@@ -1,0 +1,1 @@
+mvn -DsonarHome=..\sonarqube-5.3 org.codehaus.sonar:sonar-dev-maven-plugin::upload

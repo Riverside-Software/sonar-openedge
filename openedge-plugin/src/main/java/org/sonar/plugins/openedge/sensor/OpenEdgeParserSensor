@@ -1,0 +1,289 @@
+/*
+ * OpenEdge plugin for SonarQube
+ * Copyright (C) 2013-2014 Riverside Software
+ * contact AT riverside DASH software DOT fr
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
+ */
+package org.sonar.plugins.openedge.sensor;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.lang.reflect.Field;
+
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sonar.api.batch.Sensor;
+import org.sonar.api.batch.SensorContext;
+import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.rule.ActiveRule;
+import org.sonar.api.batch.rule.ActiveRules;
+import org.sonar.api.resources.Project;
+import org.sonar.api.rule.RuleKey;
+import org.sonar.api.utils.MessageException;
+import org.sonar.check.RuleProperty;
+import org.sonar.plugins.openedge.foundation.OpenEdge;
+import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
+import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+
+import com.openedge.core.runtime.IPropath;
+import com.openedge.core.runtime.Propath;
+import com.openedge.pdt.core.ast.ASTInfo;
+import com.openedge.pdt.core.ast.ASTNodeFactory;
+import com.openedge.pdt.core.ast.CustomASTNodeFactory;
+import com.openedge.pdt.core.ast.CustomSimpleToken;
+import com.openedge.pdt.core.ast.IASTManager;
+import com.openedge.pdt.core.ast.InputSource;
+import com.openedge.pdt.core.ast.OELexer;
+import com.openedge.pdt.core.ast.OELexer3;
+import com.openedge.pdt.core.ast.ProgressParser;
+import com.openedge.pdt.core.ast.ProgressParserTokenTypes;
+import com.openedge.pdt.core.ast.internal.CompilationUnit;
+
+import antlr.ANTLRException;
+import antlr.ASTFactory;
+import eu.rssw.openedge.ast.ASTContext;
+import eu.rssw.openedge.ast.database.DatabaseContext;
+import eu.rssw.openedge.ast.rules.AbstractLintRule;
+
+public class OpenEdgeParserSensor implements Sensor {
+  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeParserSensor.class);
+
+  private final FileSystem fileSystem;
+  private final ActiveRules activeRules;
+  private final OpenEdgeSettings settings;
+
+  public OpenEdgeParserSensor(FileSystem fileSystem, ActiveRules activesRules, OpenEdgeSettings settings) {
+    this.fileSystem = fileSystem;
+    this.activeRules = activesRules;
+    this.settings = settings;
+  }
+
+  @Override
+  public boolean shouldExecuteOnProject(Project project) {
+    return fileSystem.languages().contains(OpenEdge.KEY) && !settings.skipParserSensor();
+  }
+
+  @Override
+  public void analyse(Project project, SensorContext context) {
+    IPropath propath = getPropath();
+    LOG.debug("PROPATH {}", propath);
+
+    DatabaseContext ctx = new DatabaseContext();
+    ctx.setDatabase(settings.getDatabases().keySet().toArray(new String[0]));
+    ctx.setDbTablesMap(settings.getDatabases());
+
+    ASTContext astContext = new ASTContext(propath, ctx);
+    
+    IProgressMonitor monitor = new NullProgressMonitor();
+
+    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdge.KEY))) {
+      LOG.debug("Parsing {}", new Object[] {file.relativePath()});
+
+      try {
+        long time = System.currentTimeMillis();
+
+        ASTInfo lock = getASTInfo(file.file());
+        lock.setMonitor(monitor);
+        lock.setExpand(IASTManager.EXPAND_ON);
+        lock.setASTContext(astContext);
+
+        // TODO Probably a much better way to write that
+        InputSource source = InputSource.create(file.file());
+        long modificationStamp = source.getModificationStamp();
+        Reader inputReader = source.getReader();
+        lock.updateModificationStamp(modificationStamp);
+
+        OELexer lexer = new OELexer3(lock);
+        lexer.load(inputReader);
+        lexer.preprocess();
+
+        ProgressParser parser = new ProgressParser(lexer.getTokenStream());
+        ASTFactory factory = new CustomASTNodeFactory(parser.getTokenTypeToASTClassMap());
+        factory.setASTNodeClass(CustomSimpleToken.class);
+        parser.setASTFactory(factory);
+        parser.setProgressMonitor(monitor);
+
+        parser.openedge__unit();
+
+        CompilationUnit unit = (CompilationUnit) parser.getAST();
+        unit.setASTContext(lock.getASTContext());
+        // This is called in PSC source code, but this seems to be quite broken in many cases
+        unit.setSourceRange();
+        lexer.attachIncludes((ASTNodeFactory) parser.getASTFactory(), unit);
+        unit.setDLevel(IASTManager.DLEVEL_FULL);
+        unit.setPPBlock(lexer.getPPBlock());
+        unit.setAnalyzeBlocks(lexer.getAnalyzeMarks(), null);
+
+        LOG.debug("{} milliseconds to generate ParseTree", System.currentTimeMillis() - time);
+        
+//        LOG.debug("Saving complexity measure");
+//        context.saveMeasure(file, new Measure(CoreMetrics.COMPLEXITY, computeComplexity(unit)));
+
+        for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
+          // TODO Find a better way to skip this rule
+          if (OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY.equals(rule.internalKey())) continue;
+
+          LOG.trace("ActiveRule - Internal key {} - Repository {} - Rule {}",
+              new Object[] {rule.internalKey(), rule.ruleKey().repository(), rule.ruleKey().rule()});
+          RuleKey ruleKey = RuleKey.of(rule.ruleKey().repository(), rule.ruleKey().rule());
+          AbstractLintRule lint = getLintRule(rule);
+          if (lint != null) {
+            configureFields(rule, lint);
+            lint.execute(unit, context, file, ruleKey);
+          }
+        }
+      } catch (IOException caught) {
+        LOG.error("Unable to read source code for " + file.relativePath(), caught);
+      } catch (ANTLRException caught) {
+        LOG.error("Unable to parse source code for " + file.relativePath(), caught);
+      } catch (CoreException caught) {
+        LOG.error("Unable to parse source code " + file.relativePath(), caught);
+      } catch (NullPointerException caught) {
+        // Just to catch parser exception
+        LOG.error("Error during code parsing for " + file.relativePath());
+        LOG.debug("Stacktrace", caught);
+      }
+    }
+  }
+
+  private IPropath getPropath() {
+    IPath[] paths = new Path[settings.getPropath().size()];
+    for (int zz = 0; zz < settings.getPropath().size(); zz++) {
+      paths[zz] = new Path(settings.getPropath().get(zz).getAbsolutePath());
+    }
+
+    return new Propath(new Path(fileSystem.baseDir().getAbsolutePath()), paths, false, false);
+  }
+
+  private AbstractLintRule getLintRule(ActiveRule rule) {
+    try {
+      @SuppressWarnings("rawtypes")
+      Class clz = Class.forName(rule.internalKey());
+      if (AbstractLintRule.class.isAssignableFrom(clz)) {
+        return ((Class<AbstractLintRule>) clz).newInstance();
+      }
+    } catch (ClassNotFoundException uncaught) {
+      LOG.debug("Problem loading parser rule '{}' '{}' - {}", new String[] {rule.internalKey(), rule.ruleKey().rule(), uncaught.getMessage()});
+    } catch (ReflectiveOperationException caught) {
+      LOG.error("Unable to execute rule", caught);
+    }
+    return null;
+  }
+
+  private ASTInfo getASTInfo(File file) {
+    ASTInfo lock = new ASTInfo(file);
+    lock.getHiddenTokens().add(ProgressParserTokenTypes.WS);
+    lock.getHiddenTokens().add(ProgressParserTokenTypes.ML__COMMENT);
+    lock.getHiddenTokens().add(ProgressParserTokenTypes.PP__IF);
+    lock.getHiddenTokens().add(ProgressParserTokenTypes.PP__ELSE);
+    lock.getHiddenTokens().add(ProgressParserTokenTypes.PP__ELSEIF);
+    lock.getHiddenTokens().add(ProgressParserTokenTypes.PP__ENDIF);
+    lock.getHiddenTokens().add(ProgressParserTokenTypes.PP__ANALYZE);
+    lock.getHiddenTokens().add(ProgressParserTokenTypes.PP__SCOPED__DEFINE);
+    lock.getHiddenTokens().add(ProgressParserTokenTypes.PP__GLOBAL__DEFINE);
+    lock.getHiddenTokens().add(ProgressParserTokenTypes.PP__MESSAGE);
+    lock.getHiddenTokens().add(ProgressParserTokenTypes.PP__UNDEFINE);
+
+    return lock;
+  }
+
+  @Override
+  public String toString() {
+    return getClass().getSimpleName();
+  }
+
+  private void configureFields(ActiveRule activeRule, Object check) {
+    for (String param : activeRule.params().keySet()) {
+      Field field = getField(check, param);
+      if (field == null) {
+        throw MessageException.of("The field " + param
+            + " does not exist or is not annotated with @RuleProperty in the class " + check.getClass().getName());
+      }
+      if (StringUtils.isNotBlank(activeRule.param(param))) {
+        configureField(check, field, activeRule.param(param));
+      }
+    }
+
+  }
+
+  private void configureField(Object check, Field field, String value) {
+    try {
+      field.setAccessible(true);
+
+      if (field.getType().equals(String.class)) {
+        field.set(check, value);
+
+      } else if ("int".equals(field.getType().getSimpleName())) {
+        field.setInt(check, Integer.parseInt(value));
+
+      } else if ("short".equals(field.getType().getSimpleName())) {
+        field.setShort(check, Short.parseShort(value));
+
+      } else if ("long".equals(field.getType().getSimpleName())) {
+        field.setLong(check, Long.parseLong(value));
+
+      } else if ("double".equals(field.getType().getSimpleName())) {
+        field.setDouble(check, Double.parseDouble(value));
+
+      } else if ("boolean".equals(field.getType().getSimpleName())) {
+        field.setBoolean(check, Boolean.parseBoolean(value));
+
+      } else if ("byte".equals(field.getType().getSimpleName())) {
+        field.setByte(check, Byte.parseByte(value));
+
+      } else if (field.getType().equals(Integer.class)) {
+        field.set(check, new Integer(Integer.parseInt(value)));
+
+      } else if (field.getType().equals(Long.class)) {
+        field.set(check, new Long(Long.parseLong(value)));
+
+      } else if (field.getType().equals(Double.class)) {
+        field.set(check, new Double(Double.parseDouble(value)));
+
+      } else if (field.getType().equals(Boolean.class)) {
+        field.set(check, Boolean.valueOf(Boolean.parseBoolean(value)));
+
+      } else {
+        throw MessageException.of("The type of the field " + field + " is not supported: " + field.getType());
+      }
+    } catch (IllegalAccessException e) {
+      throw MessageException.of(
+          "Can not set the value of the field " + field + " in the class: " + check.getClass().getName());
+    }
+  }
+
+  private Field getField(Object check, String key) {
+    Field[] fields = check.getClass().getDeclaredFields();
+    for (Field field : fields) {
+      RuleProperty propertyAnnotation = field.getAnnotation(RuleProperty.class);
+      if (propertyAnnotation != null) {
+        if (StringUtils.equals(key, field.getName()) || StringUtils.equals(key, propertyAnnotation.key())) {
+          return field;
+        }
+      }
+    }
+    return null;
+  }
+
+}

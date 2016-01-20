@@ -1,0 +1,11 @@
+<p>String will be different on UNIX, because backslash is an escape character only on UNIX</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+ DISPLAY "My \\ string".
+</pre>
+
+<h2>Compliant Solution</h2>
+<pre>
+ DISPLAY "My ~\ string".
+</pre>

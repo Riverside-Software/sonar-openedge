@@ -1,0 +1,28 @@
+package org.sonar.plugins.openedge.checks;
+
+import org.sonar.check.Priority;
+import org.sonar.check.Rule;
+import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
+import org.sonar.plugins.openedge.api.org.prorefactor.proparse.NodeTypes;
+import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
+
+@Rule(priority = Priority.INFO, name = "Disable triggers", description = "No DISABLE TRIGGERS in code")
+public class DisableTriggers extends AbstractLintRule {
+
+  @Override
+  public void lint(ParseUnit unit) {
+    for (JPNode node : unit.getTopNode().query(NodeTypes.DISABLE)) {
+      if (node.isStateHead()) {
+        if (node.query(NodeTypes.TRIGGERS).isEmpty()) {
+          reportIssue(node, "Trigger disabled");
+        }
+      }
+    }
+  }
+
+  @Override
+  public String getNoSonarKeyword() {
+    return "disabletrigger";
+  }
+}

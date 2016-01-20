@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>eu.rssw.sonar.openedge</groupId>
+  <artifactId>sonar-openedge-db-rules</artifactId>
+  <version>1.0</version>
+  <packaging>sonar-plugin</packaging>
+
+  <name>OpenEdge DB rules for SonarQube plugin</name>
+  <description>Rules for OpenEdge DB projects into SonarQube</description>
+  <url>http://sonar.riverside-software.fr</url>
+  <inceptionYear>2015</inceptionYear>
+  <organization>
+    <name>Riverside Software</name>
+    <url>http://riverside-software.fr</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>LGPL 3.0</name>
+      <url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
+    </license>
+  </licenses>
+
+  <issueManagement>
+    <system>Jira</system>
+    <url>https://riverside-software.atlassian.net/browse/SONAROE</url>
+  </issueManagement>
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>http://jenkins.rssw.eu</url>
+  </ciManagement>
+
+  <developers>
+    <developer>
+      <id>jakejustus</id>
+      <name>Gilles QUERRET</name>
+    </developer>
+  </developers>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <sonar.version>5.2</sonar.version>
+    <sonar.pluginKey>openedgedbextra</sonar.pluginKey>
+    <sonar.pluginName>OpenEdge DB Extra Rules</sonar.pluginName>
+    <sonar.pluginClass>org.sonar.plugins.openedge.OpenEdgeDBExtra</sonar.pluginClass>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.sonarsource.sonarqube</groupId>
+      <artifactId>sonar-plugin-api</artifactId>
+      <version>${sonar.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.6.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>eu.rssw.openedge.checks</groupId>
+      <artifactId>database-checks</artifactId>
+      <version>1.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>6.8.21</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
+        <artifactId>sonar-packaging-maven-plugin</artifactId>
+        <version>1.15</version>
+        <extensions>true</extensions>
+        <configuration>
+          <pluginKey>${sonar.pluginKey}</pluginKey>
+          <pluginName>${sonar.pluginName}</pluginName>
+          <pluginClass>${sonar.pluginClass}</pluginClass>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

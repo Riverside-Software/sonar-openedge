@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>eu.rssw.sonar.openedge</groupId>
+  <artifactId>sonar-openedge-db-plugin</artifactId>
+  <version>1.3</version>
+  <packaging>sonar-plugin</packaging>
+
+  <name>OpenEdge DB plugin for SonarQube</name>
+  <description>Enables analysis of OpenEdge DB projects into SonarQube</description>
+  <url>http://sonar.riverside-software.fr</url>
+  <inceptionYear>2013</inceptionYear>
+  <organization>
+    <name>Riverside Software</name>
+    <url>http://riverside-software.fr</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>LGPL 3.0</name>
+      <url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
+    </license>
+  </licenses>
+
+  <issueManagement>
+    <system>Jira</system>
+    <url>https://riverside-software.atlassian.net/browse/SONAROE</url>
+  </issueManagement>
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>http://jenkins.rssw.eu</url>
+  </ciManagement>
+
+  <developers>
+    <developer>
+      <id>gquerret</id>
+      <name>Gilles QUERRET</name>
+    </developer>
+  </developers>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <sonar.version>5.2</sonar.version>
+    <sonar.pluginKey>oedb</sonar.pluginKey>
+    <sonar.pluginName>OpenEdge DB</sonar.pluginName>
+    <sonar.pluginClass>org.sonar.plugins.oedb.OpenEdgeDBPlugin</sonar.pluginClass>
+    <!-- License check -->
+    <license.mailto>contact AT riverside DASH software DOT fr</license.mailto>
+    <license.year>2013-2014</license.year>
+    <jdk.min.version>1.7</jdk.min.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.sonarsource.sonarqube</groupId>
+      <artifactId>sonar-plugin-api</artifactId>
+      <version>${sonar.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>eu.rssw.openedge.checks</groupId>
+      <artifactId>database-checks</artifactId>
+      <version>1.2</version>
+    </dependency>    
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>18.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.6.2</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
+        <artifactId>sonar-packaging-maven-plugin</artifactId>
+        <version>1.15</version>
+        <extensions>true</extensions>
+        <configuration>
+          <pluginKey>${sonar.pluginKey}</pluginKey>
+          <pluginName>${sonar.pluginName}</pluginName>
+          <pluginClass>${sonar.pluginClass}</pluginClass>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>${jdk.min.version}</source>
+          <target>${jdk.min.version}</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>
+                      com.mycila.maven-license-plugin
+                    </groupId>
+                    <artifactId>
+                      maven-license-plugin
+                    </artifactId>
+                    <versionRange>
+                      [1.9.0,)
+                    </versionRange>
+                    <goals>
+                      <goal>check</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.sonar</groupId>
+                    <artifactId>sonar-packaging-maven-plugin</artifactId>
+                    <versionRange>[1.5,)</versionRange>
+                    <goals>
+                      <goal>check-dependencies</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>

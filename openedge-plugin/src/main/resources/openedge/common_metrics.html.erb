@@ -1,0 +1,38 @@
+<%
+  classes = measure('OE_CLASSES')
+  packages = measure('OE_PACKAGES')
+  windows = measure('WINDOWS')
+  procs = measure('PROCEDURES')
+  incs = measure('INCLUDES')
+
+  if (procs && classes && windows)
+%>
+
+  <table width="100%">
+   <tbody>
+     <tr>
+       <td valign="top" width="48%" nowrap>
+         <div class="dashbox">
+           <p class="title">Classes</p>
+           <p>
+             <span class="big"><%= format_measure(classes, :url => url_for_drilldown(classes)) -%></span> <%= trend_icon(classes) %>
+           </p>
+           <p><%= format_measure(packages, :suffix => ' packages', :url => url_for_drilldown(packages)) -%> <%= trend_icon(packages) %></p>
+         </div>
+       </td>
+       <td width="10"> </td>
+       <td valign="top">
+         <div class="dashbox">
+           <p class="title">Procedural code</p>
+           <p>
+             <span class="big"><%= windows.value.to_i + procs.value.to_i -%></span>
+           </p>
+           <p><%= format_measure(procs, :suffix => ' procedures', :url => url_for_drilldown(procs)) -%> <%= trend_icon(procs) %></p>
+           <p><%= format_measure(windows, :suffix => ' windows', :url => url_for_drilldown(windows)) -%> <%= trend_icon(windows) %></p>
+           <p><i><%= format_measure(incs, :suffix => ' includes', :url => url_for_drilldown(incs)) -%></i> <%= trend_icon(incs) %></p>
+         </div>
+       </td>
+     </tr>
+   </tbody>
+  </table>
+<% end %>
