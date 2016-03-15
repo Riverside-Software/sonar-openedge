@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>proparse</groupId>
+  <artifactId>proparse</artifactId>
+  <version>1.0.1</version>
+
+  <name>Proparse</name>
+  <url>http://riverside-software.fr/</url>
+  <organization>
+    <name>Riverside Software</name>
+    <url>http://riverside-software.fr</url>
+  </organization>
+  <issueManagement>
+    <system>Jira</system>
+    <url>https://riverside-software.atlassian.net/browse/SONAROE</url>
+  </issueManagement>
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>http://jenkins.rssw.eu</url>
+  </ciManagement>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>antlr</groupId>
+      <artifactId>antlr</artifactId>
+      <version>2.7.7</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.13</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>18.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.13</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>antlr-maven-plugin</artifactId>
+        <version>2.2</version>
+        <configuration>
+          <grammarDefs>
+            <grammar>
+              <name>proeval.g</name>
+            </grammar>
+            <grammar>
+              <name>proparse.g</name>
+            </grammar>
+            <grammar>
+              <name>TreeParser01.g</name>
+            </grammar>
+            <grammar>
+              <name>JPTreeParser.g</name>
+            </grammar>
+          </grammarDefs>
+          <trace>true</trace>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.18.1</version>
+        <configuration>
+          <includes>
+            <include>**/AliasesT.java</include>
+            <include>**/ApiTest1.java</include>
+            <include>**/PstringT.java</include>
+            <include>**/TP01Test01.java</include>
+            <include>**/TP01Test02.java</include>
+            <include>**/TP01Test03.java</include>
+            <include>**/TP01SymbolActionTest.java</include>
+            <include>**/TP01ProcessActionTest.java</include>
+            <include>**/TP01FramesTest.java</include>
+            <include>**/BugFixTests.java</include>
+            <include>**/TestNewSyntax.java</include>
+            <!-- <include>**/PUBTest.java</include> -->
+          </includes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

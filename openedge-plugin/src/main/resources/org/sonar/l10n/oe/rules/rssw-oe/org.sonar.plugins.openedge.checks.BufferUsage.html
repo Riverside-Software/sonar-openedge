@@ -1,0 +1,18 @@
+<h3>Risk</h3>
+Side effects can happen when changing a buffer that may also be used by other internal procedures or functions, as well as locking issues when the procedure runs persistent.
+This rule requires that DEFINE BUFFER statements exist for every database buffer that appears in the code for an internal procedure, function or method.
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+PROCEDURE myProc:
+  DISPLAY customer.name.
+END PROCEDURE.
+</pre>
+
+<h2>Compliant Solution</h2>
+<pre>
+PROCEDURE myProc:
+  DEFINE BUFFER customer FOR customer.
+  DISPLAY customer.name.
+END PROCEDURE.
+</pre>

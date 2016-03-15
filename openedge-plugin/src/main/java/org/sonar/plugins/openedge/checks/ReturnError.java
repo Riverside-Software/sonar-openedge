@@ -4,7 +4,7 @@ import org.sonar.check.Priority;
 import org.sonar.check.Rule;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
-import org.sonar.plugins.openedge.api.org.prorefactor.proparse.NodeTypes;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 
 @Rule(priority = Priority.INFO, name = "RETURN ERROR without expression [PP]", description = "RETURN ERROR should include error message")

@@ -4,7 +4,7 @@ import org.sonar.check.Priority;
 import org.sonar.check.Rule;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
-import org.sonar.plugins.openedge.api.org.prorefactor.proparse.NodeTypes;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 
 @Rule(priority = Priority.INFO, name = "Find without NO-ERROR [PP]", description = "This lint rules verifies that FIND statements always use NO-ERROR")

@@ -7,7 +7,7 @@ import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
 import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
 import org.sonar.plugins.openedge.api.model.SqaleSubCharacteristic;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
-import org.sonar.plugins.openedge.api.org.prorefactor.proparse.NodeTypes;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 
 @Rule(priority = Priority.MINOR, name = "Block label")

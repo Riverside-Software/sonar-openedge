@@ -1,9 +1,13 @@
 package eu.rssw.antlr.database.objects;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 public class Field {
   private final String name, dataType;
   private String description, order, lobArea, format;
   private Integer extent, maxWidth;
+  private Collection<Trigger> triggers = new ArrayList<>();
 
   private int firstLine, lastLine;
 
@@ -82,6 +86,22 @@ public class Field {
 
   public String getName() {
     return name;
+  }
+
+  public Trigger getTrigger(TriggerType type) {
+    for (Trigger trig : triggers) {
+      if (trig.getType() == type)
+        return trig;
+    }
+    return null;
+  }
+
+  public Collection<Trigger> getTriggers() {
+    return triggers;
+  }
+
+  public void addTrigger(Trigger trigger) {
+    triggers.add(trigger);
   }
 
   @Override

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
+import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.rule.RuleKey;
 
 import com.google.common.base.Splitter;
@@ -40,15 +41,35 @@ public abstract class AbstractLintRule {
    * @param msg Additional message
    */
   public void reportIssue(JPNode node, String msg) {
-    if (node.getFileIndex() != 0) return;
     if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {
       return;
     }
 
+    InputFile targetFile;
+    if (node.getFileIndex() == 0) {
+      targetFile = this.file;
+    } else {
+      targetFile = context.fileSystem().inputFile(
+          context.fileSystem().predicates().hasRelativePath(node.getFilename()));
+    }
+    if (targetFile == null) {
+      return;
+    }
+
     int lineNumber = node.getLine();
-    LOG.trace("Adding issue {} to {} line {}", new Object[] { (ruleKey == null ? null : ruleKey.rule()), (file == null ? null : file.relativePath()), lineNumber });
-    NewIssue issue = context.newIssue();
-    issue.forRule(ruleKey).at(issue.newLocation().on(file).at(file.selectLine(lineNumber)).message(msg)).save();
+    LOG.trace("Adding issue {} to {} line {}", new Object[] {
+        (ruleKey == null ? null : ruleKey.rule()), targetFile.relativePath(), lineNumber});
+    NewIssue issue = context.newIssue().forRule(ruleKey);
+    NewIssueLocation location = issue.newLocation().on(targetFile);
+    if (lineNumber > 0) {
+      location.at(targetFile.selectLine(lineNumber));
+    }
+    if (targetFile == this.file) {
+      location.message(msg);
+    } else {
+      location.message("From " + file.relativePath() + " - " + msg);
+    }
+    issue.at(location).save();
   }
 
   /**

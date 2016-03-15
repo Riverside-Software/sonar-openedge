@@ -22,7 +22,7 @@ public class SortAccessAnalyzer extends XrefAnalyzer {
     xPath = XPathFactory.newInstance().newXPath();
     try {
       // Not looking into include files, and not on temp-tables
-      sortAccessExpr = xPath.compile("//Reference[@Reference-type='SORT-ACCESS' and File-num='1' and Temp-ref='']");
+      sortAccessExpr = xPath.compile("//Reference[@Reference-type='SORT-ACCESS' and Temp-ref='']");
     } catch (XPathExpressionException caught) {
       throw new RuntimeException(caught);
     }

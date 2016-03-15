@@ -1,0 +1,5 @@
+
+DEFINE VAR x05c00 AS INTEGER.
+DEFINE SHARED VAR x05c01 AS INTEGER.
+
+{data/bubble/x05/test/x05_ig02.i}

@@ -1,0 +1,374 @@
+ /* 0: buffers=sports2000.BillTo */ 
+find first  /* 0:sports2000.BillTo */ billto.
+ /* buffers=sports2000.Customer */ for each  /* 0:sports2000.Customer */ customer:
+  display /* 0:sports2000.Customer.Address unqualfield */  address.
+end.
+/* Uses customer */
+--------------------------------
+ /* 0: buffers=sports2000.BillTo */ 
+find first  /* 0:sports2000.BillTo */ billto.
+ /* buffers=sports2000.Customer */ do for  /* 0:sports2000.Customer */ customer:
+  find first  /* 0:sports2000.Customer */ customer.
+  display /* 0:sports2000.Customer.Address unqualfield */  address.
+end.
+/* Uses customer */
+--------------------------------
+ /* 0: buffers=sports2000.BillTo */ 
+find first  /* 0:sports2000.BillTo */ billto.
+ /* buffers=sports2000.Customer */ repeat:
+  find first  /* 0:sports2000.Customer */ customer.
+  display /* 0:sports2000.Customer.Address unqualfield */  address.
+end.
+/* Uses customer */
+--------------------------------
+ /* 0: buffers=sports2000.BillTo */ 
+ /* buffers=sports2000.Customer */ do for  /* 0:sports2000.Customer */ customer:
+  find first  /* 0:sports2000.Customer */ customer.
+  find first  /* 0:sports2000.BillTo */ billto.
+end.
+display /* 0:sports2000.BillTo.Name unqualfield */  name.
+/* Displays billto.name. */
+--------------------------------
+ /* 0: buffers=sports2000.BillTo */ 
+find first  /* 0:sports2000.BillTo */ billto.
+ /* buffers=sports2000.Customer */ for each  /* 0:sports2000.Customer */ customer: leave. end.
+ /* buffers=sports2000.Customer */ for each  /* 0:sports2000.Customer */ customer: leave. end.
+ /* buffers=sports2000.Customer */ do for  /* 0:sports2000.Customer */ customer: end.
+display /* 0:sports2000.BillTo.Name unqualfield */  name.
+/* Name resolves to billto.
+ * Without the strong scope on customer,
+ * it would be ambiguous.
+ */
+--------------------------------
+ /* 0: buffers=sports2000.BillTo */ 
+find first  /* 0:sports2000.BillTo */ billto.
+ /* buffers=sports2000.Customer,sports2000.State */ for each  /* 0:sports2000.State */ state:
+  find first  /* 0:sports2000.Customer */ customer.
+  display /* 0:sports2000.Customer.Name unqualfield */  name.
+end.
+/* Uses customer.name. */
+--------------------------------
+ /* 0: */ 
+ /* buffers=sports2000.Customer */ for each  /* 0:sports2000.Customer */ customer:
+   /* buffers=sports2000.BillTo */ for each  /* 0:sports2000.BillTo */ billto:
+     /* buffers=sports2000.State */ for each  /* 0:sports2000.State */ state:
+      display /* 0:sports2000.BillTo.Name unqualfield */  name.
+    end.
+  end.
+end.
+/* Displays billto.name. */
+--------------------------------
+ /* 0: buffers=sports2000.Customer */ 
+ /* buffers=sports2000.State */ for first  /* 0:sports2000.State */ state:
+  find first  /* 0:sports2000.Customer */ customer.
+end.
+display /* 0:sports2000.Customer.Name unqualfield */  name.
+/* Displays customer.name. */
+--------------------------------
+ /* 0: buffers=sports2000.BillTo */ 
+find first  /* 0:sports2000.BillTo */ billto.
+ /* buffers=sports2000.Customer */ do preselect each  /* 0:sports2000.Customer */ customer:
+  find first  /* 0:sports2000.Customer */ customer.
+  display /* 0:sports2000.Customer.Name unqualfield */  name.
+  leave.
+end.
+/* Displays customer.name. */
+--------------------------------
+ /* 0: */ 
+ /* buffers=sports2000.Customer */ do for  /* 0:sports2000.Customer */ customer:
+  find first  /* 0:sports2000.Customer */ customer.
+  display /* 0:sports2000.Customer.Name unqualfield */  name.
+end.
+ /* buffers=sports2000.Customer */ repeat:
+  find next  /* 0:sports2000.Customer */ customer.
+  display /* 0:sports2000.Customer.Name unqualfield */  name.
+  leave.
+end.
+ /* buffers=sports2000.Customer */ repeat:
+  find next  /* 0:sports2000.Customer */ customer.
+  display /* 0:sports2000.Customer.Name unqualfield */  name.
+  leave.
+end.
+/* The strong scope prevents the buffer scope from
+   being raised to the procedure. The same customer
+   name is displayed 3 times. */
+--------------------------------
+ /* 0: buffers=sports2000.Customer */ 
+/*
+do for customer:
+  find first customer.
+  display name.
+end.
+*/
+repeat:
+  find next  /* 0:sports2000.Customer */ customer.
+  display /* 0:sports2000.Customer.Name unqualfield */  name.
+  leave.
+end.
+repeat:
+  find next  /* 0:sports2000.Customer */ customer.
+  display /* 0:sports2000.Customer.Name unqualfield */  name.
+  leave.
+end.
+/* Now, the buffer scope is raised to the procedure,
+   and two different customer names are displayed. */
+--------------------------------
+ /* 0: */ 
+ /* buffers=sports2000.Customer */ do preselect each  /* 0:sports2000.Customer */ customer:
+  find next  /* 0:sports2000.Customer */ customer.
+  display /* 0:sports2000.Customer.Name unqualfield */  name.
+  pause.
+  leave.
+end.
+ /* buffers=sports2000.Customer */ do preselect each  /* 0:sports2000.Customer */ customer:
+  find next  /* 0:sports2000.Customer */ customer.
+  display /* 0:sports2000.Customer.Name unqualfield */  name.
+  leave.
+end.
+/* "medium" scopes do not raise scope - same record found. */
+--------------------------------
+ /* 0: buffers=sports2000.Customer */ 
+for each  /* 0:sports2000.Customer */ customer:
+  leave.
+end.
+ /* buffers=sports2000.State */ for each  /* 0:sports2000.State */ state:
+  display /* 0:sports2000.Customer.Name unqualfield */  name.
+  leave.
+end.
+/* Displays customer.name. */
+--------------------------------
+ /* 0: */ 
+ /* buffers=sports2000.Customer */ repeat:
+  find first  /* 0:sports2000.Customer */ customer.
+  leave.
+end.
+ /* buffers=sports2000.Customer */ do for  /* 0:sports2000.Customer */ customer: end.
+ /* buffers=sports2000.Customer */ for each  /* 0:sports2000.Customer */ customer: end.
+/* Legal. DO FOR prevents scope raising. */
+--------------------------------
+ /* 0: buffers=sports2000.BillTo */ 
+ /* buffers=sports2000.Customer */ repeat for  /* 0:sports2000.Customer */ customer:
+  find first  /* 0:sports2000.BillTo */ billto.
+  leave.
+end.
+display /* 0:sports2000.BillTo.Name unqualfield */  name.
+/* displays billto.name */
+--------------------------------
+ /* 0: buffers=sports2000.Customer */ 
+run getit.
+ /* 0:getit */ procedure getit:
+  find first  /* 0:sports2000.Customer */ customer.
+end.
+display /* 0:sports2000.Customer.Name */  customer.name.
+/* displays the first customer.name. If the display
+ * comes before the procedure definition, then the compile fails,
+ * "no for, find, or create...".
+ */
+--------------------------------
+ /* 0: buffers=sports2000.Customer */ 
+run getit.
+ /* 0:getit */ procedure getit:
+  find first  /* 0:sports2000.Customer */ customer.
+end.
+/* Customer is scoped to the root/program block, not the procedure block. */
+--------------------------------
+ /* 0: */ 
+on "f1" anywhere do:
+  def buffer  /* 1:sports2000.bcust */ bcust for  /* 0:sports2000.Customer */ customer.
+  on "f2" anywhere do:
+    /* find first bcust. */
+    def buffer  /* 2:sports2000.bcust */ bcust for  /* 0:sports2000.Customer */ customer.
+  end.
+end.
+/* Is OK, but if you uncomment the FIND, then compiler gives duplicate buffer error */
+--------------------------------
+ /* 0: */ 
+ /* buffers=sports2000.Customer */ do for  /* 0:sports2000.Customer */ customer:
+  for each  /* 0:sports2000.Customer */ customer: leave. end.
+  for each  /* 0:sports2000.Customer */ customer: leave. end.
+end.
+/* customer is scoped to the DO block, not the inner FOR blocks */
+--------------------------------
+ /* 0: buffers=sports2000.BillTo,sports2000.Customer */ 
+find first  /* 0:sports2000.BillTo */ billto.
+display /* 0:sports2000.BillTo.Name unqualfield */  name.
+run proc1.
+ /* 0:proc1 */ procedure proc1:
+  find first  /* 0:sports2000.Customer */ customer.
+  display /* 0:sports2000.Customer.Name unqualfield */  name.
+end.
+/* Even though customer is scoped to outer program, name resolves OK. */
+--------------------------------
+ /* 0: buffers=sports2000.Invoice */ 
+define query  /* 0:myQuery */ myQuery for  /* 0:sports2000.Invoice */ invoice.
+/* Creates a buffer-scope. */
+--------------------------------
+ /* 0: buffers=sports2000.bcust */ 
+def parameter buffer  /* 0:sports2000.bcust */ bcust for  /* 0:sports2000.Customer */ customer.
+/* Creates buffer-scope for bcust (but not for customer). */
+--------------------------------
+ /* 0: */ 
+def temp-table  /* 0:tt1 */ tt1 field  /* 0:tt1.f1 */ f1 as char.
+ /* 0:myProc */ procedure myProc:
+  def input parameter table for  /* 0:tt1 */ tt1.
+end.
+/* Does not create buffer-scope */
+--------------------------------
+ /* 0: buffers=sports2000.Customer */ 
+if available  /* 0:sports2000.Customer */ customer then return.
+/* Does create buffer-scope */
+--------------------------------
+ /* 0: */ 
+def buffer  /* 0:sports2000.bcust */ bcust for  /* 0:sports2000.Customer */ customer.
+/* Does not create buffer-scope */
+--------------------------------
+ /* 0: */ 
+disable triggers for dump of  /* 0:sports2000.Customer */ customer.
+/* Does not create buffer-scope */
+--------------------------------
+ /* 0: */ 
+form  /* 0:sports2000.BillTo */ billto with frame  /* 0:f1 */ f1.
+/* Does not create buffer-scope */
+--------------------------------
+ /* 0: */ 
+ /* 0:f1 buffers=sports2000.bcust */ function f1 returns character (buffer  /* 1:sports2000.bcust */ bcust for  /* 0:sports2000.Customer */ customer):
+  return "hi".
+end.
+/* Creates buffer-scope for bcust */
+--------------------------------
+ /* 0: */ 
+def temp-table  /* 0:tt1 */ tt1 field  /* 0:tt1.f1 */ f1 as char.
+ /* 0:f1 */ function f1 returns character (table for  /* 0:tt1 */ tt1):
+  return "hi".
+end.
+/* Does not create buffer-scope */
+--------------------------------
+ /* 0: */ 
+ /* buffers=sports2000.Customer */ on create of  /* 0:sports2000.Customer */ customer do:
+end.
+/* Creates buffer-scope */
+--------------------------------
+ /* 0: */ 
+message  /* buffers=sports2000.Customer */ can-find(first  /* 1:sports2000.Customer */ customer).
+/* recordphrase. Does not create buffer-scope. */
+--------------------------------
+ /* 0: buffers=sports2000.Customer */ 
+find first  /* 0:sports2000.Customer */ customer.
+/* recordphrase. Creates buffer-scope. */
+--------------------------------
+ /* 0: buffers=sports2000.BillTo,sports2000.Customer */ 
+find first  /* 0:sports2000.Customer */ customer of  /* 0:sports2000.BillTo */ billto.
+/* Creates buffer-scope for both customer and billto. */
+--------------------------------
+ /* 0: buffers=sports2000.Customer */ 
+trigger procedure for create of  /* 0:sports2000.Customer */ customer.
+/* Creates buffer-scope */
+--------------------------------
+ /* 0: */ 
+delete from  /* 0:sports2000.Customer */ customer.
+/* Does not create buffer-scope */
+--------------------------------
+ /* 0: */ 
+select * from  /* 0:sports2000.BillTo */ billto.
+/* Does not create buffer-scope. */
+--------------------------------
+ /* 0: */ 
+def temp-table  /* 0:tt1 */ tt1 like  /* 0:sports2000.BillTo */ billto.
+/* Does not create buffer-scope for either. */
+--------------------------------
+ /* 0: */ 
+def temp-table  /* 0:billto */ billto field  /* 0:billto.f1 */ f1 as char.
+message  /* buffers=billto */ can-find(first  /* 1:billto */ billto).
+/* Resolves to temp-table, even though can-find does not create buffer-scope */
+--------------------------------
+ /* 0: */ 
+def temp-table  /* 0:billto */ billto field  /* 0:billto.myfield */ myfield as char.
+form  /* 0:billto */ billto with frame  /* 0:frame1 */ frame1.
+display with frame  /* 0:frame1 */ frame1.
+/* The temp-table goes into the frame */
+--------------------------------
+ /* 0: buffers=sports2000.bb1 */ 
+def temp-table  /* 0:billto */ billto field  /* 0:billto.myfield */ myfield as char.
+def buffer  /* 0:sports2000.bb1 */ bb1 for  /* 0:sports2000.BillTo */ billto.
+find first  /* 0:sports2000.bb1 */ bb1.
+display  /* 0:sports2000.bb1 */ bb1.
+/* Buffer gets defined for schema table, not temp-table */
+--------------------------------
+ /* 0: buffers=sports2000.Customer */ 
+find first  /* 0:sports2000.Customer */ customer.
+ /* buffers=sports2000.Customer */ on create of  /* 0:sports2000.Customer */ customer do:
+end.
+/* Two buffer scopes - the trigger block gets its own. */
+--------------------------------
+ /* 0: */ 
+ /* buffers=sports2000.new-cust,sports2000.old-cust */ on write of  /* 0:sports2000.Customer */ customer new  /* 1:sports2000.new-cust */ new-cust old  /* 1:sports2000.old-cust */ old-cust do:
+end.
+/* Two buffers defined and scoped to the trigger */
+--------------------------------
+ /* 0: buffers=sports2000.BillTo */ 
+ /* buffers=sports2000.Customer */ do for  /* 0:sports2000.Customer */ customer: end.
+ /* buffers=sports2000.Customer */ repeat:
+  for each  /* 0:sports2000.Customer */ customer: leave. end.
+  for each  /* 0:sports2000.Customer */ customer: leave. end.
+  display /* 0:sports2000.Customer.Name unqualfield */  name.
+  leave.
+end.
+find first  /* 0:sports2000.BillTo */ billto.
+display /* 0:sports2000.BillTo.Name unqualfield */  name.
+/* Displays customer name then billto name */
+--------------------------------
+ /* 0: buffers=sports2000.bcust */ 
+def buffer  /* 0:sports2000.bcust */ bcust for  /* 0:sports2000.Customer */ customer.
+find first  /* 0:sports2000.bcust */ bcust.
+def var  /* 0:x1 */ x1 like /* 0:sports2000.bcust.Name unqualfield */  name.
+/* Name lookup is based on "buffers first" even if we only want a symbol. */
+--------------------------------
+ /* 0: buffers=b,b_c */ 
+def temp-table  /* 0:b */ b field  /* 0:b.f1 */ f1 as char.
+create  /* 0:b */ b.
+def buffer  /* 0:b_c */ b_c for  /* 0:b */ b.
+find first  /* 0:b_c */ b_c.
+display  /* 0:b_c */ b_c.
+/* Resolves b_c to temp-table "b" */
+--------------------------------
+ /* 0: buffers=bin,sports2000.b_c */ 
+def temp-table  /* 0:bin */ bin field  /* 0:bin.f1 */ f1 as char.
+create  /* 0:bin */ bin.
+def buffer  /* 0:sports2000.b_c */ b_c for  /* 0:sports2000.Bin */ bin.
+find first  /* 0:sports2000.b_c */ b_c.
+display  /* 0:sports2000.b_c */ b_c.
+/* Resolves b_c to schema table "bin" */
+--------------------------------
+ /* 0: buffers=b,cust */ 
+def temp-table  /* 0:cust */ cust field  /* 0:cust.f1 */ f1 as char.
+do transaction:
+  create  /* 0:cust */ cust.
+end.
+def buffer  /* 0:b */ b for  /* 0:cust */ cust.
+find first  /* 0:b */ b.
+display  /* 0:b */ b.
+/* Resolves b to temp-table, rather than schema table 'customer' */
+--------------------------------
+ /* 0: buffers=sports2000.Customer */ 
+for first  /* 0:sports2000.Customer */ customer: end.
+def buffer  /* 0:sports2000.bcust */ bcust for  /* 0:sports2000.Customer */ customer.
+ /* buffers=sports2000.bcust */ for last  /* 0:sports2000.bcust */ bcust: end.
+display /* 0:sports2000.Customer.Name unqualfield */  name.
+/* Name resolves to customer.name.
+ * It appears that a weakly scoped *named* buffer will not
+ * have its scope automagically raised for a field name
+ * reference. Without the <<for first customer>>, this
+ * snippet fails to compile.
+ */
+--------------------------------
+ /* 0: buffers=sports2000.BillTo,sports2000.Customer */ 
+find first  /* 0:sports2000.Customer */ customer.
+find first  /* 0:sports2000.BillTo */ billto.
+display  /* 0:sports2000.Customer */ customer except /* 0:sports2000.Customer.Name */  name /* 0:sports2000.Customer.Address */  address.
+/* Bug079
+ * Tree parser was missing the EXCEPT phrase in DISPLAY
+ * statements, causing the *occasional* evaluation to billto,
+ * and always incorrectly flagging as unqualified.
+ */
+
+--------------------------------

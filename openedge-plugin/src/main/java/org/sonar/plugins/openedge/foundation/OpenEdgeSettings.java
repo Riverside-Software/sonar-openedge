@@ -121,8 +121,7 @@ public class OpenEdgeSettings {
     String dbs = settings.getString(OpenEdgePlugin.DATABASES);
     LOG.info("Using schema : {}", dbs);
     if (dbs != null) {
-      try (BufferedWriter writer = Files.newWriter(dbFile, Charsets.UTF_8);
-          BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/schema/meta.txt")))) {
+      try (BufferedWriter writer = Files.newWriter(dbFile, Charsets.UTF_8)) {
         for (String str : Splitter.on(',').trimResults().split(dbs)) {
           String dbName = "";
           int colonPos = str.lastIndexOf(':');
@@ -130,6 +129,7 @@ public class OpenEdgeSettings {
             dbName = FilenameUtils.getBaseName(str);
           } else {
             dbName = str.substring(colonPos + 1);
+            str = str.substring(0, colonPos);
           }
           LOG.debug("Parsing {} with alias {}", fileSystem.resolvePath(str), dbName);
           DatabaseDescription desc = DumpFileUtils.getDatabaseDescription(fileSystem.resolvePath(str));
@@ -146,20 +146,30 @@ public class OpenEdgeSettings {
             }
           }
         }
-        String str = null;
-        while ((str = reader.readLine()) != null) {
-          writer.write(str);
-          writer.newLine();
-        }
       } catch (IOException caught) {
         LOG.error("Unable to write proparse.schema file", caught);
       }
     }
 
-    ppSchema = new Schema(dbFile.getAbsolutePath());
-    if (ppSchema.getDbSet().size() > 0) {
-      ppSchema.aliasCreate("dictdb", ppSchema.getDbSet().first().getName());
+    Schema sch = null;
+    try {
+      sch = new Schema(dbFile.getAbsolutePath(), true);
+      if (!sch.getDbSet().isEmpty()) {
+        sch.aliasCreate("dictdb", sch.getDbSet().first().getName());
+      }
+      if (settings.getString(OpenEdgePlugin.ALIASES) != null) {
+        for (String str : Splitter.on(';').trimResults().split(settings.getString(OpenEdgePlugin.ALIASES))) {
+          List<String> lst = Splitter.on(',').trimResults().splitToList(str);
+          for (String alias : lst.subList(1, lst.size())) {
+            LOG.debug("Adding {} aliases to database {}", new Object[] {alias, lst.get(0)});
+            sch.aliasCreate(alias, lst.get(1));
+          }
+        }
+      }
+    } catch (IOException uncaught) {
+      
     }
+    ppSchema = sch;
     dbFile.delete();
 
   }

@@ -22,7 +22,7 @@ public class SortAccessWholeIndexAnalyzer extends XrefAnalyzer {
     xPath = XPathFactory.newInstance().newXPath();
     try {
       // Not looking into include files, and not on temp-tables
-      sortAccessExpr = xPath.compile("//Reference[@Reference-type='SORT-ACCESS' and File-num='1' and Temp-ref='']");
+      sortAccessExpr = xPath.compile("//Reference[@Reference-type='SORT-ACCESS' and Temp-ref='']");
     } catch (XPathExpressionException caught) {
       throw new RuntimeException(caught);
     }
@@ -36,10 +36,11 @@ public class SortAccessWholeIndexAnalyzer extends XrefAnalyzer {
         Element node = (Element) nodeList.item(zz);
         // Finding reference for this SORT-ACCESS node
         String table = node.getAttribute("Object-identifier");
+        String fileNum = getChildNodeValue(node, "File-num");
         String lineNum = getChildNodeValue(node, "Line-num");
-        // And trying to catch a WHOLE-INDEX on same table and same line
+        // And trying to catch a WHOLE-INDEX on same table and same file/line
         NodeList xrefList = (NodeList) xPath.compile("//Reference[@Reference-type='SEARCH' and @Object-identifier='"
-            + table + "' and Detail='WHOLE-INDEX' and File-num='1' and Line-num='" + lineNum
+            + table + "' and Detail='WHOLE-INDEX' and File-num='" + fileNum + "' and Line-num='" + lineNum
             + "' and Temp-ref='']").evaluate(doc, XPathConstants.NODESET);
         if (xrefList.getLength() > 0) {
           reportIssue(node,

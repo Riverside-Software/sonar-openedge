@@ -33,7 +33,6 @@ import org.sonar.plugins.oedb.foundation.OpenEdgeDBRulesDefinition;
 import org.sonar.plugins.oedb.foundation.OpenEdgeDBRulesRegistrar;
 import org.sonar.plugins.oedb.sensor.OpenEdgeDBRulesSensor;
 import org.sonar.plugins.oedb.sensor.OpenEdgeDBSensor;
-import org.sonar.plugins.oedb.ui.CommonDBMetricsWidget;
 
 public class OpenEdgeDBPlugin extends SonarPlugin {
 
@@ -50,9 +49,6 @@ public class OpenEdgeDBPlugin extends SonarPlugin {
     list.add(OpenEdgeDBComponents.class);
     list.add(OpenEdgeDBRulesDefinition.class);
     list.add(OpenEdgeDBRulesRegistrar.class);
-
-    // UI
-    list.add(CommonDBMetricsWidget.class);
 
     // Code colorizer
     list.add(OpenEdgeDBColorizerFormat.class);

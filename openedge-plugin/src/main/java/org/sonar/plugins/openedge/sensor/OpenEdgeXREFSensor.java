@@ -21,6 +21,9 @@ package org.sonar.plugins.openedge.sensor;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -88,6 +91,15 @@ public class OpenEdgeXREFSensor implements Sensor {
   @Override
   public void analyse(Project project, SensorContext context) {
     int xrefNum = 0;
+    Map<String, Long> ruleTime = new HashMap<>();
+    long parseTime = 0L;
+
+    for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
+      String clsName = (rule.templateRuleKey() == null ? rule.ruleKey().rule() : rule.templateRuleKey());
+      // If class can be instantiated, then we add an entry 
+      if (components.getXrefAnalyzer(clsName) != null)
+        ruleTime.put(rule.ruleKey().rule(), 0L);
+    }
 
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdge.KEY))) {
       LOG.debug("Looking for XREF of {}", file.relativePath());
@@ -96,25 +108,23 @@ public class OpenEdgeXREFSensor implements Sensor {
       if ((xrefFile != null) && xrefFile.exists()) {
         LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
         try {
+          long startTime = System.currentTimeMillis();
           Document doc = dBuilder.parse(xrefFile);
+          parseTime += (System.currentTimeMillis() - startTime);
 
-          for (org.sonar.api.batch.rule.ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
+          for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
             RuleKey ruleKey = rule.ruleKey();
-            LOG.debug("ActiveRule - Rule key {} - Repository {} - Template rule key {}",
-                new Object[] {ruleKey.rule(), ruleKey.repository(), rule.templateRuleKey()});
             // AFAIK, no way to be sure if a rule is based on a template or not
             String clsName = (rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey());
-            try {
-              IXrefAnalyzer a = components.getXrefAnalyzer(clsName);
-              if (a == null) {
-                continue;
-              }
-              LOG.trace("Executing {} on XML document", ruleKey.rule());
-              configureFields(rule, a);
-              a.execute(doc, context, file, ruleKey);
-            } catch (ReflectiveOperationException caught) {
-              LOG.error("Unable to execute XREF rule " + rule.internalKey() + " on " + file.relativePath());
+            IXrefAnalyzer a = components.getXrefAnalyzer(clsName);
+            if (a == null) {
+              continue;
             }
+            LOG.trace("Executing {} on XML document", ruleKey.rule());
+            configureFields(rule, a);
+            startTime = System.currentTimeMillis();
+            a.execute(doc, context, file, ruleKey);
+            ruleTime.put(ruleKey.rule(), ruleTime.get(ruleKey.rule()) + System.currentTimeMillis() - startTime);
           }
 
           xrefNum++;
@@ -125,6 +135,10 @@ public class OpenEdgeXREFSensor implements Sensor {
     }
 
     LOG.info("{} XREF files imported", xrefNum);
+    LOG.info("XREF DOM Parse | time={} ms", parseTime);
+    for (Entry<String, Long> entry : ruleTime.entrySet()) {
+      LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
+    }
   }
 
   private void configureFields(ActiveRule activeRule, Object check) {
@@ -138,7 +152,6 @@ public class OpenEdgeXREFSensor implements Sensor {
         configureField(check, field, activeRule.param(param));
       }
     }
-
   }
 
   private void configureField(Object check, Field field, String value) {
@@ -147,37 +160,26 @@ public class OpenEdgeXREFSensor implements Sensor {
 
       if (field.getType().equals(String.class)) {
         field.set(check, value);
-
       } else if ("int".equals(field.getType().getSimpleName())) {
         field.setInt(check, Integer.parseInt(value));
-
       } else if ("short".equals(field.getType().getSimpleName())) {
         field.setShort(check, Short.parseShort(value));
-
       } else if ("long".equals(field.getType().getSimpleName())) {
         field.setLong(check, Long.parseLong(value));
-
       } else if ("double".equals(field.getType().getSimpleName())) {
         field.setDouble(check, Double.parseDouble(value));
-
       } else if ("boolean".equals(field.getType().getSimpleName())) {
         field.setBoolean(check, Boolean.parseBoolean(value));
-
       } else if ("byte".equals(field.getType().getSimpleName())) {
         field.setByte(check, Byte.parseByte(value));
-
       } else if (field.getType().equals(Integer.class)) {
         field.set(check, new Integer(Integer.parseInt(value)));
-
       } else if (field.getType().equals(Long.class)) {
         field.set(check, new Long(Long.parseLong(value)));
-
       } else if (field.getType().equals(Double.class)) {
         field.set(check, new Double(Double.parseDouble(value)));
-
       } else if (field.getType().equals(Boolean.class)) {
         field.set(check, Boolean.valueOf(Boolean.parseBoolean(value)));
-
       } else {
         throw MessageException.of("The type of the field " + field + " is not supported: " + field.getType());
       }

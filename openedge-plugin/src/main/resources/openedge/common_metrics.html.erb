@@ -4,35 +4,96 @@
   windows = measure('WINDOWS')
   procs = measure('PROCEDURES')
   incs = measure('INCLUDES')
-
-  if (procs && classes && windows)
+  tables = measure('OEDB_NUM_TABLES')
+  sequences = measure('OEDB_NUM_SEQUENCES')
+  fields = measure('OEDB_NUM_FIELDS')
+  indexes = measure('OEDB_NUM_INDEXES')
+  triggers = measure('OEDB_NUM_TRIGGERS')
 %>
 
-  <table width="100%">
-   <tbody>
-     <tr>
-       <td valign="top" width="48%" nowrap>
-         <div class="dashbox">
-           <p class="title">Classes</p>
-           <p>
-             <span class="big"><%= format_measure(classes, :url => url_for_drilldown(classes)) -%></span> <%= trend_icon(classes) %>
-           </p>
-           <p><%= format_measure(packages, :suffix => ' packages', :url => url_for_drilldown(packages)) -%> <%= trend_icon(packages) %></p>
-         </div>
-       </td>
-       <td width="10"> </td>
-       <td valign="top">
-         <div class="dashbox">
-           <p class="title">Procedural code</p>
-           <p>
-             <span class="big"><%= windows.value.to_i + procs.value.to_i -%></span>
-           </p>
-           <p><%= format_measure(procs, :suffix => ' procedures', :url => url_for_drilldown(procs)) -%> <%= trend_icon(procs) %></p>
-           <p><%= format_measure(windows, :suffix => ' windows', :url => url_for_drilldown(windows)) -%> <%= trend_icon(windows) %></p>
-           <p><i><%= format_measure(incs, :suffix => ' includes', :url => url_for_drilldown(incs)) -%></i> <%= trend_icon(incs) %></p>
-         </div>
-       </td>
-     </tr>
-   </tbody>
-  </table>
+  <div class="widget-row widget-row-x">
+    <div class="widget-span widget-span-3-5">
+      <div class="widget-measure-container">
+<% if (classes) %>
+        <p class="widget-measure widget-measure-main">
+          <span class="widget-label">OpenEdge classes</span>
+          <span class="nowrap">
+            <%= format_measure(classes, :url => url_for_drilldown(classes)) -%>
+          </span>
+        </p>
+        <p class="widget-measure">
+          <span class="widget-label">Packages</span>
+          <span class="nowrap">
+            <%= format_measure(packages, :url => url_for_drilldown(packages)) -%>
+          </span>
+        </p>
 <% end %>
+      </div>
+    </div>
+    <div class="widget-span widget-span-3-5">
+      <div class="widget-measure-container">
+<% if (procs && windows) %>
+        <p class="widget-measure widget-measure-main">
+          <span class="widget-label">OpenEdge procedures</span>
+          <span class="nowrap widget-link">
+            <%= windows.value.to_i + procs.value.to_i -%>
+          </span>
+        </p>
+        <p class="widget-measure">
+          <span class="widget-label">Procedures</span>
+          <span class="nowrap">
+            <%= format_measure(procs, :url => url_for_drilldown(procs)) -%>
+          </span>
+        </p>
+        <p class="widget-measure">
+          <span class="widget-label">Windows</span>
+          <span class="nowrap">
+            <%= format_measure(windows, :url => url_for_drilldown(windows)) -%>
+          </span>
+        </p>
+        <p class="widget-measure">
+          <span class="widget-label">Includes</span>
+          <span class="nowrap">
+            <%= format_measure(incs, :url => url_for_drilldown(incs)) -%>
+          </span>
+        </p>
+<% end %>
+      </div>
+    </div>
+    <div class="widget-span widget-span-5">
+      <div class="widget-measure-container">
+<% if (tables && sequences) %>
+        <p class="widget-measure widget-measure-main">
+          <span class="widget-label">DB Tables</span>
+          <span class="nowrap widget-link">
+            <%= format_measure(tables) -%>
+          </span>
+        </p>
+        <p class="widget-measure">
+          <span class="widget-label">Fields</span>
+          <span class="nowrap widget-link">
+            <%= format_measure(fields) -%>
+          </span>
+        </p>
+        <p class="widget-measure">
+          <span class="widget-label">Indexes</span>
+          <span class="nowrap widget-link">
+            <%= format_measure(indexes) -%>
+          </span>
+        </p>
+        <p class="widget-measure">
+          <span class="widget-label">Sequences</span>
+          <span class="nowrap widget-link">
+            <%= format_measure(sequences) -%>
+          </span>
+        </p>
+        <p class="widget-measure">
+          <span class="widget-label">Triggers</span>
+          <span class="nowrap widget-link">
+            <%= format_measure(triggers) -%>
+          </span>
+        </p>
+<% end %>
+      </div>
+    </div>
+  </div>

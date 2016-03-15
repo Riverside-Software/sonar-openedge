@@ -21,6 +21,9 @@ package org.sonar.plugins.openedge.sensor;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -32,11 +35,13 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.sensor.issue.NewIssue;
+import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.resources.Project;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.MessageException;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.ProparseRuntimeException;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorSession;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.IProgressSettings;
@@ -79,20 +84,36 @@ public class OpenEdgeProparseSensor implements Sensor {
     IProparseSettings settings2 = new ProparseSettings();
     RefactorSession session = new RefactorSession(settings1, settings2, this.settings.getProparseSchema(), fileSystem.encoding());
 
+    Map<String, Long> ruleTime = new HashMap<>();
+    long parseTime = 0L;
+
+    for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
+      String clsName = (rule.templateRuleKey() == null ? rule.ruleKey().rule() : rule.templateRuleKey());
+      // If class can be instantiated, then we add an entry 
+      if (components.getProparseAnalyzer(clsName) != null)
+        ruleTime.put(rule.ruleKey().rule(), 0L);
+    }
+
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdge.KEY))) {
       LOG.debug("Parsing {}", new Object[] {file.relativePath()});
-      if ("i".equals(Files.getFileExtension(file.relativePath()))) {
-        // Included files are not parsed
-        continue;
-      }
-
+      boolean isIncludeFile = "i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()));
       try {
         long time = System.currentTimeMillis();
 
         ParseUnit unit = new ParseUnit(file.file(), session);
-        unit.parse();
-
+        long startTime = System.currentTimeMillis();
+        if (isIncludeFile) {
+          unit.lex();
+        } else {
+          unit.treeParser01();
+        }
+        parseTime += (System.currentTimeMillis() - startTime);
         LOG.debug("{} milliseconds to generate ParseUnit", System.currentTimeMillis() - time);
+
+        // Saving LOC and COMMENTS metrics
+        context.saveMeasure(file, CoreMetrics.NCLOC, (double) unit.getMetrics().getLoc());
+        context.saveMeasure(file, CoreMetrics.COMMENT_LINES, (double) unit.getMetrics().getComments());
+
         if (settings.useProparseDebug()) {
           String fileName = ".proparse/" + file.relativePath();
           File dbgFile = new File(fileName);
@@ -105,21 +126,25 @@ public class OpenEdgeProparseSensor implements Sensor {
 //          }
         }
 
+        if (isIncludeFile) {
+          // Rules are not applied on include files
+          continue;
+        }
+
         for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
           LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}",
               new Object[] {rule.internalKey(), rule.ruleKey().repository(), rule.ruleKey().rule()});
           RuleKey ruleKey = RuleKey.of(rule.ruleKey().repository(), rule.ruleKey().rule());
-          try {
-            AbstractLintRule lint = components.getProparseAnalyzer(ruleKey.rule()); // getLintRule(rule);
-            if (lint != null) {
-              configureFields(rule, lint);
-              lint.execute(unit, context, file, ruleKey);
-            }
-          } catch (ReflectiveOperationException caught) {
+          AbstractLintRule lint = components.getProparseAnalyzer(ruleKey.rule());
+          if (lint != null) {
+            configureFields(rule, lint);
+            startTime = System.currentTimeMillis();
+            lint.execute(unit, context, file, ruleKey);
+            ruleTime.put(ruleKey.rule(), ruleTime.get(ruleKey.rule()) + System.currentTimeMillis() - startTime);
 
           }
         }
-      } catch (RefactorException caught) {
+      } catch (RefactorException | ProparseRuntimeException caught ) {
         LOG.error("Error during code parsing for " + file.relativePath(), caught);
         NewIssue issue = context.newIssue();
         issue.forRule(
@@ -128,6 +153,12 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
     }
     new File("listingparser.txt").delete();
+    
+    LOG.info("AST Generation | time={} ms", parseTime);
+    for (Entry<String, Long> entry : ruleTime.entrySet()) {
+      LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
+    }
+
   }
 
   @Override
@@ -155,37 +186,26 @@ public class OpenEdgeProparseSensor implements Sensor {
 
       if (field.getType().equals(String.class)) {
         field.set(check, value);
-
       } else if ("int".equals(field.getType().getSimpleName())) {
         field.setInt(check, Integer.parseInt(value));
-
       } else if ("short".equals(field.getType().getSimpleName())) {
         field.setShort(check, Short.parseShort(value));
-
       } else if ("long".equals(field.getType().getSimpleName())) {
         field.setLong(check, Long.parseLong(value));
-
       } else if ("double".equals(field.getType().getSimpleName())) {
         field.setDouble(check, Double.parseDouble(value));
-
       } else if ("boolean".equals(field.getType().getSimpleName())) {
         field.setBoolean(check, Boolean.parseBoolean(value));
-
       } else if ("byte".equals(field.getType().getSimpleName())) {
         field.setByte(check, Byte.parseByte(value));
-
       } else if (field.getType().equals(Integer.class)) {
         field.set(check, new Integer(Integer.parseInt(value)));
-
       } else if (field.getType().equals(Long.class)) {
         field.set(check, new Long(Long.parseLong(value)));
-
       } else if (field.getType().equals(Double.class)) {
         field.set(check, new Double(Double.parseDouble(value)));
-
       } else if (field.getType().equals(Boolean.class)) {
         field.set(check, Boolean.valueOf(Boolean.parseBoolean(value)));
-
       } else {
         throw MessageException.of("The type of the field " + field + " is not supported: " + field.getType());
       }

@@ -30,9 +30,11 @@ import org.sonar.plugins.openedge.checks.AbbreviatedKeywords;
 import org.sonar.plugins.openedge.checks.BackslashInIncludeFile;
 import org.sonar.plugins.openedge.checks.BackslashInString;
 import org.sonar.plugins.openedge.checks.BlockLabel;
+import org.sonar.plugins.openedge.checks.BufferUsage;
 import org.sonar.plugins.openedge.checks.ClassNameCasing;
 import org.sonar.plugins.openedge.checks.DisableTriggers;
 import org.sonar.plugins.openedge.checks.FindNoError;
+import org.sonar.plugins.openedge.checks.IndexUsage;
 import org.sonar.plugins.openedge.checks.NoReturnInFinally;
 import org.sonar.plugins.openedge.checks.ReturnError;
 import org.sonar.plugins.openedge.checks.ShareLock;
@@ -65,7 +67,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
   public static Class<? extends IXrefAnalyzer>[] xrefCheckClasses() {
     return new Class[] {
         SharedObjectsAnalyzer.class, SortAccessAnalyzer.class, SortAccessWholeIndexAnalyzer.class,
-        WholeIndexAnalyzer.class, XPathAnalyzer.class};
+        WholeIndexAnalyzer.class, XPathAnalyzer.class, IndexUsage.class};
   }
 
   /**
@@ -76,7 +78,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
     return new Class[] {
         UsingStars.class, AbbreviatedKeywords.class, BackslashInIncludeFile.class, BackslashInString.class,
         BlockLabel.class, ClassNameCasing.class, FindNoError.class, DisableTriggers.class, ShareLock.class,
-        NoReturnInFinally.class, ReturnError.class};
+        NoReturnInFinally.class, ReturnError.class, BufferUsage.class};
   }
 
 }

@@ -1,1 +1,1 @@
-mvn -DsonarHome=..\sonarqube-5.3 org.codehaus.sonar:sonar-dev-maven-plugin::upload
+mvn -DsonarHome=%SONAR_HOME% org.codehaus.sonar:sonar-dev-maven-plugin::upload

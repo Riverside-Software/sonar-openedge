@@ -27,7 +27,7 @@ public class XPathAnalyzer extends XrefAnalyzer {
     xPath = XPathFactory.newInstance().newXPath();
   }
 
-  @RuleProperty(description = "XPath expression, returning a list of 'Reference' elements", defaultValue = "//Reference[@Reference-type='...' and File-num='1']")
+  @RuleProperty(description = "XPath expression, returning a list of 'Reference' elements", defaultValue = "//Reference[@Reference-type='...']")
   public String xPathExpression = "";
   @RuleProperty(description = "Issue message", defaultValue = "")
   public String issueMessage = "";

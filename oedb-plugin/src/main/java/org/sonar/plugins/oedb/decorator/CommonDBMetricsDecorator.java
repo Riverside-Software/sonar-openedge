@@ -37,18 +37,17 @@ public class CommonDBMetricsDecorator implements MeasureComputer {
   @Override
   public MeasureComputerDefinition define(MeasureComputerDefinitionContext defContext) {
     return defContext.newDefinitionBuilder().setInputMetrics(OpenEdgeDBMetrics.NUM_TABLES_KEY,
-        OpenEdgeDBMetrics.NUM_SEQUENCES_KEY, OpenEdgeDBMetrics.NUM_FIELDS_KEY,
-        OpenEdgeDBMetrics.NUM_INDEXES_KEY).setOutputMetrics(OpenEdgeDBMetrics.NUM_TABLES_KEY,
-            OpenEdgeDBMetrics.NUM_SEQUENCES_KEY, OpenEdgeDBMetrics.NUM_FIELDS_KEY,
-            OpenEdgeDBMetrics.NUM_INDEXES_KEY).build();
-
+        OpenEdgeDBMetrics.NUM_SEQUENCES_KEY, OpenEdgeDBMetrics.NUM_FIELDS_KEY, OpenEdgeDBMetrics.NUM_INDEXES_KEY,
+        OpenEdgeDBMetrics.NUM_TRIGGERS_KEY).setOutputMetrics(OpenEdgeDBMetrics.NUM_TABLES_KEY,
+            OpenEdgeDBMetrics.NUM_SEQUENCES_KEY, OpenEdgeDBMetrics.NUM_FIELDS_KEY, OpenEdgeDBMetrics.NUM_INDEXES_KEY,
+            OpenEdgeDBMetrics.NUM_TRIGGERS_KEY).build();
   }
 
   @Override
   public void compute(MeasureComputerContext context) {
     LOG.info("Decorating " + context.getComponent().getKey());
 
-    int numTables = 0, numSeq = 0, numIndex = 0, numFields = 0;
+    int numTables = 0, numSeq = 0, numIndex = 0, numFields = 0, numTriggers = 0;
     if ((context.getComponent().getType() == Component.Type.DIRECTORY)
         || (context.getComponent().getType() == Component.Type.PROJECT)) {
       for (Measure m : context.getChildrenMeasures(OpenEdgeDBMetrics.NUM_TABLES_KEY)) {
@@ -63,10 +62,14 @@ public class CommonDBMetricsDecorator implements MeasureComputer {
       for (Measure m : context.getChildrenMeasures(OpenEdgeDBMetrics.NUM_SEQUENCES_KEY)) {
         numSeq += m.getIntValue();
       }
+      for (Measure m : context.getChildrenMeasures(OpenEdgeDBMetrics.NUM_TRIGGERS_KEY)) {
+        numTriggers += m.getIntValue();
+      }
       context.addMeasure(OpenEdgeDBMetrics.NUM_TABLES_KEY, numTables);
       context.addMeasure(OpenEdgeDBMetrics.NUM_FIELDS_KEY, numFields);
       context.addMeasure(OpenEdgeDBMetrics.NUM_INDEXES_KEY, numIndex);
       context.addMeasure(OpenEdgeDBMetrics.NUM_SEQUENCES_KEY, numSeq);
+      context.addMeasure(OpenEdgeDBMetrics.NUM_TRIGGERS_KEY, numTriggers);
     }
   }
 }

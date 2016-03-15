@@ -13,7 +13,7 @@ import org.sonar.plugins.openedge.api.com.google.common.base.Splitter;
 import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
 import org.sonar.plugins.openedge.api.model.SqaleSubCharacteristic;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
-import org.sonar.plugins.openedge.api.org.prorefactor.proparse.NodeTypes;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 
 @Rule(priority = Priority.MINOR, name = "No abbreviated keywords", tags = { "convention" })

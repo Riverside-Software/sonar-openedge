@@ -30,6 +30,7 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.resources.Project;
 import org.sonar.plugins.oedb.api.eu.rssw.antlr.database.DumpFileUtils;
 import org.sonar.plugins.oedb.api.eu.rssw.antlr.database.objects.DatabaseDescription;
+import org.sonar.plugins.oedb.api.eu.rssw.antlr.database.objects.Field;
 import org.sonar.plugins.oedb.api.eu.rssw.antlr.database.objects.Table;
 import org.sonar.plugins.oedb.foundation.OpenEdgeDB;
 import org.sonar.plugins.oedb.foundation.OpenEdgeDBMetrics;
@@ -63,13 +64,18 @@ public class OpenEdgeDBSensor implements Sensor {
         sensorContext.saveMeasure(file, OpenEdgeDBMetrics.NUM_TABLES, (double) desc.getTables().size());
         sensorContext.saveMeasure(file, OpenEdgeDBMetrics.NUM_SEQUENCES, (double) desc.getSequences().size());
 
-        int numFlds = 0, numIdx = 0;
+        int numFlds = 0, numIdx = 0, numTriggers = 0;
         for (Table tab : desc.getTables()) {
           numFlds += tab.getFields().size();
           numIdx += tab.getIndexes().size();
+          numTriggers += tab.getTriggers().size();
+          for (Field f : tab.getFields()) {
+            numTriggers += f.getTriggers().size();
+          }
         }
         sensorContext.saveMeasure(file, OpenEdgeDBMetrics.NUM_FIELDS, (double) numFlds);
         sensorContext.saveMeasure(file, OpenEdgeDBMetrics.NUM_INDEXES, (double) numIdx);
+        sensorContext.saveMeasure(file, OpenEdgeDBMetrics.NUM_TRIGGERS, (double) numTriggers);
       } catch (IOException caught) {
         LOG.error("Can not analyze file", caught);
       }

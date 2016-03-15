@@ -12,6 +12,7 @@ import eu.rssw.antlr.database.DumpFileGrammarParser.FieldExtentContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldFormatContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldMaxWidthContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldOrderContext;
+import eu.rssw.antlr.database.DumpFileGrammarParser.FieldTriggerContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.IndexAreaContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.IndexFieldContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.IndexPrimaryContext;
@@ -105,6 +106,20 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
   @Override
   public Void visitFieldOrder(FieldOrderContext ctx) {
     fields.peek().setOrder(ctx.val.getText());
+
+    return null;
+  }
+
+  @Override
+  public Void visitFieldTrigger(FieldTriggerContext ctx) {
+    Trigger trigger = new Trigger(TriggerType.valueOf(ctx.type.getText().replace('-', '_').replace("\"", "").toUpperCase()),
+        ctx.triggerProcedure.getText());
+    if (ctx.crc != null) {
+      trigger.setCrc(ctx.crc.getText());
+    }
+    if (ctx.noOverride != null)
+      trigger.setNoOverride(true);
+    fields.peek().addTrigger(trigger);
 
     return null;
   }

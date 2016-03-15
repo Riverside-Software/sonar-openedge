@@ -23,7 +23,7 @@ public class WholeIndexAnalyzer extends XrefAnalyzer {
     try {
       // Not looking into include files, and not on temp-tables
       wholeIndexExpr = xPath.compile(
-          "//Reference[@Reference-type='SEARCH' and Detail='WHOLE-INDEX' and File-num='1' and Temp-ref='']");
+          "//Reference[@Reference-type='SEARCH' and Detail='WHOLE-INDEX' and Temp-ref='']");
     } catch (XPathExpressionException caught) {
       throw new RuntimeException(caught);
     }

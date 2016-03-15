@@ -51,6 +51,7 @@ public class OpenEdgePlugin extends SonarPlugin {
   public static final String BINARIES = "sonar.oe.binaries";
   public static final String PROPATH = "sonar.oe.propath";
   public static final String DATABASES = "sonar.oe.databases";
+  public static final String ALIASES = "sonar.oe.aliases";
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
@@ -100,6 +101,9 @@ public class OpenEdgePlugin extends SonarPlugin {
     list.add(PropertyDefinition.builder(PROPATH).name("propath").description(
         "PROPATH, as a comma-separated list of directories and PL").type(PropertyType.STRING).defaultValue("").build());
     list.add(PropertyDefinition.builder(DATABASES).name("databases").description(
+        "DB connections, as a comma-separated list of DF files (with optional alias after ';')").type(
+            PropertyType.STRING).defaultValue("").build());
+    list.add(PropertyDefinition.builder(ALIASES).name("aliases").description(
         "DB connections, as a comma-separated list of DF files (with optional alias after ';')").type(
             PropertyType.STRING).defaultValue("").build());
 

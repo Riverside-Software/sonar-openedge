@@ -1,0 +1,324 @@
+find first billto.
+for each customer:
+  display address.
+end.
+/* Uses customer */
+--------------------------------
+find first billto.
+do for customer:
+  find first customer.
+  display address.
+end.
+/* Uses customer */
+--------------------------------
+find first billto.
+repeat:
+  find first customer.
+  display address.
+end.
+/* Uses customer */
+--------------------------------
+do for customer:
+  find first customer.
+  find first billto.
+end.
+display name.
+/* Displays billto.name. */
+--------------------------------
+find first billto.
+for each customer: leave. end.
+for each customer: leave. end.
+do for customer: end.
+display name.
+/* Name resolves to billto.
+ * Without the strong scope on customer,
+ * it would be ambiguous.
+ */
+--------------------------------
+find first billto.
+for each state:
+  find first customer.
+  display name.
+end.
+/* Uses customer.name. */
+--------------------------------
+for each customer:
+  for each billto:
+    for each state:
+      display name.
+    end.
+  end.
+end.
+/* Displays billto.name. */
+--------------------------------
+for first state:
+  find first customer.
+end.
+display name.
+/* Displays customer.name. */
+--------------------------------
+find first billto.
+do preselect each customer:
+  find first customer.
+  display name.
+  leave.
+end.
+/* Displays customer.name. */
+--------------------------------
+do for customer:
+  find first customer.
+  display name.
+end.
+repeat:
+  find next customer.
+  display name.
+  leave.
+end.
+repeat:
+  find next customer.
+  display name.
+  leave.
+end.
+/* The strong scope prevents the buffer scope from
+   being raised to the procedure. The same customer
+   name is displayed 3 times. */
+--------------------------------
+/*
+do for customer:
+  find first customer.
+  display name.
+end.
+*/
+repeat:
+  find next customer.
+  display name.
+  leave.
+end.
+repeat:
+  find next customer.
+  display name.
+  leave.
+end.
+/* Now, the buffer scope is raised to the procedure,
+   and two different customer names are displayed. */
+--------------------------------
+do preselect each customer:
+  find next customer.
+  display name.
+  pause.
+  leave.
+end.
+do preselect each customer:
+  find next customer.
+  display name.
+  leave.
+end.
+/* "medium" scopes do not raise scope - same record found. */
+--------------------------------
+for each customer:
+  leave.
+end.
+for each state:
+  display name.
+  leave.
+end.
+/* Displays customer.name. */
+--------------------------------
+repeat:
+  find first customer.
+  leave.
+end.
+do for customer: end.
+for each customer: end.
+/* Legal. DO FOR prevents scope raising. */
+--------------------------------
+repeat for customer:
+  find first billto.
+  leave.
+end.
+display name.
+/* displays billto.name */
+--------------------------------
+run getit.
+procedure getit:
+  find first customer.
+end.
+display customer.name.
+/* displays the first customer.name. If the display
+ * comes before the procedure definition, then the compile fails,
+ * "no for, find, or create...".
+ */
+--------------------------------
+run getit.
+procedure getit:
+  find first customer.
+end.
+/* Customer is scoped to the root/program block, not the procedure block. */
+--------------------------------
+on "f1" anywhere do:
+  def buffer bcust for customer.
+  on "f2" anywhere do:
+    /* find first bcust. */
+    def buffer bcust for customer.
+  end.
+end.
+/* Is OK, but if you uncomment the FIND, then compiler gives duplicate buffer error */
+--------------------------------
+do for customer:
+  for each customer: leave. end.
+  for each customer: leave. end.
+end.
+/* customer is scoped to the DO block, not the inner FOR blocks */
+--------------------------------
+find first billto.
+display name.
+run proc1.
+procedure proc1:
+  find first customer.
+  display name.
+end.
+/* Even though customer is scoped to outer program, name resolves OK. */
+--------------------------------
+define query myQuery for invoice.
+/* Creates a buffer-scope. */
+--------------------------------
+def parameter buffer bcust for customer.
+/* Creates buffer-scope for bcust (but not for customer). */
+--------------------------------
+def temp-table tt1 field f1 as char.
+procedure myProc:
+  def input parameter table for tt1.
+end.
+/* Does not create buffer-scope */
+--------------------------------
+if available customer then return.
+/* Does create buffer-scope */
+--------------------------------
+def buffer bcust for customer.
+/* Does not create buffer-scope */
+--------------------------------
+disable triggers for dump of customer.
+/* Does not create buffer-scope */
+--------------------------------
+form billto with frame f1.
+/* Does not create buffer-scope */
+--------------------------------
+function f1 returns character (buffer bcust for customer):
+  return "hi".
+end.
+/* Creates buffer-scope for bcust */
+--------------------------------
+def temp-table tt1 field f1 as char.
+function f1 returns character (table for tt1):
+  return "hi".
+end.
+/* Does not create buffer-scope */
+--------------------------------
+on create of customer do:
+end.
+/* Creates buffer-scope */
+--------------------------------
+message can-find(first customer).
+/* recordphrase. Does not create buffer-scope. */
+--------------------------------
+find first customer.
+/* recordphrase. Creates buffer-scope. */
+--------------------------------
+find first customer of billto.
+/* Creates buffer-scope for both customer and billto. */
+--------------------------------
+trigger procedure for create of customer.
+/* Creates buffer-scope */
+--------------------------------
+delete from customer.
+/* Does not create buffer-scope */
+--------------------------------
+select * from billto.
+/* Does not create buffer-scope. */
+--------------------------------
+def temp-table tt1 like billto.
+/* Does not create buffer-scope for either. */
+--------------------------------
+def temp-table billto field f1 as char.
+message can-find(first billto).
+/* Resolves to temp-table, even though can-find does not create buffer-scope */
+--------------------------------
+def temp-table billto field myfield as char.
+form billto with frame frame1.
+display with frame frame1.
+/* The temp-table goes into the frame */
+--------------------------------
+def temp-table billto field myfield as char.
+def buffer bb1 for billto.
+find first bb1.
+display bb1.
+/* Buffer gets defined for schema table, not temp-table */
+--------------------------------
+find first customer.
+on create of customer do:
+end.
+/* Two buffer scopes - the trigger block gets its own. */
+--------------------------------
+on write of customer new new-cust old old-cust do:
+end.
+/* Two buffers defined and scoped to the trigger */
+--------------------------------
+do for customer: end.
+repeat:
+  for each customer: leave. end.
+  for each customer: leave. end.
+  display name.
+  leave.
+end.
+find first billto.
+display name.
+/* Displays customer name then billto name */
+--------------------------------
+def buffer bcust for customer.
+find first bcust.
+def var x1 like name.
+/* Name lookup is based on "buffers first" even if we only want a symbol. */
+--------------------------------
+def temp-table b field f1 as char.
+create b.
+def buffer b_c for b.
+find first b_c.
+display b_c.
+/* Resolves b_c to temp-table "b" */
+--------------------------------
+def temp-table bin field f1 as char.
+create bin.
+def buffer b_c for bin.
+find first b_c.
+display b_c.
+/* Resolves b_c to schema table "bin" */
+--------------------------------
+def temp-table cust field f1 as char.
+do transaction:
+  create cust.
+end.
+def buffer b for cust.
+find first b.
+display b.
+/* Resolves b to temp-table, rather than schema table 'customer' */
+--------------------------------
+for first customer: end.
+def buffer bcust for customer.
+for last bcust: end.
+display name.
+/* Name resolves to customer.name.
+ * It appears that a weakly scoped *named* buffer will not
+ * have its scope automagically raised for a field name
+ * reference. Without the <<for first customer>>, this
+ * snippet fails to compile.
+ */
+--------------------------------
+find first customer.
+find first billto.
+display customer except name address.
+/* Bug079
+ * Tree parser was missing the EXCEPT phrase in DISPLAY
+ * statements, causing the *occasional* evaluation to billto,
+ * and always incorrectly flagging as unqualified.
+ */
+

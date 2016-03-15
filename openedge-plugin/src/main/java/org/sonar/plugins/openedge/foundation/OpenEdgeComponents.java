@@ -57,22 +57,32 @@ public class OpenEdgeComponents {
     return checks;
   }
 
-  public IXrefAnalyzer getXrefAnalyzer(String internalKey) throws ReflectiveOperationException {
-    for (Class<? extends IXrefAnalyzer> clz : checks) {
-      if (clz.getCanonicalName().equalsIgnoreCase(internalKey)) {
-        return clz.newInstance();
+  public IXrefAnalyzer getXrefAnalyzer(String internalKey) {
+    try {
+      for (Class<? extends IXrefAnalyzer> clz : checks) {
+        if (clz.getCanonicalName().equalsIgnoreCase(internalKey)) {
+          return clz.newInstance();
+        }
       }
+      return null;
+    } catch (ReflectiveOperationException caught) {
+      LOG.error("Unable to instantiate XREF rule " + internalKey);
+      return null;
     }
-    return null;
   }
-  
-  public AbstractLintRule getProparseAnalyzer(String internalKey) throws ReflectiveOperationException {
-    for (Class<? extends AbstractLintRule> clz : ppchecks) {
-      if (clz.getCanonicalName().equalsIgnoreCase(internalKey)) {
-        return clz.newInstance();
+
+  public AbstractLintRule getProparseAnalyzer(String internalKey) {
+    try {
+      for (Class<? extends AbstractLintRule> clz : ppchecks) {
+        if (clz.getCanonicalName().equalsIgnoreCase(internalKey)) {
+          return clz.newInstance();
+        }
       }
+      return null;
+    } catch (ReflectiveOperationException caught) {
+      LOG.error("Unable to instantiate Proparse rule " + internalKey);
+      return null;
     }
-    return null;
   }
 
 }

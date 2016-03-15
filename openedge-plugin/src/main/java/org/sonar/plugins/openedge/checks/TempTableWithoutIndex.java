@@ -4,7 +4,6 @@ import org.sonar.check.Priority;
 import org.sonar.check.Rule;
 import org.sonar.plugins.openedge.api.antlr.collections.AST;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
-import org.sonar.plugins.openedge.api.org.prorefactor.proparse.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.TreeParserException;

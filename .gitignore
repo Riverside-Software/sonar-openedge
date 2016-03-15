@@ -38,3 +38,5 @@ openedge-rules-plugin/test-output
 openedge-rules-plugin/.classpath
 openedge-rules-plugin/.project
 openedge-rules-plugin/.settings
+proparse/target
+proparse/test-output
