@@ -8,7 +8,7 @@ import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 
-@Rule(priority = Priority.INFO, name = "Star imports [PP]", description = "This lint rules verifies that * imports are not used. ")
+@Rule(priority = Priority.INFO, name = "Wildcard imports should not be used")
 public class UsingStars extends AbstractLintRule {
 
   @Override

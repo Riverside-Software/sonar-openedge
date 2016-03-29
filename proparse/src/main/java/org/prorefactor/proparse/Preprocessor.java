@@ -28,6 +28,8 @@ import java.util.regex.Pattern;
 
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.refactor.settings.IProgressSettings;
+import org.prorefactor.refactor.settings.IProparseSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,18 +62,20 @@ public class Preprocessor {
   private static final Pattern regexEmptyCurlies = Pattern.compile("\\{\\s*\\}");
 
   final DoParse doParse;
+  private final IProgressSettings pscSettings;
+  private final IProparseSettings ppSettings;
 
   /** How many levels of &IF FALSE are we currently into? */
   int consuming = 0;
 
-  int currChar;
-  int currCol;
-  int currFile;
-  int currLine;
-  int currSourceNum;
+  private int currChar;
+  private int currCol;
+  private int currFile;
+  private int currLine;
+  private int currSourceNum;
 
   /** Are we in the middle of a comment? */
-  boolean doingComment = false;
+  boolean doingComment;
 
   /**
    * Would you append the currently returned character to escapeText in order to see what the original code looked like
@@ -80,12 +84,12 @@ public class Preprocessor {
   boolean escapeAppend;
 
   /** Is the currently returned character escaped? */
-  boolean escapeCurrent = false;
+  boolean escapeCurrent;
 
   String escapeText;
 
   /** Are we writing a preprocessor-listing file? */
-  boolean listing = false;
+  boolean listing;
 
   /** The listing stream (only open if listing) */
   BufferedWriter listingStream;
@@ -105,7 +109,7 @@ public class Preprocessor {
 
   private IncludeFile currentInclude;
   private InputSource currentInput;
-  private HashMap<String, String> globalDefdNames = new HashMap<>();
+  private Map<String, String> globalDefdNames = new HashMap<>();
   private boolean gotLookahead = false;
   private LinkedList<IncludeFile> includeVector = new LinkedList<>();
   private int laFile;
@@ -129,6 +133,8 @@ public class Preprocessor {
    */
   public Preprocessor(String fileName, BufferedReader inStream, DoParse doParse) {
     this.doParse = doParse;
+    this.pscSettings = doParse.getRefactorSession().getProgressSettings();
+    this.ppSettings = doParse.getRefactorSession().getProparseSettings();
 
     // Create input source with flag isPrimaryInput=true
     sourceCounter = -1;
@@ -270,18 +276,18 @@ public class Preprocessor {
 
     // Built-ins
     if ("batch-mode".equals(argName))
-      return Boolean.toString(doParse.getRefactorSession().getProgressSettings().getBatchMode());
+      return Boolean.toString(pscSettings.getBatchMode());
     if ("opsys".equals(argName))
-      return doParse.getRefactorSession().getProgressSettings().getOpSys();
+      return pscSettings.getOpSys();
     if ("window-system".equals(argName))
-      return doParse.getRefactorSession().getProgressSettings().getWindowSystem();
+      return pscSettings.getWindowSystem();
     if ("file-name".equals(argName)) {
       // {&FILE-NAME}, unlike {0}, returns the filename as found on the PROPATH.
       ret = doParse.getRefactorSession().findFile(currentInclude.numdArgs.get(0));
       // Progress seems to be converting the slashes for the appropriate OS.
       // I don't convert the slashes when I store the filename - instead I do it here.
       // (Saves us from converting the slashes for each and every include reference.)
-      if (doParse.getRefactorSession().getProgressSettings().getOpSysNum() == RefactorSession.OPSYS_UNIX)
+      if (pscSettings.getOpSysNum() == RefactorSession.OPSYS_UNIX)
         ret = ret.replace('\\', '/');
       else
         ret = ret.replace('/', '\\');
@@ -309,7 +315,7 @@ public class Preprocessor {
         case '~': {
           // Escapes are *always* processed, even inside strings and comments.
           if (currChar == '\\'
-              && doParse.getRefactorSession().getProgressSettings().getOpSysNum() != RefactorSession.OPSYS_UNIX)
+              && pscSettings.getOpSysNum() != RefactorSession.OPSYS_UNIX)
             return currChar;
           int retChar = escape();
           if (retChar == '.')
@@ -537,7 +543,7 @@ public class Preprocessor {
 
     // Proparse Directive
     if (refText.toLowerCase().startsWith("{&_proparse_")
-        && doParse.getRefactorSession().getProparseSettings().getProparseDirectives()) {
+        && ppSettings.getProparseDirectives()) {
       currChar = PROPARSE_DIRECTIVE;
       // We strip "{&_proparse_", trailing '}', and leading/trailing whitespace
       proparseDirectiveText = refText.substring(12, closingCurly).trim();

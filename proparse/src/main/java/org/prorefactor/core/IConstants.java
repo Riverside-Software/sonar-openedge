@@ -131,8 +131,6 @@ public class IConstants {
   public static final int ORIGINAL = -216;
   /**
    * A valid value for setLink() and getLink().
-   * 
-   * @see #getFieldContainer().
    */
   public static final int FIELD_CONTAINER = -217;
   /**

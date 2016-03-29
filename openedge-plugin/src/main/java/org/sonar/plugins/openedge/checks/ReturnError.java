@@ -7,7 +7,7 @@ import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 
-@Rule(priority = Priority.INFO, name = "RETURN ERROR without expression [PP]", description = "RETURN ERROR should include error message")
+@Rule(priority = Priority.INFO, name = "RETURN ERROR without expression")
 public class ReturnError extends AbstractLintRule {
 
   @Override

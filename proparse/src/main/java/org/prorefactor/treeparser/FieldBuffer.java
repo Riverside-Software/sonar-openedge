@@ -135,9 +135,9 @@ public class FieldBuffer extends Symbol implements Primative {
   /**
    * Always returns FIELD.
    * 
-   * @see org.prorefactor.treeparser.Symbol#getProgressType(). To see if this field buffer is for a schema table,
+   * @see org.prorefactor.treeparser.Symbol#getProgressType() To see if this field buffer is for a schema table,
    *      temp-table, or work-table, see Table.getStoreType().
-   * @see org.prorefactor.core.schema.Table#getStoretype().
+   * @see org.prorefactor.core.schema.Table#getStoretype()
    */
   @Override
   public int getProgressType() {

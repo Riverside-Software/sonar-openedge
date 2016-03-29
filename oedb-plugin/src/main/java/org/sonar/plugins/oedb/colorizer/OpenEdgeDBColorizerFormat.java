@@ -24,9 +24,8 @@ import java.util.List;
 import org.sonar.api.web.CodeColorizerFormat;
 import org.sonar.colorizer.KeywordsTokenizer;
 import org.sonar.colorizer.Tokenizer;
+import org.sonar.plugins.oedb.api.com.google.common.collect.ImmutableList;
 import org.sonar.plugins.oedb.foundation.OpenEdgeDB;
-
-import com.google.common.collect.ImmutableList;
 
 // Won't be changed to Highlitable
 @SuppressWarnings("deprecation")

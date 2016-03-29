@@ -19,7 +19,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-@Rule(priority = Priority.MAJOR, name = "Index usage", description = "Index usage")
+@Rule(priority = Priority.MAJOR, name = "Index usage")
 @RuleTemplate
 public class IndexUsage extends XrefAnalyzer {
   private static final String TEMPLATE = "//Reference[@Reference-type=''SEARCH'' and translate(@Object-identifier, ''ABCDEFGHIJKLMNOPQRSTUVWXYZ'', ''abcdefghijklmnopqrstuvwxyz'') = ''{0}'' and translate(Object-context, ''ABCDEFGHIJKLMNOPQRSTUVWXYZ'', ''abcdefghijklmnopqrstuvwxyz'') = ''{1}'' and Temp-ref='''']";

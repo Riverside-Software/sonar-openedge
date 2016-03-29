@@ -93,9 +93,8 @@ public class TableBuffer extends Symbol {
   /**
    * Always returns BUFFER, whether this is a named buffer or a default buffer.
    * 
-   * @see org.prorefactor.treeparser.Symbol#getProgressType(). To see if this buffer Symbol is for a schema table,
-   *      temp-table, or work-table, see Table.getStoreType().
-   * @see org.prorefactor.core.schema.Table#getStoretype().
+   * @see org.prorefactor.treeparser.Symbol#getProgressType()
+   * @see org.prorefactor.core.schema.Table#getStoretype()
    */
   @Override
   public int getProgressType() {

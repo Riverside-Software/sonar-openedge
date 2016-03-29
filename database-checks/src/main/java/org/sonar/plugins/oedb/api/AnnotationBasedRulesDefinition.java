@@ -34,7 +34,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.io.Resources;
 
 /**
  * Utility class which helps setting up an implementation of {@link RulesDefinition} with a list of rule classes

@@ -43,11 +43,6 @@ import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.ProparseRuntimeException;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException;
-import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorSession;
-import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.IProgressSettings;
-import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.IProparseSettings;
-import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.ProgressSettings;
-import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.ProparseSettings;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
@@ -79,11 +74,6 @@ public class OpenEdgeProparseSensor implements Sensor {
 
   @Override
   public void analyse(Project project, SensorContext context) {
-    IProgressSettings settings1 = new ProgressSettings(true, "", "WIN32", this.settings.getPropathAsString(), "11.5",
-        "MS-WIN95");
-    IProparseSettings settings2 = new ProparseSettings();
-    RefactorSession session = new RefactorSession(settings1, settings2, this.settings.getProparseSchema(), fileSystem.encoding());
-
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
 
@@ -100,7 +90,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       try {
         long time = System.currentTimeMillis();
 
-        ParseUnit unit = new ParseUnit(file.file(), session);
+        ParseUnit unit = new ParseUnit(file.file(), settings.getProparseSession());
         long startTime = System.currentTimeMillis();
         if (isIncludeFile) {
           unit.lex();

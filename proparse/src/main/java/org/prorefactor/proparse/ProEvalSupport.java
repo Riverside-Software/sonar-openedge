@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.refactor.settings.IProgressSettings;
 
 /**
- * Used in evaluating expressions in &IF conditions
+ * Used in evaluating expressions in &amp;IF conditions
  */
 public class ProEvalSupport {
 
@@ -369,10 +369,11 @@ public class ProEvalSupport {
     throw new ProEvalException("Incompatible data type in expression.");
   }
 
-  static String propath(RefactorSession session) {
+  // TODO Verify if this not a duplicate of settings#getPropath()
+  static String propath(IProgressSettings settings) {
     StringBuilder bldr = new StringBuilder();
     boolean delim = false;
-    for (String p : session.getProgressSettings().getPropathAsList()) {
+    for (String p : settings.getPropathAsList()) {
       if (delim)
         bldr.append(',');
       bldr.append(p);

@@ -11,13 +11,14 @@
 package org.prorefactor.core.schema;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StreamTokenizer;
+import java.nio.charset.Charset;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -25,6 +26,10 @@ import java.util.TreeSet;
 import org.prorefactor.treeparser.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Splitter;
+import com.google.common.io.Files;
+import com.google.common.io.LineProcessor;
 
 /**
  * Schema is a singleton with methods and fields for working with database schema names, and references to those from
@@ -98,86 +103,72 @@ public class Schema {
 
   public final void injectMetaSchema() throws IOException {
     for (Database db : dbSet) {
+      SchemaLineProcessor lineProcessor = new SchemaLineProcessor(db);
       try (BufferedReader reader = new BufferedReader(
           new InputStreamReader(this.getClass().getResourceAsStream("/meta.txt")))) {
-        StreamTokenizer tokenstream = new StreamTokenizer(reader);
-        tokenstream.eolIsSignificant(false);
-        tokenstream.wordChars('!', 'z');
-
-        Table currTable = null;
-        while (tokenstream.nextToken() != StreamTokenizer.TT_EOF) {
-          String theString = tokenstream.sval;
-          if (":".equals(theString)) {
-            // table name
-            tokenstream.nextToken();
-            String tablename = tokenstream.sval;
-            tokenstream.nextToken(); // table recid is no longer stored
-            currTable = new Table(tablename, db);
-            allTables.add(currTable);
-          } else {
-            // field name
-            String fieldname = tokenstream.sval;
-            tokenstream.nextToken(); // field recid is no longer stored
-            tokenstream.nextToken();
-            String typeName = tokenstream.sval;
-            Field field = new Field(fieldname, currTable);
-            field.setDataType(DataType.getDataType(typeName));
-            if (field.getDataType() == null)
-              throw new IOException("Unknown datatype: " + typeName);
-            tokenstream.nextToken();
-            field.setExtent((int) tokenstream.nval);
-            // Fields are not needed or used in Proparse.dll.
-          }
-        } // while
+        String line;
+        while (((line = reader.readLine()) != null) && lineProcessor.processLine(line)) {
+        }
       }
     }
   }
 
+  private final void loadSchema(File file) throws IOException {
+    Files.readLines(file, Charset.defaultCharset(), new SchemaLineProcessor());
+  }
+
   /**
-   * Load schema names and RECID from a flat file.
+   * Load schema names from a flat file.
    * 
    * @param from The filename to read from.
    */
   private final void loadSchema(String from) throws IOException {
-    BufferedReader reader = new BufferedReader(new FileReader(from));
-    StreamTokenizer tokenstream = new StreamTokenizer(reader);
-    tokenstream.eolIsSignificant(false);
-    tokenstream.wordChars('!', 'z');
-    Database currDatabase = null;
-    Table currTable = null;
-    while (tokenstream.nextToken() != StreamTokenizer.TT_EOF) {
-      String theString = tokenstream.sval;
-      if ("::".equals(theString)) {
-        // database name
-        tokenstream.nextToken();
-        String dbname = tokenstream.sval;
-        tokenstream.nextToken(); // database number is no longer stored
-        currDatabase = new Database(dbname);
-        dbSet.add(currDatabase);
-      } else if (":".equals(theString)) {
-        // table name
-        tokenstream.nextToken();
-        String tablename = tokenstream.sval;
-        tokenstream.nextToken(); // table recid is no longer stored
-        currTable = new Table(tablename, currDatabase);
-        allTables.add(currTable);
-      } else {
-        // field name
-        String fieldname = tokenstream.sval;
-        tokenstream.nextToken(); // field recid is no longer stored
-        tokenstream.nextToken();
-        String typeName = tokenstream.sval;
-        Field field = new Field(fieldname, currTable);
-        field.setDataType(DataType.getDataType(typeName));
-        if (field.getDataType() == null)
-          throw new IOException("Unknown datatype: " + typeName);
-        tokenstream.nextToken();
-        field.setExtent((int) tokenstream.nval);
-        // Fields are not needed or used in Proparse.dll.
+    loadSchema(new File(from));
+  }
+
+  private class SchemaLineProcessor implements LineProcessor<Void> {
+    private Database currDatabase;
+    private Table currTable;
+
+    public SchemaLineProcessor() {
+      this(null);
+    }
+
+    public SchemaLineProcessor(Database currDatabase) {
+      this.currDatabase = currDatabase;
+    }
+
+    @Override
+    public boolean processLine(String line) throws IOException {
+      List<String> list = Splitter.on(' ').omitEmptyStrings().trimResults().splitToList(line);
+      // Stop processing on empty line
+      if ((list == null) || (list.size() < 2)) {
+        return false;
       }
-    } // while
-    reader.close();
-  } // loadSchema()
+      switch (list.get(0)) {
+        case "::":
+          currDatabase = new Database(list.get(1));
+          dbSet.add(currDatabase);
+          break;
+        case ":":
+          currTable = new Table(list.get(1), currDatabase);
+          allTables.add(currTable);
+          break;
+        default:
+          Field field = new Field(list.get(0), currTable);
+          field.setDataType(DataType.getDataType(list.get(1)));
+          if (field.getDataType() == null)
+            throw new IOException("Unknown datatype: " + list.get(1));
+          field.setExtent(Integer.parseInt(list.get(2)));
+      }
+      return true;
+    }
+
+    @Override
+    public Void getResult() {
+      return null;
+    }
+  }
 
   /** Lookup Database, with alias checks. */
   public Database lookupDatabase(String inName) {
@@ -281,9 +272,11 @@ public class Schema {
   }
 
   /**
-   * Lookup an unqualified schema field name. Does not test for uniqueness. That job is left to the compiler. (In fact,
-   * anywhere this is run, the compiler would check that the field name is also unique against temp/work tables.)
-   * Returns null if nothing found.
+   * Lookup an unqualified schema field name. Does not test for uniqueness. That job is left to the compiler. In fact,
+   * anywhere this is run, the compiler would check that the field name is also unique against temp/work tables.
+   * 
+   * @param name Unqualified schema field name
+   * @return Null if nothing found
    */
   public Field lookupUnqualifiedField(String name) {
     Field field;

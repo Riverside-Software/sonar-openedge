@@ -16,6 +16,6 @@ import org.prorefactor.core.schema.Schema;
 
 public class UnitTestSportsSchema extends Schema {
   public UnitTestSportsSchema() throws IOException {
-    super("src/test/resources/proparse.schema");
+    super("src/test/resources/projects/unittest/proparse.schema", true);
   }
 }

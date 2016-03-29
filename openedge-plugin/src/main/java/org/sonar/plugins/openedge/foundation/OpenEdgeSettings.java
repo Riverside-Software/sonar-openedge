@@ -19,11 +19,9 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,9 +33,16 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.config.Settings;
 import org.sonar.plugins.openedge.OpenEdgePlugin;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.schema.Schema;
+import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorSession;
+import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.IProgressSettings;
+import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.IProparseSettings;
+import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.ProgressSettings;
+import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.ProparseSettings;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.io.Files;
 
 import eu.rssw.antlr.database.DumpFileUtils;
@@ -49,12 +54,12 @@ import eu.rssw.antlr.database.objects.Table;
 public class OpenEdgeSettings {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeSettings.class);
 
-  private final List<String> sourceDirs = new ArrayList<String>();
+  private final List<String> sourceDirs = new ArrayList<>();
   private final File pctDir, dbgDir;
   private final Settings settings;
-  private final List<File> propath = new ArrayList<File>();
+  private final List<File> propath = new ArrayList<>();
   /* XXX private final Map<String, List<IDatabaseTable>> dbDesc = new TreeMap<String, List<IDatabaseTable>>(); */
-  private final Schema ppSchema;
+  private final RefactorSession proparseSession;
   /* XXX private final Map<String, ClassInformation> genClasses = new HashMap<String, ClassInformation>();
   private final Map<String, ClassInformation> ppClasses = new HashMap<String, ClassInformation>();*/
 
@@ -97,6 +102,16 @@ public class OpenEdgeSettings {
         propath.add(entry);
       }
     }
+    String dlcInstallDir = settings.getString(OpenEdgePlugin.DLC);
+    boolean dlcInPropath = settings.getBoolean(OpenEdgePlugin.PROPATH_DLC);
+    if (dlcInPropath && !Strings.isNullOrEmpty(dlcInstallDir)) {
+      File dlc = new File(dlcInstallDir);
+      LOG.info("Adding DLC directory '{}' to PROPATH", dlc.getAbsolutePath());
+      propath.add(new File(dlc, "gui"));
+      propath.add(new File(dlc, "tty"));
+      propath.add(new File(dlc, "src"));
+      propath.add(dlc);
+    }
     // Getting ClassInformation objects from rcode in propath
     /* XXX for (File entry : propath) {
       if (entry.isDirectory()) {
@@ -109,7 +124,6 @@ public class OpenEdgeSettings {
 
     // File definition for temporary .schema file
     File dbFile;
-    int dbId = 1, recid = 1000;
     try {
       dbFile = File.createTempFile("proparse", ".schema");
     } catch (IOException caught) {
@@ -134,13 +148,13 @@ public class OpenEdgeSettings {
           LOG.debug("Parsing {} with alias {}", fileSystem.resolvePath(str), dbName);
           DatabaseDescription desc = DumpFileUtils.getDatabaseDescription(fileSystem.resolvePath(str));
           // XXX dbDesc.put(dbName, mapToDatabaseKeyword(desc, dbName).getTables());
-          writer.write(":: " + dbName + " " + dbId++);
+          writer.write(":: " + dbName);
           writer.newLine();
           for (Table tbl : desc.getTables()) {
-            writer.write(": " + tbl.getName() + " " + (recid++));
+            writer.write(": " + tbl.getName() + " ");
             writer.newLine();
             for (Field fld : tbl.getFields()) {
-              writer.write(fld.getName() + " " + (recid++) + " " + fld.getDataType().toUpperCase() + " "
+              writer.write(fld.getName() + " " + fld.getDataType().toUpperCase() + " "
                   + (fld.getExtent() == null ? "0" : fld.getExtent()));
               writer.newLine();
             }
@@ -166,12 +180,14 @@ public class OpenEdgeSettings {
           }
         }
       }
-    } catch (IOException uncaught) {
-      
+    } catch (IOException caught) {
+      LOG.error("Unable to read proparse.schema file", caught);
     }
-    ppSchema = sch;
     dbFile.delete();
 
+    IProgressSettings settings1 = new ProgressSettings(true, "", "WIN32", getPropathAsString(), "11.5", "MS-WIN95");
+    IProparseSettings settings2 = new ProparseSettings();
+    proparseSession = new RefactorSession(settings1, settings2, sch, fileSystem.encoding());
   }
 
   public List<String> getSourceDirs() {
@@ -198,17 +214,20 @@ public class OpenEdgeSettings {
     return settings.getBoolean(OpenEdgePlugin.PROPARSE_DEBUG);
   }
 
+  public boolean useCpdDebug() {
+    return settings.getBoolean(OpenEdgePlugin.CPD_DEBUG);
+  }
+
   public List<File> getPropath() {
     return propath;
   }
 
   public String getPropathAsString() {
-    String str = settings.getString(OpenEdgePlugin.PROPATH);
-    return (str == null ? "" : str);
+    return Joiner.on(',').skipNulls().join(propath);
   }
 
-  public Schema getProparseSchema() {
-    return ppSchema;
+  public RefactorSession getProparseSession() {
+    return proparseSession;
   }
 
   /* XXX public Map<String, List<IDatabaseTable>> getDatabases() {

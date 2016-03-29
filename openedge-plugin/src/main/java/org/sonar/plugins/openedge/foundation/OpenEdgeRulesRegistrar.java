@@ -34,8 +34,11 @@ import org.sonar.plugins.openedge.checks.BufferUsage;
 import org.sonar.plugins.openedge.checks.ClassNameCasing;
 import org.sonar.plugins.openedge.checks.DisableTriggers;
 import org.sonar.plugins.openedge.checks.FindNoError;
+import org.sonar.plugins.openedge.checks.I18NLength;
 import org.sonar.plugins.openedge.checks.IndexUsage;
 import org.sonar.plugins.openedge.checks.NoReturnInFinally;
+import org.sonar.plugins.openedge.checks.NoUndo;
+import org.sonar.plugins.openedge.checks.NoWait;
 import org.sonar.plugins.openedge.checks.ReturnError;
 import org.sonar.plugins.openedge.checks.ShareLock;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
@@ -78,7 +81,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
     return new Class[] {
         UsingStars.class, AbbreviatedKeywords.class, BackslashInIncludeFile.class, BackslashInString.class,
         BlockLabel.class, ClassNameCasing.class, FindNoError.class, DisableTriggers.class, ShareLock.class,
-        NoReturnInFinally.class, ReturnError.class, BufferUsage.class};
+        NoReturnInFinally.class, ReturnError.class, BufferUsage.class, I18NLength.class, NoUndo.class, NoWait.class};
   }
 
 }

@@ -11,7 +11,7 @@
 package org.prorefactor.treeparser;
 
 /**
- * Represents a procedure handle value, used in a run statement of the form: run <proc> in <handle>.
+ * Represents a procedure handle value, used in a run statement of the form: run &lt;proc&gt; in &lt;handle&gt;.
  *
  */
 public class RunHandle implements Value {

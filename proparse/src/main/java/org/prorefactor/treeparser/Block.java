@@ -130,7 +130,7 @@ public class Block implements Xferable {
   /**
    * Create a "weak" buffer scope. This is called within a FOR or PRESELECT statement.
    * 
-   * @param node The RECORD_NAME node. It must already have the BufferSymbol linked to it.
+   * @param symbol The RECORD_NAME node. It must already have the BufferSymbol linked to it.
    */
   public BufferScope addWeakBufferScope(TableBuffer symbol) {
     BufferScope buff = getBufferScope(symbol, BufferScope.Strength.WEAK);

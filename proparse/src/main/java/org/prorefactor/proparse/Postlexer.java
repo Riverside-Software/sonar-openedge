@@ -12,6 +12,7 @@ package org.prorefactor.proparse;
 
 import antlr.TokenStreamException;
 import antlr.RecognitionException;
+import antlr.Token;
 import antlr.TokenStream;
 
 import java.util.LinkedList;
@@ -24,9 +25,9 @@ import java.util.ArrayList;
 import java.io.IOException;
 
 /**
- * This class deals with &IF conditions by acting as a filter between the lexer and the parser
+ * This class deals with &amp;IF conditions by acting as a filter between the lexer and the parser
  */
-public class Postlexer implements TokenStream, ProParserTokenTypes {
+public class Postlexer implements TokenStream {
   private final DoParse doParse;
   private final IntegerIndex<String> filenameList;
   private final Lexer lexer;
@@ -43,7 +44,7 @@ public class Postlexer implements TokenStream, ProParserTokenTypes {
   }
 
   @Override
-  public ProToken nextToken() throws TokenStreamException {
+  public Token nextToken() throws TokenStreamException {
     try {
       for (;;) {
 
@@ -51,24 +52,24 @@ public class Postlexer implements TokenStream, ProParserTokenTypes {
 
         switch (currToken.getType()) {
 
-          case AMPIF:
+          case ProParserTokenTypes.AMPIF:
             preproIf();
             break; // loop again
 
-          case AMPTHEN:
+          case ProParserTokenTypes.AMPTHEN:
             // &then are consumed by preproIf()
             throwMessage("Unexpected &THEN");
             break;
 
-          case AMPELSEIF:
+          case ProParserTokenTypes.AMPELSEIF:
             preproElseif();
             break; // loop again
 
-          case AMPELSE:
+          case ProParserTokenTypes.AMPELSE:
             preproElse();
             break; // loop again
 
-          case AMPENDIF:
+          case ProParserTokenTypes.AMPENDIF:
             preproEndif();
             break; // loop again
 
@@ -87,15 +88,15 @@ public class Postlexer implements TokenStream, ProParserTokenTypes {
     // The text between the parens can be pretty arbitrary, and can
     // have embedded comments, so this calls a specific lexer function for it.
     getNextToken();
-    if (currToken.getType() == WS)
+    if (currToken.getType() == ProParserTokenTypes.WS)
       getNextToken();
-    if (currToken.getType() != LEFTPAREN)
+    if (currToken.getType() != ProParserTokenTypes.LEFTPAREN)
       throwMessage("Bad DEFINED function in &IF preprocessor condition");
     ProToken argToken = lexer.getAmpIfDefArg();
     getNextToken();
-    if (currToken.getType() != RIGHTPAREN)
+    if (currToken.getType() != ProParserTokenTypes.RIGHTPAREN)
       throwMessage("Bad DEFINED function in &IF preprocessor condition");
-    return new ProToken(filenameList, NUMBER, prepro.defined(argToken.getText().trim().toLowerCase()));
+    return new ProToken(filenameList, ProParserTokenTypes.NUMBER, prepro.defined(argToken.getText().trim().toLowerCase()));
   }
 
   private void getNextToken() throws IOException {
@@ -118,19 +119,19 @@ public class Postlexer implements TokenStream, ProParserTokenTypes {
     while (thisIfLevel <= preproIfVec.size() && preproIfVec.get(thisIfLevel - 1).consuming) {
       getNextToken();
       switch (currToken.getType()) {
-        case AMPIF:
+        case ProParserTokenTypes.AMPIF:
           preproIf();
           break;
-        case AMPELSEIF:
+        case ProParserTokenTypes.AMPELSEIF:
           preproElseif();
           break;
-        case AMPELSE:
+        case ProParserTokenTypes.AMPELSE:
           preproElse();
           break;
-        case AMPENDIF:
+        case ProParserTokenTypes.AMPENDIF:
           preproEndif();
           break;
-        case EOF:
+        case ProParserTokenTypes.EOF:
           throwMessage("Unexpected end of input when consuming discarded &IF/&ELSEIF/&ELSE text");
           break;
         default:
@@ -239,20 +240,20 @@ public class Postlexer implements TokenStream, ProParserTokenTypes {
     while (!done) {
       getNextToken();
       switch (currToken.getType()) {
-        case EOF:
+        case ProParserTokenTypes.EOF:
           throwMessage("Unexpected end of input after &IF or &ELSEIF");
           break;
-        case AMPTHEN:
+        case ProParserTokenTypes.AMPTHEN:
           done = true;
           break;
-        case DEFINED:
+        case ProParserTokenTypes.DEFINED:
           if (evaluate)
             // If not evaluating, just discard
             tokenVector.add(defined());
           break;
-        case COMMENT:
-        case WS:
-        case PREPROCESSTOKEN:
+        case ProParserTokenTypes.COMMENT:
+        case ProParserTokenTypes.WS:
+        case ProParserTokenTypes.PREPROCESSTOKEN:
           break;
         default:
           if (evaluate)
@@ -268,7 +269,7 @@ public class Postlexer implements TokenStream, ProParserTokenTypes {
       DoParse evalDoParse = new DoParse(doParse.getRefactorSession(), null, doParse);
       evalDoParse.preProcessCondition = true;
       for (int i = 0; i < 4; i++) {
-        tokenVector.add(new ProToken(filenameList, EOF, ""));
+        tokenVector.add(new ProToken(filenameList, ProParserTokenTypes.EOF, ""));
       }
       try {
         evalDoParse.doParse(tokenVector);

@@ -107,6 +107,7 @@ public abstract class AbstractLintRule {
             return true;
         }
       }
+      left = left.prevSibling();
     }
 
     return false;

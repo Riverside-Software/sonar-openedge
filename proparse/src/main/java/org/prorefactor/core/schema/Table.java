@@ -125,6 +125,12 @@ public class Table implements Xferable {
   }
 
   @Override
+  public String toString() {
+    return new StringBuilder(storetype == IConstants.ST_DBTABLE ? "DB Table"
+        : storetype == IConstants.ST_TTABLE ? "Temp-table" : "Work-table").append(' ').append(name).toString();
+  }
+
+  @Override
   public void writeXferBytes(DataXferStream out) throws IOException {
     out.writeRef(name);
     out.writeRef(database);
@@ -180,5 +186,4 @@ public class Table implements Xferable {
       return buff.toString();
     }
   }
-
 }

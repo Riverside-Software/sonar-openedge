@@ -19,15 +19,22 @@ import org.prorefactor.core.ProToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import antlr.Token;
 import antlr.TokenStream;
 import antlr.TokenStreamException;
 
 /**
  * List of tokens for input to the parser. This class is responsible for gathering a list of tokens from the postlexer,
- * and examining that list for fine-tuning before sending it on to the parser. The complete tool chain is:<br/>
- * preprocessor -> lexer -> postlexer -> tokenlist -> filter -> parser
+ * and examining that list for fine-tuning before sending it on to the parser. The complete tool chain is:<ol>
+ * <li>preprocessor 
+ * <li>lexer
+ * <li>postlexer
+ * <li>tokenlist
+ * <li>filter
+ * <li>parser
+ * </ol>
  */
-public class TokenList implements TokenStream, ProParserTokenTypes {
+public class TokenList implements TokenStream {
   private static final Logger LOGGER = LoggerFactory.getLogger(TokenList.class);
 
   private final TokenStream tokenStream;
@@ -43,18 +50,18 @@ public class TokenList implements TokenStream, ProParserTokenTypes {
     for (;;) {
       ProToken nextToken = (ProToken) tokenStream.nextToken();
       list.add(nextToken);
-      if (nextToken.getType() == OBJCOLON)
+      if (nextToken.getType() == ProParserTokenTypes.OBJCOLON)
         reviewObjcolon();
-      if (nextToken.getType() == EOF)
+      if (nextToken.getType() == ProParserTokenTypes.EOF)
         break;
     }
     LOGGER.trace("Exiting TokenList#build() - {} tokens", list.size());
   }
 
   @Override
-  public ProToken nextToken() throws TokenStreamException {
+  public Token nextToken() throws TokenStreamException {
     if (currentPosition >= list.size())
-      return new ProToken(null, EOF, "");
+      return new ProToken(null, ProParserTokenTypes.EOF, "");
     return list.get(currentPosition++);
   }
 
@@ -90,7 +97,7 @@ public class TokenList implements TokenStream, ProParserTokenTypes {
 
     // Getting type of the token just before colon (excluding comments and whitespaces)
     int ttype = list.get(lastIndex).getType();
-    while (ttype == WS || ttype == COMMENT) {
+    while (ttype == ProParserTokenTypes.WS || ttype == ProParserTokenTypes.COMMENT) {
       ttype = list.get(--lastIndex).getType();
     }
 
@@ -105,12 +112,12 @@ public class TokenList implements TokenStream, ProParserTokenTypes {
       if (index == 0)
         break;
       int currType = list.get(index).getType();
-      if (currType == WS || currType == COMMENT) {
+      if (currType == ProParserTokenTypes.WS || currType == ProParserTokenTypes.COMMENT) {
         // There can be space in front of a NAMEDOT in a table or field name.
         // We don't want to fiddle with those here.
         return;
       }
-      if (list.get(index - 1).getType() == NAMEDOT) {
+      if (list.get(index - 1).getType() == ProParserTokenTypes.NAMEDOT) {
         index = index - 2;
       } else if (list.get(index).getText().charAt(0) == '.') {
         index = index - 1;
@@ -122,7 +129,7 @@ public class TokenList implements TokenStream, ProParserTokenTypes {
     if (foundNamedot) {
       // Now merge all the parts into one ID token.
       ProToken token = list.get(index);
-      token.setType(ID);
+      token.setType(ProParserTokenTypes.ID);
       StringWriter text = new StringWriter();
       text.append(token.getText());
       int drop = index + 1;
@@ -137,7 +144,7 @@ public class TokenList implements TokenStream, ProParserTokenTypes {
     // Not namedotted, so if it's reserved and not a system handle, convert to ID.
     ttype = list.get(index).getType();
     if (NodeTypes.isReserved(ttype) && (!NodeTypes.isSystemHandleName(ttype)))
-      list.get(index).setType(ID);
+      list.get(index).setType(ProParserTokenTypes.ID);
   }
 
 }

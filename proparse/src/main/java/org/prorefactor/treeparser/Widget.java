@@ -11,7 +11,7 @@
 package org.prorefactor.treeparser;
 
 /**
- * A Symbol defined with DEFINE <widget-type> or any of the other various syntaxes which implicitly define a widget.
+ * A Symbol defined with DEFINE &lt;widget-type&gt; or any of the other various syntaxes which implicitly define a widget.
  * This includes FRAMEs, WINDOWs, MENUs, etc.
  */
 public abstract class Widget extends Symbol implements WidgetI {

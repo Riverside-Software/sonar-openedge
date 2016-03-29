@@ -28,7 +28,10 @@ import org.sonar.plugins.openedge.checks.BackslashInIncludeFile;
 import org.sonar.plugins.openedge.checks.BackslashInString;
 import org.sonar.plugins.openedge.checks.BlockLabel;
 import org.sonar.plugins.openedge.checks.ClassNameCasing;
+import org.sonar.plugins.openedge.checks.I18NLength;
 import org.sonar.plugins.openedge.checks.NoReturnInFinally;
+import org.sonar.plugins.openedge.checks.NoUndo;
+import org.sonar.plugins.openedge.checks.NoWait;
 import org.sonar.plugins.openedge.checks.ReturnError;
 import org.sonar.plugins.openedge.checks.SortAccessAnalyzer;
 import org.sonar.plugins.openedge.checks.SortAccessWholeIndexAnalyzer;
@@ -63,7 +66,10 @@ public class OpenEdgeProfile extends ProfileDefinition {
     profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, SortAccessWholeIndexAnalyzer.class.getCanonicalName()), null);
     profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, WholeIndexAnalyzer.class.getCanonicalName()), null);
     profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, UsingStars.class.getCanonicalName()), null);
-    
+    profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, I18NLength.class.getCanonicalName()), null);
+    profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, NoUndo.class.getCanonicalName()), null);
+    profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, NoWait.class.getCanonicalName()), null);
+
     return profile;
   }
 

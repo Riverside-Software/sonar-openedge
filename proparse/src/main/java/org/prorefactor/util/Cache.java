@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * Extends LinkedHashMap to provide a "recently used" cache of a specified size. There's a good chance you will want to
- * wrap this to be thread-safe: Map<K,V> m = Collections.synchronizedMap(new Cache<K,V>(...));
+ * wrap this to be thread-safe: Map&lt;K,V&gt; m = Collections.synchronizedMap(new Cache&lt;K,V&gt;(...));
  */
 public class Cache<K, V> extends LinkedHashMap<K, V> {
 

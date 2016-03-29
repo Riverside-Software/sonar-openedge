@@ -60,6 +60,11 @@ public class Database implements Xferable {
   }
 
   @Override
+  public String toString() {
+    return new StringBuilder("DB ").append(name).toString();
+  }
+
+  @Override
   public void writeXferBytes(DataXferStream out) throws IOException {
     out.writeRef(name);
   }

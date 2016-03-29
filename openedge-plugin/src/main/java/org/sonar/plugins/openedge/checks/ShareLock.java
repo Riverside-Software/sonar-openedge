@@ -8,13 +8,13 @@ import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 
-@Rule(priority = Priority.INFO, name = "Share-lock [PP]", description = "No shared locks")
+@Rule(priority = Priority.INFO, name = "Share-lock")
 public class ShareLock extends AbstractLintRule {
 
   @Override
   public void lint(ParseUnit unit) {
     for (JPNode node : unit.getTopNode().query(NodeTypes.FIND, NodeTypes.FOR, NodeTypes.OPEN, NodeTypes.PRESELECT)) {
-      JPNode parent = node.parent();
+      JPNode parent = node.getParent();
       /* ignore FOR in strong scoped block, like "DO FOR buffername" and REPEAT FOR buffername */
       if ((parent.getType() == NodeTypes.DO) || (parent.getType() == NodeTypes.REPEAT))
         continue;

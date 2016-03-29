@@ -952,9 +952,9 @@ public class TP01Support extends TP01Action {
   }
 
   /**
-   * Called by the tree parser for RUN IN HANDLE. Get the RunHandle value in "run <proc> in <handle>." Where <handle> is
-   * a handle valued Expression; then save the RunHandle value in the current call. Partly implemented for Calls and
-   * Routines.
+   * Called by the tree parser for RUN IN HANDLE. Get the RunHandle value in "run &lt;proc&gt; in &lt;handle&gt;." Where
+   * &lt;handle&gt; is a handle valued Expression; then save the RunHandle value in the current call. Partly implemented
+   * for Calls and Routines.
    * 
    * @author pcd
    */
@@ -964,9 +964,9 @@ public class TP01Support extends TP01Action {
   }
 
   /**
-   * Called by the tree parser for RUN PERSISTENT SET. Update the <handle> in "run <proc> persistent set <handle>.":
-   * save a reference to the external procedure <proc> in <handle>. The AST structure for this form of the run is:
-   * runstate : #( RUN filenameorvalue (#(PERSISTENT ( #(SET (field)? ) <A> )? ) where <A> is this action. Thus, we
+   * Called by the tree parser for RUN PERSISTENT SET. Update the &lt;handle&gt; in "run &lt;proc&gt; persistent set &lt;handle&gt;.":
+   * save a reference to the external procedure &lt;proc&gt; in &lt;handle&gt;. The AST structure for this form of the run is:
+   * runstate : #( RUN filenameorvalue (#(PERSISTENT ( #(SET (field)? ) &lt;A&gt; )? ) where &lt;A&gt; is this action. Thus, we
    * expect a value in wipFieldNode with the name of the handle variable. This method gets the variable from the current
    * scope and stores a reference to it in the current call (being built), so that the Call.finalize method can update
    * its value. Partly implemented for Calls and Routines.

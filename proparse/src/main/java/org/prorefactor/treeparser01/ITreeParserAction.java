@@ -94,7 +94,7 @@ public interface ITreeParserAction {
   /**
    * Define an unnamed buffer which is scoped (symbol and buffer) to the trigger scope/block.
    * 
-   * @param anode The RECORD_NAME node. Must already have the Table symbol linked to it.
+   * @param recAST The RECORD_NAME node. Must already have the Table symbol linked to it.
    */
   void defineBufferForTrigger(AST recAST) throws TreeParserException;
 
@@ -263,11 +263,9 @@ public interface ITreeParserAction {
   void runInHandle(AST hn) throws TreeParserException;
 
   /**
-   * Action to take in RUNSTATE of the form run
-   * <p>
-   * persistent set <handle>.
+   * Action to take in RUNSTATE of the form run &lt;p&gt; persistent set &lt;handle&gt;.
    * 
-   * @param fld - the field node for <handle>.
+   * @param fld - the field node for &lt;handle&gt;.
    */
   void runPersistentSet(AST fld) throws TreeParserException;
 

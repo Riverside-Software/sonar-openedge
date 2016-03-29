@@ -13,7 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-@Rule(priority = Priority.MAJOR, name = "Sort access", description = "Use of BY option in a query, while the specified BY order is such that Progress can not select an existing index that completely fits. This means that Progress will have to sort the result-set on the fly before it presents the results to the program")
+@Rule(priority = Priority.MAJOR, name = "Sort access")
 public class SortAccessAnalyzer extends XrefAnalyzer {
   private static XPath xPath;
   private static XPathExpression sortAccessExpr;

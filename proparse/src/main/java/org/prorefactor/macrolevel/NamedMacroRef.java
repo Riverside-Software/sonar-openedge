@@ -15,7 +15,7 @@ import java.io.IOException;
 import org.prorefactor.xfer.DataXferStream;
 
 /**
- * A reference to a macro argument, i.e. {1} or {&name}. Origin might be an include argument or an &DEFINE.
+ * A reference to a macro argument, i.e. {1} or {&amp;name}. Origin might be an include argument or an &amp;DEFINE.
  */
 public class NamedMacroRef extends MacroRef {
   private static final long serialVersionUID = -7576618416022482176L;

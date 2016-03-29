@@ -88,6 +88,10 @@ public class DoParse {
     return filenameList.hasIndex(index);
   }
 
+  public TokenStream getLexerTokenStream() {
+    return filter;
+  }
+
   protected void doParse(List<ProToken> tokenVector) throws IOException, TokenStreamException, RecognitionException {
     doParse(false, new TokenVectorIterator(tokenVector, this));
   }
@@ -143,26 +147,13 @@ public class DoParse {
         filter.hide(NodeTypes.AMPUNDEFINE);
       }
 
+      if (justLex) {
+        return;
+      }
+
       // Create the parser, with the filter as the input.
       parser = new ProParser(filter);
       parser.init(this);
-
-      if (justLex) {
-        LOGGER.trace("justLex ON");
-        // Print a nice lexeme list.
-        ProToken t;
-        for (;;) {
-          t = (ProToken) filter.nextToken();
-          StringBuilder bldr = new StringBuilder();
-          bldr.append(t.getLine()).append(" ").append(t.getText()).append(" ").append(
-              NodeTypes.getTypeName(t.getType()));
-          // LOGGER.trace(bldr.toString());
-          if (t.getType() == Token.EOF_TYPE)
-            break;
-        }
-        LOGGER.trace("Done lexing.");
-        return;
-      }
 
       // Now parse the token stream
       // We might be:
@@ -172,12 +163,12 @@ public class DoParse {
       if (proEval) {
         LOGGER.trace("Executing ProEval parser on code chunck");
         parser.program();
-        ProEval proeval = new ProEval(session);
+        ProEval proeval = new ProEval(session.getProgressSettings());
         proeval.program(parser.getAST());
       } else if (preProcessCondition) {
         LOGGER.trace("Executing ProEval parser on preprocessor");
         parser.expression();
-        ProEval proeval = new ProEval(session);
+        ProEval proeval = new ProEval(session.getProgressSettings());
         preProcessConditionResult = proeval.preproIfEval(parser.getAST());
       } else {
         LOGGER.trace("Executing ProParser");

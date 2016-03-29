@@ -1,0 +1,13 @@
+<p>
+This rule raises an issue whenever a RETURN ERROR statement doesn't have an argument.
+</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+  RETURN ERROR.
+</pre>
+
+<h2>Compliant Solution</h2>
+<pre>
+  RETURN ERROR "Text message".
+</pre>

@@ -1,0 +1,25 @@
+<p>
+This rule raises an issue whenever a FIND or GET statement accesses a record with EXCLUSIVE-LOCK and without NO-WAIT.
+This means the procedure can have to wait unti the -lkwtmo parameter expires.
+</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+  FIND FIRST Customer EXCLUSIVE-LOCK.
+  IF AVAILABLE Customer THEN DO:
+  
+  END 
+</pre>
+
+<h2>Compliant Solution</h2>
+<pre>
+  FIND FIRST Customer EXCLUSIVE-LOCK NO-WAIT.
+  IF AVAILABLE Customer THEN DO:
+  
+  END 
+  ELSE DO:
+    IF LOCKED Customer THEN DO:
+  
+    END.
+  END.
+</pre>

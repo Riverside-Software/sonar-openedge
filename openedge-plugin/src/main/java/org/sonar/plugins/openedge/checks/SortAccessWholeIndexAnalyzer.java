@@ -13,7 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-@Rule(priority = Priority.BLOCKER, name = "Sort access and whole index", description = "Combined SORT-ACCESS and WHOLE-INDEX in a query, which may result in an extremely slow query")
+@Rule(priority = Priority.BLOCKER, name = "Sort access and whole index")
 public class SortAccessWholeIndexAnalyzer extends XrefAnalyzer {
   private static XPath xPath;
   private static XPathExpression sortAccessExpr;

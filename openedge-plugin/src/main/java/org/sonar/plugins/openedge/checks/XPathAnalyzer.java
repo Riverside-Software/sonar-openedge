@@ -17,7 +17,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-@Rule(priority = Priority.MAJOR, name = "Custom XREF rule", description = "Custom XREF rule")
+@Rule(priority = Priority.MAJOR, name = "Custom XREF rule")
 @RuleTemplate
 public class XPathAnalyzer extends XrefAnalyzer {
   private static final Logger LOG = LoggerFactory.getLogger(XPathAnalyzer.class);

@@ -23,8 +23,7 @@ import java.util.List;
 
 import org.sonar.api.measures.Metric;
 import org.sonar.api.measures.Metrics;
-
-import com.google.common.collect.ImmutableList;
+import org.sonar.plugins.oedb.api.com.google.common.collect.ImmutableList;
 
 public class OpenEdgeDBMetrics implements Metrics {
   private final static String DOMAIN_OPENEDGE = "OpenEdge";

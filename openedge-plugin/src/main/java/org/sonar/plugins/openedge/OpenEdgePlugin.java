@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.sonar.api.Extension;
+import org.sonar.api.ExtensionPoint;
 import org.sonar.api.PropertyType;
 import org.sonar.api.SonarPlugin;
 import org.sonar.api.config.PropertyDefinition;
@@ -49,14 +49,17 @@ public class OpenEdgePlugin extends SonarPlugin {
   public static final String SKIP_PROPARSE_PROPERTY = "sonar.oe.skipProparse";
   public static final String PROPARSE_DEBUG = "sonar.oe.proparse.debug";
   public static final String BINARIES = "sonar.oe.binaries";
+  public static final String DLC = "sonar.oe.dlc";
   public static final String PROPATH = "sonar.oe.propath";
+  public static final String PROPATH_DLC = "sonar.oe.propath.dlc";
   public static final String DATABASES = "sonar.oe.databases";
   public static final String ALIASES = "sonar.oe.aliases";
+  public static final String CPD_DEBUG = "sonar.oe.cpd.debug";
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public List getExtensions() {
-    List list = new ArrayList<Class<? extends Extension>>();
+    List list = new ArrayList<Class<? extends ExtensionPoint>>();
     // Main components
     list.add(OpenEdge.class);
     list.add(OpenEdgeSettings.class);
@@ -96,8 +99,11 @@ public class OpenEdgePlugin extends SonarPlugin {
         "Skip Proparse AST generation and lint rules").type(PropertyType.BOOLEAN).defaultValue("false").build());
     list.add(PropertyDefinition.builder(PROPARSE_DEBUG).name("debug_proparse").description(
         "Generate JPNodeLister debug file").type(PropertyType.BOOLEAN).defaultValue("false").build());
+    list.add(PropertyDefinition.builder(CPD_DEBUG).name("debug_cpd").description("Generate CPD tokens listing").type(
+        PropertyType.BOOLEAN).defaultValue("false").build());
     list.add(PropertyDefinition.builder(BINARIES).name("binaries").description(
-        "Build directory (where .r is generated), relative to base directory").type(PropertyType.STRING).defaultValue("build").build());
+        "Build directory (where .r is generated), relative to base directory").type(PropertyType.STRING).defaultValue(
+            "build").build());
     list.add(PropertyDefinition.builder(PROPATH).name("propath").description(
         "PROPATH, as a comma-separated list of directories and PL").type(PropertyType.STRING).defaultValue("").build());
     list.add(PropertyDefinition.builder(DATABASES).name("databases").description(
@@ -106,6 +112,10 @@ public class OpenEdgePlugin extends SonarPlugin {
     list.add(PropertyDefinition.builder(ALIASES).name("aliases").description(
         "DB connections, as a comma-separated list of DF files (with optional alias after ';')").type(
             PropertyType.STRING).defaultValue("").build());
+    list.add(PropertyDefinition.builder(DLC).name("dlc").description("OpenEdge installatin path").type(
+        PropertyType.STRING).defaultValue("").build());
+    list.add(PropertyDefinition.builder(PROPATH_DLC).name("dlc_in_propath").description(
+        "Include OE instllation path in propath").type(PropertyType.BOOLEAN).defaultValue("true").build());
 
     return Collections.unmodifiableList(list);
   }

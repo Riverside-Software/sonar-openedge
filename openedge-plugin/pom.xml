@@ -4,7 +4,7 @@
 
   <groupId>eu.rssw.sonar.openedge</groupId>
   <artifactId>sonar-openedge-plugin</artifactId>
-  <version>1.6</version>
+  <version>1.7</version>
   <packaging>sonar-plugin</packaging>
 
   <name>OpenEdge plugin for SonarQube</name>
@@ -43,7 +43,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <sonar.version>5.2</sonar.version>
+    <sonar.version>5.4</sonar.version>
     <sonar.pluginKey>openedge</sonar.pluginKey>
     <sonar.pluginName>OpenEdge</sonar.pluginName>
     <sonar.pluginClass>org.sonar.plugins.openedge.OpenEdgePlugin</sonar.pluginClass>
@@ -62,28 +62,23 @@
     </dependency>
     <dependency>
       <groupId>eu.rssw.openedge.parsers</groupId>
-      <artifactId>abl-parser</artifactId>
-      <version>1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>eu.rssw.openedge.parsers</groupId>
       <artifactId>listing-parser</artifactId>
-      <version>1.3.1</version>
+      <version>1.3.2</version>
     </dependency>
     <dependency>
       <groupId>eu.rssw.openedge.parsers</groupId>
       <artifactId>database-parser</artifactId>
-      <version>1.1.4</version>
+      <version>1.1.5</version>
     </dependency>
     <dependency>
       <groupId>eu.rssw.openedge.checks</groupId>
       <artifactId>openedge-checks</artifactId>
-      <version>1.1</version>
+      <version>1.2</version>
     </dependency>
     <!-- <dependency>
       <groupId>eu.rssw.openedge.parsers</groupId>
       <artifactId>ast-wrapper</artifactId>
-      <version>1.1.3-SNAPSHOT</version>
+      <version>1.1.3</version>
     </dependency> -->
     <dependency>
       <groupId>commons-lang</groupId>
@@ -98,7 +93,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
     <dependency>

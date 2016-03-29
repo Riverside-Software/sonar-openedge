@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import antlr.ANTLRException;
+import antlr.TokenStream;
 
 /**
  * Provides parse unit information, such as the symbol table and a reference to the AST. TreeParser01 calls
@@ -181,7 +182,7 @@ public class ParseUnit {
     return new File(PUB.pubDirFileName(session, file.getAbsolutePath()) + ".msg");
   }
 
-  public void lex() throws RefactorException {
+  public TokenStream lex() throws RefactorException {
     LOGGER.trace("Entering ParseUnit#lex()");
     DoParse doParse = new DoParse(session, file.getPath());
     try {
@@ -191,6 +192,8 @@ public class ParseUnit {
     }
     this.metrics = doParse.getMetrics();
     LOGGER.trace("Exiting ParseUnit#lex()");
+
+    return doParse.getLexerTokenStream();
   }
 
   public void parse() throws RefactorException {

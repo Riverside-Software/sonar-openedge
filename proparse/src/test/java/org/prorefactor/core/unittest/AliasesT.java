@@ -30,6 +30,7 @@ public class AliasesT extends TestCase {
 
     Injector injector = Guice.createInjector(new UnitTestSports2000Module());
     session = injector.getInstance(RefactorSession.class);
+    session.getSchema().aliasCreate("dictdb", "sports2000");
     session.getSchema().aliasCreate("foo", "sports2000");
   }
 
@@ -42,4 +43,27 @@ public class AliasesT extends TestCase {
     assertNotNull(unit.getRootScope());
   }
 
+  public void test02() throws Exception {
+    assertNotNull(session.getSchema().lookupDatabase("dictdb"));
+    assertNotNull(session.getSchema().lookupDatabase("foo"));
+    assertNull(session.getSchema().lookupDatabase("dictdb2"));
+    assertNotNull(session.getSchema().lookupTable("_file"));
+    assertNotNull(session.getSchema().lookupTable("dictdb", "_file"));
+    assertNull(session.getSchema().lookupTable("dictdb", "_file2"));
+  }
+
+  public void test03() throws Exception {
+    assertNull(session.getSchema().lookupDatabase("test"));
+    session.getSchema().aliasCreate("test", "sports2000");
+    assertNotNull(session.getSchema().lookupDatabase("test"));
+    assertNotNull(session.getSchema().lookupTable("test", "customer"));
+    session.getSchema().aliasDelete("test");
+    assertNull(session.getSchema().lookupDatabase("test"));
+  }
+
+  public void test04() throws Exception {
+    assertNotNull(session.getSchema().lookupField("sports2000", "customer", "custnum"));
+    assertNotNull(session.getSchema().lookupField("dictdb", "customer", "custnum"));
+    assertNotNull(session.getSchema().lookupField("foo", "customer", "custnum"));
+  }
 }

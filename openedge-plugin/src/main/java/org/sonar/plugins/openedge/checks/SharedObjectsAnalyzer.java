@@ -13,7 +13,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-@Rule(priority = Priority.MAJOR, name = "Shared objects analyzer", description = "Shared objects analyzer")
+@Rule(priority = Priority.MAJOR, name = "Shared objects analyzer")
 public class SharedObjectsAnalyzer extends XrefAnalyzer {
   private static XPath xPath;
   private static XPathExpression shrTTExpr, shrDSExpr, shrVarExpr;

@@ -15,8 +15,14 @@ addDatabase:
 addDatabaseOption: 
     'DBNAME' val=QUOTED_STRING           # dbName
   | 'PARAMS' val=QUOTED_STRING           # dbParams
-  | 'DB-MISC11' val=NUMBER               # dbMisc11
-  | 'DB-MISC13' val=NUMBER               # dbMisc13
+  | misc='DB-MISC11' val=NUMBER          # dbMisc
+  | misc='DB-MISC12' val=NUMBER          # dbMisc
+  | misc='DB-MISC13' val=NUMBER          # dbMisc
+  | misc='DB-MISC14' val=NUMBER          # dbMisc
+  | misc='DB-MISC15' val=NUMBER          # dbMisc
+  | misc='DB-MISC16' val=NUMBER          # dbMisc
+  | misc='DB-MISC17' val=NUMBER          # dbMisc
+  | misc='DB-MISC18' val=NUMBER          # dbMisc
   | 'DRIVER-NAME' val=QUOTED_STRING      # dbDriverName
   | 'DRIVER-VERS' val=QUOTED_STRING      # dbDriverVersion
   | 'ESCAPE-CHAR' val=QUOTED_STRING      # dbEscapeChar
@@ -33,53 +39,82 @@ addSequence:
   'ADD' 'SEQUENCE' sequence=QUOTED_STRING options=addSequenceOption*;
 
 addSequenceOption:
-    'INITIAL' val=NUMBER                # seqInitial
-  | 'INCREMENT' val=NUMBER              # seqIncrement
-  | 'MULTITENANT' val=('yes' | 'no')    # seqMultitenant
-  | 'CYCLE-ON-LIMIT' val=('yes' | 'no') # seqCycleOnLimit
-  | 'MIN-VAL' val=('?' | NUMBER)        # seqMinVal
-  | 'MAX-VAL' val=('?' | NUMBER)        # seqMaxVal
-  | 'FOREIGN-NAME' UNQUOTED_STRING      # seqForeignName
-  | 'FOREIGN-OWNER' UNQUOTED_STRING     # seqForeignOwner
-  | 'SEQ-MISC1' UNQUOTED_STRING         # seqForeignMisc1
-  | 'SEQ-MISC2' UNQUOTED_STRING         # seqForeignMisc2
-  | 'SEQ-MISC3' UNQUOTED_STRING         # seqForeignMisc3
-  | 'SEQ-MISC4' UNQUOTED_STRING         # seqForeignMisc4
-  | 'SEQ-MISC5' UNQUOTED_STRING         # seqForeignMisc5
-  | 'SEQ-MISC6' UNQUOTED_STRING         # seqForeignMisc6
-  | 'SEQ-MISC7' UNQUOTED_STRING         # seqForeignMisc7
-  | 'SEQ-MISC8' UNQUOTED_STRING         # seqForeignMisc8
+    'MULTITENANT' val=('yes' | 'no')     # seqMultitenant
+  | 'INITIAL' val=NUMBER                 # seqInitial
+  | 'INCREMENT' val=NUMBER               # seqIncrement
+  | 'CYCLE-ON-LIMIT' val=('yes' | 'no')  # seqCycleOnLimit
+  | 'MIN-VAL' val=('?' | NUMBER)         # seqMinVal
+  | 'MAX-VAL' val=('?' | NUMBER)         # seqMaxVal
+  | 'FOREIGN-NAME' UNQUOTED_STRING       # seqForeignName
+  | 'FOREIGN-OWNER' UNQUOTED_STRING      # seqForeignOwner
+  | misc='SEQ-MISC1' val=UNQUOTED_STRING # seqMisc
+  | misc='SEQ-MISC2' val=UNQUOTED_STRING # seqMisc
+  | misc='SEQ-MISC3' val=UNQUOTED_STRING # seqMisc
+  | misc='SEQ-MISC4' val=UNQUOTED_STRING # seqMisc
+  | misc='SEQ-MISC5' val=UNQUOTED_STRING # seqMisc
+  | misc='SEQ-MISC6' val=UNQUOTED_STRING # seqMisc
+  | misc='SEQ-MISC7' val=UNQUOTED_STRING # seqMisc
+  | misc='SEQ-MISC8' val=UNQUOTED_STRING # seqMisc
   ;
 
 addTable:
-    'ADD' 'TABLE' table=QUOTED_STRING ('TYPE' ('MSS' | 'ORACLE'))? options=addTableOption* triggers=tableTrigger*;
+    'ADD' 'TABLE' table=QUOTED_STRING ('TYPE' ('SQL' | 'MSS' | 'ORACLE'))? options=addTableOption* triggers=tableTrigger*;
 
 addTableOption:
-    'AREA' val=QUOTED_STRING           # tableArea
-  | 'LABEL' val=QUOTED_STRING          # tableLabel
-  | 'LABEL-SA' val=QUOTED_STRING       # tableLabelSA
-  | 'DESCRIPTION' val=QUOTED_STRING    # tableDescription
-  | 'DUMP-NAME' val=QUOTED_STRING      # tableDumpName
-  | 'VALEXP' val=QUOTED_STRING         # tableValExp
-  | 'VALMSG' val=QUOTED_STRING         # tableValMsg
-  | 'VALMSG-SA' val=QUOTED_STRING      # tableValMsgSA
-  | 'FOREIGN-NAME' val=QUOTED_STRING   # tableForeignName
-  | 'FOREIGN-OWNER' val=QUOTED_STRING  # tableForeignOwner
-  | 'FOREIGN-TYPE' val=QUOTED_STRING   # tableForeignType
-  | 'PROGRESS-RECID' val=NUMBER        # tableForeignRecid
-  | 'INDEX-FREE-FLD' val=NUMBER        # tableIndexFreeFld
-  | 'QUALIFIER' val=QUOTED_STRING      # tableQualifier
-  | 'HIDDEN-FLDS' val=QUOTED_STRING    # tableHiddenFlds
-  | 'RECID-FLD-NAME' val=QUOTED_STRING # tableRecidFieldName
+    'MULTITENANT' val=('yes' | 'no')   # tableMultitenant
+  | 'AREA' val=QUOTED_STRING           # tableArea
+  | 'NO-DEFAULT-AREA'                  # tableNoDefaultArea
   | 'CAN-CREATE' val=QUOTED_STRING     # tableCanCreate
   | 'CAN-DELETE' val=QUOTED_STRING     # tableCanDelete
   | 'CAN-READ' val=QUOTED_STRING       # tableCanRead
   | 'CAN-WRITE' val=QUOTED_STRING      # tableCanWrite
   | 'CAN-DUMP' val=QUOTED_STRING       # tableCanDump
   | 'CAN-LOAD' val=QUOTED_STRING       # tableCanLoad
-  | 'FILE-MISC26' val=QUOTED_STRING    # tableMisc26
-  | 'MULTITENANT' val=('yes' | 'no')   # tableMultitenant
+  | 'LABEL' val=QUOTED_STRING          # tableLabel
+  | 'LABEL-SA' val=QUOTED_STRING       # tableLabelSA
+  | 'DESCRIPTION' val=QUOTED_STRING    # tableDescription
+  | 'VALEXP' val=QUOTED_STRING         # tableValExp
+  | 'VALMSG' val=QUOTED_STRING         # tableValMsg
+  | 'VALMSG-SA' val=QUOTED_STRING      # tableValMsgSA
   | 'FROZEN'                           # tableFrozen
+  | 'HIDDEN'                           # tableHidden
+  | 'DUMP-NAME' val=QUOTED_STRING      # tableDumpName
+  | 'FOREIGN-FLAGS' val=NUMBER         # tableForeignFlags
+  | 'FOREIGN-FORMAT' val=UNQUOTED_STRING      # tableForeignFormat
+  | 'FOREIGN-GLOBAL' val=NUMBER        # tableForeignGlobal
+  | 'FOREIGN-ID' val=NUMBER            # tableForeignId
+  | 'FOREIGN-LOCAL' val=NUMBER            # tableForeignLocal
+  | 'FOREIGN-NAME' val=QUOTED_STRING   # tableForeignName
+  | 'FOREIGN-NUMBER' val=NUMBER        # tableForeignNumber
+  | 'FOREIGN-OWNER' val=QUOTED_STRING  # tableForeignOwner
+  | 'FOREIGN-SIZE' val=NUMBER          # tableForeignSize
+  | 'FOREIGN-TYPE' val=QUOTED_STRING   # tableForeignType
+  | 'PROGRESS-RECID' val=NUMBER        # tableForeignRecid
+  | 'INDEX-FREE-FLD' val=NUMBER        # tableIndexFreeFld
+  | 'RECID-COL-NO' val=NUMBER          # tableRecidColNo
+  | 'QUALIFIER' val=QUOTED_STRING      # tableQualifier
+  | 'HIDDEN-FLDS' val=QUOTED_STRING    # tableHiddenFlds
+  | 'RECID-FLD-NAME' val=QUOTED_STRING # tableRecidFieldName
+  | 'FLD-NAMES-LIST' val=QUOTED_STRING # tableFldNamesList
+  | 'DB-LINK-NAME' val=QUOTED_STRING   # tableDbLinkName
+  | misc='FILE-MISC11' val=NUMBER      # tableMisc
+  | misc='FILE-MISC12' val=NUMBER      # tableMisc
+  | misc='FILE-MISC13' val=NUMBER      # tableMisc
+  | misc='FILE-MISC14' val=NUMBER      # tableMisc
+  | misc='FILE-MISC15' val=NUMBER      # tableMisc
+  | misc='FILE-MISC16' val=NUMBER      # tableMisc
+  | misc='FILE-MISC17' val=NUMBER      # tableMisc
+  | misc='FILE-MISC18' val=NUMBER      # tableMisc
+  | misc='FILE-MISC21' val=QUOTED_STRING # tableMisc
+  | misc='FILE-MISC22' val=QUOTED_STRING # tableMisc
+  | misc='FILE-MISC23' val=QUOTED_STRING # tableMisc
+  | misc='FILE-MISC24' val=QUOTED_STRING # tableMisc
+  | misc='FILE-MISC25' val=QUOTED_STRING # tableMisc
+  | misc='FILE-MISC26' val=QUOTED_STRING # tableMisc
+  | misc='FILE-MISC27' val=QUOTED_STRING # tableMisc
+  | misc='FILE-MISC28' val=QUOTED_STRING # tableMisc
+  | 'CATEGORY' val=QUOTED_STRING       # tableCategory
+  | 'IS-PARTITIONED'                   # tableIsPartitioned
   | 'BUFFER-POOL' val=QUOTED_STRING    # tableBufferPool
   ;
 
@@ -106,13 +141,20 @@ addFieldOption:
     'DESCRIPTION' val=QUOTED_STRING     # fieldDescription
   | 'FORMAT' val=QUOTED_STRING          # fieldFormat
   | 'FORMAT-SA' ('?' | QUOTED_STRING)   # fieldFormatSA
-  | 'POSITION' val=NUMBER               # fieldPosition
   | 'INITIAL' ('?' | QUOTED_STRING)     # fieldInitial
   | 'INITIAL-SA' ('?' | QUOTED_STRING)  # fieldInitialSA
-  | 'HELP' QUOTED_STRING                # fieldHelp
-  | 'HELP-SA' QUOTED_STRING             # fieldHelpSA
   | 'LABEL' ('?' | QUOTED_STRING)       # fieldLabel
   | 'LABEL-SA' ('?' | QUOTED_STRING)    # fieldLabelSA
+  | 'POSITION' val=NUMBER               # fieldPosition
+  | 'LOB-AREA' val=(QUOTED_STRING | UNQUOTED_STRING)  # fieldLobArea
+  | 'LOB-BYTES' NUMBER                      # fieldLobBytes
+  | 'LOB-SIZE' UNQUOTED_STRING              # fieldLobSize
+  | 'MAX-WIDTH' val=NUMBER                  # fieldMaxWidth
+  | 'SQL-WIDTH' NUMBER                      # fieldSqlWith
+  | 'CLOB-CODEPAGE' (QUOTED_STRING | UNQUOTED_STRING)         # fieldClobCodepage
+  | 'CLOB-COLLATION' (QUOTED_STRING | UNQUOTED_STRING)        # fieldClobCollation
+  | 'CLOB-TYPE' NUMBER                      # fieldClobType
+  | 'VIEW-AS' ('?' | QUOTED_STRING)         # fieldViewAs
   | 'COLUMN-LABEL' ('?' | QUOTED_STRING)    # fieldColumnLabel
   | 'COLUMN-LABEL-SA' ('?' | QUOTED_STRING) # fieldColumnLabelSA
   | 'CAN-READ' QUOTED_STRING                # fieldCanRead
@@ -120,32 +162,53 @@ addFieldOption:
   | 'VALEXP' ('?' | QUOTED_STRING)          # fieldValExp
   | 'VALMSG' QUOTED_STRING                  # fieldValMsg
   | 'VALMSG-SA' QUOTED_STRING               # fieldValMsgSA
-  | 'VIEW-AS' ('?' | QUOTED_STRING)         # fieldViewAs
+  | 'HELP' QUOTED_STRING                    # fieldHelp
+  | 'HELP-SA' QUOTED_STRING                 # fieldHelpSA
   | 'EXTENT' val=NUMBER                     # fieldExtent 
   | 'DECIMALS' ('?' | NUMBER)               # fieldDecimals
-  | 'ORDER' val=NUMBER                      # fieldOrder
-  | 'MAX-WIDTH' val=NUMBER                  # fieldMaxWidth
-  | 'SQL-WIDTH' NUMBER                      # fieldSqlWith
   | 'LENGTH' NUMBER                         # fieldLength
-  | ('CASE-SENSITIVE' | 'NOT-CASE-SENSITIVE') # fieldCaseSensitive
+  | 'ORDER' val=NUMBER                      # fieldOrder
   | 'MANDATORY'                             # fieldMandatory
-  | 'NULL-ALLOWED'                          # fieldNullAllowed
-  | 'LOB-AREA' val=(QUOTED_STRING | UNQUOTED_STRING)  # fieldLobArea
-  | 'LOB-BYTES' NUMBER                      # fieldLobBytes
-  | 'LOB-SIZE' UNQUOTED_STRING              # fieldLobSize
-  | 'CLOB-CODEPAGE' (QUOTED_STRING | UNQUOTED_STRING)         # fieldClobCodepage
-  | 'CLOB-COLLATION' (QUOTED_STRING | UNQUOTED_STRING)        # fieldClobCollation
-  | 'CLOB-TYPE' NUMBER                      # fieldClobType
+  | ('CASE-SENSITIVE' | 'NOT-CASE-SENSITIVE') # fieldCaseSensitive
   | 'FOREIGN-POS' NUMBER                    # fieldForeignPos
+  | 'FOREIGN-SIZE' NUMBER                   # fieldForeignSize
+  | 'FOREIGN-BITS' NUMBER                   # fieldForeignBits
+  | 'FOREIGN-CODE' NUMBER                   # fieldForeignCode
+  | 'FOREIGN-ID' NUMBER                     # fieldForeignId
   | 'FOREIGN-NAME' QUOTED_STRING            # fieldForeignName
+  | 'FOREIGN-RETRIEVE' QUOTED_STRING        # fieldForeignRetrieve
+  | 'FOREIGN-SCALE' QUOTED_STRING           # fieldForeignScale
+  | 'FOREIGN-SPACING' QUOTED_STRING         # fieldForeignSpacing
   | 'FOREIGN-TYPE' QUOTED_STRING            # fieldForeignType
+  | 'FOREIGN-XPOS' QUOTED_STRING            # fieldForeignXpos
+  | 'FOREIGN-SEP' QUOTED_STRING             # fieldForeignSep
+  | 'FOREIGN-ALLOCATED' QUOTED_STRING       # fieldForeignAllocated
+  | 'FOREIGN-MAXIMUM' QUOTED_STRING         # fieldForeignMaximum
   | 'DSRVR-PRECISION' NUMBER                # fieldDataserverPrecision
   | 'DSRVR-SCALE' NUMBER                    # fieldDataserverScale
   | 'DSRVR-LENGTH' NUMBER                   # fieldDataserverLength
   | 'DSRVR-FLDMISC' NUMBER                  # fieldDataserverMisc
+  | 'DSRVR-SHADOW' NUMBER                   # fieldDataserverShadow
+  | 'SHADOW-COL' QUOTED_STRING              # fieldShadowCol
   | 'QUOTED-NAME' QUOTED_STRING             # fieldQuotedName
   | 'MISC-PROPERTIES' QUOTED_STRING         # fieldMiscProperties
-  | 'FIELD-MISC22' QUOTED_STRING            # fieldMisc22
+  | 'SHADOW-NAME' QUOTED_STRING             # fieldShadowName
+  | misc='FIELD-MISC11' val=NUMBER          # fieldMisc
+  | misc='FIELD-MISC12' val=NUMBER          # fieldMisc
+  | misc='FIELD-MISC13' val=NUMBER          # fieldMisc
+  | misc='FIELD-MISC14' val=NUMBER          # fieldMisc
+  | misc='FIELD-MISC15' val=NUMBER          # fieldMisc
+  | misc='FIELD-MISC16' val=NUMBER          # fieldMisc
+  | misc='FIELD-MISC17' val=NUMBER          # fieldMisc
+  | misc='FIELD-MISC18' val=NUMBER          # fieldMisc
+  | misc='FIELD-MISC21' val=QUOTED_STRING   # fieldMisc
+  | misc='FIELD-MISC22' val=QUOTED_STRING   # fieldMisc
+  | misc='FIELD-MISC23' val=QUOTED_STRING   # fieldMisc
+  | misc='FIELD-MISC24' val=QUOTED_STRING   # fieldMisc
+  | misc='FIELD-MISC25' val=QUOTED_STRING   # fieldMisc
+  | misc='FIELD-MISC26' val=QUOTED_STRING   # fieldMisc
+  | misc='FIELD-MISC27' val=QUOTED_STRING   # fieldMisc
+  | misc='FIELD-MISC28' val=QUOTED_STRING   # fieldMisc
   ;
 
 fieldTrigger:
@@ -158,18 +221,21 @@ addIndex:
     'ADD' 'INDEX' index=QUOTED_STRING 'ON' table=QUOTED_STRING addIndexOption* indexField*;
 
 addIndexOption:
-    'AREA' val=QUOTED_STRING # indexArea
+    'IS-LOCAL'                      # indexIsLocal
+  | 'AREA' val=QUOTED_STRING        # indexArea
+  | 'UNIQUE'                        # indexUnique
+  | 'INACTIVE'                      # indexInactive
+  | 'PRIMARY'                       # indexPrimary
+  | 'WORD'                          # indexWord
   | 'DESCRIPTION' val=QUOTED_STRING # indexDescription
-  | 'UNIQUE' # indexUnique
-  | 'PRIMARY' # indexPrimary
-  | 'WORD' # indexWord
-  | 'INDEX-NUM' NUMBER # indexNumber
-  | 'FOREIGN-NAME' QUOTED_STRING # indexForeignName
-  | 'INACTIVE' # inactive
+  | 'INDEX-NUM' NUMBER              # indexNumber
+  | 'FOREIGN-NAME' QUOTED_STRING    # indexForeignName
+  | 'FOREIGN-TYPE' QUOTED_STRING    # indexForeignType
+  | 'RECID-INDEX' QUOTED_STRING     # indexRecid
   ;
 
 indexField:
-    'INDEX-FIELD' field=QUOTED_STRING order=('ASCENDING' | 'DESCENDING')? abbr='ABBREVIATED'?;
+    'INDEX-FIELD' field=QUOTED_STRING order=('ASCENDING' | 'DESCENDING')? abbr='ABBREVIATED'? unsorted='UNSORTED'?;
 
 renameIndex:
     'RENAME' 'INDEX' QUOTED_STRING 'TO' QUOTED_STRING 'ON' QUOTED_STRING;

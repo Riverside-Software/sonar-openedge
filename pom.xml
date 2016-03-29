@@ -5,7 +5,7 @@
   <groupId>eu.rssw</groupId>
   <artifactId>sonar-openedge</artifactId>
   <packaging>pom</packaging>
-  <version>1.6.1</version>
+  <version>1.6.2</version>
   <name>OpenEdge plugin for SonarQube</name>
   <url>http://www.riverside-software.fr/</url>
   <description>Open source code analysis for OpenEdge</description>
@@ -14,6 +14,7 @@
     <module>proparse</module>
     <module>database-parser</module>
     <module>profiler-parser</module>
+    <module>listing-parser</module>
     <module>database-checks</module>
     <module>openedge-checks</module>
     <module>oedb-plugin</module>

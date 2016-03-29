@@ -13,7 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-@Rule(priority = Priority.MAJOR, name = "Whole index", description = "WHOLE-INDEX means that the selection criteria specified to search the table does not offer opportunities to use indexes that allow optimized key references (bracketed high and low values). Instead, the AVM must search the entire table using available indexes (often only the primary index) to satisfy the query, hence a WHOLE-INDEX search.")
+@Rule(priority = Priority.MAJOR, name = "Whole index")
 public class WholeIndexAnalyzer extends XrefAnalyzer {
   private static XPath xPath;
   private static XPathExpression wholeIndexExpr;

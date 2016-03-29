@@ -1,0 +1,18 @@
+<p>
+This rule raises an issue whenever a FIND / FOR / OPEN QUERY statement has no NO-LOCK / EXCLUSIVE-LOCK option, resulting in a SHARE-LOCK. Shared locks are more expensive than NO-LOCK in terms of server resources,
+and it's always better to specify the kind of lock you want to use. 
+</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+  FOR EACH Customer:
+    DISPLAY Customer.
+  END.
+</pre>
+
+<h2>Compliant Solution</h2>
+<pre>
+  FOR EACH Customer NO-LOCK:
+    DISPLAY Customer.
+  END.
+</pre>

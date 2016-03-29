@@ -129,7 +129,7 @@ public class Call extends SemanticRecord {
 
   /**
    * Set persistentHandleVar: the variable that will be used to refer to the persistent procedure instance created by
-   * this call - if any. Only used in connection with: run <proc> persistent set <handle>.
+   * this call - if any. Only used in connection with: run &lt;proc&gt; persistent set &lt;handle&gt;.
    * 
    * @param var
    */
@@ -138,7 +138,7 @@ public class Call extends SemanticRecord {
   }
 
   /**
-   * Sets runArgument: the parameter in run <fileName>, which may be an explicit string or a string expression, and
+   * Sets runArgument: the parameter in run &lt;fileName&gt;, which may be an explicit string or a string expression, and
    * which identifies either an external or an internal procedure.
    */
   public void setRunArgument(String f) {

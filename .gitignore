@@ -8,6 +8,8 @@ database-parser/test-output
 database-parser/.classpath
 database-parser/.project
 database-parser/.settings
+listing-parser/target
+listing-parser/test-output
 openedge-checks/target
 openedge-checks/test-output
 openedge-checks/.classpath

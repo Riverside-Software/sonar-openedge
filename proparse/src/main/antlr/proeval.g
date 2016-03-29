@@ -17,7 +17,7 @@ header {
 
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
-  import org.prorefactor.refactor.RefactorSession;
+  import org.prorefactor.refactor.settings.IProgressSettings;
   import static org.prorefactor.proparse.ProEvalSupport.*;
 }
 
@@ -34,11 +34,11 @@ options {
 
 {
   private final static Logger LOGGER = LoggerFactory.getLogger(ProEval.class);
-  private RefactorSession refSession;
+  private IProgressSettings pscSettings;
 
-  public ProEval(RefactorSession refSession) {
+  public ProEval(IProgressSettings pscSettings) {
     this();
-    this.refSession = refSession;
+    this.pscSettings = pscSettings;
   }
 
   private String indent() {
@@ -62,53 +62,60 @@ options {
 
 preproIfEval returns [boolean ret]
 // This is the function that gets called for evaluating preprocessor expressions
-{	Object a;
+{
+  if (pscSettings == null)
+    throw new RuntimeException("IProgressSettings not initialized");
+  Object a;
 }
-	:	a=expr {ret = a!=null && getBool(a);}
-	;
+  :  a=expr {ret = a!=null && getBool(a);}
+  ;
 
 
 program
 // This function, and the simple block and statement functions that follow it,
 // provide us with an interpreter which we can run from Proparse.
 // I used to use this for testing.
-	:	#(Program_root (blockorstatement)* )
-	;
+{
+  if (pscSettings == null)
+    throw new RuntimeException("IProgressSettings not initialized");
+}
+  :  #(Program_root (blockorstatement)* )
+  ;
 
 blockorstatement
-	:	doblock
-	|	ifblock
-	|	displaystate
-	;
+  :  doblock
+  |  ifblock
+  |  displaystate
+  ;
 
 ifblock
-{	Object a;
+{  Object a;
 }
-	:	#(IF a=expr THEN bs:. )
-		{
-			if (a!=null && getBool(a))
-				blockorstatement(bs);
-		}
-	;
+  :  #(IF a=expr THEN bs:. )
+    {
+      if (a!=null && getBool(a))
+        blockorstatement(bs);
+    }
+  ;
 
 doblock
-	:	#(DO LEXCOLON (blockorstatement)* END PERIOD)
-	;
+  :  #(DO LEXCOLON (blockorstatement)* END PERIOD)
+  ;
 
 displaystate
-	:	#(DISPLAY (formitem)* PERIOD)
-	;
+  :  #(DISPLAY (formitem)* PERIOD)
+  ;
 
 formitem
 {
-	Object a;
+  Object a;
 }
-	:	#(	Form_item
-			(	SKIP		{System.out.println();}
-			|	a=expr		{System.out.println(a);}
-			)
-		)
-	;
+  :  #(  Form_item
+      (  SKIP    {System.out.println();}
+      |  a=expr    {System.out.println(a);}
+      )
+    )
+  ;
 
 
 
@@ -118,21 +125,21 @@ expr returns [Object ret]
 // into a bool, which is used when evaluating &IF conditions. The result of expr
 // is a smart pointer to a Variant object.
 {
-	Object a;
-	Object b;
+  Object a;
+  Object b;
 }
-	:	#(OR a=expr b=expr)
-		{	ret = new Boolean(getBool(a) || getBool(b));
-		}
-	|	#(AND a=expr b=expr)
-		{	ret = new Boolean(getBool(a) && getBool(b));
-		}
-	|	ret=comparisonop
-	|	ret=binaryop
-	|	ret=unaryop
-	|	ret=atom
-	|	ret=function
-	;
+  :  #(OR a=expr b=expr)
+    {  ret = new Boolean(getBool(a) || getBool(b));
+    }
+  |  #(AND a=expr b=expr)
+    {  ret = new Boolean(getBool(a) && getBool(b));
+    }
+  |  ret=comparisonop
+  |  ret=binaryop
+  |  ret=unaryop
+  |  ret=atom
+  |  ret=function
+  ;
 
 
 comparisonop returns [Object ret]
@@ -142,620 +149,620 @@ comparisonop returns [Object ret]
 // because the types are not the same. We try converting both to
 // float (i.e. assume one is int and one is float) and go with that.
 {
-	Object a;
-	Object b;
+  Object a;
+  Object b;
 }
-	:	#(MATCHES a=expr b=expr)
-		{	ret = matches(a, b);
-		}
-	|	#(BEGINS a=expr b=expr)
-		{	String sa = ((String)a).toLowerCase();
-			String sb = ((String)b).toLowerCase();
-			ret = new Boolean(sa.startsWith(sb));
-		}
-	|	// Remember that only EQ is a comparison op, EQUAL is an assignment.
-		// Progress allows "=" for comparison, but propar.g converts its type to EQ.
-		#(EQ a=expr b=expr)
-		{	ret = compare(a, b, Compare.EQ);
-		}
-	|	#(NE a=expr b=expr)
-		{	ret = compare(a, b, Compare.NE);
-		}
-	|	#(GTHAN a=expr b=expr)
-		{	ret = compare(a, b, Compare.GT);
-		}
-	|	#(GE a=expr b=expr)
-		{	ret = compare(a, b, Compare.GE);
-		}
-	|	#(LTHAN a=expr b=expr)
-		{	ret = compare(a, b, Compare.LT);
-		}
-	|	#(LE a=expr b=expr)
-		{	ret = compare(a, b, Compare.LE);
-		}
-	;
+  :  #(MATCHES a=expr b=expr)
+    {  ret = matches(a, b);
+    }
+  |  #(BEGINS a=expr b=expr)
+    {  String sa = ((String)a).toLowerCase();
+      String sb = ((String)b).toLowerCase();
+      ret = new Boolean(sa.startsWith(sb));
+    }
+  |  // Remember that only EQ is a comparison op, EQUAL is an assignment.
+    // Progress allows "=" for comparison, but propar.g converts its type to EQ.
+    #(EQ a=expr b=expr)
+    {  ret = compare(a, b, Compare.EQ);
+    }
+  |  #(NE a=expr b=expr)
+    {  ret = compare(a, b, Compare.NE);
+    }
+  |  #(GTHAN a=expr b=expr)
+    {  ret = compare(a, b, Compare.GT);
+    }
+  |  #(GE a=expr b=expr)
+    {  ret = compare(a, b, Compare.GE);
+    }
+  |  #(LTHAN a=expr b=expr)
+    {  ret = compare(a, b, Compare.LT);
+    }
+  |  #(LE a=expr b=expr)
+    {  ret = compare(a, b, Compare.LE);
+    }
+  ;
 
 
 binaryop returns [Object ret]
 {
-	Object a;
-	Object b;
+  Object a;
+  Object b;
 }
-	:	#(PLUS a=expr b=expr)
-		{	ret = opPlus(a, b);
-		}
-	|	#(MINUS a=expr b=expr)
-		{	ret = opMinus(a, b);
-		}
-	|	#(MULTIPLY a=expr b=expr)
-		{	ret = opMultiply(a, b);
-		}
-	|	#(DIVIDE a=expr b=expr)
-		{	ret = opDivide(a, b);
-		}
-	|	#(MODULO a=expr b=expr)
-		// Progress rounds the operands to integer.
-		{	Double m1 = getFloat(a) + .5;
-			Double m2 = getFloat(b) + .5;
-			ret = new Integer(m1.intValue() % m2.intValue());
-		}
-	;
+  :  #(PLUS a=expr b=expr)
+    {  ret = opPlus(a, b);
+    }
+  |  #(MINUS a=expr b=expr)
+    {  ret = opMinus(a, b);
+    }
+  |  #(MULTIPLY a=expr b=expr)
+    {  ret = opMultiply(a, b);
+    }
+  |  #(DIVIDE a=expr b=expr)
+    {  ret = opDivide(a, b);
+    }
+  |  #(MODULO a=expr b=expr)
+    // Progress rounds the operands to integer.
+    {  Double m1 = getFloat(a) + .5;
+      Double m2 = getFloat(b) + .5;
+      ret = new Integer(m1.intValue() % m2.intValue());
+    }
+  ;
 
 
 unaryop returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(NOT a=expr)
-		{	ret = new Boolean(!getBool(a));
-		}
-	|	#(UNARY_MINUS a=expr)
-		{	if (a instanceof Integer)
-				ret = (Integer)a * -1;
-			else
-				ret = (Float)a * -1;
-		}
-	|	#(UNARY_PLUS a=expr)
-		{	ret = a;
-		}
-	;
+  :  #(NOT a=expr)
+    {  ret = new Boolean(!getBool(a));
+    }
+  |  #(UNARY_MINUS a=expr)
+    {  if (a instanceof Integer)
+        ret = (Integer)a * -1;
+      else
+        ret = (Float)a * -1;
+    }
+  |  #(UNARY_PLUS a=expr)
+    {  ret = a;
+    }
+  ;
 
 
 atom returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	n:NUMBER
-		{	ret = getNumber(n.getText());
-		}
-	|	s:QSTRING
-		// The leading and trailing quotation marks are stored in the text data.
-		// Remove those before working with the string.
-		// Also strip anything after the last quote mark - that'll be string attributes.
-		{	ret = StringFuncs.qstringStrip(s.getText());
-		}
-	|	(YES|TRUE_KW)
-		{	ret = new Boolean(true);
-		}
-	|	(NO|FALSE_KW)
-		{	ret = new Boolean(false);
-		}
-	|	UNKNOWNVALUE
-		{	ret = null;
-		}
-	|	#(LEFTPAREN a=expr RIGHTPAREN)
-		{	ret = a;
-		}
-	;
+  :  n:NUMBER
+    {  ret = getNumber(n.getText());
+    }
+  |  s:QSTRING
+    // The leading and trailing quotation marks are stored in the text data.
+    // Remove those before working with the string.
+    // Also strip anything after the last quote mark - that'll be string attributes.
+    {  ret = StringFuncs.qstringStrip(s.getText());
+    }
+  |  (YES|TRUE_KW)
+    {  ret = new Boolean(true);
+    }
+  |  (NO|FALSE_KW)
+    {  ret = new Boolean(false);
+    }
+  |  UNKNOWNVALUE
+    {  ret = null;
+    }
+  |  #(LEFTPAREN a=expr RIGHTPAREN)
+    {  ret = a;
+    }
+  ;
 
 
 function returns [Object r]
-	:	r=abs_fun
-	|	r=asc_fun
-	|	r=date_fun
-	|	r=day_fun
-	|	r=decimal_fun
-	|	r=encode_fun
-	|	r=entry_fun
-	|	r=etime_fun
-	|	r=exp_fun
-	|	r=fill_fun
-	|	r=index_fun
-	|	r=integer_fun
-	|	r=keyword_fun
-	|	r=keywordall_fun
-	|	r=lc_fun
-	|	r=lefttrim_fun
-	|	r=length_fun
-	|	r=library_fun
-	|	r=log_fun
-	|	r=lookup_fun
-	|	r=maximum_fun
-	|	r=member_fun
-	|	r=minimum_fun
-	|	r=month_fun
-	|	r=numentries_fun
-	|	r=opsys_fun
-	|	r=propath_fun
-	|	r=proversion_fun
-	|	r=rindex_fun
-	|	r=random_fun
-	|	r=replace_fun
-	|	r=righttrim_fun
-	|	r=round_fun
-	|	r=sqrt_fun
-	|	r=string_fun
-	|	r=substitute_fun
-	|	r=substring_fun
-	|	r=time_fun
-	|	r=today_fun
-	|	r=trim_fun
-	|	r=truncate_fun
-	|	r=weekday_fun
-	|	r=year_fun
-	;
+  :  r=abs_fun
+  |  r=asc_fun
+  |  r=date_fun
+  |  r=day_fun
+  |  r=decimal_fun
+  |  r=encode_fun
+  |  r=entry_fun
+  |  r=etime_fun
+  |  r=exp_fun
+  |  r=fill_fun
+  |  r=index_fun
+  |  r=integer_fun
+  |  r=keyword_fun
+  |  r=keywordall_fun
+  |  r=lc_fun
+  |  r=lefttrim_fun
+  |  r=length_fun
+  |  r=library_fun
+  |  r=log_fun
+  |  r=lookup_fun
+  |  r=maximum_fun
+  |  r=member_fun
+  |  r=minimum_fun
+  |  r=month_fun
+  |  r=numentries_fun
+  |  r=opsys_fun
+  |  r=propath_fun
+  |  r=proversion_fun
+  |  r=rindex_fun
+  |  r=random_fun
+  |  r=replace_fun
+  |  r=righttrim_fun
+  |  r=round_fun
+  |  r=sqrt_fun
+  |  r=string_fun
+  |  r=substitute_fun
+  |  r=substring_fun
+  |  r=time_fun
+  |  r=today_fun
+  |  r=trim_fun
+  |  r=truncate_fun
+  |  r=weekday_fun
+  |  r=year_fun
+  ;
 
 
 abs_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(ABSOLUTE LEFTPAREN a=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("ABS function not yet supported.");}
-	;
+  :  #(ABSOLUTE LEFTPAREN a=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("ABS function not yet supported.");}
+  ;
 
 
 asc_fun returns [Object ret]
 {
-	Object a;
-	Object b = null;
-	Object c = null;
+  Object a;
+  Object b = null;
+  Object c = null;
 }
-	:	#(ASC LEFTPAREN a=expr (COMMA b=expr (COMMA c=expr)? )? RIGHTPAREN)
-		{if(true) throw new ProEvalException("ASC function not yet supported.");}
-	;
+  :  #(ASC LEFTPAREN a=expr (COMMA b=expr (COMMA c=expr)? )? RIGHTPAREN)
+    {if(true) throw new ProEvalException("ASC function not yet supported.");}
+  ;
 
 
 date_fun returns [Object ret]
 {
-	Object a;
-	Object b = null;
-	Object c = null;
+  Object a;
+  Object b = null;
+  Object c = null;
 }
-	:	#(DATE LEFTPAREN a=expr (COMMA b=expr COMMA c=expr)? RIGHTPAREN)
-		{if(true) throw new ProEvalException("DATE function not yet supported.");}
-	;
+  :  #(DATE LEFTPAREN a=expr (COMMA b=expr COMMA c=expr)? RIGHTPAREN)
+    {if(true) throw new ProEvalException("DATE function not yet supported.");}
+  ;
 
 
 day_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(DAY LEFTPAREN a=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("DAY function not yet supported.");}
-	;
+  :  #(DAY LEFTPAREN a=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("DAY function not yet supported.");}
+  ;
 
 
 decimal_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(DECIMAL LEFTPAREN a=expr RIGHTPAREN)
-		{	ret = decimal(a);
-		}
-	;
+  :  #(DECIMAL LEFTPAREN a=expr RIGHTPAREN)
+    {  ret = decimal(a);
+    }
+  ;
 
 
 encode_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(ENCODE LEFTPAREN a=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("ENCODE function is not supported.");}
-	;
+  :  #(ENCODE LEFTPAREN a=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("ENCODE function is not supported.");}
+  ;
 
 
 entry_fun returns [Object ret]
 {
-	Object a;
-	Object b;
-	Object c = null;
+  Object a;
+  Object b;
+  Object c = null;
 }
-	:	#(ENTRY LEFTPAREN a=expr COMMA b=expr (COMMA c=expr)? RIGHTPAREN)
-		{	ret = entry(a, b, c);
-		}
-	;
+  :  #(ENTRY LEFTPAREN a=expr COMMA b=expr (COMMA c=expr)? RIGHTPAREN)
+    {  ret = entry(a, b, c);
+    }
+  ;
 
 
 etime_fun returns [Object ret]
 {
-	Object a = null;
+  Object a = null;
 }
-	:	#(ETIME_KW (LEFTPAREN a=expr RIGHTPAREN)? )
-		{if(true) throw new ProEvalException("ETIME function is not supported.");}
-	;
+  :  #(ETIME_KW (LEFTPAREN a=expr RIGHTPAREN)? )
+    {if(true) throw new ProEvalException("ETIME function is not supported.");}
+  ;
 
 
 exp_fun returns [Object ret]
 {
-	Object a;
-	Object b;
+  Object a;
+  Object b;
 }
-	:	#(EXP LEFTPAREN a=expr COMMA b=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("EXP function not yet supported.");}
-	;
+  :  #(EXP LEFTPAREN a=expr COMMA b=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("EXP function not yet supported.");}
+  ;
 
 
 fill_fun returns [Object ret]
 {
-	Object a;
-	Object b;
+  Object a;
+  Object b;
 }
-	:	#(FILL LEFTPAREN a=expr COMMA b=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("FILL function not yet supported.");}
-	;
+  :  #(FILL LEFTPAREN a=expr COMMA b=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("FILL function not yet supported.");}
+  ;
 
 
 index_fun returns [Object ret]
 {
-	Object a;
-	Object b;
-	Object c = null;
+  Object a;
+  Object b;
+  Object c = null;
 }
-	:	#(INDEX LEFTPAREN a=expr COMMA b=expr (COMMA c=expr)? RIGHTPAREN)
-		{	ret = index(a, b, c);
-		}
-	;
+  :  #(INDEX LEFTPAREN a=expr COMMA b=expr (COMMA c=expr)? RIGHTPAREN)
+    {  ret = index(a, b, c);
+    }
+  ;
 
 
 integer_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(INTEGER LEFTPAREN a=expr RIGHTPAREN)
-		{	ret = integer(a);
-		}
-	;
+  :  #(INTEGER LEFTPAREN a=expr RIGHTPAREN)
+    {  ret = integer(a);
+    }
+  ;
 
 
 keyword_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(KEYWORD LEFTPAREN a=expr RIGHTPAREN)
-		{	ret = keyword(a);
-		}
-	;
+  :  #(KEYWORD LEFTPAREN a=expr RIGHTPAREN)
+    {  ret = keyword(a);
+    }
+  ;
 
 
 keywordall_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(KEYWORDALL LEFTPAREN a=expr RIGHTPAREN)
-		{	ret = keywordall(a);
-		}
-	;
+  :  #(KEYWORDALL LEFTPAREN a=expr RIGHTPAREN)
+    {  ret = keywordall(a);
+    }
+  ;
 
 
 lc_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(LC LEFTPAREN a=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("LC function not yet supported.");}
-	;
+  :  #(LC LEFTPAREN a=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("LC function not yet supported.");}
+  ;
 
 
 lefttrim_fun returns [Object ret]
 {
-	Object a;
-	Object b = null;
+  Object a;
+  Object b = null;
 }
-	:	#(LEFTTRIM LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN)
-		{	ret = lefttrim(a, b);
-		}
-	;
+  :  #(LEFTTRIM LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN)
+    {  ret = lefttrim(a, b);
+    }
+  ;
 
 
 length_fun returns [Object ret]
 {
-	Object a;
-	Object b = null;
+  Object a;
+  Object b = null;
 }
-	:	#(LENGTH LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN)
-		{	if (b!=null)
-				throw new ProEvalException("Type option of LENGTH function not yet supported.");
-			ret = new Integer(getString(a).length());
-		}
-	;
+  :  #(LENGTH LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN)
+    {  if (b!=null)
+        throw new ProEvalException("Type option of LENGTH function not yet supported.");
+      ret = new Integer(getString(a).length());
+    }
+  ;
 
 
 library_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(LIBRARY LEFTPAREN a=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("LIBRARY function not yet supported.");}
-	;
+  :  #(LIBRARY LEFTPAREN a=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("LIBRARY function not yet supported.");}
+  ;
 
 
 log_fun returns [Object ret]
 {
-	Object a;
-	Object b = null;
+  Object a;
+  Object b = null;
 }
-	:	#(LOG LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN)
-		{if(true) throw new ProEvalException("LOG function not yet supported.");}
-	;
+  :  #(LOG LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN)
+    {if(true) throw new ProEvalException("LOG function not yet supported.");}
+  ;
 
 
 lookup_fun returns [Object ret]
 {
-	Object a;
-	Object b;
-	Object c = null;
+  Object a;
+  Object b;
+  Object c = null;
 }
-	:	#(LOOKUP LEFTPAREN a=expr COMMA b=expr (COMMA c=expr)? RIGHTPAREN )
-		{	ret = lookup(a, b, c);
-		}
-	;
+  :  #(LOOKUP LEFTPAREN a=expr COMMA b=expr (COMMA c=expr)? RIGHTPAREN )
+    {  ret = lookup(a, b, c);
+    }
+  ;
 
 
 maximum_fun returns [Object ret]
 {
-	Object a;
-	Object b;
+  Object a;
+  Object b;
 }
-	:	#(MAXIMUM LEFTPAREN a=expr
-		{	ret = a;
-		}
-		(	COMMA b=expr
-			{	if (ret==null || b==null)
-					ret=null;
-				else {
-					if (compare(b, ret, Compare.GT))
-						ret = b;
-				}
-			}
-		)+
-		RIGHTPAREN)
-	;
+  :  #(MAXIMUM LEFTPAREN a=expr
+    {  ret = a;
+    }
+    (  COMMA b=expr
+      {  if (ret==null || b==null)
+          ret=null;
+        else {
+          if (compare(b, ret, Compare.GT))
+            ret = b;
+        }
+      }
+    )+
+    RIGHTPAREN)
+  ;
 
 
 member_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(MEMBER LEFTPAREN a=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("MEMBER function not yet supported.");}
-	;
+  :  #(MEMBER LEFTPAREN a=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("MEMBER function not yet supported.");}
+  ;
 
 
 minimum_fun returns [Object ret]
 {
-	Object a;
-	Object b;
+  Object a;
+  Object b;
 }
-	:	#(MINIMUM LEFTPAREN a=expr
-		{	ret = a;
-		}
-		(	COMMA b=expr
-			{	if (ret==null || b==null)
-					ret=null;
-				else {
-					if (compare(b, ret, Compare.LT))
-						ret = b;
-				}
-			}
-		)+
-		RIGHTPAREN)
-	;
+  :  #(MINIMUM LEFTPAREN a=expr
+    {  ret = a;
+    }
+    (  COMMA b=expr
+      {  if (ret==null || b==null)
+          ret=null;
+        else {
+          if (compare(b, ret, Compare.LT))
+            ret = b;
+        }
+      }
+    )+
+    RIGHTPAREN)
+  ;
 
 
 month_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(MONTH LEFTPAREN a=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("MONTH function not yet supported.");}
-	;
+  :  #(MONTH LEFTPAREN a=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("MONTH function not yet supported.");}
+  ;
 
 
 numentries_fun returns [Object ret]
 {
-	Object a;
-	Object b = null;
+  Object a;
+  Object b = null;
 }
-	:	#(NUMENTRIES LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN )
-		{	ret = numentries(a, b);
-		}
-	;
+  :  #(NUMENTRIES LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN )
+    {  ret = numentries(a, b);
+    }
+  ;
 
 
 opsys_fun returns [Object ret]
-	:	OPSYS
-		{	String opsys = refSession.getProgressSettings().getOpSys();
-			if (opsys == null || opsys.length()==0)
-				throw new ProEvalException("OPSYS has not been configured in Proparse.");
-			ret = opsys;
-		}
-	;
+  :  OPSYS
+    {  String opsys = pscSettings.getOpSys();
+      if (opsys == null || opsys.length()==0)
+        throw new ProEvalException("OPSYS has not been configured in Proparse.");
+      ret = opsys;
+    }
+  ;
 
 
 propath_fun returns [Object ret]
-	:	PROPATH
-		{	ret = propath(refSession);
-		}
-	;
+  :  PROPATH
+    {  ret = propath(pscSettings);
+    }
+  ;
 
 
 proversion_fun returns [Object ret]
-	:	PROVERSION
-		{	String proversion = refSession.getProgressSettings().getProversion();
-			if (proversion == null || proversion.length()==0)
-				throw new ProEvalException("PROVERSION has not been configured in Proparse.");
-			ret = proversion;
-		}
-	;
+  :  PROVERSION
+    {  String proversion = pscSettings.getProversion();
+      if (proversion == null || proversion.length()==0)
+        throw new ProEvalException("PROVERSION has not been configured in Proparse.");
+      ret = proversion;
+    }
+  ;
 
 
 rindex_fun returns [Object ret]
 {
-	Object a;
-	Object b;
-	Object c = null;
+  Object a;
+  Object b;
+  Object c = null;
 }
-	:	#(RINDEX LEFTPAREN a=expr COMMA b=expr (COMMA c=expr)? RIGHTPAREN)
-		{	ret = rindex(a, b, c);
-		}
-	;
+  :  #(RINDEX LEFTPAREN a=expr COMMA b=expr (COMMA c=expr)? RIGHTPAREN)
+    {  ret = rindex(a, b, c);
+    }
+  ;
 
 
 random_fun returns [Object ret]
 {
-	Object a;
-	Object b;
+  Object a;
+  Object b;
 }
-	:	#(RANDOM LEFTPAREN a=expr COMMA b=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("RANDOM function not yet supported.");}
-	;
+  :  #(RANDOM LEFTPAREN a=expr COMMA b=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("RANDOM function not yet supported.");}
+  ;
 
 
 replace_fun returns [Object ret]
 {
-	Object a;
-	Object b;
-	Object c;
+  Object a;
+  Object b;
+  Object c;
 }
-	:	#(REPLACE LEFTPAREN a=expr COMMA b=expr COMMA c=expr RIGHTPAREN)
-		{	ret = replace(getString(a), getString(b), getString(c));
-		}
-	;
+  :  #(REPLACE LEFTPAREN a=expr COMMA b=expr COMMA c=expr RIGHTPAREN)
+    {  ret = replace(getString(a), getString(b), getString(c));
+    }
+  ;
 
 
 righttrim_fun returns [Object ret]
 {
-	Object a;
-	Object b = null;
+  Object a;
+  Object b = null;
 }
-	:	#(RIGHTTRIM LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN)
-		{	String s = getString(a);
-			if (b!=null)
-				ret = StringFuncs.rtrim(s, getString(b));
-			else
-				ret = StringFuncs.rtrim(s);
-		}
-	;
+  :  #(RIGHTTRIM LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN)
+    {  String s = getString(a);
+      if (b!=null)
+        ret = StringFuncs.rtrim(s, getString(b));
+      else
+        ret = StringFuncs.rtrim(s);
+    }
+  ;
 
 
 round_fun returns [Object ret]
 {
-	Object a;
-	Object b;
+  Object a;
+  Object b;
 }
-	:	#(ROUND LEFTPAREN a=expr COMMA b=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("ROUND function not yet supported.");}
-	;
+  :  #(ROUND LEFTPAREN a=expr COMMA b=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("ROUND function not yet supported.");}
+  ;
 
 
 sqrt_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(SQRT LEFTPAREN a=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("SQRT function not yet supported.");}
-	;
+  :  #(SQRT LEFTPAREN a=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("SQRT function not yet supported.");}
+  ;
 
 
 string_fun returns [Object ret]
 {
-	Object a;
-	Object b = null;
+  Object a;
+  Object b = null;
 }
-	:	#(STRING LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN)
-		{	if (b!=null)
-				throw new ProEvalException("Format option of STRING function is not yet supported.");
-			ret = string(a);
-		}
-	;
+  :  #(STRING LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN)
+    {  if (b!=null)
+        throw new ProEvalException("Format option of STRING function is not yet supported.");
+      ret = string(a);
+    }
+  ;
 
 
 substitute_fun returns [Object ret]
 {
-	Object a;
-	Object b;
+  Object a;
+  Object b;
 }
-	:	#(SUBSTITUTE LEFTPAREN a=expr (COMMA b=expr)* RIGHTPAREN)
-		{if(true) throw new ProEvalException("SUBSTITUTE function not yet supported.");}
-	;
+  :  #(SUBSTITUTE LEFTPAREN a=expr (COMMA b=expr)* RIGHTPAREN)
+    {if(true) throw new ProEvalException("SUBSTITUTE function not yet supported.");}
+  ;
 
 
 substring_fun returns [Object ret]
 {
-	Object a;
-	Object b;
-	Object c = null;
-	Object d = null;
+  Object a;
+  Object b;
+  Object c = null;
+  Object d = null;
 }
-	:	#(SUBSTRING LEFTPAREN a=expr COMMA b=expr (COMMA c=expr (COMMA d=expr)? )? RIGHTPAREN)
-		{	if (d!=null)
-				throw new ProEvalException("Type option of STRING function is not yet supported.");
-			ret = substring(a, b, c);
-		}
-	;
+  :  #(SUBSTRING LEFTPAREN a=expr COMMA b=expr (COMMA c=expr (COMMA d=expr)? )? RIGHTPAREN)
+    {  if (d!=null)
+        throw new ProEvalException("Type option of STRING function is not yet supported.");
+      ret = substring(a, b, c);
+    }
+  ;
 
 
 time_fun returns [Object ret]
-	:	TIME
-		{if(true) throw new ProEvalException("TIME function not yet supported.");}
-	;
+  :  TIME
+    {if(true) throw new ProEvalException("TIME function not yet supported.");}
+  ;
 
 
 today_fun returns [Object ret]
-	:	TODAY
-		{if(true) throw new ProEvalException("TODAY function not yet supported.");}
-	;
+  :  TODAY
+    {if(true) throw new ProEvalException("TODAY function not yet supported.");}
+  ;
 
 
 trim_fun returns [Object ret]
 {
-	Object a;
-	Object b = null;
+  Object a;
+  Object b = null;
 }
-	:	#(TRIM LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN)
-		{	String s = getString(a);
-			if (b != null)
-				ret = StringFuncs.trim(s, getString(b));
-			else
-				ret = s.trim();
-		}
-	;
+  :  #(TRIM LEFTPAREN a=expr (COMMA b=expr)? RIGHTPAREN)
+    {  String s = getString(a);
+      if (b != null)
+        ret = StringFuncs.trim(s, getString(b));
+      else
+        ret = s.trim();
+    }
+  ;
 
 
 truncate_fun returns [Object ret]
 {
-	Object a;
-	Object b;
+  Object a;
+  Object b;
 }
-	:	#(TRUNCATE LEFTPAREN a=expr COMMA b=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("TRUNCATE function not yet supported.");}
-	;
+  :  #(TRUNCATE LEFTPAREN a=expr COMMA b=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("TRUNCATE function not yet supported.");}
+  ;
 
 
 weekday_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(WEEKDAY LEFTPAREN a=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("WEEKDAY function not yet supported.");}
-	;
+  :  #(WEEKDAY LEFTPAREN a=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("WEEKDAY function not yet supported.");}
+  ;
 
 
 year_fun returns [Object ret]
 {
-	Object a;
+  Object a;
 }
-	:	#(YEAR LEFTPAREN a=expr RIGHTPAREN)
-		{if(true) throw new ProEvalException("YEAR function not yet supported.");}
-	;
+  :  #(YEAR LEFTPAREN a=expr RIGHTPAREN)
+    {if(true) throw new ProEvalException("YEAR function not yet supported.");}
+  ;

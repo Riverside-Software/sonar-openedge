@@ -20,7 +20,7 @@ import org.prorefactor.xfer.DataXferStream;
 
 /**
  * Abstract class for a macro reference. There are two subclasses: one for references to named macros (i.e. those named
- * with &global, &scoped, or an include argument), and one for references to include files.
+ * with &amp;global, &amp;scoped, or an include argument), and one for references to include files.
  */
 public abstract class MacroRef implements MacroEvent {
   private static final long serialVersionUID = -3732504160384813887L;
@@ -51,12 +51,12 @@ public abstract class MacroRef implements MacroEvent {
   }
 
   /**
-   * Find <i>external macro references</i>. An external macro is an include file, a &GLOBAL or a &SCOPED from another
+   * Find <i>external macro references</i>. An external macro is an include file, a &amp;GLOBAL or a &amp;SCOPED from another
    * file, and include args.
    * 
-   * TODO: (Jan 26) This doesn't seem right to me anymore. An &UNDEFINE only affects the local scope. If re-implemented
-   * after building a pseudoprocessor, consider dropping this. &UNDEFINE of a &GLOBAL or of a &SCOPED from another file
-   * is considered a reference. &UNDEFINE of an include argument is considered a reference.
+   * TODO: (Jan 26) This doesn't seem right to me anymore. An &amp;UNDEFINE only affects the local scope. If re-implemented
+   * after building a pseudoprocessor, consider dropping this. &amp;UNDEFINE of a &amp;GLOBAL or of a &amp;SCOPED from another file
+   * is considered a reference. &amp;UNDEFINE of an include argument is considered a reference.
    * 
    * The subroutine is recursive, because a local define may incur an external reference!
    * 

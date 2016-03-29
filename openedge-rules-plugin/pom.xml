@@ -4,7 +4,7 @@
 
   <groupId>eu.rssw.sonar.openedge</groupId>
   <artifactId>sonar-openedge-rules</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <packaging>sonar-plugin</packaging>
 
   <name>OpenEdge rules for SonarQube plugin</name>
@@ -40,7 +40,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <sonar.version>5.2</sonar.version>
+    <sonar.version>5.4</sonar.version>
     <sonar.pluginKey>openedgeextra</sonar.pluginKey>
     <sonar.pluginName>OpenEdge Extra Rules</sonar.pluginName>
     <sonar.pluginClass>org.sonar.plugins.openedge.OpenEdgeExtra</sonar.pluginClass>
@@ -56,19 +56,19 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.6.2</version>
+      <version>1.7.19</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>eu.rssw.openedge.checks</groupId>
       <artifactId>openedge-checks</artifactId>
-      <version>1.1</version>
+      <version>1.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.8.21</version>
+      <version>6.9.10</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

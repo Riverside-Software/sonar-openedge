@@ -83,12 +83,12 @@ public class OpenEdgeListingSensor implements Sensor {
             sb.append(block.getLineNumber());
           }
 
-          Measure m = new Measure(OpenEdgeMetrics.TRANSACTIONS, sb.toString());
-          context.saveMeasure(file, m);
+          context.saveMeasure(file, new Measure(OpenEdgeMetrics.TRANSACTIONS, sb.toString()));
+          context.saveMeasure(file, new Measure(OpenEdgeMetrics.NUM_TRANSACTIONS, (double) parser.getTransactionBlocks().size()));
 
           dbgImportNum++;
         } catch (IOException caught) {
-
+          LOG.error("Unable to parse listing file for " + file.relativePath(), caught);
         }
       } else {
         LOG.debug("Listing file for {} not found - Was looking for {}", file.relativePath(),

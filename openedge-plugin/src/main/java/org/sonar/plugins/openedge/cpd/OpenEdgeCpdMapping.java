@@ -19,22 +19,28 @@
  */
 package org.sonar.plugins.openedge.cpd;
 
-import net.sourceforge.pmd.cpd.Tokenizer;
-
 import org.sonar.api.batch.AbstractCpdMapping;
+import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.resources.Language;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
+import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+
+import net.sourceforge.pmd.cpd.Tokenizer;
 
 public class OpenEdgeCpdMapping extends AbstractCpdMapping {
   private final OpenEdge language;
+  private final OpenEdgeSettings settings;
+  private final FileSystem fileSystem;
 
-  public OpenEdgeCpdMapping(OpenEdge language) {
+  public OpenEdgeCpdMapping(FileSystem fileSystem, OpenEdge language, OpenEdgeSettings settings) {
+    this.fileSystem = fileSystem;
     this.language = language;
+    this.settings = settings;
   }
 
   @Override
   public Tokenizer getTokenizer() {
-      return new OpenEdgeCpdTokenizer();
+    return new OpenEdgeCpdTokenizer(fileSystem, settings.getProparseSession(), settings.useCpdDebug());
   }
 
   @Override

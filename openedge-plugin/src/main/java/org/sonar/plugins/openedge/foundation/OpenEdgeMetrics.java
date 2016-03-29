@@ -76,9 +76,14 @@ public class OpenEdgeMetrics implements Metrics {
           Metric.DIRECTION_NONE).setQualitative(false).create();
 
   public static final String TRANSACTIONS_KEY = "TRANSACTIONS";
-  public static final Metric<Integer> TRANSACTIONS = new Metric.Builder(TRANSACTIONS_KEY,
+  public static final Metric TRANSACTIONS = new Metric.Builder(TRANSACTIONS_KEY,
       "Transaction blocks line numbers", Metric.ValueType.DATA).setDescription(
-          "Line numbers of transaction blocks").setDirection(Metric.DIRECTION_NONE).setQualitative(false).create();
+          "Line numbers of transaction blocks").setDirection(Metric.DIRECTION_NONE).setQualitative(false).setDomain(DOMAIN_OPENEDGE).create();
+
+  public static final String NUM_TRANSACTIONS_KEY = "NUM_TRANSACTIONS";
+  public static final Metric<Integer> NUM_TRANSACTIONS = new Metric.Builder(NUM_TRANSACTIONS_KEY,
+      "Number of transaction blocks", Metric.ValueType.INT).setDescription("Number of transaction blocks").setDirection(
+          Metric.DIRECTION_NONE).setQualitative(false).setDomain(DOMAIN_OPENEDGE).create();
 
   public static final String SHR_TT_KEY = "OE_SHR_TT";
   public static final Metric<Integer> SHR_TT = new Metric.Builder(SHR_TT_KEY, "New shared temp-tables",
@@ -95,7 +100,8 @@ public class OpenEdgeMetrics implements Metrics {
       Metric.ValueType.INT).setDescription("Number of new shared variables").setDirection(
           Metric.DIRECTION_NONE).setQualitative(false).setDomain(DOMAIN_OPENEDGE).create();
 
-  private static final List<Metric> METRICS = ImmutableList.<Metric> builder().add(PACKAGES, CLASSES, PROCEDURES, INCLUDES, WINDOWS, TRANSACTIONS, SHR_DS, SHR_TT, SHR_VAR).build();
+  private static final List<Metric> METRICS = ImmutableList.<Metric> builder().add(PACKAGES, CLASSES, PROCEDURES,
+      INCLUDES, WINDOWS, TRANSACTIONS, NUM_TRANSACTIONS, SHR_DS, SHR_TT, SHR_VAR).build();
 
   @Override
   public List<Metric> getMetrics() {

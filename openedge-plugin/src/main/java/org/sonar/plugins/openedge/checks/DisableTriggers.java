@@ -7,7 +7,7 @@ import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 
-@Rule(priority = Priority.INFO, name = "Disable triggers", description = "No DISABLE TRIGGERS in code")
+@Rule(priority = Priority.INFO, name = "Disable triggers")
 public class DisableTriggers extends AbstractLintRule {
 
   @Override
