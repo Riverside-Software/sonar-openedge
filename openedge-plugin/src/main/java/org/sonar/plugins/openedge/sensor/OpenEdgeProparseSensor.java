@@ -20,8 +20,16 @@
 package org.sonar.plugins.openedge.sensor;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -41,9 +49,13 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.MessageException;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
+import org.sonar.plugins.openedge.api.com.google.common.io.ByteStreams;
+import org.sonar.plugins.openedge.api.com.google.common.primitives.Bytes;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.ProparseRuntimeException;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
+import org.sonar.plugins.openedge.api.org.prorefactor.util.JsonNodeLister;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
@@ -74,6 +86,7 @@ public class OpenEdgeProparseSensor implements Sensor {
 
   @Override
   public void analyse(Project project, SensorContext context) {
+    List<String> debugFiles = new ArrayList<>();
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
 
@@ -104,21 +117,25 @@ public class OpenEdgeProparseSensor implements Sensor {
         context.saveMeasure(file, CoreMetrics.NCLOC, (double) unit.getMetrics().getLoc());
         context.saveMeasure(file, CoreMetrics.COMMENT_LINES, (double) unit.getMetrics().getComments());
 
-        if (settings.useProparseDebug()) {
-          String fileName = ".proparse/" + file.relativePath();
-          File dbgFile = new File(fileName);
-          dbgFile.getParentFile().mkdirs();
-//          try (PrintWriter writer = new PrintWriter(dbgFile)) {
-//            JPNodeLister nodeLister = new JPNodeLister(root, writer, new TokenTypes());
-//            nodeLister.print();
-//          } catch (IOException caught) {
-//            LOG.error("Unable to write proparse debug file", caught);
-//          }
-        }
-
         if (isIncludeFile) {
           // Rules are not applied on include files
           continue;
+        }
+
+        if (settings.useProparseDebug()) {
+          String fileName = ".proparse/" + file.relativePath() + ".json";
+          File dbgFile = new File(fileName);
+          dbgFile.getParentFile().mkdirs();
+          try (PrintWriter writer = new PrintWriter(dbgFile)) {
+            JsonNodeLister nodeLister = new JsonNodeLister(unit.getTopNode(), writer,
+                new Integer[] {
+                    NodeTypes.LEFTPAREN, NodeTypes.RIGHTPAREN, NodeTypes.COMMA, NodeTypes.PERIOD, NodeTypes.LEXCOLON,
+                    NodeTypes.OBJCOLON, NodeTypes.THEN, NodeTypes.END});
+            nodeLister.print();
+            debugFiles.add(file.relativePath() + ".json");
+          } catch (IOException caught) {
+            LOG.error("Unable to write proparse debug file", caught);
+          }
         }
 
         for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
@@ -143,12 +160,35 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
     }
     new File("listingparser.txt").delete();
-    
+
     LOG.info("AST Generation | time={} ms", parseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
     }
 
+    if (settings.useProparseDebug()) {
+      try (InputStream from = this.getClass().getResourceAsStream("/debug-index.html");
+          OutputStream to = new FileOutputStream(new File(".proparse/index.html"))) {
+        ByteStreams.copy(from, to);
+      } catch (IOException caught) {
+        LOG.error("Error while writing index.html", caught);
+      }
+      try (PrintWriter writer = new PrintWriter(new File(".proparse/index.json"))) {
+        boolean first = true;
+        writer.println("var data= { \"files\": [");
+        for (String str : debugFiles) {
+          if (!first) {
+            writer.write(',');
+          } else {
+            first = false;
+          }
+          writer.println("{ \"file\": \"" + str + "\" }");
+        }
+        writer.println("]}");
+      } catch (IOException uncaught) {
+        LOG.error("Error while writing debug index", uncaught);
+      }
+    }
   }
 
   @Override

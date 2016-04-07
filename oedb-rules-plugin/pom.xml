@@ -4,7 +4,7 @@
 
   <groupId>eu.rssw.sonar.openedge</groupId>
   <artifactId>sonar-openedge-db-rules</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <packaging>sonar-plugin</packaging>
 
   <name>OpenEdge DB rules for SonarQube plugin</name>
@@ -62,7 +62,7 @@
     <dependency>
       <groupId>eu.rssw.openedge.checks</groupId>
       <artifactId>database-checks</artifactId>
-      <version>1.4</version>
+      <version>1.5</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

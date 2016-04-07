@@ -14,10 +14,11 @@ import java.io.File;
 import java.io.PrintWriter;
 
 import org.apache.commons.io.FileUtils;
-import org.prorefactor.core.unittest.util.JPNodeLister;
+import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.util.JsonNodeLister;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -58,9 +59,12 @@ public class BugFixTests extends TestCase {
       assertNotNull(pu.getTopNode());
       assertNotNull(pu.getRootScope());
 
-      PrintWriter writer = new PrintWriter(new File(tempDir, file.getName() + ".nodes"));
-      JPNodeLister nodeLister = new JPNodeLister(pu.getTopNode(), writer);
-      nodeLister.print(' ', true, true, true, true);
+      PrintWriter writer = new PrintWriter(new File(tempDir, file.getName() + ".json"));
+      JsonNodeLister nodeLister = new JsonNodeLister(pu.getTopNode(), writer,
+          new Integer[] {
+              NodeTypes.LEFTPAREN, NodeTypes.RIGHTPAREN, NodeTypes.COMMA, NodeTypes.PERIOD, NodeTypes.LEXCOLON,
+              NodeTypes.OBJCOLON, NodeTypes.THEN, NodeTypes.END});
+      nodeLister.print();
       writer.close();
     }
   }

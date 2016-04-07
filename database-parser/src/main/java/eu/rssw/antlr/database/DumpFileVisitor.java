@@ -112,8 +112,7 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitFieldTrigger(FieldTriggerContext ctx) {
-    Trigger trigger = new Trigger(TriggerType.valueOf(ctx.type.getText().replace('-', '_').replace("\"", "").toUpperCase()),
-        ctx.triggerProcedure.getText());
+    Trigger trigger = new Trigger(TriggerType.getTriggerType(ctx.type.getText()), ctx.triggerProcedure.getText());
     if (ctx.crc != null) {
       trigger.setCrc(ctx.crc.getText());
     }
@@ -169,8 +168,7 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitTableTrigger(TableTriggerContext ctx) {
-    Trigger trigger = new Trigger(TriggerType.valueOf(ctx.type.getText().replace('-', '_').replace("\"", "").toUpperCase()),
-        ctx.triggerProcedure.getText());
+    Trigger trigger = new Trigger(TriggerType.getTriggerType(ctx.type.getText()), ctx.triggerProcedure.getText());
     if (ctx.crc != null) {
       trigger.setCrc(ctx.crc.getText());
     }

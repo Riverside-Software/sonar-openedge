@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
+import com.google.common.primitives.Ints;
 
 public class ListingParser {
   private static final Logger LOG = LoggerFactory.getLogger(ListingParser.class);
@@ -106,15 +107,15 @@ public class ListingParser {
           else
             blocks.get(blocks.size() - 1).appendBuffer(str.substring(13));
         } else {
-          List<String> splitter = Splitter.on(' ').trimResults().omitEmptyStrings().splitToList(str);
+          List<String> splitter = Splitter.on(' ').trimResults().omitEmptyStrings().limit(5).splitToList(str);
           if (splitter.size() < 4)
             return;
-          int lineNumber = Integer.parseInt(splitter.get(1));
+          Integer lineNumber = Ints.tryParse(splitter.get(1));
           BlockType type = BlockType.getBlockType(splitter.get(2).toUpperCase());
           boolean transaction = "Yes".equals(splitter.get(3));
           frames = false;
           if (type != null) {
-            blocks.add(new CodeBlock(type, lineNumber, transaction, str.substring(43).trim()));
+            blocks.add(new CodeBlock(type, lineNumber == null ? -1 : lineNumber, transaction, (splitter.size() == 5 ? splitter.get(4) : "")));
           } else {
             LOG.error("Unknown block type {}", splitter.get(2).toUpperCase());
           }

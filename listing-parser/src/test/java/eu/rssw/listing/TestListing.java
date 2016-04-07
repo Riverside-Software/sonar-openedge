@@ -33,6 +33,20 @@ public class TestListing {
     ListingParser parser = new ListingParser(new File("src/test/resources/listing2.txt"));
     Assert.assertEquals(parser.getTransactionBlocks().size(), 0);
     Assert.assertEquals(parser.getMainBlock().getBuffers().size(), 4);
+    // Find last and penultimate entry
+    CodeBlock block = null;
+    CodeBlock penult = null;
+    for (CodeBlock b : parser.getBlocks()) {
+      penult = block;
+      block = b;
+    }
+    Assert.assertNotNull(penult);
+    Assert.assertEquals(penult.getLineNumber(), -1);
+    Assert.assertEquals(penult.getLabel(), "");
+
+    Assert.assertNotNull(block);
+    Assert.assertEquals(block.getLineNumber(), -32666);
+    Assert.assertEquals(block.getLabel(), "Procedure foo-bar");
   }
 
 }

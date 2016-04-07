@@ -22,8 +22,8 @@ import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 public class AbbreviatedKeywords extends AbstractLintRule {
   private Set<String> exclusionList = null;
 
-  @RuleProperty(description = "Keywords which never raise an issue", defaultValue = "DEFINE,VARIABLE,CHARACTER,INTEGER,DECIMAL,PARAMETER,FILE-INFORMATION")
-  public String excludedKeywords = "DEFINE,VARIABLE,CHARACTER,INTEGER,DECIMAL,PARAMETER,FILE-INFORMATION";
+  @RuleProperty(description = "Keywords which never raise an issue", defaultValue = "DEFINE,VARIABLE,CHARACTER,INTEGER,DECIMAL,PARAMETER,COLUMN,NO-LABELS,FILE-INFORMATION")
+  public String excludedKeywords = "DEFINE,VARIABLE,CHARACTER,INTEGER,DECIMAL,PARAMETER,COLUMN,NO-LABELS,FILE-INFORMATION";
 
   @Override
   public void lint(ParseUnit unit) {
@@ -39,7 +39,7 @@ public class AbbreviatedKeywords extends AbstractLintRule {
 
   private void visitNode(JPNode node) {
     if (node.isAbbreviated()) {
-      String keyword = NodeTypes.getTypeName(node.getType());
+      String keyword = NodeTypes.getDefaultText(node.getType());
       if (keyword == null) return;
       // Is it excluded ?
       if (isExcluded(keyword)) {

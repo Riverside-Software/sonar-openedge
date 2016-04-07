@@ -4,7 +4,7 @@
 
   <groupId>eu.rssw.openedge.checks</groupId>
   <artifactId>openedge-checks</artifactId>
-  <version>1.2</version>
+  <version>1.3</version>
 
   <name>OpenEdge checks</name>
   <url>http://riverside-software.fr/</url>
@@ -38,7 +38,7 @@
     <dependency>
       <groupId>proparse</groupId>
       <artifactId>proparse</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.3</version>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>

@@ -20,11 +20,14 @@ public abstract class AbstractLintRule {
   private InputFile file;
   private RuleKey ruleKey;
 
-  public void execute(ParseUnit unit, SensorContext context, InputFile file, RuleKey ruleKey) {
+  public void setContext(SensorContext context, InputFile file, RuleKey ruleKey) {
     this.context = context;
     this.file = file;
     this.ruleKey = ruleKey;
+  }
 
+  public void execute(ParseUnit unit, SensorContext context, InputFile file, RuleKey ruleKey) {
+    setContext(context, file, ruleKey);
     lint(unit);
   }
 

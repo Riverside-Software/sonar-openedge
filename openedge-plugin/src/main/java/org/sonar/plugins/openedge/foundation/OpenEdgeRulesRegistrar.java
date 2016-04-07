@@ -36,14 +36,18 @@ import org.sonar.plugins.openedge.checks.DisableTriggers;
 import org.sonar.plugins.openedge.checks.FindNoError;
 import org.sonar.plugins.openedge.checks.I18NLength;
 import org.sonar.plugins.openedge.checks.IndexUsage;
+import org.sonar.plugins.openedge.checks.LinesTooLong;
 import org.sonar.plugins.openedge.checks.NoReturnInFinally;
 import org.sonar.plugins.openedge.checks.NoUndo;
 import org.sonar.plugins.openedge.checks.NoWait;
+import org.sonar.plugins.openedge.checks.OneStatementPerLine;
 import org.sonar.plugins.openedge.checks.ReturnError;
 import org.sonar.plugins.openedge.checks.ShareLock;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 import org.sonar.plugins.openedge.checks.SortAccessAnalyzer;
 import org.sonar.plugins.openedge.checks.SortAccessWholeIndexAnalyzer;
+import org.sonar.plugins.openedge.checks.StringAttribute;
+import org.sonar.plugins.openedge.checks.TabsIndent;
 import org.sonar.plugins.openedge.checks.UsingStars;
 import org.sonar.plugins.openedge.checks.WholeIndexAnalyzer;
 import org.sonar.plugins.openedge.checks.XPathAnalyzer;
@@ -81,7 +85,8 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
     return new Class[] {
         UsingStars.class, AbbreviatedKeywords.class, BackslashInIncludeFile.class, BackslashInString.class,
         BlockLabel.class, ClassNameCasing.class, FindNoError.class, DisableTriggers.class, ShareLock.class,
-        NoReturnInFinally.class, ReturnError.class, BufferUsage.class, I18NLength.class, NoUndo.class, NoWait.class};
+        NoReturnInFinally.class, ReturnError.class, BufferUsage.class, I18NLength.class, NoUndo.class, NoWait.class,
+        StringAttribute.class, LinesTooLong.class, OneStatementPerLine.class, TabsIndent.class};
   }
 
 }

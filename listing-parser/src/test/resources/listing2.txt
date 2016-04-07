@@ -62,5 +62,10 @@
              abc.Customer
 
 ...es\sample\test2.p    4 Do          No                                    
-...es\sample\test2.p   30 For         No                                    
+...es\sample\test2.p   30 For         No
+
+...es\sample\test2.p -( Do No
+
+...es\sample\test2.p -32666 Procedure No Procedure foo-bar
+                                    
 

@@ -112,7 +112,7 @@ public class OpenEdgePlugin extends SonarPlugin {
     list.add(PropertyDefinition.builder(ALIASES).name("aliases").description(
         "DB connections, as a comma-separated list of DF files (with optional alias after ';')").type(
             PropertyType.STRING).defaultValue("").build());
-    list.add(PropertyDefinition.builder(DLC).name("dlc").description("OpenEdge installatin path").type(
+    list.add(PropertyDefinition.builder(DLC).name("dlc").description("OpenEdge installation path").type(
         PropertyType.STRING).defaultValue("").build());
     list.add(PropertyDefinition.builder(PROPATH_DLC).name("dlc_in_propath").description(
         "Include OE instllation path in propath").type(PropertyType.BOOLEAN).defaultValue("true").build());

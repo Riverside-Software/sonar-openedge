@@ -13,3 +13,9 @@ While in some cases you may want to use the UNDO feature on variables, it's in m
 <pre>
   DEFINE VARIABLE myVar AS CHARACTER NO-UNDO.
 </pre>
+
+<h2>Suppress issue</h2>
+<pre>
+  {&amp;_proparse_ prolint-nowarn(noundo)}
+  DEFINE VARIABLE myVar AS CHARACTER.
+</pre>
