@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
 
-import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.rule.RuleKey;
 import org.sonar.check.Priority;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
@@ -17,39 +14,32 @@ import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 
 @Rule(priority = Priority.MINOR, name = "Lines should not be too long")
 public class LinesTooLong extends AbstractLintRule {
-
   @RuleProperty(description = "The maximum authorized line length", defaultValue = "120")
   public int maximumLineLength = 120;
 
   @Override
-  public void execute(ParseUnit unit, SensorContext context, InputFile file, RuleKey ruleKey) {
-    setContext(context, file, ruleKey);
-
-
-    try {
-    Files.readLines(file.file(), Charset.defaultCharset(), new LineProcessor<Void>() {
-      private int lineNumber = 1;
-      @Override
-      public boolean processLine(String line) throws IOException {
-        if (line.length() > maximumLineLength) {
-          reportIssue(lineNumber, MessageFormat.format("Line is {0} characters long, exceeding maximum value of {1}", line.length(), maximumLineLength));
-        }
-        lineNumber++;
-        return true;
-      }
-
-      @Override
-      public Void getResult() {
-        return null;
-      }
-    });
-    } catch (IOException uncaught) {
-      
-    }
-  }
-
-  @Override
   public void lint(ParseUnit unit) {
-    throw new RuntimeException("Not implemented");
+    try {
+      Files.readLines(getInputFile().file(), Charset.defaultCharset(), new LineProcessor<Void>() {
+        private int lineNumber = 1;
+
+        @Override
+        public boolean processLine(String line) throws IOException {
+          if (line.length() > maximumLineLength) {
+            reportIssue(lineNumber, MessageFormat.format("Line is {0} characters long, exceeding maximum value of {1}",
+                line.length(), maximumLineLength));
+          }
+          lineNumber++;
+          return true;
+        }
+
+        @Override
+        public Void getResult() {
+          return null;
+        }
+      });
+    } catch (IOException uncaught) {
+
+    }
   }
 }

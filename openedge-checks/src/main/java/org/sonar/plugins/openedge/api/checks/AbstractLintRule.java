@@ -10,6 +10,7 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 
 import com.google.common.base.Splitter;
 
@@ -19,22 +20,38 @@ public abstract class AbstractLintRule {
   private SensorContext context;
   private InputFile file;
   private RuleKey ruleKey;
+  private String serverId;
+  private Licence licence;
 
-  public void setContext(SensorContext context, InputFile file, RuleKey ruleKey) {
+  public final void setContext(SensorContext context, InputFile file, RuleKey ruleKey, Licence licence, String serverId) {
     this.context = context;
     this.file = file;
     this.ruleKey = ruleKey;
+    this.licence = licence;
+    this.serverId = serverId;
   }
 
-  public void execute(ParseUnit unit, SensorContext context, InputFile file, RuleKey ruleKey) {
-    setContext(context, file, ruleKey);
+  public final void execute(ParseUnit unit, SensorContext context, InputFile file, RuleKey ruleKey, Licence licence, String serverId) {
+    setContext(context, file, ruleKey, licence, serverId);
     lint(unit);
   }
 
   public abstract void lint(ParseUnit unit);
-	  
+
+  public SensorContext getContext() {
+    return context;
+  }
+
   public InputFile getInputFile() {
     return file;
+  }
+
+  public String getServerId() {
+    return serverId;
+  }
+
+  public Licence getLicence() {
+    return licence;
   }
 
   /**

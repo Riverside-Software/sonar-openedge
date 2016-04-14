@@ -4,7 +4,7 @@
 
   <groupId>proparse</groupId>
   <artifactId>proparse</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
 
   <name>Proparse</name>
   <url>http://riverside-software.fr/</url>
@@ -132,6 +132,19 @@
             <!-- <include>**/PUBTest.java</include> -->
           </includes>
         </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>bundle-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

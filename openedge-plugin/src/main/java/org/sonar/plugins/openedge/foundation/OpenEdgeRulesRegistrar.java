@@ -36,6 +36,7 @@ import org.sonar.plugins.openedge.checks.DisableTriggers;
 import org.sonar.plugins.openedge.checks.FindNoError;
 import org.sonar.plugins.openedge.checks.I18NLength;
 import org.sonar.plugins.openedge.checks.IndexUsage;
+import org.sonar.plugins.openedge.checks.KeywordMatch;
 import org.sonar.plugins.openedge.checks.LinesTooLong;
 import org.sonar.plugins.openedge.checks.NoReturnInFinally;
 import org.sonar.plugins.openedge.checks.NoUndo;
@@ -86,7 +87,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
         UsingStars.class, AbbreviatedKeywords.class, BackslashInIncludeFile.class, BackslashInString.class,
         BlockLabel.class, ClassNameCasing.class, FindNoError.class, DisableTriggers.class, ShareLock.class,
         NoReturnInFinally.class, ReturnError.class, BufferUsage.class, I18NLength.class, NoUndo.class, NoWait.class,
-        StringAttribute.class, LinesTooLong.class, OneStatementPerLine.class, TabsIndent.class};
+        StringAttribute.class, LinesTooLong.class, OneStatementPerLine.class, TabsIndent.class, KeywordMatch.class};
   }
 
 }

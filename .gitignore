@@ -3,6 +3,7 @@ database-checks/test-output
 database-checks/.classpath
 database-checks/.project
 database-checks/.settings
+database-checks-shaded/target
 database-parser/target
 database-parser/test-output
 database-parser/.classpath
@@ -15,6 +16,7 @@ openedge-checks/test-output
 openedge-checks/.classpath
 openedge-checks/.project
 openedge-checks/.settings
+openedge-checks-shaded/target
 profiler-parser/target
 profiler-parser/test-output
 profiler-parser/.classpath

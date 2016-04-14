@@ -57,7 +57,7 @@ public class AbbreviatedKeywords extends AbstractLintRule {
   }
   
   private void initExclusionList() {
-    exclusionList = new HashSet<String>();
+    exclusionList = new HashSet<>();
     for (String str : Splitter.on(',').trimResults().omitEmptyStrings().split(excludedKeywords)) {
       exclusionList.add(str.toUpperCase());
     }

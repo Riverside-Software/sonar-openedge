@@ -32,6 +32,7 @@ import org.sonar.plugins.openedge.cpd.OpenEdgeCpdMapping;
 import org.sonar.plugins.openedge.decorator.CommonMetricsDecorator;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
+import org.sonar.plugins.openedge.foundation.OpenEdgeLicenceRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesRegistrar;
@@ -67,6 +68,7 @@ public class OpenEdgePlugin extends SonarPlugin {
     // Profile and rules
     list.add(OpenEdgeRulesDefinition.class);
     list.add(OpenEdgeRulesRegistrar.class);
+    list.add(OpenEdgeLicenceRegistrar.class);
     list.add(OpenEdgeProfile.class);
     list.add(OpenEdgeMetrics.class);
     list.add(OpenEdgeComponents.class);

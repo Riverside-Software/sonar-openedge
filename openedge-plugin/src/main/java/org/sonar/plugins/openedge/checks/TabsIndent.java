@@ -3,9 +3,6 @@ package org.sonar.plugins.openedge.checks;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.rule.RuleKey;
 import org.sonar.check.Priority;
 import org.sonar.check.Rule;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
@@ -17,40 +14,34 @@ import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 public class TabsIndent extends AbstractLintRule {
 
   @Override
-  public void execute(ParseUnit unit, SensorContext context, InputFile file, RuleKey ruleKey) {
-    setContext(context, file, ruleKey);
-
-    try {
-    Files.readLines(file.file(), Charset.defaultCharset(), new LineProcessor<Void>() {
-      private int lineNumber = 0;
-      @Override
-      public boolean processLine(String line) throws IOException {
-        lineNumber++;
-        for (int zz = 0; zz < line.length(); zz++) {
-          char c = line.charAt(zz);
-          if (c == '\t') {
-            reportIssue(lineNumber, "Don't use tabs to indent source code");
-            return true;
-          }
-          if (c != ' ') {
-            return true;
-          }
-        }
-        return true;
-      }
-
-      @Override
-      public Void getResult() {
-        return null;
-      }
-    });
-    } catch (IOException uncaught) {
-      
-    }
-  }
-
-  @Override
   public void lint(ParseUnit unit) {
-    throw new RuntimeException("Not implemented");
+    try {
+      Files.readLines(getInputFile().file(), Charset.defaultCharset(), new LineProcessor<Void>() {
+        private int lineNumber = 0;
+
+        @Override
+        public boolean processLine(String line) throws IOException {
+          lineNumber++;
+          for (int zz = 0; zz < line.length(); zz++) {
+            char c = line.charAt(zz);
+            if (c == '\t') {
+              reportIssue(lineNumber, "Don't use tabs to indent source code");
+              return true;
+            }
+            if (c != ' ') {
+              return true;
+            }
+          }
+          return true;
+        }
+
+        @Override
+        public Void getResult() {
+          return null;
+        }
+      });
+    } catch (IOException uncaught) {
+
+    }
   }
 }

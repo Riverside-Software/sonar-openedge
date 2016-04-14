@@ -10,7 +10,7 @@ annotation:
   ann=ANNOTATION_NAME '(' (UNQUOTED_STRING '=' QUOTED_STRING (',' UNQUOTED_STRING '=' QUOTED_STRING)*)? ')' '.';
 
 addDatabase:
-  'ADD' 'DATABASE' database=QUOTED_STRING ('TYPE' ('MSS' | 'ORACLE'))? addDatabaseOption*;
+  'ADD' 'DATABASE' database=QUOTED_STRING ('TYPE' ('MSS' | 'ORACLE' | 'ODBC'))? addDatabaseOption*;
   
 addDatabaseOption: 
     'DBNAME' val=QUOTED_STRING           # dbName
@@ -58,7 +58,7 @@ addSequenceOption:
   ;
 
 addTable:
-    'ADD' 'TABLE' table=QUOTED_STRING ('TYPE' ('SQL' | 'MSS' | 'ORACLE'))? options=addTableOption* triggers=tableTrigger*;
+    'ADD' 'TABLE' table=QUOTED_STRING ('TYPE' ('SQL' | 'MSS' | 'ORACLE' | 'ODBC'))? options=addTableOption* triggers=tableTrigger*;
 
 addTableOption:
     'MULTITENANT' val=('yes' | 'no')   # tableMultitenant
@@ -253,7 +253,7 @@ fragment INT:
   ('0'..'9');
 
 NUMBER:
-  INT+;
+  '-'? INT+;
 
 ANNOTATION_NAME:
   '@' [a-zA-Z] [a-zA-Z0-9]* ('.' [a-zA-Z] [a-zA-Z0-9]*)*;

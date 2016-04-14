@@ -20,6 +20,7 @@
 package org.sonar.plugins.openedge.sensor;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +49,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 public class OpenEdgeXREFSensor implements Sensor {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeXREFSensor.class);
@@ -128,8 +130,8 @@ public class OpenEdgeXREFSensor implements Sensor {
           }
 
           xrefNum++;
-        } catch (Exception caught) {
-          LOG.error("Can not analyze XREF file {} ", xrefFile.getAbsolutePath(), caught);
+        } catch (SAXException | IOException caught) {
+          LOG.error("Unable to parse file " + xrefFile.getAbsolutePath(), caught);
         }
       }
     }

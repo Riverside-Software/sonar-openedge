@@ -20,12 +20,16 @@
 package org.sonar.plugins.openedge.foundation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.BatchSide;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
+import org.sonar.plugins.openedge.api.LicenceRegistrar;
+import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
 import org.sonar.plugins.openedge.api.checks.IXrefAnalyzer;
 
@@ -35,11 +39,12 @@ public class OpenEdgeComponents {
 
   private final List<Class<? extends IXrefAnalyzer>> checks = new ArrayList<>();
   private final List<Class<? extends AbstractLintRule>> ppchecks = new ArrayList<>();
+  private final Map<String, Licence> licences = new HashMap<>();
 
-  public OpenEdgeComponents(CheckRegistrar[] registrars) {
-    if (registrars != null) {
+  public OpenEdgeComponents(CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
+    if (checkRegistrars != null) {
       CheckRegistrar.RegistrarContext registrarContext = new CheckRegistrar.RegistrarContext();
-      for (CheckRegistrar reg : registrars) {
+      for (CheckRegistrar reg : checkRegistrars) {
         reg.register(registrarContext);
         for (Class<? extends IXrefAnalyzer> analyzer : registrarContext.getXrefCheckClasses()) {
           LOG.debug("{} XREF analyzer registered", analyzer.getName());
@@ -51,6 +56,18 @@ public class OpenEdgeComponents {
         }
       }
     }
+    if (licRegistrars != null) {
+      LicenceRegistrar.Licence lic = new LicenceRegistrar.Licence();
+      for (LicenceRegistrar reg : licRegistrars) {
+        reg.register(lic);
+        LOG.info("Registering licence for {} - {} - {}", lic.getCustomerName(), lic.getRepositoryName(), lic.getExpirationDate());
+        licences.put(lic.getRepositoryName(), lic);
+      }
+    }
+  }
+
+  public Licence getLicence(String repoName) {
+    return licences.get(repoName);
   }
 
   public List<Class<? extends IXrefAnalyzer>> getChecks() {

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>eu.rssw.openedge.checks</groupId>
+  <artifactId>database-checks-shaded</artifactId>
+  <version>1.5.1</version>
+
+  <name>OpenEdge database definition checks (shaded)</name>
+  <url>http://riverside-software.fr/</url>
+  <organization>
+    <name>Riverside Software</name>
+    <url>http://riverside-software.fr</url>
+  </organization>
+  <issueManagement>
+    <system>Jira</system>
+    <url>https://riverside-software.atlassian.net/browse/SONAROE</url>
+  </issueManagement>
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>http://jenkins.rssw.eu</url>
+  </ciManagement>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+    <sonar.version>5.4</sonar.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>eu.rssw.openedge.checks</groupId>
+      <artifactId>database-checks</artifactId>
+      <version>1.5.1</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.4.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <createSourcesJar>true</createSourcesJar>
+              <shadeSourcesContent>true</shadeSourcesContent>
+              <artifactSet>
+                <excludes>
+                  <exclude>org.slf4j:slf4j-api:jar:</exclude>
+                </excludes>
+              </artifactSet>
+              <relocations>
+                <relocation>
+                  <pattern>org.antlr.v4.runtime</pattern>
+                  <shadedPattern>org.sonar.plugins.oedb.api.org.antlr.v4.runtime</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.google</pattern>
+                  <shadedPattern>org.sonar.plugins.oedb.api.com.google</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>eu.rssw.antlr.database</pattern>
+                  <shadedPattern>org.sonar.plugins.oedb.api.eu.rssw.antlr.database</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

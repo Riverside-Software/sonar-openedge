@@ -34,6 +34,7 @@ import org.sonar.plugins.openedge.api.antlr.TokenStream;
 import org.sonar.plugins.openedge.api.antlr.TokenStreamException;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.ProToken;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.ProparseRuntimeException;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorSession;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
@@ -112,7 +113,7 @@ public class OpenEdgeCpdTokenizer implements Tokenizer {
           cpdTokens.add(new TokenEntry(str, inputFile.relativePath(), tok.getLine()));
         }
       }
-    } catch (TokenStreamException | RefactorException caught) {
+    } catch (TokenStreamException | RefactorException | ProparseRuntimeException caught) {
       LOG.error("Could not parse : " + inputFile.relativePath(), caught);
     }
 

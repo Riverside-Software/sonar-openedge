@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
@@ -44,13 +43,13 @@ import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.measures.CoreMetrics;
+import org.sonar.api.platform.Server;
 import org.sonar.api.resources.Project;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.MessageException;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
 import org.sonar.plugins.openedge.api.com.google.common.io.ByteStreams;
-import org.sonar.plugins.openedge.api.com.google.common.primitives.Bytes;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.ProparseRuntimeException;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException;
@@ -70,13 +69,15 @@ public class OpenEdgeProparseSensor implements Sensor {
   private final ActiveRules activeRules;
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
+  private final Server server;
 
   public OpenEdgeProparseSensor(FileSystem fileSystem, ActiveRules activesRules, OpenEdgeSettings settings,
-      OpenEdgeComponents components) {
+      OpenEdgeComponents components, Server server) {
     this.fileSystem = fileSystem;
     this.activeRules = activesRules;
     this.settings = settings;
     this.components = components;
+    this.server = server;
   }
 
   @Override
@@ -139,16 +140,17 @@ public class OpenEdgeProparseSensor implements Sensor {
         }
 
         for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
-          LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}",
-              new Object[] {rule.internalKey(), rule.ruleKey().repository(), rule.ruleKey().rule()});
-          RuleKey ruleKey = RuleKey.of(rule.ruleKey().repository(), rule.ruleKey().rule());
-          AbstractLintRule lint = components.getProparseAnalyzer(ruleKey.rule());
+          RuleKey ruleKey = rule.ruleKey();
+          // AFAIK, no way to be sure if a rule is based on a template or not
+          String clsName = (rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey());
+          AbstractLintRule lint = components.getProparseAnalyzer(clsName);
           if (lint != null) {
+            LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}",
+                new Object[] {rule.internalKey(), rule.ruleKey().repository(), rule.ruleKey().rule()});
             configureFields(rule, lint);
             startTime = System.currentTimeMillis();
-            lint.execute(unit, context, file, ruleKey);
+            lint.execute(unit, context, file, ruleKey, components.getLicence(rule.ruleKey().repository()), server.getPermanentServerId());
             ruleTime.put(ruleKey.rule(), ruleTime.get(ruleKey.rule()) + System.currentTimeMillis() - startTime);
-
           }
         }
       } catch (RefactorException | ProparseRuntimeException caught ) {
