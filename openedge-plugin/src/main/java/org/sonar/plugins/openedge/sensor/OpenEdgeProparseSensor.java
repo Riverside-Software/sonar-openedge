@@ -159,6 +159,11 @@ public class OpenEdgeProparseSensor implements Sensor {
         issue.forRule(
             RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
                 issue.newLocation().on(file).message(caught.getMessage())).save();
+      } catch (RuntimeException caught) {
+        LOG.error("Runtime exception was caught '{}' - Please report this issue : ", caught.getMessage());
+        for (StackTraceElement element : caught.getStackTrace()) {
+          LOG.error("  {}", element.toString());
+        }
       }
     }
     new File("listingparser.txt").delete();

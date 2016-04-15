@@ -132,6 +132,11 @@ public class OpenEdgeXREFSensor implements Sensor {
           xrefNum++;
         } catch (SAXException | IOException caught) {
           LOG.error("Unable to parse file " + xrefFile.getAbsolutePath(), caught);
+        } catch (RuntimeException caught) {
+          LOG.error("Runtime exception was caught '{}' - Please report this issue : ", caught.getMessage());
+          for (StackTraceElement element : caught.getStackTrace()) {
+            LOG.error("  {}", element.toString());
+          }
         }
       }
     }

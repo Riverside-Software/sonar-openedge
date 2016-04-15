@@ -115,6 +115,11 @@ public class OpenEdgeCpdTokenizer implements Tokenizer {
       }
     } catch (TokenStreamException | RefactorException | ProparseRuntimeException caught) {
       LOG.error("Could not parse : " + inputFile.relativePath(), caught);
+    } catch (RuntimeException caught) {
+      LOG.error("Runtime exception was caught '{}' - Please report this issue : ", caught.getMessage());
+      for (StackTraceElement element : caught.getStackTrace()) {
+        LOG.error("  {}", element.toString());
+      }
     }
 
     cpdTokens.add(TokenEntry.getEOF());

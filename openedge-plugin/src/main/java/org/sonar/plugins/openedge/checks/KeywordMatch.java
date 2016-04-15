@@ -35,7 +35,7 @@ public class KeywordMatch extends AbstractLintRule {
   }
 
   private final void initRule() {
-    keywordNum = NodeTypes.getTypeNum(keyword);
+    keywordNum = NodeTypes.testLiteralsTable(keyword, -1);
   }
 
   @Override
