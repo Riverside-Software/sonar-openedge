@@ -17,6 +17,7 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -32,6 +33,8 @@ public abstract class XrefAnalyzer implements IXrefAnalyzer {
   private SensorContext context;
   private InputFile file;
   private RuleKey ruleKey;
+  private String serverId;
+  private Licence licence;
   private Map<Integer, String> sources = new HashMap<>();
 
   static {
@@ -44,10 +47,12 @@ public abstract class XrefAnalyzer implements IXrefAnalyzer {
   }
 
   @Override
-  public final void execute(Document document, SensorContext context, InputFile file, RuleKey ruleKey) throws IOException {
+  public final void execute(Document document, SensorContext context, InputFile file, RuleKey ruleKey, Licence licence, String serverId) throws IOException {
     this.context = context;
     this.file = file;
     this.ruleKey = ruleKey;
+    this.licence = licence;
+    this.serverId = serverId;
     readSourceFiles(document);
 
     execute(document);
@@ -57,6 +62,14 @@ public abstract class XrefAnalyzer implements IXrefAnalyzer {
 
   public RuleKey getRuleKey() {
     return ruleKey;
+  }
+
+  public String getServerId() {
+    return serverId;
+  }
+
+  public Licence getLicence() {
+    return licence;
   }
 
   public static String getChildNodeValue(Node node, String nodeName) {

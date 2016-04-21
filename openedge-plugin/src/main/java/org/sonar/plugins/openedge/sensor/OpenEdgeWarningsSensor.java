@@ -42,6 +42,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
 import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
+import com.google.common.primitives.Ints;
 
 public class OpenEdgeWarningsSensor implements Sensor {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeWarningsSensor.class);
@@ -71,8 +72,12 @@ public class OpenEdgeWarningsSensor implements Sensor {
   @Override
   public void analyse(Project project, SensorContext context) {
     int warningsImportNum = 0;
-    final RuleKey ruleKey = RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY,
+    final RuleKey defaultWarningRuleKey = RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY,
         OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY);
+    if (context.activeRules().find(defaultWarningRuleKey) == null) {
+      LOG.info("'Compiler warning' rule is not activated in your profile - Warning files analysis skipped");
+      return;
+    }
 
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdge.KEY))) {
       LOG.debug("Looking for warnings of {}", file.relativePath());
@@ -86,9 +91,10 @@ public class OpenEdgeWarningsSensor implements Sensor {
           Files.readLines(listingFile, StandardCharsets.UTF_8, processor);
           for (Warning w : processor.getResult()) {
             InputFile target = fileSystem.inputFile(fileSystem.predicates().hasRelativePath(w.file));
+            RuleKey ruleKey = RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
             if (target != null) {
               LOG.debug("Warning File {} - Line {} - Message {}", new Object[] {target.relativePath(), w.line, w.msg});
-              NewIssue issue = context.newIssue().forRule(ruleKey);
+              NewIssue issue = context.newIssue().forRule(context.activeRules().find(ruleKey) == null ? defaultWarningRuleKey : ruleKey);
               NewIssueLocation location = issue.newLocation().on(target);
               if (w.line > 0) {
                 location.at(target.selectLine(w.line));
@@ -130,14 +136,16 @@ public class OpenEdgeWarningsSensor implements Sensor {
       // Closing bracket after file name
       int pos2 = line.indexOf(']', pos1 + 2);
       // Line number
-      int lineNumber = 0;
-      try {
-        lineNumber = Integer.parseInt(line.substring(1, pos1));
-      } catch (NumberFormatException uncaught) {
-
+      Integer lineNumber = Ints.tryParse(line.substring(1, pos1));
+      // Trying to get Progress message number
+      int lastOpeningParen = line.lastIndexOf('(');
+      int lastClosingParen = line.lastIndexOf(')');
+      Integer msgNum = -1;
+      if ((lastOpeningParen > -1) && (lastClosingParen > -1)) {
+        msgNum = Ints.tryParse(line.substring(lastOpeningParen + 1, lastClosingParen));
       }
       String fileName = line.substring(pos1 + 3, pos2);
-      results.add(new Warning(fileName, lineNumber, line.substring(pos2 + 2)));
+      results.add(new Warning(fileName, lineNumber == null ? 0 : lineNumber, line.substring(pos2 + 2), msgNum == null ? -1 : msgNum));
 
       return true;
     }
@@ -152,11 +160,13 @@ public class OpenEdgeWarningsSensor implements Sensor {
     private String file;
     private int line;
     private String msg;
+    private int msgNum;
 
-    public Warning(String file, int line, String msg) {
+    public Warning(String file, int line, String msg, int msgNum) {
       this.file = file;
       this.line = line;
       this.msg = msg;
+      this.msgNum = msgNum;
     }
   }
 }

@@ -6,6 +6,6 @@
 
 class Sports2000.Customer.Name:
 
-	def public static property Label get.
+	def public static property Label as char get.
 
 end class.

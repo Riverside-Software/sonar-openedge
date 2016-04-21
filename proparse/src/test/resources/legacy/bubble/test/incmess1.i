@@ -14,6 +14,6 @@ FUNCTION twelve RETURNS INTEGER:
   RETURN 12.
 END.
 
-{data/bubble/test/include3.i yada yada}
+{legacy/bubble/test/include3.i yada yada}
 
 display twelve().

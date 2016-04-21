@@ -23,16 +23,12 @@ public abstract class AbstractLintRule {
   private String serverId;
   private Licence licence;
 
-  public final void setContext(SensorContext context, InputFile file, RuleKey ruleKey, Licence licence, String serverId) {
+  public final void execute(ParseUnit unit, SensorContext context, InputFile file, RuleKey ruleKey, Licence licence, String serverId) {
     this.context = context;
     this.file = file;
     this.ruleKey = ruleKey;
     this.licence = licence;
     this.serverId = serverId;
-  }
-
-  public final void execute(ParseUnit unit, SensorContext context, InputFile file, RuleKey ruleKey, Licence licence, String serverId) {
-    setContext(context, file, ruleKey, licence, serverId);
     lint(unit);
   }
 

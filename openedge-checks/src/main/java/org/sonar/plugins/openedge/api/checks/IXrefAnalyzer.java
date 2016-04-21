@@ -7,6 +7,7 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -20,7 +21,7 @@ public interface IXrefAnalyzer {
    * @param resource Initial file for analysis
    * @param ruleKey Rule being executed
    */
-  public void execute(Document document, SensorContext context, InputFile resource, RuleKey ruleKey) throws IOException;
+  public void execute(Document document, SensorContext context, InputFile resource, RuleKey ruleKey, Licence licence, String serverId) throws IOException;
 
   /**
    * Reports issue

@@ -39,6 +39,7 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.rule.ActiveRules;
+import org.sonar.api.platform.Server;
 import org.sonar.api.resources.Project;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.MessageException;
@@ -59,16 +60,18 @@ public class OpenEdgeXREFSensor implements Sensor {
   private final OpenEdgeSettings settings;
   private final ActiveRules activeRules;
   private final OpenEdgeComponents components;
+  private final Server server;
 
   // Internal use
   private final DocumentBuilderFactory dbFactory;
   private final DocumentBuilder dBuilder;
 
-  public OpenEdgeXREFSensor(OpenEdgeSettings settings, FileSystem fileSystem, ActiveRules activesRules, OpenEdgeComponents components) {
+  public OpenEdgeXREFSensor(OpenEdgeSettings settings, FileSystem fileSystem, ActiveRules activesRules, OpenEdgeComponents components, Server server) {
     this.fileSystem = fileSystem;
     this.settings = settings;
     this.activeRules = activesRules;
     this.components = components;
+    this.server = server;
 
     this.dbFactory = DocumentBuilderFactory.newInstance();
     try {
@@ -125,7 +128,7 @@ public class OpenEdgeXREFSensor implements Sensor {
             LOG.trace("Executing {} on XML document", ruleKey.rule());
             configureFields(rule, a);
             startTime = System.currentTimeMillis();
-            a.execute(doc, context, file, ruleKey);
+            a.execute(doc, context, file, ruleKey, components.getLicence(rule.ruleKey().repository()), server.getPermanentServerId());
             ruleTime.put(ruleKey.rule(), ruleTime.get(ruleKey.rule()) + System.currentTimeMillis() - startTime);
           }
 

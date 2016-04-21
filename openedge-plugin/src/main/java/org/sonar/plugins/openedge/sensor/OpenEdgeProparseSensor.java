@@ -149,7 +149,8 @@ public class OpenEdgeProparseSensor implements Sensor {
                 new Object[] {rule.internalKey(), rule.ruleKey().repository(), rule.ruleKey().rule()});
             configureFields(rule, lint);
             startTime = System.currentTimeMillis();
-            lint.execute(unit, context, file, ruleKey, components.getLicence(rule.ruleKey().repository()), server.getPermanentServerId());
+            lint.execute(unit, context, file, ruleKey, components.getLicence(rule.ruleKey().repository()),
+                (server.getPermanentServerId() == null ? "" : server.getPermanentServerId()));
             ruleTime.put(ruleKey.rule(), ruleTime.get(ruleKey.rule()) + System.currentTimeMillis() - startTime);
           }
         }

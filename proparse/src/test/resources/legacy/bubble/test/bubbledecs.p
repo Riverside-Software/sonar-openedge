@@ -10,9 +10,9 @@ def shared var c2 as char.
 /* c3 comment line 2 */
 def shared var c3 as char. /* c3 comment after */
 
-{data/bubble/test/incmess1-shared.i hello shared world}
+{legacy/bubble/test/incmess1-shared.i hello shared world}
 
-{data/bubble/test/include2.i "new shared"}
+{legacy/bubble/test/include2.i "new shared"}
 
 PROCEDURE myProc:
   def var procBlock as char.
@@ -32,7 +32,7 @@ def {1} var c4 as char. /* c4 comment after
 
 def var c5 as char.
 
-{data/bubble/test/incmess1-local.i hello shared world}
+{legacy/bubble/test/incmess1-local.i hello shared world}
 
 return.
 
@@ -42,7 +42,7 @@ END.
 
 return. /* this comment
 		should not move */
-{data/bubble/test/incmess1-proc.i hello shared world}
+{legacy/bubble/test/incmess1-proc.i hello shared world}
 
 
 

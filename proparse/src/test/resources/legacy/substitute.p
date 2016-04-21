@@ -1,5 +1,5 @@
 DEFINE VARIABLE numWidgets AS INTEGER NO-UNDO INITIAL 42.
-DEFINE VARIABLE i-übernahme AS INTEGER NO-UNDO INITIAL 12.
+DEFINE VARIABLE i-Ã¼bernahme AS INTEGER NO-UNDO INITIAL 12.
 
 &GLOBAL-DEFINE yahoo " widgets remaining"
 
@@ -28,8 +28,8 @@ DISPLAY "You have " + STRING(numWidgets) + " " + "widgets":U + " remaining".
 
 
 
-/* Test umlaut (extended) characters like ü */
-DISPLAY "übernahme 1 " + STRING(i-übernahme) + " 2 übernahme".
+/* Test umlaut (extended) characters like Ã¼ */
+DISPLAY "Ã¼bernahme 1 " + STRING(i-Ã¼bernahme) + " 2 Ã¼bernahme".
 
 
 

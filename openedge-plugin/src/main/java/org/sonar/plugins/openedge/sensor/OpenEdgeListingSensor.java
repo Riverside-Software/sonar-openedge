@@ -28,11 +28,14 @@ import org.sonar.api.batch.Sensor;
 import org.sonar.api.batch.SensorContext;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.measures.Measure;
 import org.sonar.api.resources.Project;
+import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
+import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
 import eu.rssw.listing.CodeBlock;
@@ -85,6 +88,12 @@ public class OpenEdgeListingSensor implements Sensor {
 
           context.saveMeasure(file, new Measure(OpenEdgeMetrics.TRANSACTIONS, sb.toString()));
           context.saveMeasure(file, new Measure(OpenEdgeMetrics.NUM_TRANSACTIONS, (double) parser.getTransactionBlocks().size()));
+          if (parser.getMainBlock().isTransaction()) {
+            NewIssue issue = context.newIssue();
+            issue.forRule(
+                RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.LARGE_TRANSACTION_SCOPE)).at(
+                    issue.newLocation().on(file).message("Transaction spans entire procedure")).save();
+          }
 
           dbgImportNum++;
         } catch (IOException caught) {

@@ -27,7 +27,7 @@ import org.sonar.api.measures.Metrics;
 import com.google.common.collect.ImmutableList;
 
 public class OpenEdgeMetrics implements Metrics {
-  private final static String DOMAIN_OPENEDGE = "OpenEdge";
+  private static final String DOMAIN_OPENEDGE = "OpenEdge";
 
   public static final String CLASSES_KEY = "OE_CLASSES";
   public static final Metric<Integer> CLASSES = new Metric.Builder(CLASSES_KEY, "Classes",

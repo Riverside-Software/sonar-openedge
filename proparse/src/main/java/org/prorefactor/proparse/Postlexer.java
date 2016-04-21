@@ -226,8 +226,9 @@ public class Postlexer implements TokenStream {
 
   private void preproEndif() throws IOException {
     listingLine(currToken, "ampendif");
-    // XXX Got a case where removeLast() fails with NoSuchElementException 
-    preproIfVec.removeLast();
+    // XXX Got a case where removeLast() fails with NoSuchElementException
+    if (!preproIfVec.isEmpty())
+      preproIfVec.removeLast();
   }
 
   private boolean preproIfCond(boolean evaluate) throws IOException, TokenStreamException, RecognitionException {

@@ -19,14 +19,18 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.BatchSide;
+import org.sonar.api.platform.Server;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
 import org.sonar.plugins.openedge.api.LicenceRegistrar;
 import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
@@ -41,10 +45,11 @@ public class OpenEdgeComponents {
   private final List<Class<? extends AbstractLintRule>> ppchecks = new ArrayList<>();
   private final Map<String, Licence> licences = new HashMap<>();
 
-  public OpenEdgeComponents(CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
+  public OpenEdgeComponents(Server server, CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
+    String permanentId = server.getPermanentServerId() == null ? "" : server.getPermanentServerId();
     if (checkRegistrars != null) {
-      CheckRegistrar.RegistrarContext registrarContext = new CheckRegistrar.RegistrarContext();
       for (CheckRegistrar reg : checkRegistrars) {
+        CheckRegistrar.RegistrarContext registrarContext = new CheckRegistrar.RegistrarContext();
         reg.register(registrarContext);
         for (Class<? extends IXrefAnalyzer> analyzer : registrarContext.getXrefCheckClasses()) {
           LOG.debug("{} XREF analyzer registered", analyzer.getName());
@@ -57,15 +62,32 @@ public class OpenEdgeComponents {
       }
     }
     if (licRegistrars != null) {
-      LicenceRegistrar.Licence lic = new LicenceRegistrar.Licence();
       for (LicenceRegistrar reg : licRegistrars) {
+        LicenceRegistrar.Licence lic = new LicenceRegistrar.Licence();
         reg.register(lic);
-        LOG.info("Registering licence for {} - {} - {}", lic.getCustomerName(), lic.getRepositoryName(), lic.getExpirationDate());
-        licences.put(lic.getRepositoryName(), lic);
+        LOG.info("Found {} licence - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}", lic.getType().toString(),
+            lic.getPermanentId(), lic.getCustomerName(), lic.getRepositoryName(),
+            DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date(lic.getExpirationDate())));
+        if (!lic.getPermanentId().isEmpty() && !permanentId.equals(lic.getPermanentId())) {
+          LOG.info("Skipped licence as it doesn't match permanent ID '{}'", permanentId);
+          continue;
+        }
+        // Licence with highest expiration date wins
+        Licence existingLic = licences.get(lic.getRepositoryName());
+        if ((existingLic == null) || (existingLic.getExpirationDate() < lic.getExpirationDate())) {
+          licences.put(lic.getRepositoryName(), lic);
+          LOG.info("Installed !");
+        } else {
+          LOG.info("Conflict, skipped licence");
+        }
       }
     }
+    for (Entry<String, Licence> entry : licences.entrySet()) {
+      LOG.info("Licence summary - Repository '{}' associated with {} licence permanent ID '{}' - Customer '{}' - Expiration date {}", entry.getKey(), entry.getValue().getType().toString(), entry.getValue().getPermanentId(), entry.getValue().getCustomerName(),
+          DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date(entry.getValue().getExpirationDate())));
+    }
   }
-
+  
   public Licence getLicence(String repoName) {
     return licences.get(repoName);
   }

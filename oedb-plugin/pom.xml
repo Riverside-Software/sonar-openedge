@@ -4,7 +4,7 @@
 
   <groupId>eu.rssw.sonar.openedge</groupId>
   <artifactId>sonar-openedge-db-plugin</artifactId>
-  <version>1.7.4</version>
+  <version>1.8.0</version>
   <packaging>sonar-plugin</packaging>
 
   <name>OpenEdge DB plugin for SonarQube</name>

@@ -5,7 +5,7 @@ def shared var s1 as char.
 
 def var b1 as char.
 
-{data/appendprogram/t01/test/t01.i}
+{legacy/appendprogram/t01/test/t01.i}
 
 run t01b_main (input bp1).
 

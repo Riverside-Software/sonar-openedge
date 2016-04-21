@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2015 Riverside Software
+ * Copyright (C) 2015-2016 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -26,32 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
 import org.sonar.plugins.openedge.api.checks.IXrefAnalyzer;
-import org.sonar.plugins.openedge.checks.AbbreviatedKeywords;
-import org.sonar.plugins.openedge.checks.BackslashInIncludeFile;
-import org.sonar.plugins.openedge.checks.BackslashInString;
-import org.sonar.plugins.openedge.checks.BlockLabel;
-import org.sonar.plugins.openedge.checks.BufferUsage;
-import org.sonar.plugins.openedge.checks.ClassNameCasing;
-import org.sonar.plugins.openedge.checks.DisableTriggers;
-import org.sonar.plugins.openedge.checks.FindNoError;
-import org.sonar.plugins.openedge.checks.I18NLength;
-import org.sonar.plugins.openedge.checks.IndexUsage;
-import org.sonar.plugins.openedge.checks.KeywordMatch;
-import org.sonar.plugins.openedge.checks.LinesTooLong;
-import org.sonar.plugins.openedge.checks.NoReturnInFinally;
-import org.sonar.plugins.openedge.checks.NoUndo;
-import org.sonar.plugins.openedge.checks.NoWait;
-import org.sonar.plugins.openedge.checks.OneStatementPerLine;
-import org.sonar.plugins.openedge.checks.ReturnError;
-import org.sonar.plugins.openedge.checks.ShareLock;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
-import org.sonar.plugins.openedge.checks.SortAccessAnalyzer;
-import org.sonar.plugins.openedge.checks.SortAccessWholeIndexAnalyzer;
-import org.sonar.plugins.openedge.checks.StringAttribute;
-import org.sonar.plugins.openedge.checks.TabsIndent;
-import org.sonar.plugins.openedge.checks.UsingStars;
-import org.sonar.plugins.openedge.checks.WholeIndexAnalyzer;
-import org.sonar.plugins.openedge.checks.XPathAnalyzer;
 
 public class OpenEdgeRulesRegistrar implements CheckRegistrar {
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenEdgeRulesRegistrar.class);
@@ -73,9 +48,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
    */
   @SuppressWarnings("unchecked")
   public static Class<? extends IXrefAnalyzer>[] xrefCheckClasses() {
-    return new Class[] {
-        SharedObjectsAnalyzer.class, SortAccessAnalyzer.class, SortAccessWholeIndexAnalyzer.class,
-        WholeIndexAnalyzer.class, XPathAnalyzer.class, IndexUsage.class};
+    return new Class[] {SharedObjectsAnalyzer.class};
   }
 
   /**
@@ -83,11 +56,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
    */
   @SuppressWarnings("unchecked")
   public static Class<? extends AbstractLintRule>[] ppCheckClasses() {
-    return new Class[] {
-        UsingStars.class, AbbreviatedKeywords.class, BackslashInIncludeFile.class, BackslashInString.class,
-        BlockLabel.class, ClassNameCasing.class, FindNoError.class, DisableTriggers.class, ShareLock.class,
-        NoReturnInFinally.class, ReturnError.class, BufferUsage.class, I18NLength.class, NoUndo.class, NoWait.class,
-        StringAttribute.class, LinesTooLong.class, OneStatementPerLine.class, TabsIndent.class, KeywordMatch.class};
+    return new Class[] {};
   }
 
 }

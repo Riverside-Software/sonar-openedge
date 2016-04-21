@@ -1,2 +1,2 @@
 find first cust.
-{data/names/display.i}
+{legacy/names/display.i}

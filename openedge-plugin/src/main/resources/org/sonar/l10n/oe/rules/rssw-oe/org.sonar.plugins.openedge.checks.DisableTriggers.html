@@ -1,9 +1,0 @@
-<p>
-This rule raises an issue whenever it finds the DISABLE TRIGGERS statement. While this statement can be perfectly valid during dump and load procedures,
-it shouldn't be used in standard application code.
-</p>
-
-<h2>Noncompliant Code Example</h2>
-<pre>
-  DISABLE TRIGGERS FOR DUMP OF Customer.
-</pre>

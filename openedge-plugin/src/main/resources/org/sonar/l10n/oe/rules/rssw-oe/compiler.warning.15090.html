@@ -1,0 +1,19 @@
+<p>This issue is raised whenever the OpenEdge compiler finds code which will never be executed.</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+PROCEDURE Test:
+  MESSAGE "Test".
+  RETURN.
+  MESSAGE "Test2". /* RETURN statement makes this MESSAGE unreachable */
+END PROCEDURE.
+</pre>
+
+<h2>Compliant Solution</h2>
+<pre>
+PROCEDURE Test:
+  MESSAGE "Test".
+  MESSAGE "Test2".
+  RETURN.
+END PROCEDURE.
+</pre>

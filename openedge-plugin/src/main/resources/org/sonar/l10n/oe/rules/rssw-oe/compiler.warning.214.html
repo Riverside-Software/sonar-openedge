@@ -1,0 +1,22 @@
+<p>This issue is raised whenever a TRANSACTION keyword is found within the actual scope of a transaction, meaning that the TRANSACTION keyword doesn't have any effect.</p>
+<p>It's usually raised because
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+FIND FIRST Customer EXCLUSIVE-LOCK.
+DO TRANSACTION:
+  FIND FIRST Item.
+  ASSIGN Item.Name = "xx".
+END.
+</pre>
+
+<h2>Compliant Solution</h2>
+<pre>
+/* There are different compliant solutions, one may be : */
+DO TRANSACTION:
+  FIND FIRST Customer EXCLUSIVE-LOCK.
+  ASSIGN Customer.Name = "xx".
+  FIND FIRST Item.
+  ASSIGN Item.Name = "xx".
+END.
+</pre>

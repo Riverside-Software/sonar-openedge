@@ -12,5 +12,5 @@ do:
   display myChar with frame myFrame.
 end.
 
-{pub/test01.i}
+{legacy/pub/test01.i}
 
