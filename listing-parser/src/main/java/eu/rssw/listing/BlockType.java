@@ -17,7 +17,8 @@ public enum BlockType {
   CONSTRUCTOR,
   CLASS,
   INTERFACE,
-  DESTRUCTOR;
+  DESTRUCTOR,
+  ENUM;
 
   private static final Map<String, BlockType> map = new HashMap<>();
 
