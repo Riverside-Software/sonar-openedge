@@ -24,6 +24,10 @@ import org.w3c.dom.Element;
 
 public final class ProfilerUtils {
 
+  private ProfilerUtils() {
+    // No-op
+  }
+
   public static final ProfilerSession getProfilerSession(File file) throws IOException {
     return getProfilerSession(new FileInputStream(file));
   }
@@ -61,17 +65,15 @@ public final class ProfilerUtils {
 
           fileElement.appendChild(lineElement);
         }
-
-        Transformer tr = TransformerFactory.newInstance().newTransformer();
-        tr.setOutputProperty(OutputKeys.INDENT, "yes");
-        tr.setOutputProperty(OutputKeys.METHOD, "xml");
-        tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-        tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-        tr.transform(new DOMSource(document), new StreamResult(new FileOutputStream(xmlFile)));
       }
-    } catch (ParserConfigurationException caught) {
-      throw new IOException(caught);
-    } catch (TransformerException caught) {
+
+      Transformer tr = TransformerFactory.newInstance().newTransformer();
+      tr.setOutputProperty(OutputKeys.INDENT, "yes");
+      tr.setOutputProperty(OutputKeys.METHOD, "xml");
+      tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+      tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+      tr.transform(new DOMSource(document), new StreamResult(new FileOutputStream(xmlFile)));
+    } catch (ParserConfigurationException | TransformerException caught) {
       throw new IOException(caught);
     }
   }

@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Set;
 
 public class Module implements Comparable<Module> {
-  private final int id, crc;
-  private final String name, debugListingFile;
-  private final Set<LineData> lineData = new HashSet<LineData>();
+  private final int id;
+  private final int crc;
+  private final String name;
+  private final String debugListingFile;
+  private final Set<LineData> lineData = new HashSet<>();
 
   public Module(int id, String name, String file, int crc) {
     this.id = id;
@@ -47,7 +49,7 @@ public class Module implements Comparable<Module> {
    * sous-répertoire et extension
    */
   public String getModuleObject() {
-    if (name.indexOf(' ') > 0) {
+    if (name.indexOf(' ') > -1) {
       return name.substring(name.indexOf(' ') + 1);
     } else {
       return name;
@@ -61,7 +63,7 @@ public class Module implements Comparable<Module> {
    * Renvoie une chaine vide si module principal de la procédure, ou instanciation de classe
    */
   public String getProcName() {
-    if (name.indexOf(' ') > 0) {
+    if (name.indexOf(' ') > -1) {
       return name.substring(0, name.indexOf(' '));
     } else {
       return "";
@@ -93,7 +95,7 @@ public class Module implements Comparable<Module> {
   }
 
   public List<Integer> getLinesToCover() {
-    List<Integer> rslt = new ArrayList<Integer>();
+    List<Integer> rslt = new ArrayList<>();
     for (LineData line : lineData) {
       rslt.add(line.getLineNumber());
     }
@@ -103,7 +105,7 @@ public class Module implements Comparable<Module> {
   }
 
   public List<Integer> getCoveredLines() {
-    List<Integer> rslt = new ArrayList<Integer>();
+    List<Integer> rslt = new ArrayList<>();
     for (LineData line : lineData) {
       if (line.getExecCount() > 0)
         rslt.add(line.getLineNumber());

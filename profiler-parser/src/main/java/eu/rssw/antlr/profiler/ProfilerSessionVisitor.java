@@ -14,7 +14,7 @@ import eu.rssw.antlr.profiler.ProfilerGrammarParser.Module_data_lineContext;
 
 public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
   private ProfilerSession session = null;
-  private List<Module> modules = new ArrayList<Module>();
+  private List<Module> modules = new ArrayList<>();
   private Module lastModule = null;
 
   public ProfilerSession getSession() {

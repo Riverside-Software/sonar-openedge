@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2013-2014 Riverside Software
+ * Copyright (C) 2013-2016 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -32,23 +32,21 @@ import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.config.Settings;
 import org.sonar.plugins.openedge.OpenEdgePlugin;
+import org.sonar.plugins.openedge.api.com.google.common.base.Charsets;
+import org.sonar.plugins.openedge.api.com.google.common.base.Joiner;
+import org.sonar.plugins.openedge.api.com.google.common.base.Splitter;
+import org.sonar.plugins.openedge.api.com.google.common.base.Strings;
+import org.sonar.plugins.openedge.api.com.google.common.io.Files;
+import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
+import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.DatabaseDescription;
+import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.Field;
+import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.Table;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.schema.Schema;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorSession;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.IProgressSettings;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.IProparseSettings;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.ProgressSettings;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.ProparseSettings;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.io.Files;
-
-import eu.rssw.antlr.database.DumpFileUtils;
-import eu.rssw.antlr.database.objects.DatabaseDescription;
-import eu.rssw.antlr.database.objects.Field;
-import eu.rssw.antlr.database.objects.Table;
 
 @BatchSide
 public class OpenEdgeSettings {

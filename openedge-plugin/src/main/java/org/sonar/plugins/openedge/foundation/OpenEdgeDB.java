@@ -1,6 +1,6 @@
 /*
- * OpenEdge plugin for SonarQube
- * Copyright (C) 2015-2016 Riverside Software
+ * OpenEdge DB plugin for SonarQube
+ * Copyright (C) 2013-2014 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -19,15 +19,31 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
-import org.sonar.plugins.openedge.api.LicenceRegistrar;
+import java.util.List;
 
-public class OpenEdgeLicenceRegistrar implements LicenceRegistrar {
-  /**
-   * Register the classes that will be used to instantiate checks during analysis.
-   */
+import org.sonar.api.resources.AbstractLanguage;
+import org.sonar.plugins.openedge.api.com.google.common.collect.ImmutableList;
+
+public class OpenEdgeDB extends AbstractLanguage {
+  public static final String KEY = "oedb";
+  public final List<String> extensions;
+  
+  public OpenEdgeDB() {
+    super(KEY, "OpenEdgeDB");
+    extensions = ImmutableList.of(".df");
+  }
+
   @Override
-  public void register(Licence registrarContext) {
-    registrarContext.registerLicence("", "", "", "", LicenceRegistrar.LicenceType.EVALUATION, new byte[] {},
-        1451602800000L);
+  public String[] getFileSuffixes() {
+    return extensions.toArray(new String[] {});
+  }
+
+  /**
+   * Returns the list of managed extensions
+   * 
+   * @return A non-null List
+   */
+  public List<String> getFileSuffixesList() {
+    return extensions;
   }
 }

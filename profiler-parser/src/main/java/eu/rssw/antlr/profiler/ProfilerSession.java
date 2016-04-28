@@ -1,5 +1,6 @@
 package eu.rssw.antlr.profiler;
 
+import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,14 +15,15 @@ public class ProfilerSession {
   private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
   // Description
-  private final String description, user;
+  private final String description;
+  private final String user;
   private Date timestamp;
 
   // Modules
-  private Collection<Module> moduleList = new ArrayList<Module>();
-  private Map<Integer, Module> allModules = new HashMap<Integer, Module>();
-  private Map<Integer, Module> modules = new HashMap<Integer, Module>();
-  private Map<String, Module> modulesLookup = new HashMap<String, Module>();
+  private Collection<Module> moduleList = new ArrayList<>();
+  private Map<Integer, Module> allModules = new HashMap<>();
+  private Map<Integer, Module> modules = new HashMap<>();
+  private Map<String, Module> modulesLookup = new HashMap<>();
   private int[][] adjMatrix = null;
 
   // Internal use
@@ -98,7 +100,7 @@ public class ProfilerSession {
       moduleList.add(module);
       modules.put(module.getId(), module);
       modulesLookup.put(module.getName(), module);
-      highestModuleId = (module.getId() > highestModuleId ? module.getId() : highestModuleId);
+      highestModuleId = module.getId() > highestModuleId ? module.getId() : highestModuleId;
     } else {
       // Sub-procedures modules point to the main module
       modules.put(module.getId(), m1);
@@ -122,9 +124,9 @@ public class ProfilerSession {
   }
 
   public Map<String, Set<LineData>> getCoverageByFile() {
-    Map<String, Set<LineData>> map = new HashMap<String, Set<LineData>>();
+    Map<String, Set<LineData>> map = new HashMap<>();
     for (Module module : modules.values()) {
-      if (module.getLineData().size() > 0) {
+      if (!module.getLineData().isEmpty()) {
         map.put(module.getModuleObject(), module.getLineData());
       }
     }
@@ -132,26 +134,26 @@ public class ProfilerSession {
     return map;
   }
   
-  public void printCallTree() {
+  public void printCallTree(PrintStream out) {
     for (int zz = 0; zz < adjMatrix.length; zz ++) {
       for (int yy = 0; yy < adjMatrix.length; yy++) {
-        System.out.print(adjMatrix[zz][yy] + " ");
+        out.print(adjMatrix[zz][yy] + " ");
       }
-      System.out.println();
+      out.println();
     }
     
-    System.out.println("SESSION : ");
-    printCallTreeLine(0, 2);
+    out.println("SESSION : ");
+    printCallTreeLine(out, 0, 2);
   }
   
-  private void printCallTreeLine(int moduleId, int tabs) {
+  private void printCallTreeLine(PrintStream out, int moduleId, int tabs) {
     for (int zz = 0; zz < moduleList.size(); zz++) {
       int calleeId = adjMatrix[moduleId][zz];
       if (calleeId != 0) {
         for (int kk = 0 ; kk < tabs; kk++)
-          System.out.print(" ");
-        System.out.println(moduleId + " -- " + modules.get(zz).toString());
-        printCallTreeLine(zz, tabs + 1);
+          out.print(" ");
+        out.println(moduleId + " -- " + modules.get(zz).toString());
+        printCallTreeLine(out, zz, tabs + 1);
       }
     }
   }

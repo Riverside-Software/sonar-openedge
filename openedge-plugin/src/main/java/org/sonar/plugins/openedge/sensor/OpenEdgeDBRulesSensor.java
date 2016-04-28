@@ -1,6 +1,6 @@
 /*
- * OpenEdge plugin for SonarQube
- * Copyright (C) 2013-2016 Riverside Software
+ * OpenEdge DB plugin for SonarQube
+ * Copyright (C) 2013-2014 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -19,16 +19,11 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -44,112 +39,82 @@ import org.sonar.api.resources.Project;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.MessageException;
 import org.sonar.check.RuleProperty;
-import org.sonar.plugins.openedge.api.checks.IXrefAnalyzer;
+import org.sonar.plugins.openedge.api.checks.IDumpFileAnalyzer;
+import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
+import org.sonar.plugins.openedge.api.org.antlr.v4.runtime.tree.ParseTree;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
-import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
-import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 
-public class OpenEdgeXREFSensor implements Sensor {
-  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeXREFSensor.class);
+public class OpenEdgeDBRulesSensor implements Sensor {
+  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeDBRulesSensor.class);
 
-  // IoC
   private final FileSystem fileSystem;
-  private final OpenEdgeSettings settings;
   private final ActiveRules activeRules;
   private final OpenEdgeComponents components;
   private final Server server;
 
-  // Internal use
-  private final DocumentBuilderFactory dbFactory;
-  private final DocumentBuilder dBuilder;
-
-  public OpenEdgeXREFSensor(OpenEdgeSettings settings, FileSystem fileSystem, ActiveRules activesRules, OpenEdgeComponents components, Server server) {
+  public OpenEdgeDBRulesSensor(FileSystem fileSystem, ActiveRules activesRules, OpenEdgeComponents components, Server server) {
     this.fileSystem = fileSystem;
-    this.settings = settings;
     this.activeRules = activesRules;
     this.components = components;
     this.server = server;
-
-    this.dbFactory = DocumentBuilderFactory.newInstance();
-    try {
-      this.dBuilder = dbFactory.newDocumentBuilder();
-    } catch (ParserConfigurationException caught) {
-      throw new RuntimeException(caught);
-    }
   }
 
   @Override
   public boolean shouldExecuteOnProject(Project project) {
-    return fileSystem.languages().contains(OpenEdge.KEY);
-  }
-
-  private File getXrefFile(File file) {
-    String relPath = OpenEdgeProjectHelper.getPathRelativeToSourceDirs(file, settings.getSourceDirs());
-    if (relPath == null)
-      return null;
-    return new File(settings.getPctDir(), relPath + ".xref");
+    return fileSystem.languages().contains(OpenEdgeDB.KEY);
   }
 
   @Override
   public void analyse(Project project, SensorContext context) {
-    int xrefNum = 0;
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
 
     for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
-      String clsName = (rule.templateRuleKey() == null ? rule.ruleKey().rule() : rule.templateRuleKey());
+      String clsName = rule.templateRuleKey() == null ? rule.ruleKey().rule() : rule.templateRuleKey();
       // If class can be instantiated, then we add an entry 
-      if (components.getXrefAnalyzer(clsName) != null)
+      if (components.getDFAnalyzer(clsName) != null)
         ruleTime.put(rule.ruleKey().rule(), 0L);
     }
 
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdge.KEY))) {
-      LOG.debug("Looking for XREF of {}", file.relativePath());
-
-      File xrefFile = getXrefFile(file.file());
-      if ((xrefFile != null) && xrefFile.exists()) {
-        LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
-        try {
-          long startTime = System.currentTimeMillis();
-          Document doc = dBuilder.parse(xrefFile);
-          parseTime += (System.currentTimeMillis() - startTime);
-
-          for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
-            RuleKey ruleKey = rule.ruleKey();
-            // AFAIK, no way to be sure if a rule is based on a template or not
-            String clsName = (rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey());
-            IXrefAnalyzer a = components.getXrefAnalyzer(clsName);
-            if (a == null) {
-              continue;
-            }
-            LOG.trace("Executing {} on XML document", ruleKey.rule());
-            configureFields(rule, a);
-            startTime = System.currentTimeMillis();
-            a.execute(doc, context, file, ruleKey, components.getLicence(rule.ruleKey().repository()),
+    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdgeDB.KEY))) {
+      try {
+        LOG.debug("Generating ParseTree for dump file {}", file.relativePath());
+        long time = System.currentTimeMillis();
+        ParseTree tree = DumpFileUtils.getDumpFileParseTree(file.file());
+        parseTime += (System.currentTimeMillis() - time);
+        
+        for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
+          RuleKey ruleKey = rule.ruleKey();
+          // AFAIK, no way to be sure if a rule is based on a template or not
+          String clsName = (rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey());
+          IDumpFileAnalyzer lint = components.getDFAnalyzer(clsName);
+          if (lint != null) {
+            LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}",
+                new Object[] {rule.internalKey(), rule.ruleKey().repository(), rule.ruleKey().rule()});
+            configureFields(rule, lint);
+            long startTime = System.currentTimeMillis();
+            lint.execute(tree, context, file, ruleKey, components.getLicence(rule.ruleKey().repository()),
                 server.getPermanentServerId() == null ? "" : server.getPermanentServerId());
             ruleTime.put(ruleKey.rule(), ruleTime.get(ruleKey.rule()) + System.currentTimeMillis() - startTime);
           }
-
-          xrefNum++;
-        } catch (SAXException | IOException caught) {
-          LOG.error("Unable to parse file " + xrefFile.getAbsolutePath(), caught);
-        } catch (RuntimeException caught) {
-          LOG.error("Runtime exception was caught '{}' - Please report this issue : ", caught.getMessage());
-          for (StackTraceElement element : caught.getStackTrace()) {
-            LOG.error("  {}", element.toString());
-          }
         }
+      } catch (IOException caught) {
+        LOG.error("Unable to analyze {}", file.relativePath(), caught);
       }
     }
-
-    LOG.info("{} XREF files imported", xrefNum);
-    LOG.info("XREF DOM Parse | time={} ms", parseTime);
+    
+    LOG.info("AST Generation | time={} ms", parseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
     }
+
+  }
+
+  @Override
+  public String toString() {
+    return getClass().getSimpleName();
   }
 
   private void configureFields(ActiveRule activeRule, Object check) {
@@ -163,6 +128,7 @@ public class OpenEdgeXREFSensor implements Sensor {
         configureField(check, field, activeRule.param(param));
       }
     }
+
   }
 
   private void configureField(Object check, Field field, String value) {
@@ -204,17 +170,13 @@ public class OpenEdgeXREFSensor implements Sensor {
     Field[] fields = check.getClass().getDeclaredFields();
     for (Field field : fields) {
       RuleProperty propertyAnnotation = field.getAnnotation(RuleProperty.class);
-      if (propertyAnnotation != null) {
-        if (StringUtils.equals(key, field.getName()) || StringUtils.equals(key, propertyAnnotation.key())) {
-          return field;
-        }
+      if ((propertyAnnotation != null)
+          && (StringUtils.equals(key, field.getName()) || StringUtils.equals(key, propertyAnnotation.key()))) {
+        return field;
+
       }
     }
     return null;
   }
 
-  @Override
-  public String toString() {
-    return getClass().getSimpleName();
-  }
 }

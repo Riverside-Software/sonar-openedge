@@ -50,6 +50,7 @@ import org.sonar.api.utils.MessageException;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
 import org.sonar.plugins.openedge.api.com.google.common.io.ByteStreams;
+import org.sonar.plugins.openedge.api.com.google.common.io.Files;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.ProparseRuntimeException;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException;
@@ -59,8 +60,6 @@ import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
-
-import com.google.common.io.Files;
 
 public class OpenEdgeProparseSensor implements Sensor {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeProparseSensor.class);

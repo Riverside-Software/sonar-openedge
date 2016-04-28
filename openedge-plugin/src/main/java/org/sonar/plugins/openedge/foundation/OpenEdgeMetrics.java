@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2013-2014 Riverside Software
+ * Copyright (C) 2013-2016 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -23,8 +23,7 @@ import java.util.List;
 
 import org.sonar.api.measures.Metric;
 import org.sonar.api.measures.Metrics;
-
-import com.google.common.collect.ImmutableList;
+import org.sonar.plugins.openedge.api.com.google.common.collect.ImmutableList;
 
 public class OpenEdgeMetrics implements Metrics {
   private static final String DOMAIN_OPENEDGE = "OpenEdge";
@@ -100,8 +99,34 @@ public class OpenEdgeMetrics implements Metrics {
       Metric.ValueType.INT).setDescription("Number of new shared variables").setDirection(
           Metric.DIRECTION_NONE).setQualitative(false).setDomain(DOMAIN_OPENEDGE).create();
 
+  public static final String NUM_TABLES_KEY = "OEDB_NUM_TABLES";
+  public static final Metric<Integer> NUM_TABLES = new Metric.Builder(NUM_TABLES_KEY, "Tables",
+      Metric.ValueType.INT).setDescription("Number of tables").setDirection(Metric.DIRECTION_NONE).setQualitative(
+          false).setDomain(DOMAIN_OPENEDGE).create();
+
+  public static final String NUM_SEQUENCES_KEY = "OEDB_NUM_SEQUENCES";
+  public static final Metric<Integer> NUM_SEQUENCES = new Metric.Builder(NUM_SEQUENCES_KEY, "Sequences",
+      Metric.ValueType.INT).setDescription("Number of sequences").setDirection(Metric.DIRECTION_NONE).setQualitative(
+          false).setDomain(DOMAIN_OPENEDGE).create();
+
+  public static final String NUM_INDEXES_KEY = "OEDB_NUM_INDEXES";
+  public static final Metric<Integer> NUM_INDEXES = new Metric.Builder(NUM_INDEXES_KEY, "Indexes",
+      Metric.ValueType.INT).setDescription("Number of indexes").setDirection(Metric.DIRECTION_NONE).setQualitative(
+          false).setDomain(DOMAIN_OPENEDGE).create();
+
+  public static final String NUM_FIELDS_KEY = "OEDB_NUM_FIELDS";
+  public static final Metric<Integer> NUM_FIELDS = new Metric.Builder(NUM_FIELDS_KEY, "Fields",
+      Metric.ValueType.INT).setDescription("Number of fields").setDirection(Metric.DIRECTION_NONE).setQualitative(
+          false).setDomain(DOMAIN_OPENEDGE).create();
+
+  public static final String NUM_TRIGGERS_KEY = "OEDB_NUM_TRIGGERS";
+  public static final Metric<Integer> NUM_TRIGGERS = new Metric.Builder(NUM_TRIGGERS_KEY, "Triggers",
+      Metric.ValueType.INT).setDescription("Number of triggers").setDirection(Metric.DIRECTION_NONE).setQualitative(
+          false).setDomain(DOMAIN_OPENEDGE).create();
+
   private static final List<Metric> METRICS = ImmutableList.<Metric> builder().add(PACKAGES, CLASSES, PROCEDURES,
-      INCLUDES, WINDOWS, TRANSACTIONS, NUM_TRANSACTIONS, SHR_DS, SHR_TT, SHR_VAR).build();
+      INCLUDES, WINDOWS, TRANSACTIONS, NUM_TRANSACTIONS, SHR_DS, SHR_TT, SHR_VAR, NUM_TABLES, NUM_SEQUENCES, NUM_INDEXES,
+      NUM_FIELDS, NUM_TRIGGERS).build();
 
   @Override
   public List<Metric> getMetrics() {

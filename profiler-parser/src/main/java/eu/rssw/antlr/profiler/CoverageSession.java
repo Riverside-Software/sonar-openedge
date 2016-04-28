@@ -1,25 +1,14 @@
 package eu.rssw.antlr.profiler;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Maps;
-
 public class CoverageSession {
   // Collection of files being covered
-  private final Collection<FileCoverage> files = new ArrayList<FileCoverage>();
+  private final Collection<FileCoverage> files = new ArrayList<>();
   
-  // Internal use
-  private static final Function<FileCoverage, String> FILENAME_FUNCTION = new Function<FileCoverage, String>() {
-    public String apply(FileCoverage string) {
-      return string.getFileName();
-    }
-  };
-
   public void addCoverage(Module module) {
-    FileCoverage file = Maps.uniqueIndex(files, FILENAME_FUNCTION).get(module.getModuleObject());
+    FileCoverage file = getFile(module.getModuleObject());
     if (file == null) {
       file = new FileCoverage(module.getModuleObject());
       files.add(file);
@@ -34,7 +23,7 @@ public class CoverageSession {
 
   public void mergeWith(CoverageSession session) {
     for (FileCoverage f : session.getFiles()) {
-      FileCoverage file = Maps.uniqueIndex(files, FILENAME_FUNCTION).get(f.getFileName());
+      FileCoverage file = getFile(f.getFileName()); 
       if (file == null) {
         file = new FileCoverage(f.getFileName());
         files.add(file);
@@ -44,7 +33,13 @@ public class CoverageSession {
     }
   }
 
-  public void generateXML(File xmlFile) {
-    
+  private FileCoverage getFile(String name) {
+    for (FileCoverage file : files) {
+      if (file.getFileName().equals(name))
+        return file;
+    }
+
+    return null;
   }
+
 }

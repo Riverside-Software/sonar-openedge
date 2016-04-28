@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
+import org.sonar.plugins.openedge.api.checks.IDumpFileAnalyzer;
 import org.sonar.plugins.openedge.api.checks.IXrefAnalyzer;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 
@@ -40,7 +41,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
 
     // Call to registerClassesForRepository to associate the classes with the correct repository key
     registrarContext.registerClassesForRepository(OpenEdgeRulesDefinition.REPOSITORY_KEY,
-        Arrays.asList(xrefCheckClasses()), Arrays.asList(ppCheckClasses()));
+        Arrays.asList(xrefCheckClasses()), Arrays.asList(ppCheckClasses()), Arrays.asList(dbCheckClasses()));
   }
 
   /**
@@ -56,6 +57,14 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
    */
   @SuppressWarnings("unchecked")
   public static Class<? extends AbstractLintRule>[] ppCheckClasses() {
+    return new Class[] {};
+  }
+
+  /**
+   * Lists all the DB checks provided by the plugin
+   */
+  @SuppressWarnings("unchecked")
+  public static Class<? extends IDumpFileAnalyzer>[] dbCheckClasses() {
     return new Class[] {};
   }
 

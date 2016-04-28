@@ -1,6 +1,6 @@
 /*
- * OpenEdge plugin for SonarQube
- * Copyright (C) 2013-2016 Riverside Software
+ * OpenEdge DB plugin for SonarQube
+ * Copyright (C) 2013-2014 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -23,33 +23,26 @@ import java.util.List;
 
 import org.sonar.api.web.CodeColorizerFormat;
 import org.sonar.colorizer.KeywordsTokenizer;
-import org.sonar.colorizer.MultilinesDocTokenizer;
 import org.sonar.colorizer.Tokenizer;
 import org.sonar.plugins.openedge.api.com.google.common.collect.ImmutableList;
-import org.sonar.plugins.openedge.foundation.OpenEdge;
+import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 
+// Won't be changed to Highlitable
 @SuppressWarnings("deprecation")
-public class OpenEdgeColorizerFormat extends CodeColorizerFormat {
+public class OpenEdgeDBColorizerFormat extends CodeColorizerFormat {
   private static final String SPAN_STRING = "<span class=\"s\">";
-  private static final String SPAN_CPPDOC = "<span class=\"cppd\">";
   private static final String SPAN_KEYWORD = "<span class=\"k\">";
-  private static final String SPAN_PP_VAR = "<span class=\"c\">";
-  private static final String SPAN_PP_STMT = "<span class=\"cd\">";
   private static final String SPAN_END = "</span>";
 
-  public OpenEdgeColorizerFormat() {
-    super(OpenEdge.KEY);
+  public OpenEdgeDBColorizerFormat() {
+    super(OpenEdgeDB.KEY);
   }
 
   @Override
   public List<Tokenizer> getTokenizers() {
-    KeywordsTokenizer kwTokenizer = new KeywordsTokenizer(SPAN_KEYWORD, SPAN_END, OpenEdgeKeywords.get(),
+    KeywordsTokenizer kwTokenizer = new KeywordsTokenizer(SPAN_KEYWORD, SPAN_END, OpenEdgeDBKeywords.get(),
         "[a-zA-Z_][a-zA-Z0-9_\\x2D]*+");
     kwTokenizer.setCaseInsensitive(true);
-    
-    return ImmutableList.of(new OpenEdgePPStatementTokenizer(SPAN_PP_STMT, SPAN_END),
-        new OpenEdgePPVariableTokenizer(SPAN_PP_VAR, SPAN_END), new OpenEdgeStringTokenizer(SPAN_STRING, SPAN_END),
-        new MultilinesDocTokenizer("{", "}", SPAN_PP_VAR, SPAN_END),
-        new MultilinesAndNestedDocTokenizer("/*", "*/", SPAN_CPPDOC, SPAN_END), kwTokenizer);
+    return ImmutableList.of(new OpenEdgeDBStringTokenizer(SPAN_STRING, SPAN_END), kwTokenizer);
   }
 }

@@ -7,8 +7,8 @@ import java.util.TreeSet;
 
 public class FileCoverage {
   private String fileName;
-  private SortedSet<Integer> linesToCover = new TreeSet<Integer>();
-  private SortedSet<Integer> coveredLines = new TreeSet<Integer>();
+  private SortedSet<Integer> linesToCover = new TreeSet<>();
+  private SortedSet<Integer> coveredLines = new TreeSet<>();
 
   public FileCoverage(String fileName) {
     this.fileName = fileName;

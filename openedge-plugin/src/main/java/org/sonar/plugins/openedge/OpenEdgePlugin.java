@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2013-2014 Riverside Software
+ * Copyright (C) 2013-2016 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -28,16 +28,21 @@ import org.sonar.api.PropertyType;
 import org.sonar.api.SonarPlugin;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.plugins.openedge.colorizer.OpenEdgeColorizerFormat;
+import org.sonar.plugins.openedge.colorizer.OpenEdgeDBColorizerFormat;
 import org.sonar.plugins.openedge.cpd.OpenEdgeCpdMapping;
+import org.sonar.plugins.openedge.decorator.CommonDBMetricsDecorator;
 import org.sonar.plugins.openedge.decorator.CommonMetricsDecorator;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
+import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 import org.sonar.plugins.openedge.foundation.OpenEdgeLicenceRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProfile;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+import org.sonar.plugins.openedge.sensor.OpenEdgeDBRulesSensor;
+import org.sonar.plugins.openedge.sensor.OpenEdgeDBSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDebugListingSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeListingSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeProparseSensor;
@@ -64,6 +69,7 @@ public class OpenEdgePlugin extends SonarPlugin {
     List list = new ArrayList<Class<? extends ExtensionPoint>>();
     // Main components
     list.add(OpenEdge.class);
+    list.add(OpenEdgeDB.class);
     list.add(OpenEdgeSettings.class);
 
     // Profile and rules
@@ -79,31 +85,36 @@ public class OpenEdgePlugin extends SonarPlugin {
 
     // Code colorizer
     list.add(OpenEdgeColorizerFormat.class);
+    list.add(OpenEdgeDBColorizerFormat.class);
 
     // Sensors
     list.add(OpenEdgeSensor.class);
+    list.add(OpenEdgeDBSensor.class);
     list.add(OpenEdgeDebugListingSensor.class);
     list.add(OpenEdgeListingSensor.class);
     list.add(OpenEdgeWarningsSensor.class);
     list.add(OpenEdgeXREFSensor.class);
-    // list.add(OpenEdgeParserSensor.class);
     list.add(OpenEdgeProparseSensor.class);
+    list.add(OpenEdgeDBRulesSensor.class);
 
     // Copy Paste Detector
     list.add(OpenEdgeCpdMapping.class);
 
     // Decorators
     list.add(CommonMetricsDecorator.class);
+    list.add(CommonDBMetricsDecorator.class);
 
     // Properties
     list.add(PropertyDefinition.builder(SKIP_PARSER_PROPERTY).name("skipParser").description(
-        "Skip AST generation and lint rules").type(PropertyType.BOOLEAN).defaultValue("false").build());
+        "Skip AST generation and lint rules").type(PropertyType.BOOLEAN).defaultValue(
+            Boolean.FALSE.toString()).build());
     list.add(PropertyDefinition.builder(SKIP_PROPARSE_PROPERTY).name("skipProparse").description(
-        "Skip Proparse AST generation and lint rules").type(PropertyType.BOOLEAN).defaultValue("false").build());
+        "Skip Proparse AST generation and lint rules").type(PropertyType.BOOLEAN).defaultValue(
+            Boolean.FALSE.toString()).build());
     list.add(PropertyDefinition.builder(PROPARSE_DEBUG).name("debug_proparse").description(
-        "Generate JPNodeLister debug file").type(PropertyType.BOOLEAN).defaultValue("false").build());
+        "Generate JPNodeLister debug file").type(PropertyType.BOOLEAN).defaultValue(Boolean.FALSE.toString()).build());
     list.add(PropertyDefinition.builder(CPD_DEBUG).name("debug_cpd").description("Generate CPD tokens listing").type(
-        PropertyType.BOOLEAN).defaultValue("false").build());
+        PropertyType.BOOLEAN).defaultValue(Boolean.FALSE.toString()).build());
     list.add(PropertyDefinition.builder(BINARIES).name("binaries").description(
         "Build directory (where .r is generated), relative to base directory").type(PropertyType.STRING).defaultValue(
             "build").build());
@@ -118,7 +129,8 @@ public class OpenEdgePlugin extends SonarPlugin {
     list.add(PropertyDefinition.builder(DLC).name("dlc").description("OpenEdge installation path").type(
         PropertyType.STRING).defaultValue("").build());
     list.add(PropertyDefinition.builder(PROPATH_DLC).name("dlc_in_propath").description(
-        "Include OE instllation path in propath").type(PropertyType.BOOLEAN).defaultValue("true").build());
+        "Include OE instllation path in propath").type(PropertyType.BOOLEAN).defaultValue(
+            Boolean.TRUE.toString()).build());
 
     return Collections.unmodifiableList(list);
   }

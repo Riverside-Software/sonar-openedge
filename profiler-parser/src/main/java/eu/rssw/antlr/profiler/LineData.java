@@ -3,8 +3,10 @@ package eu.rssw.antlr.profiler;
 import java.util.Comparator;
 
 public class LineData {
-  private final int lineNumber, execCount;
-  private final float actualTime, cumulativeTime;
+  private final int lineNumber;
+  private final int execCount;
+  private final float actualTime;
+  private final float cumulativeTime;
 
   public LineData(int lineNumber, int execCount, float actualTime, float cumulativeTime) {
     this.lineNumber = lineNumber;
@@ -52,7 +54,7 @@ public class LineData {
 
     @Override
     public int compare(LineData o1, LineData o2) {
-      return (((int) (o1.getCumulativeTime() * 1000000)) - ((int) (o2.getCumulativeTime() * 1000000)));
+      return ((int) (o1.getCumulativeTime() * 1000000)) - ((int) (o2.getCumulativeTime() * 1000000));
     }
 
   }

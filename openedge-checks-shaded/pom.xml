@@ -4,7 +4,7 @@
 
   <groupId>eu.rssw.openedge.checks</groupId>
   <artifactId>openedge-checks-shaded</artifactId>
-  <version>1.3.2</version>
+  <version>1.3.3</version>
 
   <name>OpenEdge checks (shaded)</name>
   <url>http://riverside-software.fr/</url>
@@ -31,7 +31,12 @@
     <dependency>
       <groupId>eu.rssw.openedge.checks</groupId>
       <artifactId>openedge-checks</artifactId>
-      <version>1.3.2</version>
+      <version>1.3.3</version>
+    </dependency>
+    <dependency>
+      <groupId>eu.rssw.openedge.parsers</groupId>
+      <artifactId>listing-parser</artifactId>
+      <version>1.3.6</version>
     </dependency>
   </dependencies>
 
@@ -64,12 +69,24 @@
                   <shadedPattern>org.sonar.plugins.openedge.api.antlr</shadedPattern>
                 </relocation>
                 <relocation>
+                  <pattern>org.antlr</pattern>
+                  <shadedPattern>org.sonar.plugins.openedge.api.org.antlr</shadedPattern>
+                </relocation>
+                <relocation>
                   <pattern>com.google</pattern>
                   <shadedPattern>org.sonar.plugins.openedge.api.com.google</shadedPattern>
                 </relocation>
                 <relocation>
                   <pattern>org.prorefactor</pattern>
                   <shadedPattern>org.sonar.plugins.openedge.api.org.prorefactor</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>eu.rssw.antlr.database</pattern>
+                  <shadedPattern>org.sonar.plugins.openedge.api.eu.rssw.antlr.database</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>eu.rssw.listing</pattern>
+                  <shadedPattern>org.sonar.plugins.openedge.api.eu.rssw.listing</shadedPattern>
                 </relocation>
               </relocations>
             </configuration>

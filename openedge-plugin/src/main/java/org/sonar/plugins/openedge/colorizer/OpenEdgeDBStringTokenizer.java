@@ -1,6 +1,6 @@
 /*
- * OpenEdge plugin for SonarQube
- * Copyright (C) 2013-2016 Riverside Software
+ * OpenEdge DB plugin for SonarQube
+ * Copyright (C) 2013-2014 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -24,18 +24,19 @@ import org.sonar.channel.EndMatcher;
 import org.sonar.colorizer.HtmlCodeBuilder;
 import org.sonar.colorizer.Tokenizer;
 
+//Won't be changed to Highlitable
 @SuppressWarnings("deprecation")
-public class OpenEdgeStringTokenizer extends Tokenizer {
+public class OpenEdgeDBStringTokenizer extends Tokenizer {
   private final String tagBefore;
   private final String tagAfter;
 
-  public OpenEdgeStringTokenizer(String tagBefore, String tagAfter) {
+  public OpenEdgeDBStringTokenizer(String tagBefore, String tagAfter) {
     this.tagBefore = tagBefore;
     this.tagAfter = tagAfter;
 
   }
 
-  public OpenEdgeStringTokenizer() {
+  public OpenEdgeDBStringTokenizer() {
     this("", "");
   }
 

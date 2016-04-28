@@ -5,7 +5,7 @@
   <groupId>eu.rssw</groupId>
   <artifactId>sonar-openedge</artifactId>
   <packaging>pom</packaging>
-  <version>1.8.1</version>
+  <version>1.9.0</version>
   <name>OpenEdge plugin for SonarQube</name>
   <url>http://www.riverside-software.fr/</url>
   <description>Open source code analysis for OpenEdge</description>
@@ -14,15 +14,11 @@
     <module>proparse</module>
     <module>database-parser</module>
     <module>profiler-parser</module>
+    <module>profiler-parser-shaded</module>
     <module>listing-parser</module>
-    <module>database-checks</module>
-    <module>database-checks-shaded</module>
     <module>openedge-checks</module>
     <module>openedge-checks-shaded</module>
-    <module>oedb-plugin</module>
     <module>openedge-plugin</module>
-    <module>oedb-rules-plugin</module>
-    <module>openedge-rules-plugin</module>
   </modules>
 
 </project>

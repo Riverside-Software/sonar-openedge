@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2013-2014 Riverside Software
+ * Copyright (C) 2013-2016 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -32,14 +32,13 @@ import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.measures.Measure;
 import org.sonar.api.resources.Project;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.plugins.openedge.api.eu.rssw.listing.CodeBlock;
+import org.sonar.plugins.openedge.api.eu.rssw.listing.ListingParser;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
-
-import eu.rssw.listing.CodeBlock;
-import eu.rssw.listing.ListingParser;
 
 public class OpenEdgeListingSensor implements Sensor {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeListingSensor.class);

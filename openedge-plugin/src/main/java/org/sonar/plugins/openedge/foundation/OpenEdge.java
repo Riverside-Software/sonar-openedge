@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2013-2014 Riverside Software
+ * Copyright (C) 2013-2016 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -22,8 +22,7 @@ package org.sonar.plugins.openedge.foundation;
 import java.util.List;
 
 import org.sonar.api.resources.AbstractLanguage;
-
-import com.google.common.collect.ImmutableList;
+import org.sonar.plugins.openedge.api.com.google.common.collect.ImmutableList;
 
 public class OpenEdge extends AbstractLanguage {
   public static final String KEY = "oe";
