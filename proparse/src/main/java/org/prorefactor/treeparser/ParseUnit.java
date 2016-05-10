@@ -19,7 +19,6 @@ import java.io.ObjectOutputStream;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
-import org.prorefactor.core.PRCException;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.ListingParser;
@@ -36,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import antlr.ANTLRException;
+import antlr.RecognitionException;
 import antlr.TokenStream;
 
 /**
@@ -232,9 +232,9 @@ public class ParseUnit {
       parse();
     }
     try {
-      TreeParserWrapper.run2(tp, this.getTopNode());
-    } catch (PRCException e) {
-      throw new RefactorException(e.getMessage(), e);
+      tp.program(getTopNode());
+    } catch (RecognitionException | TreeParserException caught) {
+      throw new RefactorException(caught);
     }
     LOGGER.trace("Exiting ParseUnit#treeParser()");
   }

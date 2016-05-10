@@ -35,6 +35,7 @@ import org.sonar.plugins.openedge.decorator.CommonMetricsDecorator;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
+import org.sonar.plugins.openedge.foundation.OpenEdgeDBProfile;
 import org.sonar.plugins.openedge.foundation.OpenEdgeLicenceRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProfile;
@@ -77,6 +78,7 @@ public class OpenEdgePlugin extends SonarPlugin {
     list.add(OpenEdgeRulesRegistrar.class);
     list.add(OpenEdgeLicenceRegistrar.class);
     list.add(OpenEdgeProfile.class);
+    list.add(OpenEdgeDBProfile.class);
     list.add(OpenEdgeMetrics.class);
     list.add(OpenEdgeComponents.class);
 

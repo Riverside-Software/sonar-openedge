@@ -26,6 +26,7 @@ import org.sonar.colorizer.KeywordsTokenizer;
 import org.sonar.colorizer.MultilinesDocTokenizer;
 import org.sonar.colorizer.Tokenizer;
 import org.sonar.plugins.openedge.api.com.google.common.collect.ImmutableList;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 
 @SuppressWarnings("deprecation")
@@ -43,7 +44,8 @@ public class OpenEdgeColorizerFormat extends CodeColorizerFormat {
 
   @Override
   public List<Tokenizer> getTokenizers() {
-    KeywordsTokenizer kwTokenizer = new KeywordsTokenizer(SPAN_KEYWORD, SPAN_END, OpenEdgeKeywords.get(),
+    
+    KeywordsTokenizer kwTokenizer = new KeywordsTokenizer(SPAN_KEYWORD, SPAN_END, NodeTypes.getAllKeywords(),
         "[a-zA-Z_][a-zA-Z0-9_\\x2D]*+");
     kwTokenizer.setCaseInsensitive(true);
     

@@ -4,7 +4,7 @@
 
   <groupId>proparse</groupId>
   <artifactId>proparse</artifactId>
-  <version>1.0.5</version>
+  <version>1.0.6</version>
 
   <name>Proparse</name>
   <url>http://riverside-software.fr/</url>
@@ -70,19 +70,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.3</version>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>antlr-maven-plugin</artifactId>

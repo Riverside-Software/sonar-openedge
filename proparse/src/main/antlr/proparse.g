@@ -291,6 +291,7 @@ statement
   |  callstate  | casestate | catchstate
   |  choosestate
   |  classstate
+  |  enumstate
   |  clearstate  | closestatement  | colorstate
   |  compilestate
   |  connectstate  
@@ -1119,6 +1120,7 @@ type_name2
       #p1.setText(theText);
     }
   ;
+
 type_name_predicate
   :  {!support.hasHiddenBefore(LT(2))}? type_name_part type_name_part
   ;
@@ -1444,6 +1446,24 @@ class_type_name
   |  type_name
   ;
 
+enumstate
+  :  e:ENUM^ type_name2 (FLAGS)? block_colon
+     defenumstate
+     enum_end
+     state_end
+     {sthd(##,0);}
+  ;
+
+defenumstate
+  : DEFINE^ ENUM (enum_member)+ state_end { sthd(##, ENUM); }
+  ;
+
+enum_member
+  :  type_name2 ( EQUAL ( NUMBER | type_name2 (COMMA type_name2)*))?
+  ;
+
+enum_end: END^ (ENUM)? ;
+
 classstate
   :  c:CLASS^ type_name2
     (class_inherits | class_implements | USEWIDGETPOOL | ABSTRACT | FINAL | SERIALIZABLE)*
@@ -1712,6 +1732,7 @@ createstatement
   |  createaliasstate
   |  createautomationobjectstate
   |  createbrowsestate
+  |  createquerystate
   |  createbufferstate
   |  createdatabasestate
   |  createindexstate
@@ -1732,7 +1753,7 @@ createstate
 
 create_whatever_state
   :  CREATE^
-    (CALL|CLIENTPRINCIPAL|DATASET|DATASOURCE|QUERY|SAXREADER|SAXWRITER|SOAPHEADER|SOAPHEADERENTRYREF|XDOCUMENT|XNODEREF)
+    (CALL|CLIENTPRINCIPAL|DATASET|DATASOURCE|SAXREADER|SAXWRITER|SOAPHEADER|SOAPHEADERENTRYREF|XDOCUMENT|XNODEREF)
     field (in_widgetpool_expr)? (NOERROR_KW)? state_end
     {sthd(##, ##.firstChild().getType());}
   ;
@@ -1758,6 +1779,13 @@ createbrowsestate
     (triggerphrase)?
     state_end
     {sthd(##,BROWSE);}
+  ;
+
+createquerystate
+  :  CREATE^ QUERY exprt
+    (in_widgetpool_expr)?
+    state_end
+    {sthd(##,QUERY);}
   ;
 
 createbufferstate
@@ -4201,7 +4229,7 @@ STATIC | THROW | TOPNAVQUERY | UNBOX
 // 10.2B
 ABSTRACT | DELEGATE | DYNAMICNEW | EVENT | FOREIGNKEYHIDDEN | SERIALIZEHIDDEN | SERIALIZENAME | SIGNATURE | STOPAFTER |
 // 11+
-GETCLASS | SERIALIZABLE | TABLESCAN | MESSAGEDIGEST
+GETCLASS | SERIALIZABLE | TABLESCAN | MESSAGEDIGEST | ENUM | FLAGS
   ;
 
 

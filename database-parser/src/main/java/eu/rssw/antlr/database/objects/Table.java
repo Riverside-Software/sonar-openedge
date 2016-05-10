@@ -6,9 +6,9 @@ import java.util.Collection;
 public class Table {
   private final String name;
   private String area, label, description, dumpName, valMsg;
-  private Collection<Field> fields = new ArrayList<Field>();
-  private Collection<Index> indexes = new ArrayList<Index>();
-  private Collection<Trigger> triggers = new ArrayList<Trigger>();
+  private Collection<Field> fields = new ArrayList<>();
+  private Collection<Index> indexes = new ArrayList<>();
+  private Collection<Trigger> triggers = new ArrayList<>();
 
   private int firstLine, lastLine;
 

@@ -20,7 +20,8 @@ import java.io.File;
 public class RefactorException extends Exception {
   private static final long serialVersionUID = -8895158616697265317L;
 
-  private int[] filePos = null;
+  private int line;
+  private int column;
   private File file = null;
 
   public RefactorException(String message) {
@@ -31,17 +32,25 @@ public class RefactorException extends Exception {
     super(cause);
   }
 
-  public RefactorException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
   /**
    * Create an exception where we don't have a file index.
    */
-  public RefactorException(File file, int line, int col, String message) {
+  public RefactorException(String message, File file, int line, int col) {
     super(file.toString() + ":" + Integer.toString(line) + ":" + Integer.toString(col) + " " + message);
     this.file = file;
-    this.filePos = new int[] {-1, line, col};
+    this.line = line;
+    this.column = col;
   }
 
+  public File getFile() {
+    return file;
+  }
+
+  public int getLine() {
+    return line;
+  }
+
+  public int getColumn() {
+    return column;
+  }
 }

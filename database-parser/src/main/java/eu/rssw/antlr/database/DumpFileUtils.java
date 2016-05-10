@@ -20,6 +20,10 @@ import eu.rssw.antlr.database.objects.DatabaseDescription;
 
 public final class DumpFileUtils {
 
+  private DumpFileUtils() {
+    // Not instantiated
+  }
+
   public static final ParseTree getDumpFileParseTree(File file) throws IOException {
     // Quick and dirty
     LineProcessor<Charset> charsetReader = new LineProcessor<Charset>() {
@@ -35,9 +39,7 @@ public final class DumpFileUtils {
         if (arg0.startsWith("cpstream=")) {
           try {
             charset = Charset.forName(arg0.substring(9));
-          } catch (IllegalCharsetNameException uncaught) {
-            // Undefined for example...
-          } catch (UnsupportedCharsetException uncaught) {
+          } catch (IllegalCharsetNameException | UnsupportedCharsetException uncaught) {
             // Undefined for example...
           }
           return false;

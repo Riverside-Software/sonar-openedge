@@ -40,17 +40,17 @@ import eu.rssw.antlr.database.objects.TriggerType;
 public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
   private DatabaseDescription db;
 
-  private Deque<Table> tables = new ArrayDeque<Table>();
-  private Deque<Field> fields = new ArrayDeque<Field>();
-  private Deque<Sequence> sequences = new ArrayDeque<Sequence>();
-  private Deque<Index> indexes = new ArrayDeque<Index>();
-
-  public DatabaseDescription getDatabase() {
-    return db;
-  }
+  private Deque<Table> tables = new ArrayDeque<>();
+  private Deque<Field> fields = new ArrayDeque<>();
+  private Deque<Sequence> sequences = new ArrayDeque<>();
+  private Deque<Index> indexes = new ArrayDeque<>();
 
   public DumpFileVisitor(String dbName) {
     this.db = new DatabaseDescription(dbName);
+  }
+
+  public DatabaseDescription getDatabase() {
+    return db;
   }
 
   // *************

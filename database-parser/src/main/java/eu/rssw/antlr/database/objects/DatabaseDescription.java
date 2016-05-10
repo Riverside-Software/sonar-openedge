@@ -6,8 +6,8 @@ import java.util.Map;
 
 public class DatabaseDescription {
   private String dbName;
-  private Map<String, Sequence> sequences = new HashMap<String, Sequence>();
-  private Map<String, Table> tables = new HashMap<String, Table>();
+  private Map<String, Sequence> sequences = new HashMap<>();
+  private Map<String, Table> tables = new HashMap<>();
 
   public DatabaseDescription(String dbName) {
     this.dbName = dbName;

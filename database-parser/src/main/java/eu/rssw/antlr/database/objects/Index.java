@@ -7,7 +7,7 @@ public class Index {
   private final String name;
   private String area;
   private boolean primary, unique, word;
-  private List<IndexField> fields = new ArrayList<IndexField>();
+  private List<IndexField> fields = new ArrayList<>();
 
   private int firstLine, lastLine;
 

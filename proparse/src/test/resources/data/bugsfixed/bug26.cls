@@ -1,7 +1,7 @@
-class data.bug21:
+class bugsfixed.bug26:
  define public property buffer as handle no-undo get. set.
  define public property query as handle no-undo get. set.
- constructor public bug21 (input ipTable as character):
+ constructor public bug26 (input ipTable as character):
   /* Next line didn't work as this-object:buffer is not a Field_Ref */
   create buffer this-object:Buffer for table ipTable.
   /* Next line to verify existing structure is still working */

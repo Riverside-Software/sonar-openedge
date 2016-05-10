@@ -275,16 +275,14 @@ public class Postlexer implements TokenStream {
       try {
         evalDoParse.doParse(tokenVector);
       } catch (ProEvalException e) {
-        e.appendMessage(" Unable to evaluate &IF condition:");
+        String str = "Unable to evaluate &IF condition:";
         for (ProToken tok : tokenVector) {
-          e.appendMessage(" " + tok.getText());
+          str += " " + tok.getText();
         }
-        int theIndex = currToken.getFileIndex();
-        if (doParse.isValidIndex(theIndex))
-          e.filename = doParse.getFilename(theIndex);
-        e.line = currToken.getLine();
-        e.column = currToken.getColumn();
-        throw e;
+        String fileName = null;
+        if (doParse.isValidIndex(currToken.getFileIndex()))
+          fileName = doParse.getFilename(currToken.getFileIndex());
+        throw new ProEvalException(str, e, fileName, currToken.getLine(), currToken.getColumn());
       }
       return evalDoParse.preProcessConditionResult;
     }

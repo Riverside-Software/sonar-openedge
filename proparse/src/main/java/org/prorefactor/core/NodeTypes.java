@@ -18,8 +18,10 @@ import org.prorefactor.proparse.ProParserTokenTypes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.io.IOException;
 
 /**
@@ -70,6 +72,30 @@ public class NodeTypes implements ProParserTokenTypes, Xferable {
   private static class TokenInfo {
     boolean isNatural = true;
     String keywordText = null;
+  }
+
+  /**
+   * Returns the list of all keywords in upper-case, including abbreviated names and alternate names 
+   */
+  public static Set<String> getAllKeywords() {
+    Set<String> kwSet = new HashSet<>();
+    for (TI typeInfo: typeInfoArray) {
+      if ((typeInfo != null) && ((typeInfo.bitset & TI.KEYWORD) > 0)) {
+        kwSet.add(typeInfo.fullText.toUpperCase());
+        if (typeInfo.altFullText != null) {
+          for (String str : typeInfo.altFullText) {
+            kwSet.add(str.toUpperCase());
+          }
+        }
+        int size = typeInfo.fullText.length();
+        for (int i = typeInfo.minAbbrev; i <= size; ++i) {
+          kwSet.add(typeInfo.fullText.substring(0, i).toUpperCase());
+        }
+
+      }
+    }
+
+    return kwSet;
   }
 
   static void add(int type, int minAbbrev, String fullText, int flags) {
@@ -677,6 +703,7 @@ public class NodeTypes implements ProParserTokenTypes, Xferable {
     add(ENDROWRESIZE, 14, "end-row-resize", TI.KEYWORD);
     add(ENTERED, 7, "entered", TI.KEYWORD);
     add(ENTRY, 5, "entry", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_REGULAR_FUNC);
+    add(ENUM, 4, "enum", TI.KEYWORD);
     add(EQ, 2, "eq", TI.KEYWORD);
     add(EQUAL, 0, "", TI.NO_FLAGS);
     add(ERROR, 5, "error", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
@@ -739,6 +766,7 @@ public class NodeTypes implements ProParserTokenTypes, Xferable {
     add(FIXCHAR, 7, "fixchar", TI.KEYWORD);
     add(FIXCODEPAGE, 12, "fix-codepage", TI.KEYWORD);
     add(FIXEDONLY, 10, "fixed-only", TI.KEYWORD);
+    add(FLAGS, 5, "flags", TI.KEYWORD);
     add(FLATBUTTON, 11, "flat-button", TI.KEYWORD);
     add(FLOAT, 5, "float", TI.KEYWORD);
     add(FOCUS, 5, "focus", TI.KEYWORD | TI.RESERVED | TI.SYSHDL);
@@ -2674,6 +2702,9 @@ public class NodeTypes implements ProParserTokenTypes, Xferable {
     // Mike Fechner / Consultingwerk Ltd.
     allTokens[BLOCKLEVEL].keywordText = "BLOCK-LEVEL";
     allTokens[GETCLASS].keywordText = "GET-CLASS";
+
+    allTokens[ENUM].keywordText = "ENUM";
+    allTokens[FLAGS].keywordText = "FLAGS";
   }
   // NO-SONAR-END
 

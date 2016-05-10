@@ -171,6 +171,7 @@ statement throws TreeParserException
   |            casestate
   |            catchstate
   |            choosestate
+  |            enumstate
   |            classstate
   |            clearstate
   |  {state2(_t, 0)}?      closestate      // SQL
@@ -993,6 +994,22 @@ choosestate throws TreeParserException
     )
   ;
 
+enumstate throws TreeParserException
+  :  #(  ENUM TYPE_NAME (FLAGS)? block_colon
+      defenumstate
+      #(END (ENUM)? )
+      state_end
+     )
+  ;
+
+defenumstate throws TreeParserException
+  :  #( DEFINE ENUM (enum_member)+ state_end )
+  ;
+
+enum_member throws TreeParserException
+  : TYPE_NAME ( EQUAL ( NUMBER | TYPE_NAME (COMMA TYPE_NAME)*))?
+  ;
+
 classstate throws TreeParserException
   :  #(  CLASS TYPE_NAME
       (  #(INHERITS TYPE_NAME)
@@ -1215,7 +1232,7 @@ createdatasourcestate throws TreeParserException
   ;
 
 createquerystate throws TreeParserException
-  :  #(CREATE QUERY create_whatever_args state_end )
+  :  #(CREATE QUERY (field | widattr) (#(IN_KW WIDGETPOOL expression))? state_end )
   ;
 
 createsaxreaderstate throws TreeParserException
