@@ -30,6 +30,7 @@ public class ParserSupport {
 
   private boolean currDefInheritable = false;
   private boolean unitIsInterface = false;
+  private boolean inDynamicNew = false;
 
   private ClassFinder classFinder;
   private final DoParse doParse;
@@ -89,6 +90,14 @@ public class ParserSupport {
 
   void addInnerScope() {
     currentScope = new SymbolScope(doParse.getRefactorSession(), currentScope);
+  }
+
+  public boolean isInDynamicNew() {
+    return inDynamicNew;
+  }
+
+  public void setInDynamicNew(boolean flag) {
+    inDynamicNew = flag;
   }
 
   /** Mark a node as "operator" */

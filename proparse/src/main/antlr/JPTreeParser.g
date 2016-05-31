@@ -418,7 +418,7 @@ functioncall throws TreeParserException
   |  #(FRAMEDOWN (LEFTPAREN ID RIGHTPAREN)? )
   |  #(FRAMELINE (LEFTPAREN ID RIGHTPAREN)? )
   |  #(FRAMEROW (LEFTPAREN ID RIGHTPAREN)? )
-  |  #(GETCODEPAGES (funargs)? )
+  |  #(GETCODEPAGE funargs )
   |  #(GUID LEFTPAREN (expression)? RIGHTPAREN )
   |  #(IF expression THEN expression ELSE expression )
   |  ldbnamefunc 
@@ -610,6 +610,7 @@ noargfunc throws TreeParserException
   |  GENERATEPBESALT
   |  GENERATERANDOMKEY
   |  GENERATEUUID
+  |  GETCODEPAGES
   |  GATEWAYS
   |  GOPENDING
   |  ISATTRSPACE
@@ -811,7 +812,7 @@ systemhandlename throws TreeParserException
   |  COMSELF | CURRENTWINDOW | DEBUGGER | DEFAULTWINDOW
   |  ERRORSTATUS | FILEINFORMATION | FOCUS | FONTTABLE | LASTEVENT | LOGMANAGER
   |  MOUSE | PROFILER | RCODEINFORMATION | SECURITYPOLICY | SELF | SESSION
-  |  SOURCEPROCEDURE | SUPER | TARGETPROCEDURE | TEXTCURSOR | THISOBJECT | THISPROCEDURE | WEBCONTEXT
+  |  SOURCEPROCEDURE | SUPER | TARGETPROCEDURE | TEXTCURSOR | THISOBJECT | THISPROCEDURE | WEBCONTEXT | ACTIVEFORM
   ;
 
 
@@ -1086,6 +1087,9 @@ columnformat throws TreeParserException
       |  #(LABELBGCOLOR expression )
       |  #(LABELFGCOLOR expression )
       |  #(LEXAT field (columnformat)? )
+      |  #(HEIGHT NUMBER )
+      |  #(HEIGHTPIXELS NUMBER )
+      |  #(HEIGHTCHARS NUMBER )
       |  #(WIDTH NUMBER )
       |  #(WIDTHPIXELS NUMBER )
       |  #(WIDTHCHARS NUMBER )
@@ -1264,7 +1268,7 @@ createsocketstate throws TreeParserException
   ;
 
 createtemptablestate throws TreeParserException
-  :  #(CREATE TEMPTABLE field (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
+  :  #(CREATE TEMPTABLE (field | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
   ;
 
 createwidgetstate throws TreeParserException

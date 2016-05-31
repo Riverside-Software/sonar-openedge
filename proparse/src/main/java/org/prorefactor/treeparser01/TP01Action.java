@@ -24,7 +24,7 @@ import antlr.collections.AST;
  * Superclass of empty actions methods for ITreeParserAction. Subclasses can override and implement any of these
  * methods, which are all called directly by TreeParser01. TP01Support is the default implementation.
  */
-public class TP01Action implements ITreeParserAction {
+public abstract class TP01Action implements ITreeParserAction {
   private ParseUnit parseUnit;
 
   @Override
@@ -98,7 +98,12 @@ public class TP01Action implements ITreeParserAction {
   }
 
   @Override
-  public void classState(AST ast) throws TreeParserException {
+  public void classState(AST ast, AST abstractKw, AST finalKw, AST serializableKw) throws TreeParserException {
+    // No-op
+  }
+
+  @Override
+  public void interfaceState(AST ast) throws TreeParserException {
     // No-op
   }
 

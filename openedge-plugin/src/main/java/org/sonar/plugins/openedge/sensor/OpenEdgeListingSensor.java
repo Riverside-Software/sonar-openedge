@@ -87,7 +87,7 @@ public class OpenEdgeListingSensor implements Sensor {
 
           context.saveMeasure(file, new Measure(OpenEdgeMetrics.TRANSACTIONS, sb.toString()));
           context.saveMeasure(file, new Measure(OpenEdgeMetrics.NUM_TRANSACTIONS, (double) parser.getTransactionBlocks().size()));
-          if (parser.getMainBlock().isTransaction()) {
+          if ((parser.getMainBlock() != null) && parser.getMainBlock().isTransaction()) {
             NewIssue issue = context.newIssue();
             issue.forRule(
                 RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.LARGE_TRANSACTION_SCOPE)).at(

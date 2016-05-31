@@ -247,7 +247,7 @@ dropIndex:
     'DROP' 'INDEX' index=QUOTED_STRING 'ON' table=QUOTED_STRING;
 
 footer:
- '.' 'PSC' ('bufpool' '=' 'yes')? UNQUOTED_STRING '=' UNQUOTED_STRING '.' NUMBER?;
+ '.' 'PSC'? ('bufpool' '=' 'yes')? (UNQUOTED_STRING '=' UNQUOTED_STRING)? '.' NUMBER?;
 
 fragment INT:
   ('0'..'9');

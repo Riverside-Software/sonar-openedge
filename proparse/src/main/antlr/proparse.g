@@ -446,7 +446,7 @@ builtinfunc
   |  FRAMEDOWN^ LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMELINE^ LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMEROW^ LEFTPAREN widgetname RIGHTPAREN  // also noarg
-  |  GETCODEPAGES^ funargs  // also noarg
+  |  GETCODEPAGE^ funargs
   |  GUID^ LEFTPAREN (expression)? RIGHTPAREN
   |  IF^ expression THEN expression ELSE expression
   |  ldbnamefunc 
@@ -869,7 +869,7 @@ exprt2
     // point in expression evaluation, if we have anything followed by a left-paren,
     // we're going to assume it's a method call.
     // Method names which are reserved keywords must be prefixed with THIS-OBJECT:.
-    ({support.isClass()}? identifier LEFTPAREN)=>
+    ({support.isClass() && !support.isInDynamicNew()}? identifier LEFTPAREN)=>
       methodname:identifier!
       {  #methodname.setType(LOCAL_METHOD_REF);
         astFactory.makeASTRoot(currentAST, #methodname);
@@ -1051,8 +1051,11 @@ record
 
 blocklabel
   // Block labels can begin with [#|$|%], which are picked up as FILENAME by the lexer.
-  :  (identifier|FILENAME) {#blocklabel.setType(BLOCK_LABEL);}
+  :  { LT(1).getType() != NodeTypes.FINALLY }?
+     (identifier|FILENAME)
+     {#blocklabel.setType(BLOCK_LABEL);}
   ;
+
 cursorname
   :  identifier
   ;
@@ -1150,7 +1153,7 @@ systemhandlename
   |  COMSELF | CURRENTWINDOW | DEBUGGER | DEFAULTWINDOW
   |  ERRORSTATUS | FILEINFORMATION | FOCUS | FONTTABLE | LASTEVENT | LOGMANAGER
   |  MOUSE | PROFILER | RCODEINFORMATION | SECURITYPOLICY | SELF | SESSION
-  |  SOURCEPROCEDURE | SUPER | TARGETPROCEDURE | TEXTCURSOR | THISOBJECT | THISPROCEDURE | WEBCONTEXT
+  |  SOURCEPROCEDURE | SUPER | TARGETPROCEDURE | TEXTCURSOR | THISOBJECT | THISPROCEDURE | WEBCONTEXT | ACTIVEFORM
   ;
 
 widgettype
@@ -1587,6 +1590,7 @@ columnformat_opt
   :  format_expr
   |  label_constant
   |  NOLABELS
+  |  (HEIGHT^|HEIGHTPIXELS^|HEIGHTCHARS^) NUMBER
   |  (WIDTH^|WIDTHPIXELS^|WIDTHCHARS^) NUMBER
   |  COLUMNFONT^ expression
   |  COLUMNDCOLOR^ expression
@@ -1824,7 +1828,7 @@ createsocketstate
   ;
 
 createtemptablestate
-  :  CREATE^ TEMPTABLE field (in_widgetpool_expr)? (NOERROR_KW)? state_end
+  :  CREATE^ TEMPTABLE exprt (in_widgetpool_expr)? (NOERROR_KW)? state_end
     {sthd(##,TEMPTABLE);}
   ;
 
@@ -2505,7 +2509,9 @@ field_equal_dynamic_new
     e:EQUAL^ dynamic_new {support.attrOp(#e);}
   ;
 dynamic_new
-  :  DYNAMICNEW^ expression parameterlist
+  :  { support.setInDynamicNew(true); }
+  DYNAMICNEW^ expression parameterlist
+  { support.setInDynamicNew(false); }
   ;
 
 editorphrase
@@ -4149,7 +4155,7 @@ GE | GENERATEMD5 | GET | GETBITS | GETBYTE | GETBYTES | GETBYTEORDER | GETCGILIS
 GETCGIVALUE | GETCONFIGVALUE | GETDIR | GETDOUBLE | 
 GETFILE | GETFLOAT | GETLICENSE |
 GETLONG | GETPOINTERVALUE | GETSHORT | GETSIZE | GETSTRING | GETUNSIGNEDSHORT | GTHAN | HANDLE | HEIGHT |
-HELPTOPIC | HINT |
+HEIGHTPIXELS | HEIGHTCHARS | HELPTOPIC | HINT |
 HORIZONTAL | HTMLENDOFLINE | HTMLFRAMEBEGIN | HTMLFRAMEEND | HTMLHEADERBEGIN | HTMLHEADEREND | HTMLTITLEBEGIN | 
 HTMLTITLEEND | IMAGE | IMAGEDOWN | IMAGEINSENSITIVE | IMAGESIZE | IMAGESIZECHARS | IMAGESIZEPIXELS | 
 IMAGEUP | INCREMENTEXCLUSIVEID | INDEXHINT | INDEXEDREPOSITION | INFORMATION | INITIAL | INITIALDIR | 
@@ -4253,7 +4259,7 @@ reservedkeyword:
  | FINDSELECT | FINDWRAPAROUND | FIRST | FIRSTOF | FOCUS | FONT | FOR | FORMAT | FRAME 
  | FRAMECOL | FRAMEDB | FRAMEDOWN | FRAMEFIELD | FRAMEFILE | FRAMEINDEX | FRAMELINE 
  | FRAMENAME | FRAMEROW | FRAMEVALUE | FROM | FUNCTIONCALLTYPE | GETATTRCALLTYPE 
- | GETBUFFERHANDLE | GETCODEPAGES | GETCOLLATIONS | GETKEYVALUE | GLOBAL | GOON 
+ | GETBUFFERHANDLE | GETCODEPAGE | GETCODEPAGES | GETCOLLATIONS | GETKEYVALUE | GLOBAL | GOON 
  | GOPENDING | GRANT | GRAPHICEDGE | GROUP | HAVING | HEADER | HELP | HIDE 
  | HOSTBYTEORDER | IF | IMPORT | INDEX | INDICATOR | INPUT | INPUTOUTPUT | INSERT 
  | INTO | IN_KW | IS | ISATTRSPACE | ISLEADBYTE | JOIN | KBLABEL | KEYS | KEYWORD 

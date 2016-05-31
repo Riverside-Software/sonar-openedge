@@ -70,7 +70,11 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
       if (t.getName().equalsIgnoreCase(ctx.table.getText()))
         table = t;
     }
-    table.addField(field);
+    if (table != null) {
+      table.addField(field);
+    } else {
+      // Log error 
+    }
 
     return visitChildren(ctx);
   }
@@ -196,7 +200,11 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
       if (t.getName().equalsIgnoreCase(ctx.table.getText()))
         table = t;
     }
-    table.addIndex(index);
+    if (table != null) {
+      table.addIndex(index);
+    } else {
+      // Log error ?
+    }
 
     return visitChildren(ctx);
   }
@@ -234,10 +242,14 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
       if (t.getName().equalsIgnoreCase(tableName))
         table = t;
     }
+    if (table != null) {
+      IndexField idxFld = new IndexField(table.getField(ctx.field.getText()),
+          "ascending".equalsIgnoreCase(ctx.order.getText()));
+      indexes.peek().addField(idxFld);
+    } else {
+      // Log error ?
+    }
 
-    IndexField idxFld = new IndexField(table.getField(ctx.field.getText()),
-        "ascending".equalsIgnoreCase(ctx.order.getText()));
-    indexes.peek().addField(idxFld);
     return null;
   }
 

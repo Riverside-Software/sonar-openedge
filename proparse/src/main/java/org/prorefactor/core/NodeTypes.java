@@ -390,7 +390,7 @@ public class NodeTypes implements ProParserTokenTypes, Xferable {
     add(ABSTRACT, 8, "abstract", TI.KEYWORD);
     add(ACCELERATOR, 11, "accelerator", TI.KEYWORD);
     add(ACCUMULATE, 5, "accumulate", TI.KEYWORD | TI.RESERVED);
-    add(ACTIVEFORM, 11, "active-form", TI.KEYWORD | TI.RESERVED);
+    add(ACTIVEFORM, 11, "active-form", TI.KEYWORD | TI.RESERVED | TI.SYSHDL);
     add(ACTIVEWINDOW, 13, "active-window", TI.KEYWORD | TI.RESERVED | TI.SYSHDL);
     add(ADD, 3, "add", TI.KEYWORD | TI.RESERVED);
     add(ADDINTERVAL, 12, "add-interval", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
@@ -820,7 +820,8 @@ public class NodeTypes implements ProParserTokenTypes, Xferable {
     add(GETCGILONGVALUE, 18, "get-cgi-long-value", TI.KEYWORD);
     add(GETCGIVALUE, 13, "get-cgi-value", TI.KEYWORD);
     add(GETCLASS, 9, "get-class", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
-    add(GETCODEPAGES, 12, "get-codepages", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_NO_ARG_FUNC | TI.MAY_BE_REGULAR_FUNC);
+    add(GETCODEPAGE, 12, "get-codepage", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_REGULAR_FUNC);
+    add(GETCODEPAGES, 13, "get-codepages", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_NO_ARG_FUNC | TI.MAY_BE_REGULAR_FUNC);
     add(GETCOLLATIONS, 8, "get-collations", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_REGULAR_FUNC);
     add(GETCONFIGVALUE, 16, "get-config-value", TI.KEYWORD);
     add(GETDIR, 7, "get-dir", TI.KEYWORD);
@@ -853,6 +854,8 @@ public class NodeTypes implements ProParserTokenTypes, Xferable {
     add(HAVING, 6, "having", TI.KEYWORD | TI.RESERVED);
     add(HEADER, 6, "header", TI.KEYWORD | TI.RESERVED);
     add(HEIGHT, 6, "height", TI.KEYWORD);
+    add(HEIGHTCHARS, 8, "height-chars", TI.KEYWORD);
+    add(HEIGHTPIXELS, 8, "height-pixels", TI.KEYWORD);
     add(HELP, 4, "help", TI.KEYWORD | TI.RESERVED);
     add(HELPTOPIC, 10, "help-topic", TI.KEYWORD);
     add(HEXDECODE, 10, "hex-decode", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
@@ -1945,6 +1948,7 @@ public class NodeTypes implements ProParserTokenTypes, Xferable {
     allTokens[GETBYTEORDER].keywordText = "GET-BYTE-ORDER";
     allTokens[GETCGILIST].keywordText = "GET-CGI-LIST";
     allTokens[GETCGIVALUE].keywordText = "GET-CGI-VALUE";
+    allTokens[GETCODEPAGE].keywordText = "GET-CODEPAGE";
     allTokens[GETCODEPAGES].keywordText = "GET-CODEPAGES";
     allTokens[GETCOLLATIONS].keywordText = "GET-COLLATIONS";
     allTokens[GETCONFIGVALUE].keywordText = "GET-CONFIG-VALUE";
@@ -1970,6 +1974,8 @@ public class NodeTypes implements ProParserTokenTypes, Xferable {
     allTokens[HAVING].keywordText = "HAVING";
     allTokens[HEADER].keywordText = "HEADER";
     allTokens[HEIGHT].keywordText = "HEIGHT";
+    allTokens[HEIGHTCHARS].keywordText = "HEIGHT-CHARS";
+    allTokens[HEIGHTPIXELS].keywordText = "HEIGHT-PIXELS";
     allTokens[HELP].keywordText = "HELP";
     allTokens[HELPTOPIC].keywordText = "HELP-TOPIC";
     allTokens[HIDE].keywordText = "HIDE";

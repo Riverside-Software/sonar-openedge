@@ -1,0 +1,7 @@
+CLASS bugsfixed.bug28 :
+  METHOD PUBLIC STATIC VOID Make():
+    DEFINE VARIABLE zz AS Progress.Lang.Object NO-UNDO.
+    DEFINE VARIABLE lcProgName AS CHARACTER NO-UNDO.
+    zz = DYNAMIC-NEW lcProgName ( ).
+  END METHOD.
+END CLASS.

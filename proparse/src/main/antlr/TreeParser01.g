@@ -186,7 +186,7 @@ functioncall throws TreeParserException
   |  #(FRAMEDOWN (LEFTPAREN ID RIGHTPAREN)? )
   |  #(FRAMELINE (LEFTPAREN ID RIGHTPAREN)? )
   |  #(FRAMEROW (LEFTPAREN ID RIGHTPAREN)? )
-  |  #(GETCODEPAGES (funargs)? )
+  |  #(GETCODEPAGE funargs )
   |  #(GUID LEFTPAREN (expression)? RIGHTPAREN )
   |  #(IF expression THEN expression ELSE expression )
   |  ldbnamefunc 
@@ -468,20 +468,25 @@ choosestate throws TreeParserException
   ;
 
 classstate throws TreeParserException
-  :  #(  c:CLASS {action.classState(#c);}
+  :  #(  c:CLASS
       TYPE_NAME
       (  #(INHERITS TYPE_NAME)
       |  #(IMPLEMENTS TYPE_NAME (COMMA TYPE_NAME)* )
       |  USEWIDGETPOOL
-      |  ABSTRACT
-      |  FINAL
-      |   SERIALIZABLE
+      |  abstractKw:ABSTRACT
+      |  finalKw:FINAL
+      |  serializableKw:SERIALIZABLE
       )*
+      {action.classState(#c, #abstractKw, #finalKw, #serializableKw);}
       block_colon
       code_block
       #(END (CLASS)? )
       state_end
     )
+  ;
+
+interfacestate throws TreeParserException
+  :  #(i:INTERFACE {action.interfaceState(#i);} TYPE_NAME (interface_inherits)? block_colon code_block #(END (INTERFACE)?) state_end )
   ;
 
 clearstate throws TreeParserException
@@ -526,6 +531,9 @@ columnformat throws TreeParserException
       |  #(LABELBGCOLOR expression )
       |  #(LABELFGCOLOR expression )
       |  #(LEXAT af:fld[ContextQualifier.SYMBOL] {action.lexat(#af);} (columnformat)? )
+      |  #(HEIGHT NUMBER )
+      |  #(HEIGHTPIXELS NUMBER )
+      |  #(HEIGHTCHARS NUMBER )
       |  #(WIDTH NUMBER )
       |  #(WIDTHPIXELS NUMBER )
       |  #(WIDTHCHARS NUMBER )
@@ -579,7 +587,7 @@ createsocketstate throws TreeParserException
   ;
 
 createtemptablestate throws TreeParserException
-  :  #(CREATE TEMPTABLE fld[ContextQualifier.UPDATING] (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
+  :  #(CREATE TEMPTABLE (fld[ContextQualifier.UPDATING] | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
   ;
 
 createwidgetstate throws TreeParserException

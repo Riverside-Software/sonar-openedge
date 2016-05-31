@@ -218,14 +218,26 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void classState(AST classAST) {
+  public void classState(AST classAST, AST abstractKw, AST finalKw, AST serializableKw) {
     LOG.trace("Entering classState {}", classAST);
     JPNode classNode = (JPNode) classAST;
     JPNode idNode = classNode.firstChild();
     rootScope.setClassName(idNode.getText());
+    rootScope.setAbstractClass(abstractKw != null);
+    rootScope.setFinalClass(finalKw != null);
+    rootScope.setSerializableClass(serializableKw != null);
     if (idNode.nextSibling().getType() == NodeTypes.INHERITS)
       classStateInherits(classNode, idNode.nextSibling().firstChild());
   }
+
+  @Override
+  public void interfaceState(AST ast) {
+    LOG.trace("Entering interfaceState {}", ast);
+    JPNode classNode = (JPNode) ast;
+    JPNode idNode = classNode.firstChild();
+    rootScope.setClassName(idNode.getText());
+    rootScope.setInterface(true);
+  };
 
   @Override
   public void clearState(AST headAST) {

@@ -26,8 +26,12 @@ import org.prorefactor.xfer.DataXferStream;
  */
 public class SymbolScopeRoot extends SymbolScope {
   private final RefactorSession refSession;
-  private String className = null;
   private Map<String, Table> tableMap = new HashMap<>();
+  private String className = null;
+  private boolean isInterface;
+  private boolean abstractClass;
+  private boolean serializableClass;
+  private boolean finalClass;
 
   public SymbolScopeRoot(RefactorSession session) {
     super(null);
@@ -98,6 +102,45 @@ public class SymbolScopeRoot extends SymbolScope {
    */
   public String getClassName() {
     return className;
+  }
+
+  /**
+   * @return True is parse unit is a CLASS or INTERFACE
+   */
+  public boolean isClass() {
+    return className != null;
+  }
+
+  public void setInterface(boolean isInterface) {
+    this.isInterface = isInterface;
+  }
+
+  public boolean isInterface() {
+    return (className != null) && isInterface;
+  }
+
+  public void setAbstractClass(boolean abstractClass) {
+    this.abstractClass = abstractClass;
+  }
+
+  public boolean isAbstractClass() {
+    return abstractClass;
+  }
+
+  public void setFinalClass(boolean finalClass) {
+    this.finalClass = finalClass;
+  }
+
+  public boolean isFinalClass() {
+    return finalClass;
+  }
+
+  public void setSerializableClass(boolean serializableClass) {
+    this.serializableClass = serializableClass;
+  }
+
+  public boolean isSerializableClass() {
+    return serializableClass;
   }
 
   public TableBuffer getLocalTableBuffer(Table table) {

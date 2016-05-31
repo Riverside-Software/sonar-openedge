@@ -65,7 +65,10 @@ public interface ITreeParserAction {
   void canFindEnd(AST canfindAST) throws TreeParserException;
 
   /** Called by the tree parser at the CLASS node. */
-  void classState(AST classAST) throws TreeParserException;
+  void classState(AST classAST, AST abstractKw, AST finalKw, AST serializableKw) throws TreeParserException;
+
+  /** Called by the tree parser at the INTERFACE node. */
+  void interfaceState(AST classAST) throws TreeParserException;
 
   /** Called at the end of a CLEAR statement. */
   void clearState(AST headAST) throws TreeParserException;

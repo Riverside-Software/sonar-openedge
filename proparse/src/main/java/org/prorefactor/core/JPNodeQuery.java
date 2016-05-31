@@ -42,7 +42,7 @@ class JPNodeQuery implements ICallback<List<JPNode>> {
     if (stateHeadOnly && !node.isStateHead())
       return true;
 
-    if (findTypes.contains(node.getType())) {
+    if (findTypes.isEmpty() || findTypes.contains(node.getType())) {
       result.add(node);
     }
 

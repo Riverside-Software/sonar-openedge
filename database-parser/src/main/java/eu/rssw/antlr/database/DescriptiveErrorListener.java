@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 public class DescriptiveErrorListener extends BaseErrorListener {
   private static final Logger LOG = LoggerFactory.getLogger(DescriptiveErrorListener.class);
 
-  public static DescriptiveErrorListener INSTANCE = new DescriptiveErrorListener();
-
   @Override
   public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
       String msg, RecognitionException e) {
