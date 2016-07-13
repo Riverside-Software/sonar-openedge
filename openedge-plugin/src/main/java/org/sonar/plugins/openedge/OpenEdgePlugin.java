@@ -19,14 +19,10 @@
  */
 package org.sonar.plugins.openedge;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.sonar.api.ExtensionPoint;
+import org.sonar.api.Plugin;
 import org.sonar.api.PropertyType;
-import org.sonar.api.SonarPlugin;
 import org.sonar.api.config.PropertyDefinition;
+import org.sonar.api.resources.Qualifiers;
 import org.sonar.plugins.openedge.colorizer.OpenEdgeColorizerFormat;
 import org.sonar.plugins.openedge.colorizer.OpenEdgeDBColorizerFormat;
 import org.sonar.plugins.openedge.cpd.OpenEdgeCpdMapping;
@@ -52,8 +48,11 @@ import org.sonar.plugins.openedge.sensor.OpenEdgeWarningsSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeXREFSensor;
 import org.sonar.plugins.openedge.ui.CommonMetricsWidget;
 
-public class OpenEdgePlugin extends SonarPlugin {
-  public static final String SKIP_PARSER_PROPERTY = "sonar.oe.skipParser";
+public class OpenEdgePlugin implements Plugin {
+  private static final String CATEGORY_OPENEDGE = "OpenEdge";
+  private static final String SUBCATEGORY_GENERAL = "General";
+  private static final String SUBCATEGORY_DEBUG = "Debug";
+
   public static final String SKIP_PROPARSE_PROPERTY = "sonar.oe.skipProparse";
   public static final String PROPARSE_DEBUG = "sonar.oe.proparse.debug";
   public static final String BINARIES = "sonar.oe.binaries";
@@ -63,78 +62,48 @@ public class OpenEdgePlugin extends SonarPlugin {
   public static final String DATABASES = "sonar.oe.databases";
   public static final String ALIASES = "sonar.oe.aliases";
   public static final String CPD_DEBUG = "sonar.oe.cpd.debug";
+  public static final String SUFFIXES = "sonar.oe.file.suffixes";
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public List getExtensions() {
-    List list = new ArrayList<Class<? extends ExtensionPoint>>();
+  public void define(Context context) {
     // Main components
-    list.add(OpenEdge.class);
-    list.add(OpenEdgeDB.class);
-    list.add(OpenEdgeSettings.class);
+    context.addExtensions(OpenEdge.class, OpenEdgeDB.class, OpenEdgeSettings.class);
 
     // Profile and rules
-    list.add(OpenEdgeRulesDefinition.class);
-    list.add(OpenEdgeRulesRegistrar.class);
-    list.add(OpenEdgeLicenceRegistrar.class);
-    list.add(OpenEdgeProfile.class);
-    list.add(OpenEdgeDBProfile.class);
-    list.add(OpenEdgeMetrics.class);
-    list.add(OpenEdgeComponents.class);
+    context.addExtensions(OpenEdgeRulesDefinition.class, OpenEdgeRulesRegistrar.class, OpenEdgeLicenceRegistrar.class,
+        OpenEdgeProfile.class, OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
 
-    // UI
-    list.add(CommonMetricsWidget.class);
-
-    // Code colorizer
-    list.add(OpenEdgeColorizerFormat.class);
-    list.add(OpenEdgeDBColorizerFormat.class);
+    // UI and code colorizer
+    context.addExtensions(CommonMetricsWidget.class, OpenEdgeColorizerFormat.class, OpenEdgeDBColorizerFormat.class);
 
     // Sensors
-    list.add(OpenEdgeSensor.class);
-    list.add(OpenEdgeDBSensor.class);
-    list.add(OpenEdgeDebugListingSensor.class);
-    list.add(OpenEdgeListingSensor.class);
-    list.add(OpenEdgeWarningsSensor.class);
-    list.add(OpenEdgeXREFSensor.class);
-    list.add(OpenEdgeProparseSensor.class);
-    list.add(OpenEdgeDBRulesSensor.class);
+    context.addExtensions(OpenEdgeSensor.class, OpenEdgeDBSensor.class, OpenEdgeDebugListingSensor.class,
+        OpenEdgeListingSensor.class, OpenEdgeWarningsSensor.class, OpenEdgeXREFSensor.class,
+        OpenEdgeProparseSensor.class, OpenEdgeDBRulesSensor.class);
 
     // Copy Paste Detector
-    list.add(OpenEdgeCpdMapping.class);
+    context.addExtension(OpenEdgeCpdMapping.class);
 
     // Decorators
-    list.add(CommonMetricsDecorator.class);
-    list.add(CommonDBMetricsDecorator.class);
+    context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
 
     // Properties
-    list.add(PropertyDefinition.builder(SKIP_PARSER_PROPERTY).name("skipParser").description(
-        "Skip AST generation and lint rules").type(PropertyType.BOOLEAN).defaultValue(
-            Boolean.FALSE.toString()).build());
-    list.add(PropertyDefinition.builder(SKIP_PROPARSE_PROPERTY).name("skipProparse").description(
-        "Skip Proparse AST generation and lint rules").type(PropertyType.BOOLEAN).defaultValue(
-            Boolean.FALSE.toString()).build());
-    list.add(PropertyDefinition.builder(PROPARSE_DEBUG).name("debug_proparse").description(
-        "Generate JPNodeLister debug file").type(PropertyType.BOOLEAN).defaultValue(Boolean.FALSE.toString()).build());
-    list.add(PropertyDefinition.builder(CPD_DEBUG).name("debug_cpd").description("Generate CPD tokens listing").type(
-        PropertyType.BOOLEAN).defaultValue(Boolean.FALSE.toString()).build());
-    list.add(PropertyDefinition.builder(BINARIES).name("binaries").description(
-        "Build directory (where .r is generated), relative to base directory").type(PropertyType.STRING).defaultValue(
-            "build").build());
-    list.add(PropertyDefinition.builder(PROPATH).name("propath").description(
-        "PROPATH, as a comma-separated list of directories and PL").type(PropertyType.STRING).defaultValue("").build());
-    list.add(PropertyDefinition.builder(DATABASES).name("databases").description(
-        "DB connections, as a comma-separated list of DF files (with optional alias after ';')").type(
-            PropertyType.STRING).defaultValue("").build());
-    list.add(PropertyDefinition.builder(ALIASES).name("aliases").description(
-        "DB connections, as a comma-separated list of DF files (with optional alias after ';')").type(
-            PropertyType.STRING).defaultValue("").build());
-    list.add(PropertyDefinition.builder(DLC).name("dlc").description("OpenEdge installation path").type(
-        PropertyType.STRING).defaultValue("").build());
-    list.add(PropertyDefinition.builder(PROPATH_DLC).name("dlc_in_propath").description(
-        "Include OE instllation path in propath").type(PropertyType.BOOLEAN).defaultValue(
-            Boolean.TRUE.toString()).build());
-
-    return Collections.unmodifiableList(list);
+    context.addExtension(PropertyDefinition.builder(SKIP_PROPARSE_PROPERTY).name("Skip ProParse step").description(
+        "Skip Proparse AST generation and lint rules").type(PropertyType.BOOLEAN).category(
+            CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
+                Qualifiers.PROJECT).defaultValue(Boolean.FALSE.toString()).build());
+    context.addExtension(PropertyDefinition.builder(PROPARSE_DEBUG).name("Proparse debug files").description(
+        "Generate JPNodeLister debug file in .proparse directory").type(PropertyType.BOOLEAN).category(
+            CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_DEBUG).defaultValue(Boolean.FALSE.toString()).onQualifiers(
+                Qualifiers.MODULE, Qualifiers.PROJECT).build());
+    context.addExtension(PropertyDefinition.builder(CPD_DEBUG).name("CPD debug files").description(
+        "Generate CPD tokens listing file").type(PropertyType.BOOLEAN).category(CATEGORY_OPENEDGE).subCategory(
+            SUBCATEGORY_DEBUG).defaultValue(Boolean.FALSE.toString()).onQualifiers(Qualifiers.MODULE,
+                Qualifiers.PROJECT).build());
+    context.addExtension(PropertyDefinition.builder(SUFFIXES).name("File suffixes").description(
+        "Comma-separated list of suffixes of OpenEdge files to analyze").type(PropertyType.STRING).defaultValue(
+            "").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
+                Qualifiers.PROJECT).build());
   }
 
 }

@@ -20,12 +20,10 @@ import org.sonar.api.server.rule.RulesDefinitionAnnotationLoader;
 import org.sonar.api.utils.AnnotationUtils;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
-import org.sonar.plugins.openedge.api.model.NoSqale;
 import org.sonar.plugins.openedge.api.model.RuleTemplate;
 import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
 import org.sonar.plugins.openedge.api.model.SqaleLinearRemediation;
 import org.sonar.plugins.openedge.api.model.SqaleLinearWithOffsetRemediation;
-import org.sonar.plugins.openedge.api.model.SqaleSubCharacteristic;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -64,13 +62,6 @@ public class AnnotationBasedRulesDefinition {
   private final String languageKey;
   private final ExternalDescriptionLoader externalDescriptionLoader;
 
-  /**
-   * Adds annotated rule classes to an instance of NewRepository. Fails if one the classes has no SQALE annotation.
-   */
-  public static void load(NewRepository repository, String languageKey, Iterable<Class> ruleClasses) {
-    new AnnotationBasedRulesDefinition(repository, languageKey).addRuleClasses(true, ruleClasses);
-  }
-
   public AnnotationBasedRulesDefinition(NewRepository repository, String languageKey) {
     this.repository = repository;
     this.languageKey = languageKey;
@@ -78,20 +69,24 @@ public class AnnotationBasedRulesDefinition {
     this.externalDescriptionLoader = new ExternalDescriptionLoader(repository, externalDescriptionBasePath);
   }
 
-  public void addRuleClasses(boolean failIfSqaleNotFound, Iterable<Class> ruleClasses) {
-    addRuleClasses(failIfSqaleNotFound, true, ruleClasses);
+  /**
+   * Adds annotated rule classes to an instance of NewRepository. Fails if one the classes has no SQALE annotation.
+   */
+  public static void load(NewRepository repository, String languageKey, Iterable<Class> ruleClasses) {
+    new AnnotationBasedRulesDefinition(repository, languageKey).addRuleClasses(true, ruleClasses);
   }
 
-  public void addRuleClasses(boolean failIfSqaleNotFound, boolean failIfNoExplicitKey, Iterable<Class> ruleClasses) {
+  public void addRuleClasses(Iterable<Class> ruleClasses) {
+    addRuleClasses(true, ruleClasses);
+  }
+
+  public void addRuleClasses(boolean failIfNoExplicitKey, Iterable<Class> ruleClasses) {
     new RulesDefinitionAnnotationLoader().load(repository, Iterables.toArray(ruleClasses, Class.class));
     List<NewRule> newRules = Lists.newArrayList();
     for (Class<?> ruleClass : ruleClasses) {
       NewRule rule = newRule(ruleClass, failIfNoExplicitKey);
       externalDescriptionLoader.addHtmlDescription(rule, ruleClass);
       rule.setTemplate(AnnotationUtils.getAnnotation(ruleClass, RuleTemplate.class) != null);
-      if (!isSqaleAnnotated(ruleClass) && failIfSqaleNotFound) {
-        throw new IllegalArgumentException("No SqaleSubCharacteristic annotation was found on " + ruleClass);
-      }
       try {
         setupSqaleModel(rule, ruleClass);
       } catch (RuntimeException e) {
@@ -100,10 +95,6 @@ public class AnnotationBasedRulesDefinition {
       newRules.add(rule);
     }
     setupExternalNames(newRules);
-  }
-
-  private boolean isSqaleAnnotated(Class<?> ruleClass) {
-    return false;
   }
 
   @VisibleForTesting
@@ -149,11 +140,6 @@ public class AnnotationBasedRulesDefinition {
   }
 
   private void setupSqaleModel(NewRule rule, Class<?> ruleClass) {
-    SqaleSubCharacteristic subChar = getSqaleSubCharAnnotation(ruleClass);
-    if (subChar != null) {
-      rule.setDebtSubCharacteristic(subChar.value());
-    }
-
     SqaleConstantRemediation constant = AnnotationUtils.getAnnotation(ruleClass, SqaleConstantRemediation.class);
     SqaleLinearRemediation linear = AnnotationUtils.getAnnotation(ruleClass, SqaleLinearRemediation.class);
     SqaleLinearWithOffsetRemediation linearWithOffset = AnnotationUtils.getAnnotation(ruleClass,
@@ -169,32 +155,25 @@ public class AnnotationBasedRulesDefinition {
     }
     if (linear != null) {
       rule.setDebtRemediationFunction(rule.debtRemediationFunctions().linear(linear.coeff()));
-      rule.setEffortToFixDescription(linear.effortToFixDescription());
+      rule.setGapDescription(linear.effortToFixDescription());
     }
     if (linearWithOffset != null) {
       rule.setDebtRemediationFunction(
           rule.debtRemediationFunctions().linearWithOffset(linearWithOffset.coeff(), linearWithOffset.offset()));
-      rule.setEffortToFixDescription(linearWithOffset.effortToFixDescription());
+      rule.setGapDescription(linearWithOffset.effortToFixDescription());
     }
-  }
-
-  private SqaleSubCharacteristic getSqaleSubCharAnnotation(Class<?> ruleClass) {
-    return AnnotationUtils.getAnnotation(ruleClass, SqaleSubCharacteristic.class);
-  }
-
-  private NoSqale getNoSqaleAnnotation(Class<?> ruleClass) {
-    return AnnotationUtils.getAnnotation(ruleClass, NoSqale.class);
   }
 
   private class ExternalDescriptionLoader {
-
+    private final NewRepository repository;
     private final String resourceBasePath;
 
     public ExternalDescriptionLoader(NewRepository repository, String resourceBasePath) {
+      this.repository = repository;
       this.resourceBasePath = resourceBasePath;
     }
 
-    public void addHtmlDescription(NewRule rule, Class clz) {
+    public void addHtmlDescription(NewRule rule, Class<?> clz) {
       URL resource = clz.getResource(resourceBasePath + "/" + rule.key() + ".html");
       if (resource != null) {
         addHtmlDescription(rule, resource);

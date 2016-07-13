@@ -696,6 +696,8 @@ definedatasetstate throws TreeParserException
       id:ID { push(action.defineSymbol(DATASET, #def, #id)); }
       (namespace_uri)? (namespace_prefix)? (xml_node_name)?
       ( #(SERIALIZENAME QSTRING) )?
+      (xml_node_type)?
+      (SERIALIZEHIDDEN)?
       (REFERENCEONLY)?
       FOR tb1:tbl[ContextQualifier.INIT] {action.datasetTable(#tb1);}
       (COMMA tb2:tbl[ContextQualifier.INIT] {action.datasetTable(#tb2);} )*

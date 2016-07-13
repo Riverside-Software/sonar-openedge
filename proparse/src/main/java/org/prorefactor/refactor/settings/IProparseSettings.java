@@ -12,8 +12,6 @@ package org.prorefactor.refactor.settings;
 
 public interface IProparseSettings {
 
-  public void enableParserListing();
-  public void disableParserListing();
   public void enableProjectBinaries();
   public void disableProjectBinaries();
 
@@ -21,7 +19,6 @@ public interface IProparseSettings {
   public boolean getIndentTab();
   public boolean isMultiParse();
   public boolean getProparseDirectives();
-  public boolean getParserListing();
   public boolean getProjectBinaries();
   public int getIndentSpaces();
   public String getKeywordAll();

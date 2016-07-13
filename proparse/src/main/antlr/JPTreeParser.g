@@ -1236,7 +1236,7 @@ createdatasourcestate throws TreeParserException
   ;
 
 createquerystate throws TreeParserException
-  :  #(CREATE QUERY (field | widattr) (#(IN_KW WIDGETPOOL expression))? state_end )
+  :  #(CREATE QUERY (field | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
   ;
 
 createsaxreaderstate throws TreeParserException

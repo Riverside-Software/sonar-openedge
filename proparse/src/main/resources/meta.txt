@@ -664,6 +664,79 @@ _AreaStatus-Rmnum INT64 0
 _AreaThreshold-ID INT64 0
 _AreaThresholdArea INTEGER 0
 _AreaThreshold INTEGER 0
+: _aud-audit-data
+_Audit-data-guid CHARACTER 0
+_Database-connection-id CHARACTER 0
+_Client-session-uuid CHARACTER 0
+_User-id CHARACTER 0
+_Audit-date-time DATETIME-TZ 0
+_Audit-event-group CHARACTER 0
+_Db-guid CHARACTER 0
+_Transaction-id INTEGER 0
+_Transaction-sequence INTEGER 0
+_Event-id INTEGER 0
+_Event-context CHARACTER 0
+_Application-context-id CHARACTER 0
+_Event-detail CHARACTER 0
+_Audit-custom-detail CHARACTER 0
+_Audit-data-security-level INTEGER 0
+_Data-seal CHARACTER 0
+: _aud-audit-data-value
+_Audit-data-guid CHARACTER 0
+_Field-name CHARACTER 0
+_Continuation-sequence INTEGER 0
+_Data-type-code INTEGER 0
+_Old-string-value CHARACTER 0
+_New-string-value CHARACTER 0
+_Old-blob-value BLOB 0
+_New-blob-value BLOB 0
+_Old-clob-value CLOB 0
+_New-clob-value CLOB 0
+_Audit-data-security-level INTEGER 0
+_Data-seal CHARACTER 0
+: _aud-audit-policy
+_Audit-policy-guid CHARACTER 0
+_Audit-policy-name CHARACTER 0
+_Audit-policy-description CHARACTER 0
+_Audit-data-security-level INTEGER 0
+_Audit-custom-detail-level INTEGER 0
+_Audit-policy-active LOGICAL 0
+: _aud-event
+_Event-id INTEGER 0
+_Event-type CHARACTER 0
+_Event-name CHARACTER 0
+_Event-description CHARACTER 0
+: _aud-event-policy
+_Audit-policy-guid CHARACTER 0
+_Event-id INTEGER 0
+_Event-level INTEGER 0
+_Event-criteria CHARACTER 0
+: _aud-field-policy
+_Audit-policy-guid CHARACTER 0
+_File-Name CHARACTER 0
+_Owner CHARACTER 0
+_Field-Name CHARACTER 0
+_Audit-create-level INTEGER 0
+_Audit-update-level INTEGER 0
+_Audit-delete-level INTEGER 0
+_Audit-read-level INTEGER 0
+_Audit-identifying-field INTEGER 0
+: _aud-file-policy
+_Audit-policy-guid CHARACTER 0
+_File-Name CHARACTER 0
+_Owner CHARACTER 0
+_Audit-create-level INTEGER 0
+_Audit-create-criteria CHARACTER 0
+_Audit-update-level INTEGER 0
+_Audit-update-criteria CHARACTER 0
+_Audit-delete-level INTEGER 0
+_Audit-delete-criteria CHARACTER 0
+_Audit-read-level INTEGER 0
+_Audit-read-criteria CHARACTER 0
+_Create-event-id INTEGER 0
+_Update-event-id INTEGER 0
+_Delete-event-id INTEGER 0
+_Read-event-id INTEGER 0
 : _Block
 _Block-Id INT64 0
 _Block-Dbkey INT64 0

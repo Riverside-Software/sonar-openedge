@@ -10,20 +10,16 @@
  *******************************************************************************/ 
 package org.prorefactor.core.schema;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.prorefactor.xfer.DataXferStream;
-import org.prorefactor.xfer.Xferable;
-
 /**
- * Database objects are created by the Schema class, and they are used when looking up table names from 4gl comile
+ * Database objects are created by the Schema class, and they are used when looking up table names from 4gl compile
  * units. "id" field is a database number, starting at one. Might be the logical database number - depends on how you
  * use this.
  */
-public class Database implements Xferable {
+public class Database {
   /** Comparator for sorting by name. */
   public static final Comparator<Database> NAME_ORDER = new Comparator<Database>() {
     @Override
@@ -32,27 +28,27 @@ public class Database implements Xferable {
     }
   };
 
-  private String name;
-  private SortedSet<Table> tableSet = new TreeSet<>(Table.NAME_ORDER);
+  private final String name;
+  private final SortedSet<Table> tableSet = new TreeSet<>(Table.NAME_ORDER);
 
-  public Database() {
-    // For Xferable
-  }
-
+  /**
+   * New Database object
+   * @param name Main DB name
+   */
   public Database(String name) {
-    this.setName(name);
+    this.name = name;
   }
 
+  /**
+   * Add new Table object
+   * @param table
+   */
   public void add(Table table) {
     tableSet.add(table);
   }
 
   public String getName() {
     return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public SortedSet<Table> getTableSet() {
@@ -62,15 +58,5 @@ public class Database implements Xferable {
   @Override
   public String toString() {
     return new StringBuilder("DB ").append(name).toString();
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    out.writeRef(name);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    out.schemaRef("name");
   }
 }

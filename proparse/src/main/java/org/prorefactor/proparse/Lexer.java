@@ -16,9 +16,10 @@ import java.util.Set;
 
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.macrolevel.MacroDef;
 
 public class Lexer {
-  private static final int EOF_CHAR = Preprocessor.EOF_CHAR;
+  private static final int EOF_CHAR = -1;
 
   /** Lowercase value of current character */
   private int currChar;
@@ -82,12 +83,12 @@ public class Lexer {
       // Check this before setting currText...
       // we don't want BEGIN_PROPARSE_DIRECTIVE in the text
       if (currInt == Preprocessor.PROPARSE_DIRECTIVE) {
-        textStartFile = prepro.textStartFile;
-        textStartLine = prepro.textStartLine;
-        textStartCol = prepro.textStartCol;
-        textStartSource = prepro.textStartSourceNum;
+        textStartFile = prepro.getTextStart().getFile();
+        textStartLine = prepro.getTextStart().getLine();
+        textStartCol = prepro.getTextStart().getCol();
+        textStartSource = prepro.getTextStart().getSourceNum();
         getChar();
-        return makeToken(ProParserTokenTypes.PROPARSEDIRECTIVE, prepro.proparseDirectiveText);
+        return makeToken(ProParserTokenTypes.PROPARSEDIRECTIVE, prepro.getProparseDirectiveText());
       }
 
       textStartFile = prepro.getFileIndex();
@@ -115,7 +116,7 @@ public class Lexer {
 
         case '"':
         case '\'':
-          if (prepro.escapeCurrent) {
+          if (prepro.isEscapeCurrent()) {
             getChar();
             // Escaped quote does not start a string
             return id(ProParserTokenTypes.FILENAME);
@@ -344,7 +345,7 @@ public class Lexer {
     // We preserve that text.
     // Note that macros are *not* expanded inside comments.
     // (See the preprocessor source)
-    prepro.doingComment = true;
+    prepro.setDoingComment(true);
     append(); // currChar=='*'
     int commentLevel = 1;
     while (commentLevel > 0) {
@@ -366,7 +367,7 @@ public class Lexer {
         prepro.lexicalThrow("Missing end of comment");
       }
     }
-    prepro.doingComment = false;
+    prepro.setDoingComment(false);
     getChar();
     return makeToken(ProParserTokenTypes.COMMENT);
   }
@@ -395,7 +396,7 @@ public class Lexer {
       if (currInt == EOF_CHAR)
         prepro.lexicalThrow("Unmatched quote");
       unEscapedAppend();
-      if (currInt == currStringType && !prepro.escapeCurrent) {
+      if (currInt == currStringType && !prepro.isEscapeCurrent()) {
         getChar();
         if (currInt == currStringType) { // quoted quote
           unEscapedAppend();
@@ -521,7 +522,7 @@ public class Lexer {
           ttype = ProParserTokenTypes.FILENAME;
           break;
         case '.':
-          if (prepro.nameDot) {
+          if (prepro.isNameDot()) {
             append();
             getChar();
             break;
@@ -594,7 +595,7 @@ public class Lexer {
           ttype = ProParserTokenTypes.FILENAME;
           break;
         case '.':
-          if (prepro.nameDot) {
+          if (prepro.isNameDot()) {
             append();
             getChar();
             break;
@@ -612,7 +613,7 @@ public class Lexer {
 
   ProToken periodStart() throws IOException {
     if (!Character.isDigit(currChar)) {
-      if (prepro.nameDot)
+      if (prepro.isNameDot())
         return makeToken(ProParserTokenTypes.NAMEDOT);
       else
         return makeToken(ProParserTokenTypes.PERIOD);
@@ -960,7 +961,7 @@ public class Lexer {
   }
 
   void macroDefine(int defType) throws IOException {
-    if (prepro.consuming != 0)
+    if (prepro.isConsuming())
       return;
     int it = 0;
     int end = currText.length();
@@ -977,15 +978,8 @@ public class Lexer {
     String defText = StringFuncs.stripComments(currText.substring(it));
     defText = defText.trim();
     // Do listing before lowercasing the name
-    // Escape line breaks. Somehow it is possible to get line breaks into globdef/scopdef.
-    if (prepro.listing) {
-      StringBuilder bldr = new StringBuilder();
-      bldr.append(textStartFile).append(" ").append(textStartLine).append(" ").append(textStartCol).append(
-          (defType == ProParserTokenTypes.AMPGLOBALDEFINE ? " globdef " : " scopdef ")).append(macroName).append(" ").append(
-              StringFuncs.escapeLineBreaks(defText));
-      prepro.listingStream.write(bldr.toString());
-      prepro.listingStream.newLine();
-    }
+    prepro.getLstListener().define(textStartLine, textStartCol, macroName, defText,
+        defType == ProParserTokenTypes.AMPGLOBALDEFINE ? MacroDef.GLOBAL : MacroDef.SCOPED);
     if (defType == ProParserTokenTypes.AMPGLOBALDEFINE)
       prepro.defGlobal(macroName.toLowerCase(), defText);
     else
@@ -993,7 +987,7 @@ public class Lexer {
   }
 
   void macroUndefine() throws IOException {
-    if (prepro.consuming != 0)
+    if (prepro.isConsuming())
       return;
     int it = 0;
     int end = currText.length();
@@ -1006,13 +1000,7 @@ public class Lexer {
       ++it; // macro name
     String macroName = currText.substring(start, it);
     // List the name as in the code - not lowercased
-    if (prepro.listing) {
-      StringBuilder bldr = new StringBuilder();
-      bldr.append(textStartFile).append(" ").append(textStartLine).append(" ").append(textStartCol).append(
-          " undef ").append(macroName);
-      prepro.listingStream.write(bldr.toString());
-      prepro.listingStream.newLine();
-    }
+    prepro.getLstListener().undefine(textStartLine, textStartCol, macroName);
     prepro.undef(macroName.toLowerCase());
   }
 
@@ -1065,9 +1053,9 @@ public class Lexer {
   }
 
   void unEscapedAppend() {
-    if (prepro.wasEscape) {
-      append(prepro.escapeText);
-      if (prepro.escapeAppend)
+    if (prepro.wasEscape()) {
+      append(prepro.getEscapeText());
+      if (prepro.isEscapeAppend())
         append();
     } else
       append();

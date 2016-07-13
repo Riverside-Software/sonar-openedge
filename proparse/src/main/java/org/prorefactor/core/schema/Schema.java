@@ -35,7 +35,7 @@ import com.google.common.io.LineProcessor;
  * Schema is a singleton with methods and fields for working with database schema names, and references to those from
  * 4gl compile units.
  */
-public class Schema {
+public class Schema implements ISchema {
   private static final Logger LOGGER = LoggerFactory.getLogger(Schema.class);
 
   private static final Comparator<Table> ALLTABLES_ORDER = new Comparator<Table>() {
@@ -78,9 +78,9 @@ public class Schema {
    * @param dbname The database's logical name
    * @return Empty string.
    */
-  public String aliasCreate(String aliasname, String dbname) {
+  @Override
+  public void createAlias(String aliasname, String dbname) {
     aliases.put(aliasname.toLowerCase(), dbname);
-    return "";
   }
 
   /**
@@ -88,7 +88,8 @@ public class Schema {
    * 
    * @param aliasname The name for the alias, null or empty string to delete all.
    */
-  public void aliasDelete(String aliasname) {
+  @Override
+  public void deleteAlias(String aliasname) {
     if (aliasname == null || aliasname.length() == 0) {
       aliases.clear();
     } else {
@@ -124,6 +125,113 @@ public class Schema {
    */
   private final void loadSchema(String from) throws IOException {
     loadSchema(new File(from));
+  }
+
+  @Override
+  public Database lookupDatabase(String inName) {
+    Database db = lookupDatabase2(inName);
+    if (db != null)
+      return db;
+    // Check for database alias
+    String realName = aliases.get(inName.toLowerCase());
+    if (realName == null)
+      return null;
+    return lookupDatabase2(realName);
+  }
+
+  @Override
+  public Field lookupField(String dbName, String tableName, String fieldName) {
+    Table table = lookupTable(dbName, tableName);
+    if (table == null)
+      return null;
+    return table.lookupField(fieldName);
+  }
+
+  @Override
+  public Table lookupTable(String inName) {
+    if (inName.indexOf('.') > -1) {
+      Table firstTry = lookupTable2(inName);
+      if (firstTry != null)
+        return firstTry;
+      return lookupMetaTable(inName);
+    }
+    return lookupTableCheckName(allTables.tailSet(new Table(inName)), inName);
+  }
+
+  @Override
+  public Table lookupTable(String dbName, String tableName) {
+    Database db = lookupDatabase(dbName);
+    if (db == null)
+      return null;
+    return lookupTableCheckName(db.getTableSet().tailSet(new Table(tableName)), tableName);
+  }
+
+  @Override
+  public Field lookupUnqualifiedField(String name) {
+    Field field;
+    for (Object allTable : allTables) {
+      Table table = (Table) allTable;
+      field = table.lookupField(name);
+      if (field != null)
+        return field;
+    }
+    return null;
+  }
+
+  /**
+   * Lookup Database by name. Called twice by lookupDatabase().
+   */
+  private Database lookupDatabase2(String inName) {
+    SortedSet<Database> dbTailSet = dbSet.tailSet(new Database(inName));
+    if (dbTailSet.isEmpty())
+      return null;
+    Database db = dbTailSet.first();
+    if (db == null || db.getName().compareToIgnoreCase(inName) != 0)
+      return null;
+    return db;
+  }
+
+  // It turns out that we *do* have to test for uniqueness - we can't just leave
+  // that job to the compiler. That's because when looking up schema names for
+  // a DEF..LIKE x, if x is non-unique in schema, then we move on to temp/work/buffer names.
+  private Table lookupTableCheckName(SortedSet<Table> set, String name) {
+    String lname = name.toLowerCase();
+    Iterator<Table> it = set.iterator();
+    if (!it.hasNext())
+      return null;
+    Table table = it.next();
+    // test that we got a match
+    if (!table.getName().toLowerCase().startsWith(lname))
+      return null;
+    // test that we got a unique match
+    if (lname.length() < table.getName().length() && it.hasNext()) {
+      Table next = it.next();
+      if (next.getName().toLowerCase().startsWith(lname))
+        return null;
+    }
+    return table;
+  }
+
+  /** Lookup a qualified table name */
+  private Table lookupTable2(String inName) {
+    String[] parts = inName.split("\\.");
+    if (parts == null) {
+      // Only in the case 'inName' equals '.'
+      return null;
+    }
+    return lookupTable(parts[0], parts[1]);
+  }
+
+  /**
+   * This is for looking up names like "sports._file". We return the dictdb Table.
+   */
+  private Table lookupMetaTable(String inName) {
+    String[] parts = inName.split("\\.");
+    Database db = lookupDatabase(parts[0]);
+    if ((db == null) || (parts[1] == null) || (!parts[1].startsWith("_"))) {
+      return null;
+    }
+    return lookupTableCheckName(db.getTableSet().tailSet(new Table(parts[1])), parts[1]);
   }
 
   private class SchemaLineProcessor implements LineProcessor<Void> {
@@ -168,125 +276,6 @@ public class Schema {
     public Void getResult() {
       return null;
     }
-  }
-
-  /** Lookup Database, with alias checks. */
-  public Database lookupDatabase(String inName) {
-    Database db = lookupDatabase2(inName);
-    if (db != null)
-      return db;
-    // Check for database alias
-    String realName = aliases.get(inName.toLowerCase());
-    if (realName == null)
-      return null;
-    return lookupDatabase2(realName);
-  }
-
-  /**
-   * Lookup Database by name. Called twice by lookupDatabase().
-   */
-  private Database lookupDatabase2(String inName) {
-    SortedSet<Database> dbTailSet = dbSet.tailSet(new Database(inName));
-    if (dbTailSet.isEmpty())
-      return null;
-    Database db = dbTailSet.first();
-    if (db == null || db.getName().compareToIgnoreCase(inName) != 0)
-      return null;
-    return db;
-  }
-
-  /** Lookup a Field, given the db, table, and field names */
-  public Field lookupField(String dbName, String tableName, String fieldName) {
-    Table table = lookupTable(dbName, tableName);
-    if (table == null)
-      return null;
-    return table.lookupField(fieldName);
-  }
-
-  /**
-   * Lookup a table by name.
-   * 
-   * @param inName The string table name to lookup.
-   * @return A Table, or null if not found. If a name like "db.table" fails on the first lookup try, we next search
-   *         dictdb for the table, in case it's something like "sports._file". In that case, the Table from the "dictdb"
-   *         database would be returned. We don't keep meta-schema records in the rest of the databases.
-   */
-  public Table lookupTable(String inName) {
-    if (inName.indexOf('.') > -1) {
-      Table firstTry = lookupTable2(inName);
-      if (firstTry != null)
-        return firstTry;
-      return lookupMetaTable(inName);
-    }
-    return lookupTableCheckName(allTables.tailSet(new Table(inName)), inName);
-  }
-
-  /** Lookup a table, given a database name and a table name. */
-  public Table lookupTable(String dbName, String tableName) {
-    Database db = lookupDatabase(dbName);
-    if (db == null)
-      return null;
-    return lookupTableCheckName(db.getTableSet().tailSet(new Table(tableName)), tableName);
-  }
-
-  // It turns out that we *do* have to test for uniqueness - we can't just leave
-  // that job to the compiler. That's because when looking up schema names for
-  // a DEF..LIKE x, if x is non-unique in schema, then we move on to temp/work/buffer names.
-  private Table lookupTableCheckName(SortedSet<Table> set, String name) {
-    String lname = name.toLowerCase();
-    Iterator<Table> it = set.iterator();
-    if (!it.hasNext())
-      return null;
-    Table table = it.next();
-    // test that we got a match
-    if (!table.getName().toLowerCase().startsWith(lname))
-      return null;
-    // test that we got a unique match
-    if (lname.length() < table.getName().length() && it.hasNext()) {
-      Table next = it.next();
-      if (next.getName().toLowerCase().startsWith(lname))
-        return null;
-    }
-    return table;
-  }
-
-  /** Lookup a qualified table name */
-  private Table lookupTable2(String inName) {
-    String[] parts = inName.split("\\.");
-    if (parts == null) {
-      // Only in the case 'inName' equals '.'
-      return null;
-    }
-    return lookupTable(parts[0], parts[1]);
-  }
-
-  /**
-   * This is for looking up names like "sports._file". We return the dictdb Table.
-   */
-  private Table lookupMetaTable(String inName) {
-    String[] parts = inName.split("\\.");
-    Database db = lookupDatabase("dictdb");
-    if (db == null)
-      return null;
-    return lookupTableCheckName(db.getTableSet().tailSet(new Table(parts[1])), parts[1]);
-  }
-
-  /**
-   * Lookup an unqualified schema field name. Does not test for uniqueness. That job is left to the compiler. In fact,
-   * anywhere this is run, the compiler would check that the field name is also unique against temp/work tables.
-   * 
-   * @param name Unqualified schema field name
-   * @return Null if nothing found
-   */
-  public Field lookupUnqualifiedField(String name) {
-    Field field;
-    for (Object allTable : allTables) {
-      Table table = (Table) allTable;
-      field = table.lookupField(name);
-      if (field != null)
-        return field;
-    }
-    return null;
   }
 
 }

@@ -21,29 +21,41 @@ package org.sonar.plugins.openedge.foundation;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+import org.sonar.api.config.Settings;
 import org.sonar.api.resources.AbstractLanguage;
-import org.sonar.plugins.openedge.api.com.google.common.collect.ImmutableList;
+import org.sonar.plugins.openedge.OpenEdgePlugin;
+import org.sonar.plugins.openedge.api.com.google.common.collect.Lists;
 
 public class OpenEdge extends AbstractLanguage {
+  private static final String DEFAULT_FILE_SUFFIXES = "p,w,i,cls";
   public static final String KEY = "oe";
-  public final List<String> extensions;
-  
-  public OpenEdge() {
+
+  private final Settings settings;
+
+  public OpenEdge(Settings settings) {
     super(KEY, "OpenEdge");
-    extensions = ImmutableList.of(".p", ".w", ".i", ".cls");
+    this.settings = settings;
   }
 
   @Override
   public String[] getFileSuffixes() {
-    return extensions.toArray(new String[] {});
+    String[] suffixes = filterEmptyStrings(settings.getStringArray(OpenEdgePlugin.SUFFIXES));
+    if (suffixes.length == 0) {
+      suffixes = StringUtils.split(OpenEdge.DEFAULT_FILE_SUFFIXES, ",");
+    }
+    return suffixes;
   }
 
-  /**
-   * Returns the list of managed extensions
-   * 
-   * @return A non-null List
-   */
-  public List<String> getFileSuffixesList() {
-    return extensions;
+  // From the PHP plugin
+  private static String[] filterEmptyStrings(String[] stringArray) {
+    List<String> nonEmptyStrings = Lists.newArrayList();
+    for (String string : stringArray) {
+      if (StringUtils.isNotBlank(string.trim())) {
+        nonEmptyStrings.add(string.trim());
+      }
+    }
+    return nonEmptyStrings.toArray(new String[nonEmptyStrings.size()]);
   }
+
 }

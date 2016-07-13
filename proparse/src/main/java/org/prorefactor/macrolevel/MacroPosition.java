@@ -1,5 +1,8 @@
 package org.prorefactor.macrolevel;
 
+/**
+ * Position of macro in a file 
+ */
 public class MacroPosition {
   private final int fileNum;
   private final int line;

@@ -12,16 +12,13 @@ package org.prorefactor.treeparser;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.macrolevel.IncludeRef;
-import org.prorefactor.macrolevel.ListingParser;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.proparse.DoParse;
@@ -198,23 +195,10 @@ public class ParseUnit {
 
   public void parse() throws RefactorException {
     LOGGER.trace("Entering ParseUnit#parse()");
-    session.enableParserListing();
     DoParse doParse = new DoParse(session, file.getPath());
     try {
       doParse.doParse();
-      ListingParser listingParser = new ListingParser(session.getListingFileName());
-      listingParser.parse();
-      macroGraph = listingParser.getRoot();
-      if (session.getProjectBinariesEnabled()) {
-        LOGGER.trace("ParseUnit#parse() - Writing PUB");
-        File macroGraphFile = macroGraphFile();
-        macroGraphFile.getParentFile().mkdirs();
-        FileOutputStream fileOut = new FileOutputStream(macroGraphFile);
-        ObjectOutputStream out = new ObjectOutputStream(fileOut);
-        out.writeObject(macroGraph);
-        out.close();
-        fileOut.close();
-      }
+      macroGraph = doParse.getMacroGraph();
     } catch (ANTLRException | IOException caught) {
       throw new RefactorException(caught);
     }

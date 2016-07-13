@@ -91,13 +91,41 @@ public abstract class AbstractLintRule {
   /**
    * Reports issue
    * 
-   * @param node Node where issue happened
-   * @param msg Additional message
+   * @param lineNumber Line number (must be greater than 0)
+   * @param msg Message to be reported
    */
   public void reportIssue(int lineNumber, String msg) {
     LOG.trace("Adding issue {} to {} line {}", new Object[] { (ruleKey == null ? null : ruleKey.rule()), (file == null ? null : file.relativePath()), lineNumber });
     NewIssue issue = context.newIssue();
     issue.forRule(ruleKey).at(issue.newLocation().on(file).at(file.selectLine(lineNumber)).message(msg)).save();
+  }
+
+  /**
+   * Reports issue on given file name
+   * 
+   * @param fileName Relative file name
+   * @param lineNumber Line number (must be greater than 0)
+   * @param msg
+   */
+  public void reportIssue(String fileName, int lineNumber, String msg) {
+    LOG.trace("Adding issue {} to {} line {}", new Object[] { ruleKey == null ? null : ruleKey.rule(), fileName, lineNumber });
+    NewIssue issue = context.newIssue();
+    InputFile targetFile = context.fileSystem().inputFile(context.fileSystem().predicates().hasRelativePath(fileName));
+    if (targetFile == null) {
+      targetFile = context.fileSystem().inputFile(context.fileSystem().predicates().hasAbsolutePath(fileName));
+      if (targetFile == null)
+        return;
+    }
+    NewIssueLocation location = issue.newLocation().on(targetFile);
+    if (targetFile == this.file) {
+      location.message(msg);
+    } else {
+      location.message("From " + file.relativePath() + " - " + msg);
+    }
+    if (lineNumber > 0) {
+      location.at(targetFile.selectLine(lineNumber));
+    }
+    issue.forRule(ruleKey).at(location).save();
   }
 
   /**

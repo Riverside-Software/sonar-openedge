@@ -21,6 +21,7 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.refactor.RefactorSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ public class DoParse {
   boolean preProcessCondition = false;
   boolean preProcessConditionResult = false;
   private JPNodeMetrics metrics;
+  private IncludeRef macroGraph;
 
   public DoParse(RefactorSession sess, String fileName) {
     this(sess, fileName, null);
@@ -122,10 +124,6 @@ public class DoParse {
         filter = new TokenStreamHiddenTokenFilter(tvi);
       } else {
         LOGGER.trace("Creating Lexer / PostLexer objects");
-        if (primary == null && !justLex) {
-          LOGGER.trace("... on primary file");
-          prepro.initListing();
-        }
         Lexer lexer = new Lexer(prepro);
         Postlexer postlexer = new Postlexer(prepro, lexer, this);
         TokenList tokenlist = new TokenList(postlexer);
@@ -182,19 +180,15 @@ public class DoParse {
       }
 
     } finally {
-      // If we are listing, then we want to list all file indexes.
-      if (prepro.listing) {
-        int i = 0;
-        while (isValidIndex(i)) {
-          StringBuilder bldr = new StringBuilder();
-          bldr.append("0 0 0 fileindex ").append(i).append(" ").append(getFilename(i));
-          prepro.listingStream.write(bldr.toString());
-          prepro.listingStream.newLine();
-          ++i;
-        }
+      // List all file indexes.
+      int i = 0;
+      while (isValidIndex(i)) {
+        prepro.getLstListener().fileIndex(i, getFilename(i));
+        ++i;
       }
       // Tell the preprocessor we're done. Releases file handles, etc.
       prepro.parseComplete();
+      macroGraph = prepro.getMacroGraph();
       if ((primary == null) && !session.getProparseSettings().isMultiParse()) {
         session.clearSuperCache();
       }
@@ -204,6 +198,10 @@ public class DoParse {
 
   public JPNodeMetrics getMetrics() {
     return metrics;
+  }
+
+  public IncludeRef getMacroGraph() {
+    return macroGraph;
   }
 
   /**

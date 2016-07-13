@@ -24,7 +24,6 @@ public class ProparseProjectSettings extends Settings implements IProparseSettin
   private String keywordall = "";
   private String rCodeDir = "";
   private String schemaFile;
-  private boolean parserListing = false;
   private boolean projectBinaries = false;
 
   public ProparseProjectSettings(String propsFilename, String projectName) {
@@ -133,16 +132,6 @@ public class ProparseProjectSettings extends Settings implements IProparseSettin
   }
 
   @Override
-  public void enableParserListing() {
-    parserListing = true;
-  }
-
-  @Override
-  public void disableParserListing() {
-    parserListing = false;
-  }
-
-  @Override
   public boolean isMultiParse() {
     return multiParse;
   }
@@ -158,11 +147,6 @@ public class ProparseProjectSettings extends Settings implements IProparseSettin
 
   public void setProparseDirectives(boolean directives) {
     this.proparseDirectives = directives;
-  }
-
-  @Override
-  public boolean getParserListing() {
-    return parserListing;
   }
 
   @Override

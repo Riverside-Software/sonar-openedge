@@ -10,7 +10,6 @@
  *******************************************************************************/ 
 package org.prorefactor.core.schema;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -19,14 +18,12 @@ import java.util.TreeSet;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.treeparser.SymbolScopeRoot;
-import org.prorefactor.xfer.DataXferStream;
-import org.prorefactor.xfer.Xferable;
 
 /**
  * Table objects are created both by the Schema class and also when temp and work tables are defined within a 4gl
  * compile unit. For temp and work tables, the database is Schema.nullDatabase.
  */
-public class Table implements Xferable {
+public class Table {
   /** Comparator for sorting by name. */
   public static final Comparator<Table> NAME_ORDER = new Comparator<Table>() {
     @Override
@@ -128,20 +125,6 @@ public class Table implements Xferable {
   public String toString() {
     return new StringBuilder(storetype == IConstants.ST_DBTABLE ? "DB Table"
         : storetype == IConstants.ST_TTABLE ? "Temp-table" : "Work-table").append(' ').append(name).toString();
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    out.writeRef(name);
-    out.writeRef(database);
-    out.writeInt(storetype);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    out.schemaRef("name");
-    out.schemaRef("database");
-    out.schemaInt("storetype");
   }
 
   /**

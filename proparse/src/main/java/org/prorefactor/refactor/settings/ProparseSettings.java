@@ -14,7 +14,6 @@ public class ProparseSettings implements IProparseSettings {
   private final boolean capKeyword, indentTab, multiParse, proparseDirectives;
   private final int indentSpaces;
   private final String keywordall, rCodeDir;
-  private boolean parserListing = false;
   private boolean projectBinaries = false;
 
   public ProparseSettings() {
@@ -58,16 +57,6 @@ public class ProparseSettings implements IProparseSettings {
   }
 
   @Override
-  public void enableParserListing() {
-    parserListing = true;
-  }
-
-  @Override
-  public void disableParserListing() {
-    parserListing = false;
-  }
-
-  @Override
   public boolean isMultiParse() {
     return multiParse;
   }
@@ -75,11 +64,6 @@ public class ProparseSettings implements IProparseSettings {
   @Override
   public boolean getProparseDirectives() {
     return proparseDirectives;
-  }
-
-  @Override
-  public boolean getParserListing() {
-    return parserListing;
   }
 
   @Override

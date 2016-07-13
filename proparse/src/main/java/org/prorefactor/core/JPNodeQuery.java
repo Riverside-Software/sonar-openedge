@@ -19,13 +19,19 @@ class JPNodeQuery implements ICallback<List<JPNode>> {
   private final List<JPNode> result = new ArrayList<>();
   private final Set<Integer> findTypes;
   private final boolean stateHeadOnly;
+  private final boolean mainFileOnly;
 
   public JPNodeQuery(Integer... types) {
-    this(false, types);
+    this(false, false, types);
   }
 
   public JPNodeQuery(boolean stateHeadOnly, Integer... types) {
+    this(stateHeadOnly, false, types);
+  }
+
+  public JPNodeQuery(boolean stateHeadOnly, boolean mainFileOnly, Integer... types) {
     this.stateHeadOnly = stateHeadOnly;
+    this.mainFileOnly = mainFileOnly;
     findTypes = new HashSet<>();
     for (Integer i : types) {
       findTypes.add(i);
@@ -39,6 +45,9 @@ class JPNodeQuery implements ICallback<List<JPNode>> {
 
   @Override
   public boolean visitNode(JPNode node) {
+    if (mainFileOnly && (node.getFileIndex() > 0))
+      return true;
+
     if (stateHeadOnly && !node.isStateHead())
       return true;
 

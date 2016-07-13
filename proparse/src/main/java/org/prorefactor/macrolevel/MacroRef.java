@@ -13,41 +13,38 @@ package org.prorefactor.macrolevel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.io.IOException;
-
-import org.prorefactor.refactor.RefactorException;
-import org.prorefactor.xfer.DataXferStream;
 
 /**
- * Abstract class for a macro reference. There are two subclasses: one for references to named macros (i.e. those named
- * with &amp;global, &amp;scoped, or an include argument), and one for references to include files.
+ * Abstract class for a macro reference. There are two subclasses:<ul>
+ * <li>one for references to named macros (i.e. those named with &amp;global, &amp;scoped, or an include argument)
+ * <li>one for references to include files.
+ * </ul>
  */
 public abstract class MacroRef implements MacroEvent {
-  private static final long serialVersionUID = -3732504160384813887L;
-
-  int listingFileLine;
-  public int refColumn;
-  public int refLine;
-  public MacroRef parent = null;
+  private final MacroRef parent;
+  private final int refColumn;
+  private final int refLine;
 
   /** A list of macro references and defines that are in this macro's source */
-  public List<MacroEvent> macroEventList = new ArrayList<>();
+  public final List<MacroEvent> macroEventList = new ArrayList<>();
 
-  /** Only to be used for persistence/serialization. */
-  protected MacroRef() {
-  }
-
-  MacroRef(int listingFileLine) {
-    this.listingFileLine = listingFileLine;
-  }
-
-  public int getListingFileLine() {
-    return listingFileLine;
+  public MacroRef(MacroRef parent, int line, int column) {
+    this.parent = parent;
+    this.refLine = line;
+    this.refColumn = column;
   }
 
   @Override
   public MacroRef getParent() {
     return parent;
+  }
+
+  public int getLine() {
+    return refLine;
+  }
+
+  public int getColumn() {
+    return refColumn;
   }
 
   /**
@@ -90,7 +87,7 @@ public abstract class MacroRef implements MacroEvent {
       }
       if (next instanceof MacroDef) {
         MacroDef def = (MacroDef) next;
-        if (isInRange(def.line, def.column, begin, end))
+        if (isInRange(def.getLine(), def.getColumn(), begin, end))
           findExternalMacroReferences(def, ret);
       }
     }
@@ -111,7 +108,7 @@ public abstract class MacroRef implements MacroEvent {
           list.add(def);
           return;
         }
-        if (!isMine(def.undefWhat.parent))
+        if (!isMine(def.undefWhat.getParent()))
           list.add(def);
       }
       return;
@@ -161,7 +158,7 @@ public abstract class MacroRef implements MacroEvent {
   public abstract int getFileIndex();
 
   @Override
-  public MacroPosition getPosition() throws RefactorException {
+  public MacroPosition getPosition() {
     return new MacroPosition(parent.getFileIndex(), refLine, refColumn);
   }
 
@@ -195,23 +192,5 @@ public abstract class MacroRef implements MacroEvent {
       return false;
     }
     return true;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    out.writeInt(listingFileLine);
-    out.writeRef(macroEventList);
-    out.writeRef(parent);
-    out.writeInt(refColumn);
-    out.writeInt(refLine);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    out.schemaInt("listingFileLine");
-    out.schemaRef("macroEventList");
-    out.schemaRef("parent");
-    out.schemaInt("refColumn");
-    out.schemaInt("refLine");
   }
 }

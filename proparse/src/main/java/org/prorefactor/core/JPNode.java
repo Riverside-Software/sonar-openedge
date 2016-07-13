@@ -654,8 +654,28 @@ public class JPNode extends BaseAST implements Xferable {
   /**
    * Get an array of all descendant nodes (including this node) of a given type
    */
+  public List<JPNode> queryMainFile(Integer... findTypes) {
+    JPNodeQuery query = new JPNodeQuery(false, true, findTypes);
+    walk(query);
+
+    return query.getResult();
+  }
+
+  /**
+   * Get an array of all descendant nodes (including this node) of a given type
+   */
   public List<JPNode> queryStateHead(Integer... findTypes) {
     JPNodeQuery query = new JPNodeQuery(true, findTypes);
+    walk(query);
+
+    return query.getResult();
+  }
+
+  /**
+   * Get an array of all descendant nodes (including this node) of a given type
+   */
+  public List<JPNode> queryStateHeadInMainFile(Integer... findTypes) {
+    JPNodeQuery query = new JPNodeQuery(true, true, findTypes);
     walk(query);
 
     return query.getResult();

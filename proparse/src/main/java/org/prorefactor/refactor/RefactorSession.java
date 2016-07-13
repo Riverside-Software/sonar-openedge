@@ -79,14 +79,6 @@ public class RefactorSession {
     return schema;
   }
 
-  public void disableParserListing() {
-    proparseSettings.disableParserListing();
-  }
-
-  public void enableParserListing() {
-    proparseSettings.enableParserListing();
-  }
-
   /**
    * Get the listing file name, makes sure the directory exists.
    */

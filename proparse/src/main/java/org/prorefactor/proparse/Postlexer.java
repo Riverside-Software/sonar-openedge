@@ -103,19 +103,10 @@ public class Postlexer implements TokenStream {
     currToken = lexer.nextToken();
   }
 
-  private void listingLine(ProToken token, String text) throws IOException {
-    if (!prepro.listing)
-      return;
-    StringBuilder bldr = listingToken(token);
-    bldr.append(text);
-    prepro.listingStream.write(bldr.toString());
-    prepro.listingStream.newLine();
-  }
-
   // For consuming tokens that has been preprocessed out (&IF FALSE...)
   private void preproconsume() throws IOException, TokenStreamException, RecognitionException {
     int thisIfLevel = preproIfVec.size();
-    prepro.consuming++;
+    prepro.incrementConsuming();
     while (thisIfLevel <= preproIfVec.size() && preproIfVec.get(thisIfLevel - 1).consuming) {
       getNextToken();
       switch (currToken.getType()) {
@@ -138,32 +129,24 @@ public class Postlexer implements TokenStream {
           break;
       }
     }
-    prepro.consuming--;
+    prepro.decrementConsuming();
   }
 
   private void preproIf() throws IOException, TokenStreamException, RecognitionException {
     // Preserve the currToken current position for listing, before evaluating the expression.
     // We can't just write to listing here, because the expression evaluation may
     // find macro references to list.
-    StringBuilder bldr = listingToken(currToken);
-    bldr.append("ampif ");
+    int currLine = currToken.getLine();
+    int currCol = currToken.getColumn();
     PreproIfState preproIfState = new PreproIfState();
     preproIfVec.add(preproIfState);
     // Only evaluate if we aren't consuming from an outer &IF.
-    boolean isTrue = preproIfCond(prepro.consuming == 0);
+    boolean isTrue = preproIfCond(!prepro.isConsuming());
     if (isTrue) {
-      if (prepro.listing) {
-        bldr.append("true");
-        prepro.listingStream.write(bldr.toString());
-        prepro.listingStream.newLine();
-      }
+      prepro.getLstListener().preproIf(currLine, currCol, true);
       preproIfState.done = true;
     } else {
-      if (prepro.listing) {
-        bldr.append("false");
-        prepro.listingStream.write(bldr.toString());
-        prepro.listingStream.newLine();
-      }
+      prepro.getLstListener().preproIf(currLine, currCol, false);
       preproIfState.consuming = true;
       preproconsume();
     }
@@ -173,15 +156,15 @@ public class Postlexer implements TokenStream {
     PreproIfState preproIfState = preproIfVec.getLast();
     if (!preproIfState.done) {
       preproIfState.consuming = false;
-      listingLine(currToken, "ampelse ?");
+      prepro.getLstListener().preproElse(currToken.getLine(), currToken.getColumn());
     } else {
       if (!preproIfState.consuming) {
-        listingLine(currToken, "ampelse true");
+        prepro.getLstListener().preproElse(currToken.getLine(), currToken.getColumn());
         preproIfState.consuming = true;
         preproconsume();
       }
       // else: already consuming. no change.
-      listingLine(currToken, "ampelse ?");
+      prepro.getLstListener().preproElse(currToken.getLine(), currToken.getColumn());
     }
   }
 
@@ -189,28 +172,17 @@ public class Postlexer implements TokenStream {
     // Preserve the current position for listing, before evaluating the expression.
     // We can't just write to listing here, because the expression evaluation may
     // find macro references to list.
-    StringBuilder bldr = listingToken(currToken);
-    bldr.append("ampelseif ");
+    int currLine = currToken.getLine();
+    int currCol = currToken.getColumn();
     boolean evaluate = true;
     // Don't evaluate if we're consuming from an outer &IF
-    if (prepro.consuming - 1 > 0)
+    if (prepro.getConsuming() - 1 > 0)
       evaluate = false;
     // Don't evaluate if we're already done with this &IF
     if (preproIfVec.getLast().done)
       evaluate = false;
     boolean isTrue = preproIfCond(evaluate);
-    if (prepro.listing) {
-      if (!evaluate) {
-        bldr.append("?");
-      } else {
-        if (isTrue)
-          bldr.append("true");
-        else
-          bldr.append("false");
-      }
-      prepro.listingStream.write(bldr.toString());
-      prepro.listingStream.newLine();
-    }
+    prepro.getLstListener().preproElseIf(currLine, currCol);
     PreproIfState preproIfState = preproIfVec.getLast();
     if (isTrue && (!preproIfState.done)) {
       preproIfState.done = true;
@@ -225,7 +197,7 @@ public class Postlexer implements TokenStream {
   }
 
   private void preproEndif() throws IOException {
-    listingLine(currToken, "ampendif");
+    prepro.getLstListener().preproEndIf(currToken.getLine(), currToken.getColumn());
     // XXX Got a case where removeLast() fails with NoSuchElementException
     if (!preproIfVec.isEmpty())
       preproIfVec.removeLast();
@@ -294,13 +266,6 @@ public class Postlexer implements TokenStream {
       throw new IllegalArgumentException(doParse.getFilename(theIndex) + ":" + currToken.getLine() + " " + theMessage);
     else
       throw new IllegalArgumentException(theMessage);
-  }
-
-  private static StringBuilder listingToken(ProToken token) {
-    StringBuilder bldr = new StringBuilder();
-    bldr.append(token.getFileIndex()).append(" ").append(token.getLine()).append(" ").append(token.getColumn()).append(" ");
-
-    return bldr;
   }
 
   private static class PreproIfState {

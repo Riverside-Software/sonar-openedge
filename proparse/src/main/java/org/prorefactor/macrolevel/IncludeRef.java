@@ -15,25 +15,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.prorefactor.xfer.DataXferStream;
-
-import java.io.IOException;
-
 public class IncludeRef extends MacroRef {
-  private static final long serialVersionUID = 6085433112733922276L;
-
   public boolean usesNamedArgs;
   public int fileIndex;
-  private List<MacroDef> includeArgs = new ArrayList<MacroDef>();
-  private Map<String, MacroDef> argMap = new HashMap<String, MacroDef>();
+  private List<MacroDef> includeArgs = new ArrayList<>();
+  private Map<String, MacroDef> argMap = new HashMap<>();
   private String fileRefName = "";
 
-  // Only to be used for persistence/serialization
-  public IncludeRef() {
-  }
-
-  public IncludeRef(int listingFileLine) {
-    super(listingFileLine);
+  public IncludeRef(MacroRef parent, int line, int column) {
+    super(parent, line, column);
   }
 
   public void addNamedArg(MacroDef arg) {
@@ -90,26 +80,6 @@ public class IncludeRef extends MacroRef {
       return theArg;
     }
     return null;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    super.writeXferBytes(out);
-    out.writeRef(argMap);
-    out.writeInt(fileIndex);
-    out.writeRef(fileRefName);
-    out.writeRef(includeArgs);
-    out.writeBool(usesNamedArgs);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    super.writeXferSchema(out);
-    out.schemaRef("argMap");
-    out.schemaInt("fileIndex");
-    out.schemaRef("fileRefName");
-    out.schemaRef("includeArgs");
-    out.schemaBool("usesNamedArgs");
   }
 
 }

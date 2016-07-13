@@ -14,17 +14,6 @@ import java.util.HashSet;
 
 public class StringFuncs {
 
-  /**
-   * Escape line breaks with backslashes. Replaces \ with \\, newline with \n, and linefeed with \r. Specifically
-   * written for the listing file, which uses one line per record, and cannot have extra line breaks in the output.
-   */
-  public static String escapeLineBreaks(String s) {
-    String ret = s.replace("\\", "\\\\");
-    ret = ret.replace("\n", "\\n");
-    ret = ret.replace("\r", "\\r");
-    return ret;
-  }
-
   public static String ltrim(String s) {
     char[] c = s.toCharArray();
     int begin = 0;

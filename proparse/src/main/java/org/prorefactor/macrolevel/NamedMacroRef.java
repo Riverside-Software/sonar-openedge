@@ -10,41 +10,24 @@
  *******************************************************************************/ 
 package org.prorefactor.macrolevel;
 
-import java.io.IOException;
-
-import org.prorefactor.xfer.DataXferStream;
-
 /**
  * A reference to a macro argument, i.e. {1} or {&amp;name}. Origin might be an include argument or an &amp;DEFINE.
  */
 public class NamedMacroRef extends MacroRef {
-  private static final long serialVersionUID = -7576618416022482176L;
+  private final MacroDef macroDef;
 
-  public MacroDef macroDef;
-
-  /** Only to be used for persistence/serialization. */
-  public NamedMacroRef() {
+  public NamedMacroRef(MacroDef macro, MacroRef parent, int line, int column) {
+    super(parent, line, column);
+    this.macroDef = macro;
   }
 
-  NamedMacroRef(int listingFileLine) {
-    super(listingFileLine);
+  public MacroDef getMacroDef() {
+    return macroDef;
   }
 
   @Override
   public int getFileIndex() {
-    return parent.getFileIndex();
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    super.writeXferBytes(out);
-    out.writeRef(macroDef);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    super.writeXferSchema(out);
-    out.schemaRef("macroDef");
+    return getParent().getFileIndex();
   }
 
 }

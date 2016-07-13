@@ -29,20 +29,20 @@ public class MacroLevel {
   public static int[] getDefinitionPosition(MacroDef def) {
     int[] ret = new int[3];
     if (def.includeRef == null) {
-      if (def.parent instanceof NamedMacroRef) {
-        return getDefinitionPosition(((NamedMacroRef) def.parent).macroDef);
+      if (def.getParent() instanceof NamedMacroRef) {
+        return getDefinitionPosition(((NamedMacroRef) def.getParent()).getMacroDef());
       }
-      ret[0] = ((IncludeRef) def.parent).fileIndex;
-      ret[1] = def.line;
-      ret[2] = def.column;
+      ret[0] = ((IncludeRef) def.getParent()).fileIndex;
+      ret[1] = def.getLine();
+      ret[2] = def.getColumn();
     } else {
       // Include arguments don't get their file/line/col stored, so
       // we have to find the include reference source.
-      if (!(def.includeRef.parent instanceof IncludeRef))
-        return getDefinitionPosition(((NamedMacroRef) def.includeRef.parent).macroDef);
-      ret[0] = ((IncludeRef) def.includeRef.parent).fileIndex;
-      ret[1] = def.includeRef.refLine;
-      ret[2] = def.includeRef.refColumn;
+      if (!(def.includeRef.getParent() instanceof IncludeRef))
+        return getDefinitionPosition(((NamedMacroRef) def.includeRef.getParent()).getMacroDef());
+      ret[0] = ((IncludeRef) def.includeRef.getParent()).fileIndex;
+      ret[1] = def.includeRef.getLine();
+      ret[2] = def.includeRef.getColumn();
     }
     return ret;
   }
@@ -52,7 +52,7 @@ public class MacroLevel {
    * simply by walking the tree and adding every MacroRef to the array.
    */
   public static MacroRef[] sourceArray(MacroRef top) {
-    ArrayList<MacroRef> list = new ArrayList<MacroRef>();
+    ArrayList<MacroRef> list = new ArrayList<>();
     sourceArray2(top, list);
     MacroRef[] ret = new MacroRef[list.size()];
     return list.toArray(ret);
@@ -60,7 +60,7 @@ public class MacroLevel {
 
   private static void sourceArray2(MacroRef macroNode, ArrayList<MacroRef> list) {
     list.add(macroNode);
-    for (MacroEvent event : ((MacroRef) macroNode).macroEventList) {
+    for (MacroEvent event : macroNode.macroEventList) {
       if (event instanceof MacroRef) {
         sourceArray2((MacroRef) event, list);
       }

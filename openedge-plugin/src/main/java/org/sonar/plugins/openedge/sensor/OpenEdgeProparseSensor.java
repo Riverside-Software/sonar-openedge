@@ -51,13 +51,16 @@ import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
 import org.sonar.plugins.openedge.api.com.google.common.io.ByteStreams;
 import org.sonar.plugins.openedge.api.com.google.common.io.Files;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.ProparseRuntimeException;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
+import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.SymbolScope;
 import org.sonar.plugins.openedge.api.org.prorefactor.util.JsonNodeLister;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
+import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
@@ -121,6 +124,9 @@ public class OpenEdgeProparseSensor implements Sensor {
           // Rules are not applied on include files
           continue;
         }
+
+        computeCommonMetrics(context, file, unit);
+        computeComplexity(context, file, unit);
 
         if (settings.useProparseDebug()) {
           String fileName = ".proparse/" + file.relativePath() + ".json";
@@ -201,6 +207,70 @@ public class OpenEdgeProparseSensor implements Sensor {
   @Override
   public String toString() {
     return getClass().getSimpleName();
+  }
+
+  private void computeCommonMetrics(SensorContext context, InputFile file, ParseUnit unit) {
+    context.saveMeasure(file, CoreMetrics.STATEMENTS, (double) unit.getTopNode().queryStateHead().size());
+    int numProcs = 0;
+    int numFuncs = 0;
+    int numMethds = 0;
+    for (SymbolScope child : unit.getRootScope().getChildScopesDeep()) {
+      int scopeType = child.getRootBlock().getNode().getType();
+      switch (scopeType) {
+        case NodeTypes.PROCEDURE:
+          boolean externalProc = false;
+          for (JPNode node : child.getRootBlock().getNode().getDirectChildren()) {
+            if ((node.getType() == NodeTypes.IN_KW) || (node.getType() == NodeTypes.SUPER) || (node.getType() == NodeTypes.EXTERNAL)) {
+              externalProc = true;
+            }
+          }
+          if (!externalProc) {
+            numProcs++;
+          }
+          break;
+        case NodeTypes.FUNCTION:
+          boolean externalFunc = false;
+          for (JPNode node : child.getRootBlock().getNode().getDirectChildren()) {
+            if ((node.getType() == NodeTypes.IN_KW) || (node.getType() == NodeTypes.FORWARDS)) {
+              externalFunc = true;
+            }
+          }
+          if (!externalFunc) {
+            numFuncs++;
+          }
+          break;
+        case NodeTypes.METHOD:
+          numMethds++;
+          break;
+        default:
+            
+      }
+    }
+    context.saveMeasure(file, OpenEdgeMetrics.INTERNAL_PROCEDURES, (double) numProcs);
+    context.saveMeasure(file, OpenEdgeMetrics.INTERNAL_FUNCTIONS, (double) numFuncs);
+    context.saveMeasure(file, OpenEdgeMetrics.METHODS, (double) numMethds);
+  }
+
+  private void computeComplexity(SensorContext context, InputFile file, ParseUnit unit) {
+    // Interfaces don't contribute to complexity
+    if (unit.getRootScope().isInterface())
+      return;
+    int complexity = 0;
+    int complexityWithInc = 0;
+    // Procedure has a main block, so starting at 1
+    if (!unit.getRootScope().isClass()) {
+      complexity++;
+      complexityWithInc++;
+    }
+    
+    for (JPNode node : unit.getTopNode().queryMainFile(NodeTypes.IF, NodeTypes.REPEAT, NodeTypes.FOR, NodeTypes.WHEN, NodeTypes.AND, NodeTypes.OR, NodeTypes.RETURN, NodeTypes.PROCEDURE, NodeTypes.FUNCTION, NodeTypes.METHOD, NodeTypes.ENUM)) {
+      complexity++;
+    }
+    for (JPNode node : unit.getTopNode().query(NodeTypes.IF, NodeTypes.REPEAT, NodeTypes.FOR, NodeTypes.WHEN, NodeTypes.AND, NodeTypes.OR, NodeTypes.RETURN, NodeTypes.PROCEDURE, NodeTypes.FUNCTION, NodeTypes.METHOD, NodeTypes.ENUM)) {
+      complexityWithInc++;
+    }
+    context.saveMeasure(file, CoreMetrics.COMPLEXITY, (double) complexity);
+    context.saveMeasure(file, OpenEdgeMetrics.COMPLEXITY, (double) complexityWithInc);
   }
 
   private void configureFields(ActiveRule activeRule, Object check) {

@@ -11,18 +11,20 @@
 package org.prorefactor.macrolevel;
 
 import org.prorefactor.refactor.RefactorException;
-import org.prorefactor.xfer.Xferable;
 
-import java.io.Serializable;
-
-/** Interface for a node in the macro event tree. */
-public interface MacroEvent extends Serializable, Xferable {
-
-  public MacroRef getParent();
+/**
+ * Interface for a node in the macro event tree.
+ */
+public interface MacroEvent {
 
   /**
-   * Get position of this macro reference
+   * @return Parent element
    */
-  public MacroPosition getPosition() throws RefactorException;
+  MacroRef getParent();
+
+  /**
+   * @return Position of this macro reference
+   */
+  MacroPosition getPosition() throws RefactorException;
 
 }

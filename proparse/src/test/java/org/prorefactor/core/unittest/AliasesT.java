@@ -12,6 +12,7 @@ package org.prorefactor.core.unittest;
 
 import java.io.File;
 
+import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -23,6 +24,8 @@ import junit.framework.TestCase;
 
 public class AliasesT extends TestCase {
   private RefactorSession session;
+  // Just a shortcut for schema
+  private ISchema schema;
 
   @Override
   public void setUp() throws Exception {
@@ -30,8 +33,9 @@ public class AliasesT extends TestCase {
 
     Injector injector = Guice.createInjector(new UnitTestSports2000Module());
     session = injector.getInstance(RefactorSession.class);
-    session.getSchema().aliasCreate("dictdb", "sports2000");
-    session.getSchema().aliasCreate("foo", "sports2000");
+    schema = session.getSchema();
+    schema.createAlias("dictdb", "sports2000");
+    schema.createAlias("foo", "sports2000");
   }
 
   public void test01() throws Exception {
@@ -43,27 +47,38 @@ public class AliasesT extends TestCase {
     assertNotNull(unit.getRootScope());
   }
 
-  public void test02() throws Exception {
-    assertNotNull(session.getSchema().lookupDatabase("dictdb"));
-    assertNotNull(session.getSchema().lookupDatabase("foo"));
-    assertNull(session.getSchema().lookupDatabase("dictdb2"));
-    assertNotNull(session.getSchema().lookupTable("_file"));
-    assertNotNull(session.getSchema().lookupTable("dictdb", "_file"));
-    assertNull(session.getSchema().lookupTable("dictdb", "_file2"));
+  public void test02() {
+    assertNotNull(schema.lookupDatabase("dictdb"));
+    assertNotNull(schema.lookupDatabase("foo"));
+    assertNull(schema.lookupDatabase("dictdb2"));
+    assertNotNull(schema.lookupTable("_file"));
+    assertNotNull(schema.lookupTable("dictdb", "_file"));
+    assertNull(schema.lookupTable("dictdb", "_file2"));
   }
 
-  public void test03() throws Exception {
-    assertNull(session.getSchema().lookupDatabase("test"));
-    session.getSchema().aliasCreate("test", "sports2000");
-    assertNotNull(session.getSchema().lookupDatabase("test"));
-    assertNotNull(session.getSchema().lookupTable("test", "customer"));
-    session.getSchema().aliasDelete("test");
-    assertNull(session.getSchema().lookupDatabase("test"));
+  public void test03() {
+    assertNull(schema.lookupDatabase("test"));
+    schema.createAlias("test", "sports2000");
+    assertNotNull(schema.lookupDatabase("test"));
+    assertNotNull(schema.lookupTable("test", "customer"));
+    schema.deleteAlias("test");
+    assertNull(schema.lookupDatabase("test"));
   }
 
-  public void test04() throws Exception {
-    assertNotNull(session.getSchema().lookupField("sports2000", "customer", "custnum"));
-    assertNotNull(session.getSchema().lookupField("dictdb", "customer", "custnum"));
-    assertNotNull(session.getSchema().lookupField("foo", "customer", "custnum"));
+  public void test04() {
+    assertNotNull(schema.lookupField("sports2000", "customer", "custnum"));
+    assertNotNull(schema.lookupField("dictdb", "customer", "custnum"));
+    assertNotNull(schema.lookupField("foo", "customer", "custnum"));
+  }
+
+  public void test05() throws Exception {
+    // Issue #27
+    assertNotNull("Salesrep table exists", schema.lookupTable("salesrep"));
+    assertNull("Typo, table doesn't exist", schema.lookupTable("salesrepp"));
+    assertNull("Table salesrep.salesrep doesn't exist (is a field)", schema.lookupTable("salesrep.salesrep"));
+
+    assertNotNull("Table _file exists", schema.lookupTable("_file"));
+    assertNotNull("Table foo._file exists", schema.lookupTable("foo._file"));
+    assertNotNull("Table sports2000._file exists", schema.lookupTable("sports2000._file"));
   }
 }

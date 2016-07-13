@@ -4,7 +4,7 @@
 
   <groupId>eu.rssw.sonar.openedge</groupId>
   <artifactId>sonar-openedge-plugin</artifactId>
-  <version>1.9.2</version>
+  <version>1.9.3</version>
   <packaging>sonar-plugin</packaging>
 
   <name>OpenEdge plugin for SonarQube</name>
@@ -43,14 +43,14 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <sonar.version>5.4</sonar.version>
+    <sonar.version>5.6</sonar.version>
     <sonar.pluginKey>openedge</sonar.pluginKey>
     <sonar.pluginName>OpenEdge</sonar.pluginName>
     <sonar.pluginClass>org.sonar.plugins.openedge.OpenEdgePlugin</sonar.pluginClass>
     <!-- License check -->
     <license.mailto>contact AT riverside DASH software DOT fr</license.mailto>
     <license.year>2013-2016</license.year>
-    <jdk.min.version>1.7</jdk.min.version>
+    <jdk.min.version>1.8</jdk.min.version>
   </properties>
 
   <dependencies>
@@ -68,7 +68,7 @@
     <dependency>
       <groupId>eu.rssw.openedge.checks</groupId>
       <artifactId>openedge-checks-shaded</artifactId>
-      <version>1.3.5</version>
+      <version>1.3.6</version>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
@@ -99,7 +99,7 @@
       <plugin>
         <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
         <artifactId>sonar-packaging-maven-plugin</artifactId>
-        <version>1.15</version>
+        <version>1.16</version>
         <extensions>true</extensions>
         <configuration>
           <pluginKey>${sonar.pluginKey}</pluginKey>
@@ -123,6 +123,19 @@
         <configuration>
           <encoding>UTF-8</encoding>
         </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>bundle-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   

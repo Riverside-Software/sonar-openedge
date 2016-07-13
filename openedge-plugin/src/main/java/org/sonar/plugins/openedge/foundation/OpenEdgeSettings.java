@@ -167,14 +167,14 @@ public class OpenEdgeSettings {
     try {
       sch = new Schema(dbFile.getAbsolutePath(), true);
       if (!sch.getDbSet().isEmpty()) {
-        sch.aliasCreate("dictdb", sch.getDbSet().first().getName());
+        sch.createAlias("dictdb", sch.getDbSet().first().getName());
       }
       if (settings.getString(OpenEdgePlugin.ALIASES) != null) {
         for (String str : Splitter.on(';').trimResults().split(settings.getString(OpenEdgePlugin.ALIASES))) {
           List<String> lst = Splitter.on(',').trimResults().splitToList(str);
           for (String alias : lst.subList(1, lst.size())) {
             LOG.debug("Adding {} aliases to database {}", new Object[] {alias, lst.get(0)});
-            sch.aliasCreate(alias, lst.get(1));
+            sch.createAlias(alias, lst.get(1));
           }
         }
       }
@@ -198,10 +198,6 @@ public class OpenEdgeSettings {
 
   public File getDbgDir() {
     return dbgDir;
-  }
-
-  public boolean skipParserSensor() {
-    return settings.getBoolean(OpenEdgePlugin.SKIP_PARSER_PROPERTY);
   }
 
   public boolean skipProparseSensor() {

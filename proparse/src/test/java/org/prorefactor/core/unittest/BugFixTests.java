@@ -44,7 +44,7 @@ public class BugFixTests extends TestCase {
 
     Injector injector = Guice.createInjector(new UnitTestSports2000Module());
     session = injector.getInstance(RefactorSession.class);
-    session.getSchema().aliasCreate("foo", "sports2000");
+    session.getSchema().createAlias("foo", "sports2000");
 
     tempDir.mkdirs();
   }

@@ -11,20 +11,17 @@
 package org.prorefactor.core.schema;
 
 import java.util.Comparator;
-import java.io.IOException;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ClassSupport;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
-import org.prorefactor.xfer.DataXferStream;
-import org.prorefactor.xfer.Xferable;
 
 /**
  * Field objects are created both by the Schema class and they are also created for temp and work table fields defined
  * within a 4gl compile unit.
  */
-public class Field implements Primative, Xferable {
+public class Field implements Primative {
   /** Comparator for sorting by name. */
   protected static final Comparator<Field> NAME_ORDER = new Comparator<Field>() {
     @Override
@@ -33,15 +30,11 @@ public class Field implements Primative, Xferable {
     }
   };
 
-  private String name;
+  private final String name;
   private int extent;
   private DataType dataType;
   private String className = null;
   private Table table;
-
-  public Field() {
-    // Only to be used for persistence/serialization
-  }
 
   /**
    * Standard constructor.
@@ -135,24 +128,6 @@ public class Field implements Primative, Xferable {
   public void setTable(Table table) {
     this.table = table;
     table.add(this);
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    out.writeRef(className);
-    out.writeRef(dataType);
-    out.writeInt(extent);
-    out.writeRef(name);
-    out.writeRef(table);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    out.schemaRef("className");
-    out.schemaRef("dataType");
-    out.schemaInt("extent");
-    out.schemaRef("name");
-    out.schemaRef("table");
   }
 
   /**
