@@ -25,7 +25,6 @@ import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.resources.Qualifiers;
 import org.sonar.plugins.openedge.colorizer.OpenEdgeColorizerFormat;
 import org.sonar.plugins.openedge.colorizer.OpenEdgeDBColorizerFormat;
-import org.sonar.plugins.openedge.cpd.OpenEdgeCpdMapping;
 import org.sonar.plugins.openedge.decorator.CommonDBMetricsDecorator;
 import org.sonar.plugins.openedge.decorator.CommonMetricsDecorator;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
@@ -80,9 +79,6 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(OpenEdgeSensor.class, OpenEdgeDBSensor.class, OpenEdgeDebugListingSensor.class,
         OpenEdgeListingSensor.class, OpenEdgeWarningsSensor.class, OpenEdgeXREFSensor.class,
         OpenEdgeProparseSensor.class, OpenEdgeDBRulesSensor.class);
-
-    // Copy Paste Detector
-    context.addExtension(OpenEdgeCpdMapping.class);
 
     // Decorators
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
