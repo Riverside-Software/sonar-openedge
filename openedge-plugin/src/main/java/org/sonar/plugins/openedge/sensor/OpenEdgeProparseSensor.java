@@ -51,12 +51,12 @@ import org.sonar.api.platform.Server;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.MessageException;
 import org.sonar.check.RuleProperty;
-import org.sonar.plugins.openedge.api.antlr.Token;
 import org.sonar.plugins.openedge.api.antlr.TokenStream;
-import org.sonar.plugins.openedge.api.antlr.TokenStreamException;
 import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
 import org.sonar.plugins.openedge.api.com.google.common.io.ByteStreams;
 import org.sonar.plugins.openedge.api.com.google.common.io.Files;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.ICallback;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.IConstants;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.ProToken;
@@ -134,7 +134,7 @@ public class OpenEdgeProparseSensor implements Sensor {
           // Rules and complexity are not applied on include files
           continue;
         }
-        computeCpd(context, file, stream);
+        computeCpd(context, file, unit);
         computeCommonMetrics(context, file, unit);
         computeComplexity(context, file, unit);
 
@@ -214,58 +214,63 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
   }
 
-  private void computeCpd(SensorContext context, InputFile file, TokenStream stream) {
-    boolean appBuilderCode;
-    boolean inUIBCode = false;
+  private void computeCpd(SensorContext context, InputFile file, ParseUnit unit) {
+    ICallback<NewCpdTokens> cpdCallback = new ICallback<NewCpdTokens>() {
+      final NewCpdTokens cpdTokens = context.newCpdTokens().onFile(file);
+      boolean appBuilderCode = false;
 
-    try {
-      Token tok = stream.nextToken();
-      appBuilderCode = ((tok.getType() == NodeTypes.AMPANALYZESUSPEND)
-          && tok.getText().startsWith("&ANALYZE-SUSPEND _VERSION-NUMBER AB_"));
-      if (appBuilderCode) {
-        LOG.debug("AppBuilder generated code detected");
+      @Override
+      public NewCpdTokens getResult() {
+        return cpdTokens;
       }
-      NewCpdTokens newCpdTokens = context.newCpdTokens().onFile(file);
-      for (; tok.getType() != Token.EOF_TYPE; tok = stream.nextToken()) {
-        if ((tok.getType() == NodeTypes.WS) || (tok.getType() == NodeTypes.COMMENT))
-          continue;
-        if (((ProToken) tok).getFileIndex() > 0)
-          continue;
-        if (appBuilderCode && (tok.getType() == NodeTypes.AMPANALYZESUSPEND)
-            && (tok.getText().startsWith("&ANALYZE-SUSPEND _CREATE-WINDOW")
-                || tok.getText().startsWith("&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE adm-create-objects"))) {
-          inUIBCode = true;
-        } else if (appBuilderCode && inUIBCode && (tok.getType() == NodeTypes.AMPANALYZERESUME)) {
-          inUIBCode = false;
-          continue;
-        }
 
-        if (appBuilderCode && inUIBCode)
-          continue;
-
-        ProToken pTok = (ProToken) tok;
-        if (pTok.getFileIndex() == 0) {
-          // Using always same case and expanded version of the keywords
-          String str = NodeTypes.getFullText(tok.getType());
-          if ((str == null) || (str.trim().length() == 0)) {
-            // Identifiers are also using the same case
-            if (tok.getType() == NodeTypes.ID)
-              str = tok.getText().toLowerCase();
-            else
-              str = tok.getText().trim();
+      @Override
+      public boolean visitNode(JPNode node) {
+        for (ProToken n : node.getHiddenTokens()) {
+          if (!appBuilderCode && (n.getType() == NodeTypes.AMPANALYZESUSPEND)
+              && (n.getText().startsWith("&ANALYZE-SUSPEND _VERSION-NUMBER AB_"))) {
+            appBuilderCode = true;
           }
-          try {
-            TextRange range = file.newRange(pTok.getLine(), pTok.getColumn() - 1, pTok.getLine(),
-                pTok.getColumn() + pTok.getText().length() - 1);
-            newCpdTokens.addToken(range, str);
-          } catch (IllegalArgumentException uncaught) {
+          if (appBuilderCode && (n.getType() == NodeTypes.AMPANALYZESUSPEND)
+              && (n.getText().startsWith("&ANALYZE-SUSPEND _CREATE-WINDOW")
+                  || n.getText().startsWith("&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE adm-create-objects"))) {
+            return false;
           }
         }
+        if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
+          // Consider that an operator only has 2 children
+          visitNode(node.firstChild());
+          visitCpdNode(node);
+          visitNode(node.firstChild().nextSibling());
+          return false;
+        } else {
+          visitCpdNode(node);
+        }
+        return true;
       }
-      newCpdTokens.save();
-    } catch (TokenStreamException uncaught) {
 
-    }
+      private void visitCpdNode(JPNode node) {
+        if (node.getFileIndex() > 0)
+          return;
+        String str = NodeTypes.getFullText(node.getType());
+        // Identifiers are also using the same case
+        if ((str == null) || (str.trim().length() == 0)) {
+          if (node.getType() == NodeTypes.ID)
+            str = node.getText().toLowerCase();
+          else
+            str = node.getText().trim();
+        }
+        try {
+          TextRange range = file.newRange(node.getLine(), node.getColumn() - 1, node.getLine(),
+              node.getColumn() + node.getText().length() - 1);
+          cpdTokens.addToken(range, str);
+        } catch (IllegalArgumentException uncaught) {
+        }
+      }
+    };
+    unit.getTopNode().walk(cpdCallback);
+    cpdCallback.getResult().save();
+
   }
 
   private void computeCommonMetrics(SensorContext context, InputFile file, ParseUnit unit) {
