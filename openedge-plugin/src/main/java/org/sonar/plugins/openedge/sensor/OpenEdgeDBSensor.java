@@ -1,6 +1,6 @@
 /*
  * OpenEdge DB plugin for SonarQube
- * Copyright (C) 2013-2014 Riverside Software
+ * Copyright (C) 2013-2016 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -23,11 +23,12 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.batch.Sensor;
-import org.sonar.api.batch.SensorContext;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.resources.Project;
+import org.sonar.api.batch.measure.Metric;
+import org.sonar.api.batch.sensor.Sensor;
+import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.DatabaseDescription;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.Field;
@@ -45,26 +46,28 @@ public class OpenEdgeDBSensor implements Sensor {
   }
 
   @Override
-  public boolean shouldExecuteOnProject(Project project) {
-    return fileSystem.languages().contains(OpenEdgeDB.KEY);
+  public void describe(SensorDescriptor descriptor) {
+    descriptor.onlyOnLanguage(OpenEdgeDB.KEY).name(getClass().getSimpleName());
   }
 
   @Override
-  public void analyse(Project project, SensorContext context) {
-    computeBaseMetrics(context, project);
+  public void execute(SensorContext context) {
+    computeBaseMetrics(context);
   }
 
-  private void computeBaseMetrics(SensorContext sensorContext, Project project) {
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private void computeBaseMetrics(SensorContext sensorContext) {
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdgeDB.KEY))) {
-
       try {
         LOG.info("Analyzing {}", file.relativePath());
 
         DatabaseDescription desc = DumpFileUtils.getDatabaseDescription(file.file());
-        sensorContext.saveMeasure(file, OpenEdgeMetrics.NUM_TABLES, (double) desc.getTables().size());
-        sensorContext.saveMeasure(file, OpenEdgeMetrics.NUM_SEQUENCES, (double) desc.getSequences().size());
+        sensorContext.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TABLES).withValue(desc.getTables().size()).save();
+        sensorContext.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_SEQUENCES).withValue(desc.getSequences().size()).save();
 
-        int numFlds = 0, numIdx = 0, numTriggers = 0;
+        int numFlds = 0;
+        int numIdx = 0;
+        int numTriggers = 0;
         for (Table tab : desc.getTables()) {
           numFlds += tab.getFields().size();
           numIdx += tab.getIndexes().size();
@@ -73,18 +76,13 @@ public class OpenEdgeDBSensor implements Sensor {
             numTriggers += f.getTriggers().size();
           }
         }
-        sensorContext.saveMeasure(file, OpenEdgeMetrics.NUM_FIELDS, (double) numFlds);
-        sensorContext.saveMeasure(file, OpenEdgeMetrics.NUM_INDEXES, (double) numIdx);
-        sensorContext.saveMeasure(file, OpenEdgeMetrics.NUM_TRIGGERS, (double) numTriggers);
+        sensorContext.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_FIELDS).withValue(numFlds).save();
+        sensorContext.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_INDEXES).withValue(numIdx).save();
+        sensorContext.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TRIGGERS).withValue(numTriggers).save();
       } catch (IOException caught) {
         LOG.error("Can not analyze file", caught);
       }
     }
-  }
-
-  @Override
-  public String toString() {
-    return getClass().getSimpleName();
   }
 
 }

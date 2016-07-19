@@ -27,13 +27,13 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.batch.Sensor;
-import org.sonar.api.batch.SensorContext;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.sensor.Sensor;
+import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
-import org.sonar.api.resources.Project;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.com.google.common.io.Files;
 import org.sonar.plugins.openedge.api.com.google.common.io.LineProcessor;
@@ -56,9 +56,10 @@ public class OpenEdgeWarningsSensor implements Sensor {
   }
 
   @Override
-  public boolean shouldExecuteOnProject(Project project) {
-    return fileSystem.languages().contains(OpenEdge.KEY);
+  public void describe(SensorDescriptor descriptor) {
+    descriptor.onlyOnLanguage(OpenEdge.KEY).name(getClass().getSimpleName());
   }
+
 
   private File getWarningsFile(File file) {
     String relPath = OpenEdgeProjectHelper.getPathRelativeToSourceDirs(file, settings.getSourceDirs());
@@ -69,7 +70,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
   }
 
   @Override
-  public void analyse(Project project, SensorContext context) {
+  public void execute(SensorContext context) {
     int warningsImportNum = 0;
     final RuleKey defaultWarningRuleKey = RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY,
         OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY);
@@ -118,11 +119,6 @@ public class OpenEdgeWarningsSensor implements Sensor {
     LOG.info("{} warning files imported", warningsImportNum);
   }
 
-  @Override
-  public String toString() {
-    return getClass().getSimpleName();
-  }
-
   private class WarningsProcessor implements LineProcessor<List<Warning>> {
     private List<Warning> results = new ArrayList<>();
 
@@ -168,4 +164,5 @@ public class OpenEdgeWarningsSensor implements Sensor {
       this.msgNum = msgNum;
     }
   }
+
 }

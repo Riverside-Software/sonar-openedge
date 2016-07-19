@@ -1,6 +1,6 @@
 /*
  * OpenEdge DB plugin for SonarQube
- * Copyright (C) 2013-2014 Riverside Software
+ * Copyright (C) 2013-2016 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -28,14 +28,14 @@ import java.util.Map.Entry;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.batch.Sensor;
-import org.sonar.api.batch.SensorContext;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.rule.ActiveRules;
+import org.sonar.api.batch.sensor.Sensor;
+import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.platform.Server;
-import org.sonar.api.resources.Project;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.MessageException;
 import org.sonar.check.RuleProperty;
@@ -62,12 +62,12 @@ public class OpenEdgeDBRulesSensor implements Sensor {
   }
 
   @Override
-  public boolean shouldExecuteOnProject(Project project) {
-    return fileSystem.languages().contains(OpenEdgeDB.KEY);
+  public void describe(SensorDescriptor descriptor) {
+    descriptor.onlyOnLanguage(OpenEdgeDB.KEY).name(getClass().getSimpleName());
   }
 
   @Override
-  public void analyse(Project project, SensorContext context) {
+  public void execute(SensorContext context) {
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
 
@@ -109,12 +109,6 @@ public class OpenEdgeDBRulesSensor implements Sensor {
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
     }
-
-  }
-
-  @Override
-  public String toString() {
-    return getClass().getSimpleName();
   }
 
   private void configureFields(ActiveRule activeRule, Object check) {
@@ -178,5 +172,6 @@ public class OpenEdgeDBRulesSensor implements Sensor {
     }
     return null;
   }
+
 
 }

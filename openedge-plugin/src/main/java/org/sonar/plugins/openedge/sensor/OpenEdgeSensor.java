@@ -22,11 +22,12 @@ package org.sonar.plugins.openedge.sensor;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.batch.Sensor;
-import org.sonar.api.batch.SensorContext;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.resources.Project;
+import org.sonar.api.batch.measure.Metric;
+import org.sonar.api.batch.sensor.Sensor;
+import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 
@@ -40,35 +41,31 @@ public class OpenEdgeSensor implements Sensor {
   }
 
   @Override
-  public boolean shouldExecuteOnProject(Project project) {
-    return fileSystem.languages().contains(OpenEdge.KEY);
+  public void describe(SensorDescriptor descriptor) {
+    descriptor.onlyOnLanguage(OpenEdge.KEY).name(getClass().getSimpleName());
   }
 
   @Override
-  public void analyse(Project project, SensorContext context) {
-    computeBaseMetrics(context, project);
+  public void execute(SensorContext context) {
+    computeBaseMetrics(context);
   }
 
-  private void computeBaseMetrics(SensorContext sensorContext, Project project) {
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private void computeBaseMetrics(SensorContext context) {
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdge.KEY))) {
-      LOG.trace("Computing base metrics on {}", file.relativePath());
-      // Mesure en fonction de l'extension
+      LOG.trace("Computing basic metrics on {}", file.relativePath());
+      // Depending on file extension
       String fileExt = FilenameUtils.getExtension(file.relativePath());
       if ("w".equalsIgnoreCase(fileExt)) {
-        sensorContext.saveMeasure(file, OpenEdgeMetrics.WINDOWS, 1.0);
+        context.newMeasure().on(file).withValue(1).forMetric((Metric) OpenEdgeMetrics.WINDOWS).save();
       } else if ("p".equalsIgnoreCase(fileExt)) {
-        sensorContext.saveMeasure(file, OpenEdgeMetrics.PROCEDURES, 1.0);
+        context.newMeasure().on(file).withValue(1).forMetric((Metric) OpenEdgeMetrics.PROCEDURES).save();
       } else if ("i".equalsIgnoreCase(fileExt)) {
-        sensorContext.saveMeasure(file, OpenEdgeMetrics.INCLUDES, 1.0);
+        context.newMeasure().on(file).withValue(1).forMetric((Metric) OpenEdgeMetrics.INCLUDES).save();
       } else if ("cls".equalsIgnoreCase(fileExt)) {
-        sensorContext.saveMeasure(file, OpenEdgeMetrics.CLASSES, 1.0);
+        context.newMeasure().on(file).withValue(1).forMetric((Metric) OpenEdgeMetrics.CLASSES).save();
       }
     }
-  }
-
-  @Override
-  public String toString() {
-    return getClass().getSimpleName();
   }
 
 }
