@@ -122,6 +122,7 @@
             <include>**/TP01FramesTest.java</include>
             <include>**/BugFixTests.java</include>
             <include>**/TestNewSyntax.java</include>
+            <include>**/ClassesTest.java</include>
             <!-- <include>**/PUBTest.java</include> -->
           </includes>
         </configuration>
