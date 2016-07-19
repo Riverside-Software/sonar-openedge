@@ -226,16 +226,20 @@ public class OpenEdgeProparseSensor implements Sensor {
 
       @Override
       public boolean visitNode(JPNode node) {
-        for (ProToken n : node.getHiddenTokens()) {
-          if (!appBuilderCode && (n.getType() == NodeTypes.AMPANALYZESUSPEND)
-              && (n.getText().startsWith("&ANALYZE-SUSPEND _VERSION-NUMBER AB_"))) {
-            appBuilderCode = true;
-          }
-          if (appBuilderCode && (n.getType() == NodeTypes.AMPANALYZESUSPEND)
-              && (n.getText().startsWith("&ANALYZE-SUSPEND _CREATE-WINDOW")
-                  || n.getText().startsWith("&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE adm-create-objects"))) {
+        if ((node.getType() == NodeTypes.PERIOD) || (node.getType() == NodeTypes.OBJCOLON))
+          return false;
+        if ((node.getType() == NodeTypes.ANNOTATION) && (settings.skipCPD(node.getAnnotationName()))) {
+          return false;
+        }
+        if (preprocessorLookup(node)) {
+          return false;
+        }
+        JPNode prevSibling = node.prevSibling();
+        while ((prevSibling != null) && (prevSibling.getType() == NodeTypes.ANNOTATION)) {
+          if (settings.skipCPD(prevSibling.getAnnotationName())) {
             return false;
           }
+          prevSibling = prevSibling.prevSibling();
         }
         if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
           // Consider that an operator only has 2 children
@@ -247,6 +251,17 @@ public class OpenEdgeProparseSensor implements Sensor {
           visitCpdNode(node);
         }
         return true;
+      }
+
+      private boolean preprocessorLookup(JPNode node) {
+        for (ProToken n : node.getHiddenTokens()) {
+          if (appBuilderCode && (n.getType() == NodeTypes.AMPANALYZESUSPEND)
+              && (n.getText().startsWith("&ANALYZE-SUSPEND _CREATE-WINDOW")
+                  || n.getText().startsWith("&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE adm-create-objects"))) {
+            return true;
+          }
+        }
+        return false;
       }
 
       private void visitCpdNode(JPNode node) {

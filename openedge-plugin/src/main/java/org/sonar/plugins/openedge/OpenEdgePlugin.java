@@ -61,6 +61,7 @@ public class OpenEdgePlugin implements Plugin {
   public static final String DATABASES = "sonar.oe.databases";
   public static final String ALIASES = "sonar.oe.aliases";
   public static final String CPD_DEBUG = "sonar.oe.cpd.debug";
+  public static final String CPD_ANNOTATIONS = "sonar.oe.cpd.annotations";
   public static final String SUFFIXES = "sonar.oe.file.suffixes";
 
   @Override
@@ -99,6 +100,10 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtension(PropertyDefinition.builder(SUFFIXES).name("File suffixes").description(
         "Comma-separated list of suffixes of OpenEdge files to analyze").type(PropertyType.STRING).defaultValue(
             "").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
+                Qualifiers.PROJECT).build());
+    context.addExtension(PropertyDefinition.builder(CPD_ANNOTATIONS).name("CPD annotations").description(
+        "Comma-separated list of annotations disabling CPD").type(PropertyType.STRING).defaultValue("@Generated").category(
+            CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
                 Qualifiers.PROJECT).build());
   }
 
