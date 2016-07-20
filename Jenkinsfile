@@ -3,7 +3,7 @@ node ('master') {
   gitClean()
   checkout scm
   def mvnHome = tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'
-  sh "${mvnHome}\\bin\\mvn install"
+  sh "${mvnHome}/bin/mvn install"
 }
 
 // see https://issues.jenkins-ci.org/browse/JENKINS-31924
