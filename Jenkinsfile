@@ -5,9 +5,7 @@ node ('master') {
   echo " Branch: ${env.BRANCH_NAME}"
   def mvnHome = tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'
   sh "${mvnHome}/bin/mvn install"
-  withCredentials([[$class: 'StringBinding', credentialsId: 'ee33521a-8ef2-4008-a70a-a85592fecd28', variable: 'GH_PASSWORD']]) {
-    sh "${mvnHome}/bin/mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.branch=${env.BRANCH_NAME} sonar:sonar"
-  }
+  sh "${mvnHome}/bin/mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.branch=${env.BRANCH_NAME} sonar:sonar"
 }
 
 // see https://issues.jenkins-ci.org/browse/JENKINS-31924
