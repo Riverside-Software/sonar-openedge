@@ -2,6 +2,7 @@ stage 'Build OpenEdge plugin'
 node ('master') {
   gitClean()
   checkout scm
+  echo " Branch: ${env.BRANCH_NAME}"
   def mvnHome = tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'
   sh "${mvnHome}/bin/mvn install"
 }
