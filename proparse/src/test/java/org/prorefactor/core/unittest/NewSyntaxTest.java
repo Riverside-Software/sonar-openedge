@@ -12,13 +12,13 @@ package org.prorefactor.core.unittest;
 
 import java.io.File;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.io.FileUtils;
 import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparserbase.JPTreeParser;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -28,17 +28,16 @@ import com.google.inject.Injector;
  * If no exceptions are thrown, then the tests pass. The files in the "newsyntax" directories are subject to change, so
  * no other tests should be added other than the expectation that they parse clean.
  */
-public class TestNewSyntax extends TestCase {
+public class NewSyntaxTest {
   private RefactorSession session;
 
-  @Override
+  @BeforeTest
   public void setUp() throws Exception {
-    super.setUp();
-
     Injector injector = Guice.createInjector(new UnitTestSports2000Module());
     session = injector.getInstance(RefactorSession.class);
   }
 
+  @Test
   public void test01() throws Exception {
     File directory = new File("src/test/resources/data/newsyntax");
     String[] extensions = {"p", "w", "cls"};

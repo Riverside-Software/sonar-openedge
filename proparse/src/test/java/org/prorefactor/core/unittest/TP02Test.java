@@ -10,6 +10,8 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
+import static org.testng.Assert.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,13 +23,13 @@ import org.apache.commons.io.FileUtils;
 import org.prorefactor.core.unittest.util.AttributedWriter;
 import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
 import org.prorefactor.refactor.RefactorSession;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import junit.framework.TestCase;
-
-public class TP01Test02 extends TestCase {
+public class TP02Test {
 
   private RefactorSession session;
 
@@ -42,10 +44,8 @@ public class TP01Test02 extends TestCase {
   File snippetOutFile = new File(snippetOutName);
   String snippetSep = "--------------------------------" + System.getProperty("line.separator");
 
-  @Override
+  @BeforeTest
   public void setUp() throws Exception {
-    super.setUp();
-
     outFile = new File(outName);
     snippetFile = new File(snippetName);
 
@@ -54,6 +54,7 @@ public class TP01Test02 extends TestCase {
     session.getSchema().createAlias("foo", "sports2000");
   }
 
+  @Test
   public void test01() throws Exception {
     BufferedWriter writer = null;
     try (BufferedReader reader = new BufferedReader(new FileReader(inName))) {

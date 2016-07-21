@@ -10,6 +10,8 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -20,23 +22,23 @@ import org.prorefactor.core.unittest.util.TP01FramesTreeLister;
 import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import junit.framework.TestCase;
-
 /**
  * Test frame scopes and implicit field associations to frames.
  */
-public class TP01FramesTest extends TestCase {
+public class TP01FramesTest {
   private RefactorSession session;
 
   String expectFileName = "src/test/resources/data/tp01tests/frames.expect.txt";
   String inFileName = "src/test/resources/data/tp01tests/frames.p";
   File outFileName = new File("target/test-temp/tp01tests/frames.out.txt");
 
-  @Override
+  @BeforeTest
   public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestSports2000Module());
     session = injector.getInstance(RefactorSession.class);
@@ -45,6 +47,7 @@ public class TP01FramesTest extends TestCase {
     outFileName.getParentFile().mkdirs();
   }
 
+  @Test
   public void test01() throws Exception {
     ParseUnit pu = new ParseUnit(new File(inFileName), session);
     pu.treeParser01();
@@ -54,8 +57,8 @@ public class TP01FramesTest extends TestCase {
     nodeLister.print(' ');
     writer.close();
 
-    assertTrue("Differences in: " + expectFileName + " " + outFileName,
-        FileUtils.contentEquals(new File(expectFileName), outFileName));
+    assertTrue(FileUtils.contentEquals(new File(expectFileName), outFileName),
+        "Differences in: " + expectFileName + " " + outFileName);
   }
 
 }
