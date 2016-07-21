@@ -526,6 +526,22 @@ public class JPNode extends BaseAST implements Xferable {
     return (Symbol) getLink(IConstants.SYMBOL);
   }
 
+  /**
+   * @return The full name of the annotation, or an empty string is node is not an annotation
+   */
+  public String getAnnotationName() {
+    if (getType() != NodeTypes.ANNOTATION)
+      return "";
+    StringBuilder annName = new StringBuilder(token.getText().substring(1));
+    JPNode tok = firstChild();
+    while ((tok != null) && (tok.getType() != NodeTypes.PERIOD) && (tok.getType() != NodeTypes.LEFTPAREN)) {
+      annName.append(tok.getText());
+      tok = (JPNode) tok.getNextSibling();
+    }
+
+    return annName.toString();
+  }
+
   @Override
   public String getText() {
     return token.getText();

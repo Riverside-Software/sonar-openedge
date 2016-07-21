@@ -23,7 +23,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -56,8 +58,9 @@ public class OpenEdgeSettings {
   private final File pctDir, dbgDir;
   private final Settings settings;
   private final List<File> propath = new ArrayList<>();
-  /* XXX private final Map<String, List<IDatabaseTable>> dbDesc = new TreeMap<String, List<IDatabaseTable>>(); */
+  private final Set<String> cpdAnnotations = new HashSet<>();
   private final RefactorSession proparseSession;
+  /* XXX private final Map<String, List<IDatabaseTable>> dbDesc = new TreeMap<String, List<IDatabaseTable>>(); */
   /* XXX private final Map<String, ClassInformation> genClasses = new HashMap<String, ClassInformation>();
   private final Map<String, ClassInformation> ppClasses = new HashMap<String, ClassInformation>();*/
 
@@ -183,6 +186,12 @@ public class OpenEdgeSettings {
     }
     dbFile.delete();
 
+    // CPD annotations
+    for (String str :settings.getString(OpenEdgePlugin.CPD_ANNOTATIONS).split(",")) {
+      LOG.debug("CPD annotation : '{}'", str);
+      cpdAnnotations.add(str);
+    }
+
     IProgressSettings settings1 = new ProgressSettings(true, "", "WIN32", getPropathAsString(), "11.5", "MS-WIN95");
     IProparseSettings settings2 = new ProparseSettings();
     proparseSession = new RefactorSession(settings1, settings2, sch, fileSystem.encoding());
@@ -198,6 +207,10 @@ public class OpenEdgeSettings {
 
   public File getDbgDir() {
     return dbgDir;
+  }
+
+  public boolean skipCPD(String annotation) {
+    return cpdAnnotations.contains(annotation);
   }
 
   public boolean skipProparseSensor() {

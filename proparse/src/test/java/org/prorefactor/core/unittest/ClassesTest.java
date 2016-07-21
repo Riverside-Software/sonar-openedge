@@ -15,6 +15,7 @@ import static org.testng.Assert.assertNull;
 
 import java.io.File;
 
+import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -41,6 +42,8 @@ public class ClassesTest {
     unit.treeParser01();
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
+    assertTrue(unit.getTopNode().query(NodeTypes.ANNOTATION).size() == 1);
+    assertEquals("Progress.Lang.Deprecated", unit.getTopNode().query(NodeTypes.ANNOTATION).get(0).getAnnotationName());
   }
 
 }
