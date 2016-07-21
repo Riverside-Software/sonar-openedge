@@ -10,8 +10,10 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 
