@@ -10,6 +10,9 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+
 import java.io.File;
 import java.io.PrintWriter;
 
@@ -19,18 +22,18 @@ import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.util.JsonNodeLister;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import junit.framework.TestCase;
 
 /**
  * Test the tree parsers against problematic syntax. These tests just run the tree parsers against the data/bugsfixed
  * directory. If no exceptions are thrown, then the tests pass. The files in the "bugsfixed" directories are subject to
  * change, so no other tests should be added other than the expectation that they parse clean.
  */
-public class BugFixTests extends TestCase {
+public class BugFixTest {
   private final static String SRC_DIR = "src/test/resources/data/bugsfixed";
   private final static String SRC_DIR2 = "src/test/resources/data/tobefixed";
   private final static String TEMP_DIR = "target/nodes-lister/data/bugsfixed";
@@ -38,10 +41,8 @@ public class BugFixTests extends TestCase {
   private RefactorSession session;
   private File tempDir = new File(TEMP_DIR);
 
-  @Override
+  @BeforeTest
   public void setUp() throws Exception {
-    super.setUp();
-
     Injector injector = Guice.createInjector(new UnitTestSports2000Module());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
@@ -49,6 +50,7 @@ public class BugFixTests extends TestCase {
     tempDir.mkdirs();
   }
 
+  @Test
   public void test01() throws Exception {
     for (File file : FileUtils.listFiles(new File(SRC_DIR), new String[] {"p", "w", "cls"}, true)) {
       ParseUnit pu = new ParseUnit(file, session);

@@ -10,27 +10,28 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+
 import java.io.File;
 
 import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import junit.framework.TestCase;
-
-public class AliasesT extends TestCase {
+public class AliasesTest {
   private RefactorSession session;
   // Just a shortcut for schema
   private ISchema schema;
 
-  @Override
+  @BeforeTest
   public void setUp() throws Exception {
-    super.setUp();
-
     Injector injector = Guice.createInjector(new UnitTestSports2000Module());
     session = injector.getInstance(RefactorSession.class);
     schema = session.getSchema();
@@ -38,6 +39,7 @@ public class AliasesT extends TestCase {
     schema.createAlias("foo", "sports2000");
   }
 
+  @Test
   public void test01() throws Exception {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/aliases.p"), session);
     assertNull(unit.getTopNode());
@@ -47,6 +49,7 @@ public class AliasesT extends TestCase {
     assertNotNull(unit.getRootScope());
   }
 
+  @Test
   public void test02() {
     assertNotNull(schema.lookupDatabase("dictdb"));
     assertNotNull(schema.lookupDatabase("foo"));
@@ -56,6 +59,7 @@ public class AliasesT extends TestCase {
     assertNull(schema.lookupTable("dictdb", "_file2"));
   }
 
+  @Test
   public void test03() {
     assertNull(schema.lookupDatabase("test"));
     schema.createAlias("test", "sports2000");
@@ -65,20 +69,22 @@ public class AliasesT extends TestCase {
     assertNull(schema.lookupDatabase("test"));
   }
 
+  @Test
   public void test04() {
     assertNotNull(schema.lookupField("sports2000", "customer", "custnum"));
     assertNotNull(schema.lookupField("dictdb", "customer", "custnum"));
     assertNotNull(schema.lookupField("foo", "customer", "custnum"));
   }
 
+  @Test
   public void test05() throws Exception {
     // Issue #27
-    assertNotNull("Salesrep table exists", schema.lookupTable("salesrep"));
-    assertNull("Typo, table doesn't exist", schema.lookupTable("salesrepp"));
-    assertNull("Table salesrep.salesrep doesn't exist (is a field)", schema.lookupTable("salesrep.salesrep"));
+    assertNotNull(schema.lookupTable("salesrep"), "Salesrep table exists");
+    assertNull(schema.lookupTable("salesrepp"), "Typo, table doesn't exist");
+    assertNull(schema.lookupTable("salesrep.salesrep"), "Table salesrep.salesrep doesn't exist (is a field)");
 
-    assertNotNull("Table _file exists", schema.lookupTable("_file"));
-    assertNotNull("Table foo._file exists", schema.lookupTable("foo._file"));
-    assertNotNull("Table sports2000._file exists", schema.lookupTable("sports2000._file"));
+    assertNotNull(schema.lookupTable("_file"), "Table _file exists");
+    assertNotNull(schema.lookupTable("foo._file"), "Table foo._file exists");
+    assertNotNull(schema.lookupTable("sports2000._file"), "Table sports2000._file exists");
   }
 }

@@ -10,27 +10,25 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
-import java.io.File;
-import java.io.PrintWriter;
+import static org.testng.Assert.assertNotNull;
 
-import org.apache.commons.io.FileUtils;
-import org.prorefactor.core.NodeTypes;
+import java.io.File;
+
 import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
-import org.prorefactor.util.JsonNodeLister;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import junit.framework.TestCase;
 
 /**
  * Test the tree parsers against problematic syntax. These tests just run the tree parsers against the data/bugsfixed
  * directory. If no exceptions are thrown, then the tests pass. The files in the "bugsfixed" directories are subject to
  * change, so no other tests should be added other than the expectation that they parse clean.
  */
-public class LegacyTests extends TestCase {
+public class LegacyTest {
   private final static String SRC_DIR1 = "src/test/resources/legacy/appendprogram/t01/test";
   private final static String SRC_DIR2 = "src/test/resources/legacy/extractmethod/";
   private final static String TEMP_DIR = "target/nodes-lister/legacy";
@@ -38,16 +36,15 @@ public class LegacyTests extends TestCase {
   private RefactorSession session;
   private File tempDir = new File(TEMP_DIR);
 
-  @Override
+  @BeforeTest
   public void setUp() throws Exception {
-    super.setUp();
-
     Injector injector = Guice.createInjector(new UnitTestSports2000Module());
     session = injector.getInstance(RefactorSession.class);
 
     tempDir.mkdirs();
   }
 
+  @Test
   public void testAppendProgram() throws Exception {
       ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/appendprogram/t01/test/t01.p"), session);
       pu1.treeParser01();
@@ -62,6 +59,7 @@ public class LegacyTests extends TestCase {
       // TODO Add assertions
   }
 
+  @Test
   public void testBubbleProgram01() throws Exception {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/test/bubbledecs.p"), session);
     pu1.treeParser01();
@@ -76,6 +74,7 @@ public class LegacyTests extends TestCase {
     // TODO Add assertions
   }
 
+  @Test
   public void testBubbleProgram02() throws Exception {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/test2/bubb2.p"), session);
     pu1.treeParser01();
@@ -84,6 +83,7 @@ public class LegacyTests extends TestCase {
     // TODO Add assertions
   }
 
+  @Test
   public void testBubbleProgram03() throws Exception {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/x03_test/x03.p"), session);
     pu1.treeParser01();
@@ -92,6 +92,7 @@ public class LegacyTests extends TestCase {
     // TODO Add assertions
   }
 
+  @Test
   public void testBubbleProgram04() throws Exception {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/x04/test/x04.p"), session);
     pu1.treeParser01();
@@ -100,6 +101,7 @@ public class LegacyTests extends TestCase {
     // TODO Add assertions
   }
 
+  @Test
   public void testBubbleProgram05() throws Exception {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/x05/test/x05.p"), session);
     pu1.treeParser01();
@@ -108,6 +110,7 @@ public class LegacyTests extends TestCase {
     // TODO Add assertions
   }
 
+  @Test
   public void testExtractMethod() throws Exception {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/extractmethod/t01/test/t01a.p"), session);
     pu1.treeParser01();
@@ -116,6 +119,7 @@ public class LegacyTests extends TestCase {
     // TODO Add assertions
   }
 
+  @Test
   public void testNames() throws Exception {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/names/billto.p"), session);
     pu1.treeParser01();
@@ -134,6 +138,7 @@ public class LegacyTests extends TestCase {
     // TODO Add assertions
   }
 
+  @Test
   public void testQualifyFields() throws Exception {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/qualifyfields/t01/test/t01a.p"), session);
     ParseUnit pu2 = new ParseUnit(new File("src/test/resources/legacy/qualifyfields/t01/test/t01b.p"), session);
@@ -158,18 +163,21 @@ public class LegacyTests extends TestCase {
     // TODO Add assertions
   }
 
+  @Test
   public void testAmbiguous() throws Exception {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/Sports2000/Customer/Name.cls"), session);
     pu1.treeParser01();
     // TODO Add assertions
   }
 
+  @Test
   public void testWrapProcedure() throws Exception {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/wrapprocedure/t01/test/t01.p"), session);
     pu1.treeParser01();
     // TODO Add assertions
   }
 
+  @Test
   public void testBaseDir() throws Exception {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/c-win.w"), session);
     ParseUnit pu3 = new ParseUnit(new File("src/test/resources/legacy/empty.p"), session);
