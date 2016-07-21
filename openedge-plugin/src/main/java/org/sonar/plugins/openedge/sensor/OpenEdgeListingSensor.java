@@ -24,13 +24,13 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.batch.Sensor;
-import org.sonar.api.batch.SensorContext;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.measure.Metric;
+import org.sonar.api.batch.sensor.Sensor;
+import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
-import org.sonar.api.measures.Measure;
-import org.sonar.api.resources.Project;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.eu.rssw.listing.CodeBlock;
 import org.sonar.plugins.openedge.api.eu.rssw.listing.ListingParser;
@@ -53,8 +53,8 @@ public class OpenEdgeListingSensor implements Sensor {
   }
 
   @Override
-  public boolean shouldExecuteOnProject(Project project) {
-    return fileSystem.languages().contains(OpenEdge.KEY);
+  public void describe(SensorDescriptor descriptor) {
+    descriptor.onlyOnLanguage(OpenEdge.KEY).name(getClass().getSimpleName());
   }
 
   private File getListingFile(File file) {
@@ -64,8 +64,9 @@ public class OpenEdgeListingSensor implements Sensor {
     return new File(settings.getPctDir(), relPath);
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public void analyse(Project project, SensorContext context) {
+  public void execute(SensorContext context) {
     int dbgImportNum = 0;
 
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdge.KEY))) {
@@ -85,8 +86,8 @@ public class OpenEdgeListingSensor implements Sensor {
             sb.append(block.getLineNumber());
           }
 
-          context.saveMeasure(file, new Measure(OpenEdgeMetrics.TRANSACTIONS, sb.toString()));
-          context.saveMeasure(file, new Measure(OpenEdgeMetrics.NUM_TRANSACTIONS, (double) parser.getTransactionBlocks().size()));
+          context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.TRANSACTIONS).withValue(sb.toString()).save();
+          context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TRANSACTIONS).withValue(parser.getTransactionBlocks().size()).save();
           if ((parser.getMainBlock() != null) && parser.getMainBlock().isTransaction()) {
             NewIssue issue = context.newIssue();
             issue.forRule(
@@ -110,4 +111,5 @@ public class OpenEdgeListingSensor implements Sensor {
   public String toString() {
     return getClass().getSimpleName();
   }
+
 }
