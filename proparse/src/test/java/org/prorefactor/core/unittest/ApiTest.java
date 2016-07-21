@@ -10,6 +10,11 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 
 import org.prorefactor.core.JPNode;
@@ -19,26 +24,25 @@ import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import junit.framework.TestCase;
-
 /**
  * For testing API and Backwards API access to the parser.
  */
-public class ApiTest1 extends TestCase {
+public class ApiTest {
   private RefactorSession session;
 
-  @Override
+  @BeforeTest
   public void setUp() throws Exception {
-    super.setUp();
-
     Injector injector = Guice.createInjector(new UnitTestSports2000Module());
     session = injector.getInstance(RefactorSession.class);
   }
 
+  @Test
   public void test01() throws Exception {
     File f = new File("src/test/resources/data/hello.p");
     ParseUnit pu = new ParseUnit(f, session);
@@ -47,6 +51,7 @@ public class ApiTest1 extends TestCase {
     assertEquals(1, numDisplay);
   }
 
+  @Test
   public void test02() throws Exception {
     File f = new File("src/test/resources/data/no-undo.p");
     ParseUnit pu = new ParseUnit(f, session);
@@ -55,6 +60,7 @@ public class ApiTest1 extends TestCase {
     assertEquals("VARIABLE", node.attrGetS("state2"));
   }
 
+  @Test
   public void test03() throws Exception {
     File f = new File("src/test/resources/data/include.p");
     ParseUnit pu = new ParseUnit(f, session);
@@ -69,6 +75,7 @@ public class ApiTest1 extends TestCase {
     assertEquals(2, ((IncludeRef) pu.getMacroSourceArray()[2]).getPosition().getLine());
   }
 
+  @Test
   public void test04() throws Exception {
     File f = new File("src/test/resources/data/nowarn.p");
     ParseUnit pu = new ParseUnit(f, session);
@@ -99,6 +106,7 @@ public class ApiTest1 extends TestCase {
     assertEquals("prolint-nowarn(something)", ((ProparseDirectiveNode) left).getDirectiveText());
   }
 
+  @Test
   public void test05() throws Exception {
     File f = new File("src/test/resources/data/bugsfixed/bug19.p");
     ParseUnit pu = new ParseUnit(f, session);
@@ -106,6 +114,7 @@ public class ApiTest1 extends TestCase {
     assertEquals("MESSAGE \"Hello\".", pu.getTopNode().toStringFulltext().trim());
   }
 
+  @Test
   public void test06() throws Exception {
     File f = new File("src/test/resources/data/abbrev.p");
     ParseUnit pu = new ParseUnit(f, session);

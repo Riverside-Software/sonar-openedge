@@ -10,15 +10,17 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
-import junit.framework.TestCase;
+import static org.testng.Assert.assertEquals;
 
 import org.prorefactor.core.Pstring;
+import org.testng.annotations.Test;
 
-public class PstringT extends TestCase {
+public class PstringTest {
 
+  @Test
   public void testBasicFunctions() {
     Pstring pstring = new Pstring("\"No more 'Hello world'!\":T");
-    assertEquals("Pstring.justText() failed", "No more 'Hello world'!", pstring.getText());
+    assertEquals("No more 'Hello world'!", pstring.getText(), "Pstring.justText() failed");
   }
 
 }

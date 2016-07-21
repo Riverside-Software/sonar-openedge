@@ -10,11 +10,11 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.prorefactor.core.unittest.util.RoutineHandler;
 import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
@@ -23,23 +23,18 @@ import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Call;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser01.TP01Support;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 /** Tests for Calls and Routines in the tree parser. */
-public class TP01ProcessActionTest extends TestCase {
+public class TP01ProcessActionTest {
   private TP01Support symbolAction;
   private RefactorSession session; // = RefactorSession.getInstance();
 
-  /**
-   * @param name
-   */
-  public TP01ProcessActionTest(String name) {
-    super(name);
-  }
-
-  @Override
+  @BeforeTest
   public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestSports2000Module());
     session = injector.getInstance(RefactorSession.class);
@@ -51,6 +46,7 @@ public class TP01ProcessActionTest extends TestCase {
    * 
    * @throws RefactorException
    */
+  @Test
   public void testCompileFileCalls() throws Exception {
     File file = new File("src/test/resources/data/tp01ProcessTests/compile-file.p");
     String externalName = file.getName();
@@ -102,6 +98,7 @@ public class TP01ProcessActionTest extends TestCase {
    * Parse persistent-run.p and verify that: a) run <proc1> persistent set <h> results in the handle variable being
    * updated. b) run <proc2> in <h> is registered as a call to proc1.proc2.
    */
+  @Test
   public void testPersistenProc() throws Exception {
     File file = new File("src/test/resources/data/tp01ProcessTests/persistent-run.p");
     String externalName = file.getName();

@@ -10,31 +10,33 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
+import static org.testng.Assert.assertTrue;
+
+import java.io.File;
+
 import org.prorefactor.core.unittest.util.RoutineHandler;
 import org.prorefactor.core.unittest.util.UnitTestSportsModule;
 import org.prorefactor.refactor.RefactorSession;
-import org.prorefactor.treeparser.SymbolScope;
 import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.treeparser.SymbolScope;
 import org.prorefactor.treeparser01.TP01Support;
 import org.prorefactor.treeparser01.TreeParser01;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import junit.framework.TestCase;
-
-import java.io.File;
 
 /**
  * Tests for symbol parse action (TP01Support).
  *
  */
-public class TP01SymbolActionTest extends TestCase {
+public class TP01SymbolActionTest {
   private TP01Support walkAction;
   private TreeParser01 walker;
   private RefactorSession session;
 
-  @Override
+  @BeforeTest
   public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestSportsModule());
     session = injector.getInstance(RefactorSession.class);
@@ -47,6 +49,7 @@ public class TP01SymbolActionTest extends TestCase {
   /**
    * Parse compile-file.p and verify that all symbols are extracted correctly.
    */
+  @Test
   public void testCompileFileRoutines() throws Exception {
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/tp01ProcessTests/compile-file.p"), session);
     pu.treeParser(walker);
@@ -69,6 +72,7 @@ public class TP01SymbolActionTest extends TestCase {
   /**
    * Parse compile-file.p and verify that all symbols are extracted correctly.
    */
+  @Test
   public void testCompileFileVars() throws Exception {
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/tp01ProcessTests/compile-file.p"), session);
     pu.treeParser(walker);
