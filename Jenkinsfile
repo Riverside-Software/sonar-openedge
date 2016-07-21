@@ -5,6 +5,7 @@ node ('master') {
   echo " Branch: ${env.BRANCH_NAME}"
   def mvnHome = tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'
   sh "${mvnHome}/bin/mvn install"
+  step([$class: 'Publisher', reportFilenamePattern: '**/testng-results.xml'])
   sh "${mvnHome}/bin/mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.branch=${env.BRANCH_NAME} sonar:sonar"
 }
 
