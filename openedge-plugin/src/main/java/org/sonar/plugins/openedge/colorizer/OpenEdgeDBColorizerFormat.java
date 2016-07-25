@@ -43,6 +43,6 @@ public class OpenEdgeDBColorizerFormat extends CodeColorizerFormat {
     KeywordsTokenizer kwTokenizer = new KeywordsTokenizer(SPAN_KEYWORD, SPAN_END, OpenEdgeDBKeywords.get(),
         "[a-zA-Z_][a-zA-Z0-9_\\x2D]*+");
     kwTokenizer.setCaseInsensitive(true);
-    return ImmutableList.of(new OpenEdgeDBStringTokenizer(SPAN_STRING, SPAN_END), kwTokenizer);
+    return ImmutableList.of(new OpenEdgeStringTokenizer(SPAN_STRING, SPAN_END), kwTokenizer);
   }
 }
