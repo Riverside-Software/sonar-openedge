@@ -21,7 +21,6 @@ package org.sonar.plugins.openedge.sensor;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,7 +29,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
@@ -42,8 +40,6 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.platform.Server;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.api.utils.MessageException;
-import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.checks.IXrefAnalyzer;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
@@ -126,7 +122,7 @@ public class OpenEdgeXREFSensor implements Sensor {
               continue;
             }
             LOG.trace("Executing {} on XML document", ruleKey.rule());
-            configureFields(rule, a);
+            OpenEdgeComponents.configureFields(rule, a);
             startTime = System.currentTimeMillis();
             a.execute(doc, context, file, ruleKey, components.getLicence(rule.ruleKey().repository()),
                 server.getPermanentServerId() == null ? "" : server.getPermanentServerId());
@@ -150,67 +146,6 @@ public class OpenEdgeXREFSensor implements Sensor {
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
     }
-  }
-
-  private void configureFields(ActiveRule activeRule, Object check) {
-    for (String param : activeRule.params().keySet()) {
-      Field field = getField(check, param);
-      if (field == null) {
-        throw MessageException.of("The field " + param
-            + " does not exist or is not annotated with @RuleProperty in the class " + check.getClass().getName());
-      }
-      if (StringUtils.isNotBlank(activeRule.param(param))) {
-        configureField(check, field, activeRule.param(param));
-      }
-    }
-  }
-
-  private void configureField(Object check, Field field, String value) {
-    try {
-      field.setAccessible(true);
-
-      if (field.getType().equals(String.class)) {
-        field.set(check, value);
-      } else if ("int".equals(field.getType().getSimpleName())) {
-        field.setInt(check, Integer.parseInt(value));
-      } else if ("short".equals(field.getType().getSimpleName())) {
-        field.setShort(check, Short.parseShort(value));
-      } else if ("long".equals(field.getType().getSimpleName())) {
-        field.setLong(check, Long.parseLong(value));
-      } else if ("double".equals(field.getType().getSimpleName())) {
-        field.setDouble(check, Double.parseDouble(value));
-      } else if ("boolean".equals(field.getType().getSimpleName())) {
-        field.setBoolean(check, Boolean.parseBoolean(value));
-      } else if ("byte".equals(field.getType().getSimpleName())) {
-        field.setByte(check, Byte.parseByte(value));
-      } else if (field.getType().equals(Integer.class)) {
-        field.set(check, new Integer(Integer.parseInt(value)));
-      } else if (field.getType().equals(Long.class)) {
-        field.set(check, new Long(Long.parseLong(value)));
-      } else if (field.getType().equals(Double.class)) {
-        field.set(check, new Double(Double.parseDouble(value)));
-      } else if (field.getType().equals(Boolean.class)) {
-        field.set(check, Boolean.valueOf(Boolean.parseBoolean(value)));
-      } else {
-        throw MessageException.of("The type of the field " + field + " is not supported: " + field.getType());
-      }
-    } catch (IllegalAccessException e) {
-      throw MessageException.of(
-          "Can not set the value of the field " + field + " in the class: " + check.getClass().getName());
-    }
-  }
-
-  private Field getField(Object check, String key) {
-    Field[] fields = check.getClass().getDeclaredFields();
-    for (Field field : fields) {
-      RuleProperty propertyAnnotation = field.getAnnotation(RuleProperty.class);
-      if (propertyAnnotation != null) {
-        if (StringUtils.equals(key, field.getName()) || StringUtils.equals(key, propertyAnnotation.key())) {
-          return field;
-        }
-      }
-    }
-    return null;
   }
 
   @Override
