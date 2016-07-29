@@ -5,3 +5,5 @@ The OpenEdge plugin for SonarQube enables analysis of OpenEdge procedural and ob
  * Issues found in the source code and DF files, such as performance killers, usage of deprecated keywords, ...
  * Code coverage from unit tests
  * Code duplication
+
+Documentation available [here](https://riverside-software.atlassian.net/wiki/spaces/WELCOME/overview)
