@@ -1,22 +1,39 @@
+/*
+ * OpenEdge plugin for SonarQube
+ * Copyright (C) 2016 Riverside Software
+ * contact AT riverside DASH software DOT fr
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
+ */
 package org.sonar.plugins.openedge.colorizer;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Before;
-import org.junit.Test;
 import org.sonar.channel.CodeReader;
 import org.sonar.colorizer.HtmlCodeBuilder;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 @SuppressWarnings("deprecation")
 public class MultilinesAndNestedDocTokenizerTest {
 
   private HtmlCodeBuilder codeBuilder;
 
-  @Before
+  @BeforeMethod
   public void init() {
     codeBuilder = new HtmlCodeBuilder();
   }
@@ -24,8 +41,11 @@ public class MultilinesAndNestedDocTokenizerTest {
   @Test
   public void testStandardComment() {
     MultilinesAndNestedDocTokenizer tokenizer = new MultiLinesAndNestedDocTokenizerImpl("{[||", "");
-    assertThat(tokenizer.hasNextToken(new CodeReader("{[|| And here is strange  multi-line comment"), new HtmlCodeBuilder()), is(true));
-    assertThat(tokenizer.hasNextToken(new CodeReader("// this is not a strange multi-line comment"), new HtmlCodeBuilder()), is(false));
+
+    assertTrue(
+        tokenizer.hasNextToken(new CodeReader("{[|| And here is strange  multi-line comment"), new HtmlCodeBuilder()));
+    assertFalse(
+        tokenizer.hasNextToken(new CodeReader("// this is not a strange multi-line comment"), new HtmlCodeBuilder()));
   }
 
   @Test
@@ -34,14 +54,14 @@ public class MultilinesAndNestedDocTokenizerTest {
     assertTrue(tokenizer.consume(new CodeReader("/*** multi-line comment**/ private part"), codeBuilder));
     assertEquals("/*** multi-line comment**/", codeBuilder.toString());
   }
-  
+
   @Test
   public void testStartTokenEndTokenOverlapping() {
     MultilinesAndNestedDocTokenizer tokenizer = new MultiLinesAndNestedDocTokenizerImpl("/*", "*/");
     assertTrue(tokenizer.consume(new CodeReader("/*// multi-line comment*/ private part"), codeBuilder));
     assertEquals("/*// multi-line comment*/", codeBuilder.toString());
   }
-  
+
   @Test
   public void testNestedComment() {
     CodeReader reader = new CodeReader("/* Single line /* ABC /* DEF */ */ */ private part");

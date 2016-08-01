@@ -187,7 +187,7 @@ public class OpenEdgeSettings {
     dbFile.delete();
 
     // CPD annotations
-    for (String str :settings.getString(OpenEdgePlugin.CPD_ANNOTATIONS).split(",")) {
+    for (String str : Strings.nullToEmpty(settings.getString(OpenEdgePlugin.CPD_ANNOTATIONS)).split(",")) {
       LOG.debug("CPD annotation : '{}'", str);
       cpdAnnotations.add(str);
     }
