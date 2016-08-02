@@ -9,7 +9,8 @@ public interface LicenceRegistrar {
    * This method is called during an analysis to register a licence
    * 
    * @param licenceContext The licence itself
-   * @see https://github.com/SonarSource/sonar-java/blob/master/java-squid/src/main/java/org/sonar/plugins/java/api/CheckRegistrar.java
+   * @see https://github.com/SonarSource/sonar-java/blob/master/java-squid/src/main/java/org/sonar/plugins/java/api/
+   *      CheckRegistrar.java
    */
   void register(Licence registrarContext);
 
@@ -22,13 +23,14 @@ public interface LicenceRegistrar {
     private String salt;
     private byte[] signature;
 
-    public void registerLicence(String permanentId, String customerName, String salt, String repoName, LicenceType type, byte[] licence, long expirationDate) {
+    public void registerLicence(String permanentId, String customerName, String salt, String repoName, LicenceType type,
+        byte[] signature, long expirationDate) {
       this.permanentId = permanentId;
       this.customerName = customerName;
       this.repositoryName = repoName;
       this.salt = salt;
       this.type = type;
-      this.signature = licence;
+      this.signature = signature;
       this.expirationDate = expirationDate;
     }
 

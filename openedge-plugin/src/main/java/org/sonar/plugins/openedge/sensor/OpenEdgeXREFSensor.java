@@ -39,8 +39,7 @@ import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.platform.Server;
-import org.sonar.api.rule.RuleKey;
-import org.sonar.plugins.openedge.api.checks.IXrefAnalyzer;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
@@ -79,7 +78,7 @@ public class OpenEdgeXREFSensor implements Sensor {
 
   @Override
   public void describe(SensorDescriptor descriptor) {
-    descriptor.onlyOnLanguage(OpenEdge.KEY);
+    descriptor.onlyOnLanguage(OpenEdge.KEY).name(getClass().getSimpleName());
   }
 
   private File getXrefFile(File file) {
@@ -94,12 +93,9 @@ public class OpenEdgeXREFSensor implements Sensor {
     int xrefNum = 0;
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
-
-    for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
-      String clsName = (rule.templateRuleKey() == null ? rule.ruleKey().rule() : rule.templateRuleKey());
-      // If class can be instantiated, then we add an entry 
-      if (components.getXrefAnalyzer(clsName) != null)
-        ruleTime.put(rule.ruleKey().rule(), 0L);
+    components.initializeChecks(context);
+    for (Map.Entry<ActiveRule, OpenEdgeXrefCheck> entry : components.getXrefRules().entrySet()) {
+      ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdge.KEY))) {
@@ -113,20 +109,15 @@ public class OpenEdgeXREFSensor implements Sensor {
           Document doc = dBuilder.parse(xrefFile);
           parseTime += (System.currentTimeMillis() - startTime);
 
-          for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
-            RuleKey ruleKey = rule.ruleKey();
-            // AFAIK, no way to be sure if a rule is based on a template or not
-            String clsName = (rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey());
-            IXrefAnalyzer a = components.getXrefAnalyzer(clsName);
-            if (a == null) {
-              continue;
-            }
-            LOG.trace("Executing {} on XML document", ruleKey.rule());
-            OpenEdgeComponents.configureFields(rule, a);
+          for (Map.Entry<ActiveRule, OpenEdgeXrefCheck> entry : components.getXrefRules().entrySet()) {
+            LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}",
+                new Object[] {
+                    entry.getKey().internalKey(), entry.getKey().ruleKey().repository(),
+                    entry.getKey().ruleKey().rule()});
             startTime = System.currentTimeMillis();
-            a.execute(doc, context, file, ruleKey, components.getLicence(rule.ruleKey().repository()),
-                server.getPermanentServerId() == null ? "" : server.getPermanentServerId());
-            ruleTime.put(ruleKey.rule(), ruleTime.get(ruleKey.rule()) + System.currentTimeMillis() - startTime);
+            entry.getValue().execute(file, doc);
+            ruleTime.put(entry.getKey().ruleKey().toString(),
+                ruleTime.get(entry.getKey().ruleKey().toString()) + System.currentTimeMillis() - startTime);
           }
 
           xrefNum++;
