@@ -3,9 +3,9 @@ package org.sonar.plugins.openedge.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.BatchSide;
-import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
-import org.sonar.plugins.openedge.api.checks.IDumpFileAnalyzer;
-import org.sonar.plugins.openedge.api.checks.IXrefAnalyzer;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
 
 @BatchSide
 public interface CheckRegistrar {
@@ -24,14 +24,14 @@ public interface CheckRegistrar {
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckRegistrar.RegistrarContext.class);
 
     private String repositoryKey;
-    private Iterable<Class<? extends IXrefAnalyzer>> xrefCheckClasses;
-    private Iterable<Class<? extends AbstractLintRule>> proparseCheckClasses;
-    private Iterable<Class<? extends IDumpFileAnalyzer>> dbCheckClasses;
+    private Iterable<Class<? extends OpenEdgeXrefCheck>> xrefCheckClasses;
+    private Iterable<Class<? extends OpenEdgeProparseCheck>> proparseCheckClasses;
+    private Iterable<Class<? extends OpenEdgeDumpFileCheck>> dbCheckClasses;
 
     public void registerClassesForRepository(String repositoryKey,
-        Iterable<Class<? extends IXrefAnalyzer>> xrefCheckClasses,
-        Iterable<Class<? extends AbstractLintRule>> proparseChecks,
-        Iterable<Class<? extends IDumpFileAnalyzer>> dbChecks) {
+        Iterable<Class<? extends OpenEdgeXrefCheck>> xrefCheckClasses,
+        Iterable<Class<? extends OpenEdgeProparseCheck>> proparseChecks,
+        Iterable<Class<? extends OpenEdgeDumpFileCheck>> dbChecks) {
       LOGGER.debug("Registering class for repository {}", repositoryKey);
       this.repositoryKey = repositoryKey;
       this.xrefCheckClasses = xrefCheckClasses;
@@ -43,15 +43,15 @@ public interface CheckRegistrar {
       return repositoryKey;
     }
 
-    public Iterable<Class<? extends IDumpFileAnalyzer>> getDbCheckClasses() {
+    public Iterable<Class<? extends OpenEdgeDumpFileCheck>> getDbCheckClasses() {
       return dbCheckClasses;
     }
 
-    public Iterable<Class<? extends IXrefAnalyzer>> getXrefCheckClasses() {
+    public Iterable<Class<? extends OpenEdgeXrefCheck>> getXrefCheckClasses() {
       return xrefCheckClasses;
     }
 
-    public Iterable<Class<? extends AbstractLintRule>> getProparseCheckClasses() {
+    public Iterable<Class<? extends OpenEdgeProparseCheck>> getProparseCheckClasses() {
       return proparseCheckClasses;
     }
   }

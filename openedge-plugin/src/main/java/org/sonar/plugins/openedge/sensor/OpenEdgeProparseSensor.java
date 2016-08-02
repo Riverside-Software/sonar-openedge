@@ -48,7 +48,7 @@ import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.platform.Server;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.antlr.TokenStream;
-import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.api.com.google.common.io.ByteStreams;
 import org.sonar.plugins.openedge.api.com.google.common.io.Files;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.ICallback;
@@ -98,12 +98,10 @@ public class OpenEdgeProparseSensor implements Sensor {
     List<String> debugFiles = new ArrayList<>();
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
+    components.initializeChecks(context);
 
-    for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
-      String clsName = (rule.templateRuleKey() == null ? rule.ruleKey().rule() : rule.templateRuleKey());
-      // If class can be instantiated, then we add an entry 
-      if (components.getProparseAnalyzer(clsName) != null)
-        ruleTime.put(rule.ruleKey().rule(), 0L);
+    for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
+      ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdge.KEY))) {
@@ -150,21 +148,17 @@ public class OpenEdgeProparseSensor implements Sensor {
           }
         }
 
-        for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
-          RuleKey ruleKey = rule.ruleKey();
-          // AFAIK, no way to be sure if a rule is based on a template or not
-          String clsName = (rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey());
-          AbstractLintRule lint = components.getProparseAnalyzer(clsName);
-          if (lint != null) {
-            LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}",
-                new Object[] {rule.internalKey(), rule.ruleKey().repository(), rule.ruleKey().rule()});
-            OpenEdgeComponents.configureFields(rule, lint);
-            startTime = System.currentTimeMillis();
-            lint.execute(unit, context, file, ruleKey, components.getLicence(rule.ruleKey().repository()),
-                (server.getPermanentServerId() == null ? "" : server.getPermanentServerId()));
-            ruleTime.put(ruleKey.rule(), ruleTime.get(ruleKey.rule()) + System.currentTimeMillis() - startTime);
-          }
+        for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
+          LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}",
+              new Object[] {
+                  entry.getKey().internalKey(), entry.getKey().ruleKey().repository(),
+                  entry.getKey().ruleKey().rule()});
+          startTime = System.currentTimeMillis();
+          entry.getValue().execute(file, unit);
+          ruleTime.put(entry.getKey().ruleKey().toString(),
+              ruleTime.get(entry.getKey().ruleKey().toString()) + System.currentTimeMillis() - startTime);
         }
+        
       } catch (RefactorException | ProparseRuntimeException caught ) {
         LOG.error("Error during code parsing for " + file.relativePath(), caught);
         NewIssue issue = context.newIssue();

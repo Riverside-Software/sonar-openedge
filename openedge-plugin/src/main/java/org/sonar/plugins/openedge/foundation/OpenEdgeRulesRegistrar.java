@@ -24,9 +24,9 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
-import org.sonar.plugins.openedge.api.checks.AbstractLintRule;
-import org.sonar.plugins.openedge.api.checks.IDumpFileAnalyzer;
-import org.sonar.plugins.openedge.api.checks.IXrefAnalyzer;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 
 public class OpenEdgeRulesRegistrar implements CheckRegistrar {
@@ -48,7 +48,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
    * Lists all the XREF checks provided by the plugin
    */
   @SuppressWarnings("unchecked")
-  public static Class<? extends IXrefAnalyzer>[] xrefCheckClasses() {
+  public static Class<? extends OpenEdgeXrefCheck>[] xrefCheckClasses() {
     return new Class[] {SharedObjectsAnalyzer.class};
   }
 
@@ -56,7 +56,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
    * Lists all the proparse checks provided by the plugin
    */
   @SuppressWarnings("unchecked")
-  public static Class<? extends AbstractLintRule>[] ppCheckClasses() {
+  public static Class<? extends OpenEdgeProparseCheck>[] ppCheckClasses() {
     return new Class[] {};
   }
 
@@ -64,7 +64,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
    * Lists all the DB checks provided by the plugin
    */
   @SuppressWarnings("unchecked")
-  public static Class<? extends IDumpFileAnalyzer>[] dbCheckClasses() {
+  public static Class<? extends OpenEdgeDumpFileCheck>[] dbCheckClasses() {
     return new Class[] {};
   }
 

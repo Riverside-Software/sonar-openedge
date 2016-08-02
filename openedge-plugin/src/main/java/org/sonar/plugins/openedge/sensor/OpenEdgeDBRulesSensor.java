@@ -34,11 +34,9 @@ import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.platform.Server;
-import org.sonar.api.rule.RuleKey;
-import org.sonar.plugins.openedge.api.checks.IDumpFileAnalyzer;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
 import org.sonar.plugins.openedge.api.org.antlr.v4.runtime.tree.ParseTree;
-import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 
@@ -50,7 +48,8 @@ public class OpenEdgeDBRulesSensor implements Sensor {
   private final OpenEdgeComponents components;
   private final Server server;
 
-  public OpenEdgeDBRulesSensor(FileSystem fileSystem, ActiveRules activesRules, OpenEdgeComponents components, Server server) {
+  public OpenEdgeDBRulesSensor(FileSystem fileSystem, ActiveRules activesRules, OpenEdgeComponents components,
+      Server server) {
     this.fileSystem = fileSystem;
     this.activeRules = activesRules;
     this.components = components;
@@ -66,12 +65,10 @@ public class OpenEdgeDBRulesSensor implements Sensor {
   public void execute(SensorContext context) {
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
+    components.initializeChecks(context);
 
-    for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
-      String clsName = rule.templateRuleKey() == null ? rule.ruleKey().rule() : rule.templateRuleKey();
-      // If class can be instantiated, then we add an entry 
-      if (components.getDFAnalyzer(clsName) != null)
-        ruleTime.put(rule.ruleKey().rule(), 0L);
+    for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules().entrySet()) {
+      ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdgeDB.KEY))) {
@@ -80,27 +77,23 @@ public class OpenEdgeDBRulesSensor implements Sensor {
         long time = System.currentTimeMillis();
         ParseTree tree = DumpFileUtils.getDumpFileParseTree(file.file());
         parseTime += (System.currentTimeMillis() - time);
-        
-        for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
-          RuleKey ruleKey = rule.ruleKey();
-          // AFAIK, no way to be sure if a rule is based on a template or not
-          String clsName = (rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey());
-          IDumpFileAnalyzer lint = components.getDFAnalyzer(clsName);
-          if (lint != null) {
-            LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}",
-                new Object[] {rule.internalKey(), rule.ruleKey().repository(), rule.ruleKey().rule()});
-            OpenEdgeComponents.configureFields(rule, lint);
-            long startTime = System.currentTimeMillis();
-            lint.execute(tree, context, file, ruleKey, components.getLicence(rule.ruleKey().repository()),
-                server.getPermanentServerId() == null ? "" : server.getPermanentServerId());
-            ruleTime.put(ruleKey.rule(), ruleTime.get(ruleKey.rule()) + System.currentTimeMillis() - startTime);
-          }
+
+        for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules().entrySet()) {
+          LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}",
+              new Object[] {
+                  entry.getKey().internalKey(), entry.getKey().ruleKey().repository(),
+                  entry.getKey().ruleKey().rule()});
+          long startTime = System.currentTimeMillis();
+          entry.getValue().execute(file, tree);
+          ruleTime.put(entry.getKey().ruleKey().toString(),
+              ruleTime.get(entry.getKey().ruleKey().toString()) + System.currentTimeMillis() - startTime);
         }
+
       } catch (IOException caught) {
         LOG.error("Unable to analyze {}", file.relativePath(), caught);
       }
     }
-    
+
     LOG.info("AST Generation | time={} ms", parseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});

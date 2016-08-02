@@ -25,20 +25,27 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.rule.RuleKey;
 import org.sonar.check.Priority;
 import org.sonar.check.Rule;
-import org.sonar.plugins.openedge.api.checks.XrefAnalyzer;
+import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 @Rule(priority = Priority.MAJOR, name = "Shared objects analyzer")
-public class SharedObjectsAnalyzer extends XrefAnalyzer {
-  private static XPath xPath;
+public class SharedObjectsAnalyzer extends OpenEdgeXrefCheck {
   private static XPathExpression shrTTExpr, shrDSExpr, shrVarExpr;
 
+  public SharedObjectsAnalyzer(RuleKey ruleKey, SensorContext context, Licence licence, String serverId) {
+    super(ruleKey, context, licence, serverId);
+  }
+
   static {
-    xPath = XPathFactory.newInstance().newXPath();
+    XPath xPath = XPathFactory.newInstance().newXPath();
     try {
       shrTTExpr = xPath.compile("//Reference[@Reference-type='NEW-SHR-TEMPTABLE']");
       shrDSExpr = xPath.compile("//Reference[@Reference-type='NEW-SHR-DATASET']");
@@ -49,7 +56,7 @@ public class SharedObjectsAnalyzer extends XrefAnalyzer {
   }
 
   @Override
-  public void execute(Document doc) {
+  public void execute(InputFile file, Document doc) {
     int numShrTT = 0, numShrDS = 0, numShrVar = 0;
     try {
       NodeList nodeList = (NodeList) shrTTExpr.evaluate(doc, XPathConstants.NODESET);
@@ -70,8 +77,8 @@ public class SharedObjectsAnalyzer extends XrefAnalyzer {
 
     }
 
-    reportMeasure(OpenEdgeMetrics.SHR_TT, numShrTT);
-    reportMeasure(OpenEdgeMetrics.SHR_DS, numShrDS);
-    reportMeasure(OpenEdgeMetrics.SHR_VAR, numShrVar);
+    reportMeasure(file, OpenEdgeMetrics.SHR_TT, numShrTT);
+    reportMeasure(file, OpenEdgeMetrics.SHR_DS, numShrDS);
+    reportMeasure(file, OpenEdgeMetrics.SHR_VAR, numShrVar);
   }
 }
