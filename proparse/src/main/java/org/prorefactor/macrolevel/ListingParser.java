@@ -47,10 +47,9 @@ public class ListingParser implements ListingListener {
 
   @Override
   public void define(int line, int column, String name, String value, int type) {
-    MacroDef newDef = new MacroDef(currRef, line, column);
+    MacroDef newDef = new MacroDef(currRef, type, line, column);
     newDef.name = name;
     newDef.value = value;
-    newDef.type = type;
     if (type == MacroDef.GLOBAL)
       globalDefMap.put(newDef.name, newDef);
     if (type == MacroDef.SCOPED) {
@@ -93,23 +92,23 @@ public class ListingParser implements ListingListener {
 
   @Override
   public void includeArgument(String argName, String value) {
-    MacroDef newArg = new MacroDef(currInclude.getParent());
-    newArg.value = value;
-    newArg.includeRef = currInclude;
     int argNum = 0;
     try {
       argNum = Integer.parseInt(argName);
-    } catch (NumberFormatException e) {
+    } catch (NumberFormatException uncaught) {
     }
+    MacroDef newArg;
     if ((argNum == 0) || (argNum != currInclude.numArgs() + 1)) {
+      newArg = new MacroDef(currInclude.getParent(), MacroDef.NAMEDARG);
       newArg.name = argName;
       currInclude.usesNamedArgs = true;
-      newArg.type = MacroDef.NAMEDARG;
       currInclude.addNamedArg(newArg);
     } else {
-      newArg.type = MacroDef.NUMBEREDARG;
+      newArg = new MacroDef(currInclude.getParent(), MacroDef.NUMBEREDARG);
       currInclude.addNumberedArg(newArg);
     }
+    newArg.value = value;
+    newArg.includeRef = currInclude;
   }
 
   @Override
@@ -139,10 +138,9 @@ public class ListingParser implements ListingListener {
   @Override
   public void undefine(int line, int column, String name) {
     // Add an object for this macro event.
-    MacroDef newDef = new MacroDef(currRef, line, column);
+    MacroDef newDef = new MacroDef(currRef, MacroDef.UNDEFINE, line, column);
     currRef.macroEventList.add(newDef);
     newDef.name = name;
-    newDef.type = MacroDef.UNDEFINE;
 
     // Now process the undefine.
     Scope currScope = scopeStack.getFirst();

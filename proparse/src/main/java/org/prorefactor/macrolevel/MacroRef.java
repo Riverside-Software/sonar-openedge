@@ -103,8 +103,8 @@ public abstract class MacroRef implements MacroEvent {
     }
     if (obj instanceof MacroDef) {
       MacroDef def = (MacroDef) obj;
-      if (def.type == MacroDef.UNDEFINE) {
-        if (def.undefWhat.type == MacroDef.NAMEDARG) {
+      if (def.getType() == MacroDef.UNDEFINE) {
+        if (def.undefWhat.getType() == MacroDef.NAMEDARG) {
           list.add(def);
           return;
         }

@@ -978,7 +978,7 @@ public class Lexer {
     String defText = StringFuncs.stripComments(currText.substring(it));
     defText = defText.trim();
     // Do listing before lowercasing the name
-    prepro.getLstListener().define(textStartLine, textStartCol, macroName, defText,
+    prepro.getLstListener().define(textStartLine, textStartCol, macroName.toLowerCase(), defText,
         defType == ProParserTokenTypes.AMPGLOBALDEFINE ? MacroDef.GLOBAL : MacroDef.SCOPED);
     if (defType == ProParserTokenTypes.AMPGLOBALDEFINE)
       prepro.defGlobal(macroName.toLowerCase(), defText);

@@ -22,6 +22,8 @@ import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.nodetypes.ProparseDirectiveNode;
 import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
 import org.prorefactor.macrolevel.IncludeRef;
+import org.prorefactor.macrolevel.MacroDef;
+import org.prorefactor.macrolevel.NamedMacroRef;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
@@ -127,4 +129,16 @@ public class ApiTest {
     assertFalse(pu.getTopNode().query(NodeTypes.SUBSTITUTE).get(1).isAbbreviated());
   }
 
+  @Test
+  public void test07() throws Exception {
+    File f = new File("src/test/resources/data/prepro.p");
+    ParseUnit pu = new ParseUnit(f, session);
+    pu.parse();
+    IncludeRef incRef = pu.getMacroGraph();
+    assertEquals(incRef.macroEventList.size(), 2);
+    assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
+    assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
+    NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
+    assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
+  }
 }
