@@ -23,6 +23,9 @@ public class ProToken extends CommonHiddenStreamToken implements Xferable {
   private int fileIndex;
   private int macroSourceNum;
   private IntegerIndex<String> filenameList;
+  private int endFile;
+  private int endLine;
+  private int endColumn;
 
   public ProToken() {
     // Only to be used for persistence/serialization
@@ -33,14 +36,17 @@ public class ProToken extends CommonHiddenStreamToken implements Xferable {
     this.filenameList = filenameList;
   }
 
-  public ProToken(IntegerIndex<String> filenameList, int type, String txt, int file, int line, int col,
-      int macroSourceNum) {
+  public ProToken(IntegerIndex<String> filenameList, int type, String txt, int file, int line, int col, int endFile,
+      int endLine, int endCol, int macroSourceNum) {
     super(type, txt);
     this.filenameList = filenameList;
-    fileIndex = file;
+    this.fileIndex = file;
     this.macroSourceNum = macroSourceNum;
     this.line = line;
     this.col = col;
+    this.endFile = endFile;
+    this.endLine = endLine;
+    this.endColumn = endCol;
   }
 
   public ProToken(ProToken orig) {
@@ -50,6 +56,8 @@ public class ProToken extends CommonHiddenStreamToken implements Xferable {
     this.macroSourceNum = orig.macroSourceNum;
     this.line = orig.line;
     this.col = orig.col;
+    this.endLine = orig.endLine;
+    this.endColumn = orig.endColumn;
   }
 
   public int getFileIndex() {
@@ -114,6 +122,29 @@ public class ProToken extends CommonHiddenStreamToken implements Xferable {
 
   public void setMacroSourceNum(int macroSourceNum) {
     this.macroSourceNum = macroSourceNum;
+  }
+
+  /**
+   * @return Ending line of token. Not guaranteed to be identical to the start line
+   */
+  public int getEndLine() {
+    return endLine;
+  }
+
+  /**
+   * @return Ending column of token. Not guaranteed to be greater than start column, as some tokens may include the
+   *         newline character
+   */
+  public int getEndColumn() {
+    return endColumn;
+  }
+
+  /**
+   * @return File number of end of token. Not guaranteed to be identical to file index, as a token can be spread over
+   *         two different files, thanks to the magic of the preprocessor
+   */
+  public int getEndFileIndex() {
+    return endFile;
   }
 
   @Override

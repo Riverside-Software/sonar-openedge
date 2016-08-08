@@ -16,6 +16,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.util.List;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
@@ -141,4 +142,27 @@ public class ApiTest {
     NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
     assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
   }
+
+  @Test
+  public void test08() throws Exception {
+    File f = new File("src/test/resources/data/prepro2.p");
+    ParseUnit pu = new ParseUnit(f, session);
+    pu.parse();
+    IncludeRef incRef = pu.getMacroGraph();
+    assertEquals(incRef.macroEventList.size(), 3);
+    assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
+    assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
+    NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
+    assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
+    List<JPNode> nodes = pu.getTopNode().query(NodeTypes.DEFINE);
+    assertEquals(nodes.size(), 1);
+    // Preprocessor magic... Keywords can start in main file, and end in include file...
+    assertEquals(nodes.get(0).getFileIndex(), 0);
+    assertEquals(nodes.get(0).getEndFileIndex(), 1);
+    assertEquals(nodes.get(0).getLine(), 6);
+    assertEquals(nodes.get(0).getEndLine(), 1);
+    assertEquals(nodes.get(0).getColumn(), 1);
+    assertEquals(nodes.get(0).getEndColumn(), 3);
+}
+
 }

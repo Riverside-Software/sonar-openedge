@@ -1019,7 +1019,7 @@ public class Lexer {
       loc.add(textStartLine);
     }
 
-    return new ProToken(filenameList, tokenType, text, textStartFile, textStartLine, textStartCol, textStartSource);
+    return new ProToken(filenameList, tokenType, text, textStartFile, textStartLine, textStartCol, prepro.getPrevFile(), prepro.getPrevLine(), prepro.getPrevColumn(), textStartSource);
   }
 
   /**

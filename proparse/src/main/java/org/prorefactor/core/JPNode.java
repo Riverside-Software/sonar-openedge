@@ -147,7 +147,7 @@ public class JPNode extends BaseAST implements Xferable {
    * For temporary nodes for comparison in set of nodes sorted by position
    */
   public JPNode(int file, int line, int column) {
-    this.token = new ProToken(null, 0, "", file, line, column, 0);
+    this.token = new ProToken(null, 0, "", file, line, column, file, line, column + 1, 0);
   }
 
   public String allLeadingHiddenText() {
@@ -332,6 +332,10 @@ public class JPNode extends BaseAST implements Xferable {
     return token.getColumn();
   }
 
+  public int getEndColumn() {
+    return token.getEndColumn();
+  }
+
   /**
    * Get the comments that precede this node. Gets the <b>consecutive</b> comments from Proparse if "connected",
    * otherwise gets the comments stored within this node object. CAUTION: We want to know if line breaks exist between
@@ -411,6 +415,10 @@ public class JPNode extends BaseAST implements Xferable {
     return token.getFileIndex();
   }
 
+  public int getEndFileIndex() {
+    return token.getEndFileIndex();
+  }
+
   public ProToken getHiddenAfter() {
     return (ProToken) token.getHiddenAfter();
   }
@@ -460,6 +468,10 @@ public class JPNode extends BaseAST implements Xferable {
   @Override
   public int getLine() {
     return token.getLine();
+  }
+
+  public int getEndLine() {
+    return token.getEndLine();
   }
 
   /**

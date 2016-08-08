@@ -71,10 +71,14 @@ public class Preprocessor implements IPreprocessor {
   private int consuming = 0;
 
   private int currChar;
-  private int currCol;
   private int currFile;
-  private int currLine;
   private int currSourceNum;
+  private int currLine;
+  private int currCol;
+  // Location of last character read by getChar()
+  private int prevFile;
+  private int prevCol;
+  private int prevLine;
 
   // Are we in the middle of a comment?
   private boolean doingComment;
@@ -128,7 +132,7 @@ public class Preprocessor implements IPreprocessor {
     currentInput.fileIndex = currFile;
     currentInclude = new IncludeFile(fileName, currentInput);
     includeVector.add(currentInclude);
-    currSourceNum = currentInput.sourceNum;
+    currSourceNum = currentInput.getSourceNum();
     lstListener = new ListingParser();
   }
 
@@ -254,6 +258,9 @@ public class Preprocessor implements IPreprocessor {
   }
 
   int getChar() throws IOException {
+    prevFile = currFile;
+    prevLine = currLine;
+    prevCol = currCol;
     wasEscape = false;
     for (;;) {
       escapeCurrent = false;
@@ -300,12 +307,24 @@ public class Preprocessor implements IPreprocessor {
     return currCol;
   }
 
+  public int getPrevColumn() {
+    return prevCol;
+  }
+
   int getFileIndex() {
     return currFile;
   }
 
+  public int getPrevFile() {
+    return prevFile;
+  }
+
   int getLine() {
     return currLine;
+  }
+
+  int getPrevLine() {
+    return prevLine;
   }
 
   int getSourceNum() {
@@ -414,7 +433,7 @@ public class Preprocessor implements IPreprocessor {
           currFile = currentInput.fileIndex;
           currLine = currentInput.nextLine;
           currCol = currentInput.nextCol;
-          currSourceNum = currentInput.sourceNum;
+          currSourceNum = currentInput.getSourceNum();
           currChar = ' ';
           return;
         case 2: // popped a macro ref or include arg ref
@@ -422,7 +441,7 @@ public class Preprocessor implements IPreprocessor {
           currLine = currentInput.nextLine;
           currCol = currentInput.nextCol;
           currChar = currentInput.get(); // might be another EOF
-          currSourceNum = currentInput.sourceNum;
+          currSourceNum = currentInput.getSourceNum();
           break;
         default:
           throw new IOException("Proparse error. popInput() returned unexpected value.");
@@ -663,7 +682,7 @@ public class Preprocessor implements IPreprocessor {
         // Unlike currline and currcol,
         // currfile is only updated with a push/pop of the input stack.
         currFile = currentInput.fileIndex;
-        currSourceNum = currentInput.sourceNum;
+        currSourceNum = currentInput.getSourceNum();
         lstListener.include(refPos.line, refPos.col, currFile, includeFilename);
         // Add the arguments to the new include object.
         int argNum = 1;
@@ -731,7 +750,7 @@ public class Preprocessor implements IPreprocessor {
     currentInclude.inputVector.add(currentInput);
     // For a macro/argument expansion, we use the file/line/col of
     // the opening curly '{' of the ref file, for all characters/tokens.
-    currentInput.isMacroExpansion = true;
+    currentInput.enableMacroExpansion();
     currentInput.fileIndex = refPos.file;
     currentInput.nextLine = refPos.line;
     currentInput.nextCol = refPos.col;

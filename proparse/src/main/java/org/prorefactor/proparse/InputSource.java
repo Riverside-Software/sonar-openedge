@@ -16,36 +16,36 @@ import java.io.IOException;
 /**
  * The bottom InputSource object for an IncludeFile is the input for the include file itself.
  * 
- * Each upper (potentially stacked) InputSource object is for an argument reference: - include file argument reference
- * or reference to scoped or global preprocessor definition - the input stream pointer is a pointer to a stringstream
- * object
- * 
+ * Each upper (potentially stacked) InputSource object is for an argument reference:
+ * <ul>
+ * <li>include file argument reference or reference to scoped or global preprocessor definition
+ * <li>the input stream pointer is a pointer to a string stream object
+ * </ul>
  * We keep a pointer to the input stream "A" in the InputSource object so that if "A" spawns a new input stream "B", we
  * can return to "A" when we are done with "B".
  */
 class InputSource {
+  private final BufferedReader reader;
+  private final boolean primaryInput;
+  private final int sourceNum;
 
+  private boolean isMacroExpansion;
   int fileIndex = 0;
-  int sourceNum;
-  boolean isMacroExpansion = false;
-  boolean isPrimaryInput = false;
   int nextCol = 1;
   int nextLine = 1;
 
-  private BufferedReader theInput;
 
-  InputSource(int sourceNum, BufferedReader theStream) {
-    this.sourceNum = sourceNum;
-    theInput = theStream;
+  public InputSource(int sourceNum, BufferedReader theStream) {
+    this(sourceNum, theStream, false);
   }
 
-  InputSource(int sourceNum, BufferedReader theStream, boolean isPrimary) {
+  public InputSource(int sourceNum, BufferedReader theStream, boolean isPrimary) {
     this.sourceNum = sourceNum;
-    isPrimaryInput = isPrimary;
-    theInput = theStream;
+    this.primaryInput = isPrimary;
+    reader = theStream;
   }
 
-  int get() throws IOException {
+  public int get() throws IOException {
     // We use nextLine and nextCol - that way '\n' can have a column
     // number at the end of the line it's on, rather than at column
     // 0 of the following line.
@@ -53,21 +53,27 @@ class InputSource {
     // or line number. Those just stay put at the file position where the
     // macro '{' was referenced.
     // (Doesn't apply to filenames)
-    int currChar = theInput.read();
+    int currChar = reader.read();
     if (!isMacroExpansion) {
       if (currChar == '\n') {
         nextLine++;
         nextCol = 1;
-      } else
+      } else {
         nextCol++;
+      }
     }
     return currChar;
   }
 
-  void setInputFilePos(int fileIndex, int line, int col) {
-    this.fileIndex = fileIndex;
-    this.nextLine = line;
-    this.nextCol = col;
+  public int getSourceNum() {
+    return sourceNum;
   }
 
+  public void enableMacroExpansion() {
+    this.isMacroExpansion = true;
+  }
+
+  public boolean isPrimaryInput() {
+    return primaryInput;
+  }
 }
