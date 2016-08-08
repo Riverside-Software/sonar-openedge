@@ -1,0 +1,4 @@
+&scoped-define FOO "foo"
+MESSAGE SUBSTITUTE("ABC", 123).
+MESSAGE SUBSTITUTE({&FOO}, "123").
+DISPLAY {&FOO} "Hello".

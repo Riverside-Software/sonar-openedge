@@ -163,6 +163,49 @@ public class ApiTest {
     assertEquals(nodes.get(0).getEndLine(), 1);
     assertEquals(nodes.get(0).getColumn(), 1);
     assertEquals(nodes.get(0).getEndColumn(), 3);
-}
+  }
+
+  @Test
+  public void test09() throws Exception {
+    File f = new File("src/test/resources/data/prepro3.p");
+    ParseUnit pu = new ParseUnit(f, session);
+    pu.parse();
+    List<JPNode> nodes = pu.getTopNode().query(NodeTypes.SUBSTITUTE);
+    assertEquals(nodes.size(), 2);
+    JPNode substNode = nodes.get(0);
+    JPNode leftParen = substNode.nextNode();
+    JPNode str = leftParen.nextNode();
+    assertEquals(leftParen.getLine(), 2);
+    assertEquals(leftParen.getColumn(), 19);
+    assertEquals(leftParen.getEndLine(), 2);
+    assertEquals(leftParen.getEndColumn(), 19);
+    assertEquals(str.getLine(), 2);
+    assertEquals(str.getColumn(), 20);
+    assertEquals(str.getEndLine(), 2);
+    assertEquals(str.getEndColumn(), 24);
+
+    JPNode substNode2 = nodes.get(1);
+    JPNode leftParen2 = substNode2.nextNode();
+    JPNode str2 = leftParen2.nextNode();
+    assertEquals(leftParen2.getLine(), 3);
+    assertEquals(leftParen2.getColumn(), 19);
+    assertEquals(leftParen2.getEndLine(), 3);
+    assertEquals(leftParen2.getEndColumn(), 19);
+    assertEquals(str2.getLine(), 3);
+    assertEquals(str2.getColumn(), 20);
+    assertEquals(str2.getEndLine(), 3);
+    // FIXME Wrong value, should be 25
+    assertEquals(str2.getEndColumn(), 20);
+
+    List<JPNode> dispNodes = pu.getTopNode().query(NodeTypes.DISPLAY);
+    assertEquals(dispNodes.size(), 1);
+    JPNode dispNode = dispNodes.get(0);
+    JPNode str3 = dispNode.nextNode().nextNode();
+    assertEquals(str3.getLine(), 4);
+    assertEquals(str3.getEndLine(), 4);
+    assertEquals(str3.getColumn(), 9);
+    // FIXME Wrong value, should be 14
+    assertEquals(str3.getEndColumn(), 9);
+  }
 
 }

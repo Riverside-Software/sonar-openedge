@@ -26,7 +26,9 @@ public class Lexer {
 
   /** Current character, before being lowercased */
   private int currInt;
-
+  private int currFile, currLine, currCol;
+  private int prevFile, prevLine, prevCol;
+  
   private int currStringType;
   private StringBuilder currText = new StringBuilder();
 
@@ -958,6 +960,12 @@ public class Lexer {
   void getChar() throws IOException {
     currInt = prepro.getChar();
     currChar = Character.toLowerCase(currInt);
+    prevFile = currFile;
+    prevLine = currLine;
+    prevCol = currCol;
+    currFile = prepro.getFileIndex();
+    currLine = prepro.getLine();
+    currCol = prepro.getColumn();
   }
 
   void macroDefine(int defType) throws IOException {
@@ -1019,7 +1027,7 @@ public class Lexer {
       loc.add(textStartLine);
     }
 
-    return new ProToken(filenameList, tokenType, text, textStartFile, textStartLine, textStartCol, prepro.getPrevFile(), prepro.getPrevLine(), prepro.getPrevColumn(), textStartSource);
+    return new ProToken(filenameList, tokenType, text, textStartFile, textStartLine, textStartCol, prevFile, prevLine, prevCol, textStartSource);
   }
 
   /**

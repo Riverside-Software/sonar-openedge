@@ -75,10 +75,6 @@ public class Preprocessor implements IPreprocessor {
   private int currSourceNum;
   private int currLine;
   private int currCol;
-  // Location of last character read by getChar()
-  private int prevFile;
-  private int prevCol;
-  private int prevLine;
 
   // Are we in the middle of a comment?
   private boolean doingComment;
@@ -258,9 +254,6 @@ public class Preprocessor implements IPreprocessor {
   }
 
   int getChar() throws IOException {
-    prevFile = currFile;
-    prevLine = currLine;
-    prevCol = currCol;
     wasEscape = false;
     for (;;) {
       escapeCurrent = false;
@@ -307,24 +300,12 @@ public class Preprocessor implements IPreprocessor {
     return currCol;
   }
 
-  public int getPrevColumn() {
-    return prevCol;
-  }
-
   int getFileIndex() {
     return currFile;
   }
 
-  public int getPrevFile() {
-    return prevFile;
-  }
-
   int getLine() {
     return currLine;
-  }
-
-  int getPrevLine() {
-    return prevLine;
   }
 
   int getSourceNum() {
