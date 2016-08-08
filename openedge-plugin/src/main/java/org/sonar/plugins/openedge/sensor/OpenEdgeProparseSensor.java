@@ -35,14 +35,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.TextRange;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.batch.sensor.cpd.NewCpdTokens;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.platform.Server;
@@ -51,16 +49,14 @@ import org.sonar.plugins.openedge.api.antlr.TokenStream;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.api.com.google.common.io.ByteStreams;
 import org.sonar.plugins.openedge.api.com.google.common.io.Files;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.ICallback;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.IConstants;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.ProToken;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.ProparseRuntimeException;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.SymbolScope;
 import org.sonar.plugins.openedge.api.org.prorefactor.util.JsonNodeLister;
+import org.sonar.plugins.openedge.foundation.CPDCallback;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
@@ -121,8 +117,10 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.debug("{} milliseconds to generate ParseUnit", System.currentTimeMillis() - time);
 
         // Saving LOC and COMMENTS metrics
-        context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(lexUnit.getMetrics().getLoc()).save();
-        context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(lexUnit.getMetrics().getComments()).save();
+        context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(
+            lexUnit.getMetrics().getLoc()).save();
+        context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
+            lexUnit.getMetrics().getComments()).save();
 
         if (isIncludeFile) {
           // Rules and complexity are not applied on include files
@@ -205,77 +203,9 @@ public class OpenEdgeProparseSensor implements Sensor {
   }
 
   private void computeCpd(SensorContext context, InputFile file, ParseUnit unit) {
-    ICallback<NewCpdTokens> cpdCallback = new ICallback<NewCpdTokens>() {
-      final NewCpdTokens cpdTokens = context.newCpdTokens().onFile(file);
-      boolean appBuilderCode = false;
-
-      @Override
-      public NewCpdTokens getResult() {
-        return cpdTokens;
-      }
-
-      @Override
-      public boolean visitNode(JPNode node) {
-        if ((node.getType() == NodeTypes.PERIOD) || (node.getType() == NodeTypes.OBJCOLON))
-          return false;
-        if ((node.getType() == NodeTypes.ANNOTATION) && (settings.skipCPD(node.getAnnotationName()))) {
-          return false;
-        }
-        if (preprocessorLookup(node)) {
-          return false;
-        }
-        JPNode prevSibling = node.prevSibling();
-        while ((prevSibling != null) && (prevSibling.getType() == NodeTypes.ANNOTATION)) {
-          if (settings.skipCPD(prevSibling.getAnnotationName())) {
-            return false;
-          }
-          prevSibling = prevSibling.prevSibling();
-        }
-        if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
-          // Consider that an operator only has 2 children
-          visitNode(node.firstChild());
-          visitCpdNode(node);
-          visitNode(node.firstChild().nextSibling());
-          return false;
-        } else {
-          visitCpdNode(node);
-        }
-        return true;
-      }
-
-      private boolean preprocessorLookup(JPNode node) {
-        for (ProToken n : node.getHiddenTokens()) {
-          if (appBuilderCode && (n.getType() == NodeTypes.AMPANALYZESUSPEND)
-              && (n.getText().startsWith("&ANALYZE-SUSPEND _CREATE-WINDOW")
-                  || n.getText().startsWith("&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE adm-create-objects"))) {
-            return true;
-          }
-        }
-        return false;
-      }
-
-      private void visitCpdNode(JPNode node) {
-        if (node.getFileIndex() > 0)
-          return;
-        String str = NodeTypes.getFullText(node.getType());
-        // Identifiers are also using the same case
-        if ((str == null) || (str.trim().length() == 0)) {
-          if (node.getType() == NodeTypes.ID)
-            str = node.getText().toLowerCase();
-          else
-            str = node.getText().trim();
-        }
-        try {
-          TextRange range = file.newRange(node.getLine(), node.getColumn() - 1, node.getLine(),
-              node.getColumn() + node.getText().length() - 1);
-          cpdTokens.addToken(range, str);
-        } catch (IllegalArgumentException uncaught) {
-        }
-      }
-    };
+    CPDCallback cpdCallback = new CPDCallback(context, file, settings, unit);
     unit.getTopNode().walk(cpdCallback);
     cpdCallback.getResult().save();
-
   }
 
   private void computeCommonMetrics(SensorContext context, InputFile file, ParseUnit unit) {

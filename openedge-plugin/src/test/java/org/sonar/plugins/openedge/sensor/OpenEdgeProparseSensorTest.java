@@ -36,6 +36,7 @@ import org.testng.annotations.Test;
 public class OpenEdgeProparseSensorTest {
   private final File moduleBaseDir = new File("src/test/resources/project1");
   private final static String FILE3 = "src/procedures/test3.p";
+  private final static String CLASS1 = "src/classes/rssw/testclass.cls";
 
   @Test
   public void testCPDPreprocessorExpansion() throws Exception {
@@ -46,7 +47,9 @@ public class OpenEdgeProparseSensorTest {
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(context.fileSystem(), context.activeRules(), oeSettings, components, server);
     sensor.execute(context);
     Assert.assertNotNull(context.cpdTokens("file3:src/procedures/test3.p"));
-    Assert.assertEquals(context.cpdTokens("file3:src/procedures/test3.p").size(), 2);
+    Assert.assertEquals(context.cpdTokens("file3:src/procedures/test3.p").size(), 3);
+    Assert.assertNotNull(context.cpdTokens("class1:src/classes/rssw/testclass.cls"));
+    Assert.assertEquals(context.cpdTokens("class1:src/classes/rssw/testclass.cls").size(), 8);
   }
 
   private SensorContextTester createContext() throws IOException {
@@ -56,6 +59,9 @@ public class OpenEdgeProparseSensorTest {
     context.fileSystem().add(
         new DefaultInputFile("file3", FILE3).setLanguage(OpenEdge.KEY).setType(Type.MAIN).initMetadata(
             Files.toString(new File(moduleBaseDir, FILE3), Charset.defaultCharset())));
+    context.fileSystem().add(
+        new DefaultInputFile("class1", CLASS1).setLanguage(OpenEdge.KEY).setType(Type.MAIN).initMetadata(
+            Files.toString(new File(moduleBaseDir, CLASS1), Charset.defaultCharset())));
 
     return context;
   }

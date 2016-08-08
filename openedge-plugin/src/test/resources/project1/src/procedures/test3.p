@@ -3,3 +3,4 @@
 &scoped-define FOO LongLongName
 MESSAGE "{&FOO}" VIEW-AS 
   ALERT-BOX.
+DEF VAR zz AS INT NO-UNDO.
