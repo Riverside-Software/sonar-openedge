@@ -46,7 +46,7 @@ public class OpenEdgeProparseSensorTest {
     context.settings().setProperty(OpenEdgePlugin.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
     OpenEdgeComponents components = new OpenEdgeComponents(context.activeRules(), server, null, null);
-    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(context.fileSystem(), context.activeRules(), oeSettings, components, server);
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(context.fileSystem(), oeSettings, components);
     sensor.execute(context);
     Assert.assertNotNull(context.cpdTokens("file3:src/procedures/test3.p"));
     Assert.assertEquals(context.cpdTokens("file3:src/procedures/test3.p").size(), 3);

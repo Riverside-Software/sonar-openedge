@@ -37,13 +37,11 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.rule.ActiveRule;
-import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.measures.CoreMetrics;
-import org.sonar.api.platform.Server;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.antlr.TokenStream;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
@@ -67,18 +65,13 @@ public class OpenEdgeProparseSensor implements Sensor {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeProparseSensor.class);
 
   private final FileSystem fileSystem;
-  private final ActiveRules activeRules;
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
-  private final Server server;
 
-  public OpenEdgeProparseSensor(FileSystem fileSystem, ActiveRules activesRules, OpenEdgeSettings settings,
-      OpenEdgeComponents components, Server server) {
+  public OpenEdgeProparseSensor(FileSystem fileSystem, OpenEdgeSettings settings, OpenEdgeComponents components) {
     this.fileSystem = fileSystem;
-    this.activeRules = activesRules;
     this.settings = settings;
     this.components = components;
-    this.server = server;
   }
 
   @Override

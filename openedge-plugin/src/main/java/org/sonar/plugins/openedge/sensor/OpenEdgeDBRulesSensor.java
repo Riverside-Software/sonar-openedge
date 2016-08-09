@@ -29,11 +29,9 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.rule.ActiveRule;
-import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.platform.Server;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
 import org.sonar.plugins.openedge.api.org.antlr.v4.runtime.tree.ParseTree;
@@ -44,16 +42,11 @@ public class OpenEdgeDBRulesSensor implements Sensor {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeDBRulesSensor.class);
 
   private final FileSystem fileSystem;
-  private final ActiveRules activeRules;
   private final OpenEdgeComponents components;
-  private final Server server;
 
-  public OpenEdgeDBRulesSensor(FileSystem fileSystem, ActiveRules activesRules, OpenEdgeComponents components,
-      Server server) {
+  public OpenEdgeDBRulesSensor(FileSystem fileSystem, OpenEdgeComponents components) {
     this.fileSystem = fileSystem;
-    this.activeRules = activesRules;
     this.components = components;
-    this.server = server;
   }
 
   @Override
