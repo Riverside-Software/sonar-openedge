@@ -102,8 +102,8 @@ public class OpenEdgePlugin implements Plugin {
             "").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
                 Qualifiers.PROJECT).build());
     context.addExtension(PropertyDefinition.builder(CPD_ANNOTATIONS).name("CPD annotations").description(
-        "Comma-separated list of annotations disabling CPD").type(PropertyType.STRING).defaultValue("@Generated").category(
-            CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
+        "Comma-separated list of annotations disabling CPD").type(PropertyType.STRING).defaultValue(
+            "Generated").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
                 Qualifiers.PROJECT).build());
   }
 

@@ -8,4 +8,16 @@ class rssw.testclass:
     return prm.
   end method.
 
+  @Generated.
+  method public void test1(prm1 as char):
+
+    return.
+  end method.
+
+  @rssw.lang.Generated.
+  method public void test2(prm1 as char):
+
+    return.
+  end method.
+
 end class.

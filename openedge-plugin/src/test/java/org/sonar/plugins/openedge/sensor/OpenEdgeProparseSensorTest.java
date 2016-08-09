@@ -27,6 +27,7 @@ import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.internal.google.common.io.Files;
+import org.sonar.plugins.openedge.OpenEdgePlugin;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
@@ -42,6 +43,7 @@ public class OpenEdgeProparseSensorTest {
   public void testCPDPreprocessorExpansion() throws Exception {
     SensorContextTester context = createContext();
     TestServer server =new TestServer();
+    context.settings().setProperty(OpenEdgePlugin.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
     OpenEdgeComponents components = new OpenEdgeComponents(context.activeRules(), server, null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(context.fileSystem(), context.activeRules(), oeSettings, components, server);
