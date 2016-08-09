@@ -1,7 +1,8 @@
 package org.prorefactor.macrolevel;
 
 /**
- * Catch preprocessor, lexer and post-lexer events in order to store preprocessor variables, include file references, ...
+ * Catch preprocessor, lexer and post-lexer events in order to store preprocessor variables, include file references,
+ * ...
  */
 public interface ListingListener {
   

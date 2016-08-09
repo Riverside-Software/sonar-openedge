@@ -11,9 +11,10 @@
 package org.prorefactor.treeparser;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
@@ -125,27 +126,10 @@ public class ParseUnit {
     return topNode.getFilenames();
   }
 
-  /** This will trigger a parse if the PUB is out of date. */
-  public IncludeRef getMacroGraph() throws RefactorException, IOException {
-    if (macroGraph != null)
-      return macroGraph;
-    getPUB();
-    if (!pub.isChecked())
-      pub.loadTo(PUB.HEADER);
-    if (!pub.isCurrent()) {
-      // Does the parse, which causes the macroGraph to be built and written to disc.
-      pub.build();
-    } else {
-      try {
-        FileInputStream fileIn = new FileInputStream(macroGraphFile());
-        ObjectInputStream in = new ObjectInputStream(fileIn);
-        macroGraph = (IncludeRef) in.readObject();
-        in.close();
-        fileIn.close();
-      } catch (Exception e) {
-        throw new RefactorException(e);
-      }
-    }
+  /** 
+   * @return IncludeRef object
+   */
+  public @Nullable IncludeRef getMacroGraph() {
     return macroGraph;
   }
 
@@ -156,27 +140,11 @@ public class ParseUnit {
    * 
    * @see org.prorefactor.macrolevel.MacroLevel#sourceArray(MacroRef)
    */
-  public MacroRef[] getMacroSourceArray() throws RefactorException, IOException {
-    return MacroLevel.sourceArray(getMacroGraph());
-  }
-
-  /**
-   * Load from PUB, or build PUB if it's out of date. TreeParser01 is run in order to build the PUB. If the PUB was up
-   * to date, then TreeParser01 is run after the PUB is loaded. (Either way, the symbol tables etc. are available.)
-   */
-  public void loadOrBuildPUB() throws RefactorException, IOException {
-    getPUB();
-    if (pub.load()) {
-      setTopNode(pub.getTree());
-      treeParser01();
-    } else {
-      pub.build();
+  public @Nonnull MacroRef[] getMacroSourceArray() {
+    if (macroGraph == null) {
+      return new MacroRef[] {};
     }
-  }
-
-  private File macroGraphFile() {
-    // .msg = Macro Source Graph. Common source of heartburn.
-    return new File(PUB.pubDirFileName(session, file.getAbsolutePath()) + ".msg");
+    return MacroLevel.sourceArray(macroGraph);
   }
 
   public TokenStream lex() throws RefactorException {

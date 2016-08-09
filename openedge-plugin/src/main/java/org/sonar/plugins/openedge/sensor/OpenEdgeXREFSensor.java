@@ -34,11 +34,9 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.rule.ActiveRule;
-import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.platform.Server;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
@@ -53,20 +51,16 @@ public class OpenEdgeXREFSensor implements Sensor {
   // IoC
   private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;
-  private final ActiveRules activeRules;
   private final OpenEdgeComponents components;
-  private final Server server;
 
   // Internal use
   private final DocumentBuilderFactory dbFactory;
   private final DocumentBuilder dBuilder;
 
-  public OpenEdgeXREFSensor(OpenEdgeSettings settings, FileSystem fileSystem, ActiveRules activesRules, OpenEdgeComponents components, Server server) {
+  public OpenEdgeXREFSensor(OpenEdgeSettings settings, FileSystem fileSystem, OpenEdgeComponents components) {
     this.fileSystem = fileSystem;
     this.settings = settings;
-    this.activeRules = activesRules;
     this.components = components;
-    this.server = server;
 
     this.dbFactory = DocumentBuilderFactory.newInstance();
     try {

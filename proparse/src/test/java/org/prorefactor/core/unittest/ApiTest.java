@@ -16,12 +16,15 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.util.List;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.nodetypes.ProparseDirectiveNode;
 import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
 import org.prorefactor.macrolevel.IncludeRef;
+import org.prorefactor.macrolevel.MacroDef;
+import org.prorefactor.macrolevel.NamedMacroRef;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
@@ -125,6 +128,84 @@ public class ApiTest {
     assertFalse(pu.getTopNode().query(NodeTypes.FILEINFORMATION).get(1).isAbbreviated());
     assertTrue(pu.getTopNode().query(NodeTypes.SUBSTITUTE).get(0).isAbbreviated());
     assertFalse(pu.getTopNode().query(NodeTypes.SUBSTITUTE).get(1).isAbbreviated());
+  }
+
+  @Test
+  public void test07() throws Exception {
+    File f = new File("src/test/resources/data/prepro.p");
+    ParseUnit pu = new ParseUnit(f, session);
+    pu.parse();
+    IncludeRef incRef = pu.getMacroGraph();
+    assertEquals(incRef.macroEventList.size(), 2);
+    assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
+    assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
+    NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
+    assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
+  }
+
+  @Test
+  public void test08() throws Exception {
+    File f = new File("src/test/resources/data/prepro2.p");
+    ParseUnit pu = new ParseUnit(f, session);
+    pu.parse();
+    IncludeRef incRef = pu.getMacroGraph();
+    assertEquals(incRef.macroEventList.size(), 3);
+    assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
+    assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
+    NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
+    assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
+    List<JPNode> nodes = pu.getTopNode().query(NodeTypes.DEFINE);
+    assertEquals(nodes.size(), 1);
+    // Preprocessor magic... Keywords can start in main file, and end in include file...
+    assertEquals(nodes.get(0).getFileIndex(), 0);
+    assertEquals(nodes.get(0).getEndFileIndex(), 1);
+    assertEquals(nodes.get(0).getLine(), 6);
+    assertEquals(nodes.get(0).getEndLine(), 1);
+    assertEquals(nodes.get(0).getColumn(), 1);
+    assertEquals(nodes.get(0).getEndColumn(), 3);
+  }
+
+  @Test
+  public void test09() throws Exception {
+    File f = new File("src/test/resources/data/prepro3.p");
+    ParseUnit pu = new ParseUnit(f, session);
+    pu.parse();
+    List<JPNode> nodes = pu.getTopNode().query(NodeTypes.SUBSTITUTE);
+    assertEquals(nodes.size(), 2);
+    JPNode substNode = nodes.get(0);
+    JPNode leftParen = substNode.nextNode();
+    JPNode str = leftParen.nextNode();
+    assertEquals(leftParen.getLine(), 2);
+    assertEquals(leftParen.getColumn(), 19);
+    assertEquals(leftParen.getEndLine(), 2);
+    assertEquals(leftParen.getEndColumn(), 19);
+    assertEquals(str.getLine(), 2);
+    assertEquals(str.getColumn(), 20);
+    assertEquals(str.getEndLine(), 2);
+    assertEquals(str.getEndColumn(), 24);
+
+    JPNode substNode2 = nodes.get(1);
+    JPNode leftParen2 = substNode2.nextNode();
+    JPNode str2 = leftParen2.nextNode();
+    assertEquals(leftParen2.getLine(), 3);
+    assertEquals(leftParen2.getColumn(), 19);
+    assertEquals(leftParen2.getEndLine(), 3);
+    assertEquals(leftParen2.getEndColumn(), 19);
+    assertEquals(str2.getLine(), 3);
+    assertEquals(str2.getColumn(), 20);
+    assertEquals(str2.getEndLine(), 3);
+    // FIXME Wrong value, should be 25
+    assertEquals(str2.getEndColumn(), 20);
+
+    List<JPNode> dispNodes = pu.getTopNode().query(NodeTypes.DISPLAY);
+    assertEquals(dispNodes.size(), 1);
+    JPNode dispNode = dispNodes.get(0);
+    JPNode str3 = dispNode.nextNode().nextNode();
+    assertEquals(str3.getLine(), 4);
+    assertEquals(str3.getEndLine(), 4);
+    assertEquals(str3.getColumn(), 9);
+    // FIXME Wrong value, should be 14
+    assertEquals(str3.getEndColumn(), 9);
   }
 
 }

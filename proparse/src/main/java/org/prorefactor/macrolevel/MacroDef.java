@@ -23,9 +23,9 @@ public class MacroDef implements MacroEvent {
   private final MacroRef parent;
   private final int column;
   private final int line;
-
   /** One of this class's values: GLOBAL, SCOPED, UNDEFINE, NAMEDARG, NUMBEREDARG */
-  public int type;
+  private int type;
+
   /** For an UNDEFINE - undef what? */
   public MacroDef undefWhat = null;
   /** For an include argument - what include reference is it for? */
@@ -34,12 +34,13 @@ public class MacroDef implements MacroEvent {
   public String name;
   public String value;
 
-  public MacroDef(MacroRef parent) {
-    this(parent, 0, 0);
+  public MacroDef(MacroRef parent, int type) {
+    this(parent, type, 0, 0);
   }
 
-  public MacroDef(MacroRef parent, int line, int column) {
+  public MacroDef(MacroRef parent, int type, int line, int column) {
     this.parent = parent;
+    this.type = type;
     this.line = line;
     this.column = column;
   }
@@ -55,6 +56,10 @@ public class MacroDef implements MacroEvent {
 
   public int getColumn() {
     return column;
+  }
+
+  public int getType() {
+    return type;
   }
 
   @Override
