@@ -106,6 +106,9 @@ public class OpenEdgeComponents {
     for (LicenceRegistrar reg : licRegistrars) {
       LicenceRegistrar.Licence lic = new LicenceRegistrar.Licence();
       reg.register(lic);
+      if (lic.getRepositoryName().isEmpty()) {
+        continue;
+      }
       LOG.info("Found {} licence - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
           lic.getType().toString(), lic.getPermanentId(), lic.getCustomerName(), lic.getRepositoryName(),
           DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date(lic.getExpirationDate())));
