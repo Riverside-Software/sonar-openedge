@@ -923,4 +923,16 @@ public class JPNode extends BaseAST implements Xferable {
     return attrStrEqs.get(attrNum);
   }
 
+  public boolean hasTableBuffer() {
+    return getLink(IConstants.SYMBOL) != null;
+  }
+
+  public boolean hasBufferScope() {
+    return getLink(IConstants.BUFFERSCOPE) != null;
+  }
+
+  public boolean hasBlock() {
+    return getLink(IConstants.BLOCK) != null;
+  }
+
 }
