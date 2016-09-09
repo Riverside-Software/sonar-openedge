@@ -10,14 +10,11 @@
  *******************************************************************************/ 
 package org.prorefactor.widgettypes;
 
-import java.io.IOException;
-
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.FieldContainer;
 import org.prorefactor.treeparser.Symbol;
 import org.prorefactor.treeparser.SymbolScope;
-import org.prorefactor.xfer.DataXferStream;
 
 public class Frame extends FieldContainer {
 
@@ -90,21 +87,6 @@ public class Frame extends FieldContainer {
   public Block setFrameScopeUnnamedDefault(Block block) {
     frameScopeBlock = block.setDefaultFrameImplicit(this);
     return frameScopeBlock;
-  }
-
-  /** Implement Xferable. */
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    super.writeXferBytes(out);
-    out.writeRef(frameScopeBlock);
-    // 'initialized' is a state variable.
-  }
-
-  /** Implement Xferable. */
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    super.writeXferSchema(out);
-    out.schemaRef("frameScopeBlock");
   }
 
 }

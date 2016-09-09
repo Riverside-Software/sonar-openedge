@@ -12,11 +12,8 @@ package org.prorefactor.treeparser;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.io.IOException;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.xfer.DataXferStream;
-import org.prorefactor.xfer.Xferable;
 
 /**
  * One static instance of DataType is created for each data type in the 4GL. You can access each of those through this
@@ -24,7 +21,7 @@ import org.prorefactor.xfer.Xferable;
  * instead of a String or int to represent data type. For example, we'll be adding datatype support into Field and
  * schemaLoad next.
  */
-public class DataType implements Xferable {
+public class DataType {
   private static Map<String, DataType> nameMap = new HashMap<>();
   private static Map<Integer, DataType> tokenTypeMap = new HashMap<>();
 
@@ -107,18 +104,6 @@ public class DataType implements Xferable {
   @Override
   public String toString() {
     return progressName;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    out.writeRef(progressName);
-    out.writeInt(tokenType);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    out.schemaRef("progressName");
-    out.schemaInt("tokenType");
   }
 
 }

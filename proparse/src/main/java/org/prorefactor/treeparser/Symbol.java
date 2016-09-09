@@ -10,11 +10,8 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
-import java.io.IOException;
-
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.xfer.DataXferStream;
 
 /**
  * Base class for any type of symbol which needs to be kept track of when parsing a 4gl compile unit's AST.
@@ -199,34 +196,6 @@ public abstract class Symbol implements SymbolI {
   @Override
   public String toString() {
     return fullName();
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    out.writeInt(allRefsCount);
-    out.writeRef(asNode);
-    out.writeRef(defNode);
-    out.writeBool(isExported());
-    out.writeBool(isImported());
-    out.writeRef(likeNode);
-    out.writeRef(name);
-    out.writeInt(numReads);
-    out.writeInt(numWrites);
-    out.writeRef(scope);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    out.schemaInt("allRefsCount");
-    out.schemaRef("asNode");
-    out.schemaRef("defNode");
-    out.schemaBool("isExported");
-    out.schemaBool("isImported");
-    out.schemaRef("likeNode");
-    out.schemaRef("name");
-    out.schemaInt("numReads");
-    out.schemaInt("numWrites");
-    out.schemaRef("scope");
   }
 
 }

@@ -12,13 +12,9 @@ package org.prorefactor.core;
 
 import antlr.CommonHiddenStreamToken;
 
-import java.io.IOException;
-
 import org.prorefactor.proparse.IntegerIndex;
-import org.prorefactor.xfer.DataXferStream;
-import org.prorefactor.xfer.Xferable;
 
-public class ProToken extends CommonHiddenStreamToken implements Xferable {
+public class ProToken extends CommonHiddenStreamToken {
 
   private int fileIndex;
   private int macroSourceNum;
@@ -145,26 +141,6 @@ public class ProToken extends CommonHiddenStreamToken implements Xferable {
    */
   public int getEndFileIndex() {
     return endFile;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    out.writeInt(getType());
-    out.writeInt(getMacroSourceNum());
-    out.writeInt(getFileIndex());
-    out.writeInt(getLine());
-    out.writeInt(getColumn());
-    out.writeRef(getText());
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    out.schemaInt("type");
-    out.schemaInt("macroSourceNum");
-    out.schemaInt("fileIndex");
-    out.schemaInt("line");
-    out.schemaInt("column");
-    out.schemaRef("text");
   }
 
 }

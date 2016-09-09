@@ -15,14 +15,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.LinkedList;
-import java.io.IOException;
 
 import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.treeparser.Call;
 import org.prorefactor.treeparser.FieldContainer;
 import org.prorefactor.treeparser.Symbol;
-import org.prorefactor.xfer.DataXferStream;
-import org.prorefactor.xfer.Xferable;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -36,7 +33,7 @@ import antlr.collections.AST;
  * then run tree parsers against. Note that tree transformation functions are currently (Feb 2004) untested and unused,
  * since we tend to only use the AST for analysis and not for code motion.
  */
-public class JPNode extends BaseAST implements Xferable {
+public class JPNode extends BaseAST {
   private static final long serialVersionUID = 328939790131475436L;
 
   private int nodeNum = -1;
@@ -873,46 +870,6 @@ public class JPNode extends BaseAST implements Xferable {
         child.walk(callback);
       }
     }
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    out.writeInt(getType());
-    out.writeInt(getSourceNum());
-    out.writeInt(getFileIndex());
-    out.writeInt(getLine());
-    out.writeInt(getColumn());
-    out.writeRef(getText());
-    out.writeRef(firstChild());
-    out.writeRef(nextSibling());
-    out.writeRef(parent());
-    out.writeRef(prevSibling());
-    out.writeRef(getHiddenTokens());
-    out.writeRef(attrMap);
-    out.writeRef(stringAttributes);
-    out.writeRef(attrMapStrings);
-    out.writeInt(nodeNum);
-    out.writeRef(linkMap);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    out.schemaInt("type");
-    out.schemaInt("macroSourceNum");
-    out.schemaInt("fileIndex");
-    out.schemaInt("line");
-    out.schemaInt("column");
-    out.schemaRef("text");
-    out.schemaRef("firstChild");
-    out.schemaRef("nextSibling");
-    out.schemaRef("parent");
-    out.schemaRef("prevSibling");
-    out.schemaRef("hiddenTokens");
-    out.schemaRef("attributesIntInt");
-    out.schemaRef("attributesIntString");
-    out.schemaRef("attributesStringString");
-    out.schemaInt("nodeNum");
-    out.schemaRef("linkMap");
   }
 
   private static Integer attrEq(String attrName) {

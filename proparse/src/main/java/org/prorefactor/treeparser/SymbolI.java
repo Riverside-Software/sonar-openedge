@@ -11,9 +11,8 @@
 package org.prorefactor.treeparser;
 
 import org.prorefactor.core.JPNode;
-import org.prorefactor.xfer.Xferable;
 
-public interface SymbolI extends Xferable {
+public interface SymbolI {
 
   /**
    * Get the "full" name for this symbol. This is expected to be overridden in subclasses. For example, we might expect

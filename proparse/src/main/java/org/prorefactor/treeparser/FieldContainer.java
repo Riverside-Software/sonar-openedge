@@ -14,11 +14,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.io.IOException;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.schema.Field;
-import org.prorefactor.xfer.DataXferStream;
 
 /**
  * Frame and Browse widgets are FieldContainers. This class provides the services for looking up fields/variables in a
@@ -125,26 +123,6 @@ public abstract class FieldContainer extends Widget {
     }
 
     return null;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    super.writeXferBytes(out);
-    out.writeRef(enabledFields);
-    out.writeRef(fieldSet);
-    out.writeRef(statementList);
-    out.writeRef(variableSet);
-    out.writeRef(otherSymbols);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    super.writeXferSchema(out);
-    out.schemaRef("enabledFields");
-    out.schemaRef("fieldSet");
-    out.schemaRef("statementList");
-    out.schemaRef("variableSet");
-    out.schemaRef("otherSymbols");
   }
 
 }
