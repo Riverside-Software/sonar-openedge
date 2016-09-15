@@ -23,6 +23,7 @@ import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -167,27 +168,27 @@ public class OpenEdgeComponents {
   }
 
   public Collection<OpenEdgeProparseCheck> getProparseChecks() {
-    return ppChecks;
+    return Collections.unmodifiableList(ppChecks);
   }
 
   public Map<ActiveRule, OpenEdgeProparseCheck> getProparseRules() {
-    return ppChecksMap;
+    return Collections.unmodifiableMap(ppChecksMap);
   }
 
   public Collection<OpenEdgeDumpFileCheck> getDumpFileChecks() {
-    return dfChecks;
+    return Collections.unmodifiableList(dfChecks);
   }
 
   public Map<ActiveRule, OpenEdgeDumpFileCheck> getDumpFileRules() {
-    return dfChecksMap;
+    return Collections.unmodifiableMap(dfChecksMap);
   }
 
   public Collection<OpenEdgeXrefCheck> getXrefChecks() {
-    return xrefChecks;
+    return Collections.unmodifiableList(xrefChecks);
   }
 
   public Map<ActiveRule, OpenEdgeXrefCheck> getXrefRules() {
-    return xrefChecksMap;
+    return Collections.unmodifiableMap(xrefChecksMap);
   }
 
   private Licence getLicence(String repoName) {
@@ -229,32 +230,32 @@ public class OpenEdgeComponents {
 
       if (field.getType().equals(String.class)) {
         field.set(check, value);
-      } else if ("int".equals(field.getType().getSimpleName())) {
+      } else if (int.class == field.getType()) {
         field.setInt(check, Integer.parseInt(value));
-      } else if ("short".equals(field.getType().getSimpleName())) {
+      } else if (short.class == field.getType()) {
         field.setShort(check, Short.parseShort(value));
-      } else if ("long".equals(field.getType().getSimpleName())) {
+      } else if (long.class == field.getType()) {
         field.setLong(check, Long.parseLong(value));
-      } else if ("double".equals(field.getType().getSimpleName())) {
+      } else if (double.class == field.getType()) {
         field.setDouble(check, Double.parseDouble(value));
-      } else if ("boolean".equals(field.getType().getSimpleName())) {
+      } else if (boolean.class == field.getType()) {
         field.setBoolean(check, Boolean.parseBoolean(value));
-      } else if ("byte".equals(field.getType().getSimpleName())) {
+      } else if (byte.class == field.getType()) {
         field.setByte(check, Byte.parseByte(value));
-      } else if (field.getType().equals(Integer.class)) {
+      } else if (Integer.class == field.getType()) {
         field.set(check, new Integer(Integer.parseInt(value)));
-      } else if (field.getType().equals(Long.class)) {
+      } else if (Long.class == field.getType()) {
         field.set(check, new Long(Long.parseLong(value)));
-      } else if (field.getType().equals(Double.class)) {
+      } else if (Double.class == field.getType()) {
         field.set(check, new Double(Double.parseDouble(value)));
-      } else if (field.getType().equals(Boolean.class)) {
+      } else if (Boolean.class == field.getType()) {
         field.set(check, Boolean.valueOf(Boolean.parseBoolean(value)));
       } else {
         throw MessageException.of("The type of the field " + field + " is not supported: " + field.getType());
       }
     } catch (IllegalAccessException e) {
       throw MessageException.of(
-          "Can not set the value of the field " + field + " in the class: " + check.getClass().getName());
+          "Can not set the value of the field " + field + " in the class: " + check.getClass().getName(), e);
     }
   }
 

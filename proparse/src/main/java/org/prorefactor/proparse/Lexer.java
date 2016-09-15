@@ -12,6 +12,7 @@ package org.prorefactor.proparse;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.prorefactor.core.NodeTypes;
@@ -986,7 +987,7 @@ public class Lexer {
     String defText = StringFuncs.stripComments(currText.substring(it));
     defText = defText.trim();
     // Do listing before lowercasing the name
-    prepro.getLstListener().define(textStartLine, textStartCol, macroName.toLowerCase(), defText,
+    prepro.getLstListener().define(textStartLine, textStartCol, macroName.toLowerCase(Locale.ENGLISH), defText,
         defType == ProParserTokenTypes.AMPGLOBALDEFINE ? MacroDef.GLOBAL : MacroDef.SCOPED);
     if (defType == ProParserTokenTypes.AMPGLOBALDEFINE)
       prepro.defGlobal(macroName.toLowerCase(), defText);
