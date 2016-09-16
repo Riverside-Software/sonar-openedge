@@ -12,6 +12,7 @@ node ('master') {
   } else {
   withCredentials([[$class: 'StringBinding', credentialsId: 'ee33521a-8ef2-4008-a70a-a85592fecd28', variable: 'GH_PASSWORD']]) {
     def prNum = env.BRANCH_NAME.substring(3)
+echo "  FooBar : ${env.ghprbPullId}"
     sh "${mvnHome}/bin/mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.analysis.mode=issues -Dsonar.github.pullRequest=${prNum} -Dsonar.github.repository=Riverside-Software/sonar-openedge -Dsonar.github.oauth=${env.GH_PASSWORD} sonar:sonar"
   }}
 }
