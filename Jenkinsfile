@@ -7,7 +7,7 @@ node ('master') {
   sh "${mvnHome}/bin/mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true"
   step([$class: 'Publisher', reportFilenamePattern: '**/testng-results.xml'])
 
-  if ("master".equalsIgnoreCase(env.BRANCH_NAME)) {
+  if ("master" == env.BRANCH_NAME) {
     sh "${mvnHome}/bin/mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.branch=${env.BRANCH_NAME} sonar:sonar"
   } else {
   withCredentials([[$class: 'StringBinding', credentialsId: 'ee33521a-8ef2-4008-a70a-a85592fecd28', variable: 'GH_PASSWORD']]) {
