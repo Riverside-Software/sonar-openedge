@@ -6,7 +6,14 @@ node ('master') {
   def mvnHome = tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'
   sh "${mvnHome}/bin/mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true"
   step([$class: 'Publisher', reportFilenamePattern: '**/testng-results.xml'])
-  sh "${mvnHome}/bin/mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.branch=${env.BRANCH_NAME} sonar:sonar"
+
+  if ("master" == env.BRANCH_NAME) {
+    sh "${mvnHome}/bin/mvn -Dsonar.host.url=http://sonar.riverside-software.fr sonar:sonar"
+  } else {
+    withCredentials([[$class: 'StringBinding', credentialsId: 'ee33521a-8ef2-4008-a70a-a85592fecd28', variable: 'GH_PASSWORD']]) {
+      sh "${mvnHome}/bin/mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.analysis.mode=issues -Dsonar.github.pullRequest=${env.BRANCH_NAME.substring(3)} -Dsonar.github.repository=Riverside-Software/sonar-openedge -Dsonar.github.oauth=${env.GH_PASSWORD} sonar:sonar"
+    }
+  }
 }
 
 // see https://issues.jenkins-ci.org/browse/JENKINS-31924
