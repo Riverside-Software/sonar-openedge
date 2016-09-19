@@ -10,11 +10,8 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
-import java.io.IOException;
-
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.xfer.DataXferStream;
 
 /**
  * A Symbol defined with DEFINE VARIABLE or any of the other various syntaxes which implicitly define a variable.
@@ -114,22 +111,6 @@ public class Variable extends Symbol implements Primative, Value {
   @Override
   public void setValue(Object value) {
     this.value = value;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    super.writeXferBytes(out);
-    out.writeRef(className);
-    out.writeRef(dataType);
-    out.writeInt(extent);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    super.writeXferSchema(out); // To change body of overridden methods use File | Settings | File Templates.
-    out.schemaRef("className");
-    out.schemaRef("dataType");
-    out.schemaInt("extent");
   }
 
 }

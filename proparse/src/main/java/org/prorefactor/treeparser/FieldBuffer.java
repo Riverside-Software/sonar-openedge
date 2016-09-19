@@ -10,13 +10,10 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
-import java.io.IOException;
-
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.Schema;
-import org.prorefactor.xfer.DataXferStream;
 
 /**
  * FieldBuffer is the Symbol object linked to from the AST for schema, temp, and work table fields, and FieldBuffer
@@ -186,20 +183,6 @@ public class FieldBuffer extends Symbol implements Primative {
   @Override
   public void setName(String name) {
     assert false;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    super.writeXferBytes(out);
-    out.writeRef(buffer);
-    out.writeRef(field);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    super.writeXferSchema(out);
-    out.schemaRef("buffer");
-    out.schemaRef("field");
   }
 
 }

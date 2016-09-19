@@ -10,7 +10,6 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,14 +22,12 @@ import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.widgettypes.Frame;
-import org.prorefactor.xfer.DataXferStream;
-import org.prorefactor.xfer.Xferable;
 
 /**
  * For keeping track of blocks, block attributes, and the things that are scoped within those blocks - especially buffer
  * scopes.
  */
-public class Block implements Xferable {
+public class Block {
 
   private List<Frame> frames = new ArrayList<>();
   private Block parent;
@@ -466,26 +463,6 @@ public class Block implements Xferable {
 
   public void setParent(Block parent) {
     this.parent = parent;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    out.writeRef(blockStatementNode);
-    out.writeRef(bufferScopes);
-    out.writeRef(defaultFrame);
-    out.writeRef(frames);
-    out.writeRef(parent);
-    out.writeRef(symbolScope);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    out.schemaRef("blockStatementNode");
-    out.schemaRef("bufferScopes");
-    out.schemaRef("defaultFrame");
-    out.schemaRef("frames");
-    out.schemaRef("parent");
-    out.schemaRef("symbolScope");
   }
 
 }

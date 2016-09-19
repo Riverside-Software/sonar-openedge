@@ -12,10 +12,8 @@ package org.prorefactor.treeparser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.io.IOException;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.xfer.DataXferStream;
 
 /** A Symbol defined with DEFINE DATASET. */
 public class Dataset extends Symbol {
@@ -62,15 +60,4 @@ public class Dataset extends Symbol {
     return NodeTypes.DATASET;
   }
 
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    super.writeXferBytes(out);
-    out.writeRef(buffers);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    super.writeXferSchema(out);
-    out.schemaRef("buffers");
-  }
 }

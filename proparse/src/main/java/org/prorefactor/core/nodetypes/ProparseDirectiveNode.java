@@ -12,9 +12,6 @@ package org.prorefactor.core.nodetypes;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.xfer.DataXferStream;
-
-import java.io.IOException;
 
 public class ProparseDirectiveNode extends JPNode {
   private static final long serialVersionUID = -8215081305962889482L;
@@ -52,18 +49,6 @@ public class ProparseDirectiveNode extends JPNode {
 
   public void setDirectiveText(String text) {
     directiveText = text;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    super.writeXferBytes(out);
-    out.writeRef(directiveText);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    super.writeXferSchema(out);
-    out.schemaRef("directiveText");
   }
 
 }

@@ -25,8 +25,6 @@ import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.Table;
-import org.prorefactor.refactor.FileStuff;
-import org.prorefactor.refactor.PUB;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.BufferScope;
@@ -818,21 +816,6 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void programTail() throws TreeParserException {
-    // Because the tree parser depends on PUB files for getting inheritance information
-    // from super classes, the tree parser is responsible for keeping the PUB files up
-    // to date.
-    if (refSession.getProjectBinariesEnabled()) {
-      try {
-        PUB pub = getParseUnit().getPUB();
-        if (!pub.isChecked())
-          pub.loadTo(PUB.HEADER);
-        if (!pub.isCurrent())
-          pub.build(this);
-      } catch (Exception e) {
-        throw new TreeParserException(e);
-      }
-    }
-
     // Now that we know what all the internal Routines are, wrap up the Calls.
     List<SymbolScope> allScopes = new ArrayList<>();
     allScopes.add(rootScope);
@@ -1124,20 +1107,12 @@ public class TP01Support extends TP01Action {
       // vendor libraries, etc.
       return null;
     }
-    PUB pub = new PUB(refSession, FileStuff.fullpath(file));
-    boolean pubIsCurrent = pub.loadTo(PUB.HEADER);
     ParseUnit pu = new ParseUnit(file, refSession);
-    pu.setPUB(pub);
     JPNode superClassTree = (JPNode) classNode.getLink(IConstants.SUPER_CLASS_TREE);
     try {
       if (superClassTree != null) {
         pu.setTopNode(superClassTree);
       } else {
-        if (!pubIsCurrent)
-          // XXX Is Error really required ???
-          throw new Error("Internal error: No tree from PUB or Proparse, for class: " + className);
-        pub.load();
-        pu.setTopNode(pub.getTree());
       }
       pu.treeParser01();
     } catch (Exception e) {

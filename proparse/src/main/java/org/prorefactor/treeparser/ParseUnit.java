@@ -23,8 +23,6 @@ import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.proparse.DoParse;
-import org.prorefactor.refactor.FileStuff;
-import org.prorefactor.refactor.PUB;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser01.ITreeParserAction;
@@ -49,7 +47,6 @@ public class ParseUnit {
   private File file;
   private IncludeRef macroGraph = null;
   private ProgramRootNode topNode;
-  private PUB pub = null;
   private SymbolScopeRoot rootScope;
   private JPNodeMetrics metrics;
 
@@ -68,8 +65,6 @@ public class ParseUnit {
 
   /** Get the syntax tree top (Program_root) node */
   public ProgramRootNode getTopNode() {
-    if (topNode == null && pub != null)
-      setTopNode(pub.getTree());
     return topNode;
   }
 
@@ -80,24 +75,6 @@ public class ParseUnit {
   /** Set the syntax tree top (Program_root) node. */
   public void setTopNode(JPNode topNode) {
     this.topNode = (ProgramRootNode) topNode;
-  }
-
-  /**
-   * Get or create a PUB
-   */
-  public PUB getPUB() {
-    if (pub == null) {
-      pub = new PUB(session, FileStuff.fullpath(getFile()));
-      pub.setParseUnit(this);
-    }
-    return pub;
-  }
-
-  public ParseUnit setPUB(PUB pub) {
-    this.pub = pub;
-    if (pub.getParseUnit() != this)
-      pub.setParseUnit(this);
-    return this;
   }
 
   public File getFile() {

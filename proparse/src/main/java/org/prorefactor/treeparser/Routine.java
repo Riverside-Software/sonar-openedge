@@ -12,10 +12,8 @@ package org.prorefactor.treeparser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.io.IOException;
 
 import org.prorefactor.core.JPNode;
-import org.prorefactor.xfer.DataXferStream;
 
 /**
  * Represents the definition of a Routine. Is a Symbol - used as an entry in the symbol table. A Routine is a
@@ -87,24 +85,6 @@ public class Routine extends Symbol {
   /** Set by TreeParser01 for functions and methods. */
   public void setReturnDatatypeNode(JPNode n) {
     this.returnDatatypeNode = n;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    super.writeXferBytes(out);
-    out.writeRef(parameters);
-    out.writeInt(progressType);
-    out.writeRef(returnDatatypeNode);
-    out.writeRef(routineScope);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    super.writeXferSchema(out);
-    out.schemaRef("parameters");
-    out.schemaInt("progressType");
-    out.schemaRef("returnDatatypeNode");
-    out.schemaRef("routineScope");
   }
 
 }

@@ -10,15 +10,10 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
-import java.io.IOException;
-
-import org.prorefactor.xfer.DataXferStream;
-import org.prorefactor.xfer.Xferable;
-
 /**
  * A record of a BufferSymbol scope to a Block. Tells us if the scope is "strong" or not.
  */
-public class BufferScope implements Xferable {
+public class BufferScope {
 
   private Strength strength;
   private Block block;
@@ -79,20 +74,6 @@ public class BufferScope implements Xferable {
 
   public void setStrength(Strength strength) {
     this.strength = strength;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    out.writeRef(block);
-    out.writeInt(strength.getValue());
-    out.writeRef(symbol);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    out.schemaRef("block");
-    out.schemaInt("strengthCode");
-    out.schemaRef("tableBuffer");
   }
 
 }

@@ -10,11 +10,7 @@
  *******************************************************************************/ 
 package org.prorefactor.core.nodetypes;
 
-import java.io.IOException;
-
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.xfer.DataXferStream;
 
 public class ProgramRootNode extends BlockNode {
   private static final long serialVersionUID = 7160983003100786995L;
@@ -35,15 +31,6 @@ public class ProgramRootNode extends BlockNode {
   @Override
   public int getSubtypeIndex() {
     return 6;
-  }
-
-  /** Implement Xferable. */
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    // Link this Program_root to a copy of the filename array, so
-    // that it goes out in the data dump.
-    setLink(IConstants.FILE_NAME_ARRAY, getFilenames());
-    super.writeXferBytes(out);
   }
 
 }

@@ -12,13 +12,11 @@ package org.prorefactor.treeparser;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.io.IOException;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorSession;
-import org.prorefactor.xfer.DataXferStream;
 
 /**
  * A ScopeRoot object is created for each compile unit, and it represents the program (topmost) scope. For classes, it
@@ -182,20 +180,6 @@ public class SymbolScopeRoot extends SymbolScope {
 
   public void setClassName(String s) {
     className = s;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    super.writeXferBytes(out);
-    out.writeRef(className);
-    out.writeRef(tableMap);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    super.writeXferSchema(out);
-    out.schemaRef("className");
-    out.schemaRef("tableMap");
   }
 
 }

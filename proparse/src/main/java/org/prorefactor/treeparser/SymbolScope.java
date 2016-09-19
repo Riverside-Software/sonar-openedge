@@ -10,7 +10,6 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,8 +23,6 @@ import org.prorefactor.core.IConstants;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.widgettypes.FieldLevelWidgetI;
-import org.prorefactor.xfer.DataXferStream;
-import org.prorefactor.xfer.Xferable;
 
 /**
  * For keeping track of PROCEDURE, FUNCTION, and trigger scopes within a 4gl compile unit. Note that scopes are nested.
@@ -34,7 +31,7 @@ import org.prorefactor.xfer.Xferable;
  * record or frame scoping!
  */
 
-public class SymbolScope implements Xferable {
+public class SymbolScope {
   private static final Integer DATASET = new Integer(NodeTypes.DATASET);
   private static final Integer DATASOURCE = new Integer(NodeTypes.DATASOURCE);
   private static final Integer QUERY = new Integer(NodeTypes.QUERY);
@@ -436,38 +433,6 @@ public class SymbolScope implements Xferable {
 
   public void setRootBlock(Block block) {
     rootBlock = block;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    out.writeRef(allSymbols);
-    out.writeRef(callList);
-    out.writeRef(childScopes);
-    out.writeRef(rootBlock);
-    out.writeRef(bufferMap);
-    out.writeRef(fieldLevelWidgetMap);
-    out.writeRef(routineMap);
-    out.writeRef(unnamedBuffers);
-    out.writeRef(typeMap);
-    out.writeRef(variableMap);
-    out.writeRef(parentScope);
-    out.writeRef(rootScope);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    out.schemaRef("allSymbols");
-    out.schemaRef("callList");
-    out.schemaRef("childScopes");
-    out.schemaRef("rootBlock");
-    out.schemaRef("bufferMap");
-    out.schemaRef("fieldLevelWidgetMap");
-    out.schemaRef("routineMap");
-    out.schemaRef("unnamedBuffers");
-    out.schemaRef("typeMap");
-    out.schemaRef("variableMap");
-    out.schemaRef("parentScope");
-    out.schemaRef("rootScope");
   }
 
 }

@@ -10,9 +10,6 @@
  *******************************************************************************/ 
 package org.prorefactor.core;
 
-import org.prorefactor.xfer.DataXferStream;
-import org.prorefactor.xfer.Xferable;
-
 import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.ProParserTokenTypes;
 
@@ -22,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.io.IOException;
 
 /**
  * For node type names and numbers, this class provides:
@@ -32,7 +28,7 @@ import java.io.IOException;
  * </ul>
  * Couldn't just use the literals table, because it does not contain the names for synthetic node types.
  */
-public class NodeTypes implements ProParserTokenTypes, Xferable {
+public class NodeTypes implements ProParserTokenTypes {
 
   private static final Map<String, Integer> literalsMap = new HashMap<>();
   private static final Map<String, Integer> userliterals = new HashMap<>();
@@ -339,39 +335,6 @@ public class NodeTypes implements ProParserTokenTypes, Xferable {
     if (info == null)
       return null;
     return info.keywordText;
-  }
-
-  /**
-   * Implement Xferable. Since this class's data is all static, Xferable for NodeTypes is somewhat different than
-   * Xferable for most other classes. It doesn't even behave like a proper collection - the Last_Token_Number is very
-   * unlikely to be the number of node types written to the list. No schema is written for this class.
-   */
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    out.writeInt(Last_Token_Number);
-    for (int num = 1; num <= Last_Token_Number; ++num) {
-      String name = getTypeName(num);
-      if (name == null || name.length() == 0)
-        continue;
-      // Get the *default* text for the token, especially needed
-      // for symbols like COMMA which aren't given text in our set here.
-      String defaultText = NodeTypes.getDefaultText(num);
-      if (defaultText == null || defaultText.length() == 0)
-        defaultText = getFullText(num);
-      if (defaultText == null)
-        defaultText = "";
-      out.writeInt(num);
-      out.writeRef(name);
-      out.writeRef(defaultText);
-      out.writeBool(isKeywordType(num));
-      out.writeBool(isReserved(num));
-      out.writeInt(minAbbrev(num));
-    }
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    // No schema is written for this class
   }
 
   // Last, because it's huge.

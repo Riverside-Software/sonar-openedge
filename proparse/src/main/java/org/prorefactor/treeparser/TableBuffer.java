@@ -10,7 +10,6 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -18,7 +17,6 @@ import org.prorefactor.core.IConstants;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.Table;
-import org.prorefactor.xfer.DataXferStream;
 
 /**
  * A TableBuffer is a Symbol which provides a link from the syntax tree to a Table object.
@@ -138,22 +136,6 @@ public class TableBuffer extends Symbol {
 
   public void setTable(Table table) {
     this.table = table;
-  }
-
-  @Override
-  public void writeXferBytes(DataXferStream out) throws IOException {
-    super.writeXferBytes(out);
-    out.writeRef(fieldBuffers);
-    out.writeBool(isDefault);
-    out.writeRef(table);
-  }
-
-  @Override
-  public void writeXferSchema(DataXferStream out) throws IOException {
-    super.writeXferSchema(out);
-    out.schemaRef("fieldBuffers");
-    out.schemaBool("isDefault");
-    out.schemaRef("table");
   }
 
 }
