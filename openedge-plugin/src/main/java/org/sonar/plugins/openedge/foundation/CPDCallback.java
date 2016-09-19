@@ -19,6 +19,8 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
+import java.util.Locale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
@@ -130,7 +132,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     // Identifiers are also using the same case
     if ((str == null) || (str.trim().length() == 0)) {
       if (node.getType() == NodeTypes.ID) {
-        str = node.getText().toLowerCase();
+        str = node.getText().toLowerCase(Locale.ENGLISH);
       } else {
         str = node.getText().trim();
       }
@@ -141,8 +143,8 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
       TextRange range = file.newRange(node.getLine(), node.getColumn(), node.getEndLine(), node.getEndColumn());
       cpdTokens.addToken(range, str);
     } catch (IllegalArgumentException uncaught) {
-      LOG.debug("Unable to create CPD token at position {}:{} to {}:{}", node.getLine(), node.getColumn(),
-          node.getEndLine(), node.getEndColumn());
+      LOG.debug("Unable to create CPD token at position {}:{} to {}:{} - Cause {}", node.getLine(), node.getColumn(),
+          node.getEndLine(), node.getEndColumn(), uncaught.getMessage());
     }
   }
 }
