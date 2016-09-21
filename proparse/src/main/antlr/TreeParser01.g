@@ -583,7 +583,7 @@ createserversocketstate throws TreeParserException
   ;
 
 createsocketstate throws TreeParserException
-  :  #(CREATE SOCKET fld[ContextQualifier.UPDATING] (NOERROR_KW)? state_end )
+  :  #(CREATE SOCKET (fld[ContextQualifier.UPDATING] | widattr) (NOERROR_KW)? state_end )
   ;
 
 createtemptablestate throws TreeParserException
