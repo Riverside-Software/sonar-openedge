@@ -1,0 +1,71 @@
+...es\sample\test2.p                  03/22/2016 10:39:55   PROGRESS(R) Page 1   
+
+{} Line Blk
+-- ---- ---
+      1     /** Some comments */
+      2     
+      3     find first customer.
+      4   1 if customer.custnum < 0 then do:
+      5   1   message "msg".
+      6     end.
+      7     
+      8     DEF NEW SHARED VAR var1        AS INTEGER NO-UNDO.
+      9     DEF NEW SHARED VAR var2        AS INTEGER NO-UNDO.
+     10     DEF NEW SHARED VAR var3        AS INTEGER NO-UNDO.
+     11     DEF NEW SHARED VAR var4        AS INTEGER NO-UNDO.
+     12     DEF NEW SHARED VAR var5        AS INTEGER NO-UNDO.
+     13     DEF NEW SHARED VAR var6        AS INTEGER NO-UNDO.
+     14     DEF NEW SHARED VAR var7        AS INTEGER NO-UNDO.
+     15     DEF NEW SHARED VAR var8        AS INTEGER NO-UNDO.
+     16     DEF NEW SHARED VAR var9        AS INTEGER NO-UNDO.
+     17     DEF NEW SHARED VAR var10       AS INTEGER NO-UNDO.
+     18     DEF NEW SHARED VAR var11       AS INTEGER NO-UNDO.
+     19     DEF NEW SHARED VAR var12       AS INTEGER NO-UNDO.
+     20     DEF NEW SHARED VAR var13       AS INTEGER NO-UNDO.
+     21     DEF NEW SHARED VAR var14       AS INTEGER NO-UNDO.
+     22     DEF NEW SHARED VAR var15       AS INTEGER NO-UNDO.
+     23     
+     24     define new shared temp-table tt1 no-undo
+     25      field a as char
+     26      field b as char.
+     27     define new shared buffer b1 for tt1.
+     28     define new shared dataset ds1 for b1.
+     29     
+     30   1 for each item :
+     31   1   run proc1 (input item.itemnum).
+     32     end.
+     33     
+     34     procedure proc1:
+     35       DEF INPUT PARAMETER prm1 as INTEGER.
+     36     
+     37       def var zz as char no-undo.
+     38       
+     39   1   if (prm1 mod 2) = 0 then do:
+     40   1     display item.itemname
+     41   1      item.catpage.
+     42       end.  
+     43     end procedure.
+     44     
+     45     return '0'.
+...es\sample\test2.p                  03/22/2016 10:39:55   PROGRESS(R) Page 2   
+
+     File Name       Line Blk. Type   Tran            Blk. Label            
+-------------------- ---- ----------- ---- --------------------------------
+...es\sample\test2.p   34 Procedure   No   Procedure proc1                  
+    Frames:  Unnamed
+
+...es\sample\test2.p   39 Do          No                                    
+...es\sample\test2.p    0 Procedure   No                                    
+    Buffers: tt1
+             abc.Item
+             b1
+             abc.Customer
+
+...es\sample\test2.p    4 Do          No                                    
+...es\sample\test2.p   30 For         No
+
+...es\sample\test2.p -( Do No
+
+...es\sample\test2.p -32666 Procedure No Procedure foo-bar
+                                    
+

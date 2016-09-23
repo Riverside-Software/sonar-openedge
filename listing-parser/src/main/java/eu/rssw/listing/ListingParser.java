@@ -22,7 +22,16 @@ public class ListingParser {
 
   private final List<CodeBlock> blocks = new ArrayList<>();
 
+  /**
+   * Ctor
+   * 
+   * @param file File name shouldn't containn any space character
+   * @throws IOException
+   */
   public ListingParser(File file) throws IOException {
+    if (file.getAbsolutePath().indexOf(' ') != -1) {
+      throw new IllegalArgumentException("File name shouldn't contain space character");
+    }
     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
       parseFile(reader);
     }
