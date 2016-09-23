@@ -1,17 +1,24 @@
+#!groovy
+
 stage 'Build OpenEdge plugin'
 node ('master') {
   gitClean()
   checkout scm
   echo " Branch: ${env.BRANCH_NAME}"
-  def mvnHome = tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'
-  sh "${mvnHome}/bin/mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true"
+  withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
+    sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true"
+  }
   step([$class: 'Publisher', reportFilenamePattern: '**/testng-results.xml'])
 
   if ("master" == env.BRANCH_NAME) {
-    sh "${mvnHome}/bin/mvn -Dsonar.host.url=http://sonar.riverside-software.fr sonar:sonar"
+    withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
+      sh "mvn -Dsonar.host.url=http://sonar.riverside-software.fr sonar:sonar"
+    }
   } else {
-    withCredentials([[$class: 'StringBinding', credentialsId: 'ee33521a-8ef2-4008-a70a-a85592fecd28', variable: 'GH_PASSWORD']]) {
-      sh "${mvnHome}/bin/mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.analysis.mode=issues -Dsonar.github.pullRequest=${env.BRANCH_NAME.substring(3)} -Dsonar.github.repository=Riverside-Software/sonar-openedge -Dsonar.github.oauth=${env.GH_PASSWORD} sonar:sonar"
+    withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
+      withCredentials([[$class: 'StringBinding', credentialsId: 'ee33521a-8ef2-4008-a70a-a85592fecd28', variable: 'GH_PASSWORD']]) {
+        sh "mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.analysis.mode=issues -Dsonar.github.pullRequest=${env.BRANCH_NAME.substring(3)} -Dsonar.github.repository=Riverside-Software/sonar-openedge -Dsonar.github.oauth=${env.GH_PASSWORD} sonar:sonar"
+      }
     }
   }
 }
