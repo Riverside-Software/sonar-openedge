@@ -73,7 +73,7 @@ public class OpenEdgeListingSensor implements Sensor {
       LOG.debug("Looking for listing of {}", file.relativePath());
 
       File listingFile = getListingFile(file.file());
-      if ((listingFile != null) && (listingFile.exists())) {
+      if ((file.relativePath().indexOf(' ') == -1) && (listingFile != null) && (listingFile.exists())) {
         LOG.debug("Import listing for {}", file.relativePath());
 
         try {

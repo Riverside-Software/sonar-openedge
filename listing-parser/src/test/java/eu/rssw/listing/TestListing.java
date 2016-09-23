@@ -49,4 +49,8 @@ public class TestListing {
     Assert.assertEquals(block.getLabel(), "Procedure foo-bar");
   }
 
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public static void testListing3() throws IOException {
+    new ListingParser(new File("src/test/resources/listing 3.txt"));
+  }
 }
