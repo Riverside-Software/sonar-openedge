@@ -194,6 +194,7 @@ statement throws TreeParserException
   |  {state2(_t, DATASOURCE)}?    createdatasourcestate
   |  {state2(_t, INDEX)}?      createindexstate    // SQL
   |  {state2(_t, QUERY)}?      createquerystate   
+  |  {state2(_t, SAXATTRIBUTES)}?    createsaxattributesstate
   |  {state2(_t, SAXREADER)}?    createsaxreaderstate
   |  {state2(_t, SAXWRITER)}?    createsaxwriterstate
   |  {state2(_t, SERVER)}?      createserverstate
@@ -1189,7 +1190,7 @@ createstate throws TreeParserException
   ;
 
 create_whatever_args throws TreeParserException
-  :  field (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)?
+  :  ( field | widattr ) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)?
   ;
 
 createaliasstate throws TreeParserException
@@ -1201,7 +1202,7 @@ createautomationobjectstate throws TreeParserException
   ;
 
 createbrowsestate throws TreeParserException
-  :  #(CREATE BROWSE field (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end )
+  :  #(CREATE BROWSE ( field | widattr ) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end )
   ;
 
 createbufferstate throws TreeParserException
@@ -1237,6 +1238,10 @@ createdatasourcestate throws TreeParserException
 
 createquerystate throws TreeParserException
   :  #(CREATE QUERY (field | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
+  ;
+
+createsaxattributesstate throws TreeParserException
+  :  #(CREATE SAXATTRIBUTES create_whatever_args state_end )
   ;
 
 createsaxreaderstate throws TreeParserException
@@ -1275,7 +1280,7 @@ createwidgetstate throws TreeParserException
   :  #(  CREATE
       (  valueexpression
       |  BUTTON | COMBOBOX | CONTROLFRAME | DIALOGBOX | EDITOR | FILLIN | FRAME | IMAGE
-      |  MENU | MENUITEM | RADIOSET | RECTANGLE | SAXATTRIBUTES | SELECTIONLIST | SLIDER
+      |  MENU | MENUITEM | RADIOSET | RECTANGLE | SELECTIONLIST | SLIDER
       |  SUBMENU | TEXT | TOGGLEBOX | WINDOW
       )
       field

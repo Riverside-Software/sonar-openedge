@@ -555,7 +555,7 @@ createstate throws TreeParserException
   ;
 
 create_whatever_args throws TreeParserException
-  :  fld[ContextQualifier.UPDATING] (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)?
+  :  (fld[ContextQualifier.UPDATING] | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)?
   ;
 
 createautomationobjectstate throws TreeParserException
@@ -563,7 +563,7 @@ createautomationobjectstate throws TreeParserException
   ;
 
 createbrowsestate throws TreeParserException
-  :  #(CREATE BROWSE fld[ContextQualifier.UPDATING] (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end )
+  :  #(CREATE BROWSE (fld[ContextQualifier.UPDATING] | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end )
   ;
 
 createbufferstate throws TreeParserException
@@ -575,11 +575,11 @@ createbufferstate throws TreeParserException
   ;
 
 createserverstate throws TreeParserException
-  :  #(CREATE SERVER fld[ContextQualifier.UPDATING] (assign_opt)? state_end )
+  :  #(CREATE SERVER (fld[ContextQualifier.UPDATING] | widattr) (assign_opt)? state_end )
   ;
 
 createserversocketstate throws TreeParserException
-  :  #(CREATE SERVERSOCKET fld[ContextQualifier.UPDATING] (NOERROR_KW)? state_end )
+  :  #(CREATE SERVERSOCKET (fld[ContextQualifier.UPDATING] | widattr) (NOERROR_KW)? state_end )
   ;
 
 createsocketstate throws TreeParserException
@@ -594,7 +594,7 @@ createwidgetstate throws TreeParserException
   :  #(  CREATE
       (  valueexpression
       |  BUTTON | COMBOBOX | CONTROLFRAME | DIALOGBOX | EDITOR | FILLIN | FRAME | IMAGE
-      |  MENU | MENUITEM | RADIOSET | RECTANGLE | SAXATTRIBUTES | SELECTIONLIST | SLIDER
+      |  MENU | MENUITEM | RADIOSET | RECTANGLE | SELECTIONLIST | SLIDER
       |  SUBMENU | TEXT | TOGGLEBOX | WINDOW
       )
       fld[ContextQualifier.UPDATING]
