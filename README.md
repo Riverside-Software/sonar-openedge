@@ -8,4 +8,4 @@ The OpenEdge plugin for SonarQube enables analysis of OpenEdge procedural and ob
 
 Documentation available [here](https://riverside-software.atlassian.net/wiki/spaces/OESONAR/overview)
 
-[![Build Status](http://ci.rssw.eu/job/sonar-openedge/master/badge/icon)](http://ci.rssw.eu/job/sonar-openedge/master)
+[![Build Status](http://ci.rssw.eu/job/sonar-openedge/job/master/badge/icon)](http://ci.rssw.eu/job/sonar-openedge/job/master/)
