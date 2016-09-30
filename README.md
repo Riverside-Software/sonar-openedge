@@ -7,3 +7,5 @@ The OpenEdge plugin for SonarQube enables analysis of OpenEdge procedural and ob
  * Code duplication
 
 Documentation available [here](https://riverside-software.atlassian.net/wiki/spaces/OESONAR/overview)
+
+[![Build Status](http://ci.rssw.eu/job/sonar-openedge/master/badge/icon)](http://ci.rssw.eu/job/sonar-openedge/master)
