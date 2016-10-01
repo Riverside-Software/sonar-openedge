@@ -1757,8 +1757,8 @@ createstate
 
 create_whatever_state
   :  CREATE^
-    (CALL|CLIENTPRINCIPAL|DATASET|DATASOURCE|SAXREADER|SAXWRITER|SOAPHEADER|SOAPHEADERENTRYREF|XDOCUMENT|XNODEREF)
-    field (in_widgetpool_expr)? (NOERROR_KW)? state_end
+    (CALL|CLIENTPRINCIPAL|DATASET|DATASOURCE|SAXATTRIBUTES|SAXREADER|SAXWRITER|SOAPHEADER|SOAPHEADERENTRYREF|XDOCUMENT|XNODEREF)
+    exprt (in_widgetpool_expr)? (NOERROR_KW)? state_end
     {sthd(##, ##.firstChild().getType());}
   ;
 
@@ -1776,7 +1776,7 @@ create_connect
   ;
 
 createbrowsestate
-  :  CREATE^ BROWSE field
+  :  CREATE^ BROWSE exprt
     (in_widgetpool_expr)?
     (NOERROR_KW)?
     (assign_opt)?
@@ -1814,12 +1814,12 @@ createdatabase_from
   ;
 
 createserverstate
-  :  CREATE^ SERVER field (assign_opt)? state_end
+  :  CREATE^ SERVER exprt (assign_opt)? state_end
     {sthd(##,SERVER);}
   ;
 
 createserversocketstate
-  :  CREATE^ SERVERSOCKET field (NOERROR_KW)? state_end
+  :  CREATE^ SERVERSOCKET exprt (NOERROR_KW)? state_end
     {sthd(##,SERVERSOCKET);}
   ;
 
@@ -1838,7 +1838,7 @@ createwidgetstate
     (  valueexpression
     |  (BUTTON | btns:BUTTONS {#btns.setType(BUTTON);})
     |  COMBOBOX | CONTROLFRAME | DIALOGBOX | EDITOR | FILLIN | FRAME | IMAGE
-    |  MENU | MENUITEM | RADIOSET | RECTANGLE | SAXATTRIBUTES | SELECTIONLIST | SLIDER
+    |  MENU | MENUITEM | RADIOSET | RECTANGLE | SELECTIONLIST | SLIDER
     |  SUBMENU | TEXT | TOGGLEBOX | WINDOW
     )
     field
