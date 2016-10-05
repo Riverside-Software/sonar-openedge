@@ -80,6 +80,7 @@ public class TP01Support extends TP01Action {
   private Deque<Call> wipCalls = new LinkedList<>();
   /** Since there can be more than one WIP Call, there can be more than one WIP Parameter. */
   private Deque<Parameter> wipParameters = new LinkedList<>();
+
   private Routine currentRoutine;
   private Routine rootRoutine;
   private RefactorSession refSession;

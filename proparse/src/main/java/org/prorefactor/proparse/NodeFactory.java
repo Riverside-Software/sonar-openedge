@@ -27,12 +27,12 @@ import antlr.collections.AST;
 
 public class NodeFactory extends ASTFactory {
 
+  private IntegerIndex<String> filenameList;
+
   public NodeFactory(Hashtable hashtable, DoParse doParse) {
     super(hashtable);
     this.filenameList = doParse.getFilenameList();
   }
-
-  private IntegerIndex<String> filenameList;
 
   @Override
   public AST create() {
@@ -81,6 +81,7 @@ public class NodeFactory extends ASTFactory {
       case NodeTypes.DESTRUCTOR:
       case NodeTypes.METHOD:
       case NodeTypes.CANFIND:
+      case NodeTypes.CATCH:
       case NodeTypes.ON:
         return new BlockNode((ProToken) token);
       default:

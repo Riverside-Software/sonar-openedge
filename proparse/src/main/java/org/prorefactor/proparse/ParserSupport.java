@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
@@ -35,7 +36,7 @@ public class ParserSupport {
   private ClassFinder classFinder;
   private final DoParse doParse;
 
-  private HashMap<String, SymbolScope> funcScopeMap = new HashMap<>();
+  private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
 
   private String thisClassName = "";
 

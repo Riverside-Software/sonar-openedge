@@ -1414,7 +1414,7 @@ case_end
   ;
 
 catchstate
-  :  CATCH^
+  :  CATCH^<AST=BlockNode>
     field AS class_type_name {support.defVarInline();}
     block_colon code_block (EOF | catch_end state_end)
     {sthd(##,0);}
