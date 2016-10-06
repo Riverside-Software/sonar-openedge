@@ -66,6 +66,7 @@ public class OpenEdgePlugin implements Plugin {
 
   @Override
   public void define(Context context) {
+    int foo = 0;
     // Main components
     context.addExtensions(OpenEdge.class, OpenEdgeDB.class, OpenEdgeSettings.class);
 
