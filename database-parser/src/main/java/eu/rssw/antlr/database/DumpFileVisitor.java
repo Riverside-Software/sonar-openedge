@@ -116,7 +116,11 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitFieldTrigger(FieldTriggerContext ctx) {
-    Trigger trigger = new Trigger(TriggerType.getTriggerType(ctx.type.getText()), ctx.triggerProcedure.getText());
+    if (TriggerType.getTriggerType(ctx.type.getText()) != TriggerType.ASSIGN) {
+      // Value can only be 'ASSIGN'. Any other value should probably be logged 
+      return null;
+    }
+    Trigger trigger = new Trigger(TriggerType.ASSIGN, ctx.triggerProcedure.getText());
     if (ctx.crc != null) {
       trigger.setCrc(ctx.crc.getText());
     }
