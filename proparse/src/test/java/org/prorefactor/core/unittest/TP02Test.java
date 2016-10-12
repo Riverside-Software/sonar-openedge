@@ -37,10 +37,10 @@ public class TP02Test {
   File snippetFile;
   String expectName = "src/test/resources/data/tp01tests/test02.expect.txt";
   String inName = "src/test/resources/data/tp01tests/test02.in.txt";
-  String outName = "src/test/resources/data/tp01tests/test02.out.txt";
+  String outName = "target/test-temp/tp02test/test02.out.txt";
   String schemaName = "src/test/resources/data/sports2000.schema";
-  String snippetName = "src/test/resources/data/tempsnippet.p";
-  String snippetOutName = "src/test/resources/data/tempout.p";
+  String snippetName = "target/test-temp/tp02test/tempsnippet.p";
+  String snippetOutName = "target/test-temp/tp02test/tempout.p";
   File snippetOutFile = new File(snippetOutName);
   String snippetSep = "--------------------------------" + System.getProperty("line.separator");
 
@@ -52,6 +52,9 @@ public class TP02Test {
     Injector injector = Guice.createInjector(new UnitTestSports2000Module());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
+
+    // Create target directory for output result
+    snippetFile.getParentFile().mkdirs();
   }
 
   @Test
