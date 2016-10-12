@@ -2622,6 +2622,9 @@ ADD INDEX "warehousename2" ON "Warehouse"
   INDEX-FIELD "WarehouseName" ASCENDING
   INDEX-FIELD "Phone" ASCENDING
 
+UPDATE INDEX "warehousenum" OF "Warehouse"
+  BUFFER-POOL "Alternate"
+
 .
 PSC
 cpstream=ISO8859-15
