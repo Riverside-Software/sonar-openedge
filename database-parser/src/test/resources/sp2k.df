@@ -146,6 +146,7 @@ ADD FIELD "DependentCare" OF "Benefits" AS integer
   MAX-WIDTH 4
   HELP "Please enter the dependent care field."
   ORDER 70
+  FIELD-TRIGGER "Assign" NO-OVERRIDE PROCEDURE "benefits-dependant-care-assign.p" CRC "?"
 
 ADD INDEX "EmpNo" ON "Benefits" 
   AREA "Employee"
