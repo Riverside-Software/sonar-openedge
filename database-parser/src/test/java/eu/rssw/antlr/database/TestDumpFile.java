@@ -1,6 +1,7 @@
 package eu.rssw.antlr.database;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -39,6 +40,8 @@ public class TestDumpFile {
 
     Index idx1 = db.getTable("Warehouse").getIndex("warehousenum");
     assertTrue(idx1.isInAlternateBufferPool());
+    Index idx2 = db.getTable("Warehouse").getIndex("warehousename");
+    assertFalse(idx2.isInAlternateBufferPool());
   }
 
 }

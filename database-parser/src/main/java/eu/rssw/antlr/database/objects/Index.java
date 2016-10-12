@@ -8,7 +8,7 @@ public class Index {
   private String area;
   private boolean primary, unique, word;
   private List<IndexField> fields = new ArrayList<>();
-  private boolean alternateBufferPool;
+  private String bufferPool;
 
   private int firstLine, lastLine;
 
@@ -81,11 +81,11 @@ public class Index {
   }
 
   public boolean isInAlternateBufferPool() {
-    return alternateBufferPool;
+    return "alternate".equalsIgnoreCase(bufferPool);
   }
 
-  public void setAlternateBufferPool(boolean altBuff) {
-    this.alternateBufferPool = altBuff;
+  public void setBufferPool(String bp) {
+    this.bufferPool = bp;
   }
 
   @Override
