@@ -36,4 +36,9 @@ public class TestDumpFile {
     assertEquals(trg2.getCrc(), "32704");
   }
 
+  @Test
+  public void testFieldTriggerNotAssign() throws IOException {
+    // Invalid field trigger type shouldn't crash the visitor, and has to be reported
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(new File("src/test/resources/fieldTriggerAssign.df"));
+  }
 }
