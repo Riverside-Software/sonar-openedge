@@ -2,6 +2,7 @@ package eu.rssw.antlr.database;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import org.testng.annotations.Test;
 
 import eu.rssw.antlr.database.objects.DatabaseDescription;
+import eu.rssw.antlr.database.objects.Index;
 import eu.rssw.antlr.database.objects.Table;
 import eu.rssw.antlr.database.objects.Trigger;
 import eu.rssw.antlr.database.objects.TriggerType;
@@ -34,6 +36,9 @@ public class TestDumpFile {
     assertNotNull(trg2);
     assertEquals(trg2.getProcedure(), "sports2000trgs/delitem.p");
     assertEquals(trg2.getCrc(), "32704");
+
+    Index idx1 = db.getTable("Warehouse").getIndex("warehousenum");
+    assertTrue(idx1.isInAlternateBufferPool());
   }
 
 }
