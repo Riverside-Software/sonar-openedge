@@ -118,12 +118,17 @@ addTableOption:
   | 'BUFFER-POOL' val=QUOTED_STRING    # tableBufferPool
   ;
 
+updateTableOption:
+    'ENCRYPTION' ('YES' | 'NO')       # encryption
+  | 'CIPHER-NAME' val=UNQUOTED_STRING # cipherName
+  ;
+
 tableTrigger:
     'TABLE-TRIGGER' type=QUOTED_STRING
     override='OVERRIDE'? noOverride='NO-OVERRIDE'? 'PROCEDURE' triggerProcedure=QUOTED_STRING ('CRC' crc=QUOTED_STRING)?;
 
 updateTable:
-    'UPDATE' 'TABLE' table=QUOTED_STRING options=addTableOption* triggers=tableTrigger*;
+    'UPDATE' 'TABLE' table=QUOTED_STRING (addTableOption | updateTableOption)* triggers=tableTrigger*;
 
 dropTable:
     'DROP' 'TABLE' table=QUOTED_STRING;

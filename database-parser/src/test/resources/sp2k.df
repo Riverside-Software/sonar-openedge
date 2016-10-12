@@ -2625,6 +2625,9 @@ ADD INDEX "warehousename2" ON "Warehouse"
 UPDATE INDEX "warehousenum" OF "Warehouse"
   BUFFER-POOL "Alternate"
 
+UPDATE TABLE "Warehouse"
+  ENCRYPTION YES
+  CIPHER-NAME AES_CBC_128
 .
 PSC
 cpstream=ISO8859-15
