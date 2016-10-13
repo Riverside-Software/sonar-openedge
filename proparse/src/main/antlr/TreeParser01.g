@@ -80,10 +80,9 @@ options {
 
   // --- The above are for all tree parsers, below are for TreeParser01 ---
 
-
-    public TreeParser01(org.prorefactor.refactor.RefactorSession refSession) {
+  public TreeParser01(org.prorefactor.refactor.RefactorSession refSession) {
     this(refSession, new TP01Support(refSession));
-    }
+  }
     
   /** Create a tree parser with a specific action object. */
   public TreeParser01(org.prorefactor.refactor.RefactorSession refSession, ITreeParserAction actionObject) {
@@ -97,19 +96,16 @@ options {
   /** Get the action object. getActionObject and getTpSupport are identical. */
   public ITreeParserAction getActionObject() { return action; }
 
-  /** Set the action object.
-   * By default, the support object is a new TP01Support,
-   * but you can configure this to be any TP01Action object.
-   * setTpSupport and setActionObject are identical.
-   */
+  // Set the action object.
+  // By default, the support object is a new TP01Support,
+  // but you can configure this to be any TP01Action object.
+  // setTpSupport and setActionObject are identical.
   public void setActionObject(ITreeParserAction action) { this.action = action; }
 
-
-  /** This tree parser's stack. I think it is best to keep the stack
-   * in the tree parser grammar for visibility sake, rather than hide
-   * it in the support class. If we move grammar and actions around
-   * within this .g, the effect on the stack should be highly visible.
-   */
+  // This tree parser's stack. I think it is best to keep the stack
+  // in the tree parser grammar for visibility sake, rather than hide
+  // it in the support class. If we move grammar and actions around
+  // within this .g, the effect on the stack should be highly visible.
   private Deque<Object> stack = new ArrayDeque<>();
   private void push(Object o) { stack.push(o);  }
   private Object pop() { return stack.pop(); }

@@ -95,7 +95,7 @@ options {
   void init(DoParse doParse) {
     this.doParse = doParse;
     support = new ParserSupport(doParse);
-        setASTNodeClass("org.prorefactor.core.JPNode");
+    setASTNodeClass("org.prorefactor.core.JPNode");
     astFactory = new NodeFactory(getTokenTypeToASTClassMap(), doParse);
   }
 
@@ -106,7 +106,6 @@ options {
   void copyHiddenBefore(JPNode from, JPNode to) {
     to.setHiddenBefore(from.getHiddenBefore());
   }
-
 
   /** Override antlr parser getFilename(). */
   @Override
@@ -131,7 +130,7 @@ options {
   /** Mark a node as a "statement head" */
   void sthd(JPNode n, int state2) {
     n.attrSet(IConstants.STATEHEAD, IConstants.TRUE);
-    if (state2!=0)
+    if (state2 != 0)
       n.attrSet(IConstants.STATE2, state2);
   }
 
