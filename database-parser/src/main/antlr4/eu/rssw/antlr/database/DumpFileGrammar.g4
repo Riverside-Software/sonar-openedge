@@ -4,7 +4,7 @@ dump:
   dump_type* footer?;
 
 dump_type:
-  annotation | addDatabase | addSequence | addTable | addField | addIndex | updateField | renameField | renameIndex | updateIndex | dropIndex | dropField | dropTable | updateTable;
+  annotation | addDatabase | addSequence | addTable | addField | addIndex | updateField | renameField | renameIndex | updateIndex | updateIndexBP | dropIndex | dropField | dropTable | updateTable;
 
 annotation:
   ann=ANNOTATION_NAME '(' (UNQUOTED_STRING '=' QUOTED_STRING (',' UNQUOTED_STRING '=' QUOTED_STRING)*)? ')' '.';
@@ -118,12 +118,17 @@ addTableOption:
   | 'BUFFER-POOL' val=QUOTED_STRING    # tableBufferPool
   ;
 
+updateTableOption:
+    'ENCRYPTION' ('YES' | 'NO')       # encryption
+  | 'CIPHER-NAME' val=UNQUOTED_STRING # cipherName
+  ;
+
 tableTrigger:
     'TABLE-TRIGGER' type=QUOTED_STRING
     override='OVERRIDE'? noOverride='NO-OVERRIDE'? 'PROCEDURE' triggerProcedure=QUOTED_STRING ('CRC' crc=QUOTED_STRING)?;
 
 updateTable:
-    'UPDATE' 'TABLE' table=QUOTED_STRING options=addTableOption* triggers=tableTrigger*;
+    'UPDATE' 'TABLE' table=QUOTED_STRING (addTableOption | updateTableOption)* triggers=tableTrigger*;
 
 dropTable:
     'DROP' 'TABLE' table=QUOTED_STRING;
@@ -242,6 +247,9 @@ renameIndex:
 
 updateIndex:
     'UPDATE' 'PRIMARY'? 'INDEX' index=QUOTED_STRING 'ON' table=QUOTED_STRING addIndexOption*;
+
+updateIndexBP:
+    'UPDATE' 'INDEX' index=QUOTED_STRING 'OF' table=QUOTED_STRING 'BUFFER-POOL' value=QUOTED_STRING;
 
 dropIndex:
     'DROP' 'INDEX' index=QUOTED_STRING 'ON' table=QUOTED_STRING;
