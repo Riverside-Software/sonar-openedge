@@ -3,6 +3,9 @@ package eu.rssw.antlr.database;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.rssw.antlr.database.DumpFileGrammarParser.AddFieldContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.AddIndexContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.AddSequenceContext;
@@ -39,6 +42,8 @@ import eu.rssw.antlr.database.objects.Trigger;
 import eu.rssw.antlr.database.objects.TriggerType;
 
 public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
+  private final static Logger LOG = LoggerFactory.getLogger(DumpFileVisitor.class);
+
   private DatabaseDescription db;
 
   private Deque<Table> tables = new ArrayDeque<>();
@@ -117,7 +122,12 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitFieldTrigger(FieldTriggerContext ctx) {
-    Trigger trigger = new Trigger(TriggerType.getTriggerType(ctx.type.getText()), ctx.triggerProcedure.getText());
+    if (TriggerType.getTriggerType(ctx.type.getText()) != TriggerType.ASSIGN) {
+      // Value can only be 'ASSIGN', but we just log the problem and return in case of different value
+      LOG.error("'{}' FIELD-TRIGGER found at line {}", ctx.type.getText(), ctx.type.getLine());
+      return null;
+    }
+    Trigger trigger = new Trigger(TriggerType.ASSIGN, ctx.triggerProcedure.getText());
     if (ctx.crc != null) {
       trigger.setCrc(ctx.crc.getText());
     }

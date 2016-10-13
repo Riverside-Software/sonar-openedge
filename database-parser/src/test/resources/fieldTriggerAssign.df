@@ -1,0 +1,9 @@
+ADD TABLE "xxx"
+
+ADD FIELD "zzz" OF "xxx" AS integer
+  FIELD-TRIGGER "create" NO-OVERRIDE PROCEDURE "trgger.p"
+.
+PSC
+cpstream=ISO8859-15
+.
+0000060070

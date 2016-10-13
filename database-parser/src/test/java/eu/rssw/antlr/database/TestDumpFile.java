@@ -44,4 +44,9 @@ public class TestDumpFile {
     assertFalse(idx2.isInAlternateBufferPool());
   }
 
+  @Test
+  public void testFieldTriggerNotAssign() throws IOException {
+    // Invalid field trigger type shouldn't crash the visitor, and has to be reported
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(new File("src/test/resources/fieldTriggerAssign.df"));
+  }
 }

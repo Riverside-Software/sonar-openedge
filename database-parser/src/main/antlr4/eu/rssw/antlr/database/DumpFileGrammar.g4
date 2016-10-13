@@ -217,7 +217,7 @@ addFieldOption:
   ;
 
 fieldTrigger:
-    'FIELD-TRIGGER' type='"ASSIGN"' override='OVERRIDE'? noOverride='NO-OVERRIDE'? 'PROCEDURE' triggerProcedure=QUOTED_STRING ('CRC' crc=QUOTED_STRING)?;
+    'FIELD-TRIGGER' type=QUOTED_STRING override='OVERRIDE'? noOverride='NO-OVERRIDE'? 'PROCEDURE' triggerProcedure=QUOTED_STRING ('CRC' crc=QUOTED_STRING)?;
 
 dropField:
     'DROP' 'FIELD' field=QUOTED_STRING 'OF' table=QUOTED_STRING;
