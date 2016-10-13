@@ -30,7 +30,6 @@ import org.prorefactor.widgettypes.FieldLevelWidgetI;
  * (Trigger scopes may be deeply nested). These scopes are defined <b>Symbol</b> scopes. They have nothing to do with
  * record or frame scoping!
  */
-
 public class SymbolScope {
   private static final Integer DATASET = new Integer(NodeTypes.DATASET);
   private static final Integer DATASOURCE = new Integer(NodeTypes.DATASOURCE);
@@ -435,4 +434,8 @@ public class SymbolScope {
     rootBlock = block;
   }
 
+  @Override
+  public String toString() {
+    return new StringBuilder("SymbolScope associated with ").append(rootBlock.toString()).toString();
+  }
 }

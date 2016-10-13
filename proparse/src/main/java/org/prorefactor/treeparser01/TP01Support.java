@@ -12,6 +12,7 @@ package org.prorefactor.treeparser01;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,9 +77,10 @@ public class TP01Support extends TP01Action {
   private FrameStack frameStack = new FrameStack();
   private Map<String, SymbolScope> funcForwards = new HashMap<>();
   /** There may be more than one WIP call, since a functioncall is a perfectly valid parameter. */
-  private LinkedList<Call> wipCalls = new LinkedList<>();
+  private Deque<Call> wipCalls = new LinkedList<>();
   /** Since there can be more than one WIP Call, there can be more than one WIP Parameter. */
-  private LinkedList<Parameter> wipParameters = new LinkedList<>();
+  private Deque<Parameter> wipParameters = new LinkedList<>();
+
   private Routine currentRoutine;
   private Routine rootRoutine;
   private RefactorSession refSession;
@@ -481,7 +483,7 @@ public class TP01Support extends TP01Action {
     if (refNode.attrGet(IConstants.INLINE_VAR_DEF) == 1)
       addToSymbolScope(defineVariable(idAST, idAST));
 
-    if ((refNode.parent().getType() == NodeTypes.USING && refNode.parent().parent().getType() == NodeTypes.RECORD_NAME)
+    if ((refNode.getParent().getType() == NodeTypes.USING && refNode.getParent().getParent().getType() == NodeTypes.RECORD_NAME)
         || (refNode.firstChild().getType() == NodeTypes.INPUT &&
             (refNode.nextSibling() == null || refNode.nextSibling().getType() != NodeTypes.OBJCOLON))) {
       // First condition : there seems to be an implicit INPUT in USING phrases in a record phrase.
@@ -510,7 +512,7 @@ public class TP01Support extends TP01Action {
         // The OpenEdge compiler seems to ignore invalid tokens in a FIELDS phrase.
         // As a result, some questionable code will fail to parse here if we don't also ignore those here.
         // Sigh. This would be a good lint rule.
-        int parentType = refNode.parent().getType();
+        int parentType = refNode.getParent().getType();
         if (parentType == NodeTypes.FIELDS || parentType == NodeTypes.EXCEPT)
           return;
         throw new TreeParserException(
@@ -641,7 +643,7 @@ public class TP01Support extends TP01Action {
     // just a funcScope map generally?
     scopeAdd(funcAST);
     JPNode idNode = (JPNode) idAST;
-    BlockNode blockNode = (BlockNode) idNode.parent();
+    BlockNode blockNode = (BlockNode) idNode.getParent();
     SymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(idAST.getText(), definingScope, currentScope);
     r.setProgressType(NodeTypes.FUNCTION);
@@ -695,7 +697,7 @@ public class TP01Support extends TP01Action {
   public void methodBegin(AST blockAST, AST idAST) {
     scopeAdd(blockAST);
     JPNode idNode = (JPNode) idAST;
-    BlockNode blockNode = (BlockNode) idNode.parent();
+    BlockNode blockNode = (BlockNode) idNode.getParent();
     SymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(idAST.getText(), definingScope, currentScope);
     r.setProgressType(NodeTypes.METHOD);
@@ -1048,7 +1050,7 @@ public class TP01Support extends TP01Action {
     // special searching for FRAME to initialize.
     JPNode headNode = (JPNode) headAST;
     for (JPNode frameNode : headNode.query(NodeTypes.FRAME)) {
-      int parentType = frameNode.parent().getType();
+      int parentType = frameNode.getParent().getType();
       if (parentType == NodeTypes.Widget_ref || parentType == NodeTypes.IN_KW) {
         frameStack.simpleFrameInitStatement(headNode, frameNode.nextNode(), currentBlock);
         return;

@@ -7,7 +7,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
- */ 
+ */
 
 // Primary tree walker.
 // This tree parser adds base attributes to the tree, such as name resolution, scoping, etc.
@@ -19,22 +19,22 @@ header {
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
   import org.prorefactor.core.JPNode;
+  import org.prorefactor.refactor.RefactorSession;
   import org.prorefactor.treeparser.TreeParserException;
   import org.prorefactor.treeparser.ContextQualifier;
   import org.prorefactor.treeparser.IJPTreeParser;
   import org.prorefactor.treeparser01.ITreeParserAction.TableNameResolution;
-  import java.util.ArrayList;
+  import java.util.Deque;
+  import java.util.ArrayDeque;
 }
 
 options {
   language = "Java";
 }
 
-// Class preamble - anything here gets inserted in front of the class definition.
 {
-
-} // Class preamble
-
+  // Class preamble - anything here gets inserted in front of the class definition.
+}
 
 // class definition options
 class TreeParser01 extends JPTreeParser;
@@ -72,7 +72,7 @@ options {
     return _retTree;
   }
 
-  // Func for grabbing the "state2" attribute from the node at LT(1) 
+  // Func for grabbing the "state2" attribute from the node at LT(1)
   private boolean state2(AST node, int match) {
     return ((JPNode)node).getState2() == match;
   }
@@ -80,10 +80,9 @@ options {
 
   // --- The above are for all tree parsers, below are for TreeParser01 ---
 
-
-    public TreeParser01(org.prorefactor.refactor.RefactorSession refSession) {
+  public TreeParser01(org.prorefactor.refactor.RefactorSession refSession) {
     this(refSession, new TP01Support(refSession));
-    }
+  }
     
   /** Create a tree parser with a specific action object. */
   public TreeParser01(org.prorefactor.refactor.RefactorSession refSession, ITreeParserAction actionObject) {
@@ -92,30 +91,26 @@ options {
   }
   
   /** By default, the action object is a new TP01Support. */
-  ITreeParserAction action = null; // See initialization block, below.
+  private ITreeParserAction action = null; // See initialization block, below.
 
   /** Get the action object. getActionObject and getTpSupport are identical. */
   public ITreeParserAction getActionObject() { return action; }
 
-  /** Set the action object.
-   * By default, the support object is a new TP01Support,
-   * but you can configure this to be any TP01Action object.
-   * setTpSupport and setActionObject are identical.
-   */
+  // Set the action object.
+  // By default, the support object is a new TP01Support,
+  // but you can configure this to be any TP01Action object.
+  // setTpSupport and setActionObject are identical.
   public void setActionObject(ITreeParserAction action) { this.action = action; }
 
+  // This tree parser's stack. I think it is best to keep the stack
+  // in the tree parser grammar for visibility sake, rather than hide
+  // it in the support class. If we move grammar and actions around
+  // within this .g, the effect on the stack should be highly visible.
+  private Deque<Object> stack = new ArrayDeque<>();
+  private void push(Object o) { stack.push(o);  }
+  private Object pop() { return stack.pop(); }
 
-  /** This tree parser's stack. I think it is best to keep the stack
-   * in the tree parser grammar for visibility sake, rather than hide
-   * it in the support class. If we move grammar and actions around
-   * within this .g, the effect on the stack should be highly visible.
-   */  
-  private ArrayList stack = new ArrayList();
-  private void push(Object o) { stack.add(o); }
-  private Object pop() { return stack.remove(stack.size()-1); }
-  private org.prorefactor.refactor.RefactorSession refSession;
-
-
+  private RefactorSession refSession;
 } // end of what's added to the top of the class definition
 
 
@@ -491,6 +486,20 @@ interfacestate throws TreeParserException
 
 clearstate throws TreeParserException
   :  #(c:CLEAR (frame_ref)? (ALL)? (NOPAUSE)? state_end {action.clearState(#c);} )
+  ;
+
+catchstate throws TreeParserException
+  :
+    #( b:CATCH { action.blockBegin(#b); }
+       id1:field as:AS (CLASS)? TYPE_NAME
+       { 
+         action.paramForRoutine(#id1);
+         action.addToSymbolScope(action.defineVariable(#id1, #id1));
+         action.defAs(#as);
+         action.paramSymbol(#id1);
+       }
+       block_colon code_block (EOF | #(END (CATCH)?) state_end) {action.blockEnd();}
+      )
   ;
 
 closestoredprocedurestate throws TreeParserException

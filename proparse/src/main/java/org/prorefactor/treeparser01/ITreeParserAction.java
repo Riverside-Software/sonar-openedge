@@ -20,16 +20,27 @@ import org.prorefactor.widgettypes.Browse;
 
 import antlr.collections.AST;
 
+/**
+ * Actions triggered during the tree parsing phase
+ */
 public interface ITreeParserAction {
+
+  /**
+   * Add object to current symbol scope
+   * 
+   * @param o Should be Symbol
+   */
   void addToSymbolScope(Object o) throws TreeParserException;
 
   /**
-   * Beginning of a block
+   * Beginning of a DO / FOR / REPEAT block
+   * 
+   * @param blockAST Reference to the node
    */
   void blockBegin(AST blockAST) throws TreeParserException;
 
   /**
-   * End of a block
+   * End of a DO / FOR / REPEAT block
    */
   void blockEnd() throws TreeParserException;
 
@@ -38,51 +49,73 @@ public interface ITreeParserAction {
    */
   void browseRef(AST idAST) throws TreeParserException;
 
-  /** Node where a call occurs, such as USER_FUNC or LOCAL_METHOD_REF. */
+  /**
+   * Node where a call occurs, such as USER_FUNC or LOCAL_METHOD_REF
+   */
   void callBegin(AST callAST) throws TreeParserException;
 
-  /** Triggered once the call's parameters have been processed. */
+  /**
+   * Triggered once the call's parameters have been processed
+   */
   void callEnd() throws TreeParserException;
 
   /**
-   * Node where a NEW call occurs 
+   * Node where a NEW call occurs
    */
   public void callConstructorBegin(AST ast) throws TreeParserException;
+
   public void callConstructorEnd() throws TreeParserException;
 
   /**
    * Node where a method call occurs
    */
   public void callMethodBegin(AST ast) throws TreeParserException;
+
   public void callMethodEnd() throws TreeParserException;
 
   /**
-   * The tree parser calls this at the start of a can-find, because it needs to have its own buffer and buffer scope.
+   * The tree parser calls this at the start of a CAN-FIND, because it needs to have its own buffer and buffer scope.
    */
   void canFindBegin(AST canfindAST, AST recordAST) throws TreeParserException;
 
-  /** Called by the tree parser at the end of a can-find. */
+  /**
+   * Called by the tree parser at the end of a CAN-FIND
+   */
   void canFindEnd(AST canfindAST) throws TreeParserException;
 
-  /** Called by the tree parser at the CLASS node. */
+  /**
+   * Called by the tree parser at the CLASS node
+   */
   void classState(AST classAST, AST abstractKw, AST finalKw, AST serializableKw) throws TreeParserException;
 
-  /** Called by the tree parser at the INTERFACE node. */
+  /**
+   * Called by the tree parser at the INTERFACE node
+   */
   void interfaceState(AST classAST) throws TreeParserException;
 
-  /** Called at the end of a CLEAR statement. */
+  /**
+   * Called at the end of a CLEAR statement
+   */
   void clearState(AST headAST) throws TreeParserException;
 
-  /** The RECORD_NAME node for a buffer in a DATASET definition. */
+  /**
+   * The RECORD_NAME node for a buffer in a DATASET definition
+   */
   void datasetTable(AST tableAST) throws TreeParserException;
 
-  /** The tree parser calls this at an AS node */
+  /**
+   * The tree parser calls this at an AS node
+   */
   void defAs(AST asAST) throws TreeParserException;
 
-  /** Called at an EXTENT node, first child is an expression. */
+  /**
+   * Called at an EXTENT node, first child is an expression
+   */
   void defExtent(AST extentAST) throws TreeParserException;
 
-  /** The tree parser calls this at a LIKE node */
+  /**
+   * The tree parser calls this at a LIKE node
+   */
   void defLike(AST likeAST) throws TreeParserException;
 
   /**
@@ -91,7 +124,13 @@ public interface ITreeParserAction {
    */
   void defineBuffer(AST defAST, AST idAST, AST recAST, boolean init) throws TreeParserException;
 
-  /** Called at the start of a DEFINE BROWSE statement. */
+  /**
+   * Called at the start of a DEFINE BROWSE statement.
+   * 
+   * @return
+   * @param defAST The DEFINE node
+   * @param idAST The ID node
+   */
   Browse defineBrowse(AST defAST, AST idAST) throws TreeParserException;
 
   /**
@@ -307,13 +346,20 @@ public interface ITreeParserAction {
   /** Constructor or destructor node. */
   void structorBegin(AST blockAST) throws TreeParserException;
 
-  /** End of a constructor or destructor. */
+  /**
+   * End of a constructor or destructor
+   */
   void structorEnd(AST blockAST) throws TreeParserException;
 
-  /** Called with the VIEW statement head, after the VIEW branch has been traversed. */
+  /**
+   * Called with the VIEW statement head, after the VIEW branch has been traversed
+   * @param headAST
+   */
   void viewState(AST headAST) throws TreeParserException;
 
   public enum TableNameResolution {
-    ANY, LAST, PREVIOUS;
+    ANY,
+    LAST,
+    PREVIOUS;
   }
 }

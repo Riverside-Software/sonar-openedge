@@ -465,4 +465,8 @@ public class Block {
     this.parent = parent;
   }
 
+  @Override
+  public String toString() {
+    return new StringBuilder("Block ").append(blockStatementNode.toString()).toString();
+  }
 }
