@@ -25,7 +25,7 @@ header {
   import org.prorefactor.treeparser.IJPTreeParser;
   import org.prorefactor.treeparser01.ITreeParserAction.TableNameResolution;
   import java.util.Deque;
-  import java.util.ArrayDeque;
+  import java.util.LinkedList;
 }
 
 options {
@@ -106,9 +106,8 @@ options {
   // in the tree parser grammar for visibility sake, rather than hide
   // it in the support class. If we move grammar and actions around
   // within this .g, the effect on the stack should be highly visible.
-  private Deque<Object> stack = new ArrayDeque<>();
-  private void push(Object o) { stack.push(o);  }
-  private Object pop() { return stack.pop(); }
+  // Deque implementation has to support null elements
+  private Deque stack = new LinkedList();
 
   private RefactorSession refSession;
 } // end of what's added to the top of the class definition
@@ -625,7 +624,7 @@ dderequeststate throws TreeParserException
 
 definebrowsestate throws TreeParserException
   :  #(  def:DEFINE (def_shared)? def_modifiers BROWSE
-      id:ID { push(action.defineBrowse(#def, #id)); }
+      id:ID { stack.push(action.defineBrowse(#def, #id)); }
       (#(QUERY ID))? (lockhow|NOWAIT)*
       (  #(  DISPLAY
           (  #(  fi1:Form_item
@@ -657,7 +656,7 @@ definebrowsestate throws TreeParserException
       (tooltip_expr)?
       (#(CONTEXTHELPID expression))?
       state_end
-      { action.addToSymbolScope(pop()); }
+      { action.addToSymbolScope(stack.pop()); }
     )
   ;
 
@@ -673,7 +672,7 @@ definebufferstate throws TreeParserException
 
 definebuttonstate throws TreeParserException
   :  #(  def:DEFINE (def_shared)? def_modifiers BUTTON
-      id:ID { push(action.defineSymbol(BUTTON, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(BUTTON, #def, #id)); }
       (  AUTOGO
       |  AUTOENDKEY
       |  DEFAULT
@@ -696,13 +695,13 @@ definebuttonstate throws TreeParserException
       )*
       (triggerphrase)?
       state_end
-      { action.addToSymbolScope(pop()); }
+      { action.addToSymbolScope(stack.pop()); }
     )
   ;
 
 definedatasetstate throws TreeParserException
   :  #(  def:DEFINE (def_shared)? def_modifiers DATASET
-      id:ID { push(action.defineSymbol(DATASET, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(DATASET, #def, #id)); }
       (namespace_uri)? (namespace_prefix)? (xml_node_name)?
       ( #(SERIALIZENAME QSTRING) )?
       (xml_node_type)?
@@ -713,7 +712,7 @@ definedatasetstate throws TreeParserException
       ( data_relation ( (COMMA)? data_relation)* )?
       ( parent_id_relation ( (COMMA)? parent_id_relation)* )?
       state_end
-      { action.addToSymbolScope(pop()); }
+      { action.addToSymbolScope(stack.pop()); }
     )
   ;
 data_relation throws TreeParserException
@@ -744,11 +743,11 @@ field_mapping_phrase throws TreeParserException
 
 definedatasourcestate throws TreeParserException
   :  #(  def:DEFINE (def_shared)? def_modifiers DATASOURCE
-      id:ID { push(action.defineSymbol(DATASOURCE, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(DATASOURCE, #def, #id)); }
       FOR (#(QUERY ID))?
       (source_buffer_phrase)? (COMMA source_buffer_phrase)*
       state_end
-      { action.addToSymbolScope(pop()); }
+      { action.addToSymbolScope(stack.pop()); }
     )
   ;
 source_buffer_phrase throws TreeParserException
@@ -759,13 +758,13 @@ source_buffer_phrase throws TreeParserException
 
 defineeventstate throws TreeParserException
   :  #(  def:DEFINE def_modifiers EVENT
-      id:ID { push(action.defineEvent(#def, #id)); }
+      id:ID { stack.push(action.defineEvent(#def, #id)); }
       (  #(SIGNATURE VOID function_params)
       |  #(DELEGATE (CLASS)? TYPE_NAME)
       )
       state_end
     )
-    { action.addToSymbolScope(pop()); }
+    { action.addToSymbolScope(stack.pop()); }
   ;
 
 defineframestate throws TreeParserException
@@ -787,7 +786,7 @@ defineframestate throws TreeParserException
 
 defineimagestate throws TreeParserException
   :  #(  def:DEFINE (def_shared)? def_modifiers IMAGE
-      id:ID { push(action.defineSymbol(IMAGE, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(IMAGE, #def, #id)); }
       (  #(LIKE fld[ContextQualifier.SYMBOL] (VALIDATE)?)
       |  imagephrase_opt 
       |  sizephrase
@@ -799,15 +798,15 @@ defineimagestate throws TreeParserException
       )*
       (triggerphrase)?
       state_end
-      { action.addToSymbolScope(pop()); }
+      { action.addToSymbolScope(stack.pop()); }
     )
   ;
 
 definemenustate throws TreeParserException
   :  #(  def:DEFINE (def_shared)? def_modifiers MENU
-      id:ID { push(action.defineSymbol(MENU, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(MENU, #def, #id)); }
       (menu_opt)* (menu_list_item)* state_end
-      { action.addToSymbolScope(pop()); }
+      { action.addToSymbolScope(stack.pop()); }
     )
   ;
 menu_opt throws TreeParserException
@@ -821,7 +820,7 @@ menu_opt throws TreeParserException
   ;
 menu_list_item throws TreeParserException
   :  (  #(  MENUITEM
-        id:ID { push(action.defineSymbol(MENUITEM, #id, #id)); }
+        id:ID { stack.push(action.defineSymbol(MENUITEM, #id, #id)); }
         (  #(ACCELERATOR expression )
         |  color_expr
         |  DISABLED
@@ -831,12 +830,12 @@ menu_list_item throws TreeParserException
         |  TOGGLEBOX
         )*
         (triggerphrase)? 
-        { action.addToSymbolScope(pop()); }
+        { action.addToSymbolScope(stack.pop()); }
       )
     |  #(  SUBMENU
-        id2:ID { push(action.defineSymbol(SUBMENU, #id2, #id2)); }
+        id2:ID { stack.push(action.defineSymbol(SUBMENU, #id2, #id2)); }
         (DISABLED | label_constant | #(FONT expression) | color_expr)*
-        { action.addToSymbolScope(pop()); }
+        { action.addToSymbolScope(stack.pop()); }
       )
     |  #(RULE (#(FONT expression) | color_expr)* )
     |  SKIP
@@ -874,11 +873,11 @@ defineparameterstate throws TreeParserException
             action.paramSymbol(#id3);
           }
         |  id2:ID
-          {  push(action.defineVariable(#def, #id2));
+          {  stack.push(action.defineVariable(#def, #id2));
             action.paramSymbol(#id2);
           }
           defineparam_var (triggerphrase)?
-          { action.addToSymbolScope(pop()); }
+          { action.addToSymbolScope(stack.pop()); }
         )
       )
       state_end
@@ -906,27 +905,27 @@ defineparam_var throws TreeParserException
 
 definepropertystate throws TreeParserException
   :  #(  def:DEFINE def_modifiers PROPERTY
-      id:ID {push(action.defineVariable(#def, #id));}
+      id:ID {stack.push(action.defineVariable(#def, #id));}
       as:AS datatype {action.defAs(#as);} (extentphrase_def_symbol|initial_constant|NOUNDO)*
-      {action.addToSymbolScope(pop());}
+      {action.addToSymbolScope(stack.pop());}
       defineproperty_accessor (defineproperty_accessor)?
     )
   ;
 
 definequerystate throws TreeParserException
   :  #(  def:DEFINE (def_shared)? def_modifiers QUERY
-      id:ID { push(action.defineSymbol(QUERY, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(QUERY, #def, #id)); }
       FOR tbl[ContextQualifier.INIT] (record_fields)?
       (COMMA tbl[ContextQualifier.INIT] (record_fields)?)*
       ( #(CACHE expression) | SCROLLING | RCODEINFORMATION)*
       state_end
     )
-    { action.addToSymbolScope(pop()); }
+    { action.addToSymbolScope(stack.pop()); }
   ;
 
 definerectanglestate throws TreeParserException
   :  #(  def:DEFINE (def_shared)? def_modifiers RECTANGLE
-      id:ID { push(action.defineSymbol(RECTANGLE, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(RECTANGLE, #def, #id)); }
       (  NOFILL
       |  #(EDGECHARS expression )
       |  #(EDGEPIXELS expression )
@@ -941,7 +940,7 @@ definerectanglestate throws TreeParserException
       (triggerphrase)?
       state_end
     )
-    { action.addToSymbolScope(pop()); }
+    { action.addToSymbolScope(stack.pop()); }
   ;
 
 definestreamstate throws TreeParserException
@@ -951,10 +950,10 @@ definestreamstate throws TreeParserException
 
 definesubmenustate throws TreeParserException
   :  #(  def:DEFINE (def_shared)? def_modifiers SUBMENU
-      id:ID { push(action.defineSymbol(SUBMENU, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(SUBMENU, #def, #id)); }
       (menu_opt)* (menu_list_item)* state_end
     )
-    { action.addToSymbolScope(pop()); }
+    { action.addToSymbolScope(stack.pop()); }
   ;
    
 definetemptablestate throws TreeParserException
@@ -990,9 +989,9 @@ def_table_like_sub throws TreeParserException
   ;
 def_table_field throws TreeParserException
   :  #(  FIELD id:ID
-      { push(action.defineTableFieldInitialize(#id)); }
+      { stack.push(action.defineTableFieldInitialize(#id)); }
       (fieldoption)*
-      { action.defineTableFieldFinalize(pop()); }
+      { action.defineTableFieldFinalize(stack.pop()); }
     )
   ;
    
@@ -1005,10 +1004,10 @@ defineworktablestate throws TreeParserException
 
 definevariablestate throws TreeParserException
   :  #(  def:DEFINE (def_shared)? def_modifiers VARIABLE
-      id:ID { push(action.defineVariable(#def, #id)); }
+      id:ID { stack.push(action.defineVariable(#def, #id)); }
       (fieldoption)* (triggerphrase)? state_end
     )
-    { action.addToSymbolScope(pop()); }
+    { action.addToSymbolScope(stack.pop()); }
   ;
 
 deletestate throws TreeParserException
@@ -1371,10 +1370,10 @@ function_param_arg throws TreeParserException
       action.paramSymbol(#id1);
     }
   |  (ID LIKE)=> id3:ID #(li:LIKE fld[ContextQualifier.SYMBOL] (VALIDATE)?) (extentphrase)?
-    {  push(action.defineVariable(#id3, #id3));
+    {  stack.push(action.defineVariable(#id3, #id3));
       action.paramSymbol(#id3);
       action.defLike(#li);
-      action.addToSymbolScope(pop());
+      action.addToSymbolScope(stack.pop());
     }
   |  {action.paramNoName(_t);} // unnamed function arg - just the datatype
     (CLASS TYPE_NAME | datatype_var) (extentphrase_def_symbol)?
@@ -1468,9 +1467,9 @@ onstate throws TreeParserException
         |  ASSIGN OF fld:fld[ContextQualifier.INIT]
           (#(TABLE LABEL constant))?
           (  OLD (VALUE)?
-            id:ID { push(action.defineVariable(#id, #id, #fld)); }
+            id:ID { stack.push(action.defineVariable(#id, #id, #fld)); }
             (options{greedy=true;}:defineparam_var)?
-            { action.addToSymbolScope(pop()); }
+            { action.addToSymbolScope(stack.pop()); }
           )?
          )
         (OVERRIDE)?
@@ -1731,17 +1730,17 @@ triggerprocedurestate throws TreeParserException
       |  ASSIGN
         (  #(OF fld[ContextQualifier.SYMBOL] (#(TABLE LABEL constant))? )
         |  #(  NEW (VALUE)?
-            id:ID { push(action.defineVariable(#id, #id)); }
+            id:ID { stack.push(action.defineVariable(#id, #id)); }
             defineparam_var
-            { action.addToSymbolScope(pop()); }
+            { action.addToSymbolScope(stack.pop()); }
           )
           
         )? 
         (  #(  OLD (VALUE)?
-            id2:ID { push(action.defineVariable(#id2, #id2)); }
+            id2:ID { stack.push(action.defineVariable(#id2, #id2)); }
             defineparam_var
           )
-          { action.addToSymbolScope(pop()); }
+          { action.addToSymbolScope(stack.pop()); }
         )?
       )
       state_end
