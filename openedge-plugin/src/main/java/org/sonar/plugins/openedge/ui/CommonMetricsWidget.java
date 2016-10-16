@@ -26,13 +26,13 @@ import org.sonar.api.web.RubyRailsWidget;
 import org.sonar.api.web.UserRole;
 import org.sonar.api.web.WidgetCategory;
 import org.sonar.api.web.WidgetScope;
-import org.sonar.plugins.openedge.foundation.OpenEdge;
+import org.sonar.plugins.openedge.api.Constants;
 
 @UserRole(UserRole.USER)
 @Description("OpenEdge metrics")
 @WidgetCategory("OpenEdge")
 @WidgetScope(WidgetScope.PROJECT)
-@ResourceLanguage(OpenEdge.KEY)
+@ResourceLanguage(Constants.LANGUAGE_KEY)
 public class CommonMetricsWidget extends AbstractRubyTemplate implements RubyRailsWidget {
 
   @Override

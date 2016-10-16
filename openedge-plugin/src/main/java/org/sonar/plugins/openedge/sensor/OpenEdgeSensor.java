@@ -28,7 +28,7 @@ import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.plugins.openedge.foundation.OpenEdge;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 
 public class OpenEdgeSensor implements Sensor {
@@ -42,7 +42,7 @@ public class OpenEdgeSensor implements Sensor {
 
   @Override
   public void describe(SensorDescriptor descriptor) {
-    descriptor.onlyOnLanguage(OpenEdge.KEY).name(getClass().getSimpleName());
+    descriptor.onlyOnLanguage(Constants.LANGUAGE_KEY).name(getClass().getSimpleName());
   }
 
   @Override
@@ -52,7 +52,7 @@ public class OpenEdgeSensor implements Sensor {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   private void computeBaseMetrics(SensorContext context) {
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdge.KEY))) {
+    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.trace("Computing basic metrics on {}", file.relativePath());
       // Depending on file extension
       String fileExt = FilenameUtils.getExtension(file.relativePath());

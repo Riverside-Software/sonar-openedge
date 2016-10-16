@@ -43,6 +43,7 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.antlr.TokenStream;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.api.com.google.common.io.ByteStreams;
@@ -55,7 +56,6 @@ import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.SymbolScope;
 import org.sonar.plugins.openedge.api.org.prorefactor.util.JsonNodeLister;
 import org.sonar.plugins.openedge.foundation.CPDCallback;
-import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
@@ -77,7 +77,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   @Override
   public void describe(SensorDescriptor descriptor) {
     descriptor.name(getClass().getSimpleName());
-    descriptor.onlyOnLanguage(OpenEdge.KEY);
+    descriptor.onlyOnLanguage(Constants.LANGUAGE_KEY);
   }
 
   @Override
@@ -93,7 +93,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdge.KEY))) {
+    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Parsing {}", new Object[] {file.relativePath()});
       boolean isIncludeFile = "i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()));
       try {

@@ -23,6 +23,7 @@ import org.sonar.api.Plugin;
 import org.sonar.api.PropertyType;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.resources.Qualifiers;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.colorizer.OpenEdgeColorizerFormat;
 import org.sonar.plugins.openedge.colorizer.OpenEdgeDBColorizerFormat;
 import org.sonar.plugins.openedge.decorator.CommonDBMetricsDecorator;
@@ -52,18 +53,6 @@ public class OpenEdgePlugin implements Plugin {
   private static final String SUBCATEGORY_GENERAL = "General";
   private static final String SUBCATEGORY_DEBUG = "Debug";
 
-  public static final String SKIP_PROPARSE_PROPERTY = "sonar.oe.skipProparse";
-  public static final String PROPARSE_DEBUG = "sonar.oe.proparse.debug";
-  public static final String BINARIES = "sonar.oe.binaries";
-  public static final String DLC = "sonar.oe.dlc";
-  public static final String PROPATH = "sonar.oe.propath";
-  public static final String PROPATH_DLC = "sonar.oe.propath.dlc";
-  public static final String DATABASES = "sonar.oe.databases";
-  public static final String ALIASES = "sonar.oe.aliases";
-  public static final String CPD_DEBUG = "sonar.oe.cpd.debug";
-  public static final String CPD_ANNOTATIONS = "sonar.oe.cpd.annotations";
-  public static final String SUFFIXES = "sonar.oe.file.suffixes";
-
   @Override
   public void define(Context context) {
     // Main components
@@ -85,23 +74,23 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
 
     // Properties
-    context.addExtension(PropertyDefinition.builder(SKIP_PROPARSE_PROPERTY).name("Skip ProParse step").description(
+    context.addExtension(PropertyDefinition.builder(Constants.SKIP_PROPARSE_PROPERTY).name("Skip ProParse step").description(
         "Skip Proparse AST generation and lint rules").type(PropertyType.BOOLEAN).category(
             CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
                 Qualifiers.PROJECT).defaultValue(Boolean.FALSE.toString()).build());
-    context.addExtension(PropertyDefinition.builder(PROPARSE_DEBUG).name("Proparse debug files").description(
+    context.addExtension(PropertyDefinition.builder(Constants.PROPARSE_DEBUG).name("Proparse debug files").description(
         "Generate JPNodeLister debug file in .proparse directory").type(PropertyType.BOOLEAN).category(
             CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_DEBUG).defaultValue(Boolean.FALSE.toString()).onQualifiers(
                 Qualifiers.MODULE, Qualifiers.PROJECT).build());
-    context.addExtension(PropertyDefinition.builder(CPD_DEBUG).name("CPD debug files").description(
+    context.addExtension(PropertyDefinition.builder(Constants.CPD_DEBUG).name("CPD debug files").description(
         "Generate CPD tokens listing file").type(PropertyType.BOOLEAN).category(CATEGORY_OPENEDGE).subCategory(
             SUBCATEGORY_DEBUG).defaultValue(Boolean.FALSE.toString()).onQualifiers(Qualifiers.MODULE,
                 Qualifiers.PROJECT).build());
-    context.addExtension(PropertyDefinition.builder(SUFFIXES).name("File suffixes").description(
+    context.addExtension(PropertyDefinition.builder(Constants.SUFFIXES).name("File suffixes").description(
         "Comma-separated list of suffixes of OpenEdge files to analyze").type(PropertyType.STRING).defaultValue(
             "").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
                 Qualifiers.PROJECT).build());
-    context.addExtension(PropertyDefinition.builder(CPD_ANNOTATIONS).name("CPD annotations").description(
+    context.addExtension(PropertyDefinition.builder(Constants.CPD_ANNOTATIONS).name("CPD annotations").description(
         "Comma-separated list of annotations disabling CPD").type(PropertyType.STRING).defaultValue(
             "Generated").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
                 Qualifiers.PROJECT).build());

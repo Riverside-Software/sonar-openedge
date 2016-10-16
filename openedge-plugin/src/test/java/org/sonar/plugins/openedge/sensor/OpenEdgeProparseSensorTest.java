@@ -27,8 +27,7 @@ import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.internal.google.common.io.Files;
-import org.sonar.plugins.openedge.OpenEdgePlugin;
-import org.sonar.plugins.openedge.foundation.OpenEdge;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.testng.Assert;
@@ -43,7 +42,7 @@ public class OpenEdgeProparseSensorTest {
   public void testCPDPreprocessorExpansion() throws Exception {
     SensorContextTester context = createContext();
     TestServer server =new TestServer();
-    context.settings().setProperty(OpenEdgePlugin.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
+    context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
     OpenEdgeComponents components = new OpenEdgeComponents(context.activeRules(), server, null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(context.fileSystem(), oeSettings, components);
@@ -59,10 +58,10 @@ public class OpenEdgeProparseSensorTest {
     context.settings().setProperty("sonar.sources", "src");
     context.settings().setProperty("sonar.oe.binaries", "build");
     context.fileSystem().add(
-        new DefaultInputFile("file3", FILE3).setLanguage(OpenEdge.KEY).setType(Type.MAIN).initMetadata(
+        new DefaultInputFile("file3", FILE3).setLanguage(Constants.LANGUAGE_KEY).setType(Type.MAIN).initMetadata(
             Files.toString(new File(moduleBaseDir, FILE3), Charset.defaultCharset())));
     context.fileSystem().add(
-        new DefaultInputFile("class1", CLASS1).setLanguage(OpenEdge.KEY).setType(Type.MAIN).initMetadata(
+        new DefaultInputFile("class1", CLASS1).setLanguage(Constants.LANGUAGE_KEY).setType(Type.MAIN).initMetadata(
             Files.toString(new File(moduleBaseDir, CLASS1), Charset.defaultCharset())));
 
     return context;

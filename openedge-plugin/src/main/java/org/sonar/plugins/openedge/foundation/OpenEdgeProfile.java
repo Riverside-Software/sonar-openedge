@@ -23,6 +23,7 @@ import org.sonar.api.profiles.ProfileDefinition;
 import org.sonar.api.profiles.RulesProfile;
 import org.sonar.api.rules.RuleFinder;
 import org.sonar.api.utils.ValidationMessages;
+import org.sonar.plugins.openedge.api.Constants;
 
 @SuppressWarnings("deprecation")
 public class OpenEdgeProfile extends ProfileDefinition {
@@ -36,7 +37,7 @@ public class OpenEdgeProfile extends ProfileDefinition {
 
   @Override
   public RulesProfile createProfile(ValidationMessages validation) {
-    RulesProfile profile = RulesProfile.create(PROFILE_NAME, OpenEdge.KEY);
+    RulesProfile profile = RulesProfile.create(PROFILE_NAME, Constants.LANGUAGE_KEY);
     profile.setDefaultProfile(false);
     profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY), null);
     profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_214_RULEKEY), null);
