@@ -24,23 +24,22 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.sonar.api.config.Settings;
 import org.sonar.api.resources.AbstractLanguage;
-import org.sonar.plugins.openedge.OpenEdgePlugin;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.com.google.common.collect.Lists;
 
 public class OpenEdge extends AbstractLanguage {
   private static final String DEFAULT_FILE_SUFFIXES = "p,w,i,cls";
-  public static final String KEY = "oe";
 
   private final Settings settings;
 
   public OpenEdge(Settings settings) {
-    super(KEY, "OpenEdge");
+    super(Constants.LANGUAGE_KEY, "OpenEdge");
     this.settings = settings;
   }
 
   @Override
   public String[] getFileSuffixes() {
-    String[] suffixes = filterEmptyStrings(settings.getStringArray(OpenEdgePlugin.SUFFIXES));
+    String[] suffixes = filterEmptyStrings(settings.getStringArray(Constants.SUFFIXES));
     if (suffixes.length == 0) {
       suffixes = StringUtils.split(OpenEdge.DEFAULT_FILE_SUFFIXES, ",");
     }

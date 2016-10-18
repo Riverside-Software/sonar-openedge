@@ -22,14 +22,24 @@ public class FileCoverage {
     this.coveredLines.addAll(coveredLines);
   }
 
+  /**
+   * File name, as written in the profiler output. It can then be an absolute or relative path,
+   * or a class name
+   */
   public String getFileName() {
     return fileName;
   }
 
+  /**
+   * Executable line numbers in the given file
+   */
   public Set<Integer> getLinesToCover() {
     return linesToCover;
   }
 
+  /**
+   * Lines which have been executed in the given file
+   */
   public Set<Integer> getCoveredLines() {
     return coveredLines;
   }

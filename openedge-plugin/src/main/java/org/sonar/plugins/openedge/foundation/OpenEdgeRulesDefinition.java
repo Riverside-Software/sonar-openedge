@@ -25,6 +25,7 @@ import org.sonar.api.rules.RuleType;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.check.Priority;
 import org.sonar.plugins.openedge.api.AnnotationBasedRulesDefinition;
+import org.sonar.plugins.openedge.api.Constants;
 
 public class OpenEdgeRulesDefinition implements RulesDefinition {
   public static final String REPOSITORY_KEY = "rssw-oe";
@@ -39,9 +40,9 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
 
   @Override
   public void define(Context context) {
-    NewRepository repository = context.createRepository(REPOSITORY_KEY, OpenEdge.KEY).setName(REPOSITORY_NAME);
+    NewRepository repository = context.createRepository(REPOSITORY_KEY, Constants.LANGUAGE_KEY).setName(REPOSITORY_NAME);
 
-    AnnotationBasedRulesDefinition annotationLoader = new AnnotationBasedRulesDefinition(repository, OpenEdge.KEY);
+    AnnotationBasedRulesDefinition annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY);
     annotationLoader.addRuleClasses(false, Arrays.<Class> asList(OpenEdgeRulesRegistrar.ppCheckClasses()));
     annotationLoader.addRuleClasses(false, Arrays.<Class> asList(OpenEdgeRulesRegistrar.xrefCheckClasses()));
 
@@ -50,7 +51,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
         Priority.CRITICAL.name());
     warning.setDebtRemediationFunction(warning.debtRemediationFunctions().constantPerIssue("2h"));
     warning.setType(RuleType.CODE_SMELL);
-    warning.setHtmlDescription(getClass().getResource(String.format("/org/sonar/l10n/%s/rules/%s/%s.html", OpenEdge.KEY,
+    warning.setHtmlDescription(getClass().getResource(String.format("/org/sonar/l10n/%s/rules/%s/%s.html", Constants.LANGUAGE_KEY,
         OpenEdgeRulesDefinition.REPOSITORY_KEY, warning.key())));
 
     NewRule warning12115 = repository.createRule(COMPILER_WARNING_12115_RULEKEY).setName(
@@ -58,21 +59,21 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     warning12115.setDebtRemediationFunction(warning12115.debtRemediationFunctions().constantPerIssue("1h"));
     warning.setType(RuleType.BUG);
     warning12115.setHtmlDescription(getClass().getResource(String.format("/org/sonar/l10n/%s/rules/%s/%s.html",
-        OpenEdge.KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, warning12115.key())));
+        Constants.LANGUAGE_KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, warning12115.key())));
 
     NewRule warning15090 = repository.createRule(COMPILER_WARNING_15090_RULEKEY).setName("Dead code").setSeverity(
         Priority.CRITICAL.name());
     warning15090.setDebtRemediationFunction(warning15090.debtRemediationFunctions().constantPerIssue("3h"));
     warning.setType(RuleType.BUG);
     warning15090.setHtmlDescription(getClass().getResource(String.format("/org/sonar/l10n/%s/rules/%s/%s.html",
-        OpenEdge.KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, warning15090.key())));
+        Constants.LANGUAGE_KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, warning15090.key())));
 
     NewRule warning214 = repository.createRule(COMPILER_WARNING_214_RULEKEY).setName(
         "TRANSACTION keyword given within actual transaction level").setSeverity(Priority.CRITICAL.name());
     warning214.setDebtRemediationFunction(warning214.debtRemediationFunctions().constantPerIssue("4h"));
     warning.setType(RuleType.BUG);
     warning214.setHtmlDescription(getClass().getResource(String.format("/org/sonar/l10n/%s/rules/%s/%s.html",
-        OpenEdge.KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, warning214.key())));
+        Constants.LANGUAGE_KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, warning214.key())));
 
     // Manually created rule for proparse errors
     NewRule proparseRule = repository.createRule(PROPARSE_ERROR_RULEKEY).setName("Proparse error").setSeverity(
@@ -80,7 +81,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     proparseRule.setDebtRemediationFunction(proparseRule.debtRemediationFunctions().constantPerIssue("3h"));
     warning.setType(RuleType.BUG);
     proparseRule.setHtmlDescription(getClass().getResource(String.format("/org/sonar/l10n/%s/rules/%s/%s.html",
-        OpenEdge.KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, proparseRule.key())));
+        Constants.LANGUAGE_KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, proparseRule.key())));
 
     // Manually created rule for large transaction scope
     NewRule largeTrans = repository.createRule(LARGE_TRANSACTION_SCOPE).setName("Large transaction scope").setSeverity(
@@ -88,7 +89,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     largeTrans.setDebtRemediationFunction(largeTrans.debtRemediationFunctions().constantPerIssue("3h"));
     warning.setType(RuleType.CODE_SMELL);
     largeTrans.setHtmlDescription(getClass().getResource(String.format("/org/sonar/l10n/%s/rules/%s/%s.html",
-        OpenEdge.KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, largeTrans.key())));
+        Constants.LANGUAGE_KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, largeTrans.key())));
 
     repository.done();
   }

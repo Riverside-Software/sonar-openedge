@@ -25,9 +25,9 @@ import org.sonar.api.web.CodeColorizerFormat;
 import org.sonar.colorizer.KeywordsTokenizer;
 import org.sonar.colorizer.MultilinesDocTokenizer;
 import org.sonar.colorizer.Tokenizer;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.com.google.common.collect.ImmutableList;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
-import org.sonar.plugins.openedge.foundation.OpenEdge;
 
 @SuppressWarnings("deprecation")
 public class OpenEdgeColorizerFormat extends CodeColorizerFormat {
@@ -39,7 +39,7 @@ public class OpenEdgeColorizerFormat extends CodeColorizerFormat {
   private static final String SPAN_END = "</span>";
 
   public OpenEdgeColorizerFormat() {
-    super(OpenEdge.KEY);
+    super(Constants.LANGUAGE_KEY);
   }
 
   @Override

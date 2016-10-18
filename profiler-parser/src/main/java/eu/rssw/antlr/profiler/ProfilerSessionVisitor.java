@@ -13,9 +13,13 @@ import eu.rssw.antlr.profiler.ProfilerGrammarParser.Line_summary_lineContext;
 import eu.rssw.antlr.profiler.ProfilerGrammarParser.Module_data_lineContext;
 
 public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
-  private ProfilerSession session = null;
-  private List<Module> modules = new ArrayList<>();
-  private Module lastModule = null;
+  private final List<Module> modules;
+  private ProfilerSession session;
+  private Module lastModule;
+
+  public ProfilerSessionVisitor() {
+    modules = new ArrayList<>();
+  }
 
   public ProfilerSession getSession() {
     return session;
@@ -54,8 +58,9 @@ public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitCall_tree_data_line(Call_tree_data_lineContext ctx) {
-    session.addCall(Integer.parseInt(ctx.callerId.getText()), Integer.parseInt(ctx.calleeId.getText()), Integer.parseInt(ctx.callCount.getText()));
-    
+    session.addCall(Integer.parseInt(ctx.callerId.getText()), Integer.parseInt(ctx.calleeId.getText()),
+        Integer.parseInt(ctx.callCount.getText()));
+
     return null;
   }
 

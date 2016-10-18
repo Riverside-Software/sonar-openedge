@@ -34,6 +34,7 @@ import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.config.Settings;
 import org.sonar.plugins.openedge.OpenEdgePlugin;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.com.google.common.base.Charsets;
 import org.sonar.plugins.openedge.api.com.google.common.base.Joiner;
 import org.sonar.plugins.openedge.api.com.google.common.base.Splitter;
@@ -79,9 +80,9 @@ public class OpenEdgeSettings {
     }
 
     // And for .pct directory
-    String binariesSetting = settings.getString(OpenEdgePlugin.BINARIES);
+    String binariesSetting = settings.getString(Constants.BINARIES);
     if (binariesSetting == null) {
-      LOG.warn("Property {} not defined, using default value", OpenEdgePlugin.BINARIES);
+      LOG.warn("Property {} not defined, using default value", Constants.BINARIES);
       binariesSetting = "build";
     }
     File binaries = new File(fileSystem.baseDir(), binariesSetting);
@@ -94,7 +95,7 @@ public class OpenEdgeSettings {
     LOG.info("{} classes read from {} directory", genClasses.keySet().size(), binariesSetting); */
 
     // PROPATH definition
-    String propathProp = settings.getString(OpenEdgePlugin.PROPATH);
+    String propathProp = settings.getString(Constants.PROPATH);
     LOG.info("Using PROPATH : {}", propathProp);
     if (propathProp != null) {
       for (String str : Splitter.on(',').trimResults().split(propathProp)) {
@@ -103,8 +104,8 @@ public class OpenEdgeSettings {
         propath.add(entry);
       }
     }
-    String dlcInstallDir = settings.getString(OpenEdgePlugin.DLC);
-    boolean dlcInPropath = settings.getBoolean(OpenEdgePlugin.PROPATH_DLC);
+    String dlcInstallDir = settings.getString(Constants.DLC);
+    boolean dlcInPropath = settings.getBoolean(Constants.PROPATH_DLC);
     if (dlcInPropath && !Strings.isNullOrEmpty(dlcInstallDir)) {
       File dlc = new File(dlcInstallDir);
       LOG.info("Adding DLC directory '{}' to PROPATH", dlc.getAbsolutePath());
@@ -133,7 +134,7 @@ public class OpenEdgeSettings {
     }
 
     // Database definitions
-    String dbs = settings.getString(OpenEdgePlugin.DATABASES);
+    String dbs = settings.getString(Constants.DATABASES);
     LOG.info("Using schema : {}", dbs);
     if (dbs != null) {
       try (BufferedWriter writer = Files.newWriter(dbFile, Charsets.UTF_8)) {
@@ -172,8 +173,8 @@ public class OpenEdgeSettings {
       if (!sch.getDbSet().isEmpty()) {
         sch.createAlias("dictdb", sch.getDbSet().first().getName());
       }
-      if (settings.getString(OpenEdgePlugin.ALIASES) != null) {
-        for (String str : Splitter.on(';').trimResults().split(settings.getString(OpenEdgePlugin.ALIASES))) {
+      if (settings.getString(Constants.ALIASES) != null) {
+        for (String str : Splitter.on(';').trimResults().split(settings.getString(Constants.ALIASES))) {
           List<String> lst = Splitter.on(',').trimResults().splitToList(str);
           for (String alias : lst.subList(1, lst.size())) {
             LOG.debug("Adding {} aliases to database {}", new Object[] {alias, lst.get(0)});
@@ -187,7 +188,7 @@ public class OpenEdgeSettings {
     dbFile.delete();
 
     // CPD annotations
-    for (String str : Strings.nullToEmpty(settings.getString(OpenEdgePlugin.CPD_ANNOTATIONS)).split(",")) {
+    for (String str : Strings.nullToEmpty(settings.getString(Constants.CPD_ANNOTATIONS)).split(",")) {
       LOG.debug("CPD annotation : '{}'", str);
       cpdAnnotations.add(str);
     }
@@ -214,15 +215,15 @@ public class OpenEdgeSettings {
   }
 
   public boolean skipProparseSensor() {
-    return settings.getBoolean(OpenEdgePlugin.SKIP_PROPARSE_PROPERTY);
+    return settings.getBoolean(Constants.SKIP_PROPARSE_PROPERTY);
   }
 
   public boolean useProparseDebug() {
-    return settings.getBoolean(OpenEdgePlugin.PROPARSE_DEBUG);
+    return settings.getBoolean(Constants.PROPARSE_DEBUG);
   }
 
   public boolean useCpdDebug() {
-    return settings.getBoolean(OpenEdgePlugin.CPD_DEBUG);
+    return settings.getBoolean(Constants.CPD_DEBUG);
   }
 
   public List<File> getPropath() {

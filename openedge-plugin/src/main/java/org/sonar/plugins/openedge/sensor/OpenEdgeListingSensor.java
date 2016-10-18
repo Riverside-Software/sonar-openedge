@@ -32,9 +32,9 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.eu.rssw.listing.CodeBlock;
 import org.sonar.plugins.openedge.api.eu.rssw.listing.ListingParser;
-import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
@@ -54,7 +54,7 @@ public class OpenEdgeListingSensor implements Sensor {
 
   @Override
   public void describe(SensorDescriptor descriptor) {
-    descriptor.onlyOnLanguage(OpenEdge.KEY).name(getClass().getSimpleName());
+    descriptor.onlyOnLanguage(Constants.LANGUAGE_KEY).name(getClass().getSimpleName());
   }
 
   private File getListingFile(File file) {
@@ -69,7 +69,7 @@ public class OpenEdgeListingSensor implements Sensor {
   public void execute(SensorContext context) {
     int dbgImportNum = 0;
 
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdge.KEY))) {
+    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Looking for listing of {}", file.relativePath());
 
       File listingFile = getListingFile(file.file());

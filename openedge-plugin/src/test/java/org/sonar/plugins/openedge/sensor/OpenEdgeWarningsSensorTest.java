@@ -30,7 +30,7 @@ import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.plugins.openedge.foundation.OpenEdge;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.testng.Assert;
@@ -56,10 +56,10 @@ public class OpenEdgeWarningsSensorTest {
     context.settings().setProperty("sonar.sources", "src");
     context.settings().setProperty("sonar.oe.binaries", "build");
     context.fileSystem().add(
-        new DefaultInputFile("file1", FILE1).setLanguage(OpenEdge.KEY).setType(Type.MAIN).initMetadata(
+        new DefaultInputFile("file1", FILE1).setLanguage(Constants.LANGUAGE_KEY).setType(Type.MAIN).initMetadata(
             Files.toString(new File(moduleBaseDir, FILE1), Charset.defaultCharset())));
     context.fileSystem().add(
-        new DefaultInputFile("file2", FILE2).setLanguage(OpenEdge.KEY).setType(Type.MAIN).initMetadata(
+        new DefaultInputFile("file2", FILE2).setLanguage(Constants.LANGUAGE_KEY).setType(Type.MAIN).initMetadata(
             Files.toString(new File(moduleBaseDir, FILE2), Charset.defaultCharset())));
     context.setActiveRules(createRules());
 

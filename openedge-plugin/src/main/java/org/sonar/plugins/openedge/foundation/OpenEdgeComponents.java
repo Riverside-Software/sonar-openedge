@@ -42,6 +42,7 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.MessageException;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.LicenceRegistrar;
 import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
@@ -139,7 +140,7 @@ public class OpenEdgeComponents {
     if (initialized)
       return;
 
-    for (ActiveRule rule : activeRules.findByLanguage(OpenEdge.KEY)) {
+    for (ActiveRule rule : activeRules.findByLanguage(Constants.LANGUAGE_KEY)) {
       RuleKey ruleKey = rule.ruleKey();
       // AFAIK, no way to be sure if a rule is based on a template or not
       String clsName = rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey();
