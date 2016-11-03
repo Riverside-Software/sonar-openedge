@@ -8,6 +8,7 @@ node ('master') {
   withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
     sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true"
   }
+  archiveArtifacts artifacts: 'openedge-plugin/target/sonar-openedge-plugin-*.jar', excludes: 'openedge-plugin/target/sonar-openedge-plugin-*-sources.jar'
   step([$class: 'Publisher', reportFilenamePattern: '**/testng-results.xml'])
 
   if ("master" == env.BRANCH_NAME) {
