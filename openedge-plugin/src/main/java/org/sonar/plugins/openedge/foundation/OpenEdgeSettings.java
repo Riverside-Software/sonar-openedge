@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.config.Settings;
-import org.sonar.plugins.openedge.OpenEdgePlugin;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.com.google.common.base.Charsets;
 import org.sonar.plugins.openedge.api.com.google.common.base.Joiner;
@@ -56,7 +55,8 @@ public class OpenEdgeSettings {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeSettings.class);
 
   private final List<String> sourceDirs = new ArrayList<>();
-  private final File pctDir, dbgDir;
+  private final File pctDir;
+  private final File dbgDir;
   private final Settings settings;
   private final List<File> propath = new ArrayList<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
@@ -65,6 +65,7 @@ public class OpenEdgeSettings {
   /* XXX private final Map<String, ClassInformation> genClasses = new HashMap<String, ClassInformation>();
   private final Map<String, ClassInformation> ppClasses = new HashMap<String, ClassInformation>();*/
 
+  
   public OpenEdgeSettings(Settings settings, FileSystem fileSystem) {
     this.settings = settings;
 
@@ -82,7 +83,7 @@ public class OpenEdgeSettings {
     // And for .pct directory
     String binariesSetting = settings.getString(Constants.BINARIES);
     if (binariesSetting == null) {
-      LOG.warn("Property {} not defined, using default value", Constants.BINARIES);
+      LOG.debug("Property {} not defined, using default value", Constants.BINARIES);
       binariesSetting = "build";
     }
     File binaries = new File(fileSystem.baseDir(), binariesSetting);
