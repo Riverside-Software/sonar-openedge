@@ -20,7 +20,10 @@
 package org.sonar.plugins.openedge.sensor;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -92,15 +95,18 @@ public class OpenEdgeXREFSensor implements Sensor {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
+    if (settings.useXrefFilter()) {
+      LOG.info("XML XREF filter activated");
+    }
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Looking for XREF of {}", file.relativePath());
 
       File xrefFile = getXrefFile(file.file());
       if ((xrefFile != null) && xrefFile.exists()) {
         LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
-        try {
+        try (InputStream inpStream = new FileInputStream(xrefFile)) {
           long startTime = System.currentTimeMillis();
-          Document doc = dBuilder.parse(xrefFile);
+          Document doc = dBuilder.parse(settings.useXrefFilter() ? new InvalidXMLFilterStream(inpStream) : inpStream);
           parseTime += (System.currentTimeMillis() - startTime);
 
           for (Map.Entry<ActiveRule, OpenEdgeXrefCheck> entry : components.getXrefRules().entrySet()) {
@@ -136,6 +142,46 @@ public class OpenEdgeXREFSensor implements Sensor {
   @Override
   public String toString() {
     return getClass().getSimpleName();
+  }
+
+  /**
+   * Filter specific characters which can be found in XML XREF files, especially CHR(1), CHR(2) and CHR(4).
+   * Those characters are used in ADM2 applications, and are hard-coded in some procedures.
+   */
+  public static class InvalidXMLFilterStream extends FilterInputStream {
+    protected InvalidXMLFilterStream(InputStream in) {
+      super(in);
+    }
+
+    @Override
+    public int read() throws IOException {
+      // Discard any 0x01, 0x02 and 0x04 character from the stream
+      int xx = super.read();
+      if ((xx == 0x01) || (xx == 0x02) || (xx == 0x04)) {
+        return read();
+      }
+
+      return xx;
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+      int xx = super.read(b, off, len);
+      int zz = off;
+      while (zz < off + xx) {
+        if ((b[zz] == 0x01) || (b[zz] == 0x02) || (b[zz] == 0x04)) {
+          // Shift all subsequent bytes by one position left
+          for (int zz2 = zz; zz2 < off + xx - 1; zz2++) {
+            b[zz2] = b[zz2 + 1];
+          }
+          // One less character read
+          xx--;
+        } else {
+          zz++;
+        }
+      }
+      return xx;
+    }
   }
 
 }

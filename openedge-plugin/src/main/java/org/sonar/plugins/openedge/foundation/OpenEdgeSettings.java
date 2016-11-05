@@ -226,6 +226,10 @@ public class OpenEdgeSettings {
     return settings.getBoolean(Constants.CPD_DEBUG);
   }
 
+  public boolean useXrefFilter() {
+    return settings.getBoolean(Constants.XREF_FILTER);
+  }
+
   public List<File> getPropath() {
     return propath;
   }

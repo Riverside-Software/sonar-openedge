@@ -15,6 +15,7 @@ public class Constants {
   public static final String CPD_DEBUG = "sonar.oe.cpd.debug";
   public static final String CPD_ANNOTATIONS = "sonar.oe.cpd.annotations";
   public static final String SUFFIXES = "sonar.oe.file.suffixes";
+  public static final String XREF_FILTER = "sonar.oe.filter.invalidxref";
 
   private Constants() {
     

@@ -94,6 +94,10 @@ public class OpenEdgePlugin implements Plugin {
         "Comma-separated list of annotations disabling CPD").type(PropertyType.STRING).defaultValue(
             "Generated").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
                 Qualifiers.PROJECT).build());
+    context.addExtension(PropertyDefinition.builder(Constants.XREF_FILTER).name("Filter invalid XML files").description(
+        "Use filter to discard malformed characters from XML XREF files").type(PropertyType.BOOLEAN).defaultValue(
+            Boolean.FALSE.toString()).category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(
+                Qualifiers.MODULE, Qualifiers.PROJECT).build());
   }
 
 }
