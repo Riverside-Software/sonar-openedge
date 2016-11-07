@@ -228,4 +228,8 @@ public class BugFixTest {
     genericTest("bug33.cls");
   }
 
+  @Test
+  public void testLinuxBackslash() throws Exception {
+    genericTest("escape_char.p");
+  }
 }
