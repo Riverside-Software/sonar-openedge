@@ -134,7 +134,7 @@ block_for throws TreeParserException
     )
   ;
 block_opt throws TreeParserException
-  :  #(Block_iterator fld[ContextQualifier.UPDATING] EQUAL expression TO expression (BY constant)? )
+  :  #(Block_iterator fld[ContextQualifier.REFUP] EQUAL expression TO expression (BY constant)? )
   |  querytuningphrase 
   |  #(WHILE expression )
   |  TRANSACTION 

@@ -20,7 +20,7 @@ import org.prorefactor.treeparser.FieldBuffer;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.Symbol;
 import org.prorefactor.treeparser.Variable;
-import org.prorefactor.widgettypes.FieldLevelWidgetI;
+import org.prorefactor.widgettypes.IFieldLevelWidget;
 
 public class FieldRefNode extends JPNode {
   private static final long serialVersionUID = 7754879272592544238L;
@@ -95,7 +95,7 @@ public class FieldRefNode extends JPNode {
     setLink(IConstants.SYMBOL, symbol);
   }
 
-  public void setSymbol(FieldLevelWidgetI symbol) {
+  public void setSymbol(IFieldLevelWidget symbol) {
     assert symbol != null;
     setLink(IConstants.SYMBOL, symbol);
   }

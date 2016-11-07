@@ -10,12 +10,12 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
-public interface WidgetI extends SymbolI {
+public interface IWidget extends ISymbol {
 
   /**
    * For this subclass of Symbol, fullName() returns the same value as getName()
    */
   @Override
-  public abstract String fullName();
+  String fullName();
 
 }

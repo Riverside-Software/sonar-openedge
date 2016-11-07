@@ -15,7 +15,7 @@ import org.prorefactor.treeparser.Symbol;
 import org.prorefactor.treeparser.SymbolScope;
 import org.prorefactor.treeparser.Widget;
 
-public class Button extends Widget implements FieldLevelWidgetI {
+public class Button extends Widget implements IFieldLevelWidget {
 
   public Button() {
     // Only to be used for persistence/serialization
