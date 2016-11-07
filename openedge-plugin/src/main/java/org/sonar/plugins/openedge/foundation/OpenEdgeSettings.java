@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.config.Settings;
-import org.sonar.plugins.openedge.OpenEdgePlugin;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.com.google.common.base.Charsets;
 import org.sonar.plugins.openedge.api.com.google.common.base.Joiner;
@@ -61,9 +60,6 @@ public class OpenEdgeSettings {
   private final List<File> propath = new ArrayList<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
   private final RefactorSession proparseSession;
-  /* XXX private final Map<String, List<IDatabaseTable>> dbDesc = new TreeMap<String, List<IDatabaseTable>>(); */
-  /* XXX private final Map<String, ClassInformation> genClasses = new HashMap<String, ClassInformation>();
-  private final Map<String, ClassInformation> ppClasses = new HashMap<String, ClassInformation>();*/
 
   public OpenEdgeSettings(Settings settings, FileSystem fileSystem) {
     this.settings = settings;
@@ -88,11 +84,6 @@ public class OpenEdgeSettings {
     File binaries = new File(fileSystem.baseDir(), binariesSetting);
     this.pctDir = new File(binaries, ".pct");
     this.dbgDir = new File(binaries, ".dbg");
-    // Getting ClassInformation objects from rcode in binaries dir
-    /* XXX if (binaries.exists() && binaries.isDirectory()) {
-      readRCodeFromDirectory(binaries, genClasses);
-    }
-    LOG.info("{} classes read from {} directory", genClasses.keySet().size(), binariesSetting); */
 
     // PROPATH definition
     String propathProp = settings.getString(Constants.PROPATH);
@@ -114,15 +105,6 @@ public class OpenEdgeSettings {
       propath.add(new File(dlc, "src"));
       propath.add(dlc);
     }
-    // Getting ClassInformation objects from rcode in propath
-    /* XXX for (File entry : propath) {
-      if (entry.isDirectory()) {
-        readRCodeFromDirectory(entry, ppClasses);
-      } else if (entry.isFile() && "pl".equalsIgnoreCase(Files.getFileExtension(entry.getName()))) {
-        readRCodeFromPL(entry, ppClasses);
-      }
-    }
-    LOG.info("{} classes read from PROPATH entries", ppClasses.keySet().size(), binariesSetting);*/
 
     // File definition for temporary .schema file
     File dbFile;
@@ -242,80 +224,4 @@ public class OpenEdgeSettings {
     return proparseSession;
   }
 
-  /* XXX public Map<String, List<IDatabaseTable>> getDatabases() {
-    return dbDesc;
-  }
-
-  public Map<String, ClassInformation> getBinariesClassInfo() {
-    return genClasses;
-  }
-
-  public Map<String, ClassInformation> getPropathClassInfo() {
-    return ppClasses;
-  }
-
-  private DatabaseKeyword mapToDatabaseKeyword(DatabaseDescription desc, String name) {
-    DatabaseKeyword db = new DatabaseKeyword(name);
-    for (Table t : desc.getTables()) {
-      LOG.trace("Adding table {}.{}", new Object[] {name, t.getName()});
-      DatabaseTableKeyword tbl = new DatabaseTableKeyword(db, t.getName());
-      for (Field f : t.getFields()) {
-        LOG.trace("Adding field {}.{}.{} {}", new Object[] {name, t.getName(), f.getName(), f.getDataType()});
-        new DatabaseFieldKeyword(tbl, f.getName(), DataTypes.getDataType(f.getDataType()), f.getDescription(),
-            (f.getExtent() == null ? 0 : f.getExtent().intValue()), "", false, 10);
-      }
-      for (Index i : t.getIndexes()) {
-        DatabaseIndexFieldKeyword[] flds = new DatabaseIndexFieldKeyword[i.getFields().size()];
-        for (int zz = 0; zz < i.getFields().size(); zz++) {
-          LOG.trace("Adding index field {}.{}.{}.{}",
-              new Object[] {name, t.getName(), i.getName(), i.getFields().get(zz).getField().getName()});
-          flds[zz] = new DatabaseIndexFieldKeyword(tbl, i.getName(), i.getFields().get(zz).getField().getName(),
-              i.getFields().get(zz).isAscending());
-        }
-        new DatabaseIndexKeyword(tbl, i.getName(), flds, i.isUnique(), i.isPrimary());
-      }
-    }
-
-    return db;
-  }
-
-  private void readRCodeFromDirectory(File dir, Map<String, ClassInformation> infos) {
-    for (File f : FileUtils.listFiles(dir, new String[] {"r"}, true)) {
-      try {
-        RCodeObject obj = new RCodeObject(f);
-        if (obj.isClass()) {
-          infos.put(obj.getClassInfo().getName(), new ClassInformation(obj.getClassInfo()));
-        }
-        obj.dispose();
-      } catch (IOException | RCodeReadException e) {
-        LOG.error("Unable to read rcode {}", f.getName());
-      }
-    }
-  }
-
-  private void readRCodeFromPL(File lib, Map<String, ClassInformation> infos) {
-    File tmpFile = null;
-    try {
-      tmpFile = File.createTempFile("rcode", ".r");
-      PLReader reader = new PLReader(lib);
-      for (FileEntry e : reader.getFileList()) {
-        // Extracts rcode from PL into temporary file
-        OutputStream os = new FileOutputStream(tmpFile);
-        IOUtils.copy(reader.getInputStream(e), os);
-        // Then read content
-        RCodeObject obj = new RCodeObject(tmpFile);
-        if (obj.isClass()) {
-          infos.put(obj.getClassInfo().getName(), new ClassInformation(obj.getClassInfo()));
-        }
-        obj.dispose();
-      }
-    } catch (IOException caught) {
-
-    } catch (RCodeReadException caught) {
-
-    } finally {
-      if (tmpFile != null)
-        tmpFile.delete();
-    }
-  }*/
 }
