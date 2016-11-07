@@ -15,7 +15,7 @@ import org.prorefactor.treeparser.Symbol;
 import org.prorefactor.treeparser.SymbolScope;
 import org.prorefactor.treeparser.Widget;
 
-public class Image extends Widget implements FieldLevelWidgetI {
+public class Image extends Widget implements IFieldLevelWidget {
 
   public Image() {
     // Only to be used for persistence/serialization

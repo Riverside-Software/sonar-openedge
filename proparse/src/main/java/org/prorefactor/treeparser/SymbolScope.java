@@ -22,7 +22,7 @@ import java.util.Set;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.Table;
-import org.prorefactor.widgettypes.FieldLevelWidgetI;
+import org.prorefactor.widgettypes.IFieldLevelWidget;
 
 /**
  * For keeping track of PROCEDURE, FUNCTION, and trigger scopes within a 4gl compile unit. Note that scopes are nested.
@@ -41,7 +41,7 @@ public class SymbolScope {
   protected List<SymbolScope> childScopes = new ArrayList<>();
   protected Block rootBlock;
   protected Map<String, TableBuffer> bufferMap = new HashMap<>();
-  protected Map<String, FieldLevelWidgetI> fieldLevelWidgetMap = new HashMap<>();
+  protected Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
   protected Map<String, Routine> routineMap = new HashMap<>();
   protected Map<Table, TableBuffer> unnamedBuffers = new HashMap<>();
   protected Map<Integer, Map<String, Symbol>> typeMap = new HashMap<>();
@@ -72,7 +72,7 @@ public class SymbolScope {
   }
 
   /** Add a FieldLevelWidget for names lookup. */
-  public void add(FieldLevelWidgetI widget) {
+  public void add(IFieldLevelWidget widget) {
     fieldLevelWidgetMap.put(widget.getName().toLowerCase(), widget);
   }
 
@@ -102,8 +102,8 @@ public class SymbolScope {
 
   /** Add a Symbol for names lookup. */
   public void add(Symbol symbol) {
-    if (symbol instanceof FieldLevelWidgetI) {
-      add((FieldLevelWidgetI) symbol);
+    if (symbol instanceof IFieldLevelWidget) {
+      add((IFieldLevelWidget) symbol);
     } else if (symbol instanceof Variable) {
       add((Variable) symbol);
     } else if (symbol instanceof Routine) {
@@ -342,8 +342,8 @@ public class SymbolScope {
   }
 
   /** Lookup a FieldLevelWidget in this scope or an enclosing scope. */
-  public FieldLevelWidgetI lookupFieldLevelWidget(String inName) {
-    FieldLevelWidgetI wid = fieldLevelWidgetMap.get(inName.toLowerCase());
+  public IFieldLevelWidget lookupFieldLevelWidget(String inName) {
+    IFieldLevelWidget wid = fieldLevelWidgetMap.get(inName.toLowerCase());
     if (wid == null && parentScope != null)
       return parentScope.lookupFieldLevelWidget(inName);
     return wid;

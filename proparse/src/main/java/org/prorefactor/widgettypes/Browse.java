@@ -15,7 +15,7 @@ import org.prorefactor.treeparser.FieldContainer;
 import org.prorefactor.treeparser.Symbol;
 import org.prorefactor.treeparser.SymbolScope;
 
-public class Browse extends FieldContainer implements FieldLevelWidgetI {
+public class Browse extends FieldContainer implements IFieldLevelWidget {
 
   public Browse() {
     // Only to be used for persistence/serialization

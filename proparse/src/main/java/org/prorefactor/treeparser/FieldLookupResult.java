@@ -10,7 +10,7 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
-import org.prorefactor.widgettypes.FieldLevelWidgetI;
+import org.prorefactor.widgettypes.IFieldLevelWidget;
 
 /**
  * For field lookups, we need to be able to pass back the BufferScope object as well as the Field object.
@@ -20,7 +20,7 @@ public class FieldLookupResult {
   public boolean isUnqualified = false;
   public BufferScope bufferScope = null;
   public Variable variable = null;
-  public FieldLevelWidgetI fieldLevelWidget = null;
+  public IFieldLevelWidget fieldLevelWidget = null;
   public FieldBuffer field = null;
   public Event event = null;
 }

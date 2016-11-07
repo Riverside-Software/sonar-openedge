@@ -10,8 +10,8 @@
  *******************************************************************************/ 
 package org.prorefactor.widgettypes;
 
-import org.prorefactor.treeparser.WidgetI;
+import org.prorefactor.treeparser.IWidget;
 
-public interface FieldLevelWidgetI extends WidgetI {
+public interface IFieldLevelWidget extends IWidget {
 
 }

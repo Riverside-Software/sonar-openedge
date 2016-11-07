@@ -16,7 +16,7 @@ import org.prorefactor.core.NodeTypes;
 /**
  * Base class for any type of symbol which needs to be kept track of when parsing a 4gl compile unit's AST.
  */
-public abstract class Symbol implements SymbolI {
+public abstract class Symbol implements ISymbol {
   private int allRefsCount = 0;
   private int numReads = 0;
   private int numWrites = 0;
@@ -113,13 +113,11 @@ public abstract class Symbol implements SymbolI {
   public abstract int getProgressType();
 
   @Override
-
   public SymbolScope getScope() {
     return scope;
   }
 
   @Override
-
   public boolean isExported() {
     // If the symbol belongs to a SymbolScopeSuper, then not only has it already
     // been determined that the symbol is exported, but also the rest of this
@@ -153,7 +151,6 @@ public abstract class Symbol implements SymbolI {
   }
 
   @Override
-
   public boolean isImported() {
     // If there is no DEFINE node (inline var def), then it is not SHARED.
     if (defNode == null || defNode.getType() != NodeTypes.DEFINE)
@@ -164,7 +161,6 @@ public abstract class Symbol implements SymbolI {
   }
 
   @Override
-
   public void noteReference(ContextQualifier contextQualifier) {
     allRefsCount++;
     if (ContextQualifier.isRead(contextQualifier))

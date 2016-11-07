@@ -15,7 +15,7 @@ import org.prorefactor.treeparser.Symbol;
 import org.prorefactor.treeparser.SymbolScope;
 import org.prorefactor.treeparser.Widget;
 
-public class Rectangle extends Widget implements FieldLevelWidgetI {
+public class Rectangle extends Widget implements IFieldLevelWidget {
 
   public Rectangle() {
     // Only to be used for persistence/serialization
