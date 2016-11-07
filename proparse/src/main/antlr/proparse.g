@@ -401,6 +401,7 @@ pseudfn
   // The following are from <optargfn>
   | PAGESIZE_KW | LINECOUNTER | PAGENUMBER | FRAMECOL
   | FRAMEDOWN | FRAMELINE | FRAMEROW | USERID | ETIME_KW
+  | PROVERSION
   // The following are from <noargfn>
   | DBNAME | TIME | OPSYS | RETRY | AASERIAL | AACONTROL
   | MESSAGELINES | TERMINAL | PROPATH | CURRENTLANGUAGE | PROMSGS
@@ -409,7 +410,7 @@ pseudfn
   | PROGRESS | FRAMEINDEX | FRAMEDB | FRAMENAME | DATASERVERS
   | NUMDBS | NUMALIASES | ISATTRSPACE | PROCSTATUS
   | PROCHANDLE | CURSOR | OSERROR | RETURNVALUE | OSDRIVES
-  | PROVERSION | TRANSACTION | MACHINECLASS 
+  | TRANSACTION | MACHINECLASS 
   | AAPCONTROL | GETCODEPAGES | COMSELF
   ;
 
@@ -459,6 +460,7 @@ builtinfunc
     // ENTERED and NOTENTERED are only dealt with as part of an expression term. See: exprt.
   |  PAGENUMBER^ LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  PAGESIZE_KW^ LEFTPAREN streamname RIGHTPAREN  // also noarg
+  |  PROVERSION^ LEFTPAREN expression RIGHTPAREN
   |  rawfunc // is also a pseudfn.
   |  SEEK^ LEFTPAREN (INPUT|OUTPUT|streamname|STREAMHANDLE expression) RIGHTPAREN // streamname, /not/ stream_name_or_handle.
   |  substringfunc // is also a pseudfn.
@@ -657,7 +659,6 @@ noargfunc
   |  PROGRESS
   |  PROMSGS
   |  PROPATH
-  |  PROVERSION
   |  RETRY
   |  RETURNVALUE
   |  SCREENLINES
@@ -667,6 +668,7 @@ noargfunc
   |  TRANSACTION
     // The following are built-in functions with optional arguments.
     // You will also find them listed in builtinfunc. 
+  |  PROVERSION
   |  ETIME_KW
   |  FRAMECOL
   |  FRAMEDOWN
