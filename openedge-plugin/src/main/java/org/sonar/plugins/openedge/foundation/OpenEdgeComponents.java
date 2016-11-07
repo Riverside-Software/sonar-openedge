@@ -111,20 +111,20 @@ public class OpenEdgeComponents {
       if (lic.getRepositoryName().isEmpty()) {
         continue;
       }
-      LOG.info("Found {} licence - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
+      LOG.debug("Found {} licence - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
           lic.getType().toString(), lic.getPermanentId(), lic.getCustomerName(), lic.getRepositoryName(),
           DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date(lic.getExpirationDate())));
       if (!lic.getPermanentId().isEmpty() && !permanentId.equals(lic.getPermanentId())) {
-        LOG.info("Skipped licence as it doesn't match permanent ID '{}'", permanentId);
+        LOG.debug("Skipped licence as it doesn't match permanent ID '{}'", permanentId);
         continue;
       }
       // Licence with highest expiration date wins
       Licence existingLic = licences.get(lic.getRepositoryName());
       if ((existingLic == null) || (existingLic.getExpirationDate() < lic.getExpirationDate())) {
         licences.put(lic.getRepositoryName(), lic);
-        LOG.info("Installed !");
+        LOG.debug("Installed !");
       } else {
-        LOG.info("Conflict, skipped licence");
+        LOG.debug("Conflict, skipped licence");
       }
     }
     for (Entry<String, Licence> entry : licences.entrySet()) {

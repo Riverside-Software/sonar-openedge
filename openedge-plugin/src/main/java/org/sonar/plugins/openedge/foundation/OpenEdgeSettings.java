@@ -55,12 +55,14 @@ public class OpenEdgeSettings {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeSettings.class);
 
   private final List<String> sourceDirs = new ArrayList<>();
-  private final File pctDir, dbgDir;
+  private final File pctDir;
+  private final File dbgDir;
   private final Settings settings;
   private final List<File> propath = new ArrayList<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
   private final RefactorSession proparseSession;
 
+  
   public OpenEdgeSettings(Settings settings, FileSystem fileSystem) {
     this.settings = settings;
 
@@ -78,7 +80,7 @@ public class OpenEdgeSettings {
     // And for .pct directory
     String binariesSetting = settings.getString(Constants.BINARIES);
     if (binariesSetting == null) {
-      LOG.warn("Property {} not defined, using default value", Constants.BINARIES);
+      LOG.debug("Property {} not defined, using default value", Constants.BINARIES);
       binariesSetting = "build";
     }
     File binaries = new File(fileSystem.baseDir(), binariesSetting);
