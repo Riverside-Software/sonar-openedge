@@ -73,9 +73,7 @@ public class OpenEdgeListingSensor implements Sensor {
       LOG.debug("Looking for listing of {}", file.relativePath());
 
       File listingFile = getListingFile(file.file());
-      if ((file.relativePath().indexOf(' ') == -1) && (listingFile != null) && (listingFile.exists())) {
-        LOG.debug("Import listing for {}", file.relativePath());
-
+      if ((file.absolutePath().indexOf(' ') == -1) && (listingFile != null) && (listingFile.exists())) {
         try {
           ListingParser parser = new ListingParser(listingFile);
           StringBuilder sb = new StringBuilder();
@@ -100,7 +98,7 @@ public class OpenEdgeListingSensor implements Sensor {
           LOG.error("Unable to parse listing file for " + file.relativePath(), caught);
         }
       } else {
-        LOG.debug("Listing file for {} not found - Was looking for {}", file.relativePath(),
+        LOG.debug("Listing file for '{}' not found or contains space character - Was looking for '{}'", file.relativePath(),
             listingFile.getAbsolutePath());
       }
     }
