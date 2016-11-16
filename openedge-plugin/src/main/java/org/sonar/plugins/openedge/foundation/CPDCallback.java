@@ -19,7 +19,9 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,8 +68,8 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     if ((node.getType() == NodeTypes.PERIOD) || (node.getType() == NodeTypes.OBJCOLON)) {
       return false;
     }
-    if ((node.getType() == NodeTypes.ANNOTATION) && (settings.skipCPD(node.getAnnotationName()))) {
-      return false;
+    if ((node.getType() == NodeTypes.ANNOTATION) && settings.skipCPD(node.getAnnotationName())) {
+        return false;
     }
     if (preprocessorLookup(node)) {
       return false;
@@ -76,6 +78,10 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     JPNode prevSibling = node.prevSibling();
     while ((prevSibling != null) && (prevSibling.getType() == NodeTypes.ANNOTATION)) {
       if (settings.skipCPD(prevSibling.getAnnotationName())) {
+        // Skipping nodes is not enough, as the content of the method would be considered blank lines.
+        // So if this method is between two 'duplicate' methods, then all those blank lines would be
+        // considered duplicates
+        insertFakeNode(node);
         return false;
       }
       prevSibling = prevSibling.prevSibling();
@@ -145,6 +151,18 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     } catch (IllegalArgumentException uncaught) {
       LOG.debug("Unable to create CPD token at position {}:{} to {}:{} - Cause {}", node.getLine(), node.getColumn(),
           node.getEndLine(), node.getEndColumn(), uncaught.getMessage());
+    }
+  }
+
+  private void insertFakeNode(JPNode node) {
+    List<JPNode> children = node.getDirectChildren();
+    JPNode lastSibling = children.isEmpty() ? node : children.get(children.size() - 1);
+    try {
+      TextRange range = file.newRange(node.getLine(), node.getColumn(), lastSibling.getEndLine(), lastSibling.getEndColumn());
+      cpdTokens.addToken(range, UUID.randomUUID().toString());
+    } catch (IllegalArgumentException uncaught) {
+      LOG.debug("Unable to create CPD token at position {}:{} to {}:{} - Cause {}", node.getLine(), node.getColumn(),
+          lastSibling.getEndLine(), lastSibling.getEndColumn(), uncaught.getMessage());
     }
   }
 }

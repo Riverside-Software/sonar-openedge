@@ -50,7 +50,7 @@ public class OpenEdgeProparseSensorTest {
     Assert.assertNotNull(context.cpdTokens("file3:src/procedures/test3.p"));
     Assert.assertEquals(context.cpdTokens("file3:src/procedures/test3.p").size(), 3);
     Assert.assertNotNull(context.cpdTokens("class1:src/classes/rssw/testclass.cls"));
-    Assert.assertEquals(context.cpdTokens("class1:src/classes/rssw/testclass.cls").size(), 8);
+    Assert.assertEquals(context.cpdTokens("class1:src/classes/rssw/testclass.cls").size(), 10);
   }
 
   private SensorContextTester createContext() throws IOException {
