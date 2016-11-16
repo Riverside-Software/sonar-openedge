@@ -75,6 +75,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
       return false;
     }
 
+    // Skip code blocks following parameterized annotations
     JPNode prevSibling = node.prevSibling();
     while ((prevSibling != null) && (prevSibling.getType() == NodeTypes.ANNOTATION)) {
       if (settings.skipCPD(prevSibling.getAnnotationName())) {
@@ -86,6 +87,23 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
       }
       prevSibling = prevSibling.prevSibling();
     }
+    // Skip method matching parameterized names
+    if (node.getType() == NodeTypes.METHOD) {
+      JPNode methodName = node.findDirectChild(NodeTypes.ID);
+      if ((methodName != null) && (settings.skipMethod(methodName.getText()))) {
+        insertFakeNode(node);
+        return false;
+      }
+    }
+    // Skip procedures and functions matching parameterized names
+    if ((node.getType() == NodeTypes.PROCEDURE) || (node.getType() == NodeTypes.FUNCTION)) {
+      JPNode procName = node.findDirectChild(NodeTypes.ID);
+      if ((procName != null) && (settings.skipProcedure(procName.getText()))) {
+        insertFakeNode(node);
+        return false;
+      }
+    }
+
     if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
       // Consider that an operator only has 2 children
       visitNode(node.firstChild());

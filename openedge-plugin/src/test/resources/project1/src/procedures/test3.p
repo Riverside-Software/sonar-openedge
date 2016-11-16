@@ -4,3 +4,16 @@
 MESSAGE "{&FOO}" VIEW-AS 
   ALERT-BOX.
 DEF VAR zz AS INT NO-UNDO.
+
+
+procedure adm-create-objects:
+ message "test".
+end procedure.
+
+function adm-create-objects returns int ():
+  return 1.
+end function.
+
+procedure test:
+
+end procedure.
