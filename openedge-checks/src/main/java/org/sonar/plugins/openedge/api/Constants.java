@@ -14,6 +14,8 @@ public class Constants {
   public static final String ALIASES = "sonar.oe.aliases";
   public static final String CPD_DEBUG = "sonar.oe.cpd.debug";
   public static final String CPD_ANNOTATIONS = "sonar.oe.cpd.annotations";
+  public static final String CPD_METHODS = "sonar.oe.cpd.skip_methods";
+  public static final String CPD_PROCEDURES = "sonar.oe.cpd.skip_procedures";
   public static final String SUFFIXES = "sonar.oe.file.suffixes";
   public static final String XREF_FILTER = "sonar.oe.filter.invalidxref";
 

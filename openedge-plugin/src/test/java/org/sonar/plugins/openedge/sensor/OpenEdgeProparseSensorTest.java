@@ -43,14 +43,16 @@ public class OpenEdgeProparseSensorTest {
     SensorContextTester context = createContext();
     TestServer server =new TestServer();
     context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
+    context.settings().setProperty(Constants.CPD_METHODS, "TEST3");
+    context.settings().setProperty(Constants.CPD_PROCEDURES, "adm-create-objects");
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
     OpenEdgeComponents components = new OpenEdgeComponents(context.activeRules(), server, null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(context.fileSystem(), oeSettings, components);
     sensor.execute(context);
     Assert.assertNotNull(context.cpdTokens("file3:src/procedures/test3.p"));
-    Assert.assertEquals(context.cpdTokens("file3:src/procedures/test3.p").size(), 3);
+    Assert.assertEquals(context.cpdTokens("file3:src/procedures/test3.p").size(), 7);
     Assert.assertNotNull(context.cpdTokens("class1:src/classes/rssw/testclass.cls"));
-    Assert.assertEquals(context.cpdTokens("class1:src/classes/rssw/testclass.cls").size(), 10);
+    Assert.assertEquals(context.cpdTokens("class1:src/classes/rssw/testclass.cls").size(), 11);
   }
 
   private SensorContextTester createContext() throws IOException {
@@ -67,5 +69,4 @@ public class OpenEdgeProparseSensorTest {
     return context;
   }
 
-  
 }

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
@@ -60,9 +61,10 @@ public class OpenEdgeSettings {
   private final Settings settings;
   private final List<File> propath = new ArrayList<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
+  private final Set<String> cpdMethods = new HashSet<>();
+  private final Set<String> cpdProcedures = new HashSet<>();
   private final RefactorSession proparseSession;
 
-  
   public OpenEdgeSettings(Settings settings, FileSystem fileSystem) {
     this.settings = settings;
 
@@ -176,6 +178,16 @@ public class OpenEdgeSettings {
       LOG.debug("CPD annotation : '{}'", str);
       cpdAnnotations.add(str);
     }
+    // CPD - Skip methods
+    for (String str : Strings.nullToEmpty(settings.getString(Constants.CPD_METHODS)).split(",")) {
+      LOG.debug("CPD skip method : '{}'", str);
+      cpdMethods.add(str.toLowerCase(Locale.ENGLISH));
+    }
+    // CPD - Skip procedures and functions
+    for (String str : Strings.nullToEmpty(settings.getString(Constants.CPD_PROCEDURES)).split(",")) {
+      LOG.debug("CPD skip procedure : '{}'", str);
+      cpdProcedures.add(str.toLowerCase(Locale.ENGLISH));
+    }
 
     IProgressSettings settings1 = new ProgressSettings(true, "", "WIN32", getPropathAsString(), "11.5", "MS-WIN95");
     IProparseSettings settings2 = new ProparseSettings();
@@ -196,6 +208,28 @@ public class OpenEdgeSettings {
 
   public boolean skipCPD(String annotation) {
     return cpdAnnotations.contains(annotation);
+  }
+
+  /**
+   * Returns true if method should be skipped by CPD engine
+   * @param name Method name
+   */
+  public boolean skipMethod(String name) {
+    if (name == null) {
+      return false;
+    }
+    return cpdMethods.contains(name.toLowerCase(Locale.ENGLISH));
+  }
+
+  /**
+   * Returns true if procedure or function should be skipped by CPD engine
+   * @param name Procedure or function name
+   */
+  public boolean skipProcedure(String name) {
+    if (name == null) {
+      return false;
+    }
+    return cpdProcedures.contains(name.toLowerCase(Locale.ENGLISH));
   }
 
   public boolean skipProparseSensor() {

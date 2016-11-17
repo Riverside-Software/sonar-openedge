@@ -20,4 +20,8 @@ class rssw.testclass:
     return.
   end method.
 
+  method public Object test3():
+    return ?.
+  end method.
+
 end class.
