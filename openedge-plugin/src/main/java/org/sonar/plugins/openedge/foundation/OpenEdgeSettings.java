@@ -39,6 +39,7 @@ import org.sonar.plugins.openedge.api.com.google.common.base.Charsets;
 import org.sonar.plugins.openedge.api.com.google.common.base.Joiner;
 import org.sonar.plugins.openedge.api.com.google.common.base.Splitter;
 import org.sonar.plugins.openedge.api.com.google.common.base.Strings;
+import org.sonar.plugins.openedge.api.com.google.common.collect.ImmutableSet;
 import org.sonar.plugins.openedge.api.com.google.common.io.Files;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.DatabaseDescription;
@@ -64,6 +65,7 @@ public class OpenEdgeSettings {
   private final Set<String> cpdMethods = new HashSet<>();
   private final Set<String> cpdProcedures = new HashSet<>();
   private final RefactorSession proparseSession;
+  private final Set<Integer> xrefBytes = new HashSet<>();
 
   public OpenEdgeSettings(Settings settings, FileSystem fileSystem) {
     this.settings = settings;
@@ -189,6 +191,22 @@ public class OpenEdgeSettings {
       cpdProcedures.add(str.toLowerCase(Locale.ENGLISH));
     }
 
+    // XREF invalid bytes
+    for (String str : Strings.nullToEmpty(settings.getString(Constants.XREF_FILTER_BYTES)).split(",")) {
+      try {
+        if (str.indexOf('-') != -1) {
+          for (int zz = Integer.parseInt(str.substring(0, str.indexOf('-'))); zz <= Integer.parseInt(
+              str.substring(str.indexOf('-') + 1)); zz++) {
+            xrefBytes.add(zz);
+          }
+        } else if (!str.isEmpty()) {
+          xrefBytes.add(Integer.parseInt(str));
+        }
+      } catch (NumberFormatException caught) {
+        throw new IllegalArgumentException("Invalid '" + Constants.XREF_FILTER_BYTES + "' property : " + str, caught);
+      }
+    }
+
     IProgressSettings settings1 = new ProgressSettings(true, "", "WIN32", getPropathAsString(), "11.5", "MS-WIN95");
     IProparseSettings settings2 = new ProparseSettings();
     proparseSession = new RefactorSession(settings1, settings2, sch, fileSystem.encoding());
@@ -246,6 +264,22 @@ public class OpenEdgeSettings {
 
   public boolean useXrefFilter() {
     return settings.getBoolean(Constants.XREF_FILTER);
+  }
+
+  public Set<Integer> getXrefBytes() {
+    return ImmutableSet.copyOf(xrefBytes);
+  }
+
+  public String getXrefBytesAsString() {
+    StringBuilder sb = new StringBuilder();
+    for (Integer xx : xrefBytes) {
+      if (sb.length() > 0) {
+        sb.append(',');
+      }
+      sb.append(String.format("%#04x", xx));
+    }
+
+    return sb.toString();
   }
 
   public List<File> getPropath() {
