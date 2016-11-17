@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -96,8 +97,9 @@ public class OpenEdgeXREFSensor implements Sensor {
     }
 
     if (settings.useXrefFilter()) {
-      LOG.info("XML XREF filter activated");
+      LOG.info("XML XREF filter activated [{}]", settings.getXrefBytesAsString());
     }
+
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Looking for XREF of {}", file.relativePath());
 
@@ -106,7 +108,7 @@ public class OpenEdgeXREFSensor implements Sensor {
         LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
         try (InputStream inpStream = new FileInputStream(xrefFile)) {
           long startTime = System.currentTimeMillis();
-          Document doc = dBuilder.parse(settings.useXrefFilter() ? new InvalidXMLFilterStream(inpStream) : inpStream);
+          Document doc = dBuilder.parse(settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
           parseTime += (System.currentTimeMillis() - startTime);
 
           for (Map.Entry<ActiveRule, OpenEdgeXrefCheck> entry : components.getXrefRules().entrySet()) {
@@ -149,8 +151,11 @@ public class OpenEdgeXREFSensor implements Sensor {
    * Those characters are used in ADM2 applications, and are hard-coded in some procedures.
    */
   public static class InvalidXMLFilterStream extends FilterInputStream {
-    protected InvalidXMLFilterStream(InputStream in) {
+    private final Set<Integer> bytes;
+
+    protected InvalidXMLFilterStream(Set<Integer> skippedBytes, InputStream in) {
       super(in);
+      this.bytes = skippedBytes;
     }
 
     @Override
@@ -169,7 +174,7 @@ public class OpenEdgeXREFSensor implements Sensor {
       int xx = super.read(b, off, len);
       int zz = off;
       while (zz < off + xx) {
-        if ((b[zz] == 0x01) || (b[zz] == 0x02) || (b[zz] == 0x04)) {
+        if (bytes.contains((int) b[zz])) {
           // Shift all subsequent bytes by one position left
           for (int zz2 = zz; zz2 < off + xx - 1; zz2++) {
             b[zz2] = b[zz2 + 1];

@@ -98,6 +98,11 @@ public class OpenEdgePlugin implements Plugin {
         "Use filter to discard malformed characters from XML XREF files").type(PropertyType.BOOLEAN).defaultValue(
             Boolean.FALSE.toString()).category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(
                 Qualifiers.MODULE, Qualifiers.PROJECT).build());
+    context.addExtension(
+        PropertyDefinition.builder(Constants.XREF_FILTER_BYTES).name("Bytes to be filtered from XML files").description(
+            "Comma-separated list of ranges, i.e. 1-2,4-7,9,11-13").type(PropertyType.STRING).defaultValue("1-4").category(
+                CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
+                    Qualifiers.PROJECT).build());
   }
 
 }
