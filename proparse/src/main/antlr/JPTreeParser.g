@@ -955,7 +955,7 @@ callstate throws TreeParserException
   ;
 
 catchstate throws TreeParserException
-  :  #(  CATCH field AS (CLASS)? TYPE_NAME
+  :  #(  CATCH ID AS (CLASS)? TYPE_NAME
       block_colon code_block (EOF | #(END (CATCH)?) state_end)
     )
   ;
