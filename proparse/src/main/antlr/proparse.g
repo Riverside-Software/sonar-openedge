@@ -1416,7 +1416,7 @@ case_end
 
 catchstate
   :  CATCH^<AST=BlockNode>
-    field AS class_type_name {support.defVarInline();}
+    n:ID AS class_type_name { support.defVar(#n.getText()); }
     block_colon code_block (EOF | catch_end state_end)
     {sthd(##,0);}
   ;
