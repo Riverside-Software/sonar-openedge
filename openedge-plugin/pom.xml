@@ -9,7 +9,7 @@
 
   <name>OpenEdge plugin for SonarQube</name>
   <description>Enables analysis of OpenEdge projects</description>
-  <url>http://sonar.riverside-software.fr</url>
+  <url>https://github.com/Riverside-Software/sonar-openedge/</url>
   <inceptionYear>2013</inceptionYear>
   <organization>
     <name>Riverside Software</name>
@@ -23,15 +23,15 @@
   </licenses>
 
   <issueManagement>
-    <system>Jira</system>
-    <url>https://riverside-software.atlassian.net/browse/SONAROE</url>
+    <system>GitHub</system>
+    <url>https://github.com/Riverside-Software/sonar-openedge/issues</url>
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
-    <url>http://jenkins.rssw.eu</url>
+    <url>https://ci.rssw.eu/job/sonar-openedge/</url>
   </ciManagement>
   <scm>
-    <url>https://bitbucket.org/gquerret/openedge-plugin-for-sonarqube</url>
+    <url>https://ci.rssw.eu/job/sonar-openedge/</url>
   </scm>
 
   <developers>
@@ -63,7 +63,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.19</version>
+      <version>1.7.21</version>
     </dependency>
     <dependency>
       <groupId>eu.rssw.openedge.checks</groupId>
@@ -78,7 +78,7 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.4</version>
+      <version>2.5</version>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
@@ -89,7 +89,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.19</version>
+      <version>1.7.21</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
