@@ -9,7 +9,7 @@
 
   <name>OpenEdge plugin for SonarQube</name>
   <description>Enables analysis of OpenEdge projects</description>
-  <url>http://sonar.riverside-software.fr</url>
+  <url>https://ci.rssw.eu/job/sonar-openedge/</url>
   <inceptionYear>2013</inceptionYear>
   <organization>
     <name>Riverside Software</name>
@@ -23,15 +23,15 @@
   </licenses>
 
   <issueManagement>
-    <system>Jira</system>
-    <url>https://riverside-software.atlassian.net/browse/SONAROE</url>
+    <system>GitHub</system>
+    <url>https://github.com/Riverside-Software/sonar-openedge/issues</url>
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
-    <url>http://jenkins.rssw.eu</url>
+    <url>https://ci.rssw.eu/job/sonar-openedge/</url>
   </ciManagement>
   <scm>
-    <url>https://bitbucket.org/gquerret/openedge-plugin-for-sonarqube</url>
+    <url>https://ci.rssw.eu/job/sonar-openedge/</url>
   </scm>
 
   <developers>
@@ -43,7 +43,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <sonar.version>5.6.3</sonar.version>
+    <sonar.version>5.6</sonar.version>
     <sonar.pluginKey>openedge</sonar.pluginKey>
     <sonar.pluginName>OpenEdge</sonar.pluginName>
     <sonar.pluginClass>org.sonar.plugins.openedge.OpenEdgePlugin</sonar.pluginClass>
