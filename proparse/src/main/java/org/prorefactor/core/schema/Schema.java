@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
 
@@ -74,26 +76,28 @@ public class Schema implements ISchema {
   /**
    * Add a database alias.
    * 
-   * @param aliasname The name for the alias
-   * @param dbname The database's logical name
-   * @return Empty string.
+   * @param aliasName The name for the alias
+   * @param dbName The database's logical name
    */
   @Override
-  public void createAlias(String aliasname, String dbname) {
-    aliases.put(aliasname.toLowerCase(), dbname);
+  public void createAlias(String aliasName, String dbName) {
+    if (lookupDatabase2(dbName) == null) {
+      LOGGER.error("Creating alias {} for unknown database {}", aliasName, dbName);
+    }
+    aliases.put(aliasName.toLowerCase(Locale.ENGLISH), dbName);
   }
 
   /**
    * Delete a database alias.
    * 
-   * @param aliasname The name for the alias, null or empty string to delete all.
+   * @param aliasName The name for the alias, null or empty string to delete all.
    */
   @Override
-  public void deleteAlias(String aliasname) {
-    if (aliasname == null || aliasname.length() == 0) {
+  public void deleteAlias(String aliasName) {
+    if (Strings.isNullOrEmpty(aliasName)) {
       aliases.clear();
     } else {
-      aliases.remove(aliasname.toLowerCase());
+      aliases.remove(aliasName.toLowerCase(Locale.ENGLISH));
     }
   }
 
