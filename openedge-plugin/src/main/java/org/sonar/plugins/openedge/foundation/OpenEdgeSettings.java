@@ -161,13 +161,12 @@ public class OpenEdgeSettings {
       if (!sch.getDbSet().isEmpty()) {
         sch.createAlias("dictdb", sch.getDbSet().first().getName());
       }
-      if (settings.getString(Constants.ALIASES) != null) {
-        for (String str : Splitter.on(';').trimResults().split(settings.getString(Constants.ALIASES))) {
-          List<String> lst = Splitter.on(',').trimResults().splitToList(str);
-          for (String alias : lst.subList(1, lst.size())) {
-            LOG.debug("Adding {} aliases to database {}", new Object[] {alias, lst.get(0)});
-            sch.createAlias(alias, lst.get(1));
-          }
+      for (String str : Splitter.on(';').trimResults().omitEmptyStrings().split(
+          Strings.nullToEmpty(settings.getString(Constants.ALIASES)))) {
+        List<String> lst = Splitter.on(',').trimResults().splitToList(str);
+        for (String alias : lst.subList(1, lst.size())) {
+          LOG.debug("Adding {} aliases to database {}", new Object[] {alias, lst.get(0)});
+          sch.createAlias(alias, lst.get(0));
         }
       }
     } catch (IOException caught) {
