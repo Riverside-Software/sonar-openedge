@@ -15,14 +15,8 @@ import org.prorefactor.core.NodeTypes;
 /** A Symbol defined with DEFINE DATA-SOURCE. */
 public class Datasource extends Symbol {
 
-  /** Only to be used for persistence/serialization. */
-  public Datasource() {
-    // Only to be used for persistence/serialization
-  }
-
   public Datasource(String name, SymbolScope scope) {
-    super(scope);
-    setName(name);
+    super(name, scope);
   }
 
   @Override
@@ -39,7 +33,7 @@ public class Datasource extends Symbol {
   }
 
   /**
-   * Returns NodeTypes.DATASOURCE.
+   * Returns NodeTypes.DATASOURCE
    */
   @Override
   public int getProgressType() {

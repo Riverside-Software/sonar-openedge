@@ -16,13 +16,8 @@ package org.prorefactor.treeparser;
  */
 public abstract class Widget extends Symbol implements IWidget {
 
-  protected Widget() {
-    // Only to be used for persistence/serialization
-  }
-
   public Widget(String name, SymbolScope scope) {
-    super(scope);
-    setName(name);
+    super(name, scope);
   }
 
   @Override

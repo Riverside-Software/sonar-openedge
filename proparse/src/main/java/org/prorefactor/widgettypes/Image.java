@@ -17,10 +17,6 @@ import org.prorefactor.treeparser.Widget;
 
 public class Image extends Widget implements IFieldLevelWidget {
 
-  public Image() {
-    // Only to be used for persistence/serialization
-  }
-
   public Image(String name, SymbolScope scope) {
     super(name, scope);
   }

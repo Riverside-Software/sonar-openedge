@@ -30,10 +30,6 @@ public abstract class FieldContainer extends Widget {
   private Set<Symbol> otherSymbols = new HashSet<>();
   private Set<Variable> variableSet = new HashSet<>();
 
-  protected FieldContainer() {
-    // Only to be used for persistence/serialization
-  }
-
   public FieldContainer(String name, SymbolScope scope) {
     super(name, scope);
   }

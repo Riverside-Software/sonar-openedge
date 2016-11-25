@@ -15,13 +15,8 @@ import org.prorefactor.core.NodeTypes;
 /** A Symbol defined with DEFINE QUERY. */
 public class Query extends Symbol {
 
-  public Query() {
-    // Only to be used for persistence/serialization
-  }
-
   public Query(String name, SymbolScope scope) {
-    super(scope);
-    setName(name);
+    super(name, scope);
   }
 
   @Override

@@ -12,6 +12,7 @@ package org.prorefactor.treeparser;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.NodeTypes;
@@ -22,14 +23,9 @@ import org.prorefactor.core.schema.Table;
  * A TableBuffer is a Symbol which provides a link from the syntax tree to a Table object.
  */
 public class TableBuffer extends Symbol {
-
-  private boolean isDefault = false;
-  private HashMap<Field, FieldBuffer> fieldBuffers = new HashMap<>();
-  private Table table;
-
-  public TableBuffer() {
-    // Only to be used for persistence/serialization
-  }
+  private final Table table;
+  private final boolean isDefault;
+  private final Map<Field, FieldBuffer> fieldBuffers = new HashMap<>();
 
   /**
    * Constructor for a named buffer.
@@ -37,15 +33,9 @@ public class TableBuffer extends Symbol {
    * @param name Input "" for an unnamed or default buffer
    */
   public TableBuffer(String name, SymbolScope scope, Table table) {
-    super(scope);
-    this.setName(name);
+    super(name, scope);
     this.table = table;
-    if (name.length() == 0) {
-      isDefault = true;
-      // The default buffer for temp/work tables is not really "unnamed"
-      if (table.getStoretype() != IConstants.ST_DBTABLE)
-        this.setName(table.getName());
-    }
+    this.isDefault = name.isEmpty();
   }
 
   void addFieldBuffer(FieldBuffer fieldBuffer) {
@@ -76,11 +66,8 @@ public class TableBuffer extends Symbol {
   public String fullName() {
     if (table.getStoretype() != IConstants.ST_DBTABLE)
       return getName();
-    StringBuilder buff = new StringBuilder();
-    buff.append(table.getDatabase().getName());
-    buff.append(".");
-    buff.append(getName());
-    return buff.toString();
+
+    return new StringBuilder(table.getDatabase().getName()).append(".").append(getName()).toString();
   }
 
   /** Get a list of FieldBuffer symbols that have been created for this TableBuffer. */
@@ -115,8 +102,10 @@ public class TableBuffer extends Symbol {
    */
   @Override
   public String getName() {
-    if (super.getName().length() == 0)
+    if (super.getName().isEmpty()) {
       return table.getName();
+    }
+
     return super.getName();
   }
 
@@ -132,10 +121,6 @@ public class TableBuffer extends Symbol {
   /** Is this a default (unnamed) buffer for a schema table? */
   public boolean isDefaultSchema() {
     return isDefault && table.getStoretype() == IConstants.ST_DBTABLE;
-  }
-
-  public void setTable(Table table) {
-    this.table = table;
   }
 
 }

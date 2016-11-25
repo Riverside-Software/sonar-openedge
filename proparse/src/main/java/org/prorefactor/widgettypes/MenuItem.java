@@ -17,10 +17,6 @@ import org.prorefactor.treeparser.Widget;
 
 public class MenuItem extends Widget {
 
-  public MenuItem() {
-    // Only to be used for persistence/serialization
-  }
-
   public MenuItem(String name, SymbolScope scope) {
     super(name, scope);
   }

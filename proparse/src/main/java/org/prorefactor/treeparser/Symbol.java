@@ -22,48 +22,36 @@ public abstract class Symbol implements ISymbol {
   private int numWrites = 0;
   private JPNode asNode;
 
-  /**
-   * We store the DEFINE node if available and sensible. If defined in a syntax where there is no DEFINE node briefly
-   * preceeding the ID node, then we store the ID node. If this is a schema symbol, then this member is null.
-   */
+  // We store the DEFINE node if available and sensible. If defined in a syntax where there is no DEFINE node briefly
+  // preceeding the ID node, then we store the ID node. If this is a schema symbol, then this member is null.
   private JPNode defNode;
-
   private JPNode likeNode;
 
-  /** What scope this symbol was defined in. */
+  // What scope this symbol was defined in
   private SymbolScope scope;
+  // Stores the full name, original (mixed) case as in definition
+  private final String name;
 
-  /** Stores the full name, original (mixed) case as in definition. */
-  private String name;
-
-  /** Only to be used for persistence/serialization. */
-  protected Symbol() {
-  }
-
-  protected Symbol(int allRefsCount, JPNode asNode, JPNode defNode, JPNode likeNode, String name, int numReads,
-      int numWrites, SymbolScope scope) {
-    this.allRefsCount = allRefsCount;
-    this.asNode = asNode;
-    this.defNode = defNode;
-    this.likeNode = likeNode;
+  public Symbol(String name, SymbolScope scope) {
     this.name = name;
-    this.numReads = numReads;
-    this.numWrites = numWrites;
-    this.scope = scope;
-  }
-
-  Symbol(SymbolScope scope) {
     this.scope = scope;
     scope.addSymbol(this);
   }
 
-  /**
-   * Generate a bare-bones copy of this symbol. Requires the scope to attach it to as the argument.
-   */
-  public abstract Symbol copyBare(SymbolScope intoScope);
+  @Override
+  public void setAsNode(JPNode asNode) {
+    this.asNode = asNode;
+  }
 
   @Override
-  public abstract String fullName();
+  public void setDefOrIdNode(JPNode node) {
+    defNode = node;
+  }
+
+  @Override
+  public void setLikeNode(JPNode likeNode) {
+    this.likeNode = likeNode;
+  }
 
   @Override
   public int getAllRefsCount() {
@@ -87,15 +75,17 @@ public abstract class Symbol implements ISymbol {
 
   @Override
   public JPNode getDefineNode() {
-    if (defNode != null && defNode.getType() != NodeTypes.ID)
+    if ((defNode != null) && (defNode.getType() != NodeTypes.ID))
       return defNode;
+
     return null;
   }
 
   @Override
   public JPNode getIndirectDefineIdNode() {
-    if (defNode != null && defNode.getType() == NodeTypes.ID)
+    if ((defNode != null) && (defNode.getType() != NodeTypes.ID))
       return defNode;
+
     return null;
   }
 
@@ -110,9 +100,6 @@ public abstract class Symbol implements ISymbol {
   }
 
   @Override
-  public abstract int getProgressType();
-
-  @Override
   public SymbolScope getScope() {
     return scope;
   }
@@ -123,7 +110,7 @@ public abstract class Symbol implements ISymbol {
     // been determined that the symbol is exported, but also the rest of this
     // method would just not work because there is never any AST linked to any
     // of the symbols in a SymbolScopeSuper.
-    if (this.scope instanceof SymbolScopeSuper)
+    if (scope instanceof SymbolScopeSuper)
       return true;
     SymbolScopeRoot unitScope = scope.getRootScope();
     // If this is not at the unit (root) scope, then it cannot be visible.
@@ -167,26 +154,6 @@ public abstract class Symbol implements ISymbol {
       numReads++;
     if (ContextQualifier.isWrite(contextQualifier))
       numWrites++;
-  }
-
-  @Override
-  public void setAsNode(JPNode asNode) {
-    this.asNode = asNode;
-  }
-
-  @Override
-  public void setDefOrIdNode(JPNode node) {
-    defNode = node;
-  }
-
-  @Override
-  public void setLikeNode(JPNode likeNode) {
-    this.likeNode = likeNode;
-  }
-
-  @Override
-  public void setName(String name) {
-    this.name = name;
   }
 
   @Override

@@ -17,10 +17,6 @@ import org.prorefactor.treeparser.Widget;
 
 public class Button extends Widget implements IFieldLevelWidget {
 
-  public Button() {
-    // Only to be used for persistence/serialization
-  }
-
   public Button(String name, SymbolScope scope) {
     super(name, scope);
   }

@@ -23,13 +23,8 @@ public class Variable extends Symbol implements Primative, Value {
   private Object value;
   private String className = null;
 
-  public Variable() {
-    // Only to be used for persistence/serialization
-  }
-
   public Variable(String name, SymbolScope scope) {
-    super(scope);
-    setName(name);
+    super(name, scope);
   }
 
   @Override

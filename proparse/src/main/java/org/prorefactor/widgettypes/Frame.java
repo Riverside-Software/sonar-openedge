@@ -21,10 +21,6 @@ public class Frame extends FieldContainer {
   private boolean initialized = false;
   private Block frameScopeBlock = null;
 
-  public Frame() {
-    // Only to be used for persistence/serialization
-  }
-
   /** Unlike other symbols, Frames are automatically added to the scope, right here at creation time. */
   public Frame(String name, SymbolScope scope) {
     super(name, scope);

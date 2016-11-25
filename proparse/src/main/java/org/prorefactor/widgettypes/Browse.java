@@ -17,10 +17,6 @@ import org.prorefactor.treeparser.SymbolScope;
 
 public class Browse extends FieldContainer implements IFieldLevelWidget {
 
-  public Browse() {
-    // Only to be used for persistence/serialization
-  }
-
   public Browse(String name, SymbolScope scope) {
     super(name, scope);
   }
