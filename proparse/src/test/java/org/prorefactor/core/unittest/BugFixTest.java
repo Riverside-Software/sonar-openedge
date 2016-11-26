@@ -227,9 +227,4 @@ public class BugFixTest {
   public void test33() throws Exception {
     genericTest("bug33.cls");
   }
-
-  @Test
-  public void testLinuxBackslash() throws Exception {
-    genericTest("escape_char.p");
-  }
 }
