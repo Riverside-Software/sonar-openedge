@@ -17,13 +17,8 @@ import org.prorefactor.core.NodeTypes;
  */
 public class Stream extends Symbol {
 
-  public Stream() {
-    // Only to be used for persistence/serialization
-  }
-
   public Stream(String name, SymbolScope scope) {
-    super(scope);
-    setName(name);
+    super(name, scope);
   }
 
   @Override

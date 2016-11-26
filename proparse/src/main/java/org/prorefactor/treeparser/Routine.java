@@ -20,18 +20,13 @@ import org.prorefactor.core.JPNode;
  * Program_root, PROCEDURE, FUNCTION, or METHOD.
  */
 public class Routine extends Symbol {
-  private List<Parameter> parameters = new ArrayList<>();
+  private final SymbolScope routineScope;
+  private final List<Parameter> parameters = new ArrayList<>();
   private JPNode returnDatatypeNode = null;
-  private SymbolScope routineScope;
   private int progressType;
 
-  public Routine() {
-    // Only to be used for persistence/serialization
-  }
-
   public Routine(String name, SymbolScope definingScope, SymbolScope routineScope) {
-    super(definingScope);
-    setName(name);
+    super(name, definingScope);
     this.routineScope = routineScope;
   }
 

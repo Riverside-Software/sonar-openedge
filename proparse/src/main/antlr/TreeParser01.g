@@ -757,14 +757,15 @@ source_buffer_phrase throws TreeParserException
   ;
 
 defineeventstate throws TreeParserException
-  :  #(  def:DEFINE def_modifiers EVENT
-      id:ID { stack.push(action.defineEvent(#def, #id)); }
+  :
+    #( def:DEFINE def_modifiers e:EVENT
+      id:ID { action.eventBegin(#e, #id); stack.push(action.defineEvent(#def, #id)); }
       (  #(SIGNATURE VOID function_params)
       |  #(DELEGATE (CLASS)? TYPE_NAME)
       )
       state_end
     )
-    { action.addToSymbolScope(stack.pop()); }
+    { action.eventEnd(#e); action.addToSymbolScope(stack.pop()); }
   ;
 
 defineframestate throws TreeParserException

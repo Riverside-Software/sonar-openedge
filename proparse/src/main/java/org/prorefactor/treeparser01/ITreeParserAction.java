@@ -238,10 +238,25 @@ public interface ITreeParserAction {
   /** Called at the Field_ref node after a lexical '@' sign in a frame phrase. */
   void lexat(AST fieldRefAST) throws TreeParserException;
 
-  /** Called by the tree parser at METHOD statement, after method's scope has been created. */
+  /**
+   * Called by the tree parser at METHOD statement, after method's scope has been created
+   * 
+   * @param methodAST The METHOD node
+   * @param idAST The ID node (method name)
+   */
   void methodBegin(AST methodAST, AST idAST) throws TreeParserException;
 
   void methodEnd(AST methodAST) throws TreeParserException;
+
+  /**
+   * Called by the tree parser at EVENT statement
+   * 
+   * @param methodAST The EVENT node
+   * @param idAST The ID node (event name)
+   */
+  void eventBegin(AST eventAST, AST idAST) throws TreeParserException;
+
+  void eventEnd(AST eventAST) throws TreeParserException;
 
   /** Called if there is a BIND keyword for a parameter. */
   void paramBind() throws TreeParserException;

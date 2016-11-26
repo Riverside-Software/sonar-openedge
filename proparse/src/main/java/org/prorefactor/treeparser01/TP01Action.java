@@ -290,6 +290,16 @@ public abstract class TP01Action implements ITreeParserAction {
   }
 
   @Override
+  public void eventBegin(AST eventAST, AST idAST) throws TreeParserException {
+    // No-op
+  }
+
+  @Override
+  public void eventEnd(AST eventAST) throws TreeParserException {
+    // No-op
+  }
+
+  @Override
   public void paramBind() throws TreeParserException {
     // No-op
   }

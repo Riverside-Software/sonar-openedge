@@ -12,12 +12,11 @@ package org.prorefactor.treeparser;
 
 /**
  * Represents objects that have a value.
- *
  */
 public interface Value {
 
-  public void setValue(Object fileName);
+  void setValue(Object obj);
 
-  public Object getValue();
+  Object getValue();
 
 }

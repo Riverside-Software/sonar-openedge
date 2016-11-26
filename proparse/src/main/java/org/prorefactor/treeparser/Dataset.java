@@ -17,16 +17,11 @@ import org.prorefactor.core.NodeTypes;
 
 /** A Symbol defined with DEFINE DATASET. */
 public class Dataset extends Symbol {
-  /** Keep the buffers, in order, as part of the DATASET signature. */
-  List<TableBuffer> buffers = new ArrayList<>();
-
-  public Dataset() {
-    // Only to be used for persistence/serialization
-  }
+  // Keep the buffers, in order, as part of the DATASET signature
+  private final List<TableBuffer> buffers = new ArrayList<>();
 
   public Dataset(String name, SymbolScope scope) {
-    super(scope);
-    setName(name);
+    super(name, scope);
   }
 
   /**

@@ -17,10 +17,6 @@ import org.prorefactor.treeparser.Widget;
 
 public class Rectangle extends Widget implements IFieldLevelWidget {
 
-  public Rectangle() {
-    // Only to be used for persistence/serialization
-  }
-
   public Rectangle(String name, SymbolScope scope) {
     super(name, scope);
   }

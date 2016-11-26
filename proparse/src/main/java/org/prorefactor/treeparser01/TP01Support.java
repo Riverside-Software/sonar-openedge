@@ -97,6 +97,9 @@ public class TP01Support extends TP01Action {
   private TableBuffer prevTableReferenced;
   private TableBuffer currDefTable;
 
+  // Temporary work-around
+  private boolean inDefineEvent = false;
+
   public TP01Support(RefactorSession session) {
     this.refSession = session;
     rootScope = new SymbolScopeRoot(refSession);
@@ -108,6 +111,7 @@ public class TP01Support extends TP01Action {
   @Override
   public void addToSymbolScope(Object o) {
     LOG.trace("Entering addToSymbolScope {}", o);
+    if (inDefineEvent) return;
     currentScope.add((Symbol) o);
   }
 
@@ -711,6 +715,16 @@ public class TP01Support extends TP01Action {
   public void methodEnd(AST blockAST) {
     scopeClose(blockAST);
     currentRoutine = rootRoutine;
+  }
+
+  @Override
+  public void eventBegin(AST eventAST, AST idAST) throws TreeParserException {
+    this.inDefineEvent = true;
+  }
+
+  @Override
+  public void eventEnd(AST eventAST) throws TreeParserException {
+    this.inDefineEvent = false;
   }
 
   @Override

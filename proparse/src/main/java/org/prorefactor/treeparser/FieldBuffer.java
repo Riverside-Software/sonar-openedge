@@ -20,18 +20,14 @@ import org.prorefactor.core.schema.Schema;
  * provides the link to the Field object.
  */
 public class FieldBuffer extends Symbol implements Primative {
-  Field field;
-  TableBuffer buffer;
-
-  public FieldBuffer() {
-    // Only to be used for persistence/serialization
-  }
+  private final TableBuffer buffer;
+  private final Field field;
 
   /**
    * When you create a FieldBuffer object, you do not set the name, because that comes from the Field object.
    */
   public FieldBuffer(SymbolScope scope, TableBuffer buffer, Field field) {
-    super(scope);
+    super("", scope);
     this.buffer = buffer;
     this.field = field;
     buffer.addFieldBuffer(this);
@@ -177,12 +173,6 @@ public class FieldBuffer extends Symbol implements Primative {
   public Primative setExtent(int extent) {
     field.setExtent(extent);
     return this;
-  }
-
-  /** Invalid - do not call. Name comes from the Field. */
-  @Override
-  public void setName(String name) {
-    assert false;
   }
 
 }
