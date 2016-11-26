@@ -601,10 +601,7 @@ numentries_fun returns [Object ret]
 
 opsys_fun returns [Object ret]
   :  OPSYS
-    {  String opsys = ppSettings.getOpSys();
-      if (opsys == null || opsys.length()==0)
-        throw new ProEvalException("OPSYS has not been configured in Proparse.");
-      ret = opsys;
+    {  ret = ppSettings.getOpSys().getName();
     }
   ;
 

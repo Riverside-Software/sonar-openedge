@@ -26,8 +26,8 @@ import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.ListingListener;
 import org.prorefactor.macrolevel.ListingParser;
-import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.IProparseSettings;
+import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -207,7 +207,7 @@ public class Preprocessor implements IPreprocessor {
     if ("batch-mode".equals(argName))
       return Boolean.toString(ppSettings.getBatchMode());
     if ("opsys".equals(argName))
-      return ppSettings.getOpSys();
+      return ppSettings.getOpSys().getName();
     if ("window-system".equals(argName))
       return ppSettings.getWindowSystem();
     if ("file-name".equals(argName)) {
@@ -216,7 +216,7 @@ public class Preprocessor implements IPreprocessor {
       // Progress seems to be converting the slashes for the appropriate OS.
       // I don't convert the slashes when I store the filename - instead I do it here.
       // (Saves us from converting the slashes for each and every include reference.)
-      if (ppSettings.getOpSysNum() == RefactorSession.OPSYS_UNIX)
+      if (ppSettings.getOpSys() == OperatingSystem.UNIX)
         ret = ret.replace('\\', '/');
       else
         ret = ret.replace('/', '\\');

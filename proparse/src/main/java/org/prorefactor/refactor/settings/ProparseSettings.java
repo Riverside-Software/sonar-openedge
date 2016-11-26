@@ -62,13 +62,8 @@ public class ProparseSettings implements IProparseSettings {
   }
 
   @Override
-  public String getOpSys() {
-    return os.getName();
-  }
-
-  @Override
-  public int getOpSysNum() {
-    return os.getNumber();
+  public OperatingSystem getOpSys() {
+    return os;
   }
 
   @Override

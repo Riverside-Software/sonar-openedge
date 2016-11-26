@@ -12,17 +12,18 @@ package org.prorefactor.refactor.settings;
 
 import java.util.List;
 
+import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
+
 public interface IProparseSettings {
 
   boolean isMultiParse();
   boolean getProparseDirectives();
   boolean useBackslashAsEscape();
-  int getOpSysNum();
   String getPropath();
   List<String> getPropathAsList();
 
   boolean getBatchMode();
-  String getOpSys();
+  OperatingSystem getOpSys();
   String getProversion();
   String getWindowSystem();
 }
