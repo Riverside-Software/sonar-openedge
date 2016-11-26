@@ -83,7 +83,7 @@ public abstract class Symbol implements ISymbol {
 
   @Override
   public JPNode getIndirectDefineIdNode() {
-    if ((defNode != null) && (defNode.getType() != NodeTypes.ID))
+    if ((defNode != null) && (defNode.getType() == NodeTypes.ID))
       return defNode;
 
     return null;

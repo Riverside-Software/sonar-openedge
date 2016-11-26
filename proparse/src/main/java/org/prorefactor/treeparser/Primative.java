@@ -18,28 +18,30 @@ import org.prorefactor.core.JPNode;
  */
 public interface Primative {
 
-  /** Assign datatype, class, extent from another primative (for the LIKE keyword). */
-  public void assignAttributesLike(Primative likePrim);
+  /**
+   * Assign datatype, class, extent from another primative (for the LIKE keyword)
+   */
+  void assignAttributesLike(Primative likePrim);
 
   /**
    * The name of the CLASS that this variable was defined for. This is more interesting than getDataType, which returns
    * CLASS. Returns null if this variable was not defined for a CLASS.
    * 
    * TODO For 10.1B support, this should return the fully qualified class name, even if the reference wasn't fully
-   * qualfied. If that's not to be the case, then John needs to look at method signatures implementation in Callgraph.
+   * qualified. If that's not to be the case, then John needs to look at method signatures implementation in Callgraph.
    */
-  public String getClassName();
+  String getClassName();
 
-  public DataType getDataType();
+  DataType getDataType();
 
-  public int getExtent();
+  int getExtent();
 
-  public Primative setClassName(String className);
+  Primative setClassName(String className);
 
-  public Primative setClassName(JPNode typeNameNode);
+  Primative setClassName(JPNode typeNameNode);
 
-  public Primative setDataType(DataType dataType);
+  Primative setDataType(DataType dataType);
 
-  public Primative setExtent(int extent);
+  Primative setExtent(int extent);
 
 }
