@@ -16,7 +16,7 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 import org.prorefactor.core.unittest.util.AttributedWriter;
-import org.prorefactor.core.unittest.util.UnitTestSportsModule;
+import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.testng.annotations.Test;
 
@@ -31,7 +31,7 @@ public class TP01Test {
 
   @Test
   public void test01() throws Exception {
-    Injector injector = Guice.createInjector(new UnitTestSportsModule());
+    Injector injector = Guice.createInjector(new UnitTestModule());
     RefactorSession session = injector.getInstance(RefactorSession.class);
     outFile.getParentFile().mkdirs();
 

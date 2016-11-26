@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2003-2015 John Green
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -10,17 +10,19 @@
  *******************************************************************************/ 
 package org.prorefactor.refactor.settings;
 
+import java.util.List;
+
 public interface IProparseSettings {
 
-  public void enableProjectBinaries();
-  public void disableProjectBinaries();
+  boolean isMultiParse();
+  boolean getProparseDirectives();
+  boolean useBackslashAsEscape();
+  int getOpSysNum();
+  String getPropath();
+  List<String> getPropathAsList();
 
-  public boolean getCapKeyword();
-  public boolean getIndentTab();
-  public boolean isMultiParse();
-  public boolean getProparseDirectives();
-  public boolean getProjectBinaries();
-  public int getIndentSpaces();
-  public String getKeywordAll();
-  public String getRCodeDir();
+  boolean getBatchMode();
+  String getOpSys();
+  String getProversion();
+  String getWindowSystem();
 }

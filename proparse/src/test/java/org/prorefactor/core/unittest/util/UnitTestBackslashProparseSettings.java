@@ -10,17 +10,10 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest.util;
 
-import org.prorefactor.core.schema.Schema;
-import org.prorefactor.refactor.settings.IProgressSettings;
-import org.prorefactor.refactor.settings.IProparseSettings;
+import org.prorefactor.refactor.settings.ProparseSettings;
 
-import com.google.inject.AbstractModule;
-
-public class UnitTestSportsModule extends AbstractModule {
-  @Override
-  protected void configure() {
-    bind(IProgressSettings.class).to(UnitTestProgressSettings.class);
-    bind(IProparseSettings.class).to(UnitTestProparseSettings.class);
-    bind(Schema.class).to(UnitTestSportsSchema.class);
+public class UnitTestBackslashProparseSettings extends ProparseSettings {
+  public UnitTestBackslashProparseSettings() {
+    super(true, true, false, true, OperatingSystem.WINDOWS, "src/test/resources,src/test/resources/data", "11.6");
   }
 }

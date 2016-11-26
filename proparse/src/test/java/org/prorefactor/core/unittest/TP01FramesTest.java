@@ -19,7 +19,7 @@ import java.io.PrintWriter;
 import org.apache.commons.io.FileUtils;
 import org.prorefactor.core.unittest.util.JPNodeLister;
 import org.prorefactor.core.unittest.util.TP01FramesTreeLister;
-import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
+import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
@@ -40,7 +40,7 @@ public class TP01FramesTest {
 
   @BeforeTest
   public void setUp() {
-    Injector injector = Guice.createInjector(new UnitTestSports2000Module());
+    Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
 
     // Create target directory for output result

@@ -161,12 +161,12 @@ public class DoParse {
       if (proEval) {
         LOGGER.trace("Executing ProEval parser on code chunck");
         parser.program();
-        ProEval proeval = new ProEval(session.getProgressSettings());
+        ProEval proeval = new ProEval(session.getProparseSettings());
         proeval.program(parser.getAST());
       } else if (preProcessCondition) {
         LOGGER.trace("Executing ProEval parser on preprocessor");
         parser.expression();
-        ProEval proeval = new ProEval(session.getProgressSettings());
+        ProEval proeval = new ProEval(session.getProparseSettings());
         preProcessConditionResult = proeval.preproIfEval(parser.getAST());
       } else {
         LOGGER.trace("Executing ProParser");

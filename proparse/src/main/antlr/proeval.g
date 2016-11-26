@@ -10,14 +10,14 @@
  *
  * Tree walker for evaluating Progress code chunks
  * Used when we hit an &IF <expr>. Returns bool, depending on how <expr> evaluates out.
- */ 
+ */
 
 header {
   package org.prorefactor.proparse;
 
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
-  import org.prorefactor.refactor.settings.IProgressSettings;
+  import org.prorefactor.refactor.settings.IProparseSettings;
   import static org.prorefactor.proparse.ProEvalSupport.*;
 }
 
@@ -34,11 +34,11 @@ options {
 
 {
   private final static Logger LOGGER = LoggerFactory.getLogger(ProEval.class);
-  private IProgressSettings pscSettings;
+  private IProparseSettings ppSettings;
 
-  public ProEval(IProgressSettings pscSettings) {
+  public ProEval(IProparseSettings ppSettings) {
     this();
-    this.pscSettings = pscSettings;
+    this.ppSettings = ppSettings;
   }
 
   private String indent() {
@@ -63,8 +63,8 @@ options {
 preproIfEval returns [boolean ret]
 // This is the function that gets called for evaluating preprocessor expressions
 {
-  if (pscSettings == null)
-    throw new RuntimeException("IProgressSettings not initialized");
+  if (ppSettings == null)
+    throw new RuntimeException("IProparseSettings not initialized");
   Object a;
 }
   :  a=expr {ret = a!=null && getBool(a);}
@@ -76,8 +76,8 @@ program
 // provide us with an interpreter which we can run from Proparse.
 // I used to use this for testing.
 {
-  if (pscSettings == null)
-    throw new RuntimeException("IProgressSettings not initialized");
+  if (ppSettings == null)
+    throw new RuntimeException("IProparseSettings not initialized");
 }
   :  #(Program_root (blockorstatement)* )
   ;
@@ -601,7 +601,7 @@ numentries_fun returns [Object ret]
 
 opsys_fun returns [Object ret]
   :  OPSYS
-    {  String opsys = pscSettings.getOpSys();
+    {  String opsys = ppSettings.getOpSys();
       if (opsys == null || opsys.length()==0)
         throw new ProEvalException("OPSYS has not been configured in Proparse.");
       ret = opsys;
@@ -611,14 +611,14 @@ opsys_fun returns [Object ret]
 
 propath_fun returns [Object ret]
   :  PROPATH
-    {  ret = propath(pscSettings);
+    {  ret = propath(ppSettings);
     }
   ;
 
 
 proversion_fun returns [Object ret]
   :  PROVERSION
-    {  String proversion = pscSettings.getProversion();
+    {  String proversion = ppSettings.getProversion();
       if (proversion == null || proversion.length()==0)
         throw new ProEvalException("PROVERSION has not been configured in Proparse.");
       ret = proversion;

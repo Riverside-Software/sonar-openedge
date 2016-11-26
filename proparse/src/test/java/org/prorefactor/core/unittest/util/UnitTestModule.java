@@ -10,20 +10,15 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest.util;
 
-import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.core.schema.Schema;
+import org.prorefactor.refactor.settings.IProparseSettings;
 
-/**
- * ProgressSettings class which just returns UNIX as the operating system
- */
-public class UnixProgressSettings extends UnitTestProgressSettings {
+import com.google.inject.AbstractModule;
 
+public class UnitTestModule extends AbstractModule {
   @Override
-  public String getOpSys() {
-    return "UNIX";
-  }
-
-  @Override
-  public int getOpSysNum() {
-    return RefactorSession.OPSYS_UNIX;
+  protected void configure() {
+    bind(IProparseSettings.class).to(UnitTestProparseSettings.class);
+    bind(Schema.class).to(SportsSchema.class);
   }
 }

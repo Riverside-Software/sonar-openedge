@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.refactor.settings.IProgressSettings;
+import org.prorefactor.refactor.settings.IProparseSettings;
 
 /**
  * Used in evaluating expressions in &amp;IF conditions
@@ -370,7 +370,7 @@ public class ProEvalSupport {
   }
 
   // TODO Verify if this not a duplicate of settings#getPropath()
-  static String propath(IProgressSettings settings) {
+  static String propath(IProparseSettings settings) {
     StringBuilder bldr = new StringBuilder();
     boolean delim = false;
     for (String p : settings.getPropathAsList()) {

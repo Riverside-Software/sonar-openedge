@@ -10,12 +10,15 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest.util;
 
-import java.io.IOException;
-
 import org.prorefactor.core.schema.Schema;
+import org.prorefactor.refactor.settings.IProparseSettings;
 
-public class UnitTestSportsSchema extends Schema {
-  public UnitTestSportsSchema() throws IOException {
-    super("src/test/resources/projects/unittest/proparse.schema", true);
+import com.google.inject.AbstractModule;
+
+public class UnitTestBackslashModule extends AbstractModule {
+  @Override
+  protected void configure() {
+    bind(IProparseSettings.class).to(UnitTestBackslashProparseSettings.class);
+    bind(Schema.class).to(SportsSchema.class);
   }
 }

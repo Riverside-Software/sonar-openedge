@@ -5,8 +5,8 @@ import static org.testng.Assert.assertNotNull;
 import java.io.File;
 
 import org.prorefactor.core.ProparseRuntimeException;
-import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
-import org.prorefactor.core.unittest.util.UnitTestSports2000UnixModule;
+import org.prorefactor.core.unittest.util.UnitTestBackslashModule;
+import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.Test;
@@ -19,7 +19,7 @@ public class OpSysTest {
 
   @Test
   public void testUnix() throws Exception {
-    Injector injector = Guice.createInjector(new UnitTestSports2000UnixModule());
+    Injector injector = Guice.createInjector(new UnitTestModule());
     RefactorSession session = injector.getInstance(RefactorSession.class);
 
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char.p"), session);
@@ -30,7 +30,7 @@ public class OpSysTest {
 
   @Test(expectedExceptions = { ProparseRuntimeException.class })
   public void testWindows() throws Exception {
-    Injector injector = Guice.createInjector(new UnitTestSports2000Module());
+    Injector injector = Guice.createInjector(new UnitTestBackslashModule());
     RefactorSession session = injector.getInstance(RefactorSession.class);
 
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char.p"), session);

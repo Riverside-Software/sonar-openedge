@@ -17,7 +17,6 @@ import java.util.Map;
 
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.proparse.SymbolScope;
-import org.prorefactor.refactor.settings.IProgressSettings;
 import org.prorefactor.refactor.settings.IProparseSettings;
 
 import com.google.inject.Inject;
@@ -30,7 +29,6 @@ public class RefactorSession {
   public static final int OPSYS_WINDOWS = 1;
   public static final int OPSYS_UNIX = 2;
 
-  private final IProgressSettings progressSettings;
   private final IProparseSettings proparseSettings;
   private final Schema schema;
   private final Charset charset;
@@ -38,13 +36,12 @@ public class RefactorSession {
   private final Map<String, SymbolScope> superCache = new HashMap<>();
 
   @Inject
-  public RefactorSession(IProgressSettings progressSettings, IProparseSettings proparseSettings, Schema schema) {
-    this(progressSettings, proparseSettings, schema, Charset.defaultCharset());
+  public RefactorSession(IProparseSettings proparseSettings, Schema schema) {
+    this(proparseSettings, schema, Charset.defaultCharset());
   }
 
-  public RefactorSession(IProgressSettings progressSettings, IProparseSettings proparseSettings, Schema schema,
+  public RefactorSession(IProparseSettings proparseSettings, Schema schema,
       Charset charset) {
-    this.progressSettings = progressSettings;
     this.proparseSettings = proparseSettings;
     this.schema = schema;
     this.charset = charset;
@@ -87,37 +84,10 @@ public class RefactorSession {
   }
 
   /**
-   * Are the project binaries (.pub, .msg) enabled?
-   */
-  public boolean getProjectBinariesEnabled() {
-    return proparseSettings.getProjectBinaries();
-  }
-
-  public IProgressSettings getProgressSettings() {
-    return progressSettings;
-  }
-
-  /**
    * Returns the Settings for the currently loaded project
    */
   public IProparseSettings getProparseSettings() {
     return proparseSettings;
-  }
-
-  /**
-   * Disable the project directory binary output files (.pub, .msg).
-   */
-  @Deprecated
-  public void setProjectBinariesEnabledOff() {
-    proparseSettings.disableProjectBinaries();
-  }
-
-  /**
-   * Enable the project directory binary output files (.pub, .msg).
-   */
-  @Deprecated
-  public void setProjectBinariesEnabledOn() {
-    proparseSettings.enableProjectBinaries();
   }
 
   public String findFile(String fileName) {
@@ -133,7 +103,7 @@ public class RefactorSession {
         return fileName;
     }
 
-    for (String p : progressSettings.getPropathAsList()) {
+    for (String p : proparseSettings.getPropathAsList()) {
       String tryPath = p + File.separatorChar + fileName;
       if (new File(tryPath).exists())
         return tryPath;
@@ -159,7 +129,7 @@ public class RefactorSession {
         return inFile;
       return null;
     }
-    String propath = progressSettings.getPropath();
+    String propath = proparseSettings.getPropath();
     String[] parts = propath.split(",");
     for (String part : parts) {
       File retFile = new File(part + File.separator + filename);

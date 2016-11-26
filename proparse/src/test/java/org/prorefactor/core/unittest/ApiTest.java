@@ -21,7 +21,7 @@ import java.util.List;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.nodetypes.ProparseDirectiveNode;
-import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
+import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroDef;
 import org.prorefactor.macrolevel.NamedMacroRef;
@@ -41,7 +41,7 @@ public class ApiTest {
 
   @BeforeTest
   public void setUp() throws Exception {
-    Injector injector = Guice.createInjector(new UnitTestSports2000Module());
+    Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
   }
 

@@ -11,7 +11,7 @@ DISPLAY address bal.
 DISPLAY customer.discount.
 DISPLAY customer.disc.
 DISPLAY cust.discount.
-DISPLAY sports.cust.comm.
+DISPLAY sports2000.cust.comm.
 
 DEF VAR outer1 AS INT.
 

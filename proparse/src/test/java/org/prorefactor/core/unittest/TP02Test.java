@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.prorefactor.core.unittest.util.AttributedWriter;
-import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
+import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -49,7 +49,7 @@ public class TP02Test {
     outFile = new File(outName);
     snippetFile = new File(snippetName);
 
-    Injector injector = Guice.createInjector(new UnitTestSports2000Module());
+    Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
 

@@ -27,7 +27,6 @@ import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.ListingListener;
 import org.prorefactor.macrolevel.ListingParser;
 import org.prorefactor.refactor.RefactorSession;
-import org.prorefactor.refactor.settings.IProgressSettings;
 import org.prorefactor.refactor.settings.IProparseSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +63,6 @@ public class Preprocessor implements IPreprocessor {
   public static final int PROPARSE_DIRECTIVE = -101;
 
   final DoParse doParse;
-  private final IProgressSettings pscSettings;
   private final IProparseSettings ppSettings;
 
   // How many levels of &IF FALSE are we currently into?
@@ -118,7 +116,6 @@ public class Preprocessor implements IPreprocessor {
    */
   public Preprocessor(String fileName, BufferedReader inStream, DoParse doParse) {
     this.doParse = doParse;
-    this.pscSettings = doParse.getRefactorSession().getProgressSettings();
     this.ppSettings = doParse.getRefactorSession().getProparseSettings();
 
     // Create input source with flag isPrimaryInput=true
@@ -208,18 +205,18 @@ public class Preprocessor implements IPreprocessor {
 
     // Built-ins
     if ("batch-mode".equals(argName))
-      return Boolean.toString(pscSettings.getBatchMode());
+      return Boolean.toString(ppSettings.getBatchMode());
     if ("opsys".equals(argName))
-      return pscSettings.getOpSys();
+      return ppSettings.getOpSys();
     if ("window-system".equals(argName))
-      return pscSettings.getWindowSystem();
+      return ppSettings.getWindowSystem();
     if ("file-name".equals(argName)) {
       // {&FILE-NAME}, unlike {0}, returns the filename as found on the PROPATH.
       ret = doParse.getRefactorSession().findFile(currentInclude.numdArgs.get(0));
       // Progress seems to be converting the slashes for the appropriate OS.
       // I don't convert the slashes when I store the filename - instead I do it here.
       // (Saves us from converting the slashes for each and every include reference.)
-      if (pscSettings.getOpSysNum() == RefactorSession.OPSYS_UNIX)
+      if (ppSettings.getOpSysNum() == RefactorSession.OPSYS_UNIX)
         ret = ret.replace('\\', '/');
       else
         ret = ret.replace('/', '\\');
@@ -265,8 +262,7 @@ public class Preprocessor implements IPreprocessor {
         case '\\':
         case '~': {
           // Escapes are *always* processed, even inside strings and comments.
-          if (currChar == '\\'
-              && pscSettings.getOpSysNum() != RefactorSession.OPSYS_UNIX)
+          if ((currChar == '\\') && !ppSettings.useBackslashAsEscape())
             return currChar;
           int retChar = escape();
           if (retChar == '.')

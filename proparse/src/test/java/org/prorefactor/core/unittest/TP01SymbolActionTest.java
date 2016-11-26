@@ -15,7 +15,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 
 import org.prorefactor.core.unittest.util.RoutineHandler;
-import org.prorefactor.core.unittest.util.UnitTestSportsModule;
+import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.SymbolScope;
@@ -38,7 +38,7 @@ public class TP01SymbolActionTest {
 
   @BeforeTest
   public void setUp() {
-    Injector injector = Guice.createInjector(new UnitTestSportsModule());
+    Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
 
     walkAction = new TP01Support(session);

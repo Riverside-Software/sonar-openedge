@@ -10,17 +10,12 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest.util;
 
+import java.io.IOException;
+
 import org.prorefactor.core.schema.Schema;
-import org.prorefactor.refactor.settings.IProgressSettings;
-import org.prorefactor.refactor.settings.IProparseSettings;
 
-import com.google.inject.AbstractModule;
-
-public class UnitTestSports2000Module extends AbstractModule {
-  @Override
-  protected void configure() {
-    bind(IProgressSettings.class).to(UnitTestProgressSettings.class);
-    bind(IProparseSettings.class).to(UnitTestProparseSettings.class);
-    bind(Schema.class).to(UnitTestSports2000Schema.class);
+public class SportsSchema extends Schema {
+  public SportsSchema() throws IOException {
+    super("src/test/resources/projects/sports2000/proparse.schema", true);
   }
 }

@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.PrintWriter;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
+import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.util.JsonNodeLister;
@@ -38,7 +38,7 @@ public class BugFixTest {
 
   @BeforeTest
   public void setUp() throws Exception {
-    Injector injector = Guice.createInjector(new UnitTestSports2000Module());
+    Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
 
@@ -227,4 +227,5 @@ public class BugFixTest {
   public void test33() throws Exception {
     genericTest("bug33.cls");
   }
+
 }

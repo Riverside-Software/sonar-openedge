@@ -15,7 +15,7 @@ import static org.testng.Assert.assertNull;
 
 import java.io.File;
 
-import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
+import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
@@ -34,7 +34,7 @@ public class TP03Test {
 
 	@BeforeTest
 	public void setUp(){
-		Injector injector = Guice.createInjector(new UnitTestSports2000Module());
+		Injector injector = Guice.createInjector(new UnitTestModule());
 		session = injector.getInstance(RefactorSession.class);
 	}
 
