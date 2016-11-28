@@ -1,54 +1,93 @@
 package org.prorefactor.core.unittest;
 
-import static org.testng.Assert.assertNotNull;
-
 import java.io.File;
 
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.unittest.util.UnitTestBackslashModule;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 public class OpSysTest {
+  private final static boolean IS_WINDOWS = (System.getenv("windir") != null);
   private final static String SRC_DIR = "src/test/resources/data/bugsfixed";
 
   @Test
-  public void testUnix() throws Exception {
+  public void testBackslashNoEscape() throws Exception {
+    // Backslash not considered an escape character on Windows, so it has to fail on Windows
+    // UNIX test not executed
+    if (!IS_WINDOWS)
+      return;
     Injector injector = Guice.createInjector(new UnitTestModule());
     RefactorSession session = injector.getInstance(RefactorSession.class);
-
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char.p"), session);
-    pu.treeParser01();
-    assertNotNull(pu.getTopNode());
-    assertNotNull(pu.getRootScope());
+    try {
+      pu.treeParser01();
+      Assert.fail("Should have failed");
+    } catch (ProparseRuntimeException caught) {
+
+    }
   }
 
-  @Test(expectedExceptions = { ProparseRuntimeException.class })
-  public void testWindows() throws Exception {
+  @Test
+  public void testBackslashEscape() throws Exception {
+    // Backslash considered an escape character on Windows, so it shouldn't fail on both Windows and Unix
     Injector injector = Guice.createInjector(new UnitTestBackslashModule());
     RefactorSession session = injector.getInstance(RefactorSession.class);
-
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char.p"), session);
     pu.treeParser01();
   }
-  
+
   @Test
-  public void testWindows2() throws Exception {
-    // Not tested on Linux
-    if (System.getenv("windir") == null) {
+  public void testBackslashInIncludeWindows() throws Exception {
+    // Backslash considered an escape character on Windows, so include file will fail
+    if (!IS_WINDOWS)
       return;
+
+    Injector injector = Guice.createInjector(new UnitTestBackslashModule());
+    RefactorSession session = injector.getInstance(RefactorSession.class);
+    ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char2.p"), session);
+    try {
+      pu.treeParser01();
+      Assert.fail("Should have failed");
+    } catch (RefactorException caught) {
+
     }
+  }
+
+  @Test
+  public void test2BackslashInIncludeWindows() throws Exception {
+    // Backslash not considered an escape character on Windows, so include file is OK (standard behavior)
+    if (!IS_WINDOWS)
+      return;
 
     Injector injector = Guice.createInjector(new UnitTestModule());
     RefactorSession session = injector.getInstance(RefactorSession.class);
-
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char2.p"), session);
     pu.treeParser01();
+  }
+
+  @Test
+  public void testBackslashInIncludeLinux() throws Exception {
+    // Always fail on Linux
+    if (IS_WINDOWS)
+      return;
+
+    Injector injector = Guice.createInjector(new UnitTestModule());
+    RefactorSession session = injector.getInstance(RefactorSession.class);
+    ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char2.p"), session);
+    try {
+      pu.treeParser01();
+      Assert.fail("Should have failed");
+    } catch (RefactorException caught) {
+
+    }
   }
 
 }
