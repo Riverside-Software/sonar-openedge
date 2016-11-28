@@ -30,7 +30,7 @@ public class ProparseSettings implements IProparseSettings {
   }
 
   public ProparseSettings(String propath, boolean backslashAsEscape) {
-    this(true, true, backslashAsEscape, true, OperatingSystem.WINDOWS, propath, "11.6");
+    this(true, true, backslashAsEscape, true, OperatingSystem.getOS(), propath, "11.6");
   }
 
   public ProparseSettings(boolean proparseDirectives, boolean multiParse, boolean backslashEscape, boolean batchMode,
@@ -103,6 +103,10 @@ public class ProparseSettings implements IProparseSettings {
 
     public int getNumber() {
       return this == OperatingSystem.WINDOWS ? 1 : 2;
+    }
+
+    public static OperatingSystem getOS() {
+      return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0 ? WINDOWS : UNIX;
     }
   }
 }
