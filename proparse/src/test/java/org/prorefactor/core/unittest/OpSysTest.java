@@ -36,5 +36,19 @@ public class OpSysTest {
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char.p"), session);
     pu.treeParser01();
   }
+  
+  @Test
+  public void testWindows2() throws Exception {
+    // Not tested on Linux
+    if (System.getenv("windir") == null) {
+      return;
+    }
+
+    Injector injector = Guice.createInjector(new UnitTestModule());
+    RefactorSession session = injector.getInstance(RefactorSession.class);
+
+    ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char2.p"), session);
+    pu.treeParser01();
+  }
 
 }
