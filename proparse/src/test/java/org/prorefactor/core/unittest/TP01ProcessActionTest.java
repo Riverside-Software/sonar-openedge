@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.core.unittest.util.RoutineHandler;
-import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
+import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Call;
@@ -36,7 +36,7 @@ public class TP01ProcessActionTest {
 
   @BeforeTest
   public void setUp() {
-    Injector injector = Guice.createInjector(new UnitTestSports2000Module());
+    Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     symbolAction = new TP01Support(session);
   }

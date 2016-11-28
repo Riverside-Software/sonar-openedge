@@ -1,4 +1,4 @@
- /* 0: buffers=sports.Customer,sports.State,sports.bs,tt1,tt12,wt1 */ 
+ /* 0: buffers=sports2000.Customer,sports2000.State,sports2000.bs,tt1,tt12,wt1 */ 
 /* Data file for testing treeparser01.
  */
 
@@ -6,28 +6,28 @@
 DEF TEMP-TABLE  /* 0:tt1 */ tt1 FIELD  /* 0:tt1.f1 */ f1 AS INT.
 DEF WORK-TABLE  /* 0:wt1 */ wt1 FIELD  /* 0:wt1.f1 */ f1 AS INT.
 
-FIND FIRST  /* 0:sports.Customer */ customer NO-ERROR.
-FIND FIRST  /* 0:sports.Customer abbrev */ cust NO-ERROR.
-DISPLAY /* 0:sports.Customer.Address unqualfield */  address /* 0:sports.Customer.Balance abbrev unqualfield */  bal.
-DISPLAY /* 0:sports.Customer.Discount */  customer.discount.
-DISPLAY /* 0:sports.Customer.Discount abbrev */  customer.disc.
-DISPLAY /* 0:sports.Customer.Discount abbrev */  cust.discount.
-DISPLAY /* 0:sports.Customer.Comments abbrev */  sports.cust.comm.
+FIND FIRST  /* 0:sports2000.Customer */ customer NO-ERROR.
+FIND FIRST  /* 0:sports2000.Customer abbrev */ cust NO-ERROR.
+DISPLAY /* 0:sports2000.Customer.Address unqualfield */  address /* 0:sports2000.Customer.Balance abbrev unqualfield */  bal.
+DISPLAY /* 0:sports2000.Customer.Discount */  customer.discount.
+DISPLAY /* 0:sports2000.Customer.Discount abbrev */  customer.disc.
+DISPLAY /* 0:sports2000.Customer.Discount abbrev */  cust.discount.
+DISPLAY /* 0:sports2000.Customer.Comments abbrev */  sports2000.cust.comm.
 
 DEF VAR  /* 0:outer1 */ outer1 AS INT.
 
- /* 0:myproc1 buffers=b_tt1,sports.b_cust */ PROCEDURE myproc1:
+ /* 0:myproc1 buffers=b_tt1,sports2000.b_cust */ PROCEDURE myproc1:
   DEF INPUT PARAMETER  /* 1:inner1c */ inner1c AS INT.
   DEF BUFFER  /* 1:b_tt1 */ b_tt1 FOR  /* 0:tt1 */ tt1.
-  DEF BUFFER  /* 1:sports.b_cust */ b_cust FOR  /* 0:sports.Customer abbrev */ cust.
+  DEF BUFFER  /* 1:sports2000.b_cust */ b_cust FOR  /* 0:sports2000.Customer abbrev */ cust.
   DEF VAR  /* 1:inner1a */ inner1a AS INT.
   DEF VAR  /* 1:inner1b */ inner1b AS INT.
   DISPLAY /* 1:inner1c */  inner1c.
   FIND FIRST  /* 0:tt1 */ tt1 NO-ERROR.
   FIND FIRST  /* 0:wt1 */ wt1 NO-ERROR.
   FIND FIRST  /* 1:b_tt1 */ b_tt1 NO-ERROR.
-  FIND FIRST  /* 1:sports.b_cust */ b_cust NO-ERROR.
-  DISPLAY /* 1:sports.b_cust.Comments abbrev */  b_cust.comm.
+  FIND FIRST  /* 1:sports2000.b_cust */ b_cust NO-ERROR.
+  DISPLAY /* 1:sports2000.b_cust.Comments abbrev */  b_cust.comm.
 END.
 
 DEF VAR  /* 0:outer2 */ outer2 AS INT.
@@ -51,14 +51,14 @@ DEF VAR  /* 0:outer3 */ outer3 AS INT.
 /* Bug in the tree parser used to prevent parameter buffers from working */
 DEFINE TEMP-TABLE  /* 0:tt11 */ tt11
   FIELD  /* 0:tt11.f1 */ f1 AS CHARACTER.
- /* 0:fn11 buffers=sports.bf11 */ function fn11 returns logical
-    (   buffer  /* 1:sports.bf11 */ bf11 for  /* 0:sports.Customer */ customer,
+ /* 0:fn11 buffers=sports2000.bf11 */ function fn11 returns logical
+    (   buffer  /* 1:sports2000.bf11 */ bf11 for  /* 0:sports2000.Customer */ customer,
         table for  /* 0:tt11 */ tt11 append,
         table  /* 0:tt11 */ tt11,
         table-handle  /* 1:thandle11 */ thandle11 append
     ):
   message /* 1:thandle11 */  thandle11.
-  find first  /* 1:sports.bf11 */ bf11.
+  find first  /* 1:sports2000.bf11 */ bf11.
   return false.
 end.
 
@@ -80,7 +80,7 @@ display /* 0:tt12.f1 */  tt12.f1.
  * statement. Normally it would display the record (not state.state)
  * but in this case, the variable is displayed.
  */
-find first  /* 0:sports.State */ state.
+find first  /* 0:sports2000.State */ state.
 MESSAGE "hello" 
   VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE /* 0:state */   /* 0:state */ state AS LOGICAL.
 display /* 0:state */  state.
@@ -89,13 +89,13 @@ display /* 0:state */  state.
 /* Make sure that we aren't comparing a buffer name to the
  * table name.
  */
-define buffer  /* 0:sports.bs */ bs for  /* 0:sports.State */ state.
-find first  /* 0:sports.bs */ bs.
-display /* 0:sports.bs.State */  bs.state.
+define buffer  /* 0:sports2000.bs */ bs for  /* 0:sports2000.State */ state.
+find first  /* 0:sports2000.bs */ bs.
+display /* 0:sports2000.bs.State */  bs.state.
 
 
 /* There used to be a problem with references like this... */
-DEFINE TEMP-TABLE  /* 0:state */ state NO-UNDO LIKE  /* 0:sports.State */ state
+DEFINE TEMP-TABLE  /* 0:state */ state NO-UNDO LIKE  /* 0:sports2000.State */ state
        Field  /* 0:state.oldstate */ oldstate like /* 0:state.State */  state.state.
 
 

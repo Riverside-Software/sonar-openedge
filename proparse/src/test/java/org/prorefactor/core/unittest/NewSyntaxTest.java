@@ -9,7 +9,7 @@ package org.prorefactor.core.unittest;
 
 import java.io.File;
 
-import org.prorefactor.core.unittest.util.UnitTestSports2000Module;
+import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparserbase.JPTreeParser;
@@ -29,7 +29,7 @@ public class NewSyntaxTest {
 
   @BeforeTest
   public void setUp() throws Exception {
-    Injector injector = Guice.createInjector(new UnitTestSports2000Module());
+    Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
   }
 

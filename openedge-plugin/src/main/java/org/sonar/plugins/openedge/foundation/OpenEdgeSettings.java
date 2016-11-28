@@ -47,9 +47,7 @@ import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.Field;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.Table;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.schema.Schema;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorSession;
-import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.IProgressSettings;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.IProparseSettings;
-import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.ProgressSettings;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.ProparseSettings;
 
 @BatchSide
@@ -206,9 +204,8 @@ public class OpenEdgeSettings {
       }
     }
 
-    IProgressSettings settings1 = new ProgressSettings(true, "", "WIN32", getPropathAsString(), "11.5", "MS-WIN95");
-    IProparseSettings settings2 = new ProparseSettings();
-    proparseSession = new RefactorSession(settings1, settings2, sch, fileSystem.encoding());
+    IProparseSettings ppSettings = new ProparseSettings(getPropathAsString());
+    proparseSession = new RefactorSession(ppSettings, sch, fileSystem.encoding());
   }
 
   public List<String> getSourceDirs() {

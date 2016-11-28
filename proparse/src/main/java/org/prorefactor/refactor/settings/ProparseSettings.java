@@ -10,50 +10,35 @@
  *******************************************************************************/ 
 package org.prorefactor.refactor.settings;
 
-public class ProparseSettings implements IProparseSettings {
-  private final boolean capKeyword, indentTab, multiParse, proparseDirectives;
-  private final int indentSpaces;
-  private final String keywordall, rCodeDir;
-  private boolean projectBinaries = false;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-  public ProparseSettings() {
-    this(true, false, false, true, 2, "", "");
+public class ProparseSettings implements IProparseSettings {
+  private final boolean multiParse;
+  private final boolean proparseDirectives;
+  private final boolean backslashEscape;
+
+  private final OperatingSystem os;
+  private final boolean batchMode;
+  private final String propath;
+  private final String proversion;
+  private List<String> path = new ArrayList<>();
+
+  public ProparseSettings(String propath) {
+    this(true, true, true, true, OperatingSystem.WINDOWS, propath, "11.6");
   }
 
-  public ProparseSettings(boolean capKeyword, boolean indentTab, boolean multiParse, boolean proparseDirectives,
-      int indentSpaces, String keywordAll, String rCodeDir) {
-    this.capKeyword = capKeyword;
-    this.indentTab = indentTab;
+  public ProparseSettings(boolean proparseDirectives, boolean multiParse, boolean backslashEscape, boolean batchMode,
+      OperatingSystem os, String propath, String proversion) {
     this.multiParse = multiParse;
     this.proparseDirectives = proparseDirectives;
-    this.indentSpaces = indentSpaces;
-    this.keywordall = keywordAll;
-    this.rCodeDir = rCodeDir;
-  }
-
-  @Override
-  public boolean getCapKeyword() {
-    return capKeyword;
-  }
-
-  @Override
-  public boolean getIndentTab() {
-    return indentTab;
-  }
-
-  @Override
-  public int getIndentSpaces() {
-    return indentSpaces;
-  }
-
-  @Override
-  public String getKeywordAll() {
-    return keywordall;
-  }
-
-  @Override
-  public String getRCodeDir() {
-    return rCodeDir;
+    this.backslashEscape = backslashEscape;
+    this.batchMode = batchMode;
+    this.os = os;
+    this.propath = propath;
+    this.proversion = proversion;
+    path.addAll(Arrays.asList(propath.split(",")));
   }
 
   @Override
@@ -67,18 +52,53 @@ public class ProparseSettings implements IProparseSettings {
   }
 
   @Override
-  public void enableProjectBinaries() {
-    projectBinaries = true;
+  public boolean useBackslashAsEscape() {
+    return backslashEscape;
   }
 
   @Override
-  public void disableProjectBinaries() {
-    projectBinaries = false;
+  public boolean getBatchMode() {
+    return batchMode;
   }
 
   @Override
-  public boolean getProjectBinaries() {
-    return projectBinaries;
+  public OperatingSystem getOpSys() {
+    return os;
   }
 
+  @Override
+  public String getWindowSystem() {
+    return os.getWindowSystem();
+  }
+
+  @Override
+  public String getPropath() {
+    return propath;
+  }
+
+  @Override
+  public List<String> getPropathAsList() {
+    return path;
+  }
+
+  @Override
+  public String getProversion() {
+    return proversion;
+  }
+
+  public enum OperatingSystem {
+    UNIX, WINDOWS;
+
+    public String getName() {
+      return this == OperatingSystem.WINDOWS ? "WIN32" : "UNIX";
+    }
+
+    public String getWindowSystem() {
+      return this == OperatingSystem.WINDOWS ? "MS-WIN95" : "TTY";
+    }
+
+    public int getNumber() {
+      return this == OperatingSystem.WINDOWS ? 1 : 2;
+    }
+  }
 }
