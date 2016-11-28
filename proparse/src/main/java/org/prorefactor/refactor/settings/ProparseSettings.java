@@ -26,7 +26,11 @@ public class ProparseSettings implements IProparseSettings {
   private List<String> path = new ArrayList<>();
 
   public ProparseSettings(String propath) {
-    this(true, true, true, true, OperatingSystem.WINDOWS, propath, "11.6");
+    this(propath, false);
+  }
+
+  public ProparseSettings(String propath, boolean backslashAsEscape) {
+    this(true, true, backslashAsEscape, true, OperatingSystem.WINDOWS, propath, "11.6");
   }
 
   public ProparseSettings(boolean proparseDirectives, boolean multiParse, boolean backslashEscape, boolean batchMode,

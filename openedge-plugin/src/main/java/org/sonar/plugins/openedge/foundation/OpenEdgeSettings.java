@@ -204,7 +204,9 @@ public class OpenEdgeSettings {
       }
     }
 
-    IProparseSettings ppSettings = new ProparseSettings(getPropathAsString());
+    LOG.info("Using backslash as escape character : {}", settings.getBoolean(Constants.BACKSLASH_ESCAPE));
+    IProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
+        settings.getBoolean(Constants.BACKSLASH_ESCAPE));
     proparseSession = new RefactorSession(ppSettings, sch, fileSystem.encoding());
   }
 

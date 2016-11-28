@@ -14,6 +14,6 @@ import org.prorefactor.refactor.settings.ProparseSettings;
 
 public class UnitTestProparseSettings extends ProparseSettings {
   public UnitTestProparseSettings() {
-    super("src/test/resources,src/test/resources/data");
+    super("src/test/resources,src/test/resources/data", false);
   }
 }

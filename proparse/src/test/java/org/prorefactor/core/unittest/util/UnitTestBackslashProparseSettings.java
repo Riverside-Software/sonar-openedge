@@ -14,6 +14,6 @@ import org.prorefactor.refactor.settings.ProparseSettings;
 
 public class UnitTestBackslashProparseSettings extends ProparseSettings {
   public UnitTestBackslashProparseSettings() {
-    super(true, true, false, true, OperatingSystem.WINDOWS, "src/test/resources,src/test/resources/data", "11.6");
+    super("src/test/resources,src/test/resources/data", true);
   }
 }

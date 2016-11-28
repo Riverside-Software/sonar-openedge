@@ -262,8 +262,9 @@ public class Preprocessor implements IPreprocessor {
         case '\\':
         case '~': {
           // Escapes are *always* processed, even inside strings and comments.
-          if ((currChar == '\\') && !ppSettings.useBackslashAsEscape())
+          if ((currChar == '\\') && (ppSettings.getOpSys() == OperatingSystem.WINDOWS) && !ppSettings.useBackslashAsEscape()) {
             return currChar;
+          }
           int retChar = escape();
           if (retChar == '.')
             checkForNameDot();
