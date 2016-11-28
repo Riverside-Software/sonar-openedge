@@ -19,6 +19,7 @@ public class Constants {
   public static final String SUFFIXES = "sonar.oe.file.suffixes";
   public static final String XREF_FILTER = "sonar.oe.filter.invalidxref";
   public static final String XREF_FILTER_BYTES = "sonar.oe.filter.invalidxref.bytes";
+  public static final String BACKSLASH_ESCAPE = "sonar.oe.backslash.escape";
 
   private Constants() {
     

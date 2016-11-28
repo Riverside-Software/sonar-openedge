@@ -103,6 +103,11 @@ public class OpenEdgePlugin implements Plugin {
             "Comma-separated list of ranges, i.e. 1-2,4-7,9,11-13").type(PropertyType.STRING).defaultValue("1-4").category(
                 CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
                     Qualifiers.PROJECT).build());
+    context.addExtension(
+        PropertyDefinition.builder(Constants.BACKSLASH_ESCAPE).name("Backslash as escape char").description(
+            "Does backslash escape next character on Windows ?").type(PropertyType.BOOLEAN).defaultValue(Boolean.FALSE.toString()).category(
+                CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
+                    Qualifiers.PROJECT).build());
   }
 
 }
