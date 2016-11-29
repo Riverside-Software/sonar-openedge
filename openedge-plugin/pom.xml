@@ -4,7 +4,7 @@
 
   <groupId>eu.rssw.sonar.openedge</groupId>
   <artifactId>sonar-openedge-plugin</artifactId>
-  <version>1.9.6</version>
+  <version>1.9.7-SNAPSHOT</version>
   <packaging>sonar-plugin</packaging>
 
   <name>OpenEdge plugin for SonarQube</name>
@@ -68,7 +68,7 @@
     <dependency>
       <groupId>eu.rssw.openedge.checks</groupId>
       <artifactId>openedge-checks-shaded</artifactId>
-      <version>1.3.9</version>
+      <version>1.3.10-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
