@@ -2,7 +2,8 @@
 
 stage 'Build OpenEdge plugin'
 node ('master') {
-  checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanCheckout']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'GitHub-GQuerret', url: 'https://github.com/Riverside-Software/sonar-openedge']]])
+  checkout scm ( extensions: [[$class: 'CleanCheckout']])
+//  [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false,, submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'GitHub-GQuerret', url: 'https://github.com/Riverside-Software/sonar-openedge']]])
 //  gitClean()
 //  checkout scm
   echo " Branch: ${env.BRANCH_NAME}"
