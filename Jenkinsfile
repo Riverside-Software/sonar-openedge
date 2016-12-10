@@ -2,8 +2,9 @@
 
 stage 'Build OpenEdge plugin'
 node ('master') {
-  gitClean()
-  checkout scm
+  checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanCheckout']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'GitHub-GQuerret', url: 'https://github.com/Riverside-Software/sonar-openedge']]])
+//  gitClean()
+//  checkout scm
   echo " Branch: ${env.BRANCH_NAME}"
   withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
     if ("master" == env.BRANCH_NAME) {
