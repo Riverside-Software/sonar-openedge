@@ -194,6 +194,8 @@ functioncall throws TreeParserException
   |  #(SEEK LEFTPAREN (INPUT|OUTPUT|ID|STREAMHANDLE expression) RIGHTPAREN )
   |  substringfunc // is also a pseudfn.
   |  #(sr:SUPER {action.callBegin(#sr);} (parameterlist)? {action.callEnd();} )
+  |  #(TENANTID LEFTPAREN (expression)? RIGHTPAREN )
+  |  #(TENANTNAME LEFTPAREN (expression)? RIGHTPAREN )
   |  #(TIMEZONE (funargs)? )
   |  #(TYPEOF LEFTPAREN expression COMMA TYPE_NAME RIGHTPAREN )
   | #(GETCLASS LEFTPAREN TYPE_NAME RIGHTPAREN )

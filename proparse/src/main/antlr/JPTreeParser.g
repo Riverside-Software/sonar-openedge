@@ -433,6 +433,8 @@ functioncall throws TreeParserException
   |  #(SEEK LEFTPAREN (INPUT|OUTPUT|ID|STREAMHANDLE expression) RIGHTPAREN )
   |  substringfunc // is also a pseudfn.
   |  #(SUPER (parameterlist)? )
+  |  #(TENANTID LEFTPAREN (expression)? RIGHTPAREN )
+  |  #(TENANTNAME LEFTPAREN (expression)? RIGHTPAREN )
   |  #(TIMEZONE (funargs)? )
   |  #(TYPEOF LEFTPAREN expression COMMA TYPE_NAME RIGHTPAREN )
   | #(GETCLASS LEFTPAREN TYPE_NAME RIGHTPAREN )
@@ -562,6 +564,7 @@ argfunc throws TreeParserException
   |  #(SSLSERVERNAME funargs )
   |  #(STRING funargs )
   |  #(SUBSTITUTE funargs )
+  |  #(TENANTNAMETOID funargs )
   |  #(TOROWID funargs )
   |  #(TRIM funargs )
   |  #(TRUNCATE funargs )

@@ -1427,6 +1427,9 @@ public class NodeTypes implements ProParserTokenTypes {
     add(TARGET, 6, "target", TI.KEYWORD);
     add(TARGETPROCEDURE, 16, "target-procedure", TI.KEYWORD | TI.SYSHDL);
     add(TEMPTABLE, 10, "temp-table", TI.KEYWORD);
+    add(TENANTID, 9, "tenant-id", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_REGULAR_FUNC);
+    add(TENANTNAME, 11, "tenant-name", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_REGULAR_FUNC);
+    add(TENANTNAMETOID, 17, "tenant-name-to-id", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_REGULAR_FUNC);
     add(TERMINAL, 4, "term", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_NO_ARG_FUNC);
     add(TERMINAL, 8, "terminal", TI.EXTRA_LITERAL);
     add(TERMINATE, 9, "terminate", TI.KEYWORD);
@@ -2375,6 +2378,9 @@ public class NodeTypes implements ProParserTokenTypes {
     allTokens[TARGET].keywordText = "TARGET";
     allTokens[TARGETPROCEDURE].keywordText = "TARGET-PROCEDURE";
     allTokens[TEMPTABLE].keywordText = "TEMP-TABLE";
+    allTokens[TENANTID].keywordText = "TENANT-ID";
+    allTokens[TENANTNAME].keywordText = "TENANT-NAME";
+    allTokens[TENANTNAMETOID].keywordText = "TENANT-NAME-TO-ID";
     allTokens[TERMINAL].keywordText = "TERMINAL";
     allTokens[TERMINATE].keywordText = "TERMINATE";
     allTokens[TEXT].keywordText = "TEXT";
