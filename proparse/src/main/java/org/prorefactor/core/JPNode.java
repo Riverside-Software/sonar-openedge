@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.treeparser.Call;
 import org.prorefactor.treeparser.FieldContainer;
 import org.prorefactor.treeparser.Symbol;
