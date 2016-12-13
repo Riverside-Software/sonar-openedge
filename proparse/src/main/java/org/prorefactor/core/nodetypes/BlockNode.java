@@ -18,31 +18,14 @@ import org.prorefactor.treeparser.Block;
 public class BlockNode extends JPNode {
   private static final long serialVersionUID = 6062037678978630381L;
 
-  /** For creating from persistent storage */
-  public BlockNode() {
-    super();
-  }
-
   public BlockNode(ProToken t) {
     super(t);
-  }
-
-  public BlockNode(int file, int line, int column) {
-    super(file, line, column);
   }
 
   public Block getBlock() {
     Block block = (Block) getLink(IConstants.BLOCK);
     assert block != null;
     return block;
-  }
-
-  /**
-   * Every JPNode subtype has its own index. Used for persistent storage.
-   */
-  @Override
-  public int getSubtypeIndex() {
-    return 2;
   }
 
   public void setBlock(Block block) {

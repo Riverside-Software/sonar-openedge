@@ -12,9 +12,9 @@ package org.prorefactor.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.LinkedList;
 
 import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.treeparser.Call;
@@ -36,14 +36,14 @@ import antlr.collections.AST;
 public class JPNode extends BaseAST {
   private static final long serialVersionUID = 328939790131475436L;
 
-  private int nodeNum = -1;
+  private ProToken token;
+
   private Map<Integer, Integer> attrMap;
   private Map<String, String> attrMapStrings;
   private Map<Integer, Object> linkMap;
   private Map<Integer, String> stringAttributes;
   private JPNode left;
   private JPNode up;
-  private ProToken token;
 
   public enum AttributeKey {
     STORETYPE(IConstants.STORETYPE),
@@ -109,42 +109,9 @@ public class JPNode extends BaseAST {
     }
   }
 
-  public JPNode() {
-    this.token = new ProToken(null, 0, "");
-  }
-
   public JPNode(ProToken t) {
     this.token = t;
     setType(t.getType());
-  }
-
-  /**
-   * Create an node with a given token type. Used extensively by Antlr auto-generated tree constructors.
-   */
-  public JPNode(int type) {
-    this.token = new ProToken(null, type, "");
-    setType(type);
-  }
-
-  /**
-   * If this AST is constructed from another, then create with link to the original.
-   */
-  public JPNode(int type, JPNode original) {
-    this.token = new ProToken(original.token);
-    setType(type);
-    setLink(IConstants.ORIGINAL, original);
-  }
-
-  public JPNode(int type, String text) {
-    this.token = new ProToken(null, type, text);
-    setType(type);
-  }
-
-  /**
-   * For temporary nodes for comparison in set of nodes sorted by position
-   */
-  public JPNode(int file, int line, int column) {
-    this.token = new ProToken(null, 0, "", file, line, column, file, line, column + 1, 0);
   }
 
   public String allLeadingHiddenText() {
@@ -480,17 +447,6 @@ public class JPNode extends BaseAST {
     return linkMap.get(key);
   }
 
-  /**
-   * Node number, as counted in the syntax tree. If this node was created from PUB or from the "getTree" functions to
-   * build the tree from Proparse, then the nodeNum is set. Otherwise, it is -1. The count begins at zero at the
-   * Program_root node. The node numbers are simply derived by walking down through the tree, depth first. These node
-   * numbers are useful for mapping from externally persistent data back to nodes that are no longer in memory but are
-   * instead pulled out of PUB files when needed.
-   */
-  public int getNodeNum() {
-    return nodeNum;
-  }
-
   /** If this AST was constructed from another, then get the original. */
   public JPNode getOriginal() {
     if (linkMap == null)
@@ -523,11 +479,6 @@ public class JPNode extends BaseAST {
       n = n.parent();
     }
     return n;
-  }
-
-  /** Every JPNode subtype has its own index. Used for persistent storage. */
-  public int getSubtypeIndex() {
-    return 1;
   }
 
   /** Certain nodes will have a link to a Symbol, set by TreeParser01. */
@@ -716,11 +667,6 @@ public class JPNode extends BaseAST {
     setLink(IConstants.CALL, call);
   }
 
-  /** Used when re-loading serialized nodes. */
-  public void setColumn(int column) {
-    token.setColumn(column);
-  }
-
   /**
    * Set the comments preceding this node. CAUTION: Does not change any values in Proparse. Only use this if the JPNode
    * tree is "disconnected", because getComments returns the comments from the "hidden tokens" in Proparse in
@@ -739,31 +685,11 @@ public class JPNode extends BaseAST {
     setLink(IConstants.FIELD_CONTAINER, fieldContainer);
   }
 
-  /** Used when re-loading serialized nodes. */
-  public void setFileIndex(int fileIndex) {
-    token.setFileIndex(fileIndex);
-  }
-
-  /** A reference to the collection of filenames from the parse. */
-  public void setFilenameList(IntegerIndex<String> filenameList) {
-    token.setFilenameList(filenameList);
-  }
-
-  /** Used when re-loading serialized nodes. */
-  public void setLine(int line) {
-    token.setLine(line);
-  }
-
   /** @see #getLink(Integer) */
   public void setLink(Integer key, Object value) {
     if (linkMap == null)
       initLinkMap();
     linkMap.put(key, value);
-  }
-
-  /** For use by the JPNode tree construction classes only. */
-  public void setNodeNum(int nodeNum) {
-    this.nodeNum = nodeNum;
   }
 
   public void setParent(JPNode parent) {
@@ -778,11 +704,6 @@ public class JPNode extends BaseAST {
 
   void setRight(JPNode right) {
     this.right = right;
-  }
-
-  /** Used when re-loading serialized nodes. */
-  public void setSourceNum(int n) {
-    token.setMacroSourceNum(n);
   }
 
   /** Assigned by the tree parser. */
@@ -827,7 +748,6 @@ public class JPNode extends BaseAST {
 
   @Override
   public void setType(int type) {
-    super.setType(type);
     token.setType(type);
   }
 

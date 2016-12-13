@@ -19,17 +19,6 @@ import org.prorefactor.treeparser.TableBuffer;
 public class RecordNameNode extends JPNode {
   private static final long serialVersionUID = 8045143516803910613L;
 
-  /**
-   * For creating from persistent storage
-   */
-  public RecordNameNode() {
-    super();
-  }
-
-  public RecordNameNode(int file, int line, int column) {
-    super(file, line, column);
-  }
-
   public RecordNameNode(ProToken t) {
     super(t);
   }
@@ -38,14 +27,6 @@ public class RecordNameNode extends JPNode {
     BufferScope bufferScope = (BufferScope) getLink(IConstants.BUFFERSCOPE);
     assert bufferScope != null;
     return bufferScope;
-  }
-
-  /**
-   * Every JPNode subtype has its own index. Used for persistent storage.
-   */
-  @Override
-  public int getSubtypeIndex() {
-    return 4;
   }
 
   public TableBuffer getTableBuffer() {

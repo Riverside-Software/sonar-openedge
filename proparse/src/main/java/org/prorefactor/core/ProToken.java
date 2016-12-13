@@ -15,21 +15,15 @@ import antlr.CommonHiddenStreamToken;
 import org.prorefactor.proparse.IntegerIndex;
 
 public class ProToken extends CommonHiddenStreamToken {
+  private final IntegerIndex<String> filenameList;
+  private final int fileIndex;
+  private final int macroSourceNum;
+  private final int endFile;
+  private final int endLine;
+  private final int endColumn;
 
-  private int fileIndex;
-  private int macroSourceNum;
-  private IntegerIndex<String> filenameList;
-  private int endFile;
-  private int endLine;
-  private int endColumn;
-
-  public ProToken() {
-    // Only to be used for persistence/serialization
-  }
-
-  public ProToken(IntegerIndex<String> filenameList, int type, String s) {
-    super(type, s);
-    this.filenameList = filenameList;
+  public ProToken(IntegerIndex<String> filenameList, int type, String txt) {
+    this(filenameList, type, txt, 0, 0, 0, 0, 0, 0, 0);
   }
 
   public ProToken(IntegerIndex<String> filenameList, int type, String txt, int file, int line, int col, int endFile,
@@ -43,17 +37,6 @@ public class ProToken extends CommonHiddenStreamToken {
     this.endFile = endFile;
     this.endLine = endLine;
     this.endColumn = endCol;
-  }
-
-  public ProToken(ProToken orig) {
-    super(orig.getType(), orig.getText());
-    this.filenameList = orig.filenameList;
-    this.fileIndex = orig.fileIndex;
-    this.macroSourceNum = orig.macroSourceNum;
-    this.line = orig.line;
-    this.col = orig.col;
-    this.endLine = orig.endLine;
-    this.endColumn = orig.endColumn;
   }
 
   public int getFileIndex() {
@@ -105,19 +88,6 @@ public class ProToken extends CommonHiddenStreamToken {
   public void setHiddenBefore(ProToken t) { // NOSONAR
     // In order to change visibility
     super.setHiddenBefore(t);
-  }
-
-  public void setFileIndex(int fileIndex) {
-    this.fileIndex = fileIndex;
-  }
-
-  /** A reference to the collection of filenames from the parse. */
-  public void setFilenameList(IntegerIndex<String> filenameList) {
-    this.filenameList = filenameList;
-  }
-
-  public void setMacroSourceNum(int macroSourceNum) {
-    this.macroSourceNum = macroSourceNum;
   }
 
   /**

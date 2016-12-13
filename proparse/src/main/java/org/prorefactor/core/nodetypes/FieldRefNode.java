@@ -25,17 +25,8 @@ import org.prorefactor.widgettypes.IFieldLevelWidget;
 public class FieldRefNode extends JPNode {
   private static final long serialVersionUID = 7754879272592544238L;
 
-  /** For creating from persistent storage */
-  public FieldRefNode() {
-    super();
-  }
-
   public FieldRefNode(ProToken t) {
     super(t);
-  }
-
-  public FieldRefNode(int file, int line, int column) {
-    super(file, line, column);
   }
 
   public BufferScope getBufferScope() {
@@ -61,14 +52,6 @@ public class FieldRefNode extends JPNode {
     JPNode idNode = findDirectChild(NodeTypes.ID);
     assert idNode != null;
     return idNode;
-  }
-
-  /**
-   * Every JPNode subtype has its own index. Used for persistent storage.
-   */
-  @Override
-  public int getSubtypeIndex() {
-    return 3;
   }
 
   /**

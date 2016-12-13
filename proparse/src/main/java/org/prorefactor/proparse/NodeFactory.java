@@ -27,7 +27,7 @@ import antlr.collections.AST;
 
 public class NodeFactory extends ASTFactory {
 
-  private IntegerIndex<String> filenameList;
+  private final IntegerIndex<String> filenameList;
 
   public NodeFactory(Hashtable hashtable, DoParse doParse) {
     super(hashtable);
@@ -86,26 +86,6 @@ public class NodeFactory extends ASTFactory {
         return new BlockNode((ProToken) token);
       default:
         throw new IllegalArgumentException("Proparse error creating AST node " + token.toString() + ", " + s);
-    }
-  }
-
-  /** Used for restoring serialized JPNode objects. */
-  public static JPNode createByIndex(int index) {
-    switch (index) {
-      case 1:
-        return new JPNode();
-      case 2:
-        return new BlockNode();
-      case 3:
-        return new FieldRefNode();
-      case 4:
-        return new RecordNameNode();
-      case 5:
-        return new ProparseDirectiveNode();
-      case 6:
-        return new ProgramRootNode();
-      default:
-        throw new IllegalArgumentException();
     }
   }
 
