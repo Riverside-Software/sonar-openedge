@@ -21,11 +21,11 @@ package org.sonar.plugins.openedge.foundation;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.sonar.api.config.Settings;
 import org.sonar.api.resources.AbstractLanguage;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.api.com.google.common.collect.Lists;
+import org.sonar.plugins.openedge.api.com.google.common.base.Splitter;
+import org.sonar.plugins.openedge.api.com.google.common.base.Strings;
 
 public class OpenEdge extends AbstractLanguage {
   private static final String DEFAULT_FILE_SUFFIXES = "p,w,i,cls";
@@ -39,22 +39,12 @@ public class OpenEdge extends AbstractLanguage {
 
   @Override
   public String[] getFileSuffixes() {
-    String[] suffixes = filterEmptyStrings(settings.getStringArray(Constants.SUFFIXES));
-    if (suffixes.length == 0) {
-      suffixes = StringUtils.split(OpenEdge.DEFAULT_FILE_SUFFIXES, ",");
+    List<String> suffixes = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
+        Strings.nullToEmpty(settings.getString(Constants.SUFFIXES)));
+    if (suffixes.isEmpty()) {
+      suffixes = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(OpenEdge.DEFAULT_FILE_SUFFIXES);
     }
-    return suffixes;
-  }
-
-  // From the PHP plugin
-  private static String[] filterEmptyStrings(String[] stringArray) {
-    List<String> nonEmptyStrings = Lists.newArrayList();
-    for (String string : stringArray) {
-      if (StringUtils.isNotBlank(string.trim())) {
-        nonEmptyStrings.add(string.trim());
-      }
-    }
-    return nonEmptyStrings.toArray(new String[nonEmptyStrings.size()]);
+    return suffixes.toArray(new String[] {});
   }
 
 }
