@@ -40,14 +40,12 @@ public class Postlexer implements TokenSource {
 
   private final LinkedList<PreproIfState> preproIfVec = new LinkedList<>();
   private ProToken currToken;
-  private final ProTokenFactory factory;
 
   Postlexer(Preprocessor prepro, Lexer lexer, DoParse doParse) {
     this.prepro = prepro;
     this.lexer = lexer;
     this.doParse = doParse;
     this.filenameList = doParse.getFilenameList();
-    this.factory = new ProTokenFactory(this);
   }
 
   @Override
@@ -319,7 +317,7 @@ public class Postlexer implements TokenSource {
 
   @Override
   public TokenFactory<?> getTokenFactory() {
-    return factory;
+    return lexer.getTokenFactory();
   }
 
 }

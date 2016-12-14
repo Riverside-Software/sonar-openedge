@@ -15,12 +15,17 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenFactory;
+import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.misc.Pair;
 import org.prorefactor.macrolevel.MacroDef;
 import org.prorefactor.proparse.IntegerIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Lexer {
+public class Lexer implements TokenSource, TokenFactory<ProToken> {
   private static final Logger LOGGER = LoggerFactory.getLogger(Lexer.class);
 
   private static final int EOF_CHAR = -1;
@@ -64,8 +69,9 @@ public class Lexer {
 
   //////////////// Lexical productions listed first, support functions follow.
 
-  ProToken nextToken() throws IOException {
+  public ProToken nextToken() {
     LOGGER.trace("Entering nextToken()");
+    try {
     for (;;) {
 
       if (preserve) {
@@ -264,6 +270,9 @@ public class Lexer {
           }
 
       }
+    }
+    } catch(IOException uncaught) {
+      throw new RuntimeException(uncaught);
     }
   }
 
@@ -1044,8 +1053,33 @@ public class Lexer {
     prepro.undef(macroName.toLowerCase());
   }
 
+  // ***************************
+  // TokenFactory implementation
+  // ***************************
+  @Override
+  public ProToken create(Pair<TokenSource, CharStream> source, int type, String text, int channel, int start, int stop,
+      int line, int charPositionInLine) {
+    ProToken t = new ProToken(source, type, channel, start, stop);
+    t.setLine(line);
+    t.setCharPositionInLine(charPositionInLine);
+    if (text != null) {
+      t.setText(text);
+    }
+
+    return t;
+  }
+
+  @Override
+  public ProToken create(int type, String text) {
+    return new ProToken(type, text);
+  }
+
+  // ***************************
+  // TokenFactory implementation
+  // ***************************
+
   ProToken makeToken(int tokenType) {
-    return makeToken(tokenType, currText.toString());
+    return create(tokenType, currText.toString());
   }
 
   ProToken makeToken(int tokenType, String text) {
@@ -1058,10 +1092,8 @@ public class Lexer {
     } else if ((textStartFile == 0) && (tokenType != PreprocessorParser.WS) && (tokenType != PreprocessorParser.EOF) && (textStartLine > 0)) {
       loc.add(textStartLine);
     }
-
-//    ProToken token = 
-    
-    return new ProToken(/*filenameList,*/ tokenType, text, textStartLine, textStartCol, textStartFile/*, textStartSource*/);
+    Pair<TokenSource, CharStream> pair = new Pair<TokenSource, CharStream>(this, null);
+    return create(pair, tokenType, text, Token.DEFAULT_CHANNEL, -1, -1, textStartLine, textStartCol);
   }
 
   /**
@@ -1101,6 +1133,46 @@ public class Lexer {
         append();
     } else
       append();
+  }
+
+
+  @Override
+  public int getLine() {
+    // Return 0 as we track line numbers differently
+    return 0;
+  }
+
+
+  @Override
+  public int getCharPositionInLine() {
+    // Return -1 as we track column numbers differently
+    return -1;
+  }
+
+
+  @Override
+  public CharStream getInputStream() {
+    // Return null as we track input stream differently
+    return null;
+  }
+
+
+  @Override
+  public String getSourceName() {
+    // Should return file name
+    return null;
+  }
+
+
+  @Override
+  public void setTokenFactory(TokenFactory<?> factory) {
+    throw new UnsupportedOperationException("Can't replace built-in TokenFactory");
+  }
+
+
+  @Override
+  public TokenFactory<?> getTokenFactory() {
+    return this;
   }
 
 }

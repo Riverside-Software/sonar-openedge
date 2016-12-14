@@ -11,42 +11,23 @@
 package org.prorefactor.proparse.antlr4;
 
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.TokenSource;
-import org.antlr.v4.runtime.WritableToken;
+import org.antlr.v4.runtime.misc.Pair;
 
-public class ProToken implements WritableToken {
-  private int type;
-  private String text;
-  private int channel;
-  private int line;
-  private int charPositionInLine;
-  // -1 means token was conjured up since it doesn't have a valid index.
-  private int tokenIndex = -1;
-  private TokenSource source;
+public class ProToken extends CommonToken {
+  private static final long serialVersionUID = 8235907735284214484L;
 
-  private int macroSourceNum;
   private int fileIndex;
+  private int macroSourceNum;
 
   public ProToken(int type, String text) {
-    this(type, text, 0, -1);
+    super(type, text);
+    this.fileIndex = -1;
   }
 
-  public ProToken(int type, String text, int line, int charPositionInLine) {
-    this(type, text, line, charPositionInLine, 0);
-  }
-  
-  public ProToken(int type, String text, int line, int charPositionInLine, int fileIndex) {
-    this.type = type;
-    this.text = text;
-    this.line = line;
-    this.charPositionInLine = charPositionInLine;
-    this.fileIndex = fileIndex;
-  }
-
-  public ProToken(ProToken orig) {
-    this(orig.getType(), orig.getText(), orig.getLine(), orig.getCharPositionInLine());
-    this.channel = orig.getChannel();
-    this.macroSourceNum = orig.getMacroSourceNum();
+  public ProToken(Pair<TokenSource, CharStream> source, int type, int channel, int start, int stop) {
+    super(source, type, channel, start, stop);
   }
 
   public int getMacroSourceNum() {
@@ -61,107 +42,7 @@ public class ProToken implements WritableToken {
     return fileIndex;
   }
 
-  @Override
-  public int getType() {
-    return type;
-  }
-
-  @Override
-  public void setType(int ttype) {
-    this.type = ttype;
-  }
-
-  @Override
-  public String getText() {
-    return text;
-  }
-
-  @Override
-  public void setText(String text) {
-    this.text = text;
-  }
-
-  @Override
-  public int getChannel() {
-    return channel;
-  }
-
-  @Override
-  public void setChannel(int channel) {
-    this.channel = channel;
-  }
-
-  @Override
-  public int getLine() {
-    return line;
-  }
-
-  @Override
-  public void setLine(int line) {
-    this.line = line;
-  }
-
-  @Override
-  public int getCharPositionInLine() {
-    return charPositionInLine;
-  }
-
-  @Override
-  public void setCharPositionInLine(int pos) {
-    this.charPositionInLine = pos;
-  }
-
-  @Override
-  public int getTokenIndex() {
-    return tokenIndex;
-  }
-
-  @Override
-  public void setTokenIndex(int index) {
-    this.tokenIndex = index;
-  }
-
-  @Override
-  public int getStartIndex() {
-    // -1 means not implemented
-    return -1;
-  }
-
-  @Override
-  public int getStopIndex() {
-    // -1 means not implemented
-    return -1;
-  }
-
-  @Override
-  public TokenSource getTokenSource() {
-    return source;
-  }
-
-  public void setTokenSource(TokenSource source) {
-    this.source = source;
-  }
-
-  @Override
-  public CharStream getInputStream() {
-    return null;
-  }
-
-  @Override
-  public String toString() {
-    String channelStr = "";
-    if ( channel>0 ) {
-      channelStr=",channel="+channel;
-    }
-    String txt = getText();
-    if ( txt!=null ) {
-      txt = txt.replace("\n","\\n");
-      txt = txt.replace("\r","\\r");
-      txt = txt.replace("\t","\\t");
-    }
-    else {
-      txt = "<no text>";
-    }
-    return "[@"+fileIndex+":"+getTokenIndex()+","+"='"+txt+"',<"+type+">"+channelStr+","+line+":"+getCharPositionInLine()+"]";
+  public void setFileIndex(int fileIndex) {
+    this.fileIndex = fileIndex;
   }
 }
