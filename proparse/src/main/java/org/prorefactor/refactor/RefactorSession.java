@@ -26,9 +26,6 @@ import com.google.inject.Inject;
  * place for use of Proparse within an Eclipse environment, with references to multiple projects within Eclipse.
  */
 public class RefactorSession {
-  public static final int OPSYS_WINDOWS = 1;
-  public static final int OPSYS_UNIX = 2;
-
   private final IProparseSettings proparseSettings;
   private final Schema schema;
   private final Charset charset;

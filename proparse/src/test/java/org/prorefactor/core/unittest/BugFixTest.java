@@ -13,11 +13,11 @@ import static org.testng.Assert.assertNull;
 import java.io.File;
 import java.io.PrintWriter;
 
+import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
-import org.prorefactor.util.JsonNodeLister;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 

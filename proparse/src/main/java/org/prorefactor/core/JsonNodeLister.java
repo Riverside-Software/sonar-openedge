@@ -8,14 +8,11 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.util;
+package org.prorefactor.core;
 
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 
 /**
  * Prints out the structure of a JPNode AST as JSON.
