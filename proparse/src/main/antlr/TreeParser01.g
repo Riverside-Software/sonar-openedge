@@ -489,7 +489,7 @@ clearstate throws TreeParserException
 
 catchstate throws TreeParserException
   :
-    #( b:CATCH { action.scopeAdd(#b); }
+    #( b:CATCH { action.blockBegin(#b); }
        id1:ID as:AS (CLASS)? TYPE_NAME
        { 
          action.paramForRoutine(#id1);
