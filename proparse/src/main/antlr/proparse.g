@@ -85,10 +85,14 @@ options {
   private boolean schemaTablePriority = false;
   public ParserSupport support;
 
-  void init(DoParse doParse) {
-    support = new ParserSupport(doParse.getRefactorSession());
+  public void initAntlr4(RefactorSession session, IntegerIndex<String> filenameList) {
+    support = new ParserSupport(session);
     setASTNodeClass("org.prorefactor.core.JPNode");
-    astFactory = new NodeFactory(getTokenTypeToASTClassMap(), doParse.getFilenameList());
+    astFactory = new NodeFactory(getTokenTypeToASTClassMap(), filenameList);
+  }
+
+  public ParserSupport getParserSupport() {
+    return support;
   }
 
   void copyHiddenAfter(JPNode from, JPNode to) {
@@ -143,7 +147,6 @@ program
       if (LA(1) != antlr.Token.EOF_TYPE)
         throw new antlr.NoViableAltException(LT(1), getFilename());
       ## = #([Program_root], ##, [Program_tail]);
-      support.setTopNode(##);
     }
   ;
 

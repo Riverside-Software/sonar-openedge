@@ -1,4 +1,4 @@
-package org.prorefactor.proparse;
+package org.prorefactor.proparse.antlr4;
 
 public interface IPreprocessor {
 

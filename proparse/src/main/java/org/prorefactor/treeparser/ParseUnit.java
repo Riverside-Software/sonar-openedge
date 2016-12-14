@@ -7,7 +7,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
- *******************************************************************************/ 
+ *******************************************************************************/
 package org.prorefactor.treeparser;
 
 import java.io.File;
@@ -22,7 +22,8 @@ import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
-import org.prorefactor.proparse.DoParse;
+import org.prorefactor.proparse.ProParser;
+import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser01.ITreeParserAction;
@@ -32,7 +33,9 @@ import org.slf4j.LoggerFactory;
 
 import antlr.ANTLRException;
 import antlr.RecognitionException;
+import antlr.Token;
 import antlr.TokenStream;
+import antlr.TokenStreamException;
 
 /**
  * Provides parse unit information, such as the symbol table and a reference to the AST. TreeParser01 calls
@@ -90,19 +93,6 @@ public class ParseUnit {
     return file;
   }
 
-  /**
-   * Get the file index, either from the PUB file or from the parser, whichever was used to get the tree. The return is
-   * the array of file names. The file at index zero is always the compile unit. The others are include files. The array
-   * index position corresponds to JPNode.getFileIndex().
-   * 
-   * @see org.prorefactor.core.nodetypes.ProgramRootNode#getFilenames()
-   */
-  public String[] getFileIndex() {
-    if (topNode == null)
-      return null;
-    return topNode.getFilenames();
-  }
-
   /** 
    * @return IncludeRef object
    */
@@ -126,29 +116,45 @@ public class ParseUnit {
 
   public TokenStream lex() throws RefactorException {
     LOGGER.trace("Entering ParseUnit#lex()");
-    DoParse doParse = new DoParse(session, file.getPath());
     try {
-      doParse.doParse(true);
-    } catch (ANTLRException | IOException caught) {
+      ProgressLexer lexer = new ProgressLexer(session, file.getPath());
+      TokenStream stream = lexer.getANTLR2TokenStream(false);
+      try {
+        Token tok = stream.nextToken();
+        while (tok.getType() != Token.EOF_TYPE) {
+          tok = stream.nextToken();
+        }
+      } catch (TokenStreamException uncaught) {
+
+      }
+      this.metrics = lexer.getMetrics();
+      LOGGER.trace("Exiting ParseUnit#lex()");
+      return stream;
+    } catch (IOException caught) {
       throw new RefactorException(caught);
     }
-    this.metrics = doParse.getMetrics();
-    LOGGER.trace("Exiting ParseUnit#lex()");
-
-    return doParse.getLexerTokenStream();
   }
 
   public void parse() throws RefactorException {
     LOGGER.trace("Entering ParseUnit#parse()");
-    DoParse doParse = new DoParse(session, file.getPath());
+    
     try {
-      doParse.doParse();
-      macroGraph = doParse.getMacroGraph();
+      ProgressLexer lexer = new ProgressLexer(session, file.getPath());
+      ProParser parser = new ProParser(lexer.getANTLR2TokenStream(true));
+      parser.initAntlr4(session, lexer.getFilenameList());
+      parser.program();
+      ((JPNode) parser.getAST()).backLink();
+
+      // Deal with trailing hidden tokens
+      JPNode.finalizeTrailingHidden((JPNode) parser.getAST());
+      lexer.parseComplete();
+
+      macroGraph = lexer.getMacroGraph();
+      setTopNode((JPNode) parser.getAST());
+      this.metrics = lexer.getMetrics();
     } catch (ANTLRException | IOException caught) {
       throw new RefactorException(caught);
     }
-    setTopNode(doParse.getTopNode());
-    this.metrics = doParse.getMetrics();
     LOGGER.trace("Exiting ParseUnit#parse()");
   }
 
@@ -179,7 +185,6 @@ public class ParseUnit {
     TreeParser01 tp = new TreeParser01(session);
     tp.getActionObject().setParseUnit(this);
     treeParser(tp);
-
     LOGGER.trace("Exiting ParseUnit#treeParser01()");
   }
 
@@ -191,7 +196,7 @@ public class ParseUnit {
     if (this.getTopNode() == null)
       parse();
     TreeParser01 tp = new TreeParser01(session, action);
-    action.setParseUnit(this);
+    tp.getActionObject().setParseUnit(this);
     treeParser(tp);
   }
 

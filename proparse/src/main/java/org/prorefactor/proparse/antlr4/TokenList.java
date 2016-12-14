@@ -8,61 +8,60 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.proparse;
+package org.prorefactor.proparse.antlr4;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.prorefactor.core.NodeTypes;
-import org.prorefactor.core.ProToken;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.IntStream;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenFactory;
+import org.antlr.v4.runtime.TokenSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import antlr.Token;
-import antlr.TokenStream;
-import antlr.TokenStreamException;
-
 /**
- * List of tokens for input to the parser. This class is responsible for gathering a list of tokens from the postlexer,
- * and examining that list for fine-tuning before sending it on to the parser. The complete tool chain is:<ol>
- * <li>preprocessor 
- * <li>lexer
- * <li>postlexer
- * <li>tokenlist
- * <li>filter
+ * List of tokens for input to the parser. This class is responsible for gathering a list of tokens from the PostLexer,
+ * and examining that list for fine-tuning before sending it on to the parser.
+ * 
+ * The complete tool chain is:<ol>
+ * <li>Lexer 
+ * <li>PostLexer
+ * <li>TokenList
  * <li>parser
  * </ol>
+ * 
+ * TODO The temporary list should be avoided
  */
-public class TokenList implements TokenStream {
+public class TokenList implements TokenSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(TokenList.class);
 
-  private final TokenStream tokenStream;
+  private final TokenSource tokenStream;
   private final List<ProToken> list = new ArrayList<>();
-  private int currentPosition = 0;
 
-  TokenList(TokenStream input) {
+  private int currentPosition = 0;
+  private ProToken currentToken;
+  private boolean initialized = false;
+
+  TokenList(TokenSource input) {
     this.tokenStream = input;
   }
 
-  public void build() throws TokenStreamException {
+  private void build()  {
     LOGGER.trace("Entering TokenList#build()");
+    int zz = 0;
     for (;;) {
       ProToken nextToken = (ProToken) tokenStream.nextToken();
+      nextToken.setTokenIndex(zz++);
       list.add(nextToken);
-      if (nextToken.getType() == ProParserTokenTypes.OBJCOLON)
+      if (nextToken.getType() == PreprocessorParser.OBJCOLON)
         reviewObjcolon();
-      if (nextToken.getType() == ProParserTokenTypes.EOF)
+      if (nextToken.getType() == PreprocessorParser.EOF)
         break;
     }
     LOGGER.trace("Exiting TokenList#build() - {} tokens", list.size());
-  }
-
-  @Override
-  public Token nextToken() throws TokenStreamException {
-    if (currentPosition >= list.size())
-      return new ProToken(null, ProParserTokenTypes.EOF, "");
-    return list.get(currentPosition++);
   }
 
   /**
@@ -97,7 +96,7 @@ public class TokenList implements TokenStream {
 
     // Getting type of the token just before colon (excluding comments and whitespaces)
     int ttype = list.get(lastIndex).getType();
-    while (ttype == ProParserTokenTypes.WS || ttype == ProParserTokenTypes.COMMENT) {
+    while (ttype == PreprocessorParser.WS || ttype == PreprocessorParser.COMMENT) {
       ttype = list.get(--lastIndex).getType();
     }
 
@@ -112,12 +111,12 @@ public class TokenList implements TokenStream {
       if (index == 0)
         break;
       int currType = list.get(index).getType();
-      if (currType == ProParserTokenTypes.WS || currType == ProParserTokenTypes.COMMENT) {
+      if (currType == PreprocessorParser.WS || currType == PreprocessorParser.COMMENT) {
         // There can be space in front of a NAMEDOT in a table or field name.
         // We don't want to fiddle with those here.
         return;
       }
-      if (list.get(index - 1).getType() == ProParserTokenTypes.NAMEDOT) {
+      if (list.get(index - 1).getType() == PreprocessorParser.NAMEDOT) {
         index = index - 2;
       } else if (list.get(index).getText().charAt(0) == '.') {
         index = index - 1;
@@ -129,7 +128,7 @@ public class TokenList implements TokenStream {
     if (foundNamedot) {
       // Now merge all the parts into one ID token.
       ProToken token = list.get(index);
-      token.setType(ProParserTokenTypes.ID);
+      token.setType(PreprocessorParser.ID);
       StringWriter text = new StringWriter();
       text.append(token.getText());
       int drop = index + 1;
@@ -144,7 +143,49 @@ public class TokenList implements TokenStream {
     // Not namedotted, so if it's reserved and not a system handle, convert to ID.
     ttype = list.get(index).getType();
     if (NodeTypes.isReserved(ttype) && (!NodeTypes.isSystemHandleName(ttype)))
-      list.get(index).setType(ProParserTokenTypes.ID);
+      list.get(index).setType(PreprocessorParser.ID);
+  }
+
+  @Override
+  public Token nextToken() {
+    if (!initialized) {
+      build();
+      initialized = true;
+    }
+    if (currentPosition >= list.size())
+      return currentToken;
+    currentToken = list.get(currentPosition++);
+    return currentToken;
+  }
+
+  @Override
+  public int getLine() {
+    return currentToken.getLine();
+  }
+
+  @Override
+  public int getCharPositionInLine() {
+    return currentToken.getCharPositionInLine();
+  }
+
+  @Override
+  public CharStream getInputStream() {
+    return currentToken.getInputStream();
+  }
+
+  @Override
+  public String getSourceName() {
+    return IntStream.UNKNOWN_SOURCE_NAME;
+  }
+
+  @Override
+  public void setTokenFactory(TokenFactory<?> factory) {
+    throw new UnsupportedOperationException("Unable to change TokenFactory object");
+  }
+
+  @Override
+  public TokenFactory<?> getTokenFactory() {
+    return tokenStream.getTokenFactory();
   }
 
 }
