@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
@@ -1093,18 +1095,27 @@ public class TP01Support extends TP01Action {
   private void classStateInherits(JPNode classNode, JPNode inheritsTypeNode) {
     LOG.trace("Entering classStateInherits {} {}", classNode, inheritsTypeNode);
     String className = inheritsTypeNode.attrGetS(IConstants.QUALIFIED_CLASS_STRING);
-    SymbolScopeSuper cachedCopy = SymbolScopeSuper.cache.get(className.toLowerCase());
-    if (cachedCopy == null)
-      cachedCopy = classStateSuper(classNode, className);
-    if (cachedCopy != null) {
-      // Whether we got it from the cache or created it new, we put it back in the cache.
-      // Putting a cached copy back into the cache just moves it up in the MRU list.
-      SymbolScopeSuper.cache.put(className.toLowerCase(), cachedCopy);
-      // We take a copy of the cached superScope, because the tree parser messes with
-      // the attributes of the symbols, and we don't want to mess with the symbols that
-      // are in the super scopes in the cache.
-      rootScope.assignSuper(cachedCopy.generateSymbolScopeSuper());
+    SymbolScopeSuper cachedCopy = null;
+    try {
+      cachedCopy = SymbolScopeSuper.cache.get(className.toLowerCase(), new Callable<SymbolScopeSuper>() {
+        @Override
+        public SymbolScopeSuper call() throws Exception {
+          SymbolScopeSuper clz = classStateSuper(classNode, className);
+          if (clz == null) {
+            throw new ExecutionException("Unable to find class " + className, null);
+          } else {
+            return clz;
+          }
+        }
+      });
+    } catch (ExecutionException caught) {
+      LOG.trace("Unable to find cache for class " + className, caught);
+      return;
     }
+    // We take a copy of the cached superScope, because the tree parser messes with
+    // the attributes of the symbols, and we don't want to mess with the symbols that
+    // are in the super scopes in the cache.
+    rootScope.assignSuper(cachedCopy.generateSymbolScopeSuper());
   }
 
   /** Get the Table symbol linked from a RECORD_NAME AST. */

@@ -56,10 +56,6 @@ public class SymbolScope {
         Collections.checkedMap((Map) variableMap, String.class, Symbol.class));
   }
 
-  public SymbolScope() {
-    // Only to be used for persistence/serialization
-  }
-
   /**
    * Only Scope and derivatives may create a Scope object.
    * 

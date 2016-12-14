@@ -16,7 +16,7 @@ package org.prorefactor.core;
  * easily fetch and work with things like just the text portion, just the attributes portion, check if the delimiting
  * quotes are single-quotes or double-quotes, etc.
  */
-public class Pstring {
+public class ProgressString {
 
   private final char quote;
   private final String text;
@@ -25,7 +25,7 @@ public class Pstring {
   /**
    * Constructor - should generally only be constructed by passing in the results of parser.getNodeText()
    */
-  public Pstring(String quotedString) {
+  public ProgressString(String quotedString) {
     quote = quotedString.charAt(0);
     int secondQuote = quotedString.lastIndexOf(quote);
     text = quotedString.substring(1, secondQuote);
@@ -75,7 +75,7 @@ public class Pstring {
   /** Strip attributes and quotes, if quoted. */
   public static String dequote(String orig) {
     if (isQuoted(orig)) {
-      Pstring pstring = new Pstring(orig);
+      ProgressString pstring = new ProgressString(orig);
       return pstring.getText().trim();
     } else {
       return orig;

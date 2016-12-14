@@ -15,22 +15,8 @@ import org.prorefactor.core.ProToken;
 public class ProgramRootNode extends BlockNode {
   private static final long serialVersionUID = 7160983003100786995L;
 
-  public ProgramRootNode() {
-    super();
-  }
-
-  public ProgramRootNode(int file, int line, int column) {
-    super(file, line, column);
-  }
-
   public ProgramRootNode(ProToken t) {
     super(t);
-  }
-
-  /** Every JPNode subtype has its own index. Used for persistent storage. */
-  @Override
-  public int getSubtypeIndex() {
-    return 6;
   }
 
 }

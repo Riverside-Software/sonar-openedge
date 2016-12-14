@@ -5,7 +5,6 @@ package org.prorefactor.macrolevel;
  * ...
  */
 public interface ListingListener {
-  
   void macroRef(int line, int column, String macroName);
   void macroRefEnd();
   void include(int line, int column, int currentFile, String incFile);

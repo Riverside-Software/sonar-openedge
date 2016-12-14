@@ -38,10 +38,6 @@ public class BufferScope {
     }
   }
 
-  public BufferScope() {
-    // Only to be used for persistence/serialization
-  }
-
   public BufferScope(Block block, TableBuffer symbol, Strength strength) {
     this.block = block;
     this.symbol = symbol;

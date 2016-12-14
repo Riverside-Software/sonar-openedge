@@ -72,14 +72,17 @@ public class AnnotationBasedRulesDefinition {
   /**
    * Adds annotated rule classes to an instance of NewRepository. Fails if one the classes has no SQALE annotation.
    */
+  @SuppressWarnings("rawtypes")
   public static void load(NewRepository repository, String languageKey, Iterable<Class> ruleClasses) {
     new AnnotationBasedRulesDefinition(repository, languageKey).addRuleClasses(true, ruleClasses);
   }
 
+  @SuppressWarnings("rawtypes")
   public void addRuleClasses(Iterable<Class> ruleClasses) {
     addRuleClasses(true, ruleClasses);
   }
 
+  @SuppressWarnings("rawtypes")
   public void addRuleClasses(boolean failIfNoExplicitKey, Iterable<Class> ruleClasses) {
     new RulesDefinitionAnnotationLoader().load(repository, Iterables.toArray(ruleClasses, Class.class));
     List<NewRule> newRules = Lists.newArrayList();

@@ -41,10 +41,6 @@ public class Block {
    */
   private SymbolScope symbolScope;
 
-  public Block() {
-    // Only to be used for persistence/serialization
-  }
-
   /** For constructing nested blocks */
   public Block(Block parent, JPNode node) {
     this.blockStatementNode = node;

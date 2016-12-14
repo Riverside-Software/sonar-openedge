@@ -60,10 +60,6 @@ public class DataType {
   private Integer tokenType;
   private String progressName;
 
-  public DataType() {
-    // Only to be used for persistence/serialization
-  }
-
   private DataType(int tokenType, String progressName) {
     this.tokenType = new Integer(tokenType);
     this.progressName = progressName;

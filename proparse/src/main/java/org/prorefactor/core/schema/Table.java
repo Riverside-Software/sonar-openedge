@@ -38,10 +38,6 @@ public class Table {
   private Database database;
   private SortedSet<Field> fieldSet = new TreeSet<>(Field.NAME_ORDER);
 
-  public Table() {
-    // Only to be used for persistence/serialization
-  }
-
   /** Constructor for schema */
   public Table(String name, Database database) {
     this.name = name;

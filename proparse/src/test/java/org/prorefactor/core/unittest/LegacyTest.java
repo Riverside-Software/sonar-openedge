@@ -29,8 +29,6 @@ import com.google.inject.Injector;
  * change, so no other tests should be added other than the expectation that they parse clean.
  */
 public class LegacyTest {
-  private final static String SRC_DIR1 = "src/test/resources/legacy/appendprogram/t01/test";
-  private final static String SRC_DIR2 = "src/test/resources/legacy/extractmethod/";
   private final static String TEMP_DIR = "target/nodes-lister/legacy";
 
   private RefactorSession session;

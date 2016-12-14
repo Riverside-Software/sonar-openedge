@@ -41,7 +41,6 @@ public class DoParse {
 
   private TokenStreamHiddenTokenFilter filter;
   private boolean proEval = false;
-  private int nextNodeNum;
   private IntegerIndex<String> filenameList = new IntegerIndex<>();
   
   BufferedReader inStream;
@@ -172,9 +171,7 @@ public class DoParse {
         LOGGER.trace("Executing ProParser");
         parser.program();
         JPNode topNode = (JPNode) parser.getAST();
-        nextNodeNum = 0;
-        topNode.setNodeNum(nextNodeNum++);
-        backLinkAndNodeNum(topNode);
+        backLink(topNode);
         // Deal with trailing hidden tokens
         JPNode.finalizeTrailingHidden((JPNode) parser.getAST());
       }
@@ -205,15 +202,13 @@ public class DoParse {
   }
 
   /**
-   * Set parent and prevSibling links, as well as nodeNum. Caller is responsible for setting nodeNum of input node, as
-   * well as nextNodeNum value.
+   * Set parent and prevSibling links
    */
-  private void backLinkAndNodeNum(JPNode r) {
+  private void backLink(JPNode r) {
     JPNode currNode = r.firstChild();
     while (currNode != null) {
-      currNode.setNodeNum(nextNodeNum++);
       currNode.setParent(r);
-      backLinkAndNodeNum(currNode);
+      backLink(currNode);
       JPNode nextNode = currNode.nextSibling();
       if (nextNode != null)
         nextNode.setPrevSibling(currNode);

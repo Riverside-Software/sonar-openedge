@@ -13,23 +13,16 @@ package org.prorefactor.core.nodetypes;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 
+import com.google.common.base.Strings;
+
 public class ProparseDirectiveNode extends JPNode {
   private static final long serialVersionUID = -8215081305962889482L;
 
-  private String directiveText = "";
-
-  /** For creating from persistent storage */
-  public ProparseDirectiveNode() {
-    super();
-  }
-
-  public ProparseDirectiveNode(int file, int line, int column) {
-    super(file, line, column);
-  }
+  private final String directiveText;
 
   public ProparseDirectiveNode(ProToken t) {
     super(t);
-    directiveText = t.getText();
+    directiveText = Strings.nullToEmpty(t.getText());
   }
 
   /**
@@ -37,18 +30,6 @@ public class ProparseDirectiveNode extends JPNode {
    */
   public String getDirectiveText() {
     return directiveText;
-  }
-
-  /**
-   * Every JPNode subtype has its own index. Used for persistent storage.
-   */
-  @Override
-  public int getSubtypeIndex() {
-    return 5;
-  }
-
-  public void setDirectiveText(String text) {
-    directiveText = text;
   }
 
 }

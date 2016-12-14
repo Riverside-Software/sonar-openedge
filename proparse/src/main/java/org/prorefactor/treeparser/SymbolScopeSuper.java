@@ -10,11 +10,10 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
-import java.util.Collections;
-import java.util.Map;
-
 import org.prorefactor.refactor.RefactorSession;
-import org.prorefactor.util.Cache;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * Contains skeleton symbols for purposes of inheritance. Since these are cached indefinately, they never have
@@ -29,8 +28,7 @@ public class SymbolScopeSuper extends SymbolScopeRoot {
    * completely override this. (Well, of course, be careful that you provide some mechanism for keeping the cache from
    * growing too large.) Since it's just a cache, it's completely exposed. Just don't make it null. :)
    */
-  public static Map<String, SymbolScopeSuper> cache = Collections.synchronizedMap(
-      new Cache<String, SymbolScopeSuper>(100));
+  public static Cache<String, SymbolScopeSuper> cache = CacheBuilder.newBuilder().maximumSize(100).build();
 
   /**
    * Constructor is "package" visibility. Should only be called from the SymbolScopeRoot, or from another

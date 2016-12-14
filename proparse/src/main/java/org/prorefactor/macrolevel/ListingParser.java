@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public class ListingParser implements ListingListener {
   /** Map of fileIndex (Integer) to fileName (String) */
-  public final Map<Integer, String> fileIndexes = new HashMap<>();
+  private final Map<Integer, String> fileIndexes = new HashMap<>();
 
   private IncludeRef root = null;
 

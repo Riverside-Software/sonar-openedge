@@ -8,28 +8,19 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.core;
+package org.prorefactor.core.unittest;
 
-/**
- * ProRefactor Core Exception
- */
-public class PRCException extends Exception {
-  private static final long serialVersionUID = -5030805228326542339L;
+import static org.testng.Assert.assertEquals;
 
-  public PRCException() {
-    super();
-  }
+import org.prorefactor.core.ProgressString;
+import org.testng.annotations.Test;
 
-  public PRCException(String message) {
-    super(message);
-  }
+public class ProgressStringTest {
 
-  public PRCException(Throwable cause) {
-    super(cause);
-  }
-
-  public PRCException(String message, Throwable cause) {
-    super(message, cause);
+  @Test
+  public void testBasicFunctions() {
+    ProgressString pstring = new ProgressString("\"No more 'Hello world'!\":T");
+    assertEquals("No more 'Hello world'!", pstring.getText(), "Pstring.justText() failed");
   }
 
 }
