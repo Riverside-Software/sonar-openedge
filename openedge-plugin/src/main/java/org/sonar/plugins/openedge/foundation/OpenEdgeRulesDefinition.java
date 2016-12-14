@@ -38,6 +38,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
   public static final String PROPARSE_ERROR_RULEKEY = "proparse.error";
   public static final String LARGE_TRANSACTION_SCOPE = "large.trans";
 
+  @SuppressWarnings("rawtypes")
   @Override
   public void define(Context context) {
     NewRepository repository = context.createRepository(REPOSITORY_KEY, Constants.LANGUAGE_KEY).setName(REPOSITORY_NAME);

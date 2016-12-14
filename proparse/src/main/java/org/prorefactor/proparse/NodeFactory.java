@@ -29,7 +29,7 @@ public class NodeFactory extends ASTFactory {
 
   private final IntegerIndex<String> filenameList;
 
-  public NodeFactory(Hashtable hashtable, DoParse doParse) {
+  public NodeFactory(@SuppressWarnings("rawtypes") Hashtable hashtable, DoParse doParse) {
     super(hashtable);
     this.filenameList = doParse.getFilenameList();
   }

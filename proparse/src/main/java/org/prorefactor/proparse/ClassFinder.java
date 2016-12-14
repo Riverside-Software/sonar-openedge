@@ -20,11 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ClassFinder {
-  private final static Logger LOGGER = LoggerFactory.getLogger(ClassFinder.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ClassFinder.class);
 
   private RefactorSession session;
-  private List<String> paths = new ArrayList<String>();
-  private Map<String, String> namesMap = new HashMap<String, String>();
+  private List<String> paths = new ArrayList<>();
+  private Map<String, String> namesMap = new HashMap<>();
 
   public ClassFinder(RefactorSession session) {
     this.session = session;

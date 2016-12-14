@@ -77,7 +77,7 @@ public class FrameStack {
     RecordNameNode recordNameNode = (RecordNameNode) formItemNode.firstChild();
     TableBuffer tableBuffer = recordNameNode.getTableBuffer();
     HashSet<Field> fieldSet = new HashSet<>(tableBuffer.getTable().getFieldSet());
-    JPNode exceptNode = formItemNode.parent().findDirectChild(NodeTypes.EXCEPT);
+    JPNode exceptNode = formItemNode.getParent().findDirectChild(NodeTypes.EXCEPT);
     if (exceptNode != null)
       for (JPNode n = exceptNode.firstChild(); n != null; n = n.nextSibling()) {
         if (!(n instanceof FieldRefNode))
