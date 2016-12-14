@@ -13,34 +13,33 @@ package org.prorefactor.proparse.antlr4;
 public class ProEvalException extends RuntimeException {
   private static final long serialVersionUID = 7002021531916522201L;
 
-  private StringBuilder moreMessage = new StringBuilder();
-  String filename = "";
-  int column = 0;
-  int line = 0;
-
-  public ProEvalException() {
-    super();
-  }
+  private final String fileName;
+  private final int line;
+  private final int column;
 
   public ProEvalException(String message) {
     super(message);
+    this.fileName = null;
+    this.line = -1;
+    this.column = -1;
   }
 
-  public ProEvalException(String message, Throwable cause) {
-    super(message, cause);
-  }
-  
-  public ProEvalException(Throwable cause) {
-    super(cause);
-  }
-
-  void appendMessage(String s) {
-    moreMessage.append(s);
+  public ProEvalException(String message, Throwable caught, String fileName, int line, int column) {
+    super(message, caught);
+    this.fileName = fileName;
+    this.line = line;
+    this.column = column;
   }
 
-  @Override
-  public String getMessage() {
-    return super.getMessage() + moreMessage.toString();
+  public String getFileName() {
+    return fileName;
   }
 
+  public int getColumn() {
+    return column;
+  }
+
+  public int getLine() {
+    return line;
+  }
 }

@@ -14,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.CharStream;
@@ -31,9 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import antlr.RecognitionException;
-import antlr.TokenStream;
 import antlr.TokenStreamException;
-import antlr.TokenStreamHiddenTokenFilter;
 
 public class DoParse {
   private static final Logger LOGGER = LoggerFactory.getLogger(DoParse.class);
@@ -113,7 +110,6 @@ public class DoParse {
         LOGGER.trace("Creating Lexer / PostLexer objects");
         if (primary == null && !justLex) {
           LOGGER.trace("... on primary file");
-          prepro.initListing();
         }
         Lexer lexer = new Lexer(prepro);
         Postlexer postlexer = new Postlexer(prepro, lexer, this);
@@ -156,16 +152,11 @@ public class DoParse {
       throw t;
     }
     finally {
-      // If we are listing, then we want to list all file indexes.
-      if (prepro.listing) {
-        int i = 0;
-        while (isValidIndex(i)) {
-          StringBuilder bldr = new StringBuilder();
-          bldr.append("0 0 0 fileindex ").append(i).append(" ").append(getFilename(i));
-          prepro.listingStream.write(bldr.toString());
-          prepro.listingStream.newLine();
-          ++i;
-        }
+      // List all file indexes.
+      int i = 0;
+      while (isValidIndex(i)) {
+        prepro.getLstListener().fileIndex(i, getFilename(i));
+        ++i;
       }
       // Tell the preprocessor we're done. Releases file handles, etc.
       prepro.parseComplete();

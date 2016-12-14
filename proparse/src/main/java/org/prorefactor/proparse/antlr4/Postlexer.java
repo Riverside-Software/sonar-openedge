@@ -112,21 +112,12 @@ public class Postlexer implements TokenSource {
     currToken = lexer.nextToken();
   }
 
-  private void listingLine(ProToken token, String text) throws IOException {
-    if (!prepro.listing)
-      return;
-    StringBuilder bldr = listingToken(token);
-    bldr.append(text);
-    prepro.listingStream.write(bldr.toString());
-    prepro.listingStream.newLine();
-  }
-
   // For consuming tokens that has been preprocessed out (&IF FALSE...)
   private void preproconsume() throws IOException, TokenStreamException, RecognitionException {
     LOGGER.trace("Entering preproconsume()");
 
     int thisIfLevel = preproIfVec.size();
-    prepro.consuming++;
+    prepro.incrementConsuming();
     while (thisIfLevel <= preproIfVec.size() && preproIfVec.get(thisIfLevel - 1).consuming) {
       getNextToken();
       switch (currToken.getType()) {
@@ -149,7 +140,7 @@ public class Postlexer implements TokenSource {
           break;
       }
     }
-    prepro.consuming--;
+    prepro.decrementConsuming();
   }
 
   private void preproIf() throws IOException, TokenStreamException, RecognitionException {
@@ -158,25 +149,17 @@ public class Postlexer implements TokenSource {
     // Preserve the currToken current position for listing, before evaluating the expression.
     // We can't just write to listing here, because the expression evaluation may
     // find macro references to list.
-    StringBuilder bldr = listingToken(currToken);
-    bldr.append("ampif ");
+    int currLine = currToken.getLine();
+    int currCol = currToken.getCharPositionInLine();
     PreproIfState preproIfState = new PreproIfState();
     preproIfVec.add(preproIfState);
     // Only evaluate if we aren't consuming from an outer &IF.
-    boolean isTrue = preproIfCond(prepro.consuming == 0);
+    boolean isTrue = preproIfCond(!prepro.isConsuming());
     if (isTrue) {
-      if (prepro.listing) {
-        bldr.append("true");
-        prepro.listingStream.write(bldr.toString());
-        prepro.listingStream.newLine();
-      }
+      prepro.getLstListener().preproIf(currLine, currCol, true);
       preproIfState.done = true;
     } else {
-      if (prepro.listing) {
-        bldr.append("false");
-        prepro.listingStream.write(bldr.toString());
-        prepro.listingStream.newLine();
-      }
+      prepro.getLstListener().preproIf(currLine, currCol, false);
       preproIfState.consuming = true;
       preproconsume();
     }
@@ -188,15 +171,15 @@ public class Postlexer implements TokenSource {
     PreproIfState preproIfState = preproIfVec.getLast();
     if (!preproIfState.done) {
       preproIfState.consuming = false;
-      listingLine(currToken, "ampelse ?");
+      prepro.getLstListener().preproElse(currToken.getLine(), currToken.getCharPositionInLine());
     } else {
       if (!preproIfState.consuming) {
-        listingLine(currToken, "ampelse true");
+        prepro.getLstListener().preproElse(currToken.getLine(), currToken.getCharPositionInLine());
         preproIfState.consuming = true;
         preproconsume();
       }
       // else: already consuming. no change.
-      listingLine(currToken, "ampelse ?");
+      prepro.getLstListener().preproElse(currToken.getLine(), currToken.getCharPositionInLine());
     }
   }
 
@@ -205,28 +188,17 @@ public class Postlexer implements TokenSource {
     // Preserve the current position for listing, before evaluating the expression.
     // We can't just write to listing here, because the expression evaluation may
     // find macro references to list.
-    StringBuilder bldr = listingToken(currToken);
-    bldr.append("ampelseif ");
+    int currLine = currToken.getLine();
+    int currCol = currToken.getCharPositionInLine();
     boolean evaluate = true;
     // Don't evaluate if we're consuming from an outer &IF
-    if (prepro.consuming - 1 > 0)
+    if (prepro.getConsuming() - 1 > 0)
       evaluate = false;
     // Don't evaluate if we're already done with this &IF
     if (preproIfVec.getLast().done)
       evaluate = false;
     boolean isTrue = preproIfCond(evaluate);
-    if (prepro.listing) {
-      if (!evaluate) {
-        bldr.append("?");
-      } else {
-        if (isTrue)
-          bldr.append("true");
-        else
-          bldr.append("false");
-      }
-      prepro.listingStream.write(bldr.toString());
-      prepro.listingStream.newLine();
-    }
+    prepro.getLstListener().preproElseIf(currLine, currCol);
     PreproIfState preproIfState = preproIfVec.getLast();
     if (isTrue && (!preproIfState.done)) {
       preproIfState.done = true;
@@ -242,7 +214,7 @@ public class Postlexer implements TokenSource {
 
   private void preproEndif() throws IOException {
     LOGGER.trace("Entering preproEndif()");
-    listingLine(currToken, "ampendif");
+    prepro.getLstListener().preproEndIf(currToken.getLine(), currToken.getCharPositionInLine());
     // XXX Got a case where removeLast() fails with NoSuchElementException 
     preproIfVec.removeLast();
   }
@@ -294,16 +266,14 @@ public class Postlexer implements TokenSource {
       try {
         evalDoParse.doParse(tokenVector);
       } catch (ProEvalException e) {
-        e.appendMessage(" Unable to evaluate &IF condition:");
+        String str = "Unable to evaluate &IF condition:";
         for (ProToken tok : tokenVector) {
-          e.appendMessage(" " + tok.getText());
+          str += " " + tok.getText();
         }
-        int theIndex = currToken.getFileIndex();
-        if (doParse.isValidIndex(theIndex))
-          e.filename = doParse.getFilename(theIndex);
-        e.line = currToken.getLine();
-        e.column = currToken.getCharPositionInLine();
-        throw e;
+        String fileName = null;
+        if (doParse.isValidIndex(currToken.getFileIndex()))
+          fileName = doParse.getFilename(currToken.getFileIndex());
+        throw new ProEvalException(str, e, fileName, currToken.getLine(), currToken.getCharPositionInLine());
       }
       return evalDoParse.preProcessConditionResult;
     }
@@ -315,13 +285,6 @@ public class Postlexer implements TokenSource {
       throw new IllegalArgumentException(doParse.getFilename(theIndex) + ":" + currToken.getLine() + " " + theMessage);
     else
       throw new IllegalArgumentException(theMessage);
-  }
-
-  private static StringBuilder listingToken(ProToken token) {
-    StringBuilder bldr = new StringBuilder();
-    bldr.append(token.getFileIndex()).append(" ").append(token.getLine()).append(" ").append(token.getCharPositionInLine()).append(" ");
-
-    return bldr;
   }
 
   private static class PreproIfState {

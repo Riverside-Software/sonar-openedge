@@ -11,9 +11,7 @@
 package org.prorefactor.proparse.antlr4;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -25,8 +23,9 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.prorefactor.core.ProparseRuntimeException;
-import org.prorefactor.proparse.Preprocessor.FilePos;
-import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.macrolevel.IncludeRef;
+import org.prorefactor.macrolevel.ListingListener;
+import org.prorefactor.macrolevel.ListingParser;
 import org.prorefactor.refactor.settings.IProparseSettings;
 import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
 import org.slf4j.Logger;
@@ -54,56 +53,48 @@ import org.slf4j.LoggerFactory;
  * We keep a reference to the input stream "A" in the InputSource object so that if "A" spawns a new input stream "B",
  * we can return to "A" when we are done with "B".
  */
-public class Preprocessor {
+public class Preprocessor implements IPreprocessor {
   private static final Logger LOGGER = LoggerFactory.getLogger(Preprocessor.class);
 
   private static final Pattern regexNumberedArg = Pattern.compile("\\{\\d+\\}");
   private static final Pattern regexEmptyCurlies = Pattern.compile("\\{\\s*\\}");
+  private static final int EOF_CHAR = -1;
+  private static final int SKIP_CHAR = -100;
+  public static final int PROPARSE_DIRECTIVE = -101;
 
   final DoParse doParse;
   private final IProparseSettings ppSettings;
 
-  /** How many levels of &IF FALSE are we currently into? */
-  int consuming = 0;
+  // How many levels of &IF FALSE are we currently into?
+  private int consuming = 0;
 
   private int currChar;
-  private int currCol;
   private int currFile;
-  private int currLine;
   private int currSourceNum;
+  private int currLine;
+  private int currCol;
 
-  /** Are we in the middle of a comment? */
-  boolean doingComment;
+  // Are we in the middle of a comment?
+  private boolean doingComment;
+  // Would you append the currently returned character to escapeText in order to see what the original code looked like
+  // before escape processing? (See escape().)
+  private boolean escapeAppend;
+  // Is the currently returned character escaped?
+  private boolean escapeCurrent;
+  // Was there escaped text before current character?
+  private boolean wasEscape;
+  private String escapeText;
+  // Is the current '.' a name dot? (i.e. not followed by whitespace) */
+  private boolean nameDot;
+  private String proparseDirectiveText;
+  private FilePos textStart;
 
-  /**
-   * Would you append the currently returned character to escapeText in order to see what the original code looked like
-   * before escape processing? (See escape().)
-   */
-  boolean escapeAppend;
-
-  /** Is the currently returned character escaped? */
-  boolean escapeCurrent;
-
-  String escapeText;
-
+  private ListingListener lstListener;
   /** Are we writing a preprocessor-listing file? */
-  boolean listing;
+  // boolean listing;
 
   /** The listing stream (only open if listing) */
-  BufferedWriter listingStream;
-
-  /** Is the current '.' a name dot? (i.e. not followed by whitespace) */
-  boolean nameDot;
-
-  String proparseDirectiveText;
-
-  int textStartFile;
-  int textStartLine;
-  int textStartCol;
-  int textStartSourceNum;
-
-  /** Was there escaped text before current character? */
-  boolean wasEscape;
+//  BufferedWriter listingStream;
 
   private IncludeFile currentInclude;
   private InputSource currentInput;
@@ -118,12 +109,6 @@ public class Preprocessor {
   private int safetyNet = 0;
   private int sequence = 0;
   private int sourceCounter;
-
-  /** Java's Reader.read() returns -1 at end of file. */
-  static final int EOF_CHAR = -1;
-  static final int SKIP_CHAR = -100;
-  public static final int PROPARSE_DIRECTIVE = -101;
-
 
   /**
    * An existing reference to the input stream is required for construction. The caller is responsible for closing that
@@ -141,10 +126,11 @@ public class Preprocessor {
     currentInclude = new IncludeFile(fileName, currentInput);
     includeVector.add(currentInclude);
     currSourceNum = currentInput.getSourceNum();
+    lstListener = new ListingParser();
   }
 
-  String defined(String argName) {
-    LOGGER.trace("Entering defined({})", argName);
+  @Override
+  public String defined(String argName) {
     // Yes, the precedence for defined() really is 3,2,3,1,0.
     // First look for local SCOPED define
     if (currentInclude.defdNames.containsKey(argName))
@@ -164,86 +150,25 @@ public class Preprocessor {
     return "0";
   }
 
-  void defGlobal(String argName, String argVal) {
-    LOGGER.trace("Entering defGlobal({}, {})", argName, argVal);
+  @Override
+  public void defGlobal(String argName, String argVal) {
     globalDefdNames.put(argName, argVal);
   }
 
-  void defScoped(String argName, String argVal) {
-    LOGGER.trace("Entering defScoped({}, {})", argName, argVal);
+  @Override
+  public void defScoped(String argName, String argVal) {
     currentInclude.defdNames.put(argName, argVal);
   }
 
-  /**
-   * We keep a record of discarded escape characters. This is in case the client wants to fetch those and use them. (Ex:
-   * Our lexer preserves original text inside string constants, including escape sequences).
-   */
-  private int escape() throws IOException {
-    LOGGER.trace("Entering escape()");
-
-    // We may have multiple contiguous discarded characters
-    // or a new escape sequence.
-    if (wasEscape)
-      escapeText += (char) currChar;
-    else {
-      wasEscape = true;
-      escapeText = Character.toString((char) currChar);
-      escapeAppend = true;
-    }
-    // Discard current character ('~' or '\\'), get next.
-    getRawChar();
-    int retChar = currChar;
-    escapeCurrent = true;
-    switch (currChar) {
-      case '\n':
-        // An escaped newline can be pretty much anywhere: mid-keyword, mid-identifier, between '*' and '/', etc.
-        // It is discarded.
-        escapeText += (char) currChar;
-        retChar = SKIP_CHAR;
-        break;
-      case '\r':
-        // Lookahead to the next character.
-        // If it's anything other than '\n', we need to do normal processing on it. Progress does not strip '\r' the way
-        // it strips '\n'. There is one issue here - Progress treats "\r\r\n" the same as "\r\n". I'm not sure how I
-        // could implement it.
-        if (!gotLookahead)
-          laGet();
-        if (laChar == '\n') {
-          escapeText += "\r\n";
-          laUse();
-          retChar = SKIP_CHAR;
-        } else {
-          retChar = '\r';
-        }
-        break;
-      case 'r':
-        // An escaped 'r' or an escaped 'n' gets *converted* to a different character. We don't just drop chars.
-        escapeText += (char) currChar;
-        escapeAppend = false;
-        retChar = '\r';
-        break;
-      case 'n':
-        // An escaped 'r' or an escaped 'n' gets *converted* to a different character. We don't just drop chars.
-        escapeText += (char) currChar;
-        escapeAppend = false;
-        retChar = '\n';
-        break;
-      default:
-        escapeAppend = true;
-        break; // No change to retChar.
-    }
-    return retChar;
-  }
-
-  String getArgText(int argNum) {
-    LOGGER.trace("Entering getArgText({})", argNum);
+  @Override
+  public String getArgText(int argNum) {
     if (argNum >= currentInclude.numdArgs.size())
       return "";
     return currentInclude.numdArgs.get(argNum);
   }
 
-  String getArgText(String argName) {
-    LOGGER.trace("Entering getArgText({})", argName);
+  @Override
+  public String getArgText(String argName) {
     String ret;
     // First look for local &SCOPE define
     ret = currentInclude.defdNames.get(argName);
@@ -306,6 +231,25 @@ public class Preprocessor {
     return "";
   }
 
+  @Override
+  public void undef(String argName) {
+    // First look for a local file scoped defined name to undef
+    if (undef_helper(argName, (currentInclude.defdNames)))
+      return;
+    // Second look for a named include arg to undef
+    if (currentInclude.undefNamedArg(argName))
+      return;
+    // Third look for a non-local file scoped defined name to undef
+    ListIterator<IncludeFile> it = includeVector.listIterator(includeVector.size());
+    while (it.hasPrevious()) {
+      IncludeFile incfile = it.previous();
+      if (undef_helper(argName, incfile.defdNames))
+        return;
+    }
+    // Last, look for a global arg to undef
+    undef_helper(argName, globalDefdNames);
+  }
+
   int getChar() throws IOException {
     wasEscape = false;
     for (;;) {
@@ -324,23 +268,20 @@ public class Preprocessor {
           int retChar = escape();
           if (retChar == '.')
             checkForNameDot();
-          if (retChar != SKIP_CHAR) {
+          if (retChar != SKIP_CHAR)
             return retChar;
-          }
           // else do another loop
           break;
         }
         case '{':
           // Macros are processed inside strings, but not inside comments.
-          if (doingComment) {
+          if (doingComment)
             return currChar;
-          }
           else {
             macroReference();
-            if (currChar == PROPARSE_DIRECTIVE) {
+            if (currChar == PROPARSE_DIRECTIVE)
               return currChar;
             // else do another loop
-            }
           }
           break;
         case '.':
@@ -360,14 +301,6 @@ public class Preprocessor {
     return currFile;
   }
 
-  String getFilename() {
-    return doParse.getFilename(currentInput.fileIndex);
-  }
-
-  String getFilename(int fileIndex) {
-    return doParse.getFilename(fileIndex);
-  }
-
   int getLine() {
     return currLine;
   }
@@ -376,6 +309,72 @@ public class Preprocessor {
     return currSourceNum;
   }
 
+  /**
+   * We keep a record of discarded escape characters. This is in case the client wants to fetch those and use them. (Ex:
+   * Our lexer preserves original text inside string constants, including escape sequences).
+   */
+  private int escape() throws IOException {
+    // We may have multiple contiguous discarded characters
+    // or a new escape sequence.
+    if (wasEscape)
+      escapeText += (char) currChar;
+    else {
+      wasEscape = true;
+      escapeText = Character.toString((char) currChar);
+      escapeAppend = true;
+    }
+    // Discard current character ('~' or '\\'), get next.
+    getRawChar();
+    int retChar = currChar;
+    escapeCurrent = true;
+    switch (currChar) {
+      case '\n':
+        // An escaped newline can be pretty much anywhere: mid-keyword, mid-identifier, between '*' and '/', etc.
+        // It is discarded.
+        escapeText += (char) currChar;
+        retChar = SKIP_CHAR;
+        break;
+      case '\r':
+        // Lookahead to the next character.
+        // If it's anything other than '\n', we need to do normal processing on it. Progress does not strip '\r' the way
+        // it strips '\n'. There is one issue here - Progress treats "\r\r\n" the same as "\r\n". I'm not sure how I
+        // could implement it.
+        if (!gotLookahead)
+          laGet();
+        if (laChar == '\n') {
+          escapeText += "\r\n";
+          laUse();
+          retChar = SKIP_CHAR;
+        } else {
+          retChar = '\r';
+        }
+        break;
+      case 'r':
+        // An escaped 'r' or an escaped 'n' gets *converted* to a different character. We don't just drop chars.
+        escapeText += (char) currChar;
+        escapeAppend = false;
+        retChar = '\r';
+        break;
+      case 'n':
+        // An escaped 'r' or an escaped 'n' gets *converted* to a different character. We don't just drop chars.
+        escapeText += (char) currChar;
+        escapeAppend = false;
+        retChar = '\n';
+        break;
+      default:
+        escapeAppend = true;
+        break; // No change to retChar.
+    }
+    return retChar;
+  }
+
+  private String getFilename() {
+    return doParse.getFilename(currentInput.fileIndex);
+  }
+
+  String getFilename(int fileIndex) {
+    return doParse.getFilename(fileIndex);
+  }
 
   /**
    * Deal with end of input stream, and switch to previous. Because Progress allows you to switch streams in the middle
@@ -437,8 +436,6 @@ public class Preprocessor {
    * that we'll collect whitespace. A singlequote does not have this effect.
    */
   private String includeRefArg(CharPos cp) {
-    LOGGER.trace("Entering includeRefArg({})", cp);
-
     boolean gobbleWS = false;
     StringBuilder theRet = new StringBuilder();
     // Iterate up to, but not including, closing curly.
@@ -475,15 +472,6 @@ public class Preprocessor {
       }
     }
     return theRet.toString();
-  }
-
-  void initListing() throws IOException {
-    LOGGER.trace("Entering initListing()");
-    String listingFile = doParse.getRefactorSession().getListingFileName();
-    if ((listingFile == null) || (listingFile.length() == 0))
-      return;
-    listing = true;
-    listingStream = new BufferedWriter(new FileWriter(listingFile));
   }
 
   /**
@@ -524,18 +512,11 @@ public class Preprocessor {
   }
 
   private void macroReference() throws IOException {
-    LOGGER.trace("Entering macroReference()");
+    ArrayList<IncludeArg> incArgs = new ArrayList<>();
 
-    textStartFile = currFile;
-    textStartLine = currLine;
-    textStartCol = currCol;
-    textStartSourceNum = currSourceNum;
-    ArrayList<IncludeArg> incArgs = new ArrayList<IncludeArg>();
-
-    // Preserve the macro reference start point, because
-    // textStart* get messed with if this macro
-    // reference itself contains any macro references.
-    FilePos refPos = new FilePos(textStartFile, textStartLine, textStartCol, textStartSourceNum);
+    this.textStart = new FilePos(currFile, currLine, currCol, currSourceNum);
+    // Preserve the macro reference start point, because textStart get messed with if this macro reference itself contains any macro references.
+    FilePos refPos = new FilePos(textStart.file, textStart.line, textStart.col, textStart.sourceNum);
 
     // Gather the macro reference text
     // Do not stop on escaped '}'
@@ -562,15 +543,7 @@ public class Preprocessor {
       // This will be counted as a source whether picked up here or picked
       // up as a normal macro ref.
       ++sourceCounter;
-      if (listing) {
-        StringBuilder bldr = new StringBuilder();
-        bldr.append(refPos.file).append(" ").append(refPos.line).append(" ").append(refPos.col).append(
-            " macroref _proparse_");
-        listingStream.write(bldr.toString());
-        listingStream.newLine();
-        listingStream.write("0 0 0 macrorefend");
-        listingStream.newLine();
-      }
+      lstListener.macroRef(refPos.line, refPos.col, "_proparse");
       return;
     }
 
@@ -692,13 +665,7 @@ public class Preprocessor {
         // currfile is only updated with a push/pop of the input stack.
         currFile = currentInput.fileIndex;
         currSourceNum = currentInput.getSourceNum();
-        if (listing) {
-          StringBuilder bldr = new StringBuilder();
-          bldr.append(refPos.file).append(" ").append(refPos.line).append(" ").append(refPos.col).append(
-              " include ").append(currFile).append(" ").append(includeFilename);
-          listingStream.write(bldr.toString());
-          listingStream.newLine();
-        }
+        lstListener.include(refPos.line, refPos.col, currFile, includeFilename);
         // Add the arguments to the new include object.
         int argNum = 1;
         for (IncludeArg incarg : incArgs) {
@@ -706,18 +673,7 @@ public class Preprocessor {
             currentInclude.defNamedArg(incarg.argName, incarg.argVal);
           else
             currentInclude.numdArgs.add(incarg.argVal);
-          if (listing) {
-            // See Note[1] at end of this file
-            listingStream.write("0 0 0 incarg ");
-            if (usingNamed)
-              listingStream.write(incarg.argName);
-            else
-              listingStream.write(Integer.toString(argNum));
-            // Unlike named macros, include args can contain line breaks.
-            listingStream.write(" ");
-            //listingStream.write(escapeLineBreaks(incarg.argVal));
-            listingStream.newLine();
-          }
+          lstListener.includeArgument(usingNamed ? incarg.argName : Integer.toString(argNum), incarg.argVal);
           argNum++;
         }
       }
@@ -727,7 +683,6 @@ public class Preprocessor {
   } // macroReference()
 
   private boolean newInclude(String referencedWithName) throws IOException {
-    LOGGER.trace("Entering newInclude({})", referencedWithName);
     // Progress doesn't enter include files if &IF FALSE
     // It *is* possible to get here with a blank include file
     // name. See bug#034. Don't enter if the includefilename is blank.
@@ -756,23 +711,19 @@ public class Preprocessor {
     // Using this trick: {{&undefined-argument}{&*}}
     // it is possible to get line breaks into what we
     // get here as the macroName. See test data bug15.p and bug15.i.
-    // lstListener.macroRef(refPos.line, refPos.col, macroName);
+    lstListener.macroRef(refPos.line, refPos.col, macroName);
     newMacroRef2(getArgText(macroName), refPos);
   }
 
   private void newMacroRef(int argNum, FilePos refPos) throws IOException {
-    // lstListener.macroRef(refPos.line, refPos.col, Integer.toString(argNum));
+    lstListener.macroRef(refPos.line, refPos.col, Integer.toString(argNum));
     newMacroRef2(getArgText(argNum), refPos);
   }
 
   private void newMacroRef2(String theText, FilePos refPos) throws IOException {
-    LOGGER.trace("Entering newMacroRef2({}, {})", theText, refPos);
     if (theText.length() == 0) {
       ++sourceCounter;
-      if (listing) {
-        listingStream.write("0 0 0 macrorefend");
-        listingStream.newLine();
-      }
+      lstListener.macroRefEnd();
       return;
     }
     // We must expand macros even if consuming,
@@ -791,16 +742,12 @@ public class Preprocessor {
    * Cleanup work, once the parse is complete. Gets run by doParse even if there's an exception thrown.
    */
   void parseComplete() throws IOException {
-    LOGGER.trace("Entering parseComplete()");
     // Things to do once the parse is complete
     // Release input streams, so that files can be written to by other processes.
     // Otherwise, these hang around until the next parse or until the Progress
     // session closes, and nothing else can write to the include files.
     while (popInput() != 0) {
     }
-    // Close the listing stream.
-    if (listing)
-      listingStream.close();
   }
 
   /**
@@ -809,7 +756,6 @@ public class Preprocessor {
    * at the end of the include reference.
    */
   private int popInput() throws IOException {
-    LOGGER.trace("Entering popInput()");
     // Returns 2 if we popped a macro or arg ref off the input stack.
     // Returns 1 if we popped an include file off the input stack.
     // Returns 0 if there's nothing left to pop.
@@ -819,49 +765,21 @@ public class Preprocessor {
     if (currentInclude.inputVector.size() > 1) {
       currentInclude.inputVector.removeLast();
       currentInput = currentInclude.inputVector.getLast();
-      if (listing) {
-        listingStream.write("0 0 0 macrorefend");
-        listingStream.newLine();
-      }
+      lstListener.macroRefEnd();
       return 2;
     } else if (includeVector.size() > 1) {
       includeVector.removeLast();
       currentInclude = includeVector.getLast();
       currentInput = currentInclude.inputVector.getLast();
+      lstListener.includeEnd();
       LOGGER.trace("Back to file: {}", getFilename());
-
-      if (listing) {
-        listingStream.write("0 0 0 incend");
-        listingStream.newLine();
-      }
       return 1;
     } else {
       return 0;
     }
   }
 
-  void undef(String argName) {
-    LOGGER.trace("Entering undef({})", argName);
-
-    // First look for a local file scoped defined name to undef
-    if (undef_helper(argName, (currentInclude.defdNames)))
-      return;
-    // Second look for a named include arg to undef
-    if (currentInclude.undefNamedArg(argName))
-      return;
-    // Third look for a non-local file scoped defined name to undef
-    ListIterator<IncludeFile> it = includeVector.listIterator(includeVector.size());
-    while (it.hasPrevious()) {
-      IncludeFile incfile = it.previous();
-      if (undef_helper(argName, incfile.defdNames))
-        return;
-    }
-    // Last, look for a global arg to undef
-    undef_helper(argName, globalDefdNames);
-  }
-
   private boolean undef_helper(String argName, Map<String, String> names) {
-    LOGGER.trace("Entering undef_helper({})", argName);
     if (names.containsKey(argName)) {
       names.remove(argName);
       return true;
@@ -870,13 +788,68 @@ public class Preprocessor {
   }
 
   private void checkForNameDot() throws IOException {
-    LOGGER.trace("Entering checkForNameDot()");
     // Have to check for nameDot in the preprocessor because nameDot is true
     // even if the next character is a '{' which eventually expands
     // out to be a space character.
     if (!gotLookahead)
       laGet();
-    nameDot = (laChar != EOF_CHAR) && (!Character.isWhitespace(laChar));
+    nameDot = (laChar != EOF_CHAR && (!Character.isWhitespace(laChar)));
+  }
+
+  public void setDoingComment(boolean doingComment) {
+    this.doingComment = doingComment;
+  }
+
+  public boolean isEscapeAppend() {
+    return escapeAppend;
+  }
+
+  public boolean isEscapeCurrent() {
+    return escapeCurrent;
+  }
+
+  public String getEscapeText() {
+    return escapeText;
+  }
+
+  public boolean wasEscape() {
+    return wasEscape;
+  }
+
+  public boolean isNameDot() {
+    return nameDot;
+  }
+
+  public String getProparseDirectiveText() {
+    return proparseDirectiveText;
+  }
+
+  public boolean isConsuming() {
+    return consuming != 0;
+  }
+
+  public int getConsuming() {
+    return consuming;
+  }
+
+  public void incrementConsuming() {
+    consuming++;
+  }
+
+  public void decrementConsuming() {
+    consuming--;
+  }
+
+  public FilePos getTextStart() {
+    return textStart;
+  }
+
+  public ListingListener getLstListener() {
+    return lstListener;
+  }
+
+  public IncludeRef getMacroGraph() {
+    return ((ListingParser) lstListener).getMacroGraph();
   }
 
   private static class CharPos {
@@ -889,7 +862,7 @@ public class Preprocessor {
     }
   }
   
-  private static class FilePos {
+  public static class FilePos {
     private final int file;
     private final int line;
     private final int col;
@@ -900,6 +873,22 @@ public class Preprocessor {
       this.line = line;
       this.col = col;
       this.sourceNum = sourceNum;
+    }
+
+    public int getFile() {
+      return file;
+    }
+
+    public int getLine() {
+      return line;
+    }
+
+    public int getCol() {
+      return col;
+    }
+
+    public int getSourceNum() {
+      return sourceNum;
     }
   }
 
