@@ -234,7 +234,7 @@ public class NodeTypes {
     return ttype;
   }
 
-  public static void userLiteraladd(String text, String ttype) throws Exception {
+  public static void userLiteralAdd(String text, String ttype) throws Exception {
     String lowType = ttype.toLowerCase();
     Integer typeNum = getTypeNum(lowType);
     // The documentation states that the second parameter must be a valid Proparse
@@ -639,6 +639,7 @@ public class NodeTypes {
     add(PreprocessorParser.ENDROWRESIZE, 14, "end-row-resize", TI.KEYWORD);
     add(PreprocessorParser.ENTERED, 7, "entered", TI.KEYWORD);
     add(PreprocessorParser.ENTRY, 5, "entry", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_REGULAR_FUNC);
+    add(PreprocessorParser.ENUM, 4, "enum", TI.KEYWORD);
     add(PreprocessorParser.EQ, 2, "eq", TI.KEYWORD);
     add(PreprocessorParser.EQUAL, 0, "", TI.NO_FLAGS);
     add(PreprocessorParser.ERROR, 5, "error", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
@@ -701,6 +702,7 @@ public class NodeTypes {
     add(PreprocessorParser.FIXCHAR, 7, "fixchar", TI.KEYWORD);
     add(PreprocessorParser.FIXCODEPAGE, 12, "fix-codepage", TI.KEYWORD);
     add(PreprocessorParser.FIXEDONLY, 10, "fixed-only", TI.KEYWORD);
+    add(PreprocessorParser.FLAGS, 5, "flags", TI.KEYWORD);
     add(PreprocessorParser.FLATBUTTON, 11, "flat-button", TI.KEYWORD);
     add(PreprocessorParser.FLOAT, 5, "float", TI.KEYWORD);
     add(PreprocessorParser.FOCUS, 5, "focus", TI.KEYWORD | TI.RESERVED | TI.SYSHDL);
@@ -754,7 +756,8 @@ public class NodeTypes {
     add(PreprocessorParser.GETCGILONGVALUE, 18, "get-cgi-long-value", TI.KEYWORD);
     add(PreprocessorParser.GETCGIVALUE, 13, "get-cgi-value", TI.KEYWORD);
     add(PreprocessorParser.GETCLASS, 9, "get-class", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
-    add(PreprocessorParser.GETCODEPAGES, 12, "get-codepages", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_NO_ARG_FUNC | TI.MAY_BE_REGULAR_FUNC);
+    add(PreprocessorParser.GETCODEPAGE, 12, "get-codepage", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_REGULAR_FUNC);
+    add(PreprocessorParser.GETCODEPAGES, 13, "get-codepages", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_NO_ARG_FUNC | TI.MAY_BE_REGULAR_FUNC);
     add(PreprocessorParser.GETCOLLATIONS, 8, "get-collations", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_REGULAR_FUNC);
     add(PreprocessorParser.GETCONFIGVALUE, 16, "get-config-value", TI.KEYWORD);
     add(PreprocessorParser.GETDIR, 7, "get-dir", TI.KEYWORD);
@@ -787,6 +790,8 @@ public class NodeTypes {
     add(PreprocessorParser.HAVING, 6, "having", TI.KEYWORD | TI.RESERVED);
     add(PreprocessorParser.HEADER, 6, "header", TI.KEYWORD | TI.RESERVED);
     add(PreprocessorParser.HEIGHT, 6, "height", TI.KEYWORD);
+    add(PreprocessorParser.HEIGHTCHARS, 8, "height-chars", TI.KEYWORD);
+    add(PreprocessorParser.HEIGHTPIXELS, 8, "height-pixels", TI.KEYWORD);
     add(PreprocessorParser.HELP, 4, "help", TI.KEYWORD | TI.RESERVED);
     add(PreprocessorParser.HELPTOPIC, 10, "help-topic", TI.KEYWORD);
     add(PreprocessorParser.HEXDECODE, 10, "hex-decode", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
@@ -1879,6 +1884,7 @@ public class NodeTypes {
     allTokens[PreprocessorParser.GETBYTEORDER].keywordText = "GET-BYTE-ORDER";
     allTokens[PreprocessorParser.GETCGILIST].keywordText = "GET-CGI-LIST";
     allTokens[PreprocessorParser.GETCGIVALUE].keywordText = "GET-CGI-VALUE";
+    allTokens[PreprocessorParser.GETCODEPAGE].keywordText = "GET-CODEPAGE";
     allTokens[PreprocessorParser.GETCODEPAGES].keywordText = "GET-CODEPAGES";
     allTokens[PreprocessorParser.GETCOLLATIONS].keywordText = "GET-COLLATIONS";
     allTokens[PreprocessorParser.GETCONFIGVALUE].keywordText = "GET-CONFIG-VALUE";
@@ -1904,6 +1910,8 @@ public class NodeTypes {
     allTokens[PreprocessorParser.HAVING].keywordText = "HAVING";
     allTokens[PreprocessorParser.HEADER].keywordText = "HEADER";
     allTokens[PreprocessorParser.HEIGHT].keywordText = "HEIGHT";
+    allTokens[PreprocessorParser.HEIGHTCHARS].keywordText = "HEIGHT-CHARS";
+    allTokens[PreprocessorParser.HEIGHTPIXELS].keywordText = "HEIGHT-PIXELS";
     allTokens[PreprocessorParser.HELP].keywordText = "HELP";
     allTokens[PreprocessorParser.HELPTOPIC].keywordText = "HELP-TOPIC";
     allTokens[PreprocessorParser.HIDE].keywordText = "HIDE";
@@ -2636,6 +2644,9 @@ public class NodeTypes {
     // Mike Fechner / Consultingwerk Ltd.
     allTokens[PreprocessorParser.BLOCKLEVEL].keywordText = "BLOCK-LEVEL";
     allTokens[PreprocessorParser.GETCLASS].keywordText = "GET-CLASS";
+
+    allTokens[PreprocessorParser.ENUM].keywordText = "ENUM";
+    allTokens[PreprocessorParser.FLAGS].keywordText = "FLAGS";
   }
   // NO-SONAR-END
 

@@ -13,6 +13,8 @@ import org.prorefactor.proparse.antlr4.PreprocessorParser.ExprInParenContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.FalseExprContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.GreaterEqualsContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.GreaterThanContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.Int64FunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.IntegerFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.LesserEqualsContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.LesserThanContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.MatchesContext;
@@ -181,8 +183,18 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   // *********
 
   @Override
+  public Object visitIntegerFunction(IntegerFunctionContext ctx) {
+    return new Integer(ctx.expr().getText());
+  }
+
+  @Override
+  public Object visitInt64Function(Int64FunctionContext ctx) {
+    return new Integer(ctx.expr().getText());
+  }
+
+  @Override
   public Object visitProversionFunction(ProversionFunctionContext ctx) {
-    return "11.0";
+    return "11.6";
   }
 
   /**
@@ -246,11 +258,9 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
       return ((Boolean) left).compareTo((Boolean) right);
     if ((left instanceof String) && (right instanceof String))
       return compareStringHelper(left).compareTo(compareStringHelper(right));
-    if ((left instanceof Integer) && (right instanceof Integer))
-      return ((Integer) left).compareTo((Integer) right);
     if ((left instanceof Number) && (right instanceof Number)) {
-      Float fl = ((Number) left).floatValue();
-      Float fr = ((Number) right).floatValue();
+      Double fl = ((Number) left).doubleValue();
+      Double fr = ((Number) right).doubleValue();
       return fl.compareTo(fr);
     }
     throw new ProEvalException("Incompatible data types in comparison expression.");

@@ -51,6 +51,7 @@ function:
   | FILL LEFTPAREN expr COMMA expr RIGHTPAREN                   # fillFunction
   | INDEX LEFTPAREN expr COMMA expr (COMMA expr)? RIGHTPAREN    # indexFunction
   | INTEGER LEFTPAREN expr RIGHTPAREN                           # integerFunction
+  | INT64 LEFTPAREN expr RIGHTPAREN                             # int64Function
   | KEYWORD LEFTPAREN expr RIGHTPAREN                           # keywordFunction
   | KEYWORDALL LEFTPAREN expr RIGHTPAREN                        # keywordAllFunction
   | LC LEFTPAREN expr RIGHTPAREN                                # lcFunction

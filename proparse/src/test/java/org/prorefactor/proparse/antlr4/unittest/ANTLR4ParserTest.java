@@ -72,7 +72,7 @@ public class ANTLR4ParserTest {
   }
 
   @Test
-  public void test01bis() throws Exception {
+  public void test01() throws Exception {
     genericTest("bug01.p");
   }
 
