@@ -49,8 +49,10 @@ public abstract class FieldContainer extends Widget {
   public void addSymbol(Symbol symbol, boolean statementIsEnabler) {
     if (symbol instanceof FieldBuffer)
       fieldSet.add((FieldBuffer) symbol);
-    else if (symbol instanceof Variable)
+    else if (symbol instanceof Variable) {
+      ((Variable) symbol).referencedInFrame();
       variableSet.add((Variable) symbol);
+    }
     else
       otherSymbols.add(symbol);
     if (statementIsEnabler)
