@@ -112,7 +112,7 @@ public class TP01Support extends TP01Action {
   /** Called at the *end* of the statement that defines the symbol. */
   @Override
   public void addToSymbolScope(Object o) {
-    LOG.trace("Entering addToSymbolScope {}", o);
+    LOG.trace("addToSymbolScope - Adding {} to {}", o, currentScope);
     if (inDefineEvent) return;
     currentScope.add((Symbol) o);
   }
@@ -129,6 +129,7 @@ public class TP01Support extends TP01Action {
   /** End of a block. */
   @Override
   public void blockEnd() {
+    LOG.trace("Entering blockEnd");
     currentBlock = popBlock();
   }
 
@@ -140,7 +141,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void callBegin(AST callAST) {
-    LOG.trace("Entering callBegin {} - Parent", callAST);
+    LOG.trace("Entering callBegin {}", callAST);
     JPNode callNode = (JPNode) callAST;
     Call call = new Call(callNode);
     callNode.setCall(call);
@@ -757,6 +758,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void paramForRoutine(AST directionAST) {
+    LOG.trace("Adding parameter {} for routine {}", directionAST.getText(), currentRoutine.fullName());
     Parameter param = new Parameter();
     param.setDirectionNode((JPNode) directionAST);
     wipParameters.addFirst(param);
@@ -994,6 +996,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void scopeAdd(AST anode) {
+    LOG.trace("Creating new scope {}", anode);
     BlockNode blockNode = (BlockNode) anode;
     currentScope = currentScope.addScope();
     currentBlock = pushBlock(new Block(currentScope, blockNode));

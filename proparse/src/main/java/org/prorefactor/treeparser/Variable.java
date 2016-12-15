@@ -22,6 +22,7 @@ public class Variable extends Symbol implements Primative, Value {
   private DataType dataType;
   private Object value;
   private String className = null;
+  private boolean refInFrame = false;
 
   public Variable(String name, SymbolScope scope) {
     super(name, scope);
@@ -108,4 +109,11 @@ public class Variable extends Symbol implements Primative, Value {
     this.value = value;
   }
 
+  public void referencedInFrame() {
+    this.refInFrame = true;
+  }
+
+  public boolean isReferencedInFrame() {
+    return refInFrame;
+  }
 }
