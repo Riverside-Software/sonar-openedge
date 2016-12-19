@@ -285,4 +285,8 @@ public class NewSyntaxTest {
     testNewSyntax("prolint/regrtest-oo/test6.cls");
   }
 
+  @Test
+  public void test50() throws Exception {
+    testNewSyntax("11n/Class03.cls");
+  }
 }
