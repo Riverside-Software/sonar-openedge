@@ -1452,7 +1452,7 @@ class_type_name
 
 enumstate
   :  e:ENUM^ type_name2 (FLAGS)? block_colon
-     defenumstate
+     (defenumstate)+
      enum_end
      state_end
      {sthd(##,0);}
