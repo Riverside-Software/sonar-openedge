@@ -1,0 +1,4 @@
+ENUM 11n.Class03:
+   DEFINE ENUM Val1 = 1.
+   DEFINE ENUM Val2 = 2.
+END ENUM.

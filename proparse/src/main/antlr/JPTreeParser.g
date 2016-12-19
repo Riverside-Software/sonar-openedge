@@ -998,7 +998,7 @@ choosestate throws TreeParserException
 
 enumstate throws TreeParserException
   :  #(  ENUM TYPE_NAME (FLAGS)? block_colon
-      defenumstate
+      (defenumstate)+
       #(END (ENUM)? )
       state_end
      )
