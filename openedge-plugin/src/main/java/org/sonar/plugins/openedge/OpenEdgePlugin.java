@@ -74,6 +74,10 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
 
     // Properties
+    context.addExtension(PropertyDefinition.builder(Constants.OE_ANALYTICS).name("Enable analytics").description(
+        "Ping remote server for usage analytics").type(PropertyType.BOOLEAN).category(
+            CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
+                Qualifiers.PROJECT).defaultValue(Boolean.TRUE.toString()).build());
     context.addExtension(PropertyDefinition.builder(Constants.SKIP_PROPARSE_PROPERTY).name("Skip ProParse step").description(
         "Skip Proparse AST generation and lint rules").type(PropertyType.BOOLEAN).category(
             CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
