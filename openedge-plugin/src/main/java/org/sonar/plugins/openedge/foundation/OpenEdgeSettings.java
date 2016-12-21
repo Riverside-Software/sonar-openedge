@@ -268,7 +268,7 @@ public class OpenEdgeSettings {
    * @return False only if property is present and set to false
    */
   public boolean useAnalytics() {
-    return !"false".equalsIgnoreCase(Strings.nullToEmpty(settings.getString(Constants.OE_ANALYTICS))) ;
+    return !"false".equalsIgnoreCase(Strings.nullToEmpty(settings.getString(Constants.OE_ANALYTICS)));
   }
 
   public Set<Integer> getXrefBytes() {
