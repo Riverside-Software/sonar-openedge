@@ -6,7 +6,7 @@ node ('master') {
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'GitHub-GQuerret', usernameVariable: 'GH_LOGIN', passwordVariable: 'GH_PASSWORD']]) {
       def resp = getPR(env.BRANCH_NAME, env.GH_PASSWORD)
       echo "resp ok ${resp}"
-      def ttl = getTitle(resp.getContent())
+      def ttl = getTitle(resp.content)
       echo "title ${ttl}" 
       def itm = getItem(env.BRANCH_NAME)
       echo "itm ok ${itm}"
