@@ -61,7 +61,7 @@ def getItem(branchName) {
 def getTitle(json) {
     def slurper = new groovy.json.JsonSlurper()
     def jsonObject = slurper.parseText(json.content)
-    result.title
+    jsonObject.title
 }
 
 // see https://issues.jenkins-ci.org/browse/JENKINS-31924
