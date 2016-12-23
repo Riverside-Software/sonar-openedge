@@ -5,12 +5,14 @@ node ('master') {
   if (env.BRANCH_NAME.startsWith('PR')) {
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'GitHub-GQuerret', usernameVariable: 'GH_LOGIN', passwordVariable: 'GH_PASSWORD']]) {
       def resp = getPR(env.BRANCH_NAME, env.GH_PASSWORD)
-      echo "resp ok ${resp.title}"
+      echo "resp ok ${resp}"
+      def ttl = getTitle(resp)
+      echo "title ${ttl}" 
       def itm = getItem(env.BRANCH_NAME)
       echo "itm ok ${itm}"
-      currentBuild.displayName = "Current build ${resp.title}"
+      currentBuild.displayName = "Current build ${ttl}"
       echo "current build ok"
-      itm.setDisplayName("Current item ${resp.title}")
+      itm.setDisplayName("Current item ${ttl}")
     }
   }
   gitClean()
@@ -52,6 +54,13 @@ def getPR(branchName, gitToken) {
 @NonCPS
 def getItem(branchName) {
   Jenkins.instance.getItemByFullName("sonar-openedge/${branchName}")
+}
+
+@NonCPS
+def getTitle(String json) {
+    def slurper = new JsonSlurper()
+    def jsonObject = slurper.parseText(json)
+    result.title
 }
 
 // see https://issues.jenkins-ci.org/browse/JENKINS-31924
