@@ -7,7 +7,7 @@ node ('master') {
       def resp = httpRequest url: "https://api.github.com/repos/Riverside-Software/sonar-openedge/pulls/${env.BRANCH_NAME.substring(3)}", customHeaders: [[name: 'Authorization', value: "token ${env.GH_PASSWORD}"]]
       // def resp = getPR(env.BRANCH_NAME, env.GH_PASSWORD)
       echo "resp ok ${resp.content}"
-      def ttl = getTitle(resp.content)
+      def ttl = getTitle(resp)
       echo "title ${ttl}" 
       def itm = getItem(env.BRANCH_NAME)
       echo "itm ok ${itm}"
@@ -60,7 +60,7 @@ def getItem(branchName) {
 @NonCPS
 def getTitle(json) {
     def slurper = new groovy.json.JsonSlurper()
-    def jsonObject = slurper.parseText(json)
+    def jsonObject = slurper.parseText(json.content)
     result.title
 }
 
