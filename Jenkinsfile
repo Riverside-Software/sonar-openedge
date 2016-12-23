@@ -4,8 +4,9 @@ stage 'Build OpenEdge plugin'
 node ('master') {
   if (env.BRANCH_NAME.startsWith('PR')) {
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'GitHub-GQuerret', usernameVariable: 'GH_LOGIN', passwordVariable: 'GH_PASSWORD']]) {
-      def resp = getPR(env.BRANCH_NAME, env.GH_PASSWORD)
-      echo "resp ok ${resp}"
+      def resp = httpRequest url: "https://api.github.com/repos/Riverside-Software/sonar-openedge/pulls/${env.BRANCH_NAME.substring(3)}", customHeaders: [[name: 'Authorization', value: "token ${env.GH_PASSWORD}"]]
+      // def resp = getPR(env.BRANCH_NAME, env.GH_PASSWORD)
+      echo "resp ok ${resp.content}"
       def ttl = getTitle(resp.content)
       echo "title ${ttl}" 
       def itm = getItem(env.BRANCH_NAME)
