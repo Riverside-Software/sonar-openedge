@@ -35,7 +35,9 @@ node ('master') {
 @NonCPS
 def setDisplayName(branchName, gitToken) {
   def response = httpRequest url: "https://api.github.com/repos/Riverside-Software/sonar-openedge/pulls/${branchName.substring(3)}", customHeaders: [[name: 'Authorization', value: "token ${gitToken}"]]
+  echo "Response : ${response}"
   item = Jenkins.instance.getItemByFullName("sonar-openedge/${branchName}")
+  echo "Item : ${item}"
   item.setDisplayName("My custom description")
   echo "Done..."
 }
