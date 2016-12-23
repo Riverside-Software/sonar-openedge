@@ -58,7 +58,7 @@ def getItem(branchName) {
 
 @NonCPS
 def getTitle(String json) {
-    def slurper = new JsonSlurper()
+    def slurper = new groovy.json.JsonSlurper()
     def jsonObject = slurper.parseText(json)
     result.title
 }
