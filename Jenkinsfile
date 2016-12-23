@@ -5,9 +5,12 @@ node ('master') {
   if (env.BRANCH_NAME.startsWith('PR')) {
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'GitHub-GQuerret', usernameVariable: 'GH_LOGIN', passwordVariable: 'GH_PASSWORD']]) {
       def resp = getPR(env.BRANCH_NAME, env.GH_PASSWORD)
-      echo "resp ok ${resp}"
+      echo "resp ok ${resp.title}"
       def itm = getItem(env.BRANCH_NAME)
       echo "itm ok ${itm}"
+      currentBuild.displayName = "Current build ${resp.title}"
+      echo "current build ok"
+      itm.setDisplayName("Current item ${resp.title}")
     }
   }
   gitClean()
