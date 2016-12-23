@@ -2,18 +2,13 @@
 
 stage 'Build OpenEdge plugin'
 node ('master') {
+  // Set job description with PR title
   if (env.BRANCH_NAME.startsWith('PR')) {
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'GitHub-GQuerret', usernameVariable: 'GH_LOGIN', passwordVariable: 'GH_PASSWORD']]) {
       def resp = httpRequest url: "https://api.github.com/repos/Riverside-Software/sonar-openedge/pulls/${env.BRANCH_NAME.substring(3)}", customHeaders: [[name: 'Authorization', value: "token ${env.GH_PASSWORD}"]]
-      // def resp = getPR(env.BRANCH_NAME, env.GH_PASSWORD)
-      echo "resp ok ${resp.content}"
       def ttl = getTitle(resp)
-      echo "title ${ttl}" 
       def itm = getItem(env.BRANCH_NAME)
-      echo "itm ok ${itm}"
-      currentBuild.displayName = "Current build ${ttl}"
-      echo "current build ok"
-      itm.setDisplayName("Current item ${ttl}")
+      itm.setDisplayName(ttl)
     }
   }
   gitClean()
@@ -39,17 +34,6 @@ node ('master') {
       }
     }
   }
-}
-
-@NonCPS
-def getPR(branchName, gitToken) {
-  // echo "Before HTTP request..."
-  httpRequest url: "https://api.github.com/repos/Riverside-Software/sonar-openedge/pulls/${branchName.substring(3)}", customHeaders: [[name: 'Authorization', value: "token ${gitToken}"]]
-  // echo "Response : ${response}"
-  // item = Jenkins.instance.getItemByFullName("sonar-openedge/${branchName}")
-  // echo "Item : ${item}"
-  // item.setDisplayName("My custom description")
-  // echo "Done..."
 }
 
 @NonCPS
