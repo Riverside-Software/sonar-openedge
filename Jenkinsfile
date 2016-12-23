@@ -2,9 +2,17 @@
 
 stage 'Build OpenEdge plugin'
 node ('master') {
+  // Set job description with PR title
+  if (env.BRANCH_NAME.startsWith('PR')) {
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'GitHub-GQuerret', usernameVariable: 'GH_LOGIN', passwordVariable: 'GH_PASSWORD']]) {
+      def resp = httpRequest url: "https://api.github.com/repos/Riverside-Software/sonar-openedge/pulls/${env.BRANCH_NAME.substring(3)}", customHeaders: [[name: 'Authorization', value: "token ${env.GH_PASSWORD}"]]
+      def ttl = getTitle(resp)
+      def itm = getItem(env.BRANCH_NAME)
+      itm.setDisplayName("PR '${ttl}'")
+    }
+  }
   gitClean()
   checkout scm
-  echo " Branch: ${env.BRANCH_NAME}"
   withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
     if ("master" == env.BRANCH_NAME) {
       sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true"
@@ -26,6 +34,18 @@ node ('master') {
       }
     }
   }
+}
+
+@NonCPS
+def getItem(branchName) {
+  Jenkins.instance.getItemByFullName("sonar-openedge/${branchName}")
+}
+
+@NonCPS
+def getTitle(json) {
+    def slurper = new groovy.json.JsonSlurper()
+    def jsonObject = slurper.parseText(json.content)
+    jsonObject.title
 }
 
 // see https://issues.jenkins-ci.org/browse/JENKINS-31924
