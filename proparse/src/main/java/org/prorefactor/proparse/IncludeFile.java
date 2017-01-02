@@ -12,6 +12,7 @@ package org.prorefactor.proparse;
 
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -32,18 +33,18 @@ import java.util.Map;
  */
 public class IncludeFile {
   final Map<String, String> defdNames = new HashMap<>();
-  final LinkedList<InputSource> inputVector = new LinkedList<>();
+  final Deque<InputSource> inputVector = new LinkedList<>();
   final List<String> numdArgs = new ArrayList<>();
   final Map<String, String> namedArgs = new HashMap<>();
   final List<NamedArgIn> namedArgsIn = new ArrayList<>();
 
-  IncludeFile(String referencedWithName, InputSource is) {
+  public IncludeFile(String referencedWithName, InputSource is) {
     inputVector.add(is);
     // {0} must return the name that this include file was referenced with.
     numdArgs.add(referencedWithName);
   }
 
-  void defNamedArg(String name, String arg) {
+  public void addNamedArgument(String name, String arg) {
     namedArgsIn.add(new NamedArgIn(name, arg));
     String lname = name.toLowerCase();
     // The first one defined is the one that gets used

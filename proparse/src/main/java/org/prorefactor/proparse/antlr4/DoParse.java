@@ -10,14 +10,12 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse.antlr4;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.IntStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
@@ -30,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import antlr.RecognitionException;
-import antlr.TokenStreamException;
 
 public class DoParse {
   private static final Logger LOGGER = LoggerFactory.getLogger(DoParse.class);
@@ -40,11 +37,8 @@ public class DoParse {
   private final DoParse primary;
 
   private TokenSource filter;
-  private boolean proEval = false;
-  private int nextNodeNum;
   private IntegerIndex<String> filenameList = new IntegerIndex<>();
   
-  BufferedReader inStream;
   boolean preProcessCondition = false;
   boolean preProcessConditionResult = false;
   private JPNodeMetrics metrics;
@@ -84,16 +78,13 @@ public class DoParse {
     return filter;
   }
 
-  protected void doParse(List<ProToken> tokenVector) throws IOException, TokenStreamException, RecognitionException {
-    doParse(false, new TokenVectorIterator(tokenVector, this));
+  protected void doParse(List<ProToken> tokenVector) throws IOException, RecognitionException {
+    doParse(false, new TokenVectorIterator(tokenVector));
   }
 
-  public void doParse(boolean justLex, TokenVectorIterator tvi) throws IOException, TokenStreamException, RecognitionException {
+  public void doParse(boolean justLex, TokenSource tvi) throws IOException, RecognitionException {
     LOGGER.trace("Entering DoParse#doParse({})", justLex);
-    if (fileName != null) {
-      inStream = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), session.getCharset()));
-    }
-    Preprocessor prepro = new Preprocessor(fileName, inStream, this);
+    Preprocessor prepro = new Preprocessor(fileName, this);
 
     try  {
       if (fileName != null) {
@@ -104,7 +95,7 @@ public class DoParse {
       // Parsing either a token vector or else regular input stream
       if (tvi != null) {
         LOGGER.trace("Using TokenVectorIterator filter");
-        tvi.trace();
+        // tvi.trace();
 //        filter = new CommonTokenStream(tvi);
       } else {
         LOGGER.trace("Creating Lexer / PostLexer objects");
@@ -191,17 +182,15 @@ public class DoParse {
   private static class TokenVectorIterator implements TokenSource {
     private final List<ProToken> tokenVector;
     private int it = 0;
-    private DoParse doParse;
 
-    TokenVectorIterator(List<ProToken> tokenVector, DoParse doParse) {
+    TokenVectorIterator(List<ProToken> tokenVector) {
       this.tokenVector = tokenVector;
-      this.doParse = doParse;
     }
 
     @Override
     public Token nextToken() {
       if (it >= tokenVector.size())
-        return new ProToken(/*doParse.getFilenameList(),*/ Token.EOF, "");
+        return new ProToken(Token.EOF, "");
 
       return tokenVector.get(it++);
     }
@@ -211,39 +200,38 @@ public class DoParse {
         LOGGER.trace(" TVI # " + tk.toString());
       }
     }
+
     @Override
     public int getLine() {
-      // TODO Auto-generated method stub
+      // Return 0 as it's not implemented
       return 0;
     }
 
     @Override
     public int getCharPositionInLine() {
-      // TODO Auto-generated method stub
-      return 0;
+      // Return -1 as it's not implemented
+      return -1;
     }
 
     @Override
     public CharStream getInputStream() {
-      // TODO Auto-generated method stub
+      // No input stream available
       return null;
     }
 
     @Override
     public String getSourceName() {
-      // TODO Auto-generated method stub
-      return null;
+      // No input stream available
+      return IntStream.UNKNOWN_SOURCE_NAME;
     }
 
     @Override
     public void setTokenFactory(TokenFactory<?> factory) {
-      // TODO Auto-generated method stub
-      
+      throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
     public TokenFactory<?> getTokenFactory() {
-      // TODO Auto-generated method stub
       return null;
     }
   }

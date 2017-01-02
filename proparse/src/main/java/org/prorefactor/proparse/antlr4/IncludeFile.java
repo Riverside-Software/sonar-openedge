@@ -12,6 +12,7 @@ package org.prorefactor.proparse.antlr4;
 
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -32,19 +33,19 @@ import java.util.Map;
  */
 public class IncludeFile {
   final Map<String, String> defdNames = new HashMap<>();
-  final LinkedList<InputSource> inputVector = new LinkedList<>();
+  final Deque<InputSource> inputVector = new LinkedList<>();
   final List<String> numdArgs = new ArrayList<>();
   final Map<String, String> namedArgs = new HashMap<>();
-  final List<NamedArgIn> namedArgsIn = new ArrayList<>();
+  final List<NamedArgument> namedArgsIn = new ArrayList<>();
 
-  IncludeFile(String referencedWithName, InputSource is) {
+  public IncludeFile(String referencedWithName, InputSource is) {
     inputVector.add(is);
     // {0} must return the name that this include file was referenced with.
     numdArgs.add(referencedWithName);
   }
 
-  void defNamedArg(String name, String arg) {
-    namedArgsIn.add(new NamedArgIn(name, arg));
+  public void addNamedArgument(String name, String arg) {
+    namedArgsIn.add(new NamedArgument(name, arg));
     String lname = name.toLowerCase();
     // The first one defined is the one that gets used
     if (!namedArgs.containsKey(lname))
@@ -53,17 +54,15 @@ public class IncludeFile {
     numdArgs.add(arg);
   }
 
-  String getAllNamedArgs() {
-    String allArgs = "";
-    String currArg;
-    for (NamedArgIn aNamedArgsIn : namedArgsIn) {
-      if (allArgs.length() > 0)
-        allArgs += " ";
-      currArg = aNamedArgsIn.name;
-      allArgs += "&" + currArg + "=\"";
-      allArgs += aNamedArgsIn.arg + "\"";
+  public String getAllNamedArgs() {
+    StringBuilder out = new StringBuilder();
+    for (NamedArgument arg : namedArgsIn) {
+      if (out.length() > 0) {
+        out.append(' ');
+      }
+      out.append('&').append(arg.name).append("=\"").append(arg.arg).append("\"");
     }
-    return allArgs;
+    return out.toString();
   }
 
   /**
@@ -75,7 +74,7 @@ public class IncludeFile {
   String getNamedArg(String name) {
     // If name is blank, return the first blank (undefined) named argument (if any).
     if (name.length() == 0) {
-      for (NamedArgIn nargin : namedArgsIn) {
+      for (NamedArgument nargin : namedArgsIn) {
         if (nargin.name.length() == 0)
           return nargin.arg;
       }
@@ -88,7 +87,7 @@ public class IncludeFile {
     String lname = name.toLowerCase();
     // Find the first one and clobber it
     boolean found = false;
-    for (NamedArgIn nargin : namedArgsIn) {
+    for (NamedArgument nargin : namedArgsIn) {
       if (nargin.name.equalsIgnoreCase(name)) {
         // Erase the argument name, which seems to be what Progress does.
         nargin.name = "";
@@ -100,7 +99,7 @@ public class IncludeFile {
       return false;
     // Now see if that named argument got assigned more than once
     found = false;
-    for (NamedArgIn nargin : namedArgsIn) {
+    for (NamedArgument nargin : namedArgsIn) {
       if (nargin.name.equalsIgnoreCase(name)) {
         namedArgs.put(lname, nargin.arg);
         found = true;
@@ -112,11 +111,11 @@ public class IncludeFile {
     return true;
   }
 
-  private static final class NamedArgIn {
+  private static final class NamedArgument {
     private String name;
     private String arg;
 
-    NamedArgIn(String name, String arg) {
+    NamedArgument(String name, String arg) {
       this.name = name;
       this.arg = arg;
     }

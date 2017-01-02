@@ -666,7 +666,7 @@ public class Preprocessor implements IPreprocessor {
         int argNum = 1;
         for (IncludeArg incarg : incArgs) {
           if (usingNamed)
-            currentInclude.defNamedArg(incarg.argName, incarg.argVal);
+            currentInclude.addNamedArgument(incarg.argName, incarg.argVal);
           else
             currentInclude.numdArgs.add(incarg.argVal);
           lstListener.includeArgument(usingNamed ? incarg.argName : Integer.toString(argNum), incarg.argVal);

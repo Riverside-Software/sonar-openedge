@@ -20,7 +20,6 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.IntStream;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
-import org.prorefactor.proparse.IntegerIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,6 @@ public class Postlexer implements TokenSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(Postlexer.class);
 
   private final DoParse doParse;
-  private final IntegerIndex<String> filenameList;
   private final Lexer lexer;
   private final Preprocessor prepro;
 
@@ -45,7 +43,6 @@ public class Postlexer implements TokenSource {
     this.prepro = prepro;
     this.lexer = lexer;
     this.doParse = doParse;
-    this.filenameList = doParse.getFilenameList();
   }
 
   @Override

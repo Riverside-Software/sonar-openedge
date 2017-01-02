@@ -10,11 +10,8 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse.antlr4;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -90,11 +87,6 @@ public class Preprocessor implements IPreprocessor {
   private FilePos textStart;
 
   private ListingListener lstListener;
-  /** Are we writing a preprocessor-listing file? */
-  // boolean listing;
-
-  /** The listing stream (only open if listing) */
-//  BufferedWriter listingStream;
 
   private IncludeFile currentInclude;
   private InputSource currentInput;
@@ -114,14 +106,20 @@ public class Preprocessor implements IPreprocessor {
    * An existing reference to the input stream is required for construction. The caller is responsible for closing that
    * stream once parsing is complete.
    */
-  public Preprocessor(String fileName, BufferedReader inStream, DoParse doParse) {
+  public Preprocessor(String fileName, DoParse doParse) throws IOException {
+    LOGGER.trace("New Preprocessor instance {}", fileName);
     this.doParse = doParse;
     this.ppSettings = doParse.getRefactorSession().getProparseSettings();
 
     // Create input source with flag isPrimaryInput=true
     sourceCounter = -1;
     currFile = doParse.addFilename(fileName);
-    currentInput = new InputSource(++sourceCounter, inStream, true);
+    if (fileName != null)
+      currentInput = new InputSource(++sourceCounter, new File(fileName), doParse.getRefactorSession().getCharset(), true);
+    else {
+      LOGGER.trace("  With InputStream {}");
+      currentInput = new InputSource(++sourceCounter, "");
+    }
     currentInput.fileIndex = currFile;
     currentInclude = new IncludeFile(fileName, currentInput);
     includeVector.add(currentInclude);
@@ -372,10 +370,6 @@ public class Preprocessor implements IPreprocessor {
     return doParse.getFilename(currentInput.fileIndex);
   }
 
-  String getFilename(int fileIndex) {
-    return doParse.getFilename(fileIndex);
-  }
-
   /**
    * Deal with end of input stream, and switch to previous. Because Progress allows you to switch streams in the middle
    * of a token, we have to completely override EOF handling, right at the point where we get() a new character from the
@@ -384,8 +378,8 @@ public class Preprocessor implements IPreprocessor {
    * then we have to insert a space into the character stream, because that's what Progress's compiler does.
    */
   private void getRawChar() throws IOException {
-    currLine = currentInput.nextLine;
-    currCol = currentInput.nextCol;
+    currLine = currentInput.getNextLine();
+    currCol = currentInput.getNextCol();
     currChar = currentInput.get();
     if (currChar == 65533) {
       // This is the 'replacement' character in Unicode, used by Java as a
@@ -413,15 +407,15 @@ public class Preprocessor implements IPreprocessor {
           return;
         case 1: // popped an include file
           currFile = currentInput.fileIndex;
-          currLine = currentInput.nextLine;
-          currCol = currentInput.nextCol;
+          currLine = currentInput.getNextLine();
+          currCol = currentInput.getNextCol();
           currSourceNum = currentInput.getSourceNum();
           currChar = ' ';
           return;
         case 2: // popped a macro ref or include arg ref
           currFile = currentInput.fileIndex;
-          currLine = currentInput.nextLine;
-          currCol = currentInput.nextCol;
+          currLine = currentInput.getNextLine();
+          currCol = currentInput.getNextCol();
           currChar = currentInput.get(); // might be another EOF
           currSourceNum = currentInput.getSourceNum();
           break;
@@ -670,7 +664,7 @@ public class Preprocessor implements IPreprocessor {
         int argNum = 1;
         for (IncludeArg incarg : incArgs) {
           if (usingNamed)
-            currentInclude.defNamedArg(incarg.argName, incarg.argVal);
+            currentInclude.addNamedArgument(incarg.argName, incarg.argVal);
           else
             currentInclude.numdArgs.add(incarg.argVal);
           lstListener.includeArgument(usingNamed ? incarg.argName : Integer.toString(argNum), incarg.argVal);
@@ -689,11 +683,11 @@ public class Preprocessor implements IPreprocessor {
     String fName = referencedWithName.trim();
     if (consuming != 0 || fName.length() == 0)
       return false;
-    fName = doParse.getRefactorSession().findFile(fName);
-    if ("".equals(fName)) {
+    File ff = doParse.getRefactorSession().findFile3(fName);
+    if (ff == null) {
       throw new IOException(getFilename() + ": " + "Could not find include file: " + referencedWithName);
     }
-    currentInput = new InputSource(++sourceCounter, new BufferedReader(new InputStreamReader(new FileInputStream(fName), doParse.getRefactorSession().getCharset())));
+    currentInput = new InputSource(++sourceCounter, ff, doParse.getRefactorSession().getCharset());
 
     currentInput.fileIndex = doParse.addFilename(fName);
     currentInclude = new IncludeFile(referencedWithName, currentInput);
@@ -728,14 +722,14 @@ public class Preprocessor implements IPreprocessor {
     }
     // We must expand macros even if consuming,
     // because we can have &ENDIF inside a preprocesstoken
-    currentInput = new InputSource(++sourceCounter, new BufferedReader(new StringReader(theText)));
+    currentInput = new InputSource(++sourceCounter, theText);
     currentInclude.inputVector.add(currentInput);
     // For a macro/argument expansion, we use the file/line/col of
     // the opening curly '{' of the ref file, for all characters/tokens.
     currentInput.enableMacroExpansion();
     currentInput.fileIndex = refPos.file;
-    currentInput.nextLine = refPos.line;
-    currentInput.nextCol = refPos.col;
+    currentInput.setNextLine(refPos.line);
+    currentInput.setNextCol(refPos.col);
   }
 
   /**

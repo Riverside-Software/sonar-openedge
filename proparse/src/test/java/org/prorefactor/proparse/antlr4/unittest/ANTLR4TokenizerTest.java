@@ -38,18 +38,15 @@ import antlr.TokenStream;
  */
 public class ANTLR4TokenizerTest {
   private final static String SRC_DIR = "src/test/resources/data/bugsfixed";
-  private final static String TEMP_DIR = "target/nodes-lister/data/bugsfixed";
-
+  private final static String SRC_DIR2 = "src/test/resources/data/lexer";
+  
   private RefactorSession session;
-  private File tempDir = new File(TEMP_DIR);
 
   @BeforeTest
   public void setUp() throws Exception {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
-
-    tempDir.mkdirs();
   }
 
   @Test
@@ -217,8 +214,17 @@ public class ANTLR4TokenizerTest {
     genericTest("bug33.cls");
   }
 
+  @Test
+  public void testLexer01() throws Exception {
+    genericTest2("lexer01.p");
+  }
+
   private void genericTest(String fileName) throws RefactorException, ANTLRException, IOException {
     executeTokenizerTest(new File(SRC_DIR, fileName));
+  }
+
+  private void genericTest2(String fileName) throws RefactorException, ANTLRException, IOException {
+    executeTokenizerTest2(new File(SRC_DIR2, fileName));
   }
 
   private void executeTokenizerTest(File file) throws RefactorException, ANTLRException, IOException {
@@ -232,6 +238,13 @@ public class ANTLR4TokenizerTest {
     TokenSource tokenSource = dp.getLexerTokenStream();
 
     compareTokens(tokenStream, tokenSource);
+  }
+
+  private void executeTokenizerTest2(File file) throws RefactorException, ANTLRException, IOException {
+    // ANTLR4
+    DoParse dp = new DoParse(session, file.getAbsolutePath());
+    dp.doParse(true, null);
+    dp.getLexerTokenStream();
   }
 
   /**

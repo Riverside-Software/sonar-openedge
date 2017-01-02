@@ -15,6 +15,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.proparse.SymbolScope;
 import org.prorefactor.refactor.settings.IProparseSettings;
@@ -74,17 +75,33 @@ public class RefactorSession {
   }
 
   /**
-   * Get the listing file name, makes sure the directory exists.
-   */
-  public String getListingFileName() {
-    return "listingfile.txt";
-  }
-
-  /**
    * Returns the Settings for the currently loaded project
    */
   public IProparseSettings getProparseSettings() {
     return proparseSettings;
+  }
+
+  public File findFile3(String fileName) {
+    
+    // If we have an absolute path-filename, we don't search the path.
+    // If we have a relative (starts with dot) path-filename, ditto.
+    int len = fileName.length();
+    
+    // Windows drive letter, ex: "C:"
+ // Relative path, "./" or "../"
+    if ((len > 0 && (fileName.charAt(0) == '/' || fileName.charAt(0) == '\\')) || (len > 1 && fileName.charAt(1) == ':')
+        || (len > 1 && fileName.charAt(0) == '.')) {
+      if (new File(fileName).exists())
+        return new File(fileName);
+    }
+
+    for (String p : proparseSettings.getPropathAsList()) {
+      String tryPath = p + File.separatorChar + fileName;
+      if (new File(tryPath).exists())
+        return new File(tryPath);
+    }
+
+    return null;
   }
 
   public String findFile(String fileName) {

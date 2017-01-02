@@ -1092,7 +1092,7 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
     } else if ((textStartFile == 0) && (tokenType != PreprocessorParser.WS) && (tokenType != PreprocessorParser.EOF) && (textStartLine > 0)) {
       loc.add(textStartLine);
     }
-    Pair<TokenSource, CharStream> pair = new Pair<TokenSource, CharStream>(this, null);
+    Pair<TokenSource, CharStream> pair = new Pair<>(this, null);
     return create(pair, tokenType, text, Token.DEFAULT_CHANNEL, -1, -1, textStartLine, textStartCol);
   }
 
