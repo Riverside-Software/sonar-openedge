@@ -245,4 +245,9 @@ public class BugFixTest {
     genericTest("sax-writer.p");
   }
 
+  @Test
+  public void testNoBox() throws Exception {
+    genericTest("nobox.p");
+  }
+
 }
