@@ -16,6 +16,7 @@ import java.io.PrintWriter;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
@@ -226,6 +227,16 @@ public class BugFixTest {
   @Test
   public void test33() throws Exception {
     genericTest("bug33.cls");
+  }
+
+  @Test(expectedExceptions = {RefactorException.class})
+  public void testCache1() throws Exception {
+    genericTest("CacheChild.cls");
+  }
+
+  @Test(expectedExceptions = {RefactorException.class})
+  public void testCache2() throws Exception {
+    genericTest("CacheParent.cls");
   }
 
 }
