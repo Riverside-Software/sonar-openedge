@@ -17,6 +17,7 @@ import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
@@ -238,6 +239,10 @@ public class BugFixTest {
   @Test(expectedExceptions = {ProparseRuntimeException.class})
   public void testCache2() throws Exception {
     genericTest("CacheChild.cls");
+
+  @Test
+  public void testSaxWriter() throws Exception {
+    genericTest("sax-writer.p");
   }
 
 }
