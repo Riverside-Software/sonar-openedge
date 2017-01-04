@@ -171,6 +171,7 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     final int fNumFiles = numFiles;
     Runnable r = new Runnable() {
+      @Override
       public void run() {
         try {
           final URL url = new URL(
@@ -180,7 +181,7 @@ public class OpenEdgeProparseSensor implements Sensor {
           connx.setConnectTimeout(2000);
           connx.getContentEncoding();
         } catch (IOException uncaught) {
-
+          LOG.info("Unable to send analytics", uncaught);
         }
       }
     };
@@ -188,6 +189,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       new Thread(r).start();
     }
 
+    LOG.info("{} files proparse'd", numFiles);
     LOG.info("AST Generation | time={} ms", parseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
