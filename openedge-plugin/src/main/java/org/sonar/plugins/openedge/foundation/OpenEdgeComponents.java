@@ -192,7 +192,7 @@ public class OpenEdgeComponents {
     return Collections.unmodifiableMap(xrefChecksMap);
   }
 
-  private Licence getLicence(String repoName) {
+  public Licence getLicence(String repoName) {
     return licences.get(repoName);
   }
 

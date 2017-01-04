@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -84,6 +86,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   public void execute(SensorContext context) {
     if (settings.skipProparseSensor())
       return;
+    int numFiles = 0;
     List<String> debugFiles = new ArrayList<>();
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
@@ -96,6 +99,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Parsing {}", new Object[] {file.relativePath()});
       boolean isIncludeFile = "i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()));
+      numFiles++;
       try {
         long time = System.currentTimeMillis();
 
@@ -165,6 +169,27 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
     new File("listingparser.txt").delete();
 
+    final int fNumFiles = numFiles;
+    Runnable r = new Runnable() {
+      @Override
+      public void run() {
+        try {
+          final URL url = new URL(
+              String.format("http://analytics.rssw.eu/oeps.%s.%d.stats", components.getLicence("rssw-oe-main") == null
+                  ? "none" : components.getLicence("rssw-oe-main").getPermanentId(), fNumFiles));
+          URLConnection connx = url.openConnection();
+          connx.setConnectTimeout(2000);
+          connx.getContentEncoding();
+        } catch (IOException uncaught) {
+          LOG.info("Unable to send analytics", uncaught);
+        }
+      }
+    };
+    if (settings.useAnalytics()) {
+      new Thread(r).start();
+    }
+
+    LOG.info("{} files proparse'd", numFiles);
     LOG.info("AST Generation | time={} ms", parseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
