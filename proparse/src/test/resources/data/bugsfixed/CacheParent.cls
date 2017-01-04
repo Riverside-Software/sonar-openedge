@@ -5,4 +5,4 @@ class bugsfixed.CacheParent:
   define variable as handle no-undo.
  end method.
 
-end interface.
+end class.
