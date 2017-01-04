@@ -73,7 +73,8 @@ public abstract class OpenEdgeXrefCheck extends OpenEdgeCheck<Document> {
         if (lineNumber <= file2.lines()) {
           location.at(file2.selectLine(lineNumber));
         } else {
-          LOGGER.error("Invalid line number {} in XREF file {}", lineNumber, file2.relativePath());
+          LOGGER.error("Invalid line number {} in XREF file {} (base file {})", lineNumber, file2.relativePath(),
+              file.relativePath());
         }
       }
       if (file2 == file) {
