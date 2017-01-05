@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -226,6 +227,17 @@ public class BugFixTest {
   @Test
   public void test33() throws Exception {
     genericTest("bug33.cls");
+  }
+
+  // Next two tests : same exception should be thrown in both cases
+  @Test(expectedExceptions = {ProparseRuntimeException.class})
+  public void testCache1() throws Exception {
+    genericTest("CacheChild.cls");
+  }
+
+  @Test(expectedExceptions = {ProparseRuntimeException.class})
+  public void testCache2() throws Exception {
+    genericTest("CacheChild.cls");
   }
 
 }
