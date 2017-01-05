@@ -1105,12 +1105,12 @@ public class TP01Support extends TP01Action {
       cachedCopy = SymbolScopeSuper.cache.get(className.toLowerCase(), new Callable<SymbolScopeSuper>() {
         @Override
         public SymbolScopeSuper call() throws Exception {
-            SymbolScopeSuper clz = classStateSuper(classNode, className);
-            if (clz == null) {
-              throw new ExecutionException("Unable to find class " + className, null);
-            } else {
-              return clz;
-            }
+          SymbolScopeSuper clz = classStateSuper(classNode, className);
+          if (clz == null) {
+            throw new ExecutionException("Unable to find class " + className, null);
+          } else {
+            return clz;
+          }
         }
       });
     } catch (ExecutionException caught) {
