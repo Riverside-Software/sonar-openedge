@@ -87,6 +87,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     if (settings.skipProparseSensor())
       return;
     int numFiles = 0;
+    int numFailures = 0;
     List<String> debugFiles = new ArrayList<>();
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
@@ -159,6 +160,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         
       } catch (RefactorException | ProparseRuntimeException caught ) {
         LOG.error("Error during code parsing for " + file.relativePath(), caught);
+        numFailures++;
         NewIssue issue = context.newIssue();
         issue.forRule(
             RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
@@ -175,8 +177,8 @@ public class OpenEdgeProparseSensor implements Sensor {
     if (settings.useAnalytics()) {
       try {
         final URL url = new URL(
-            String.format("http://analytics.rssw.eu/oeps.%s.%d.%d.%d.stats", components.getLicence("rssw-oe-main") == null
-                ? "none" : components.getLicence("rssw-oe-main").getPermanentId(), numFiles, parseTime, maxParseTime));
+            String.format("http://analytics.rssw.eu/oeps.%s.%d.%d.%d.%d.stats", components.getLicence("rssw-oe-main") == null
+                ? "none" : components.getLicence("rssw-oe-main").getPermanentId(), numFiles, numFailures, parseTime, maxParseTime));
         URLConnection connx = url.openConnection();
         connx.setConnectTimeout(2000);
         connx.getContentEncoding();
@@ -185,7 +187,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
     }
 
-    LOG.info("{} files proparse'd", numFiles);
+    LOG.info("{} files proparse'd, {} failure(s)", numFiles, numFailures);
     LOG.info("AST Generation | time={} ms", parseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
