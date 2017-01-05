@@ -87,9 +87,11 @@ public class OpenEdgeProparseSensor implements Sensor {
     if (settings.skipProparseSensor())
       return;
     int numFiles = 0;
+    int numFailures = 0;
     List<String> debugFiles = new ArrayList<>();
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
+    long maxParseTime = 0L;
     components.initializeChecks(context);
 
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
@@ -101,17 +103,19 @@ public class OpenEdgeProparseSensor implements Sensor {
       boolean isIncludeFile = "i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()));
       numFiles++;
       try {
-        long time = System.currentTimeMillis();
-
+        long startTime = System.currentTimeMillis();
         ParseUnit unit = new ParseUnit(file.file(), settings.getProparseSession());
         ParseUnit lexUnit = new ParseUnit(file.file(), settings.getProparseSession());
-        long startTime = System.currentTimeMillis();
         TokenStream stream = lexUnit.lex();
         if (!isIncludeFile) {
           unit.treeParser01();
         }
-        parseTime += (System.currentTimeMillis() - startTime);
-        LOG.debug("{} milliseconds to generate ParseUnit", System.currentTimeMillis() - time);
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        parseTime += elapsedTime;
+        if (maxParseTime < elapsedTime) {
+          maxParseTime = elapsedTime;
+        }
+        LOG.debug("{} milliseconds to generate ParseUnit", System.currentTimeMillis() - elapsedTime);
 
         // Saving LOC and COMMENTS metrics
         context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(
@@ -156,6 +160,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         
       } catch (RefactorException | ProparseRuntimeException caught ) {
         LOG.error("Error during code parsing for " + file.relativePath(), caught);
+        numFailures++;
         NewIssue issue = context.newIssue();
         issue.forRule(
             RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
@@ -169,27 +174,20 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
     new File("listingparser.txt").delete();
 
-    final int fNumFiles = numFiles;
-    Runnable r = new Runnable() {
-      @Override
-      public void run() {
-        try {
-          final URL url = new URL(
-              String.format("http://analytics.rssw.eu/oeps.%s.%d.stats", components.getLicence("rssw-oe-main") == null
-                  ? "none" : components.getLicence("rssw-oe-main").getPermanentId(), fNumFiles));
-          URLConnection connx = url.openConnection();
-          connx.setConnectTimeout(2000);
-          connx.getContentEncoding();
-        } catch (IOException uncaught) {
-          LOG.info("Unable to send analytics", uncaught);
-        }
-      }
-    };
     if (settings.useAnalytics()) {
-      new Thread(r).start();
+      try {
+        final URL url = new URL(
+            String.format("http://analytics.rssw.eu/oeps.%s.%d.%d.%d.%d.stats", components.getLicence("rssw-oe-main") == null
+                ? "none" : components.getLicence("rssw-oe-main").getPermanentId(), numFiles, numFailures, parseTime, maxParseTime));
+        URLConnection connx = url.openConnection();
+        connx.setConnectTimeout(2000);
+        connx.getContentEncoding();
+      } catch (IOException uncaught) {
+        LOG.info("Unable to send analytics", uncaught);
+      }
     }
 
-    LOG.info("{} files proparse'd", numFiles);
+    LOG.info("{} files proparse'd, {} failure(s)", numFiles, numFailures);
     LOG.info("AST Generation | time={} ms", parseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
