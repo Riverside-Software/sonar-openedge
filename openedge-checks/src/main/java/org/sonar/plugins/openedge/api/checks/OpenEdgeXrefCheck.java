@@ -1,5 +1,7 @@
 package org.sonar.plugins.openedge.api.checks;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
@@ -16,6 +18,7 @@ import org.w3c.dom.NodeList;
  * Extend this class to implement an XREF analyzer
  */
 public abstract class OpenEdgeXrefCheck extends OpenEdgeCheck<Document> {
+  private final static Logger LOGGER = LoggerFactory.getLogger(OpenEdgeXrefCheck.class);
 
   /**
    * Standard constructor of a Proparse based check
@@ -67,7 +70,12 @@ public abstract class OpenEdgeXrefCheck extends OpenEdgeCheck<Document> {
       NewIssue issue = getContext().newIssue().forRule(getRuleKey());
       NewIssueLocation location = issue.newLocation().on(file2);
       if (lineNumber > 0) {
-        location.at(file2.selectLine(lineNumber));
+        if (lineNumber <= file2.lines()) {
+          location.at(file2.selectLine(lineNumber));
+        } else {
+          LOGGER.error("Invalid line number {} in XREF file {} (base file {})", lineNumber, file2.relativePath(),
+              file.relativePath());
+        }
       }
       if (file2 == file) {
         location.message(msg);
