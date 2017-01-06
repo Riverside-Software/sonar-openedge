@@ -240,4 +240,9 @@ public class BugFixTest {
     genericTest("CacheChild.cls");
   }
 
+  @Test
+  public void testSaxWriter() throws Exception {
+    genericTest("sax-writer.p");
+  }
+
 }
