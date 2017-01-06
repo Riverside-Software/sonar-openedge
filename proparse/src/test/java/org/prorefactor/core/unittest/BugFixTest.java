@@ -251,6 +251,7 @@ public class BugFixTest {
   @Test(expectedExceptions = {ProparseRuntimeException.class})
   public void testCache2() throws Exception {
     genericTest("CacheChild.cls");
+  }
 
   @Test
   public void testSaxWriter() throws Exception {
