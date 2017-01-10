@@ -4,7 +4,7 @@
 
   <groupId>eu.rssw.openedge.parsers</groupId>
   <artifactId>profiler-parser-shaded</artifactId>
-  <version>1.4.6-SNAPSHOT</version>
+  <version>1.4.6</version>
 
   <name>OpenEdge profiler output lexer and parser (shaded)</name>
   <url>http://riverside-software.fr/</url>
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>eu.rssw.openedge.parsers</groupId>
       <artifactId>profiler-parser</artifactId>
-      <version>1.4.6-SNAPSHOT</version>
+      <version>1.4.6</version>
     </dependency>
   </dependencies>
 
