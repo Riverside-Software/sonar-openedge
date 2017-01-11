@@ -11,4 +11,3 @@ Documentation available [here](https://riverside-software.atlassian.net/wiki/spa
 ## Build status
 
 * OpenEdge plugin - master branch : [![Build Status](http://ci.rssw.eu/job/sonar-openedge/job/master/badge/icon)](http://ci.rssw.eu/job/sonar-openedge/job/master/)
-* OpenEdge rules - master branch : [![Build Status](http://ci.rssw.eu/job/sonar-openedge-rules/job/master/badge/icon)](http://ci.rssw.eu/job/sonar-openedge-rules/job/master/)
