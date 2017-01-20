@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.rule.ActiveRules;
@@ -40,6 +38,8 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.platform.Server;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.MessageException;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
 import org.sonar.plugins.openedge.api.Constants;
@@ -53,7 +53,7 @@ import org.sonar.plugins.openedge.api.com.google.common.base.Strings;
 
 @BatchSide
 public class OpenEdgeComponents {
-  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeComponents.class);
+  private static final Logger LOG = Loggers.get(OpenEdgeComponents.class);
 
   // IoC
   private final Server server;

@@ -33,8 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
@@ -45,6 +43,8 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.antlr.TokenStream;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
@@ -64,7 +64,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
 public class OpenEdgeProparseSensor implements Sensor {
-  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeProparseSensor.class);
+  private static final Logger LOG = Loggers.get(OpenEdgeProparseSensor.class);
 
   private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;

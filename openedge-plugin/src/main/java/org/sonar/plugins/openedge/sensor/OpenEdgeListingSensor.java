@@ -22,8 +22,6 @@ package org.sonar.plugins.openedge.sensor;
 import java.io.File;
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
@@ -32,6 +30,8 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.eu.rssw.listing.CodeBlock;
 import org.sonar.plugins.openedge.api.eu.rssw.listing.ListingParser;
@@ -41,7 +41,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
 public class OpenEdgeListingSensor implements Sensor {
-  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeListingSensor.class);
+  private static final Logger LOG = Loggers.get(OpenEdgeListingSensor.class);
 
   // IoC
   private final FileSystem fileSystem;

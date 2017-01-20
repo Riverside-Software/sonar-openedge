@@ -21,14 +21,14 @@ package org.sonar.plugins.openedge.sensor;
 
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.DatabaseDescription;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.Field;
@@ -37,7 +37,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 
 public class OpenEdgeDBSensor implements Sensor {
-  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeDBSensor.class);
+  private static final Logger LOG = Loggers.get(OpenEdgeDBSensor.class);
 
   private final FileSystem fileSystem;
 

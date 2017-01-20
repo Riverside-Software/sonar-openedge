@@ -29,11 +29,11 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.config.Settings;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.com.google.common.base.Charsets;
 import org.sonar.plugins.openedge.api.com.google.common.base.Joiner;
@@ -52,7 +52,7 @@ import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.Proparse
 
 @BatchSide
 public class OpenEdgeSettings {
-  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeSettings.class);
+  private static final Logger LOG = Loggers.get(OpenEdgeSettings.class);
 
   private final List<String> sourceDirs = new ArrayList<>();
   private final File pctDir;
