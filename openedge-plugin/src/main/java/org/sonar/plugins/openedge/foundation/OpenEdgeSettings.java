@@ -55,6 +55,7 @@ public class OpenEdgeSettings {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeSettings.class);
 
   private final List<String> sourceDirs = new ArrayList<>();
+  private final File binariesDir;
   private final File pctDir;
   private final File dbgDir;
   private final Settings settings;
@@ -88,6 +89,7 @@ public class OpenEdgeSettings {
     File binaries = new File(fileSystem.baseDir(), binariesSetting);
     this.pctDir = new File(binaries, ".pct");
     this.dbgDir = new File(binaries, ".dbg");
+    binariesDir = new File(fileSystem.baseDir(), binariesSetting);
 
     // PROPATH definition
     String propathProp = settings.getString(Constants.PROPATH);
@@ -228,6 +230,7 @@ public class OpenEdgeSettings {
 
   /**
    * Returns true if method should be skipped by CPD engine
+   * 
    * @param name Method name
    */
   public boolean skipMethod(String name) {
@@ -238,7 +241,47 @@ public class OpenEdgeSettings {
   }
 
   /**
+   * Return File pointer to rcode in sonar.binaries directory if such rcode exists
+   * 
+   * @param fileName File name from profiler
+   */
+  public File getRCode(String fileName) {
+    if (fileName.endsWith(".r"))
+      return new File(fileName);
+
+    File rCode = new File(binariesDir, FilenameUtils.removeExtension(fileName) + ".r");
+    if (rCode.exists())
+      return rCode;
+    // Profiler also send file name as packagename.classname
+    File rCode2 = new File(binariesDir, fileName.replace('.', '/') + ".r");
+    if (rCode2.exists())
+      return rCode2;
+
+    return null;
+  }
+
+  /**
+   * Returns absolute file name if found in work directory or in propath
+   */
+  public String getFilePath(String fileName) {
+    if (new File(fileName).exists())
+      return fileName;
+
+    for (File file : propath) {
+      File stdName = new File(file, fileName);
+      if (stdName.exists())
+        return stdName.getAbsolutePath();
+      File clsName = new File(file, fileName.replace('.', '/') + ".cls");
+      if (clsName.exists())
+        return clsName.getAbsolutePath();
+    }
+
+    return fileName;
+  }
+
+  /**
    * Returns true if procedure or function should be skipped by CPD engine
+   * 
    * @param name Procedure or function name
    */
   public boolean skipProcedure(String name) {
