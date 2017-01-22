@@ -224,6 +224,10 @@ public class OpenEdgeSettings {
     return dbgDir;
   }
 
+  public File getBinariesDir() {
+    return binariesDir;
+  }
+
   public boolean skipCPD(String annotation) {
     return cpdAnnotations.contains(annotation);
   }
