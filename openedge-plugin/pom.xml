@@ -99,7 +99,7 @@
       <plugin>
         <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
         <artifactId>sonar-packaging-maven-plugin</artifactId>
-        <version>1.16</version>
+        <version>1.17</version>
         <extensions>true</extensions>
         <configuration>
           <pluginKey>${sonar.pluginKey}</pluginKey>
