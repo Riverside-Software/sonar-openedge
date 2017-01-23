@@ -207,7 +207,7 @@ public class OpenEdgeComponents {
       }
       return null;
     } catch (ReflectiveOperationException caught) {
-      LOG.error("Unable to instantiate Proparse rule " + internalKey);
+      LOG.error("Unable to instantiate Proparse rule " + internalKey, caught);
       return null;
     }
   }
