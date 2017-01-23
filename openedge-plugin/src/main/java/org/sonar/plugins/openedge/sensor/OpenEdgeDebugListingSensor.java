@@ -22,20 +22,20 @@ package org.sonar.plugins.openedge.sensor;
 import java.io.File;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.com.google.common.io.Files;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
 public class OpenEdgeDebugListingSensor implements Sensor {
-  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeDebugListingSensor.class);
+  private static final Logger LOG = Loggers.get(OpenEdgeDebugListingSensor.class);
 
   // IoC
   private final FileSystem fileSystem;

@@ -24,14 +24,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
 import org.sonar.plugins.openedge.api.org.antlr.v4.runtime.tree.ParseTree;
@@ -39,7 +39,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 
 public class OpenEdgeDBRulesSensor implements Sensor {
-  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeDBRulesSensor.class);
+  private static final Logger LOG = Loggers.get(OpenEdgeDBRulesSensor.class);
 
   private final FileSystem fileSystem;
   private final OpenEdgeComponents components;

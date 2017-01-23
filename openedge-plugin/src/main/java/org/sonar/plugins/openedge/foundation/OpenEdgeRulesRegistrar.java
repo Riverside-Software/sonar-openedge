@@ -21,8 +21,8 @@ package org.sonar.plugins.openedge.foundation;
 
 import java.util.Arrays;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
@@ -30,7 +30,7 @@ import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 
 public class OpenEdgeRulesRegistrar implements CheckRegistrar {
-  private static final Logger LOGGER = LoggerFactory.getLogger(OpenEdgeRulesRegistrar.class);
+  private static final Logger LOGGER = Loggers.get(OpenEdgeRulesRegistrar.class);
 
   /**
    * Register the classes that will be used to instantiate checks during analysis.

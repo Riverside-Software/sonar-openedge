@@ -19,15 +19,15 @@
  */
 package org.sonar.plugins.openedge.decorator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 
 public class CommonDBMetricsDecorator implements MeasureComputer {
-  private static final Logger LOG = LoggerFactory.getLogger(CommonDBMetricsDecorator.class);
+  private static final Logger LOG = Loggers.get(CommonDBMetricsDecorator.class);
 
   @Override
   public String toString() {

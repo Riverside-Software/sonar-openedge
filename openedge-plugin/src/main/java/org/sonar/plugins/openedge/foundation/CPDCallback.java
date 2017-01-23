@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.cpd.NewCpdTokens;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.ICallback;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.IConstants;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
@@ -43,7 +43,7 @@ import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
  * reverting preprocessor, as CPD engine doesn't want tokens to overlap.
  */
 public class CPDCallback implements ICallback<NewCpdTokens> {
-  private static final Logger LOG = LoggerFactory.getLogger(CPDCallback.class);
+  private static final Logger LOG = Loggers.get(CPDCallback.class);
 
   private final NewCpdTokens cpdTokens;
   private final OpenEdgeSettings settings;

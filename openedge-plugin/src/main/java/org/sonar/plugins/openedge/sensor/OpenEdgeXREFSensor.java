@@ -33,14 +33,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
@@ -50,7 +50,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 public class OpenEdgeXREFSensor implements Sensor {
-  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeXREFSensor.class);
+  private static final Logger LOG = Loggers.get(OpenEdgeXREFSensor.class);
 
   // IoC
   private final FileSystem fileSystem;
