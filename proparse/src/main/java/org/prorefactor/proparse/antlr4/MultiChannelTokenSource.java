@@ -20,28 +20,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * List of tokens for input to the parser. This class is responsible for gathering a list of tokens from the postlexer,
- * and examining that list for fine-tuning before sending it on to the parser. The complete tool chain is:<ol>
- * <li>preprocessor 
- * <li>lexer
- * <li>postlexer
- * <li>tokenlist
- * <li>filter
- * <li>parser
- * </ol>
+ * Last layer of TokenSource, used to dispatch preprocessor statements, comments and whitespaces to the right channel 
  */
-public class MultiChannelTokenList implements TokenSource {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MultiChannelTokenList.class);
+public class MultiChannelTokenSource implements TokenSource {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MultiChannelTokenSource.class);
 
   // All preprocessor statements (&MESSAGE, &ANALYZE-SUSPEND and RESUME, &GLOBAL/SCOPED DEFINE and &UNDEFINE) go to this channel
-  private static final int PREPROCESSOR_CHANNEL = 2;
+  public static final int PREPROCESSOR_CHANNEL = 2;
   // All &_PROPARSE statements go to this channel
-  private static final int PROPARSE_CHANNEL = 3;
+  public static final int PROPARSE_CHANNEL = 3;
   
   private final TokenSource source;
   private Token currentToken;
 
-  public MultiChannelTokenList(TokenSource input) {
+  public MultiChannelTokenSource(TokenSource input) {
     this.source = input;
   }
 

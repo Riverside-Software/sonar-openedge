@@ -25,7 +25,7 @@ import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.Tree;
 import org.prorefactor.core.unittest.util.UnitTestModule;
-import org.prorefactor.proparse.antlr4.DoParse;
+import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.testng.Assert;
@@ -62,9 +62,8 @@ public class ANTLR4ParserTest {
   public void test00() throws Exception {
     // Only in order to initialize Proparse class
     try {
-      DoParse dp = new DoParse(session, new File(SRC_DIR, "bug01.p").getAbsolutePath());
-      dp.doParse(true, null);
-      Proparse parser = new Proparse(new CommonTokenStream(dp.getLexerTokenStream()));
+      ProgressLexer dp = new ProgressLexer(session, new File(SRC_DIR, "bug01.p").getAbsolutePath());
+      Proparse parser = new Proparse(new CommonTokenStream(dp));
       parser.program();
     } catch (Throwable uncaught) {
       
@@ -241,9 +240,8 @@ public class ANTLR4ParserTest {
   }
 
   private void executeTokenizerTest(File file) throws ANTLRException, IOException {
-    DoParse dp = new DoParse(session, file.getAbsolutePath());
-    dp.doParse(true, null);
-    Proparse parser = new Proparse(new CommonTokenStream(dp.getLexerTokenStream()));
+    ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
+    Proparse parser = new Proparse(new CommonTokenStream(dp));
     ParseTree tree = parser.program();
     Assert.assertNotNull(tree);
   }

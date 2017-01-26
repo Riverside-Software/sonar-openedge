@@ -18,7 +18,7 @@ import java.io.IOException;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.unittest.util.UnitTestModule;
-import org.prorefactor.proparse.antlr4.DoParse;
+import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -219,6 +219,11 @@ public class ANTLR4TokenizerTest {
     genericTest2("lexer01.p");
   }
 
+  @Test
+  public void testLexer02() throws Exception {
+    genericTest2("lexer02.p");
+  }
+
   private void genericTest(String fileName) throws RefactorException, ANTLRException, IOException {
     executeTokenizerTest(new File(SRC_DIR, fileName));
   }
@@ -231,20 +236,16 @@ public class ANTLR4TokenizerTest {
     // ANTLR2
     ParseUnit pu = new ParseUnit(file, session);
     TokenStream tokenStream = pu.lex();
-
     // ANTLR4
-    DoParse dp = new DoParse(session, file.getAbsolutePath());
-    dp.doParse(true, null);
-    TokenSource tokenSource = dp.getLexerTokenStream();
+    ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
 
-    compareTokens(tokenStream, tokenSource);
+    compareTokens(tokenStream, dp);
   }
 
   private void executeTokenizerTest2(File file) throws RefactorException, ANTLRException, IOException {
     // ANTLR4
-    DoParse dp = new DoParse(session, file.getAbsolutePath());
-    dp.doParse(true, null);
-    dp.getLexerTokenStream();
+    ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
+    dp.nextToken();
   }
 
   /**
@@ -258,7 +259,7 @@ public class ANTLR4TokenizerTest {
     int zz = 0;
     while ((tok2 != null) && (tok2.getType() != antlr.Token.EOF_TYPE) && (tok4 != null) && (tok4.getType() != Token.EOF)) {
       if (tok2.getType() != tok4.getType()) {
-        fail("Difference at position " + zz + " -- " + tok2.getType() + "/" + tok4.getType() + " -- " + tok2.getText() + "/" +tok4.getText());
+        fail("Difference at position " + zz + " -- " + tok2.getType() + "/" + tok4.getType() + " -- " + tok2.getText() + "/" + tok4.getText());
       }
       zz++;
       tok2 = stream.nextToken();

@@ -59,7 +59,7 @@ public class Preprocessor implements IPreprocessor {
   private static final int SKIP_CHAR = -100;
   public static final int PROPARSE_DIRECTIVE = -101;
 
-  final DoParse doParse;
+  final ProgressLexer doParse;
   private final IProparseSettings ppSettings;
 
   // How many levels of &IF FALSE are we currently into?
@@ -106,7 +106,7 @@ public class Preprocessor implements IPreprocessor {
    * An existing reference to the input stream is required for construction. The caller is responsible for closing that
    * stream once parsing is complete.
    */
-  public Preprocessor(String fileName, DoParse doParse) throws IOException {
+  public Preprocessor(String fileName, ProgressLexer doParse) throws IOException {
     LOGGER.trace("New Preprocessor instance {}", fileName);
     this.doParse = doParse;
     this.ppSettings = doParse.getRefactorSession().getProparseSettings();

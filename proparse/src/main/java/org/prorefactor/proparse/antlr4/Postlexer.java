@@ -17,7 +17,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.IntStream;
+import org.antlr.v4.runtime.ListTokenSource;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.slf4j.Logger;
@@ -32,14 +34,14 @@ import java.io.IOException;
 public class Postlexer implements TokenSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(Postlexer.class);
 
-  private final DoParse doParse;
+  private final ProgressLexer doParse;
   private final Lexer lexer;
   private final Preprocessor prepro;
 
   private final LinkedList<PreproIfState> preproIfVec = new LinkedList<>();
   private ProToken currToken;
 
-  Postlexer(Preprocessor prepro, Lexer lexer, DoParse doParse) {
+  Postlexer(Preprocessor prepro, Lexer lexer, ProgressLexer doParse) {
     this.prepro = prepro;
     this.lexer = lexer;
     this.doParse = doParse;
@@ -210,8 +212,9 @@ public class Postlexer implements TokenSource {
   private void preproEndif() throws IOException {
     LOGGER.trace("Entering preproEndif()");
     prepro.getLstListener().preproEndIf(currToken.getLine(), currToken.getCharPositionInLine());
-    // XXX Got a case where removeLast() fails with NoSuchElementException 
-    preproIfVec.removeLast();
+    // XXX Got a case where removeLast() fails with NoSuchElementException
+    if (!preproIfVec.isEmpty())
+      preproIfVec.removeLast();
   }
 
   private boolean preproIfCond(boolean evaluate) throws IOException, TokenStreamException, RecognitionException {
@@ -253,24 +256,11 @@ public class Postlexer implements TokenSource {
     if (tokenVector.isEmpty() || !evaluate)
       return false;
     else {
-      DoParse evalDoParse = new DoParse(doParse.getRefactorSession(), null, doParse);
-      evalDoParse.preProcessCondition = true;
-      for (int i = 0; i < 4; i++) {
-        tokenVector.add(new ProToken(/*filenameList,*/ PreprocessorParser.EOF, ""));
-      }
-      try {
-        evalDoParse.doParse(tokenVector);
-      } catch (ProEvalException e) {
-        String str = "Unable to evaluate &IF condition:";
-        for (ProToken tok : tokenVector) {
-          str += " " + tok.getText();
-        }
-        String fileName = null;
-        if (doParse.isValidIndex(currToken.getFileIndex()))
-          fileName = doParse.getFilename(currToken.getFileIndex());
-        throw new ProEvalException(str, e, fileName, currToken.getLine(), currToken.getCharPositionInLine());
-      }
-      return evalDoParse.preProcessConditionResult;
+      CommonTokenStream cts = new CommonTokenStream(new ListTokenSource(tokenVector));
+      PreprocessorParser parser = new PreprocessorParser(cts);
+      PreproEval eval = new PreproEval();
+      Boolean b = eval.visitPreproIfEval(parser.preproIfEval());
+      return b;
     }
   }
 

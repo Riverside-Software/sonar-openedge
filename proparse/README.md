@@ -2,14 +2,18 @@
 
 TokenList implements TokenStream
   ==> implements TokenSource
+  Entièrement migré
+  
 PostLexer implements TokenStream
   ==> implements TokenSource
+  
 MultiChannelTokenList implements TokenSource : nouvelle classe remplaçant le TokenStreamHiddenTokenFilter dans DoParse, et masquant le préprocesseur 
 
 ProTokenFactory remplace NodeFactory
 
 ProToken extends CommonHiddenStreamToken
-  ==> ProToken implements WritableToken (voir si ne devrait pas étendre CommonToken)
+  ==> ProToken extends CommonToken
 
 ProEvalSupport ==> à déplacer entièrement dans PreproEval
 
+StringFuncs ==> entièrement migré

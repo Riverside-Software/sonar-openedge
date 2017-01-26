@@ -45,9 +45,10 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
    * @return A Boolean object
    */
   @Override
-  public Object visitPreproIfEval(PreproIfEvalContext ctx) {
+  public Boolean visitPreproIfEval(PreproIfEvalContext ctx) {
     LOGGER.trace("Entering visitPreproIfEval()");
     Object o = visit(ctx.expr());
+    LOGGER.trace("Exiting visitPreproIfEval() with return value '{}'", o);
     return (o != null) && getBool(o);
   }
 
