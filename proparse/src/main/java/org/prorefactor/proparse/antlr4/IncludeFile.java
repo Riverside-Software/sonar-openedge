@@ -18,30 +18,46 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A preprocessor contains one or more IncludeFiles.
- * 
- * There is a special IncludeFile object created for the top-level program (ex: .p or .w).
- * 
- * Every time the lexer has to scan an include file, we create an IncludeFile object, for managing include file
- * arguments and pre-processor scopes.
- * 
- * We keep an InputSource object, which has an input stream.
- * 
- * Each IncludeFile object will have one or more InputSource objects.
- * 
- * The bottom InputSource object for an IncludeFile is the input for the include file itself.
+ * <ul>
+ * <li>Every time the lexer has to scan an include file, we create an IncludeFile object, for managing include file arguments and preprocessor scopes.</li>
+ * <li>We keep an InputSource object, which has an input stream.</li>
+ * <li>Each IncludeFile object will have one or more InputSource objects.</li>
+ * <li>The bottom InputSource object for an IncludeFile is the input for the include file itself.</li>
+ * </ul>
  */
 public class IncludeFile {
-  final Map<String, String> defdNames = new HashMap<>();
-  final Deque<InputSource> inputVector = new LinkedList<>();
-  final List<String> numdArgs = new ArrayList<>();
-  final Map<String, String> namedArgs = new HashMap<>();
-  final List<NamedArgument> namedArgsIn = new ArrayList<>();
+  private final Map<String, String> defdNames = new HashMap<>();
+  private final Deque<InputSource> inputVector = new LinkedList<>();
+
+  private final List<String> numberedArgs = new ArrayList<>();
+  private final Map<String, String> namedArgs = new HashMap<>();
+  private final List<NamedArgument> namedArgsIn = new ArrayList<>();
 
   public IncludeFile(String referencedWithName, InputSource is) {
     inputVector.add(is);
     // {0} must return the name that this include file was referenced with.
-    numdArgs.add(referencedWithName);
+    numberedArgs.add(referencedWithName);
+  }
+
+  public void addInputSource(InputSource source) {
+    inputVector.add(source);
+  }
+
+  public InputSource pop() {
+    if (inputVector.size() > 1) {
+      inputVector.removeLast();
+      return inputVector.getLast();
+    } else {
+      return null;
+    }
+  }
+
+  public InputSource getLastSource() {
+    return inputVector.getLast();
+  }
+
+  public void addArgument(String arg) {
+    numberedArgs.add(arg);
   }
 
   public void addNamedArgument(String name, String arg) {
@@ -51,7 +67,7 @@ public class IncludeFile {
     if (!namedArgs.containsKey(lname))
       namedArgs.put(lname, arg);
     // Named include arguments can also be referenced by number.
-    numdArgs.add(arg);
+    numberedArgs.add(arg);
   }
 
   public String getAllNamedArgs() {
@@ -66,12 +82,43 @@ public class IncludeFile {
   }
 
   /**
-   * Get a named arg.
+   * Returns space-separated list of all include arguments
+   */
+  public String getAllArguments() {
+    StringBuilder sb = new StringBuilder();
+
+    // Note: starts from 1. Doesn't include arg[0], which is the filename.
+    for (String str : numberedArgs) {
+      if (sb.length() > 0) {
+        sb.append(' ');
+      }
+      sb.append(str);
+    }
+    return sb.toString();
+  }
+
+
+  /**
+   * Get value of numbered argument (i.e. {&amp;2})
+   * 
+   * @param num Arg number
+   * @return String value
+   */
+  public String getNumberedArgument(int num) {
+    if (num >= numberedArgs.size()) {
+      return "";
+    } else {
+      return numberedArgs.get(num);
+    }
+  }
+
+  /**
+   * Get value of named argument (i.e. {&amp;FOO}).
    * 
    * @param name Arg name. If blank, returns first blank (undefined) named arg.
    * @return null if not found.
    */
-  String getNamedArg(String name) {
+  public String getNamedArg(String name) {
     // If name is blank, return the first blank (undefined) named argument (if any).
     if (name.length() == 0) {
       for (NamedArgument nargin : namedArgsIn) {
@@ -81,6 +128,25 @@ public class IncludeFile {
       return null;
     }
     return namedArgs.get(name.toLowerCase());
+  }
+
+  /**
+   * Returns value of scope-defined variable
+   */
+  public String getValue(String name) {
+    return defdNames.get(name);
+  }
+
+  public boolean isNameDefined(String name) {
+    return defdNames.containsKey(name);
+  }
+
+  public void scopeDefine(String name, String value) {
+    defdNames.put(name, value);
+  }
+
+  public void removeVariable(String name) {
+    defdNames.remove(name);
   }
 
   boolean undefNamedArg(String name) {

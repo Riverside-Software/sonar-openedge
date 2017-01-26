@@ -40,7 +40,7 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
   private int currStringType;
   private StringBuilder currText = new StringBuilder();
 
-  private Preprocessor prepro;
+  private ProgressLexer prepro;
 
   private boolean gettingAmpIfDefArg = false;
   private boolean preserve = false;
@@ -58,14 +58,14 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
   private Set<Integer> comments = new HashSet<>();
   private Set<Integer> loc = new HashSet<>();
 
-  Lexer(Preprocessor prepro) throws IOException {
+  Lexer(ProgressLexer prepro) throws IOException {
     this.prepro = prepro;
     getChar(); // We always assume "currChar" is available.
   }
 
 
   //////////////// Lexical productions listed first, support functions follow.
-
+  @Override
   public ProToken nextToken() {
     LOGGER.trace("Entering nextToken()");
     try {
@@ -91,7 +91,7 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
       // Proparse Directive
       // Check this before setting currText...
       // we don't want BEGIN_PROPARSE_DIRECTIVE in the text
-      if (currInt == Preprocessor.PROPARSE_DIRECTIVE) {
+      if (currInt == ProgressLexer.PROPARSE_DIRECTIVE) {
         textStartFile = prepro.getTextStart().getFile();
         textStartLine = prepro.getTextStart().getLine();
         textStartCol = prepro.getTextStart().getCol();
@@ -101,7 +101,7 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
       }
 
       textStartFile = prepro.getFileIndex();
-      textStartLine = prepro.getLine();
+      textStartLine = prepro.getLine2();
       textStartCol = prepro.getColumn();
       textStartSource = prepro.getSourceNum();
       currText.setLength(1);
@@ -998,7 +998,7 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
     prevLine = currLine;
     prevCol = currCol;
     currFile = prepro.getFileIndex();
-    currLine = prepro.getLine();
+    currLine = prepro.getLine2();
     currCol = prepro.getColumn();
   }
 
@@ -1113,7 +1113,7 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
     // our file/line/col, and that's why we need to preserve.
     preserve = true;
     preserveFile = prepro.getFileIndex();
-    preserveLine = prepro.getLine();
+    preserveLine = prepro.getLine2();
     preserveCol = prepro.getColumn();
     preserveSource = prepro.getSourceNum();
     preserveChar = currChar;
@@ -1132,7 +1132,7 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
       append();
   }
 
-  public Preprocessor getPreprocessor() {
+  public ProgressLexer getPreprocessor() {
     return prepro;
   }
 

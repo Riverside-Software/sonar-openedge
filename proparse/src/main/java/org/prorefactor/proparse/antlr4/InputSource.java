@@ -27,32 +27,39 @@ import com.google.common.io.Files;
  * We keep a pointer to the input stream "A" in the InputSource object so that if "A" spawns a new input stream "B", we
  * can return to "A" when we are done with "B".
  */
-class InputSource {
+public class InputSource {
+  // TODO Almost sure those two fields are useless
   private final boolean primaryInput;
   private final int sourceNum;
-  private final String fileContent;
 
-  private boolean isMacroExpansion;
-  int fileIndex = 0;
+  private final String fileContent;
+  private final int fileIndex;
+  private final boolean macroExpansion;
+
   private int nextCol = 1;
   private int nextLine = 1;
-
   private int currPos;
 
-  public InputSource(int sourceNum, String s) {
+  public InputSource(int sourceNum, String str, int fileIndex, int line, int col) {
     this.sourceNum = sourceNum;
     this.primaryInput = false;
-    this.fileContent = s;
+    this.fileContent = str;
+    this.fileIndex = fileIndex;
+    this.macroExpansion = true;
+    this.nextLine = line;
+    this.nextCol = col;
   }
 
-  public InputSource(int sourceNum, File file, Charset charset) throws IOException {
-    this(sourceNum, file, charset, false);
+  public InputSource(int sourceNum, File file, Charset charset, int fileIndex) throws IOException {
+    this(sourceNum, file, charset, fileIndex, false);
   }
 
-  public InputSource(int sourceNum, File file, Charset charset, boolean isPrimary) throws IOException {
+  public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean isPrimary) throws IOException {
     this.sourceNum = sourceNum;
     this.primaryInput = isPrimary;
+    this.fileIndex = fileIndex;
     this.fileContent = Files.toString(file, charset);
+    this.macroExpansion = false;
   }
 
   public int get() {
@@ -65,7 +72,7 @@ class InputSource {
     }
 
     int currChar = fileContent.charAt(currPos++);
-    if (!isMacroExpansion) {
+    if (!macroExpansion) {
       if (currChar == '\n') {
         nextLine++;
         nextCol = 1;
@@ -74,6 +81,10 @@ class InputSource {
       }
     }
     return currChar;
+  }
+
+  public int getFileIndex() {
+    return fileIndex;
   }
 
   public int getSourceNum() {
@@ -90,10 +101,6 @@ class InputSource {
 
   public boolean isPrimaryInput() {
     return primaryInput;
-  }
-
-  public void enableMacroExpansion() {
-    this.isMacroExpansion = true;
   }
 
   public void setNextCol(int nextCol) {

@@ -35,7 +35,7 @@ public class PostLexer implements TokenSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(PostLexer.class);
 
   private final Lexer lexer;
-  private final Preprocessor prepro;
+  private final ProgressLexer prepro;
 
   private final LinkedList<PreproIfState> preproIfVec = new LinkedList<>();
   private ProToken currToken;

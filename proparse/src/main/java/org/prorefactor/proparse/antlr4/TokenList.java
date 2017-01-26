@@ -23,21 +23,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * List of tokens for input to the parser. This class is responsible for gathering a list of tokens from the postlexer,
- * and examining that list for fine-tuning before sending it on to the parser. The complete tool chain is:<ol>
- * <li>preprocessor 
- * <li>lexer
- * <li>postlexer
- * <li>tokenlist
- * <li>filter
+ * List of tokens for input to the parser. This class is responsible for gathering a list of tokens from the PostLexer,
+ * and examining that list for fine-tuning before sending it on to the parser.
+ * 
+ * The complete tool chain is:<ol>
+ * <li>Lexer 
+ * <li>PostLexer
+ * <li>TokenList
  * <li>parser
  * </ol>
+ * 
+ * TODO The temporary list should be avoided
  */
 public class TokenList implements TokenSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(TokenList.class);
 
   private final TokenSource tokenStream;
   private final List<ProToken> list = new ArrayList<>();
+
   private int currentPosition = 0;
   private ProToken currentToken;
   private boolean initialized = false;
