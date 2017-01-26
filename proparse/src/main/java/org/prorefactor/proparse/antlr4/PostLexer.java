@@ -31,20 +31,18 @@ import java.io.IOException;
 /**
  * This class deals with &amp;IF conditions by acting as a filter between the lexer and the parser
  */
-public class Postlexer implements TokenSource {
-  private static final Logger LOGGER = LoggerFactory.getLogger(Postlexer.class);
+public class PostLexer implements TokenSource {
+  private static final Logger LOGGER = LoggerFactory.getLogger(PostLexer.class);
 
-  private final ProgressLexer doParse;
   private final Lexer lexer;
   private final Preprocessor prepro;
 
   private final LinkedList<PreproIfState> preproIfVec = new LinkedList<>();
   private ProToken currToken;
 
-  Postlexer(Preprocessor prepro, Lexer lexer, ProgressLexer doParse) {
-    this.prepro = prepro;
+  public PostLexer(Lexer lexer) {
     this.lexer = lexer;
-    this.doParse = doParse;
+    this.prepro = lexer.getPreprocessor();
   }
 
   @Override
@@ -102,7 +100,7 @@ public class Postlexer implements TokenSource {
     getNextToken();
     if (currToken.getType() != PreprocessorParser.RIGHTPAREN)
       throwMessage("Bad DEFINED function in &IF preprocessor condition");
-    return new ProToken(/*filenameList,*/ PreprocessorParser.NUMBER, prepro.defined(argToken.getText().trim().toLowerCase()));
+    return new ProToken(PreprocessorParser.NUMBER, prepro.defined(argToken.getText().trim().toLowerCase()));
   }
 
   private void getNextToken() throws IOException {
@@ -265,11 +263,8 @@ public class Postlexer implements TokenSource {
   }
 
   private void throwMessage(String theMessage) {
-    int theIndex = currToken.getFileIndex();
-    if (doParse.isValidIndex(theIndex))
-      throw new IllegalArgumentException(doParse.getFilename(theIndex) + ":" + currToken.getLine() + " " + theMessage);
-    else
-      throw new IllegalArgumentException(theMessage);
+    // TODO Add file name in message
+    throw new IllegalArgumentException("Line " + currToken.getLine() + " - " + theMessage);
   }
 
   private static class PreproIfState {

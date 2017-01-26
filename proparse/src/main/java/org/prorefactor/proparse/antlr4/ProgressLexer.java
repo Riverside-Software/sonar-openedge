@@ -17,12 +17,14 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.JPNodeMetrics;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.refactor.RefactorSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import antlr.TokenStream;
+import antlr.TokenStreamException;
 
 public class ProgressLexer implements TokenSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(ProgressLexer.class);
@@ -49,7 +51,7 @@ public class ProgressLexer implements TokenSource {
 
     Preprocessor prepro = new Preprocessor(fileName, this);
     Lexer lexer = new Lexer(prepro);
-    Postlexer postlexer = new Postlexer(prepro, lexer, this);
+    PostLexer postlexer = new PostLexer(lexer);
     TokenSource filter1 = new TokenList(postlexer);
     wrapper = new MultiChannelTokenSource(filter1);
   }
@@ -121,5 +123,21 @@ public class ProgressLexer implements TokenSource {
   // ****************************
   // End of TokenSource interface
   // ****************************
+
+  public TokenStream getTokenStream() {
+    LOGGER.trace("Entering legacy getTokenStream()");
+    return new ANTLR2TokenStreamWrapper();
+  }
+
+  private class ANTLR2TokenStreamWrapper implements TokenStream {
+    @Override
+    public antlr.Token nextToken() throws TokenStreamException {
+      org.prorefactor.proparse.antlr4.ProToken tok = (org.prorefactor.proparse.antlr4.ProToken) wrapper.nextToken();
+      ProToken pTok = new ProToken(filenameList, tok.getType(), tok.getText(), tok.getFileIndex(), tok.getLine(),
+          tok.getCharPositionInLine(), tok.getFileIndex(), tok.getLine(), tok.getCharPositionInLine(), tok.getMacroSourceNum());
+
+      return pTok;
+    }
+  }
 
 }

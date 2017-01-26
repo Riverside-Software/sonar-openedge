@@ -21,7 +21,6 @@ import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
 import org.prorefactor.macrolevel.MacroDef;
-import org.prorefactor.proparse.IntegerIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,6 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
   private int currStringType;
   private StringBuilder currText = new StringBuilder();
 
-  private IntegerIndex<String> filenameList;
   private Preprocessor prepro;
 
   private boolean gettingAmpIfDefArg = false;
@@ -62,7 +60,6 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
 
   Lexer(Preprocessor prepro) throws IOException {
     this.prepro = prepro;
-    this.filenameList = prepro.doParse.getFilenameList();
     getChar(); // We always assume "currChar" is available.
   }
 
@@ -1135,6 +1132,9 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
       append();
   }
 
+  public Preprocessor getPreprocessor() {
+    return prepro;
+  }
 
   @Override
   public int getLine() {
