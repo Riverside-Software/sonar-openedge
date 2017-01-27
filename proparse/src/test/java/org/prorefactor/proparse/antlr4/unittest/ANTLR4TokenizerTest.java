@@ -239,7 +239,7 @@ public class ANTLR4TokenizerTest {
 
     // ANTLR4
     ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
-    TokenStream tokenStream2 = dp.getANTLR2TokenStream();
+    TokenStream tokenStream2 = dp.getANTLR2TokenStream(false);
 
     compareTokens(tokenStream, tokenStream2);
   }
@@ -285,8 +285,10 @@ public class ANTLR4TokenizerTest {
     
     int zz = 0;
     while ((tok2 != null) && (tok2.getType() != antlr.Token.EOF_TYPE) && (tok4 != null) && (tok4.getType() != antlr.Token.EOF_TYPE)) {
-      if (tok2.getType() != tok4.getType()) {
-        fail("Difference at position " + zz + " -- " + tok2.getType() + "/" + tok4.getType() + " -- " + tok2.getText() + "/" + tok4.getText());
+      if ((tok2.getType() != tok4.getType()) || (tok2.getLine() != tok4.getLine())) {
+        fail("Difference at position " + zz + " -- " + tok2.getType() + "/" + tok4.getType() + " -- " + tok2.getText()
+            + "/" + tok4.getText() + " -- " + tok2.getLine() + ":" + tok2.getColumn() + "/" + tok4.getLine() + ":"
+            + tok4.getColumn());
       }
       zz++;
       tok2 = stream2.nextToken();

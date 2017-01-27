@@ -267,7 +267,7 @@ public class ANTLR4ParserTest {
 
   private void executeAntlr2Test(File file) throws ANTLRException, IOException {
     ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
-    ProParser parser = new ProParser(dp.getANTLR2TokenStream());
+    ProParser parser = new ProParser(dp.getANTLR2TokenStream(true));
     parser.initAntlr4(session, dp.getFilenameList());
     parser.program();
     Assert.assertNotNull(parser.getAST());
