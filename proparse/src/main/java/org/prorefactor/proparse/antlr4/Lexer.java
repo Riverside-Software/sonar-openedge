@@ -24,7 +24,7 @@ import org.prorefactor.macrolevel.MacroDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Lexer implements TokenSource, TokenFactory<ProToken> {
+public class Lexer implements TokenSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(Lexer.class);
 
   private static final int EOF_CHAR = -1;
@@ -1050,33 +1050,8 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
     prepro.undef(macroName.toLowerCase());
   }
 
-  // ***************************
-  // TokenFactory implementation
-  // ***************************
-  @Override
-  public ProToken create(Pair<TokenSource, CharStream> source, int type, String text, int channel, int start, int stop,
-      int line, int charPositionInLine) {
-    ProToken t = new ProToken(source, type, channel, start, stop);
-    t.setLine(line);
-    t.setCharPositionInLine(charPositionInLine);
-    if (text != null) {
-      t.setText(text);
-    }
-
-    return t;
-  }
-
-  @Override
-  public ProToken create(int type, String text) {
-    return new ProToken(type, text);
-  }
-
-  // ***************************
-  // TokenFactory implementation
-  // ***************************
-
   ProToken makeToken(int tokenType) {
-    return create(tokenType, currText.toString());
+    return new ProToken(tokenType, currText.toString());
   }
 
   ProToken makeToken(int tokenType, String text) {
@@ -1089,8 +1064,17 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
     } else if ((textStartFile == 0) && (tokenType != PreprocessorParser.WS) && (tokenType != PreprocessorParser.EOF) && (textStartLine > 0)) {
       loc.add(textStartLine);
     }
-    Pair<TokenSource, CharStream> pair = new Pair<>(this, null);
-    return create(pair, tokenType, text, Token.DEFAULT_CHANNEL, -1, -1, textStartLine, textStartCol);
+    ProToken tok = new ProToken(tokenType, text);
+    tok.setText(text);
+    tok.setFileIndex(textStartFile);
+    tok.setLine(textStartLine);
+    tok.setCharPositionInLine(textStartCol);
+    tok.setEndFileIndex(prevFile);
+    tok.setEndLine(prevLine);
+    tok.setEndCharPositionInLine(prevCol);
+    tok.setMacroSourceNum(textStartSource);
+
+    return tok;
   }
 
   /**
@@ -1172,7 +1156,7 @@ public class Lexer implements TokenSource, TokenFactory<ProToken> {
 
   @Override
   public TokenFactory<?> getTokenFactory() {
-    return this;
+    return null;
   }
 
 }

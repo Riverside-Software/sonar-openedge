@@ -24,7 +24,9 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.Tree;
+import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
@@ -235,8 +237,25 @@ public class ANTLR4ParserTest {
     genericTest("bug33.cls");
   }
 
+  // Next two tests : same exception should be thrown in both cases
+  @Test(expectedExceptions = {ProparseRuntimeException.class})
+  public void testCache1() throws Exception {
+    genericTest("CacheChild.cls");
+  }
+
+  @Test(expectedExceptions = {ProparseRuntimeException.class})
+  public void testCache2() throws Exception {
+    genericTest("CacheChild.cls");
+  }
+
+  @Test
+  public void testSaxWriter() throws Exception {
+    genericTest("sax-writer.p");
+  }
+
   private void genericTest(String fileName) throws ANTLRException, IOException {
-    executeTokenizerTest(new File(SRC_DIR, fileName));
+//    executeTokenizerTest(new File(SRC_DIR, fileName));
+    executeAntlr2Test(new File(SRC_DIR, fileName));
   }
 
   private void executeTokenizerTest(File file) throws ANTLRException, IOException {
@@ -244,6 +263,14 @@ public class ANTLR4ParserTest {
     Proparse parser = new Proparse(new CommonTokenStream(dp));
     ParseTree tree = parser.program();
     Assert.assertNotNull(tree);
+  }
+
+  private void executeAntlr2Test(File file) throws ANTLRException, IOException {
+    ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
+    ProParser parser = new ProParser(dp.getANTLR2TokenStream());
+    parser.initAntlr4(session, dp.getFilenameList());
+    parser.program();
+    Assert.assertNotNull(parser.getAST());
   }
 
   /** Print out a whole tree in LISP form. {@link #getNodeText} is used on the

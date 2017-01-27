@@ -15,7 +15,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FilenameUtils;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.proparse.SymbolScope;
 import org.prorefactor.refactor.settings.IProparseSettings;

@@ -236,10 +236,12 @@ public class ANTLR4TokenizerTest {
     // ANTLR2
     ParseUnit pu = new ParseUnit(file, session);
     TokenStream tokenStream = pu.lex();
+
     // ANTLR4
     ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
+    TokenStream tokenStream2 = dp.getANTLR2TokenStream();
 
-    compareTokens(tokenStream, dp);
+    compareTokens(tokenStream, tokenStream2);
   }
 
   private void executeTokenizerTest2(File file) throws RefactorException, ANTLRException, IOException {
@@ -269,6 +271,31 @@ public class ANTLR4TokenizerTest {
       fail("Still some tokens in ANTLR2 stream - Pos " + zz + " - " + tok2.getType() + " - " + tok2.getText());
     }
     if (tok4.getType() != Token.EOF) {
+      fail("Still some tokens in ANTLR4 stream");
+    }
+  }
+
+  /**
+   * @return True if both flows of tokens are identical
+   */
+  private void compareTokens(TokenStream stream2, TokenStream stream4) throws ANTLRException {
+    // Compares ANTLR2 token stream to ANTLR4 token source
+    antlr.Token tok2 = stream2.nextToken();
+    antlr.Token tok4 = stream4.nextToken();
+    
+    int zz = 0;
+    while ((tok2 != null) && (tok2.getType() != antlr.Token.EOF_TYPE) && (tok4 != null) && (tok4.getType() != antlr.Token.EOF_TYPE)) {
+      if (tok2.getType() != tok4.getType()) {
+        fail("Difference at position " + zz + " -- " + tok2.getType() + "/" + tok4.getType() + " -- " + tok2.getText() + "/" + tok4.getText());
+      }
+      zz++;
+      tok2 = stream2.nextToken();
+      tok4 = stream4.nextToken();
+    }
+    if (tok2.getType() != antlr.Token.EOF_TYPE) {
+      fail("Still some tokens in ANTLR2 stream - Pos " + zz + " - " + tok2.getType() + " - " + tok2.getText());
+    }
+    if (tok4.getType() != antlr.Token.EOF_TYPE) {
       fail("Still some tokens in ANTLR4 stream");
     }
   }
