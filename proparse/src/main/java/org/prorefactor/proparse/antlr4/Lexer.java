@@ -15,16 +15,11 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.TokenFactory;
-import org.antlr.v4.runtime.TokenSource;
-import org.antlr.v4.runtime.misc.Pair;
 import org.prorefactor.macrolevel.MacroDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Lexer implements TokenSource {
+public class Lexer  {
   private static final Logger LOGGER = LoggerFactory.getLogger(Lexer.class);
 
   private static final int EOF_CHAR = -1;
@@ -65,7 +60,6 @@ public class Lexer implements TokenSource {
 
 
   //////////////// Lexical productions listed first, support functions follow.
-  @Override
   public ProToken nextToken() {
     LOGGER.trace("Entering nextToken()");
     try {
@@ -1051,7 +1045,7 @@ public class Lexer implements TokenSource {
   }
 
   ProToken makeToken(int tokenType) {
-    return new ProToken(tokenType, currText.toString());
+    return makeToken(tokenType, currText.toString());
   }
 
   ProToken makeToken(int tokenType, String text) {
@@ -1118,45 +1112,6 @@ public class Lexer implements TokenSource {
 
   public ProgressLexer getPreprocessor() {
     return prepro;
-  }
-
-  @Override
-  public int getLine() {
-    // Return 0 as we track line numbers differently
-    return 0;
-  }
-
-
-  @Override
-  public int getCharPositionInLine() {
-    // Return -1 as we track column numbers differently
-    return -1;
-  }
-
-
-  @Override
-  public CharStream getInputStream() {
-    // Return null as we track input stream differently
-    return null;
-  }
-
-
-  @Override
-  public String getSourceName() {
-    // Should return file name
-    return null;
-  }
-
-
-  @Override
-  public void setTokenFactory(TokenFactory<?> factory) {
-    throw new UnsupportedOperationException("Can't replace built-in TokenFactory");
-  }
-
-
-  @Override
-  public TokenFactory<?> getTokenFactory() {
-    return null;
   }
 
 }

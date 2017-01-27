@@ -299,7 +299,7 @@ public class PostLexer implements TokenSource {
 
   @Override
   public TokenFactory<?> getTokenFactory() {
-    return lexer.getTokenFactory();
+    return null;
   }
 
 }

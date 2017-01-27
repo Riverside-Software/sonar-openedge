@@ -285,7 +285,7 @@ public class ANTLR4TokenizerTest {
     
     int zz = 0;
     while ((tok2 != null) && (tok2.getType() != antlr.Token.EOF_TYPE) && (tok4 != null) && (tok4.getType() != antlr.Token.EOF_TYPE)) {
-      if ((tok2.getType() != tok4.getType()) || (tok2.getLine() != tok4.getLine())) {
+      if ((tok2.getType() != tok4.getType()) || (tok2.getLine() != tok4.getLine()) || (tok2.getColumn() != tok4.getColumn())) {
         fail("Difference at position " + zz + " -- " + tok2.getType() + "/" + tok4.getType() + " -- " + tok2.getText()
             + "/" + tok4.getText() + " -- " + tok2.getLine() + ":" + tok2.getColumn() + "/" + tok4.getLine() + ":"
             + tok4.getColumn());
