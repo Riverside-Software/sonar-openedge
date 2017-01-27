@@ -13,7 +13,6 @@ package org.prorefactor.proparse.antlr4;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.WritableToken;
-import org.antlr.v4.runtime.misc.Pair;
 
 public class ProToken implements WritableToken {
 
