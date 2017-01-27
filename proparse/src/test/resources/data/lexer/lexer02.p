@@ -1,0 +1,7 @@
+MESSAGE "Lexer02-01".
+&IF 1 = 2 &THEN
+ MESSAGE "Lexer02-02".
+&ELSEIF 2 = 2 &THEN
+ MESSAGE "Lexer02-03".
+&ENDIF
+MESSAGE "Lexer02-04".

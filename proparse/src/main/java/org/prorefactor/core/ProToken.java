@@ -12,6 +12,8 @@ package org.prorefactor.core;
 
 import antlr.CommonHiddenStreamToken;
 
+import java.util.Objects;
+
 import org.prorefactor.proparse.IntegerIndex;
 
 public class ProToken extends CommonHiddenStreamToken {
@@ -113,4 +115,28 @@ public class ProToken extends CommonHiddenStreamToken {
     return endFile;
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof ProToken) {
+      ProToken tok = (ProToken) obj;
+      return ((tok.type == this.type) && (tok.text.equals(this.text)) && (tok.line == this.line)
+          && (tok.col == this.col) && (tok.fileIndex == this.fileIndex) && (tok.endFile == this.endFile)
+          && (tok.endLine == this.endLine) && (tok.endColumn == this.endColumn)
+          && (tok.macroSourceNum == this.macroSourceNum));
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(type, text, line, col, fileIndex, endFile, endLine, endColumn, macroSourceNum);
+  }
+
+  @Override
+  public String toString() {
+    return "[\"" + getText().replace('\r', ' ').replace('\n', ' ') + "\",<" + type + ">,macro=" + macroSourceNum
+        + ",file=" + fileIndex + ":" + endFile + ",line=" + line + ":" + endLine + ",col=" + col + ":" + endColumn
+        + "]";
+  }
 }

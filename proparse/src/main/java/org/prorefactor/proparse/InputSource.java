@@ -76,4 +76,5 @@ class InputSource {
   public boolean isPrimaryInput() {
     return primaryInput;
   }
+
 }
