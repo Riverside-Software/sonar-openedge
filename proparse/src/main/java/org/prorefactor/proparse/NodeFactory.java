@@ -29,9 +29,9 @@ public class NodeFactory extends ASTFactory {
 
   private final IntegerIndex<String> filenameList;
 
-  public NodeFactory(@SuppressWarnings("rawtypes") Hashtable hashtable, DoParse doParse) {
+  public NodeFactory(@SuppressWarnings("rawtypes") Hashtable hashtable, IntegerIndex<String> filenameList) {
     super(hashtable);
-    this.filenameList = doParse.getFilenameList();
+    this.filenameList = filenameList;
   }
 
   @Override

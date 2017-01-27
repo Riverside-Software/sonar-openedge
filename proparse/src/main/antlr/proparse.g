@@ -42,6 +42,7 @@ header {
   import org.prorefactor.core.nodetypes.ProgramRootNode;
   import org.prorefactor.core.nodetypes.ProparseDirectiveNode;
   import org.prorefactor.core.nodetypes.RecordNameNode;
+  import org.prorefactor.refactor.RefactorSession;
 }
 
 class ProParser extends Parser;
@@ -90,13 +91,11 @@ options {
 
   private boolean schemaTablePriority = false;
   public ParserSupport support;
-  public DoParse doParse;
 
   void init(DoParse doParse) {
-    this.doParse = doParse;
-    support = new ParserSupport(doParse);
+    support = new ParserSupport(doParse.getRefactorSession());
     setASTNodeClass("org.prorefactor.core.JPNode");
-    astFactory = new NodeFactory(getTokenTypeToASTClassMap(), doParse);
+    astFactory = new NodeFactory(getTokenTypeToASTClassMap(), doParse.getFilenameList());
   }
 
   void copyHiddenAfter(JPNode from, JPNode to) {

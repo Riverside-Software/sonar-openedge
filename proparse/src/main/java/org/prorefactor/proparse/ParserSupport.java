@@ -22,6 +22,7 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
+import org.prorefactor.refactor.RefactorSession;
 
 import antlr.ANTLRException;
 
@@ -34,7 +35,7 @@ public class ParserSupport {
   private boolean inDynamicNew = false;
 
   private ClassFinder classFinder;
-  private final DoParse doParse;
+  private final RefactorSession session;
 
   private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
 
@@ -55,11 +56,11 @@ public class ParserSupport {
   private JPNode lastFieldRefNode;
   private JPNode lastFieldIDNode;
 
-  ParserSupport(DoParse doParse) {
-    unitScope = new SymbolScope(doParse.getRefactorSession());
+  ParserSupport(RefactorSession session) {
+    unitScope = new SymbolScope(session);
     currentScope = unitScope;
-    this.doParse = doParse;
-    this.classFinder = new ClassFinder(doParse.getRefactorSession());
+    this.session = session;
+    this.classFinder = new ClassFinder(session);
   }
 
   /**
@@ -90,7 +91,7 @@ public class ParserSupport {
   }
 
   void addInnerScope() {
-    currentScope = new SymbolScope(doParse.getRefactorSession(), currentScope);
+    currentScope = new SymbolScope(session, currentScope);
   }
 
   public boolean isInDynamicNew() {
@@ -125,15 +126,15 @@ public class ParserSupport {
       // we might only be parsing for the purpose of finding inherite symbols for a subclass.
       // That pointer is stored in the Environment, and that cache of SymbolScopes is cleaned
       // up via a method it provides.
-      inheritanceScope = new SymbolScope(doParse.getRefactorSession());
-      doParse.getRefactorSession().addToSuperCache(thisClassName, inheritanceScope);
+      inheritanceScope = new SymbolScope(session);
+      session.addToSuperCache(thisClassName, inheritanceScope);
       inheritanceScope.setScopeName(thisClassName);
 
       // Does this class have a super class?
       JPNode nextNode = idNode.nextSibling();
       if ((nextNode != null) && nextNode.getType() == NodeTypes.INHERITS) {
         String inheritName = nextNode.firstChild().attrGetS(IConstants.QUALIFIED_CLASS_INT);
-        SymbolScope scope = doParse.getRefactorSession().lookupSuper(inheritName);
+        SymbolScope scope = session.lookupSuper(inheritName);
         if (scope == null)
           scope = parseSuper(classNode, inheritName);
         if (scope != null) {
@@ -214,7 +215,7 @@ public class ParserSupport {
     if (ss != null) {
       currentScope = ss;
     } else {
-      SymbolScope newScope = new SymbolScope(doParse.getRefactorSession(), currentScope);
+      SymbolScope newScope = new SymbolScope(session, currentScope);
       currentScope = newScope;
       funcScopeMap.put(lowername, newScope);
       // User functions are always at the "unit" scope.
@@ -292,14 +293,14 @@ public class ParserSupport {
     }
 
     try (BufferedReader ifstream = new BufferedReader(
-        new InputStreamReader(new FileInputStream(superFileName), doParse.getRefactorSession().getCharset()))) {
-      DoParse superDoParse = new DoParse(doParse.getRefactorSession(), superFileName, doParse);
+        new InputStreamReader(new FileInputStream(superFileName), session.getCharset()))) {
+      DoParse superDoParse = new DoParse(session, superFileName, /* FIXME doParse */ null);
       superDoParse.inStream = ifstream;
       superDoParse.doParse();
       ParserSupport superSupport = superDoParse.getParserSupport();
       if (!superSupport.isClass())
         throw new ProparseRuntimeException(unitScope.getScopeName() + " inherits " + qualSuperName + " which is not a class.");
-      SymbolScope superScope = doParse.getRefactorSession().lookupSuper(qualSuperName);
+      SymbolScope superScope = session.lookupSuper(qualSuperName);
       if (superScope == null)
         throw new ProparseRuntimeException("Internal error. parseSuper failed to find superScope.");
       for (SymbolScope p = superScope.getSuperScope(); p != null; p = p.getSuperScope()) {
