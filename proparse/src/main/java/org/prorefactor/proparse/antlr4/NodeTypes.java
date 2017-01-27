@@ -14,8 +14,10 @@ import org.prorefactor.proparse.ProParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * For node type names and numbers, this class provides:
@@ -65,6 +67,30 @@ public class NodeTypes {
   private static class TokenInfo {
     boolean isNatural = true;
     String keywordText = null;
+  }
+
+  /**
+   * Returns the list of all keywords in upper-case, including abbreviated names and alternate names 
+   */
+  public static Set<String> getAllKeywords() {
+    Set<String> kwSet = new HashSet<>();
+    for (TI typeInfo: typeInfoArray) {
+      if ((typeInfo != null) && ((typeInfo.bitset & TI.KEYWORD) > 0)) {
+        kwSet.add(typeInfo.fullText.toUpperCase());
+        if (typeInfo.altFullText != null) {
+          for (String str : typeInfo.altFullText) {
+            kwSet.add(str.toUpperCase());
+          }
+        }
+        int size = typeInfo.fullText.length();
+        for (int i = typeInfo.minAbbrev; i <= size; ++i) {
+          kwSet.add(typeInfo.fullText.substring(0, i).toUpperCase());
+        }
+
+      }
+    }
+
+    return kwSet;
   }
 
   static void add(int type, int minAbbrev, String fullText, int flags) {
