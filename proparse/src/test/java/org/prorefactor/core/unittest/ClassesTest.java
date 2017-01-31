@@ -100,4 +100,28 @@ public class ClassesTest {
     }
   }
 
+  @Test
+  public void testThisObject() throws Exception {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/TestThisObject.cls"), session);
+    assertNull(unit.getTopNode());
+    assertNull(unit.getRootScope());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Variable prop1 = null, prop2 = null;
+    for (Variable v : unit.getRootScope().getRootScope().getVariables()) {
+      if ("prop1".equalsIgnoreCase(v.getName()))
+        prop1 = v;
+      if ("prop2".equalsIgnoreCase(v.getName()))
+        prop2 = v;
+    }
+    assertNotNull(prop1);
+    assertNotNull(prop1);
+    assertTrue(prop2.getNumReads() == 1);
+    assertTrue(prop2.getNumWrites() == 1);
+    assertTrue(prop1.getNumReads() == 1);
+    assertTrue(prop1.getNumWrites() == 1);
+  }
+
 }
