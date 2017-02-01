@@ -182,6 +182,12 @@ public interface ITreeParserAction {
   default void defineWorktable(AST defAST, AST idNode) throws TreeParserException { }
 
   /**
+   * Process a Widget_ref node
+   * @param widAST The Widget_ref node
+   */
+  default void widattr(AST widAST, AST idAST, ContextQualifier cq) throws TreeParserException { }
+
+  /**
    * Process a Field_ref node.
    * 
    * @param refAST The Field_ref node.

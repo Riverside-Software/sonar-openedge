@@ -782,7 +782,7 @@ widname throws TreeParserException
   ;
 
 field throws TreeParserException
-  :  #(Field_ref (INPUT)? (#(FRAME ID) | #(BROWSE ID))? ( ID | THISOBJECTHDL OBJCOLON ID ) (array_subscript)? )
+  :  #(Field_ref (INPUT)? (#(FRAME ID) | #(BROWSE ID))? ID (array_subscript)? )
   ;
 
 array_subscript throws TreeParserException

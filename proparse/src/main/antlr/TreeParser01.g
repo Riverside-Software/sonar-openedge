@@ -256,7 +256,7 @@ filenameorvalue throws TreeParserException
 exprt throws TreeParserException
   :  #(LEFTPAREN expression RIGHTPAREN )
   |  constant
-  |  widattr
+  |  widattr2[ContextQualifier.REF]
   |  #(uf:USER_FUNC {action.callBegin(#uf);} parameterlist_noroot {action.callEnd();} )
   |  #(lm:LOCAL_METHOD_REF {action.callMethodBegin(#lm);} parameterlist_noroot {action.callMethodEnd();} )
   |  ( #(NEW TYPE_NAME) )=> #(NEW tn:TYPE_NAME {action.callConstructorBegin(#tn);} parameterlist {action.callConstructorEnd();} )
@@ -284,6 +284,23 @@ widattr throws TreeParserException
       )+
       (#(IN_KW (MENU|FRAME|BROWSE|SUBMENU|BUFFER) ID ))? (AS .)?
     )
+  ;
+
+widattr2[ContextQualifier cq] throws TreeParserException
+  :  #(  ref:Widget_ref
+      (NORETURNVALUE)?
+     (  (widname)=> id1:widname
+      |  id2:exprt
+      )
+      (  (OBJCOLON|DOUBLECOLON) aname:. (array_subscript)?
+        (  {action.callBegin(#aname);}
+          method_param_list
+          {action.callEnd();}
+        )? 
+      )+
+      (#(IN_KW (MENU|FRAME|BROWSE|SUBMENU|BUFFER) ID ))? (AS .)?
+    )
+    { action.widattr (#ref, (#id1 == null ? #id2 : #id1), cq); }
   ;
 
 gwidget throws TreeParserException
@@ -332,19 +349,19 @@ tbl[ContextQualifier contextQualifier] throws TreeParserException
 // referenced table. fld2 indicates that this must be a field of the *previous*
 // referenced table.
 fld[ContextQualifier contextQualifier] throws TreeParserException
-  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? (id:ID | THISOBJECTHDL OBJCOLON id2:ID) (array_subscript)? )
+  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? id:ID (array_subscript)? )
     // Note that sequence is important. This must be called after the full Field_ref branch has
     // been walked, because any frame or browse ID must be resolved before trying to resolve Field_ref.
     // (For example, this is required for resolving if the INPUT function was used.)
-    {action.field(#ref, (#id == null ? #id2 : #id), contextQualifier, TableNameResolution.ANY);}
+    {action.field(#ref, #id, contextQualifier, TableNameResolution.ANY);}
   ;
 fld1[ContextQualifier contextQualifier] throws TreeParserException
-  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? (id:ID | THISOBJECTHDL OBJCOLON id2:ID) (array_subscript)? )
-    {action.field(#ref, (#id == null ? #id2 : #id), contextQualifier, TableNameResolution.LAST);}
+  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? id:ID (array_subscript)? )
+    {action.field(#ref, #id, contextQualifier, TableNameResolution.LAST);}
   ;
 fld2[ContextQualifier contextQualifier] throws TreeParserException
-  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? (id:ID | THISOBJECTHDL OBJCOLON id2:ID) (array_subscript)? )
-    {action.field(#ref, (#id == null ? #id2 : #id), contextQualifier, TableNameResolution.PREVIOUS);}
+  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? id:ID (array_subscript)? )
+    {action.field(#ref, #id, contextQualifier, TableNameResolution.PREVIOUS);}
   ;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -380,7 +397,10 @@ assignment_list throws TreeParserException
   ;
 assign_equal throws TreeParserException
   :  #(EQUAL
-      (  pseudfn
+       
+      (  options { generateAmbigWarnings=false; } : // Because widattr2[CQ] replaces widattr in pseudfn
+         widattr2[ContextQualifier.UPDATING]
+      |  pseudfn
       |  fld[ContextQualifier.UPDATING]
       )
       expression
@@ -559,7 +579,7 @@ createstate throws TreeParserException
   ;
 
 create_whatever_args throws TreeParserException
-  :  (fld[ContextQualifier.UPDATING] | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)?
+  :  (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)?
   ;
 
 createautomationobjectstate throws TreeParserException
@@ -567,31 +587,35 @@ createautomationobjectstate throws TreeParserException
   ;
 
 createbrowsestate throws TreeParserException
-  :  #(CREATE BROWSE (fld[ContextQualifier.UPDATING] | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end )
+  :  #(CREATE BROWSE (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end )
   ;
 
 createbufferstate throws TreeParserException
-  :  #(  CREATE BUFFER (fld[ContextQualifier.UPDATING] | widattr) FOR TABLE expression
+  :  #(  CREATE BUFFER (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) FOR TABLE expression
       ( #(BUFFERNAME expression) )?
       (#(IN_KW WIDGETPOOL expression))?
       (NOERROR_KW)? state_end
     )
   ;
 
+createquerystate throws TreeParserException
+  :  #(CREATE QUERY (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
+  ;
+
 createserverstate throws TreeParserException
-  :  #(CREATE SERVER (fld[ContextQualifier.UPDATING] | widattr) (assign_opt)? state_end )
+  :  #(CREATE SERVER (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (assign_opt)? state_end )
   ;
 
 createserversocketstate throws TreeParserException
-  :  #(CREATE SERVERSOCKET (fld[ContextQualifier.UPDATING] | widattr) (NOERROR_KW)? state_end )
+  :  #(CREATE SERVERSOCKET (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (NOERROR_KW)? state_end )
   ;
 
 createsocketstate throws TreeParserException
-  :  #(CREATE SOCKET (fld[ContextQualifier.UPDATING] | widattr) (NOERROR_KW)? state_end )
+  :  #(CREATE SOCKET (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (NOERROR_KW)? state_end )
   ;
 
 createtemptablestate throws TreeParserException
-  :  #(CREATE TEMPTABLE (fld[ContextQualifier.UPDATING] | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
+  :  #(CREATE TEMPTABLE (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
   ;
 
 createwidgetstate throws TreeParserException
@@ -1083,7 +1107,7 @@ display_item throws TreeParserException
 dynamicnewstate throws TreeParserException
   :  #(  Assign_dynamic_new
       #(  EQUAL
-        (widattr | fld[ContextQualifier.UPDATING])
+        (widattr2[ContextQualifier.UPDATING] | fld[ContextQualifier.UPDATING])
         #(dn:DYNAMICNEW expression {action.callBegin(#dn);} parameterlist {action.callEnd();})
       )
       (NOERROR_KW)?

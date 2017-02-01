@@ -957,7 +957,6 @@ field
     {  #field=#([Field_ref],#field);
       support.fieldReference(#field, #id);
     }
-    | THISOBJECTHDL OBJCOLON id2:fieldn { #field=#([Field_ref],#field); support.fieldReference(#field, #id2); }
   ;
 
 field_frame_or_browse
@@ -1455,8 +1454,8 @@ defenumstate
   : DEFINE^ ENUM (enum_member)+ state_end { sthd(##, ENUM); }
   ;
 
-enum_member
-  :  type_name2 ( EQUAL ( NUMBER | type_name2 (COMMA type_name2)*))?
+enum_member 
+  :  type_name2 ( EQUAL ( options{generateAmbigWarnings=false;} : NUMBER | type_name2 (COMMA type_name2)*))?
   ;
 
 enum_end: END^ (ENUM)? ;

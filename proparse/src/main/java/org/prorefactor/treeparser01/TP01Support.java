@@ -479,16 +479,34 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
+  public void widattr(AST widAST, AST idAST, ContextQualifier cq) throws TreeParserException {
+    LOG.trace("Accessing " + idAST.getText() + " in mode " + cq);
+    if (idAST.getType() == NodeTypes.THISOBJECT) {
+      AST tok = idAST.getNextSibling();
+      if (tok.getType() == NodeTypes.OBJCOLON) {
+        AST fld = tok.getNextSibling();
+        String name = fld.getText();
+
+        FieldLookupResult result =  currentBlock.lookupField(name, true);
+        // TODO Once we've added static member resolution, we can re-add this test.
+        if (result == null)
+          return;
+        LOG.trace ("Found field !");
+
+        // Variable
+        if (result.variable != null) {
+          result.variable.noteReference(cq);
+        }
+
+      }
+    }
+  }
+
+  @Override
   public void field(AST refAST, AST idAST, ContextQualifier cq, TableNameResolution resolution) throws TreeParserException {
     JPNode idNode = (JPNode) idAST;
     FieldRefNode refNode = (FieldRefNode) refAST;
-
-    String name = null;
-    if (idNode.getType() == NodeTypes.THISOBJECTHDL) {
-      name = refNode.nextSibling().nextSibling().getText();
-    } else {
-      name = idNode.getText();
-    }
+    String name = idNode.getText();
     
     FieldLookupResult result = null;
 
