@@ -492,12 +492,10 @@ catchstate throws TreeParserException
     #( b:CATCH { action.scopeAdd(#b); }
        id1:ID as:AS (CLASS)? TYPE_NAME
        { 
-         action.paramForRoutine(#id1);
          action.addToSymbolScope(action.defineVariable(#id1, #id1));
          action.defAs(#as);
-         action.paramSymbol(#id1);
        }
-       block_colon code_block (EOF | #(END (CATCH)?) state_end) {action.blockEnd();}
+       block_colon code_block (EOF | #(END (CATCH)?) state_end) { action.scopeClose(#b); }
       )
   ;
 
@@ -910,6 +908,19 @@ definepropertystate throws TreeParserException
       as:AS datatype {action.defAs(#as);} (extentphrase_def_symbol|initial_constant|NOUNDO)*
       {action.addToSymbolScope(stack.pop());}
       defineproperty_accessor (defineproperty_accessor)?
+    )
+  ;
+
+defineproperty_accessor throws TreeParserException
+  :  #(  b:Property_getter def_modifiers GET
+      (  (PERIOD)=> PERIOD
+      |  (function_params)? block_colon { action.scopeAdd(#b); } code_block END (GET)? {action.scopeClose(#b);} PERIOD
+      )
+    )
+  |  #(  b:Property_setter def_modifiers SET
+      (  PERIOD
+      |  function_params block_colon { action.scopeAdd(#b); } code_block END (SET)? {action.scopeClose(#b);} PERIOD
+      )
     )
   ;
 

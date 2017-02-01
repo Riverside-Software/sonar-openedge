@@ -760,7 +760,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void paramForRoutine(AST directionAST) {
-    LOG.trace("Adding parameter {} for routine {}", directionAST.getText(), currentRoutine.fullName());
+    LOG.trace("Entering paramForRoutine '{}' -- '{}'", directionAST.getText(), currentRoutine.fullName());
     Parameter param = new Parameter();
     param.setDirectionNode((JPNode) directionAST);
     wipParameters.addFirst(param);
@@ -998,7 +998,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void scopeAdd(AST anode) {
-    LOG.trace("Creating new scope {}", anode);
+    LOG.trace("Entering scopeAdd {}", anode);
     BlockNode blockNode = (BlockNode) anode;
     currentScope = currentScope.addScope();
     currentBlock = pushBlock(new Block(currentScope, blockNode));
@@ -1008,6 +1008,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void scopeClose(AST scopeRootNode) {
+    LOG.trace("Entering scopeClose {}", scopeRootNode);
     currentScope = currentScope.getParentScope();
     blockEnd();
   }
