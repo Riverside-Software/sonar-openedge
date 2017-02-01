@@ -723,6 +723,27 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
+  public void propGetSetBegin(AST propAST) throws TreeParserException {
+    LOG.trace("Entering propGetSetBegin {}", propAST);
+    scopeAdd(propAST);
+    BlockNode blockNode = (BlockNode) propAST;
+    SymbolScope definingScope = currentScope.getParentScope();
+    Routine r = new Routine(propAST.getText(), definingScope, currentScope);
+    r.setProgressType(propAST.getType());
+    r.setDefOrIdNode(blockNode);
+    blockNode.setSymbol(r);
+    definingScope.add(r);
+    currentRoutine = r;
+  }
+
+  @Override
+  public void propGetSetEnd(AST propAST) throws TreeParserException {
+    LOG.trace("Entering propGetSetEnd {}", propAST);
+    scopeClose(propAST);
+    currentRoutine = rootRoutine;
+  }
+
+  @Override
   public void eventBegin(AST eventAST, AST idAST) throws TreeParserException {
     this.inDefineEvent = true;
   }

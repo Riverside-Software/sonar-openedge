@@ -11,6 +11,7 @@
 package org.prorefactor.core.unittest;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -58,14 +59,44 @@ public class ClassesTest {
     unit.treeParser01();
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
+
+    // Only zz and zz2 properties should be there
+    boolean zz = false;
+    boolean zz2 = false;
+    boolean oth = false;
+    String othName = "";
     for (Variable v : unit.getRootScope().getVariables()) {
-      System.out.println(" Root "  + v);
-    }
-    for (SymbolScope sc : unit.getRootScope().getChildScopesDeep()) {
-      System.out.println("Scope " + sc);
-      for (Variable v : sc.getVariables()) {
-        System.out.println("Var " + v);
+      if ("zz".equalsIgnoreCase(v.getName())) {
+        zz = true;
+      } else if ("zz2".equalsIgnoreCase(v.getName())) {
+        zz2 = true;
+      } else {
+        oth = true;
+        othName = v.getName();
       }
+    }
+    assertTrue(zz, "Property zz not in root scope");
+    assertTrue(zz2, "Property zz2 not in root scope");
+    assertFalse(oth, "Something else found in root scope : '" + othName + "' ; ");
+
+    for (SymbolScope sc : unit.getRootScope().getChildScopesDeep()) {
+      if (sc.getRootBlock().getNode().getType() == NodeTypes.METHOD) continue;
+      if (sc.getRootBlock().getNode().getType() == NodeTypes.CATCH) continue;
+      boolean arg = false, i = false, oth2 = false;
+      String oth2Name = "";
+      for (Variable v : sc.getVariables()) {
+        if ("arg".equalsIgnoreCase(v.getName())) {
+          arg = true;
+        } else if ("i".equalsIgnoreCase(v.getName())) {
+          i = true;
+        } else {
+          oth2= true;
+          oth2Name = v.getName();
+        }
+      }
+      assertTrue(arg, "Property var not in GET/SET scope");
+      assertTrue(i, "Property i not in GET/SET scope");
+      assertFalse(oth2, "Something else found in GET/SET scope : '" + oth2Name + "' ; ");
     }
   }
 

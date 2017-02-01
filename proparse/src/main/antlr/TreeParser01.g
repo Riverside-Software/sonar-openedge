@@ -912,14 +912,14 @@ definepropertystate throws TreeParserException
   ;
 
 defineproperty_accessor throws TreeParserException
-  :  #(  b:Property_getter def_modifiers GET
+  :  #(  b1:Property_getter def_modifiers GET
       (  (PERIOD)=> PERIOD
-      |  (function_params)? block_colon { action.scopeAdd(#b); } code_block END (GET)? {action.scopeClose(#b);} PERIOD
+      |  { action.propGetSetBegin(#b1); } (function_params)? block_colon  code_block END (GET)? { action.propGetSetEnd(#b1); } PERIOD
       )
     )
-  |  #(  b:Property_setter def_modifiers SET
+  |  #(  b2:Property_setter def_modifiers SET
       (  PERIOD
-      |  function_params block_colon { action.scopeAdd(#b); } code_block END (SET)? {action.scopeClose(#b);} PERIOD
+      |  { action.propGetSetBegin(#b2); } function_params block_colon  code_block END (SET)? { action.propGetSetEnd(#b2); } PERIOD
       )
     )
   ;
