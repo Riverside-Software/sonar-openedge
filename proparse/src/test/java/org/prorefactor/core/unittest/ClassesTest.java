@@ -21,6 +21,8 @@ import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.Variable;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -36,7 +38,7 @@ public class ClassesTest {
     session = injector.getInstance(RefactorSession.class);
   }
 
-  @Test
+//  @Test
   public void test01() throws Exception {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/LoadLogger.cls"), session);
     assertNull(unit.getTopNode());
@@ -46,6 +48,25 @@ public class ClassesTest {
     assertNotNull(unit.getRootScope());
     assertTrue(unit.getTopNode().query(NodeTypes.ANNOTATION).size() == 1);
     assertEquals("Progress.Lang.Deprecated", unit.getTopNode().query(NodeTypes.ANNOTATION).get(0).getAnnotationName());
+  }
+
+  @Test
+  public void test03() throws Exception {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/ScopeTest.cls"), session);
+    assertNull(unit.getTopNode());
+    assertNull(unit.getRootScope());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    for (Variable v : unit.getRootScope().getVariables()) {
+      System.out.println(" Root "  + v);
+    }
+    for (SymbolScope sc : unit.getRootScope().getChildScopesDeep()) {
+      System.out.println("Scope " + sc);
+      for (Variable v : sc.getVariables()) {
+        System.out.println("Var " + v);
+      }
+    }
   }
 
 }
