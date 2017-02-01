@@ -488,10 +488,8 @@ public class TP01Support extends TP01Action {
         String name = fld.getText();
 
         FieldLookupResult result =  currentBlock.lookupField(name, true);
-        // TODO Once we've added static member resolution, we can re-add this test.
         if (result == null)
           return;
-        LOG.trace ("Found field !");
 
         // Variable
         if (result.variable != null) {
