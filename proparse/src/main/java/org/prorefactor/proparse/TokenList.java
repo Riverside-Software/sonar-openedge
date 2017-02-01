@@ -50,6 +50,14 @@ public class TokenList implements TokenStream {
     for (;;) {
       ProToken nextToken = (ProToken) tokenStream.nextToken();
       list.add(nextToken);
+      // THIS-OBJECT followed by ':' is transformed to THISOBJECTHDL
+      if (nextToken.getType() == ProParserTokenTypes.THISOBJECT) {
+        ProToken nn = (ProToken) tokenStream.nextToken();
+        list.add(nn);
+        if (nn.getType() == ProParserTokenTypes.OBJCOLON) {
+          nextToken.setType(ProParserTokenTypes.THISOBJECTHDL);
+        }
+      }
       if (nextToken.getType() == ProParserTokenTypes.OBJCOLON)
         reviewObjcolon();
       if (nextToken.getType() == ProParserTokenTypes.EOF)

@@ -79,13 +79,6 @@ options {
   }
 
   public void traceOut(String rname) {
-    if (inputState.guessing == 0) {
-      try {
-        LOGGER.trace("{}< {}; LA(1)=={} {}", new Object[] { indent(), rname, LT(1).getText(), ((inputState.guessing > 0)?" [guessing]":"") });
-      } catch (TokenStreamException uncaught) {
-        LOGGER.trace("{}< {}; LA(1)==!!ERROR!! {}", new Object[] { indent(), rname, ((inputState.guessing > 0)?" [guessing]":"") });
-      }
-    }
     traceDepth--;
   }
 
@@ -964,6 +957,7 @@ field
     {  #field=#([Field_ref],#field);
       support.fieldReference(#field, #id);
     }
+    | THISOBJECTHDL OBJCOLON id2:fieldn { #field=#([Field_ref],#field); support.fieldReference(#field, #id2); }
   ;
 
 field_frame_or_browse

@@ -77,7 +77,6 @@ options {
   }
 
   public void traceOut(String rname, AST t) {
-    LOGGER.trace("{}< {} ({}) {}", new Object[] { indent(), rname, t, ((inputState.guessing > 0)?" [guessing]":"") });
     traceDepth--;
   }
 
@@ -783,7 +782,7 @@ widname throws TreeParserException
   ;
 
 field throws TreeParserException
-  :  #(Field_ref (INPUT)? (#(FRAME ID) | #(BROWSE ID))? ID (array_subscript)? )
+  :  #(Field_ref (INPUT)? (#(FRAME ID) | #(BROWSE ID))? ( ID | THISOBJECTHDL OBJCOLON ID ) (array_subscript)? )
   ;
 
 array_subscript throws TreeParserException

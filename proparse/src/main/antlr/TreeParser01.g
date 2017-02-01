@@ -59,7 +59,6 @@ options {
   }
 
   public void traceOut(String rname, AST t) {
-    LOGGER.trace("{}< {} ({}) {}", new Object[] { indent(), rname, t, ((inputState.guessing > 0)?" [guessing]":"") });
     traceDepth--;
   }
 
@@ -333,21 +332,20 @@ tbl[ContextQualifier contextQualifier] throws TreeParserException
 // referenced table. fld2 indicates that this must be a field of the *previous*
 // referenced table.
 fld[ContextQualifier contextQualifier] throws TreeParserException
-  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? id:ID (array_subscript)? )
+  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? (id:ID | THISOBJECTHDL OBJCOLON id2:ID) (array_subscript)? )
     // Note that sequence is important. This must be called after the full Field_ref branch has
     // been walked, because any frame or browse ID must be resolved before trying to resolve Field_ref.
     // (For example, this is required for resolving if the INPUT function was used.)
-    {action.field(#ref, #id, contextQualifier, TableNameResolution.ANY);}
+    {action.field(#ref, (#id == null ? #id2 : #id), contextQualifier, TableNameResolution.ANY);}
   ;
 fld1[ContextQualifier contextQualifier] throws TreeParserException
-  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? id:ID (array_subscript)? )
-    {action.field(#ref, #id, contextQualifier, TableNameResolution.LAST);}
+  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? (id:ID | THISOBJECTHDL OBJCOLON id2:ID) (array_subscript)? )
+    {action.field(#ref, (#id == null ? #id2 : #id), contextQualifier, TableNameResolution.LAST);}
   ;
 fld2[ContextQualifier contextQualifier] throws TreeParserException
-  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? id:ID (array_subscript)? )
-    {action.field(#ref, #id, contextQualifier, TableNameResolution.PREVIOUS);}
+  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? (id:ID | THISOBJECTHDL OBJCOLON id2:ID) (array_subscript)? )
+    {action.field(#ref, (#id == null ? #id2 : #id), contextQualifier, TableNameResolution.PREVIOUS);}
   ;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////

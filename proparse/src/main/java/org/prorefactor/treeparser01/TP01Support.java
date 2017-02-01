@@ -482,7 +482,14 @@ public class TP01Support extends TP01Action {
   public void field(AST refAST, AST idAST, ContextQualifier cq, TableNameResolution resolution) throws TreeParserException {
     JPNode idNode = (JPNode) idAST;
     FieldRefNode refNode = (FieldRefNode) refAST;
-    String name = idNode.getText();
+
+    String name = null;
+    if (idNode.getType() == NodeTypes.THISOBJECTHDL) {
+      name = refNode.nextSibling().nextSibling().getText();
+    } else {
+      name = idNode.getText();
+    }
+    
     FieldLookupResult result = null;
 
     refNode.attrSet(IConstants.CONTEXT_QUALIFIER, cq.toString());
