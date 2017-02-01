@@ -507,7 +507,6 @@ public class TP01Support extends TP01Action {
     JPNode idNode = (JPNode) idAST;
     FieldRefNode refNode = (FieldRefNode) refAST;
     String name = idNode.getText();
-    
     FieldLookupResult result = null;
 
     refNode.attrSet(IConstants.CONTEXT_QUALIFIER, cq.toString());

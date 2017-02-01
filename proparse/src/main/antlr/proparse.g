@@ -1454,7 +1454,7 @@ defenumstate
   : DEFINE^ ENUM (enum_member)+ state_end { sthd(##, ENUM); }
   ;
 
-enum_member 
+enum_member
   :  type_name2 ( EQUAL ( options{generateAmbigWarnings=false;} : NUMBER | type_name2 (COMMA type_name2)*))?
   ;
 
