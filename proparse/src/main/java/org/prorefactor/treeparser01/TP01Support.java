@@ -723,6 +723,27 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
+  public void propGetSetBegin(AST propAST) throws TreeParserException {
+    LOG.trace("Entering propGetSetBegin {}", propAST);
+    scopeAdd(propAST);
+    BlockNode blockNode = (BlockNode) propAST;
+    SymbolScope definingScope = currentScope.getParentScope();
+    Routine r = new Routine(propAST.getText(), definingScope, currentScope);
+    r.setProgressType(propAST.getType());
+    r.setDefOrIdNode(blockNode);
+    blockNode.setSymbol(r);
+    definingScope.add(r);
+    currentRoutine = r;
+  }
+
+  @Override
+  public void propGetSetEnd(AST propAST) throws TreeParserException {
+    LOG.trace("Entering propGetSetEnd {}", propAST);
+    scopeClose(propAST);
+    currentRoutine = rootRoutine;
+  }
+
+  @Override
   public void eventBegin(AST eventAST, AST idAST) throws TreeParserException {
     this.inDefineEvent = true;
   }
@@ -760,7 +781,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void paramForRoutine(AST directionAST) {
-    LOG.trace("Adding parameter {} for routine {}", directionAST.getText(), currentRoutine.fullName());
+    LOG.trace("Entering paramForRoutine '{}' -- '{}'", directionAST.getText(), currentRoutine.fullName());
     Parameter param = new Parameter();
     param.setDirectionNode((JPNode) directionAST);
     wipParameters.addFirst(param);
@@ -998,7 +1019,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void scopeAdd(AST anode) {
-    LOG.trace("Creating new scope {}", anode);
+    LOG.trace("Entering scopeAdd {}", anode);
     BlockNode blockNode = (BlockNode) anode;
     currentScope = currentScope.addScope();
     currentBlock = pushBlock(new Block(currentScope, blockNode));
@@ -1008,6 +1029,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void scopeClose(AST scopeRootNode) {
+    LOG.trace("Entering scopeClose {}", scopeRootNode);
     currentScope = currentScope.getParentScope();
     blockEnd();
   }

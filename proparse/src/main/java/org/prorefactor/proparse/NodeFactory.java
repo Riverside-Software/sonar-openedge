@@ -48,6 +48,9 @@ public class NodeFactory extends ASTFactory {
         return new FieldRefNode(token);
       case NodeTypes.Program_root:
         return new ProgramRootNode(token);
+      case NodeTypes.Property_getter:
+      case NodeTypes.Property_setter:
+        return new BlockNode(token);
       default:
         return new JPNode(token);
     }
