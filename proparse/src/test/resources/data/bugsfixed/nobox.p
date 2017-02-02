@@ -5,4 +5,6 @@ define query q1 for tt1.
 define browse b1 query q1
   display xxx with 10 down.
 
-disp xxx with browse b1 no-box.
+disp xxx with browse b1.
+disp xxx with browse b1 no-box no-validate.
+disp xxx with browse b1 no-box no-validate no-row-markers.
