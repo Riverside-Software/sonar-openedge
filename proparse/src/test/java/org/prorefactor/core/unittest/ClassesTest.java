@@ -39,7 +39,7 @@ public class ClassesTest {
     session = injector.getInstance(RefactorSession.class);
   }
 
-//  @Test
+  @Test
   public void test01() throws Exception {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/LoadLogger.cls"), session);
     assertNull(unit.getTopNode());
