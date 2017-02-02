@@ -77,7 +77,6 @@ options {
   }
 
   public void traceOut(String rname, AST t) {
-    LOGGER.trace("{}< {} ({}) {}", new Object[] { indent(), rname, t, ((inputState.guessing > 0)?" [guessing]":"") });
     traceDepth--;
   }
 

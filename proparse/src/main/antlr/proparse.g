@@ -79,13 +79,6 @@ options {
   }
 
   public void traceOut(String rname) {
-    if (inputState.guessing == 0) {
-      try {
-        LOGGER.trace("{}< {}; LA(1)=={} {}", new Object[] { indent(), rname, LT(1).getText(), ((inputState.guessing > 0)?" [guessing]":"") });
-      } catch (TokenStreamException uncaught) {
-        LOGGER.trace("{}< {}; LA(1)==!!ERROR!! {}", new Object[] { indent(), rname, ((inputState.guessing > 0)?" [guessing]":"") });
-      }
-    }
     traceDepth--;
   }
 
@@ -1462,7 +1455,7 @@ defenumstate
   ;
 
 enum_member
-  :  type_name2 ( EQUAL ( NUMBER | type_name2 (COMMA type_name2)*))?
+  :  type_name2 ( EQUAL ( options{generateAmbigWarnings=false;} : NUMBER | type_name2 (COMMA type_name2)*))?
   ;
 
 enum_end: END^ (ENUM)? ;
