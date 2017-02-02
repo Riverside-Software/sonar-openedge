@@ -274,6 +274,10 @@ public class SymbolScope {
     return variableMap.values();
   }
 
+  public Variable getVariable(String name) {
+    return variableMap.get(name.toLowerCase());
+  }
+
   /**
    * Answer whether the scope has a Routine named by param.
    * 

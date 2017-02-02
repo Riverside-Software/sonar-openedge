@@ -61,42 +61,20 @@ public class ClassesTest {
     assertNotNull(unit.getRootScope());
 
     // Only zz and zz2 properties should be there
-    boolean zz = false;
-    boolean zz2 = false;
-    boolean oth = false;
-    String othName = "";
-    for (Variable v : unit.getRootScope().getVariables()) {
-      if ("zz".equalsIgnoreCase(v.getName())) {
-        zz = true;
-      } else if ("zz2".equalsIgnoreCase(v.getName())) {
-        zz2 = true;
-      } else {
-        oth = true;
-        othName = v.getName();
-      }
-    }
-    assertTrue(zz, "Property zz not in root scope");
-    assertTrue(zz2, "Property zz2 not in root scope");
-    assertFalse(oth, "Something else found in root scope : '" + othName + "' ; ");
+    Variable zz = unit.getRootScope().getVariable("zz");
+    Variable zz2 = unit.getRootScope().getVariable("zz2");
+    assertNotNull(zz, "Property zz not in root scope");
+    assertNotNull(zz2, "Property zz2 not in root scope");
+    assertEquals(unit.getRootScope().getVariables().size(), 2);
 
     for (SymbolScope sc : unit.getRootScope().getChildScopesDeep()) {
       if (sc.getRootBlock().getNode().getType() == NodeTypes.METHOD) continue;
       if (sc.getRootBlock().getNode().getType() == NodeTypes.CATCH) continue;
-      boolean arg = false, i = false, oth2 = false;
-      String oth2Name = "";
-      for (Variable v : sc.getVariables()) {
-        if ("arg".equalsIgnoreCase(v.getName())) {
-          arg = true;
-        } else if ("i".equalsIgnoreCase(v.getName())) {
-          i = true;
-        } else {
-          oth2= true;
-          oth2Name = v.getName();
-        }
-      }
-      assertTrue(arg, "Property var not in GET/SET scope");
-      assertTrue(i, "Property i not in GET/SET scope");
-      assertFalse(oth2, "Something else found in GET/SET scope : '" + oth2Name + "' ; ");
+      Variable arg = sc.getVariable("arg");
+      Variable i = sc.getVariable("i");
+      assertNotNull(arg, "Property var not in GET/SET scope");
+      assertNotNull(i, "Property i not in GET/SET scope");
+      assertEquals(sc.getVariables().size(), 2);
     }
   }
 
@@ -109,13 +87,8 @@ public class ClassesTest {
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    Variable prop1 = null, prop2 = null;
-    for (Variable v : unit.getRootScope().getRootScope().getVariables()) {
-      if ("prop1".equalsIgnoreCase(v.getName()))
-        prop1 = v;
-      if ("prop2".equalsIgnoreCase(v.getName()))
-        prop2 = v;
-    }
+    Variable prop1 = unit.getRootScope().getVariable("prop1");
+    Variable prop2 = unit.getRootScope().getVariable("prop2");
     assertNotNull(prop1);
     assertNotNull(prop1);
     assertTrue(prop2.getNumReads() == 1);
