@@ -99,6 +99,7 @@
           <pluginName>${sonar.pluginName}</pluginName>
           <pluginClass>${sonar.pluginClass}</pluginClass>
           <sonarQubeMinVersion>5.6</sonarQubeMinVersion>
+	  <sonarLintSupported>true</sonarLintSupported>
         </configuration>
       </plugin>
       <plugin>
