@@ -75,7 +75,7 @@ public class OpenEdgeListingSensor implements Sensor {
       File listingFile = getListingFile(file.file());
       if ((file.absolutePath().indexOf(' ') == -1) && (listingFile != null) && (listingFile.exists())) {
         try {
-          ListingParser parser = new ListingParser(listingFile);
+          ListingParser parser = new ListingParser(listingFile, file.relativePath());
           StringBuilder sb = new StringBuilder();
           for (CodeBlock block : parser.getTransactionBlocks()) {
             if (sb.length() > 0) {

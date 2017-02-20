@@ -21,6 +21,7 @@ public class ListingParser {
   private static final Logger LOG = LoggerFactory.getLogger(ListingParser.class);
 
   private final List<CodeBlock> blocks = new ArrayList<>();
+  private final String relativeName;
 
   /**
    * Ctor
@@ -28,16 +29,18 @@ public class ListingParser {
    * @param file File name shouldn't containn any space character
    * @throws IOException
    */
-  public ListingParser(File file) throws IOException {
+  public ListingParser(File file, String relativeName) throws IOException {
     if (file.getAbsolutePath().indexOf(' ') != -1) {
       throw new IllegalArgumentException("File name shouldn't contain space character");
     }
+    this.relativeName = relativeName;
     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
       parseFile(reader);
     }
   }
 
-  public ListingParser(BufferedReader reader) throws IOException {
+  public ListingParser(BufferedReader reader, String relativeName) throws IOException {
+    this.relativeName = relativeName;
     parseFile(reader);
   }
 
@@ -81,7 +84,9 @@ public class ListingParser {
     boolean newPage = true;
     boolean frames = false;
     String str;
+    int fileLineNumber = 0;
     while ((str = reader.readLine()) != null) {
+      fileLineNumber++;
       if (str.length() == 0)
         continue;
 
@@ -106,15 +111,21 @@ public class ListingParser {
             sourceDone = true;
           }
         }
+        fileLineNumber += 3;
       } else if (sourceDone) {
         if (str.charAt(0) == ' ') {
           if ("frames:".equalsIgnoreCase(str.substring(0, 12).trim()))
             frames = true;
           // Buffer or frame block
-          if (frames)
-            blocks.get(blocks.size() - 1).appendFrame(str.substring(13));
-          else
-            blocks.get(blocks.size() - 1).appendBuffer(str.substring(13));
+          if (blocks.isEmpty()) {
+            // Caused by unknown block type with associated buffers
+            LOG.error("No matching block in {} at line {}, please report issue", relativeName, fileLineNumber);
+          } else {
+            if (frames)
+              blocks.get(blocks.size() - 1).appendFrame(str.substring(13));
+            else
+              blocks.get(blocks.size() - 1).appendBuffer(str.substring(13));
+          }
         } else {
           List<String> splitter = Splitter.on(' ').trimResults().omitEmptyStrings().limit(5).splitToList(str);
           if (splitter.size() < 4)
@@ -126,7 +137,7 @@ public class ListingParser {
           if (type != null) {
             blocks.add(new CodeBlock(type, lineNumber == null ? -1 : lineNumber, transaction, (splitter.size() == 5 ? splitter.get(4) : "")));
           } else {
-            LOG.error("Unknown block type {}", splitter.get(2).toUpperCase());
+            LOG.error("Unknown block type {} in {} at line {}, please report issue", splitter.get(2).toUpperCase(), relativeName, fileLineNumber);
           }
         }
       }
