@@ -1867,7 +1867,7 @@ datatype_com_native
   ;
 
 datatype_dll
-  :  CHARACTER | INT64 | datatype_dll_native
+  :  CHARACTER | INT64 | MEMPTR | datatype_dll_native
   |  {support.abbrevDatatype(LT(1).getText()) == CHARACTER}? id:ID {#id.setType(CHARACTER);}
   ;
 datatype_dll_native

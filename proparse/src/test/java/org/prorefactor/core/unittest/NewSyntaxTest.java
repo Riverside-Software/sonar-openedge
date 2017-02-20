@@ -289,4 +289,9 @@ public class NewSyntaxTest {
   public void test50() throws Exception {
     testNewSyntax("11n/Class03.cls");
   }
+
+  @Test
+  public void test51() throws Exception {
+    testNewSyntax("11n/ParameterHandleTo.p");
+  }
 }
