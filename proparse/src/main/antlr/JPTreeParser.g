@@ -1316,7 +1316,7 @@ datatype_com_native throws TreeParserException
   ;
 
 datatype_dll throws TreeParserException
-  :  CHARACTER | INT64 | datatype_dll_native  
+  :  CHARACTER | INT64 | MEMPTR | datatype_dll_native  
   ;
 
 datatype_dll_native throws TreeParserException
