@@ -37,16 +37,19 @@ import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
 import org.sonar.plugins.openedge.api.org.antlr.v4.runtime.tree.ParseTree;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
+import org.sonar.plugins.openedge.foundation.licence.IServerNameProvider;
 
 public class OpenEdgeDBRulesSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeDBRulesSensor.class);
 
   private final FileSystem fileSystem;
   private final OpenEdgeComponents components;
+  private final IServerNameProvider nameProvider;
 
-  public OpenEdgeDBRulesSensor(FileSystem fileSystem, OpenEdgeComponents components) {
+  public OpenEdgeDBRulesSensor(FileSystem fileSystem, OpenEdgeComponents components, IServerNameProvider nameProvider) {
     this.fileSystem = fileSystem;
     this.components = components;
+    this.nameProvider = nameProvider;
   }
 
   @Override
@@ -58,7 +61,7 @@ public class OpenEdgeDBRulesSensor implements Sensor {
   public void execute(SensorContext context) {
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
-    components.initializeChecks(context);
+    components.initializeChecks(context, nameProvider.getServerName());
 
     for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);

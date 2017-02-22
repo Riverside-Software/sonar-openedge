@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
@@ -62,6 +63,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+import org.sonar.plugins.openedge.foundation.licence.IServerNameProvider;
 
 public class OpenEdgeProparseSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeProparseSensor.class);
@@ -69,11 +71,13 @@ public class OpenEdgeProparseSensor implements Sensor {
   private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
+  private final IServerNameProvider nameProvider;
 
-  public OpenEdgeProparseSensor(FileSystem fileSystem, OpenEdgeSettings settings, OpenEdgeComponents components) {
+  public OpenEdgeProparseSensor(FileSystem fileSystem, OpenEdgeSettings settings, OpenEdgeComponents components, IServerNameProvider nameProvider) {
     this.fileSystem = fileSystem;
     this.settings = settings;
     this.components = components;
+    this.nameProvider = nameProvider;
   }
 
   @Override
@@ -92,7 +96,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
     long maxParseTime = 0L;
-    components.initializeChecks(context);
+    components.initializeChecks(context, nameProvider.getServerName());
 
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
@@ -127,9 +131,11 @@ public class OpenEdgeProparseSensor implements Sensor {
           // Rules and complexity are not applied on include files
           continue;
         }
-        computeCpd(context, file, unit);
-        computeCommonMetrics(context, file, unit);
-        computeComplexity(context, file, unit);
+        if (!nameProvider.isSonarLintSide()) {
+          computeCpd(context, file, unit);
+          computeCommonMetrics(context, file, unit);
+          computeComplexity(context, file, unit);
+        }
 
         if (settings.useProparseDebug()) {
           String fileName = ".proparse/" + file.relativePath() + ".json";

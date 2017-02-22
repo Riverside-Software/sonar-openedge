@@ -76,6 +76,10 @@ public class OpenEdgePlugin implements Plugin {
     // Decorators
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
 
+    // Extensions providing server name - Those classes are annotated so only one will be injected
+    context.addExtension(ScannerSideNameProvider.class);
+    context.addExtension(SonarLintSideNameProvider.class);
+
     // Properties
     context.addExtension(PropertyDefinition.builder(Constants.OE_ANALYTICS).name("Enable analytics").description(
         "Ping remote server for usage analytics").type(PropertyType.BOOLEAN).category(

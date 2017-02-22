@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.sonar.api.batch.BatchSide;
+import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.rule.RuleKey;
@@ -49,7 +50,10 @@ import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
 import org.sonar.plugins.openedge.api.com.google.common.base.Strings;
+import org.sonarsource.api.sonarlint.SonarLintSide;
 
+@ScannerSide
+@SonarLintSide
 @BatchSide
 public class OpenEdgeComponents {
   private static final Logger LOG = Loggers.get(OpenEdgeComponents.class);
@@ -112,7 +116,7 @@ public class OpenEdgeComponents {
     }
   }
 
-  private void registerLicences(LicenceRegistrar[] licRegistrars, String permanentId) {
+  private void registerLicences(LicenceRegistrar[] licRegistrars) {
     for (LicenceRegistrar reg : licRegistrars) {
       LicenceRegistrar.Licence lic = new LicenceRegistrar.Licence();
       reg.register(lic);
@@ -122,10 +126,6 @@ public class OpenEdgeComponents {
       LOG.debug("Found {} licence - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
           lic.getType().toString(), lic.getPermanentId(), lic.getCustomerName(), lic.getRepositoryName(),
           DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date(lic.getExpirationDate())));
-      if (!lic.getPermanentId().isEmpty() && !permanentId.equals(lic.getPermanentId())) {
-        LOG.debug("Skipped licence as it doesn't match permanent ID '{}'", permanentId);
-        continue;
-      }
       // Licence with highest expiration date wins
       Licence existingLic = licences.get(lic.getRepositoryName());
       if ((existingLic == null) || (existingLic.getExpirationDate() < lic.getExpirationDate())) {
@@ -144,7 +144,7 @@ public class OpenEdgeComponents {
     }
   }
 
-  public void initializeChecks(SensorContext context) {
+  public void initializeChecks(SensorContext context, String serverId) {
     if (initialized)
       return;
 
