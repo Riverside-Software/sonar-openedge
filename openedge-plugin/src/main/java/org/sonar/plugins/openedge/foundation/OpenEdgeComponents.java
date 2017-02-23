@@ -56,7 +56,7 @@ public class OpenEdgeComponents {
   private static final Logger LOG = Loggers.get(OpenEdgeComponents.class);
 
   // IoC
-  private final Server server;
+  private final IIdProvider idProvider;
 
   private final List<Class<? extends OpenEdgeCheck>> checkClasses = new ArrayList<>();
 
@@ -71,26 +71,26 @@ public class OpenEdgeComponents {
 
   private final Map<String, Licence> licences = new HashMap<>();
 
-  public OpenEdgeComponents(Server server) {
-    this(server, null, null);
+  public OpenEdgeComponents(IIdProvider provider) {
+    this(provider, null, null);
   }
 
-  public OpenEdgeComponents(Server server, CheckRegistrar[] checkRegistrars) {
-    this(server, checkRegistrars, null);
+  public OpenEdgeComponents(IIdProvider provider, CheckRegistrar[] checkRegistrars) {
+    this(provider, checkRegistrars, null);
   }
 
-  public OpenEdgeComponents(Server server, LicenceRegistrar[] licRegistrars) {
-    this(server, null, licRegistrars);
+  public OpenEdgeComponents(IIdProvider provider, LicenceRegistrar[] licRegistrars) {
+    this(provider, null, licRegistrars);
   }
 
-  public OpenEdgeComponents(Server server, CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
-    this.server = server;
+  public OpenEdgeComponents(IIdProvider provider, CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
+    this.idProvider = provider;
 
     if (checkRegistrars != null) {
       registerChecks(checkRegistrars);
     }
     if (licRegistrars != null) {
-      registerLicences(licRegistrars, Strings.nullToEmpty(server.getPermanentServerId()));
+      registerLicences(licRegistrars, Strings.nullToEmpty(idProvider.getPermanentID()));
     }
   }
 
@@ -154,7 +154,7 @@ public class OpenEdgeComponents {
       // AFAIK, no way to be sure if a rule is based on a template or not
       String clsName = rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey();
       OpenEdgeCheck lint = getAnalyzer(clsName, ruleKey, context, getLicence(ruleKey.repository()),
-          Strings.nullToEmpty(server.getPermanentServerId()));
+          Strings.nullToEmpty(idProvider.getPermanentID()));
       if (lint != null) {
         configureFields(rule, lint);
         lint.initialize();
