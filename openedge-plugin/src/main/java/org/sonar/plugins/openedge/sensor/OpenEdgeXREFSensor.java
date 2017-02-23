@@ -43,10 +43,10 @@ import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
+import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
-import org.sonar.plugins.openedge.foundation.licence.IServerNameProvider;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -57,13 +57,13 @@ public class OpenEdgeXREFSensor implements Sensor {
   private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
-  private final IServerNameProvider nameProvider;
+  private final IIdProvider nameProvider;
 
   // Internal use
   private final DocumentBuilderFactory dbFactory;
   private final DocumentBuilder dBuilder;
 
-  public OpenEdgeXREFSensor(OpenEdgeSettings settings, FileSystem fileSystem, OpenEdgeComponents components, IServerNameProvider nameProvider) {
+  public OpenEdgeXREFSensor(OpenEdgeSettings settings, FileSystem fileSystem, OpenEdgeComponents components, IIdProvider nameProvider) {
     this.fileSystem = fileSystem;
     this.settings = settings;
     this.components = components;
@@ -94,7 +94,7 @@ public class OpenEdgeXREFSensor implements Sensor {
     int xrefNum = 0;
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
-    components.initializeChecks(context, nameProvider.getServerName());
+    components.initializeChecks(context, nameProvider.getPermanentID());
     for (Map.Entry<ActiveRule, OpenEdgeXrefCheck> entry : components.getXrefRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }

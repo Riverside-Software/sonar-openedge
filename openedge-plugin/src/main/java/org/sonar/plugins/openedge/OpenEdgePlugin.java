@@ -38,6 +38,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.foundation.ScannerIdProvider;
+import org.sonar.plugins.openedge.foundation.SonarLintIdProvider;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBRulesSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDebugListingSensor;
@@ -77,8 +78,7 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
 
     // Extensions providing server name - Those classes are annotated so only one will be injected
-    context.addExtension(ScannerSideNameProvider.class);
-    context.addExtension(SonarLintSideNameProvider.class);
+    context.addExtensions(ScannerIdProvider.class, SonarLintIdProvider.class);
 
     // Properties
     context.addExtension(PropertyDefinition.builder(Constants.OE_ANALYTICS).name("Enable analytics").description(

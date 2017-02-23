@@ -116,7 +116,7 @@ public class OpenEdgeComponents {
     }
   }
 
-  private void registerLicences(LicenceRegistrar[] licRegistrars) {
+  private void registerLicences(LicenceRegistrar[] licRegistrars, String permanentId) {
     for (LicenceRegistrar reg : licRegistrars) {
       LicenceRegistrar.Licence lic = new LicenceRegistrar.Licence();
       reg.register(lic);
@@ -126,6 +126,10 @@ public class OpenEdgeComponents {
       LOG.debug("Found {} licence - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
           lic.getType().toString(), lic.getPermanentId(), lic.getCustomerName(), lic.getRepositoryName(),
           DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date(lic.getExpirationDate())));
+      if (!lic.getPermanentId().isEmpty() && !permanentId.equals(lic.getPermanentId())) {
+        LOG.debug("Skipped licence as it doesn't match permanent ID '{}'", permanentId);
+        continue;
+      }
       // Licence with highest expiration date wins
       Licence existingLic = licences.get(lic.getRepositoryName());
       if ((existingLic == null) || (existingLic.getExpirationDate() < lic.getExpirationDate())) {

@@ -17,9 +17,20 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.plugins.openedge.foundation.licence;
+package org.sonar.plugins.openedge.foundation;
 
-public interface IServerNameProvider {
-  String getServerName();
-  boolean isSonarLintSide();
+import org.sonarsource.api.sonarlint.SonarLintSide;
+
+@SonarLintSide
+public class SonarLintIdProvider implements IIdProvider {
+
+  @Override
+  public String getPermanentID() {
+    return "lint";
+  }
+
+  @Override
+  public boolean isSonarLintSide() {
+    return true;
+  }
 }

@@ -59,11 +59,11 @@ import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.SymbolScope;
 import org.sonar.plugins.openedge.foundation.CPDCallback;
+import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
-import org.sonar.plugins.openedge.foundation.licence.IServerNameProvider;
 
 public class OpenEdgeProparseSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeProparseSensor.class);
@@ -71,9 +71,9 @@ public class OpenEdgeProparseSensor implements Sensor {
   private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
-  private final IServerNameProvider nameProvider;
+  private final IIdProvider nameProvider;
 
-  public OpenEdgeProparseSensor(FileSystem fileSystem, OpenEdgeSettings settings, OpenEdgeComponents components, IServerNameProvider nameProvider) {
+  public OpenEdgeProparseSensor(FileSystem fileSystem, OpenEdgeSettings settings, OpenEdgeComponents components, IIdProvider nameProvider) {
     this.fileSystem = fileSystem;
     this.settings = settings;
     this.components = components;
@@ -96,7 +96,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
     long maxParseTime = 0L;
-    components.initializeChecks(context, nameProvider.getServerName());
+    components.initializeChecks(context, nameProvider.getPermanentID());
 
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
