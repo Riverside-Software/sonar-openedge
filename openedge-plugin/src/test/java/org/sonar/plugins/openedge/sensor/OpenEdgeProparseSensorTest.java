@@ -46,7 +46,7 @@ public class OpenEdgeProparseSensorTest {
     context.settings().setProperty(Constants.CPD_METHODS, "TEST3");
     context.settings().setProperty(Constants.CPD_PROCEDURES, "adm-create-objects");
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
-    OpenEdgeComponents components = new OpenEdgeComponents(context.activeRules(), server, null, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(server, null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(context.fileSystem(), oeSettings, components);
     sensor.execute(context);
     Assert.assertNotNull(context.cpdTokens("file3:src/procedures/test3.p"));

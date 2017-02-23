@@ -33,7 +33,6 @@ import java.util.Map.Entry;
 import org.apache.commons.lang.StringUtils;
 import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.rule.ActiveRule;
-import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.platform.Server;
 import org.sonar.api.rule.RuleKey;
@@ -43,6 +42,7 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.api.InvalidLicenceException;
 import org.sonar.plugins.openedge.api.LicenceRegistrar;
 import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
@@ -57,7 +57,6 @@ public class OpenEdgeComponents {
 
   // IoC
   private final Server server;
-  private final ActiveRules activeRules;
 
   private final List<Class<? extends OpenEdgeCheck>> checkClasses = new ArrayList<>();
 
@@ -72,9 +71,7 @@ public class OpenEdgeComponents {
 
   private final Map<String, Licence> licences = new HashMap<>();
 
-  public OpenEdgeComponents(ActiveRules activeRules, Server server, CheckRegistrar[] checkRegistrars,
-      LicenceRegistrar[] licRegistrars) {
-    this.activeRules = activeRules;
+  public OpenEdgeComponents(Server server, CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
     this.server = server;
 
     if (checkRegistrars != null) {
@@ -140,7 +137,7 @@ public class OpenEdgeComponents {
     if (initialized)
       return;
 
-    for (ActiveRule rule : activeRules.findByLanguage(Constants.LANGUAGE_KEY)) {
+    for (ActiveRule rule : context.activeRules().findByLanguage(Constants.LANGUAGE_KEY)) {
       RuleKey ruleKey = rule.ruleKey();
       // AFAIK, no way to be sure if a rule is based on a template or not
       String clsName = rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey();
@@ -207,7 +204,11 @@ public class OpenEdgeComponents {
       }
       return null;
     } catch (ReflectiveOperationException caught) {
-      LOG.error("Unable to instantiate Proparse rule " + internalKey, caught);
+      if (caught.getCause() instanceof InvalidLicenceException) {
+        LOG.error("Unable to instantiate Proparse rule {} - Cause {}", internalKey, caught.getCause().getMessage());
+      } else {
+        LOG.error("Unable to instantiate Proparse rule " + internalKey, caught);
+      }
       return null;
     }
   }

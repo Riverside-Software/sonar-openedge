@@ -3,6 +3,9 @@ package org.sonar.plugins.openedge.api;
 public class Constants {
   public static final String LANGUAGE_KEY = "oe";
 
+  // Key of the default rule repository
+  public static final String STD_REPOSITORY_KEY = "rssw-oe";
+
   // Sonar properties
   public static final String SKIP_PROPARSE_PROPERTY = "sonar.oe.skipProparse";
   public static final String PROPARSE_DEBUG = "sonar.oe.proparse.debug";
