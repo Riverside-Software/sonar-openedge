@@ -1,7 +1,11 @@
 package org.sonar.plugins.openedge.api;
 
 import org.sonar.api.batch.BatchSide;
+import org.sonar.api.batch.ScannerSide;
+import org.sonarsource.api.sonarlint.SonarLintSide;
 
+@ScannerSide
+@SonarLintSide
 @BatchSide
 public interface LicenceRegistrar {
 

@@ -33,7 +33,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.Sensor;
@@ -53,7 +52,6 @@ public class OpenEdgeXREFSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeXREFSensor.class);
 
   // IoC
-  private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
 
@@ -61,8 +59,7 @@ public class OpenEdgeXREFSensor implements Sensor {
   private final DocumentBuilderFactory dbFactory;
   private final DocumentBuilder dBuilder;
 
-  public OpenEdgeXREFSensor(OpenEdgeSettings settings, FileSystem fileSystem, OpenEdgeComponents components) {
-    this.fileSystem = fileSystem;
+  public OpenEdgeXREFSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
     this.settings = settings;
     this.components = components;
 
@@ -100,7 +97,7 @@ public class OpenEdgeXREFSensor implements Sensor {
       LOG.info("XML XREF filter activated [{}]", settings.getXrefBytesAsString());
     }
 
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
+    for (InputFile file : context.fileSystem().inputFiles(context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Looking for XREF of {}", file.relativePath());
 
       File xrefFile = getXrefFile(file.file());

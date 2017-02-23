@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.Sensor;
@@ -41,11 +40,10 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 public class OpenEdgeDBRulesSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeDBRulesSensor.class);
 
-  private final FileSystem fileSystem;
+  // IoC
   private final OpenEdgeComponents components;
 
-  public OpenEdgeDBRulesSensor(FileSystem fileSystem, OpenEdgeComponents components) {
-    this.fileSystem = fileSystem;
+  public OpenEdgeDBRulesSensor(OpenEdgeComponents components) {
     this.components = components;
   }
 
@@ -64,7 +62,7 @@ public class OpenEdgeDBRulesSensor implements Sensor {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdgeDB.KEY))) {
+    for (InputFile file : context.fileSystem().inputFiles(context.fileSystem().predicates().hasLanguage(OpenEdgeDB.KEY))) {
       try {
         LOG.debug("Generating ParseTree for dump file {}", file.relativePath());
         long time = System.currentTimeMillis();

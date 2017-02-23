@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.sonar.api.batch.BatchSide;
+import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.rule.RuleKey;
@@ -49,7 +50,10 @@ import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
 import org.sonar.plugins.openedge.api.com.google.common.base.Strings;
+import org.sonarsource.api.sonarlint.SonarLintSide;
 
+@ScannerSide
+@SonarLintSide
 @BatchSide
 public class OpenEdgeComponents {
   private static final Logger LOG = Loggers.get(OpenEdgeComponents.class);
@@ -174,6 +178,10 @@ public class OpenEdgeComponents {
       }
     }
     initialized = true;
+  }
+
+  public IIdProvider getIdProvider() {
+    return idProvider;
   }
 
   public Collection<OpenEdgeProparseCheck> getProparseChecks() {

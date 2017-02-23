@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.rule.ActiveRule;
@@ -66,12 +65,11 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 public class OpenEdgeProparseSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeProparseSensor.class);
 
-  private final FileSystem fileSystem;
+  // IoC
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
 
-  public OpenEdgeProparseSensor(FileSystem fileSystem, OpenEdgeSettings settings, OpenEdgeComponents components) {
-    this.fileSystem = fileSystem;
+  public OpenEdgeProparseSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
     this.settings = settings;
     this.components = components;
   }
@@ -98,7 +96,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
+    for (InputFile file : context.fileSystem().inputFiles(context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Parsing {}", new Object[] {file.relativePath()});
       boolean isIncludeFile = "i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()));
       numFiles++;
@@ -127,9 +125,11 @@ public class OpenEdgeProparseSensor implements Sensor {
           // Rules and complexity are not applied on include files
           continue;
         }
-        computeCpd(context, file, unit);
-        computeCommonMetrics(context, file, unit);
-        computeComplexity(context, file, unit);
+        if (!components.getIdProvider().isSonarLintSide()) {
+          computeCpd(context, file, unit);
+          computeCommonMetrics(context, file, unit);
+          computeComplexity(context, file, unit);
+        }
 
         if (settings.useProparseDebug()) {
           String fileName = ".proparse/" + file.relativePath() + ".json";

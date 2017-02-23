@@ -6,7 +6,7 @@ public class Constants {
   // Key of the default rule repository
   public static final String STD_REPOSITORY_KEY = "rssw-oe";
 
-  // Sonar properties
+  // Sonar analysis properties
   public static final String SKIP_PROPARSE_PROPERTY = "sonar.oe.skipProparse";
   public static final String PROPARSE_DEBUG = "sonar.oe.proparse.debug";
   public static final String BINARIES = "sonar.oe.binaries";

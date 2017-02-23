@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 import org.sonar.api.batch.BatchSide;
+import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.config.Settings;
 import org.sonar.api.utils.log.Logger;
@@ -49,7 +50,10 @@ import org.sonar.plugins.openedge.api.org.prorefactor.core.schema.Schema;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorSession;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.IProparseSettings;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.ProparseSettings;
+import org.sonarsource.api.sonarlint.SonarLintSide;
 
+@ScannerSide
+@SonarLintSide
 @BatchSide
 public class OpenEdgeSettings {
   private static final Logger LOG = Loggers.get(OpenEdgeSettings.class);
