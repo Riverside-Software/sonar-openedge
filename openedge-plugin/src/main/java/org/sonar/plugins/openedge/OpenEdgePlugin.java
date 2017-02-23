@@ -64,7 +64,7 @@ public class OpenEdgePlugin implements Plugin {
         OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
 
     // Server ID providers
-    context.addExtension(ScannerIdProvider.class);
+    context.addExtensions(ScannerIdProvider.class, SonarLintIdProvider.class);
 
     // UI and code colorizer
     context.addExtensions(CommonMetricsWidget.class, OpenEdgeColorizerFormat.class, OpenEdgeDBColorizerFormat.class);
@@ -76,9 +76,6 @@ public class OpenEdgePlugin implements Plugin {
 
     // Decorators
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
-
-    // Extensions providing server name - Those classes are annotated so only one will be injected
-    context.addExtensions(ScannerIdProvider.class, SonarLintIdProvider.class);
 
     // Properties
     context.addExtension(PropertyDefinition.builder(Constants.OE_ANALYTICS).name("Enable analytics").description(
