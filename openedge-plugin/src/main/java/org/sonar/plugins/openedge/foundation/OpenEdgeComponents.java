@@ -71,6 +71,18 @@ public class OpenEdgeComponents {
 
   private final Map<String, Licence> licences = new HashMap<>();
 
+  public OpenEdgeComponents(Server server) {
+    this(server, null, null);
+  }
+
+  public OpenEdgeComponents(Server server, CheckRegistrar[] checkRegistrars) {
+    this(server, checkRegistrars, null);
+  }
+
+  public OpenEdgeComponents(Server server, LicenceRegistrar[] licRegistrars) {
+    this(server, null, licRegistrars);
+  }
+
   public OpenEdgeComponents(Server server, CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
     this.server = server;
 
@@ -205,9 +217,9 @@ public class OpenEdgeComponents {
       return null;
     } catch (ReflectiveOperationException caught) {
       if (caught.getCause() instanceof InvalidLicenceException) {
-        LOG.error("Unable to instantiate Proparse rule {} - Cause {}", internalKey, caught.getCause().getMessage());
+        LOG.error("Unable to instantiate rule {} - {}", internalKey, caught.getCause().getMessage());
       } else {
-        LOG.error("Unable to instantiate Proparse rule " + internalKey, caught);
+        LOG.error("Unable to instantiate rule " + internalKey, caught);
       }
       return null;
     }
