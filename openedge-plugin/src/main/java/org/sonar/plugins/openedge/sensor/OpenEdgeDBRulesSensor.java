@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.Sensor;
@@ -35,21 +34,17 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
 import org.sonar.plugins.openedge.api.org.antlr.v4.runtime.tree.ParseTree;
-import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 
 public class OpenEdgeDBRulesSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeDBRulesSensor.class);
 
-  private final FileSystem fileSystem;
+  // IoC
   private final OpenEdgeComponents components;
-  private final IIdProvider nameProvider;
 
-  public OpenEdgeDBRulesSensor(FileSystem fileSystem, OpenEdgeComponents components, IIdProvider nameProvider) {
-    this.fileSystem = fileSystem;
+  public OpenEdgeDBRulesSensor(OpenEdgeComponents components) {
     this.components = components;
-    this.nameProvider = nameProvider;
   }
 
   @Override
@@ -61,13 +56,13 @@ public class OpenEdgeDBRulesSensor implements Sensor {
   public void execute(SensorContext context) {
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
-    components.initializeChecks(context, nameProvider.getPermanentID());
+    components.initializeChecks(context);
 
     for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdgeDB.KEY))) {
+    for (InputFile file : context.fileSystem().inputFiles(context.fileSystem().predicates().hasLanguage(OpenEdgeDB.KEY))) {
       try {
         LOG.debug("Generating ParseTree for dump file {}", file.relativePath());
         long time = System.currentTimeMillis();

@@ -33,7 +33,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.Sensor;
@@ -43,7 +42,6 @@ import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
-import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
@@ -54,20 +52,16 @@ public class OpenEdgeXREFSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeXREFSensor.class);
 
   // IoC
-  private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
-  private final IIdProvider nameProvider;
 
   // Internal use
   private final DocumentBuilderFactory dbFactory;
   private final DocumentBuilder dBuilder;
 
-  public OpenEdgeXREFSensor(OpenEdgeSettings settings, FileSystem fileSystem, OpenEdgeComponents components, IIdProvider nameProvider) {
-    this.fileSystem = fileSystem;
+  public OpenEdgeXREFSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
     this.settings = settings;
     this.components = components;
-    this.nameProvider = nameProvider;
 
     this.dbFactory = DocumentBuilderFactory.newInstance();
     try {
@@ -94,7 +88,7 @@ public class OpenEdgeXREFSensor implements Sensor {
     int xrefNum = 0;
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
-    components.initializeChecks(context, nameProvider.getPermanentID());
+    components.initializeChecks(context);
     for (Map.Entry<ActiveRule, OpenEdgeXrefCheck> entry : components.getXrefRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
@@ -103,7 +97,7 @@ public class OpenEdgeXREFSensor implements Sensor {
       LOG.info("XML XREF filter activated [{}]", settings.getXrefBytesAsString());
     }
 
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
+    for (InputFile file : context.fileSystem().inputFiles(context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Looking for XREF of {}", file.relativePath());
 
       File xrefFile = getXrefFile(file.file());

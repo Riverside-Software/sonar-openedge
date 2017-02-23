@@ -33,8 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.sonar.api.SonarProduct;
-import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.rule.ActiveRule;
@@ -59,7 +57,6 @@ import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.SymbolScope;
 import org.sonar.plugins.openedge.foundation.CPDCallback;
-import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
@@ -68,16 +65,13 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 public class OpenEdgeProparseSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeProparseSensor.class);
 
-  private final FileSystem fileSystem;
+  // IoC
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
-  private final IIdProvider nameProvider;
 
-  public OpenEdgeProparseSensor(FileSystem fileSystem, OpenEdgeSettings settings, OpenEdgeComponents components, IIdProvider nameProvider) {
-    this.fileSystem = fileSystem;
+  public OpenEdgeProparseSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
     this.settings = settings;
     this.components = components;
-    this.nameProvider = nameProvider;
   }
 
   @Override
@@ -96,13 +90,13 @@ public class OpenEdgeProparseSensor implements Sensor {
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
     long maxParseTime = 0L;
-    components.initializeChecks(context, nameProvider.getPermanentID());
+    components.initializeChecks(context);
 
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
+    for (InputFile file : context.fileSystem().inputFiles(context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Parsing {}", new Object[] {file.relativePath()});
       boolean isIncludeFile = "i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()));
       numFiles++;
@@ -131,7 +125,7 @@ public class OpenEdgeProparseSensor implements Sensor {
           // Rules and complexity are not applied on include files
           continue;
         }
-        if (!nameProvider.isSonarLintSide()) {
+        if (!components.getIdProvider().isSonarLintSide()) {
           computeCpd(context, file, unit);
           computeCommonMetrics(context, file, unit);
           computeComplexity(context, file, unit);

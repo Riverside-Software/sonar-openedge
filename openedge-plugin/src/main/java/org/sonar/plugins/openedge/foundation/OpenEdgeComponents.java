@@ -148,7 +148,7 @@ public class OpenEdgeComponents {
     }
   }
 
-  public void initializeChecks(SensorContext context, String serverId) {
+  public void initializeChecks(SensorContext context) {
     if (initialized)
       return;
 
@@ -178,6 +178,10 @@ public class OpenEdgeComponents {
       }
     }
     initialized = true;
+  }
+
+  public IIdProvider getIdProvider() {
+    return idProvider;
   }
 
   public Collection<OpenEdgeProparseCheck> getProparseChecks() {
