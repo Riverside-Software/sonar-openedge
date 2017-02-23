@@ -26,7 +26,7 @@ public class SonarLintIdProvider implements IIdProvider {
 
   @Override
   public String getPermanentID() {
-    return "lint";
+    return "SonarLint";
   }
 
   @Override
