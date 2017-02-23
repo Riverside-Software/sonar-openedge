@@ -32,12 +32,12 @@ import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 import org.sonar.plugins.openedge.foundation.OpenEdgeDBProfile;
-import org.sonar.plugins.openedge.foundation.OpenEdgeLicenceRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProfile;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+import org.sonar.plugins.openedge.foundation.ScannerIdProvider;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBRulesSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDebugListingSensor;
@@ -59,8 +59,11 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(OpenEdge.class, OpenEdgeDB.class, OpenEdgeSettings.class);
 
     // Profile and rules
-    context.addExtensions(OpenEdgeRulesDefinition.class, OpenEdgeRulesRegistrar.class, OpenEdgeLicenceRegistrar.class,
-        OpenEdgeProfile.class, OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
+    context.addExtensions(OpenEdgeRulesDefinition.class, OpenEdgeRulesRegistrar.class, OpenEdgeProfile.class,
+        OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
+
+    // Server ID providers
+    context.addExtension(ScannerIdProvider.class);
 
     // UI and code colorizer
     context.addExtensions(CommonMetricsWidget.class, OpenEdgeColorizerFormat.class, OpenEdgeDBColorizerFormat.class);

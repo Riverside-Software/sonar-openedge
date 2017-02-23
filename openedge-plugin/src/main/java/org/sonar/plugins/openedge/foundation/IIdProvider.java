@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2015-2016 Riverside Software
+ * Copyright (C) 2013-2016 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -19,15 +19,16 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
-import org.sonar.plugins.openedge.api.LicenceRegistrar;
+public interface IIdProvider {
 
-public class OpenEdgeLicenceRegistrar implements LicenceRegistrar {
   /**
-   * Register the classes that will be used to instantiate checks during analysis.
+   * @return Permanent ID
    */
-  @Override
-  public void register(Licence registrarContext) {
-    registrarContext.registerLicence("", "", "", "", LicenceRegistrar.LicenceType.EVALUATION, new byte[] {},
-        1451602800000L);
-  }
+  String getPermanentID();
+
+  /**
+   * TODO Remove as soon as SQ 5.x support is dropped, and use context.getRuntime()
+   * @return True if SonarLint side
+   */
+  boolean isSonarLintSide();
 }

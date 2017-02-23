@@ -115,7 +115,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         if (maxParseTime < elapsedTime) {
           maxParseTime = elapsedTime;
         }
-        LOG.debug("{} milliseconds to generate ParseUnit", System.currentTimeMillis() - elapsedTime);
+        LOG.debug("{} milliseconds to generate ParseUnit", elapsedTime);
 
         // Saving LOC and COMMENTS metrics
         context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(

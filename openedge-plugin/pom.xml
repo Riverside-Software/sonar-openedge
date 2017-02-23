@@ -43,21 +43,19 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <sonar.version>5.6</sonar.version>
     <sonar.pluginKey>openedge</sonar.pluginKey>
     <sonar.pluginName>OpenEdge</sonar.pluginName>
     <sonar.pluginClass>org.sonar.plugins.openedge.OpenEdgePlugin</sonar.pluginClass>
     <!-- License check -->
     <license.mailto>contact AT riverside DASH software DOT fr</license.mailto>
-    <license.year>2013-2016</license.year>
-    <jdk.min.version>1.8</jdk.min.version>
+    <license.year>2013-2017</license.year>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>
       <artifactId>sonar-plugin-api</artifactId>
-      <version>${sonar.version}</version>
+      <version>6.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -100,6 +98,7 @@
           <pluginKey>${sonar.pluginKey}</pluginKey>
           <pluginName>${sonar.pluginName}</pluginName>
           <pluginClass>${sonar.pluginClass}</pluginClass>
+          <sonarQubeMinVersion>5.6</sonarQubeMinVersion>
         </configuration>
       </plugin>
       <plugin>
@@ -107,8 +106,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <source>${jdk.min.version}</source>
-          <target>${jdk.min.version}</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>

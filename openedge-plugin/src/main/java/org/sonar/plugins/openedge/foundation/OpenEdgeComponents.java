@@ -33,9 +33,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang.StringUtils;
 import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.rule.ActiveRule;
-import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.platform.Server;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.MessageException;
 import org.sonar.api.utils.log.Logger;
@@ -43,6 +41,7 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.api.InvalidLicenceException;
 import org.sonar.plugins.openedge.api.LicenceRegistrar;
 import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
@@ -56,8 +55,7 @@ public class OpenEdgeComponents {
   private static final Logger LOG = Loggers.get(OpenEdgeComponents.class);
 
   // IoC
-  private final Server server;
-  private final ActiveRules activeRules;
+  private final IIdProvider idProvider;
 
   private final List<Class<? extends OpenEdgeCheck>> checkClasses = new ArrayList<>();
 
@@ -72,16 +70,26 @@ public class OpenEdgeComponents {
 
   private final Map<String, Licence> licences = new HashMap<>();
 
-  public OpenEdgeComponents(ActiveRules activeRules, Server server, CheckRegistrar[] checkRegistrars,
-      LicenceRegistrar[] licRegistrars) {
-    this.activeRules = activeRules;
-    this.server = server;
+  public OpenEdgeComponents(IIdProvider provider) {
+    this(provider, null, null);
+  }
+
+  public OpenEdgeComponents(IIdProvider provider, CheckRegistrar[] checkRegistrars) {
+    this(provider, checkRegistrars, null);
+  }
+
+  public OpenEdgeComponents(IIdProvider provider, LicenceRegistrar[] licRegistrars) {
+    this(provider, null, licRegistrars);
+  }
+
+  public OpenEdgeComponents(IIdProvider provider, CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
+    this.idProvider = provider;
 
     if (checkRegistrars != null) {
       registerChecks(checkRegistrars);
     }
     if (licRegistrars != null) {
-      registerLicences(licRegistrars, Strings.nullToEmpty(server.getPermanentServerId()));
+      registerLicences(licRegistrars, Strings.nullToEmpty(idProvider.getPermanentID()));
     }
   }
 
@@ -140,12 +148,12 @@ public class OpenEdgeComponents {
     if (initialized)
       return;
 
-    for (ActiveRule rule : activeRules.findByLanguage(Constants.LANGUAGE_KEY)) {
+    for (ActiveRule rule : context.activeRules().findByLanguage(Constants.LANGUAGE_KEY)) {
       RuleKey ruleKey = rule.ruleKey();
       // AFAIK, no way to be sure if a rule is based on a template or not
       String clsName = rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey();
       OpenEdgeCheck lint = getAnalyzer(clsName, ruleKey, context, getLicence(ruleKey.repository()),
-          Strings.nullToEmpty(server.getPermanentServerId()));
+          Strings.nullToEmpty(idProvider.getPermanentID()));
       if (lint != null) {
         configureFields(rule, lint);
         lint.initialize();
@@ -207,7 +215,11 @@ public class OpenEdgeComponents {
       }
       return null;
     } catch (ReflectiveOperationException caught) {
-      LOG.error("Unable to instantiate Proparse rule " + internalKey, caught);
+      if (caught.getCause() instanceof InvalidLicenceException) {
+        LOG.error("Unable to instantiate rule {} - {}", internalKey, caught.getCause().getMessage());
+      } else {
+        LOG.error("Unable to instantiate rule " + internalKey, caught);
+      }
       return null;
     }
   }
