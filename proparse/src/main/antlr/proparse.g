@@ -2468,7 +2468,7 @@ display_item
   ;
 display_with
 // The compiler allows NO-ERROR, but I don't see in their grammar where it fits in.
-  :  {LA(2)==BROWSE}? WITH^ BROWSE widgetname
+  :  {LA(2)==BROWSE}? WITH^ BROWSE widgetname (frame_opt)*
   |  framephrase
   ;
 
