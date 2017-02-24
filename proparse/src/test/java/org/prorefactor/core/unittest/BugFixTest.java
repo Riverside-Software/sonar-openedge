@@ -25,6 +25,8 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import antlr.TokenStream;
+
 /**
  * Test the tree parsers against problematic syntax. These tests just run the tree parsers against the data/bugsfixed
  * directory. If no exceptions are thrown, then the tests pass. The files in the "bugsfixed" directories are subject to
@@ -62,6 +64,12 @@ public class BugFixTest {
             NodeTypes.OBJCOLON, NodeTypes.THEN, NodeTypes.END});
     nodeLister.print();
     writer.close();
+  }
+
+  private void genericLexerTest(String file) throws Exception {
+    ParseUnit pu = new ParseUnit(new File(SRC_DIR, file), session);
+    TokenStream stream = pu.lex();
+    assertNotNull(stream);
   }
 
   @Test
@@ -227,6 +235,11 @@ public class BugFixTest {
   @Test
   public void test33() throws Exception {
     genericTest("bug33.cls");
+  }
+
+  @Test
+  public void test34() throws Exception {
+    genericLexerTest("bug34.i");
   }
 
   // Next two tests : same exception should be thrown in both cases
