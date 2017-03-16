@@ -22,6 +22,7 @@ package org.sonar.plugins.openedge.colorizer;
 import java.util.List;
 
 import org.sonar.api.web.CodeColorizerFormat;
+import org.sonar.colorizer.CDocTokenizer;
 import org.sonar.colorizer.KeywordsTokenizer;
 import org.sonar.colorizer.MultilinesDocTokenizer;
 import org.sonar.colorizer.Tokenizer;
@@ -49,7 +50,8 @@ public class OpenEdgeColorizerFormat extends CodeColorizerFormat {
         "[a-zA-Z_][a-zA-Z0-9_\\x2D]*+");
     kwTokenizer.setCaseInsensitive(true);
     
-    return ImmutableList.of(new OpenEdgePPStatementTokenizer(SPAN_PP_STMT, SPAN_END),
+    return ImmutableList.of(new CDocTokenizer(SPAN_CPPDOC, SPAN_END),
+        new OpenEdgePPStatementTokenizer(SPAN_PP_STMT, SPAN_END),
         new OpenEdgePPVariableTokenizer(SPAN_PP_VAR, SPAN_END), new OpenEdgeStringTokenizer(SPAN_STRING, SPAN_END),
         new MultilinesDocTokenizer("{", "}", SPAN_PP_VAR, SPAN_END),
         new MultilinesAndNestedDocTokenizer("/*", "*/", SPAN_CPPDOC, SPAN_END), kwTokenizer);
