@@ -182,13 +182,13 @@ addFieldOption:
   | 'FOREIGN-ID' NUMBER                     # fieldForeignId
   | 'FOREIGN-NAME' QUOTED_STRING            # fieldForeignName
   | 'FOREIGN-RETRIEVE' QUOTED_STRING        # fieldForeignRetrieve
-  | 'FOREIGN-SCALE' QUOTED_STRING           # fieldForeignScale
-  | 'FOREIGN-SPACING' QUOTED_STRING         # fieldForeignSpacing
+  | 'FOREIGN-SCALE' NUMBER                  # fieldForeignScale
+  | 'FOREIGN-SPACING' NUMBER                # fieldForeignSpacing
   | 'FOREIGN-TYPE' QUOTED_STRING            # fieldForeignType
-  | 'FOREIGN-XPOS' QUOTED_STRING            # fieldForeignXpos
+  | 'FOREIGN-XPOS' NUMBER                   # fieldForeignXpos
   | 'FOREIGN-SEP' QUOTED_STRING             # fieldForeignSep
-  | 'FOREIGN-ALLOCATED' QUOTED_STRING       # fieldForeignAllocated
-  | 'FOREIGN-MAXIMUM' QUOTED_STRING         # fieldForeignMaximum
+  | 'FOREIGN-ALLOCATED' NUMBER              # fieldForeignAllocated
+  | 'FOREIGN-MAXIMUM' NUMBER                # fieldForeignMaximum
   | 'DSRVR-PRECISION' NUMBER                # fieldDataserverPrecision
   | 'DSRVR-SCALE' NUMBER                    # fieldDataserverScale
   | 'DSRVR-LENGTH' NUMBER                   # fieldDataserverLength
