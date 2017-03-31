@@ -250,4 +250,9 @@ public class BugFixTest {
     genericTest("nobox.p");
   }
 
+  @Test
+  public void testIncludeInComment() throws Exception {
+    genericTest("include_comment.p");
+  }
+
 }
