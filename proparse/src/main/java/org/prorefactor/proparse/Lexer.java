@@ -380,11 +380,13 @@ public class Lexer {
     // everything till end of line is considered comment - no escape
     // character to look after
     append(); // currChar=='/'
+    prepro.setDoingComment(true);
 
     while (true) {
       getChar();
       unEscapedAppend();
       if (currChar == '\r' || currChar == '\n' || currInt == EOF_CHAR) {
+        prepro.setDoingComment(false);
         return makeToken(ProParserTokenTypes.COMMENT);
       }
     }
