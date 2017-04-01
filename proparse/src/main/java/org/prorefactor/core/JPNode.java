@@ -750,6 +750,21 @@ public class JPNode extends BaseAST {
     token.setType(type);
   }
 
+  /**
+   * Set parent and prevSibling links
+   */
+  public void backLink() {
+    JPNode currNode = firstChild();
+    while (currNode != null) {
+      currNode.setParent(this);
+      currNode.backLink();
+      JPNode nextNode = currNode.nextSibling();
+      if (nextNode != null)
+        nextNode.setPrevSibling(currNode);
+      currNode = nextNode;
+    }
+  }
+
   @Override
   public String toString() {
     StringBuilder buff = new StringBuilder();

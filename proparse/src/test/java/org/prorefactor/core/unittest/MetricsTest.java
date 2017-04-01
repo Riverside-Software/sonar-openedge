@@ -37,8 +37,8 @@ public class MetricsTest {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/include.p"), session);
     unit.treeParser01();
 
-    assertEquals(2, unit.getMetrics().getLoc());
-    assertEquals(6, unit.getMetrics().getComments());
+    assertEquals(unit.getMetrics().getLoc(), 2);
+    assertEquals(unit.getMetrics().getComments(), 6);
   }
 
   @Test
@@ -46,8 +46,8 @@ public class MetricsTest {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/inc3.i"), session);
     unit.lex();
 
-    assertEquals(1, unit.getMetrics().getLoc());
-    assertEquals(2, unit.getMetrics().getComments());
+    assertEquals(unit.getMetrics().getLoc(), 1);
+    assertEquals(unit.getMetrics().getComments(), 2);
   }
 
 }

@@ -171,7 +171,7 @@ public class DoParse {
         LOGGER.trace("Executing ProParser");
         parser.program();
         JPNode topNode = (JPNode) parser.getAST();
-        backLink(topNode);
+        topNode.backLink();
         // Deal with trailing hidden tokens
         JPNode.finalizeTrailingHidden((JPNode) parser.getAST());
       }
@@ -199,21 +199,6 @@ public class DoParse {
 
   public IncludeRef getMacroGraph() {
     return macroGraph;
-  }
-
-  /**
-   * Set parent and prevSibling links
-   */
-  private void backLink(JPNode r) {
-    JPNode currNode = r.firstChild();
-    while (currNode != null) {
-      currNode.setParent(r);
-      backLink(currNode);
-      JPNode nextNode = currNode.nextSibling();
-      if (nextNode != null)
-        nextNode.setPrevSibling(currNode);
-      currNode = nextNode;
-    }
   }
 
   private static class TokenVectorIterator implements TokenStream {
