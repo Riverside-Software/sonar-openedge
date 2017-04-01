@@ -17,18 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A preprocessor contains one or more IncludeFiles.
- * 
- * There is a special IncludeFile object created for the top-level program (ex: .p or .w).
- * 
- * Every time the lexer has to scan an include file, we create an IncludeFile object, for managing include file
- * arguments and pre-processor scopes.
- * 
- * We keep an InputSource object, which has an input stream.
- * 
- * Each IncludeFile object will have one or more InputSource objects.
- * 
- * The bottom InputSource object for an IncludeFile is the input for the include file itself.
+ * <ul>
+ * <li>Every time the lexer has to scan an include file, we create an IncludeFile object, for managing include file arguments and preprocessor scopes.</li>
+ * <li>We keep an InputSource object, which has an input stream.</li>
+ * <li>Each IncludeFile object will have one or more InputSource objects.</li>
+ * <li>The bottom InputSource object for an IncludeFile is the input for the include file itself.</li>
+ * </ul>
  */
 public class IncludeFile {
   final Map<String, String> defdNames = new HashMap<>();
