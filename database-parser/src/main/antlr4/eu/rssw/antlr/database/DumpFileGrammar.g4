@@ -125,7 +125,8 @@ updateTableOption:
 
 tableTrigger:
     'TABLE-TRIGGER' type=QUOTED_STRING
-    override='OVERRIDE'? noOverride='NO-OVERRIDE'? 'PROCEDURE' triggerProcedure=QUOTED_STRING ('CRC' crc=QUOTED_STRING)?;
+    (   override='OVERRIDE'? noOverride='NO-OVERRIDE'? 'PROCEDURE' triggerProcedure=QUOTED_STRING ('CRC' crc=QUOTED_STRING)?
+      | 'DELETE');
 
 updateTable:
     'UPDATE' 'TABLE' table=QUOTED_STRING (addTableOption | updateTableOption)* triggers=tableTrigger*;
@@ -174,6 +175,7 @@ addFieldOption:
   | 'LENGTH' NUMBER                         # fieldLength
   | 'ORDER' val=NUMBER                      # fieldOrder
   | 'MANDATORY'                             # fieldMandatory
+  | 'NULL-ALLOWED'                          # fieldNullAllowed
   | ('CASE-SENSITIVE' | 'NOT-CASE-SENSITIVE') # fieldCaseSensitive
   | 'FOREIGN-POS' NUMBER                    # fieldForeignPos
   | 'FOREIGN-SIZE' NUMBER                   # fieldForeignSize
@@ -217,7 +219,9 @@ addFieldOption:
   ;
 
 fieldTrigger:
-    'FIELD-TRIGGER' type=QUOTED_STRING override='OVERRIDE'? noOverride='NO-OVERRIDE'? 'PROCEDURE' triggerProcedure=QUOTED_STRING ('CRC' crc=QUOTED_STRING)?;
+    'FIELD-TRIGGER' type=QUOTED_STRING
+    (   override='OVERRIDE'? noOverride='NO-OVERRIDE'? 'PROCEDURE' triggerProcedure=QUOTED_STRING ('CRC' crc=QUOTED_STRING)?
+      | 'DELETE');
 
 dropField:
     'DROP' 'FIELD' field=QUOTED_STRING 'OF' table=QUOTED_STRING;
