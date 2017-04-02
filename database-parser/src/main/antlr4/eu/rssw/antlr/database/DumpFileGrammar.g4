@@ -174,6 +174,7 @@ addFieldOption:
   | 'LENGTH' NUMBER                         # fieldLength
   | 'ORDER' val=NUMBER                      # fieldOrder
   | 'MANDATORY'                             # fieldMandatory
+  | 'NULL-ALLOWED'                          # fieldNullAllowed
   | ('CASE-SENSITIVE' | 'NOT-CASE-SENSITIVE') # fieldCaseSensitive
   | 'FOREIGN-POS' NUMBER                    # fieldForeignPos
   | 'FOREIGN-SIZE' NUMBER                   # fieldForeignSize
