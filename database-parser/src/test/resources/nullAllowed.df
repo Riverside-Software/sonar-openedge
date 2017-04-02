@@ -1,0 +1,16 @@
+ADD TABLE "Test"
+  AREA "Schema Area"
+  LABEL "Test"
+  DUMP-NAME "test"
+
+ADD FIELD "Fld1" OF "Test" AS character
+  DESCRIPTION ""
+  NULL-ALLOWED
+  NOT-CASE-SENSITIVE
+  SQL-WIDTH 24
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000008375
