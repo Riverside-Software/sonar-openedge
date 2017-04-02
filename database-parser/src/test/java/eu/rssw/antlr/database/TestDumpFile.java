@@ -47,12 +47,19 @@ public class TestDumpFile {
   @Test
   public void testFieldTriggerNotAssign() throws IOException {
     // Invalid field trigger type shouldn't crash the visitor, and has to be reported
-    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(new File("src/test/resources/fieldTriggerAssign.df"));
+    DumpFileUtils.getDatabaseDescription(new File("src/test/resources/fieldTriggerAssign.df"));
   }
 
   @Test
-  public void testFailure() throws IOException {
+  public void testNullAllowed() throws IOException {
     // NULL-ALLOWED is a valid argument
-    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(new File("src/test/resources/nullAllowed.df"));
+    DumpFileUtils.getDatabaseDescription(new File("src/test/resources/nullAllowed.df"));
   }
+
+  @Test
+  public void testTriggerDelete() throws IOException {
+    // Delete triggers on table
+    DumpFileUtils.getDatabaseDescription(new File("src/test/resources/triggerDelete.df"));
+  }
+
 }
