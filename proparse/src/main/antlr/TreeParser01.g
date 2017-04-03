@@ -882,7 +882,7 @@ defineparameterstate throws TreeParserException
             action.paramSymbol(#tb1);
           }
         |  TABLEHANDLE (FOR)? id:ID defineparam_ab
-          {  action.addToSymbolScope(action.defineVariable(#def, #id, HANDLE));
+          {  action.addToSymbolScope(action.defineVariable(#def, #id, HANDLE, true));
             action.paramSymbol(#id);
           }
         |  DATASET FOR ds:ID defineparam_ab
@@ -891,11 +891,11 @@ defineparameterstate throws TreeParserException
             action.paramSymbol(#ds);
           }
         |  DATASETHANDLE id3:ID defineparam_ab
-          {  action.addToSymbolScope(action.defineVariable(#def, #id3, HANDLE));
+          {  action.addToSymbolScope(action.defineVariable(#def, #id3, HANDLE, true));
             action.paramSymbol(#id3);
           }
         |  id2:ID
-          {  stack.push(action.defineVariable(#def, #id2));
+          {  stack.push(action.defineVariable(#def, #id2, true));
             action.paramSymbol(#id2);
           }
           defineparam_var (triggerphrase)?
@@ -1387,7 +1387,7 @@ function_param_arg throws TreeParserException
       action.paramSymbol(#tb1);
     }
   |  TABLEHANDLE (FOR)? id2:ID (APPEND)? (BIND {action.paramBind();})?
-    {  action.addToSymbolScope(action.defineVariable(#id2, #id2, HANDLE));
+    {  action.addToSymbolScope(action.defineVariable(#id2, #id2, HANDLE, true));
       action.paramSymbol(#id2);
     }
   |  DATASET (FOR)? ds:ID (APPEND)? (BIND {action.paramBind();})?
@@ -1396,16 +1396,16 @@ function_param_arg throws TreeParserException
       action.paramSymbol(#ds);
     }
   |  DATASETHANDLE (FOR)? dsh:ID (APPEND)? (BIND {action.paramBind();})?
-    {  action.addToSymbolScope(action.defineVariable(#dsh, #dsh, HANDLE));
+    {  action.addToSymbolScope(action.defineVariable(#dsh, #dsh, HANDLE, true));
       action.paramSymbol(#dsh);
     }
   |  (ID AS)=> id1:ID as:AS datatype (extentphrase)?
-    {  action.addToSymbolScope(action.defineVariable(#id1, #id1));
+    {  action.addToSymbolScope(action.defineVariable(#id1, #id1, true));
       action.defAs(#as);
       action.paramSymbol(#id1);
     }
   |  (ID LIKE)=> id3:ID #(li:LIKE fld[ContextQualifier.SYMBOL] (VALIDATE)?) (extentphrase)?
-    {  stack.push(action.defineVariable(#id3, #id3));
+    {  stack.push(action.defineVariable(#id3, #id3, true));
       action.paramSymbol(#id3);
       action.defLike(#li);
       action.addToSymbolScope(stack.pop());

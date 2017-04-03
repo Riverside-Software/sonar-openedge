@@ -431,6 +431,11 @@ public class TP01Support extends TP01Action {
 
   @Override
   public Variable defineVariable(AST defAST, AST idAST) {
+    return defineVariable(defAST, idAST, false);
+  }
+
+  @Override
+  public Variable defineVariable(AST defAST, AST idAST, boolean parameter) {
     /*
      * Some notes: We need to create the Variable Symbol right away, because further actions in the grammar might need
      * to set attributes on it. We can't add it to the scope yet, because of statements like this: def var xyz like xyz.
@@ -449,7 +454,7 @@ public class TP01Support extends TP01Action {
        */
       name = NodeTypes.getTokenName(idNode.getType());
     }
-    Variable variable = new Variable(name, currentScope);
+    Variable variable = new Variable(name, currentScope, parameter);
     variable.setDefOrIdNode(defNode);
     currSymbol = variable;
     idNode.setLink(IConstants.SYMBOL, variable);
@@ -458,15 +463,25 @@ public class TP01Support extends TP01Action {
 
   @Override
   public Variable defineVariable(AST defAST, AST idAST, int dataType) {
+    return defineVariable(defAST, idAST, dataType, false);
+  }
+
+  @Override
+  public Variable defineVariable(AST defAST, AST idAST, int dataType, boolean parameter) {
     assert dataType != NodeTypes.CLASS;
-    Variable v = defineVariable(defAST, idAST);
+    Variable v = defineVariable(defAST, idAST, parameter);
     v.setDataType(DataType.getDataType(dataType));
     return v;
   }
 
   @Override
   public Variable defineVariable(AST defAST, AST idAST, AST likeAST) {
-    Variable v = defineVariable(defAST, idAST);
+    return defineVariable(defAST, idAST, likeAST, false);
+  }
+
+  @Override
+  public Variable defineVariable(AST defAST, AST idAST, AST likeAST, boolean parameter) {
+    Variable v = defineVariable(defAST, idAST, parameter);
     FieldRefNode likeRefNode = (FieldRefNode) likeAST;
     v.setDataType(likeRefNode.getDataType());
     v.setClassName(likeRefNode.getClassName());

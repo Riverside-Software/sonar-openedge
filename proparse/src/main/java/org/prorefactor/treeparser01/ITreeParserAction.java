@@ -171,12 +171,15 @@ public interface ITreeParserAction {
 
   /** Called by the tree parser when a variable is defined. */
   default Variable defineVariable(AST defAST, AST idNode) throws TreeParserException { return null; }
+  default Variable defineVariable(AST defAST, AST idNode, boolean parameter) throws TreeParserException { return null; }
 
   /** Some syntaxes imply a data type without LIKE/AS. */
   default Variable defineVariable(AST defAST, AST idAST, int dataType) throws TreeParserException { return null; }
+  default Variable defineVariable(AST defAST, AST idAST, int dataType, boolean parameter) throws TreeParserException { return null; }
 
   /** Some syntaxes have an implicit LIKE. */
   default Variable defineVariable(AST defAST, AST idAST, AST likeAST) throws TreeParserException { return null; }
+  default Variable defineVariable(AST defAST, AST idAST, AST likeAST, boolean parameter) throws TreeParserException { return null; }
 
   /** Called by the tree parser when a work-table is defined. */
   default void defineWorktable(AST defAST, AST idNode) throws TreeParserException { }
