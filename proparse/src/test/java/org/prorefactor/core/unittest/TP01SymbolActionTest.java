@@ -10,6 +10,9 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -89,32 +92,50 @@ public class TP01SymbolActionTest {
     RoutineHandler getCompileList = new RoutineHandler("get-compile-list", walkAction);
 
     // Variables expected in root scope.
-    assertTrue(rootScope().lookupVariable(sourcePath) != null);
-    assertTrue(rootScope().lookupVariable(currentPropath) != null);
-    assertTrue(rootScope().lookupVariable(compileFile) != null);
-    assertTrue(rootScope().lookupVariable(currentStatus) != null);
-    assertTrue(rootScope().lookupVariable(test) != null);
+    assertNotNull(rootScope().lookupVariable(sourcePath));
+    assertFalse(rootScope().lookupVariable(sourcePath).isParameter());
+    assertNotNull(rootScope().lookupVariable(currentPropath));
+    assertFalse(rootScope().lookupVariable(currentPropath).isParameter());
+    assertNotNull(rootScope().lookupVariable(compileFile));
+    assertFalse(rootScope().lookupVariable(compileFile).isParameter());
+    assertNotNull(rootScope().lookupVariable(currentStatus));
+    assertFalse(rootScope().lookupVariable(currentStatus).isParameter());
+    assertNotNull(rootScope().lookupVariable(test));
+    assertFalse(rootScope().lookupVariable(test).isParameter());
 
     // Variables not expected in root scope.
-    assertTrue(rootScope().lookupVariable(aFile) == null);
-    assertTrue(rootScope().lookupVariable(aNewFile) == null);
-    assertTrue(rootScope().lookupVariable(aNewSrcDir) == null);
+    assertNull(rootScope().lookupVariable(aFile));
+    assertNull(rootScope().lookupVariable(aNewFile));
+    assertNull(rootScope().lookupVariable(aNewSrcDir));
 
     // Get get-compile-list scope.
     SymbolScope routineScope = getCompileList.getRoutineScope();
 
     // Variables expected in get-compile-list scope.
-    assertTrue(routineScope.lookupVariable(aFile) != null);
-    assertTrue(routineScope.lookupVariable(aNewFile) != null);
-    assertTrue(routineScope.lookupVariable(aNewSrcDir) != null);
+    assertNotNull(routineScope.lookupVariable(aFile));
+    assertFalse(routineScope.lookupVariable(sourcePath).isParameter());
+    assertNotNull(routineScope.lookupVariable(aNewFile));
+    assertFalse(routineScope.lookupVariable(sourcePath).isParameter());
+    assertNotNull(routineScope.lookupVariable(aNewSrcDir));
+    assertFalse(routineScope.lookupVariable(sourcePath).isParameter());
+    // Parameters expected in get-compile-list scope
+    assertNotNull(routineScope.lookupVariable("pSourcePath"));
+    assertTrue(routineScope.lookupVariable("pSourcePath").isParameter());
+
+    // Variables and parameters from the 'foo' function scope
+    RoutineHandler fooList = new RoutineHandler("foo", walkAction);
+    SymbolScope fooScope = fooList.getRoutineScope();
+    assertNotNull(fooScope.lookupVariable("yy"));
+    assertTrue(fooScope.lookupVariable("yy").isParameter());
+    assertNotNull(fooScope.lookupVariable("abc"));
+    assertFalse(fooScope.lookupVariable("abc").isParameter());
 
     // Variables visible from the open scope.
-    assertTrue(routineScope.lookupVariable(sourcePath) != null);
-    assertTrue(routineScope.lookupVariable(currentPropath) != null);
-    assertTrue(routineScope.lookupVariable(compileFile) != null);
-    assertTrue(routineScope.lookupVariable(currentStatus) != null);
-    assertTrue(routineScope.lookupVariable(test) != null);
-
+    assertNotNull(routineScope.lookupVariable(sourcePath));
+    assertNotNull(routineScope.lookupVariable(currentPropath));
+    assertNotNull(routineScope.lookupVariable(compileFile));
+    assertNotNull(routineScope.lookupVariable(currentStatus));
+    assertNotNull(routineScope.lookupVariable(test));
   }
 
   private SymbolScope rootScope() {
