@@ -21,6 +21,7 @@ public abstract class Symbol implements ISymbol {
   private int numReads = 0;
   private int numWrites = 0;
   private JPNode asNode;
+  private boolean parameter = false;
 
   // We store the DEFINE node if available and sensible. If defined in a syntax where there is no DEFINE node briefly
   // preceeding the ID node, then we store the ID node. If this is a schema symbol, then this member is null.
@@ -33,8 +34,13 @@ public abstract class Symbol implements ISymbol {
   private final String name;
 
   public Symbol(String name, SymbolScope scope) {
+    this(name, scope, false);
+  }
+
+  public Symbol(String name, SymbolScope scope, boolean parameter) {
     this.name = name;
     this.scope = scope;
+    this.parameter = parameter;
     scope.addSymbol(this);
   }
 
@@ -161,4 +167,14 @@ public abstract class Symbol implements ISymbol {
     return fullName();
   }
 
+  public void setParameter(boolean parameter) {
+    this.parameter = parameter;
+  }
+
+  /**
+   * @return True if this variable is a procedure/function/method parameter
+   */
+  public boolean isParameter() {
+    return parameter;
+  }
 }

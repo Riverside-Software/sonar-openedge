@@ -23,15 +23,13 @@ public class Variable extends Symbol implements Primative, Value {
   private Object value;
   private String className = null;
   private boolean refInFrame = false;
-  private boolean parameter = false;
 
   public Variable(String name, SymbolScope scope) {
-    this(name, scope, false);
+    super(name, scope);
   }
 
   public Variable(String name, SymbolScope scope, boolean parameter) {
-    super(name, scope);
-    this.parameter = parameter;
+    super(name, scope, parameter);
   }
 
   @Override
@@ -123,14 +121,4 @@ public class Variable extends Symbol implements Primative, Value {
     return refInFrame;
   }
 
-  public void setParameter(boolean parameter) {
-    this.parameter = parameter;
-  }
-
-  /**
-   * @return True if this variable is a procedure/function/method parameter
-   */
-  public boolean isParameter() {
-    return parameter;
-  }
 }
