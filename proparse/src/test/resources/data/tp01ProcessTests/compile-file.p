@@ -109,3 +109,8 @@ procedure get-compile-list:
 
 end.
 
+function foo returns character(xx as int, yy as date, zz as char):
+  define variable abc as int.
+
+  return 'xx'.
+end function.
