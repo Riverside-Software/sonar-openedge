@@ -5,6 +5,7 @@ public class Constants {
 
   // Key of the default rule repository
   public static final String STD_REPOSITORY_KEY = "rssw-oe";
+  public static final String RSSW_REPOSITORY_KEY = "rssw-oe-main";
 
   // Sonar analysis properties
   public static final String SKIP_PROPARSE_PROPERTY = "sonar.oe.skipProparse";
