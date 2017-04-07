@@ -19,12 +19,14 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -175,13 +177,28 @@ public class OpenEdgeProparseSensor implements Sensor {
     new File("listingparser.txt").delete();
 
     if (settings.useAnalytics()) {
+      StringBuilder data = new StringBuilder(
+          String.format("proparse,sid=%1$s files=%2$d,failures=%3$d,parseTime=%4$d,maxParseTime=%5$d\n",
+              components.getLicence(Constants.RSSW_REPOSITORY_KEY) == null ? "none"
+                  : components.getLicence(Constants.RSSW_REPOSITORY_KEY).getPermanentId(),
+              numFiles, numFailures, parseTime, maxParseTime));
+      for (Entry<String, Long> entry : ruleTime.entrySet()) {
+        data.append(
+            String.format("rule,sid=%1$s,rulename=%2$s ruleTime=%3$d\n", components.getLicence(Constants.RSSW_REPOSITORY_KEY) == null
+                ? "none" : components.getLicence(Constants.RSSW_REPOSITORY_KEY).getPermanentId(), entry.getKey(), entry.getValue()));
+      }
+
       try {
-        final URL url = new URL(
-            String.format("http://analytics.rssw.eu/oeps.%s.%d.%d.%d.%d.stats", components.getLicence("rssw-oe-main") == null
-                ? "none" : components.getLicence("rssw-oe-main").getPermanentId(), numFiles, numFailures, parseTime, maxParseTime));
-        URLConnection connx = url.openConnection();
+        final URL url = new URL("http://sonar-analytics.rssw.eu/write?db=sonar");
+        HttpURLConnection connx = (HttpURLConnection) url.openConnection();
+        connx.setRequestMethod("POST");
         connx.setConnectTimeout(2000);
-        connx.getContentEncoding();
+        connx.setDoOutput(true);
+        DataOutputStream wr = new DataOutputStream(connx.getOutputStream());
+        wr.writeBytes(data.toString());
+        wr.flush();
+        wr.close();
+        connx.getResponseCode();
       } catch (IOException uncaught) {
         LOG.info("Unable to send analytics", uncaught);
       }
