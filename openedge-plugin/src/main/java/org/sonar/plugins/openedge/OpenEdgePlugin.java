@@ -46,7 +46,6 @@ import org.sonar.plugins.openedge.sensor.OpenEdgeProparseSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeWarningsSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeXREFSensor;
-import org.sonar.plugins.openedge.ui.CommonMetricsWidget;
 
 public class OpenEdgePlugin implements Plugin {
   private static final String CATEGORY_OPENEDGE = "OpenEdge";
@@ -66,7 +65,7 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(ScannerIdProvider.class, SonarLintIdProvider.class);
 
     // UI and code colorizer
-    context.addExtensions(CommonMetricsWidget.class, OpenEdgeColorizerFormat.class, OpenEdgeDBColorizerFormat.class);
+    context.addExtensions(OpenEdgeColorizerFormat.class, OpenEdgeDBColorizerFormat.class);
 
     // Sensors
     context.addExtensions(OpenEdgeSensor.class, OpenEdgeDBSensor.class, OpenEdgeListingSensor.class,
