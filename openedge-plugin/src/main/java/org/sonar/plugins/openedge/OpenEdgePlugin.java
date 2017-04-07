@@ -41,7 +41,6 @@ import org.sonar.plugins.openedge.foundation.ScannerIdProvider;
 import org.sonar.plugins.openedge.foundation.SonarLintIdProvider;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBRulesSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBSensor;
-import org.sonar.plugins.openedge.sensor.OpenEdgeDebugListingSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeListingSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeProparseSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeSensor;
@@ -70,9 +69,9 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(CommonMetricsWidget.class, OpenEdgeColorizerFormat.class, OpenEdgeDBColorizerFormat.class);
 
     // Sensors
-    context.addExtensions(OpenEdgeSensor.class, OpenEdgeDBSensor.class, OpenEdgeDebugListingSensor.class,
-        OpenEdgeListingSensor.class, OpenEdgeWarningsSensor.class, OpenEdgeXREFSensor.class,
-        OpenEdgeProparseSensor.class, OpenEdgeDBRulesSensor.class);
+    context.addExtensions(OpenEdgeSensor.class, OpenEdgeDBSensor.class, OpenEdgeListingSensor.class,
+        OpenEdgeWarningsSensor.class, OpenEdgeXREFSensor.class, OpenEdgeProparseSensor.class,
+        OpenEdgeDBRulesSensor.class);
 
     // Decorators
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
