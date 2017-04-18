@@ -901,35 +901,35 @@ public class Lexer  {
       return makeToken(PreprocessorParser.AMPUNDEFINE);
     }
 
-    if (macroType.equals("&analyze-suspend")) {
+    if ("&analyze-suspend".equals(macroType)) {
       appendToEOL();
       getChar();
       return makeToken(PreprocessorParser.AMPANALYZESUSPEND);
     }
-    if (macroType.equals("&analyze-resume")) {
+    if ("&analyze-resume".equals(macroType)) {
       appendToEOL();
       getChar();
       return makeToken(PreprocessorParser.AMPANALYZERESUME);
     }
-    if (macroType.equals("&message")) {
+    if ("&message".equals(macroType)) {
       appendToEOL();
       getChar();
       return makeToken(PreprocessorParser.AMPMESSAGE);
     }
 
-    if (macroType.equals("&if")) {
+    if ("&if".equals(macroType)) {
       return makeToken(PreprocessorParser.AMPIF);
     }
-    if (macroType.equals("&then")) {
+    if ("&then".equals(macroType)) {
       return makeToken(PreprocessorParser.AMPTHEN);
     }
-    if (macroType.equals("&elseif")) {
+    if ("&elseif".equals(macroType)) {
       return makeToken(PreprocessorParser.AMPELSEIF);
     }
-    if (macroType.equals("&else")) {
+    if ("&else".equals(macroType)) {
       return makeToken(PreprocessorParser.AMPELSE);
     }
-    if (macroType.equals("&endif")) {
+    if ("&endif".equals(macroType)) {
       return makeToken(PreprocessorParser.AMPENDIF);
     }
 

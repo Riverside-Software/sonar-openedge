@@ -317,10 +317,10 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       }
     }
     // Last, look for a global arg to undef
-    undef_helper(argName, globalDefdNames);
+    undefHelper(argName, globalDefdNames);
   }
 
-  private boolean undef_helper(String argName, Map<String, String> names) {
+  private boolean undefHelper(String argName, Map<String, String> names) {
     if (names.containsKey(argName)) {
       names.remove(argName);
       return true;

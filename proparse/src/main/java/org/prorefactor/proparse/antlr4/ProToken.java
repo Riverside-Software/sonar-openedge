@@ -63,6 +63,24 @@ public class ProToken implements WritableToken {
   private int endFileIndex;
   private int endLine;
   private int endCharPositionInLine;
+  private int macroSourceNum;
+
+  public ProToken(int type, String text) {
+    this.type = type;
+    this.channel = DEFAULT_CHANNEL;
+    this.text = text;
+    this.fileIndex = -1;
+  }
+
+  public ProToken(int type, int channel, int start, int stop, int line, int col) {
+    this.type = type;
+    this.channel = channel;
+    this.start = start;
+    this.stop = stop;
+    this.line = line;
+    this.charPositionInLine = col;
+  }
+
   public int getEndFileIndex() {
     return endFileIndex;
   }
@@ -85,24 +103,6 @@ public class ProToken implements WritableToken {
 
   public void setEndCharPositionInLine(int endCharPositionInLine) {
     this.endCharPositionInLine = endCharPositionInLine;
-  }
-
-  private int macroSourceNum;
-
-  public ProToken(int type, String text) {
-    this.type = type;
-    this.channel = DEFAULT_CHANNEL;
-    this.text = text;
-    this.fileIndex = -1;
-  }
-
-  public ProToken(int type, int channel, int start, int stop, int line, int col) {
-    this.type = type;
-    this.channel = channel;
-    this.start = start;
-    this.stop = stop;
-    this.line = line;
-    this.charPositionInLine = col;
   }
 
   public int getMacroSourceNum() {

@@ -14,6 +14,10 @@ import java.util.HashSet;
 
 public class StringFuncs {
 
+  private StringFuncs() {
+    // No-op
+  }
+
   /**
    * Escape line breaks with backslashes. Replaces \ with \\, newline with \n, and linefeed with \r. Specifically
    * written for the listing file, which uses one line per record, and cannot have extra line breaks in the output.
@@ -60,7 +64,7 @@ public class StringFuncs {
   }
 
   static HashSet<Character> setOfMatchChars(String s) {
-    HashSet<Character> set = new HashSet<Character>();
+    HashSet<Character> set = new HashSet<>();
     for (char c : s.toLowerCase().toCharArray())
       set.add(c);
     for (char c : s.toUpperCase().toCharArray())
