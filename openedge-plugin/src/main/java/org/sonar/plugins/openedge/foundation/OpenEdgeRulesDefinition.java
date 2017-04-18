@@ -35,6 +35,9 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
   public static final String COMPILER_WARNING_12115_RULEKEY = "compiler.warning.12115";
   public static final String COMPILER_WARNING_15090_RULEKEY = "compiler.warning.15090";
   public static final String COMPILER_WARNING_214_RULEKEY = "compiler.warning.214";
+  public static final String COMPILER_WARNING_14786_RULEKEY = "compiler.warning.14786";
+  public static final String COMPILER_WARNING_14789_RULEKEY = "compiler.warning.14789";
+  public static final String COMPILER_WARNING_18494_RULEKEY = "compiler.warning.18494";
   public static final String PROPARSE_ERROR_RULEKEY = "proparse.error";
   public static final String LARGE_TRANSACTION_SCOPE = "large.trans";
   private static final String COMPILER_WARNING_TAG = "compiler-warnings";
@@ -50,37 +53,13 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     annotationLoader.addRuleClasses(false, Arrays.<Class> asList(OpenEdgeRulesRegistrar.xrefCheckClasses()));
 
     // Manually created rules for compiler warnings
-    NewRule warning = repository.createRule(COMPILER_WARNING_RULEKEY).setName("Compiler warnings").setSeverity(
-        Priority.CRITICAL.name());
-    warning.setTags(COMPILER_WARNING_TAG);
-    warning.setDebtRemediationFunction(warning.debtRemediationFunctions().constantPerIssue("2h"));
-    warning.setType(RuleType.CODE_SMELL);
-    warning.setHtmlDescription(getClass().getResource(
-        String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, warning.key())));
-
-    NewRule warning12115 = repository.createRule(COMPILER_WARNING_12115_RULEKEY).setName(
-        "Expression evaluates to a constant").setSeverity(Priority.CRITICAL.name());
-    warning12115.setTags(COMPILER_WARNING_TAG);
-    warning12115.setDebtRemediationFunction(warning12115.debtRemediationFunctions().constantPerIssue("1h"));
-    warning12115.setType(RuleType.BUG);
-    warning12115.setHtmlDescription(getClass().getResource(String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY,
-        OpenEdgeRulesDefinition.REPOSITORY_KEY, warning12115.key())));
-
-    NewRule warning15090 = repository.createRule(COMPILER_WARNING_15090_RULEKEY).setName("Dead code").setSeverity(
-        Priority.CRITICAL.name());
-    warning15090.setTags(COMPILER_WARNING_TAG);
-    warning15090.setDebtRemediationFunction(warning15090.debtRemediationFunctions().constantPerIssue("3h"));
-    warning15090.setType(RuleType.BUG);
-    warning15090.setHtmlDescription(getClass().getResource(String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY,
-        OpenEdgeRulesDefinition.REPOSITORY_KEY, warning15090.key())));
-
-    NewRule warning214 = repository.createRule(COMPILER_WARNING_214_RULEKEY).setName(
-        "TRANSACTION keyword given within actual transaction level").setSeverity(Priority.CRITICAL.name());
-    warning214.setTags(COMPILER_WARNING_TAG);
-    warning214.setDebtRemediationFunction(warning214.debtRemediationFunctions().constantPerIssue("4h"));
-    warning214.setType(RuleType.BUG);
-    warning214.setHtmlDescription(getClass().getResource(String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY,
-        OpenEdgeRulesDefinition.REPOSITORY_KEY, warning214.key())));
+    createWarningRule(repository, COMPILER_WARNING_RULEKEY, "Compiler warnings", "2h");
+    createWarningRule(repository, COMPILER_WARNING_12115_RULEKEY, "Expression evaluates to a constant", "1h");
+    createWarningRule(repository, COMPILER_WARNING_15090_RULEKEY, "Dead code", "4h");
+    createWarningRule(repository, COMPILER_WARNING_214_RULEKEY, "TRANSACTION keyword given within actual transaction level", "3h");
+    createWarningRule(repository, COMPILER_WARNING_14786_RULEKEY, "Table and field names must appear as they are in the schema", "20m");
+    createWarningRule(repository, COMPILER_WARNING_14789_RULEKEY, "Fields must be qualified with table name", "15m");
+    createWarningRule(repository, COMPILER_WARNING_18494_RULEKEY, "Abbreviated keywords are not authorized", "5m");
 
     // Manually created rule for proparse errors
     NewRule proparseRule = repository.createRule(PROPARSE_ERROR_RULEKEY).setName("Proparse error").setSeverity(
@@ -101,4 +80,12 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     repository.done();
   }
 
+  private void createWarningRule(NewRepository repository, String ruleKey, String name, String remediationCost) {
+    NewRule warning = repository.createRule(ruleKey).setName(name).setSeverity(Priority.CRITICAL.name());
+    warning.setTags(COMPILER_WARNING_TAG);
+    warning.setDebtRemediationFunction(warning.debtRemediationFunctions().constantPerIssue(remediationCost));
+    warning.setType(RuleType.BUG);
+    warning.setHtmlDescription(getClass().getResource(
+        String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, warning.key())));
+  }
 }

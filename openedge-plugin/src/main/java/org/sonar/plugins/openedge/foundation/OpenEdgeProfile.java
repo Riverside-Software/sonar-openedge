@@ -43,6 +43,9 @@ public class OpenEdgeProfile extends ProfileDefinition {
     profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_214_RULEKEY), null);
     profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_12115_RULEKEY), null);
     profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_15090_RULEKEY), null);
+    profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_14786_RULEKEY), null);
+    profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_14789_RULEKEY), null);
+    profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_18494_RULEKEY), null);
     profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY), null);
     profile.activateRule(ruleFinder.findByKey(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.LARGE_TRANSACTION_SCOPE), null);
 
