@@ -1,0 +1,14 @@
+<p>All table and field names must appear as they are in the schema.</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+ /* On sports2000 database */
+ FIND FIRST custome.
+ DISP cust.custnu.
+</pre>
+
+<h2>Compliant Solution</h2>
+<pre>
+ FIND FIRST customer.
+ DISP customer.custnum.
+</pre>
