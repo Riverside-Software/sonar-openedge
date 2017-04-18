@@ -117,7 +117,6 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private IntegerIndex<String> filenameList = new IntegerIndex<>();
   private final RefactorSession session;
   private TokenSource wrapper;
-  private final String fileName;
 
   /**
    * An existing reference to the input stream is required for construction. The caller is responsible for closing that
@@ -127,7 +126,6 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.ppSettings = session.getProparseSettings();
     this.session = session;
-    this.fileName = fileName;
 
     // Create input source with flag isPrimaryInput=true
     currFile = addFilename(fileName);
@@ -143,8 +141,8 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     wrapper = new MultiChannelTokenSource(filter1);
   }
 
-  public String getFileName() {
-    return fileName;
+  public String getMainFileName() {
+    return filenameList.getValue(0);
   }
 
   public IntegerIndex<String> getFilenameList() {
