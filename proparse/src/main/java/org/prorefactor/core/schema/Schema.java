@@ -40,9 +40,9 @@ import com.google.common.io.LineProcessor;
 public class Schema implements ISchema {
   private static final Logger LOGGER = LoggerFactory.getLogger(Schema.class);
 
-  private static final Comparator<Table> ALLTABLES_ORDER = new Comparator<Table>() {
+  private static final Comparator<ITable> ALLTABLES_ORDER = new Comparator<ITable>() {
     @Override
-    public int compare(Table s1, Table s2) {
+    public int compare(ITable s1, ITable s2) {
       int ret = s1.getName().compareToIgnoreCase(s2.getName());
       if (ret != 0)
         return ret;
@@ -50,12 +50,10 @@ public class Schema implements ISchema {
     }
   };
 
-  public static final Database nullDatabase = new Database("");
-  public static final Table nullTable = new Table("");
 
   private final Map<String, String> aliases = new HashMap<>();
-  private final SortedSet<Database> dbSet = new TreeSet<>(Database.NAME_ORDER);
-  private final SortedSet<Table> allTables = new TreeSet<>(ALLTABLES_ORDER);
+  private final SortedSet<IDatabase> dbSet = new TreeSet<>(Constants.DB_NAME_ORDER);
+  private final SortedSet<ITable> allTables = new TreeSet<>(ALLTABLES_ORDER);
 
   public Schema(String file) throws IOException {
     this(file, false);
@@ -69,7 +67,7 @@ public class Schema implements ISchema {
   }
 
   /** Get databases sorted by name. */
-  public SortedSet<Database> getDbSet() {
+  public SortedSet<IDatabase> getDbSet() {
     return dbSet;
   }
 
@@ -102,12 +100,12 @@ public class Schema implements ISchema {
   }
 
   /** Get an iterator through all tables, sorted by db.table name. */
-  public Iterator<Table> getAllTablesIterator() {
+  public Iterator<ITable> getAllTablesIterator() {
     return allTables.iterator();
   }
 
   public final void injectMetaSchema() throws IOException {
-    for (Database db : dbSet) {
+    for (IDatabase db : dbSet) {
       SchemaLineProcessor lineProcessor = new SchemaLineProcessor(db);
       try (BufferedReader reader = new BufferedReader(
           new InputStreamReader(this.getClass().getResourceAsStream("/meta.txt")))) {
@@ -132,8 +130,8 @@ public class Schema implements ISchema {
   }
 
   @Override
-  public Database lookupDatabase(String inName) {
-    Database db = lookupDatabase2(inName);
+  public IDatabase lookupDatabase(String inName) {
+    IDatabase db = lookupDatabase2(inName);
     if (db != null)
       return db;
     // Check for database alias
@@ -144,17 +142,17 @@ public class Schema implements ISchema {
   }
 
   @Override
-  public Field lookupField(String dbName, String tableName, String fieldName) {
-    Table table = lookupTable(dbName, tableName);
+  public IField lookupField(String dbName, String tableName, String fieldName) {
+    ITable table = lookupTable(dbName, tableName);
     if (table == null)
       return null;
     return table.lookupField(fieldName);
   }
 
   @Override
-  public Table lookupTable(String inName) {
+  public ITable lookupTable(String inName) {
     if (inName.indexOf('.') > -1) {
-      Table firstTry = lookupTable2(inName);
+      ITable firstTry = lookupTable2(inName);
       if (firstTry != null)
         return firstTry;
       return lookupMetaTable(inName);
@@ -163,16 +161,16 @@ public class Schema implements ISchema {
   }
 
   @Override
-  public Table lookupTable(String dbName, String tableName) {
-    Database db = lookupDatabase(dbName);
+  public ITable lookupTable(String dbName, String tableName) {
+    IDatabase db = lookupDatabase(dbName);
     if (db == null)
       return null;
     return lookupTableCheckName(db.getTableSet().tailSet(new Table(tableName)), tableName);
   }
 
   @Override
-  public Field lookupUnqualifiedField(String name) {
-    Field field;
+  public IField lookupUnqualifiedField(String name) {
+    IField field;
     for (Object allTable : allTables) {
       Table table = (Table) allTable;
       field = table.lookupField(name);
@@ -185,11 +183,11 @@ public class Schema implements ISchema {
   /**
    * Lookup Database by name. Called twice by lookupDatabase().
    */
-  private Database lookupDatabase2(String inName) {
-    SortedSet<Database> dbTailSet = dbSet.tailSet(new Database(inName));
+  private IDatabase lookupDatabase2(String inName) {
+    SortedSet<IDatabase> dbTailSet = dbSet.tailSet(new Database(inName));
     if (dbTailSet.isEmpty())
       return null;
-    Database db = dbTailSet.first();
+    IDatabase db = dbTailSet.first();
     if (db == null || db.getName().compareToIgnoreCase(inName) != 0)
       return null;
     return db;
@@ -198,18 +196,18 @@ public class Schema implements ISchema {
   // It turns out that we *do* have to test for uniqueness - we can't just leave
   // that job to the compiler. That's because when looking up schema names for
   // a DEF..LIKE x, if x is non-unique in schema, then we move on to temp/work/buffer names.
-  private Table lookupTableCheckName(SortedSet<Table> set, String name) {
+  private ITable lookupTableCheckName(SortedSet<ITable> set, String name) {
     String lname = name.toLowerCase();
-    Iterator<Table> it = set.iterator();
+    Iterator<ITable> it = set.iterator();
     if (!it.hasNext())
       return null;
-    Table table = it.next();
+    ITable table = it.next();
     // test that we got a match
     if (!table.getName().toLowerCase().startsWith(lname))
       return null;
     // test that we got a unique match
     if (lname.length() < table.getName().length() && it.hasNext()) {
-      Table next = it.next();
+      ITable next = it.next();
       if (next.getName().toLowerCase().startsWith(lname))
         return null;
     }
@@ -217,7 +215,7 @@ public class Schema implements ISchema {
   }
 
   /** Lookup a qualified table name */
-  private Table lookupTable2(String inName) {
+  private ITable lookupTable2(String inName) {
     String[] parts = inName.split("\\.");
     if (parts == null) {
       // Only in the case 'inName' equals '.'
@@ -229,9 +227,9 @@ public class Schema implements ISchema {
   /**
    * This is for looking up names like "sports._file". We return the dictdb Table.
    */
-  private Table lookupMetaTable(String inName) {
+  private ITable lookupMetaTable(String inName) {
     String[] parts = inName.split("\\.");
-    Database db = lookupDatabase(parts[0]);
+    IDatabase db = lookupDatabase(parts[0]);
     if ((db == null) || (parts[1] == null) || (!parts[1].startsWith("_"))) {
       return null;
     }
@@ -239,14 +237,14 @@ public class Schema implements ISchema {
   }
 
   private class SchemaLineProcessor implements LineProcessor<Void> {
-    private Database currDatabase;
+    private IDatabase currDatabase;
     private Table currTable;
 
     public SchemaLineProcessor() {
       this(null);
     }
 
-    public SchemaLineProcessor(Database currDatabase) {
+    public SchemaLineProcessor(IDatabase currDatabase) {
       this.currDatabase = currDatabase;
     }
 

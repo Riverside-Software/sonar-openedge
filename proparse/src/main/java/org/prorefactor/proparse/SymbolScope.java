@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorSession;
 
@@ -55,7 +56,7 @@ public class SymbolScope {
     newRef.tableType = bufferType;
     tableMap.put(bufferName, newRef);
     if (newRef.tableType == FieldType.DBTABLE) {
-      Table table = session.getSchema().lookupTable(tableName);
+      ITable table = session.getSchema().lookupTable(tableName);
       if (table != null) {
         newRef.dbName = table.getDatabase().getName();
         newRef.fullName = newRef.dbName + "." + table.getName();
@@ -104,7 +105,7 @@ public class SymbolScope {
   FieldType isTable(String inName) {
     // isTable is not recursive, but isTableDef is.
     // First: Qualified db.table.
-    Table table = session.getSchema().lookupTable(inName);
+    ITable table = session.getSchema().lookupTable(inName);
     if (table != null && inName.contains("."))
       return FieldType.DBTABLE;
     // Second: temp-table/work-table/buffer name.
@@ -140,7 +141,7 @@ public class SymbolScope {
   FieldType isTableSchemaFirst(String inName) {
     // If we find that an non-abbreviated schema table name matches,
     // we return it even before a temp/work table match.
-    Table table = session.getSchema().lookupTable(inName);
+    ITable table = session.getSchema().lookupTable(inName);
     if (table != null) {
       Table.Name name = new Table.Name(inName);
       if (table.getName().length() == name.getTable().length())

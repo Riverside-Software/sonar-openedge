@@ -15,6 +15,8 @@ import java.util.Map;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.Field;
+import org.prorefactor.core.schema.IField;
+import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorSession;
 
@@ -24,7 +26,7 @@ import org.prorefactor.refactor.RefactorSession;
  */
 public class SymbolScopeRoot extends SymbolScope {
   private final RefactorSession refSession;
-  private Map<String, Table> tableMap = new HashMap<>();
+  private Map<String, ITable> tableMap = new HashMap<>();
   private String className = null;
   private boolean isInterface;
   private boolean abstractClass;
@@ -41,7 +43,7 @@ public class SymbolScopeRoot extends SymbolScope {
     return refSession;
   }
 
-  public void addTableDefinitionIfNew(Table table) {
+  public void addTableDefinitionIfNew(ITable table) {
     String lowerName = table.getName().toLowerCase();
     if (tableMap.get(lowerName) == null)
       tableMap.put(lowerName, table);
@@ -61,7 +63,7 @@ public class SymbolScopeRoot extends SymbolScope {
    * @return A newly created BufferSymbol for this temp/work table.
    */
   public TableBuffer defineTable(String name, int type) {
-    Table table = new Table(name, type);
+    ITable table = new Table(name, type);
     tableMap.put(name.toLowerCase(), table);
     // Pass empty string for name for default buffer.
     TableBuffer bufferSymbol = new TableBuffer("", this, table);
@@ -74,10 +76,9 @@ public class SymbolScopeRoot extends SymbolScope {
 
   /** Define a temp or work table field */
   public FieldBuffer defineTableField(String name, TableBuffer buffer) {
-    Table table = buffer.getTable();
-    Field field = new Field(name, table);
-    FieldBuffer fieldBuff = new FieldBuffer(this, buffer, field);
-    return fieldBuff;
+    ITable table = buffer.getTable();
+    IField field = new Field(name, table);
+    return new FieldBuffer(this, buffer, field);
   }
 
   /**
@@ -85,9 +86,8 @@ public class SymbolScopeRoot extends SymbolScope {
    * separate step.
    */
   public FieldBuffer defineTableFieldDelayedAttach(String name, TableBuffer buffer) {
-    Field field = new Field(name, null);
-    FieldBuffer fieldBuff = new FieldBuffer(this, buffer, field);
-    return fieldBuff;
+    IField field = new Field(name, null);
+    return new FieldBuffer(this, buffer, field);
   }
 
   /** Generate "bare" symbols and SymbolScopeSuper from this scope's PUBLIC|PROTECTED members. */
@@ -141,7 +141,7 @@ public class SymbolScopeRoot extends SymbolScope {
     return serializableClass;
   }
 
-  public TableBuffer getLocalTableBuffer(Table table) {
+  public TableBuffer getLocalTableBuffer(ITable table) {
     assert table.getStoretype() != IConstants.ST_DBTABLE;
     return bufferMap.get(table.getName().toLowerCase());
   }
@@ -152,7 +152,7 @@ public class SymbolScopeRoot extends SymbolScope {
    * 
    * @return null if not found
    */
-  public Table lookupTableDefinition(String name) {
+  public ITable lookupTableDefinition(String name) {
     return tableMap.get(name.toLowerCase());
   }
 
@@ -161,9 +161,9 @@ public class SymbolScopeRoot extends SymbolScope {
    * (In fact, anywhere this is run, the compiler would check that the field name is also unique against schema tables.)
    * Returns null if nothing found.
    */
-  protected Field lookupUnqualifiedField(String name) {
-    Field field;
-    for (Table table : tableMap.values()) {
+  protected IField lookupUnqualifiedField(String name) {
+    IField field;
+    for (ITable table : tableMap.values()) {
       field = table.lookupField(name);
       if (field != null)
         return field;

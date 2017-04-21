@@ -16,23 +16,23 @@ import java.util.Map;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.core.schema.Field;
-import org.prorefactor.core.schema.Table;
+import org.prorefactor.core.schema.IField;
+import org.prorefactor.core.schema.ITable;
 
 /**
  * A TableBuffer is a Symbol which provides a link from the syntax tree to a Table object.
  */
 public class TableBuffer extends Symbol {
-  private final Table table;
+  private final ITable table;
   private final boolean isDefault;
-  private final Map<Field, FieldBuffer> fieldBuffers = new HashMap<>();
+  private final Map<IField, FieldBuffer> fieldBuffers = new HashMap<>();
 
   /**
    * Constructor for a named buffer.
    * 
    * @param name Input "" for an unnamed or default buffer
    */
-  public TableBuffer(String name, SymbolScope scope, Table table) {
+  public TableBuffer(String name, SymbolScope scope, ITable table) {
     super(name, scope);
     this.table = table;
     this.isDefault = name.isEmpty();
@@ -45,7 +45,7 @@ public class TableBuffer extends Symbol {
   /** For temp/work table, also adds Table definition to the scope if it doesn't already exist. */
   @Override
   public Symbol copyBare(SymbolScope scope) {
-    Table t;
+    ITable t;
     if (this.table.getStoretype() == IConstants.ST_DBTABLE) {
       t = this.table;
     } else {
@@ -79,7 +79,7 @@ public class TableBuffer extends Symbol {
    * Always returns BUFFER, whether this is a named buffer or a default buffer.
    * 
    * @see org.prorefactor.treeparser.Symbol#getProgressType()
-   * @see org.prorefactor.core.schema.Table#getStoretype()
+   * @see org.prorefactor.core.schema.ITable#getStoretype()
    */
   @Override
   public int getProgressType() {
@@ -87,7 +87,7 @@ public class TableBuffer extends Symbol {
   }
 
   /** Get or create a FieldBuffer for a Field. */
-  public FieldBuffer getFieldBuffer(Field field) {
+  public FieldBuffer getFieldBuffer(IField field) {
     assert field.getTable() == this.table;
     FieldBuffer ret = fieldBuffers.get(field);
     if (ret != null)
@@ -109,7 +109,7 @@ public class TableBuffer extends Symbol {
     return super.getName();
   }
 
-  public Table getTable() {
+  public ITable getTable() {
     return table;
   }
 

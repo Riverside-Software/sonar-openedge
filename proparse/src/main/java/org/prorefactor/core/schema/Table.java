@@ -11,7 +11,6 @@
 package org.prorefactor.core.schema;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -23,23 +22,15 @@ import org.prorefactor.treeparser.SymbolScopeRoot;
  * Table objects are created both by the Schema class and also when temp and work tables are defined within a 4gl
  * compile unit. For temp and work tables, the database is Schema.nullDatabase.
  */
-public class Table {
-  /** Comparator for sorting by name. */
-  public static final Comparator<Table> NAME_ORDER = new Comparator<Table>() {
-    @Override
-    public int compare(Table t1, Table t2) {
-      return t1.name.compareToIgnoreCase(t2.name);
-    }
-  };
-
-  private int storetype = IConstants.ST_DBTABLE;
-  private List<Field> fieldPosOrder = new ArrayList<>();
+public class Table implements ITable {
+  private IDatabase database;
   private String name;
-  private Database database;
-  private SortedSet<Field> fieldSet = new TreeSet<>(Field.NAME_ORDER);
+  private int storetype = IConstants.ST_DBTABLE;
+  private List<IField> fieldPosOrder = new ArrayList<>();
+  private SortedSet<IField> fieldSet = new TreeSet<>(Constants.FIELD_NAME_ORDER);
 
   /** Constructor for schema */
-  public Table(String name, Database database) {
+  public Table(String name, IDatabase database) {
     this.name = name;
     this.database = database;
     database.add(this);
@@ -49,17 +40,18 @@ public class Table {
   public Table(String name, int storetype) {
     this.name = name;
     this.storetype = storetype;
-    this.database = Schema.nullDatabase;
+    this.database = Constants.nullDatabase;
   }
 
   /** Constructor for temporary "comparator" objects. */
   public Table(String name) {
     this.name = name;
-    database = Schema.nullDatabase;
+    database = Constants.nullDatabase;
   }
 
   /** Add a Field to this table. "Package" visibility only. */
-  void add(Field field) {
+  @Override
+  public void add(IField field) {
     fieldSet.add(field);
     fieldPosOrder.add(field);
   }
@@ -71,34 +63,39 @@ public class Table {
    * @param scope The scope that this table is to be added to.
    * @return The newly created table, or the existing one from the scope if it has previously been defined.
    */
-  public Table copyBare(SymbolScopeRoot scope) {
-    Table t = scope.lookupTableDefinition(this.name);
+  public ITable copyBare(SymbolScopeRoot scope) {
+    ITable t = scope.lookupTableDefinition(this.name);
     if (t != null)
       return t;
     t = new Table(this.name, this.storetype);
-    for (Field field : this.fieldPosOrder) {
+    for (IField field : this.fieldPosOrder) {
       field.copyBare(t);
     }
     return t;
   }
 
-  public Database getDatabase() {
+  @Override
+  public IDatabase getDatabase() {
     return database;
   }
 
   /** Get the ArrayList of fields in field position order (rather than sorted alpha). */
-  public List<Field> getFieldPosOrder() {
+  @Override
+  public List<IField> getFieldPosOrder() {
     return fieldPosOrder;
   }
 
-  public SortedSet<Field> getFieldSet() {
+  @Override
+  public SortedSet<IField> getFieldSet() {
     return fieldSet;
   }
 
+  @Override
   public String getName() {
     return name;
   }
 
+  @Override
   public int getStoretype() {
     return storetype;
   }
@@ -107,11 +104,12 @@ public class Table {
    * Lookup a field by name. We do not test for uniqueness. We leave that job to the compiler. This function expects an
    * unqualified field name (no name dots).
    */
-  public Field lookupField(String lookupName) {
-    java.util.SortedSet<Field> fieldTailSet = fieldSet.tailSet(new Field(lookupName));
+  @Override
+  public IField lookupField(String lookupName) {
+    SortedSet<IField> fieldTailSet = fieldSet.tailSet(new Field(lookupName));
     if (fieldTailSet.isEmpty())
       return null;
-    Field field = fieldTailSet.first();
+    IField field = fieldTailSet.first();
     if (field == null || !field.getName().toLowerCase().startsWith(lookupName.toLowerCase()))
       return null;
     return field;

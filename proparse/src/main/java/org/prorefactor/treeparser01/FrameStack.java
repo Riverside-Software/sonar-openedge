@@ -22,6 +22,7 @@ import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Field;
+import org.prorefactor.core.schema.IField;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.FieldBuffer;
 import org.prorefactor.treeparser.FieldContainer;
@@ -76,17 +77,17 @@ public class FrameStack {
     assert formItemNode.firstChild().getType() == NodeTypes.RECORD_NAME;
     RecordNameNode recordNameNode = (RecordNameNode) formItemNode.firstChild();
     TableBuffer tableBuffer = recordNameNode.getTableBuffer();
-    HashSet<Field> fieldSet = new HashSet<>(tableBuffer.getTable().getFieldSet());
+    HashSet<IField> fieldSet = new HashSet<>(tableBuffer.getTable().getFieldSet());
     JPNode exceptNode = formItemNode.getParent().findDirectChild(NodeTypes.EXCEPT);
     if (exceptNode != null)
       for (JPNode n = exceptNode.firstChild(); n != null; n = n.nextSibling()) {
         if (!(n instanceof FieldRefNode))
           continue;
-        Field f = ((FieldBuffer) ((FieldRefNode) n).getSymbol()).getField();
+        IField f = ((FieldBuffer) ((FieldRefNode) n).getSymbol()).getField();
         fieldSet.remove(f);
       }
     ArrayList<FieldBuffer> returnList = new ArrayList<>();
-    for (Field field : fieldSet) {
+    for (IField field : fieldSet) {
       returnList.add(tableBuffer.getFieldBuffer(field));
     }
     return returnList;

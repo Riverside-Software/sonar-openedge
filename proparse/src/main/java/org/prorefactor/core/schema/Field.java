@@ -10,8 +10,6 @@
  *******************************************************************************/ 
 package org.prorefactor.core.schema;
 
-import java.util.Comparator;
-
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ClassSupport;
 import org.prorefactor.treeparser.DataType;
@@ -21,20 +19,12 @@ import org.prorefactor.treeparser.Primative;
  * Field objects are created both by the Schema class and they are also created for temp and work table fields defined
  * within a 4gl compile unit.
  */
-public class Field implements Primative {
-  /** Comparator for sorting by name. */
-  protected static final Comparator<Field> NAME_ORDER = new Comparator<Field>() {
-    @Override
-    public int compare(Field f1, Field f2) {
-      return f1.name.compareToIgnoreCase(f2.name);
-    }
-  };
-
+public class Field implements IField {
   private final String name;
   private int extent;
   private DataType dataType;
   private String className = null;
-  private Table table;
+  private ITable table;
 
   /**
    * Standard constructor.
@@ -42,7 +32,7 @@ public class Field implements Primative {
    * @param table Use null if you want to assign the field to a table as a separate step.
    * @see #setTable(Table)
    */
-  public Field(String inName, Table table) {
+  public Field(String inName, ITable table) {
     this.name = inName;
     this.table = table;
     if (table != null)
@@ -52,7 +42,7 @@ public class Field implements Primative {
   /** Constructor for temporary "lookup" fields. "Package" visibility. */
   Field(String inName) {
     this.name = inName;
-    this.table = Schema.nullTable;
+    this.table = Constants.nullTable;
   }
 
   @Override
@@ -69,7 +59,8 @@ public class Field implements Primative {
    * @return The newly created Field, though you may not need it for anything since it has already been added to the
    *         Table.
    */
-  public Field copyBare(Table toTable) {
+  @Override
+  public IField copyBare(ITable toTable) {
     Field f = new Field(this.name, toTable);
     f.dataType = this.dataType;
     f.extent = this.extent;
@@ -92,11 +83,13 @@ public class Field implements Primative {
     return extent;
   }
 
+  @Override
   public String getName() {
     return name;
   }
 
-  public Table getTable() {
+  @Override
+  public ITable getTable() {
     return table;
   }
 
@@ -125,7 +118,8 @@ public class Field implements Primative {
   }
 
   /** Use this to set the field to a table if you used null for the table in the constructor. */
-  public void setTable(Table table) {
+  @Override
+  public void setTable(ITable table) {
     this.table = table;
     table.add(this);
   }

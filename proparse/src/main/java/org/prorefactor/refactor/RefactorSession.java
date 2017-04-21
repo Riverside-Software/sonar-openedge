@@ -15,7 +15,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.prorefactor.core.schema.Schema;
+import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.proparse.SymbolScope;
 import org.prorefactor.refactor.settings.IProparseSettings;
 
@@ -27,17 +27,17 @@ import com.google.inject.Inject;
  */
 public class RefactorSession {
   private final IProparseSettings proparseSettings;
-  private final Schema schema;
+  private final ISchema schema;
   private final Charset charset;
 
   private final Map<String, SymbolScope> superCache = new HashMap<>();
 
   @Inject
-  public RefactorSession(IProparseSettings proparseSettings, Schema schema) {
+  public RefactorSession(IProparseSettings proparseSettings, ISchema schema) {
     this(proparseSettings, schema, Charset.defaultCharset());
   }
 
-  public RefactorSession(IProparseSettings proparseSettings, Schema schema,
+  public RefactorSession(IProparseSettings proparseSettings, ISchema schema,
       Charset charset) {
     this.proparseSettings = proparseSettings;
     this.schema = schema;
@@ -69,7 +69,7 @@ public class RefactorSession {
     return superCache.get(superName.toLowerCase());
   }
 
-  public Schema getSchema() {
+  public ISchema getSchema() {
     return schema;
   }
 
