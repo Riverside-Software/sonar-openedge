@@ -19,10 +19,10 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -36,16 +36,14 @@ import org.sonar.api.config.Settings;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.api.com.google.common.base.Charsets;
 import org.sonar.plugins.openedge.api.com.google.common.base.Joiner;
 import org.sonar.plugins.openedge.api.com.google.common.base.Splitter;
 import org.sonar.plugins.openedge.api.com.google.common.base.Strings;
 import org.sonar.plugins.openedge.api.com.google.common.collect.ImmutableSet;
-import org.sonar.plugins.openedge.api.com.google.common.io.Files;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
 import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.DatabaseDescription;
-import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.Field;
-import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.Table;
+import org.sonar.plugins.openedge.api.objects.DatabaseWrapper;
+import org.sonar.plugins.openedge.api.org.prorefactor.core.schema.IDatabase;
 import org.sonar.plugins.openedge.api.org.prorefactor.core.schema.Schema;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorSession;
 import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.IProparseSettings;
@@ -61,7 +59,6 @@ public class OpenEdgeSettings {
   private final List<String> sourceDirs = new ArrayList<>();
   private final File binariesDir;
   private final File pctDir;
-  private final File dbgDir;
   private final Settings settings;
   private final List<File> propath = new ArrayList<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
@@ -73,6 +70,29 @@ public class OpenEdgeSettings {
   public OpenEdgeSettings(Settings settings, FileSystem fileSystem) {
     this.settings = settings;
 
+    initializeDirectories(settings, fileSystem);
+
+    // And for .pct directory
+    String binariesSetting = settings.getString(Constants.BINARIES);
+    if (binariesSetting == null) {
+      LOG.debug("Property {} not defined, using default value", Constants.BINARIES);
+      binariesSetting = "build";
+    }
+    binariesDir = new File(fileSystem.baseDir(), binariesSetting);
+    this.pctDir = new File(binariesDir, ".pct");
+
+    initializePropath(settings, fileSystem);
+    initializeCPD(settings);
+    initializeXrefBytes(settings);
+    LOG.info("Using backslash as escape character : {}", settings.getBoolean(Constants.BACKSLASH_ESCAPE));
+
+    Schema sch = readSchema(settings, fileSystem);
+    IProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
+        settings.getBoolean(Constants.BACKSLASH_ESCAPE));
+    proparseSession = new RefactorSession(ppSettings, sch, fileSystem.encoding());
+  }
+
+  private final void initializeDirectories(Settings settings, FileSystem fileSystem) {
     // Looking for source directories
     String sonarSources = settings.getString("sonar.sources");
     if (sonarSources == null) {
@@ -83,18 +103,9 @@ public class OpenEdgeSettings {
         sourceDirs.add(dir);
       }
     }
+  }
 
-    // And for .pct directory
-    String binariesSetting = settings.getString(Constants.BINARIES);
-    if (binariesSetting == null) {
-      LOG.debug("Property {} not defined, using default value", Constants.BINARIES);
-      binariesSetting = "build";
-    }
-    File binaries = new File(fileSystem.baseDir(), binariesSetting);
-    this.pctDir = new File(binaries, ".pct");
-    this.dbgDir = new File(binaries, ".dbg");
-    binariesDir = new File(fileSystem.baseDir(), binariesSetting);
-
+  private final void initializePropath(Settings settings, FileSystem fileSystem) {
     // PROPATH definition
     String propathProp = settings.getString(Constants.PROPATH);
     LOG.info("Using PROPATH : {}", propathProp);
@@ -115,69 +126,9 @@ public class OpenEdgeSettings {
       propath.add(new File(dlc, "src"));
       propath.add(dlc);
     }
+  }
 
-    // File definition for temporary .schema file
-    File dbFile;
-    try {
-      dbFile = File.createTempFile("proparse", ".schema");
-    } catch (IOException caught) {
-      LOG.error("Unable to create proparse.schema file", caught);
-      throw new RuntimeException(caught);
-    }
-
-    // Database definitions
-    String dbs = settings.getString(Constants.DATABASES);
-    LOG.info("Using schema : {}", dbs);
-    if (dbs != null) {
-      try (BufferedWriter writer = Files.newWriter(dbFile, Charsets.UTF_8)) {
-        for (String str : Splitter.on(',').trimResults().split(dbs)) {
-          String dbName = "";
-          int colonPos = str.lastIndexOf(':');
-          if (colonPos == -1) {
-            dbName = FilenameUtils.getBaseName(str);
-          } else {
-            dbName = str.substring(colonPos + 1);
-            str = str.substring(0, colonPos);
-          }
-          LOG.debug("Parsing {} with alias {}", fileSystem.resolvePath(str), dbName);
-          DatabaseDescription desc = DumpFileUtils.getDatabaseDescription(fileSystem.resolvePath(str));
-          // XXX dbDesc.put(dbName, mapToDatabaseKeyword(desc, dbName).getTables());
-          writer.write(":: " + dbName);
-          writer.newLine();
-          for (Table tbl : desc.getTables()) {
-            writer.write(": " + tbl.getName() + " ");
-            writer.newLine();
-            for (Field fld : tbl.getFields()) {
-              writer.write(fld.getName() + " " + fld.getDataType().toUpperCase() + " "
-                  + (fld.getExtent() == null ? "0" : fld.getExtent()));
-              writer.newLine();
-            }
-          }
-        }
-      } catch (IOException caught) {
-        LOG.error("Unable to write proparse.schema file", caught);
-      }
-    }
-
-    Schema sch = null;
-    try {
-      sch = new Schema(dbFile.getAbsolutePath(), true);
-      if (!sch.getDbSet().isEmpty()) {
-        sch.createAlias("dictdb", sch.getDbSet().first().getName());
-      }
-      for (String str : Splitter.on(';').trimResults().omitEmptyStrings().split(
-          Strings.nullToEmpty(settings.getString(Constants.ALIASES)))) {
-        List<String> lst = Splitter.on(',').trimResults().splitToList(str);
-        for (String alias : lst.subList(1, lst.size())) {
-          LOG.debug("Adding {} aliases to database {}", new Object[] {alias, lst.get(0)});
-          sch.createAlias(alias, lst.get(0));
-        }
-      }
-    } catch (IOException caught) {
-      LOG.error("Unable to read proparse.schema file", caught);
-    }
-    dbFile.delete();
-
+  private final void initializeCPD(Settings settings) {
     // CPD annotations
     for (String str : Strings.nullToEmpty(settings.getString(Constants.CPD_ANNOTATIONS)).split(",")) {
       LOG.debug("CPD annotation : '{}'", str);
@@ -193,7 +144,9 @@ public class OpenEdgeSettings {
       LOG.debug("CPD skip procedure : '{}'", str);
       cpdProcedures.add(str.toLowerCase(Locale.ENGLISH));
     }
+  }
 
+  private final void initializeXrefBytes(Settings settings) {
     // XREF invalid bytes
     for (String str : Strings.nullToEmpty(settings.getString(Constants.XREF_FILTER_BYTES)).split(",")) {
       try {
@@ -209,11 +162,6 @@ public class OpenEdgeSettings {
         throw new IllegalArgumentException("Invalid '" + Constants.XREF_FILTER_BYTES + "' property : " + str, caught);
       }
     }
-
-    LOG.info("Using backslash as escape character : {}", settings.getBoolean(Constants.BACKSLASH_ESCAPE));
-    IProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
-        settings.getBoolean(Constants.BACKSLASH_ESCAPE));
-    proparseSession = new RefactorSession(ppSettings, sch, fileSystem.encoding());
   }
 
   public List<String> getSourceDirs() {
@@ -222,10 +170,6 @@ public class OpenEdgeSettings {
 
   public File getPctDir() {
     return pctDir;
-  }
-
-  public File getDbgDir() {
-    return dbgDir;
   }
 
   public File getBinariesDir() {
@@ -350,4 +294,43 @@ public class OpenEdgeSettings {
     return proparseSession;
   }
 
+  private Schema readSchema(Settings settings, FileSystem fileSystem) {
+    String dbList = Strings.nullToEmpty(settings.getString(Constants.DATABASES));
+    LOG.info("Using schema : {}", dbList);
+    Collection<IDatabase> dbs = new ArrayList<>();
+
+    for (String str : Splitter.on(',').trimResults().omitEmptyStrings().split(dbList)) {
+      String dbName;
+      int colonPos = str.lastIndexOf(':');
+      if (colonPos == -1) {
+        dbName = FilenameUtils.getBaseName(str);
+      } else {
+        dbName = str.substring(colonPos + 1);
+        str = str.substring(0, colonPos);
+      }
+
+      LOG.debug("Parsing {} with alias {}", fileSystem.resolvePath(str), dbName);
+      try {
+        DatabaseDescription desc = DumpFileUtils.getDatabaseDescription(fileSystem.resolvePath(str));
+        dbs.add(new DatabaseWrapper(desc));
+      } catch (IOException caught) {
+        LOG.error("Unable to parse " + str, caught);
+      }
+    }
+
+    Schema sch = new Schema(dbs.toArray(new IDatabase[] {}));
+    if (!sch.getDbSet().isEmpty()) {
+      sch.createAlias("dictdb", sch.getDbSet().first().getName());
+    }
+    for (String str : Splitter.on(';').trimResults().omitEmptyStrings().split(
+        Strings.nullToEmpty(settings.getString(Constants.ALIASES)))) {
+      List<String> lst = Splitter.on(',').trimResults().splitToList(str);
+      for (String alias : lst.subList(1, lst.size())) {
+        LOG.debug("Adding {} aliases to database {}", new Object[] {alias, lst.get(0)});
+        sch.createAlias(alias, lst.get(0));
+      }
+    }
+
+    return sch;
+  }
 }

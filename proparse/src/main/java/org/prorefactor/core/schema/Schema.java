@@ -66,6 +66,16 @@ public class Schema implements ISchema {
     }
   }
 
+  public Schema(IDatabase... dbs) {
+    for (IDatabase db : dbs) {
+      dbSet.add(db);
+      for (ITable tbl : db.getTableSet()) {
+        allTables.add(tbl);
+      }
+    }
+    injectMetaSchema();
+  }
+
   /** Get databases sorted by name. */
   public SortedSet<IDatabase> getDbSet() {
     return dbSet;
@@ -104,7 +114,7 @@ public class Schema implements ISchema {
     return allTables.iterator();
   }
 
-  public final void injectMetaSchema() throws IOException {
+  public final void injectMetaSchema() {
     for (IDatabase db : dbSet) {
       SchemaLineProcessor lineProcessor = new SchemaLineProcessor(db);
       try (BufferedReader reader = new BufferedReader(
@@ -112,6 +122,8 @@ public class Schema implements ISchema {
         String line;
         while (((line = reader.readLine()) != null) && lineProcessor.processLine(line)) {
         }
+      } catch (IOException caught) {
+        LOGGER.error("Unable to open file 'meta.txt'", caught);
       }
     }
   }
@@ -171,8 +183,7 @@ public class Schema implements ISchema {
   @Override
   public IField lookupUnqualifiedField(String name) {
     IField field;
-    for (Object allTable : allTables) {
-      Table table = (Table) allTable;
+    for (ITable table : allTables) {
       field = table.lookupField(name);
       if (field != null)
         return field;

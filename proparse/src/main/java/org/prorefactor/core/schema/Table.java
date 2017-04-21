@@ -49,20 +49,12 @@ public class Table implements ITable {
     database = Constants.nullDatabase;
   }
 
-  /** Add a Field to this table. "Package" visibility only. */
   @Override
   public void add(IField field) {
     fieldSet.add(field);
     fieldPosOrder.add(field);
   }
 
-  /**
-   * Create a bare minimum copy of a Table definition. No-op if the table already exists in the requested scope. Copies
-   * all of the field definitions as well.
-   * 
-   * @param scope The scope that this table is to be added to.
-   * @return The newly created table, or the existing one from the scope if it has previously been defined.
-   */
   public ITable copyBare(SymbolScopeRoot scope) {
     ITable t = scope.lookupTableDefinition(this.name);
     if (t != null)
@@ -79,7 +71,6 @@ public class Table implements ITable {
     return database;
   }
 
-  /** Get the ArrayList of fields in field position order (rather than sorted alpha). */
   @Override
   public List<IField> getFieldPosOrder() {
     return fieldPosOrder;
@@ -100,10 +91,6 @@ public class Table implements ITable {
     return storetype;
   }
 
-  /**
-   * Lookup a field by name. We do not test for uniqueness. We leave that job to the compiler. This function expects an
-   * unqualified field name (no name dots).
-   */
   @Override
   public IField lookupField(String lookupName) {
     SortedSet<IField> fieldTailSet = fieldSet.tailSet(new Field(lookupName));

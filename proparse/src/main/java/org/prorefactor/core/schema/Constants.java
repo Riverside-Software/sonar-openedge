@@ -23,7 +23,7 @@ public class Constants {
   };
 
   /** Comparator for sorting by name. */
-  protected static final Comparator<IField> FIELD_NAME_ORDER = new Comparator<IField>() {
+  public static final Comparator<IField> FIELD_NAME_ORDER = new Comparator<IField>() {
     @Override
     public int compare(IField f1, IField f2) {
       return f1.getName().compareToIgnoreCase(f2.getName());
