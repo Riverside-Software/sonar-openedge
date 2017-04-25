@@ -8,13 +8,10 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.proparse;
+package org.prorefactor.proparse.antlr4;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,18 +19,29 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenFactory;
+import org.antlr.v4.runtime.TokenSource;
+import org.prorefactor.core.JPNodeMetrics;
+import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.ListingListener;
 import org.prorefactor.macrolevel.ListingParser;
+import org.prorefactor.proparse.IntegerIndex;
+import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.IProparseSettings;
 import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import antlr.TokenStream;
+import antlr.TokenStreamException;
+import antlr.TokenStreamHiddenTokenFilter;
+
 /**
- * There is one preprocessor created per lexer.
- * 
  * A preprocessor contains one or more IncludeFiles.
  * 
  * There is a special IncludeFile object created for the top-level program (ex: .p or .w).
@@ -53,8 +61,8 @@ import org.slf4j.LoggerFactory;
  * We keep a reference to the input stream "A" in the InputSource object so that if "A" spawns a new input stream "B",
  * we can return to "A" when we are done with "B".
  */
-public class Preprocessor implements IPreprocessor {
-  private static final Logger LOGGER = LoggerFactory.getLogger(Preprocessor.class);
+public class ProgressLexer implements TokenSource, IPreprocessor {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProgressLexer.class);
 
   private static final Pattern regexNumberedArg = Pattern.compile("\\{\\d+\\}");
   private static final Pattern regexEmptyCurlies = Pattern.compile("\\{\\s*\\}");
@@ -62,7 +70,6 @@ public class Preprocessor implements IPreprocessor {
   private static final int SKIP_CHAR = -100;
   public static final int PROPARSE_DIRECTIVE = -101;
 
-  final DoParse doParse;
   private final IProparseSettings ppSettings;
 
   // How many levels of &IF FALSE are we currently into?
@@ -90,11 +97,6 @@ public class Preprocessor implements IPreprocessor {
   private FilePos textStart;
 
   private ListingListener lstListener;
-  /** Are we writing a preprocessor-listing file? */
-  // boolean listing;
-
-  /** The listing stream (only open if listing) */
-//  BufferedWriter listingStream;
 
   private IncludeFile currentInclude;
   private InputSource currentInput;
@@ -108,39 +110,112 @@ public class Preprocessor implements IPreprocessor {
   private int laChar;
   private int safetyNet = 0;
   private int sequence = 0;
-  private int sourceCounter;
+  private int sourceCounter = -1;
+
+  // From ProgressLexer
+  private Lexer lexer;
+  private IntegerIndex<String> filenameList = new IntegerIndex<>();
+  private final RefactorSession session;
+  private TokenSource wrapper;
 
   /**
    * An existing reference to the input stream is required for construction. The caller is responsible for closing that
    * stream once parsing is complete.
    */
-  public Preprocessor(String fileName, BufferedReader inStream, DoParse doParse) {
-    this.doParse = doParse;
-    this.ppSettings = doParse.getRefactorSession().getProparseSettings();
+  public ProgressLexer(RefactorSession session, String fileName) throws IOException {
+    LOGGER.trace("New ProgressLexer instance {}", fileName);
+    this.ppSettings = session.getProparseSettings();
+    this.session = session;
 
     // Create input source with flag isPrimaryInput=true
-    sourceCounter = -1;
-    currFile = doParse.addFilename(fileName);
-    currentInput = new InputSource(++sourceCounter, inStream, true);
-    currentInput.fileIndex = currFile;
+    currFile = addFilename(fileName);
+    currentInput = new InputSource(++sourceCounter, new File(fileName), session.getCharset(), currFile, true);
     currentInclude = new IncludeFile(fileName, currentInput);
     includeVector.add(currentInclude);
     currSourceNum = currentInput.getSourceNum();
     lstListener = new ListingParser();
+    
+    lexer = new Lexer(this);
+    PostLexer postlexer = new PostLexer(lexer);
+    TokenSource filter1 = new TokenList(postlexer);
+    wrapper = new MultiChannelTokenSource(filter1);
   }
+
+  public String getMainFileName() {
+    return filenameList.getValue(0);
+  }
+
+  public IntegerIndex<String> getFilenameList() {
+    return filenameList;
+  }
+
+  public String getFilename(int fileIndex) {
+    return filenameList.getValue(fileIndex);
+  }
+
+  protected int addFilename(String filename) {
+    return filenameList.add(filename);
+  }
+
+  // **********************
+  // TokenSource interface
+  // **********************
+
+  @Override
+  public Token nextToken() {
+    return wrapper.nextToken();
+  }
+
+  @Override
+  public int getLine() {
+    return wrapper.getLine();
+  }
+
+  @Override
+  public int getCharPositionInLine() {
+    return wrapper.getCharPositionInLine();
+  }
+
+  @Override
+  public CharStream getInputStream() {
+    return wrapper.getInputStream();
+  }
+
+  @Override
+  public String getSourceName() {
+    return wrapper.getSourceName();
+  }
+
+  @Override
+  public void setTokenFactory(TokenFactory<?> factory) {
+    wrapper.setTokenFactory(factory);
+  }
+
+  @Override
+  public TokenFactory<?> getTokenFactory() {
+    return wrapper.getTokenFactory();
+  }
+
+  // ****************************
+  // End of TokenSource interface
+  // ****************************
+
+  // ****************************
+  // IPreprocessor implementation
+  // ****************************
 
   @Override
   public String defined(String argName) {
     // Yes, the precedence for defined() really is 3,2,3,1,0.
     // First look for local SCOPED define
-    if (currentInclude.defdNames.containsKey(argName))
+    if (currentInclude.isNameDefined(argName))
       return "3";
     // Second look for named include arg
     if (currentInclude.getNamedArg(argName) != null)
       return "2";
     // Third look for a non-local SCOPED define
     for (IncludeFile incl : includeVector) {
-      if (incl.defdNames.containsKey(argName))
+      if (incl.isNameDefined(argName))
         return "3";
     }
     // Finally, check for global define
@@ -157,21 +232,19 @@ public class Preprocessor implements IPreprocessor {
 
   @Override
   public void defScoped(String argName, String argVal) {
-    currentInclude.defdNames.put(argName, argVal);
+    currentInclude.scopeDefine(argName, argVal);
   }
 
   @Override
   public String getArgText(int argNum) {
-    if (argNum >= currentInclude.numdArgs.size())
-      return "";
-    return currentInclude.numdArgs.get(argNum);
+    return currentInclude.getNumberedArgument(argNum);
   }
 
   @Override
   public String getArgText(String argName) {
     String ret;
     // First look for local &SCOPE define
-    ret = currentInclude.defdNames.get(argName);
+    ret = currentInclude.getValue(argName);
     if (ret != null)
       return ret;
     // Second look for a named include file argument
@@ -180,7 +253,7 @@ public class Preprocessor implements IPreprocessor {
       return ret;
     // Third look for a non-local SCOPED define
     for (int i = includeVector.size() - 1; i >= 0; --i) {
-      ret = includeVector.get(i).defdNames.get(argName);
+      ret = includeVector.get(i).getValue(argName);
       if (ret != null)
         return ret;
     }
@@ -190,14 +263,7 @@ public class Preprocessor implements IPreprocessor {
       return ret;
     // * to return all include arguments, space delimited.
     if ("*".equals(argName)) {
-      StringBuilder allArgs = new StringBuilder();
-      // Note: starts from 1. Doesn't include arg[0], which is the filename.
-      for (int i1 = 1; i1 < currentInclude.numdArgs.size(); ++i1) {
-        if (i1 > 1)
-          allArgs.append(" ");
-        allArgs.append(currentInclude.numdArgs.get(i1));
-      }
-      return allArgs.toString();
+      return currentInclude.getAllArguments();
     }
     // &* to return all named include argument definitions
     if ("&*".equals(argName))
@@ -212,7 +278,7 @@ public class Preprocessor implements IPreprocessor {
       return ppSettings.getWindowSystem();
     if ("file-name".equals(argName)) {
       // {&FILE-NAME}, unlike {0}, returns the filename as found on the PROPATH.
-      ret = doParse.getRefactorSession().findFile(currentInclude.numdArgs.get(0));
+      ret = session.findFile(currentInclude.getNumberedArgument(0));
       // Progress seems to be converting the slashes for the appropriate OS.
       // I don't convert the slashes when I store the filename - instead I do it here.
       // (Saves us from converting the slashes for each and every include reference.)
@@ -223,7 +289,7 @@ public class Preprocessor implements IPreprocessor {
       return ret;
     }
     if ("line-number".equals(argName))
-      return Integer.toString(getLine());
+      return Integer.toString(getLine2());
     if ("sequence".equals(argName))
       return Integer.toString(sequence++);
 
@@ -234,8 +300,10 @@ public class Preprocessor implements IPreprocessor {
   @Override
   public void undef(String argName) {
     // First look for a local file scoped defined name to undef
-    if (undef_helper(argName, (currentInclude.defdNames)))
+    if (currentInclude.isNameDefined(argName)) {
+      currentInclude.removeVariable(argName);
       return;
+    }
     // Second look for a named include arg to undef
     if (currentInclude.undefNamedArg(argName))
       return;
@@ -243,11 +311,21 @@ public class Preprocessor implements IPreprocessor {
     ListIterator<IncludeFile> it = includeVector.listIterator(includeVector.size());
     while (it.hasPrevious()) {
       IncludeFile incfile = it.previous();
-      if (undef_helper(argName, incfile.defdNames))
+      if (incfile.isNameDefined(argName)) {
+        incfile.removeVariable(argName);
         return;
+      }
     }
     // Last, look for a global arg to undef
-    undef_helper(argName, globalDefdNames);
+    undefHelper(argName, globalDefdNames);
+  }
+
+  private boolean undefHelper(String argName, Map<String, String> names) {
+    if (names.containsKey(argName)) {
+      names.remove(argName);
+      return true;
+    }
+    return false;
   }
 
   int getChar() throws IOException {
@@ -293,6 +371,10 @@ public class Preprocessor implements IPreprocessor {
     }
   }
 
+  // ****************************
+  // IPreprocessor implementation
+  // ****************************
+
   int getColumn() {
     return currCol;
   }
@@ -301,7 +383,7 @@ public class Preprocessor implements IPreprocessor {
     return currFile;
   }
 
-  int getLine() {
+  int getLine2() {
     return currLine;
   }
 
@@ -369,7 +451,7 @@ public class Preprocessor implements IPreprocessor {
   }
 
   private String getFilename() {
-    return doParse.getFilename(currentInput.fileIndex);
+    return getFilename(currentInput.getFileIndex());
   }
 
   /**
@@ -380,8 +462,8 @@ public class Preprocessor implements IPreprocessor {
    * then we have to insert a space into the character stream, because that's what Progress's compiler does.
    */
   private void getRawChar() throws IOException {
-    currLine = currentInput.nextLine;
-    currCol = currentInput.nextCol;
+    currLine = currentInput.getNextLine();
+    currCol = currentInput.getNextCol();
     currChar = currentInput.get();
     if (currChar == 65533) {
       // This is the 'replacement' character in Unicode, used by Java as a
@@ -408,16 +490,16 @@ public class Preprocessor implements IPreprocessor {
             throw new ProparseRuntimeException("Proparse error. Infinite loop caught by preprocessor.");
           return;
         case 1: // popped an include file
-          currFile = currentInput.fileIndex;
-          currLine = currentInput.nextLine;
-          currCol = currentInput.nextCol;
+          currFile = currentInput.getFileIndex();
+          currLine = currentInput.getNextLine();
+          currCol = currentInput.getNextCol();
           currSourceNum = currentInput.getSourceNum();
           currChar = ' ';
           return;
         case 2: // popped a macro ref or include arg ref
-          currFile = currentInput.fileIndex;
-          currLine = currentInput.nextLine;
-          currCol = currentInput.nextCol;
+          currFile = currentInput.getFileIndex();
+          currLine = currentInput.getNextLine();
+          currCol = currentInput.getNextCol();
           currChar = currentInput.get(); // might be another EOF
           currSourceNum = currentInput.getSourceNum();
           break;
@@ -504,7 +586,7 @@ public class Preprocessor implements IPreprocessor {
   }
 
   void lexicalThrow(String theMessage) {
-    throw new ProparseRuntimeException(getFilename() + ":" + Integer.toString(getLine()) + " " + theMessage);
+    throw new ProparseRuntimeException(getFilename() + ":" + Integer.toString(getLine2()) + " " + theMessage);
   }
 
   private void macroReference() throws IOException {
@@ -659,16 +741,16 @@ public class Preprocessor implements IPreprocessor {
       if (newInclude(includeFilename)) {
         // Unlike currline and currcol,
         // currfile is only updated with a push/pop of the input stack.
-        currFile = currentInput.fileIndex;
+        currFile = currentInput.getFileIndex();
         currSourceNum = currentInput.getSourceNum();
         lstListener.include(refPos.line, refPos.col, currFile, includeFilename);
         // Add the arguments to the new include object.
         int argNum = 1;
         for (IncludeArg incarg : incArgs) {
           if (usingNamed)
-            currentInclude.defNamedArg(incarg.argName, incarg.argVal);
+            currentInclude.addNamedArgument(incarg.argName, incarg.argVal);
           else
-            currentInclude.numdArgs.add(incarg.argVal);
+            currentInclude.addArgument(incarg.argVal);
           lstListener.includeArgument(usingNamed ? incarg.argName : Integer.toString(argNum), incarg.argVal);
           argNum++;
         }
@@ -685,13 +767,11 @@ public class Preprocessor implements IPreprocessor {
     String fName = referencedWithName.trim();
     if (consuming != 0 || fName.length() == 0)
       return false;
-    fName = doParse.getRefactorSession().findFile(fName);
-    if ("".equals(fName)) {
+    File ff = session.findFile3(fName);
+    if (ff == null) {
       throw new IOException(getFilename() + ": " + "Could not find include file: " + referencedWithName);
     }
-    currentInput = new InputSource(++sourceCounter, new BufferedReader(new InputStreamReader(new FileInputStream(fName), doParse.getRefactorSession().getCharset())));
-
-    currentInput.fileIndex = doParse.addFilename(fName);
+    currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName));
     currentInclude = new IncludeFile(referencedWithName, currentInput);
     includeVector.add(currentInclude);
     LOGGER.trace("Entering file: {}", getFilename());
@@ -724,25 +804,33 @@ public class Preprocessor implements IPreprocessor {
     }
     // We must expand macros even if consuming,
     // because we can have &ENDIF inside a preprocesstoken
-    currentInput = new InputSource(++sourceCounter, new BufferedReader(new StringReader(theText)));
-    currentInclude.inputVector.add(currentInput);
     // For a macro/argument expansion, we use the file/line/col of
     // the opening curly '{' of the ref file, for all characters/tokens.
-    currentInput.enableMacroExpansion();
-    currentInput.fileIndex = refPos.file;
-    currentInput.nextLine = refPos.line;
-    currentInput.nextCol = refPos.col;
+    currentInput = new InputSource(++sourceCounter, theText, refPos.file, refPos.line, refPos.col);
+    currentInclude.addInputSource(currentInput);
+    currentInput.setNextLine(refPos.line);
+    currentInput.setNextCol(refPos.col);
   }
 
   /**
    * Cleanup work, once the parse is complete. Gets run by doParse even if there's an exception thrown.
    */
-  void parseComplete() throws IOException {
+  public void parseComplete() throws IOException {
     // Things to do once the parse is complete
     // Release input streams, so that files can be written to by other processes.
     // Otherwise, these hang around until the next parse or until the Progress
     // session closes, and nothing else can write to the include files.
+
+    // List all file indexes.
+    // TODO Probably a much cleaner way to write that
+    int i = 0;
+    while (filenameList.hasIndex(i)) {
+      getLstListener().fileIndex(i, getFilename(i));
+      ++i;
+    }
+
     while (popInput() != 0) {
+      // No-op
     }
   }
 
@@ -758,29 +846,21 @@ public class Preprocessor implements IPreprocessor {
     // There's no need to pop the primary input source, so we leave it
     // around. There's a good chance that something will want to refer
     // to currentInclude or currentInput anyway, even though it's done.
-    if (currentInclude.inputVector.size() > 1) {
-      currentInclude.inputVector.removeLast();
-      currentInput = currentInclude.inputVector.getLast();
+    InputSource tmp;
+    if ((tmp = currentInclude.pop()) != null) {
+      currentInput = tmp;
       lstListener.macroRefEnd();
       return 2;
     } else if (includeVector.size() > 1) {
       includeVector.removeLast();
       currentInclude = includeVector.getLast();
-      currentInput = currentInclude.inputVector.getLast();
+      currentInput = currentInclude.getLastSource();
       lstListener.includeEnd();
       LOGGER.trace("Back to file: {}", getFilename());
       return 1;
     } else {
       return 0;
     }
-  }
-
-  private boolean undef_helper(String argName, Map<String, String> names) {
-    if (names.containsKey(argName)) {
-      names.remove(argName);
-      return true;
-    }
-    return false;
   }
 
   private void checkForNameDot() throws IOException {
@@ -844,8 +924,16 @@ public class Preprocessor implements IPreprocessor {
     return lstListener;
   }
 
+  public JPNodeMetrics getMetrics() {
+    return new JPNodeMetrics(lexer.getLoc(), lexer.getCommentedLines());
+  }
+
   public IncludeRef getMacroGraph() {
     return ((ListingParser) lstListener).getMacroGraph();
+  }
+
+  public IProparseSettings getProparseSettings(){
+    return ppSettings;
   }
 
   private static class CharPos {
@@ -898,6 +986,38 @@ public class Preprocessor implements IPreprocessor {
     }
   }
 
+  public TokenStream getANTLR2TokenStream(boolean hideNonDefaultChannel) {
+    TokenStream stream = new ANTRL2TokenStreamWrapper();
+    if (hideNonDefaultChannel) {
+      TokenStreamHiddenTokenFilter filter = new TokenStreamHiddenTokenFilter(stream); 
+      filter.hide(NodeTypes.WS);
+      filter.hide(NodeTypes.COMMENT);
+      filter.hide(NodeTypes.AMPMESSAGE);
+      filter.hide(NodeTypes.AMPANALYZESUSPEND);
+      filter.hide(NodeTypes.AMPANALYZERESUME);
+      filter.hide(NodeTypes.AMPGLOBALDEFINE);
+      filter.hide(NodeTypes.AMPSCOPEDDEFINE);
+      filter.hide(NodeTypes.AMPUNDEFINE);
+      stream = filter;
+    }
+
+    return stream;
+  }
+
+  private class ANTRL2TokenStreamWrapper implements TokenStream {
+
+    @Override
+    public antlr.Token nextToken() throws TokenStreamException {
+      return convertToken((org.prorefactor.proparse.antlr4.ProToken) wrapper.nextToken());
+    }
+
+    private antlr.Token convertToken(org.prorefactor.proparse.antlr4.ProToken tok) {
+      // Value of EOF is different in ANTLR2 and ANTLR4
+      return new ProToken(filenameList, tok.getType() == Token.EOF ? antlr.Token.EOF_TYPE : tok.getType(),
+          tok.getText(), tok.getFileIndex(), tok.getLine(), tok.getCharPositionInLine(), tok.getEndFileIndex(),
+          tok.getEndLine(), tok.getEndCharPositionInLine(), tok.getMacroSourceNum());
+    }
+  }
 
 }
 

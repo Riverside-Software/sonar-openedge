@@ -7,19 +7,21 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
- *******************************************************************************/ 
-package org.prorefactor.proparse;
+ *******************************************************************************/
+package org.prorefactor.proparse.antlr4;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.prorefactor.core.NodeTypes;
-import org.prorefactor.core.ProToken;
 import org.prorefactor.macrolevel.MacroDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class Lexer {
+public class Lexer  {
+  private static final Logger LOGGER = LoggerFactory.getLogger(Lexer.class);
+
   private static final int EOF_CHAR = -1;
 
   /** Lowercase value of current character */
@@ -29,12 +31,11 @@ public class Lexer {
   private int currInt;
   private int currFile, currLine, currCol;
   private int prevFile, prevLine, prevCol;
-  
+
   private int currStringType;
   private StringBuilder currText = new StringBuilder();
 
-  private IntegerIndex<String> filenameList;
-  private Preprocessor prepro;
+  private ProgressLexer prepro;
 
   private boolean gettingAmpIfDefArg = false;
   private boolean preserve = false;
@@ -52,17 +53,16 @@ public class Lexer {
   private Set<Integer> comments = new HashSet<>();
   private Set<Integer> loc = new HashSet<>();
 
-  Lexer(Preprocessor prepro) throws IOException {
+  Lexer(ProgressLexer prepro) throws IOException {
     this.prepro = prepro;
-    this.filenameList = prepro.doParse.getFilenameList();
     getChar(); // We always assume "currChar" is available.
   }
 
 
   //////////////// Lexical productions listed first, support functions follow.
-
-  ProToken nextToken() throws IOException {
-
+  public ProToken nextToken() {
+    LOGGER.trace("Entering nextToken()");
+    try {
     for (;;) {
 
       if (preserve) {
@@ -85,17 +85,17 @@ public class Lexer {
       // Proparse Directive
       // Check this before setting currText...
       // we don't want BEGIN_PROPARSE_DIRECTIVE in the text
-      if (currInt == Preprocessor.PROPARSE_DIRECTIVE) {
+      if (currInt == ProgressLexer.PROPARSE_DIRECTIVE) {
         textStartFile = prepro.getTextStart().getFile();
         textStartLine = prepro.getTextStart().getLine();
         textStartCol = prepro.getTextStart().getCol();
         textStartSource = prepro.getTextStart().getSourceNum();
         getChar();
-        return makeToken(ProParserTokenTypes.PROPARSEDIRECTIVE, prepro.getProparseDirectiveText());
+        return makeToken(PreprocessorParser.PROPARSEDIRECTIVE, prepro.getProparseDirectiveText());
       }
 
       textStartFile = prepro.getFileIndex();
-      textStartLine = prepro.getLine();
+      textStartLine = prepro.getLine2();
       textStartCol = prepro.getColumn();
       textStartSource = prepro.getSourceNum();
       currText.setLength(1);
@@ -122,7 +122,7 @@ public class Lexer {
           if (prepro.isEscapeCurrent()) {
             getChar();
             // Escaped quote does not start a string
-            return id(ProParserTokenTypes.FILENAME);
+            return id(PreprocessorParser.FILENAME);
           } else {
             currStringType = currInt;
             getChar();
@@ -138,11 +138,11 @@ public class Lexer {
           } else if (currChar == '(' || currIsSpace()) {
             // slash (division) can only be followed by whitespace or '('
             // ...that's what I found empirically, anyway. (jag 2003/05/09)
-            return makeToken(ProParserTokenTypes.SLASH);
+            return makeToken(PreprocessorParser.SLASH);
           } else {
             append();
             getChar();
-            return id(ProParserTokenTypes.FILENAME);
+            return id(PreprocessorParser.FILENAME);
           }
 
         case ':':
@@ -155,47 +155,47 @@ public class Lexer {
         case '@':
           getChar();
           if (currIsSpace())
-            return makeToken(ProParserTokenTypes.LEXAT);
+            return makeToken(PreprocessorParser.LEXAT);
           else
             append();
           getChar();
-          return id(ProParserTokenTypes.ANNOTATION);
+          return id(PreprocessorParser.ANNOTATION);
         case '[':
           getChar();
-          return makeToken(ProParserTokenTypes.LEFTBRACE);
+          return makeToken(PreprocessorParser.LEFTBRACE);
         case ']':
           getChar();
-          return makeToken(ProParserTokenTypes.RIGHTBRACE);
+          return makeToken(PreprocessorParser.RIGHTBRACE);
         case '^':
           getChar();
-          return makeToken(ProParserTokenTypes.CARET);
+          return makeToken(PreprocessorParser.CARET);
         case ',':
           getChar();
-          return makeToken(ProParserTokenTypes.COMMA);
+          return makeToken(PreprocessorParser.COMMA);
         case '!':
           getChar();
-          return makeToken(ProParserTokenTypes.EXCLAMATION);
+          return makeToken(PreprocessorParser.EXCLAMATION);
         case '=':
           getChar();
-          return makeToken(ProParserTokenTypes.EQUAL);
+          return makeToken(PreprocessorParser.EQUAL);
         case '(':
           getChar();
-          return makeToken(ProParserTokenTypes.LEFTPAREN);
+          return makeToken(PreprocessorParser.LEFTPAREN);
         case ')':
           getChar();
-          return makeToken(ProParserTokenTypes.RIGHTPAREN);
+          return makeToken(PreprocessorParser.RIGHTPAREN);
         case ';':
           getChar();
-          return makeToken(ProParserTokenTypes.SEMI);
+          return makeToken(PreprocessorParser.SEMI);
         case '*':
           getChar();
-          return makeToken(ProParserTokenTypes.STAR);
+          return makeToken(PreprocessorParser.STAR);
         case '?':
           getChar();
-          return makeToken(ProParserTokenTypes.UNKNOWNVALUE);
+          return makeToken(PreprocessorParser.UNKNOWNVALUE);
         case '`':
           getChar();
-          return makeToken(ProParserTokenTypes.BACKTICK);
+          return makeToken(PreprocessorParser.BACKTICK);
 
         case '0':
         case '1':
@@ -219,9 +219,9 @@ public class Lexer {
           if (currChar == '=') {
             append();
             getChar();
-            return makeToken(ProParserTokenTypes.GTOREQUAL);
+            return makeToken(PreprocessorParser.GTOREQUAL);
           } else {
-            return makeToken(ProParserTokenTypes.RIGHTANGLE);
+            return makeToken(PreprocessorParser.RIGHTANGLE);
           }
 
         case '<':
@@ -229,38 +229,41 @@ public class Lexer {
           if (currChar == '>') {
             append();
             getChar();
-            return makeToken(ProParserTokenTypes.GTORLT);
+            return makeToken(PreprocessorParser.GTORLT);
           } else if (currChar == '=') {
             append();
             getChar();
-            return makeToken(ProParserTokenTypes.LTOREQUAL);
+            return makeToken(PreprocessorParser.LTOREQUAL);
           } else {
-            return makeToken(ProParserTokenTypes.LEFTANGLE);
+            return makeToken(PreprocessorParser.LEFTANGLE);
           }
 
         case '+':
           getChar();
-          return plusMinusStart(ProParserTokenTypes.PLUS);
+          return plusMinusStart(PreprocessorParser.PLUS);
         case '-':
           getChar();
-          return plusMinusStart(ProParserTokenTypes.MINUS);
+          return plusMinusStart(PreprocessorParser.MINUS);
 
         case '#':
         case '|':
         case '%':
           getChar();
-          return id(ProParserTokenTypes.FILENAME);
+          return id(PreprocessorParser.FILENAME);
 
         default:
           if (currInt == EOF_CHAR) {
             getChar(); // preprocessor will catch any infinite loop on this.
-            return makeToken(ProParserTokenTypes.EOF, "");
+            return makeToken(PreprocessorParser.EOF, "");
           } else {
             getChar();
-            return id(ProParserTokenTypes.ID);
+            return id(PreprocessorParser.ID);
           }
 
       }
+    }
+    } catch(IOException uncaught) {
+      throw new RuntimeException(uncaught);
     }
   }
 
@@ -269,6 +272,8 @@ public class Lexer {
    * wrapper around that.
    */
   ProToken getAmpIfDefArg() throws IOException {
+    LOGGER.trace("Entering getAmpIfDefArg()");
+
     gettingAmpIfDefArg = true;
     return nextToken();
   }
@@ -277,11 +282,11 @@ public class Lexer {
    * Get the text between the parens for &IF DEFINED(...). The compiler seems to allow any number of tokens between the
    * parens, and like with an &Name reference, it allows embedded comments. Here, I'm allowing for the embedded comments
    * and just gathering all the text up to the closing paren. Hopefully that will do it.
-   * 
+   *
    * The compiler doesn't seem to ignore extra tokens. For example, &if defined(ab cd) does not match a macro named
    * "ab". It doesn't match "abcd" either, so all I can guess is that they are combining the text of all the tokens
    * between the parens. I haven't found any macro name that matches &if defined(ab"cd").
-   * 
+   *
    * The compiler works different here than it does for a typical ID token. An ID token (like a procedure name) may
    * contain arbitrary quotation marks. Within an &if defined() function, the quotation marks must match. I don't know
    * if that really makes a difference, because the quoted string can't contain a paren ')' anyway, so as far as I can
@@ -290,6 +295,8 @@ public class Lexer {
    * lexer. I don't think there's any way to get whitespace into a macro name either.
    */
   private ProToken ampIfDefArg() throws IOException {
+    LOGGER.trace("Entering ampIfDefArg()");
+
     loop : for (;;) {
       if (currChar == ')') {
         break loop;
@@ -310,21 +317,25 @@ public class Lexer {
       append();
       getChar();
     }
-    return makeToken(ProParserTokenTypes.ID);
+    return makeToken(PreprocessorParser.ID);
   }
 
   ProToken colon() throws IOException {
+    LOGGER.trace("Entering colon()");
+
     if (currChar == ':') {
       append();
       getChar();
-      return makeToken(ProParserTokenTypes.DOUBLECOLON);
+      return makeToken(PreprocessorParser.DOUBLECOLON);
     }
     if (currIsSpace())
-      return makeToken(ProParserTokenTypes.LEXCOLON);
-    return makeToken(ProParserTokenTypes.OBJCOLON);
+      return makeToken(PreprocessorParser.LEXCOLON);
+    return makeToken(PreprocessorParser.OBJCOLON);
   }
 
   ProToken whitespace() throws IOException {
+    LOGGER.trace("Entering whitespace()");
+
     loop : for (;;) {
       switch (currChar) {
         case ' ':
@@ -339,10 +350,12 @@ public class Lexer {
           break loop;
       }
     }
-    return makeToken(ProParserTokenTypes.WS);
+    return makeToken(PreprocessorParser.WS);
   }
 
   ProToken comment() throws IOException {
+    LOGGER.trace("Entering comment()");
+
     // Escapes in comments are processed because you can end a comment
     // with something dumb like: ~*~/
     // We preserve that text.
@@ -372,10 +385,12 @@ public class Lexer {
     }
     prepro.setDoingComment(false);
     getChar();
-    return makeToken(ProParserTokenTypes.COMMENT);
+    return makeToken(PreprocessorParser.COMMENT);
   }
 
   ProToken singleLineComment() throws IOException {
+    LOGGER.trace("Entering singleLineComment()");
+
     // Single line comments are treated just like regular comments,
     // everything till end of line is considered comment - no escape
     // character to look after
@@ -387,12 +402,14 @@ public class Lexer {
       unEscapedAppend();
       if (currChar == '\r' || currChar == '\n' || currInt == EOF_CHAR) {
         prepro.setDoingComment(false);
-        return makeToken(ProParserTokenTypes.COMMENT);
+        return makeToken(PreprocessorParser.COMMENT);
       }
     }
   }
 
   ProToken quotedString() throws IOException {
+    LOGGER.trace("Entering quotedString()");
+
     // Inside quoted strings (string constants) we preserve
     // the source code's original text - we don't discard
     // escape characters.
@@ -452,11 +469,13 @@ public class Lexer {
       }
     } // currChar==':'
 
-    return makeToken(ProParserTokenTypes.QSTRING);
+    return makeToken(PreprocessorParser.QSTRING);
   }
 
   ProToken digitStart() throws IOException {
-    int ttype = ProParserTokenTypes.NUMBER;
+    LOGGER.trace("Entering digitStart()");
+
+    int ttype = PreprocessorParser.NUMBER;
     for_loop : for (;;) {
       switch (currChar) {
         case '0':
@@ -505,8 +524,8 @@ public class Lexer {
         case '_':
           append();
           getChar();
-          if (ttype != ProParserTokenTypes.FILENAME)
-            ttype = ProParserTokenTypes.ID;
+          if (ttype != PreprocessorParser.FILENAME)
+            ttype = PreprocessorParser.ID;
           break;
         // We don't know here if the plus or minus is in the middle or at the end.
         // Don't change ttype.
@@ -518,13 +537,13 @@ public class Lexer {
         case '/':
           append();
           getChar();
-          if (ttype == ProParserTokenTypes.NUMBER)
-            ttype = ProParserTokenTypes.LEXDATE;
+          if (ttype == PreprocessorParser.NUMBER)
+            ttype = PreprocessorParser.LEXDATE;
           break;
         case '\\':
           append();
           getChar();
-          ttype = ProParserTokenTypes.FILENAME;
+          ttype = PreprocessorParser.FILENAME;
           break;
         case '.':
           if (prepro.isNameDot()) {
@@ -541,7 +560,8 @@ public class Lexer {
   }
 
   ProToken plusMinusStart(int inputType) throws IOException {
-    int ttype = ProParserTokenTypes.NUMBER;
+	  LOGGER.trace("Entering plusMinusStart()");
+	  int ttype = PreprocessorParser.NUMBER;
     for_loop : for (;;) {
       switch (currChar) {
         // We don't know here if the plus or minus is in the middle or at the end.
@@ -597,7 +617,7 @@ public class Lexer {
         case 'z':
           append();
           getChar();
-          ttype = ProParserTokenTypes.FILENAME;
+          ttype = PreprocessorParser.FILENAME;
           break;
         case '.':
           if (prepro.isNameDot()) {
@@ -617,13 +637,15 @@ public class Lexer {
   }
 
   ProToken periodStart() throws IOException {
+    LOGGER.trace("Entering periodStart()");
+
     if (!Character.isDigit(currChar)) {
       if (prepro.isNameDot())
-        return makeToken(ProParserTokenTypes.NAMEDOT);
+        return makeToken(PreprocessorParser.NAMEDOT);
       else
-        return makeToken(ProParserTokenTypes.PERIOD);
+        return makeToken(PreprocessorParser.PERIOD);
     }
-    int ttype = ProParserTokenTypes.NUMBER;
+    int ttype = PreprocessorParser.NUMBER;
     for_loop : for (;;) {
       switch (currChar) {
         // We don't know here if the plus or minus is in the middle or at the end.
@@ -678,7 +700,7 @@ public class Lexer {
         case 'z':
           append();
           getChar();
-          ttype = ProParserTokenTypes.FILENAME;
+          ttype = PreprocessorParser.FILENAME;
           break;
         default:
           break for_loop;
@@ -688,6 +710,8 @@ public class Lexer {
   }
 
   ProToken id(int inputTokenType) throws IOException {
+    LOGGER.trace("Entering id()");
+
     // Tokens that start with a-z or underscore
     // - ID
     // - FILENAME
@@ -766,8 +790,8 @@ public class Lexer {
         case '\'':
           append();
           getChar();
-          if (ttype == ProParserTokenTypes.ID)
-            ttype = ProParserTokenTypes.FILENAME;
+          if (ttype == PreprocessorParser.ID)
+            ttype = PreprocessorParser.FILENAME;
           break;
         default:
           if (currInt >= 128 && currInt <= 255) {
@@ -780,12 +804,13 @@ public class Lexer {
       }
     }
     // See if it's a keyword
-    if (ttype == ProParserTokenTypes.ID)
+    if (ttype == PreprocessorParser.ID)
       ttype = NodeTypes.testLiteralsTable(currText.toString(), ttype);
     return makeToken(ttype);
   }
 
   ProToken ampText() throws IOException {
+    LOGGER.trace("Entering ampText()");
     for (;;) {
       if (Character.isLetterOrDigit(currInt) || (currInt >= 128 && currInt <= 255)) {
         append();
@@ -821,10 +846,12 @@ public class Lexer {
     ProToken t = directive();
     if (t != null)
       return t;
-    return makeToken(ProParserTokenTypes.FILENAME);
+    return makeToken(PreprocessorParser.FILENAME);
   }
 
   ProToken directive() throws IOException {
+    LOGGER.trace("Entering directive()");
+
     // Called by ampText, which has already gather the text for
     // the *potential* directive.
 
@@ -833,16 +860,16 @@ public class Lexer {
     if ("&global-define".startsWith(macroType) && macroType.length() >= 4) {
       appendToEOL();
       // We have to do the define *before* getting next char.
-      macroDefine(ProParserTokenTypes.AMPGLOBALDEFINE);
+      macroDefine(PreprocessorParser.AMPGLOBALDEFINE);
       getChar();
-      return makeToken(ProParserTokenTypes.AMPGLOBALDEFINE);
+      return makeToken(PreprocessorParser.AMPGLOBALDEFINE);
     }
     if ("&scoped-define".startsWith(macroType) && macroType.length() >= 4) {
       appendToEOL();
       // We have to do the define *before* getting next char.
-      macroDefine(ProParserTokenTypes.AMPSCOPEDDEFINE);
+      macroDefine(PreprocessorParser.AMPSCOPEDDEFINE);
       getChar();
-      return makeToken(ProParserTokenTypes.AMPSCOPEDDEFINE);
+      return makeToken(PreprocessorParser.AMPSCOPEDDEFINE);
     }
 
     if ("&undefine".startsWith(macroType) && macroType.length() >= 5) {
@@ -871,39 +898,39 @@ public class Lexer {
         getChar();
       }
       macroUndefine();
-      return makeToken(ProParserTokenTypes.AMPUNDEFINE);
+      return makeToken(PreprocessorParser.AMPUNDEFINE);
     }
 
-    if (macroType.equals("&analyze-suspend")) {
+    if ("&analyze-suspend".equals(macroType)) {
       appendToEOL();
       getChar();
-      return makeToken(ProParserTokenTypes.AMPANALYZESUSPEND);
+      return makeToken(PreprocessorParser.AMPANALYZESUSPEND);
     }
-    if (macroType.equals("&analyze-resume")) {
+    if ("&analyze-resume".equals(macroType)) {
       appendToEOL();
       getChar();
-      return makeToken(ProParserTokenTypes.AMPANALYZERESUME);
+      return makeToken(PreprocessorParser.AMPANALYZERESUME);
     }
-    if (macroType.equals("&message")) {
+    if ("&message".equals(macroType)) {
       appendToEOL();
       getChar();
-      return makeToken(ProParserTokenTypes.AMPMESSAGE);
+      return makeToken(PreprocessorParser.AMPMESSAGE);
     }
 
-    if (macroType.equals("&if")) {
-      return makeToken(ProParserTokenTypes.AMPIF);
+    if ("&if".equals(macroType)) {
+      return makeToken(PreprocessorParser.AMPIF);
     }
-    if (macroType.equals("&then")) {
-      return makeToken(ProParserTokenTypes.AMPTHEN);
+    if ("&then".equals(macroType)) {
+      return makeToken(PreprocessorParser.AMPTHEN);
     }
-    if (macroType.equals("&elseif")) {
-      return makeToken(ProParserTokenTypes.AMPELSEIF);
+    if ("&elseif".equals(macroType)) {
+      return makeToken(PreprocessorParser.AMPELSEIF);
     }
-    if (macroType.equals("&else")) {
-      return makeToken(ProParserTokenTypes.AMPELSE);
+    if ("&else".equals(macroType)) {
+      return makeToken(PreprocessorParser.AMPELSE);
     }
-    if (macroType.equals("&endif")) {
-      return makeToken(ProParserTokenTypes.AMPENDIF);
+    if ("&endif".equals(macroType)) {
+      return makeToken(PreprocessorParser.AMPENDIF);
     }
 
     // If we got here, it wasn't a preprocessor directive,
@@ -967,11 +994,13 @@ public class Lexer {
     prevLine = currLine;
     prevCol = currCol;
     currFile = prepro.getFileIndex();
-    currLine = prepro.getLine();
+    currLine = prepro.getLine2();
     currCol = prepro.getColumn();
   }
 
   void macroDefine(int defType) throws IOException {
+    LOGGER.trace("Entering macroDefine({})", defType);
+
     if (prepro.isConsuming())
       return;
     int it = 0;
@@ -990,14 +1019,16 @@ public class Lexer {
     defText = defText.trim();
     // Do listing before lowercasing the name
     prepro.getLstListener().define(textStartLine, textStartCol, macroName.toLowerCase(Locale.ENGLISH), defText,
-        defType == ProParserTokenTypes.AMPGLOBALDEFINE ? MacroDef.GLOBAL : MacroDef.SCOPED);
-    if (defType == ProParserTokenTypes.AMPGLOBALDEFINE)
+            defType == PreprocessorParser.AMPGLOBALDEFINE ? MacroDef.GLOBAL : MacroDef.SCOPED);
+    if (defType == PreprocessorParser.AMPGLOBALDEFINE)
       prepro.defGlobal(macroName.toLowerCase(), defText);
     else
       prepro.defScoped(macroName.toLowerCase(), defText);
   }
 
   void macroUndefine() throws IOException {
+    LOGGER.trace("Entering macroUndefine()");
+
     if (prepro.isConsuming())
       return;
     int it = 0;
@@ -1021,16 +1052,25 @@ public class Lexer {
 
   ProToken makeToken(int tokenType, String text) {
     // Counting lines of code and commented lines only in the main file (textStartFile set to 0)
-    if ((textStartFile == 0) && (tokenType == ProParserTokenTypes.COMMENT)) {
+    if ((textStartFile == 0) && (tokenType == PreprocessorParser.COMMENT)) {
       int numLines = currText.toString().length() - currText.toString().replace("\n", "").length();
       for (int zz = textStartLine; zz <= textStartLine + numLines; zz++) {
         comments.add(zz);
       }
-    } else if ((textStartFile == 0) && (tokenType != ProParserTokenTypes.WS) && (tokenType != ProParserTokenTypes.EOF) && (textStartLine > 0)) {
+    } else if ((textStartFile == 0) && (tokenType != PreprocessorParser.WS) && (tokenType != PreprocessorParser.EOF) && (textStartLine > 0)) {
       loc.add(textStartLine);
     }
+    ProToken tok = new ProToken(tokenType, text);
+    tok.setText(text);
+    tok.setFileIndex(textStartFile);
+    tok.setLine(textStartLine);
+    tok.setCharPositionInLine(textStartCol);
+    tok.setEndFileIndex(prevFile);
+    tok.setEndLine(prevLine);
+    tok.setEndCharPositionInLine(prevCol);
+    tok.setMacroSourceNum(textStartSource);
 
-    return new ProToken(filenameList, tokenType, text, textStartFile, textStartLine, textStartCol, prevFile, prevLine, prevCol, textStartSource);
+    return tok;
   }
 
   /**
@@ -1053,7 +1093,7 @@ public class Lexer {
     // our file/line/col, and that's why we need to preserve.
     preserve = true;
     preserveFile = prepro.getFileIndex();
-    preserveLine = prepro.getLine();
+    preserveLine = prepro.getLine2();
     preserveCol = prepro.getColumn();
     preserveSource = prepro.getSourceNum();
     preserveChar = currChar;
@@ -1070,6 +1110,10 @@ public class Lexer {
         append();
     } else
       append();
+  }
+
+  public ProgressLexer getPreprocessor() {
+    return prepro;
   }
 
 }

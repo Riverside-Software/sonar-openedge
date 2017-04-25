@@ -8,18 +8,22 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.proparse;
+package org.prorefactor.proparse.antlr4;
 
 import antlr.TokenStreamException;
 import antlr.RecognitionException;
-import antlr.Token;
-import antlr.TokenStream;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import org.prorefactor.core.ProToken;
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.IntStream;
+import org.antlr.v4.runtime.ListTokenSource;
+import org.antlr.v4.runtime.TokenFactory;
+import org.antlr.v4.runtime.TokenSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.io.IOException;
@@ -27,24 +31,25 @@ import java.io.IOException;
 /**
  * This class deals with &amp;IF conditions by acting as a filter between the lexer and the parser
  */
-public class Postlexer implements TokenStream {
-  private final DoParse doParse;
-  private final IntegerIndex<String> filenameList;
+public class PostLexer implements TokenSource {
+  private static final Logger LOGGER = LoggerFactory.getLogger(PostLexer.class);
+
   private final Lexer lexer;
-  private final Preprocessor prepro;
+  private final ProgressLexer prepro;
+  private final PreproEval eval;
 
   private final LinkedList<PreproIfState> preproIfVec = new LinkedList<>();
   private ProToken currToken;
 
-  Postlexer(Preprocessor prepro, Lexer lexer, DoParse doParse) {
-    this.prepro = prepro;
+  public PostLexer(Lexer lexer) {
     this.lexer = lexer;
-    this.doParse = doParse;
-    this.filenameList = doParse.getFilenameList();
+    this.prepro = lexer.getPreprocessor();
+    this.eval = new PreproEval(prepro.getProparseSettings());
   }
 
   @Override
-  public Token nextToken() throws TokenStreamException {
+  public ProToken nextToken() {
+    LOGGER.trace("Entering nextToken()");
     try {
       for (;;) {
 
@@ -52,24 +57,24 @@ public class Postlexer implements TokenStream {
 
         switch (currToken.getType()) {
 
-          case ProParserTokenTypes.AMPIF:
+          case PreprocessorParser.AMPIF:
             preproIf();
             break; // loop again
 
-          case ProParserTokenTypes.AMPTHEN:
+          case PreprocessorParser.AMPTHEN:
             // &then are consumed by preproIf()
             throwMessage("Unexpected &THEN");
             break;
 
-          case ProParserTokenTypes.AMPELSEIF:
+          case PreprocessorParser.AMPELSEIF:
             preproElseif();
             break; // loop again
 
-          case ProParserTokenTypes.AMPELSE:
+          case PreprocessorParser.AMPELSE:
             preproElse();
             break; // loop again
 
-          case ProParserTokenTypes.AMPENDIF:
+          case PreprocessorParser.AMPENDIF:
             preproEndif();
             break; // loop again
 
@@ -78,25 +83,26 @@ public class Postlexer implements TokenStream {
 
         }
       }
-    } catch (IOException | RecognitionException caught) {
-      throw new TokenStreamException(caught);
+    } catch (IOException | RecognitionException | TokenStreamException caught) {
+      throw new RuntimeException(caught);
     }
   }
 
   private ProToken defined() throws IOException {
+    LOGGER.trace("Entering defined()");
     // Progress DEFINED() returns a single digit: 0,1,2, or 3.
     // The text between the parens can be pretty arbitrary, and can
     // have embedded comments, so this calls a specific lexer function for it.
     getNextToken();
-    if (currToken.getType() == ProParserTokenTypes.WS)
+    if (currToken.getType() == PreprocessorParser.WS)
       getNextToken();
-    if (currToken.getType() != ProParserTokenTypes.LEFTPAREN)
+    if (currToken.getType() != PreprocessorParser.LEFTPAREN)
       throwMessage("Bad DEFINED function in &IF preprocessor condition");
     ProToken argToken = lexer.getAmpIfDefArg();
     getNextToken();
-    if (currToken.getType() != ProParserTokenTypes.RIGHTPAREN)
+    if (currToken.getType() != PreprocessorParser.RIGHTPAREN)
       throwMessage("Bad DEFINED function in &IF preprocessor condition");
-    return new ProToken(filenameList, ProParserTokenTypes.NUMBER, prepro.defined(argToken.getText().trim().toLowerCase()));
+    return new ProToken(PreprocessorParser.NUMBER, prepro.defined(argToken.getText().trim().toLowerCase()));
   }
 
   private void getNextToken() throws IOException {
@@ -105,24 +111,26 @@ public class Postlexer implements TokenStream {
 
   // For consuming tokens that has been preprocessed out (&IF FALSE...)
   private void preproconsume() throws IOException, TokenStreamException, RecognitionException {
+    LOGGER.trace("Entering preproconsume()");
+
     int thisIfLevel = preproIfVec.size();
     prepro.incrementConsuming();
     while (thisIfLevel <= preproIfVec.size() && preproIfVec.get(thisIfLevel - 1).consuming) {
       getNextToken();
       switch (currToken.getType()) {
-        case ProParserTokenTypes.AMPIF:
+        case PreprocessorParser.AMPIF:
           preproIf();
           break;
-        case ProParserTokenTypes.AMPELSEIF:
+        case PreprocessorParser.AMPELSEIF:
           preproElseif();
           break;
-        case ProParserTokenTypes.AMPELSE:
+        case PreprocessorParser.AMPELSE:
           preproElse();
           break;
-        case ProParserTokenTypes.AMPENDIF:
+        case PreprocessorParser.AMPENDIF:
           preproEndif();
           break;
-        case ProParserTokenTypes.EOF:
+        case PreprocessorParser.EOF:
           throwMessage("Unexpected end of input when consuming discarded &IF/&ELSEIF/&ELSE text");
           break;
         default:
@@ -133,11 +141,13 @@ public class Postlexer implements TokenStream {
   }
 
   private void preproIf() throws IOException, TokenStreamException, RecognitionException {
+    LOGGER.trace("Entering preproIf()");
+
     // Preserve the currToken current position for listing, before evaluating the expression.
     // We can't just write to listing here, because the expression evaluation may
     // find macro references to list.
     int currLine = currToken.getLine();
-    int currCol = currToken.getColumn();
+    int currCol = currToken.getCharPositionInLine();
     PreproIfState preproIfState = new PreproIfState();
     preproIfVec.add(preproIfState);
     // Only evaluate if we aren't consuming from an outer &IF.
@@ -153,27 +163,30 @@ public class Postlexer implements TokenStream {
   }
 
   private void preproElse() throws IOException, TokenStreamException, RecognitionException {
+    LOGGER.trace("Entering preproElse()");
+
     PreproIfState preproIfState = preproIfVec.getLast();
     if (!preproIfState.done) {
       preproIfState.consuming = false;
-      prepro.getLstListener().preproElse(currToken.getLine(), currToken.getColumn());
+      prepro.getLstListener().preproElse(currToken.getLine(), currToken.getCharPositionInLine());
     } else {
       if (!preproIfState.consuming) {
-        prepro.getLstListener().preproElse(currToken.getLine(), currToken.getColumn());
+        prepro.getLstListener().preproElse(currToken.getLine(), currToken.getCharPositionInLine());
         preproIfState.consuming = true;
         preproconsume();
       }
       // else: already consuming. no change.
-      prepro.getLstListener().preproElse(currToken.getLine(), currToken.getColumn());
+      prepro.getLstListener().preproElse(currToken.getLine(), currToken.getCharPositionInLine());
     }
   }
 
   private void preproElseif() throws IOException, TokenStreamException, RecognitionException {
+    LOGGER.trace("Entering preproElseif()");
     // Preserve the current position for listing, before evaluating the expression.
     // We can't just write to listing here, because the expression evaluation may
     // find macro references to list.
     int currLine = currToken.getLine();
-    int currCol = currToken.getColumn();
+    int currCol = currToken.getCharPositionInLine();
     boolean evaluate = true;
     // Don't evaluate if we're consuming from an outer &IF
     if (prepro.getConsuming() - 1 > 0)
@@ -197,13 +210,17 @@ public class Postlexer implements TokenStream {
   }
 
   private void preproEndif() throws IOException {
-    prepro.getLstListener().preproEndIf(currToken.getLine(), currToken.getColumn());
+    LOGGER.trace("Entering preproEndif()");
+    prepro.getLstListener().preproEndIf(currToken.getLine(), currToken.getCharPositionInLine());
     // XXX Got a case where removeLast() fails with NoSuchElementException
     if (!preproIfVec.isEmpty())
       preproIfVec.removeLast();
   }
 
   private boolean preproIfCond(boolean evaluate) throws IOException, TokenStreamException, RecognitionException {
+    LOGGER.trace("Entering preproIfCond()");
+
+    
     // Notes
     // An &IF here in this &IF condition is not legal. Progress would barf on it.
     // That allows us to simply use a global flag to watch for &THEN.
@@ -213,20 +230,20 @@ public class Postlexer implements TokenStream {
     while (!done) {
       getNextToken();
       switch (currToken.getType()) {
-        case ProParserTokenTypes.EOF:
+        case PreprocessorParser.EOF:
           throwMessage("Unexpected end of input after &IF or &ELSEIF");
           break;
-        case ProParserTokenTypes.AMPTHEN:
+        case PreprocessorParser.AMPTHEN:
           done = true;
           break;
-        case ProParserTokenTypes.DEFINED:
+        case PreprocessorParser.DEFINED:
           if (evaluate)
             // If not evaluating, just discard
             tokenVector.add(defined());
           break;
-        case ProParserTokenTypes.COMMENT:
-        case ProParserTokenTypes.WS:
-        case ProParserTokenTypes.PREPROCESSTOKEN:
+        case PreprocessorParser.COMMENT:
+        case PreprocessorParser.WS:
+        case PreprocessorParser.PREPROCESSTOKEN:
           break;
         default:
           if (evaluate)
@@ -239,38 +256,50 @@ public class Postlexer implements TokenStream {
     if (tokenVector.isEmpty() || !evaluate)
       return false;
     else {
-      DoParse evalDoParse = new DoParse(doParse.getRefactorSession(), null, doParse);
-      evalDoParse.preProcessCondition = true;
-      for (int i = 0; i < 4; i++) {
-        tokenVector.add(new ProToken(filenameList, ProParserTokenTypes.EOF, ""));
-      }
-      try {
-        evalDoParse.doParse(tokenVector);
-      } catch (ProEvalException e) {
-        String str = "Unable to evaluate &IF condition:";
-        for (ProToken tok : tokenVector) {
-          str += " " + tok.getText();
-        }
-        String fileName = null;
-        if (doParse.isValidIndex(currToken.getFileIndex()))
-          fileName = doParse.getFilename(currToken.getFileIndex());
-        throw new ProEvalException(str, e, fileName, currToken.getLine(), currToken.getColumn());
-      }
-      return evalDoParse.preProcessConditionResult;
+      CommonTokenStream cts = new CommonTokenStream(new ListTokenSource(tokenVector));
+      PreprocessorParser parser = new PreprocessorParser(cts);
+      return eval.visitPreproIfEval(parser.preproIfEval());
     }
   }
 
   private void throwMessage(String theMessage) {
-    int theIndex = currToken.getFileIndex();
-    if (doParse.isValidIndex(theIndex))
-      throw new IllegalArgumentException(doParse.getFilename(theIndex) + ":" + currToken.getLine() + " " + theMessage);
-    else
-      throw new IllegalArgumentException(theMessage);
+    // TODO Add file name in message
+    throw new IllegalArgumentException("Line " + currToken.getLine() + " - " + theMessage);
   }
 
   private static class PreproIfState {
     private boolean consuming = false;
     private boolean done = false;
+  }
+
+  @Override
+  public int getLine() {
+    return currToken.getLine();
+  }
+
+  @Override
+  public int getCharPositionInLine() {
+    return currToken.getCharPositionInLine();
+  }
+
+  @Override
+  public CharStream getInputStream() {
+    return currToken.getInputStream();
+  }
+
+  @Override
+  public String getSourceName() {
+    return IntStream.UNKNOWN_SOURCE_NAME;
+  }
+
+  @Override
+  public void setTokenFactory(TokenFactory<?> factory) {
+    throw new UnsupportedOperationException("Unable to override ProTokenFactory");
+  }
+
+  @Override
+  public TokenFactory<?> getTokenFactory() {
+    return null;
   }
 
 }

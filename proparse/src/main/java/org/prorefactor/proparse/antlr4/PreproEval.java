@@ -1,33 +1,423 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Copyright (c) 2017 Gilles Querret
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    John Green - initial API and implementation and/or initial documentation
- *******************************************************************************/ 
-package org.prorefactor.proparse;
+ *    Gilles Querret - initial API and implementation and/or initial documentation
+ *******************************************************************************/
+package org.prorefactor.proparse.antlr4;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.prorefactor.core.NodeTypes;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.AndOrContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.ComparisonContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.DecimalFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.EntryFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.ExprContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.ExprInParenContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.FalseExprContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.IndexFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.Int64FunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.IntegerFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.KeywordAllFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.KeywordFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.LeftTrimFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.LengthFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.LookupFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.MaximumFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.MinimumFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.MultiplyContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.NotContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.NumEntriesFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.NumberContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.OpsysFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.PlusContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.PreproIfEvalContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.ProversionFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.QuotedStringContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.RIndexFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.RandomFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.ReplaceFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.RightTrimFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.StringOpContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.SubstringFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.TrimFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.TrueExprContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.UnaryMinusContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.UnknownExprContext;
 import org.prorefactor.refactor.settings.IProparseSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Used in evaluating expressions in &amp;IF conditions
- */
-public class ProEvalSupport {
+public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(PreproEval.class);
 
-  private ProEvalSupport() {
-    // 
+  private final IProparseSettings settings;
+
+  public PreproEval(IProparseSettings settings) {
+    this.settings = settings;
   }
 
+  /**
+   * Main entry point returning the evaluation of the preprocessor expression
+   * 
+   * @return A Boolean object
+   */
+  @Override
+  public Boolean visitPreproIfEval(PreproIfEvalContext ctx) {
+    LOGGER.trace("Entering visitPreproIfEval()");
+    Object o = visit(ctx.expr());
+    LOGGER.trace("Exiting visitPreproIfEval() with return value '{}'", o);
+    return (o != null) && getBool(o);
+  }
+
+  // ****
+  // Expr
+  // ****
+  @Override
+  public Object visitAndOr(AndOrContext ctx) {
+    boolean b1 = getBool(visit(ctx.expr(0)));
+    boolean b2 = getBool(visit(ctx.expr(1)));
+
+    if (ctx.op.getType() == PreprocessorParser.OR) {
+      return b1 || b2;
+    } else {
+      return b1 && b2;
+    }
+  }
+
+  @Override
+  public Object visitStringOp(StringOpContext ctx) {
+    Object o1 = visit(ctx.expr(0));
+    Object o2 = visit(ctx.expr(1));
+
+    if (ctx.op.getType() == PreprocessorParser.MATCHES) {
+      return matches(o1, o2);
+    } else {
+      return getString(o1).toLowerCase().startsWith(getString(o2).toLowerCase());
+    }
+  }
+
+  @Override
+  public Object visitComparison(ComparisonContext ctx) {
+    Object o1 = visit(ctx.expr(0));
+    Object o2 = visit(ctx.expr(1));
+
+    switch (ctx.op.getType()) {
+      case PreprocessorParser.EQ:
+      case PreprocessorParser.EQUAL:
+        return compare(o1, o2, Compare.EQ);
+      case PreprocessorParser.GTORLT:
+      case PreprocessorParser.NE:
+        return compare(o1, o2, Compare.NE);
+      case PreprocessorParser.RIGHTANGLE:
+      case PreprocessorParser.GTHAN:
+        return compare(o1, o2, Compare.GT);
+      case PreprocessorParser.LEFTANGLE:
+      case PreprocessorParser.LTHAN:
+        return compare(o1, o2, Compare.LT);
+      case PreprocessorParser.GTOREQUAL:
+      case PreprocessorParser.GE:
+        return compare(o1, o2, Compare.GE);
+      case PreprocessorParser.LTOREQUAL:
+      case PreprocessorParser.LE:
+        return compare(o1, o2, Compare.LE);
+      default:
+        return null;
+    }
+  }
+
+  @Override
+  public Object visitPlus(PlusContext ctx) {
+    if (ctx.op.getType() == PreprocessorParser.PLUS)
+      return opPlus(visit(ctx.expr(0)), visit(ctx.expr(1)));
+    else
+      return opMinus(visit(ctx.expr(0)), visit(ctx.expr(1)));
+  }
+
+  @Override
+  public Object visitMultiply(MultiplyContext ctx) {
+    switch (ctx.op.getType()) {
+      case PreprocessorParser.STAR:
+      case PreprocessorParser.MULTIPLY:
+        return opMultiply(visit(ctx.expr(0)), visit(ctx.expr(1)));
+      case PreprocessorParser.SLASH:
+      case PreprocessorParser.DIVIDE:
+        return opDivide(visit(ctx.expr(0)), visit(ctx.expr(1)));
+      case PreprocessorParser.MODULO:
+        Double m1 = getFloat(visit(ctx.expr(0))) + .5;
+        Double m2 = getFloat(visit(ctx.expr(1))) + .5;
+        return new Integer(m1.intValue() % m2.intValue());
+      default:
+        return null;
+    }
+  }
+
+  @Override
+  public Object visitNot(NotContext ctx) {
+    return new Boolean(!getBool(visit(ctx.expr())));
+  }
+
+  @Override
+  public Object visitUnaryMinus(UnaryMinusContext ctx) {
+    Object o = visit(ctx.expr());
+    if (o instanceof Integer)
+      return (Integer) o * -1;
+    else
+      return (Float) o * -1;
+  }
+
+  // ****
+  // Atom
+  // ****
+
+  @Override
+  public Object visitNumber(NumberContext ctx) {
+    return getNumber(ctx.NUMBER().getText());
+  }
+
+  @Override
+  public Object visitQuotedString(QuotedStringContext ctx) {
+    return StringFuncs.qstringStrip(ctx.QSTRING().getText());
+  }
+
+  @Override
+  public Object visitTrueExpr(TrueExprContext ctx) {
+    return Boolean.TRUE;
+  }
+
+  @Override
+  public Object visitFalseExpr(FalseExprContext ctx) {
+    return Boolean.FALSE;
+  }
+
+  @Override
+  public Object visitExprInParen(ExprInParenContext ctx) {
+    return visit(ctx.expr());
+  }
+
+  @Override
+  public Object visitUnknownExpr(UnknownExprContext ctx) {
+    return null;
+  }
+
+  // *********
+  // Functions
+  // *********
+
+  @Override
+  public Object visitIntegerFunction(IntegerFunctionContext ctx) {
+    return integer(visit(ctx.expr()));
+  }
+
+  @Override
+  public Object visitInt64Function(Int64FunctionContext ctx) {
+    return integer(visit(ctx.expr()));
+  }
+
+  @Override
+  public Object visitDecimalFunction(DecimalFunctionContext ctx) {
+    return decimal(visit(ctx.expr()));
+  }
+
+  @Override
+  public Object visitLeftTrimFunction(LeftTrimFunctionContext ctx) {
+    Object ch = null;
+    if (ctx.trimChars != null) {
+      ch = visit(ctx.trimChars);
+    }
+
+    return lefttrim(visit(ctx.expr(0)), ch);
+  }
+
+  @Override
+  public Object visitRightTrimFunction(RightTrimFunctionContext ctx) {
+    if (ctx.trimChars != null)
+      return StringFuncs.rtrim(getString(visit(ctx.expr(0))), getString(visit(ctx.trimChars)));
+    else
+      return StringFuncs.rtrim(getString(visit(ctx.expr(0))));
+  }
+
+  @Override
+  public Object visitProversionFunction(ProversionFunctionContext ctx) {
+    return settings.getProversion();
+  }
+
+  @Override
+  public Object visitEntryFunction(EntryFunctionContext ctx) {
+    Object element = visit(ctx.element);
+    Object list = visit(ctx.list);
+    Object ch = null;
+    if (ctx.character != null) {
+      ch = visit(ctx.character);
+    }
+
+    return entry(element, list, ch);
+  }
+
+  @Override
+  public Object visitIndexFunction(IndexFunctionContext ctx) {
+    Object source = visit(ctx.source);
+    Object target = visit(ctx.target);
+    Object start = null;
+    if (ctx.starting != null) {
+      start = visit(ctx.starting);
+    }
+
+    return index(source, target, start);
+  }
+
+  @Override
+  public Object visitLengthFunction(LengthFunctionContext ctx) {
+    return visit(ctx.expr(0)).toString().length();
+  }
+
+  @Override
+  public Object visitLookupFunction(LookupFunctionContext ctx) {
+    Object expr = visit(ctx.expr(0));
+    Object list = visit(ctx.list);
+    Object ch = null;
+    if (ctx.character != null) {
+      ch = visit(ctx.character);
+    }
+
+    return lookup(expr, list, ch);
+  }
+
+  @Override
+  public Object visitMaximumFunction(MaximumFunctionContext ctx) {
+    Object ret = null;
+    for (ExprContext expr : ctx.expr()) {
+      Object o = visit(expr);
+      if ((ret == null) || compare(o, ret, Compare.GT)) {
+        ret = o;
+      }
+    }
+
+    return ret;
+  }
+
+  @Override
+  public Object visitMinimumFunction(MinimumFunctionContext ctx) {
+    Object ret = null;
+    for (ExprContext expr : ctx.expr()) {
+      Object o = visit(expr);
+      if ((ret == null) || compare(o, ret, Compare.LT)) {
+        ret = o;
+      }
+    }
+
+    return ret;
+  }
+
+  @Override
+  public Object visitNumEntriesFunction(NumEntriesFunctionContext ctx) {
+    Object list = visit(ctx.list);
+    Object ch = null;
+    if (ctx.character != null) {
+      ch = visit(ctx.character);
+    }
+
+    return numentries(list, ch);
+  }
+
+  @Override
+  public Object visitOpsysFunction(OpsysFunctionContext ctx) {
+    return settings.getOpSys().getName();
+  }
+
+  /**
+   * Perfect :-)
+   * 
+   * @see https://xkcd.com/221/
+   */
+  @Override
+  public Object visitRandomFunction(RandomFunctionContext ctx) {
+    return Integer.valueOf(4);
+  }
+
+  @Override
+  public Object visitReplaceFunction(ReplaceFunctionContext ctx) {
+    return replace(getString(visit(ctx.source)), getString(visit(ctx.from)), getString(visit(ctx.to)));
+  }
+
+  @Override
+  public Object visitRIndexFunction(RIndexFunctionContext ctx) {
+    Object source = visit(ctx.source);
+    Object target = visit(ctx.target);
+    Object start = null;
+    if (ctx.starting != null) {
+      start = visit(ctx.starting);
+    }
+
+    return rindex(source, target, start);
+  }
+
+  @Override
+  public Object visitSubstringFunction(SubstringFunctionContext ctx) {
+    Object o = visit(ctx.expr(0));
+    Object pos = visit(ctx.position);
+    Object len = visit(ctx.length);
+    if (ctx.type != null) {
+      throw new ProEvalException("Type option of STRING function is not yet supported");
+    }
+
+    return substring(o, pos, len);
+  }
+
+  @Override
+  public Object visitTrimFunction(TrimFunctionContext ctx) {
+    Object expr = visit(ctx.expr(0));
+    if (ctx.trimChars != null) {
+      return StringFuncs.trim(getString(expr), getString(visit(ctx.trimChars)));
+    } else {
+      return getString(expr).trim();
+    }
+  }
+
+  @Override
+  public Object visitKeywordFunction(KeywordFunctionContext ctx) {
+    String str = getString(visit(ctx.expr()));
+    int tokenType = -2;
+    tokenType = NodeTypes.testLiteralsTable(str, tokenType);
+    if (tokenType > 0 && NodeTypes.isReserved(tokenType))
+      return NodeTypes.getFullText(str);
+    return null;
+  }
+
+  @Override
+  public Object visitKeywordAllFunction(KeywordAllFunctionContext ctx) {
+    String str = getString(visit(ctx.expr()));
+    int tokenType = -2;
+    tokenType = NodeTypes.testLiteralsTable(str, tokenType);
+    if (tokenType > 0 && NodeTypes.isKeywordType(tokenType))
+      return NodeTypes.getFullText(str);
+    else {
+      // KEYWORD-ALL returns a value even for method and attribute
+      // names, but Proparse doesn't track all those. So, we
+      // never return an unknown here, we always return the uppercased
+      // text of whatever was passed us.
+      return str.toUpperCase();
+    }
+  }
+
+  // *****************
+  // Support functions
+  // *****************
+
   enum Compare {
-    EQ, NE, GT, GE, LT, LE
+    EQ,
+    NE,
+    GT,
+    GE,
+    LT,
+    LE
   }
 
   /**
@@ -56,8 +446,7 @@ public class ProEvalSupport {
       case NE:
         return result != 0;
       default:
-        // impossible to get here, but IntelliJ complains without it.
-        throw new RuntimeException();
+        throw new IllegalArgumentException("Undefined state for Compare object");
     }
   }
 
@@ -74,11 +463,9 @@ public class ProEvalSupport {
       return ((Boolean) left).compareTo((Boolean) right);
     if ((left instanceof String) && (right instanceof String))
       return compareStringHelper(left).compareTo(compareStringHelper(right));
-    if ((left instanceof Integer) && (right instanceof Integer))
-      return ((Integer) left).compareTo((Integer) right);
     if ((left instanceof Number) && (right instanceof Number)) {
-      Float fl = ((Number) left).floatValue();
-      Float fr = ((Number) right).floatValue();
+      Double fl = ((Number) left).doubleValue();
+      Double fr = ((Number) right).doubleValue();
       return fl.compareTo(fr);
     }
     throw new ProEvalException("Incompatible data types in comparison expression.");

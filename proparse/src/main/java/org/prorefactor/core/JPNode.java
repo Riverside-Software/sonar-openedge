@@ -7,7 +7,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
- *******************************************************************************/ 
+ *******************************************************************************/
 package org.prorefactor.core;
 
 import java.util.ArrayList;

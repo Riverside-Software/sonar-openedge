@@ -10,10 +10,8 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,13 +20,13 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
+import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.ParseUnit;
 
 import antlr.ANTLRException;
 
 public class ParserSupport {
-
-  private JPNode topNode;
 
   private boolean currDefInheritable = false;
   private boolean unitIsInterface = false;
@@ -287,28 +285,29 @@ public class ParserSupport {
       throws IOException, ANTLRException {
     String superFileName = classFinder.findClassFile(qualSuperName);
     if (superFileName.length() == 0) {
-      // Could not find the super class. Will happen with Progress.lang.*,
-      // vendor libraries, etc.
+      // Could not find the super class. Will happen with Progress.lang.*, vendor libraries, etc.
       return null;
     }
 
-    try (BufferedReader ifstream = new BufferedReader(
-        new InputStreamReader(new FileInputStream(superFileName), session.getCharset()))) {
-      DoParse superDoParse = new DoParse(session, superFileName, /* FIXME doParse */ null);
-      superDoParse.inStream = ifstream;
-      superDoParse.doParse();
-      ParserSupport superSupport = superDoParse.getParserSupport();
-      if (!superSupport.isClass())
-        throw new ProparseRuntimeException(unitScope.getScopeName() + " inherits " + qualSuperName + " which is not a class.");
+    try {
+      ParseUnit unit = new ParseUnit(new File(superFileName), session);
+      unit.parse();
+
+      // FIXME Find if this really has to be kept 
+      // ParserSupport superSupport = parser.getParserSupport();
+      // if (!superSupport.isClass())
+      //   throw new ProparseRuntimeException(unitScope.getScopeName() + " inherits " + qualSuperName + " which is not a class."); */
       SymbolScope superScope = session.lookupSuper(qualSuperName);
-      if (superScope == null)
+      if (superScope == null) 
         throw new ProparseRuntimeException("Internal error. parseSuper failed to find superScope.");
       for (SymbolScope p = superScope.getSuperScope(); p != null; p = p.getSuperScope()) {
         if (p == superScope)
           throw new ProparseRuntimeException("Circular inheritance found from class: " + qualSuperName);
       }
-      classNode.setLink(IConstants.SUPER_CLASS_TREE, superSupport.topNode);
+      classNode.setLink(IConstants.SUPER_CLASS_TREE, unit.getTopNode());
       return superScope;
+    } catch (RefactorException caught) {
+      throw new ANTLRException(caught);
     }
   }
 
@@ -329,11 +328,6 @@ public class ParserSupport {
         node.attrSet(IConstants.STORETYPE, IConstants.ST_WTABLE);
         break;
     }
-  }
-
-  /* Called by ProParser at the *end* of the parse. */
-  void setTopNode(JPNode refTopNode) {
-    topNode = refTopNode;
   }
 
   void typenameLookup(JPNode typenameNode) {

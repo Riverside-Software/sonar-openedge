@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003-2016 John Green
+ * Copyright (c) 2003-2015 John Green
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.proparse;
+package org.prorefactor.proparse.antlr4;
 
 public class ProEvalException extends RuntimeException {
   private static final long serialVersionUID = 7002021531916522201L;
