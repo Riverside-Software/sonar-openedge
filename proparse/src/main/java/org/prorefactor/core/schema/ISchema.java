@@ -15,7 +15,6 @@ package org.prorefactor.core.schema;
  * Represents the list of all available db, aliases and tables in an OpenEdge session
  */
 public interface ISchema {
-
   /**
    * Add a database alias.
    * 
@@ -36,7 +35,7 @@ public interface ISchema {
    * @param name Database name
    * @return Null if not found
    */
-  Database lookupDatabase(String name);
+  IDatabase lookupDatabase(String name);
 
   /**
    * Lookup a Field, given the db, table, and field names
@@ -45,7 +44,7 @@ public interface ISchema {
    * @param fieldName
    * @return
    */
-  Field lookupField(String dbName, String tableName, String fieldName);
+  IField lookupField(String dbName, String tableName, String fieldName);
 
   /**
    * Lookup a table by name.
@@ -55,10 +54,10 @@ public interface ISchema {
    *         dictdb for the table, in case it's something like "sports._file". In that case, the Table from the "dictdb"
    *         database would be returned. We don't keep meta-schema records in the rest of the databases.
    */
-  Table lookupTable(String inName);
+  ITable lookupTable(String inName);
 
   /** Lookup a table, given a database name and a table name. */
-  Table lookupTable(String dbName, String tableName);
+  ITable lookupTable(String dbName, String tableName);
 
   /**
    * Lookup an unqualified schema field name. Does not test for uniqueness. That job is left to the compiler. In fact,
@@ -67,5 +66,5 @@ public interface ISchema {
    * @param name Unqualified schema field name
    * @return Null if nothing found
    */
-  Field lookupUnqualifiedField(String name);
+  IField lookupUnqualifiedField(String name);
 }

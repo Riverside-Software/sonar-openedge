@@ -10,7 +10,7 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest.util;
 
-import org.prorefactor.core.schema.Schema;
+import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.refactor.settings.IProparseSettings;
 
 import com.google.inject.AbstractModule;
@@ -19,6 +19,6 @@ public class UnitTestModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(IProparseSettings.class).to(UnitTestProparseSettings.class);
-    bind(Schema.class).to(SportsSchema.class);
+    bind(ISchema.class).to(SportsSchema.class);
   }
 }

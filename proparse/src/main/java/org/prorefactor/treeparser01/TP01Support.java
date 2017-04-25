@@ -28,6 +28,8 @@ import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Field;
+import org.prorefactor.core.schema.IField;
+import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
@@ -206,7 +208,7 @@ public class TP01Support extends TP01Action {
     // ...and then set this "can-find block" to use it as its parent.
     currentBlock.setParent(b);
     String buffName = recordAST.getText();
-    Table table;
+    ITable table;
     boolean isDefault;
     TableBuffer tableBuffer = currentScope.lookupBuffer(buffName);
     if (tableBuffer != null) {
@@ -327,7 +329,7 @@ public class TP01Support extends TP01Action {
   @Override
   public void defineBuffer(AST defAST, AST idAST, AST tableAST, boolean init) {
     JPNode idNode = (JPNode) idAST;
-    Table table = astTableLink(tableAST);
+    ITable table = astTableLink(tableAST);
     TableBuffer bufSymbol = currentScope.defineBuffer(idNode.getText(), table);
     currSymbol = bufSymbol;
     bufSymbol.setDefOrIdNode((JPNode) defAST);
@@ -345,7 +347,7 @@ public class TP01Support extends TP01Action {
    */
   @Override
   public void defineBufferForTrigger(AST tableAST) {
-    Table table = astTableLink(tableAST);
+    ITable table = astTableLink(tableAST);
     TableBuffer bufSymbol = currentScope.defineBuffer("", table);
     currentBlock.getBufferForReference(bufSymbol); // Create the BufferScope
     currSymbol = bufSymbol;
@@ -409,9 +411,9 @@ public class TP01Support extends TP01Action {
   @Override
   public void defineTableLike(AST tableAST) {
     // Get table for "LIKE table"
-    Table table = astTableLink(tableAST);
+    ITable table = astTableLink(tableAST);
     // For each field in "table", create a field def in currDefTable
-    for (Field field : table.getFieldPosOrder()) {
+    for (IField field : table.getFieldPosOrder()) {
       rootScope.defineTableField(field.getName(), currDefTable).assignAttributesLike(field);
     }
   }
@@ -553,7 +555,7 @@ public class TP01Support extends TP01Action {
       String[] parts = name.split("\\.");
       String fieldPart = parts[parts.length - 1];
       TableBuffer ourBuffer = resolution == TableNameResolution.PREVIOUS ? prevTableReferenced : lastTableReferenced;
-      Field field = ourBuffer.getTable().lookupField(fieldPart);
+      IField field = ourBuffer.getTable().lookupField(fieldPart);
       if (field == null) {
         // The OpenEdge compiler seems to ignore invalid tokens in a FIELDS phrase.
         // As a result, some questionable code will fail to parse here if we don't also ignore those here.
@@ -926,7 +928,7 @@ public class TP01Support extends TP01Action {
     String nodeText = node.getText();
     if (buffer == null)
       throw new TreeParserException(node.getFilename() + ":" + node.getLine() + " Could not resolve table: " + nodeText);
-    Table table = buffer.getTable();
+    ITable table = buffer.getTable();
     // If we get a mismatch between storetype here and the storetype determined
     // by proparse.dll then there's a bug somewhere. This is just a double-check.
     if (table.getStoretype() != node.attrGet(IConstants.STORETYPE))
@@ -967,7 +969,7 @@ public class TP01Support extends TP01Action {
         buffer = currentScope.lookupTempTable(anode.getText());
         break;
       case SCHEMATABLESYMBOL:
-        Table table = refSession.getSchema().lookupTable(anode.getText());
+        ITable table = refSession.getSchema().lookupTable(anode.getText());
         if (table != null)
           buffer = currentScope.getUnnamedBuffer(table);
         break;
@@ -1188,7 +1190,7 @@ public class TP01Support extends TP01Action {
   }
 
   /** Get the Table symbol linked from a RECORD_NAME AST. */
-  private Table astTableLink(AST tableAST) {
+  private ITable astTableLink(AST tableAST) {
     LOG.trace("Entering astTableLink {}", tableAST);
     TableBuffer buffer = (TableBuffer) ((JPNode) tableAST).getLink(IConstants.SYMBOL);
     assert buffer != null;

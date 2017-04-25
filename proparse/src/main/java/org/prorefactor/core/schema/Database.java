@@ -10,7 +10,6 @@
  *******************************************************************************/ 
 package org.prorefactor.core.schema;
 
-import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -19,17 +18,9 @@ import java.util.TreeSet;
  * units. "id" field is a database number, starting at one. Might be the logical database number - depends on how you
  * use this.
  */
-public class Database {
-  /** Comparator for sorting by name. */
-  public static final Comparator<Database> NAME_ORDER = new Comparator<Database>() {
-    @Override
-    public int compare(Database d1, Database d2) {
-      return d1.getName().compareToIgnoreCase(d2.getName());
-    }
-  };
-
+public class Database implements IDatabase {
   private final String name;
-  private final SortedSet<Table> tableSet = new TreeSet<>(Table.NAME_ORDER);
+  private final SortedSet<ITable> tableSet = new TreeSet<>(Constants.TABLE_NAME_ORDER);
 
   /**
    * New Database object
@@ -43,15 +34,18 @@ public class Database {
    * Add new Table object
    * @param table
    */
-  public void add(Table table) {
+  @Override
+  public void add(ITable table) {
     tableSet.add(table);
   }
 
+  @Override
   public String getName() {
     return name;
   }
 
-  public SortedSet<Table> getTableSet() {
+  @Override
+  public SortedSet<ITable> getTableSet() {
     return tableSet;
   }
 

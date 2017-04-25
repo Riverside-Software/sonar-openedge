@@ -13,7 +13,8 @@ package org.prorefactor.treeparser;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.Field;
-import org.prorefactor.core.schema.Schema;
+import org.prorefactor.core.schema.IField;
+import org.prorefactor.core.schema.ISchema;
 
 /**
  * FieldBuffer is the Symbol object linked to from the AST for schema, temp, and work table fields, and FieldBuffer
@@ -21,12 +22,12 @@ import org.prorefactor.core.schema.Schema;
  */
 public class FieldBuffer extends Symbol implements Primative {
   private final TableBuffer buffer;
-  private final Field field;
+  private final IField field;
 
   /**
    * When you create a FieldBuffer object, you do not set the name, because that comes from the Field object.
    */
-  public FieldBuffer(SymbolScope scope, TableBuffer buffer, Field field) {
+  public FieldBuffer(SymbolScope scope, TableBuffer buffer, IField field) {
     super("", scope);
     this.buffer = buffer;
     this.field = field;
@@ -47,7 +48,7 @@ public class FieldBuffer extends Symbol implements Primative {
     assert input.generateName().toLowerCase().equals(input.generateName());
     Field.Name self = new Field.Name(this.fullName().toLowerCase());
     if (input.getDb() != null) {
-      Schema schema = getScope().getRootScope().getRefactorSession().getSchema();
+      ISchema schema = getScope().getRootScope().getRefactorSession().getSchema();
       if (this.buffer.getTable().getDatabase() != schema.lookupDatabase(input.getDb()))
         return false;
     }
@@ -115,7 +116,7 @@ public class FieldBuffer extends Symbol implements Primative {
     return field.getExtent();
   }
 
-  public Field getField() {
+  public IField getField() {
     return field;
   }
 
@@ -130,7 +131,7 @@ public class FieldBuffer extends Symbol implements Primative {
    * 
    * @see org.prorefactor.treeparser.Symbol#getProgressType() To see if this field buffer is for a schema table,
    *      temp-table, or work-table, see Table.getStoreType().
-   * @see org.prorefactor.core.schema.Table#getStoretype()
+   * @see org.prorefactor.core.schema.ITable#getStoretype()
    */
   @Override
   public int getProgressType() {

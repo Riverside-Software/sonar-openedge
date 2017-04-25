@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.widgettypes.IFieldLevelWidget;
 
@@ -43,7 +44,7 @@ public class SymbolScope {
   protected Map<String, TableBuffer> bufferMap = new HashMap<>();
   protected Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
   protected Map<String, Routine> routineMap = new HashMap<>();
-  protected Map<Table, TableBuffer> unnamedBuffers = new HashMap<>();
+  protected Map<ITable, TableBuffer> unnamedBuffers = new HashMap<>();
   protected Map<Integer, Map<String, Symbol>> typeMap = new HashMap<>();
   protected Map<String, Variable> variableMap = new HashMap<>();
 
@@ -86,7 +87,7 @@ public class SymbolScope {
    * purposes.
    */
   public void add(TableBuffer tableBuffer) {
-    Table table = tableBuffer.getTable();
+    ITable table = tableBuffer.getTable();
     addTableBuffer(tableBuffer.getName(), table, tableBuffer);
     rootScope.addTableDefinitionIfNew(table);
   }
@@ -133,7 +134,7 @@ public class SymbolScope {
   }
 
   /** Add a TableBuffer to the appropriate map. */
-  private void addTableBuffer(String name, Table table, TableBuffer buffer) {
+  private void addTableBuffer(String name, ITable table, TableBuffer buffer) {
     if (name.length() == 0) {
       if (table.getStoretype() == IConstants.ST_DBTABLE)
         unnamedBuffers.put(table, buffer);
@@ -148,7 +149,7 @@ public class SymbolScope {
    * 
    * @param name Input "" for a default or unnamed buffer, otherwise the "named buffer" name.
    */
-  public TableBuffer defineBuffer(String name, Table table) {
+  public TableBuffer defineBuffer(String name, ITable table) {
     TableBuffer buffer = new TableBuffer(name, this, table);
     addTableBuffer(name, table, buffer);
     return buffer;
@@ -216,7 +217,7 @@ public class SymbolScope {
     // The default buffer for temp and work tables was defined at
     // the time that the table was defined. So, lookupBuffer() would have found
     // temp/work table references, and all we have to search now is schema.
-    Table table = rootScope.getRefactorSession().getSchema().lookupTable(inName);
+    ITable table = rootScope.getRefactorSession().getSchema().lookupTable(inName);
     if (table == null)
       return null;
     return getUnnamedBuffer(table);
@@ -254,7 +255,7 @@ public class SymbolScope {
   }
 
   /** Get or create the unnamed buffer for a schema table. */
-  public TableBuffer getUnnamedBuffer(Table table) {
+  public TableBuffer getUnnamedBuffer(ITable table) {
     assert table.getStoretype() == IConstants.ST_DBTABLE;
     // Check this and parents for the unnamed buffer. Table triggers
     // can scope an unnamed buffer - that's why we don't go straight to
@@ -383,7 +384,7 @@ public class SymbolScope {
    * buffer/temp/work name, then abbreviated schema names. Sheesh.
    */
   public TableBuffer lookupTableOrBufferSymbol(String inName) {
-    Table table = rootScope.getRefactorSession().getSchema().lookupTable(inName);
+    ITable table = rootScope.getRefactorSession().getSchema().lookupTable(inName);
     if (table != null && table.getName().length() == inName.length())
       return getUnnamedBuffer(table);
     TableBuffer ret2 = lookupBuffer(inName);

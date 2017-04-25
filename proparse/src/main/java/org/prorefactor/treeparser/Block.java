@@ -20,7 +20,7 @@ import java.util.Set;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.nodetypes.RecordNameNode;
-import org.prorefactor.core.schema.Field;
+import org.prorefactor.core.schema.IField;
 import org.prorefactor.widgettypes.Frame;
 
 /**
@@ -341,7 +341,7 @@ public class Block {
       // amongst all schema and temp/work tables. We don't check for
       // uniqueness, we just take the first we find.
       if (result == null) {
-        Field field;
+        IField field;
         result = new FieldLookupResult();
         field = symbolScope.getRootScope().lookupUnqualifiedField(name);
         if (field != null) {
@@ -363,7 +363,7 @@ public class Block {
       tableBuff = symbolScope.getBufferSymbol(tablePart);
       if (tableBuff == null)
         return null;
-      Field field = tableBuff.getTable().lookupField(fieldPart);
+      IField field = tableBuff.getTable().lookupField(fieldPart);
       if (field == null)
         return null;
       result.field = tableBuff.getFieldBuffer(field);
@@ -414,7 +414,7 @@ public class Block {
       // Weak scoped named buffers don't get raised for field references.
       if (buffScope.isWeak() && !isBufferLocal(buffScope) && !tableBuff.isDefault())
         continue;
-      Field field = tableBuff.getTable().lookupField(name);
+      IField field = tableBuff.getTable().lookupField(name);
       if (field == null)
         continue;
       // The buffers aren't sorted, but "named" buffers and temp/work
