@@ -468,19 +468,9 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     if (currChar == 65533) {
       // This is the 'replacement' character in Unicode, used by Java as a
       // placeholder for a character which could not be converted.
-      // Java silently uses the replacement character, rather than throw an exception.
-      // This would only happen if the source file is a different character
-      // encoding than the system character encoding picked by the JVM.
-      // This is unlikely, unless the source file came from an outside source.
-      // For example, in my test environment, I have samples of source code
-      // from lots of different places.
-      // See http://java.sun.com/j2se/1.5.0/docs/guide/intl/encoding.doc.html
-      throw new IOException("Character conversion error." + "\nCould not read character from source file\n"
-          + getFilename() + " line " + currLine + " column " + currCol
-          + "\nThis indicates a character that cannot be converted to Unicode using"
-          + "\nthe current file I/O code page: " + System.getProperty("file.encoding")
-          + "\nTry using a different encoding from the Java Virtual Machine command line"
-          + "\nfor example: -Dfile.encoding=\"ISO8859_1\"");
+      // We replace those characters at runtime with a space, and log an error
+      LOGGER.error("Character conversion error in {} at line {} column {} from encoding {}", getFilename(), currLine, currCol, session.getCharset().name());
+      currChar = ' ';
     }
     while (currChar == EOF_CHAR) {
       switch (popInput()) {

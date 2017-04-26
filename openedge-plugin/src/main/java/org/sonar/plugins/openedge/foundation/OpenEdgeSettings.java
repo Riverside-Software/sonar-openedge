@@ -21,6 +21,7 @@ package org.sonar.plugins.openedge.foundation;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
+import org.sonar.api.CoreProperties;
 import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.fs.FileSystem;
@@ -89,7 +91,7 @@ public class OpenEdgeSettings {
     Schema sch = readSchema(settings, fileSystem);
     IProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
         settings.getBoolean(Constants.BACKSLASH_ESCAPE));
-    proparseSession = new RefactorSession(ppSettings, sch, fileSystem.encoding());
+    proparseSession = new RefactorSession(ppSettings, sch, encoding());
   }
 
   private final void initializeDirectories(Settings settings, FileSystem fileSystem) {
@@ -292,6 +294,18 @@ public class OpenEdgeSettings {
 
   public RefactorSession getProparseSession() {
     return proparseSession;
+  }
+
+  /**
+   * Force usage of sonar.sourceEncoding property as SonarLint doesn't set correctly encoding
+   */
+  private Charset encoding() {
+      String encoding = settings.getString(CoreProperties.ENCODING_PROPERTY);
+      if (Strings.isNullOrEmpty(encoding)) {
+        return Charset.defaultCharset();
+      } else {
+        return Charset.forName(encoding.trim());
+      }
   }
 
   private Schema readSchema(Settings settings, FileSystem fileSystem) {
