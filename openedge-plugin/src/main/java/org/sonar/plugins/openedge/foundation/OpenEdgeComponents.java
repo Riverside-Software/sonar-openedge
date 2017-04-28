@@ -36,6 +36,7 @@ import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.api.server.ServerSide;
 import org.sonar.api.utils.MessageException;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -55,6 +56,7 @@ import org.sonarsource.api.sonarlint.SonarLintSide;
 @ScannerSide
 @SonarLintSide
 @BatchSide
+@ServerSide
 public class OpenEdgeComponents {
   private static final Logger LOG = Loggers.get(OpenEdgeComponents.class);
 
@@ -210,6 +212,10 @@ public class OpenEdgeComponents {
 
   public Licence getLicence(String repoName) {
     return licences.get(repoName);
+  }
+
+  public Collection<Licence> getLicences() {
+    return licences.values();
   }
 
   private OpenEdgeCheck getAnalyzer(String internalKey, RuleKey ruleKey, SensorContext context, Licence licence,
