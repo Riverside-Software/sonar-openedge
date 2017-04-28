@@ -254,4 +254,11 @@ public class PreprocessorTest {
     testVariable(unit.getTopNode(), "var39");
   }
 
+  public void testSubstring3() throws Exception {
+    testVariable(unit.getTopNode(), "var40");
+  }
+
+  public void testSubstring4() throws Exception {
+    testVariable(unit.getTopNode(), "var41");
+  }
 }

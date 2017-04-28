@@ -363,9 +363,9 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   public Object visitSubstringFunction(SubstringFunctionContext ctx) {
     Object o = visit(ctx.expr(0));
     Object pos = visit(ctx.position);
-    Object len = visit(ctx.length);
+    Object len = (ctx.length == null ? null : visit(ctx.length));
     if (ctx.type != null) {
-      throw new ProEvalException("Type option of STRING function is not yet supported");
+      throw new ProEvalException("Type option of SUBSTRING function is not yet supported");
     }
 
     return substring(o, pos, len);
