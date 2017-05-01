@@ -42,7 +42,7 @@ import eu.rssw.antlr.database.objects.Trigger;
 import eu.rssw.antlr.database.objects.TriggerType;
 
 public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
-  private final static Logger LOG = LoggerFactory.getLogger(DumpFileVisitor.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DumpFileVisitor.class);
 
   private DatabaseDescription db;
 
@@ -125,7 +125,7 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
   public Void visitFieldOrder(FieldOrderContext ctx) {
     if (fields.isEmpty())
       return null;
-    fields.peek().setOrder(ctx.val.getText());
+    fields.peek().setOrder(Integer.parseInt(ctx.val.getText()));
 
     return null;
   }

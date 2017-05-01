@@ -1,16 +1,25 @@
 package eu.rssw.antlr.database.objects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class Table {
-  private final String name;
-  private String area, label, description, dumpName, valMsg;
-  private Collection<Field> fields = new ArrayList<>();
-  private Collection<Index> indexes = new ArrayList<>();
-  private Collection<Trigger> triggers = new ArrayList<>();
+public class Table implements Serializable {
+  private static final long serialVersionUID = -2264768039243516809L;
 
-  private int firstLine, lastLine;
+  private final String name;
+  private transient String area;
+  private transient String label;
+  private transient String description;
+  private transient String dumpName;
+  private transient String valMsg;
+
+  private Collection<Field> fields = new ArrayList<>();
+  private transient Collection<Index> indexes = new ArrayList<>();
+  private transient Collection<Trigger> triggers = new ArrayList<>();
+
+  private transient int firstLine;
+  private transient int lastLine;
 
   public Table(String name) {
     this.name = name;
@@ -149,4 +158,5 @@ public class Table {
   public String toString() {
     return "Table " + name;
   }
+
 }

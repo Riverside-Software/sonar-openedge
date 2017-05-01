@@ -5,9 +5,19 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import eu.rssw.antlr.database.objects.DatabaseDescription;
@@ -60,6 +70,51 @@ public class TestDumpFile {
   public void testTriggerDelete() throws IOException {
     // Delete triggers on table
     DumpFileUtils.getDatabaseDescription(new File("src/test/resources/triggerDelete.df"));
+  }
+
+  @Test
+  public void testSerialize() throws IOException, ClassNotFoundException {
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(new File("src/test/resources/sp2k.df"));
+    // Serialize object
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    ObjectOutput out = new ObjectOutputStream(bytes);
+    out.writeObject(db);
+    // Deserialize
+    InputStream in = new ByteArrayInputStream(bytes.toByteArray());
+    ObjectInputStream stream = new ObjectInputStream(in);
+    DatabaseDescription db2 = (DatabaseDescription) stream.readObject();
+    // Compare
+    Assert.assertEquals(db2.getSequences().size(), db.getSequences().size());
+    Assert.assertEquals(db2.getTables().size(), db.getTables().size());
+  }
+
+  @Test
+  public void testLargeFile() throws IOException {
+
+    DumpFileGrammarLexer lexer1 = new DumpFileGrammarLexer(CharStreams.fromFileName("src/test/resources/sp2k.df"));
+    CommonTokenStream tokens1 = new CommonTokenStream(lexer1);
+    DumpFileGrammarParser parser1 = new DumpFileGrammarParser(tokens1);
+    parser1.dump();
+
+    // 1 table : 0,166
+    // 10 tables : 0,175
+    long t1 = System.currentTimeMillis();
+    DumpFileGrammarLexer lexer = new DumpFileGrammarLexer(CharStreams.fromFileName("src/test/resources/vision.df"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    DumpFileGrammarParser parser = new DumpFileGrammarParser(tokens);
+    // parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+    // parser.dump();
+    
+    DumpFileVisitor v = new DumpFileVisitor("plop");
+    v.visit(parser.dump());
+    System.out.println("Time " + (System.currentTimeMillis() - t1));
+    
+    try (FileOutputStream fichierOut = new FileOutputStream("maclasse.ser"); 
+    ObjectOutputStream oos = new ObjectOutputStream(fichierOut)) {
+      oos.writeObject(v.getDatabase());
+    
+    }
+    
   }
 
 }
