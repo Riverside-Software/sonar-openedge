@@ -198,7 +198,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         wr.close();
         connx.getResponseCode();
       } catch (IOException uncaught) {
-        LOG.info("Unable to send analytics", uncaught);
+        LOG.debug("Unable to send analytics: {}", uncaught.getMessage());
       }
     }
 
