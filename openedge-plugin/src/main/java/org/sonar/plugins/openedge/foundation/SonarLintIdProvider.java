@@ -19,14 +19,21 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
+import org.sonar.api.config.Settings;
 import org.sonarsource.api.sonarlint.SonarLintSide;
 
 @SonarLintSide
 public class SonarLintIdProvider implements IIdProvider {
 
+  private final Settings settings;
+
+  public SonarLintIdProvider(Settings settings) {
+    this.settings = settings;
+  }
+
   @Override
   public String getPermanentID() {
-    return "SonarLint";
+    return "SonarLint-" + settings.getString("sonar.server_id");
   }
 
   @Override
