@@ -29,15 +29,19 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 
 public class OpenEdgeSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeSensor.class);
 
+  // IoC
   private final FileSystem fileSystem;
+  private final IIdProvider idProvider;
 
-  public OpenEdgeSensor(FileSystem fileSystem) {
+  public OpenEdgeSensor(FileSystem fileSystem, IIdProvider idProvider) {
     this.fileSystem = fileSystem;
+    this.idProvider = idProvider;
   }
 
   @Override
@@ -47,6 +51,8 @@ public class OpenEdgeSensor implements Sensor {
 
   @Override
   public void execute(SensorContext context) {
+    if (idProvider.isSonarLintSide())
+      return;
     computeBaseMetrics(context);
   }
 

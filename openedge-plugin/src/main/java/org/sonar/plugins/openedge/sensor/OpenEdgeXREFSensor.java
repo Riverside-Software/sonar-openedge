@@ -42,6 +42,7 @@ import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
+import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
@@ -54,14 +55,16 @@ public class OpenEdgeXREFSensor implements Sensor {
   // IoC
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
+  private final IIdProvider idProvider;
 
   // Internal use
   private final DocumentBuilderFactory dbFactory;
   private final DocumentBuilder dBuilder;
 
-  public OpenEdgeXREFSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
+  public OpenEdgeXREFSensor(OpenEdgeSettings settings, OpenEdgeComponents components, IIdProvider idProvider) {
     this.settings = settings;
     this.components = components;
+    this.idProvider = idProvider;
 
     this.dbFactory = DocumentBuilderFactory.newInstance();
     try {
@@ -85,6 +88,9 @@ public class OpenEdgeXREFSensor implements Sensor {
 
   @Override
   public void execute(SensorContext context) {
+    if (idProvider.isSonarLintSide())
+      return;
+
     int xrefNum = 0;
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;

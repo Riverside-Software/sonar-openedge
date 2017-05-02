@@ -176,15 +176,14 @@ public class OpenEdgeProparseSensor implements Sensor {
     new File("listingparser.txt").delete();
 
     if (settings.useAnalytics()) {
+      String sid = components.getLicence(Constants.RSSW_REPOSITORY_KEY) == null ? "none"
+          : components.getLicence(Constants.RSSW_REPOSITORY_KEY).getPermanentId();
       StringBuilder data = new StringBuilder(
-          String.format("proparse,sid=%1$s files=%2$d,failures=%3$d,parseTime=%4$d,maxParseTime=%5$d\n",
-              components.getLicence(Constants.RSSW_REPOSITORY_KEY) == null ? "none"
-                  : components.getLicence(Constants.RSSW_REPOSITORY_KEY).getPermanentId(),
-              numFiles, numFailures, parseTime, maxParseTime));
+          String.format("proparse,sid=%1$s files=%2$d,failures=%3$d,parseTime=%4$d,maxParseTime=%5$d\n", sid, numFiles,
+              numFailures, parseTime, maxParseTime));
       for (Entry<String, Long> entry : ruleTime.entrySet()) {
         data.append(
-            String.format("rule,sid=%1$s,rulename=%2$s ruleTime=%3$d\n", components.getLicence(Constants.RSSW_REPOSITORY_KEY) == null
-                ? "none" : components.getLicence(Constants.RSSW_REPOSITORY_KEY).getPermanentId(), entry.getKey(), entry.getValue()));
+            String.format("rule,sid=%1$s,rulename=%2$s ruleTime=%3$d\n", sid, entry.getKey(), entry.getValue()));
       }
 
       try {
@@ -199,7 +198,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         wr.close();
         connx.getResponseCode();
       } catch (IOException uncaught) {
-        LOG.info("Unable to send analytics", uncaught);
+        LOG.debug("Unable to send analytics: {}", uncaught.getMessage());
       }
     }
 

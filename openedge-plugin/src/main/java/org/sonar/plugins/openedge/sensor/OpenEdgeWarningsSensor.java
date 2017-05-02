@@ -39,6 +39,7 @@ import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.com.google.common.io.Files;
 import org.sonar.plugins.openedge.api.com.google.common.io.LineProcessor;
 import org.sonar.plugins.openedge.api.com.google.common.primitives.Ints;
+import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
@@ -49,10 +50,12 @@ public class OpenEdgeWarningsSensor implements Sensor {
   // IoC
   private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;
+  private final IIdProvider idProvider;
 
-  public OpenEdgeWarningsSensor(OpenEdgeSettings settings, FileSystem fileSystem) {
+  public OpenEdgeWarningsSensor(OpenEdgeSettings settings, FileSystem fileSystem, IIdProvider idProvider) {
     this.fileSystem = fileSystem;
     this.settings = settings;
+    this.idProvider = idProvider;
   }
 
   @Override
@@ -71,6 +74,9 @@ public class OpenEdgeWarningsSensor implements Sensor {
 
   @Override
   public void execute(SensorContext context) {
+    if (idProvider.isSonarLintSide())
+      return;
+
     int warningsImportNum = 0;
     final RuleKey defaultWarningRuleKey = RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY,
         OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY);

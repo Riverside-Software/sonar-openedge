@@ -35,6 +35,7 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.eu.rssw.listing.CodeBlock;
 import org.sonar.plugins.openedge.api.eu.rssw.listing.ListingParser;
+import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
@@ -46,10 +47,12 @@ public class OpenEdgeListingSensor implements Sensor {
   // IoC
   private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;
+  private final IIdProvider idProvider;
 
-  public OpenEdgeListingSensor(OpenEdgeSettings settings, FileSystem fileSystem) {
+  public OpenEdgeListingSensor(OpenEdgeSettings settings, FileSystem fileSystem, IIdProvider idProvider) {
     this.fileSystem = fileSystem;
     this.settings = settings;
+    this.idProvider = idProvider;
   }
 
   @Override
@@ -67,6 +70,9 @@ public class OpenEdgeListingSensor implements Sensor {
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void execute(SensorContext context) {
+    if (idProvider.isSonarLintSide())
+      return;
+
     int dbgImportNum = 0;
 
     for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
