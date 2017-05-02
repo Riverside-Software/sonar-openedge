@@ -33,7 +33,7 @@ public class SonarLintIdProvider implements IIdProvider {
 
   @Override
   public String getPermanentID() {
-    return "SonarLint-" + settings.getString("sonar.server_id");
+    return "sonarlint-" + settings.getString("sonar.server_id");
   }
 
   @Override
