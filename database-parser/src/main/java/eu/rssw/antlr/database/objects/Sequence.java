@@ -1,19 +1,15 @@
 package eu.rssw.antlr.database.objects;
 
-import java.io.Serializable;
-
-public class Sequence implements Serializable {
-  private static final long serialVersionUID = -5330062418474725829L;
-
+public class Sequence {
   private final String name;
-  private transient Long initialValue;
-  private transient Long minValue;
-  private transient Long maxValue;
-  private transient Long increment;
-  private transient boolean cycleOnLimit;
+  private Long initialValue;
+  private Long minValue;
+  private Long maxValue;
+  private Long increment;
+  private boolean cycleOnLimit;
 
-  private transient int firstLine;
-  private transient int lastLine;
+  private int firstLine;
+  private int lastLine;
 
   public Sequence(String name) {
     this.name = name;

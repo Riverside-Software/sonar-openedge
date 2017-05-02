@@ -10,7 +10,7 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 
 import org.antlr.v4.runtime.ANTLRErrorListener;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -35,7 +35,7 @@ public final class DumpFileUtils {
 
   public static final ParseTree getDumpFileParseTree(Reader reader) throws IOException {
     ANTLRErrorListener listener = new DescriptiveErrorListener();
-    DumpFileGrammarLexer lexer = new DumpFileGrammarLexer(new ANTLRInputStream(reader));
+    DumpFileGrammarLexer lexer = new DumpFileGrammarLexer(CharStreams.fromReader(reader));
     lexer.removeErrorListeners();
     lexer.addErrorListener(listener);
     CommonTokenStream tokens = new CommonTokenStream(lexer);

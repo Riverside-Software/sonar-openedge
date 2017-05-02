@@ -1,24 +1,21 @@
 package eu.rssw.antlr.database.objects;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class Field implements Serializable {
-  private static final long serialVersionUID = 3669965223943445129L;
-
+public class Field {
   private final String name;
   private final String dataType;
   private Integer order;
-  private Integer extent;
-  private transient String description;
-  private transient String lobArea;
-  private transient String format;
-  private transient Integer maxWidth;
-  private transient Collection<Trigger> triggers = new ArrayList<>();
+  private Integer extent = 0;
+  private String description;
+  private String lobArea;
+  private String format;
+  private Integer maxWidth;
+  private Collection<Trigger> triggers = new ArrayList<>();
 
-  private transient int firstLine;
-  private transient int lastLine;
+  private int firstLine;
+  private int lastLine;
 
   public Field(String name, String dataType) {
     this.name = name;
