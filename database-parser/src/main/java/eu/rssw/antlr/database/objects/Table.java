@@ -3,7 +3,7 @@ package eu.rssw.antlr.database.objects;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class Table  {
+public class Table {
   private final String name;
   private String area;
   private String label;
@@ -155,5 +155,4 @@ public class Table  {
   public String toString() {
     return "Table " + name;
   }
-
 }
