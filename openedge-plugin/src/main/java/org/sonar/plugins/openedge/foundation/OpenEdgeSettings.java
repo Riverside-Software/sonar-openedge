@@ -20,7 +20,11 @@
 package org.sonar.plugins.openedge.foundation;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.batch.BatchSide;
@@ -58,10 +63,14 @@ import org.sonarsource.api.sonarlint.SonarLintSide;
 public class OpenEdgeSettings {
   private static final Logger LOG = Loggers.get(OpenEdgeSettings.class);
 
+  // IoC
+  private final Settings settings;
+  private final IIdProvider idProvider;
+
+  // Internal use
   private final List<String> sourceDirs = new ArrayList<>();
   private final File binariesDir;
   private final File pctDir;
-  private final Settings settings;
   private final List<File> propath = new ArrayList<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
   private final Set<String> cpdMethods = new HashSet<>();
@@ -69,8 +78,9 @@ public class OpenEdgeSettings {
   private final RefactorSession proparseSession;
   private final Set<Integer> xrefBytes = new HashSet<>();
 
-  public OpenEdgeSettings(Settings settings, FileSystem fileSystem) {
+  public OpenEdgeSettings(Settings settings, FileSystem fileSystem, IIdProvider idProvider) {
     this.settings = settings;
+    this.idProvider = idProvider;
 
     initializeDirectories(settings, fileSystem);
 
@@ -300,12 +310,12 @@ public class OpenEdgeSettings {
    * Force usage of sonar.sourceEncoding property as SonarLint doesn't set correctly encoding
    */
   private Charset encoding() {
-      String encoding = settings.getString(CoreProperties.ENCODING_PROPERTY);
-      if (Strings.isNullOrEmpty(encoding)) {
-        return Charset.defaultCharset();
-      } else {
-        return Charset.forName(encoding.trim());
-      }
+    String encoding = settings.getString(CoreProperties.ENCODING_PROPERTY);
+    if (Strings.isNullOrEmpty(encoding)) {
+      return Charset.defaultCharset();
+    } else {
+      return Charset.forName(encoding.trim());
+    }
   }
 
   private Schema readSchema(Settings settings, FileSystem fileSystem) {
@@ -316,7 +326,7 @@ public class OpenEdgeSettings {
     for (String str : Splitter.on(',').trimResults().omitEmptyStrings().split(dbList)) {
       String dbName;
       int colonPos = str.lastIndexOf(':');
-      if (colonPos == -1) {
+      if (colonPos <= 1) {
         dbName = FilenameUtils.getBaseName(str);
       } else {
         dbName = str.substring(colonPos + 1);
@@ -324,11 +334,34 @@ public class OpenEdgeSettings {
       }
 
       LOG.debug("Parsing {} with alias {}", fileSystem.resolvePath(str), dbName);
-      try {
-        DatabaseDescription desc = DumpFileUtils.getDatabaseDescription(fileSystem.resolvePath(str));
+      File dfFile = fileSystem.resolvePath(str);
+      File serFile = new File(fileSystem.baseDir(), ".sonarlint/" + str.replace('\\', '_').replace('/', '_') + ".bin");
+      serFile.getParentFile().mkdir();
+      DatabaseDescription desc = null;
+      if (idProvider.isSonarLintSide() && (dfFile.lastModified() < serFile.lastModified())) {
+        LOG.debug("SonarLint side, using serialized file");
+        try (InputStream is = new FileInputStream(serFile)) {
+          desc = DatabaseDescription.deserialize(is, dbName);
+        } catch (IOException caught) {
+          LOG.error("Unable to deserialize from '" + serFile + "', deleting file", caught);
+          FileUtils.deleteQuietly(serFile);
+        }
+      } else {
+        try {
+          desc = DumpFileUtils.getDatabaseDescription(fileSystem.resolvePath(str));
+        } catch (IOException caught) {
+          LOG.error("Unable to parse " + str, caught);
+        }
+        if ((desc != null) && idProvider.isSonarLintSide()) {
+          try (OutputStream os = new FileOutputStream(serFile)) {
+            desc.serialize(os);
+          } catch (IOException caught) {
+            LOG.error("Unable to serialize to '" + serFile + "'", caught);
+          }
+        }
+      }
+      if (desc != null) {
         dbs.add(new DatabaseWrapper(desc));
-      } catch (IOException caught) {
-        LOG.error("Unable to parse " + str, caught);
       }
     }
 

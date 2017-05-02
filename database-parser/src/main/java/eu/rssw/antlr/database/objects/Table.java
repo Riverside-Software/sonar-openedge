@@ -5,12 +5,18 @@ import java.util.Collection;
 
 public class Table {
   private final String name;
-  private String area, label, description, dumpName, valMsg;
+  private String area;
+  private String label;
+  private String description;
+  private String dumpName;
+  private String valMsg;
+
   private Collection<Field> fields = new ArrayList<>();
   private Collection<Index> indexes = new ArrayList<>();
   private Collection<Trigger> triggers = new ArrayList<>();
 
-  private int firstLine, lastLine;
+  private int firstLine;
+  private int lastLine;
 
   public Table(String name) {
     this.name = name;

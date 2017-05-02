@@ -46,7 +46,7 @@ public class OpenEdgeProparseSensorTest {
     context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
     context.settings().setProperty(Constants.CPD_METHODS, "TEST3");
     context.settings().setProperty(Constants.CPD_PROCEDURES, "adm-create-objects");
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem(), new TestIdProvider());
     OpenEdgeComponents components = new OpenEdgeComponents(new ScannerIdProvider(server), null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);

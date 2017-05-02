@@ -5,9 +5,13 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import eu.rssw.antlr.database.objects.DatabaseDescription;
@@ -60,6 +64,24 @@ public class TestDumpFile {
   public void testTriggerDelete() throws IOException {
     // Delete triggers on table
     DumpFileUtils.getDatabaseDescription(new File("src/test/resources/triggerDelete.df"));
+  }
+
+  @Test
+  public void testSerialize() throws IOException {
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(new File("src/test/resources/sp2k.df"));
+    // Serialize object
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    db.serialize(bytes);
+    // Deserialize
+    InputStream in = new ByteArrayInputStream(bytes.toByteArray());
+    DatabaseDescription db2 = DatabaseDescription.deserialize(in, "sp2k");
+    // Compare
+    Assert.assertEquals(db2.getSequences().size(), db.getSequences().size());
+    Assert.assertEquals(db2.getTables().size(), db.getTables().size());
+    Assert.assertEquals(db2.getTable("BillTo").getField("Address").getDataType().toUpperCase(), "CHARACTER");
+    Assert.assertEquals(db2.getTable("Bin").getField("Qty").getDataType().toUpperCase(), "INTEGER");
+    Assert.assertEquals(db2.getTable("Customer").getField("CreditLimit").getDataType().toUpperCase(), "DECIMAL");
+    Assert.assertEquals(db2.getTable("Salesrep").getField("monthquota").getExtent().intValue(), 12);
   }
 
 }

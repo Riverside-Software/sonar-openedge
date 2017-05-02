@@ -43,7 +43,7 @@ public class OpenEdgeListingSensorTest {
   public void testListing() throws Exception {
     SensorContextTester context = createContext();
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem(), new TestIdProvider());
     OpenEdgeListingSensor sensor = new OpenEdgeListingSensor(oeSettings, context.fileSystem());
     sensor.execute(context);
 

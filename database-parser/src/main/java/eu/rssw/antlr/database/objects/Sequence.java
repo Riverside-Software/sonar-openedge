@@ -2,10 +2,14 @@ package eu.rssw.antlr.database.objects;
 
 public class Sequence {
   private final String name;
-  private Long initialValue, minValue, maxValue, increment;
+  private Long initialValue;
+  private Long minValue;
+  private Long maxValue;
+  private Long increment;
   private boolean cycleOnLimit;
 
-  private int firstLine, lastLine;
+  private int firstLine;
+  private int lastLine;
 
   public Sequence(String name) {
     this.name = name;

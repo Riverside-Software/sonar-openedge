@@ -271,7 +271,7 @@ ANNOTATION_NAME:
   '@' [a-zA-Z] [a-zA-Z0-9]* ('.' [a-zA-Z] [a-zA-Z0-9]*)*;
 
 UNQUOTED_STRING:
-  ~[ '"'\r\n\t'('')''='',']+;
+  ~[ '"\r\n\t()=,]+;
   
 QUOTED_STRING: // 
   '"' ('"' '"' | ~'"')* '"' { setText(getText().substring(1, getText().length() - 1)); };

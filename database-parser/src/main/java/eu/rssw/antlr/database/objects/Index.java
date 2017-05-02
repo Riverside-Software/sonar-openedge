@@ -6,11 +6,14 @@ import java.util.List;
 public class Index {
   private final String name;
   private String area;
-  private boolean primary, unique, word;
+  private boolean primary;
+  private boolean unique;
+  private boolean word;
   private List<IndexField> fields = new ArrayList<>();
   private String bufferPool;
 
-  private int firstLine, lastLine;
+  private int firstLine;
+  private int lastLine;
 
   public Index(String name) {
     this.name = name;

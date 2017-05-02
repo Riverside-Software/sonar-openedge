@@ -4,12 +4,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class Field {
-  private final String name, dataType;
-  private String description, order, lobArea, format;
-  private Integer extent, maxWidth;
+  private final String name;
+  private final String dataType;
+  private Integer order;
+  private Integer extent = 0;
+  private String description;
+  private String lobArea;
+  private String format;
+  private Integer maxWidth;
   private Collection<Trigger> triggers = new ArrayList<>();
 
-  private int firstLine, lastLine;
+  private int firstLine;
+  private int lastLine;
 
   public Field(String name, String dataType) {
     this.name = name;
@@ -28,11 +34,11 @@ public class Field {
     this.description = description;
   }
 
-  public String getOrder() {
+  public Integer getOrder() {
     return order;
   }
 
-  public void setOrder(String order) {
+  public void setOrder(Integer order) {
     this.order = order;
   }
 
