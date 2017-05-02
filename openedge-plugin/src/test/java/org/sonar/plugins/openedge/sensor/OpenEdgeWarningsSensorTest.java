@@ -44,7 +44,7 @@ public class OpenEdgeWarningsSensorTest {
   @Test
   public void testWarnings() throws IOException {
     SensorContextTester context = createContext();
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem(), new TestIdProvider());
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, context.fileSystem());
     sensor.execute(context);
 
