@@ -47,7 +47,11 @@ public final class DumpFileUtils {
   }
 
   public static final DatabaseDescription getDatabaseDescription(File file) throws IOException {
-    DumpFileVisitor visitor = new DumpFileVisitor(Files.getNameWithoutExtension(file.getName()));
+    return getDatabaseDescription(file, Files.getNameWithoutExtension(file.getName()));
+  }
+
+  public static final DatabaseDescription getDatabaseDescription(File file, String dbName) throws IOException {
+    DumpFileVisitor visitor = new DumpFileVisitor(dbName);
     visitor.visit(getDumpFileParseTree(file));
 
     return visitor.getDatabase();

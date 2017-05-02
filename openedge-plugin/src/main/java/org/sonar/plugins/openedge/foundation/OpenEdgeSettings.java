@@ -348,7 +348,7 @@ public class OpenEdgeSettings {
         }
       } else {
         try {
-          desc = DumpFileUtils.getDatabaseDescription(fileSystem.resolvePath(str));
+          desc = DumpFileUtils.getDatabaseDescription(fileSystem.resolvePath(str), dbName);
         } catch (IOException caught) {
           LOG.error("Unable to parse " + str, caught);
         }
