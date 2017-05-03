@@ -64,6 +64,15 @@ public class BugFixTest {
     writer.close();
   }
 
+  private void genericLex(String file) throws Exception {
+    ParseUnit pu = new ParseUnit(new File(SRC_DIR, file), session);
+    assertNull(pu.getTopNode());
+    assertNull(pu.getRootScope());
+    assertNull(pu.getMetrics());
+    pu.lex();
+    assertNotNull(pu.getMetrics());
+  }
+
   @Test
   public void test01() throws Exception {
     genericTest("bug01.p");
@@ -221,7 +230,7 @@ public class BugFixTest {
 
   @Test
   public void test32() throws Exception {
-    genericTest("bug32.p");
+    genericLex("bug32.i");
   }
 
   @Test
