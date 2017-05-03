@@ -205,7 +205,7 @@ public class ANTLR4TokenizerTest {
 
   @Test
   public void test32() throws Exception {
-    genericTest("bug32.p");
+    genericTest("bug32.i");
   }
 
   @Test
