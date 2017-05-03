@@ -578,7 +578,7 @@ constructorstate throws TreeParserException
   ;
   
 createstate throws TreeParserException
-  :  #(CREATE tbl[ContextQualifier.UPDATING] (#(USING (ROWID|RECID) expression))? (NOERROR_KW)? state_end )
+  :  #(CREATE tbl[ContextQualifier.UPDATING] (#(FOR TENANT expression))? (#(USING (ROWID|RECID) expression))? (NOERROR_KW)? state_end )
   ;
 
 create_whatever_args throws TreeParserException

@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import org.prorefactor.core.NodeTypes;
 import org.prorefactor.macrolevel.MacroDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
