@@ -38,6 +38,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.foundation.ScannerIdProvider;
+import org.sonar.plugins.openedge.foundation.ServerIdProvider;
 import org.sonar.plugins.openedge.foundation.SonarLintIdProvider;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBRulesSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBSensor;
@@ -46,6 +47,7 @@ import org.sonar.plugins.openedge.sensor.OpenEdgeProparseSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeWarningsSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeXREFSensor;
+import org.sonar.plugins.openedge.web.OpenEdgeWebService;
 
 public class OpenEdgePlugin implements Plugin {
   private static final String CATEGORY_OPENEDGE = "OpenEdge";
@@ -62,7 +64,7 @@ public class OpenEdgePlugin implements Plugin {
         OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
 
     // Server ID providers
-    context.addExtensions(ScannerIdProvider.class, SonarLintIdProvider.class);
+    context.addExtensions(ScannerIdProvider.class, SonarLintIdProvider.class, ServerIdProvider.class);
 
     // UI and code colorizer
     context.addExtensions(OpenEdgeColorizerFormat.class, OpenEdgeDBColorizerFormat.class);
@@ -74,6 +76,9 @@ public class OpenEdgePlugin implements Plugin {
 
     // Decorators
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
+
+    // Web service handler
+    context.addExtension(OpenEdgeWebService.class);
 
     // Properties
     context.addExtension(PropertyDefinition.builder(Constants.OE_ANALYTICS).name("Enable analytics").description(
