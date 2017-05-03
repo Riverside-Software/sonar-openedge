@@ -294,4 +294,10 @@ public class NewSyntaxTest {
   public void test51() throws Exception {
     testNewSyntax("11n/ParameterHandleTo.p");
   }
+
+  @Test
+  public void testTenantKeywords() throws Exception {
+    testNewSyntax("11n/tenant.p");
+  }
+
 }

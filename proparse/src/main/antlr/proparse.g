@@ -460,6 +460,8 @@ builtinfunc
   |  SEEK^ LEFTPAREN (INPUT|OUTPUT|streamname|STREAMHANDLE expression) RIGHTPAREN // streamname, /not/ stream_name_or_handle.
   |  substringfunc // is also a pseudfn.
   |  SUPER^ parameterlist  // also noarg
+  |  TENANTID^ LEFTPAREN (expression)? RIGHTPAREN
+  |  TENANTNAME^ LEFTPAREN (expression)? RIGHTPAREN
   |  TIMEZONE^ funargs  // also noarg
   |  TYPEOF^ LEFTPAREN expression COMMA type_name RIGHTPAREN
   | GETCLASS^ LEFTPAREN type_name RIGHTPAREN
@@ -478,6 +480,8 @@ argfunc
     |  BASE64DECODE^
     |  BASE64ENCODE^
     |  BOX^
+    |  BUFFERTENANTID^
+    |  BUFFERTENANTNAME^
     |  CANDO^
     |  CANQUERY^
     |  CANSET^
@@ -518,6 +522,8 @@ argfunc
     |  GETBYTES^
     |  GETCOLLATIONS^
     |  GETDOUBLE^
+    |  GETEFFECTIVETENANTID^
+    |  GETEFFECTIVETENANTNAME^
     |  GETFLOAT^
     |  GETINT64^
     |  GETLICENSE^
@@ -537,6 +543,7 @@ argfunc
     |  INTERVAL^
     |  ISCODEPAGEFIXED^
     |  ISCOLUMNCODEPAGE^
+    |  ISDBMULTITENANT^
     |  ISLEADBYTE^
     |  ISODATE^
     |  KBLABEL^
@@ -581,12 +588,14 @@ argfunc
     |  SDBNAME^
     |  SEARCH^
     |  SETDBCLIENT^
+    |  SETEFFECTIVETENANT^
     |  SETUSERID^
     |  SHA1DIGEST^
     |  SQRT^
     |  SSLSERVERNAME^
     |  STRING^
     |  SUBSTITUTE^
+    |  TENANTNAMETOID^
     |  TOROWID^
     |  TRIM^
     |  TRUNCATE^
@@ -1727,7 +1736,7 @@ createstatement
     // Progress seems to treat this as a CREATE WIDGET-POOL statement rather than a
     // CREATE table statement. So, we'll resolve it the same way.
   :  (CREATE WIDGETPOOL state_end)=> createwidgetpoolstate
-  |  (CREATE record (USING|NOERROR_KW|PERIOD|EOF))=> createstate
+  |  (CREATE record (FOR|USING|NOERROR_KW|PERIOD|EOF))=> createstate
   |  create_whatever_state
   |  createaliasstate
   |  createautomationobjectstate
@@ -1746,8 +1755,12 @@ createstatement
   |  createwidgetstate
   ;
 
+for_tenant
+  :  FOR^ TENANT expression
+  ;
+
 createstate
-  :  CREATE^ record (using_row)? (NOERROR_KW)? state_end
+  :  CREATE^ record (for_tenant)? (using_row)? (NOERROR_KW)? state_end
     {sthd(##,0);}
   ;
 
@@ -1852,7 +1865,7 @@ createwidgetpoolstate
   ;
 
 currentvaluefunc
-  :  CURRENTVALUE^ LEFTPAREN sequencename (COMMA identifier)? RIGHTPAREN
+  :  CURRENTVALUE^ LEFTPAREN sequencename (COMMA expression (COMMA expression)? )? RIGHTPAREN
   ;
 
 // Basic variable class or primitive datatype syntax.
@@ -3553,6 +3566,7 @@ record_opt
     // (The constant NO-LOCK value is 6209).
   |  (WHERE (SHARELOCK|EXCLUSIVELOCK|NOLOCK|NOWAIT|NOPREFETCH|NOERROR_KW))=> WHERE^
   |  WHERE^ (options{greedy=true;}: expression)?
+  |  TENANTWHERE^ (options{greedy=true;}: expression)? /* TODO (SKIPGROUPDUPLICATES)? */
   |  USEINDEX^ identifier
   |  USING^ field (AND field)*
   |  lockhow
@@ -4232,9 +4246,11 @@ STATIC | THROW | TOPNAVQUERY | UNBOX
 // 10.2B
 ABSTRACT | DELEGATE | DYNAMICNEW | EVENT | FOREIGNKEYHIDDEN | SERIALIZEHIDDEN | SERIALIZENAME | SIGNATURE | STOPAFTER |
 // 11+
-GETCLASS | SERIALIZABLE | TABLESCAN | MESSAGEDIGEST | ENUM | FLAGS
+GETCLASS | SERIALIZABLE | TABLESCAN | MESSAGEDIGEST | ENUM | FLAGS |
+// Multi tenancy
+TENANT | TENANTID | TENANTNAME | TENANTNAMETOID | SETEFFECTIVETENANT | GETEFFECTIVETENANTID | GETEFFECTIVETENANTNAME |
+BUFFERTENANTID | BUFFERTENANTNAME | ISMULTITENANT | ISDBMULTITENANT | BUFFERGROUPID | BUFFERGROUPNAME
   ;
-
 
 reservedkeyword:
    ACCUMULATE | ACTIVEFORM | ACTIVEWINDOW | ADD | ALIAS | ALL | ALTER | AMBIGUOUS | AND 

@@ -433,6 +433,8 @@ functioncall throws TreeParserException
   |  #(SEEK LEFTPAREN (INPUT|OUTPUT|ID|STREAMHANDLE expression) RIGHTPAREN )
   |  substringfunc // is also a pseudfn.
   |  #(SUPER (parameterlist)? )
+  |  #(TENANTID LEFTPAREN (expression)? RIGHTPAREN )
+  |  #(TENANTNAME LEFTPAREN (expression)? RIGHTPAREN )
   |  #(TIMEZONE (funargs)? )
   |  #(TYPEOF LEFTPAREN expression COMMA TYPE_NAME RIGHTPAREN )
   | #(GETCLASS LEFTPAREN TYPE_NAME RIGHTPAREN )
@@ -453,6 +455,8 @@ argfunc throws TreeParserException
   |  #(BASE64DECODE funargs )
   |  #(BASE64ENCODE funargs )
   |  #(BOX funargs )
+  |  #(BUFFERTENANTID funargs )
+  |  #(BUFFERTENANTNAME funargs )
   |  #(CANDO funargs )
   |  #(CANQUERY funargs )
   |  #(CANSET funargs )
@@ -493,6 +497,8 @@ argfunc throws TreeParserException
   |  #(GETBYTES funargs )
   |  #(GETCOLLATIONS funargs )
   |  #(GETDOUBLE funargs )
+  |  #(GETEFFECTIVETENANTID funargs )
+  |  #(GETEFFECTIVETENANTNAME funargs )
   |  #(GETFLOAT funargs )
   |  #(GETINT64 funargs )
   |  #(GETLICENSE funargs )
@@ -512,6 +518,7 @@ argfunc throws TreeParserException
   |  #(INTERVAL funargs )
   |  #(ISCODEPAGEFIXED funargs )
   |  #(ISCOLUMNCODEPAGE funargs )
+  |  #(ISDBMULTITENANT funargs )
   |  #(ISLEADBYTE funargs )
   |  #(ISODATE funargs )
   |  #(KBLABEL funargs )
@@ -556,12 +563,14 @@ argfunc throws TreeParserException
   |  #(SDBNAME funargs )
   |  #(SEARCH funargs )
   |  #(SETDBCLIENT funargs )
+  |  #(SETEFFECTIVETENANT funargs )
   |  #(SETUSERID funargs )
   |  #(SHA1DIGEST funargs )
   |  #(SQRT funargs )
   |  #(SSLSERVERNAME funargs )
   |  #(STRING funargs )
   |  #(SUBSTITUTE funargs )
+  |  #(TENANTNAMETOID funargs )
   |  #(TOROWID funargs )
   |  #(TRIM funargs )
   |  #(TRUNCATE funargs )
@@ -1185,7 +1194,7 @@ copylobstate throws TreeParserException
   ;
 
 createstate throws TreeParserException
-  :  #(CREATE RECORD_NAME (#(USING (ROWID|RECID) expression))? (NOERROR_KW)? state_end )
+  :  #(CREATE RECORD_NAME (#(FOR TENANT expression))? (#(USING (ROWID|RECID) expression))? (NOERROR_KW)? state_end )
   ;
 
 create_whatever_args throws TreeParserException
@@ -1300,7 +1309,7 @@ createxnoderefstate throws TreeParserException
   ;
 
 currentvaluefunc throws TreeParserException
-  :  #(CURRENTVALUE LEFTPAREN ID (COMMA ID)? RIGHTPAREN )
+  :  #(CURRENTVALUE LEFTPAREN ID (COMMA expression (COMMA expression)? )? RIGHTPAREN )
   ;
 
 datatype throws TreeParserException
@@ -2466,6 +2475,7 @@ recordphrase throws TreeParserException
       |  OUTERJOIN
       |  #(OF RECORD_NAME )
       |  #(WHERE (expression)? )
+      |  #(TENANTWHERE (expression)? )
       |  #(USEINDEX ID )
       |  #(USING field (AND field)* )
       |  lockhow

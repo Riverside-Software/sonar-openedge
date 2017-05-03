@@ -194,6 +194,8 @@ functioncall throws TreeParserException
   |  #(SEEK LEFTPAREN (INPUT|OUTPUT|ID|STREAMHANDLE expression) RIGHTPAREN )
   |  substringfunc // is also a pseudfn.
   |  #(sr:SUPER {action.callBegin(#sr);} (parameterlist)? {action.callEnd();} )
+  |  #(TENANTID LEFTPAREN (expression)? RIGHTPAREN )
+  |  #(TENANTNAME LEFTPAREN (expression)? RIGHTPAREN )
   |  #(TIMEZONE (funargs)? )
   |  #(TYPEOF LEFTPAREN expression COMMA TYPE_NAME RIGHTPAREN )
   | #(GETCLASS LEFTPAREN TYPE_NAME RIGHTPAREN )
@@ -576,7 +578,7 @@ constructorstate throws TreeParserException
   ;
   
 createstate throws TreeParserException
-  :  #(CREATE tbl[ContextQualifier.UPDATING] (#(USING (ROWID|RECID) expression))? (NOERROR_KW)? state_end )
+  :  #(CREATE tbl[ContextQualifier.UPDATING] (#(FOR TENANT expression))? (#(USING (ROWID|RECID) expression))? (NOERROR_KW)? state_end )
   ;
 
 create_whatever_args throws TreeParserException
