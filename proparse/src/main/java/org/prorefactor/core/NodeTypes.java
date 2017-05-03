@@ -96,9 +96,9 @@ public class NodeTypes implements ProParserTokenTypes {
     return kwSet;
   }
 
-  /*static void add(int type, String fullText, int flags) {
+  static void add(int type, String fullText, int flags) {
     add(type, fullText.length(), fullText, flags);
-  }*/
+  }
 
   static void add(int type, int minAbbrev, String fullText, int flags) {
     // For some token types, there are "synonym" literals. For those synonym literals,
@@ -461,8 +461,8 @@ public class NodeTypes implements ProParserTokenTypes {
     add(BUFFERGROUPNAME, 17, "buffer-group-name", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
     add(BUFFERLINES, 12, "buffer-lines", TI.KEYWORD);
     add(BUFFERNAME, 8, "buffer-name", TI.KEYWORD);
-    add(BUFFERTENANTNAME, 18, "buffer-tenant-name", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
-    add(BUFFERTENANTID, 16, "buffer-tenant-id", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
+    add(BUFFERTENANTNAME, "buffer-tenant-name", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
+    add(BUFFERTENANTID, "buffer-tenant-id", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
     add(BUTTON, 6, "button", TI.KEYWORD);
     add(BUTTONS, 7, "buttons", TI.KEYWORD);
     add(BY, 2, "by", TI.KEYWORD | TI.RESERVED);
@@ -802,8 +802,8 @@ public class NodeTypes implements ProParserTokenTypes {
     add(GETCONFIGVALUE, 16, "get-config-value", TI.KEYWORD);
     add(GETDIR, 7, "get-dir", TI.KEYWORD);
     add(GETDOUBLE, 10, "get-double", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
-    add(GETEFFECTIVETENANTID, 23, "get-effective-tenant-id", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
-    add(GETEFFECTIVETENANTNAME, 25, "get-effective-tenant-name", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
+    add(GETEFFECTIVETENANTID, "get-effective-tenant-id", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
+    add(GETEFFECTIVETENANTNAME, "get-effective-tenant-name", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
     add(GETFILE, 8, "get-file", TI.KEYWORD);
     add(GETFLOAT, 9, "get-float", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
     add(GETINT64, 9, "get-int64", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
@@ -894,9 +894,9 @@ public class NodeTypes implements ProParserTokenTypes {
     add(ISATTRSPACE, 7, "is-attr-space", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_NO_ARG_FUNC);
     add(ISCODEPAGEFIXED, 17, "is-codepage-fixed", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
     add(ISCOLUMNCODEPAGE, 18, "is-column-codepage", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
-    add(ISDBMULTITENANT, 18, "is-db-multi-tenant", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
+    add(ISDBMULTITENANT, "is-db-multi-tenant", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
     add(ISLEADBYTE, 7, "is-lead-byte", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_REGULAR_FUNC);
-    add(ISMULTITENANT, 15, "is-multi-tenant", TI.KEYWORD);
+    add(ISMULTITENANT, "is-multi-tenant", TI.KEYWORD);
     add(ISODATE, 8, "iso-date", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
     add(ITEM, 4, "item", TI.KEYWORD);
     add(IUNKNOWN, 8, "iunknown", TI.KEYWORD);
@@ -1354,7 +1354,7 @@ public class NodeTypes implements ProParserTokenTypes {
     add(SETCONTENTS, 12, "set-contents", TI.KEYWORD);
     add(SETCURRENTVALUE, 17, "set-current-value", TI.KEYWORD);
     add(SETDBCLIENT, 13, "set-db-client", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
-    add(SETEFFECTIVETENANT, 20, "set-effective-tenant", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
+    add(SETEFFECTIVETENANT, "set-effective-tenant", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
     add(SETPOINTERVALUE, 15, "set-pointer-value", TI.KEYWORD);
     add(SETSIZE, 8, "set-size", TI.KEYWORD);
     add(SETUSERID, 7, "setuserid", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_REGULAR_FUNC);
@@ -1446,11 +1446,11 @@ public class NodeTypes implements ProParserTokenTypes {
     add(TARGET, 6, "target", TI.KEYWORD);
     add(TARGETPROCEDURE, 16, "target-procedure", TI.KEYWORD | TI.SYSHDL);
     add(TEMPTABLE, 10, "temp-table", TI.KEYWORD);
-    add(TENANT, 6, "tenant", TI.KEYWORD);
-    add(TENANTID, 9, "tenant-id", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
-    add(TENANTNAME, 11, "tenant-name", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
-    add(TENANTNAMETOID, 17, "tenant-name-to-id", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
-    add(TENANTWHERE, 12, "tenant-where", TI.KEYWORD | TI.RESERVED);
+    add(TENANT, "tenant", TI.KEYWORD);
+    add(TENANTID, "tenant-id", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
+    add(TENANTNAME, "tenant-name", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
+    add(TENANTNAMETOID, "tenant-name-to-id", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
+    add(TENANTWHERE, "tenant-where", TI.KEYWORD | TI.RESERVED);
     add(TERMINAL, 4, "term", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_NO_ARG_FUNC);
     add(TERMINAL, 8, "terminal", TI.EXTRA_LITERAL);
     add(TERMINATE, 9, "terminate", TI.KEYWORD);
