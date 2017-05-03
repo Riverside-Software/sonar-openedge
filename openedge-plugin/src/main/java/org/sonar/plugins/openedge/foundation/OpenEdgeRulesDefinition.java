@@ -50,7 +50,6 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
 
     AnnotationBasedRulesDefinition annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY);
     annotationLoader.addRuleClasses(false, Arrays.<Class> asList(OpenEdgeRulesRegistrar.ppCheckClasses()));
-    annotationLoader.addRuleClasses(false, Arrays.<Class> asList(OpenEdgeRulesRegistrar.xrefCheckClasses()));
 
     // Manually created rules for compiler warnings
     createWarningRule(repository, COMPILER_WARNING_RULEKEY, "Compiler warnings", "2h");

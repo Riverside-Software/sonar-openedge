@@ -12,6 +12,9 @@ import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.InvalidLicenceException;
 import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.google.common.base.Splitter;
 
@@ -143,6 +146,56 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     }
 
     return false;
+  }
+
+  protected static String getChildNodeValue(Node node, String nodeName) {
+    NodeList list = node.getChildNodes();
+    for (int idx = 0; idx < list.getLength(); idx++) {
+      Node subNode = list.item(idx);
+      if (nodeName.equals(subNode.getNodeName())) {
+        return ((Element) subNode).getChildNodes().item(0).getNodeValue();
+      }
+    }
+    return null;
+  }
+
+  public void reportIssue(InputFile file, Element element, String msg) {
+    if (!"Reference".equals(element.getNodeName())) {
+      throw new IllegalArgumentException("Invalid 'Reference' element");
+    }
+    InputFile file2 = getSourceFile(file, element);
+    int lineNumber = Integer.parseInt(getChildNodeValue(element, "Line-num"));
+    if (file2 == null) {
+      return;
+    } else {
+      NewIssue issue = getContext().newIssue().forRule(getRuleKey());
+      NewIssueLocation location = issue.newLocation().on(file2);
+      if (lineNumber > 0) {
+        if (lineNumber <= file2.lines()) {
+          location.at(file2.selectLine(lineNumber));
+        } else {
+          LOG.error("Invalid line number {} in XREF file {} (base file {})", lineNumber, file2.relativePath(),
+              file.relativePath());
+        }
+      }
+      if (file2 == file) {
+        location.message(msg);
+      } else {
+        location.message("From " + file.relativePath() + " - " + msg);
+      }
+      issue.at(location).save();
+    }
+  }
+
+  private InputFile getSourceFile(InputFile file, Element refElement) {
+    Element parentNode = (Element) refElement.getParentNode();
+    String fileNum = getChildNodeValue(refElement, "File-num");
+    if ("1".equals(fileNum)) {
+      return file;
+    } else {
+      return getContext().fileSystem().inputFile(
+          getContext().fileSystem().predicates().hasRelativePath(parentNode.getAttribute("File-name")));
+    }
   }
 
 }

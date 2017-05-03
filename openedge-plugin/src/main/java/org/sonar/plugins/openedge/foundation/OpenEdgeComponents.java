@@ -49,7 +49,6 @@ import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
-import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
 import org.sonar.plugins.openedge.api.com.google.common.base.Strings;
 import org.sonarsource.api.sonarlint.SonarLintSide;
 
@@ -66,12 +65,10 @@ public class OpenEdgeComponents {
   private final List<Class<? extends OpenEdgeCheck>> checkClasses = new ArrayList<>();
 
   private final Map<ActiveRule, OpenEdgeProparseCheck> ppChecksMap = new HashMap<>();
-  private final Map<ActiveRule, OpenEdgeXrefCheck> xrefChecksMap = new HashMap<>();
   private final Map<ActiveRule, OpenEdgeDumpFileCheck> dfChecksMap = new HashMap<>();
 
   private boolean initialized = false;
   private final List<OpenEdgeProparseCheck> ppChecks = new ArrayList<>();
-  private final List<OpenEdgeXrefCheck> xrefChecks = new ArrayList<>();
   private final List<OpenEdgeDumpFileCheck> dfChecks = new ArrayList<>();
 
   private final Map<String, Licence> licences = new HashMap<>();
@@ -103,10 +100,6 @@ public class OpenEdgeComponents {
     for (CheckRegistrar reg : checkRegistrars) {
       CheckRegistrar.RegistrarContext registrarContext = new CheckRegistrar.RegistrarContext();
       reg.register(registrarContext);
-      for (Class<? extends OpenEdgeXrefCheck> analyzer : registrarContext.getXrefCheckClasses()) {
-        LOG.debug("{} XREF check registered", analyzer.getName());
-        checkClasses.add(analyzer);
-      }
       for (Class<? extends OpenEdgeProparseCheck> analyzer : registrarContext.getProparseCheckClasses()) {
         LOG.debug("{} Proparse check registered", analyzer.getName());
         checkClasses.add(analyzer);
@@ -172,10 +165,6 @@ public class OpenEdgeComponents {
             ppChecks.add((OpenEdgeProparseCheck) lint);
             ppChecksMap.put(rule, (OpenEdgeProparseCheck) lint);
             break;
-          case XREF:
-            xrefChecks.add((OpenEdgeXrefCheck) lint);
-            xrefChecksMap.put(rule, (OpenEdgeXrefCheck) lint);
-            break;
         }
       }
     }
@@ -200,14 +189,6 @@ public class OpenEdgeComponents {
 
   public Map<ActiveRule, OpenEdgeDumpFileCheck> getDumpFileRules() {
     return Collections.unmodifiableMap(dfChecksMap);
-  }
-
-  public Collection<OpenEdgeXrefCheck> getXrefChecks() {
-    return Collections.unmodifiableList(xrefChecks);
-  }
-
-  public Map<ActiveRule, OpenEdgeXrefCheck> getXrefRules() {
-    return Collections.unmodifiableMap(xrefChecksMap);
   }
 
   public Licence getLicence(String repoName) {

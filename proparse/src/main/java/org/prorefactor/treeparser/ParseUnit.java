@@ -30,6 +30,7 @@ import org.prorefactor.treeparser01.ITreeParserAction;
 import org.prorefactor.treeparser01.TreeParser01;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 import antlr.ANTLRException;
 import antlr.RecognitionException;
@@ -52,6 +53,7 @@ public class ParseUnit {
   private ProgramRootNode topNode;
   private SymbolScopeRoot rootScope;
   private JPNodeMetrics metrics;
+  private Document xref = null;
 
   public ParseUnit(File file, RefactorSession prsession) {
     this.file = file;
@@ -204,4 +206,12 @@ public class ParseUnit {
     treeParser(tp);
   }
 
+  public void attachXref(Document xref) {
+    this.xref = xref;
+  }
+
+  @Nullable
+  public Document getXref() {
+    return xref;
+  }
 }

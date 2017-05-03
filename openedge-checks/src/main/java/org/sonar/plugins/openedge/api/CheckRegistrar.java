@@ -6,7 +6,6 @@ import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
-import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
 import org.sonarsource.api.sonarlint.SonarLintSide;
 
 @ScannerSide
@@ -28,17 +27,14 @@ public interface CheckRegistrar {
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckRegistrar.RegistrarContext.class);
 
     private String repositoryKey;
-    private Iterable<Class<? extends OpenEdgeXrefCheck>> xrefCheckClasses;
     private Iterable<Class<? extends OpenEdgeProparseCheck>> proparseCheckClasses;
     private Iterable<Class<? extends OpenEdgeDumpFileCheck>> dbCheckClasses;
 
     public void registerClassesForRepository(String repositoryKey,
-        Iterable<Class<? extends OpenEdgeXrefCheck>> xrefCheckClasses,
         Iterable<Class<? extends OpenEdgeProparseCheck>> proparseChecks,
         Iterable<Class<? extends OpenEdgeDumpFileCheck>> dbChecks) {
       LOGGER.debug("Registering class for repository {}", repositoryKey);
       this.repositoryKey = repositoryKey;
-      this.xrefCheckClasses = xrefCheckClasses;
       this.proparseCheckClasses = proparseChecks;
       this.dbCheckClasses = dbChecks;
     }
@@ -49,10 +45,6 @@ public interface CheckRegistrar {
 
     public Iterable<Class<? extends OpenEdgeDumpFileCheck>> getDbCheckClasses() {
       return dbCheckClasses;
-    }
-
-    public Iterable<Class<? extends OpenEdgeXrefCheck>> getXrefCheckClasses() {
-      return xrefCheckClasses;
     }
 
     public Iterable<Class<? extends OpenEdgeProparseCheck>> getProparseCheckClasses() {
