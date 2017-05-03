@@ -68,7 +68,9 @@ public class BugFixTest {
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, file), session);
     assertNull(pu.getTopNode());
     assertNull(pu.getRootScope());
+    assertNull(pu.getMetrics());
     pu.lex();
+    assertNotNull(pu.getMetrics());
   }
 
   @Test
