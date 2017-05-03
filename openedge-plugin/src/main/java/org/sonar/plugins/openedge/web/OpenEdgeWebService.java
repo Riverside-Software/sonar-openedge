@@ -1,5 +1,5 @@
 /*
- * OpenEdge DB plugin for SonarQube
+ * OpenEdge plugin for SonarQube
  * Copyright (C) 2013-2016 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
@@ -29,6 +29,7 @@ import org.sonar.api.server.ws.Response;
 import org.sonar.api.server.ws.WebService;
 import org.sonar.api.utils.text.JsonWriter;
 import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
+import org.sonar.plugins.openedge.api.com.google.common.io.BaseEncoding;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 
 public class OpenEdgeWebService implements WebService {
@@ -52,10 +53,15 @@ public class OpenEdgeWebService implements WebService {
       JsonWriter writer = response.newJsonWriter().beginObject().name("licences").beginArray();
       for (Licence lic : components.getLicences()) {
         writer.beginObject()
-          .prop("permanentId", lic.getPermanentId()).prop("customer", lic.getCustomerName()).prop("repository",
-              lic.getRepositoryName()).prop("type", lic.getType().name()).prop("expiration",
+          .prop("permanentId", lic.getPermanentId())
+          .prop("customer", lic.getCustomerName())
+          .prop("repository", lic.getRepositoryName())
+          .prop("type", lic.getType().name())
+          .prop("signature", BaseEncoding.base64().encode(lic.getSig()))
+          .prop("expiration",
                   LocalDateTime.ofEpochSecond(lic.getExpirationDate() / 1000, 0, ZoneOffset.UTC).format(
-                      DateTimeFormatter.ISO_LOCAL_DATE_TIME)).endObject();
+                      DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+          .endObject();
       }
       writer.endArray().endObject().close();
     }
