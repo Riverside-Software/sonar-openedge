@@ -79,7 +79,6 @@ public abstract class OpenEdgeCheck<T> {
 
   public enum CheckType {
     PROPARSE,
-    XREF,
     DUMP_FILE;
   }
 }

@@ -1,5 +1,7 @@
 package org.sonar.plugins.openedge.api.checks;
 
+import java.text.MessageFormat;
+
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.ProparseDirectiveNode;
 import org.prorefactor.treeparser.ParseUnit;
@@ -20,6 +22,7 @@ import com.google.common.base.Splitter;
 
 public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeProparseCheck.class);
+  private static final String INC_MESSAGE = "From {0} - {1}";
 
   /**
    * Standard constructor of a Proparse based check
@@ -89,7 +92,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     if (targetFile == file) {
       location.message(msg);
     } else {
-      location.message("From " + file.relativePath() + " - " + msg);
+      location.message(MessageFormat.format(INC_MESSAGE, file.relativePath(), msg));
     }
     issue.at(location).save();
   }
@@ -117,7 +120,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     if (targetFile == file) {
       location.message(msg);
     } else {
-      location.message("From " + file.relativePath() + " - " + msg);
+      location.message(MessageFormat.format(INC_MESSAGE, file.relativePath(), msg));
     }
     if (lineNumber > 0) {
       location.at(targetFile.selectLine(lineNumber));
@@ -181,7 +184,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
       if (file2 == file) {
         location.message(msg);
       } else {
-        location.message("From " + file.relativePath() + " - " + msg);
+        location.message(MessageFormat.format(INC_MESSAGE, file.relativePath(), msg));
       }
       issue.at(location).save();
     }
@@ -197,5 +200,4 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
           getContext().fileSystem().predicates().hasRelativePath(parentNode.getAttribute("File-name")));
     }
   }
-
 }

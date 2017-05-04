@@ -104,7 +104,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     try {
       this.dBuilder = dbFactory.newDocumentBuilder();
     } catch (ParserConfigurationException caught) {
-      throw new RuntimeException(caught);
+      throw new IllegalStateException(caught);
     }
   }
 
