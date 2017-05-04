@@ -264,4 +264,9 @@ public class BugFixTest {
     genericTest("include_comment.p");
   }
 
+  @Test
+  public void testTildeInComment() throws Exception {
+    genericLex("comment-tilde.p");
+  }
+
 }
