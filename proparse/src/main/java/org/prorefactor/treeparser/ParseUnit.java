@@ -114,8 +114,13 @@ public class ParseUnit {
     return MacroLevel.sourceArray(macroGraph);
   }
 
-  public TokenStream lex() throws RefactorException {
-    LOGGER.trace("Entering ParseUnit#lex()");
+  public TokenStream lex() throws IOException, RefactorException {
+    ProgressLexer lexer = new ProgressLexer(session, file.getPath());
+    return lexer.getANTLR2TokenStream(false);
+  }
+
+  public void lexAndGenerateMetrics() throws RefactorException {
+    LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
     try {
       ProgressLexer lexer = new ProgressLexer(session, file.getPath());
       TokenStream stream = lexer.getANTLR2TokenStream(false);
@@ -129,7 +134,6 @@ public class ParseUnit {
       }
       this.metrics = lexer.getMetrics();
       LOGGER.trace("Exiting ParseUnit#lex()");
-      return stream;
     } catch (IOException caught) {
       throw new RefactorException(caught);
     }

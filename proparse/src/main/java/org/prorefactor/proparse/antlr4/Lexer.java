@@ -395,15 +395,16 @@ public class Lexer  {
     // Single line comments are treated just like regular comments,
     // everything till end of line is considered comment - no escape
     // character to look after
-    append(); // currChar=='/'
     prepro.setDoingComment(true);
+    append(); // currChar=='/'
 
     while (true) {
       getChar();
-      unEscapedAppend();
-      if (currChar == '\r' || currChar == '\n' || currInt == EOF_CHAR) {
+      if ((currInt == EOF_CHAR) || (!prepro.isEscapeCurrent() && (currChar == '\r' || currChar == '\n' ))) {
         prepro.setDoingComment(false);
         return makeToken(PreprocessorParser.COMMENT);
+      } else {
+        unEscapedAppend();
       }
     }
   }

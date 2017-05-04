@@ -105,7 +105,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         long startTime = System.currentTimeMillis();
         ParseUnit unit = new ParseUnit(file.file(), settings.getProparseSession());
         ParseUnit lexUnit = new ParseUnit(file.file(), settings.getProparseSession());
-        TokenStream stream = lexUnit.lex();
+        lexUnit.lexAndGenerateMetrics();
         if (!isIncludeFile) {
           unit.treeParser01();
         }

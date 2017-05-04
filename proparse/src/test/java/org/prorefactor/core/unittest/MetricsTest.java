@@ -44,7 +44,7 @@ public class MetricsTest {
   @Test
   public void test02() throws Exception {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/inc3.i"), session);
-    unit.lex();
+    unit.lexAndGenerateMetrics();
 
     assertEquals(unit.getMetrics().getLoc(), 1);
     assertEquals(unit.getMetrics().getComments(), 2);
