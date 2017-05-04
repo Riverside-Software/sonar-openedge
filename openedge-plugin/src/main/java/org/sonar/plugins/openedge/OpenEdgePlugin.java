@@ -46,7 +46,6 @@ import org.sonar.plugins.openedge.sensor.OpenEdgeListingSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeProparseSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeWarningsSensor;
-import org.sonar.plugins.openedge.sensor.OpenEdgeXREFSensor;
 import org.sonar.plugins.openedge.web.OpenEdgeWebService;
 
 public class OpenEdgePlugin implements Plugin {
@@ -71,8 +70,7 @@ public class OpenEdgePlugin implements Plugin {
 
     // Sensors
     context.addExtensions(OpenEdgeSensor.class, OpenEdgeDBSensor.class, OpenEdgeListingSensor.class,
-        OpenEdgeWarningsSensor.class, OpenEdgeXREFSensor.class, OpenEdgeProparseSensor.class,
-        OpenEdgeDBRulesSensor.class);
+        OpenEdgeWarningsSensor.class, OpenEdgeProparseSensor.class, OpenEdgeDBRulesSensor.class);
 
     // Decorators
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);

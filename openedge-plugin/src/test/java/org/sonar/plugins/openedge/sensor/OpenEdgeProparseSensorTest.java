@@ -28,6 +28,7 @@ import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.foundation.ScannerIdProvider;
@@ -43,12 +44,13 @@ public class OpenEdgeProparseSensorTest {
   public void testCPDPreprocessorExpansion() throws Exception {
     SensorContextTester context = createContext();
     TestServer server = new TestServer();
+    IIdProvider idProvider = new TestIdProvider();
     context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
     context.settings().setProperty(Constants.CPD_METHODS, "TEST3");
     context.settings().setProperty(Constants.CPD_PROCEDURES, "adm-create-objects");
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem(), new TestIdProvider());
     OpenEdgeComponents components = new OpenEdgeComponents(new ScannerIdProvider(server), null, null);
-    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components, idProvider);
     sensor.execute(context);
     Assert.assertNotNull(context.cpdTokens("file3:src/procedures/test3.p"));
     Assert.assertEquals(context.cpdTokens("file3:src/procedures/test3.p").size(), 7);

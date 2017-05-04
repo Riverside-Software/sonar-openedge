@@ -26,7 +26,6 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
-import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 
 public class OpenEdgeRulesRegistrar implements CheckRegistrar {
@@ -41,15 +40,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
 
     // Call to registerClassesForRepository to associate the classes with the correct repository key
     registrarContext.registerClassesForRepository(OpenEdgeRulesDefinition.REPOSITORY_KEY,
-        Arrays.asList(xrefCheckClasses()), Arrays.asList(ppCheckClasses()), Arrays.asList(dbCheckClasses()));
-  }
-
-  /**
-   * Lists all the XREF checks provided by the plugin
-   */
-  @SuppressWarnings("unchecked")
-  public static Class<? extends OpenEdgeXrefCheck>[] xrefCheckClasses() {
-    return new Class[] {SharedObjectsAnalyzer.class};
+         Arrays.asList(ppCheckClasses()), Arrays.asList(dbCheckClasses()));
   }
 
   /**
@@ -57,7 +48,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
    */
   @SuppressWarnings("unchecked")
   public static Class<? extends OpenEdgeProparseCheck>[] ppCheckClasses() {
-    return new Class[] {};
+    return new Class[] {SharedObjectsAnalyzer.class};
   }
 
   /**

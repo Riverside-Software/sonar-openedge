@@ -21,6 +21,7 @@ package org.sonar.plugins.openedge.sensor;
 
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +34,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
@@ -57,10 +62,14 @@ import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.SymbolScope;
 import org.sonar.plugins.openedge.foundation.CPDCallback;
+import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
+import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 public class OpenEdgeProparseSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeProparseSensor.class);
@@ -68,145 +77,210 @@ public class OpenEdgeProparseSensor implements Sensor {
   // IoC
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
+  private final IIdProvider idProvider;
 
-  public OpenEdgeProparseSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
+  // Internal use
+  private final DocumentBuilderFactory dbFactory;
+  private final DocumentBuilder dBuilder;
+
+  // File statistics
+  private int numFiles;
+  private int numXREF;
+  private int numFailures;
+  // Timing statistics
+  private Map<String, Long> ruleTime = new HashMap<>();
+  private long parseTime = 0L;
+  private long xmlParseTime = 0L;
+  private long maxParseTime = 0L;
+  // Proparse debug
+  List<String> debugFiles = new ArrayList<>();
+
+  public OpenEdgeProparseSensor(OpenEdgeSettings settings, OpenEdgeComponents components, IIdProvider idProvider) {
     this.settings = settings;
     this.components = components;
+    this.idProvider = idProvider;
+
+    this.dbFactory = DocumentBuilderFactory.newInstance();
+    try {
+      this.dBuilder = dbFactory.newDocumentBuilder();
+    } catch (ParserConfigurationException caught) {
+      throw new IllegalStateException(caught);
+    }
   }
 
   @Override
   public void describe(SensorDescriptor descriptor) {
-    descriptor.name(getClass().getSimpleName());
-    descriptor.onlyOnLanguage(Constants.LANGUAGE_KEY);
+    descriptor.onlyOnLanguage(Constants.LANGUAGE_KEY).name(getClass().getSimpleName());
   }
 
   @Override
   public void execute(SensorContext context) {
     if (settings.skipProparseSensor())
       return;
-    int numFiles = 0;
-    int numFailures = 0;
-    List<String> debugFiles = new ArrayList<>();
-    Map<String, Long> ruleTime = new HashMap<>();
-    long parseTime = 0L;
-    long maxParseTime = 0L;
-    components.initializeChecks(context);
 
+    components.initializeChecks(context);
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
-    for (InputFile file : context.fileSystem().inputFiles(context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
+    for (InputFile file : context.fileSystem().inputFiles(
+        context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Parsing {}", new Object[] {file.relativePath()});
-      boolean isIncludeFile = "i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()));
       numFiles++;
-      try {
+
+      if ("i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()))) {
+        parseIncludeFile(context, file);
+      } else {
+        parseMainFile(context, file);
+      }
+    }
+
+    executeAnalytics();
+    logStatistics();
+    generateProparseDebugIndex();
+  }
+
+  private void parseIncludeFile(SensorContext context, InputFile file) {
+    long startTime = System.currentTimeMillis();
+    ParseUnit lexUnit = new ParseUnit(file.file(), settings.getProparseSession());
+    try {
+      lexUnit.lexAndGenerateMetrics();
+    } catch (RefactorException | ProparseRuntimeException caught) {
+      LOG.error("Error during code lexing for " + file.relativePath(), caught);
+      numFailures++;
+    }
+    updateParseTime(System.currentTimeMillis() - startTime);
+
+    if (lexUnit.getMetrics() != null) {
+      // Saving LOC and COMMENTS metrics
+      context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(
+          lexUnit.getMetrics().getLoc()).save();
+      context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
+          lexUnit.getMetrics().getComments()).save();
+    }
+  }
+
+  private void parseMainFile(SensorContext context, InputFile file) {
+    File xrefFile = getXrefFile(file.file());
+    Document doc = null;
+    if (!idProvider.isSonarLintSide() && (xrefFile != null) && xrefFile.exists()) {
+      LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
+      try (InputStream inpStream = new FileInputStream(xrefFile)) {
         long startTime = System.currentTimeMillis();
-        ParseUnit unit = new ParseUnit(file.file(), settings.getProparseSession());
-        ParseUnit lexUnit = new ParseUnit(file.file(), settings.getProparseSession());
-        lexUnit.lexAndGenerateMetrics();
-        if (!isIncludeFile) {
-          unit.treeParser01();
-        }
-        long elapsedTime = System.currentTimeMillis() - startTime;
-        parseTime += elapsedTime;
-        if (maxParseTime < elapsedTime) {
-          maxParseTime = elapsedTime;
-        }
-        LOG.debug("{} milliseconds to generate ParseUnit", elapsedTime);
-
-        // Saving LOC and COMMENTS metrics
-        context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(
-            lexUnit.getMetrics().getLoc()).save();
-        context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
-            lexUnit.getMetrics().getComments()).save();
-
-        if (isIncludeFile) {
-          // Rules and complexity are not applied on include files
-          continue;
-        }
-        if (!components.getIdProvider().isSonarLintSide()) {
-          computeCpd(context, file, unit);
-          computeCommonMetrics(context, file, unit);
-          computeComplexity(context, file, unit);
-        }
-
-        if (settings.useProparseDebug()) {
-          String fileName = ".proparse/" + file.relativePath() + ".json";
-          File dbgFile = new File(fileName);
-          dbgFile.getParentFile().mkdirs();
-          try (PrintWriter writer = new PrintWriter(dbgFile)) {
-            JsonNodeLister nodeLister = new JsonNodeLister(unit.getTopNode(), writer,
-                new Integer[] {
-                    NodeTypes.LEFTPAREN, NodeTypes.RIGHTPAREN, NodeTypes.COMMA, NodeTypes.PERIOD, NodeTypes.LEXCOLON,
-                    NodeTypes.OBJCOLON, NodeTypes.THEN, NodeTypes.END});
-            nodeLister.print();
-            debugFiles.add(file.relativePath() + ".json");
-          } catch (IOException caught) {
-            LOG.error("Unable to write proparse debug file", caught);
-          }
-        }
-
-        for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
-          LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}",
-              new Object[] {
-                  entry.getKey().internalKey(), entry.getKey().ruleKey().repository(),
-                  entry.getKey().ruleKey().rule()});
-          startTime = System.currentTimeMillis();
-          entry.getValue().execute(file, unit);
-          ruleTime.put(entry.getKey().ruleKey().toString(),
-              ruleTime.get(entry.getKey().ruleKey().toString()) + System.currentTimeMillis() - startTime);
-        }
-        
-      } catch (RefactorException | ProparseRuntimeException caught ) {
-        LOG.error("Error during code parsing for " + file.relativePath(), caught);
-        numFailures++;
-        NewIssue issue = context.newIssue();
-        issue.forRule(
-            RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
-                issue.newLocation().on(file).message(caught.getMessage())).save();
-      } catch (RuntimeException caught) {
-        LOG.error("Runtime exception was caught '{}' - Please report this issue : ", caught.getMessage());
-        for (StackTraceElement element : caught.getStackTrace()) {
-          LOG.error("  {}", element.toString());
-        }
-      }
-    }
-    new File("listingparser.txt").delete();
-
-    if (settings.useAnalytics()) {
-      String sid = components.getLicence(Constants.RSSW_REPOSITORY_KEY) == null ? "none"
-          : components.getLicence(Constants.RSSW_REPOSITORY_KEY).getPermanentId();
-      StringBuilder data = new StringBuilder(
-          String.format("proparse,sid=%1$s files=%2$d,failures=%3$d,parseTime=%4$d,maxParseTime=%5$d\n", sid, numFiles,
-              numFailures, parseTime, maxParseTime));
-      for (Entry<String, Long> entry : ruleTime.entrySet()) {
-        data.append(
-            String.format("rule,sid=%1$s,rulename=%2$s ruleTime=%3$d\n", sid, entry.getKey(), entry.getValue()));
-      }
-
-      try {
-        final URL url = new URL("http://sonar-analytics.rssw.eu/write?db=sonar");
-        HttpURLConnection connx = (HttpURLConnection) url.openConnection();
-        connx.setRequestMethod("POST");
-        connx.setConnectTimeout(2000);
-        connx.setDoOutput(true);
-        DataOutputStream wr = new DataOutputStream(connx.getOutputStream());
-        wr.writeBytes(data.toString());
-        wr.flush();
-        wr.close();
-        connx.getResponseCode();
-      } catch (IOException uncaught) {
-        LOG.debug("Unable to send analytics: {}", uncaught.getMessage());
+        doc = dBuilder.parse(
+            settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
+        xmlParseTime += (System.currentTimeMillis() - startTime);
+        numXREF++;
+      } catch (SAXException | IOException caught) {
+        LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
       }
     }
 
-    LOG.info("{} files proparse'd, {} failure(s)", numFiles, numFailures);
+    try {
+      long startTime = System.currentTimeMillis();
+      ParseUnit unit = new ParseUnit(file.file(), settings.getProparseSession());
+      unit.treeParser01();
+      unit.attachXref(doc);
+      updateParseTime(System.currentTimeMillis() - startTime);
+
+      if (!components.getIdProvider().isSonarLintSide()) {
+        computeCpd(context, file, unit);
+        computeSimpleMetrics(context, file, unit);
+        computeCommonMetrics(context, file, unit);
+        computeComplexity(context, file, unit);
+      }
+
+      if (settings.useProparseDebug()) {
+        generateProparseDebugFile(file, unit);
+      }
+
+      for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
+        LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}", new Object[] {
+            entry.getKey().internalKey(), entry.getKey().ruleKey().repository(), entry.getKey().ruleKey().rule()});
+        startTime = System.currentTimeMillis();
+        entry.getValue().execute(file, unit);
+        ruleTime.put(entry.getKey().ruleKey().toString(),
+            ruleTime.get(entry.getKey().ruleKey().toString()) + System.currentTimeMillis() - startTime);
+      }
+
+    } catch (RefactorException | ProparseRuntimeException caught) {
+      LOG.error("Error during code parsing for " + file.relativePath(), caught);
+      numFailures++;
+      NewIssue issue = context.newIssue();
+      issue.forRule(
+          RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
+              issue.newLocation().on(file).message(caught.getMessage())).save();
+    } catch (RuntimeException caught) {
+      LOG.error("Runtime exception was caught '{}' - Please report this issue : ", caught.getMessage());
+      for (StackTraceElement element : caught.getStackTrace()) {
+        LOG.error("  {}", element.toString());
+      }
+    }
+  }
+
+  private void updateParseTime(long elapsedTime) {
+    LOG.debug("{} milliseconds to generate ParseUnit", elapsedTime);
+    parseTime += elapsedTime;
+    if (maxParseTime < elapsedTime) {
+      maxParseTime = elapsedTime;
+    }
+  }
+
+  private void executeAnalytics() {
+    if (!settings.useAnalytics())
+      return;
+
+    String sid = components.getLicence(Constants.RSSW_REPOSITORY_KEY) == null ? "none"
+        : components.getLicence(Constants.RSSW_REPOSITORY_KEY).getPermanentId();
+    StringBuilder data = new StringBuilder(
+        String.format("proparse,sid=%1$s files=%2$d,failures=%3$d,parseTime=%4$d,maxParseTime=%5$d\n", sid, numFiles,
+            numFailures, parseTime, maxParseTime));
+    for (Entry<String, Long> entry : ruleTime.entrySet()) {
+      data.append(String.format("rule,sid=%1$s,rulename=%2$s ruleTime=%3$d\n", sid, entry.getKey(), entry.getValue()));
+    }
+
+    try {
+      final URL url = new URL("http://sonar-analytics.rssw.eu/write?db=sonar");
+      HttpURLConnection connx = (HttpURLConnection) url.openConnection();
+      connx.setRequestMethod("POST");
+      connx.setConnectTimeout(2000);
+      connx.setDoOutput(true);
+      DataOutputStream wr = new DataOutputStream(connx.getOutputStream());
+      wr.writeBytes(data.toString());
+      wr.flush();
+      wr.close();
+      connx.getResponseCode();
+    } catch (IOException uncaught) {
+      LOG.debug("Unable to send analytics: {}", uncaught.getMessage());
+    }
+  }
+
+  private void logStatistics() {
+    LOG.info("{} files proparse'd, {} XML files, {} failure(s)", numFiles, numXREF, numFailures);
     LOG.info("AST Generation | time={} ms", parseTime);
+    LOG.info("XML Parsing    | time={} ms", xmlParseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
     }
+  }
 
+  private void generateProparseDebugFile(InputFile file, ParseUnit unit) {
+    String fileName = ".proparse/" + file.relativePath() + ".json";
+    File dbgFile = new File(fileName);
+    dbgFile.getParentFile().mkdirs();
+    try (PrintWriter writer = new PrintWriter(dbgFile)) {
+      JsonNodeLister nodeLister = new JsonNodeLister(unit.getTopNode(), writer,
+          new Integer[] {
+              NodeTypes.LEFTPAREN, NodeTypes.RIGHTPAREN, NodeTypes.COMMA, NodeTypes.PERIOD, NodeTypes.LEXCOLON,
+              NodeTypes.OBJCOLON, NodeTypes.THEN, NodeTypes.END});
+      nodeLister.print();
+      debugFiles.add(file.relativePath() + ".json");
+    } catch (IOException caught) {
+      LOG.error("Unable to write proparse debug file", caught);
+    }
+  }
+
+  private void generateProparseDebugIndex() {
     if (settings.useProparseDebug()) {
       try (InputStream from = this.getClass().getResourceAsStream("/debug-index.html");
           OutputStream to = new FileOutputStream(new File(".proparse/index.html"))) {
@@ -232,14 +306,29 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
   }
 
+  private File getXrefFile(File file) {
+    String relPath = OpenEdgeProjectHelper.getPathRelativeToSourceDirs(file, settings.getSourceDirs());
+    if (relPath == null)
+      return null;
+    return new File(settings.getPctDir(), relPath + ".xref");
+  }
+
   private void computeCpd(SensorContext context, InputFile file, ParseUnit unit) {
     CPDCallback cpdCallback = new CPDCallback(context, file, settings, unit);
     unit.getTopNode().walk(cpdCallback);
     cpdCallback.getResult().save();
   }
 
+  private void computeSimpleMetrics(SensorContext context, InputFile file, ParseUnit unit) {
+    // Saving LOC and COMMENTS metrics
+    context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(unit.getMetrics().getLoc()).save();
+    context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
+        unit.getMetrics().getComments()).save();
+  }
+
   private void computeCommonMetrics(SensorContext context, InputFile file, ParseUnit unit) {
-    context.newMeasure().on(file).forMetric((Metric) CoreMetrics.STATEMENTS).withValue(unit.getTopNode().queryStateHead().size()).save();
+    context.newMeasure().on(file).forMetric((Metric) CoreMetrics.STATEMENTS).withValue(
+        unit.getTopNode().queryStateHead().size()).save();
     int numProcs = 0;
     int numFuncs = 0;
     int numMethds = 0;
@@ -249,7 +338,8 @@ public class OpenEdgeProparseSensor implements Sensor {
         case NodeTypes.PROCEDURE:
           boolean externalProc = false;
           for (JPNode node : child.getRootBlock().getNode().getDirectChildren()) {
-            if ((node.getType() == NodeTypes.IN_KW) || (node.getType() == NodeTypes.SUPER) || (node.getType() == NodeTypes.EXTERNAL)) {
+            if ((node.getType() == NodeTypes.IN_KW) || (node.getType() == NodeTypes.SUPER)
+                || (node.getType() == NodeTypes.EXTERNAL)) {
               externalProc = true;
             }
           }
@@ -272,7 +362,7 @@ public class OpenEdgeProparseSensor implements Sensor {
           numMethds++;
           break;
         default:
-            
+
       }
     }
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.INTERNAL_PROCEDURES).withValue(numProcs).save();

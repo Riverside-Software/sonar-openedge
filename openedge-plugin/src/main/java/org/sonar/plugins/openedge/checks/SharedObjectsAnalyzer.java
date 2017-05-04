@@ -31,14 +31,16 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.check.Priority;
 import org.sonar.check.Rule;
 import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
-import org.sonar.plugins.openedge.api.checks.OpenEdgeXrefCheck;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
+import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
-import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 @Rule(priority = Priority.MAJOR, name = "Shared objects analyzer")
-public class SharedObjectsAnalyzer extends OpenEdgeXrefCheck {
-  private static XPathExpression shrTTExpr, shrDSExpr, shrVarExpr;
+public class SharedObjectsAnalyzer extends OpenEdgeProparseCheck {
+  private static XPathExpression shrTTExpr;
+  private static XPathExpression shrDSExpr;
+  private static XPathExpression shrVarExpr;
 
   public SharedObjectsAnalyzer(RuleKey ruleKey, SensorContext context, Licence licence, String serverId) {
     super(ruleKey, context, licence, serverId);
@@ -56,22 +58,25 @@ public class SharedObjectsAnalyzer extends OpenEdgeXrefCheck {
   }
 
   @Override
-  public void execute(InputFile file, Document doc) {
+  public void execute(InputFile file, ParseUnit unit) {
+    if (unit.getXref() == null)
+      return;
+
     int numShrTT = 0, numShrDS = 0, numShrVar = 0;
     try {
-      NodeList nodeList = (NodeList) shrTTExpr.evaluate(doc, XPathConstants.NODESET);
+      NodeList nodeList = (NodeList) shrTTExpr.evaluate(unit.getXref(), XPathConstants.NODESET);
       numShrTT = nodeList.getLength();
     } catch (XPathExpressionException uncaught) {
 
     }
     try {
-      NodeList nodeList = (NodeList) shrDSExpr.evaluate(doc, XPathConstants.NODESET);
+      NodeList nodeList = (NodeList) shrDSExpr.evaluate(unit.getXref(), XPathConstants.NODESET);
       numShrDS = nodeList.getLength();
     } catch (XPathExpressionException uncaught) {
 
     }
     try {
-      NodeList nodeList = (NodeList) shrVarExpr.evaluate(doc, XPathConstants.NODESET);
+      NodeList nodeList = (NodeList) shrVarExpr.evaluate(unit.getXref(), XPathConstants.NODESET);
       numShrVar = nodeList.getLength();
     } catch (XPathExpressionException uncaught) {
 
@@ -81,4 +86,5 @@ public class SharedObjectsAnalyzer extends OpenEdgeXrefCheck {
     reportMeasure(file, OpenEdgeMetrics.SHR_DS, numShrDS);
     reportMeasure(file, OpenEdgeMetrics.SHR_VAR, numShrVar);
   }
+
 }

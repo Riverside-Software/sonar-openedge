@@ -97,6 +97,9 @@ public class OpenEdgeSettings {
     initializeCPD(settings);
     initializeXrefBytes(settings);
     LOG.info("Using backslash as escape character : {}", settings.getBoolean(Constants.BACKSLASH_ESCAPE));
+    if (useXrefFilter()) {
+      LOG.info("XML XREF filter activated [{}]", getXrefBytesAsString());
+    }
 
     Schema sch = readSchema(settings, fileSystem);
     IProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
