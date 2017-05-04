@@ -123,13 +123,12 @@ public class OpenEdgeProparseSensor implements Sensor {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
-    for (InputFile file : context.fileSystem().inputFiles(context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
+    for (InputFile file : context.fileSystem().inputFiles(
+        context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Parsing {}", new Object[] {file.relativePath()});
-
-      boolean isIncludeFile = "i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()));
       numFiles++;
 
-      if (isIncludeFile) {
+      if ("i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()))) {
         parseIncludeFile(context, file);
       } else {
         parseMainFile(context, file);
@@ -138,7 +137,7 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     executeAnalytics();
     logStatistics();
-    generateProparseDebug();
+    generateProparseDebugIndex();
   }
 
   private void parseIncludeFile(SensorContext context, InputFile file) {
@@ -146,7 +145,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     ParseUnit lexUnit = new ParseUnit(file.file(), settings.getProparseSession());
     try {
       lexUnit.lexAndGenerateMetrics();
-    } catch (RefactorException | ProparseRuntimeException caught ) {
+    } catch (RefactorException | ProparseRuntimeException caught) {
       LOG.error("Error during code lexing for " + file.relativePath(), caught);
       numFailures++;
     }
@@ -168,7 +167,8 @@ public class OpenEdgeProparseSensor implements Sensor {
       LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
       try (InputStream inpStream = new FileInputStream(xrefFile)) {
         long startTime = System.currentTimeMillis();
-        doc = dBuilder.parse(settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
+        doc = dBuilder.parse(
+            settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
         xmlParseTime += (System.currentTimeMillis() - startTime);
         numXREF++;
       } catch (SAXException | IOException caught) {
@@ -202,8 +202,8 @@ public class OpenEdgeProparseSensor implements Sensor {
         ruleTime.put(entry.getKey().ruleKey().toString(),
             ruleTime.get(entry.getKey().ruleKey().toString()) + System.currentTimeMillis() - startTime);
       }
-      
-    } catch (RefactorException | ProparseRuntimeException caught ) {
+
+    } catch (RefactorException | ProparseRuntimeException caught) {
       LOG.error("Error during code parsing for " + file.relativePath(), caught);
       numFailures++;
       NewIssue issue = context.newIssue();
@@ -216,24 +216,6 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.error("  {}", element.toString());
       }
     }
-  }
-
-  private void generateProparseDebugFile(InputFile file, ParseUnit unit) {
-    String fileName = ".proparse/" + file.relativePath() + ".json";
-    File dbgFile = new File(fileName);
-    dbgFile.getParentFile().mkdirs();
-    try (PrintWriter writer = new PrintWriter(dbgFile)) {
-      JsonNodeLister nodeLister = new JsonNodeLister(unit.getTopNode(), writer,
-          new Integer[] {
-              NodeTypes.LEFTPAREN, NodeTypes.RIGHTPAREN, NodeTypes.COMMA, NodeTypes.PERIOD, NodeTypes.LEXCOLON,
-              NodeTypes.OBJCOLON, NodeTypes.THEN, NodeTypes.END});
-      nodeLister.print();
-      debugFiles.add(file.relativePath() + ".json");
-    } catch (IOException caught) {
-      LOG.error("Unable to write proparse debug file", caught);
-    }
-
-    
   }
 
   private void updateParseTime(long elapsedTime) {
@@ -282,7 +264,23 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
   }
 
-  private void generateProparseDebug() {
+  private void generateProparseDebugFile(InputFile file, ParseUnit unit) {
+    String fileName = ".proparse/" + file.relativePath() + ".json";
+    File dbgFile = new File(fileName);
+    dbgFile.getParentFile().mkdirs();
+    try (PrintWriter writer = new PrintWriter(dbgFile)) {
+      JsonNodeLister nodeLister = new JsonNodeLister(unit.getTopNode(), writer,
+          new Integer[] {
+              NodeTypes.LEFTPAREN, NodeTypes.RIGHTPAREN, NodeTypes.COMMA, NodeTypes.PERIOD, NodeTypes.LEXCOLON,
+              NodeTypes.OBJCOLON, NodeTypes.THEN, NodeTypes.END});
+      nodeLister.print();
+      debugFiles.add(file.relativePath() + ".json");
+    } catch (IOException caught) {
+      LOG.error("Unable to write proparse debug file", caught);
+    }
+  }
+
+  private void generateProparseDebugIndex() {
     if (settings.useProparseDebug()) {
       try (InputStream from = this.getClass().getResourceAsStream("/debug-index.html");
           OutputStream to = new FileOutputStream(new File(".proparse/index.html"))) {
@@ -323,14 +321,14 @@ public class OpenEdgeProparseSensor implements Sensor {
 
   private void computeSimpleMetrics(SensorContext context, InputFile file, ParseUnit unit) {
     // Saving LOC and COMMENTS metrics
-    context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(
-        unit.getMetrics().getLoc()).save();
+    context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(unit.getMetrics().getLoc()).save();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
         unit.getMetrics().getComments()).save();
   }
 
   private void computeCommonMetrics(SensorContext context, InputFile file, ParseUnit unit) {
-    context.newMeasure().on(file).forMetric((Metric) CoreMetrics.STATEMENTS).withValue(unit.getTopNode().queryStateHead().size()).save();
+    context.newMeasure().on(file).forMetric((Metric) CoreMetrics.STATEMENTS).withValue(
+        unit.getTopNode().queryStateHead().size()).save();
     int numProcs = 0;
     int numFuncs = 0;
     int numMethds = 0;
@@ -340,7 +338,8 @@ public class OpenEdgeProparseSensor implements Sensor {
         case NodeTypes.PROCEDURE:
           boolean externalProc = false;
           for (JPNode node : child.getRootBlock().getNode().getDirectChildren()) {
-            if ((node.getType() == NodeTypes.IN_KW) || (node.getType() == NodeTypes.SUPER) || (node.getType() == NodeTypes.EXTERNAL)) {
+            if ((node.getType() == NodeTypes.IN_KW) || (node.getType() == NodeTypes.SUPER)
+                || (node.getType() == NodeTypes.EXTERNAL)) {
               externalProc = true;
             }
           }
@@ -363,7 +362,7 @@ public class OpenEdgeProparseSensor implements Sensor {
           numMethds++;
           break;
         default:
-            
+
       }
     }
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.INTERNAL_PROCEDURES).withValue(numProcs).save();
