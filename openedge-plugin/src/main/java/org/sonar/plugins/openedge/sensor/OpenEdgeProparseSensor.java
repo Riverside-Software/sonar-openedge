@@ -46,7 +46,6 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.api.antlr.TokenStream;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.api.com.google.common.io.ByteStreams;
 import org.sonar.plugins.openedge.api.com.google.common.io.Files;
@@ -105,7 +104,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         long startTime = System.currentTimeMillis();
         ParseUnit unit = new ParseUnit(file.file(), settings.getProparseSession());
         ParseUnit lexUnit = new ParseUnit(file.file(), settings.getProparseSession());
-        TokenStream stream = lexUnit.lex();
+        lexUnit.lexAndGenerateMetrics();
         if (!isIncludeFile) {
           unit.treeParser01();
         }

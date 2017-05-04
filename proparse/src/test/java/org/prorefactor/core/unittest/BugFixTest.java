@@ -7,6 +7,7 @@
  *******************************************************************************/
 package org.prorefactor.core.unittest;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
@@ -24,6 +25,9 @@ import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import antlr.Token;
+import antlr.TokenStream;
 
 /**
  * Test the tree parsers against problematic syntax. These tests just run the tree parsers against the data/bugsfixed
@@ -64,13 +68,14 @@ public class BugFixTest {
     writer.close();
   }
 
-  private void genericLex(String file) throws Exception {
+  private TokenStream genericLex(String file) throws Exception {
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, file), session);
     assertNull(pu.getTopNode());
     assertNull(pu.getRootScope());
     assertNull(pu.getMetrics());
-    pu.lex();
+    pu.lexAndGenerateMetrics();
     assertNotNull(pu.getMetrics());
+    return pu.lex();
   }
 
   @Test
@@ -262,6 +267,26 @@ public class BugFixTest {
   @Test
   public void testIncludeInComment() throws Exception {
     genericTest("include_comment.p");
+  }
+
+  @Test
+  public void testTildeInComment() throws Exception {
+    TokenStream stream = genericLex("comment-tilde.p");
+    Token tok = stream.nextToken();
+    assertEquals(tok.getType(), NodeTypes.COMMENT);
+    assertEquals(tok.getText(), "// \"~n\"");
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), NodeTypes.DEFINE);
+  }
+
+  @Test
+  public void testTildeInComment2() throws Exception {
+    TokenStream stream = genericLex("comment-tilde2.p");
+    assertEquals(stream.nextToken().getType(), NodeTypes.DEFINE);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    Token tok = stream.nextToken();
+    assertEquals(tok.getType(), NodeTypes.COMMENT);
+    assertEquals(tok.getText(), "// \"~n\"");
   }
 
 }
