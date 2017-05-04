@@ -146,7 +146,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     ParseUnit lexUnit = new ParseUnit(file.file(), settings.getProparseSession());
     try {
       lexUnit.lexAndGenerateMetrics();
-    } catch (IOException | ProparseRuntimeException caught ) {
+    } catch (RefactorException | ProparseRuntimeException caught ) {
       LOG.error("Error during code lexing for " + file.relativePath(), caught);
       numFailures++;
     }
