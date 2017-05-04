@@ -114,7 +114,7 @@ public class ParseUnit {
     return MacroLevel.sourceArray(macroGraph);
   }
 
-  public TokenStream lex() throws IOException, RefactorException {
+  public TokenStream lex() throws IOException {
     ProgressLexer lexer = new ProgressLexer(session, file.getPath());
     return lexer.getANTLR2TokenStream(false);
   }
