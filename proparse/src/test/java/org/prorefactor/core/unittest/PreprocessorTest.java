@@ -126,6 +126,16 @@ public class PreprocessorTest {
   }
 
   @Test
+  public void testGreaterEquals3() throws Exception {
+    testVariable(unit.getTopNode(), "var44");
+  }
+
+  @Test
+  public void testGreaterEquals4() throws Exception {
+    testNoVariable(unit.getTopNode(), "var45");
+  }
+
+  @Test
   public void testLesserEquals1() throws Exception {
     testVariable(unit.getTopNode(), "var15");
   }
@@ -133,6 +143,16 @@ public class PreprocessorTest {
   @Test
   public void testLesserEquals2() throws Exception {
     testNoVariable(unit.getTopNode(), "var16");
+  }
+
+  @Test
+  public void testLesserEquals3() throws Exception {
+    testVariable(unit.getTopNode(), "var42");
+  }
+
+  @Test
+  public void testLesserEquals4() throws Exception {
+    testNoVariable(unit.getTopNode(), "var43");
   }
 
   @Test

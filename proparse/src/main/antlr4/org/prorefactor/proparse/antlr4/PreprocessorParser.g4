@@ -14,7 +14,7 @@ expr:
   | expr op=(STAR | MULTIPLY | SLASH | DIVIDE | MODULO) expr
                                       # multiply
   | expr op=(PLUS | MINUS) expr       # plus
-  | expr op=(EQUAL | EQ | GTORLT | NE | RIGHTANGLE | GTHAN | LEFTANGLE | LTHAN | GTOREQUAL | GE | LEFTANGLE | LE) expr
+  | expr op=(EQUAL | EQ | GTORLT | NE | RIGHTANGLE | GTHAN | LEFTANGLE | LTHAN | GTOREQUAL | GE | LTOREQUAL | LE) expr
                                       # comparison
   | NOT expr                          # not
   | expr op=(OR | AND) expr           # andOr
