@@ -281,4 +281,12 @@ public class PreprocessorTest {
   public void testSubstring4() throws Exception {
     testVariable(unit.getTopNode(), "var41");
   }
+
+  public void testMacroGraph() throws Exception {
+    Assert.assertEquals(unit.getMacroGraph().findExternalMacroReferences().size(), 2);
+    Assert.assertEquals(unit.getMacroGraph().findExternalMacroReferences(new int[] {28,1}, new int[] {40,1}).size(), 2);
+    Assert.assertEquals(unit.getMacroGraph().findExternalMacroReferences(new int[] {28,1}, new int[] {30,1}).size(), 1);
+    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(0), 1);
+    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(1), 0);
+  }
 }
