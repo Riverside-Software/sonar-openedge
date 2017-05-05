@@ -78,19 +78,12 @@ public abstract class MacroRef implements MacroEvent {
     List<MacroEvent> ret = new ArrayList<>();
     for (Iterator<MacroEvent> it = macroEventList.iterator(); it.hasNext();) {
       MacroEvent next = it.next();
-      if (next instanceof MacroRef) {
-        MacroRef ref = (MacroRef) next;
-        if (isInRange(ref.refLine, ref.refColumn, begin, end)) {
-          findExternalMacroReferences(ref, ret);
-        }
-        continue;
-      }
-      if (next instanceof MacroDef) {
-        MacroDef def = (MacroDef) next;
-        if (isInRange(def.getLine(), def.getColumn(), begin, end))
-          findExternalMacroReferences(def, ret);
+      MacroPosition pos = next.getPosition();
+      if (isInRange(pos.getLine(), pos.getColumn(), begin, end)) {
+        findExternalMacroReferences(next, ret);
       }
     }
+
     return ret;
   }
 
@@ -159,16 +152,7 @@ public abstract class MacroRef implements MacroEvent {
 
   @Override
   public MacroPosition getPosition() {
-    return new MacroPosition(parent.getFileIndex(), refLine, refColumn);
-  }
-
-  /** Is a macro ref/def myself, or, a child of mine? */
-  private boolean isMine(MacroEvent obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    return isMine(obj.getParent());
+    return new MacroPosition(parent == null ? 0 : parent.getFileIndex(), refLine, refColumn);
   }
 
   /**

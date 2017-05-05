@@ -50,14 +50,6 @@ public class MacroDef implements MacroEvent {
     return parent;
   }
 
-  public int getLine() {
-    return line;
-  }
-
-  public int getColumn() {
-    return column;
-  }
-
   public int getType() {
     return type;
   }

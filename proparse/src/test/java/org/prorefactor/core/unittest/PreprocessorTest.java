@@ -11,10 +11,12 @@
 package org.prorefactor.core.unittest;
 
 import java.io.File;
+import java.util.List;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.macrolevel.MacroEvent;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.Assert;
@@ -274,19 +276,14 @@ public class PreprocessorTest {
     testVariable(unit.getTopNode(), "var39");
   }
 
+  @Test
   public void testSubstring3() throws Exception {
     testVariable(unit.getTopNode(), "var40");
   }
 
+  @Test
   public void testSubstring4() throws Exception {
     testVariable(unit.getTopNode(), "var41");
   }
 
-  public void testMacroGraph() throws Exception {
-    Assert.assertEquals(unit.getMacroGraph().findExternalMacroReferences().size(), 2);
-    Assert.assertEquals(unit.getMacroGraph().findExternalMacroReferences(new int[] {28,1}, new int[] {40,1}).size(), 2);
-    Assert.assertEquals(unit.getMacroGraph().findExternalMacroReferences(new int[] {28,1}, new int[] {30,1}).size(), 1);
-    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(0), 1);
-    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(1), 0);
-  }
 }

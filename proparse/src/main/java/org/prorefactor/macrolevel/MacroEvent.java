@@ -10,8 +10,6 @@
  *******************************************************************************/ 
 package org.prorefactor.macrolevel;
 
-import org.prorefactor.refactor.RefactorException;
-
 /**
  * Interface for a node in the macro event tree.
  */
@@ -25,6 +23,15 @@ public interface MacroEvent {
   /**
    * @return Position of this macro reference
    */
-  MacroPosition getPosition() throws RefactorException;
+  MacroPosition getPosition();
+
+  /** Is a macro ref/def myself, or, a child of mine? */
+  default boolean isMine(MacroEvent obj) {
+    if (obj == null)
+      return false;
+    if (obj == this)
+      return true;
+    return isMine(obj.getParent());
+  }
 
 }
