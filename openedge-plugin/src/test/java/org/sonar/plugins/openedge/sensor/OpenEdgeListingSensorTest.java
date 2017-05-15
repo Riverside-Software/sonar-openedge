@@ -28,7 +28,6 @@ import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
@@ -44,9 +43,8 @@ public class OpenEdgeListingSensorTest {
   public void testListing() throws Exception {
     SensorContextTester context = createContext();
 
-    IIdProvider idProvider = new TestIdProvider();
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem(), idProvider);
-    OpenEdgeListingSensor sensor = new OpenEdgeListingSensor(oeSettings, context.fileSystem(), idProvider);
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    OpenEdgeListingSensor sensor = new OpenEdgeListingSensor(oeSettings, context.fileSystem());
     sensor.execute(context);
 
     Assert.assertEquals(context.measure("file1:src/procedures/test1.p", OpenEdgeMetrics.NUM_TRANSACTIONS_KEY).value(),

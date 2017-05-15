@@ -44,8 +44,10 @@ import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.refactor.RefactorException;
+import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.SymbolScope;
+import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.rule.ActiveRule;
@@ -60,7 +62,6 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.foundation.CPDCallback;
-import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
@@ -78,7 +79,6 @@ public class OpenEdgeProparseSensor implements Sensor {
   // IoC
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
-  private final IIdProvider idProvider;
 
   // Internal use
   private final DocumentBuilderFactory dbFactory;
@@ -96,10 +96,9 @@ public class OpenEdgeProparseSensor implements Sensor {
   // Proparse debug
   List<String> debugFiles = new ArrayList<>();
 
-  public OpenEdgeProparseSensor(OpenEdgeSettings settings, OpenEdgeComponents components, IIdProvider idProvider) {
+  public OpenEdgeProparseSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
     this.settings = settings;
     this.components = components;
-    this.idProvider = idProvider;
 
     this.dbFactory = DocumentBuilderFactory.newInstance();
     try {
@@ -123,16 +122,16 @@ public class OpenEdgeProparseSensor implements Sensor {
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
-
+    RefactorSession session = settings.getProparseSession(context.runtime().getProduct() == SonarProduct.SONARLINT);
     for (InputFile file : context.fileSystem().inputFiles(
         context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Parsing {}", new Object[] {file.relativePath()});
       numFiles++;
 
       if ("i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()))) {
-        parseIncludeFile(context, file);
+        parseIncludeFile(context, file, session);
       } else {
-        parseMainFile(context, file);
+        parseMainFile(context, file, session);
       }
     }
 
@@ -141,9 +140,9 @@ public class OpenEdgeProparseSensor implements Sensor {
     generateProparseDebugIndex();
   }
 
-  private void parseIncludeFile(SensorContext context, InputFile file) {
+  private void parseIncludeFile(SensorContext context, InputFile file, RefactorSession session) {
     long startTime = System.currentTimeMillis();
-    ParseUnit lexUnit = new ParseUnit(file.file(), settings.getProparseSession());
+    ParseUnit lexUnit = new ParseUnit(file.file(), session);
     try {
       lexUnit.lexAndGenerateMetrics();
     } catch (RefactorException | ProparseRuntimeException caught) {
@@ -161,10 +160,10 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
   }
 
-  private void parseMainFile(SensorContext context, InputFile file) {
+  private void parseMainFile(SensorContext context, InputFile file, RefactorSession session) {
     File xrefFile = getXrefFile(file.file());
     Document doc = null;
-    if (!idProvider.isSonarLintSide() && (xrefFile != null) && xrefFile.exists()) {
+    if ((context.runtime().getProduct() == SonarProduct.SONARQUBE) && (xrefFile != null) && xrefFile.exists()) {
       LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
       try (InputStream inpStream = new FileInputStream(xrefFile)) {
         long startTime = System.currentTimeMillis();
@@ -179,12 +178,12 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     try {
       long startTime = System.currentTimeMillis();
-      ParseUnit unit = new ParseUnit(file.file(), settings.getProparseSession());
+      ParseUnit unit = new ParseUnit(file.file(), session);
       unit.treeParser01();
       unit.attachXref(doc);
       updateParseTime(System.currentTimeMillis() - startTime);
 
-      if (!components.getIdProvider().isSonarLintSide()) {
+      if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
         computeCpd(context, file, unit);
         computeSimpleMetrics(context, file, unit);
         computeCommonMetrics(context, file, unit);

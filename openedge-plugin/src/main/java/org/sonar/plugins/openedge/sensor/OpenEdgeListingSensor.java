@@ -22,6 +22,7 @@ package org.sonar.plugins.openedge.sensor;
 import java.io.File;
 import java.io.IOException;
 
+import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
@@ -33,7 +34,6 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
@@ -48,12 +48,10 @@ public class OpenEdgeListingSensor implements Sensor {
   // IoC
   private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;
-  private final IIdProvider idProvider;
 
-  public OpenEdgeListingSensor(OpenEdgeSettings settings, FileSystem fileSystem, IIdProvider idProvider) {
+  public OpenEdgeListingSensor(OpenEdgeSettings settings, FileSystem fileSystem) {
     this.fileSystem = fileSystem;
     this.settings = settings;
-    this.idProvider = idProvider;
   }
 
   @Override
@@ -71,7 +69,7 @@ public class OpenEdgeListingSensor implements Sensor {
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void execute(SensorContext context) {
-    if (idProvider.isSonarLintSide())
+    if (context.runtime().getProduct() == SonarProduct.SONARLINT)
       return;
 
     int dbgImportNum = 0;

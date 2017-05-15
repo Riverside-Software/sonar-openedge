@@ -41,7 +41,6 @@ import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.IProparseSettings;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.sonar.api.CoreProperties;
-import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.config.Settings;
@@ -61,13 +60,12 @@ import eu.rssw.antlr.database.objects.DatabaseDescription;
 
 @ScannerSide
 @SonarLintSide
-@BatchSide
 public class OpenEdgeSettings {
   private static final Logger LOG = Loggers.get(OpenEdgeSettings.class);
 
   // IoC
   private final Settings settings;
-  private final IIdProvider idProvider;
+  private final FileSystem fileSystem;
 
   // Internal use
   private final List<String> sourceDirs = new ArrayList<>();
@@ -77,12 +75,13 @@ public class OpenEdgeSettings {
   private final Set<String> cpdAnnotations = new HashSet<>();
   private final Set<String> cpdMethods = new HashSet<>();
   private final Set<String> cpdProcedures = new HashSet<>();
-  private final RefactorSession proparseSession;
   private final Set<Integer> xrefBytes = new HashSet<>();
 
-  public OpenEdgeSettings(Settings settings, FileSystem fileSystem, IIdProvider idProvider) {
+  private RefactorSession proparseSession;
+
+  public OpenEdgeSettings(Settings settings, FileSystem fileSystem) {
     this.settings = settings;
-    this.idProvider = idProvider;
+    this.fileSystem = fileSystem;
 
     initializeDirectories(settings, fileSystem);
 
@@ -102,11 +101,6 @@ public class OpenEdgeSettings {
     if (useXrefFilter()) {
       LOG.info("XML XREF filter activated [{}]", getXrefBytesAsString());
     }
-
-    Schema sch = readSchema(settings, fileSystem);
-    IProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
-        settings.getBoolean(Constants.BACKSLASH_ESCAPE));
-    proparseSession = new RefactorSession(ppSettings, sch, encoding());
   }
 
   private final void initializeDirectories(Settings settings, FileSystem fileSystem) {
@@ -307,7 +301,14 @@ public class OpenEdgeSettings {
     return Joiner.on(',').skipNulls().join(propath);
   }
 
-  public RefactorSession getProparseSession() {
+  public RefactorSession getProparseSession(boolean useCache) {
+    if (proparseSession == null) {
+      Schema sch = readSchema(settings, fileSystem, useCache);
+      IProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
+          settings.getBoolean(Constants.BACKSLASH_ESCAPE));
+      proparseSession = new RefactorSession(ppSettings, sch, encoding());
+    }
+
     return proparseSession;
   }
 
@@ -323,7 +324,7 @@ public class OpenEdgeSettings {
     }
   }
 
-  private Schema readSchema(Settings settings, FileSystem fileSystem) {
+  private Schema readSchema(Settings settings, FileSystem fileSystem, boolean useCache) {
     String dbList = Strings.nullToEmpty(settings.getString(Constants.DATABASES));
     LOG.info("Using schema : {}", dbList);
     Collection<IDatabase> dbs = new ArrayList<>();
@@ -343,7 +344,7 @@ public class OpenEdgeSettings {
       File serFile = new File(fileSystem.baseDir(), ".sonarlint/" + str.replace('\\', '_').replace('/', '_') + ".bin");
       serFile.getParentFile().mkdir();
       DatabaseDescription desc = null;
-      if (idProvider.isSonarLintSide() && (dfFile.lastModified() < serFile.lastModified())) {
+      if (useCache && (dfFile.lastModified() < serFile.lastModified())) {
         LOG.debug("SonarLint side, using serialized file");
         try (InputStream is = new FileInputStream(serFile)) {
           desc = DatabaseDescription.deserialize(is, dbName);
@@ -357,7 +358,7 @@ public class OpenEdgeSettings {
         } catch (IOException caught) {
           LOG.error("Unable to parse " + str, caught);
         }
-        if ((desc != null) && idProvider.isSonarLintSide()) {
+        if ((desc != null) && useCache) {
           try (OutputStream os = new FileOutputStream(serFile)) {
             desc.serialize(os);
           } catch (IOException caught) {

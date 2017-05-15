@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
-import org.sonar.api.batch.BatchSide;
+import org.sonar.api.CoreProperties;
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -55,16 +55,11 @@ import com.google.common.base.Strings;
 
 @ScannerSide
 @SonarLintSide
-@BatchSide
 @ServerSide
 public class OpenEdgeComponents {
   private static final Logger LOG = Loggers.get(OpenEdgeComponents.class);
 
-  // IoC
-  private final IIdProvider idProvider;
-
   private final List<Class<? extends OpenEdgeCheck>> checkClasses = new ArrayList<>();
-
   private final Map<ActiveRule, OpenEdgeProparseCheck> ppChecksMap = new HashMap<>();
   private final Map<ActiveRule, OpenEdgeDumpFileCheck> dfChecksMap = new HashMap<>();
 
@@ -74,26 +69,24 @@ public class OpenEdgeComponents {
 
   private final Map<String, Licence> licences = new HashMap<>();
 
-  public OpenEdgeComponents(IIdProvider provider) {
-    this(provider, null, null);
+  public OpenEdgeComponents() {
+    this(null, null);
   }
 
-  public OpenEdgeComponents(IIdProvider provider, CheckRegistrar[] checkRegistrars) {
-    this(provider, checkRegistrars, null);
+  public OpenEdgeComponents(CheckRegistrar[] checkRegistrars) {
+    this(checkRegistrars, null);
   }
 
-  public OpenEdgeComponents(IIdProvider provider, LicenceRegistrar[] licRegistrars) {
-    this(provider, null, licRegistrars);
+  public OpenEdgeComponents(LicenceRegistrar[] licRegistrars) {
+    this(null, licRegistrars);
   }
 
-  public OpenEdgeComponents(IIdProvider provider, CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
-    this.idProvider = provider;
-
+  public OpenEdgeComponents(CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
     if (checkRegistrars != null) {
       registerChecks(checkRegistrars);
     }
     if (licRegistrars != null) {
-      registerLicences(licRegistrars, Strings.nullToEmpty(idProvider.getPermanentID()));
+      registerLicences(licRegistrars /*, Strings.nullToEmpty(idProvider.getPermanentID())*/);
     }
   }
 
@@ -112,7 +105,7 @@ public class OpenEdgeComponents {
     }
   }
 
-  private void registerLicences(LicenceRegistrar[] licRegistrars, String permanentId) {
+  private void registerLicences(LicenceRegistrar[] licRegistrars /*, String permanentId*/) {
     for (LicenceRegistrar reg : licRegistrars) {
       LicenceRegistrar.Licence lic = new LicenceRegistrar.Licence();
       reg.register(lic);
@@ -122,10 +115,10 @@ public class OpenEdgeComponents {
       LOG.debug("Found {} licence - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
           lic.getType().toString(), lic.getPermanentId(), lic.getCustomerName(), lic.getRepositoryName(),
           DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date(lic.getExpirationDate())));
-      if (!lic.getPermanentId().isEmpty() && !permanentId.equals(lic.getPermanentId())) {
-        LOG.debug("Skipped licence as it doesn't match permanent ID '{}'", permanentId);
-        continue;
-      }
+//      if (!lic.getPermanentId().isEmpty() && !permanentId.equals(lic.getPermanentId())) {
+//        LOG.debug("Skipped licence as it doesn't match permanent ID '{}'", permanentId);
+//        continue;
+//      }
       // Licence with highest expiration date wins
       Licence existingLic = licences.get(lic.getRepositoryName());
       if ((existingLic == null) || (existingLic.getExpirationDate() < lic.getExpirationDate())) {
@@ -153,7 +146,7 @@ public class OpenEdgeComponents {
       // AFAIK, no way to be sure if a rule is based on a template or not
       String clsName = rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey();
       OpenEdgeCheck lint = getAnalyzer(clsName, ruleKey, context, getLicence(ruleKey.repository()),
-          Strings.nullToEmpty(idProvider.getPermanentID()));
+          Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID)));
       if (lint != null) {
         configureFields(rule, lint);
         lint.initialize();
@@ -170,10 +163,6 @@ public class OpenEdgeComponents {
       }
     }
     initialized = true;
-  }
-
-  public IIdProvider getIdProvider() {
-    return idProvider;
   }
 
   public Collection<OpenEdgeProparseCheck> getProparseChecks() {

@@ -28,7 +28,6 @@ import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -42,7 +41,7 @@ public class OpenEdgeSensorTest {
   public void testMetrics() throws Exception {
     SensorContextTester context = createContext();
 
-    OpenEdgeSensor sensor = new OpenEdgeSensor(context.fileSystem(), createIdProvider());
+    OpenEdgeSensor sensor = new OpenEdgeSensor(context.fileSystem());
     sensor.execute(context);
 
     Assert.assertEquals(1, context.measure("file1:src/procedures/test1.p", OpenEdgeMetrics.PROCEDURES_KEY).value());
@@ -61,21 +60,6 @@ public class OpenEdgeSensorTest {
             Files.toString(new File(moduleBaseDir, FILE2), Charset.defaultCharset())));
 
     return context;
-  }
-
-  private IIdProvider createIdProvider() {
-    return new IIdProvider() {
-
-      @Override
-      public String getPermanentID() {
-        return "";
-      }
-
-      @Override
-      public boolean isSonarLintSide() {
-        return false;
-      }
-    };
   }
 
 }
