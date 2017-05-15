@@ -152,6 +152,9 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     if ((node.getFileIndex() > 0) || (node.getLine() <= 0) || (node.getFileIndex() != node.getEndFileIndex())){
       return;
     }
+    if ((node.getLine() == node.getEndLine()) && (node.getColumn() == node.getEndColumn())) {
+      return;
+    }
     String str = NodeTypes.getFullText(node.getType());
     // Identifiers are also using the same case
     if ((str == null) || (str.trim().length() == 0)) {
