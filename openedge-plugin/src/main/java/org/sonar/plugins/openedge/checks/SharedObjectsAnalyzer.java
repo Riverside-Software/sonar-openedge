@@ -25,6 +25,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.rule.RuleKey;
@@ -32,7 +33,6 @@ import org.sonar.check.Priority;
 import org.sonar.check.Rule;
 import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
-import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.w3c.dom.NodeList;
 

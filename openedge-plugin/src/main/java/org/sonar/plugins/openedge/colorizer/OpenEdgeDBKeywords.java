@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileGrammarLexer;
+import eu.rssw.antlr.database.DumpFileGrammarLexer;
 
 public final class OpenEdgeDBKeywords {
 

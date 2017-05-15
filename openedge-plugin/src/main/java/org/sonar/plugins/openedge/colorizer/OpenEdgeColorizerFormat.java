@@ -21,14 +21,15 @@ package org.sonar.plugins.openedge.colorizer;
 
 import java.util.List;
 
+import org.prorefactor.core.NodeTypes;
 import org.sonar.api.web.CodeColorizerFormat;
 import org.sonar.colorizer.CDocTokenizer;
 import org.sonar.colorizer.KeywordsTokenizer;
 import org.sonar.colorizer.MultilinesDocTokenizer;
 import org.sonar.colorizer.Tokenizer;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.api.com.google.common.collect.ImmutableList;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
+
+import com.google.common.collect.ImmutableList;
 
 @SuppressWarnings("deprecation")
 public class OpenEdgeColorizerFormat extends CodeColorizerFormat {

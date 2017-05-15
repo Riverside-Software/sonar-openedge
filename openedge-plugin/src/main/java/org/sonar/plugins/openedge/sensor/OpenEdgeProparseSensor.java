@@ -39,6 +39,13 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.prorefactor.core.JPNode;
+import org.prorefactor.core.JsonNodeLister;
+import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ProparseRuntimeException;
+import org.prorefactor.refactor.RefactorException;
+import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.treeparser.SymbolScope;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.rule.ActiveRule;
@@ -52,15 +59,6 @@ import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
-import org.sonar.plugins.openedge.api.com.google.common.io.ByteStreams;
-import org.sonar.plugins.openedge.api.com.google.common.io.Files;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.JsonNodeLister;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.ProparseRuntimeException;
-import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorException;
-import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
-import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.SymbolScope;
 import org.sonar.plugins.openedge.foundation.CPDCallback;
 import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
@@ -70,6 +68,9 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
 
 public class OpenEdgeProparseSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeProparseSensor.class);

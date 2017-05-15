@@ -23,20 +23,20 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.prorefactor.core.ICallback;
+import org.prorefactor.core.IConstants;
+import org.prorefactor.core.JPNode;
+import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ProToken;
+import org.prorefactor.macrolevel.MacroEvent;
+import org.prorefactor.macrolevel.NamedMacroRef;
+import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.cpd.NewCpdTokens;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.ICallback;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.IConstants;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.JPNode;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.NodeTypes;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.ProToken;
-import org.sonar.plugins.openedge.api.org.prorefactor.macrolevel.MacroEvent;
-import org.sonar.plugins.openedge.api.org.prorefactor.macrolevel.NamedMacroRef;
-import org.sonar.plugins.openedge.api.org.prorefactor.treeparser.ParseUnit;
 
 /**
  * This class generated CPD tokens for the CPD engine, by skipping tokens within annotated code blocks and also by

@@ -29,12 +29,13 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
-import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
-import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.DatabaseDescription;
-import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.Field;
-import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.Table;
 import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
+
+import eu.rssw.antlr.database.DumpFileUtils;
+import eu.rssw.antlr.database.objects.DatabaseDescription;
+import eu.rssw.antlr.database.objects.Field;
+import eu.rssw.antlr.database.objects.Table;
 
 public class OpenEdgeDBSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeDBSensor.class);

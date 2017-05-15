@@ -33,13 +33,14 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.api.eu.rssw.listing.CodeBlock;
-import org.sonar.plugins.openedge.api.eu.rssw.listing.ListingParser;
 import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+
+import eu.rssw.listing.CodeBlock;
+import eu.rssw.listing.ListingParser;
 
 public class OpenEdgeListingSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeListingSensor.class);

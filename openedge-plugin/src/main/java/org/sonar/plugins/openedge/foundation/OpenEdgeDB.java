@@ -22,7 +22,8 @@ package org.sonar.plugins.openedge.foundation;
 import java.util.List;
 
 import org.sonar.api.resources.AbstractLanguage;
-import org.sonar.plugins.openedge.api.com.google.common.collect.ImmutableList;
+
+import com.google.common.collect.ImmutableList;
 
 public class OpenEdgeDB extends AbstractLanguage {
   public static final String KEY = "oedb";
