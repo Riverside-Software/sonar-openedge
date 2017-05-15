@@ -29,8 +29,9 @@ import org.sonar.api.server.ws.Response;
 import org.sonar.api.server.ws.WebService;
 import org.sonar.api.utils.text.JsonWriter;
 import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
-import org.sonar.plugins.openedge.api.com.google.common.io.BaseEncoding;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
+
+import com.google.common.io.BaseEncoding;
 
 public class OpenEdgeWebService implements WebService {
   private final OpenEdgeComponents components;

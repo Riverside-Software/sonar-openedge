@@ -14,10 +14,8 @@
     <module>proparse</module>
     <module>database-parser</module>
     <module>profiler-parser</module>
-    <module>profiler-parser-shaded</module>
     <module>listing-parser</module>
     <module>openedge-checks</module>
-    <module>openedge-checks-shaded</module>
     <module>openedge-plugin</module>
   </modules>
 

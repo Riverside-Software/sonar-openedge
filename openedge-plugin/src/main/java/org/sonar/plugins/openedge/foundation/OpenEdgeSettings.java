@@ -35,6 +35,11 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.prorefactor.core.schema.IDatabase;
+import org.prorefactor.core.schema.Schema;
+import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.refactor.settings.IProparseSettings;
+import org.prorefactor.refactor.settings.ProparseSettings;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.ScannerSide;
@@ -43,19 +48,16 @@ import org.sonar.api.config.Settings;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.api.com.google.common.base.Joiner;
-import org.sonar.plugins.openedge.api.com.google.common.base.Splitter;
-import org.sonar.plugins.openedge.api.com.google.common.base.Strings;
-import org.sonar.plugins.openedge.api.com.google.common.collect.ImmutableSet;
-import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.DumpFileUtils;
-import org.sonar.plugins.openedge.api.eu.rssw.antlr.database.objects.DatabaseDescription;
 import org.sonar.plugins.openedge.api.objects.DatabaseWrapper;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.schema.IDatabase;
-import org.sonar.plugins.openedge.api.org.prorefactor.core.schema.Schema;
-import org.sonar.plugins.openedge.api.org.prorefactor.refactor.RefactorSession;
-import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.IProparseSettings;
-import org.sonar.plugins.openedge.api.org.prorefactor.refactor.settings.ProparseSettings;
 import org.sonarsource.api.sonarlint.SonarLintSide;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
+
+import eu.rssw.antlr.database.DumpFileUtils;
+import eu.rssw.antlr.database.objects.DatabaseDescription;
 
 @ScannerSide
 @SonarLintSide

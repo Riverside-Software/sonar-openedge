@@ -49,8 +49,9 @@ import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
-import org.sonar.plugins.openedge.api.com.google.common.base.Strings;
 import org.sonarsource.api.sonarlint.SonarLintSide;
+
+import com.google.common.base.Strings;
 
 @ScannerSide
 @SonarLintSide
