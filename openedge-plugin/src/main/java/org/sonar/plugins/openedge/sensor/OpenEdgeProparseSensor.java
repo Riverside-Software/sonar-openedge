@@ -71,6 +71,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 
@@ -141,6 +142,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     generateProparseDebugIndex();
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private void parseIncludeFile(SensorContext context, InputFile file, RefactorSession session) {
     long startTime = System.currentTimeMillis();
     ParseUnit lexUnit = new ParseUnit(file.file(), session);
@@ -231,8 +233,8 @@ public class OpenEdgeProparseSensor implements Sensor {
     if (!settings.useAnalytics())
       return;
 
-    
-    String sid = context.settings().getString(CoreProperties.PERMANENT_SERVER_ID);
+    String sid = context.runtime().getProduct().toString().toLowerCase() + "-"
+        + Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID));
     StringBuilder data = new StringBuilder(
         String.format("proparse,sid=%1$s files=%2$d,failures=%3$d,parseTime=%4$d,maxParseTime=%5$d\n", sid, numFiles,
             numFailures, parseTime, maxParseTime));
@@ -320,6 +322,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     cpdCallback.getResult().save();
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private void computeSimpleMetrics(SensorContext context, InputFile file, ParseUnit unit) {
     // Saving LOC and COMMENTS metrics
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(unit.getMetrics().getLoc()).save();
@@ -327,6 +330,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         unit.getMetrics().getComments()).save();
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private void computeCommonMetrics(SensorContext context, InputFile file, ParseUnit unit) {
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.STATEMENTS).withValue(
         unit.getTopNode().queryStateHead().size()).save();
@@ -371,6 +375,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.METHODS).withValue(numMethds).save();
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private void computeComplexity(SensorContext context, InputFile file, ParseUnit unit) {
     // Interfaces don't contribute to complexity
     if (unit.getRootScope().isInterface())
