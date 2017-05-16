@@ -42,8 +42,8 @@ public class SharedObjectsAnalyzer extends OpenEdgeProparseCheck {
   private static XPathExpression shrDSExpr;
   private static XPathExpression shrVarExpr;
 
-  public SharedObjectsAnalyzer(RuleKey ruleKey, SensorContext context, Licence licence, String serverId) {
-    super(ruleKey, context, licence, serverId);
+  public SharedObjectsAnalyzer(RuleKey ruleKey, SensorContext context, Licence licence) {
+    super(ruleKey, context, licence);
   }
 
   static {

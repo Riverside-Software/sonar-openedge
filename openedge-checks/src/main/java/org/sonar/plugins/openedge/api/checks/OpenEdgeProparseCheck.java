@@ -28,12 +28,13 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    * Standard constructor of a Proparse based check
    * 
    * @param ruleKey Rule key
+   * @param context Sensor context
    * @param licence May be null
-   * @param serverId Never null
+   * 
    * @throws InvalidLicenceException In case of licence check failure
    */
-  public OpenEdgeProparseCheck(RuleKey ruleKey, SensorContext context, Licence licence, String serverId) {
-    super(ruleKey, context, licence, serverId);
+  public OpenEdgeProparseCheck(RuleKey ruleKey, SensorContext context, Licence licence) {
+    super(ruleKey, context, licence);
   }
 
   @Override

@@ -23,11 +23,10 @@ public abstract class OpenEdgeCheck<T> {
    * @param ruleKey Rule key
    * @param context Sensor context
    * @param licence May be null
-   * @param serverId Never null
    * 
    * @throws InvalidLicenceException In case of licence check failure
    */
-  public OpenEdgeCheck(RuleKey ruleKey, SensorContext context, Licence licence, String serverId) {
+  public OpenEdgeCheck(RuleKey ruleKey, SensorContext context, Licence licence) {
     this.ruleKey = ruleKey;
     this.context = context;
   }

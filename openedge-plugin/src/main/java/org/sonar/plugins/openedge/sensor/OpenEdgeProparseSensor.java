@@ -47,6 +47,7 @@ import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.SymbolScope;
+import org.sonar.api.CoreProperties;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
@@ -135,7 +136,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
     }
 
-    executeAnalytics();
+    executeAnalytics(context);
     logStatistics();
     generateProparseDebugIndex();
   }
@@ -226,12 +227,12 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
   }
 
-  private void executeAnalytics() {
+  private void executeAnalytics(SensorContext context) {
     if (!settings.useAnalytics())
       return;
 
-    String sid = components.getLicence(Constants.RSSW_REPOSITORY_KEY) == null ? "none"
-        : components.getLicence(Constants.RSSW_REPOSITORY_KEY).getPermanentId();
+    
+    String sid = context.settings().getString(CoreProperties.PERMANENT_SERVER_ID);
     StringBuilder data = new StringBuilder(
         String.format("proparse,sid=%1$s files=%2$d,failures=%3$d,parseTime=%4$d,maxParseTime=%5$d\n", sid, numFiles,
             numFailures, parseTime, maxParseTime));
