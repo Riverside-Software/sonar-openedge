@@ -2,7 +2,6 @@ package org.sonar.plugins.openedge.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
@@ -10,7 +9,6 @@ import org.sonarsource.api.sonarlint.SonarLintSide;
 
 @ScannerSide
 @SonarLintSide
-@BatchSide
 public interface CheckRegistrar {
 
   /**
