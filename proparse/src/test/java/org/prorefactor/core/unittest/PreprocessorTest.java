@@ -11,10 +11,12 @@
 package org.prorefactor.core.unittest;
 
 import java.io.File;
+import java.util.List;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.macrolevel.MacroEvent;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.Assert;
@@ -81,8 +83,9 @@ public class PreprocessorTest {
   }
 
   @Test
-  public void testOr() throws Exception {
+  public void testOr1() throws Exception {
     testVariable(unit.getTopNode(), "var6");
+    testVariable(unit.getTopNode(), "var46");
   }
 
   @Test
@@ -274,11 +277,49 @@ public class PreprocessorTest {
     testVariable(unit.getTopNode(), "var39");
   }
 
+  @Test
   public void testSubstring3() throws Exception {
     testVariable(unit.getTopNode(), "var40");
   }
 
+  @Test
   public void testSubstring4() throws Exception {
     testVariable(unit.getTopNode(), "var41");
+  }
+
+  @Test
+  public void testMatches() throws Exception {
+    testVariable(unit.getTopNode(), "var47");
+    testNoVariable(unit.getTopNode(), "var48");
+  }
+
+  @Test
+  public void testBegins() throws Exception {
+    testVariable(unit.getTopNode(), "var49");
+    testNoVariable(unit.getTopNode(), "var50");
+  }
+
+  @Test
+  public void testNotEquals() throws Exception {
+    testVariable(unit.getTopNode(), "var51");
+    testNoVariable(unit.getTopNode(), "var52");
+  }
+
+  @Test
+  public void testNot() throws Exception {
+    testVariable(unit.getTopNode(), "var53");
+  }
+
+  @Test
+  public void testUnaryMinus() throws Exception {
+    testVariable(unit.getTopNode(), "var54");
+    testVariable(unit.getTopNode(), "var55");
+    testNoVariable(unit.getTopNode(), "var56");
+  }
+
+  @Test
+  public void testUnknown() throws Exception {
+    testNoVariable(unit.getTopNode(), "var57");
+    testVariable(unit.getTopNode(), "var58");
   }
 }

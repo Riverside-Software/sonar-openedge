@@ -15,6 +15,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -164,8 +165,7 @@ public class ListingParser implements ListingListener {
       }
     }
     // Fourth look for a GLOBAL define
-    if (globalDefMap.containsKey(name))
-      newDef.undefWhat = globalDefMap.remove(name);
+    newDef.undefWhat = globalDefMap.remove(name.toLowerCase(Locale.ENGLISH));
   }
 
   /**

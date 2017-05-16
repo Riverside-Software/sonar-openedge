@@ -33,8 +33,8 @@ public class MacroLevel {
         return getDefinitionPosition(((NamedMacroRef) def.getParent()).getMacroDef());
       }
       ret[0] = ((IncludeRef) def.getParent()).fileIndex;
-      ret[1] = def.getLine();
-      ret[2] = def.getColumn();
+      ret[1] = def.getPosition().getLine();
+      ret[2] = def.getPosition().getColumn();
     } else {
       // Include arguments don't get their file/line/col stored, so
       // we have to find the include reference source.
