@@ -233,13 +233,16 @@ public class OpenEdgeProparseSensor implements Sensor {
     if (!settings.useAnalytics())
       return;
 
-    String sid = context.runtime().getProduct().toString().toLowerCase() + "-"
-        + Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID));
-    StringBuilder data = new StringBuilder(
-        String.format("proparse,sid=%1$s files=%2$d,failures=%3$d,parseTime=%4$d,maxParseTime=%5$d\n", sid, numFiles,
-            numFailures, parseTime, maxParseTime));
+    StringBuilder data = new StringBuilder(String.format(
+        "proparse,product=%1$s,sid=%2$s files=%3$d,failures=%4$d,parseTime=%5$d,maxParseTime=%6$d,version=\"%7$s\"\n",
+        context.runtime().getProduct().toString().toLowerCase(),
+        Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID)), numFiles, numFailures,
+        parseTime, maxParseTime, context.runtime().getApiVersion().toString()));
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
-      data.append(String.format("rule,sid=%1$s,rulename=%2$s ruleTime=%3$d\n", sid, entry.getKey(), entry.getValue()));
+      data.append(String.format("rule,product=%1$s,sid=%2$s,rulename=%3$s ruleTime=%4$d\n",
+          context.runtime().getProduct().toString().toLowerCase(),
+          Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID)), entry.getKey(),
+          entry.getValue()));
     }
 
     try {
