@@ -31,7 +31,6 @@ import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.testng.Assert;
@@ -45,9 +44,8 @@ public class OpenEdgeWarningsSensorTest {
   @Test
   public void testWarnings() throws IOException {
     SensorContextTester context = createContext();
-    IIdProvider idProvider = new TestIdProvider();
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem(), idProvider);
-    OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, context.fileSystem(), idProvider);
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, context.fileSystem());
     sensor.execute(context);
 
     Assert.assertEquals(1, context.allIssues().size());

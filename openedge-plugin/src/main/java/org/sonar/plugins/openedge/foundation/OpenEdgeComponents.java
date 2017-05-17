@@ -28,10 +28,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
-import org.sonar.api.batch.BatchSide;
+import org.sonar.api.CoreProperties;
+import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -55,16 +55,11 @@ import com.google.common.base.Strings;
 
 @ScannerSide
 @SonarLintSide
-@BatchSide
 @ServerSide
 public class OpenEdgeComponents {
   private static final Logger LOG = Loggers.get(OpenEdgeComponents.class);
 
-  // IoC
-  private final IIdProvider idProvider;
-
-  private final List<Class<? extends OpenEdgeCheck>> checkClasses = new ArrayList<>();
-
+  private final List<Class<? extends OpenEdgeCheck<?>>> checkClasses = new ArrayList<>();
   private final Map<ActiveRule, OpenEdgeProparseCheck> ppChecksMap = new HashMap<>();
   private final Map<ActiveRule, OpenEdgeDumpFileCheck> dfChecksMap = new HashMap<>();
 
@@ -72,28 +67,26 @@ public class OpenEdgeComponents {
   private final List<OpenEdgeProparseCheck> ppChecks = new ArrayList<>();
   private final List<OpenEdgeDumpFileCheck> dfChecks = new ArrayList<>();
 
-  private final Map<String, Licence> licences = new HashMap<>();
+  private final Collection<Licence> licences = new ArrayList<>();
 
-  public OpenEdgeComponents(IIdProvider provider) {
-    this(provider, null, null);
+  public OpenEdgeComponents() {
+    this(null, null);
   }
 
-  public OpenEdgeComponents(IIdProvider provider, CheckRegistrar[] checkRegistrars) {
-    this(provider, checkRegistrars, null);
+  public OpenEdgeComponents(CheckRegistrar[] checkRegistrars) {
+    this(checkRegistrars, null);
   }
 
-  public OpenEdgeComponents(IIdProvider provider, LicenceRegistrar[] licRegistrars) {
-    this(provider, null, licRegistrars);
+  public OpenEdgeComponents(LicenceRegistrar[] licRegistrars) {
+    this(null, licRegistrars);
   }
 
-  public OpenEdgeComponents(IIdProvider provider, CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
-    this.idProvider = provider;
-
+  public OpenEdgeComponents(CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
     if (checkRegistrars != null) {
       registerChecks(checkRegistrars);
     }
     if (licRegistrars != null) {
-      registerLicences(licRegistrars, Strings.nullToEmpty(idProvider.getPermanentID()));
+      registerLicences(licRegistrars);
     }
   }
 
@@ -112,7 +105,7 @@ public class OpenEdgeComponents {
     }
   }
 
-  private void registerLicences(LicenceRegistrar[] licRegistrars, String permanentId) {
+  private void registerLicences(LicenceRegistrar[] licRegistrars) {
     for (LicenceRegistrar reg : licRegistrars) {
       LicenceRegistrar.Licence lic = new LicenceRegistrar.Licence();
       reg.register(lic);
@@ -122,25 +115,23 @@ public class OpenEdgeComponents {
       LOG.debug("Found {} licence - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
           lic.getType().toString(), lic.getPermanentId(), lic.getCustomerName(), lic.getRepositoryName(),
           DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date(lic.getExpirationDate())));
-      if (!lic.getPermanentId().isEmpty() && !permanentId.equals(lic.getPermanentId())) {
-        LOG.debug("Skipped licence as it doesn't match permanent ID '{}'", permanentId);
-        continue;
-      }
-      // Licence with highest expiration date wins
-      Licence existingLic = licences.get(lic.getRepositoryName());
-      if ((existingLic == null) || (existingLic.getExpirationDate() < lic.getExpirationDate())) {
-        licences.put(lic.getRepositoryName(), lic);
-        LOG.debug("Installed !");
-      } else {
-        LOG.debug("Conflict, skipped licence");
+
+      // Only one licence per repository / permID
+      Licence existingLic = getLicence(lic.getRepositoryName(), lic.getPermanentId());
+      if (existingLic == null) {
+        licences.add(lic);
+      } else if (existingLic.getExpirationDate() < lic.getExpirationDate()) {
+        licences.remove(existingLic);
+        licences.add(lic);
       }
     }
-    for (Entry<String, Licence> entry : licences.entrySet()) {
+    for (Licence entry : licences) {
       LOG.info(
           "Licence summary - Repository '{}' associated with {} licence permanent ID '{}' - Customer '{}' - Expiration date {}",
-          entry.getKey(), entry.getValue().getType().toString(), entry.getValue().getPermanentId(),
-          entry.getValue().getCustomerName(), DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(
-              new Date(entry.getValue().getExpirationDate())));
+          entry.getRepositoryName(),
+          entry.getType().toString(), entry.getPermanentId(),
+          entry.getCustomerName(), DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(
+              new Date(entry.getExpirationDate())));
     }
   }
 
@@ -148,12 +139,13 @@ public class OpenEdgeComponents {
     if (initialized)
       return;
 
+    String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "") + Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID));
+
     for (ActiveRule rule : context.activeRules().findByLanguage(Constants.LANGUAGE_KEY)) {
       RuleKey ruleKey = rule.ruleKey();
       // AFAIK, no way to be sure if a rule is based on a template or not
       String clsName = rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey();
-      OpenEdgeCheck lint = getAnalyzer(clsName, ruleKey, context, getLicence(ruleKey.repository()),
-          Strings.nullToEmpty(idProvider.getPermanentID()));
+      OpenEdgeCheck<?> lint = getAnalyzer(clsName, ruleKey, context, getLicence(ruleKey.repository(), permId));
       if (lint != null) {
         configureFields(rule, lint);
         lint.initialize();
@@ -172,10 +164,6 @@ public class OpenEdgeComponents {
     initialized = true;
   }
 
-  public IIdProvider getIdProvider() {
-    return idProvider;
-  }
-
   public Collection<OpenEdgeProparseCheck> getProparseChecks() {
     return Collections.unmodifiableList(ppChecks);
   }
@@ -192,21 +180,26 @@ public class OpenEdgeComponents {
     return Collections.unmodifiableMap(dfChecksMap);
   }
 
-  public Licence getLicence(String repoName) {
-    return licences.get(repoName);
+  public Licence getLicence(String repoName, String permId) {
+    if (permId == null)
+      return null;
+    for (Licence lic : licences) {
+      if (repoName.equals(lic.getRepositoryName()) && permId.equals(lic.getPermanentId()))
+        return lic;
+    }
+    return null;
   }
 
   public Collection<Licence> getLicences() {
-    return licences.values();
+    return licences;
   }
 
-  private OpenEdgeCheck getAnalyzer(String internalKey, RuleKey ruleKey, SensorContext context, Licence licence,
-      String permanentId) {
+  private OpenEdgeCheck<?> getAnalyzer(String internalKey, RuleKey ruleKey, SensorContext context, Licence licence) {
     try {
-      for (Class<? extends OpenEdgeCheck> clz : checkClasses) {
+      for (Class<? extends OpenEdgeCheck<?>> clz : checkClasses) {
         if (clz.getCanonicalName().equalsIgnoreCase(internalKey)) {
-          return clz.getConstructor(RuleKey.class, SensorContext.class, Licence.class, String.class).newInstance(
-              ruleKey, context, licence, permanentId);
+          return clz.getConstructor(RuleKey.class, SensorContext.class, Licence.class).newInstance(
+              ruleKey, context, licence);
         }
       }
       return null;

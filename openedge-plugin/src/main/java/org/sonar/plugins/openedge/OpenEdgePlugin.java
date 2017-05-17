@@ -37,9 +37,6 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeProfile;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
-import org.sonar.plugins.openedge.foundation.ScannerIdProvider;
-import org.sonar.plugins.openedge.foundation.ServerIdProvider;
-import org.sonar.plugins.openedge.foundation.SonarLintIdProvider;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBRulesSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeListingSensor;
@@ -61,9 +58,6 @@ public class OpenEdgePlugin implements Plugin {
     // Profile and rules
     context.addExtensions(OpenEdgeRulesDefinition.class, OpenEdgeRulesRegistrar.class, OpenEdgeProfile.class,
         OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
-
-    // Server ID providers
-    context.addExtensions(ScannerIdProvider.class, SonarLintIdProvider.class, ServerIdProvider.class);
 
     // UI and code colorizer
     context.addExtensions(OpenEdgeColorizerFormat.class, OpenEdgeDBColorizerFormat.class);

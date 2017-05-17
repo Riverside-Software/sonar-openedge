@@ -7,7 +7,9 @@ import org.prorefactor.core.nodetypes.ProparseDirectiveNode;
 import org.prorefactor.treeparser.ParseUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.TextRange;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
@@ -21,6 +23,7 @@ import org.w3c.dom.NodeList;
 import com.google.common.base.Splitter;
 
 public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
+  private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeProparseCheck.class);
   private static final String INC_MESSAGE = "From {0} - {1}";
 
@@ -28,12 +31,13 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    * Standard constructor of a Proparse based check
    * 
    * @param ruleKey Rule key
+   * @param context Sensor context
    * @param licence May be null
-   * @param serverId Never null
+   * 
    * @throws InvalidLicenceException In case of licence check failure
    */
-  public OpenEdgeProparseCheck(RuleKey ruleKey, SensorContext context, Licence licence, String serverId) {
-    super(ruleKey, context, licence, serverId);
+  public OpenEdgeProparseCheck(RuleKey ruleKey, SensorContext context, Licence licence) {
+    super(ruleKey, context, licence);
   }
 
   @Override
@@ -87,7 +91,12 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     NewIssue issue = getContext().newIssue().forRule(getRuleKey());
     NewIssueLocation location = issue.newLocation().on(targetFile);
     if (lineNumber > 0) {
-      location.at(targetFile.selectLine(lineNumber));
+      TextRange range = targetFile.selectLine(lineNumber);
+      if (IS_WINDOWS && (getContext().runtime().getProduct() == SonarProduct.SONARLINT) && (range.end().lineOffset() > 1)) {
+        location.at(targetFile.newRange(lineNumber, 0, lineNumber, range.end().lineOffset() - 1));
+      } else {
+        location.at(range);
+      }
     }
     if (targetFile == file) {
       location.message(msg);

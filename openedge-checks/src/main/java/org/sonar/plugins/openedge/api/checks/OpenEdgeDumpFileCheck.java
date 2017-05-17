@@ -15,12 +15,13 @@ public abstract class OpenEdgeDumpFileCheck extends OpenEdgeCheck<ParseTree> {
    * Standard constructor of a Proparse based check
    * 
    * @param ruleKey Rule key
+   * @param context Sensor context
    * @param licence May be null
-   * @param serverId Never null
+   * 
    * @throws InvalidLicenceException In case of licence check failure
    */
-  public OpenEdgeDumpFileCheck(RuleKey ruleKey, SensorContext context, Licence licence, String serverId) {
-    super(ruleKey, context, licence, serverId);
+  public OpenEdgeDumpFileCheck(RuleKey ruleKey, SensorContext context, Licence licence) {
+    super(ruleKey, context, licence);
   }
 
   @Override

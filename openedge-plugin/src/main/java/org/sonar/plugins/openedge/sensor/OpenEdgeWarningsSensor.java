@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.Sensor;
@@ -36,7 +37,6 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.foundation.IIdProvider;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
@@ -51,12 +51,10 @@ public class OpenEdgeWarningsSensor implements Sensor {
   // IoC
   private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;
-  private final IIdProvider idProvider;
 
-  public OpenEdgeWarningsSensor(OpenEdgeSettings settings, FileSystem fileSystem, IIdProvider idProvider) {
+  public OpenEdgeWarningsSensor(OpenEdgeSettings settings, FileSystem fileSystem) {
     this.fileSystem = fileSystem;
     this.settings = settings;
-    this.idProvider = idProvider;
   }
 
   @Override
@@ -75,7 +73,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
 
   @Override
   public void execute(SensorContext context) {
-    if (idProvider.isSonarLintSide())
+    if (context.runtime().getProduct() == SonarProduct.SONARLINT)
       return;
 
     int warningsImportNum = 0;
