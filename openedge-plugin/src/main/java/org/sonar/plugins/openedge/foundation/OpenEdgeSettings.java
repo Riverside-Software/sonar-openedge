@@ -341,7 +341,7 @@ public class OpenEdgeSettings {
 
       LOG.debug("Parsing {} with alias {}", fileSystem.resolvePath(str), dbName);
       File dfFile = fileSystem.resolvePath(str);
-      File serFile = new File(fileSystem.baseDir(), ".sonarlint/" + str.replace('\\', '_').replace('/', '_') + ".bin");
+      File serFile = new File(fileSystem.baseDir(), ".sonarlint/" + str.replace(':', '_').replace('\\', '_').replace('/', '_') + ".bin");
       serFile.getParentFile().mkdir();
       DatabaseDescription desc = null;
       if (useCache && (dfFile.lastModified() < serFile.lastModified())) {
