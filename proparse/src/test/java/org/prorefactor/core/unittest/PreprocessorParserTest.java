@@ -11,12 +11,10 @@
 package org.prorefactor.core.unittest;
 
 import java.io.File;
-import java.util.List;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestModule;
-import org.prorefactor.macrolevel.MacroEvent;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.Assert;
@@ -26,7 +24,7 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-public class PreprocessorTest {
+public class PreprocessorParserTest {
   private final static String SRC_DIR = "src/test/resources/data/preprocessor";
 
   private RefactorSession session;

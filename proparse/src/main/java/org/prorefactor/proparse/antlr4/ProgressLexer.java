@@ -227,11 +227,13 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
   @Override
   public void defGlobal(String argName, String argVal) {
+    LOGGER.trace("Global define '{}': '{}'", argName, argVal);
     globalDefdNames.put(argName, argVal);
   }
 
   @Override
   public void defScoped(String argName, String argVal) {
+    LOGGER.trace("Scoped define '{}': '{}'", argName, argVal);
     currentInclude.scopeDefine(argName, argVal);
   }
 
@@ -242,6 +244,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
   @Override
   public String getArgText(String argName) {
+    LOGGER.trace("getArgText('{}')", argName);
     String ret;
     // First look for local &SCOPE define
     ret = currentInclude.getValue(argName);
