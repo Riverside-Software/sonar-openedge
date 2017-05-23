@@ -20,6 +20,9 @@ import org.prorefactor.macrolevel.MacroDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+
 public class Lexer  {
   private static final Logger LOGGER = LoggerFactory.getLogger(Lexer.class);
 
@@ -50,6 +53,8 @@ public class Lexer  {
   private int textStartLine;
   private int textStartCol;
   private int textStartSource;
+
+  private String currentAnalyzeSuspend;
 
   private Set<Integer> comments = new HashSet<>();
   private Set<Integer> loc = new HashSet<>();
@@ -905,11 +910,20 @@ public class Lexer  {
 
     if ("&analyze-suspend".equals(macroType)) {
       appendToEOL();
+      if (currText.toString().indexOf(' ') == -1) {
+        // Shouldn't be there
+        currentAnalyzeSuspend = "";
+      } else {
+        // Generates a clean comma-separated list of all entries
+        currentAnalyzeSuspend = Joiner.on(',').join(Splitter.on(' ').omitEmptyStrings().trimResults().splitToList(
+            currText.toString().substring(currText.toString().indexOf(' ') + 1)));
+      }
       getChar();
       return makeToken(PreprocessorParser.AMPANALYZESUSPEND);
     }
     if ("&analyze-resume".equals(macroType)) {
       appendToEOL();
+      currentAnalyzeSuspend = "";
       getChar();
       return makeToken(PreprocessorParser.AMPANALYZERESUME);
     }
@@ -955,9 +969,8 @@ public class Lexer  {
     currText.append(theText);
   }
 
-  void appendToEOL() throws IOException {
-    // As with the other "append" functions,
-    // the caller is responsible for calling getChar() after this.
+  private void appendToEOL() throws IOException {
+    // As with the other "append" functions, the caller is responsible for calling getChar() after this.
     for (;;) {
       if (currChar == '/') {
         append();
@@ -1071,6 +1084,7 @@ public class Lexer  {
     tok.setEndLine(prevLine);
     tok.setEndCharPositionInLine(prevCol);
     tok.setMacroSourceNum(textStartSource);
+    tok.setAnalyzeSuspend(currentAnalyzeSuspend);
 
     return tok;
   }
