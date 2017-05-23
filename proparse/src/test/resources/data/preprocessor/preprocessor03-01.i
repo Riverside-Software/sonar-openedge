@@ -1,3 +1,3 @@
-&SCOPED-DEFINE SysInclude {1}
+&SCOPED-DEFINE SysInclude {3}
 
-{ preprocessor/{&SysInclude}.i }
+{"preprocessor/{&SysInclude }.i" "FIND-CDE":U "{&SbrTblNam}"}
