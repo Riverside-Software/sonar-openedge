@@ -248,30 +248,40 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     String ret;
     // First look for local &SCOPE define
     ret = currentInclude.getValue(argName);
-    if (ret != null)
+    if (ret != null) {
+      LOGGER.trace("Found scope-defined variable: '{}'", ret);
       return ret;
+    }
     // Second look for a named include file argument
     ret = currentInclude.getNamedArg(argName);
-    if (ret != null)
+    if (ret != null) {
+      LOGGER.trace("Found named argument: '{}'", ret);
       return ret;
+    }
     // Third look for a non-local SCOPED define
     for (int i = includeVector.size() - 1; i >= 0; --i) {
       ret = includeVector.get(i).getValue(argName);
-      if (ret != null)
+      if (ret != null) {
+        LOGGER.trace("Found non-local scope-defined variable: '{}'", ret);
         return ret;
+      }
     }
     // Fourth look for a global define
     ret = globalDefdNames.get(argName);
-    if (ret != null)
+    if (ret != null) {
+      LOGGER.trace("Found global-defined variable: '{}'", ret);
       return ret;
+    }
     // * to return all include arguments, space delimited.
     if ("*".equals(argName)) {
+      LOGGER.trace("Return all include arugments");
       return currentInclude.getAllArguments();
     }
     // &* to return all named include argument definitions
-    if ("&*".equals(argName))
+    if ("&*".equals(argName)) {
+      LOGGER.trace("Return all named include arugments");
       return currentInclude.getAllNamedArgs();
-
+    }
     // Built-ins
     if ("batch-mode".equals(argName))
       return Boolean.toString(ppSettings.getBatchMode());
@@ -297,6 +307,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       return Integer.toString(sequence++);
 
     // Not defined
+    LOGGER.trace("Nothing found...");
     return "";
   }
 
