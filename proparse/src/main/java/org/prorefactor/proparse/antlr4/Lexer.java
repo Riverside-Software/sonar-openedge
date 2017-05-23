@@ -54,7 +54,7 @@ public class Lexer  {
   private int textStartCol;
   private int textStartSource;
 
-  private String currentAnalyzeSuspend;
+  private String currentAnalyzeSuspend = "";
 
   private Set<Integer> comments = new HashSet<>();
   private Set<Integer> loc = new HashSet<>();
