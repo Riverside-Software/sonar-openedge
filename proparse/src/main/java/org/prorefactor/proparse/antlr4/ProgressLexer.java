@@ -71,6 +71,8 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   public static final int PROPARSE_DIRECTIVE = -101;
 
   private final IProparseSettings ppSettings;
+  // Do we only read tokens ?
+  private final boolean lexOnly;
 
   // How many levels of &IF FALSE are we currently into?
   private int consuming = 0;
@@ -118,14 +120,19 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private final RefactorSession session;
   private TokenSource wrapper;
 
+  public ProgressLexer(RefactorSession session, String fileName) throws IOException {
+    this(session, fileName, false);
+  }
+
   /**
    * An existing reference to the input stream is required for construction. The caller is responsible for closing that
    * stream once parsing is complete.
    */
-  public ProgressLexer(RefactorSession session, String fileName) throws IOException {
+  public ProgressLexer(RefactorSession session, String fileName, boolean lexOnly) throws IOException {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.ppSettings = session.getProparseSettings();
     this.session = session;
+    this.lexOnly = lexOnly;
 
     // Create input source with flag isPrimaryInput=true
     currFile = addFilename(fileName);
@@ -136,7 +143,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     lstListener = new ListingParser();
     
     lexer = new Lexer(this);
-    PostLexer postlexer = new PostLexer(lexer);
+    TokenSource postlexer = lexOnly ? new NoOpPostLexer(lexer) : new PostLexer(lexer);
     TokenSource filter1 = new TokenList(postlexer);
     wrapper = new MultiChannelTokenSource(filter1);
   }
@@ -374,6 +381,10 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   // ****************************
   // IPreprocessor implementation
   // ****************************
+
+  boolean isLexOnly() {
+    return lexOnly;
+  }
 
   int getColumn() {
     return currCol;
@@ -755,7 +766,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     // It *is* possible to get here with a blank include file
     // name. See bug#034. Don't enter if the includefilename is blank.
     String fName = referencedWithName.trim();
-    if (consuming != 0 || fName.length() == 0)
+    if (isConsuming() || isLexOnly() || fName.length() == 0)
       return false;
     File ff = session.findFile3(fName);
     if (ff == null) {
