@@ -289,4 +289,8 @@ public class BugFixTest {
     assertEquals(tok.getText(), "// \"~n\"");
   }
 
+  @Test
+  public void testLexer01() throws Exception {
+    TokenStream stream = genericLex("lex.p");
+  }
 }
