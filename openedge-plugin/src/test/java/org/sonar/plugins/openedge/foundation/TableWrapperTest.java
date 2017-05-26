@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.prorefactor.core.schema.IField;
+import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Schema;
 import org.sonar.plugins.openedge.api.objects.DatabaseWrapper;
 import org.testng.Assert;
@@ -21,6 +22,11 @@ public class TableWrapperTest {
     Assert.assertNotNull(fld1);
     IField fld2 = sch.lookupUnqualifiedField("minqt");
     Assert.assertNotNull(fld2);
+
+    ITable tbl1 = sch.lookupTable("customer");
+    Assert.assertNotNull(tbl1);
+    ITable tbl2 = sch.lookupTable("custome");
+    Assert.assertNotNull(tbl2);
   }
 
   @Test
@@ -31,6 +37,11 @@ public class TableWrapperTest {
     Assert.assertNotNull(fld1);
     IField fld2 = sch.lookupUnqualifiedField("minqt");
     Assert.assertNotNull(fld2);
+
+    ITable tbl1 = sch.lookupTable("customer");
+    Assert.assertNotNull(tbl1);
+    ITable tbl2 = sch.lookupTable("custome");
+    Assert.assertNotNull(tbl2);
   }
 
 }
