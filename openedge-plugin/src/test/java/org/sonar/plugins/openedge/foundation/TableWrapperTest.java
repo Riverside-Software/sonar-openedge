@@ -22,6 +22,9 @@ public class TableWrapperTest {
     Assert.assertNotNull(fld1);
     IField fld2 = sch.lookupUnqualifiedField("minqt");
     Assert.assertNotNull(fld2);
+    IField fld3 = sch.lookupUnqualifiedField("custnum");
+    Assert.assertNotNull(fld3);
+    Assert.assertEquals(fld3.getTable().getName(), "BillTo");
 
     ITable tbl1 = sch.lookupTable("customer");
     Assert.assertNotNull(tbl1);
@@ -37,6 +40,9 @@ public class TableWrapperTest {
     Assert.assertNotNull(fld1);
     IField fld2 = sch.lookupUnqualifiedField("minqt");
     Assert.assertNotNull(fld2);
+    IField fld3 = sch.lookupUnqualifiedField("custnum");
+    Assert.assertNotNull(fld3);
+    Assert.assertEquals(fld3.getTable().getName(), "BillTo");
 
     ITable tbl1 = sch.lookupTable("customer");
     Assert.assertNotNull(tbl1);
