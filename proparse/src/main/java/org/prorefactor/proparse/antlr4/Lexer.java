@@ -911,7 +911,8 @@ public class Lexer  {
     if ("&analyze-suspend".equals(macroType)) {
       appendToEOL();
       if (currText.toString().indexOf(' ') == -1) {
-        // Shouldn't be there
+        // Documentation says &analyze-suspend is always followed by an option
+        // But better to never trust documentation...
         currentAnalyzeSuspend = "";
       } else {
         // Generates a clean comma-separated list of all entries
