@@ -23,13 +23,14 @@ public class ProToken extends CommonHiddenStreamToken {
   private final int endFile;
   private final int endLine;
   private final int endColumn;
+  private final String analyzeSuspend;
 
   public ProToken(IntegerIndex<String> filenameList, int type, String txt) {
-    this(filenameList, type, txt, 0, 0, 0, 0, 0, 0, 0);
+    this(filenameList, type, txt, 0, 0, 0, 0, 0, 0, 0, "");
   }
 
   public ProToken(IntegerIndex<String> filenameList, int type, String txt, int file, int line, int col, int endFile,
-      int endLine, int endCol, int macroSourceNum) {
+      int endLine, int endCol, int macroSourceNum, String analyzeSuspend) {
     super(type, txt);
     this.filenameList = filenameList;
     this.fileIndex = file;
@@ -39,6 +40,7 @@ public class ProToken extends CommonHiddenStreamToken {
     this.endFile = endFile;
     this.endLine = endLine;
     this.endColumn = endCol;
+    this.analyzeSuspend = analyzeSuspend;
   }
 
   public int getFileIndex() {
@@ -113,6 +115,13 @@ public class ProToken extends CommonHiddenStreamToken {
    */
   public int getEndFileIndex() {
     return endFile;
+  }
+
+  /**
+   * @return Comma-separated list of &ANALYZE-SUSPEND options. Never null.
+   */
+  public String getAnalyzeSuspend() {
+    return analyzeSuspend;
   }
 
   @Override

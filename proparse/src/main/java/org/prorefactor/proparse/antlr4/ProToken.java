@@ -65,6 +65,8 @@ public class ProToken implements WritableToken {
   private int endCharPositionInLine;
   private int macroSourceNum;
 
+  private String analyzeSuspend = "";
+
   public ProToken(int type, String text) {
     this.type = type;
     this.channel = DEFAULT_CHANNEL;
@@ -119,6 +121,17 @@ public class ProToken implements WritableToken {
 
   public void setFileIndex(int fileIndex) {
     this.fileIndex = fileIndex;
+  }
+
+  public void setAnalyzeSuspend(String analyzeSuspend) {
+    this.analyzeSuspend = analyzeSuspend;
+  }
+
+  /**
+   * @return Comma-separated list of &ANALYZE-SUSPEND options. Never null.
+   */
+  public String getAnalyzeSuspend() {
+    return analyzeSuspend;
   }
 
   @Override

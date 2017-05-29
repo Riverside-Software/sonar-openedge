@@ -299,6 +299,10 @@ public class JPNode extends BaseAST {
     return token.getEndColumn();
   }
 
+  public String getAnalyzeSuspend() {
+    return token.getAnalyzeSuspend();
+  }
+
   /**
    * Get the comments that precede this node. Gets the <b>consecutive</b> comments from Proparse if "connected",
    * otherwise gets the comments stored within this node object. CAUTION: We want to know if line breaks exist between
