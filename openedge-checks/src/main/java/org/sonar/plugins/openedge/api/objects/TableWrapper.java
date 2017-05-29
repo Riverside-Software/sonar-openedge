@@ -54,12 +54,12 @@ public class TableWrapper implements ITable {
   }
 
   @Override
-  public IField lookupField(String name) {
-    Field fld = table.getField(name);
-    if (fld == null)
-      return null;
-    else
-      return new FieldWrapper(this, fld);
+  public IField lookupField(String lookupName) {
+    for (IField fld : fields) {
+      if (fld.getName().toLowerCase().startsWith(lookupName.toLowerCase()))
+        return fld;
+    }
+    return null;
   }
 
   @Override
