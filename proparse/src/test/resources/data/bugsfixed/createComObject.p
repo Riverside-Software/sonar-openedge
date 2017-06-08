@@ -1,0 +1,4 @@
+DEFINE VARIABLE hComHandle AS COM-HANDLE NO-UNDO.
+
+CREATE "Excel.Application" hComHandle CONNECT NO-ERROR.
+CREATE VALUE("Excel.Application") hComHandle CONNECT NO-ERROR.

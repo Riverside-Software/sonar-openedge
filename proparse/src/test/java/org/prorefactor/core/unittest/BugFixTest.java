@@ -270,6 +270,11 @@ public class BugFixTest {
   }
 
   @Test
+  public void testCreateComObject() throws Exception {
+    genericTest("createComObject.p");
+  }
+
+  @Test
   public void testTildeInComment() throws Exception {
     TokenStream stream = genericLex("comment-tilde.p");
     Token tok = stream.nextToken();
