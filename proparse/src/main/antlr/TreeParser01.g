@@ -752,9 +752,9 @@ data_relation throws TreeParserException
 parent_id_relation throws TreeParserException
   :  #(  PARENTIDRELATION (ID)?
       FOR tbl[ContextQualifier.INIT] COMMA tbl[ContextQualifier.INIT] // TODO Verify context qualifier
-      PARENTIDFIELD fld1[ContextQualifier.SYMBOL]       // TODO Verify context qualifier
-      ( PARENTFIELDSBEFORE LEFTPAREN fld1[ContextQualifier.SYMBOL] (COMMA fld1[ContextQualifier.SYMBOL])* RIGHTPAREN)? // TODO Verify context qualifier
-      ( PARENTFIELDSAFTER  LEFTPAREN fld1[ContextQualifier.SYMBOL] (COMMA fld1[ContextQualifier.SYMBOL])* RIGHTPAREN)? // TODO Verify context qualifier
+      PARENTIDFIELD fld[ContextQualifier.SYMBOL]
+      ( PARENTFIELDSBEFORE LEFTPAREN fld[ContextQualifier.SYMBOL] (COMMA fld[ContextQualifier.SYMBOL])* RIGHTPAREN)?
+      ( PARENTFIELDSAFTER  LEFTPAREN fld[ContextQualifier.SYMBOL] (COMMA fld[ContextQualifier.SYMBOL])* RIGHTPAREN)?
       
     )
   ;

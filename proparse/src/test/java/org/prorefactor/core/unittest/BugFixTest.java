@@ -303,4 +303,9 @@ public class BugFixTest {
   public void testLexer01() throws Exception {
     TokenStream stream = genericLex("lex.p");
   }
+
+  @Test
+  public void testDataset() throws Exception {
+    genericTest("DatasetParentFields.p");
+  }
 }
