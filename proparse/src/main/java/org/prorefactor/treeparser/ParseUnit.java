@@ -41,14 +41,13 @@ import antlr.TokenStreamException;
 /**
  * Provides parse unit information, such as the symbol table and a reference to the AST. TreeParser01 calls
  * symbolUsage() in this class in order to build the symbol table.
- * 
- * Main methods : parse() and getTopNode()
  */
 public class ParseUnit {
   private static final Logger LOGGER = LoggerFactory.getLogger(ParseUnit.class);
 
   private final RefactorSession session;
-  private File file;
+  private final File file;
+
   private IncludeRef macroGraph = null;
   private ProgramRootNode topNode;
   private SymbolScopeRoot rootScope;
@@ -83,15 +82,6 @@ public class ParseUnit {
   }
 
   public File getFile() {
-    if (file == null) {
-      // A lot of old code starts with a string filename, sends that to Proparse, gets the top node
-      // handle, builds JPNode, and then runs TreeParser01 from that. (All the stuff ParseUnit does
-      // now.) In those cases, this ParseUnit might have been created as an empty shell by TreeParser01
-      // itself, and "file" would not be set. In that case, we attempt to find the File from the file index.
-      if (topNode == null)
-        return null;
-      file = new File(topNode.getFilenames()[0]);
-    }
     return file;
   }
 
@@ -117,14 +107,14 @@ public class ParseUnit {
   }
 
   public TokenStream lex() throws IOException {
-    ProgressLexer lexer = new ProgressLexer(session, file.getPath());
+    ProgressLexer lexer = new ProgressLexer(session, file.getPath(), true);
     return lexer.getANTLR2TokenStream(false);
   }
 
   public void lexAndGenerateMetrics() throws RefactorException {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
     try {
-      ProgressLexer lexer = new ProgressLexer(session, file.getPath());
+      ProgressLexer lexer = new ProgressLexer(session, file.getPath(), true);
       TokenStream stream = lexer.getANTLR2TokenStream(false);
       try {
         Token tok = stream.nextToken();
@@ -145,7 +135,7 @@ public class ParseUnit {
     LOGGER.trace("Entering ParseUnit#parse()");
     
     try {
-      ProgressLexer lexer = new ProgressLexer(session, file.getPath());
+      ProgressLexer lexer = new ProgressLexer(session, file.getPath(), false);
       ProParser parser = new ProParser(lexer.getANTLR2TokenStream(true));
       parser.initAntlr4(session, lexer.getFilenameList());
       parser.program();

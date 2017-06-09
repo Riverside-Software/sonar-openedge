@@ -1017,7 +1017,7 @@ public class Lexer  {
   void macroDefine(int defType) throws IOException {
     LOGGER.trace("Entering macroDefine({})", defType);
 
-    if (prepro.isConsuming())
+    if (prepro.isConsuming() || prepro.isLexOnly())
       return;
     int it = 0;
     int end = currText.length();
