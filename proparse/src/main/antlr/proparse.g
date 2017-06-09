@@ -1703,15 +1703,11 @@ contexthelpid_expr
   ;
 
 convertphrase
-  :  CONVERT^ (options{greedy=true;}: convertphrase_source)? (options{greedy=true;}: convertphrase_target)?
+  :  CONVERT^ (options{greedy=true;}: convertphrase_opt)+
   ;
-convertphrase_source
-  :  SOURCE^ ( BASE64 | CODEPAGE expression (options{greedy=true;}: BASE64)? )
-  ;
-convertphrase_target
-  :  TARGET^ ( BASE64 | CODEPAGE expression (options{greedy=true;}: BASE64)? )
-  ;
-    
+convertphrase_opt
+  : (SOURCE|TARGET) ( BASE64 | CODEPAGE expression (options{greedy=true;}: BASE64)? );
+
 copylobstate
   :  COPYLOB^ (FROM)?
     (  (FILE expression)=> FILE expression
