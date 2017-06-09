@@ -758,6 +758,10 @@ options{generateAmbigWarnings=false;}
 valueexpression
   :  VALUE^ LEFTPAREN expression RIGHTPAREN
   ;
+qstringorvalue
+  :  valueexpression | QSTRING
+  ;
+
 expressionorvalue
 options{generateAmbigWarnings=false;}
   :  valueexpression | expression
@@ -1777,7 +1781,7 @@ createaliasstate
   ;
 
 createautomationobjectstate
-  :  CREATE^ QSTRING field (create_connect)? (NOERROR_KW)? state_end
+  :  CREATE^ qstringorvalue field (create_connect)? (NOERROR_KW)? state_end
     {sthd(##,Automationobject);}
   ;
 create_connect
