@@ -1173,8 +1173,7 @@ constructorstate throws TreeParserException
   
 convertphrase throws TreeParserException
   :  #(  CONVERT 
-      ( #(SOURCE (BASE64 | CODEPAGE expression (BASE64)?) ) )?
-      ( #(TARGET (BASE64 | CODEPAGE expression (BASE64)?) ) )?
+      ( (SOURCE|TARGET) (BASE64 | CODEPAGE expression (BASE64)?) )+
     )
   ;
   
