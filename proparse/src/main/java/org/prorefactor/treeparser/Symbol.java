@@ -20,6 +20,7 @@ public abstract class Symbol implements ISymbol {
   private int allRefsCount = 0;
   private int numReads = 0;
   private int numWrites = 0;
+  private int numRefd = 0;
   private JPNode asNode;
   private boolean parameter = false;
 
@@ -72,6 +73,11 @@ public abstract class Symbol implements ISymbol {
   @Override
   public int getNumWrites() {
     return numWrites;
+  }
+
+  @Override
+  public int getNumReferenced() {
+    return numRefd;
   }
 
   @Override
@@ -160,6 +166,8 @@ public abstract class Symbol implements ISymbol {
       numReads++;
     if (ContextQualifier.isWrite(contextQualifier))
       numWrites++;
+    if (ContextQualifier.isReference(contextQualifier))
+      numRefd++;
   }
 
   @Override
