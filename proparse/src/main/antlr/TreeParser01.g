@@ -586,7 +586,7 @@ create_whatever_args throws TreeParserException
   ;
 
 createautomationobjectstate throws TreeParserException
-  :  #(CREATE QSTRING fld[ContextQualifier.UPDATING] (#(CONNECT (#(TO expression))?))? (NOERROR_KW)? state_end )
+  :  #(CREATE (QSTRING|valueexpression) fld[ContextQualifier.UPDATING] (#(CONNECT (#(TO expression))?))? (NOERROR_KW)? state_end )
   ;
 
 createbrowsestate throws TreeParserException

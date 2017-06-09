@@ -1206,7 +1206,7 @@ createaliasstate throws TreeParserException
   ;
 
 createautomationobjectstate throws TreeParserException
-  :  #(CREATE QSTRING field (#(CONNECT (#(TO expression))?))? (NOERROR_KW)? state_end )
+  :  #(CREATE (QSTRING|valueexpression) field (#(CONNECT (#(TO expression))?))? (NOERROR_KW)? state_end )
   ;
 
 createbrowsestate throws TreeParserException
