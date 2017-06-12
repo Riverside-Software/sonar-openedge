@@ -40,7 +40,6 @@ public class OpenEdgeProfile extends ProfileDefinition {
   @Override
   public RulesProfile createProfile(ValidationMessages validation) {
     RulesProfile profile = RulesProfile.create(PROFILE_NAME, Constants.LANGUAGE_KEY);
-    profile.setDefaultProfile(false);
     profile.activateRule(ruleFinder.findByKey(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY), null);
     profile.activateRule(ruleFinder.findByKey(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_214_RULEKEY), null);
     profile.activateRule(ruleFinder.findByKey(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_12115_RULEKEY), null);

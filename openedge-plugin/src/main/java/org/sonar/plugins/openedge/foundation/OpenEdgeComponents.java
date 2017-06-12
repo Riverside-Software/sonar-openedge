@@ -47,6 +47,7 @@ import org.sonar.plugins.openedge.api.InvalidLicenceException;
 import org.sonar.plugins.openedge.api.LicenceRegistrar;
 import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck.CheckType;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonarsource.api.sonarlint.SonarLintSide;
@@ -141,27 +142,37 @@ public class OpenEdgeComponents {
 
     String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "") + Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID));
 
+    // Proparse and XREF rules
     for (ActiveRule rule : context.activeRules().findByLanguage(Constants.LANGUAGE_KEY)) {
-      RuleKey ruleKey = rule.ruleKey();
-      // AFAIK, no way to be sure if a rule is based on a template or not
-      String clsName = rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey();
-      OpenEdgeCheck<?> lint = getAnalyzer(clsName, ruleKey, context, getLicence(ruleKey.repository(), permId));
-      if (lint != null) {
-        configureFields(rule, lint);
-        lint.initialize();
-        switch (lint.getCheckType()) {
-          case DUMP_FILE:
-            dfChecks.add((OpenEdgeDumpFileCheck) lint);
-            dfChecksMap.put(rule, (OpenEdgeDumpFileCheck) lint);
-            break;
-          case PROPARSE:
-            ppChecks.add((OpenEdgeProparseCheck) lint);
-            ppChecksMap.put(rule, (OpenEdgeProparseCheck) lint);
-            break;
-        }
+      OpenEdgeCheck lint = initializeCheck(context, rule, permId);
+      if ((lint != null) && (lint.getCheckType() == CheckType.PROPARSE)) {
+        ppChecks.add((OpenEdgeProparseCheck) lint);
+        ppChecksMap.put(rule, (OpenEdgeProparseCheck) lint);
       }
     }
+    // DB rules
+    for (ActiveRule rule : context.activeRules().findByLanguage(Constants.DB_LANGUAGE_KEY)) {
+      OpenEdgeCheck lint = initializeCheck(context, rule, permId);
+      if ((lint != null) && (lint.getCheckType() == CheckType.PROPARSE)) {
+        dfChecks.add((OpenEdgeDumpFileCheck) lint);
+        dfChecksMap.put(rule, (OpenEdgeDumpFileCheck) lint);
+      }
+    }
+
     initialized = true;
+  }
+
+  private OpenEdgeCheck initializeCheck(SensorContext context, ActiveRule rule, String permId) {
+    RuleKey ruleKey = rule.ruleKey();
+    // AFAIK, no way to be sure if a rule is based on a template or not
+    String clsName = rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey();
+    OpenEdgeCheck<?> lint = getAnalyzer(clsName, ruleKey, context, getLicence(ruleKey.repository(), permId));
+    if (lint != null) {
+      configureFields(rule, lint);
+      lint.initialize();
+    }
+
+    return lint;
   }
 
   public Collection<OpenEdgeProparseCheck> getProparseChecks() {
