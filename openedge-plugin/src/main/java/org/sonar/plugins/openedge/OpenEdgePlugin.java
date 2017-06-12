@@ -23,6 +23,7 @@ import org.sonar.api.Plugin;
 import org.sonar.api.PropertyType;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.resources.Qualifiers;
+import org.sonar.api.utils.Version;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.colorizer.OpenEdgeColorizerFormat;
 import org.sonar.plugins.openedge.colorizer.OpenEdgeDBColorizerFormat;
@@ -59,8 +60,10 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(OpenEdgeRulesDefinition.class, OpenEdgeRulesRegistrar.class, OpenEdgeProfile.class,
         OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
 
-    // UI and code colorizer
-    context.addExtensions(OpenEdgeColorizerFormat.class, OpenEdgeDBColorizerFormat.class);
+    // UI and code colorizer - 6.4+ removed CodeColorizerFormat class
+    if (!context.getSonarQubeVersion().isGreaterThanOrEqual(Version.parse("6.4"))) {
+      context.addExtensions(OpenEdgeColorizerFormat.class, OpenEdgeDBColorizerFormat.class);
+    }
 
     // Sensors
     context.addExtensions(OpenEdgeSensor.class, OpenEdgeDBSensor.class, OpenEdgeListingSensor.class,
