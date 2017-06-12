@@ -262,10 +262,6 @@ public class OpenEdgeSettings {
     return settings.getBoolean(Constants.PROPARSE_DEBUG);
   }
 
-  public boolean useCpdDebug() {
-    return settings.getBoolean(Constants.CPD_DEBUG);
-  }
-
   public boolean useXrefFilter() {
     return settings.getBoolean(Constants.XREF_FILTER);
   }

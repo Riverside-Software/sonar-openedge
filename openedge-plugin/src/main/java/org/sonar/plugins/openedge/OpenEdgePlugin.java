@@ -88,10 +88,6 @@ public class OpenEdgePlugin implements Plugin {
         "Generate JPNodeLister debug file in .proparse directory").type(PropertyType.BOOLEAN).category(
             CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_DEBUG).defaultValue(Boolean.FALSE.toString()).onQualifiers(
                 Qualifiers.MODULE, Qualifiers.PROJECT).build());
-    context.addExtension(PropertyDefinition.builder(Constants.CPD_DEBUG).name("CPD debug files").description(
-        "Generate CPD tokens listing file").type(PropertyType.BOOLEAN).category(CATEGORY_OPENEDGE).subCategory(
-            SUBCATEGORY_DEBUG).defaultValue(Boolean.FALSE.toString()).onQualifiers(Qualifiers.MODULE,
-                Qualifiers.PROJECT).build());
     context.addExtension(PropertyDefinition.builder(Constants.SUFFIXES).name("File suffixes").description(
         "Comma-separated list of suffixes of OpenEdge files to analyze").type(PropertyType.STRING).defaultValue(
             "").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
