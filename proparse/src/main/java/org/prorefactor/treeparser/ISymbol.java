@@ -26,6 +26,8 @@ public interface ISymbol {
 
   int getNumWrites();
 
+  int getNumReferenced();
+
   /**
    * If this was defined AS something, then we have an AS node
    */
