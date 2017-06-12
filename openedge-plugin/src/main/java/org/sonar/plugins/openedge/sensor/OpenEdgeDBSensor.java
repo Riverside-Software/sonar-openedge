@@ -30,6 +30,7 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 
@@ -43,7 +44,7 @@ public class OpenEdgeDBSensor implements Sensor {
 
   @Override
   public void describe(SensorDescriptor descriptor) {
-    descriptor.onlyOnLanguage(OpenEdgeDB.KEY).name(getClass().getSimpleName());
+    descriptor.onlyOnLanguage(Constants.DB_LANGUAGE_KEY).name(getClass().getSimpleName());
   }
 
   @Override
@@ -55,7 +56,7 @@ public class OpenEdgeDBSensor implements Sensor {
   private void computeBaseMetrics(SensorContext sensorContext) {
     FilePredicates predicates = sensorContext.fileSystem().predicates();
     for (InputFile file : sensorContext.fileSystem().inputFiles(
-        predicates.and(predicates.hasLanguage(OpenEdgeDB.KEY), predicates.hasType(Type.MAIN)))) {
+        predicates.and(predicates.hasLanguage(Constants.DB_LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       try {
         LOG.info("Analyzing {}", file.relativePath());
 
