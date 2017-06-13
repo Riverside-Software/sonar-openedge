@@ -5,7 +5,7 @@
   <groupId>eu.rssw</groupId>
   <artifactId>sonar-openedge</artifactId>
   <packaging>pom</packaging>
-  <version>2.0.2-SNAPSHOT</version>
+  <version>2.0.2</version>
   <name>OpenEdge plugin for SonarQube</name>
   <url>http://www.riverside-software.fr/</url>
   <description>Open source code analysis for OpenEdge</description>
