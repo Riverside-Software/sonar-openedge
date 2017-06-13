@@ -83,7 +83,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     NewRule warning = repository.createRule(ruleKey).setName(name).setSeverity(Priority.CRITICAL.name());
     warning.setTags(COMPILER_WARNING_TAG);
     warning.setDebtRemediationFunction(warning.debtRemediationFunctions().constantPerIssue(remediationCost));
-    warning.setType(RuleType.BUG);
+    warning.setType(RuleType.CODE_SMELL);
     warning.setHtmlDescription(getClass().getResource(
         String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, warning.key())));
   }
