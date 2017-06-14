@@ -19,18 +19,11 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-
-import org.sonar.api.batch.fs.InputFile.Type;
-import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.internal.google.common.io.Files;
-import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -41,7 +34,7 @@ public class OpenEdgeListingSensorTest {
 
   @Test
   public void testListing() throws Exception {
-    SensorContextTester context = createContext();
+    SensorContextTester context = TestProjectSensorContext.createContext();
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
     OpenEdgeListingSensor sensor = new OpenEdgeListingSensor(oeSettings, context.fileSystem());
@@ -56,18 +49,5 @@ public class OpenEdgeListingSensorTest {
         OpenEdgeRulesDefinition.LARGE_TRANSACTION_SCOPE, "Wrong issue type");
   }
 
-  private SensorContextTester createContext() throws IOException {
-    SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
-    context.settings().setProperty("sonar.sources", "src");
-    context.settings().setProperty("sonar.oe.binaries", "build");
-    context.fileSystem().add(
-        new TestInputFileBuilder(BASEDIR, FILE1).setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE1), Charset.defaultCharset())).build());
-    context.fileSystem().add(
-        new TestInputFileBuilder(BASEDIR, FILE2).setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE2), Charset.defaultCharset())).build());
-
-    return context;
-  }
 
 }

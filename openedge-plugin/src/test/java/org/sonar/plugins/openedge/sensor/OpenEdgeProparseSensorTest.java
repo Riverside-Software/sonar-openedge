@@ -19,28 +19,23 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.BASEDIR;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.CLASS1;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
 
-import org.sonar.api.batch.fs.InputFile.Type;
-import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class OpenEdgeProparseSensorTest {
-  private final static String BASEDIR = "src/test/resources/project1";
-  private final static String FILE3 = "src/procedures/test3.p";
-  private final static String CLASS1 = "src/classes/rssw/testclass.cls";
 
   @Test
   public void testCPDPreprocessorExpansion() throws Exception {
-    SensorContextTester context = createContext();
+    SensorContextTester context = TestProjectSensorContext.createContext();
     context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
     context.settings().setProperty(Constants.CPD_METHODS, "TEST3");
     context.settings().setProperty(Constants.CPD_PROCEDURES, "adm-create-objects");
@@ -54,20 +49,6 @@ public class OpenEdgeProparseSensorTest {
     Assert.assertEquals(context.cpdTokens(BASEDIR + ":" + FILE3).size(), 7);
     Assert.assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
     Assert.assertEquals(context.cpdTokens(BASEDIR + ":" + CLASS1).size(), 11);
-  }
-
-  private SensorContextTester createContext() throws IOException {
-    SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
-    context.settings().setProperty("sonar.sources", "src");
-    context.settings().setProperty("sonar.oe.binaries", "build");
-    context.fileSystem().add(
-        new TestInputFileBuilder(BASEDIR, FILE3).setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE3), Charset.defaultCharset())).build());
-    context.fileSystem().add(
-        new TestInputFileBuilder(BASEDIR, CLASS1).setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, CLASS1), Charset.defaultCharset())).build());
-
-    return context;
   }
 
 }

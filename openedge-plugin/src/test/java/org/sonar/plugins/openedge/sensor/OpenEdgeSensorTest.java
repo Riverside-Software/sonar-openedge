@@ -19,47 +19,27 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.BASEDIR;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE2;
 
-import org.sonar.api.batch.fs.InputFile.Type;
-import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.internal.google.common.io.Files;
-import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
+import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class OpenEdgeSensorTest {
-  private final static String BASEDIR = "src/test/resources/project1";
-  private final static String FILE1 = "src/procedures/test1.p";
-  private final static String FILE2 = "src/procedures/test2.p";
 
   @Test
   public void testMetrics() throws Exception {
-    SensorContextTester context = createContext();
+    SensorContextTester context = TestProjectSensorContext.createContext();
 
     OpenEdgeSensor sensor = new OpenEdgeSensor(context.fileSystem());
     sensor.execute(context);
 
     Assert.assertEquals(1, context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.PROCEDURES_KEY).value());
     Assert.assertEquals(1, context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.PROCEDURES_KEY).value());
-  }
-
-  private SensorContextTester createContext() throws IOException {
-    SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
-    context.settings().setProperty("sonar.sources", "src");
-    context.settings().setProperty("sonar.oe.binaries", "build");
-    context.fileSystem().add(
-        new TestInputFileBuilder(BASEDIR, FILE1).setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE1), Charset.defaultCharset())).build());
-    context.fileSystem().add(
-        new TestInputFileBuilder(BASEDIR, FILE2).setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE2), Charset.defaultCharset())).build());
-
-    return context;
   }
 
 }
