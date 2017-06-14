@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.sonar.api.batch.fs.InputFile.Type;
-import org.sonar.api.batch.fs.internal.DefaultInputFile;
+import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
@@ -37,7 +37,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class OpenEdgeWarningsSensorTest {
-  private final File moduleBaseDir = new File("src/test/resources/project1");
+  private final static String BASEDIR = "src/test/resources/project1";
   private final static String FILE1 = "src/procedures/test1.p";
   private final static String FILE2 = "src/procedures/test2.p";
 
@@ -52,15 +52,15 @@ public class OpenEdgeWarningsSensorTest {
   }
 
   private SensorContextTester createContext() throws IOException {
-    SensorContextTester context = SensorContextTester.create(moduleBaseDir);
+    SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     context.settings().setProperty("sonar.sources", "src");
     context.settings().setProperty("sonar.oe.binaries", "build");
     context.fileSystem().add(
-        new DefaultInputFile("file1", FILE1).setLanguage(Constants.LANGUAGE_KEY).setType(Type.MAIN).initMetadata(
-            Files.toString(new File(moduleBaseDir, FILE1), Charset.defaultCharset())));
+        new TestInputFileBuilder(BASEDIR, FILE1).setLanguage(Constants.LANGUAGE_KEY).setType(
+            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE1), Charset.defaultCharset())).build());
     context.fileSystem().add(
-        new DefaultInputFile("file2", FILE2).setLanguage(Constants.LANGUAGE_KEY).setType(Type.MAIN).initMetadata(
-            Files.toString(new File(moduleBaseDir, FILE2), Charset.defaultCharset())));
+        new TestInputFileBuilder(BASEDIR, FILE2).setLanguage(Constants.LANGUAGE_KEY).setType(
+            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE2), Charset.defaultCharset())).build());
     context.setActiveRules(createRules());
 
     return context;
