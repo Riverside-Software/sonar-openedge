@@ -37,7 +37,6 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
-import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 
 import eu.rssw.antlr.database.DumpFileUtils;
 

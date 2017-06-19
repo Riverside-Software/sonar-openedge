@@ -9,7 +9,6 @@ import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
 
 public class TestProjectSensorContext {
   public final static String BASEDIR = "src/test/resources/project1";
@@ -33,7 +32,7 @@ public class TestProjectSensorContext {
     context.settings().setProperty(Constants.SKIP_RCODE, true);
 
     context.fileSystem().add(
-        new TestInputFileBuilder("src/test/resources/project1", DF1).setLanguage(OpenEdgeDB.KEY).setType(
+        new TestInputFileBuilder("src/test/resources/project1", DF1).setLanguage(Constants.DB_LANGUAGE_KEY).setType(
             Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, DF1), Charset.defaultCharset())).build());
     context.fileSystem().add(
         new TestInputFileBuilder(BASEDIR, FILE1).setLanguage(Constants.LANGUAGE_KEY).setType(
