@@ -750,6 +750,14 @@ public class JPNode extends BaseAST {
     down = child;
   }
 
+  public void copyHiddenAfter(JPNode to) {
+    to.setHiddenAfter(getHiddenAfter());
+  }
+
+  public void copyHiddenBefore(JPNode to) {
+    to.setHiddenBefore(getHiddenBefore());
+  }
+
   public void setHiddenAfter(ProToken t) {
     token.setHiddenAfter(t);
   }
@@ -764,6 +772,13 @@ public class JPNode extends BaseAST {
 
   public void setPrevSibling(JPNode n) {
     left = n;
+  }
+
+  /** Mark a node as a "statement head" */
+  public void setStatementHead(int state2) {
+    attrSet(IConstants.STATEHEAD, IConstants.TRUE);
+    if (state2 != 0)
+      attrSet(IConstants.STATE2, state2);
   }
 
   public void setNextSiblingWithLinks(AST n) {

@@ -56,7 +56,7 @@ options {
 // class definition options for Antlr
 class JPTreeParser extends TreeParser;
 options {
-  importVocab = ProParser;
+  importVocab = Base;
   defaultErrorHandler = false;
   classHeaderSuffix = IJPTreeParser;
 }

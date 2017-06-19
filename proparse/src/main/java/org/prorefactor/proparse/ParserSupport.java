@@ -243,11 +243,11 @@ public class ParserSupport {
   /**
    * @return True if the parser in the middle of a DYNAMIC-NEW statement
    */
-  public boolean isInDynamicNew() {
+  boolean isInDynamicNew() {
     return inDynamicNew;
   }
 
-  public void setInDynamicNew(boolean flag) {
+  void setInDynamicNew(boolean flag) {
     inDynamicNew = flag;
   }
 
@@ -257,24 +257,6 @@ public class ParserSupport {
 
   void attrTypeName(JPNode node) {
     node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
-  }
-
-  /** Set the 'store type' attribute on a RECORD_NAME node. */
-  static void setStoreType(JPNode node, FieldType tabletype) {
-    switch (tabletype) {
-      case DBTABLE:
-        node.attrSet(IConstants.STORETYPE, IConstants.ST_DBTABLE);
-        break;
-      case TTABLE:
-        node.attrSet(IConstants.STORETYPE, IConstants.ST_TTABLE);
-        break;
-      case WTABLE:
-        node.attrSet(IConstants.STORETYPE, IConstants.ST_WTABLE);
-        break;
-      case VARIABLE:
-        // Never happens
-        break;
-    }
   }
 
   /**

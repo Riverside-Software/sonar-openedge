@@ -25,6 +25,10 @@ import antlr.collections.AST;
 
 public class NodeFactory extends ASTFactory {
 
+  public NodeFactory() {
+    setASTNodeClass(JPNode.class);
+  }
+
   @Override
   public AST create() {
     // Not used in ProParser

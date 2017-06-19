@@ -47,6 +47,23 @@ import org.prorefactor.core.NodeTypes;
  * (NAMEDOT followed by anything), then we convert all of the NAMEDOT pairs to NAMEDOT-ID pairs. Otherwise, if the
  * OBJCOLON is proceeded by any reserved keyword other than a systemhandlename, then we change that token's type to
  * ID.
+ * 
+ * Comment extracted from proparse.g
+ *
+ * Comparing identifiers in Progress code
+ * --------------------------------------
+ * Progress only allows certain ASCII characters in identifiers (field names, etc). Because of this, it is safe
+ * to store/compare lower-cased versions of identifiers, without concern for alternative code pages (I hope).
+ * 
+ * 
+ * "OBJCOLON"
+ * --------
+ * "OBJCOLON" describes a colon that is followed by non-whitespace.
+ * Note that the following compiles: c[1] :move-to-top ().  So, not only
+ * do we not want to try to figure out (from lexical) if it's an attribute
+ * or method, but we want to make sure that either field or METHOD will
+ * work in a particular spot, that METHOD is tried for first.
+ * 
  */
 public class TokenList implements TokenSource {
   private final TokenSource source;
