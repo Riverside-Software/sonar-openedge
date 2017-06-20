@@ -537,21 +537,26 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
     throw new ProEvalException("Incompatible datatype");
   }
 
-  static Number getNumber(String s) {
-    // Given a String, return a Float or Integer.
-    // Progress allows negative numbers to be represented like: 256-
-    // Convert it to -256
-    if (s.endsWith("-"))
-      s = "-" + s.substring(0, s.length() - 1);
-    if (s.startsWith("+"))
-      s = s.substring(1);
+  static Number getNumber(String str) {
+    String nbr = str.trim();
+    if (nbr.length() == 0) {
+      // Empty string returns 0
+      return 0;
+    }
+    if (nbr.endsWith("-")) {
+      // Progress allows negative numbers to be represented like: 256-
+      nbr = "-" + nbr.substring(0, nbr.length() - 1);
+    }
+    if (nbr.startsWith("+")) {
+      nbr = nbr.substring(1);
+    }
     try {
-      if (s.indexOf('.') > -1)
-        return Float.parseFloat(s);
+      if (nbr.indexOf('.') > -1)
+        return Float.parseFloat(nbr);
       else
-        return Integer.parseInt(s);
+        return Integer.parseInt(nbr);
     } catch (NumberFormatException e) {
-      throw new ProEvalException("Lexical cast to number from: " + s + " failed.");
+      throw new ProEvalException("Lexical cast to number from '" + str + "' failed");
     }
   }
 

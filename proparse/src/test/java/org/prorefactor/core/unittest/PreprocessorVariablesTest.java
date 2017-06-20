@@ -59,4 +59,20 @@ public class PreprocessorVariablesTest {
     }
   }
 
+  @Test
+  public void test04() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor04.p"), session);
+    unit.parse();
+    testVariable(unit.getTopNode(), "var01");
+    testNoVariable(unit.getTopNode(), "var02");
+    testVariable(unit.getTopNode(), "var03");
+    testVariable(unit.getTopNode(), "var04");
+    testNoVariable(unit.getTopNode(), "var05");
+    testVariable(unit.getTopNode(), "var06");
+    testNoVariable(unit.getTopNode(), "var07");
+    testVariable(unit.getTopNode(), "var08");
+    testVariable(unit.getTopNode(), "var09");
+    testVariable(unit.getTopNode(), "var10");
+  }
+
 }
