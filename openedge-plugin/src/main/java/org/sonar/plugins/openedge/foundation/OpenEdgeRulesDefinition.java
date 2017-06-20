@@ -53,14 +53,14 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     annotationLoader.addRuleClasses(false, Arrays.<Class> asList(OpenEdgeRulesRegistrar.ppCheckClasses()));
 
     // Manually created rules for compiler warnings
-    createWarningRule(repository, COMPILER_WARNING_RULEKEY, "Compiler warnings", "2h");
+    createWarningRule(repository, COMPILER_WARNING_RULEKEY, "Compiler warnings", "2h", Priority.MINOR);
     createWarningRule(repository, COMPILER_WARNING_12115_RULEKEY, "Expression evaluates to a constant", "1h");
     createWarningRule(repository, COMPILER_WARNING_15090_RULEKEY, "Dead code", "4h");
     createWarningRule(repository, COMPILER_WARNING_214_RULEKEY, "TRANSACTION keyword given within actual transaction level", "3h");
-    createWarningRule(repository, COMPILER_WARNING_14786_RULEKEY, "Table and field names must appear as they are in the schema", "20min");
-    createWarningRule(repository, COMPILER_WARNING_14789_RULEKEY, "Fields must be qualified with table name", "15min");
-    createWarningRule(repository, COMPILER_WARNING_18494_RULEKEY, "Abbreviated keywords are not authorized", "5min");
-    createWarningRule(repository, COMPILER_WARNING_2965_RULEKEY, "Invalid use of nonconstant elements in preprocessor expression", "30min");
+    createWarningRule(repository, COMPILER_WARNING_14786_RULEKEY, "Table and field names must appear as they are in the schema", "20min", Priority.CRITICAL);
+    createWarningRule(repository, COMPILER_WARNING_14789_RULEKEY, "Fields must be qualified with table name", "15min", Priority.MAJOR);
+    createWarningRule(repository, COMPILER_WARNING_18494_RULEKEY, "Abbreviated keywords are not authorized", "5min", Priority.INFO);
+    createWarningRule(repository, COMPILER_WARNING_2965_RULEKEY, "Invalid use of nonconstant elements in preprocessor expression", "30min", Priority.BLOCKER);
 
     // Manually created rule for proparse errors
     NewRule proparseRule = repository.createRule(PROPARSE_ERROR_RULEKEY).setName("Proparse error").setSeverity(
@@ -82,7 +82,11 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
   }
 
   private void createWarningRule(NewRepository repository, String ruleKey, String name, String remediationCost) {
-    NewRule warning = repository.createRule(ruleKey).setName(name).setSeverity(Priority.CRITICAL.name());
+    createWarningRule(repository, ruleKey, name, remediationCost, Priority.CRITICAL);
+  }
+
+  private void createWarningRule(NewRepository repository, String ruleKey, String name, String remediationCost, Priority priority) {
+    NewRule warning = repository.createRule(ruleKey).setName(name).setSeverity(priority.name());
     warning.setTags(COMPILER_WARNING_TAG);
     warning.setDebtRemediationFunction(warning.debtRemediationFunctions().constantPerIssue(remediationCost));
     warning.setType(RuleType.CODE_SMELL);
