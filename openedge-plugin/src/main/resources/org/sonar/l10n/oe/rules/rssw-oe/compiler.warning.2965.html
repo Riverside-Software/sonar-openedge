@@ -1,0 +1,21 @@
+<p>A preprocessor expression, such as would appear in an &amp;IF or &amp;ELSEIF, contained an element that was not a constant. Progress preprocessor expressions must consist solely of constants or of preprocessor names that expand to constants.
+For example: &amp;IF A &lt; 3 &amp;THEN ... is incorrect, because A is not a constant or a preprocessor reference that expands to a constant.</p>
+<p>As the compiler will (almost) silently discard the entire code block in the &amp;THEN or &amp;ELSE block, this issue should absolutely be fixed</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+&amp;SCOPED-DEFINE VAR1 xxx
+&amp;SCOPED-DEFINE VAR2 yyy
+&amp;IF {&amp;VAR1} EQ {&amp;VAR2} &amp;THEN
+  // xxx and yyy are constants and can't be evaluated
+&amp;ENDIF
+</pre>
+
+<h2>Compliant Solution</h2>
+<pre>
+&amp;SCOPED-DEFINE VAR1 xxx
+&amp;SCOPED-DEFINE VAR2 yyy
+&amp;IF "{&amp;VAR1}" EQ "{&amp;VAR2}" &amp;THEN
+  // Comparison on string values
+&amp;ENDIF
+</pre>

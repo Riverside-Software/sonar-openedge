@@ -38,6 +38,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
   public static final String COMPILER_WARNING_14786_RULEKEY = "compiler.warning.14786";
   public static final String COMPILER_WARNING_14789_RULEKEY = "compiler.warning.14789";
   public static final String COMPILER_WARNING_18494_RULEKEY = "compiler.warning.18494";
+  public static final String COMPILER_WARNING_2965_RULEKEY = "compiler.warning.2965";
   public static final String PROPARSE_ERROR_RULEKEY = "proparse.error";
   public static final String LARGE_TRANSACTION_SCOPE = "large.trans";
   private static final String COMPILER_WARNING_TAG = "compiler-warnings";
@@ -59,6 +60,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     createWarningRule(repository, COMPILER_WARNING_14786_RULEKEY, "Table and field names must appear as they are in the schema", "20min");
     createWarningRule(repository, COMPILER_WARNING_14789_RULEKEY, "Fields must be qualified with table name", "15min");
     createWarningRule(repository, COMPILER_WARNING_18494_RULEKEY, "Abbreviated keywords are not authorized", "5min");
+    createWarningRule(repository, COMPILER_WARNING_2965_RULEKEY, "Invalid use of nonconstant elements in preprocessor expression", "30min");
 
     // Manually created rule for proparse errors
     NewRule proparseRule = repository.createRule(PROPARSE_ERROR_RULEKEY).setName("Proparse error").setSeverity(
