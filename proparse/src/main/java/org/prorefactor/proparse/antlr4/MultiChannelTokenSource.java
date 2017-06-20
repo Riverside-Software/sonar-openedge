@@ -52,6 +52,7 @@ public class MultiChannelTokenSource implements TokenSource {
       case PreprocessorParser.AMPGLOBALDEFINE:
       case PreprocessorParser.AMPSCOPEDDEFINE:
       case PreprocessorParser.AMPUNDEFINE:
+      case PreprocessorParser.INCLUDEDIRECTIVE:
         ((WritableToken) currentToken).setChannel(PREPROCESSOR_CHANNEL);
         break;
       case PreprocessorParser.PROPARSEDIRECTIVE:

@@ -26,6 +26,7 @@ public class TestProjectSensorContext {
   public static SensorContextTester createContext() throws IOException {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     context.settings().setProperty("sonar.sources", "src");
+    context.settings().setProperty(Constants.PROPATH, new File(BASEDIR).getAbsolutePath());
     context.settings().setProperty(Constants.BINARIES, "build");
     context.settings().setProperty(Constants.DATABASES, "src/schema/sp2k.df");
 

@@ -76,6 +76,7 @@ ADD SEQUENCE "NextInvTransNum"
   CYCLE-ON-LIMIT no
   MIN-VAL 0
 
+@RSSW.Schema(name="benefits").
 ADD TABLE "Benefits"
   AREA "Employee"
   DESCRIPTION "The benefits table contains employee benefits."

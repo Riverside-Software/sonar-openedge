@@ -17,3 +17,5 @@ end function.
 procedure test:
 
 end procedure.
+
+{ src/procedures/test3.i }

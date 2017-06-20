@@ -98,6 +98,13 @@ public class Lexer  {
         textStartSource = prepro.getTextStart().getSourceNum();
         getChar();
         return makeToken(PreprocessorParser.PROPARSEDIRECTIVE, prepro.getProparseDirectiveText());
+      } else if (currInt == ProgressLexer.INCLUDE_DIRECTIVE) {
+        textStartFile = prepro.getTextStart().getFile();
+        textStartLine = prepro.getTextStart().getLine();
+        textStartCol = prepro.getTextStart().getCol();
+        textStartSource = prepro.getTextStart().getSourceNum();
+        getChar();
+        return makeToken(PreprocessorParser.INCLUDEDIRECTIVE, prepro.getIncludeDirectiveText());
       }
 
       textStartFile = prepro.getFileIndex();
