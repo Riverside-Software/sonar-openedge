@@ -1739,7 +1739,6 @@ createstatement
   |  (CREATE record (FOR|USING|NOERROR_KW|PERIOD|EOF))=> createstate
   |  create_whatever_state
   |  createaliasstate
-  |  createautomationobjectstate
   |  createbrowsestate
   |  createquerystate
   |  createbufferstate
@@ -1776,10 +1775,6 @@ createaliasstate
     {sthd(##,ALIAS);}
   ;
 
-createautomationobjectstate
-  :  CREATE^ qstringorvalue field (create_connect)? (NOERROR_KW)? state_end
-    {sthd(##,Automationobject);}
-  ;
 create_connect
   :  CONNECT^ (to_expr)?
   ;
@@ -1844,19 +1839,20 @@ createtemptablestate
 
 createwidgetstate
   :  CREATE^
-    (  valueexpression
+    (  qstringorvalue
     |  (BUTTON | btns:BUTTONS {#btns.setType(BUTTON);})
     |  COMBOBOX | CONTROLFRAME | DIALOGBOX | EDITOR | FILLIN | FRAME | IMAGE
     |  MENU | MENUITEM | RADIOSET | RECTANGLE | SELECTIONLIST | SLIDER
     |  SUBMENU | TEXT | TOGGLEBOX | WINDOW
     )
     field
-    (in_widgetpool_expr)?
-    (NOERROR_KW)?
-    (assign_opt)?
-    (triggerphrase)?
-    state_end
     {sthd(##,WIDGET);}
+    // When no option provided in statement, such as
+    // CREATE VALUE("XXX") hVar.
+    // In this case, state2 attribute will be set to WIDGET
+    (in_widgetpool_expr)? (create_connect {sthd(##,Automationobject);})? (NOERROR_KW)? (assign_opt)? (triggerphrase)?
+    state_end
+
   ;
 
 createwidgetpoolstate
