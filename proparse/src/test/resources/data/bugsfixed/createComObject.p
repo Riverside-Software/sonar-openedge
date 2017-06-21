@@ -10,3 +10,6 @@ END.
 
 DEFINE VARIABLE lFrame AS HANDLE NO-UNDO.
 CREATE VALUE("button") lHdl ASSIGN FRAME = lFrame.
+
+// No option, ambiguous (for the parser), state2 remains as WIDGET
+CREATE VALUE("Excel.Application") hComHandle.

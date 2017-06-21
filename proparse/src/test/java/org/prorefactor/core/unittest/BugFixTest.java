@@ -13,7 +13,9 @@ import static org.testng.Assert.assertNull;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.List;
 
+import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProparseRuntimeException;
@@ -50,7 +52,7 @@ public class BugFixTest {
     tempDir.mkdirs();
   }
 
-  private void genericTest(String file) throws Exception {
+  private ParseUnit genericTest(String file) throws Exception {
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, file), session);
     assertNull(pu.getTopNode());
     assertNull(pu.getRootScope());
@@ -66,6 +68,8 @@ public class BugFixTest {
             NodeTypes.OBJCOLON, NodeTypes.THEN, NodeTypes.END});
     nodeLister.print();
     writer.close();
+
+    return pu;
   }
 
   private TokenStream genericLex(String file) throws Exception {
@@ -271,7 +275,21 @@ public class BugFixTest {
 
   @Test
   public void testCreateComObject() throws Exception {
-    genericTest("createComObject.p");
+    ParseUnit unit = genericTest("createComObject.p");
+    List<JPNode> list = unit.getTopNode().query(NodeTypes.CREATE);
+    // COM automation
+    assertEquals(list.get(0).getLine(), 3);
+    assertEquals(list.get(0).getState2(), NodeTypes.Automationobject);
+    assertEquals(list.get(1).getLine(), 4);
+    assertEquals(list.get(1).getState2(), NodeTypes.Automationobject);
+    // Widgets
+    assertEquals(list.get(2).getLine(), 8);
+    assertEquals(list.get(2).getState2(), NodeTypes.WIDGET);
+    assertEquals(list.get(3).getLine(), 12);
+    assertEquals(list.get(3).getState2(), NodeTypes.WIDGET);
+    // Ambiguous
+    assertEquals(list.get(4).getLine(), 15);
+    assertEquals(list.get(4).getState2(), NodeTypes.WIDGET);
   }
 
   @Test
