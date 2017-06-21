@@ -1467,7 +1467,7 @@ enumstate
   ;
 
 defenumstate
-  : DEFINE^ ENUM (enum_member)+ state_end { sthd(##, ENUM); }
+  : DEFINE^ ENUM (enum_member)+ PERIOD { sthd(##, ENUM); }
   ;
 
 enum_member
@@ -2482,9 +2482,10 @@ display_item
     )
     {## = #([Form_item], ##);}
   ;
+
 display_with
 // The compiler allows NO-ERROR, but I don't see in their grammar where it fits in.
-  :  {LA(2)==BROWSE}? WITH^ BROWSE widgetname (frame_opt)*
+  :  {LA(2)==BROWSE}? WITH^ BROWSE widgetname (browse_opt)*
   |  framephrase
   ;
 
@@ -2759,6 +2760,33 @@ frame_exp_down
   :  expression DOWN
     {## = #([With_down], ##);}
   ;
+
+browse_opt:
+       (NUMBER)? DOWN
+    |  (WIDTH^|WIDTHCHARS^) expression
+    |  sizephrase
+    |  color_expr
+    |  LABELFONT^ expression
+    |  LABELDCOLOR^ expression
+    |  LABELFGCOLOR^ expression
+    |  LABELBGCOLOR^ expression
+    |  MULTIPLE | SINGLE
+    |  SEPARATORS | NOSEPARATORS
+    |  NOASSIGN | NOROWMARKERS
+    |  NOLABELS
+    |  NOBOX
+    |  FONT^ expression
+    |  titlephrase 
+    |  NOVALIDATE
+    |  NOSCROLLBARVERTICAL | SCROLLBARVERTICAL
+    |  ROWHEIGHTCHARS^ expression
+    |  ROWHEIGHTPIXELS^ expression
+    |  FITLASTCOLUMN
+    |  EXPANDABLE
+    |  NOEMPTYSPACE
+    |  DROPTARGET
+    |  NOAUTOVALIDATE;
+
 frame_opt
   :  (options{greedy=true;}:   ACCUMULATE^ (options{greedy=true;}: expression)?
     |  ATTRSPACE | NOATTRSPACE
