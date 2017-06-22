@@ -146,7 +146,7 @@ block_opt throws TreeParserException
   |  #(GROUP ( #(BY expression (DESCENDING)? ) )+ )
   ;
 block_preselect throws TreeParserException
-  :  #(PRESELECT for_record_spec[ContextQualifier.INITWEAK] )
+  :  #(PRESELECT for_record_spec2[ContextQualifier.INITWEAK] )
   ;
 
 functioncall throws TreeParserException
@@ -799,7 +799,7 @@ defineframestate throws TreeParserException
       (PRIVATE)?  // important: see note above.
       FRAME
       id:ID { action.frameDef(#def, #id); }
-      (form_item[ContextQualifier.SYMBOL])*
+      (form_item2[ContextQualifier.SYMBOL])*
       (  #(HEADER (display_item)+ )
       |  #(BACKGROUND (display_item)+ )
       )?
@@ -1062,7 +1062,7 @@ destructorstate throws TreeParserException
   
 disablestate throws TreeParserException
   :  #(  head:DISABLE  { action.frameInitializingStatement(#head); }
-      (UNLESSHIDDEN)? (#(ALL (#(EXCEPT (fld[ContextQualifier.SYMBOL])*))?) | (form_item[ContextQualifier.SYMBOL])+)? (framephrase)?
+      (UNLESSHIDDEN)? (#(ALL (#(EXCEPT (fld[ContextQualifier.SYMBOL])*))?) | (form_item2[ContextQualifier.SYMBOL])+)? (framephrase)?
       state_end  { action.frameStatementEnd(); }
     )
   ;
@@ -1141,7 +1141,7 @@ emptytemptablestate throws TreeParserException
 
 enablestate throws TreeParserException
   :  #(  head:ENABLE  { action.frameEnablingStatement(#head); }
-      (UNLESSHIDDEN)? (#(ALL (#(EXCEPT (fld[ContextQualifier.SYMBOL])*))?) | (form_item[ContextQualifier.SYMBOL])+)?
+      (UNLESSHIDDEN)? (#(ALL (#(EXCEPT (fld[ContextQualifier.SYMBOL])*))?) | (form_item2[ContextQualifier.SYMBOL])+)?
       (#(IN_KW WINDOW expression))? (framephrase)? state_end  { action.frameStatementEnd(); }
     )
   ;
@@ -1207,11 +1207,11 @@ forstate throws TreeParserException
       {  action.blockBegin(#f); 
         action.frameBlockCheck(#f);
       }
-      for_record_spec[ContextQualifier.INITWEAK] (block_opt)* block_colon {action.frameStatementEnd();}
+      for_record_spec2[ContextQualifier.INITWEAK] (block_opt)* block_colon {action.frameStatementEnd();}
       code_block block_end {action.blockEnd();}
     )
   ;
-for_record_spec[ContextQualifier contextQualifier] throws TreeParserException
+for_record_spec2[ContextQualifier contextQualifier] throws TreeParserException
   // Also used in PRESELECT
   :  (findwhich)?
     #(  rp1:RECORD_NAME
@@ -1226,13 +1226,13 @@ for_record_spec[ContextQualifier contextQualifier] throws TreeParserException
     )*
   ;
 
-form_item[ContextQualifier contextQualifier] throws TreeParserException
+form_item2[ContextQualifier contextQualifier] throws TreeParserException
 {  ContextQualifier tblQualifier = contextQualifier;
   if (contextQualifier==ContextQualifier.SYMBOL) tblQualifier = ContextQualifier.BUFFERSYMBOL;
 }
   :  #(  fi:Form_item
       (  tbl[tblQualifier]  {action.formItem(#fi);}
-      |  #(TEXT LEFTPAREN (form_item[contextQualifier])* RIGHTPAREN )
+      |  #(TEXT LEFTPAREN (form_item2[contextQualifier])* RIGHTPAREN )
       |  constant (formatphrase)?
       |  spacephrase
       |  skipphrase
@@ -1247,7 +1247,7 @@ form_item[ContextQualifier contextQualifier] throws TreeParserException
 
 formstate throws TreeParserException
   :  #(  head:FORMAT  { action.frameInitializingStatement(#head); }
-      (form_item[ContextQualifier.SYMBOL])*
+      (form_item2[ContextQualifier.SYMBOL])*
       (  #(HEADER (display_item)+ )
       |  #(BACKGROUND (display_item)+ )
       )?
@@ -1540,7 +1540,7 @@ onstate throws TreeParserException
   ;
 
 openquerystate throws TreeParserException
-  :  #(  OPEN QUERY ID (FOR|PRESELECT) for_record_spec[ContextQualifier.INIT]
+  :  #(  OPEN QUERY ID (FOR|PRESELECT) for_record_spec2[ContextQualifier.INIT]
       (  querytuningphrase
       |  BREAK
       |  #(BY expression (DESCENDING)? )
@@ -1573,7 +1573,7 @@ procedurestate throws TreeParserException
 
 promptforstate throws TreeParserException
   :  #(  head:PROMPTFOR  { action.frameEnablingStatement(#head); }
-      (stream_name_or_handle)? (UNLESSHIDDEN)? (form_item[ContextQualifier.SYMBOL])*
+      (stream_name_or_handle)? (UNLESSHIDDEN)? (form_item2[ContextQualifier.SYMBOL])*
       (goonphrase)?  (#(EXCEPT (fld1[ContextQualifier.SYMBOL])*))?  (#(IN_KW WINDOW expression))?
       (framephrase)?  { action.frameStatementEnd(); }
       (editingphrase)? state_end
@@ -1670,7 +1670,7 @@ scrollstate throws TreeParserException
 setstate throws TreeParserException
   :  #(  head:SET  { action.frameInitializingStatement(#head); }
       (stream_name_or_handle)? (UNLESSHIDDEN)?
-      (form_item[ContextQualifier.UPDATING])*
+      (form_item2[ContextQualifier.UPDATING])*
       (goonphrase)?  (#(EXCEPT (fld1[ContextQualifier.SYMBOL])*))?  (#(IN_KW WINDOW expression))?
       (framephrase)?  { action.frameStatementEnd(); }
       (editingphrase)? (NOERROR_KW)? state_end  
@@ -1806,7 +1806,7 @@ updatestatement throws TreeParserException
 updatestate throws TreeParserException
   :  #(  head:UPDATE  { action.frameEnablingStatement(#head); }
       (UNLESSHIDDEN)?  
-      (form_item[ContextQualifier.REFUP])*
+      (form_item2[ContextQualifier.REFUP])*
       (goonphrase)?
       (#(EXCEPT (fld1[ContextQualifier.SYMBOL])*))?
       (#(IN_KW WINDOW expression))?
