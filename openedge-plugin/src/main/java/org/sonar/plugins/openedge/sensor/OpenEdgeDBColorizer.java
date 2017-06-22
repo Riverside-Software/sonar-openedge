@@ -33,7 +33,7 @@ import org.sonar.api.batch.sensor.highlighting.NewHighlighting;
 import org.sonar.api.batch.sensor.highlighting.TypeOfText;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
-import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
+import org.sonar.plugins.openedge.api.Constants;
 
 import eu.rssw.antlr.database.DumpFileGrammarLexer;
 
@@ -42,7 +42,7 @@ public class OpenEdgeDBColorizer implements Sensor {
 
   @Override
   public void describe(SensorDescriptor descriptor) {
-    descriptor.onlyOnLanguage(OpenEdgeDB.KEY).name(getClass().getSimpleName());
+    descriptor.onlyOnLanguage(Constants.DB_LANGUAGE_KEY).name(getClass().getSimpleName());
   }
 
   @Override
@@ -51,7 +51,7 @@ public class OpenEdgeDBColorizer implements Sensor {
       return;
 
     for (InputFile file : context.fileSystem().inputFiles(
-        context.fileSystem().predicates().hasLanguage(OpenEdgeDB.KEY))) {
+        context.fileSystem().predicates().hasLanguage(Constants.DB_LANGUAGE_KEY))) {
       LOG.debug("DF syntax highlight on {}", file.relativePath());
       try {
         highlightFile(context, file);
