@@ -68,7 +68,9 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private static final Pattern regexEmptyCurlies = Pattern.compile("\\{\\s*\\}");
   private static final int EOF_CHAR = -1;
   private static final int SKIP_CHAR = -100;
+
   public static final int PROPARSE_DIRECTIVE = -101;
+  public static final int INCLUDE_DIRECTIVE = -102;
 
   private final IProparseSettings ppSettings;
   // Do we only read tokens ?
@@ -96,6 +98,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   // Is the current '.' a name dot? (i.e. not followed by whitespace) */
   private boolean nameDot;
   private String proparseDirectiveText;
+  private String includeDirectiveText;
   private FilePos textStart;
 
   private ListingListener lstListener;
@@ -378,7 +381,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
             return currChar;
           else {
             macroReference();
-            if (currChar == PROPARSE_DIRECTIVE)
+            if ((currChar == PROPARSE_DIRECTIVE) || (currChar == INCLUDE_DIRECTIVE))
               return currChar;
             // else do another loop
           }
@@ -750,6 +753,12 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
         }
       } // numbered args
 
+      // If lex only, we generate a token
+      if (lexOnly) {
+        currChar = INCLUDE_DIRECTIVE;
+        includeDirectiveText = refText.trim();
+        return;
+      } else 
       // newInclude() returns false if filename is blank or currently
       // "consuming" due to &IF FALSE.
       // newInclude() will throw() if file not found or cannot be opened.
@@ -913,6 +922,10 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
   public String getProparseDirectiveText() {
     return proparseDirectiveText;
+  }
+
+  public String getIncludeDirectiveText() {
+    return includeDirectiveText;
   }
 
   public boolean isConsuming() {
