@@ -11,6 +11,7 @@
   <description>Open source code analysis for OpenEdge</description>
 
   <modules>
+    <module>rcode-reader</module>
     <module>proparse</module>
     <module>database-parser</module>
     <module>profiler-parser</module>

@@ -32,6 +32,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -54,9 +58,14 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Files;
 
 import eu.rssw.antlr.database.DumpFileUtils;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
+import eu.rssw.pct.FileEntry;
+import eu.rssw.pct.PLReader;
+import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 
 @ScannerSide
 @SonarLintSide
@@ -69,8 +78,8 @@ public class OpenEdgeSettings {
 
   // Internal use
   private final List<String> sourceDirs = new ArrayList<>();
-  private final File binariesDir;
-  private final File pctDir;
+  private File binariesDir;
+  private File pctDir;
   private final List<File> propath = new ArrayList<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
   private final Set<String> cpdMethods = new HashSet<>();
@@ -84,23 +93,15 @@ public class OpenEdgeSettings {
     this.fileSystem = fileSystem;
 
     initializeDirectories(settings, fileSystem);
-
-    // And for .pct directory
-    String binariesSetting = settings.getString(Constants.BINARIES);
-    if (binariesSetting == null) {
-      LOG.debug("Property {} not defined, using default value", Constants.BINARIES);
-      binariesSetting = "build";
-    }
-    binariesDir = new File(fileSystem.baseDir(), binariesSetting);
-    this.pctDir = new File(binariesDir, ".pct");
-
     initializePropath(settings, fileSystem);
     initializeCPD(settings);
     initializeXrefBytes(settings);
+
     LOG.info("Using backslash as escape character : {}", settings.getBoolean(Constants.BACKSLASH_ESCAPE));
     if (useXrefFilter()) {
       LOG.info("XML XREF filter activated [{}]", getXrefBytesAsString());
     }
+    parseBuildDirectory();
   }
 
   private final void initializeDirectories(Settings settings, FileSystem fileSystem) {
@@ -114,6 +115,21 @@ public class OpenEdgeSettings {
         sourceDirs.add(dir);
       }
     }
+
+    // Read first sonar.oe.binaries, then sonar.binaries
+    String binariesSetting = settings.getString(Constants.BINARIES);
+    if (binariesSetting == null) {
+      LOG.debug("Property {} not defined, using sonar.binaries", Constants.BINARIES);
+      binariesSetting = settings.getString("sonar.binaries");
+    }
+
+    // First try an absolute path, then a relative path
+    File tmp = new File(binariesSetting);
+    if (!tmp.exists() || !tmp.isDirectory())
+      tmp = new File(fileSystem.baseDir(), binariesSetting);
+    this.binariesDir = tmp;
+    this.pctDir = new File(binariesDir, ".pct");
+
   }
 
   private final void initializePropath(Settings settings, FileSystem fileSystem) {
@@ -171,6 +187,73 @@ public class OpenEdgeSettings {
         }
       } catch (NumberFormatException caught) {
         throw new IllegalArgumentException("Invalid '" + Constants.XREF_FILTER_BYTES + "' property : " + str, caught);
+      }
+    }
+  }
+
+  private final void parseBuildDirectory() {
+    if (settings.getBoolean(Constants.SKIP_RCODE))
+      return;
+
+    AtomicInteger numClasses = new AtomicInteger(0);
+    AtomicInteger numMethods = new AtomicInteger(0);
+    AtomicInteger numProperties = new AtomicInteger(0);
+    // Multi-threaded pool
+    long currTime = System.currentTimeMillis();
+    AtomicInteger numRCode = new AtomicInteger(0);
+    ExecutorService service = Executors.newFixedThreadPool(4);
+    Files.fileTreeTraverser().preOrderTraversal(getBinariesDir()).forEach(f -> {
+      if (f.getName().endsWith(".r")) {
+        numRCode.incrementAndGet();
+        service.submit(() -> {
+          try {
+            RCodeInfo rci = new RCodeInfo(new FileInputStream(f));
+            if (rci.isClass()) {
+              numClasses.incrementAndGet();
+              numMethods.addAndGet(rci.getUnit().getMethods().size());
+              numProperties.addAndGet(rci.getUnit().getProperties().size());
+            }
+          } catch (InvalidRCodeException | IOException caught) {
+            LOG.error("Unable to parse rcode " + f.getAbsolutePath(), caught);
+          }
+        });
+      }
+    });
+
+    // Include PL files in $DLC/gui
+    String dlcInstallDir = settings.getString(Constants.DLC);
+    boolean dlcInPropath = settings.getBoolean(Constants.PROPATH_DLC);
+    if (dlcInPropath && !Strings.isNullOrEmpty(dlcInstallDir)) {
+      currTime = System.currentTimeMillis();
+      File dlc = new File(dlcInstallDir);
+
+      Files.fileTreeTraverser().preOrderTraversal(new File(dlc, "gui")).forEach(f -> {
+        if (f.getName().endsWith(".pl")) {
+          service.submit(() -> parseLibrary(f));
+        }
+      });
+    }
+    
+    try {
+      service.shutdown();
+      service.awaitTermination(10, TimeUnit.MINUTES);
+    } catch (InterruptedException caught) {
+      LOG.error("Unable to finish parsing rcode...", caught);
+    }
+    LOG.info("{} RCode read in {} ms - {} classes - {} methods - {} properties", numRCode.get(),
+        System.currentTimeMillis() - currTime, numClasses.get(), numMethods.get(), numProperties.get());
+  }
+
+  private void parseLibrary(File lib) {
+    LOG.info("Parsing PL " + lib.getAbsolutePath());
+    PLReader pl = new PLReader(lib);
+    for (FileEntry entry : pl.getFileList()) {
+      if (entry.getFileName().endsWith(".r")) {
+        try {
+          new RCodeInfo(pl.getInputStream(entry));
+        } catch (InvalidRCodeException | IOException caught) {
+          LOG.error("Unable to open file " + entry.getFileName() + " in PL " + lib.getAbsolutePath(), caught);
+        }
       }
     }
   }

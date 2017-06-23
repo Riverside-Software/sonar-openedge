@@ -76,6 +76,10 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtension(OpenEdgeWebService.class);
 
     // Properties
+    context.addExtension(PropertyDefinition.builder(Constants.SKIP_RCODE).name("Skip rcode parsing").description(
+        "Skip rcode parsing").type(PropertyType.BOOLEAN).category(CATEGORY_OPENEDGE).subCategory(
+            SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT).defaultValue(
+                Boolean.FALSE.toString()).build());
     context.addExtension(PropertyDefinition.builder(Constants.OE_ANALYTICS).name("Enable analytics").description(
         "Ping remote server for usage analytics").type(PropertyType.BOOLEAN).category(
             CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,

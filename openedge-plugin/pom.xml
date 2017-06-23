@@ -74,6 +74,11 @@
       <version>1.4.10-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>eu.rssw.sonar.openedge</groupId>
+      <artifactId>rcode-reader</artifactId>
+      <version>2.0.3-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
       <version>2.6</version>
