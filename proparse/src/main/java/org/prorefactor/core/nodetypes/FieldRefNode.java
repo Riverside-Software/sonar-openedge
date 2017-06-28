@@ -39,7 +39,14 @@ public class FieldRefNode extends JPNode {
     return ((Primative) getSymbol()).getClassName();
   }
 
+  /**
+   * @see FieldRefNode#getSymbol() as it can be null
+   */
   public DataType getDataType() {
+    if (getSymbol() == null) {
+      // Just in order to avoid NPE
+      return null;
+    }
     return ((Primative) getSymbol()).getDataType();
   }
 
