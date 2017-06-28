@@ -24,6 +24,7 @@ public class Constants {
   public static final String XREF_FILTER_BYTES = "sonar.oe.filter.invalidxref.bytes";
   public static final String BACKSLASH_ESCAPE = "sonar.oe.backslash.escape";
   public static final String OE_ANALYTICS = "sonar.oe.analytics";
+  public static final String SKIP_RCODE = "sonar.oe.rcode.skip";
 
   private Constants() {
     

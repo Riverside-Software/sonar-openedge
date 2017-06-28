@@ -29,6 +29,7 @@ public class TestProjectSensorContext {
     context.settings().setProperty(Constants.PROPATH, new File(BASEDIR).getAbsolutePath());
     context.settings().setProperty(Constants.BINARIES, "build");
     context.settings().setProperty(Constants.DATABASES, "src/schema/sp2k.df");
+    context.settings().setProperty(Constants.SKIP_RCODE, true);
 
     context.fileSystem().add(
         new TestInputFileBuilder("src/test/resources/project1", DF1).setLanguage(OpenEdgeDB.KEY).setType(
