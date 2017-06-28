@@ -51,12 +51,10 @@ public class EventElement extends AbstractAccessibleElement {
   @Override
   public int size() {
     int size = 24;
-
-    int i = 0;
-    while (i < this.parameters.length) {
-      size += ((MethodParameter) this.parameters[i]).size();
-      ++i;
+    for (IParameter p : parameters) {
+      size += ((MethodParameter) p).size();
     }
+
     return size;
   }
 

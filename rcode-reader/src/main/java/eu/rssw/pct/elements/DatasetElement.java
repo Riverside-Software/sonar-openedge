@@ -40,7 +40,11 @@ public class DatasetElement extends AbstractAccessibleElement {
       currPos += param.size();
       relations[zz] = param;
     }
+  }
 
+  @Override
+  public String toString() {
+    return String.format("Dataset %s for %d buffer(s) and %d relations", name, bufferNames.length, relations.length);
   }
 
   @Override
@@ -49,7 +53,7 @@ public class DatasetElement extends AbstractAccessibleElement {
     for (DataRelationElement elem : relations) {
       size += elem.size();
     }
-    return size;
+    return size + 7 & -8;
   }
 
   public DataRelationElement[] getDataRelations() {

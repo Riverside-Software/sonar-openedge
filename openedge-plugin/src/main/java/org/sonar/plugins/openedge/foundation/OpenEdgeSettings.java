@@ -207,6 +207,7 @@ public class OpenEdgeSettings {
         numRCode.incrementAndGet();
         service.submit(() -> {
           try {
+            LOG.debug("Parsing rcode {}", f.getAbsolutePath());
             RCodeInfo rci = new RCodeInfo(new FileInputStream(f));
             if (rci.isClass()) {
               numClasses.incrementAndGet();
@@ -245,7 +246,7 @@ public class OpenEdgeSettings {
   }
 
   private void parseLibrary(File lib) {
-    LOG.info("Parsing PL " + lib.getAbsolutePath());
+    LOG.debug("Parsing PL " + lib.getAbsolutePath());
     PLReader pl = new PLReader(lib);
     for (FileEntry entry : pl.getFileList()) {
       if (entry.getFileName().endsWith(".r")) {

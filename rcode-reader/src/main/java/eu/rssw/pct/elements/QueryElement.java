@@ -35,7 +35,7 @@ public class QueryElement extends AbstractAccessibleElement {
 
   @Override
   public int size() {
-    return 24 + 4 * bufferNames.length;
+    return (24 + 4 * bufferNames.length) + 7 & -8;
   }
 
   public String[] getBufferNames() {

@@ -269,7 +269,7 @@ public class RCodeInfo {
     for (short[] entry : entries) {
       String name = readNullTerminatedString(segment, textAreaOffset + entry[3]);
       Set<AccessType> set = AccessType.getTypeFromString(entry[1]);
-      
+
       switch(ElementKind.getKind(entry[2])) {
         case METHOD:
           MethodElement mthd = new MethodElement(name, set, segment, currOffset, textAreaOffset, order);
