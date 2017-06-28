@@ -222,7 +222,7 @@ public class RCodeInfo {
     debugSegmentSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_DEBUG_SEGMENT_SIZE, Integer.BYTES).order(order).getInt();
   }
 
-  private final void processTypeBlock(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {
+  void processTypeBlock(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {
     byte[] segment = new byte[typeBlockSize];
     int bytesRead = input.read(segment);
     if (bytesRead != typeBlockSize) {
