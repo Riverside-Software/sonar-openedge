@@ -43,6 +43,7 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProparseRuntimeException;
+import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -149,8 +150,12 @@ public class OpenEdgeProparseSensor implements Sensor {
     try {
       lexUnit.lexAndGenerateMetrics();
     } catch (RefactorException | RuntimeException caught) {
-      LOG.error("Error during code lexing for " + file.relativePath(), caught);
       numFailures++;
+      if ((caught.getCause() != null) && (caught.getCause() instanceof XCodedFileException)) {
+        LOG.error("Unable to analyze xcode'd file " + file.relativePath());
+      } else {
+        LOG.error("Error during code lexing for " + file.relativePath(), caught);
+      }
     }
     updateParseTime(System.currentTimeMillis() - startTime);
 
@@ -205,7 +210,6 @@ public class OpenEdgeProparseSensor implements Sensor {
         ruleTime.put(entry.getKey().ruleKey().toString(),
             ruleTime.get(entry.getKey().ruleKey().toString()) + System.currentTimeMillis() - startTime);
       }
-
     } catch (RefactorException | ProparseRuntimeException caught) {
       LOG.error("Error during code parsing for " + file.relativePath(), caught);
       numFailures++;
@@ -214,9 +218,11 @@ public class OpenEdgeProparseSensor implements Sensor {
           RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
               issue.newLocation().on(file).message(caught.getMessage())).save();
     } catch (RuntimeException caught) {
-      LOG.error("Runtime exception was caught '{}' - Please report this issue : ", caught.getMessage());
-      for (StackTraceElement element : caught.getStackTrace()) {
-        LOG.error("  {}", element.toString());
+      numFailures++;
+      if ((caught.getCause() != null) && (caught.getCause() instanceof XCodedFileException)) {
+        LOG.error("Unable to analyze xcode'd file " + file.relativePath());
+      } else {
+        LOG.error("Runtime exception was caught - Please report this issue : ", caught);
       }
     }
   }

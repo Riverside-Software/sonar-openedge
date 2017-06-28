@@ -23,6 +23,7 @@ import java.io.IOException;
 
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.SonarProduct;
@@ -69,6 +70,8 @@ public class OpenEdgeCodeColorizer implements Sensor {
       LOG.debug("Syntax highlight on {}", file.relativePath());
       try {
         highlightFile(context, session, file);
+      } catch (XCodedFileException caught) {
+        LOG.error("Unable to highlight xcode'd file '" + caught.getFileName() + "'");
       } catch (RuntimeException | IOException | ANTLRException caught) {
         LOG.error("Unable to lex file " + file.relativePath(), caught);
       }
