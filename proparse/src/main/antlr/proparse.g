@@ -467,6 +467,7 @@ builtinfunc
   | GETCLASS^ LEFTPAREN type_name RIGHTPAREN
   |  (USERID^|USER^) funargs  // also noarg
   |  argfunc
+  |  optargfunc
   |  recordfunc
   ;
 
@@ -522,8 +523,6 @@ argfunc
     |  GETBYTES^
     |  GETCOLLATIONS^
     |  GETDOUBLE^
-    |  GETEFFECTIVETENANTID^
-    |  GETEFFECTIVETENANTNAME^
     |  GETFLOAT^
     |  GETINT64^
     |  GETLICENSE^
@@ -608,6 +607,14 @@ argfunc
     |  YEAR^
     )
     funargs
+    ;
+
+optargfunc:
+    (  GETDBCLIENT^
+    |  GETEFFECTIVETENANTID^
+    |  GETEFFECTIVETENANTNAME^
+    )
+    optfunargs
     ;
 
 // ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
@@ -743,6 +750,12 @@ funargs
 // Use funargs /only/ if it is the child of a root-node keyword.
   :  LEFTPAREN expression (COMMA expression)* RIGHTPAREN
   ;
+
+optfunargs
+  // Use optfunargs /only/ if it is the child of a root-node keyword.
+  :  LEFTPAREN (expression (COMMA expression)*)? RIGHTPAREN
+  ;
+
 
 // ... or value phrases
 // There are a number of situations where you can have name, filename,
@@ -4258,7 +4271,7 @@ AUDITENABLED | BIND | CLASS | CLIENTPRINCIPAL | CONSTRUCTOR | DESTRUCTOR | FINAL
 HEXDECODE | HEXENCODE | IMPLEMENTS | INHERITS | INTERFACE | METHOD | NAMESPACEPREFIX | 
 NAMESPACEURI | NESTED | NEWINSTANCE | PROTECTED | REFERENCEONLY | 
 SAXWRITER | SETDBCLIENT | TYPEOF | VALIDOBJECT | VOID | WIDGETID | XMLDATATYPE | XMLNODETYPE |
-ROUNDED | GROUPBOX |
+ROUNDED | GROUPBOX | GETDBCLIENT |
 // 10.1B
 INT64 | PUTINT64 | GETINT64 | PUTUNSIGNEDLONG | GETUNSIGNEDLONG | PROPERTY | SAXATTRIBUTES | 
 INHERITBGCOLOR | NOINHERITBGCOLOR | INHERITFGCOLOR | NOINHERITFGCOLOR | USEWIDGETPOOL | XREFXML |
