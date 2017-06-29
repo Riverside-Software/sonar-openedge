@@ -298,6 +298,11 @@ public class BugFixTest {
   }
 
   @Test
+  public void testGetDbClient() throws Exception {
+    genericTest("getdbclient.p");
+  }
+
+  @Test
   public void testTildeInComment() throws Exception {
     TokenStream stream = genericLex("comment-tilde.p");
     Token tok = stream.nextToken();

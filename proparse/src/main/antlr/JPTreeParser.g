@@ -496,9 +496,10 @@ argfunc throws TreeParserException
   |  #(GETBYTEORDER funargs )
   |  #(GETBYTES funargs )
   |  #(GETCOLLATIONS funargs )
+  |  #(GETDBCLIENT optfunargs )
   |  #(GETDOUBLE funargs )
-  |  #(GETEFFECTIVETENANTID funargs )
-  |  #(GETEFFECTIVETENANTNAME funargs )
+  |  #(GETEFFECTIVETENANTID optfunargs )
+  |  #(GETEFFECTIVETENANTNAME optfunargs )
   |  #(GETFLOAT funargs )
   |  #(GETINT64 funargs )
   |  #(GETLICENSE funargs )
@@ -682,6 +683,10 @@ eventlist throws TreeParserException
 
 funargs throws TreeParserException
   :  LEFTPAREN expression (COMMA expression)* RIGHTPAREN
+  ;
+
+optfunargs throws TreeParserException
+  :  LEFTPAREN (expression (COMMA expression)*)? RIGHTPAREN
   ;
 
 anyorvalue throws TreeParserException

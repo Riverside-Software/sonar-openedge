@@ -800,6 +800,7 @@ public class NodeTypes implements ProParserTokenTypes {
     add(GETCODEPAGES, 13, "get-codepages", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_NO_ARG_FUNC | TI.MAY_BE_REGULAR_FUNC);
     add(GETCOLLATIONS, 8, "get-collations", TI.KEYWORD | TI.RESERVED | TI.MAY_BE_REGULAR_FUNC);
     add(GETCONFIGVALUE, 16, "get-config-value", TI.KEYWORD);
+    add(GETDBCLIENT, 13, "get-db-client", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC | TI.MAY_BE_NO_ARG_FUNC);
     add(GETDIR, 7, "get-dir", TI.KEYWORD);
     add(GETDOUBLE, 10, "get-double", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
     add(GETEFFECTIVETENANTID, "get-effective-tenant-id", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
@@ -2610,6 +2611,7 @@ public class NodeTypes implements ProParserTokenTypes {
     allTokens[CONSTRUCTOR].keywordText = "CONSTRUCTOR";
     allTokens[FINAL].keywordText = "FINAL";
     allTokens[GENERATEUUID].keywordText = "GENERATE-UUID";
+    allTokens[GETDBCLIENT].keywordText = "GET-DB-CLIENT";
     allTokens[GUID].keywordText = "GUID";
     allTokens[HEXDECODE].keywordText = "HEX-DECODE";
     allTokens[HEXENCODE].keywordText = "HEX-ENCODE";
