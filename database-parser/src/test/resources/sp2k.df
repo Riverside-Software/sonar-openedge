@@ -2629,6 +2629,12 @@ UPDATE INDEX "warehousenum" OF "Warehouse"
 UPDATE TABLE "Warehouse"
   ENCRYPTION YES
   CIPHER-NAME AES_CBC_128
+
+ADD CONSTRAINT "xxx" ON "customer"
+  PRIMARY
+  ACTIVE
+  CONSTRAINT-INDEX "yyy"
+
 .
 PSC
 cpstream=ISO8859-15
