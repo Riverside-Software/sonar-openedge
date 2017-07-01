@@ -4,7 +4,7 @@ dump:
   dump_type* footer?;
 
 dump_type:
-  annotation | addDatabase | addSequence | addTable | addField | addIndex | updateField | renameField | renameIndex | updateIndex | updateIndexBP | dropIndex | dropField | dropTable | updateTable;
+  annotation | addDatabase | addSequence | addTable | addField | addIndex | addConstraint | updateField | renameField | renameIndex | updateIndex | updateIndexBP | dropIndex | dropField | dropTable | updateTable;
 
 annotation:
   ann=ANNOTATION_NAME '(' (UNQUOTED_STRING '=' QUOTED_STRING (',' UNQUOTED_STRING '=' QUOTED_STRING)*)? ')' '.';
@@ -257,6 +257,22 @@ updateIndexBP:
 
 dropIndex:
     'DROP' 'INDEX' index=QUOTED_STRING 'ON' table=QUOTED_STRING;
+
+addConstraint:
+    'ADD' 'CONSTRAINT' constraint=QUOTED_STRING 'ON' table=QUOTED_STRING addConstraintOption*;
+
+addConstraintOption:
+    'UNIQUE'                # constraintUnique
+  | 'PRIMARY'               # constraintPrimary
+  | 'PRIMARY-CLUSTERED'     # constraintPrimaryClustered
+  | 'CHECK'                 # constraintCheck
+  | 'DEFAULT'               # constraintDefault
+  | 'CLUSTERED'             # constraintClustered
+  | 'ACTIVE'                # constraintActive
+  | 'INACTIVE'              # constraintInactive
+  | 'CONSTRAINT-INDEX' indexConstraint=QUOTED_STRING  # constraintIndex
+  | 'CONSTRAINT-FIELD' fieldConstraint=QUOTED_STRING  # constraintField
+  | 'CONSTRAINT-EXPR'  exprConstraint=QUOTED_STRING   # constraintExpr;
 
 footer:
  '.' 'PSC'? ('bufpool' '=' 'yes')? (UNQUOTED_STRING '=' UNQUOTED_STRING)? '.' NUMBER?;
