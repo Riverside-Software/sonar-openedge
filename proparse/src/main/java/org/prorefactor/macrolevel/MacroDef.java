@@ -30,19 +30,40 @@ public class MacroDef implements MacroEvent {
   public MacroDef undefWhat = null;
   /** For an include argument - what include reference is it for? */
   public IncludeRef includeRef = null;
-  /** The source where this definition can be found */
-  public String name;
-  public String value;
+  private String name;
+  private String value;
 
   public MacroDef(MacroRef parent, int type) {
     this(parent, type, 0, 0);
   }
 
   public MacroDef(MacroRef parent, int type, int line, int column) {
+    this(parent, type, line, column, "", "");
+  }
+
+  public MacroDef(MacroRef parent, int type, int line, int column, String name, String value) {
     this.parent = parent;
     this.type = type;
     this.line = line;
     this.column = column;
+    this.name = name;
+    this.value = value;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setValue(String value) {
+    this.value = value;
+  }
+
+  public String getValue() {
+    return value;
   }
 
   @Override

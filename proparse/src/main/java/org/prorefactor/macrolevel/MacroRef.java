@@ -138,7 +138,7 @@ public abstract class MacroRef implements MacroEvent {
       return;
     if (ref instanceof IncludeRef) {
       IncludeRef incl = (IncludeRef) ref;
-      if (incl.fileIndex == fileIndex)
+      if (incl.getFileIndex() == fileIndex)
         list.add(incl);
     }
     for (Iterator<MacroEvent> it = ref.macroEventList.iterator(); it.hasNext();) {

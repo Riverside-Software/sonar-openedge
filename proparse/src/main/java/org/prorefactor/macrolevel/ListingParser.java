@@ -48,14 +48,12 @@ public class ListingParser implements ListingListener {
 
   @Override
   public void define(int line, int column, String name, String value, int type) {
-    MacroDef newDef = new MacroDef(currRef, type, line, column);
-    newDef.name = name;
-    newDef.value = value;
+    MacroDef newDef = new MacroDef(currRef, type, line, column, name, value);
     if (type == MacroDef.GLOBAL)
-      globalDefMap.put(newDef.name, newDef);
+      globalDefMap.put(name, newDef);
     if (type == MacroDef.SCOPED) {
       Scope currScope = scopeStack.getFirst();
-      currScope.defMap.put(newDef.name, newDef);
+      currScope.defMap.put(name, newDef);
     }
     currRef.macroEventList.add(newDef);
   }
@@ -82,12 +80,11 @@ public class ListingParser implements ListingListener {
 
   @Override
   public void include(int line, int column, int currentFile, String incFile) {
-    IncludeRef newRef = new IncludeRef(currRef, line, column);
+    IncludeRef newRef = new IncludeRef(currRef, line, column, currentFile);
     scopeStack.addFirst(new Scope(newRef));
     currRef.macroEventList.add(newRef);
     currInclude = newRef;
     currRef = newRef;
-    newRef.fileIndex = currentFile;
     newRef.setFileRefName(incFile);
   }
 
@@ -101,14 +98,13 @@ public class ListingParser implements ListingListener {
     MacroDef newArg;
     if ((argNum == 0) || (argNum != currInclude.numArgs() + 1)) {
       newArg = new MacroDef(currInclude.getParent(), MacroDef.NAMEDARG);
-      newArg.name = argName;
-      currInclude.usesNamedArgs = true;
+      newArg.setName(argName);
       currInclude.addNamedArg(newArg);
     } else {
       newArg = new MacroDef(currInclude.getParent(), MacroDef.NUMBEREDARG);
       currInclude.addNumberedArg(newArg);
     }
-    newArg.value = value;
+    newArg.setValue(value);
     newArg.includeRef = currInclude;
   }
 
@@ -139,9 +135,8 @@ public class ListingParser implements ListingListener {
   @Override
   public void undefine(int line, int column, String name) {
     // Add an object for this macro event.
-    MacroDef newDef = new MacroDef(currRef, MacroDef.UNDEFINE, line, column);
+    MacroDef newDef = new MacroDef(currRef, MacroDef.UNDEFINE, line, column, name, "");
     currRef.macroEventList.add(newDef);
-    newDef.name = name;
 
     // Now process the undefine.
     Scope currScope = scopeStack.getFirst();
