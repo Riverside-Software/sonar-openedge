@@ -303,6 +303,11 @@ public class BugFixTest {
   }
 
   @Test
+  public void testDoubleColon() throws Exception {
+    genericTest("double-colon.p");
+  }
+
+  @Test
   public void testTildeInComment() throws Exception {
     TokenStream stream = genericLex("comment-tilde.p");
     Token tok = stream.nextToken();
