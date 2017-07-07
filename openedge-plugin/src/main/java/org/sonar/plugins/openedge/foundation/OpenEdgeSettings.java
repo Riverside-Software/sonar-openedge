@@ -121,6 +121,10 @@ public class OpenEdgeSettings {
     if (binariesSetting == null) {
       LOG.debug("Property {} not defined, using sonar.binaries", Constants.BINARIES);
       binariesSetting = settings.getString("sonar.binaries");
+      if (binariesSetting == null) {
+        LOG.debug("Property {} not defined, using 'build'", Constants.BINARIES);
+        binariesSetting = "build";
+      }
     }
 
     // First try an absolute path, then a relative path
