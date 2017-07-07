@@ -44,7 +44,6 @@ import org.sonar.plugins.openedge.sensor.OpenEdgeListingSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeProparseSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeWarningsSensor;
-import org.sonar.plugins.openedge.web.OpenEdgeWebService;
 
 public class OpenEdgePlugin implements Plugin {
   private static final String CATEGORY_OPENEDGE = "OpenEdge";
@@ -71,9 +70,6 @@ public class OpenEdgePlugin implements Plugin {
 
     // Decorators
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
-
-    // Web service handler
-    context.addExtension(OpenEdgeWebService.class);
 
     // Properties
     context.addExtension(PropertyDefinition.builder(Constants.SKIP_RCODE).name("Skip rcode parsing").description(
