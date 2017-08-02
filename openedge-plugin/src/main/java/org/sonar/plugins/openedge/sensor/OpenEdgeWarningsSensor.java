@@ -26,8 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sonar.api.SonarProduct;
-import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
@@ -49,11 +50,9 @@ public class OpenEdgeWarningsSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeWarningsSensor.class);
 
   // IoC
-  private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;
 
-  public OpenEdgeWarningsSensor(OpenEdgeSettings settings, FileSystem fileSystem) {
-    this.fileSystem = fileSystem;
+  public OpenEdgeWarningsSensor(OpenEdgeSettings settings) {
     this.settings = settings;
   }
 
@@ -84,7 +83,9 @@ public class OpenEdgeWarningsSensor implements Sensor {
       return;
     }
 
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
+    FilePredicates predicates = context.fileSystem().predicates();
+    for (InputFile file : context.fileSystem().inputFiles(predicates.and(
+        predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       LOG.debug("Looking for warnings of {}", file.relativePath());
 
       File listingFile = getWarningsFile(file.file());
@@ -95,10 +96,10 @@ public class OpenEdgeWarningsSensor implements Sensor {
           WarningsProcessor processor = new WarningsProcessor();
           Files.readLines(listingFile, StandardCharsets.UTF_8, processor);
           for (Warning w : processor.getResult()) {
-            InputFile target = fileSystem.inputFile(fileSystem.predicates().hasRelativePath(w.file));
+            InputFile target = context.fileSystem().inputFile(predicates.hasRelativePath(w.file));
             RuleKey ruleKey = RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
             if (target != null) {
-              LOG.debug("Warning File {} - Line {} - Message {}", new Object[] {target.relativePath(), w.line, w.msg});
+              LOG.debug("Warning File {} - Line {} - Message {}", target.relativePath(), w.line, w.msg);
               NewIssue issue = context.newIssue().forRule(context.activeRules().find(ruleKey) == null ? defaultWarningRuleKey : ruleKey);
               NewIssueLocation location = issue.newLocation().on(target);
               if (w.line > 0) {

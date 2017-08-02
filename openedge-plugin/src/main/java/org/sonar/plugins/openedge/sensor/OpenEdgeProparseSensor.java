@@ -50,7 +50,9 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.SymbolScope;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.SonarProduct;
+import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.Sensor;
@@ -126,9 +128,10 @@ public class OpenEdgeProparseSensor implements Sensor {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
     RefactorSession session = settings.getProparseSession(context.runtime().getProduct() == SonarProduct.SONARLINT);
+    FilePredicates predicates = context.fileSystem().predicates();
     for (InputFile file : context.fileSystem().inputFiles(
-        context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
-      LOG.debug("Parsing {}", new Object[] {file.relativePath()});
+        predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
+      LOG.debug("Parsing {}", file.relativePath());
       numFiles++;
 
       if ("i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()))) {
@@ -203,8 +206,8 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
 
       for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
-        LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}", new Object[] {
-            entry.getKey().internalKey(), entry.getKey().ruleKey().repository(), entry.getKey().ruleKey().rule()});
+        LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}", entry.getKey().internalKey(),
+            entry.getKey().ruleKey().repository(), entry.getKey().ruleKey().rule());
         startTime = System.currentTimeMillis();
         entry.getValue().execute(file, unit);
         ruleTime.put(entry.getKey().ruleKey().toString(),

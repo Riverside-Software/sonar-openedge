@@ -23,8 +23,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.sonar.api.SonarProduct;
-import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -46,11 +47,9 @@ public class OpenEdgeListingSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeListingSensor.class);
 
   // IoC
-  private final FileSystem fileSystem;
   private final OpenEdgeSettings settings;
 
-  public OpenEdgeListingSensor(OpenEdgeSettings settings, FileSystem fileSystem) {
-    this.fileSystem = fileSystem;
+  public OpenEdgeListingSensor(OpenEdgeSettings settings) {
     this.settings = settings;
   }
 
@@ -73,8 +72,10 @@ public class OpenEdgeListingSensor implements Sensor {
       return;
 
     int dbgImportNum = 0;
+    FilePredicates predicates = context.fileSystem().predicates();
 
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
+    for (InputFile file : context.fileSystem().inputFiles(
+        predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       LOG.debug("Looking for listing of {}", file.relativePath());
 
       File listingFile = getListingFile(file.file());
