@@ -37,7 +37,7 @@ public class OpenEdgeListingSensorTest {
     SensorContextTester context = TestProjectSensorContext.createContext();
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
-    OpenEdgeListingSensor sensor = new OpenEdgeListingSensor(oeSettings, context.fileSystem());
+    OpenEdgeListingSensor sensor = new OpenEdgeListingSensor(oeSettings);
     sensor.execute(context);
 
     Assert.assertEquals(context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.NUM_TRANSACTIONS_KEY).value(),

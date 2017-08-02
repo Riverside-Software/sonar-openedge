@@ -33,7 +33,7 @@ public class OpenEdgeDBSensorTest {
   @Test
   public void testSp2k() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
-    OpenEdgeDBSensor sensor = new OpenEdgeDBSensor(context.fileSystem());
+    OpenEdgeDBSensor sensor = new OpenEdgeDBSensor();
     sensor.execute(context);
 
     Assert.assertEquals(context.measure(BASEDIR + ":" + DF1, OpenEdgeMetrics.NUM_TABLES_KEY).value(), 25,

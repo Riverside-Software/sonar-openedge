@@ -35,7 +35,7 @@ public class OpenEdgeSensorTest {
   public void testMetrics() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
 
-    OpenEdgeSensor sensor = new OpenEdgeSensor(context.fileSystem());
+    OpenEdgeSensor sensor = new OpenEdgeSensor();
     sensor.execute(context);
 
     Assert.assertEquals(1, context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.PROCEDURES_KEY).value());
