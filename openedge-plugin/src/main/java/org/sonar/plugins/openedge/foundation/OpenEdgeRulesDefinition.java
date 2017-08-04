@@ -64,7 +64,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
 
     // Manually created rule for proparse errors
     NewRule proparseRule = repository.createRule(PROPARSE_ERROR_RULEKEY).setName("Proparse error").setSeverity(
-        Priority.BLOCKER.name());
+        Priority.INFO.name());
     proparseRule.setDebtRemediationFunction(proparseRule.debtRemediationFunctions().constantPerIssue("3h"));
     proparseRule.setType(RuleType.BUG);
     proparseRule.setHtmlDescription(getClass().getResource(String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY,
