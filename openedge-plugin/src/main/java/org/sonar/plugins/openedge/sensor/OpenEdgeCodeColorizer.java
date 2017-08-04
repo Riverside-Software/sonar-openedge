@@ -104,11 +104,18 @@ public class OpenEdgeCodeColorizer implements Sensor {
       }
 
       if (textType != null) {
-        TextPointer start = file.newPointer(tok.getLine(), tok.getColumn() - 1);
-        int maxChar = file.selectLine(tok.getEndLine()).end().lineOffset();
-        TextPointer end = file.newPointer(tok.getEndLine(),
-            maxChar < tok.getEndColumn() ? maxChar - 1 : tok.getEndColumn());
-        highlighting.highlight(file.newRange(start, end), textType);
+        try {
+          TextPointer start = file.newPointer(tok.getLine(), tok.getColumn() - 1);
+          int maxChar = file.selectLine(tok.getEndLine()).end().lineOffset();
+          TextPointer end = file.newPointer(tok.getEndLine(),
+              maxChar < tok.getEndColumn() ? maxChar - 1 : tok.getEndColumn());
+
+          highlighting.highlight(file.newRange(start, end), textType);
+        } catch (IllegalArgumentException caught) {
+          LOG.error("File {} - Unable to highlight token type {} - Start {}:{} - End {}:{} - Remaining tokens skipped", file.relativePath(),
+              textType, tok.getLine(), tok.getColumn(), tok.getEndLine(), tok.getEndColumn());
+          return;
+        }
       }
 
       tok = nextTok;
