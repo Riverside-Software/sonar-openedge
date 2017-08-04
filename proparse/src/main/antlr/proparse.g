@@ -696,22 +696,21 @@ noargfunc
   ;
 
 
-parameter
-  // This is the syntax for parameters when calling or running something.
-  // This can refer to a buffer/tablehandle, but it doesn't define one.
-  :  (BUFFER identifier FOR)=> BUFFER^ identifier FOR record
-  |  // BUFFER parameter. Be careful not to pick up BUFFER customer:whatever
-    // and BUFFER sports2000.customer:whatever
-    ( { LA(3)!=OBJCOLON && (LA(3)!=NAMEDOT || LA(5)!=OBJCOLON) }?
-      BUFFER record
-    )=> BUFFER^ record
-  |  (options{greedy=true;}: p1:OUTPUT^|p2:INPUTOUTPUT^|p3:INPUT^)?
+parameter:
+    // This is the syntax for parameters when calling or running something.
+    // This can refer to a buffer/tablehandle, but it doesn't define one.
+    ( BUFFER identifier FOR ) => BUFFER^ identifier FOR record
+  |
+    // BUFFER parameter. Be careful not to pick up BUFFER customer:whatever and BUFFER sports2000.customer:whatever
+    ( { LA(3) != OBJCOLON && (LA(3) != NAMEDOT || LA(5) != OBJCOLON) }? BUFFER record ) => BUFFER^ record
+  |
+    ( options{greedy=true;}: p1:OUTPUT^ | p2:INPUTOUTPUT^ | p3:INPUT^)?
     (  // Ambiguous on expression, for a few of these.
       options{generateAmbigWarnings=false;}
     :  TABLEHANDLE field parameter_dataset_options
     |  TABLE (FOR)? record parameter_dataset_options
     |  // Ambiguous on DATASET identifier for a widgetname in an expression.
-      {LA(3)!=OBJCOLON}?
+      { LA(3) != OBJCOLON && LA(3) != DOUBLECOLON }?
       DATASET identifier parameter_dataset_options
     |  DATASETHANDLE field parameter_dataset_options
     |  PARAMETER field EQUAL expression // for RUN STORED-PROCEDURE
