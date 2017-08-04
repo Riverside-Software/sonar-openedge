@@ -585,10 +585,6 @@ create_whatever_args throws TreeParserException
   :  (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)?
   ;
 
-createautomationobjectstate throws TreeParserException
-  :  #(CREATE (QSTRING|valueexpression) fld[ContextQualifier.UPDATING] (#(CONNECT (#(TO expression))?))? (NOERROR_KW)? state_end )
-  ;
-
 createbrowsestate throws TreeParserException
   :  #(CREATE BROWSE (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end )
   ;
@@ -623,13 +619,13 @@ createtemptablestate throws TreeParserException
 
 createwidgetstate throws TreeParserException
   :  #(  CREATE
-      (  valueexpression
+      (  qstringorvalue
       |  BUTTON | COMBOBOX | CONTROLFRAME | DIALOGBOX | EDITOR | FILLIN | FRAME | IMAGE
       |  MENU | MENUITEM | RADIOSET | RECTANGLE | SELECTIONLIST | SLIDER
       |  SUBMENU | TEXT | TOGGLEBOX | WINDOW
       )
       fld[ContextQualifier.UPDATING]
-      (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end
+      (#(IN_KW WIDGETPOOL expression))? (#(CONNECT (#(TO expression))?))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end
     )
   ;
 

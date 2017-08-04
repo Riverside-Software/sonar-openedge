@@ -183,7 +183,6 @@ statement throws TreeParserException
   |            copylobstate
   |  {state2(_t, 0)}?      createstate
   |  {state2(_t, ALIAS)}?      createaliasstate
-  |  {state2(_t, Automationobject)}?  createautomationobjectstate
   |  {state2(_t, BROWSE)}?      createbrowsestate
   |  {state2(_t, BUFFER)}?      createbufferstate
   |  {state2(_t, CALL)}?      createcallstate
@@ -204,7 +203,7 @@ statement throws TreeParserException
   |  {state2(_t, TABLE)}?      createtablestate    // SQL
   |  {state2(_t, TEMPTABLE)}?    createtemptablestate
   |  {state2(_t, VIEW)}?      createviewstate      // SQL
-  |  {state2(_t, WIDGET)}?      createwidgetstate
+  |  {state2(_t, WIDGET) || state2(_t, Automationobject)}?  createwidgetstate
   |  {state2(_t, WIDGETPOOL)}?    createwidgetpoolstate
   |  {state2(_t, XDOCUMENT)}?    createxdocumentstate
   |  {state2(_t, XNODEREF)}?    createxnoderefstate
@@ -699,6 +698,10 @@ filenameorvalue throws TreeParserException
 valueexpression throws TreeParserException
   :  #(VALUE LEFTPAREN expression RIGHTPAREN )
   ;
+qstringorvalue throws TreeParserException
+  :  valueexpression | QSTRING
+  ;
+
 expressionorvalue throws TreeParserException
   :  valueexpression | expression
   ;
@@ -1209,10 +1212,6 @@ createaliasstate throws TreeParserException
   :  #(CREATE ALIAS anyorvalue FOR DATABASE anyorvalue (NOERROR_KW)? state_end )
   ;
 
-createautomationobjectstate throws TreeParserException
-  :  #(CREATE (QSTRING|valueexpression) field (#(CONNECT (#(TO expression))?))? (NOERROR_KW)? state_end )
-  ;
-
 createbrowsestate throws TreeParserException
   :  #(CREATE BROWSE ( field | widattr ) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end )
   ;
@@ -1290,13 +1289,13 @@ createtemptablestate throws TreeParserException
 
 createwidgetstate throws TreeParserException
   :  #(  CREATE
-      (  valueexpression
+      (  qstringorvalue
       |  BUTTON | COMBOBOX | CONTROLFRAME | DIALOGBOX | EDITOR | FILLIN | FRAME | IMAGE
       |  MENU | MENUITEM | RADIOSET | RECTANGLE | SELECTIONLIST | SLIDER
       |  SUBMENU | TEXT | TOGGLEBOX | WINDOW
       )
       field
-      (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end
+      (#(IN_KW WIDGETPOOL expression))? (#(CONNECT (#(TO expression))?))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end
     )
   ;
 
