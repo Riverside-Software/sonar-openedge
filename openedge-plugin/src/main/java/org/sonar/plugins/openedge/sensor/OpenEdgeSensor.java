@@ -21,8 +21,9 @@ package org.sonar.plugins.openedge.sensor;
 
 import org.apache.commons.io.FilenameUtils;
 import org.sonar.api.SonarProduct;
-import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -34,13 +35,6 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 
 public class OpenEdgeSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeSensor.class);
-
-  // IoC
-  private final FileSystem fileSystem;
-
-  public OpenEdgeSensor(FileSystem fileSystem) {
-    this.fileSystem = fileSystem;
-  }
 
   @Override
   public void describe(SensorDescriptor descriptor) {
@@ -57,7 +51,9 @@ public class OpenEdgeSensor implements Sensor {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   private void computeBaseMetrics(SensorContext context) {
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
+    FilePredicates predicates = context.fileSystem().predicates();
+    for (InputFile file : context.fileSystem().inputFiles(
+        predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       LOG.trace("Computing basic metrics on {}", file.relativePath());
       // Depending on file extension
       String fileExt = FilenameUtils.getExtension(file.relativePath());

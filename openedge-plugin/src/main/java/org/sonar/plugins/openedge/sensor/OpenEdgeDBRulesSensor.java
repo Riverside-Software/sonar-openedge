@@ -25,7 +25,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -63,7 +65,9 @@ public class OpenEdgeDBRulesSensor implements Sensor {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
-    for (InputFile file : context.fileSystem().inputFiles(context.fileSystem().predicates().hasLanguage(OpenEdgeDB.KEY))) {
+    FilePredicates predicates = context.fileSystem().predicates();
+    for (InputFile file : context.fileSystem().inputFiles(
+        predicates.and(predicates.hasLanguage(OpenEdgeDB.KEY), predicates.hasType(Type.MAIN)))) {
       try {
         LOG.debug("Generating ParseTree for dump file {}", file.relativePath());
         long time = System.currentTimeMillis();
@@ -71,10 +75,8 @@ public class OpenEdgeDBRulesSensor implements Sensor {
         parseTime += (System.currentTimeMillis() - time);
 
         for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules().entrySet()) {
-          LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}",
-              new Object[] {
-                  entry.getKey().internalKey(), entry.getKey().ruleKey().repository(),
-                  entry.getKey().ruleKey().rule()});
+          LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}", entry.getKey().internalKey(),
+              entry.getKey().ruleKey().repository(), entry.getKey().ruleKey().rule());
           long startTime = System.currentTimeMillis();
           entry.getValue().execute(file, tree);
           ruleTime.put(entry.getKey().ruleKey().toString(),

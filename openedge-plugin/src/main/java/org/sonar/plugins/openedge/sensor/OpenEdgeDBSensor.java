@@ -21,8 +21,9 @@ package org.sonar.plugins.openedge.sensor;
 
 import java.io.IOException;
 
-import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -40,12 +41,6 @@ import eu.rssw.antlr.database.objects.Table;
 public class OpenEdgeDBSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeDBSensor.class);
 
-  private final FileSystem fileSystem;
-
-  public OpenEdgeDBSensor(FileSystem fileSystem) {
-    this.fileSystem = fileSystem;
-  }
-
   @Override
   public void describe(SensorDescriptor descriptor) {
     descriptor.onlyOnLanguage(OpenEdgeDB.KEY).name(getClass().getSimpleName());
@@ -58,7 +53,9 @@ public class OpenEdgeDBSensor implements Sensor {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private void computeBaseMetrics(SensorContext sensorContext) {
-    for (InputFile file : fileSystem.inputFiles(fileSystem.predicates().hasLanguage(OpenEdgeDB.KEY))) {
+    FilePredicates predicates = sensorContext.fileSystem().predicates();
+    for (InputFile file : sensorContext.fileSystem().inputFiles(
+        predicates.and(predicates.hasLanguage(OpenEdgeDB.KEY), predicates.hasType(Type.MAIN)))) {
       try {
         LOG.info("Analyzing {}", file.relativePath());
 

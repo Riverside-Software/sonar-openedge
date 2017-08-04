@@ -37,7 +37,7 @@ public class OpenEdgeWarningsSensorTest {
     SensorContextTester context = TestProjectSensorContext.createContext();
     context.setActiveRules(createRules());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
-    OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, context.fileSystem());
+    OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings);
     sensor.execute(context);
 
     Assert.assertEquals(1, context.allIssues().size());
