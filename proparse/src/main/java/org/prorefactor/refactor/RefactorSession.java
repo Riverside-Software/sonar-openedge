@@ -15,11 +15,15 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.prorefactor.core.schema.ISchema;
-import org.prorefactor.proparse.SymbolScope;
 import org.prorefactor.refactor.settings.IProparseSettings;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
+
+import eu.rssw.pct.RCodeInfo.RCodeUnit;
 
 /**
  * This class provides an interface to an org.prorefactor.refactor session. Much of this class was originally put in
@@ -30,7 +34,8 @@ public class RefactorSession {
   private final ISchema schema;
   private final Charset charset;
 
-  private final Map<String, SymbolScope> superCache = new HashMap<>();
+  // Structure from rcode
+  private final Map<String, RCodeUnit> clazzMap = new HashMap<>();
 
   @Inject
   public RefactorSession(IProparseSettings proparseSettings, ISchema schema) {
@@ -48,27 +53,6 @@ public class RefactorSession {
     return charset;
   }
 
-  /**
-   * This gets called by DoParse at cleanup time, if multiParse==false.
-   */
-  public void clearSuperCache() {
-    superCache.clear();
-  }
-
-  /**
-   * Adds an inheritance scope regardless of the multiParse flag. Deals with name's letter case.
-   */
-  public void addToSuperCache(String name, SymbolScope scope) {
-    superCache.put(name.toLowerCase(), scope);
-  }
-
-  /**
-   * The lookup deals with the name's letter case.
-   */
-  public SymbolScope lookupSuper(String superName) {
-    return superCache.get(superName.toLowerCase());
-  }
-
   public ISchema getSchema() {
     return schema;
   }
@@ -78,6 +62,17 @@ public class RefactorSession {
    */
   public IProparseSettings getProparseSettings() {
     return proparseSettings;
+  }
+
+  @Nullable
+  public RCodeUnit getRCodeUnit(String clz) {
+    return clazzMap.get(clz);
+  }
+
+  public void injectRCodeUnit(RCodeUnit unit) {
+    if ((unit == null) || Strings.isNullOrEmpty(unit.getTypeName()))
+      return;
+    clazzMap.put(unit.getTypeName(), unit);
   }
 
   public File findFile3(String fileName) {

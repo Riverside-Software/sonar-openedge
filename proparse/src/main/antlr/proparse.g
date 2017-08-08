@@ -870,13 +870,13 @@ exprt2
 {  int ntype = 0;
 }
   :  LEFTPAREN^ expression RIGHTPAREN
-  |  // methodOrFunc returns zero, and the assignment evaluates to false, if
+  |  // isMethodOrFunc returns zero, and the assignment evaluates to false, if
     // the identifier cannot be resolved to a method or user function name.
     // Otherwise, the return value assigned to ntype is either LOCAL_METHOD_REF
     // or USER_FUNC.
     // Methods take precedent over built-in functions. The compiler (10.2b) 
     // does not seem to try recognize by function/method signature.
-    ( {(ntype = support.methodOrFunc(LT(1).getText())) != 0}? identifier LEFTPAREN)=>
+    ( {(ntype = support.isMethodOrFunc(LT(1).getText())) != 0}? identifier LEFTPAREN)=>
       fname:identifier!
       {  #fname.setType(ntype);
         astFactory.makeASTRoot(currentAST, #fname);
@@ -1027,9 +1027,10 @@ recordAsFormItem
 
 // RECORD can be any db table name, work/temp table name, buffer name.
 record
-{  SymbolScope.FieldType tabletype = null;
+{
+  SymbolScope.FieldType tabletype = null;
   String recname = LT(1).getText();
-  if (LA(2)==NAMEDOT) {
+  if (LA(2) == NAMEDOT) {
     recname += ".";
     recname += LT(3).getText();
   }
@@ -1043,23 +1044,17 @@ record
   // Note that we have to put this here in the init-action section, so that
   // it gets executed regardless of the guess mode. (As normal semantic predicates do)
   {
-    tabletype = schemaTablePriority ?
-        support.isTableSchemaFirst(recname.toLowerCase())
-      : support.isTable(recname.toLowerCase());
+    tabletype = schemaTablePriority ? support.isTableSchemaFirst(recname.toLowerCase()) : support.isTable(recname.toLowerCase());
     if (tabletype == null) {
-      String err
-        = getFilename()
-        + ":"
-        + Integer.toString(LT(1).getLine())
-        + ": Unknown table name: "
-        + recname;
+      String err = getFilename() + ":" + Integer.toString(LT(1).getLine()) + ": Unknown table name: " + recname;
       throw new antlr.SemanticException(err);
     }
   }
   ProToken holdToken = (ProToken)LT(1);
 }
   :  filn! // consume tokens and discard
-    {  holdToken.setText(recname);
+    { 
+      holdToken.setText(recname);
       holdToken.setType(RECORD_NAME);
       JPNode n = (JPNode) astFactory.create(holdToken, "RecordNameNode");
       support.setStoreType(n, tabletype);
@@ -1131,7 +1126,7 @@ filename_part
 
 type_name
   :  type_name2
-    { support.typenameLookup(##); }
+    { support.attrTypeNameLookup(##); }
   ;
 type_name2
 {String theText = "";}
@@ -1703,7 +1698,7 @@ constructorstate
   :  CONSTRUCTOR^<AST=BlockNode>
     (options{greedy=true;}: PUBLIC|PROTECTED|PRIVATE|STATIC)?
     tn:type_name2 function_params block_colon
-    { support.typenameThis(#tn); }
+    { support.attrTypeName(#tn); }
     code_block
     constructor_end state_end
     {sthd(##,0);}
@@ -1975,10 +1970,9 @@ default_expr
 
 definestatement
   :  DEFINE^ define_share
-    {support.setCurrDefInheritable(false);}
     (  PRIVATE
-    |  PROTECTED {support.setCurrDefInheritable(true);}
-    |  PUBLIC {support.setCurrDefInheritable(true);}
+    |  PROTECTED
+    |  PUBLIC
     |  ABSTRACT
     |  STATIC
     |  OVERRIDE
@@ -2425,7 +2419,7 @@ delimiter_constant
 destructorstate
   :  DESTRUCTOR^<AST=BlockNode>
      (options{greedy=true;}: PUBLIC)? tn:type_name2 LEFTPAREN RIGHTPAREN block_colon
-    { support.typenameThis(#tn); }
+    { support.attrTypeName(#tn); }
     code_block
     destructor_end state_end
     {sthd(##,0);}
@@ -3063,7 +3057,7 @@ insertstate
 
 interfacestate
   :  INTERFACE^ type_name2 (interface_inherits)? block_colon
-    {support.interfaceNode(##);}
+    {support.defInterface(##);}
     code_block
     interface_end state_end
     {sthd(##,0);}
@@ -3197,8 +3191,7 @@ methodstate
 {  boolean isAbstract = false;
 }
   :  METHOD^<AST=BlockNode>
-    {support.setCurrDefInheritable(true);}
-    (options{greedy=true;}:   PRIVATE {support.setCurrDefInheritable(false);}
+    (options{greedy=true;}:   PRIVATE
     |  PROTECTED
     |  PUBLIC // default
     |  STATIC

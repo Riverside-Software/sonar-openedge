@@ -217,6 +217,7 @@ public class OpenEdgeSettings {
               numClasses.incrementAndGet();
               numMethods.addAndGet(rci.getUnit().getMethods().size());
               numProperties.addAndGet(rci.getUnit().getProperties().size());
+              proparseSession.injectRCodeUnit(rci.getUnit());
             }
           } catch (InvalidRCodeException | IOException caught) {
             LOG.error("Unable to parse rcode " + f.getAbsolutePath(), caught);

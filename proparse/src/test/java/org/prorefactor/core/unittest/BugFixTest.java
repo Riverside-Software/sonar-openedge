@@ -12,6 +12,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -30,6 +31,7 @@ import com.google.inject.Injector;
 
 import antlr.Token;
 import antlr.TokenStream;
+import eu.rssw.pct.RCodeInfo;
 
 /**
  * Test the tree parsers against problematic syntax. These tests just run the tree parsers against the data/bugsfixed
@@ -48,6 +50,10 @@ public class BugFixTest {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
+    session.injectRCodeUnit(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ParentClass.r")).getUnit());
+    session.injectRCodeUnit(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ChildClass.r")).getUnit());
 
     tempDir.mkdirs();
   }
@@ -341,4 +347,13 @@ public class BugFixTest {
   public void testDataset() throws Exception {
     genericTest("DatasetParentFields.p");
   }
+
+  @Test
+  public void testRCodeStructure() throws Exception {
+     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/ChildClass.cls"), session);
+     assertNull(unit.getTopNode());
+     assertNull(unit.getRootScope());
+     unit.treeParser01();
+     assertNotNull(unit.getTopNode());
+   }
 }

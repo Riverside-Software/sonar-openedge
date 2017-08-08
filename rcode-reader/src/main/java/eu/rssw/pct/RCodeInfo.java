@@ -89,10 +89,6 @@ public class RCodeInfo {
 
   // From type block
   private boolean isClass = false;
-  private String typeName;
-  private String parentTypeName;
-  private String assemblyName;
-  private List<String> interfaces = new ArrayList<>();
 
   private RCodeUnit unit = new RCodeUnit();
 
@@ -242,9 +238,9 @@ public class RCodeInfo {
     int textAreaOffset = ByteBuffer.wrap(segment, 40, Integer.BYTES).order(order).getInt();
 
     int nameOffset = ByteBuffer.wrap(segment, 32, Integer.BYTES).order(order).getInt();
-    this.typeName = readNullTerminatedString(segment, textAreaOffset + nameOffset);
+    this.unit.typeName = readNullTerminatedString(segment, textAreaOffset + nameOffset);
     int assemblyNameOffset = ByteBuffer.wrap(segment, 36, Integer.BYTES).order(order).getInt();
-    this.assemblyName = readNullTerminatedString(segment, textAreaOffset + assemblyNameOffset);
+    this.unit.assemblyName = readNullTerminatedString(segment, textAreaOffset + assemblyNameOffset);
 
     List<short[]> entries = new ArrayList<>();
     for (int zz = 0; zz < publicElementCount + protectedElementCount + privateElementCount + constructorCount; zz++) {
@@ -256,13 +252,13 @@ public class RCodeInfo {
     }
 
     int currOffset = 80 + 16 * (publicElementCount + protectedElementCount + privateElementCount + constructorCount);
-    this.parentTypeName = readNullTerminatedString(segment, textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
+    this.unit.parentTypeName = readNullTerminatedString(segment, textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
     currOffset += 24;
     
     for (int zz = 0; zz < interfaceCount; zz++) {
       String str = readNullTerminatedString(segment,
           textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
-      interfaces.add(str);
+      unit.interfaces.add(str);
       currOffset += 24;
     }
     
@@ -399,22 +395,6 @@ public class RCodeInfo {
     return isClass;
   }
 
-  public String getTypeName() {
-    return typeName;
-  }
-
-  public String getParentTypeName() {
-    return parentTypeName;
-  }
-
-  public String getAssemblyName() {
-    return assemblyName;
-  }
-
-  public List<String> getInterfaces() {
-    return interfaces;
-  }
-
   public static String readNullTerminatedString(byte[] array, int offset) {
     return readNullTerminatedString(array, offset, Charset.defaultCharset());
   }
@@ -517,15 +497,28 @@ public class RCodeInfo {
 
   // Main object for all object signatures
   public static class RCodeUnit {
+    private String typeName;
+    private String parentTypeName;
+    private String assemblyName;
+    private List<String> interfaces = new ArrayList<>();
+
     private Function mainProcedure;
     private Collection<Function> funcs = new ArrayList<>();
-    private List<TempTable> tts = new ArrayList<>();
     private Collection<MethodElement> methods = new ArrayList<>();
     private Collection<PropertyElement> properties = new ArrayList<>();
     private Collection<EventElement> events = new ArrayList<>();
     private Collection<VariableElement> variables = new ArrayList<>();
     private Collection<TableElement> tables = new ArrayList<>();
     private Collection<BufferElement> buffers = new ArrayList<>();
+
+    public boolean hasTempTable(String inName) {
+      for (TableElement tbl : tables) {
+        if (tbl.getName().equalsIgnoreCase(inName) && (tbl.isProtected() || tbl.isPublic())) {
+          return true;
+        }
+      }
+      return false;
+    }
 
     public Function getMainProcedure() {
       return mainProcedure;
@@ -557,6 +550,22 @@ public class RCodeInfo {
 
     public Collection<BufferElement> getBuffers() {
       return buffers;
+    }
+
+    public String getTypeName() {
+      return typeName;
+    }
+
+    public String getParentTypeName() {
+      return parentTypeName;
+    }
+
+    public String getAssemblyName() {
+      return assemblyName;
+    }
+
+    public List<String> getInterfaces() {
+      return interfaces;
     }
   }
   
@@ -712,13 +721,4 @@ public class RCodeInfo {
     }
   }
 
-  public static class TempTable {
-    private String name;
-    private List<Field> fields = new ArrayList<>();
-  }
-
-  public static class Field {
-    private String name;
-    private DataType datatype;
-  }
 }

@@ -84,12 +84,12 @@ public class ProToken extends CommonHiddenStreamToken {
     return (ProToken) getHiddenBefore();
   }
 
-  public void setHiddenAfter(ProToken t) { // NOSONAR
+  public void setHiddenAfter(ProToken t) {
     // In order to change visibility
     super.setHiddenAfter(t);
   }
 
-  public void setHiddenBefore(ProToken t) { // NOSONAR
+  public void setHiddenBefore(ProToken t) {
     // In order to change visibility
     super.setHiddenBefore(t);
   }
