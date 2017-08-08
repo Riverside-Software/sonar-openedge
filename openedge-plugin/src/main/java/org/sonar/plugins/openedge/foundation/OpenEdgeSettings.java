@@ -101,7 +101,6 @@ public class OpenEdgeSettings {
     if (useXrefFilter()) {
       LOG.info("XML XREF filter activated [{}]", getXrefBytesAsString());
     }
-    parseBuildDirectory();
   }
 
   private final void initializeDirectories(Settings settings, FileSystem fileSystem) {
@@ -195,7 +194,7 @@ public class OpenEdgeSettings {
     }
   }
 
-  private final void parseBuildDirectory() {
+  public final void parseBuildDirectory() {
     if (settings.getBoolean(Constants.SKIP_RCODE))
       return;
 
@@ -256,7 +255,10 @@ public class OpenEdgeSettings {
     for (FileEntry entry : pl.getFileList()) {
       if (entry.getFileName().endsWith(".r")) {
         try {
-          new RCodeInfo(pl.getInputStream(entry));
+          RCodeInfo rci = new RCodeInfo(pl.getInputStream(entry));
+          if (rci.isClass()) {
+            proparseSession.injectRCodeUnit(rci.getUnit());
+          }
         } catch (InvalidRCodeException | IOException caught) {
           LOG.error("Unable to open file " + entry.getFileName() + " in PL " + lib.getAbsolutePath(), caught);
         }

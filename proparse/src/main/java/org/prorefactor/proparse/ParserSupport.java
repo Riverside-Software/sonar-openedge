@@ -213,10 +213,10 @@ public class ParserSupport {
 
     RCodeUnit unt = unit;
     while (unt != null) {
-      if (unit.hasTempTable(inName)) {
+      if (unt.hasTempTable(inName)) {
         return FieldType.TTABLE;
       }
-      unt = session.getRCodeUnit(unit.getParentTypeName());
+      unt = session.getRCodeUnit(unt.getParentTypeName());
     }
     return null;
   }
@@ -272,19 +272,19 @@ public class ParserSupport {
     inDynamicNew = flag;
   }
 
-  void attrTypeNameLookup(JPNode typenameNode) {
-    typenameNode.attrSet(IConstants.QUALIFIED_CLASS_INT, classFinder.lookup(typenameNode.getText()));
+  void attrTypeNameLookup(JPNode node) {
+    node.attrSet(IConstants.QUALIFIED_CLASS_INT, classFinder.lookup(node.getText()));
   }
 
-  void attrTypeName(JPNode typenameNode) {
-    typenameNode.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
+  void attrTypeName(JPNode node) {
+    node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
   }
 
   /**
    * Mark a node as "operator"
    */
-  static void attrOp(JPNode ast) {
-    ast.attrSet(IConstants.OPERATOR, IConstants.TRUE);
+  static void attrOp(JPNode node) {
+    node.attrSet(IConstants.OPERATOR, IConstants.TRUE);
   }
 
   /** Set the 'store type' attribute on a RECORD_NAME node. */

@@ -128,6 +128,8 @@ public class OpenEdgeProparseSensor implements Sensor {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
     RefactorSession session = settings.getProparseSession(context.runtime().getProduct() == SonarProduct.SONARLINT);
+    settings.parseBuildDirectory();
+
     FilePredicates predicates = context.fileSystem().predicates();
     for (InputFile file : context.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
@@ -192,6 +194,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       ParseUnit unit = new ParseUnit(file.file(), session);
       unit.treeParser01();
       unit.attachXref(doc);
+      unit.attachRCodeUnit(session.getRCodeUnit(unit.getRootScope().getClassName()));
       updateParseTime(System.currentTimeMillis() - startTime);
 
       if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
