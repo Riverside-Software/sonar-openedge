@@ -8,4 +8,9 @@ CLASS rssw.pct.ChildClass INHERITS rssw.pct.ParentClass:
     CREATE tt1.
   END METHOD.
 
+  METHOD PUBLIC VOID method2():
+    define buffer btt1 for tt1.
+    CREATE btt1.
+  END METHOD.
+
 END CLASS.

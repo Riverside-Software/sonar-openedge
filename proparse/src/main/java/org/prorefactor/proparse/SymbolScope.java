@@ -18,11 +18,15 @@ import java.util.Set;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
+import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.refactor.RefactorSession;
+
+import eu.rssw.pct.RCodeInfo.RCodeUnit;
 
 public class SymbolScope {
   private final RefactorSession session;
   private final SymbolScope superScope;
+  private final RCodeUnit unit;
 
   private final Map<String, TableRef> tableMap = new HashMap<>();
   private final Set<String> functionSet = new HashSet<>();
@@ -30,12 +34,13 @@ public class SymbolScope {
   private final Set<String> varSet = new HashSet<>();
 
   SymbolScope(RefactorSession session) {
-    this(session, null);
+    this(session, null, null);
   }
 
-  SymbolScope(RefactorSession session, SymbolScope superScope) {
+  SymbolScope(RefactorSession session, SymbolScope superScope, RCodeUnit unit) {
     this.session = session;
     this.superScope = superScope;
+    this.unit = unit;
   }
 
   public RefactorSession getSession() {
@@ -133,6 +138,14 @@ public class SymbolScope {
         return ft;
       }
     }
+    RCodeUnit unt = unit;
+    while (unt != null) {
+      if (unt.hasTempTable(inName)) {
+        return FieldType.TTABLE;
+      }
+      unt = session.getRCodeUnit(unt.getParentTypeName());
+    }
+
     return null;
   }
 

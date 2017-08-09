@@ -85,7 +85,7 @@ public class ParserSupport {
   }
 
   void addInnerScope() {
-    currentScope = new SymbolScope(session, currentScope);
+    currentScope = new SymbolScope(session, currentScope, unit);
   }
 
   // Functions triggered from proparse.g
@@ -172,7 +172,7 @@ public class ParserSupport {
     if (ss != null) {
       currentScope = ss;
     } else {
-      SymbolScope newScope = new SymbolScope(session, currentScope);
+      SymbolScope newScope = new SymbolScope(session, currentScope, unit);
       currentScope = newScope;
       funcScopeMap.put(lowername, newScope);
       // User functions are always at the "unit" scope.
@@ -192,33 +192,11 @@ public class ParserSupport {
   // End of functions triggered from proparse.g
 
   FieldType isTable(String inName) {
-    FieldType ft = currentScope.isTable(inName);
-    if (ft != null)
-      return ft;
-
-    RCodeUnit unt = unit;
-    while (unt != null) {
-      if (unt.hasTempTable(inName)) {
-        return FieldType.TTABLE;
-      }
-      unt = session.getRCodeUnit(unt.getParentTypeName());
-    }
-    return null;
+    return currentScope.isTable(inName);
   }
 
   FieldType isTableSchemaFirst(String inName) {
-    FieldType ft = currentScope.isTableSchemaFirst(inName);
-    if (ft != null)
-      return ft;
-
-    RCodeUnit unt = unit;
-    while (unt != null) {
-      if (unt.hasTempTable(inName)) {
-        return FieldType.TTABLE;
-      }
-      unt = session.getRCodeUnit(unt.getParentTypeName());
-    }
-    return null;
+    return currentScope.isTableSchemaFirst(inName);
   }
 
   /** Returns true if the lookahead is a table name, and not a var name. */
