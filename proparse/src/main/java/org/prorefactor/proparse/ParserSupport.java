@@ -107,6 +107,7 @@ public class ParserSupport {
     className = ClassFinder.dequote(idNode.getText());
 
     unit = session.getRCodeUnit(className);
+    currentScope.attachRCodeUnit(unit);
   }
 
   void defInterface(JPNode interfaceNode) {
