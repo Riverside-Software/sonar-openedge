@@ -83,24 +83,24 @@ public class MethodElement extends AbstractAccessibleElement {
 
   @Override
   public boolean isProtected() {
-    if (this.accessType != null)
-      return this.accessType.contains(AccessType.PROTECTED);
+    if (accessType != null)
+      return accessType.contains(AccessType.PROTECTED);
     else
       return (flags & PROTECTED_METHOD) != 0;
   }
 
   @Override
   public boolean isPublic() {
-    if (this.accessType != null)
-      return this.accessType.contains(AccessType.PUBLIC);
+    if (accessType != null)
+      return accessType.contains(AccessType.PUBLIC);
     else
       return (flags & PUBLIC_METHOD) != 0;
   }
 
   @Override
   public boolean isPrivate() {
-    if (this.accessType != null)
-      return this.accessType.contains(AccessType.PRIVATE);
+    if (accessType != null)
+      return accessType.contains(AccessType.PRIVATE);
     else
       return (flags & PRIVATE_METHOD) != 0;
   }

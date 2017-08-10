@@ -23,7 +23,7 @@ import org.prorefactor.refactor.RefactorSession;
 import com.google.common.base.Strings;
 
 import antlr.Token;
-import eu.rssw.pct.RCodeInfo.RCodeUnit;
+import eu.rssw.pct.TypeInfo;
 
 /**
  * Helper class when parsing procedure or class.
@@ -44,7 +44,7 @@ public class ParserSupport {
   private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
 
   private String className = "";
-  private RCodeUnit unit;
+  private TypeInfo typeInfo;
 
   // Last field referenced. Used for inline defines using LIKE or AS.
   private JPNode lastFieldRefNode;
@@ -85,7 +85,7 @@ public class ParserSupport {
   }
 
   void addInnerScope() {
-    currentScope = new SymbolScope(session, currentScope, unit);
+    currentScope = new SymbolScope(session, currentScope, typeInfo);
   }
 
   // Functions triggered from proparse.g
@@ -106,8 +106,8 @@ public class ParserSupport {
     JPNode idNode = classNode.firstChild();
     className = ClassFinder.dequote(idNode.getText());
 
-    unit = session.getRCodeUnit(className);
-    currentScope.attachRCodeUnit(unit);
+    typeInfo = session.getTypeInfo(className);
+    currentScope.attachTypeInfo(typeInfo);
   }
 
   void defInterface(JPNode interfaceNode) {
@@ -173,7 +173,7 @@ public class ParserSupport {
     if (ss != null) {
       currentScope = ss;
     } else {
-      SymbolScope newScope = new SymbolScope(session, currentScope, unit);
+      SymbolScope newScope = new SymbolScope(session, currentScope, typeInfo);
       currentScope = newScope;
       funcScopeMap.put(lowername, newScope);
       // User functions are always at the "unit" scope.

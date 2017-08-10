@@ -53,10 +53,10 @@ public class BugFixTest {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
-    session.injectRCodeUnit(
-        new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ParentClass.r")).getUnit());
-    session.injectRCodeUnit(
-        new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ChildClass.r")).getUnit());
+    session.injectTypeInfo(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ParentClass.r")).getTypeInfo());
+    session.injectTypeInfo(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ChildClass.r")).getTypeInfo());
 
     tempDir.mkdirs();
   }

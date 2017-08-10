@@ -214,9 +214,9 @@ public class OpenEdgeSettings {
             RCodeInfo rci = new RCodeInfo(new FileInputStream(f));
             if (rci.isClass()) {
               numClasses.incrementAndGet();
-              numMethods.addAndGet(rci.getUnit().getMethods().size());
-              numProperties.addAndGet(rci.getUnit().getProperties().size());
-              proparseSession.injectRCodeUnit(rci.getUnit());
+              numMethods.addAndGet(rci.getTypeInfo().getMethods().size());
+              numProperties.addAndGet(rci.getTypeInfo().getProperties().size());
+              proparseSession.injectTypeInfo(rci.getTypeInfo());
             }
           } catch (InvalidRCodeException | IOException caught) {
             LOG.error("Unable to parse rcode " + f.getAbsolutePath(), caught);
@@ -257,7 +257,7 @@ public class OpenEdgeSettings {
         try {
           RCodeInfo rci = new RCodeInfo(pl.getInputStream(entry));
           if (rci.isClass()) {
-            proparseSession.injectRCodeUnit(rci.getUnit());
+            proparseSession.injectTypeInfo(rci.getTypeInfo());
           }
         } catch (InvalidRCodeException | IOException caught) {
           LOG.error("Unable to open file " + entry.getFileName() + " in PL " + lib.getAbsolutePath(), caught);

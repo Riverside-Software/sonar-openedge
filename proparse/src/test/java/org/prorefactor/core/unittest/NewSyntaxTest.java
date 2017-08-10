@@ -34,10 +34,10 @@ public class NewSyntaxTest {
   public void setUp() throws Exception {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
-    session.injectRCodeUnit(
-        new RCodeInfo(new FileInputStream("src/test/resources/data/newsyntax/101b/deep/FindMe.r")).getUnit());
-    session.injectRCodeUnit(
-        new RCodeInfo(new FileInputStream("src/test/resources/data/newsyntax/101b/Test1.r")).getUnit());
+    session.injectTypeInfo(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/newsyntax/101b/deep/FindMe.r")).getTypeInfo());
+    session.injectTypeInfo(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/newsyntax/101b/Test1.r")).getTypeInfo());
   }
 
   private void testNewSyntax(String file) throws Exception {

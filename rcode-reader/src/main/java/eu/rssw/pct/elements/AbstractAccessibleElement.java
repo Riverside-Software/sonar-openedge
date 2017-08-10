@@ -17,22 +17,22 @@ public abstract class AbstractAccessibleElement extends AbstractElement {
   }
 
   public boolean isProtected() {
-    return (this.accessType != null) && this.accessType.contains(AccessType.PROTECTED);
+    return (accessType != null) && accessType.contains(AccessType.PROTECTED);
   }
 
   public boolean isPublic() {
-    return (this.accessType != null) && this.accessType.contains(AccessType.PUBLIC);
+    return (accessType != null) && accessType.contains(AccessType.PUBLIC);
   }
 
   public boolean isPrivate() {
-    return (this.accessType != null) && this.accessType.contains(AccessType.PRIVATE);
+    return (accessType != null) && accessType.contains(AccessType.PRIVATE);
   }
 
   public boolean isAbstract() {
-    return (this.accessType != null) && this.accessType.contains(AccessType.ABSTRACT);
+    return (accessType != null) && accessType.contains(AccessType.ABSTRACT);
   }
 
   public boolean isStatic() {
-    return (this.accessType != null) && this.accessType.contains(AccessType.STATIC);
+    return (accessType != null) && accessType.contains(AccessType.STATIC);
   }
 }

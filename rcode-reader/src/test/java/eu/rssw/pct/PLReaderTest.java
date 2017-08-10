@@ -16,9 +16,9 @@ public class PLReaderTest {
     Assert.assertNotNull(pl.getEntry("OpenEdge/ABLUnit/Reflection/ClassAnnotationInfo.r"));
     RCodeInfo rci = new RCodeInfo(pl.getInputStream(pl.getEntry("OpenEdge/ABLUnit/Reflection/ClassAnnotationInfo.r")));
     Assert.assertTrue(rci.isClass());
-    Assert.assertTrue(rci.getUnit().getMethods().size() > 0);
-    Assert.assertTrue(rci.getUnit().getProperties().size() > 0);
-    Assert.assertTrue(rci.getUnit().getTables().size() == 0);
+    Assert.assertTrue(rci.getTypeInfo().getMethods().size() > 0);
+    Assert.assertTrue(rci.getTypeInfo().getProperties().size() > 0);
+    Assert.assertTrue(rci.getTypeInfo().getTables().size() == 0);
   }
 
 }

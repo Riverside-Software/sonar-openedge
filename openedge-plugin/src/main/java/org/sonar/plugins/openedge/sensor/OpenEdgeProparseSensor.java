@@ -194,7 +194,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       ParseUnit unit = new ParseUnit(file.file(), session);
       unit.treeParser01();
       unit.attachXref(doc);
-      unit.attachRCodeUnit(session.getRCodeUnit(unit.getRootScope().getClassName()));
+      unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
       updateParseTime(System.currentTimeMillis() - startTime);
 
       if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {

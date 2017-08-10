@@ -20,12 +20,12 @@ import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorSession;
 
-import eu.rssw.pct.RCodeInfo.RCodeUnit;
+import eu.rssw.pct.TypeInfo;
 
 public class SymbolScope {
   private final RefactorSession session;
   private final SymbolScope superScope;
-  private RCodeUnit unit;
+  private TypeInfo typeInfo;
 
   private final Map<String, TableRef> tableMap = new HashMap<>();
   private final Set<String> functionSet = new HashSet<>();
@@ -36,14 +36,14 @@ public class SymbolScope {
     this(session, null, null);
   }
 
-  SymbolScope(RefactorSession session, SymbolScope superScope, RCodeUnit unit) {
+  SymbolScope(RefactorSession session, SymbolScope superScope, TypeInfo typeInfo) {
     this.session = session;
     this.superScope = superScope;
-    this.unit = unit;
+    this.typeInfo = typeInfo;
   }
 
-  public void attachRCodeUnit(RCodeUnit unit) {
-    this.unit = unit;
+  public void attachTypeInfo(TypeInfo typeInfo) {
+    this.typeInfo = typeInfo;
   }
 
   public RefactorSession getSession() {
@@ -141,12 +141,12 @@ public class SymbolScope {
         return ft;
       }
     }
-    RCodeUnit unt = unit;
-    while (unt != null) {
-      if (unt.hasTempTable(inName)) {
+    TypeInfo info = typeInfo;
+    while (info != null) {
+      if (info.hasTempTable(inName)) {
         return FieldType.TTABLE;
       }
-      unt = session.getRCodeUnit(unt.getParentTypeName());
+      info = session.getTypeInfo(info.getParentTypeName());
     }
 
     return null;

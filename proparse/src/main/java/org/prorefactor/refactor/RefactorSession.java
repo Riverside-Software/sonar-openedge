@@ -23,7 +23,7 @@ import org.prorefactor.refactor.settings.IProparseSettings;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
-import eu.rssw.pct.RCodeInfo.RCodeUnit;
+import eu.rssw.pct.TypeInfo;
 
 /**
  * This class provides an interface to an org.prorefactor.refactor session. Much of this class was originally put in
@@ -35,7 +35,7 @@ public class RefactorSession {
   private final Charset charset;
 
   // Structure from rcode
-  private final Map<String, RCodeUnit> clazzMap = new HashMap<>();
+  private final Map<String, TypeInfo> typeInfoMap = new HashMap<>();
 
   @Inject
   public RefactorSession(IProparseSettings proparseSettings, ISchema schema) {
@@ -65,14 +65,14 @@ public class RefactorSession {
   }
 
   @Nullable
-  public RCodeUnit getRCodeUnit(String clz) {
-    return clazzMap.get(clz);
+  public TypeInfo getTypeInfo(String clz) {
+    return typeInfoMap.get(clz);
   }
 
-  public void injectRCodeUnit(RCodeUnit unit) {
+  public void injectTypeInfo(TypeInfo unit) {
     if ((unit == null) || Strings.isNullOrEmpty(unit.getTypeName()))
       return;
-    clazzMap.put(unit.getTypeName(), unit);
+    typeInfoMap.put(unit.getTypeName(), unit);
   }
 
   public File findFile3(String fileName) {

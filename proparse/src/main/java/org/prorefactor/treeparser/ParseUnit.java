@@ -37,7 +37,7 @@ import antlr.RecognitionException;
 import antlr.Token;
 import antlr.TokenStream;
 import antlr.TokenStreamException;
-import eu.rssw.pct.RCodeInfo.RCodeUnit;
+import eu.rssw.pct.TypeInfo;
 
 /**
  * Provides parse unit information, such as the symbol table and a reference to the AST. TreeParser01 calls
@@ -54,7 +54,7 @@ public class ParseUnit {
   private SymbolScopeRoot rootScope;
   private JPNodeMetrics metrics;
   private Document xref = null;
-  private RCodeUnit unit = null;
+  private TypeInfo typeInfo = null;
 
   public ParseUnit(File file, RefactorSession prsession) {
     this.file = file;
@@ -202,8 +202,8 @@ public class ParseUnit {
     this.xref = xref;
   }
 
-  public void attachRCodeUnit(RCodeUnit unit) {
-    this.unit = unit;
+  public void attachTypeInfo(TypeInfo unit) {
+    this.typeInfo = unit;
   }
 
   @Nullable
@@ -212,8 +212,8 @@ public class ParseUnit {
   }
 
   @Nullable
-  public RCodeUnit getRCodeUnit() {
-    return unit;
+  public TypeInfo getTypeInfo() {
+    return typeInfo;
   }
 
   public RefactorSession getSession() {
