@@ -69,7 +69,7 @@ public class SymbolScope {
   }
 
   /** Add a FieldLevelWidget for names lookup. */
-  public void add(IFieldLevelWidget widget) {
+  private void add(IFieldLevelWidget widget) {
     fieldLevelWidgetMap.put(widget.getName().toLowerCase(), widget);
   }
 
@@ -78,7 +78,7 @@ public class SymbolScope {
    * declaration, as well as a local definition. The local definition should be the one in this map, but as it stands,
    * the *last added* is what will be found.
    */
-  public void add(Routine routine) {
+  private void add(Routine routine) {
     routineMap.put(routine.getName().toLowerCase(), routine);
   }
 
@@ -86,15 +86,26 @@ public class SymbolScope {
    * Add a TableBuffer for names lookup. This is called when copying a SymbolScopeSuper's symbols for inheritance
    * purposes.
    */
-  public void add(TableBuffer tableBuffer) {
+  private void add(TableBuffer tableBuffer) {
     ITable table = tableBuffer.getTable();
     addTableBuffer(tableBuffer.getName(), table, tableBuffer);
     rootScope.addTableDefinitionIfNew(table);
   }
 
   /** Add a Variable for names lookup. */
-  public void add(Variable var) {
+  private void add(Variable var) {
     variableMap.put(var.getName().toLowerCase(), var);
+  }
+
+  /** Add a TableBuffer to the appropriate map. */
+  private void addTableBuffer(String name, ITable table, TableBuffer buffer) {
+    if (name.length() == 0) {
+      if (table.getStoretype() == IConstants.ST_DBTABLE)
+        unnamedBuffers.put(table, buffer);
+      else // default buffers for temp/work tables go into the "named" buffer map
+        bufferMap.put(table.getName().toLowerCase(), buffer);
+    } else
+      bufferMap.put(name.toLowerCase(), buffer);
   }
 
   /** Add a Symbol for names lookup. */
@@ -108,11 +119,10 @@ public class SymbolScope {
     } else if (symbol instanceof TableBuffer) {
       add((TableBuffer) symbol);
     } else {
-      Integer type = new Integer(symbol.getProgressType());
-      Map<String, Symbol> map = typeMap.get(type);
+      Map<String, Symbol> map = typeMap.get(symbol.getProgressType());
       if (map == null) {
         map = new HashMap<>();
-        typeMap.put(type, map);
+        typeMap.put(symbol.getProgressType(), map);
       }
       map.put(symbol.getName().toLowerCase(), symbol);
     }
@@ -131,17 +141,6 @@ public class SymbolScope {
    */
   void addSymbol(Symbol symbol) {
     allSymbols.add(symbol);
-  }
-
-  /** Add a TableBuffer to the appropriate map. */
-  private void addTableBuffer(String name, ITable table, TableBuffer buffer) {
-    if (name.length() == 0) {
-      if (table.getStoretype() == IConstants.ST_DBTABLE)
-        unnamedBuffers.put(table, buffer);
-      else // default buffers for temp/work tables go into the "named" buffer map
-        bufferMap.put(table.getName().toLowerCase(), buffer);
-    } else
-      bufferMap.put(name.toLowerCase(), buffer);
   }
 
   /**
@@ -327,9 +326,18 @@ public class SymbolScope {
     TableBuffer symbol = bufferMap.get(bufferPart.toLowerCase());
     if (symbol == null
         || (dbPart.length() != 0 && !dbPart.equalsIgnoreCase(symbol.getTable().getDatabase().getName()))) {
-      if (parentScope == null)
-        return null;
-      return parentScope.lookupBuffer(inName);
+      if (parentScope != null) {
+        TableBuffer tb = parentScope.lookupBuffer(inName);
+        if (tb != null) {
+          return tb;
+        }
+      }
+      if (rootScope != null) {
+        ITable tbl =  rootScope.lookupTableInParentClass(inName);
+        if (tbl != null) {
+          return new TableBuffer(inName, this, tbl);
+        }
+      }      
     }
     return symbol;
   }
@@ -401,8 +409,15 @@ public class SymbolScope {
     TableBuffer buff = bufferMap.get(name.toLowerCase());
     if (buff != null)
       return buff;
+    if (rootScope != null) {
+      ITable tbl =  rootScope.lookupTableInParentClass(name);
+      if (tbl != null) {
+        return new TableBuffer(name, this, tbl);
+      }
+    }      
     if (parentScope == null)
       return null;
+
     return parentScope.lookupTempTable(name);
   }
 

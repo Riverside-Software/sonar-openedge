@@ -27,10 +27,8 @@ import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
-import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
@@ -234,6 +232,7 @@ public class TP01Support extends TP01Action {
     JPNode classNode = (JPNode) classAST;
     JPNode idNode = classNode.firstChild();
     rootScope.setClassName(idNode.getText());
+    rootScope.setTypeInfo(refSession.getTypeInfo(idNode.getText()));
     rootScope.setAbstractClass(abstractKw != null);
     rootScope.setFinalClass(finalKw != null);
     rootScope.setSerializableClass(serializableKw != null);
@@ -247,8 +246,9 @@ public class TP01Support extends TP01Action {
     JPNode classNode = (JPNode) ast;
     JPNode idNode = classNode.firstChild();
     rootScope.setClassName(idNode.getText());
+    rootScope.setTypeInfo(refSession.getTypeInfo(idNode.getText()));
     rootScope.setInterface(true);
-  };
+  }
 
   @Override
   public void clearState(AST headAST) {
@@ -1198,20 +1198,21 @@ public class TP01Support extends TP01Action {
   }
 
   private SymbolScopeSuper classStateSuper(JPNode classNode, String className) throws RefactorException {
-    LOG.trace("Entering classStateSuper {} {}", classNode, className);
+    return null;
+    /* LOG.trace("Entering classStateSuper {} {}", classNode, className);
     File file = refSession.findFileForClassName(className);
     if ((file == null) || !file.exists()) {
       // Could not find the super class. Will happen with Progress.lang.*, vendor libraries, etc.
       return null;
     }
-    ParseUnit pu = new ParseUnit(file, refSession);
+     ParseUnit pu = new ParseUnit(file, refSession);
     JPNode superClassTree = (JPNode) classNode.getLink(IConstants.SUPER_CLASS_TREE);
     if (superClassTree != null) {
       pu.setTopNode(superClassTree);
     }
     pu.treeParser01();
 
-    return pu.getRootScope().generateSymbolScopeSuper();
+    return pu.getRootScope().generateSymbolScopeSuper(); */
   }
 
 }

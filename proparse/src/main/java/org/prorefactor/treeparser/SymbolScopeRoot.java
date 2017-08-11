@@ -20,6 +20,8 @@ import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorSession;
 
+import eu.rssw.pct.TypeInfo;
+
 /**
  * A ScopeRoot object is created for each compile unit, and it represents the program (topmost) scope. For classes, it
  * is the class scope, but it may also have a super class scope by way of inheritance.
@@ -28,6 +30,7 @@ public class SymbolScopeRoot extends SymbolScope {
   private final RefactorSession refSession;
   private Map<String, ITable> tableMap = new HashMap<>();
   private String className = null;
+  private TypeInfo typeInfo = null;
   private boolean isInterface;
   private boolean abstractClass;
   private boolean serializableClass;
@@ -146,6 +149,17 @@ public class SymbolScopeRoot extends SymbolScope {
     return bufferMap.get(table.getName().toLowerCase());
   }
 
+  public ITable lookupTableInParentClass(String name) {
+    TypeInfo info = typeInfo;
+    while (info != null) {
+      if (info.hasTempTable(name)) {
+        return new Table(name, IConstants.ST_TTABLE);
+      }
+      info = refSession.getTypeInfo(info.getParentTypeName());
+    }
+    return null;
+  }
+  
   /**
    * Lookup a temp or work table definition in this scope. Unlike most other lookup functions, this one has nothing to
    * do with 4gl semantics, buffers, scopes, etc. This just looks up the raw Table definition for a temp or work table.
@@ -182,4 +196,7 @@ public class SymbolScopeRoot extends SymbolScope {
     className = s;
   }
 
+  public void setTypeInfo(TypeInfo typeInfo) {
+    this.typeInfo = typeInfo;
+  }
 }

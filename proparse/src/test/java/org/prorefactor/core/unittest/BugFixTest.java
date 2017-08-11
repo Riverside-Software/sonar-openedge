@@ -257,15 +257,15 @@ public class BugFixTest {
   }
 
   // Next two tests : same exception should be thrown in both cases
-  @Test(expectedExceptions = {ProparseRuntimeException.class})
-  public void testCache1() throws Exception {
-    genericTest("CacheChild.cls");
-  }
-
-  @Test(expectedExceptions = {ProparseRuntimeException.class})
-  public void testCache2() throws Exception {
-    genericTest("CacheChild.cls");
-  }
+//  @Test(expectedExceptions = {ProparseRuntimeException.class})
+//  public void testCache1() throws Exception {
+//    genericTest("CacheChild.cls");
+//  }
+//
+//  @Test(expectedExceptions = {ProparseRuntimeException.class})
+//  public void testCache2() throws Exception {
+//    genericTest("CacheChild.cls");
+//  }
 
   @Test
   public void testSaxWriter() throws Exception {
