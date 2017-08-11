@@ -12,9 +12,21 @@ import eu.rssw.pct.elements.TableElement;
 import eu.rssw.pct.elements.VariableElement;
 
 public class TypeInfo {
+  private static final int IS_FINAL = 1;
+  private static final int IS_INTERFACE = 2;
+  private static final int USE_WIDGET_POOL = 4;
+  private static final int IS_DOTNET = 8;
+  private static final int HAS_STATICS = 64;
+  private static final int IS_BUILTIN = 128;
+  private static final int IS_HYBRID = 2048;
+  private static final int HAS_DOTNETBASE = 4096;
+  private static final int IS_ABSTRACT = 32768;
+  private static final int IS_SERIALIZABLE = 65536;
+  
   protected String typeName;
   protected String parentTypeName;
   protected String assemblyName;
+  protected int flags;
   private List<String> interfaces = new ArrayList<>();
 
   private Collection<MethodElement> methods = new ArrayList<>();
@@ -26,7 +38,7 @@ public class TypeInfo {
 
   public boolean hasTempTable(String inName) {
     for (TableElement tbl : tables) {
-      if (tbl.getName().equalsIgnoreCase(inName) && (tbl.isProtected() || tbl.isPublic())) {
+      if (tbl.getName().equalsIgnoreCase(inName)) {
         return true;
       }
     }
@@ -72,4 +84,50 @@ public class TypeInfo {
   public List<String> getInterfaces() {
     return interfaces;
   }
+
+  @Override
+  public String toString() {
+    return String.format("Type info %s - Parent %s", typeName, parentTypeName);
+  }
+
+  public boolean isFinal() {
+    return (flags & IS_FINAL) != 0;
+  }
+
+  public boolean isInterface() {
+    return (flags & IS_INTERFACE) != 0;
+  }
+
+  public boolean hasStatics() {
+    return (flags & HAS_STATICS) != 0;
+  }
+
+  public boolean isBuiltIn() {
+    return (flags & IS_BUILTIN) != 0;
+  }
+
+  public boolean isHybrid() {
+    return (flags & IS_HYBRID) != 0;
+  }
+
+  public boolean hasDotNetBase() {
+    return (flags & HAS_DOTNETBASE) != 0;
+  }
+
+  public boolean isAbstract() {
+    return (flags & IS_ABSTRACT) != 0;
+  }
+
+  public boolean isSerializable() {
+    return (flags & IS_SERIALIZABLE) != 0;
+  }
+
+  public boolean isUseWidgetPool() {
+    return (flags & USE_WIDGET_POOL) != 0;
+  }
+
+  protected boolean isDotNet() {
+    return (flags & IS_DOTNET) != 0;
+  }
+
 }

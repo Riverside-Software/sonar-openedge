@@ -235,19 +235,21 @@ public class RCodeInfo {
     int interfaceCount = ByteBuffer.wrap(segment, 16, Short.BYTES).order(order).getShort();
     // int textAreaSize = ByteBuffer.wrap(segment, 24, Integer.BYTES).order(order).getInt();
     int textAreaOffset = ByteBuffer.wrap(segment, 40, Integer.BYTES).order(order).getInt();
-
+    
+    this.typeInfo.flags = ByteBuffer.wrap(segment, 20, Integer.BYTES).order(order).getInt();
     int nameOffset = ByteBuffer.wrap(segment, 32, Integer.BYTES).order(order).getInt();
     this.typeInfo.typeName = readNullTerminatedString(segment, textAreaOffset + nameOffset);
     int assemblyNameOffset = ByteBuffer.wrap(segment, 36, Integer.BYTES).order(order).getInt();
     this.typeInfo.assemblyName = readNullTerminatedString(segment, textAreaOffset + assemblyNameOffset);
 
-    List<short[]> entries = new ArrayList<>();
+    // ID - Access type - Kind - Name offset
+    List<int[]> entries = new ArrayList<>();
     for (int zz = 0; zz < publicElementCount + protectedElementCount + privateElementCount + constructorCount; zz++) {
-      entries.add(new short[] {
-          ByteBuffer.wrap(segment, 80 + 0 + (16 * zz), Short.BYTES).order(order).getShort(),
-          ByteBuffer.wrap(segment, 80 + 2 + (16 * zz), Short.BYTES).order(order).getShort(),
-          ByteBuffer.wrap(segment, 80 + 4 + (16 * zz), Short.BYTES).order(order).getShort(),
-          ByteBuffer.wrap(segment, 80 + 12 + (16 * zz), Short.BYTES).order(order).getShort()});
+      entries.add(new int[] {
+          (int) ByteBuffer.wrap(segment, 80 + 0 + (16 * zz), Short.BYTES).order(order).getShort(),
+          (int) ByteBuffer.wrap(segment, 80 + 2 + (16 * zz), Short.BYTES).order(order).getShort(),
+          (int) ByteBuffer.wrap(segment, 80 + 4 + (16 * zz), Short.BYTES).order(order).getShort(),
+          ByteBuffer.wrap(segment, 80 + 12 + (16 * zz), Integer.BYTES).order(order).getInt()});
     }
 
     int currOffset = 80 + 16 * (publicElementCount + protectedElementCount + privateElementCount + constructorCount);
@@ -260,8 +262,8 @@ public class RCodeInfo {
       typeInfo.getInterfaces().add(str);
       currOffset += 24;
     }
-    
-    for (short[] entry : entries) {
+
+    for (int[] entry : entries) {
       String name = readNullTerminatedString(segment, textAreaOffset + entry[3]);
       Set<AccessType> set = AccessType.getTypeFromString(entry[1]);
 

@@ -209,17 +209,17 @@ public class OpenEdgeSettings {
       if (f.getName().endsWith(".r")) {
         numRCode.incrementAndGet();
         service.submit(() -> {
-          try {
+          try (FileInputStream fis = new FileInputStream(f)) {
             LOG.debug("Parsing rcode {}", f.getAbsolutePath());
-            RCodeInfo rci = new RCodeInfo(new FileInputStream(f));
+            RCodeInfo rci = new RCodeInfo(fis);
             if (rci.isClass()) {
               numClasses.incrementAndGet();
               numMethods.addAndGet(rci.getTypeInfo().getMethods().size());
               numProperties.addAndGet(rci.getTypeInfo().getProperties().size());
               proparseSession.injectTypeInfo(rci.getTypeInfo());
             }
-          } catch (InvalidRCodeException | IOException caught) {
-            LOG.error("Unable to parse rcode " + f.getAbsolutePath(), caught);
+          } catch (InvalidRCodeException | IOException | RuntimeException caught) {
+            LOG.error("Unable to parse rcode {} - Please open issue on GitHub - {}", f.getAbsolutePath(), caught.getClass().getName());
           }
         });
       }
@@ -229,7 +229,6 @@ public class OpenEdgeSettings {
     String dlcInstallDir = settings.getString(Constants.DLC);
     boolean dlcInPropath = settings.getBoolean(Constants.PROPATH_DLC);
     if (dlcInPropath && !Strings.isNullOrEmpty(dlcInstallDir)) {
-      currTime = System.currentTimeMillis();
       File dlc = new File(dlcInstallDir);
 
       Files.fileTreeTraverser().preOrderTraversal(new File(dlc, "gui")).forEach(f -> {
@@ -388,12 +387,16 @@ public class OpenEdgeSettings {
     return Joiner.on(',').skipNulls().join(propath);
   }
 
-  public RefactorSession getProparseSession(boolean useCache) {
+  public RefactorSession getProparseSession(boolean sonarLintSession) {
     if (proparseSession == null) {
-      Schema sch = readSchema(settings, fileSystem, useCache);
+      Schema sch = readSchema(settings, fileSystem, sonarLintSession);
       IProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
           settings.getBoolean(Constants.BACKSLASH_ESCAPE));
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
+      if (!sonarLintSession) {
+        // Parse entire build directory if not in SonarLint
+        parseBuildDirectory();
+      }
     }
 
     return proparseSession;

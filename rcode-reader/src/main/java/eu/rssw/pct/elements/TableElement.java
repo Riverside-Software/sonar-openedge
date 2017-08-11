@@ -74,4 +74,8 @@ public class TableElement extends AbstractAccessibleElement {
     return indexes;
   }
 
+  @Override
+  public String toString() {
+    return String.format("%s Table %s - BeforeTable %s", accessType.toString(), name, beforeTableName);
+  }
 }

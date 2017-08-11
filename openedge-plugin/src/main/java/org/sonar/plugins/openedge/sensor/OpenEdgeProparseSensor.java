@@ -128,7 +128,6 @@ public class OpenEdgeProparseSensor implements Sensor {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
     RefactorSession session = settings.getProparseSession(context.runtime().getProduct() == SonarProduct.SONARLINT);
-    settings.parseBuildDirectory();
 
     FilePredicates predicates = context.fileSystem().predicates();
     for (InputFile file : context.fileSystem().inputFiles(
