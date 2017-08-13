@@ -15,35 +15,24 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorSession;
 
-import eu.rssw.pct.TypeInfo;
-
 public class SymbolScope {
   private final RefactorSession session;
   private final SymbolScope superScope;
-  private TypeInfo typeInfo;
 
   private final Map<String, TableRef> tableMap = new HashMap<>();
-  private final Set<String> functionSet = new HashSet<>();
-  private final Set<String> methodSet = new HashSet<>();
   private final Set<String> varSet = new HashSet<>();
 
   SymbolScope(RefactorSession session) {
-    this(session, null, null);
+    this(session, null);
   }
 
-  SymbolScope(RefactorSession session, SymbolScope superScope, TypeInfo typeInfo) {
+  SymbolScope(RefactorSession session, SymbolScope superScope) {
     this.session = session;
     this.superScope = superScope;
-    this.typeInfo = typeInfo;
-  }
-
-  public void attachTypeInfo(TypeInfo typeInfo) {
-    this.typeInfo = typeInfo;
   }
 
   public RefactorSession getSession() {
@@ -54,7 +43,7 @@ public class SymbolScope {
     return superScope;
   }
 
-  void defBuffer(String bufferName, String tableName) {
+  void defineBuffer(String bufferName, String tableName) {
     // Look for the tableName in tableMap /before/
     // adding the new ref. This is in case they have done:
     // DEFINE BUFFER customer FOR customer. (groan)
@@ -85,21 +74,13 @@ public class SymbolScope {
     }
   }
 
-  void defFunc(String name) {
-    functionSet.add(name.toLowerCase());
-  }
-
-  void defMethod(String name) {
-    methodSet.add(name.toLowerCase());
-  }
-
-  void defTable(String name, FieldType ttype) {
+  void defineTable(String name, FieldType ttype) {
     TableRef newTable = new TableRef();
     newTable.tableType = ttype;
     tableMap.put(name.toLowerCase(), newTable);
   }
 
-  void defVar(String name) {
+  void defineVar(String name) {
     varSet.add(name.toLowerCase());
   }
 
@@ -141,13 +122,6 @@ public class SymbolScope {
         return ft;
       }
     }
-    TypeInfo info = typeInfo;
-    while (info != null) {
-      if (info.hasTempTable(inName)) {
-        return FieldType.TTABLE;
-      }
-      info = session.getTypeInfo(info.getParentTypeName());
-    }
 
     return null;
   }
@@ -164,12 +138,12 @@ public class SymbolScope {
     return isTable(inName);
   }
 
-  boolean isVar(String name) {
+  boolean isVariable(String name) {
     // Variable names cannot be abbreviated.
     if (varSet.contains(name.toLowerCase()))
       return true;
     if (superScope != null)
-      return superScope.isVar(name);
+      return superScope.isVariable(name);
     return false;
   }
 
@@ -177,17 +151,8 @@ public class SymbolScope {
    * methodOrFunc should only be called for the "unit" scope, since it is the only one that would ever contain methods
    * or user functions.
    */
-  int isMethodOrFunc(String name) {
-    String lname = name.toLowerCase();
-    // Methods take precedent over built-in functions. The compiler (10.2b)
-    // does not seem to try recognize by function/method signature.
-    if (methodSet.contains(lname))
-      return NodeTypes.LOCAL_METHOD_REF;
-    if (functionSet.contains(lname))
-      return NodeTypes.USER_FUNC;
-    if (superScope != null)
-      return superScope.isMethodOrFunc(name);
-    return 0;
+  int isMethodOrFunction(String name) {
+    return superScope.isMethodOrFunction(name);
   }
 
   // Field and table types

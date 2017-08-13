@@ -33,7 +33,7 @@ public class ParserSupport {
   private final RefactorSession session;
   private final ClassFinder classFinder;
   // Scope for the compile unit or class. It might be "sub" to a super scope in a class hierarchy
-  private final SymbolScope unitScope;
+  private final RootSymbolScope unitScope;
 
   // Current scope might be "unitScope" or an inner method/subprocedure scope
   private SymbolScope currentScope;
@@ -44,14 +44,13 @@ public class ParserSupport {
   private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
 
   private String className = "";
-  private TypeInfo typeInfo;
 
   // Last field referenced. Used for inline defines using LIKE or AS.
   private JPNode lastFieldRefNode;
   private JPNode lastFieldIDNode;
 
   ParserSupport(RefactorSession session) {
-    this.unitScope = new SymbolScope(session);
+    this.unitScope = new RootSymbolScope(session);
     this.currentScope = unitScope;
     this.session = session;
     this.classFinder = new ClassFinder(session);
@@ -60,8 +59,16 @@ public class ParserSupport {
   /**
    * An AS phrase allows further abbreviations on the datatype names. Input a token's text, this returns 0 if it is not
    * a datatype abbreviation, otherwise returns the integer token type for the abbreviation. Here's the normal keyword
-   * abbreviation, with what AS phrase allows: char,c. date,da. dec,de. int,i. logical,l. recid,rec. rowid,rowi.
-   * widget-h,widg.
+   * abbreviation, with what AS phrase allows:<ul>
+   * <li>char: c
+   * <li>date: da
+   * <li>dec: de
+   * <li>int: i
+   * <li>logical: l
+   * <li>recid: rec
+   * <li>rowid: rowi
+   * <li>widget-h: widg
+   * </ul>
    */
   int abbrevDatatype(String text) {
     String s = text.toLowerCase();
@@ -85,29 +92,26 @@ public class ParserSupport {
   }
 
   void addInnerScope() {
-    currentScope = new SymbolScope(session, currentScope, typeInfo);
+    currentScope = new SymbolScope(session, currentScope);
   }
 
   // Functions triggered from proparse.g
 
   /**
    * When parsing class, all methods are added as part of the classState rule.
-   * TODO Don't do that if RCodeUnit object is there
    */
   void declareMethod(String s) {
-    unitScope.defMethod(s);
+    // Not used anymore
   }
 
   void defBuffer(String bufferName, String tableName) {
-    currentScope.defBuffer(bufferName, tableName);
+    currentScope.defineBuffer(bufferName, tableName);
   }
 
-  void defClass(JPNode classNode) {
+  void defineClass(JPNode classNode) {
     JPNode idNode = classNode.firstChild();
     className = ClassFinder.dequote(idNode.getText());
-
-    typeInfo = session.getTypeInfo(className);
-    currentScope.attachTypeInfo(typeInfo);
+    unitScope.attachTypeInfo(session.getTypeInfo(className));
   }
 
   void defInterface(JPNode interfaceNode) {
@@ -116,25 +120,22 @@ public class ParserSupport {
   }
 
   void defMethod(JPNode idNode) {
-    String methodName = idNode.getText();
-    // Methods can only be defined at the "unit" (class) scope.
-    // Next line is redundant: method names were already picked up by the scan-ahead.
-    unitScope.defMethod(methodName);
+    // Not used anymore
   }
 
   void defTable(String name, SymbolScope.FieldType ttype) {
     // I think the compiler will only allow table defs at the class/unit scope,
     // but we don't need to enforce that here. It'll go in the right spot by the
     // nature of the code.
-    currentScope.defTable(name, ttype);
+    currentScope.defineTable(name, ttype);
   }
 
   void defVar(String name) {
-    currentScope.defVar(name);
+    currentScope.defineVar(name);
   }
 
   void defVarInline() {
-    currentScope.defVar(lastFieldIDNode.getText());
+    currentScope.defineVar(lastFieldIDNode.getText());
     // I'm not sure if this would ever be inheritable. Doesn't hurt to check.
     lastFieldRefNode.attrSet(IConstants.INLINE_VAR_DEF, IConstants.TRUE);
   }
@@ -173,7 +174,7 @@ public class ParserSupport {
     if (ss != null) {
       currentScope = ss;
     } else {
-      SymbolScope newScope = new SymbolScope(session, currentScope, typeInfo);
+      SymbolScope newScope = new SymbolScope(session, currentScope);
       currentScope = newScope;
       funcScopeMap.put(lowername, newScope);
       // User functions are always at the "unit" scope.
@@ -217,13 +218,13 @@ public class ParserSupport {
   }
 
   boolean isVar(String name) {
-    return currentScope.isVar(name);
+    return currentScope.isVariable(name);
   }
 
   int isMethodOrFunc(String name) {
     // Methods and user functions are only at the "unit" (class) scope.
     // Methods can also be inherited from superclasses.
-    return unitScope.isMethodOrFunc(name);
+    return unitScope.isMethodOrFunction(name);
   }
 
   /**
