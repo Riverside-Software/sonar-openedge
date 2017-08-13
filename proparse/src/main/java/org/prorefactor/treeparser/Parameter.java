@@ -12,6 +12,7 @@ package org.prorefactor.treeparser;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
+import org.prorefactor.treeparser.symbols.Symbol;
 
 public class Parameter {
 

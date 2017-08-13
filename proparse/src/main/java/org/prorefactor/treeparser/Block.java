@@ -21,7 +21,10 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
-import org.prorefactor.widgettypes.Frame;
+import org.prorefactor.treeparser.symbols.Event;
+import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.widgets.Frame;
 
 /**
  * For keeping track of blocks, block attributes, and the things that are scoped within those blocks - especially buffer

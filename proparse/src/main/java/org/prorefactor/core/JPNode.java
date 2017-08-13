@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.prorefactor.treeparser.Call;
-import org.prorefactor.treeparser.FieldContainer;
-import org.prorefactor.treeparser.Symbol;
+import org.prorefactor.treeparser.symbols.FieldContainer;
+import org.prorefactor.treeparser.symbols.Symbol;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;

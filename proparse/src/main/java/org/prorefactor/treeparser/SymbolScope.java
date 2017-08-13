@@ -23,7 +23,16 @@ import org.prorefactor.core.IConstants;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
-import org.prorefactor.widgettypes.IFieldLevelWidget;
+import org.prorefactor.treeparser.symbols.Dataset;
+import org.prorefactor.treeparser.symbols.Datasource;
+import org.prorefactor.treeparser.symbols.Query;
+import org.prorefactor.treeparser.symbols.Routine;
+import org.prorefactor.treeparser.symbols.Stream;
+import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.Variable;
+import org.prorefactor.treeparser.symbols.Widget;
+import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 /**
  * For keeping track of PROCEDURE, FUNCTION, and trigger scopes within a 4gl compile unit. Note that scopes are nested.
@@ -139,7 +148,7 @@ public class SymbolScope {
    * All symbols within this scope are added to this scope's symbol list. This method has "package" visibility, since
    * the Symbol object adds itself to its scope.
    */
-  void addSymbol(Symbol symbol) {
+  public void addSymbol(Symbol symbol) {
     allSymbols.add(symbol);
   }
 

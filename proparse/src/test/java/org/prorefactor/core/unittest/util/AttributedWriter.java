@@ -23,8 +23,8 @@ import org.prorefactor.core.ProToken;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.ParseUnit;
-import org.prorefactor.treeparser.Symbol;
-import org.prorefactor.treeparser.TableBuffer;
+import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.TableBuffer;
 
 public class AttributedWriter {
 

@@ -17,8 +17,8 @@ import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.treeparser.Block;
-import org.prorefactor.treeparser.FieldContainer;
-import org.prorefactor.widgettypes.Frame;
+import org.prorefactor.treeparser.symbols.FieldContainer;
+import org.prorefactor.treeparser.symbols.widgets.Frame;
 
 public class TP01FramesTreeLister extends JPNodeLister {
 

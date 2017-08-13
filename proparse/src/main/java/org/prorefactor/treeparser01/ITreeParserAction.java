@@ -11,12 +11,12 @@
 package org.prorefactor.treeparser01;
 
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.Event;
 import org.prorefactor.treeparser.ParseUnit;
-import org.prorefactor.treeparser.Symbol;
 import org.prorefactor.treeparser.TreeParserException;
-import org.prorefactor.treeparser.Variable;
-import org.prorefactor.widgettypes.Browse;
+import org.prorefactor.treeparser.symbols.Event;
+import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.Variable;
+import org.prorefactor.treeparser.symbols.widgets.Browse;
 
 import antlr.collections.AST;
 

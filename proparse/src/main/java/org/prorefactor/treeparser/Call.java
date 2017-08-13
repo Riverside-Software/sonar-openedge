@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.core.JPNode;
+import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.Variable;
 
 import antlr.SemanticException;
 

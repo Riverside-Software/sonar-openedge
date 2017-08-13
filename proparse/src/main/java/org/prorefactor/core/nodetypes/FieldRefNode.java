@@ -16,11 +16,11 @@ import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.BufferScope;
 import org.prorefactor.treeparser.DataType;
-import org.prorefactor.treeparser.FieldBuffer;
 import org.prorefactor.treeparser.Primative;
-import org.prorefactor.treeparser.Symbol;
-import org.prorefactor.treeparser.Variable;
-import org.prorefactor.widgettypes.IFieldLevelWidget;
+import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.Variable;
+import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 public class FieldRefNode extends JPNode {
   private static final long serialVersionUID = 7754879272592544238L;

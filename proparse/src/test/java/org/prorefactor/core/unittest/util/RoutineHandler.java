@@ -10,8 +10,8 @@
  *******************************************************************************/ 
 package org.prorefactor.core.unittest.util;
 
-import org.prorefactor.treeparser.Routine;
 import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser01.TP01Support;
 
 

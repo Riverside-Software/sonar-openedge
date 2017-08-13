@@ -23,7 +23,6 @@ import org.prorefactor.refactor.RefactorSession;
 import com.google.common.base.Strings;
 
 import antlr.Token;
-import eu.rssw.pct.TypeInfo;
 
 /**
  * Helper class when parsing procedure or class.

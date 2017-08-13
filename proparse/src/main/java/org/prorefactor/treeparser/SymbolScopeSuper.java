@@ -11,6 +11,8 @@
 package org.prorefactor.treeparser;
 
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.Symbol;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
