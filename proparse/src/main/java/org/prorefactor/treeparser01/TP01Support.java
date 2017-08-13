@@ -1186,7 +1186,7 @@ public class TP01Support extends TP01Action {
     // We take a copy of the cached superScope, because the tree parser messes with
     // the attributes of the symbols, and we don't want to mess with the symbols that
     // are in the super scopes in the cache.
-    rootScope.assignSuper(cachedCopy.generateSymbolScopeSuper());
+    // rootScope.assignSuper(cachedCopy.generateSymbolScopeSuper());
   }
 
   /** Get the Table symbol linked from a RECORD_NAME AST. */

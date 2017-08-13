@@ -22,7 +22,6 @@ import java.util.Set;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.core.schema.Table;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
 import org.prorefactor.treeparser.symbols.Query;
@@ -41,10 +40,10 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
  * record or frame scoping!
  */
 public class SymbolScope {
-  private static final Integer DATASET = new Integer(NodeTypes.DATASET);
-  private static final Integer DATASOURCE = new Integer(NodeTypes.DATASOURCE);
-  private static final Integer QUERY = new Integer(NodeTypes.QUERY);
-  private static final Integer STREAM = new Integer(NodeTypes.STREAM);
+  private static final Integer DATASET = NodeTypes.DATASET;
+  private static final Integer DATASOURCE = NodeTypes.DATASOURCE;
+  private static final Integer QUERY = NodeTypes.QUERY;
+  private static final Integer STREAM = NodeTypes.STREAM;
 
   protected List<Symbol> allSymbols = new ArrayList<>();
   protected List<Call> callList = new ArrayList<>();
@@ -341,12 +340,6 @@ public class SymbolScope {
           return tb;
         }
       }
-      if (rootScope != null) {
-        ITable tbl =  rootScope.lookupTableInParentClass(inName);
-        if (tbl != null) {
-          return new TableBuffer(inName, this, tbl);
-        }
-      }      
     }
     return symbol;
   }
@@ -418,12 +411,6 @@ public class SymbolScope {
     TableBuffer buff = bufferMap.get(name.toLowerCase());
     if (buff != null)
       return buff;
-    if (rootScope != null) {
-      ITable tbl =  rootScope.lookupTableInParentClass(name);
-      if (tbl != null) {
-        return new TableBuffer(name, this, tbl);
-      }
-    }      
     if (parentScope == null)
       return null;
 
@@ -445,7 +432,7 @@ public class SymbolScope {
 
   /** Lookup a Widget based on TokenType (FRAME, BUTTON, etc) and the name in this scope or enclosing scope. */
   public Widget lookupWidget(int widgetType, String name) {
-    Widget ret = (Widget) lookupSymbolLocally(new Integer(widgetType), name);
+    Widget ret = (Widget) lookupSymbolLocally(widgetType, name);
     if (ret == null && parentScope != null)
       return parentScope.lookupWidget(widgetType, name);
     return ret;

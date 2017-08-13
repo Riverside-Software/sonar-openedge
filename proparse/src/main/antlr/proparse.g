@@ -1487,38 +1487,7 @@ classstate
   :  c:CLASS^ type_name2
     (class_inherits | class_implements | USEWIDGETPOOL | ABSTRACT | FINAL | SERIALIZABLE)*
     {  // Header parsing done, call defClass which adds the name and processes inheritance.
-      support.defClass(#c);
-      // Now scan ahead through the entire token stream (!) for method names.
-      // Note that if Progress ever adds nested classes or support for more than one class
-      // in a single .cls file, then this will have to change.
-      int i = 3;
-      int next = LA(i);
-      int current = LA(i-1);
-      int prev = LA(i-2);
-      for (;;) {
-        if (next==antlr.Token.EOF_TYPE)
-          break;
-        if  (  current==METHOD
-          &&  (prev==PERIOD || prev==LEXCOLON)
-          ) {
-          int j = i;
-          while(NodeTypes.isMethodModifier(LA(j)))
-            j++;
-          if (LA(j)==CLASS)
-            j++;
-          // Now we have VOID, a data type, or a class name.
-          // Skip NAMEDOT classname parts while present ("com.example.package.Class").
-          while(LA(j+1)==NAMEDOT) j = j+2;
-          j++;
-          // Now as a final check, the identifier should be followed by a leftparen.
-          if (LA(j+1)==LEFTPAREN)
-            support.declareMethod(LT(j).getText());
-    }
-        i++;
-        prev=current;
-        current=next;
-        next=LA(i);
-      }
+      support.defineClass(#c);
     }
     block_colon
     code_block

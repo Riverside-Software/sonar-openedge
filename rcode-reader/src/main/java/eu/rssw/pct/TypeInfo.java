@@ -36,6 +36,15 @@ public class TypeInfo {
   private Collection<TableElement> tables = new ArrayList<>();
   private Collection<BufferElement> buffers = new ArrayList<>();
 
+  public BufferElement getBufferFor(String name) {
+    for (BufferElement tbl : buffers) {
+      if (tbl.getName().equalsIgnoreCase(name)) {
+        return tbl;
+      }
+    }
+    return null;
+  }
+
   public boolean hasTempTable(String inName) {
     for (TableElement tbl : tables) {
       if (tbl.getName().equalsIgnoreCase(inName)) {

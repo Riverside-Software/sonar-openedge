@@ -56,10 +56,10 @@ public class SymbolScopeRoot extends SymbolScope {
   }
 
   /** Assign a super (inherited) class scope to this class scope. */
-  public void assignSuper(SymbolScopeRoot superScope) {
+  /* public void assignSuper(SymbolScopeRoot superScope) {
     assert parentScope == null;
     parentScope = superScope;
-  }
+  } */
 
   /**
    * Define a temp or work table.
@@ -152,17 +152,6 @@ public class SymbolScopeRoot extends SymbolScope {
     return bufferMap.get(table.getName().toLowerCase());
   }
 
-  public ITable lookupTableInParentClass(String name) {
-    TypeInfo info = typeInfo;
-    while (info != null) {
-      if (info.hasTempTable(name)) {
-        return new Table(name, IConstants.ST_TTABLE);
-      }
-      info = refSession.getTypeInfo(info.getParentTypeName());
-    }
-    return null;
-  }
-  
   /**
    * Lookup a temp or work table definition in this scope. Unlike most other lookup functions, this one has nothing to
    * do with 4gl semantics, buffers, scopes, etc. This just looks up the raw Table definition for a temp or work table.
@@ -171,6 +160,41 @@ public class SymbolScopeRoot extends SymbolScope {
    */
   public ITable lookupTableDefinition(String name) {
     return tableMap.get(name.toLowerCase());
+  }
+
+  @Override
+  public TableBuffer lookupBuffer(String name) {
+    TableBuffer buff = super.lookupBuffer(name);
+    if (buff != null) {
+      return buff;
+    }
+
+    TypeInfo info = typeInfo;
+    while (info != null) {
+      if (info.hasTempTable(name)) {
+        ITable tbl = new Table(name, IConstants.ST_TTABLE);
+        return new TableBuffer(name, this, tbl);
+      }
+      info = refSession.getTypeInfo(info.getParentTypeName());
+    }
+    return null;
+  }
+
+  @Override
+  public TableBuffer lookupTempTable(String name) {
+    TableBuffer buff = super.lookupTempTable(name);
+    if (buff != null) {
+      return buff;
+    }
+    TypeInfo info = typeInfo;
+    while (info != null) {
+      if (info.hasTempTable(name)) {
+        ITable tbl = new Table(name, IConstants.ST_TTABLE);
+        return new TableBuffer(name, this, tbl);
+      }
+      info = refSession.getTypeInfo(info.getParentTypeName());
+    }
+    return null;
   }
 
   /**
