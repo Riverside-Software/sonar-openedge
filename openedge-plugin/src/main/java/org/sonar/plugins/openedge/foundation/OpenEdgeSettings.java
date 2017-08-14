@@ -209,7 +209,7 @@ public class OpenEdgeSettings {
   }
 
   private final void parseHierarchy(TypeInfo info) {
-    LOG.debug("Injecting type info '{}'", info);
+    LOG.info("Injecting type info '{}'", info);
     proparseSession.injectTypeInfo(info);
     if (info.getParentTypeName() != null) {
       File rcd = getRCode(info.getParentTypeName());
