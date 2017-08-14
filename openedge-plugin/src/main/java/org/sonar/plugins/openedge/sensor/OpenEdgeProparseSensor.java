@@ -78,6 +78,8 @@ import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 
+import eu.rssw.pct.TypeInfo;
+
 public class OpenEdgeProparseSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeProparseSensor.class);
 
@@ -186,6 +188,9 @@ public class OpenEdgeProparseSensor implements Sensor {
       } catch (SAXException | IOException caught) {
         LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
       }
+    }
+    if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
+      settings.parseHierarchy(file.relativePath());
     }
 
     try {

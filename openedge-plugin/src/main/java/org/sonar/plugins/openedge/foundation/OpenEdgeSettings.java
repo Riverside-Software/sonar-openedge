@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -66,6 +68,7 @@ import eu.rssw.pct.FileEntry;
 import eu.rssw.pct.PLReader;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
+import eu.rssw.pct.TypeInfo;
 
 @ScannerSide
 @SonarLintSide
@@ -132,7 +135,6 @@ public class OpenEdgeSettings {
       tmp = new File(fileSystem.baseDir(), binariesSetting);
     this.binariesDir = tmp;
     this.pctDir = new File(binariesDir, ".pct");
-
   }
 
   private final void initializePropath(Settings settings, FileSystem fileSystem) {
@@ -194,6 +196,41 @@ public class OpenEdgeSettings {
     }
   }
 
+  public final void parseHierarchy(String fileName) {
+    String fileInPropath = searchInPropath(fileName);
+    File rcd = getRCode(fileInPropath);
+    LOG.info("Parsing hierarchy of {} -- In PROPATH {} - Expecting rcode in {}", fileName, fileInPropath, rcd);
+    if ((rcd != null) && rcd.exists()) {
+      TypeInfo info = parseRCode(rcd);
+      if (info != null) {
+        parseHierarchy(info);
+      }
+    }
+  }
+
+  private final void parseHierarchy(TypeInfo info) {
+    LOG.debug("Injecting type info '{}'", info);
+    proparseSession.injectTypeInfo(info);
+    if (info.getParentTypeName() != null) {
+      File rcd = getRCode(info.getParentTypeName());
+      if (rcd != null) {
+        TypeInfo inf = parseRCode(rcd);
+        if (inf != null) {
+          parseHierarchy(inf);
+        }
+      }
+    }
+    for (String str : info.getInterfaces()) {
+      File rcd = getRCode(str);
+      if (rcd != null) {
+        TypeInfo inf = parseRCode(rcd);
+        if (inf != null) {
+          parseHierarchy(inf);
+        }
+      }
+    }
+  }
+
   public final void parseBuildDirectory() {
     if (settings.getBoolean(Constants.SKIP_RCODE))
       return;
@@ -209,17 +246,12 @@ public class OpenEdgeSettings {
       if (f.getName().endsWith(".r")) {
         numRCode.incrementAndGet();
         service.submit(() -> {
-          try (FileInputStream fis = new FileInputStream(f)) {
-            LOG.debug("Parsing rcode {}", f.getAbsolutePath());
-            RCodeInfo rci = new RCodeInfo(fis);
-            if (rci.isClass()) {
-              numClasses.incrementAndGet();
-              numMethods.addAndGet(rci.getTypeInfo().getMethods().size());
-              numProperties.addAndGet(rci.getTypeInfo().getProperties().size());
-              proparseSession.injectTypeInfo(rci.getTypeInfo());
-            }
-          } catch (InvalidRCodeException | IOException | RuntimeException caught) {
-            LOG.error("Unable to parse rcode {} - Please open issue on GitHub - {}", f.getAbsolutePath(), caught.getClass().getName());
+          TypeInfo info = parseRCode(f);
+          if (info != null) {
+            numClasses.incrementAndGet();
+            numMethods.addAndGet(info.getMethods().size());
+            numProperties.addAndGet(info.getProperties().size());
+            proparseSession.injectTypeInfo(info);
           }
         });
       }
@@ -246,6 +278,20 @@ public class OpenEdgeSettings {
     }
     LOG.info("{} RCode read in {} ms - {} classes - {} methods - {} properties", numRCode.get(),
         System.currentTimeMillis() - currTime, numClasses.get(), numMethods.get(), numProperties.get());
+  }
+
+  private TypeInfo parseRCode(File file) {
+    try (FileInputStream fis = new FileInputStream(file)) {
+      LOG.debug("Parsing rcode {}", file.getAbsolutePath());
+      RCodeInfo rci = new RCodeInfo(fis);
+      if (rci.isClass()) {
+        return rci.getTypeInfo();
+      }
+    } catch (InvalidRCodeException | IOException | RuntimeException caught) {
+      LOG.error("Unable to parse rcode {} - Please open issue on GitHub - {}", file.getAbsolutePath(),
+          caught.getClass().getName());
+    }
+    return null;
   }
 
   private void parseLibrary(File lib) {
@@ -330,6 +376,17 @@ public class OpenEdgeSettings {
     }
 
     return fileName;
+  }
+
+  public String searchInPropath(String fileName) {
+    Path target = Paths.get(fileName);
+    for (File entry : propath) {
+      Path relPath = entry.toPath().relativize(target);
+      if (!relPath.startsWith(".."))
+        return relPath.toString();
+    }
+
+    return "";
   }
 
   /**
