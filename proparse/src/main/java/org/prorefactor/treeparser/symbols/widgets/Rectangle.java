@@ -12,18 +12,12 @@ package org.prorefactor.treeparser.symbols.widgets;
 
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
-import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.Widget;
 
 public class Rectangle extends Widget implements IFieldLevelWidget {
 
   public Rectangle(String name, TreeParserSymbolScope scope) {
     super(name, scope);
-  }
-
-  @Override
-  public Symbol copyBare(TreeParserSymbolScope scope) {
-    return new Rectangle(getName(), scope);
   }
 
   /**

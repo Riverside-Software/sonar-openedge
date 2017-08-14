@@ -37,13 +37,6 @@ public class Routine extends Symbol {
     parameters.add(p);
   }
 
-  @Override
-  public Symbol copyBare(TreeParserSymbolScope scope) {
-    Routine ret = new Routine(getName(), scope, scope);
-    ret.progressType = this.progressType;
-    return ret;
-  }
-
   /** @see org.prorefactor.treeparser.symbols.Symbol#fullName() */
   @Override
   public String fullName() {

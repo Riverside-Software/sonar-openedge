@@ -20,11 +20,6 @@ public class Query extends Symbol {
     super(name, scope);
   }
 
-  @Override
-  public Symbol copyBare(TreeParserSymbolScope scope) {
-    return new Query(getName(), scope);
-  }
-
   /**
    * For this subclass of Symbol, fullName() returns the same value as getName()
    */

@@ -32,11 +32,6 @@ public class Dataset extends Symbol {
     buffers.add(buff);
   }
 
-  @Override
-  public Symbol copyBare(TreeParserSymbolScope scope) {
-    return new Dataset(getName(), scope);
-  }
-
   /** For this subclass of Symbol, fullName() returns the same value as getName(). */
   @Override
   public String fullName() {

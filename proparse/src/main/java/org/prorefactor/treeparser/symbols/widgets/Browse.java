@@ -13,17 +13,11 @@ package org.prorefactor.treeparser.symbols.widgets;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.FieldContainer;
-import org.prorefactor.treeparser.symbols.Symbol;
 
 public class Browse extends FieldContainer implements IFieldLevelWidget {
 
   public Browse(String name, TreeParserSymbolScope scope) {
     super(name, scope);
-  }
-
-  @Override
-  public Symbol copyBare(TreeParserSymbolScope scope) {
-    return new Browse(getName(), scope);
   }
 
   /**

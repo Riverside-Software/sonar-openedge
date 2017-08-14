@@ -14,7 +14,6 @@ import org.prorefactor.core.NodeTypes;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.FieldContainer;
-import org.prorefactor.treeparser.symbols.Symbol;
 
 public class Frame extends FieldContainer {
 
@@ -25,12 +24,6 @@ public class Frame extends FieldContainer {
   public Frame(String name, TreeParserSymbolScope scope) {
     super(name, scope);
     scope.add(this);
-  }
-
-  @Override
-  public Symbol copyBare(TreeParserSymbolScope scope) {
-    // Frames cannot be inherited, so we don't have to worry about the other frame attributes.
-    return new Frame(getName(), scope);
   }
 
   public Block getFrameScopeBlock() {

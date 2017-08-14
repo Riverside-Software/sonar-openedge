@@ -44,15 +44,6 @@ public class Variable extends Symbol implements Primative, Value {
     extent = likePrim.getExtent();
   }
 
-  @Override
-  public Symbol copyBare(TreeParserSymbolScope scope) {
-    Variable v = new Variable(getName(), scope);
-    v.className = this.className;
-    v.dataType = this.dataType;
-    v.extent = this.extent;
-    return v;
-  }
-
   /**
    * Return the name of the variable. For this subclass of Symbol, fullName() returns the same value as getName().
    */

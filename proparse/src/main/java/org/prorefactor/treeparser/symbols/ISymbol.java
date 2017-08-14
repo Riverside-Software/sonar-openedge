@@ -92,9 +92,4 @@ public interface ISymbol {
    */
   void setLikeNode(JPNode likeNode);
 
-  /**
-   * Generate a bare-bones copy of this symbol. Requires the scope to attach it to as the argument.
-   */
-  Symbol copyBare(TreeParserSymbolScope intoScope);
-
 }

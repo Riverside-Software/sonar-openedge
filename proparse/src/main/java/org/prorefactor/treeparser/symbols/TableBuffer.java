@@ -19,7 +19,6 @@ import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
-import org.prorefactor.treeparser.TreeParserRootSymbolScope;
 
 /**
  * A TableBuffer is a Symbol which provides a link from the syntax tree to a Table object.
@@ -42,23 +41,6 @@ public class TableBuffer extends Symbol {
 
   void addFieldBuffer(FieldBuffer fieldBuffer) {
     fieldBuffers.put(fieldBuffer.getField(), fieldBuffer);
-  }
-
-  /** For temp/work table, also adds Table definition to the scope if it doesn't already exist. */
-  @Override
-  public Symbol copyBare(TreeParserSymbolScope scope) {
-    ITable t;
-    if (this.table.getStoretype() == IConstants.ST_DBTABLE) {
-      t = this.table;
-    } else {
-      // Make sure temp/work table definition exists in target root scope.
-      TreeParserRootSymbolScope rootScope = scope.getRootScope();
-      t = rootScope.lookupTableDefinition(table.getName());
-      if (t == null)
-        t = table.copyBare(rootScope);
-    }
-    String useName = this.isDefault ? "" : super.getName();
-    return new TableBuffer(useName, scope, t);
   }
 
   /**

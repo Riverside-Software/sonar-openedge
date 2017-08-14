@@ -22,11 +22,6 @@ public class Stream extends Symbol {
     super(name, scope);
   }
 
-  @Override
-  public Symbol copyBare(TreeParserSymbolScope scope) {
-    return new Stream(getName(), scope);
-  }
-
   /**
    * For this subclass of Symbol, fullName() returns the same value as getName()
    */

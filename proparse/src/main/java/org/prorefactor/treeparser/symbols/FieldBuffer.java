@@ -71,18 +71,6 @@ public class FieldBuffer extends Symbol implements Primative {
   }
 
   /**
-   * INVALID. Do not use. There is never any reason to copy a FieldBuffer, since they are created by the tree parser on
-   * the fly. They are not defined formally in the syntax.
-   * 
-   * @deprecated
-   */
-  @Override
-  public Symbol copyBare(TreeParserSymbolScope scope) {
-    assert false;
-    return null;
-  }
-
-  /**
    * Get "database.buffer.field" for schema fields, or "buffer.field" for temp/work table fields.
    */
   @Override
