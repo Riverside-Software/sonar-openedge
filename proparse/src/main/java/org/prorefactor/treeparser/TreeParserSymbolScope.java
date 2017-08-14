@@ -40,10 +40,7 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
  * record or frame scoping!
  */
 public class TreeParserSymbolScope {
-  private static final Integer DATASET = NodeTypes.DATASET;
-  private static final Integer DATASOURCE = NodeTypes.DATASOURCE;
-  private static final Integer QUERY = NodeTypes.QUERY;
-  private static final Integer STREAM = NodeTypes.STREAM;
+  protected final TreeParserSymbolScope parentScope;
 
   protected List<Symbol> allSymbols = new ArrayList<>();
   protected List<Call> callList = new ArrayList<>();
@@ -56,13 +53,8 @@ public class TreeParserSymbolScope {
   protected Map<Integer, Map<String, Symbol>> typeMap = new HashMap<>();
   protected Map<String, Variable> variableMap = new HashMap<>();
 
-  protected TreeParserSymbolScope parentScope;
-  protected TreeParserRootSymbolScope rootScope;
-
-  // Initialization block
-  {
-    typeMap.put(new Integer(NodeTypes.VARIABLE),
-        Collections.checkedMap((Map) variableMap, String.class, Symbol.class));
+  protected TreeParserSymbolScope() {
+    this(null);
   }
 
   /**
@@ -70,10 +62,9 @@ public class TreeParserSymbolScope {
    * 
    * @param parentScope null if called by the SymbolScopeRoot constructor.
    */
-  protected TreeParserSymbolScope(TreeParserSymbolScope parentScope) {
+  private TreeParserSymbolScope(TreeParserSymbolScope parentScope) {
     this.parentScope = parentScope;
-    if (parentScope != null)
-      this.rootScope = parentScope.rootScope;
+    typeMap.put(NodeTypes.VARIABLE, Collections.checkedMap((Map) variableMap, String.class, Symbol.class));
   }
 
   /** Add a FieldLevelWidget for names lookup. */
@@ -97,7 +88,7 @@ public class TreeParserSymbolScope {
   private void add(TableBuffer tableBuffer) {
     ITable table = tableBuffer.getTable();
     addTableBuffer(tableBuffer.getName(), table, tableBuffer);
-    rootScope.addTableDefinitionIfNew(table);
+    getRootScope().addTableDefinitionIfNew(table);
   }
 
   /** Add a Variable for names lookup. */
@@ -224,7 +215,7 @@ public class TreeParserSymbolScope {
     // The default buffer for temp and work tables was defined at
     // the time that the table was defined. So, lookupBuffer() would have found
     // temp/work table references, and all we have to search now is schema.
-    ITable table = rootScope.getRefactorSession().getSchema().lookupTable(inName);
+    ITable table = getRootScope().getRefactorSession().getSchema().lookupTable(inName);
     if (table == null)
       return null;
     return getUnnamedBuffer(table);
@@ -258,7 +249,11 @@ public class TreeParserSymbolScope {
   }
 
   public TreeParserRootSymbolScope getRootScope() {
-    return rootScope;
+    if (parentScope == null) {
+      return (TreeParserRootSymbolScope) this;
+    } else {
+      return parentScope.getRootScope();
+    }
   }
 
   /** Get or create the unnamed buffer for a schema table. */
@@ -274,7 +269,7 @@ public class TreeParserSymbolScope {
         return buffer;
       nextScope = nextScope.parentScope;
     }
-    return rootScope.defineBuffer("", table);
+    return getRootScope().defineBuffer("", table);
   }
 
   /** Get the Variables. (vars, params, etc, etc.) */
@@ -345,11 +340,11 @@ public class TreeParserSymbolScope {
   }
 
   public Dataset lookupDataset(String name) {
-    return (Dataset) lookupSymbolLocally(DATASET, name);
+    return (Dataset) lookupSymbolLocally(NodeTypes.DATASET, name);
   }
 
   public Datasource lookupDatasource(String name) {
-    return (Datasource) lookupSymbolLocally(DATASOURCE, name);
+    return (Datasource) lookupSymbolLocally(NodeTypes.DATASOURCE, name);
   }
 
   /** Lookup a FieldLevelWidget in this scope or an enclosing scope. */
@@ -361,16 +356,15 @@ public class TreeParserSymbolScope {
   }
 
   public Query lookupQuery(String name) {
-    return (Query) lookupSymbolLocally(QUERY, name);
+    return (Query) lookupSymbolLocally(NodeTypes.QUERY, name);
   }
 
   public Routine lookupRoutine(String name) {
-    Routine routine = routineMap.get(name.toLowerCase());
-    return routine;
+    return routineMap.get(name.toLowerCase());
   }
 
   public Stream lookupStream(String name) {
-    return (Stream) lookupSymbolLocally(STREAM, name);
+    return (Stream) lookupSymbolLocally(NodeTypes.STREAM, name);
   }
 
   public Symbol lookupSymbol(Integer symbolType, String name) {
@@ -394,7 +388,7 @@ public class TreeParserSymbolScope {
    * buffer/temp/work name, then abbreviated schema names. Sheesh.
    */
   public TableBuffer lookupTableOrBufferSymbol(String inName) {
-    ITable table = rootScope.getRefactorSession().getSchema().lookupTable(inName);
+    ITable table = getRootScope().getRefactorSession().getSchema().lookupTable(inName);
     if (table != null && table.getName().length() == inName.length())
       return getUnnamedBuffer(table);
     TableBuffer ret2 = lookupBuffer(inName);

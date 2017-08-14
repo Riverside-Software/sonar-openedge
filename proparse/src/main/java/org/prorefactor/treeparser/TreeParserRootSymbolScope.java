@@ -40,8 +40,6 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   private boolean finalClass;
 
   public TreeParserRootSymbolScope(RefactorSession session) {
-    super(null);
-    this.rootScope = this;
     this.refSession = session;
   }
 

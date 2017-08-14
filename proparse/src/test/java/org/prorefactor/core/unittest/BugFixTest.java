@@ -22,7 +22,6 @@ import java.util.List;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
