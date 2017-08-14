@@ -55,12 +55,6 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
       tableMap.put(lowerName, table);
   }
 
-  /** Assign a super (inherited) class scope to this class scope. */
-  /* public void assignSuper(SymbolScopeRoot superScope) {
-    assert parentScope == null;
-    parentScope = superScope;
-  } */
-
   /**
    * Define a temp or work table.
    * 

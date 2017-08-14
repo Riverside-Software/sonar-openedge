@@ -10,26 +10,21 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser01;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.BufferScope;
@@ -42,10 +37,9 @@ import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.SymbolFactory;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
-import org.prorefactor.treeparser.TreeParserRootSymbolScope;
-import org.prorefactor.treeparser.TreeParserSuperSymbolScope;
 import org.prorefactor.treeparser.TreeParserException;
+import org.prorefactor.treeparser.TreeParserRootSymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
@@ -236,8 +230,6 @@ public class TP01Support extends TP01Action {
     rootScope.setAbstractClass(abstractKw != null);
     rootScope.setFinalClass(finalKw != null);
     rootScope.setSerializableClass(serializableKw != null);
-    if (idNode.nextSibling().getType() == NodeTypes.INHERITS)
-      classStateInherits(classNode, idNode.nextSibling().firstChild());
   }
 
   @Override
@@ -1158,61 +1150,12 @@ public class TP01Support extends TP01Action {
     return rootScope;
   }
 
-  private void classStateInherits(JPNode classNode, JPNode inheritsTypeNode) {
-    LOG.trace("Entering classStateInherits {} {}", classNode, inheritsTypeNode);
-    String className = inheritsTypeNode.attrGetS(IConstants.QUALIFIED_CLASS_STRING);
-    TreeParserSuperSymbolScope cachedCopy = null;
-    try {
-      cachedCopy = TreeParserSuperSymbolScope.cache.get(className.toLowerCase(), new Callable<TreeParserSuperSymbolScope>() {
-        @Override
-        public TreeParserSuperSymbolScope call() throws Exception {
-          TreeParserSuperSymbolScope clz = classStateSuper(classNode, className);
-          if (clz == null) {
-            throw new ExecutionException("Unable to find class " + className, null);
-          } else {
-            return clz;
-          }
-        }
-      });
-    } catch (ExecutionException caught) {
-      // Parse error from parent classes are thrown to caller
-      if (caught.getCause() instanceof RefactorException) {
-        throw new ProparseRuntimeException(caught.getCause());
-      }
-      LOG.trace("ExecutionException", caught);
-      return;
-    }
-
-    // We take a copy of the cached superScope, because the tree parser messes with
-    // the attributes of the symbols, and we don't want to mess with the symbols that
-    // are in the super scopes in the cache.
-    // rootScope.assignSuper(cachedCopy.generateSymbolScopeSuper());
-  }
-
   /** Get the Table symbol linked from a RECORD_NAME AST. */
   private ITable astTableLink(AST tableAST) {
     LOG.trace("Entering astTableLink {}", tableAST);
     TableBuffer buffer = (TableBuffer) ((JPNode) tableAST).getLink(IConstants.SYMBOL);
     assert buffer != null;
     return buffer.getTable();
-  }
-
-  private TreeParserSuperSymbolScope classStateSuper(JPNode classNode, String className) throws RefactorException {
-    return null;
-    /* LOG.trace("Entering classStateSuper {} {}", classNode, className);
-    File file = refSession.findFileForClassName(className);
-    if ((file == null) || !file.exists()) {
-      // Could not find the super class. Will happen with Progress.lang.*, vendor libraries, etc.
-      return null;
-    }
-     ParseUnit pu = new ParseUnit(file, refSession);
-    JPNode superClassTree = (JPNode) classNode.getLink(IConstants.SUPER_CLASS_TREE);
-    if (superClassTree != null) {
-      pu.setTopNode(superClassTree);
-    }
-    pu.treeParser01();
-
-    return pu.getRootScope().generateSymbolScopeSuper(); */
   }
 
 }

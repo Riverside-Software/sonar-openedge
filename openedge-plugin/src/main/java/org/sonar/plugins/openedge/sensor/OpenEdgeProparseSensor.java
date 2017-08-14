@@ -78,8 +78,6 @@ import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 
-import eu.rssw.pct.TypeInfo;
-
 public class OpenEdgeProparseSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeProparseSensor.class);
 
@@ -407,16 +405,12 @@ public class OpenEdgeProparseSensor implements Sensor {
       complexityWithInc++;
     }
 
-    for (JPNode node : unit.getTopNode().queryMainFile(NodeTypes.IF, NodeTypes.REPEAT, NodeTypes.FOR, NodeTypes.WHEN,
+    complexity += unit.getTopNode().queryMainFile(NodeTypes.IF, NodeTypes.REPEAT, NodeTypes.FOR, NodeTypes.WHEN,
         NodeTypes.AND, NodeTypes.OR, NodeTypes.RETURN, NodeTypes.PROCEDURE, NodeTypes.FUNCTION, NodeTypes.METHOD,
-        NodeTypes.ENUM)) {
-      complexity++;
-    }
-    for (JPNode node : unit.getTopNode().query(NodeTypes.IF, NodeTypes.REPEAT, NodeTypes.FOR, NodeTypes.WHEN,
+        NodeTypes.ENUM).size();
+    complexityWithInc += unit.getTopNode().query(NodeTypes.IF, NodeTypes.REPEAT, NodeTypes.FOR, NodeTypes.WHEN,
         NodeTypes.AND, NodeTypes.OR, NodeTypes.RETURN, NodeTypes.PROCEDURE, NodeTypes.FUNCTION, NodeTypes.METHOD,
-        NodeTypes.ENUM)) {
-      complexityWithInc++;
-    }
+        NodeTypes.ENUM).size();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMPLEXITY).withValue(complexity).save();
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.COMPLEXITY).withValue(complexityWithInc).save();
   }
