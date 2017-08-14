@@ -4,14 +4,23 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public class IndexComponentElement extends AbstractElement {
-  protected int ascending;
-  protected int flags;
-  protected int position;
+  private final int ascending;
+  private final int flags;
+  private final int position;
 
-  protected IndexComponentElement(byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
-    this.ascending = segment[currentPos];
-    this.flags = segment[currentPos + 1];
-    this.position = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
+  public IndexComponentElement(int position, int flags, int ascending) {
+    this.position = position;
+    this.flags = flags;
+    this.ascending = ascending;
+  }
+
+  protected static IndexComponentElement fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
+      ByteOrder order) {
+    int ascending = segment[currentPos];
+    int flags = segment[currentPos + 1];
+    int position = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
+
+    return new IndexComponentElement(position, flags, ascending);
   }
 
   @Override

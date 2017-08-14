@@ -37,7 +37,7 @@ public class PropertyElement extends AbstractAccessibleElement {
 
     int currPos = currentPos + 8;
     if (this.propertyAsVariable()) {
-      this.variable = new VariableElement("", accessType, segment, currPos, textAreaOffset, order);
+      this.variable = VariableElement.fromDebugSegment("", accessType, segment, currPos, textAreaOffset, order);
       currPos += this.variable.size();
     }
 
@@ -47,7 +47,7 @@ public class PropertyElement extends AbstractAccessibleElement {
         atp.add(AccessType.PUBLIC);
       if (isGetterProtected())
         atp.add(AccessType.PROTECTED);
-      this.getter = new MethodElement("", atp, segment, currPos, textAreaOffset, order);
+      this.getter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
       currPos += this.getter.size();
     }
     if (this.hasSetter()) {
@@ -56,7 +56,7 @@ public class PropertyElement extends AbstractAccessibleElement {
         atp.add(AccessType.PUBLIC);
       if (isGetterProtected())
         atp.add(AccessType.PROTECTED);
-      this.setter = new MethodElement("", atp, segment, currPos, textAreaOffset, order);
+      this.setter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
     }
   }
 

@@ -37,14 +37,14 @@ public class TableElement extends AbstractAccessibleElement {
     fields = new VariableElement[fieldCount];
     int currPos = currentPos + 24;
     for (int zz = 0; zz < fieldCount; zz++) {
-      VariableElement var = new VariableElement("", null, segment, currPos, textAreaOffset, order);
+      VariableElement var = VariableElement.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
       currPos += var.size();
       fields[zz] = var;
     }
 
     indexes = new IndexElement[indexCount];
     for (int zz = 0; zz < indexCount; zz++) {
-      IndexElement idx = new IndexElement(segment, currPos, textAreaOffset, order);
+      IndexElement idx = IndexElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += idx.size();
       indexes[zz] = idx;
     }

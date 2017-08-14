@@ -14,27 +14,38 @@ public class VariableElement extends AbstractAccessibleElement {
   private static final int BASE_IS_DOTNET = 4;
   private static final int NO_UNDO = 8;
 
-  private int data_type;
-  // private int recordPosition;
-  private int extent;
-  private int flags;
+  private final int dataType;
+  private final int extent;
+  private final int flags;
+  private final String typeName;
   // private int fullNameLength;
-  private String typeName;
+  // private int recordPosition;
 
-  public VariableElement(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
+  public VariableElement(String name, Set<AccessType> accessType, int dataType, int extent, int flags,
+      String typeName) {
     super(name, accessType);
+    this.dataType = dataType;
+    this.extent = extent;
+    this.flags = flags;
+    this.typeName = typeName;
+  }
 
-    this.data_type = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
-    // this.recordPosition = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
-    this.extent = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
-    this.flags = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
-    // this.fullNameLength = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(order).getShort();
+  public static VariableElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment,
+      int currentPos, int textAreaOffset, ByteOrder order) {
+    int dataType = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
+    // int recordPosition = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
+    int extent = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
+    // int fullNameLength = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 12, Integer.BYTES).order(order).getInt();
-    this.name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
+    String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
-    this.typeName = typeNameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
+    String typeName = typeNameOffset == 0 ? ""
+        : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
+
+    return new VariableElement(name2, accessType, dataType, extent, flags, typeName);
   }
 
   protected String getTypeName() {
@@ -46,7 +57,7 @@ public class VariableElement extends AbstractAccessibleElement {
   }
 
   public DataType getDataType() {
-    return DataType.getDataType(data_type);
+    return DataType.getDataType(dataType);
   }
 
   public int getExtent() {

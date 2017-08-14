@@ -38,7 +38,7 @@ public class EventElement extends AbstractAccessibleElement {
     int currPos = currentPos + 24;
     parameters = new IParameter[parameterCount];
     for (int zz = 0; zz < parameterCount; zz++) {
-      MethodParameter param = new MethodParameter(segment, currPos, textAreaOffset, order);
+      MethodParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += param.size();
       parameters[zz] = param;
     }

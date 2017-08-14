@@ -22,37 +22,47 @@ public class MethodElement extends AbstractAccessibleElement {
   protected static final int OVERLOADED_METHOD = 256;
   protected static final int STATIC_METHOD = 512;
 
-  protected int flags;
-  protected int returnType;
+  private final int flags;
+  private final int returnType;
+  private final String returnTypeName;
+  private final int extent;
+  private final IParameter[] parameters;
 
-  protected String typeName;
-  protected int extent;
-  protected IParameter[] parameters;
-
-  public MethodElement(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
-      ByteOrder order) {
+  public MethodElement(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
+      int extent, IParameter[] parameters) {
     super(name, accessType);
+    this.flags = flags;
+    this.returnType = returnType;
+    this.returnTypeName = returnTypeName;
+    this.extent = extent;
+    this.parameters = parameters;
+  }
 
-    this.flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    this.returnType = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
+  public static MethodElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
+      ByteOrder order) {
+    int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    int returnType = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
     int paramCount = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    this.extent = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    int extent = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 12, Integer.BYTES).order(ByteOrder.LITTLE_ENDIAN).getInt();
-    this.name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
+    String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(
         ByteOrder.LITTLE_ENDIAN).getInt();
-    this.typeName = typeNameOffset == 0 ? ""
+    String typeName = typeNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
 
+    System.out.println("meth " + name + " -- " + name2 + " -- " + typeName + " -- " + returnType);
     int currPos = currentPos + 24;
-    parameters = new IParameter[paramCount];
+    IParameter[] parameters = new IParameter[paramCount];
     for (int zz = 0; zz < paramCount; zz++) {
-      MethodParameter param = new MethodParameter(segment, currPos, textAreaOffset, order);
+      MethodParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += param.size();
       parameters[zz] = param;
     }
+    
+    return new MethodElement(name2, accessType, flags, returnType, typeName, extent, parameters);
   }
 
   @Override
@@ -61,7 +71,7 @@ public class MethodElement extends AbstractAccessibleElement {
   }
 
   protected String getReturnTypeName() {
-    return typeName;
+    return returnTypeName;
   }
 
   @Override

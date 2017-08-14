@@ -269,7 +269,7 @@ public class RCodeInfo {
 
       switch(ElementKind.getKind(entry[2])) {
         case METHOD:
-          MethodElement mthd = new MethodElement(name, set, segment, currOffset, textAreaOffset, order);
+          MethodElement mthd = MethodElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
           currOffset += mthd.size();
           typeInfo.getMethods().add(mthd);
           break;
@@ -279,7 +279,7 @@ public class RCodeInfo {
             typeInfo.getProperties().add(prop);
             break;
         case VARIABLE:
-            VariableElement var = new VariableElement(name, set, segment, currOffset, textAreaOffset, order);
+            VariableElement var = VariableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += var.size();
             typeInfo.getVariables().add(var);
           break;
@@ -289,12 +289,12 @@ public class RCodeInfo {
             typeInfo.getTables().add(tbl);
           break;
         case BUFFER:
-            BufferElement buf = new BufferElement(name, set, segment, currOffset, textAreaOffset, order);
+            BufferElement buf =  BufferElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += buf.size();
             typeInfo.getBuffers().add(buf);
           break;
         case QUERY:
-            QueryElement qry = new QueryElement(name, set, segment, currOffset, textAreaOffset, order);
+            QueryElement qry = QueryElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += qry.size();
           break;
         case DATASET:

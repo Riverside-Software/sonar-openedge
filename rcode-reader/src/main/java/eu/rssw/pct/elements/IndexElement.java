@@ -10,25 +10,34 @@ public class IndexElement extends AbstractElement {
   private static final int WORD_INDEX = 8;
   private static final int DEFAULT_INDEX = 16;
 
-  protected int primary;
-  protected int flags;
-  protected IndexComponentElement[] indexComponents;
+  private final int primary;
+  private final int flags;
+  private final IndexComponentElement[] indexComponents;
 
-  protected IndexElement(byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
-    this.primary = segment[currentPos];
-    this.flags = segment[currentPos + 1];
+  public IndexElement(String name, int primary, int flags, IndexComponentElement[] indexComponents) {
+    super(name);
+    this.primary = primary;
+    this.flags = flags;
+    this.indexComponents = indexComponents;
+  }
+
+  protected static IndexElement fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
+    int primary = segment[currentPos];
+    int flags = segment[currentPos + 1];
 
     int componentCount = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 8, Integer.BYTES).order(order).getInt();
-    this.name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
+    String name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int currPos = currentPos + 16;
-    indexComponents = new IndexComponentElement[componentCount];
+    IndexComponentElement[] indexComponents = new IndexComponentElement[componentCount];
     for (int zz = 0; zz < componentCount; zz++) {
-      IndexComponentElement component = new IndexComponentElement(segment, currPos, textAreaOffset, order);
+      IndexComponentElement component = IndexComponentElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += component.size();
       indexComponents[zz] = component;
     }
+
+    return new IndexElement(name, primary, flags, indexComponents);
   }
 
   @Override
