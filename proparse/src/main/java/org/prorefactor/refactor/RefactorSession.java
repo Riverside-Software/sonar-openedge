@@ -12,6 +12,7 @@ package org.prorefactor.refactor;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +20,8 @@ import javax.annotation.Nullable;
 
 import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.refactor.settings.IProparseSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -30,6 +33,8 @@ import eu.rssw.pct.TypeInfo;
  * place for use of Proparse within an Eclipse environment, with references to multiple projects within Eclipse.
  */
 public class RefactorSession {
+  private static final Logger LOG = LoggerFactory.getLogger(RefactorSession.class);
+
   private final IProparseSettings proparseSettings;
   private final ISchema schema;
   private final Charset charset;
@@ -66,7 +71,21 @@ public class RefactorSession {
 
   @Nullable
   public TypeInfo getTypeInfo(String clz) {
-    return typeInfoMap.get(clz);
+    if (clz == null) {
+      return null;
+    }
+    TypeInfo info = typeInfoMap.get(clz);
+    if (info == null) {
+      LOG.debug("No TypeInfo found for {}", clz);
+    }
+
+    return info;
+  }
+
+  public void injectTypeInfoCollection(Collection<TypeInfo> units) {
+    for (TypeInfo info : units) {
+      injectTypeInfo(info);
+    }
   }
 
   public void injectTypeInfo(TypeInfo unit) {

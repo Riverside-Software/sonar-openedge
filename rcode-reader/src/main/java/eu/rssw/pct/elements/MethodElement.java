@@ -53,7 +53,6 @@ public class MethodElement extends AbstractAccessibleElement {
     String typeName = typeNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
 
-    System.out.println("meth " + name + " -- " + name2 + " -- " + typeName + " -- " + returnType);
     int currPos = currentPos + 24;
     IParameter[] parameters = new IParameter[paramCount];
     for (int zz = 0; zz < paramCount; zz++) {

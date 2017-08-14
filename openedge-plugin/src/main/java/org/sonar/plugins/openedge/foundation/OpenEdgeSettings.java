@@ -66,6 +66,7 @@ import eu.rssw.antlr.database.DumpFileUtils;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
 import eu.rssw.pct.FileEntry;
 import eu.rssw.pct.PLReader;
+import eu.rssw.pct.ProgressClasses;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.TypeInfo;
@@ -450,6 +451,7 @@ public class OpenEdgeSettings {
       IProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
           settings.getBoolean(Constants.BACKSLASH_ESCAPE));
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
+      proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());
       if (!sonarLintSession) {
         // Parse entire build directory if not in SonarLint
         parseBuildDirectory();

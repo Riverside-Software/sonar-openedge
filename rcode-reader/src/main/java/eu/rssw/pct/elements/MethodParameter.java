@@ -14,6 +14,11 @@ public class MethodParameter extends AbstractElement implements IParameter {
   private static final int PARAMETER_HANDLE = 2;
   private static final int PARAMETER_BIND = 4;
 
+  public static final int PARAMETER_INPUT = 6028;
+  public static final int PARAMETER_INOUT = 6110;
+  public static final int PARAMETER_OUTPUT = 6049;
+  public static final int PARAMETER_BUFFER = 1070;
+  
   private final int paramNum;
   private final int extent;
   private final int flags;

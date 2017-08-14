@@ -27,9 +27,11 @@ public final class ProgressClasses {
     info.typeName = PROGRESS_LANG_OBJECT;
     info.getMethods().add(new MethodElement("Clone", EnumSet.of(AccessType.PUBLIC), 0, DataType.CLASS.getNum(),
         PROGRESS_LANG_OBJECT, 0, EMPTY_PARAMETERS));
-    info.getMethods().add(new MethodElement("Equals", EnumSet.of(AccessType.PUBLIC), 0, DataType.LOGICAL.getNum(), "",
-        0, new MethodParameter[] {
-            new MethodParameter(0, "otherObj", 1, 1, 1, DataType.CLASS.getNum(), PROGRESS_LANG_OBJECT, 0)}));
+    info.getMethods().add(
+        new MethodElement("Equals", EnumSet.of(AccessType.PUBLIC), 0, DataType.LOGICAL.getNum(), "", 0,
+            new MethodParameter[] {
+                new MethodParameter(0, "otherObj", 2, MethodParameter.PARAMETER_INPUT, 0, DataType.CLASS.getNum(),
+                    PROGRESS_LANG_OBJECT, 0)}));
     info.getMethods().add(new MethodElement("GetClass", EnumSet.of(AccessType.PUBLIC), 0, DataType.CLASS.getNum(),
         "Progress.Lang.Class", 0, EMPTY_PARAMETERS));
     info.getMethods().add(new MethodElement("ToString", EnumSet.of(AccessType.PUBLIC), 0, DataType.CHARACTER.getNum(),
