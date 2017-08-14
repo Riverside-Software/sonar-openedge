@@ -45,7 +45,7 @@ public class CommonDBMetricsDecorator implements MeasureComputer {
 
   @Override
   public void compute(MeasureComputerContext context) {
-    LOG.info("Decorating " + context.getComponent().getKey());
+    LOG.debug("Decorating " + context.getComponent().getKey());
 
     int numTables = 0, numSeq = 0, numIndex = 0, numFields = 0, numTriggers = 0;
     if ((context.getComponent().getType() == Component.Type.DIRECTORY)

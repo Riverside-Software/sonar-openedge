@@ -47,7 +47,7 @@ public class CommonMetricsDecorator implements MeasureComputer {
   
   @Override
   public void compute(MeasureComputerContext context) {
-    LOG.info("Decorating " + context.getComponent().getKey());
+    LOG.debug("Decorating " + context.getComponent().getKey());
 
     int numClasses = 0;
     int numProcedures = 0;
