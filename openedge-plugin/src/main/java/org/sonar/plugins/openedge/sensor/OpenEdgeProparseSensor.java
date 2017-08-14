@@ -280,7 +280,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     LOG.info("AST Generation | time={} ms", parseTime);
     LOG.info("XML Parsing    | time={} ms", xmlParseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
-      LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
+      LOG.info("Rule {} | time={} ms", entry.getKey(), entry.getValue());
     }
   }
 

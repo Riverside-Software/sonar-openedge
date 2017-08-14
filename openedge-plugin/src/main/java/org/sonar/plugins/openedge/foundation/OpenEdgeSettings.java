@@ -526,7 +526,7 @@ public class OpenEdgeSettings {
         Strings.nullToEmpty(settings.getString(Constants.ALIASES)))) {
       List<String> lst = Splitter.on(',').trimResults().splitToList(str);
       for (String alias : lst.subList(1, lst.size())) {
-        LOG.debug("Adding {} aliases to database {}", new Object[] {alias, lst.get(0)});
+        LOG.debug("Adding {} aliases to database {}", alias, lst.get(0));
         sch.createAlias(alias, lst.get(0));
       }
     }

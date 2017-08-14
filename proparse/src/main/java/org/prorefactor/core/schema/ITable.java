@@ -3,8 +3,6 @@ package org.prorefactor.core.schema;
 import java.util.List;
 import java.util.SortedSet;
 
-import org.prorefactor.treeparser.TreeParserRootSymbolScope;
-
 public interface ITable {
   IDatabase getDatabase();
   String getName();

@@ -48,7 +48,7 @@ public class FieldBuffer extends Symbol implements Primative {
    */
   public boolean canMatch(Field.Name input) {
     // Assert that the input name is already lowercase.
-    assert input.generateName().toLowerCase().equals(input.generateName());
+    assert input.generateName().equalsIgnoreCase(input.generateName());
     Field.Name self = new Field.Name(this.fullName().toLowerCase());
     if (input.getDb() != null) {
       ISchema schema = getScope().getRootScope().getRefactorSession().getSchema();
