@@ -21,7 +21,7 @@ import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -66,7 +66,7 @@ public class ClassesTest {
     assertNotNull(zz2, "Property zz2 not in root scope");
     assertEquals(unit.getRootScope().getVariables().size(), 2);
 
-    for (SymbolScope sc : unit.getRootScope().getChildScopesDeep()) {
+    for (TreeParserSymbolScope sc : unit.getRootScope().getChildScopesDeep()) {
       if (sc.getRootBlock().getNode().getType() == NodeTypes.METHOD) continue;
       if (sc.getRootBlock().getNode().getType() == NodeTypes.CATCH) continue;
       Variable arg = sc.getVariable("arg");

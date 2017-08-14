@@ -3,7 +3,7 @@ package org.prorefactor.core.schema;
 import java.util.List;
 import java.util.SortedSet;
 
-import org.prorefactor.treeparser.SymbolScopeRoot;
+import org.prorefactor.treeparser.TreeParserRootSymbolScope;
 
 public interface ITable {
   IDatabase getDatabase();
@@ -36,5 +36,5 @@ public interface ITable {
    * @return The newly created table, or the existing one from the scope if it has previously been defined.
    */
   // TODO Remove dependency
-  ITable copyBare(SymbolScopeRoot scope);
+  ITable copyBare(TreeParserRootSymbolScope scope);
 }

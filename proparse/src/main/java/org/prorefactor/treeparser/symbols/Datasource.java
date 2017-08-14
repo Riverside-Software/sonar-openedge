@@ -11,17 +11,17 @@
 package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE DATA-SOURCE. */
 public class Datasource extends Symbol {
 
-  public Datasource(String name, SymbolScope scope) {
+  public Datasource(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
   @Override
-  public Symbol copyBare(SymbolScope scope) {
+  public Symbol copyBare(TreeParserSymbolScope scope) {
     return new Datasource(getName(), scope);
   }
 

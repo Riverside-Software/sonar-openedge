@@ -22,7 +22,7 @@ import com.google.common.cache.CacheBuilder;
  * references to syntax tree nodes or child scopes. Is always generated either from a SymbolScopeRoot, or else from
  * another SymbolScopeSuper when a copy is being made.
  */
-public class SymbolScopeSuper extends SymbolScopeRoot {
+public class TreeParserSuperSymbolScope extends TreeParserRootSymbolScope {
 
   /**
    * TreeParser01 stores and looks up SymbolScopeSuper objects in this cache, which by default is a synchronizedMap
@@ -30,19 +30,19 @@ public class SymbolScopeSuper extends SymbolScopeRoot {
    * completely override this. (Well, of course, be careful that you provide some mechanism for keeping the cache from
    * growing too large.) Since it's just a cache, it's completely exposed. Just don't make it null. :)
    */
-  public static Cache<String, SymbolScopeSuper> cache = CacheBuilder.newBuilder().maximumSize(100).build();
+  public static Cache<String, TreeParserSuperSymbolScope> cache = CacheBuilder.newBuilder().maximumSize(100).build();
 
   /**
    * Constructor is "package" visibility. Should only be called from the SymbolScopeRoot, or from another
    * SymbolScopeSuper in the case where a copy is being made.
    */
-  SymbolScopeSuper(RefactorSession session, SymbolScopeRoot fromScope) {
+  TreeParserSuperSymbolScope(RefactorSession session, TreeParserRootSymbolScope fromScope) {
     super(session);
     setClassName(fromScope.getClassName());
     gatherInheritableMembers(fromScope);
     if (fromScope.parentScope != null) {
       // Logic error if not instanceof SymbolScopeSuper
-      SymbolScopeSuper fromSuper = (SymbolScopeSuper) fromScope.parentScope;
+      TreeParserSuperSymbolScope fromSuper = (TreeParserSuperSymbolScope) fromScope.parentScope;
       this.parentScope = fromSuper.generateSymbolScopeSuper();
     }
   }
@@ -52,12 +52,12 @@ public class SymbolScopeSuper extends SymbolScopeRoot {
    * have references to child scopes, ASTs, etc.
    */
   @Override
-  public SymbolScope addScope() {
+  public TreeParserSymbolScope addScope() {
     assert false;
     return null;
   }
 
-  private void gatherInheritableMembers(SymbolScopeRoot fromScope) {
+  private void gatherInheritableMembers(TreeParserRootSymbolScope fromScope) {
     for (Symbol symbol : fromScope.getAllSymbols()) {
       // FieldBuffers are not part of the language syntax, and they are not copied.
       // They are created on the fly as needed by the tree parser.

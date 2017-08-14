@@ -11,18 +11,18 @@
 package org.prorefactor.treeparser.symbols.widgets;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.Widget;
 
 public class Image extends Widget implements IFieldLevelWidget {
 
-  public Image(String name, SymbolScope scope) {
+  public Image(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
   @Override
-  public Symbol copyBare(SymbolScope scope) {
+  public Symbol copyBare(TreeParserSymbolScope scope) {
     return new Image(getName(), scope);
   }
 

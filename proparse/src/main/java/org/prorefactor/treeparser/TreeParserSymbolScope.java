@@ -39,7 +39,7 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
  * (Trigger scopes may be deeply nested). These scopes are defined <b>Symbol</b> scopes. They have nothing to do with
  * record or frame scoping!
  */
-public class SymbolScope {
+public class TreeParserSymbolScope {
   private static final Integer DATASET = NodeTypes.DATASET;
   private static final Integer DATASOURCE = NodeTypes.DATASOURCE;
   private static final Integer QUERY = NodeTypes.QUERY;
@@ -47,7 +47,7 @@ public class SymbolScope {
 
   protected List<Symbol> allSymbols = new ArrayList<>();
   protected List<Call> callList = new ArrayList<>();
-  protected List<SymbolScope> childScopes = new ArrayList<>();
+  protected List<TreeParserSymbolScope> childScopes = new ArrayList<>();
   protected Block rootBlock;
   protected Map<String, TableBuffer> bufferMap = new HashMap<>();
   protected Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
@@ -56,8 +56,8 @@ public class SymbolScope {
   protected Map<Integer, Map<String, Symbol>> typeMap = new HashMap<>();
   protected Map<String, Variable> variableMap = new HashMap<>();
 
-  protected SymbolScope parentScope;
-  protected SymbolScopeRoot rootScope;
+  protected TreeParserSymbolScope parentScope;
+  protected TreeParserRootSymbolScope rootScope;
 
   // Initialization block
   {
@@ -70,7 +70,7 @@ public class SymbolScope {
    * 
    * @param parentScope null if called by the SymbolScopeRoot constructor.
    */
-  protected SymbolScope(SymbolScope parentScope) {
+  protected TreeParserSymbolScope(TreeParserSymbolScope parentScope) {
     this.parentScope = parentScope;
     if (parentScope != null)
       this.rootScope = parentScope.rootScope;
@@ -137,8 +137,8 @@ public class SymbolScope {
   }
 
   /** Add a new scope to this scope. */
-  public SymbolScope addScope() {
-    SymbolScope newScope = new SymbolScope(this);
+  public TreeParserSymbolScope addScope() {
+    TreeParserSymbolScope newScope = new TreeParserSymbolScope(this);
     childScopes.add(newScope);
     return newScope;
   }
@@ -171,7 +171,7 @@ public class SymbolScope {
    */
   public int depth() {
     int depth = 0;
-    SymbolScope scope = this;
+    TreeParserSymbolScope scope = this;
     while ((scope = scope.getParentScope()) != null)
       depth++;
     return depth;
@@ -196,7 +196,7 @@ public class SymbolScope {
   /** Get a list of this scope's symbols, and all symbols of all descendant scopes. */
   public List<Symbol> getAllSymbolsDeep() {
     ArrayList<Symbol> ret = new ArrayList<>(allSymbols);
-    for (SymbolScope child : childScopes) {
+    for (TreeParserSymbolScope child : childScopes) {
       ret.addAll(child.getAllSymbolsDeep());
     }
     return ret;
@@ -205,7 +205,7 @@ public class SymbolScope {
   /** Get a list of this scope's symbols, and all symbols of all descendant scopes, which match a given class. */
   public <T extends Symbol> List<T> getAllSymbolsDeep(Class<T> klass) {
     List<T> ret = getAllSymbols(klass);
-    for (SymbolScope child : childScopes) {
+    for (TreeParserSymbolScope child : childScopes) {
       ret.addAll(child.getAllSymbols(klass));
     }
     return ret;
@@ -235,21 +235,21 @@ public class SymbolScope {
   }
 
   /** Get a *copy* of the list of child scopes */
-  public List<SymbolScope> getChildScopes() {
+  public List<TreeParserSymbolScope> getChildScopes() {
     return new ArrayList<>(childScopes);
   }
 
   /** Get a list of all child scopes, and their child scopes, etc */
-  public List<SymbolScope> getChildScopesDeep() {
-    ArrayList<SymbolScope> ret = new ArrayList<>();
-    for (SymbolScope child : childScopes) {
+  public List<TreeParserSymbolScope> getChildScopesDeep() {
+    ArrayList<TreeParserSymbolScope> ret = new ArrayList<>();
+    for (TreeParserSymbolScope child : childScopes) {
       ret.add(child);
       ret.addAll(child.getChildScopesDeep());
     }
     return ret;
   }
 
-  public SymbolScope getParentScope() {
+  public TreeParserSymbolScope getParentScope() {
     return parentScope;
   }
 
@@ -257,7 +257,7 @@ public class SymbolScope {
     return rootBlock;
   }
 
-  public SymbolScopeRoot getRootScope() {
+  public TreeParserRootSymbolScope getRootScope() {
     return rootScope;
   }
 
@@ -267,7 +267,7 @@ public class SymbolScope {
     // Check this and parents for the unnamed buffer. Table triggers
     // can scope an unnamed buffer - that's why we don't go straight to
     // the root scope.
-    SymbolScope nextScope = this;
+    TreeParserSymbolScope nextScope = this;
     while (nextScope != null) {
       TableBuffer buffer = nextScope.unnamedBuffers.get(table);
       if (buffer != null)
@@ -301,7 +301,7 @@ public class SymbolScope {
    * Is this scope active in the input scope? In other words, is this scope the input scope, or any of the parents of
    * the input scope?
    */
-  public boolean isActiveIn(SymbolScope theScope) {
+  public boolean isActiveIn(TreeParserSymbolScope theScope) {
     while (theScope != null) {
       if (this == theScope)
         return true;

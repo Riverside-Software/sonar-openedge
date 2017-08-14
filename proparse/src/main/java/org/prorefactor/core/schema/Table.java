@@ -16,7 +16,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.prorefactor.core.IConstants;
-import org.prorefactor.treeparser.SymbolScopeRoot;
+import org.prorefactor.treeparser.TreeParserRootSymbolScope;
 
 /**
  * Table objects are created both by the Schema class and also when temp and work tables are defined within a 4gl
@@ -55,7 +55,7 @@ public class Table implements ITable {
     fieldPosOrder.add(field);
   }
 
-  public ITable copyBare(SymbolScopeRoot scope) {
+  public ITable copyBare(TreeParserRootSymbolScope scope) {
     ITable t = scope.lookupTableDefinition(this.name);
     if (t != null)
       return t;

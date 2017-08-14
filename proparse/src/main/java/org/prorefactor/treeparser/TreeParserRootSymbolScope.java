@@ -29,7 +29,7 @@ import eu.rssw.pct.TypeInfo;
  * A ScopeRoot object is created for each compile unit, and it represents the program (topmost) scope. For classes, it
  * is the class scope, but it may also have a super class scope by way of inheritance.
  */
-public class SymbolScopeRoot extends SymbolScope {
+public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   private final RefactorSession refSession;
   private Map<String, ITable> tableMap = new HashMap<>();
   private String className = null;
@@ -39,7 +39,7 @@ public class SymbolScopeRoot extends SymbolScope {
   private boolean serializableClass;
   private boolean finalClass;
 
-  public SymbolScopeRoot(RefactorSession session) {
+  public TreeParserRootSymbolScope(RefactorSession session) {
     super(null);
     this.rootScope = this;
     this.refSession = session;
@@ -97,8 +97,8 @@ public class SymbolScopeRoot extends SymbolScope {
   }
 
   /** Generate "bare" symbols and SymbolScopeSuper from this scope's PUBLIC|PROTECTED members. */
-  public SymbolScopeSuper generateSymbolScopeSuper() {
-    return new SymbolScopeSuper(refSession, this);
+  public TreeParserSuperSymbolScope generateSymbolScopeSuper() {
+    return new TreeParserSuperSymbolScope(refSession, this);
   }
 
   /**

@@ -15,19 +15,19 @@ import java.util.List;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.Parameter;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * Represents the definition of a Routine. Is a Symbol - used as an entry in the symbol table. A Routine is a
  * Program_root, PROCEDURE, FUNCTION, or METHOD.
  */
 public class Routine extends Symbol {
-  private final SymbolScope routineScope;
+  private final TreeParserSymbolScope routineScope;
   private final List<Parameter> parameters = new ArrayList<>();
   private JPNode returnDatatypeNode = null;
   private int progressType;
 
-  public Routine(String name, SymbolScope definingScope, SymbolScope routineScope) {
+  public Routine(String name, TreeParserSymbolScope definingScope, TreeParserSymbolScope routineScope) {
     super(name, definingScope);
     this.routineScope = routineScope;
   }
@@ -38,7 +38,7 @@ public class Routine extends Symbol {
   }
 
   @Override
-  public Symbol copyBare(SymbolScope scope) {
+  public Symbol copyBare(TreeParserSymbolScope scope) {
     Routine ret = new Routine(getName(), scope, scope);
     ret.progressType = this.progressType;
     return ret;
@@ -70,7 +70,7 @@ public class Routine extends Symbol {
     return returnDatatypeNode;
   }
 
-  public SymbolScope getRoutineScope() {
+  public TreeParserSymbolScope getRoutineScope() {
     return routineScope;
   }
 

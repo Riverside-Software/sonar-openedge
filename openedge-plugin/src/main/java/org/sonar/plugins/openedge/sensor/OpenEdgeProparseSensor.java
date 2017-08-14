@@ -47,7 +47,7 @@ import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.FilePredicates;
@@ -351,7 +351,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     int numProcs = 0;
     int numFuncs = 0;
     int numMethds = 0;
-    for (SymbolScope child : unit.getRootScope().getChildScopesDeep()) {
+    for (TreeParserSymbolScope child : unit.getRootScope().getChildScopesDeep()) {
       int scopeType = child.getRootBlock().getNode().getType();
       switch (scopeType) {
         case NodeTypes.PROCEDURE:

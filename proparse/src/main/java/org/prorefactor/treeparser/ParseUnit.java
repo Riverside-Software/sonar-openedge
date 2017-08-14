@@ -51,7 +51,7 @@ public class ParseUnit {
 
   private IncludeRef macroGraph = null;
   private ProgramRootNode topNode;
-  private SymbolScopeRoot rootScope;
+  private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
   private Document xref = null;
   private TypeInfo typeInfo = null;
@@ -61,11 +61,11 @@ public class ParseUnit {
     this.session = prsession;
   }
 
-  public SymbolScopeRoot getRootScope() {
+  public TreeParserRootSymbolScope getRootScope() {
     return rootScope;
   }
 
-  public void setRootScope(SymbolScopeRoot rootScope) {
+  public void setRootScope(TreeParserRootSymbolScope rootScope) {
     this.rootScope = rootScope;
   }
 

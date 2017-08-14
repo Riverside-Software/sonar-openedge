@@ -15,7 +15,7 @@ import org.prorefactor.core.NodeTypes;
 import org.prorefactor.treeparser.ClassSupport;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.Value;
 
 /**
@@ -29,11 +29,11 @@ public class Variable extends Symbol implements Primative, Value {
   private String className = null;
   private boolean refInFrame = false;
 
-  public Variable(String name, SymbolScope scope) {
+  public Variable(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
-  public Variable(String name, SymbolScope scope, boolean parameter) {
+  public Variable(String name, TreeParserSymbolScope scope, boolean parameter) {
     super(name, scope, parameter);
   }
 
@@ -45,7 +45,7 @@ public class Variable extends Symbol implements Primative, Value {
   }
 
   @Override
-  public Symbol copyBare(SymbolScope scope) {
+  public Symbol copyBare(TreeParserSymbolScope scope) {
     Variable v = new Variable(getName(), scope);
     v.className = this.className;
     v.dataType = this.dataType;

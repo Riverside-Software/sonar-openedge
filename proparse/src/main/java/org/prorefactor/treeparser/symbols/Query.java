@@ -11,17 +11,17 @@
 package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE QUERY. */
 public class Query extends Symbol {
 
-  public Query(String name, SymbolScope scope) {
+  public Query(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
   @Override
-  public Symbol copyBare(SymbolScope scope) {
+  public Symbol copyBare(TreeParserSymbolScope scope) {
     return new Query(getName(), scope);
   }
 

@@ -25,7 +25,7 @@ import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.FieldLookupResult;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 import org.prorefactor.treeparser.symbols.Symbol;
@@ -57,12 +57,12 @@ public class FrameStack {
    * The ID node in a BROWSE ID pair. The ID node might have already had the symbol assigned to it at the point where
    * the statement head was processed.
    */
-  void browseRefNode(JPNode idNode, SymbolScope symbolScope) {
+  void browseRefNode(JPNode idNode, TreeParserSymbolScope symbolScope) {
     if (idNode.getSymbol() == null)
       browseRefSet(idNode, symbolScope);
   }
 
-  private Browse browseRefSet(JPNode idNode, SymbolScope symbolScope) {
+  private Browse browseRefSet(JPNode idNode, TreeParserSymbolScope symbolScope) {
     Browse browse = (Browse) symbolScope.lookupFieldLevelWidget(idNode.getText());
     idNode.setLink(IConstants.SYMBOL, browse);
     return browse;
@@ -96,7 +96,7 @@ public class FrameStack {
   /**
    * Create a frame object. Adds the new frame object to the MRU list.
    */
-  private Frame createFrame(String frameName, SymbolScope symbolScope) {
+  private Frame createFrame(String frameName, TreeParserSymbolScope symbolScope) {
     Frame frame = new Frame(frameName, symbolScope);
     frameMRU.addFirst(frame);
     return frame;
@@ -137,12 +137,12 @@ public class FrameStack {
   /**
    * The ID node in a FRAME ID pair. For "WITH FRAME id", the ID was already set when we processed the statement head.
    */
-  void frameRefNode(JPNode idNode, SymbolScope symbolScope) {
+  void frameRefNode(JPNode idNode, TreeParserSymbolScope symbolScope) {
     if (idNode.getSymbol() == null)
       frameRefSet(idNode, symbolScope);
   }
 
-  private Frame frameRefSet(JPNode idNode, SymbolScope symbolScope) {
+  private Frame frameRefSet(JPNode idNode, TreeParserSymbolScope symbolScope) {
     String frameName = idNode.getText();
     Frame frame = (Frame) symbolScope.lookupWidget(NodeTypes.FRAME, frameName);
     if (frame == null)
@@ -189,7 +189,7 @@ public class FrameStack {
    * 
    * @see org.prorefactor.core.JPNode#getFieldContainer().
    */
-  FieldLookupResult inputFieldLookup(FieldRefNode fieldRefNode, SymbolScope currentScope) {
+  FieldLookupResult inputFieldLookup(FieldRefNode fieldRefNode, TreeParserSymbolScope currentScope) {
     JPNode idNode = fieldRefNode.getIdNode();
     Field.Name inputName = new Field.Name(idNode.getText().toLowerCase());
     FieldContainer fieldContainer = null;
@@ -267,7 +267,7 @@ public class FrameStack {
    * symbol scope. A DEFINE FRAME statement is legal for a frame symbol already in use, sort of like how you can have
    * multiple FORM statements, I suppose. A DEFINE FRAME statement does not initialize the frame's scope.
    */
-  void nodeOfDefineFrame(JPNode defNode, JPNode idNode, SymbolScope currentSymbolScope) {
+  void nodeOfDefineFrame(JPNode defNode, JPNode idNode, TreeParserSymbolScope currentSymbolScope) {
     String frameName = idNode.getText();
     Frame frame = (Frame) currentSymbolScope.lookupSymbolLocally(NodeTypes.FRAME, frameName);
     if (frame == null)

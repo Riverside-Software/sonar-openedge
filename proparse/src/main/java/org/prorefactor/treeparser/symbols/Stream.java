@@ -11,19 +11,19 @@
 package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * A Symbol defined with DEFINE STREAM or any other syntax which implicitly define a stream.
  */
 public class Stream extends Symbol {
 
-  public Stream(String name, SymbolScope scope) {
+  public Stream(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
   @Override
-  public Symbol copyBare(SymbolScope scope) {
+  public Symbol copyBare(TreeParserSymbolScope scope) {
     return new Stream(getName(), scope);
   }
 

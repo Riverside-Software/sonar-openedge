@@ -32,7 +32,7 @@ public final class SymbolFactory {
     // Shouldn't be instantiated
   }
 
-  public static Symbol create(int symbolType, String name, SymbolScope scope) {
+  public static Symbol create(int symbolType, String name, TreeParserSymbolScope scope) {
     switch (symbolType) {
       case NodeTypes.DATASET:
         return new Dataset(name, scope);

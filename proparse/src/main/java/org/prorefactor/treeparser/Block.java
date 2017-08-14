@@ -42,7 +42,7 @@ public class Block {
    * The SymbolScope for a block is going to be the root program scope, unless the block is inside a method
    * (function/trigger/procedure).
    */
-  private SymbolScope symbolScope;
+  private TreeParserSymbolScope symbolScope;
 
   /** For constructing nested blocks */
   public Block(Block parent, JPNode node) {
@@ -57,7 +57,7 @@ public class Block {
    * @param symbolScope
    * @param node Is the Program_root if this is the program root block.
    */
-  public Block(SymbolScope symbolScope, JPNode node) {
+  public Block(TreeParserSymbolScope symbolScope, JPNode node) {
     this.blockStatementNode = node;
     this.symbolScope = symbolScope;
     if (symbolScope.getParentScope() != null)
@@ -285,7 +285,7 @@ public class Block {
     return parent;
   }
 
-  public SymbolScope getSymbolScope() {
+  public TreeParserSymbolScope getSymbolScope() {
     return symbolScope;
   }
 

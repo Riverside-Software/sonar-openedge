@@ -12,7 +12,7 @@ package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 public interface ISymbol {
 
@@ -58,7 +58,7 @@ public interface ISymbol {
    */
   int getProgressType();
 
-  SymbolScope getScope();
+  TreeParserSymbolScope getScope();
 
   /**
    * Is the symbol newly defined here and visible to other compile units? This includes PROTECTED members visible to
@@ -95,6 +95,6 @@ public interface ISymbol {
   /**
    * Generate a bare-bones copy of this symbol. Requires the scope to attach it to as the argument.
    */
-  Symbol copyBare(SymbolScope intoScope);
+  Symbol copyBare(TreeParserSymbolScope intoScope);
 
 }

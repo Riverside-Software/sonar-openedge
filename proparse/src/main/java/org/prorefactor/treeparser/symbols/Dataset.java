@@ -14,14 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE DATASET. */
 public class Dataset extends Symbol {
   // Keep the buffers, in order, as part of the DATASET signature
   private final List<TableBuffer> buffers = new ArrayList<>();
 
-  public Dataset(String name, SymbolScope scope) {
+  public Dataset(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
@@ -33,7 +33,7 @@ public class Dataset extends Symbol {
   }
 
   @Override
-  public Symbol copyBare(SymbolScope scope) {
+  public Symbol copyBare(TreeParserSymbolScope scope) {
     return new Dataset(getName(), scope);
   }
 

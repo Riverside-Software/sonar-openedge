@@ -11,19 +11,19 @@
 package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * A Symbol defined with DEFINE EVENT
  */
 public class Event extends Symbol {
 
-  public Event(String name, SymbolScope scope) {
+  public Event(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
   @Override
-  public Symbol copyBare(SymbolScope scope) {
+  public Symbol copyBare(TreeParserSymbolScope scope) {
     return new Event(getName(), scope);
   }
 
