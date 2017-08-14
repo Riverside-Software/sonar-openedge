@@ -90,11 +90,6 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     return new FieldBuffer(this, buffer, field);
   }
 
-  /** Generate "bare" symbols and SymbolScopeSuper from this scope's PUBLIC|PROTECTED members. */
-  public TreeParserSuperSymbolScope generateSymbolScopeSuper() {
-    return new TreeParserSuperSymbolScope(refSession, this);
-  }
-
   /**
    * Valid only if the parse unit is a CLASS. Returns null otherwise.
    */

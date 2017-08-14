@@ -13,9 +13,8 @@ package org.prorefactor.treeparser.symbols;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.TreeParserRootSymbolScope;
-import org.prorefactor.treeparser.TreeParserSuperSymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * Base class for any type of symbol which needs to be kept track of when parsing a 4gl compile unit's AST.
@@ -122,12 +121,6 @@ public abstract class Symbol implements ISymbol {
 
   @Override
   public boolean isExported() {
-    // If the symbol belongs to a SymbolScopeSuper, then not only has it already
-    // been determined that the symbol is exported, but also the rest of this
-    // method would just not work because there is never any AST linked to any
-    // of the symbols in a SymbolScopeSuper.
-    if (scope instanceof TreeParserSuperSymbolScope)
-      return true;
     TreeParserRootSymbolScope unitScope = scope.getRootScope();
     // If this is not at the unit (root) scope, then it cannot be visible.
     if (scope != unitScope)
