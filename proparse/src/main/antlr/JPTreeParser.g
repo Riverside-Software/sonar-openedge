@@ -2311,7 +2311,7 @@ oscopystate throws TreeParserException
   ;
 
 oscreatedirstate throws TreeParserException
-  :  #(OSCREATEDIR (anyorvalue)+ state_end )
+  :  #(OSCREATEDIR filenameorvalue (anyorvalue)* state_end )
   ;
 
 osdeletestate throws TreeParserException

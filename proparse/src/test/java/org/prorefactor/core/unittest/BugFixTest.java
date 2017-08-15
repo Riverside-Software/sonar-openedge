@@ -298,6 +298,11 @@ public class BugFixTest {
   }
 
   @Test
+  public void testOsCreate() throws Exception {
+    genericTest("oscreate.p");
+  }
+
+  @Test
   public void testGetDbClient() throws Exception {
     genericTest("getdbclient.p");
   }
