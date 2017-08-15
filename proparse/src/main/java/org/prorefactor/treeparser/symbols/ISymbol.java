@@ -61,17 +61,6 @@ public interface ISymbol {
   TreeParserSymbolScope getScope();
 
   /**
-   * Is the symbol newly defined here and visible to other compile units? This includes PROTECTED members visible to
-   * subclasses.
-   */
-  boolean isExported();
-
-  /**
-   * Defined as SHARED?
-   */
-  boolean isImported();
-
-  /**
    * Take note of a symbol reference (read, write, reference by name)
    */
   void noteReference(ContextQualifier contextQualifier);

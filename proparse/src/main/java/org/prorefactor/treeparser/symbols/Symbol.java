@@ -13,7 +13,6 @@ package org.prorefactor.treeparser.symbols;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.TreeParserRootSymbolScope;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
@@ -117,43 +116,6 @@ public abstract class Symbol implements ISymbol {
   @Override
   public TreeParserSymbolScope getScope() {
     return scope;
-  }
-
-  @Override
-  public boolean isExported() {
-    TreeParserRootSymbolScope unitScope = scope.getRootScope();
-    // If this is not at the unit (root) scope, then it cannot be visible.
-    if (scope != unitScope)
-      return false;
-    if (unitScope.getClassName() != null) {
-      // For class members, only elements declared PUBLIC|PROTECTED are visible.
-      // Unnamed buffers don't have a DEFINE node.
-      if (defNode == null)
-        return false;
-      return (defNode.findDirectChild(NodeTypes.PUBLIC) != null)
-          || (defNode.findDirectChild(NodeTypes.PROTECTED) != null);
-    }
-    // If there is no DEFINE node (inline var def), then it is not visible.
-    if (defNode == null)
-      return false;
-    switch (defNode.getType()) {
-      case NodeTypes.DEFINE:
-        return defNode.firstChild().getType() == NodeTypes.NEW;
-      case NodeTypes.FUNCTION:
-      case NodeTypes.PROCEDURE:
-        return defNode.findDirectChild(NodeTypes.PRIVATE) == null;
-    }
-    return false;
-  }
-
-  @Override
-  public boolean isImported() {
-    // If there is no DEFINE node (inline var def), then it is not SHARED.
-    if (defNode == null || defNode.getType() != NodeTypes.DEFINE)
-      return false;
-    if (defNode.firstChild().getType() == NodeTypes.SHARED)
-      return true;
-    return false;
   }
 
   @Override

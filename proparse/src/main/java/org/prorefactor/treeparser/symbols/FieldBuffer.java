@@ -129,16 +129,6 @@ public class FieldBuffer extends Symbol implements Primative {
     return NodeTypes.FIELD;
   }
 
-  @Override
-  public boolean isExported() {
-    return buffer.isExported();
-  }
-
-  @Override
-  public boolean isImported() {
-    return buffer.isImported();
-  }
-
   /** Sets the underlying Field's className. */
   @Override
   public Primative setClassName(String className) {
