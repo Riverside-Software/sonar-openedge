@@ -8,33 +8,40 @@ import eu.rssw.pct.AccessType;
 import eu.rssw.pct.RCodeInfo;
 
 public class TableElement extends AbstractAccessibleElement {
-  protected int flags;
-  protected int crc;
-  protected int prvte;
-  protected VariableElement[] fields;
-  protected IndexElement[] indexes;
+  private final int flags;
+  private final int prvte;
+  private final VariableElement[] fields;
+  private final IndexElement[] indexes;
   private String beforeTableName;
 
-  public TableElement(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
-      ByteOrder order) {
+  public TableElement(String name, Set<AccessType> accessType, int flags, int prvte, VariableElement[] fields,
+      IndexElement[] indexes, String beforeTableName) {
     super(name, accessType);
+    this.fields = fields;
+    this.indexes = indexes;
+    this.beforeTableName = beforeTableName;
+    this.flags = flags;
+    this.prvte = prvte;
+  }
 
+  public static TableElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
+      int textAreaOffset, ByteOrder order) {
     int fieldCount = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
     int indexCount = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    this.flags = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    this.crc = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    this.prvte = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    // int crc = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    int prvte = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
     // int indexComponentCount = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(
-    //    ByteOrder.LITTLE_ENDIAN).getShort();
+    // ByteOrder.LITTLE_ENDIAN).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(ByteOrder.LITTLE_ENDIAN).getInt();
-    this.name = RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
+    String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
     int beforeNameOffset = ByteBuffer.wrap(segment, currentPos + 20, Integer.BYTES).order(
         ByteOrder.LITTLE_ENDIAN).getInt();
-    this.beforeTableName = beforeNameOffset == 0 ? ""
+    String beforeTableName = beforeNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + beforeNameOffset);
 
-    fields = new VariableElement[fieldCount];
+    VariableElement[] fields = new VariableElement[fieldCount];
     int currPos = currentPos + 24;
     for (int zz = 0; zz < fieldCount; zz++) {
       VariableElement var = VariableElement.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
@@ -42,16 +49,26 @@ public class TableElement extends AbstractAccessibleElement {
       fields[zz] = var;
     }
 
-    indexes = new IndexElement[indexCount];
+    IndexElement[] indexes = new IndexElement[indexCount];
     for (int zz = 0; zz < indexCount; zz++) {
       IndexElement idx = IndexElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += idx.size();
       indexes[zz] = idx;
     }
+
+    return new TableElement(name2, accessType, flags, prvte, fields, indexes, beforeTableName);
   }
 
   public String getBeforeTableName() {
     return beforeTableName;
+  }
+
+  public int getFlags() {
+    return flags;
+  }
+
+  public int getPrvte() {
+    return prvte;
   }
 
   @Override

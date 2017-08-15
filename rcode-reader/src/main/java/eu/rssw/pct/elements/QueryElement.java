@@ -11,8 +11,6 @@ public class QueryElement extends AbstractAccessibleElement {
   private final String[] bufferNames;
   private final int prvte;
   private final int flags;
-  // protected int cacheSize;
-  // protected int crc;
 
   public QueryElement(String name, Set<AccessType> accessType, String[] buffers, int flags, int prvte) {
     super(name, accessType);
@@ -39,6 +37,14 @@ public class QueryElement extends AbstractAccessibleElement {
     }
 
     return new QueryElement(name2, accessType, bufferNames, flags, prvte);
+  }
+
+  public int getPrvte() {
+    return prvte;
+  }
+
+  public int getFlags() {
+    return flags;
   }
 
   @Override

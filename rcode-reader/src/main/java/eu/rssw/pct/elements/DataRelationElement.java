@@ -6,24 +6,23 @@ import java.nio.ByteOrder;
 import eu.rssw.pct.RCodeInfo;
 
 public class DataRelationElement extends AbstractElement {
-  // private int pairCount;
-  // private int flags;
-
   private final String parentBufferName;
   private final String childBufferName;
   private final String fieldPairs;
+  private final int flags;
 
-  public DataRelationElement(String name, String parentBuffer, String childBuffer, String fieldPairs) {
+  public DataRelationElement(String name, String parentBuffer, String childBuffer, String fieldPairs, int flags) {
     super(name);
     this.parentBufferName = parentBuffer;
     this.childBufferName = childBuffer;
     this.fieldPairs = fieldPairs;
+    this.flags = flags;
   }
 
   public static DataRelationElement fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
     // int pairCount = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
-    // int flags = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
 
     int parentBufferNameOffset = ByteBuffer.wrap(segment, currentPos + 8, Integer.BYTES).order(order).getInt();
     String parentBufferName = parentBufferNameOffset == 0 ? ""
@@ -40,7 +39,7 @@ public class DataRelationElement extends AbstractElement {
     String fieldPairs = fieldPairsOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + fieldPairsOffset);
 
-    return new DataRelationElement(name, parentBufferName, childBufferName, fieldPairs);
+    return new DataRelationElement(name, parentBufferName, childBufferName, fieldPairs, flags);
   }
 
   public String getParentBufferName() {
@@ -53,6 +52,10 @@ public class DataRelationElement extends AbstractElement {
 
   public String getFieldPairs() {
     return fieldPairs;
+  }
+
+  public int getFlags() {
+    return flags;
   }
 
   @Override

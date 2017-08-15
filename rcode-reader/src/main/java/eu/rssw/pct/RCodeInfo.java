@@ -284,7 +284,7 @@ public class RCodeInfo {
             typeInfo.getVariables().add(var);
           break;
         case TABLE:
-            TableElement tbl = new TableElement(name, set, segment, currOffset, textAreaOffset, order);
+            TableElement tbl = TableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += tbl.size();
             typeInfo.getTables().add(tbl);
           break;
@@ -298,15 +298,15 @@ public class RCodeInfo {
             currOffset += qry.size();
           break;
         case DATASET:
-            DatasetElement ds = new DatasetElement(name, set, segment, currOffset, textAreaOffset, order);
+            DatasetElement ds = DatasetElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += ds.size();
           break;
         case DATASOURCE:
-           DataSourceElement dso = new DataSourceElement(name, set, segment, currOffset, textAreaOffset, order);
+           DataSourceElement dso = DataSourceElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += dso.size();
           break;
         case EVENT:
-           EventElement evt = new EventElement(name, set, segment, currOffset, textAreaOffset, order);
+           EventElement evt = EventElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += evt.size();
             typeInfo.getEvents().add(evt);
           break;

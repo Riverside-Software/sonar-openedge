@@ -28,6 +28,10 @@ public class IndexComponentElement extends AbstractElement {
     return 8;
   }
 
+  public int getFlags() {
+    return flags;
+  }
+
   public int getFieldPosition() {
     return this.position;
   }

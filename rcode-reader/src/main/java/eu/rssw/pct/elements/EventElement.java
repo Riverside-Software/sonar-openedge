@@ -10,42 +10,56 @@ import eu.rssw.pct.IParameter;
 import eu.rssw.pct.RCodeInfo;
 
 public class EventElement extends AbstractAccessibleElement {
-  // private int flags;
-  private int returnType;
-  private IParameter[] parameters;
+  private final int flags;
+  private final int returnType;
+  private final String returnTypeName;
+  private final String delegateName;
+  private final IParameter[] parameters;
 
-  private String returnTypename;
-  private String delegateName;
-
-  public EventElement(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
+  public EventElement(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
+      String delegateName, IParameter[] parameters) {
     super(name, accessType);
-    
-    // this.flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
-    this.returnType = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
+    this.flags = flags;
+    this.returnType = returnType;
+    this.returnTypeName = returnTypeName;
+    this.delegateName = delegateName;
+    this.parameters = parameters;
+  }
+
+  public static EventElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
+      int textAreaOffset, ByteOrder order) {
+    int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
+    int returnType = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
     int parameterCount = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 12, Integer.BYTES).order(order).getInt();
-    this.name = RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
+    String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
-    this.returnTypename = typeNameOffset == 0 ? ""
+    String returnTypeName = typeNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
 
     int delegateNameOffset = ByteBuffer.wrap(segment, currentPos + 20, Integer.BYTES).order(order).getInt();
-    this.delegateName = delegateNameOffset == 0 ? ""
+    String delegateName = delegateNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + delegateNameOffset);
 
     int currPos = currentPos + 24;
-    parameters = new IParameter[parameterCount];
+    IParameter[] parameters = new IParameter[parameterCount];
     for (int zz = 0; zz < parameterCount; zz++) {
       MethodParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += param.size();
       parameters[zz] = param;
     }
+
+    return new EventElement(name2, accessType, flags, returnType, returnTypeName, delegateName, parameters);
   }
 
   public IParameter[] getParameters() {
     return this.parameters;
+  }
+
+  public int getFlags() {
+    return flags;
   }
 
   @Override
@@ -67,7 +81,7 @@ public class EventElement extends AbstractAccessibleElement {
   }
 
   protected String getReturnTypeName() {
-    return returnTypename;
+    return returnTypeName;
   }
 
 }
