@@ -36,7 +36,7 @@ public class DatasetElement extends AbstractAccessibleElement {
     int currPos = currentPos + 4 * bufferCount;
     relations = new DataRelationElement[relationshipCount];
     for (int zz = 0; zz < relationshipCount; zz++) {
-      DataRelationElement param = new DataRelationElement(segment, currPos, textAreaOffset, order);
+      DataRelationElement param = DataRelationElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += param.size();
       relations[zz] = param;
     }

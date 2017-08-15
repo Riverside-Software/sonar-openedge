@@ -47,9 +47,9 @@ public class MethodParameter extends AbstractElement implements IParameter {
     int paramMode = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
     int extent = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
     int dataType = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
-    // this.crc = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(order).getShort();
+    // int crc = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(order).getShort();
     int flags = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(order).getShort();
-    // this.fullNameLength = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort();
+    // int fullNameLength = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort();
     int argumentNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 20, Integer.BYTES).order(order).getInt();
 

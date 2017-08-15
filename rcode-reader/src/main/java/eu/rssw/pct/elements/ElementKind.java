@@ -11,7 +11,7 @@ public enum ElementKind {
   DATASOURCE(7),
   PROPERTY(8),
   EVENT(9);
-  
+
   private final int num;
 
   private ElementKind(int num) {
@@ -29,6 +29,6 @@ public enum ElementKind {
       }
     }
     return UNKNOWN;
-
   }
+
 }

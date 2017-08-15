@@ -21,43 +21,52 @@ public class PropertyElement extends AbstractAccessibleElement {
   private static final int PROPERTY_IS_INDEXED = 8192;
   private static final int PROPERTY_IS_DEFAULT = 16384;
 
-  private int flags;
-  private VariableElement variable;
-  private MethodElement getter;
-  private MethodElement setter;
-  private int extent;
+  private final int flags;
+  private final VariableElement variable;
+  private final MethodElement getter;
+  private final MethodElement setter;
 
-  public PropertyElement(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
+  public PropertyElement(String name, Set<AccessType> accessType, int flags, VariableElement var, MethodElement getter, MethodElement setter) {
     super(name, accessType);
+    this.flags = flags;
+    this.variable = var;
+    this.getter = getter;
+    this.setter = setter;
+  }
 
-    this.flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
+  public static PropertyElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
+    int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
-    this.name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
+    String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
+    VariableElement variable = null;
     int currPos = currentPos + 8;
-    if (this.propertyAsVariable()) {
-      this.variable = VariableElement.fromDebugSegment("", accessType, segment, currPos, textAreaOffset, order);
-      currPos += this.variable.size();
+    if ((flags & PROPERTY_AS_VARIABLE) != 0) {
+      variable = VariableElement.fromDebugSegment("", accessType, segment, currPos, textAreaOffset, order);
+      currPos += variable.size();
     }
 
-    if (this.hasGetter()) {
+    MethodElement getter = null;
+    if ((flags & HAS_GETTER) != 0) {
       Set<AccessType> atp = EnumSet.noneOf(AccessType.class);
-      if (isGetterPublic())
+      if ((flags & PUBLIC_GETTER) != 0)
         atp.add(AccessType.PUBLIC);
-      if (isGetterProtected())
+      if ((flags & PROTECTED_GETTER) != 0)
         atp.add(AccessType.PROTECTED);
-      this.getter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
-      currPos += this.getter.size();
+      getter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
+      currPos += getter.size();
     }
-    if (this.hasSetter()) {
+    MethodElement setter = null;
+    if ((flags & HAS_SETTER) != 0) {
       Set<AccessType> atp = EnumSet.noneOf(AccessType.class);
-      if (isGetterPublic())
+      if ((flags & PUBLIC_SETTER) != 0)
         atp.add(AccessType.PUBLIC);
-      if (isGetterProtected())
+      if ((flags & PROTECTED_SETTER) != 0)
         atp.add(AccessType.PROTECTED);
-      this.setter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
+      setter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
     }
+    return new PropertyElement(name2, accessType, flags, variable, getter, setter);
   }
 
   @Override
@@ -129,10 +138,6 @@ public class PropertyElement extends AbstractAccessibleElement {
 
   public boolean isDefault() {
     return (flags & PROPERTY_IS_DEFAULT) != 0;
-  }
-
-  public int getExtent() {
-    return this.extent;
   }
 
   public boolean canRead() {

@@ -274,7 +274,7 @@ public class RCodeInfo {
           typeInfo.getMethods().add(mthd);
           break;
         case PROPERTY:          
-            PropertyElement prop = new PropertyElement(name, set, segment, currOffset, textAreaOffset, order);
+            PropertyElement prop = PropertyElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += prop.size();
             typeInfo.getProperties().add(prop);
             break;
