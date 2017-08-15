@@ -1,5 +1,5 @@
 /*
- * OpenEdge plugin for SonarQube
+ * RCode library - OpenEdge plugin for SonarQube
  * Copyright (C) 2017 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
