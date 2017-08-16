@@ -17,6 +17,7 @@ public class TestProjectSensorContext {
   public final static String FILE1 = "src/procedures/test1.p";
   public final static String FILE2 = "src/procedures/test2.p";
   public final static String FILE3 = "src/procedures/test3.p";
+  public final static String FILE4 = "src/procedures/test3.i";
   public final static String CLASS1 = "src/classes/rssw/testclass.cls";
 
   private TestProjectSensorContext() {
@@ -43,6 +44,9 @@ public class TestProjectSensorContext {
     context.fileSystem().add(
         new TestInputFileBuilder(BASEDIR, FILE3).setLanguage(Constants.LANGUAGE_KEY).setType(
             Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE3), Charset.defaultCharset())).build());
+    context.fileSystem().add(
+        new TestInputFileBuilder(BASEDIR, FILE4).setLanguage(Constants.LANGUAGE_KEY).setType(
+            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE4), Charset.defaultCharset())).build());
     context.fileSystem().add(
         new TestInputFileBuilder(BASEDIR, CLASS1).setLanguage(Constants.LANGUAGE_KEY).setType(
             Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, CLASS1), Charset.defaultCharset())).build());
