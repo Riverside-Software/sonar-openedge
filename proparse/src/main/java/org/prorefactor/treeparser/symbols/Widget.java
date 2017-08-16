@@ -8,7 +8,9 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols;
+
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * A Symbol defined with DEFINE &lt;widget-type&gt; or any of the other various syntaxes which implicitly define a widget.
@@ -16,7 +18,7 @@ package org.prorefactor.treeparser;
  */
 public abstract class Widget extends Symbol implements IWidget {
 
-  public Widget(String name, SymbolScope scope) {
+  public Widget(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 

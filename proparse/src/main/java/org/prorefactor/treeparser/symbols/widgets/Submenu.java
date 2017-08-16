@@ -8,14 +8,24 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols.widgets;
 
-public interface IWidget extends ISymbol {
+import org.prorefactor.core.NodeTypes;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.symbols.Widget;
+
+public class Submenu extends Widget {
+
+  public Submenu(String name, TreeParserSymbolScope scope) {
+    super(name, scope);
+  }
 
   /**
-   * For this subclass of Symbol, fullName() returns the same value as getName()
+   * @return NodeTypes.SUBMENU
    */
   @Override
-  String fullName();
+  public int getProgressType() {
+    return NodeTypes.SUBMENU;
+  }
 
 }

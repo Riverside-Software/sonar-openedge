@@ -8,7 +8,7 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,6 +18,7 @@ import org.prorefactor.core.IConstants;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * A TableBuffer is a Symbol which provides a link from the syntax tree to a Table object.
@@ -32,7 +33,7 @@ public class TableBuffer extends Symbol {
    * 
    * @param name Input "" for an unnamed or default buffer
    */
-  public TableBuffer(String name, SymbolScope scope, ITable table) {
+  public TableBuffer(String name, TreeParserSymbolScope scope, ITable table) {
     super(name, scope);
     this.table = table;
     this.isDefault = name.isEmpty();
@@ -40,23 +41,6 @@ public class TableBuffer extends Symbol {
 
   void addFieldBuffer(FieldBuffer fieldBuffer) {
     fieldBuffers.put(fieldBuffer.getField(), fieldBuffer);
-  }
-
-  /** For temp/work table, also adds Table definition to the scope if it doesn't already exist. */
-  @Override
-  public Symbol copyBare(SymbolScope scope) {
-    ITable t;
-    if (this.table.getStoretype() == IConstants.ST_DBTABLE) {
-      t = this.table;
-    } else {
-      // Make sure temp/work table definition exists in target root scope.
-      SymbolScopeRoot rootScope = scope.getRootScope();
-      t = rootScope.lookupTableDefinition(table.getName());
-      if (t == null)
-        t = table.copyBare(rootScope);
-    }
-    String useName = this.isDefault ? "" : super.getName();
-    return new TableBuffer(useName, scope, t);
   }
 
   /**
@@ -78,7 +62,7 @@ public class TableBuffer extends Symbol {
   /**
    * Always returns BUFFER, whether this is a named buffer or a default buffer.
    * 
-   * @see org.prorefactor.treeparser.Symbol#getProgressType()
+   * @see org.prorefactor.treeparser.symbols.Symbol#getProgressType()
    * @see org.prorefactor.core.schema.ITable#getStoretype()
    */
   @Override

@@ -21,7 +21,10 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
-import org.prorefactor.widgettypes.Frame;
+import org.prorefactor.treeparser.symbols.Event;
+import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.widgets.Frame;
 
 /**
  * For keeping track of blocks, block attributes, and the things that are scoped within those blocks - especially buffer
@@ -39,7 +42,7 @@ public class Block {
    * The SymbolScope for a block is going to be the root program scope, unless the block is inside a method
    * (function/trigger/procedure).
    */
-  private SymbolScope symbolScope;
+  private TreeParserSymbolScope symbolScope;
 
   /** For constructing nested blocks */
   public Block(Block parent, JPNode node) {
@@ -54,7 +57,7 @@ public class Block {
    * @param symbolScope
    * @param node Is the Program_root if this is the program root block.
    */
-  public Block(SymbolScope symbolScope, JPNode node) {
+  public Block(TreeParserSymbolScope symbolScope, JPNode node) {
     this.blockStatementNode = node;
     this.symbolScope = symbolScope;
     if (symbolScope.getParentScope() != null)
@@ -282,7 +285,7 @@ public class Block {
     return parent;
   }
 
-  public SymbolScope getSymbolScope() {
+  public TreeParserSymbolScope getSymbolScope() {
     return symbolScope;
   }
 

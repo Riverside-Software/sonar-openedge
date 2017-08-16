@@ -1,3 +1,22 @@
+/*
+ * RCode library - OpenEdge plugin for SonarQube
+ * Copyright (C) 2017 Riverside Software
+ * contact AT riverside DASH software DOT fr
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
+ */
 package eu.rssw.pct.elements;
 
 import java.nio.ByteBuffer;
@@ -14,27 +33,38 @@ public class VariableElement extends AbstractAccessibleElement {
   private static final int BASE_IS_DOTNET = 4;
   private static final int NO_UNDO = 8;
 
-  private int data_type;
-  // private int recordPosition;
-  private int extent;
-  private int flags;
+  private final int dataType;
+  private final int extent;
+  private final int flags;
+  private final String typeName;
   // private int fullNameLength;
-  private String typeName;
+  // private int recordPosition;
 
-  public VariableElement(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
+  public VariableElement(String name, Set<AccessType> accessType, int dataType, int extent, int flags,
+      String typeName) {
     super(name, accessType);
+    this.dataType = dataType;
+    this.extent = extent;
+    this.flags = flags;
+    this.typeName = typeName;
+  }
 
-    this.data_type = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
-    // this.recordPosition = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
-    this.extent = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
-    this.flags = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
-    // this.fullNameLength = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(order).getShort();
+  public static VariableElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment,
+      int currentPos, int textAreaOffset, ByteOrder order) {
+    int dataType = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
+    // int recordPosition = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
+    int extent = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
+    // int fullNameLength = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 12, Integer.BYTES).order(order).getInt();
-    this.name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
+    String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
-    this.typeName = typeNameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
+    String typeName = typeNameOffset == 0 ? ""
+        : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
+
+    return new VariableElement(name2, accessType, dataType, extent, flags, typeName);
   }
 
   protected String getTypeName() {
@@ -46,7 +76,7 @@ public class VariableElement extends AbstractAccessibleElement {
   }
 
   public DataType getDataType() {
-    return DataType.getDataType(data_type);
+    return DataType.getDataType(dataType);
   }
 
   public int getExtent() {

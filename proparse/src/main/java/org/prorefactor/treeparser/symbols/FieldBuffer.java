@@ -8,13 +8,16 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ISchema;
+import org.prorefactor.treeparser.DataType;
+import org.prorefactor.treeparser.Primative;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * FieldBuffer is the Symbol object linked to from the AST for schema, temp, and work table fields, and FieldBuffer
@@ -27,7 +30,7 @@ public class FieldBuffer extends Symbol implements Primative {
   /**
    * When you create a FieldBuffer object, you do not set the name, because that comes from the Field object.
    */
-  public FieldBuffer(SymbolScope scope, TableBuffer buffer, IField field) {
+  public FieldBuffer(TreeParserSymbolScope scope, TableBuffer buffer, IField field) {
     super("", scope);
     this.buffer = buffer;
     this.field = field;
@@ -45,7 +48,7 @@ public class FieldBuffer extends Symbol implements Primative {
    */
   public boolean canMatch(Field.Name input) {
     // Assert that the input name is already lowercase.
-    assert input.generateName().toLowerCase().equals(input.generateName());
+    assert input.generateName().equalsIgnoreCase(input.generateName());
     Field.Name self = new Field.Name(this.fullName().toLowerCase());
     if (input.getDb() != null) {
       ISchema schema = getScope().getRootScope().getRefactorSession().getSchema();
@@ -65,18 +68,6 @@ public class FieldBuffer extends Symbol implements Primative {
     if (!self.getField().startsWith(input.getField()))
       return false;
     return true;
-  }
-
-  /**
-   * INVALID. Do not use. There is never any reason to copy a FieldBuffer, since they are created by the tree parser on
-   * the fly. They are not defined formally in the syntax.
-   * 
-   * @deprecated
-   */
-  @Override
-  public Symbol copyBare(SymbolScope scope) {
-    assert false;
-    return null;
   }
 
   /**
@@ -129,23 +120,13 @@ public class FieldBuffer extends Symbol implements Primative {
   /**
    * Always returns FIELD.
    * 
-   * @see org.prorefactor.treeparser.Symbol#getProgressType() To see if this field buffer is for a schema table,
+   * @see org.prorefactor.treeparser.symbols.Symbol#getProgressType() To see if this field buffer is for a schema table,
    *      temp-table, or work-table, see Table.getStoreType().
    * @see org.prorefactor.core.schema.ITable#getStoretype()
    */
   @Override
   public int getProgressType() {
     return NodeTypes.FIELD;
-  }
-
-  @Override
-  public boolean isExported() {
-    return buffer.isExported();
-  }
-
-  @Override
-  public boolean isImported() {
-    return buffer.isImported();
   }
 
   /** Sets the underlying Field's className. */

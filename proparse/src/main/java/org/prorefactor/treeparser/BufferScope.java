@@ -10,6 +10,8 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
+import org.prorefactor.treeparser.symbols.TableBuffer;
+
 /**
  * A record of a BufferSymbol scope to a Block. Tells us if the scope is "strong" or not.
  */

@@ -37,6 +37,7 @@ import antlr.RecognitionException;
 import antlr.Token;
 import antlr.TokenStream;
 import antlr.TokenStreamException;
+import eu.rssw.pct.TypeInfo;
 
 /**
  * Provides parse unit information, such as the symbol table and a reference to the AST. TreeParser01 calls
@@ -50,20 +51,21 @@ public class ParseUnit {
 
   private IncludeRef macroGraph = null;
   private ProgramRootNode topNode;
-  private SymbolScopeRoot rootScope;
+  private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
   private Document xref = null;
+  private TypeInfo typeInfo = null;
 
   public ParseUnit(File file, RefactorSession prsession) {
     this.file = file;
     this.session = prsession;
   }
 
-  public SymbolScopeRoot getRootScope() {
+  public TreeParserRootSymbolScope getRootScope() {
     return rootScope;
   }
 
-  public void setRootScope(SymbolScopeRoot rootScope) {
+  public void setRootScope(TreeParserRootSymbolScope rootScope) {
     this.rootScope = rootScope;
   }
 
@@ -200,8 +202,21 @@ public class ParseUnit {
     this.xref = xref;
   }
 
+  public void attachTypeInfo(TypeInfo unit) {
+    this.typeInfo = unit;
+  }
+
   @Nullable
   public Document getXref() {
     return xref;
+  }
+
+  @Nullable
+  public TypeInfo getTypeInfo() {
+    return typeInfo;
+  }
+
+  public RefactorSession getSession() {
+    return session;
   }
 }

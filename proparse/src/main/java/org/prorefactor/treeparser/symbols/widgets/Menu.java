@@ -8,36 +8,24 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols.widgets;
 
 import org.prorefactor.core.NodeTypes;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.symbols.Widget;
 
-/** A Symbol defined with DEFINE DATA-SOURCE. */
-public class Datasource extends Symbol {
+public class Menu extends Widget {
 
-  public Datasource(String name, SymbolScope scope) {
+  public Menu(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
-  @Override
-  public Symbol copyBare(SymbolScope scope) {
-    return new Datasource(getName(), scope);
-  }
-
   /**
-   * For this subclass of Symbol, fullName() returns the same value as getName()
-   */
-  @Override
-  public String fullName() {
-    return getName();
-  }
-
-  /**
-   * Returns NodeTypes.DATASOURCE
+   * @return NodeTypes.MENU
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.DATASOURCE;
+    return NodeTypes.MENU;
   }
 
 }

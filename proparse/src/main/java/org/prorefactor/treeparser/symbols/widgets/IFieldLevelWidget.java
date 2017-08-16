@@ -8,30 +8,10 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.widgettypes;
+package org.prorefactor.treeparser.symbols.widgets;
 
-import org.prorefactor.core.NodeTypes;
-import org.prorefactor.treeparser.Symbol;
-import org.prorefactor.treeparser.SymbolScope;
-import org.prorefactor.treeparser.Widget;
+import org.prorefactor.treeparser.symbols.IWidget;
 
-public class Menu extends Widget {
-
-  public Menu(String name, SymbolScope scope) {
-    super(name, scope);
-  }
-
-  @Override
-  public Symbol copyBare(SymbolScope scope) {
-    return new Menu(getName(), scope);
-  }
-
-  /**
-   * @return NodeTypes.MENU
-   */
-  @Override
-  public int getProgressType() {
-    return NodeTypes.MENU;
-  }
+public interface IFieldLevelWidget extends IWidget {
 
 }

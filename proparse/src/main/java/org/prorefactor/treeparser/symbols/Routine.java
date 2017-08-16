@@ -8,24 +8,26 @@
  * Contributors:
  *    Peter Dalbadie - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.core.JPNode;
+import org.prorefactor.treeparser.Parameter;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * Represents the definition of a Routine. Is a Symbol - used as an entry in the symbol table. A Routine is a
  * Program_root, PROCEDURE, FUNCTION, or METHOD.
  */
 public class Routine extends Symbol {
-  private final SymbolScope routineScope;
+  private final TreeParserSymbolScope routineScope;
   private final List<Parameter> parameters = new ArrayList<>();
   private JPNode returnDatatypeNode = null;
   private int progressType;
 
-  public Routine(String name, SymbolScope definingScope, SymbolScope routineScope) {
+  public Routine(String name, TreeParserSymbolScope definingScope, TreeParserSymbolScope routineScope) {
     super(name, definingScope);
     this.routineScope = routineScope;
   }
@@ -35,14 +37,7 @@ public class Routine extends Symbol {
     parameters.add(p);
   }
 
-  @Override
-  public Symbol copyBare(SymbolScope scope) {
-    Routine ret = new Routine(getName(), scope, scope);
-    ret.progressType = this.progressType;
-    return ret;
-  }
-
-  /** @see org.prorefactor.treeparser.Symbol#fullName() */
+  /** @see org.prorefactor.treeparser.symbols.Symbol#fullName() */
   @Override
   public String fullName() {
     return getName();
@@ -68,7 +63,7 @@ public class Routine extends Symbol {
     return returnDatatypeNode;
   }
 
-  public SymbolScope getRoutineScope() {
+  public TreeParserSymbolScope getRoutineScope() {
     return routineScope;
   }
 

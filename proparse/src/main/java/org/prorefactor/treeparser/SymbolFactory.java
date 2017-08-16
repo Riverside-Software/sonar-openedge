@@ -11,14 +11,19 @@
 package org.prorefactor.treeparser;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.widgettypes.Browse;
-import org.prorefactor.widgettypes.Button;
-import org.prorefactor.widgettypes.Frame;
-import org.prorefactor.widgettypes.Image;
-import org.prorefactor.widgettypes.Menu;
-import org.prorefactor.widgettypes.MenuItem;
-import org.prorefactor.widgettypes.Rectangle;
-import org.prorefactor.widgettypes.Submenu;
+import org.prorefactor.treeparser.symbols.Dataset;
+import org.prorefactor.treeparser.symbols.Datasource;
+import org.prorefactor.treeparser.symbols.Query;
+import org.prorefactor.treeparser.symbols.Stream;
+import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.widgets.Browse;
+import org.prorefactor.treeparser.symbols.widgets.Button;
+import org.prorefactor.treeparser.symbols.widgets.Frame;
+import org.prorefactor.treeparser.symbols.widgets.Image;
+import org.prorefactor.treeparser.symbols.widgets.Menu;
+import org.prorefactor.treeparser.symbols.widgets.MenuItem;
+import org.prorefactor.treeparser.symbols.widgets.Rectangle;
+import org.prorefactor.treeparser.symbols.widgets.Submenu;
 
 /** Create a Symbol of the appropriate subclass. */
 public final class SymbolFactory {
@@ -27,7 +32,7 @@ public final class SymbolFactory {
     // Shouldn't be instantiated
   }
 
-  public static Symbol create(int symbolType, String name, SymbolScope scope) {
+  public static Symbol create(int symbolType, String name, TreeParserSymbolScope scope) {
     switch (symbolType) {
       case NodeTypes.DATASET:
         return new Dataset(name, scope);

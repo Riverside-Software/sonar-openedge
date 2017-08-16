@@ -8,9 +8,11 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.JPNode;
+import org.prorefactor.treeparser.ContextQualifier;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 public interface ISymbol {
 
@@ -56,18 +58,7 @@ public interface ISymbol {
    */
   int getProgressType();
 
-  SymbolScope getScope();
-
-  /**
-   * Is the symbol newly defined here and visible to other compile units? This includes PROTECTED members visible to
-   * subclasses.
-   */
-  boolean isExported();
-
-  /**
-   * Defined as SHARED?
-   */
-  boolean isImported();
+  TreeParserSymbolScope getScope();
 
   /**
    * Take note of a symbol reference (read, write, reference by name)
@@ -89,10 +80,5 @@ public interface ISymbol {
    * @see #getLikeNode()
    */
   void setLikeNode(JPNode likeNode);
-
-  /**
-   * Generate a bare-bones copy of this symbol. Requires the scope to attach it to as the argument.
-   */
-  Symbol copyBare(SymbolScope intoScope);
 
 }

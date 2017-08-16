@@ -8,19 +8,20 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.core.NodeTypes;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE DATASET. */
 public class Dataset extends Symbol {
   // Keep the buffers, in order, as part of the DATASET signature
   private final List<TableBuffer> buffers = new ArrayList<>();
 
-  public Dataset(String name, SymbolScope scope) {
+  public Dataset(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
@@ -29,11 +30,6 @@ public class Dataset extends Symbol {
    */
   public void addBuffer(TableBuffer buff) {
     buffers.add(buff);
-  }
-
-  @Override
-  public Symbol copyBare(SymbolScope scope) {
-    return new Dataset(getName(), scope);
   }
 
   /** For this subclass of Symbol, fullName() returns the same value as getName(). */

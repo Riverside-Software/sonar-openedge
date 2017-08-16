@@ -8,20 +8,18 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.NodeTypes;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
-/** A Symbol defined with DEFINE QUERY. */
-public class Query extends Symbol {
+/**
+ * A Symbol defined with DEFINE EVENT
+ */
+public class Event extends Symbol {
 
-  public Query(String name, SymbolScope scope) {
+  public Event(String name, TreeParserSymbolScope scope) {
     super(name, scope);
-  }
-
-  @Override
-  public Symbol copyBare(SymbolScope scope) {
-    return new Query(getName(), scope);
   }
 
   /**
@@ -33,11 +31,11 @@ public class Query extends Symbol {
   }
 
   /**
-   * @return NodeTypes.QUERY
+   * Returns NodeTypes.EVENT.
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.QUERY;
+    return NodeTypes.EVENT;
   }
 
 }

@@ -47,7 +47,7 @@ import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.FilePredicates;
@@ -128,6 +128,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
     RefactorSession session = settings.getProparseSession(context.runtime().getProduct() == SonarProduct.SONARLINT);
+
     FilePredicates predicates = context.fileSystem().predicates();
     for (InputFile file : context.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
@@ -186,12 +187,16 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
       }
     }
+    if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
+      settings.parseHierarchy(file.relativePath());
+    }
 
     try {
       long startTime = System.currentTimeMillis();
       ParseUnit unit = new ParseUnit(file.file(), session);
       unit.treeParser01();
       unit.attachXref(doc);
+      unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
       updateParseTime(System.currentTimeMillis() - startTime);
 
       if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
@@ -275,7 +280,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     LOG.info("AST Generation | time={} ms", parseTime);
     LOG.info("XML Parsing    | time={} ms", xmlParseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
-      LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
+      LOG.info("Rule {} | time={} ms", entry.getKey(), entry.getValue());
     }
   }
 
@@ -349,7 +354,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     int numProcs = 0;
     int numFuncs = 0;
     int numMethds = 0;
-    for (SymbolScope child : unit.getRootScope().getChildScopesDeep()) {
+    for (TreeParserSymbolScope child : unit.getRootScope().getChildScopesDeep()) {
       int scopeType = child.getRootBlock().getNode().getType();
       switch (scopeType) {
         case NodeTypes.PROCEDURE:
@@ -400,16 +405,12 @@ public class OpenEdgeProparseSensor implements Sensor {
       complexityWithInc++;
     }
 
-    for (JPNode node : unit.getTopNode().queryMainFile(NodeTypes.IF, NodeTypes.REPEAT, NodeTypes.FOR, NodeTypes.WHEN,
+    complexity += unit.getTopNode().queryMainFile(NodeTypes.IF, NodeTypes.REPEAT, NodeTypes.FOR, NodeTypes.WHEN,
         NodeTypes.AND, NodeTypes.OR, NodeTypes.RETURN, NodeTypes.PROCEDURE, NodeTypes.FUNCTION, NodeTypes.METHOD,
-        NodeTypes.ENUM)) {
-      complexity++;
-    }
-    for (JPNode node : unit.getTopNode().query(NodeTypes.IF, NodeTypes.REPEAT, NodeTypes.FOR, NodeTypes.WHEN,
+        NodeTypes.ENUM).size();
+    complexityWithInc += unit.getTopNode().query(NodeTypes.IF, NodeTypes.REPEAT, NodeTypes.FOR, NodeTypes.WHEN,
         NodeTypes.AND, NodeTypes.OR, NodeTypes.RETURN, NodeTypes.PROCEDURE, NodeTypes.FUNCTION, NodeTypes.METHOD,
-        NodeTypes.ENUM)) {
-      complexityWithInc++;
-    }
+        NodeTypes.ENUM).size();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMPLEXITY).withValue(complexity).save();
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.COMPLEXITY).withValue(complexityWithInc).save();
   }

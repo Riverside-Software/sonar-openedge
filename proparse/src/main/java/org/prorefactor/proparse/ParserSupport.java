@@ -10,8 +10,6 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,44 +17,40 @@ import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.core.ProparseRuntimeException;
-import org.prorefactor.refactor.RefactorException;
+import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.refactor.RefactorSession;
-import org.prorefactor.treeparser.ParseUnit;
 
-import antlr.ANTLRException;
+import com.google.common.base.Strings;
 
+import antlr.Token;
+
+/**
+ * Helper class when parsing procedure or class.
+ * One instance per class being parsed.
+ */
 public class ParserSupport {
+  private final RefactorSession session;
+  private final ClassFinder classFinder;
+  // Scope for the compile unit or class. It might be "sub" to a super scope in a class hierarchy
+  private final RootSymbolScope unitScope;
 
-  private boolean currDefInheritable = false;
+  // Current scope might be "unitScope" or an inner method/subprocedure scope
+  private SymbolScope currentScope;
+
   private boolean unitIsInterface = false;
   private boolean inDynamicNew = false;
 
-  private ClassFinder classFinder;
-  private final RefactorSession session;
-
   private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
 
-  private String thisClassName = "";
-
-  // We keep a separate scope object for inheritance, because PRIVATE members
-  // at the unit scope are not inheritable.
-  private SymbolScope inheritanceScope;
-
-  // Current scope might be "unitScope" or an inner method/subprocedure scope.
-  private SymbolScope currentScope;
-
-  // This is the scope for the compile unit or class.
-  // It might be "sub" to a super scope in a class hierarchy.
-  private SymbolScope unitScope;
+  private String className = "";
 
   // Last field referenced. Used for inline defines using LIKE or AS.
   private JPNode lastFieldRefNode;
   private JPNode lastFieldIDNode;
 
   ParserSupport(RefactorSession session) {
-    unitScope = new SymbolScope(session);
-    currentScope = unitScope;
+    this.unitScope = new RootSymbolScope(session);
+    this.currentScope = unitScope;
     this.session = session;
     this.classFinder = new ClassFinder(session);
   }
@@ -64,8 +58,16 @@ public class ParserSupport {
   /**
    * An AS phrase allows further abbreviations on the datatype names. Input a token's text, this returns 0 if it is not
    * a datatype abbreviation, otherwise returns the integer token type for the abbreviation. Here's the normal keyword
-   * abbreviation, with what AS phrase allows: char,c. date,da. dec,de. int,i. logical,l. recid,rec. rowid,rowi.
-   * widget-h,widg.
+   * abbreviation, with what AS phrase allows:<ul>
+   * <li>char: c
+   * <li>date: da
+   * <li>dec: de
+   * <li>int: i
+   * <li>logical: l
+   * <li>recid: rec
+   * <li>rowid: rowi
+   * <li>widget-h: widg
+   * </ul>
    */
   int abbrevDatatype(String text) {
     String s = text.toLowerCase();
@@ -92,90 +94,48 @@ public class ParserSupport {
     currentScope = new SymbolScope(session, currentScope);
   }
 
-  public boolean isInDynamicNew() {
-    return inDynamicNew;
-  }
+  // Functions triggered from proparse.g
 
-  public void setInDynamicNew(boolean flag) {
-    inDynamicNew = flag;
-  }
-
-  /** Mark a node as "operator" */
-  static void attrOp(JPNode ast) {
-    ast.attrSet(IConstants.OPERATOR, IConstants.TRUE);
-  }
-
+  /**
+   * When parsing class, all methods are added as part of the classState rule.
+   */
   void declareMethod(String s) {
-    unitScope.defMethod(s);
+    // Not used anymore
   }
 
   void defBuffer(String bufferName, String tableName) {
-    currentScope.defBuffer(bufferName, tableName);
-    if (currDefInheritable)
-      inheritanceScope.defBuffer(bufferName, tableName);
+    currentScope.defineBuffer(bufferName, tableName);
   }
 
-  void defClass(JPNode classNode) {
-    try {
-      JPNode idNode = classNode.firstChild();
-      thisClassName = ClassFinder.dequote(idNode.getText());
+  void defineClass(JPNode classNode) {
+    JPNode idNode = classNode.firstChild();
+    className = ClassFinder.dequote(idNode.getText());
+    unitScope.attachTypeInfo(session.getTypeInfo(className));
+  }
 
-      // We always build an inheritance scope, because the parser is called recursively, and
-      // we might only be parsing for the purpose of finding inherite symbols for a subclass.
-      // That pointer is stored in the Environment, and that cache of SymbolScopes is cleaned
-      // up via a method it provides.
-      inheritanceScope = new SymbolScope(session);
-      session.addToSuperCache(thisClassName, inheritanceScope);
-      inheritanceScope.setScopeName(thisClassName);
-
-      // Does this class have a super class?
-      JPNode nextNode = idNode.nextSibling();
-      if ((nextNode != null) && nextNode.getType() == NodeTypes.INHERITS) {
-        String inheritName = nextNode.firstChild().attrGetS(IConstants.QUALIFIED_CLASS_INT);
-        SymbolScope scope = session.lookupSuper(inheritName);
-        if (scope == null)
-          scope = parseSuper(classNode, inheritName);
-        if (scope != null) {
-          unitScope.setSuperScope(scope);
-          inheritanceScope.setSuperScope(scope);
-        }
-      }
-
-      // No nested classes (at 10.1), so classes aren't added to inheritance tables.
-    } catch (ANTLRException | IOException e) {
-      throw new ProparseRuntimeException(e);
-    }
+  void defInterface(JPNode interfaceNode) {
+    unitIsInterface = true;
+    className = ClassFinder.dequote(interfaceNode.firstChild().getText());
   }
 
   void defMethod(JPNode idNode) {
-    String methodName = idNode.getText();
-    // Methods can only be defined at the "unit" (class) scope.
-    // Next line is redundant: method names were already picked up by the scan-ahead.
-    unitScope.defMethod(methodName);
-    if (currDefInheritable)
-      inheritanceScope.defMethod(methodName);
+    // Not used anymore
   }
 
   void defTable(String name, SymbolScope.FieldType ttype) {
     // I think the compiler will only allow table defs at the class/unit scope,
     // but we don't need to enforce that here. It'll go in the right spot by the
     // nature of the code.
-    currentScope.defTable(name, ttype);
-    if (currDefInheritable)
-      inheritanceScope.defTable(name, ttype);
+    currentScope.defineTable(name, ttype);
   }
 
   void defVar(String name) {
-    currentScope.defVar(name);
-    if (currDefInheritable)
-      inheritanceScope.defVar(name);
+    currentScope.defineVar(name);
   }
 
   void defVarInline() {
-    currentScope.defVar(lastFieldIDNode.getText());
+    currentScope.defineVar(lastFieldIDNode.getText());
     // I'm not sure if this would ever be inheritable. Doesn't hurt to check.
-    if (currDefInheritable)
-      inheritanceScope.defVar(lastFieldIDNode.getText());
     lastFieldRefNode.attrSet(IConstants.INLINE_VAR_DEF, IConstants.TRUE);
   }
 
@@ -226,37 +186,22 @@ public class ParserSupport {
     currentScope = currentScope.getSuperScope();
   }
 
-  static boolean hasHiddenAfter(antlr.Token token) {
-    return ((ProToken) token).getHiddenAfter() != null;
+  void usingState(JPNode typeNameNode) {
+    classFinder.addPath(typeNameNode.getText());
   }
 
-  static boolean hasHiddenBefore(antlr.Token token) {
-    return ((ProToken) token).getHiddenBefore() != null;
-  }
+  // End of functions triggered from proparse.g
 
-  void interfaceNode(JPNode interfaceNode) {
-    unitIsInterface = true;
-    thisClassName = ClassFinder.dequote(interfaceNode.firstChild().getText());
-  }
-
-  boolean isClass() {
-    return inheritanceScope != null;
-  }
-
-  boolean isInterface() {
-    return unitIsInterface;
-  }
-
-  SymbolScope.FieldType isTable(String inName) {
+  FieldType isTable(String inName) {
     return currentScope.isTable(inName);
   }
 
-  SymbolScope.FieldType isTableSchemaFirst(String inName) {
+  FieldType isTableSchemaFirst(String inName) {
     return currentScope.isTableSchemaFirst(inName);
   }
 
   /** Returns true if the lookahead is a table name, and not a var name. */
-  boolean isTableName(antlr.Token lt1, antlr.Token lt2, antlr.Token lt3, antlr.Token lt4) {
+  boolean isTableName(Token lt1, Token lt2, Token lt3, Token lt4) {
     String name = lt1.getText();
     if (lt2.getType() == NodeTypes.NAMEDOT) {
       if (lt4.getType() == NodeTypes.NAMEDOT) {
@@ -272,51 +217,57 @@ public class ParserSupport {
   }
 
   boolean isVar(String name) {
-    return currentScope.isVar(name);
+    return currentScope.isVariable(name);
   }
 
-  int methodOrFunc(String name) {
+  int isMethodOrFunc(String name) {
     // Methods and user functions are only at the "unit" (class) scope.
     // Methods can also be inherited from superclasses.
-    return unitScope.methodOrFunc(name);
+    return unitScope.isMethodOrFunction(name);
   }
 
-  SymbolScope parseSuper(JPNode classNode, String qualSuperName)
-      throws IOException, ANTLRException {
-    String superFileName = classFinder.findClassFile(qualSuperName);
-    if (superFileName.length() == 0) {
-      // Could not find the super class. Will happen with Progress.lang.*, vendor libraries, etc.
-      return null;
-    }
-
-    try {
-      ParseUnit unit = new ParseUnit(new File(superFileName), session);
-      unit.parse();
-
-      // FIXME Find if this really has to be kept 
-      // ParserSupport superSupport = parser.getParserSupport();
-      // if (!superSupport.isClass())
-      //   throw new ProparseRuntimeException(unitScope.getScopeName() + " inherits " + qualSuperName + " which is not a class."); */
-      SymbolScope superScope = session.lookupSuper(qualSuperName);
-      if (superScope == null) 
-        throw new ProparseRuntimeException("Internal error. parseSuper failed to find superScope.");
-      for (SymbolScope p = superScope.getSuperScope(); p != null; p = p.getSuperScope()) {
-        if (p == superScope)
-          throw new ProparseRuntimeException("Circular inheritance found from class: " + qualSuperName);
-      }
-      classNode.setLink(IConstants.SUPER_CLASS_TREE, unit.getTopNode());
-      return superScope;
-    } catch (RefactorException caught) {
-      throw new ANTLRException(caught);
-    }
+  /**
+   * @return True if parsing a class or interface
+   */
+  boolean isClass() {
+    return !Strings.isNullOrEmpty(className);
   }
 
-  void setCurrDefInheritable(boolean canInherit) {
-    currDefInheritable = canInherit && inheritanceScope != null && currentScope == unitScope;
+  /**
+   * @return True if parsing an interface
+   */
+  boolean isInterface() {
+    return unitIsInterface;
+  }
+
+  /**
+   * @return True if the parser in the middle of a DYNAMIC-NEW statement
+   */
+  public boolean isInDynamicNew() {
+    return inDynamicNew;
+  }
+
+  public void setInDynamicNew(boolean flag) {
+    inDynamicNew = flag;
+  }
+
+  void attrTypeNameLookup(JPNode node) {
+    node.attrSet(IConstants.QUALIFIED_CLASS_INT, classFinder.lookup(node.getText()));
+  }
+
+  void attrTypeName(JPNode node) {
+    node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
+  }
+
+  /**
+   * Mark a node as "operator"
+   */
+  static void attrOp(JPNode node) {
+    node.attrSet(IConstants.OPERATOR, IConstants.TRUE);
   }
 
   /** Set the 'store type' attribute on a RECORD_NAME node. */
-  void setStoreType(JPNode node, SymbolScope.FieldType tabletype) {
+  static void setStoreType(JPNode node, FieldType tabletype) {
     switch (tabletype) {
       case DBTABLE:
         node.attrSet(IConstants.STORETYPE, IConstants.ST_DBTABLE);
@@ -327,19 +278,24 @@ public class ParserSupport {
       case WTABLE:
         node.attrSet(IConstants.STORETYPE, IConstants.ST_WTABLE);
         break;
+      case VARIABLE:
+        // Never happens
+        break;
     }
   }
 
-  void typenameLookup(JPNode typenameNode) {
-    typenameNode.attrSet(IConstants.QUALIFIED_CLASS_INT, classFinder.lookup(typenameNode.getText()));
+  /**
+   * @see ProToken#getHiddenAfter()
+   */
+  static boolean hasHiddenAfter(Token token) {
+    return ((ProToken) token).getHiddenAfter() != null;
   }
 
-  void typenameThis(JPNode typenameNode) {
-    typenameNode.attrSet(IConstants.QUALIFIED_CLASS_INT, thisClassName);
-  }
-
-  void usingState(JPNode typeNameNode) {
-    classFinder.addPath(typeNameNode.getText());
+  /**
+   * @see ProToken#getHiddenBefore()
+   */
+  static boolean hasHiddenBefore(Token token) {
+    return ((ProToken) token).getHiddenBefore() != null;
   }
 
 }

@@ -22,8 +22,16 @@ import java.util.Set;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.core.schema.Table;
-import org.prorefactor.widgettypes.IFieldLevelWidget;
+import org.prorefactor.treeparser.symbols.Dataset;
+import org.prorefactor.treeparser.symbols.Datasource;
+import org.prorefactor.treeparser.symbols.Query;
+import org.prorefactor.treeparser.symbols.Routine;
+import org.prorefactor.treeparser.symbols.Stream;
+import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.Variable;
+import org.prorefactor.treeparser.symbols.Widget;
+import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 /**
  * For keeping track of PROCEDURE, FUNCTION, and trigger scopes within a 4gl compile unit. Note that scopes are nested.
@@ -31,15 +39,12 @@ import org.prorefactor.widgettypes.IFieldLevelWidget;
  * (Trigger scopes may be deeply nested). These scopes are defined <b>Symbol</b> scopes. They have nothing to do with
  * record or frame scoping!
  */
-public class SymbolScope {
-  private static final Integer DATASET = new Integer(NodeTypes.DATASET);
-  private static final Integer DATASOURCE = new Integer(NodeTypes.DATASOURCE);
-  private static final Integer QUERY = new Integer(NodeTypes.QUERY);
-  private static final Integer STREAM = new Integer(NodeTypes.STREAM);
+public class TreeParserSymbolScope {
+  protected final TreeParserSymbolScope parentScope;
 
   protected List<Symbol> allSymbols = new ArrayList<>();
   protected List<Call> callList = new ArrayList<>();
-  protected List<SymbolScope> childScopes = new ArrayList<>();
+  protected List<TreeParserSymbolScope> childScopes = new ArrayList<>();
   protected Block rootBlock;
   protected Map<String, TableBuffer> bufferMap = new HashMap<>();
   protected Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
@@ -48,13 +53,8 @@ public class SymbolScope {
   protected Map<Integer, Map<String, Symbol>> typeMap = new HashMap<>();
   protected Map<String, Variable> variableMap = new HashMap<>();
 
-  protected SymbolScope parentScope;
-  protected SymbolScopeRoot rootScope;
-
-  // Initialization block
-  {
-    typeMap.put(new Integer(NodeTypes.VARIABLE),
-        Collections.checkedMap((Map) variableMap, String.class, Symbol.class));
+  protected TreeParserSymbolScope() {
+    this(null);
   }
 
   /**
@@ -62,14 +62,13 @@ public class SymbolScope {
    * 
    * @param parentScope null if called by the SymbolScopeRoot constructor.
    */
-  protected SymbolScope(SymbolScope parentScope) {
+  private TreeParserSymbolScope(TreeParserSymbolScope parentScope) {
     this.parentScope = parentScope;
-    if (parentScope != null)
-      this.rootScope = parentScope.rootScope;
+    typeMap.put(NodeTypes.VARIABLE, Collections.checkedMap((Map) variableMap, String.class, Symbol.class));
   }
 
   /** Add a FieldLevelWidget for names lookup. */
-  public void add(IFieldLevelWidget widget) {
+  private void add(IFieldLevelWidget widget) {
     fieldLevelWidgetMap.put(widget.getName().toLowerCase(), widget);
   }
 
@@ -78,7 +77,7 @@ public class SymbolScope {
    * declaration, as well as a local definition. The local definition should be the one in this map, but as it stands,
    * the *last added* is what will be found.
    */
-  public void add(Routine routine) {
+  private void add(Routine routine) {
     routineMap.put(routine.getName().toLowerCase(), routine);
   }
 
@@ -86,15 +85,26 @@ public class SymbolScope {
    * Add a TableBuffer for names lookup. This is called when copying a SymbolScopeSuper's symbols for inheritance
    * purposes.
    */
-  public void add(TableBuffer tableBuffer) {
+  private void add(TableBuffer tableBuffer) {
     ITable table = tableBuffer.getTable();
     addTableBuffer(tableBuffer.getName(), table, tableBuffer);
-    rootScope.addTableDefinitionIfNew(table);
+    getRootScope().addTableDefinitionIfNew(table);
   }
 
   /** Add a Variable for names lookup. */
-  public void add(Variable var) {
+  private void add(Variable var) {
     variableMap.put(var.getName().toLowerCase(), var);
+  }
+
+  /** Add a TableBuffer to the appropriate map. */
+  private void addTableBuffer(String name, ITable table, TableBuffer buffer) {
+    if (name.length() == 0) {
+      if (table.getStoretype() == IConstants.ST_DBTABLE)
+        unnamedBuffers.put(table, buffer);
+      else // default buffers for temp/work tables go into the "named" buffer map
+        bufferMap.put(table.getName().toLowerCase(), buffer);
+    } else
+      bufferMap.put(name.toLowerCase(), buffer);
   }
 
   /** Add a Symbol for names lookup. */
@@ -108,19 +118,18 @@ public class SymbolScope {
     } else if (symbol instanceof TableBuffer) {
       add((TableBuffer) symbol);
     } else {
-      Integer type = new Integer(symbol.getProgressType());
-      Map<String, Symbol> map = typeMap.get(type);
+      Map<String, Symbol> map = typeMap.get(symbol.getProgressType());
       if (map == null) {
         map = new HashMap<>();
-        typeMap.put(type, map);
+        typeMap.put(symbol.getProgressType(), map);
       }
       map.put(symbol.getName().toLowerCase(), symbol);
     }
   }
 
   /** Add a new scope to this scope. */
-  public SymbolScope addScope() {
-    SymbolScope newScope = new SymbolScope(this);
+  public TreeParserSymbolScope addScope() {
+    TreeParserSymbolScope newScope = new TreeParserSymbolScope(this);
     childScopes.add(newScope);
     return newScope;
   }
@@ -129,19 +138,8 @@ public class SymbolScope {
    * All symbols within this scope are added to this scope's symbol list. This method has "package" visibility, since
    * the Symbol object adds itself to its scope.
    */
-  void addSymbol(Symbol symbol) {
+  public void addSymbol(Symbol symbol) {
     allSymbols.add(symbol);
-  }
-
-  /** Add a TableBuffer to the appropriate map. */
-  private void addTableBuffer(String name, ITable table, TableBuffer buffer) {
-    if (name.length() == 0) {
-      if (table.getStoretype() == IConstants.ST_DBTABLE)
-        unnamedBuffers.put(table, buffer);
-      else // default buffers for temp/work tables go into the "named" buffer map
-        bufferMap.put(table.getName().toLowerCase(), buffer);
-    } else
-      bufferMap.put(name.toLowerCase(), buffer);
   }
 
   /**
@@ -164,7 +162,7 @@ public class SymbolScope {
    */
   public int depth() {
     int depth = 0;
-    SymbolScope scope = this;
+    TreeParserSymbolScope scope = this;
     while ((scope = scope.getParentScope()) != null)
       depth++;
     return depth;
@@ -189,7 +187,7 @@ public class SymbolScope {
   /** Get a list of this scope's symbols, and all symbols of all descendant scopes. */
   public List<Symbol> getAllSymbolsDeep() {
     ArrayList<Symbol> ret = new ArrayList<>(allSymbols);
-    for (SymbolScope child : childScopes) {
+    for (TreeParserSymbolScope child : childScopes) {
       ret.addAll(child.getAllSymbolsDeep());
     }
     return ret;
@@ -198,7 +196,7 @@ public class SymbolScope {
   /** Get a list of this scope's symbols, and all symbols of all descendant scopes, which match a given class. */
   public <T extends Symbol> List<T> getAllSymbolsDeep(Class<T> klass) {
     List<T> ret = getAllSymbols(klass);
-    for (SymbolScope child : childScopes) {
+    for (TreeParserSymbolScope child : childScopes) {
       ret.addAll(child.getAllSymbols(klass));
     }
     return ret;
@@ -217,7 +215,7 @@ public class SymbolScope {
     // The default buffer for temp and work tables was defined at
     // the time that the table was defined. So, lookupBuffer() would have found
     // temp/work table references, and all we have to search now is schema.
-    ITable table = rootScope.getRefactorSession().getSchema().lookupTable(inName);
+    ITable table = getRootScope().getRefactorSession().getSchema().lookupTable(inName);
     if (table == null)
       return null;
     return getUnnamedBuffer(table);
@@ -228,21 +226,21 @@ public class SymbolScope {
   }
 
   /** Get a *copy* of the list of child scopes */
-  public List<SymbolScope> getChildScopes() {
+  public List<TreeParserSymbolScope> getChildScopes() {
     return new ArrayList<>(childScopes);
   }
 
   /** Get a list of all child scopes, and their child scopes, etc */
-  public List<SymbolScope> getChildScopesDeep() {
-    ArrayList<SymbolScope> ret = new ArrayList<>();
-    for (SymbolScope child : childScopes) {
+  public List<TreeParserSymbolScope> getChildScopesDeep() {
+    ArrayList<TreeParserSymbolScope> ret = new ArrayList<>();
+    for (TreeParserSymbolScope child : childScopes) {
       ret.add(child);
       ret.addAll(child.getChildScopesDeep());
     }
     return ret;
   }
 
-  public SymbolScope getParentScope() {
+  public TreeParserSymbolScope getParentScope() {
     return parentScope;
   }
 
@@ -250,8 +248,12 @@ public class SymbolScope {
     return rootBlock;
   }
 
-  public SymbolScopeRoot getRootScope() {
-    return rootScope;
+  public TreeParserRootSymbolScope getRootScope() {
+    if (parentScope == null) {
+      return (TreeParserRootSymbolScope) this;
+    } else {
+      return parentScope.getRootScope();
+    }
   }
 
   /** Get or create the unnamed buffer for a schema table. */
@@ -260,14 +262,14 @@ public class SymbolScope {
     // Check this and parents for the unnamed buffer. Table triggers
     // can scope an unnamed buffer - that's why we don't go straight to
     // the root scope.
-    SymbolScope nextScope = this;
+    TreeParserSymbolScope nextScope = this;
     while (nextScope != null) {
       TableBuffer buffer = nextScope.unnamedBuffers.get(table);
       if (buffer != null)
         return buffer;
       nextScope = nextScope.parentScope;
     }
-    return rootScope.defineBuffer("", table);
+    return getRootScope().defineBuffer("", table);
   }
 
   /** Get the Variables. (vars, params, etc, etc.) */
@@ -294,7 +296,7 @@ public class SymbolScope {
    * Is this scope active in the input scope? In other words, is this scope the input scope, or any of the parents of
    * the input scope?
    */
-  public boolean isActiveIn(SymbolScope theScope) {
+  public boolean isActiveIn(TreeParserSymbolScope theScope) {
     while (theScope != null) {
       if (this == theScope)
         return true;
@@ -327,19 +329,22 @@ public class SymbolScope {
     TableBuffer symbol = bufferMap.get(bufferPart.toLowerCase());
     if (symbol == null
         || (dbPart.length() != 0 && !dbPart.equalsIgnoreCase(symbol.getTable().getDatabase().getName()))) {
-      if (parentScope == null)
-        return null;
-      return parentScope.lookupBuffer(inName);
+      if (parentScope != null) {
+        TableBuffer tb = parentScope.lookupBuffer(inName);
+        if (tb != null) {
+          return tb;
+        }
+      }
     }
     return symbol;
   }
 
   public Dataset lookupDataset(String name) {
-    return (Dataset) lookupSymbolLocally(DATASET, name);
+    return (Dataset) lookupSymbolLocally(NodeTypes.DATASET, name);
   }
 
   public Datasource lookupDatasource(String name) {
-    return (Datasource) lookupSymbolLocally(DATASOURCE, name);
+    return (Datasource) lookupSymbolLocally(NodeTypes.DATASOURCE, name);
   }
 
   /** Lookup a FieldLevelWidget in this scope or an enclosing scope. */
@@ -351,16 +356,15 @@ public class SymbolScope {
   }
 
   public Query lookupQuery(String name) {
-    return (Query) lookupSymbolLocally(QUERY, name);
+    return (Query) lookupSymbolLocally(NodeTypes.QUERY, name);
   }
 
   public Routine lookupRoutine(String name) {
-    Routine routine = routineMap.get(name.toLowerCase());
-    return routine;
+    return routineMap.get(name.toLowerCase());
   }
 
   public Stream lookupStream(String name) {
-    return (Stream) lookupSymbolLocally(STREAM, name);
+    return (Stream) lookupSymbolLocally(NodeTypes.STREAM, name);
   }
 
   public Symbol lookupSymbol(Integer symbolType, String name) {
@@ -384,7 +388,7 @@ public class SymbolScope {
    * buffer/temp/work name, then abbreviated schema names. Sheesh.
    */
   public TableBuffer lookupTableOrBufferSymbol(String inName) {
-    ITable table = rootScope.getRefactorSession().getSchema().lookupTable(inName);
+    ITable table = getRootScope().getRefactorSession().getSchema().lookupTable(inName);
     if (table != null && table.getName().length() == inName.length())
       return getUnnamedBuffer(table);
     TableBuffer ret2 = lookupBuffer(inName);
@@ -403,6 +407,7 @@ public class SymbolScope {
       return buff;
     if (parentScope == null)
       return null;
+
     return parentScope.lookupTempTable(name);
   }
 
@@ -421,7 +426,7 @@ public class SymbolScope {
 
   /** Lookup a Widget based on TokenType (FRAME, BUTTON, etc) and the name in this scope or enclosing scope. */
   public Widget lookupWidget(int widgetType, String name) {
-    Widget ret = (Widget) lookupSymbolLocally(new Integer(widgetType), name);
+    Widget ret = (Widget) lookupSymbolLocally(widgetType, name);
     if (ret == null && parentScope != null)
       return parentScope.lookupWidget(widgetType, name);
     return ret;

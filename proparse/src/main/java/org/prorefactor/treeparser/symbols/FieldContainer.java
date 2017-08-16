@@ -8,7 +8,7 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.schema.Field;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * Frame and Browse widgets are FieldContainers. This class provides the services for looking up fields/variables in a
@@ -30,7 +31,7 @@ public abstract class FieldContainer extends Widget {
   private Set<Symbol> otherSymbols = new HashSet<>();
   private Set<Variable> variableSet = new HashSet<>();
 
-  public FieldContainer(String name, SymbolScope scope) {
+  public FieldContainer(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 

@@ -10,7 +10,10 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
-import org.prorefactor.widgettypes.IFieldLevelWidget;
+import org.prorefactor.treeparser.symbols.Event;
+import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.Variable;
+import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 /**
  * For field lookups, we need to be able to pass back the BufferScope object as well as the Field object.

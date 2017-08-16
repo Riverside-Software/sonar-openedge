@@ -1,3 +1,22 @@
+/*
+ * RCode library - OpenEdge plugin for SonarQube
+ * Copyright (C) 2017 Riverside Software
+ * contact AT riverside DASH software DOT fr
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
+ */
 package eu.rssw.pct.elements;
 
 import java.nio.ByteBuffer;
@@ -14,31 +33,50 @@ public class MethodParameter extends AbstractElement implements IParameter {
   private static final int PARAMETER_HANDLE = 2;
   private static final int PARAMETER_BIND = 4;
 
-  private int extent;
+  public static final int PARAMETER_INPUT = 6028;
+  public static final int PARAMETER_INOUT = 6110;
+  public static final int PARAMETER_OUTPUT = 6049;
+  public static final int PARAMETER_BUFFER = 1070;
+  
+  private final int paramNum;
+  private final int extent;
+  private final int flags;
+  private final int parameterType;
+  private final int paramMode;
+  private final int dataType;
+  private final String dataTypeName;
   // private int crc;
-  private int flags;
-  private int parameterType;
-  private int paramMode;
-  private int dataType;
   // private int fullNameLength;
-  private int paramNum;
 
-  private String argumentName;
+  public MethodParameter(int num, String name, int type, int mode, int flags, int dataType, String dataTypeName,
+      int extent) {
+    super(name);
+    this.paramNum = num;
+    this.parameterType = type;
+    this.paramMode = mode;
+    this.dataType = dataType;
+    this.dataTypeName = dataTypeName;
+    this.flags = flags;
+    this.extent = extent;
+  }
 
-  protected MethodParameter(byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
-    this.parameterType = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
-    this.paramMode = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
-    this.extent = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
-    this.dataType = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
-    // this.crc = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(order).getShort();
-    this.flags = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(order).getShort();
-    // this.fullNameLength = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort();
+  protected static MethodParameter fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
+      ByteOrder order) {
+    int parameterType = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
+    int paramMode = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
+    int extent = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
+    int dataType = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
+    // int crc = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(order).getShort();
+    // int fullNameLength = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort();
     int argumentNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 20, Integer.BYTES).order(order).getInt();
 
-    this.argumentName = argumentNameOffset == 0 ? ""
+    String dataTypeName = argumentNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + argumentNameOffset);
-    this.name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
+    String name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
+
+    return new MethodParameter(0, name, parameterType, paramMode, flags, dataType, dataTypeName, extent);
   }
 
   @Override
@@ -58,12 +96,12 @@ public class MethodParameter extends AbstractElement implements IParameter {
   @Override
   public String getDataType() {
     if (dataType == DataType.CLASS.getNum())
-      return argumentName;
+      return dataTypeName;
     return getABLDataType().name();
   }
 
   public String getArgumentName() {
-    return argumentName;
+    return dataTypeName;
   }
 
   public ParameterMode getABLMode() {

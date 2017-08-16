@@ -31,6 +31,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>eu.rssw.sonar.openedge</groupId>
+      <artifactId>rcode-reader</artifactId>
+      <version>2.0.4-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>antlr</groupId>
       <artifactId>antlr</artifactId>
       <version>2.7.7</version>

@@ -8,10 +8,15 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
+import org.prorefactor.treeparser.ClassSupport;
+import org.prorefactor.treeparser.DataType;
+import org.prorefactor.treeparser.Primative;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.Value;
 
 /**
  * A Symbol defined with DEFINE VARIABLE or any of the other various syntaxes which implicitly define a variable.
@@ -24,11 +29,11 @@ public class Variable extends Symbol implements Primative, Value {
   private String className = null;
   private boolean refInFrame = false;
 
-  public Variable(String name, SymbolScope scope) {
+  public Variable(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
-  public Variable(String name, SymbolScope scope, boolean parameter) {
+  public Variable(String name, TreeParserSymbolScope scope, boolean parameter) {
     super(name, scope, parameter);
   }
 
@@ -37,15 +42,6 @@ public class Variable extends Symbol implements Primative, Value {
     dataType = likePrim.getDataType();
     className = likePrim.getClassName();
     extent = likePrim.getExtent();
-  }
-
-  @Override
-  public Symbol copyBare(SymbolScope scope) {
-    Variable v = new Variable(getName(), scope);
-    v.className = this.className;
-    v.dataType = this.dataType;
-    v.extent = this.extent;
-    return v;
   }
 
   /**

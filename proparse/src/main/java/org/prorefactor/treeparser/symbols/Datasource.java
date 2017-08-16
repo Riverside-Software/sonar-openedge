@@ -8,30 +8,32 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.widgettypes;
+package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.treeparser.Symbol;
-import org.prorefactor.treeparser.SymbolScope;
-import org.prorefactor.treeparser.Widget;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
-public class Rectangle extends Widget implements IFieldLevelWidget {
+/** A Symbol defined with DEFINE DATA-SOURCE. */
+public class Datasource extends Symbol {
 
-  public Rectangle(String name, SymbolScope scope) {
+  public Datasource(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
+  /**
+   * For this subclass of Symbol, fullName() returns the same value as getName()
+   */
   @Override
-  public Symbol copyBare(SymbolScope scope) {
-    return new Rectangle(getName(), scope);
+  public String fullName() {
+    return getName();
   }
 
   /**
-   * @return NodeTypes.RECTANGLE
+   * Returns NodeTypes.DATASOURCE
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.RECTANGLE;
+    return NodeTypes.DATASOURCE;
   }
 
 }

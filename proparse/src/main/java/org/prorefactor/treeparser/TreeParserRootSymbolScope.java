@@ -19,23 +19,27 @@ import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.Routine;
+import org.prorefactor.treeparser.symbols.TableBuffer;
+
+import eu.rssw.pct.TypeInfo;
 
 /**
  * A ScopeRoot object is created for each compile unit, and it represents the program (topmost) scope. For classes, it
  * is the class scope, but it may also have a super class scope by way of inheritance.
  */
-public class SymbolScopeRoot extends SymbolScope {
+public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   private final RefactorSession refSession;
   private Map<String, ITable> tableMap = new HashMap<>();
   private String className = null;
+  private TypeInfo typeInfo = null;
   private boolean isInterface;
   private boolean abstractClass;
   private boolean serializableClass;
   private boolean finalClass;
 
-  public SymbolScopeRoot(RefactorSession session) {
-    super(null);
-    this.rootScope = this;
+  public TreeParserRootSymbolScope(RefactorSession session) {
     this.refSession = session;
   }
 
@@ -47,12 +51,6 @@ public class SymbolScopeRoot extends SymbolScope {
     String lowerName = table.getName().toLowerCase();
     if (tableMap.get(lowerName) == null)
       tableMap.put(lowerName, table);
-  }
-
-  /** Assign a super (inherited) class scope to this class scope. */
-  public void assignSuper(SymbolScopeRoot superScope) {
-    assert parentScope == null;
-    parentScope = superScope;
   }
 
   /**
@@ -88,11 +86,6 @@ public class SymbolScopeRoot extends SymbolScope {
   public FieldBuffer defineTableFieldDelayedAttach(String name, TableBuffer buffer) {
     IField field = new Field(name, null);
     return new FieldBuffer(this, buffer, field);
-  }
-
-  /** Generate "bare" symbols and SymbolScopeSuper from this scope's PUBLIC|PROTECTED members. */
-  public SymbolScopeSuper generateSymbolScopeSuper() {
-    return new SymbolScopeSuper(refSession, this);
   }
 
   /**
@@ -156,6 +149,41 @@ public class SymbolScopeRoot extends SymbolScope {
     return tableMap.get(name.toLowerCase());
   }
 
+  @Override
+  public TableBuffer lookupBuffer(String name) {
+    TableBuffer buff = super.lookupBuffer(name);
+    if (buff != null) {
+      return buff;
+    }
+
+    TypeInfo info = typeInfo;
+    while (info != null) {
+      if (info.hasTempTable(name)) {
+        ITable tbl = new Table(name, IConstants.ST_TTABLE);
+        return new TableBuffer(name, this, tbl);
+      }
+      info = refSession.getTypeInfo(info.getParentTypeName());
+    }
+    return null;
+  }
+
+  @Override
+  public TableBuffer lookupTempTable(String name) {
+    TableBuffer buff = super.lookupTempTable(name);
+    if (buff != null) {
+      return buff;
+    }
+    TypeInfo info = typeInfo;
+    while (info != null) {
+      if (info.hasTempTable(name)) {
+        ITable tbl = new Table(name, IConstants.ST_TTABLE);
+        return new TableBuffer(name, this, tbl);
+      }
+      info = refSession.getTypeInfo(info.getParentTypeName());
+    }
+    return null;
+  }
+
   /**
    * Lookup an unqualified temp/work table field name. Does not test for uniqueness. That job is left to the compiler.
    * (In fact, anywhere this is run, the compiler would check that the field name is also unique against schema tables.)
@@ -182,4 +210,7 @@ public class SymbolScopeRoot extends SymbolScope {
     className = s;
   }
 
+  public void setTypeInfo(TypeInfo typeInfo) {
+    this.typeInfo = typeInfo;
+  }
 }

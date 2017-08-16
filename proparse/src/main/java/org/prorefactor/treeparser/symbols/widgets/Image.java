@@ -8,30 +8,24 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.widgettypes;
+package org.prorefactor.treeparser.symbols.widgets;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.treeparser.Symbol;
-import org.prorefactor.treeparser.SymbolScope;
-import org.prorefactor.treeparser.Widget;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.symbols.Widget;
 
-public class Button extends Widget implements IFieldLevelWidget {
+public class Image extends Widget implements IFieldLevelWidget {
 
-  public Button(String name, SymbolScope scope) {
+  public Image(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
-  @Override
-  public Symbol copyBare(SymbolScope scope) {
-    return new Button(getName(), scope);
-  }
-
   /**
-   * @return NodeTypes.BUTTON
+   * @return NodeTypes.IMAGE
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.BUTTON;
+    return NodeTypes.IMAGE;
   }
 
 }

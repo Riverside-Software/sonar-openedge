@@ -8,38 +8,24 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols.widgets;
 
 import org.prorefactor.core.NodeTypes;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.symbols.FieldContainer;
 
-/**
- * A Symbol defined with DEFINE EVENT
- */
-public class Event extends Symbol {
+public class Browse extends FieldContainer implements IFieldLevelWidget {
 
-  public Event(String name, SymbolScope scope) {
+  public Browse(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
-  @Override
-  public Symbol copyBare(SymbolScope scope) {
-    return new Event(getName(), scope);
-  }
-
   /**
-   * For this subclass of Symbol, fullName() returns the same value as getName()
-   */
-  @Override
-  public String fullName() {
-    return getName();
-  }
-
-  /**
-   * Returns NodeTypes.EVENT.
+   * @return NodeTypes.BROWSE
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.EVENT;
+    return NodeTypes.BROWSE;
   }
 
 }

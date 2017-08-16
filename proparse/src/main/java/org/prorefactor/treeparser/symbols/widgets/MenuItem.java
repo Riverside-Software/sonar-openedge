@@ -8,30 +8,24 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.widgettypes;
+package org.prorefactor.treeparser.symbols.widgets;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.treeparser.Symbol;
-import org.prorefactor.treeparser.SymbolScope;
-import org.prorefactor.treeparser.Widget;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.symbols.Widget;
 
-public class Submenu extends Widget {
+public class MenuItem extends Widget {
 
-  public Submenu(String name, SymbolScope scope) {
+  public MenuItem(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
-  @Override
-  public Symbol copyBare(SymbolScope scope) {
-    return new Submenu(getName(), scope);
-  }
-
   /**
-   * @return NodeTypes.SUBMENU
+   * @return NodeTypes.MENUITEM
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.SUBMENU;
+    return NodeTypes.MENUITEM;
   }
 
 }

@@ -11,7 +11,6 @@ import org.prorefactor.core.schema.Constants;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.treeparser.SymbolScopeRoot;
 
 import eu.rssw.antlr.database.objects.Field;
 import eu.rssw.antlr.database.objects.Table;
@@ -77,8 +76,4 @@ public class TableWrapper implements ITable {
     return IConstants.ST_DBTABLE;
   }
 
-  @Override
-  public ITable copyBare(SymbolScopeRoot scope) {
-    return new TableWrapper(db, table);
-  }
 }

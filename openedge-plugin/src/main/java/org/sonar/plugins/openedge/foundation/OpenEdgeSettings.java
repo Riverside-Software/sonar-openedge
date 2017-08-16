@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -64,8 +66,10 @@ import eu.rssw.antlr.database.DumpFileUtils;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
 import eu.rssw.pct.FileEntry;
 import eu.rssw.pct.PLReader;
+import eu.rssw.pct.ProgressClasses;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
+import eu.rssw.pct.TypeInfo;
 
 @ScannerSide
 @SonarLintSide
@@ -101,7 +105,6 @@ public class OpenEdgeSettings {
     if (useXrefFilter()) {
       LOG.info("XML XREF filter activated [{}]", getXrefBytesAsString());
     }
-    parseBuildDirectory();
   }
 
   private final void initializeDirectories(Settings settings, FileSystem fileSystem) {
@@ -133,7 +136,6 @@ public class OpenEdgeSettings {
       tmp = new File(fileSystem.baseDir(), binariesSetting);
     this.binariesDir = tmp;
     this.pctDir = new File(binariesDir, ".pct");
-
   }
 
   private final void initializePropath(Settings settings, FileSystem fileSystem) {
@@ -195,7 +197,42 @@ public class OpenEdgeSettings {
     }
   }
 
-  private final void parseBuildDirectory() {
+  public final void parseHierarchy(String fileName) {
+    String fileInPropath = searchInPropath(fileName);
+    File rcd = getRCode(fileInPropath);
+    LOG.info("Parsing hierarchy of {} -- In PROPATH {} - Expecting rcode in {}", fileName, fileInPropath, rcd);
+    if ((rcd != null) && rcd.exists()) {
+      TypeInfo info = parseRCode(rcd);
+      if (info != null) {
+        parseHierarchy(info);
+      }
+    }
+  }
+
+  private final void parseHierarchy(TypeInfo info) {
+    LOG.info("Injecting type info '{}'", info);
+    proparseSession.injectTypeInfo(info);
+    if (info.getParentTypeName() != null) {
+      File rcd = getRCode(info.getParentTypeName());
+      if (rcd != null) {
+        TypeInfo inf = parseRCode(rcd);
+        if (inf != null) {
+          parseHierarchy(inf);
+        }
+      }
+    }
+    for (String str : info.getInterfaces()) {
+      File rcd = getRCode(str);
+      if (rcd != null) {
+        TypeInfo inf = parseRCode(rcd);
+        if (inf != null) {
+          parseHierarchy(inf);
+        }
+      }
+    }
+  }
+
+  public final void parseBuildDirectory() {
     if (settings.getBoolean(Constants.SKIP_RCODE))
       return;
 
@@ -210,16 +247,12 @@ public class OpenEdgeSettings {
       if (f.getName().endsWith(".r")) {
         numRCode.incrementAndGet();
         service.submit(() -> {
-          try {
-            LOG.debug("Parsing rcode {}", f.getAbsolutePath());
-            RCodeInfo rci = new RCodeInfo(new FileInputStream(f));
-            if (rci.isClass()) {
-              numClasses.incrementAndGet();
-              numMethods.addAndGet(rci.getUnit().getMethods().size());
-              numProperties.addAndGet(rci.getUnit().getProperties().size());
-            }
-          } catch (InvalidRCodeException | IOException caught) {
-            LOG.error("Unable to parse rcode " + f.getAbsolutePath(), caught);
+          TypeInfo info = parseRCode(f);
+          if (info != null) {
+            numClasses.incrementAndGet();
+            numMethods.addAndGet(info.getMethods().size());
+            numProperties.addAndGet(info.getProperties().size());
+            proparseSession.injectTypeInfo(info);
           }
         });
       }
@@ -229,7 +262,6 @@ public class OpenEdgeSettings {
     String dlcInstallDir = settings.getString(Constants.DLC);
     boolean dlcInPropath = settings.getBoolean(Constants.PROPATH_DLC);
     if (dlcInPropath && !Strings.isNullOrEmpty(dlcInstallDir)) {
-      currTime = System.currentTimeMillis();
       File dlc = new File(dlcInstallDir);
 
       Files.fileTreeTraverser().preOrderTraversal(new File(dlc, "gui")).forEach(f -> {
@@ -249,13 +281,30 @@ public class OpenEdgeSettings {
         System.currentTimeMillis() - currTime, numClasses.get(), numMethods.get(), numProperties.get());
   }
 
+  private TypeInfo parseRCode(File file) {
+    try (FileInputStream fis = new FileInputStream(file)) {
+      LOG.debug("Parsing rcode {}", file.getAbsolutePath());
+      RCodeInfo rci = new RCodeInfo(fis);
+      if (rci.isClass()) {
+        return rci.getTypeInfo();
+      }
+    } catch (InvalidRCodeException | IOException | RuntimeException caught) {
+      LOG.error("Unable to parse rcode {} - Please open issue on GitHub - {}", file.getAbsolutePath(),
+          caught.getClass().getName());
+    }
+    return null;
+  }
+
   private void parseLibrary(File lib) {
     LOG.debug("Parsing PL " + lib.getAbsolutePath());
     PLReader pl = new PLReader(lib);
     for (FileEntry entry : pl.getFileList()) {
       if (entry.getFileName().endsWith(".r")) {
         try {
-          new RCodeInfo(pl.getInputStream(entry));
+          RCodeInfo rci = new RCodeInfo(pl.getInputStream(entry));
+          if (rci.isClass()) {
+            proparseSession.injectTypeInfo(rci.getTypeInfo());
+          }
         } catch (InvalidRCodeException | IOException caught) {
           LOG.error("Unable to open file " + entry.getFileName() + " in PL " + lib.getAbsolutePath(), caught);
         }
@@ -330,6 +379,17 @@ public class OpenEdgeSettings {
     return fileName;
   }
 
+  public String searchInPropath(String fileName) {
+    Path target = Paths.get(fileName);
+    for (File entry : propath) {
+      Path relPath = entry.toPath().relativize(target);
+      if (!relPath.startsWith(".."))
+        return relPath.toString();
+    }
+
+    return "";
+  }
+
   /**
    * Returns true if procedure or function should be skipped by CPD engine
    * 
@@ -385,12 +445,17 @@ public class OpenEdgeSettings {
     return Joiner.on(',').skipNulls().join(propath);
   }
 
-  public RefactorSession getProparseSession(boolean useCache) {
+  public RefactorSession getProparseSession(boolean sonarLintSession) {
     if (proparseSession == null) {
-      Schema sch = readSchema(settings, fileSystem, useCache);
+      Schema sch = readSchema(settings, fileSystem, sonarLintSession);
       IProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
           settings.getBoolean(Constants.BACKSLASH_ESCAPE));
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
+      proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());
+      if (!sonarLintSession) {
+        // Parse entire build directory if not in SonarLint
+        parseBuildDirectory();
+      }
     }
 
     return proparseSession;
@@ -463,7 +528,7 @@ public class OpenEdgeSettings {
         Strings.nullToEmpty(settings.getString(Constants.ALIASES)))) {
       List<String> lst = Splitter.on(',').trimResults().splitToList(str);
       for (String alias : lst.subList(1, lst.size())) {
-        LOG.debug("Adding {} aliases to database {}", new Object[] {alias, lst.get(0)});
+        LOG.debug("Adding {} aliases to database {}", alias, lst.get(0));
         sch.createAlias(alias, lst.get(0));
       }
     }

@@ -8,30 +8,24 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.widgettypes;
+package org.prorefactor.treeparser.symbols.widgets;
 
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.treeparser.FieldContainer;
-import org.prorefactor.treeparser.Symbol;
-import org.prorefactor.treeparser.SymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.symbols.Widget;
 
-public class Browse extends FieldContainer implements IFieldLevelWidget {
+public class Button extends Widget implements IFieldLevelWidget {
 
-  public Browse(String name, SymbolScope scope) {
+  public Button(String name, TreeParserSymbolScope scope) {
     super(name, scope);
   }
 
-  @Override
-  public Symbol copyBare(SymbolScope scope) {
-    return new Browse(getName(), scope);
-  }
-
   /**
-   * @return NodeTypes.BROWSE
+   * @return NodeTypes.BUTTON
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.BROWSE;
+    return NodeTypes.BUTTON;
   }
 
 }

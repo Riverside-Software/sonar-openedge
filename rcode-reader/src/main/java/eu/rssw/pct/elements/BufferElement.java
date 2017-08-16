@@ -1,3 +1,22 @@
+/*
+ * RCode library - OpenEdge plugin for SonarQube
+ * Copyright (C) 2017 Riverside Software
+ * contact AT riverside DASH software DOT fr
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
+ */
 package eu.rssw.pct.elements;
 
 import java.nio.ByteBuffer;
@@ -10,29 +29,35 @@ import eu.rssw.pct.RCodeInfo;
 public class BufferElement extends AbstractAccessibleElement {
   private static final int TEMP_TABLE = 4;
 
-  private String tableName;
-  private String databaseName;
+  private final String tableName;
+  private final String databaseName;
+  private final int flags;
 
-  private int flags;
-
-  public BufferElement(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
-      ByteOrder order) {
+  public BufferElement(String name, Set<AccessType> accessType, String tableName, String dbName, int flags) {
     super(name, accessType);
+    this.tableName = tableName;
+    this.databaseName = dbName;
+    this.flags = flags;
+  }
 
+  public static BufferElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
+      ByteOrder order) {
     int nameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
-    this.name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
+    String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int tableNameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
-    this.tableName = tableNameOffset == 0 ? ""
+    String tableName = tableNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + tableNameOffset);
 
     int databaseNameOffset = ByteBuffer.wrap(segment, currentPos + 8, Integer.BYTES).order(order).getInt();
-    this.databaseName = databaseNameOffset == 0 ? ""
+    String databaseName = databaseNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + databaseNameOffset);
 
-    this.flags = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort();
-    // this.crc = ByteBuffer.wrap(segment, currentPos + 14, Short.BYTES).order(order).getShort();
-    // this.prvt = ByteBuffer.wrap(segment, currentPos + 16, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort();
+    // int crc = ByteBuffer.wrap(segment, currentPos + 14, Short.BYTES).order(order).getShort();
+    // int prvt = ByteBuffer.wrap(segment, currentPos + 16, Short.BYTES).order(order).getShort();
+
+    return new BufferElement(name2, accessType, tableName, databaseName, flags);
   }
 
   @Override

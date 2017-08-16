@@ -10,52 +10,44 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser01;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
-import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.core.schema.Table;
-import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.BufferScope;
 import org.prorefactor.treeparser.Call;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.DataType;
-import org.prorefactor.treeparser.Dataset;
-import org.prorefactor.treeparser.Event;
 import org.prorefactor.treeparser.Expression;
-import org.prorefactor.treeparser.FieldBuffer;
 import org.prorefactor.treeparser.FieldLookupResult;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.Primative;
-import org.prorefactor.treeparser.Routine;
-import org.prorefactor.treeparser.Symbol;
 import org.prorefactor.treeparser.SymbolFactory;
-import org.prorefactor.treeparser.SymbolScope;
-import org.prorefactor.treeparser.SymbolScopeRoot;
-import org.prorefactor.treeparser.SymbolScopeSuper;
-import org.prorefactor.treeparser.TableBuffer;
 import org.prorefactor.treeparser.TreeParserException;
-import org.prorefactor.treeparser.Variable;
-import org.prorefactor.widgettypes.Browse;
+import org.prorefactor.treeparser.TreeParserRootSymbolScope;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.symbols.Dataset;
+import org.prorefactor.treeparser.symbols.Event;
+import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.Routine;
+import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.Variable;
+import org.prorefactor.treeparser.symbols.widgets.Browse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +73,7 @@ public class TP01Support extends TP01Action {
   private Block currentBlock;
   private Expression wipExpression;
   private FrameStack frameStack = new FrameStack();
-  private Map<String, SymbolScope> funcForwards = new HashMap<>();
+  private Map<String, TreeParserSymbolScope> funcForwards = new HashMap<>();
   /** There may be more than one WIP call, since a functioncall is a perfectly valid parameter. */
   private Deque<Call> wipCalls = new LinkedList<>();
   /** Since there can be more than one WIP Call, there can be more than one WIP Parameter. */
@@ -97,8 +89,8 @@ public class TP01Support extends TP01Action {
    */
   private Symbol currSymbol;
 
-  private SymbolScope currentScope;
-  private SymbolScopeRoot rootScope;
+  private TreeParserSymbolScope currentScope;
+  private TreeParserRootSymbolScope rootScope;
   private TableBuffer lastTableReferenced;
   private TableBuffer prevTableReferenced;
   private TableBuffer currDefTable;
@@ -108,7 +100,7 @@ public class TP01Support extends TP01Action {
 
   public TP01Support(RefactorSession session) {
     this.refSession = session;
-    rootScope = new SymbolScopeRoot(refSession);
+    rootScope = new TreeParserRootSymbolScope(refSession);
     currentScope = rootScope;
     setParseUnit(new ParseUnit(null, session));
   }
@@ -234,11 +226,10 @@ public class TP01Support extends TP01Action {
     JPNode classNode = (JPNode) classAST;
     JPNode idNode = classNode.firstChild();
     rootScope.setClassName(idNode.getText());
+    rootScope.setTypeInfo(refSession.getTypeInfo(idNode.getText()));
     rootScope.setAbstractClass(abstractKw != null);
     rootScope.setFinalClass(finalKw != null);
     rootScope.setSerializableClass(serializableKw != null);
-    if (idNode.nextSibling().getType() == NodeTypes.INHERITS)
-      classStateInherits(classNode, idNode.nextSibling().firstChild());
   }
 
   @Override
@@ -247,8 +238,9 @@ public class TP01Support extends TP01Action {
     JPNode classNode = (JPNode) ast;
     JPNode idNode = classNode.firstChild();
     rootScope.setClassName(idNode.getText());
+    rootScope.setTypeInfo(refSession.getTypeInfo(idNode.getText()));
     rootScope.setInterface(true);
-  };
+  }
 
   @Override
   public void clearState(AST headAST) {
@@ -692,7 +684,7 @@ public class TP01Support extends TP01Action {
     scopeAdd(funcAST);
     JPNode idNode = (JPNode) idAST;
     BlockNode blockNode = (BlockNode) idNode.getParent();
-    SymbolScope definingScope = currentScope.getParentScope();
+    TreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(idAST.getText(), definingScope, currentScope);
     r.setProgressType(NodeTypes.FUNCTION);
     r.setDefOrIdNode(blockNode);
@@ -713,7 +705,7 @@ public class TP01Support extends TP01Action {
      */
     if (currentRoutine.getParameters().size() > 0)
       return;
-    SymbolScope forwardScope = funcForwards.get(idAST.getText());
+    TreeParserSymbolScope forwardScope = funcForwards.get(idAST.getText());
     if (forwardScope != null) {
       Routine routine = (Routine) forwardScope.getRootBlock().getNode().getSymbol();
       scopeSwap(forwardScope);
@@ -746,7 +738,7 @@ public class TP01Support extends TP01Action {
     scopeAdd(blockAST);
     JPNode idNode = (JPNode) idAST;
     BlockNode blockNode = (BlockNode) idNode.getParent();
-    SymbolScope definingScope = currentScope.getParentScope();
+    TreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(idAST.getText(), definingScope, currentScope);
     r.setProgressType(NodeTypes.METHOD);
     r.setDefOrIdNode(blockNode);
@@ -766,7 +758,7 @@ public class TP01Support extends TP01Action {
     LOG.trace("Entering propGetSetBegin {}", propAST);
     scopeAdd(propAST);
     BlockNode blockNode = (BlockNode) propAST;
-    SymbolScope definingScope = currentScope.getParentScope();
+    TreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(propAST.getText(), definingScope, currentScope);
     r.setProgressType(propAST.getType());
     r.setDefOrIdNode(blockNode);
@@ -863,7 +855,7 @@ public class TP01Support extends TP01Action {
   @Override
   public void procedureBegin(AST procAST, AST idAST) {
     BlockNode blockNode = (BlockNode) procAST;
-    SymbolScope definingScope = currentScope;
+    TreeParserSymbolScope definingScope = currentScope;
     scopeAdd(blockNode);
     Routine r = new Routine(idAST.getText(), definingScope, currentScope);
     r.setProgressType(NodeTypes.PROCEDURE);
@@ -899,11 +891,11 @@ public class TP01Support extends TP01Action {
   @Override
   public void programTail() throws TreeParserException {
     // Now that we know what all the internal Routines are, wrap up the Calls.
-    List<SymbolScope> allScopes = new ArrayList<>();
+    List<TreeParserSymbolScope> allScopes = new ArrayList<>();
     allScopes.add(rootScope);
     allScopes.addAll(rootScope.getChildScopesDeep());
     LinkedList<Call> calls = new LinkedList<>();
-    for (SymbolScope scope : allScopes) {
+    for (TreeParserSymbolScope scope : allScopes) {
       for (Call call : scope.getCallList()) {
         // Process IN HANDLE last to make sure PERSISTENT SET is processed first.
         if (call.isInHandle()) {
@@ -1079,7 +1071,7 @@ public class TP01Support extends TP01Action {
    * definitions. We have to do this because the definition itself may have left out the parameter list - it's not
    * required - it just uses the parameter list from the declaration.
    */
-  private void scopeSwap(SymbolScope scope) {
+  private void scopeSwap(TreeParserSymbolScope scope) {
     currentScope = scope;
     blockEnd(); // pop the unused block from the stack
     currentBlock = pushBlock(scope.getRootBlock());
@@ -1109,7 +1101,7 @@ public class TP01Support extends TP01Action {
      */
     scopeAdd(blockAST);
     BlockNode blockNode = (BlockNode) blockAST;
-    SymbolScope definingScope = currentScope.getParentScope();
+    TreeParserSymbolScope definingScope = currentScope.getParentScope();
     // 'structors don't have names, so use empty string.
     Routine r = new Routine("", definingScope, currentScope);
     r.setProgressType(blockNode.getType());
@@ -1150,43 +1142,12 @@ public class TP01Support extends TP01Action {
     return block;
   }
 
-  public SymbolScope getCurrentScope() {
+  public TreeParserSymbolScope getCurrentScope() {
     return currentScope;
   }
 
-  public SymbolScopeRoot getRootScope() {
+  public TreeParserRootSymbolScope getRootScope() {
     return rootScope;
-  }
-
-  private void classStateInherits(JPNode classNode, JPNode inheritsTypeNode) {
-    LOG.trace("Entering classStateInherits {} {}", classNode, inheritsTypeNode);
-    String className = inheritsTypeNode.attrGetS(IConstants.QUALIFIED_CLASS_STRING);
-    SymbolScopeSuper cachedCopy = null;
-    try {
-      cachedCopy = SymbolScopeSuper.cache.get(className.toLowerCase(), new Callable<SymbolScopeSuper>() {
-        @Override
-        public SymbolScopeSuper call() throws Exception {
-          SymbolScopeSuper clz = classStateSuper(classNode, className);
-          if (clz == null) {
-            throw new ExecutionException("Unable to find class " + className, null);
-          } else {
-            return clz;
-          }
-        }
-      });
-    } catch (ExecutionException caught) {
-      // Parse error from parent classes are thrown to caller
-      if (caught.getCause() instanceof RefactorException) {
-        throw new ProparseRuntimeException(caught.getCause());
-      }
-      LOG.trace("ExecutionException", caught);
-      return;
-    }
-
-    // We take a copy of the cached superScope, because the tree parser messes with
-    // the attributes of the symbols, and we don't want to mess with the symbols that
-    // are in the super scopes in the cache.
-    rootScope.assignSuper(cachedCopy.generateSymbolScopeSuper());
   }
 
   /** Get the Table symbol linked from a RECORD_NAME AST. */
@@ -1195,23 +1156,6 @@ public class TP01Support extends TP01Action {
     TableBuffer buffer = (TableBuffer) ((JPNode) tableAST).getLink(IConstants.SYMBOL);
     assert buffer != null;
     return buffer.getTable();
-  }
-
-  private SymbolScopeSuper classStateSuper(JPNode classNode, String className) throws RefactorException {
-    LOG.trace("Entering classStateSuper {} {}", classNode, className);
-    File file = refSession.findFileForClassName(className);
-    if ((file == null) || !file.exists()) {
-      // Could not find the super class. Will happen with Progress.lang.*, vendor libraries, etc.
-      return null;
-    }
-    ParseUnit pu = new ParseUnit(file, refSession);
-    JPNode superClassTree = (JPNode) classNode.getLink(IConstants.SUPER_CLASS_TREE);
-    if (superClassTree != null) {
-      pu.setTopNode(superClassTree);
-    }
-    pu.treeParser01();
-
-    return pu.getRootScope().generateSymbolScopeSuper();
   }
 
 }

@@ -1,10 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green All rights reserved. This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
+ * Copyright (c) 2003-2015 John Green
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: John Green - initial API and implementation and/or initial documentation
- *******************************************************************************/
+ * Contributors:
+ *    John Green - initial API and implementation and/or initial documentation
+ *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
 import static org.testng.Assert.assertEquals;
@@ -12,13 +15,13 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.util.List;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -30,6 +33,7 @@ import com.google.inject.Injector;
 
 import antlr.Token;
 import antlr.TokenStream;
+import eu.rssw.pct.RCodeInfo;
 
 /**
  * Test the tree parsers against problematic syntax. These tests just run the tree parsers against the data/bugsfixed
@@ -48,6 +52,10 @@ public class BugFixTest {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
+    session.injectTypeInfo(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ParentClass.r")).getTypeInfo());
+    session.injectTypeInfo(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ChildClass.r")).getTypeInfo());
 
     tempDir.mkdirs();
   }
@@ -248,15 +256,15 @@ public class BugFixTest {
   }
 
   // Next two tests : same exception should be thrown in both cases
-  @Test(expectedExceptions = {ProparseRuntimeException.class})
-  public void testCache1() throws Exception {
-    genericTest("CacheChild.cls");
-  }
-
-  @Test(expectedExceptions = {ProparseRuntimeException.class})
-  public void testCache2() throws Exception {
-    genericTest("CacheChild.cls");
-  }
+//  @Test(expectedExceptions = {ProparseRuntimeException.class})
+//  public void testCache1() throws Exception {
+//    genericTest("CacheChild.cls");
+//  }
+//
+//  @Test(expectedExceptions = {ProparseRuntimeException.class})
+//  public void testCache2() throws Exception {
+//    genericTest("CacheChild.cls");
+//  }
 
   @Test
   public void testSaxWriter() throws Exception {
@@ -341,4 +349,13 @@ public class BugFixTest {
   public void testDataset() throws Exception {
     genericTest("DatasetParentFields.p");
   }
+
+  @Test
+  public void testRCodeStructure() throws Exception {
+     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/ChildClass.cls"), session);
+     assertNull(unit.getTopNode());
+     assertNull(unit.getRootScope());
+     unit.treeParser01();
+     assertNotNull(unit.getTopNode());
+   }
 }

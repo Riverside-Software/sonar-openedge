@@ -3,8 +3,6 @@ package org.prorefactor.core.schema;
 import java.util.List;
 import java.util.SortedSet;
 
-import org.prorefactor.treeparser.SymbolScopeRoot;
-
 public interface ITable {
   IDatabase getDatabase();
   String getName();
@@ -28,13 +26,4 @@ public interface ITable {
   // TODO Document return values
   int getStoretype();
 
-  /**
-   * Create a bare minimum copy of a Table definition. No-op if the table already exists in the requested scope. Copies
-   * all of the field definitions as well.
-   * 
-   * @param scope The scope that this table is to be added to.
-   * @return The newly created table, or the existing one from the scope if it has previously been defined.
-   */
-  // TODO Remove dependency
-  ITable copyBare(SymbolScopeRoot scope);
 }

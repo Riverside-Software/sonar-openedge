@@ -8,10 +8,12 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
+import org.prorefactor.treeparser.ContextQualifier;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * Base class for any type of symbol which needs to be kept track of when parsing a 4gl compile unit's AST.
@@ -30,15 +32,15 @@ public abstract class Symbol implements ISymbol {
   private JPNode likeNode;
 
   // What scope this symbol was defined in
-  private SymbolScope scope;
+  private TreeParserSymbolScope scope;
   // Stores the full name, original (mixed) case as in definition
   private final String name;
 
-  public Symbol(String name, SymbolScope scope) {
+  public Symbol(String name, TreeParserSymbolScope scope) {
     this(name, scope, false);
   }
 
-  public Symbol(String name, SymbolScope scope, boolean parameter) {
+  public Symbol(String name, TreeParserSymbolScope scope, boolean parameter) {
     this.name = name;
     this.scope = scope;
     this.parameter = parameter;
@@ -112,51 +114,8 @@ public abstract class Symbol implements ISymbol {
   }
 
   @Override
-  public SymbolScope getScope() {
+  public TreeParserSymbolScope getScope() {
     return scope;
-  }
-
-  @Override
-  public boolean isExported() {
-    // If the symbol belongs to a SymbolScopeSuper, then not only has it already
-    // been determined that the symbol is exported, but also the rest of this
-    // method would just not work because there is never any AST linked to any
-    // of the symbols in a SymbolScopeSuper.
-    if (scope instanceof SymbolScopeSuper)
-      return true;
-    SymbolScopeRoot unitScope = scope.getRootScope();
-    // If this is not at the unit (root) scope, then it cannot be visible.
-    if (scope != unitScope)
-      return false;
-    if (unitScope.getClassName() != null) {
-      // For class members, only elements declared PUBLIC|PROTECTED are visible.
-      // Unnamed buffers don't have a DEFINE node.
-      if (defNode == null)
-        return false;
-      return (defNode.findDirectChild(NodeTypes.PUBLIC) != null)
-          || (defNode.findDirectChild(NodeTypes.PROTECTED) != null);
-    }
-    // If there is no DEFINE node (inline var def), then it is not visible.
-    if (defNode == null)
-      return false;
-    switch (defNode.getType()) {
-      case NodeTypes.DEFINE:
-        return defNode.firstChild().getType() == NodeTypes.NEW;
-      case NodeTypes.FUNCTION:
-      case NodeTypes.PROCEDURE:
-        return defNode.findDirectChild(NodeTypes.PRIVATE) == null;
-    }
-    return false;
-  }
-
-  @Override
-  public boolean isImported() {
-    // If there is no DEFINE node (inline var def), then it is not SHARED.
-    if (defNode == null || defNode.getType() != NodeTypes.DEFINE)
-      return false;
-    if (defNode.firstChild().getType() == NodeTypes.SHARED)
-      return true;
-    return false;
   }
 
   @Override

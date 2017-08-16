@@ -1,5 +1,5 @@
 /*
- * OpenEdge plugin for SonarQube
+ * RCode library - OpenEdge plugin for SonarQube
  * Copyright (C) 2017 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
@@ -27,7 +27,6 @@ import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -89,12 +88,8 @@ public class RCodeInfo {
 
   // From type block
   private boolean isClass = false;
-  private String typeName;
-  private String parentTypeName;
-  private String assemblyName;
-  private List<String> interfaces = new ArrayList<>();
 
-  private RCodeUnit unit = new RCodeUnit();
+  private TypeInfo typeInfo = new TypeInfo();
 
   public RCodeInfo(InputStream input) throws InvalidRCodeException, IOException {
     this(input, null);
@@ -240,78 +235,80 @@ public class RCodeInfo {
     int interfaceCount = ByteBuffer.wrap(segment, 16, Short.BYTES).order(order).getShort();
     // int textAreaSize = ByteBuffer.wrap(segment, 24, Integer.BYTES).order(order).getInt();
     int textAreaOffset = ByteBuffer.wrap(segment, 40, Integer.BYTES).order(order).getInt();
-
+    
+    this.typeInfo.flags = ByteBuffer.wrap(segment, 20, Integer.BYTES).order(order).getInt();
     int nameOffset = ByteBuffer.wrap(segment, 32, Integer.BYTES).order(order).getInt();
-    this.typeName = readNullTerminatedString(segment, textAreaOffset + nameOffset);
+    this.typeInfo.typeName = readNullTerminatedString(segment, textAreaOffset + nameOffset);
     int assemblyNameOffset = ByteBuffer.wrap(segment, 36, Integer.BYTES).order(order).getInt();
-    this.assemblyName = readNullTerminatedString(segment, textAreaOffset + assemblyNameOffset);
+    this.typeInfo.assemblyName = readNullTerminatedString(segment, textAreaOffset + assemblyNameOffset);
 
-    List<short[]> entries = new ArrayList<>();
+    // ID - Access type - Kind - Name offset
+    List<int[]> entries = new ArrayList<>();
     for (int zz = 0; zz < publicElementCount + protectedElementCount + privateElementCount + constructorCount; zz++) {
-      entries.add(new short[] {
-          ByteBuffer.wrap(segment, 80 + 0 + (16 * zz), Short.BYTES).order(order).getShort(),
-          ByteBuffer.wrap(segment, 80 + 2 + (16 * zz), Short.BYTES).order(order).getShort(),
-          ByteBuffer.wrap(segment, 80 + 4 + (16 * zz), Short.BYTES).order(order).getShort(),
-          ByteBuffer.wrap(segment, 80 + 12 + (16 * zz), Short.BYTES).order(order).getShort()});
+      entries.add(new int[] {
+          (int) ByteBuffer.wrap(segment, 80 + 0 + (16 * zz), Short.BYTES).order(order).getShort(),
+          (int) ByteBuffer.wrap(segment, 80 + 2 + (16 * zz), Short.BYTES).order(order).getShort(),
+          (int) ByteBuffer.wrap(segment, 80 + 4 + (16 * zz), Short.BYTES).order(order).getShort(),
+          ByteBuffer.wrap(segment, 80 + 12 + (16 * zz), Integer.BYTES).order(order).getInt()});
     }
 
     int currOffset = 80 + 16 * (publicElementCount + protectedElementCount + privateElementCount + constructorCount);
-    this.parentTypeName = readNullTerminatedString(segment, textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
+    this.typeInfo.parentTypeName = readNullTerminatedString(segment, textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
     currOffset += 24;
     
     for (int zz = 0; zz < interfaceCount; zz++) {
       String str = readNullTerminatedString(segment,
           textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
-      interfaces.add(str);
+      typeInfo.getInterfaces().add(str);
       currOffset += 24;
     }
-    
-    for (short[] entry : entries) {
+
+    for (int[] entry : entries) {
       String name = readNullTerminatedString(segment, textAreaOffset + entry[3]);
       Set<AccessType> set = AccessType.getTypeFromString(entry[1]);
 
       switch(ElementKind.getKind(entry[2])) {
         case METHOD:
-          MethodElement mthd = new MethodElement(name, set, segment, currOffset, textAreaOffset, order);
+          MethodElement mthd = MethodElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
           currOffset += mthd.size();
-          unit.methods.add(mthd);
+          typeInfo.getMethods().add(mthd);
           break;
         case PROPERTY:          
-            PropertyElement prop = new PropertyElement(name, set, segment, currOffset, textAreaOffset, order);
+            PropertyElement prop = PropertyElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += prop.size();
-            unit.properties.add(prop);
+            typeInfo.getProperties().add(prop);
             break;
         case VARIABLE:
-            VariableElement var = new VariableElement(name, set, segment, currOffset, textAreaOffset, order);
+            VariableElement var = VariableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += var.size();
-            unit.variables.add(var);
+            typeInfo.getVariables().add(var);
           break;
         case TABLE:
-            TableElement tbl = new TableElement(name, set, segment, currOffset, textAreaOffset, order);
+            TableElement tbl = TableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += tbl.size();
-            unit.tables.add(tbl);
+            typeInfo.getTables().add(tbl);
           break;
         case BUFFER:
-            BufferElement buf = new BufferElement(name, set, segment, currOffset, textAreaOffset, order);
+            BufferElement buf =  BufferElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += buf.size();
-            unit.buffers.add(buf);
+            typeInfo.getBuffers().add(buf);
           break;
         case QUERY:
-            QueryElement qry = new QueryElement(name, set, segment, currOffset, textAreaOffset, order);
+            QueryElement qry = QueryElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += qry.size();
           break;
         case DATASET:
-            DatasetElement ds = new DatasetElement(name, set, segment, currOffset, textAreaOffset, order);
+            DatasetElement ds = DatasetElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += ds.size();
           break;
         case DATASOURCE:
-           DataSourceElement dso = new DataSourceElement(name, set, segment, currOffset, textAreaOffset, order);
+           DataSourceElement dso = DataSourceElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += dso.size();
           break;
         case EVENT:
-           EventElement evt = new EventElement(name, set, segment, currOffset, textAreaOffset, order);
+           EventElement evt = EventElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
             currOffset += evt.size();
-            unit.events.add(evt);
+            typeInfo.getEvents().add(evt);
           break;
         case UNKNOWN:
           throw new InvalidRCodeException("Found element kind " + entry[2]);
@@ -344,8 +341,8 @@ public class RCodeInfo {
 
   }
 
-  public RCodeUnit getUnit() {
-    return unit;
+  public TypeInfo getTypeInfo() {
+    return typeInfo;
   }
 
   public static void printByteBuffer(PrintStream writer, byte[] block) {
@@ -397,22 +394,6 @@ public class RCodeInfo {
 
   public boolean isClass() {
     return isClass;
-  }
-
-  public String getTypeName() {
-    return typeName;
-  }
-
-  public String getParentTypeName() {
-    return parentTypeName;
-  }
-
-  public String getAssemblyName() {
-    return assemblyName;
-  }
-
-  public List<String> getInterfaces() {
-    return interfaces;
   }
 
   public static String readNullTerminatedString(byte[] array, int offset) {
@@ -515,51 +496,6 @@ public class RCodeInfo {
     return param;
   }
 
-  // Main object for all object signatures
-  public static class RCodeUnit {
-    private Function mainProcedure;
-    private Collection<Function> funcs = new ArrayList<>();
-    private List<TempTable> tts = new ArrayList<>();
-    private Collection<MethodElement> methods = new ArrayList<>();
-    private Collection<PropertyElement> properties = new ArrayList<>();
-    private Collection<EventElement> events = new ArrayList<>();
-    private Collection<VariableElement> variables = new ArrayList<>();
-    private Collection<TableElement> tables = new ArrayList<>();
-    private Collection<BufferElement> buffers = new ArrayList<>();
-
-    public Function getMainProcedure() {
-      return mainProcedure;
-    }
-
-    public Collection<Function> getFuncs() {
-      return funcs;
-    }
-
-    public Collection<MethodElement> getMethods() {
-      return methods;
-    }
-
-    public Collection<PropertyElement> getProperties() {
-      return properties;
-    }
-
-    public Collection<EventElement> getEvents() {
-      return events;
-    }
-
-    public Collection<VariableElement> getVariables() {
-      return variables;
-    }
-
-    public Collection<TableElement> getTables() {
-      return tables;
-    }
-
-    public Collection<BufferElement> getBuffers() {
-      return buffers;
-    }
-  }
-  
   public static class Function {
     private Set<SigAccessType> accessTypes;
     private String name;
@@ -712,13 +648,4 @@ public class RCodeInfo {
     }
   }
 
-  public static class TempTable {
-    private String name;
-    private List<Field> fields = new ArrayList<>();
-  }
-
-  public static class Field {
-    private String name;
-    private DataType datatype;
-  }
 }

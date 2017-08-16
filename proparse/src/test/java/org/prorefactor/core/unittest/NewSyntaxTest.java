@@ -8,6 +8,7 @@
 package org.prorefactor.core.unittest;
 
 import java.io.File;
+import java.io.FileInputStream;
 
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
@@ -18,6 +19,8 @@ import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import eu.rssw.pct.RCodeInfo;
 
 /**
  * Test all tree parsers against new syntax. These tests just run the tree parsers against the data/newsyntax directory.
@@ -31,6 +34,10 @@ public class NewSyntaxTest {
   public void setUp() throws Exception {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
+    session.injectTypeInfo(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/newsyntax/101b/deep/FindMe.r")).getTypeInfo());
+    session.injectTypeInfo(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/newsyntax/101b/Test1.r")).getTypeInfo());
   }
 
   private void testNewSyntax(String file) throws Exception {

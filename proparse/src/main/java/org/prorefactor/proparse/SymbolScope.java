@@ -15,23 +15,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorSession;
 
 public class SymbolScope {
   private final RefactorSession session;
-  private SymbolScope superScope;
-  private String scopeName;
+  private final SymbolScope superScope;
 
   private final Map<String, TableRef> tableMap = new HashMap<>();
-  private final Set<String> functionSet = new HashSet<>();
-  private final Set<String> methodSet = new HashSet<>();
   private final Set<String> varSet = new HashSet<>();
 
   SymbolScope(RefactorSession session) {
-    this.session = session;
+    this(session, null);
   }
 
   SymbolScope(RefactorSession session, SymbolScope superScope) {
@@ -43,7 +39,11 @@ public class SymbolScope {
     return session;
   }
 
-  void defBuffer(String bufferName, String tableName) {
+  SymbolScope getSuperScope() {
+    return superScope;
+  }
+
+  void defineBuffer(String bufferName, String tableName) {
     // Look for the tableName in tableMap /before/
     // adding the new ref. This is in case they have done:
     // DEFINE BUFFER customer FOR customer. (groan)
@@ -74,31 +74,14 @@ public class SymbolScope {
     }
   }
 
-  void defFunc(String name) {
-    functionSet.add(name.toLowerCase());
-  }
-
-  void defMethod(String name) {
-    methodSet.add(name.toLowerCase());
-  }
-
-  void defTable(String name, FieldType ttype) {
+  void defineTable(String name, FieldType ttype) {
     TableRef newTable = new TableRef();
     newTable.tableType = ttype;
     tableMap.put(name.toLowerCase(), newTable);
   }
 
-  void defVar(String name) {
+  void defineVar(String name) {
     varSet.add(name.toLowerCase());
-  }
-
-  /** If this is an "inheritance scope", then getScopeName() returns the class name. */
-  String getScopeName() {
-    return scopeName;
-  }
-
-  SymbolScope getSuperScope() {
-    return superScope;
   }
 
   /** Returns null if false, else, the table type */
@@ -133,8 +116,13 @@ public class SymbolScope {
     // All of these can be inherited from a super class.
     if (tableMap.containsKey(inName))
       return tableMap.get(inName).tableType;
-    if (superScope != null)
-      return superScope.isTableDef(inName);
+    if (superScope != null) {
+      FieldType ft = superScope.isTableDef(inName);
+      if (ft != null) {
+        return ft;
+      }
+    }
+
     return null;
   }
 
@@ -150,12 +138,12 @@ public class SymbolScope {
     return isTable(inName);
   }
 
-  boolean isVar(String name) {
+  boolean isVariable(String name) {
     // Variable names cannot be abbreviated.
     if (varSet.contains(name.toLowerCase()))
       return true;
     if (superScope != null)
-      return superScope.isVar(name);
+      return superScope.isVariable(name);
     return false;
   }
 
@@ -163,28 +151,8 @@ public class SymbolScope {
    * methodOrFunc should only be called for the "unit" scope, since it is the only one that would ever contain methods
    * or user functions.
    */
-  int methodOrFunc(String name) {
-    String lname = name.toLowerCase();
-    // Methods take precedent over built-in functions. The compiler (10.2b)
-    // does not seem to try recognize by function/method signature.
-    if (methodSet.contains(lname))
-      return NodeTypes.LOCAL_METHOD_REF;
-    if (functionSet.contains(lname))
-      return NodeTypes.USER_FUNC;
-    if (superScope != null)
-      return superScope.methodOrFunc(name);
-    return 0;
-  }
-
-  /** Set to the class name if this is an "inheritance scope". */
-  void setScopeName(String inName) {
-    scopeName = inName;
-  }
-
-  /** returns <this> */
-  SymbolScope setSuperScope(SymbolScope superScope) {
-    this.superScope = superScope;
-    return this;
+  int isMethodOrFunction(String name) {
+    return superScope.isMethodOrFunction(name);
   }
 
   // Field and table types

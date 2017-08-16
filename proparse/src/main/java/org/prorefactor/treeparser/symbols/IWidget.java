@@ -8,10 +8,14 @@
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
  *******************************************************************************/ 
-package org.prorefactor.widgettypes;
+package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.treeparser.IWidget;
+public interface IWidget extends ISymbol {
 
-public interface IFieldLevelWidget extends IWidget {
+  /**
+   * For this subclass of Symbol, fullName() returns the same value as getName()
+   */
+  @Override
+  String fullName();
 
 }
