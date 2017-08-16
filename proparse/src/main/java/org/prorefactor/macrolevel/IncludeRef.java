@@ -16,19 +16,25 @@ import java.util.List;
 import java.util.Map;
 
 public class IncludeRef extends MacroRef {
-  public boolean usesNamedArgs;
-  public int fileIndex;
   private List<MacroDef> includeArgs = new ArrayList<>();
   private Map<String, MacroDef> argMap = new HashMap<>();
   private String fileRefName = "";
+  private int fileIndex;
+  private boolean usesNamedArgs;
 
   public IncludeRef(MacroRef parent, int line, int column) {
     super(parent, line, column);
   }
 
+  public IncludeRef(MacroRef parent, int line, int column, int fileIndex) {
+    super(parent, line, column);
+    this.fileIndex = fileIndex;
+  }
+
   public void addNamedArg(MacroDef arg) {
+    usesNamedArgs = true;
     includeArgs.add(arg);
-    argMap.put(arg.name.toLowerCase(), arg);
+    argMap.put(arg.getName().toLowerCase(), arg);
   }
 
   public void addNumberedArg(MacroDef arg) {

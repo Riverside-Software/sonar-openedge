@@ -32,7 +32,7 @@ public class MacroLevel {
       if (def.getParent() instanceof NamedMacroRef) {
         return getDefinitionPosition(((NamedMacroRef) def.getParent()).getMacroDef());
       }
-      ret[0] = ((IncludeRef) def.getParent()).fileIndex;
+      ret[0] = ((IncludeRef) def.getParent()).getFileIndex();
       ret[1] = def.getPosition().getLine();
       ret[2] = def.getPosition().getColumn();
     } else {
@@ -40,7 +40,7 @@ public class MacroLevel {
       // we have to find the include reference source.
       if (!(def.includeRef.getParent() instanceof IncludeRef))
         return getDefinitionPosition(((NamedMacroRef) def.includeRef.getParent()).getMacroDef());
-      ret[0] = ((IncludeRef) def.includeRef.getParent()).fileIndex;
+      ret[0] = ((IncludeRef) def.includeRef.getParent()).getFileIndex();
       ret[1] = def.includeRef.getLine();
       ret[2] = def.includeRef.getColumn();
     }

@@ -140,7 +140,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
         // Reduce expanded prepro variable back to {&VAR_NAME}
         if ((nmr.getMacroDef() != null) && NamedMacroRef.isInRange(nmr.getLine(), nmr.getColumn(),
             new int[] {node.getLine(), node.getColumn() - 1}, new int[] {node.getEndLine(), node.getEndColumn() - 1})) {
-          foo = foo.replace(nmr.getMacroDef().value, "{&" + nmr.getMacroDef().name + "}");
+          foo = foo.replace(nmr.getMacroDef().getValue(), "{&" + nmr.getMacroDef().getName() + "}");
         }
       }
     }
