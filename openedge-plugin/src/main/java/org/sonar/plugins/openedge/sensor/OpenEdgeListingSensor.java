@@ -95,7 +95,7 @@ public class OpenEdgeListingSensor implements Sensor {
           if ((parser.getMainBlock() != null) && parser.getMainBlock().isTransaction()) {
             NewIssue issue = context.newIssue();
             issue.forRule(
-                RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.LARGE_TRANSACTION_SCOPE)).at(
+                RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.LARGE_TRANSACTION_SCOPE)).at(
                     issue.newLocation().on(file).message("Transaction spans entire procedure")).save();
           }
 

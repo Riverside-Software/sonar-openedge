@@ -25,6 +25,7 @@ import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
@@ -44,7 +45,7 @@ public class OpenEdgeWarningsSensorTest {
   }
 
   private ActiveRules createRules() {
-    return new ActiveRulesBuilder().create(RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY,
+    return new ActiveRulesBuilder().create(RuleKey.of(Constants.STD_REPOSITORY_KEY,
         OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY)).activate().build();
   }
 

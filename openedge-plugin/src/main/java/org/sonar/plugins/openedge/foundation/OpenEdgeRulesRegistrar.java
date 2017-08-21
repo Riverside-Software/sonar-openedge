@@ -24,6 +24,7 @@ import java.util.Arrays;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
+import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
@@ -39,7 +40,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
     LOGGER.debug("Registering CheckRegistrar {}", OpenEdgeRulesRegistrar.class.toString());
 
     // Call to registerClassesForRepository to associate the classes with the correct repository key
-    registrarContext.registerClassesForRepository(OpenEdgeRulesDefinition.REPOSITORY_KEY,
+    registrarContext.registerClassesForRepository(Constants.STD_REPOSITORY_KEY,
          Arrays.asList(ppCheckClasses()), Arrays.asList(dbCheckClasses()));
   }
 
