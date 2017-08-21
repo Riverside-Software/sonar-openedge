@@ -28,7 +28,6 @@ import org.sonar.plugins.openedge.api.AnnotationBasedRulesDefinition;
 import org.sonar.plugins.openedge.api.Constants;
 
 public class OpenEdgeRulesDefinition implements RulesDefinition {
-  public static final String REPOSITORY_KEY = "rssw-oe";
   public static final String REPOSITORY_NAME = "Standard rules";
 
   public static final String COMPILER_WARNING_RULEKEY = "compiler.warning";
@@ -47,7 +46,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
   @SuppressWarnings("rawtypes")
   @Override
   public void define(Context context) {
-    NewRepository repository = context.createRepository(REPOSITORY_KEY, Constants.LANGUAGE_KEY).setName(REPOSITORY_NAME);
+    NewRepository repository = context.createRepository(Constants.STD_REPOSITORY_KEY, Constants.LANGUAGE_KEY).setName(REPOSITORY_NAME);
 
     AnnotationBasedRulesDefinition annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY);
     annotationLoader.addRuleClasses(false, Arrays.<Class> asList(OpenEdgeRulesRegistrar.ppCheckClasses()));
@@ -68,7 +67,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     proparseRule.setDebtRemediationFunction(proparseRule.debtRemediationFunctions().constantPerIssue("3h"));
     proparseRule.setType(RuleType.BUG);
     proparseRule.setHtmlDescription(getClass().getResource(String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY,
-        OpenEdgeRulesDefinition.REPOSITORY_KEY, proparseRule.key())));
+        Constants.STD_REPOSITORY_KEY, proparseRule.key())));
 
     // Manually created rule for large transaction scope
     NewRule largeTrans = repository.createRule(LARGE_TRANSACTION_SCOPE).setName("Large transaction scope").setSeverity(
@@ -76,7 +75,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     largeTrans.setDebtRemediationFunction(largeTrans.debtRemediationFunctions().constantPerIssue("3h"));
     largeTrans.setType(RuleType.CODE_SMELL);
     largeTrans.setHtmlDescription(getClass().getResource(String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY,
-        OpenEdgeRulesDefinition.REPOSITORY_KEY, largeTrans.key())));
+        Constants.STD_REPOSITORY_KEY, largeTrans.key())));
 
     repository.done();
   }
@@ -91,6 +90,6 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     warning.setDebtRemediationFunction(warning.debtRemediationFunctions().constantPerIssue(remediationCost));
     warning.setType(RuleType.CODE_SMELL);
     warning.setHtmlDescription(getClass().getResource(
-        String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY, OpenEdgeRulesDefinition.REPOSITORY_KEY, warning.key())));
+        String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY, Constants.STD_REPOSITORY_KEY, warning.key())));
   }
 }
