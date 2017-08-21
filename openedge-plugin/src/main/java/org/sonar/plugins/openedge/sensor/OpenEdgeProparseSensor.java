@@ -223,7 +223,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       numFailures++;
       NewIssue issue = context.newIssue();
       issue.forRule(
-          RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
+          RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
               issue.newLocation().on(file).message(caught.getMessage())).save();
     } catch (RuntimeException caught) {
       numFailures++;

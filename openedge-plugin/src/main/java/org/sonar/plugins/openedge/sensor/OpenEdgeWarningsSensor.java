@@ -76,7 +76,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
       return;
 
     int warningsImportNum = 0;
-    final RuleKey defaultWarningRuleKey = RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY,
+    final RuleKey defaultWarningRuleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY,
         OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY);
     if (context.activeRules().find(defaultWarningRuleKey) == null) {
       LOG.info("'Compiler warning' rule is not activated in your profile - Warning files analysis skipped");
@@ -97,7 +97,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
           Files.readLines(listingFile, StandardCharsets.UTF_8, processor);
           for (Warning w : processor.getResult()) {
             InputFile target = context.fileSystem().inputFile(predicates.hasRelativePath(w.file));
-            RuleKey ruleKey = RuleKey.of(OpenEdgeRulesDefinition.REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
+            RuleKey ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
             if (target != null) {
               LOG.debug("Warning File {} - Line {} - Message {}", target.relativePath(), w.line, w.msg);
               NewIssue issue = context.newIssue().forRule(context.activeRules().find(ruleKey) == null ? defaultWarningRuleKey : ruleKey);
