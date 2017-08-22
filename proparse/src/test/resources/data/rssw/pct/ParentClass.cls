@@ -5,5 +5,6 @@ USING Progress.Lang.*.
 CLASS rssw.pct.ParentClass:
   DEFINE PROTECTED TEMP-TABLE tt1 NO-UNDO
     FIELD fld1 AS CHAR.
-
+  DEFINE PROTECTED BUFFER xtt1 FOR tt1.
+  DEFINE PROTECTED BUFFER xcust FOR customer.
 END CLASS.

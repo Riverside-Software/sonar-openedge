@@ -12,7 +12,12 @@ CLASS rssw.pct.ChildClass INHERITS rssw.pct.ParentClass:
 
   METHOD PUBLIC VOID method2():
     define buffer btt1 for tt1.
-    CREATE btt1.
+    create btt1.
+    create xtt1.
+    create xcust.
+    if can-find(first btt1) then message "xxx".
+    if can-find(first xtt1) then message "xxx".
+    if can-find(first xcust) then message "xxx".
   END METHOD.
 
 END CLASS.
