@@ -73,6 +73,15 @@ public class TypeInfo {
     return false;
   }
 
+  public boolean hasBuffer(String inName) {
+    for (BufferElement buf : buffers) {
+      if (buf.getName().equalsIgnoreCase(inName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public Collection<MethodElement> getMethods() {
     return methods;
   }

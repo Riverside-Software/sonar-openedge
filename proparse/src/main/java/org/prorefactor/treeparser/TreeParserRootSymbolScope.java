@@ -158,7 +158,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
 
     TypeInfo info = typeInfo;
     while (info != null) {
-      if (info.hasTempTable(name)) {
+      if (info.hasBuffer(name)) {
         ITable tbl = new Table(name, IConstants.ST_TTABLE);
         return new TableBuffer(name, this, tbl);
       }
