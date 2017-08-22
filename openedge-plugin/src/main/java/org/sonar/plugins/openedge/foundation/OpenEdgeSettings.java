@@ -82,8 +82,7 @@ public class OpenEdgeSettings {
 
   // Internal use
   private final List<String> sourceDirs = new ArrayList<>();
-  private File binariesDir;
-  private File pctDir;
+  private final List<File> binariesDirs = new ArrayList<>();
   private final List<File> propath = new ArrayList<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
   private final Set<String> cpdMethods = new HashSet<>();
@@ -129,17 +128,17 @@ public class OpenEdgeSettings {
         binariesSetting = "build";
       }
     }
-
-    // First try an absolute path, then a relative path
-    File tmp = new File(fileSystem.baseDir(), binariesSetting);
-    if (!tmp.exists() || !tmp.isDirectory())
-      tmp = new File(binariesSetting);
-    if (!tmp.exists() || !tmp.isDirectory())
-      LOG.warn("'{}' directory not found - Value '{}' - Analysis is not likely to be successful", Constants.BINARIES, binariesSetting);
-    else
-      LOG.debug("OE build directory: '{}'", FilenameUtils.normalizeNoEndSeparator(tmp.getAbsolutePath(), true));
-    this.binariesDir = tmp;
-    this.pctDir = new File(binariesDir, ".pct");
+    for (String str : Splitter.on(',').trimResults().split(binariesSetting)) {
+      // First try an absolute path, then a relative path
+      File tmp = new File(fileSystem.baseDir(), str);
+      if (!tmp.exists() || !tmp.isDirectory())
+        tmp = new File(str);
+      if (!tmp.exists() || !tmp.isDirectory())
+        LOG.warn("'{}' directory not found - Value '{}' - Analysis is not likely to be successful", Constants.BINARIES, str);
+      else
+        LOG.debug("OE build directory: '{}'", FilenameUtils.normalizeNoEndSeparator(tmp.getAbsolutePath(), true));
+      this.binariesDirs.add(tmp);
+    }
   }
 
   private final void initializePropath(Settings settings, FileSystem fileSystem) {
@@ -247,20 +246,22 @@ public class OpenEdgeSettings {
     long currTime = System.currentTimeMillis();
     AtomicInteger numRCode = new AtomicInteger(0);
     ExecutorService service = Executors.newFixedThreadPool(4);
-    Files.fileTreeTraverser().preOrderTraversal(getBinariesDir()).forEach(f -> {
-      if (f.getName().endsWith(".r")) {
-        numRCode.incrementAndGet();
-        service.submit(() -> {
-          TypeInfo info = parseRCode(f);
-          if (info != null) {
-            numClasses.incrementAndGet();
-            numMethods.addAndGet(info.getMethods().size());
-            numProperties.addAndGet(info.getProperties().size());
-            proparseSession.injectTypeInfo(info);
-          }
-        });
-      }
-    });
+    for (File binDir : binariesDirs) {
+      Files.fileTreeTraverser().preOrderTraversal(binDir).forEach(f -> {
+        if (f.getName().endsWith(".r")) {
+          numRCode.incrementAndGet();
+          service.submit(() -> {
+            TypeInfo info = parseRCode(f);
+            if (info != null) {
+              numClasses.incrementAndGet();
+              numMethods.addAndGet(info.getMethods().size());
+              numProperties.addAndGet(info.getProperties().size());
+              proparseSession.injectTypeInfo(info);
+            }
+          });
+        }
+      });
+    }
 
     // Include PL files in $DLC/gui
     String dlcInstallDir = settings.getString(Constants.DLC);
@@ -321,11 +322,11 @@ public class OpenEdgeSettings {
   }
 
   public File getPctDir() {
-    return pctDir;
-  }
-
-  public File getBinariesDir() {
-    return binariesDir;
+    if (binariesDirs.isEmpty()) {
+      return null;
+    } else {
+      return new File(binariesDirs.get(0), ".pct");
+    }
   }
 
   public boolean skipCPD(String annotation) {
@@ -350,16 +351,18 @@ public class OpenEdgeSettings {
    * @param fileName File name from profiler
    */
   public File getRCode(String fileName) {
-    if (fileName.endsWith(".r"))
-      return new File(fileName);
+    for (File binariesDir : binariesDirs) {
+      if (fileName.endsWith(".r"))
+        return new File(fileName);
 
-    File rCode = new File(binariesDir, FilenameUtils.removeExtension(fileName) + ".r");
-    if (rCode.exists())
-      return rCode;
-    // Profiler also send file name as packagename.classname
-    File rCode2 = new File(binariesDir, fileName.replace('.', '/') + ".r");
-    if (rCode2.exists())
-      return rCode2;
+      File rCode = new File(binariesDir, FilenameUtils.removeExtension(fileName) + ".r");
+      if (rCode.exists())
+        return rCode;
+      // Profiler also send file name as packagename.classname
+      File rCode2 = new File(binariesDir, fileName.replace('.', '/') + ".r");
+      if (rCode2.exists())
+        return rCode2;
+    }
 
     return null;
   }
