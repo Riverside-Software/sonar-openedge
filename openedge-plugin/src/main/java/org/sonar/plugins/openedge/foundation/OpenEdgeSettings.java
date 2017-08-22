@@ -131,9 +131,13 @@ public class OpenEdgeSettings {
     }
 
     // First try an absolute path, then a relative path
-    File tmp = new File(binariesSetting);
+    File tmp = new File(fileSystem.baseDir(), binariesSetting);
     if (!tmp.exists() || !tmp.isDirectory())
-      tmp = new File(fileSystem.baseDir(), binariesSetting);
+      tmp = new File(binariesSetting);
+    if (!tmp.exists() || !tmp.isDirectory())
+      LOG.warn("'{}' directory not found - Value '{}' - Analysis is not likely to be successful", Constants.BINARIES, binariesSetting);
+    else
+      LOG.debug("OE build directory: '{}'", FilenameUtils.normalizeNoEndSeparator(tmp.getAbsolutePath(), true));
     this.binariesDir = tmp;
     this.pctDir = new File(binariesDir, ".pct");
   }
@@ -200,7 +204,7 @@ public class OpenEdgeSettings {
   public final void parseHierarchy(String fileName) {
     String fileInPropath = searchInPropath(fileName);
     File rcd = getRCode(fileInPropath);
-    LOG.info("Parsing hierarchy of {} -- In PROPATH {} - Expecting rcode in {}", fileName, fileInPropath, rcd);
+    LOG.debug("Parsing hierarchy of {} -- In PROPATH {} - Rcode '{}'", fileName, fileInPropath, rcd);
     if ((rcd != null) && rcd.exists()) {
       TypeInfo info = parseRCode(rcd);
       if (info != null) {
@@ -341,7 +345,7 @@ public class OpenEdgeSettings {
   }
 
   /**
-   * Return File pointer to rcode in sonar.binaries directory if such rcode exists
+   * Return File pointer to rcode in sonar.oe.binaries directory if such rcode exists
    * 
    * @param fileName File name from profiler
    */
