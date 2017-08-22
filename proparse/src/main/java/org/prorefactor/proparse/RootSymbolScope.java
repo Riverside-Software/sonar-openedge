@@ -57,7 +57,7 @@ public class RootSymbolScope extends SymbolScope {
     // Then look through rcode
     TypeInfo info = typeInfo;
     while (info != null) {
-      if (info.hasTempTable(inName)) {
+      if (info.hasBuffer(inName)) {
         return FieldType.TTABLE;
       }
       info = getSession().getTypeInfo(info.getParentTypeName());
