@@ -1026,6 +1026,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       filter.hide(NodeTypes.AMPGLOBALDEFINE);
       filter.hide(NodeTypes.AMPSCOPEDDEFINE);
       filter.hide(NodeTypes.AMPUNDEFINE);
+      filter.hide(NodeTypes.PROPARSEDIRECTIVE);
       stream = filter;
     }
 

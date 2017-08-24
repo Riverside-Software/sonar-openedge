@@ -20,6 +20,7 @@ import org.prorefactor.treeparser.Call;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 import org.prorefactor.treeparser.symbols.Symbol;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
@@ -209,6 +210,44 @@ public class JPNode extends BaseAST {
     if (attrMapStrings == null)
       attrMapStrings = new HashMap<>();
     attrMapStrings.put(key, value);
+  }
+
+  /**
+   * Mark a node as "operator"
+   */
+  public void setOperator() {
+    attrSet(IConstants.OPERATOR, IConstants.TRUE);
+  }
+
+  public boolean hasProparseDirective(String directive) {
+    ProToken tok = getHiddenBefore();
+    while (tok != null) {
+      if (tok.getType() == NodeTypes.PROPARSEDIRECTIVE) {
+        String str = tok.getText().trim();
+        if (str.startsWith("prolint-nowarn(") && str.charAt(str.length() - 1) == ')') {
+          for (String rule : Splitter.on(',').omitEmptyStrings().trimResults().split(
+              str.substring(15, str.length() - 1))) {
+            if (rule.equals(directive))
+              return true;
+          }
+        }
+      }
+      tok = (ProToken) tok.getHiddenBefore();
+    }
+
+    // In case of assignments without ASSIGN keyword, then we search for hidden tokens in the bottom-left child
+    // See assignstate2 for example, where EQUAL is the root of the current tree
+    if (getType() == NodeTypes.ASSIGN) {
+      JPNode child = firstChild();
+      while (child.firstChild() != null) {
+        child = child.firstChild();
+      }
+      if (child.hasProparseDirective(directive)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public static void finalizeTrailingHidden(JPNode root) {

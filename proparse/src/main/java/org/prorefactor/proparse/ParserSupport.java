@@ -259,13 +259,6 @@ public class ParserSupport {
     node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
   }
 
-  /**
-   * Mark a node as "operator"
-   */
-  static void attrOp(JPNode node) {
-    node.attrSet(IConstants.OPERATOR, IConstants.TRUE);
-  }
-
   /** Set the 'store type' attribute on a RECORD_NAME node. */
   static void setStoreType(JPNode node, FieldType tabletype) {
     switch (tabletype) {

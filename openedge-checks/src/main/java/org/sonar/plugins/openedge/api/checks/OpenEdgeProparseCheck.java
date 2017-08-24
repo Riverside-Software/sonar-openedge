@@ -3,7 +3,6 @@ package org.sonar.plugins.openedge.api.checks;
 import java.text.MessageFormat;
 
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.nodetypes.ProparseDirectiveNode;
 import org.prorefactor.treeparser.ParseUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +18,6 @@ import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import com.google.common.base.Splitter;
 
 public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
@@ -87,7 +84,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
 
     int lineNumber = node.getLine();
     LOG.trace("Adding issue {} to {} line {}",
-        new Object[] {(getRuleKey() == null ? null : getRuleKey().rule()), targetFile.relativePath(), lineNumber});
+        (getRuleKey() == null ? null : getRuleKey().rule()), targetFile.relativePath(), lineNumber);
     NewIssue issue = getContext().newIssue().forRule(getRuleKey());
     NewIssueLocation location = issue.newLocation().on(targetFile);
     if (lineNumber > 0) {
@@ -115,7 +112,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    */
   public void reportIssue(InputFile file, String fileName, int lineNumber, String msg) {
     LOG.trace("Adding issue {} to {} line {}",
-        new Object[] {getRuleKey() == null ? null : getRuleKey().rule(), fileName, lineNumber});
+        getRuleKey() == null ? null : getRuleKey().rule(), fileName, lineNumber);
     NewIssue issue = getContext().newIssue();
     InputFile targetFile = getContext().fileSystem().inputFile(
         getContext().fileSystem().predicates().hasRelativePath(fileName));
@@ -143,21 +140,8 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     if (parent == null)
       return false;
 
-    // Then looking for ProparseDirective
-    JPNode left = parent.prevSibling();
-    while ((left != null) && (left instanceof ProparseDirectiveNode)) {
-      String str = ((ProparseDirectiveNode) left).getDirectiveText().trim();
-      if (str.startsWith("prolint-nowarn(") && str.charAt(str.length() - 1) == ')') {
-        for (String rule : Splitter.on(',').omitEmptyStrings().trimResults().split(
-            str.substring(15, str.length() - 1))) {
-          if (rule.equals(getNoSonarKeyword()))
-            return true;
-        }
-      }
-      left = left.prevSibling();
-    }
-
-    return false;
+    // Search hidden tokens before
+    return parent.hasProparseDirective(getNoSonarKeyword());
   }
 
   protected static String getChildNodeValue(Node node, String nodeName) {
