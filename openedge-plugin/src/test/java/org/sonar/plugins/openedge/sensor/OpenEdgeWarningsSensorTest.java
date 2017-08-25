@@ -20,10 +20,12 @@
 package org.sonar.plugins.openedge.sensor;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.batch.sensor.issue.Issue;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
@@ -42,6 +44,26 @@ public class OpenEdgeWarningsSensorTest {
     sensor.execute(context);
 
     Assert.assertEquals(context.allIssues().size(), 4);
+    Iterator<Issue> issues = context.allIssues().iterator();
+    Issue issue = issues.next();
+    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
+    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 1);
+
+    issue = issues.next();
+    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
+    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 2);
+
+    issue = issues.next();
+    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
+    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 3);
+
+    issue = issues.next();
+    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE1);
+    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 1);
   }
 
   private ActiveRules createRules() {
