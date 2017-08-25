@@ -20,10 +20,12 @@
 package org.sonar.plugins.openedge.sensor;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.batch.sensor.issue.Issue;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
@@ -33,6 +35,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class OpenEdgeWarningsSensorTest {
+  private final static boolean IS_WINDOWS = (System.getenv("windir") != null);
+
   @Test
   public void testWarnings() throws IOException {
     SensorContextTester context = TestProjectSensorContext.createContext();
@@ -41,7 +45,34 @@ public class OpenEdgeWarningsSensorTest {
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings);
     sensor.execute(context);
 
-    Assert.assertEquals(1, context.allIssues().size());
+    // Unix is case-sensitive, so one issue can't be reported
+    Assert.assertEquals(context.allIssues().size(), IS_WINDOWS ? 4 : 3);
+    Iterator<Issue> issues = context.allIssues().iterator();
+    Issue issue;
+
+    if (IS_WINDOWS) {
+      // Case sensitive name - So doesn't work on Linux
+      issue = issues.next();
+      Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+          TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
+      Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 1);
+    }
+
+    // Starts with ../
+    issue = issues.next();
+    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
+    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 2);
+
+    issue = issues.next();
+    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
+    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 3);
+
+    issue = issues.next();
+    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE1);
+    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 1);
   }
 
   private ActiveRules createRules() {
