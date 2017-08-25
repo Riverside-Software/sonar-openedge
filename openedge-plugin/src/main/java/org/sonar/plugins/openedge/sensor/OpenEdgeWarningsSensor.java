@@ -96,7 +96,8 @@ public class OpenEdgeWarningsSensor implements Sensor {
           WarningsProcessor processor = new WarningsProcessor();
           Files.readLines(listingFile, StandardCharsets.UTF_8, processor);
           for (Warning w : processor.getResult()) {
-            InputFile target = context.fileSystem().inputFile(predicates.hasRelativePath(w.file));
+            InputFile target = context.fileSystem().inputFile(
+                predicates.hasPath(context.fileSystem().resolvePath(w.file).getAbsolutePath()));
             RuleKey ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
             if (target != null) {
               LOG.debug("Warning File {} - Line {} - Message {}", target.relativePath(), w.line, w.msg);
