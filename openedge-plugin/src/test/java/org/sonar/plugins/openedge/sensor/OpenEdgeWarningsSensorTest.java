@@ -51,12 +51,14 @@ public class OpenEdgeWarningsSensorTest {
     Issue issue;
 
     if (IS_WINDOWS) {
+      // Case sensitive name - So doesn't work on Linux
       issue = issues.next();
       Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
           TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
       Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 1);
     }
 
+    // Starts with ../
     issue = issues.next();
     Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
         TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
