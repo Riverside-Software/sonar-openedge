@@ -35,6 +35,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class OpenEdgeWarningsSensorTest {
+  private final static boolean IS_WINDOWS = (System.getenv("windir") != null);
+
   @Test
   public void testWarnings() throws IOException {
     SensorContextTester context = TestProjectSensorContext.createContext();
@@ -43,12 +45,17 @@ public class OpenEdgeWarningsSensorTest {
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings);
     sensor.execute(context);
 
-    Assert.assertEquals(context.allIssues().size(), 4);
+    // Unix is case-sensitive, so one issue can't be reported
+    Assert.assertEquals(context.allIssues().size(), IS_WINDOWS ? 4 : 3);
     Iterator<Issue> issues = context.allIssues().iterator();
-    Issue issue = issues.next();
-    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
-        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
-    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 1);
+    Issue issue;
+
+    if (IS_WINDOWS) {
+      issue = issues.next();
+      Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+          TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
+      Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 1);
+    }
 
     issue = issues.next();
     Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
