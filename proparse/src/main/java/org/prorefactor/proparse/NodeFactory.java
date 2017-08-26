@@ -36,15 +36,20 @@ public class NodeFactory extends ASTFactory {
 
   @Override
   public AST create() {
-    return new JPNode(new ProToken(filenameList, 0, ""));
+    // Not used in ProParser
+    return create(0); 
   }
 
-  /**
-   * Used for synthetic node creation by the Antlr generated parser
-   */
   @Override
   public AST create(int type) {
-    ProToken token = new ProToken(filenameList, type, "");
+    // Not used in ProParser
+    return create(type, "");
+  }
+
+  @Override
+  public AST create(int type, String text) {
+    // Used for synthetic node creation by the ANTLR generated parser
+    ProToken token = new ProToken(filenameList, type, text);
     switch (type) {
       case NodeTypes.Field_ref:
         return new FieldRefNode(token);
@@ -56,11 +61,6 @@ public class NodeFactory extends ASTFactory {
       default:
         return new JPNode(token);
     }
-  }
-
-  @Override
-  public AST create(int i, String s) {
-    return new JPNode(new ProToken(filenameList, i, s));
   }
 
   /**
