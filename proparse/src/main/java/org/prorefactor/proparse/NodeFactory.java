@@ -39,7 +39,9 @@ public class NodeFactory extends ASTFactory {
     return new JPNode(new ProToken(filenameList, 0, ""));
   }
 
-  /** Used for synthetic node creation by the Antlr generated parser. */
+  /**
+   * Used for synthetic node creation by the Antlr generated parser
+   */
   @Override
   public AST create(int type) {
     ProToken token = new ProToken(filenameList, type, "");

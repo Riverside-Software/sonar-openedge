@@ -40,7 +40,6 @@ header {
   import org.prorefactor.core.nodetypes.BlockNode;
   import org.prorefactor.core.nodetypes.FieldRefNode;
   import org.prorefactor.core.nodetypes.ProgramRootNode;
-  import org.prorefactor.core.nodetypes.ProparseDirectiveNode;
   import org.prorefactor.core.nodetypes.RecordNameNode;
   import org.prorefactor.refactor.RefactorSession;
 }
@@ -165,7 +164,6 @@ blockorstate
     :  PERIOD
     |  annotation
     |  dot_comment // ".anything" is a dotcomment if it's where a statement would fit.
-    |  proparse_directive
     |  (blocklabel LEXCOLON (DO|FOR|REPEAT))=> labeled_block
     |  (widattr EQUAL DYNAMICNEW)=> dynamicnewstate
     |  (field EQUAL DYNAMICNEW)=> dynamicnewstate
@@ -185,18 +183,6 @@ blockorstate
     |  statement
     |  expression_statement
     )
-  ;
-
-proparse_directive
-  :  dir:PROPARSEDIRECTIVE<AST=ProparseDirectiveNode>
-    {  // We move the text from the regular token's text
-      // to "proparsedirective" string attribute.
-      #dir.attrSet(
-        IConstants.PROPARSEDIRECTIVE,
-        #dir.getText()
-        );
-      #dir.setText("");
-    }
   ;
 
 dot_comment
@@ -799,10 +785,10 @@ expression
   :  orExpression
   ;
 orExpression
-  :  andExpression (options{greedy=true;}: OR^ andExpression {support.attrOp(##);} )*
+  :  andExpression (options{greedy=true;}: OR^ andExpression { ##.setOperator(); } )*
   ;
 andExpression
-  :  notExpression (options{greedy=true;}: AND^ notExpression {support.attrOp(##);} )*
+  :  notExpression (options{greedy=true;}: AND^ notExpression { ##.setOperator(); } )*
   ;
 notExpression
   :  NOT^ relationalExpression
@@ -821,14 +807,14 @@ relationalExpression
       |  le:LTOREQUAL^ {#le.setType(LE);} | LE^
       )
       additiveExpression
-      {support.attrOp(##);}
+      { ##.setOperator(); }
     )*
   ;
 additiveExpression
   :  multiplicativeExpression
     (options{greedy=true;}:   (PLUS^ | MINUS^)
       multiplicativeExpression
-      {support.attrOp(##);}
+      { ##.setOperator(); }
     )*
   ;
 multiplicativeExpression
@@ -838,7 +824,7 @@ multiplicativeExpression
       | MODULO^
       )
       unaryExpression
-      {support.attrOp(##);}
+      { ##.setOperator(); }
     )*
   ;
 unaryExpression
@@ -1268,7 +1254,7 @@ assign_opt
   ;
 assign_opt2
   :  . EQUAL^ expression
-    {support.attrOp(##);}
+    { ##.setOperator(); }
   ;
 
 assignstate
@@ -1287,7 +1273,7 @@ assignment_list
   ;
 assignstate2
   :  field e:EQUAL^ expression
-    {support.attrOp(#e);}
+    { #e.setOperator(); }
     {## = #([ASSIGN], ##);}
     (NOERROR_KW)?
     state_end
@@ -1295,7 +1281,7 @@ assignstate2
   ;
 assignstate3
   :  pseudfn e:EQUAL^ expression
-    {support.attrOp(#e);}
+    { #e.setOperator(); }
     {## = #([ASSIGN], ##);}
     (NOERROR_KW)?
     state_end
@@ -1303,16 +1289,16 @@ assignstate3
   ;
 assignstate4
   :  widattr e:EQUAL^ expression
-    {support.attrOp(#e);}
+    { #e.setOperator(); }
     {## = #([ASSIGN], ##);}
     (NOERROR_KW)?
     state_end
     {sthd(##,0);}
   ;
 assign_equal
-  :  (pseudfn)=> pseudfn e1:EQUAL^ expression {support.attrOp(#e1);}
-  |  (widattr)=> widattr e3:EQUAL^ expression {support.attrOp(#e3);}
-  |  field e2:EQUAL^ expression {support.attrOp(#e2);}
+  :  (pseudfn)=> pseudfn e1:EQUAL^ expression { #e1.setOperator(); }
+  |  (widattr)=> widattr e3:EQUAL^ expression { #e3.setOperator(); }
+  |  field e2:EQUAL^ expression { #e2.setOperator(); }
   ;
 assign_field
   :  field {## = #([Assign_from_buffer], ##);}
@@ -1417,7 +1403,7 @@ case_when
   :  WHEN^ case_expression THEN blockorstate
   ;
 case_expression
-  :  (case_expr_term) (options{greedy=true;}: OR^ case_expr_term {support.attrOp(##);})*
+  :  (case_expr_term) (options{greedy=true;}: OR^ case_expr_term { ##.setOperator(); })*
   ;
 case_expr_term
   :  (WHEN^)? expression
@@ -1520,7 +1506,7 @@ closestoredprocedurestate
     {sthd(##,STOREDPROCEDURE);}
   ;
 closestored_field
-  :  field EQUAL^ PROCSTATUS {support.attrOp(##);}
+  :  field EQUAL^ PROCSTATUS { ##.setOperator(); }
   ;
 closestored_where
   :  WHERE^ PROCHANDLE (e:EQUAL{#e.setType(EQ);}|EQ) field
@@ -2488,7 +2474,7 @@ dynamicnewstate
   ;
 field_equal_dynamic_new
   :  ((widattr)=>widattr | field)
-    e:EQUAL^ dynamic_new {support.attrOp(#e);}
+    e:EQUAL^ dynamic_new { #e.setOperator(); }
   ;
 dynamic_new
   :  { support.setInDynamicNew(true); }
@@ -4555,7 +4541,7 @@ sqlupdatestate
     {sthd(##,0);}
   ;
 sqlupdate_equal
-  :  field EQUAL^ sqlexpression (fetch_indicator)?  {support.attrOp(##);}
+  :  field EQUAL^ sqlexpression (fetch_indicator)? { ##.setOperator(); }
   ;
 sqlupdate_where
   :  WHERE^ (sqlexpression | CURRENT OF identifier)
@@ -4608,10 +4594,10 @@ sqlexpression
   :  sqlorExpression
   ;
 sqlorExpression
-  :  sqlandExpression (options{greedy=true;}: OR^ sqlandExpression {support.attrOp(##);})*
+  :  sqlandExpression (options{greedy=true;}: OR^ sqlandExpression { ##.setOperator(); })*
   ;
 sqlandExpression
-  :  sqlnotExpression (options{greedy=true;}: AND^ sqlnotExpression {support.attrOp(##);})*
+  :  sqlnotExpression (options{greedy=true;}: AND^ sqlnotExpression { ##.setOperator(); })*
   ;
 sqlnotExpression
   :  NOT^ sqlrelationalExpression
@@ -4629,7 +4615,7 @@ sqlrelationalExpression
       |  lt:LEFTANGLE^ {#lt.setType(LTHAN);} | LTHAN^
       |  le:LTOREQUAL^ {#le.setType(LE);} | LE^
       )
-      {support.attrOp(##);}
+      { ##.setOperator(); }
       (  ((ANY|ALL|SOME)? LEFTPAREN SELECT)=> sql_comp_query
       |  sqlscalar
       )
@@ -4653,7 +4639,7 @@ sql_in_val
   :  field (fetch_indicator)? | constant | USERID
   ;
 sqlscalar
-  :  sqlmultiplicativeExpression (options{greedy=true;}: (PLUS^ | MINUS^) {support.attrOp(##);} sqlmultiplicativeExpression)*
+  :  sqlmultiplicativeExpression (options{greedy=true;}: (PLUS^ | MINUS^) { ##.setOperator(); } sqlmultiplicativeExpression)*
   ;
 sqlmultiplicativeExpression
   :  sqlunaryExpression
@@ -4661,7 +4647,7 @@ sqlmultiplicativeExpression
       | SLASH^ {#SLASH.setType(DIVIDE);}
       | MODULO^
       )
-      {support.attrOp(##);}
+      { ##.setOperator(); }
       sqlunaryExpression
     )*
   ;

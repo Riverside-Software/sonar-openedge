@@ -13,6 +13,7 @@ package org.prorefactor.core.unittest;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -20,7 +21,7 @@ import java.util.List;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
-import org.prorefactor.core.nodetypes.ProparseDirectiveNode;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroDef;
@@ -97,16 +98,27 @@ public class ApiTest {
     }
     assertEquals(node1, parent);
 
-    // Looking for the proparse directive
+    // No proparse directive as nodes anymore
     JPNode left = node1.prevSibling();
-    assertNotNull(left);
-    assertTrue(left instanceof ProparseDirectiveNode);
-    assertEquals("prolint-nowarn(shared)", ((ProparseDirectiveNode) left).getDirectiveText());
+    assertNull(left);
+    
+    // But as ProToken
+    ProToken tok = node1.getHiddenBefore();
+    assertNotNull(tok);
+    // First WS, then proparse directive
+    tok = (ProToken) tok.getHiddenBefore();
+    assertNotNull(tok);
+    assertEquals(tok.getType(), NodeTypes.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "prolint-nowarn(shared)");
 
-    left = left.prevSibling();
-    assertNotNull(left);
-    assertTrue(left instanceof ProparseDirectiveNode);
-    assertEquals("prolint-nowarn(something)", ((ProparseDirectiveNode) left).getDirectiveText());
+    // First WS
+    tok = (ProToken) tok.getHiddenBefore();
+    assertNotNull(tok);
+    // Then previous directive
+    tok = (ProToken) tok.getHiddenBefore();
+    assertNotNull(tok);
+    assertEquals(tok.getType(), NodeTypes.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "prolint-nowarn(something)");
   }
 
   @Test

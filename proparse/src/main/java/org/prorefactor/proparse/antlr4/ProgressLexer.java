@@ -979,7 +979,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     private final int line;
     private final int col;
     private final int sourceNum;
-    
+
     public FilePos(int file, int line, int col, int sourceNum) {
       this.file = file;
       this.line = line;
@@ -1001,6 +1001,22 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
     public int getSourceNum() {
       return sourceNum;
+    }
+
+    @Override
+    public int hashCode() {
+      return (13 * file) + (17 * line) + (31 * col) + (37 * sourceNum);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == null)
+        return false;
+      if (this.getClass() == obj.getClass()) {
+        FilePos fp = (FilePos) obj;
+        return (fp.file == file) && (fp.line == line) && (fp.col == col) && (fp.sourceNum == sourceNum);
+      } else
+        return false;
     }
   }
 
@@ -1026,6 +1042,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       filter.hide(NodeTypes.AMPGLOBALDEFINE);
       filter.hide(NodeTypes.AMPSCOPEDDEFINE);
       filter.hide(NodeTypes.AMPUNDEFINE);
+      filter.hide(NodeTypes.PROPARSEDIRECTIVE);
       stream = filter;
     }
 
