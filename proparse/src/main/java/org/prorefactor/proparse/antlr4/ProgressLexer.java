@@ -1010,6 +1010,8 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
     @Override
     public boolean equals(Object obj) {
+      if (obj == null)
+        return false;
       if (this.getClass() == obj.getClass()) {
         FilePos fp = (FilePos) obj;
         return (fp.file == file) && (fp.line == line) && (fp.col == col) && (fp.sourceNum == sourceNum);
