@@ -1060,7 +1060,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       // Value of EOF is different in ANTLR2 and ANTLR4
       return new ProToken(filenameList, tok.getType() == Token.EOF ? antlr.Token.EOF_TYPE : tok.getType(),
           tok.getText(), tok.getFileIndex(), tok.getLine(), tok.getCharPositionInLine(), tok.getEndFileIndex(),
-          tok.getEndLine(), tok.getEndCharPositionInLine(), tok.getMacroSourceNum(), tok.getAnalyzeSuspend());
+          tok.getEndLine(), tok.getEndCharPositionInLine(), tok.getMacroSourceNum(), tok.getAnalyzeSuspend(), false);
     }
   }
 
