@@ -22,7 +22,6 @@ import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
-import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.refactor.RefactorException;
