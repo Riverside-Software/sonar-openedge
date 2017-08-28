@@ -135,6 +135,10 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   }
 
   private boolean skipIssue(JPNode node) {
+    // Look on node itself
+    if (node.hasProparseDirective(getNoSonarKeyword()))
+      return true;
+
     // Looking for statehead node
     JPNode parent = node.getStatement();
     if (parent == null)
