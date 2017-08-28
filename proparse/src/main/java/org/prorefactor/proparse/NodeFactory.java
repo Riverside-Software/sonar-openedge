@@ -10,8 +10,6 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse;
 
-import java.util.Hashtable;
-
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
@@ -26,13 +24,6 @@ import antlr.Token;
 import antlr.collections.AST;
 
 public class NodeFactory extends ASTFactory {
-
-  private final IntegerIndex<String> filenameList;
-
-  public NodeFactory(@SuppressWarnings("rawtypes") Hashtable hashtable, IntegerIndex<String> filenameList) {
-    super(hashtable);
-    this.filenameList = filenameList;
-  }
 
   @Override
   public AST create() {
@@ -49,7 +40,7 @@ public class NodeFactory extends ASTFactory {
   @Override
   public AST create(int type, String text) {
     // Used for synthetic node creation by the ANTLR generated parser
-    ProToken token = new ProToken(filenameList, type, text);
+    ProToken token = new ProToken(type, text);
     switch (type) {
       case NodeTypes.Field_ref:
         return new FieldRefNode(token);

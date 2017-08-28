@@ -87,7 +87,7 @@ options {
   public void initAntlr4(RefactorSession session, IntegerIndex<String> filenameList) {
     support = new ParserSupport(session);
     setASTNodeClass("org.prorefactor.core.JPNode");
-    astFactory = new NodeFactory(getTokenTypeToASTClassMap(), filenameList);
+    astFactory = new NodeFactory();
   }
 
   public ParserSupport getParserSupport() {
@@ -110,7 +110,6 @@ options {
         return ((ProToken)inputState.getInput().LT(1)).getFilename();
       return "";
     } catch (TokenStreamException e) {
-      // Antlr's method does not throw.
       throw new RuntimeException(e);
     }
   }

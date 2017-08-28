@@ -31,14 +31,12 @@ import com.google.inject.Injector;
 
 /** Tests for Calls and Routines in the tree parser. */
 public class TP01ProcessActionTest {
-  private TP01Support symbolAction;
   private RefactorSession session; // = RefactorSession.getInstance();
 
   @BeforeTest
   public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
-    symbolAction = new TP01Support(session);
   }
 
   /**
@@ -52,6 +50,7 @@ public class TP01ProcessActionTest {
     String externalName = file.getName();
 
     ParseUnit pu = new ParseUnit(file, session);
+    TP01Support symbolAction = new TP01Support(session);
     pu.treeParser01(symbolAction);
 
     // Define routine handlers for expected routines.
@@ -104,6 +103,7 @@ public class TP01ProcessActionTest {
     String externalName = file.getName();
 
     ParseUnit pu = new ParseUnit(file, session);
+    TP01Support symbolAction = new TP01Support(session);
     pu.treeParser01(symbolAction);
 
     // Define routines.

@@ -10,32 +10,29 @@
  *******************************************************************************/ 
 package org.prorefactor.core;
 
-import antlr.CommonHiddenStreamToken;
-
 import java.util.Objects;
 
-import org.prorefactor.proparse.IntegerIndex;
+import antlr.CommonHiddenStreamToken;
 
 public class ProToken extends CommonHiddenStreamToken {
-  // TODO Why keep a reference onto this object on every ProToken ??
-  private final IntegerIndex<String> filenameList;
   private final boolean synthetic;
   private final int fileIndex;
+  private final String fileName;
   private final int macroSourceNum;
   private final int endFile;
   private final int endLine;
   private final int endColumn;
   private final String analyzeSuspend;
 
-  public ProToken(IntegerIndex<String> filenameList, int type, String txt) {
-    this(filenameList, type, txt, 0, 0, 0, 0, 0, 0, 0, "", true);
+  public ProToken(int type, String txt) {
+    this(type, txt, 0, "", 0, 0, 0, 0, 0, 0, "", true);
   }
 
-  public ProToken(IntegerIndex<String> filenameList, int type, String txt, int file, int line, int col, int endFile,
-      int endLine, int endCol, int macroSourceNum, String analyzeSuspend, boolean synthetic) {
+  public ProToken(int type, String txt, int file, String fileName, int line, int col, int endFile, int endLine, int endCol,
+      int macroSourceNum, String analyzeSuspend, boolean synthetic) {
     super(type, txt);
-    this.filenameList = filenameList;
     this.fileIndex = file;
+    this.fileName = fileName;
     this.macroSourceNum = macroSourceNum;
     this.line = line;
     this.col = col;
@@ -54,23 +51,9 @@ public class ProToken extends CommonHiddenStreamToken {
     return macroSourceNum;
   }
 
-  /**
-   * A reference to the collection of filenames from the parse
-   */
-  public IntegerIndex<String> getFilenameList() {
-    return filenameList;
-  }
-
   @Override
   public String getFilename() {
-    if ((filenameList == null) || (fileIndex < 0) || (fileIndex > filenameList.size())) {
-      return "";
-    }
-    String ret = filenameList.getValue(fileIndex);
-    if (ret == null) {
-      ret = "";
-    }
-    return ret;
+    return fileName;
   }
 
   /**

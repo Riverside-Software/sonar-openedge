@@ -49,6 +49,17 @@ options {
 {
   private final static Logger LOGGER = LoggerFactory.getLogger(TreeParser01.class);
 
+  private RefactorSession refSession;
+  // By default, the action object is a new TP01Support
+  private ITreeParserAction action;
+
+  // This tree parser's stack. I think it is best to keep the stack
+  // in the tree parser grammar for visibility sake, rather than hide
+  // it in the support class. If we move grammar and actions around
+  // within this .g, the effect on the stack should be highly visible.
+  // Deque implementation has to support null elements
+  private Deque stack = new LinkedList();
+
   private String indent() {
     return java.nio.CharBuffer.allocate(traceDepth).toString().replace('\0', ' ');
   }
@@ -76,24 +87,14 @@ options {
     return ((JPNode)node).getState2() == match;
   }
 
-
   // --- The above are for all tree parsers, below are for TreeParser01 ---
 
-  public TreeParser01(org.prorefactor.refactor.RefactorSession refSession) {
-    this(refSession, new TP01Support(refSession));
-  }
-    
   /** Create a tree parser with a specific action object. */
-  public TreeParser01(org.prorefactor.refactor.RefactorSession refSession, ITreeParserAction actionObject) {
-    action = actionObject;
+  public TreeParser01(RefactorSession refSession, ITreeParserAction actionObject) {
+    this();
+    this.action = actionObject;
     this.refSession = refSession;
   }
-  
-  /** By default, the action object is a new TP01Support. */
-  private ITreeParserAction action = null; // See initialization block, below.
-
-  /** Get the action object. getActionObject and getTpSupport are identical. */
-  public ITreeParserAction getActionObject() { return action; }
 
   // Set the action object.
   // By default, the support object is a new TP01Support,
@@ -101,14 +102,9 @@ options {
   // setTpSupport and setActionObject are identical.
   public void setActionObject(ITreeParserAction action) { this.action = action; }
 
-  // This tree parser's stack. I think it is best to keep the stack
-  // in the tree parser grammar for visibility sake, rather than hide
-  // it in the support class. If we move grammar and actions around
-  // within this .g, the effect on the stack should be highly visible.
-  // Deque implementation has to support null elements
-  private Deque stack = new LinkedList();
+  /** Get the action object. getActionObject and getTpSupport are identical. */
+  public ITreeParserAction getActionObject() { return action; }
 
-  private RefactorSession refSession;
 } // end of what's added to the top of the class definition
 
 

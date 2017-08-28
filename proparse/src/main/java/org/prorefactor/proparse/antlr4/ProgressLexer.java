@@ -37,6 +37,8 @@ import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
+
 import antlr.TokenStream;
 import antlr.TokenStreamException;
 import antlr.TokenStreamHiddenTokenFilter;
@@ -75,6 +77,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private final IProparseSettings ppSettings;
   // Do we only read tokens ?
   private final boolean lexOnly;
+  private final IntegerIndex<String> filenameList = new IntegerIndex<>();
 
   // How many levels of &IF FALSE are we currently into?
   private int consuming = 0;
@@ -119,7 +122,6 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
   // From ProgressLexer
   private Lexer lexer;
-  private IntegerIndex<String> filenameList = new IntegerIndex<>();
   private final RefactorSession session;
   private TokenSource wrapper;
 
@@ -1058,9 +1060,10 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
     private antlr.Token convertToken(org.prorefactor.proparse.antlr4.ProToken tok) {
       // Value of EOF is different in ANTLR2 and ANTLR4
-      return new ProToken(filenameList, tok.getType() == Token.EOF ? antlr.Token.EOF_TYPE : tok.getType(),
-          tok.getText(), tok.getFileIndex(), tok.getLine(), tok.getCharPositionInLine(), tok.getEndFileIndex(),
-          tok.getEndLine(), tok.getEndCharPositionInLine(), tok.getMacroSourceNum(), tok.getAnalyzeSuspend(), false);
+      return new ProToken(tok.getType() == Token.EOF ? antlr.Token.EOF_TYPE : tok.getType(), tok.getText(),
+          tok.getFileIndex(), Strings.nullToEmpty(filenameList.getValue(tok.getFileIndex())), tok.getLine(),
+          tok.getCharPositionInLine(), tok.getEndFileIndex(), tok.getEndLine(), tok.getEndCharPositionInLine(),
+          tok.getMacroSourceNum(), tok.getAnalyzeSuspend(), false);
     }
   }
 
