@@ -51,7 +51,7 @@ public class LargeTransactionScope extends OpenEdgeProparseCheck {
     
     for (Integer line : unit.getTransactionBlocks()) {
       if (line == 0) {
-        reportIssue(file, 1, "Transaction scope of main block spans the entire procedure");
+        reportIssue(file, "Transaction scope of main block spans the entire procedure");
       }
     }
   }
