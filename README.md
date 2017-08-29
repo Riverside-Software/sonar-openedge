@@ -1,7 +1,5 @@
 # OpenEdge plugin for SonarQube
 
-<img src="https://github.com/Riverside-Software/sonar-openedge/wiki/img/main-page-01.png" align="center" vspace="5">
-
 The OpenEdge plugin for SonarQube enables analysis of OpenEdge procedural and object-oriented code, and reports:
  * Metrics (lines of code, comment density, complexity, shared objects, ...)
  * Issues found in the source code and DF files, such as performance killers, usage of deprecated keywords, ...
@@ -9,6 +7,8 @@ The OpenEdge plugin for SonarQube enables analysis of OpenEdge procedural and ob
  * Code duplication
  * Compiler warnings
  * XREF information
+
+<img src="https://github.com/Riverside-Software/sonar-openedge/wiki/img/main-page-01.png" align="center" vspace="5">
 
 Documentation available in the [wiki](https://github.com/Riverside-Software/sonar-openedge/wiki)
 
@@ -20,4 +20,4 @@ PCT is open-source and free, but if you want to rely on our consulting services,
 
 ## Build status
 
-* OpenEdge plugin - master branch : [![Build Status](http://ci.rssw.eu/job/sonar-openedge/job/master/badge/icon)](http://ci.rssw.eu/job/sonar-openedge/job/master/)
+OpenEdge plugin - master branch: <br/>  [![Build Status](http://ci.rssw.eu/job/sonar-openedge/job/master/badge/icon)](http://ci.rssw.eu/job/sonar-openedge/job/master/)
