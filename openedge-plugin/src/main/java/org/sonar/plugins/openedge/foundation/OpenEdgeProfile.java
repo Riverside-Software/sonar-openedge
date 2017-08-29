@@ -24,6 +24,8 @@ import org.sonar.api.profiles.RulesProfile;
 import org.sonar.api.rules.RuleFinder;
 import org.sonar.api.utils.ValidationMessages;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.checks.LargeTransactionScope;
+import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 
 @SuppressWarnings("deprecation")
 public class OpenEdgeProfile extends ProfileDefinition {
@@ -48,7 +50,8 @@ public class OpenEdgeProfile extends ProfileDefinition {
     profile.activateRule(ruleFinder.findByKey(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_18494_RULEKEY), null);
     profile.activateRule(ruleFinder.findByKey(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_2965_RULEKEY), null);
     profile.activateRule(ruleFinder.findByKey(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY), null);
-    profile.activateRule(ruleFinder.findByKey(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.LARGE_TRANSACTION_SCOPE), null);
+    profile.activateRule(ruleFinder.findByKey(Constants.STD_REPOSITORY_KEY, SharedObjectsAnalyzer.class.getName()), null);
+    profile.activateRule(ruleFinder.findByKey(Constants.STD_REPOSITORY_KEY, LargeTransactionScope.class.getName()), null);
 
     return profile;
   }

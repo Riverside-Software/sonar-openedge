@@ -12,6 +12,7 @@ package org.prorefactor.treeparser;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -55,6 +56,7 @@ public class ParseUnit {
   private JPNodeMetrics metrics;
   private Document xref = null;
   private TypeInfo typeInfo = null;
+  private List<Integer> trxBlocks;
 
   public ParseUnit(File file, RefactorSession prsession) {
     this.file = file;
@@ -206,6 +208,10 @@ public class ParseUnit {
     this.typeInfo = unit;
   }
 
+  public void attachTransactionBlocks(List<Integer> blocks) {
+    this.trxBlocks = blocks;
+  }
+
   @Nullable
   public Document getXref() {
     return xref;
@@ -214,6 +220,10 @@ public class ParseUnit {
   @Nullable
   public TypeInfo getTypeInfo() {
     return typeInfo;
+  }
+
+  public List<Integer> getTransactionBlocks() {
+    return trxBlocks;
   }
 
   public RefactorSession getSession() {

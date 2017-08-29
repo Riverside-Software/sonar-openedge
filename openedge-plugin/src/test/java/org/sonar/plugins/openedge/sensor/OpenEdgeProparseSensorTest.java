@@ -21,11 +21,14 @@ package org.sonar.plugins.openedge.sensor;
 
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.BASEDIR;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.CLASS1;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE2;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
 
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
+import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.Assert;
@@ -49,6 +52,21 @@ public class OpenEdgeProparseSensorTest {
     Assert.assertEquals(context.cpdTokens(BASEDIR + ":" + FILE3).size(), 7);
     Assert.assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
     Assert.assertEquals(context.cpdTokens(BASEDIR + ":" + CLASS1).size(), 11);
+  }
+
+  @Test
+  public void testListing() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    OpenEdgeComponents components = new OpenEdgeComponents(null, null);
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    Assert.assertEquals(context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.NUM_TRANSACTIONS_KEY).value(), 1,
+        "Wrong number of transactions");
+    Assert.assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.NUM_TRANSACTIONS_KEY).value(), 0,
+        "Wrong number of transactions");
   }
 
 }

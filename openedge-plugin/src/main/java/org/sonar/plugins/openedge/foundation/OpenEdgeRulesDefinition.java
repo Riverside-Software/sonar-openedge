@@ -39,7 +39,6 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
   public static final String COMPILER_WARNING_18494_RULEKEY = "compiler.warning.18494";
   public static final String COMPILER_WARNING_2965_RULEKEY = "compiler.warning.2965";
   public static final String PROPARSE_ERROR_RULEKEY = "proparse.error";
-  public static final String LARGE_TRANSACTION_SCOPE = "large.trans";
   private static final String COMPILER_WARNING_TAG = "compiler-warnings";
   private static final String HTML_DOC_PATH = "/org/sonar/l10n/%s/rules/%s/%s.html";
 
@@ -68,14 +67,6 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     proparseRule.setType(RuleType.BUG);
     proparseRule.setHtmlDescription(getClass().getResource(String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY,
         Constants.STD_REPOSITORY_KEY, proparseRule.key())));
-
-    // Manually created rule for large transaction scope
-    NewRule largeTrans = repository.createRule(LARGE_TRANSACTION_SCOPE).setName("Large transaction scope").setSeverity(
-        Priority.CRITICAL.name());
-    largeTrans.setDebtRemediationFunction(largeTrans.debtRemediationFunctions().constantPerIssue("3h"));
-    largeTrans.setType(RuleType.CODE_SMELL);
-    largeTrans.setHtmlDescription(getClass().getResource(String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY,
-        Constants.STD_REPOSITORY_KEY, largeTrans.key())));
 
     repository.done();
   }
