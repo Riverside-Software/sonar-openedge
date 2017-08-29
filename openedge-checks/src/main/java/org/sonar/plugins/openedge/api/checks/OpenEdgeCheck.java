@@ -63,6 +63,14 @@ public abstract class OpenEdgeCheck<T> {
   /**
    * Reports an issue on specified file and at given line number
    */
+  public void reportIssue(InputFile file, String msg) {
+    NewIssue issue = context.newIssue();
+    issue.forRule(getRuleKey()).at(issue.newLocation().on(file).message(msg)).save();
+  }
+
+  /**
+   * Reports an issue on specified file and at given line number
+   */
   public void reportIssue(InputFile file, int lineNumber, String msg) {
     NewIssue issue = context.newIssue();
     issue.forRule(getRuleKey()).at(issue.newLocation().on(file).at(file.selectLine(lineNumber)).message(msg)).save();

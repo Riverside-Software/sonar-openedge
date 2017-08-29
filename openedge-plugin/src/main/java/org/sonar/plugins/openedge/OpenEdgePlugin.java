@@ -40,7 +40,6 @@ import org.sonar.plugins.openedge.sensor.OpenEdgeCodeColorizer;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBColorizer;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBRulesSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBSensor;
-import org.sonar.plugins.openedge.sensor.OpenEdgeListingSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeProparseSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeWarningsSensor;
@@ -65,8 +64,8 @@ public class OpenEdgePlugin implements Plugin {
     }
 
     // Sensors
-    context.addExtensions(OpenEdgeSensor.class, OpenEdgeDBSensor.class, OpenEdgeListingSensor.class,
-        OpenEdgeWarningsSensor.class, OpenEdgeProparseSensor.class, OpenEdgeDBRulesSensor.class);
+    context.addExtensions(OpenEdgeSensor.class, OpenEdgeDBSensor.class, OpenEdgeWarningsSensor.class,
+        OpenEdgeProparseSensor.class, OpenEdgeDBRulesSensor.class);
 
     // Decorators
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);

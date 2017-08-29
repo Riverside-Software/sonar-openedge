@@ -74,9 +74,13 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
+
+import eu.rssw.listing.CodeBlock;
+import eu.rssw.listing.ListingParser;
 
 public class OpenEdgeProparseSensor implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeProparseSensor.class);
@@ -92,7 +96,9 @@ public class OpenEdgeProparseSensor implements Sensor {
   // File statistics
   private int numFiles;
   private int numXREF;
+  private int numListings;
   private int numFailures;
+
   // Timing statistics
   private Map<String, Long> ruleTime = new HashMap<>();
   private long parseTime = 0L;
@@ -191,11 +197,33 @@ public class OpenEdgeProparseSensor implements Sensor {
       settings.parseHierarchy(file.relativePath());
     }
 
+    File listingFile = getListingFile(file.file());
+    List<Integer> trxBlocks = new ArrayList<>();
+    if ((file.absolutePath().indexOf(' ') == -1) && (listingFile != null) && (listingFile.exists())) {
+      try {
+        ListingParser parser = new ListingParser(listingFile, file.relativePath());
+        for (CodeBlock block : parser.getTransactionBlocks()) {
+          trxBlocks.add(block.getLineNumber());
+        }
+        numListings++;
+      } catch (IOException caught) {
+        LOG.error("Unable to parse listing file for " + file.relativePath(), caught);
+      }
+    } else {
+      LOG.debug("Listing file for '{}' not found or contains space character - Was looking for '{}'",
+          file.relativePath(), listingFile.getAbsolutePath());
+    }
+    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.TRANSACTIONS).withValue(
+        Joiner.on(",").join(trxBlocks)).save();
+    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TRANSACTIONS).withValue(
+        trxBlocks.size()).save();
+
     try {
       long startTime = System.currentTimeMillis();
       ParseUnit unit = new ParseUnit(file.file(), session);
       unit.treeParser01();
       unit.attachXref(doc);
+      unit.attachTransactionBlocks(trxBlocks);
       unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
       updateParseTime(System.currentTimeMillis() - startTime);
 
@@ -276,7 +304,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   }
 
   private void logStatistics() {
-    LOG.info("{} files proparse'd, {} XML files, {} failure(s)", numFiles, numXREF, numFailures);
+    LOG.info("{} files proparse'd, {} XML files, {} listing files, {} failure(s)", numFiles, numXREF, numListings, numFailures);
     LOG.info("AST Generation | time={} ms", parseTime);
     LOG.info("XML Parsing    | time={} ms", xmlParseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
@@ -331,6 +359,13 @@ public class OpenEdgeProparseSensor implements Sensor {
     if (relPath == null)
       return null;
     return new File(settings.getPctDir(), relPath + ".xref");
+  }
+
+  private File getListingFile(File file) {
+    String relPath = OpenEdgeProjectHelper.getPathRelativeToSourceDirs(file, settings.getSourceDirs());
+    if (relPath == null)
+      return null;
+    return new File(settings.getPctDir(), relPath);
   }
 
   private void computeCpd(SensorContext context, InputFile file, ParseUnit unit) {
