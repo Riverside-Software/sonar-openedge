@@ -28,6 +28,7 @@ import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser01.ITreeParserAction;
+import org.prorefactor.treeparser01.TP01Support;
 import org.prorefactor.treeparser01.TreeParser01;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,7 +183,7 @@ public class ParseUnit {
     if (this.getTopNode() == null) {
       parse();
     }
-    TreeParser01 tp = new TreeParser01(session);
+    TreeParser01 tp = new TreeParser01(session, new TP01Support(session));
     tp.getActionObject().setParseUnit(this);
     treeParser(tp);
     LOGGER.trace("Exiting ParseUnit#treeParser01()");

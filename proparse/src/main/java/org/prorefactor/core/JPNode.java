@@ -410,16 +410,6 @@ public class JPNode extends BaseAST {
     return token.getFilename();
   }
 
-  /**
-   * Get the array of file names. The file at index zero is always the compile unit. The others are include files. The
-   * array index position corresponds to JPNode.getFileIndex(). The array is genereated every time this is called, so
-   * don't make repeated calls to this.
-   */
-  public String[] getFilenames() {
-    List<String> list = token.getFilenameList().getValues();
-    return list.toArray(new String[list.size()]);
-  }
-
   public int getFileIndex() {
     return token.getFileIndex();
   }

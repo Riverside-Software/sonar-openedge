@@ -35,18 +35,12 @@ import com.google.inject.Injector;
  *
  */
 public class TP01SymbolActionTest {
-  private TP01Support walkAction;
-  private TreeParser01 walker;
   private RefactorSession session;
 
   @BeforeTest
   public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
-
-    walkAction = new TP01Support(session);
-    walker = new TreeParser01();
-    walker.setActionObject(walkAction);
   }
 
   /**
@@ -55,7 +49,8 @@ public class TP01SymbolActionTest {
   @Test
   public void testCompileFileRoutines() throws Exception {
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/tp01ProcessTests/compile-file.p"), session);
-    pu.treeParser(walker);
+    TP01Support walkAction = new TP01Support(session);
+    pu.treeParser(new TreeParser01(session, walkAction));
 
     // Create expected symbols.
     RoutineHandler enableUi = new RoutineHandler("enable-ui", walkAction);
@@ -65,11 +60,11 @@ public class TP01SymbolActionTest {
     RoutineHandler getCompileList = new RoutineHandler("get-compile-list", walkAction);
 
     // Routines expected in root scope.
-    assertTrue(rootScope().hasRoutine(enableUi.getName()));
-    assertTrue(rootScope().hasRoutine(userAction.getName()));
-    assertTrue(rootScope().hasRoutine(disableUi.getName()));
-    assertTrue(rootScope().hasRoutine(setState.getName()));
-    assertTrue(rootScope().hasRoutine(getCompileList.getName()));
+    assertTrue(walkAction.getRootScope().hasRoutine(enableUi.getName()));
+    assertTrue(walkAction.getRootScope().hasRoutine(userAction.getName()));
+    assertTrue(walkAction.getRootScope().hasRoutine(disableUi.getName()));
+    assertTrue(walkAction.getRootScope().hasRoutine(setState.getName()));
+    assertTrue(walkAction.getRootScope().hasRoutine(getCompileList.getName()));
   }
 
   /**
@@ -78,7 +73,8 @@ public class TP01SymbolActionTest {
   @Test
   public void testCompileFileVars() throws Exception {
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/tp01ProcessTests/compile-file.p"), session);
-    pu.treeParser(walker);
+    TP01Support walkAction = new TP01Support(session);
+    pu.treeParser(new TreeParser01(session, walkAction));
 
     // Create expected symbols.
     String sourcePath = "sourcePath";
@@ -92,21 +88,21 @@ public class TP01SymbolActionTest {
     RoutineHandler getCompileList = new RoutineHandler("get-compile-list", walkAction);
 
     // Variables expected in root scope.
-    assertNotNull(rootScope().lookupVariable(sourcePath));
-    assertFalse(rootScope().lookupVariable(sourcePath).isParameter());
-    assertNotNull(rootScope().lookupVariable(currentPropath));
-    assertFalse(rootScope().lookupVariable(currentPropath).isParameter());
-    assertNotNull(rootScope().lookupVariable(compileFile));
-    assertFalse(rootScope().lookupVariable(compileFile).isParameter());
-    assertNotNull(rootScope().lookupVariable(currentStatus));
-    assertFalse(rootScope().lookupVariable(currentStatus).isParameter());
-    assertNotNull(rootScope().lookupVariable(test));
-    assertFalse(rootScope().lookupVariable(test).isParameter());
+    assertNotNull(walkAction.getRootScope().lookupVariable(sourcePath));
+    assertFalse(walkAction.getRootScope().lookupVariable(sourcePath).isParameter());
+    assertNotNull(walkAction.getRootScope().lookupVariable(currentPropath));
+    assertFalse(walkAction.getRootScope().lookupVariable(currentPropath).isParameter());
+    assertNotNull(walkAction.getRootScope().lookupVariable(compileFile));
+    assertFalse(walkAction.getRootScope().lookupVariable(compileFile).isParameter());
+    assertNotNull(walkAction.getRootScope().lookupVariable(currentStatus));
+    assertFalse(walkAction.getRootScope().lookupVariable(currentStatus).isParameter());
+    assertNotNull(walkAction.getRootScope().lookupVariable(test));
+    assertFalse(walkAction.getRootScope().lookupVariable(test).isParameter());
 
     // Variables not expected in root scope.
-    assertNull(rootScope().lookupVariable(aFile));
-    assertNull(rootScope().lookupVariable(aNewFile));
-    assertNull(rootScope().lookupVariable(aNewSrcDir));
+    assertNull(walkAction.getRootScope().lookupVariable(aFile));
+    assertNull(walkAction.getRootScope().lookupVariable(aNewFile));
+    assertNull(walkAction.getRootScope().lookupVariable(aNewSrcDir));
 
     // Get get-compile-list scope.
     TreeParserSymbolScope routineScope = getCompileList.getRoutineScope();
@@ -136,10 +132,6 @@ public class TP01SymbolActionTest {
     assertNotNull(routineScope.lookupVariable(compileFile));
     assertNotNull(routineScope.lookupVariable(currentStatus));
     assertNotNull(routineScope.lookupVariable(test));
-  }
-
-  private TreeParserSymbolScope rootScope() {
-    return walkAction.getRootScope();
   }
 
 }

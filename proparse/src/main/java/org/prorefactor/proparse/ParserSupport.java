@@ -49,9 +49,9 @@ public class ParserSupport {
   private JPNode lastFieldIDNode;
 
   ParserSupport(RefactorSession session) {
+    this.session = session;
     this.unitScope = new RootSymbolScope(session);
     this.currentScope = unitScope;
-    this.session = session;
     this.classFinder = new ClassFinder(session);
   }
 

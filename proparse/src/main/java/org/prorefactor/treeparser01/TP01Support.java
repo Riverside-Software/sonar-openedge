@@ -81,7 +81,7 @@ public class TP01Support extends TP01Action {
 
   private Routine currentRoutine;
   private Routine rootRoutine;
-  private RefactorSession refSession;
+  private final RefactorSession refSession;
 
   /**
    * The symbol last, or currently being, defined. Needed when we have complex syntax like DEFINE id ... LIKE, where we
@@ -100,6 +100,7 @@ public class TP01Support extends TP01Action {
 
   public TP01Support(RefactorSession session) {
     this.refSession = session;
+
     rootScope = new TreeParserRootSymbolScope(refSession);
     currentScope = rootScope;
     setParseUnit(new ParseUnit(null, session));

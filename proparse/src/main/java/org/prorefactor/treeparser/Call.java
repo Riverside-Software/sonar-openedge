@@ -31,7 +31,6 @@ import antlr.SemanticException;
  * @author pcd
  */
 public class Call extends SemanticRecord {
-
   private List<Parameter> parameters = new ArrayList<>();
   private JPNode persistentHandleNode = null;
   private JPNode runHandleNode = null;
@@ -59,9 +58,9 @@ public class Call extends SemanticRecord {
   }
 
   public String baseFilename(String filename) {
-    int startAt = filename.lastIndexOf("/");
+    int startAt = filename.lastIndexOf('/');
     if (startAt == -1)
-      startAt = filename.lastIndexOf("\\");
+      startAt = filename.lastIndexOf('\\');
     return filename.substring(startAt + 1);
   }
 
@@ -71,6 +70,8 @@ public class Call extends SemanticRecord {
    */
   @Override
   public boolean equals(Object other) {
+    if (other == null)
+      return false;
     if (other.getClass() == this.getClass()) {
       Call otherCall = (Call) other;
       return id().equalsIgnoreCase(otherCall.id());
