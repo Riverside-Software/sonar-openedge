@@ -1,6 +1,6 @@
 # OpenEdge plugin for SonarQube
 
-[[img/main-page-01.png]]
+<img src="https://github.com/Riverside-Software/sonar-openedge/wiki/img/main-page-01.png" align="center" vspace="5">
 
 The OpenEdge plugin for SonarQube enables analysis of OpenEdge procedural and object-oriented code, and reports:
  * Metrics (lines of code, comment density, complexity, shared objects, ...)
