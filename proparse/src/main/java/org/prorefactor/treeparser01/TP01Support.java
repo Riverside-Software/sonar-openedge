@@ -137,6 +137,14 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
+  public void bufferRef(AST idAST) throws TreeParserException {
+    TableBuffer tableBuffer = currentScope.lookupBuffer(idAST.getText());
+    if (tableBuffer != null) {
+      tableBuffer.noteReference(ContextQualifier.SYMBOL);
+    }
+  }
+
+  @Override
   public void callBegin(AST callAST) {
     LOG.trace("Entering callBegin {}", callAST);
     JPNode callNode = (JPNode) callAST;
@@ -207,6 +215,8 @@ public class TP01Support extends TP01Action {
     if (tableBuffer != null) {
       table = tableBuffer.getTable();
       isDefault = tableBuffer.isDefault();
+      // Notify table buffer that it's used in a CAN-FIND
+      tableBuffer.noteReference(ContextQualifier.INIT);
     } else {
       table = refSession.getSchema().lookupTable(buffName);
       isDefault = true;
@@ -490,7 +500,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void widattr(AST widAST, AST idAST, ContextQualifier cq) throws TreeParserException {
-    LOG.trace("Accessing " + idAST.getText() + " in mode " + cq);
+    LOG.trace("Accessing {} in mode {}", idAST.getText(), cq);
     if (idAST.getType() == NodeTypes.THISOBJECT) {
       AST tok = idAST.getNextSibling();
       if (tok.getType() == NodeTypes.OBJCOLON) {

@@ -58,6 +58,8 @@ public interface ITreeParserAction {
    */
   default void browseRef(AST idAST) throws TreeParserException { }
 
+  default void bufferRef(AST idAST) throws TreeParserException {}
+
   /**
    * Node where a call occurs, such as USER_FUNC or LOCAL_METHOD_REF
    */

@@ -331,7 +331,7 @@ widname throws TreeParserException
   |  BROWSE b:ID  { action.browseRef(#b); }
   |  QUERY ID
   |  TEMPTABLE ID
-  |  BUFFER ID
+  |  BUFFER bf:ID { action.bufferRef(#bf); }
   |  XDOCUMENT ID
   |  XNODEREF ID
   |  SOCKET ID
