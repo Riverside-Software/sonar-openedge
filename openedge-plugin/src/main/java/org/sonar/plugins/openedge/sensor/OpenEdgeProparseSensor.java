@@ -307,9 +307,10 @@ public class OpenEdgeProparseSensor implements Sensor {
     LOG.info("{} files proparse'd, {} XML files, {} listing files, {} failure(s)", numFiles, numXREF, numListings, numFailures);
     LOG.info("AST Generation | time={} ms", parseTime);
     LOG.info("XML Parsing    | time={} ms", xmlParseTime);
-    for (Entry<String, Long> entry : ruleTime.entrySet()) {
-      LOG.info("Rule {} | time={} ms", entry.getKey(), entry.getValue());
-    }
+    // Sort entries by rule name
+    ruleTime.entrySet().stream().sorted(
+        (Entry<String, Long> obj1, Entry<String, Long> obj2) -> obj1.getKey().compareTo(obj2.getKey())).forEach(
+            (Entry<String, Long> entry) -> LOG.info("Rule {} | time={} ms", entry.getKey(), entry.getValue()));
   }
 
   private void generateProparseDebugFile(InputFile file, ParseUnit unit) {
