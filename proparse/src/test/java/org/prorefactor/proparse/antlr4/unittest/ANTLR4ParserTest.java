@@ -27,6 +27,7 @@ import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.ParseUnit;
 import org.testng.Assert;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
@@ -61,9 +62,8 @@ public class ANTLR4ParserTest {
   public void test00() throws Exception {
     // Only in order to initialize Proparse class
     try {
-      ProgressLexer lex = new ProgressLexer(session, new File(SRC_DIR, "bug01.p").getAbsolutePath());
-      // Proparse parser = new Proparse(new CommonTokenStream(dp));
-      // parser.program();
+      ParseUnit unit = new ParseUnit(new File(SRC_DIR, "bug01.p"), session);
+      unit.lex4().nextToken();
     } catch (Throwable uncaught) {
       
     }
@@ -263,11 +263,10 @@ public class ANTLR4ParserTest {
   }
 
   private void executeAntlr2Test(File file) throws ANTLRException, IOException {
-    ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
-    ProParser parser = new ProParser(dp.getANTLR2TokenStream(true));
-    parser.initAntlr4(session, dp.getFilenameList());
-    parser.program();
-    Assert.assertNotNull(parser.getAST());
+    // ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
+    // ProParser parser = new ProParser(dp.getANTLR2TokenStream(true));
+    // parser.initAntlr4(session, dp.getFilenameList());
+    // parser.program();
   }
 
   /** Print out a whole tree in LISP form. {@link #getNodeText} is used on the

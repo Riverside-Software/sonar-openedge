@@ -77,7 +77,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private final IProparseSettings ppSettings;
   // Do we only read tokens ?
   private final boolean lexOnly;
-  private final IntegerIndex<String> filenameList = new IntegerIndex<>();
+  private final IntegerIndex<String> filenameList;
 
   // How many levels of &IF FALSE are we currently into?
   private int consuming = 0;
@@ -125,18 +125,15 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private final RefactorSession session;
   private TokenSource wrapper;
 
-  public ProgressLexer(RefactorSession session, String fileName) throws IOException {
-    this(session, fileName, false);
-  }
-
   /**
    * An existing reference to the input stream is required for construction. The caller is responsible for closing that
    * stream once parsing is complete.
    */
-  public ProgressLexer(RefactorSession session, String fileName, boolean lexOnly) throws IOException {
+  public ProgressLexer(RefactorSession session, String fileName, IntegerIndex<String> filenameList, boolean lexOnly) throws IOException {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.ppSettings = session.getProparseSettings();
     this.session = session;
+    this.filenameList = filenameList;
     this.lexOnly = lexOnly;
 
     // Create input source with flag isPrimaryInput=true

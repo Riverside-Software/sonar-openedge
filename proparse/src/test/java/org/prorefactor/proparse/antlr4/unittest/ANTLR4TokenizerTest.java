@@ -21,6 +21,7 @@ import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -242,16 +243,16 @@ public class ANTLR4TokenizerTest {
     // TokenStream tokenStream = pu.lex();
 
     // ANTLR4
-    ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
-    TokenStream tokenStream2 = dp.getANTLR2TokenStream(false);
+    ParseUnit unit = new ParseUnit(file, session);
+    TokenStream tokenStream2 = unit.lex();
 
     // compareTokens(tokenStream, tokenStream2);
   }
 
   private void executeTokenizerTest2(File file) throws RefactorException, ANTLRException, IOException {
     // ANTLR4
-    ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
-    dp.nextToken();
+    ParseUnit unit = new ParseUnit(file, session);
+    unit.lex4().nextToken();
   }
 
   /**

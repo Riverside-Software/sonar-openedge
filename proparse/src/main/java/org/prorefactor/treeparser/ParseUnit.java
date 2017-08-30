@@ -17,12 +17,14 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
+import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.refactor.RefactorException;
@@ -33,6 +35,8 @@ import org.prorefactor.treeparser01.TreeParser01;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+
+import com.google.common.base.Strings;
 
 import antlr.ANTLRException;
 import antlr.RecognitionException;
@@ -50,9 +54,10 @@ public class ParseUnit {
 
   private final RefactorSession session;
   private final File file;
+  private final IntegerIndex<String> fileNameList;
 
-  private IncludeRef macroGraph = null;
   private ProgramRootNode topNode;
+  private IncludeRef macroGraph = null;
   private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
   private Document xref = null;
@@ -62,6 +67,7 @@ public class ParseUnit {
   public ParseUnit(File file, RefactorSession prsession) {
     this.file = file;
     this.session = prsession;
+    this.fileNameList = new IntegerIndex<>();
   }
 
   public TreeParserRootSymbolScope getRootScope() {
@@ -90,6 +96,9 @@ public class ParseUnit {
     return file;
   }
 
+  public String getIncludeFileName(int index) {
+    return Strings.nullToEmpty(fileNameList.getValue(index));
+  }
   /** 
    * @return IncludeRef object
    */
@@ -111,15 +120,19 @@ public class ParseUnit {
     return MacroLevel.sourceArray(macroGraph);
   }
 
+  public TokenSource lex4() throws IOException {
+    return new ProgressLexer(session, file.getPath(), fileNameList, true);
+  }
+
   public TokenStream lex() throws IOException {
-    ProgressLexer lexer = new ProgressLexer(session, file.getPath(), true);
+    ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, true);
     return lexer.getANTLR2TokenStream(false);
   }
 
   public void lexAndGenerateMetrics() throws RefactorException {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
     try {
-      ProgressLexer lexer = new ProgressLexer(session, file.getPath(), true);
+      ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, true);
       TokenStream stream = lexer.getANTLR2TokenStream(false);
       try {
         Token tok = stream.nextToken();
@@ -140,7 +153,7 @@ public class ParseUnit {
     LOGGER.trace("Entering ParseUnit#parse()");
     
     try {
-      ProgressLexer lexer = new ProgressLexer(session, file.getPath(), false);
+      ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, false);
       ProParser parser = new ProParser(lexer.getANTLR2TokenStream(true));
       parser.initAntlr4(session, lexer.getFilenameList());
       parser.program();
