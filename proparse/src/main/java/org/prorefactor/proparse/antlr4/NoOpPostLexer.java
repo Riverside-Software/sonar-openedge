@@ -37,8 +37,6 @@ public class NoOpPostLexer implements TokenSource {
     return currToken;
   }
 
-
-
   @Override
   public int getLine() {
     return currToken.getLine();

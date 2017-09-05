@@ -358,4 +358,26 @@ public class BugFixTest {
      unit.treeParser01();
      assertNotNull(unit.getTopNode());
    }
+
+  @Test
+  public void testAscendingFunction() throws Exception {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/bugsfixed/ascending.p"), session);
+    assertNull(unit.getTopNode());
+    assertNull(unit.getRootScope());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+
+    // Message statement
+    JPNode node = unit.getTopNode().queryStateHead(NodeTypes.MESSAGE).get(0);
+    assertNotNull(node);
+    assertEquals(node.query(NodeTypes.ASCENDING).size(), 0);
+    assertEquals(node.query(NodeTypes.ASC).size(), 1);
+
+    // Define TT statement
+    JPNode node2 = unit.getTopNode().queryStateHead(NodeTypes.DEFINE).get(0);
+    assertNotNull(node2);
+    assertEquals(node2.query(NodeTypes.ASCENDING).size(), 1);
+    assertEquals(node2.query(NodeTypes.ASC).size(), 0);
+
+  }
 }
