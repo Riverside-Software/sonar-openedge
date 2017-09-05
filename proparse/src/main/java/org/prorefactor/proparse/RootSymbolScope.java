@@ -47,6 +47,25 @@ public class RootSymbolScope extends SymbolScope {
   }
 
   @Override
+  boolean isVariable(String name) {
+    // First look through the standard way
+    if (super.isVariable(name))
+      return true;
+
+    // Then look through rcode
+    TypeInfo info = typeInfo;
+    while (info != null) {
+      
+      if (info.hasProperty(name)) {
+        return true;
+      }
+      info = getSession().getTypeInfo(info.getParentTypeName());
+    }
+
+    return false;
+  }
+
+  @Override
   FieldType isTableDef(String inName) {
     // First look through the standard way
     FieldType ft = super.isTableDef(inName);

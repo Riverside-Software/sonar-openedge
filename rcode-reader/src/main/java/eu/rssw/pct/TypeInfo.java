@@ -73,7 +73,16 @@ public class TypeInfo {
     return false;
   }
 
+  public boolean hasProperty(String name) {
+    for (PropertyElement prop : properties) {
+      if (prop.getName().equalsIgnoreCase(name))
+        return true;
+    }
+    return false;
+  }
+
   public boolean hasBuffer(String inName) {
+    // TODO Can it be abbreviated ??
     for (BufferElement buf : buffers) {
       if (buf.getName().equalsIgnoreCase(inName)) {
         return true;

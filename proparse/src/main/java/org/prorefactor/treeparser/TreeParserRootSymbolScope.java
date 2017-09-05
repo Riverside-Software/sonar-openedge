@@ -19,9 +19,11 @@ import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.Variable;
 
 import eu.rssw.pct.TypeInfo;
 
@@ -137,6 +139,34 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   public TableBuffer getLocalTableBuffer(ITable table) {
     assert table.getStoretype() != IConstants.ST_DBTABLE;
     return bufferMap.get(table.getName().toLowerCase());
+  }
+
+  @Override
+  public Variable lookupVariable(String name) {
+    Variable var = super.lookupVariable(name);
+    if (var != null) {
+      return var;
+    }
+
+    TypeInfo info = typeInfo;
+    while (info != null) {
+      if (info.hasProperty(name)) {
+        return new Variable(name, this);
+      }
+      info = refSession.getTypeInfo(info.getParentTypeName());
+    }
+    return null;
+  }
+
+  @Override
+  public Dataset lookupDataset(String name) {
+    Dataset ds = super.lookupDataset(name);
+    if (ds != null) {
+      return ds;
+    }
+    
+    // TODO Lookup in parent classes
+    return null;
   }
 
   /**
