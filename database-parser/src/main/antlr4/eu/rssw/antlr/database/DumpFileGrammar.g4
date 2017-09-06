@@ -153,8 +153,8 @@ addFieldOption:
   | 'LABEL-SA' ('?' | QUOTED_STRING)    # fieldLabelSA
   | 'POSITION' val=NUMBER               # fieldPosition
   | 'LOB-AREA' val=(QUOTED_STRING | UNQUOTED_STRING)  # fieldLobArea
-  | 'LOB-BYTES' NUMBER                      # fieldLobBytes
-  | 'LOB-SIZE' UNQUOTED_STRING              # fieldLobSize
+  | 'LOB-BYTES' ('?' | NUMBER)              # fieldLobBytes
+  | 'LOB-SIZE' ('?' | NUMBER)               # fieldLobSize
   | 'MAX-WIDTH' val=NUMBER                  # fieldMaxWidth
   | 'SQL-WIDTH' NUMBER                      # fieldSqlWith
   | 'CLOB-CODEPAGE' (QUOTED_STRING | UNQUOTED_STRING)         # fieldClobCodepage
