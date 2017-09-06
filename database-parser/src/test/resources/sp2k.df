@@ -2606,6 +2606,7 @@ ADD FIELD "Phone" OF "Warehouse" AS character
   POSITION 10
   MAX-WIDTH 40
   HELP "Please enter a phone."
+  LOB-SIZE ?
   ORDER 90
 
 ADD INDEX "warehousenum" ON "Warehouse" 
