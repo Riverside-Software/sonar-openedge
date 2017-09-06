@@ -378,6 +378,10 @@ public class BugFixTest {
     assertNotNull(node2);
     assertEquals(node2.query(NodeTypes.ASCENDING).size(), 1);
     assertEquals(node2.query(NodeTypes.ASC).size(), 0);
+  }
 
+  @Test(enabled = false, description = "Issue #356, won't fix,")
+  public void testDefineMenu() throws Exception {
+    genericTest("definemenu.p");
   }
 }
