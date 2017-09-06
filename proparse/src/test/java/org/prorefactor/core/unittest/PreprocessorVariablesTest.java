@@ -75,4 +75,11 @@ public class PreprocessorVariablesTest {
     testVariable(unit.getTopNode(), "var10");
   }
 
+  @Test
+  public void test06() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor06.p"), session);
+    unit.parse();
+    Assert.assertEquals(unit.getTopNode().queryStateHead(NodeTypes.MESSAGE).size(), 1);
+  }
+
 }
