@@ -55,7 +55,6 @@ public class RootSymbolScope extends SymbolScope {
     // Then look through rcode
     TypeInfo info = typeInfo;
     while (info != null) {
-      
       if (info.hasProperty(name)) {
         return true;
       }

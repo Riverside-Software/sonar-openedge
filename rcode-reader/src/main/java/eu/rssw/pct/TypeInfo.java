@@ -75,10 +75,19 @@ public class TypeInfo {
 
   public boolean hasProperty(String name) {
     for (PropertyElement prop : properties) {
-      if (prop.getName().equalsIgnoreCase(name))
+      if (prop.getName().equalsIgnoreCase(name) && (prop.isPublic() || prop.isProtected()))
         return true;
     }
     return false;
+  }
+
+  protected PropertyElement getProperty(String name) {
+    // Only for testing
+    for (PropertyElement prop : properties) {
+      if (prop.getName().equalsIgnoreCase(name))
+        return prop;
+    }
+    return null;
   }
 
   public boolean hasBuffer(String inName) {

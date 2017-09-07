@@ -19,7 +19,9 @@
  */
 package eu.rssw.pct;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.FileInputStream;
@@ -28,6 +30,7 @@ import java.io.IOException;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
+import eu.rssw.pct.elements.PropertyElement;
 
 public class RCodeInfoTest {
 
@@ -56,6 +59,46 @@ public class RCodeInfoTest {
     try (FileInputStream input = new FileInputStream("src/test/resources/rcode/BackupDataCallback.r")) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testClass2() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/propList.r")) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      TypeInfo info = rci.getTypeInfo();
+      assertNotNull(info);
+      assertNotNull(info.getProperties());
+      assertEquals(info.getProperties().size(), 6);
+
+      PropertyElement prop1 = info.getProperty("prop1");
+      assertNotNull(prop1);
+      assertTrue(prop1.isPublic());
+
+      PropertyElement prop2 = info.getProperty("prop2");
+      assertNotNull(prop2);
+      assertTrue(prop2.isPrivate());
+
+      PropertyElement prop3 = info.getProperty("prop3");
+      assertNotNull(prop3);
+      assertTrue(prop3.isPublic());
+
+      PropertyElement prop4 = info.getProperty("prop4");
+      assertNotNull(prop4);
+      assertTrue(prop4.isProtected());
+
+      PropertyElement prop5 = info.getProperty("prop5");
+      assertNotNull(prop5);
+      assertTrue(prop5.isProtected());
+      assertTrue(prop5.isAbstract());
+
+      PropertyElement prop6 = info.getProperty("prop6");
+      assertNotNull(prop6);
+      assertTrue(prop6.isPublic());
+      assertTrue(prop6.isStatic());
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
