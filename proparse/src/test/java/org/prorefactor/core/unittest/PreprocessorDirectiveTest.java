@@ -67,4 +67,10 @@ public class PreprocessorDirectiveTest {
     assertEquals(numDirectives, 2);
   }
 
+  @Test
+  public void test02() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor07.p"), session);
+    unit.parse();
+  }
+
 }
