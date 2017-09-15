@@ -235,7 +235,7 @@ public class TP01Support extends TP01Action {
   public void classState(AST classAST, AST abstractKw, AST finalKw, AST serializableKw) {
     LOG.trace("Entering classState {}", classAST);
     JPNode classNode = (JPNode) classAST;
-    JPNode idNode = classNode.firstChild();
+    JPNode idNode = classNode.getFirstChild();
     rootScope.setClassName(idNode.getText());
     rootScope.setTypeInfo(refSession.getTypeInfo(idNode.getText()));
     rootScope.setAbstractClass(abstractKw != null);
@@ -247,7 +247,7 @@ public class TP01Support extends TP01Action {
   public void interfaceState(AST ast) {
     LOG.trace("Entering interfaceState {}", ast);
     JPNode classNode = (JPNode) ast;
-    JPNode idNode = classNode.firstChild();
+    JPNode idNode = classNode.getFirstChild();
     rootScope.setClassName(idNode.getText());
     rootScope.setTypeInfo(refSession.getTypeInfo(idNode.getText()));
     rootScope.setInterface(true);
@@ -256,7 +256,7 @@ public class TP01Support extends TP01Action {
   @Override
   public void clearState(AST headAST) {
     JPNode headNode = (JPNode) headAST;
-    JPNode firstChild = headNode.firstChild();
+    JPNode firstChild = headNode.getFirstChild();
     if (firstChild.getType() == NodeTypes.FRAME)
       frameStack.simpleFrameInitStatement(headNode, firstChild.nextNode(), currentBlock);
   }
@@ -291,7 +291,7 @@ public class TP01Support extends TP01Action {
   public void defExtent(AST extentAST) {
     JPNode extentNode = (JPNode) extentAST;
     Primative primative = (Primative) currSymbol;
-    JPNode exprNode = extentNode.firstChild();
+    JPNode exprNode = extentNode.getFirstChild();
     // If there is no expression node, then it's an "indeterminate extent".
     // If it's not a numeric literal, then we give up.
     if (exprNode == null || exprNode.getType() != NodeTypes.NUMBER) {
@@ -557,8 +557,8 @@ public class TP01Support extends TP01Action {
       addToSymbolScope(defineVariable(idAST, idAST));
 
     if ((refNode.getParent().getType() == NodeTypes.USING && refNode.getParent().getParent().getType() == NodeTypes.RECORD_NAME)
-        || (refNode.firstChild().getType() == NodeTypes.INPUT &&
-            (refNode.nextSibling() == null || refNode.nextSibling().getType() != NodeTypes.OBJCOLON))) {
+        || (refNode.getFirstChild().getType() == NodeTypes.INPUT &&
+            (refNode.getNextSibling() == null || refNode.getNextSibling().getType() != NodeTypes.OBJCOLON))) {
       // First condition : there seems to be an implicit INPUT in USING phrases in a record phrase.
       // Second condition :I've seen at least one instance of "INPUT objHandle:attribute" in code,
       // which for some reason compiled clean. As far as I'm aware, the INPUT was

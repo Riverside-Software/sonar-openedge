@@ -71,55 +71,22 @@ blockorstate
     // (no source code available, like progress.lang.*).
   ;
 
-proparse_directive:
-    PROPARSEDIRECTIVE
-    {
-      // We move the text from the regular token's text to "proparsedirective" string attribute.
-      LOGGER.error("#dir.attrSet(IConstants.PROPARSEDIRECTIVE, #dir.getText());");
-      LOGGER.error("#dir.setText(\"\");");
-    }
-;
 
-// FIXME Later
-/*dot_comment
-{String dotText = "";}
-  :  nd:NAMEDOT
-    {
-      dotText += #nd.getText();
-    }
-    (  t2:not_state_end!
-      {
-        dotText += #t2.allLeadingHiddenText();
-        dotText += #t2.getText();
-      }
-    )*
-    (  t3:state_end!
-      {
-        dotText += #t3.allLeadingHiddenText();
-        dotText += #t3.getText();
-      }
-    )
-    {
-      #nd.setType(DOT_COMMENT);
-      #nd.setText(dotText);
-    }
-  ;*/
-
-expression_statement
-  : expression NOERROR_KW? state_end 
+expression_statement:
+    expression NOERROR_KW? state_end 
   ;
 
-labeled_block
-  : blocklabel LEXCOLON ( dostate | forstate | repeatstate )
+labeled_block:
+    blocklabel LEXCOLON ( dostate | forstate | repeatstate )
   ;
 
-block_colon
-  : LEXCOLON
+block_colon:
+    LEXCOLON
   | PERIOD
   ;
 
-block_end
-  : EOF
+block_end:
+    EOF
   | END state_end
   ;
 
@@ -128,11 +95,8 @@ block_for:
     FOR record (COMMA record)*
 ;
 
-block_opt
-  : field EQUAL expression TO expression (BY constant)?
-    {
-      LOGGER.error("{##=#([Block_iterator],##);");
-    }
+block_opt:
+    field EQUAL expression TO expression (BY constant)?
   | querytuningphrase 
   | WHILE expression 
   | TRANSACTION
@@ -147,18 +111,18 @@ block_opt
   | GROUP by_expr+
   ;
 
-block_preselect
-  : PRESELECT for_record_spec
+block_preselect:
+    PRESELECT for_record_spec
   ;
 
+statement:
 // Do not turn off warnings for the statement rule. We want to know if we have ambiguities here.
 // Many statements can be ambiguous on the first two terms with a built-in function. I have predicated those statements.
 // Some statement keywords are not reserved, and could be used as a field name in unreskeyword EQUAL expression.
 // However, there are no statements
 // that have an unreserved keyword followed by EQUAL or LEFTPAREN, so with ASSIGN and user def'd function predicated
 // at the top, we take care of our ambiguity.
-statement
-  : aatraceonoffstate
+    aatraceonoffstate
   | aatraceclosestate
   | aatracestate
   // 
@@ -254,7 +218,7 @@ statement
   | processeventsstate
   | promptforstate
   | publishstate
-  | { _input.LA(2) == CURSOR }? putcursorstate 
+  | { _input.LA(2) == CURSOR }? putcursorstate
   | putstate
   | putscreenstate
   | putkeyvaluestate
@@ -299,12 +263,12 @@ statement
   | waitforstate
   ;
 
+pseudfn:
 // See PSC's grammar for <pseudfn> and for <asignmt>.
 // These are functions that can (or, in some cases, must) be an l-value.
 // Productions that are named *_pseudfn /must/ be l-values.
 // Widget attributes are ambiguous with pretty much anything, because
 // the first bit before the colon can be any expression.
-pseudfn:
     (  EXTENT
     |  FIXCODEPAGE
     |  OVERLAY
@@ -324,8 +288,7 @@ pseudfn:
     |  SETSIZE
     )
     funargs
- // not the whole func - we don't want its arguments here
-  | AAMSG
+  | AAMSG  // not the whole func - we don't want its arguments here
   | currentvaluefunc
   | CURRENTWINDOW
   | dynamiccurrentvaluefunc
@@ -340,6 +303,7 @@ pseudfn:
   // The following are from <optargfn>
   | PAGESIZE_KW | LINECOUNTER | PAGENUMBER | FRAMECOL
   | FRAMEDOWN | FRAMELINE | FRAMEROW | USERID | ETIME_KW
+  | PROVERSION
   // The following are from <noargfn>
   | DBNAME | TIME | OPSYS | RETRY | AASERIAL | AACONTROL
   | MESSAGELINES | TERMINAL | PROPATH | CURRENTLANGUAGE | PROMSGS
@@ -348,7 +312,7 @@ pseudfn:
   | PROGRESS | FRAMEINDEX | FRAMEDB | FRAMENAME | DATASERVERS
   | NUMDBS | NUMALIASES | ISATTRSPACE | PROCSTATUS
   | PROCHANDLE | CURSOR | OSERROR | RETURNVALUE | OSDRIVES
-  | PROVERSION | TRANSACTION | MACHINECLASS 
+  | TRANSACTION | MACHINECLASS 
   | AAPCONTROL | GETCODEPAGES | COMSELF
 ;
 
@@ -356,20 +320,17 @@ pseudfn:
 // Predicates not in alpha order because they give ambiguous warnings if they're below
 // maximumfunc or minimumfunc. Judy
 // ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
-builtinfunc
-  :  ACCUMULATE/*^*/ accum_what 
-    (  by_expr expression
-    |  expression
-    )
+builtinfunc:
+     ACCUMULATE accum_what ( by_expr expression | expression )
   |  ADDINTERVAL LEFTPAREN expression COMMA expression COMMA expression RIGHTPAREN
   |  AUDITENABLED LEFTPAREN (expression)? RIGHTPAREN
   |  sqlaggregatefunc  
   |  CANFIND LEFTPAREN (findwhich)? recordphrase RIGHTPAREN
-  |  CAST/*^*/ LEFTPAREN expression COMMA type_name RIGHTPAREN
+  |  CAST LEFTPAREN expression COMMA type_name RIGHTPAREN
   |  currentvaluefunc // is also a pseudfn.
   |  dynamiccurrentvaluefunc // is also a pseudfn.
-  |  DYNAMICFUNCTION/*^*/ LEFTPAREN expression (in_expr)? (COMMA parameter)* RIGHTPAREN (/*options{greedy=true;}:*/ NOERROR_KW)?
-  |  DYNAMICINVOKE/*^*/
+  |  DYNAMICFUNCTION LEFTPAREN expression (in_expr)? (COMMA parameter)* RIGHTPAREN NOERROR_KW?
+  |  DYNAMICINVOKE
     LEFTPAREN
     ( exprt | type_name )
     COMMA expression
@@ -377,171 +338,181 @@ builtinfunc
     RIGHTPAREN
   // ENTERED and NOTENTERED are only dealt with as part of an expression term. See: exprt.
   |  entryfunc // is also a pseudfn.
-  |  ETIME_KW/*^*/ funargs  // also noarg
-  |  EXTENT/*^*/ LEFTPAREN field RIGHTPAREN
-  |  FRAMECOL/*^*/ LEFTPAREN widgetname RIGHTPAREN  // also noarg
-  |  FRAMEDOWN/*^*/ LEFTPAREN widgetname RIGHTPAREN  // also noarg
-  |  FRAMELINE/*^*/ LEFTPAREN widgetname RIGHTPAREN  // also noarg
-  |  FRAMEROW/*^*/ LEFTPAREN widgetname RIGHTPAREN  // also noarg
-  |  GETCODEPAGES/*^*/ funargs  // also noarg
-  |  GUID/*^*/ LEFTPAREN (expression)? RIGHTPAREN
-  |  IF/*^*/ expression THEN expression ELSE expression
+  |  ETIME_KW funargs  // also noarg
+  |  EXTENT LEFTPAREN field RIGHTPAREN
+  |  FRAMECOL LEFTPAREN widgetname RIGHTPAREN  // also noarg
+  |  FRAMEDOWN LEFTPAREN widgetname RIGHTPAREN  // also noarg
+  |  FRAMELINE LEFTPAREN widgetname RIGHTPAREN  // also noarg
+  |  FRAMEROW LEFTPAREN widgetname RIGHTPAREN  // also noarg
+  |  GETCODEPAGES funargs  // also noarg
+  |  GUID LEFTPAREN (expression)? RIGHTPAREN
+  |  IF expression THEN expression ELSE expression
   |  ldbnamefunc 
   |  lengthfunc // is also a pseudfn.
-  |  LINECOUNTER/*^*/ LEFTPAREN streamname RIGHTPAREN  // also noarg
-  |  MTIME/*^*/ funargs  // also noarg
+  |  LINECOUNTER LEFTPAREN streamname RIGHTPAREN  // also noarg
+  |  MTIME funargs  // also noarg
   |  nextvaluefunc // is also a pseudfn.
     // ENTERED and NOTENTERED are only dealt with as part of an expression term. See: exprt.
-  |  PAGENUMBER/*^*/ LEFTPAREN streamname RIGHTPAREN  // also noarg
-  |  PAGESIZE_KW/*^*/ LEFTPAREN streamname RIGHTPAREN  // also noarg
+  |  PAGENUMBER LEFTPAREN streamname RIGHTPAREN  // also noarg
+  |  PAGESIZE_KW LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  rawfunc // is also a pseudfn.
-  |  SEEK/*^*/ LEFTPAREN (INPUT|OUTPUT|streamname|STREAMHANDLE expression) RIGHTPAREN // streamname, /not/ stream_name_or_handle.
+  |  SEEK LEFTPAREN (INPUT|OUTPUT|streamname|STREAMHANDLE expression) RIGHTPAREN // streamname, /not/ stream_name_or_handle.
   |  substringfunc // is also a pseudfn.
-  |  SUPER/*^*/ parameterlist  // also noarg
-  |  TIMEZONE/*^*/ funargs  // also noarg
-  |  TYPEOF/*^*/ LEFTPAREN expression COMMA type_name RIGHTPAREN
-  | GETCLASS/*^*/ LEFTPAREN type_name RIGHTPAREN
-  |  (USERID/*^*/|USER/*^*/) funargs  // also noarg
+  |  SUPER parameterlist  // also noarg
+  |  TIMEZONE funargs  // also noarg
+  |  TYPEOF LEFTPAREN expression COMMA type_name RIGHTPAREN
+  |  GETCLASS LEFTPAREN type_name RIGHTPAREN
+  |  (USERID | USER) funargs  // also noarg
   |  argfunc
   |  recordfunc
   ;
 
 // ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
-argfunc
-  :  (  AACBIT/*^*/
-    |  AAMSG/*^*/
-    |  ABSOLUTE/*^*/
-    |  ALIAS/*^*/
-    |  (ASC/*^*/|ASCENDING/*^*/ /*{#a.setType(ASC);} */)
-    |  BASE64DECODE/*^*/
-    |  BASE64ENCODE/*^*/
-    |  BOX/*^*/
-    |  CANDO/*^*/
-    |  CANQUERY/*^*/
-    |  CANSET/*^*/
-    |  CAPS/*^*/
-    |  CHR/*^*/
-    |  CODEPAGECONVERT/*^*/
-    |  COLLATE/*^*/ // See docs for BY phrase in FOR, PRESELECT, etc.
-    |  (COMPARE/*^*/|COMPARES/*^*/ )
-    |  CONNECTED/*^*/
-    |  COUNTOF/*^*/
-    |  CURRENTRESULTROW/*^*/
-    |  DATE/*^*/
-    |  DATETIME/*^*/
-    |  DATETIMETZ/*^*/
-    |  DAY/*^*/
-    |  DBCODEPAGE/*^*/
-    |  DBCOLLATION/*^*/
-    |  DBPARAM/*^*/
-    |  DBREMOTEHOST/*^*/
-    |  DBRESTRICTIONS/*^*/
-    |  DBTASKID/*^*/
-    |  DBTYPE/*^*/
-    |  DBVERSION/*^*/
-    |  DECIMAL/*^*/
-    |  DECRYPT/*^*/
-    |  DYNAMICCAST/*^*/
-    |  DYNAMICNEXTVALUE/*^*/
-    |  ENCODE/*^*/
-    |  ENCRYPT/*^*/
-    |  EXP/*^*/
-    |  FILL/*^*/
-    |  FIRST/*^*/
-    |  FIRSTOF/*^*/
-    |  GENERATEPBEKEY/*^*/
-    |  GETBITS/*^*/
-    |  GETBYTE/*^*/
-    |  GETBYTEORDER/*^*/
-    |  GETBYTES/*^*/
-    |  GETCOLLATIONS/*^*/
-    |  GETDOUBLE/*^*/
-    |  GETFLOAT/*^*/
-    |  GETINT64/*^*/
-    |  GETLICENSE/*^*/
-    |  GETLONG/*^*/
-    |  GETPOINTERVALUE/*^*/
-    |  GETSHORT/*^*/
-    |  GETSIZE/*^*/
-    |  GETSTRING/*^*/
-    |  GETUNSIGNEDLONG/*^*/
-    |  GETUNSIGNEDSHORT/*^*/
-    |  HANDLE/*^*/
-    |  HEXDECODE/*^*/
-    |  HEXENCODE/*^*/
-    |  INDEX/*^*/
-    |  INT64/*^*/
-    |  INTEGER/*^*/
-    |  INTERVAL/*^*/
-    |  ISCODEPAGEFIXED/*^*/
-    |  ISCOLUMNCODEPAGE/*^*/
-    |  ISLEADBYTE/*^*/
-    |  ISODATE/*^*/
-    |  KBLABEL/*^*/
-    |  KEYCODE/*^*/
-    |  KEYFUNCTION/*^*/
-    |  KEYLABEL/*^*/
-    |  KEYWORD/*^*/
-    |  KEYWORDALL/*^*/
-    |  LAST/*^*/
-    |  LASTOF/*^*/
-    |  LC/*^*/
-    |  LEFTTRIM/*^*/
-    |  LIBRARY/*^*/
-    |  LISTEVENTS/*^*/
-    |  LISTQUERYATTRS/*^*/
-    |  LISTSETATTRS/*^*/
-    |  LISTWIDGETS/*^*/
-    |  LOADPICTURE/*^*/ // Args are required, contrary to ref manual.
-    |  LOG/*^*/
-    |  LOGICAL/*^*/
-    |  LOOKUP/*^*/
-    |  MAXIMUM/*^*/
-    |  MD5DIGEST/*^*/
-    |  MEMBER/*^*/
-    |  MESSAGEDIGEST/*^*/
-    |  MINIMUM/*^*/
-    |  MONTH/*^*/
-    |  NORMALIZE/*^*/
-    |  NUMENTRIES/*^*/
-    |  NUMRESULTS/*^*/
-    |  OSGETENV/*^*/
-    |  PDBNAME/*^*/
-    |  PROGRAMNAME/*^*/
-    |  QUERYOFFEND/*^*/
-    |  QUOTER/*^*/
-    |  RINDEX/*^*/
-    |  RANDOM/*^*/
-    |  REPLACE/*^*/
-    |  RGBVALUE/*^*/
-    |  RIGHTTRIM/*^*/
-    |  ROUND/*^*/
-    |  SDBNAME/*^*/
-    |  SEARCH/*^*/
-    |  SETDBCLIENT/*^*/
-    |  SETUSERID/*^*/
-    |  SHA1DIGEST/*^*/
-    |  SQRT/*^*/
-    |  SSLSERVERNAME/*^*/
-    |  STRING/*^*/
-    |  SUBSTITUTE/*^*/
-    |  TOROWID/*^*/
-    |  TRIM/*^*/
-    |  TRUNCATE/*^*/
-    |  UNBOX/*^*/
-    |  VALIDEVENT/*^*/
-    |  VALIDHANDLE/*^*/
-    |  VALIDOBJECT/*^*/
-    |  WEEKDAY/*^*/
-    |  WIDGETHANDLE/*^*/
-    |  YEAR/*^*/
+argfunc: 
+    (  AACBIT
+    |  AAMSG
+    |  ABSOLUTE
+    |  ALIAS
+    |  (ASC|ASCENDING /*{#a.setType(ASC);} */)
+    |  BASE64DECODE
+    |  BASE64ENCODE
+    |  BOX
+    |  CANDO
+    |  CANQUERY
+    |  CANSET
+    |  CAPS
+    |  CHR
+    |  CODEPAGECONVERT
+    |  COLLATE // See docs for BY phrase in FOR, PRESELECT, etc.
+    |  (COMPARE|COMPARES )
+    |  CONNECTED
+    |  COUNTOF
+    |  CURRENTRESULTROW
+    |  DATE
+    |  DATETIME
+    |  DATETIMETZ
+    |  DAY
+    |  DBCODEPAGE
+    |  DBCOLLATION
+    |  DBPARAM
+    |  DBREMOTEHOST
+    |  DBRESTRICTIONS
+    |  DBTASKID
+    |  DBTYPE
+    |  DBVERSION
+    |  DECIMAL
+    |  DECRYPT
+    |  DYNAMICCAST
+    |  DYNAMICNEXTVALUE
+    |  ENCODE
+    |  ENCRYPT
+    |  EXP
+    |  FILL
+    |  FIRST
+    |  FIRSTOF
+    |  GENERATEPBEKEY
+    |  GETBITS
+    |  GETBYTE
+    |  GETBYTEORDER
+    |  GETBYTES
+    |  GETCOLLATIONS
+    |  GETDOUBLE
+    |  GETFLOAT
+    |  GETINT64
+    |  GETLICENSE
+    |  GETLONG
+    |  GETPOINTERVALUE
+    |  GETSHORT
+    |  GETSIZE
+    |  GETSTRING
+    |  GETUNSIGNEDLONG
+    |  GETUNSIGNEDSHORT
+    |  HANDLE
+    |  HEXDECODE
+    |  HEXENCODE
+    |  INDEX
+    |  INT64
+    |  INTEGER
+    |  INTERVAL
+    |  ISCODEPAGEFIXED
+    |  ISCOLUMNCODEPAGE
+    |  ISLEADBYTE
+    |  ISODATE
+    |  KBLABEL
+    |  KEYCODE
+    |  KEYFUNCTION
+    |  KEYLABEL
+    |  KEYWORD
+    |  KEYWORDALL
+    |  LAST
+    |  LASTOF
+    |  LC
+    |  LEFTTRIM
+    |  LIBRARY
+    |  LISTEVENTS
+    |  LISTQUERYATTRS
+    |  LISTSETATTRS
+    |  LISTWIDGETS
+    |  LOADPICTURE // Args are required, contrary to ref manual.
+    |  LOG
+    |  LOGICAL
+    |  LOOKUP
+    |  MAXIMUM
+    |  MD5DIGEST
+    |  MEMBER
+    |  MESSAGEDIGEST
+    |  MINIMUM
+    |  MONTH
+    |  NORMALIZE
+    |  NUMENTRIES
+    |  NUMRESULTS
+    |  OSGETENV
+    |  PDBNAME
+    |  PROGRAMNAME
+    |  QUERYOFFEND
+    |  QUOTER
+    |  RINDEX
+    |  RANDOM
+    |  REPLACE
+    |  RGBVALUE
+    |  RIGHTTRIM
+    |  ROUND
+    |  SDBNAME
+    |  SEARCH
+    |  SETDBCLIENT
+    |  SETEFFECTIVETENANT
+    |  SETUSERID
+    |  SHA1DIGEST
+    |  SQRT
+    |  SSLSERVERNAME
+    |  STRING
+    |  SUBSTITUTE
+    |  TENANTNAMETOID^
+    |  TOROWID
+    |  TRIM
+    |  TRUNCATE
+    |  UNBOX
+    |  VALIDEVENT
+    |  VALIDHANDLE
+    |  VALIDOBJECT
+    |  WEEKDAY
+    |  WIDGETHANDLE
+    |  YEAR
     )
     funargs
     ;
 
+optargfunc:
+    (  GETDBCLIENT
+    |  GETEFFECTIVETENANTID
+    |  GETEFFECTIVETENANTNAME
+    )
+    optfunargs
+    ;
+
 // ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
-recordfunc
-  :  (  AMBIGUOUS
+recordfunc:
+    (  AMBIGUOUS
     |  AVAILABLE
     |  CURRENTCHANGED
     |  DATASOURCEMODIFIED
@@ -558,8 +529,8 @@ recordfunc
   ;
 
 // ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
-noargfunc
-  :  AACONTROL
+noargfunc:
+     AACONTROL
   |  AAPCONTROL
   |  AASERIAL
   |  CURRENTLANGUAGE
@@ -592,7 +563,6 @@ noargfunc
   |  PROGRESS
   |  PROMSGS
   |  PROPATH
-  |  PROVERSION
   |  RETRY
   |  RETURNVALUE
   |  SCREENLINES
@@ -602,6 +572,7 @@ noargfunc
   |  TRANSACTION
     // The following are built-in functions with optional arguments.
     // You will also find them listed in builtinfunc. 
+  |  PROVERSION
   |  ETIME_KW
   |  FRAMECOL
   |  FRAMEDOWN
@@ -618,13 +589,13 @@ noargfunc
   ;
 
 
-// This is the syntax for parameters when calling or running something.
-// This can refer to a buffer/tablehandle, but it doesn't define one.
 parameter:
+    // This is the syntax for parameters when calling or running something.
+    // This can refer to a buffer/tablehandle, but it doesn't define one.
     BUFFER identifier FOR record
-// BUFFER parameter. Be careful not to pick up BUFFER customer:whatever
-// and BUFFER sports2000.customer:whatever
-  | {  _input.LA(3) != OBJCOLON && (_input.LA(3)!=NAMEDOT || _input.LA(5)!=OBJCOLON) }? BUFFER record
+  | 
+    // BUFFER parameter. Be careful not to pick up BUFFER customer:whatever and BUFFER sports2000.customer:whatever
+    {  _input.LA(3) != OBJCOLON && (_input.LA(3)!=NAMEDOT || _input.LA(5)!=OBJCOLON) }? BUFFER record
   |  ( OUTPUT | INPUTOUTPUT | INPUT )?
      ( TABLEHANDLE field (APPEND)? (BYVALUE|BYREFERENCE|BIND)?
     |  TABLE (FOR)? record (APPEND)? (BYVALUE|BYREFERENCE|BIND)?
@@ -657,10 +628,10 @@ eventlist:
     . (COMMA .)* // {## = #([Event_list], ##);}
 ;
 
-// Use funargs /only/ if it is the child of a root-node keyword.
 funargs:
+    // Use funargs /only/ if it is the child of a root-node keyword.
     LEFTPAREN expression (COMMA expression)* RIGHTPAREN
-;
+  ;
 
 // ... or value phrases
 // There are a number of situations where you can have name, filename,
@@ -807,22 +778,20 @@ attr_colon
     (/*options{greedy=true;}:*/ inuic)? (/*options{greedy=true;}:*/ AS .)?
   ;
 
-gwidget
-  :  s_widget (inuic)?
-    // {##=#([Widget_ref],##);}
+gwidget:
+    s_widget (inuic)?
   ;
 
-widgetlist
-  :  gwidget (COMMA gwidget)*
+widgetlist:
+    gwidget (COMMA gwidget)*
   ;
 
-s_widget
-    /*options{generateAmbigWarnings=false;}*/
-  :  widname | field
+s_widget:
+    widname | field
   ;
 
-widname
-  :  systemhandlename
+widname:
+     systemhandlename
   |  DATASET identifier
   |  DATASOURCE identifier
   |  FIELD field
@@ -840,9 +809,8 @@ widname
   |  STREAM streamname
   ;
 
-filn
-@init{String fn;}
-  :  t1=identifier (/*options{greedy=true;}:*/ NAMEDOT/*!*/ t2=identifier/*!*/)?
+filn @init { String fn; }:
+    t1=identifier (/*options{greedy=true;}:*/ NAMEDOT/*!*/ t2=identifier/*!*/)?
     /*{  fn = #t1.getText();
       if (#t2!=null) {
         fn += ".";
@@ -880,22 +848,21 @@ field
     }*/
   ;
 
-field_frame_or_browse
-  :  FRAME widgetname
-  |  BROWSE widgetname 
+field_frame_or_browse:
+     FRAME widgetname
+  |  BROWSE widgetname
   ;
 
-array_subscript
-  :  LEFTBRACE expression (FOR expression)? RIGHTBRACE
+array_subscript:
+    LEFTBRACE expression (FOR expression)? RIGHTBRACE
   ;
 
-method_param_list
-  :  LEFTPAREN (/*options{greedy=true;}:*/ parameter)? (/*options{greedy=true;}:*/ COMMA (/*options{greedy=true;}:*/ parameter)?)* RIGHTPAREN
-   // {##=#([Method_param_list],##);}
+method_param_list:
+    LEFTPAREN (/*options{greedy=true;}:*/ parameter)? (/*options{greedy=true;}:*/ COMMA (/*options{greedy=true;}:*/ parameter)?)* RIGHTPAREN
   ;
 
-inuic
-  :   IN_KW (MENU|FRAME|BROWSE|SUBMENU|BUFFER) widgetname
+inuic:
+    IN_KW (MENU|FRAME|BROWSE|SUBMENU|BUFFER) widgetname
  // FIXME |  // empty alternative (pseudo hoisting)
   ;
 
@@ -911,15 +878,13 @@ var_rec_field
   |  field
   ;
 
-recordAsFormItem
-  :  record
-    //{## = #([Form_item], ##);}
+recordAsFormItem:
+    record
   ;
 
 // RECORD can be any db table name, work/temp table name, buffer name.
 record
-@init
-{ 
+@init { 
   /* FIXME 
   SymbolScope.FieldType tabletype = null;
   String recname = LT(1).getText();
@@ -1135,7 +1100,7 @@ aggregate_opt
   ;
 
 all_except_fields
-  :  ALL/*^*/ (except_fields)?
+  :  ALL (except_fields)?
   ;
 
 // Don't ask me - I don't know. I just found it in PSC's grammar.
@@ -1147,7 +1112,7 @@ analyzestate:
   ;
 
 analyzestate2
-  :  OUTPUT/*^*/ filenameorvalue
+  :  OUTPUT filenameorvalue
   ;
 
 annotation
@@ -1161,11 +1126,11 @@ applystate:
 
 // Used in defining widgets - sets widget attributes
 assign_opt:
-    ASSIGN/*^*/ (/*options{greedy=true;}:*/ assign_opt2)+
+    ASSIGN (/*options{greedy=true;}:*/ assign_opt2)+
 ;
 
 assign_opt2:
-    . EQUAL/*^*/ expression
+    . EQUAL expression
     // {support.attrOp(##);}
 ;
 
@@ -1205,44 +1170,44 @@ assignStatement1:
 assign_equal
   :  /*(pseudfn) // =>*/ pseudfn e1=EQUAL expression // {support.attrOp(#e1);}
   |  /*(widattr) // =>*/ widattr e3=EQUAL expression // {support.attrOp(#e3);}
-  |  field e2=EQUAL/*^*/ expression // {support.attrOp(#e2);}
+  |  field e2=EQUAL expression // {support.attrOp(#e2);}
   ;
 assign_field
   :  field // {## = #([Assign_from_buffer], ##);}
   ;
 
 at_expr
-  :  AT/*^*/ expression
+  :  AT expression
   ;
 
 atphrase
-  :  AT/*^*/
+  :  AT
     (  (atphraseab) // => atphraseab atphraseab
     |  expression
     )
     (/*options{greedy=true;}:*/ COLONALIGNED|LEFTALIGNED|RIGHTALIGNED)?
   ;
 atphraseab
-  :  (COLUMN/*^*/|c1=COLUMNS/*^*/) expression
-  |  (COLUMNOF/*^*/|c=COLOF/*^*/) referencepoint
-  |  ROW/*^*/ expression
-  |  ROWOF/*^*/ referencepoint
-  |  X/*^*/ expression
-  |  XOF/*^*/ referencepoint
-  |  Y/*^*/ expression
-  |  YOF/*^*/ referencepoint
+  :  (COLUMN|c1=COLUMNS) expression
+  |  (COLUMNOF|c=COLOF) referencepoint
+  |  ROW expression
+  |  ROWOF referencepoint
+  |  X expression
+  |  XOF referencepoint
+  |  Y expression
+  |  YOF referencepoint
   ;
 referencepoint
   :  field (/*options{greedy=true;}:*/ (PLUS|MINUS) expression)?
   ;
 
 bellstate
-  :  BELL/*^*/ state_end
+  :  BELL state_end
    // {sthd(##,0);}
   ;
 
 buffercomparestate
-  :  BUFFERCOMPARE/*^*/ record (except_using_fields)? TO record
+  :  BUFFERCOMPARE record (except_using_fields)? TO record
     (CASESENSITIVE|BINARY)?
     (buffercompare_save)?
     (EXPLICIT)?
@@ -1258,16 +1223,16 @@ buffercomparestate
    // {sthd(##,0);}
   ;
 buffercompare_save
-  :  SAVE/*^*/ (/*options{greedy=true;}:*/ buffercompare_result)? field
+  :  SAVE (/*options{greedy=true;}:*/ buffercompare_result)? field
   ;
 buffercompare_result
-  :  RESULT/*^*/ IN_KW
+  :  RESULT IN_KW
   ;
 buffercompares_block
   :  (buffercompare_when)* //{## = #([Code_block], ##);}
   ;
 buffercompare_when
-  :  WHEN/*^*/ expression THEN blockorstate
+  :  WHEN expression THEN blockorstate
   ;
 
 buffercompares_end:
@@ -1275,7 +1240,7 @@ buffercompares_end:
 ;
 
 buffercopystate
-  :  BUFFERCOPY/*^*/ record (except_using_fields)? TO record
+  :  BUFFERCOPY record (except_using_fields)? TO record
     (buffercopy_assign)? (NOLOBS)? (NOERROR_KW)? state_end
   //  {sthd(##,0);}
   ;
@@ -1293,7 +1258,7 @@ cache_expr:
 ;
 
 callstate
-  :  CALL/*^*/ filenameorvalue (expressionorvalue)* state_end
+  :  CALL filenameorvalue (expressionorvalue)* state_end
    // {sthd(##,0);}
   ;
 
@@ -1304,40 +1269,40 @@ casesens_or_not
   ;
 
 casestate
-  :  CASE/*^*/ expression block_colon case_block (case_otherwise)? (EOF | case_end state_end)
+  :  CASE expression block_colon case_block (case_otherwise)? (EOF | case_end state_end)
    // {sthd(##,0);}
   ;
 case_block
   :  (case_when)* //{## = #([Code_block], ##);}
   ;
 case_when
-  :  WHEN/*^*/ case_expression THEN blockorstate
+  :  WHEN case_expression THEN blockorstate
   ;
 case_expression
-  :  (case_expr_term) (/*options{greedy=true;}:*/ OR/*^*/ case_expr_term {LOGGER.error("support.attrOp(##);"); })*
+  :  (case_expr_term) (/*options{greedy=true;}:*/ OR case_expr_term {LOGGER.error("support.attrOp(##);"); })*
   ;
 case_expr_term
-  :  (WHEN/*^*/)? expression
+  :  (WHEN)? expression
   ;
 case_otherwise
-  :  OTHERWISE/*^*/ blockorstate
+  :  OTHERWISE blockorstate
   ;
 case_end
-  :  END/*^*/ (CASE)?
+  :  END (CASE)?
   ;
 
 catchstate
-  :  CATCH/*^*/
+  :  CATCH
     field AS class_type_name {LOGGER.error("support.defVarInline();");}
     block_colon code_block (EOF | catch_end state_end)
    // {sthd(##,0);}
   ;
 catch_end
-  :  END/*^*/ (CATCH)?
+  :  END (CATCH)?
   ;
 
 choosestate
-  :  CHOOSE/*^*/
+  :  CHOOSE
     (  ROW
     |  FIELD
     |  FIELDS 
@@ -1352,7 +1317,7 @@ choose_opt
   :  AUTORETURN 
   |  color_anyorvalue 
   |  goonphrase
-  |  KEYS/*^*/ field 
+  |  KEYS field 
   |  NOERROR_KW
   |  pause_expr
   ;
@@ -1363,7 +1328,7 @@ class_type_name
   ;
 
 classstate
-  :  CLASS/*^*/ type_name2
+  :  CLASS type_name2
     (class_inherits | class_implements | USEWIDGETPOOL | ABSTRACT | FINAL | SERIALIZABLE)*
     {  
 	/*
@@ -1407,12 +1372,12 @@ classstate
     class_end state_end
    // {sthd(##,0);}
   ;
-class_inherits: INHERITS/*^*/ type_name ;
-class_implements: IMPLEMENTS/*^*/ type_name (COMMA type_name)* ;
-class_end: END/*^*/ (CLASS)? ;
+class_inherits: INHERITS type_name ;
+class_implements: IMPLEMENTS type_name (COMMA type_name)* ;
+class_end: END (CLASS)? ;
 
 clearstate
-  :  CLEAR/*^*/ ({_input.LA(3) != OBJCOLON}? frame_widgetname)? (ALL)? (NOPAUSE)? state_end
+  :  CLEAR ({_input.LA(3) != OBJCOLON}? frame_widgetname)? (ALL)? (NOPAUSE)? state_end
    // {sthd(##,0);}
   ;
 
@@ -1424,49 +1389,49 @@ closestatement
   ;
 
 closequerystate
-  :  CLOSE/*^*/ QUERY queryname state_end
+  :  CLOSE QUERY queryname state_end
   //  {sthd(##,QUERY);}
   ;
 
 closestoredprocedurestate
-  :  CLOSE/*^*/ STOREDPROCEDURE identifier (closestored_field)? (closestored_where)? state_end
+  :  CLOSE STOREDPROCEDURE identifier (closestored_field)? (closestored_where)? state_end
     // {sthd(##,STOREDPROCEDURE);}
   ;
 closestored_field
-  :  field EQUAL/*^*/ PROCSTATUS {LOGGER.error("support.attrOp(##);");}
+  :  field EQUAL PROCSTATUS {LOGGER.error("support.attrOp(##);");}
   ;
 closestored_where
-  :  WHERE/*^*/ PROCHANDLE (e=EQUAL|EQ) field
+  :  WHERE PROCHANDLE (e=EQUAL|EQ) field
   ;
 
 collatephrase
-  :  COLLATE/*^*/ funargs (DESCENDING)?
+  :  COLLATE funargs (DESCENDING)?
   ;
 
 color_anyorvalue
-  :  COLOR/*^*/ anyorvalue
+  :  COLOR anyorvalue
   ;
 
 color_expr
-  :  (BGCOLOR/*^*/|DCOLOR/*^*/|FGCOLOR/*^*/|PFCOLOR/*^*/) expression
+  :  (BGCOLOR|DCOLOR|FGCOLOR|PFCOLOR) expression
   ;
 
 colorspecification
   :  (/*options{greedy=true;}:*/ color_expr)+
-  |  COLOR/*^*/ (/*options{greedy=true;}:*/ DISPLAY)? anyorvalue (/*options{greedy=true;}:*/ color_prompt)?
+  |  COLOR (/*options{greedy=true;}:*/ DISPLAY)? anyorvalue (/*options{greedy=true;}:*/ color_prompt)?
   ;
 color_display
-  :  DISPLAY/*^*/ anyorvalue
+  :  DISPLAY anyorvalue
   ;
 color_prompt
-  :  (PROMPT/*^*/|p=PROMPTFOR/*^*/ ) anyorvalue
+  :  (PROMPT|p=PROMPTFOR ) anyorvalue
   ;
 
 // I'm having trouble figuring this one out. From the docs, it looks like DISPLAY
 // is optional. From PSC's grammar, PROMPT looks optional.(?!).
 // From testing, it looks like /neither/ keyword is optional.
 colorstate
-  :  COLOR/*^*/
+  :  COLOR
     (/*options{greedy=true;}:*/ (color_display|color_prompt) (/*options{greedy=true;}:*/ color_display|color_prompt)? )?
     (field_form_item)*
     (framephrase)?
@@ -1477,7 +1442,7 @@ colorstate
 column_expr
 // The compiler really lets you PUT SCREEN ... COLUMNS, but I don't see
 // how their grammar allows for it.
-  :  (COLUMN/*^*/|c=COLUMNS/*^*/ ) expression
+  :  (COLUMN|c=COLUMNS ) expression
   ;
 
 columnformat
@@ -1488,33 +1453,33 @@ columnformat_opt
   :  format_expr
   |  label_constant
   |  NOLABELS
-  |  (WIDTH/*^*/|WIDTHPIXELS/*^*/|WIDTHCHARS/*^*/) NUMBER
-  |  COLUMNFONT/*^*/ expression
-  |  COLUMNDCOLOR/*^*/ expression
-  |  COLUMNBGCOLOR/*^*/ expression
-  |  COLUMNFGCOLOR/*^*/ expression
-  |  COLUMNPFCOLOR/*^*/ expression
-  |  LABELFONT/*^*/ expression
-  |  LABELDCOLOR/*^*/ expression
-  |  LABELBGCOLOR/*^*/ expression
-  |  LABELFGCOLOR/*^*/ expression
-  |  LEXAT/*^*/ field (/*options{greedy=true;}:*/ columnformat)?
+  |  (WIDTH|WIDTHPIXELS|WIDTHCHARS) NUMBER
+  |  COLUMNFONT expression
+  |  COLUMNDCOLOR expression
+  |  COLUMNBGCOLOR expression
+  |  COLUMNFGCOLOR expression
+  |  COLUMNPFCOLOR expression
+  |  LABELFONT expression
+  |  LABELDCOLOR expression
+  |  LABELBGCOLOR expression
+  |  LABELFGCOLOR expression
+  |  LEXAT field (/*options{greedy=true;}:*/ columnformat)?
   ;
 
 comboboxphrase
-  :  COMBOBOX/*^*/ (/*options{greedy=true;}:*/ combobox_opt)*
+  :  COMBOBOX (/*options{greedy=true;}:*/ combobox_opt)*
   ;
 combobox_opt
-  :  LISTITEMS/*^*/ constant (/*options{greedy=true;}:*/ COMMA constant)*
-  |  LISTITEMPAIRS/*^*/ constant (/*options{greedy=true;}:*/ COMMA constant)*
-  |  INNERLINES/*^*/ expression
+  :  LISTITEMS constant (/*options{greedy=true;}:*/ COMMA constant)*
+  |  LISTITEMPAIRS constant (/*options{greedy=true;}:*/ COMMA constant)*
+  |  INNERLINES expression
   |  SORT
   |  tooltip_expr
   |  SIMPLE
   |  DROPDOWN
   |  DROPDOWNLIST
-  |  MAXCHARS/*^*/ NUMBER
-  |  AUTOCOMPLETION/*^*/ (/*options{greedy=true;}:*/ UNIQUEMATCH)?
+  |  MAXCHARS NUMBER
+  |  AUTOCOMPLETION (/*options{greedy=true;}:*/ UNIQUEMATCH)?
   |  sizephrase
   ;
 
@@ -1575,7 +1540,7 @@ connectstate:
 ;
 
 constructorstate
-  :  CONSTRUCTOR/*^*/ //<AST=BlockNode>
+  :  CONSTRUCTOR //<AST=BlockNode>
     (/*options{greedy=true;}:*/ PUBLIC|PROTECTED|PRIVATE|STATIC)?
     tn=type_name2 function_params block_colon
     { LOGGER.error("support.typenameThis(#tn);"); }
@@ -1583,24 +1548,24 @@ constructorstate
     constructor_end state_end
    // {sthd(##,0);}
   ;
-constructor_end: END/*^*/ (CONSTRUCTOR|METHOD)? ;
+constructor_end: END (CONSTRUCTOR|METHOD)? ;
 
 contexthelpid_expr
-  :  CONTEXTHELPID/*^*/ expression
+  :  CONTEXTHELPID expression
   ;
 
 convertphrase
-  :  CONVERT/*^*/ (/*options{greedy=true;}:*/ convertphrase_source)? (/*options{greedy=true;}:*/ convertphrase_target)?
+  :  CONVERT (/*options{greedy=true;}:*/ convertphrase_source)? (/*options{greedy=true;}:*/ convertphrase_target)?
   ;
 convertphrase_source
-  :  SOURCE/*^*/ ( BASE64 | CODEPAGE expression (/*options{greedy=true;}:*/ BASE64)? )
+  :  SOURCE ( BASE64 | CODEPAGE expression (/*options{greedy=true;}:*/ BASE64)? )
   ;
 convertphrase_target
-  :  TARGET/*^*/ ( BASE64 | CODEPAGE expression (/*options{greedy=true;}:*/ BASE64)? )
+  :  TARGET ( BASE64 | CODEPAGE expression (/*options{greedy=true;}:*/ BASE64)? )
   ;
     
 copylobstate
-  :  COPYLOB/*^*/ (FROM)?
+  :  COPYLOB (FROM)?
     (  (FILE expression)// => FILE expression
     |  (/*options{greedy=true;}:*/ OBJECT)? expression
     )
@@ -1616,10 +1581,10 @@ copylobstate
     //{sthd(##,0);}
   ;
 copylob_for
-  :  FOR/*^*/ expression
+  :  FOR expression
   ;
 copylob_starting
-  :  STARTING/*^*/ AT expression
+  :  STARTING AT expression
   ;
     
 createstatement
@@ -1646,32 +1611,32 @@ createstatement
   ;
 
 createstate
-  :  CREATE/*^*/ record (using_row)? (NOERROR_KW)? state_end
+  :  CREATE record (using_row)? (NOERROR_KW)? state_end
   //  {sthd(##,0);}
   ;
 
 create_whatever_state
-  :  CREATE/*^*/
+  :  CREATE
     (CALL|CLIENTPRINCIPAL|DATASET|DATASOURCE|QUERY|SAXREADER|SAXWRITER|SOAPHEADER|SOAPHEADERENTRYREF|XDOCUMENT|XNODEREF)
     field (in_widgetpool_expr)? (NOERROR_KW)? state_end
    // {sthd(##, ##.firstChild().getType());}
   ;
 
 createaliasstate
-  :  CREATE/*^*/ ALIAS anyorvalue FOR DATABASE anyorvalue (NOERROR_KW)? state_end
+  :  CREATE ALIAS anyorvalue FOR DATABASE anyorvalue (NOERROR_KW)? state_end
    // {sthd(##,ALIAS);}
   ;
 
 createautomationobjectstate
-  :  CREATE/*^*/ QSTRING field (create_connect)? (NOERROR_KW)? state_end
+  :  CREATE QSTRING field (create_connect)? (NOERROR_KW)? state_end
   //  {sthd(##,Automationobject);}
   ;
 create_connect
-  :  CONNECT/*^*/ (to_expr)?
+  :  CONNECT (to_expr)?
   ;
 
 createbrowsestate
-  :  CREATE/*^*/ BROWSE field
+  :  CREATE BROWSE field
     (in_widgetpool_expr)?
     (NOERROR_KW)?
     (assign_opt)?
@@ -1681,7 +1646,7 @@ createbrowsestate
   ;
 
 createbufferstate
-  :  CREATE/*^*/ BUFFER exprt FOR TABLE expression
+  :  CREATE BUFFER exprt FOR TABLE expression
     (createbuffer_name)?
     (in_widgetpool_expr)?
     (NOERROR_KW)?
@@ -1689,39 +1654,39 @@ createbufferstate
    // {sthd(##,BUFFER);}
   ;
 createbuffer_name
-  :  BUFFERNAME/*^*/ expression
+  :  BUFFERNAME expression
   ;
 
 createdatabasestate
-  :  CREATE/*^*/ DATABASE expression (createdatabase_from)? (REPLACE)? (NOERROR_KW)? state_end
+  :  CREATE DATABASE expression (createdatabase_from)? (REPLACE)? (NOERROR_KW)? state_end
   //  {sthd(##,DATABASE);}
   ;
 createdatabase_from
-  :  FROM/*^*/ expression (NEWINSTANCE)?
+  :  FROM expression (NEWINSTANCE)?
   ;
 
 createserverstate
-  :  CREATE/*^*/ SERVER field (assign_opt)? state_end
+  :  CREATE SERVER field (assign_opt)? state_end
   //  {sthd(##,SERVER);}
   ;
 
 createserversocketstate
-  :  CREATE/*^*/ SERVERSOCKET field (NOERROR_KW)? state_end
+  :  CREATE SERVERSOCKET field (NOERROR_KW)? state_end
   //  {sthd(##,SERVERSOCKET);}
   ;
 
 createsocketstate
-  :  CREATE/*^*/ SOCKET field (NOERROR_KW)? state_end
+  :  CREATE SOCKET field (NOERROR_KW)? state_end
   //  {sthd(##,SOCKET);}
   ;
 
 createtemptablestate
-  :  CREATE/*^*/ TEMPTABLE field (in_widgetpool_expr)? (NOERROR_KW)? state_end
+  :  CREATE TEMPTABLE field (in_widgetpool_expr)? (NOERROR_KW)? state_end
    // {sthd(##,TEMPTABLE);}
   ;
 
 createwidgetstate
-  :  CREATE/*^*/
+  :  CREATE
     (  valueexpression
     |  (BUTTON | BUTTONS )
     |  COMBOBOX | CONTROLFRAME | DIALOGBOX | EDITOR | FILLIN | FRAME | IMAGE
@@ -1738,12 +1703,12 @@ createwidgetstate
   ;
 
 createwidgetpoolstate
-  :  CREATE/*^*/ WIDGETPOOL (expression)? (PERSISTENT)? (NOERROR_KW)? state_end
+  :  CREATE WIDGETPOOL (expression)? (PERSISTENT)? (NOERROR_KW)? state_end
    // {sthd(##,WIDGETPOOL);}
   ;
 
 currentvaluefunc
-  :  CURRENTVALUE/*^*/ LEFTPAREN sequencename (COMMA identifier)? RIGHTPAREN
+  :  CURRENTVALUE LEFTPAREN sequencename (COMMA identifier)? RIGHTPAREN
   ;
 
 // Basic variable class or primitive datatype syntax.
@@ -1801,50 +1766,50 @@ datatype_var
   ;
 
 ddeadvisestate
-  :  DDE/*^*/ ADVISE expression (START|STOP) ITEM expression (time_expr)? (NOERROR_KW)? state_end
+  :  DDE ADVISE expression (START|STOP) ITEM expression (time_expr)? (NOERROR_KW)? state_end
   //  {sthd(##,ADVISE);}
   ;
 
 ddeexecutestate
-  :  DDE/*^*/ EXECUTE expression COMMAND expression (time_expr)? (NOERROR_KW)? state_end
+  :  DDE EXECUTE expression COMMAND expression (time_expr)? (NOERROR_KW)? state_end
   //  {sthd(##,EXECUTE);}
   ;
 
 ddegetstate
-  :  DDE/*^*/ GET expression TARGET field ITEM expression (time_expr)? (NOERROR_KW)? state_end
+  :  DDE GET expression TARGET field ITEM expression (time_expr)? (NOERROR_KW)? state_end
   //  {sthd(##,GET);}
   ;
 
 ddeinitiatestate
-  :  DDE/*^*/ INITIATE field FRAME expression APPLICATION expression TOPIC expression (NOERROR_KW)? state_end
+  :  DDE INITIATE field FRAME expression APPLICATION expression TOPIC expression (NOERROR_KW)? state_end
   //  {sthd(##,INITIATE);}
   ;
 
 dderequeststate
-  :  DDE/*^*/ REQUEST expression TARGET field ITEM expression (time_expr)? (NOERROR_KW)? state_end
+  :  DDE REQUEST expression TARGET field ITEM expression (time_expr)? (NOERROR_KW)? state_end
   //  {sthd(##,REQUEST);}
   ;
 
 ddesendstate
-  :  DDE/*^*/ SEND expression SOURCE expression ITEM expression (time_expr)? (NOERROR_KW)? state_end
+  :  DDE SEND expression SOURCE expression ITEM expression (time_expr)? (NOERROR_KW)? state_end
   //  {sthd(##,SEND);}
   ;
 
 ddeterminatestate
-  :  DDE/*^*/ TERMINATE expression (NOERROR_KW)? state_end
+  :  DDE TERMINATE expression (NOERROR_KW)? state_end
   //  {sthd(##,TERMINATE);}
   ;
 
 decimals_expr
-  :  DECIMALS/*^*/ expression
+  :  DECIMALS expression
   ;
 
 default_expr
-  :  DEFAULT/*^*/ expression
+  :  DEFAULT expression
   ;
 
 definestatement
-  :  DEFINE/*^*/ define_share
+  :  DEFINE define_share
     { LOGGER.error("support.setCurrDefInheritable(false);"); }
     (  PRIVATE
     |  PROTECTED //{support.setCurrDefInheritable(true);}
@@ -1874,7 +1839,7 @@ definestatement
     )
   ;
 define_share
-  :  ((NEW/*^*/ (GLOBAL)?)? SHARED)?
+  :  ((NEW (GLOBAL)?)? SHARED)?
   ;
 
 definebrowsestate
@@ -1887,7 +1852,7 @@ definebrowsestate
     { /*support.defVar(#n.getText()); */}
   ;
 def_browse_display
-  :  DISPLAY/*^*/ def_browse_display_items_or_record (except_fields)?
+  :  DISPLAY def_browse_display_items_or_record (except_fields)?
   ;
 def_browse_display_items_or_record
   :  // If there's more than one display item, then it cannot be a table name.
@@ -1903,7 +1868,7 @@ def_browse_display_item
     //{## = #([Form_item], ##);}
   ;
 def_browse_enable
-  :  ENABLE/*^*/ (all_except_fields | (/*options{greedy=true;}:*/ def_browse_enable_item)*)
+  :  ENABLE (all_except_fields | (/*options{greedy=true;}:*/ def_browse_enable_item)*)
   ;
 def_browse_enable_item
   :  field
@@ -1942,15 +1907,15 @@ button_opt
   |  contexthelpid_expr
   |  DROPTARGET
   |  font_expr
-  |  IMAGEDOWN/*^*/ (imagephrase_opt)+
-  |  IMAGE/*^*/ (imagephrase_opt)+
-  |  IMAGEUP/*^*/ (imagephrase_opt)+
-  |  IMAGEINSENSITIVE/*^*/ (imagephrase_opt)+
-  |  MOUSEPOINTER/*^*/ expression
+  |  IMAGEDOWN (imagephrase_opt)+
+  |  IMAGE (imagephrase_opt)+
+  |  IMAGEUP (imagephrase_opt)+
+  |  IMAGEINSENSITIVE (imagephrase_opt)+
+  |  MOUSEPOINTER expression
   |  label_constant
   |  like_field
   |  FLATBUTTON
-  |  NOFOCUS/*^*/ (/*options{greedy=true;}:*/ FLATBUTTON)?
+  |  NOFOCUS (/*options{greedy=true;}:*/ FLATBUTTON)?
   |  NOCONVERT3DCOLORS
   |  tooltip_expr
   |  sizephrase (MARGINEXTRA)?
@@ -1966,7 +1931,7 @@ definedatasetstate
     state_end
   ;
 data_relation
-  :  DATARELATION/*^*/ (/*n:*/identifier)?
+  :  DATARELATION (/*n:*/identifier)?
     FOR record COMMA record
     (//options{greedy=true;}:
       field_mapping_phrase
@@ -1978,20 +1943,20 @@ data_relation
     { LOGGER.error("if (#n != null) support.defVar(#n.getText());"); }
   ;
 parent_id_relation
-  :  PARENTIDRELATION/*^*/ (/*n:*/identifier)?
+  :  PARENTIDRELATION (/*n:*/identifier)?
     FOR record COMMA record
     PARENTIDFIELD field
     ( PARENTFIELDSBEFORE LEFTPAREN field (COMMA field)* RIGHTPAREN)?
     ( PARENTFIELDSAFTER  LEFTPAREN field (COMMA field)* RIGHTPAREN)?
   ;
 field_mapping_phrase
-  :  RELATIONFIELDS/*^*/  LEFTPAREN
+  :  RELATIONFIELDS  LEFTPAREN
     field COMMA field
     ( COMMA field COMMA field )*
     RIGHTPAREN
   ;
 datarelation_nested
-  :  NESTED/*^*/ (FOREIGNKEYHIDDEN)?
+  :  NESTED (FOREIGNKEYHIDDEN)?
   ;
 
 definedatasourcestate
@@ -2020,7 +1985,7 @@ defineeventstate
     { LOGGER.error("support.defVar(#n.getText());"); }
   ;
 event_signature
-  :  SIGNATURE/*^*/ VOID function_params
+  :  SIGNATURE VOID function_params
   |  VOID function_params //{## = #([SIGNATURE], ##);}
   ;
 event_delegate
@@ -2047,7 +2012,7 @@ defineimage_opt
   |  color_expr
   |  CONVERT3DCOLORS
   |  tooltip_expr
-  |  STRETCHTOFIT/*^*/ (RETAINSHAPE)?
+  |  STRETCHTOFIT (RETAINSHAPE)?
   |  TRANSPARENT
   ;
 
@@ -2069,15 +2034,15 @@ menu_opt
   |  SUBMENUHELP
   ;
 menu_list_item
-  :  MENUITEM/*^*/ n=identifier (menu_item_opt)* (triggerphrase)?
+  :  MENUITEM n=identifier (menu_item_opt)* (triggerphrase)?
     {LOGGER.error("support.defVar(#n.getText());"); }
-  |  SUBMENU/*^*/ s=identifier (DISABLED | label_constant | font_expr | color_expr)*
+  |  SUBMENU s=identifier (DISABLED | label_constant | font_expr | color_expr)*
     {LOGGER.error("support.defVar(#s.getText());");}
-  |  RULE/*^*/ (font_expr | color_expr)*
+  |  RULE (font_expr | color_expr)*
   |  SKIP
   ;
 menu_item_opt
-  :  ACCELERATOR/*^*/ expression
+  :  ACCELERATOR expression
   |  color_expr
   |  DISABLED
   |  font_expr
@@ -2107,7 +2072,7 @@ defineparam_var
     )*
   ;
 defineparam_as
-  :  AS/*^*/
+  :  AS
     ( // options{generateAmbigWarnings=false;} // order of options is important.
       // Only parameters in a DLL procedure can have HANDLE phrase.
     /*:*/  HANDLE (TO)? datatype_dll
@@ -2148,8 +2113,8 @@ definerectanglestate
   ;
 rectangle_opt
   :  NOFILL
-  |  EDGECHARS/*^*/ expression
-  |  EDGEPIXELS/*^*/ expression
+  |  EDGECHARS expression
+  |  EDGEPIXELS expression
   |  color_expr
   |  GRAPHICEDGE
   |  like_field
@@ -2197,31 +2162,31 @@ def_table_beforetable
 @init
     {  String beforeName;
 }
-  :  BEFORETABLE/*^*/ i=identifier
+  :  BEFORETABLE i=identifier
     {  //beforeName = #i.getText().toLowerCase();
       //support.defTable(beforeName, SymbolScope.FieldType.TTABLE);
     }
   ;
 def_table_like
-  :  (LIKE/*^*/ | LIKESEQUENTIAL/*^*/)
+  :  (LIKE | LIKESEQUENTIAL)
     //{schemaTablePriority=true;}
     record
     // {schemaTablePriority=false;}
     (/*options{greedy=true;}:*/ VALIDATE)? (def_table_useindex)*
   ;
 def_table_useindex
-  :  USEINDEX/*^*/ identifier (/*options{greedy=true;}:*/ (AS|IS) PRIMARY)?
+  :  USEINDEX identifier (/*options{greedy=true;}:*/ (AS|IS) PRIMARY)?
   ;
 def_table_field
   :  // Compiler allows FIELDS here. Sheesh.
-    ( FIELD/*^*/ | fs=FIELDS/*^*/ /*{#fs.setType(FIELD);}*/ )
+    ( FIELD | fs=FIELDS /*{#fs.setType(FIELD);}*/ )
     identifier
     (/*options{greedy=true;}:*/ fieldoption)*
   ;
 def_table_index
   :  // Yes, the compiler really lets you use AS instead of IS here.
     // (AS|IS) is not optional the first time, but it is on subsequent uses.
-    INDEX/*^*/ identifier (/*options{greedy=true;}:*/ (AS|IS)? (UNIQUE|PRIMARY|WORDINDEX))*
+    INDEX identifier (/*options{greedy=true;}:*/ (AS|IS)? (UNIQUE|PRIMARY|WORDINDEX))*
     (identifier (/*options{greedy=true;}:*/ ASCENDING|ASC|DESCENDING|CASESENSITIVE)*)+
   ;
    
@@ -2256,12 +2221,12 @@ deletestatement
   ;
 
 deletestate
-  :  DELETE_KW/*^*/ record (validatephrase)? (NOERROR_KW)? state_end
+  :  DELETE_KW record (validatephrase)? (NOERROR_KW)? state_end
    // {sthd(##,0);}
   ;
 
 deletealiasstate
-  :  DELETE_KW/*^*/ ALIAS
+  :  DELETE_KW ALIAS
     (  identifier
     |  QSTRING
     |  valueexpression
@@ -2271,47 +2236,47 @@ deletealiasstate
   ;
 
 deleteobjectstate
-  :  DELETE_KW/*^*/ OBJECT expression (NOERROR_KW)? state_end
+  :  DELETE_KW OBJECT expression (NOERROR_KW)? state_end
    // {sthd(##,OBJECT);}
   ;
 
 deleteprocedurestate
-  :  DELETE_KW/*^*/ PROCEDURE expression (NOERROR_KW)? state_end
+  :  DELETE_KW PROCEDURE expression (NOERROR_KW)? state_end
    // {sthd(##,PROCEDURE);}
   ;
 
 deletewidgetstate
-  :  DELETE_KW/*^*/ WIDGET (gwidget)* state_end
+  :  DELETE_KW WIDGET (gwidget)* state_end
    // {sthd(##,WIDGET);}
   ;
 
 deletewidgetpoolstate
-  :  DELETE_KW/*^*/ WIDGETPOOL (expression)? (NOERROR_KW)? state_end
+  :  DELETE_KW WIDGETPOOL (expression)? (NOERROR_KW)? state_end
    // {sthd(##,WIDGETPOOL);}
   ;
 
 delimiter_constant
-  :  DELIMITER/*^*/ constant
+  :  DELIMITER constant
   ;
 
 destructorstate
-  :  DESTRUCTOR/*^*///<AST=BlockNode>
+  :  DESTRUCTOR//<AST=BlockNode>
      (/*options{greedy=true;}:*/ PUBLIC)? tn=type_name2 LEFTPAREN RIGHTPAREN block_colon
     { LOGGER.error("support.typenameThis(#tn);"); }
     code_block
     destructor_end state_end
   //  {sthd(##,0);}
   ;
-destructor_end: END/*^*/ (DESTRUCTOR|METHOD)? ;
+destructor_end: END (DESTRUCTOR|METHOD)? ;
 
 dictionarystate
-  :  DICTIONARY/*^*/ state_end
+  :  DICTIONARY state_end
    // {sthd(##,0);}
   ;
 
 disablestate
 // Does not allow DISABLE <record buffer name>
-  :  DISABLE/*^*/ 
+  :  DISABLE 
   (UNLESSHIDDEN)? 
   (all_except_fields | (form_item)+)? 
   (framephrase)? 
@@ -2320,17 +2285,17 @@ disablestate
   ;
 
 disabletriggersstate
-  :  DISABLE/*^*/ TRIGGERS FOR (DUMP|LOAD) OF record (ALLOWREPLICATION)? state_end
+  :  DISABLE TRIGGERS FOR (DUMP|LOAD) OF record (ALLOWREPLICATION)? state_end
   //  {sthd(##,TRIGGERS);}
   ;
 
 disconnectstate
-  :  DISCONNECT/*^*/ filenameorvalue (NOERROR_KW)? state_end
+  :  DISCONNECT filenameorvalue (NOERROR_KW)? state_end
   //  {sthd(##,0);}
   ;
 
 displaystate
-  :  DISPLAY/*^*/
+  :  DISPLAY
     (/*options{greedy=true;}:*/ stream_name_or_handle)?
     (UNLESSHIDDEN)? display_items_or_record
     (except_fields)? (in_window_expr)?
@@ -2364,18 +2329,18 @@ display_item
   ;
 display_with
 // The compiler allows NO-ERROR, but I don't see in their grammar where it fits in.
-  :  {_input.LA(2)==BROWSE}? WITH/*^*/ BROWSE widgetname
+  :  {_input.LA(2)==BROWSE}? WITH BROWSE widgetname
   |  framephrase
   ;
 
 dostate
-  :  DO/*^*///<AST=BlockNode>
+  :  DO//<AST=BlockNode>
     (block_for)? (/*options{greedy=true;}:*/ block_preselect)? (block_opt)* block_colon code_block block_end
   //  {sthd(##,0);}
   ;
 
 downstate
-  :  DOWN/*^*/
+  :  DOWN
     // The STREAM phrase may come before or after the expression, ex: DOWN 1 STREAM  MyStream.
     (/*options{greedy=true;}:*/ stream_name_or_handle)?
     (/*options{greedy=true;}:*/ expression)?
@@ -2385,7 +2350,7 @@ downstate
   ;
 
 dynamiccurrentvaluefunc
-  :  DYNAMICCURRENTVALUE/*^*/ funargs
+  :  DYNAMICCURRENTVALUE funargs
   ;
 
 dynamicnewstate
@@ -2403,16 +2368,16 @@ dynamic_new
   ;
 
 editorphrase
-  :  EDITOR/*^*/ (/*options{greedy=true;}:*/ editor_opt)*
+  :  EDITOR (/*options{greedy=true;}:*/ editor_opt)*
   ;
 
 editor_opt
-  :  INNERCHARS/*^*/ expression 
-  |  INNERLINES/*^*/ expression
-  |  BUFFERCHARS/*^*/ expression
-  |  BUFFERLINES/*^*/ expression
+  :  INNERCHARS expression 
+  |  INNERLINES expression
+  |  BUFFERCHARS expression
+  |  BUFFERLINES expression
   |  LARGE
-  |  MAXCHARS/*^*/ expression
+  |  MAXCHARS expression
   |  NOBOX
   |  NOWORDWRAP
   |  SCROLLBARHORIZONTAL
@@ -2422,13 +2387,13 @@ editor_opt
   ;
 
 emptytemptablestate
-  :  EMPTY/*^*/ TEMPTABLE record (NOERROR_KW)? state_end
+  :  EMPTY TEMPTABLE record (NOERROR_KW)? state_end
    // {sthd(##,0);}
   ;
 
 enablestate
 // Does not allow ENABLE <record buffer name>
-  :  ENABLE/*^*/ (UNLESSHIDDEN)? (all_except_fields | (form_item)+)?
+  :  ENABLE (UNLESSHIDDEN)? (all_except_fields | (form_item)+)?
     (in_window_expr)? (framephrase)?
     state_end
     //{sthd(##,0);}
@@ -2440,18 +2405,18 @@ editingphrase
   ;
 
 entryfunc
-  :  ENTRY/*^*/ funargs
+  :  ENTRY funargs
   ;
 
 except_fields
-  :  EXCEPT/*^*/ (/*options{greedy=true;}:*/ field)*
+  :  EXCEPT (/*options{greedy=true;}:*/ field)*
   ;
 except_using_fields
-  :  (EXCEPT/*^*/|USING/*^*/) (/*options{greedy=true;}:*/ field)*
+  :  (EXCEPT|USING) (/*options{greedy=true;}:*/ field)*
   ;
 
 exportstate
-  :  EXPORT/*^*/ (/*options{greedy=true;}:*/ stream_name_or_handle)? (delimiter_constant)?
+  :  EXPORT (/*options{greedy=true;}:*/ stream_name_or_handle)? (delimiter_constant)?
     display_items_or_record (except_fields)?
     (NOLOBS)?
     state_end
@@ -2459,7 +2424,7 @@ exportstate
   ;
 
 extentphrase
-  :  EXTENT/*^*/ (/*options{greedy=true;}:*/ constant)?
+  :  EXTENT (/*options{greedy=true;}:*/ constant)?
   ;
 
 field_form_item
@@ -2472,18 +2437,18 @@ field_list
   ;
 
 fields_fields
-  :  (FIELDS/*^*/|f=FIELD/*^*/) (field)*
+  :  (FIELDS|f=FIELD) (field)*
   ;
 
 fieldoption
-  :  AS/*^*/
+  :  AS
     (  /*options{generateAmbigWarnings=false;} // order of options is important.
     :*/  CLASS type_name
     |  datatype_field
     )
   |  casesens_or_not
   |  color_expr
-  |  COLUMNCODEPAGE/*^*/ expression
+  |  COLUMNCODEPAGE expression
   |  contexthelpid_expr
   |  decimals_expr
   |  DROPTARGET
@@ -2493,8 +2458,8 @@ fieldoption
   |  help_const
   |  initial_constant
   |  label_constant
-  |  LIKE/*^*/ field (VALIDATE)?
-  |  MOUSEPOINTER/*^*/ expression
+  |  LIKE field (VALIDATE)?
+  |  MOUSEPOINTER expression
   |  NOUNDO
   |  viewasphrase
   |  TTCODEPAGE
@@ -2506,28 +2471,28 @@ fieldoption
   ;
 
 fillinphrase
-  :  FILLIN/*^*/ (/*options{greedy=true;}:*/ NATIVE | sizephrase | tooltip_expr)*
+  :  FILLIN (/*options{greedy=true;}:*/ NATIVE | sizephrase | tooltip_expr)*
   ;
 
 finallystate
-  :  FINALLY/*^*/ block_colon code_block (EOF | finally_end state_end)
+  :  FINALLY block_colon code_block (EOF | finally_end state_end)
     //{sthd(##,0);}
   ;
 finally_end
-  :  END/*^*/ (FINALLY)?
+  :  END (FINALLY)?
   ;
 
 findstate
-  :  FIND/*^*/ (/*options{greedy=true;}:*/ findwhich)? recordphrase (NOWAIT|NOPREFETCH|NOERROR_KW)* state_end
+  :  FIND (/*options{greedy=true;}:*/ findwhich)? recordphrase (NOWAIT|NOPREFETCH|NOERROR_KW)* state_end
   //  {sthd(##,0);}
   ;
 
 font_expr
-  :  FONT/*^*/ expression
+  :  FONT expression
   ;
 
 forstate
-  :  FOR/*^*///<AST=BlockNode>
+  :  FOR//<AST=BlockNode>
     for_record_spec (block_opt)* block_colon code_block block_end
    // {sthd(##,0);}
   ;
@@ -2536,7 +2501,7 @@ for_record_spec
   ;
 
 format_expr
-  :  FORMAT/*^*/ expression
+  :  FORMAT expression
   ;
 
 form_items_or_record
@@ -2565,7 +2530,7 @@ form_item
 // FORM is really short for FORMAT. I don't have a keyword called FORM.
 // The syntax here should always be identical to DEFINE FRAME.
 formstate
-  :  FORMAT/*^*/ form_items_or_record
+  :  FORMAT form_items_or_record
     (header_background)? (except_fields)? (framephrase)? state_end
   //  {sthd(##,0);}
   ;
@@ -2582,7 +2547,7 @@ formatphrase
   //  {## = #([Format_phrase], ##);}
   ;
 format_opt
-  :  AS/*^*/ datatype_var {LOGGER.error("support.defVarInline();");}
+  :  AS datatype_var {LOGGER.error("support.defVarInline();");}
   |  atphrase
   |  ATTRSPACE
   |  NOATTRSPACE
@@ -2590,7 +2555,7 @@ format_opt
   |  color_expr
   |  contexthelpid_expr
   |  BLANK 
-  |  COLON/*^*/ expression 
+  |  COLON expression 
   |  to_expr
   |  DEBLANK 
   |  DISABLEAUTOZAP 
@@ -2598,8 +2563,8 @@ format_opt
   |  format_expr
   |  help_const
   |  label_constant
-  |  LEXAT/*^*/ field (/*options{greedy=true;}:*/ formatphrase)?
-  |  LIKE/*^*/ { LOGGER.error("support.defVarInline();"); } field
+  |  LEXAT field (/*options{greedy=true;}:*/ formatphrase)?
+  |  LIKE { LOGGER.error("support.defVarInline();"); } field
   |  NOLABELS
   |  NOTABSTOP
   |  PASSWORDFIELD
@@ -2610,11 +2575,11 @@ format_opt
   ;
 
 frame_widgetname
-  :  FRAME/*^*/ widgetname
+  :  FRAME widgetname
   ;
 
 framephrase
-  :  WITH/*^*/
+  :  WITH
     (/*options{greedy=true;}:*/   // In front of COLUMN[S] must be a number constant. See PSC's grammar.
       (NUMBER (COLUMN|COLUMNS)) // =>frame_exp_col
     |  // See PSC's grammar. The following come before <expression DOWN>.
@@ -2639,41 +2604,41 @@ frame_exp_down
   //  {## = #([With_down], ##);}
   ;
 frame_opt
-  :  (/*options{greedy=true;}:*/   ACCUMULATE/*^*/ (/*options{greedy=true;}:*/ expression)?
+  :  (/*options{greedy=true;}:*/   ACCUMULATE (/*options{greedy=true;}:*/ expression)?
     |  ATTRSPACE | NOATTRSPACE
-    |  CANCELBUTTON/*^*/ field
+    |  CANCELBUTTON field
     |  CENTERED 
-    |  (COLUMN/*^*/| c2=COLUMNS/*^*/ ) expression
+    |  (COLUMN| c2=COLUMNS ) expression
     |  CONTEXTHELP | CONTEXTHELPFILE expression
-    |  DEFAULTBUTTON/*^*/ field
+    |  DEFAULTBUTTON field
     |  EXPORT
     |  FITLASTCOLUMN
-    |  FONT/*^*/ expression
+    |  FONT expression
     |  FONTBASEDLAYOUT
     |  frame_widgetname
     |  INHERITBGCOLOR | NOINHERITBGCOLOR | INHERITFGCOLOR | NOINHERITFGCOLOR
-    |  LABELFONT/*^*/ expression
-    |  LABELDCOLOR/*^*/ expression
-    |  LABELFGCOLOR/*^*/ expression
-    |  LABELBGCOLOR/*^*/ expression
+    |  LABELFONT expression
+    |  LABELDCOLOR expression
+    |  LABELFGCOLOR expression
+    |  LABELBGCOLOR expression
     |  MULTIPLE | SINGLE | SEPARATORS | NOSEPARATORS | NOASSIGN| NOROWMARKERS
     |  NOSCROLLBARVERTICAL | SCROLLBARVERTICAL
-    |  ROWHEIGHTCHARS/*^*/ expression
-    |  ROWHEIGHTPIXELS/*^*/ expression
+    |  ROWHEIGHTCHARS expression
+    |  ROWHEIGHTPIXELS expression
     |  EXPANDABLE | DROPTARGET | NOAUTOVALIDATE | NOCOLUMNSCROLLING
     |  KEEPTABORDER | NOBOX | NOEMPTYSPACE | NOHIDE | NOLABELS | USEDICTEXPS | NOVALIDATE
     |  NOHELP | NOUNDERLINE | OVERLAY | PAGEBOTTOM | PAGETOP | NOTABSTOP
-    |  RETAIN/*^*/ expression 
-    |  ROW/*^*/ expression
+    |  RETAIN expression 
+    |  ROW expression
     |  SCREENIO | STREAMIO
-    |  SCROLL/*^*/ expression
+    |  SCROLL expression
     |  SCROLLABLE | SIDELABELS 
     |  stream_name_or_handle | THREED
     |  tooltip_expr
     |  TOPONLY | USETEXT
     |  V6FRAME | USEREVVIDEO | USEUNDERLINE
     |  frameviewas
-    |  (WIDTH/*^*/|WIDTHCHARS/*^*/) expression
+    |  (WIDTH|WIDTHCHARS) expression
     |  widget_id
     |  in_window_expr
     |  colorspecification | atphrase | sizephrase | titlephrase 
@@ -2683,18 +2648,18 @@ frame_opt
   ;
 
 frameviewas
-  :  VIEWAS/*^*/ frameviewas_opt
+  :  VIEWAS frameviewas_opt
   ;
 
 frameviewas_opt
-  :  DIALOGBOX/*^*/ (/*options{greedy=true;}:*/ DIALOGHELP (/*options{greedy=true;}:*/ expression)?)?
+  :  DIALOGBOX (/*options{greedy=true;}:*/ DIALOGHELP (/*options{greedy=true;}:*/ expression)?)?
   |  MESSAGELINE
   |  STATUSBAR
-  |  TOOLBAR/*^*/ (/*options{greedy=true;}:*/ ATTACHMENT (TOP|BOTTOM|LEFT|RIGHT))?
+  |  TOOLBAR (/*options{greedy=true;}:*/ ATTACHMENT (TOP|BOTTOM|LEFT|RIGHT))?
   ;
 
 from_pos
-  :  FROM/*^*/ from_pos_elem from_pos_elem
+  :  FROM from_pos_elem from_pos_elem
   ;
 from_pos_elem
   :  X expression | Y expression | ROW expression | COLUMN expression
@@ -2702,7 +2667,7 @@ from_pos_elem
 
 functionstate
 // You don't see it in PSC's grammar, but the compiler really does insist on a datatype.
-  :  f=FUNCTION/*^*/ // <AST=BlockNode>
+  :  f=FUNCTION // <AST=BlockNode>
     id=identifier {LOGGER.error("support.funcBegin(#id);");}
     (/*options{greedy=true;}:*/ RETURNS|RETURN)?
     ( /* options{generateAmbigWarnings=false;} // order of options is important.
@@ -2740,7 +2705,7 @@ function_param
         support.defBuffer(#bn.getText(), #bf.getText());
       }*/
     }
-  |  (/*options{greedy=true;}:*/ p1=INPUT/*^*/|p2=OUTPUT/*^*/|p3=INPUTOUTPUT/*^*/)?
+  |  (/*options{greedy=true;}:*/ p1=INPUT|p2=OUTPUT|p3=INPUTOUTPUT)?
     (  {_input.LA(2)==AS}?
       n=identifier AS 
       ( /* options{generateAmbigWarnings=false;}
@@ -2773,32 +2738,32 @@ function_param
   ;
 
 getstate
-  :  GET/*^*/ findwhich queryname (lockhow|NOWAIT)* state_end
+  :  GET findwhich queryname (lockhow|NOWAIT)* state_end
    // {sthd(##,0);}
   ;
 
 getkeyvaluestate
-  :  GETKEYVALUE/*^*/ SECTION expression KEY (DEFAULT|expression) VALUE field state_end
+  :  GETKEYVALUE SECTION expression KEY (DEFAULT|expression) VALUE field state_end
    // {sthd(##,0);}
   ;
 
 goonphrase
-  :  GOON/*^*/ LEFTPAREN goon_elem ((/*options{greedy=true;}:*/ COMMA)? goon_elem)* RIGHTPAREN
+  :  GOON LEFTPAREN goon_elem ((/*options{greedy=true;}:*/ COMMA)? goon_elem)* RIGHTPAREN
   ;
 goon_elem
   :  ~(RIGHTPAREN) (/*options{greedy=true;}:*/ OF gwidget)?
   ;
 
 header_background
-  :  (HEADER/*^*/|BACKGROUND/*^*/) (display_item)+
+  :  (HEADER|BACKGROUND) (display_item)+
   ;
 
 help_const
-  :  HELP/*^*/ constant
+  :  HELP constant
   ;
 
 hidestate
-  :  HIDE/*^*/
+  :  HIDE
     (/*options{greedy=true;}:*/ stream_name_or_handle)?
     (/*options{greedy=true;}:*/ ALL|MESSAGE|(/*options{greedy=true;}:*/ gwidget)*)? (NOPAUSE)? (in_window_expr)? state_end
    // {sthd(##,0);}
@@ -2807,29 +2772,29 @@ hidestate
 ifstate
 // Plplt. Progress compiles this fine: DO: IF FALSE THEN END.
 // i.e. you don't have to have anything after the THEN or the ELSE.
-  :  IF/*^*/ expression THEN (/*options{greedy=true;}:*/ blockorstate)? (/*options{greedy=true;}:*/ if_else)?
+  :  IF expression THEN (/*options{greedy=true;}:*/ blockorstate)? (/*options{greedy=true;}:*/ if_else)?
   //  {sthd(##,0);}
   ;
 if_else
-  :  ELSE/*^*/ (/*options{greedy=true;}:*/ blockorstate)?
+  :  ELSE (/*options{greedy=true;}:*/ blockorstate)?
   ;
 
 in_expr
-  :  IN_KW/*^*/ expression
+  :  IN_KW expression
   ;
 
 in_window_expr
-  :  IN_KW/*^*/ WINDOW expression
+  :  IN_KW WINDOW expression
   ;
 
 imagephrase_opt
   :  (FILE|FILENAME) expression
-  |  (IMAGESIZE/*^*/|IMAGESIZECHARS/*^*/|IMAGESIZEPIXELS/*^*/) expression BY expression
+  |  (IMAGESIZE|IMAGESIZECHARS|IMAGESIZEPIXELS) expression BY expression
   |  from_pos
   ;
 
 importstate
-  :  IMPORT/*^*/ (stream_name_or_handle)?
+  :  IMPORT (stream_name_or_handle)?
     ( delimiter_constant | UNFORMATTED )?
     (  // If there's more than one, then we've got fields, not a record
       ((field|CARET) (field|CARET)) // => (field|CARET)+
@@ -2841,7 +2806,7 @@ importstate
   ;
 
 in_widgetpool_expr
-  :  IN_KW/*^*/ WIDGETPOOL expression
+  :  IN_KW WIDGETPOOL expression
   ;
 
 initial_constant
@@ -2859,7 +2824,7 @@ inputstatement
   ;
 
 inputclearstate
-  :  INPUT/*^*/ CLEAR state_end
+  :  INPUT CLEAR state_end
   //  {sthd(##,CLEAR);}
   ;
 
@@ -2889,7 +2854,7 @@ inputoutputclosestate
   ;
 
 inputoutputthroughstate
-  :  INPUTOUTPUT/*^*/ (stream_name_or_handle)? THROUGH io_phrase_state_end
+  :  INPUTOUTPUT (stream_name_or_handle)? THROUGH io_phrase_state_end
    // {sthd(##,THROUGH);}
   ;
 
@@ -2899,22 +2864,22 @@ insertstatement
   ;
 
 insertstate
-  :  INSERT/*^*/ record (except_fields)?
+  :  INSERT record (except_fields)?
     (using_row)?
     (framephrase)? (NOERROR_KW)? state_end
   //  {sthd(##,0);}
   ;
 
 interfacestate
-  :  INTERFACE/*^*/ type_name2 (interface_inherits)? block_colon
+  :  INTERFACE type_name2 (interface_inherits)? block_colon
     {LOGGER.error("support.interfaceNode(##);");}
     code_block
     interface_end state_end
  //   {sthd(##,0);}
   ;
 
-interface_inherits: INHERITS/*^*/ type_name (COMMA type_name)*;
-interface_end: END/*^*/ (INTERFACE)? ;
+interface_inherits: INHERITS type_name (COMMA type_name)*;
+interface_end: END (INTERFACE)? ;
 
 // Order of options is important
 io_phrase_state_end
@@ -2943,23 +2908,23 @@ io_opt
   :  APPEND
   |  BINARY
   |  COLLATE
-  |  CONVERT/*^*/ ((SOURCE|TARGET) expression)* | NOCONVERT
+  |  CONVERT ((SOURCE|TARGET) expression)* | NOCONVERT
   |  ECHO | NOECHO
   |  KEEPMESSAGES 
   |  LANDSCAPE
-  |  LOBDIR/*^*/ filenameorvalue
-  |  MAP/*^*/ anyorvalue | NOMAP
-  |  NUMCOPIES/*^*/ anyorvalue
+  |  LOBDIR filenameorvalue
+  |  MAP anyorvalue | NOMAP
+  |  NUMCOPIES anyorvalue
   |  PAGED
-  |  PAGESIZE_KW/*^*/ anyorvalue
+  |  PAGESIZE_KW anyorvalue
   |  PORTRAIT
   |  UNBUFFERED 
   ;
 io_osdir
-  :  OSDIR/*^*/ LEFTPAREN expression RIGHTPAREN (NOATTRLIST)?
+  :  OSDIR LEFTPAREN expression RIGHTPAREN (NOATTRLIST)?
   ;
 io_printer
-  :  PRINTER/*^*/  // A unix printer name could be just about anything.
+  :  PRINTER  // A unix printer name could be just about anything.
     ( // options{greedy=true;}:
       valueexpression
     |  ~(  VALUE|NUMCOPIES|COLLATE|LANDSCAPE|PORTRAIT|APPEND|BINARY|ECHO|NOECHO
@@ -2968,52 +2933,52 @@ io_printer
   ;
 
 label_constant
-  :  (COLUMNLABEL/*^*/|LABEL/*^*/) constant (/*options{greedy=true;}:*/ COMMA constant)*
+  :  (COLUMNLABEL|LABEL) constant (/*options{greedy=true;}:*/ COMMA constant)*
   ;
 
 ldbnamefunc
-  :  LDBNAME/*^*/ LEFTPAREN
+  :  LDBNAME LEFTPAREN
     (  (ldbname_opt1)// => ldbname_opt1
     |  expression
     )
     RIGHTPAREN
   ;
 ldbname_opt1
-  :  BUFFER/*^*/ record
+  :  BUFFER record
   ;
 
 leavestate
-  :  LEAVE/*^*/ (blocklabel)? state_end
+  :  LEAVE (blocklabel)? state_end
   //  {sthd(##,0);}
   ;
 
 lengthfunc
-  :  LENGTH/*^*/ funargs
+  :  LENGTH funargs
   ;
 
 like_field
-  :  LIKE/*^*/ field (/*options{greedy=true;}:*/ VALIDATE)?
+  :  LIKE field (/*options{greedy=true;}:*/ VALIDATE)?
   ;
 
 like_widgetname
-  :  LIKE/*^*/ widgetname
+  :  LIKE widgetname
   ;
 
 loadstate
-  :  LOAD/*^*/ expression (load_opt)* state_end
+  :  LOAD expression (load_opt)* state_end
 //    {sthd(##,0);}
   ;
 load_opt
-  :  DIR/*^*/ expression
+  :  DIR expression
   |  APPLICATION
   |  DYNAMIC
   |  NEW
-  |  BASEKEY/*^*/ expression
+  |  BASEKEY expression
   |  NOERROR_KW
   ;
 
 messagestate
-  :  MESSAGE/*^*/
+  :  MESSAGE
     (color_anyorvalue)?
     (message_item)*
     (message_opt)*
@@ -3029,14 +2994,14 @@ message_item
   ;
 
 message_opt    
-  :  VIEWAS/*^*/ ALERTBOX
+  :  VIEWAS ALERTBOX
     (MESSAGE|QUESTION|INFORMATION|ERROR|WARNING)?
     (  (BUTTONS | b=BUTTON)
       (YESNO|YESNOCANCEL|OK|OKCANCEL|RETRYCANCEL)
     )?
     (title_expr)?  
-  |  SET/*^*/ field ({_input.LA(2)!=ALERTBOX}? (/*options{greedy=true;}:*/ formatphrase)? |)
-  |  UPDATE/*^*/ field ({_input.LA(2)!=ALERTBOX}? (/*options{greedy=true;}:*/ formatphrase)? |)
+  |  SET field ({_input.LA(2)!=ALERTBOX}? (/*options{greedy=true;}:*/ formatphrase)? |)
+  |  UPDATE field ({_input.LA(2)!=ALERTBOX}? (/*options{greedy=true;}:*/ formatphrase)? |)
   ;
 
 methodstate
@@ -3074,31 +3039,31 @@ methodstate
   ;
   
 method_end:
-  END/*^*/ (METHOD)? ;
+  END (METHOD)? ;
 
-namespace_prefix: NAMESPACEPREFIX/*^*/ constant ;
-namespace_uri: NAMESPACEURI/*^*/ constant ;
+namespace_prefix: NAMESPACEPREFIX constant ;
+namespace_uri: NAMESPACEURI constant ;
 
 nextstate
-  :  NEXT/*^*/ (blocklabel)? state_end
+  :  NEXT (blocklabel)? state_end
  //   {sthd(##,0);}
   ;
 
 nextpromptstate
-  :  NEXTPROMPT/*^*/ field (framephrase)? state_end
+  :  NEXTPROMPT field (framephrase)? state_end
    // {sthd(##,0);}
   ;
 
 nextvaluefunc
-  :  NEXTVALUE/*^*/ LEFTPAREN sequencename (COMMA identifier)* RIGHTPAREN
+  :  NEXTVALUE LEFTPAREN sequencename (COMMA identifier)* RIGHTPAREN
   ;
 
 nullphrase
-  :  NULL_KW/*^*/ (/*options{greedy=true;}:*/ funargs)?
+  :  NULL_KW (/*options{greedy=true;}:*/ funargs)?
   ;
 
 onstate
-  :  ON/*^*/ //<AST=BlockNode>
+  :  ON //<AST=BlockNode>
     // {sthd(##,0);}
     (  // ON event OF database-object
       /*((ASSIGN|CREATE|DELETE_KW|FIND|WRITE) OF record|field)=>*/
@@ -3140,14 +3105,14 @@ onstate_run_params
   ;
 
 on___phrase
-  :  ON/*^*/ (ENDKEY|ERROR|STOP|QUIT) (on_undo)? (COMMA on_action)?
+  :  ON (ENDKEY|ERROR|STOP|QUIT) (on_undo)? (COMMA on_action)?
   ;
 on_undo
-  :  UNDO/*^*/ (/*options{greedy=true;}:*/ blocklabel)?
+  :  UNDO (/*options{greedy=true;}:*/ blocklabel)?
   ;
 on_action
-  :  (LEAVE/*^*/|NEXT/*^*/|RETRY/*^*/) (/*options{greedy=true;}:*/ blocklabel)?
-  |  RETURN/*^*/ return_options
+  :  (LEAVE|NEXT|RETRY) (/*options{greedy=true;}:*/ blocklabel)?
+  |  RETURN return_options
   |  THROW
   ;
 
@@ -3157,7 +3122,7 @@ openstatement
   ;
 
 openquerystate
-  :  OPEN/*^*/ QUERY queryname (FOR|PRESELECT) for_record_spec
+  :  OPEN QUERY queryname (FOR|PRESELECT) for_record_spec
     (openquery_opt)*
     state_end
   //  {sthd(##,QUERY);}
@@ -3168,16 +3133,16 @@ openquery_opt
   |  by_expr
   |  collatephrase
   |  INDEXEDREPOSITION
-  |  MAXROWS/*^*/ expression
+  |  MAXROWS expression
   ;
 
 osappendstate
-  :  OSAPPEND/*^*/ filenameorvalue filenameorvalue state_end
+  :  OSAPPEND filenameorvalue filenameorvalue state_end
   //  {sthd(##,0);}
   ;
 
 oscommandstate
-  :  (OS400/*^*/|BTOS/*^*/|DOS/*^*/|MPE/*^*/|OS2/*^*/|OSCOMMAND/*^*/|UNIX/*^*/|VMS/*^*/)
+  :  (OS400|BTOS|DOS|MPE|OS2|OSCOMMAND|UNIX|VMS)
     (/*options{greedy=true;}:*/ SILENT|NOWAIT|NOCONSOLE)?
     (anyorvalue)*
     state_end
@@ -3185,17 +3150,17 @@ oscommandstate
   ;
 
 oscopystate
-  :  OSCOPY/*^*/ filenameorvalue filenameorvalue state_end
+  :  OSCOPY filenameorvalue filenameorvalue state_end
   //  {sthd(##,0);}
   ;
 
 oscreatedirstate
-  :  OSCREATEDIR/*^*/ filenameorvalue (anyorvalue)* state_end
+  :  OSCREATEDIR filenameorvalue (anyorvalue)* state_end
   //  {sthd(##,0);}
   ;
 
 osdeletestate
-  :  OSDELETE/*^*/
+  :  OSDELETE
     (/*options{greedy=true;}:*/   /*(VALUE LEFTPAREN)=>*/ valueexpression
     |  ~(RECURSIVE|PERIOD|EOF)
     )+
@@ -3204,7 +3169,7 @@ osdeletestate
   ;
 
 osrenamestate
-  :  OSRENAME/*^*/ filenameorvalue filenameorvalue state_end
+  :  OSRENAME filenameorvalue filenameorvalue state_end
   //  {sthd(##,0);}
   ;
 
@@ -3215,46 +3180,46 @@ outputstatement
   ;
 
 outputclosestate
-  :  OUTPUT/*^*/ (stream_name_or_handle)? CLOSE state_end
+  :  OUTPUT (stream_name_or_handle)? CLOSE state_end
    // {sthd(##,CLOSE);}
   ;
 
 outputthroughstate
-  :  OUTPUT/*^*/ (stream_name_or_handle)? THROUGH io_phrase_state_end
+  :  OUTPUT (stream_name_or_handle)? THROUGH io_phrase_state_end
   //  {sthd(##,THROUGH);}
   ;
 
 outputtostate
-  :  OUTPUT/*^*/ (stream_name_or_handle)? TO io_phrase_state_end
+  :  OUTPUT (stream_name_or_handle)? TO io_phrase_state_end
   //  {sthd(##,TO);}
   ;
 
 pagestate
-  :  PAGE/*^*/ (stream_name_or_handle)? state_end
+  :  PAGE (stream_name_or_handle)? state_end
   //  {sthd(##,0);}
   ;
 
 pause_expr
-  :  PAUSE/*^*/ expression
+  :  PAUSE expression
   ;
 
 pausestate
-  :  PAUSE/*^*/ (expression)? (pause_opt)* state_end
+  :  PAUSE (expression)? (pause_opt)* state_end
   //  {sthd(##,0);}
   ;
 pause_opt
   :  BEFOREHIDE
-  |  MESSAGE/*^*/ constant
+  |  MESSAGE constant
   |  NOMESSAGE
   |  in_window_expr
   ;
 
 procedure_expr
-  :  PROCEDURE/*^*/ expression
+  :  PROCEDURE expression
   ;
 
 procedurestate
-  :  PROCEDURE/*^*/ //<AST=BlockNode>
+  :  PROCEDURE //<AST=BlockNode>
     name=filename {LOGGER.error("#name.setType(ID);");}
     (/*options{greedy=true;}:*/ procedure_opt)? block_colon
     {LOGGER.error("support.addInnerScope();");}
@@ -3266,7 +3231,7 @@ procedurestate
   //  {sthd(##,0);}
   ;
 procedure_opt
-  :  EXTERNAL/*^*/ constant (/*options{greedy=true;}:*/ procedure_dll_opt)*
+  :  EXTERNAL constant (/*options{greedy=true;}:*/ procedure_dll_opt)*
   |  PRIVATE
   |  IN_KW SUPER
   ;
@@ -3274,20 +3239,20 @@ procedure_dll_opt
   :  CDECL_KW
   |  PASCAL_KW
   |  STDCALL_KW
-  |  ORDINAL/*^*/ expression
+  |  ORDINAL expression
   |  PERSISTENT
   ;
 procedure_end
-  :  END/*^*/ (PROCEDURE)?
+  :  END (PROCEDURE)?
   ;
 
 processeventsstate
-  :  PROCESS/*^*/ EVENTS state_end
+  :  PROCESS EVENTS state_end
   //  {sthd(##,0);}
   ;
 
 promptforstate
-  :  (PROMPTFOR/*^*/|p=PROMPT/*^*/ )
+  :  (PROMPTFOR|p=PROMPT )
     (/*options{greedy=true;}:*/ stream_name_or_handle)?
     (UNLESSHIDDEN)? form_items_or_record
     (goonphrase)?
@@ -3300,15 +3265,15 @@ promptforstate
   ;
 
 publishstate
-  :  PUBLISH/*^*/ expression (publish_opt1)? (parameterlist)? state_end
+  :  PUBLISH expression (publish_opt1)? (parameterlist)? state_end
   //  {sthd(##,0);}
   ;
 publish_opt1
-  :  FROM/*^*/ expression
+  :  FROM expression
   ;
 
 putstate
-  :  PUT/*^*/ (/*options{greedy=true;}:*/ stream_name_or_handle)? (CONTROL|UNFORMATTED)?
+  :  PUT (/*options{greedy=true;}:*/ stream_name_or_handle)? (CONTROL|UNFORMATTED)?
     (  {_input.LA(1)==NULL_KW}? nullphrase
     |  skipphrase
     |  spacephrase
@@ -3319,12 +3284,12 @@ putstate
   ;
 
 putcursorstate
-  :  PUT/*^*/ CURSOR (OFF | (row_expr|column_expr)* ) state_end
+  :  PUT CURSOR (OFF | (row_expr|column_expr)* ) state_end
   //  {sthd(##,CURSOR);}
   ;
 
 putscreenstate
-  :  PUT/*^*/ SCREEN
+  :  PUT SCREEN
     ( /* options{generateAmbigWarnings=false;}
       // order of options is important. Expression after COLUMN|ROW.
     :*/  ATTRSPACE
@@ -3339,7 +3304,7 @@ putscreenstate
   ;
 
 putkeyvaluestate
-  :  PUTKEYVALUE/*^*/
+  :  PUTKEYVALUE
     (  SECTION expression KEY (DEFAULT|expression) VALUE expression
     |  (COLOR|FONT) (expression|ALL)
     )
@@ -3348,20 +3313,20 @@ putkeyvaluestate
   ;
 
 query_queryname
-  :  QUERY/*^*/ queryname
+  :  QUERY queryname
   ;
 
 querytuningphrase
-  :  QUERYTUNING/*^*/ LEFTPAREN (querytuning_opt)* RIGHTPAREN
+  :  QUERYTUNING LEFTPAREN (querytuning_opt)* RIGHTPAREN
   ;
 querytuning_opt
   :  ARRAYMESSAGE | NOARRAYMESSAGE
   |  BINDWHERE | NOBINDWHERE
-  |  CACHESIZE/*^*/ NUMBER (ROW|BYTE)?
-  |  DEBUG/*^*/ (SQL|EXTENDED|CURSOR|DATABIND|PERFORMANCE|VERBOSE|SUMMARY|NUMBER)?
+  |  CACHESIZE NUMBER (ROW|BYTE)?
+  |  DEBUG (SQL|EXTENDED|CURSOR|DATABIND|PERFORMANCE|VERBOSE|SUMMARY|NUMBER)?
     | NODEBUG
   |  DEFERLOBFETCH
-  |  HINT/*^*/ expression
+  |  HINT expression
   |  INDEXHINT | NOINDEXHINT
   |  JOINBYSQLDB | NOJOINBYSQLDB
   |  LOOKAHEAD | NOLOOKAHEAD
@@ -3371,7 +3336,7 @@ querytuning_opt
   ;
 
 quitstate
-  :  QUIT/*^*/ state_end
+  :  QUIT state_end
    // {sthd(##,0);}
   ;
 
@@ -3379,10 +3344,10 @@ radiosetphrase
   :  RADIOSET (radioset_opt)*
   ;
 radioset_opt
-  :  HORIZONTAL/*^*/ (EXPAND)?
+  :  HORIZONTAL (EXPAND)?
   |  VERTICAL
   |  (sizephrase)
-  |  RADIOBUTTONS/*^*/ radio_label COMMA (constant|TODAY|NOW)
+  |  RADIOBUTTONS radio_label COMMA (constant|TODAY|NOW)
     // Greedy. Try to consume COMMA... here first.
     // Otherwise, this becomes ambiguous with SQL field lists (like in SELECT).
     /*(options{greedy=true;}:   (COMMA radio_label COMMA (constant|TODAY|NOW)
@@ -3408,11 +3373,11 @@ radio_label
   ;
 
 rawfunc
-  :  RAW/*^*/ funargs
+  :  RAW funargs
   ;
 
 rawtransferstate
-  :  RAWTRANSFER/*^*/ rawtransfer_elem TO rawtransfer_elem (NOERROR_KW)? state_end
+  :  RAWTRANSFER rawtransfer_elem TO rawtransfer_elem (NOERROR_KW)? state_end
   //  {sthd(##,0);}
   ;
 rawtransfer_elem
@@ -3422,19 +3387,19 @@ rawtransfer_elem
   ;
 
 readkeystate
-  :  READKEY/*^*/ (stream_name_or_handle)? (pause_expr)? state_end
+  :  READKEY (stream_name_or_handle)? (pause_expr)? state_end
   //  {sthd(##,0);}
   ;
 
 repeatstate
-  :  REPEAT/*^*/ //<AST=BlockNode>
+  :  REPEAT //<AST=BlockNode>
     (block_for)? (/*options{greedy=true;}:*/ block_preselect)? (block_opt)* block_colon code_block block_end
    // {sthd(##,0);}
   ;
 
 record_fields
   // It may not look like it from the grammar, but the compiler really does allow FIELD here.
-  :  (FIELDS/*^*/|f=FIELD/*^*//*{#f.setType(FIELDS);}*/|EXCEPT/*^*/) (LEFTPAREN (field (when_exp)?)* RIGHTPAREN)?
+  :  (FIELDS|f=FIELD/*{#f.setType(FIELDS);}*/|EXCEPT) (LEFTPAREN (field (when_exp)?)* RIGHTPAREN)?
   ;
 
 recordphrase
@@ -3443,18 +3408,18 @@ recordphrase
     (/*options{greedy=true;}:*/ record_fields)? (/*options{greedy=true;}:*/ TODAY|NOW|constant)? (/*options{greedy=true;}:*/ record_opt)*
   ;
 record_opt
-  :  (LEFT/*^*/)? OUTERJOIN
-  |  OF/*^*/ record
+  :  (LEFT)? OUTERJOIN
+  |  OF record
     // Believe it or not, WHERE compiles without <expression>
     // It's also a bit tricky because NO-LOCK, etc, are constant values - valid expressions.
     // So, we have to make sure we're not consuming one of those keywords as an expression.
     // We (intentionally, for now) don't parse something that Progress runs fine with:
     //    FOR EACH customer WHERE NO-LOCK=6209:
     // (The constant NO-LOCK value is 6209).
-  |  /*(WHERE (SHARELOCK|EXCLUSIVELOCK|NOLOCK|NOWAIT|NOPREFETCH|NOERROR_KW))=>*/ WHERE/*^*/
-  |  WHERE/*^*/ (/*options{greedy=true;}:*/ expression)?
-  |  USEINDEX/*^*/ identifier
-  |  USING/*^*/ field (AND field)*
+  |  /*(WHERE (SHARELOCK|EXCLUSIVELOCK|NOLOCK|NOWAIT|NOPREFETCH|NOERROR_KW))=>*/ WHERE
+  |  WHERE (/*options{greedy=true;}:*/ expression)?
+  |  USEINDEX identifier
+  |  USING field (AND field)*
   |  lockhow
   |  NOWAIT
   |  NOPREFETCH
@@ -3468,42 +3433,42 @@ releasestatement
   ;
 
 releasestate
-  :  RELEASE/*^*/ record (NOERROR_KW)? state_end
+  :  RELEASE record (NOERROR_KW)? state_end
   //  {sthd(##,0);}
   ;
 
 releaseexternalstate
-  :  RELEASE/*^*/ EXTERNAL (/*options{greedy=true;}:*/ PROCEDURE)? expression (NOERROR_KW)? state_end
+  :  RELEASE EXTERNAL (/*options{greedy=true;}:*/ PROCEDURE)? expression (NOERROR_KW)? state_end
    // {sthd(##,EXTERNAL);}
   ;
 
 releaseobjectstate
-  :  RELEASE/*^*/ OBJECT expression (NOERROR_KW)? state_end
+  :  RELEASE OBJECT expression (NOERROR_KW)? state_end
   //  {sthd(##,OBJECT);}
   ;
 
 repositionstate
-  :  REPOSITION/*^*/ queryname reposition_opt (NOERROR_KW)? state_end
+  :  REPOSITION queryname reposition_opt (NOERROR_KW)? state_end
   //  {sthd(##,0);}
   ;
 reposition_opt
-  :  TO/*^*/
+  :  TO
     (  ROWID expression (COMMA expression)* 
     |  RECID expression
     |  ROW expression
     )
-  |  ROW/*^*/ expression
-  |  FORWARDS/*^*/ expression
-  |  BACKWARDS/*^*/ expression
+  |  ROW expression
+  |  FORWARDS expression
+  |  BACKWARDS expression
   ;
 
 returnstate
-  :  RETURN/*^*/ return_options state_end
+  :  RETURN return_options state_end
   //  {sthd(##,0);}
   ;
 
 return_options
-  :  (///*options{greedy=true;}:*/ (ERROR/*^*/ LEFTPAREN record RIGHTPAREN)=> // no action - pick up error func in expression below
+  :  (///*options{greedy=true;}:*/ (ERROR LEFTPAREN record RIGHTPAREN)=> // no action - pick up error func in expression below
     /*|*/  ERROR
     |  NOAPPLY
     )?
@@ -3521,7 +3486,7 @@ blocklevelstate
     ;
 
 row_expr
-  :  ROW/*^*/ expression
+  :  ROW expression
   ;
 
 runstatement
@@ -3532,7 +3497,7 @@ runstatement
   ;
 
 runstate
-  :  RUN/*^*/
+  :  RUN
     filenameorvalue
     (/*options{greedy=true;}:*/ LEFTANGLE LEFTANGLE filenameorvalue RIGHTANGLE RIGHTANGLE)?
     (/*options{greedy=true;}:*/ run_opt)*
@@ -3545,68 +3510,68 @@ runstate
   //  {sthd(##,0);}
   ;
 run_opt
-  :  PERSISTENT/*^*/ (/*options{greedy=true;}:*/ run_set)?
+  :  PERSISTENT (/*options{greedy=true;}:*/ run_set)?
   |  run_set
-  |  ON/*^*/ (/*options{greedy=true;}:*/ SERVER)? expression (/*options{greedy=true;}:*/ TRANSACTION (/*options{greedy=true;}:*/ DISTINCT)? )?
+  |  ON (/*options{greedy=true;}:*/ SERVER)? expression (/*options{greedy=true;}:*/ TRANSACTION (/*options{greedy=true;}:*/ DISTINCT)? )?
   |  in_expr
-  |  ASYNCHRONOUS/*^*/ (/*options{greedy=true;}:*/ run_set)? (/*options{greedy=true;}:*/ run_event)? (/*options{greedy=true;}:*/ in_expr)?
+  |  ASYNCHRONOUS (/*options{greedy=true;}:*/ run_set)? (/*options{greedy=true;}:*/ run_event)? (/*options{greedy=true;}:*/ in_expr)?
   ;
 run_event
-  :  EVENTPROCEDURE/*^*/ expression
+  :  EVENTPROCEDURE expression
   ;
 run_set
-  :  SET/*^*/ (/*options{greedy=true;}:*/ field)?
+  :  SET (/*options{greedy=true;}:*/ field)?
   ;
 
 runstoredprocedurestate
-  :  RUN/*^*/ STOREDPROCEDURE identifier (/*options{greedy=true;}:*/ assign_equal)? (NOERROR_KW)? (parameterlist)? state_end
+  :  RUN STOREDPROCEDURE identifier (/*options{greedy=true;}:*/ assign_equal)? (NOERROR_KW)? (parameterlist)? state_end
  //   {sthd(##,STOREDPROCEDURE);}
   ;
 
 runsuperstate
-  :  RUN/*^*/ SUPER (parameterlist)? (NOERROR_KW)? state_end
+  :  RUN SUPER (parameterlist)? (NOERROR_KW)? state_end
   //  {sthd(##,SUPER);}
   ;
 
 savecachestate
-  :  SAVE/*^*/ CACHE (CURRENT|COMPLETE) anyorvalue TO filenameorvalue (NOERROR_KW)? state_end
+  :  SAVE CACHE (CURRENT|COMPLETE) anyorvalue TO filenameorvalue (NOERROR_KW)? state_end
   //  {sthd(##,0);}
   ;
 
 scrollstate
-  :  SCROLL/*^*/ (FROMCURRENT)? (UP)? (DOWN)? (framephrase)? state_end
+  :  SCROLL (FROMCURRENT)? (UP)? (DOWN)? (framephrase)? state_end
   //  {sthd(##,0);}
   ;
 
 seekstate
-  :  SEEK/*^*/ (INPUT|OUTPUT|stream_name_or_handle) TO (expression|END) state_end
+  :  SEEK (INPUT|OUTPUT|stream_name_or_handle) TO (expression|END) state_end
   //  {sthd(##,0);}
   ;
 
 selectionlistphrase
-  :  SELECTIONLIST/*^*/ (/*options{greedy=true;}:*/ selectionlist_opt)*
+  :  SELECTIONLIST (/*options{greedy=true;}:*/ selectionlist_opt)*
   ;
 selectionlist_opt
   :  SINGLE
   |  MULTIPLE
   |  NODRAG
-  |  LISTITEMS/*^*/ constant (/*options{greedy=true;}:*/ COMMA constant)*
-  |  LISTITEMPAIRS/*^*/ constant (/*options{greedy=true;}:*/ COMMA constant)*
+  |  LISTITEMS constant (/*options{greedy=true;}:*/ COMMA constant)*
+  |  LISTITEMPAIRS constant (/*options{greedy=true;}:*/ COMMA constant)*
   |  SCROLLBARHORIZONTAL
   |  SCROLLBARVERTICAL
-  |  INNERCHARS/*^*/ expression
-  |  INNERLINES/*^*/ expression
+  |  INNERCHARS expression
+  |  INNERLINES expression
   |  SORT
   |  tooltip_expr
   |  sizephrase
   ;
 
 serialize_name
-  :  SERIALIZENAME/*^*/ QSTRING
+  :  SERIALIZENAME QSTRING
   ;
 
 setstate
-  :  SET/*^*/ (/*options{greedy=true;}:*/ stream_name_or_handle)? (UNLESSHIDDEN)? form_items_or_record
+  :  SET (/*options{greedy=true;}:*/ stream_name_or_handle)? (UNLESSHIDDEN)? form_items_or_record
     (goonphrase)?
     (except_fields)?
     (in_window_expr)?
@@ -3618,38 +3583,38 @@ setstate
   ;
 
 showstatsstate
-  :  SHOWSTATS/*^*/ (CLEAR)? state_end
+  :  SHOWSTATS (CLEAR)? state_end
   //  {sthd(##,0);}
   ;
 
 sizephrase
-  :  (SIZE/*^*/ | SIZECHARS/*^*/ | SIZEPIXELS/*^*/) expression BY expression
+  :  (SIZE | SIZECHARS | SIZEPIXELS) expression BY expression
   ;
 
 skipphrase
-  :  SKIP/*^*/ (/*options{greedy=true;}:*/ funargs)?
+  :  SKIP (/*options{greedy=true;}:*/ funargs)?
   ;
 
 sliderphrase
-  :  SLIDER/*^*/ (/*options{greedy=true;}:*/ slider_opt)*
+  :  SLIDER (/*options{greedy=true;}:*/ slider_opt)*
   ;
 slider_opt
   :  HORIZONTAL
-  |  MAXVALUE/*^*/ expression
-  |  MINVALUE/*^*/ expression
+  |  MAXVALUE expression
+  |  MINVALUE expression
   |  VERTICAL
   |  NOCURRENTVALUE
   |  LARGETOSMALL
-  |  TICMARKS/*^*/ (NONE|TOP|BOTTOM|LEFT|RIGHT|BOTH) (/*options{greedy=true;}:*/ slider_frequency)?
+  |  TICMARKS (NONE|TOP|BOTTOM|LEFT|RIGHT|BOTH) (/*options{greedy=true;}:*/ slider_frequency)?
   |  tooltip_expr
   |  sizephrase
   ;
 slider_frequency
-  :  FREQUENCY/*^*/ expression
+  :  FREQUENCY expression
   ;
 
 spacephrase
-  :  SPACE/*^*/ (/*options{greedy=true;}:*/ funargs)?
+  :  SPACE (/*options{greedy=true;}:*/ funargs)?
   ;
 
 state_end
@@ -3661,181 +3626,181 @@ not_state_end
   ;
 
 statusstate
-  :  STATUS/*^*/ status_opt (in_window_expr)? state_end
+  :  STATUS status_opt (in_window_expr)? state_end
   //  {sthd(##,0);}
   ;
 status_opt
-  :  DEFAULT/*^*/ (expression)? | INPUT/*^*/ (OFF|expression)?
+  :  DEFAULT (expression)? | INPUT (OFF|expression)?
   ;
 
 stop_after
-  :  STOPAFTER/*^*/ expression
+  :  STOPAFTER expression
   ;
 
 stopstate
-  :  STOP/*^*/ state_end
+  :  STOP state_end
    // {sthd(##,0);}
   ;
 
 stream_name_or_handle
-  :  STREAM/*^*/ streamname
-  |  STREAMHANDLE/*^*/ expression
+  :  STREAM streamname
+  |  STREAMHANDLE expression
   ;
 
 subscribestate
-  :  SUBSCRIBE/*^*/ (/*options{greedy=true;}:*/ procedure_expr)? (TO)? expression
+  :  SUBSCRIBE (/*options{greedy=true;}:*/ procedure_expr)? (TO)? expression
     (ANYWHERE | in_expr)
     (subscribe_run)? (NOERROR_KW)? state_end
   //  {sthd(##,0);}
   ;
 subscribe_run
-  :  RUNPROCEDURE/*^*/ expression
+  :  RUNPROCEDURE expression
   ;
    
 substringfunc
-  :  SUBSTRING/*^*/ funargs
+  :  SUBSTRING funargs
   ;
 
 systemdialogcolorstate
-  :  SYSTEMDIALOG/*^*/ COLOR expression (update_field)? (in_window_expr)? state_end
+  :  SYSTEMDIALOG COLOR expression (update_field)? (in_window_expr)? state_end
   //  {sthd(##,COLOR);}
   ;
 
 systemdialogfontstate
-  :  SYSTEMDIALOG/*^*/ FONT expression (sysdiafont_opt)* state_end
+  :  SYSTEMDIALOG FONT expression (sysdiafont_opt)* state_end
   //  {sthd(##,FONT);}
   ;
 sysdiafont_opt
   :  ANSIONLY
   |  FIXEDONLY
-  |  MAXSIZE/*^*/ expression
-  |  MINSIZE/*^*/ expression
+  |  MAXSIZE expression
+  |  MINSIZE expression
   |  update_field
   |  in_window_expr
   ;
 
 systemdialoggetdirstate
-  :  SYSTEMDIALOG/*^*/ GETDIR field (systemdialoggetdir_opt)* state_end { /*sthd(##,GETDIR);*/}
+  :  SYSTEMDIALOG GETDIR field (systemdialoggetdir_opt)* state_end { /*sthd(##,GETDIR);*/}
   ;
 systemdialoggetdir_opt
-  :  INITIALDIR/*^*/ expression
+  :  INITIALDIR expression
   |  RETURNTOSTARTDIR
-  |  TITLE/*^*/ expression
-  |  UPDATE/*^*/ field
+  |  TITLE expression
+  |  UPDATE field
   ;
 
 systemdialoggetfilestate
-  :  SYSTEMDIALOG/*^*/ GETFILE field (sysdiagetfile_opt)* state_end
+  :  SYSTEMDIALOG GETFILE field (sysdiagetfile_opt)* state_end
   //  {sthd(##,GETFILE);}
   ;
 sysdiagetfile_opt
-  :  FILTERS/*^*/ expression expression (COMMA expression expression)* (sysdiagetfile_initfilter)?
+  :  FILTERS expression expression (COMMA expression expression)* (sysdiagetfile_initfilter)?
   |  ASKOVERWRITE
   |  CREATETESTFILE
-  |  DEFAULTEXTENSION/*^*/ expression
-  |  INITIALDIR/*^*/ expression
+  |  DEFAULTEXTENSION expression
+  |  INITIALDIR expression
   |  MUSTEXIST
   |  RETURNTOSTARTDIR
   |  SAVEAS
   |  title_expr
   |  USEFILENAME
-  |  UPDATE/*^*/ field
+  |  UPDATE field
   |  in_window_expr
   ;
 sysdiagetfile_initfilter
-  :  INITIALFILTER/*^*/ expression
+  :  INITIALFILTER expression
   ;
 
 systemdialogprintersetupstate
-  :  SYSTEMDIALOG/*^*/ PRINTERSETUP (sysdiapri_opt)* state_end
+  :  SYSTEMDIALOG PRINTERSETUP (sysdiapri_opt)* state_end
   //  {sthd(##,PRINTERSETUP);}
   ;
 sysdiapri_opt
-  :  (NUMCOPIES/*^*/ expression | update_field | LANDSCAPE | PORTRAIT | in_window_expr)
+  :  (NUMCOPIES expression | update_field | LANDSCAPE | PORTRAIT | in_window_expr)
   ;
 
 systemhelpstate
-  :  SYSTEMHELP/*^*/ expression (systemhelp_window)? systemhelp_opt state_end
+  :  SYSTEMHELP expression (systemhelp_window)? systemhelp_opt state_end
   //  {sthd(##,0);}
   ;
 systemhelp_window
-  :  WINDOWNAME/*^*/ expression
+  :  WINDOWNAME expression
   ;
 systemhelp_opt
-  :  ALTERNATEKEY/*^*/ expression
-  |  CONTEXT/*^*/ expression
+  :  ALTERNATEKEY expression
+  |  CONTEXT expression
   |  CONTENTS 
-  |  SETCONTENTS/*^*/ expression
+  |  SETCONTENTS expression
   |  FINDER
-  |  CONTEXTPOPUP/*^*/ expression
-  |  HELPTOPIC/*^*/ expression
-  |  KEY/*^*/ expression
-  |  PARTIALKEY/*^*/ (expression)?
-  |  MULTIPLEKEY/*^*/ expression TEXT expression
-  |  COMMAND/*^*/ expression
-  |  POSITION/*^*/ (MAXIMIZE | X expression Y expression WIDTH expression HEIGHT expression)
+  |  CONTEXTPOPUP expression
+  |  HELPTOPIC expression
+  |  KEY expression
+  |  PARTIALKEY (expression)?
+  |  MULTIPLEKEY expression TEXT expression
+  |  COMMAND expression
+  |  POSITION (MAXIMIZE | X expression Y expression WIDTH expression HEIGHT expression)
   |  FORCEFILE
   |  HELP
   |  QUIT
   ;
 
 text_opt
-  :  TEXT/*^*/ LEFTPAREN (form_item)* RIGHTPAREN
+  :  TEXT LEFTPAREN (form_item)* RIGHTPAREN
   ;
 
 textphrase
-  :  TEXT/*^*/ (/*options{greedy=true;}:*/ sizephrase | tooltip_expr)*
+  :  TEXT (/*options{greedy=true;}:*/ sizephrase | tooltip_expr)*
   ;
 
 thisobjectstate
-  :  THISOBJECT/*^*/ parameterlist_noroot state_end
+  :  THISOBJECT parameterlist_noroot state_end
   //  {sthd(##,0);}
   ;
 
 title_expr
-  :  TITLE/*^*/ expression
+  :  TITLE expression
   ;
 
 time_expr
-  :  TIME/*^*/ expression
+  :  TIME expression
   ;
 
 titlephrase
-  :  TITLE/*^*/ (/*options{greedy=true;}:*/ color_expr | color_anyorvalue | font_expr)* expression
+  :  TITLE (/*options{greedy=true;}:*/ color_expr | color_anyorvalue | font_expr)* expression
   ;
 
 to_expr
-  :  TO/*^*/ expression
+  :  TO expression
   ;
 
 toggleboxphrase
-  :  TOGGLEBOX/*^*/ (/*options{greedy=true;}:*/ sizephrase | tooltip_expr)*
+  :  TOGGLEBOX (/*options{greedy=true;}:*/ sizephrase | tooltip_expr)*
   ;
 
 tooltip_expr
-  :  TOOLTIP/*^*/ (valueexpression | constant)
+  :  TOOLTIP (valueexpression | constant)
   ;
 
 transactionmodeautomaticstate
-  :  TRANSACTIONMODE/*^*/ AUTOMATIC (CHAINED)? state_end
+  :  TRANSACTIONMODE AUTOMATIC (CHAINED)? state_end
   //  {sthd(##,0);}
   ;
 
 triggerphrase
-  :  TRIGGERS/*^*/ block_colon trigger_block triggers_end
+  :  TRIGGERS block_colon trigger_block triggers_end
   ;
 trigger_block
   :  (trigger_on)* // {## = #([Code_block], ##);}
   ;
 trigger_on
-  :  ON/*^*/ /*<AST=BlockNode>*/ eventlist (/*options{greedy=true;}:*/ ANYWHERE)? (PERSISTENT runstate | blockorstate)
+  :  ON /*<AST=BlockNode>*/ eventlist (/*options{greedy=true;}:*/ ANYWHERE)? (PERSISTENT runstate | blockorstate)
   ;
 triggers_end
-  :  END/*^*/ (/*options{greedy=true;}:*/ TRIGGERS)?
+  :  END (/*options{greedy=true;}:*/ TRIGGERS)?
   ;
 
 triggerprocedurestate
-  :  TRIGGER/*^*/ PROCEDURE FOR
+  :  TRIGGER PROCEDURE FOR
     (  (CREATE|DELETE_KW|FIND|REPLICATIONCREATE|REPLICATIONDELETE) OF record (label_constant)?
     |  (WRITE|REPLICATIONWRITE) OF bf=record (label_constant)?
       (  NEW (BUFFER)? n=identifier (label_constant)?
@@ -3850,48 +3815,48 @@ triggerprocedurestate
    // {sthd(##,0);}
   ;
 trigger_of
-  :  OF/*^*/ field (trigger_table_label)?
-  |  NEW/*^*/ (VALUE)? n=identifier defineparam_var
+  :  OF field (trigger_table_label)?
+  |  NEW (VALUE)? n=identifier defineparam_var
     {LOGGER.error("support.defVar(#n.getText());");}
   ;
 trigger_table_label
 // Found this in PSC's grammar
-  :  TABLE/*^*/ LABEL constant
+  :  TABLE LABEL constant
   ;
 trigger_old
-  :  OLD/*^*/ (VALUE)? n=identifier defineparam_var
+  :  OLD (VALUE)? n=identifier defineparam_var
     {LOGGER.error("support.defVar(#n.getText());");}
   ;
 
 underlinestate
-  :  UNDERLINE/*^*/ (stream_name_or_handle)? (field_form_item)* (framephrase)? state_end
+  :  UNDERLINE (stream_name_or_handle)? (field_form_item)* (framephrase)? state_end
   //  {sthd(##,0);}
   ;
 
 undostate
-  :  UNDO/*^*/ (blocklabel)? (COMMA undo_action)? state_end
+  :  UNDO (blocklabel)? (COMMA undo_action)? state_end
   //  {sthd(##,0);}
   ;
 undo_action
-  :  LEAVE/*^*/ (blocklabel)?
-  |  NEXT/*^*/ (blocklabel)?
-  |  RETRY/*^*/ (blocklabel)?
-  |  RETURN/*^*/ return_options
-  |  THROW/*^*/ expression
+  :  LEAVE (blocklabel)?
+  |  NEXT (blocklabel)?
+  |  RETRY (blocklabel)?
+  |  RETURN return_options
+  |  THROW expression
   ;
 
 unloadstate
-  :  UNLOAD/*^*/ expression (NOERROR_KW)? state_end
+  :  UNLOAD expression (NOERROR_KW)? state_end
   //  {sthd(##,0);}
   ;
 
 unsubscribestate
-  :  UNSUBSCRIBE/*^*/ (/*options{greedy=true;}:*/ procedure_expr)? (TO)? (expression|ALL) (in_expr)? state_end
+  :  UNSUBSCRIBE (/*options{greedy=true;}:*/ procedure_expr)? (TO)? (expression|ALL) (in_expr)? state_end
    // {sthd(##,0);}
   ;
 
 upstate
-  :  UP/*^*/
+  :  UP
     (/*options{greedy=true;}:*/ stream_name_or_handle)?
     (/*options{greedy=true;}:*/ expression)?
     (framephrase)? state_end
@@ -3905,11 +3870,11 @@ updatestatement
   ;
 
 update_field
-  :  UPDATE/*^*/ field
+  :  UPDATE field
   ;
 
 updatestate
-  :  UPDATE/*^*/  (UNLESSHIDDEN)?  form_items_or_record
+  :  UPDATE  (UNLESSHIDDEN)?  form_items_or_record
     (goonphrase)?
     (except_fields)?
     (in_window_expr)?
@@ -3921,16 +3886,16 @@ updatestate
   ;
 
 usestate
-  :  USE/*^*/ expression (NOERROR_KW)? state_end
+  :  USE expression (NOERROR_KW)? state_end
    // {sthd(##,0);}
   ;
 
 using_row
-  :  USING/*^*/ (ROWID|RECID) expression
+  :  USING (ROWID|RECID) expression
   ;
 
 usingstate
-  :  USING/*^*/
+  :  USING
     tn=type_name2
     (  STAR/*!*/
       {  //#tn.setText(#tn.getText() + "*");
@@ -3943,26 +3908,26 @@ usingstate
     }
   ;
 using_from
-  :  FROM/*^*/ (ASSEMBLY|PROPATH)
+  :  FROM (ASSEMBLY|PROPATH)
   ;
 
 validatephrase
-  :  VALIDATE/*^*/ funargs
+  :  VALIDATE funargs
   ;
 
 validatestate
-  :  VALIDATE/*^*/ record (NOERROR_KW)? state_end
+  :  VALIDATE record (NOERROR_KW)? state_end
    // {sthd(##,0);}
   ;
 
 viewstate
-  :  VIEW/*^*/ (/*options{greedy=true;}:*/ stream_name_or_handle)?
+  :  VIEW (/*options{greedy=true;}:*/ stream_name_or_handle)?
     (gwidget)* (in_window_expr)? state_end
    // {sthd(##,0);}
   ;
 
 viewasphrase
-  :  VIEWAS/*^*/
+  :  VIEWAS
     (  comboboxphrase
     |  editorphrase
     |  fillinphrase
@@ -3975,7 +3940,7 @@ viewasphrase
   ;
 
 waitforstate
-  :  (WAITFOR/*^*/|w=WAIT/*^*/ /*{#w.setType(WAITFOR);}*/)
+  :  (WAITFOR|w=WAIT /*{#w.setType(WAITFOR);}*/)
     (
     {_input.LA(2)==OF || _input.LA(2)==COMMA}?
       eventlist OF widgetlist
@@ -3990,27 +3955,27 @@ waitforstate
   //  {sthd(##,0);}
   ;
 waitfor_or
-  :  OR/*^*/ eventlist OF widgetlist
+  :  OR eventlist OF widgetlist
   ;
 waitfor_focus
-  :  FOCUS/*^*/ gwidget
+  :  FOCUS gwidget
   ;
 waitfor_exclusiveweb
   :  EXCLUSIVEWEBUSER (expression)?
   ;
 waitfor_set
-  :  SET/*^*/ field
+  :  SET field
   ;
    
 when_exp
-  :  WHEN/*^*/ expression
+  :  WHEN expression
   ;
 
-widget_id: WIDGETID/*^*/ expression ;
+widget_id: WIDGETID expression ;
 
-xml_data_type: XMLDATATYPE/*^*/ constant ;
-xml_node_name: XMLNODENAME/*^*/ constant ;
-xml_node_type: XMLNODETYPE/*^*/ constant ;
+xml_data_type: XMLDATATYPE constant ;
+xml_node_name: XMLNODENAME constant ;
+xml_node_type: XMLNODETYPE constant ;
 
 // Documentation bugs:
 // - PARENT, ROWID, and RETURNS can be used as field names

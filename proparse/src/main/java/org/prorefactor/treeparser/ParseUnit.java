@@ -157,10 +157,10 @@ public class ParseUnit {
       ProParser parser = new ProParser(lexer.getANTLR2TokenStream(true));
       parser.initAntlr4(session, lexer.getFilenameList());
       parser.program();
-      ((JPNode) parser.getAST()).backLink();
+      ((JPNode) parser.getAST()).backLinkAndFinalize();
 
       // Deal with trailing hidden tokens
-      JPNode.finalizeTrailingHidden((JPNode) parser.getAST());
+      // JPNode.finalizeTrailingHidden((JPNode) parser.getAST());
       lexer.parseComplete();
 
       macroGraph = lexer.getMacroGraph();

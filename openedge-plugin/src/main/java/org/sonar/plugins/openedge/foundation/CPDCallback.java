@@ -76,7 +76,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     }
 
     // Skip code blocks following parameterized annotations
-    JPNode prevSibling = node.prevSibling();
+    JPNode prevSibling = node.getPreviousSibling();
     while ((prevSibling != null) && (prevSibling.getType() == NodeTypes.ANNOTATION)) {
       if (settings.skipCPD(prevSibling.getAnnotationName())) {
         // Skipping nodes is not enough, as the content of the method would be considered blank lines.
@@ -85,7 +85,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
         insertFakeNode(node);
         return false;
       }
-      prevSibling = prevSibling.prevSibling();
+      prevSibling = prevSibling.getPreviousSibling();
     }
     // Skip method matching parameterized names
     if (node.getType() == NodeTypes.METHOD) {
@@ -106,9 +106,9 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
 
     if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
       // Consider that an operator only has 2 children
-      visitNode(node.firstChild());
+      visitNode(node.getFirstChild());
       visitCpdNode(node);
-      visitNode(node.firstChild().nextSibling());
+      visitNode(node.getFirstChild().getNextSibling());
       return false;
     } else {
       visitCpdNode(node);

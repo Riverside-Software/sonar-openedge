@@ -24,77 +24,25 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import antlr.BaseAST;
 import antlr.Token;
 import antlr.collections.AST;
+import antlr.collections.ASTEnumeration;
 
 /**
- * Extension to antlr.BaseAST, which allows us to extract an external "antlr" AST view of a Proparse AST, which we can
- * then run tree parsers against. Note that tree transformation functions are currently (Feb 2004) untested and unused,
- * since we tend to only use the AST for analysis and not for code motion.
+ * Implementation of antlr.AST. Most "simple" methods are just copy/pasted from antlr.BaseAST.
  */
-public class JPNode extends BaseAST {
-  private static final long serialVersionUID = 328939790131475436L;
-
+public class JPNode implements AST {
   private ProToken token;
 
-  private Map<Integer, Integer> attrMap;
-  private Map<String, String> attrMapStrings;
-  private transient Map<Integer, Object> linkMap;
-  private Map<Integer, String> stringAttributes;
+  private JPNode down;
+  private JPNode right;
   private JPNode left;
   private JPNode up;
 
-  public enum AttributeKey {
-    STORETYPE(IConstants.STORETYPE),
-    OPERATOR(IConstants.OPERATOR),
-    STATE2(IConstants.STATE2),
-    STATEHEAD(IConstants.STATEHEAD),
-    PROPARSEDIRECTIVE(IConstants.PROPARSEDIRECTIVE),
-    NODE_TYPE_KEYWORD(IConstants.NODE_TYPE_KEYWORD),
-    ABBREVIATED(IConstants.ABBREVIATED),
-    FULLTEXT(IConstants.FULLTEXT),
-    FROM_USER_DICT(IConstants.FROM_USER_DICT),
-    INLINE_VAR_DEF(IConstants.INLINE_VAR_DEF),
-    QUALIFIED_CLASS(IConstants.QUALIFIED_CLASS_INT);
-
-    private int key;
-
-    private AttributeKey(int key) {
-      this.key = key;
-    }
-
-    public int getKey() {
-      return key;
-    }
-
-    public String getName() {
-      return name().toLowerCase().replace('_', '-');
-    }
-  }
-
-  public enum AttributeValue {
-    FALSE(IConstants.FALSE),
-    TRUE(IConstants.TRUE),
-    ST_VARIABLE(IConstants.ST_VAR),
-    ST_DBTABLE(IConstants.ST_DBTABLE),
-    ST_TTABLE(IConstants.ST_TTABLE),
-    ST_WTABLE(IConstants.ST_WTABLE);
-
-    int key;
-
-    private AttributeValue(int key) {
-      this.key = key;
-    }
-
-    public int getKey() {
-      return key;
-    }
-
-    public String getName() {
-      return name().toLowerCase().replace('_', '-');
-    }
-  }
+  private Map<Integer, Integer> attrMap;
+  private Map<String, String> attrMapStrings;
+  private Map<Integer, Object> linkMap;
+  private Map<Integer, String> stringAttributes;
 
   private static final BiMap<Integer, String> attrStrEqs;
 
@@ -114,15 +62,401 @@ public class JPNode extends BaseAST {
     setType(t.getType());
   }
 
-  public String allLeadingHiddenText() {
-    String ret = "";
-    ProToken t = getHiddenFirst();
-    while (t != null) {
-      ret += t.getText();
-      t = (ProToken) t.getHiddenAfter();
+  /**
+   * Call after tree has been created, in order to deal with tree traversing and trailing nodes
+   */
+  public void backLinkAndFinalize() {
+    // Assert that this is done on the top level node
+    backLink();
+    finalizeTrailingHidden();
+  }
+
+  /**
+   * Set parent and prevSibling links
+   */
+  private void backLink() {
+    JPNode currNode = down;
+    while (currNode != null) {
+      currNode.up = this;
+      currNode.backLink();
+      JPNode nextNode = currNode.right;
+      if (nextNode != null)
+        nextNode.left = currNode;
+      currNode = nextNode;
+    }
+  }
+
+  private void finalizeTrailingHidden() {
+    /*
+     * The node passed in should be the Program_root. The last child of the Program_root should be the Program_tail, as
+     * set by the parser. (See propar.g) We want to find the last descendant of the last child before Program_tail, and
+     * then set up Program_tail with that node's hiddenAfter. Program_tail is the holder node for any trailing hidden
+     * tokens. This function will have to change slightly if we change the layout of hidden tokens.
+     */
+    JPNode tailNode = down;
+    if (tailNode == null || tailNode.getType() == NodeTypes.Program_tail)
+      return;
+    JPNode lastNode = tailNode;
+    while (tailNode != null && tailNode.getType() != NodeTypes.Program_tail) {
+      lastNode = tailNode;
+      tailNode = tailNode.getNextSibling();
+    }
+    if (tailNode == null || tailNode.getType() != NodeTypes.Program_tail)
+      return;
+    lastNode = lastNode.getLastDescendant();
+    ProToken lastT = lastNode.getHiddenAfter();
+    ProToken tempT = lastT;
+    while (tempT != null) {
+      lastT = tempT;
+      tempT = (ProToken) tempT.getHiddenAfter();
+    }
+    tailNode.setHiddenBefore(lastT);
+  }
+
+  // *************
+  // AST interface
+  // *************
+
+  @Override
+  public void addChild(AST child) {
+    if (child == null)
+      return;
+    JPNode node = down;
+    if (node != null) {
+      while (node.right != null) {
+        node = node.right;
+      }
+      node.right = (JPNode) child;
+    } else {
+      down = (JPNode) child;
+    }
+  }
+
+  @Override
+  public int getNumberOfChildren() {
+    int n = 0;
+    JPNode node = down;
+    if (node != null) {
+      n = 1;
+      while (node.right != null) {
+        node = node.right;
+        n++;
+      }
+      return n;
+    }
+    return n;
+  }
+
+  @Override
+  public void initialize(int t, String txt) {
+    setType(t);
+    setText(txt);
+  }
+
+  @Override
+  public void initialize(AST t) {
+    setType(t.getType());
+    setText(t.getText());
+  }
+
+  @Override
+  public void initialize(Token t) {
+    this.token = (ProToken) t;
+    setType(t.getType());
+  }
+
+
+  @Override
+  public JPNode getFirstChild() {
+    return down;
+  }
+
+  @Override
+  public JPNode getNextSibling() {
+    return right;
+  }
+
+  @Override
+  public String getText() {
+    return token.getText();
+  }
+
+  @Override
+  public int getType() {
+    return token.getType();
+  }
+
+  @Override
+  public int getLine() {
+    return token.getLine();
+  }
+
+  @Override
+  public int getColumn() {
+    return token.getColumn();
+  }
+
+  @Override
+  public void setFirstChild(AST c) {
+    down = (JPNode) c;
+  }
+
+  @Override
+  public void setNextSibling(AST n) {
+    right = (JPNode) n;
+  }
+
+  @Override
+  public void setText(String text) {
+    token.setText(text);
+  }
+  
+  @Override
+  public void setType(int type) {
+    token.setType(type);
+  }
+
+  @Override
+  public boolean equals(AST t) { // NOSONAR
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public String toStringList() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public String toStringTree() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean equalsList(AST t) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean equalsListPartial(AST sub) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean equalsTree(AST t) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean equalsTreePartial(AST sub) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public ASTEnumeration findAll(AST target) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public ASTEnumeration findAllPartial(AST sub) {
+    throw new UnsupportedOperationException();
+  }
+
+  // ********************
+  // End of AST interface
+  // ********************
+
+  // Attributes from ProToken
+
+  /**
+   * Source number in the macro tree.
+   * 
+   * @see org.prorefactor.macrolevel.ListingParser#sourceArray()
+   */
+  public int getSourceNum() {
+    return token.getMacroSourceNum();
+  }
+
+  public int getEndLine() {
+    return token.getEndLine();
+  }
+
+  public int getEndColumn() {
+    return token.getEndColumn();
+  }
+
+  public String getFilename() {
+    return token.getFilename();
+  }
+
+  public int getFileIndex() {
+    return token.getFileIndex();
+  }
+
+  public int getEndFileIndex() {
+    return token.getEndFileIndex();
+  }
+
+  public ProToken getHiddenAfter() {
+    return (ProToken) token.getHiddenAfter();
+  }
+
+  public ProToken getHiddenBefore() {
+    return (ProToken) token.getHiddenBefore();
+  }
+
+
+  public String getAnalyzeSuspend() {
+    return token.getAnalyzeSuspend();
+  }
+
+  // ******************
+  // Navigation methods
+  // ******************
+
+  public JPNode getParent() {
+    return up;
+  }
+
+  /**
+   * @return Previous sibling in line before this one
+   */
+  public JPNode getPreviousSibling() {
+    return left;
+  }
+
+  /**
+   * First Natural Child is found by repeating firstChild() until a natural node is found. If the start node is a
+   * natural node, then it is returned.
+   * 
+   * @see NodeTypes#isNatural(int)
+   */
+  public JPNode firstNaturalChild() {
+    if (NodeTypes.isNatural(getType()))
+      return this;
+    for (JPNode n = down; n != null; n = n.down) {
+      if (NodeTypes.isNatural(n.getType()))
+        return n;
+    }
+    return null;
+  }
+
+  /** 
+   * @return Last child of the last child of the...
+   */
+  public JPNode getLastDescendant() {
+    if (down == null)
+      return this;
+    JPNode node = down;
+    while (node.right != null) {
+      node = node.right;
+    }
+    return node.getLastDescendant();
+  }
+
+  /**
+   * @return First child if there is one, otherwise next sibling
+   */
+  public JPNode nextNode() {
+    return (down == null ? right : down);
+  }
+
+  /** 
+   * @return Previous sibling if there is one, otherwise parent
+   */
+  public JPNode getPreviousNode() {
+    return (left == null ? up : left);
+  }
+
+  // *************************
+  // End of navigation methods
+  // *************************
+
+  // ***************
+  // Various queries
+  // ***************
+
+  /** Get an ArrayList of the direct children of this node. */
+  public List<JPNode> getDirectChildren() {
+    List<JPNode> ret = new ArrayList<>();
+    JPNode n = getFirstChild();
+    while (n != null) {
+      ret.add(n);
+      n = n.getNextSibling();
     }
     return ret;
   }
+
+  /**
+   * Get an array of all descendant nodes (including this node) of a given type
+   */
+  public List<JPNode> query(Integer... findTypes) {
+    JPNodeQuery query = new JPNodeQuery(findTypes);
+    walk(query);
+
+    return query.getResult();
+  }
+
+  /**
+   * Get an array of all descendant nodes (including this node) of a given type
+   */
+  public List<JPNode> queryMainFile(Integer... findTypes) {
+    JPNodeQuery query = new JPNodeQuery(false, true, findTypes);
+    walk(query);
+
+    return query.getResult();
+  }
+
+  /**
+   * Get an array of all descendant nodes (including this node) of a given type
+   */
+  public List<JPNode> queryStateHead(Integer... findTypes) {
+    JPNodeQuery query = new JPNodeQuery(true, findTypes);
+    walk(query);
+
+    return query.getResult();
+  }
+
+  /**
+   * Get an array of all descendant nodes (including this node) of a given type
+   */
+  public List<JPNode> queryStateHeadInMainFile(Integer... findTypes) {
+    JPNodeQuery query = new JPNodeQuery(true, true, findTypes);
+    walk(query);
+
+    return query.getResult();
+  }
+
+  /** Find the first hidden token after this node's last descendant. */
+  public ProToken findFirstHiddenAfterLastDescendant() {
+    // There's no direct way to get a "hidden after" token,
+    // so to find the hidden tokens after the current node's last
+    // descendant, we find the next sibling of the current node,
+    // find the first "natural" descendant of it (if it is not
+    // itself natural), and then get its first hidden token.
+    JPNode nextNatural = getNextSibling();
+    if (nextNatural == null)
+      return null;
+    if (nextNatural.getType() != NodeTypes.Program_tail) {
+      nextNatural = nextNatural.firstNaturalChild();
+      if (nextNatural == null)
+        return null;
+    }
+    return nextNatural.getHiddenFirst();
+  }
+
+
+  /** Find the first direct child with a given node type. */
+  public JPNode findDirectChild(int nodeType) {
+    for (JPNode node = down; node != null; node = node.getNextSibling()) {
+      if (node.getType() == nodeType)
+        return node;
+    }
+    return null;
+  }
+
+  // *****************************
+  // Various attributes management
+  // *****************************
 
   public int attrGet(int key) {
     if ((attrMap != null) && attrMap.containsKey(key)) {
@@ -219,6 +553,68 @@ public class JPNode extends BaseAST {
     attrSet(IConstants.OPERATOR, IConstants.TRUE);
   }
 
+  /**
+   * Get a link to an arbitrary object. Integers from -200 through -499 are reserved for Joanju.
+   */
+  public Object getLink(Integer key) {
+    if (linkMap == null)
+      return null;
+    return linkMap.get(key);
+  }
+
+  /** If this AST was constructed from another, then get the original. */
+  public JPNode getOriginal() {
+    if (linkMap == null)
+      return null;
+    return (JPNode) linkMap.get(IConstants.ORIGINAL);
+  }
+
+  public int getState2() {
+    return attrGet(IConstants.STATE2);
+  }
+
+  /** Some nodes like RUN, USER_FUNC, LOCAL_METHOD_REF have a Call object linked to them by TreeParser01. */
+  public Call getCall() {
+    return (Call) getLink(IConstants.CALL);
+  }
+
+  /** Mark a node as a "statement head" */
+  public void setStatementHead() {
+    attrSet(IConstants.STATEHEAD, IConstants.TRUE);
+  }
+
+  /** Mark a node as a "statement head" */
+  public void setStatementHead(int state2) {
+    attrSet(IConstants.STATEHEAD, IConstants.TRUE);
+    if (state2 != 0)
+      attrSet(IConstants.STATE2, state2);
+  }
+
+  /** Certain nodes will have a link to a Symbol, set by TreeParser01. */
+  public Symbol getSymbol() {
+    return (Symbol) getLink(IConstants.SYMBOL);
+  }
+
+  private static Integer attrEq(String attrName) {
+    return attrStrEqs.inverse().get(attrName);
+  }
+
+  private static String attrEq(int attrNum) {
+    return attrStrEqs.get(attrNum);
+  }
+
+  public boolean hasTableBuffer() {
+    return getLink(IConstants.SYMBOL) != null;
+  }
+
+  public boolean hasBufferScope() {
+    return getLink(IConstants.BUFFERSCOPE) != null;
+  }
+
+  public boolean hasBlock() {
+    return getLink(IConstants.BLOCK) != null;
+  }
+
   public boolean hasProparseDirective(String directive) {
     ProToken tok = getHiddenBefore();
     while (tok != null) {
@@ -237,112 +633,20 @@ public class JPNode extends BaseAST {
     // If token has been generated by the parser (ie synthetic token), then we look for hidden token attached to the
     // first child
     if (token.isSynthetic()) {
-      JPNode child = firstChild();
+      JPNode child = down;
       if ((child != null) && (child.hasProparseDirective(directive))) {
         return true;
       }
       // And for synthetic ASSIGN statements, we have to look for the first grandchild
       // See root node of assignstate2
       if ((child != null) && (token.getType() == NodeTypes.ASSIGN)) {
-        child = child.firstChild();
+        child = child.getFirstChild();
         if ((child != null) && child.hasProparseDirective(directive))
           return true;
       }
     }
 
     return false;
-  }
-
-  public static void finalizeTrailingHidden(JPNode root) {
-    /*
-     * The node passed in should be the Program_root. The last child of the Program_root should be the Program_tail, as
-     * set by the parser. (See propar.g) We want to find the last descendant of the last child before Program_tail, and
-     * then set up Program_tail with that node's hiddenAfter. Program_tail is the holder node for any trailing hidden
-     * tokens. This function will have to change slightly if we change the layout of hidden tokens.
-     */
-    JPNode tailNode = root.firstChild();
-    if (tailNode == null || tailNode.getType() == NodeTypes.Program_tail)
-      return;
-    JPNode lastNode = tailNode;
-    while (tailNode != null && tailNode.getType() != NodeTypes.Program_tail) {
-      lastNode = tailNode;
-      tailNode = tailNode.nextSibling();
-    }
-    if (tailNode == null || tailNode.getType() != NodeTypes.Program_tail)
-      return;
-    lastNode = getLastDescendant(lastNode);
-    ProToken lastT = lastNode.getHiddenAfter();
-    ProToken tempT = lastT;
-    while (tempT != null) {
-      lastT = tempT;
-      tempT = (ProToken) tempT.getHiddenAfter();
-    }
-    tailNode.setHiddenBefore(lastT);
-  }
-
-  /** Find the first hidden token after this node's last descendant. */
-  public ProToken findFirstHiddenAfterLastDescendant() {
-    // There's no direct way to get a "hidden after" token,
-    // so to find the hidden tokens after the current node's last
-    // descendant, we find the next sibling of the current node,
-    // find the first "natural" descendant of it (if it is not
-    // itself natural), and then get its first hidden token.
-    JPNode nextNatural = nextSibling();
-    if (nextNatural == null)
-      return null;
-    if (nextNatural.getType() != NodeTypes.Program_tail) {
-      nextNatural = nextNatural.firstNaturalChild();
-      if (nextNatural == null)
-        return null;
-    }
-    return nextNatural.getHiddenFirst();
-  }
-
-  public JPNode firstChild() {
-    return (JPNode) down;
-  }
-
-  /** Find the first direct child with a given node type. */
-  public JPNode findDirectChild(int nodeType) {
-    for (JPNode node = firstChild(); node != null; node = node.nextSibling()) {
-      if (node.getType() == nodeType)
-        return node;
-    }
-    return null;
-  }
-
-  /**
-   * First Natural Child is found by repeating firstChild() until a natural node is found. If the start node is a
-   * natural node, then it is returned. Note: This is very different than Prolint's "NextNaturalNode" in lintsuper.p.
-   * 
-   * @see NodeTypes#isNatural(int)
-   */
-  public JPNode firstNaturalChild() {
-    if (NodeTypes.isNatural(getType()))
-      return this;
-    for (JPNode n = firstChild(); n != null; n = n.firstChild()) {
-      if (NodeTypes.isNatural(n.getType()))
-        return n;
-    }
-    return null;
-  }
-
-  /** Some nodes like RUN, USER_FUNC, LOCAL_METHOD_REF have a Call object linked to them by TreeParser01. */
-  public Call getCall() {
-    return (Call) getLink(IConstants.CALL);
-  }
-
-  @Override
-  public int getColumn() {
-    return token.getColumn();
-  }
-
-  public int getEndColumn() {
-    return token.getEndColumn();
-  }
-
-  public String getAnalyzeSuspend() {
-    return token.getAnalyzeSuspend();
   }
 
   /**
@@ -378,25 +682,6 @@ public class JPNode extends BaseAST {
     return hasComment ? buff.toString() : null;
   }
 
-  /** Get an ArrayList of the direct children of this node. */
-  public List<JPNode> getDirectChildren() {
-    List<JPNode> ret = new ArrayList<>();
-    JPNode n = this.firstChild();
-    while (n != null) {
-      ret.add(n);
-      n = n.nextSibling();
-    }
-    return ret;
-  }
-
-  /** This variant is primarily for ease of use from ABL. */
-  public JPNode[] getDirectChildrenArray() {
-    List<JPNode> list = getDirectChildren();
-    JPNode[] ret = new JPNode[list.size()];
-    list.toArray(ret);
-    return ret;
-  }
-
   /**
    * Get the FieldContainer (Frame or Browse) for a statement head node or a frame field reference. This value is set by
    * TreeParser01. Head nodes for statements with the [WITH FRAME | WITH BROWSE] option have this value set. Is also
@@ -404,26 +689,6 @@ public class JPNode extends BaseAST {
    */
   public FieldContainer getFieldContainer() {
     return (FieldContainer) getLink(IConstants.FIELD_CONTAINER);
-  }
-
-  public String getFilename() {
-    return token.getFilename();
-  }
-
-  public int getFileIndex() {
-    return token.getFileIndex();
-  }
-
-  public int getEndFileIndex() {
-    return token.getEndFileIndex();
-  }
-
-  public ProToken getHiddenAfter() {
-    return (ProToken) token.getHiddenAfter();
-  }
-
-  public ProToken getHiddenBefore() {
-    return (ProToken) token.getHiddenBefore();
   }
 
   public ProToken getHiddenFirst() {
@@ -451,75 +716,15 @@ public class JPNode extends BaseAST {
     return ret;
   }
 
-  /** Find the last child of the last child of the... */
-  public static JPNode getLastDescendant(JPNode top) {
-    JPNode child = top.firstChild();
-    if (child == null)
-      return top;
-    JPNode temp = child;
-    while (temp != null) {
-      child = temp;
-      temp = temp.nextSibling();
-    }
-    return getLastDescendant(child);
-  }
-
-  @Override
-  public int getLine() {
-    return token.getLine();
-  }
-
-  public int getEndLine() {
-    return token.getEndLine();
-  }
-
-  /**
-   * Get a link to an arbitrary object. Integers from -200 through -499 are reserved for Joanju.
-   */
-  public Object getLink(Integer key) {
-    if (linkMap == null)
-      return null;
-    return linkMap.get(key);
-  }
-
-  /** If this AST was constructed from another, then get the original. */
-  public JPNode getOriginal() {
-    if (linkMap == null)
-      return null;
-    return (JPNode) linkMap.get(IConstants.ORIGINAL);
-  }
-
-  /** Return int[3] of nodes file/line/col. */
-  public int[] getPos() {
-    return new int[] {getFileIndex(), getLine(), getColumn()};
-  }
-
-  /**
-   * Source number in the macro tree.
-   * 
-   * @see org.prorefactor.macrolevel.ListingParser#sourceArray()
-   */
-  public int getSourceNum() {
-    return token.getMacroSourceNum();
-  }
-
-  public int getState2() {
-    return attrGet(IConstants.STATE2);
-  }
-
   /** Return self if statehead, otherwise returns enclosing statehead. */
   public JPNode getStatement() {
     JPNode n = this;
     while (n != null && !n.isStateHead()) {
-      n = n.parent();
+      n = n.getParent();
     }
     return n;
   }
 
-  /** Certain nodes will have a link to a Symbol, set by TreeParser01. */
-  public Symbol getSymbol() {
-    return (Symbol) getLink(IConstants.SYMBOL);
-  }
 
   /**
    * @return The full name of the annotation, or an empty string is node is not an annotation
@@ -528,42 +733,16 @@ public class JPNode extends BaseAST {
     if (getType() != NodeTypes.ANNOTATION)
       return "";
     StringBuilder annName = new StringBuilder(token.getText().substring(1));
-    JPNode tok = firstChild();
+    JPNode tok = down;
     while ((tok != null) && (tok.getType() != NodeTypes.PERIOD) && (tok.getType() != NodeTypes.LEFTPAREN)) {
       annName.append(tok.getText());
-      tok = (JPNode) tok.getNextSibling();
+      tok = tok.getNextSibling();
     }
 
     return annName.toString();
   }
 
-  @Override
-  public String getText() {
-    return token.getText();
-  }
 
-  @Override
-  public int getType() {
-    return token.getType();
-  }
-
-  @Override
-  public void initialize(int t, String txt) {
-    setType(t);
-    setText(txt);
-  }
-
-  @Override
-  public void initialize(AST t) {
-    setType(t.getType());
-    setText(t.getText());
-  }
-
-  @Override
-  public void initialize(Token t) {
-    this.token = (ProToken) t;
-    super.setType(t.getType());
-  }
 
   private void initAttrMap() {
     if (attrMap == null) {
@@ -595,107 +774,6 @@ public class JPNode extends BaseAST {
     return attrGet(IConstants.STATEHEAD) == IConstants.TRUE;
   }
 
-  /** Return the last immediate child (no grandchildren). */
-  public JPNode lastChild() {
-    JPNode ret = firstChild();
-    if (ret == null)
-      return null;
-    while (ret.nextSibling() != null)
-      ret = ret.nextSibling();
-    return ret;
-  }
-
-  public JPNode lastDescendant() {
-    JPNode ret = lastChild();
-    for (JPNode temp = ret; temp != null; temp = ret.lastChild()) {
-      ret = temp;
-    }
-    return ret;
-  }
-
-  /** First child if there is one, otherwise next sibling. */
-  public JPNode nextNode() {
-    if (firstChild() != null)
-      return firstChild();
-    return nextSibling();
-  }
-
-  public JPNode nextSibling() {
-    return (JPNode) right;
-  }
-
-  @Deprecated
-  public JPNode parent() {
-    return getParent();
-  }
-
-  public JPNode getParent() {
-    return up;
-  }
-
-  /** Previous sibling if there is one, otherwise parent. */
-  public JPNode prevNode() {
-    if (up == null)
-      return null;
-    JPNode n = parent().firstChild();
-    if (n == null || n == this)
-      return up;
-    while (n != null) {
-      if (n.nextSibling() == this)
-        return n;
-      n = n.nextSibling();
-    }
-    throw new AssertionError("JPNode.prevNode() failed - corrupt tree?");
-  }
-
-  public JPNode prevSibling() {
-    return left;
-  }
-
-  /**
-   * Get an array of all descendant nodes (including this node) of a given type
-   */
-  public List<JPNode> query(Integer... findTypes) {
-    JPNodeQuery query = new JPNodeQuery(findTypes);
-    walk(query);
-
-    return query.getResult();
-  }
-
-  /**
-   * Get an array of all descendant nodes (including this node) of a given type
-   */
-  public List<JPNode> queryMainFile(Integer... findTypes) {
-    JPNodeQuery query = new JPNodeQuery(false, true, findTypes);
-    walk(query);
-
-    return query.getResult();
-  }
-
-  /**
-   * Get an array of all descendant nodes (including this node) of a given type
-   */
-  public List<JPNode> queryStateHead(Integer... findTypes) {
-    JPNodeQuery query = new JPNodeQuery(true, findTypes);
-    walk(query);
-
-    return query.getResult();
-  }
-
-  /**
-   * Get an array of all descendant nodes (including this node) of a given type
-   */
-  public List<JPNode> queryStateHeadInMainFile(Integer... findTypes) {
-    JPNodeQuery query = new JPNodeQuery(true, true, findTypes);
-    walk(query);
-
-    return query.getResult();
-  }
-
-  /** This variant is primarily for ease of use from ABL. */
-  public JPNode[] query(String typeName) {
-    return query(NodeTypes.getTypeNum(typeName)).toArray(new JPNode[] {});
-  }
 
   /** Some nodes like RUN, USER_FUNC, LOCAL_METHOD_REF have a Call object linked to them by TreeParser01. */
   public void setCall(Call call) {
@@ -711,10 +789,6 @@ public class JPNode extends BaseAST {
     setLink(IConstants.COMMENTS, comments);
   }
 
-  void setDown(JPNode down) {
-    this.down = down;
-  }
-
   /** @see #getFieldContainer() */
   public void setFieldContainer(FieldContainer fieldContainer) {
     setLink(IConstants.FIELD_CONTAINER, fieldContainer);
@@ -727,27 +801,9 @@ public class JPNode extends BaseAST {
     linkMap.put(key, value);
   }
 
-  public void setParent(JPNode parent) {
-    this.up = parent;
-  }
-
-  public void setParentInChildren() {
-    for (JPNode child = firstChild(); child != null; child = child.nextSibling()) {
-      child.up = this;
-    }
-  }
-
-  void setRight(JPNode right) {
-    this.right = right;
-  }
-
   /** Assigned by the tree parser. */
   public void setSymbol(Symbol symbol) {
     setLink(IConstants.SYMBOL, symbol);
-  }
-
-  public void setFirstChild(JPNode child) {
-    down = child;
   }
 
   public void copyHiddenAfter(JPNode to) {
@@ -766,53 +822,13 @@ public class JPNode extends BaseAST {
     token.setHiddenBefore(t);
   }
 
-  public void setNextSibling(JPNode sibling) {
-    right = sibling;
-  }
-
-  public void setPrevSibling(JPNode n) {
-    left = n;
-  }
-
-  /** Mark a node as a "statement head" */
-  public void setStatementHead(int state2) {
-    attrSet(IConstants.STATEHEAD, IConstants.TRUE);
-    if (state2 != 0)
-      attrSet(IConstants.STATE2, state2);
-  }
-
   public void setNextSiblingWithLinks(AST n) {
     for (AST next = getNextSibling(); next != null; next = next.getNextSibling()) {
       ((JPNode) next).up = null;
     }
-    super.setNextSibling(n);
+    setNextSibling(n);
     for (AST next = getNextSibling(); next != null; next = next.getNextSibling()) {
       ((JPNode) next).up = this.up;
-    }
-  }
-
-  @Override
-  public void setText(String text) {
-    token.setText(text);
-  }
-
-  @Override
-  public void setType(int type) {
-    token.setType(type);
-  }
-
-  /**
-   * Set parent and prevSibling links
-   */
-  public void backLink() {
-    JPNode currNode = firstChild();
-    while (currNode != null) {
-      currNode.setParent(this);
-      currNode.backLink();
-      JPNode nextNode = currNode.nextSibling();
-      if (nextNode != null)
-        nextNode.setPrevSibling(currNode);
-      currNode = nextNode;
     }
   }
 
@@ -857,24 +873,15 @@ public class JPNode extends BaseAST {
     }
   }
 
-  private static Integer attrEq(String attrName) {
-    return attrStrEqs.inverse().get(attrName);
+  public String allLeadingHiddenText() {
+    String ret = "";
+    ProToken t = getHiddenFirst();
+    while (t != null) {
+      ret += t.getText();
+      t = (ProToken) t.getHiddenAfter();
+    }
+    return ret;
   }
 
-  private static String attrEq(int attrNum) {
-    return attrStrEqs.get(attrNum);
-  }
-
-  public boolean hasTableBuffer() {
-    return getLink(IConstants.SYMBOL) != null;
-  }
-
-  public boolean hasBufferScope() {
-    return getLink(IConstants.BUFFERSCOPE) != null;
-  }
-
-  public boolean hasBlock() {
-    return getLink(IConstants.BLOCK) != null;
-  }
 
 }

@@ -108,14 +108,14 @@ public class ParserSupport {
   }
 
   void defineClass(JPNode classNode) {
-    JPNode idNode = classNode.firstChild();
+    JPNode idNode = classNode.getFirstChild();
     className = ClassFinder.dequote(idNode.getText());
     unitScope.attachTypeInfo(session.getTypeInfo(className));
   }
 
   void defInterface(JPNode interfaceNode) {
     unitIsInterface = true;
-    className = ClassFinder.dequote(interfaceNode.firstChild().getText());
+    className = ClassFinder.dequote(interfaceNode.getFirstChild().getText());
   }
 
   void defMethod(JPNode idNode) {
@@ -151,18 +151,18 @@ public class ParserSupport {
 
   void filenameMerge(JPNode node) {
     JPNode currNode = node;
-    JPNode nextNode = node.nextSibling();
+    JPNode nextNode = node.getNextSibling();
     while (nextNode != null) {
       if (currNode.getType() == NodeTypes.FILENAME && nextNode.getType() == NodeTypes.FILENAME
           && nextNode.getHiddenBefore() == null) {
         currNode.setHiddenAfter(nextNode.getHiddenAfter());
         currNode.setText(currNode.getText() + nextNode.getText());
-        currNode.setNextSibling(nextNode.nextSibling());
-        nextNode = currNode.nextSibling();
+        currNode.setNextSibling(nextNode.getNextSibling());
+        nextNode = currNode.getNextSibling();
         continue;
       }
-      currNode = currNode.nextSibling();
-      nextNode = currNode.nextSibling();
+      currNode = currNode.getNextSibling();
+      nextNode = currNode.getNextSibling();
     }
   }
 

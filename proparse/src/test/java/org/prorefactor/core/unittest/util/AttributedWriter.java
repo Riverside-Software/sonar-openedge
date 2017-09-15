@@ -90,15 +90,15 @@ public class AttributedWriter {
     if (node == null)
       return;
     if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
-      walker(node.firstChild(), false);
+      walker(node.getFirstChild(), false);
       writeNode(node);
-      walker(node.firstChild().nextSibling(), true);
+      walker(node.getFirstChild().getNextSibling(), true);
     } else {
       writeNode(node);
-      walker(node.firstChild(), true);
+      walker(node.getFirstChild(), true);
     }
     if (showSiblings)
-      walker(node.nextSibling(), true);
+      walker(node.getNextSibling(), true);
   }
 
   /**

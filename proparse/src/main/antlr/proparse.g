@@ -7,6 +7,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - anything implemented after 2015
  */ 
 
 header {
@@ -91,6 +92,11 @@ options {
   }
 
   /** Mark a node as a "statement head" */
+  void sthd(JPNode n) {
+    n.setStatementHead(0);
+  }
+
+  /** Mark a node as a "statement head" */
   void sthd(JPNode n, int state2) {
     n.setStatementHead(state2);
   }
@@ -117,13 +123,13 @@ code_block:
   ;
 
 blockorstate:
-    (  // Method calls and other expressions can stand alone as statements.
+    ( // Method calls and other expressions can stand alone as statements.
       // Many functions are ambiguous with statements on the first few tokens.
       // The order listed here is important.
       // Check on assignment before statement. Something like <empty = 1.> would
       // otherwise take us into the EMPTY TEMPTABLE statement, and then barf when
       // we don't get a TEMPTABLE token.
-      options{greedy=true; generateAmbigWarnings=false;}
+       options { greedy=true; generateAmbigWarnings=false; }
     :  PERIOD
     |  annotation
     |  dot_comment // ".anything" is a dotcomment if it's where a statement would fit.
@@ -134,15 +140,15 @@ blockorstate:
     |  (widattr EQUAL) => assignstate4
     |  (field EQUAL) => assignstate2
     |  // Anything followed by an OBJCOLON is going to be an expression statement.
-      // We have to disambiguate, for example, THIS-OBJECT:whatever from the THIS-OBJECT statement.
-      // (I don't know why the lookahead didn't take care of that.)
-      (. OBJCOLON) => expression_statement
+       // We have to disambiguate, for example, THIS-OBJECT:whatever from the THIS-OBJECT statement.
+       // (I don't know why the lookahead didn't take care of that.)
+       (. OBJCOLON) => expression_statement
     |  // Any possible identifier followed by a parameterlist is assumed to be a function or method call.
-      // Method names that are reserved keywords must be prefixed with an object reference or THIS-OBJECT,
-      // so we don't have to worry about reserved keyword method names here.
-      // We might not know what all the method names are due to inheritance from .r files
-      // (no source code available, like progress.lang.*).
-      (identifier parameterlist_noroot) => expression_statement
+       // Method names that are reserved keywords must be prefixed with an object reference or THIS-OBJECT,
+       // so we don't have to worry about reserved keyword method names here.
+       // We might not know what all the method names are due to inheritance from .r files
+       // (no source code available, like progress.lang.*).
+       (identifier parameterlist_noroot) => expression_statement
     |  statement
     |  expression_statement
     )
@@ -172,7 +178,7 @@ dot_comment { /* RULE_INIT */ String dotText = ""; }:
   ;
 
 expression_statement:
-    expression (NOERROR_KW)? state_end {## = #([Expr_statement], ##); sthd(##,0);}
+    expression (NOERROR_KW)? state_end {## = #([Expr_statement], ##); sthd(##);}
   ;
 
 labeled_block:
@@ -198,7 +204,7 @@ block_for:
   ;
 
 block_opt:
-    (field EQUAL) => field EQUAL expression TO expression (options{greedy=true;}: BY constant)? {##=#([Block_iterator],##);}
+     (field EQUAL) => field EQUAL expression TO expression (options{greedy=true;}: BY constant)? {##=#([Block_iterator],##);}
   |  querytuningphrase 
   |  WHILE^ expression 
   |  TRANSACTION
@@ -208,9 +214,8 @@ block_opt:
   |  BREAK
   |  by_expr
   |  collatephrase
-  |  // weird. Couldn't find GROUP BY in the docs, and couldn't even figure
-    // out how it gets through PSC's parser.
-    GROUP^ (options{greedy=true;}: by_expr)+
+  |  // weird. Couldn't find GROUP BY in the docs, and couldn't even figure out how it gets through PSC's parser.
+     GROUP^ (options{greedy=true;}: by_expr)+
   ;
 
 block_preselect:
@@ -410,25 +415,22 @@ pseudfn:
 // maximumfunc or minimumfunc. Judy
 // ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
 builtinfunc:
-    ACCUMULATE^ accum_what 
-    (  (by_expr expression)=> by_expr expression
-    |  expression
-    )
+     ACCUMULATE^ accum_what ( ( by_expr expression ) => by_expr expression | expression )
   |  ADDINTERVAL^ LEFTPAREN expression COMMA expression COMMA expression RIGHTPAREN
   |  AUDITENABLED^ LEFTPAREN (expression)? RIGHTPAREN
-  |  (AVG LEFTPAREN)=> sqlaggregatefunc  
+  |  (AVG LEFTPAREN) => sqlaggregatefunc  
   |  CANFIND^<AST=BlockNode> LEFTPAREN (options{greedy=true;}: findwhich)? recordphrase RIGHTPAREN
   |  CAST^ LEFTPAREN expression COMMA type_name RIGHTPAREN
-  |  (COUNT LEFTPAREN)=> sqlaggregatefunc
+  |  (COUNT LEFTPAREN) => sqlaggregatefunc
   |  currentvaluefunc // is also a pseudfn.
   |  dynamiccurrentvaluefunc // is also a pseudfn.
   |  DYNAMICFUNCTION^ LEFTPAREN expression (in_expr)? (COMMA parameter)* RIGHTPAREN (options{greedy=true;}: NOERROR_KW)?
   |  DYNAMICINVOKE^
-    LEFTPAREN
-    ( (exprt)=>exprt | type_name )
-    COMMA expression
-    (COMMA parameter)*
-    RIGHTPAREN
+       LEFTPAREN
+       ( (exprt)=>exprt | type_name )
+       COMMA expression
+       (COMMA parameter)*
+       RIGHTPAREN
   // ENTERED and NOTENTERED are only dealt with as part of an expression term. See: exprt.
   |  entryfunc // is also a pseudfn.
   |  ETIME_KW^ funargs  // also noarg
@@ -448,7 +450,6 @@ builtinfunc:
   |  (SUM LEFTPAREN)=> sqlaggregatefunc
   |  MTIME^ funargs  // also noarg
   |  nextvaluefunc // is also a pseudfn.
-    // ENTERED and NOTENTERED are only dealt with as part of an expression term. See: exprt.
   |  PAGENUMBER^ LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  PAGESIZE_KW^ LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  PROVERSION^ LEFTPAREN expression RIGHTPAREN
@@ -460,7 +461,7 @@ builtinfunc:
   |  TENANTNAME^ LEFTPAREN (expression)? RIGHTPAREN
   |  TIMEZONE^ funargs  // also noarg
   |  TYPEOF^ LEFTPAREN expression COMMA type_name RIGHTPAREN
-  | GETCLASS^ LEFTPAREN type_name RIGHTPAREN
+  |  GETCLASS^ LEFTPAREN type_name RIGHTPAREN
   |  (USERID^|USER^) funargs  // also noarg
   |  argfunc
   |  optargfunc
@@ -814,7 +815,8 @@ notExpression:
 
 relationalExpression:
      additiveExpression
-    (options{greedy=true;}:   (  MATCHES^
+    (options{greedy=true;}:   
+      (  MATCHES^
       |  BEGINS^
       |  CONTAINS^
       |  e1:EQUAL^ {#e1.setType(EQ);}  | EQ^
@@ -864,17 +866,14 @@ unaryExpression:
 exprt:
     (NORETURNVALUE s_widget attr_colon)=> NORETURNVALUE s_widget attr_colon {##=#([Widget_ref],##);}
   |  // Widget attributes has to be checked before field or func, because they can be ambiguous
-    // up to the OBJCOLON. Think about no-arg functions like SUPER.
-    // Also has to be checked before systemhandlename, because you want to pick up all
-    // of FILE-INFO:FILE-TYPE rather than just FILE-INFO, for example.
-    (widname (OBJCOLON|DOUBLECOLON))=> widname attr_colon {##=#([Widget_ref],##);}
+     // up to the OBJCOLON. Think about no-arg functions like SUPER.
+     // Also has to be checked before systemhandlename, because you want to pick up all
+     // of FILE-INFO:FILE-TYPE rather than just FILE-INFO, for example.
+     (widname (OBJCOLON|DOUBLECOLON)) => widname attr_colon {##=#([Widget_ref],##);}
   | exprt2 (options{greedy=true;}:  attr_colon {##=#([Widget_ref],##);} )?
   ;
 
-exprt2
-{  int ntype = 0;
-
-}:
+exprt2 { /* RULE_INIT */ int ntype = 0; }:
      LEFTPAREN^ expression RIGHTPAREN
   |  // isMethodOrFunc returns zero, and the assignment evaluates to false, if
     // the identifier cannot be resolved to a method or user function name.
@@ -882,13 +881,13 @@ exprt2
     // or USER_FUNC.
     // Methods take precedent over built-in functions. The compiler (10.2b) 
     // does not seem to try recognize by function/method signature.
-    ( {(ntype = support.isMethodOrFunc(LT(1).getText())) != 0}? identifier LEFTPAREN)=>
+    ( { /* RULE_LOGIC */ (ntype = support.isMethodOrFunc(LT(1).getText())) != 0}? identifier LEFTPAREN)=>
       fname:identifier!
       {  #fname.setType(ntype);
         astFactory.makeASTRoot(currentAST, #fname);
       }
     parameterlist_noroot
-  |  (NEW type_name LEFTPAREN)=> NEW^ type_name parameterlist
+  |  (NEW type_name LEFTPAREN) => NEW^ type_name parameterlist
   |  // Have to predicate all of builtinfunc, because it can be ambiguous with method call.
     (builtinfunc)=> builtinfunc
   |  // We are going to have lots of cases where we are inheriting methods
@@ -896,7 +895,7 @@ exprt2
     // point in expression evaluation, if we have anything followed by a left-paren,
     // we're going to assume it's a method call.
     // Method names which are reserved keywords must be prefixed with THIS-OBJECT:.
-    ({support.isClass() && !support.isInDynamicNew()}? identifier LEFTPAREN)=>
+    ({ /* RULE_INIT */support.isClass() && !support.isInDynamicNew()}? identifier LEFTPAREN)=>
       methodname:identifier!
       {  #methodname.setType(LOCAL_METHOD_REF);
         astFactory.makeASTRoot(currentAST, #methodname);
@@ -913,7 +912,7 @@ exprt2
 widattr:
      (widname (OBJCOLON|DOUBLECOLON))=> widname attr_colon {##=#([Widget_ref],##);}
   |  (exprt2 (OBJCOLON|DOUBLECOLON))=> exprt2 attr_colon {##=#([Widget_ref],##);}
-  |  // empty alternative (pseudo hoisting)
+  |  // Empty alternative (pseudo hoisting) - TODO Why???
   ;
 
 attr_colon:
@@ -998,18 +997,18 @@ field_frame_or_browse:
 
 array_subscript:
     LEFTBRACE expression (FOR expression)? RIGHTBRACE
-    {##=#([Array_subscript],##);}
+    { ##=#([Array_subscript],##); }
   ;
 
 method_param_list:
     LEFTPAREN (options{greedy=true;}: parameter)? (options{greedy=true;}: COMMA (options{greedy=true;}: parameter)?)* RIGHTPAREN
-    {##=#([Method_param_list],##);}
+    { ##=#([Method_param_list],##); }
   ;
 
 inuic:
     (IN_KW (MENU|FRAME|BROWSE|SUBMENU|BUFFER) widgetname)
     => IN_KW^ (MENU|FRAME|BROWSE|SUBMENU|BUFFER) widgetname
-  |  // empty alternative (pseudo hoisting)
+  |  // empty alternative (pseudo hoisting) TODO Why ??
   ;
 
 var_rec_field:
@@ -1071,9 +1070,9 @@ record
 
 blocklabel:
   // Block labels can begin with [#|$|%], which are picked up as FILENAME by the lexer.
-    { LT(1).getType() != NodeTypes.FINALLY }?
-     (identifier|FILENAME)
-     {#blocklabel.setType(BLOCK_LABEL);}
+    { /* RULE_PREDICATE */ LT(1).getType() != NodeTypes.FINALLY }?
+     ( identifier | FILENAME )
+     { #blocklabel.setType(BLOCK_LABEL); }
   ;
 
 cursorname:
@@ -1097,27 +1096,27 @@ widgetname:
   ;
 
 identifier:
-// identifier gets us an ID node for an unqualified (local) reference.
-// Only an ID or unreservedkeyword can be used as an unqualified reference.
-// Reserved keywords as names can be referenced if they are prefixed with
-// an object handle or THIS-OBJECT.
-    ID | urkw:unreservedkeyword {#urkw.setType(ID);}
+    // identifier gets us an ID node for an unqualified (local) reference.
+    // Only an ID or unreservedkeyword can be used as an unqualified reference.
+    // Reserved keywords as names can be referenced if they are prefixed with
+    // an object handle or THIS-OBJECT.
+    ID | urkw:unreservedkeyword { #urkw.setType(ID); }
   ;
 
 new_identifier:
-// new_identifier gets us an ID node when naming (defining) a new named thing.
-// Reserved keywords can be used as names.
-    id:. {#id.setType(ID);}
+    // new_identifier gets us an ID node when naming (defining) a new named thing.
+    // Reserved keywords can be used as names.
+    id:. { #id.setType(ID); }
   ;
 
-filename { /* RULE_INIT */ String theText = ""; }:
-    t1:filename_part
-    {theText += #t1.getText();}
-    (options{greedy=true;}:   {!support.hasHiddenBefore(LT(1))}?
-      t2:filename_part! {theText += #t2.getText();}
+filename { /* RULE_INIT */ StringBuilder theText = new StringBuilder(); }:
+    t1:filename_part { theText.append(#t1.getText()); }
+    (options{greedy=true;}: { /* RULE_PREDICATE */ !support.hasHiddenBefore(LT(1))}?
+      t2:filename_part! { theText.append(#t2.getText()); }
     )*
-    {  #t1.setType(FILENAME);
-      #t1.setText(theText);
+    {
+      #t1.setType(FILENAME);
+      #t1.setText(theText.toString());
     }
   ;
 
@@ -1137,20 +1136,19 @@ type_name:
     { support.attrTypeNameLookup(##); }
   ;
 
-type_name2
-{String theText = "";}:
-    p1:type_name_part
-    {theText += #p1.getText();}
-    (options{greedy=true;}:   {!support.hasHiddenBefore(LT(1))}?
-      p2:type_name_part! {theText += #p2.getText();}
+type_name2 { /* RULE_INIT */ StringBuilder theText = new StringBuilder(); }:
+    p1:type_name_part { theText.append(#p1.getText()); }
+    ( options{greedy=true;}: { /* RULE_PREDICATE */ !support.hasHiddenBefore(LT(1)) }?
+      p2:type_name_part! { theText.append(#p2.getText()); }
     )*
-    {  #p1.setType(TYPE_NAME);
-      #p1.setText(theText);
+    { 
+      #p1.setType(TYPE_NAME);
+      #p1.setText(theText.toString());
     }
   ;
 
 type_name_predicate:
-    {!support.hasHiddenBefore(LT(2))}? type_name_part type_name_part
+    { /* RULE_PREDICATE */ !support.hasHiddenBefore(LT(2))}? type_name_part type_name_part
   ;
 
 type_name_part:
@@ -1159,8 +1157,8 @@ type_name_part:
   ;
 
 constant:
-  // These are necessarily reserved keywords.
-    TRUE_KW | FALSE_KW | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL_KW
+     // These are necessarily reserved keywords.
+     TRUE_KW | FALSE_KW | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL_KW
   |  NOWAIT | SHARELOCK | EXCLUSIVELOCK | NOLOCK
   |  BIGENDIAN
   |  FINDCASESENSITIVE | FINDGLOBAL | FINDNEXTOCCURRENCE | FINDPREVOCCURRENCE | FINDSELECT | FINDWRAPAROUND
@@ -1174,7 +1172,7 @@ constant:
   ;
 
 systemhandlename:
-// ## IMPORTANT ## If you change this list you also have to change NodeTypes.
+     // ## IMPORTANT ## If you change this list you also have to change NodeTypes.
      AAMEMORY | ACTIVEWINDOW | AUDITCONTROL | AUDITPOLICY | CLIPBOARD | CODEBASELOCATOR | COLORTABLE | COMPILER
   |  COMSELF | CURRENTWINDOW | DEBUGGER | DEFAULTWINDOW
   |  ERRORSTATUS | FILEINFORMATION | FOCUS | FONTTABLE | LASTEVENT | LOGMANAGER
@@ -1205,18 +1203,22 @@ non_punctuating:
 //////////////////////////////////////////////////////////////////////////////
 
 aatracestatement:
-    (AATRACE (OFF|ON))=> aatraceonoffstate
-  |  (AATRACE (stream_name_or_handle)? CLOSE)=> aatraceclosestate
-  |  (AATRACE (stream_name_or_handle)? (TO|FROM|THROUGH))=> aatracestate
+     (AATRACE ( OFF | ON )) => aatraceonoffstate
+  |  (AATRACE (stream_name_or_handle)? CLOSE) => aatraceclosestate
+  |  (AATRACE (stream_name_or_handle)? ( TO | FROM | THROUGH )) => aatracestate
   ;
 
 aatraceclosestate:
     AATRACE^ (stream_name_or_handle)? CLOSE state_end
-    {sthd(##,CLOSE);}
+    { ##.setStatementHead(CLOSE); }
   ;
 
 aatraceonoffstate:
-    AATRACE^ (OFF {sthd(##,OFF);} | aatrace_on {sthd(##,ON);}) state_end
+    AATRACE^
+    ( OFF { ##.setStatementHead(OFF); }
+    | aatrace_on { ##.setStatementHead(ON); }
+    )
+    state_end
   ;
 
 aatrace_on:
@@ -1224,8 +1226,8 @@ aatrace_on:
   ;
 
 aatracestate:
-    AATRACE^ (stream_name_or_handle)? (TO|FROM|THROUGH) io_phrase_state_end
-    {sthd(##,0);}
+    AATRACE^ (stream_name_or_handle)? ( TO | FROM | THROUGH ) io_phrase_state_end
+    { ##.setStatementHead(); }
   ;
 
 accum_what:
@@ -1234,17 +1236,17 @@ accum_what:
 
 accumulatestate:
     ACCUMULATE^ (display_item)* state_end
-    {sthd(##,0);}
+    { ##.setStatementHead(); }
   ;
 
 aggregatephrase:
     LEFTPAREN (options{greedy=true;}: aggregate_opt)+ (by_expr)* RIGHTPAREN
-    {## = #([Aggregate_phrase], ##);}
+    { ## = #([Aggregate_phrase], ##); }
   ;
 
 aggregate_opt:
     aw:accum_what!
-    {astFactory.makeASTRoot(currentAST, #aw);}
+    { astFactory.makeASTRoot(currentAST, #aw); }
     (label_constant)?
   ;
 
@@ -1257,7 +1259,7 @@ analyzestate:
     ANALYZE^ filenameorvalue filenameorvalue (analyzestate2)?
     (APPEND | ALL | NOERROR_KW)*
     state_end
-    {sthd(##,0);}
+    { ##.setStatementHead(); }
   ;
 
 analyzestate2:
@@ -1271,7 +1273,7 @@ annotation:
 applystate:
     // apply is not necessarily an IO statement. See the language ref.
     APPLY^ expression (applystate2)? state_end
-    {sthd(##,0);}
+    { ##.setStatementHead(); }
   ;
 
 applystate2:
@@ -1279,7 +1281,7 @@ applystate2:
   ;
 
 assign_opt:
-// Used in defining widgets - sets widget attributes
+    // Used in defining widgets - sets widget attributes
     ASSIGN^ (options{greedy=true;}: assign_opt2)+
   ;
 
@@ -1290,14 +1292,14 @@ assign_opt2:
 
 assignstate:
     ASSIGN^ assignment_list (NOERROR_KW)? state_end
-    {sthd(##,0);}
+    { ##.setStatementHead(); }
   ;
 
 assignment_list:
-    (record except_fields)=> record except_fields
+    (record except_fields) => record except_fields
   |  // We want to pick up record only if it can't be a variable name
-    (record (NOERROR_KW|PERIOD|EOF))=>
-      {LA(2)==NAMEDOT || (!(support.isVar(LT(1).getText())))}?
+    (record ( NOERROR_KW | PERIOD | EOF))=>
+      { /* RULE_PREDICATE */ LA(2)==NAMEDOT || (!(support.isVar(LT(1).getText())))}?
       record
   |  (  (assign_equal)=> assign_equal (when_exp)?
     |  assign_field (when_exp)?
@@ -1311,7 +1313,7 @@ assignstate2:
     {## = #([ASSIGN], ##);}
     (NOERROR_KW)?
     state_end
-    {sthd(##,0);}
+    { ##.setStatementHead(); }
   ;
 
 assignstate3:
@@ -1320,7 +1322,7 @@ assignstate3:
     {## = #([ASSIGN], ##);}
     (NOERROR_KW)?
     state_end
-    {sthd(##,0);}
+    { ##.setStatementHead(); }
   ;
 
 assignstate4:
@@ -1329,12 +1331,12 @@ assignstate4:
     {## = #([ASSIGN], ##);}
     (NOERROR_KW)?
     state_end
-    {sthd(##,0);}
+    { ##.setStatementHead(); }
   ;
 
 assign_equal:
-     (pseudfn)=> pseudfn e1:EQUAL^ expression { #e1.setOperator(); }
-  |  (widattr)=> widattr e3:EQUAL^ expression { #e3.setOperator(); }
+     (pseudfn) => pseudfn e1:EQUAL^ expression { #e1.setOperator(); }
+  |  (widattr) => widattr e3:EQUAL^ expression { #e3.setOperator(); }
   |  field e2:EQUAL^ expression { #e2.setOperator(); }
   ;
 
@@ -1371,7 +1373,7 @@ referencepoint:
 
 bellstate:
     BELL^ state_end
-    {sthd(##,0);}
+    { ##.setStatementHead(); }
   ;
 
 buffercomparestate:
@@ -1810,7 +1812,7 @@ create_whatever_state:
     CREATE^
     (CALL|CLIENTPRINCIPAL|DATASET|DATASOURCE|SAXATTRIBUTES|SAXREADER|SAXWRITER|SOAPHEADER|SOAPHEADERENTRYREF|XDOCUMENT|XNODEREF)
     exprt (in_widgetpool_expr)? (NOERROR_KW)? state_end
-    {sthd(##, ##.firstChild().getType());}
+    {sthd(##, ##.getFirstChild().getType());}
   ;
 
 createaliasstate:
@@ -4756,7 +4758,7 @@ select_having:
   ;
 
 select_order:
-    (ORDER^ BY | BY^) sqlscalar ((ASC|a:ASCENDING {#a.setType(ASC);}) | DESCENDING)?
+    (ORDER^ BY | BY^) sqlscalar (ASCENDING | DESCENDING)?
     (COMMA sqlscalar (ASCENDING | DESCENDING)?)*
   ;
 
@@ -4881,10 +4883,11 @@ sqlscalar:
     sqlmultiplicativeExpression (options{greedy=true;}: (PLUS^ | MINUS^) { ##.setOperator(); } sqlmultiplicativeExpression)*
   ;
 
-sqlmultiplicativeExpression
-  :  sqlunaryExpression
-    (options{greedy=true;}:   ( STAR^ {#STAR.setType(MULTIPLY);}
-      | SLASH^ {#SLASH.setType(DIVIDE);}
+sqlmultiplicativeExpression:
+    sqlunaryExpression
+    ( options { greedy=true; }:
+      ( STAR^ { #STAR.setType(MULTIPLY); }
+      | SLASH^ { #SLASH.setType(DIVIDE); }
       | MODULO^
       )
       { ##.setOperator(); }
@@ -4892,8 +4895,7 @@ sqlmultiplicativeExpression
     )*
   ;
 
-sqlunaryExpression
-options{generateAmbigWarnings=false;}:
+sqlunaryExpression options { generateAmbigWarnings=false; }:
     // order of options is important.
     MINUS^ { #MINUS.setType(UNARY_MINUS); } exprt
   | PLUS^  { #PLUS.setType(UNARY_PLUS); } exprt

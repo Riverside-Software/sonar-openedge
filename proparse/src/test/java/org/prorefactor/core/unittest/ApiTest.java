@@ -51,8 +51,7 @@ public class ApiTest {
     File f = new File("src/test/resources/data/hello.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.treeParser01();
-    int numDisplay = pu.getTopNode().query("DISPLAY").length;
-    assertEquals(1, numDisplay);
+    assertEquals(pu.getTopNode().query(NodeTypes.DISPLAY).size(), 1);
   }
 
   @Test
@@ -94,12 +93,12 @@ public class ApiTest {
     JPNode node2 = (JPNode) pu.getTopNode().query(NodeTypes.NOUNDO).get(0);
     JPNode parent = node2;
     while (!parent.isStateHead()) {
-      parent = parent.prevNode();
+      parent = parent.getPreviousNode();
     }
     assertEquals(node1, parent);
 
     // No proparse directive as nodes anymore
-    JPNode left = node1.prevSibling();
+    JPNode left = node1.getPreviousSibling();
     assertNull(left);
     
     // But as ProToken

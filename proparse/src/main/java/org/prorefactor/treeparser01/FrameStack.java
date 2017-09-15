@@ -74,13 +74,13 @@ public class FrameStack {
    */
   public List<FieldBuffer> calculateFormItemTableFields(JPNode formItemNode) {
     assert formItemNode.getType() == NodeTypes.Form_item;
-    assert formItemNode.firstChild().getType() == NodeTypes.RECORD_NAME;
-    RecordNameNode recordNameNode = (RecordNameNode) formItemNode.firstChild();
+    assert formItemNode.getFirstChild().getType() == NodeTypes.RECORD_NAME;
+    RecordNameNode recordNameNode = (RecordNameNode) formItemNode.getFirstChild();
     TableBuffer tableBuffer = recordNameNode.getTableBuffer();
     HashSet<IField> fieldSet = new HashSet<>(tableBuffer.getTable().getFieldSet());
     JPNode exceptNode = formItemNode.getParent().findDirectChild(NodeTypes.EXCEPT);
     if (exceptNode != null)
-      for (JPNode n = exceptNode.firstChild(); n != null; n = n.nextSibling()) {
+      for (JPNode n = exceptNode.getFirstChild(); n != null; n = n.getNextSibling()) {
         if (!(n instanceof FieldRefNode))
           continue;
         IField f = ((FieldBuffer) ((FieldRefNode) n).getSymbol()).getField();
@@ -114,7 +114,7 @@ public class FrameStack {
     if (containerForCurrentStatement == null)
       return;
     assert formItemNode.getType() == NodeTypes.Form_item;
-    JPNode firstChild = formItemNode.firstChild();
+    JPNode firstChild = formItemNode.getFirstChild();
     if (firstChild.getType() == NodeTypes.RECORD_NAME) {
       // Delay processing until the end of the statement. We need any EXCEPT fields resolved first.
       currStatementWholeTableFormItemNode = formItemNode;
@@ -194,10 +194,10 @@ public class FrameStack {
     Field.Name inputName = new Field.Name(idNode.getText().toLowerCase());
     FieldContainer fieldContainer = null;
     Symbol fieldOrVariable = null;
-    JPNode tempNode = fieldRefNode.firstChild();
+    JPNode tempNode = fieldRefNode.getFirstChild();
     int tempType = tempNode.getType();
     if (tempType == NodeTypes.INPUT) {
-      tempNode = tempNode.nextSibling();
+      tempNode = tempNode.getNextSibling();
       tempType = tempNode.getType();
     }
     if (tempType == NodeTypes.BROWSE || tempType == NodeTypes.FRAME) {
