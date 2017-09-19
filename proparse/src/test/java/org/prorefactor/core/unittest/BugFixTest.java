@@ -340,6 +340,11 @@ public class BugFixTest {
     assertEquals(tok.getText(), "// \"~n\"");
   }
 
+  @Test(enabled = false, description = "Issue #309, won't fix,")
+  public void testAbstractKw() throws Exception {
+    genericTest("abstractkw.p");
+  }
+
   @Test
   public void testLexer01() throws Exception {
     TokenStream stream = genericLex("lex.p");
