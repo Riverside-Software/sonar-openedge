@@ -462,7 +462,7 @@ argfunc
     |  AAMSG^
     |  ABSOLUTE^
     |  ALIAS^
-    |  (ASC^|a:ASCENDING^ {#a.setType(ASC);})
+    |  ASC^
     |  BASE64DECODE^
     |  BASE64ENCODE^
     |  BOX^
@@ -2294,11 +2294,12 @@ def_table_field
     identifier
     (options{greedy=true;}: fieldoption)*
   ;
+
 def_table_index
   :  // Yes, the compiler really lets you use AS instead of IS here.
     // (AS|IS) is not optional the first time, but it is on subsequent uses.
     INDEX^ identifier (options{greedy=true;}: (AS|IS)? (UNIQUE|PRIMARY|WORDINDEX))*
-    (identifier (options{greedy=true;}: ASCENDING|as:ASC{#as.setType(ASCENDING);}|DESCENDING|CASESENSITIVE)*)+
+    (identifier (options{greedy=true;}: ASCENDING|DESCENDING|CASESENSITIVE)*)+
   ;
    
 // Token WORKTABLE can be "work-file" or abbreviated forms of "work-table"
@@ -4525,8 +4526,8 @@ select_having
   :  HAVING^ sqlexpression
   ;
 select_order
-  :  (ORDER^ BY | BY^) sqlscalar ((ASC|a:ASCENDING {#a.setType(ASC);}) | DESCENDING)?
-    (COMMA sqlscalar ((ASC|a2:ASCENDING {#a2.setType(ASC);}) | DESCENDING)?)*
+  :  (ORDER^ BY | BY^) sqlscalar (ASCENDING | DESCENDING)?
+    (COMMA sqlscalar (ASCENDING | DESCENDING)?)*
   ;
 select_union
   :  UNION^ (ALL)? selectstatea
