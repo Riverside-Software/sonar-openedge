@@ -83,4 +83,47 @@ public class ParserTest {
     }
   }
 
+  @Test
+  public void testLogical01() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "logical01.p"), session);
+    unit.parse();
+
+    List<JPNode> stmts = unit.getTopNode().queryStateHead(NodeTypes.DEFINE);
+    for (JPNode stmt : stmts) {
+      assertEquals(stmt.query(NodeTypes.LOG).size(), 0);
+      assertEquals(stmt.query(NodeTypes.LOGICAL).size(), 1);
+    }
+    assertTrue(stmts.get(0).query(NodeTypes.LOGICAL).get(0).isAbbreviated());
+    assertTrue(stmts.get(1).query(NodeTypes.LOGICAL).get(0).isAbbreviated());
+    assertFalse(stmts.get(2).query(NodeTypes.LOGICAL).get(0).isAbbreviated());
+    assertTrue(stmts.get(3).query(NodeTypes.LOGICAL).get(0).isAbbreviated());
+    assertTrue(stmts.get(4).query(NodeTypes.LOGICAL).get(0).isAbbreviated());
+    assertFalse(stmts.get(5).query(NodeTypes.LOGICAL).get(0).isAbbreviated());
+  }
+
+  @Test
+  public void testLogical02() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "logical02.p"), session);
+    unit.parse();
+
+    List<JPNode> stmts = unit.getTopNode().queryStateHead(NodeTypes.MESSAGE);
+    assertEquals(stmts.get(0).query(NodeTypes.LOG).size(), 1);
+    assertEquals(stmts.get(0).query(NodeTypes.LOGICAL).size(), 0);
+  }
+
+  @Test
+  public void testGetCodepage() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "getcodepage.p"), session);
+    unit.parse();
+
+    List<JPNode> stmts = unit.getTopNode().queryStateHead(NodeTypes.MESSAGE);
+    assertEquals(stmts.get(0).query(NodeTypes.GETCODEPAGE).size(), 1);
+    assertEquals(stmts.get(0).query(NodeTypes.GETCODEPAGES).size(), 0);
+    assertEquals(stmts.get(1).query(NodeTypes.GETCODEPAGE).size(), 1);
+    assertEquals(stmts.get(1).query(NodeTypes.GETCODEPAGES).size(), 0);
+    assertEquals(stmts.get(2).query(NodeTypes.GETCODEPAGE).size(), 0);
+    assertEquals(stmts.get(2).query(NodeTypes.GETCODEPAGES).size(), 1);
+    assertEquals(stmts.get(3).query(NodeTypes.GETCODEPAGE).size(), 0);
+    assertEquals(stmts.get(3).query(NodeTypes.GETCODEPAGES).size(), 1);
+  }
 }

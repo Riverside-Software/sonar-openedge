@@ -20,13 +20,18 @@ import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.NodeTypes;
 
 /**
- * Convert ASC tokens to ASCENDING tokens if not followed by LEFTPAREN
+ * Convert some tokens to another type when not followed by LEFTPAREN:
+ * <ul>
+ * <li>ASC to ASCENDING</li>
+ * <li>LOG to LOGICAL</li>
+ * <li>GET-CODEPAGE to GET-CODEPAGES</li>
+ * </ul>
  */
-public class AscFunctionTokenFilter implements TokenSource {
+public class FunctionKeywordTokenFilter implements TokenSource {
   private final TokenSource source;
   private final Queue<Token> heap = new LinkedList<>();
 
-  public AscFunctionTokenFilter(TokenSource source) {
+  public FunctionKeywordTokenFilter(TokenSource source) {
     this.source = source;
   }
 
@@ -35,9 +40,10 @@ public class AscFunctionTokenFilter implements TokenSource {
     if (!heap.isEmpty()) {
       return heap.poll();
     }
-    
+
     Token currToken = source.nextToken();
-    if (currToken.getType() == NodeTypes.ASC) {
+    if ((currToken.getType() == NodeTypes.ASC) || (currToken.getType() == NodeTypes.LOG)
+        || (currToken.getType() == NodeTypes.GETCODEPAGE) || (currToken.getType() == NodeTypes.GETCODEPAGES)) {
       Token nxt = source.nextToken();
       while ((nxt.getType() != Token.EOF) && (nxt.getChannel() != Token.DEFAULT_CHANNEL)) {
         heap.offer(nxt);
@@ -45,8 +51,14 @@ public class AscFunctionTokenFilter implements TokenSource {
       }
       heap.offer(nxt);
       if (nxt.getType() != NodeTypes.LEFTPAREN) {
-        ((ProToken) currToken).setType(NodeTypes.ASCENDING);
-      }
+        if (currToken.getType() == NodeTypes.ASC)
+          ((ProToken) currToken).setType(NodeTypes.ASCENDING);
+        else if (currToken.getType() == NodeTypes.LOG)
+          ((ProToken) currToken).setType(NodeTypes.LOGICAL);
+        else if (currToken.getType() == NodeTypes.GETCODEPAGE)
+          ((ProToken) currToken).setType(NodeTypes.GETCODEPAGES);
+      } else if (currToken.getType() == NodeTypes.GETCODEPAGES)
+        ((ProToken) currToken).setType(NodeTypes.GETCODEPAGE);
     }
     return currToken;
   }

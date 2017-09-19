@@ -13,6 +13,8 @@ package org.prorefactor.core;
 import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.ProParserTokenTypes;
 
+import com.google.common.base.Strings;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -183,14 +185,13 @@ public class NodeTypes implements ProParserTokenTypes {
 
   public static boolean isAbbreviated(Integer nodeType, String text) {
     String lowText = text.toLowerCase();
-//    Integer nodeType = literalsMap.get(lowText);
-    if (nodeType == null)
+    if (Strings.isNullOrEmpty(text))
       return false;
     if (typeInfoArray[nodeType].fullText.startsWith(lowText)) {
       return typeInfoArray[nodeType].fullText.length() > lowText.length();
     } else if (typeInfoArray[nodeType].altFullText == null) {
-      // Should never be the case
-      return true;
+      // Doesn't start with something identical, and no alt text. Only for comparison operators
+      return false;
     } else {
       for (String s : typeInfoArray[nodeType].altFullText) {
         if (s.startsWith(lowText)) {
