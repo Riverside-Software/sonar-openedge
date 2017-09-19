@@ -24,17 +24,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * List of tokens for input to the parser. This class is responsible for gathering a list of tokens from the PostLexer,
- * and examining that list for fine-tuning before sending it on to the parser.
+ * Review the token list at an OBJCOLON token.
  * 
- * The complete tool chain is:<ol>
- * <li>Lexer 
- * <li>PostLexer
- * <li>TokenList
- * <li>parser
- * </ol>
- * 
- * TODO The temporary list should be avoided
+ * This is the reason this class was created in the first place. If we have an OBJCOLON, what comes before it has to
+ * be one of a few things:
+ * <ul>
+ * <li>a system handle,
+ * <li>a handle expression,
+ * <li>an Object reference expression, or
+ * <li>a type name (class name) for a static member reference
+ * </ul>
+ * <p>
+ * A type name can be pretty much anything, even a reserved keyword. It can also be a qualified class name, such as
+ * com.joanju.Foo.
+ * <p>
+ * This method attempts to resolve the following problem: Because of static class member references, a class name can
+ * be the first token in an expression. Class names can be composed of reserved keywords. This means that a reserved
+ * keyword could be the first piece of an expression, and this completely breaks the lookahead in the ANTLR generated
+ * parser. So, here, we look for OBJCOLON, and make sure that what comes before it is a system handle, an ID, or a
+ * non-reserved keyword.
+ * <p>
+ * A NAMEDOT token is a '.' followed by anything other than whitespace. If the OBJCOLON is proceeded by a NAMEDOT pair
+ * (NAMEDOT followed by anything), then we convert all of the NAMEDOT pairs to NAMEDOT-ID pairs. Otherwise, if the
+ * OBJCOLON is proceeded by any reserved keyword other than a systemhandlename, then we change that token's type to
+ * ID.
  */
 public class TokenList implements TokenSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(TokenList.class);
@@ -65,32 +78,6 @@ public class TokenList implements TokenSource {
     LOGGER.trace("Exiting TokenList#build() - {} tokens", list.size());
   }
 
-  /**
-   * Review the token list at an OBJCOLON token.
-   * 
-   * This is the reason this class was created in the first place. If we have an OBJCOLON, what comes before it has to
-   * be one of a few things:
-   * <ul>
-   * <li>a system handle,
-   * <li>a handle expression,
-   * <li>an Object reference expression, or
-   * <li>a type name (class name) for a static member reference
-   * </ul>
-   * <p>
-   * A type name can be pretty much anything, even a reserved keyword. It can also be a qualified class name, such as
-   * com.joanju.Foo.
-   * <p>
-   * This method attempts to resolve the following problem: Because of static class member references, a class name can
-   * be the first token in an expression. Class names can be composed of reserved keywords. This means that a reserved
-   * keyword could be the first piece of an expression, and this completely breaks the lookahead in the ANTLR generated
-   * parser. So, here, we look for OBJCOLON, and make sure that what comes before it is a system handle, an ID, or a
-   * non-reserved keyword.
-   * <p>
-   * A NAMEDOT token is a '.' followed by anything other than whitespace. If the OBJCOLON is proceeded by a NAMEDOT pair
-   * (NAMEDOT followed by anything), then we convert all of the NAMEDOT pairs to NAMEDOT-ID pairs. Otherwise, if the
-   * OBJCOLON is proceeded by any reserved keyword other than a systemhandlename, then we change that token's type to
-   * ID.
-   */
   private void reviewObjcolon() {
     int colonIndex = list.size() - 1;
     int lastIndex = colonIndex - 1;

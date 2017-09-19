@@ -147,7 +147,8 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     lexer = new Lexer(this);
     TokenSource postlexer = lexOnly ? new NoOpPostLexer(lexer) : new PostLexer(lexer);
     TokenSource filter1 = new TokenList(postlexer);
-    wrapper = new MultiChannelTokenSource(filter1);
+    TokenSource filter2 = new MultiChannelTokenSource(filter1);
+    wrapper = new FunctionKeywordTokenFilter(filter2);
   }
 
   public String getMainFileName() {

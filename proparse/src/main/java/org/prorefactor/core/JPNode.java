@@ -578,7 +578,7 @@ public class JPNode extends BaseAST {
   }
 
   public boolean isAbbreviated() {
-    return NodeTypes.isKeywordType(getType()) && NodeTypes.isAbbreviated(getText());
+    return NodeTypes.isKeywordType(getType()) && NodeTypes.isAbbreviated(getType(), getText());
   }
 
   /**
