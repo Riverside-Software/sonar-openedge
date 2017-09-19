@@ -340,7 +340,7 @@ public class BugFixTest {
     assertEquals(tok.getText(), "// \"~n\"");
   }
 
-  @Test
+  @Test(enabled = false, description = "Issue #309, won't fix,")
   public void testAbstractKw() throws Exception {
     genericTest("abstractkw.p");
   }
