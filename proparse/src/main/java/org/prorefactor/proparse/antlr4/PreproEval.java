@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.AndOrContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.ComparisonContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.DbTypeFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.DecimalFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.EntryFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.ExprContext;
@@ -82,8 +83,10 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   // ****
   @Override
   public Object visitAndOr(AndOrContext ctx) {
-    boolean b1 = getBool(visit(ctx.expr(0)));
-    boolean b2 = getBool(visit(ctx.expr(1)));
+    Object o1 = visit(ctx.expr(0));
+    Object o2 = visit(ctx.expr(1));
+    boolean b1 = (o1 != null) && getBool(o1);
+    boolean b2 = (o2 != null) && getBool(o2);
 
     if (ctx.op.getType() == PreprocessorParser.OR) {
       return b1 || b2;
@@ -405,6 +408,11 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
       // text of whatever was passed us.
       return str.toUpperCase();
     }
+  }
+
+  @Override
+  public Object visitDbTypeFunction(DbTypeFunctionContext ctx) {
+    return "PROGRESS";
   }
 
   // *****************

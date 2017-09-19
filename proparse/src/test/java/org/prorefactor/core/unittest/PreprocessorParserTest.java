@@ -320,4 +320,17 @@ public class PreprocessorParserTest {
     testNoVariable(unit.getTopNode(), "var57");
     testVariable(unit.getTopNode(), "var58");
   }
+
+  @Test
+  public void testDbType() throws Exception {
+    testVariable(unit.getTopNode(), "var59");
+    testNoVariable(unit.getTopNode(), "var60");
+  }
+
+  @Test
+  public void testAndOrNotImplemented() throws Exception {
+    testNoVariable(unit.getTopNode(), "var61");
+    testNoVariable(unit.getTopNode(), "var62");
+  }
+
 }
