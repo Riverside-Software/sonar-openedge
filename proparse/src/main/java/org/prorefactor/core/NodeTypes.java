@@ -181,9 +181,9 @@ public class NodeTypes implements ProParserTokenTypes {
     return ret;
   }
 
-  public static boolean isAbbreviated(String text) {
+  public static boolean isAbbreviated(Integer nodeType, String text) {
     String lowText = text.toLowerCase();
-    Integer nodeType = literalsMap.get(lowText);
+//    Integer nodeType = literalsMap.get(lowText);
     if (nodeType == null)
       return false;
     if (typeInfoArray[nodeType].fullText.startsWith(lowText)) {
