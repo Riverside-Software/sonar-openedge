@@ -133,6 +133,10 @@ public class TokenList2 implements TokenSource {
 
   @Override
   public Token nextToken() {
+    if ((currentToken != null) && (currentToken.getType() == Token.EOF)) {
+      return currentToken;
+    }
+
     if (heap.isEmpty()) {
       fillHeap();
     }

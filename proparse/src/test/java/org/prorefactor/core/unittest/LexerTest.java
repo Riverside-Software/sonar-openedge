@@ -17,6 +17,7 @@ import java.util.NoSuchElementException;
 
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -185,4 +186,55 @@ public class LexerTest {
     TokenStream stream = unit.lex();
     stream.nextToken();
   }
+
+  @Test
+  public void testTokenList05() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist05.p"), session);
+    TokenStream stream = unit.lex();
+
+    // MESSAGE customer.custnum Progress.Security.PAMStatus:AccessDenied.
+    assertEquals(stream.nextToken().getType(), NodeTypes.MESSAGE);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.NAMEDOT);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+
+    // MESSAGE customer.custnum. Progress.Security.PAMStatus:AccessDenied.
+    assertEquals(stream.nextToken().getType(), NodeTypes.MESSAGE);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.NAMEDOT);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+  }
+
+  @Test
+  public void testEndOfFile() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist01.p"), session);
+    TokenStream stream = unit.lex();
+
+    while (stream.nextToken().getType() != Token.EOF_TYPE) {
+
+    }
+    for (int zz = 0; zz < 1000; zz++) {
+      // Verify safety net is not triggered
+      stream.nextToken();
+    }
+    // Make sure nextToken() always return EOF (and no null element or any exception)
+    assertEquals(stream.nextToken().getType(), Token.EOF_TYPE);
+    assertEquals(stream.nextToken().getType(), Token.EOF_TYPE);
+  }
+
 }
