@@ -13,6 +13,7 @@ package org.prorefactor.proparse.antlr4;
 
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.IntStream;
@@ -73,38 +74,44 @@ public class TokenList implements TokenSource {
 
   private void reviewObjcolon() {
     ProToken objColonToken = queue.removeLast();
-
-    // Store comments and whitespaces before the colon
     Deque<ProToken> comments = new LinkedList<>();
-    ProToken tok = queue.removeLast();
-    while ((tok.getType() == NodeTypes.WS) || (tok.getType() == NodeTypes.COMMENT)) {
-      comments.addFirst(tok);
-      tok = queue.pollLast();
-    }
-
     Deque<ProToken> clsName = new LinkedList<>();
-    boolean foundNamedot = false;
-    while (true) {
-      if (tok == null)
-        break;
-      
-      // There can be space in front of a NAMEDOT in a table or field name. We don't want to fiddle with those here.
-      if ((tok.getType() == PreprocessorParser.WS) || (tok.getType() == PreprocessorParser.COMMENT)) {
-        break;
-      }
 
-      // If previous is NAMEDOT, then we add both tokens
-      if ((queue.peekLast() != null) && (queue.peekLast().getType() == NodeTypes.NAMEDOT)) {
-        clsName.addFirst(tok);
-        clsName.addFirst(queue.pollLast());
-        tok = queue.removeLast();
-      } else if (tok.getText().startsWith(".")) {
-        clsName.addFirst(tok);
-        tok = queue.removeLast();
-      } else {
-        break;
+    boolean foundNamedot = false;
+    ProToken tok = null;
+    try {
+      // Store comments and whitespaces before the colon
+      tok = queue.removeLast();
+      while ((tok.getType() == NodeTypes.WS) || (tok.getType() == NodeTypes.COMMENT)) {
+        comments.addFirst(tok);
+        tok = queue.pollLast();
       }
-      foundNamedot = true;
+  
+      foundNamedot = false;
+      while (true) {
+        // There can be space in front of a NAMEDOT in a table or field name. We don't want to fiddle with those here.
+        if ((tok.getType() == PreprocessorParser.WS) || (tok.getType() == PreprocessorParser.COMMENT)) {
+          break;
+        }
+  
+        // If previous is NAMEDOT, then we add both tokens
+        if ((queue.peekLast() != null) && (queue.peekLast().getType() == NodeTypes.NAMEDOT)) {
+          clsName.addFirst(tok);
+          clsName.addFirst(queue.removeLast());
+          tok = queue.removeLast();
+        } else if (tok.getText().startsWith(".")) {
+          clsName.addFirst(tok);
+          tok = queue.removeLast();
+        } else {
+          break;
+        }
+        foundNamedot = true;
+      }
+    } catch (NoSuchElementException caught) {
+      queue.addAll(clsName);
+      queue.addAll(comments);
+      queue.add(objColonToken);
+      return;
     }
 
     if (foundNamedot) {
@@ -122,8 +129,7 @@ public class TokenList implements TokenSource {
       queue.addAll(comments);
     } else {
       // Not namedotted, so if it's reserved and not a system handle, convert to ID.
-      int ttype = tok.getType();
-      if (NodeTypes.isReserved(ttype) && (!NodeTypes.isSystemHandleName(ttype)))
+      if (NodeTypes.isReserved(tok.getType()) && (!NodeTypes.isSystemHandleName(tok.getType())))
         tok.setType(PreprocessorParser.ID);
       queue.addLast(tok);
       queue.addAll(comments);

@@ -178,12 +178,21 @@ public class LexerTest {
     assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
   }
 
-  @Test(expectedExceptions = NoSuchElementException.class)
+  @Test
   public void testTokenList04() throws Exception {
-    // TokenList throws an exception, but not really bad, as the syntax is by the way invalid
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist04.p"), session);
     TokenStream stream = unit.lex();
-    stream.nextToken();
+
+    // .Security.PAMStatus:AccessDenied.
+    // Nothing recognized here, so we don't change the stream 
+    assertEquals(stream.nextToken().getType(), NodeTypes.NAMEDOT);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.NAMEDOT);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
   }
 
   @Test
@@ -213,6 +222,31 @@ public class LexerTest {
     assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
     assertEquals(stream.nextToken().getType(), NodeTypes.WS);
     assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+  }
+
+  @Test
+  public void testTokenList06() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist06.p"), session);
+    TokenStream stream = unit.lex();
+
+    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+  }
+
+  @Test
+  public void testTokenList07() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist07.p"), session);
+    TokenStream stream = unit.lex();
+
+    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
     assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
     assertEquals(stream.nextToken().getType(), NodeTypes.ID);
     assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
