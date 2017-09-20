@@ -17,7 +17,6 @@ import java.util.NoSuchElementException;
 
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
