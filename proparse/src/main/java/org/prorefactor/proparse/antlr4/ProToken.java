@@ -213,4 +213,11 @@ public class ProToken implements WritableToken {
   public void setTokenIndex(int index) {
     this.index = index;
   }
+
+  @Override
+  public String toString() {
+    return "[\"" + text.replace('\r', ' ').replace('\n', ' ') + "\",<" + type + ">,macro=" + macroSourceNum + ",start="
+        + fileIndex + ":" + line + ":" + charPositionInLine + ",end=" + endFileIndex + ":" + endLine + ":"
+        + endCharPositionInLine + "]";
+  }
 }

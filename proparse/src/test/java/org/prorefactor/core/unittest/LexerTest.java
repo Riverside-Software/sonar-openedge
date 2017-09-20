@@ -16,9 +16,11 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -101,18 +103,26 @@ public class LexerTest {
     TokenStream stream = unit.lex();
 
     // Progress.Security.PAMStatus:AccessDenied.
-    Token tok = stream.nextToken();
+    ProToken tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), NodeTypes.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 27);
     assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
     assertEquals(stream.nextToken().getType(), NodeTypes.ID);
     assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
     assertEquals(stream.nextToken().getType(), NodeTypes.WS);
 
     // Progress.Security.PAMStatus :AccessDenied.
-    tok = stream.nextToken();
+    tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), NodeTypes.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
+    assertEquals(tok.getLine(), 2);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 2);
+    assertEquals(tok.getEndColumn(), 27);
     assertEquals(stream.nextToken().getType(), NodeTypes.WS);
     assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
     assertEquals(stream.nextToken().getType(), NodeTypes.ID);
@@ -120,9 +130,13 @@ public class LexerTest {
     assertEquals(stream.nextToken().getType(), NodeTypes.WS);
 
     // Progress.Security.PAMStatus <bazinga> :AccessDenied.
-    tok = stream.nextToken();
+    tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), NodeTypes.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
+    assertEquals(tok.getLine(), 3);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 3);
+    assertEquals(tok.getEndColumn(), 27);
     assertEquals(stream.nextToken().getType(), NodeTypes.WS);
     assertEquals(stream.nextToken().getType(), NodeTypes.COMMENT);
     assertEquals(stream.nextToken().getType(), NodeTypes.WS);
@@ -132,11 +146,41 @@ public class LexerTest {
     assertEquals(stream.nextToken().getType(), NodeTypes.WS);
 
     // Progress.117x.clsName:StaticProperty.
-    tok = stream.nextToken();
+    tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), NodeTypes.ID);
     assertEquals(tok.getText(), "Progress.117x.clsName");
+    assertEquals(tok.getLine(), 6);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 6);
+    assertEquals(tok.getEndColumn(), 21);
     assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
     assertEquals(stream.nextToken().getType(), NodeTypes.ID);
     assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+  }
+
+  @Test(enabled = false)
+  public void testTokenList03() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist03.p"), session);
+    TokenStream stream = unit.lex();
+
+    // MESSAGE Progress./* Holy shit */   Security.PAMStatus:AccessDenied.
+    // The compiler accepts that...
+    assertEquals(stream.nextToken().getType(), NodeTypes.MESSAGE);
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    Token tok = stream.nextToken();
+    assertEquals(tok.getType(), NodeTypes.ID);
+    assertEquals(tok.getText(), "Progress.Security.PAMStatus");
+    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
+    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
+  }
+
+  @Test(expectedExceptions = NoSuchElementException.class)
+  public void testTokenList04() throws Exception {
+    // TokenList throws an exception, but not really bad, as the syntax is by the way invalid
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist04.p"), session);
+    TokenStream stream = unit.lex();
+    stream.nextToken();
   }
 }
