@@ -11,14 +11,10 @@
 package org.prorefactor.core.unittest;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.io.File;
-import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.unittest.util.UnitTestModule;
@@ -138,7 +134,13 @@ public class LexerTest {
     assertEquals(tok.getEndLine(), 3);
     assertEquals(tok.getEndColumn(), 27);
     assertEquals(stream.nextToken().getType(), NodeTypes.WS);
-    assertEquals(stream.nextToken().getType(), NodeTypes.COMMENT);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), NodeTypes.COMMENT);
+    assertEquals(tok.getText(), "//Test");
+    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), NodeTypes.COMMENT);
+    assertEquals(tok.getText(), "//Test2");
     assertEquals(stream.nextToken().getType(), NodeTypes.WS);
     assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
     assertEquals(stream.nextToken().getType(), NodeTypes.ID);
@@ -149,9 +151,9 @@ public class LexerTest {
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), NodeTypes.ID);
     assertEquals(tok.getText(), "Progress.117x.clsName");
-    assertEquals(tok.getLine(), 6);
+    assertEquals(tok.getLine(), 7);
     assertEquals(tok.getColumn(), 1);
-    assertEquals(tok.getEndLine(), 6);
+    assertEquals(tok.getEndLine(), 7);
     assertEquals(tok.getEndColumn(), 21);
     assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
     assertEquals(stream.nextToken().getType(), NodeTypes.ID);
