@@ -30,6 +30,7 @@ public class Routine extends Symbol {
   public Routine(String name, TreeParserSymbolScope definingScope, TreeParserSymbolScope routineScope) {
     super(name, definingScope);
     this.routineScope = routineScope;
+    this.routineScope.setRoutine(this);
   }
 
   /** Called by the tree parser. */

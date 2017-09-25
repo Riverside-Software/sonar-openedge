@@ -610,6 +610,9 @@ public class TP01Support extends TP01Action {
       refNode.setSymbol(result.field);
       refNode.attrSet(IConstants.STORETYPE, result.field.getField().getTable().getStoretype());
       result.field.noteReference(cq);
+      if (result.field.getBuffer() != null) {
+        result.field.getBuffer().noteReference(cq);
+      }
     }
     // Event
     if (result.event != null) {
