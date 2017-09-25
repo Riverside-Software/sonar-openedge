@@ -59,6 +59,10 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return "";
   }
 
+  public void reportIssue(InputFile file, JPNode node, String msg) {
+    reportIssue(file, node, msg, false);
+  }
+
   /**
    * Reports issue
    * 
@@ -66,7 +70,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    * @param node Node where issue happened
    * @param msg Additional message
    */
-  public void reportIssue(InputFile file, JPNode node, String msg) {
+  public void reportIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
     if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {
       return;
     }
@@ -88,11 +92,15 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     NewIssue issue = getContext().newIssue().forRule(getRuleKey());
     NewIssueLocation location = issue.newLocation().on(targetFile);
     if (lineNumber > 0) {
-      TextRange range = targetFile.selectLine(lineNumber);
-      if (IS_WINDOWS && (getContext().runtime().getProduct() == SonarProduct.SONARLINT) && (range.end().lineOffset() > 1)) {
-        location.at(targetFile.newRange(lineNumber, 0, lineNumber, range.end().lineOffset() - 1));
+      if (exactLocation) {
+        location.at(targetFile.newRange(node.getLine(), node.getColumn() - 1, node.getEndLine(), node.getEndColumn()));
       } else {
-        location.at(range);
+        TextRange range = targetFile.selectLine(lineNumber);
+        if (IS_WINDOWS && (getContext().runtime().getProduct() == SonarProduct.SONARLINT) && (range.end().lineOffset() > 1)) {
+          location.at(targetFile.newRange(lineNumber, 0, lineNumber, range.end().lineOffset() - 1));
+        } else {
+          location.at(range);
+        }
       }
     }
     if (targetFile == file) {
