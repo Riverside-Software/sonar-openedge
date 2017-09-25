@@ -2586,6 +2586,7 @@ ADD FIELD "State" OF "Warehouse" AS character
   POSITION 8
   MAX-WIDTH 40
   HELP "Please enter standard state abbreviation."
+  LOB-SIZE 100
   ORDER 70
 
 ADD FIELD "PostalCode" OF "Warehouse" AS character 
@@ -2596,6 +2597,8 @@ ADD FIELD "PostalCode" OF "Warehouse" AS character
   POSITION 9
   MAX-WIDTH 20
   HELP "Please enter the appropriate Postal Code."
+  LOB-BYTES 104857600
+  LOB-SIZE 100M
   ORDER 80
 
 ADD FIELD "Phone" OF "Warehouse" AS character 

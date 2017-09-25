@@ -154,7 +154,7 @@ addFieldOption:
   | 'POSITION' val=NUMBER               # fieldPosition
   | 'LOB-AREA' val=(QUOTED_STRING | UNQUOTED_STRING)  # fieldLobArea
   | 'LOB-BYTES' ('?' | NUMBER)              # fieldLobBytes
-  | 'LOB-SIZE' ('?' | NUMBER)               # fieldLobSize
+  | 'LOB-SIZE' ('?' | NUMBER | NUM_BYTES )  # fieldLobSize
   | 'MAX-WIDTH' val=NUMBER                  # fieldMaxWidth
   | 'SQL-WIDTH' NUMBER                      # fieldSqlWith
   | 'CLOB-CODEPAGE' (QUOTED_STRING | UNQUOTED_STRING)         # fieldClobCodepage
@@ -279,6 +279,9 @@ footer:
 
 fragment INT:
   ('0'..'9');
+
+NUM_BYTES:
+  ('0'..'9')+ [bBkKmMgG];
 
 NUMBER:
   '-'? INT+;
