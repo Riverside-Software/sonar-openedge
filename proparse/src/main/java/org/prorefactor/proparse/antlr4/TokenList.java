@@ -7,12 +7,13 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - 
  *******************************************************************************/ 
 package org.prorefactor.proparse.antlr4;
 
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.IntStream;
@@ -20,8 +21,6 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.NodeTypes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Review the token list at an OBJCOLON token.
@@ -50,99 +49,110 @@ import org.slf4j.LoggerFactory;
  * ID.
  */
 public class TokenList implements TokenSource {
-  private static final Logger LOGGER = LoggerFactory.getLogger(TokenList.class);
+  private final TokenSource source;
+  private final Deque<ProToken> queue = new LinkedList<>();
 
-  private final TokenSource tokenStream;
-  private final List<ProToken> list = new ArrayList<>();
-
-  private int currentPosition = 0;
+  private int currentPosition;
   private ProToken currentToken;
-  private boolean initialized = false;
 
-  TokenList(TokenSource input) {
-    this.tokenStream = input;
+  public TokenList(TokenSource input) {
+    this.source = input;
   }
 
-  private void build()  {
-    LOGGER.trace("Entering TokenList#build()");
-    int zz = 0;
-    for (;;) {
-      ProToken nextToken = (ProToken) tokenStream.nextToken();
-      nextToken.setTokenIndex(zz++);
-      list.add(nextToken);
-      if (nextToken.getType() == PreprocessorParser.OBJCOLON)
+  private void fillHeap() {
+    ProToken nxt = (ProToken) source.nextToken();
+    while (true) {
+      queue.offer(nxt);
+      if (nxt.getType() == NodeTypes.OBJCOLON) {
         reviewObjcolon();
-      if (nextToken.getType() == PreprocessorParser.EOF)
+      }
+      if ((nxt.getType() == NodeTypes.OBJCOLON) || (nxt.getType() == Token.EOF))
         break;
+      nxt = (ProToken) source.nextToken();
     }
-    LOGGER.trace("Exiting TokenList#build() - {} tokens", list.size());
   }
 
   private void reviewObjcolon() {
-    int colonIndex = list.size() - 1;
-    int lastIndex = colonIndex - 1;
+    ProToken objColonToken = queue.removeLast();
+    Deque<ProToken> comments = new LinkedList<>();
+    Deque<ProToken> clsName = new LinkedList<>();
 
-    // Getting type of the token just before colon (excluding comments and whitespaces)
-    int ttype = list.get(lastIndex).getType();
-    while (ttype == PreprocessorParser.WS || ttype == PreprocessorParser.COMMENT) {
-      ttype = list.get(--lastIndex).getType();
-    }
-
-    // Look for NAMEDOT pairs.
-    // Actually, it's not that easy. Something like:
-    // newsyntax.101b.deep.FindMe
-    // is perfectly valid, and because of the digit following the '.',
-    // one part of that name gets picked up as a token with text ".101b".
-    int index = lastIndex;
     boolean foundNamedot = false;
-    for (;;) {
-      if (index == 0)
-        break;
-      int currType = list.get(index).getType();
-      if (currType == PreprocessorParser.WS || currType == PreprocessorParser.COMMENT) {
-        // There can be space in front of a NAMEDOT in a table or field name.
-        // We don't want to fiddle with those here.
-        return;
+    ProToken tok = null;
+    try {
+      // Store comments and whitespaces before the colon
+      tok = queue.removeLast();
+      while ((tok.getType() == NodeTypes.WS) || (tok.getType() == NodeTypes.COMMENT)) {
+        comments.addFirst(tok);
+        tok = queue.pollLast();
       }
-      if (list.get(index - 1).getType() == PreprocessorParser.NAMEDOT) {
-        index = index - 2;
-      } else if (list.get(index).getText().charAt(0) == '.') {
-        index = index - 1;
-      } else {
-        break;
+  
+      foundNamedot = false;
+      while (true) {
+        // There can be space in front of a NAMEDOT in a table or field name. We don't want to fiddle with those here.
+        if ((tok.getType() == PreprocessorParser.WS) || (tok.getType() == PreprocessorParser.COMMENT)) {
+          break;
+        }
+  
+        // If previous is NAMEDOT, then we add both tokens
+        if ((queue.peekLast() != null) && (queue.peekLast().getType() == NodeTypes.NAMEDOT)) {
+          clsName.addFirst(tok);
+          clsName.addFirst(queue.removeLast());
+          tok = queue.removeLast();
+        } else if (tok.getText().startsWith(".")) {
+          clsName.addFirst(tok);
+          tok = queue.removeLast();
+        } else {
+          break;
+        }
+        foundNamedot = true;
       }
-      foundNamedot = true;
-    }
-    if (foundNamedot) {
-      // Now merge all the parts into one ID token.
-      ProToken token = list.get(index);
-      token.setType(PreprocessorParser.ID);
-      StringWriter text = new StringWriter();
-      text.append(token.getText());
-      int drop = index + 1;
-      for (int i = 0; i < lastIndex - index; i++) {
-        text.append(list.get(drop).getText());
-        list.remove(drop);
-      }
-      token.setText(text.toString());
+    } catch (NoSuchElementException caught) {
+      queue.addAll(clsName);
+      queue.addAll(comments);
+      queue.add(objColonToken);
       return;
     }
 
-    // Not namedotted, so if it's reserved and not a system handle, convert to ID.
-    ttype = list.get(index).getType();
-    if (NodeTypes.isReserved(ttype) && (!NodeTypes.isSystemHandleName(ttype)))
-      list.get(index).setType(PreprocessorParser.ID);
+    if (foundNamedot) {
+      // Now merge all the parts into one ID token.
+      StringBuilder text = new StringBuilder(tok.getText());
+      tok.setType(PreprocessorParser.ID);
+      for (ProToken zz : clsName) {
+        text.append(zz.getText());
+        tok.setEndFileIndex(zz.getEndFileIndex());
+        tok.setEndLine(zz.getEndLine());
+        tok.setEndCharPositionInLine(zz.getEndCharPositionInLine());
+      }
+      tok.setText(text.toString());
+      queue.addLast(tok);
+      queue.addAll(comments);
+    } else {
+      // Not namedotted, so if it's reserved and not a system handle, convert to ID.
+      if (NodeTypes.isReserved(tok.getType()) && (!NodeTypes.isSystemHandleName(tok.getType())))
+        tok.setType(PreprocessorParser.ID);
+      queue.addLast(tok);
+      queue.addAll(comments);
+    }
+    queue.add(objColonToken);
   }
 
   @Override
   public Token nextToken() {
-    if (!initialized) {
-      build();
-      initialized = true;
-    }
-    if (currentPosition >= list.size())
+    if ((currentToken != null) && (currentToken.getType() == Token.EOF)) {
       return currentToken;
-    currentToken = list.get(currentPosition++);
+    }
+
+    if (queue.isEmpty()) {
+      fillHeap();
+    }
+
+    ProToken tok = queue.poll();
+    if (tok != null) {
+      currentToken = tok;
+      currentToken.setTokenIndex(currentPosition++);
+    }
+
     return currentToken;
   }
 
@@ -173,7 +183,7 @@ public class TokenList implements TokenSource {
 
   @Override
   public TokenFactory<?> getTokenFactory() {
-    return tokenStream.getTokenFactory();
+    return source.getTokenFactory();
   }
 
 }
