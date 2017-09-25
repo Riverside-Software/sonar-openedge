@@ -46,6 +46,7 @@ public class TreeParserSymbolScope {
   protected List<Call> callList = new ArrayList<>();
   protected List<TreeParserSymbolScope> childScopes = new ArrayList<>();
   protected Block rootBlock;
+  protected Routine routine;
   protected Map<String, TableBuffer> bufferMap = new HashMap<>();
   protected Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
   protected Map<String, Routine> routineMap = new HashMap<>();
@@ -70,6 +71,17 @@ public class TreeParserSymbolScope {
   /** Add a FieldLevelWidget for names lookup. */
   private void add(IFieldLevelWidget widget) {
     fieldLevelWidgetMap.put(widget.getName().toLowerCase(), widget);
+  }
+
+  public void setRoutine(Routine routine) {
+    if (this.routine != null) {
+      throw new IllegalStateException();
+    }
+    this.routine = routine;
+  }
+
+  public Routine getRoutine() {
+    return routine;
   }
 
   /**
