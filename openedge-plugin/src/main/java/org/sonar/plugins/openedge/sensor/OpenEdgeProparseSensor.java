@@ -98,6 +98,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   private int numXREF;
   private int numListings;
   private int numFailures;
+  private int ncLocs;
 
   // Timing statistics
   private Map<String, Long> ruleTime = new HashMap<>();
@@ -173,6 +174,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       // Saving LOC and COMMENTS metrics
       context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(
           lexUnit.getMetrics().getLoc()).save();
+      ncLocs += lexUnit.getMetrics().getLoc();
       context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
           lexUnit.getMetrics().getComments()).save();
     }
@@ -276,10 +278,10 @@ public class OpenEdgeProparseSensor implements Sensor {
       return;
 
     StringBuilder data = new StringBuilder(String.format(
-        "proparse,product=%1$s,sid=%2$s files=%3$d,failures=%4$d,parseTime=%5$d,maxParseTime=%6$d,version=\"%7$s\"\n",
+        "proparse,product=%1$s,sid=%2$s files=%3$d,failures=%4$d,parseTime=%5$d,maxParseTime=%6$d,version=\"%7$s\",ncloc=%8$d\n",
         context.runtime().getProduct().toString().toLowerCase(),
         Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID)), numFiles, numFailures,
-        parseTime, maxParseTime, context.runtime().getApiVersion().toString()));
+        parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs));
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       data.append(String.format("rule,product=%1$s,sid=%2$s,rulename=%3$s ruleTime=%4$d\n",
           context.runtime().getProduct().toString().toLowerCase(),
@@ -304,7 +306,8 @@ public class OpenEdgeProparseSensor implements Sensor {
   }
 
   private void logStatistics() {
-    LOG.info("{} files proparse'd, {} XML files, {} listing files, {} failure(s)", numFiles, numXREF, numListings, numFailures);
+    LOG.info("{} files proparse'd, {} XML files, {} listing files, {} failure(s), {} NCLOCs", numFiles, numXREF,
+        numListings, numFailures, ncLocs);
     LOG.info("AST Generation | time={} ms", parseTime);
     LOG.info("XML Parsing    | time={} ms", xmlParseTime);
     // Sort entries by rule name
@@ -379,6 +382,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   private void computeSimpleMetrics(SensorContext context, InputFile file, ParseUnit unit) {
     // Saving LOC and COMMENTS metrics
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(unit.getMetrics().getLoc()).save();
+    ncLocs += unit.getMetrics().getLoc();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
         unit.getMetrics().getComments()).save();
   }
