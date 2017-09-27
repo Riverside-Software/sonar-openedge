@@ -308,7 +308,8 @@ public class OpenEdgeProparseSensor implements Sensor {
   }
 
   private void logStatistics() {
-    LOG.info("{} files proparse'd, {} XML files, {} listing files, {} failure(s)", numFiles, numXREF, numListings, numFailures);
+    LOG.info("{} files proparse'd, {} XML files, {} listing files, {} failure(s), {} NCLOCs, {} comments", numFiles,
+        numXREF, numListings, numFailures, ncLocs, comments);
     LOG.info("AST Generation | time={} ms", parseTime);
     LOG.info("XML Parsing    | time={} ms", xmlParseTime);
     // Sort entries by rule name
