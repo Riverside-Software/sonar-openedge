@@ -40,7 +40,7 @@ public class JPNode extends BaseAST {
 
   private Map<Integer, Integer> attrMap;
   private Map<String, String> attrMapStrings;
-  private Map<Integer, Object> linkMap;
+  private transient Map<Integer, Object> linkMap;
   private Map<Integer, String> stringAttributes;
   private JPNode left;
   private JPNode up;

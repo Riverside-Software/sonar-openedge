@@ -333,4 +333,8 @@ public class PreprocessorParserTest {
     testNoVariable(unit.getTopNode(), "var62");
   }
 
+  public void testIfElseIf() throws Exception {
+    testNoVariable(unit.getTopNode(), "var63");
+    testVariable(unit.getTopNode(), "var64");
+  }
 }

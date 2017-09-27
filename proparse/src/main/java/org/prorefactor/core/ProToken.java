@@ -10,11 +10,14 @@
  *******************************************************************************/ 
 package org.prorefactor.core;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import antlr.CommonHiddenStreamToken;
 
-public class ProToken extends CommonHiddenStreamToken {
+public class ProToken extends CommonHiddenStreamToken implements Serializable {
+  private static final long serialVersionUID = 6330218429653110333L;
+
   private final boolean synthetic;
   private final int fileIndex;
   private final String fileName;
