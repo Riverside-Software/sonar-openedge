@@ -99,7 +99,6 @@ public class OpenEdgeProparseSensor implements Sensor {
   private int numListings;
   private int numFailures;
   private int ncLocs;
-  private int comments;
 
   // Timing statistics
   private Map<String, Long> ruleTime = new HashMap<>();
@@ -178,7 +177,6 @@ public class OpenEdgeProparseSensor implements Sensor {
       ncLocs += lexUnit.getMetrics().getLoc();
       context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
           lexUnit.getMetrics().getComments()).save();
-      comments += lexUnit.getMetrics().getComments();
     }
   }
 
@@ -387,7 +385,6 @@ public class OpenEdgeProparseSensor implements Sensor {
     ncLocs += unit.getMetrics().getLoc();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
         unit.getMetrics().getComments()).save();
-    comments += unit.getMetrics().getComments();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
