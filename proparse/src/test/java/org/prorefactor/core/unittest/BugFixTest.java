@@ -378,6 +378,18 @@ public class BugFixTest {
   }
 
   @Test
+  public void testNoArgFunc() throws Exception {
+    ParseUnit pu = genericTest("noargfunc.p");
+    List<JPNode> nodes = pu.getTopNode().query(NodeTypes.MESSAGE);
+    assertEquals(nodes.get(0).firstChild().firstChild().getType(), NodeTypes.GUID);
+    assertEquals(nodes.get(1).firstChild().firstChild().getType(), NodeTypes.Field_ref);
+    assertEquals(nodes.get(2).firstChild().firstChild().getType(), NodeTypes.TIMEZONE);
+    assertEquals(nodes.get(3).firstChild().firstChild().getType(), NodeTypes.Field_ref);
+    assertEquals(nodes.get(4).firstChild().firstChild().getType(), NodeTypes.MTIME);
+    assertEquals(nodes.get(5).firstChild().firstChild().getType(), NodeTypes.Field_ref);
+  }
+
+  @Test
   public void testLexer01() throws Exception {
     TokenStream stream = genericLex("lex.p");
   }

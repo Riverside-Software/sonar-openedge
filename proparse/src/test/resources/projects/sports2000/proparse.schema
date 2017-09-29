@@ -234,4 +234,9 @@ City CHARACTER 0
 State CHARACTER 0
 PostalCode CHARACTER 0
 Phone CHARACTER 0
+: XXXTbl
+guid CHARACTER 0
+timezone INTEGER 0
+mtime INTEGER 0
+foobar CHARACTER 0
 

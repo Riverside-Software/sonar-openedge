@@ -176,7 +176,7 @@ functioncall throws TreeParserException
   |  #(FRAMELINE (LEFTPAREN ID RIGHTPAREN)? )
   |  #(FRAMEROW (LEFTPAREN ID RIGHTPAREN)? )
   |  #(GETCODEPAGE funargs )
-  |  #(GUID LEFTPAREN (expression)? RIGHTPAREN )
+  |  #(GUID (funargs)? )
   |  #(IF expression THEN expression ELSE expression )
   |  ldbnamefunc 
   |  lengthfunc // is also a pseudfn.
