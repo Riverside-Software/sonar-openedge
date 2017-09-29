@@ -10,19 +10,25 @@
  *******************************************************************************/ 
 package org.prorefactor.core;
 
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Prints out the structure of a JPNode AST as JSON.
  */
 public class JsonNodeLister {
+  private static final Logger LOG = LoggerFactory.getLogger(JsonNodeLister.class);
+
   private final JPNode topNode;
-  private final PrintWriter ofile;
+  private final Writer ofile;
   private final Set<Integer> ignored = new HashSet<>();
 
-  public JsonNodeLister(JPNode topNode, PrintWriter writer, Integer[] ignoredKeywords) {
+  public JsonNodeLister(JPNode topNode, Writer writer, Integer[] ignoredKeywords) {
     this.topNode = topNode;
     this.ofile = writer;
     for (Integer i : ignoredKeywords) {
@@ -34,7 +40,11 @@ public class JsonNodeLister {
    * Print node content to PrintWriter
    */
   public void print() {
-    printSub(topNode, true);
+    try {
+      printSub(topNode, true);
+    } catch (IOException uncaught) {
+      LOG.error("Unable to write output");
+    }
   }
 
   /**
@@ -44,11 +54,9 @@ public class JsonNodeLister {
    * @param firstElem First child of parent element ?
    * @return False if node is skipped
    */
-  private boolean printSub(JPNode node, boolean firstElem) {
+  private boolean printSub(JPNode node, boolean firstElem) throws IOException {
     if (ignored.contains(node.getType()))
       return false;
-//    if ((node.getType() == NodeTypes.LEFTPAREN) || (node.getType() == NodeTypes.RIGHTPAREN) || (node.getType() == NodeTypes.COMMA) || (node.getType() == NodeTypes.PERIOD) || (node.getType() == NodeTypes.LEXCOLON) || (node.getType() == NodeTypes.OBJCOLON) || (node.getType() == NodeTypes.THEN) || (node.getType() == NodeTypes.END))
-//      return false;
     if (!firstElem) {
       ofile.write(',');
     }
@@ -57,7 +65,6 @@ public class JsonNodeLister {
     if (!node.getDirectChildren().isEmpty()) {
       boolean firstChild = true;
       ofile.write(", \"children\": [");
-      ofile.println();
       for (JPNode child : node.getDirectChildren()) {
         // Next element won't be first child anymore if this element is printed
         firstChild &= !printSub(child, firstChild);
@@ -65,12 +72,11 @@ public class JsonNodeLister {
       ofile.write(']');
     }
     ofile.write('}');
-    ofile.println();
     
     return true;
   }
 
-  private void printAttributes(JPNode node) {
+  private void printAttributes(JPNode node) throws IOException {
     ofile.write("\"name\": \"" + NodeTypes.getTypeName(node.getType()));
     if (node.getType() == NodeTypes.ID) {
       ofile.write(" [");

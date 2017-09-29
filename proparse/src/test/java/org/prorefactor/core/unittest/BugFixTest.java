@@ -17,6 +17,8 @@ import static org.testng.Assert.assertNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.core.JPNode;
@@ -25,6 +27,7 @@ import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -47,6 +50,9 @@ public class BugFixTest {
   private RefactorSession session;
   private File tempDir = new File(TEMP_DIR);
 
+  private List<String> jsonOut = new ArrayList<>();
+  private List<String> jsonNames = new ArrayList<>();
+
   @BeforeTest
   public void setUp() throws Exception {
     Injector injector = Guice.createInjector(new UnitTestModule());
@@ -60,6 +66,30 @@ public class BugFixTest {
     tempDir.mkdirs();
   }
 
+  @AfterTest
+  public void tearDown() throws Exception {
+    System.out.println("ici");
+    PrintWriter writer = new PrintWriter(new File(tempDir, "index.html"));
+    writer.println("<!DOCTYPE html><html><head><meta charset=\"utf-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"http://riverside-software.fr/d3-style.css\" />"); 
+    writer.println("<script src=\"http://riverside-software.fr/jquery-1.10.2.min.js\"></script><script src=\"http://riverside-software.fr/d3.v3.min.js\"></script>");
+    writer.println("<script>var data= { \"files\": [");
+    int zz = 1;
+    for (String str : jsonNames) {
+      if (zz > 1) {
+        writer.write(',');
+      }
+      writer.print("{ \"file\": \"" + str + "\", \"var\": \"json" + zz++ + "\" }");
+    }
+    writer.println("]};");
+    zz = 1;
+    for (String str : jsonOut) {
+      writer.println("var json" + zz++ + " = " + str + ";");
+    }
+    writer.println("</script></head><body><div id=\"wrapper\"><div id=\"left\"></div><div id=\"tree-container\"></div></div>");
+    writer.println("<script src=\"http://riverside-software.fr/dndTreeDebug.js\"></script></body></html>");
+    writer.close();
+  }
+
   private ParseUnit genericTest(String file) throws Exception {
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, file), session);
     assertNull(pu.getTopNode());
@@ -69,13 +99,15 @@ public class BugFixTest {
     assertNotNull(pu.getTopNode());
     assertNotNull(pu.getRootScope());
 
-    PrintWriter writer = new PrintWriter(new File(tempDir, file + ".json"));
+    StringWriter writer = new StringWriter();
     JsonNodeLister nodeLister = new JsonNodeLister(pu.getTopNode(), writer,
         new Integer[] {
             NodeTypes.LEFTPAREN, NodeTypes.RIGHTPAREN, NodeTypes.COMMA, NodeTypes.PERIOD, NodeTypes.LEXCOLON,
             NodeTypes.OBJCOLON, NodeTypes.THEN, NodeTypes.END});
     nodeLister.print();
-    writer.close();
+    
+    jsonNames.add(file);
+    jsonOut.add(writer.toString());
 
     return pu;
   }
