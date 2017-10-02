@@ -28,6 +28,7 @@ import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.AfterTest;
+import org.prorefactor.treeparser.symbols.Variable;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -68,7 +69,6 @@ public class BugFixTest {
 
   @AfterTest
   public void tearDown() throws Exception {
-    System.out.println("ici");
     PrintWriter writer = new PrintWriter(new File(tempDir, "index.html"));
     writer.println("<!DOCTYPE html><html><head><meta charset=\"utf-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"http://riverside-software.fr/d3-style.css\" />"); 
     writer.println("<script src=\"http://riverside-software.fr/jquery-1.10.2.min.js\"></script><script src=\"http://riverside-software.fr/d3.v3.min.js\"></script>");
@@ -120,6 +120,14 @@ public class BugFixTest {
     pu.lexAndGenerateMetrics();
     assertNotNull(pu.getMetrics());
     return pu.lex();
+  }
+
+  @Test
+  public void testVarUsage() throws Exception {
+    ParseUnit unit = genericTest("varusage.cls");
+    /* for (Variable v :  unit.getRootScope().getVariables()) {
+      System.out.println(v + " --- " + v.getAllRefsCount());
+    } */
   }
 
   @Test
