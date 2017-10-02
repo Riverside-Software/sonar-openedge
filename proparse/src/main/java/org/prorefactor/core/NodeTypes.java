@@ -829,7 +829,7 @@ public class NodeTypes implements ProParserTokenTypes {
     add(GTHAN, 2, "gt", TI.KEYWORD);
     add(GTOREQUAL, 0, "", TI.NO_FLAGS);
     add(GTORLT, 0, "", TI.NO_FLAGS);
-    add(GUID, 4, "guid", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC);
+    add(GUID, 4, "guid", TI.KEYWORD | TI.MAY_BE_REGULAR_FUNC | TI.MAY_BE_NO_ARG_FUNC);
     add(HANDLE, 6, "handle", TI.KEYWORD);
     add(HAVING, 6, "having", TI.KEYWORD | TI.RESERVED);
     add(HEADER, 6, "header", TI.KEYWORD | TI.RESERVED);

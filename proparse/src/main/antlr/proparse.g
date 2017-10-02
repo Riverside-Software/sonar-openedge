@@ -640,6 +640,7 @@ noargfunc
   |  GENERATEUUID
   |  GATEWAYS
   |  GOPENDING
+  |  GUID
   |  ISATTRSPACE
   |  LASTKEY
   |  MACHINECLASS
