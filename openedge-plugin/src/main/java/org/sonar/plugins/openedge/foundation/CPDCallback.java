@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ICallback;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
@@ -155,10 +156,10 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     if ((node.getLine() == node.getEndLine()) && (node.getColumn() == node.getEndColumn())) {
       return;
     }
-    String str = NodeTypes.getFullText(node.getType());
+    String str = node.getNodeType().getText();
     // Identifiers are also using the same case
     if ((str == null) || (str.trim().length() == 0)) {
-      if (node.getType() == NodeTypes.ID) {
+      if (node.getNodeType() == ABLNodeType.ID) {
         str = node.getText().toLowerCase(Locale.ENGLISH);
       } else {
         str = node.getText().trim();

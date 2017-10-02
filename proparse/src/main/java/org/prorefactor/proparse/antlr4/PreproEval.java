@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.AndOrContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.ComparisonContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.DbTypeFunctionContext;
@@ -387,27 +387,23 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   @Override
   public Object visitKeywordFunction(KeywordFunctionContext ctx) {
     String str = getString(visit(ctx.expr()));
-    int tokenType = -2;
-    tokenType = NodeTypes.testLiteralsTable(str, tokenType);
-    if (tokenType > 0 && NodeTypes.isReserved(tokenType))
-      return NodeTypes.getFullText(str);
-    return null;
+    ABLNodeType nodeType = ABLNodeType.getLiteral(str);
+    if (nodeType == null)
+      return null;
+    else if (nodeType.isReservedKeyword())
+      return nodeType.getText().toUpperCase();
+    else 
+      return null;
   }
 
   @Override
   public Object visitKeywordAllFunction(KeywordAllFunctionContext ctx) {
     String str = getString(visit(ctx.expr()));
-    int tokenType = -2;
-    tokenType = NodeTypes.testLiteralsTable(str, tokenType);
-    if (tokenType > 0 && NodeTypes.isKeywordType(tokenType))
-      return NodeTypes.getFullText(str);
-    else {
-      // KEYWORD-ALL returns a value even for method and attribute
-      // names, but Proparse doesn't track all those. So, we
-      // never return an unknown here, we always return the uppercased
-      // text of whatever was passed us.
-      return str.toUpperCase();
-    }
+    ABLNodeType nodeType = ABLNodeType.getLiteral(str);
+    if (nodeType == null)
+      return null;
+    else
+      return nodeType.getText().toUpperCase();
   }
 
   @Override
@@ -602,30 +598,6 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
     if (o instanceof Boolean)
       return (Boolean) o ? 1 : 0;
     throw new ProEvalException("Error converting to INTEGER.");
-  }
-
-  static String keyword(Object o) {
-    String s = getString(o);
-    int ttype = -2;
-    ttype = NodeTypes.testLiteralsTable(s, ttype);
-    if (ttype > 0 && NodeTypes.isReserved(ttype))
-      return NodeTypes.getFullText(s);
-    return null;
-  }
-
-  static String keywordall(Object o) {
-    String s = getString(o);
-    int ttype = -2;
-    ttype = NodeTypes.testLiteralsTable(s, ttype);
-    if (ttype > 0 && NodeTypes.isKeywordType(ttype))
-      return NodeTypes.getFullText(s);
-    else {
-      // KEYWORD-ALL returns a value even for method and attribute
-      // names, but Proparse doesn't track all those. So, we
-      // never return an unknown here, we always return the uppercased
-      // text of whatever was passed us.
-      return s.toUpperCase();
-    }
   }
 
   static String lefttrim(Object a, Object b) {

@@ -158,9 +158,6 @@ public class ParseUnit {
       parser.initAntlr4(session, lexer.getFilenameList());
       parser.program();
       ((JPNode) parser.getAST()).backLinkAndFinalize();
-
-      // Deal with trailing hidden tokens
-      // JPNode.finalizeTrailingHidden((JPNode) parser.getAST());
       lexer.parseComplete();
 
       macroGraph = lexer.getMacroGraph();

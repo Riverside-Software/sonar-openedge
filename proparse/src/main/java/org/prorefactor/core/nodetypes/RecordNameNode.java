@@ -18,8 +18,6 @@ import org.prorefactor.treeparser.BufferScope;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 
 public class RecordNameNode extends JPNode {
-  private static final long serialVersionUID = 8045143516803910613L;
-
   public RecordNameNode(ProToken t) {
     super(t);
   }

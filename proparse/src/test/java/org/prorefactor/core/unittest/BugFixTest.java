@@ -21,6 +21,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.NodeTypes;
@@ -392,12 +393,12 @@ public class BugFixTest {
   public void testNoArgFunc() throws Exception {
     ParseUnit pu = genericTest("noargfunc.p");
     List<JPNode> nodes = pu.getTopNode().query(NodeTypes.MESSAGE);
-    assertEquals(nodes.get(0).firstChild().firstChild().getType(), NodeTypes.GUID);
-    assertEquals(nodes.get(1).firstChild().firstChild().getType(), NodeTypes.Field_ref);
-    assertEquals(nodes.get(2).firstChild().firstChild().getType(), NodeTypes.TIMEZONE);
-    assertEquals(nodes.get(3).firstChild().firstChild().getType(), NodeTypes.Field_ref);
-    assertEquals(nodes.get(4).firstChild().firstChild().getType(), NodeTypes.MTIME);
-    assertEquals(nodes.get(5).firstChild().firstChild().getType(), NodeTypes.Field_ref);
+    assertEquals(nodes.get(0).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.GUID);
+    assertEquals(nodes.get(1).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.FIELD_REF);
+    assertEquals(nodes.get(2).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.TIMEZONE);
+    assertEquals(nodes.get(3).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.FIELD_REF);
+    assertEquals(nodes.get(4).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.MTIME);
+    assertEquals(nodes.get(5).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.FIELD_REF);
   }
 
   @Test

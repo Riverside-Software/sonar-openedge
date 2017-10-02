@@ -77,8 +77,8 @@ public class JsonNodeLister {
   }
 
   private void printAttributes(JPNode node) throws IOException {
-    ofile.write("\"name\": \"" + NodeTypes.getTypeName(node.getType()));
-    if (node.getType() == NodeTypes.ID) {
+    ofile.write("\"name\": \"" + node.getNodeType());
+    if (node.getNodeType() == ABLNodeType.ID) {
       ofile.write(" [");
       ofile.write(node.getText().replace('\'', ' ').replace('"', ' '));
       ofile.write("]");

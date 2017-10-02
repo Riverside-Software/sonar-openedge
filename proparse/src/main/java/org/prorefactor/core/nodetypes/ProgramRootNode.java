@@ -13,8 +13,6 @@ package org.prorefactor.core.nodetypes;
 import org.prorefactor.core.ProToken;
 
 public class ProgramRootNode extends BlockNode {
-  private static final long serialVersionUID = 7160983003100786995L;
-
   public ProgramRootNode(ProToken t) {
     super(t);
   }

@@ -20,7 +20,7 @@ import org.antlr.v4.runtime.IntStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ABLNodeType;
 
 /**
  * Review the token list at an OBJCOLON token.
@@ -80,10 +80,10 @@ public class TokenList implements TokenSource {
     ProToken nxt = (ProToken) source.nextToken();
     while (true) {
       queue.offer(nxt);
-      if (nxt.getType() == NodeTypes.OBJCOLON) {
+      if (nxt.getNodeType() == ABLNodeType.OBJCOLON) {
         reviewObjcolon();
       }
-      if ((nxt.getType() == NodeTypes.OBJCOLON) || (nxt.getType() == Token.EOF))
+      if ((nxt.getNodeType() == ABLNodeType.OBJCOLON) || (nxt.getNodeType() == ABLNodeType.EOF_ANTLR4))
         break;
       nxt = (ProToken) source.nextToken();
     }
@@ -99,7 +99,7 @@ public class TokenList implements TokenSource {
     try {
       // Store comments and whitespaces before the colon
       tok = queue.removeLast();
-      while ((tok.getType() == NodeTypes.WS) || (tok.getType() == NodeTypes.COMMENT)) {
+      while ((tok.getNodeType() == ABLNodeType.WS) || (tok.getNodeType() == ABLNodeType.COMMENT)) {
         comments.addFirst(tok);
         tok = queue.pollLast();
       }
@@ -107,12 +107,12 @@ public class TokenList implements TokenSource {
       foundNamedot = false;
       while (true) {
         // There can be space in front of a NAMEDOT in a table or field name. We don't want to fiddle with those here.
-        if ((tok.getType() == PreprocessorParser.WS) || (tok.getType() == PreprocessorParser.COMMENT)) {
+        if ((tok.getNodeType() == ABLNodeType.WS) || (tok.getNodeType() == ABLNodeType.COMMENT)) {
           break;
         }
   
         // If previous is NAMEDOT, then we add both tokens
-        if ((queue.peekLast() != null) && (queue.peekLast().getType() == NodeTypes.NAMEDOT)) {
+        if ((queue.peekLast() != null) && (queue.peekLast().getNodeType() == ABLNodeType.NAMEDOT)) {
           clsName.addFirst(tok);
           clsName.addFirst(queue.removeLast());
           tok = queue.removeLast();
@@ -146,8 +146,8 @@ public class TokenList implements TokenSource {
       queue.addAll(comments);
     } else {
       // Not namedotted, so if it's reserved and not a system handle, convert to ID.
-      if (NodeTypes.isReserved(tok.getType()) && (!NodeTypes.isSystemHandleName(tok.getType())))
-        tok.setType(PreprocessorParser.ID);
+      if (tok.getNodeType().isReservedKeyword() && !tok.getNodeType().isSystemHandleName())
+        tok.setNodeType(ABLNodeType.ID);
       queue.addLast(tok);
       queue.addAll(comments);
     }

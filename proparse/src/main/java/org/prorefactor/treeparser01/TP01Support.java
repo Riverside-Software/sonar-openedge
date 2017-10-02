@@ -362,7 +362,7 @@ public class TP01Support extends TP01Action {
     JPNode idNode = (JPNode) idAST;
     String name = idNode.getText();
     if (name == null || name.length() == 0)
-      name = NodeTypes.getTokenName(idNode.getType());
+      name = idNode.getNodeType().name();
     Event event = new Event(name, currentScope);
     event.setDefOrIdNode(defNode);
     currSymbol = event;
@@ -457,7 +457,7 @@ public class TP01Support extends TP01Action {
        * aggregate_opt, we are defining variable/symbols using the COUNT|MAXIMUM|TOTAL|whatever node. I added a check
        * for empty text from the "id" node.
        */
-      name = NodeTypes.getTokenName(idNode.getType());
+      name = idNode.getNodeType().name();
     }
     Variable variable = new Variable(name, currentScope, parameter);
     variable.setDefOrIdNode(defNode);

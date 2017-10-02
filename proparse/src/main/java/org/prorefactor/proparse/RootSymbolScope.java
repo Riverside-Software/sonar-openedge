@@ -13,7 +13,7 @@ package org.prorefactor.proparse;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.refactor.RefactorSession;
 
 import eu.rssw.pct.TypeInfo;
@@ -94,9 +94,9 @@ public class RootSymbolScope extends SymbolScope {
     // Methods take precedent over built-in functions. The compiler (10.2b)
     // does not seem to try recognize by function/method signature.
     if (methodSet.contains(lname))
-      return NodeTypes.LOCAL_METHOD_REF;
+      return ABLNodeType.LOCAL_METHOD_REF.getType();
     if (functionSet.contains(lname))
-      return NodeTypes.USER_FUNC;
+      return ABLNodeType.USER_FUNC.getType();
 
     return 0;
   }

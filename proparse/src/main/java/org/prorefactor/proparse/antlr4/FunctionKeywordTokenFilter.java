@@ -17,7 +17,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ABLNodeType;
 
 /**
  * Convert some tokens to another type when not followed by LEFTPAREN:
@@ -41,24 +41,24 @@ public class FunctionKeywordTokenFilter implements TokenSource {
       return heap.poll();
     }
 
-    Token currToken = source.nextToken();
-    if ((currToken.getType() == NodeTypes.ASC) || (currToken.getType() == NodeTypes.LOG)
-        || (currToken.getType() == NodeTypes.GETCODEPAGE) || (currToken.getType() == NodeTypes.GETCODEPAGES)) {
-      Token nxt = source.nextToken();
+    ProToken currToken = (ProToken) source.nextToken();
+    if ((currToken.getNodeType() == ABLNodeType.ASC) || (currToken.getNodeType() == ABLNodeType.LOG)
+        || (currToken.getNodeType() == ABLNodeType.GETCODEPAGE) || (currToken.getNodeType() == ABLNodeType.GETCODEPAGES)) {
+      ProToken nxt = (ProToken) source.nextToken();
       while ((nxt.getType() != Token.EOF) && (nxt.getChannel() != Token.DEFAULT_CHANNEL)) {
         heap.offer(nxt);
-        nxt = source.nextToken();
+        nxt = (ProToken) source.nextToken();
       }
       heap.offer(nxt);
-      if (nxt.getType() != NodeTypes.LEFTPAREN) {
-        if (currToken.getType() == NodeTypes.ASC)
-          ((ProToken) currToken).setType(NodeTypes.ASCENDING);
-        else if (currToken.getType() == NodeTypes.LOG)
-          ((ProToken) currToken).setType(NodeTypes.LOGICAL);
-        else if (currToken.getType() == NodeTypes.GETCODEPAGE)
-          ((ProToken) currToken).setType(NodeTypes.GETCODEPAGES);
-      } else if (currToken.getType() == NodeTypes.GETCODEPAGES)
-        ((ProToken) currToken).setType(NodeTypes.GETCODEPAGE);
+      if (nxt.getNodeType() != ABLNodeType.LEFTPAREN) {
+        if (currToken.getNodeType() == ABLNodeType.ASC)
+          currToken.setNodeType(ABLNodeType.ASCENDING);
+        else if (currToken.getNodeType() == ABLNodeType.LOG)
+          currToken.setNodeType(ABLNodeType.LOGICAL);
+        else if (currToken.getNodeType() == ABLNodeType.GETCODEPAGE)
+          currToken.setNodeType(ABLNodeType.GETCODEPAGES);
+      } else if (currToken.getNodeType() == ABLNodeType.GETCODEPAGES)
+        currToken.setNodeType(ABLNodeType.GETCODEPAGE);
     }
     return currToken;
   }

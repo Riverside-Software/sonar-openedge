@@ -94,14 +94,14 @@ public class JPNode implements AST {
      * tokens. This function will have to change slightly if we change the layout of hidden tokens.
      */
     JPNode tailNode = down;
-    if (tailNode == null || tailNode.getType() == NodeTypes.Program_tail)
+    if (tailNode == null || tailNode.getNodeType() == ABLNodeType.PROGRAM_TAIL)
       return;
     JPNode lastNode = tailNode;
-    while (tailNode != null && tailNode.getType() != NodeTypes.Program_tail) {
+    while (tailNode != null && tailNode.getNodeType() != ABLNodeType.PROGRAM_TAIL) {
       lastNode = tailNode;
       tailNode = tailNode.getNextSibling();
     }
-    if (tailNode == null || tailNode.getType() != NodeTypes.Program_tail)
+    if (tailNode == null || tailNode.getNodeType() != ABLNodeType.PROGRAM_TAIL)
       return;
     lastNode = lastNode.getLastDescendant();
     ProToken lastT = lastNode.getHiddenAfter();
@@ -267,6 +267,10 @@ public class JPNode implements AST {
 
   // Attributes from ProToken
 
+  public ABLNodeType getNodeType() {
+    return token.getNodeType();
+  }
+
   /**
    * Source number in the macro tree.
    * 
@@ -327,14 +331,12 @@ public class JPNode implements AST {
   /**
    * First Natural Child is found by repeating firstChild() until a natural node is found. If the start node is a
    * natural node, then it is returned.
-   * 
-   * @see NodeTypes#isNatural(int)
    */
   public JPNode firstNaturalChild() {
-    if (NodeTypes.isNatural(getType()))
+    if (token.isNatural())
       return this;
     for (JPNode n = down; n != null; n = n.down) {
-      if (NodeTypes.isNatural(n.getType()))
+      if (n.token.isNatural())
         return n;
     }
     return null;
@@ -436,7 +438,7 @@ public class JPNode implements AST {
     JPNode nextNatural = getNextSibling();
     if (nextNatural == null)
       return null;
-    if (nextNatural.getType() != NodeTypes.Program_tail) {
+    if (nextNatural.getNodeType() != ABLNodeType.PROGRAM_TAIL) {
       nextNatural = nextNatural.firstNaturalChild();
       if (nextNatural == null)
         return null;
@@ -464,7 +466,7 @@ public class JPNode implements AST {
     }
     switch (key) {
       case IConstants.NODE_TYPE_KEYWORD:
-        return NodeTypes.isKeywordType(getType()) ? 1 : 0;
+        return getNodeType().isKeyword() ? 1 : 0;
       case IConstants.ABBREVIATED:
         return isAbbreviated() ? 1 : 0;
       case IConstants.FROM_USER_DICT:
@@ -492,7 +494,7 @@ public class JPNode implements AST {
     }
     switch (attrNum) {
       case IConstants.NODE_TYPE_KEYWORD:
-        if (NodeTypes.isKeywordType(getType()))
+        if (getNodeType().isKeyword())
           return "t";
         else
           return "";
@@ -618,7 +620,7 @@ public class JPNode implements AST {
   public boolean hasProparseDirective(String directive) {
     ProToken tok = getHiddenBefore();
     while (tok != null) {
-      if (tok.getType() == NodeTypes.PROPARSEDIRECTIVE) {
+      if (tok.getNodeType() == ABLNodeType.PROPARSEDIRECTIVE) {
         String str = tok.getText().trim();
         if (str.startsWith("prolint-nowarn(") && str.charAt(str.length() - 1) == ')') {
           for (String rule : Splitter.on(',').omitEmptyStrings().trimResults().split(
@@ -639,7 +641,7 @@ public class JPNode implements AST {
       }
       // And for synthetic ASSIGN statements, we have to look for the first grandchild
       // See root node of assignstate2
-      if ((child != null) && (token.getType() == NodeTypes.ASSIGN)) {
+      if ((child != null) && (token.getNodeType() == ABLNodeType.ASSIGN)) {
         child = child.getFirstChild();
         if ((child != null) && child.hasProparseDirective(directive))
           return true;
@@ -730,11 +732,11 @@ public class JPNode implements AST {
    * @return The full name of the annotation, or an empty string is node is not an annotation
    */
   public String getAnnotationName() {
-    if (getType() != NodeTypes.ANNOTATION)
+    if (getNodeType() != ABLNodeType.ANNOTATION)
       return "";
     StringBuilder annName = new StringBuilder(token.getText().substring(1));
     JPNode tok = down;
-    while ((tok != null) && (tok.getType() != NodeTypes.PERIOD) && (tok.getType() != NodeTypes.LEFTPAREN)) {
+    while ((tok != null) && (tok.getNodeType() != ABLNodeType.PERIOD) && (tok.getNodeType() != ABLNodeType.LEFTPAREN)) {
       annName.append(tok.getText());
       tok = tok.getNextSibling();
     }
@@ -757,16 +759,14 @@ public class JPNode implements AST {
   }
 
   public boolean isAbbreviated() {
-    return NodeTypes.isKeywordType(getType()) && NodeTypes.isAbbreviated(getType(), getText());
+    return token.getNodeType().isAbbreviated(getText());
   }
 
   /**
    * Is this a natural node (from real source text)? If not, then it is a synthetic node, added just for tree structure.
-   * 
-   * @see NodeTypes#isNatural(int)
    */
   public boolean isNatural() {
-    return NodeTypes.isNatural(getType());
+    return token.isNatural();
   }
 
   /** Does this node have the Proparse STATEHEAD attribute? */
@@ -835,7 +835,7 @@ public class JPNode implements AST {
   @Override
   public String toString() {
     StringBuilder buff = new StringBuilder();
-    buff.append(NodeTypes.getTokenName(getType())).append(" \"").append(getText()).append("\" ").append(
+    buff.append(token.getNodeType()).append(" \"").append(getText()).append("\" ").append(
         getFilename()).append(':').append(getLine()).append(':').append(getColumn());
     return buff.toString();
   }
@@ -851,8 +851,7 @@ public class JPNode implements AST {
     StringBuilder bldr = new StringBuilder();
     for (JPNode node : list) {
       for (ProToken t = node.getHiddenFirst(); t != null; t = t.getNext()) {
-        int type = t.getType();
-        if (type == NodeTypes.COMMENT || type == NodeTypes.WS)
+        if ((t.getNodeType() == ABLNodeType.COMMENT) || (t.getNodeType() == ABLNodeType.WS))
           bldr.append(t.getText());
       }
       bldr.append(node.getText());

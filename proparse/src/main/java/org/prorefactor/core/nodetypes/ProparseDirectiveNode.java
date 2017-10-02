@@ -16,8 +16,6 @@ import org.prorefactor.core.ProToken;
 import com.google.common.base.Strings;
 
 public class ProparseDirectiveNode extends JPNode {
-  private static final long serialVersionUID = -8215081305962889482L;
-
   private final String directiveText;
 
   public ProparseDirectiveNode(ProToken t) {
