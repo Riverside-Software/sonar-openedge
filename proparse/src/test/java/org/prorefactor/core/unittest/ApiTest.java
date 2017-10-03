@@ -19,6 +19,8 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 
+import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
@@ -60,7 +62,7 @@ public class ApiTest {
     ParseUnit pu = new ParseUnit(f, session);
     pu.treeParser01();
     JPNode node = pu.getTopNode().findDirectChild(NodeTypes.DEFINE);
-    assertEquals("VARIABLE", node.attrGetS("state2"));
+    assertEquals(ABLNodeType.VARIABLE.getType(), node.attrGet(IConstants.STATE2));
   }
 
   @Test

@@ -10,7 +10,7 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
 import org.prorefactor.treeparser.symbols.Query;
@@ -34,30 +34,30 @@ public final class SymbolFactory {
 
   public static Symbol create(int symbolType, String name, TreeParserSymbolScope scope) {
     switch (symbolType) {
-      case NodeTypes.DATASET:
+      case ProParserTokenTypes.DATASET:
         return new Dataset(name, scope);
-      case NodeTypes.DATASOURCE:
+      case ProParserTokenTypes.DATASOURCE:
         return new Datasource(name, scope);
-      case NodeTypes.QUERY:
+      case ProParserTokenTypes.QUERY:
         return new Query(name, scope);
-      case NodeTypes.STREAM:
+      case ProParserTokenTypes.STREAM:
         return new Stream(name, scope);
       // Widgets
-      case NodeTypes.BROWSE:
+      case ProParserTokenTypes.BROWSE:
         return new Browse(name, scope);
-      case NodeTypes.BUTTON:
+      case ProParserTokenTypes.BUTTON:
         return new Button(name, scope);
-      case NodeTypes.FRAME:
+      case ProParserTokenTypes.FRAME:
         return new Frame(name, scope);
-      case NodeTypes.IMAGE:
+      case ProParserTokenTypes.IMAGE:
         return new Image(name, scope);
-      case NodeTypes.MENU:
+      case ProParserTokenTypes.MENU:
         return new Menu(name, scope);
-      case NodeTypes.MENUITEM:
+      case ProParserTokenTypes.MENUITEM:
         return new MenuItem(name, scope);
-      case NodeTypes.RECTANGLE:
+      case ProParserTokenTypes.RECTANGLE:
         return new Rectangle(name, scope);
-      case NodeTypes.SUBMENU:
+      case ProParserTokenTypes.SUBMENU:
         return new Submenu(name, scope);
       default:
         assert false : "Unexpected values for SymbolFactory" + " " + symbolType + " " + name;

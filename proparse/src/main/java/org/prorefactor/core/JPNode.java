@@ -63,18 +63,9 @@ public class JPNode implements AST {
   }
 
   /**
-   * Call after tree has been created, in order to deal with tree traversing and trailing nodes
-   */
-  public void backLinkAndFinalize() {
-    // Assert that this is done on the top level node
-    backLink();
-    finalizeTrailingHidden();
-  }
-
-  /**
    * Set parent and prevSibling links
    */
-  private void backLink() {
+  protected void backLink() {
     JPNode currNode = down;
     while (currNode != null) {
       currNode.up = this;
@@ -86,7 +77,7 @@ public class JPNode implements AST {
     }
   }
 
-  private void finalizeTrailingHidden() {
+  protected void finalizeTrailingHidden() {
     /*
      * The node passed in should be the Program_root. The last child of the Program_root should be the Program_tail, as
      * set by the parser. (See propar.g) We want to find the last descendant of the last child before Program_tail, and
@@ -492,8 +483,6 @@ public class JPNode implements AST {
         return getNodeType().isKeyword() ? 1 : 0;
       case IConstants.ABBREVIATED:
         return isAbbreviated() ? 1 : 0;
-      case IConstants.FROM_USER_DICT:
-        return NodeTypes.userLiteralTest(getText(), getType()) ? 1 : 0;
       case IConstants.SOURCENUM:
         return token.getMacroSourceNum();
       default:
@@ -502,46 +491,17 @@ public class JPNode implements AST {
   }
 
   public String attrGetS(int attrNum) {
+    if (attrNum != IConstants.QUALIFIED_CLASS_INT)
+      throw new IllegalArgumentException("Invalid value " + attrNum);
     if ((stringAttributes != null) && stringAttributes.containsKey(attrNum)) {
       return stringAttributes.get(attrNum);
     }
-    if (attrMap != null && attrMap.containsKey(attrNum)) {
-      if (attrNum == IConstants.STATE2) {
-        String typename = NodeTypes.getTypeName(attrMap.get(attrNum));
-        return typename == null ? "" : typename;
-      } else {
-        String ret = attrEq(attrMap.get(attrNum));
-        if (ret != null)
-          return ret;
-      }
-    }
-    switch (attrNum) {
-      case IConstants.NODE_TYPE_KEYWORD:
-        if (getNodeType().isKeyword())
-          return "t";
-        else
-          return "";
-      case IConstants.ABBREVIATED:
-        if (isAbbreviated())
-          return "t";
-        else
-          return "";
-      case IConstants.FULLTEXT:
-        if (NodeTypes.isKeywordType(getType()))
-          return NodeTypes.getFullText(getText());
-        else
-          return getText();
-      case IConstants.FROM_USER_DICT:
-        if (NodeTypes.userLiteralTest(getText(), getType()))
-          return "t";
-        else
-          return "";
-      default:
-        return "";
-    }
+    return "";
   }
 
   public String attrGetS(String attrName) {
+    if (IConstants.QUALIFIED_CLASS_STRING.equalsIgnoreCase(attrName))
+      throw new IllegalArgumentException("Invalid value " + attrName);
     if (attrMapStrings != null) {
       String ret = attrMapStrings.get(attrName);
       if (ret != null)
@@ -622,10 +582,6 @@ public class JPNode implements AST {
 
   private static Integer attrEq(String attrName) {
     return attrStrEqs.inverse().get(attrName);
-  }
-
-  private static String attrEq(int attrNum) {
-    return attrStrEqs.get(attrNum);
   }
 
   public boolean hasTableBuffer() {

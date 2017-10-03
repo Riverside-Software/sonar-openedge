@@ -13,9 +13,9 @@ package org.prorefactor.proparse;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.refactor.RefactorSession;
@@ -72,21 +72,21 @@ public class ParserSupport {
   int abbrevDatatype(String text) {
     String s = text.toLowerCase();
     if ("cha".startsWith(s))
-      return NodeTypes.CHARACTER;
+      return ProParserTokenTypes.CHARACTER;
     if ("da".equals(s) || "dat".equals(s))
-      return NodeTypes.DATE;
+      return ProParserTokenTypes.DATE;
     if ("de".equals(s))
-      return NodeTypes.DECIMAL;
+      return ProParserTokenTypes.DECIMAL;
     if ("i".equals(s) || "in".equals(s))
-      return NodeTypes.INTEGER;
+      return ProParserTokenTypes.INTEGER;
     if ("logical".startsWith(s))
-      return NodeTypes.LOGICAL;
+      return ProParserTokenTypes.LOGICAL;
     if ("rec".equals(s) || "reci".equals(s))
-      return NodeTypes.RECID;
+      return ProParserTokenTypes.RECID;
     if ("rowi".equals(s))
-      return NodeTypes.ROWID;
+      return ProParserTokenTypes.ROWID;
     if ("widget-h".startsWith(s) && s.length() >= 4)
-      return NodeTypes.WIDGETHANDLE;
+      return ProParserTokenTypes.WIDGETHANDLE;
     return 0;
   }
 
@@ -153,7 +153,7 @@ public class ParserSupport {
     JPNode currNode = node;
     JPNode nextNode = node.getNextSibling();
     while (nextNode != null) {
-      if (currNode.getType() == NodeTypes.FILENAME && nextNode.getType() == NodeTypes.FILENAME
+      if (currNode.getNodeType() == ABLNodeType.FILENAME && nextNode.getNodeType() == ABLNodeType.FILENAME
           && nextNode.getHiddenBefore() == null) {
         currNode.setHiddenAfter(nextNode.getHiddenAfter());
         currNode.setText(currNode.getText() + nextNode.getText());
@@ -203,8 +203,8 @@ public class ParserSupport {
   /** Returns true if the lookahead is a table name, and not a var name. */
   boolean isTableName(Token lt1, Token lt2, Token lt3, Token lt4) {
     String name = lt1.getText();
-    if (lt2.getType() == NodeTypes.NAMEDOT) {
-      if (lt4.getType() == NodeTypes.NAMEDOT) {
+    if (lt2.getType() == ProParserTokenTypes.NAMEDOT) {
+      if (lt4.getType() == ProParserTokenTypes.NAMEDOT) {
         // Can't be more than one dot (db.table) in a table reference.
         // Maybe this is a field reference, but it sure isn't a table.
         return false;

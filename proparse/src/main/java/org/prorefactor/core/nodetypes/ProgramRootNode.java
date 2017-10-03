@@ -17,4 +17,12 @@ public class ProgramRootNode extends BlockNode {
     super(t);
   }
 
+  /**
+   * Call after tree has been created, in order to deal with tree traversing and trailing nodes
+   */
+  public void backLinkAndFinalize() {
+    backLink();
+    finalizeTrailingHidden();
+  }
+
 }

@@ -11,13 +11,13 @@
 package org.prorefactor.treeparser;
 
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.symbols.Symbol;
 
 public class Parameter {
 
   private boolean bind = false;
-  private int progressType = NodeTypes.VARIABLE;
+  private int progressType = ProParserTokenTypes.VARIABLE;
   private JPNode directionNode;
   private Symbol symbol;
 

@@ -10,7 +10,7 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser.symbols.widgets;
 
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Widget;
 
@@ -25,7 +25,7 @@ public class Image extends Widget implements IFieldLevelWidget {
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.IMAGE;
+    return ProParserTokenTypes.IMAGE;
   }
 
 }

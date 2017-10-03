@@ -157,7 +157,7 @@ public class ParseUnit {
       ProParser parser = new ProParser(lexer.getANTLR2TokenStream(true));
       parser.initAntlr4(session, lexer.getFilenameList());
       parser.program();
-      ((JPNode) parser.getAST()).backLinkAndFinalize();
+      ((ProgramRootNode) parser.getAST()).backLinkAndFinalize();
       lexer.parseComplete();
 
       macroGraph = lexer.getMacroGraph();

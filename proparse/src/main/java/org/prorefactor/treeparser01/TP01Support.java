@@ -19,12 +19,12 @@ import java.util.Map;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.BufferScope;
@@ -265,7 +265,7 @@ public class TP01Support implements ITreeParserAction {
   public void clearState(JPNode headNode) {
     LOG.trace("Entering clearState {}", headNode);
     JPNode firstChild = headNode.getFirstChild();
-    if (firstChild.getType() == NodeTypes.FRAME)
+    if (firstChild.getType() == ProParserTokenTypes.FRAME)
       frameStack.simpleFrameInitStatement(headNode, firstChild.nextNode(), currentBlock);
   }
 
@@ -284,10 +284,10 @@ public class TP01Support implements ITreeParserAction {
     currSymbol.setAsNode(asNode);
     Primative primative = (Primative) currSymbol;
     JPNode typeNode = asNode.nextNode();
-    if (typeNode.getType() == NodeTypes.CLASS)
+    if (typeNode.getType() == ProParserTokenTypes.CLASS)
       typeNode = typeNode.nextNode();
-    if (typeNode.getType() == NodeTypes.TYPE_NAME) {
-      primative.setDataType(DataType.getDataType(NodeTypes.CLASS));
+    if (typeNode.getType() == ProParserTokenTypes.TYPE_NAME) {
+      primative.setDataType(DataType.getDataType(ProParserTokenTypes.CLASS));
       primative.setClassName(typeNode);
     } else {
       primative.setDataType(DataType.getDataType(typeNode.getType()));
@@ -303,7 +303,7 @@ public class TP01Support implements ITreeParserAction {
     JPNode exprNode = extentNode.getFirstChild();
     // If there is no expression node, then it's an "indeterminate extent".
     // If it's not a numeric literal, then we give up.
-    if (exprNode == null || exprNode.getType() != NodeTypes.NUMBER) {
+    if (exprNode == null || exprNode.getType() != ProParserTokenTypes.NUMBER) {
       primative.setExtent(-1);
     } else {
       primative.setExtent(Integer.parseInt(exprNode.getText()));
@@ -330,7 +330,7 @@ public class TP01Support implements ITreeParserAction {
   @Override
   public Browse defineBrowse(JPNode defAST, JPNode idAST) {
     LOG.trace("Entering defineBrowse {} - {}", defAST, idAST);
-    Browse browse = (Browse) defineSymbol(NodeTypes.BROWSE, defAST, idAST);
+    Browse browse = (Browse) defineSymbol(ProParserTokenTypes.BROWSE, defAST, idAST);
     frameStack.nodeOfDefineBrowse(browse, (JPNode) defAST);
     return browse;
   }
@@ -484,7 +484,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public Variable defineVariable(JPNode defAST, JPNode idAST, int dataType, boolean parameter) {
-    assert dataType != NodeTypes.CLASS;
+    assert dataType != ProParserTokenTypes.CLASS;
     Variable v = defineVariable(defAST, idAST, parameter);
     v.setDataType(DataType.getDataType(dataType));
     return v;
@@ -512,9 +512,9 @@ public class TP01Support implements ITreeParserAction {
   @Override
   public void widattr(JPNode widAST, JPNode idAST, ContextQualifier cq) throws TreeParserException {
     LOG.trace("Entering {} mode {}", idAST, cq);
-    if (idAST.getType() == NodeTypes.THISOBJECT) {
+    if (idAST.getType() == ProParserTokenTypes.THISOBJECT) {
       JPNode tok = idAST.getNextSibling();
-      if (tok.getType() == NodeTypes.OBJCOLON) {
+      if (tok.getType() == ProParserTokenTypes.OBJCOLON) {
         JPNode fld = tok.getNextSibling();
         String name = fld.getText();
 
@@ -553,13 +553,8 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-<<<<<<< HEAD
-  public void field(AST refAST, AST idAST, ContextQualifier cq, TableNameResolution resolution) throws TreeParserException {
-    LOG.trace("Entering field {} {} {} {}", refAST, idAST, cq, resolution);
-    JPNode idNode = (JPNode) idAST;
-=======
   public void field(JPNode refAST, JPNode idNode, ContextQualifier cq, TableNameResolution resolution) throws TreeParserException {
->>>>>>> 54ecf76... JPNode as base type in tree parsers
+    LOG.trace("Entering field {} {} {} {}", refAST, idAST, cq, resolution);
     FieldRefNode refNode = (FieldRefNode) refAST;
     String name = idNode.getText();
     FieldLookupResult result = null;
@@ -571,9 +566,9 @@ public class TP01Support implements ITreeParserAction {
     if (refNode.attrGet(IConstants.INLINE_VAR_DEF) == 1)
       addToSymbolScope(defineVariable(idNode, idNode));
 
-    if ((refNode.getParent().getType() == NodeTypes.USING && refNode.getParent().getParent().getType() == NodeTypes.RECORD_NAME)
-        || (refNode.getFirstChild().getType() == NodeTypes.INPUT &&
-            (refNode.getNextSibling() == null || refNode.getNextSibling().getType() != NodeTypes.OBJCOLON))) {
+    if ((refNode.getParent().getType() == ProParserTokenTypes.USING && refNode.getParent().getParent().getType() == ProParserTokenTypes.RECORD_NAME)
+        || (refNode.getFirstChild().getType() == ProParserTokenTypes.INPUT &&
+            (refNode.getNextSibling() == null || refNode.getNextSibling().getType() != ProParserTokenTypes.OBJCOLON))) {
       // First condition : there seems to be an implicit INPUT in USING phrases in a record phrase.
       // Second condition :I've seen at least one instance of "INPUT objHandle:attribute" in code,
       // which for some reason compiled clean. As far as I'm aware, the INPUT was
@@ -601,7 +596,7 @@ public class TP01Support implements ITreeParserAction {
         // As a result, some questionable code will fail to parse here if we don't also ignore those here.
         // Sigh. This would be a good lint rule.
         int parentType = refNode.getParent().getType();
-        if (parentType == NodeTypes.FIELDS || parentType == NodeTypes.EXCEPT)
+        if (parentType == ProParserTokenTypes.FIELDS || parentType == ProParserTokenTypes.EXCEPT)
           return;
         throw new TreeParserException(
             idNode.getFilename() + ":" + idNode.getLine() + " Unknown field or variable name: " + fieldPart);
@@ -746,7 +741,7 @@ public class TP01Support implements ITreeParserAction {
     BlockNode blockNode = (BlockNode) idNode.getParent();
     TreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(idNode.getText(), definingScope, currentScope);
-    r.setProgressType(NodeTypes.FUNCTION);
+    r.setProgressType(ProParserTokenTypes.FUNCTION);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     definingScope.add(r);
@@ -805,7 +800,7 @@ public class TP01Support implements ITreeParserAction {
     BlockNode blockNode = (BlockNode) idNode.getParent();
     TreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(idNode.getText(), definingScope, currentScope);
-    r.setProgressType(NodeTypes.METHOD);
+    r.setProgressType(ProParserTokenTypes.METHOD);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     definingScope.add(r);
@@ -899,10 +894,10 @@ public class TP01Support implements ITreeParserAction {
     LOG.trace("Entering paramNoName {}", typeNode);
     Variable variable = new Variable("", currentScope);
     currSymbol = variable;
-    if (typeNode.getType() == NodeTypes.CLASS)
+    if (typeNode.getType() == ProParserTokenTypes.CLASS)
       typeNode = typeNode.nextNode();
-    if (typeNode.getType() == NodeTypes.TYPE_NAME) {
-      variable.setDataType(DataType.getDataType(NodeTypes.CLASS));
+    if (typeNode.getType() == ProParserTokenTypes.TYPE_NAME) {
+      variable.setDataType(DataType.getDataType(ProParserTokenTypes.CLASS));
       variable.setClassName(typeNode);
     } else {
       variable.setDataType(DataType.getDataType(typeNode.getType()));
@@ -926,7 +921,7 @@ public class TP01Support implements ITreeParserAction {
     TreeParserSymbolScope definingScope = currentScope;
     scopeAdd(blockNode);
     Routine r = new Routine(idAST.getText(), definingScope, currentScope);
-    r.setProgressType(NodeTypes.PROCEDURE);
+    r.setProgressType(ProParserTokenTypes.PROCEDURE);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     definingScope.add(r);
@@ -949,7 +944,7 @@ public class TP01Support implements ITreeParserAction {
     getParseUnit().setTopNode(blockNode);
     getParseUnit().setRootScope(rootScope);
     Routine r = new Routine("", rootScope, rootScope);
-    r.setProgressType(NodeTypes.Program_root);
+    r.setProgressType(ProParserTokenTypes.Program_root);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     rootScope.add(r);
@@ -1059,7 +1054,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public void routineReturnDatatype(JPNode datatypeNode) {
-    if (datatypeNode.getType() == NodeTypes.CLASS)
+    if (datatypeNode.getType() == ProParserTokenTypes.CLASS)
       datatypeNode = datatypeNode.nextNode();
     currentRoutine.setReturnDatatypeNode(datatypeNode);
   }
@@ -1193,10 +1188,10 @@ public class TP01Support implements ITreeParserAction {
   public void viewState(JPNode headAST) {
     // The VIEW statement grammar uses gwidget, so we have to do some
     // special searching for FRAME to initialize.
-    JPNode headNode = (JPNode) headAST;
-    for (JPNode frameNode : headNode.query(NodeTypes.FRAME)) {
+    JPNode headNode = headAST;
+    for (JPNode frameNode : headNode.query(ProParserTokenTypes.FRAME)) {
       int parentType = frameNode.getParent().getType();
-      if (parentType == NodeTypes.Widget_ref || parentType == NodeTypes.IN_KW) {
+      if (parentType == ProParserTokenTypes.Widget_ref || parentType == ProParserTokenTypes.IN_KW) {
         frameStack.simpleFrameInitStatement(headNode, frameNode.nextNode(), currentBlock);
         return;
       }
