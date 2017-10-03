@@ -391,6 +391,37 @@ public class JPNode implements AST {
   /**
    * Get an array of all descendant nodes (including this node) of a given type
    */
+  public List<JPNode> query(ABLNodeType type, ABLNodeType... findTypes) {
+    JPNodeQuery query = new JPNodeQuery(type, findTypes);
+    walk(query);
+
+    return query.getResult();
+  }
+
+  /**
+   * Get an array of all descendant nodes (including this node) of a given type
+   */
+  public List<JPNode> queryMainFile(ABLNodeType type, ABLNodeType... findTypes) {
+    JPNodeQuery query = new JPNodeQuery(false, true, type, findTypes);
+    walk(query);
+
+    return query.getResult();
+  }
+
+  /**
+   * Get an array of all descendant nodes (including this node) of a given type
+   */
+  public List<JPNode> queryStateHead(ABLNodeType type, ABLNodeType... findTypes) {
+    JPNodeQuery query = new JPNodeQuery( true, type, findTypes);
+    walk(query);
+
+    return query.getResult();
+  }
+
+  /**
+   * Get an array of all descendant nodes (including this node) of a given type
+   */
+  @Deprecated
   public List<JPNode> query(Integer... findTypes) {
     JPNodeQuery query = new JPNodeQuery(findTypes);
     walk(query);
@@ -401,6 +432,7 @@ public class JPNode implements AST {
   /**
    * Get an array of all descendant nodes (including this node) of a given type
    */
+  @Deprecated
   public List<JPNode> queryMainFile(Integer... findTypes) {
     JPNodeQuery query = new JPNodeQuery(false, true, findTypes);
     walk(query);
@@ -411,18 +443,9 @@ public class JPNode implements AST {
   /**
    * Get an array of all descendant nodes (including this node) of a given type
    */
+  @Deprecated
   public List<JPNode> queryStateHead(Integer... findTypes) {
     JPNodeQuery query = new JPNodeQuery(true, findTypes);
-    walk(query);
-
-    return query.getResult();
-  }
-
-  /**
-   * Get an array of all descendant nodes (including this node) of a given type
-   */
-  public List<JPNode> queryStateHeadInMainFile(Integer... findTypes) {
-    JPNodeQuery query = new JPNodeQuery(true, true, findTypes);
     walk(query);
 
     return query.getResult();
@@ -668,13 +691,12 @@ public class JPNode implements AST {
     boolean hasComment = false;
     int filenum = getFileIndex();
     for (ProToken t = getHiddenBefore(); t != null; t = (ProToken) t.getHiddenBefore()) {
-      int hiddenType = t.getType();
       if (t.getFileIndex() != filenum)
         break;
-      if (hiddenType == NodeTypes.WS) {
+      if (t.getNodeType() == ABLNodeType.WS) {
         if (t.getText().indexOf('\n') > -1)
           buff.insert(0, '\n');
-      } else if (hiddenType == NodeTypes.COMMENT) {
+      } else if (t.getNodeType() == ABLNodeType.COMMENT) {
         buff.insert(0, t.getText());
         hasComment = true;
       } else {

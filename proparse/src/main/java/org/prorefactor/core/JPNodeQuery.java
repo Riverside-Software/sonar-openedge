@@ -11,31 +11,49 @@
 package org.prorefactor.core;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 class JPNodeQuery implements ICallback<List<JPNode>> {
   private final List<JPNode> result = new ArrayList<>();
-  private final Set<Integer> findTypes;
+  private final Set<ABLNodeType> findTypes;
   private final boolean stateHeadOnly;
   private final boolean mainFileOnly;
 
+  @Deprecated
   public JPNodeQuery(Integer... types) {
     this(false, false, types);
   }
 
+  @Deprecated
   public JPNodeQuery(boolean stateHeadOnly, Integer... types) {
     this(stateHeadOnly, false, types);
   }
 
+  @Deprecated
   public JPNodeQuery(boolean stateHeadOnly, boolean mainFileOnly, Integer... types) {
     this.stateHeadOnly = stateHeadOnly;
     this.mainFileOnly = mainFileOnly;
-    findTypes = new HashSet<>();
+    this.findTypes = new HashSet<>();
     for (Integer i : types) {
-      findTypes.add(i);
+      findTypes.add(ABLNodeType.getNodeType(i));
     }
+  }
+
+  public JPNodeQuery(ABLNodeType type, ABLNodeType... types) {
+    this(false, false, type, types);
+  }
+
+  public JPNodeQuery(boolean stateHeadOnly, ABLNodeType type, ABLNodeType... types) {
+    this(stateHeadOnly, false, type , types);
+  }
+
+  public JPNodeQuery(boolean stateHeadOnly, boolean mainFileOnly, ABLNodeType type,  ABLNodeType... types) {
+    this.stateHeadOnly = stateHeadOnly;
+    this.mainFileOnly = mainFileOnly;
+    this.findTypes = EnumSet.of(type, types);
   }
 
   @Override
@@ -51,7 +69,7 @@ class JPNodeQuery implements ICallback<List<JPNode>> {
     if (stateHeadOnly && !node.isStateHead())
       return true;
 
-    if (findTypes.isEmpty() || findTypes.contains(node.getType())) {
+    if (findTypes.isEmpty() || findTypes.contains(node.getNodeType())) {
       result.add(node);
     }
 
