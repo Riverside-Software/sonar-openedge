@@ -193,8 +193,8 @@ public class ParseUnit {
     if (this.getTopNode() == null) {
       parse();
     }
-    TreeParser01 tp = new TreeParser01(session, new TP01Support(session));
-    tp.getActionObject().setParseUnit(this);
+    ITreeParserAction action = new TP01Support(session, this);
+    TreeParser01 tp = new TreeParser01(session, action);
     treeParser(tp);
     LOGGER.trace("Exiting ParseUnit#treeParser01()");
   }
@@ -207,7 +207,6 @@ public class ParseUnit {
     if (this.getTopNode() == null)
       parse();
     TreeParser01 tp = new TreeParser01(session, action);
-    tp.getActionObject().setParseUnit(this);
     treeParser(tp);
   }
 

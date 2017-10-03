@@ -1650,7 +1650,7 @@ public enum ABLNodeType {
   }
 
   public boolean isAbbreviated(String txt) {
-    if (Strings.isNullOrEmpty(text) || !isKeyword())
+    if (Strings.isNullOrEmpty(txt) || !isKeyword())
       return false;
     String lowText = txt.toLowerCase();
     if (text.startsWith(lowText)) {

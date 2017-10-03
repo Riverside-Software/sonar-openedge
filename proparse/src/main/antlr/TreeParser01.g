@@ -43,6 +43,7 @@ options {
   importVocab = Base;
   defaultErrorHandler = false;
   classHeaderSuffix = IJPTreeParser;
+  ASTLabelType = "JPNode";
 }
 
 // This is added to top of the class definitions
@@ -208,7 +209,7 @@ recordfunargs throws TreeParserException
   ;
 
 parameter throws TreeParserException
-{action.paramForCall(_t);}
+{action.paramForCall(parameter_AST_in);}
   :  (  #(  BUFFER bt:tbl[ContextQualifier.INIT]
         {  action.paramProgressType(BUFFER);
           action.paramSymbol(#bt);
@@ -236,7 +237,7 @@ parameter_arg throws TreeParserException
       {action.paramSymbol(#dsh);}
     |  PARAMETER expression EQUAL expression // for RUN STORED-PROCEDURE.
       {action.paramProgressType(PARAMETER);}
-    |  ID AS {action.paramNoName(_t);} (CLASS TYPE_NAME | datatype_com_native | datatype_var )
+    |  ID AS {action.paramNoName(parameter_arg_AST_in);} (CLASS TYPE_NAME | datatype_com_native | datatype_var )
     |  ex:expression (AS datatype_com)? {action.paramExpression(#ex);}
     )
     (BYPOINTER|BYVARIANTPOINTER)?
@@ -869,7 +870,7 @@ defineparameterstate throws TreeParserException
           action.paramProgressType(BUFFER);
         }
         (PRESELECT)? (label_constant)? (#(FIELDS (fld1[ContextQualifier.SYMBOL])* ))?
-      |  {action.paramForRoutine(_t);}
+      |  {action.paramForRoutine(defineparameterstate_AST_in);}
         (INPUT|OUTPUT|INPUTOUTPUT|RETURN) PARAMETER
         (  TABLE FOR tb1:tbl[ContextQualifier.TEMPTABLESYMBOL] defineparam_ab
           {  action.paramProgressType(TEMPTABLE);
@@ -1340,7 +1341,7 @@ framephrase throws TreeParserException
 functionstate throws TreeParserException
   :  #(  f:FUNCTION id:ID {action.funcBegin(#f, #id);}
       (RETURNS|RETURN)?
-      {action.routineReturnDatatype(_t);}
+      {action.routineReturnDatatype(functionstate_AST_in);}
       ( CLASS TYPE_NAME | datatype_var ) (extentphrase)?
       (PRIVATE)?
       ( function_params )?
@@ -1357,7 +1358,7 @@ functionstate throws TreeParserException
     {  action.funcEnd(#f); }
   ;
 function_param throws TreeParserException
-{action.paramForRoutine(_t);}
+{action.paramForRoutine(function_param_AST_in);}
   :  (
       #(  b:BUFFER (id:ID)? FOR rec:tbl[ContextQualifier.SYMBOL] (PRESELECT)?
         {  if (#id!=null) {
@@ -1404,7 +1405,7 @@ function_param_arg throws TreeParserException
       action.defLike(#li);
       action.addToSymbolScope(stack.pop());
     }
-  |  {action.paramNoName(_t);} // unnamed function arg - just the datatype
+  |  {action.paramNoName(function_param_arg_AST_in);} // unnamed function arg - just the datatype
     (CLASS TYPE_NAME | datatype_var) (extentphrase_def_symbol)?
   ;
 
@@ -1451,10 +1452,10 @@ messagestate throws TreeParserException
   ;
 
 methodstate throws TreeParserException
-{  AST returnTypeNode = null;
+{  JPNode returnTypeNode = null;
 }
   :  #(  m:METHOD def_modifiers
-      {returnTypeNode = _t;}
+      {returnTypeNode = (JPNode) _t;}
       (  VOID
       |  datatype ( (extentphrase)=> (extentphrase) | )
       )

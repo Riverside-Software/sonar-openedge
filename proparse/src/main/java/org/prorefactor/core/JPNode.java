@@ -835,8 +835,8 @@ public class JPNode implements AST {
   @Override
   public String toString() {
     StringBuilder buff = new StringBuilder();
-    buff.append(token.getNodeType()).append(" \"").append(getText()).append("\" ").append(
-        getFilename()).append(':').append(getLine()).append(':').append(getColumn());
+    buff.append(token.getNodeType()).append(" \"").append(getText()).append("\" F").append(
+        getFileIndex()).append('/').append(getLine()).append(':').append(getColumn());
     return buff.toString();
   }
 

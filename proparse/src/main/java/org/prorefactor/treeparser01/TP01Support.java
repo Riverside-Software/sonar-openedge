@@ -52,13 +52,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import antlr.SemanticException;
-import antlr.collections.AST;
 
 /**
  * Provides all functions called by TreeParser01. TreeParser01 does not, itself, define any actions. Instead, it only
  * makes calls to the functions defined in this class.
  */
-public class TP01Support extends TP01Action {
+public class TP01Support implements ITreeParserAction {
   private static final Logger LOG = LoggerFactory.getLogger(TP01Support.class);
 
   /*
@@ -81,7 +80,10 @@ public class TP01Support extends TP01Action {
 
   private Routine currentRoutine;
   private Routine rootRoutine;
+
   private final RefactorSession refSession;
+  private final ParseUnit unit;
+  private final TreeParserRootSymbolScope rootScope;
 
   /**
    * The symbol last, or currently being, defined. Needed when we have complex syntax like DEFINE id ... LIKE, where we
@@ -90,7 +92,6 @@ public class TP01Support extends TP01Action {
   private Symbol currSymbol;
 
   private TreeParserSymbolScope currentScope;
-  private TreeParserRootSymbolScope rootScope;
   private TableBuffer lastTableReferenced;
   private TableBuffer prevTableReferenced;
   private TableBuffer currDefTable;
@@ -98,12 +99,17 @@ public class TP01Support extends TP01Action {
   // Temporary work-around
   private boolean inDefineEvent = false;
 
-  public TP01Support(RefactorSession session) {
+  public TP01Support(RefactorSession session, ParseUnit unit) {
     this.refSession = session;
+    this.unit = unit;
+    this.rootScope = new TreeParserRootSymbolScope(refSession);
 
-    rootScope = new TreeParserRootSymbolScope(refSession);
     currentScope = rootScope;
-    setParseUnit(new ParseUnit(null, session));
+  }
+
+  @Override
+  public ParseUnit getParseUnit() {
+    return unit;
   }
 
   /** Called at the *end* of the statement that defines the symbol. */
@@ -116,7 +122,7 @@ public class TP01Support extends TP01Action {
 
   /** Beginning of a block. */
   @Override
-  public void blockBegin(AST blockAST) {
+  public void blockBegin(JPNode blockAST) {
     LOG.trace("Entering blockBegin {}", blockAST);
     BlockNode blockNode = (BlockNode) blockAST;
     currentBlock = pushBlock(new Block(currentBlock, blockNode));
@@ -132,12 +138,14 @@ public class TP01Support extends TP01Action {
 
   /** The ID node in a BROWSE ID pair. */
   @Override
-  public void browseRef(AST idAST) {
+  public void browseRef(JPNode idAST) {
+    LOG.trace("Entering browseRef {}", idAST);
     frameStack.browseRefNode((JPNode) idAST, currentScope);
   }
 
   @Override
-  public void bufferRef(AST idAST) throws TreeParserException {
+  public void bufferRef(JPNode idAST) throws TreeParserException {
+    LOG.trace("Entering bufferRef {}", idAST);
     TableBuffer tableBuffer = currentScope.lookupBuffer(idAST.getText());
     if (tableBuffer != null) {
       tableBuffer.noteReference(ContextQualifier.SYMBOL);
@@ -145,9 +153,8 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void callBegin(AST callAST) {
-    LOG.trace("Entering callBegin {}", callAST);
-    JPNode callNode = (JPNode) callAST;
+  public void callBegin(JPNode callNode) {
+    LOG.trace("Entering callBegin {}", callNode);
     Call call = new Call(callNode);
     callNode.setCall(call);
     wipCalls.addFirst(call);
@@ -155,15 +162,15 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void callEnd() {
+    LOG.trace("Entering callEnd {}");
     // Record the call in the current context.
     currentScope.registerCall(wipCalls.getFirst());
     wipCalls.removeFirst();
   }
 
   @Override
-  public void callConstructorBegin(AST callAST) {
-    LOG.trace("Entering callConstructorBegin {}", callAST);
-    JPNode callNode = (JPNode) callAST;
+  public void callConstructorBegin(JPNode callNode) {
+    LOG.trace("Entering callConstructorBegin {}", callNode);
     Call call = new Call(callNode);
     callNode.setCall(call);
     wipCalls.addFirst(call);
@@ -171,15 +178,15 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void callConstructorEnd() {
+    LOG.trace("Entering callConstructorEnd");
     // Record the call in the current context.
     currentScope.registerCall(wipCalls.getFirst());
     wipCalls.removeFirst();
   }
 
   @Override
-  public void callMethodBegin(AST callAST) {
-    LOG.trace("Entering callMethodBegin {}", callAST);
-    JPNode callNode = (JPNode) callAST;
+  public void callMethodBegin(JPNode callNode) {
+    LOG.trace("Entering callMethodBegin {}", callNode);
     Call call = new Call(callNode);
     callNode.setCall(call);
     wipCalls.addFirst(call);
@@ -187,6 +194,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void callMethodEnd() {
+    LOG.trace("Entering callMethodEnd {}");
     // Record the call in the current context.
     currentScope.registerCall(wipCalls.getFirst());
     wipCalls.removeFirst();
@@ -200,7 +208,8 @@ public class TP01Support extends TP01Action {
    * local-scoped named buffer using that same name.
    */
   @Override
-  public void canFindBegin(AST canfindAST, AST recordAST) {
+  public void canFindBegin(JPNode canfindAST, JPNode recordAST) {
+    LOG.trace("Entering canFindBegin {} - {}", canfindAST, recordAST);
     RecordNameNode recordNode = (RecordNameNode) recordAST;
     // Keep a ref to the current block...
     Block b = currentBlock;
@@ -227,14 +236,14 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void canFindEnd(AST canfindAST) {
+  public void canFindEnd(JPNode canfindAST) {
+    LOG.trace("Entering canFindEnd {}", canfindAST);
     scopeClose(canfindAST);
   }
 
   @Override
-  public void classState(AST classAST, AST abstractKw, AST finalKw, AST serializableKw) {
-    LOG.trace("Entering classState {}", classAST);
-    JPNode classNode = (JPNode) classAST;
+  public void classState(JPNode classNode, JPNode abstractKw, JPNode finalKw, JPNode serializableKw) {
+    LOG.trace("Entering classState {}", classNode);
     JPNode idNode = classNode.getFirstChild();
     rootScope.setClassName(idNode.getText());
     rootScope.setTypeInfo(refSession.getTypeInfo(idNode.getText()));
@@ -244,9 +253,8 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void interfaceState(AST ast) {
-    LOG.trace("Entering interfaceState {}", ast);
-    JPNode classNode = (JPNode) ast;
+  public void interfaceState(JPNode classNode) {
+    LOG.trace("Entering interfaceState {}", classNode);
     JPNode idNode = classNode.getFirstChild();
     rootScope.setClassName(idNode.getText());
     rootScope.setTypeInfo(refSession.getTypeInfo(idNode.getText()));
@@ -254,15 +262,16 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void clearState(AST headAST) {
-    JPNode headNode = (JPNode) headAST;
+  public void clearState(JPNode headNode) {
+    LOG.trace("Entering clearState {}", headNode);
     JPNode firstChild = headNode.getFirstChild();
     if (firstChild.getType() == NodeTypes.FRAME)
       frameStack.simpleFrameInitStatement(headNode, firstChild.nextNode(), currentBlock);
   }
 
   @Override
-  public void datasetTable(AST tableAST) {
+  public void datasetTable(JPNode tableAST) {
+    LOG.trace("Entering datasetTable {}", tableAST);
     RecordNameNode tableNode = (RecordNameNode) tableAST;
     Dataset dataset = (Dataset) currSymbol;
     dataset.addBuffer(tableNode.getTableBuffer());
@@ -270,8 +279,8 @@ public class TP01Support extends TP01Action {
 
   /** The tree parser calls this at an AS node */
   @Override
-  public void defAs(AST asAST) {
-    JPNode asNode = (JPNode) asAST;
+  public void defAs(JPNode asNode) {
+    LOG.trace("Entering defAs {}", asNode);
     currSymbol.setAsNode(asNode);
     Primative primative = (Primative) currSymbol;
     JPNode typeNode = asNode.nextNode();
@@ -288,8 +297,8 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void defExtent(AST extentAST) {
-    JPNode extentNode = (JPNode) extentAST;
+  public void defExtent(JPNode extentNode) {
+    LOG.trace("Entering defExtent {}", extentNode);
     Primative primative = (Primative) currSymbol;
     JPNode exprNode = extentNode.getFirstChild();
     // If there is no expression node, then it's an "indeterminate extent".
@@ -303,8 +312,8 @@ public class TP01Support extends TP01Action {
 
   /** The tree parser calls this at a LIKE node */
   @Override
-  public void defLike(AST likeAST) {
-    JPNode likeNode = (JPNode) likeAST;
+  public void defLike(JPNode likeNode) {
+    LOG.trace("Entering defLike {}", likeNode);
     currSymbol.setLikeNode(likeNode);
     Primative likePrim = (Primative) likeNode.nextNode().getSymbol();
     Primative newPrim = (Primative) currSymbol;
@@ -319,7 +328,8 @@ public class TP01Support extends TP01Action {
 
   /** Called at the start of a DEFINE BROWSE statement. */
   @Override
-  public Browse defineBrowse(AST defAST, AST idAST) {
+  public Browse defineBrowse(JPNode defAST, JPNode idAST) {
+    LOG.trace("Entering defineBrowse {} - {}", defAST, idAST);
     Browse browse = (Browse) defineSymbol(NodeTypes.BROWSE, defAST, idAST);
     frameStack.nodeOfDefineBrowse(browse, (JPNode) defAST);
     return browse;
@@ -330,8 +340,8 @@ public class TP01Support extends TP01Action {
    * parameter init should be true.
    */
   @Override
-  public void defineBuffer(AST defAST, AST idAST, AST tableAST, boolean init) {
-    JPNode idNode = (JPNode) idAST;
+  public void defineBuffer(JPNode defAST, JPNode idNode, JPNode tableAST, boolean init) {
+    LOG.trace("Entering defineBuffer {} {} {} {}", defAST, idNode, tableAST, init);
     ITable table = astTableLink(tableAST);
     TableBuffer bufSymbol = currentScope.defineBuffer(idNode.getText(), table);
     currSymbol = bufSymbol;
@@ -349,7 +359,8 @@ public class TP01Support extends TP01Action {
    * @param tableAST The RECORD_NAME node. Must already have the Table symbol linked to it.
    */
   @Override
-  public void defineBufferForTrigger(AST tableAST) {
+  public void defineBufferForTrigger(JPNode tableAST) {
+    LOG.trace("Entering defineBufferForTrigger {}", tableAST);
     ITable table = astTableLink(tableAST);
     TableBuffer bufSymbol = currentScope.defineBuffer("", table);
     currentBlock.getBufferForReference(bufSymbol); // Create the BufferScope
@@ -357,9 +368,8 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public Event defineEvent(AST defAST, AST idAST) {
-    JPNode defNode = (JPNode) defAST;
-    JPNode idNode = (JPNode) idAST;
+  public Event defineEvent(JPNode defNode, JPNode idNode) {
+    LOG.trace("Entering defineEvent {}", defNode, idNode);
     String name = idNode.getText();
     if (name == null || name.length() == 0)
       name = idNode.getNodeType().name();
@@ -371,15 +381,14 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public Symbol defineSymbol(int symbolType, AST defAST, AST idAST) {
+  public Symbol defineSymbol(int symbolType, JPNode defNode, JPNode idNode) {
+    LOG.trace("Entering defineSymbol {}", symbolType, defNode, idNode);
     /*
      * Some notes: We need to create the Symbol right away, because further actions in the grammar might need to set
      * attributes on it. We can't add it to the scope yet, because of statements like this: def var xyz like xyz. The
      * tree parser is responsible for calling addToScope at the end of the statement or when it is otherwise safe to do
      * so.
      */
-    JPNode defNode = (JPNode) defAST;
-    JPNode idNode = (JPNode) idAST;
     Symbol symbol = SymbolFactory.create(symbolType, idNode.getText(), currentScope);
     symbol.setDefOrIdNode(defNode);
     currSymbol = symbol;
@@ -397,8 +406,8 @@ public class TP01Support extends TP01Action {
    * @see #defineTableFieldFinalize(Object)
    */
   @Override
-  public Object defineTableFieldInitialize(AST idAST) {
-    JPNode idNode = (JPNode) idAST;
+  public Object defineTableFieldInitialize(JPNode idNode) {
+    LOG.trace("Entering defineTableFieldInitialize {}", idNode);
     FieldBuffer fieldBuff = rootScope.defineTableFieldDelayedAttach(idNode.getText(), currDefTable);
     currSymbol = fieldBuff;
     fieldBuff.setDefOrIdNode(idNode);
@@ -408,11 +417,13 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void defineTableFieldFinalize(Object obj) {
+    LOG.trace("Entering defineTableFieldFinalize {}", obj);
     ((FieldBuffer) obj).getField().setTable(currDefTable.getTable());
   }
 
   @Override
-  public void defineTableLike(AST tableAST) {
+  public void defineTableLike(JPNode tableAST) {
+    LOG.trace("Entering defineTableLike {}", tableAST);
     // Get table for "LIKE table"
     ITable table = astTableLink(tableAST);
     // For each field in "table", create a field def in currDefTable
@@ -422,6 +433,7 @@ public class TP01Support extends TP01Action {
   }
 
   public void defineTable(JPNode defNode, JPNode idNode, int storeType) {
+    LOG.trace("Entering defineTable {} {} {}", defNode, idNode, storeType);
     TableBuffer buffer = rootScope.defineTable(idNode.getText(), storeType);
     buffer.setDefOrIdNode(defNode);
     currSymbol = buffer;
@@ -430,25 +442,24 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void defineTemptable(AST defAST, AST idAST) {
+  public void defineTemptable(JPNode defAST, JPNode idAST) {
     defineTable((JPNode) defAST, (JPNode) idAST, IConstants.ST_TTABLE);
   }
 
   @Override
-  public Variable defineVariable(AST defAST, AST idAST) {
+  public Variable defineVariable(JPNode defAST, JPNode idAST) {
     return defineVariable(defAST, idAST, false);
   }
 
   @Override
-  public Variable defineVariable(AST defAST, AST idAST, boolean parameter) {
+  public Variable defineVariable(JPNode defNode, JPNode idNode, boolean parameter) {
+    LOG.trace("Entering defineVariable {} {} {}", defNode, idNode, parameter);
     /*
      * Some notes: We need to create the Variable Symbol right away, because further actions in the grammar might need
      * to set attributes on it. We can't add it to the scope yet, because of statements like this: def var xyz like xyz.
      * The tree parser is responsible for calling addToScope at the end of the statement or when it is otherwise safe to
      * do so.
      */
-    JPNode defNode = (JPNode) defAST;
-    JPNode idNode = (JPNode) idAST;
     String name = idNode.getText();
     if (name == null || name.length() == 0) {
       /*
@@ -467,12 +478,12 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public Variable defineVariable(AST defAST, AST idAST, int dataType) {
+  public Variable defineVariable(JPNode defAST, JPNode idAST, int dataType) {
     return defineVariable(defAST, idAST, dataType, false);
   }
 
   @Override
-  public Variable defineVariable(AST defAST, AST idAST, int dataType, boolean parameter) {
+  public Variable defineVariable(JPNode defAST, JPNode idAST, int dataType, boolean parameter) {
     assert dataType != NodeTypes.CLASS;
     Variable v = defineVariable(defAST, idAST, parameter);
     v.setDataType(DataType.getDataType(dataType));
@@ -480,12 +491,12 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public Variable defineVariable(AST defAST, AST idAST, AST likeAST) {
+  public Variable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST) {
     return defineVariable(defAST, idAST, likeAST, false);
   }
 
   @Override
-  public Variable defineVariable(AST defAST, AST idAST, AST likeAST, boolean parameter) {
+  public Variable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST, boolean parameter) {
     Variable v = defineVariable(defAST, idAST, parameter);
     FieldRefNode likeRefNode = (FieldRefNode) likeAST;
     v.setDataType(likeRefNode.getDataType());
@@ -494,17 +505,17 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void defineWorktable(AST defAST, AST idAST) {
+  public void defineWorktable(JPNode defAST, JPNode idAST) {
     defineTable((JPNode) defAST, (JPNode) idAST, IConstants.ST_WTABLE);
   }
 
   @Override
-  public void widattr(AST widAST, AST idAST, ContextQualifier cq) throws TreeParserException {
-    LOG.trace("Entering widattr {} in mode {}", idAST, cq);
+  public void widattr(JPNode widAST, JPNode idAST, ContextQualifier cq) throws TreeParserException {
+    LOG.trace("Entering {} mode {}", idAST, cq);
     if (idAST.getType() == NodeTypes.THISOBJECT) {
-      AST tok = idAST.getNextSibling();
+      JPNode tok = idAST.getNextSibling();
       if (tok.getType() == NodeTypes.OBJCOLON) {
-        AST fld = tok.getNextSibling();
+        JPNode fld = tok.getNextSibling();
         String name = fld.getText();
 
         FieldLookupResult result =  currentBlock.lookupField(name, true);
@@ -542,9 +553,13 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
+<<<<<<< HEAD
   public void field(AST refAST, AST idAST, ContextQualifier cq, TableNameResolution resolution) throws TreeParserException {
     LOG.trace("Entering field {} {} {} {}", refAST, idAST, cq, resolution);
     JPNode idNode = (JPNode) idAST;
+=======
+  public void field(JPNode refAST, JPNode idNode, ContextQualifier cq, TableNameResolution resolution) throws TreeParserException {
+>>>>>>> 54ecf76... JPNode as base type in tree parsers
     FieldRefNode refNode = (FieldRefNode) refAST;
     String name = idNode.getText();
     FieldLookupResult result = null;
@@ -554,7 +569,7 @@ public class TP01Support extends TP01Action {
     // Check if this is a Field_ref being "inline defined"
     // If so, we define it right now.
     if (refNode.attrGet(IConstants.INLINE_VAR_DEF) == 1)
-      addToSymbolScope(defineVariable(idAST, idAST));
+      addToSymbolScope(defineVariable(idNode, idNode));
 
     if ((refNode.getParent().getType() == NodeTypes.USING && refNode.getParent().getParent().getType() == NodeTypes.RECORD_NAME)
         || (refNode.getFirstChild().getType() == NodeTypes.INPUT &&
@@ -652,7 +667,8 @@ public class TP01Support extends TP01Action {
    * @author pcd
    */
   @Override
-  public void fnvExpression(AST node) {
+  public void fnvExpression(JPNode node) {
+    LOG.trace("fnvExpression  {}", node);
     wipExpression = new Expression((JPNode) node);
   }
 
@@ -662,7 +678,9 @@ public class TP01Support extends TP01Action {
    * @author pcd
    */
   @Override
-  public void fnvFilename(AST node) {
+  public void fnvFilename(JPNode node) {
+    LOG.trace("Entering fnvFilename {}", node);
+
     Expression exp = new Expression((JPNode) node);
     exp.setValue(node.getText());
     wipExpression = exp;
@@ -670,25 +688,30 @@ public class TP01Support extends TP01Action {
 
   /** Called from Form_item node */
   @Override
-  public void formItem(AST ast) {
+  public void formItem(JPNode ast) {
+    LOG.trace("Entering formItem {}", ast);
     frameStack.formItem((JPNode) ast);
   }
 
   /** Called from DO|REPEAT|FOR blocks. */
   @Override
-  public void frameBlockCheck(AST ast) {
+  public void frameBlockCheck(JPNode ast) {
+    LOG.trace("Entering frameBlockCheck {}", ast);
     frameStack.nodeOfBlock((JPNode) ast, currentBlock);
   }
 
   /** Called at tree parser DEFINE FRAME statement. */
   @Override
-  public void frameDef(AST defAST, AST idAST) {
+  public void frameDef(JPNode defAST, JPNode idAST) {
+    LOG.trace("Entering frameDef {} {}", defAST, idAST);
     frameStack.nodeOfDefineFrame((JPNode) defAST, (JPNode) idAST, currentScope);
   }
 
   /** This is a specialization of frameInitializingStatement, called for ENABLE|UPDATE|PROMPT-FOR. */
   @Override
-  public void frameEnablingStatement(AST ast) {
+  public void frameEnablingStatement(JPNode ast) {
+    LOG.trace("Entering frameEnablingStatement {}", ast);
+
     // Flip this flag before calling nodeOfInitializingStatement.
     frameStack.statementIsEnabler();
     frameStack.nodeOfInitializingStatement((JPNode) ast, currentBlock);
@@ -696,7 +719,7 @@ public class TP01Support extends TP01Action {
 
   /** This is called at the beginning of a frame affecting statement, with the statement head node. */
   @Override
-  public void frameInitializingStatement(AST ast) {
+  public void frameInitializingStatement(JPNode ast) {
     frameStack.nodeOfInitializingStatement((JPNode) ast, currentBlock);
   }
 
@@ -707,21 +730,22 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void frameRef(AST idAST) {
+  public void frameRef(JPNode idAST) {
     frameStack.frameRefNode((JPNode) idAST, currentScope);
   }
 
   @Override
-  public void funcBegin(AST funcAST, AST idAST) {
+  public void funcBegin(JPNode funcAST, JPNode idNode) {
+    LOG.trace("Entering funcBegin {} {}", funcAST, idNode);
+
     // John: Need some comments here. Why don't I just fetch any
     // function forward scope right away? Why wait until funcDef()?
     // Why bother with a funcForward map specifically, rather than
     // just a funcScope map generally?
     scopeAdd(funcAST);
-    JPNode idNode = (JPNode) idAST;
     BlockNode blockNode = (BlockNode) idNode.getParent();
     TreeParserSymbolScope definingScope = currentScope.getParentScope();
-    Routine r = new Routine(idAST.getText(), definingScope, currentScope);
+    Routine r = new Routine(idNode.getText(), definingScope, currentScope);
     r.setProgressType(NodeTypes.FUNCTION);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
@@ -730,7 +754,8 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void funcDef(AST funcAST, AST idAST) {
+  public void funcDef(JPNode funcAST, JPNode idAST) {
+    LOG.trace("Entering funcDef {} {}", funcAST, idAST);
     /*
      * If this function definition had a function forward declaration, then we use the block and scope from that
      * declaration, in case it is where the parameters were defined. (You can define the params in the FORWARD, and
@@ -754,28 +779,32 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void funcEnd(AST funcAST) {
+  public void funcEnd(JPNode funcAST) {
+    LOG.trace("Entering funcEnd {}", funcAST);
     scopeClose(funcAST);
     currentRoutine = rootRoutine;
   }
 
   @Override
-  public void funcForward(AST idAST) {
+  public void funcForward(JPNode idAST) {
+    LOG.trace("Entering funcForward {}", idAST);
     funcForwards.put(idAST.getText(), currentScope);
   }
 
   @Override
-  public void lexat(AST fieldRefAST) {
+  public void lexat(JPNode fieldRefAST) {
+    LOG.trace("Entering lexAt {}", fieldRefAST);
     frameStack.lexAt((JPNode) fieldRefAST);
   }
 
   @Override
-  public void methodBegin(AST blockAST, AST idAST) {
+  public void methodBegin(JPNode blockAST, JPNode idNode) {
+    LOG.trace("Entering methodBegin{}", blockAST, idNode);
+
     scopeAdd(blockAST);
-    JPNode idNode = (JPNode) idAST;
     BlockNode blockNode = (BlockNode) idNode.getParent();
     TreeParserSymbolScope definingScope = currentScope.getParentScope();
-    Routine r = new Routine(idAST.getText(), definingScope, currentScope);
+    Routine r = new Routine(idNode.getText(), definingScope, currentScope);
     r.setProgressType(NodeTypes.METHOD);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
@@ -784,13 +813,14 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void methodEnd(AST blockAST) {
+  public void methodEnd(JPNode blockAST) {
+    LOG.trace("Entering methodEnd{}", blockAST);
     scopeClose(blockAST);
     currentRoutine = rootRoutine;
   }
 
   @Override
-  public void propGetSetBegin(AST propAST) throws TreeParserException {
+  public void propGetSetBegin(JPNode propAST) throws TreeParserException {
     LOG.trace("Entering propGetSetBegin {}", propAST);
     scopeAdd(propAST);
     BlockNode blockNode = (BlockNode) propAST;
@@ -804,22 +834,22 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void propGetSetEnd(AST propAST) throws TreeParserException {
+  public void propGetSetEnd(JPNode propAST) throws TreeParserException {
     LOG.trace("Entering propGetSetEnd {}", propAST);
     scopeClose(propAST);
     currentRoutine = rootRoutine;
   }
 
   @Override
-  public void eventBegin(AST eventAST, AST idAST) throws TreeParserException {
+  public void eventBegin(JPNode eventAST, JPNode idAST) throws TreeParserException {
     this.inDefineEvent = true;
   }
 
   @Override
-  public void eventEnd(AST eventAST) throws TreeParserException {
+  public void eventEnd(JPNode eventAST) throws TreeParserException {
     this.inDefineEvent = false;
   }
-
+ 
   @Override
   public void paramBind() {
     wipParameters.getFirst().setBind(true);
@@ -831,15 +861,16 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void paramExpression(AST exprAST) {
-    JPNode exprNode = (JPNode) exprAST;
+  public void paramExpression(JPNode exprNode) {
+    LOG.trace("Entering paramExpression {}", exprNode);
     // The expression may or may not be a Field_ref node with a symbol. We don't dig any deeper.
     // As a result, the symbol for an expression parameter might be null.
     wipParameters.getFirst().setSymbol(exprNode.getSymbol());
   }
 
   @Override
-  public void paramForCall(AST directionAST) {
+  public void paramForCall(JPNode directionAST) {
+    LOG.trace("Entering paramForCall {}", directionAST);
     Parameter param = new Parameter();
     param.setDirectionNode((JPNode) directionAST);
     wipParameters.addFirst(param);
@@ -847,7 +878,7 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void paramForRoutine(AST directionAST) {
+  public void paramForRoutine(JPNode directionAST) {
     LOG.trace("Entering paramForRoutine '{}' -- '{}'", directionAST.getText(), currentRoutine.fullName());
     Parameter param = new Parameter();
     param.setDirectionNode((JPNode) directionAST);
@@ -864,10 +895,10 @@ public class TP01Support extends TP01Action {
    * @param datatypeAST The node of the datatype, might be a CLASS node.
    */
   @Override
-  public void paramNoName(AST datatypeAST) {
+  public void paramNoName(JPNode typeNode) {
+    LOG.trace("Entering paramNoName {}", typeNode);
     Variable variable = new Variable("", currentScope);
     currSymbol = variable;
-    JPNode typeNode = (JPNode) datatypeAST;
     if (typeNode.getType() == NodeTypes.CLASS)
       typeNode = typeNode.nextNode();
     if (typeNode.getType() == NodeTypes.TYPE_NAME) {
@@ -884,12 +915,13 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void paramSymbol(AST symbolAST) {
-    wipParameters.getFirst().setSymbol(((JPNode) symbolAST).getSymbol());
+  public void paramSymbol(JPNode symbolAST) {
+    wipParameters.getFirst().setSymbol(symbolAST.getSymbol());
   }
 
   @Override
-  public void procedureBegin(AST procAST, AST idAST) {
+  public void procedureBegin(JPNode procAST, JPNode idAST) {
+    LOG.trace("Entering procedureBegin {} - {}", procAST, idAST);
     BlockNode blockNode = (BlockNode) procAST;
     TreeParserSymbolScope definingScope = currentScope;
     scopeAdd(blockNode);
@@ -902,13 +934,14 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void procedureEnd(AST node) {
+  public void procedureEnd(JPNode node) {
     scopeClose(node);
     currentRoutine = rootRoutine;
   }
 
   @Override
-  public void programRoot(AST rootAST) {
+  public void programRoot(JPNode rootAST) {
+    LOG.trace("Entering programRoot {}", rootAST);
     BlockNode blockNode = (BlockNode) rootAST;
     currentBlock = pushBlock(new Block(rootScope, blockNode));
     rootScope.setRootBlock(currentBlock);
@@ -926,6 +959,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void programTail() throws TreeParserException {
+    LOG.trace("Entering programTail");
     // Now that we know what all the internal Routines are, wrap up the Calls.
     List<TreeParserSymbolScope> allScopes = new ArrayList<>();
     allScopes.add(rootScope);
@@ -977,7 +1011,8 @@ public class TP01Support extends TP01Action {
 
   /** Action to take at various RECORD_NAME nodes. */
   @Override
-  public void recordNameNode(AST anode, ContextQualifier contextQualifier) throws TreeParserException {
+  public void recordNameNode(JPNode anode, ContextQualifier contextQualifier) throws TreeParserException {
+    LOG.trace("Entering recordNameNode {} {}", anode, contextQualifier);
     RecordNameNode recordNode = (RecordNameNode) anode;
     recordNode.attrSet(IConstants.CONTEXT_QUALIFIER, contextQualifier.toString());
     TableBuffer buffer = null;
@@ -1023,8 +1058,7 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void routineReturnDatatype(AST datatypeAST) {
-    JPNode datatypeNode = (JPNode) datatypeAST;
+  public void routineReturnDatatype(JPNode datatypeNode) {
     if (datatypeNode.getType() == NodeTypes.CLASS)
       datatypeNode = datatypeNode.nextNode();
     currentRoutine.setReturnDatatypeNode(datatypeNode);
@@ -1036,8 +1070,8 @@ public class TP01Support extends TP01Action {
    * @author pcd
    */
   @Override
-  public void runBegin(AST runAST) {
-    JPNode runNode = (JPNode) runAST;
+  public void runBegin(JPNode runNode) {
+    LOG.trace("Entering runBegin {}", runNode);
     // Expect a FileName at the top of semantic stack
     String fileName = (String) wipExpression.getValue();
     Call call = new Call(runNode);
@@ -1052,7 +1086,7 @@ public class TP01Support extends TP01Action {
    * @author pcd
    */
   @Override
-  public void runEnd(AST node) {
+  public void runEnd(JPNode node) {
     // Record the call in the current context.
     currentScope.registerCall(wipCalls.getFirst());
     wipCalls.removeFirst();
@@ -1066,7 +1100,7 @@ public class TP01Support extends TP01Action {
    * @author pcd
    */
   @Override
-  public void runInHandle(AST exprNode) {
+  public void runInHandle(JPNode exprNode) {
     wipCalls.getFirst().setRunHandleNode((JPNode) exprNode);
   }
 
@@ -1082,12 +1116,12 @@ public class TP01Support extends TP01Action {
    * @param fld is used for error reporting.
    */
   @Override
-  public void runPersistentSet(AST fld) {
+  public void runPersistentSet(JPNode fld) {
     wipCalls.getFirst().setPersistentHandleNode((JPNode) fld);
   }
 
   @Override
-  public void scopeAdd(AST anode) {
+  public void scopeAdd(JPNode anode) {
     LOG.trace("Entering scopeAdd {}", anode);
     BlockNode blockNode = (BlockNode) anode;
     currentScope = currentScope.addScope();
@@ -1097,7 +1131,7 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void scopeClose(AST scopeRootNode) {
+  public void scopeClose(JPNode scopeRootNode) {
     LOG.trace("Entering scopeClose {}", scopeRootNode);
     currentScope = currentScope.getParentScope();
     blockEnd();
@@ -1116,8 +1150,7 @@ public class TP01Support extends TP01Action {
   }
 
   @Override
-  public void setSymbol(int symbolType, AST idAST) {
-    JPNode idNode = (JPNode) idAST;
+  public void setSymbol(int symbolType, JPNode idNode) {
     idNode.setSymbol(currentScope.lookupSymbol(symbolType, idNode.getText()));
   }
 
@@ -1127,13 +1160,13 @@ public class TP01Support extends TP01Action {
    * @param anode Is the RECORD_NAME node. It must already have the BufferSymbol linked to it.
    */
   @Override
-  public void strongScope(AST anode) {
+  public void strongScope(JPNode anode) {
     currentBlock.addStrongBufferScope((RecordNameNode) anode);
   }
 
   /** Constructor or destructor. */
   @Override
-  public void structorBegin(AST blockAST) {
+  public void structorBegin(JPNode blockAST) {
     /*
      * Since 'structors don't have a name, we don't add them to any sort of map in the parent scope.
      */
@@ -1150,14 +1183,14 @@ public class TP01Support extends TP01Action {
 
   /** End of constructor or destructor. */
   @Override
-  public void structorEnd(AST blockAST) {
+  public void structorEnd(JPNode blockAST) {
     scopeClose(blockAST);
     currentRoutine = rootRoutine;
   }
 
   /** Called at the end of a VIEW statement. */
   @Override
-  public void viewState(AST headAST) {
+  public void viewState(JPNode headAST) {
     // The VIEW statement grammar uses gwidget, so we have to do some
     // special searching for FRAME to initialize.
     JPNode headNode = (JPNode) headAST;
@@ -1189,9 +1222,9 @@ public class TP01Support extends TP01Action {
   }
 
   /** Get the Table symbol linked from a RECORD_NAME AST. */
-  private ITable astTableLink(AST tableAST) {
+  private ITable astTableLink(JPNode tableAST) {
     LOG.trace("Entering astTableLink {}", tableAST);
-    TableBuffer buffer = (TableBuffer) ((JPNode) tableAST).getLink(IConstants.SYMBOL);
+    TableBuffer buffer = (TableBuffer) tableAST.getLink(IConstants.SYMBOL);
     assert buffer != null;
     return buffer.getTable();
   }

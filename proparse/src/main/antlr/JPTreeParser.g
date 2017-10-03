@@ -59,6 +59,7 @@ options {
   importVocab = Base;
   defaultErrorHandler = false;
   classHeaderSuffix = IJPTreeParser;
+  ASTLabelType = "JPNode";
 }
 
 
