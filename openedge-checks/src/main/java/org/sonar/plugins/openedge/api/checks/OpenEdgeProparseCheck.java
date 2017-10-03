@@ -59,36 +59,27 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return "";
   }
 
-  public void reportIssue(InputFile file, JPNode node, String msg) {
-    reportIssue(file, node, msg, false);
-  }
-
-  /**
-   * Reports issue
-   * 
-   * @param file InputFile
-   * @param node Node where issue happened
-   * @param msg Additional message
-   */
-  public void reportIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
-    if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {
-      return;
-    }
-
-    InputFile targetFile;
+  protected InputFile getInputFile(InputFile file, JPNode node) {
     if (node.getFileIndex() == 0) {
-      targetFile = file;
+      return file;
     } else {
-      targetFile = getContext().fileSystem().inputFile(
+      return getContext().fileSystem().inputFile(
           getContext().fileSystem().predicates().hasRelativePath(node.getFilename()));
     }
+  }
+
+  protected NewIssue createIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
+    if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {
+      return null;
+    }
+
+    InputFile targetFile = getInputFile(file, node);
     if (targetFile == null) {
-      return;
+      return null;
     }
 
     int lineNumber = node.getLine();
-    LOG.trace("Adding issue {} to {} line {}",
-        (getRuleKey() == null ? null : getRuleKey().rule()), targetFile.relativePath(), lineNumber);
+    LOG.trace("Adding issue {} to {} line {}", getRuleKey(), targetFile.relativePath(), lineNumber);
     NewIssue issue = getContext().newIssue().forRule(getRuleKey());
     NewIssueLocation location = issue.newLocation().on(targetFile);
     if (lineNumber > 0) {
@@ -108,7 +99,27 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     } else {
       location.message(MessageFormat.format(INC_MESSAGE, file.relativePath(), msg));
     }
-    issue.at(location).save();
+    issue.at(location);
+
+    return issue;
+  }
+
+  protected void reportIssue(InputFile file, JPNode node, String msg) {
+    reportIssue(file, node, msg, false);
+  }
+
+  /**
+   * Reports issue
+   * 
+   * @param file InputFile
+   * @param node Node where issue happened
+   * @param msg Additional message
+   */
+  protected void reportIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
+    NewIssue issue = createIssue(file, node, msg, exactLocation);
+    if (issue == null)
+      return;
+    issue.save();
   }
 
   /**
@@ -118,7 +129,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    * @param lineNumber Line number (must be greater than 0)
    * @param msg
    */
-  public void reportIssue(InputFile file, String fileName, int lineNumber, String msg) {
+  protected void reportIssue(InputFile file, String fileName, int lineNumber, String msg) {
     LOG.trace("Adding issue {} to {} line {}",
         getRuleKey() == null ? null : getRuleKey().rule(), fileName, lineNumber);
     NewIssue issue = getContext().newIssue();
@@ -167,7 +178,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return null;
   }
 
-  public void reportIssue(InputFile file, Element element, String msg) {
+  protected void reportIssue(InputFile file, Element element, String msg) {
     if (!"Reference".equals(element.getNodeName())) {
       throw new IllegalArgumentException("Invalid 'Reference' element");
     }
