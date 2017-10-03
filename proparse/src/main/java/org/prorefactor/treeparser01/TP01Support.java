@@ -522,10 +522,10 @@ public class TP01Support extends TP01Action {
       if ((idNode.getFirstChild().getType()) == NodeTypes.ID && (idNode.nextSibling() != null) && (idNode.nextSibling().getType() == NodeTypes.OBJCOLON)) {
         String clsRef = idAST.getFirstChild().getText();
         String clsName = rootScope.getClassName();
-        if ((clsRef.indexOf('.') == -1) && (clsName.indexOf('.') != -1))
+        if ((clsRef != null) && (clsName != null) && (clsRef.indexOf('.') == -1) && (clsName.indexOf('.') != -1))
           clsName = clsName.substring(clsName.indexOf('.') + 1);
         
-        if (clsRef.equalsIgnoreCase(clsName)) {
+        if ((clsRef != null) && (clsName != null) && clsRef.equalsIgnoreCase(clsName)) {
           String right = idNode.nextSibling().nextSibling().getText();
           
           FieldLookupResult result =  currentBlock.lookupField(right, true);
