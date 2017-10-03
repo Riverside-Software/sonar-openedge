@@ -125,9 +125,12 @@ public class BugFixTest {
   @Test
   public void testVarUsage() throws Exception {
     ParseUnit unit = genericTest("varusage.cls");
-    /* for (Variable v :  unit.getRootScope().getVariables()) {
-      System.out.println(v + " --- " + v.getAllRefsCount());
-    } */
+    assertEquals(unit.getRootScope().getVariable("x1").getNumWrites(), 2);
+    assertEquals(unit.getRootScope().getVariable("x1").getNumReads(), 1);
+    assertEquals(unit.getRootScope().getVariable("x2").getNumWrites(), 1);
+    assertEquals(unit.getRootScope().getVariable("x2").getNumReads(), 1);
+    assertEquals(unit.getRootScope().getVariable("x3").getNumWrites(), 1);
+    assertEquals(unit.getRootScope().getVariable("x3").getNumReads(), 0);
   }
 
   @Test

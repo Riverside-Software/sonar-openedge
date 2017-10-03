@@ -500,7 +500,7 @@ public class TP01Support extends TP01Action {
 
   @Override
   public void widattr(AST widAST, AST idAST, ContextQualifier cq) throws TreeParserException {
-    LOG.trace("Accessing {} in mode {}", idAST.getText(), cq);
+    LOG.trace("Entering widattr {} in mode {}", idAST, cq);
     if (idAST.getType() == NodeTypes.THISOBJECT) {
       AST tok = idAST.getNextSibling();
       if (tok.getType() == NodeTypes.OBJCOLON) {
@@ -515,13 +515,35 @@ public class TP01Support extends TP01Action {
         if (result.variable != null) {
           result.variable.noteReference(cq);
         }
+      }
+    } else if (idAST.getType() == NodeTypes.Field_ref) {
+      // Reference to a static field
+      JPNode idNode = (JPNode) idAST;
+      if ((idNode.getFirstChild().getType()) == NodeTypes.ID && (idNode.nextSibling() != null) && (idNode.nextSibling().getType() == NodeTypes.OBJCOLON)) {
+        String clsRef = idAST.getFirstChild().getText();
+        String clsName = rootScope.getClassName();
+        if ((clsRef.indexOf('.') == -1) && (clsName.indexOf('.') != -1))
+          clsName = clsName.substring(clsName.indexOf('.') + 1);
+        
+        if (clsRef.equalsIgnoreCase(clsName)) {
+          String right = idNode.nextSibling().nextSibling().getText();
+          
+          FieldLookupResult result =  currentBlock.lookupField(right, true);
+          if (result == null)
+            return;
 
+          // Variable
+          if (result.variable != null) {
+            result.variable.noteReference(cq);
+          }
+        }
       }
     }
   }
 
   @Override
   public void field(AST refAST, AST idAST, ContextQualifier cq, TableNameResolution resolution) throws TreeParserException {
+    LOG.trace("Entering field {} {} {} {}", refAST, idAST, cq, resolution);
     JPNode idNode = (JPNode) idAST;
     FieldRefNode refNode = (FieldRefNode) refAST;
     String name = idNode.getText();
