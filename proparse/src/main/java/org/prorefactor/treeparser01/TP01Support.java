@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.BlockNode;
@@ -527,17 +528,17 @@ public class TP01Support implements ITreeParserAction {
           result.variable.noteReference(cq);
         }
       }
-    } else if (idAST.getType() == NodeTypes.Field_ref) {
+    } else if (idAST.getType() == ProParserTokenTypes.Field_ref) {
       // Reference to a static field
       JPNode idNode = (JPNode) idAST;
-      if ((idNode.getFirstChild().getType()) == NodeTypes.ID && (idNode.nextSibling() != null) && (idNode.nextSibling().getType() == NodeTypes.OBJCOLON)) {
+      if ((idNode.getFirstChild().getType()) == ProParserTokenTypes.ID && (idNode.getNextSibling() != null) && (idNode.getNextSibling().getType() == ProParserTokenTypes.OBJCOLON)) {
         String clsRef = idAST.getFirstChild().getText();
         String clsName = rootScope.getClassName();
         if ((clsRef != null) && (clsName != null) && (clsRef.indexOf('.') == -1) && (clsName.indexOf('.') != -1))
           clsName = clsName.substring(clsName.indexOf('.') + 1);
         
         if ((clsRef != null) && (clsName != null) && clsRef.equalsIgnoreCase(clsName)) {
-          String right = idNode.nextSibling().nextSibling().getText();
+          String right = idNode.getNextSibling().getNextSibling().getText();
           
           FieldLookupResult result =  currentBlock.lookupField(right, true);
           if (result == null)
@@ -554,7 +555,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public void field(JPNode refAST, JPNode idNode, ContextQualifier cq, TableNameResolution resolution) throws TreeParserException {
-    LOG.trace("Entering field {} {} {} {}", refAST, idAST, cq, resolution);
+    LOG.trace("Entering field {} {} {} {}", refAST, idNode, cq, resolution);
     FieldRefNode refNode = (FieldRefNode) refAST;
     String name = idNode.getText();
     FieldLookupResult result = null;
@@ -1189,7 +1190,7 @@ public class TP01Support implements ITreeParserAction {
     // The VIEW statement grammar uses gwidget, so we have to do some
     // special searching for FRAME to initialize.
     JPNode headNode = headAST;
-    for (JPNode frameNode : headNode.query(ProParserTokenTypes.FRAME)) {
+    for (JPNode frameNode : headNode.query(ABLNodeType.FRAME)) {
       int parentType = frameNode.getParent().getType();
       if (parentType == ProParserTokenTypes.Widget_ref || parentType == ProParserTokenTypes.IN_KW) {
         frameStack.simpleFrameInitStatement(headNode, frameNode.nextNode(), currentBlock);
