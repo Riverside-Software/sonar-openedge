@@ -511,10 +511,10 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public void widattr(JPNode widAST, JPNode idAST, ContextQualifier cq) {
-    LOG.trace("Entering {} mode {}", idAST, cq);
-    if (idAST.getType() == ProParserTokenTypes.THISOBJECT) {
-      JPNode tok = idAST.getNextSibling();
+  public void widattr(JPNode widAST, JPNode idNode, ContextQualifier cq) {
+    LOG.trace("Entering {} mode {}", idNode, cq);
+    if (idNode.getType() == ProParserTokenTypes.THISOBJECT) {
+      JPNode tok = idNode.getNextSibling();
       if (tok.getType() == ProParserTokenTypes.OBJCOLON) {
         JPNode fld = tok.getNextSibling();
         String name = fld.getText();
@@ -528,11 +528,10 @@ public class TP01Support implements ITreeParserAction {
           result.variable.noteReference(cq);
         }
       }
-    } else if (idAST.getType() == ProParserTokenTypes.Field_ref) {
+    } else if (idNode.getType() == ProParserTokenTypes.Field_ref) {
       // Reference to a static field
-      JPNode idNode = (JPNode) idAST;
       if ((idNode.getFirstChild().getType()) == ProParserTokenTypes.ID && (idNode.getNextSibling() != null) && (idNode.getNextSibling().getType() == ProParserTokenTypes.OBJCOLON)) {
-        String clsRef = idAST.getFirstChild().getText();
+        String clsRef = idNode.getFirstChild().getText();
         String clsName = rootScope.getClassName();
         if ((clsRef != null) && (clsName != null) && (clsRef.indexOf('.') == -1) && (clsName.indexOf('.') != -1))
           clsName = clsName.substring(clsName.indexOf('.') + 1);

@@ -1666,6 +1666,7 @@ public enum ABLNodeType {
 
 
   // Static section
+  private final static String ERR_INIT = "Error while initializing typeMap - Duplicate key ";
   private static Map<String, ABLNodeType> literalsMap = new HashMap<>();
   private static Map<Integer, ABLNodeType> typeMap = new HashMap<>();
 
@@ -1673,27 +1674,24 @@ public enum ABLNodeType {
     for (ABLNodeType e : ABLNodeType.values()) {
       // No duplicates allowed in definition
       if (typeMap.put(e.typeNum, e) != null)
-        throw new IllegalStateException("Error while initializing typeMap - Duplicate key " + e.typeNum);
+        throw new IllegalStateException(ERR_INIT + e.typeNum);
 
       if (e.options.contains(NodeTypesOption.KEYWORD)) {
         // Full-text map is only filled with keywords
         for (int zz = e.abbrMain; zz <= e.text.length(); zz++) {
           if (literalsMap.put(e.text.substring(0, zz).toLowerCase(), e) != null)
-            throw new IllegalStateException(
-                "Error while initializing literalsMap - Duplicate key " + e.text.substring(0, zz));
+            throw new IllegalStateException(ERR_INIT + e.text.substring(0, zz));
         }
         if (e.alt1 != null) {
           for (int zz = e.abbrAlt1; zz <= e.alt1.length(); zz++) {
             if (literalsMap.put(e.alt1.substring(0, zz), e) != null)
-              throw new IllegalStateException(
-                  "Error while initializing literalsMap - Duplicate key " + e.alt1.substring(0, zz));
+              throw new IllegalStateException(ERR_INIT + e.alt1.substring(0, zz));
           }
         }
         if (e.alt2 != null) {
           for (int zz = e.abbrAlt2; zz <= e.alt2.length(); zz++) {
             if (literalsMap.put(e.alt2.substring(0, zz), e) != null)
-              throw new IllegalStateException(
-                  "Error while initializing literalsMap - Duplicate key " + e.alt2.substring(0, zz));
+              throw new IllegalStateException(ERR_INIT + e.alt2.substring(0, zz));
           }
         }
       }
