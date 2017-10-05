@@ -63,6 +63,7 @@ public class TreeParserSymbolScope {
    * 
    * @param parentScope null if called by the SymbolScopeRoot constructor.
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private TreeParserSymbolScope(TreeParserSymbolScope parentScope) {
     this.parentScope = parentScope;
     typeMap.put(NodeTypes.VARIABLE, Collections.checkedMap((Map) variableMap, String.class, Symbol.class));

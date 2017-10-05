@@ -59,10 +59,10 @@ public class InputSource {
     this.sourceNum = sourceNum;
     this.primaryInput = isPrimary;
     this.fileIndex = fileIndex;
-    if (Files.readBytes(file, new XCodedFileByteProcessor())) {
+    if (Files.asByteSource(file).read(new XCodedFileByteProcessor())) {
       throw new XCodedFileException(file.getAbsolutePath());
     }
-    this.fileContent = Files.toString(file, charset);
+    this.fileContent = Files.asCharSource(file, charset).read();
     this.macroExpansion = false;
   }
 
