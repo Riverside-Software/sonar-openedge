@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ICallback;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
@@ -76,7 +77,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     }
 
     // Skip code blocks following parameterized annotations
-    JPNode prevSibling = node.prevSibling();
+    JPNode prevSibling = node.getPreviousSibling();
     while ((prevSibling != null) && (prevSibling.getType() == NodeTypes.ANNOTATION)) {
       if (settings.skipCPD(prevSibling.getAnnotationName())) {
         // Skipping nodes is not enough, as the content of the method would be considered blank lines.
@@ -85,7 +86,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
         insertFakeNode(node);
         return false;
       }
-      prevSibling = prevSibling.prevSibling();
+      prevSibling = prevSibling.getPreviousSibling();
     }
     // Skip method matching parameterized names
     if (node.getType() == NodeTypes.METHOD) {
@@ -106,9 +107,9 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
 
     if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
       // Consider that an operator only has 2 children
-      visitNode(node.firstChild());
+      visitNode(node.getFirstChild());
       visitCpdNode(node);
-      visitNode(node.firstChild().nextSibling());
+      visitNode(node.getFirstChild().getNextSibling());
       return false;
     } else {
       visitCpdNode(node);
@@ -155,10 +156,10 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     if ((node.getLine() == node.getEndLine()) && (node.getColumn() == node.getEndColumn())) {
       return;
     }
-    String str = NodeTypes.getFullText(node.getType());
+    String str = node.getNodeType().getText();
     // Identifiers are also using the same case
     if ((str == null) || (str.trim().length() == 0)) {
-      if (node.getType() == NodeTypes.ID) {
+      if (node.getNodeType() == ABLNodeType.ID) {
         str = node.getText().toLowerCase(Locale.ENGLISH);
       } else {
         str = node.getText().trim();

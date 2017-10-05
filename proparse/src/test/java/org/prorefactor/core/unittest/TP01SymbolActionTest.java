@@ -49,7 +49,7 @@ public class TP01SymbolActionTest {
   @Test
   public void testCompileFileRoutines() throws Exception {
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/tp01ProcessTests/compile-file.p"), session);
-    TP01Support walkAction = new TP01Support(session);
+    TP01Support walkAction = new TP01Support(session, pu);
     pu.treeParser(new TreeParser01(session, walkAction));
 
     // Create expected symbols.
@@ -73,7 +73,7 @@ public class TP01SymbolActionTest {
   @Test
   public void testCompileFileVars() throws Exception {
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/tp01ProcessTests/compile-file.p"), session);
-    TP01Support walkAction = new TP01Support(session);
+    TP01Support walkAction = new TP01Support(session, pu);
     pu.treeParser(new TreeParser01(session, walkAction));
 
     // Create expected symbols.

@@ -13,12 +13,11 @@ package org.prorefactor.core.nodetypes;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.treeparser.BufferScope;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 
 public class RecordNameNode extends JPNode {
-  private static final long serialVersionUID = 8045143516803910613L;
-
   public RecordNameNode(ProToken t) {
     super(t);
   }
@@ -42,6 +41,24 @@ public class RecordNameNode extends JPNode {
 
   public void setTableBuffer(TableBuffer buffer) {
     setLink(IConstants.SYMBOL, buffer);
+  }
+
+  /** Set the 'store type' attribute on a RECORD_NAME node. */
+  public void setStoreType(FieldType tabletype) {
+    switch (tabletype) {
+      case DBTABLE:
+        attrSet(IConstants.STORETYPE, IConstants.ST_DBTABLE);
+        break;
+      case TTABLE:
+        attrSet(IConstants.STORETYPE, IConstants.ST_TTABLE);
+        break;
+      case WTABLE:
+        attrSet(IConstants.STORETYPE, IConstants.ST_WTABLE);
+        break;
+      case VARIABLE:
+        // Never happens
+        break;
+    }
   }
 
 }

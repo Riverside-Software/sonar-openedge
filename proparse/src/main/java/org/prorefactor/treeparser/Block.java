@@ -17,10 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -72,7 +73,7 @@ public class Block {
    */
   public void addBufferScopeReferences(BufferScope bufferScope) {
     // References do not get added to DO blocks.
-    if (blockStatementNode.getType() != NodeTypes.DO)
+    if (blockStatementNode.getNodeType() != ABLNodeType.DO)
       bufferScopes.add(bufferScope);
     if (parent != null && bufferScope.getSymbol().getScope().getRootBlock() != this) {
       parent.addBufferScopeReferences(bufferScope);
@@ -144,9 +145,9 @@ public class Block {
   private boolean canScopeBufferReference(TableBuffer symbol) {
     // REPEAT, FOR, and Program_root blocks can scope a buffer.
     switch (blockStatementNode.getType()) {
-      case NodeTypes.REPEAT:
-      case NodeTypes.FOR:
-      case NodeTypes.Program_root:
+      case ProParserTokenTypes.REPEAT:
+      case ProParserTokenTypes.FOR:
+      case ProParserTokenTypes.Program_root:
         return true;
     }
     // If this is the root block for the buffer's symbol, then the scope
@@ -159,8 +160,8 @@ public class Block {
   /** Can a frame be scoped to this block? */
   private boolean canScopeFrame() {
     switch (blockStatementNode.getType()) {
-      case NodeTypes.REPEAT:
-      case NodeTypes.FOR:
+      case ProParserTokenTypes.REPEAT:
+      case ProParserTokenTypes.FOR:
         return true;
     }
     return isRootBlock();
@@ -332,7 +333,7 @@ public class Block {
       result.fieldLevelWidget = symbolScope.lookupFieldLevelWidget(name);
       if (result.fieldLevelWidget != null)
         return result;
-      s = symbolScope.lookupSymbol(NodeTypes.EVENT, name);
+      s = symbolScope.lookupSymbol(ProParserTokenTypes.EVENT, name);
       if (s != null) {
         result.event = (Event) s;
         return result;

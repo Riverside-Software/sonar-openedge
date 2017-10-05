@@ -10,9 +10,9 @@
  *******************************************************************************/ 
 package org.prorefactor.core.nodetypes;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.BufferScope;
 import org.prorefactor.treeparser.DataType;
@@ -23,8 +23,6 @@ import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 public class FieldRefNode extends JPNode {
-  private static final long serialVersionUID = 7754879272592544238L;
-
   public FieldRefNode(ProToken t) {
     super(t);
   }
@@ -56,7 +54,7 @@ public class FieldRefNode extends JPNode {
    * those from the ID node.
    */
   public JPNode getIdNode() {
-    JPNode idNode = findDirectChild(NodeTypes.ID);
+    JPNode idNode = findDirectChild(ABLNodeType.ID.getType());
     assert idNode != null;
     return idNode;
   }

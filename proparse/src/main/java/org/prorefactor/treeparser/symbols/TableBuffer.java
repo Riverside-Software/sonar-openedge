@@ -15,9 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.prorefactor.core.IConstants;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
@@ -67,7 +67,7 @@ public class TableBuffer extends Symbol {
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.BUFFER;
+    return ProParserTokenTypes.BUFFER;
   }
 
   /** Get or create a FieldBuffer for a Field. */

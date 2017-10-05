@@ -157,10 +157,7 @@ public class ParseUnit {
       ProParser parser = new ProParser(lexer.getANTLR2TokenStream(true));
       parser.initAntlr4(session, lexer.getFilenameList());
       parser.program();
-      ((JPNode) parser.getAST()).backLink();
-
-      // Deal with trailing hidden tokens
-      JPNode.finalizeTrailingHidden((JPNode) parser.getAST());
+      ((ProgramRootNode) parser.getAST()).backLinkAndFinalize();
       lexer.parseComplete();
 
       macroGraph = lexer.getMacroGraph();
@@ -182,7 +179,7 @@ public class ParseUnit {
     }
     try {
       tp.program(getTopNode());
-    } catch (RecognitionException | TreeParserException caught) {
+    } catch (RecognitionException caught) {
       throw new RefactorException(caught);
     }
     LOGGER.trace("Exiting ParseUnit#treeParser()");
@@ -196,8 +193,8 @@ public class ParseUnit {
     if (this.getTopNode() == null) {
       parse();
     }
-    TreeParser01 tp = new TreeParser01(session, new TP01Support(session));
-    tp.getActionObject().setParseUnit(this);
+    ITreeParserAction action = new TP01Support(session, this);
+    TreeParser01 tp = new TreeParser01(session, action);
     treeParser(tp);
     LOGGER.trace("Exiting ParseUnit#treeParser01()");
   }
@@ -210,7 +207,6 @@ public class ParseUnit {
     if (this.getTopNode() == null)
       parse();
     TreeParser01 tp = new TreeParser01(session, action);
-    tp.getActionObject().setParseUnit(this);
     treeParser(tp);
   }
 

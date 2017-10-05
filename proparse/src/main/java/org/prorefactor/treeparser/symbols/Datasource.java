@@ -10,7 +10,7 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE DATA-SOURCE. */
@@ -33,7 +33,7 @@ public class Datasource extends Symbol {
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.DATASOURCE;
+    return ProParserTokenTypes.DATASOURCE;
   }
 
 }

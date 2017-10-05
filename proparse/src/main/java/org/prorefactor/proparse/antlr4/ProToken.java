@@ -13,28 +13,29 @@ package org.prorefactor.proparse.antlr4;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.WritableToken;
+import org.prorefactor.core.ABLNodeType;
 
 public class ProToken implements WritableToken {
 
   /**
    * This is the backing field for {@link #getType} and {@link #setType}.
    */
-  protected int type;
+  private ABLNodeType type;
 
   /**
    * This is the backing field for {@link #getLine} and {@link #setLine}.
    */
-  protected int line;
+  private int line;
 
   /**
    * This is the backing field for {@link #getCharPositionInLine} and {@link #setCharPositionInLine}.
    */
-  protected int charPositionInLine = -1; // set to invalid position
+  private int charPositionInLine = -1; // set to invalid position
 
   /**
    * This is the backing field for {@link #getChannel} and {@link #setChannel}.
    */
-  protected int channel = DEFAULT_CHANNEL;
+  private int channel = DEFAULT_CHANNEL;
 
   /**
    * This is the backing field for {@link #getText} when the token text is explicitly set in the constructor or via
@@ -42,22 +43,22 @@ public class ProToken implements WritableToken {
    *
    * @see #getText()
    */
-  protected String text;
+  private String text;
 
   /**
    * This is the backing field for {@link #getTokenIndex} and {@link #setTokenIndex}.
    */
-  protected int index = -1;
+  private int index = -1;
 
   /**
    * This is the backing field for {@link #getStartIndex} and {@link #setStartIndex}.
    */
-  protected int start;
+  private int start;
 
   /**
    * This is the backing field for {@link #getStopIndex} and {@link #setStopIndex}.
    */
-  protected int stop;
+  private int stop;
 
   private int fileIndex;
   private int endFileIndex;
@@ -67,7 +68,7 @@ public class ProToken implements WritableToken {
 
   private String analyzeSuspend = "";
 
-  public ProToken(int type, String text) {
+  public ProToken(ABLNodeType type, String text) {
     this.type = type;
     this.channel = DEFAULT_CHANNEL;
     this.text = text;
@@ -75,7 +76,9 @@ public class ProToken implements WritableToken {
   }
 
   public ProToken(int type, int channel, int start, int stop, int line, int col) {
-    this.type = type;
+    this.type = ABLNodeType.getNodeType(type);
+    if (this.type == null)
+      throw new IllegalArgumentException("Invalid type number " + type);
     this.channel = channel;
     this.start = start;
     this.stop = stop;
@@ -141,6 +144,10 @@ public class ProToken implements WritableToken {
 
   @Override
   public int getType() {
+    return type.getType();
+  }
+
+  public ABLNodeType getNodeType() {
     return type;
   }
 
@@ -190,8 +197,16 @@ public class ProToken implements WritableToken {
   }
 
   @Override
-  public void setType(int ttype) {
-    this.type = ttype;
+  public void setType(int type) {
+    this.type = ABLNodeType.getNodeType(type);
+    if (this.type == null)
+      throw new IllegalArgumentException("Invalid type number " + type);
+  }
+
+  public void setNodeType(ABLNodeType type) {
+    if (type == null)
+      throw new IllegalArgumentException("Invalid type number " + type);
+    this.type = type;
   }
 
   @Override

@@ -15,7 +15,6 @@ import java.util.Arrays;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 
 /**
  * Prints out the structure of a JPNode AST. Prints nodes one per line, using indentation to show the tree structure.
@@ -72,7 +71,7 @@ public class JPNodeLister {
     ofile.write(indentArray);
 
     // Node type
-    ofile.append(NodeTypes.getTypeName(node.getType())).append(spacer);
+    ofile.append(node.getNodeType().name()).append(spacer);
     // Node text
     ofile.append(node.getText()).append(spacer);
     if (showLine)

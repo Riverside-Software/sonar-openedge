@@ -11,7 +11,7 @@
 package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.ClassSupport;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
@@ -77,7 +77,7 @@ public class Variable extends Symbol implements Primative, Value {
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.VARIABLE;
+    return ProParserTokenTypes.VARIABLE;
   }
 
   @Override

@@ -17,12 +17,12 @@ import java.util.List;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.FieldLookupResult;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -73,14 +73,14 @@ public class FrameStack {
    * the frame, respecting any EXCEPT fields list.
    */
   public List<FieldBuffer> calculateFormItemTableFields(JPNode formItemNode) {
-    assert formItemNode.getType() == NodeTypes.Form_item;
-    assert formItemNode.firstChild().getType() == NodeTypes.RECORD_NAME;
-    RecordNameNode recordNameNode = (RecordNameNode) formItemNode.firstChild();
+    assert formItemNode.getType() == ProParserTokenTypes.Form_item;
+    assert formItemNode.getFirstChild().getType() == ProParserTokenTypes.RECORD_NAME;
+    RecordNameNode recordNameNode = (RecordNameNode) formItemNode.getFirstChild();
     TableBuffer tableBuffer = recordNameNode.getTableBuffer();
     HashSet<IField> fieldSet = new HashSet<>(tableBuffer.getTable().getFieldSet());
-    JPNode exceptNode = formItemNode.getParent().findDirectChild(NodeTypes.EXCEPT);
+    JPNode exceptNode = formItemNode.getParent().findDirectChild(ProParserTokenTypes.EXCEPT);
     if (exceptNode != null)
-      for (JPNode n = exceptNode.firstChild(); n != null; n = n.nextSibling()) {
+      for (JPNode n = exceptNode.getFirstChild(); n != null; n = n.getNextSibling()) {
         if (!(n instanceof FieldRefNode))
           continue;
         IField f = ((FieldBuffer) ((FieldRefNode) n).getSymbol()).getField();
@@ -113,20 +113,20 @@ public class FrameStack {
   void formItem(JPNode formItemNode) {
     if (containerForCurrentStatement == null)
       return;
-    assert formItemNode.getType() == NodeTypes.Form_item;
-    JPNode firstChild = formItemNode.firstChild();
-    if (firstChild.getType() == NodeTypes.RECORD_NAME) {
+    assert formItemNode.getType() == ProParserTokenTypes.Form_item;
+    JPNode firstChild = formItemNode.getFirstChild();
+    if (firstChild.getType() == ProParserTokenTypes.RECORD_NAME) {
       // Delay processing until the end of the statement. We need any EXCEPT fields resolved first.
       currStatementWholeTableFormItemNode = formItemNode;
     } else {
       FieldRefNode fieldRefNode = null;
-      JPNode tempNode = formItemNode.findDirectChild(NodeTypes.Format_phrase);
+      JPNode tempNode = formItemNode.findDirectChild(ProParserTokenTypes.Format_phrase);
       if (tempNode != null) {
-        tempNode = tempNode.findDirectChild(NodeTypes.LEXAT);
+        tempNode = tempNode.findDirectChild(ProParserTokenTypes.LEXAT);
         if (tempNode != null)
           return;
       }
-      if (fieldRefNode == null && firstChild.getType() == NodeTypes.Field_ref) {
+      if (fieldRefNode == null && firstChild.getType() == ProParserTokenTypes.Field_ref) {
         fieldRefNode = (FieldRefNode) firstChild;
       }
       if (fieldRefNode != null)
@@ -144,7 +144,7 @@ public class FrameStack {
 
   private Frame frameRefSet(JPNode idNode, TreeParserSymbolScope symbolScope) {
     String frameName = idNode.getText();
-    Frame frame = (Frame) symbolScope.lookupWidget(NodeTypes.FRAME, frameName);
+    Frame frame = (Frame) symbolScope.lookupWidget(ProParserTokenTypes.FRAME, frameName);
     if (frame == null)
       frame = createFrame(frameName, symbolScope);
     idNode.setLink(IConstants.SYMBOL, frame);
@@ -153,12 +153,12 @@ public class FrameStack {
 
   /** For a statement that might have #(WITH ... #([FRAME|BROWSE] ID)), get the FRAME|BROWSE node. */
   private JPNode getContainerTypeNode(JPNode stateNode) {
-    JPNode withNode = stateNode.findDirectChild(NodeTypes.WITH);
+    JPNode withNode = stateNode.findDirectChild(ProParserTokenTypes.WITH);
     if (withNode == null)
       return null;
-    JPNode typeNode = withNode.findDirectChild(NodeTypes.FRAME);
+    JPNode typeNode = withNode.findDirectChild(ProParserTokenTypes.FRAME);
     if (typeNode == null)
-      typeNode = withNode.findDirectChild(NodeTypes.BROWSE);
+      typeNode = withNode.findDirectChild(ProParserTokenTypes.BROWSE);
     return typeNode;
   }
 
@@ -194,13 +194,13 @@ public class FrameStack {
     Field.Name inputName = new Field.Name(idNode.getText().toLowerCase());
     FieldContainer fieldContainer = null;
     Symbol fieldOrVariable = null;
-    JPNode tempNode = fieldRefNode.firstChild();
+    JPNode tempNode = fieldRefNode.getFirstChild();
     int tempType = tempNode.getType();
-    if (tempType == NodeTypes.INPUT) {
-      tempNode = tempNode.nextSibling();
+    if (tempType == ProParserTokenTypes.INPUT) {
+      tempNode = tempNode.getNextSibling();
       tempType = tempNode.getType();
     }
-    if (tempType == NodeTypes.BROWSE || tempType == NodeTypes.FRAME) {
+    if (tempType == ProParserTokenTypes.BROWSE || tempType == ProParserTokenTypes.FRAME) {
       fieldContainer = (FieldContainer) tempNode.nextNode().getSymbol();
       fieldOrVariable = fieldContainer.lookupFieldOrVar(inputName);
     } else {
@@ -247,9 +247,9 @@ public class FrameStack {
     if (containerTypeNode == null)
       return;
     // No such thing as DO WITH BROWSE...
-    assert containerTypeNode.getType() == NodeTypes.FRAME;
+    assert containerTypeNode.getType() == ProParserTokenTypes.FRAME;
     JPNode frameIDNode = containerTypeNode.nextNode();
-    assert frameIDNode.getType() == NodeTypes.ID;
+    assert frameIDNode.getType() == ProParserTokenTypes.ID;
     Frame frame = frameRefSet(frameIDNode, currentBlock.getSymbolScope());
     frame.setFrameScopeBlockExplicitDefault(((BlockNode) blockNode).getBlock());
     blockNode.setFieldContainer(frame);
@@ -269,7 +269,7 @@ public class FrameStack {
    */
   void nodeOfDefineFrame(JPNode defNode, JPNode idNode, TreeParserSymbolScope currentSymbolScope) {
     String frameName = idNode.getText();
-    Frame frame = (Frame) currentSymbolScope.lookupSymbolLocally(NodeTypes.FRAME, frameName);
+    Frame frame = (Frame) currentSymbolScope.lookupSymbolLocally(ProParserTokenTypes.FRAME, frameName);
     if (frame == null)
       frame = createFrame(frameName, currentSymbolScope);
     frame.setDefOrIdNode(defNode);
@@ -289,9 +289,9 @@ public class FrameStack {
     JPNode idNode = null;
     if (containerTypeNode != null) {
       idNode = containerTypeNode.nextNode();
-      assert idNode.getType() == NodeTypes.ID;
+      assert idNode.getType() == ProParserTokenTypes.ID;
     }
-    if (containerTypeNode != null && containerTypeNode.getType() == NodeTypes.BROWSE) {
+    if (containerTypeNode != null && containerTypeNode.getType() == ProParserTokenTypes.BROWSE) {
       containerForCurrentStatement = browseRefSet(idNode, currentBlock.getSymbolScope());
     } else {
       Frame frame = null;

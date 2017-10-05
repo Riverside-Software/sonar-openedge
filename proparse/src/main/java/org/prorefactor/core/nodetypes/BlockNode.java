@@ -16,8 +16,6 @@ import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.Block;
 
 public class BlockNode extends JPNode {
-  private static final long serialVersionUID = 6062037678978630381L;
-
   public BlockNode(ProToken t) {
     super(t);
   }

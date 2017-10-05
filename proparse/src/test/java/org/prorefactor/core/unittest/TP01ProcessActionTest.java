@@ -50,7 +50,7 @@ public class TP01ProcessActionTest {
     String externalName = file.getName();
 
     ParseUnit pu = new ParseUnit(file, session);
-    TP01Support symbolAction = new TP01Support(session);
+    TP01Support symbolAction = new TP01Support(session, pu);
     pu.treeParser01(symbolAction);
 
     // Define routine handlers for expected routines.
@@ -103,7 +103,7 @@ public class TP01ProcessActionTest {
     String externalName = file.getName();
 
     ParseUnit pu = new ParseUnit(file, session);
-    TP01Support symbolAction = new TP01Support(session);
+    TP01Support symbolAction = new TP01Support(session, pu);
     pu.treeParser01(symbolAction);
 
     // Define routines.

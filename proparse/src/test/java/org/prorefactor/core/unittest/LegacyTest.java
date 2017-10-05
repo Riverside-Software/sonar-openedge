@@ -14,7 +14,7 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -196,13 +196,13 @@ public class LegacyTest {
     pu8.treeParser01();
     pu9.treeParser01();
 
-    Assert.assertEquals(pu1.getTopNode().query(NodeTypes.BGCOLOR).size(), 1);
-    Assert.assertNotNull(pu1.getTopNode().query(NodeTypes.BGCOLOR).get(0));
-    Assert.assertEquals(pu1.getTopNode().query(NodeTypes.BGCOLOR).get(0).getAnalyzeSuspend(), "_CREATE-WINDOW");
+    Assert.assertEquals(pu1.getTopNode().query(ABLNodeType.BGCOLOR).size(), 1);
+    Assert.assertNotNull(pu1.getTopNode().query(ABLNodeType.BGCOLOR).get(0));
+    Assert.assertEquals(pu1.getTopNode().query(ABLNodeType.BGCOLOR).get(0).getAnalyzeSuspend(), "_CREATE-WINDOW");
 
-    Assert.assertEquals(pu1.getTopNode().query(NodeTypes.WAITFOR).size(), 1);
-    Assert.assertNotNull(pu1.getTopNode().query(NodeTypes.WAITFOR).get(0));
-    Assert.assertEquals(pu1.getTopNode().query(NodeTypes.WAITFOR).get(0).getAnalyzeSuspend(), "_UIB-CODE-BLOCK,_CUSTOM,_MAIN-BLOCK,C-Win");
+    Assert.assertEquals(pu1.getTopNode().query(ABLNodeType.WAITFOR).size(), 1);
+    Assert.assertNotNull(pu1.getTopNode().query(ABLNodeType.WAITFOR).get(0));
+    Assert.assertEquals(pu1.getTopNode().query(ABLNodeType.WAITFOR).get(0).getAnalyzeSuspend(), "_UIB-CODE-BLOCK,_CUSTOM,_MAIN-BLOCK,C-Win");
 }
 
 }

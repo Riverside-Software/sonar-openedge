@@ -24,11 +24,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.Tree;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.unittest.util.UnitTestModule;
-import org.prorefactor.proparse.ProParser;
-import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
-import org.testng.Assert;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
@@ -255,6 +252,7 @@ public class ANTLR4ParserTest {
     executeAntlr2Test(new File(SRC_DIR, fileName));
   }
 
+  @SuppressWarnings("unused")
   private void executeTokenizerTest(File file) throws ANTLRException, IOException {
     // ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
     // Proparse parser = new Proparse(new CommonTokenStream(dp));

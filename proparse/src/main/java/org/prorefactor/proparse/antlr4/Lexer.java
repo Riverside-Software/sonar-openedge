@@ -15,8 +15,9 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.macrolevel.MacroDef;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,14 +98,14 @@ public class Lexer  {
         textStartCol = prepro.getTextStart().getCol();
         textStartSource = prepro.getTextStart().getSourceNum();
         getChar();
-        return makeToken(PreprocessorParser.PROPARSEDIRECTIVE, prepro.getProparseDirectiveText());
+        return makeToken(ABLNodeType.PROPARSEDIRECTIVE, prepro.getProparseDirectiveText());
       } else if (currInt == ProgressLexer.INCLUDE_DIRECTIVE) {
         textStartFile = prepro.getTextStart().getFile();
         textStartLine = prepro.getTextStart().getLine();
         textStartCol = prepro.getTextStart().getCol();
         textStartSource = prepro.getTextStart().getSourceNum();
         getChar();
-        return makeToken(PreprocessorParser.INCLUDEDIRECTIVE, prepro.getIncludeDirectiveText());
+        return makeToken(ABLNodeType.INCLUDEDIRECTIVE, prepro.getIncludeDirectiveText());
       }
 
       textStartFile = prepro.getFileIndex();
@@ -135,7 +136,7 @@ public class Lexer  {
           if (prepro.isEscapeCurrent()) {
             getChar();
             // Escaped quote does not start a string
-            return id(PreprocessorParser.FILENAME);
+            return id(ABLNodeType.FILENAME);
           } else {
             currStringType = currInt;
             getChar();
@@ -151,11 +152,11 @@ public class Lexer  {
           } else if (currChar == '(' || currIsSpace()) {
             // slash (division) can only be followed by whitespace or '('
             // ...that's what I found empirically, anyway. (jag 2003/05/09)
-            return makeToken(PreprocessorParser.SLASH);
+            return makeToken(ABLNodeType.SLASH);
           } else {
             append();
             getChar();
-            return id(PreprocessorParser.FILENAME);
+            return id(ABLNodeType.FILENAME);
           }
 
         case ':':
@@ -168,47 +169,47 @@ public class Lexer  {
         case '@':
           getChar();
           if (currIsSpace())
-            return makeToken(PreprocessorParser.LEXAT);
+            return makeToken(ABLNodeType.LEXAT);
           else
             append();
           getChar();
-          return id(PreprocessorParser.ANNOTATION);
+          return id(ABLNodeType.ANNOTATION);
         case '[':
           getChar();
-          return makeToken(PreprocessorParser.LEFTBRACE);
+          return makeToken(ABLNodeType.LEFTBRACE);
         case ']':
           getChar();
-          return makeToken(PreprocessorParser.RIGHTBRACE);
+          return makeToken(ABLNodeType.RIGHTBRACE);
         case '^':
           getChar();
-          return makeToken(PreprocessorParser.CARET);
+          return makeToken(ABLNodeType.CARET);
         case ',':
           getChar();
-          return makeToken(PreprocessorParser.COMMA);
+          return makeToken(ABLNodeType.COMMA);
         case '!':
           getChar();
-          return makeToken(PreprocessorParser.EXCLAMATION);
+          return makeToken(ABLNodeType.EXCLAMATION);
         case '=':
           getChar();
-          return makeToken(PreprocessorParser.EQUAL);
+          return makeToken(ABLNodeType.EQUAL);
         case '(':
           getChar();
-          return makeToken(PreprocessorParser.LEFTPAREN);
+          return makeToken(ABLNodeType.LEFTPAREN);
         case ')':
           getChar();
-          return makeToken(PreprocessorParser.RIGHTPAREN);
+          return makeToken(ABLNodeType.RIGHTPAREN);
         case ';':
           getChar();
-          return makeToken(PreprocessorParser.SEMI);
+          return makeToken(ABLNodeType.SEMI);
         case '*':
           getChar();
-          return makeToken(PreprocessorParser.STAR);
+          return makeToken(ABLNodeType.STAR);
         case '?':
           getChar();
-          return makeToken(PreprocessorParser.UNKNOWNVALUE);
+          return makeToken(ABLNodeType.UNKNOWNVALUE);
         case '`':
           getChar();
-          return makeToken(PreprocessorParser.BACKTICK);
+          return makeToken(ABLNodeType.BACKTICK);
 
         case '0':
         case '1':
@@ -232,9 +233,9 @@ public class Lexer  {
           if (currChar == '=') {
             append();
             getChar();
-            return makeToken(PreprocessorParser.GTOREQUAL);
+            return makeToken(ABLNodeType.GTOREQUAL);
           } else {
-            return makeToken(PreprocessorParser.RIGHTANGLE);
+            return makeToken(ABLNodeType.RIGHTANGLE);
           }
 
         case '<':
@@ -242,35 +243,35 @@ public class Lexer  {
           if (currChar == '>') {
             append();
             getChar();
-            return makeToken(PreprocessorParser.GTORLT);
+            return makeToken(ABLNodeType.GTORLT);
           } else if (currChar == '=') {
             append();
             getChar();
-            return makeToken(PreprocessorParser.LTOREQUAL);
+            return makeToken(ABLNodeType.LTOREQUAL);
           } else {
-            return makeToken(PreprocessorParser.LEFTANGLE);
+            return makeToken(ABLNodeType.LEFTANGLE);
           }
 
         case '+':
           getChar();
-          return plusMinusStart(PreprocessorParser.PLUS);
+          return plusMinusStart(ABLNodeType.PLUS);
         case '-':
           getChar();
-          return plusMinusStart(PreprocessorParser.MINUS);
+          return plusMinusStart(ABLNodeType.MINUS);
 
         case '#':
         case '|':
         case '%':
           getChar();
-          return id(PreprocessorParser.FILENAME);
+          return id(ABLNodeType.FILENAME);
 
         default:
           if (currInt == EOF_CHAR) {
             getChar(); // preprocessor will catch any infinite loop on this.
-            return makeToken(PreprocessorParser.EOF, "");
+            return makeToken(ABLNodeType.EOF_ANTLR4, "");
           } else {
             getChar();
-            return id(PreprocessorParser.ID);
+            return id(ABLNodeType.ID);
           }
 
       }
@@ -330,7 +331,7 @@ public class Lexer  {
       append();
       getChar();
     }
-    return makeToken(PreprocessorParser.ID);
+    return makeToken(ABLNodeType.ID);
   }
 
   ProToken colon() throws IOException {
@@ -339,11 +340,11 @@ public class Lexer  {
     if (currChar == ':') {
       append();
       getChar();
-      return makeToken(PreprocessorParser.DOUBLECOLON);
+      return makeToken(ABLNodeType.DOUBLECOLON);
     }
     if (currIsSpace())
-      return makeToken(PreprocessorParser.LEXCOLON);
-    return makeToken(PreprocessorParser.OBJCOLON);
+      return makeToken(ABLNodeType.LEXCOLON);
+    return makeToken(ABLNodeType.OBJCOLON);
   }
 
   ProToken whitespace() throws IOException {
@@ -363,7 +364,7 @@ public class Lexer  {
           break loop;
       }
     }
-    return makeToken(PreprocessorParser.WS);
+    return makeToken(ABLNodeType.WS);
   }
 
   ProToken comment() throws IOException {
@@ -398,7 +399,7 @@ public class Lexer  {
     }
     prepro.setDoingComment(false);
     getChar();
-    return makeToken(PreprocessorParser.COMMENT);
+    return makeToken(ABLNodeType.COMMENT);
   }
 
   ProToken singleLineComment() throws IOException {
@@ -414,7 +415,7 @@ public class Lexer  {
       getChar();
       if ((currInt == EOF_CHAR) || (!prepro.isEscapeCurrent() && (currChar == '\r' || currChar == '\n' ))) {
         prepro.setDoingComment(false);
-        return makeToken(PreprocessorParser.COMMENT);
+        return makeToken(ABLNodeType.COMMENT);
       } else {
         unEscapedAppend();
       }
@@ -483,13 +484,13 @@ public class Lexer  {
       }
     } // currChar==':'
 
-    return makeToken(PreprocessorParser.QSTRING);
+    return makeToken(ABLNodeType.QSTRING);
   }
 
   ProToken digitStart() throws IOException {
     LOGGER.trace("Entering digitStart()");
 
-    int ttype = PreprocessorParser.NUMBER;
+    ABLNodeType ttype = ABLNodeType.NUMBER;
     for_loop : for (;;) {
       switch (currChar) {
         case '0':
@@ -538,8 +539,8 @@ public class Lexer  {
         case '_':
           append();
           getChar();
-          if (ttype != PreprocessorParser.FILENAME)
-            ttype = PreprocessorParser.ID;
+          if (ttype != ABLNodeType.FILENAME)
+            ttype = ABLNodeType.ID;
           break;
         // We don't know here if the plus or minus is in the middle or at the end.
         // Don't change ttype.
@@ -551,13 +552,13 @@ public class Lexer  {
         case '/':
           append();
           getChar();
-          if (ttype == PreprocessorParser.NUMBER)
-            ttype = PreprocessorParser.LEXDATE;
+          if (ttype == ABLNodeType.NUMBER)
+            ttype = ABLNodeType.LEXDATE;
           break;
         case '\\':
           append();
           getChar();
-          ttype = PreprocessorParser.FILENAME;
+          ttype = ABLNodeType.FILENAME;
           break;
         case '.':
           if (prepro.isNameDot()) {
@@ -573,9 +574,9 @@ public class Lexer  {
     return makeToken(ttype);
   }
 
-  ProToken plusMinusStart(int inputType) throws IOException {
+  ProToken plusMinusStart(ABLNodeType inputType) throws IOException {
 	  LOGGER.trace("Entering plusMinusStart()");
-	  int ttype = PreprocessorParser.NUMBER;
+	  ABLNodeType ttype = ABLNodeType.NUMBER;
     for_loop : for (;;) {
       switch (currChar) {
         // We don't know here if the plus or minus is in the middle or at the end.
@@ -631,7 +632,7 @@ public class Lexer  {
         case 'z':
           append();
           getChar();
-          ttype = PreprocessorParser.FILENAME;
+          ttype = ABLNodeType.FILENAME;
           break;
         case '.':
           if (prepro.isNameDot()) {
@@ -655,11 +656,11 @@ public class Lexer  {
 
     if (!Character.isDigit(currChar)) {
       if (prepro.isNameDot())
-        return makeToken(PreprocessorParser.NAMEDOT);
+        return makeToken(ABLNodeType.NAMEDOT);
       else
-        return makeToken(PreprocessorParser.PERIOD);
+        return makeToken(ABLNodeType.PERIOD);
     }
-    int ttype = PreprocessorParser.NUMBER;
+    ABLNodeType ttype = ABLNodeType.NUMBER;
     for_loop : for (;;) {
       switch (currChar) {
         // We don't know here if the plus or minus is in the middle or at the end.
@@ -714,7 +715,7 @@ public class Lexer  {
         case 'z':
           append();
           getChar();
-          ttype = PreprocessorParser.FILENAME;
+          ttype = ABLNodeType.FILENAME;
           break;
         default:
           break for_loop;
@@ -723,7 +724,7 @@ public class Lexer  {
     return makeToken(ttype);
   }
 
-  ProToken id(int inputTokenType) throws IOException {
+  ProToken id(ABLNodeType inputTokenType) throws IOException {
     LOGGER.trace("Entering id()");
 
     // Tokens that start with a-z or underscore
@@ -736,7 +737,7 @@ public class Lexer  {
     // Undocumented: the compiler allows you to start a block label with $
     // If we find a back slash, we know we're into a filename.
     // Extended characters (octal 200-377) can be used in identifiers, even at the beginning.
-    int ttype = inputTokenType;
+    ABLNodeType ttype = inputTokenType;
     for_loop : for (;;) {
       switch (currChar) {
         case '0':
@@ -804,8 +805,8 @@ public class Lexer  {
         case '\'':
           append();
           getChar();
-          if (ttype == PreprocessorParser.ID)
-            ttype = PreprocessorParser.FILENAME;
+          if (ttype == ABLNodeType.ID)
+            ttype = ABLNodeType.FILENAME;
           break;
         default:
           if (currInt >= 128 && currInt <= 255) {
@@ -818,8 +819,8 @@ public class Lexer  {
       }
     }
     // See if it's a keyword
-    if (ttype == PreprocessorParser.ID)
-      ttype = NodeTypes.testLiteralsTable(currText.toString(), ttype);
+    if (ttype == ABLNodeType.ID)
+      ttype = ABLNodeType.getLiteral(currText.toString(), ttype);
     return makeToken(ttype);
   }
 
@@ -860,7 +861,7 @@ public class Lexer  {
     ProToken t = directive();
     if (t != null)
       return t;
-    return makeToken(PreprocessorParser.FILENAME);
+    return makeToken(ABLNodeType.FILENAME);
   }
 
   ProToken directive() throws IOException {
@@ -874,16 +875,16 @@ public class Lexer  {
     if ("&global-define".startsWith(macroType) && macroType.length() >= 4) {
       appendToEOL();
       // We have to do the define *before* getting next char.
-      macroDefine(PreprocessorParser.AMPGLOBALDEFINE);
+      macroDefine(ProParserTokenTypes.AMPGLOBALDEFINE);
       getChar();
-      return makeToken(PreprocessorParser.AMPGLOBALDEFINE);
+      return makeToken(ABLNodeType.AMPGLOBALDEFINE);
     }
     if ("&scoped-define".startsWith(macroType) && macroType.length() >= 4) {
       appendToEOL();
       // We have to do the define *before* getting next char.
-      macroDefine(PreprocessorParser.AMPSCOPEDDEFINE);
+      macroDefine(ProParserTokenTypes.AMPSCOPEDDEFINE);
       getChar();
-      return makeToken(PreprocessorParser.AMPSCOPEDDEFINE);
+      return makeToken(ABLNodeType.AMPSCOPEDDEFINE);
     }
 
     if ("&undefine".startsWith(macroType) && macroType.length() >= 5) {
@@ -912,7 +913,7 @@ public class Lexer  {
         getChar();
       }
       macroUndefine();
-      return makeToken(PreprocessorParser.AMPUNDEFINE);
+      return makeToken(ABLNodeType.AMPUNDEFINE);
     }
 
     if ("&analyze-suspend".equals(macroType)) {
@@ -927,34 +928,34 @@ public class Lexer  {
             currText.toString().substring(currText.toString().indexOf(' ') + 1)));
       }
       getChar();
-      return makeToken(PreprocessorParser.AMPANALYZESUSPEND);
+      return makeToken(ABLNodeType.AMPANALYZESUSPEND);
     }
     if ("&analyze-resume".equals(macroType)) {
       appendToEOL();
       currentAnalyzeSuspend = "";
       getChar();
-      return makeToken(PreprocessorParser.AMPANALYZERESUME);
+      return makeToken(ABLNodeType.AMPANALYZERESUME);
     }
     if ("&message".equals(macroType)) {
       appendToEOL();
       getChar();
-      return makeToken(PreprocessorParser.AMPMESSAGE);
+      return makeToken(ABLNodeType.AMPMESSAGE);
     }
 
     if ("&if".equals(macroType)) {
-      return makeToken(PreprocessorParser.AMPIF);
+      return makeToken(ABLNodeType.AMPIF);
     }
     if ("&then".equals(macroType)) {
-      return makeToken(PreprocessorParser.AMPTHEN);
+      return makeToken(ABLNodeType.AMPTHEN);
     }
     if ("&elseif".equals(macroType)) {
-      return makeToken(PreprocessorParser.AMPELSEIF);
+      return makeToken(ABLNodeType.AMPELSEIF);
     }
     if ("&else".equals(macroType)) {
-      return makeToken(PreprocessorParser.AMPELSE);
+      return makeToken(ABLNodeType.AMPELSE);
     }
     if ("&endif".equals(macroType)) {
-      return makeToken(PreprocessorParser.AMPENDIF);
+      return makeToken(ABLNodeType.AMPENDIF);
     }
 
     // If we got here, it wasn't a preprocessor directive,
@@ -1042,8 +1043,8 @@ public class Lexer  {
     defText = defText.trim();
     // Do listing before lowercasing the name
     prepro.getLstListener().define(textStartLine, textStartCol, macroName.toLowerCase(Locale.ENGLISH), defText,
-            defType == PreprocessorParser.AMPGLOBALDEFINE ? MacroDef.GLOBAL : MacroDef.SCOPED);
-    if (defType == PreprocessorParser.AMPGLOBALDEFINE)
+            defType == ProParserTokenTypes.AMPGLOBALDEFINE ? MacroDef.GLOBAL : MacroDef.SCOPED);
+    if (defType == ProParserTokenTypes.AMPGLOBALDEFINE)
       prepro.defGlobal(macroName.toLowerCase(), defText);
     else
       prepro.defScoped(macroName.toLowerCase(), defText);
@@ -1069,21 +1070,21 @@ public class Lexer  {
     prepro.undef(macroName.toLowerCase());
   }
 
-  ProToken makeToken(int tokenType) {
-    return makeToken(tokenType, currText.toString());
+  ProToken makeToken(ABLNodeType type) {
+    return makeToken(type, currText.toString());
   }
 
-  ProToken makeToken(int tokenType, String text) {
+  ProToken makeToken(ABLNodeType type, String text) {
     // Counting lines of code and commented lines only in the main file (textStartFile set to 0)
-    if ((textStartFile == 0) && (tokenType == PreprocessorParser.COMMENT)) {
+    if ((textStartFile == 0) && (type == ABLNodeType.COMMENT)) {
       int numLines = currText.toString().length() - currText.toString().replace("\n", "").length();
       for (int zz = textStartLine; zz <= textStartLine + numLines; zz++) {
         comments.add(zz);
       }
-    } else if ((textStartFile == 0) && (tokenType != PreprocessorParser.WS) && (tokenType != PreprocessorParser.EOF) && (textStartLine > 0)) {
+    } else if ((textStartFile == 0) && (type != ABLNodeType.WS) && (type != ABLNodeType.EOF_ANTLR4) && (textStartLine > 0)) {
       loc.add(textStartLine);
     }
-    ProToken tok = new ProToken(tokenType, text);
+    ProToken tok = new ProToken(type, text);
     tok.setText(text);
     tok.setFileIndex(textStartFile);
     tok.setLine(textStartLine);

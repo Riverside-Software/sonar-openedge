@@ -23,8 +23,8 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNodeMetrics;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.macrolevel.IncludeRef;
@@ -1034,15 +1034,15 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     TokenStream stream = new ANTRL2TokenStreamWrapper();
     if (hideNonDefaultChannel) {
       TokenStreamHiddenTokenFilter filter = new TokenStreamHiddenTokenFilter(stream); 
-      filter.hide(NodeTypes.WS);
-      filter.hide(NodeTypes.COMMENT);
-      filter.hide(NodeTypes.AMPMESSAGE);
-      filter.hide(NodeTypes.AMPANALYZESUSPEND);
-      filter.hide(NodeTypes.AMPANALYZERESUME);
-      filter.hide(NodeTypes.AMPGLOBALDEFINE);
-      filter.hide(NodeTypes.AMPSCOPEDDEFINE);
-      filter.hide(NodeTypes.AMPUNDEFINE);
-      filter.hide(NodeTypes.PROPARSEDIRECTIVE);
+      filter.hide(ABLNodeType.WS.getType());
+      filter.hide(ABLNodeType.COMMENT.getType());
+      filter.hide(ABLNodeType.AMPMESSAGE.getType());
+      filter.hide(ABLNodeType.AMPANALYZESUSPEND.getType());
+      filter.hide(ABLNodeType.AMPANALYZERESUME.getType());
+      filter.hide(ABLNodeType.AMPGLOBALDEFINE.getType());
+      filter.hide(ABLNodeType.AMPSCOPEDDEFINE.getType());
+      filter.hide(ABLNodeType.AMPUNDEFINE.getType());
+      filter.hide(ABLNodeType.PROPARSEDIRECTIVE.getType());
       stream = filter;
     }
 
@@ -1058,10 +1058,10 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
     private antlr.Token convertToken(org.prorefactor.proparse.antlr4.ProToken tok) {
       // Value of EOF is different in ANTLR2 and ANTLR4
-      return new ProToken(tok.getType() == Token.EOF ? antlr.Token.EOF_TYPE : tok.getType(), tok.getText(),
-          tok.getFileIndex(), Strings.nullToEmpty(filenameList.getValue(tok.getFileIndex())), tok.getLine(),
-          tok.getCharPositionInLine(), tok.getEndFileIndex(), tok.getEndLine(), tok.getEndCharPositionInLine(),
-          tok.getMacroSourceNum(), tok.getAnalyzeSuspend(), false);
+      return new ProToken(tok.getNodeType() == ABLNodeType.EOF_ANTLR4 ? ABLNodeType.EOF : tok.getNodeType(),
+          tok.getText(), tok.getFileIndex(), Strings.nullToEmpty(filenameList.getValue(tok.getFileIndex())),
+          tok.getLine(), tok.getCharPositionInLine(), tok.getEndFileIndex(), tok.getEndLine(),
+          tok.getEndCharPositionInLine(), tok.getMacroSourceNum(), tok.getAnalyzeSuspend(), false);
     }
   }
 

@@ -13,7 +13,7 @@ package org.prorefactor.treeparser.symbols;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE DATASET. */
@@ -48,7 +48,7 @@ public class Dataset extends Symbol {
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.DATASET;
+    return ProParserTokenTypes.DATASET;
   }
 
 }

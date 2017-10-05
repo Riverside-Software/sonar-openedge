@@ -39,7 +39,6 @@ header {
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
   import org.prorefactor.core.JPNode;
-  import org.prorefactor.treeparser.TreeParserException;
   import org.prorefactor.treeparser.IJPTreeParser;
 }
 
@@ -56,9 +55,10 @@ options {
 // class definition options for Antlr
 class JPTreeParser extends TreeParser;
 options {
-  importVocab = ProParser;
+  importVocab = Base;
   defaultErrorHandler = false;
   classHeaderSuffix = IJPTreeParser;
+  ASTLabelType = "JPNode";
 }
 
 
@@ -101,16 +101,16 @@ options {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-program throws TreeParserException
-  :  #(Program_root (blockorstate)* Program_tail)
+program:
+    #(Program_root (blockorstate)* Program_tail)
   ;
 
-code_block throws TreeParserException
-  :  #(Code_block (blockorstate)* )
+code_block:
+    #(Code_block (blockorstate)* )
   ;
 
-blockorstate throws TreeParserException
-  :  (  labeled_block
+blockorstate:
+    (  labeled_block
     |  statement
     |  // Expr_statement has a "statehead" node attribute
       #(Expr_statement expression (NOERROR_KW)? state_end)
@@ -121,23 +121,25 @@ blockorstate throws TreeParserException
     )
   ;
 
-labeled_block throws TreeParserException
-  :  #(BLOCK_LABEL LEXCOLON (dostate|forstate|repeatstate) )
+labeled_block:
+    #(BLOCK_LABEL LEXCOLON (dostate|forstate|repeatstate) )
   ;
 
-
-block_colon throws TreeParserException
-  :  LEXCOLON | PERIOD
+block_colon:
+    LEXCOLON | PERIOD
   ;
-block_end throws TreeParserException
-  :  EOF
+
+block_end:
+    EOF
   |  END state_end
   ;
-block_for throws TreeParserException
-  :  #(FOR RECORD_NAME (COMMA RECORD_NAME)* )
+
+block_for:
+    #(FOR RECORD_NAME (COMMA RECORD_NAME)* )
   ;
-block_opt throws TreeParserException
-  :  #(Block_iterator field EQUAL expression TO expression (BY constant)? )
+
+block_opt:
+    #(Block_iterator field EQUAL expression TO expression (BY constant)? )
   |  querytuningphrase 
   |  #(WHILE expression )
   |  TRANSACTION 
@@ -149,18 +151,19 @@ block_opt throws TreeParserException
   |  collatephrase
   |  #(GROUP ( #(BY expression (DESCENDING)? ) )+ )
   ;
-block_preselect throws TreeParserException
-  :  #(PRESELECT for_record_spec )
+
+block_preselect:
+    #(PRESELECT for_record_spec )
   ;
 
-statement throws TreeParserException
 // All statement first nodes have a node attribute of "statehead".
 // Additionally, for those first statement nodes which are ambiguous
 // (ex: CREATE), there is an additional disambiguating attribute of "state2".
-  :            aatracestatement
+statement:
+               aatracestatement
   |            accumulatestate
-   |            altertablestate
-   |            analyzestate
+  |            altertablestate
+  |            analyzestate
   |            applystate
   |            assignstate
   |            bellstate
@@ -351,10 +354,10 @@ statement throws TreeParserException
   ;
 
 
-pseudfn throws TreeParserException
 // See PSC's grammar for <pseudfn> and for <asignmt>.
 // These are functions that can (or, in some cases, must) be an l-value.
-  :  #(EXTENT funargs )
+pseudfn:
+     #(EXTENT funargs )
   |  #(FIXCODEPAGE funargs )
   |  #(OVERLAY funargs )
   |  #(PUTBITS funargs )
@@ -399,8 +402,8 @@ pseudfn throws TreeParserException
   | AAPCONTROL | GETCODEPAGES | COMSELF
   ;
 
-functioncall throws TreeParserException
-  :  #(ACCUMULATE accum_what (#(BY expression (DESCENDING)?))? expression )
+functioncall:
+    #(ACCUMULATE accum_what (#(BY expression (DESCENDING)?))? expression )
   |  #(ADDINTERVAL LEFTPAREN expression COMMA expression COMMA expression RIGHTPAREN )
   |  #(AUDITENABLED LEFTPAREN (expression)? RIGHTPAREN )
   |  #(CANFIND LEFTPAREN (findwhich)? recordphrase RIGHTPAREN )
@@ -445,8 +448,8 @@ functioncall throws TreeParserException
   |  recordfunc
   ;
 
-argfunc throws TreeParserException
-  :  #(AACBIT funargs )
+argfunc:
+    #(AACBIT funargs )
   |  #(AAMSG funargs )
   |  #(ABSOLUTE funargs )
   |  #(ALIAS funargs )
@@ -581,11 +584,10 @@ argfunc throws TreeParserException
   |  #(WEEKDAY funargs )
   |  #(WIDGETHANDLE funargs )
   |  #(YEAR funargs )
-
   ;
 
-recordfunc throws TreeParserException
-  :  #(AMBIGUOUS recordfunargs )
+recordfunc:
+    #(AMBIGUOUS recordfunargs )
   |  #(AVAILABLE recordfunargs )
   |  #(CURRENTCHANGED recordfunargs )
   |  #(DATASOURCEMODIFIED recordfunargs )
@@ -598,12 +600,12 @@ recordfunc throws TreeParserException
   |  #(ROWID recordfunargs )
   |  #(ROWSTATE recordfunargs )
   ;
-recordfunargs throws TreeParserException
-  :  (LEFTPAREN RECORD_NAME RIGHTPAREN | RECORD_NAME)
+recordfunargs:
+    (LEFTPAREN RECORD_NAME RIGHTPAREN | RECORD_NAME)
   ;
 
-noargfunc throws TreeParserException
-  :  AACONTROL
+noargfunc:
+    AACONTROL
   |  AAPCONTROL
   |  AASERIAL
   |  CURRENTLANGUAGE
@@ -647,15 +649,15 @@ noargfunc throws TreeParserException
   |  TRANSACTION
   ;
 
-
-parameter throws TreeParserException
-  :  #(BUFFER (RECORD_NAME | ID FOR RECORD_NAME ) )
+parameter:
+    #(BUFFER (RECORD_NAME | ID FOR RECORD_NAME ) )
   |  #(OUTPUT parameter_arg )
   |  #(INPUTOUTPUT parameter_arg )
   |  #(INPUT parameter_arg )
   ;
-parameter_arg throws TreeParserException
-  :  (  TABLEHANDLE field parameter_dataset_options
+
+parameter_arg:
+    (  TABLEHANDLE field parameter_dataset_options
     |  TABLE (FOR)? RECORD_NAME parameter_dataset_options
     |  DATASET ID parameter_dataset_options
     |  DATASETHANDLE field parameter_dataset_options
@@ -665,58 +667,62 @@ parameter_arg throws TreeParserException
     )
     (BYPOINTER|BYVARIANTPOINTER)?
   ;
-parameter_dataset_options throws TreeParserException
-  : (APPEND)? (BYVALUE|BYREFERENCE|BIND)?
+
+parameter_dataset_options:
+   (APPEND)? (BYVALUE|BYREFERENCE|BIND)?
   ;
 
-parameterlist throws TreeParserException
-  :  #(Parameter_list parameterlist_noroot )
-  ;
-parameterlist_noroot throws TreeParserException
-  :  LEFTPAREN (parameter)? (COMMA parameter)* RIGHTPAREN
+parameterlist:
+    #(Parameter_list parameterlist_noroot )
   ;
 
-eventlist throws TreeParserException
-  :  #(Event_list . (COMMA .)* )
+parameterlist_noroot:
+    LEFTPAREN (parameter)? (COMMA parameter)* RIGHTPAREN
   ;
 
-funargs throws TreeParserException
-  :  LEFTPAREN expression (COMMA expression)* RIGHTPAREN
+eventlist:
+    #(Event_list . (COMMA .)* )
   ;
 
-optfunargs throws TreeParserException
-  :  LEFTPAREN (expression (COMMA expression)*)? RIGHTPAREN
+funargs:
+    LEFTPAREN expression (COMMA expression)* RIGHTPAREN
   ;
 
-anyorvalue throws TreeParserException
-  :  #(VALUE LEFTPAREN expression RIGHTPAREN )
+optfunargs:
+    LEFTPAREN (expression (COMMA expression)*)? RIGHTPAREN
+  ;
+
+anyorvalue:
+    #(VALUE LEFTPAREN expression RIGHTPAREN )
   |  TYPELESS_TOKEN
   ;
-filenameorvalue throws TreeParserException
-  :  valueexpression | FILENAME
-  ;
-valueexpression throws TreeParserException
-  :  #(VALUE LEFTPAREN expression RIGHTPAREN )
-  ;
-qstringorvalue throws TreeParserException
-  :  valueexpression | QSTRING
+
+filenameorvalue:
+    valueexpression | FILENAME
   ;
 
-expressionorvalue throws TreeParserException
-  :  valueexpression | expression
+valueexpression:
+    #(VALUE LEFTPAREN expression RIGHTPAREN )
   ;
 
-findwhich throws TreeParserException
-  :  CURRENT | EACH | FIRST | LAST | NEXT | PREV
+qstringorvalue:
+    valueexpression | QSTRING
   ;
 
-lockhow throws TreeParserException
-  :  SHARELOCK | EXCLUSIVELOCK | NOLOCK
+expressionorvalue:
+    valueexpression | expression
   ;
 
+findwhich:
+    CURRENT | EACH | FIRST | LAST | NEXT | PREV
+  ;
 
-expression throws TreeParserException
-  :  #(OR expression expression )
+lockhow:
+    SHARELOCK | EXCLUSIVELOCK | NOLOCK
+  ;
+
+expression:
+    #(OR expression expression )
   |  #(AND expression expression )
   |  #(NOT expression )
   |  #(MATCHES expression expression )
@@ -738,8 +744,8 @@ expression throws TreeParserException
   |  exprt
   ;
 
-exprt throws TreeParserException
-  :  #(LEFTPAREN expression RIGHTPAREN )
+exprt:
+    #(LEFTPAREN expression RIGHTPAREN )
   |  constant
   |  widattr
   |  #(USER_FUNC parameterlist_noroot )
@@ -755,8 +761,8 @@ exprt throws TreeParserException
   |  RECORD_NAME // for DISPLAY buffername, etc.
   ;
 
-widattr throws TreeParserException
-  :  #(  Widget_ref
+widattr:
+    #(  Widget_ref
       (NORETURNVALUE)?
       (  (widname)=> widname
       |  exprt
@@ -767,20 +773,20 @@ widattr throws TreeParserException
     )
   ;
 
-gwidget throws TreeParserException
-  :  #(Widget_ref s_widget (#(IN_KW (MENU|FRAME|BROWSE|SUBMENU|BUFFER) ID ))? )
+gwidget:
+    #(Widget_ref s_widget (#(IN_KW (MENU|FRAME|BROWSE|SUBMENU|BUFFER) ID ))? )
   ;
 
-widgetlist throws TreeParserException
-  :  gwidget (COMMA gwidget)*
+widgetlist:
+    gwidget (COMMA gwidget)*
   ;
 
-s_widget throws TreeParserException
-  :  widname  | field
+s_widget:
+    widname  | field
   ;
 
-widname throws TreeParserException
-  :  systemhandlename
+widname:
+    systemhandlename
   |  DATASET ID
   |  DATASOURCE ID
   |  FIELD field
@@ -798,20 +804,20 @@ widname throws TreeParserException
   |  STREAM ID
   ;
 
-field throws TreeParserException
-  :  #(Field_ref (INPUT)? (#(FRAME ID) | #(BROWSE ID))? ID (array_subscript)? )
+field:
+    #(Field_ref (INPUT)? (#(FRAME ID) | #(BROWSE ID))? ID (array_subscript)? )
   ;
 
-array_subscript throws TreeParserException
-  :  #(Array_subscript LEFTBRACE expression (FOR expression)? RIGHTBRACE )
+array_subscript:
+    #(Array_subscript LEFTBRACE expression (FOR expression)? RIGHTBRACE )
   ;
 
-method_param_list throws TreeParserException
-  :  #(Method_param_list LEFTPAREN (parameter)? (COMMA (parameter)?)* RIGHTPAREN )
+method_param_list:
+    #(Method_param_list LEFTPAREN (parameter)? (COMMA (parameter)?)* RIGHTPAREN )
   ;
 
-constant throws TreeParserException
-  :  TRUE_KW | FALSE_KW | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL_KW
+constant:
+    TRUE_KW | FALSE_KW | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL_KW
   |  NOWAIT | SHARELOCK | EXCLUSIVELOCK | NOLOCK
   |  BIGENDIAN
   |  FINDCASESENSITIVE | FINDGLOBAL | FINDNEXTOCCURRENCE | FINDPREVOCCURRENCE | FINDSELECT | FINDWRAPAROUND
@@ -824,14 +830,13 @@ constant throws TreeParserException
   |  WINDOWDELAYEDMINIMIZE | WINDOWMINIMIZED | WINDOWNORMAL | WINDOWMAXIMIZED
   ;
 
-systemhandlename throws TreeParserException
-  :  AAMEMORY | ACTIVEWINDOW | AUDITCONTROL | AUDITPOLICY | CLIPBOARD | CODEBASELOCATOR | COLORTABLE | COMPILER 
+systemhandlename:
+    AAMEMORY | ACTIVEWINDOW | AUDITCONTROL | AUDITPOLICY | CLIPBOARD | CODEBASELOCATOR | COLORTABLE | COMPILER 
   |  COMSELF | CURRENTWINDOW | DEBUGGER | DEFAULTWINDOW
   |  ERRORSTATUS | FILEINFORMATION | FOCUS | FONTTABLE | LASTEVENT | LOGMANAGER
   |  MOUSE | PROFILER | RCODEINFORMATION | SECURITYPOLICY | SELF | SESSION
   |  SOURCEPROCEDURE | SUPER | TARGETPROCEDURE | TEXTCURSOR | THISOBJECT | THISPROCEDURE | WEBCONTEXT | ACTIVEFORM
   ;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -839,10 +844,8 @@ systemhandlename throws TreeParserException
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-aatracestatement throws TreeParserException
-  :  #(  AATRACE
+aatracestatement:
+    #(  AATRACE
       (  OFF state_end
       |  #(ON (AALIST)? ) state_end
       |  (stream_name_or_handle)?
@@ -853,19 +856,20 @@ aatracestatement throws TreeParserException
     )
   ;
 
-accum_what throws TreeParserException
-  :  AVERAGE|COUNT|MAXIMUM|MINIMUM|TOTAL|SUBAVERAGE|SUBCOUNT|SUBMAXIMUM|SUBMINIMUM|SUBTOTAL
+accum_what:
+    AVERAGE|COUNT|MAXIMUM|MINIMUM|TOTAL|SUBAVERAGE|SUBCOUNT|SUBMAXIMUM|SUBMINIMUM|SUBTOTAL
   ;
 
-accumulatestate throws TreeParserException
-  :  #(ACCUMULATE (display_item)* state_end )
+accumulatestate:
+    #(ACCUMULATE (display_item)* state_end )
   ;
 
-aggregatephrase throws TreeParserException
-  :  #(Aggregate_phrase LEFTPAREN (aggregate_opt)+ ( #(BY expression (DESCENDING)? ) )* RIGHTPAREN )
+aggregatephrase:
+    #(Aggregate_phrase LEFTPAREN (aggregate_opt)+ ( #(BY expression (DESCENDING)? ) )* RIGHTPAREN )
   ;
-aggregate_opt throws TreeParserException
-  :  #(AVERAGE (label_constant)? )
+
+aggregate_opt:
+    #(AVERAGE (label_constant)? )
   |  #(COUNT (label_constant)? )
   |  #(MAXIMUM (label_constant)? )
   |  #(MINIMUM (label_constant)? )
@@ -877,44 +881,47 @@ aggregate_opt throws TreeParserException
   |  #(SUBTOTAL (label_constant)? )
   ;
 
-analyzestate throws TreeParserException
-  :  #(  ANALYZE filenameorvalue filenameorvalue
+analyzestate:
+    #(  ANALYZE filenameorvalue filenameorvalue
       ( #(OUTPUT filenameorvalue ) )?
       (APPEND | ALL | NOERROR_KW)* state_end
     )
   ;
 
-applystate throws TreeParserException
-  :  #(APPLY expression (#(TO gwidget ))? state_end )
+applystate:
+    #(APPLY expression (#(TO gwidget ))? state_end )
   ;
 
-assign_opt throws TreeParserException
-  :  #(ASSIGN ( #(EQUAL . expression ) )+ )
+assign_opt:
+    #(ASSIGN ( #(EQUAL . expression ) )+ )
   ;
 
-assignstate throws TreeParserException
-  :  #(ASSIGN assignment_list (NOERROR_KW)? state_end )
+assignstate:
+    #(ASSIGN assignment_list (NOERROR_KW)? state_end )
   ;
-assignment_list throws TreeParserException
-  :  RECORD_NAME (#(EXCEPT (field)*))?
+
+assignment_list:
+    RECORD_NAME (#(EXCEPT (field)*))?
   |  (  assign_equal (#(WHEN expression))?
     |  #(Assign_from_buffer field ) (#(WHEN expression))?
     )*
   ;
-assign_equal throws TreeParserException
-  :  #(EQUAL (pseudfn|field) expression )
+
+assign_equal:
+    #(EQUAL (pseudfn|field) expression )
   ;
 
-atphrase throws TreeParserException
-  :  #(  AT
+atphrase:
+    #(  AT
       (  atphraseab atphraseab
       |  expression
       )
       (COLONALIGNED|LEFTALIGNED|RIGHTALIGNED)?
     )
   ;
-atphraseab throws TreeParserException
-  :  #(COLUMN expression )
+
+atphraseab:
+    #(COLUMN expression )
   |  #(COLUMNOF referencepoint )
   |  #(ROW expression )
   |  #(ROWOF referencepoint )
@@ -923,16 +930,17 @@ atphraseab throws TreeParserException
   |  #(Y expression )
   |  #(YOF referencepoint )
   ;
-referencepoint throws TreeParserException
-  :  field ((PLUS|MINUS) expression)?
+
+referencepoint:
+    field ((PLUS|MINUS) expression)?
   ;
 
-bellstate throws TreeParserException
-  :  #(BELL state_end )
+bellstate:
+    #(BELL state_end )
   ;
 
-buffercomparestate throws TreeParserException
-  :  #(  BUFFERCOMPARE
+buffercomparestate:
+    #(  BUFFERCOMPARE
       RECORD_NAME
       (  #(EXCEPT (field)*)
       |  #(USING (field)+)
@@ -953,8 +961,8 @@ buffercomparestate throws TreeParserException
     )
   ;
 
-buffercopystate throws TreeParserException
-  :  #(  BUFFERCOPY RECORD_NAME
+buffercopystate:
+    #(  BUFFERCOPY RECORD_NAME
       (  #(EXCEPT (field)*)
       |  #(USING (field)+)
       )?
@@ -966,23 +974,23 @@ buffercopystate throws TreeParserException
     )
   ;
 
-callstate throws TreeParserException
-  :  #(CALL filenameorvalue (expressionorvalue)* state_end )
+callstate:
+    #(CALL filenameorvalue (expressionorvalue)* state_end )
   ;
 
-catchstate throws TreeParserException
-  :  #(  CATCH ID AS (CLASS)? TYPE_NAME
+catchstate:
+    #(  CATCH ID AS (CLASS)? TYPE_NAME
       block_colon code_block (EOF | #(END (CATCH)?) state_end)
     )
   ;
 
-casesens_or_not throws TreeParserException
-  :  #(Not_casesens NOT CASESENSITIVE )
+casesens_or_not:
+    #(Not_casesens NOT CASESENSITIVE )
   |  CASESENSITIVE
   ;
 
-casestate throws TreeParserException
-  :  #(  CASE expression block_colon
+casestate:
+    #(  CASE expression block_colon
       #(  Code_block
         (  #(WHEN case_expression THEN blockorstate )
         )*
@@ -991,14 +999,15 @@ casestate throws TreeParserException
       (EOF | #(END (CASE)? ) state_end)
     )
   ;
-case_expression throws TreeParserException
-  :  (#(OR .))=> #(OR case_expression case_expression )
+
+case_expression:
+    (#(OR .))=> #(OR case_expression case_expression )
   |  #(WHEN expression)
   |  expression
   ;
 
-choosestate throws TreeParserException
-  :  #(  CHOOSE (ROW|FIELD)
+choosestate:
+    #(  CHOOSE (ROW|FIELD)
       ( #(Form_item field (#(HELP constant))? ) )+
       (  AUTORETURN 
       |  #(COLOR anyorvalue) 
@@ -1012,24 +1021,24 @@ choosestate throws TreeParserException
     )
   ;
 
-enumstate throws TreeParserException
-  :  #(  ENUM TYPE_NAME (FLAGS)? block_colon
+enumstate:
+    #(  ENUM TYPE_NAME (FLAGS)? block_colon
       (defenumstate)+
       #(END (ENUM)? )
       state_end
      )
   ;
 
-defenumstate throws TreeParserException
-  :  #( DEFINE ENUM (enum_member)+ state_end )
+defenumstate:
+    #( DEFINE ENUM (enum_member)+ state_end )
   ;
 
-enum_member throws TreeParserException
-  : TYPE_NAME ( EQUAL ( NUMBER | TYPE_NAME (COMMA TYPE_NAME)*))?
+enum_member:
+   TYPE_NAME ( EQUAL ( NUMBER | TYPE_NAME (COMMA TYPE_NAME)*))?
   ;
 
-classstate throws TreeParserException
-  :  #(  CLASS TYPE_NAME
+classstate:
+    #(  CLASS TYPE_NAME
       (  #(INHERITS TYPE_NAME)
       |  #(IMPLEMENTS TYPE_NAME (COMMA TYPE_NAME)* )
       |  USEWIDGETPOOL
@@ -1044,16 +1053,16 @@ classstate throws TreeParserException
     )
   ;
 
-clearstate throws TreeParserException
-  :  #(CLEAR (#(FRAME ID))? (ALL)? (NOPAUSE)? state_end )
+clearstate:
+    #(CLEAR (#(FRAME ID))? (ALL)? (NOPAUSE)? state_end )
   ;
 
-closequerystate throws TreeParserException
-  :  #(CLOSE QUERY ID state_end )
+closequerystate:
+    #(CLOSE QUERY ID state_end )
   ;
 
-closestoredprocedurestate throws TreeParserException
-  :  #(  CLOSE
+closestoredprocedurestate:
+    #(  CLOSE
       STOREDPROCEDURE ID
       ( #(EQUAL field PROCSTATUS ) )?
       ( #(WHERE PROCHANDLE EQ field ) )?
@@ -1061,26 +1070,26 @@ closestoredprocedurestate throws TreeParserException
     )
   ;
 
-collatephrase throws TreeParserException
-  :  #(COLLATE funargs (DESCENDING)? )
+collatephrase:
+    #(COLLATE funargs (DESCENDING)? )
   ;
 
-color_expr throws TreeParserException
-  :  #(BGCOLOR expression )
+color_expr:
+    #(BGCOLOR expression )
   |  #(DCOLOR expression )
   |  #(FGCOLOR expression )
   |  #(PFCOLOR expression )
   ;
 
-colorspecification throws TreeParserException
-  :  (options{greedy=true;}:color_expr)+
+colorspecification:
+    (options{greedy=true;}:color_expr)+
   |  #(  COLOR (DISPLAY)? anyorvalue
       ( #(PROMPT anyorvalue) )?
     )
   ;
 
-colorstate throws TreeParserException
-  :  #(  COLOR
+colorstate:
+    #(  COLOR
       (  ( #(DISPLAY anyorvalue) | #(PROMPT anyorvalue) )
         ( #(DISPLAY anyorvalue) | #(PROMPT anyorvalue) )?
       )?
@@ -1089,8 +1098,8 @@ colorstate throws TreeParserException
     )
   ;
 
-columnformat throws TreeParserException
-  :  #(  Format_phrase
+columnformat:
+    #(  Format_phrase
       (  #(FORMAT expression)
       |  label_constant
       |  NOLABELS
@@ -1114,8 +1123,8 @@ columnformat throws TreeParserException
     )
   ;
 
-comboboxphrase throws TreeParserException
-  :  #(  COMBOBOX
+comboboxphrase:
+    #(  COMBOBOX
       (  #(LISTITEMS constant (COMMA constant)* )
       |  #(LISTITEMPAIRS constant (COMMA constant)* )
       |  #(INNERLINES expression )
@@ -1131,8 +1140,8 @@ comboboxphrase throws TreeParserException
     )
   ;
 
-compilestate throws TreeParserException
-  :  #(  COMPILE filenameorvalue
+compilestate:
+    #(  COMPILE filenameorvalue
       (  #(ATTRSPACE (#(EQUAL expression))? )
       |  NOATTRSPACE
       |  #(SAVE (#(EQUAL expression))? ( #(INTO filenameorvalue ) )? )
@@ -1162,31 +1171,33 @@ compilestate throws TreeParserException
       state_end
     )
   ;
-compile_lang throws TreeParserException
-  :  valueexpression | TYPELESS_TOKEN (LEXCOLON TYPELESS_TOKEN)*
-  ;
-compile_append throws TreeParserException
-  :  #(APPEND (#(EQUAL expression))? )
+
+compile_lang:
+    valueexpression | TYPELESS_TOKEN (LEXCOLON TYPELESS_TOKEN)*
   ;
 
-connectstate throws TreeParserException
-  :  #(CONNECT (NOERROR_KW|DDE|filenameorvalue)* state_end )
+compile_append:
+    #(APPEND (#(EQUAL expression))? )
   ;
-  
-constructorstate throws TreeParserException
-  :  #(  CONSTRUCTOR def_modifiers TYPE_NAME function_params
+
+connectstate:
+    #(CONNECT (NOERROR_KW|DDE|filenameorvalue)* state_end )
+  ;
+
+constructorstate:
+    #(  CONSTRUCTOR def_modifiers TYPE_NAME function_params
       block_colon code_block #(END (CONSTRUCTOR|METHOD)? ) state_end
     )
   ;
-  
-convertphrase throws TreeParserException
-  :  #(  CONVERT 
+
+convertphrase:
+    #(  CONVERT 
       ( (SOURCE|TARGET) (BASE64 | CODEPAGE expression (BASE64)?) )+
     )
   ;
-  
-copylobstate throws TreeParserException
-  :  #(  COPYLOB (FROM)?
+
+copylobstate:
+    #(  COPYLOB (FROM)?
       ( FILE expression | (OBJECT)? expression )
       ( #(STARTING AT expression) )?
       ( #(FOR expression) )?
@@ -1200,95 +1211,95 @@ copylobstate throws TreeParserException
     )
   ;
 
-createstate throws TreeParserException
-  :  #(CREATE RECORD_NAME (#(FOR TENANT expression))? (#(USING (ROWID|RECID) expression))? (NOERROR_KW)? state_end )
+createstate:
+    #(CREATE RECORD_NAME (#(FOR TENANT expression))? (#(USING (ROWID|RECID) expression))? (NOERROR_KW)? state_end )
   ;
 
-create_whatever_args throws TreeParserException
-  :  ( field | widattr ) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)?
+create_whatever_args:
+    ( field | widattr ) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)?
   ;
 
-createaliasstate throws TreeParserException
-  :  #(CREATE ALIAS anyorvalue FOR DATABASE anyorvalue (NOERROR_KW)? state_end )
+createaliasstate:
+    #(CREATE ALIAS anyorvalue FOR DATABASE anyorvalue (NOERROR_KW)? state_end )
   ;
 
-createbrowsestate throws TreeParserException
-  :  #(CREATE BROWSE ( field | widattr ) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end )
+createbrowsestate:
+    #(CREATE BROWSE ( field | widattr ) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end )
   ;
 
-createbufferstate throws TreeParserException
-  :  #(  CREATE BUFFER (field | widattr) FOR TABLE expression
+createbufferstate:
+    #(  CREATE BUFFER (field | widattr) FOR TABLE expression
       ( #(BUFFERNAME expression) )?
       (#(IN_KW WIDGETPOOL expression))?
       (NOERROR_KW)? state_end
     )
   ;
 
-createcallstate throws TreeParserException
-  :  #(CREATE CALL create_whatever_args state_end )
+createcallstate:
+    #(CREATE CALL create_whatever_args state_end )
   ;
 
-createclientprincipalstate throws TreeParserException
-  :  #(CREATE CLIENTPRINCIPAL create_whatever_args state_end )
+createclientprincipalstate:
+    #(CREATE CLIENTPRINCIPAL create_whatever_args state_end )
   ;
 
-createdatabasestate throws TreeParserException
-  :  #(  CREATE DATABASE expression 
+createdatabasestate:
+    #(  CREATE DATABASE expression 
       ( #(FROM expression (NEWINSTANCE)? ) )?
       (REPLACE)? (NOERROR_KW)? state_end
     )
   ;
 
-createdatasetstate throws TreeParserException
-  :  #(CREATE DATASET create_whatever_args state_end )
+createdatasetstate:
+    #(CREATE DATASET create_whatever_args state_end )
   ;
 
-createdatasourcestate throws TreeParserException
-  :  #(CREATE DATASOURCE create_whatever_args state_end )
+createdatasourcestate:
+    #(CREATE DATASOURCE create_whatever_args state_end )
   ;
 
-createquerystate throws TreeParserException
-  :  #(CREATE QUERY (field | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
+createquerystate:
+    #(CREATE QUERY (field | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
   ;
 
-createsaxattributesstate throws TreeParserException
-  :  #(CREATE SAXATTRIBUTES create_whatever_args state_end )
+createsaxattributesstate:
+    #(CREATE SAXATTRIBUTES create_whatever_args state_end )
   ;
 
-createsaxreaderstate throws TreeParserException
-  :  #(CREATE SAXREADER create_whatever_args state_end )
+createsaxreaderstate:
+    #(CREATE SAXREADER create_whatever_args state_end )
   ;
 
-createsaxwriterstate throws TreeParserException
-  :  #(CREATE SAXWRITER create_whatever_args state_end )
+createsaxwriterstate:
+    #(CREATE SAXWRITER create_whatever_args state_end )
   ;
 
-createserverstate throws TreeParserException
-  :  #(CREATE SERVER field (assign_opt)? state_end )
+createserverstate:
+    #(CREATE SERVER field (assign_opt)? state_end )
   ;
 
-createserversocketstate throws TreeParserException
-  :  #(CREATE SERVERSOCKET field (NOERROR_KW)? state_end )
+createserversocketstate:
+    #(CREATE SERVERSOCKET field (NOERROR_KW)? state_end )
   ;
 
-createsoapheaderstate throws TreeParserException
-  :  #(CREATE SOAPHEADER create_whatever_args state_end )
+createsoapheaderstate:
+    #(CREATE SOAPHEADER create_whatever_args state_end )
   ;
 
-createsoapheaderentryrefstate throws TreeParserException
-  :  #(CREATE SOAPHEADERENTRYREF create_whatever_args state_end )
+createsoapheaderentryrefstate:
+    #(CREATE SOAPHEADERENTRYREF create_whatever_args state_end )
   ;
 
-createsocketstate throws TreeParserException
-  :  #(CREATE SOCKET (field | widattr) (NOERROR_KW)? state_end )
+createsocketstate:
+    #(CREATE SOCKET (field | widattr) (NOERROR_KW)? state_end )
   ;
 
-createtemptablestate throws TreeParserException
-  :  #(CREATE TEMPTABLE (field | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
+createtemptablestate:
+    #(CREATE TEMPTABLE (field | widattr) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
   ;
 
-createwidgetstate throws TreeParserException
-  :  #(  CREATE
+createwidgetstate:
+    #(  CREATE
       (  qstringorvalue
       |  BUTTON | COMBOBOX | CONTROLFRAME | DIALOGBOX | EDITOR | FILLIN | FRAME | IMAGE
       |  MENU | MENUITEM | RADIOSET | RECTANGLE | SELECTIONLIST | SLIDER
@@ -1299,95 +1310,95 @@ createwidgetstate throws TreeParserException
     )
   ;
 
-createwidgetpoolstate throws TreeParserException
-  :  #(CREATE WIDGETPOOL (expression)? (PERSISTENT)? (NOERROR_KW)? state_end )
+createwidgetpoolstate:
+    #(CREATE WIDGETPOOL (expression)? (PERSISTENT)? (NOERROR_KW)? state_end )
   ;
 
-createxdocumentstate throws TreeParserException
-  :  #(CREATE XDOCUMENT create_whatever_args state_end )
+createxdocumentstate:
+    #(CREATE XDOCUMENT create_whatever_args state_end )
   ;
 
-createxnoderefstate throws TreeParserException
-  :  #(CREATE XNODEREF create_whatever_args state_end )
+createxnoderefstate:
+    #(CREATE XNODEREF create_whatever_args state_end )
   ;
 
-currentvaluefunc throws TreeParserException
-  :  #(CURRENTVALUE LEFTPAREN ID (COMMA expression (COMMA expression)? )? RIGHTPAREN )
+currentvaluefunc:
+    #(CURRENTVALUE LEFTPAREN ID (COMMA expression (COMMA expression)? )? RIGHTPAREN )
   ;
 
-datatype throws TreeParserException
-  :  CLASS TYPE_NAME
+datatype:
+    CLASS TYPE_NAME
   |  datatype_var
   ;
 
-datatype_com throws TreeParserException
-  :  INT64 | datatype_com_native
+datatype_com:
+    INT64 | datatype_com_native
   ;
-datatype_com_native throws TreeParserException
-  :  SHORT | FLOAT | CURRENCY | UNSIGNEDBYTE | ERRORCODE | IUNKNOWN
-  ;
-
-datatype_dll throws TreeParserException
-  :  CHARACTER | INT64 | MEMPTR | datatype_dll_native  
+datatype_com_native:
+    SHORT | FLOAT | CURRENCY | UNSIGNEDBYTE | ERRORCODE | IUNKNOWN
   ;
 
-datatype_dll_native throws TreeParserException
-  :  BYTE | DOUBLE | FLOAT | LONG | SHORT | UNSIGNEDSHORT
+datatype_dll:
+    CHARACTER | INT64 | MEMPTR | datatype_dll_native  
   ;
 
-datatype_field throws TreeParserException
-  :  BLOB | CLOB | datatype_var
+datatype_dll_native:
+    BYTE | DOUBLE | FLOAT | LONG | SHORT | UNSIGNEDSHORT
   ;
 
-datatype_param throws TreeParserException
-  :  datatype_dll_native | datatype_var
+datatype_field:
+    BLOB | CLOB | datatype_var
   ;
 
-datatype_var throws TreeParserException
-  :  CHARACTER | COMHANDLE | DATE | DATETIME | DATETIMETZ
+datatype_param:
+    datatype_dll_native | datatype_var
+  ;
+
+datatype_var:
+    CHARACTER | COMHANDLE | DATE | DATETIME | DATETIMETZ
     | DECIMAL | HANDLE | INTEGER | INT64 | LOGICAL | LONGCHAR | MEMPTR
     | RAW | RECID | ROWID | TYPE_NAME | WIDGETHANDLE
   ;
 
-ddeadvisestate throws TreeParserException
-  :  #(DDE ADVISE expression (START|STOP) ITEM expression (#(TIME expression))? (NOERROR_KW)? state_end )
+ddeadvisestate:
+    #(DDE ADVISE expression (START|STOP) ITEM expression (#(TIME expression))? (NOERROR_KW)? state_end )
   ;
 
-ddeexecutestate throws TreeParserException
-  :  #(DDE EXECUTE expression COMMAND expression (#(TIME expression))? (NOERROR_KW)? state_end )
+ddeexecutestate:
+    #(DDE EXECUTE expression COMMAND expression (#(TIME expression))? (NOERROR_KW)? state_end )
   ;
 
-ddegetstate throws TreeParserException
-  :  #(DDE GET expression TARGET field ITEM expression (#(TIME expression))? (NOERROR_KW)? state_end )
+ddegetstate:
+    #(DDE GET expression TARGET field ITEM expression (#(TIME expression))? (NOERROR_KW)? state_end )
   ;
 
-ddeinitiatestate throws TreeParserException
-  :  #(DDE INITIATE field FRAME expression APPLICATION expression TOPIC expression (NOERROR_KW)? state_end )
+ddeinitiatestate:
+    #(DDE INITIATE field FRAME expression APPLICATION expression TOPIC expression (NOERROR_KW)? state_end )
   ;
 
-dderequeststate throws TreeParserException
-  :  #(DDE REQUEST expression TARGET field ITEM expression (#(TIME expression))? (NOERROR_KW)? state_end )
+dderequeststate:
+    #(DDE REQUEST expression TARGET field ITEM expression (#(TIME expression))? (NOERROR_KW)? state_end )
   ;
 
-ddesendstate throws TreeParserException
-  :  #(DDE SEND expression SOURCE expression ITEM expression (#(TIME expression))? (NOERROR_KW)? state_end )
+ddesendstate:
+    #(DDE SEND expression SOURCE expression ITEM expression (#(TIME expression))? (NOERROR_KW)? state_end )
   ;
 
-ddeterminatestate throws TreeParserException
-  :  #(DDE TERMINATE expression (NOERROR_KW)? state_end )
+ddeterminatestate:
+    #(DDE TERMINATE expression (NOERROR_KW)? state_end )
   ;
 
-def_shared throws TreeParserException
-  :  SHARED
+def_shared:
+    SHARED
   |  #(NEW (GLOBAL)? SHARED )
   ;
 
-def_modifiers throws TreeParserException
-  :  ( PRIVATE | PROTECTED | PUBLIC | STATIC | ABSTRACT | OVERRIDE | FINAL )*
+def_modifiers:
+    ( PRIVATE | PROTECTED | PUBLIC | STATIC | ABSTRACT | OVERRIDE | FINAL )*
   ;
 
-definebrowsestate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers BROWSE ID
+definebrowsestate:
+    #(  DEFINE (def_shared)? def_modifiers BROWSE ID
       (#(QUERY ID))? (lockhow|NOWAIT)*
       (  #(  DISPLAY
           (  #(  Form_item
@@ -1420,16 +1431,16 @@ definebrowsestate throws TreeParserException
     )
   ;
 
-definebufferstate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers BUFFER ID
+definebufferstate:
+    #(  DEFINE (def_shared)? def_modifiers BUFFER ID
       FOR (TEMPTABLE)? RECORD_NAME (PRESELECT)? (label_constant)?
       (namespace_uri)? (namespace_prefix)? (xml_node_name)?
       (#(FIELDS (field)* ))? state_end
     )
   ;
 
-definebuttonstate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers BUTTON ID
+definebuttonstate:
+    #(  DEFINE (def_shared)? def_modifiers BUTTON ID
       (  AUTOGO
       |  AUTOENDKEY
       |  DEFAULT
@@ -1455,8 +1466,8 @@ definebuttonstate throws TreeParserException
     )
   ;
 
-definedatasetstate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers DATASET ID
+definedatasetstate:
+    #(  DEFINE (def_shared)? def_modifiers DATASET ID
       (namespace_uri)? (namespace_prefix)? (xml_node_name)?
       ( #(SERIALIZENAME QSTRING) )?
       (REFERENCEONLY)?
@@ -1466,8 +1477,8 @@ definedatasetstate throws TreeParserException
       state_end
     )
   ;
-data_relation throws TreeParserException
-  :  #(  DATARELATION (ID)?
+data_relation:
+    #(  DATARELATION (ID)?
       FOR RECORD_NAME COMMA RECORD_NAME
       (  field_mapping_phrase
       |  REPOSITION
@@ -1477,31 +1488,31 @@ data_relation throws TreeParserException
       )*
     )
   ;
-parent_id_relation throws TreeParserException
-  :  #(  PARENTIDRELATION (ID)?
+parent_id_relation:
+    #(  PARENTIDRELATION (ID)?
       FOR RECORD_NAME COMMA RECORD_NAME
       PARENTIDFIELD field
       ( PARENTFIELDSBEFORE LEFTPAREN field (COMMA field)* RIGHTPAREN)?
       ( PARENTFIELDSAFTER  LEFTPAREN field (COMMA field)* RIGHTPAREN)?
     )
   ;
-field_mapping_phrase throws TreeParserException
-  :  #(RELATIONFIELDS LEFTPAREN field COMMA field ( COMMA field COMMA field )* RIGHTPAREN )
+field_mapping_phrase:
+    #(RELATIONFIELDS LEFTPAREN field COMMA field ( COMMA field COMMA field )* RIGHTPAREN )
   ;
 
-definedatasourcestate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers DATASOURCE ID
+definedatasourcestate:
+    #(  DEFINE (def_shared)? def_modifiers DATASOURCE ID
       FOR (#(QUERY ID))?
       (source_buffer_phrase)? (COMMA source_buffer_phrase)*
       state_end
     )
   ;
-source_buffer_phrase throws TreeParserException
-  :  #(RECORD_NAME ( KEYS LEFTPAREN ( ROWID | field (COMMA field)* ) RIGHTPAREN )? )
+source_buffer_phrase:
+    #(RECORD_NAME ( KEYS LEFTPAREN ( ROWID | field (COMMA field)* ) RIGHTPAREN )? )
   ;
 
-defineeventstate throws TreeParserException
-  :  #(  DEFINE def_modifiers EVENT ID
+defineeventstate:
+    #(  DEFINE def_modifiers EVENT ID
       (  #(SIGNATURE VOID function_params)
       |  #(DELEGATE (CLASS)? TYPE_NAME)
       )
@@ -1509,8 +1520,8 @@ defineeventstate throws TreeParserException
     )
   ;
 
-defineframestate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers FRAME ID
+defineframestate:
+    #(  DEFINE (def_shared)? def_modifiers FRAME ID
       (form_item)*
       (  #(HEADER (display_item)+ )
       |  #(BACKGROUND (display_item)+ )
@@ -1519,8 +1530,8 @@ defineframestate throws TreeParserException
     )
   ;
 
-defineimagestate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers IMAGE ID
+defineimagestate:
+    #(  DEFINE (def_shared)? def_modifiers IMAGE ID
       (  #(LIKE field (VALIDATE)?)
       |  imagephrase_opt 
       |  sizephrase
@@ -1535,13 +1546,13 @@ defineimagestate throws TreeParserException
     )
   ;
 
-definemenustate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers MENU ID
+definemenustate:
+    #(  DEFINE (def_shared)? def_modifiers MENU ID
       (menu_opt)* (menu_list_item)* state_end
     )
   ;
-menu_opt throws TreeParserException
-  :  color_expr
+menu_opt:
+    color_expr
   |  #(FONT expression)
   |  #(LIKE field (VALIDATE)?)
   |  #(TITLE expression)
@@ -1549,8 +1560,8 @@ menu_opt throws TreeParserException
   |  PINNABLE
   |  SUBMENUHELP
   ;
-menu_list_item throws TreeParserException
-  :  (  #(  MENUITEM ID
+menu_list_item:
+    (  #(  MENUITEM ID
         (  #(ACCELERATOR expression )
         |  color_expr
         |  DISABLED
@@ -1569,8 +1580,8 @@ menu_list_item throws TreeParserException
     ((PERIOD (RULE|SKIP|SUBMENU|MENUITEM))=> PERIOD)?
   ;
 
-defineparameterstate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers
+defineparameterstate:
+    #(  DEFINE (def_shared)? def_modifiers
       (  PARAMETER BUFFER ID FOR (TEMPTABLE)? RECORD_NAME
         (PRESELECT)? (label_constant)? (#(FIELDS (field)* ))?
       |  (INPUT|OUTPUT|INPUTOUTPUT|RETURN) PARAMETER
@@ -1584,8 +1595,8 @@ defineparameterstate throws TreeParserException
       state_end
     )
   ;
-defineparam_var throws TreeParserException
-  :  (  #(  AS
+defineparam_var:
+    (  #(  AS
         (  (HANDLE (TO)? datatype_dll)=> HANDLE (TO)? datatype_dll
         |  CLASS TYPE_NAME
         |  datatype_param
@@ -1598,14 +1609,14 @@ defineparam_var throws TreeParserException
     )*
   ;
 
-definepropertystate throws TreeParserException
-  :  #(  DEFINE def_modifiers PROPERTY ID AS datatype
+definepropertystate:
+    #(  DEFINE def_modifiers PROPERTY ID AS datatype
       (extentphrase|initial_constant|NOUNDO)*
       defineproperty_accessor (defineproperty_accessor)?
     )
   ;
-defineproperty_accessor throws TreeParserException
-  :  #(  Property_getter def_modifiers GET
+defineproperty_accessor:
+    #(  Property_getter def_modifiers GET
       (  (PERIOD)=> PERIOD
       |  (function_params)? block_colon code_block END (GET)? PERIOD
       )
@@ -1617,8 +1628,8 @@ defineproperty_accessor throws TreeParserException
     )
   ;
 
-definequerystate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers QUERY ID
+definequerystate:
+    #(  DEFINE (def_shared)? def_modifiers QUERY ID
       FOR RECORD_NAME (record_fields)?
       (COMMA RECORD_NAME (record_fields)?)*
       ( #(CACHE expression) | SCROLLING | RCODEINFORMATION)*
@@ -1626,8 +1637,8 @@ definequerystate throws TreeParserException
     )
   ;
 
-definerectanglestate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers RECTANGLE ID
+definerectanglestate:
+    #(  DEFINE (def_shared)? def_modifiers RECTANGLE ID
       (  NOFILL
       |  #(EDGECHARS expression )
       |  #(EDGEPIXELS expression )
@@ -1644,18 +1655,18 @@ definerectanglestate throws TreeParserException
     )
   ;
 
-definestreamstate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers STREAM ID state_end )
+definestreamstate:
+    #(  DEFINE (def_shared)? def_modifiers STREAM ID state_end )
   ;
 
-definesubmenustate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers SUBMENU ID
+definesubmenustate:
+    #(  DEFINE (def_shared)? def_modifiers SUBMENU ID
       (menu_opt)* (menu_list_item)* state_end
     )
   ;
    
-definetemptablestate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers TEMPTABLE ID
+definetemptablestate:
+    #(  DEFINE (def_shared)? def_modifiers TEMPTABLE ID
       (UNDO|NOUNDO)?
       (namespace_uri)? (namespace_prefix)? (xml_node_name)?
       ( #(SERIALIZENAME QSTRING) )?
@@ -1672,113 +1683,113 @@ definetemptablestate throws TreeParserException
       state_end
     )
   ;
-def_table_like throws TreeParserException
-  :  #(LIKE def_table_like_sub)
+def_table_like:
+    #(LIKE def_table_like_sub)
   |  #(LIKESEQUENTIAL def_table_like_sub)
   ;
-def_table_like_sub throws TreeParserException
-  :  RECORD_NAME (VALIDATE)?
+def_table_like_sub:
+    RECORD_NAME (VALIDATE)?
     ( #(USEINDEX ID ((AS|IS) PRIMARY)? ) )*
   ;
-def_table_field throws TreeParserException
-  :  #(FIELD ID (fieldoption)* )
+def_table_field:
+    #(FIELD ID (fieldoption)* )
   ;
    
-defineworktablestate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers WORKTABLE ID
+defineworktablestate:
+    #(  DEFINE (def_shared)? def_modifiers WORKTABLE ID
       (NOUNDO)? (def_table_like)? (label_constant)? (def_table_field)* state_end
     )
   ;
 
-definevariablestate throws TreeParserException
-  :  #(  DEFINE (def_shared)? def_modifiers VARIABLE ID
+definevariablestate:
+    #(  DEFINE (def_shared)? def_modifiers VARIABLE ID
       (fieldoption)* (triggerphrase)? state_end
     )
   ;
 
-deletestate throws TreeParserException
-  :  #(DELETE_KW RECORD_NAME (#(VALIDATE funargs))? (NOERROR_KW)? state_end )
+deletestate:
+    #(DELETE_KW RECORD_NAME (#(VALIDATE funargs))? (NOERROR_KW)? state_end )
   ;
 
-deletealiasstate throws TreeParserException
-  :  #(DELETE_KW ALIAS (ID|QSTRING|valueexpression) state_end )
+deletealiasstate:
+    #(DELETE_KW ALIAS (ID|QSTRING|valueexpression) state_end )
   ;
 
-deleteobjectstate throws TreeParserException
-  :  #(DELETE_KW OBJECT expression (NOERROR_KW)? state_end )
+deleteobjectstate:
+    #(DELETE_KW OBJECT expression (NOERROR_KW)? state_end )
   ;
 
-deleteprocedurestate throws TreeParserException
-  :  #(DELETE_KW PROCEDURE expression (NOERROR_KW)? state_end )
+deleteprocedurestate:
+    #(DELETE_KW PROCEDURE expression (NOERROR_KW)? state_end )
   ;
 
-deletewidgetstate throws TreeParserException
-  :  #(DELETE_KW WIDGET (gwidget)* state_end )
+deletewidgetstate:
+    #(DELETE_KW WIDGET (gwidget)* state_end )
   ;
 
-deletewidgetpoolstate throws TreeParserException
-  :  #(DELETE_KW WIDGETPOOL (expression)? (NOERROR_KW)? state_end )
+deletewidgetpoolstate:
+    #(DELETE_KW WIDGETPOOL (expression)? (NOERROR_KW)? state_end )
   ;
   
-destructorstate throws TreeParserException
-  :  #(  DESTRUCTOR (PUBLIC)? TYPE_NAME LEFTPAREN RIGHTPAREN block_colon
+destructorstate:
+    #(  DESTRUCTOR (PUBLIC)? TYPE_NAME LEFTPAREN RIGHTPAREN block_colon
       code_block #(END (DESTRUCTOR|METHOD)? ) state_end
     )
   ;
   
-dictionarystate throws TreeParserException
-  :  #(DICTIONARY state_end )
+dictionarystate:
+    #(DICTIONARY state_end )
   ;
 
-disablestate throws TreeParserException
-  :  #(DISABLE (UNLESSHIDDEN)? (#(ALL (#(EXCEPT (field)*))?) | (form_item)+)? (framephrase)? state_end )
+disablestate:
+    #(DISABLE (UNLESSHIDDEN)? (#(ALL (#(EXCEPT (field)*))?) | (form_item)+)? (framephrase)? state_end )
   ;
 
-disabletriggersstate throws TreeParserException
-  :  #(DISABLE TRIGGERS FOR (DUMP|LOAD) OF RECORD_NAME (ALLOWREPLICATION)? state_end )
+disabletriggersstate:
+    #(DISABLE TRIGGERS FOR (DUMP|LOAD) OF RECORD_NAME (ALLOWREPLICATION)? state_end )
   ;
 
-disconnectstate throws TreeParserException
-  :  #(DISCONNECT filenameorvalue (NOERROR_KW)? state_end )
+disconnectstate:
+    #(DISCONNECT filenameorvalue (NOERROR_KW)? state_end )
   ;
 
-displaystate throws TreeParserException
-  :  #(  DISPLAY (stream_name_or_handle)? (UNLESSHIDDEN)? (display_item)*
+displaystate:
+    #(  DISPLAY (stream_name_or_handle)? (UNLESSHIDDEN)? (display_item)*
       (#(EXCEPT (field)*))? (#(IN_KW WINDOW expression))?
       (display_with)*
       (NOERROR_KW)?
       state_end
     )
   ;
-display_item throws TreeParserException
-  :  #(  Form_item
+display_item:
+    #(  Form_item
       (  skipphrase
       |  spacephrase
       |  (expression|ID) (aggregatephrase|formatphrase)*
       )
     )
   ;
-display_with throws TreeParserException
-  :  (#(WITH BROWSE ID))=> #(WITH BROWSE ID )
+display_with:
+    (#(WITH BROWSE ID))=> #(WITH BROWSE ID )
   |  framephrase
   ;
 
-dostate throws TreeParserException
-  :  #(DO (block_for)? (block_preselect)? (block_opt)* block_colon code_block block_end )
+dostate:
+    #(DO (block_for)? (block_preselect)? (block_opt)* block_colon code_block block_end )
   ;
 
-downstate throws TreeParserException
-  :  #(DOWN ((stream_name_or_handle (expression)?) | (expression (stream_name_or_handle)?))? (framephrase)? state_end )
+downstate:
+    #(DOWN ((stream_name_or_handle (expression)?) | (expression (stream_name_or_handle)?))? (framephrase)? state_end )
   ;
 
 // drop - see SQL grammar
 
-dynamiccurrentvaluefunc throws TreeParserException
-  :  #(DYNAMICCURRENTVALUE funargs)
+dynamiccurrentvaluefunc:
+    #(DYNAMICCURRENTVALUE funargs)
   ;
 
-dynamicnewstate throws TreeParserException
-  :  #(  Assign_dynamic_new
+dynamicnewstate:
+    #(  Assign_dynamic_new
       #(  EQUAL
         (widattr|field)
         #(DYNAMICNEW expression parameterlist)
@@ -1788,8 +1799,8 @@ dynamicnewstate throws TreeParserException
     )
   ;
   
-editorphrase throws TreeParserException
-  :  #(  EDITOR
+editorphrase:
+    #(  EDITOR
       (  #(INNERCHARS expression )
       |  #(INNERLINES expression )
       |  #(BUFFERCHARS expression )
@@ -1806,32 +1817,32 @@ editorphrase throws TreeParserException
     )
   ;
 
-emptytemptablestate throws TreeParserException
-  :  #(EMPTY TEMPTABLE RECORD_NAME (NOERROR_KW)? state_end )
+emptytemptablestate:
+    #(EMPTY TEMPTABLE RECORD_NAME (NOERROR_KW)? state_end )
   ;
 
-enablestate throws TreeParserException
-  :  #(ENABLE (UNLESSHIDDEN)? (#(ALL (#(EXCEPT (field)*))?) | (form_item)+)? (#(IN_KW WINDOW expression))? (framephrase)? state_end )
+enablestate:
+    #(ENABLE (UNLESSHIDDEN)? (#(ALL (#(EXCEPT (field)*))?) | (form_item)+)? (#(IN_KW WINDOW expression))? (framephrase)? state_end )
   ;
 
-editingphrase throws TreeParserException
-  :  #(Editing_phrase (ID LEXCOLON)? EDITING block_colon (blockorstate)* END )
+editingphrase:
+    #(Editing_phrase (ID LEXCOLON)? EDITING block_colon (blockorstate)* END )
   ;
 
-entryfunc throws TreeParserException
-  :  #(ENTRY funargs )
+entryfunc:
+    #(ENTRY funargs )
   ;
 
-exportstate throws TreeParserException
-  :  #(EXPORT (stream_name_or_handle)? (#(DELIMITER constant))? (display_item)* (#(EXCEPT (field)*))? (NOLOBS)? state_end )
+exportstate:
+    #(EXPORT (stream_name_or_handle)? (#(DELIMITER constant))? (display_item)* (#(EXCEPT (field)*))? (NOLOBS)? state_end )
   ;
 
-extentphrase throws TreeParserException
-  :  #(EXTENT (expression)? )
+extentphrase:
+    #(EXTENT (expression)? )
   ;
 
-fieldoption throws TreeParserException
-  :  #(  AS
+fieldoption:
+    #(  AS
       (  CLASS TYPE_NAME
       |  datatype_field
       )
@@ -1860,27 +1871,27 @@ fieldoption throws TreeParserException
   |  SERIALIZEHIDDEN
   ;
 
-fillinphrase throws TreeParserException
-  :  #(FILLIN (NATIVE | sizephrase | tooltip_expr)* )
+fillinphrase:
+    #(FILLIN (NATIVE | sizephrase | tooltip_expr)* )
   ;
 
-finallystate throws TreeParserException
-  :  #(FINALLY block_colon code_block (EOF | #(END (FINALLY)?) state_end) )
+finallystate:
+    #(FINALLY block_colon code_block (EOF | #(END (FINALLY)?) state_end) )
   ;
 
-findstate throws TreeParserException
-  :  #(FIND (findwhich)? recordphrase (NOWAIT|NOPREFETCH|NOERROR_KW)* state_end )
+findstate:
+    #(FIND (findwhich)? recordphrase (NOWAIT|NOPREFETCH|NOERROR_KW)* state_end )
   ;
 
-forstate throws TreeParserException
-  :  #(FOR for_record_spec (block_opt)* block_colon code_block block_end )
+forstate:
+    #(FOR for_record_spec (block_opt)* block_colon code_block block_end )
   ;
-for_record_spec throws TreeParserException
-  :  (findwhich)? recordphrase (COMMA (findwhich)? recordphrase)*
+for_record_spec:
+    (findwhich)? recordphrase (COMMA (findwhich)? recordphrase)*
   ;
 
-form_item throws TreeParserException
-  :  #(  Form_item
+form_item:
+    #(  Form_item
       (  RECORD_NAME
       |  #(TEXT LEFTPAREN (form_item)* RIGHTPAREN )
       |  constant (formatphrase)?
@@ -1894,8 +1905,8 @@ form_item throws TreeParserException
     )
   ;
 
-formstate throws TreeParserException
-  :  #(  FORMAT
+formstate:
+    #(  FORMAT
       (form_item)*
       (  #(HEADER (display_item)+ )
       |  #(BACKGROUND (display_item)+ )
@@ -1906,8 +1917,8 @@ formstate throws TreeParserException
     )
   ;
 
-formatphrase throws TreeParserException
-  :  #(  Format_phrase
+formatphrase:
+    #(  Format_phrase
       (  #(AS datatype_var )
       |  atphrase
       |  ATTRSPACE
@@ -1937,8 +1948,8 @@ formatphrase throws TreeParserException
     )
   ;
 
-framephrase throws TreeParserException
-  :  #(  WITH
+framephrase:
+    #(  WITH
       (  #(ACCUMULATE (expression)? )
       |  ATTRSPACE | NOATTRSPACE
       |  #(CANCELBUTTON field )
@@ -1991,8 +2002,8 @@ framephrase throws TreeParserException
     )
   ;
 
-functionstate throws TreeParserException
-  :  #(  FUNCTION ID
+functionstate:
+    #(  FUNCTION ID
       (RETURNS|RETURN)?
       datatype (extentphrase)?
       (PRIVATE)?
@@ -2008,17 +2019,17 @@ functionstate throws TreeParserException
       )
     )
   ;
-function_params throws TreeParserException
-  :  #(Parameter_list LEFTPAREN (function_param)? (COMMA function_param)* RIGHTPAREN )
+function_params:
+    #(Parameter_list LEFTPAREN (function_param)? (COMMA function_param)* RIGHTPAREN )
   ;
-function_param throws TreeParserException
-  :  #(BUFFER (ID)? FOR RECORD_NAME (PRESELECT)? )
+function_param:
+    #(BUFFER (ID)? FOR RECORD_NAME (PRESELECT)? )
   |  #(INPUT function_param_arg )
   |  #(OUTPUT function_param_arg )
   |  #(INPUTOUTPUT function_param_arg )
   ;
-function_param_arg throws TreeParserException
-  :  TABLE (FOR)? RECORD_NAME (APPEND)? (BIND)?
+function_param_arg:
+    TABLE (FOR)? RECORD_NAME (APPEND)? (BIND)?
   |  TABLEHANDLE (FOR)? ID (APPEND)? (BIND)?
   |  (DATASET|DATASETHANDLE) (FOR)? ID (APPEND)? (BIND)?
   |  (ID AS)=> ID AS datatype (extentphrase)?
@@ -2026,33 +2037,33 @@ function_param_arg throws TreeParserException
   |  datatype (extentphrase)?
   ;
 
-getstate throws TreeParserException
-  :  #(GET findwhich ID (lockhow|NOWAIT)* state_end )
+getstate:
+    #(GET findwhich ID (lockhow|NOWAIT)* state_end )
   ;
 
-getkeyvaluestate throws TreeParserException
-  :  #(GETKEYVALUE SECTION expression KEY (DEFAULT|expression) VALUE field state_end )
+getkeyvaluestate:
+    #(GETKEYVALUE SECTION expression KEY (DEFAULT|expression) VALUE field state_end )
   ;
 
-goonphrase throws TreeParserException
-  :  #(GOON LEFTPAREN goon_elem ((options{greedy=true;}:COMMA)? goon_elem)* RIGHTPAREN )
+goonphrase:
+    #(GOON LEFTPAREN goon_elem ((options{greedy=true;}:COMMA)? goon_elem)* RIGHTPAREN )
   ;
-goon_elem throws TreeParserException
-  :  ~(RIGHTPAREN) ( (OF)=> OF gwidget)?
-  ;
-
-hidestate throws TreeParserException
-  :  #(HIDE (stream_name_or_handle)? (MESSAGE|ALL|(gwidget)*) (NOPAUSE)? (#(IN_KW WINDOW expression))? state_end )
+goon_elem:
+    ~(RIGHTPAREN) ( (OF)=> OF gwidget)?
   ;
 
-ifstate throws TreeParserException
-  :  #(  IF expression THEN (blockorstate)?
+hidestate:
+    #(HIDE (stream_name_or_handle)? (MESSAGE|ALL|(gwidget)*) (NOPAUSE)? (#(IN_KW WINDOW expression))? state_end )
+  ;
+
+ifstate:
+    #(  IF expression THEN (blockorstate)?
       ( #(ELSE (blockorstate)? ) )?
     )
   ;
 
-imagephrase_opt throws TreeParserException
-  :  #(FILE expression )
+imagephrase_opt:
+    #(FILE expression )
   |  #(IMAGESIZE expression BY expression )
   |  #(IMAGESIZECHARS expression BY expression )
   |  #(IMAGESIZEPIXELS expression BY expression )
@@ -2062,8 +2073,8 @@ imagephrase_opt throws TreeParserException
     )
   ;
 
-importstate throws TreeParserException
-  :  #(  IMPORT (stream_name_or_handle)?
+importstate:
+    #(  IMPORT (stream_name_or_handle)?
       ( #(DELIMITER constant) | UNFORMATTED )?
       (  RECORD_NAME (#(EXCEPT (field)*))?
       |  (field|CARET)+
@@ -2072,50 +2083,52 @@ importstate throws TreeParserException
     )
   ;
 
-initial_constant throws TreeParserException
-  :  #(  INITIAL
+initial_constant:
+    #(  INITIAL
       (  LEFTBRACE (TODAY|NOW|constant) (COMMA (TODAY|NOW|constant))* RIGHTBRACE
       |  (TODAY|NOW|constant)
       )
     )
   ;
 
-inputclearstate throws TreeParserException
-  :  #(INPUT CLEAR state_end )
+inputclearstate:
+    #(INPUT CLEAR state_end )
   ;
 
-inputclosestate throws TreeParserException
-  :  #(INPUT (stream_name_or_handle)? CLOSE state_end )
+inputclosestate:
+    #(INPUT (stream_name_or_handle)? CLOSE state_end )
   ;
 
-inputfromstate throws TreeParserException
-  :  #(INPUT (stream_name_or_handle)? FROM io_phrase state_end )
+inputfromstate:
+    #(INPUT (stream_name_or_handle)? FROM io_phrase state_end )
   ;
    
-inputthroughstate throws TreeParserException
-  :  #(INPUT (stream_name_or_handle)? THROUGH io_phrase state_end )
+inputthroughstate:
+    #(INPUT (stream_name_or_handle)? THROUGH io_phrase state_end )
   ;
 
-inputoutputclosestate throws TreeParserException
-  :  #(INPUTOUTPUT (stream_name_or_handle)? CLOSE state_end )
+inputoutputclosestate:
+    #(INPUTOUTPUT (stream_name_or_handle)? CLOSE state_end )
   ;
 
-inputoutputthroughstate throws TreeParserException
-  :  #(INPUTOUTPUT (stream_name_or_handle)? THROUGH io_phrase state_end )
+inputoutputthroughstate:
+    #(INPUTOUTPUT (stream_name_or_handle)? THROUGH io_phrase state_end )
   ;
 
-insertstate throws TreeParserException
-  :  #(INSERT RECORD_NAME (#(EXCEPT (field)*))? (#(USING (ROWID|RECID) expression))? (framephrase)? (NOERROR_KW)? state_end )
+insertstate:
+    #(INSERT RECORD_NAME (#(EXCEPT (field)*))? (#(USING (ROWID|RECID) expression))? (framephrase)? (NOERROR_KW)? state_end )
   ;
   
-interfacestate throws TreeParserException
-  :  #(INTERFACE TYPE_NAME (interface_inherits)? block_colon code_block #(END (INTERFACE)?) state_end )
+interfacestate:
+    #(INTERFACE TYPE_NAME (interface_inherits)? block_colon code_block #(END (INTERFACE)?) state_end )
   ;
   
-interface_inherits throws TreeParserException: #(INHERITS TYPE_NAME (COMMA TYPE_NAME)*);
+interface_inherits:
+    #(INHERITS TYPE_NAME (COMMA TYPE_NAME)*)
+  ;
   
-io_phrase throws TreeParserException
-  :  (  #(OSDIR LEFTPAREN expression RIGHTPAREN (NOATTRLIST)? )
+io_phrase:
+    (  #(OSDIR LEFTPAREN expression RIGHTPAREN (NOATTRLIST)? )
     |  #(PRINTER (valueexpression|.)? )
     |  TERMINAL
     |  (valueexpression | FILENAME) *
@@ -2139,25 +2152,25 @@ io_phrase throws TreeParserException
     )*
   ;
 
-label_constant throws TreeParserException
-  :  #(COLUMNLABEL constant (COMMA constant)* )
+label_constant:
+    #(COLUMNLABEL constant (COMMA constant)* )
   |  #(LABEL constant (COMMA constant)* )
   ;
 
-ldbnamefunc throws TreeParserException
-  :  #(LDBNAME LEFTPAREN (#(BUFFER RECORD_NAME) | expression) RIGHTPAREN )
+ldbnamefunc:
+    #(LDBNAME LEFTPAREN (#(BUFFER RECORD_NAME) | expression) RIGHTPAREN )
   ;
 
-leavestate throws TreeParserException
-  :  #(LEAVE (BLOCK_LABEL)? state_end )
+leavestate:
+    #(LEAVE (BLOCK_LABEL)? state_end )
   ;
 
-lengthfunc throws TreeParserException
-  :  #(LENGTH funargs )
+lengthfunc:
+    #(LENGTH funargs )
   ;
 
-loadstate throws TreeParserException
-  :  #(  LOAD expression
+loadstate:
+    #(  LOAD expression
       (  #(DIR expression )
       |  APPLICATION
       |  DYNAMIC
@@ -2169,12 +2182,12 @@ loadstate throws TreeParserException
     )
   ;
 
-loadpicturefunc  throws TreeParserException
-  :  #(LOADPICTURE (funargs)? )
+loadpicturefunc :
+    #(LOADPICTURE (funargs)? )
   ;
 
-messagestate throws TreeParserException
-  :  #(  MESSAGE
+messagestate:
+    #(  MESSAGE
       ( #(COLOR anyorvalue) )?
       ( #(Form_item (skipphrase | expression) ) )*
       (  #(  VIEWAS ALERTBOX
@@ -2190,8 +2203,8 @@ messagestate throws TreeParserException
     )
   ;
 
-methodstate throws TreeParserException
-  :  #(  METHOD def_modifiers
+methodstate:
+    #(  METHOD def_modifiers
       (VOID | datatype (options{greedy=true;}:extentphrase)?)
       .  // Method name might be a reserved keyword.
       function_params
@@ -2205,27 +2218,27 @@ methodstate throws TreeParserException
     )
   ;
 
-namespace_prefix throws TreeParserException
-  :  #(NAMESPACEPREFIX constant )
+namespace_prefix:
+    #(NAMESPACEPREFIX constant )
   ;
-namespace_uri throws TreeParserException
-  :  #(NAMESPACEURI constant )
-  ;
-
-nextstate throws TreeParserException
-  :  #(NEXT (BLOCK_LABEL)? state_end )
+namespace_uri:
+    #(NAMESPACEURI constant )
   ;
 
-nextpromptstate throws TreeParserException
-  :  #(NEXTPROMPT field (framephrase)? state_end )
+nextstate:
+    #(NEXT (BLOCK_LABEL)? state_end )
   ;
 
-nextvaluefunc throws TreeParserException
-  :  #(NEXTVALUE LEFTPAREN ID (COMMA ID)* RIGHTPAREN )
+nextpromptstate:
+    #(NEXTPROMPT field (framephrase)? state_end )
   ;
 
-onstate throws TreeParserException
-  :  #(  ON
+nextvaluefunc:
+    #(NEXTVALUE LEFTPAREN ID (COMMA ID)* RIGHTPAREN )
+  ;
+
+onstate:
+    #(  ON
       (  (ASSIGN|CREATE|DELETE_KW|FIND|WRITE)=>
         (  (CREATE|DELETE_KW|FIND) OF RECORD_NAME (label_constant)?
         |  WRITE OF RECORD_NAME (label_constant)?
@@ -2264,8 +2277,8 @@ onstate throws TreeParserException
     )
   ;
 
-on___phrase throws TreeParserException
-  :  #(  ON (ENDKEY|ERROR|STOP|QUIT)
+on___phrase:
+    #(  ON (ENDKEY|ERROR|STOP|QUIT)
       ( #(UNDO (BLOCK_LABEL)? ) )?
       (  COMMA
         (  #(LEAVE (BLOCK_LABEL)? )
@@ -2278,8 +2291,8 @@ on___phrase throws TreeParserException
     )
   ;
 
-openquerystate throws TreeParserException
-  :  #(  OPEN QUERY ID (FOR|PRESELECT) for_record_spec
+openquerystate:
+    #(  OPEN QUERY ID (FOR|PRESELECT) for_record_spec
       (  querytuningphrase
       |  BREAK
       |  #(BY expression (DESCENDING)? )
@@ -2291,12 +2304,12 @@ openquerystate throws TreeParserException
     )
   ;
 
-osappendstate throws TreeParserException
-  :  #(OSAPPEND filenameorvalue filenameorvalue state_end )
+osappendstate:
+    #(OSAPPEND filenameorvalue filenameorvalue state_end )
   ;
 
-oscommandstate throws TreeParserException
-  :  #(OS400    (SILENT|NOWAIT|NOCONSOLE)? (anyorvalue)* state_end )
+oscommandstate:
+    #(OS400    (SILENT|NOWAIT|NOCONSOLE)? (anyorvalue)* state_end )
   |  #(BTOS    (SILENT|NOWAIT|NOCONSOLE)? (anyorvalue)* state_end )
   |  #(DOS    (SILENT|NOWAIT|NOCONSOLE)? (anyorvalue)* state_end )
   |  #(MPE    (SILENT|NOWAIT|NOCONSOLE)? (anyorvalue)* state_end )
@@ -2306,40 +2319,40 @@ oscommandstate throws TreeParserException
   |  #(VMS    (SILENT|NOWAIT|NOCONSOLE)? (anyorvalue)* state_end )
   ;
 
-oscopystate throws TreeParserException
-  :  #(OSCOPY filenameorvalue filenameorvalue state_end )
+oscopystate:
+    #(OSCOPY filenameorvalue filenameorvalue state_end )
   ;
 
-oscreatedirstate throws TreeParserException
-  :  #(OSCREATEDIR filenameorvalue (anyorvalue)* state_end )
+oscreatedirstate:
+    #(OSCREATEDIR filenameorvalue (anyorvalue)* state_end )
   ;
 
-osdeletestate throws TreeParserException
-  :  #(OSDELETE (valueexpression | ~(VALUE|RECURSIVE|PERIOD) )+ (RECURSIVE)? state_end )
+osdeletestate:
+    #(OSDELETE (valueexpression | ~(VALUE|RECURSIVE|PERIOD) )+ (RECURSIVE)? state_end )
   ;
 
-osrenamestate throws TreeParserException
-  :  #(OSRENAME filenameorvalue filenameorvalue state_end )
+osrenamestate:
+    #(OSRENAME filenameorvalue filenameorvalue state_end )
   ;
 
-outputclosestate throws TreeParserException
-  :  #(OUTPUT (stream_name_or_handle)? CLOSE state_end )
+outputclosestate:
+    #(OUTPUT (stream_name_or_handle)? CLOSE state_end )
   ;
 
-outputthroughstate throws TreeParserException
-  :  #(OUTPUT (stream_name_or_handle)? THROUGH io_phrase state_end )
+outputthroughstate:
+    #(OUTPUT (stream_name_or_handle)? THROUGH io_phrase state_end )
   ;
 
-outputtostate throws TreeParserException
-  :  #(OUTPUT (stream_name_or_handle)? TO io_phrase state_end )
+outputtostate:
+    #(OUTPUT (stream_name_or_handle)? TO io_phrase state_end )
   ;
 
-pagestate throws TreeParserException
-  :  #(PAGE (stream_name_or_handle)? state_end )
+pagestate:
+    #(PAGE (stream_name_or_handle)? state_end )
   ;
 
-pausestate throws TreeParserException
-  :  #(  PAUSE (expression)?
+pausestate:
+    #(  PAUSE (expression)?
       (  BEFOREHIDE
       |  #(MESSAGE constant )
       |  NOMESSAGE
@@ -2349,8 +2362,8 @@ pausestate throws TreeParserException
     )
   ;
 
-procedurestate throws TreeParserException
-  :  #(  PROCEDURE ID
+procedurestate:
+    #(  PROCEDURE ID
       (  #(  EXTERNAL constant
           (  CDECL_KW
           |  PASCAL_KW
@@ -2366,23 +2379,23 @@ procedurestate throws TreeParserException
     )
   ;
 
-processeventsstate throws TreeParserException
-  :  #(PROCESS EVENTS state_end )
+processeventsstate:
+    #(PROCESS EVENTS state_end )
   ;
 
-promptforstate throws TreeParserException
-  :  #(  PROMPTFOR (stream_name_or_handle)? (UNLESSHIDDEN)? (form_item)*
+promptforstate:
+    #(  PROMPTFOR (stream_name_or_handle)? (UNLESSHIDDEN)? (form_item)*
       (goonphrase)?  (#(EXCEPT (field)*))?  (#(IN_KW WINDOW expression))?  (framephrase)?  (editingphrase)?
       state_end
     )
   ;
 
-publishstate throws TreeParserException
-  :  #(PUBLISH expression (#(FROM expression) )? (parameterlist)? state_end )
+publishstate:
+    #(PUBLISH expression (#(FROM expression) )? (parameterlist)? state_end )
   ;
 
-putstate throws TreeParserException
-  :  #(  PUT  
+putstate:
+    #(  PUT  
       (stream_name_or_handle)? (CONTROL|UNFORMATTED)?
       (  ( #(NULL_KW (LEFTPAREN)? ) )=> #(NULL_KW (funargs)? )
       |  skipphrase
@@ -2393,19 +2406,19 @@ putstate throws TreeParserException
     )
   ;
 
-putcursorstate throws TreeParserException
-  :  #(PUT CURSOR (OFF | (#(ROW expression)|#(COLUMN expression))* ) state_end )
+putcursorstate:
+    #(PUT CURSOR (OFF | (#(ROW expression)|#(COLUMN expression))* ) state_end )
   ;
 
-putscreenstate throws TreeParserException
-  :  #(  PUT SCREEN
+putscreenstate:
+    #(  PUT SCREEN
       ( ATTRSPACE | NOATTRSPACE | #(COLOR anyorvalue) | #(COLUMN expression) | #(ROW expression) | expression )*
       state_end
     )
   ;
 
-putkeyvaluestate throws TreeParserException
-  :  #(  PUTKEYVALUE
+putkeyvaluestate:
+    #(  PUTKEYVALUE
       (  SECTION expression KEY (DEFAULT|expression) VALUE expression
       |  (COLOR|FONT) (expression|ALL)
       )
@@ -2413,8 +2426,8 @@ putkeyvaluestate throws TreeParserException
     )
   ;
 
-querytuningphrase throws TreeParserException
-  :  #(  QUERYTUNING LEFTPAREN
+querytuningphrase:
+    #(  QUERYTUNING LEFTPAREN
       (  ARRAYMESSAGE | NOARRAYMESSAGE
       |  BINDWHERE | NOBINDWHERE
       |  #(CACHESIZE NUMBER (ROW|BYTE)? )
@@ -2433,12 +2446,12 @@ querytuningphrase throws TreeParserException
     )
   ;
 
-quitstate throws TreeParserException
-  :  #(QUIT state_end )
+quitstate:
+    #(QUIT state_end )
   ;
 
-radiosetphrase throws TreeParserException
-  :  #(  RADIOSET
+radiosetphrase:
+    #(  RADIOSET
       (  #(HORIZONTAL (EXPAND)? )
       |  VERTICAL
       |  (sizephrase)
@@ -2451,29 +2464,29 @@ radiosetphrase throws TreeParserException
     )
   ;
 
-rawfunc throws TreeParserException
-  :  #(RAW funargs )
+rawfunc:
+    #(RAW funargs )
   ;
 
-rawtransferstate throws TreeParserException
-  :  #(RAWTRANSFER (BUFFER|FIELD)? (RECORD_NAME|field) TO (BUFFER|FIELD)? (RECORD_NAME|field) (NOERROR_KW)? state_end )
+rawtransferstate:
+    #(RAWTRANSFER (BUFFER|FIELD)? (RECORD_NAME|field) TO (BUFFER|FIELD)? (RECORD_NAME|field) (NOERROR_KW)? state_end )
   ;
 
-readkeystate throws TreeParserException
-  :  #(READKEY (stream_name_or_handle)? (#(PAUSE expression))? state_end )
+readkeystate:
+    #(READKEY (stream_name_or_handle)? (#(PAUSE expression))? state_end )
   ;
 
-repeatstate throws TreeParserException
-  :  #(REPEAT (block_for)? (block_preselect)? (block_opt)* block_colon code_block block_end )
+repeatstate:
+    #(REPEAT (block_for)? (block_preselect)? (block_opt)* block_colon code_block block_end )
   ;
 
-record_fields throws TreeParserException
-  :  #(FIELDS (LEFTPAREN (field (#(WHEN expression))?)* RIGHTPAREN)? )
+record_fields:
+    #(FIELDS (LEFTPAREN (field (#(WHEN expression))?)* RIGHTPAREN)? )
   |  #(EXCEPT (LEFTPAREN (field (#(WHEN expression))?)* RIGHTPAREN)? )
   ;
 
-recordphrase throws TreeParserException
-  :  #(  RECORD_NAME (record_fields)? (options{greedy=true;}:TODAY|NOW|constant)?
+recordphrase:
+    #(  RECORD_NAME (record_fields)? (options{greedy=true;}:TODAY|NOW|constant)?
       (  #(LEFT OUTERJOIN )
       |  OUTERJOIN
       |  #(OF RECORD_NAME )
@@ -2490,20 +2503,20 @@ recordphrase throws TreeParserException
     )
   ;
 
-releasestate throws TreeParserException
-  :  #(RELEASE RECORD_NAME (NOERROR_KW)? state_end )
+releasestate:
+    #(RELEASE RECORD_NAME (NOERROR_KW)? state_end )
   ;
 
-releaseexternalstate throws TreeParserException
-  :  #(RELEASE EXTERNAL (PROCEDURE)? expression (NOERROR_KW)? state_end )
+releaseexternalstate:
+    #(RELEASE EXTERNAL (PROCEDURE)? expression (NOERROR_KW)? state_end )
   ;
 
-releaseobjectstate throws TreeParserException
-  :  #(RELEASE OBJECT expression (NOERROR_KW)? state_end )
+releaseobjectstate:
+    #(RELEASE OBJECT expression (NOERROR_KW)? state_end )
   ;
 
-repositionstate throws TreeParserException
-  :  #(  REPOSITION ID
+repositionstate:
+    #(  REPOSITION ID
       (  #(  TO
           (  ROWID expression (COMMA expression)* 
           |  RECID expression
@@ -2518,28 +2531,28 @@ repositionstate throws TreeParserException
     )
   ;
 
-returnstate throws TreeParserException
-  :  #(RETURN (return_options)? state_end )
+returnstate:
+    #(RETURN (return_options)? state_end )
   ;
 
-return_options throws TreeParserException
-  :  (  ( #(ERROR LEFTPAREN RECORD_NAME RIGHTPAREN) )=> expression
+return_options:
+    (  ( #(ERROR LEFTPAREN RECORD_NAME RIGHTPAREN) )=> expression
     |  (ERROR)=> ERROR (expression)?
     |  NOAPPLY (expression)?
     |  expression
     )
   ;
 
-routinelevelstate throws TreeParserException
-  :  #(ROUTINELEVEL ON ERROR UNDO COMMA THROW state_end)
+routinelevelstate:
+    #(ROUTINELEVEL ON ERROR UNDO COMMA THROW state_end)
   ;
 
-blocklevelstate throws TreeParserException
-    :   #(BLOCKLEVEL ON ERROR UNDO COMMA THROW state_end)
-    ;
+blocklevelstate:
+    #(BLOCKLEVEL ON ERROR UNDO COMMA THROW state_end)
+  ;
 
-runstate throws TreeParserException
-  :  #(  RUN filenameorvalue
+runstate:
+    #(  RUN filenameorvalue
       (LEFTANGLE LEFTANGLE filenameorvalue RIGHTANGLE RIGHTANGLE)?
       (  #(PERSISTENT ( #(SET (field)? ) )? )
       |  #(SET (field)? )
@@ -2556,28 +2569,28 @@ runstate throws TreeParserException
     )
   ;
 
-runstoredprocedurestate throws TreeParserException
-  :  #(RUN STOREDPROCEDURE ID (assign_equal)? (NOERROR_KW)? (parameterlist)? state_end )
+runstoredprocedurestate:
+    #(RUN STOREDPROCEDURE ID (assign_equal)? (NOERROR_KW)? (parameterlist)? state_end )
   ;
 
-runsuperstate throws TreeParserException
-  :  #(RUN SUPER (parameterlist)? (NOERROR_KW)? state_end )
+runsuperstate:
+    #(RUN SUPER (parameterlist)? (NOERROR_KW)? state_end )
   ;
 
-savecachestate throws TreeParserException
-  :  #(SAVE CACHE (CURRENT|COMPLETE) anyorvalue TO filenameorvalue (NOERROR_KW)? state_end )
+savecachestate:
+    #(SAVE CACHE (CURRENT|COMPLETE) anyorvalue TO filenameorvalue (NOERROR_KW)? state_end )
   ;
 
-scrollstate throws TreeParserException
-  :  #(SCROLL (FROMCURRENT)? (UP)? (DOWN)? (framephrase)? state_end )
+scrollstate:
+    #(SCROLL (FROMCURRENT)? (UP)? (DOWN)? (framephrase)? state_end )
   ;
 
-seekstate throws TreeParserException
-  :  #(SEEK (INPUT|OUTPUT|stream_name_or_handle) TO (expression|END) state_end )
+seekstate:
+    #(SEEK (INPUT|OUTPUT|stream_name_or_handle) TO (expression|END) state_end )
   ;
 
-selectionlistphrase throws TreeParserException
-  :  #(  SELECTIONLIST
+selectionlistphrase:
+    #(  SELECTIONLIST
       (  SINGLE
       |  MULTIPLE
       |  NODRAG
@@ -2594,30 +2607,30 @@ selectionlistphrase throws TreeParserException
     )
   ;
 
-setstate throws TreeParserException
-  :  #(  SET
+setstate:
+    #(  SET
       (stream_name_or_handle)? (UNLESSHIDDEN)? (form_item)*
       (goonphrase)?  (#(EXCEPT (field)*))?  (#(IN_KW WINDOW expression))?  (framephrase)?  (editingphrase)?  (NOERROR_KW)?
       state_end
     )
   ;
 
-showstatsstate throws TreeParserException
-  :  #(SHOWSTATS (CLEAR)? state_end )
+showstatsstate:
+    #(SHOWSTATS (CLEAR)? state_end )
   ;
 
-sizephrase throws TreeParserException
-  :  #(SIZE expression BY expression )
+sizephrase:
+    #(SIZE expression BY expression )
   |  #(SIZECHARS expression BY expression )
   |  #(SIZEPIXELS expression BY expression )
   ;
 
-skipphrase throws TreeParserException
-  :  #(SKIP (funargs)? )
+skipphrase:
+    #(SKIP (funargs)? )
   ;
 
-sliderphrase throws TreeParserException
-  :  #(  SLIDER
+sliderphrase:
+    #(  SLIDER
       (  HORIZONTAL
       |  #(MAXVALUE expression )
       |  #(MINVALUE expression )
@@ -2631,16 +2644,16 @@ sliderphrase throws TreeParserException
     )
   ;
 
-spacephrase throws TreeParserException
-  :  #(SPACE (funargs)? )
+spacephrase:
+    #(SPACE (funargs)? )
   ;
 
-state_end throws TreeParserException
-  :  PERIOD | EOF
+state_end:
+    PERIOD | EOF
   ;
 
-statusstate throws TreeParserException
-  :  #(  STATUS
+statusstate:
+    #(  STATUS
       (  #(DEFAULT (expression)? )
       |  #(INPUT (OFF|expression)? )
       )
@@ -2649,33 +2662,33 @@ statusstate throws TreeParserException
     )
   ;
 
-stopstate throws TreeParserException
-  :  #(STOP state_end )
+stopstate:
+    #(STOP state_end )
   ;
 
-stream_name_or_handle throws TreeParserException
-  :  #(STREAM ID )
+stream_name_or_handle:
+    #(STREAM ID )
   |  #(STREAMHANDLE expression )
   ;
 
-subscribestate throws TreeParserException
-  :  #(  SUBSCRIBE ( #(PROCEDURE expression) )? (TO)? expression
+subscribestate:
+    #(  SUBSCRIBE ( #(PROCEDURE expression) )? (TO)? expression
       (ANYWHERE | #(IN_KW expression) )
       ( #(RUNPROCEDURE expression) )?
       (NOERROR_KW)? state_end
     )
   ;
    
-substringfunc throws TreeParserException
-  :  #(SUBSTRING funargs )
+substringfunc:
+    #(SUBSTRING funargs )
   ;
 
-systemdialogcolorstate throws TreeParserException
-  :  #(SYSTEMDIALOG COLOR expression ( #(UPDATE field) )? (#(IN_KW WINDOW expression))? state_end )
+systemdialogcolorstate:
+    #(SYSTEMDIALOG COLOR expression ( #(UPDATE field) )? (#(IN_KW WINDOW expression))? state_end )
   ;
 
-systemdialogfontstate throws TreeParserException
-  :  #(  SYSTEMDIALOG FONT expression
+systemdialogfontstate:
+    #(  SYSTEMDIALOG FONT expression
       (  ANSIONLY
       |  FIXEDONLY
       |  #(MAXSIZE expression )
@@ -2687,8 +2700,8 @@ systemdialogfontstate throws TreeParserException
     )
   ;
 
-systemdialoggetdirstate throws TreeParserException
-  :  #(  SYSTEMDIALOG GETDIR field
+systemdialoggetdirstate:
+    #(  SYSTEMDIALOG GETDIR field
       (  #(INITIALDIR expression)
       |  RETURNTOSTARTDIR
       |  #(TITLE expression)
@@ -2698,8 +2711,8 @@ systemdialoggetdirstate throws TreeParserException
     )
   ;
 
-systemdialoggetfilestate throws TreeParserException
-  :  #(  SYSTEMDIALOG GETFILE field
+systemdialoggetfilestate:
+    #(  SYSTEMDIALOG GETFILE field
       (  #(  FILTERS expression expression (COMMA expression expression)*
           ( #(INITIALFILTER expression ) )?
         )
@@ -2719,15 +2732,15 @@ systemdialoggetfilestate throws TreeParserException
     )
   ;
 
-systemdialogprintersetupstate throws TreeParserException
-  :  #(  SYSTEMDIALOG PRINTERSETUP
+systemdialogprintersetupstate:
+    #(  SYSTEMDIALOG PRINTERSETUP
       ( #(NUMCOPIES expression) | #(UPDATE field) | LANDSCAPE | PORTRAIT | #(IN_KW WINDOW expression) )*
       state_end
     )
   ;
 
-systemhelpstate throws TreeParserException
-  :  #(  SYSTEMHELP expression
+systemhelpstate:
+    #(  SYSTEMHELP expression
       ( #(WINDOWNAME expression) )?
       (  #(ALTERNATEKEY expression )
       |  #(CONTEXT expression )
@@ -2749,32 +2762,32 @@ systemhelpstate throws TreeParserException
     )
   ;
 
-textphrase throws TreeParserException
-  :  #(TEXT (sizephrase | tooltip_expr)* )
+textphrase:
+    #(TEXT (sizephrase | tooltip_expr)* )
   ;
 
-titlephrase throws TreeParserException
-  :  #(TITLE (color_expr | #(COLOR anyorvalue) | #(FONT expression) )* expression )
+titlephrase:
+    #(TITLE (color_expr | #(COLOR anyorvalue) | #(FONT expression) )* expression )
   ;
 
-thisobjectstate throws TreeParserException
-  :  #(THISOBJECT parameterlist_noroot state_end )
+thisobjectstate:
+    #(THISOBJECT parameterlist_noroot state_end )
   ;
   
-toggleboxphrase throws TreeParserException
-  :  #(TOGGLEBOX (sizephrase | tooltip_expr)* )
+toggleboxphrase:
+    #(TOGGLEBOX (sizephrase | tooltip_expr)* )
   ;
 
-tooltip_expr throws TreeParserException
-  :  #(TOOLTIP (valueexpression | constant) )
+tooltip_expr:
+    #(TOOLTIP (valueexpression | constant) )
   ;
 
-transactionmodeautomaticstate throws TreeParserException
-  :  #(TRANSACTIONMODE AUTOMATIC (CHAINED)? state_end )
+transactionmodeautomaticstate:
+    #(TRANSACTIONMODE AUTOMATIC (CHAINED)? state_end )
   ;
 
-triggerphrase throws TreeParserException
-  :  #(  TRIGGERS block_colon
+triggerphrase:
+    #(  TRIGGERS block_colon
       #(  Code_block
         ( #(ON eventlist (ANYWHERE)? (PERSISTENT runstate | blockorstate) ) )*
       )
@@ -2782,8 +2795,8 @@ triggerphrase throws TreeParserException
     )
   ;
 
-triggerprocedurestate throws TreeParserException
-  :  #(  TRIGGER PROCEDURE FOR
+triggerprocedurestate:
+    #(  TRIGGER PROCEDURE FOR
       (  (CREATE|DELETE_KW|FIND|REPLICATIONCREATE|REPLICATIONDELETE)
         OF RECORD_NAME (label_constant)?
       |  (WRITE|REPLICATIONWRITE) OF RECORD_NAME (label_constant)?
@@ -2800,12 +2813,12 @@ triggerprocedurestate throws TreeParserException
     )
   ;
 
-underlinestate throws TreeParserException
-  :  #(UNDERLINE (stream_name_or_handle)? (#(Form_item field (formatphrase)? ))* (framephrase)? state_end )
+underlinestate:
+    #(UNDERLINE (stream_name_or_handle)? (#(Form_item field (formatphrase)? ))* (framephrase)? state_end )
   ;
 
-undostate throws TreeParserException
-  :  #(  UNDO (BLOCK_LABEL)?
+undostate:
+    #(  UNDO (BLOCK_LABEL)?
       (  COMMA
         (  #(LEAVE (BLOCK_LABEL)? )
         |  #(NEXT (BLOCK_LABEL)? )
@@ -2818,25 +2831,25 @@ undostate throws TreeParserException
     )
   ;
 
-unloadstate throws TreeParserException
-  :  #(UNLOAD expression (NOERROR_KW)? state_end )
+unloadstate:
+    #(UNLOAD expression (NOERROR_KW)? state_end )
   ;
 
-unsubscribestate throws TreeParserException
-  :  #(UNSUBSCRIBE (#(PROCEDURE expression))? (TO)? (expression|ALL) (#(IN_KW expression))? state_end )
+unsubscribestate:
+    #(UNSUBSCRIBE (#(PROCEDURE expression))? (TO)? (expression|ALL) (#(IN_KW expression))? state_end )
   ;
 
-upstate throws TreeParserException
-  :  #(UP (options{greedy=true;}:stream_name_or_handle)? (expression)? (stream_name_or_handle)? (framephrase)? state_end )
+upstate:
+    #(UP (options{greedy=true;}:stream_name_or_handle)? (expression)? (stream_name_or_handle)? (framephrase)? state_end )
   ;
 
-updatestatement throws TreeParserException
-  :  (#(UPDATE RECORD_NAME SET))=> sqlupdatestate
+updatestatement:
+    (#(UPDATE RECORD_NAME SET))=> sqlupdatestate
   |  updatestate
   ;
 
-updatestate throws TreeParserException
-  :  #(  UPDATE
+updatestate:
+    #(  UPDATE
       (UNLESSHIDDEN)?  
       (form_item)*
       (goonphrase)?
@@ -2849,24 +2862,24 @@ updatestate throws TreeParserException
     )
   ;
 
-usestate throws TreeParserException
-  :  #(USE expression (NOERROR_KW)? state_end )
+usestate:
+    #(USE expression (NOERROR_KW)? state_end )
   ;
 
-usingstate throws TreeParserException
-  :  #(USING TYPE_NAME (#(FROM (ASSEMBLY|PROPATH)))? state_end )
+usingstate:
+    #(USING TYPE_NAME (#(FROM (ASSEMBLY|PROPATH)))? state_end )
   ;
 
-validatestate throws TreeParserException
-  :  #(VALIDATE RECORD_NAME (NOERROR_KW)? state_end )
+validatestate:
+    #(VALIDATE RECORD_NAME (NOERROR_KW)? state_end )
   ;
 
-viewstate throws TreeParserException
-  :  #(VIEW (stream_name_or_handle)? (gwidget)* (#(IN_KW WINDOW expression))? state_end )
+viewstate:
+    #(VIEW (stream_name_or_handle)? (gwidget)* (#(IN_KW WINDOW expression))? state_end )
   ;
 
-viewasphrase throws TreeParserException
-  :  #(  VIEWAS
+viewasphrase:
+    #(  VIEWAS
       (  comboboxphrase
       |  editorphrase
       |  fillinphrase
@@ -2879,8 +2892,8 @@ viewasphrase throws TreeParserException
     )
   ;
 
-waitforstate throws TreeParserException
-  :  #(  WAITFOR
+waitforstate:
+    #(  WAITFOR
       (  widattr (#(SET field))? // .NET WAIT-FOR.
       |  eventlist OF widgetlist
         (#(OR eventlist OF widgetlist))*
@@ -2892,20 +2905,28 @@ waitforstate throws TreeParserException
     )
   ;
 
-widget_id throws TreeParserException: #(WIDGETID expression ) ;
+widget_id:
+    #(WIDGETID expression )
+  ;
 
-xml_data_type throws TreeParserException: #(XMLDATATYPE constant ) ;
-xml_node_name throws TreeParserException: #(XMLNODENAME constant ) ;
-xml_node_type throws TreeParserException: #(XMLNODETYPE constant ) ;
+xml_data_type:
+    #(XMLDATATYPE constant )
+  ;
 
+xml_node_name:
+    #(XMLNODENAME constant )
+  ;
 
+xml_node_type:
+    #(XMLNODETYPE constant )
+  ;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Begin SQL
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-altertablestate throws TreeParserException
-  :  #(  ALTER TABLE RECORD_NAME
+altertablestate:
+    #(  ALTER TABLE RECORD_NAME
       (  ADD COLUMN sql_col_def
       |  DROP COLUMN field
       |  ALTER COLUMN field
@@ -2919,16 +2940,16 @@ altertablestate throws TreeParserException
     )
   ;
 
-closestate throws TreeParserException
-  :  #(CLOSE ID state_end )
+closestate:
+    #(CLOSE ID state_end )
   ;
 
-createindexstate throws TreeParserException
-  :  #(CREATE (UNIQUE)? INDEX ID ON RECORD_NAME #(Field_list LEFTPAREN field (COMMA field)* RIGHTPAREN ) state_end )
+createindexstate:
+    #(CREATE (UNIQUE)? INDEX ID ON RECORD_NAME #(Field_list LEFTPAREN field (COMMA field)* RIGHTPAREN ) state_end )
   ;
 
-createtablestate throws TreeParserException
-  :  #(  CREATE TABLE ID 
+createtablestate:
+    #(  CREATE TABLE ID 
       LEFTPAREN
       (  sql_col_def
       |  #(UNIQUE LEFTPAREN ID (COMMA ID)* RIGHTPAREN)
@@ -2943,58 +2964,61 @@ createtablestate throws TreeParserException
     )
   ;
 
-createviewstate throws TreeParserException
-  :  #(CREATE VIEW ID (#(Field_list LEFTPAREN field (COMMA field)* RIGHTPAREN ))? AS selectstatea state_end )
+createviewstate:
+    #(CREATE VIEW ID (#(Field_list LEFTPAREN field (COMMA field)* RIGHTPAREN ))? AS selectstatea state_end )
   ;
 
-declarecursorstate throws TreeParserException
-  :  #(DECLARE ID CURSOR FOR selectstatea (#(FOR (#(READ (ONLY)?) | UPDATE)))? state_end )
+declarecursorstate:
+    #(DECLARE ID CURSOR FOR selectstatea (#(FOR (#(READ (ONLY)?) | UPDATE)))? state_end )
   ;
 
-deletefromstate throws TreeParserException
-  :  #(  DELETE_KW FROM RECORD_NAME
+deletefromstate:
+    #(  DELETE_KW FROM RECORD_NAME
       ( #(WHERE (sqlexpression | #(CURRENT OF ID))? ) )?
       state_end
     )
   ;
 
-dropindexstate throws TreeParserException
-  :  #(DROP INDEX ID state_end )
+dropindexstate:
+    #(DROP INDEX ID state_end )
   ;
 
-droptablestate throws TreeParserException
-  :  #(DROP TABLE RECORD_NAME state_end )
+droptablestate:
+    #(DROP TABLE RECORD_NAME state_end )
   ;
 
-dropviewstate throws TreeParserException
-  :  #(DROP VIEW ID state_end )
+dropviewstate:
+    #(DROP VIEW ID state_end )
   ;
 
-fetchstate throws TreeParserException
-  :  #(FETCH ID INTO field (fetch_indicator)? (COMMA field (fetch_indicator)? )* state_end )
+fetchstate:
+    #(FETCH ID INTO field (fetch_indicator)? (COMMA field (fetch_indicator)? )* state_end )
   ;
-fetch_indicator throws TreeParserException
-  :  #(INDICATOR field )
+
+fetch_indicator:
+    #(INDICATOR field )
   |  field
   ;
 
-grantstate throws TreeParserException
-  :   #(GRANT (grant_rev_opt) ON (RECORD_NAME|ID) grant_rev_to (WITH GRANT OPTION)? state_end )
+grantstate:
+     #(GRANT (grant_rev_opt) ON (RECORD_NAME|ID) grant_rev_to (WITH GRANT OPTION)? state_end )
   ;
-grant_rev_opt throws TreeParserException
-  :  #(ALL (PRIVILEGES)? )
+
+grant_rev_opt:
+    #(ALL (PRIVILEGES)? )
   |  (  SELECT | INSERT | DELETE_KW
     |  #(UPDATE (#(Field_list LEFTPAREN field (COMMA field)* RIGHTPAREN ))? )
     |  COMMA
     )+
   ;
-grant_rev_to throws TreeParserException
-  :  #(TO (PUBLIC | FILENAME (COMMA FILENAME)*) )
+
+grant_rev_to:
+    #(TO (PUBLIC | FILENAME (COMMA FILENAME)*) )
   |  #(FROM (PUBLIC | FILENAME (COMMA FILENAME)*) )
   ;
 
-insertintostate throws TreeParserException
-  :  #(  INSERT INTO RECORD_NAME
+insertintostate:
+    #(  INSERT INTO RECORD_NAME
       (#(Field_list LEFTPAREN field (COMMA field)* RIGHTPAREN ))?
       (  #(  VALUES LEFTPAREN sqlexpression (fetch_indicator)?
           (COMMA sqlexpression (fetch_indicator)?)* RIGHTPAREN
@@ -3005,20 +3029,20 @@ insertintostate throws TreeParserException
     )
   ;
 
-openstate throws TreeParserException
-  :   #(OPEN ID state_end )
+openstate:
+     #(OPEN ID state_end )
   ;
 
-revokestate throws TreeParserException
-  :   #(REVOKE (grant_rev_opt) ON (RECORD_NAME|ID) grant_rev_to state_end )
+revokestate:
+     #(REVOKE (grant_rev_opt) ON (RECORD_NAME|ID) grant_rev_to state_end )
   ;
 
-selectstate throws TreeParserException
-  :   selectstatea state_end
+selectstate:
+     selectstatea state_end
   ;
 
-selectstatea throws TreeParserException
-  :  #(  SELECT
+selectstatea:
+    #(  SELECT
       (ALL | DISTINCT)?
       (  STAR
       |  #(  Sql_select_what
@@ -3044,8 +3068,9 @@ selectstatea throws TreeParserException
       ( #(UNION (ALL)? selectstatea) )?
     )
   ;
-select_from_spec throws TreeParserException
-  :  select_sqltableref
+
+select_from_spec:
+    select_sqltableref
     (  #(LEFT (OUTER)? JOIN select_sqltableref ON sqlexpression )
     |  #(RIGHT (OUTER)? JOIN select_sqltableref ON sqlexpression )
     |  #(INNER JOIN select_sqltableref ON sqlexpression )
@@ -3054,35 +3079,39 @@ select_from_spec throws TreeParserException
     )*
     ( #(WHERE sqlexpression) )?
   ;
-select_sqltableref throws TreeParserException
-  :  (RECORD_NAME | ID) (ID)?
-  ;
-select_order_expr throws TreeParserException
-  :  sqlscalar (ASC|DESCENDING)? (COMMA sqlscalar (ASC|DESCENDING)?)*
+
+select_sqltableref:
+    (RECORD_NAME | ID) (ID)?
   ;
 
-sqlupdatestate throws TreeParserException
-  :   #(  UPDATE RECORD_NAME SET sqlupdate_equal (COMMA sqlupdate_equal)*
+select_order_expr:
+    sqlscalar (ASC|DESCENDING)? (COMMA sqlscalar (ASC|DESCENDING)?)*
+  ;
+
+sqlupdatestate:
+     #(  UPDATE RECORD_NAME SET sqlupdate_equal (COMMA sqlupdate_equal)*
       ( #(WHERE (sqlexpression | CURRENT OF ID) ) )?
       state_end
     )
   ;
-sqlupdate_equal throws TreeParserException
-  :  #(EQUAL field sqlexpression (fetch_indicator)? )
+
+sqlupdate_equal:
+    #(EQUAL field sqlexpression (fetch_indicator)? )
   ;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // sql functions and phrases
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-sqlaggregatefunc throws TreeParserException
 // also see maximumfunc and minimumfunc
-  :  #(AVG sqlaggregatefunc_arg )
-  |  #(COUNT sqlaggregatefunc_arg )
-  |  #(SUM sqlaggregatefunc_arg )
+sqlaggregatefunc:
+    #(AVG sqlaggregatefunc_arg )
+  | #(COUNT sqlaggregatefunc_arg )
+  | #(SUM sqlaggregatefunc_arg )
   ;
-sqlaggregatefunc_arg throws TreeParserException
-  :  LEFTPAREN
+
+sqlaggregatefunc_arg:
+    LEFTPAREN
     (  DISTINCT
       (  LEFTPAREN field RIGHTPAREN
       |  field
@@ -3093,8 +3122,8 @@ sqlaggregatefunc_arg throws TreeParserException
     RIGHTPAREN
   ;
 
-sql_col_def throws TreeParserException
-  :  #(  ID
+sql_col_def:
+    #(  ID
       . // datatype
       (PRECISION)?
       (LEFTPAREN NUMBER (COMMA NUMBER)? RIGHTPAREN)?
@@ -3113,8 +3142,8 @@ sql_col_def throws TreeParserException
 // sqlexpression 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-sqlexpression throws TreeParserException
-  :  #(OR sqlexpression sqlexpression )
+sqlexpression:
+    #(OR sqlexpression sqlexpression )
   |  #(AND sqlexpression sqlexpression )
   |  #(NOT sqlexpression )
   |  #(MATCHES  sqlscalar (sqlscalar | sql_comp_query) )
@@ -3134,14 +3163,17 @@ sqlexpression throws TreeParserException
   |  #(Sql_null_test IS (NOT)? NULL_KW )
   |  sqlscalar
   ;
-sql_comp_query throws TreeParserException
-  :  #(Sql_comp_query (ANY|ALL|SOME)? LEFTPAREN selectstatea RIGHTPAREN )
+
+sql_comp_query:
+    #(Sql_comp_query (ANY|ALL|SOME)? LEFTPAREN selectstatea RIGHTPAREN )
   ;
-sql_in_val throws TreeParserException
-  :  field (fetch_indicator)? | constant | USERID
+
+sql_in_val:
+    field (fetch_indicator)? | constant | USERID
   ;
-sqlscalar throws TreeParserException
-  :  #(PLUS sqlscalar sqlscalar )
+
+sqlscalar:
+    #(PLUS sqlscalar sqlscalar )
   |  #(MINUS sqlscalar sqlscalar )
   |  #(MULTIPLY sqlscalar sqlscalar )
   |  #(DIVIDE sqlscalar sqlscalar )

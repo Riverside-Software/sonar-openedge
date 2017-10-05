@@ -17,8 +17,8 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -44,14 +44,14 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending01.p"), session);
     unit.parse();
 
-    List<JPNode> stmts = unit.getTopNode().queryStateHead(NodeTypes.DEFINE);
+    List<JPNode> stmts = unit.getTopNode().queryStateHead(ABLNodeType.DEFINE);
     for (JPNode stmt : stmts) {
-      assertEquals(stmt.query(NodeTypes.ASC).size(), 0);
-      assertEquals(stmt.query(NodeTypes.ASCENDING).size(), 1);
+      assertEquals(stmt.query(ABLNodeType.ASC).size(), 0);
+      assertEquals(stmt.query(ABLNodeType.ASCENDING).size(), 1);
     }
-    assertTrue(stmts.get(0).query(NodeTypes.ASCENDING).get(0).isAbbreviated());
-    assertTrue(stmts.get(1).query(NodeTypes.ASCENDING).get(0).isAbbreviated());
-    assertFalse(stmts.get(2).query(NodeTypes.ASCENDING).get(0).isAbbreviated());
+    assertTrue(stmts.get(0).query(ABLNodeType.ASCENDING).get(0).isAbbreviated());
+    assertTrue(stmts.get(1).query(ABLNodeType.ASCENDING).get(0).isAbbreviated());
+    assertFalse(stmts.get(2).query(ABLNodeType.ASCENDING).get(0).isAbbreviated());
   }
 
   @Test
@@ -59,14 +59,14 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending02.p"), session);
     unit.parse();
 
-    List<JPNode> stmts = unit.getTopNode().queryStateHead(NodeTypes.SELECT);
+    List<JPNode> stmts = unit.getTopNode().queryStateHead(ABLNodeType.SELECT);
     for (JPNode stmt : stmts) {
-      assertEquals(stmt.query(NodeTypes.ASC).size(), 0);
-      assertEquals(stmt.query(NodeTypes.ASCENDING).size(), 1);
+      assertEquals(stmt.query(ABLNodeType.ASC).size(), 0);
+      assertEquals(stmt.query(ABLNodeType.ASCENDING).size(), 1);
     }
-    assertTrue(stmts.get(0).query(NodeTypes.ASCENDING).get(0).isAbbreviated());
-    assertTrue(stmts.get(1).query(NodeTypes.ASCENDING).get(0).isAbbreviated());
-    assertFalse(stmts.get(2).query(NodeTypes.ASCENDING).get(0).isAbbreviated());
+    assertTrue(stmts.get(0).query(ABLNodeType.ASCENDING).get(0).isAbbreviated());
+    assertTrue(stmts.get(1).query(ABLNodeType.ASCENDING).get(0).isAbbreviated());
+    assertFalse(stmts.get(2).query(ABLNodeType.ASCENDING).get(0).isAbbreviated());
   }
 
   @Test
@@ -74,10 +74,10 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending03.p"), session);
     unit.parse();
 
-    for (JPNode stmt : unit.getTopNode().queryStateHead(NodeTypes.MESSAGE)) {
-      assertEquals(stmt.query(NodeTypes.ASC).size(), 2);
-      assertEquals(stmt.query(NodeTypes.ASCENDING).size(), 0);
-      for (JPNode ascNode : stmt.query(NodeTypes.ASC)) {
+    for (JPNode stmt : unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE)) {
+      assertEquals(stmt.query(ABLNodeType.ASC).size(), 2);
+      assertEquals(stmt.query(ABLNodeType.ASCENDING).size(), 0);
+      for (JPNode ascNode : stmt.query(ABLNodeType.ASC)) {
         assertFalse(ascNode.isAbbreviated());
       }
     }
@@ -88,17 +88,17 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "logical01.p"), session);
     unit.parse();
 
-    List<JPNode> stmts = unit.getTopNode().queryStateHead(NodeTypes.DEFINE);
+    List<JPNode> stmts = unit.getTopNode().queryStateHead(ABLNodeType.DEFINE);
     for (JPNode stmt : stmts) {
-      assertEquals(stmt.query(NodeTypes.LOG).size(), 0);
-      assertEquals(stmt.query(NodeTypes.LOGICAL).size(), 1);
+      assertEquals(stmt.query(ABLNodeType.LOG).size(), 0);
+      assertEquals(stmt.query(ABLNodeType.LOGICAL).size(), 1);
     }
-    assertTrue(stmts.get(0).query(NodeTypes.LOGICAL).get(0).isAbbreviated());
-    assertTrue(stmts.get(1).query(NodeTypes.LOGICAL).get(0).isAbbreviated());
-    assertFalse(stmts.get(2).query(NodeTypes.LOGICAL).get(0).isAbbreviated());
-    assertTrue(stmts.get(3).query(NodeTypes.LOGICAL).get(0).isAbbreviated());
-    assertTrue(stmts.get(4).query(NodeTypes.LOGICAL).get(0).isAbbreviated());
-    assertFalse(stmts.get(5).query(NodeTypes.LOGICAL).get(0).isAbbreviated());
+    assertTrue(stmts.get(0).query(ABLNodeType.LOGICAL).get(0).isAbbreviated());
+    assertTrue(stmts.get(1).query(ABLNodeType.LOGICAL).get(0).isAbbreviated());
+    assertFalse(stmts.get(2).query(ABLNodeType.LOGICAL).get(0).isAbbreviated());
+    assertTrue(stmts.get(3).query(ABLNodeType.LOGICAL).get(0).isAbbreviated());
+    assertTrue(stmts.get(4).query(ABLNodeType.LOGICAL).get(0).isAbbreviated());
+    assertFalse(stmts.get(5).query(ABLNodeType.LOGICAL).get(0).isAbbreviated());
   }
 
   @Test
@@ -106,9 +106,9 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "logical02.p"), session);
     unit.parse();
 
-    List<JPNode> stmts = unit.getTopNode().queryStateHead(NodeTypes.MESSAGE);
-    assertEquals(stmts.get(0).query(NodeTypes.LOG).size(), 1);
-    assertEquals(stmts.get(0).query(NodeTypes.LOGICAL).size(), 0);
+    List<JPNode> stmts = unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE);
+    assertEquals(stmts.get(0).query(ABLNodeType.LOG).size(), 1);
+    assertEquals(stmts.get(0).query(ABLNodeType.LOGICAL).size(), 0);
   }
 
   @Test
@@ -116,14 +116,14 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "getcodepage.p"), session);
     unit.parse();
 
-    List<JPNode> stmts = unit.getTopNode().queryStateHead(NodeTypes.MESSAGE);
-    assertEquals(stmts.get(0).query(NodeTypes.GETCODEPAGE).size(), 1);
-    assertEquals(stmts.get(0).query(NodeTypes.GETCODEPAGES).size(), 0);
-    assertEquals(stmts.get(1).query(NodeTypes.GETCODEPAGE).size(), 1);
-    assertEquals(stmts.get(1).query(NodeTypes.GETCODEPAGES).size(), 0);
-    assertEquals(stmts.get(2).query(NodeTypes.GETCODEPAGE).size(), 0);
-    assertEquals(stmts.get(2).query(NodeTypes.GETCODEPAGES).size(), 1);
-    assertEquals(stmts.get(3).query(NodeTypes.GETCODEPAGE).size(), 0);
-    assertEquals(stmts.get(3).query(NodeTypes.GETCODEPAGES).size(), 1);
+    List<JPNode> stmts = unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE);
+    assertEquals(stmts.get(0).query(ABLNodeType.GETCODEPAGE).size(), 1);
+    assertEquals(stmts.get(0).query(ABLNodeType.GETCODEPAGES).size(), 0);
+    assertEquals(stmts.get(1).query(ABLNodeType.GETCODEPAGE).size(), 1);
+    assertEquals(stmts.get(1).query(ABLNodeType.GETCODEPAGES).size(), 0);
+    assertEquals(stmts.get(2).query(ABLNodeType.GETCODEPAGE).size(), 0);
+    assertEquals(stmts.get(2).query(ABLNodeType.GETCODEPAGES).size(), 1);
+    assertEquals(stmts.get(3).query(ABLNodeType.GETCODEPAGE).size(), 0);
+    assertEquals(stmts.get(3).query(ABLNodeType.GETCODEPAGES).size(), 1);
   }
 }

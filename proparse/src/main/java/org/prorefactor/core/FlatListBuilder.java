@@ -25,9 +25,9 @@ class FlatListBuilder implements ICallback<List<JPNode>> {
   public boolean visitNode(JPNode node) {
     if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
       // Consider that an operator only has 2 children
-      visitNode(node.firstChild());
+      visitNode(node.getFirstChild());
       result.add(node);
-      visitNode(node.firstChild().nextSibling());
+      visitNode(node.getFirstChild().getNextSibling());
       return false;
     } else {
       result.add(node);

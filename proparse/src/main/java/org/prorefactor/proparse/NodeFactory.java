@@ -10,8 +10,8 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
@@ -24,6 +24,10 @@ import antlr.Token;
 import antlr.collections.AST;
 
 public class NodeFactory extends ASTFactory {
+
+  public NodeFactory() {
+    setASTNodeClass(JPNode.class);
+  }
 
   @Override
   public AST create() {
@@ -39,15 +43,18 @@ public class NodeFactory extends ASTFactory {
 
   @Override
   public AST create(int type, String text) {
+    ABLNodeType nodeType = ABLNodeType.getNodeType(type);
+    if (nodeType == null)
+      throw new IllegalArgumentException("Invalid type number " + type);
     // Used for synthetic node creation by the ANTLR generated parser
-    ProToken token = new ProToken(type, text);
-    switch (type) {
-      case NodeTypes.Field_ref:
+    ProToken token = new ProToken(nodeType, text);
+    switch (nodeType) {
+      case FIELD_REF:
         return new FieldRefNode(token);
-      case NodeTypes.Program_root:
+      case PROGRAM_ROOT:
         return new ProgramRootNode(token);
-      case NodeTypes.Property_getter:
-      case NodeTypes.Property_setter:
+      case PROPERTY_GETTER:
+      case PROPERTY_SETTER:
         return new BlockNode(token);
       default:
         return new JPNode(token);
@@ -63,22 +70,22 @@ public class NodeFactory extends ASTFactory {
    */
   @Override
   public AST create(Token token, String s) {
-    switch (token.getType()) {
-      case NodeTypes.RECORD_NAME:
+    switch (ABLNodeType.getNodeType(token.getType())) {
+      case RECORD_NAME:
         return new RecordNameNode((ProToken) token);
-      case NodeTypes.PROPARSEDIRECTIVE:
+      case PROPARSEDIRECTIVE:
         return new ProparseDirectiveNode((ProToken) token);
-      case NodeTypes.DO:
-      case NodeTypes.FOR:
-      case NodeTypes.REPEAT:
-      case NodeTypes.FUNCTION:
-      case NodeTypes.PROCEDURE:
-      case NodeTypes.CONSTRUCTOR:
-      case NodeTypes.DESTRUCTOR:
-      case NodeTypes.METHOD:
-      case NodeTypes.CANFIND:
-      case NodeTypes.CATCH:
-      case NodeTypes.ON:
+      case DO:
+      case FOR:
+      case REPEAT:
+      case FUNCTION:
+      case PROCEDURE:
+      case CONSTRUCTOR:
+      case DESTRUCTOR:
+      case METHOD:
+      case CANFIND:
+      case CATCH:
+      case ON:
         return new BlockNode((ProToken) token);
       default:
         throw new IllegalArgumentException("Proparse error creating AST node " + token.toString() + ", " + s);

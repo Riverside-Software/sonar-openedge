@@ -16,9 +16,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.TreeSet;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
@@ -37,7 +37,7 @@ public class AttributedWriter {
     if (nodeComments.length() > 0) {
       nodeComments.insert(0, " /*");
       nodeComments.append(" */ ");
-      if (node.getType() == NodeTypes.Program_root)
+      if (node.getNodeType() == ABLNodeType.PROGRAM_ROOT)
         nodeComments.append(System.getProperty("line.separator"));
     }
     return nodeComments.toString();
@@ -90,15 +90,15 @@ public class AttributedWriter {
     if (node == null)
       return;
     if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
-      walker(node.firstChild(), false);
+      walker(node.getFirstChild(), false);
       writeNode(node);
-      walker(node.firstChild().nextSibling(), true);
+      walker(node.getFirstChild().getNextSibling(), true);
     } else {
       writeNode(node);
-      walker(node.firstChild(), true);
+      walker(node.getFirstChild(), true);
     }
     if (showSiblings)
-      walker(node.nextSibling(), true);
+      walker(node.getNextSibling(), true);
   }
 
   /**
