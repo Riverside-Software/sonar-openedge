@@ -60,8 +60,6 @@ public class IConstants {
   /** See Proparse documentation, "Node Attributes Reference". */
   public static final int FULLTEXT = 1800;
   /** See Proparse documentation, "Node Attributes Reference". */
-  // public static final int FROM_USER_DICT = 1900;
-  /** See Proparse documentation, "Node Attributes Reference". */
   public static final int INLINE_VAR_DEF = 2000;
 
   //
