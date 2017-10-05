@@ -1744,26 +1744,6 @@ public enum ABLNodeType {
   }
 
   /**
-   * Get the type name (different than the keyword literal text) for a type number. Any "_KW" suffix is stripped.
-   * 
-   * @param n type number
-   * @return null if out of range
-   */
-  @Deprecated
-  public static String getTypeName(int nodeType) {
-    ABLNodeType type = typeMap.get(nodeType);
-    if (type != null)
-      return type.getTypeName();
-
-    if (nodeType > ProParserTokenTypes.Last_Token_Number || nodeType < 1)
-      return null;
-    String ret = ProParser._tokenNames[nodeType];
-    if (ret.endsWith("_KW"))
-      ret = ret.substring(0, ret.length() - 3);
-    return ret;
-  }
-
-  /**
    * Get the type number for a type name. For those type names that have it, the "_KW" suffix is optional.
    * 
    * @param s type name

@@ -12,6 +12,9 @@ package org.prorefactor.core;
 
 import org.prorefactor.proparse.ProParserTokenTypes;
 
+/**
+ * @Deprecated Since 2.1.3, use {@link ABLNodeType}
+ */
 @Deprecated
 public class NodeTypes implements ProParserTokenTypes {
 
@@ -31,16 +34,6 @@ public class NodeTypes implements ProParserTokenTypes {
    */
   public static String getFullText(String text) {
     return ABLNodeType.getFullText(text);
-  }
-
-  /**
-   * Get the type name (different than the keyword literal text) for a type number. Any "_KW" suffix is stripped.
-   * 
-   * @param n type number
-   * @return null if out of range
-   */
-  public static String getTypeName(int n) {
-    return ABLNodeType.getTypeName(n);
   }
 
   /**
