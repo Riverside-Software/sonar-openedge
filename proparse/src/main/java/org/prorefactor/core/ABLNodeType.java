@@ -1615,6 +1615,10 @@ public enum ABLNodeType {
     return options.contains(NodeTypesOption.KEYWORD);
   }
 
+  public boolean isPreprocessor() {
+    return options.contains(NodeTypesOption.PREPROCESSOR);
+  }
+
   /**
    * @return True if node type is a keyword but can't be used as a variable name or field name among other things
    */

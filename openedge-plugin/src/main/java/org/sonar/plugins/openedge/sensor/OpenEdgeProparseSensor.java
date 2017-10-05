@@ -42,8 +42,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProparseRuntimeException;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
@@ -397,11 +397,11 @@ public class OpenEdgeProparseSensor implements Sensor {
     for (TreeParserSymbolScope child : unit.getRootScope().getChildScopesDeep()) {
       int scopeType = child.getRootBlock().getNode().getType();
       switch (scopeType) {
-        case NodeTypes.PROCEDURE:
+        case ProParserTokenTypes.PROCEDURE:
           boolean externalProc = false;
           for (JPNode node : child.getRootBlock().getNode().getDirectChildren()) {
-            if ((node.getType() == NodeTypes.IN_KW) || (node.getType() == NodeTypes.SUPER)
-                || (node.getType() == NodeTypes.EXTERNAL)) {
+            if ((node.getType() == ProParserTokenTypes.IN_KW) || (node.getType() == ProParserTokenTypes.SUPER)
+                || (node.getType() == ProParserTokenTypes.EXTERNAL)) {
               externalProc = true;
             }
           }
@@ -409,10 +409,10 @@ public class OpenEdgeProparseSensor implements Sensor {
             numProcs++;
           }
           break;
-        case NodeTypes.FUNCTION:
+        case ProParserTokenTypes.FUNCTION:
           boolean externalFunc = false;
           for (JPNode node : child.getRootBlock().getNode().getDirectChildren()) {
-            if ((node.getType() == NodeTypes.IN_KW) || (node.getType() == NodeTypes.FORWARDS)) {
+            if ((node.getType() == ProParserTokenTypes.IN_KW) || (node.getType() == ProParserTokenTypes.FORWARDS)) {
               externalFunc = true;
             }
           }
@@ -420,7 +420,7 @@ public class OpenEdgeProparseSensor implements Sensor {
             numFuncs++;
           }
           break;
-        case NodeTypes.METHOD:
+        case ProParserTokenTypes.METHOD:
           numMethds++;
           break;
         default:
@@ -445,12 +445,12 @@ public class OpenEdgeProparseSensor implements Sensor {
       complexityWithInc++;
     }
 
-    complexity += unit.getTopNode().queryMainFile(NodeTypes.IF, NodeTypes.REPEAT, NodeTypes.FOR, NodeTypes.WHEN,
-        NodeTypes.AND, NodeTypes.OR, NodeTypes.RETURN, NodeTypes.PROCEDURE, NodeTypes.FUNCTION, NodeTypes.METHOD,
-        NodeTypes.ENUM).size();
-    complexityWithInc += unit.getTopNode().query(NodeTypes.IF, NodeTypes.REPEAT, NodeTypes.FOR, NodeTypes.WHEN,
-        NodeTypes.AND, NodeTypes.OR, NodeTypes.RETURN, NodeTypes.PROCEDURE, NodeTypes.FUNCTION, NodeTypes.METHOD,
-        NodeTypes.ENUM).size();
+    complexity += unit.getTopNode().queryMainFile(ABLNodeType.IF, ABLNodeType.REPEAT, ABLNodeType.FOR, ABLNodeType.WHEN,
+        ABLNodeType.AND, ABLNodeType.OR, ABLNodeType.RETURN, ABLNodeType.PROCEDURE, ABLNodeType.FUNCTION, ABLNodeType.METHOD,
+        ABLNodeType.ENUM).size();
+    complexityWithInc += unit.getTopNode().query(ABLNodeType.IF, ABLNodeType.REPEAT, ABLNodeType.FOR, ABLNodeType.WHEN,
+        ABLNodeType.AND, ABLNodeType.OR, ABLNodeType.RETURN, ABLNodeType.PROCEDURE, ABLNodeType.FUNCTION, ABLNodeType.METHOD,
+        ABLNodeType.ENUM).size();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMPLEXITY).withValue(complexity).save();
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.COMPLEXITY).withValue(complexityWithInc).save();
   }

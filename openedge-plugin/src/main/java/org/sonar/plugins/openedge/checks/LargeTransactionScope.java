@@ -19,8 +19,8 @@
  */
 package org.sonar.plugins.openedge.checks;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -43,8 +43,8 @@ public class LargeTransactionScope extends OpenEdgeProparseCheck {
   public void execute(InputFile file, ParseUnit unit) {
     if (unit.getTransactionBlocks() == null)
       return;
-    for (JPNode node : unit.getTopNode().queryStateHead(NodeTypes.TRIGGER)) {
-      if (node.getFirstChild().getType() == NodeTypes.PROCEDURE) {
+    for (JPNode node : unit.getTopNode().queryStateHead(ABLNodeType.TRIGGER)) {
+      if (node.getFirstChild().getNodeType() == ABLNodeType.PROCEDURE) {
         return;
       }
     }

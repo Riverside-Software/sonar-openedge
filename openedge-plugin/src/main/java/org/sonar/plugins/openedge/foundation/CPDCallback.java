@@ -27,7 +27,6 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ICallback;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.macrolevel.MacroEvent;
 import org.prorefactor.macrolevel.NamedMacroRef;
@@ -66,10 +65,10 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
   @Override
   public boolean visitNode(JPNode node) {
     // Periods, colons and CPD annotations not taken into account
-    if ((node.getType() == NodeTypes.PERIOD) || (node.getType() == NodeTypes.OBJCOLON)) {
+    if ((node.getNodeType() == ABLNodeType.PERIOD) || (node.getNodeType() == ABLNodeType.OBJCOLON)) {
       return false;
     }
-    if ((node.getType() == NodeTypes.ANNOTATION) && settings.skipCPD(node.getAnnotationName())) {
+    if ((node.getNodeType() == ABLNodeType.ANNOTATION) && settings.skipCPD(node.getAnnotationName())) {
         return false;
     }
     if (preprocessorLookup(node)) {
@@ -78,7 +77,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
 
     // Skip code blocks following parameterized annotations
     JPNode prevSibling = node.getPreviousSibling();
-    while ((prevSibling != null) && (prevSibling.getType() == NodeTypes.ANNOTATION)) {
+    while ((prevSibling != null) && (prevSibling.getNodeType() == ABLNodeType.ANNOTATION)) {
       if (settings.skipCPD(prevSibling.getAnnotationName())) {
         // Skipping nodes is not enough, as the content of the method would be considered blank lines.
         // So if this method is between two 'duplicate' methods, then all those blank lines would be
@@ -89,16 +88,16 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
       prevSibling = prevSibling.getPreviousSibling();
     }
     // Skip method matching parameterized names
-    if (node.getType() == NodeTypes.METHOD) {
-      JPNode methodName = node.findDirectChild(NodeTypes.ID);
+    if (node.getNodeType() == ABLNodeType.METHOD) {
+      JPNode methodName = node.findDirectChild(ABLNodeType.ID);
       if ((methodName != null) && (settings.skipMethod(methodName.getText()))) {
         insertFakeNode(node);
         return false;
       }
     }
     // Skip procedures and functions matching parameterized names
-    if ((node.getType() == NodeTypes.PROCEDURE) || (node.getType() == NodeTypes.FUNCTION)) {
-      JPNode procName = node.findDirectChild(NodeTypes.ID);
+    if ((node.getNodeType() == ABLNodeType.PROCEDURE) || (node.getNodeType() == ABLNodeType.FUNCTION)) {
+      JPNode procName = node.findDirectChild(ABLNodeType.ID);
       if ((procName != null) && (settings.skipProcedure(procName.getText()))) {
         insertFakeNode(node);
         return false;
@@ -122,7 +121,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
    */
   private boolean preprocessorLookup(JPNode node) {
     for (ProToken n : node.getHiddenTokens()) {
-      if ((n.getType() == NodeTypes.AMPANALYZESUSPEND) && (n.getText().startsWith("&ANALYZE-SUSPEND _CREATE-WINDOW")
+      if ((n.getNodeType() == ABLNodeType.AMPANALYZESUSPEND) && (n.getText().startsWith("&ANALYZE-SUSPEND _CREATE-WINDOW")
           || n.getText().startsWith("&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE adm-create-objects"))) {
         return true;
       }

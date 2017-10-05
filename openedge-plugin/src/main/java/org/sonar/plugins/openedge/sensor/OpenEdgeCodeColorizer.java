@@ -21,7 +21,7 @@ package org.sonar.plugins.openedge.sensor;
 
 import java.io.IOException;
 
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
@@ -40,7 +40,6 @@ import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
 import antlr.ANTLRException;
-import antlr.Token;
 import antlr.TokenStream;
 
 public class OpenEdgeCodeColorizer implements Sensor {
@@ -86,20 +85,19 @@ public class OpenEdgeCodeColorizer implements Sensor {
     ProToken nextTok = (ProToken) stream.nextToken();
     NewHighlighting highlighting = context.newHighlighting().onFile(file);
 
-    while (tok.getType() != Token.EOF_TYPE) {
+    while (tok.getNodeType() != ABLNodeType.EOF) {
       TypeOfText textType = null;
-      if (tok.getType() == NodeTypes.QSTRING) {
+      if (tok.getNodeType() == ABLNodeType.QSTRING) {
         textType = TypeOfText.STRING;
-      } else if (tok.getType() == NodeTypes.COMMENT) {
+      } else if (tok.getNodeType() == ABLNodeType.COMMENT) {
         textType = TypeOfText.COMMENT;
-      } else if (NodeTypes.isKeywordType(tok.getType())) {
+      } else if (tok.getNodeType().isKeyword()) {
         textType = TypeOfText.KEYWORD;
-      } else if ((tok.getType() == NodeTypes.INCLUDEDIRECTIVE)
-          || ((tok.getType() >= NodeTypes.AMPANALYZESUSPEND) && (tok.getType() <= NodeTypes.AMPSCOPEDDEFINE))) {
+      } else if ((tok.getNodeType() == ABLNodeType.INCLUDEDIRECTIVE) || tok.getNodeType().isPreprocessor()) {
         textType = TypeOfText.PREPROCESS_DIRECTIVE;
-      } else if ((tok.getType() == NodeTypes.NUMBER) || (tok.getType() == NodeTypes.QUESTION)) {
+      } else if ((tok.getNodeType() == ABLNodeType.NUMBER) || (tok.getNodeType() == ABLNodeType.QUESTION)) {
         textType = TypeOfText.CONSTANT;
-      } else if (tok.getType() == NodeTypes.ANNOTATION) {
+      } else if (tok.getNodeType() == ABLNodeType.ANNOTATION) {
         textType = TypeOfText.ANNOTATION;
       }
 
