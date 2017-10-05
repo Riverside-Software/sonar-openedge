@@ -13,7 +13,7 @@ package org.prorefactor.core;
 import org.prorefactor.proparse.ProParserTokenTypes;
 
 /**
- * @Deprecated Since 2.1.3, use {@link ABLNodeType}
+ * @deprecated Since 2.1.3, use {@link ABLNodeType}
  */
 @Deprecated
 public class NodeTypes implements ProParserTokenTypes {
