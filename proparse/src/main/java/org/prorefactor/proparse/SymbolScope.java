@@ -167,7 +167,9 @@ public class SymbolScope {
 
   private static class TableRef {
     FieldType tableType;
+    @SuppressWarnings("unused")
     String bufferFor;
+    @SuppressWarnings("unused")
     String fullName;
     String dbName;
   }

@@ -1016,6 +1016,8 @@ public class TP01Support extends TP01Action {
       case INITWEAK:
         recordNode.setBufferScope(currentBlock.addWeakBufferScope(buffer));
         break;
+      default:
+        break;
     }
     buffer.noteReference(contextQualifier);
   }

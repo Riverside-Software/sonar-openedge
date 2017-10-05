@@ -129,7 +129,7 @@ public class Schema implements ISchema {
   }
 
   private final void loadSchema(File file) throws IOException {
-    Files.readLines(file, Charset.defaultCharset(), new SchemaLineProcessor());
+    Files.asCharSource(file, Charset.defaultCharset()).readLines(new SchemaLineProcessor());
   }
 
   /**
