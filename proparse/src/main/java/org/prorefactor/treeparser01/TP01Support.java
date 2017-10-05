@@ -145,7 +145,7 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public void bufferRef(JPNode idAST) throws TreeParserException {
+  public void bufferRef(JPNode idAST) {
     LOG.trace("Entering bufferRef {}", idAST);
     TableBuffer tableBuffer = currentScope.lookupBuffer(idAST.getText());
     if (tableBuffer != null) {
@@ -511,7 +511,7 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public void widattr(JPNode widAST, JPNode idAST, ContextQualifier cq) throws TreeParserException {
+  public void widattr(JPNode widAST, JPNode idAST, ContextQualifier cq) {
     LOG.trace("Entering {} mode {}", idAST, cq);
     if (idAST.getType() == ProParserTokenTypes.THISOBJECT) {
       JPNode tok = idAST.getNextSibling();
@@ -554,7 +554,7 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public void field(JPNode refAST, JPNode idNode, ContextQualifier cq, TableNameResolution resolution) throws TreeParserException {
+  public void field(JPNode refAST, JPNode idNode, ContextQualifier cq, TableNameResolution resolution) throws SemanticException {
     LOG.trace("Entering field {} {} {} {}", refAST, idNode, cq, resolution);
     FieldRefNode refNode = (FieldRefNode) refAST;
     String name = idNode.getText();
@@ -816,7 +816,7 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public void propGetSetBegin(JPNode propAST) throws TreeParserException {
+  public void propGetSetBegin(JPNode propAST) {
     LOG.trace("Entering propGetSetBegin {}", propAST);
     scopeAdd(propAST);
     BlockNode blockNode = (BlockNode) propAST;
@@ -830,19 +830,19 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public void propGetSetEnd(JPNode propAST) throws TreeParserException {
+  public void propGetSetEnd(JPNode propAST) {
     LOG.trace("Entering propGetSetEnd {}", propAST);
     scopeClose(propAST);
     currentRoutine = rootRoutine;
   }
 
   @Override
-  public void eventBegin(JPNode eventAST, JPNode idAST) throws TreeParserException {
+  public void eventBegin(JPNode eventAST, JPNode idAST) {
     this.inDefineEvent = true;
   }
 
   @Override
-  public void eventEnd(JPNode eventAST) throws TreeParserException {
+  public void eventEnd(JPNode eventAST) {
     this.inDefineEvent = false;
   }
  
@@ -954,7 +954,7 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public void programTail() throws TreeParserException {
+  public void programTail() throws SemanticException {
     LOG.trace("Entering programTail");
     // Now that we know what all the internal Routines are, wrap up the Calls.
     List<TreeParserSymbolScope> allScopes = new ArrayList<>();
@@ -972,27 +972,25 @@ public class TP01Support implements ITreeParserAction {
       }
     }
     for (Call call : calls) {
-      try {
-        String routineId = call.getRunArgument();
-        call.wrapUp(rootScope.hasRoutine(routineId));
-      } catch (SemanticException e) {
-        throw new TreeParserException("Unhandled SemanticException.", e);
-      }
+      String routineId = call.getRunArgument();
+      call.wrapUp(rootScope.hasRoutine(routineId));
     }
   }
 
   /** For a RECORD_NAME node, do checks and assignments for the TableBuffer. */
-  private void recordNodeSymbol(JPNode node, TableBuffer buffer) throws TreeParserException {
+  private void recordNodeSymbol(JPNode node, TableBuffer buffer) throws SemanticException {
     String nodeText = node.getText();
-    if (buffer == null)
-      throw new TreeParserException(node.getFilename() + ":" + node.getLine() + " Could not resolve table: " + nodeText);
+    if (buffer == null) {
+      throw new TreeParserException("Could not resolve table '" + nodeText + "'", node.getFilename(), node.getLine(), node.getColumn());
+    }
     ITable table = buffer.getTable();
     // If we get a mismatch between storetype here and the storetype determined
     // by proparse.dll then there's a bug somewhere. This is just a double-check.
-    if (table.getStoretype() != node.attrGet(IConstants.STORETYPE))
+    if (table.getStoretype() != node.attrGet(IConstants.STORETYPE)) {
       throw new TreeParserException(
-          node.getFilename() + ":" + node.getLine() + " Storetype mismatch between proparse.dll and treeparser01: "
-              + nodeText + " " + node.attrGet(IConstants.STORETYPE) + " " + table.getStoretype());
+          "Store type mismatch '" + node.attrGet(IConstants.STORETYPE) + "' / '" + table.getStoretype() + "'",
+          node.getFilename(), node.getLine(), node.getColumn());
+    }
     prevTableReferenced = lastTableReferenced;
     lastTableReferenced = buffer;
     // For an unnamed buffer, determine if it's abbreviated.
@@ -1007,7 +1005,7 @@ public class TP01Support implements ITreeParserAction {
 
   /** Action to take at various RECORD_NAME nodes. */
   @Override
-  public void recordNameNode(JPNode anode, ContextQualifier contextQualifier) throws TreeParserException {
+  public void recordNameNode(JPNode anode, ContextQualifier contextQualifier) throws SemanticException {
     LOG.trace("Entering recordNameNode {} {}", anode, contextQualifier);
     RecordNameNode recordNode = (RecordNameNode) anode;
     recordNode.attrSet(IConstants.CONTEXT_QUALIFIER, contextQualifier.toString());

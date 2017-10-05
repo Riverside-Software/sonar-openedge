@@ -22,7 +22,7 @@ public interface IJPTreeParser {
    * The starting point for parsing a tree. You don't have to worry about this one - it is generated automatically if
    * your grammar "extends" JPTreeParser.g.
    */
-  public void program(AST ast) throws RecognitionException, TreeParserException;
+  public void program(AST ast) throws RecognitionException;
 
   /**
    * Get the (hopefully) last node where the tree parser left off before it died with an exception. See JPTreeParser for

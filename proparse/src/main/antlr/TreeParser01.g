@@ -20,7 +20,6 @@ header {
   import org.slf4j.LoggerFactory;
   import org.prorefactor.core.JPNode;
   import org.prorefactor.refactor.RefactorSession;
-  import org.prorefactor.treeparser.TreeParserException;
   import org.prorefactor.treeparser.ContextQualifier;
   import org.prorefactor.treeparser.IJPTreeParser;
   import org.prorefactor.treeparser01.ITreeParserAction.TableNameResolution;
@@ -115,8 +114,8 @@ options {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-program throws TreeParserException
-  :  #(  p:Program_root {action.programRoot(#p);}
+program:
+    #(  p:Program_root {action.programRoot(#p);}
       (blockorstate)*
       Program_tail
       {action.programTail();}
@@ -124,13 +123,13 @@ program throws TreeParserException
   ;
 
 
-block_for throws TreeParserException
-  :  #(  FOR rn1:tbl[ContextQualifier.BUFFERSYMBOL] {action.strongScope(#rn1);}
+block_for:
+    #(  FOR rn1:tbl[ContextQualifier.BUFFERSYMBOL] {action.strongScope(#rn1);}
       (COMMA rn2:tbl[ContextQualifier.BUFFERSYMBOL] {action.strongScope(#rn2);} )*
     )
   ;
-block_opt throws TreeParserException
-  :  #(Block_iterator fld[ContextQualifier.REFUP] EQUAL expression TO expression (BY constant)? )
+block_opt:
+    #(Block_iterator fld[ContextQualifier.REFUP] EQUAL expression TO expression (BY constant)? )
   |  querytuningphrase 
   |  #(WHILE expression )
   |  TRANSACTION 
@@ -142,12 +141,12 @@ block_opt throws TreeParserException
   |  collatephrase
   |  #(GROUP ( #(BY expression (DESCENDING)? ) )+ )
   ;
-block_preselect throws TreeParserException
-  :  #(PRESELECT for_record_spec2[ContextQualifier.INITWEAK] )
+block_preselect:
+    #(PRESELECT for_record_spec2[ContextQualifier.INITWEAK] )
   ;
 
-functioncall throws TreeParserException
-  :  #(ACCUMULATE accum_what (#(BY expression (DESCENDING)?))? expression )
+functioncall:
+    #(ACCUMULATE accum_what (#(BY expression (DESCENDING)?))? expression )
   |  #(ADDINTERVAL LEFTPAREN expression COMMA expression COMMA expression RIGHTPAREN )
   |  #(AUDITENABLED LEFTPAREN (expression)? RIGHTPAREN )
   |  canfindfunc // has extra "action." support handling in this tree parser.
@@ -204,13 +203,12 @@ functioncall throws TreeParserException
   |  recordfunc
   ;
 
-recordfunargs throws TreeParserException
-  :  (LEFTPAREN tbl[ContextQualifier.REF] RIGHTPAREN | tbl[ContextQualifier.REF])
+recordfunargs:
+    (LEFTPAREN tbl[ContextQualifier.REF] RIGHTPAREN | tbl[ContextQualifier.REF])
   ;
 
-parameter throws TreeParserException
-{action.paramForCall(parameter_AST_in);}
-  :  (  #(  BUFFER bt:tbl[ContextQualifier.INIT]
+parameter { /* RULE_INIT */ action.paramForCall(parameter_AST_in); }:
+    (  #(  BUFFER bt:tbl[ContextQualifier.INIT]
         {  action.paramProgressType(BUFFER);
           action.paramSymbol(#bt);
         }
@@ -221,8 +219,9 @@ parameter throws TreeParserException
     )
 {action.paramEnd();}
   ;
-parameter_arg throws TreeParserException
-  :  (  TABLEHANDLE thf:fld[ContextQualifier.INIT] parameter_dataset_options
+  
+parameter_arg:
+    (  TABLEHANDLE thf:fld[ContextQualifier.INIT] parameter_dataset_options
       {action.paramSymbol(#thf);}
     |  TABLE (FOR)? tt:tbl[ContextQualifier.TEMPTABLESYMBOL] parameter_dataset_options
       {  action.paramProgressType(TEMPTABLE);
@@ -242,18 +241,18 @@ parameter_arg throws TreeParserException
     )
     (BYPOINTER|BYVARIANTPOINTER)?
   ;
-parameter_dataset_options throws TreeParserException
-  : (APPEND)? (BYVALUE|BYREFERENCE| BIND {action.paramBind();} )?
+parameter_dataset_options:
+   (APPEND)? (BYVALUE|BYREFERENCE| BIND {action.paramBind();} )?
   ;
 
-filenameorvalue throws TreeParserException
-  :  #(VALUE LEFTPAREN exp:expression RIGHTPAREN ) { action.fnvExpression(#exp); }
+filenameorvalue:
+    #(VALUE LEFTPAREN exp:expression RIGHTPAREN ) { action.fnvExpression(#exp); }
   |  fn:FILENAME { action.fnvFilename(#fn); }
   ;
 
 // Expression term
-exprt throws TreeParserException
-  :  #(LEFTPAREN expression RIGHTPAREN )
+exprt:
+    #(LEFTPAREN expression RIGHTPAREN )
   |  constant
   |  widattr2[ContextQualifier.REF]
   |  #(uf:USER_FUNC {action.callBegin(#uf);} parameterlist_noroot {action.callEnd();} )
@@ -269,8 +268,8 @@ exprt throws TreeParserException
   |  tbl[ContextQualifier.REF] // for DISPLAY buffername, etc.
   ;
 
-widattr throws TreeParserException
-  :  #(  Widget_ref
+widattr:
+    #(  Widget_ref
       (NORETURNVALUE)?
       (  (widname)=> widname
       |  exprt
@@ -285,8 +284,8 @@ widattr throws TreeParserException
     )
   ;
 
-widattr2[ContextQualifier cq] throws TreeParserException
-  :  #(  ref:Widget_ref
+widattr2[ContextQualifier cq]:
+    #(  ref:Widget_ref
       (NORETURNVALUE)?
      (  (widname)=> id1:widname
       |  id2:exprt
@@ -302,8 +301,8 @@ widattr2[ContextQualifier cq] throws TreeParserException
     { action.widattr (#ref, (#id1 == null ? #id2 : #id1), cq); }
   ;
 
-gwidget throws TreeParserException
-  :  #(  Widget_ref s_widget
+gwidget:
+    #(  Widget_ref s_widget
       (  #(  IN_KW
           (  MENU ID
           |  FRAME f:ID { action.frameRef(#f); }
@@ -316,12 +315,12 @@ gwidget throws TreeParserException
     )
   ;
 
-s_widget throws TreeParserException
-  :  widname  | fld[ContextQualifier.REF]
+s_widget:
+    widname  | fld[ContextQualifier.REF]
   ;
 
-widname throws TreeParserException
-  :  systemhandlename
+widname:
+    systemhandlename
   |  DATASET ID
   |  DATASOURCE ID
   |  FIELD fld[ContextQualifier.REF]
@@ -339,27 +338,29 @@ widname throws TreeParserException
   |  STREAM ID
   ;
 
-tbl[ContextQualifier contextQualifier] throws TreeParserException
-  :  id:RECORD_NAME {action.recordNameNode(#id, contextQualifier);}
+tbl[ContextQualifier contextQualifier]:
+    id:RECORD_NAME {action.recordNameNode(#id, contextQualifier);}
   ;
 
 // The only difference between fld and fld1 is that fld1 passes LAST to
 // field(), telling it that this field can only be a member of the last
 // referenced table. fld2 indicates that this must be a field of the *previous*
 // referenced table.
-fld[ContextQualifier contextQualifier] throws TreeParserException
-  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? id:ID (array_subscript)? )
+fld[ContextQualifier contextQualifier]:
+    #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? id:ID (array_subscript)? )
     // Note that sequence is important. This must be called after the full Field_ref branch has
     // been walked, because any frame or browse ID must be resolved before trying to resolve Field_ref.
     // (For example, this is required for resolving if the INPUT function was used.)
     {action.field(#ref, #id, contextQualifier, TableNameResolution.ANY);}
   ;
-fld1[ContextQualifier contextQualifier] throws TreeParserException
-  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? id:ID (array_subscript)? )
+
+  fld1[ContextQualifier contextQualifier]:
+    #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? id:ID (array_subscript)? )
     {action.field(#ref, #id, contextQualifier, TableNameResolution.LAST);}
   ;
-fld2[ContextQualifier contextQualifier] throws TreeParserException
-  :  #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? id:ID (array_subscript)? )
+
+  fld2[ContextQualifier contextQualifier]:
+    #(ref:Field_ref (INPUT)? (frame_ref|browse_ref)? id:ID (array_subscript)? )
     {action.field(#ref, #id, contextQualifier, TableNameResolution.PREVIOUS);}
   ;
 
@@ -371,12 +372,11 @@ fld2[ContextQualifier contextQualifier] throws TreeParserException
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-aggregate_opt throws TreeParserException
-
-  // It appears that the compiler treats COUNT, MAX, TOTAL, etc as new variables.
-  // TODO: To get an accurrate datatype for things like MAXIMUM, we would have to work out
-  // the datatype of the expression being accumulated.
-  :  #(id1:AVERAGE (label_constant)? {action.addToSymbolScope(action.defineVariable(#id1, #id1, DECIMAL));} )
+// It appears that the compiler treats COUNT, MAX, TOTAL, etc as new variables.
+// TODO: To get an accurrate datatype for things like MAXIMUM, we would have to work out
+// the datatype of the expression being accumulated.
+aggregate_opt:
+     #(id1:AVERAGE (label_constant)? {action.addToSymbolScope(action.defineVariable(#id1, #id1, DECIMAL));} )
   |  #(id2:COUNT (label_constant)? {action.addToSymbolScope(action.defineVariable(#id2, #id2, INTEGER));} )
   |  #(id3:MAXIMUM (label_constant)? {action.addToSymbolScope(action.defineVariable(#id3, #id3, DECIMAL));} )
   |  #(id4:MINIMUM (label_constant)? {action.addToSymbolScope(action.defineVariable(#id4, #id4, DECIMAL));} )
@@ -388,15 +388,16 @@ aggregate_opt throws TreeParserException
   |  #(id10:SUBTOTAL (label_constant)? {action.addToSymbolScope(action.defineVariable(#id10, #id10, DECIMAL));} )
   ;
 
-assignment_list throws TreeParserException
-  :  tbl[ContextQualifier.UPDATING] (#(EXCEPT (fld1[ContextQualifier.SYMBOL])*))?
+assignment_list:
+    tbl[ContextQualifier.UPDATING] (#(EXCEPT (fld1[ContextQualifier.SYMBOL])*))?
   |  (  assign_equal (#(WHEN expression))?
     |  #(  Assign_from_buffer fld[ContextQualifier.UPDATING]  )
       (#(WHEN expression))?
     )*
   ;
-assign_equal throws TreeParserException
-  :  #(EQUAL
+
+assign_equal:
+    #(EQUAL
        
       (  options { generateAmbigWarnings=false; } : // Because widattr2[CQ] replaces widattr in pseudfn
          widattr2[ContextQualifier.UPDATING]
@@ -407,16 +408,16 @@ assign_equal throws TreeParserException
     )
   ;
 
-referencepoint throws TreeParserException
-  :  fld[ContextQualifier.SYMBOL] ((PLUS|MINUS) expression)?
+referencepoint:
+    fld[ContextQualifier.SYMBOL] ((PLUS|MINUS) expression)?
   ;
 
-browse_ref throws TreeParserException
-  :  #(BROWSE i:ID) { action.browseRef(#i); }
+browse_ref:
+    #(BROWSE i:ID) { action.browseRef(#i); }
   ;
 
-buffercomparestate throws TreeParserException
-  :  #(  BUFFERCOMPARE
+buffercomparestate:
+    #(  BUFFERCOMPARE
       tbl[ContextQualifier.REF]
       (  #(EXCEPT (fld1[ContextQualifier.SYMBOL])*)
       |  #(USING (fld1[ContextQualifier.REF])+)
@@ -437,8 +438,8 @@ buffercomparestate throws TreeParserException
     )
   ;
 
-buffercopystate throws TreeParserException
-  :  #(  BUFFERCOPY tbl[ContextQualifier.REF]
+buffercopystate:
+    #(  BUFFERCOPY tbl[ContextQualifier.REF]
       (  #(EXCEPT (fld1[ContextQualifier.SYMBOL])*)
       |  #(USING (fld1[ContextQualifier.REF])+)
       )?
@@ -450,8 +451,8 @@ buffercopystate throws TreeParserException
     )
   ;
 
-canfindfunc throws TreeParserException
-  :  #(  cf:CANFIND LEFTPAREN (findwhich)?
+canfindfunc:
+    #(  cf:CANFIND LEFTPAREN (findwhich)?
       #(  r:RECORD_NAME
         {  action.canFindBegin(#cf, #r);
           action.recordNameNode(#r, ContextQualifier.INIT);
@@ -464,8 +465,8 @@ canfindfunc throws TreeParserException
   ;
  
 
-choosestate throws TreeParserException
-  :  #(  head:CHOOSE (ROW|FIELD)  { action.frameInitializingStatement(#head); }
+choosestate:
+    #(  head:CHOOSE (ROW|FIELD)  { action.frameInitializingStatement(#head); }
       ( #(fi:Form_item fld[ContextQualifier.UPDATING] {action.formItem(#fi);} (#(HELP constant))? ) )+
       (  AUTORETURN 
       |  #(COLOR anyorvalue) 
@@ -479,8 +480,8 @@ choosestate throws TreeParserException
     )
   ;
 
-classstate throws TreeParserException
-  :  #(  c:CLASS
+classstate:
+    #(  c:CLASS
       TYPE_NAME
       (  #(INHERITS TYPE_NAME)
       |  #(IMPLEMENTS TYPE_NAME (COMMA TYPE_NAME)* )
@@ -497,16 +498,15 @@ classstate throws TreeParserException
     )
   ;
 
-interfacestate throws TreeParserException
-  :  #(i:INTERFACE {action.interfaceState(#i);} TYPE_NAME (interface_inherits)? block_colon code_block #(END (INTERFACE)?) state_end )
+interfacestate:
+    #(i:INTERFACE {action.interfaceState(#i);} TYPE_NAME (interface_inherits)? block_colon code_block #(END (INTERFACE)?) state_end )
   ;
 
-clearstate throws TreeParserException
-  :  #(c:CLEAR (frame_ref)? (ALL)? (NOPAUSE)? state_end {action.clearState(#c);} )
+clearstate:
+    #(c:CLEAR (frame_ref)? (ALL)? (NOPAUSE)? state_end {action.clearState(#c);} )
   ;
 
-catchstate throws TreeParserException
-  :
+catchstate:
     #( b:CATCH { action.scopeAdd(#b); }
        id1:ID as:AS (CLASS)? TYPE_NAME
        { 
@@ -517,8 +517,8 @@ catchstate throws TreeParserException
       )
   ;
 
-closestoredprocedurestate throws TreeParserException
-  :  #(  CLOSE
+closestoredprocedurestate:
+    #(  CLOSE
       STOREDPROCEDURE ID
       ( #(EQUAL fld[ContextQualifier.REF] PROCSTATUS ) )?
       ( #(WHERE PROCHANDLE EQ fld[ContextQualifier.REF] ) )?
@@ -526,8 +526,8 @@ closestoredprocedurestate throws TreeParserException
     )
   ;
 
-colorstate throws TreeParserException
-  :  #(  head:COLOR  { action.frameInitializingStatement(#head); }
+colorstate:
+    #(  head:COLOR  { action.frameInitializingStatement(#head); }
       (  ( #(DISPLAY anyorvalue) | #(PROMPT anyorvalue) )
         ( #(DISPLAY anyorvalue) | #(PROMPT anyorvalue) )?
       )?
@@ -540,8 +540,8 @@ colorstate throws TreeParserException
     )
   ;
 
-columnformat throws TreeParserException
-  :  #(  Format_phrase
+columnformat:
+    #(  Format_phrase
       (  #(FORMAT expression)
       |  label_constant
       |  NOLABELS
@@ -565,57 +565,57 @@ columnformat throws TreeParserException
     )
   ;
 
-constructorstate throws TreeParserException
-  :  #(  c:CONSTRUCTOR
+constructorstate:
+    #(  c:CONSTRUCTOR
       {action.structorBegin(#c);}
       def_modifiers TYPE_NAME function_params
       block_colon code_block #(END (CONSTRUCTOR|METHOD)? ) state_end
       {action.structorEnd(#c);}
     )
   ;
-  
-createstate throws TreeParserException
-  :  #(CREATE tbl[ContextQualifier.UPDATING] (#(FOR TENANT expression))? (#(USING (ROWID|RECID) expression))? (NOERROR_KW)? state_end )
+
+createstate:
+    #(CREATE tbl[ContextQualifier.UPDATING] (#(FOR TENANT expression))? (#(USING (ROWID|RECID) expression))? (NOERROR_KW)? state_end )
   ;
 
-create_whatever_args throws TreeParserException
-  :  (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)?
+create_whatever_args:
+    (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)?
   ;
 
-createbrowsestate throws TreeParserException
-  :  #(CREATE BROWSE (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end )
+createbrowsestate:
+    #(CREATE BROWSE (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? (assign_opt)? (triggerphrase)? state_end )
   ;
 
-createbufferstate throws TreeParserException
-  :  #(  CREATE BUFFER (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) FOR TABLE expression
+createbufferstate:
+    #(  CREATE BUFFER (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) FOR TABLE expression
       ( #(BUFFERNAME expression) )?
       (#(IN_KW WIDGETPOOL expression))?
       (NOERROR_KW)? state_end
     )
   ;
 
-createquerystate throws TreeParserException
-  :  #(CREATE QUERY (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
+createquerystate:
+    #(CREATE QUERY (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
   ;
 
-createserverstate throws TreeParserException
-  :  #(CREATE SERVER (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (assign_opt)? state_end )
+createserverstate:
+    #(CREATE SERVER (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (assign_opt)? state_end )
   ;
 
-createserversocketstate throws TreeParserException
-  :  #(CREATE SERVERSOCKET (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (NOERROR_KW)? state_end )
+createserversocketstate:
+    #(CREATE SERVERSOCKET (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (NOERROR_KW)? state_end )
   ;
 
-createsocketstate throws TreeParserException
-  :  #(CREATE SOCKET (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (NOERROR_KW)? state_end )
+createsocketstate:
+    #(CREATE SOCKET (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (NOERROR_KW)? state_end )
   ;
 
-createtemptablestate throws TreeParserException
-  :  #(CREATE TEMPTABLE (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
+createtemptablestate:
+    #(CREATE TEMPTABLE (fld[ContextQualifier.UPDATING] | widattr2[ContextQualifier.UPDATING]) (#(IN_KW WIDGETPOOL expression))? (NOERROR_KW)? state_end )
   ;
 
-createwidgetstate throws TreeParserException
-  :  #(  CREATE
+createwidgetstate:
+    #(  CREATE
       (  qstringorvalue
       |  BUTTON | COMBOBOX | CONTROLFRAME | DIALOGBOX | EDITOR | FILLIN | FRAME | IMAGE
       |  MENU | MENUITEM | RADIOSET | RECTANGLE | SELECTIONLIST | SLIDER
@@ -626,20 +626,20 @@ createwidgetstate throws TreeParserException
     )
   ;
 
-ddegetstate throws TreeParserException
-  :  #(DDE GET expression TARGET fld[ContextQualifier.UPDATING] ITEM expression (#(TIME expression))? (NOERROR_KW)? state_end )
+ddegetstate:
+    #(DDE GET expression TARGET fld[ContextQualifier.UPDATING] ITEM expression (#(TIME expression))? (NOERROR_KW)? state_end )
   ;
 
-ddeinitiatestate throws TreeParserException
-  :  #(DDE INITIATE fld[ContextQualifier.UPDATING] FRAME expression APPLICATION expression TOPIC expression (NOERROR_KW)? state_end )
+ddeinitiatestate:
+    #(DDE INITIATE fld[ContextQualifier.UPDATING] FRAME expression APPLICATION expression TOPIC expression (NOERROR_KW)? state_end )
   ;
 
-dderequeststate throws TreeParserException
-  :  #(DDE REQUEST expression TARGET fld[ContextQualifier.UPDATING] ITEM expression (#(TIME expression))? (NOERROR_KW)? state_end )
+dderequeststate:
+    #(DDE REQUEST expression TARGET fld[ContextQualifier.UPDATING] ITEM expression (#(TIME expression))? (NOERROR_KW)? state_end )
   ;
 
-definebrowsestate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers BROWSE
+definebrowsestate:
+    #(  def:DEFINE (def_shared)? def_modifiers BROWSE
       id:ID { stack.push(action.defineBrowse(#def, #id)); }
       (#(QUERY ID))? (lockhow|NOWAIT)*
       (  #(  DISPLAY
@@ -676,8 +676,8 @@ definebrowsestate throws TreeParserException
     )
   ;
 
-definebufferstate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers BUFFER id:ID
+definebufferstate:
+    #(  def:DEFINE (def_shared)? def_modifiers BUFFER id:ID
       FOR (TEMPTABLE)? rec:tbl[ContextQualifier.SYMBOL]
       { action.defineBuffer(#def, #id, #rec, false); }
       (PRESELECT)? (label_constant)?
@@ -686,8 +686,8 @@ definebufferstate throws TreeParserException
     )
   ;
 
-definebuttonstate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers BUTTON
+definebuttonstate:
+    #(  def:DEFINE (def_shared)? def_modifiers BUTTON
       id:ID { stack.push(action.defineSymbol(BUTTON, #def, #id)); }
       (  AUTOGO
       |  AUTOENDKEY
@@ -715,8 +715,8 @@ definebuttonstate throws TreeParserException
     )
   ;
 
-definedatasetstate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers DATASET
+definedatasetstate:
+    #(  def:DEFINE (def_shared)? def_modifiers DATASET
       id:ID { stack.push(action.defineSymbol(DATASET, #def, #id)); }
       (namespace_uri)? (namespace_prefix)? (xml_node_name)?
       ( #(SERIALIZENAME QSTRING) )?
@@ -731,8 +731,9 @@ definedatasetstate throws TreeParserException
       { action.addToSymbolScope(stack.pop()); }
     )
   ;
-data_relation throws TreeParserException
-  :  #(  DATARELATION (ID)?
+
+data_relation:
+    #(  DATARELATION (ID)?
       FOR tbl[ContextQualifier.INIT] COMMA tbl[ContextQualifier.INIT]
       (  field_mapping_phrase
       |  REPOSITION
@@ -742,8 +743,9 @@ data_relation throws TreeParserException
       )*
     )
   ;
-parent_id_relation throws TreeParserException
-  :  #(  PARENTIDRELATION (ID)?
+
+parent_id_relation:
+    #(  PARENTIDRELATION (ID)?
       FOR tbl[ContextQualifier.INIT] COMMA tbl[ContextQualifier.INIT] // TODO Verify context qualifier
       PARENTIDFIELD fld[ContextQualifier.SYMBOL]
       ( PARENTFIELDSBEFORE LEFTPAREN fld[ContextQualifier.SYMBOL] (COMMA fld[ContextQualifier.SYMBOL])* RIGHTPAREN)?
@@ -752,13 +754,13 @@ parent_id_relation throws TreeParserException
     )
   ;
 
-field_mapping_phrase throws TreeParserException
-  :  #(RELATIONFIELDS LEFTPAREN fld2[ContextQualifier.SYMBOL] COMMA fld1[ContextQualifier.SYMBOL]
+field_mapping_phrase:
+    #(RELATIONFIELDS LEFTPAREN fld2[ContextQualifier.SYMBOL] COMMA fld1[ContextQualifier.SYMBOL]
     ( COMMA fld2[ContextQualifier.SYMBOL] COMMA fld1[ContextQualifier.SYMBOL] )* RIGHTPAREN )
   ;
 
-definedatasourcestate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers DATASOURCE
+definedatasourcestate:
+    #(  def:DEFINE (def_shared)? def_modifiers DATASOURCE
       id:ID { stack.push(action.defineSymbol(DATASOURCE, #def, #id)); }
       FOR (#(QUERY ID))?
       (source_buffer_phrase)? (COMMA source_buffer_phrase)*
@@ -766,14 +768,15 @@ definedatasourcestate throws TreeParserException
       { action.addToSymbolScope(stack.pop()); }
     )
   ;
-source_buffer_phrase throws TreeParserException
-  :  #(  r:RECORD_NAME {action.recordNameNode(#r, ContextQualifier.INIT);}
+
+source_buffer_phrase:
+    #(  r:RECORD_NAME {action.recordNameNode(#r, ContextQualifier.INIT);}
       ( KEYS LEFTPAREN ( ROWID | fld[ContextQualifier.SYMBOL] (COMMA fld[ContextQualifier.SYMBOL])* ) RIGHTPAREN )?
     )
   ;
 
-defineeventstate throws TreeParserException
-  :
+defineeventstate:
+  
     #( def:DEFINE def_modifiers e:EVENT
       id:ID { action.eventBegin(#e, #id); stack.push(action.defineEvent(#def, #id)); }
       (  #(SIGNATURE VOID function_params)
@@ -784,8 +787,8 @@ defineeventstate throws TreeParserException
     { action.eventEnd(#e); action.addToSymbolScope(stack.pop()); }
   ;
 
-defineframestate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)?
+defineframestate:
+    #(  def:DEFINE (def_shared)?
       // Note that frames cannot be inherited. If that ever changes, then things will get tricky
       // when creating the symbol tables for inheritance caching. See Frame.copyBare(), and the
       // attributes of Frame that it does not deal with.
@@ -801,8 +804,8 @@ defineframestate throws TreeParserException
     )
   ;
 
-defineimagestate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers IMAGE
+defineimagestate:
+    #(  def:DEFINE (def_shared)? def_modifiers IMAGE
       id:ID { stack.push(action.defineSymbol(IMAGE, #def, #id)); }
       (  #(LIKE fld[ContextQualifier.SYMBOL] (VALIDATE)?)
       |  imagephrase_opt 
@@ -819,15 +822,16 @@ defineimagestate throws TreeParserException
     )
   ;
 
-definemenustate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers MENU
+definemenustate:
+    #(  def:DEFINE (def_shared)? def_modifiers MENU
       id:ID { stack.push(action.defineSymbol(MENU, #def, #id)); }
       (menu_opt)* (menu_list_item)* state_end
       { action.addToSymbolScope(stack.pop()); }
     )
   ;
-menu_opt throws TreeParserException
-  :  color_expr
+
+menu_opt:
+    color_expr
   |  #(FONT expression)
   |  #(LIKE fld[ContextQualifier.SYMBOL] (VALIDATE)?)
   |  #(TITLE expression)
@@ -835,8 +839,9 @@ menu_opt throws TreeParserException
   |  PINNABLE
   |  SUBMENUHELP
   ;
-menu_list_item throws TreeParserException
-  :  (  #(  MENUITEM
+
+menu_list_item:
+    (  #(  MENUITEM
         id:ID { stack.push(action.defineSymbol(MENUITEM, #id, #id)); }
         (  #(ACCELERATOR expression )
         |  color_expr
@@ -861,8 +866,8 @@ menu_list_item throws TreeParserException
     ((PERIOD (RULE|SKIP|SUBMENU|MENUITEM))=> PERIOD)?
   ;
 
-defineparameterstate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers
+defineparameterstate:
+    #(  def:DEFINE (def_shared)? def_modifiers
       (  PARAMETER buff:BUFFER bid:ID FOR (TEMPTABLE)? brec:tbl[ContextQualifier.SYMBOL]
         {  action.paramForRoutine(#buff);
           action.defineBuffer(#def, #bid, #brec, true);
@@ -901,11 +906,13 @@ defineparameterstate throws TreeParserException
     )
     {action.paramEnd();}
   ;
-defineparam_ab throws TreeParserException
-  :  ( APPEND | BYVALUE | BIND {action.paramBind();} )*
+
+defineparam_ab:
+    ( APPEND | BYVALUE | BIND {action.paramBind();} )*
   ;
-defineparam_var throws TreeParserException
-  :  (  #(  as:AS
+
+defineparam_var:
+    (  #(  as:AS
         (  (HANDLE (TO)? datatype_dll)=> HANDLE (TO)? datatype_dll
         |  CLASS TYPE_NAME
         |  datatype_param
@@ -920,8 +927,8 @@ defineparam_var throws TreeParserException
     )*
   ;
 
-definepropertystate throws TreeParserException
-  :  #(  def:DEFINE def_modifiers PROPERTY
+definepropertystate:
+    #(  def:DEFINE def_modifiers PROPERTY
       id:ID {stack.push(action.defineVariable(#def, #id));}
       as:AS datatype {action.defAs(#as);} (extentphrase_def_symbol|initial_constant|NOUNDO)*
       {action.addToSymbolScope(stack.pop());}
@@ -929,8 +936,8 @@ definepropertystate throws TreeParserException
     )
   ;
 
-defineproperty_accessor throws TreeParserException
-  :  #(  b1:Property_getter def_modifiers GET
+defineproperty_accessor:
+    #(  b1:Property_getter def_modifiers GET
       (  (PERIOD)=> PERIOD
       |  { action.propGetSetBegin(#b1); } (function_params)? block_colon  code_block END (GET)? { action.propGetSetEnd(#b1); } PERIOD
       )
@@ -942,8 +949,8 @@ defineproperty_accessor throws TreeParserException
     )
   ;
 
-definequerystate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers QUERY
+definequerystate:
+    #(  def:DEFINE (def_shared)? def_modifiers QUERY
       id:ID { stack.push(action.defineSymbol(QUERY, #def, #id)); }
       FOR tbl[ContextQualifier.INIT] (record_fields)?
       (COMMA tbl[ContextQualifier.INIT] (record_fields)?)*
@@ -953,8 +960,8 @@ definequerystate throws TreeParserException
     { action.addToSymbolScope(stack.pop()); }
   ;
 
-definerectanglestate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers RECTANGLE
+definerectanglestate:
+    #(  def:DEFINE (def_shared)? def_modifiers RECTANGLE
       id:ID { stack.push(action.defineSymbol(RECTANGLE, #def, #id)); }
       (  NOFILL
       |  #(EDGECHARS expression )
@@ -973,21 +980,21 @@ definerectanglestate throws TreeParserException
     { action.addToSymbolScope(stack.pop()); }
   ;
 
-definestreamstate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers STREAM id:ID state_end )
+definestreamstate:
+    #(  def:DEFINE (def_shared)? def_modifiers STREAM id:ID state_end )
     { action.addToSymbolScope(action.defineSymbol(STREAM, #def, #id)); }
   ;
 
-definesubmenustate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers SUBMENU
+definesubmenustate:
+    #(  def:DEFINE (def_shared)? def_modifiers SUBMENU
       id:ID { stack.push(action.defineSymbol(SUBMENU, #def, #id)); }
       (menu_opt)* (menu_list_item)* state_end
     )
     { action.addToSymbolScope(stack.pop()); }
   ;
-   
-definetemptablestate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers TEMPTABLE id:ID
+
+definetemptablestate:
+    #(  def:DEFINE (def_shared)? def_modifiers TEMPTABLE id:ID
       {  action.defineTemptable(#def, #id); }
       (UNDO|NOUNDO)?
       (namespace_uri)? (namespace_prefix)? (xml_node_name)?
@@ -1008,68 +1015,71 @@ definetemptablestate throws TreeParserException
       state_end
     )
   ;
-def_table_like throws TreeParserException
-  :  #(LIKE def_table_like_sub)
+
+def_table_like:
+    #(LIKE def_table_like_sub)
   |  #(LIKESEQUENTIAL def_table_like_sub)
   ;
-def_table_like_sub throws TreeParserException
-  :  rec:tbl[ContextQualifier.SYMBOL] (VALIDATE)?
+
+def_table_like_sub:
+    rec:tbl[ContextQualifier.SYMBOL] (VALIDATE)?
     ( #(USEINDEX ID ((AS|IS) PRIMARY)? ) )*
     { action.defineTableLike(#rec); }
   ;
-def_table_field throws TreeParserException
-  :  #(  FIELD id:ID
+
+def_table_field:
+    #(  FIELD id:ID
       { stack.push(action.defineTableFieldInitialize(#id)); }
       (fieldoption)*
       { action.defineTableFieldFinalize(stack.pop()); }
     )
   ;
-   
-defineworktablestate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers WORKTABLE id:ID
+
+defineworktablestate:
+    #(  def:DEFINE (def_shared)? def_modifiers WORKTABLE id:ID
       {  action.defineWorktable(#def, #id); }
       (NOUNDO)? (def_table_like)? (label_constant)? (def_table_field)* state_end
     )
   ;
 
-definevariablestate throws TreeParserException
-  :  #(  def:DEFINE (def_shared)? def_modifiers VARIABLE
+definevariablestate:
+    #(  def:DEFINE (def_shared)? def_modifiers VARIABLE
       id:ID { stack.push(action.defineVariable(#def, #id)); }
       (fieldoption)* (triggerphrase)? state_end
     )
     { action.addToSymbolScope(stack.pop()); }
   ;
 
-deletestate throws TreeParserException
-  :  #(DELETE_KW tbl[ContextQualifier.UPDATING] (#(VALIDATE funargs))? (NOERROR_KW)? state_end )
+deletestate:
+    #(DELETE_KW tbl[ContextQualifier.UPDATING] (#(VALIDATE funargs))? (NOERROR_KW)? state_end )
   ;
 
-destructorstate throws TreeParserException
-  :  #(  d:DESTRUCTOR 
+destructorstate:
+    #(  d:DESTRUCTOR 
       {action.structorBegin(#d);}
       (PUBLIC)? TYPE_NAME LEFTPAREN RIGHTPAREN block_colon
       code_block #(END (DESTRUCTOR|METHOD)? ) state_end
       {action.structorEnd(#d);}
     )
   ;
-  
-disablestate throws TreeParserException
-  :  #(  head:DISABLE  { action.frameInitializingStatement(#head); }
+
+disablestate:
+    #(  head:DISABLE  { action.frameInitializingStatement(#head); }
       (UNLESSHIDDEN)? (#(ALL (#(EXCEPT (fld[ContextQualifier.SYMBOL])*))?) | (form_item2[ContextQualifier.SYMBOL])+)? (framephrase)?
       state_end  { action.frameStatementEnd(); }
     )
   ;
 
-disabletriggersstate throws TreeParserException
-  :  #(DISABLE TRIGGERS FOR (DUMP|LOAD) OF tbl[ContextQualifier.SYMBOL] (ALLOWREPLICATION)? state_end )
+disabletriggersstate:
+    #(DISABLE TRIGGERS FOR (DUMP|LOAD) OF tbl[ContextQualifier.SYMBOL] (ALLOWREPLICATION)? state_end )
   ;
 
-disconnectstate throws TreeParserException
-  :  #(DISCONNECT filenameorvalue (NOERROR_KW)? state_end )
+disconnectstate:
+    #(DISCONNECT filenameorvalue (NOERROR_KW)? state_end )
   ;
 
-displaystate throws TreeParserException
-  :  #(  head:DISPLAY  { action.frameInitializingStatement(#head); }
+displaystate:
+    #(  head:DISPLAY  { action.frameInitializingStatement(#head); }
       (stream_name_or_handle)? (UNLESSHIDDEN)? (displaystate_item)*
       (#(EXCEPT (fld1[ContextQualifier.SYMBOL])*))? (#(IN_KW WINDOW expression))?
       (display_with)*
@@ -1077,8 +1087,9 @@ displaystate throws TreeParserException
       state_end  { action.frameStatementEnd(); }
     )
   ;
-displaystate_item throws TreeParserException
-  :  #(  fi:Form_item
+
+displaystate_item:
+    #(  fi:Form_item
       (  skipphrase
       |  spacephrase
       |  (expression|ID) (aggregatephrase|formatphrase)*
@@ -1088,9 +1099,9 @@ displaystate_item throws TreeParserException
     )
   ;
 
-display_item throws TreeParserException
 // In TP01, this is used by lots of statements, but not actually by the DISPLAY statement. See displaystate_item above.
-  :  #(  fi:Form_item
+display_item:
+    #(  fi:Form_item
       (  skipphrase
       |  spacephrase
       |  (expression|ID)
@@ -1100,8 +1111,8 @@ display_item throws TreeParserException
     )
   ;
 
-dynamicnewstate throws TreeParserException
-  :  #(  Assign_dynamic_new
+dynamicnewstate:
+    #(  Assign_dynamic_new
       #(  EQUAL
         (widattr2[ContextQualifier.UPDATING] | fld[ContextQualifier.UPDATING])
         #(dn:DYNAMICNEW expression {action.callBegin(#dn);} parameterlist {action.callEnd();})
@@ -1111,8 +1122,8 @@ dynamicnewstate throws TreeParserException
     )
   ;
 
-dostate throws TreeParserException
-  :  #(  d:DO
+dostate:
+    #(  d:DO
       {  action.blockBegin(#d);
         action.frameBlockCheck(#d);
       }
@@ -1121,37 +1132,38 @@ dostate throws TreeParserException
     )
   ;
 
-downstate throws TreeParserException
-  :  #(  head:DOWN  { action.frameInitializingStatement(#head); }
+downstate:
+    #(  head:DOWN  { action.frameInitializingStatement(#head); }
       ((stream_name_or_handle (expression)?) | (expression (stream_name_or_handle)?))? (framephrase)?
       state_end  { action.frameStatementEnd(); }
     )
   ;
 
-emptytemptablestate throws TreeParserException
-  :  #(EMPTY TEMPTABLE tbl[ContextQualifier.TEMPTABLESYMBOL] (NOERROR_KW)? state_end )
+emptytemptablestate:
+    #(EMPTY TEMPTABLE tbl[ContextQualifier.TEMPTABLESYMBOL] (NOERROR_KW)? state_end )
   ;
 
-enablestate throws TreeParserException
-  :  #(  head:ENABLE  { action.frameEnablingStatement(#head); }
+enablestate:
+    #(  head:ENABLE  { action.frameEnablingStatement(#head); }
       (UNLESSHIDDEN)? (#(ALL (#(EXCEPT (fld[ContextQualifier.SYMBOL])*))?) | (form_item2[ContextQualifier.SYMBOL])+)?
       (#(IN_KW WINDOW expression))? (framephrase)? state_end  { action.frameStatementEnd(); }
     )
   ;
 
-exportstate throws TreeParserException
-  :  #(EXPORT (stream_name_or_handle)? (#(DELIMITER constant))? (display_item)* (#(EXCEPT (fld1[ContextQualifier.SYMBOL])*))? (NOLOBS)? state_end )
+exportstate:
+    #(EXPORT (stream_name_or_handle)? (#(DELIMITER constant))? (display_item)* (#(EXCEPT (fld1[ContextQualifier.SYMBOL])*))? (NOLOBS)? state_end )
   ;
 
-extentphrase throws TreeParserException
-  :  #(ex:EXTENT (expression)?)
-  ;
-extentphrase_def_symbol throws TreeParserException
-  :  #(ex:EXTENT (expression)? {action.defExtent(#ex);} )
+extentphrase:
+    #(ex:EXTENT (expression)?)
   ;
 
-fieldoption throws TreeParserException
-  :  #(as:AS
+extentphrase_def_symbol:
+    #(ex:EXTENT (expression)? {action.defExtent(#ex);} )
+  ;
+
+fieldoption:
+    #(as:AS
       (  CLASS TYPE_NAME
       |  datatype_field
       )
@@ -1181,8 +1193,8 @@ fieldoption throws TreeParserException
   |  SERIALIZEHIDDEN
   ;
 
-findstate throws TreeParserException
-  :  #(  FIND (findwhich)?
+findstate:
+    #(  FIND (findwhich)?
       #(  r:RECORD_NAME
         {action.recordNameNode(#r, ContextQualifier.INIT);}
         recordphrase
@@ -1191,12 +1203,12 @@ findstate throws TreeParserException
     )
   ;
 
-fixcodepage_pseudfn throws TreeParserException
-  :  #(FIXCODEPAGE LEFTPAREN fld[ContextQualifier.SYMBOL] RIGHTPAREN )
+fixcodepage_pseudfn:
+    #(FIXCODEPAGE LEFTPAREN fld[ContextQualifier.SYMBOL] RIGHTPAREN )
   ;
 
-forstate throws TreeParserException
-  :  #(  f:FOR 
+forstate:
+    #(  f:FOR 
       {  action.blockBegin(#f); 
         action.frameBlockCheck(#f);
       }
@@ -1204,9 +1216,10 @@ forstate throws TreeParserException
       code_block block_end {action.blockEnd();}
     )
   ;
-for_record_spec2[ContextQualifier contextQualifier] throws TreeParserException
-  // Also used in PRESELECT
-  :  (findwhich)?
+
+// Also used in PRESELECT
+for_record_spec2[ContextQualifier contextQualifier]:
+     (findwhich)?
     #(  rp1:RECORD_NAME
       {action.recordNameNode(#rp1, contextQualifier);}
       recordphrase
@@ -1219,11 +1232,11 @@ for_record_spec2[ContextQualifier contextQualifier] throws TreeParserException
     )*
   ;
 
-form_item2[ContextQualifier contextQualifier] throws TreeParserException
-{  ContextQualifier tblQualifier = contextQualifier;
+form_item2[ContextQualifier contextQualifier]
+{  /* RULE_INIT */ ContextQualifier tblQualifier = contextQualifier;
   if (contextQualifier==ContextQualifier.SYMBOL) tblQualifier = ContextQualifier.BUFFERSYMBOL;
-}
-  :  #(  fi:Form_item
+}:
+    #(  fi:Form_item
       (  tbl[tblQualifier]  {action.formItem(#fi);}
       |  #(TEXT LEFTPAREN (form_item2[contextQualifier])* RIGHTPAREN )
       |  constant (formatphrase)?
@@ -1238,8 +1251,8 @@ form_item2[ContextQualifier contextQualifier] throws TreeParserException
     )
   ;
 
-formstate throws TreeParserException
-  :  #(  head:FORMAT  { action.frameInitializingStatement(#head); }
+formstate:
+    #(  head:FORMAT  { action.frameInitializingStatement(#head); }
       (form_item2[ContextQualifier.SYMBOL])*
       (  #(HEADER (display_item)+ )
       |  #(BACKGROUND (display_item)+ )
@@ -1250,8 +1263,8 @@ formstate throws TreeParserException
     )
   ;
 
-formatphrase throws TreeParserException
-  :  #(  Format_phrase
+formatphrase:
+    #(  Format_phrase
       (  #(AS datatype_var )
       |  atphrase
       |  ATTRSPACE
@@ -1280,12 +1293,12 @@ formatphrase throws TreeParserException
     )
   ;
 
-frame_ref throws TreeParserException
-  :  #(FRAME f:ID) { action.frameRef(#f); }
+frame_ref:
+    #(FRAME f:ID) { action.frameRef(#f); }
   ;
 
-framephrase throws TreeParserException
-  :  #(  WITH
+framephrase:
+    #(  WITH
       (  #(ACCUMULATE (expression)? )
       |  ATTRSPACE | NOATTRSPACE
       |  #(CANCELBUTTON fld[ContextQualifier.SYMBOL] )
@@ -1338,8 +1351,8 @@ framephrase throws TreeParserException
     )
   ;
 
-functionstate throws TreeParserException
-  :  #(  f:FUNCTION id:ID {action.funcBegin(#f, #id);}
+functionstate:
+    #(  f:FUNCTION id:ID {action.funcBegin(#f, #id);}
       (RETURNS|RETURN)?
       {action.routineReturnDatatype(functionstate_AST_in);}
       ( CLASS TYPE_NAME | datatype_var ) (extentphrase)?
@@ -1357,9 +1370,9 @@ functionstate throws TreeParserException
     )
     {  action.funcEnd(#f); }
   ;
-function_param throws TreeParserException
-{action.paramForRoutine(function_param_AST_in);}
-  :  (
+
+function_param { /* RULE_INIT */ action.paramForRoutine(function_param_AST_in); }:
+     (
       #(  b:BUFFER (id:ID)? FOR rec:tbl[ContextQualifier.SYMBOL] (PRESELECT)?
         {  if (#id!=null) {
             action.defineBuffer(#id, #id, #rec, true);
@@ -1374,10 +1387,11 @@ function_param throws TreeParserException
     |  #(OUTPUT function_param_arg )
     |  #(INPUTOUTPUT function_param_arg )
     )
-{action.paramEnd();}
+    { action.paramEnd(); }
   ;
-function_param_arg throws TreeParserException
-  :  TABLE (FOR)? tb1:tbl[ContextQualifier.TEMPTABLESYMBOL] (APPEND)? (BIND {action.paramBind();})?
+
+function_param_arg:
+    TABLE (FOR)? tb1:tbl[ContextQualifier.TEMPTABLESYMBOL] (APPEND)? (BIND {action.paramBind();})?
     {  action.paramProgressType(TEMPTABLE);
       action.paramSymbol(#tb1);
     }
@@ -1409,12 +1423,12 @@ function_param_arg throws TreeParserException
     (CLASS TYPE_NAME | datatype_var) (extentphrase_def_symbol)?
   ;
 
-getkeyvaluestate throws TreeParserException
-  :  #(GETKEYVALUE SECTION expression KEY (DEFAULT|expression) VALUE fld[ContextQualifier.UPDATING] state_end )
+getkeyvaluestate:
+    #(GETKEYVALUE SECTION expression KEY (DEFAULT|expression) VALUE fld[ContextQualifier.UPDATING] state_end )
   ;
 
-importstate throws TreeParserException
-  :  #(  IMPORT (stream_name_or_handle)?
+importstate:
+    #(  IMPORT (stream_name_or_handle)?
       ( #(DELIMITER constant) | UNFORMATTED )?
       (  tbl[ContextQualifier.UPDATING] (#(EXCEPT (fld1[ContextQualifier.SYMBOL])*))?
       |  ( fld[ContextQualifier.UPDATING] | CARET )+
@@ -1423,19 +1437,19 @@ importstate throws TreeParserException
     )
   ;
 
-insertstate throws TreeParserException
-  :  #(  head:INSERT  { action.frameInitializingStatement(#head); }
+insertstate:
+    #(  head:INSERT  { action.frameInitializingStatement(#head); }
       tbl[ContextQualifier.UPDATING] (#(EXCEPT (fld1[ContextQualifier.SYMBOL])*))? (#(USING (ROWID|RECID) expression))?
       (framephrase)? (NOERROR_KW)? state_end  { action.frameStatementEnd(); }
     )
   ;
 
-ldbnamefunc throws TreeParserException
-  :  #(LDBNAME LEFTPAREN (#(BUFFER tbl[ContextQualifier.BUFFERSYMBOL]) | expression) RIGHTPAREN )
+ldbnamefunc:
+    #(LDBNAME LEFTPAREN (#(BUFFER tbl[ContextQualifier.BUFFERSYMBOL]) | expression) RIGHTPAREN )
   ;
 
-messagestate throws TreeParserException
-  :  #(  MESSAGE
+messagestate:
+    #(  MESSAGE
       ( #(COLOR anyorvalue) )?
       ( #(Form_item (skipphrase | expression) ) )* // No call to formItem() for MESSAGE.
       (  #(  VIEWAS ALERTBOX
@@ -1451,10 +1465,8 @@ messagestate throws TreeParserException
     )
   ;
 
-methodstate throws TreeParserException
-{  JPNode returnTypeNode = null;
-}
-  :  #(  m:METHOD def_modifiers
+methodstate { /* RULE_INIT */ JPNode returnTypeNode = null; }:
+    #(  m:METHOD def_modifiers
       {returnTypeNode = (JPNode) _t;}
       (  VOID
       |  datatype ( (extentphrase)=> (extentphrase) | )
@@ -1475,13 +1487,13 @@ methodstate throws TreeParserException
     )
   ;
 
-nextpromptstate throws TreeParserException
 // Note that NEXT-PROMPT would not initialize a frame, add fields to a frame, etc.
-  :  #(NEXTPROMPT fld[ContextQualifier.SYMBOL] (framephrase)? state_end )
+nextpromptstate:
+    #(NEXTPROMPT fld[ContextQualifier.SYMBOL] (framephrase)? state_end )
   ;
 
-onstate throws TreeParserException
-  :  #(  onNode:ON
+onstate:
+    #(  onNode:ON
       {action.scopeAdd(#onNode);}
       (  (ASSIGN|CREATE|DELETE_KW|FIND|WRITE)=>
         (  (CREATE|DELETE_KW|FIND) OF t1:tbl[ContextQualifier.SYMBOL] (label_constant)?
@@ -1532,8 +1544,8 @@ onstate throws TreeParserException
     )
   ;
 
-openquerystate throws TreeParserException
-  :  #(  OPEN QUERY ID (FOR|PRESELECT) for_record_spec2[ContextQualifier.INIT]
+openquerystate:
+    #(  OPEN QUERY ID (FOR|PRESELECT) for_record_spec2[ContextQualifier.INIT]
       (  querytuningphrase
       |  BREAK
       |  #(BY expression (DESCENDING)? )
@@ -1545,8 +1557,8 @@ openquerystate throws TreeParserException
     )
   ;
 
-procedurestate throws TreeParserException
-  :  #(  p:PROCEDURE id:ID
+procedurestate:
+    #(  p:PROCEDURE id:ID
       {  action.procedureBegin(#p, #id); }
       (  #(  EXTERNAL constant
           (  CDECL_KW
@@ -1564,8 +1576,8 @@ procedurestate throws TreeParserException
     )
   ;
 
-promptforstate throws TreeParserException
-  :  #(  head:PROMPTFOR  { action.frameEnablingStatement(#head); }
+promptforstate:
+    #(  head:PROMPTFOR  { action.frameEnablingStatement(#head); }
       (stream_name_or_handle)? (UNLESSHIDDEN)? (form_item2[ContextQualifier.SYMBOL])*
       (goonphrase)?  (#(EXCEPT (fld1[ContextQualifier.SYMBOL])*))?  (#(IN_KW WINDOW expression))?
       (framephrase)?  { action.frameStatementEnd(); }
@@ -1573,8 +1585,8 @@ promptforstate throws TreeParserException
     )
   ;
 
-publishstate throws TreeParserException
-  :  #(  pu:PUBLISH expression (#(FROM expression) )?
+publishstate:
+    #(  pu:PUBLISH expression (#(FROM expression) )?
       {action.callBegin(#pu);}
       (parameterlist)?
       state_end
@@ -1582,17 +1594,17 @@ publishstate throws TreeParserException
     )
   ;
 
-rawtransferstate throws TreeParserException
-  :  #(RAWTRANSFER (BUFFER|FIELD)? (tbl[ContextQualifier.REF]|fld[ContextQualifier.REF]) TO (BUFFER|FIELD)? (tbl[ContextQualifier.UPDATING]|fld[ContextQualifier.UPDATING]) (NOERROR_KW)? state_end )
+rawtransferstate:
+    #(RAWTRANSFER (BUFFER|FIELD)? (tbl[ContextQualifier.REF]|fld[ContextQualifier.REF]) TO (BUFFER|FIELD)? (tbl[ContextQualifier.UPDATING]|fld[ContextQualifier.UPDATING]) (NOERROR_KW)? state_end )
   ;
 
-record_fields throws TreeParserException
-  :  #(FIELDS (LEFTPAREN (fld1[ContextQualifier.SYMBOL] (#(WHEN expression))?)* RIGHTPAREN)? )
+record_fields:
+    #(FIELDS (LEFTPAREN (fld1[ContextQualifier.SYMBOL] (#(WHEN expression))?)* RIGHTPAREN)? )
   |  #(EXCEPT (LEFTPAREN (fld1[ContextQualifier.SYMBOL] (#(WHEN expression))?)* RIGHTPAREN)? )
   ;
 
-recordphrase throws TreeParserException
-  :  (record_fields)? (options{greedy=true;}:TODAY|NOW|constant)?
+recordphrase:
+    (record_fields)? (options{greedy=true;}:TODAY|NOW|constant)?
     (  #(LEFT OUTERJOIN )
     |  OUTERJOIN
     |  #(OF tbl[ContextQualifier.REF] )
@@ -1607,12 +1619,12 @@ recordphrase throws TreeParserException
     )*
   ;
 
-releasestate throws TreeParserException
-  :  #(RELEASE tbl[ContextQualifier.REF] (NOERROR_KW)? state_end )
+releasestate:
+    #(RELEASE tbl[ContextQualifier.REF] (NOERROR_KW)? state_end )
   ;
 
-repeatstate throws TreeParserException
-  :  #(  r:REPEAT
+repeatstate:
+    #(  r:REPEAT
       {  action.blockBegin(#r);
         action.frameBlockCheck(#r);
       }
@@ -1621,8 +1633,8 @@ repeatstate throws TreeParserException
     )
   ;
 
-runstate throws TreeParserException
-  :  #(  r:RUN filenameorvalue { action.runBegin(#r); } 
+runstate:
+    #(  r:RUN filenameorvalue { action.runBegin(#r); } 
       (LEFTANGLE LEFTANGLE filenameorvalue RIGHTANGLE RIGHTANGLE)?
       (  #(PERSISTENT ( #(SET (hnd:fld[ContextQualifier.UPDATING] { action.runPersistentSet(#hnd); } )? ) )? )
       |  #(SET (fld[ContextQualifier.UPDATING])? )
@@ -1640,8 +1652,8 @@ runstate throws TreeParserException
     )
   ;
 
-runstoredprocedurestate throws TreeParserException
-  :  #(  r:RUN STOREDPROCEDURE ID (assign_equal)? (NOERROR_KW)?
+runstoredprocedurestate:
+    #(  r:RUN STOREDPROCEDURE ID (assign_equal)? (NOERROR_KW)?
       {action.callBegin(#r);}
       (parameterlist)?
       state_end
@@ -1649,19 +1661,19 @@ runstoredprocedurestate throws TreeParserException
     )
   ;
 
-runsuperstate throws TreeParserException
-  :  #(r:RUN {action.callBegin(#r);} SUPER (parameterlist)? (NOERROR_KW)? state_end {action.callEnd();} )
+runsuperstate:
+    #(r:RUN {action.callBegin(#r);} SUPER (parameterlist)? (NOERROR_KW)? state_end {action.callEnd();} )
   ;
 
-scrollstate throws TreeParserException
-  :  #(  head:SCROLL  { action.frameInitializingStatement(#head); }
+scrollstate:
+    #(  head:SCROLL  { action.frameInitializingStatement(#head); }
       (FROMCURRENT)? (UP)? (DOWN)? (framephrase)?
       state_end  { action.frameStatementEnd(); }
     )
   ;
 
-setstate throws TreeParserException
-  :  #(  head:SET  { action.frameInitializingStatement(#head); }
+setstate:
+    #(  head:SET  { action.frameInitializingStatement(#head); }
       (stream_name_or_handle)? (UNLESSHIDDEN)?
       (form_item2[ContextQualifier.UPDATING])*
       (goonphrase)?  (#(EXCEPT (fld1[ContextQualifier.SYMBOL])*))?  (#(IN_KW WINDOW expression))?
@@ -1670,12 +1682,12 @@ setstate throws TreeParserException
     )
   ;
 
-systemdialogcolorstate throws TreeParserException
-  :  #(SYSTEMDIALOG COLOR expression ( #(UPDATE fld[ContextQualifier.UPDATING]) )? (#(IN_KW WINDOW expression))? state_end )
+systemdialogcolorstate:
+    #(SYSTEMDIALOG COLOR expression ( #(UPDATE fld[ContextQualifier.UPDATING]) )? (#(IN_KW WINDOW expression))? state_end )
   ;
 
-systemdialogfontstate throws TreeParserException
-  :  #(  SYSTEMDIALOG FONT expression
+systemdialogfontstate:
+    #(  SYSTEMDIALOG FONT expression
       (  ANSIONLY
       |  FIXEDONLY
       |  #(MAXSIZE expression )
@@ -1687,8 +1699,8 @@ systemdialogfontstate throws TreeParserException
     )
   ;
 
-systemdialoggetdirstate throws TreeParserException
-  :  #(  SYSTEMDIALOG GETDIR fld[ContextQualifier.REFUP]
+systemdialoggetdirstate:
+    #(  SYSTEMDIALOG GETDIR fld[ContextQualifier.REFUP]
       (  #(INITIALDIR expression)
       |  RETURNTOSTARTDIR
       |  #(TITLE expression)
@@ -1698,8 +1710,8 @@ systemdialoggetdirstate throws TreeParserException
     )
   ;
 
-systemdialoggetfilestate throws TreeParserException
-  :  #(  SYSTEMDIALOG GETFILE fld[ContextQualifier.REFUP]
+systemdialoggetfilestate:
+    #(  SYSTEMDIALOG GETFILE fld[ContextQualifier.REFUP]
       (  #(  FILTERS expression expression (COMMA expression expression)*
           ( #(INITIALFILTER expression ) )?
         )
@@ -1719,19 +1731,19 @@ systemdialoggetfilestate throws TreeParserException
     )
   ;
 
-systemdialogprintersetupstate throws TreeParserException
-  :  #(  SYSTEMDIALOG PRINTERSETUP
+systemdialogprintersetupstate:
+    #(  SYSTEMDIALOG PRINTERSETUP
       ( #(NUMCOPIES expression) | #(UPDATE fld[ContextQualifier.UPDATING]) | LANDSCAPE | PORTRAIT | #(IN_KW WINDOW expression) )*
       state_end
     )
   ;
 
-thisobjectstate throws TreeParserException
-  :  #(to:THISOBJECT {action.callBegin(#to);} parameterlist_noroot state_end {action.callEnd();} )
+thisobjectstate:
+    #(to:THISOBJECT {action.callBegin(#to);} parameterlist_noroot state_end {action.callEnd();} )
   ;
-  
-triggerphrase throws TreeParserException
-  :  #(  TRIGGERS block_colon
+
+triggerphrase:
+    #(  TRIGGERS block_colon
       #(  Code_block
         (  #(  on:ON {action.scopeAdd(#on);}
             eventlist (ANYWHERE)?
@@ -1744,8 +1756,8 @@ triggerphrase throws TreeParserException
     )
   ;
 
-triggerprocedurestate throws TreeParserException
-  :  #(  TRIGGER PROCEDURE FOR
+triggerprocedurestate:
+    #(  TRIGGER PROCEDURE FOR
       (  (CREATE|DELETE_KW|FIND|REPLICATIONCREATE|REPLICATIONDELETE)
         OF t1:tbl[ContextQualifier.SYMBOL] (label_constant)?
         {action.defineBufferForTrigger(#t1);}
@@ -1777,27 +1789,27 @@ triggerprocedurestate throws TreeParserException
     )
   ;
 
-underlinestate throws TreeParserException
-  :  #(  head:UNDERLINE  { action.frameInitializingStatement(#head); }
+underlinestate:
+    #(  head:UNDERLINE  { action.frameInitializingStatement(#head); }
       (stream_name_or_handle)? (#(fi:Form_item fld[ContextQualifier.SYMBOL] {action.formItem(#fi);} (formatphrase)? ))* (framephrase)?
       state_end  { action.frameStatementEnd(); }
     )
   ;
 
-upstate throws TreeParserException
-  :  #(  head:UP  { action.frameInitializingStatement(#head); }
+upstate:
+    #(  head:UP  { action.frameInitializingStatement(#head); }
       (options{greedy=true;}:stream_name_or_handle)? (expression)? (stream_name_or_handle)? (framephrase)?
       state_end  { action.frameStatementEnd(); }
     )
   ;
 
-updatestatement throws TreeParserException
-  :  (#(UPDATE tbl[ContextQualifier.SYMBOL] SET))=> sqlupdatestate
+updatestatement:
+    (#(UPDATE tbl[ContextQualifier.SYMBOL] SET))=> sqlupdatestate
   |  updatestate
   ;
 
-updatestate throws TreeParserException
-  :  #(  head:UPDATE  { action.frameEnablingStatement(#head); }
+updatestate:
+    #(  head:UPDATE  { action.frameEnablingStatement(#head); }
       (UNLESSHIDDEN)?  
       (form_item2[ContextQualifier.REFUP])*
       (goonphrase)?
@@ -1808,20 +1820,20 @@ updatestate throws TreeParserException
     )
   ;
 
-validatestate throws TreeParserException
-  :  #(VALIDATE tbl[ContextQualifier.REF] (NOERROR_KW)? state_end )
+validatestate:
+    #(VALIDATE tbl[ContextQualifier.REF] (NOERROR_KW)? state_end )
   ;
 
-viewstate throws TreeParserException
-  :  #(v:VIEW (stream_name_or_handle)? (gwidget)* (#(IN_KW WINDOW expression))? state_end {action.viewState(#v);} )
+viewstate:
+    #(v:VIEW (stream_name_or_handle)? (gwidget)* (#(IN_KW WINDOW expression))? state_end {action.viewState(#v);} )
   ;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Begin SQL
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-altertablestate throws TreeParserException
-  :  #(  ALTER TABLE tbl[ContextQualifier.SCHEMATABLESYMBOL]
+altertablestate:
+    #(  ALTER TABLE tbl[ContextQualifier.SCHEMATABLESYMBOL]
       (  ADD COLUMN sql_col_def
       |  DROP COLUMN fld[ContextQualifier.SYMBOL]
       |  ALTER COLUMN fld[ContextQualifier.SYMBOL]
@@ -1835,46 +1847,46 @@ altertablestate throws TreeParserException
     )
   ;
 
-createindexstate throws TreeParserException
-  :  #(CREATE (UNIQUE)? INDEX ID ON tbl[ContextQualifier.SCHEMATABLESYMBOL] #(Field_list LEFTPAREN fld[ContextQualifier.SYMBOL] (COMMA fld[ContextQualifier.SYMBOL])* RIGHTPAREN ) state_end )
+createindexstate:
+    #(CREATE (UNIQUE)? INDEX ID ON tbl[ContextQualifier.SCHEMATABLESYMBOL] #(Field_list LEFTPAREN fld[ContextQualifier.SYMBOL] (COMMA fld[ContextQualifier.SYMBOL])* RIGHTPAREN ) state_end )
   ;
 
-createviewstate throws TreeParserException
-  :  #(CREATE VIEW ID (#(Field_list LEFTPAREN fld[ContextQualifier.SYMBOL] (COMMA fld[ContextQualifier.SYMBOL])* RIGHTPAREN ))? AS selectstatea state_end )
+createviewstate:
+    #(CREATE VIEW ID (#(Field_list LEFTPAREN fld[ContextQualifier.SYMBOL] (COMMA fld[ContextQualifier.SYMBOL])* RIGHTPAREN ))? AS selectstatea state_end )
   ;
 
-deletefromstate throws TreeParserException
-  :  #(  DELETE_KW FROM tbl[ContextQualifier.SCHEMATABLESYMBOL]
+deletefromstate:
+    #(  DELETE_KW FROM tbl[ContextQualifier.SCHEMATABLESYMBOL]
       ( #(WHERE (sqlexpression | #(CURRENT OF ID))? ) )?
       state_end
     )
   ;
 
-droptablestate throws TreeParserException
-  :  #(DROP TABLE tbl[ContextQualifier.SCHEMATABLESYMBOL] state_end )
+droptablestate:
+    #(DROP TABLE tbl[ContextQualifier.SCHEMATABLESYMBOL] state_end )
   ;
 
-fetchstate throws TreeParserException
-  :  #(FETCH ID INTO fld[ContextQualifier.UPDATING] (fetch_indicator)? (COMMA fld[ContextQualifier.UPDATING] (fetch_indicator)? )* state_end )
+fetchstate:
+    #(FETCH ID INTO fld[ContextQualifier.UPDATING] (fetch_indicator)? (COMMA fld[ContextQualifier.UPDATING] (fetch_indicator)? )* state_end )
   ;
-fetch_indicator throws TreeParserException
-  :  #(INDICATOR fld[ContextQualifier.UPDATING] )
+fetch_indicator:
+    #(INDICATOR fld[ContextQualifier.UPDATING] )
   |  fld[ContextQualifier.UPDATING]
   ;
 
-grantstate throws TreeParserException
-  :   #(GRANT (grant_rev_opt) ON (tbl[ContextQualifier.SCHEMATABLESYMBOL]|ID) grant_rev_to (WITH GRANT OPTION)? state_end )
+grantstate:
+     #(GRANT (grant_rev_opt) ON (tbl[ContextQualifier.SCHEMATABLESYMBOL]|ID) grant_rev_to (WITH GRANT OPTION)? state_end )
   ;
-grant_rev_opt throws TreeParserException
-  :  #(ALL (PRIVILEGES)? )
+grant_rev_opt:
+    #(ALL (PRIVILEGES)? )
   |  (  SELECT | INSERT | DELETE_KW
     |  #(UPDATE (#(Field_list LEFTPAREN fld[ContextQualifier.UPDATING] (COMMA fld[ContextQualifier.UPDATING])* RIGHTPAREN ))? )
     |  COMMA
     )+
   ;
 
-insertintostate throws TreeParserException
-  :  #(  INSERT INTO tbl[ContextQualifier.SCHEMATABLESYMBOL]
+insertintostate:
+    #(  INSERT INTO tbl[ContextQualifier.SCHEMATABLESYMBOL]
       (#(Field_list LEFTPAREN fld[ContextQualifier.UPDATING] (COMMA fld[ContextQualifier.UPDATING])* RIGHTPAREN ))?
       (  #(  VALUES LEFTPAREN sqlexpression (fetch_indicator)?
           (COMMA sqlexpression (fetch_indicator)?)* RIGHTPAREN
@@ -1885,21 +1897,21 @@ insertintostate throws TreeParserException
     )
   ;
 
-revokestate throws TreeParserException
-  :   #(REVOKE (grant_rev_opt) ON (tbl[ContextQualifier.SCHEMATABLESYMBOL]|ID) grant_rev_to state_end )
+revokestate:
+     #(REVOKE (grant_rev_opt) ON (tbl[ContextQualifier.SCHEMATABLESYMBOL]|ID) grant_rev_to state_end )
   ;
 
-selectstate throws TreeParserException
 // selectstate_AST_in is the name of the input node within the Antlr generated code.
 // Hopefully Antlr won't change how that works.  :-/  I don't know if there's a "proper" way
 // of getting the next or input token for Antlr generated tree parsers.
-  :   { action.frameInitializingStatement(selectstate_AST_in); }
+selectstate:
+    { action.frameInitializingStatement(selectstate_AST_in); }
     selectstatea state_end
     { action.frameStatementEnd(); }
   ;
 
-selectstatea throws TreeParserException
-  :  #(  SELECT
+selectstatea:
+    #(  SELECT
       (ALL | DISTINCT)?
       (  STAR
       |  #(  Sql_select_what
@@ -1926,32 +1938,34 @@ selectstatea throws TreeParserException
     )
   ;
 
-select_sqltableref throws TreeParserException
-  :  (tbl[ContextQualifier.SCHEMATABLESYMBOL] | ID) (ID)?
+select_sqltableref:
+    (tbl[ContextQualifier.SCHEMATABLESYMBOL] | ID) (ID)?
   ;
 
-sqlupdatestate throws TreeParserException
-  :   #(  UPDATE tbl[ContextQualifier.SCHEMATABLESYMBOL] SET sqlupdate_equal (COMMA sqlupdate_equal)*
+sqlupdatestate:
+     #(  UPDATE tbl[ContextQualifier.SCHEMATABLESYMBOL] SET sqlupdate_equal (COMMA sqlupdate_equal)*
       ( #(WHERE (sqlexpression | CURRENT OF ID) ) )?
       state_end
     )
   ;
-sqlupdate_equal throws TreeParserException
-  :  #(EQUAL fld[ContextQualifier.REF] sqlexpression (fetch_indicator)? )
+
+sqlupdate_equal:
+    #(EQUAL fld[ContextQualifier.REF] sqlexpression (fetch_indicator)? )
   ;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // sql functions and phrases
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-sqlaggregatefunc throws TreeParserException
 // also see maximumfunc and minimumfunc
-  :  #(AVG sqlaggregatefunc_arg )
+sqlaggregatefunc:
+    #(AVG sqlaggregatefunc_arg )
   |  #(COUNT sqlaggregatefunc_arg )
   |  #(SUM sqlaggregatefunc_arg )
   ;
-sqlaggregatefunc_arg throws TreeParserException
-  :  LEFTPAREN
+
+sqlaggregatefunc_arg:
+    LEFTPAREN
     (  DISTINCT
       (  LEFTPAREN fld[ContextQualifier.REF] RIGHTPAREN
       |  fld[ContextQualifier.REF]
@@ -1966,6 +1980,6 @@ sqlaggregatefunc_arg throws TreeParserException
 // sqlexpression 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-sql_in_val throws TreeParserException
-  :  fld[ContextQualifier.REF] (fetch_indicator)? | constant | USERID
+sql_in_val:
+    fld[ContextQualifier.REF] (fetch_indicator)? | constant | USERID
   ;

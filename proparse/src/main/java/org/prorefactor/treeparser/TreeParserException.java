@@ -1,17 +1,16 @@
 package org.prorefactor.treeparser;
 
-public class TreeParserException extends Exception {
-  private static final long serialVersionUID = 4003548635999211002L;
+import antlr.SemanticException;
+
+public class TreeParserException extends SemanticException {
+
+  private static final long serialVersionUID = 3643827078682041743L;
 
   public TreeParserException(String msg) {
     super(msg);
   }
-  
-  public TreeParserException(Throwable t) {
-    super(t);
-  }
-  
-  public TreeParserException(String msg, Throwable t) {
-    super(msg, t);
+
+  public TreeParserException(String s, String fileName, int line, int column) {
+    super(s, fileName, line, column);
   }
 }

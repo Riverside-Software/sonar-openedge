@@ -179,7 +179,7 @@ public class ParseUnit {
     }
     try {
       tp.program(getTopNode());
-    } catch (RecognitionException | TreeParserException caught) {
+    } catch (RecognitionException caught) {
       throw new RefactorException(caught);
     }
     LOGGER.trace("Exiting ParseUnit#treeParser()");
