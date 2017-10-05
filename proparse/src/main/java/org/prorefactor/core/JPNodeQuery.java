@@ -22,16 +22,25 @@ class JPNodeQuery implements ICallback<List<JPNode>> {
   private final boolean stateHeadOnly;
   private final boolean mainFileOnly;
 
+  /**
+   * @deprecated Since 2.1.3, use {@link JPNodeQuery#JPNodeQuery(ABLNodeType, ABLNodeType...)}
+   */
   @Deprecated
   public JPNodeQuery(Integer... types) {
     this(false, false, types);
   }
 
+  /**
+   * @deprecated Since 2.1.3, use {@link JPNodeQuery#JPNodeQuery(boolean, ABLNodeType, ABLNodeType...)}
+   */
   @Deprecated
   public JPNodeQuery(boolean stateHeadOnly, Integer... types) {
     this(stateHeadOnly, false, types);
   }
 
+  /**
+   * @deprecated Since 2.1.3, use {@link JPNodeQuery#JPNodeQuery(boolean, boolean, ABLNodeType, ABLNodeType...)}
+   */
   @Deprecated
   public JPNodeQuery(boolean stateHeadOnly, boolean mainFileOnly, Integer... types) {
     this.stateHeadOnly = stateHeadOnly;

@@ -411,6 +411,7 @@ public class JPNode implements AST {
 
   /**
    * Get an array of all descendant nodes (including this node) of a given type
+   * @deprecated Since 2.1.3, use {@link JPNode#query(ABLNodeType, ABLNodeType...)}
    */
   @Deprecated
   public List<JPNode> query(Integer... findTypes) {
@@ -422,6 +423,7 @@ public class JPNode implements AST {
 
   /**
    * Get an array of all descendant nodes (including this node) of a given type
+   * @deprecated Since 2.1.3, use {@link JPNode#queryMainFile(ABLNodeType, ABLNodeType...)}
    */
   @Deprecated
   public List<JPNode> queryMainFile(Integer... findTypes) {
@@ -433,6 +435,7 @@ public class JPNode implements AST {
 
   /**
    * Get an array of all descendant nodes (including this node) of a given type
+   * @deprecated Since 2.1.3, use {@link JPNode#queryStateHead(ABLNodeType, ABLNodeType...)}
    */
   @Deprecated
   public List<JPNode> queryStateHead(Integer... findTypes) {

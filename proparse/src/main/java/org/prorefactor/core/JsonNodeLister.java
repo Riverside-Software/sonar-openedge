@@ -53,7 +53,7 @@ public class JsonNodeLister {
    * @return False if node is skipped
    */
   private boolean printSub(JPNode node, boolean firstElem) throws IOException {
-    if (ignored.contains(node.getType()))
+    if (ignored.contains(node.getNodeType()))
       return false;
     if (!firstElem) {
       ofile.write(',');

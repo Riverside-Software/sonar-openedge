@@ -1506,6 +1506,10 @@ public enum ABLNodeType {
   YESNOCANCEL(ProParserTokenTypes.YESNOCANCEL, "yes-no-cancel", NodeTypesOption.KEYWORD),
   YOF(ProParserTokenTypes.YOF, "y-of", NodeTypesOption.KEYWORD);
 
+  private static final String ERR_INIT = "Error while initializing typeMap - Duplicate key ";
+  private static Map<String, ABLNodeType> literalsMap = new HashMap<>();
+  private static Map<Integer, ABLNodeType> typeMap = new HashMap<>();
+
   // Private attributes
   private int typeNum;
   private String text;
@@ -1664,11 +1668,6 @@ public enum ABLNodeType {
     return false;
   }
 
-
-  // Static section
-  private final static String ERR_INIT = "Error while initializing typeMap - Duplicate key ";
-  private static Map<String, ABLNodeType> literalsMap = new HashMap<>();
-  private static Map<Integer, ABLNodeType> typeMap = new HashMap<>();
 
   static {
     for (ABLNodeType e : ABLNodeType.values()) {
@@ -1831,7 +1830,4 @@ public enum ABLNodeType {
     return type.mayBeRegularFunc();
   }
 
-  public static void main(String[] args) {
-    System.out.println("oo");
-  }
 }
