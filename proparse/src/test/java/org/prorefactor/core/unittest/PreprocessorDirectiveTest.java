@@ -14,10 +14,11 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.Assert;
@@ -42,14 +43,14 @@ public class PreprocessorDirectiveTest {
   public void test01() throws Exception {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor05.p"), session);
     unit.parse();
-    Assert.assertEquals(unit.getTopNode().query(NodeTypes.PROPARSEDIRECTIVE).size(), 0);
-    JPNode node1 = unit.getTopNode().query(NodeTypes.MESSAGE).get(0);
-    JPNode node2 = unit.getTopNode().query(NodeTypes.MESSAGE).get(1);
+    Assert.assertEquals(unit.getTopNode().query(ABLNodeType.PROPARSEDIRECTIVE).size(), 0);
+    JPNode node1 = unit.getTopNode().query(ABLNodeType.MESSAGE).get(0);
+    JPNode node2 = unit.getTopNode().query(ABLNodeType.MESSAGE).get(1);
 
     ProToken h1 = node1.getHiddenBefore();
     int numDirectives = 0;
     while (h1 != null) {
-      if (h1.getType() == NodeTypes.PROPARSEDIRECTIVE) {
+      if (h1.getType() == ProParserTokenTypes.PROPARSEDIRECTIVE) {
         numDirectives += 1;
       }
       h1 = (ProToken) h1.getHiddenBefore();
@@ -59,7 +60,7 @@ public class PreprocessorDirectiveTest {
     numDirectives = 0;
     ProToken h2 = node2.getHiddenBefore();
     while (h2 != null) {
-      if (h2.getType() == NodeTypes.PROPARSEDIRECTIVE) {
+      if (h2.getType() == ProParserTokenTypes.PROPARSEDIRECTIVE) {
         numDirectives += 1;
       }
       h2 = (ProToken) h2.getHiddenBefore();

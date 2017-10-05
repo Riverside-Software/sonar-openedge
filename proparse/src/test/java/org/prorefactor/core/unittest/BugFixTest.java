@@ -24,12 +24,11 @@ import java.util.List;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.AfterTest;
-import org.prorefactor.treeparser.symbols.Variable;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -101,10 +100,9 @@ public class BugFixTest {
     assertNotNull(pu.getRootScope());
 
     StringWriter writer = new StringWriter();
-    JsonNodeLister nodeLister = new JsonNodeLister(pu.getTopNode(), writer,
-        new Integer[] {
-            NodeTypes.LEFTPAREN, NodeTypes.RIGHTPAREN, NodeTypes.COMMA, NodeTypes.PERIOD, NodeTypes.LEXCOLON,
-            NodeTypes.OBJCOLON, NodeTypes.THEN, NodeTypes.END});
+    JsonNodeLister nodeLister = new JsonNodeLister(pu.getTopNode(), writer, ABLNodeType.LEFTPAREN,
+        ABLNodeType.RIGHTPAREN, ABLNodeType.COMMA, ABLNodeType.PERIOD, ABLNodeType.LEXCOLON, ABLNodeType.OBJCOLON,
+        ABLNodeType.THEN, ABLNodeType.END);
     nodeLister.print();
     
     jsonNames.add(file);
@@ -328,20 +326,20 @@ public class BugFixTest {
   @Test
   public void testCreateComObject() throws Exception {
     ParseUnit unit = genericTest("createComObject.p");
-    List<JPNode> list = unit.getTopNode().query(NodeTypes.CREATE);
+    List<JPNode> list = unit.getTopNode().query(ABLNodeType.CREATE);
     // COM automation
     assertEquals(list.get(0).getLine(), 3);
-    assertEquals(list.get(0).getState2(), NodeTypes.Automationobject);
+    assertEquals(list.get(0).getState2(), ProParserTokenTypes.Automationobject);
     assertEquals(list.get(1).getLine(), 4);
-    assertEquals(list.get(1).getState2(), NodeTypes.Automationobject);
+    assertEquals(list.get(1).getState2(), ProParserTokenTypes.Automationobject);
     // Widgets
     assertEquals(list.get(2).getLine(), 8);
-    assertEquals(list.get(2).getState2(), NodeTypes.WIDGET);
+    assertEquals(list.get(2).getState2(), ProParserTokenTypes.WIDGET);
     assertEquals(list.get(3).getLine(), 12);
-    assertEquals(list.get(3).getState2(), NodeTypes.WIDGET);
+    assertEquals(list.get(3).getState2(), ProParserTokenTypes.WIDGET);
     // Ambiguous
     assertEquals(list.get(4).getLine(), 15);
-    assertEquals(list.get(4).getState2(), NodeTypes.WIDGET);
+    assertEquals(list.get(4).getState2(), ProParserTokenTypes.WIDGET);
   }
 
   @Test
@@ -368,19 +366,19 @@ public class BugFixTest {
   public void testTildeInComment() throws Exception {
     TokenStream stream = genericLex("comment-tilde.p");
     Token tok = stream.nextToken();
-    assertEquals(tok.getType(), NodeTypes.COMMENT);
+    assertEquals(tok.getType(), ProParserTokenTypes.COMMENT);
     assertEquals(tok.getText(), "// \"~n\"");
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
-    assertEquals(stream.nextToken().getType(), NodeTypes.DEFINE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DEFINE);
   }
 
   @Test
   public void testTildeInComment2() throws Exception {
     TokenStream stream = genericLex("comment-tilde2.p");
-    assertEquals(stream.nextToken().getType(), NodeTypes.DEFINE);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DEFINE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
     Token tok = stream.nextToken();
-    assertEquals(tok.getType(), NodeTypes.COMMENT);
+    assertEquals(tok.getType(), ProParserTokenTypes.COMMENT);
     assertEquals(tok.getText(), "// \"~n\"");
   }
 
@@ -392,7 +390,7 @@ public class BugFixTest {
   @Test
   public void testNoArgFunc() throws Exception {
     ParseUnit pu = genericTest("noargfunc.p");
-    List<JPNode> nodes = pu.getTopNode().query(NodeTypes.MESSAGE);
+    List<JPNode> nodes = pu.getTopNode().query(ABLNodeType.MESSAGE);
     assertEquals(nodes.get(0).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.GUID);
     assertEquals(nodes.get(1).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.FIELD_REF);
     assertEquals(nodes.get(2).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.TIMEZONE);
@@ -403,6 +401,7 @@ public class BugFixTest {
 
   @Test
   public void testLexer01() throws Exception {
+    @SuppressWarnings("unused")
     TokenStream stream = genericLex("lex.p");
   }
 
@@ -429,16 +428,16 @@ public class BugFixTest {
     assertNotNull(unit.getTopNode());
 
     // Message statement
-    JPNode node = unit.getTopNode().queryStateHead(NodeTypes.MESSAGE).get(0);
+    JPNode node = unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).get(0);
     assertNotNull(node);
-    assertEquals(node.query(NodeTypes.ASCENDING).size(), 0);
-    assertEquals(node.query(NodeTypes.ASC).size(), 1);
+    assertEquals(node.query(ABLNodeType.ASCENDING).size(), 0);
+    assertEquals(node.query(ABLNodeType.ASC).size(), 1);
 
     // Define TT statement
-    JPNode node2 = unit.getTopNode().queryStateHead(NodeTypes.DEFINE).get(0);
+    JPNode node2 = unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0);
     assertNotNull(node2);
-    assertEquals(node2.query(NodeTypes.ASCENDING).size(), 1);
-    assertEquals(node2.query(NodeTypes.ASC).size(), 0);
+    assertEquals(node2.query(ABLNodeType.ASCENDING).size(), 1);
+    assertEquals(node2.query(ABLNodeType.ASC).size(), 0);
   }
 
   @Test(enabled = false, description = "Issue #356, won't fix,")

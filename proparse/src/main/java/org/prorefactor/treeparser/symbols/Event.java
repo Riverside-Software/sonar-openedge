@@ -10,7 +10,7 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
@@ -35,7 +35,7 @@ public class Event extends Symbol {
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.EVENT;
+    return ProParserTokenTypes.EVENT;
   }
 
 }

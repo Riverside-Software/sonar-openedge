@@ -11,7 +11,7 @@
 package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
@@ -89,7 +89,7 @@ public abstract class Symbol implements ISymbol {
 
   @Override
   public JPNode getDefineNode() {
-    if ((defNode != null) && (defNode.getType() != NodeTypes.ID))
+    if ((defNode != null) && (defNode.getType() != ProParserTokenTypes.ID))
       return defNode;
 
     return null;
@@ -97,7 +97,7 @@ public abstract class Symbol implements ISymbol {
 
   @Override
   public JPNode getIndirectDefineIdNode() {
-    if ((defNode != null) && (defNode.getType() == NodeTypes.ID))
+    if ((defNode != null) && (defNode.getType() == ProParserTokenTypes.ID))
       return defNode;
 
     return null;

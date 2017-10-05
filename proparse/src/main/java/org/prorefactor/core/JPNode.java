@@ -460,14 +460,18 @@ public class JPNode implements AST {
     return nextNatural.getHiddenFirst();
   }
 
-
   /** Find the first direct child with a given node type. */
-  public JPNode findDirectChild(int nodeType) {
+  public JPNode findDirectChild(ABLNodeType nodeType) {
     for (JPNode node = down; node != null; node = node.getNextSibling()) {
-      if (node.getType() == nodeType)
+      if (node.getNodeType() == nodeType)
         return node;
     }
     return null;
+  }
+
+  /** Find the first direct child with a given node type. */
+  public JPNode findDirectChild(int nodeType) {
+    return findDirectChild(ABLNodeType.getNodeType(nodeType));
   }
 
   // *****************************

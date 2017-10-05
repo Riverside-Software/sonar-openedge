@@ -13,11 +13,10 @@ package org.prorefactor.core.unittest;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
-import java.util.NoSuchElementException;
 
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
@@ -46,51 +45,51 @@ public class LexerTest {
     TokenStream stream = unit.lex();
 
     // CURRENT-WINDOW:HANDLE.
-    assertEquals(stream.nextToken().getType(), NodeTypes.CURRENTWINDOW);
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.HANDLE);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.CURRENTWINDOW);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.HANDLE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
 
     // SESSION:FIRST-SERVER-SOCKET:HANDLE.
-    assertEquals(stream.nextToken().getType(), NodeTypes.SESSION);
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.HANDLE);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.SESSION);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.HANDLE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
 
     // TEMP-TABLE tt1::fld1.
-    assertEquals(stream.nextToken().getType(), NodeTypes.TEMPTABLE);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.DOUBLECOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.TEMPTABLE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DOUBLECOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
 
     // DATASET ds1::tt1.
-    assertEquals(stream.nextToken().getType(), NodeTypes.DATASET);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.DOUBLECOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DATASET);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DOUBLECOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
 
     // DATASET ds1::tt1:set-callback().
-    assertEquals(stream.nextToken().getType(), NodeTypes.DATASET);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.DOUBLECOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.LEFTPAREN);
-    assertEquals(stream.nextToken().getType(), NodeTypes.RIGHTPAREN);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DATASET);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DOUBLECOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.LEFTPAREN);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.RIGHTPAREN);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test
@@ -100,65 +99,65 @@ public class LexerTest {
 
     // Progress.Security.PAMStatus:AccessDenied.
     ProToken tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), NodeTypes.ID);
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getColumn(), 1);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndColumn(), 27);
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
 
     // Progress.Security.PAMStatus :AccessDenied.
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), NodeTypes.ID);
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
     assertEquals(tok.getLine(), 2);
     assertEquals(tok.getColumn(), 1);
     assertEquals(tok.getEndLine(), 2);
     assertEquals(tok.getEndColumn(), 27);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
 
     // Progress.Security.PAMStatus <bazinga> :AccessDenied.
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), NodeTypes.ID);
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
     assertEquals(tok.getLine(), 3);
     assertEquals(tok.getColumn(), 1);
     assertEquals(tok.getEndLine(), 3);
     assertEquals(tok.getEndColumn(), 27);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), NodeTypes.COMMENT);
+    assertEquals(tok.getType(), ProParserTokenTypes.COMMENT);
     assertEquals(tok.getText(), "//Test");
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), NodeTypes.COMMENT);
+    assertEquals(tok.getType(), ProParserTokenTypes.COMMENT);
     assertEquals(tok.getText(), "//Test2");
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
 
     // Progress.117x.clsName:StaticProperty.
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), NodeTypes.ID);
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
     assertEquals(tok.getText(), "Progress.117x.clsName");
     assertEquals(tok.getLine(), 7);
     assertEquals(tok.getColumn(), 1);
     assertEquals(tok.getEndLine(), 7);
     assertEquals(tok.getEndColumn(), 21);
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test(enabled = false)
@@ -168,14 +167,14 @@ public class LexerTest {
 
     // MESSAGE Progress./* Holy shit */   Security.PAMStatus:AccessDenied.
     // The compiler accepts that...
-    assertEquals(stream.nextToken().getType(), NodeTypes.MESSAGE);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.MESSAGE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
     Token tok = stream.nextToken();
-    assertEquals(tok.getType(), NodeTypes.ID);
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
   }
 
   @Test
@@ -185,14 +184,14 @@ public class LexerTest {
 
     // .Security.PAMStatus:AccessDenied.
     // Nothing recognized here, so we don't change the stream 
-    assertEquals(stream.nextToken().getType(), NodeTypes.NAMEDOT);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.NAMEDOT);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test
@@ -201,31 +200,31 @@ public class LexerTest {
     TokenStream stream = unit.lex();
 
     // MESSAGE customer.custnum Progress.Security.PAMStatus:AccessDenied.
-    assertEquals(stream.nextToken().getType(), NodeTypes.MESSAGE);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.NAMEDOT);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.MESSAGE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
 
     // MESSAGE customer.custnum. Progress.Security.PAMStatus:AccessDenied.
-    assertEquals(stream.nextToken().getType(), NodeTypes.MESSAGE);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.NAMEDOT);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.MESSAGE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test
@@ -233,10 +232,10 @@ public class LexerTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist06.p"), session);
     TokenStream stream = unit.lex();
 
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test
@@ -244,13 +243,13 @@ public class LexerTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist07.p"), session);
     TokenStream stream = unit.lex();
 
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
-    assertEquals(stream.nextToken().getType(), NodeTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), NodeTypes.ID);
-    assertEquals(stream.nextToken().getType(), NodeTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), NodeTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test

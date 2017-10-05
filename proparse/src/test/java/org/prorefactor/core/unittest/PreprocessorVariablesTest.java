@@ -12,8 +12,8 @@ package org.prorefactor.core.unittest;
 
 import java.io.File;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -43,7 +43,7 @@ public class PreprocessorVariablesTest {
   }
 
   private void testVariable(JPNode topNode, String variable) {
-    for (JPNode node : topNode.query(NodeTypes.ID)) {
+    for (JPNode node : topNode.query(ABLNodeType.ID)) {
       if (node.getText().equals(variable)) {
         return;
       }
@@ -52,7 +52,7 @@ public class PreprocessorVariablesTest {
   }
 
   private void testNoVariable(JPNode topNode, String variable) {
-    for (JPNode node : topNode.query(NodeTypes.ID)) {
+    for (JPNode node : topNode.query(ABLNodeType.ID)) {
       if (node.getText().equals(variable)) {
         Assert.fail("Variable " + variable + " not found");
       }
@@ -79,7 +79,7 @@ public class PreprocessorVariablesTest {
   public void test06() throws Exception {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor06.p"), session);
     unit.parse();
-    Assert.assertEquals(unit.getTopNode().queryStateHead(NodeTypes.MESSAGE).size(), 1);
+    Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
   }
 
 }

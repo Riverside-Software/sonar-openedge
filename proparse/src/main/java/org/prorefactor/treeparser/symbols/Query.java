@@ -10,7 +10,7 @@
  *******************************************************************************/ 
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE QUERY. */
@@ -33,7 +33,7 @@ public class Query extends Symbol {
    */
   @Override
   public int getProgressType() {
-    return NodeTypes.QUERY;
+    return ProParserTokenTypes.QUERY;
   }
 
 }

@@ -69,7 +69,7 @@ public class TP01FramesTreeLister extends JPNodeLister {
     FieldContainer fieldContainer = node.getFieldContainer();
     if (fieldContainer == null)
       return;
-    buff.append(spacer).append(ABLNodeType.getTypeName(fieldContainer.getProgressType())).append("=");
+    buff.append(spacer).append(ABLNodeType.getNodeType(fieldContainer.getProgressType())).append("=");
     appendName(buff, fieldContainer);
   }
 

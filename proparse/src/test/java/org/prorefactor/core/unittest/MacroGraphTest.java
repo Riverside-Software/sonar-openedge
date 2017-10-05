@@ -13,8 +13,8 @@ package org.prorefactor.core.unittest;
 import java.io.File;
 import java.util.List;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.macrolevel.MacroEvent;
 import org.prorefactor.refactor.RefactorSession;
@@ -41,7 +41,7 @@ public class MacroGraphTest {
   }
 
   private void testVariable(JPNode topNode, String variable) {
-    for (JPNode node : topNode.query(NodeTypes.ID)) {
+    for (JPNode node : topNode.query(ABLNodeType.ID)) {
       if (node.getText().equals(variable)) {
         return;
       }
@@ -50,7 +50,7 @@ public class MacroGraphTest {
   }
 
   private void testNoVariable(JPNode topNode, String variable) {
-    for (JPNode node : topNode.query(NodeTypes.ID)) {
+    for (JPNode node : topNode.query(ABLNodeType.ID)) {
       if (node.getText().equals(variable)) {
         Assert.fail("Variable " + variable + " not found");
       }

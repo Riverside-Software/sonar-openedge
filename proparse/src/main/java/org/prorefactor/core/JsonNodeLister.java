@@ -12,7 +12,7 @@ package org.prorefactor.core;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -26,14 +26,12 @@ public class JsonNodeLister {
 
   private final JPNode topNode;
   private final Writer ofile;
-  private final Set<Integer> ignored = new HashSet<>();
+  private final Set<ABLNodeType> ignored;
 
-  public JsonNodeLister(JPNode topNode, Writer writer, Integer[] ignoredKeywords) {
+  public JsonNodeLister(JPNode topNode, Writer writer, ABLNodeType ignoredKw, ABLNodeType... ignoredKws) {
     this.topNode = topNode;
     this.ofile = writer;
-    for (Integer i : ignoredKeywords) {
-      ignored.add(i);
-    }
+    this.ignored = EnumSet.of(ignoredKw, ignoredKws);
   }
 
   /**

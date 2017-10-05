@@ -22,7 +22,6 @@ import java.util.List;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.NodeTypes;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.macrolevel.IncludeRef;
@@ -53,7 +52,7 @@ public class ApiTest {
     File f = new File("src/test/resources/data/hello.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.treeParser01();
-    assertEquals(pu.getTopNode().query(NodeTypes.DISPLAY).size(), 1);
+    assertEquals(pu.getTopNode().query(ABLNodeType.DISPLAY).size(), 1);
   }
 
   @Test
@@ -61,7 +60,7 @@ public class ApiTest {
     File f = new File("src/test/resources/data/no-undo.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.treeParser01();
-    JPNode node = pu.getTopNode().findDirectChild(NodeTypes.DEFINE);
+    JPNode node = pu.getTopNode().findDirectChild(ABLNodeType.DEFINE);
     assertEquals(ABLNodeType.VARIABLE.getType(), node.attrGet(IConstants.STATE2));
   }
 
@@ -87,12 +86,12 @@ public class ApiTest {
     pu.parse();
 
     // Looking for the DEFINE node
-    JPNode node1 = (JPNode) pu.getTopNode().findDirectChild(NodeTypes.DEFINE);
+    JPNode node1 = (JPNode) pu.getTopNode().findDirectChild(ABLNodeType.DEFINE);
     assertNotNull(node1);
     assertTrue(node1.isStateHead());
 
     // Looking for the NO-UNDO node, and trying to get the state-head node
-    JPNode node2 = (JPNode) pu.getTopNode().query(NodeTypes.NOUNDO).get(0);
+    JPNode node2 = (JPNode) pu.getTopNode().query(ABLNodeType.NOUNDO).get(0);
     JPNode parent = node2;
     while (!parent.isStateHead()) {
       parent = parent.getPreviousNode();
@@ -109,7 +108,7 @@ public class ApiTest {
     // First WS, then proparse directive
     tok = (ProToken) tok.getHiddenBefore();
     assertNotNull(tok);
-    assertEquals(tok.getType(), NodeTypes.PROPARSEDIRECTIVE);
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
     assertEquals(tok.getText(), "prolint-nowarn(shared)");
 
     // First WS
@@ -118,7 +117,7 @@ public class ApiTest {
     // Then previous directive
     tok = (ProToken) tok.getHiddenBefore();
     assertNotNull(tok);
-    assertEquals(tok.getType(), NodeTypes.PROPARSEDIRECTIVE);
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
     assertEquals(tok.getText(), "prolint-nowarn(something)");
   }
 
@@ -135,12 +134,12 @@ public class ApiTest {
     File f = new File("src/test/resources/data/abbrev.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.parse();
-    assertFalse(pu.getTopNode().query(NodeTypes.LC).get(0).isAbbreviated());
-    assertFalse(pu.getTopNode().query(NodeTypes.LC).get(0).isAbbreviated());
-    assertTrue(pu.getTopNode().query(NodeTypes.FILEINFORMATION).get(0).isAbbreviated());
-    assertFalse(pu.getTopNode().query(NodeTypes.FILEINFORMATION).get(1).isAbbreviated());
-    assertTrue(pu.getTopNode().query(NodeTypes.SUBSTITUTE).get(0).isAbbreviated());
-    assertFalse(pu.getTopNode().query(NodeTypes.SUBSTITUTE).get(1).isAbbreviated());
+    assertFalse(pu.getTopNode().query(ABLNodeType.LC).get(0).isAbbreviated());
+    assertFalse(pu.getTopNode().query(ABLNodeType.LC).get(0).isAbbreviated());
+    assertTrue(pu.getTopNode().query(ABLNodeType.FILEINFORMATION).get(0).isAbbreviated());
+    assertFalse(pu.getTopNode().query(ABLNodeType.FILEINFORMATION).get(1).isAbbreviated());
+    assertTrue(pu.getTopNode().query(ABLNodeType.SUBSTITUTE).get(0).isAbbreviated());
+    assertFalse(pu.getTopNode().query(ABLNodeType.SUBSTITUTE).get(1).isAbbreviated());
   }
 
   @Test
@@ -167,7 +166,7 @@ public class ApiTest {
     assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
     NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
     assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
-    List<JPNode> nodes = pu.getTopNode().query(NodeTypes.DEFINE);
+    List<JPNode> nodes = pu.getTopNode().query(ABLNodeType.DEFINE);
     assertEquals(nodes.size(), 1);
     // Preprocessor magic... Keywords can start in main file, and end in include file...
     assertEquals(nodes.get(0).getFileIndex(), 0);
@@ -183,7 +182,7 @@ public class ApiTest {
     File f = new File("src/test/resources/data/prepro3.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.parse();
-    List<JPNode> nodes = pu.getTopNode().query(NodeTypes.SUBSTITUTE);
+    List<JPNode> nodes = pu.getTopNode().query(ABLNodeType.SUBSTITUTE);
     assertEquals(nodes.size(), 2);
     JPNode substNode = nodes.get(0);
     JPNode leftParen = substNode.nextNode();
@@ -210,7 +209,7 @@ public class ApiTest {
     // FIXME Wrong value, should be 25
     assertEquals(str2.getEndColumn(), 20);
 
-    List<JPNode> dispNodes = pu.getTopNode().query(NodeTypes.DISPLAY);
+    List<JPNode> dispNodes = pu.getTopNode().query(ABLNodeType.DISPLAY);
     assertEquals(dispNodes.size(), 1);
     JPNode dispNode = dispNodes.get(0);
     JPNode str3 = dispNode.nextNode().nextNode();

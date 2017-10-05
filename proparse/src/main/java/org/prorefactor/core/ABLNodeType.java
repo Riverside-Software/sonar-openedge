@@ -22,6 +22,7 @@ import com.google.common.base.Strings;
 
 public enum ABLNodeType {
   // Placeholders and unknown tokens
+  INVALID_NODE(Token.INVALID_TYPE, NodeTypesOption.PLACEHOLDER),
   EOF_ANTLR4(Token.EOF, NodeTypesOption.PLACEHOLDER),
   EOF(antlr.Token.EOF_TYPE, NodeTypesOption.PLACEHOLDER),
   INCLUDEDIRECTIVE(ProParserTokenTypes.INCLUDEDIRECTIVE, NodeTypesOption.PLACEHOLDER),
@@ -1700,7 +1701,8 @@ public enum ABLNodeType {
   }
 
   public static ABLNodeType getNodeType(int type) {
-    return typeMap.get(type);
+    ABLNodeType nodeType = typeMap.get(type);
+    return nodeType == null ? INVALID_NODE : nodeType;
   }
 
   static boolean isValidType(int type) {

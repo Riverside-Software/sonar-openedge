@@ -39,6 +39,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.NodeTypes;
@@ -321,10 +322,9 @@ public class OpenEdgeProparseSensor implements Sensor {
     File dbgFile = new File(fileName);
     dbgFile.getParentFile().mkdirs();
     try (PrintWriter writer = new PrintWriter(dbgFile)) {
-      JsonNodeLister nodeLister = new JsonNodeLister(unit.getTopNode(), writer,
-          new Integer[] {
-              NodeTypes.LEFTPAREN, NodeTypes.RIGHTPAREN, NodeTypes.COMMA, NodeTypes.PERIOD, NodeTypes.LEXCOLON,
-              NodeTypes.OBJCOLON, NodeTypes.THEN, NodeTypes.END});
+      JsonNodeLister nodeLister = new JsonNodeLister(unit.getTopNode(), writer, ABLNodeType.LEFTPAREN,
+          ABLNodeType.RIGHTPAREN, ABLNodeType.COMMA, ABLNodeType.PERIOD, ABLNodeType.LEXCOLON, ABLNodeType.OBJCOLON,
+          ABLNodeType.THEN, ABLNodeType.END);
       nodeLister.print();
       debugFiles.add(file.relativePath() + ".json");
     } catch (IOException caught) {

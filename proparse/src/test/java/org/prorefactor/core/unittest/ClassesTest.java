@@ -17,8 +17,9 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 
-import org.prorefactor.core.NodeTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -46,8 +47,8 @@ public class ClassesTest {
     unit.treeParser01();
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
-    assertTrue(unit.getTopNode().query(NodeTypes.ANNOTATION).size() == 1);
-    assertEquals("Progress.Lang.Deprecated", unit.getTopNode().query(NodeTypes.ANNOTATION).get(0).getAnnotationName());
+    assertTrue(unit.getTopNode().query(ABLNodeType.ANNOTATION).size() == 1);
+    assertEquals("Progress.Lang.Deprecated", unit.getTopNode().query(ABLNodeType.ANNOTATION).get(0).getAnnotationName());
   }
 
   @Test
@@ -67,8 +68,8 @@ public class ClassesTest {
     assertEquals(unit.getRootScope().getVariables().size(), 2);
 
     for (TreeParserSymbolScope sc : unit.getRootScope().getChildScopesDeep()) {
-      if (sc.getRootBlock().getNode().getType() == NodeTypes.METHOD) continue;
-      if (sc.getRootBlock().getNode().getType() == NodeTypes.CATCH) continue;
+      if (sc.getRootBlock().getNode().getType() == ProParserTokenTypes.METHOD) continue;
+      if (sc.getRootBlock().getNode().getType() == ProParserTokenTypes.CATCH) continue;
       Variable arg = sc.getVariable("arg");
       Variable i = sc.getVariable("i");
       assertNotNull(arg, "Property var not in GET/SET scope");
