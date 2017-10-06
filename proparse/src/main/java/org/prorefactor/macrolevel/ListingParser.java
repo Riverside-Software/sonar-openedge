@@ -11,12 +11,17 @@
  *******************************************************************************/ 
 package org.prorefactor.macrolevel;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Queue;
+
+import org.prorefactor.core.ProToken;
 
 /**
  * For parsing Proparse's "preprocessor listing" file. Generates a "macro tree". The macro tree's root is an IncludeRef
@@ -25,6 +30,10 @@ import java.util.Map;
 public class ListingParser implements ListingListener {
   /** Map of fileIndex (Integer) to fileName (String) */
   private final Map<Integer, String> fileIndexes = new HashMap<>();
+
+  private boolean appBuilderCode = false;
+  private List<EditableTextRange> sections = new ArrayList<>();
+  private EditableTextRange currSection;
 
   private IncludeRef root = null;
 
@@ -163,6 +172,36 @@ public class ListingParser implements ListingListener {
     newDef.undefWhat = globalDefMap.remove(name.toLowerCase(Locale.ENGLISH));
   }
 
+  public void analyzeSuspend(String str, int line) {
+    appBuilderCode = true;
+    if (ProToken.isEditableInAB(str)) {
+      currSection = new EditableTextRange();
+      currSection.fileNum = currInclude.getFileIndex();
+      currSection.startLine = line;
+    }
+  }
+
+  @Override
+  public void analyzeResume(int line) {
+    if ((currSection != null) && (currInclude.getFileIndex() == currSection.fileNum)) {
+      currSection.endLine = line;
+      sections.add(currSection);
+    }
+    currSection = null;
+  }
+
+  public boolean isAppBuilderCode() {
+    return appBuilderCode;
+  }
+
+  public boolean isLineInEditableSection(int file, int line) {
+    for (EditableTextRange range : sections) {
+      if ((range.fileNum == file) && (range.startLine <= line) && (range.endLine >= line))
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Find a MacroDef by name. NOTE: I have not yet implemented {*} and other such built-in macro reference tricks. Not
    * sure how soon I'll need those. There's a good chance that this function will return null.
@@ -192,6 +231,10 @@ public class ListingParser implements ListingListener {
     return ret;
   }
 
+  public List<EditableTextRange> getSections() {
+    return sections;
+  }
+
   // These scopes are temporary, just used during tree creation
   private static class Scope {
     Map<String, MacroDef> defMap = new HashMap<>();
@@ -202,4 +245,19 @@ public class ListingParser implements ListingListener {
     }
   }
 
+  public static class EditableTextRange {
+    private int fileNum;
+    private int startLine;
+    private int endLine;
+    
+    public int getFileNum() {
+      return fileNum;
+    }
+    public int getStartLine() {
+      return startLine;
+    }
+    public int getEndLine() {
+      return endLine;
+    }
+  }
 }

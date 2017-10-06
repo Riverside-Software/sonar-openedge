@@ -17,4 +17,6 @@ public interface ListingListener {
   void preproElse(int line, int column);
   void preproElseIf(int line, int column);
   void preproEndIf(int line, int column);
+  void analyzeSuspend(String str, int line);
+  void analyzeResume(int line);
 }

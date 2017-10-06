@@ -143,25 +143,7 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
    * @return True if token is part of an editable section in AppBuilder managed code
    */
   public boolean isEditableInAB() {
-    if (analyzeSuspend == null)
-      return true;
-    List<String> attrs = Splitter.on(',').omitEmptyStrings().trimResults().splitToList(analyzeSuspend);
-    if (attrs.isEmpty() || !"_UIB-CODE-BLOCK".equalsIgnoreCase(attrs.get(0)))
-      return false;
-
-    if ((attrs.size() >= 3) && "_CUSTOM".equalsIgnoreCase(attrs.get(1))
-        && "_DEFINITIONS".equalsIgnoreCase(attrs.get(2)))
-      return true;
-    else if ((attrs.size() >= 2) && "_CONTROL".equalsIgnoreCase(attrs.get(1)))
-      return true;
-    else if ((attrs.size() == 4) && "_PROCEDURE".equals(attrs.get(1)))
-      return true;
-    else if ((attrs.size() == 5) && "_PROCEDURE".equals(attrs.get(1)) && "_FREEFORM".equals(attrs.get(4)))
-      return true;
-    else if ((attrs.size() >= 2) && "_FUNCTION".equals(attrs.get(1)))
-      return true;
-
-    return false;
+    return isEditableInAB(analyzeSuspend);
   }
 
   /**
@@ -201,5 +183,30 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
     return "[\"" + getText().replace('\r', ' ').replace('\n', ' ') + "\",<" + nodeType + ">,macro=" + macroSourceNum
         + ",file=" + fileIndex + ":" + endFile + ",line=" + line + ":" + endLine + ",col=" + col + ":" + endColumn
         + "]";
+  }
+
+  /**
+   * @return True if token is part of an editable section in AppBuilder managed code
+   */
+  public static boolean isEditableInAB(String str) {
+    if (str == null)
+      return true;
+    List<String> attrs = Splitter.on(',').omitEmptyStrings().trimResults().splitToList(str);
+    if (attrs.isEmpty() || !"_UIB-CODE-BLOCK".equalsIgnoreCase(attrs.get(0)))
+      return false;
+
+    if ((attrs.size() >= 3) && "_CUSTOM".equalsIgnoreCase(attrs.get(1))
+        && "_DEFINITIONS".equalsIgnoreCase(attrs.get(2)))
+      return true;
+    else if ((attrs.size() >= 2) && "_CONTROL".equalsIgnoreCase(attrs.get(1)))
+      return true;
+    else if ((attrs.size() == 4) && "_PROCEDURE".equals(attrs.get(1)))
+      return true;
+    else if ((attrs.size() == 5) && "_PROCEDURE".equals(attrs.get(1)) && "_FREEFORM".equals(attrs.get(4)))
+      return true;
+    else if ((attrs.size() >= 2) && "_FUNCTION".equals(attrs.get(1)))
+      return true;
+
+    return false;
   }
 }

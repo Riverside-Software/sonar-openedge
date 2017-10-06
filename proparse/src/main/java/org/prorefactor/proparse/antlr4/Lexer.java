@@ -929,12 +929,15 @@ public class Lexer  {
       }
       getChar();
       prepro.analyzeSuspend(currentAnalyzeSuspend);
+      prepro.getLstListener().analyzeSuspend(currentAnalyzeSuspend, textStartLine);
       return makeToken(ABLNodeType.AMPANALYZESUSPEND);
     }
     if ("&analyze-resume".equals(macroType)) {
       appendToEOL();
       currentAnalyzeSuspend = "";
       getChar();
+      prepro.analyzeResume();
+      prepro.getLstListener().analyzeResume(textStartLine);
       return makeToken(ABLNodeType.AMPANALYZERESUME);
     }
     if ("&message".equals(macroType)) {

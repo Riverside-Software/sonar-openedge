@@ -63,7 +63,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    * Override this method if you don't want to report issues on AppBuilder code 
    */
   public boolean reportIssueOnAppBuilderCode() {
-    return true;
+    return false;
   }
 
   protected InputFile getInputFile(InputFile file, JPNode node) {
