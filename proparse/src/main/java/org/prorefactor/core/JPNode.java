@@ -748,6 +748,13 @@ public class JPNode implements AST {
   }
 
   /**
+   * @return True if token is part of an editable section in AppBuilder managed code
+   */
+  public boolean isEditableInAB() {
+    return firstNaturalChild().token.isEditableInAB();
+  }
+
+  /**
    * Is this a natural node (from real source text)? If not, then it is a synthetic node, added just for tree structure.
    */
   public boolean isNatural() {

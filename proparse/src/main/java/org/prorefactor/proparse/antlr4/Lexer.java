@@ -928,6 +928,7 @@ public class Lexer  {
             currText.toString().substring(currText.toString().indexOf(' ') + 1)));
       }
       getChar();
+      prepro.analyzeSuspend(currentAnalyzeSuspend);
       return makeToken(ABLNodeType.AMPANALYZESUSPEND);
     }
     if ("&analyze-resume".equals(macroType)) {
@@ -1093,7 +1094,8 @@ public class Lexer  {
     tok.setEndLine(prevLine);
     tok.setEndCharPositionInLine(prevCol);
     tok.setMacroSourceNum(textStartSource);
-    tok.setAnalyzeSuspend(currentAnalyzeSuspend);
+    if (prepro.isAppBuilderCode())
+      tok.setAnalyzeSuspend(currentAnalyzeSuspend);
 
     return tok;
   }

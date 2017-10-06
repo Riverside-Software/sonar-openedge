@@ -59,6 +59,13 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return "";
   }
 
+  /**
+   * Override this method if you don't want to report issues on AppBuilder code 
+   */
+  public boolean reportIssueOnAppBuilderCode() {
+    return true;
+  }
+
   protected InputFile getInputFile(InputFile file, JPNode node) {
     if (node.getFileIndex() == 0) {
       return file;
@@ -72,6 +79,8 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {
       return null;
     }
+    if (!reportIssueOnAppBuilderCode() && !node.isEditableInAB())
+      return null;
 
     InputFile targetFile = getInputFile(file, node);
     if (targetFile == null) {

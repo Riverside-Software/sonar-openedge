@@ -11,7 +11,13 @@
 package org.prorefactor.core;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import com.google.common.base.Splitter;
 
 import antlr.CommonHiddenStreamToken;
 
@@ -32,8 +38,8 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
     this(type, txt, 0, "", 0, 0, 0, 0, 0, 0, "", true);
   }
 
-  public ProToken(ABLNodeType type, String txt, int file, String fileName, int line, int col, int endFile, int endLine, int endCol,
-      int macroSourceNum, String analyzeSuspend, boolean synthetic) {
+  public ProToken(@Nonnull ABLNodeType type, @Nonnull String txt, int file, String fileName, int line, int col, int endFile, int endLine, int endCol,
+      int macroSourceNum, @Nullable String analyzeSuspend, boolean synthetic) {
     // Make sure that the type field is completely hidden in base Token class 
     super(0, txt);
 
@@ -127,10 +133,35 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
   }
 
   /**
-   * @return Comma-separated list of &ANALYZE-SUSPEND options. Never null.
+   * @return Comma-separated list of &ANALYZE-SUSPEND options. Null for code not managed by AppBuilder
    */
   public String getAnalyzeSuspend() {
     return analyzeSuspend;
+  }
+
+  /**
+   * @return True if token is part of an editable section in AppBuilder managed code
+   */
+  public boolean isEditableInAB() {
+    if (analyzeSuspend == null)
+      return true;
+    List<String> attrs = Splitter.on(',').omitEmptyStrings().trimResults().splitToList(analyzeSuspend);
+    if (attrs.isEmpty() || !"_UIB-CODE-BLOCK".equalsIgnoreCase(attrs.get(0)))
+      return false;
+
+    if ((attrs.size() >= 3) && "_CUSTOM".equalsIgnoreCase(attrs.get(1))
+        && "_DEFINITIONS".equalsIgnoreCase(attrs.get(2)))
+      return true;
+    else if ((attrs.size() >= 2) && "_CONTROL".equalsIgnoreCase(attrs.get(1)))
+      return true;
+    else if ((attrs.size() == 4) && "_PROCEDURE".equals(attrs.get(1)))
+      return true;
+    else if ((attrs.size() == 5) && "_PROCEDURE".equals(attrs.get(1)) && "_FREEFORM".equals(attrs.get(4)))
+      return true;
+    else if ((attrs.size() >= 2) && "_FUNCTION".equals(attrs.get(1)))
+      return true;
+
+    return false;
   }
 
   /**

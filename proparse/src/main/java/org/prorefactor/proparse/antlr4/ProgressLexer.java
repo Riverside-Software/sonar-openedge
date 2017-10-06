@@ -109,6 +109,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private IncludeFile currentInclude;
   private InputSource currentInput;
   private Map<String, String> globalDefdNames = new HashMap<>();
+  private boolean appBuilderCode = false;
   private boolean gotLookahead = false;
   private LinkedList<IncludeFile> includeVector = new LinkedList<>();
   private int laFile;
@@ -344,6 +345,16 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     undefHelper(argName, globalDefdNames);
   }
 
+  @Override
+  public void analyzeSuspend(String analyzeSuspend) {
+    this.appBuilderCode = true;
+  }
+
+  @Override
+  public void analyzeResume() {
+    // No-op
+  }
+
   private boolean undefHelper(String argName, Map<String, String> names) {
     if (names.containsKey(argName)) {
       names.remove(argName);
@@ -351,6 +362,10 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     }
     return false;
   }
+
+  // ***********************************
+  // End of IPreprocessor implementation
+  // ***********************************
 
   int getChar() throws IOException {
     wasEscape = false;
@@ -962,6 +977,10 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
   public IProparseSettings getProparseSettings(){
     return ppSettings;
+  }
+
+  public boolean isAppBuilderCode() {
+    return appBuilderCode;
   }
 
   private static class CharPos {

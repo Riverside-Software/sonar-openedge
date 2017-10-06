@@ -66,7 +66,7 @@ public class ProToken implements WritableToken {
   private int endCharPositionInLine;
   private int macroSourceNum;
 
-  private String analyzeSuspend = "";
+  private String analyzeSuspend = null;
 
   public ProToken(ABLNodeType type, String text) {
     this.type = type;
@@ -131,7 +131,7 @@ public class ProToken implements WritableToken {
   }
 
   /**
-   * @return Comma-separated list of &ANALYZE-SUSPEND options. Never null.
+   * @return Comma-separated list of &ANALYZE-SUSPEND options. Null for code not managed by AppBuilder.
    */
   public String getAnalyzeSuspend() {
     return analyzeSuspend;
