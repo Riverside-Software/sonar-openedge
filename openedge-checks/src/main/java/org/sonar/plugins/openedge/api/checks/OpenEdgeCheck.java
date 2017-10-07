@@ -31,11 +31,11 @@ public abstract class OpenEdgeCheck<T> {
     this.context = context;
   }
 
-  public RuleKey getRuleKey() {
+  public final RuleKey getRuleKey() {
     return ruleKey;
   }
 
-  public SensorContext getContext() {
+  public final SensorContext getContext() {
     return context;
   }
 
@@ -44,6 +44,13 @@ public abstract class OpenEdgeCheck<T> {
    * context.
    */
   public abstract void initialize();
+
+  /**
+   * Only for internal SonarQube usage
+   * @param file
+   * @param o
+   */
+  public abstract void sensorExecute(InputFile file, T o);
 
   /**
    * Main method of the check

@@ -42,4 +42,16 @@ public interface IPreprocessor {
    * @param argName
    */
   void undef(String argName);
+
+  /**
+   * Implementation of &ANALYZE-SUSPEND 
+   * @param analyzeSuspend Attributes
+   */
+  void analyzeSuspend(String analyzeSuspend);
+
+  /**
+   * Implementation of &ANALYZE-RESUME 
+   * @param analyzeSuspend Attributes
+   */
+  void analyzeResume();
 }

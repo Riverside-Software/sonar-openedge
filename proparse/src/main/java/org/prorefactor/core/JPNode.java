@@ -265,7 +265,7 @@ public class JPNode implements AST {
   /**
    * Source number in the macro tree.
    * 
-   * @see org.prorefactor.macrolevel.ListingParser#sourceArray()
+   * @see org.prorefactor.macrolevel.PreprocessorEventListener#sourceArray()
    */
   public int getSourceNum() {
     return token.getMacroSourceNum();
@@ -745,6 +745,13 @@ public class JPNode implements AST {
 
   public boolean isAbbreviated() {
     return token.getNodeType().isAbbreviated(getText());
+  }
+
+  /**
+   * @return True if token is part of an editable section in AppBuilder managed code
+   */
+  public boolean isEditableInAB() {
+    return firstNaturalChild().token.isEditableInAB();
   }
 
   /**

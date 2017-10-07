@@ -1,6 +1,7 @@
 package org.sonar.plugins.openedge.api.checks;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.InvalidLicenceException;
@@ -22,6 +23,11 @@ public abstract class OpenEdgeDumpFileCheck extends OpenEdgeCheck<ParseTree> {
    */
   public OpenEdgeDumpFileCheck(RuleKey ruleKey, SensorContext context, Licence licence) {
     super(ruleKey, context, licence);
+  }
+
+  @Override
+  public final void sensorExecute(InputFile file, ParseTree unit) {
+    execute(file, unit);
   }
 
   @Override

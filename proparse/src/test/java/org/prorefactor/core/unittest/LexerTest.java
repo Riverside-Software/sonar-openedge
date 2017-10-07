@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Gilles Querret
+* Copyright (c) 2017 Gilles Querret
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,13 @@
 package org.prorefactor.core.unittest;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.ProParserTokenTypes;
@@ -267,6 +271,52 @@ public class LexerTest {
     // Make sure nextToken() always return EOF (and no null element or any exception)
     assertEquals(stream.nextToken().getType(), Token.EOF_TYPE);
     assertEquals(stream.nextToken().getType(), Token.EOF_TYPE);
+  }
+
+  @Test
+  public void testAnalyzeSuspend() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer05.p"), session);
+    TokenStream stream = unit.lex();
+
+    ProToken tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertTrue(tok.getAnalyzeSuspend().isEmpty());
+    assertFalse(tok.isEditableInAB());
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertFalse(tok.isEditableInAB());
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertTrue(tok.isEditableInAB());
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertFalse(tok.isEditableInAB());
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertFalse(tok.isEditableInAB());
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertTrue(tok.isEditableInAB());
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertFalse(tok.isEditableInAB());
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertTrue(tok.isEditableInAB());
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertTrue(tok.isEditableInAB());
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertTrue(tok.isEditableInAB());
+  }
+
+  private ProToken nextToken(TokenStream stream, ABLNodeType type) throws Exception {
+    ProToken tok = (ProToken) stream.nextToken();
+    while (tok.getNodeType() != ABLNodeType.MESSAGE) {
+      tok = (ProToken) stream.nextToken();
+    }
+    return tok;
   }
 
 }

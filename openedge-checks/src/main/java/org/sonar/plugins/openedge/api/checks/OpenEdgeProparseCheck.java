@@ -24,6 +24,8 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeProparseCheck.class);
   private static final String INC_MESSAGE = "From {0} - {1}";
 
+  private ParseUnit unit;
+
   /**
    * Standard constructor of a Proparse based check
    * 
@@ -35,6 +37,11 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    */
   public OpenEdgeProparseCheck(RuleKey ruleKey, SensorContext context, Licence licence) {
     super(ruleKey, context, licence);
+  }
+
+  public final void sensorExecute(InputFile file, ParseUnit unit) {
+    this.unit = unit;
+    execute(file, unit);
   }
 
   @Override
@@ -59,6 +66,13 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return "";
   }
 
+  /**
+   * Override this method if you don't want to report issues on AppBuilder code 
+   */
+  public boolean reportIssueOnAppBuilderCode() {
+    return false;
+  }
+
   protected InputFile getInputFile(InputFile file, JPNode node) {
     if (node.getFileIndex() == 0) {
       return file;
@@ -72,6 +86,8 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {
       return null;
     }
+    if (unit.isAppBuilderCode() && !reportIssueOnAppBuilderCode() && !node.isEditableInAB())
+      return null;
 
     InputFile targetFile = getInputFile(file, node);
     if (targetFile == null) {

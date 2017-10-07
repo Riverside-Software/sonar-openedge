@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+* * Copyright (c) 2003-2015 John Green
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,8 +22,10 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.macrolevel.IncludeRef;
+import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
+import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
 import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
@@ -57,7 +59,9 @@ public class ParseUnit {
   private final IntegerIndex<String> fileNameList;
 
   private ProgramRootNode topNode;
-  private IncludeRef macroGraph = null;
+  private IncludeRef macroGraph;
+  private boolean appBuilderCode;
+  private List<EditableCodeSection> sections;
   private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
   private Document xref = null;
@@ -161,6 +165,7 @@ public class ParseUnit {
       lexer.parseComplete();
 
       macroGraph = lexer.getMacroGraph();
+      sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
       setTopNode((JPNode) parser.getAST());
       this.metrics = lexer.getMetrics();
     } catch (ANTLRException | IOException caught) {
@@ -239,4 +244,20 @@ public class ParseUnit {
   public RefactorSession getSession() {
     return session;
   }
+
+  public boolean isAppBuilderCode() {
+    return appBuilderCode;
+  }
+
+  public boolean isInEditableSection(int file, int line) {
+    if (!appBuilderCode || (file > 0))
+      return true;
+    for (EditableCodeSection range : sections) {
+      if ((range.getFileNum() == file) && (range.getStartLine() <= line) && (range.getEndLine() >= line))
+        return true;
+    }
+    return false;
+
+  }
+
 }

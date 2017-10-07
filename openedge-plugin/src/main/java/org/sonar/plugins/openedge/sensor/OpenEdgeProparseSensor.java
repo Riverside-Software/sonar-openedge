@@ -245,7 +245,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}", entry.getKey().internalKey(),
             entry.getKey().ruleKey().repository(), entry.getKey().ruleKey().rule());
         startTime = System.currentTimeMillis();
-        entry.getValue().execute(file, unit);
+        entry.getValue().sensorExecute(file, unit);
         ruleTime.put(entry.getKey().ruleKey().toString(),
             ruleTime.get(entry.getKey().ruleKey().toString()) + System.currentTimeMillis() - startTime);
       }
