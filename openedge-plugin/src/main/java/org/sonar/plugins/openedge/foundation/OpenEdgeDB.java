@@ -22,15 +22,15 @@ package org.sonar.plugins.openedge.foundation;
 import java.util.List;
 
 import org.sonar.api.resources.AbstractLanguage;
+import org.sonar.plugins.openedge.api.Constants;
 
 import com.google.common.collect.ImmutableList;
 
 public class OpenEdgeDB extends AbstractLanguage {
-  public static final String KEY = "oedb";
   public final List<String> extensions;
   
   public OpenEdgeDB() {
-    super(KEY, "OpenEdgeDB");
+    super(Constants.DB_LANGUAGE_KEY, "OpenEdgeDB");
     extensions = ImmutableList.of(".df");
   }
 

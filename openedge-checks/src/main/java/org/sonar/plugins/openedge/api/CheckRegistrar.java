@@ -24,7 +24,6 @@ public interface CheckRegistrar {
   class RegistrarContext {
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckRegistrar.RegistrarContext.class);
 
-    private String repositoryKey;
     private Iterable<Class<? extends OpenEdgeProparseCheck>> proparseCheckClasses;
     private Iterable<Class<? extends OpenEdgeDumpFileCheck>> dbCheckClasses;
 
@@ -32,13 +31,8 @@ public interface CheckRegistrar {
         Iterable<Class<? extends OpenEdgeProparseCheck>> proparseChecks,
         Iterable<Class<? extends OpenEdgeDumpFileCheck>> dbChecks) {
       LOGGER.debug("Registering class for repository {}", repositoryKey);
-      this.repositoryKey = repositoryKey;
       this.proparseCheckClasses = proparseChecks;
       this.dbCheckClasses = dbChecks;
-    }
-
-    public String repositoryKey() {
-      return repositoryKey;
     }
 
     public Iterable<Class<? extends OpenEdgeDumpFileCheck>> getDbCheckClasses() {
