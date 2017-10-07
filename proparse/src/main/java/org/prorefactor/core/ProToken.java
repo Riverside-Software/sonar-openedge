@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import com.google.common.base.Splitter;
 
@@ -39,7 +38,7 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
   }
 
   public ProToken(@Nonnull ABLNodeType type, @Nonnull String txt, int file, String fileName, int line, int col, int endFile, int endLine, int endCol,
-      int macroSourceNum, @Nullable String analyzeSuspend, boolean synthetic) {
+      int macroSourceNum, @Nonnull String analyzeSuspend, boolean synthetic) {
     // Make sure that the type field is completely hidden in base Token class 
     super(0, txt);
 
@@ -189,8 +188,6 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
    * @return True if token is part of an editable section in AppBuilder managed code
    */
   public static boolean isEditableInAB(String str) {
-    if (str == null)
-      return true;
     List<String> attrs = Splitter.on(',').omitEmptyStrings().trimResults().splitToList(str);
     if (attrs.isEmpty() || !"_UIB-CODE-BLOCK".equalsIgnoreCase(attrs.get(0)))
       return false;

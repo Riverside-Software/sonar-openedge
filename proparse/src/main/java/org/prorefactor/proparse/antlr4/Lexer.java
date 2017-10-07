@@ -1097,8 +1097,7 @@ public class Lexer  {
     tok.setEndLine(prevLine);
     tok.setEndCharPositionInLine(prevCol);
     tok.setMacroSourceNum(textStartSource);
-    if (prepro.isAppBuilderCode())
-      tok.setAnalyzeSuspend(currentAnalyzeSuspend);
+    tok.setAnalyzeSuspend(currentAnalyzeSuspend);
 
     return tok;
   }
