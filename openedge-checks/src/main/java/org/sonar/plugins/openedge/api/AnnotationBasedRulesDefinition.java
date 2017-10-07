@@ -168,6 +168,7 @@ public class AnnotationBasedRulesDefinition {
   }
 
   private class ExternalDescriptionLoader {
+    @SuppressWarnings("unused")
     private final NewRepository repository;
     private final String resourceBasePath;
 

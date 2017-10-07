@@ -316,6 +316,7 @@ public class RCodeInfo {
     }
   }
 
+  @SuppressWarnings("unused")
   private final void processInitialValueSegment(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {
     byte[] segment = new byte[initialValueSegmentSize];
     int bytesRead = input.read(segment);
@@ -429,6 +430,7 @@ public class RCodeInfo {
     }
   }
 
+  @SuppressWarnings("unused")
   private static Function parseProcSignature(String str) {
     Function fn = new Function();
     

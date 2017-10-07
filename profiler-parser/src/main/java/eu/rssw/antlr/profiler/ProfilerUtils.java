@@ -16,7 +16,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.w3c.dom.Document;
@@ -33,7 +33,7 @@ public final class ProfilerUtils {
   }
 
   public static final ProfilerSession getProfilerSession(InputStream input) throws IOException {
-    ProfilerGrammarLexer lexer = new ProfilerGrammarLexer(new ANTLRInputStream(input));
+    ProfilerGrammarLexer lexer = new ProfilerGrammarLexer(CharStreams.fromStream(input));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     ProfilerGrammarParser parser = new ProfilerGrammarParser(tokens);
     ParseTree tree = parser.profiler();
