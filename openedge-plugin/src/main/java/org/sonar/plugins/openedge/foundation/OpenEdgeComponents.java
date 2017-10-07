@@ -153,7 +153,7 @@ public class OpenEdgeComponents {
     // DB rules
     for (ActiveRule rule : context.activeRules().findByLanguage(Constants.DB_LANGUAGE_KEY)) {
       OpenEdgeCheck lint = initializeCheck(context, rule, permId);
-      if ((lint != null) && (lint.getCheckType() == CheckType.PROPARSE)) {
+      if ((lint != null) && (lint.getCheckType() == CheckType.DUMP_FILE)) {
         dfChecks.add((OpenEdgeDumpFileCheck) lint);
         dfChecksMap.put(rule, (OpenEdgeDumpFileCheck) lint);
       }
