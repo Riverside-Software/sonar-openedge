@@ -12,6 +12,7 @@
 package org.prorefactor.macrolevel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,23 +20,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Queue;
 
 import org.prorefactor.core.ProToken;
 
 /**
- * For parsing Proparse's "preprocessor listing" file. Generates a "macro tree". The macro tree's root is an IncludeRef
- * object. The root IncludeRef represents the main.p source file.
+ * Catch preprocessor events in order to generate a macro tree.
  */
-public class ListingParser implements ListingListener {
-  /** Map of fileIndex (Integer) to fileName (String) */
-  private final Map<Integer, String> fileIndexes = new HashMap<>();
+public class PreprocessorEventListener implements IPreprocessorEventListener {
+  private final IncludeRef root;
 
+  // AppBuilder managed is read-only by default - Keep track of editable code sections
   private boolean appBuilderCode = false;
-  private List<EditableTextRange> sections = new ArrayList<>();
-  private EditableTextRange currSection;
-
-  private IncludeRef root = null;
+  private final List<EditableCodeSection> sections = new ArrayList<>();
 
   /* Temp stack of scopes, just used during tree creation */
   private Deque<Scope> scopeStack = new LinkedList<>();
@@ -43,9 +39,12 @@ public class ListingParser implements ListingListener {
   /* Temp stack of global defines, just used during tree creation */
   private Map<String, MacroDef> globalDefMap = new HashMap<>();
   private MacroRef currRef;
+  /* Temp object for editable section */
+  private EditableCodeSection currSection;
 
-  public ListingParser() {
+  public PreprocessorEventListener() {
     root = new IncludeRef(null, 0, 0);
+
     currRef = root;
     currInclude = root;
     scopeStack.addFirst(new Scope(root));
@@ -137,11 +136,6 @@ public class ListingParser implements ListingListener {
   }
 
   @Override
-  public void fileIndex(int num, String name) {
-    fileIndexes.put(num, name);
-  }
-
-  @Override
   public void undefine(int line, int column, String name) {
     // Add an object for this macro event.
     MacroDef newDef = new MacroDef(currRef, MacroDef.UNDEFINE, line, column, name, "");
@@ -174,8 +168,8 @@ public class ListingParser implements ListingListener {
 
   public void analyzeSuspend(String str, int line) {
     appBuilderCode = true;
-    if (ProToken.isEditableInAB(str)) {
-      currSection = new EditableTextRange();
+    if ((currInclude.getFileIndex() == 0) && ProToken.isEditableInAB(str)) {
+      currSection = new EditableCodeSection();
       currSection.fileNum = currInclude.getFileIndex();
       currSection.startLine = line;
     }
@@ -195,7 +189,7 @@ public class ListingParser implements ListingListener {
   }
 
   public boolean isLineInEditableSection(int file, int line) {
-    for (EditableTextRange range : sections) {
+    for (EditableCodeSection range : sections) {
       if ((range.fileNum == file) && (range.startLine <= line) && (range.endLine >= line))
       return true;
     }
@@ -231,8 +225,8 @@ public class ListingParser implements ListingListener {
     return ret;
   }
 
-  public List<EditableTextRange> getSections() {
-    return sections;
+  public List<EditableCodeSection> getEditableCodeSections() {
+    return Collections.unmodifiableList(sections);
   }
 
   // These scopes are temporary, just used during tree creation
@@ -245,17 +239,28 @@ public class ListingParser implements ListingListener {
     }
   }
 
-  public static class EditableTextRange {
+  public static class EditableCodeSection {
     private int fileNum;
     private int startLine;
     private int endLine;
-    
+
+    /**
+     * @return Always 0 for now
+     */
     public int getFileNum() {
       return fileNum;
     }
+
+    /**
+     * @return Starting line number of editable code sectin
+     */
     public int getStartLine() {
       return startLine;
     }
+
+    /**
+     * @return Ending line number of editable code sectin
+     */
     public int getEndLine() {
       return endLine;
     }

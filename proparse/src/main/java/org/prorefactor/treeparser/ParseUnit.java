@@ -22,10 +22,10 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.macrolevel.IncludeRef;
-import org.prorefactor.macrolevel.ListingParser;
+import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
-import org.prorefactor.macrolevel.ListingParser.EditableTextRange;
+import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
 import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
@@ -59,8 +59,9 @@ public class ParseUnit {
   private final IntegerIndex<String> fileNameList;
 
   private ProgramRootNode topNode;
-  private IncludeRef macroGraph = null;
-  private List<EditableTextRange> sections = null;
+  private IncludeRef macroGraph;
+  private boolean appBuilderCode;
+  private List<EditableCodeSection> sections;
   private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
   private Document xref = null;
@@ -164,7 +165,7 @@ public class ParseUnit {
       lexer.parseComplete();
 
       macroGraph = lexer.getMacroGraph();
-      sections = ((ListingParser) lexer.getLstListener()).getSections();
+      sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
       setTopNode((JPNode) parser.getAST());
       this.metrics = lexer.getMetrics();
     } catch (ANTLRException | IOException caught) {
@@ -244,12 +245,16 @@ public class ParseUnit {
     return session;
   }
 
+  public boolean isAppBuilderCode() {
+    return appBuilderCode;
+  }
+
   public boolean isInEditableSection(int file, int line) {
-    if ((sections == null) || sections.isEmpty()) 
+    if (!appBuilderCode || (file > 0))
       return true;
-    for (EditableTextRange range : sections) {
-      if ((range.getFileNum() == file) && (range.getStartLine()<= line) && (range.getEndLine()>= line))
-      return true;
+    for (EditableCodeSection range : sections) {
+      if ((range.getFileNum() == file) && (range.getStartLine() <= line) && (range.getEndLine() >= line))
+        return true;
     }
     return false;
 

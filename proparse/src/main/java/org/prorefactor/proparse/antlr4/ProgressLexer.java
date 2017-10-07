@@ -28,8 +28,8 @@ import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.macrolevel.IncludeRef;
-import org.prorefactor.macrolevel.ListingListener;
-import org.prorefactor.macrolevel.ListingParser;
+import org.prorefactor.macrolevel.IPreprocessorEventListener;
+import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.IProparseSettings;
@@ -104,7 +104,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private String includeDirectiveText;
   private FilePos textStart;
 
-  private ListingListener lstListener;
+  private IPreprocessorEventListener lstListener;
 
   private IncludeFile currentInclude;
   private InputSource currentInput;
@@ -142,7 +142,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     currentInclude = new IncludeFile(fileName, currentInput);
     includeVector.add(currentInclude);
     currSourceNum = currentInput.getSourceNum();
-    lstListener = new ListingParser();
+    lstListener = new PreprocessorEventListener();
     
     lexer = new Lexer(this);
     TokenSource postlexer = lexOnly ? new NoOpPostLexer(lexer) : new PostLexer(lexer);
@@ -859,14 +859,6 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     // Otherwise, these hang around until the next parse or until the Progress
     // session closes, and nothing else can write to the include files.
 
-    // List all file indexes.
-    // TODO Probably a much cleaner way to write that
-    int i = 0;
-    while (filenameList.hasIndex(i)) {
-      getLstListener().fileIndex(i, getFilename(i));
-      ++i;
-    }
-
     while (popInput() != 0) {
       // No-op
     }
@@ -962,7 +954,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     return textStart;
   }
 
-  public ListingListener getLstListener() {
+  public IPreprocessorEventListener getLstListener() {
     return lstListener;
   }
 
@@ -971,7 +963,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   }
 
   public IncludeRef getMacroGraph() {
-    return ((ListingParser) lstListener).getMacroGraph();
+    return ((PreprocessorEventListener) lstListener).getMacroGraph();
   }
 
   public IProparseSettings getProparseSettings(){
@@ -979,7 +971,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   }
 
   public boolean isAppBuilderCode() {
-    return ((ListingParser) lstListener).isAppBuilderCode();
+    return ((PreprocessorEventListener) lstListener).isAppBuilderCode();
   }
 
   private static class CharPos {
