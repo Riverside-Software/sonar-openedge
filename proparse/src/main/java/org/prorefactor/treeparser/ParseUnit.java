@@ -165,6 +165,7 @@ public class ParseUnit {
       lexer.parseComplete();
 
       macroGraph = lexer.getMacroGraph();
+      appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
       sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
       setTopNode((JPNode) parser.getAST());
       this.metrics = lexer.getMetrics();
