@@ -23,12 +23,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -73,7 +75,7 @@ public class BugFixTest {
   @AfterTest
   public void tearDown() throws IOException {
     PrintWriter writer = new PrintWriter(new File(tempDir, "index.html"));
-    writer.println("<!DOCTYPE html><html><head><meta charset=\"utf-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"http://riverside-software.fr/d3-style.css\" />"); 
+    writer.println("<!DOCTYPE html><html><head><meta charset=\"utf-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"http://riverside-software.fr/d3-style.css\" />");
     writer.println("<script src=\"http://riverside-software.fr/jquery-1.10.2.min.js\"></script><script src=\"http://riverside-software.fr/d3.v3.min.js\"></script>");
     writer.println("<script>var data= { \"files\": [");
     int zz = 1;
@@ -417,6 +419,36 @@ public class BugFixTest {
   public void testExtentFunction() throws ANTLRException {
     genericTest("testextent1.cls");
     genericTest("testextent2.p");
+  }
+
+  @Test
+  public void testTTLikeDB01() throws ANTLRException {
+    genericTest("ttlikedb01.p");
+  }
+
+  @Test
+  public void testTTLikeDB02() throws ANTLRException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/bugsfixed/ttlikedb02.p"), session);
+    assertNull(unit.getTopNode());
+    assertNull(unit.getRootScope());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+
+    // First FIND statement
+    JPNode node = unit.getTopNode().queryStateHead(ABLNodeType.FIND).get(0);
+    assertNotNull(node);
+    assertEquals(node.query(ABLNodeType.RECORD_NAME).size(), 1);
+    Object obj = node.query(ABLNodeType.RECORD_NAME).get(0).getLink(IConstants.SYMBOL);
+    assertNotNull(obj);
+    assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_DBTABLE);
+
+    // Second FIND statement
+    node = unit.getTopNode().queryStateHead(ABLNodeType.FIND).get(1);
+    assertNotNull(node);
+    assertEquals(node.query(ABLNodeType.RECORD_NAME).size(), 1);
+    obj = node.query(ABLNodeType.RECORD_NAME).get(0).getLink(IConstants.SYMBOL);
+    assertNotNull(obj);
+    assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_TTABLE);
   }
 
   @Test
