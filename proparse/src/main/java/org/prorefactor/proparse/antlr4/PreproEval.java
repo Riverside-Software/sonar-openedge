@@ -509,6 +509,8 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
       delim = ",";
     else
       delim = getString(odelim);
+    if (delim.isEmpty())
+      delim = " ";
     // Progress position numbers start at 1
     if (pos < 1)
       throw new ProEvalException("ENTRY function received non-positive number");
