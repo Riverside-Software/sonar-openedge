@@ -11,6 +11,7 @@
 package org.prorefactor.treeparser;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -18,8 +19,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.antlr.v4.runtime.TokenSource;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
@@ -28,6 +31,7 @@ import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
 import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.proparse.ProParser;
+import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
@@ -131,6 +135,24 @@ public class ParseUnit {
   public TokenStream lex() throws IOException {
     ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, true);
     return lexer.getANTLR2TokenStream(false);
+  }
+
+  public void preprocess() throws IOException {
+    ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, false);
+    TokenStream stream = lexer.getANTLR2TokenStream(false);
+    try (FileWriter writer = new FileWriter("foo.preprocess")){
+      ProToken tok = (ProToken) stream.nextToken();
+      while (tok.getType() != Token.EOF_TYPE) {
+        if ((tok.getNodeType() == ABLNodeType.AMPSCOPEDDEFINE) || (tok.getNodeType() == ABLNodeType.AMPGLOBALDEFINE)) {
+//            writer.write("prepro");
+        } else {
+          writer.write(tok.getText());
+        }
+        tok = (ProToken) stream.nextToken();
+      }
+    } catch (TokenStreamException uncaught) {
+
+    }
   }
 
   public void lexAndGenerateMetrics() throws RefactorException {
