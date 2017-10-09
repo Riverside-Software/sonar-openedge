@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.proparse.antlr4.PreprocessorParser.AndOrContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.AndContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.ComparisonContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.DbTypeFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.DecimalFunctionContext;
@@ -38,6 +38,7 @@ import org.prorefactor.proparse.antlr4.PreprocessorParser.NotContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.NumEntriesFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.NumberContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.OpsysFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.OrContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.PlusContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.PreproIfEvalContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.ProversionFunctionContext;
@@ -82,17 +83,23 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   // Expr
   // ****
   @Override
-  public Object visitAndOr(AndOrContext ctx) {
+  public Object visitAnd(AndContext ctx) {
     Object o1 = visit(ctx.expr(0));
     Object o2 = visit(ctx.expr(1));
     boolean b1 = (o1 != null) && getBool(o1);
     boolean b2 = (o2 != null) && getBool(o2);
 
-    if (ctx.op.getType() == PreprocessorParser.OR) {
-      return b1 || b2;
-    } else {
-      return b1 && b2;
-    }
+    return b1 && b2;
+  }
+
+  @Override
+  public Object visitOr(OrContext ctx) {
+    Object o1 = visit(ctx.expr(0));
+    Object o2 = visit(ctx.expr(1));
+    boolean b1 = (o1 != null) && getBool(o1);
+    boolean b2 = (o2 != null) && getBool(o2);
+
+    return b1 || b2;
   }
 
   @Override
