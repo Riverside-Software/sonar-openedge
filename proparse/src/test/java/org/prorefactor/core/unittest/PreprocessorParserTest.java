@@ -31,11 +31,15 @@ public class PreprocessorParserTest {
   private ParseUnit unit;
 
   @BeforeTest
-  public void setUp() throws Exception {
+  public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
-    unit = new ParseUnit(new File(SRC_DIR, "preprocessor01.p"), session);
-    unit.parse();
+    try {
+      unit = new ParseUnit(new File(SRC_DIR, "preprocessor01.p"), session);
+      unit.parse();
+    } catch (Exception caught) {
+      throw new RuntimeException(caught);
+    }
   }
 
   private void testVariable(JPNode topNode, String variable) {
