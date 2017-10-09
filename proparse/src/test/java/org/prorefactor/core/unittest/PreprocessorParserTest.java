@@ -202,6 +202,12 @@ public class PreprocessorParserTest {
   }
 
   @Test
+  public void testEntry4() throws Exception {
+    testVariable(unit.getTopNode(), "var66");
+    testNoVariable(unit.getTopNode(), "var67");
+  }
+
+  @Test
   public void testIndex1() throws Exception {
     testVariable(unit.getTopNode(), "var26");
   }
