@@ -1,5 +1,5 @@
 /*******************************************************************************
-* * Copyright (c) 2003-2015 John Green
+ * Copyright (c) 2003-2015 John Green
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,23 +11,21 @@
 package org.prorefactor.treeparser;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.antlr.v4.runtime.TokenSource;
-import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
-import org.prorefactor.core.ProToken;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.macrolevel.IncludeRef;
-import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
+import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
 import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.proparse.ProParser;
@@ -137,24 +135,6 @@ public class ParseUnit {
     return lexer.getANTLR2TokenStream(false);
   }
 
-  public void preprocess() throws IOException {
-    ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, false);
-    TokenStream stream = lexer.getANTLR2TokenStream(false);
-    try (FileWriter writer = new FileWriter("foo.preprocess")){
-      ProToken tok = (ProToken) stream.nextToken();
-      while (tok.getType() != Token.EOF_TYPE) {
-        if ((tok.getNodeType() == ABLNodeType.AMPSCOPEDDEFINE) || (tok.getNodeType() == ABLNodeType.AMPGLOBALDEFINE)) {
-//            writer.write("prepro");
-        } else {
-          writer.write(tok.getText());
-        }
-        tok = (ProToken) stream.nextToken();
-      }
-    } catch (TokenStreamException uncaught) {
-
-    }
-  }
-
   public void lexAndGenerateMetrics() throws RefactorException {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
     try {
@@ -172,6 +152,26 @@ public class ParseUnit {
       LOGGER.trace("Exiting ParseUnit#lex()");
     } catch (IOException caught) {
       throw new RefactorException(caught);
+    }
+  }
+
+  /**
+   * Equivalent to PREPROCESS option of COMPILE statement
+   */
+  public void preprocess(Writer writer) throws IOException {
+    ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, false);
+    TokenStream stream = lexer.getANTLR2TokenStream(false);
+    try {
+      Token tok = stream.nextToken();
+      while (tok.getType() != Token.EOF_TYPE) {
+        if ((tok.getType() != ProParserTokenTypes.AMPSCOPEDDEFINE)
+            && (tok.getType() != ProParserTokenTypes.AMPGLOBALDEFINE)) {
+          writer.write(tok.getText());
+        }
+        tok = stream.nextToken();
+      }
+    } catch (TokenStreamException uncaught) {
+
     }
   }
 

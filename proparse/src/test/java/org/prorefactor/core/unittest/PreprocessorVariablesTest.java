@@ -11,6 +11,8 @@
 package org.prorefactor.core.unittest;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.StringWriter;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
@@ -82,4 +84,13 @@ public class PreprocessorVariablesTest {
     Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
   }
 
+  @Test
+  public void testPreprocessOption() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor03.p"), session);
+    try (StringWriter writer = new StringWriter()) {
+      unit.preprocess(writer);
+      String content = writer.getBuffer().toString();
+      Assert.assertEquals(content, "\nDEFINE VARIABLE var01 AS CHARACTER NO-UNDO.\n  \n\n");
+    }
+  }
 }
