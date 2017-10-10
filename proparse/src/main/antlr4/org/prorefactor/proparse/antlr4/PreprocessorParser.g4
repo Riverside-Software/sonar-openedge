@@ -17,7 +17,8 @@ expr:
   | expr op=(EQUAL | EQ | GTORLT | NE | RIGHTANGLE | GTHAN | LEFTANGLE | LTHAN | GTOREQUAL | GE | LTOREQUAL | LE) expr
                                       # comparison
   | NOT expr                          # not
-  | expr op=(OR | AND) expr           # andOr
+  | expr AND expr                     # and
+  | expr OR expr                      # or
   | function                          # functionExpr
   | atom                              # atomExpr
 ;
