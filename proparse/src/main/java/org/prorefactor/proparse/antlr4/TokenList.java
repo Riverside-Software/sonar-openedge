@@ -101,7 +101,7 @@ public class TokenList implements TokenSource {
       tok = queue.removeLast();
       while ((tok.getNodeType() == ABLNodeType.WS) || (tok.getNodeType() == ABLNodeType.COMMENT)) {
         comments.addFirst(tok);
-        tok = queue.pollLast();
+        tok = queue.removeLast();
       }
   
       foundNamedot = false;

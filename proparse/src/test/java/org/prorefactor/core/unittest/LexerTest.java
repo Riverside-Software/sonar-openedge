@@ -257,6 +257,18 @@ public class LexerTest {
   }
 
   @Test
+  public void testTokenList08() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist08.p"), session);
+    TokenStream stream = unit.lex();
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.COMMENT);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.FILE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PLUS);
+  }
+
+  @Test
   public void testEndOfFile() throws Exception {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist01.p"), session);
     TokenStream stream = unit.lex();
