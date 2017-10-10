@@ -31,11 +31,15 @@ public class PreprocessorParserTest {
   private ParseUnit unit;
 
   @BeforeTest
-  public void setUp() throws Exception {
+  public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
-    unit = new ParseUnit(new File(SRC_DIR, "preprocessor01.p"), session);
-    unit.parse();
+    try {
+      unit = new ParseUnit(new File(SRC_DIR, "preprocessor01.p"), session);
+      unit.parse();
+    } catch (Exception caught) {
+      throw new RuntimeException(caught);
+    }
   }
 
   private void testVariable(JPNode topNode, String variable) {
@@ -199,6 +203,18 @@ public class PreprocessorParserTest {
   @Test
   public void testEntry3() throws Exception {
     testNoVariable(unit.getTopNode(), "var25");
+  }
+
+  @Test
+  public void testEntry4() throws Exception {
+    testVariable(unit.getTopNode(), "var66");
+    testNoVariable(unit.getTopNode(), "var67");
+  }
+
+  @Test
+  public void testEntry5() throws Exception {
+    testVariable(unit.getTopNode(), "var68");
+    testNoVariable(unit.getTopNode(), "var69");
   }
 
   @Test
