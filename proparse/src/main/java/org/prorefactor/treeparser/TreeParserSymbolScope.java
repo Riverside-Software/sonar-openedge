@@ -321,15 +321,14 @@ public class TreeParserSymbolScope {
   /**
    * Lookup a named record/table buffer in this scope or an enclosing scope.
    * 
-   * @param inName String buffer name.
-   * @return A Buffer, or null if not found.
+   * @param inName String buffer name
+   * @return A TableBuffer, or null if not found.
    */
   public TableBuffer lookupBuffer(String inName) {
     // - Buffer names cannot be abbreviated.
     // - Buffer names *can* be qualified with a database name.
-    // - Buffer names *are* unique in a given scope: you cannot have two
-    // buffers with the same name in the same scope even if they are
-    // for two different databases.
+    // - Buffer names *are* unique in a given scope: you cannot have two buffers with the same name in the same scope
+    // even if they are for two different databases.
     String[] parts = inName.split("\\.");
     String bufferPart;
     String dbPart = "";
@@ -340,14 +339,15 @@ public class TreeParserSymbolScope {
       bufferPart = parts[1];
     }
     TableBuffer symbol = bufferMap.get(bufferPart.toLowerCase());
-    if (symbol == null
-        || (dbPart.length() != 0 && !dbPart.equalsIgnoreCase(symbol.getTable().getDatabase().getName()))) {
+    if (symbol == null || (!dbPart.isEmpty() && !dbPart.equalsIgnoreCase(symbol.getTable().getDatabase().getName()))
+        || (!dbPart.isEmpty() && (symbol.getTable().getStoretype() == IConstants.ST_TTABLE))) {
       if (parentScope != null) {
         TableBuffer tb = parentScope.lookupBuffer(inName);
         if (tb != null) {
           return tb;
         }
       }
+      return null;
     }
     return symbol;
   }
@@ -401,10 +401,13 @@ public class TreeParserSymbolScope {
    * buffer/temp/work name, then abbreviated schema names. Sheesh.
    */
   public TableBuffer lookupTableOrBufferSymbol(String inName) {
-    ITable table = getRootScope().getRefactorSession().getSchema().lookupTable(inName);
-    if (table != null && table.getName().length() == inName.length())
+    String tblName = inName.indexOf('.') == -1 ? inName : inName.substring(inName.indexOf('.') + 1);
+
+    ITable table = getRootScope().getRefactorSession().getSchema().lookupTable(tblName);
+    if ((table != null) && tblName.equalsIgnoreCase(table.getName()))
       return getUnnamedBuffer(table);
-    TableBuffer ret2 = lookupBuffer(inName);
+
+    TableBuffer ret2 = lookupBuffer(tblName);
     if (ret2 != null)
       return ret2;
     if (table != null)

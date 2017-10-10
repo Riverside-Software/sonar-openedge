@@ -677,9 +677,11 @@ definebrowsestate:
   ;
 
 definebufferstate:
-    #(  def:DEFINE (def_shared)? def_modifiers BUFFER id:ID
-      FOR (TEMPTABLE)? rec:tbl[ContextQualifier.SYMBOL]
-      { action.defineBuffer(#def, #id, #rec, false); }
+    #(  def:DEFINE (def_shared)? def_modifiers BUFFER id:ID FOR
+        ( 
+          TEMPTABLE rec:tbl[ContextQualifier.TEMPTABLESYMBOL] { action.defineBuffer(#def, #id, #rec, false); }
+        | rec2:tbl[ContextQualifier.SYMBOL] { action.defineBuffer(#def, #id, #rec2, false); }
+        )
       (PRESELECT)? (label_constant)?
       (namespace_uri)? (namespace_prefix)? (xml_node_name)?
       (#(FIELDS (fld1[ContextQualifier.SYMBOL])* ))? state_end

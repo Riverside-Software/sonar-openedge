@@ -449,6 +449,22 @@ public class BugFixTest {
     obj = node.query(ABLNodeType.RECORD_NAME).get(0).getLink(IConstants.SYMBOL);
     assertNotNull(obj);
     assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_TTABLE);
+
+    // Third FIND statement
+    node = unit.getTopNode().queryStateHead(ABLNodeType.FIND).get(2);
+    assertNotNull(node);
+    assertEquals(node.query(ABLNodeType.RECORD_NAME).size(), 1);
+    obj = node.query(ABLNodeType.RECORD_NAME).get(0).getLink(IConstants.SYMBOL);
+    assertNotNull(obj);
+    assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_DBTABLE);
+
+    // Fourth FIND statement
+    node = unit.getTopNode().queryStateHead(ABLNodeType.FIND).get(3);
+    assertNotNull(node);
+    assertEquals(node.query(ABLNodeType.RECORD_NAME).size(), 1);
+    obj = node.query(ABLNodeType.RECORD_NAME).get(0).getLink(IConstants.SYMBOL);
+    assertNotNull(obj);
+    assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_TTABLE);
   }
 
   @Test
