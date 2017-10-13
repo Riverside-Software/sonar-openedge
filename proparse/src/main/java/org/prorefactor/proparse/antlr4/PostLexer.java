@@ -10,9 +10,7 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse.antlr4;
 
-import antlr.TokenStreamException;
-import antlr.RecognitionException;
-
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,9 +23,6 @@ import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.io.IOException;
 
 /**
  * This class deals with &amp;IF conditions by acting as a filter between the lexer and the parser
@@ -51,7 +46,6 @@ public class PostLexer implements TokenSource {
   @Override
   public ProToken nextToken() {
     LOGGER.trace("Entering nextToken()");
-    try {
       for (;;) {
 
         getNextToken();
@@ -84,12 +78,9 @@ public class PostLexer implements TokenSource {
 
         }
       }
-    } catch (IOException | RecognitionException | TokenStreamException caught) {
-      throw new RuntimeException(caught);
-    }
   }
 
-  private ProToken defined() throws IOException {
+  private ProToken defined() {
     LOGGER.trace("Entering defined()");
     // Progress DEFINED() returns a single digit: 0,1,2, or 3.
     // The text between the parens can be pretty arbitrary, and can
@@ -106,12 +97,12 @@ public class PostLexer implements TokenSource {
     return new ProToken(ABLNodeType.NUMBER, prepro.defined(argToken.getText().trim().toLowerCase()));
   }
 
-  private void getNextToken() throws IOException {
+  private void getNextToken() {
     currToken = lexer.nextToken();
   }
 
   // For consuming tokens that has been preprocessed out (&IF FALSE...)
-  private void preproconsume() throws IOException, TokenStreamException, RecognitionException {
+  private void preproconsume() {
     LOGGER.trace("Entering preproconsume()");
 
     int thisIfLevel = preproIfVec.size();
@@ -141,7 +132,7 @@ public class PostLexer implements TokenSource {
     prepro.decrementConsuming();
   }
 
-  private void preproIf() throws IOException, TokenStreamException, RecognitionException {
+  private void preproIf() {
     LOGGER.trace("Entering preproIf()");
 
     // Preserve the currToken current position for listing, before evaluating the expression.
@@ -163,7 +154,7 @@ public class PostLexer implements TokenSource {
     }
   }
 
-  private void preproElse() throws IOException, TokenStreamException, RecognitionException {
+  private void preproElse() {
     LOGGER.trace("Entering preproElse()");
 
     PreproIfState preproIfState = preproIfVec.getLast();
@@ -181,7 +172,7 @@ public class PostLexer implements TokenSource {
     }
   }
 
-  private void preproElseif() throws IOException, TokenStreamException, RecognitionException {
+  private void preproElseif() {
     LOGGER.trace("Entering preproElseif()");
     // Preserve the current position for listing, before evaluating the expression.
     // We can't just write to listing here, because the expression evaluation may
@@ -210,7 +201,7 @@ public class PostLexer implements TokenSource {
     }
   }
 
-  private void preproEndif() throws IOException {
+  private void preproEndif() {
     LOGGER.trace("Entering preproEndif()");
     prepro.getLstListener().preproEndIf(currToken.getLine(), currToken.getCharPositionInLine());
     // XXX Got a case where removeLast() fails with NoSuchElementException
@@ -218,7 +209,7 @@ public class PostLexer implements TokenSource {
       preproIfVec.removeLast();
   }
 
-  private boolean preproIfCond(boolean evaluate) throws IOException, TokenStreamException, RecognitionException {
+  private boolean preproIfCond(boolean evaluate) {
     LOGGER.trace("Entering preproIfCond()");
 
     

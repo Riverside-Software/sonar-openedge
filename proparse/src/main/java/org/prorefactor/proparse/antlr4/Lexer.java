@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.prorefactor.proparse.antlr4;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -60,7 +59,7 @@ public class Lexer  {
   private Set<Integer> comments = new HashSet<>();
   private Set<Integer> loc = new HashSet<>();
 
-  Lexer(ProgressLexer prepro) throws IOException {
+  Lexer(ProgressLexer prepro) {
     this.prepro = prepro;
     getChar(); // We always assume "currChar" is available.
   }
@@ -69,7 +68,6 @@ public class Lexer  {
   //////////////// Lexical productions listed first, support functions follow.
   public ProToken nextToken() {
     LOGGER.trace("Entering nextToken()");
-    try {
     for (;;) {
 
       if (preserve) {
@@ -276,16 +274,13 @@ public class Lexer  {
 
       }
     }
-    } catch(IOException uncaught) {
-      throw new RuntimeException(uncaught);
-    }
   }
 
   /**
    * Get argument for &IF DEFINED(...). The nextToken function is necessarily the main entry point. This is just a
    * wrapper around that.
    */
-  ProToken getAmpIfDefArg() throws IOException {
+  ProToken getAmpIfDefArg() {
     LOGGER.trace("Entering getAmpIfDefArg()");
 
     gettingAmpIfDefArg = true;
@@ -308,7 +303,7 @@ public class Lexer  {
    * marks anyway, so for all I know the compiler's handling of quotes within defined() may just be an artifact of its
    * lexer. I don't think there's any way to get whitespace into a macro name either.
    */
-  private ProToken ampIfDefArg() throws IOException {
+  private ProToken ampIfDefArg() {
     LOGGER.trace("Entering ampIfDefArg()");
 
     loop : for (;;) {
@@ -334,7 +329,7 @@ public class Lexer  {
     return makeToken(ABLNodeType.ID);
   }
 
-  ProToken colon() throws IOException {
+  ProToken colon() {
     LOGGER.trace("Entering colon()");
 
     if (currChar == ':') {
@@ -347,7 +342,7 @@ public class Lexer  {
     return makeToken(ABLNodeType.OBJCOLON);
   }
 
-  ProToken whitespace() throws IOException {
+  ProToken whitespace() {
     LOGGER.trace("Entering whitespace()");
 
     loop : for (;;) {
@@ -367,7 +362,7 @@ public class Lexer  {
     return makeToken(ABLNodeType.WS);
   }
 
-  ProToken comment() throws IOException {
+  ProToken comment() {
     LOGGER.trace("Entering comment()");
 
     // Escapes in comments are processed because you can end a comment
@@ -402,7 +397,7 @@ public class Lexer  {
     return makeToken(ABLNodeType.COMMENT);
   }
 
-  ProToken singleLineComment() throws IOException {
+  ProToken singleLineComment() {
     LOGGER.trace("Entering singleLineComment()");
 
     // Single line comments are treated just like regular comments,
@@ -422,7 +417,7 @@ public class Lexer  {
     }
   }
 
-  ProToken quotedString() throws IOException {
+  ProToken quotedString() {
     LOGGER.trace("Entering quotedString()");
 
     // Inside quoted strings (string constants) we preserve
@@ -487,7 +482,7 @@ public class Lexer  {
     return makeToken(ABLNodeType.QSTRING);
   }
 
-  ProToken digitStart() throws IOException {
+  ProToken digitStart() {
     LOGGER.trace("Entering digitStart()");
 
     ABLNodeType ttype = ABLNodeType.NUMBER;
@@ -574,7 +569,7 @@ public class Lexer  {
     return makeToken(ttype);
   }
 
-  ProToken plusMinusStart(ABLNodeType inputType) throws IOException {
+  ProToken plusMinusStart(ABLNodeType inputType) {
 	  LOGGER.trace("Entering plusMinusStart()");
 	  ABLNodeType ttype = ABLNodeType.NUMBER;
     for_loop : for (;;) {
@@ -651,7 +646,7 @@ public class Lexer  {
       return makeToken(ttype);
   }
 
-  ProToken periodStart() throws IOException {
+  ProToken periodStart() {
     LOGGER.trace("Entering periodStart()");
 
     if (!Character.isDigit(currChar)) {
@@ -724,7 +719,7 @@ public class Lexer  {
     return makeToken(ttype);
   }
 
-  ProToken id(ABLNodeType inputTokenType) throws IOException {
+  ProToken id(ABLNodeType inputTokenType) {
     LOGGER.trace("Entering id()");
 
     // Tokens that start with a-z or underscore
@@ -824,7 +819,7 @@ public class Lexer  {
     return makeToken(ttype);
   }
 
-  ProToken ampText() throws IOException {
+  ProToken ampText() {
     LOGGER.trace("Entering ampText()");
     for (;;) {
       if (Character.isLetterOrDigit(currInt) || (currInt >= 128 && currInt <= 255)) {
@@ -864,7 +859,7 @@ public class Lexer  {
     return makeToken(ABLNodeType.FILENAME);
   }
 
-  ProToken directive() throws IOException {
+  ProToken directive() {
     LOGGER.trace("Entering directive()");
 
     // Called by ampText, which has already gather the text for
@@ -982,7 +977,7 @@ public class Lexer  {
     currText.append(theText);
   }
 
-  private void appendToEOL() throws IOException {
+  private void appendToEOL() {
     // As with the other "append" functions, the caller is responsible for calling getChar() after this.
     for (;;) {
       if (currChar == '/') {
@@ -1015,7 +1010,7 @@ public class Lexer  {
     return (currInt == EOF_CHAR || Character.isWhitespace(currChar));
   }
 
-  void getChar() throws IOException {
+  void getChar() {
     currInt = prepro.getChar();
     currChar = Character.toLowerCase(currInt);
     prevFile = currFile;
@@ -1026,7 +1021,7 @@ public class Lexer  {
     currCol = prepro.getColumn();
   }
 
-  void macroDefine(int defType) throws IOException {
+  void macroDefine(int defType) {
     LOGGER.trace("Entering macroDefine({})", defType);
 
     if (prepro.isConsuming() || prepro.isLexOnly())
@@ -1054,7 +1049,7 @@ public class Lexer  {
       prepro.defScoped(macroName.toLowerCase(), defText);
   }
 
-  void macroUndefine() throws IOException {
+  void macroUndefine() {
     LOGGER.trace("Entering macroUndefine()");
 
     if (prepro.isConsuming())
