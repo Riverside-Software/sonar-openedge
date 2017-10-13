@@ -23,6 +23,7 @@ import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
+import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -321,6 +322,80 @@ public class LexerTest {
     tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
+  }
+
+  @Test
+  public void testPreproErrorMessages01() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer06.p"), session);
+    try {
+      TokenStream stream = unit.preprocess();
+      while (stream.nextToken().getType() != Token.EOF_TYPE) {
+
+      }
+    } catch (IllegalArgumentException caught) {
+      Assert.assertTrue(caught.getMessage().replace('\\', '/').startsWith("File '" + SRC_DIR + "/lexer06.p'"));
+      Assert.assertTrue(caught.getMessage().endsWith("Unexpected &THEN"));
+      return;
+    } catch (Exception caught) {
+      Assert.fail("Unwanted exception...");
+    }
+    Assert.fail("No exception found");
+  }
+
+  @Test
+  public void testPreproErrorMessages02() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer07.p"), session);
+    try {
+      TokenStream stream = unit.preprocess();
+      while (stream.nextToken().getType() != Token.EOF_TYPE) {
+
+      }
+    } catch (IllegalArgumentException caught) {
+      Assert.assertTrue(caught.getMessage().replace('\\', '/').startsWith("File '" + SRC_DIR + "/lexer07.p'"));
+      Assert.assertTrue(caught.getMessage().endsWith("Unexpected end of input after &IF or &ELSEIF"));
+      return;
+    } catch (Exception caught) {
+      Assert.fail("Unwanted exception...");
+    }
+    Assert.fail("No exception found");
+  }
+
+  @Test
+  public void testPreproErrorMessages03() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer08.p"), session);
+    try {
+      TokenStream stream = unit.preprocess();
+      while (stream.nextToken().getType() != Token.EOF_TYPE) {
+
+      }
+    } catch (IllegalArgumentException caught) {
+      Assert.assertTrue(caught.getMessage().replace('\\', '/').startsWith("File '" + SRC_DIR + "/lexer08.p'"));
+      Assert.assertTrue(
+          caught.getMessage().endsWith("Unexpected end of input when consuming discarded &IF/&ELSEIF/&ELSE text"));
+      return;
+    } catch (Exception caught) {
+      Assert.fail("Unwanted exception...");
+    }
+    Assert.fail("No exception found");
+  }
+
+  @Test
+  public void testPreproErrorMessages04() throws Exception {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer09.p"), session);
+    try {
+      TokenStream stream = unit.preprocess();
+      while (stream.nextToken().getType() != Token.EOF_TYPE) {
+
+      }
+    } catch (IllegalArgumentException caught) {
+      Assert.assertTrue(caught.getMessage().replace('\\', '/').startsWith(
+          "File '" + SRC_DIR + "/lexer09.p' - Current position 'data/lexer/lexer09.i':2"));
+      Assert.assertTrue(caught.getMessage().endsWith("Unexpected &THEN"));
+      return;
+    } catch (Exception caught) {
+      Assert.fail("Unwanted exception...");
+    }
+    Assert.fail("No exception found");
   }
 
   private ProToken nextToken(TokenStream stream, ABLNodeType type) throws Exception {

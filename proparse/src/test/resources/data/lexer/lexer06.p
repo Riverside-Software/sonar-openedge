@@ -1,0 +1,3 @@
+&THEN
+  MESSAGE "XYZ".
+&ENDIF

@@ -263,9 +263,9 @@ public class PostLexer implements TokenSource {
     }
   }
 
-  private void throwMessage(String theMessage) {
-    // TODO Add file name in message
-    throw new IllegalArgumentException("Line " + currToken.getLine() + " - " + theMessage);
+  private void throwMessage(String msg) {
+    throw new IllegalArgumentException("File '" + prepro.getFilename(0) + "' - Current position '"
+        + prepro.getFilename(currToken.getFileIndex()) + "':" + currToken.getLine() + " - " + msg);
   }
 
   private static class PreproIfState {

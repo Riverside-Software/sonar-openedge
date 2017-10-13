@@ -128,8 +128,17 @@ public class ParseUnit {
     return new ProgressLexer(session, file.getPath(), fileNameList, true);
   }
 
+  public TokenSource preprocess4() throws IOException {
+    return new ProgressLexer(session, file.getPath(), fileNameList, false);
+  }
+
   public TokenStream lex() throws IOException {
     ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, true);
+    return lexer.getANTLR2TokenStream(false);
+  }
+
+  public TokenStream preprocess() throws IOException {
+    ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, false);
     return lexer.getANTLR2TokenStream(false);
   }
 
