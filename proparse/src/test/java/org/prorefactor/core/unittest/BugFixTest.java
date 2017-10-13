@@ -414,6 +414,12 @@ public class BugFixTest {
   }
 
   @Test
+  public void testExtentFunction() throws ANTLRException {
+    genericTest("testextent1.cls");
+    genericTest("testextent2.p");
+  }
+
+  @Test
   public void testRCodeStructure() throws ANTLRException {
      ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/ChildClass.cls"), session);
      assertNull(unit.getTopNode());
