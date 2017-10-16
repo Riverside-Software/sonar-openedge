@@ -28,8 +28,8 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
-import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.IPreprocessorEventListener;
+import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.refactor.RefactorSession;
@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
 
 import antlr.TokenStream;
-import antlr.TokenStreamException;
 import antlr.TokenStreamHiddenTokenFilter;
 
 /**
@@ -129,8 +128,10 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   /**
    * An existing reference to the input stream is required for construction. The caller is responsible for closing that
    * stream once parsing is complete.
+   * 
+   * @throws UncheckedIOException 
    */
-  public ProgressLexer(RefactorSession session, String fileName, IntegerIndex<String> filenameList, boolean lexOnly) throws IOException {
+  public ProgressLexer(RefactorSession session, String fileName, IntegerIndex<String> filenameList, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.ppSettings = session.getProparseSettings();
     this.session = session;
@@ -138,8 +139,12 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     this.lexOnly = lexOnly;
 
     // Create input source with flag isPrimaryInput=true
+    try {
+      currentInput = new InputSource(++sourceCounter, new File(fileName), session.getCharset(), currFile, true);
+    } catch (IOException caught) {
+      throw new UncheckedIOException(caught);
+    }
     currFile = addFilename(fileName);
-    currentInput = new InputSource(++sourceCounter, new File(fileName), session.getCharset(), currFile, true);
     currentInclude = new IncludeFile(fileName, currentInput);
     includeVector.add(currentInclude);
     currSourceNum = currentInput.getSourceNum();
@@ -856,14 +861,13 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   }
 
   /**
-   * Cleanup work, once the parse is complete. Gets run by doParse even if there's an exception thrown.
+   * Cleanup work, once the parse is complete.
    */
   public void parseComplete() {
     // Things to do once the parse is complete
     // Release input streams, so that files can be written to by other processes.
     // Otherwise, these hang around until the next parse or until the Progress
     // session closes, and nothing else can write to the include files.
-
     while (popInput() != 0) {
       // No-op
     }
@@ -1067,7 +1071,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private class ANTRL2TokenStreamWrapper implements TokenStream {
 
     @Override
-    public antlr.Token nextToken() throws TokenStreamException {
+    public antlr.Token nextToken() {
       return convertToken((org.prorefactor.proparse.antlr4.ProToken) wrapper.nextToken());
     }
 

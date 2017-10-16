@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.prorefactor.core.unittest.util.RoutineHandler;
 import org.prorefactor.core.unittest.util.UnitTestModule;
-import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Call;
 import org.prorefactor.treeparser.ParseUnit;
