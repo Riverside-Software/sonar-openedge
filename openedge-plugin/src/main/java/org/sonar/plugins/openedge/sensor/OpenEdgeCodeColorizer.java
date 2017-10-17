@@ -84,7 +84,7 @@ public class OpenEdgeCodeColorizer implements Sensor {
     ProToken nextTok = (ProToken) stream.nextToken();
     NewHighlighting highlighting = context.newHighlighting().onFile(file);
 
-    while (tok.getNodeType() != ABLNodeType.EOF) {
+    while (tok.getNodeType() != ABLNodeType.EOF_ANTLR4) {
       TypeOfText textType = null;
       if (tok.getNodeType() == ABLNodeType.QSTRING) {
         textType = TypeOfText.STRING;
