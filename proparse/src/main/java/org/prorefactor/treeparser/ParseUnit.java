@@ -18,7 +18,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.antlr.v4.runtime.TokenSource;
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.macrolevel.IncludeRef;
@@ -87,11 +86,6 @@ public class ParseUnit {
 
   public JPNodeMetrics getMetrics() {
     return metrics;
-  }
-
-  /** Set the syntax tree top (Program_root) node. */
-  public void setTopNode(JPNode topNode) {
-    this.topNode = (ProgramRootNode) topNode;
   }
 
   public File getFile() {
@@ -185,8 +179,7 @@ public class ParseUnit {
     appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
     sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
     metrics = lexer.getMetrics();
-    setTopNode((JPNode) parser.getAST());
-    
+    topNode = (ProgramRootNode) parser.getAST();
 
     LOGGER.trace("Exiting ParseUnit#parse()");
   }

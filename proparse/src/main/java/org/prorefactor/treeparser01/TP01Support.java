@@ -941,7 +941,6 @@ public class TP01Support implements ITreeParserAction {
     currentBlock = pushBlock(new Block(rootScope, blockNode));
     rootScope.setRootBlock(currentBlock);
     blockNode.setBlock(currentBlock);
-    getParseUnit().setTopNode(blockNode);
     getParseUnit().setRootScope(rootScope);
     Routine r = new Routine("", rootScope, rootScope);
     r.setProgressType(ProParserTokenTypes.Program_root);
