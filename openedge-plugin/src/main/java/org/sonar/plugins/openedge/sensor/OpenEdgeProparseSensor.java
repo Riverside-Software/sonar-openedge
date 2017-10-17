@@ -222,26 +222,46 @@ public class OpenEdgeProparseSensor implements Sensor {
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TRANSACTIONS).withValue(
         trxBlocks.size()).save();
 
+    ParseUnit unit = null;
+    long startTime = System.currentTimeMillis();
+
     try {
-      long startTime = System.currentTimeMillis();
-      ParseUnit unit = new ParseUnit(file.file(), session);
+      
+      unit = new ParseUnit(file.file(), session);
       unit.treeParser01();
       unit.attachXref(doc);
       unit.attachTransactionBlocks(trxBlocks);
       unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
       updateParseTime(System.currentTimeMillis() - startTime);
-
-      if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
-        computeCpd(context, file, unit);
-        computeSimpleMetrics(context, file, unit);
-        computeCommonMetrics(context, file, unit);
-        computeComplexity(context, file, unit);
+    } catch (UncheckedIOException caught) {
+      numFailures++;
+      if ((caught.getCause() != null) && (caught.getCause() instanceof XCodedFileException)) {
+        LOG.error("Unable to analyze xcode'd file " + file.relativePath());
+      } else {
+        LOG.error("Runtime exception was caught - Please report this issue : ", caught);
       }
+      return;
+    } catch (ProparseRuntimeException | ANTLRException caught) {
+      LOG.error("Error during code parsing for " + file.relativePath(), caught);
+      numFailures++;
+      NewIssue issue = context.newIssue();
+      issue.forRule(RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
+          issue.newLocation().on(file).message(caught.getMessage())).save();
+      return;
+    }
 
-      if (settings.useProparseDebug()) {
-        generateProparseDebugFile(file, unit);
-      }
+    if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
+      computeCpd(context, file, unit);
+      computeSimpleMetrics(context, file, unit);
+      computeCommonMetrics(context, file, unit);
+      computeComplexity(context, file, unit);
+    }
 
+    if (settings.useProparseDebug()) {
+      generateProparseDebugFile(file, unit);
+    }
+
+    try {
       for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
         LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}", entry.getKey().internalKey(),
             entry.getKey().ruleKey().repository(), entry.getKey().ruleKey().rule());
@@ -250,19 +270,6 @@ public class OpenEdgeProparseSensor implements Sensor {
         ruleTime.put(entry.getKey().ruleKey().toString(),
             ruleTime.get(entry.getKey().ruleKey().toString()) + System.currentTimeMillis() - startTime);
       }
-    } catch (UncheckedIOException caught) {
-      numFailures++;
-      if ((caught.getCause() != null) && (caught.getCause() instanceof XCodedFileException)) {
-        LOG.error("Unable to analyze xcode'd file " + file.relativePath());
-      } else {
-        LOG.error("Runtime exception was caught - Please report this issue : ", caught);
-      }
-    } catch (ProparseRuntimeException | ANTLRException caught) {
-      LOG.error("Error during code parsing for " + file.relativePath(), caught);
-      numFailures++;
-      NewIssue issue = context.newIssue();
-      issue.forRule(RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
-          issue.newLocation().on(file).message(caught.getMessage())).save();
     } catch (RuntimeException caught) {
       LOG.error("Error during rule execution for " + file.relativePath(), caught);
     }
