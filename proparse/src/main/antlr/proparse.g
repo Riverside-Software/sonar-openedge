@@ -15,13 +15,9 @@ header {
 
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
-  import org.prorefactor.core.IConstants;
   import org.prorefactor.core.JPNode;
-  import org.prorefactor.core.NodeTypes;
   import org.prorefactor.core.ProToken;
   import org.prorefactor.core.nodetypes.BlockNode;
-  import org.prorefactor.core.nodetypes.FieldRefNode;
-  import org.prorefactor.core.nodetypes.ProgramRootNode;
   import org.prorefactor.core.nodetypes.RecordNameNode;
   import org.prorefactor.refactor.RefactorSession;
 }
@@ -1070,7 +1066,7 @@ record
 
 blocklabel:
   // Block labels can begin with [#|$|%], which are picked up as FILENAME by the lexer.
-    { /* RULE_PREDICATE */ LT(1).getType() != NodeTypes.FINALLY }?
+    { /* RULE_PREDICATE */ LT(1).getType() != ProParserTokenTypes.FINALLY }?
      ( identifier | FILENAME )
      { #blocklabel.setType(BLOCK_LABEL); }
   ;
@@ -1111,7 +1107,7 @@ new_identifier:
 
 filename { /* RULE_INIT */ StringBuilder theText = new StringBuilder(); }:
     t1:filename_part { theText.append(#t1.getText()); }
-    (options{greedy=true;}: { /* RULE_PREDICATE */ !support.hasHiddenBefore(LT(1))}?
+    (options{greedy=true;}: { /* RULE_PREDICATE */ !ParserSupport.hasHiddenBefore(LT(1))}?
       t2:filename_part! { theText.append(#t2.getText()); }
     )*
     {
@@ -1138,7 +1134,7 @@ type_name:
 
 type_name2 { /* RULE_INIT */ StringBuilder theText = new StringBuilder(); }:
     p1:type_name_part { theText.append(#p1.getText()); }
-    ( options{greedy=true;}: { /* RULE_PREDICATE */ !support.hasHiddenBefore(LT(1)) }?
+    ( options{greedy=true;}: { /* RULE_PREDICATE */ !ParserSupport.hasHiddenBefore(LT(1)) }?
       p2:type_name_part! { theText.append(#p2.getText()); }
     )*
     { 
@@ -1148,7 +1144,7 @@ type_name2 { /* RULE_INIT */ StringBuilder theText = new StringBuilder(); }:
   ;
 
 type_name_predicate:
-    { /* RULE_PREDICATE */ !support.hasHiddenBefore(LT(2))}? type_name_part type_name_part
+    { /* RULE_PREDICATE */ !ParserSupport.hasHiddenBefore(LT(2))}? type_name_part type_name_part
   ;
 
 type_name_part:
@@ -1505,7 +1501,7 @@ choose_opt:
   ;
 
 class_type_name:
-    {support.hasHiddenAfter(LT(1))}? CLASS type_name
+    {ParserSupport.hasHiddenAfter(LT(1))}? CLASS type_name
   |  type_name
   ;
 

@@ -94,7 +94,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
 
         try {
           WarningsProcessor processor = new WarningsProcessor();
-          Files.readLines(listingFile, StandardCharsets.UTF_8, processor);
+          Files.asCharSource(listingFile, StandardCharsets.UTF_8).readLines(processor);
           for (Warning w : processor.getResult()) {
             InputFile target = context.fileSystem().inputFile(
                 predicates.hasPath(context.fileSystem().resolvePath(w.file).getAbsolutePath()));
