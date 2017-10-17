@@ -695,8 +695,8 @@ parameter:
     // This can refer to a buffer/tablehandle, but it doesn't define one.
     ( BUFFER identifier FOR ) => BUFFER^ identifier FOR record
   |
-    // BUFFER parameter. Be careful not to pick up BUFFER customer:whatever and BUFFER sports2000.customer:whatever
-    ( { LA(3) != OBJCOLON && (LA(3) != NAMEDOT || LA(5) != OBJCOLON) }? BUFFER record ) => BUFFER^ record
+    // BUFFER parameter. Be careful not to pick up BUFFER customer:whatever or BUFFER sports2000.customer:whatever or BUFFER foo::fld1  or BUFFER sports2000.foo::fld1
+    ( { (LA(3) != OBJCOLON) && (LA(3) != DOUBLECOLON) && (LA(3) != NAMEDOT || LA(5) != OBJCOLON) && (LA(3) != NAMEDOT || LA(5) != DOUBLECOLON) }? BUFFER record ) => BUFFER^ record
   |
     ( options{greedy=true;}: p1:OUTPUT^ | p2:INPUTOUTPUT^ | p3:INPUT^)?
     (  // Ambiguous on expression, for a few of these.

@@ -11,4 +11,5 @@ message valid-handle(dataset ds1::tt1).
 
 fn1(temp-table tt1::fld1).
 fn1(dataset ds1::tt1).
-
+fn1(buffer tt1::fld1).
+fn1(buffer sports2000.customer::custnum).
