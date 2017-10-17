@@ -32,6 +32,7 @@ import com.google.inject.Injector;
 
 import antlr.Token;
 import antlr.TokenStream;
+import antlr.TokenStreamException;
 
 public class LexerTest {
   private final static String SRC_DIR = "src/test/resources/data/lexer";
@@ -39,13 +40,13 @@ public class LexerTest {
   private RefactorSession session;
 
   @BeforeTest
-  public void setUp() throws Exception {
+  public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
   }
 
   @Test
-  public void testTokenList01() throws Exception {
+  public void testTokenList01() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist01.p"), session);
     TokenStream stream = unit.lex();
 
@@ -98,7 +99,7 @@ public class LexerTest {
   }
 
   @Test
-  public void testTokenList02() throws Exception {
+  public void testTokenList02() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist02.p"), session);
     TokenStream stream = unit.lex();
 
@@ -166,7 +167,7 @@ public class LexerTest {
   }
 
   @Test(enabled = false)
-  public void testTokenList03() throws Exception {
+  public void testTokenList03() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist03.p"), session);
     TokenStream stream = unit.lex();
 
@@ -183,7 +184,7 @@ public class LexerTest {
   }
 
   @Test
-  public void testTokenList04() throws Exception {
+  public void testTokenList04() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist04.p"), session);
     TokenStream stream = unit.lex();
 
@@ -200,7 +201,7 @@ public class LexerTest {
   }
 
   @Test
-  public void testTokenList05() throws Exception {
+  public void testTokenList05() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist05.p"), session);
     TokenStream stream = unit.lex();
 
@@ -233,7 +234,7 @@ public class LexerTest {
   }
 
   @Test
-  public void testTokenList06() throws Exception {
+  public void testTokenList06() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist06.p"), session);
     TokenStream stream = unit.lex();
 
@@ -244,7 +245,7 @@ public class LexerTest {
   }
 
   @Test
-  public void testTokenList07() throws Exception {
+  public void testTokenList07() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist07.p"), session);
     TokenStream stream = unit.lex();
 
@@ -258,7 +259,7 @@ public class LexerTest {
   }
 
   @Test
-  public void testTokenList08() throws Exception {
+  public void testTokenList08() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist08.p"), session);
     TokenStream stream = unit.lex();
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.COMMENT);
@@ -270,7 +271,7 @@ public class LexerTest {
   }
 
   @Test
-  public void testEndOfFile() throws Exception {
+  public void testEndOfFile() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist01.p"), session);
     TokenStream stream = unit.lex();
 
@@ -287,7 +288,7 @@ public class LexerTest {
   }
 
   @Test
-  public void testAnalyzeSuspend() throws Exception {
+  public void testAnalyzeSuspend() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer05.p"), session);
     TokenStream stream = unit.lex();
 
@@ -325,7 +326,7 @@ public class LexerTest {
   }
 
   @Test
-  public void testPreproErrorMessages01() throws Exception {
+  public void testPreproErrorMessages01() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer06.p"), session);
     try {
       TokenStream stream = unit.preprocess();
@@ -343,7 +344,7 @@ public class LexerTest {
   }
 
   @Test
-  public void testPreproErrorMessages02() throws Exception {
+  public void testPreproErrorMessages02() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer07.p"), session);
     try {
       TokenStream stream = unit.preprocess();
@@ -361,7 +362,7 @@ public class LexerTest {
   }
 
   @Test
-  public void testPreproErrorMessages03() throws Exception {
+  public void testPreproErrorMessages03() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer08.p"), session);
     try {
       TokenStream stream = unit.preprocess();
@@ -380,7 +381,7 @@ public class LexerTest {
   }
 
   @Test
-  public void testPreproErrorMessages04() throws Exception {
+  public void testPreproErrorMessages04() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer09.p"), session);
     try {
       TokenStream stream = unit.preprocess();
@@ -398,7 +399,7 @@ public class LexerTest {
     Assert.fail("No exception found");
   }
 
-  private ProToken nextToken(TokenStream stream, ABLNodeType type) throws Exception {
+  private ProToken nextToken(TokenStream stream, ABLNodeType type) throws TokenStreamException {
     ProToken tok = (ProToken) stream.nextToken();
     while (tok.getNodeType() != ABLNodeType.MESSAGE) {
       tok = (ProToken) stream.nextToken();

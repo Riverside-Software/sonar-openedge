@@ -28,19 +28,21 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import antlr.ANTLRException;
+
 public class ParserTest {
   private final static String SRC_DIR = "src/test/resources/data/parser";
 
   private RefactorSession session;
 
   @BeforeTest
-  public void setUp() throws Exception {
+  public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
   }
 
   @Test
-  public void testAscending01() throws Exception {
+  public void testAscending01() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending01.p"), session);
     unit.parse();
 
@@ -55,7 +57,7 @@ public class ParserTest {
   }
 
   @Test
-  public void testAscending02() throws Exception {
+  public void testAscending02() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending02.p"), session);
     unit.parse();
 
@@ -70,7 +72,7 @@ public class ParserTest {
   }
 
   @Test
-  public void testAscending03() throws Exception {
+  public void testAscending03() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending03.p"), session);
     unit.parse();
 
@@ -84,7 +86,7 @@ public class ParserTest {
   }
 
   @Test
-  public void testLogical01() throws Exception {
+  public void testLogical01() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "logical01.p"), session);
     unit.parse();
 
@@ -102,7 +104,7 @@ public class ParserTest {
   }
 
   @Test
-  public void testLogical02() throws Exception {
+  public void testLogical02() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "logical02.p"), session);
     unit.parse();
 
@@ -112,7 +114,7 @@ public class ParserTest {
   }
 
   @Test
-  public void testGetCodepage() throws Exception {
+  public void testGetCodepage() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "getcodepage.p"), session);
     unit.parse();
 

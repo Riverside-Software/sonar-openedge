@@ -23,17 +23,19 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import antlr.ANTLRException;
+
 public class MetricsTest {
   private RefactorSession session;
 
   @BeforeTest
-  public void setUp() throws Exception {
+  public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
   }
 
   @Test
-  public void test01() throws Exception {
+  public void test01() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/include.p"), session);
     unit.treeParser01();
 
@@ -42,7 +44,7 @@ public class MetricsTest {
   }
 
   @Test
-  public void test02() throws Exception {
+  public void test02() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/inc3.i"), session);
     unit.lexAndGenerateMetrics();
 

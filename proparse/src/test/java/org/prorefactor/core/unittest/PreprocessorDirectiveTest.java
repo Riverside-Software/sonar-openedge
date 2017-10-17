@@ -28,19 +28,21 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import antlr.ANTLRException;
+
 public class PreprocessorDirectiveTest {
   private final static String SRC_DIR = "src/test/resources/data/preprocessor";
 
   private RefactorSession session;
 
   @BeforeTest
-  public void setUp() throws Exception {
+  public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
   }
 
   @Test
-  public void test01() throws Exception {
+  public void test01() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor05.p"), session);
     unit.parse();
     Assert.assertEquals(unit.getTopNode().query(ABLNodeType.PROPARSEDIRECTIVE).size(), 0);
@@ -69,7 +71,7 @@ public class PreprocessorDirectiveTest {
   }
 
   @Test(enabled = false)
-  public void test02() throws Exception {
+  public void test02() throws ANTLRException {
     // See issue #341 - Won't fix
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor07.p"), session);
     unit.parse();

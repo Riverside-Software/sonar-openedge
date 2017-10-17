@@ -30,6 +30,8 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import antlr.ANTLRException;
+
 /**
  * Tests for symbol parse action (TP01Support).
  *
@@ -47,7 +49,7 @@ public class TP01SymbolActionTest {
    * Parse compile-file.p and verify that all symbols are extracted correctly.
    */
   @Test
-  public void testCompileFileRoutines() throws Exception {
+  public void testCompileFileRoutines() throws ANTLRException {
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/tp01ProcessTests/compile-file.p"), session);
     TP01Support walkAction = new TP01Support(session, pu);
     pu.treeParser(new TreeParser01(session, walkAction));
@@ -71,7 +73,7 @@ public class TP01SymbolActionTest {
    * Parse compile-file.p and verify that all symbols are extracted correctly.
    */
   @Test
-  public void testCompileFileVars() throws Exception {
+  public void testCompileFileVars() throws ANTLRException {
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/tp01ProcessTests/compile-file.p"), session);
     TP01Support walkAction = new TP01Support(session, pu);
     pu.treeParser(new TreeParser01(session, walkAction));

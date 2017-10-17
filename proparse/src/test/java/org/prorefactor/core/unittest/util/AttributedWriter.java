@@ -26,6 +26,8 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 
+import antlr.ANTLRException;
+
 public class AttributedWriter {
 
   BufferedWriter writer = null;
@@ -106,8 +108,9 @@ public class AttributedWriter {
    * 
    * @param inName Name of the compile unit's source file.
    * @param outName Name of the file to write out to.
+   * @throws IOException 
    */
-  public void write(String inName, File outName, RefactorSession session) throws Exception {
+  public void write(String inName, File outName, RefactorSession session) throws ANTLRException, IOException {
     try {
       ParseUnit pu = new ParseUnit(new File(inName), session);
       pu.treeParser01();

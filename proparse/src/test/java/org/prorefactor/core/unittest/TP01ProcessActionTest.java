@@ -28,6 +28,8 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import antlr.ANTLRException;
+
 /** Tests for Calls and Routines in the tree parser. */
 public class TP01ProcessActionTest {
   private RefactorSession session; // = RefactorSession.getInstance();
@@ -44,7 +46,7 @@ public class TP01ProcessActionTest {
    * @throws RefactorException
    */
   @Test
-  public void testCompileFileCalls() throws Exception {
+  public void testCompileFileCalls() throws ANTLRException {
     File file = new File("src/test/resources/data/tp01ProcessTests/compile-file.p");
     String externalName = file.getName();
 
@@ -97,7 +99,7 @@ public class TP01ProcessActionTest {
    * updated. b) run <proc2> in <h> is registered as a call to proc1.proc2.
    */
   @Test
-  public void testPersistenProc() throws Exception {
+  public void testPersistenProc() throws ANTLRException {
     File file = new File("src/test/resources/data/tp01ProcessTests/persistent-run.p");
     String externalName = file.getName();
 
