@@ -12,6 +12,7 @@ package org.prorefactor.proparse.antlr4;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -27,8 +28,8 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
-import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.IPreprocessorEventListener;
+import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.refactor.RefactorSession;
@@ -40,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
 
 import antlr.TokenStream;
-import antlr.TokenStreamException;
 import antlr.TokenStreamHiddenTokenFilter;
 
 /**
@@ -128,8 +128,10 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   /**
    * An existing reference to the input stream is required for construction. The caller is responsible for closing that
    * stream once parsing is complete.
+   * 
+   * @throws UncheckedIOException 
    */
-  public ProgressLexer(RefactorSession session, String fileName, IntegerIndex<String> filenameList, boolean lexOnly) throws IOException {
+  public ProgressLexer(RefactorSession session, String fileName, IntegerIndex<String> filenameList, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.ppSettings = session.getProparseSettings();
     this.session = session;
@@ -137,8 +139,12 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     this.lexOnly = lexOnly;
 
     // Create input source with flag isPrimaryInput=true
+    try {
+      currentInput = new InputSource(++sourceCounter, new File(fileName), session.getCharset(), currFile, true);
+    } catch (IOException caught) {
+      throw new UncheckedIOException(caught);
+    }
     currFile = addFilename(fileName);
-    currentInput = new InputSource(++sourceCounter, new File(fileName), session.getCharset(), currFile, true);
     currentInclude = new IncludeFile(fileName, currentInput);
     includeVector.add(currentInclude);
     currSourceNum = currentInput.getSourceNum();
@@ -366,7 +372,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   // End of IPreprocessor implementation
   // ***********************************
 
-  int getChar() throws IOException {
+  int getChar() {
     wasEscape = false;
     for (;;) {
       escapeCurrent = false;
@@ -437,7 +443,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    * We keep a record of discarded escape characters. This is in case the client wants to fetch those and use them. (Ex:
    * Our lexer preserves original text inside string constants, including escape sequences).
    */
-  private int escape() throws IOException {
+  private int escape() {
     // We may have multiple contiguous discarded characters
     // or a new escape sequence.
     if (wasEscape)
@@ -503,7 +509,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    * character stream at all. If we've popped an include file off the stack (not just argument or preprocessor text),
    * then we have to insert a space into the character stream, because that's what Progress's compiler does.
    */
-  private void getRawChar() throws IOException {
+  private void getRawChar() {
     currLine = currentInput.getNextLine();
     currCol = currentInput.getNextCol();
     currChar = currentInput.get();
@@ -536,7 +542,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
           currSourceNum = currentInput.getSourceNum();
           break;
         default:
-          throw new IOException("Proparse error. popInput() returned unexpected value.");
+          throw new IllegalStateException("Proparse error. popInput() returned unexpected value.");
       }
     }
   }
@@ -588,7 +594,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    * Get the lookahead character. The caller is responsible for knowing that the lookahead isn't already there, ex: if
    * (!gotLookahead) laGet();
    */
-  private void laGet() throws IOException {
+  private void laGet() {
     int saveFile = currFile;
     int saveLine = currLine;
     int saveCol = currCol;
@@ -621,7 +627,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     throw new ProparseRuntimeException(getFilename() + ":" + Integer.toString(getLine2()) + " " + theMessage);
   }
 
-  private void macroReference() throws IOException {
+  private void macroReference() {
     ArrayList<IncludeArg> incArgs = new ArrayList<>();
 
     this.textStart = new FilePos(currFile, currLine, currCol, currSourceNum);
@@ -798,7 +804,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
   } // macroReference()
 
-  private boolean newInclude(String referencedWithName) throws IOException {
+  private boolean newInclude(String referencedWithName) {
     // Progress doesn't enter include files if &IF FALSE
     // It *is* possible to get here with a blank include file
     // name. See bug#034. Don't enter if the includefilename is blank.
@@ -807,9 +813,13 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       return false;
     File ff = session.findFile3(fName);
     if (ff == null) {
-      throw new IOException(getFilename() + ": " + "Could not find include file: " + referencedWithName);
+      throw new UncheckedIOException(new IOException("'" + getFilename() + "' could not find include file: " + referencedWithName));
     }
-    currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName));
+    try {
+      currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName));
+    } catch (IOException caught) {
+      throw new UncheckedIOException(caught);
+    }
     currentInclude = new IncludeFile(referencedWithName, currentInput);
     includeVector.add(currentInclude);
     LOGGER.trace("Entering file: {}", getFilename());
@@ -821,7 +831,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    * New macro or named/numbered argument reference. Input either macro/argument name or the argument number, as well as
    * fileIndex, line, and column where the '{' appeared. Returns false if there's nothing to expand.
    */
-  private void newMacroRef(String macroName, FilePos refPos) throws IOException {
+  private void newMacroRef(String macroName, FilePos refPos) {
     // Using this trick: {{&undefined-argument}{&*}}
     // it is possible to get line breaks into what we
     // get here as the macroName. See test data bug15.p and bug15.i.
@@ -829,12 +839,12 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     newMacroRef2(getArgText(macroName), refPos);
   }
 
-  private void newMacroRef(int argNum, FilePos refPos) throws IOException {
+  private void newMacroRef(int argNum, FilePos refPos) {
     lstListener.macroRef(refPos.line, refPos.col, Integer.toString(argNum));
     newMacroRef2(getArgText(argNum), refPos);
   }
 
-  private void newMacroRef2(String theText, FilePos refPos) throws IOException {
+  private void newMacroRef2(String theText, FilePos refPos) {
     if (theText.length() == 0) {
       ++sourceCounter;
       lstListener.macroRefEnd();
@@ -851,14 +861,13 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   }
 
   /**
-   * Cleanup work, once the parse is complete. Gets run by doParse even if there's an exception thrown.
+   * Cleanup work, once the parse is complete.
    */
-  public void parseComplete() throws IOException {
+  public void parseComplete() {
     // Things to do once the parse is complete
     // Release input streams, so that files can be written to by other processes.
     // Otherwise, these hang around until the next parse or until the Progress
     // session closes, and nothing else can write to the include files.
-
     while (popInput() != 0) {
       // No-op
     }
@@ -869,7 +878,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    * we've just popped off an argument or preprocessor text. The calling program has to know this, to add the space ' '
    * at the end of the include reference.
    */
-  private int popInput() throws IOException {
+  private int popInput() {
     // Returns 2 if we popped a macro or arg ref off the input stack.
     // Returns 1 if we popped an include file off the input stack.
     // Returns 0 if there's nothing left to pop.
@@ -893,7 +902,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     }
   }
 
-  private void checkForNameDot() throws IOException {
+  private void checkForNameDot() {
     // Have to check for nameDot in the preprocessor because nameDot is true
     // even if the next character is a '{' which eventually expands
     // out to be a space character.
@@ -1062,7 +1071,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private class ANTRL2TokenStreamWrapper implements TokenStream {
 
     @Override
-    public antlr.Token nextToken() throws TokenStreamException {
+    public antlr.Token nextToken() {
       return convertToken((org.prorefactor.proparse.antlr4.ProToken) wrapper.nextToken());
     }
 

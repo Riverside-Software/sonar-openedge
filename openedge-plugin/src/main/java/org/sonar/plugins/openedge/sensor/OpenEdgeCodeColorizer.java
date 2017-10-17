@@ -19,10 +19,11 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
-import java.io.IOException;
+import java.io.UncheckedIOException;
 
+import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.ProToken;
+import org.prorefactor.proparse.antlr4.ProToken;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -38,9 +39,6 @@ import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
-
-import antlr.ANTLRException;
-import antlr.TokenStream;
 
 public class OpenEdgeCodeColorizer implements Sensor {
   private static final Logger LOG = Loggers.get(OpenEdgeCodeColorizer.class);
@@ -69,23 +67,24 @@ public class OpenEdgeCodeColorizer implements Sensor {
       LOG.debug("Syntax highlight on {}", file.relativePath());
       try {
         highlightFile(context, session, file);
-      } catch (XCodedFileException caught) {
-        LOG.error("Unable to highlight xcode'd file '" + caught.getFileName() + "'");
-      } catch (RuntimeException | IOException | ANTLRException caught) {
-        LOG.error("Unable to lex file " + file.relativePath(), caught);
+      } catch (UncheckedIOException caught) {
+        if (caught.getCause() instanceof XCodedFileException) {
+          LOG.error("Unable to highlight xcode'd file '{}", file.relativePath());
+        } else {
+          LOG.error("Unable to lex file '{}'", file.relativePath(), caught);
+        }
       }
     }
   }
 
-  private void highlightFile(SensorContext context, RefactorSession session, InputFile file)
-      throws IOException, ANTLRException {
-    TokenStream stream = new ParseUnit(file.file(), session).lex();
+  private void highlightFile(SensorContext context, RefactorSession session, InputFile file) {
+    TokenSource stream = new ParseUnit(file.file(), session).lex4();
 
     ProToken tok = (ProToken) stream.nextToken();
     ProToken nextTok = (ProToken) stream.nextToken();
     NewHighlighting highlighting = context.newHighlighting().onFile(file);
 
-    while (tok.getNodeType() != ABLNodeType.EOF) {
+    while (tok.getNodeType() != ABLNodeType.EOF_ANTLR4) {
       TypeOfText textType = null;
       if (tok.getNodeType() == ABLNodeType.QSTRING) {
         textType = TypeOfText.STRING;
@@ -103,15 +102,16 @@ public class OpenEdgeCodeColorizer implements Sensor {
 
       if (textType != null) {
         try {
-          TextPointer start = file.newPointer(tok.getLine(), tok.getColumn() - 1);
+          TextPointer start = file.newPointer(tok.getLine(), tok.getCharPositionInLine() - 1);
           int maxChar = file.selectLine(tok.getEndLine()).end().lineOffset();
           TextPointer end = file.newPointer(tok.getEndLine(),
-              maxChar < tok.getEndColumn() ? maxChar - 1 : tok.getEndColumn());
+              maxChar < tok.getEndCharPositionInLine() ? maxChar - 1 : tok.getEndCharPositionInLine());
 
           highlighting.highlight(file.newRange(start, end), textType);
         } catch (IllegalArgumentException caught) {
-          LOG.error("File {} - Unable to highlight token type {} - Start {}:{} - End {}:{} - Remaining tokens skipped", file.relativePath(),
-              textType, tok.getLine(), tok.getColumn(), tok.getEndLine(), tok.getEndColumn());
+          LOG.error("File {} - Unable to highlight token type {} - Start {}:{} - End {}:{} - Remaining tokens skipped",
+              file.relativePath(), textType, tok.getLine(), tok.getCharPositionInLine(), tok.getEndLine(),
+              tok.getEndCharPositionInLine());
           return;
         }
       }

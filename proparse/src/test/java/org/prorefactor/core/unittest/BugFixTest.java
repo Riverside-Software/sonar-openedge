@@ -16,6 +16,7 @@ import static org.testng.Assert.assertNull;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -35,9 +36,11 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import antlr.ANTLRException;
 import antlr.Token;
 import antlr.TokenStream;
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 
 /**
  * Test the tree parsers against problematic syntax. These tests just run the tree parsers against the data/bugsfixed
@@ -55,7 +58,7 @@ public class BugFixTest {
   private List<String> jsonNames = new ArrayList<>();
 
   @BeforeTest
-  public void setUp() throws Exception {
+  public void setUp() throws IOException, InvalidRCodeException {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
@@ -68,7 +71,7 @@ public class BugFixTest {
   }
 
   @AfterTest
-  public void tearDown() throws Exception {
+  public void tearDown() throws IOException {
     PrintWriter writer = new PrintWriter(new File(tempDir, "index.html"));
     writer.println("<!DOCTYPE html><html><head><meta charset=\"utf-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"http://riverside-software.fr/d3-style.css\" />"); 
     writer.println("<script src=\"http://riverside-software.fr/jquery-1.10.2.min.js\"></script><script src=\"http://riverside-software.fr/d3.v3.min.js\"></script>");
@@ -90,7 +93,7 @@ public class BugFixTest {
     writer.close();
   }
 
-  private ParseUnit genericTest(String file) throws Exception {
+  private ParseUnit genericTest(String file) throws ANTLRException {
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, file), session);
     assertNull(pu.getTopNode());
     assertNull(pu.getRootScope());
@@ -111,7 +114,7 @@ public class BugFixTest {
     return pu;
   }
 
-  private TokenStream genericLex(String file) throws Exception {
+  private TokenStream genericLex(String file) throws ANTLRException {
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, file), session);
     assertNull(pu.getTopNode());
     assertNull(pu.getRootScope());
@@ -122,7 +125,7 @@ public class BugFixTest {
   }
 
   @Test
-  public void testVarUsage() throws Exception {
+  public void testVarUsage() throws ANTLRException {
     ParseUnit unit = genericTest("varusage.cls");
     assertEquals(unit.getRootScope().getVariable("x1").getNumWrites(), 2);
     assertEquals(unit.getRootScope().getVariable("x1").getNumReads(), 1);
@@ -133,198 +136,198 @@ public class BugFixTest {
   }
 
   @Test
-  public void test01() throws Exception {
+  public void test01() throws ANTLRException {
     genericTest("bug01.p");
   }
 
   @Test
-  public void test02() throws Exception {
+  public void test02() throws ANTLRException {
     genericTest("bug02.p");
   }
 
   @Test
-  public void test03() throws Exception {
+  public void test03() throws ANTLRException {
     genericTest("bug03.p");
   }
 
   @Test
-  public void test04() throws Exception {
+  public void test04() throws ANTLRException {
     genericTest("bug04.p");
   }
 
   @Test
-  public void test05() throws Exception {
+  public void test05() throws ANTLRException {
     genericTest("bug05.p");
   }
 
   @Test
-  public void test06() throws Exception {
+  public void test06() throws ANTLRException {
     genericTest("bug06.p");
   }
 
   @Test
-  public void test07() throws Exception {
+  public void test07() throws ANTLRException {
     genericTest("interface07.cls");
   }
 
   @Test
-  public void test08() throws Exception {
+  public void test08() throws ANTLRException {
     genericTest("bug08.cls");
   }
 
   @Test
-  public void test09() throws Exception {
+  public void test09() throws ANTLRException {
     genericTest("bug09.p");
   }
 
   @Test
-  public void test10() throws Exception {
+  public void test10() throws ANTLRException {
     genericTest("bug10.p");
   }
 
   @Test
-  public void test11() throws Exception {
+  public void test11() throws ANTLRException {
     genericTest("bug11.p");
   }
 
   @Test
-  public void test12() throws Exception {
+  public void test12() throws ANTLRException {
     genericTest("bug12.p");
   }
 
   @Test
-  public void test13() throws Exception {
+  public void test13() throws ANTLRException {
     genericTest("bug13.p");
   }
 
   @Test
-  public void test14() throws Exception {
+  public void test14() throws ANTLRException {
     genericTest("bug14.p");
   }
 
   @Test
-  public void test15() throws Exception {
+  public void test15() throws ANTLRException {
     genericTest("bug15.p");
   }
 
   @Test
-  public void test16() throws Exception {
+  public void test16() throws ANTLRException {
     genericTest("bug16.p");
   }
 
   @Test
-  public void test17() throws Exception {
+  public void test17() throws ANTLRException {
     genericTest("bug17.p");
   }
 
   @Test
-  public void test18() throws Exception {
+  public void test18() throws ANTLRException {
     genericTest("bug18.p");
   }
 
   @Test
-  public void test19() throws Exception {
+  public void test19() throws ANTLRException {
     genericTest("bug19.p");
   }
 
   @Test
-  public void test20() throws Exception {
+  public void test20() throws ANTLRException {
     genericTest("bug20.p");
   }
 
   @Test
-  public void test21() throws Exception {
+  public void test21() throws ANTLRException {
     genericTest("bug21.cls");
   }
 
   @Test
-  public void test22() throws Exception {
+  public void test22() throws ANTLRException {
     genericTest("bug22.cls");
   }
 
   @Test
-  public void test23() throws Exception {
+  public void test23() throws ANTLRException {
     genericTest("bug23.cls");
   }
 
   @Test
-  public void test24() throws Exception {
+  public void test24() throws ANTLRException {
     genericTest("bug24.p");
   }
 
   @Test
-  public void test25() throws Exception {
+  public void test25() throws ANTLRException {
     genericTest("bug25.p");
   }
 
   @Test
-  public void test26() throws Exception {
+  public void test26() throws ANTLRException {
     genericTest("bug26.cls");
   }
 
   @Test
-  public void test27() throws Exception {
+  public void test27() throws ANTLRException {
     genericTest("bug27.cls");
   }
 
   @Test
-  public void test28() throws Exception {
+  public void test28() throws ANTLRException {
     genericTest("bug28.cls");
   }
 
   @Test
-  public void test29() throws Exception {
+  public void test29() throws ANTLRException {
     genericTest("bug29.p");
   }
 
   @Test
-  public void test30() throws Exception {
+  public void test30() throws ANTLRException {
     genericTest("bug30.p");
   }
 
   @Test
-  public void test31() throws Exception {
+  public void test31() throws ANTLRException {
     genericTest("bug31.cls");
   }
 
   @Test
-  public void test32() throws Exception {
+  public void test32() throws ANTLRException {
     genericLex("bug32.i");
   }
 
   @Test
-  public void test33() throws Exception {
+  public void test33() throws ANTLRException {
     genericTest("bug33.cls");
   }
 
   // Next two tests : same exception should be thrown in both cases
 //  @Test(expectedExceptions = {ProparseRuntimeException.class})
-//  public void testCache1() throws Exception {
+//  public void testCache1() throws ANTLRException {
 //    genericTest("CacheChild.cls");
 //  }
 //
 //  @Test(expectedExceptions = {ProparseRuntimeException.class})
-//  public void testCache2() throws Exception {
+//  public void testCache2() throws ANTLRException {
 //    genericTest("CacheChild.cls");
 //  }
 
   @Test
-  public void testSaxWriter() throws Exception {
+  public void testSaxWriter() throws ANTLRException {
     genericTest("sax-writer.p");
   }
 
   @Test
-  public void testNoBox() throws Exception {
+  public void testNoBox() throws ANTLRException {
     genericTest("nobox.p");
   }
 
   @Test
-  public void testIncludeInComment() throws Exception {
+  public void testIncludeInComment() throws ANTLRException {
     genericTest("include_comment.p");
   }
 
   @Test
-  public void testCreateComObject() throws Exception {
+  public void testCreateComObject() throws ANTLRException {
     ParseUnit unit = genericTest("createComObject.p");
     List<JPNode> list = unit.getTopNode().query(ABLNodeType.CREATE);
     // COM automation
@@ -343,27 +346,27 @@ public class BugFixTest {
   }
 
   @Test
-  public void testCopyLob() throws Exception {
+  public void testCopyLob() throws ANTLRException {
     genericTest("copylob.p");
   }
 
   @Test
-  public void testOsCreate() throws Exception {
+  public void testOsCreate() throws ANTLRException {
     genericTest("oscreate.p");
   }
 
   @Test
-  public void testGetDbClient() throws Exception {
+  public void testGetDbClient() throws ANTLRException {
     genericTest("getdbclient.p");
   }
 
   @Test
-  public void testDoubleColon() throws Exception {
+  public void testDoubleColon() throws ANTLRException {
     genericTest("double-colon.p");
   }
 
   @Test
-  public void testTildeInComment() throws Exception {
+  public void testTildeInComment() throws ANTLRException {
     TokenStream stream = genericLex("comment-tilde.p");
     Token tok = stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.COMMENT);
@@ -373,7 +376,7 @@ public class BugFixTest {
   }
 
   @Test
-  public void testTildeInComment2() throws Exception {
+  public void testTildeInComment2() throws ANTLRException {
     TokenStream stream = genericLex("comment-tilde2.p");
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DEFINE);
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
@@ -383,12 +386,12 @@ public class BugFixTest {
   }
 
   @Test(enabled = false, description = "Issue #309, won't fix,")
-  public void testAbstractKw() throws Exception {
+  public void testAbstractKw() throws ANTLRException {
     genericTest("abstractkw.p");
   }
 
   @Test
-  public void testNoArgFunc() throws Exception {
+  public void testNoArgFunc() throws ANTLRException {
     ParseUnit pu = genericTest("noargfunc.p");
     List<JPNode> nodes = pu.getTopNode().query(ABLNodeType.MESSAGE);
     assertEquals(nodes.get(0).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.GUID);
@@ -400,18 +403,18 @@ public class BugFixTest {
   }
 
   @Test
-  public void testLexer01() throws Exception {
+  public void testLexer01() throws ANTLRException {
     @SuppressWarnings("unused")
     TokenStream stream = genericLex("lex.p");
   }
 
   @Test
-  public void testDataset() throws Exception {
+  public void testDataset() throws ANTLRException {
     genericTest("DatasetParentFields.p");
   }
 
   @Test
-  public void testRCodeStructure() throws Exception {
+  public void testRCodeStructure() throws ANTLRException {
      ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/ChildClass.cls"), session);
      assertNull(unit.getTopNode());
      assertNull(unit.getRootScope());
@@ -420,7 +423,7 @@ public class BugFixTest {
    }
 
   @Test
-  public void testAscendingFunction() throws Exception {
+  public void testAscendingFunction() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/bugsfixed/ascending.p"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
@@ -441,7 +444,7 @@ public class BugFixTest {
   }
 
   @Test(enabled = false, description = "Issue #356, won't fix,")
-  public void testDefineMenu() throws Exception {
+  public void testDefineMenu() throws ANTLRException {
     genericTest("definemenu.p");
   }
 }

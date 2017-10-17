@@ -24,6 +24,8 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import antlr.ANTLRException;
+
 
 /** This class simply runs the tree parser through various code,
  * and as long as the tree parser does not throw any errors, then
@@ -39,7 +41,7 @@ public class TP03Test {
 	}
 
 	@Test
-	public void test01() throws Exception {
+	public void test01() throws ANTLRException {
 	  ParseUnit unit = new ParseUnit(new File("src/test/resources/data/tp01tests/test03.p"), session);
 		assertNull(unit.getTopNode());
 		unit.treeParser01();
@@ -47,7 +49,7 @@ public class TP03Test {
 	}
 
   @Test
-	public void test02() throws Exception {
+	public void test02() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/tp01tests/test0302.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();

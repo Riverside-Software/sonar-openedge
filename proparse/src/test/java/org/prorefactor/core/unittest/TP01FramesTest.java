@@ -14,6 +14,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.apache.commons.io.FileUtils;
@@ -27,6 +28,8 @@ import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import antlr.ANTLRException;
 
 /**
  * Test frame scopes and implicit field associations to frames.
@@ -48,7 +51,7 @@ public class TP01FramesTest {
   }
 
   @Test
-  public void test01() throws Exception {
+  public void test01() throws ANTLRException, IOException {
     ParseUnit pu = new ParseUnit(new File(inFileName), session);
     pu.treeParser01();
 

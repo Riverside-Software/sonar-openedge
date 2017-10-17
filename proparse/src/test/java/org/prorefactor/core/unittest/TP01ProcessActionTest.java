@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.prorefactor.core.unittest.util.RoutineHandler;
 import org.prorefactor.core.unittest.util.UnitTestModule;
-import org.prorefactor.refactor.RefactorException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Call;
 import org.prorefactor.treeparser.ParseUnit;
@@ -28,6 +27,8 @@ import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import antlr.ANTLRException;
 
 /** Tests for Calls and Routines in the tree parser. */
 public class TP01ProcessActionTest {
@@ -45,7 +46,7 @@ public class TP01ProcessActionTest {
    * @throws RefactorException
    */
   @Test
-  public void testCompileFileCalls() throws Exception {
+  public void testCompileFileCalls() throws ANTLRException {
     File file = new File("src/test/resources/data/tp01ProcessTests/compile-file.p");
     String externalName = file.getName();
 
@@ -98,7 +99,7 @@ public class TP01ProcessActionTest {
    * updated. b) run <proc2> in <h> is registered as a call to proc1.proc2.
    */
   @Test
-  public void testPersistenProc() throws Exception {
+  public void testPersistenProc() throws ANTLRException {
     File file = new File("src/test/resources/data/tp01ProcessTests/persistent-run.p");
     String externalName = file.getName();
 

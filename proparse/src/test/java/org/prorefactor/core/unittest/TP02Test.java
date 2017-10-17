@@ -29,6 +29,8 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import antlr.ANTLRException;
+
 public class TP02Test {
 
   private RefactorSession session;
@@ -45,7 +47,7 @@ public class TP02Test {
   String snippetSep = "--------------------------------" + System.getProperty("line.separator");
 
   @BeforeTest
-  public void setUp() throws Exception {
+  public void setUp() {
     outFile = new File(outName);
     snippetFile = new File(snippetName);
 
@@ -58,7 +60,7 @@ public class TP02Test {
   }
 
   @Test
-  public void test01() throws Exception {
+  public void test01() throws IOException, ANTLRException {
     BufferedWriter writer = null;
     try (BufferedReader reader = new BufferedReader(new FileReader(inName))) {
       outFile.delete();

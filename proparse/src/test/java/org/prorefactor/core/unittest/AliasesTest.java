@@ -25,13 +25,15 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import antlr.ANTLRException;
+
 public class AliasesTest {
   private RefactorSession session;
   // Just a shortcut for schema
   private ISchema schema;
 
   @BeforeTest
-  public void setUp() throws Exception {
+  public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     schema = session.getSchema();
@@ -40,7 +42,7 @@ public class AliasesTest {
   }
 
   @Test
-  public void test01() throws Exception {
+  public void test01() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/aliases.p"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
@@ -77,7 +79,7 @@ public class AliasesTest {
   }
 
   @Test
-  public void test05() throws Exception {
+  public void test05()  {
     // Issue #27
     assertNotNull(schema.lookupTable("salesrep"), "Salesrep table exists");
     assertNull(schema.lookupTable("salesrepp"), "Typo, table doesn't exist");
