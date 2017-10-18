@@ -362,4 +362,13 @@ public class PreprocessorParserTest {
     testVariable(unit.getTopNode(), "var65");
   }
 
+  @Test
+  public void testPriority() {
+    testVariable(unit.getTopNode(), "var70");
+    testNoVariable(unit.getTopNode(), "var71");
+    testVariable(unit.getTopNode(), "var72");
+    testNoVariable(unit.getTopNode(), "var73");
+    testVariable(unit.getTopNode(), "var74");
+  }
+
 }
