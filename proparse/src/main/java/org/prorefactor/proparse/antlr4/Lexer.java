@@ -991,10 +991,16 @@ public class Lexer  {
         }
         continue;
       }
+      if ((currChar == '"') || (currChar == '\'')) {
+        currStringType = currInt;
+        getChar();
+        quotedString();
+        continue;
+      }
       if (currInt == EOF_CHAR)
         break;
       append();
-      if (!prepro.wasEscape() && (currChar == '\n')) {
+      if (currChar == '\n') {
         // We do not call getChar() here. That is because we cannot
         // get the next character until after any &glob, &scoped, or &undefine
         // have been dealt with. The next character might be a '{' which in

@@ -141,7 +141,7 @@ public class ParseUnit {
 
   public TokenStream preprocess() {
     ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, false);
-    return lexer.getANTLR2TokenStream(false);
+    return lexer.getANTLR2TokenStream(true);
   }
 
   /**
