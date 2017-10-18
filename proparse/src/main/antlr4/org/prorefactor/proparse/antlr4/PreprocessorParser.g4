@@ -9,13 +9,12 @@ preproIfEval:
 expr:
     UNARY_MINUS expr                  # unaryMinus
   | UNARY_PLUS expr                   # unaryPlus
-  | expr op=(BEGINS | MATCHES) expr
-                                      # stringOp
   | expr op=(STAR | MULTIPLY | SLASH | DIVIDE | MODULO) expr
                                       # multiply
   | expr op=(PLUS | MINUS) expr       # plus
   | expr op=(EQUAL | EQ | GTORLT | NE | RIGHTANGLE | GTHAN | LEFTANGLE | LTHAN | GTOREQUAL | GE | LTOREQUAL | LE) expr
                                       # comparison
+  | expr op=(BEGINS | MATCHES) expr   # stringOp
   | NOT expr                          # not
   | expr AND expr                     # and
   | expr OR expr                      # or

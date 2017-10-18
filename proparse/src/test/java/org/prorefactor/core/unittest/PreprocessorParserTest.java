@@ -39,8 +39,9 @@ public class PreprocessorParserTest {
     try {
       unit = new ParseUnit(new File(SRC_DIR, "preprocessor01.p"), session);
       unit.parse();
-    } catch (ANTLRException caught) {
-      throw new RuntimeException(caught);
+    } catch (ANTLRException | RuntimeException caught) {
+      // Just so that tests will throw NPE and fail (and not just be skipped)
+      unit = null;
     }
   }
 
@@ -360,6 +361,15 @@ public class PreprocessorParserTest {
   @Test
   public void testBugIf()  {
     testVariable(unit.getTopNode(), "var65");
+  }
+
+  @Test
+  public void testPriority() {
+    testVariable(unit.getTopNode(), "var70");
+    testNoVariable(unit.getTopNode(), "var71");
+    testVariable(unit.getTopNode(), "var72");
+    testNoVariable(unit.getTopNode(), "var73");
+    testVariable(unit.getTopNode(), "var74");
   }
 
 }
