@@ -992,6 +992,7 @@ public class Lexer  {
         continue;
       }
       if ((currChar == '"') || (currChar == '\'')) {
+        append();
         currStringType = currInt;
         getChar();
         quotedString();
