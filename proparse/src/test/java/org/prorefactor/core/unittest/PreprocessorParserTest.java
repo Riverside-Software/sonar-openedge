@@ -40,7 +40,8 @@ public class PreprocessorParserTest {
       unit = new ParseUnit(new File(SRC_DIR, "preprocessor01.p"), session);
       unit.parse();
     } catch (ANTLRException caught) {
-      throw new RuntimeException(caught);
+      // Just so that tests will throw NPE and fail (and not just be skipped)
+      unit = null;
     }
   }
 
