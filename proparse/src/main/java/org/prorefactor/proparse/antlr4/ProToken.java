@@ -16,6 +16,7 @@ import org.antlr.v4.runtime.WritableToken;
 import org.prorefactor.core.ABLNodeType;
 
 public class ProToken implements WritableToken {
+  private final static String INVALID_TYPE = "Invalid type number ";
 
   /**
    * This is the backing field for {@link #getType} and {@link #setType}.
@@ -78,7 +79,7 @@ public class ProToken implements WritableToken {
   public ProToken(int type, int channel, int start, int stop, int line, int col) {
     this.type = ABLNodeType.getNodeType(type);
     if (this.type == null)
-      throw new IllegalArgumentException("Invalid type number " + type);
+      throw new IllegalArgumentException(INVALID_TYPE + type);
     this.channel = channel;
     this.start = start;
     this.stop = stop;
@@ -200,12 +201,12 @@ public class ProToken implements WritableToken {
   public void setType(int type) {
     this.type = ABLNodeType.getNodeType(type);
     if (this.type == null)
-      throw new IllegalArgumentException("Invalid type number " + type);
+      throw new IllegalArgumentException(INVALID_TYPE + type);
   }
 
   public void setNodeType(ABLNodeType type) {
     if (type == null)
-      throw new IllegalArgumentException("Invalid type number " + type);
+      throw new IllegalArgumentException(INVALID_TYPE + type);
     this.type = type;
   }
 

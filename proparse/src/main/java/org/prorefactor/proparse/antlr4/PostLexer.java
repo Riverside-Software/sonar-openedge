@@ -21,6 +21,7 @@ import org.antlr.v4.runtime.ListTokenSource;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.ProparseRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -250,12 +251,14 @@ public class PostLexer implements TokenSource {
     else {
       CommonTokenStream cts = new CommonTokenStream(new ListTokenSource(tokenVector));
       PreprocessorParser parser = new PreprocessorParser(cts);
+      parser.removeErrorListeners();
+      parser.addErrorListener(new PreprocessorErrorListener(prepro, tokenVector));
       return eval.visitPreproIfEval(parser.preproIfEval());
     }
   }
 
   private void throwMessage(String msg) {
-    throw new IllegalArgumentException("File '" + prepro.getFilename(0) + "' - Current position '"
+    throw new ProparseRuntimeException("File '" + prepro.getFilename(0) + "' - Current position '"
         + prepro.getFilename(currToken.getFileIndex()) + "':" + currToken.getLine() + " - " + msg);
   }
 

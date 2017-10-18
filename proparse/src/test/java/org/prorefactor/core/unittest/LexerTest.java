@@ -19,6 +19,7 @@ import java.io.File;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
@@ -333,7 +334,7 @@ public class LexerTest {
       while (stream.nextToken().getType() != Token.EOF_TYPE) {
 
       }
-    } catch (IllegalArgumentException caught) {
+    } catch (ProparseRuntimeException caught) {
       Assert.assertTrue(caught.getMessage().replace('\\', '/').startsWith("File '" + SRC_DIR + "/lexer06.p'"));
       Assert.assertTrue(caught.getMessage().endsWith("Unexpected &THEN"));
       return;
@@ -351,7 +352,7 @@ public class LexerTest {
       while (stream.nextToken().getType() != Token.EOF_TYPE) {
 
       }
-    } catch (IllegalArgumentException caught) {
+    } catch (ProparseRuntimeException caught) {
       Assert.assertTrue(caught.getMessage().replace('\\', '/').startsWith("File '" + SRC_DIR + "/lexer07.p'"));
       Assert.assertTrue(caught.getMessage().endsWith("Unexpected end of input after &IF or &ELSEIF"));
       return;
@@ -369,7 +370,7 @@ public class LexerTest {
       while (stream.nextToken().getType() != Token.EOF_TYPE) {
 
       }
-    } catch (IllegalArgumentException caught) {
+    } catch (ProparseRuntimeException caught) {
       Assert.assertTrue(caught.getMessage().replace('\\', '/').startsWith("File '" + SRC_DIR + "/lexer08.p'"));
       Assert.assertTrue(
           caught.getMessage().endsWith("Unexpected end of input when consuming discarded &IF/&ELSEIF/&ELSE text"));
@@ -388,7 +389,7 @@ public class LexerTest {
       while (stream.nextToken().getType() != Token.EOF_TYPE) {
 
       }
-    } catch (IllegalArgumentException caught) {
+    } catch (ProparseRuntimeException caught) {
       Assert.assertTrue(caught.getMessage().replace('\\', '/').startsWith(
           "File '" + SRC_DIR + "/lexer09.p' - Current position 'data/lexer/lexer09.i':2"));
       Assert.assertTrue(caught.getMessage().endsWith("Unexpected &THEN"));

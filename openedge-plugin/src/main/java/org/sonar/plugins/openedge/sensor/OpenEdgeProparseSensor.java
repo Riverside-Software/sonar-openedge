@@ -45,6 +45,7 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.proparse.antlr4.ProEvalException;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -226,7 +227,6 @@ public class OpenEdgeProparseSensor implements Sensor {
     long startTime = System.currentTimeMillis();
 
     try {
-      
       unit = new ParseUnit(file.file(), session);
       unit.treeParser01();
       unit.attachXref(doc);
@@ -241,7 +241,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.error("Runtime exception was caught - Please report this issue : ", caught);
       }
       return;
-    } catch (ProparseRuntimeException | ANTLRException caught) {
+    } catch (ProparseRuntimeException | ProEvalException | ANTLRException caught) {
       LOG.error("Error during code parsing for " + file.relativePath(), caught);
       numFailures++;
       NewIssue issue = context.newIssue();
