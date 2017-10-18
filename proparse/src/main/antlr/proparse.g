@@ -430,7 +430,7 @@ builtinfunc:
   // ENTERED and NOTENTERED are only dealt with as part of an expression term. See: exprt.
   |  entryfunc // is also a pseudfn.
   |  ETIME_KW^ funargs  // also noarg
-  |  EXTENT^ LEFTPAREN field RIGHTPAREN
+  |  EXTENT^ LEFTPAREN expression RIGHTPAREN
   |  FRAMECOL^ LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMEDOWN^ LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMELINE^ LEFTPAREN widgetname RIGHTPAREN  // also noarg

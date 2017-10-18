@@ -415,7 +415,7 @@ functioncall:
   // ENTERED and NOTENTERED are only dealt with as part of an expression term. See: exprt.
   |  entryfunc // is also a pseudfn.
   |  #(ETIME_KW (funargs)? )
-  |  #(EXTENT LEFTPAREN field RIGHTPAREN )
+  |  #(EXTENT LEFTPAREN expression RIGHTPAREN )
   |  #(FRAMECOL (LEFTPAREN ID RIGHTPAREN)? )
   |  #(FRAMEDOWN (LEFTPAREN ID RIGHTPAREN)? )
   |  #(FRAMELINE (LEFTPAREN ID RIGHTPAREN)? )
