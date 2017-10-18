@@ -56,7 +56,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     createWarningRule(repository, COMPILER_WARNING_214_RULEKEY, "TRANSACTION keyword given within actual transaction level", "3h");
     createWarningRule(repository, COMPILER_WARNING_2965_RULEKEY, "Invalid use of nonconstant elements in preprocessor expression", "30min", Priority.BLOCKER);
     createWarningRule(repository, COMPILER_WARNING_4788_RULEKEY, "Translation exceeds allocated length", "30min",
-        Priority.CRITICAL, new String[] {COMPILER_WARNING_TAG, "i18n"});
+        Priority.CRITICAL, new String[] {COMPILER_WARNING_TAG, "tranman"});
     createWarningRule(repository, COMPILER_WARNING_12115_RULEKEY, "Expression evaluates to a constant", "1h");
     createWarningRule(repository, COMPILER_WARNING_14786_RULEKEY, "Table and field names must appear as they are in the schema", "20min", Priority.CRITICAL);
     createWarningRule(repository, COMPILER_WARNING_14789_RULEKEY, "Fields must be qualified with table name", "15min", Priority.MAJOR);
