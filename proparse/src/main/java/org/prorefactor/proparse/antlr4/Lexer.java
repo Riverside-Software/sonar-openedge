@@ -994,7 +994,8 @@ public class Lexer  {
       if (currInt == EOF_CHAR)
         break;
       append();
-      if (!prepro.wasEscape() && (currChar == '\n')) {
+      // Unescaped newline character or escaped newline where previous char is not tilde
+      if ((currChar == '\n') && (!prepro.wasEscape() || (prepro.wasEscape() && !currText.toString().endsWith("~\n")))) {
         // We do not call getChar() here. That is because we cannot
         // get the next character until after any &glob, &scoped, or &undefine
         // have been dealt with. The next character might be a '{' which in

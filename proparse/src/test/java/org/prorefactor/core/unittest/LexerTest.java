@@ -272,6 +272,43 @@ public class LexerTest {
   }
 
   @Test
+  public void testPostLexer01() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
+    TokenStream stream = unit.preprocess();
+    Token tok = stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getText(), "\"zz\"");
+  }
+
+  @Test
+  public void testPostLexer02() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer02.p"), session);
+    TokenStream stream = unit.preprocess();
+    Token tok = stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getText(), "\"yy\"");
+  }
+
+  @Test
+  public void testPostLexer03() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer03.p"), session);
+    TokenStream stream = unit.preprocess();
+    Token tok = stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getText(), "\"zz\"");
+  }
+
+  @Test
+  public void testPostLexer04() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer04.p"), session);
+    TokenStream stream = unit.preprocess();
+    Token tok = stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    // The best we can do right now... This is to cover edge cases in preprocessing...
+    assertEquals(tok.getText(), "\"a'aabb'bxxx~\nyyy\"");
+  }
+
+  @Test
   public void testEndOfFile() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist01.p"), session);
     TokenStream stream = unit.lex();
