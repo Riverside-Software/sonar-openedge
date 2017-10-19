@@ -23,6 +23,7 @@ import java.io.UncheckedIOException;
 
 import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.proparse.antlr4.ProToken;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
@@ -67,7 +68,7 @@ public class OpenEdgeCodeColorizer implements Sensor {
       LOG.debug("Syntax highlight on {}", file.relativePath());
       try {
         highlightFile(context, session, file);
-      } catch (UncheckedIOException caught) {
+      } catch (UncheckedIOException | ProparseRuntimeException caught) {
         if (caught.getCause() instanceof XCodedFileException) {
           LOG.error("Unable to highlight xcode'd file '{}", file.relativePath());
         } else {

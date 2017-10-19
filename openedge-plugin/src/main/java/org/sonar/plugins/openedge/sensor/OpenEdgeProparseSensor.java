@@ -166,10 +166,12 @@ public class OpenEdgeProparseSensor implements Sensor {
     } catch (UncheckedIOException caught) {
       numFailures++;
       if (caught.getCause() instanceof XCodedFileException) {
-        LOG.error("Unable to highlight xcode'd file '{}", file.relativePath());
+        LOG.error("Unable to generate file metrics for xcode'd file '{}", file.relativePath());
       } else {
-        LOG.error("Unable to lex file '" + file.relativePath() + "'", caught);
+        LOG.error("Unable to generate file metrics for file '" + file.relativePath() + "'", caught);
       }
+    } catch (ProparseRuntimeException caught) {
+      LOG.error("Unable to generate file metrics for file '" + file.relativePath() + "'", caught);
     }
     updateParseTime(System.currentTimeMillis() - startTime);
 
