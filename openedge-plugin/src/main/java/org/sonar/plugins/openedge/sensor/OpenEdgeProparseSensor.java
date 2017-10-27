@@ -243,7 +243,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.error("Runtime exception was caught - Please report this issue : ", caught);
       }
       return;
-    } catch (ProparseRuntimeException | ProEvalException | ANTLRException caught) {
+    } catch (RuntimeException | ANTLRException caught) {
       LOG.error("Error during code parsing for " + file.relativePath(), caught);
       numFailures++;
       NewIssue issue = context.newIssue();
