@@ -813,7 +813,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       return false;
     File ff = session.findFile3(fName);
     if (ff == null) {
-      throw new UncheckedIOException(new IOException("'" + getFilename() + "' could not find include file: " + referencedWithName));
+      throw new UncheckedIOException(new IncludeFileNotFoundException(getFilename(), referencedWithName));
     }
     try {
       currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName));

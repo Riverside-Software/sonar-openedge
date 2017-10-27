@@ -45,7 +45,7 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.proparse.ProParserTokenTypes;
-import org.prorefactor.proparse.antlr4.ProEvalException;
+import org.prorefactor.proparse.antlr4.IncludeFileNotFoundException;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -238,9 +238,13 @@ public class OpenEdgeProparseSensor implements Sensor {
     } catch (UncheckedIOException caught) {
       numFailures++;
       if ((caught.getCause() != null) && (caught.getCause() instanceof XCodedFileException)) {
-        LOG.error("Unable to analyze xcode'd file " + file.relativePath());
+        XCodedFileException cause = (XCodedFileException) caught.getCause();
+        LOG.error("Unable to parse {} - Can't read xcode'd file {}", file.relativePath(), cause.getFileName());
+      } else if ((caught.getCause() != null) && (caught.getCause() instanceof IncludeFileNotFoundException)) {
+        IncludeFileNotFoundException cause = (IncludeFileNotFoundException) caught.getCause();
+        LOG.error("Unable to parse {} - Can't find include file '{}' from '{}'", file.relativePath(), cause.getIncludeName(), cause.getFileName());
       } else {
-        LOG.error("Runtime exception was caught - Please report this issue : ", caught);
+        LOG.error("Unable to parse " + file.relativePath() + " - IOException was caught - Please report this issue", caught);
       }
       return;
     } catch (RuntimeException | ANTLRException caught) {
@@ -248,7 +252,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       numFailures++;
       NewIssue issue = context.newIssue();
       issue.forRule(RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
-          issue.newLocation().on(file).message(caught.getMessage())).save();
+          issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()))).save();
       return;
     }
 
