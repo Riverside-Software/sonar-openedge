@@ -372,4 +372,8 @@ public class PreprocessorParserTest {
     testVariable(unit.getTopNode(), "var74");
   }
 
+  @Test
+  public void testSubstring5()  {
+    testVariable(unit.getTopNode(), "var75");
+  }
 }
