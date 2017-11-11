@@ -62,6 +62,7 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.measures.CoreMetrics;
+import org.sonar.api.platform.Server;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -91,7 +92,8 @@ public class OpenEdgeProparseSensor implements Sensor {
   // IoC
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
-
+  // private final Server server;
+  
   // Internal use
   private final DocumentBuilderFactory dbFactory;
   private final DocumentBuilder dBuilder;
@@ -111,10 +113,11 @@ public class OpenEdgeProparseSensor implements Sensor {
   // Proparse debug
   List<String> debugFiles = new ArrayList<>();
 
-  public OpenEdgeProparseSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
+  public OpenEdgeProparseSensor(OpenEdgeSettings settings, OpenEdgeComponents components /*, Server server*/) {
     this.settings = settings;
     this.components = components;
-
+    // this.server = server;
+    
     this.dbFactory = DocumentBuilderFactory.newInstance();
     try {
       this.dBuilder = dbFactory.newDocumentBuilder();
@@ -132,7 +135,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   public void execute(SensorContext context) {
     if (settings.skipProparseSensor())
       return;
-
+    // System.out.println("SERVER " + server.getPermanentServerId() + " -- " + server.getId());
     components.initializeChecks(context);
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
@@ -296,12 +299,12 @@ public class OpenEdgeProparseSensor implements Sensor {
     StringBuilder data = new StringBuilder(String.format(
         "proparse,product=%1$s,sid=%2$s files=%3$d,failures=%4$d,parseTime=%5$d,maxParseTime=%6$d,version=\"%7$s\",ncloc=%8$d\n",
         context.runtime().getProduct().toString().toLowerCase(),
-        Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID)), numFiles, numFailures,
+        Strings.nullToEmpty(context.settings().getString(CoreProperties.SERVER_ID)), numFiles, numFailures,
         parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs));
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       data.append(String.format("rule,product=%1$s,sid=%2$s,rulename=%3$s ruleTime=%4$d\n",
           context.runtime().getProduct().toString().toLowerCase(),
-          Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID)), entry.getKey(),
+          Strings.nullToEmpty(context.settings().getString(CoreProperties.SERVER_ID)), entry.getKey(),
           entry.getValue()));
     }
 

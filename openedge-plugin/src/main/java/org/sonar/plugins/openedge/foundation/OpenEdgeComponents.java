@@ -140,7 +140,7 @@ public class OpenEdgeComponents {
     if (initialized)
       return;
 
-    String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "") + Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID));
+    String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "") + Strings.nullToEmpty(context.settings().getString(CoreProperties.SERVER_ID));
 
     // Proparse and XREF rules
     for (ActiveRule rule : context.activeRules().findByLanguage(Constants.LANGUAGE_KEY)) {
