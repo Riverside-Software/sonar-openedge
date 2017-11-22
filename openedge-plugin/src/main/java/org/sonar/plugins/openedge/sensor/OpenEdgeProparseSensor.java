@@ -62,7 +62,6 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.measures.CoreMetrics;
-import org.sonar.api.platform.Server;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -92,7 +91,6 @@ public class OpenEdgeProparseSensor implements Sensor {
   // IoC
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
-  // private final Server server;
   
   // Internal use
   private final DocumentBuilderFactory dbFactory;
@@ -113,11 +111,10 @@ public class OpenEdgeProparseSensor implements Sensor {
   // Proparse debug
   List<String> debugFiles = new ArrayList<>();
 
-  public OpenEdgeProparseSensor(OpenEdgeSettings settings, OpenEdgeComponents components /*, Server server*/) {
+  public OpenEdgeProparseSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
     this.settings = settings;
     this.components = components;
-    // this.server = server;
-    
+
     this.dbFactory = DocumentBuilderFactory.newInstance();
     try {
       this.dBuilder = dbFactory.newDocumentBuilder();
@@ -135,7 +132,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   public void execute(SensorContext context) {
     if (settings.skipProparseSensor())
       return;
-    // System.out.println("SERVER " + server.getPermanentServerId() + " -- " + server.getId());
+
     components.initializeChecks(context);
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
