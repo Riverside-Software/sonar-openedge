@@ -63,6 +63,7 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.api.utils.Version;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
@@ -295,13 +296,11 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     StringBuilder data = new StringBuilder(String.format( // NOSONAR Influx requires LF
         "proparse,product=%1$s,sid=%2$s files=%3$d,failures=%4$d,parseTime=%5$d,maxParseTime=%6$d,version=\"%7$s\",ncloc=%8$d\n",
-        context.runtime().getProduct().toString().toLowerCase(),
-        Strings.nullToEmpty(context.settings().getString(CoreProperties.SERVER_ID)), numFiles, numFailures,
-        parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs));
+        context.runtime().getProduct().toString().toLowerCase(), getServerId(context), numFiles, numFailures, parseTime,
+        maxParseTime, context.runtime().getApiVersion().toString(), ncLocs));
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       data.append(String.format("rule,product=%1$s,sid=%2$s,rulename=%3$s ruleTime=%4$d\n", // NOSONAR
-          context.runtime().getProduct().toString().toLowerCase(),
-          Strings.nullToEmpty(context.settings().getString(CoreProperties.SERVER_ID)), entry.getKey(),
+          context.runtime().getProduct().toString().toLowerCase(), getServerId(context), entry.getKey(),
           entry.getValue()));
     }
 
@@ -468,6 +467,15 @@ public class OpenEdgeProparseSensor implements Sensor {
         ABLNodeType.ENUM).size();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMPLEXITY).withValue(complexity).save();
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.COMPLEXITY).withValue(complexityWithInc).save();
+  }
+
+  /**
+   * @return ServerID based on the SonarQube version
+   */
+  private static String getServerId(SensorContext context) {
+    return Strings.nullToEmpty(
+        context.settings().getString(context.getSonarQubeVersion().isGreaterThanOrEqual(Version.parse("6.7"))
+            ? CoreProperties.SERVER_ID : CoreProperties.PERMANENT_SERVER_ID));
   }
 
 }
