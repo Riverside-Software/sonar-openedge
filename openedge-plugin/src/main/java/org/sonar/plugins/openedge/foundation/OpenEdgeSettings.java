@@ -95,6 +95,8 @@ public class OpenEdgeSettings {
     this.settings = settings;
     this.fileSystem = fileSystem;
 
+    LOG.info("Loading OpenEdge settings for server ID '{}' '{}'", settings.getString(CoreProperties.SERVER_ID),
+        settings.getString(CoreProperties.PERMANENT_SERVER_ID));
     initializeDirectories(settings, fileSystem);
     initializePropath(settings, fileSystem);
     initializeCPD(settings);

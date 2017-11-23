@@ -38,6 +38,7 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.server.ServerSide;
 import org.sonar.api.utils.MessageException;
+import org.sonar.api.utils.Version;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.check.RuleProperty;
@@ -140,7 +141,7 @@ public class OpenEdgeComponents {
     if (initialized)
       return;
 
-    String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "") + Strings.nullToEmpty(context.settings().getString(CoreProperties.SERVER_ID));
+    String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "") + getServerId(context);
 
     // Proparse and XREF rules
     for (ActiveRule rule : context.activeRules().findByLanguage(Constants.LANGUAGE_KEY)) {
@@ -283,6 +284,15 @@ public class OpenEdgeComponents {
       }
     }
     return null;
+  }
+
+  /**
+   * @return ServerID based on the SonarQube version
+   */
+  private static String getServerId(SensorContext context) {
+    return Strings.nullToEmpty(
+        context.settings().getString(context.getSonarQubeVersion().isGreaterThanOrEqual(Version.parse("6.7"))
+            ? CoreProperties.SERVER_ID : CoreProperties.PERMANENT_SERVER_ID));
   }
 
 }
