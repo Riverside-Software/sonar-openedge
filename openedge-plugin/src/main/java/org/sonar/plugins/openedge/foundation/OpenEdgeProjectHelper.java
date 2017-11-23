@@ -24,11 +24,25 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
+import org.sonar.api.CoreProperties;
+import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.utils.Version;
+
+import com.google.common.base.Strings;
 
 public class OpenEdgeProjectHelper {
 
   private OpenEdgeProjectHelper() {
 
+  }
+
+  /**
+   * @return ServerID based on the SonarQube version
+   */
+  public static String getServerId(SensorContext context) {
+    return Strings.nullToEmpty(
+        context.settings().getString(context.getSonarQubeVersion().isGreaterThanOrEqual(Version.parse("6.7"))
+            ? CoreProperties.SERVER_ID : CoreProperties.PERMANENT_SERVER_ID));
   }
 
   /**
