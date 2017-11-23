@@ -92,7 +92,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   // IoC
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
-  
+
   // Internal use
   private final DocumentBuilderFactory dbFactory;
   private final DocumentBuilder dBuilder;
