@@ -50,7 +50,6 @@ import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
-import org.sonar.api.CoreProperties;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
@@ -293,16 +292,14 @@ public class OpenEdgeProparseSensor implements Sensor {
     if (!settings.useAnalytics())
       return;
 
-    StringBuilder data = new StringBuilder(String.format(
+    StringBuilder data = new StringBuilder(String.format( // NOSONAR Influx requires LF
         "proparse,product=%1$s,sid=%2$s files=%3$d,failures=%4$d,parseTime=%5$d,maxParseTime=%6$d,version=\"%7$s\",ncloc=%8$d\n",
-        context.runtime().getProduct().toString().toLowerCase(),
-        Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID)), numFiles, numFailures,
-        parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs));
+        context.runtime().getProduct().toString().toLowerCase(), OpenEdgeProjectHelper.getServerId(context), numFiles,
+        numFailures, parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs));
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
-      data.append(String.format("rule,product=%1$s,sid=%2$s,rulename=%3$s ruleTime=%4$d\n",
-          context.runtime().getProduct().toString().toLowerCase(),
-          Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID)), entry.getKey(),
-          entry.getValue()));
+      data.append(String.format("rule,product=%1$s,sid=%2$s,rulename=%3$s ruleTime=%4$d\n", // NOSONAR
+          context.runtime().getProduct().toString().toLowerCase(), OpenEdgeProjectHelper.getServerId(context),
+          entry.getKey(), entry.getValue()));
     }
 
     try {

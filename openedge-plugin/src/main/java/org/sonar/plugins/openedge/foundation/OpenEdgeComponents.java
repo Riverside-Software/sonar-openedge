@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.sonar.api.CoreProperties;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.rule.ActiveRule;
@@ -51,8 +50,6 @@ import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck.CheckType;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonarsource.api.sonarlint.SonarLintSide;
-
-import com.google.common.base.Strings;
 
 @ScannerSide
 @SonarLintSide
@@ -140,7 +137,8 @@ public class OpenEdgeComponents {
     if (initialized)
       return;
 
-    String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "") + Strings.nullToEmpty(context.settings().getString(CoreProperties.PERMANENT_SERVER_ID));
+    String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "")
+        + OpenEdgeProjectHelper.getServerId(context);
 
     // Proparse and XREF rules
     for (ActiveRule rule : context.activeRules().findByLanguage(Constants.LANGUAGE_KEY)) {
