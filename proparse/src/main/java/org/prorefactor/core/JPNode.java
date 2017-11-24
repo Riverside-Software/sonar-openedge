@@ -393,7 +393,7 @@ public class JPNode implements AST {
    * Get an array of all descendant nodes (including this node) of a given type
    */
   public List<JPNode> queryMainFile(ABLNodeType type, ABLNodeType... findTypes) {
-    JPNodeQuery query = new JPNodeQuery(false, true, type, findTypes);
+    JPNodeQuery query = new JPNodeQuery(false, true, null, type, findTypes);
     walk(query);
 
     return query.getResult();
@@ -403,7 +403,17 @@ public class JPNode implements AST {
    * Get an array of all descendant nodes (including this node) of a given type
    */
   public List<JPNode> queryStateHead(ABLNodeType type, ABLNodeType... findTypes) {
-    JPNodeQuery query = new JPNodeQuery( true, type, findTypes);
+    JPNodeQuery query = new JPNodeQuery(true, type, findTypes);
+    walk(query);
+
+    return query.getResult();
+  }
+
+  /**
+   * Get an array of all descendant nodes of a given type within current statement
+   */
+  public List<JPNode> queryCurrentStatement(ABLNodeType type, ABLNodeType... findTypes) {
+    JPNodeQuery query = new JPNodeQuery(false, false, this, type, findTypes);
     walk(query);
 
     return query.getResult();
@@ -427,7 +437,7 @@ public class JPNode implements AST {
    */
   @Deprecated
   public List<JPNode> queryMainFile(Integer... findTypes) {
-    JPNodeQuery query = new JPNodeQuery(false, true, findTypes);
+    JPNodeQuery query = new JPNodeQuery(false, true, null, findTypes);
     walk(query);
 
     return query.getResult();
