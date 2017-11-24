@@ -374,11 +374,14 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
     Object o = visit(ctx.expr(0));
     Object pos = visit(ctx.position);
     Object len = (ctx.length == null ? null : visit(ctx.length));
-    if (ctx.type != null) {
-      throw new ProEvalException("Type option of SUBSTRING function is not yet supported");
+    SubstringType type = SubstringType.CHARACTER;
+    if ((ctx.type != null) && (ctx.type.getText() != null))
+        type = SubstringType.valueOf(StringFuncs.qstringStrip(ctx.type.getText()).toUpperCase().trim());
+    if (type != SubstringType.CHARACTER) {
+      throw new ProEvalException("FIXED / COLUMN / RAW options of SUBSTRING function not yet supported");
     }
 
-    return substring(o, pos, len);
+    return substring(o, pos, len, type);
   }
 
   @Override
@@ -791,7 +794,7 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
     return a.toString();
   }
 
-  static String substring(Object a, Object b, Object c) {
+  static String substring(Object a, Object b, Object c, SubstringType type) {
     String str = getString(a);
     int pos = getInt(b) - 1;
     if (pos >= str.length())
@@ -807,4 +810,7 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
     return str.substring(pos, endpos);
   }
 
+  private enum SubstringType {
+    CHARACTER, FIXED, COLUMN, RAW;
+  }
 }
