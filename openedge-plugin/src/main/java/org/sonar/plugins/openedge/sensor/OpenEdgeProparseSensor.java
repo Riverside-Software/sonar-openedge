@@ -54,12 +54,14 @@ import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
+import org.sonar.api.batch.fs.TextPointer;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
+import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
@@ -81,6 +83,7 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 
 import antlr.ANTLRException;
+import antlr.RecognitionException;
 import eu.rssw.listing.CodeBlock;
 import eu.rssw.listing.ListingParser;
 
@@ -245,6 +248,26 @@ public class OpenEdgeProparseSensor implements Sensor {
       } else {
         LOG.error("Unable to parse " + file.relativePath() + " - IOException was caught - Please report this issue", caught);
       }
+      return;
+    } catch (RecognitionException caught) {
+      LOG.error("Error during code parsing for " + file.relativePath() + " at position " + caught.getFilename() + ":"
+          + caught.getLine() + ":" + caught.getColumn(), caught);
+      numFailures++;
+      NewIssue issue = context.newIssue().forRule(
+          RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY));
+      NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()) + " in "
+          + caught.getFilename() + ":" + caught.getLine() + ":" + caught.getColumn());
+      if (file.relativePath().equals(caught.getFilename())) {
+        try {
+          TextPointer strt = file.newPointer(caught.getLine(), caught.getColumn() - 1);
+          TextPointer end = file.newPointer(caught.getLine(), caught.getColumn());
+          loc.at(file.newRange(strt, end));
+        } catch (IllegalArgumentException uncaught) {
+          // Nothing
+        }
+      }
+      issue.at(loc);
+      issue.save();
       return;
     } catch (RuntimeException | ANTLRException caught) {
       LOG.error("Error during code parsing for " + file.relativePath(), caught);
