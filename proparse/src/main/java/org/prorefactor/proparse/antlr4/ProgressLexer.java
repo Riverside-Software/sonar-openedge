@@ -129,9 +129,14 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    * An existing reference to the input stream is required for construction. The caller is responsible for closing that
    * stream once parsing is complete.
    * 
+   * @param session Current parser session
+   * @param file File object of main file
+   * @param fileName Referenced under which name
+   * @param filenameList 
+   * @param lexOnly Don't use preprocessor
    * @throws UncheckedIOException 
    */
-  public ProgressLexer(RefactorSession session, String fileName, IntegerIndex<String> filenameList, boolean lexOnly) {
+  public ProgressLexer(RefactorSession session, File file, String fileName, IntegerIndex<String> filenameList, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.ppSettings = session.getProparseSettings();
     this.session = session;
@@ -140,7 +145,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
     // Create input source with flag isPrimaryInput=true
     try {
-      currentInput = new InputSource(++sourceCounter, new File(fileName), session.getCharset(), currFile, true);
+      currentInput = new InputSource(++sourceCounter, file, session.getCharset(), currFile, true);
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
