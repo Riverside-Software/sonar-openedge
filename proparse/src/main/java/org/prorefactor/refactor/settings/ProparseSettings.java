@@ -98,7 +98,7 @@ public class ProparseSettings implements IProparseSettings {
     }
 
     public String getWindowSystem() {
-      return this == OperatingSystem.WINDOWS ? "MS-WIN95" : "TTY";
+      return this == OperatingSystem.WINDOWS ? "MS-WINDOWS" : "TTY";
     }
 
     public int getNumber() {
