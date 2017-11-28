@@ -84,6 +84,7 @@ public class OpenEdgeSettings {
   private final List<String> sourceDirs = new ArrayList<>();
   private final List<File> binariesDirs = new ArrayList<>();
   private final List<File> propath = new ArrayList<>();
+  private final Set<String> includeExtensions = new HashSet<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
   private final Set<String> cpdMethods = new HashSet<>();
   private final Set<String> cpdProcedures = new HashSet<>();
@@ -101,8 +102,9 @@ public class OpenEdgeSettings {
     initializePropath(settings, fileSystem);
     initializeCPD(settings);
     initializeXrefBytes(settings);
+    initializeIncludeExtensions(settings);
 
-    LOG.info("Using backslash as escape character : {}", settings.getBoolean(Constants.BACKSLASH_ESCAPE));
+    LOG.debug("Using backslash as escape character : {}", settings.getBoolean(Constants.BACKSLASH_ESCAPE));
     if (useXrefFilter()) {
       LOG.info("XML XREF filter activated [{}]", getXrefBytesAsString());
     }
@@ -200,6 +202,15 @@ public class OpenEdgeSettings {
         throw new IllegalArgumentException("Invalid '" + Constants.XREF_FILTER_BYTES + "' property : " + str, caught);
       }
     }
+  }
+
+  private final void initializeIncludeExtensions(Settings settings) {
+    // Include files extensions
+    includeExtensions.addAll(Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
+        Strings.nullToEmpty(settings.getString(Constants.INCLUDE_SUFFIXES))));
+    // Default value is ".i"
+    if (includeExtensions.isEmpty())
+      includeExtensions.add("i");
   }
 
   public final void parseHierarchy(String fileName) {
@@ -401,6 +412,13 @@ public class OpenEdgeSettings {
     }
 
     return "";
+  }
+
+  /**
+   * @return True if file name is defined as an include file
+   */
+  public boolean isIncludeFile(String name) {
+    return includeExtensions.contains(Files.getFileExtension(name)); 
   }
 
   /**
