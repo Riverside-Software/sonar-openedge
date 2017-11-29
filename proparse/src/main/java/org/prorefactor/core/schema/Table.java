@@ -27,6 +27,7 @@ public class Table implements ITable {
   private String name;
   private int storetype = IConstants.ST_DBTABLE;
   private List<IField> fieldPosOrder = new ArrayList<>();
+  private List<IIndex> indexes = new ArrayList<>();
   private SortedSet<IField> fieldSet = new TreeSet<>(Constants.FIELD_NAME_ORDER);
 
   /** Constructor for schema */
@@ -79,6 +80,11 @@ public class Table implements ITable {
   @Override
   public SortedSet<IField> getFieldSet() {
     return fieldSet;
+  }
+
+  @Override
+  public List<IIndex> getIndexes() {
+    return indexes;
   }
 
   @Override
