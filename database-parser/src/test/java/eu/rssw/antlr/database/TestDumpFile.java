@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import eu.rssw.antlr.database.objects.DatabaseDescription;
@@ -76,12 +75,15 @@ public class TestDumpFile {
     InputStream in = new ByteArrayInputStream(bytes.toByteArray());
     DatabaseDescription db2 = DatabaseDescription.deserialize(in, "sp2k");
     // Compare
-    Assert.assertEquals(db2.getSequences().size(), db.getSequences().size());
-    Assert.assertEquals(db2.getTables().size(), db.getTables().size());
-    Assert.assertEquals(db2.getTable("BillTo").getField("Address").getDataType().toUpperCase(), "CHARACTER");
-    Assert.assertEquals(db2.getTable("Bin").getField("Qty").getDataType().toUpperCase(), "INTEGER");
-    Assert.assertEquals(db2.getTable("Customer").getField("CreditLimit").getDataType().toUpperCase(), "DECIMAL");
-    Assert.assertEquals(db2.getTable("Salesrep").getField("monthquota").getExtent().intValue(), 12);
+    assertEquals(db2.getSequences().size(), db.getSequences().size());
+    assertEquals(db2.getTables().size(), db.getTables().size());
+    assertEquals(db2.getTable("BillTo").getField("Address").getDataType().toUpperCase(), "CHARACTER");
+    assertEquals(db2.getTable("Bin").getField("Qty").getDataType().toUpperCase(), "INTEGER");
+    assertEquals(db2.getTable("Customer").getField("CreditLimit").getDataType().toUpperCase(), "DECIMAL");
+    assertEquals(db2.getTable("Salesrep").getField("monthquota").getExtent().intValue(), 12);
+    assertEquals(db2.getTable("Order").getIndexes().size(), 5);
+    assertNotNull(db2.getTable("Order").getIndex("CustOrder"));
+    assertEquals(db2.getTable("Order").getIndex("CustOrder").getFields().size(), 2);
   }
 
 }

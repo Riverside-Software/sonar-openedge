@@ -105,7 +105,7 @@ public class DatabaseDescription {
           List<String> lst = Splitter.on(':').trimResults().splitToList(line);
           if (lst.size() < 3)
             throw new IOException("Invalid file format: " + line);
-          Index i = new Index(lst.get(0));
+          Index i = new Index(lst.get(0).substring(1));
           i.setUnique(lst.get(1).indexOf('U') > -1);
           i.setPrimary(lst.get(1).indexOf('P') > -1);
           for (int zz = 2; zz < lst.size(); zz++) {
