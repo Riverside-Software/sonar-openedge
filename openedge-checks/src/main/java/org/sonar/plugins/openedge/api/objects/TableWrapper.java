@@ -10,9 +10,11 @@ import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.Constants;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.IField;
+import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
 
 import eu.rssw.antlr.database.objects.Field;
+import eu.rssw.antlr.database.objects.Index;
 import eu.rssw.antlr.database.objects.Table;
 
 public class TableWrapper implements ITable {
@@ -20,6 +22,7 @@ public class TableWrapper implements ITable {
   private final Table table;
 
   private final List<IField> fields = new ArrayList<>();
+  private final List<IIndex> indexes = new ArrayList<>();
   private final SortedSet<IField> sortedFields = new TreeSet<>(Constants.FIELD_NAME_ORDER);
 
   public TableWrapper(IDatabase db, Table t) {
@@ -30,6 +33,10 @@ public class TableWrapper implements ITable {
       IField iFld = new FieldWrapper(this, fld);
       fields.add(iFld);
       sortedFields.add(iFld);
+    }
+    for (Index idx : table.getIndexes()) {
+      IIndex iIdx = new IndexWrapper(this, idx);
+      indexes.add(iIdx);
     }
   }
 
@@ -69,6 +76,11 @@ public class TableWrapper implements ITable {
   @Override
   public List<IField> getFieldPosOrder() {
     return Collections.unmodifiableList(fields);
+  }
+
+  @Override
+  public List<IIndex> getIndexes() {
+    return Collections.unmodifiableList(indexes);
   }
 
   @Override

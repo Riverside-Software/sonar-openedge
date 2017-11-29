@@ -10,7 +10,10 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import com.google.common.base.Splitter;
 
 public class DatabaseDescription {
   private String dbName;
@@ -63,6 +66,13 @@ public class DatabaseDescription {
           writer.write("F" + f.getName() + ":" + f.getDataType() + ":" + f.getExtent());
           writer.newLine();
         }
+        for (Index i : t.getIndexes()) {
+          writer.write("I" + i.getName() + ":" + (i.isPrimary() ? "P" : "") + (i.isUnique() ? "U" : ""));
+          for (IndexField ifld : i.getFields()) {
+            writer.write(":" + (ifld.isAscending() ? 'A' : 'D') + ifld.getField().getName());
+          }
+          writer.newLine();
+        }
       }
     }
   }
@@ -88,7 +98,20 @@ public class DatabaseDescription {
           Field f = new Field(line.substring(1, ch1), line.substring(ch1 + 1, ch2));
           f.setExtent(Integer.parseInt(line.substring(ch2 + 1)));
           currTbl.addField(f);
-
+        } else if (line.startsWith("I")) {
+          if (currTbl == null)
+            throw new IOException("No associated table for " + line);
+          // IndexName:Attributes:Field1:Field2:...
+          List<String> lst = Splitter.on(':').trimResults().splitToList(line);
+          if (lst.size() < 3)
+            throw new IOException("Invalid file format: " + line);
+          Index i = new Index(lst.get(0).substring(1));
+          i.setUnique(lst.get(1).indexOf('U') > -1);
+          i.setPrimary(lst.get(1).indexOf('P') > -1);
+          for (int zz = 2; zz < lst.size(); zz++) {
+            i.addField(new IndexField(currTbl.getField(lst.get(zz).substring(1)), lst.get(zz).charAt(0) == 'A'));
+          }
+          currTbl.addIndex(i);
         }
       }
     }

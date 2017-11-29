@@ -26,4 +26,5 @@ public interface ITable {
   // TODO Document return values
   int getStoretype();
 
+  List<IIndex> getIndexes();
 }

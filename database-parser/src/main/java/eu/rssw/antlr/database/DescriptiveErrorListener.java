@@ -12,7 +12,6 @@ public class DescriptiveErrorListener extends BaseErrorListener {
   @Override
   public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
       String msg, RecognitionException e) {
-    LOG.error("Syntax error {}:{}:{} {}", new Object[] {
-        recognizer.getInputStream().getSourceName(), line, charPositionInLine, msg});
+    LOG.error("Syntax error {}:{}:{} {}", recognizer.getInputStream().getSourceName(), line, charPositionInLine, msg);
   }
 }
