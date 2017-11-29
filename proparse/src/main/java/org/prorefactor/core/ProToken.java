@@ -132,7 +132,7 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
   }
 
   /**
-   * @return Comma-separated list of &ANALYZE-SUSPEND options. Null for code not managed by AppBuilder
+   * @return Comma-separated list of &ANALYZE-SUSPEND options.
    */
   public String getAnalyzeSuspend() {
     return analyzeSuspend;

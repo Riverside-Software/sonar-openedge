@@ -13,6 +13,7 @@ package org.prorefactor.core.unittest;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -445,4 +446,18 @@ public class LexerTest {
     return tok;
   }
 
+  @Test
+  public void testAnalyzeSuspendIncludeFile() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer10.p"), session);
+    TokenStream stream = unit.lex();
+
+    ProToken tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    // assertTrue(tok.getAnalyzeSuspend().isEmpty());
+    assertFalse(tok.isEditableInAB());
+
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertFalse(tok.isEditableInAB());
+  }
 }
