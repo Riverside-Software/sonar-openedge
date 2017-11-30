@@ -17,6 +17,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * <ul>
  * <li>Every time the lexer has to scan an include file, we create an IncludeFile object, for managing include file arguments and preprocessor scopes.</li>
@@ -26,6 +29,8 @@ import java.util.Map;
  * </ul>
  */
 public class IncludeFile {
+  private static final Logger LOGGER = LoggerFactory.getLogger(IncludeFile.class);
+
   private final Map<String, String> defdNames = new HashMap<>();
   private final Deque<InputSource> inputVector = new LinkedList<>();
 
@@ -34,6 +39,8 @@ public class IncludeFile {
   private final List<NamedArgument> namedArgsIn = new ArrayList<>();
 
   public IncludeFile(String referencedWithName, InputSource is) {
+    LOGGER.trace("New IncludeFile object for '{}'", referencedWithName);
+
     inputVector.add(is);
     // {0} must return the name that this include file was referenced with.
     numberedArgs.add(referencedWithName);

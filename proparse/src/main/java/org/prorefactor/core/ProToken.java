@@ -132,7 +132,7 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
   }
 
   /**
-   * @return Comma-separated list of &ANALYZE-SUSPEND options.
+   * @return Comma-separated list of &ANALYZE-SUSPEND options. Null for code not managed by AppBuilder.
    */
   public String getAnalyzeSuspend() {
     return analyzeSuspend;
@@ -142,7 +142,7 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
    * @return True if token is part of an editable section in AppBuilder managed code
    */
   public boolean isEditableInAB() {
-    return isEditableInAB(analyzeSuspend);
+    return (analyzeSuspend == null) || isEditableInAB(analyzeSuspend);
   }
 
   /**
@@ -187,7 +187,7 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
   /**
    * @return True if token is part of an editable section in AppBuilder managed code
    */
-  public static boolean isEditableInAB(String str) {
+  public static boolean isEditableInAB(@Nonnull String str) {
     List<String> attrs = Splitter.on(',').omitEmptyStrings().trimResults().splitToList(str);
     if (attrs.isEmpty() || !"_UIB-CODE-BLOCK".equalsIgnoreCase(attrs.get(0)))
       return false;

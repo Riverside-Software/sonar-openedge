@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import antlr.ANTLRException;
 import antlr.Token;
 import antlr.TokenStream;
 import antlr.TokenStreamException;
@@ -327,13 +328,21 @@ public class LexerTest {
   }
 
   @Test
-  public void testAnalyzeSuspend() throws TokenStreamException {
+  public void testAnalyzeSuspend() throws TokenStreamException, ANTLRException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer05.p"), session);
     TokenStream stream = unit.lex();
 
     ProToken tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNull(tok.getAnalyzeSuspend());
+    assertTrue(tok.isEditableInAB());
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
-    assertTrue(tok.getAnalyzeSuspend().isEmpty());
+    assertFalse(tok.isEditableInAB());
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertTrue(tok.isEditableInAB());
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
     assertFalse(tok.isEditableInAB());
     tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
@@ -346,15 +355,6 @@ public class LexerTest {
     assertFalse(tok.isEditableInAB());
     tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
-    assertFalse(tok.isEditableInAB());
-    tok = nextToken(stream, ABLNodeType.MESSAGE);
-    assertNotNull(tok.getAnalyzeSuspend());
-    assertTrue(tok.isEditableInAB());
-    tok = nextToken(stream, ABLNodeType.MESSAGE);
-    assertNotNull(tok.getAnalyzeSuspend());
-    assertFalse(tok.isEditableInAB());
-    tok = nextToken(stream, ABLNodeType.MESSAGE);
-    assertNotNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
     tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
@@ -362,6 +362,12 @@ public class LexerTest {
     tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
+
+    ParseUnit unit2 = new ParseUnit(new File(SRC_DIR, "lexer05.p"), session);
+    unit2.parse();
+    assertFalse(unit2.isInEditableSection(0, 9));
+    assertFalse(unit2.isInEditableSection(0, 18));
+    assertTrue(unit2.isInEditableSection(0, 28));
   }
 
   @Test
@@ -449,15 +455,39 @@ public class LexerTest {
   @Test
   public void testAnalyzeSuspendIncludeFile() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer10.p"), session);
-    TokenStream stream = unit.lex();
+    TokenStream stream = unit.preprocess();
 
+    // First MESSAGE in main file
     ProToken tok = nextToken(stream, ABLNodeType.MESSAGE);
-    assertNotNull(tok.getAnalyzeSuspend());
-    // assertTrue(tok.getAnalyzeSuspend().isEmpty());
-    assertFalse(tok.isEditableInAB());
+    assertNull(tok.getAnalyzeSuspend());
+    assertTrue(tok.isEditableInAB());
 
+    // First MESSAGE in first include file
     tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
+    assertFalse(tok.getAnalyzeSuspend().isEmpty());
+    assertTrue(tok.isEditableInAB());
+
+    // Second MESSAGE in first include file
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertFalse(tok.getAnalyzeSuspend().isEmpty());
     assertFalse(tok.isEditableInAB());
+
+    // MESSAGE in second include file
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNull(tok.getAnalyzeSuspend());
+    assertTrue(tok.isEditableInAB());
+    
+    // Back to first include file
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNotNull(tok.getAnalyzeSuspend());
+    assertTrue(tok.getAnalyzeSuspend().isEmpty());
+    assertFalse(tok.isEditableInAB());
+    
+    // Back to main file
+    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    assertNull(tok.getAnalyzeSuspend());
+    assertTrue(tok.isEditableInAB());
   }
 }
