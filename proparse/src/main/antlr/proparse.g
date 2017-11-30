@@ -2360,14 +2360,9 @@ definesubmenustate:
     {support.defVar(#n.getText());}
   ;
    
-definetemptablestate
-{  String tableName;
-}
-  :  TEMPTABLE tn:identifier
-    {
-      tableName = #tn.getText().toLowerCase();
-      support.defTable(tableName, SymbolScope.FieldType.TTABLE);
-    }
+definetemptablestate:
+    TEMPTABLE
+    tn:identifier { support.defTable(#tn.getText().toLowerCase(), SymbolScope.FieldType.TTABLE); }
     (UNDO|NOUNDO)?
     (namespace_uri)? (namespace_prefix)? (xml_node_name)? (serialize_name)?
     (REFERENCEONLY)?
@@ -2380,13 +2375,8 @@ definetemptablestate
     state_end
   ;
 
-def_table_beforetable
-{  String beforeName;
-}
-  :  BEFORETABLE^ i:identifier
-    {  beforeName = #i.getText().toLowerCase();
-      support.defTable(beforeName, SymbolScope.FieldType.TTABLE);
-    }
+def_table_beforetable:
+    BEFORETABLE^ i:identifier { support.defTable(#i.getText().toLowerCase(), SymbolScope.FieldType.TTABLE); }
   ;
 
 def_table_like:
@@ -2416,13 +2406,9 @@ def_table_index:
   ;
    
 // Token WORKTABLE can be "work-file" or abbreviated forms of "work-table"
-defineworktablestate
-{  String tableName;
-}
-  :  WORKTABLE tn:identifier
-    {  tableName = #tn.getText().toLowerCase();
-      support.defTable(tableName, SymbolScope.FieldType.WTABLE);
-    }
+defineworktablestate:
+    WORKTABLE
+    tn:identifier { support.defTable(#tn.getText().toLowerCase(), SymbolScope.FieldType.WTABLE); }
     (NOUNDO)?
     (def_table_like)?
     (label_constant)?
