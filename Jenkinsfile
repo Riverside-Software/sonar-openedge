@@ -25,16 +25,12 @@ node ('master') {
   archiveArtifacts artifacts: 'openedge-plugin/target/sonar-openedge-plugin-*.jar', excludes: 'openedge-plugin/target/sonar-openedge-plugin-*-sources.jar'
   step([$class: 'Publisher', reportFilenamePattern: '**/testng-results.xml'])
 
-  if ("master" == env.BRANCH_NAME) {
-    withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
-      withCredentials([string(credentialsId: 'SonarCloudToken', variable: 'SONARCLOUD_TOKEN')]) {
-        sh "mvn -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=rssw -Dsonar.login=${env.SONARCLOUD_TOKEN} sonar:sonar"
-      }
-    }
-  } else {
-    withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
-      withCredentials([string(credentialsId: 'SonarCloudToken', variable: 'SONARCLOUD_TOKEN'), usernamePassword(credentialsId: 'GitHub-GQuerret', usernameVariable: 'GH_LOGIN', passwordVariable: 'GH_PASSWORD')]) {
-        sh "mvn -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=rssw -Dsonar.login=${env.SONARCLOUD_TOKEN} -Dsonar.github.pullRequest=${env.BRANCH_NAME.substring(3)} -Dsonar.github.repository=Riverside-Software/sonar-openedge -Dsonar.github.oauth=${env.GH_PASSWORD} -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=master sonar:sonar"
+  withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
+    withCredentials([string(credentialsId: 'SonarCloudToken', variable: 'SONARCLOUD_TOKEN')]) {
+      if ("master" == env.BRANCH_NAME) {
+        sh "mvn -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=rssw -Dsonar.login=${env.SONARCLOUD_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
+      } else {
+        sh "mvn -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=rssw -Dsonar.login=${env.SONARCLOUD_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=master sonar:sonar"
       }
     }
   }
