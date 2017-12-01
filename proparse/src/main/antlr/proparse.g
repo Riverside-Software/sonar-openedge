@@ -1107,7 +1107,7 @@ new_identifier:
 
 filename { /* RULE_INIT */ StringBuilder theText = new StringBuilder(); }:
     t1:filename_part { theText.append(#t1.getText()); }
-    (options{greedy=true;}: { /* RULE_PREDICATE */ !ParserSupport.hasHiddenBefore(LT(1))}?
+    (options{greedy=true;}: { /* RULE_PREDICATE */ (LA(1) != Token.EOF_TYPE) && !ParserSupport.hasHiddenBefore(LT(1))}?
       t2:filename_part! { theText.append(#t2.getText()); }
     )*
     {
@@ -1134,7 +1134,7 @@ type_name:
 
 type_name2 { /* RULE_INIT */ StringBuilder theText = new StringBuilder(); }:
     p1:type_name_part { theText.append(#p1.getText()); }
-    ( options{greedy=true;}: { /* RULE_PREDICATE */ !ParserSupport.hasHiddenBefore(LT(1)) }?
+    ( options{greedy=true;}: { /* RULE_PREDICATE */ (LA(1) != Token.EOF_TYPE) && !ParserSupport.hasHiddenBefore(LT(1)) }?
       p2:type_name_part! { theText.append(#p2.getText()); }
     )*
     { 

@@ -302,6 +302,16 @@ public class BugFixTest {
     genericTest("bug33.cls");
   }
 
+  @Test
+  public void test34() throws ANTLRException {
+    genericTest("bug34.p");
+  }
+
+  @Test
+  public void test35() throws ANTLRException {
+    genericTest("bug35.p");
+  }
+
   // Next two tests : same exception should be thrown in both cases
 //  @Test(expectedExceptions = {ProparseRuntimeException.class})
 //  public void testCache1() throws ANTLRException {

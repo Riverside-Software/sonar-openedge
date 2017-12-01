@@ -13,11 +13,13 @@ node ('master') {
   }
   gitClean()
   checkout scm
-  withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
-    if ("master" == env.BRANCH_NAME) {
-      sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true"
-    } else {
-      sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package -Dmaven.test.failure.ignore=true"
+  timeout(5) {
+    withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
+      if ("master" == env.BRANCH_NAME) {
+        sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true"
+      } else {
+        sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package -Dmaven.test.failure.ignore=true"
+      }
     }
   }
   archiveArtifacts artifacts: 'openedge-plugin/target/sonar-openedge-plugin-*.jar', excludes: 'openedge-plugin/target/sonar-openedge-plugin-*-sources.jar'
