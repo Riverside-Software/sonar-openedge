@@ -10,23 +10,27 @@ pipeline {
     stage ('Build OpenEdge plugin') {
       steps {
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: scm.userRemoteConfigs])
-        withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
-          if ("master" == env.BRANCH_NAME) {
-            sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true"
-          } else {
-            sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package -Dmaven.test.failure.ignore=true"
+        script {
+          withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
+            if ("master" == env.BRANCH_NAME) {
+              sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true"
+            } else {
+              sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package -Dmaven.test.failure.ignore=true"
+            }
           }
-        }
+         }
       }
     }
-    stage ('Build OpenEdge plugin') {
+    stage ('SonarQube analysis') {
       steps {
-        withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
-          withCredentials([string(credentialsId: 'SonarCloudToken', variable: 'SONARCLOUD_TOKEN')]) {
-            if ("master" == env.BRANCH_NAME) {
-              sh "mvn -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=rssw -Dsonar.login=${env.SONARCLOUD_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
-            } else {
-              sh "mvn -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=rssw -Dsonar.login=${env.SONARCLOUD_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=master sonar:sonar"
+        script {
+          withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
+            withCredentials([string(credentialsId: 'SonarCloudToken', variable: 'SONARCLOUD_TOKEN')]) {
+              if ("master" == env.BRANCH_NAME) {
+                sh "mvn -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=rssw -Dsonar.login=${env.SONARCLOUD_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
+              } else {
+                sh "mvn -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=rssw -Dsonar.login=${env.SONARCLOUD_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=master sonar:sonar"
+              }
             }
           }
         }
