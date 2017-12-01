@@ -281,7 +281,7 @@ fragment INT:
   ('0'..'9');
 
 NUM_BYTES:
-  ('0'..'9')+ [bBkKmMgG];
+  ('0'..'9')+ ([bB] | [kKmMgG]([bB])?);
 
 NUMBER:
   '-'? INT+;
