@@ -201,10 +201,15 @@ public class JPNode implements AST {
   public void setText(String text) {
     token.setText(text);
   }
-  
+
   @Override
   public void setType(int type) {
     token.setType(type);
+  }
+
+  public void updateEndPosition(int file, int line, int col) {
+    token = new ProToken(token.getNodeType(), token.getText(), token.getFileIndex(), token.getFilename(),
+        token.getLine(), token.getColumn(), file, line, col, token.getMacroSourceNum(), token.getAnalyzeSuspend(), token.isSynthetic());
   }
 
   @Override
