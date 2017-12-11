@@ -60,6 +60,11 @@ public class TableWrapper implements ITable {
   }
 
   @Override
+  public void add(IIndex index) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public IField lookupField(String lookupName) {
     for (IField fld : fields) {
       if (fld.getName().toLowerCase().startsWith(lookupName.toLowerCase()))
