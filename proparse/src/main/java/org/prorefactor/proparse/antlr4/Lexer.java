@@ -1084,7 +1084,6 @@ public class Lexer  {
     } else if ((textStartFile == 0) && (type != ABLNodeType.WS) && (type != ABLNodeType.EOF_ANTLR4) && (textStartLine > 0)) {
       loc.add(textStartLine);
     }
-    LOGGER.trace("PrevLine : " + prevLine);
     ProToken tok = new ProToken(type, text);
     tok.setText(text);
     tok.setFileIndex(textStartFile);

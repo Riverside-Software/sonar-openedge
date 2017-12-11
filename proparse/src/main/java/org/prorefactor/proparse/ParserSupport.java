@@ -105,7 +105,6 @@ public class ParserSupport {
   }
 
   void defBuffer(String bufferName, String tableName) {
-    System.out.println("Define buffer");
     currentScope.defineBuffer(bufferName, tableName);
   }
 
@@ -124,25 +123,7 @@ public class ParserSupport {
     // Not used anymore
   }
 
-  void defTableLike(JPNode node) {
-    System.out.println("Je définis TT like " + node + " et je vais recopier tous les fields");
-  }
-
-  void defField(String s) {
-    System.out.println("Field : " + s);
-    currentScope.defineTableField(s);
-  }
-
-  void defIndex(String s, JPNode unique) {
-    System.out.println("Definition index " + s + " -- unq: " + (unique != null));
-  }
-
-  void defIndexFld(String s) {
-    System.out.println("Definition index field " + s);
-  }
-
   void defTable(String name, SymbolScope.FieldType ttype) {
-    System.out.println("def " + ttype + " " + name);
     // I think the compiler will only allow table defs at the class/unit scope,
     // but we don't need to enforce that here. It'll go in the right spot by the
     // nature of the code.

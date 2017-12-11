@@ -2388,9 +2388,8 @@ def_table_beforetable:
 def_table_like:
     (LIKE^ | LIKESEQUENTIAL^)
     { schemaTablePriority=true; }
-    rec:record
+    record
     { schemaTablePriority=false; }
-    { support.defTableLike(#rec); }
     (options{greedy=true;}: VALIDATE)? (def_table_useindex)*
   ;
 
@@ -2401,17 +2400,15 @@ def_table_useindex:
 def_table_field:
     // Compiler allows FIELDS here. Sheesh.
     ( FIELD^ | fs:FIELDS^ {#fs.setType(FIELD);} )
-    i:identifier { support.defField(#i.getText()); }
+    identifier
     (options{greedy=true;}: fieldoption)*
   ;
 
 def_table_index:
     // Yes, the compiler really lets you use AS instead of IS here.
     // (AS|IS) is not optional the first time, but it is on subsequent uses.
-    INDEX^ id:identifier 
-    (options{greedy=true;}: (AS|IS)? (unq:UNIQUE|PRIMARY|WORDINDEX))*
-    { support.defIndex(#id.getText(), #unq); }
-    (fld:identifier { support.defIndexFld(#fld.getText()); } (options{greedy=true;}: ASCENDING|DESCENDING|CASESENSITIVE)* )+
+    INDEX^ identifier (options{greedy=true;}: (AS|IS)? (UNIQUE|PRIMARY|WORDINDEX))*
+    (identifier (options{greedy=true;}: ASCENDING|DESCENDING|CASESENSITIVE)*)+
   ;
    
 // Token WORKTABLE can be "work-file" or abbreviated forms of "work-table"
