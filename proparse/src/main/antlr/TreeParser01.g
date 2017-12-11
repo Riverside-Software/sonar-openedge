@@ -1010,10 +1010,7 @@ definetemptablestate:
       )?
       (RCODEINFORMATION)?
       (def_table_field)*
-      (  #(  INDEX ID ( (AS|IS)? (UNIQUE|PRIMARY|WORDINDEX) )*
-          ( ID (ASCENDING|DESCENDING|CASESENSITIVE)* )+
-        )
-      )*
+      (def_table_index)*
       state_end
     )
   ;
@@ -1035,6 +1032,11 @@ def_table_field:
       (fieldoption)*
       { action.defineTableFieldFinalize(stack.pop()); }
     )
+  ;
+
+def_table_index:
+    #(INDEX id:ID ( (AS|IS)? (unq:UNIQUE|prim:PRIMARY|word:WORDINDEX) )* { action.defineIndexInitialize(#id, #unq, #prim, #word); }
+          ( ID (ASCENDING|DESCENDING|CASESENSITIVE)* )+ )
   ;
 
 defineworktablestate:

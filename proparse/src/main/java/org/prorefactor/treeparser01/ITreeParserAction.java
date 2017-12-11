@@ -194,6 +194,26 @@ public interface ITreeParserAction {
   default void defineTableLike(JPNode recNode) throws SemanticException {
   }
 
+  /** Called by the tree parser at the beginning of a temp or work table index definition */
+  default Object defineIndexInitialize(JPNode idNode, JPNode unique, JPNode primary, JPNode word) throws SemanticException {
+    return null;
+  }
+
+  /** Called by the tree parser at the end of a temp or work table index definition */
+  default Object defineIndexFinalize(JPNode idNode) throws SemanticException {
+    return null;
+  }
+
+  /** Called by the tree parser at the beginning of a temp or work table index field definition */
+  default Object defineIndexFieldInitialize(JPNode idNode) throws SemanticException {
+    return null;
+  }
+
+  /** Called by the tree parser at the end of a temp or work table index field definition */
+  default Object defineIndexFieldFinalize(JPNode idNode) throws SemanticException {
+    return null;
+  }
+
   /** Called by the tree parser when a temp-table is defined. */
   default void defineTemptable(JPNode defAST, JPNode idNode) throws SemanticException {
   }

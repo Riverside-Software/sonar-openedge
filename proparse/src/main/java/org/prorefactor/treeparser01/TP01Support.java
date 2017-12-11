@@ -433,6 +433,12 @@ public class TP01Support implements ITreeParserAction {
     }
   }
 
+  @Override
+  public Object defineIndexInitialize(JPNode idNode, JPNode unique, JPNode primary, JPNode word) throws SemanticException {
+    LOG.trace("Entering defineIndexInitialize {} - {} - {} - {}", idNode, unique, primary, word);
+    return ITreeParserAction.super.defineIndexInitialize(idNode, unique, primary, word);
+  }
+
   public void defineTable(JPNode defNode, JPNode idNode, int storeType) {
     LOG.trace("Entering defineTable {} {} {}", defNode, idNode, storeType);
     TableBuffer buffer = rootScope.defineTable(idNode.getText(), storeType);
