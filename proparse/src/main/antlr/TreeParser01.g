@@ -66,7 +66,7 @@ options {
 
   public void traceIn(String rname, AST t) {
     traceDepth++;
-    LOGGER.trace("{}> {} ({}) {}", new Object[] { indent(), rname, t, ((inputState.guessing > 0)?" [guessing]":"") });
+    LOGGER.trace("{}> {} ({}) {}", indent(), rname, t, inputState.guessing > 0 ? " [guessing]" : "");
   }
 
   public void traceOut(String rname, AST t) {
@@ -1017,7 +1017,7 @@ definetemptablestate:
 
 def_table_like:
     #(LIKE def_table_like_sub)
-  |  #(LIKESEQUENTIAL def_table_like_sub)
+  | #(LIKESEQUENTIAL def_table_like_sub)
   ;
 
 def_table_like_sub:
@@ -1035,8 +1035,10 @@ def_table_field:
   ;
 
 def_table_index:
-    #(INDEX id:ID ( (AS|IS)? (unq:UNIQUE|prim:PRIMARY|word:WORDINDEX) )* { action.defineIndexInitialize(#id, #unq, #prim, #word); }
-          ( ID (ASCENDING|DESCENDING|CASESENSITIVE)* )+ )
+    #(INDEX id:ID ( (AS|IS)? ( unq:UNIQUE | prim:PRIMARY | word:WORDINDEX ) )*
+      { action.defineIndexInitialize(#id, #unq, #prim, #word); }
+      ( fld:ID { action.defineIndexFieldInitialize(#fld); } ( ASCENDING | DESCENDING | CASESENSITIVE )* )+ )
+      { action.defineIndexFinalize(#id); }
   ;
 
 defineworktablestate:

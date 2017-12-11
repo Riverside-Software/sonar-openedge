@@ -73,7 +73,7 @@ options {
 
   public void traceIn(String rname, AST t) {
     traceDepth++;
-    LOGGER.trace("{}> {} ({}) {}", new Object[] { indent(), rname, t, ((inputState.guessing > 0)?" [guessing]":"") });
+    LOGGER.trace("{}> {} ({}) {}", indent(), rname, t, inputState.guessing > 0 ? " [guessing]" : "");
   }
 
   public void traceOut(String rname, AST t) {
@@ -3190,5 +3190,3 @@ sqlscalar:
   |  (LEFTPAREN)=> #(LEFTPAREN sqlexpression RIGHTPAREN )
   |  exprt
   ;
-
-

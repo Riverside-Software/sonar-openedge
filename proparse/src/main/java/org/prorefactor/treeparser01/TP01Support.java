@@ -24,7 +24,9 @@ import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
+import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.core.schema.Index;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
@@ -96,6 +98,7 @@ public class TP01Support implements ITreeParserAction {
   private TableBuffer lastTableReferenced;
   private TableBuffer prevTableReferenced;
   private TableBuffer currDefTable;
+  private Index currDefIndex;
 
   // Temporary work-around
   private boolean inDefineEvent = false;
@@ -434,9 +437,26 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public Object defineIndexInitialize(JPNode idNode, JPNode unique, JPNode primary, JPNode word) throws SemanticException {
+  public void defineIndexInitialize(JPNode idNode, JPNode unique, JPNode primary, JPNode word) throws SemanticException {
     LOG.trace("Entering defineIndexInitialize {} - {} - {} - {}", idNode, unique, primary, word);
-    return ITreeParserAction.super.defineIndexInitialize(idNode, unique, primary, word);
+    currDefIndex = new Index(currDefTable.getTable(), idNode.getText(), (unique != null), (primary != null));
+    currDefTable.getTable().add(currDefIndex);
+    // return ITreeParserAction.super.defineIndexInitialize(idNode, unique, primary, word);
+  }
+
+  @Override
+  public void defineIndexFinalize(JPNode idNode) throws SemanticException {
+    LOG.trace("Entering defineIndexFinalize {}", idNode);
+    // return ITreeParserAction.super.defineIndexFinalize(idNode);
+  }
+
+  @Override
+  public void defineIndexFieldInitialize(JPNode idNode) throws SemanticException {
+    LOG.trace("Entering defineIndexFieldInitialize {}", idNode);
+    IField fld = currDefTable.getTable().lookupField(idNode.getText());
+    if (fld != null)
+      currDefIndex.addField(fld);
+    // return ITreeParserAction.super.defineIndexFieldInitialize(idNode);
   }
 
   public void defineTable(JPNode defNode, JPNode idNode, int storeType) {
