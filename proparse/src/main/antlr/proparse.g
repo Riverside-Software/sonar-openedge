@@ -150,33 +150,21 @@ blockorstate:
     )
   ;
 
-dot_comment { /* RULE_INIT */ String dotText = ""; int lastLine = 0; int lastCol = 0; int lastFile = 0; }:
-    nd:NAMEDOT
-    {
-      dotText += #nd.getText();
-    }
-    (  t2:not_state_end!
+dot_comment { /* RULE_INIT */ StringBuilder dotText = new StringBuilder(); int lastLine = 0; int lastCol = 0; int lastFile = 0; }:
+    nd:NAMEDOT { dotText.append(#nd.getText()); }
+    ( t2:not_state_end!
       {
-        dotText += #t2.allLeadingHiddenText();
-        dotText += #t2.getText();
+        dotText.append(#t2.allLeadingHiddenText()).append(#t2.getText());
       }
     )*
-    (  t3:state_end!
+    ( t3:state_end!
       {
-        dotText += #t3.allLeadingHiddenText();
-        dotText += #t3.getText();
-        lastLine = #t3.getEndLine();
-        lastCol = #t3.getEndColumn();
-        lastFile = #t3.getEndFileIndex();
+        dotText.append(#t3.allLeadingHiddenText()).append(#t3.getText());
+        #nd.setType(DOT_COMMENT);
+        #nd.setText(dotText.toString());
+        #nd.updateEndPosition(#t3.getEndFileIndex(), #t3.getEndLine(), #t3.getEndColumn());
       }
     )
-    {
-      #nd.setType(DOT_COMMENT);
-      #nd.setText(dotText);
-      // System.out.println("boudiou " + lastLine + "--" + lastCol);
-      #nd.updateEndPosition(lastFile, lastLine, lastCol);
-      // #nd.updateEndCol(lastCol);
-    }
   ;
 
 expression_statement:
@@ -2387,9 +2375,9 @@ def_table_beforetable:
 
 def_table_like:
     (LIKE^ | LIKESEQUENTIAL^)
-    { schemaTablePriority=true; }
+    {schemaTablePriority=true;}
     record
-    { schemaTablePriority=false; }
+    {schemaTablePriority=false;}
     (options{greedy=true;}: VALIDATE)? (def_table_useindex)*
   ;
 

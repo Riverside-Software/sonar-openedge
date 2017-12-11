@@ -17,7 +17,6 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.refactor.RefactorSession;
 
