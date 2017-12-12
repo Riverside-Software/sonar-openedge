@@ -1,22 +1,40 @@
 package org.sonar.plugins.openedge.api;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.server.ServerSide;
 import org.sonarsource.api.sonarlint.SonarLintSide;
 
+/**
+ * Implement this interface to add OpenEdge rules licenses
+ */
 @ScannerSide
 @SonarLintSide
 @ServerSide
 public interface LicenceRegistrar {
 
+  default void register(Licence license) { }
+
   /**
-   * This method is called during an analysis to register a licence
-   * 
-   * @param licenceContext The licence itself
-   * @see https://github.com/SonarSource/sonar-java/blob/master/java-squid/src/main/java/org/sonar/plugins/java/api/
-   *      CheckRegistrar.java
+   * Register set of licenses
+   * @param context
    */
-  void register(Licence registrarContext);
+  default void register(LicenseContext context) { }
+
+  public class LicenseContext {
+    private Collection<Licence> licenses = new ArrayList<>();
+
+    public Iterable<Licence> getLicenses() {
+      return licenses;
+    }
+
+    public void registerLicence(String permanentId, String customerName, String salt, String repoName, LicenceType type,
+        byte[] signature, long expirationDate) {
+      licenses.add(new Licence(permanentId, customerName, salt, repoName, type, signature, expirationDate));
+    }
+  }
 
   public class Licence {
     private String permanentId;
@@ -27,6 +45,23 @@ public interface LicenceRegistrar {
     private String salt;
     private byte[] signature;
 
+    @Deprecated
+    public Licence() {
+      // For legacy licenses
+    }
+
+    public Licence(String permanentId, String customerName, String salt, String repoName, LicenceType type,
+        byte[] signature, long expirationDate) {
+      this.permanentId = permanentId;
+      this.customerName = customerName;
+      this.repositoryName = repoName;
+      this.salt = salt;
+      this.type = type;
+      this.signature = signature;
+      this.expirationDate = expirationDate;
+    }
+
+    @Deprecated
     public void registerLicence(String permanentId, String customerName, String salt, String repoName, LicenceType type,
         byte[] signature, long expirationDate) {
       this.permanentId = permanentId;
