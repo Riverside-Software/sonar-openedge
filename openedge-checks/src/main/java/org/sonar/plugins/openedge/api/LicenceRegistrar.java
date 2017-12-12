@@ -15,6 +15,7 @@ import org.sonarsource.api.sonarlint.SonarLintSide;
 @ServerSide
 public interface LicenceRegistrar {
 
+  @Deprecated
   default void register(Licence license) { }
 
   /**
@@ -26,7 +27,7 @@ public interface LicenceRegistrar {
   public class LicenseContext {
     private Collection<Licence> licenses = new ArrayList<>();
 
-    public Iterable<Licence> getLicenses() {
+    public final Iterable<Licence> getLicenses() {
       return licenses;
     }
 

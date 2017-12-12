@@ -51,6 +51,8 @@ import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonarsource.api.sonarlint.SonarLintSide;
 
+import com.google.common.base.Strings;
+
 @ScannerSide
 @SonarLintSide
 @ServerSide
@@ -127,7 +129,7 @@ public class OpenEdgeComponents {
   }
 
   private void registerLicense(Licence lic) {
-    if (lic.getRepositoryName().isEmpty())
+    if (Strings.isNullOrEmpty(lic.getRepositoryName()))
       return;
     LOG.debug("Found {} licence - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
         lic.getType().toString(), lic.getPermanentId(), lic.getCustomerName(), lic.getRepositoryName(),
