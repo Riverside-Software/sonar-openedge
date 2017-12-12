@@ -51,6 +51,8 @@ import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonarsource.api.sonarlint.SonarLintSide;
 
+import com.google.common.base.Strings;
+
 @ScannerSide
 @SonarLintSide
 @ServerSide
@@ -65,7 +67,7 @@ public class OpenEdgeComponents {
   private final List<OpenEdgeProparseCheck> ppChecks = new ArrayList<>();
   private final List<OpenEdgeDumpFileCheck> dfChecks = new ArrayList<>();
 
-  private final Collection<Licence> licences = new ArrayList<>();
+  private final Collection<Licence> licenses = new ArrayList<>();
 
   public OpenEdgeComponents() {
     this(null, null);
@@ -104,32 +106,41 @@ public class OpenEdgeComponents {
   }
 
   private void registerLicences(LicenceRegistrar[] licRegistrars) {
-    for (LicenceRegistrar reg : licRegistrars) {
-      LicenceRegistrar.Licence lic = new LicenceRegistrar.Licence();
-      reg.register(lic);
-      if (lic.getRepositoryName().isEmpty()) {
-        continue;
-      }
-      LOG.debug("Found {} licence - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
-          lic.getType().toString(), lic.getPermanentId(), lic.getCustomerName(), lic.getRepositoryName(),
-          DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date(lic.getExpirationDate())));
+    for (LicenceRegistrar registrar : licRegistrars) {
+      // Deprecated...
+      LicenceRegistrar.Licence lic = new Licence();
+      registrar.register(lic);
+      registerLicense(lic);
 
-      // Only one licence per repository / permID
-      Licence existingLic = getLicence(lic.getRepositoryName(), lic.getPermanentId());
-      if (existingLic == null) {
-        licences.add(lic);
-      } else if (existingLic.getExpirationDate() < lic.getExpirationDate()) {
-        licences.remove(existingLic);
-        licences.add(lic);
+      LicenceRegistrar.LicenseContext context = new LicenceRegistrar.LicenseContext();
+      registrar.register(context);
+      for (Licence l : context.getLicenses()) {
+        registerLicense(l);
       }
     }
-    for (Licence entry : licences) {
+    for (Licence entry : licenses) {
       LOG.info(
           "Licence summary - Repository '{}' associated with {} licence permanent ID '{}' - Customer '{}' - Expiration date {}",
           entry.getRepositoryName(),
           entry.getType().toString(), entry.getPermanentId(),
           entry.getCustomerName(), DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(
               new Date(entry.getExpirationDate())));
+    }
+  }
+
+  private void registerLicense(Licence lic) {
+    if (Strings.isNullOrEmpty(lic.getRepositoryName()))
+      return;
+    LOG.debug("Found {} licence - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
+        lic.getType().toString(), lic.getPermanentId(), lic.getCustomerName(), lic.getRepositoryName(),
+        DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date(lic.getExpirationDate())));
+    // Only one licence per repository / permID
+    Licence existingLic = getLicence(lic.getRepositoryName(), lic.getPermanentId());
+    if (existingLic == null) {
+      licenses.add(lic);
+    } else if (existingLic.getExpirationDate() < lic.getExpirationDate()) {
+      licenses.remove(existingLic);
+      licenses.add(lic);
     }
   }
 
@@ -192,7 +203,7 @@ public class OpenEdgeComponents {
   public Licence getLicence(String repoName, String permId) {
     if (permId == null)
       return null;
-    for (Licence lic : licences) {
+    for (Licence lic : licenses) {
       if (repoName.equals(lic.getRepositoryName()) && permId.equals(lic.getPermanentId()))
         return lic;
     }
@@ -200,7 +211,7 @@ public class OpenEdgeComponents {
   }
 
   public Collection<Licence> getLicences() {
-    return licences;
+    return licenses;
   }
 
   private OpenEdgeCheck<?> getAnalyzer(String internalKey, RuleKey ruleKey, SensorContext context, Licence licence) {
