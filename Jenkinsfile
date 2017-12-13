@@ -18,7 +18,9 @@ pipeline {
               sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package -Dmaven.test.failure.ignore=true"
             }
           }
-         }
+        }
+        archiveArtifacts artifacts: 'openedge-plugin/target/sonar-openedge-plugin-*.jar'
+        step([$class: 'Publisher', reportFilenamePattern: 'target/surefire-reports/testng-results.xml'])
       }
     }
     stage ('SonarQube analysis') {
