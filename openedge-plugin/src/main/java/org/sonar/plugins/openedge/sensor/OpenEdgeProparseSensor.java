@@ -262,7 +262,7 @@ public class OpenEdgeProparseSensor implements Sensor {
           TextPointer strt = file.newPointer(caught.getLine(), caught.getColumn() - 1);
           TextPointer end = file.newPointer(caught.getLine(), caught.getColumn());
           loc.at(file.newRange(strt, end));
-        } catch (IllegalArgumentException uncaught) {
+        } catch (IllegalArgumentException uncaught) { // NO-SONAR
           // Nothing
         }
       }
