@@ -84,4 +84,11 @@ public class PreprocessorVariablesTest {
     Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
   }
 
+  @Test
+  public void test08() throws ANTLRException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor08.p"), session);
+    unit.parse();
+    Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 0);
+  }
+
 }

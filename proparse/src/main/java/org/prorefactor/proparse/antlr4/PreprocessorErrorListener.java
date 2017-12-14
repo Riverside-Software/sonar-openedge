@@ -15,6 +15,7 @@ import java.util.List;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +33,8 @@ public class PreprocessorErrorListener extends BaseErrorListener {
   @Override
   public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
       String msg, RecognitionException e) {
-    LOGGER.error("Found symbol '{}' in preprocessor expression '{}' at position {}", offendingSymbol,
-        getExpressionAsString(), charPositionInLine);
+    LOGGER.error("Unexpected symbol '{}' in preprocessor expression '{}' at position {}",
+        ((Token) offendingSymbol).getText(), getExpressionAsString(), charPositionInLine);
     if (tokens.isEmpty())
       LOGGER.error("Expression found while analyzing '{}'", lexer.getFilename(0));
     else if (tokens.get(0).getFileIndex() == 0)
