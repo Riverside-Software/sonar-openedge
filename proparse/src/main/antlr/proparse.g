@@ -150,7 +150,7 @@ blockorstate:
     )
   ;
 
-dot_comment { /* RULE_INIT */ StringBuilder dotText = new StringBuilder(); int lastLine = 0; int lastCol = 0; int lastFile = 0; }:
+dot_comment { /* RULE_INIT */ StringBuilder dotText = new StringBuilder(); }:
     nd:NAMEDOT { dotText.append(#nd.getText()); }
     ( t2:not_state_end!
       {
