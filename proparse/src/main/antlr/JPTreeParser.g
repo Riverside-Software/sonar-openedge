@@ -87,9 +87,9 @@ options {
     return _retTree;
   }
 
-  // Func for grabbing the "state2" attribute from the node at LT(1) 
-  private boolean state2(AST node, int match) {
-    return ((JPNode)node).getState2() == match;
+  // Func for grabbing the "state2" attribute from the node at LT(1)
+  private boolean state2(JPNode node, int match) {
+    return node.getState2() == match;
   }
 
 }
@@ -176,84 +176,84 @@ statement:
   |            enumstate
   |            classstate
   |            clearstate
-  |  {state2(_t, 0)}?      closestate      // SQL
-  |  {state2(_t, QUERY)}?      closequerystate
-  |  {state2(_t, STOREDPROCEDURE)}?  closestoredprocedurestate
+  |  {state2(statement_AST_in, 0)}?      closestate      // SQL
+  |  {state2(statement_AST_in, QUERY)}?      closequerystate
+  |  {state2(statement_AST_in, STOREDPROCEDURE)}?  closestoredprocedurestate
   |            colorstate
   |            compilestate
   |            connectstate
   |            constructorstate
   |            copylobstate
-  |  {state2(_t, 0)}?      createstate
-  |  {state2(_t, ALIAS)}?      createaliasstate
-  |  {state2(_t, BROWSE)}?      createbrowsestate
-  |  {state2(_t, BUFFER)}?      createbufferstate
-  |  {state2(_t, CALL)}?      createcallstate
-  |  {state2(_t, CLIENTPRINCIPAL)}? createclientprincipalstate
-  |  {state2(_t, DATABASE)}?    createdatabasestate
-  |  {state2(_t, DATASET)}?      createdatasetstate
-  |  {state2(_t, DATASOURCE)}?    createdatasourcestate
-  |  {state2(_t, INDEX)}?      createindexstate    // SQL
-  |  {state2(_t, QUERY)}?      createquerystate   
-  |  {state2(_t, SAXATTRIBUTES)}?    createsaxattributesstate
-  |  {state2(_t, SAXREADER)}?    createsaxreaderstate
-  |  {state2(_t, SAXWRITER)}?    createsaxwriterstate
-  |  {state2(_t, SERVER)}?      createserverstate
-  |  {state2(_t, SERVERSOCKET)}?    createserversocketstate
-  |  {state2(_t, SOAPHEADER)}?    createsoapheaderstate
-  |  {state2(_t, SOAPHEADERENTRYREF)}?  createsoapheaderentryrefstate
-  |  {state2(_t, SOCKET)}?      createsocketstate
-  |  {state2(_t, TABLE)}?      createtablestate    // SQL
-  |  {state2(_t, TEMPTABLE)}?    createtemptablestate
-  |  {state2(_t, VIEW)}?      createviewstate      // SQL
-  |  {state2(_t, WIDGET) || state2(_t, Automationobject)}?  createwidgetstate
-  |  {state2(_t, WIDGETPOOL)}?    createwidgetpoolstate
-  |  {state2(_t, XDOCUMENT)}?    createxdocumentstate
-  |  {state2(_t, XNODEREF)}?    createxnoderefstate
-  |  {state2(_t, ADVISE)}?      ddeadvisestate
-  |  {state2(_t, EXECUTE)}?    ddeexecutestate
-  |  {state2(_t, GET)}?      ddegetstate
-  |  {state2(_t, INITIATE)}?    ddeinitiatestate
-  |  {state2(_t, REQUEST)}?    dderequeststate
-  |  {state2(_t, SEND)}?      ddesendstate
-  |  {state2(_t, TERMINATE)}?    ddeterminatestate  
+  |  {state2(statement_AST_in, 0)}?      createstate
+  |  {state2(statement_AST_in, ALIAS)}?      createaliasstate
+  |  {state2(statement_AST_in, BROWSE)}?      createbrowsestate
+  |  {state2(statement_AST_in, BUFFER)}?      createbufferstate
+  |  {state2(statement_AST_in, CALL)}?      createcallstate
+  |  {state2(statement_AST_in, CLIENTPRINCIPAL)}? createclientprincipalstate
+  |  {state2(statement_AST_in, DATABASE)}?    createdatabasestate
+  |  {state2(statement_AST_in, DATASET)}?      createdatasetstate
+  |  {state2(statement_AST_in, DATASOURCE)}?    createdatasourcestate
+  |  {state2(statement_AST_in, INDEX)}?      createindexstate    // SQL
+  |  {state2(statement_AST_in, QUERY)}?      createquerystate
+  |  {state2(statement_AST_in, SAXATTRIBUTES)}?    createsaxattributesstate
+  |  {state2(statement_AST_in, SAXREADER)}?    createsaxreaderstate
+  |  {state2(statement_AST_in, SAXWRITER)}?    createsaxwriterstate
+  |  {state2(statement_AST_in, SERVER)}?      createserverstate
+  |  {state2(statement_AST_in, SERVERSOCKET)}?    createserversocketstate
+  |  {state2(statement_AST_in, SOAPHEADER)}?    createsoapheaderstate
+  |  {state2(statement_AST_in, SOAPHEADERENTRYREF)}?  createsoapheaderentryrefstate
+  |  {state2(statement_AST_in, SOCKET)}?      createsocketstate
+  |  {state2(statement_AST_in, TABLE)}?      createtablestate    // SQL
+  |  {state2(statement_AST_in, TEMPTABLE)}?    createtemptablestate
+  |  {state2(statement_AST_in, VIEW)}?      createviewstate      // SQL
+  |  {state2(statement_AST_in, WIDGET) || state2(statement_AST_in, Automationobject)}?  createwidgetstate
+  |  {state2(statement_AST_in, WIDGETPOOL)}?    createwidgetpoolstate
+  |  {state2(statement_AST_in, XDOCUMENT)}?    createxdocumentstate
+  |  {state2(statement_AST_in, XNODEREF)}?    createxnoderefstate
+  |  {state2(statement_AST_in, ADVISE)}?      ddeadvisestate
+  |  {state2(statement_AST_in, EXECUTE)}?    ddeexecutestate
+  |  {state2(statement_AST_in, GET)}?      ddegetstate
+  |  {state2(statement_AST_in, INITIATE)}?    ddeinitiatestate
+  |  {state2(statement_AST_in, REQUEST)}?    dderequeststate
+  |  {state2(statement_AST_in, SEND)}?      ddesendstate
+  |  {state2(statement_AST_in, TERMINATE)}?    ddeterminatestate
   |            declarecursorstate
-  |  {state2(_t, BROWSE)}?      definebrowsestate
-  |  {state2(_t, BUFFER)}?      definebufferstate
-  |  {state2(_t, BUTTON)}?      definebuttonstate
-  |  {state2(_t, DATASET)}?      definedatasetstate
-  |  {state2(_t, DATASOURCE)}?    definedatasourcestate
-  |  {state2(_t, EVENT)}?      defineeventstate
-  |  {state2(_t, FRAME)}?      defineframestate
-  |  {state2(_t, IMAGE)}?      defineimagestate
-  |  {state2(_t, MENU)}?      definemenustate
-  |  {state2(_t, PARAMETER)}?    defineparameterstate
-  |  {state2(_t, PROPERTY)}?    definepropertystate
-  |  {state2(_t, QUERY)}?      definequerystate
-  |  {state2(_t, RECTANGLE)}?    definerectanglestate
-  |  {state2(_t, STREAM)}?      definestreamstate
-  |  {state2(_t, SUBMENU)}?    definesubmenustate
-  |  {state2(_t, TEMPTABLE)}?    definetemptablestate
-  |  {state2(_t, WORKTABLE)}?    defineworktablestate
-  |  {state2(_t, VARIABLE)}?    definevariablestate
+  |  {state2(statement_AST_in, BROWSE)}?      definebrowsestate
+  |  {state2(statement_AST_in, BUFFER)}?      definebufferstate
+  |  {state2(statement_AST_in, BUTTON)}?      definebuttonstate
+  |  {state2(statement_AST_in, DATASET)}?      definedatasetstate
+  |  {state2(statement_AST_in, DATASOURCE)}?    definedatasourcestate
+  |  {state2(statement_AST_in, EVENT)}?      defineeventstate
+  |  {state2(statement_AST_in, FRAME)}?      defineframestate
+  |  {state2(statement_AST_in, IMAGE)}?      defineimagestate
+  |  {state2(statement_AST_in, MENU)}?      definemenustate
+  |  {state2(statement_AST_in, PARAMETER)}?    defineparameterstate
+  |  {state2(statement_AST_in, PROPERTY)}?    definepropertystate
+  |  {state2(statement_AST_in, QUERY)}?      definequerystate
+  |  {state2(statement_AST_in, RECTANGLE)}?    definerectanglestate
+  |  {state2(statement_AST_in, STREAM)}?      definestreamstate
+  |  {state2(statement_AST_in, SUBMENU)}?    definesubmenustate
+  |  {state2(statement_AST_in, TEMPTABLE)}?    definetemptablestate
+  |  {state2(statement_AST_in, WORKTABLE)}?    defineworktablestate
+  |  {state2(statement_AST_in, VARIABLE)}?    definevariablestate
   |            dictionarystate
-  |  {state2(_t, 0)}?      deletestate
-  |  {state2(_t, ALIAS)}?      deletealiasstate
-  |  {state2(_t, FROM)}?      deletefromstate
-  |  {state2(_t, OBJECT)}?      deleteobjectstate
-  |  {state2(_t, PROCEDURE)}?    deleteprocedurestate
-  |  {state2(_t, WIDGET)}?      deletewidgetstate
-  |  {state2(_t, WIDGETPOOL)}?    deletewidgetpoolstate
+  |  {state2(statement_AST_in, 0)}?      deletestate
+  |  {state2(statement_AST_in, ALIAS)}?      deletealiasstate
+  |  {state2(statement_AST_in, FROM)}?      deletefromstate
+  |  {state2(statement_AST_in, OBJECT)}?      deleteobjectstate
+  |  {state2(statement_AST_in, PROCEDURE)}?    deleteprocedurestate
+  |  {state2(statement_AST_in, WIDGET)}?      deletewidgetstate
+  |  {state2(statement_AST_in, WIDGETPOOL)}?    deletewidgetpoolstate
   |            destructorstate
-  |  {state2(_t, 0)}?      disablestate
-  |  {state2(_t, TRIGGERS)}?    disabletriggersstate
+  |  {state2(statement_AST_in, 0)}?      disablestate
+  |  {state2(statement_AST_in, TRIGGERS)}?    disabletriggersstate
   |            disconnectstate
   |            displaystate
   |            dostate
   |            downstate
-  |  {state2(_t, INDEX)}?      dropindexstate      // SQL
-  |  {state2(_t, TABLE)}?      droptablestate      // SQL
-  |  {state2(_t, VIEW)}?      dropviewstate      // SQL
+  |  {state2(statement_AST_in, INDEX)}?      dropindexstate      // SQL
+  |  {state2(statement_AST_in, TABLE)}?      droptablestate      // SQL
+  |  {state2(statement_AST_in, VIEW)}?      dropviewstate      // SQL
   |            dynamicnewstate
   |            emptytemptablestate  
   |            enablestate
@@ -270,14 +270,14 @@ statement:
   |            hidestate
   |            ifstate
   |            importstate  
-  |  {state2(_t, CLEAR)}?      inputclearstate
-  |  {state2(_t, CLOSE)}?      inputclosestate
-  |  {state2(_t, FROM)}?      inputfromstate
-  |  {state2(_t, THROUGH)}?    inputthroughstate
-  |  {state2(_t, CLOSE)}?      inputoutputclosestate
-  |  {state2(_t, THROUGH)}?    inputoutputthroughstate
-  |  {state2(_t, INTO)}?      insertintostate      // SQL
-  |  {state2(_t, 0)}?      insertstate
+  |  {state2(statement_AST_in, CLEAR)}?      inputclearstate
+  |  {state2(statement_AST_in, CLOSE)}?      inputclosestate
+  |  {state2(statement_AST_in, FROM)}?      inputfromstate
+  |  {state2(statement_AST_in, THROUGH)}?    inputthroughstate
+  |  {state2(statement_AST_in, CLOSE)}?      inputoutputclosestate
+  |  {state2(statement_AST_in, THROUGH)}?    inputoutputthroughstate
+  |  {state2(statement_AST_in, INTO)}?      insertintostate      // SQL
+  |  {state2(statement_AST_in, 0)}?      insertstate
   |            interfacestate
   |            leavestate
   |            loadstate  
@@ -286,42 +286,42 @@ statement:
   |            nextstate
   |            nextpromptstate
   |            onstate  
-  |  {state2(_t, 0)}?      openstate      // SQL
-  |  {state2(_t, QUERY)}?      openquerystate
+  |  {state2(statement_AST_in, 0)}?      openstate      // SQL
+  |  {state2(statement_AST_in, QUERY)}?      openquerystate
   |            osappendstate
   |            oscommandstate
   |            oscopystate
   |            oscreatedirstate  
   |            osdeletestate
   |            osrenamestate
-  |  {state2(_t, CLOSE)}?      outputclosestate
-  |  {state2(_t, THROUGH)}?    outputthroughstate
-  |  {state2(_t, TO)}?      outputtostate
+  |  {state2(statement_AST_in, CLOSE)}?      outputclosestate
+  |  {state2(statement_AST_in, THROUGH)}?    outputthroughstate
+  |  {state2(statement_AST_in, TO)}?      outputtostate
   |            pagestate  
   |            pausestate
   |            procedurestate
   |            processeventsstate
   |            promptforstate
   |            publishstate
-  |  {state2(_t, 0)}?      putstate
-  |  {state2(_t, CURSOR)}?      putcursorstate
-  |  {state2(_t, SCREEN)}?      putscreenstate
+  |  {state2(statement_AST_in, 0)}?      putstate
+  |  {state2(statement_AST_in, CURSOR)}?      putcursorstate
+  |  {state2(statement_AST_in, SCREEN)}?      putscreenstate
   |            putkeyvaluestate
   |            quitstate
   |            rawtransferstate
   |            readkeystate
-  |  {state2(_t, 0)}?      releasestate
-  |  {state2(_t, EXTERNAL)}?    releaseexternalstate
-  |  {state2(_t, OBJECT)}?      releaseobjectstate
+  |  {state2(statement_AST_in, 0)}?      releasestate
+  |  {state2(statement_AST_in, EXTERNAL)}?    releaseexternalstate
+  |  {state2(statement_AST_in, OBJECT)}?      releaseobjectstate
   |            repeatstate
   |            repositionstate  
   |            returnstate
   |            revokestate
   |            routinelevelstate
     |                       blocklevelstate
-  |  {state2(_t, 0)}?      runstate
-  |  {state2(_t, STOREDPROCEDURE)}?  runstoredprocedurestate
-  |  {state2(_t, SUPER)}?      runsuperstate
+  |  {state2(statement_AST_in, 0)}?      runstate
+  |  {state2(statement_AST_in, STOREDPROCEDURE)}?  runstoredprocedurestate
+  |  {state2(statement_AST_in, SUPER)}?      runsuperstate
   |            savecachestate
   |            scrollstate
   |            seekstate  
@@ -331,11 +331,11 @@ statement:
   |            statusstate  
   |            stopstate
   |            subscribestate
-  |  {state2(_t, COLOR)}?      systemdialogcolorstate
-  |  {state2(_t, FONT)}?      systemdialogfontstate
-  |  {state2(_t, GETDIR)}?    systemdialoggetdirstate
-  |  {state2(_t, GETFILE)}?    systemdialoggetfilestate
-  |  {state2(_t, PRINTERSETUP)}?    systemdialogprintersetupstate
+  |  {state2(statement_AST_in, COLOR)}?      systemdialogcolorstate
+  |  {state2(statement_AST_in, FONT)}?      systemdialogfontstate
+  |  {state2(statement_AST_in, GETDIR)}?    systemdialoggetdirstate
+  |  {state2(statement_AST_in, GETFILE)}?    systemdialoggetfilestate
+  |  {state2(statement_AST_in, PRINTERSETUP)}?    systemdialogprintersetupstate
   |            systemhelpstate
   |            thisobjectstate
   |            transactionmodeautomaticstate

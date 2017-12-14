@@ -83,8 +83,8 @@ options {
   }
 
   // Func for grabbing the "state2" attribute from the node at LT(1)
-  private boolean state2(AST node, int match) {
-    return ((JPNode)node).getState2() == match;
+  private boolean state2(JPNode node, int match) {
+    return node.getState2() == match;
   }
 
   // --- The above are for all tree parsers, below are for TreeParser01 ---
