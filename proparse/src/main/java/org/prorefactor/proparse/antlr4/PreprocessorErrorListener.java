@@ -35,11 +35,11 @@ public class PreprocessorErrorListener extends BaseErrorListener {
     LOGGER.error("Found symbol '{}' in preprocessor expression '{}' at position {}", offendingSymbol,
         getExpressionAsString(), charPositionInLine);
     if (tokens.isEmpty())
-      LOGGER.error("Expression found while analyzing '{}'", lexer.getFilename(0));
+      LOGGER.error("Exception found while analyzing '{}'", lexer.getFilename(0));
     else if (tokens.get(0).getFileIndex() == 0)
-      LOGGER.error("Expression found while analyzing '{}' at line {}", lexer.getFilename(0), tokens.get(0).getLine());
+      LOGGER.error("Exception found while analyzing '{}' at line {}", lexer.getFilename(0), tokens.get(0).getLine());
     else
-      LOGGER.error("Expression found in file '{}' at line {} while analyzing '{}'",
+      LOGGER.error("Exception found in file '{}' at line {} while analyzing '{}'",
           lexer.getFilename(tokens.get(0).getFileIndex()), tokens.get(0).getLine(), lexer.getFilename(0));
   }
 

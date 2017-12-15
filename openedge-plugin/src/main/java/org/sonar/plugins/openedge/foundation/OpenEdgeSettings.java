@@ -44,7 +44,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.refactor.RefactorSession;
-import org.prorefactor.refactor.settings.IProparseSettings;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.batch.ScannerSide;
@@ -479,8 +478,20 @@ public class OpenEdgeSettings {
   public RefactorSession getProparseSession(boolean sonarLintSession) {
     if (proparseSession == null) {
       Schema sch = readSchema(settings, fileSystem, sonarLintSession);
-      IProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
+      ProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
           settings.getBoolean(Constants.BACKSLASH_ESCAPE));
+      // Some preprocessor values can be overridden at the project level
+      if (!Strings.isNullOrEmpty(settings.getString("sonar.oe.preprocessor.opsys")))
+        ppSettings.setCustomOpsys(settings.getString("sonar.oe.preprocessor.opsys"));
+      if (!Strings.isNullOrEmpty(settings.getString("sonar.oe.preprocessor.window-system")))
+        ppSettings.setCustomWindowSystem(settings.getString("sonar.oe.preprocessor.window-system"));
+      if (!Strings.isNullOrEmpty(settings.getString("sonar.oe.preprocessor.proversion")))
+        ppSettings.setCustomProversion(settings.getString("sonar.oe.preprocessor.proversion"));
+      if (!Strings.isNullOrEmpty(settings.getString("sonar.oe.preprocessor.batch-mode")))
+        ppSettings.setCustomBatchMode(settings.getBoolean("sonar.oe.preprocessor.batch-mode"));
+      if (!Strings.isNullOrEmpty(settings.getString("sonar.oe.preprocessor.process-architecture")))
+        ppSettings.setCustomProcessArchitecture(settings.getString("sonar.oe.preprocessor.process-architecture"));
+
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
       proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());
       if (!sonarLintSession) {

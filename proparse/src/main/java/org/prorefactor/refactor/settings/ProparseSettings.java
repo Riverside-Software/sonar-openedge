@@ -20,21 +20,28 @@ public class ProparseSettings implements IProparseSettings {
   private final boolean backslashEscape;
 
   private final OperatingSystem os;
+  private final String processArchitecture;
   private final boolean batchMode;
   private final String propath;
   private final String proversion;
-  private List<String> path = new ArrayList<>();
+  private final List<String> path = new ArrayList<>();
+
+  private String customWindowSystem;
+  private OperatingSystem customOpsys;
+  private String customProcessArchitecture;
+  private Boolean customBatchMode;
+  private String customProversion;
 
   public ProparseSettings(String propath) {
     this(propath, false);
   }
 
   public ProparseSettings(String propath, boolean backslashAsEscape) {
-    this(true, true, backslashAsEscape, true, OperatingSystem.getOS(), propath, "11.6");
+    this(true, true, backslashAsEscape, true, OperatingSystem.getOS(), propath, "11.7", "64");
   }
 
   public ProparseSettings(boolean proparseDirectives, boolean multiParse, boolean backslashEscape, boolean batchMode,
-      OperatingSystem os, String propath, String proversion) {
+      OperatingSystem os, String propath, String proversion, String processArchitecture) {
     this.multiParse = multiParse;
     this.proparseDirectives = proparseDirectives;
     this.backslashEscape = backslashEscape;
@@ -42,6 +49,7 @@ public class ProparseSettings implements IProparseSettings {
     this.os = os;
     this.propath = propath;
     this.proversion = proversion;
+    this.processArchitecture = processArchitecture;
     path.addAll(Arrays.asList(propath.split(",")));
   }
 
@@ -62,17 +70,17 @@ public class ProparseSettings implements IProparseSettings {
 
   @Override
   public boolean getBatchMode() {
-    return batchMode;
+    return customBatchMode == null ? batchMode : customBatchMode.booleanValue();
   }
 
   @Override
   public OperatingSystem getOpSys() {
-    return os;
+    return customOpsys == null ? os : customOpsys;
   }
 
   @Override
   public String getWindowSystem() {
-    return os.getWindowSystem();
+    return customWindowSystem == null ? os.getWindowSystem() : customWindowSystem;
   }
 
   @Override
@@ -87,7 +95,36 @@ public class ProparseSettings implements IProparseSettings {
 
   @Override
   public String getProversion() {
-    return proversion;
+    return customProversion == null ? proversion : customProversion;
+  }
+
+  @Override
+  public String getProcessArchitecture() {
+    return customProcessArchitecture == null ? processArchitecture : customProcessArchitecture;
+  }
+
+  public void setCustomBatchMode(boolean customBatchMode) {
+    this.customBatchMode = customBatchMode;
+  }
+
+  public void setCustomOpsys(String customOpsys) {
+    if (OperatingSystem.UNIX.name().equalsIgnoreCase(customOpsys)) {
+      this.customOpsys = OperatingSystem.UNIX;
+    } else if (OperatingSystem.WINDOWS.name().equalsIgnoreCase(customOpsys)) {
+      this.customOpsys = OperatingSystem.WINDOWS;
+    }
+  }
+
+  public void setCustomProcessArchitecture(String customProcessArchitecture) {
+    this.customProcessArchitecture = customProcessArchitecture;
+  }
+
+  public void setCustomWindowSystem(String customWindowSystem) {
+    this.customWindowSystem = customWindowSystem;
+  }
+
+  public void setCustomProversion(String customProversion) {
+    this.customProversion = customProversion;
   }
 
   public enum OperatingSystem {

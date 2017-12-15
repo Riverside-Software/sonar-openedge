@@ -24,14 +24,18 @@ import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.CLASS1;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE2;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
+import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class OpenEdgeProparseSensorTest {
@@ -48,10 +52,10 @@ public class OpenEdgeProparseSensorTest {
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
-    Assert.assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE3));
-    Assert.assertEquals(context.cpdTokens(BASEDIR + ":" + FILE3).size(), 7);
-    Assert.assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
-    Assert.assertEquals(context.cpdTokens(BASEDIR + ":" + CLASS1).size(), 11);
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE3));
+    assertEquals(context.cpdTokens(BASEDIR + ":" + FILE3).size(), 7);
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
+    assertEquals(context.cpdTokens(BASEDIR + ":" + CLASS1).size(), 11);
   }
 
   @Test
@@ -63,10 +67,37 @@ public class OpenEdgeProparseSensorTest {
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
-    Assert.assertEquals(context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.NUM_TRANSACTIONS_KEY).value(), 1,
+    assertEquals(context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.NUM_TRANSACTIONS_KEY).value(), 1,
         "Wrong number of transactions");
-    Assert.assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.NUM_TRANSACTIONS_KEY).value(), 0,
+    assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.NUM_TRANSACTIONS_KEY).value(), 0,
         "Wrong number of transactions");
+  }
+
+  @Test
+  public void testPreprocessorSettings01() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    context.settings().setProperty("sonar.oe.preprocessor.window-system", "foobar");
+    context.settings().setProperty("sonar.oe.preprocessor.opsys", "unix");
+    context.settings().setProperty("sonar.oe.preprocessor.batch-mode", "false");
+    context.settings().setProperty("sonar.oe.preprocessor.process-architecture", "32");
+    context.settings().setProperty("sonar.oe.preprocessor.proversion", "12.0");
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    assertFalse(oeSettings.getProparseSession(false).getProparseSettings().getBatchMode());
+    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getWindowSystem(), "foobar");
+    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getOpSys(), OperatingSystem.UNIX);
+    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProcessArchitecture(), "32");
+    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProversion(), "12.0");
+  }
+
+  @Test
+  public void testPreprocessorSettings02() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    assertTrue(oeSettings.getProparseSession(false).getProparseSettings().getBatchMode());
+    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProcessArchitecture(), "64");
+    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProversion(), "11.7");
   }
 
 }
