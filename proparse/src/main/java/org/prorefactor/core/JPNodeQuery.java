@@ -21,13 +21,14 @@ class JPNodeQuery implements ICallback<List<JPNode>> {
   private final Set<ABLNodeType> findTypes;
   private final boolean stateHeadOnly;
   private final boolean mainFileOnly;
+  private final JPNode currStatement;
 
   /**
    * @deprecated Since 2.1.3, use {@link JPNodeQuery#JPNodeQuery(ABLNodeType, ABLNodeType...)}
    */
   @Deprecated
   public JPNodeQuery(Integer... types) {
-    this(false, false, types);
+    this(false, false, null, types);
   }
 
   /**
@@ -35,16 +36,21 @@ class JPNodeQuery implements ICallback<List<JPNode>> {
    */
   @Deprecated
   public JPNodeQuery(boolean stateHeadOnly, Integer... types) {
-    this(stateHeadOnly, false, types);
+    this(stateHeadOnly, false, null, types);
   }
 
   /**
    * @deprecated Since 2.1.3, use {@link JPNodeQuery#JPNodeQuery(boolean, boolean, ABLNodeType, ABLNodeType...)}
    */
   @Deprecated
-  public JPNodeQuery(boolean stateHeadOnly, boolean mainFileOnly, Integer... types) {
+  public JPNodeQuery(boolean stateHeadOnly, boolean mainFileOnly, JPNode currentStatement, Integer... types) {
     this.stateHeadOnly = stateHeadOnly;
     this.mainFileOnly = mainFileOnly;
+    if ((currentStatement != null) && (currentStatement.getStatement() != null)) {
+      this.currStatement = currentStatement.getStatement();
+    } else {
+      this.currStatement = null;
+    }
     this.findTypes = new HashSet<>();
     for (Integer i : types) {
       findTypes.add(ABLNodeType.getNodeType(i));
@@ -52,16 +58,17 @@ class JPNodeQuery implements ICallback<List<JPNode>> {
   }
 
   public JPNodeQuery(ABLNodeType type, ABLNodeType... types) {
-    this(false, false, type, types);
+    this(false, false, null, type, types);
   }
 
   public JPNodeQuery(boolean stateHeadOnly, ABLNodeType type, ABLNodeType... types) {
-    this(stateHeadOnly, false, type , types);
+    this(stateHeadOnly, false, null, type , types);
   }
 
-  public JPNodeQuery(boolean stateHeadOnly, boolean mainFileOnly, ABLNodeType type,  ABLNodeType... types) {
+  public JPNodeQuery(boolean stateHeadOnly, boolean mainFileOnly, JPNode currentStatement, ABLNodeType type,  ABLNodeType... types) {
     this.stateHeadOnly = stateHeadOnly;
     this.mainFileOnly = mainFileOnly;
+    this.currStatement = currentStatement;
     this.findTypes = EnumSet.of(type, types);
   }
 
@@ -72,6 +79,9 @@ class JPNodeQuery implements ICallback<List<JPNode>> {
 
   @Override
   public boolean visitNode(JPNode node) {
+    if ((currStatement != null) && (node.getStatement() != currStatement))
+      return false;
+
     if (mainFileOnly && (node.getFileIndex() > 0))
       return true;
 
