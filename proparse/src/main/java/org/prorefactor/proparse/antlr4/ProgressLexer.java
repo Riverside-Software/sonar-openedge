@@ -20,6 +20,9 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenFactory;
@@ -356,13 +359,15 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   }
 
   @Override
-  public void analyzeSuspend(String analyzeSuspend) {
-    // No-op
+  public void analyzeSuspend(@Nonnull String analyzeSuspend) {
+    // Notify current include
+    currentInput.setAnalyzeSuspend(analyzeSuspend);
   }
 
   @Override
   public void analyzeResume() {
-    // No-op
+    // Notify current include
+    currentInput.setAnalyzeSuspend("");
   }
 
   private boolean undefHelper(String argName, Map<String, String> names) {
@@ -505,6 +510,11 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
   private String getFilename() {
     return getFilename(currentInput.getFileIndex());
+  }
+
+  @CheckForNull
+  String getCurrentAnalyzeSuspend() {
+    return currentInput.getAnalyzeSuspend();
   }
 
   /**

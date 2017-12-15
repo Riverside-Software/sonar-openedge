@@ -54,8 +54,6 @@ public class Lexer  {
   private int textStartCol;
   private int textStartSource;
 
-  private String currentAnalyzeSuspend = "";
-
   private Set<Integer> comments = new HashSet<>();
   private Set<Integer> loc = new HashSet<>();
 
@@ -913,23 +911,20 @@ public class Lexer  {
 
     if ("&analyze-suspend".equals(macroType)) {
       appendToEOL();
-      if (currText.toString().indexOf(' ') == -1) {
-        // Documentation says &analyze-suspend is always followed by an option
-        // But better to never trust documentation...
-        currentAnalyzeSuspend = "";
-      } else {
+      String analyzeSuspend = "";
+      if (currText.toString().indexOf(' ') != -1) {
+        // Documentation says &analyze-suspend is always followed by an option, but better to never trust documentation...
         // Generates a clean comma-separated list of all entries
-        currentAnalyzeSuspend = Joiner.on(',').join(Splitter.on(' ').omitEmptyStrings().trimResults().splitToList(
+        analyzeSuspend = Joiner.on(',').join(Splitter.on(' ').omitEmptyStrings().trimResults().splitToList(
             currText.toString().substring(currText.toString().indexOf(' ') + 1)));
       }
       getChar();
-      prepro.analyzeSuspend(currentAnalyzeSuspend);
-      prepro.getLstListener().analyzeSuspend(currentAnalyzeSuspend, textStartLine);
+      prepro.analyzeSuspend(analyzeSuspend);
+      prepro.getLstListener().analyzeSuspend(analyzeSuspend, textStartLine);
       return makeToken(ABLNodeType.AMPANALYZESUSPEND);
     }
     if ("&analyze-resume".equals(macroType)) {
       appendToEOL();
-      currentAnalyzeSuspend = "";
       getChar();
       prepro.analyzeResume();
       prepro.getLstListener().analyzeResume(textStartLine);
@@ -1093,7 +1088,7 @@ public class Lexer  {
     tok.setEndLine(prevLine);
     tok.setEndCharPositionInLine(prevCol);
     tok.setMacroSourceNum(textStartSource);
-    tok.setAnalyzeSuspend(currentAnalyzeSuspend);
+    tok.setAnalyzeSuspend(prepro.getCurrentAnalyzeSuspend());
 
     return tok;
   }

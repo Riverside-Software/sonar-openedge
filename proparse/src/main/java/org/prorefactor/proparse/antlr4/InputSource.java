@@ -14,6 +14,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.io.ByteProcessor;
 import com.google.common.io.Files;
 
@@ -29,6 +35,8 @@ import com.google.common.io.Files;
  * can return to "A" when we are done with "B".
  */
 public class InputSource {
+  private static final Logger LOGGER = LoggerFactory.getLogger(InputSource.class);
+
   // TODO Almost sure those two fields are useless
   private final boolean primaryInput;
   private final int sourceNum;
@@ -40,8 +48,10 @@ public class InputSource {
   private int nextCol = 1;
   private int nextLine = 1;
   private int currPos;
+  private String currAnalyzeSuspend = null;
 
   public InputSource(int sourceNum, String str, int fileIndex, int line, int col) {
+    LOGGER.trace("New InputSource object for macro element '{}'", str);
     this.sourceNum = sourceNum;
     this.primaryInput = false;
     this.fileContent = str;
@@ -56,6 +66,7 @@ public class InputSource {
   }
 
   public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean isPrimary) throws IOException {
+    LOGGER.trace("New InputSource object for include file '{}'", file.getName());
     this.sourceNum = sourceNum;
     this.primaryInput = isPrimary;
     this.fileIndex = fileIndex;
@@ -101,6 +112,15 @@ public class InputSource {
 
   public int getNextLine() {
     return nextLine;
+  }
+
+  @CheckForNull
+  public String getAnalyzeSuspend() {
+    return currAnalyzeSuspend;
+  }
+
+  public void setAnalyzeSuspend(@Nonnull String str) {
+    this.currAnalyzeSuspend = str;
   }
 
   public boolean isPrimaryInput() {
