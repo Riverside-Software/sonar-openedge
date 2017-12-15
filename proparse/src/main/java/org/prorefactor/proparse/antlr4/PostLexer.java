@@ -14,12 +14,14 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.IntStream;
 import org.antlr.v4.runtime.ListTokenSource;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.slf4j.Logger;
@@ -251,9 +253,14 @@ public class PostLexer implements TokenSource {
     else {
       CommonTokenStream cts = new CommonTokenStream(new ListTokenSource(tokenVector));
       PreprocessorParser parser = new PreprocessorParser(cts);
+      parser.setErrorHandler(new BailErrorStrategy());
       parser.removeErrorListeners();
       parser.addErrorListener(new PreprocessorErrorListener(prepro, tokenVector));
-      return eval.visitPreproIfEval(parser.preproIfEval());
+      try {
+        return eval.visitPreproIfEval(parser.preproIfEval());
+      } catch (ParseCancellationException caught) {
+        return false;
+      }
     }
   }
 
