@@ -16,7 +16,7 @@ import org.antlr.v4.runtime.WritableToken;
 import org.prorefactor.core.ABLNodeType;
 
 public class ProToken implements WritableToken {
-  private final static String INVALID_TYPE = "Invalid type number ";
+  private static final String INVALID_TYPE = "Invalid type number ";
 
   /**
    * This is the backing field for {@link #getType} and {@link #setType}.
