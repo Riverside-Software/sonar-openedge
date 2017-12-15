@@ -22,6 +22,7 @@ public class Constants {
   public static final String CPD_METHODS = "sonar.oe.cpd.skip_methods";
   public static final String CPD_PROCEDURES = "sonar.oe.cpd.skip_procedures";
   public static final String SUFFIXES = "sonar.oe.file.suffixes";
+  public static final String INCLUDE_SUFFIXES = "sonar.oe.include.suffixes";
   public static final String XREF_FILTER = "sonar.oe.filter.invalidxref";
   public static final String XREF_FILTER_BYTES = "sonar.oe.filter.invalidxref.bytes";
   public static final String BACKSLASH_ESCAPE = "sonar.oe.backslash.escape";

@@ -88,7 +88,11 @@ public class OpenEdgePlugin implements Plugin {
             CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_DEBUG).defaultValue(Boolean.FALSE.toString()).onQualifiers(
                 Qualifiers.MODULE, Qualifiers.PROJECT).build());
     context.addExtension(PropertyDefinition.builder(Constants.SUFFIXES).name("File suffixes").description(
-        "Comma-separated list of suffixes of OpenEdge files to analyze").type(PropertyType.STRING).defaultValue(
+        "Comma-separated list of suffixes of OpenEdge files to analyze, e.g. 'p,w,t'").type(PropertyType.STRING).defaultValue(
+            "").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
+                Qualifiers.PROJECT).build());
+    context.addExtension(PropertyDefinition.builder(Constants.INCLUDE_SUFFIXES).name("Include file suffixes").description(
+        "Comma-separated list of suffixes of OpenEdge include files to analyze, e.g. 'i,v,f'").type(PropertyType.STRING).defaultValue(
             "").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
                 Qualifiers.PROJECT).build());
     context.addExtension(PropertyDefinition.builder(Constants.CPD_ANNOTATIONS).name("CPD annotations").description(

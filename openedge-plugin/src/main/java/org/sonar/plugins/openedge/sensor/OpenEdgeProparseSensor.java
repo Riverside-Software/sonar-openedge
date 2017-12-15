@@ -80,7 +80,6 @@ import org.xml.sax.SAXException;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
 
 import antlr.ANTLRException;
 import antlr.RecognitionException;
@@ -147,7 +146,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       LOG.debug("Parsing {}", file.relativePath());
       numFiles++;
 
-      if ("i".equalsIgnoreCase(Files.getFileExtension(file.relativePath()))) {
+      if (settings.isIncludeFile(file.relativePath())) {
         parseIncludeFile(context, file, session);
       } else {
         parseMainFile(context, file, session);
