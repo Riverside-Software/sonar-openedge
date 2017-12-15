@@ -1,5 +1,5 @@
 /*******************************************************************************
-* * Copyright (c) 2003-2015 John Green
+ * Copyright (c) 2003-2015 John Green
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,6 +53,7 @@ public class ParseUnit {
 
   private final RefactorSession session;
   private final File file;
+  private final String relativeName;
   private final IntegerIndex<String> fileNameList;
 
   private ProgramRootNode topNode;
@@ -65,9 +66,14 @@ public class ParseUnit {
   private TypeInfo typeInfo = null;
   private List<Integer> trxBlocks;
 
-  public ParseUnit(File file, RefactorSession prsession) {
+  public ParseUnit(File file, RefactorSession session) {
+    this(file, file.getPath(), session);
+  }
+
+  public ParseUnit(File file, String relativeName, RefactorSession session) {
     this.file = file;
-    this.session = prsession;
+    this.relativeName = relativeName;
+    this.session = session;
     this.fileNameList = new IntegerIndex<>();
   }
 
@@ -122,11 +128,11 @@ public class ParseUnit {
    * @throws UncheckedIOException If main file can't be opened
    */
   public TokenSource lex4() {
-    return new ProgressLexer(session, file.getPath(), fileNameList, true);
+    return new ProgressLexer(session, file, relativeName, fileNameList, true);
   }
 
   public TokenSource preprocess4() {
-    return new ProgressLexer(session, file.getPath(), fileNameList, false);
+    return new ProgressLexer(session, file, relativeName, fileNameList, false);
   }
 
   /**
@@ -135,12 +141,12 @@ public class ParseUnit {
    * @throws UncheckedIOException If main file can't be opened
    */
   public TokenStream lex() {
-    ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, true);
+    ProgressLexer lexer = new ProgressLexer(session, file, relativeName, fileNameList, true);
     return lexer.getANTLR2TokenStream(false);
   }
 
   public TokenStream preprocess() {
-    ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, false);
+    ProgressLexer lexer = new ProgressLexer(session, file, relativeName, fileNameList, false);
     return lexer.getANTLR2TokenStream(true);
   }
 
@@ -151,7 +157,7 @@ public class ParseUnit {
    */
   public void lexAndGenerateMetrics() {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
-    ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, true);
+    ProgressLexer lexer = new ProgressLexer(session, file, relativeName, fileNameList, true);
     TokenStream stream = lexer.getANTLR2TokenStream(false);
     try {
       Token tok = stream.nextToken();
@@ -168,7 +174,7 @@ public class ParseUnit {
   public void parse() throws ANTLRException {
     LOGGER.trace("Entering ParseUnit#parse()");
     
-    ProgressLexer lexer = new ProgressLexer(session, file.getPath(), fileNameList, false);
+    ProgressLexer lexer = new ProgressLexer(session, file, relativeName, fileNameList, false);
     ProParser parser = new ProParser(lexer.getANTLR2TokenStream(true));
     parser.initAntlr4(session, lexer.getFilenameList());
     parser.program();
