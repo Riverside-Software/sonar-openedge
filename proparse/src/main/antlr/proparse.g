@@ -951,6 +951,7 @@ filn { /* RULE_INIT */ String fn; }:
         fn += #t2.getText();
         #t2.copyHiddenAfter(#t1);
       }
+      // TODO Update end position of token, see dot_comment
       #t1.setText(fn);
     }
   ;
@@ -968,6 +969,7 @@ fieldn { /* RULE_INIT */ String fn; }:
         } else {
           #t2.copyHiddenAfter(#t1);
         }
+        // TODO Update end position of token, see dot_comment
         #t1.setText(fn);
       }
     }
@@ -1047,6 +1049,7 @@ record
 }
   :  filn! // consume tokens and discard
     { 
+      // TODO Update end position, see dot_comment
       holdToken.setText(recname);
       holdToken.setType(RECORD_NAME);
       RecordNameNode n = (RecordNameNode) astFactory.create(holdToken, "RecordNameNode");
@@ -1105,6 +1108,7 @@ filename { /* RULE_INIT */ StringBuilder theText = new StringBuilder(); }:
       t2:filename_part! { theText.append(#t2.getText()); }
     )*
     {
+      // TODO Update end position, see dot_comment
       #t1.setType(FILENAME);
       #t1.setText(theText.toString());
     }
@@ -1132,6 +1136,7 @@ type_name2 { /* RULE_INIT */ StringBuilder theText = new StringBuilder(); }:
       p2:type_name_part! { theText.append(#p2.getText()); }
     )*
     { 
+      // TODO Update end position, see dot_comment
       #p1.setType(TYPE_NAME);
       #p1.setText(theText.toString());
     }
@@ -4203,10 +4208,7 @@ using_row:
 usingstate:
     USING^
     tn:type_name2
-    (  STAR!
-      {  #tn.setText(#tn.getText() + "*");
-      }
-    )?
+    ( STAR! { /* TODO Update end position, see dot_comment */ #tn.setText(#tn.getText() + "*"); } )?
     (using_from)?
     state_end
     {  sthd(##,0);
