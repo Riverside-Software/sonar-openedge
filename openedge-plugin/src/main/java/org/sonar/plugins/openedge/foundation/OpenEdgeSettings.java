@@ -38,6 +38,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -205,8 +206,11 @@ public class OpenEdgeSettings {
 
   private final void initializeIncludeExtensions(Settings settings) {
     // Include files extensions
-    includeExtensions.addAll(Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
-        Strings.nullToEmpty(settings.getString(Constants.INCLUDE_SUFFIXES))));
+    List<String> exts = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
+        Strings.nullToEmpty(settings.getString(Constants.INCLUDE_SUFFIXES))).stream().map(String::toLowerCase).collect(
+            Collectors.toList());
+    includeExtensions.addAll(exts);
+
     // Default value is ".i"
     if (includeExtensions.isEmpty())
       includeExtensions.add("i");
@@ -417,7 +421,7 @@ public class OpenEdgeSettings {
    * @return True if file name is defined as an include file
    */
   public boolean isIncludeFile(String name) {
-    return includeExtensions.contains(Files.getFileExtension(name)); 
+    return includeExtensions.contains(Files.getFileExtension(name).toLowerCase()); 
   }
 
   /**
