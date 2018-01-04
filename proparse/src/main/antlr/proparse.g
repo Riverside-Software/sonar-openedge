@@ -1683,6 +1683,8 @@ compile_opt:
   |  USEREVVIDEO^ (compile_equal)?
   |  USEUNDERLINE^ (compile_equal)?
   |  V6FRAME^ (compile_equal)?
+  |  OPTIONS^ exprt
+  |  OPTIONSFILE^ filenameorvalue
   |  NOERROR_KW
   ;
 
