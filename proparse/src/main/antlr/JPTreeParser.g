@@ -1166,6 +1166,8 @@ compilestate:
       |  #(USEREVVIDEO (#(EQUAL expression))? )
       |  #(USEUNDERLINE (#(EQUAL expression))? )
       |  #(V6FRAME (#(EQUAL expression))? )
+      |  #(OPTIONS exprt )
+      |  #(OPTIONSFILE filenameorvalue )
       |  NOERROR_KW
       )*
       state_end
