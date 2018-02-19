@@ -24,7 +24,6 @@ import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
-import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Index;
 import org.prorefactor.proparse.ProParserTokenTypes;
@@ -1011,9 +1010,9 @@ public class TP01Support implements ITreeParserAction {
     // If we get a mismatch between storetype here and the storetype determined
     // by proparse.dll then there's a bug somewhere. This is just a double-check.
     if (table.getStoretype() != node.attrGet(IConstants.STORETYPE)) {
-      throw new TreeParserException(
+      /* throw new TreeParserException(
           "Store type mismatch '" + node.attrGet(IConstants.STORETYPE) + "' / '" + table.getStoretype() + "'",
-          node.getFilename(), node.getLine(), node.getColumn());
+          node.getFilename(), node.getLine(), node.getColumn()); */
     }
     prevTableReferenced = lastTableReferenced;
     lastTableReferenced = buffer;

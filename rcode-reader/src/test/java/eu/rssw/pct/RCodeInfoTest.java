@@ -105,6 +105,16 @@ public class RCodeInfoTest {
   }
 
   @Test
+  public void testClass3() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/ttClass.r")) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
   public void testProcedure() throws IOException {
     try (FileInputStream input = new FileInputStream("src/test/resources/rcode/compile.r")) {
       RCodeInfo rci = new RCodeInfo(input);

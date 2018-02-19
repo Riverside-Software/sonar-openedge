@@ -64,10 +64,15 @@ public class BugFixTest {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
+    session.getSchema().createAlias("sp2k", "sports2000");
     session.injectTypeInfo(
         new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ParentClass.r")).getTypeInfo());
     session.injectTypeInfo(
         new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ChildClass.r")).getTypeInfo());
+    session.injectTypeInfo(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/ttClass.r")).getTypeInfo());
+    session.injectTypeInfo(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/ProtectedTT.r")).getTypeInfo());
 
     tempDir.mkdirs();
   }
@@ -480,6 +485,15 @@ public class BugFixTest {
   @Test
   public void testRCodeStructure() throws ANTLRException {
      ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/ChildClass.cls"), session);
+     assertNull(unit.getTopNode());
+     assertNull(unit.getRootScope());
+     unit.treeParser01();
+     assertNotNull(unit.getTopNode());
+   }
+
+  @Test
+  public void testProtectedTTAndBuffers() throws ANTLRException {
+     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/ProtectedTT.cls"), session);
      assertNull(unit.getTopNode());
      assertNull(unit.getRootScope());
      unit.treeParser01();
