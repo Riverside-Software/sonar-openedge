@@ -25,6 +25,7 @@ import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.core.schema.Index;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
@@ -96,6 +97,7 @@ public class TP01Support implements ITreeParserAction {
   private TableBuffer lastTableReferenced;
   private TableBuffer prevTableReferenced;
   private TableBuffer currDefTable;
+  private Index currDefIndex;
 
   // Temporary work-around
   private boolean inDefineEvent = false;
@@ -431,6 +433,29 @@ public class TP01Support implements ITreeParserAction {
     for (IField field : table.getFieldPosOrder()) {
       rootScope.defineTableField(field.getName(), currDefTable).assignAttributesLike(field);
     }
+  }
+
+  @Override
+  public void defineIndexInitialize(JPNode idNode, JPNode unique, JPNode primary, JPNode word) throws SemanticException {
+    LOG.trace("Entering defineIndexInitialize {} - {} - {} - {}", idNode, unique, primary, word);
+    currDefIndex = new Index(currDefTable.getTable(), idNode.getText(), (unique != null), (primary != null));
+    currDefTable.getTable().add(currDefIndex);
+    // return ITreeParserAction.super.defineIndexInitialize(idNode, unique, primary, word);
+  }
+
+  @Override
+  public void defineIndexFinalize(JPNode idNode) throws SemanticException {
+    LOG.trace("Entering defineIndexFinalize {}", idNode);
+    // return ITreeParserAction.super.defineIndexFinalize(idNode);
+  }
+
+  @Override
+  public void defineIndexFieldInitialize(JPNode idNode) throws SemanticException {
+    LOG.trace("Entering defineIndexFieldInitialize {}", idNode);
+    IField fld = currDefTable.getTable().lookupField(idNode.getText());
+    if (fld != null)
+      currDefIndex.addField(fld);
+    // return ITreeParserAction.super.defineIndexFieldInitialize(idNode);
   }
 
   public void defineTable(JPNode defNode, JPNode idNode, int storeType) {
@@ -985,9 +1010,9 @@ public class TP01Support implements ITreeParserAction {
     // If we get a mismatch between storetype here and the storetype determined
     // by proparse.dll then there's a bug somewhere. This is just a double-check.
     if (table.getStoretype() != node.attrGet(IConstants.STORETYPE)) {
-      throw new TreeParserException(
+      /* throw new TreeParserException(
           "Store type mismatch '" + node.attrGet(IConstants.STORETYPE) + "' / '" + table.getStoretype() + "'",
-          node.getFilename(), node.getLine(), node.getColumn());
+          node.getFilename(), node.getLine(), node.getColumn()); */
     }
     prevTableReferenced = lastTableReferenced;
     lastTableReferenced = buffer;

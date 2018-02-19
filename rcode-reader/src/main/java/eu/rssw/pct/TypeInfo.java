@@ -73,6 +73,15 @@ public class TypeInfo {
     return false;
   }
 
+  public TableElement getTempTable(String inName) {
+    for (TableElement tbl : tables) {
+      if (tbl.getName().equalsIgnoreCase(inName)) {
+        return tbl;
+      }
+    }
+    return null;
+  }
+
   public boolean hasProperty(String name) {
     for (PropertyElement prop : properties) {
       if (prop.getName().equalsIgnoreCase(name) && (prop.isPublic() || prop.isProtected()))
@@ -98,6 +107,15 @@ public class TypeInfo {
       }
     }
     return false;
+  }
+
+  public BufferElement getBuffer(String inName) {
+    for (BufferElement buf : buffers) {
+      if (buf.getName().equalsIgnoreCase(inName)) {
+        return buf;
+      }
+    }
+    return null;
   }
 
   public Collection<MethodElement> getMethods() {
