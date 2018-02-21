@@ -122,22 +122,6 @@ public class ParserSupport {
     // Not used anymore
   }
 
-  void defTableLike(JPNode node) {
-    // Not used anymore
-  }
-
-  void defField(String s) {
-    currentScope.defineTableField(s);
-  }
-
-  void defIndex(String s, JPNode unique) {
-    // Not used anymore
-  }
-
-  void defIndexFld(String s) {
-    // Not used anymore
-  }
-
   void defTable(String name, SymbolScope.FieldType ttype) {
     // I think the compiler will only allow table defs at the class/unit scope,
     // but we don't need to enforce that here. It'll go in the right spot by the
