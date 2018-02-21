@@ -10,8 +10,10 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,6 +27,9 @@ public class SymbolScope {
 
   private final Map<String, TableRef> tableMap = new HashMap<>();
   private final Set<String> varSet = new HashSet<>();
+
+  // Reference to the last DEFINE TEMP-TABLE in order to push fields/indexes
+  private TableRef lastTableDefd;
 
   SymbolScope(RefactorSession session) {
     this(session, null);
@@ -75,9 +80,16 @@ public class SymbolScope {
   }
 
   void defineTable(String name, FieldType ttype) {
-    TableRef newTable = new TableRef();
-    newTable.tableType = ttype;
-    tableMap.put(name.toLowerCase(), newTable);
+    lastTableDefd  = new TableRef();
+    lastTableDefd.tableType = ttype;
+    tableMap.put(name.toLowerCase(), lastTableDefd);
+  }
+
+  void defineTableField(String name) {
+    // Fail silently
+    if (lastTableDefd == null)
+      return;
+    lastTableDefd.fields.add(name);
   }
 
   void defineVar(String name) {
@@ -172,6 +184,8 @@ public class SymbolScope {
     @SuppressWarnings("unused")
     String fullName;
     String dbName;
+
+    private List<String> fields = new ArrayList<>();
   }
 
 }

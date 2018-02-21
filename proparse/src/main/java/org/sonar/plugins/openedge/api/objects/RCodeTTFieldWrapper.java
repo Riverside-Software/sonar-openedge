@@ -1,22 +1,3 @@
-/**
- * OpenEdge plugin for SonarQube - OpenEdge checks module
- * Copyright (C) 2015-2018 Riverside Software
- * contact AT riverside DASH software DOT fr
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
- */
 package org.sonar.plugins.openedge.api.objects;
 
 import org.prorefactor.core.JPNode;
@@ -27,20 +8,20 @@ import org.prorefactor.treeparser.Primative;
 
 import com.google.common.base.Preconditions;
 
-import eu.rssw.antlr.database.objects.Field;
+import eu.rssw.pct.elements.VariableElement;
 
-public class FieldWrapper implements IField {
+public class RCodeTTFieldWrapper implements IField {
   private final ITable table;
-  private final Field field;
+  private final VariableElement field;
 
-  public FieldWrapper(ITable table, Field field) {
+  public RCodeTTFieldWrapper(ITable table, VariableElement field) {
     Preconditions.checkNotNull(table);
     Preconditions.checkNotNull(field);
     this.table = table;
     this.field = field;
   }
 
-  public Field getBackingObject() {
+  public VariableElement getBackingObject() {
     return field;
   }
 
@@ -51,7 +32,8 @@ public class FieldWrapper implements IField {
 
   @Override
   public DataType getDataType() {
-    return DataType.getDataType(field.getDataType().toUpperCase());
+    // TODO Fix conversion between datatypes
+    return DataType.getDataType(field.getDataType().toString().replace('_', '-'));
   }
 
   @Override
@@ -62,7 +44,7 @@ public class FieldWrapper implements IField {
 
   @Override
   public int getExtent() {
-    return field.getExtent() == null ? 0 : field.getExtent();
+    return field.getExtent();
   }
 
   @Override
@@ -72,7 +54,7 @@ public class FieldWrapper implements IField {
 
   @Override
   public IField copyBare(ITable toTable) {
-    return new FieldWrapper(toTable, field);
+    return new RCodeTTFieldWrapper(toTable, field);
   }
 
   @Override

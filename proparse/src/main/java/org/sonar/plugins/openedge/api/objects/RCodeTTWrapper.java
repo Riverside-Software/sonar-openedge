@@ -1,22 +1,3 @@
-/**
- * OpenEdge plugin for SonarQube - OpenEdge checks module
- * Copyright (C) 2015-2018 Riverside Software
- * contact AT riverside DASH software DOT fr
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
- */
 package org.sonar.plugins.openedge.api.objects;
 
 import java.util.ArrayList;
@@ -32,43 +13,41 @@ import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
 
-import eu.rssw.antlr.database.objects.Field;
-import eu.rssw.antlr.database.objects.Index;
-import eu.rssw.antlr.database.objects.Table;
+import eu.rssw.pct.elements.IndexElement;
+import eu.rssw.pct.elements.TableElement;
+import eu.rssw.pct.elements.VariableElement;
 
-/**
- * Wrapper for table objects created by database-parser project so that they can be used in Proparse
- */
-public class TableWrapper implements ITable {
-  private final IDatabase db;
-  private final Table table;
+public class RCodeTTWrapper implements ITable {
+//  private final IDatabase db;
+//  private final Table table;
+  private final TableElement table;
 
   private final List<IField> fields = new ArrayList<>();
   private final List<IIndex> indexes = new ArrayList<>();
   private final SortedSet<IField> sortedFields = new TreeSet<>(Constants.FIELD_NAME_ORDER);
 
-  public TableWrapper(IDatabase db, Table t) {
-    this.db = db;
+  public RCodeTTWrapper(TableElement t) {
+//    this.db = Constants.nullDatabase;
     this.table = t;
 
-    for (Field fld : table.getFields()) {
-      IField iFld = new FieldWrapper(this, fld);
+    for (VariableElement fld : table.getFields()) {
+      IField iFld = new RCodeTTFieldWrapper(this, fld);
       fields.add(iFld);
       sortedFields.add(iFld);
     }
-    for (Index idx : table.getIndexes()) {
-      IIndex iIdx = new IndexWrapper(this, idx);
+    for (IndexElement idx : table.getIndexes()) {
+      IIndex iIdx = new RCodeTTIndexWrapper(this, idx);
       indexes.add(iIdx);
     }
   }
 
-  public Table getBackingObject() {
+  public TableElement getBackingObject() {
     return table;
   }
 
   @Override
   public IDatabase getDatabase() {
-    return db;
+    return Constants.nullDatabase;
   }
 
   @Override
@@ -112,7 +91,12 @@ public class TableWrapper implements ITable {
 
   @Override
   public int getStoretype() {
-    return IConstants.ST_DBTABLE;
+    return IConstants.ST_TTABLE;
   }
 
+  @Override
+  public String toString() {
+    return "TT Wrapper for " + getName() + " - " + getFieldSet().size() + " fields - " + getIndexes().size() + " indexes";
+    
+  }
 }

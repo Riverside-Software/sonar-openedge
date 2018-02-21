@@ -15,8 +15,7 @@ import java.util.TreeSet;
 
 /**
  * Database objects are created by the Schema class, and they are used when looking up table names from 4gl compile
- * units. "id" field is a database number, starting at one. Might be the logical database number - depends on how you
- * use this.
+ * units.
  */
 public class Database implements IDatabase {
   private final String name;
@@ -30,10 +29,6 @@ public class Database implements IDatabase {
     this.name = name;
   }
 
-  /**
-   * Add new Table object
-   * @param table
-   */
   @Override
   public void add(ITable table) {
     tableSet.add(table);
