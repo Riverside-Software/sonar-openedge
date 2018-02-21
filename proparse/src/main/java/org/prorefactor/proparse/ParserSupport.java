@@ -19,6 +19,8 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.refactor.RefactorSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 
@@ -29,6 +31,8 @@ import antlr.Token;
  * One instance per class being parsed.
  */
 public class ParserSupport {
+  private static final Logger LOG = LoggerFactory.getLogger(ParserSupport.class);
+
   private final RefactorSession session;
   private final ClassFinder classFinder;
   // Scope for the compile unit or class. It might be "sub" to a super scope in a class hierarchy
@@ -96,24 +100,20 @@ public class ParserSupport {
 
   // Functions triggered from proparse.g
 
-  /**
-   * When parsing class, all methods are added as part of the classState rule.
-   */
-  void declareMethod(String s) {
-    // Not used anymore
-  }
-
   void defBuffer(String bufferName, String tableName) {
+    LOG.trace("defBuffer {} to {}", bufferName, tableName);
     currentScope.defineBuffer(bufferName, tableName);
   }
 
   void defineClass(JPNode classNode) {
+    LOG.trace("defineClass");
     JPNode idNode = classNode.getFirstChild();
     className = ClassFinder.dequote(idNode.getText());
     unitScope.attachTypeInfo(session.getTypeInfo(className));
   }
 
   void defInterface(JPNode interfaceNode) {
+    LOG.trace("defineInterface");
     unitIsInterface = true;
     className = ClassFinder.dequote(interfaceNode.getFirstChild().getText());
   }
@@ -123,24 +123,22 @@ public class ParserSupport {
   }
 
   void defTableLike(JPNode node) {
-//    System.out.println("Je définis TT like " + node + " et je vais recopier tous les fields");
+    // Not used anymore
   }
 
   void defField(String s) {
-//    System.out.println("Field : " + s);
     currentScope.defineTableField(s);
   }
 
   void defIndex(String s, JPNode unique) {
-//    System.out.println("Definition index " + s + " -- unq: " + (unique != null));
+    // Not used anymore
   }
 
   void defIndexFld(String s) {
-//    System.out.println("Definition index field " + s);
+    // Not used anymore
   }
 
   void defTable(String name, SymbolScope.FieldType ttype) {
-//    System.out.println("def " + ttype + " " + name);
     // I think the compiler will only allow table defs at the class/unit scope,
     // but we don't need to enforce that here. It'll go in the right spot by the
     // nature of the code.
