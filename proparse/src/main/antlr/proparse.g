@@ -2385,7 +2385,7 @@ def_table_like:
     { schemaTablePriority=true; }
     rec:record
     { schemaTablePriority=false; }
-    { support.defTableLike(#rec); }
+    { /* Not used anymore support.defTableLike(#rec); */ }
     (options{greedy=true;}: VALIDATE)? (def_table_useindex)*
   ;
 
@@ -2396,7 +2396,7 @@ def_table_useindex:
 def_table_field:
     // Compiler allows FIELDS here. Sheesh.
     ( FIELD^ | fs:FIELDS^ {#fs.setType(FIELD);} )
-    i:identifier { support.defField(#i.getText()); }
+    i:identifier { /* Not used anymore support.defField(#i.getText()); */ }
     (options{greedy=true;}: fieldoption)*
   ;
 
@@ -2405,8 +2405,8 @@ def_table_index:
     // (AS|IS) is not optional the first time, but it is on subsequent uses.
     INDEX^ id:identifier 
     (options{greedy=true;}: (AS|IS)? (unq:UNIQUE|PRIMARY|WORDINDEX))*
-    { support.defIndex(#id.getText(), #unq); }
-    (fld:identifier { support.defIndexFld(#fld.getText()); } (options{greedy=true;}: ASCENDING|DESCENDING|CASESENSITIVE)* )+
+    { /* Not used anymore support.defIndex(#id.getText(), #unq); */ }
+    (fld:identifier { /* Not used anymore support.defIndexFld(#fld.getText()); */ } (options{greedy=true;}: ASCENDING|DESCENDING|CASESENSITIVE)* )+
   ;
    
 // Token WORKTABLE can be "work-file" or abbreviated forms of "work-table"
