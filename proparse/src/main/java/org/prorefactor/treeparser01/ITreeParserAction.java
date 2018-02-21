@@ -206,11 +206,6 @@ public interface ITreeParserAction {
   default void defineIndexFieldInitialize(JPNode idNode) throws SemanticException {
   }
 
-  /** Called by the tree parser at the end of a temp or work table index field definition
-  default Object defineIndexFieldFinalize(JPNode idNode) throws SemanticException {
-    return null;
-  } */
-
   /** Called by the tree parser when a temp-table is defined. */
   default void defineTemptable(JPNode defAST, JPNode idNode) throws SemanticException {
   }

@@ -30,7 +30,6 @@ import com.google.common.base.Strings;
 
 import eu.rssw.pct.TypeInfo;
 import eu.rssw.pct.elements.BufferElement;
-import eu.rssw.pct.elements.TableElement;
 
 /**
  * A ScopeRoot object is created for each compile unit, and it represents the program (topmost) scope. For classes, it
