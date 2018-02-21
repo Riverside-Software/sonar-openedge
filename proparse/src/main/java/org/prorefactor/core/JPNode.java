@@ -727,6 +727,19 @@ public class JPNode implements AST {
     return n;
   }
 
+  /**
+   * @param type ABLNodeType to search for
+   * @return Parent node within the current statement of the given type. Null if not found
+   */
+  public JPNode getParent(ABLNodeType type) {
+    if (type == getNodeType())
+      return this;
+    if (isStateHead())
+      return null;
+    if (getParent() != null)
+      return getParent().getParent(type);
+    return null;
+  }
 
   /**
    * @return The full name of the annotation, or an empty string is node is not an annotation
