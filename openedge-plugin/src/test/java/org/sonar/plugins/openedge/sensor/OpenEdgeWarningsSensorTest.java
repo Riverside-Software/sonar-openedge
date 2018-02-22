@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
 public class OpenEdgeWarningsSensorTest {
   private final static boolean IS_WINDOWS = (System.getenv("windir") != null);
 
-//  @Test
+  @Test
   public void testWarnings() throws IOException {
     SensorContextTester context = TestProjectSensorContext.createContext();
     context.setActiveRules(createRules());
