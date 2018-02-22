@@ -26,9 +26,6 @@ public final class DumpFileUtils {
   }
 
   public static final ParseTree getDumpFileParseTree(File file) throws IOException {
-    
-    int x = 0;
-    
     // Trying to read codepage from DF footer
     LineProcessor<Charset> charsetReader = new DFCodePageProcessor();
     Files.asCharSource(file, Charset.defaultCharset()).readLines(charsetReader);

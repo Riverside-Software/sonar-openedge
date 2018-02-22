@@ -57,4 +57,9 @@ public class TestServer extends Server {
     return "";
   }
 
+  @Override
+  public File getDeployDir() {
+    return null;
+  }
+
 }

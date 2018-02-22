@@ -78,7 +78,7 @@ public class OpenEdgeMetrics implements Metrics {
           Metric.DIRECTION_NONE).setQualitative(false).create();
 
   public static final String TRANSACTIONS_KEY = "TRANSACTIONS";
-  public static final Metric TRANSACTIONS = new Metric.Builder(TRANSACTIONS_KEY,
+  public static final Metric<String> TRANSACTIONS = new Metric.Builder(TRANSACTIONS_KEY,
       "Transaction blocks line numbers", Metric.ValueType.DATA).setDescription(
           "Line numbers of transaction blocks").setDirection(Metric.DIRECTION_NONE).setQualitative(false).setDomain(DOMAIN_OPENEDGE).create();
 
