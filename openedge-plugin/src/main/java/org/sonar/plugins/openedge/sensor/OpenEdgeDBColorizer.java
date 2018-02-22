@@ -52,11 +52,11 @@ public class OpenEdgeDBColorizer implements Sensor {
 
     for (InputFile file : context.fileSystem().inputFiles(
         context.fileSystem().predicates().hasLanguage(Constants.DB_LANGUAGE_KEY))) {
-      LOG.debug("DF syntax highlight on {}", file.relativePath());
+      LOG.debug("DF syntax highlight on {}", file);
       try {
         highlightFile(context, file);
       } catch (RuntimeException | IOException caught) {
-        LOG.error("Unable to lex file " + file.relativePath(), caught);
+        LOG.error("Unable to lex file " + file, caught);
       }
     }
   }

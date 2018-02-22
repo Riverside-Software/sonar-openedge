@@ -69,7 +69,7 @@ public class OpenEdgeDBRulesSensor implements Sensor {
     for (InputFile file : context.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.DB_LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       try {
-        LOG.debug("Generating ParseTree for dump file {}", file.relativePath());
+        LOG.debug("Generating ParseTree for dump file {}", file);
         long time = System.currentTimeMillis();
         ParseTree tree = DumpFileUtils.getDumpFileParseTree(file.file());
         parseTime += (System.currentTimeMillis() - time);
@@ -84,7 +84,7 @@ public class OpenEdgeDBRulesSensor implements Sensor {
         }
 
       } catch (IOException caught) {
-        LOG.error("Unable to analyze {}", file.relativePath(), caught);
+        LOG.error("Unable to analyze {}", file, caught);
       }
     }
 

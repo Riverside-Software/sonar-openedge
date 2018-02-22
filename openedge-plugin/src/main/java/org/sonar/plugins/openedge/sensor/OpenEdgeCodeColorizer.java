@@ -65,14 +65,14 @@ public class OpenEdgeCodeColorizer implements Sensor {
 
     for (InputFile file : context.fileSystem().inputFiles(
         context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
-      LOG.debug("Syntax highlight on {}", file.relativePath());
+      LOG.debug("Syntax highlight on {}", file);
       try {
         highlightFile(context, session, file);
       } catch (UncheckedIOException | ProparseRuntimeException caught) {
         if (caught.getCause() instanceof XCodedFileException) {
-          LOG.error("Unable to highlight xcode'd file '{}", file.relativePath());
+          LOG.error("Unable to highlight xcode'd file '{}", file);
         } else {
-          LOG.error("Unable to lex file '{}'", file.relativePath(), caught);
+          LOG.error("Unable to lex file '{}'", file, caught);
         }
       }
     }

@@ -21,30 +21,26 @@ package org.sonar.plugins.openedge.foundation;
 
 import java.util.List;
 
-import org.sonar.api.config.Settings;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.resources.AbstractLanguage;
 import org.sonar.plugins.openedge.api.Constants;
 
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
 
 public class OpenEdge extends AbstractLanguage {
   private static final String DEFAULT_FILE_SUFFIXES = "p,w,i,cls";
 
-  private final Settings settings;
+  private final Configuration config;
 
-  public OpenEdge(Settings settings) {
+  public OpenEdge(Configuration config) {
     super(Constants.LANGUAGE_KEY, "OpenEdge");
-    this.settings = settings;
+    this.config = config;
   }
 
   @Override
   public String[] getFileSuffixes() {
     List<String> suffixes = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
-        Strings.nullToEmpty(settings.getString(Constants.SUFFIXES)));
-    if (suffixes.isEmpty()) {
-      suffixes = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(OpenEdge.DEFAULT_FILE_SUFFIXES);
-    }
+        config.get(Constants.SUFFIXES).orElse(DEFAULT_FILE_SUFFIXES));
     return suffixes.toArray(new String[] {});
   }
 

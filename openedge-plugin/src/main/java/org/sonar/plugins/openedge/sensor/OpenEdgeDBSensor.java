@@ -57,7 +57,7 @@ public class OpenEdgeDBSensor implements Sensor {
     for (InputFile file : sensorContext.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.DB_LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       try {
-        LOG.info("Analyzing {}", file.relativePath());
+        LOG.info("Analyzing {}", file);
 
         DatabaseDescription desc = DumpFileUtils.getDatabaseDescription(file.file());
         sensorContext.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TABLES).withValue(desc.getTables().size()).save();
