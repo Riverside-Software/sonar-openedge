@@ -20,18 +20,18 @@ pipeline {
           }
         }
         archiveArtifacts artifacts: 'openedge-plugin/target/sonar-openedge-plugin-*.jar'
-        step([$class: 'Publisher', reportFilenamePattern: 'target/surefire-reports/testng-results.xml'])
+        step([$class: 'Publisher', reportFilenamePattern: '**/target/surefire-reports/testng-results.xml'])
       }
     }
     stage ('SonarQube analysis') {
       steps {
         script {
           withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
-            withCredentials([string(credentialsId: 'SonarCloudToken', variable: 'SONARCLOUD_TOKEN')]) {
+            withCredentials([string(credentialsId: 'AdminTokenSonarQube', variable: 'SQ_TOKEN')]) {
               if (("master" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME)) {
-                sh "mvn -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=rssw -Dsonar.login=${env.SONARCLOUD_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
+                sh "mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.login=${env.SQ_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
               } else {
-                sh "mvn -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=rssw -Dsonar.login=${env.SONARCLOUD_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=master sonar:sonar"
+                sh "mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.login=${env.SQ_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=develop sonar:sonar"
               }
             }
           }
