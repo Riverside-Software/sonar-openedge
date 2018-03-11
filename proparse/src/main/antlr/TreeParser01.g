@@ -1830,6 +1830,19 @@ viewstate:
     #(v:VIEW (stream_name_or_handle)? (gwidget)* (#(IN_KW WINDOW expression))? state_end {action.viewState(#v);} )
   ;
 
+waitforstate:
+    #(  WAITFOR
+      (  widattr (#(SET fld[ContextQualifier.UPDATING]))? // .NET WAIT-FOR.
+      |  eventlist OF widgetlist
+        (#(OR eventlist OF widgetlist))*
+        (#(FOCUS gwidget))?
+        (#(PAUSE expression))?
+        (EXCLUSIVEWEBUSER (expression)?)?
+      )
+      state_end
+    )
+  ;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Begin SQL
 ///////////////////////////////////////////////////////////////////////////////////////////////////
