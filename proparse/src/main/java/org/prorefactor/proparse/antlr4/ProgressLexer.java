@@ -12,6 +12,7 @@ package org.prorefactor.proparse.antlr4;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -133,13 +134,13 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    * stream once parsing is complete.
    * 
    * @param session Current parser session
-   * @param file File object of main file
+   * @param input File object of main file
    * @param fileName Referenced under which name
    * @param filenameList 
    * @param lexOnly Don't use preprocessor
    * @throws UncheckedIOException 
    */
-  public ProgressLexer(RefactorSession session, File file, String fileName, IntegerIndex<String> filenameList, boolean lexOnly) {
+  public ProgressLexer(RefactorSession session, InputStream input, String fileName, IntegerIndex<String> filenameList, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.ppSettings = session.getProparseSettings();
     this.session = session;
@@ -148,7 +149,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
     // Create input source with flag isPrimaryInput=true
     try {
-      currentInput = new InputSource(++sourceCounter, file, session.getCharset(), currFile, true);
+      currentInput = new InputSource(++sourceCounter, fileName, input, session.getCharset(), currFile, true);
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
