@@ -30,6 +30,8 @@ import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +54,7 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.FilePredicates;
+import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.TextPointer;
@@ -64,11 +67,13 @@ import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.api.utils.PathUtils;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.foundation.CPDCallback;
+import org.sonar.plugins.openedge.foundation.InputFileUtils;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
@@ -143,10 +148,10 @@ public class OpenEdgeProparseSensor implements Sensor {
     FilePredicates predicates = context.fileSystem().predicates();
     for (InputFile file : context.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
-      LOG.debug("Parsing {}", file.relativePath());
+      LOG.debug("Parsing {}", file);
       numFiles++;
 
-      if (settings.isIncludeFile(file.relativePath())) {
+      if (settings.isIncludeFile(file.filename())) {
         parseIncludeFile(context, file, session);
       } else {
         parseMainFile(context, file, session);
@@ -161,18 +166,21 @@ public class OpenEdgeProparseSensor implements Sensor {
   @SuppressWarnings({"unchecked", "rawtypes"})
   private void parseIncludeFile(SensorContext context, InputFile file, RefactorSession session) {
     long startTime = System.currentTimeMillis();
-    ParseUnit lexUnit = new ParseUnit(file.file(), session);
+    ParseUnit lexUnit = null;
     try {
+      lexUnit = new ParseUnit(InputFileUtils. getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session);
       lexUnit.lexAndGenerateMetrics();
     } catch (UncheckedIOException caught) {
       numFailures++;
       if (caught.getCause() instanceof XCodedFileException) {
-        LOG.error("Unable to generate file metrics for xcode'd file '{}", file.relativePath());
+        LOG.error("Unable to generate file metrics for xcode'd file '{}", file);
       } else {
-        LOG.error("Unable to generate file metrics for file '" + file.relativePath() + "'", caught);
+        LOG.error("Unable to generate file metrics for file '" + file + "'", caught);
       }
+      return;
     } catch (ProparseRuntimeException caught) {
-      LOG.error("Unable to generate file metrics for file '" + file.relativePath() + "'", caught);
+      LOG.error("Unable to generate file metrics for file '" + file + "'", caught);
+      return;
     }
     updateParseTime(System.currentTimeMillis() - startTime);
 
@@ -245,11 +253,11 @@ public class OpenEdgeProparseSensor implements Sensor {
         IncludeFileNotFoundException cause = (IncludeFileNotFoundException) caught.getCause();
         LOG.error("Unable to parse {} - Can't find include file '{}' from '{}'", file.relativePath(), cause.getIncludeName(), cause.getFileName());
       } else {
-        LOG.error("Unable to parse " + file.relativePath() + " - IOException was caught - Please report this issue", caught);
+        LOG.error("Unable to parse " + file + " - IOException was caught - Please report this issue", caught);
       }
       return;
     } catch (RecognitionException caught) {
-      LOG.error("Error during code parsing for " + file.relativePath() + " at position " + caught.getFilename() + ":"
+      LOG.error("Error during code parsing for " + file + " at position " + caught.getFilename() + ":"
           + caught.getLine() + ":" + caught.getColumn(), caught);
       numFailures++;
       NewIssue issue = context.newIssue().forRule(
@@ -298,7 +306,7 @@ public class OpenEdgeProparseSensor implements Sensor {
             ruleTime.get(entry.getKey().ruleKey().toString()) + System.currentTimeMillis() - startTime);
       }
     } catch (RuntimeException caught) {
-      LOG.error("Error during rule execution for " + file.relativePath(), caught);
+      LOG.error("Error during rule execution for " + file, caught);
     }
   }
 
