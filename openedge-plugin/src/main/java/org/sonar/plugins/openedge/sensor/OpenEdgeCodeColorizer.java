@@ -39,6 +39,7 @@ import org.sonar.api.batch.sensor.highlighting.TypeOfText;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.InputFileUtils;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
 public class OpenEdgeCodeColorizer implements Sensor {
@@ -79,7 +80,7 @@ public class OpenEdgeCodeColorizer implements Sensor {
   }
 
   private void highlightFile(SensorContext context, RefactorSession session, InputFile file) {
-    TokenSource stream = new ParseUnit(file.file(), session).lex4();
+    TokenSource stream = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session).lex4();
 
     ProToken tok = (ProToken) stream.nextToken();
     ProToken nextTok = (ProToken) stream.nextToken();
@@ -111,7 +112,7 @@ public class OpenEdgeCodeColorizer implements Sensor {
           highlighting.highlight(file.newRange(start, end), textType);
         } catch (IllegalArgumentException caught) {
           LOG.error("File {} - Unable to highlight token type {} - Start {}:{} - End {}:{} - Remaining tokens skipped",
-              file.relativePath(), textType, tok.getLine(), tok.getCharPositionInLine(), tok.getEndLine(),
+              file, textType, tok.getLine(), tok.getCharPositionInLine(), tok.getEndLine(),
               tok.getEndCharPositionInLine());
           return;
         }
