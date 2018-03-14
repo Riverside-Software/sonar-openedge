@@ -56,7 +56,7 @@ public class OpenEdgeSensor implements Sensor {
         predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       LOG.trace("Computing basic metrics on {}", file);
       // Depending on file extension
-      String fileExt = FilenameUtils.getExtension(file.relativePath());
+      String fileExt = FilenameUtils.getExtension(file.filename());
       if ("w".equalsIgnoreCase(fileExt)) {
         context.newMeasure().on(file).withValue(1).forMetric((Metric) OpenEdgeMetrics.WINDOWS).save();
       } else if ("p".equalsIgnoreCase(fileExt)) {
