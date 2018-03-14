@@ -71,7 +71,7 @@ public class OpenEdgeDBRulesSensor implements Sensor {
       try {
         LOG.debug("Generating ParseTree for dump file {}", file);
         long time = System.currentTimeMillis();
-        ParseTree tree = DumpFileUtils.getDumpFileParseTree(file.file());
+        ParseTree tree = DumpFileUtils.getDumpFileParseTree(file.inputStream(), file.charset());
         parseTime += (System.currentTimeMillis() - time);
 
         for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules().entrySet()) {

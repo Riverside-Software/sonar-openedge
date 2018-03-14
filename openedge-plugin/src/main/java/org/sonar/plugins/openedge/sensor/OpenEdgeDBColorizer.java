@@ -62,7 +62,7 @@ public class OpenEdgeDBColorizer implements Sensor {
   }
 
   private void highlightFile(SensorContext context, InputFile file) throws IOException {
-    DumpFileGrammarLexer lexer = new DumpFileGrammarLexer(CharStreams.fromPath(file.path()));
+    DumpFileGrammarLexer lexer = new DumpFileGrammarLexer(CharStreams.fromStream(file.inputStream()));
     NewHighlighting highlighting = context.newHighlighting().onFile(file);
 
     Token tok = lexer.nextToken();
