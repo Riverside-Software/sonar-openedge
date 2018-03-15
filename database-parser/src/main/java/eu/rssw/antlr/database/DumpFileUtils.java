@@ -36,7 +36,7 @@ public final class DumpFileUtils {
    * DF file encoding is stored at the end of the file. It's usually not expected that Sonar properties will hold the
    * right value.
    */
-  public static final ParseTree getDumpFileParseTree(InputStream stream, Charset sonarCharset) throws IOException {
+  public static final ParseTree getDumpFileParseTree(InputStream stream, Charset defaultCharset) throws IOException {
     // FileInputStream doesn't support mark for example, so we read the entire file in memory
     ByteArrayOutputStream outStream = new ByteArrayOutputStream();
     byte[] buffer = new byte[16384];
@@ -46,8 +46,10 @@ public final class DumpFileUtils {
     ByteArrayInputStream buffdInput = new ByteArrayInputStream(outStream.toByteArray());
 
     // Trying to read codepage from DF footer
-    LineProcessor<Charset> charsetReader = new DFCodePageProcessor(sonarCharset);
-    com.google.common.io.CharStreams.readLines(new InputStreamReader(buffdInput, sonarCharset), charsetReader);
+    LineProcessor<Charset> charsetReader = new DFCodePageProcessor(defaultCharset);
+    com.google.common.io.CharStreams.readLines(
+        new InputStreamReader(buffdInput, defaultCharset == null ? Charset.defaultCharset() : defaultCharset),
+        charsetReader);
     buffdInput.reset();
     return getDumpFileParseTree(new InputStreamReader(buffdInput, charsetReader.getResult()));
   }
@@ -84,10 +86,11 @@ public final class DumpFileUtils {
   }
 
   private static class DFCodePageProcessor implements LineProcessor<Charset> {
-    private Charset charset;
+    private Charset charset = Charset.defaultCharset();
 
     public DFCodePageProcessor(Charset charset) {
-      this.charset = charset;
+      if (charset != null)
+        this.charset = charset;
     }
 
     @Override
