@@ -27,7 +27,7 @@ public class OpenEdgeDBProfile implements BuiltInQualityProfilesDefinition {
 
   @Override
   public void define(Context context) {
-    context.createBuiltInQualityProfile(PROFILE_NAME, Constants.DB_LANGUAGE_KEY);
+    context.createBuiltInQualityProfile(PROFILE_NAME, Constants.DB_LANGUAGE_KEY).done();
   }
 
 }

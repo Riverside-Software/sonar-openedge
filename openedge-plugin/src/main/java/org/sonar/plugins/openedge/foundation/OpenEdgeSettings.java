@@ -253,7 +253,7 @@ public class OpenEdgeSettings {
     AtomicInteger numRCode = new AtomicInteger(0);
     ExecutorService service = Executors.newFixedThreadPool(4);
     for (Path binDir : binariesDirs) {
-      Files.fileTreeTraverser().preOrderTraversal(binDir.toFile()).forEach(f -> {
+      Files.fileTraverser().depthFirstPreOrder(binDir.toFile()).forEach(f -> {
         if (f.getName().endsWith(".r")) {
           numRCode.incrementAndGet();
           service.submit(() -> {
@@ -275,7 +275,7 @@ public class OpenEdgeSettings {
     if (dlcInPropath && !Strings.isNullOrEmpty(dlcInstallDir)) {
       File dlc = new File(dlcInstallDir);
 
-      Files.fileTreeTraverser().preOrderTraversal(new File(dlc, "gui")).forEach(f -> {
+      Files.fileTraverser().depthFirstPreOrder(new File(dlc, "gui")).forEach(f -> {
         if (f.getName().endsWith(".pl")) {
           service.submit(() -> parseLibrary(f));
         }
