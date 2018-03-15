@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.plugins.openedge.api.Constants;
 
@@ -24,12 +25,15 @@ public class TestProjectSensorContext {
   }
   
   public static SensorContextTester createContext() throws IOException {
+    MapSettings settings = new MapSettings();
+    settings.setProperty("sonar.sources", "src");
+    settings.setProperty(Constants.PROPATH, new File(BASEDIR).getAbsolutePath());
+    settings.setProperty(Constants.BINARIES, "build");
+    settings.setProperty(Constants.DATABASES, "src/schema/sp2k.df");
+    settings.setProperty(Constants.SKIP_RCODE, true);
+
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
-    context.settings().setProperty("sonar.sources", "src");
-    context.settings().setProperty(Constants.PROPATH, new File(BASEDIR).getAbsolutePath());
-    context.settings().setProperty(Constants.BINARIES, "build");
-    context.settings().setProperty(Constants.DATABASES, "src/schema/sp2k.df");
-    context.settings().setProperty(Constants.SKIP_RCODE, true);
+    context.setSettings(settings);
 
     context.fileSystem().add(
         new TestInputFileBuilder("src/test/resources/project1", DF1).setLanguage(Constants.DB_LANGUAGE_KEY).setType(
