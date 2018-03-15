@@ -151,7 +151,7 @@ public class InputSource {
 
     @Override
     public boolean processBytes(byte[] buf, int off, int len) throws IOException {
-      isXCoded = (buf[0] == 0x11) || (buf[0] == 0x13);
+      isXCoded = (len > 0) && ((buf[0] == 0x11) || (buf[0] == 0x13));
       // No need to read more bytes
       return false;
     }

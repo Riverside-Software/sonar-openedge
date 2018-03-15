@@ -382,7 +382,7 @@ public class OpenEdgeSettings {
 
   public String getRelativePathToSourceDirs(InputFile file) {
     for (Path p : sourcePaths) {
-      String s = p.relativize(Paths.get(file.uri())).toString();
+      String s = p.toAbsolutePath().relativize(Paths.get(file.uri())).toString();
       if (!Strings.isNullOrEmpty(s) && !s.startsWith(".."))
         return s;
     }
