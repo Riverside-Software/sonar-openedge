@@ -123,6 +123,11 @@
           <pluginClass>${sonar.pluginClass}</pluginClass>
           <sonarQubeMinVersion>6.3</sonarQubeMinVersion>
           <sonarLintSupported>true</sonarLintSupported>
+          <archive>
+            <manifestEntries>
+              <Implementation-Build>${git.commit}</Implementation-Build>
+            </manifestEntries>
+          </archive>
         </configuration>
       </plugin>
       <plugin>

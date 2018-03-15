@@ -13,7 +13,9 @@ pipeline {
         script {
           withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
             if (("master" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME)) {
-              sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true"
+              sh "git rev-parse HEAD > current-commit"
+              def currCommit = readFile('current-commit').replace("\n", "").replace("\r", "")
+              sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true -Dgit.commit=${currCommit}"
             } else {
               sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package -Dmaven.test.failure.ignore=true"
             }
