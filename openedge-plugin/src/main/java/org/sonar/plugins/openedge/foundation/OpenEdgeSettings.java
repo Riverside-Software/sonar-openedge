@@ -509,17 +509,27 @@ public class OpenEdgeSettings {
       Schema sch = readSchema(config, fileSystem, sonarLintSession);
       ProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
           config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
+
       // Some preprocessor values can be overridden at the project level
-      if (config.get("sonar.oe.preprocessor.opsys").isPresent())
-        ppSettings.setCustomOpsys(config.get("sonar.oe.preprocessor.opsys").get());
-      if (config.get("sonar.oe.preprocessor.window-system").isPresent())
-        ppSettings.setCustomWindowSystem(config.get("sonar.oe.preprocessor.window-system").get());
-      if (config.get("sonar.oe.preprocessor.proversion").isPresent())
-        ppSettings.setCustomProversion(config.get("sonar.oe.preprocessor.proversion").get());
-      if (config.get("sonar.oe.preprocessor.batch-mode").isPresent())
-        ppSettings.setCustomBatchMode(config.getBoolean("sonar.oe.preprocessor.batch-mode").get());
-      if (config.get("sonar.oe.preprocessor.process-architecture").isPresent())
-        ppSettings.setCustomProcessArchitecture(config.get("sonar.oe.preprocessor.process-architecture").get());
+      Optional<String> opsys = config.get("sonar.oe.preprocessor.opsys");
+      if (opsys.isPresent())
+        ppSettings.setCustomOpsys(opsys.get());
+
+      Optional<String> windowSystem = config.get("sonar.oe.preprocessor.window-system");
+      if (windowSystem.isPresent())
+        ppSettings.setCustomWindowSystem(windowSystem.get());
+
+      Optional<String> proVersion = config.get("sonar.oe.preprocessor.proversion");
+      if (proVersion.isPresent())
+        ppSettings.setCustomProversion(proVersion.get());
+
+      Optional<Boolean> batchMode = config.getBoolean("sonar.oe.preprocessor.batch-mode");
+      if (batchMode.isPresent())
+        ppSettings.setCustomBatchMode(batchMode.get());
+
+      Optional<String> processArch = config.get("sonar.oe.preprocessor.process-architecture");
+      if (processArch.isPresent())
+        ppSettings.setCustomProcessArchitecture(processArch.get());
 
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
       proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());
