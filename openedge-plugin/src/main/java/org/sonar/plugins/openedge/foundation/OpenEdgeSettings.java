@@ -201,7 +201,8 @@ public class OpenEdgeSettings {
 
   private final void initializeIncludeExtensions(Configuration config) {
     includeExtensions.addAll(Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
-        config.get(Constants.INCLUDE_SUFFIXES).orElse("i"))).stream().map(String::toLowerCase).collect(Collectors.toList());
+        config.get(Constants.INCLUDE_SUFFIXES).orElse("i")).stream().map(String::toLowerCase).collect(
+            Collectors.toList()));
   }
 
   public final void parseHierarchy(InputFile file) {
