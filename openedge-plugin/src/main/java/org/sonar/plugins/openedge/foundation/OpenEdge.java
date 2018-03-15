@@ -19,8 +19,6 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
-import java.util.List;
-
 import org.sonar.api.config.Configuration;
 import org.sonar.api.resources.AbstractLanguage;
 import org.sonar.plugins.openedge.api.Constants;
@@ -39,9 +37,8 @@ public class OpenEdge extends AbstractLanguage {
 
   @Override
   public String[] getFileSuffixes() {
-    List<String> suffixes = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
-        config.get(Constants.SUFFIXES).orElse(DEFAULT_FILE_SUFFIXES));
-    return suffixes.toArray(new String[] {});
+    return Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
+        config.get(Constants.SUFFIXES).orElse(DEFAULT_FILE_SUFFIXES)).toArray(new String[] {});
   }
 
 }

@@ -164,7 +164,8 @@ public class OpenEdgeProparseSensor implements Sensor {
     long startTime = System.currentTimeMillis();
     ParseUnit lexUnit = null;
     try {
-      lexUnit = new ParseUnit(InputFileUtils. getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session);
+      lexUnit = new ParseUnit(InputFileUtils.getInputStream(file),
+          InputFileUtils.getRelativePath(file, context.fileSystem()), session);
       lexUnit.lexAndGenerateMetrics();
     } catch (UncheckedIOException caught) {
       numFailures++;
@@ -206,7 +207,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
     }
     if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
-      settings.parseHierarchy(InputFileUtils.getRelativePath(file, context.fileSystem()));
+      settings.parseHierarchy(file);
     }
 
     File listingFile = settings.getListingFile(file);

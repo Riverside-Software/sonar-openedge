@@ -140,7 +140,7 @@ public class ParseUnit {
     return new ProgressLexer(session, getInputStream(), relativeName, fileNameList, true);
   }
 
-  public TokenSource preprocess4() throws IOException {
+  public TokenSource preprocess4() {
     return new ProgressLexer(session, getInputStream(), relativeName, fileNameList, false);
   }
 

@@ -19,12 +19,6 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import org.apache.commons.io.FilenameUtils;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.utils.Version;
@@ -41,62 +35,6 @@ public class OpenEdgeProjectHelper {
   public static String getServerId(SensorContext context) {
     return context.config().get(context.getSonarQubeVersion().isGreaterThanOrEqual(Version.parse("6.7"))
             ? CoreProperties.SERVER_ID : CoreProperties.PERMANENT_SERVER_ID).orElse("");
-  }
-
-  /**
-   * Get the relative path from one file to another. Directory separator should be / Implementation from
-   * StackOverflow...
-   * 
-   * @param targetPath targetPath is calculated to this file
-   * @param basePath basePath is calculated from this file
-   * @param pathSeparator directory separator. The platform default is not assumed so that we can test Unix behaviour
-   *          when running on Windows (for example)
-   * @return Null if not present in subdirectory
-   */
-  public static String getRelativePath(String targetPath, String basePath) {
-    String[] base = basePath.split(Pattern.quote("/"));
-    String[] target = targetPath.split(Pattern.quote("/"));
-
-    // First get all the common elements. Store them as a string,
-    // and also count how many of them there are.
-    StringBuilder common = new StringBuilder();
-
-    int commonIndex = 0;
-    while (commonIndex < target.length && commonIndex < base.length && target[commonIndex].equals(base[commonIndex])) {
-      common.append(target[commonIndex] + "/");
-      commonIndex++;
-    }
-
-    if (commonIndex == 0) {
-      return "";
-    }
-
-    StringBuilder relative = new StringBuilder();
-
-    if (base.length != commonIndex) {
-      return "";
-    }
-
-    relative.append(targetPath.substring(common.length()));
-    return relative.toString();
-  }
-
-  public static String getPathRelativeToSourceDirs(File file, List<String> propath) {
-    for (String entry : propath) {
-      String s = getRelativePath(FilenameUtils.normalizeNoEndSeparator(file.getAbsolutePath(), true), entry);
-      if (s.length() != 0)
-        return s;
-    }
-    return "";
-  }
-
-  public static String getPathRelativeToSourceDirs(Path file, List<String> propath) {
-    for (String entry : propath) {
-      String s = getRelativePath(FilenameUtils.normalizeNoEndSeparator(file.toAbsolutePath().toString(), true), entry);
-      if (s.length() != 0)
-        return s;
-    }
-    return "";
   }
 
 }

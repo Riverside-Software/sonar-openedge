@@ -204,10 +204,11 @@ public class OpenEdgeSettings {
         config.get(Constants.INCLUDE_SUFFIXES).orElse("i"))).stream().map(String::toLowerCase).collect(Collectors.toList());
   }
 
-  public final void parseHierarchy(String fileName) {
-    String fileInPropath = searchInPropath(fileName);
+  public final void parseHierarchy(InputFile file) {
+    String relPath = InputFileUtils.getRelativePath(file, fileSystem);
+    String fileInPropath = searchInPropath(relPath);
     File rcd = getRCode(fileInPropath);
-    LOG.debug("Parsing hierarchy of {} -- In PROPATH {} - Rcode '{}'", fileName, fileInPropath, rcd);
+    LOG.debug("Parsing hierarchy of {} -- In PROPATH {} - Rcode '{}'", relPath, fileInPropath, rcd);
     if ((rcd != null) && rcd.exists()) {
       TypeInfo info = parseRCode(rcd);
       if (info != null) {

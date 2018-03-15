@@ -41,7 +41,7 @@ import org.testng.annotations.Test;
 
 public class OpenEdgeProparseSensorTest {
 
-  //@Test
+  @Test
   public void testCPDPreprocessorExpansion() throws Exception {
     MapSettings settings = new MapSettings();
     settings.setProperty(Constants.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
@@ -60,7 +60,7 @@ public class OpenEdgeProparseSensorTest {
     assertEquals(context.cpdTokens(BASEDIR + ":" + CLASS1).size(), 11);
   }
 
-  //@Test
+  @Test
   public void testListing() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
 

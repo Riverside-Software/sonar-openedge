@@ -39,6 +39,7 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.InputFileUtils;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
@@ -110,7 +111,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
               if (target == file) {
                 location.message(w.msg);
               } else {
-                location.message("From " + file.toString() + " - " + w.msg);
+                location.message("From " + InputFileUtils.getRelativePath(file, context.fileSystem()) + " - " + w.msg);
               }
               issue.at(location).save();
             } else {
