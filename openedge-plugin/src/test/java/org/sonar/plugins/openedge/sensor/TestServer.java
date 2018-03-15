@@ -28,6 +28,11 @@ public class TestServer extends Server {
   }
 
   @Override
+  public File getDeployDir() {
+    return null;
+  }
+
+  @Override
   public String getContextPath() {
     return null;
   }
@@ -55,11 +60,6 @@ public class TestServer extends Server {
   @Override
   public String getPermanentServerId() {
     return "";
-  }
-
-  @Override
-  public File getDeployDir() {
-    return null;
   }
 
 }
