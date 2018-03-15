@@ -46,8 +46,8 @@ public final class DumpFileUtils {
     ByteArrayInputStream buffdInput = new ByteArrayInputStream(outStream.toByteArray());
 
     // Trying to read codepage from DF footer
-    LineProcessor<Charset> charsetReader = new DFCodePageProcessor();
-    com.google.common.io.CharStreams.readLines(new InputStreamReader(buffdInput), charsetReader);
+    LineProcessor<Charset> charsetReader = new DFCodePageProcessor(sonarCharset);
+    com.google.common.io.CharStreams.readLines(new InputStreamReader(buffdInput, sonarCharset), charsetReader);
     buffdInput.reset();
     return getDumpFileParseTree(new InputStreamReader(buffdInput, charsetReader.getResult()));
   }
@@ -84,7 +84,11 @@ public final class DumpFileUtils {
   }
 
   private static class DFCodePageProcessor implements LineProcessor<Charset> {
-    private Charset charset = Charset.defaultCharset();
+    private Charset charset;
+
+    public DFCodePageProcessor(Charset charset) {
+      this.charset = charset;
+    }
 
     @Override
     public Charset getResult() {
