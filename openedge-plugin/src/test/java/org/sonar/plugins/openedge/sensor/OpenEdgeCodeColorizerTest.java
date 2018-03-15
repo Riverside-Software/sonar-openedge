@@ -36,7 +36,7 @@ public class OpenEdgeCodeColorizerTest {
   @Test
   public void testSp2k() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
     OpenEdgeCodeColorizer sensor = new OpenEdgeCodeColorizer(oeSettings);
     sensor.execute(context);
 

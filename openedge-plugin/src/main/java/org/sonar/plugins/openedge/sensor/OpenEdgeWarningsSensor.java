@@ -39,7 +39,6 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
@@ -63,14 +62,6 @@ public class OpenEdgeWarningsSensor implements Sensor {
   }
 
 
-  private File getWarningsFile(File file) {
-    String relPath = OpenEdgeProjectHelper.getPathRelativeToSourceDirs(file, settings.getSourceDirs());
-    if (relPath == null)
-      return null;
-
-    return new File(settings.getPctDir(), relPath + ".warnings");
-  }
-
   @Override
   public void execute(SensorContext context) {
     if (context.runtime().getProduct() == SonarProduct.SONARLINT)
@@ -89,7 +80,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
         predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       LOG.debug("Looking for warnings of {}", file);
 
-      File listingFile = getWarningsFile(file.file());
+      File listingFile = settings.getWarningsFile(file);
       if ((listingFile != null) && (listingFile.exists())) {
         LOG.debug("Import warnings for {}", file);
 

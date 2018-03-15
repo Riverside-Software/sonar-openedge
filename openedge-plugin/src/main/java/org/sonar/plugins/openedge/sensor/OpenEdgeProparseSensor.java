@@ -30,8 +30,6 @@ import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +52,6 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.FilePredicates;
-import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.TextPointer;
@@ -67,7 +64,6 @@ import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.api.utils.PathUtils;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
@@ -195,7 +191,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   }
 
   private void parseMainFile(SensorContext context, InputFile file, RefactorSession session) {
-    File xrefFile = getXrefFile(file.file());
+    File xrefFile = settings.getXrefFile(file);
     Document doc = null;
     if ((context.runtime().getProduct() == SonarProduct.SONARQUBE) && (xrefFile != null) && xrefFile.exists()) {
       LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
@@ -210,24 +206,24 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
     }
     if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
-      settings.parseHierarchy(file.relativePath());
+      settings.parseHierarchy(InputFileUtils.getRelativePath(file, context.fileSystem()));
     }
 
-    File listingFile = getListingFile(file.file());
+    File listingFile = settings.getListingFile(file);
     List<Integer> trxBlocks = new ArrayList<>();
-    if ((file.absolutePath().indexOf(' ') == -1) && (listingFile != null) && (listingFile.exists())) {
+    if ((file.uri().toString().indexOf(' ') == -1) && (listingFile != null) && (listingFile.exists())) {
       try {
-        ListingParser parser = new ListingParser(listingFile, file.relativePath());
+        ListingParser parser = new ListingParser(listingFile, InputFileUtils.getRelativePath(file, context.fileSystem()));
         for (CodeBlock block : parser.getTransactionBlocks()) {
           trxBlocks.add(block.getLineNumber());
         }
         numListings++;
       } catch (IOException caught) {
-        LOG.error("Unable to parse listing file for " + file.relativePath(), caught);
+        LOG.error("Unable to parse listing file for " + file, caught);
       }
     } else {
-      LOG.debug("Listing file for '{}' not found or contains space character - Was looking for '{}'",
-          file.relativePath(), listingFile.getAbsolutePath());
+      LOG.debug("Listing file for '{}' not found or contains space character - Was looking for '{}'", file,
+          listingFile.getAbsolutePath());
     }
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.TRANSACTIONS).withValue(
         Joiner.on(",").join(trxBlocks)).save();
@@ -238,7 +234,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     long startTime = System.currentTimeMillis();
 
     try {
-      unit = new ParseUnit(file.file(), file.relativePath(), session);
+      unit = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session);
       unit.treeParser01();
       unit.attachXref(doc);
       unit.attachTransactionBlocks(trxBlocks);
@@ -248,10 +244,10 @@ public class OpenEdgeProparseSensor implements Sensor {
       numFailures++;
       if ((caught.getCause() != null) && (caught.getCause() instanceof XCodedFileException)) {
         XCodedFileException cause = (XCodedFileException) caught.getCause();
-        LOG.error("Unable to parse {} - Can't read xcode'd file {}", file.relativePath(), cause.getFileName());
+        LOG.error("Unable to parse {} - Can't read xcode'd file {}", file, cause.getFileName());
       } else if ((caught.getCause() != null) && (caught.getCause() instanceof IncludeFileNotFoundException)) {
         IncludeFileNotFoundException cause = (IncludeFileNotFoundException) caught.getCause();
-        LOG.error("Unable to parse {} - Can't find include file '{}' from '{}'", file.relativePath(), cause.getIncludeName(), cause.getFileName());
+        LOG.error("Unable to parse {} - Can't find include file '{}' from '{}'", file, cause.getIncludeName(), cause.getFileName());
       } else {
         LOG.error("Unable to parse " + file + " - IOException was caught - Please report this issue", caught);
       }
@@ -264,7 +260,7 @@ public class OpenEdgeProparseSensor implements Sensor {
           RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY));
       NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()) + " in "
           + caught.getFilename() + ":" + caught.getLine() + ":" + caught.getColumn());
-      if (file.relativePath().equals(caught.getFilename())) {
+      if (InputFileUtils.getRelativePath(file, context.fileSystem()).equals(caught.getFilename())) {
         try {
           TextPointer strt = file.newPointer(caught.getLine(), caught.getColumn() - 1);
           TextPointer end = file.newPointer(caught.getLine(), caught.getColumn());
@@ -277,7 +273,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       issue.save();
       return;
     } catch (RuntimeException | ANTLRException caught) {
-      LOG.error("Error during code parsing for " + file.relativePath(), caught);
+      LOG.error("Error during code parsing for " + InputFileUtils.getRelativePath(file, context.fileSystem()), caught);
       numFailures++;
       NewIssue issue = context.newIssue();
       issue.forRule(RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
@@ -398,20 +394,6 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.error("Error while writing debug index", uncaught);
       }
     }
-  }
-
-  private File getXrefFile(File file) {
-    String relPath = OpenEdgeProjectHelper.getPathRelativeToSourceDirs(file, settings.getSourceDirs());
-    if (relPath == null)
-      return null;
-    return new File(settings.getPctDir(), relPath + ".xref");
-  }
-
-  private File getListingFile(File file) {
-    String relPath = OpenEdgeProjectHelper.getPathRelativeToSourceDirs(file, settings.getSourceDirs());
-    if (relPath == null)
-      return null;
-    return new File(settings.getPctDir(), relPath);
   }
 
   private void computeCpd(SensorContext context, InputFile file, ParseUnit unit) {

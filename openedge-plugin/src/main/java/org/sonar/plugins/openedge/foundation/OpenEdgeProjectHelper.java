@@ -20,6 +20,7 @@
 package org.sonar.plugins.openedge.foundation;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -83,6 +84,15 @@ public class OpenEdgeProjectHelper {
   public static String getPathRelativeToSourceDirs(File file, List<String> propath) {
     for (String entry : propath) {
       String s = getRelativePath(FilenameUtils.normalizeNoEndSeparator(file.getAbsolutePath(), true), entry);
+      if (s.length() != 0)
+        return s;
+    }
+    return "";
+  }
+
+  public static String getPathRelativeToSourceDirs(Path file, List<String> propath) {
+    for (String entry : propath) {
+      String s = getRelativePath(FilenameUtils.normalizeNoEndSeparator(file.toAbsolutePath().toString(), true), entry);
       if (s.length() != 0)
         return s;
     }
