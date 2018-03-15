@@ -67,4 +67,10 @@ public class TestProfiler {
     ProfilerUtils.dumpCoverageAsXml(session, new ArrayList<File>(), new File("target/foo.xml"));
   }
 
+  @Test
+  public void testProfiler7() throws IOException {
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler6.out"));
+    Assert.assertEquals(session.getUser(), "apprise");
+  }
+
 }
