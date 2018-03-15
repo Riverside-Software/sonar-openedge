@@ -1,6 +1,6 @@
-/*
+/**
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2013-2016 Riverside Software
+ * Copyright (C) 2016 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -19,22 +19,20 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
-import org.sonar.api.CoreProperties;
-import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.utils.Version;
+import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
-public class OpenEdgeProjectHelper {
+public class InputFileUtilsTest {
 
-  private OpenEdgeProjectHelper() {
-
+  @SuppressWarnings("deprecation")
+  @Test
+  public void testSp2k() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    InputFile f1 = context.fileSystem().inputFile(context.fileSystem().predicates().hasFilename("test1.p"));
+    Assert.assertEquals(InputFileUtils.getFile(f1), f1.file());
+    Assert.assertEquals(InputFileUtils.getRelativePath(f1, context.fileSystem()), f1.relativePath());
   }
-
-  /**
-   * @return ServerID based on the SonarQube version
-   */
-  public static String getServerId(SensorContext context) {
-    return context.config().get(context.getSonarQubeVersion().isGreaterThanOrEqual(Version.parse("6.7"))
-            ? CoreProperties.SERVER_ID : CoreProperties.PERMANENT_SERVER_ID).orElse("");
-  }
-
 }

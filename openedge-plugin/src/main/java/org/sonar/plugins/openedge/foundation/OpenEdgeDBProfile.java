@@ -19,20 +19,15 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
-import org.sonar.api.profiles.ProfileDefinition;
-import org.sonar.api.profiles.RulesProfile;
-import org.sonar.api.utils.ValidationMessages;
+import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
 import org.sonar.plugins.openedge.api.Constants;
 
-public class OpenEdgeDBProfile extends ProfileDefinition {
+public class OpenEdgeDBProfile implements BuiltInQualityProfilesDefinition {
   public static final String PROFILE_NAME = "Sonar way";
 
   @Override
-  public RulesProfile createProfile(ValidationMessages validation) {
-    RulesProfile profile = RulesProfile.create(PROFILE_NAME, Constants.DB_LANGUAGE_KEY);
-    profile.setDefaultProfile(true);
-
-    return profile;
+  public void define(Context context) {
+    context.createBuiltInQualityProfile(PROFILE_NAME, Constants.DB_LANGUAGE_KEY).done();
   }
 
 }

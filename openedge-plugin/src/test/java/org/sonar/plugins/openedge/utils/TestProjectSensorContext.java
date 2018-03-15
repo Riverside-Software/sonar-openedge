@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.plugins.openedge.api.Constants;
 
@@ -24,31 +25,34 @@ public class TestProjectSensorContext {
   }
   
   public static SensorContextTester createContext() throws IOException {
+    MapSettings settings = new MapSettings();
+    settings.setProperty("sonar.sources", "src");
+    settings.setProperty(Constants.PROPATH, new File(BASEDIR).getAbsolutePath());
+    settings.setProperty(Constants.BINARIES, "build");
+    settings.setProperty(Constants.DATABASES, "src/schema/sp2k.df");
+    settings.setProperty(Constants.SKIP_RCODE, true);
+
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
-    context.settings().setProperty("sonar.sources", "src");
-    context.settings().setProperty(Constants.PROPATH, new File(BASEDIR).getAbsolutePath());
-    context.settings().setProperty(Constants.BINARIES, "build");
-    context.settings().setProperty(Constants.DATABASES, "src/schema/sp2k.df");
-    context.settings().setProperty(Constants.SKIP_RCODE, true);
+    context.setSettings(settings);
 
     context.fileSystem().add(
         new TestInputFileBuilder("src/test/resources/project1", DF1).setLanguage(Constants.DB_LANGUAGE_KEY).setType(
-            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, DF1), Charset.defaultCharset())).build());
+            Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, DF1), Charset.defaultCharset())).build());
     context.fileSystem().add(
         new TestInputFileBuilder(BASEDIR, FILE1).setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE1), Charset.defaultCharset())).build());
+            Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, FILE1), Charset.defaultCharset())).build());
     context.fileSystem().add(
         new TestInputFileBuilder(BASEDIR, FILE2).setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE2), Charset.defaultCharset())).build());
+            Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, FILE2), Charset.defaultCharset())).build());
     context.fileSystem().add(
         new TestInputFileBuilder(BASEDIR, FILE3).setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE3), Charset.defaultCharset())).build());
+            Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, FILE3), Charset.defaultCharset())).build());
     context.fileSystem().add(
         new TestInputFileBuilder(BASEDIR, FILE4).setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, FILE4), Charset.defaultCharset())).build());
+            Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, FILE4), Charset.defaultCharset())).build());
     context.fileSystem().add(
         new TestInputFileBuilder(BASEDIR, CLASS1).setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).initMetadata(Files.toString(new File(BASEDIR, CLASS1), Charset.defaultCharset())).build());
+            Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, CLASS1), Charset.defaultCharset())).build());
 
 
     return context;

@@ -49,9 +49,7 @@ public class InvalidXMLFilterStreamTest {
 
   @Test(expectedExceptions = SAXParseException.class)
   public void testInvalidFile2() throws IOException, SAXException {
-    InputStream input = new FileInputStream(new File("src/test/resources/file2.xml"));
-
-    try {
+    try (InputStream input = new FileInputStream(new File("src/test/resources/file2.xml"))) {
       DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(input);
     } catch (ParserConfigurationException uncaught) {
       throw new RuntimeException(uncaught);

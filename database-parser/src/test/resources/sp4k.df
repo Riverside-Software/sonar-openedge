@@ -1,0 +1,9 @@
+ADD TABLE "Tbl1"
+  AREA "XXX"
+  DESCRIPTION "éç"
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000000

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sonar.api.SonarProduct;
+import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
@@ -38,7 +39,7 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
+import org.sonar.plugins.openedge.foundation.InputFileUtils;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
@@ -62,14 +63,6 @@ public class OpenEdgeWarningsSensor implements Sensor {
   }
 
 
-  private File getWarningsFile(File file) {
-    String relPath = OpenEdgeProjectHelper.getPathRelativeToSourceDirs(file, settings.getSourceDirs());
-    if (relPath == null)
-      return null;
-
-    return new File(settings.getPctDir(), relPath + ".warnings");
-  }
-
   @Override
   public void execute(SensorContext context) {
     if (context.runtime().getProduct() == SonarProduct.SONARLINT)
@@ -86,21 +79,30 @@ public class OpenEdgeWarningsSensor implements Sensor {
     FilePredicates predicates = context.fileSystem().predicates();
     for (InputFile file : context.fileSystem().inputFiles(predicates.and(
         predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
-      LOG.debug("Looking for warnings of {}", file.relativePath());
+      LOG.debug("Looking for warnings of {}", file);
 
-      File listingFile = getWarningsFile(file.file());
+      File listingFile = settings.getWarningsFile(file);
       if ((listingFile != null) && (listingFile.exists())) {
-        LOG.debug("Import warnings for {}", file.relativePath());
+        LOG.debug("Import warnings for {}", file);
 
         try {
           WarningsProcessor processor = new WarningsProcessor();
           Files.asCharSource(listingFile, StandardCharsets.UTF_8).readLines(processor);
           for (Warning w : processor.getResult()) {
-            InputFile target = context.fileSystem().inputFile(
-                predicates.hasPath(context.fileSystem().resolvePath(w.file).getAbsolutePath()));
             RuleKey ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
+
+            FilePredicate fp1 = predicates.hasRelativePath(w.file);
+            FilePredicate fp2 = predicates.hasAbsolutePath(
+                new File(context.fileSystem().baseDir(), w.file).toPath().normalize().toString());
+
+            // XXX FilePredicate.or() doesn't work...
+            InputFile target = context.fileSystem().inputFile(fp1);
+            if (target == null) {
+              target = context.fileSystem().inputFile(fp2);
+            }
+
             if (target != null) {
-              LOG.debug("Warning File {} - Line {} - Message {}", target.relativePath(), w.line, w.msg);
+              LOG.debug("Warning File {} - Line {} - Message {}", target, w.line, w.msg);
               NewIssue issue = context.newIssue().forRule(context.activeRules().find(ruleKey) == null ? defaultWarningRuleKey : ruleKey);
               NewIssueLocation location = issue.newLocation().on(target);
               if (w.line > 0) {
@@ -109,7 +111,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
               if (target == file) {
                 location.message(w.msg);
               } else {
-                location.message("From " + file.relativePath() + " - " + w.msg);
+                location.message("From " + InputFileUtils.getRelativePath(file, context.fileSystem()) + " - " + w.msg);
               }
               issue.at(location).save();
             } else {
@@ -119,7 +121,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
 
           warningsImportNum++;
         } catch (IOException caught) {
-
+          // Nothing...
         }
       }
     }

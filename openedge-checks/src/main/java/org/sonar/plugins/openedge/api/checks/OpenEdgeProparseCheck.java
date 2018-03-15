@@ -95,7 +95,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     }
 
     int lineNumber = node.getLine();
-    LOG.trace("Adding issue {} to {} line {}", getRuleKey(), targetFile.relativePath(), lineNumber);
+    LOG.trace("Adding issue {} to {} line {}", getRuleKey(), targetFile, lineNumber);
     NewIssue issue = getContext().newIssue().forRule(getRuleKey());
     NewIssueLocation location = issue.newLocation().on(targetFile);
     if (lineNumber > 0) {

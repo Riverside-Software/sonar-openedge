@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,8 +49,10 @@ import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.batch.ScannerSide;
+import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.api.batch.fs.FileSystem;
-import org.sonar.api.config.Settings;
+import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
@@ -77,12 +80,13 @@ public class OpenEdgeSettings {
   private static final Logger LOG = Loggers.get(OpenEdgeSettings.class);
 
   // IoC
-  private final Settings settings;
+  private final Configuration config;
   private final FileSystem fileSystem;
 
   // Internal use
-  private final List<String> sourceDirs = new ArrayList<>();
-  private final List<File> binariesDirs = new ArrayList<>();
+  
+  private final List<Path> sourcePaths = new ArrayList<>();
+  private final List<Path> binariesDirs = new ArrayList<>();
   private final List<File> propath = new ArrayList<>();
   private final Set<String> includeExtensions = new HashSet<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
@@ -90,74 +94,65 @@ public class OpenEdgeSettings {
   private final Set<String> cpdProcedures = new HashSet<>();
   private final Set<Integer> xrefBytes = new HashSet<>();
 
+  private final Path basePath;
+
   private RefactorSession proparseSession;
 
-  public OpenEdgeSettings(Settings settings, FileSystem fileSystem) {
-    this.settings = settings;
+  public OpenEdgeSettings(Configuration config, FileSystem fileSystem) {
+    this.config = config;
     this.fileSystem = fileSystem;
+    this.basePath = fileSystem.baseDir().toPath().toAbsolutePath();
 
-    LOG.info("Loading OpenEdge settings for server ID '{}' '{}'", settings.getString(CoreProperties.SERVER_ID),
-        settings.getString(CoreProperties.PERMANENT_SERVER_ID));
-    initializeDirectories(settings, fileSystem);
-    initializePropath(settings, fileSystem);
-    initializeCPD(settings);
-    initializeXrefBytes(settings);
-    initializeIncludeExtensions(settings);
+    LOG.info("Loading OpenEdge settings for server ID '{}' '{}'", config.get(CoreProperties.SERVER_ID).orElse(""),
+        config.get(CoreProperties.PERMANENT_SERVER_ID).orElse(""));
+    initializeDirectories(config, fileSystem);
+    initializePropath(config, fileSystem);
+    initializeCPD(config);
+    initializeXrefBytes(config);
+    initializeIncludeExtensions(config);
 
-    LOG.debug("Using backslash as escape character : {}", settings.getBoolean(Constants.BACKSLASH_ESCAPE));
+    LOG.debug("Using backslash as escape character : {}", config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
     if (useXrefFilter()) {
       LOG.info("XML XREF filter activated [{}]", getXrefBytesAsString());
     }
   }
 
-  private final void initializeDirectories(Settings settings, FileSystem fileSystem) {
+  private final void initializeDirectories(Configuration config, FileSystem fileSystem) {
     // Looking for source directories
-    String sonarSources = settings.getString("sonar.sources");
-    if (sonarSources == null) {
-      sourceDirs.add(FilenameUtils.normalizeNoEndSeparator(fileSystem.baseDir().getAbsolutePath(), true));
-    } else {
-      for (String str : Splitter.on(',').trimResults().split(sonarSources)) {
-        String dir = FilenameUtils.normalizeNoEndSeparator(new File(fileSystem.baseDir(), str).getAbsolutePath(), true);
-        sourceDirs.add(dir);
+    Optional<String> sonarSources = config.get(ProjectDefinition.SOURCES_PROPERTY);
+    if (sonarSources.isPresent()) {
+      for (String str : Splitter.on(',').trimResults().split(sonarSources.get())) {
+        sourcePaths.add(new File(fileSystem.baseDir(), str).toPath().normalize());
       }
+    } else {
+      sourcePaths.add(fileSystem.baseDir().toPath().normalize());
+      LOG.debug("No sonar.sources property, defaults to base directory");
     }
 
-    // Read first sonar.oe.binaries, then sonar.binaries
-    String binariesSetting = settings.getString(Constants.BINARIES);
-    if (binariesSetting == null) {
-      LOG.debug("Property {} not defined, using sonar.binaries", Constants.BINARIES);
-      binariesSetting = settings.getString("sonar.binaries");
-      if (binariesSetting == null) {
-        LOG.debug("Property {} not defined, using 'build'", Constants.BINARIES);
-        binariesSetting = "build";
+    // Build directories
+    Optional<String> binariesSetting = config.get(Constants.BINARIES);
+    if (binariesSetting.isPresent()) {
+      for (String str : Splitter.on(',').trimResults().split(binariesSetting.get())) {
+        binariesDirs.add(fileSystem.baseDir().toPath().resolve(str));
       }
-    }
-    for (String str : Splitter.on(',').trimResults().split(binariesSetting)) {
-      // First try an absolute path, then a relative path
-      File tmp = new File(fileSystem.baseDir(), str);
-      if (!tmp.exists() || !tmp.isDirectory())
-        tmp = new File(str);
-      if (!tmp.exists() || !tmp.isDirectory())
-        LOG.warn("'{}' directory not found - Value '{}' - Analysis is not likely to be successful", Constants.BINARIES, str);
-      else
-        LOG.debug("OE build directory: '{}'", FilenameUtils.normalizeNoEndSeparator(tmp.getAbsolutePath(), true));
-      this.binariesDirs.add(tmp);
+    } else {
+      LOG.debug("No sonar.oe.binaries property, defaults to source directories");
+      binariesDirs.addAll(sourcePaths);
     }
   }
 
-  private final void initializePropath(Settings settings, FileSystem fileSystem) {
+  private final void initializePropath(Configuration config, FileSystem fileSystem) {
     // PROPATH definition
-    String propathProp = settings.getString(Constants.PROPATH);
+    String propathProp = config.get(Constants.PROPATH).orElse("");
     LOG.info("Using PROPATH : {}", propathProp);
-    if (propathProp != null) {
-      for (String str : Splitter.on(',').trimResults().split(propathProp)) {
-        File entry = fileSystem.resolvePath(str);
-        LOG.debug("Adding {} to PROPATH", entry.getAbsolutePath());
-        propath.add(entry);
-      }
+    for (String str : Splitter.on(',').trimResults().split(propathProp)) {
+      File entry = fileSystem.resolvePath(str);
+      LOG.debug("Adding {} to PROPATH", entry.getAbsolutePath());
+      propath.add(entry);
     }
-    String dlcInstallDir = settings.getString(Constants.DLC);
-    boolean dlcInPropath = settings.getBoolean(Constants.PROPATH_DLC);
+
+    String dlcInstallDir = config.get(Constants.DLC).orElse(null);
+    boolean dlcInPropath = config.getBoolean(Constants.PROPATH_DLC).orElse(false);
     if (dlcInPropath && !Strings.isNullOrEmpty(dlcInstallDir)) {
       File dlc = new File(dlcInstallDir);
       LOG.info("Adding DLC directory '{}' to PROPATH", dlc.getAbsolutePath());
@@ -168,27 +163,27 @@ public class OpenEdgeSettings {
     }
   }
 
-  private final void initializeCPD(Settings settings) {
+  private final void initializeCPD(Configuration config) {
     // CPD annotations
-    for (String str : Strings.nullToEmpty(settings.getString(Constants.CPD_ANNOTATIONS)).split(",")) {
+    for (String str : config.get(Constants.CPD_ANNOTATIONS).orElse("").split(",")) {
       LOG.debug("CPD annotation : '{}'", str);
       cpdAnnotations.add(str);
     }
     // CPD - Skip methods
-    for (String str : Strings.nullToEmpty(settings.getString(Constants.CPD_METHODS)).split(",")) {
+    for (String str : config.get(Constants.CPD_METHODS).orElse("").split(",")) {
       LOG.debug("CPD skip method : '{}'", str);
       cpdMethods.add(str.toLowerCase(Locale.ENGLISH));
     }
     // CPD - Skip procedures and functions
-    for (String str : Strings.nullToEmpty(settings.getString(Constants.CPD_PROCEDURES)).split(",")) {
+    for (String str : config.get(Constants.CPD_PROCEDURES).orElse("").split(",")) {
       LOG.debug("CPD skip procedure : '{}'", str);
       cpdProcedures.add(str.toLowerCase(Locale.ENGLISH));
     }
   }
 
-  private final void initializeXrefBytes(Settings settings) {
+  private final void initializeXrefBytes(Configuration config) {
     // XREF invalid bytes
-    for (String str : Strings.nullToEmpty(settings.getString(Constants.XREF_FILTER_BYTES)).split(",")) {
+    for (String str : config.get(Constants.XREF_FILTER_BYTES).orElse("").split(",")) {
       try {
         if (str.indexOf('-') != -1) {
           for (int zz = Integer.parseInt(str.substring(0, str.indexOf('-'))); zz <= Integer.parseInt(
@@ -204,22 +199,17 @@ public class OpenEdgeSettings {
     }
   }
 
-  private final void initializeIncludeExtensions(Settings settings) {
-    // Include files extensions
-    List<String> exts = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
-        Strings.nullToEmpty(settings.getString(Constants.INCLUDE_SUFFIXES))).stream().map(String::toLowerCase).collect(
-            Collectors.toList());
-    includeExtensions.addAll(exts);
-
-    // Default value is ".i"
-    if (includeExtensions.isEmpty())
-      includeExtensions.add("i");
+  private final void initializeIncludeExtensions(Configuration config) {
+    includeExtensions.addAll(Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
+        config.get(Constants.INCLUDE_SUFFIXES).orElse("i")).stream().map(String::toLowerCase).collect(
+            Collectors.toList()));
   }
 
-  public final void parseHierarchy(String fileName) {
-    String fileInPropath = searchInPropath(fileName);
+  public final void parseHierarchy(InputFile file) {
+    String relPath = InputFileUtils.getRelativePath(file, fileSystem);
+    String fileInPropath = searchInPropath(relPath);
     File rcd = getRCode(fileInPropath);
-    LOG.debug("Parsing hierarchy of {} -- In PROPATH {} - Rcode '{}'", fileName, fileInPropath, rcd);
+    LOG.debug("Parsing hierarchy of {} -- In PROPATH {} - Rcode '{}'", relPath, fileInPropath, rcd);
     if ((rcd != null) && rcd.exists()) {
       TypeInfo info = parseRCode(rcd);
       if (info != null) {
@@ -252,7 +242,7 @@ public class OpenEdgeSettings {
   }
 
   public final void parseBuildDirectory() {
-    if (settings.getBoolean(Constants.SKIP_RCODE))
+    if (config.getBoolean(Constants.SKIP_RCODE).orElse(false))
       return;
 
     AtomicInteger numClasses = new AtomicInteger(0);
@@ -262,8 +252,8 @@ public class OpenEdgeSettings {
     long currTime = System.currentTimeMillis();
     AtomicInteger numRCode = new AtomicInteger(0);
     ExecutorService service = Executors.newFixedThreadPool(4);
-    for (File binDir : binariesDirs) {
-      Files.fileTreeTraverser().preOrderTraversal(binDir).forEach(f -> {
+    for (Path binDir : binariesDirs) {
+      Files.fileTraverser().depthFirstPreOrder(binDir.toFile()).forEach(f -> {
         if (f.getName().endsWith(".r")) {
           numRCode.incrementAndGet();
           service.submit(() -> {
@@ -280,12 +270,12 @@ public class OpenEdgeSettings {
     }
 
     // Include PL files in $DLC/gui
-    String dlcInstallDir = settings.getString(Constants.DLC);
-    boolean dlcInPropath = settings.getBoolean(Constants.PROPATH_DLC);
+    String dlcInstallDir = config.get(Constants.DLC).orElse(null);
+    boolean dlcInPropath = config.getBoolean(Constants.PROPATH_DLC).orElse(false);
     if (dlcInPropath && !Strings.isNullOrEmpty(dlcInstallDir)) {
       File dlc = new File(dlcInstallDir);
 
-      Files.fileTreeTraverser().preOrderTraversal(new File(dlc, "gui")).forEach(f -> {
+      Files.fileTraverser().depthFirstPreOrder(new File(dlc, "gui")).forEach(f -> {
         if (f.getName().endsWith(".pl")) {
           service.submit(() -> parseLibrary(f));
         }
@@ -333,19 +323,11 @@ public class OpenEdgeSettings {
     }
   }
 
-  public List<String> getSourceDirs() {
-    return sourceDirs;
-  }
-
   public File getPctDir() {
-    if (binariesDirs.isEmpty()) {
-      return null;
-    } else {
-      return new File(binariesDirs.get(0), ".pct");
-    }
+    return new File(binariesDirs.get(0).toFile(), ".pct");
   }
 
-  public List<File> getBinariesDirs() {
+  public List<Path> getBinariesDirs() {
     return binariesDirs;
   }
 
@@ -371,19 +353,62 @@ public class OpenEdgeSettings {
    * @param fileName File name from profiler
    */
   public File getRCode(String fileName) {
-    for (File binariesDir : binariesDirs) {
+    for (Path binariesDir : binariesDirs) {
       if (fileName.endsWith(".r"))
         return new File(fileName);
 
-      File rCode = new File(binariesDir, FilenameUtils.removeExtension(fileName) + ".r");
-      if (rCode.exists())
-        return rCode;
+      Path rCode = binariesDir.resolve(FilenameUtils.removeExtension(fileName) + ".r");
+      if (rCode.toFile().exists())
+        return rCode.toFile();
       // Profiler also send file name as packagename.classname
-      File rCode2 = new File(binariesDir, fileName.replace('.', '/') + ".r");
-      if (rCode2.exists())
-        return rCode2;
+      Path rCode2 = binariesDir.resolve(fileName.replace('.', '/') + ".r");
+      if (rCode2.toFile().exists())
+        return rCode2.toFile();
     }
 
+    return null;
+  }
+
+  public static String getPathRelativeToSourceDirs(Path file, List<String> propath) {
+    for (String entry : propath) {
+      String s  = new File(entry).toPath().relativize(file).toString().replace('\\', '/');
+      if (s.length() != 0)
+        return s;
+    }
+    return "";
+  }
+
+  public String getRelativePath(InputFile file) {
+    return basePath.relativize(Paths.get(file.uri())).toString().replace('\\', '/');
+  }
+
+  public String getRelativePathToSourceDirs(InputFile file) {
+    for (Path p : sourcePaths) {
+      String s = p.toAbsolutePath().relativize(Paths.get(file.uri())).toString();
+      if (!Strings.isNullOrEmpty(s) && !s.startsWith(".."))
+        return s;
+    }
+    return "";
+  }
+
+  public File getWarningsFile(InputFile file) {
+    String s = getRelativePathToSourceDirs(file);
+    if (!Strings.isNullOrEmpty(s))
+      return new File(getPctDir(), s + ".warnings");
+    return null;
+  }
+
+  public File getXrefFile(InputFile file) {
+    String s = getRelativePathToSourceDirs(file);
+    if (!Strings.isNullOrEmpty(s))
+      return new File(getPctDir(), s + ".xref");
+    return null;
+  }
+
+  public File getListingFile(InputFile file) {
+    String s = getRelativePathToSourceDirs(file);
+    if (!Strings.isNullOrEmpty(s))
+      return new File(getPctDir(), s);
     return null;
   }
 
@@ -437,22 +462,22 @@ public class OpenEdgeSettings {
   }
 
   public boolean skipProparseSensor() {
-    return settings.getBoolean(Constants.SKIP_PROPARSE_PROPERTY);
+    return config.getBoolean(Constants.SKIP_PROPARSE_PROPERTY).orElse(false);
   }
 
   public boolean useProparseDebug() {
-    return settings.getBoolean(Constants.PROPARSE_DEBUG);
+    return config.getBoolean(Constants.PROPARSE_DEBUG).orElse(false);
   }
 
   public boolean useXrefFilter() {
-    return settings.getBoolean(Constants.XREF_FILTER);
+    return config.getBoolean(Constants.XREF_FILTER).orElse(false);
   }
 
   /**
    * @return False only if property is present and set to false
    */
   public boolean useAnalytics() {
-    return !"false".equalsIgnoreCase(Strings.nullToEmpty(settings.getString(Constants.OE_ANALYTICS)));
+    return config.getBoolean(Constants.OE_ANALYTICS).orElse(true);
   }
 
   public Set<Integer> getXrefBytes() {
@@ -481,20 +506,30 @@ public class OpenEdgeSettings {
 
   public RefactorSession getProparseSession(boolean sonarLintSession) {
     if (proparseSession == null) {
-      Schema sch = readSchema(settings, fileSystem, sonarLintSession);
+      Schema sch = readSchema(config, fileSystem, sonarLintSession);
       ProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
-          settings.getBoolean(Constants.BACKSLASH_ESCAPE));
+          config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
+
       // Some preprocessor values can be overridden at the project level
-      if (!Strings.isNullOrEmpty(settings.getString("sonar.oe.preprocessor.opsys")))
-        ppSettings.setCustomOpsys(settings.getString("sonar.oe.preprocessor.opsys"));
-      if (!Strings.isNullOrEmpty(settings.getString("sonar.oe.preprocessor.window-system")))
-        ppSettings.setCustomWindowSystem(settings.getString("sonar.oe.preprocessor.window-system"));
-      if (!Strings.isNullOrEmpty(settings.getString("sonar.oe.preprocessor.proversion")))
-        ppSettings.setCustomProversion(settings.getString("sonar.oe.preprocessor.proversion"));
-      if (!Strings.isNullOrEmpty(settings.getString("sonar.oe.preprocessor.batch-mode")))
-        ppSettings.setCustomBatchMode(settings.getBoolean("sonar.oe.preprocessor.batch-mode"));
-      if (!Strings.isNullOrEmpty(settings.getString("sonar.oe.preprocessor.process-architecture")))
-        ppSettings.setCustomProcessArchitecture(settings.getString("sonar.oe.preprocessor.process-architecture"));
+      Optional<String> opsys = config.get("sonar.oe.preprocessor.opsys");
+      if (opsys.isPresent())
+        ppSettings.setCustomOpsys(opsys.get());
+
+      Optional<String> windowSystem = config.get("sonar.oe.preprocessor.window-system");
+      if (windowSystem.isPresent())
+        ppSettings.setCustomWindowSystem(windowSystem.get());
+
+      Optional<String> proVersion = config.get("sonar.oe.preprocessor.proversion");
+      if (proVersion.isPresent())
+        ppSettings.setCustomProversion(proVersion.get());
+
+      Optional<Boolean> batchMode = config.getBoolean("sonar.oe.preprocessor.batch-mode");
+      if (batchMode.isPresent())
+        ppSettings.setCustomBatchMode(batchMode.get());
+
+      Optional<String> processArch = config.get("sonar.oe.preprocessor.process-architecture");
+      if (processArch.isPresent())
+        ppSettings.setCustomProcessArchitecture(processArch.get());
 
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
       proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());
@@ -511,7 +546,7 @@ public class OpenEdgeSettings {
    * Force usage of sonar.sourceEncoding property as SonarLint doesn't set correctly encoding
    */
   private Charset encoding() {
-    String encoding = settings.getString(CoreProperties.ENCODING_PROPERTY);
+    String encoding = config.get(CoreProperties.ENCODING_PROPERTY).orElse("");
     if (Strings.isNullOrEmpty(encoding)) {
       return Charset.defaultCharset();
     } else {
@@ -519,8 +554,8 @@ public class OpenEdgeSettings {
     }
   }
 
-  private Schema readSchema(Settings settings, FileSystem fileSystem, boolean useCache) {
-    String dbList = Strings.nullToEmpty(settings.getString(Constants.DATABASES));
+  private Schema readSchema(Configuration config, FileSystem fileSystem, boolean useCache) {
+    String dbList = config.get(Constants.DATABASES).orElse("");
     LOG.info("Using schema : {}", dbList);
     Collection<IDatabase> dbs = new ArrayList<>();
 
@@ -571,7 +606,7 @@ public class OpenEdgeSettings {
       sch.createAlias("dictdb", sch.getDbSet().first().getName());
     }
     for (String str : Splitter.on(';').trimResults().omitEmptyStrings().split(
-        Strings.nullToEmpty(settings.getString(Constants.ALIASES)))) {
+        config.get(Constants.ALIASES).orElse(""))) {
       List<String> lst = Splitter.on(',').trimResults().splitToList(str);
       for (String alias : lst.subList(1, lst.size())) {
         LOG.debug("Adding {} aliases to database {}", alias, lst.get(0));

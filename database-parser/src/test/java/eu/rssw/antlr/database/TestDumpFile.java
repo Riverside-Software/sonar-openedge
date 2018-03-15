@@ -8,8 +8,10 @@ import static org.testng.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import org.testng.annotations.Test;
 
@@ -20,6 +22,17 @@ import eu.rssw.antlr.database.objects.Trigger;
 import eu.rssw.antlr.database.objects.TriggerType;
 
 public class TestDumpFile {
+
+  @Test
+  public void testInputStream() throws IOException {
+    InputStream stream1 = new FileInputStream("src/test/resources/sp3k.df");
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(stream1, Charset.forName("utf-8"), "sp3k");
+    assertEquals(db.getTable("Tbl1").getDescription(), "éç");
+
+    InputStream stream2 = new FileInputStream("src/test/resources/sp4k.df");
+    DatabaseDescription db2 = DumpFileUtils.getDatabaseDescription(stream2, Charset.forName("utf-8"), "sp4k");
+    assertEquals(db2.getTable("Tbl1").getDescription(), "Ã©Ã§");
+  }
 
   @Test
   public void testSports2000() throws IOException {
