@@ -31,7 +31,6 @@ import static org.testng.Assert.assertTrue;
 
 import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.config.internal.MapSettings;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
@@ -41,15 +40,14 @@ import org.testng.annotations.Test;
 
 public class OpenEdgeProparseSensorTest {
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testCPDPreprocessorExpansion() throws Exception {
-    MapSettings settings = new MapSettings();
-    settings.setProperty(Constants.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
-    settings.setProperty(Constants.CPD_METHODS, "TEST3");
-    settings.setProperty(Constants.CPD_PROCEDURES, "adm-create-objects");
-
     SensorContextTester context = TestProjectSensorContext.createContext();
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(settings.asConfig(), context.fileSystem());
+    context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
+    context.settings().setProperty(Constants.CPD_METHODS, "TEST3");
+    context.settings().setProperty(Constants.CPD_PROCEDURES, "adm-create-objects");
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
     OpenEdgeComponents components = new OpenEdgeComponents(null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
@@ -75,17 +73,17 @@ public class OpenEdgeProparseSensorTest {
         "Wrong number of transactions");
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testPreprocessorSettings01() throws Exception {
-    MapSettings settings = new MapSettings();
-    settings.setProperty("sonar.oe.preprocessor.window-system", "foobar");
-    settings.setProperty("sonar.oe.preprocessor.opsys", "unix");
-    settings.setProperty("sonar.oe.preprocessor.batch-mode", "false");
-    settings.setProperty("sonar.oe.preprocessor.process-architecture", "32");
-    settings.setProperty("sonar.oe.preprocessor.proversion", "12.0");
-
     SensorContextTester context = TestProjectSensorContext.createContext();
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(settings.asConfig(), context.fileSystem());
+    context.settings().setProperty("sonar.oe.preprocessor.window-system", "foobar");
+    context.settings().setProperty("sonar.oe.preprocessor.opsys", "unix");
+    context.settings().setProperty("sonar.oe.preprocessor.batch-mode", "false");
+    context.settings().setProperty("sonar.oe.preprocessor.process-architecture", "32");
+    context.settings().setProperty("sonar.oe.preprocessor.proversion", "12.0");
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
     assertFalse(oeSettings.getProparseSession(false).getProparseSettings().getBatchMode());
     assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getWindowSystem(), "foobar");
     assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getOpSys(), OperatingSystem.UNIX);
