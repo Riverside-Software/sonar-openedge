@@ -1013,13 +1013,6 @@ public class TP01Support implements ITreeParserAction {
       throw new TreeParserException("Could not resolve table '" + nodeText + "'", node.getFilename(), node.getLine(), node.getColumn());
     }
     ITable table = buffer.getTable();
-    // If we get a mismatch between storetype here and the storetype determined
-    // by proparse.dll then there's a bug somewhere. This is just a double-check.
-    if (table.getStoretype() != node.attrGet(IConstants.STORETYPE)) {
-      /* throw new TreeParserException(
-          "Store type mismatch '" + node.attrGet(IConstants.STORETYPE) + "' / '" + table.getStoretype() + "'",
-          node.getFilename(), node.getLine(), node.getColumn()); */
-    }
     prevTableReferenced = lastTableReferenced;
     lastTableReferenced = buffer;
     // For an unnamed buffer, determine if it's abbreviated.
