@@ -18,7 +18,6 @@ import java.nio.charset.Charset;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
@@ -28,7 +27,6 @@ import org.prorefactor.treeparser.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
@@ -260,7 +258,7 @@ public class Schema implements ISchema {
     @Override
     public boolean processLine(String line) throws IOException {
       if (line.startsWith("S")) {
-        // currDatabase.addSequence(new Sequence(line.substring(1)));
+        // No support for sequences
       } else if (line.startsWith("T")) {
         currTable = new Table(line.substring(1), currDatabase);
         currDatabase.add(currTable);
@@ -278,17 +276,7 @@ public class Schema implements ISchema {
         f.setExtent(Integer.parseInt(line.substring(ch2 + 1)));
         currTable.add(f);
       } else if (line.startsWith("I")) {
-        if (currTable == null)
-          throw new IOException("No associated table for " + line);
-        // IndexName:Attributes:Field1:Field2:...
-        List<String> lst = Splitter.on(':').trimResults().splitToList(line);
-        if (lst.size() < 3)
-          throw new IOException("Invalid file format: " + line);
-        Index i = new Index(currTable, lst.get(0).substring(1), lst.get(1).indexOf('U') > -1, lst.get(1).indexOf('P') > -1);
-        for (int zz = 2; zz < lst.size(); zz++) {
-          i.addField(currTable.lookupField(lst.get(zz).substring(1)));
-        }
-        currTable.add(i);
+        // Nothing for now...
       }
 
       return true;
