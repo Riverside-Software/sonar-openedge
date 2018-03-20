@@ -1025,8 +1025,6 @@ def_table_like_sub:
     rec:tbl[ContextQualifier.SYMBOL] { action.defineTableLike(#rec); }
     (VALIDATE)?
     ( #(USEINDEX id:ID ((AS|IS) PRIMARY)? ) { action.defineUseIndex(#rec, #id); } )*
-    
-    { action.postDefineTableLike(#rec); }
   ;
 
 def_table_field:
@@ -1040,8 +1038,7 @@ def_table_field:
 def_table_index:
     #(INDEX id:ID ( (AS|IS)? ( unq:UNIQUE | prim:PRIMARY | word:WORDINDEX ) )*
       { action.defineIndexInitialize(#id, #unq, #prim, #word); }
-      ( fld:ID { action.defineIndexFieldInitialize(#fld); } ( ASCENDING | DESCENDING | CASESENSITIVE )* )+ )
-      { action.defineIndexFinalize(#id); }
+      ( fld:ID { action.defineIndexField(#fld); } ( ASCENDING | DESCENDING | CASESENSITIVE )* )+ )
   ;
 
 defineworktablestate:

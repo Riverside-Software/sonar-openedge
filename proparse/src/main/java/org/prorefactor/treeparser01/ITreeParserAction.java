@@ -194,10 +194,6 @@ public interface ITreeParserAction {
   default void defineTableLike(JPNode recNode) throws SemanticException {
   }
 
-  /** Called by the tree parser after a LIKE node is encountered in a temp/work table definition. */
-  default void postDefineTableLike(JPNode recNode) throws SemanticException {
-  }
-
   /** Called by the tree parser if a USE-INDEX node is encountered in a LIKE temp/work table definition. */
   default void defineUseIndex(JPNode recNode, JPNode idNode) throws SemanticException {
   }
@@ -206,12 +202,8 @@ public interface ITreeParserAction {
   default void defineIndexInitialize(JPNode idNode, JPNode unique, JPNode primary, JPNode word) throws SemanticException {
   }
 
-  /** Called by the tree parser at the end of a temp or work table index definition */
-  default void defineIndexFinalize(JPNode idNode) throws SemanticException {
-  }
-
   /** Called by the tree parser at the beginning of a temp or work table index field definition */
-  default void defineIndexFieldInitialize(JPNode idNode) throws SemanticException {
+  default void defineIndexField(JPNode idNode) throws SemanticException {
   }
 
   /** Called by the tree parser when a temp-table is defined. */

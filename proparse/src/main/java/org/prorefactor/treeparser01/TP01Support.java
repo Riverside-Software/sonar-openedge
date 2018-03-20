@@ -441,11 +441,6 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public void postDefineTableLike(JPNode recNode) throws SemanticException {
-    LOG.trace("Entering postDefineTableLike {}", recNode);
-  }
-
-  @Override
   public void defineUseIndex(JPNode recNode, JPNode idNode) throws SemanticException {
     LOG.trace("Entering defineUseIndex {}", idNode);
     ITable table = astTableLink(recNode);
@@ -462,13 +457,8 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public void defineIndexFinalize(JPNode idNode) throws SemanticException {
-    LOG.trace("Entering defineIndexFinalize {}", idNode);
-  }
-
-  @Override
-  public void defineIndexFieldInitialize(JPNode idNode) throws SemanticException {
-    LOG.trace("Entering defineIndexFieldInitialize {}", idNode);
+  public void defineIndexField(JPNode idNode) throws SemanticException {
+    LOG.trace("Entering defineIndexField{}", idNode);
     IField fld = currDefTable.getTable().lookupField(idNode.getText());
     if (fld != null)
       currDefIndex.addField(fld);
