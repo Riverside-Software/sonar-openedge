@@ -997,7 +997,7 @@ definesubmenustate:
 
 definetemptablestate:
     #(  def:DEFINE (def_shared)? def_modifiers TEMPTABLE id:ID
-      {  action.defineTemptable(#def, #id); }
+      {  action.defineTempTable(#def, #id); }
       (UNDO|NOUNDO)?
       (namespace_uri)? (namespace_prefix)? (xml_node_name)?
       ( #(SERIALIZENAME QSTRING) )?
@@ -1011,6 +1011,7 @@ definetemptablestate:
       (RCODEINFORMATION)?
       (def_table_field)*
       (def_table_index)*
+      { action.postDefineTempTable(#def, #id); }
       state_end
     )
   ;
@@ -1021,9 +1022,11 @@ def_table_like:
   ;
 
 def_table_like_sub:
-    rec:tbl[ContextQualifier.SYMBOL] (VALIDATE)?
-    ( #(USEINDEX ID ((AS|IS) PRIMARY)? ) )*
-    { action.defineTableLike(#rec); }
+    rec:tbl[ContextQualifier.SYMBOL] { action.defineTableLike(#rec); }
+    (VALIDATE)?
+    ( #(USEINDEX id:ID ((AS|IS) PRIMARY)? ) { action.defineUseIndex(#rec, #id); } )*
+    
+    { action.postDefineTableLike(#rec); }
   ;
 
 def_table_field:

@@ -96,6 +96,15 @@ public class Table implements ITable {
   }
 
   @Override
+  public IIndex lookupIndex(String name) {
+    for (IIndex idx : indexes) {
+      if (idx.getName().equalsIgnoreCase(name))
+        return idx;
+    }
+    return null;
+  }
+
+  @Override
   public String getName() {
     return name;
   }

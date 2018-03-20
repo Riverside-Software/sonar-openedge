@@ -99,6 +99,9 @@ public class TP01Support implements ITreeParserAction {
   private TableBuffer prevTableReferenced;
   private TableBuffer currDefTable;
   private Index currDefIndex;
+  // LIKE tables management for index copy
+  private boolean currDefTableUseIndex = false;
+  private ITable currDefTableLike = null;
 
   // Temporary work-around
   private boolean inDefineEvent = false;
@@ -430,18 +433,25 @@ public class TP01Support implements ITreeParserAction {
     LOG.trace("Entering defineTableLike {}", tableAST);
     // Get table for "LIKE table"
     ITable table = astTableLink(tableAST);
+    currDefTableLike = table;
     // For each field in "table", create a field def in currDefTable
     for (IField field : table.getFieldPosOrder()) {
       rootScope.defineTableField(field.getName(), currDefTable).assignAttributesLike(field);
     }
-    // FIXME Indexes are not automatically added
-    for (IIndex idx : table.getIndexes()) {
-      Index newIdx = new Index(table, idx.getName(), idx.isUnique(), idx.isPrimary());
-      for (IField fld : idx.getFields()) {
-        newIdx.addField(newIdx.getTable().lookupField(fld.getName()));
-      }
-      currDefTable.getTable().add(newIdx);
-    }
+  }
+
+  @Override
+  public void postDefineTableLike(JPNode recNode) throws SemanticException {
+    LOG.trace("Entering postDefineTableLike {}", recNode);
+  }
+
+  @Override
+  public void defineUseIndex(JPNode recNode, JPNode idNode) throws SemanticException {
+    LOG.trace("Entering defineUseIndex {}", idNode);
+    ITable table = astTableLink(recNode);
+    IIndex idx = table.lookupIndex(idNode.getText());
+    currDefTable.getTable().add(new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary()));
+    currDefTableUseIndex = true;
   }
 
   @Override
@@ -470,11 +480,28 @@ public class TP01Support implements ITreeParserAction {
     buffer.setDefOrIdNode(defNode);
     currSymbol = buffer;
     currDefTable = buffer;
+    currDefTableUseIndex = false;
     idNode.setLink(IConstants.SYMBOL, buffer);
   }
 
   @Override
-  public void defineTemptable(JPNode defAST, JPNode idAST) {
+  public void postDefineTempTable(JPNode defAST, JPNode idNode) throws SemanticException {
+    LOG.trace("Entering postDefineTempTable {} {}", defAST, idNode);
+    // In case of DEFINE TT LIKE, indexes are copied only if USE-INDEX and INDEX are never used 
+    if ((currDefTableLike != null) && !currDefTableUseIndex && currDefTable.getTable().getIndexes().isEmpty()) {
+      LOG.trace("Copying all indexes from {}", currDefTableLike.getName());
+      for (IIndex idx : currDefTableLike.getIndexes()) {
+        Index newIdx = new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary());
+        for (IField fld : idx.getFields()) {
+          newIdx.addField(newIdx.getTable().lookupField(fld.getName()));
+        }
+        currDefTable.getTable().add(newIdx);
+      }
+    }
+  }
+
+  @Override
+  public void defineTempTable(JPNode defAST, JPNode idAST) {
     defineTable((JPNode) defAST, (JPNode) idAST, IConstants.ST_TTABLE);
   }
 

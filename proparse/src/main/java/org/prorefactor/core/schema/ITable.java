@@ -45,4 +45,6 @@ public interface ITable {
   List<IField> getFieldPosOrder();
 
   List<IIndex> getIndexes();
+  
+  IIndex lookupIndex(String name);
 }

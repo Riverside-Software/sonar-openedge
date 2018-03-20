@@ -90,6 +90,15 @@ public class RCodeTTWrapper implements ITable {
   }
 
   @Override
+  public IIndex lookupIndex(String name) {
+    for (IIndex idx : indexes) {
+      if (idx.getName().equalsIgnoreCase(name))
+        return idx;
+    }
+    return null;
+  }
+
+  @Override
   public int getStoretype() {
     return IConstants.ST_TTABLE;
   }
