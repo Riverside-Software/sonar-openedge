@@ -54,9 +54,9 @@ options {
       // Also, the interesting thing (for now !) is to get the AST, not the skipped paths
       // TODO Introduce a switch to display all traces 
       try {
-        LOGGER.trace("{}> {}; LA(1)=={} {}", new Object[] { indent(), rname, LT(1).getText(), ((inputState.guessing > 0)?" [guessing]":"") });
+        LOGGER.trace("{}> {}; LA(1)=={} {}", indent(), rname, LT(1).getText(), inputState.guessing > 0 ? " [guessing]" : "");
       } catch (TokenStreamException uncaught) {
-        LOGGER.trace("{}> {}; LA(1)==!!ERROR!! {}", new Object[] { indent(), rname, ((inputState.guessing > 0)?" [guessing]":"") });
+        LOGGER.trace("{}> {}; LA(1)==!!ERROR!! {}", indent(), rname, inputState.guessing > 0 ? " [guessing]" : "");
       }
     }
   }
@@ -2382,9 +2382,9 @@ def_table_beforetable:
 
 def_table_like:
     (LIKE^ | LIKESEQUENTIAL^)
-    {schemaTablePriority=true;}
+    { schemaTablePriority=true; }
     record
-    {schemaTablePriority=false;}
+    { schemaTablePriority=false; }
     (options{greedy=true;}: VALIDATE)? (def_table_useindex)*
   ;
 
