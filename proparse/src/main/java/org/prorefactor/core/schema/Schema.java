@@ -276,7 +276,17 @@ public class Schema implements ISchema {
         f.setExtent(Integer.parseInt(line.substring(ch2 + 1)));
         currTable.add(f);
       } else if (line.startsWith("I")) {
-        // Nothing for now...
+        if (currTable == null)
+          throw new IOException("No associated table for " + line);
+        // IndexName:Attributes:Field1:Field2:...
+        List<String> lst = Splitter.on(':').trimResults().splitToList(line);
+        if (lst.size() < 3)
+          throw new IOException("Invalid file format: " + line);
+        Index i = new Index(currTable, lst.get(0).substring(1), lst.get(1).indexOf('U') > -1, lst.get(1).indexOf('P') > -1);
+        for (int zz = 2; zz < lst.size(); zz++) {
+          i.addField(currTable.lookupField(lst.get(zz).substring(1)));
+        }
+        currTable.add(i);
       }
 
       return true;
