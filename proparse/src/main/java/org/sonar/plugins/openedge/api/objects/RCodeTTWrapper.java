@@ -18,8 +18,6 @@ import eu.rssw.pct.elements.TableElement;
 import eu.rssw.pct.elements.VariableElement;
 
 public class RCodeTTWrapper implements ITable {
-//  private final IDatabase db;
-//  private final Table table;
   private final TableElement table;
 
   private final List<IField> fields = new ArrayList<>();
@@ -27,7 +25,6 @@ public class RCodeTTWrapper implements ITable {
   private final SortedSet<IField> sortedFields = new TreeSet<>(Constants.FIELD_NAME_ORDER);
 
   public RCodeTTWrapper(TableElement t) {
-//    this.db = Constants.nullDatabase;
     this.table = t;
 
     for (VariableElement fld : table.getFields()) {
