@@ -17,7 +17,7 @@ public class TableWrapperTest {
   
   @Test
   public void testFromDotSchema() throws IOException {
-    Schema sch = new Schema("src/test/resources/project1/src/schema/sp2k.schema");
+    Schema sch = new Schema("src/test/resources/project1/src/schema/sp2k.cache");
     IField fld1 = sch.lookupUnqualifiedField("minqty");
     Assert.assertNotNull(fld1);
     IField fld2 = sch.lookupUnqualifiedField("minqt");

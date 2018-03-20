@@ -18,7 +18,6 @@ import java.nio.charset.Charset;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
@@ -28,7 +27,6 @@ import org.prorefactor.treeparser.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
@@ -129,7 +127,9 @@ public class Schema implements ISchema {
   }
 
   private final void loadSchema(File file) throws IOException {
-    Files.asCharSource(file, Charset.defaultCharset()).readLines(new SchemaLineProcessor());
+    Database db = new Database(Files.getNameWithoutExtension(file.getName()));
+    dbSet.add(db);
+    Files.asCharSource(file, Charset.defaultCharset()).readLines(new SchemaLineProcessor(db));
   }
 
   /**
@@ -251,37 +251,34 @@ public class Schema implements ISchema {
     private IDatabase currDatabase;
     private Table currTable;
 
-    public SchemaLineProcessor() {
-      this(null);
-    }
-
     public SchemaLineProcessor(IDatabase currDatabase) {
       this.currDatabase = currDatabase;
     }
 
     @Override
     public boolean processLine(String line) throws IOException {
-      List<String> list = Splitter.on(' ').omitEmptyStrings().trimResults().splitToList(line);
-      // Stop processing on empty line
-      if ((list == null) || (list.size() < 2)) {
-        return false;
+      if (line.startsWith("S")) {
+        // No support for sequences
+      } else if (line.startsWith("T")) {
+        currTable = new Table(line.substring(1), currDatabase);
+        currDatabase.add(currTable);
+        allTables.add(currTable);
+      } else if (line.startsWith("F")) {
+        // FieldName:DataType:Extent
+        int ch1 = line.indexOf(':');
+        int ch2 = line.lastIndexOf(':');
+        if ((currTable == null) || (ch1 == -1) || (ch2 == -1))
+          throw new IOException("Invalid file format: " + line);
+        Field f = new Field(line.substring(1, ch1), currTable);
+        f.setDataType(DataType.getDataType(line.substring(ch1 + 1, ch2).toUpperCase()));
+        if (f.getDataType() == null)
+          throw new IOException("Unknown datatype: " + line.substring(ch1 + 1, ch2));
+        f.setExtent(Integer.parseInt(line.substring(ch2 + 1)));
+        currTable.add(f);
+      } else if (line.startsWith("I")) {
+        // Nothing for now...
       }
-      switch (list.get(0)) {
-        case "::":
-          currDatabase = new Database(list.get(1));
-          dbSet.add(currDatabase);
-          break;
-        case ":":
-          currTable = new Table(list.get(1), currDatabase);
-          allTables.add(currTable);
-          break;
-        default:
-          Field field = new Field(list.get(0), currTable);
-          field.setDataType(DataType.getDataType(list.get(1)));
-          if (field.getDataType() == null)
-            throw new IOException("Unknown datatype: " + list.get(1));
-          field.setExtent(Integer.parseInt(list.get(2)));
-      }
+
       return true;
     }
 

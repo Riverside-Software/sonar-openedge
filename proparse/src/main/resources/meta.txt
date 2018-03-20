@@ -1,1940 +1,2290 @@
-: SYSBIGINTSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE BIGINT 0
-PARTITIONID INTEGER 0
-: SYSCALCTABLE
-FLD INTEGER 0
-: SYSCHARSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE CHARACTER 0
-PARTITIONID INTEGER 0
-: SYSCHKCONSTR_NAME_MAP
-OWNER CHARACTER 0
-TBLNAME CHARACTER 0
-CNSTRNAME CHARACTER 0
-SEQ INTEGER 0
-NAME_LOC INTEGER 0
-: SYSCOLAUTH
-GRANTOR CHARACTER 0
-GRANTEE CHARACTER 0
-TBLOWNER CHARACTER 0
-TBL CHARACTER 0
-COL CHARACTER 0
-UPD CHARACTER 0
-REF CHARACTER 0
-SEL CHARACTER 0
-GRANTOR_DOMAINID INT64 0
-GRANTEE_DOMAINID INT64 0
-: SYSCOLSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE INT64 0
-VAL_TS TIMESTAMP 0
-PARTITIONID INTEGER 0
-: SYSCOLUMNS
-ID INTEGER 0
-COL CHARACTER 0
-TBL CHARACTER 0
-OWNER CHARACTER 0
-COLTYPE CHARACTER 0
-WIDTH INTEGER 0
-SCALE INTEGER 0
-NULLFLAG CHARACTER 0
-DFLT_VALUE CHARACTER 0
-CHARSET CHARACTER 0
-COLLATION CHARACTER 0
-: SYSCOLUMNS_FULL
-ID INTEGER 0
-COL CHARACTER 0
-TBL CHARACTER 0
-OWNER CHARACTER 0
-COLTYPE CHARACTER 0
-WIDTH INTEGER 0
-SCALE INTEGER 0
-NULLFLAG FIXCHAR 0
-DFLT_VALUE CHARACTER 0
-CHARSET CHARACTER 0
-COLLATION CHARACTER 0
-COL_SUBTYPE INTEGER 0
-LABEL CHARACTER 0
-FORMAT CHARACTER 0
-FIELD_RPOS INTEGER 0
-DISPLAY_ORDER INTEGER 0
-ARRAY_EXTENT INTEGER 0
-VALEXP CHARACTER 0
-VALMSG CHARACTER 0
-HELP CHARACTER 0
-DESCRIPTION CHARACTER 0
-COL_LABEL CHARACTER 0
-VIEW_AS CHARACTER 0
-DFLT_VALUE_SA CHARACTER 0
-LABEL_SA CHARACTER 0
-FORMAT_SA CHARACTER 0
-VALMSG_SA CHARACTER 0
-HELP_SA CHARACTER 0
-COL_LABEL_SA CHARACTER 0
-USER_MISC CHARACTER 0
-: SYSDATATYPES
-DHTYPENAME CHARACTER 0
-DATATYPE SHORT 0
-TYPEPRECISION INTEGER 0
-LITERALPREFIX CHARACTER 0
-LITERALSUFFIX CHARACTER 0
-CREATEPARAMS CHARACTER 0
-NULLABLE SHORT 0
-CASESENSITIVE SHORT 0
-SEARCHABLE SHORT 0
-UNSIGNEDATTR SHORT 0
-ODBCMONEY SHORT 0
-AUTOINCR SHORT 0
-LOCALTYPENAME CHARACTER 0
-: SYSDATESTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE DATE 0
-PARTITIONID INTEGER 0
-: SYSDBAUTH
-GRANTEE CHARACTER 0
-DBA_ACC CHARACTER 0
-RES_ACC CHARACTER 0
-GRANTEE_DOMAINID INT64 0
-: SYSFLOATSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE DOUBLE 0
-PARTITIONID INTEGER 0
-: SYSIDXSTAT
-TBLID INTEGER 0
-IDXID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE INT64 0
-VAL_TS TIMESTAMP 0
-PARTITIONID INTEGER 0
-: SYSINDEXES
-ID INTEGER 0
-IDXSEGID INTEGER 0
-IDXNAME CHARACTER 0
-IDXOWNER CHARACTER 0
-TBL CHARACTER 0
-TBLOWNER CHARACTER 0
-COLNAME CHARACTER 0
-IDXTYPE FIXCHAR 0
-IDXORDER FIXCHAR 0
-IDXCOMPRESS FIXCHAR 0
-IDXMETHOD CHARACTER 0
-IDXSEQ INTEGER 0
-RSSID INTEGER 0
-ACTIVE LOGICAL 0
-WORDIDX INTEGER 0
-desc CHARACTER 0
-ABBREVIATE LOGICAL 0
-UNSORTED LOGICAL 0
-INDEX_USER_MISC CHARACTER 0
-IXCOL_USER_MISC CHARACTER 0
-: SYSINTSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE INTEGER 0
-PARTITIONID INTEGER 0
-: SYSNCHARSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE FIXCHAR 0
-PARTITIONID INTEGER 0
-: SYSNUMSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE DECIMAL 0
-PARTITIONID INTEGER 0
-: SYSNVARCHARSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE CHARACTER 0
-PARTITIONID INTEGER 0
-: SYSPROCBIN
-RSSID INTEGER 0
-ID INTEGER 0
-PROC_TYPE FIXCHAR 0
-SEQ INTEGER 0
-PROC_BIN RAW 0
-: SYSPROCCOLUMNS
-ID INTEGER 0
-COL CHARACTER 0
-PROC_ID INTEGER 0
-RSSID INTEGER 0
-DATATYPE CHARACTER 0
-ARGTYPE CHARACTER 0
-WIDTH INTEGER 0
-SCALE INTEGER 0
-NULLFLAG FIXCHAR 0
-DFLT_VALUE CHARACTER 0
-: SYSPROCEDURES
-PROC_ID INTEGER 0
-PROC_NAME CHARACTER 0
-CREATOR CHARACTER 0
-OWNER CHARACTER 0
-RSSID INTEGER 0
-PROC_TYPE CHARACTER 0
-HAS_RESULTSET FIXCHAR 0
-HAS_RETURN_VAL FIXCHAR 0
-LANG INTEGER 0
-: SYSPROCTEXT
-RSSID INTEGER 0
-ID INTEGER 0
-PROC_TYPE FIXCHAR 0
-SEQ INTEGER 0
-PROC_TEXT CHARACTER 0
-: SYSREALSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE FLOAT 0
-PARTITIONID INTEGER 0
-: SYSROLES
-ROLENAME CHARACTER 0
-GRANTOR CHARACTER 0
-GRANTEE CHARACTER 0
-ADMIN LOGICAL 0
-: SYSSCHEMAS
-SCHEMANAME CHARACTER 0
-OWNER CHARACTER 0
-: SYSSEQAUTH
-GRANTOR CHARACTER 0
-GRANTEE CHARACTER 0
-SEQ-OWNER CHARACTER 0
-SEQ-NAME CHARACTER 0
-UPD CHARACTER 0
-REF CHARACTER 0
-SEL CHARACTER 0
-GRANTOR_DOMAINID INT64 0
-GRANTEE_DOMAINID INT64 0
-: SYSSEQUENCES
-SEQ-NAME CHARACTER 0
-SEQ-NUM INTEGER 0
-SEQ-INIT INT64 0
-SEQ-INCR INT64 0
-SEQ-MIN INT64 0
-SEQ-MAX INT64 0
-CYCLE-OK LOGICAL 0
-SEQ-MISC CHARACTER 8
-DB-RECID RECID 0
-USER-MISC CHARACTER 0
-SEQ-OWNER CHARACTER 0
-SEQ-ATTRIBUTES LOGICAL 64
-: SYSSMINTSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE SHORT 0
-PARTITIONID INTEGER 0
-: SYSSQL_PROPERTIES
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE_N INTEGER 0
-VALUE_CH CHARACTER 0
-: SYSSYNONYMS
-SNAME CHARACTER 0
-SOWNER CHARACTER 0
-SCREATOR CHARACTER 0
-STBL CHARACTER 0
-STBLOWNER CHARACTER 0
-ISPUBLIC SHORT 0
-SREMDB CHARACTER 0
-: SYSTABAUTH
-GRANTOR CHARACTER 0
-GRANTEE CHARACTER 0
-TBLOWNER CHARACTER 0
-TBL CHARACTER 0
-INS CHARACTER 0
-DEL CHARACTER 0
-UPD CHARACTER 0
-SEL CHARACTER 0
-EXE FIXCHAR 0
-NDX CHARACTER 0
-ALT CHARACTER 0
-REF CHARACTER 0
-GRANTOR_DOMAINID INT64 0
-GRANTEE_DOMAINID INT64 0
-: SYSTABLES
-ID INTEGER 0
-TBL CHARACTER 0
-CREATOR CHARACTER 0
-OWNER CHARACTER 0
-TBLTYPE CHARACTER 0
-SEGID INTEGER 0
-HAS_PCNSTRS CHARACTER 0
-HAS_FCNSTRS CHARACTER 0
-HAS_CCNSTRS CHARACTER 0
-HAS_UCNSTRS CHARACTER 0
-TBL_STATUS CHARACTER 0
-RSSID INTEGER 0
-: SYSTABLES_FULL
-ID INTEGER 0
-TBL CHARACTER 0
-CREATOR CHARACTER 0
-OWNER CHARACTER 0
-TBLTYPE CHARACTER 0
-SEGID INTEGER 0
-HAS_PCNSTRS CHARACTER 0
-HAS_FCNSTRS CHARACTER 0
-HAS_CCNSTRS CHARACTER 0
-HAS_UCNSTRS CHARACTER 0
-TBL_STATUS CHARACTER 0
-RSSID INTEGER 0
-PRIME_INDEX INTEGER 0
-DESCRIPTION CHARACTER 0
-VALEXP CHARACTER 0
-VALMSG CHARACTER 0
-LAST_CHANGE INTEGER 0
-HIDDEN LOGICAL 0
-FROZEN LOGICAL 0
-DUMP_NAME CHARACTER 0
-FILE_LABEL CHARACTER 0
-CAN_DUMP CHARACTER 0
-CAN_LOAD CHARACTER 0
-VALMSG_SA CHARACTER 0
-FILE_LABEL_SA CHARACTER 0
-USER_MISC CHARACTER 0
-: SYSTBLSTAT
-TBLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE INT64 0
-VAL_TS TIMESTAMP 0
-PARTITIONID INTEGER 0
-: SYSTIMESTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE TIME 0
-PARTITIONID INTEGER 0
-: SYSTINYINTSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE INTEGER 0
-PARTITIONID INTEGER 0
-: SYSTRIGCOLS
-TRIGGERNAME CHARACTER 0
-OWNER CHARACTER 0
-COLID INTEGER 0
-: SYSTRIGGER
-TRIGGERID INTEGER 0
-TRIGGERNAME CHARACTER 0
-OWNER CHARACTER 0
-TBL CHARACTER 0
-TBLOWNER CHARACTER 0
-TRIGGER_TIME CHARACTER 0
-TRIGGER_EVENT CHARACTER 0
-REFERS_TO_OLD FIXCHAR 0
-REFERS_TO_NEW FIXCHAR 0
-STATEMENT_OR_ROW FIXCHAR 0
-RSSID INTEGER 0
-FIRE_4GL LOGICAL 0
-: SYSTSSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE TIMESTAMP 0
-PARTITIONID INTEGER 0
-: SYSTSTZSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE DATETIME-TZ 0
-PARTITIONID INTEGER 0
-: SYSVARCHARSTAT
-TBLID INTEGER 0
-COLID INTEGER 0
-PROPERTY INTEGER 0
-ATTRIBUTE INTEGER 0
-VALUE CHARACTER 0
-PARTITIONID INTEGER 0
-: SYSVIEWS
-VIEWNAME CHARACTER 0
-CREATOR CHARACTER 0
-OWNER CHARACTER 0
-SEQ INTEGER 0
-VIEWTEXT CHARACTER 0
-: SYSVIEWS_NAME_MAP
-OWNER CHARACTER 0
-VIEWNAME CHARACTER 0
-SEQ INTEGER 0
-NAME_LOC INTEGER 0
-: SYS_CHKCOL_USAGE
-OWNER CHARACTER 0
-TBLNAME CHARACTER 0
-CNSTRNAME CHARACTER 0
-COLNAME CHARACTER 0
-: SYS_CHK_CONSTRS
-OWNER CHARACTER 0
-TBLNAME CHARACTER 0
-CNSTRNAME CHARACTER 0
-CHKSEQ INTEGER 0
-CHKCLAUSE CHARACTER 0
-: SYS_KEYCOL_USAGE
-OWNER CHARACTER 0
-TBLNAME CHARACTER 0
-CNSTRNAME CHARACTER 0
-COLNAME CHARACTER 0
-COLPOSITION INTEGER 0
-: SYS_REF_CONSTRS
-OWNER CHARACTER 0
-TBLNAME CHARACTER 0
-CNSTRNAME CHARACTER 0
-REFOWNER CHARACTER 0
-REFTBLNAME CHARACTER 0
-REFCNSTRNAME CHARACTER 0
-DELETERULE CHARACTER 0
-: SYS_TBL_CONSTRS
-OWNER CHARACTER 0
-TBLNAME CHARACTER 0
-CNSTRNAME CHARACTER 0
-CNSTRTYPE CHARACTER 0
-IDXNAME CHARACTER 0
-: _ActAILog
-_AiLog-Id INT64 0
-_AiLog-TotWrites INT64 0
-_AiLog-AIWWrites INT64 0
-_AiLog-RecWriten INT64 0
-_AiLog-BytesWritn INT64 0
-_AiLog-BBuffWaits INT64 0
-_AiLog-NoBufAvail INT64 0
-_AiLog-PartialWrt INT64 0
-_AiLog-ForceWaits INT64 0
-_AiLog-Trans INT64 0
-_AiLog-UpTime INTEGER 0
-_AiLog-Misc INTEGER 0
-: _ActBILog
-_BiLog-Id INT64 0
-_BiLog-TotalWrts INT64 0
-_BiLog-BIWWrites INT64 0
-_BiLog-RecWriten INT64 0
-_BiLog-BytesWrtn INT64 0
-_BiLog-TotReads INT64 0
-_BiLog-RecRead INT64 0
-_BiLog-BytesRead INT64 0
-_BiLog-ClstrClose INT64 0
-_BiLog-BBuffWaits INT64 0
-_BiLog-EBuffWaits INT64 0
-_BiLog-ForceWaits INT64 0
-_BiLog-ForceWrts INT64 0
-_BiLog-PartialWrts INT64 0
-_BiLog-Trans INT64 0
-_BiLog-UpTime INTEGER 0
-_BiLog-Misc INTEGER 0
-_BiLog-InputBufHit INT64 0
-_BiLog-OutputBufHit INT64 0
-_BiLog-ModBufHit INT64 0
-_BiLog-BOBufHit INT64 0
-: _ActBuffer
-_Buffer-Id INT64 0
-_Buffer-LogicRds INT64 0
-_Buffer-LogicWrts INT64 0
-_Buffer-OSRds INT64 0
-_Buffer-OSWrts INT64 0
-_Buffer-Chkpts INT64 0
-_Buffer-Marked INT64 0
-_Buffer-Flushed INT64 0
-_Buffer-Deferred INT64 0
-_Buffer-LRUSkips INT64 0
-_Buffer-LRUWrts INT64 0
-_Buffer-APWEnq INT64 0
-_Buffer-Trans INT64 0
-_Buffer-UpTime INTEGER 0
-_Buffer-Misc INTEGER 0
-_Buffer-LRUEnabled LOGICAL 0
-: _ActIndex
-_Index-Id INT64 0
-_Index-Find INT64 0
-_Index-Create INT64 0
-_Index-Delete INT64 0
-_Index-Remove INT64 0
-_Index-Splits INT64 0
-_Index-Free INT64 0
-_Index-Trans INT64 0
-_Index-UpTime INTEGER 0
-_Index-Misc INTEGER 0
-_Index-PartitionId INTEGER 0
-: _ActIOFile
-_IOFile-Id INT64 0
-_IOFile-FileName CHARACTER 0
-_IOFile-Reads INT64 0
-_IOFile-Writes INT64 0
-_IOFile-Extends INT64 0
-_IOFile-Trans INT64 0
-_IOFile-BufWrites INT64 0
-_IOFile-UbufWrites INT64 0
-_IOFile-BufReads INT64 0
-_IOFile-UbufReads INT64 0
-_IOFile-UpTime INTEGER 0
-_IOFile-Misc INTEGER 0
-: _ActIOType
-_IOType-Id INT64 0
-_IOType-IdxRds INT64 0
-_IOType-DataReads INT64 0
-_IOType-BiRds INT64 0
-_IOType-AiRds INT64 0
-_IOType-IdxWrts INT64 0
-_IOType-DataWrts INT64 0
-_IOType-BiWrts INT64 0
-_IOType-AiWrts INT64 0
-_IOType-Trans INT64 0
-_IOType-UpTime INTEGER 0
-_IOType-Misc INTEGER 0
-: _ActLock
-_Lock-Id INT64 0
-_Lock-ShrReq INTEGER 0
-_Lock-ExclReq INTEGER 0
-_Lock-UpgReq INTEGER 0
-_Lock-RecGetReq INTEGER 0
-_Lock-ShrLock INTEGER 0
-_Lock-ExclLock INTEGER 0
-_Lock-UpgLock INTEGER 0
-_Lock-RecGetLock INTEGER 0
-_Lock-ShrWait INTEGER 0
-_Lock-ExclWait INTEGER 0
-_Lock-UpgWait INTEGER 0
-_Lock-RecGetWait INTEGER 0
-_Lock-CanclReq INTEGER 0
-_Lock-Downgrade INTEGER 0
-_Lock-RedReq INTEGER 0
-_Lock-Trans INT64 0
-_Lock-UpTime INTEGER 0
-_Lock-ExclFind INT64 0
-_Lock-ShrFind INT64 0
-_Lock-Misc INTEGER 0
-: _ActOther
-_Other-Id INT64 0
-_Other-Commit INT64 0
-_Other-Undo INT64 0
-_Other-Wait INT64 0
-_Other-FlushMblk INT64 0
-_Other-Trans INT64 0
-_Other-UpTime INTEGER 0
-_Other-Misc INTEGER 0
-_Other-NBWait INT64 0
-_Other-SemLatWait INT64 0
-: _ActPWs
-_PW-Id INT64 0
-_PW-TotDBWrites INT64 0
-_PW-DBWrites INT64 0
-_PW-ScanWrites INT64 0
-_PW-ApwQWrites INT64 0
-_PW-CkpQWrites INT64 0
-_PW-ScanCycles INT64 0
-_PW-BuffsScaned INT64 0
-_PW-BufsCkp INT64 0
-_PW-Checkpoints INT64 0
-_PW-Marked INT64 0
-_PW-Flushed INT64 0
-_PW-Trans INT64 0
-_PW-UpTime INTEGER 0
-_PW-Misc INTEGER 0
-: _ActRecord
-_Record-Id INT64 0
-_Record-RecRead INT64 0
-_Record-RecUpd INT64 0
-_Record-RecCreat INT64 0
-_Record-RecDel INT64 0
-_Record-FragRead INT64 0
-_Record-FragCreat INT64 0
-_Record-FragDel INT64 0
-_Record-FragUpd INT64 0
-_Record-BytesRead INT64 0
-_Record-BytesCreat INT64 0
-_Record-BytesDel INT64 0
-_Record-BytesUpd INT64 0
-_Record-Trans INT64 0
-_Record-UpTime INTEGER 0
-_Record-Misc INTEGER 0
-: _ActServer
-_Server-Id INT64 0
-_Server-MsgRec INT64 0
-_Server-MsgSent INT64 0
-_Server-ByteRec INT64 0
-_Server-ByteSent INT64 0
-_Server-RecRec INT64 0
-_Server-RecSent INT64 0
-_Server-QryRec INT64 0
-_Server-TimeSlice INT64 0
-_Server-Trans INT64 0
-_Server-UpTime INTEGER 0
-_Server-Misc INTEGER 0
-: _ActSpace
-_Space-Id INT64 0
-_Space-DbExd INT64 0
-_Space-TakeFree INT64 0
-_Space-RetFree INT64 0
-_Space-AllocNewRm INT64 0
-_Space-FromRm INT64 0
-_Space-FromFree INT64 0
-_Space-BytesAlloc INT64 0
-_Space-Examined INT64 0
-_Space-Removed INT64 0
-_Space-FrontAdd INT64 0
-_Space-BackAdd INT64 0
-_Space-Front2Back INT64 0
-_Space-Locked INT64 0
-_Space-Trans INT64 0
-_Space-UpTime INTEGER 0
-_Space-Misc INTEGER 0
-: _ActSummary
-_Summary-Id INT64 0
-_Summary-Commits INT64 0
-_Summary-Undos INT64 0
-_Summary-RecReads INT64 0
-_Summary-RecUpd INT64 0
-_Summary-RecCreat INT64 0
-_Summary-RecDel INT64 0
-_Summary-RecLock INT64 0
-_Summary-RecWait INT64 0
-_Summary-DbReads INT64 0
-_Summary-DbWrites INT64 0
-_Summary-BiReads INT64 0
-_Summary-BiWrites INT64 0
-_Summary-AiWrites INT64 0
-_Summary-Chkpts INT64 0
-_Summary-Flushed INT64 0
-_Summary-TransComm INT64 0
-_Summary-UpTime INTEGER 0
-_Summary-DbAccesses INT64 0
-_Summary-Misc INTEGER 0
-: _Area
-_Area-version INTEGER 0
-_Area-number INTEGER 0
-_Area-name CHARACTER 0
-_Area-type INTEGER 0
-_Area-block RECID 0
-_Area-attrib INTEGER 0
-_Area-clustersize INTEGER 0
-_Area-blocksize INTEGER 0
-_Area-recbits INTEGER 0
-_Area-extents INTEGER 0
-_Area-misc INTEGER 8
-: _AreaExtent
-_Area-recid RECID 0
-_Extent-version INTEGER 0
-_Extent-number INTEGER 0
-_Area-number INTEGER 0
-_Extent-type INTEGER 0
-_Extent-attrib INTEGER 0
-_Extent-system INTEGER 0
-_Extent-size INTEGER 0
-_Extent-path CHARACTER 0
-_Extent-misc INTEGER 8
-: _AreaStatus
-_AreaStatus-Id INT64 0
-_AreaStatus-Areaname CHARACTER 0
-_AreaStatus-Areanum INTEGER 0
-_AreaStatus-Totblocks INT64 0
-_AreaStatus-Hiwater INT64 0
-_AreaStatus-Extents INTEGER 0
-_AreaStatus-Lastextent CHARACTER 0
-_AreaStatus-Freenum INT64 0
-_AreaStatus-Rmnum INT64 0
-: _AreaThreshold
-_AreaThreshold-ID INT64 0
-_AreaThresholdArea INTEGER 0
-_AreaThreshold INTEGER 0
-: _aud-audit-data
-_Audit-data-guid CHARACTER 0
-_Database-connection-id CHARACTER 0
-_Client-session-uuid CHARACTER 0
-_User-id CHARACTER 0
-_Audit-date-time DATETIME-TZ 0
-_Audit-event-group CHARACTER 0
-_Db-guid CHARACTER 0
-_Transaction-id INTEGER 0
-_Transaction-sequence INTEGER 0
-_Event-id INTEGER 0
-_Event-context CHARACTER 0
-_Application-context-id CHARACTER 0
-_Event-detail CHARACTER 0
-_Audit-custom-detail CHARACTER 0
-_Audit-data-security-level INTEGER 0
-_Data-seal CHARACTER 0
-: _aud-audit-data-value
-_Audit-data-guid CHARACTER 0
-_Field-name CHARACTER 0
-_Continuation-sequence INTEGER 0
-_Data-type-code INTEGER 0
-_Old-string-value CHARACTER 0
-_New-string-value CHARACTER 0
-_Old-blob-value BLOB 0
-_New-blob-value BLOB 0
-_Old-clob-value CLOB 0
-_New-clob-value CLOB 0
-_Audit-data-security-level INTEGER 0
-_Data-seal CHARACTER 0
-: _aud-audit-policy
-_Audit-policy-guid CHARACTER 0
-_Audit-policy-name CHARACTER 0
-_Audit-policy-description CHARACTER 0
-_Audit-data-security-level INTEGER 0
-_Audit-custom-detail-level INTEGER 0
-_Audit-policy-active LOGICAL 0
-: _aud-event
-_Event-id INTEGER 0
-_Event-type CHARACTER 0
-_Event-name CHARACTER 0
-_Event-description CHARACTER 0
-: _aud-event-policy
-_Audit-policy-guid CHARACTER 0
-_Event-id INTEGER 0
-_Event-level INTEGER 0
-_Event-criteria CHARACTER 0
-: _aud-field-policy
-_Audit-policy-guid CHARACTER 0
-_File-Name CHARACTER 0
-_Owner CHARACTER 0
-_Field-Name CHARACTER 0
-_Audit-create-level INTEGER 0
-_Audit-update-level INTEGER 0
-_Audit-delete-level INTEGER 0
-_Audit-read-level INTEGER 0
-_Audit-identifying-field INTEGER 0
-: _aud-file-policy
-_Audit-policy-guid CHARACTER 0
-_File-Name CHARACTER 0
-_Owner CHARACTER 0
-_Audit-create-level INTEGER 0
-_Audit-create-criteria CHARACTER 0
-_Audit-update-level INTEGER 0
-_Audit-update-criteria CHARACTER 0
-_Audit-delete-level INTEGER 0
-_Audit-delete-criteria CHARACTER 0
-_Audit-read-level INTEGER 0
-_Audit-read-criteria CHARACTER 0
-_Create-event-id INTEGER 0
-_Update-event-id INTEGER 0
-_Delete-event-id INTEGER 0
-_Read-event-id INTEGER 0
-: _Block
-_Block-Id INT64 0
-_Block-Dbkey INT64 0
-_Block-Type CHARACTER 0
-_Block-ChainType CHARACTER 0
-_Block-BkupCtr INTEGER 0
-_Block-NextDbkey INT64 0
-_Block-Update INTEGER 0
-_Block-Area INTEGER 0
-_Block-Block CHARACTER 0
-_Block-Misc INTEGER 0
-: _BuffStatus
-_BfStatus-Id INT64 0
-_BfStatus-TotBufs INTEGER 0
-_BfStatus-HashSize INTEGER 0
-_BfStatus-UsedBuffs INTEGER 0
-_BfStatus-LRU INTEGER 0
-_BfStatus-APWQ INTEGER 0
-_BfStatus-CKPQ INTEGER 0
-_BfStatus-ModBuffs INT64 0
-_BfStatus-CKPMarked INT64 0
-_BfStatus-LastCkpNum INTEGER 0
-_BfStatus-Misc INTEGER 0
-_BfStatus-LRU2 INTEGER 0
-_BfStatus-LRU-Skips INTEGER 0
-_BfStatus-LRU2-Skips INTEGER 0
-: _Checkpoint
-_Checkpoint-Id INT64 0
-_Checkpoint-Time CHARACTER 0
-_Checkpoint-Len CHARACTER 0
-_Checkpoint-Dirty INT64 0
-_Checkpoint-CptQ INT64 0
-_Checkpoint-Scan INT64 0
-_Checkpoint-ApwQ INT64 0
-_Checkpoint-Flush INT64 0
-_Checkpoint-Misc INTEGER 0
-_Checkpoint-Duration DECIMAL 0
-_Checkpoint-SyncTime DECIMAL 0
-: _Client-Session
-_Client-session-uuid CHARACTER 0
-_Client-name CHARACTER 0
-_User-id CHARACTER 0
-_Authentication-date-time DATETIME-TZ 0
-_Server-uuid CHARACTER 0
-_Authentication-domain-type CHARACTER 0
-_Authentication-domain-name CHARACTER 0
-_Db-guid CHARACTER 0
-_Session-custom-detail CHARACTER 0
-_Audit-data-security-level INTEGER 0
-_Data-seal CHARACTER 0
-: _Code-Feature
-_CodeFeature-ID INT64 0
-_CodeFeature_Name CHARACTER 0
-_CodeFeature_Supported CHARACTER 0
-_CodeFeature_Required CHARACTER 0
-_CodeFeature-Res01 CHARACTER 10
-_CodeFeature-Res02 INTEGER 10
-: _Codepage
-_Cp-Name CHARACTER 0
-_Cp-Sequence INTEGER 0
-_Cp-Dbrecid RECID 0
-_Cp-Attr RAW 0
-: _Collation
-_Coll-Name CHARACTER 0
-_Coll-Sequence INTEGER 0
-_Coll-Cp INTEGER 0
-_Coll-Tran-Version INTEGER 0
-_Coll-Tran-Subtype INTEGER 0
-_Coll-Segment INTEGER 0
-_Coll-Data RAW 0
-_Coll-CSData BLOB 0
-_Coll-CIData BLOB 0
-_Coll-CXData BLOB 0
-: _Connect
-_Connect-Id INT64 0
-_Connect-Usr INTEGER 0
-_Connect-Type CHARACTER 0
-_Connect-Name CHARACTER 0
-_Connect-Device CHARACTER 0
-_Connect-Time CHARACTER 0
-_Connect-Pid INTEGER 0
-_Connect-Server INTEGER 0
-_Connect-Wait1 INT64 0
-_Connect-Wait CHARACTER 0
-_Connect-TransId INTEGER 0
-_Connect-SemNum INTEGER 0
-_Connect-semid INTEGER 0
-_Connect-Disconnect INTEGER 0
-_Connect-Resync INTEGER 0
-_Connect-Interrupt INTEGER 0
-_Connect-2phase INTEGER 0
-_Connect-Batch CHARACTER 0
-_Connect-Misc INTEGER 0
-_Connect-ClientType CHARACTER 0
-_Connect-IPAddress CHARACTER 0
-_Connect-CachingType INTEGER 0
-_Connect-CacheLastUpdate CHARACTER 0
-_Connect-CacheInfoType CHARACTER 0
-_Connect-CacheLineNumber INTEGER 32
-_Connect-CacheInfo CHARACTER 32
-_Connect-TenantId INTEGER 0
-_Connect-DomainId INT64 0
-: _Constraint
-_Con-Active LOGICAL 0
-_Con-Type CHARACTER 0
-_Con-Status CHARACTER 0
-_Con-num INT64 0
-_Con-Name CHARACTER 0
-_Con-Desc CHARACTER 0
-_File-recid RECID 0
-_Db-recid RECID 0
-_For-Name CHARACTER 0
-_Con-Misc1 INTEGER 8
-_Con-Misc2 CHARACTER 8
-_C-Res1 INTEGER 8
-_C-Res2 CHARACTER 8
-_Field-Recid RECID 0
-_Index-recid RECID 0
-_Index-parent-recid RECID 0
-_Con-Expr CHARACTER 0
-: _Constraint-Keys
-_Con-recid RECID 0
-_Con-Misc1 INTEGER 8
-_Con-Misc2 CHARACTER 8
-_C-Res1 INTEGER 8
-_C-Res2 CHARACTER 8
-_Field-Recid RECID 0
-_Con-Key-Fld-Order INTEGER 0
-_Con-Key-Parent-Ind LOGICAL 0
-_Ascending LOGICAL 0
-_Con-Key-Con-Recid RECID 0
-: _Database-Feature
-_DBFeature-ID INT64 0
-_DBFeature_Name CHARACTER 0
-_DBFeature_Enabled CHARACTER 0
-_DBFeature_Active CHARACTER 0
-_DBFeature-Res01 CHARACTER 10
-_DBFeature-Res02 INTEGER 10
-: _Db
-_Db-name CHARACTER 0
-_Db-addr CHARACTER 0
-_Db-type CHARACTER 0
-_Db-comm CHARACTER 0
-_Db-revision INTEGER 0
-_Db-misc1 INTEGER 8
-_Db-misc2 CHARACTER 8
-_Db-slave LOGICAL 0
-_Db-local LOGICAL 0
-_Db-res1 INTEGER 8
-_Db-res2 CHARACTER 8
-_Db-xlate RAW 2
-_Db-xl-name CHARACTER 0
-_Db-collate RAW 10
-_Db-coll-name CHARACTER 0
-_User-Misc CHARACTER 0
-_Db-guid CHARACTER 0
-: _Db-Detail
-_Db-guid CHARACTER 0
-_Db-description CHARACTER 0
-_Db-mac-key RAW 0
-_Db-custom-detail CHARACTER 0
-: _Db-Option
-_Db-recid RECID 0
-_Db-option-type INTEGER 0
-_Db-option-code CHARACTER 0
-_Db-option-description CHARACTER 0
-_Db-option-value CHARACTER 0
-: _DbStatus
-_DbStatus-Id INTEGER 0
-_DbStatus-state INTEGER 0
-_DbStatus-tainted INTEGER 0
-_DbStatus-IntFlags INTEGER 0
-_DbStatus-DbBlkSize INTEGER 0
-_DbStatus-TotalBlks INT64 0
-_DbStatus-EmptyBlks INT64 0
-_DbStatus-FreeBlks INT64 0
-_DbStatus-RMFreeBlks INT64 0
-_DbStatus-LastTran INTEGER 0
-_DbStatus-LastTable INTEGER 0
-_DbStatus-DbVers INTEGER 0
-_DbStatus-DbVersMinor INTEGER 0
-_DbStatus-ClVersMinor INTEGER 0
-_DbStatus-ShmVers INTEGER 0
-_DbStatus-Changed INTEGER 0
-_DbStatus-ibSeq INTEGER 0
-_DbStatus-Integrity CHARACTER 0
-_DbStatus-HiWater INTEGER 0
-_DbStatus-BiBlkSize INTEGER 0
-_DbStatus-BiClSize INTEGER 0
-_DbStatus-AiBlkSize INTEGER 0
-_DbStatus-starttime CHARACTER 0
-_DbStatus-LastOpen CHARACTER 0
-_DbStatus-PrevOpen CHARACTER 0
-_DbStatus-CacheStamp CHARACTER 0
-_DbStatus-fbDate CHARACTER 0
-_DbStatus-ibDate CHARACTER 0
-_DbStatus-CreateDate CHARACTER 0
-_DbStatus-BiOpen CHARACTER 0
-_DbStatus-BiSize INT64 0
-_DbStatus-BiTrunc CHARACTER 0
-_DbStatus-Codepage CHARACTER 0
-_DbStatus-Collation CHARACTER 0
-_DbStatus-NumAreas INTEGER 0
-_DbStatus-NumLocks INTEGER 0
-_DbStatus-MostLocks INTEGER 0
-_DbStatus-SharedMemVer INTEGER 0
-_DbStatus-NumSems INTEGER 0
-_DbStatus-Misc INTEGER 0
-: _Field
-_File-recid RECID 0
-_Field-Name CHARACTER 0
-_Data-Type CHARACTER 0
-_dtype INTEGER 0
-_Initial CHARACTER 0
-_Label CHARACTER 0
-_Mandatory LOGICAL 0
-_Format CHARACTER 0
-_sys-field LOGICAL 0
-_field-rpos INTEGER 0
-_Decimals INTEGER 0
-_Order INTEGER 0
-_Can-Read CHARACTER 0
-_Can-Write CHARACTER 0
-_Extent INTEGER 0
-_Valexp CHARACTER 0
-_Valmsg CHARACTER 0
-_Help CHARACTER 0
-_Desc CHARACTER 0
-_Col-label CHARACTER 0
-_Fld-stdtype INTEGER 0
-_Fld-stlen INTEGER 0
-_Fld-stoff INTEGER 0
-_Fld-misc1 INTEGER 8
-_Fld-misc2 CHARACTER 8
-_Fld-case LOGICAL 0
-_Fld-res1 INTEGER 8
-_Fld-res2 CHARACTER 8
-_For-Id INTEGER 0
-_For-Primary INTEGER 0
-_For-Spacing INTEGER 0
-_For-Scale INTEGER 0
-_For-Name CHARACTER 0
-_For-Type CHARACTER 0
-_For-Itype INTEGER 0
-_For-Xpos INTEGER 0
-_For-Retrieve LOGICAL 0
-_For-Separator CHARACTER 0
-_For-Maxsize INTEGER 0
-_For-Allocated INTEGER 0
-_View-As CHARACTER 0
-_Initial-SA CHARACTER 0
-_Label-SA CHARACTER 0
-_Format-SA CHARACTER 0
-_Valmsg-SA CHARACTER 0
-_Help-SA CHARACTER 0
-_Col-label-SA CHARACTER 0
-_Charset CHARACTER 0
-_Collation CHARACTER 0
-_Fetch-Type CHARACTER 0
-_Width INTEGER 0
-_Field-Physpos INTEGER 0
-_User-Misc CHARACTER 0
-_Attributes1 INTEGER 0
-_Last-modified DATETIME-TZ 0
-_Mod-sequence INTEGER 0
-_Field-Attributes LOGICAL 64
-_Fld-Misc3 INTEGER 8
-_Fld-Misc4 CHARACTER 8
-: _Field-Trig
-_Field-Recid RECID 0
-_File-Recid RECID 0
-_Field-Rpos INTEGER 0
-_Event CHARACTER 0
-_Proc-Name CHARACTER 0
-_Override LOGICAL 0
-_Trig-Crc INTEGER 0
-_Last-modified DATETIME-TZ 0
-_Mod-sequence INTEGER 0
-: _File
-_File-Name CHARACTER 0
-_Prime-Index RECID 0
-_File-Number INTEGER 0
-_dft-pk LOGICAL 0
-_numkey INTEGER 0
-_numkfld INTEGER 0
-_numkcomp INTEGER 0
-_Template RECID 0
-_numfld INTEGER 0
-_Can-Create CHARACTER 0
-_Can-Read CHARACTER 0
-_Can-Write CHARACTER 0
-_Can-Delete CHARACTER 0
-_Desc CHARACTER 0
-_Db-recid RECID 0
-_Valexp CHARACTER 0
-_Valmsg CHARACTER 0
-_Fil-misc1 INTEGER 8
-_Fil-misc2 CHARACTER 8
-_Last-change INTEGER 0
-_DB-lang INTEGER 0
-_Hidden LOGICAL 0
-_Frozen LOGICAL 0
-_Dump-name CHARACTER 0
-_CRC INTEGER 0
-_Fil-res1 INTEGER 8
-_Fil-res2 CHARACTER 8
-_Cache RAW 0
-_For-Size INTEGER 0
-_For-Flag INTEGER 0
-_For-Cnt1 INTEGER 0
-_For-Cnt2 INTEGER 0
-_For-Name CHARACTER 0
-_For-Owner CHARACTER 0
-_For-Format CHARACTER 0
-_For-Info CHARACTER 0
-_For-Type CHARACTER 0
-_For-Id INTEGER 0
-_For-Number INTEGER 0
-_File-Label CHARACTER 0
-_Can-Dump CHARACTER 0
-_Can-Load CHARACTER 0
-_Valmsg-SA CHARACTER 0
-_File-Label-SA CHARACTER 0
-_ianum INTEGER 0
-_Version INTEGER 0
-_Field-map RAW 0
-_Creator CHARACTER 0
-_Has-Ccnstrs CHARACTER 0
-_Has-Fcnstrs CHARACTER 0
-_Has-Pcnstrs CHARACTER 0
-_Has-Ucnstrs CHARACTER 0
-_Owner CHARACTER 0
-_Rssid INTEGER 0
-_Tbl-Status CHARACTER 0
-_Tbl-Type CHARACTER 0
-_User-Misc CHARACTER 0
-_Last-modified DATETIME-TZ 0
-_Mod-sequence INTEGER 0
-_File-Attributes LOGICAL 64
-_category CHARACTER 0
-_Fil-Misc3 INTEGER 8
-_Fil-Misc4 CHARACTER 8
-: _File-Trig
-_File-Recid RECID 0
-_Event CHARACTER 0
-_Proc-Name CHARACTER 0
-_Override LOGICAL 0
-_Trig-Crc INTEGER 0
-_Last-modified DATETIME-TZ 0
-_Mod-sequence INTEGER 0
-: _Filelist
-_FileList-Id INT64 0
-_FileList-Size INTEGER 0
-_FileList-Extend INTEGER 0
-_FileList-LogicalSz INTEGER 0
-_FileList-BlkSize INTEGER 0
-_FileList-Openmode CHARACTER 0
-_FileList-Name CHARACTER 0
-_FileList-Misc INTEGER 0
-: _Index
-_File-recid RECID 0
-_Index-Name CHARACTER 0
-_Unique LOGICAL 0
-_num-comp INTEGER 0
-_idx-num INTEGER 0
-_I-misc1 INTEGER 8
-_I-misc2 CHARACTER 8
-_Active LOGICAL 0
-_I-res1 INTEGER 8
-_I-res2 CHARACTER 8
-_Wordidx INTEGER 0
-_Desc CHARACTER 0
-_For-Name CHARACTER 0
-_For-Type CHARACTER 0
-_ianum INTEGER 0
-_Idx-CRC INTEGER 0
-_Idxowner CHARACTER 0
-_Idxmethod CHARACTER 0
-_User-Misc CHARACTER 0
-_Last-modified DATETIME-TZ 0
-_Mod-sequence INTEGER 0
-_Mode INTEGER 0
-_Word-Rules INTEGER 0
-_Index-Attributes LOGICAL 64
-: _Index-Field
-_Index-recid RECID 0
-_Index-Seq INTEGER 0
-_Field-recid RECID 0
-_Ascending LOGICAL 0
-_Abbreviate LOGICAL 0
-_Unsorted LOGICAL 0
-_If-misc1 INTEGER 8
-_If-misc2 CHARACTER 8
-_If-res1 INTEGER 8
-_If-res2 CHARACTER 8
-_User-Misc CHARACTER 0
-_Last-modified DATETIME-TZ 0
-_Mod-sequence INTEGER 0
-_Collation CHARACTER 0
-_Coll-Strength INTEGER 0
-_KeyValue-expr CHARACTER 0
-_If-Attributes LOGICAL 64
-: _IndexStat
-_IndexStat-id INT64 0
-_IndexStat-read INT64 0
-_IndexStat-create INT64 0
-_IndexStat-delete INT64 0
-_IndexStat-split INT64 0
-_IndexStat-blockdelete INT64 0
-_IndexStat-OsRead INT64 0
-_IndexStat-PartitionId INTEGER 0
-: _KeyEvent
-_KeyEvent-Date DATETIME-TZ 0
-_KeyEvent-Procid INTEGER 0
-_KeyEvent-ThreadId INTEGER 0
-_KeyEvent-MsgId INTEGER 0
-_KeyEvent-Usrnum INTEGER 0
-_KeyEvent-Event CHARACTER 0
-_KeyEvent-Spare1 INTEGER 0
-_KeyEvent-Spare2 CHARACTER 0
-: _Latch
-_Latch-Id INT64 0
-_Latch-Name CHARACTER 0
-_Latch-Hold INTEGER 0
-_Latch-Qhold INTEGER 0
-_Latch-Type CHARACTER 0
-_Latch-Wait INT64 0
-_Latch-Lock INT64 0
-_Latch-Spin INTEGER 0
-_Latch-Busy INT64 0
-_Latch-LockedT INTEGER 0
-_Latch-LockT INTEGER 0
-_Latch-WaitT INTEGER 0
-_Latch-HoldTenantId INTEGER 0
-_Latch-QHoldTenantId INTEGER 0
-: _License
-_Lic-Id INT64 0
-_Lic-ValidUsers INTEGER 0
-_Lic-ActiveConns INTEGER 0
-_Lic-MaxActive INTEGER 0
-_Lic-MinActive INTEGER 0
-_Lic-BatchConns INTEGER 0
-_Lic-MaxBatch INTEGER 0
-_Lic-MinBatch INTEGER 0
-_Lic-CurrConns INTEGER 0
-_Lic-MaxCurrent INTEGER 0
-_Lic-MinCurrent INTEGER 0
-: _Lock
-_Lock-Id INT64 0
-_Lock-Usr INTEGER 0
-_Lock-Name CHARACTER 0
-_Lock-Type CHARACTER 0
-_Lock-Table INTEGER 0
-_Lock-RecId INT64 0
-_Lock-Chain INTEGER 0
-_Lock-Flags CHARACTER 0
-_Lock-Misc INTEGER 0
-_Lock-TenantId INTEGER 0
-_Lock-PartitionId INTEGER 0
-: _LockReq
-_LockReq-Id INT64 0
-_LockReq-Num INTEGER 0
-_LockReq-Name CHARACTER 0
-_LockReq-RecLock INT64 0
-_LockReq-RecWait INT64 0
-_LockReq-TrnLock INT64 0
-_LockReq-TrnWait INT64 0
-_LockReq-SchLock INT64 0
-_LockReq-SchWait INT64 0
-_LockReq-ExclFind INT64 0
-_LockReq-ShrFind INT64 0
-_LockReq-Misc INTEGER 0
-_LockReq-TenantId INTEGER 0
-: _Logging
-_Logging-Id INT64 0
-_Logging-CrashProt INTEGER 0
-_Logging-CommitDelay INTEGER 0
-_Logging-BiIO CHARACTER 0
-_Logging-BiClAge INTEGER 0
-_Logging-BiBlkSize INTEGER 0
-_Logging-BiClSize INTEGER 0
-_Logging-BiExtents INTEGER 0
-_Logging-BiLogSize INTEGER 0
-_Logging-BiBytesFree INTEGER 0
-_Logging-LastCkp CHARACTER 0
-_Logging-BiBuffs INTEGER 0
-_Logging-BiFullBuffs INTEGER 0
-_Logging-AiJournal CHARACTER 0
-_Logging-AiIO CHARACTER 0
-_Logging-AiBegin CHARACTER 0
-_Logging-AiNew CHARACTER 0
-_Logging-AiOpen CHARACTER 0
-_Logging-AiGenNum INTEGER 0
-_Logging-AiExtents INTEGER 0
-_Logging-AiCurrExt INTEGER 0
-_Logging-AiBuffs INTEGER 0
-_Logging-AiBlkSize INTEGER 0
-_Logging-AiLogSize INTEGER 0
-_Logging-2PC CHARACTER 0
-_Logging-2PCNickName CHARACTER 0
-_Logging-2PCPriority INTEGER 0
-_Logging-Misc INTEGER 0
-: _MstrBlk
-_MstrBlk-Id INT64 0
-_MstrBlk-dbvers INTEGER 0
-_MstrBlk-dbstate INTEGER 0
-_MstrBlk-tainted INTEGER 0
-_MstrBlk-integrity INTEGER 0
-_MstrBlk-totblks INT64 0
-_MstrBlk-hiwater INTEGER 0
-_MstrBlk-biblksize INTEGER 0
-_MstrBlk-rlclsize INTEGER 0
-_MstrBlk-aiblksize INTEGER 0
-_MstrBlk-lasttask INTEGER 0
-_MstrBlk-cfilnum INTEGER 0
-_MstrBlk-bistate INTEGER 0
-_MstrBlk-ibseq INTEGER 0
-_MstrBlk-crdate CHARACTER 0
-_MstrBlk-oprdate CHARACTER 0
-_MstrBlk-oppdate CHARACTER 0
-_MstrBlk-fbdate CHARACTER 0
-_MstrBlk-ibdate CHARACTER 0
-_MstrBlk-timestamp CHARACTER 0
-_MstrBlk-biopen CHARACTER 0
-_MstrBlk-rltime CHARACTER 0
-_MstrBlk-biprev CHARACTER 0
-_MstrBlk-Misc INTEGER 0
-: _MyConnection
-_MyConn-Id INT64 0
-_MyConn-UserId INTEGER 0
-_MyConn-Pid INTEGER 0
-_MyConn-NumSeqBuffers INTEGER 0
-_MyConn-UsedSeqBuffers INTEGER 0
-_MyConn-TenantId INTEGER 0
-: _Partition-Set
-_Object-Type INTEGER 0
-_Object-Number INTEGER 0
-_PSetId INTEGER 0
-_PSet-Type INTEGER 0
-_PSet-Name CHARACTER 0
-_PSet-Description CHARACTER 0
-_PSet-Attributes LOGICAL 64
-_PSet-DataArea-default INTEGER 0
-_PSet-IndexArea-default INTEGER 0
-_PSet-LobArea-default INTEGER 0
-_PSet-Allocation-default CHARACTER 0
-: _Partition-Set-Detail
-_Object-Type INTEGER 0
-_Object-Number INTEGER 0
-_PSetId INTEGER 0
-_TenantId INTEGER 0
-_Permissions INTEGER 0
-: _Repl-Agent
-_ReplAgt-AgentID INT64 0
-_ReplAgt-AgentName CHARACTER 0
-_ReplAgt-ConnectTime CHARACTER 0
-_ReplAgt-DBName CHARACTER 0
-_ReplAgt-ServerHost CHARACTER 0
-_ReplAgt-Port INTEGER 0
-_ReplAgt-BlocksReceived INTEGER 0
-_ReplAgt-BlocksProcessed INTEGER 0
-_ReplAgt-BlocksACK INTEGER 0
-_ReplAgt-NotesProcessed INTEGER 0
-_ReplAgt-LastTRID INTEGER 0
-_ReplAgt-Method CHARACTER 0
-_ReplAgt-Status INTEGER 0
-_ReplAgt-CommStatus INTEGER 0
-_ReplAgt-ReservedChar CHARACTER 10
-_ReplAgt-ReservedInt INTEGER 10
-: _Repl-AgentControl
-_ReplAgtCtl-AgentID INT64 0
-_ReplAgtCtl-AgentName CHARACTER 0
-_ReplAgtCtl-ConnectTime CHARACTER 0
-_ReplAgtCtl-RemoteDBName CHARACTER 0
-_ReplAgtCtl-RemoteHost CHARACTER 0
-_ReplAgtCtl-Port INTEGER 0
-_ReplAgtCtl-BlocksSent INTEGER 0
-_ReplAgtCtl-BlocksACK INTEGER 0
-_ReplAgtCtl-LastBlockSentAt CHARACTER 0
-_ReplAgtCtl-Method CHARACTER 0
-_ReplAgtCtl-status INTEGER 0
-_ReplAgtCtl-CommStatus INTEGER 0
-_ReplAgtCtl-ReservedChar CHARACTER 10
-_ReplAgtCtl-ReservedInt INTEGER 10
-: _Repl-Server
-_ReplSrv-id INT64 0
-_ReplSrv-AgentCount INTEGER 0
-_ReplSrv-BlocksSent INTEGER 0
-_ReplSrv-StartTime CHARACTER 0
-_ReplSrv-LastBlockSentAt CHARACTER 0
-_ReplSrv-ReservedChar CHARACTER 10
-_ReplSrv-ReservedInt INTEGER 10
-: _Resrc
-_Resrc-Id INT64 0
-_Resrc-Name CHARACTER 0
-_Resrc-lock INT64 0
-_Resrc-wait INT64 0
-_Resrc-time INT64 0
-: _sec-authentication-domain
-_Domain-name CHARACTER 0
-_Domain-type CHARACTER 0
-_Domain-description CHARACTER 0
-_Domain-access-code CHARACTER 0
-_Auditing-context CHARACTER 0
-_Domain-runtime-options CHARACTER 0
-_Domain-enabled LOGICAL 0
-_PAM-actions CHARACTER 0
-_PAM-control CHARACTER 0
-_PAM-library-path CHARACTER 0
-_PAM-options CHARACTER 0
-_Domain-custom-detail CHARACTER 0
-_Tenant-Name CHARACTER 0
-_Domain-Id INT64 0
-_Domain-category INTEGER 0
-: _sec-authentication-system
-_Domain-type CHARACTER 0
-_Domain-type-description CHARACTER 0
-_PAM-plug-in LOGICAL 0
-_PAM-module-name CHARACTER 0
-_PAM-callback-procedure CHARACTER 0
-_PAM-library-checksum RAW 0
-_Key-store-id CHARACTER 0
-_Custom-detail CHARACTER 0
-: _sec-granted-role
-_Granted-role-guid CHARACTER 0
-_Grantee CHARACTER 0
-_Role-name CHARACTER 0
-_Grant-rights LOGICAL 0
-_Grantor CHARACTER 0
-_Custom-grant-detail CHARACTER 0
-: _sec-granted-role-condition
-_Granted-role-guid CHARACTER 0
-_Conditional-attribute CHARACTER 0
-_Logical-operator CHARACTER 0
-_Conditional-value CHARACTER 0
-_Custom-condition-detail CHARACTER 0
-: _sec-role
-_Role-name CHARACTER 0
-_Role-description CHARACTER 0
-_Role-creator CHARACTER 0
-_Custom-role-detail CHARACTER 0
-: _Segments
-_Segment-Id INT64 0
-_Segment-SegId INTEGER 0
-_Segment-SegSize INT64 0
-_Segment-BytesUsed INT64 0
-_Segment-ByteFree INT64 0
-_Segment-Misc INTEGER 0
-: _Sequence
-_Seq-Name CHARACTER 0
-_Seq-Num INTEGER 0
-_Seq-Init INT64 0
-_Seq-Incr INT64 0
-_Seq-Min INT64 0
-_Seq-Max INT64 0
-_Cycle-Ok LOGICAL 0
-_Seq-Misc CHARACTER 8
-_Db-recid RECID 0
-_User-Misc CHARACTER 0
-_Seq-Owner CHARACTER 0
-_Seq-Attributes LOGICAL 64
-: _Servers
-_Server-Id INT64 0
-_Server-Num INTEGER 0
-_Server-Pid INTEGER 0
-_Server-Type CHARACTER 0
-_Server-Protocol CHARACTER 0
-_Server-Logins INT64 0
-_Server-CurrUsers INTEGER 0
-_Server-MaxUsers INTEGER 0
-_Server-PortNum INTEGER 0
-_Server-PendConn INTEGER 0
-_Server-Misc INTEGER 0
-: _SQL_Properties
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value_n INTEGER 0
-_Value_ch CHARACTER 0
-: _Startup
-_Startup-Id INT64 0
-_Startup-AiName CHARACTER 0
-_Startup-Buffs INTEGER 0
-_Startup-AiBuffs INTEGER 0
-_Startup-BiBuffs INTEGER 0
-_Startup-BiName CHARACTER 0
-_Startup-BiTrunc INTEGER 0
-_Startup-CrashProt INTEGER 0
-_Startup-LockTable INTEGER 0
-_Startup-MaxClients INTEGER 0
-_Startup-BiDelay INTEGER 0
-_Startup-MaxServers INTEGER 0
-_Startup-MaxUsers INTEGER 0
-_Startup-BiIO INTEGER 0
-_Startup-APWQTime INTEGER 0
-_Startup-APWSTime INTEGER 0
-_Startup-APWBuffs INTEGER 0
-_Startup-APWMaxWrites INTEGER 0
-_Startup-Spin INTEGER 0
-_Startup-Directio INTEGER 0
-_Startup-Misc INTEGER 0
-_Startup-MemOverflow INT64 0
-_Startup-Alternate_Buffs INTEGER 0
-_Startup-LRU-Skips INTEGER 0
-_Startup-LRU2-Skips INTEGER 0
-_Startup-NmsgWait INTEGER 0
-_Startup-Prefetch-Factor INTEGER 0
-_Startup-Prefetch-Num-Recs INTEGER 0
-_Startup-Prefetch-Priority INTEGER 0
-_Startup-Prefetch-Delay LOGICAL 0
-_Startup-nGovernor INTEGER 0
-_Startup-LGovernor INTEGER 0
-: _StatBase
-_StatBase-id INT64 0
-_TableBase INTEGER 0
-_IndexBase INTEGER 0
-: _StorageObject
-_Db-recid RECID 0
-_Object-type INTEGER 0
-_Object-number INTEGER 0
-_Object-associate-type INTEGER 0
-_Object-associate INTEGER 0
-_Area-number INTEGER 0
-_Object-block RECID 0
-_Object-root RECID 0
-_Object-attrib INTEGER 0
-_Object-system INTEGER 0
-_Object-misc INTEGER 8
-_Create-Limit INTEGER 0
-_Toss-Limit INTEGER 0
-_PartitionId INTEGER 0
-_CollationId INTEGER 0
-_Object-state INTEGER 0
-: _Sysautostats
-_PolicyType INTEGER 0
-_IntervalType INTEGER 0
-_IntervalValue INTEGER 0
-_TableId INTEGER 0
-_TenantId INTEGER 0
-_Misc CLOB 0
-: _Sysbigintstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value BIGINT 0
-_PartitionId INTEGER 0
-: _Syscalctable
-_Fld INTEGER 0
-: _Syscharstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value CHARACTER 0
-_PartitionId INTEGER 0
-: _Syschkcolusage
-_Owner CHARACTER 0
-_Tblname CHARACTER 0
-_Cnstrname CHARACTER 0
-_Colname CHARACTER 0
-: _Syschkconstrs
-_Owner CHARACTER 0
-_Tblname CHARACTER 0
-_Cnstrname CHARACTER 0
-_Chkseq INTEGER 0
-_Chkclause CHARACTER 0
-: _Syschkconstr_Name_Map
-_Owner CHARACTER 0
-_Tblname CHARACTER 0
-_Cnstrname CHARACTER 0
-_Seq INTEGER 0
-_Name_loc INTEGER 0
-: _Syscolauth
-_Grantor CHARACTER 0
-_Grantee CHARACTER 0
-_Tblowner CHARACTER 0
-_Tbl CHARACTER 0
-_Col CHARACTER 0
-_Upd CHARACTER 0
-_Ref CHARACTER 0
-_Sel CHARACTER 0
-_Grantor-DomainId INT64 0
-_Grantee-DomainId INT64 0
-: _Syscolstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value INT64 0
-_Val_ts TIMESTAMP 0
-_PartitionId INTEGER 0
-: _Sysdatatypes
-_Dhtypename CHARACTER 0
-_Datatype SHORT 0
-_Typeprecision INTEGER 0
-_Literalprefix CHARACTER 0
-_Literalsuffix CHARACTER 0
-_Createparams CHARACTER 0
-_Nullable SHORT 0
-_Casesensitive SHORT 0
-_Searchable SHORT 0
-_Unsignedattr SHORT 0
-_Odbcmoney SHORT 0
-_Autoincr SHORT 0
-_Localtypename CHARACTER 0
-: _Sysdatestat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value DATE 0
-_PartitionId INTEGER 0
-: _Sysdbauth
-_Grantee CHARACTER 0
-_Dbaacc CHARACTER 0
-_Resacc CHARACTER 0
-_Grantee-DomainId INT64 0
-: _Sysfloatstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value DOUBLE 0
-_PartitionId INTEGER 0
-: _Sysidxstat
-_Tblid INTEGER 0
-_Idxid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value INT64 0
-_Val_ts TIMESTAMP 0
-_PartitionId INTEGER 0
-: _Sysintstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value INTEGER 0
-_PartitionId INTEGER 0
-: _Syskeycolusage
-_Owner CHARACTER 0
-_Tblname CHARACTER 0
-_Cnstrname CHARACTER 0
-_Colname CHARACTER 0
-_Colposition INTEGER 0
-: _Sysncharstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value FIXCHAR 0
-_PartitionId INTEGER 0
-: _Sysnumstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value DECIMAL 0
-_PartitionId INTEGER 0
-: _Sysnvarcharstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value CHARACTER 0
-_PartitionId INTEGER 0
-: _Sysprocbin
-_Rssid INTEGER 0
-_Id INTEGER 0
-_Proctype FIXCHAR 0
-_Seq INTEGER 0
-_Procbin RAW 0
-: _Sysproccolumns
-_Id INTEGER 0
-_Col CHARACTER 0
-_Procid INTEGER 0
-_Rssid INTEGER 0
-_Datatype CHARACTER 0
-_Argtype CHARACTER 0
-_Width INTEGER 0
-_Scale INTEGER 0
-_Nullflag FIXCHAR 0
-_Dfltvalue CHARACTER 0
-: _Sysprocedures
-_Procid INTEGER 0
-_Procname CHARACTER 0
-_Creator CHARACTER 0
-_Owner CHARACTER 0
-_Rssid INTEGER 0
-_Proctype CHARACTER 0
-_Hasresultset FIXCHAR 0
-_Hasreturnval FIXCHAR 0
-_Lang INTEGER 0
-: _Sysproctext
-_Rssid INTEGER 0
-_Id INTEGER 0
-_Proctype FIXCHAR 0
-_Seq INTEGER 0
-_Proctext CHARACTER 0
-: _Sysrealstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value FLOAT 0
-_PartitionId INTEGER 0
-: _Sysrefconstrs
-_Owner CHARACTER 0
-_Tblname CHARACTER 0
-_Cnstrname CHARACTER 0
-_Refowner CHARACTER 0
-_Reftblname CHARACTER 0
-_Refcnstrname CHARACTER 0
-_Deleterule CHARACTER 0
-: _Sysroles
-_Rolename CHARACTER 0
-_Grantor CHARACTER 0
-_Grantee CHARACTER 0
-_Admin LOGICAL 0
-: _Sysschemas
-_Schemaname CHARACTER 0
-_Owner CHARACTER 0
-: _Sysseqauth
-_Grantor CHARACTER 0
-_Grantee CHARACTER 0
-_Seq-Owner CHARACTER 0
-_Seq-Name CHARACTER 0
-_Upd CHARACTER 0
-_Ref CHARACTER 0
-_Sel CHARACTER 0
-_Grantor-DomainId INT64 0
-_Grantee-DomainId INT64 0
-: _Syssmintstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value SHORT 0
-_PartitionId INTEGER 0
-: _Syssynonyms
-_Sname CHARACTER 0
-_Sowner CHARACTER 0
-_Screator CHARACTER 0
-_Stbl CHARACTER 0
-_Stblowner CHARACTER 0
-_Ispublic SHORT 0
-_Sremdb CHARACTER 0
-: _Systabauth
-_Grantor CHARACTER 0
-_Grantee CHARACTER 0
-_Tblowner CHARACTER 0
-_Tbl CHARACTER 0
-_Ins CHARACTER 0
-_Del CHARACTER 0
-_Upd CHARACTER 0
-_Sel CHARACTER 0
-_Exe FIXCHAR 0
-_Ndx CHARACTER 0
-_Alt CHARACTER 0
-_Ref CHARACTER 0
-_Grantor-DomainId INT64 0
-_Grantee-DomainId INT64 0
-: _Systblconstrs
-_Owner CHARACTER 0
-_Tblname CHARACTER 0
-_Cnstrname CHARACTER 0
-_Cnstrtype CHARACTER 0
-_Idxname CHARACTER 0
-: _Systblstat
-_Tblid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value INT64 0
-_Val_ts TIMESTAMP 0
-_PartitionId INTEGER 0
-: _Systimestat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value TIME 0
-_PartitionId INTEGER 0
-: _Systinyintstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value INTEGER 0
-_PartitionId INTEGER 0
-: _Systrigcols
-_Triggername CHARACTER 0
-_Owner CHARACTER 0
-_Colid INTEGER 0
-: _Systrigger
-_Triggerid INTEGER 0
-_Triggername CHARACTER 0
-_Owner CHARACTER 0
-_Tbl CHARACTER 0
-_Tblowner CHARACTER 0
-_Triggertime CHARACTER 0
-_Triggerevent CHARACTER 0
-_Referstoold FIXCHAR 0
-_Referstonew FIXCHAR 0
-_Statementorrow FIXCHAR 0
-_Rssid INTEGER 0
-_Fire_4GL LOGICAL 0
-: _Systsstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value TIMESTAMP 0
-_PartitionId INTEGER 0
-: _Syststzstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value DATETIME-TZ 0
-_PartitionId INTEGER 0
-: _Sysvarcharstat
-_Tblid INTEGER 0
-_Colid INTEGER 0
-_Property INTEGER 0
-_Attribute INTEGER 0
-_Value CHARACTER 0
-_PartitionId INTEGER 0
-: _Sysviews
-_Viewname CHARACTER 0
-_Creator CHARACTER 0
-_Owner CHARACTER 0
-_Seq INTEGER 0
-_Viewtext CHARACTER 0
-: _Sysviews_Name_Map
-_Owner CHARACTER 0
-_Viewname CHARACTER 0
-_Seq INTEGER 0
-_Name_loc INTEGER 0
-: _TableStat
-_TableStat-id INT64 0
-_TableStat-read INT64 0
-_TableStat-update INT64 0
-_TableStat-create INT64 0
-_TableStat-delete INT64 0
-_TableStat-OsRead INT64 0
-_TableStat-PartitionId INTEGER 0
-: _Tenant
-_TenantId INTEGER 0
-_Tenant-Name CHARACTER 0
-_Tenant-ExtId CHARACTER 0
-_Tenant-Description CHARACTER 0
-_Tenant-Type INTEGER 0
-_Tenant-Attributes LOGICAL 64
-_Tenant-Sequence-Block RECID 0
-_Tenant-DataArea-default INTEGER 0
-_Tenant-IndexArea-default INTEGER 0
-_Tenant-LobArea-default INTEGER 0
-_Tenant-Allocation-default CHARACTER 0
-: _Trans
-_Trans-Id INT64 0
-_Trans-State CHARACTER 0
-_Trans-Flags CHARACTER 0
-_Trans-Usrnum INTEGER 0
-_Trans-Num INTEGER 0
-_Trans-counter INTEGER 0
-_Trans-txtime CHARACTER 0
-_Trans-Coord CHARACTER 0
-_Trans-CoordTx INTEGER 0
-_Trans-Duration INTEGER 0
-_Trans-Misc INTEGER 0
-_Trans-TenantId INTEGER 0
-: _TxeLock
-_Txe-Id INT64 0
-_Txe-Type CHARACTER 9
-_Txe-Locks INT64 9
-_Txe-Lockss INT64 9
-_Txe-Waits INT64 9
-_Txe-Waitss INT64 9
-_Txe-Time INTEGER 9
-_Txe-Wait-Time INTEGER 9
-: _User
-_Userid CHARACTER 0
-_Password CHARACTER 0
-_User-Name CHARACTER 0
-_U-misc1 INTEGER 8
-_U-misc2 CHARACTER 8
-_User-Misc CHARACTER 0
-_User_number INTEGER 0
-_Group_number INTEGER 0
-_Given_name CHARACTER 0
-_Middle_initial CHARACTER 0
-_Surname CHARACTER 0
-_Telephone CHARACTER 0
-_Email CHARACTER 0
-_Description CHARACTER 0
-_Disabled LOGICAL 0
-_Create_date DATETIME-TZ 0
-_Account_expires DATETIME-TZ 0
-_Pwd_expires DATETIME-TZ 0
-_Pwd_duration INTEGER 0
-_Last_login DATETIME-TZ 0
-_Logins INTEGER 0
-_Max_logins INTEGER 0
-_Max_tries INTEGER 0
-_Login_failures INTEGER 0
-_Spare1 INTEGER 0
-_Spare2 INTEGER 0
-_Spare3 CHARACTER 0
-_Spare4 CHARACTER 0
-_TenantId INTEGER 0
-_Domain-Name CHARACTER 0
-_sql-only-user LOGICAL 0
-: _UserIndexStat
-_UserIndexStat-Id INT64 0
-_UserIndexStat-Conn INTEGER 0
-_UserIndexStat-Num INTEGER 0
-_UserIndexStat-read INT64 0
-_UserIndexStat-create INT64 0
-_UserIndexStat-delete INT64 0
-_UserIndexStat-split INT64 0
-_UserIndexStat-blockdelete INT64 0
-_UserIndexStat-PartitionId INTEGER 0
-_UserIndexStat-TenantId INTEGER 0
-: _UserIO
-_UserIO-Id INT64 0
-_UserIO-Usr INTEGER 0
-_UserIO-Name CHARACTER 0
-_UserIO-DbAccess INT64 0
-_UserIO-DbRead INT64 0
-_UserIO-DbWrite INT64 0
-_UserIO-BiRead INT64 0
-_UserIO-BiWrite INT64 0
-_UserIO-AiRead INT64 0
-_UserIO-AiWrite INT64 0
-_UserIO-Misc INTEGER 0
-_UserIO-TenantId INTEGER 0
-: _UserLock
-_UserLock-Id INT64 0
-_UserLock-Usr INTEGER 0
-_UserLock-Name CHARACTER 0
-_UserLock-Recid INT64 512
-_UserLock-Type CHARACTER 512
-_UserLock-Chain INTEGER 512
-_UserLock-Flags CHARACTER 512
-_UserLock-Misc INTEGER 0
-_UserLock-Table INTEGER 512
-_UserLock-TenantId INTEGER 0
-_UserLock-PartitionId INTEGER 512
-: _UserStatus
-_UserStatus-UserId INT64 0
-_UserStatus-ObjectId INTEGER 0
-_UserStatus-ObjectType INTEGER 0
-_UserStatus-State INTEGER 0
-_UserStatus-Counter INTEGER 0
-_UserStatus-Target INTEGER 0
-_UserStatus-Operation CHARACTER 0
-_UserStatus-TenantId INTEGER 0
-: _UserTableStat
-_UserTableStat-Id INT64 0
-_UserTableStat-Conn INTEGER 0
-_UserTableStat-Num INTEGER 0
-_UserTableStat-read INT64 0
-_UserTableStat-update INT64 0
-_UserTableStat-create INT64 0
-_UserTableStat-delete INT64 0
-_UserTableStat-PartitionId INTEGER 0
-_UserTableStat-TenantId INTEGER 0
-: _View
-_Auth-Id CHARACTER 0
-_View-Name CHARACTER 0
-_Base-Tables CHARACTER 0
-_Where-Cls CHARACTER 0
-_Group-By CHARACTER 0
-_View-Def CHARACTER 0
-_Can-Read CHARACTER 0
-_Can-Write CHARACTER 0
-_Can-Create CHARACTER 0
-_Can-Delete CHARACTER 0
-_Updatable LOGICAL 0
-_Desc CHARACTER 0
-: _View-Col
-_Auth-Id CHARACTER 0
-_View-Name CHARACTER 0
-_Col-Name CHARACTER 0
-_Base-Col CHARACTER 0
-_Can-Write CHARACTER 0
-_Can-Create CHARACTER 0
-_Vcol-Order INTEGER 0
-: _View-Ref
-_Auth-Id CHARACTER 0
-_View-Name CHARACTER 0
-_Ref-Table CHARACTER 0
-_Base-Col CHARACTER 0
-: _Word-rule
-_Wr-Number INTEGER 0
-_Wr-Name CHARACTER 0
-_Wr-Cp INTEGER 0
-_Wr-Version INTEGER 0
-_Wr-Type INTEGER 0
-_Wr-Segment INTEGER 0
-_Wr-Attr RAW 0
+TSYSBIGINTSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:bigint:0
+TSYSCALCTABLE
+FFLD:integer:0
+TSYSCHARSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:character:0
+TSYSCHKCONSTR_NAME_MAP
+FCNSTRNAME:character:0
+FNAME_LOC:integer:0
+FOWNER:character:0
+FSEQ:integer:0
+FTBLNAME:character:0
+TSYSCOLAUTH
+FCOL:character:0
+FGRANTEE:character:0
+FGRANTEE_DOMAINID:int64:0
+FGRANTOR:character:0
+FGRANTOR_DOMAINID:int64:0
+FREF:character:0
+FSEL:character:0
+FTBL:character:0
+FTBLOWNER:character:0
+FUPD:character:0
+TSYSCOLSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:int64:0
+FVAL_TS:timestamp:0
+TSYSCOLUMNS
+FCHARSET:character:0
+FCOL:character:0
+FCOLLATION:character:0
+FCOLTYPE:character:0
+FDFLT_VALUE:character:0
+FID:integer:0
+FNULLFLAG:character:0
+FOWNER:character:0
+FSCALE:integer:0
+FTBL:character:0
+FWIDTH:integer:0
+TSYSCOLUMNS_FULL
+FARRAY_EXTENT:integer:0
+FCHARSET:character:0
+FCOL:character:0
+FCOLLATION:character:0
+FCOLTYPE:character:0
+FCOL_LABEL:character:0
+FCOL_LABEL_SA:character:0
+FCOL_SUBTYPE:integer:0
+FDESCRIPTION:character:0
+FDFLT_VALUE:character:0
+FDFLT_VALUE_SA:character:0
+FDISPLAY_ORDER:integer:0
+FFIELD_RPOS:integer:0
+FFORMAT:character:0
+FFORMAT_SA:character:0
+FHELP:character:0
+FHELP_SA:character:0
+FID:integer:0
+FLABEL:character:0
+FLABEL_SA:character:0
+FNULLFLAG:fixchar:0
+FOWNER:character:0
+FSCALE:integer:0
+FTBL:character:0
+FUSER_MISC:character:0
+FVALEXP:character:0
+FVALMSG:character:0
+FVALMSG_SA:character:0
+FVIEW_AS:character:0
+FWIDTH:integer:0
+TSYSDATATYPES
+FAUTOINCR:short:0
+FCASESENSITIVE:short:0
+FCREATEPARAMS:character:0
+FDATATYPE:short:0
+FDHTYPENAME:character:0
+FLITERALPREFIX:character:0
+FLITERALSUFFIX:character:0
+FLOCALTYPENAME:character:0
+FNULLABLE:short:0
+FODBCMONEY:short:0
+FSEARCHABLE:short:0
+FTYPEPRECISION:integer:0
+FUNSIGNEDATTR:short:0
+TSYSDATESTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:date:0
+TSYSDBAUTH
+FDBA_ACC:character:0
+FGRANTEE:character:0
+FGRANTEE_DOMAINID:int64:0
+FRES_ACC:character:0
+TSYSFLOATSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:double:0
+TSYSIDXSTAT
+FATTRIBUTE:integer:0
+FIDXID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:int64:0
+FVAL_TS:timestamp:0
+TSYSINDEXES
+FABBREVIATE:logical:0
+FACTIVE:logical:0
+FCOLNAME:character:0
+Fdesc:character:0
+FID:integer:0
+FIDXCOMPRESS:fixchar:0
+FIDXMETHOD:character:0
+FIDXNAME:character:0
+FIDXORDER:fixchar:0
+FIDXOWNER:character:0
+FIDXSEGID:integer:0
+FIDXSEQ:integer:0
+FIDXTYPE:fixchar:0
+FINDEX_USER_MISC:character:0
+FIXCOL_USER_MISC:character:0
+FRSSID:integer:0
+FTBL:character:0
+FTBLOWNER:character:0
+FUNSORTED:logical:0
+FWORDIDX:integer:0
+TSYSINTSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:integer:0
+TSYSNCHARSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:fixchar:0
+TSYSNUMSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:decimal:0
+TSYSNVARCHARSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:character:0
+TSYSPROCBIN
+FID:integer:0
+FPROC_BIN:raw:0
+FPROC_TYPE:fixchar:0
+FRSSID:integer:0
+FSEQ:integer:0
+TSYSPROCCOLUMNS
+FARGTYPE:character:0
+FCOL:character:0
+FDATATYPE:character:0
+FDFLT_VALUE:character:0
+FID:integer:0
+FNULLFLAG:fixchar:0
+FPROC_ID:integer:0
+FRSSID:integer:0
+FSCALE:integer:0
+FWIDTH:integer:0
+TSYSPROCEDURES
+FCREATOR:character:0
+FHAS_RESULTSET:fixchar:0
+FHAS_RETURN_VAL:fixchar:0
+FLANG:integer:0
+FOWNER:character:0
+FPROC_ID:integer:0
+FPROC_NAME:character:0
+FPROC_TYPE:character:0
+FRSSID:integer:0
+TSYSPROCTEXT
+FID:integer:0
+FPROC_TEXT:character:0
+FPROC_TYPE:fixchar:0
+FRSSID:integer:0
+FSEQ:integer:0
+TSYSREALSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:float:0
+TSYSROLES
+FADMIN:logical:0
+FGRANTEE:character:0
+FGRANTOR:character:0
+FROLENAME:character:0
+TSYSSCHEMAS
+FOWNER:character:0
+FSCHEMANAME:character:0
+TSYSSEQAUTH
+FGRANTEE:character:0
+FGRANTEE_DOMAINID:int64:0
+FGRANTOR:character:0
+FGRANTOR_DOMAINID:int64:0
+FREF:character:0
+FSEL:character:0
+FSEQ-NAME:character:0
+FSEQ-OWNER:character:0
+FUPD:character:0
+TSYSSEQUENCES
+FCYCLE-OK:logical:0
+FDB-RECID:recid:0
+FSEQ-ATTRIBUTES:logical:64
+FSEQ-INCR:int64:0
+FSEQ-INIT:int64:0
+FSEQ-MAX:int64:0
+FSEQ-MIN:int64:0
+FSEQ-MISC:character:8
+FSEQ-NAME:character:0
+FSEQ-NUM:integer:0
+FSEQ-OWNER:character:0
+FUSER-MISC:character:0
+TSYSSMINTSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:short:0
+TSYSSQL_PROPERTIES
+FATTRIBUTE:integer:0
+FPROPERTY:integer:0
+FVALUE_CH:character:0
+FVALUE_N:integer:0
+TSYSSYNONYMS
+FISPUBLIC:short:0
+FSCREATOR:character:0
+FSNAME:character:0
+FSOWNER:character:0
+FSREMDB:character:0
+FSTBL:character:0
+FSTBLOWNER:character:0
+TSYSTABAUTH
+FALT:character:0
+FDEL:character:0
+FEXE:fixchar:0
+FGRANTEE:character:0
+FGRANTEE_DOMAINID:int64:0
+FGRANTOR:character:0
+FGRANTOR_DOMAINID:int64:0
+FINS:character:0
+FNDX:character:0
+FREF:character:0
+FSEL:character:0
+FTBL:character:0
+FTBLOWNER:character:0
+FUPD:character:0
+TSYSTABLES
+FCREATOR:character:0
+FHAS_CCNSTRS:character:0
+FHAS_FCNSTRS:character:0
+FHAS_PCNSTRS:character:0
+FHAS_UCNSTRS:character:0
+FID:integer:0
+FOWNER:character:0
+FRSSID:integer:0
+FSEGID:integer:0
+FTBL:character:0
+FTBLTYPE:character:0
+FTBL_STATUS:character:0
+TSYSTABLES_FULL
+FCAN_DUMP:character:0
+FCAN_LOAD:character:0
+FCREATOR:character:0
+FDESCRIPTION:character:0
+FDUMP_NAME:character:0
+FFILE_LABEL:character:0
+FFILE_LABEL_SA:character:0
+FFROZEN:logical:0
+FHAS_CCNSTRS:character:0
+FHAS_FCNSTRS:character:0
+FHAS_PCNSTRS:character:0
+FHAS_UCNSTRS:character:0
+FHIDDEN:logical:0
+FID:integer:0
+FLAST_CHANGE:integer:0
+FOWNER:character:0
+FPRIME_INDEX:integer:0
+FRSSID:integer:0
+FSEGID:integer:0
+FTBL:character:0
+FTBLTYPE:character:0
+FTBL_STATUS:character:0
+FUSER_MISC:character:0
+FVALEXP:character:0
+FVALMSG:character:0
+FVALMSG_SA:character:0
+TSYSTBLSTAT
+FATTRIBUTE:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:int64:0
+FVAL_TS:timestamp:0
+TSYSTIMESTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:time:0
+TSYSTINYINTSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:integer:0
+TSYSTRIGCOLS
+FCOLID:integer:0
+FOWNER:character:0
+FTRIGGERNAME:character:0
+TSYSTRIGGER
+FFIRE_4GL:logical:0
+FOWNER:character:0
+FREFERS_TO_NEW:fixchar:0
+FREFERS_TO_OLD:fixchar:0
+FRSSID:integer:0
+FSTATEMENT_OR_ROW:fixchar:0
+FTBL:character:0
+FTBLOWNER:character:0
+FTRIGGERID:integer:0
+FTRIGGERNAME:character:0
+FTRIGGER_EVENT:character:0
+FTRIGGER_TIME:character:0
+TSYSTSSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:timestamp:0
+TSYSTSTZSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:datetime-tz:0
+TSYSVARCHARSTAT
+FATTRIBUTE:integer:0
+FCOLID:integer:0
+FPARTITIONID:integer:0
+FPROPERTY:integer:0
+FTBLID:integer:0
+FVALUE:character:0
+TSYSVIEWS
+FCREATOR:character:0
+FOWNER:character:0
+FSEQ:integer:0
+FVIEWNAME:character:0
+FVIEWTEXT:character:0
+TSYSVIEWS_NAME_MAP
+FNAME_LOC:integer:0
+FOWNER:character:0
+FSEQ:integer:0
+FVIEWNAME:character:0
+TSYS_CHKCOL_USAGE
+FCNSTRNAME:character:0
+FCOLNAME:character:0
+FOWNER:character:0
+FTBLNAME:character:0
+TSYS_CHK_CONSTRS
+FCHKCLAUSE:character:0
+FCHKSEQ:integer:0
+FCNSTRNAME:character:0
+FOWNER:character:0
+FTBLNAME:character:0
+TSYS_KEYCOL_USAGE
+FCNSTRNAME:character:0
+FCOLNAME:character:0
+FCOLPOSITION:integer:0
+FOWNER:character:0
+FTBLNAME:character:0
+TSYS_REF_CONSTRS
+FCNSTRNAME:character:0
+FDELETERULE:character:0
+FOWNER:character:0
+FREFCNSTRNAME:character:0
+FREFOWNER:character:0
+FREFTBLNAME:character:0
+FTBLNAME:character:0
+TSYS_TBL_CONSTRS
+FCNSTRNAME:character:0
+FCNSTRTYPE:character:0
+FIDXNAME:character:0
+FOWNER:character:0
+FTBLNAME:character:0
+T_ActAILog
+F_AiLog-AIWWrites:int64:0
+F_AiLog-BBuffWaits:int64:0
+F_AiLog-BytesWritn:int64:0
+F_AiLog-ForceWaits:int64:0
+F_AiLog-Id:int64:0
+F_AiLog-Misc:integer:0
+F_AiLog-NoBufAvail:int64:0
+F_AiLog-PartialWrt:int64:0
+F_AiLog-RecWriten:int64:0
+F_AiLog-TotWrites:int64:0
+F_AiLog-Trans:int64:0
+F_AiLog-UpTime:integer:0
+I_AiLog-Id:PU:A_AiLog-Id
+T_ActBILog
+F_BiLog-BBuffWaits:int64:0
+F_BiLog-BIWWrites:int64:0
+F_BiLog-BOBufHit:int64:0
+F_BiLog-BytesRead:int64:0
+F_BiLog-BytesWrtn:int64:0
+F_BiLog-ClstrClose:int64:0
+F_BiLog-EBuffWaits:int64:0
+F_BiLog-ForceWaits:int64:0
+F_BiLog-ForceWrts:int64:0
+F_BiLog-Id:int64:0
+F_BiLog-InputBufHit:int64:0
+F_BiLog-Misc:integer:0
+F_BiLog-ModBufHit:int64:0
+F_BiLog-OutputBufHit:int64:0
+F_BiLog-PartialWrts:int64:0
+F_BiLog-RecRead:int64:0
+F_BiLog-RecWriten:int64:0
+F_BiLog-TotalWrts:int64:0
+F_BiLog-TotReads:int64:0
+F_BiLog-Trans:int64:0
+F_BiLog-UpTime:integer:0
+I_BiLog-Id:PU:A_BiLog-Id
+T_ActBuffer
+F_Buffer-Active:int64:0
+F_Buffer-APWEnq:int64:0
+F_Buffer-Area:int64:0
+F_Buffer-BlockMap:int64:0
+F_Buffer-Chkpts:int64:0
+F_Buffer-ClusterMap:int64:0
+F_Buffer-Control:int64:0
+F_Buffer-Deferred:int64:0
+F_Buffer-Flushed:int64:0
+F_Buffer-Free:int64:0
+F_Buffer-Id:int64:0
+F_Buffer-Index:int64:0
+F_Buffer-LogicRds:int64:0
+F_Buffer-LogicWrts:int64:0
+F_Buffer-LRUEnabled:logical:0
+F_Buffer-LRUSkips:int64:0
+F_Buffer-LRUWrts:int64:0
+F_Buffer-Marked:int64:0
+F_Buffer-Master:int64:0
+F_Buffer-Misc:integer:0
+F_Buffer-ObjClist:int64:0
+F_Buffer-Object:int64:0
+F_Buffer-ObjList:int64:0
+F_Buffer-OSRds:int64:0
+F_Buffer-OSWrts:int64:0
+F_Buffer-RM:int64:0
+F_Buffer-Seq:int64:0
+F_Buffer-Trans:int64:0
+F_Buffer-UpTime:integer:0
+I_Buffer-Id:PU:A_Buffer-Id
+T_ActIndex
+F_Index-Create:int64:0
+F_Index-Delete:int64:0
+F_Index-Find:int64:0
+F_Index-Free:int64:0
+F_Index-Id:int64:0
+F_Index-Misc:integer:0
+F_Index-PartitionId:integer:0
+F_Index-Remove:int64:0
+F_Index-Splits:int64:0
+F_Index-Trans:int64:0
+F_Index-UpTime:integer:0
+I_Index-Id:PU:A_Index-Id
+T_ActIOFile
+F_IOFile-BufReads:int64:0
+F_IOFile-BufWrites:int64:0
+F_IOFile-Extends:int64:0
+F_IOFile-FileName:character:0
+F_IOFile-Id:int64:0
+F_IOFile-Misc:integer:0
+F_IOFile-Reads:int64:0
+F_IOFile-Trans:int64:0
+F_IOFile-UbufReads:int64:0
+F_IOFile-UbufWrites:int64:0
+F_IOFile-UpTime:integer:0
+F_IOFile-Writes:int64:0
+I_IOFile-Id:PU:A_IOFile-Id
+T_ActIOType
+F_IOType-AiRds:int64:0
+F_IOType-AiWrts:int64:0
+F_IOType-BiRds:int64:0
+F_IOType-BiWrts:int64:0
+F_IOType-DataReads:int64:0
+F_IOType-DataWrts:int64:0
+F_IOType-Id:int64:0
+F_IOType-IdxRds:int64:0
+F_IOType-IdxWrts:int64:0
+F_IOType-Misc:integer:0
+F_IOType-Trans:int64:0
+F_IOType-UpTime:integer:0
+I_IOType-Id:PU:A_IOType-Id
+T_ActLock
+F_Lock-CanclReq:integer:0
+F_Lock-Downgrade:integer:0
+F_Lock-ExclFind:int64:0
+F_Lock-ExclLock:integer:0
+F_Lock-ExclReq:integer:0
+F_Lock-ExclWait:integer:0
+F_Lock-Id:int64:0
+F_Lock-Misc:integer:0
+F_Lock-RecGetLock:integer:0
+F_Lock-RecGetReq:integer:0
+F_Lock-RecGetWait:integer:0
+F_Lock-RedReq:integer:0
+F_Lock-ShrFind:int64:0
+F_Lock-ShrLock:integer:0
+F_Lock-ShrReq:integer:0
+F_Lock-ShrWait:integer:0
+F_Lock-Trans:int64:0
+F_Lock-UpgLock:integer:0
+F_Lock-UpgReq:integer:0
+F_Lock-UpgWait:integer:0
+F_Lock-UpTime:integer:0
+I_Lock-Id:PU:A_Lock-Id
+T_ActOther
+F_Other-Commit:int64:0
+F_Other-FlushMblk:int64:0
+F_Other-Id:int64:0
+F_Other-Misc:integer:0
+F_Other-NBWait:int64:0
+F_Other-SemLatWait:int64:0
+F_Other-Trans:int64:0
+F_Other-Undo:int64:0
+F_Other-UpTime:integer:0
+F_Other-Wait:int64:0
+I_Other-Id:PU:A_Other-Id
+T_ActPWs
+F_PW-ApwQWrites:int64:0
+F_PW-BuffsScaned:int64:0
+F_PW-BufsCkp:int64:0
+F_PW-Checkpoints:int64:0
+F_PW-CkpQWrites:int64:0
+F_PW-DBWrites:int64:0
+F_PW-Flushed:int64:0
+F_PW-Id:int64:0
+F_PW-Marked:int64:0
+F_PW-Misc:integer:0
+F_PW-ScanCycles:int64:0
+F_PW-ScanWrites:int64:0
+F_PW-TotDBWrites:int64:0
+F_PW-Trans:int64:0
+F_PW-UpTime:integer:0
+I_PW-Id:PU:A_PW-Id
+T_ActRecord
+F_Record-BytesCreat:int64:0
+F_Record-BytesDel:int64:0
+F_Record-BytesRead:int64:0
+F_Record-BytesUpd:int64:0
+F_Record-FragCreat:int64:0
+F_Record-FragDel:int64:0
+F_Record-FragRead:int64:0
+F_Record-FragUpd:int64:0
+F_Record-Id:int64:0
+F_Record-Misc:integer:0
+F_Record-RecCreat:int64:0
+F_Record-RecDel:int64:0
+F_Record-RecRead:int64:0
+F_Record-RecUpd:int64:0
+F_Record-Trans:int64:0
+F_Record-UpTime:integer:0
+I_Record-Id:PU:A_Record-Id
+T_ActServer
+F_Server-ByteRec:int64:0
+F_Server-ByteSent:int64:0
+F_Server-Id:int64:0
+F_Server-Misc:integer:0
+F_Server-MsgRec:int64:0
+F_Server-MsgSent:int64:0
+F_Server-QryRec:int64:0
+F_Server-RecRec:int64:0
+F_Server-RecSent:int64:0
+F_Server-TimeSlice:int64:0
+F_Server-Trans:int64:0
+F_Server-UpTime:integer:0
+I_Server-Id:PU:A_Server-Id
+T_ActSpace
+F_Space-AllocNewRm:int64:0
+F_Space-BackAdd:int64:0
+F_Space-BytesAlloc:int64:0
+F_Space-DbExd:int64:0
+F_Space-Examined:int64:0
+F_Space-FromFree:int64:0
+F_Space-FromRm:int64:0
+F_Space-Front2Back:int64:0
+F_Space-FrontAdd:int64:0
+F_Space-Id:int64:0
+F_Space-Locked:int64:0
+F_Space-Misc:integer:0
+F_Space-Removed:int64:0
+F_Space-RetFree:int64:0
+F_Space-TakeFree:int64:0
+F_Space-Trans:int64:0
+F_Space-UpTime:integer:0
+I_Space-Id:PU:A_Space-Id
+T_ActSummary
+F_Summary-AiWrites:int64:0
+F_Summary-BiReads:int64:0
+F_Summary-BiWrites:int64:0
+F_Summary-Chkpts:int64:0
+F_Summary-Commits:int64:0
+F_Summary-DbAccesses:int64:0
+F_Summary-DbReads:int64:0
+F_Summary-DbWrites:int64:0
+F_Summary-Flushed:int64:0
+F_Summary-Id:int64:0
+F_Summary-Misc:integer:0
+F_Summary-RecCreat:int64:0
+F_Summary-RecDel:int64:0
+F_Summary-RecLock:int64:0
+F_Summary-RecReads:int64:0
+F_Summary-RecUpd:int64:0
+F_Summary-RecWait:int64:0
+F_Summary-TransComm:int64:0
+F_Summary-Undos:int64:0
+F_Summary-UpTime:integer:0
+I_Summary-Id:PU:A_Summary-Id
+T_Area
+F_Area-attrib:integer:0
+F_Area-block:recid:0
+F_Area-blocksize:integer:0
+F_Area-clustersize:integer:0
+F_Area-extents:integer:0
+F_Area-misc:integer:8
+F_Area-name:character:0
+F_Area-number:integer:0
+F_Area-recbits:integer:0
+F_Area-type:integer:0
+F_Area-version:integer:0
+I_Area-Number:PU:A_Area-number
+T_AreaExtent
+F_Area-number:integer:0
+F_Area-recid:recid:0
+F_Extent-attrib:integer:0
+F_Extent-misc:integer:8
+F_Extent-number:integer:0
+F_Extent-path:character:0
+F_Extent-size:integer:0
+F_Extent-system:integer:0
+F_Extent-type:integer:0
+F_Extent-version:integer:0
+I_AreaExtent-Area:PU:A_Area-number:A_Extent-number
+T_AreaStatus
+F_AreaStatus-AI-Seq:integer:0
+F_AreaStatus-AIActivated:character:0
+F_AreaStatus-Areaname:character:0
+F_AreaStatus-Areanum:integer:0
+F_AreaStatus-Extents:integer:0
+F_AreaStatus-Freenum:int64:0
+F_AreaStatus-Hiwater:int64:0
+F_AreaStatus-Id:int64:0
+F_AreaStatus-Lastextent:character:0
+F_AreaStatus-LastOp:character:0
+F_AreaStatus-Rmnum:int64:0
+F_AreaStatus-State:character:0
+F_AreaStatus-Totblocks:int64:0
+F_AreaStatus-Type:character:0
+I_AreaStatus-Id:PU:A_AreaStatus-Id
+T_AreaThreshold
+F_AreaThreshold:integer:0
+F_AreaThreshold-ID:int64:0
+F_AreaThresholdArea:integer:0
+I_AreaThreshold:PU:A_AreaThreshold-ID
+T_Block
+F_Block-Area:integer:0
+F_Block-BkupCtr:integer:0
+F_Block-Block:character:0
+F_Block-ChainType:character:0
+F_Block-Dbkey:int64:0
+F_Block-Id:int64:0
+F_Block-Misc:integer:0
+F_Block-NextDbkey:int64:0
+F_Block-Type:character:0
+F_Block-Update:integer:0
+I_Block-Id:PU:A_Block-Id
+T_BuffStatus
+F_BfStatus-APWQ:integer:0
+F_BfStatus-CKPMarked:int64:0
+F_BfStatus-CKPQ:integer:0
+F_BfStatus-HashSize:integer:0
+F_BfStatus-Id:int64:0
+F_BfStatus-LastCkpNum:integer:0
+F_BfStatus-LRU:integer:0
+F_BfStatus-LRU-Skips:integer:0
+F_BfStatus-LRU2:integer:0
+F_BfStatus-LRU2-Skips:integer:0
+F_BfStatus-Misc:integer:0
+F_BfStatus-ModBuffs:int64:0
+F_BfStatus-TotBufs:integer:0
+F_BfStatus-UsedBuffs:integer:0
+I_BfStatus-Id:PU:A_BfStatus-Id
+T_Cache
+F_Cache-Entries:integer:0
+F_Cache-Hash:integer:0
+F_Cache-Hits:int64:0
+F_Cache-Id:integer:0
+F_Cache-Misses:int64:0
+F_Cache-Name:character:0
+F_Cache-Size:integer:0
+I_Cache-Id:PU:A_Cache-Id
+T_Checkpoint
+F_Checkpoint-ApwQ:int64:0
+F_Checkpoint-B-Write-Time:decimal:0
+F_Checkpoint-Bi-Write-Time:decimal:0
+F_Checkpoint-Bi-Writes:integer:0
+F_Checkpoint-Buffers:int64:0
+F_Checkpoint-Cluster:int64:0
+F_Checkpoint-CptQ:int64:0
+F_Checkpoint-Dirty:int64:0
+F_Checkpoint-Duration:decimal:0
+F_Checkpoint-Flush:int64:0
+F_Checkpoint-Id:int64:0
+F_Checkpoint-Len:character:0
+F_Checkpoint-Misc:integer:0
+F_Checkpoint-Number:int64:0
+F_Checkpoint-Scan:int64:0
+F_Checkpoint-SyncTime:decimal:0
+F_Checkpoint-Time:character:0
+I_Checkpoint-Id:PU:A_Checkpoint-Id
+T_Client-Session
+F_Audit-data-security-level:integer:0
+F_Authentication-date-time:datetime-tz:0
+F_Authentication-domain-name:character:0
+F_Authentication-domain-type:character:0
+F_Client-name:character:0
+F_Client-session-uuid:character:0
+F_Data-seal:character:0
+F_Db-guid:character:0
+F_Server-uuid:character:0
+F_Session-custom-detail:character:0
+F_User-id:character:0
+I_Auth-time::A_Authentication-date-time
+I_Db-guid::A_Db-guid
+I_Session-uuid:PU:A_Client-session-uuid
+I_Userid::A_User-id
+T_Code-Feature
+F_CodeFeature-ID:int64:0
+F_CodeFeature-Res01:character:10
+F_CodeFeature-Res02:integer:10
+F_CodeFeature_Name:character:0
+F_CodeFeature_Required:character:0
+F_CodeFeature_Supported:character:0
+I_Code-Feature:PU:A_CodeFeature-ID
+T_Codepage
+F_Cp-Attr:raw:0
+F_Cp-Dbrecid:recid:0
+F_Cp-Name:character:0
+F_Cp-Sequence:integer:0
+I_Codepage-Name:PU:A_Cp-Dbrecid:A_Cp-Name
+I_Codepage-Seq:U:A_Cp-Sequence
+T_Collation
+F_Coll-CIData:blob:0
+F_Coll-Cp:integer:0
+F_Coll-CSData:blob:0
+F_Coll-CXData:blob:0
+F_Coll-Data:raw:0
+F_Coll-Name:character:0
+F_Coll-Segment:integer:0
+F_Coll-Sequence:integer:0
+F_Coll-Tran-Subtype:integer:0
+F_Coll-Tran-Version:integer:0
+I_Collation-Name:PU:A_Coll-Cp:A_Coll-Name:A_Coll-Segment
+I_Collation-Seq:U:A_Coll-Sequence
+T_Connect
+F_Connect-2phase:integer:0
+F_Connect-Batch:character:0
+F_Connect-CacheInfo:character:32
+F_Connect-CacheInfoType:character:0
+F_Connect-CacheLastUpdate:character:0
+F_Connect-CacheLineNumber:integer:32
+F_Connect-CachingType:integer:0
+F_Connect-ClientType:character:0
+F_Connect-Device:character:0
+F_Connect-Disconnect:integer:0
+F_Connect-DomainId:int64:0
+F_Connect-Id:int64:0
+F_Connect-Interrupt:integer:0
+F_Connect-IPAddress:character:0
+F_Connect-LastNotifyCheck:character:0
+F_Connect-Misc:integer:0
+F_Connect-Name:character:0
+F_Connect-Notifications:character:0
+F_Connect-NotifyTime:integer:0
+F_Connect-NumSeqBuffers:integer:0
+F_Connect-NumTrans:int64:0
+F_Connect-PartitionId:integer:0
+F_Connect-Pid:integer:0
+F_Connect-Resync:integer:0
+F_Connect-semid:integer:0
+F_Connect-SemNum:integer:0
+F_Connect-Server:integer:0
+F_Connect-TenantId:integer:0
+F_Connect-Time:character:0
+F_Connect-Timestamp:integer:0
+F_Connect-TransId:integer:0
+F_Connect-Type:character:0
+F_Connect-UsedSeqBuffers:integer:0
+F_Connect-UserMisc:character:0
+F_Connect-Usr:integer:0
+F_Connect-Wait:character:0
+F_Connect-Wait1:int64:0
+F_Connect-Wait2:integer:0
+I_Connect-Id:PU:A_Connect-Id
+T_Constraint
+F_C-Res1:integer:8
+F_C-Res2:character:8
+F_Con-Active:logical:0
+F_Con-Desc:character:0
+F_Con-Expr:character:0
+F_Con-Misc1:integer:8
+F_Con-Misc2:character:8
+F_Con-Name:character:0
+F_Con-num:int64:0
+F_Con-Status:character:0
+F_Con-Type:character:0
+F_Db-recid:recid:0
+F_Field-Recid:recid:0
+F_File-recid:recid:0
+F_For-Name:character:0
+F_Index-parent-recid:recid:0
+F_Index-recid:recid:0
+I_Con-dependency::A_Db-recid:A_Con-Type:A_Index-recid:A_Index-parent-recid
+I_Con-Migrate:U:A_Db-recid:A_Con-Active:A_Con-Status:A_Con-num
+I_Con-Migration-Seq:U:A_Db-recid:A_Con-Active:A_Con-Status:A_Con-Type:A_Con-num
+I_Con-Num:PU:A_Db-recid:A_Con-num
+I_Con-Present:U:A_Db-recid:A_Con-Type:A_Con-Name:A_Con-num
+T_Constraint-Keys
+F_Ascending:logical:0
+F_C-Res1:integer:8
+F_C-Res2:character:8
+F_Con-Key-Con-Recid:recid:0
+F_Con-Key-Fld-Order:integer:0
+F_Con-Key-Parent-Ind:logical:0
+F_Con-Misc1:integer:8
+F_Con-Misc2:character:8
+F_Con-recid:recid:0
+F_Field-Recid:recid:0
+I_Con-Key-Ord:PU:A_Con-recid:A_Con-Key-Parent-Ind:A_Con-Key-Fld-Order
+T_Database-Feature
+F_DBFeature-ID:int64:0
+F_DBFeature-Res01:character:10
+F_DBFeature-Res02:integer:10
+F_DBFeature_Active:character:0
+F_DBFeature_Enabled:character:0
+F_DBFeature_Name:character:0
+I_Database-Feature:PU:A_DBFeature-ID
+T_Db
+F_Db-addr:character:0
+F_Db-coll-name:character:0
+F_Db-collate:raw:10
+F_Db-comm:character:0
+F_Db-guid:character:0
+F_Db-local:logical:0
+F_Db-misc1:integer:8
+F_Db-misc2:character:8
+F_Db-name:character:0
+F_Db-res1:integer:8
+F_Db-res2:character:8
+F_Db-revision:integer:0
+F_Db-slave:logical:0
+F_Db-type:character:0
+F_Db-xl-name:character:0
+F_Db-xlate:raw:2
+F_User-Misc:character:0
+I_Database:PU:A_Db-name
+T_Db-Detail
+F_Db-custom-detail:character:0
+F_Db-description:character:0
+F_Db-guid:character:0
+F_Db-mac-key:raw:0
+I_Db-guid:PU:A_Db-guid
+T_Db-Option
+F_Db-option-code:character:0
+F_Db-option-description:character:0
+F_Db-option-type:integer:0
+F_Db-option-value:character:0
+F_Db-recid:recid:0
+I_Option-code:PU:A_Db-recid:A_Db-option-type:A_Db-option-code
+T_DbParams
+F_DbParams-Desc:character:0
+F_DbParams-dtype:integer:0
+F_DbParams-Id:int64:0
+F_DbParams-Is-Default:logical:0
+F_DbParams-Is-Modifiable:logical:0
+F_DbParams-Misc:character:0
+F_DbParams-Msg-Num:int64:0
+F_DbParams-Name:character:0
+F_DbParams-Value:character:0
+I_DbParams:PU:A_DbParams-Id
+T_DbServiceManager
+F_DbSvcMgr-AccessCollisions:int64:0
+F_DbSvcMgr-AccessCount:int64:0
+F_DbSvcMgr-CommunicationAreaSize:decimal:0
+F_DbSvcMgr-FreeMsgEntries:int64:0
+F_DbSvcMgr-Id:int64:0
+F_DbSvcMgr-LatchHolder:integer:0
+F_DbSvcMgr-LockPID:integer:0
+F_DbSvcMgr-LockUserNumber:int64:0
+F_DbSvcMgr-LockUserType:character:0
+F_DbSvcMgr-MessageHWM:int64:0
+F_DbSvcMgr-PicaFilled:int64:0
+F_DbSvcMgr-ReservedChar:character:10
+F_DbSvcMgr-ReservedInt:integer:10
+F_DbSvcMgr-TotalMsgEntries:int64:0
+F_DbSvcMgr-UsedMsgEntries:int64:0
+I_DbSvcMgr-Id:PU:A_DbSvcMgr-Id
+T_DbServiceManagerObjects
+F_DbSvcMgrObj-Id:int64:0
+F_DbSvcMgrObj-LockPID:integer:0
+F_DbSvcMgrObj-LockUserNumber:int64:0
+F_DbSvcMgrObj-LockUserType:character:0
+F_DbSvcMgrObj-Msgs:int64:0
+F_DbSvcMgrObj-Name:character:0
+F_DbSvcMgrObj-Ready:character:0
+F_DbSvcMgrObj-ReservedChar:character:10
+F_DbSvcMgrObj-ReservedInt:integer:10
+F_DbSvcMgrObj-Status:character:0
+I_DbSvcMgrObj-Id:PU:A_DbSvcMgrObj-Id
+T_DbStatus
+F_DbStatus-AiBlkSize:integer:0
+F_DbStatus-BiBlkSize:integer:0
+F_DbStatus-BiClSize:integer:0
+F_DbStatus-BiOpen:character:0
+F_DbStatus-BiSize:int64:0
+F_DbStatus-BiTrunc:character:0
+F_DbStatus-CacheStamp:character:0
+F_DbStatus-Changed:integer:0
+F_DbStatus-ClVersMinor:integer:0
+F_DbStatus-Codepage:character:0
+F_DbStatus-Collation:character:0
+F_DbStatus-CreateDate:character:0
+F_DbStatus-DbBlkSize:integer:0
+F_DbStatus-DbVers:integer:0
+F_DbStatus-DbVersMinor:integer:0
+F_DbStatus-EmptyBlks:int64:0
+F_DbStatus-fbDate:character:0
+F_DbStatus-FreeBlks:int64:0
+F_DbStatus-HiWater:integer:0
+F_DbStatus-ibDate:character:0
+F_DbStatus-ibSeq:integer:0
+F_DbStatus-Id:integer:0
+F_DbStatus-InitiateDiag:logical:0
+F_DbStatus-Integrity:character:0
+F_DbStatus-IntFlags:integer:0
+F_DbStatus-LastOpen:character:0
+F_DbStatus-LastTable:integer:0
+F_DbStatus-LastTran:integer:0
+F_DbStatus-Misc:integer:0
+F_DbStatus-MostLocks:integer:0
+F_DbStatus-NumAreas:integer:0
+F_DbStatus-NumLocks:integer:0
+F_DbStatus-NumSems:integer:0
+F_DbStatus-PrevOpen:character:0
+F_DbStatus-RestrictMode:character:0
+F_DbStatus-RMFreeBlks:int64:0
+F_DbStatus-SharedMemVer:integer:0
+F_DbStatus-ShmVers:integer:0
+F_DbStatus-starttime:character:0
+F_DbStatus-state:integer:0
+F_DbStatus-tainted:integer:0
+F_DbStatus-TotalBlks:int64:0
+F_DbStatus-ZeroStatsDate:character:0
+I_DbStatus-Id:PU:A_DbStatus-Id
+T_Field
+F_Attributes1:integer:0
+F_Can-Read:character:0
+F_Can-Write:character:0
+F_Charset:character:0
+F_Col-label:character:0
+F_Col-label-SA:character:0
+F_Collation:character:0
+F_Data-Type:character:0
+F_Decimals:integer:0
+F_Desc:character:0
+F_dtype:integer:0
+F_Extent:integer:0
+F_Fetch-Type:character:0
+F_Field-Attributes:logical:64
+F_Field-Name:character:0
+F_Field-Physpos:integer:0
+F_field-rpos:integer:0
+F_File-recid:recid:0
+F_Fld-case:logical:0
+F_Fld-misc1:integer:8
+F_Fld-misc2:character:8
+F_Fld-Misc3:integer:8
+F_Fld-Misc4:character:8
+F_Fld-res1:integer:8
+F_Fld-res2:character:8
+F_Fld-stdtype:integer:0
+F_Fld-stlen:integer:0
+F_Fld-stoff:integer:0
+F_For-Allocated:integer:0
+F_For-Id:integer:0
+F_For-Itype:integer:0
+F_For-Maxsize:integer:0
+F_For-Name:character:0
+F_For-Primary:integer:0
+F_For-Retrieve:logical:0
+F_For-Scale:integer:0
+F_For-Separator:character:0
+F_For-Spacing:integer:0
+F_For-Type:character:0
+F_For-Xpos:integer:0
+F_Format:character:0
+F_Format-SA:character:0
+F_Help:character:0
+F_Help-SA:character:0
+F_Initial:character:0
+F_Initial-SA:character:0
+F_Label:character:0
+F_Label-SA:character:0
+F_Last-modified:datetime-tz:0
+F_Mandatory:logical:0
+F_Mod-sequence:integer:0
+F_Order:integer:0
+F_sys-field:logical:0
+F_User-Misc:character:0
+F_Valexp:character:0
+F_Valmsg:character:0
+F_Valmsg-SA:character:0
+F_View-As:character:0
+F_Width:integer:0
+I_Field-Name:U:A_Field-Name:A_File-recid
+I_Field-Position:U:A_File-recid:A_Order
+I_Fieldphyspos:U:A_File-recid:A_Field-Physpos
+I_File/Field:PU:A_File-recid:A_Field-Name
+T_Field-Trig
+F_Event:character:0
+F_Field-Recid:recid:0
+F_Field-Rpos:integer:0
+F_File-Recid:recid:0
+F_Last-modified:datetime-tz:0
+F_Mod-sequence:integer:0
+F_Override:logical:0
+F_Proc-Name:character:0
+F_Trig-Crc:integer:0
+I_Field-Trig-DBK::A_Field-Recid
+I_Field-Trig-Rpos:PU:A_File-Recid:A_Field-Rpos:A_Event
+T_File
+F_Cache:raw:0
+F_Can-Create:character:0
+F_Can-Delete:character:0
+F_Can-Dump:character:0
+F_Can-Load:character:0
+F_Can-Read:character:0
+F_Can-Write:character:0
+F_category:character:0
+F_CRC:integer:0
+F_Creator:character:0
+F_DB-lang:integer:0
+F_Db-recid:recid:0
+F_Desc:character:0
+F_dft-pk:logical:0
+F_Dump-name:character:0
+F_Field-map:raw:0
+F_Fil-misc1:integer:8
+F_Fil-misc2:character:8
+F_Fil-Misc3:integer:8
+F_Fil-Misc4:character:8
+F_Fil-res1:integer:8
+F_Fil-res2:character:8
+F_File-Attributes:logical:64
+F_File-Label:character:0
+F_File-Label-SA:character:0
+F_File-Name:character:0
+F_File-Number:integer:0
+F_For-Cnt1:integer:0
+F_For-Cnt2:integer:0
+F_For-Flag:integer:0
+F_For-Format:character:0
+F_For-Id:integer:0
+F_For-Info:character:0
+F_For-Name:character:0
+F_For-Number:integer:0
+F_For-Owner:character:0
+F_For-Size:integer:0
+F_For-Type:character:0
+F_Frozen:logical:0
+F_Has-Ccnstrs:character:0
+F_Has-Fcnstrs:character:0
+F_Has-Pcnstrs:character:0
+F_Has-Ucnstrs:character:0
+F_Hidden:logical:0
+F_ianum:integer:0
+F_Last-change:integer:0
+F_Last-modified:datetime-tz:0
+F_Mod-sequence:integer:0
+F_numfld:integer:0
+F_numkcomp:integer:0
+F_numkey:integer:0
+F_numkfld:integer:0
+F_Owner:character:0
+F_Prime-Index:recid:0
+F_Rssid:integer:0
+F_Tbl-Status:character:0
+F_Tbl-Type:character:0
+F_Template:recid:0
+F_User-Misc:character:0
+F_Valexp:character:0
+F_Valmsg:character:0
+F_Valmsg-SA:character:0
+F_Version:integer:0
+I_Db/File:U:A_Db-recid:A_File-Name:A_Owner
+I_Dump-Name:U:A_Db-recid:A_Dump-name:A_Owner
+I_File-Name:P:A_File-Name
+I_File-Number::A_File-Number
+T_File-Trig
+F_Event:character:0
+F_File-Recid:recid:0
+F_Last-modified:datetime-tz:0
+F_Mod-sequence:integer:0
+F_Override:logical:0
+F_Proc-Name:character:0
+F_Trig-Crc:integer:0
+I_File-Trig:PU:A_File-Recid:A_Event
+T_Filelist
+F_FileList-BlkSize:integer:0
+F_FileList-Extend:integer:0
+F_FileList-Id:int64:0
+F_FileList-LogicalSz:integer:0
+F_FileList-Misc:integer:0
+F_FileList-Name:character:0
+F_FileList-Openmode:character:0
+F_FileList-Size:integer:0
+I_FileList-Id:PU:A_FileList-Id
+T_Index
+F_Active:logical:0
+F_Desc:character:0
+F_File-recid:recid:0
+F_For-Name:character:0
+F_For-Type:character:0
+F_I-misc1:integer:8
+F_I-misc2:character:8
+F_I-res1:integer:8
+F_I-res2:character:8
+F_ianum:integer:0
+F_Idx-CRC:integer:0
+F_idx-num:integer:0
+F_Idxmethod:character:0
+F_Idxowner:character:0
+F_Index-Attributes:logical:64
+F_Index-Name:character:0
+F_Last-modified:datetime-tz:0
+F_Mod-sequence:integer:0
+F_Mode:integer:0
+F_num-comp:integer:0
+F_Unique:logical:0
+F_User-Misc:character:0
+F_Word-Rules:integer:0
+F_Wordidx:integer:0
+I_File/Index:PU:A_File-recid:A_Index-Name
+I_Index-Name::A_Index-Name
+I_Index-Number::A_idx-num
+T_Index-Field
+F_Abbreviate:logical:0
+F_Ascending:logical:0
+F_Coll-Strength:integer:0
+F_Collation:character:0
+F_Field-recid:recid:0
+F_If-Attributes:logical:64
+F_If-misc1:integer:8
+F_If-misc2:character:8
+F_If-res1:integer:8
+F_If-res2:character:8
+F_Index-recid:recid:0
+F_Index-Seq:integer:0
+F_KeyValue-expr:character:0
+F_Last-modified:datetime-tz:0
+F_Mod-sequence:integer:0
+F_Unsorted:logical:0
+F_User-Misc:character:0
+I_Field::A_Field-recid
+I_Index/Number:PU:A_Index-recid:A_Index-Seq
+T_IndexStat
+F_IndexStat-blockdelete:int64:0
+F_IndexStat-create:int64:0
+F_IndexStat-delete:int64:0
+F_IndexStat-id:int64:0
+F_IndexStat-OsRead:int64:0
+F_IndexStat-PartitionId:integer:0
+F_IndexStat-read:int64:0
+F_IndexStat-split:int64:0
+I_IndexStat:PU:A_IndexStat-id
+T_KeyEvent
+F_KeyEvent-Date:datetime-tz:0
+F_KeyEvent-Event:character:0
+F_KeyEvent-MsgId:integer:0
+F_KeyEvent-Procid:integer:0
+F_KeyEvent-Spare1:integer:0
+F_KeyEvent-Spare2:character:0
+F_KeyEvent-ThreadId:integer:0
+F_KeyEvent-Usrnum:integer:0
+I_KeyEvent-Date:U:A_KeyEvent-Date
+I_KeyEvent-MsgId::A_KeyEvent-MsgId
+I_KeyEvent-Usrnum:P:A_KeyEvent-Usrnum
+T_Latch
+F_Latch-Busy:int64:0
+F_Latch-Hold:integer:0
+F_Latch-HoldTenantId:integer:0
+F_Latch-Id:int64:0
+F_Latch-Lock:int64:0
+F_Latch-LockedT:integer:0
+F_Latch-LockT:integer:0
+F_Latch-Name:character:0
+F_Latch-Owner:integer:0
+F_Latch-Qhold:integer:0
+F_Latch-QHoldTenantId:integer:0
+F_Latch-Spin:integer:0
+F_Latch-Type:character:0
+F_Latch-Wait:int64:0
+F_Latch-WaitT:integer:0
+I_Latch-Id:PU:A_Latch-Id
+T_License
+F_Lic-ActiveConns:integer:0
+F_Lic-BatchConns:integer:0
+F_Lic-CurrConns:integer:0
+F_Lic-Id:int64:0
+F_Lic-MaxActive:integer:0
+F_Lic-MaxBatch:integer:0
+F_Lic-MaxCurrent:integer:0
+F_Lic-MinActive:integer:0
+F_Lic-MinBatch:integer:0
+F_Lic-MinCurrent:integer:0
+F_Lic-ValidUsers:integer:0
+I_License:PU:A_Lic-Id
+T_Lock
+F_Lock-Chain:integer:0
+F_Lock-DomainId:int64:0
+F_Lock-Flags:character:0
+F_Lock-Id:int64:0
+F_Lock-Misc:integer:0
+F_Lock-Name:character:0
+F_Lock-PartitionId:integer:0
+F_Lock-RecId:int64:0
+F_Lock-Table:integer:0
+F_Lock-TenantId:integer:0
+F_Lock-Trans-Flags:character:0
+F_Lock-Trans-State:character:0
+F_Lock-TransId:integer:0
+F_Lock-Tty:character:0
+F_Lock-Type:character:0
+F_Lock-Usr:integer:0
+I_Lock-Id:PU:A_Lock-Id
+T_LockReq
+F_LockReq-ExclFind:int64:0
+F_LockReq-Id:int64:0
+F_LockReq-Misc:integer:0
+F_LockReq-Name:character:0
+F_LockReq-Num:integer:0
+F_LockReq-RecLock:int64:0
+F_LockReq-RecWait:int64:0
+F_LockReq-SchLock:int64:0
+F_LockReq-SchWait:int64:0
+F_LockReq-ShrFind:int64:0
+F_LockReq-TenantId:integer:0
+F_LockReq-TrnLock:int64:0
+F_LockReq-TrnWait:int64:0
+I_LockReq-Id:PU:A_LockReq-Id
+T_Logging
+F_Logging-2PC:character:0
+F_Logging-2PCNickName:character:0
+F_Logging-2PCPriority:integer:0
+F_Logging-AiBegin:character:0
+F_Logging-AiBlkSize:integer:0
+F_Logging-AiBuffs:integer:0
+F_Logging-AiCurrExt:integer:0
+F_Logging-AiExtents:integer:0
+F_Logging-AiGenNum:integer:0
+F_Logging-AiIO:character:0
+F_Logging-AiJournal:character:0
+F_Logging-AiLogSize:integer:0
+F_Logging-AiNew:character:0
+F_Logging-AiOpen:character:0
+F_Logging-AiSequence:int64:0
+F_Logging-BiBlkSize:integer:0
+F_Logging-BiBuffs:integer:0
+F_Logging-BiBytesFree:integer:0
+F_Logging-BiClAge:integer:0
+F_Logging-BiClSize:integer:0
+F_Logging-BiClusterHWM:int64:0
+F_Logging-BiExtents:integer:0
+F_Logging-BiFullBuffs:integer:0
+F_Logging-BiIO:character:0
+F_Logging-BiLogSize:integer:0
+F_Logging-CommitDelay:integer:0
+F_Logging-CrashProt:integer:0
+F_Logging-CurrBiCluster:int64:0
+F_Logging-Id:int64:0
+F_Logging-LastCkp:character:0
+F_Logging-Misc:integer:0
+I_Logging-Id:PU:A_Logging-Id
+T_MstrBlk
+F_MstrBlk-aiblksize:integer:0
+F_MstrBlk-biblksize:integer:0
+F_MstrBlk-biopen:character:0
+F_MstrBlk-biprev:character:0
+F_MstrBlk-bistate:integer:0
+F_MstrBlk-cfilnum:integer:0
+F_MstrBlk-crdate:character:0
+F_MstrBlk-dbstate:integer:0
+F_MstrBlk-dbvers:integer:0
+F_MstrBlk-fbdate:character:0
+F_MstrBlk-hiwater:integer:0
+F_MstrBlk-ibdate:character:0
+F_MstrBlk-ibseq:integer:0
+F_MstrBlk-Id:int64:0
+F_MstrBlk-integrity:integer:0
+F_MstrBlk-lasttask:integer:0
+F_MstrBlk-Misc:integer:0
+F_MstrBlk-oppdate:character:0
+F_MstrBlk-oprdate:character:0
+F_MstrBlk-rlclsize:integer:0
+F_MstrBlk-rltime:character:0
+F_MstrBlk-tainted:integer:0
+F_MstrBlk-timestamp:character:0
+F_MstrBlk-totblks:int64:0
+I_MstrBlk-Id:PU:A_MstrBlk-Id
+T_MyConnection
+F_MyConn-Id:int64:0
+F_MyConn-NumSeqBuffers:integer:0
+F_MyConn-Pid:integer:0
+F_MyConn-TenantId:integer:0
+F_MyConn-UsedSeqBuffers:integer:0
+F_MyConn-UserId:integer:0
+F_MyConn-UserMisc:character:0
+I_MyConnection-Id:PU:A_MyConn-Id
+T_Partition-Set
+F_Object-Number:integer:0
+F_Object-Type:integer:0
+F_PSet-Allocation-default:character:0
+F_PSet-Attributes:logical:64
+F_PSet-DataArea-default:integer:0
+F_PSet-Description:character:0
+F_PSet-IndexArea-default:integer:0
+F_PSet-LobArea-default:integer:0
+F_PSet-Name:character:0
+F_PSet-Type:integer:0
+F_PSetId:integer:0
+I_Partition-Set-Name:U:A_PSet-Name
+I_Partition-Set-Object:PU:A_Object-Type:A_Object-Number:A_PSetId
+I_Partition-Set-Type::A_PSet-Type
+T_Partition-Set-Detail
+F_Object-Number:integer:0
+F_Object-Type:integer:0
+F_Permissions:integer:0
+F_PSetId:integer:0
+F_TenantId:integer:0
+I_Partition-Set-Object:U:A_Object-Type:A_Object-Number:A_TenantId:A_PSetId:A_Permissions
+I_Partition-Set-Tenant::A_TenantId
+I_Partition-SetId:PU:A_Object-Type:A_Object-Number:A_PSetId:A_TenantId:A_Permissions
+T_Repl-Agent
+F_ReplAgt-AgentID:int64:0
+F_ReplAgt-AgentName:character:0
+F_ReplAgt-AIFile:character:0
+F_ReplAgt-AutoAddAI:logical:0
+F_ReplAgt-AutoBeginAI:logical:0
+F_ReplAgt-BackupMethod:character:0
+F_ReplAgt-BlocksACK:integer:0
+F_ReplAgt-BlocksProcessed:integer:0
+F_ReplAgt-BlocksReceived:integer:0
+F_ReplAgt-CommStatus:integer:0
+F_ReplAgt-ConnectTime:character:0
+F_ReplAgt-ConnectTimeout:int64:0
+F_ReplAgt-Critical:integer:0
+F_ReplAgt-DatabaseRole:character:0
+F_ReplAgt-DBName:character:0
+F_ReplAgt-LastTRID:integer:0
+F_ReplAgt-MaxDelayInterval:integer:0
+F_ReplAgt-MaxMsgSize:int64:0
+F_ReplAgt-MaxPort:int64:0
+F_ReplAgt-Method:character:0
+F_ReplAgt-MinDelayInterval:integer:0
+F_ReplAgt-MinPort:int64:0
+F_ReplAgt-NotesProcessed:integer:0
+F_ReplAgt-Port:integer:0
+F_ReplAgt-ReplicationSet:integer:0
+F_ReplAgt-ReservedChar:character:10
+F_ReplAgt-ReservedInt:integer:10
+F_ReplAgt-RestartAfterTrans:logical:0
+F_ReplAgt-ServerHost:character:0
+F_ReplAgt-Status:integer:0
+F_ReplAgt-TimeoutLimit:integer:0
+F_ReplAgt-TransDatabaseRole:character:0
+F_ReplAgt-TransitionToAgents:character:0
+F_ReplAgt-TransitionType:character:0
+I_ReplAgt-AgentID:PU:A_ReplAgt-AgentID
+T_Repl-AgentActivity
+F_ReplAgtAct-AgentID:int64:0
+F_ReplAgtAct-AgentName:character:0
+F_ReplAgtAct-BlocksACK:integer:0
+F_ReplAgtAct-BlocksProcessed:integer:0
+F_ReplAgtAct-BlocksReceived:integer:0
+F_ReplAgtAct-CommStatus:integer:0
+F_ReplAgtAct-ConnectTime:character:0
+F_ReplAgtAct-CurDelayInterval:integer:0
+F_ReplAgtAct-LastBlockBlock:int64:0
+F_ReplAgtAct-LastBlockReceived:character:0
+F_ReplAgtAct-LastBlockSeq:int64:0
+F_ReplAgtAct-LastSyncDelta:character:0
+F_ReplAgtAct-LastSyncTimeSrc:character:0
+F_ReplAgtAct-LastSyncTimeTgt:character:0
+F_ReplAgtAct-LastTRID:integer:0
+F_ReplAgtAct-NotesProcessed:integer:0
+F_ReplAgtAct-Ready:integer:0
+F_ReplAgtAct-ReservedChar:character:10
+F_ReplAgtAct-ReservedInt:integer:10
+F_ReplAgtAct-ServerLag:integer:0
+F_ReplAgtAct-SourceTRID:integer:0
+F_ReplAgtAct-SrcRDBMSBlock:int64:0
+F_ReplAgtAct-SrcRDBMSSeq:int64:0
+F_ReplAgtAct-State:character:0
+F_ReplAgtAct-Status:integer:0
+F_ReplAgtAct-SyncPoints:int64:0
+F_ReplAgtAct-TimeToTransition:character:0
+F_ReplAgtAct-TransEnded:int64:0
+F_ReplAgtAct-TransStarted:int64:0
+F_ReplAgtAct-WaitingFor:character:0
+I_ReplAgtAct-Id:PU:A_ReplAgtAct-AgentID
+T_Repl-AgentControl
+F_ReplAgtCtl-AgentID:int64:0
+F_ReplAgtCtl-AgentName:character:0
+F_ReplAgtCtl-BlocksACK:integer:0
+F_ReplAgtCtl-BlocksSent:integer:0
+F_ReplAgtCtl-CommStatus:integer:0
+F_ReplAgtCtl-ConnectionTimeout:decimal:0
+F_ReplAgtCtl-ConnectTime:character:0
+F_ReplAgtCtl-Critical:integer:0
+F_ReplAgtCtl-LastBlockSentAt:character:0
+F_ReplAgtCtl-MaxMsgSize:int64:0
+F_ReplAgtCtl-Method:character:0
+F_ReplAgtCtl-Port:integer:0
+F_ReplAgtCtl-RemoteDBName:character:0
+F_ReplAgtCtl-RemoteHost:character:0
+F_ReplAgtCtl-ReservedChar:character:10
+F_ReplAgtCtl-ReservedInt:integer:10
+F_ReplAgtCtl-status:integer:0
+F_ReplAgtCtl-TimeoutLimit:integer:0
+F_ReplAgtCtl-TransitionType:character:0
+I_ReplAgtCtl-AgentID:PU:A_ReplAgtCtl-AgentID
+T_Repl-AgentControlActivity
+F_ReplAgtCtlAct-AgentID:int64:0
+F_ReplAgtCtlAct-AgentName:character:0
+F_ReplAgtCtlAct-BlocksACK:integer:0
+F_ReplAgtCtlAct-BlocksSent:integer:0
+F_ReplAgtCtlAct-CommStatus:integer:0
+F_ReplAgtCtlAct-ConnectTime:character:0
+F_ReplAgtCtlAct-CurRDBMSBlock:int64:0
+F_ReplAgtCtlAct-CurRDBMSSeq:int64:0
+F_ReplAgtCtlAct-LastBlockBlock:int64:0
+F_ReplAgtCtlAct-LastBlockSentAt:character:0
+F_ReplAgtCtlAct-LastBlockSeq:int64:0
+F_ReplAgtCtlAct-LastMsgRecv:character:0
+F_ReplAgtCtlAct-LoadChkInt:decimal:0
+F_ReplAgtCtlAct-LoadChkResp:decimal:0
+F_ReplAgtCtlAct-LoadInterval:integer:0
+F_ReplAgtCtlAct-RecoveryState:character:0
+F_ReplAgtCtlAct-ReservedChar:character:10
+F_ReplAgtCtlAct-ReservedInt:integer:10
+F_ReplAgtCtlAct-State:character:0
+F_ReplAgtCtlAct-Status:integer:0
+F_ReplAgtCtlAct-SyncPoints:int64:0
+F_ReplAgtCtlAct-WaitingFor:character:0
+I_ReplAgtCtlAct-Id:PU:A_ReplAgtCtlAct-AgentID
+T_Repl-InterAgentActivity
+F_ReplIntAgtAct-AgentID:int64:0
+F_ReplIntAgtAct-AgentName:character:0
+F_ReplIntAgtAct-ConnectionState:character:0
+F_ReplIntAgtAct-DBName:character:0
+F_ReplIntAgtAct-Host:character:0
+F_ReplIntAgtAct-LastMsgRecv:character:0
+F_ReplIntAgtAct-LastMsgSent:character:0
+F_ReplIntAgtAct-LastPingRecv:character:0
+F_ReplIntAgtAct-LastPingSent:character:0
+F_ReplIntAgtAct-Port:integer:0
+F_ReplIntAgtAct-RecvMsgs:int64:0
+F_ReplIntAgtAct-RemoteLastBlkSeq:integer:0
+F_ReplIntAgtAct-RemoteSourceTRID:int64:0
+F_ReplIntAgtAct-ReservedChar:character:10
+F_ReplIntAgtAct-ReservedInt:integer:10
+F_ReplIntAgtAct-SentMsgs:int64:0
+F_ReplIntAgtAct-SyncPoints:int64:0
+I_ReplIntAgtAct-AgentID:PU:A_ReplIntAgtAct-AgentID
+T_Repl-Server
+F_ReplSrv-AgentCount:integer:0
+F_ReplSrv-AgentsConnected:integer:0
+F_ReplSrv-AgentShutdownAction:character:0
+F_ReplSrv-AgentsInSync:integer:0
+F_ReplSrv-AIFile:character:0
+F_ReplSrv-AutoAddAI:logical:0
+F_ReplSrv-AutoBeginAI:logical:0
+F_ReplSrv-BackupMethod:character:0
+F_ReplSrv-BlocksSent:integer:0
+F_ReplSrv-ConfiguredAgents:character:0
+F_ReplSrv-ConnectAttempts:int64:0
+F_ReplSrv-CurDelayInterval:integer:0
+F_ReplSrv-Database:character:0
+F_ReplSrv-DatabaseRole:character:0
+F_ReplSrv-DeferAgentConnUntil:character:0
+F_ReplSrv-DeferAgentExpire:character:0
+F_ReplSrv-id:int64:0
+F_ReplSrv-LastBlockSentAt:character:0
+F_ReplSrv-MaxDelayInterval:integer:0
+F_ReplSrv-MinDelayInterval:integer:0
+F_ReplSrv-NextConnectIn:character:0
+F_ReplSrv-RecAgentsConnected:integer:0
+F_ReplSrv-RecAgentsToRecover:integer:0
+F_ReplSrv-RecoveryState:character:0
+F_ReplSrv-ReplicationSet:integer:0
+F_ReplSrv-ReplKeepAlive:int64:0
+F_ReplSrv-ReservedChar:character:10
+F_ReplSrv-ReservedInt:integer:10
+F_ReplSrv-RestartAfterTrans:logical:0
+F_ReplSrv-SchemaLockAction:character:0
+F_ReplSrv-ServerState:character:0
+F_ReplSrv-StartTime:character:0
+F_ReplSrv-TransDatabaseRole:character:0
+F_ReplSrv-TransitionTimeout:integer:0
+F_ReplSrv-TransitionToAgents:character:0
+F_ReplSrv-TransitionType:character:0
+I_ReplSrv-id:PU:A_ReplSrv-id
+T_Resrc
+F_Resrc-Id:int64:0
+F_Resrc-lock:int64:0
+F_Resrc-Name:character:0
+F_Resrc-time:int64:0
+F_Resrc-wait:int64:0
+I_Resrc-Id:PU:A_Resrc-Id
+T_sec-authentication-domain
+F_Auditing-context:character:0
+F_Domain-access-code:character:0
+F_Domain-category:integer:0
+F_Domain-custom-detail:character:0
+F_Domain-description:character:0
+F_Domain-enabled:logical:0
+F_Domain-Id:int64:0
+F_Domain-name:character:0
+F_Domain-runtime-options:character:0
+F_Domain-type:character:0
+F_PAM-actions:character:0
+F_PAM-control:character:0
+F_PAM-library-path:character:0
+F_PAM-options:character:0
+F_Tenant-Name:character:0
+I_Domain-description::A_Domain-description
+I_Domain-enabled::A_Domain-enabled
+I_Domain-Id:U:A_Domain-Id
+I_Domain-name:PU:A_Domain-name
+I_Domain-type::A_Domain-type
+I_Tenant-Name::A_Tenant-Name
+T_sec-authentication-system
+F_Custom-detail:character:0
+F_Domain-type:character:0
+F_Domain-type-description:character:0
+F_Key-store-id:character:0
+F_PAM-callback-procedure:character:0
+F_PAM-library-checksum:raw:0
+F_PAM-module-name:character:0
+F_PAM-plug-in:logical:0
+I_Domain-type:PU:A_Domain-type
+I_Domain-type-description::A_Domain-type-description
+I_PAM-module-name::A_PAM-module-name
+T_sec-granted-role
+F_Custom-grant-detail:character:0
+F_Grant-rights:logical:0
+F_Granted-role-guid:character:0
+F_Grantee:character:0
+F_Grantor:character:0
+F_Role-name:character:0
+I_Granted-role-guid:PU:A_Granted-role-guid
+I_Grantee:U:A_Grantee:A_Role-name:A_Grantor
+I_Grantor::A_Grantor
+I_Role-name::A_Role-name
+T_sec-granted-role-condition
+F_Conditional-attribute:character:0
+F_Conditional-value:character:0
+F_Custom-condition-detail:character:0
+F_Granted-role-guid:character:0
+F_Logical-operator:character:0
+I_Conditional-attribute::A_Conditional-attribute
+I_Granted-role-guid:PU:A_Granted-role-guid:A_Conditional-attribute:A_Logical-operator:A_Conditional-value
+T_sec-role
+F_Custom-role-detail:character:0
+F_Role-creator:character:0
+F_Role-description:character:0
+F_Role-name:character:0
+I_Role-creator::A_Role-creator
+I_Role-description::A_Role-description
+I_Role-name:PU:A_Role-name
+T_Segments
+F_Segment-ByteFree:int64:0
+F_Segment-BytesUsed:int64:0
+F_Segment-Id:int64:0
+F_Segment-Misc:integer:0
+F_Segment-SegId:integer:0
+F_Segment-SegSize:int64:0
+I_Segment-Id:PU:A_Segment-Id
+T_Sequence
+F_Cycle-Ok:logical:0
+F_Db-recid:recid:0
+F_Seq-Attributes:logical:64
+F_Seq-Incr:int64:0
+F_Seq-Init:int64:0
+F_Seq-Max:int64:0
+F_Seq-Min:int64:0
+F_Seq-Misc:character:8
+F_Seq-Name:character:0
+F_Seq-Num:integer:0
+F_Seq-Owner:character:0
+F_User-Misc:character:0
+I_Seq-Name:PU:A_Db-recid:A_Seq-Name
+T_Servers
+F_Server-Broker-Pid:integer:0
+F_Server-CurrUsers:integer:0
+F_Server-Id:int64:0
+F_Server-Logins:int64:0
+F_Server-MaxUsers:integer:0
+F_Server-Misc:integer:0
+F_Server-Num:integer:0
+F_Server-PendConn:integer:0
+F_Server-Pid:integer:0
+F_Server-PortNum:integer:0
+F_Server-Protocol:character:0
+F_Server-Type:character:0
+F_SrvParam-Desc:character:64
+F_SrvParam-dtype:integer:64
+F_SrvParam-Is-Default:logical:64
+F_SrvParam-Is-Modifiable:logical:64
+F_SrvParam-Msg-Num:int64:64
+F_SrvParam-Name:character:64
+F_SrvParam-Value:character:64
+I_Server-Id:PU:A_Server-Id
+T_SQL_Properties
+F_Attribute:integer:0
+F_Property:integer:0
+F_Value_ch:character:0
+F_Value_n:integer:0
+I_Idxsqlproperties:P:A_Property
+T_Startup
+F_Startup-AiBuffs:integer:0
+F_Startup-AiName:character:0
+F_Startup-Alternate_Buffs:integer:0
+F_Startup-APWBuffs:integer:0
+F_Startup-APWMaxWrites:integer:0
+F_Startup-APWQTime:integer:0
+F_Startup-APWSTime:integer:0
+F_Startup-BiBuffs:integer:0
+F_Startup-BiDelay:integer:0
+F_Startup-BiIO:integer:0
+F_Startup-BiName:character:0
+F_Startup-BiTrunc:integer:0
+F_Startup-Buffs:integer:0
+F_Startup-CrashProt:integer:0
+F_Startup-Directio:integer:0
+F_Startup-Id:int64:0
+F_Startup-LGovernor:integer:0
+F_Startup-LockTable:integer:0
+F_Startup-LRU-Skips:integer:0
+F_Startup-LRU2-Skips:integer:0
+F_Startup-MaxClients:integer:0
+F_Startup-MaxServers:integer:0
+F_Startup-MaxUsers:integer:0
+F_Startup-MemOverflow:int64:0
+F_Startup-Misc:integer:0
+F_Startup-nGovernor:integer:0
+F_Startup-NmsgWait:integer:0
+F_Startup-Prefetch-Delay:logical:0
+F_Startup-Prefetch-Factor:integer:0
+F_Startup-Prefetch-Num-Recs:integer:0
+F_Startup-Prefetch-Priority:integer:0
+F_Startup-Spin:integer:0
+I_Startup-Id:PU:A_Startup-Id
+T_StatBase
+F_BaseUserIndex:integer:0
+F_BaseUserTable:integer:0
+F_IndexBase:integer:0
+F_StatBase-id:int64:0
+F_TableBase:integer:0
+I_StatBase-id:PU:A_StatBase-id
+T_StorageObject
+F_Area-number:integer:0
+F_CollationId:integer:0
+F_Create-Limit:integer:0
+F_Db-recid:recid:0
+F_Object-associate:integer:0
+F_Object-associate-type:integer:0
+F_Object-attrib:integer:0
+F_Object-block:recid:0
+F_Object-misc:integer:8
+F_Object-number:integer:0
+F_Object-root:recid:0
+F_Object-state:integer:0
+F_Object-system:integer:0
+F_Object-type:integer:0
+F_PartitionId:integer:0
+F_Toss-Limit:integer:0
+I_Object-Area-Number::A_Area-number
+I_Object-Id:PU:A_Db-recid:A_Object-type:A_Object-number:A_PartitionId:A_CollationId
+I_Object-PartitionId::A_PartitionId
+T_Sysautostats
+F_IntervalType:integer:0
+F_IntervalValue:integer:0
+F_Misc:clob:0
+F_PolicyType:integer:0
+F_TableId:integer:0
+F_TenantId:integer:0
+I_Sysautostats-Policy:PU:A_PolicyType:A_TenantId:A_TableId
+I_Sysautostats-Table::A_TenantId:A_TableId
+T_Sysbigintstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:bigint:0
+I_Idxsysbigintstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Syscalctable
+F_Fld:integer:0
+I_Idxsyscalctable:P:A_Fld
+T_Syscharstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:character:0
+I_Idxsyscharstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Syschkcolusage
+F_Cnstrname:character:0
+F_Colname:character:0
+F_Owner:character:0
+F_Tblname:character:0
+I_Idxchkcolcolusage::A_Owner:A_Tblname:A_Colname
+I_Idxchkcolusage:P:A_Owner:A_Tblname:A_Cnstrname
+T_Syschkconstrs
+F_Chkclause:character:0
+F_Chkseq:integer:0
+F_Cnstrname:character:0
+F_Owner:character:0
+F_Tblname:character:0
+I_Idxchkconstrs:P:A_Owner:A_Tblname:A_Cnstrname
+T_Syschkconstr_Name_Map
+F_Cnstrname:character:0
+F_Name_loc:integer:0
+F_Owner:character:0
+F_Seq:integer:0
+F_Tblname:character:0
+I_Idxsyschkconstrnmmap:P:A_Owner:A_Tblname:A_Cnstrname:A_Seq
+T_Syscolauth
+F_Col:character:0
+F_Grantee:character:0
+F_Grantee-DomainId:int64:0
+F_Grantor:character:0
+F_Grantor-DomainId:int64:0
+F_Ref:character:0
+F_Sel:character:0
+F_Tbl:character:0
+F_Tblowner:character:0
+F_Upd:character:0
+I_Idxsyscolauth:P:A_Tblowner:A_Tbl:A_Grantee-DomainId:A_Grantee:A_Col
+T_Syscolstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:int64:0
+F_Val_ts:timestamp:0
+I_Idxsyscolstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Sysdatatypes
+F_Autoincr:short:0
+F_Casesensitive:short:0
+F_Createparams:character:0
+F_Datatype:short:0
+F_Dhtypename:character:0
+F_Literalprefix:character:0
+F_Literalsuffix:character:0
+F_Localtypename:character:0
+F_Nullable:short:0
+F_Odbcmoney:short:0
+F_Searchable:short:0
+F_Typeprecision:integer:0
+F_Unsignedattr:short:0
+I_Idxsysdatatypes:P:A_Datatype
+T_Sysdatestat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:date:0
+I_Idxsysdatestat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Sysdbauth
+F_Dbaacc:character:0
+F_Grantee:character:0
+F_Grantee-DomainId:int64:0
+F_Resacc:character:0
+I_Idxsysdbauth:P:A_Grantee-DomainId:A_Grantee
+T_Sysfloatstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:double:0
+I_Idxsysfloatstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Sysidxstat
+F_Attribute:integer:0
+F_Idxid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:int64:0
+F_Val_ts:timestamp:0
+I_Idxsysidxstat:P:A_Tblid:A_Idxid:A_PartitionId:A_Property:A_Attribute
+T_Sysintstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:integer:0
+I_Idxsysintstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Syskeycolusage
+F_Cnstrname:character:0
+F_Colname:character:0
+F_Colposition:integer:0
+F_Owner:character:0
+F_Tblname:character:0
+I_Idxkeycolusage:P:A_Owner:A_Tblname:A_Cnstrname:A_Colposition
+T_Sysncharstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:fixchar:0
+I_Idxsysncharstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Sysnumstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:decimal:0
+I_Idxsysnumstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Sysnvarcharstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:character:0
+I_Idxsysnvarcharstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Sysprocbin
+F_Id:integer:0
+F_Procbin:raw:0
+F_Proctype:fixchar:0
+F_Rssid:integer:0
+F_Seq:integer:0
+I_Idxsysprocbin:P:A_Id:A_Rssid
+T_Sysproccolumns
+F_Argtype:character:0
+F_Col:character:0
+F_Datatype:character:0
+F_Dfltvalue:character:0
+F_Id:integer:0
+F_Nullflag:fixchar:0
+F_Procid:integer:0
+F_Rssid:integer:0
+F_Scale:integer:0
+F_Width:integer:0
+I_Idxsysproccolumns:P:A_Procid
+T_Sysprocedures
+F_Creator:character:0
+F_Hasresultset:fixchar:0
+F_Hasreturnval:fixchar:0
+F_Lang:integer:0
+F_Owner:character:0
+F_Procid:integer:0
+F_Procname:character:0
+F_Proctype:character:0
+F_Rssid:integer:0
+I_Idxsysprocedures:P:A_Procname
+T_Sysproctext
+F_Id:integer:0
+F_Proctext:character:0
+F_Proctype:fixchar:0
+F_Rssid:integer:0
+F_Seq:integer:0
+I_Idxsysproctext:P:A_Id
+T_Sysrealstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:float:0
+I_Idxsysrealstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Sysrefconstrs
+F_Cnstrname:character:0
+F_Deleterule:character:0
+F_Owner:character:0
+F_Refcnstrname:character:0
+F_Refowner:character:0
+F_Reftblname:character:0
+F_Tblname:character:0
+I_Idxrefcnstrsref::A_Refowner:A_Reftblname:A_Refcnstrname
+I_Idxrefconstrs:P:A_Owner:A_Tblname:A_Cnstrname
+T_Sysroles
+F_Admin:logical:0
+F_Grantee:character:0
+F_Grantor:character:0
+F_Rolename:character:0
+I_Idxsysroles:P:A_Rolename:A_Grantor:A_Grantee
+T_Sysschemas
+F_Owner:character:0
+F_Schemaname:character:0
+I_Idxsysschemas:P:A_Schemaname:A_Owner
+T_Sysseqauth
+F_Grantee:character:0
+F_Grantee-DomainId:int64:0
+F_Grantor:character:0
+F_Grantor-DomainId:int64:0
+F_Ref:character:0
+F_Sel:character:0
+F_Seq-Name:character:0
+F_Seq-Owner:character:0
+F_Upd:character:0
+I_Idxsysseqauth:P:A_Seq-Owner:A_Grantee-DomainId:A_Grantee:A_Seq-Name
+T_Syssmintstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:short:0
+I_Idxsyssmintstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Syssynonyms
+F_Ispublic:short:0
+F_Screator:character:0
+F_Sname:character:0
+F_Sowner:character:0
+F_Sremdb:character:0
+F_Stbl:character:0
+F_Stblowner:character:0
+I_Sysprvsynidx:PU:A_Sname:A_Sowner:A_Ispublic
+I_Syspubsynidx::A_Sname
+T_Systabauth
+F_Alt:character:0
+F_Del:character:0
+F_Exe:fixchar:0
+F_Grantee:character:0
+F_Grantee-DomainId:int64:0
+F_Grantor:character:0
+F_Grantor-DomainId:int64:0
+F_Ins:character:0
+F_Ndx:character:0
+F_Ref:character:0
+F_Sel:character:0
+F_Tbl:character:0
+F_Tblowner:character:0
+F_Upd:character:0
+I_Idxsystabauth:P:A_Tblowner:A_Tbl:A_Grantee-DomainId:A_Grantee:A_Grantor-DomainId:A_Grantor
+T_Systblconstrs
+F_Cnstrname:character:0
+F_Cnstrtype:character:0
+F_Idxname:character:0
+F_Owner:character:0
+F_Tblname:character:0
+I_Idxtblconstrs:P:A_Owner:A_Tblname:A_Cnstrname
+T_Systblstat
+F_Attribute:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:int64:0
+F_Val_ts:timestamp:0
+I_Idxsystblstat:P:A_Tblid:A_PartitionId:A_Property:A_Attribute
+T_Systimestat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:time:0
+I_Idxsystimestat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Systinyintstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:integer:0
+I_Idxsystinyintstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Systrigcols
+F_Colid:integer:0
+F_Owner:character:0
+F_Triggername:character:0
+I_Idxsystrigcols:P:A_Triggername
+T_Systrigger
+F_Fire_4GL:logical:0
+F_Owner:character:0
+F_Referstonew:fixchar:0
+F_Referstoold:fixchar:0
+F_Rssid:integer:0
+F_Statementorrow:fixchar:0
+F_Tbl:character:0
+F_Tblowner:character:0
+F_Triggerevent:character:0
+F_Triggerid:integer:0
+F_Triggername:character:0
+F_Triggertime:character:0
+I_Idxsystrigger:P:A_Tbl
+T_Systsstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:timestamp:0
+I_Idxsystsstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Syststzstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:datetime-tz:0
+I_Idxsyststzstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Sysvarcharstat
+F_Attribute:integer:0
+F_Colid:integer:0
+F_PartitionId:integer:0
+F_Property:integer:0
+F_Tblid:integer:0
+F_Value:character:0
+I_Idxsysvarcharstat:P:A_Tblid:A_PartitionId:A_Colid:A_Property:A_Attribute
+T_Sysviews
+F_Creator:character:0
+F_Owner:character:0
+F_Seq:integer:0
+F_Viewname:character:0
+F_Viewtext:character:0
+I_Viewidx:PU:A_Owner:A_Viewname:A_Seq
+T_Sysviews_Name_Map
+F_Name_loc:integer:0
+F_Owner:character:0
+F_Seq:integer:0
+F_Viewname:character:0
+I_Idxsysviewsnmmap:P:A_Owner:A_Viewname:A_Seq
+T_TableStat
+F_TableStat-create:int64:0
+F_TableStat-delete:int64:0
+F_TableStat-id:int64:0
+F_TableStat-OsRead:int64:0
+F_TableStat-PartitionId:integer:0
+F_TableStat-read:int64:0
+F_TableStat-update:int64:0
+I_TableStat:PU:A_TableStat-id
+T_Tenant
+F_Tenant-Allocation-default:character:0
+F_Tenant-Attributes:logical:64
+F_Tenant-DataArea-default:integer:0
+F_Tenant-Description:character:0
+F_Tenant-ExtId:character:0
+F_Tenant-IndexArea-default:integer:0
+F_Tenant-LobArea-default:integer:0
+F_Tenant-Name:character:0
+F_Tenant-Sequence-Block:recid:0
+F_Tenant-Type:integer:0
+F_TenantId:integer:0
+I_Tenant-Name:PU:A_Tenant-Name
+I_TenantId:U:A_TenantId
+T_Trans
+F_Trans-BIRecReads:integer:0
+F_Trans-BIRecWrites:integer:0
+F_Trans-Coord:character:0
+F_Trans-CoordTx:integer:0
+F_Trans-counter:integer:0
+F_Trans-Duration:integer:0
+F_Trans-Flags:character:0
+F_Trans-Id:int64:0
+F_Trans-JTA-Flags:character:0
+F_Trans-JTA-State:character:0
+F_Trans-Misc:integer:0
+F_Trans-Num:integer:0
+F_Trans-State:character:0
+F_Trans-TenantId:integer:0
+F_Trans-txtime:character:0
+F_Trans-Usrnum:integer:0
+F_Trans-XID:character:0
+I_Trans-Id:PU:A_Trans-Id
+T_TxeLock
+F_Txe-Id:int64:0
+F_Txe-Locks:int64:9
+F_Txe-Lockss:int64:9
+F_Txe-Time:integer:9
+F_Txe-Type:character:9
+F_Txe-Wait-Time:integer:9
+F_Txe-Waits:int64:9
+F_Txe-Waitss:int64:9
+I_Txe-id:PU:A_Txe-Id
+T_User
+F_Account_expires:datetime-tz:0
+F_Create_date:datetime-tz:0
+F_Description:character:0
+F_Disabled:logical:0
+F_Domain-Name:character:0
+F_Email:character:0
+F_Given_name:character:0
+F_Group_number:integer:0
+F_Last_login:datetime-tz:0
+F_Logins:integer:0
+F_Login_failures:integer:0
+F_Max_logins:integer:0
+F_Max_tries:integer:0
+F_Middle_initial:character:0
+F_Password:character:0
+F_Pwd_duration:integer:0
+F_Pwd_expires:datetime-tz:0
+F_Spare1:integer:0
+F_Spare2:integer:0
+F_Spare3:character:0
+F_Spare4:character:0
+F_sql-only-user:logical:0
+F_Surname:character:0
+F_Telephone:character:0
+F_TenantId:integer:0
+F_U-misc1:integer:8
+F_U-misc2:character:8
+F_User-Misc:character:0
+F_User-Name:character:0
+F_Userid:character:0
+F_User_number:integer:0
+I_User-domain-name::A_Domain-Name:A_sql-only-user:A_Userid
+I_User-sql-only-user::A_sql-only-user
+I_Userid:PU:A_Userid:A_Domain-Name
+T_UserIndexStat
+F_UserIndexStat-blockdelete:int64:0
+F_UserIndexStat-Conn:integer:0
+F_UserIndexStat-create:int64:0
+F_UserIndexStat-delete:int64:0
+F_UserIndexStat-Id:int64:0
+F_UserIndexStat-Num:integer:0
+F_UserIndexStat-PartitionId:integer:0
+F_UserIndexStat-read:int64:0
+F_UserIndexStat-split:int64:0
+F_UserIndexStat-TenantId:integer:0
+I_UserIndexStat:PU:A_UserIndexStat-Id
+T_UserIO
+F_UserIO-AiRead:int64:0
+F_UserIO-AiWrite:int64:0
+F_UserIO-BiRead:int64:0
+F_UserIO-BIRecReads:int64:0
+F_UserIO-BIRecWrites:int64:0
+F_UserIO-BiWrite:int64:0
+F_UserIO-DbAccess:int64:0
+F_UserIO-DbRead:int64:0
+F_UserIO-DbWrite:int64:0
+F_UserIO-Id:int64:0
+F_UserIO-Misc:integer:0
+F_UserIO-Name:character:0
+F_UserIO-TenantId:integer:0
+F_UserIO-Usr:integer:0
+I_UserIO-Id:PU:A_UserIO-Id
+T_UserLock
+F_UserLock-Chain:integer:512
+F_UserLock-Flags:character:512
+F_UserLock-HWM:integer:0
+F_UserLock-Id:int64:0
+F_UserLock-Misc:integer:0
+F_UserLock-Name:character:0
+F_UserLock-PartitionId:integer:512
+F_UserLock-Recid:int64:512
+F_UserLock-Table:integer:512
+F_UserLock-TenantId:integer:0
+F_UserLock-Total:integer:0
+F_UserLock-Total-EXCL:integer:0
+F_UserLock-Total-IS:integer:0
+F_UserLock-Total-IX:integer:0
+F_UserLock-Total-Partition:integer:0
+F_UserLock-Total-Purge:integer:0
+F_UserLock-Total-RecGet:integer:0
+F_UserLock-Total-Record:integer:0
+F_UserLock-Total-SHR:integer:0
+F_UserLock-Total-SIX:integer:0
+F_UserLock-Total-Table:integer:0
+F_UserLock-Type:character:512
+F_UserLock-Usr:integer:0
+I_UserLock-Id:PU:A_UserLock-Id
+T_UserStatus
+F_UserStatus-Counter:integer:0
+F_UserStatus-ObjectId:integer:0
+F_UserStatus-ObjectType:integer:0
+F_UserStatus-Operation:character:0
+F_UserStatus-State:integer:0
+F_UserStatus-Target:integer:0
+F_UserStatus-TenantId:integer:0
+F_UserStatus-UserId:int64:0
+I_UserStatus-UserId:PU:A_UserStatus-UserId
+T_UserTableStat
+F_UserTableStat-Conn:integer:0
+F_UserTableStat-create:int64:0
+F_UserTableStat-delete:int64:0
+F_UserTableStat-Id:int64:0
+F_UserTableStat-Num:integer:0
+F_UserTableStat-PartitionId:integer:0
+F_UserTableStat-read:int64:0
+F_UserTableStat-TenantId:integer:0
+F_UserTableStat-update:int64:0
+I_UserTableStat:PU:A_UserTableStat-Id
+T_View
+F_Auth-Id:character:0
+F_Base-Tables:character:0
+F_Can-Create:character:0
+F_Can-Delete:character:0
+F_Can-Read:character:0
+F_Can-Write:character:0
+F_Desc:character:0
+F_Group-By:character:0
+F_Updatable:logical:0
+F_View-Def:character:0
+F_View-Name:character:0
+F_Where-Cls:character:0
+I_View-Name:PU:A_View-Name
+T_View-Col
+F_Auth-Id:character:0
+F_Base-Col:character:0
+F_Can-Create:character:0
+F_Can-Write:character:0
+F_Col-Name:character:0
+F_Vcol-Order:integer:0
+F_View-Name:character:0
+I_Vcol-Position:U:A_View-Name:A_Vcol-Order
+I_View-Col:PU:A_View-Name:A_Col-Name
+T_View-Ref
+F_Auth-Id:character:0
+F_Base-Col:character:0
+F_Ref-Table:character:0
+F_View-Name:character:0
+I_View-Ref:P:A_Ref-Table:A_Base-Col
+I_Vref-View::A_View-Name
+T_Word-rule
+F_Wr-Attr:raw:0
+F_Wr-Cp:integer:0
+F_Wr-Name:character:0
+F_Wr-Number:integer:0
+F_Wr-Segment:integer:0
+F_Wr-Type:integer:0
+F_Wr-Version:integer:0
+I_Wr-Number:PU:A_Wr-Number:A_Wr-Segment
