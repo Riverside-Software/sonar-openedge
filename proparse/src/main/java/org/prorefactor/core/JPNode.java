@@ -418,7 +418,7 @@ public class JPNode implements AST {
    * Get an array of all descendant nodes of a given type within current statement
    */
   public List<JPNode> queryCurrentStatement(ABLNodeType type, ABLNodeType... findTypes) {
-    JPNodeQuery query = new JPNodeQuery(false, false, this, type, findTypes);
+    JPNodeQuery query = new JPNodeQuery(false, false, this.getStatement(), type, findTypes);
     walk(query);
 
     return query.getResult();
