@@ -171,7 +171,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public void callEnd() {
-    LOG.trace("Entering callEnd {}");
+    LOG.trace("Entering callEnd");
     // Record the call in the current context.
     currentScope.registerCall(wipCalls.getFirst());
     wipCalls.removeFirst();
@@ -203,7 +203,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public void callMethodEnd() {
-    LOG.trace("Entering callMethodEnd {}");
+    LOG.trace("Entering callMethodEnd");
     // Record the call in the current context.
     currentScope.registerCall(wipCalls.getFirst());
     wipCalls.removeFirst();
@@ -378,7 +378,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public Event defineEvent(JPNode defNode, JPNode idNode) {
-    LOG.trace("Entering defineEvent {}", defNode, idNode);
+    LOG.trace("Entering defineEvent {} - {}", defNode, idNode);
     String name = idNode.getText();
     if (name == null || name.length() == 0)
       name = idNode.getNodeType().name();
@@ -391,7 +391,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public Symbol defineSymbol(int symbolType, JPNode defNode, JPNode idNode) {
-    LOG.trace("Entering defineSymbol {}", symbolType, defNode, idNode);
+    LOG.trace("Entering defineSymbol {} - {} - {}", symbolType, defNode, idNode);
     /*
      * Some notes: We need to create the Symbol right away, because further actions in the grammar might need to set
      * attributes on it. We can't add it to the scope yet, because of statements like this: def var xyz like xyz. The
@@ -850,7 +850,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public void methodBegin(JPNode blockAST, JPNode idNode) {
-    LOG.trace("Entering methodBegin {}", blockAST, idNode);
+    LOG.trace("Entering methodBegin {} - {}", blockAST, idNode);
 
     scopeAdd(blockAST);
     BlockNode blockNode = (BlockNode) idNode.getParent();

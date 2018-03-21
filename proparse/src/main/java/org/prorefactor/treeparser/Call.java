@@ -117,7 +117,7 @@ public class Call extends SemanticRecord {
   }
 
   public boolean isLocal() {
-    return getFilename() == externalName;
+    return (externalName == null) || externalName.equals(getFilename());
   }
 
   public boolean isPersistent() {

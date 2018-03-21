@@ -79,12 +79,11 @@ public class Lexer  {
         currText.setLength(1);
         currText.setCharAt(0, (char) preserveChar);
         preserveDrop(); // we are done with the preservation
-        switch (preserveChar) {
-          case '.':
-            return periodStart();
-          case ':':
-            return colon();
-        } // switch
+        if (preserveChar == '.') {
+          return periodStart();
+        } else if (preserveChar == ':') {
+          return colon();
+        }
       }
 
       // Proparse Directive
