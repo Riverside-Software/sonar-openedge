@@ -472,6 +472,7 @@ public class TP01Support implements ITreeParserAction {
     buffer.setDefOrIdNode(defNode);
     currSymbol = buffer;
     currDefTable = buffer;
+    currDefTableLike = null;
     currDefTableUseIndex = false;
     idNode.setLink(IConstants.SYMBOL, buffer);
   }
