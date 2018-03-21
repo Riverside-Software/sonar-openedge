@@ -26,12 +26,12 @@ public class ListingParser {
   /**
    * Ctor
    * 
-   * @param file File name shouldn't containn any space character
+   * @param file File name shouldn't contain any space character
    * @throws IOException
    */
   public ListingParser(File file, String relativeName) throws IOException {
     if (file.getAbsolutePath().indexOf(' ') != -1) {
-      throw new IllegalArgumentException("File name shouldn't contain space character");
+      throw new IllegalArgumentException("File name shouldn't contain space character - '" + file.getAbsolutePath() + "'");
     }
     this.relativeName = relativeName;
     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
