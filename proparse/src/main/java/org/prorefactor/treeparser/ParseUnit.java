@@ -220,7 +220,7 @@ public class ParseUnit {
     if (this.getTopNode() == null)
       parse();
     ITreeParserAction action = new TP01Support(session, this);
-    TreeParser01 tp = new TreeParser01(session, action);
+    TreeParser01 tp = new TreeParser01(action);
     treeParser(tp);
     LOGGER.trace("Exiting ParseUnit#treeParser01()");
   }
@@ -232,7 +232,7 @@ public class ParseUnit {
   public void treeParser01(ITreeParserAction action) throws ANTLRException {
     if (this.getTopNode() == null)
       parse();
-    TreeParser01 tp = new TreeParser01(session, action);
+    TreeParser01 tp = new TreeParser01(action);
     treeParser(tp);
   }
 

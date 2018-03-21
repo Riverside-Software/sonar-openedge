@@ -2154,7 +2154,7 @@ data_relation:
   ;
 
 parent_id_relation:
-    PARENTIDRELATION^ (n:identifier)?
+    PARENTIDRELATION^ (identifier)?
     FOR record COMMA record
     PARENTIDFIELD field
     ( PARENTFIELDSBEFORE LEFTPAREN field (COMMA field)* RIGHTPAREN)?

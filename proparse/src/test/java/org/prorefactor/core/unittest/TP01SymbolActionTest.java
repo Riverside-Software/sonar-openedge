@@ -54,7 +54,7 @@ public class TP01SymbolActionTest {
   public void testCompileFileRoutines() throws ANTLRException {
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/tp01ProcessTests/compile-file.p"), session);
     TP01Support walkAction = new TP01Support(session, pu);
-    pu.treeParser(new TreeParser01(session, walkAction));
+    pu.treeParser(new TreeParser01(walkAction));
 
     // Create expected symbols.
     RoutineHandler enableUi = new RoutineHandler("enable-ui", walkAction);
@@ -78,7 +78,7 @@ public class TP01SymbolActionTest {
   public void testCompileFileVars() throws ANTLRException {
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/tp01ProcessTests/compile-file.p"), session);
     TP01Support walkAction = new TP01Support(session, pu);
-    pu.treeParser(new TreeParser01(session, walkAction));
+    pu.treeParser(new TreeParser01(walkAction));
 
     // Create expected symbols.
     String sourcePath = "sourcePath";
