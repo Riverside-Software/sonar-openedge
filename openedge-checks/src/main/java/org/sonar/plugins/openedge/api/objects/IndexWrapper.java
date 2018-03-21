@@ -1,6 +1,6 @@
-/**
- * OpenEdge plugin for SonarQube - OpenEdge checks module
- * Copyright (C) 2015-2018 Riverside Software
+/*
+ * OpenEdge plugin for SonarQube
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or

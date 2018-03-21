@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,9 +8,9 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
- */
+ *    Gilles Querret - Almost anything written after 2015
+ */ 
 
-// Primary tree walker.
 // This tree parser adds base attributes to the tree, such as name resolution, scoping, etc.
 // To find actions taken within this grammar, search for "action.", which is the tree parser action object.
 
