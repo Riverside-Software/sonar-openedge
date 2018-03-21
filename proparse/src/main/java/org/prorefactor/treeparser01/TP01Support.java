@@ -483,7 +483,12 @@ public class TP01Support implements ITreeParserAction {
       for (IIndex idx : currDefTableLike.getIndexes()) {
         Index newIdx = new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary());
         for (IField fld : idx.getFields()) {
-          newIdx.addField(newIdx.getTable().lookupField(fld.getName()));
+          IField ifld = newIdx.getTable().lookupField(fld.getName());
+          if (ifld == null) {
+            LOG.info("Unable to find field name {} in table {}", fld.getName(), currDefTable.getTable().getName());
+          } else {
+            newIdx.addField(ifld);
+          }
         }
         currDefTable.getTable().add(newIdx);
       }
