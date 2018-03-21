@@ -164,10 +164,16 @@ public class Table {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof Table) {
-      return ((Table) obj).name.equalsIgnoreCase(name);
-    } else
+    if (obj == this) {
+      return true;
+    }
+    if (obj == null) {
       return false;
+    }
+    if (this.getClass() == obj.getClass()) {
+      return ((Table) obj).name.equalsIgnoreCase(name);
+    }
+    return false;
   }
 
   @Override

@@ -815,7 +815,7 @@ public class TP01Support implements ITreeParserAction {
      * However, if this statement re-defines the formal args, then we use this statement's scope - because the formal
      * arg names from here will be in effect rather than the names from the FORWARD. (The names don't have to match.)
      */
-    if (currentRoutine.getParameters().size() > 0)
+    if (!currentRoutine.getParameters().isEmpty())
       return;
     TreeParserSymbolScope forwardScope = funcForwards.get(idAST.getText());
     if (forwardScope != null) {

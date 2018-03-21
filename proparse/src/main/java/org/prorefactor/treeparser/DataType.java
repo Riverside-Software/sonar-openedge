@@ -63,7 +63,7 @@ public class DataType {
   private String progressName;
 
   private DataType(int tokenType, String progressName) {
-    this.tokenType = new Integer(tokenType);
+    this.tokenType = tokenType;
     this.progressName = progressName;
     nameMap.put(progressName, this);
     tokenTypeMap.put(this.tokenType, this);
@@ -74,7 +74,7 @@ public class DataType {
    * check with assert or throw might be appropriate.
    */
   public static DataType getDataType(int tokenType) {
-    return tokenTypeMap.get(new Integer(tokenType));
+    return tokenTypeMap.get(tokenType);
   }
 
   /**

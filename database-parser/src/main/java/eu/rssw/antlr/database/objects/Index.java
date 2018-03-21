@@ -112,10 +112,16 @@ public class Index {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof Index) {
-      return ((Index) obj).name.equalsIgnoreCase(name);
-    } else
+    if (obj == this) {
+      return true;
+    }
+    if (obj == null) {
       return false;
+    }
+    if (this.getClass() == obj.getClass()) {
+      return ((Index) obj).name.equalsIgnoreCase(name);
+    }
+    return false;
   }
 
   @Override

@@ -57,10 +57,15 @@ public class LineData {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof LineData) {
+    if (obj == this) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() == obj.getClass()) {
       return ((LineData) obj).lineNumber == lineNumber;
     }
-
     return false;
   }
 
