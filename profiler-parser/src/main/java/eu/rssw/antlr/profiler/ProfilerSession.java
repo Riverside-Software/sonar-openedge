@@ -68,7 +68,7 @@ public class ProfilerSession {
   public void initializeCallTreeMatrix() {
     if (adjMatrix != null)
       throw new RuntimeException("Matrix already initialized");
-    adjMatrix = new int[modules.keySet().size() + 1][modules.keySet().size() + 1];
+    adjMatrix = new int[highestModuleId + 1][highestModuleId + 1];
   }
 
   public boolean isCallTreeInitialized() {
@@ -96,11 +96,11 @@ public class ProfilerSession {
   public void addModule(Module module) {
     allModules.put(module.getId(), module);
     Module m1 = modulesLookup.get(module.getModuleObject());
+    highestModuleId = module.getId() > highestModuleId ? module.getId() : highestModuleId;
     if (m1 == null) {
       moduleList.add(module);
       modules.put(module.getId(), module);
       modulesLookup.put(module.getName(), module);
-      highestModuleId = module.getId() > highestModuleId ? module.getId() : highestModuleId;
     } else {
       // Sub-procedures modules point to the main module
       modules.put(module.getId(), m1);
