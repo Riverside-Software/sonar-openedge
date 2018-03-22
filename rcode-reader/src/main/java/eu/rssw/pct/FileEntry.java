@@ -100,8 +100,16 @@ public class FileEntry implements Comparable<FileEntry> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof FileEntry)
-            return fileName.equals(((FileEntry) obj).getFileName());
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null) {
         return false;
+      }
+      if (this.getClass() == obj.getClass()) {
+        return ((FileEntry) obj).fileName.equalsIgnoreCase(fileName);
+      }
+      return false;
     }
+
 }

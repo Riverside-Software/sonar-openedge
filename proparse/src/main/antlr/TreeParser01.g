@@ -50,7 +50,6 @@ options {
 {
   private final static Logger LOGGER = LoggerFactory.getLogger(TreeParser01.class);
 
-  private RefactorSession refSession;
   // By default, the action object is a new TP01Support
   private ITreeParserAction action;
 
@@ -91,10 +90,9 @@ options {
   // --- The above are for all tree parsers, below are for TreeParser01 ---
 
   /** Create a tree parser with a specific action object. */
-  public TreeParser01(RefactorSession refSession, ITreeParserAction actionObject) {
+  public TreeParser01(ITreeParserAction actionObject) {
     this();
     this.action = actionObject;
-    this.refSession = refSession;
   }
 
   // Set the action object.

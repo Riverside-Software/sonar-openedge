@@ -161,10 +161,9 @@ public class Block {
 
   /** Can a frame be scoped to this block? */
   private boolean canScopeFrame() {
-    switch (blockStatementNode.getType()) {
-      case ProParserTokenTypes.REPEAT:
-      case ProParserTokenTypes.FOR:
-        return true;
+    if ((blockStatementNode.getNodeType() == ABLNodeType.REPEAT)
+        || (blockStatementNode.getNodeType() == ABLNodeType.FOR)) {
+      return true;
     }
     return isRootBlock();
   }

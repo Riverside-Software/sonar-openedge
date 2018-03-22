@@ -107,7 +107,7 @@ public class IConstants {
   /** A valid value for setLink() and getLink() */
   public static final int SYMBOL = -210;
   /** A valid value for setLink() and getLink() */
-  public static final int TETNode = -211;
+  public static final int TET_NODE = -211;
 
   /**
    * A valid value for setLink() and getLink(). Link to a BufferScope object, set by tp01 for RECORD_NAME nodes and for

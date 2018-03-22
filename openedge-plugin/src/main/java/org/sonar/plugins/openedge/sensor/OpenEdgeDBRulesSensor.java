@@ -90,7 +90,7 @@ public class OpenEdgeDBRulesSensor implements Sensor {
 
     LOG.info("AST Generation | time={} ms", parseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
-      LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
+      LOG.info("Rule {} | time={} ms", entry.getKey(), entry.getValue());
     }
   }
 
