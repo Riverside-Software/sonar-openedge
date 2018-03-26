@@ -1,3 +1,22 @@
+/*
+ * OpenEdge plugin for SonarQube
+ * Copyright (c) 2015-2018 Riverside Software
+ * contact AT riverside DASH software DOT fr
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
+ */
 package eu.rssw.antlr.profiler;
 
 import java.io.PrintStream;
@@ -68,7 +87,7 @@ public class ProfilerSession {
   public void initializeCallTreeMatrix() {
     if (adjMatrix != null)
       throw new RuntimeException("Matrix already initialized");
-    adjMatrix = new int[modules.keySet().size() + 1][modules.keySet().size() + 1];
+    adjMatrix = new int[highestModuleId + 1][highestModuleId + 1];
   }
 
   public boolean isCallTreeInitialized() {
@@ -96,11 +115,11 @@ public class ProfilerSession {
   public void addModule(Module module) {
     allModules.put(module.getId(), module);
     Module m1 = modulesLookup.get(module.getModuleObject());
+    highestModuleId = module.getId() > highestModuleId ? module.getId() : highestModuleId;
     if (m1 == null) {
       moduleList.add(module);
       modules.put(module.getId(), module);
       modulesLookup.put(module.getName(), module);
-      highestModuleId = module.getId() > highestModuleId ? module.getId() : highestModuleId;
     } else {
       // Sub-procedures modules point to the main module
       modules.put(module.getId(), m1);

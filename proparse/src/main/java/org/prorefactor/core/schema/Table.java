@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +8,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - Almost anything written after 2015
  *******************************************************************************/ 
 package org.prorefactor.core.schema;
 
@@ -23,9 +25,10 @@ import org.prorefactor.treeparser.TreeParserRootSymbolScope;
  * compile unit. For temp and work tables, the database is Schema.nullDatabase.
  */
 public class Table implements ITable {
-  private IDatabase database;
-  private String name;
-  private int storetype = IConstants.ST_DBTABLE;
+  private final IDatabase database;
+  private final String name;
+  private final int storetype;
+
   private List<IField> fieldPosOrder = new ArrayList<>();
   private List<IIndex> indexes = new ArrayList<>();
   private SortedSet<IField> fieldSet = new TreeSet<>(Constants.FIELD_NAME_ORDER);
@@ -34,6 +37,7 @@ public class Table implements ITable {
   public Table(String name, IDatabase database) {
     this.name = name;
     this.database = database;
+    this.storetype = IConstants.ST_DBTABLE;
     database.add(this);
   }
 
@@ -47,6 +51,7 @@ public class Table implements ITable {
   /** Constructor for temporary "comparator" objects. */
   public Table(String name) {
     this.name = name;
+    this.storetype = IConstants.ST_DBTABLE;
     database = Constants.nullDatabase;
   }
 
@@ -54,6 +59,11 @@ public class Table implements ITable {
   public void add(IField field) {
     fieldSet.add(field);
     fieldPosOrder.add(field);
+  }
+
+  @Override
+  public void add(IIndex index) {
+    indexes.add(index);
   }
 
   public ITable copyBare(TreeParserRootSymbolScope scope) {
@@ -85,6 +95,15 @@ public class Table implements ITable {
   @Override
   public List<IIndex> getIndexes() {
     return indexes;
+  }
+
+  @Override
+  public IIndex lookupIndex(String name) {
+    for (IIndex idx : indexes) {
+      if (idx.getName().equalsIgnoreCase(name))
+        return idx;
+    }
+    return null;
   }
 
   @Override

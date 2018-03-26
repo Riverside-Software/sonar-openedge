@@ -1,3 +1,22 @@
+/*
+ * OpenEdge plugin for SonarQube
+ * Copyright (c) 2015-2018 Riverside Software
+ * contact AT riverside DASH software DOT fr
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
+ */
 package eu.rssw.antlr.database;
 
 import static org.testng.Assert.assertEquals;
@@ -8,8 +27,10 @@ import static org.testng.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import org.testng.annotations.Test;
 
@@ -20,6 +41,17 @@ import eu.rssw.antlr.database.objects.Trigger;
 import eu.rssw.antlr.database.objects.TriggerType;
 
 public class TestDumpFile {
+
+  @Test
+  public void testInputStream() throws IOException {
+    InputStream stream1 = new FileInputStream("src/test/resources/sp3k.df");
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(stream1, Charset.forName("utf-8"), "sp3k");
+    assertEquals(db.getTable("Tbl1").getDescription(), "éç");
+
+    InputStream stream2 = new FileInputStream("src/test/resources/sp4k.df");
+    DatabaseDescription db2 = DumpFileUtils.getDatabaseDescription(stream2, Charset.forName("utf-8"), "sp4k");
+    assertEquals(db2.getTable("Tbl1").getDescription(), "Ã©Ã§");
+  }
 
   @Test
   public void testSports2000() throws IOException {

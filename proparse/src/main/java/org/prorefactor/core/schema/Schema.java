@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +8,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - Almost anything written after 2015
  *******************************************************************************/ 
 package org.prorefactor.core.schema;
 
@@ -129,7 +131,9 @@ public class Schema implements ISchema {
   }
 
   private final void loadSchema(File file) throws IOException {
-    Files.asCharSource(file, Charset.defaultCharset()).readLines(new SchemaLineProcessor());
+    Database db = new Database(Files.getNameWithoutExtension(file.getName()));
+    dbSet.add(db);
+    Files.asCharSource(file, Charset.defaultCharset()).readLines(new SchemaLineProcessor(db));
   }
 
   /**
@@ -251,37 +255,44 @@ public class Schema implements ISchema {
     private IDatabase currDatabase;
     private Table currTable;
 
-    public SchemaLineProcessor() {
-      this(null);
-    }
-
     public SchemaLineProcessor(IDatabase currDatabase) {
       this.currDatabase = currDatabase;
     }
 
     @Override
     public boolean processLine(String line) throws IOException {
-      List<String> list = Splitter.on(' ').omitEmptyStrings().trimResults().splitToList(line);
-      // Stop processing on empty line
-      if ((list == null) || (list.size() < 2)) {
-        return false;
+      if (line.startsWith("S")) {
+        // No support for sequences
+      } else if (line.startsWith("T")) {
+        currTable = new Table(line.substring(1), currDatabase);
+        currDatabase.add(currTable);
+        allTables.add(currTable);
+      } else if (line.startsWith("F")) {
+        // FieldName:DataType:Extent
+        int ch1 = line.indexOf(':');
+        int ch2 = line.lastIndexOf(':');
+        if ((currTable == null) || (ch1 == -1) || (ch2 == -1))
+          throw new IOException("Invalid file format: " + line);
+        Field f = new Field(line.substring(1, ch1), currTable);
+        f.setDataType(DataType.getDataType(line.substring(ch1 + 1, ch2).toUpperCase()));
+        if (f.getDataType() == null)
+          throw new IOException("Unknown datatype: " + line.substring(ch1 + 1, ch2));
+        f.setExtent(Integer.parseInt(line.substring(ch2 + 1)));
+        currTable.add(f);
+      } else if (line.startsWith("I")) {
+        if (currTable == null)
+          throw new IOException("No associated table for " + line);
+        // IndexName:Attributes:Field1:Field2:...
+        List<String> lst = Splitter.on(':').trimResults().splitToList(line);
+        if (lst.size() < 3)
+          throw new IOException("Invalid file format: " + line);
+        Index i = new Index(currTable, lst.get(0).substring(1), lst.get(1).indexOf('U') > -1, lst.get(1).indexOf('P') > -1);
+        for (int zz = 2; zz < lst.size(); zz++) {
+          i.addField(currTable.lookupField(lst.get(zz).substring(1)));
+        }
+        currTable.add(i);
       }
-      switch (list.get(0)) {
-        case "::":
-          currDatabase = new Database(list.get(1));
-          dbSet.add(currDatabase);
-          break;
-        case ":":
-          currTable = new Table(list.get(1), currDatabase);
-          allTables.add(currTable);
-          break;
-        default:
-          Field field = new Field(list.get(0), currTable);
-          field.setDataType(DataType.getDataType(list.get(1)));
-          if (field.getDataType() == null)
-            throw new IOException("Unknown datatype: " + list.get(1));
-          field.setExtent(Integer.parseInt(list.get(2)));
-      }
+
       return true;
     }
 

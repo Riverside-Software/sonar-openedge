@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2017 Riverside Software
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -52,17 +52,17 @@ public class OpenEdgeDBColorizer implements Sensor {
 
     for (InputFile file : context.fileSystem().inputFiles(
         context.fileSystem().predicates().hasLanguage(Constants.DB_LANGUAGE_KEY))) {
-      LOG.debug("DF syntax highlight on {}", file.relativePath());
+      LOG.debug("DF syntax highlight on {}", file);
       try {
         highlightFile(context, file);
       } catch (RuntimeException | IOException caught) {
-        LOG.error("Unable to lex file " + file.relativePath(), caught);
+        LOG.error("Unable to lex file " + file, caught);
       }
     }
   }
 
   private void highlightFile(SensorContext context, InputFile file) throws IOException {
-    DumpFileGrammarLexer lexer = new DumpFileGrammarLexer(CharStreams.fromPath(file.path()));
+    DumpFileGrammarLexer lexer = new DumpFileGrammarLexer(CharStreams.fromStream(file.inputStream()));
     NewHighlighting highlighting = context.newHighlighting().onFile(file);
 
     Token tok = lexer.nextToken();

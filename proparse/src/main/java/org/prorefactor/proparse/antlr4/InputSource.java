@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,11 +8,14 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - Almost anything written after 2015
  *******************************************************************************/ 
 package org.prorefactor.proparse.antlr4;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import javax.annotation.CheckForNull;
@@ -21,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.io.ByteProcessor;
-import com.google.common.io.Files;
+import com.google.common.io.ByteSource;
+import com.google.common.io.ByteStreams;
 
 /**
  * The bottom InputSource object for an IncludeFile is the input for the include file itself.
@@ -66,14 +71,19 @@ public class InputSource {
   }
 
   public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean isPrimary) throws IOException {
-    LOGGER.trace("New InputSource object for include file '{}'", file.getName());
+    this(sourceNum, file.getName(), new FileInputStream(file), charset, fileIndex, isPrimary);
+  }
+
+  public InputSource(int sourceNum, String fileName, InputStream file, Charset charset, int fileIndex, boolean isPrimary) throws IOException {
+    LOGGER.trace("New InputSource object for include stream '{}'", fileName);
     this.sourceNum = sourceNum;
     this.primaryInput = isPrimary;
     this.fileIndex = fileIndex;
-    if (Files.asByteSource(file).read(new XCodedFileByteProcessor())) {
-      throw new XCodedFileException(file.getAbsolutePath());
+    ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(file));
+    if (src.read(new XCodedFileByteProcessor())) {
+      throw new XCodedFileException(fileName);
     }
-    this.fileContent = Files.asCharSource(file, charset).read();
+    this.fileContent = src.asCharSource(charset).read();
     this.macroExpansion = false;
   }
 
@@ -143,7 +153,7 @@ public class InputSource {
 
     @Override
     public boolean processBytes(byte[] buf, int off, int len) throws IOException {
-      isXCoded = (buf[0] == 0x11) || (buf[0] == 0x13);
+      isXCoded = (len > 0) && ((buf[0] == 0x11) || (buf[0] == 0x13));
       // No need to read more bytes
       return false;
     }

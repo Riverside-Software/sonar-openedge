@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +8,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - Almost anything written after 2015
  *******************************************************************************/ 
 package org.prorefactor.core.schema;
 
@@ -15,8 +17,7 @@ import java.util.TreeSet;
 
 /**
  * Database objects are created by the Schema class, and they are used when looking up table names from 4gl compile
- * units. "id" field is a database number, starting at one. Might be the logical database number - depends on how you
- * use this.
+ * units.
  */
 public class Database implements IDatabase {
   private final String name;
@@ -30,10 +31,6 @@ public class Database implements IDatabase {
     this.name = name;
   }
 
-  /**
-   * Add new Table object
-   * @param table
-   */
   @Override
   public void add(ITable table) {
     tableSet.add(table);

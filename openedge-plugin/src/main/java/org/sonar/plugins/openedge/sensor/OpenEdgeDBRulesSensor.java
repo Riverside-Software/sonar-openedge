@@ -1,6 +1,6 @@
 /*
- * OpenEdge DB plugin for SonarQube
- * Copyright (C) 2013-2016 Riverside Software
+ * OpenEdge plugin for SonarQube
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -69,9 +69,9 @@ public class OpenEdgeDBRulesSensor implements Sensor {
     for (InputFile file : context.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.DB_LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       try {
-        LOG.debug("Generating ParseTree for dump file {}", file.relativePath());
+        LOG.debug("Generating ParseTree for dump file {}", file);
         long time = System.currentTimeMillis();
-        ParseTree tree = DumpFileUtils.getDumpFileParseTree(file.file());
+        ParseTree tree = DumpFileUtils.getDumpFileParseTree(file.inputStream(), file.charset());
         parseTime += (System.currentTimeMillis() - time);
 
         for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules().entrySet()) {
@@ -84,13 +84,13 @@ public class OpenEdgeDBRulesSensor implements Sensor {
         }
 
       } catch (IOException caught) {
-        LOG.error("Unable to analyze {}", file.relativePath(), caught);
+        LOG.error("Unable to analyze {}", file, caught);
       }
     }
 
     LOG.info("AST Generation | time={} ms", parseTime);
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
-      LOG.info("Rule {} | time={} ms", new Object[] {entry.getKey(), entry.getValue()});
+      LOG.info("Rule {} | time={} ms", entry.getKey(), entry.getValue());
     }
   }
 

@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +8,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - Almost anything written after 2015
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
@@ -24,8 +26,12 @@ import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
+import org.sonar.plugins.openedge.api.objects.RCodeTTWrapper;
+
+import com.google.common.base.Strings;
 
 import eu.rssw.pct.TypeInfo;
+import eu.rssw.pct.elements.BufferElement;
 
 /**
  * A ScopeRoot object is created for each compile unit, and it represents the program (topmost) scope. For classes, it
@@ -189,7 +195,17 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     TypeInfo info = typeInfo;
     while (info != null) {
       if (info.hasBuffer(name)) {
-        ITable tbl = new Table(name, IConstants.ST_TTABLE);
+        BufferElement elem = info.getBuffer(name);
+        ITable tbl = null;
+        if (!Strings.isNullOrEmpty(elem.getDatabaseName())) {
+          tbl = refSession.getSchema().lookupTable(elem.getDatabaseName(), elem.getTableName());
+        } else {
+          tbl = lookupTempTable(elem.getTableName()).getTable();
+        }
+        if (tbl == null) {
+          // Defaults to fake temp-table
+          tbl = new Table(name, IConstants.ST_TTABLE);
+        }
         return new TableBuffer(name, this, tbl);
       }
       info = refSession.getTypeInfo(info.getParentTypeName());
@@ -206,8 +222,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     TypeInfo info = typeInfo;
     while (info != null) {
       if (info.hasTempTable(name)) {
-        ITable tbl = new Table(name, IConstants.ST_TTABLE);
-        return new TableBuffer(name, this, tbl);
+        return new TableBuffer(name, this, new RCodeTTWrapper(info.getTempTable(name)));
       }
       info = refSession.getTypeInfo(info.getParentTypeName());
     }

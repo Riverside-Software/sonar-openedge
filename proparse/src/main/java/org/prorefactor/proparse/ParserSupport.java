@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +8,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - Almost anything written after 2015
  *******************************************************************************/ 
 package org.prorefactor.proparse;
 
@@ -19,6 +21,8 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.refactor.RefactorSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 
@@ -29,6 +33,8 @@ import antlr.Token;
  * One instance per class being parsed.
  */
 public class ParserSupport {
+  private static final Logger LOG = LoggerFactory.getLogger(ParserSupport.class);
+
   private final RefactorSession session;
   private final ClassFinder classFinder;
   // Scope for the compile unit or class. It might be "sub" to a super scope in a class hierarchy
@@ -96,24 +102,20 @@ public class ParserSupport {
 
   // Functions triggered from proparse.g
 
-  /**
-   * When parsing class, all methods are added as part of the classState rule.
-   */
-  void declareMethod(String s) {
-    // Not used anymore
-  }
-
   void defBuffer(String bufferName, String tableName) {
+    LOG.trace("defBuffer {} to {}", bufferName, tableName);
     currentScope.defineBuffer(bufferName, tableName);
   }
 
   void defineClass(JPNode classNode) {
+    LOG.trace("defineClass");
     JPNode idNode = classNode.getFirstChild();
     className = ClassFinder.dequote(idNode.getText());
     unitScope.attachTypeInfo(session.getTypeInfo(className));
   }
 
   void defInterface(JPNode interfaceNode) {
+    LOG.trace("defineInterface");
     unitIsInterface = true;
     className = ClassFinder.dequote(interfaceNode.getFirstChild().getText());
   }

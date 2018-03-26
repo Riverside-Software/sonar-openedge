@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2016 Riverside Software
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -35,28 +35,18 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class OpenEdgeWarningsSensorTest {
-  private final static boolean IS_WINDOWS = (System.getenv("windir") != null);
-
   @Test
   public void testWarnings() throws IOException {
     SensorContextTester context = TestProjectSensorContext.createContext();
     context.setActiveRules(createRules());
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings);
     sensor.execute(context);
 
-    // Unix is case-sensitive, so one issue can't be reported
-    Assert.assertEquals(context.allIssues().size(), IS_WINDOWS ? 4 : 3);
+    // Case-sensitive, so one issue can't be reported
+    Assert.assertEquals(context.allIssues().size(), 3);
     Iterator<Issue> issues = context.allIssues().iterator();
     Issue issue;
-
-    if (IS_WINDOWS) {
-      // Case sensitive name - So doesn't work on Linux
-      issue = issues.next();
-      Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
-          TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
-      Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 1);
-    }
 
     // Starts with ../
     issue = issues.next();

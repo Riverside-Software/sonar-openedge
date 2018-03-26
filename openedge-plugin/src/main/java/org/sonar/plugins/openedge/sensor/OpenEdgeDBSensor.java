@@ -1,6 +1,6 @@
 /*
- * OpenEdge DB plugin for SonarQube
- * Copyright (C) 2013-2016 Riverside Software
+ * OpenEdge plugin for SonarQube
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -33,6 +33,8 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 
+import com.google.common.io.Files;
+
 import eu.rssw.antlr.database.DumpFileUtils;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
 import eu.rssw.antlr.database.objects.Field;
@@ -57,11 +59,14 @@ public class OpenEdgeDBSensor implements Sensor {
     for (InputFile file : sensorContext.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.DB_LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       try {
-        LOG.info("Analyzing {}", file.relativePath());
+        LOG.info("Analyzing {}", file);
 
-        DatabaseDescription desc = DumpFileUtils.getDatabaseDescription(file.file());
-        sensorContext.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TABLES).withValue(desc.getTables().size()).save();
-        sensorContext.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_SEQUENCES).withValue(desc.getSequences().size()).save();
+        DatabaseDescription desc = DumpFileUtils.getDatabaseDescription(file.inputStream(), file.charset(),
+            Files.getNameWithoutExtension(file.filename()));
+        sensorContext.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TABLES).withValue(
+            desc.getTables().size()).save();
+        sensorContext.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_SEQUENCES).withValue(
+            desc.getSequences().size()).save();
 
         int numFlds = 0;
         int numIdx = 0;

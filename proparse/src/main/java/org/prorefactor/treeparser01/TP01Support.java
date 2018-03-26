@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +8,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - Almost anything written after 2015
  *******************************************************************************/ 
 package org.prorefactor.treeparser01;
 
@@ -24,7 +26,9 @@ import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
+import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.core.schema.Index;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
@@ -96,6 +100,10 @@ public class TP01Support implements ITreeParserAction {
   private TableBuffer lastTableReferenced;
   private TableBuffer prevTableReferenced;
   private TableBuffer currDefTable;
+  private Index currDefIndex;
+  // LIKE tables management for index copy
+  private boolean currDefTableUseIndex = false;
+  private ITable currDefTableLike = null;
 
   // Temporary work-around
   private boolean inDefineEvent = false;
@@ -163,7 +171,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public void callEnd() {
-    LOG.trace("Entering callEnd {}");
+    LOG.trace("Entering callEnd");
     // Record the call in the current context.
     currentScope.registerCall(wipCalls.getFirst());
     wipCalls.removeFirst();
@@ -195,7 +203,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public void callMethodEnd() {
-    LOG.trace("Entering callMethodEnd {}");
+    LOG.trace("Entering callMethodEnd");
     // Record the call in the current context.
     currentScope.registerCall(wipCalls.getFirst());
     wipCalls.removeFirst();
@@ -370,7 +378,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public Event defineEvent(JPNode defNode, JPNode idNode) {
-    LOG.trace("Entering defineEvent {}", defNode, idNode);
+    LOG.trace("Entering defineEvent {} - {}", defNode, idNode);
     String name = idNode.getText();
     if (name == null || name.length() == 0)
       name = idNode.getNodeType().name();
@@ -383,7 +391,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public Symbol defineSymbol(int symbolType, JPNode defNode, JPNode idNode) {
-    LOG.trace("Entering defineSymbol {}", symbolType, defNode, idNode);
+    LOG.trace("Entering defineSymbol {} - {} - {}", symbolType, defNode, idNode);
     /*
      * Some notes: We need to create the Symbol right away, because further actions in the grammar might need to set
      * attributes on it. We can't add it to the scope yet, because of statements like this: def var xyz like xyz. The
@@ -427,10 +435,35 @@ public class TP01Support implements ITreeParserAction {
     LOG.trace("Entering defineTableLike {}", tableAST);
     // Get table for "LIKE table"
     ITable table = astTableLink(tableAST);
+    currDefTableLike = table;
     // For each field in "table", create a field def in currDefTable
     for (IField field : table.getFieldPosOrder()) {
       rootScope.defineTableField(field.getName(), currDefTable).assignAttributesLike(field);
     }
+  }
+
+  @Override
+  public void defineUseIndex(JPNode recNode, JPNode idNode) throws SemanticException {
+    LOG.trace("Entering defineUseIndex {}", idNode);
+    ITable table = astTableLink(recNode);
+    IIndex idx = table.lookupIndex(idNode.getText());
+    currDefTable.getTable().add(new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary()));
+    currDefTableUseIndex = true;
+  }
+
+  @Override
+  public void defineIndexInitialize(JPNode idNode, JPNode unique, JPNode primary, JPNode word) throws SemanticException {
+    LOG.trace("Entering defineIndexInitialize {} - {} - {} - {}", idNode, unique, primary, word);
+    currDefIndex = new Index(currDefTable.getTable(), idNode.getText(), (unique != null), (primary != null));
+    currDefTable.getTable().add(currDefIndex);
+  }
+
+  @Override
+  public void defineIndexField(JPNode idNode) throws SemanticException {
+    LOG.trace("Entering defineIndexField{}", idNode);
+    IField fld = currDefTable.getTable().lookupField(idNode.getText());
+    if (fld != null)
+      currDefIndex.addField(fld);
   }
 
   public void defineTable(JPNode defNode, JPNode idNode, int storeType) {
@@ -439,11 +472,34 @@ public class TP01Support implements ITreeParserAction {
     buffer.setDefOrIdNode(defNode);
     currSymbol = buffer;
     currDefTable = buffer;
+    currDefTableLike = null;
+    currDefTableUseIndex = false;
     idNode.setLink(IConstants.SYMBOL, buffer);
   }
 
   @Override
-  public void defineTemptable(JPNode defAST, JPNode idAST) {
+  public void postDefineTempTable(JPNode defAST, JPNode idNode) throws SemanticException {
+    LOG.trace("Entering postDefineTempTable {} {}", defAST, idNode);
+    // In case of DEFINE TT LIKE, indexes are copied only if USE-INDEX and INDEX are never used 
+    if ((currDefTableLike != null) && !currDefTableUseIndex && currDefTable.getTable().getIndexes().isEmpty()) {
+      LOG.trace("Copying all indexes from {}", currDefTableLike.getName());
+      for (IIndex idx : currDefTableLike.getIndexes()) {
+        Index newIdx = new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary());
+        for (IField fld : idx.getFields()) {
+          IField ifld = newIdx.getTable().lookupField(fld.getName());
+          if (ifld == null) {
+            LOG.info("Unable to find field name {} in table {}", fld.getName(), currDefTable.getTable().getName());
+          } else {
+            newIdx.addField(ifld);
+          }
+        }
+        currDefTable.getTable().add(newIdx);
+      }
+    }
+  }
+
+  @Override
+  public void defineTempTable(JPNode defAST, JPNode idAST) {
     defineTable((JPNode) defAST, (JPNode) idAST, IConstants.ST_TTABLE);
   }
 
@@ -759,7 +815,7 @@ public class TP01Support implements ITreeParserAction {
      * However, if this statement re-defines the formal args, then we use this statement's scope - because the formal
      * arg names from here will be in effect rather than the names from the FORWARD. (The names don't have to match.)
      */
-    if (currentRoutine.getParameters().size() > 0)
+    if (!currentRoutine.getParameters().isEmpty())
       return;
     TreeParserSymbolScope forwardScope = funcForwards.get(idAST.getText());
     if (forwardScope != null) {
@@ -794,7 +850,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public void methodBegin(JPNode blockAST, JPNode idNode) {
-    LOG.trace("Entering methodBegin{}", blockAST, idNode);
+    LOG.trace("Entering methodBegin {} - {}", blockAST, idNode);
 
     scopeAdd(blockAST);
     BlockNode blockNode = (BlockNode) idNode.getParent();
@@ -809,7 +865,7 @@ public class TP01Support implements ITreeParserAction {
 
   @Override
   public void methodEnd(JPNode blockAST) {
-    LOG.trace("Entering methodEnd{}", blockAST);
+    LOG.trace("Entering methodEnd {}", blockAST);
     scopeClose(blockAST);
     currentRoutine = rootRoutine;
   }
@@ -982,13 +1038,6 @@ public class TP01Support implements ITreeParserAction {
       throw new TreeParserException("Could not resolve table '" + nodeText + "'", node.getFilename(), node.getLine(), node.getColumn());
     }
     ITable table = buffer.getTable();
-    // If we get a mismatch between storetype here and the storetype determined
-    // by proparse.dll then there's a bug somewhere. This is just a double-check.
-    if (table.getStoretype() != node.attrGet(IConstants.STORETYPE)) {
-      throw new TreeParserException(
-          "Store type mismatch '" + node.attrGet(IConstants.STORETYPE) + "' / '" + table.getStoretype() + "'",
-          node.getFilename(), node.getLine(), node.getColumn());
-    }
     prevTableReferenced = lastTableReferenced;
     lastTableReferenced = buffer;
     // For an unnamed buffer, determine if it's abbreviated.

@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2017 Riverside Software
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -39,6 +39,7 @@ import org.sonar.api.batch.sensor.highlighting.TypeOfText;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.InputFileUtils;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
 public class OpenEdgeCodeColorizer implements Sensor {
@@ -65,21 +66,21 @@ public class OpenEdgeCodeColorizer implements Sensor {
 
     for (InputFile file : context.fileSystem().inputFiles(
         context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
-      LOG.debug("Syntax highlight on {}", file.relativePath());
+      LOG.debug("Syntax highlight on {}", file);
       try {
         highlightFile(context, session, file);
       } catch (UncheckedIOException | ProparseRuntimeException caught) {
         if (caught.getCause() instanceof XCodedFileException) {
-          LOG.error("Unable to highlight xcode'd file '{}", file.relativePath());
+          LOG.error("Unable to highlight xcode'd file '{}", file);
         } else {
-          LOG.error("Unable to lex file '{}'", file.relativePath(), caught);
+          LOG.error("Unable to lex file '{}'", file, caught);
         }
       }
     }
   }
 
   private void highlightFile(SensorContext context, RefactorSession session, InputFile file) {
-    TokenSource stream = new ParseUnit(file.file(), session).lex4();
+    TokenSource stream = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session).lex4();
 
     ProToken tok = (ProToken) stream.nextToken();
     ProToken nextTok = (ProToken) stream.nextToken();
@@ -111,7 +112,7 @@ public class OpenEdgeCodeColorizer implements Sensor {
           highlighting.highlight(file.newRange(start, end), textType);
         } catch (IllegalArgumentException caught) {
           LOG.error("File {} - Unable to highlight token type {} - Start {}:{} - End {}:{} - Remaining tokens skipped",
-              file.relativePath(), textType, tok.getLine(), tok.getCharPositionInLine(), tok.getEndLine(),
+              file, textType, tok.getLine(), tok.getCharPositionInLine(), tok.getEndLine(),
               tok.getEndCharPositionInLine());
           return;
         }

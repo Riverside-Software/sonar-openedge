@@ -1,6 +1,6 @@
-/**
+/*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2016 Riverside Software
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -82,42 +82,42 @@ public class OpenEdgeComponentsTest {
 
   private final static LicenceRegistrar LICENCE_ME_OE_2015 = new LicenceRegistrar() {
     @Override
-    public void register(Licence context) {
+    public void register(LicenseContext context) {
       context.registerLicence("123456789", "Me", "salt", "rssw-oe-main", LicenceRegistrar.LicenceType.COMMERCIAL,
           new byte[] {}, 1420074061000L);
     }
   };
   private final static LicenceRegistrar LICENCE_YOU_OE_2015 = new LicenceRegistrar() {
     @Override
-    public void register(Licence context) {
+    public void register(LicenseContext context) {
       context.registerLicence("987654321", "You", "salt", "rssw-oe-main", LicenceRegistrar.LicenceType.COMMERCIAL,
           new byte[] {}, 1420074061000L);
     }
   };
   private final static LicenceRegistrar LICENCE_YOU_OTHER_2015 = new LicenceRegistrar() {
     @Override
-    public void register(Licence context) {
+    public void register(LicenseContext context) {
       context.registerLicence("987654321", "You", "salt", "other-repo", LicenceRegistrar.LicenceType.COMMERCIAL,
           new byte[] {}, 1420074061000L);
     }
   };
   private final static LicenceRegistrar LICENCE_ME_OE_2025 = new LicenceRegistrar() {
     @Override
-    public void register(Licence context) {
+    public void register(LicenseContext context) {
       context.registerLicence("123456789", "Me", "salt", "rssw-oe-main", LicenceRegistrar.LicenceType.COMMERCIAL,
           new byte[] {}, 1735693261000L);
     }
   };
   private final static LicenceRegistrar LICENCE_YOU_OE_2025 = new LicenceRegistrar() {
     @Override
-    public void register(Licence context) {
+    public void register(LicenseContext context) {
       context.registerLicence("987654321", "You", "salt", "rssw-oe-main", LicenceRegistrar.LicenceType.COMMERCIAL,
           new byte[] {}, 1735693261000L);
     }
   };
   private final static LicenceRegistrar LICENCE_ME_OE_2030 = new LicenceRegistrar() {
     @Override
-    public void register(Licence context) {
+    public void register(LicenseContext context) {
       context.registerLicence("123456789", "Me", "salt", "rssw-oe-main", LicenceRegistrar.LicenceType.COMMERCIAL,
           new byte[] {}, 1893459661000L);
     }

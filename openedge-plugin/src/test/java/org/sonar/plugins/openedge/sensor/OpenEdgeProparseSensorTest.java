@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2016 Riverside Software
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -40,14 +40,14 @@ import org.testng.annotations.Test;
 
 public class OpenEdgeProparseSensorTest {
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testCPDPreprocessorExpansion() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
     context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
     context.settings().setProperty(Constants.CPD_METHODS, "TEST3");
     context.settings().setProperty(Constants.CPD_PROCEDURES, "adm-create-objects");
-
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
     OpenEdgeComponents components = new OpenEdgeComponents(null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
@@ -62,7 +62,7 @@ public class OpenEdgeProparseSensorTest {
   public void testListing() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
     OpenEdgeComponents components = new OpenEdgeComponents(null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
@@ -73,6 +73,7 @@ public class OpenEdgeProparseSensorTest {
         "Wrong number of transactions");
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testPreprocessorSettings01() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
@@ -82,7 +83,7 @@ public class OpenEdgeProparseSensorTest {
     context.settings().setProperty("sonar.oe.preprocessor.process-architecture", "32");
     context.settings().setProperty("sonar.oe.preprocessor.proversion", "12.0");
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
     assertFalse(oeSettings.getProparseSession(false).getProparseSettings().getBatchMode());
     assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getWindowSystem(), "foobar");
     assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getOpSys(), OperatingSystem.UNIX);
@@ -94,7 +95,7 @@ public class OpenEdgeProparseSensorTest {
   public void testPreprocessorSettings02() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.settings(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
     assertTrue(oeSettings.getProparseSession(false).getProparseSettings().getBatchMode());
     assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProcessArchitecture(), "64");
     assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProversion(), "11.7");

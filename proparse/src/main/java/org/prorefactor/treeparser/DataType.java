@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +8,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - Almost anything written after 2015
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
@@ -61,7 +63,7 @@ public class DataType {
   private String progressName;
 
   private DataType(int tokenType, String progressName) {
-    this.tokenType = new Integer(tokenType);
+    this.tokenType = tokenType;
     this.progressName = progressName;
     nameMap.put(progressName, this);
     tokenTypeMap.put(this.tokenType, this);
@@ -72,7 +74,7 @@ public class DataType {
    * check with assert or throw might be appropriate.
    */
   public static DataType getDataType(int tokenType) {
-    return tokenTypeMap.get(new Integer(tokenType));
+    return tokenTypeMap.get(tokenType);
   }
 
   /**

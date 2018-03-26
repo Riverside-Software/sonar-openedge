@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +8,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - Almost anything written after 2015
  *******************************************************************************/ 
 package org.prorefactor.core;
 
@@ -105,7 +107,7 @@ public class IConstants {
   /** A valid value for setLink() and getLink() */
   public static final int SYMBOL = -210;
   /** A valid value for setLink() and getLink() */
-  public static final int TETNode = -211;
+  public static final int TET_NODE = -211;
 
   /**
    * A valid value for setLink() and getLink(). Link to a BufferScope object, set by tp01 for RECORD_NAME nodes and for

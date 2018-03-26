@@ -1,6 +1,6 @@
 /*
- * RCode library - OpenEdge plugin for SonarQube
- * Copyright (C) 2017 Riverside Software
+ * OpenEdge plugin for SonarQube
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -109,9 +109,17 @@ public class RCodeInfo {
     processSignatureBlock(input, out);
     processSegmentTable(input, out);
 
+    if ((initialValueSegmentOffset >= 0) && (initialValueSegmentSize > 0)) {
+      long bytesRead = input.skip(initialValueSegmentOffset);
+      if (bytesRead != initialValueSegmentOffset) {
+        throw new InvalidRCodeException("Not enough bytes to reach initial values segment");
+      }
+      processInitialValueSegment(input, out);
+    }
+
     if ((debugSegmentOffset > 0) && (debugSegmentSize > 0)) {
-      long bytesRead = input.skip(debugSegmentOffset);
-      if (bytesRead != debugSegmentOffset) {
+      long bytesRead = input.skip(debugSegmentOffset - initialValueSegmentSize);
+      if (bytesRead != debugSegmentOffset - initialValueSegmentSize) {
         throw new InvalidRCodeException("Not enough bytes to reach debug segment");
       }
       processDebugSegment(input, out);
@@ -316,7 +324,6 @@ public class RCodeInfo {
     }
   }
 
-  @SuppressWarnings("unused")
   private final void processInitialValueSegment(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {
     byte[] segment = new byte[initialValueSegmentSize];
     int bytesRead = input.read(segment);
@@ -324,7 +331,7 @@ public class RCodeInfo {
       throw new InvalidRCodeException("Not enough bytes in initial value segment block");
     }
     if (out != null) {
-      out.printf("%n**********%INITIAL VALUES%n***********%n");
+      out.printf("%n**********%nINITIAL VALUES%n***********%n");
       printByteBuffer(out, segment);
     }
   }

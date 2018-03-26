@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +8,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - Almost anything written after 2015
  *******************************************************************************/ 
 package org.prorefactor.core.unittest;
 
@@ -68,6 +70,10 @@ public class BugFixTest {
         new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ParentClass.r")).getTypeInfo());
     session.injectTypeInfo(
         new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ChildClass.r")).getTypeInfo());
+    session.injectTypeInfo(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/ttClass.r")).getTypeInfo());
+    session.injectTypeInfo(
+        new RCodeInfo(new FileInputStream("src/test/resources/data/ProtectedTT.r")).getTypeInfo());
 
     tempDir.mkdirs();
   }
@@ -334,6 +340,11 @@ public class BugFixTest {
   }
 
   @Test
+  public void testOnStatement() throws ANTLRException {
+    genericTest("on_statement.p");
+  }
+
+  @Test
   public void testIncludeInComment() throws ANTLRException {
     genericTest("include_comment.p");
   }
@@ -480,6 +491,15 @@ public class BugFixTest {
   @Test
   public void testRCodeStructure() throws ANTLRException {
      ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/ChildClass.cls"), session);
+     assertNull(unit.getTopNode());
+     assertNull(unit.getRootScope());
+     unit.treeParser01();
+     assertNotNull(unit.getTopNode());
+   }
+
+  @Test
+  public void testProtectedTTAndBuffers() throws ANTLRException {
+     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/ProtectedTT.cls"), session);
      assertNull(unit.getTopNode());
      assertNull(unit.getRootScope());
      unit.treeParser01();

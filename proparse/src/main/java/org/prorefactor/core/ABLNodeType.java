@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Gilles Querret
+ * Copyright (c) 2017-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -937,6 +937,8 @@ public enum ABLNodeType {
   OPSYS(ProParserTokenTypes.OPSYS, "opsys", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED,
       NodeTypesOption.MAY_BE_NO_ARG_FUNC),
   OPTION(ProParserTokenTypes.OPTION, "option", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
+  OPTIONS(ProParserTokenTypes.OPTIONS, "options", NodeTypesOption.KEYWORD),
+  OPTIONSFILE(ProParserTokenTypes.OPTIONSFILE, "options-file", NodeTypesOption.KEYWORD),
   OR(ProParserTokenTypes.OR, "or", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   ORDER(ProParserTokenTypes.ORDER, "order", NodeTypesOption.KEYWORD),
   ORDEREDJOIN(ProParserTokenTypes.ORDEREDJOIN, "ordered-join", NodeTypesOption.KEYWORD),

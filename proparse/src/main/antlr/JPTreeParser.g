@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,10 +8,8 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - Almost anything written after 2015
  */ 
-
-// Primary tree parser.
-// Joanju Proparse Syntax Tree Structure Specification
 
 /*
 
@@ -73,7 +72,7 @@ options {
 
   public void traceIn(String rname, AST t) {
     traceDepth++;
-    LOGGER.trace("{}> {} ({}) {}", new Object[] { indent(), rname, t, ((inputState.guessing > 0)?" [guessing]":"") });
+    LOGGER.trace("{}> {} ({}) {}", indent(), rname, t, inputState.guessing > 0 ? " [guessing]" : "");
   }
 
   public void traceOut(String rname, AST t) {
@@ -1166,6 +1165,8 @@ compilestate:
       |  #(USEREVVIDEO (#(EQUAL expression))? )
       |  #(USEUNDERLINE (#(EQUAL expression))? )
       |  #(V6FRAME (#(EQUAL expression))? )
+      |  #(OPTIONS exprt )
+      |  #(OPTIONSFILE filenameorvalue )
       |  NOERROR_KW
       )*
       state_end
@@ -1676,25 +1677,30 @@ definetemptablestate:
       (#(BEFORETABLE ID))?
       (RCODEINFORMATION)?
       (def_table_field)*
-      (  #(  INDEX ID ( (AS|IS)? (UNIQUE|PRIMARY|WORDINDEX) )*
-          ( ID (ASCENDING|DESCENDING|CASESENSITIVE)* )+
-        )
-      )*
+      (def_table_index)*
       state_end
     )
   ;
+
 def_table_like:
-    #(LIKE def_table_like_sub)
+     #(LIKE def_table_like_sub)
   |  #(LIKESEQUENTIAL def_table_like_sub)
   ;
+
 def_table_like_sub:
     RECORD_NAME (VALIDATE)?
     ( #(USEINDEX ID ((AS|IS) PRIMARY)? ) )*
   ;
+
 def_table_field:
     #(FIELD ID (fieldoption)* )
   ;
-   
+
+def_table_index:
+    #(INDEX ID ( (AS|IS)? (UNIQUE|PRIMARY|WORDINDEX) )*
+          ( ID (ASCENDING|DESCENDING|CASESENSITIVE)* )+ )
+  ;
+
 defineworktablestate:
     #(  DEFINE (def_shared)? def_modifiers WORKTABLE ID
       (NOUNDO)? (def_table_like)? (label_constant)? (def_table_field)* state_end
@@ -3183,5 +3189,3 @@ sqlscalar:
   |  (LEFTPAREN)=> #(LEFTPAREN sqlexpression RIGHTPAREN )
   |  exprt
   ;
-
-

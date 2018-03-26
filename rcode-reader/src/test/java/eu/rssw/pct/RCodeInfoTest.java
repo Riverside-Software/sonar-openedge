@@ -1,6 +1,6 @@
 /*
- * RCode library - OpenEdge plugin for SonarQube
- * Copyright (C) 2017 Riverside Software
+ * OpenEdge plugin for SonarQube
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -99,6 +99,16 @@ public class RCodeInfoTest {
       assertNotNull(prop6);
       assertTrue(prop6.isPublic());
       assertTrue(prop6.isStatic());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testClass3() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/ttClass.r")) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }

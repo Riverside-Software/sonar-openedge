@@ -1,8 +1,30 @@
+/*
+ * OpenEdge plugin for SonarQube
+ * Copyright (c) 2015-2018 Riverside Software
+ * contact AT riverside DASH software DOT fr
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
+ */
 package eu.rssw.antlr.database;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
@@ -26,11 +48,29 @@ public final class DumpFileUtils {
   }
 
   public static final ParseTree getDumpFileParseTree(File file) throws IOException {
-    // Trying to read codepage from DF footer
-    LineProcessor<Charset> charsetReader = new DFCodePageProcessor();
-    Files.asCharSource(file, Charset.defaultCharset()).readLines(charsetReader);
+    return getDumpFileParseTree(new FileInputStream(file), null);
+  }
 
-    return getDumpFileParseTree(new InputStreamReader(new FileInputStream(file), charsetReader.getResult()));
+  /**
+   * DF file encoding is stored at the end of the file. It's usually not expected that Sonar properties will hold the
+   * right value.
+   */
+  public static final ParseTree getDumpFileParseTree(InputStream stream, Charset defaultCharset) throws IOException {
+    // FileInputStream doesn't support mark for example, so we read the entire file in memory
+    ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+    byte[] buffer = new byte[16384];
+    for (int len = stream.read(buffer); len != -1; len = stream.read(buffer)) {
+      outStream.write(buffer, 0, len);
+    }
+    ByteArrayInputStream buffdInput = new ByteArrayInputStream(outStream.toByteArray());
+
+    // Trying to read codepage from DF footer
+    LineProcessor<Charset> charsetReader = new DFCodePageProcessor(defaultCharset);
+    com.google.common.io.CharStreams.readLines(
+        new InputStreamReader(buffdInput, defaultCharset == null ? Charset.defaultCharset() : defaultCharset),
+        charsetReader);
+    buffdInput.reset();
+    return getDumpFileParseTree(new InputStreamReader(buffdInput, charsetReader.getResult()));
   }
 
   public static final ParseTree getDumpFileParseTree(Reader reader) throws IOException {
@@ -57,8 +97,20 @@ public final class DumpFileUtils {
     return visitor.getDatabase();
   }
 
+  public static final DatabaseDescription getDatabaseDescription(InputStream stream, Charset cs, String dbName) throws IOException {
+    DumpFileVisitor visitor = new DumpFileVisitor(dbName);
+    visitor.visit(getDumpFileParseTree(stream, cs));
+
+    return visitor.getDatabase();
+  }
+
   private static class DFCodePageProcessor implements LineProcessor<Charset> {
     private Charset charset = Charset.defaultCharset();
+
+    public DFCodePageProcessor(Charset charset) {
+      if (charset != null)
+        this.charset = charset;
+    }
 
     @Override
     public Charset getResult() {

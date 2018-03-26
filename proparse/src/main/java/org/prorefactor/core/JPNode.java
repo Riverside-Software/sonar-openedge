@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,7 +8,8 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
- *******************************************************************************/
+ *    Gilles Querret - Almost anything written after 2015
+ *******************************************************************************/ 
 package org.prorefactor.core;
 
 import java.util.ArrayList;
@@ -418,7 +420,7 @@ public class JPNode implements AST {
    * Get an array of all descendant nodes of a given type within current statement
    */
   public List<JPNode> queryCurrentStatement(ABLNodeType type, ABLNodeType... findTypes) {
-    JPNodeQuery query = new JPNodeQuery(false, false, this, type, findTypes);
+    JPNodeQuery query = new JPNodeQuery(false, false, this.getStatement(), type, findTypes);
     walk(query);
 
     return query.getResult();
@@ -727,6 +729,19 @@ public class JPNode implements AST {
     return n;
   }
 
+  /**
+   * @param type ABLNodeType to search for
+   * @return Parent node within the current statement of the given type. Null if not found
+   */
+  public JPNode getParent(ABLNodeType type) {
+    if (type == getNodeType())
+      return this;
+    if (isStateHead())
+      return null;
+    if (getParent() != null)
+      return getParent().getParent(type);
+    return null;
+  }
 
   /**
    * @return The full name of the annotation, or an empty string is node is not an annotation

@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +8,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
+ *    Gilles Querret - Almost anything written after 2015
  *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
@@ -159,10 +161,9 @@ public class Block {
 
   /** Can a frame be scoped to this block? */
   private boolean canScopeFrame() {
-    switch (blockStatementNode.getType()) {
-      case ProParserTokenTypes.REPEAT:
-      case ProParserTokenTypes.FOR:
-        return true;
+    if ((blockStatementNode.getNodeType() == ABLNodeType.REPEAT)
+        || (blockStatementNode.getNodeType() == ABLNodeType.FOR)) {
+      return true;
     }
     return isRootBlock();
   }

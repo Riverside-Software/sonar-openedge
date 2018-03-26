@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2013-2016 Riverside Software
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -78,7 +78,7 @@ public class OpenEdgeMetrics implements Metrics {
           Metric.DIRECTION_NONE).setQualitative(false).create();
 
   public static final String TRANSACTIONS_KEY = "TRANSACTIONS";
-  public static final Metric TRANSACTIONS = new Metric.Builder(TRANSACTIONS_KEY,
+  public static final Metric<String> TRANSACTIONS = new Metric.Builder(TRANSACTIONS_KEY,
       "Transaction blocks line numbers", Metric.ValueType.DATA).setDescription(
           "Line numbers of transaction blocks").setDirection(Metric.DIRECTION_NONE).setQualitative(false).setDomain(DOMAIN_OPENEDGE).create();
 

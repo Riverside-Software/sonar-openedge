@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,10 +8,14 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
- *******************************************************************************/
+ *    Gilles Querret - Almost anything written after 2015
+ *******************************************************************************/ 
 package org.prorefactor.treeparser;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.List;
 
@@ -53,6 +58,7 @@ public class ParseUnit {
 
   private final RefactorSession session;
   private final File file;
+  private final InputStream input;
   private final String relativeName;
   private final IntegerIndex<String> fileNameList;
 
@@ -72,6 +78,15 @@ public class ParseUnit {
 
   public ParseUnit(File file, String relativeName, RefactorSession session) {
     this.file = file;
+    this.input = null;
+    this.relativeName = relativeName;
+    this.session = session;
+    this.fileNameList = new IntegerIndex<>();
+  }
+
+  public ParseUnit(InputStream input, String relativeName, RefactorSession session) {
+    this.file = null;
+    this.input = input;
     this.relativeName = relativeName;
     this.session = session;
     this.fileNameList = new IntegerIndex<>();
@@ -92,10 +107,6 @@ public class ParseUnit {
 
   public JPNodeMetrics getMetrics() {
     return metrics;
-  }
-
-  public File getFile() {
-    return file;
   }
 
   public String getIncludeFileName(int index) {
@@ -128,11 +139,11 @@ public class ParseUnit {
    * @throws UncheckedIOException If main file can't be opened
    */
   public TokenSource lex4() {
-    return new ProgressLexer(session, file, relativeName, fileNameList, true);
+    return new ProgressLexer(session, getInputStream(), relativeName, fileNameList, true);
   }
 
   public TokenSource preprocess4() {
-    return new ProgressLexer(session, file, relativeName, fileNameList, false);
+    return new ProgressLexer(session, getInputStream(), relativeName, fileNameList, false);
   }
 
   /**
@@ -141,12 +152,12 @@ public class ParseUnit {
    * @throws UncheckedIOException If main file can't be opened
    */
   public TokenStream lex() {
-    ProgressLexer lexer = new ProgressLexer(session, file, relativeName, fileNameList, true);
+    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, fileNameList, true);
     return lexer.getANTLR2TokenStream(false);
   }
 
   public TokenStream preprocess() {
-    ProgressLexer lexer = new ProgressLexer(session, file, relativeName, fileNameList, false);
+    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, fileNameList, false);
     return lexer.getANTLR2TokenStream(true);
   }
 
@@ -157,7 +168,7 @@ public class ParseUnit {
    */
   public void lexAndGenerateMetrics() {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
-    ProgressLexer lexer = new ProgressLexer(session, file, relativeName, fileNameList, true);
+    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, fileNameList, true);
     TokenStream stream = lexer.getANTLR2TokenStream(false);
     try {
       Token tok = stream.nextToken();
@@ -174,7 +185,7 @@ public class ParseUnit {
   public void parse() throws ANTLRException {
     LOGGER.trace("Entering ParseUnit#parse()");
     
-    ProgressLexer lexer = new ProgressLexer(session, file, relativeName, fileNameList, false);
+    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, fileNameList, false);
     ProParser parser = new ProParser(lexer.getANTLR2TokenStream(true));
     parser.initAntlr4(session, lexer.getFilenameList());
     parser.program();
@@ -209,7 +220,7 @@ public class ParseUnit {
     if (this.getTopNode() == null)
       parse();
     ITreeParserAction action = new TP01Support(session, this);
-    TreeParser01 tp = new TreeParser01(session, action);
+    TreeParser01 tp = new TreeParser01(action);
     treeParser(tp);
     LOGGER.trace("Exiting ParseUnit#treeParser01()");
   }
@@ -221,7 +232,7 @@ public class ParseUnit {
   public void treeParser01(ITreeParserAction action) throws ANTLRException {
     if (this.getTopNode() == null)
       parse();
-    TreeParser01 tp = new TreeParser01(session, action);
+    TreeParser01 tp = new TreeParser01(action);
     treeParser(tp);
   }
 
@@ -267,7 +278,19 @@ public class ParseUnit {
         return true;
     }
     return false;
-
   }
 
+  /**
+   * Careful, returned object can be closed
+   */
+  private InputStream getInputStream() {
+    try {
+      if (input == null)
+        return new FileInputStream(file);
+      else
+        return input;
+    } catch (IOException caught) {
+      throw new UncheckedIOException(caught);
+    }
+  }
 }

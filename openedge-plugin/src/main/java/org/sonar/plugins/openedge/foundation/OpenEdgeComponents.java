@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (C) 2013-2016 Riverside Software
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -265,13 +265,13 @@ public class OpenEdgeComponents {
       } else if (byte.class == field.getType()) {
         field.setByte(check, Byte.parseByte(value));
       } else if (Integer.class == field.getType()) {
-        field.set(check, new Integer(Integer.parseInt(value)));
+        field.set(check, Integer.parseInt(value));
       } else if (Long.class == field.getType()) {
-        field.set(check, new Long(Long.parseLong(value)));
+        field.set(check, Long.parseLong(value));
       } else if (Double.class == field.getType()) {
-        field.set(check, new Double(Double.parseDouble(value)));
+        field.set(check, Double.parseDouble(value));
       } else if (Boolean.class == field.getType()) {
-        field.set(check, Boolean.valueOf(Boolean.parseBoolean(value)));
+        field.set(check, Boolean.parseBoolean(value));
       } else {
         throw MessageException.of("The type of the field " + field + " is not supported: " + field.getType());
       }

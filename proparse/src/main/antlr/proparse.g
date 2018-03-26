@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2003-2017 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,7 +8,7 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
- *    Gilles Querret - anything implemented after 2015
+ *    Gilles Querret - Almost anything written after 2015
  */ 
 
 header {
@@ -54,9 +55,9 @@ options {
       // Also, the interesting thing (for now !) is to get the AST, not the skipped paths
       // TODO Introduce a switch to display all traces 
       try {
-        LOGGER.trace("{}> {}; LA(1)=={} {}", new Object[] { indent(), rname, LT(1).getText(), ((inputState.guessing > 0)?" [guessing]":"") });
+        LOGGER.trace("{}> {}; LA(1)=={} {}", indent(), rname, LT(1).getText(), inputState.guessing > 0 ? " [guessing]" : "");
       } catch (TokenStreamException uncaught) {
-        LOGGER.trace("{}> {}; LA(1)==!!ERROR!! {}", new Object[] { indent(), rname, ((inputState.guessing > 0)?" [guessing]":"") });
+        LOGGER.trace("{}> {}; LA(1)==!!ERROR!! {}", indent(), rname, inputState.guessing > 0 ? " [guessing]" : "");
       }
     }
   }
@@ -1683,6 +1684,8 @@ compile_opt:
   |  USEREVVIDEO^ (compile_equal)?
   |  USEUNDERLINE^ (compile_equal)?
   |  V6FRAME^ (compile_equal)?
+  |  OPTIONS^ exprt
+  |  OPTIONSFILE^ filenameorvalue
   |  NOERROR_KW
   ;
 
@@ -2151,7 +2154,7 @@ data_relation:
   ;
 
 parent_id_relation:
-    PARENTIDRELATION^ (n:identifier)?
+    PARENTIDRELATION^ (identifier)?
     FOR record COMMA record
     PARENTIDFIELD field
     ( PARENTFIELDSBEFORE LEFTPAREN field (COMMA field)* RIGHTPAREN)?
@@ -2380,9 +2383,9 @@ def_table_beforetable:
 
 def_table_like:
     (LIKE^ | LIKESEQUENTIAL^)
-    {schemaTablePriority=true;}
+    { schemaTablePriority=true; }
     record
-    {schemaTablePriority=false;}
+    { schemaTablePriority=false; }
     (options{greedy=true;}: VALIDATE)? (def_table_useindex)*
   ;
 
@@ -3338,23 +3341,24 @@ nullphrase:
   ;
 
 onstate:
-    ON^<AST=BlockNode>
-    {sthd(##,0);}
-    (  // ON event OF database-object
-      ((ASSIGN|CREATE|DELETE_KW|FIND|WRITE) OF record|field)=>
-      (  (CREATE|DELETE_KW|FIND) OF record (label_constant)?
-      |  WRITE OF bf:record (label_constant)?
-        (options{greedy=true;}:   NEW (options{greedy=true;}: BUFFER)? n:identifier (label_constant)?
-          {support.defBuffer(#n.getText(), #bf.getText());}
-        )? 
-        (options{greedy=true;}:   OLD (options{greedy=true;}: BUFFER)? o:identifier (label_constant)?
-          {support.defBuffer(#o.getText(), #bf.getText());}
-        )? 
-      |  ASSIGN OF field (trigger_table_label)?
-        (  OLD (VALUE)? f:identifier (options{greedy=true;}: defineparam_var)?
-          {support.defVar(#f.getText());}
-        )?
-       )
+    ON^<AST=BlockNode> { sthd(##, 0); }
+    (  ( ASSIGN OF field ) => ASSIGN OF field (trigger_table_label)? ( OLD (VALUE)? f:identifier (options{greedy=true;}: defineparam_var)? {support.defVar(#f.getText());} )?
+      (options{greedy=true;}: OVERRIDE)?
+      (  REVERT state_end
+      |  PERSISTENT runstate
+      |  {support.addInnerScope();} blockorstate {support.dropInnerScope();}
+      )
+    | // ON event OF database-object
+      ( (CREATE|DELETE_KW|FIND|WRITE) OF record) =>
+        (   (CREATE|DELETE_KW|FIND) OF record (label_constant)?
+          | WRITE OF bf:record (label_constant)?
+             (options{greedy=true;}:   NEW (options{greedy=true;}: BUFFER)? n:identifier (label_constant)?
+             {support.defBuffer(#n.getText(), #bf.getText());}
+             )?
+             (options{greedy=true;}:   OLD (options{greedy=true;}: BUFFER)? o:identifier (label_constant)?
+             {support.defBuffer(#o.getText(), #bf.getText());}
+             )?
+        )
       (options{greedy=true;}: OVERRIDE)?
       (  REVERT state_end
       |  PERSISTENT runstate

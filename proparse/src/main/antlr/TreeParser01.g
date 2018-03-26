@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2003-2015 John Green
+ * Original work Copyright (c) 2003-2015 John Green
+ * Modified work Copyright (c) 2015-2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,9 +8,9 @@
  *
  * Contributors:
  *    John Green - initial API and implementation and/or initial documentation
- */
+ *    Gilles Querret - Almost anything written after 2015
+ */ 
 
-// Primary tree walker.
 // This tree parser adds base attributes to the tree, such as name resolution, scoping, etc.
 // To find actions taken within this grammar, search for "action.", which is the tree parser action object.
 
@@ -49,7 +50,6 @@ options {
 {
   private final static Logger LOGGER = LoggerFactory.getLogger(TreeParser01.class);
 
-  private RefactorSession refSession;
   // By default, the action object is a new TP01Support
   private ITreeParserAction action;
 
@@ -66,7 +66,7 @@ options {
 
   public void traceIn(String rname, AST t) {
     traceDepth++;
-    LOGGER.trace("{}> {} ({}) {}", new Object[] { indent(), rname, t, ((inputState.guessing > 0)?" [guessing]":"") });
+    LOGGER.trace("{}> {} ({}) {}", indent(), rname, t, inputState.guessing > 0 ? " [guessing]" : "");
   }
 
   public void traceOut(String rname, AST t) {
@@ -90,10 +90,9 @@ options {
   // --- The above are for all tree parsers, below are for TreeParser01 ---
 
   /** Create a tree parser with a specific action object. */
-  public TreeParser01(RefactorSession refSession, ITreeParserAction actionObject) {
+  public TreeParser01(ITreeParserAction actionObject) {
     this();
     this.action = actionObject;
-    this.refSession = refSession;
   }
 
   // Set the action object.
@@ -997,7 +996,7 @@ definesubmenustate:
 
 definetemptablestate:
     #(  def:DEFINE (def_shared)? def_modifiers TEMPTABLE id:ID
-      {  action.defineTemptable(#def, #id); }
+      {  action.defineTempTable(#def, #id); }
       (UNDO|NOUNDO)?
       (namespace_uri)? (namespace_prefix)? (xml_node_name)?
       ( #(SERIALIZENAME QSTRING) )?
@@ -1010,23 +1009,21 @@ definetemptablestate:
       )?
       (RCODEINFORMATION)?
       (def_table_field)*
-      (  #(  INDEX ID ( (AS|IS)? (UNIQUE|PRIMARY|WORDINDEX) )*
-          ( ID (ASCENDING|DESCENDING|CASESENSITIVE)* )+
-        )
-      )*
+      (def_table_index)*
+      { action.postDefineTempTable(#def, #id); }
       state_end
     )
   ;
 
 def_table_like:
     #(LIKE def_table_like_sub)
-  |  #(LIKESEQUENTIAL def_table_like_sub)
+  | #(LIKESEQUENTIAL def_table_like_sub)
   ;
 
 def_table_like_sub:
-    rec:tbl[ContextQualifier.SYMBOL] (VALIDATE)?
-    ( #(USEINDEX ID ((AS|IS) PRIMARY)? ) )*
-    { action.defineTableLike(#rec); }
+    rec:tbl[ContextQualifier.SYMBOL] { action.defineTableLike(#rec); }
+    (VALIDATE)?
+    ( #(USEINDEX id:ID ((AS|IS) PRIMARY)? ) { action.defineUseIndex(#rec, #id); } )*
   ;
 
 def_table_field:
@@ -1035,6 +1032,12 @@ def_table_field:
       (fieldoption)*
       { action.defineTableFieldFinalize(stack.pop()); }
     )
+  ;
+
+def_table_index:
+    #(INDEX id:ID ( (AS|IS)? ( unq:UNIQUE | prim:PRIMARY | word:WORDINDEX ) )*
+      { action.defineIndexInitialize(#id, #unq, #prim, #word); }
+      ( fld:ID { action.defineIndexField(#fld); } ( ASCENDING | DESCENDING | CASESENSITIVE )* )+ )
   ;
 
 defineworktablestate:
@@ -1828,6 +1831,19 @@ validatestate:
 
 viewstate:
     #(v:VIEW (stream_name_or_handle)? (gwidget)* (#(IN_KW WINDOW expression))? state_end {action.viewState(#v);} )
+  ;
+
+waitforstate:
+    #(  WAITFOR
+      (  widattr (#(SET fld[ContextQualifier.UPDATING]))? // .NET WAIT-FOR.
+      |  eventlist OF widgetlist
+        (#(OR eventlist OF widgetlist))*
+        (#(FOCUS gwidget))?
+        (#(PAUSE expression))?
+        (EXCLUSIVEWEBUSER (expression)?)?
+      )
+      state_end
+    )
   ;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

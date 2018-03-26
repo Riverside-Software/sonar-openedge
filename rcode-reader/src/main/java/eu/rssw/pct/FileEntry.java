@@ -1,6 +1,6 @@
 /*
- * RCode library - OpenEdge plugin for SonarQube
- * Copyright (C) 2017 Riverside Software
+ * OpenEdge plugin for SonarQube
+ * Copyright (c) 2015-2018 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -100,8 +100,16 @@ public class FileEntry implements Comparable<FileEntry> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof FileEntry)
-            return fileName.equals(((FileEntry) obj).getFileName());
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null) {
         return false;
+      }
+      if (this.getClass() == obj.getClass()) {
+        return ((FileEntry) obj).fileName.equalsIgnoreCase(fileName);
+      }
+      return false;
     }
+
 }
