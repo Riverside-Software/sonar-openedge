@@ -12,7 +12,7 @@ pipeline {
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: scm.userRemoteConfigs])
         script {
           withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
-            if (("master" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME)) {
+            if (("master" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME) || (env.BRANCH_NAME.startsWith("release"))) {
               sh "git rev-parse HEAD > current-commit"
               def currCommit = readFile('current-commit').replace("\n", "").replace("\r", "")
               sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true -Dgit.commit=${currCommit}"
@@ -32,6 +32,8 @@ pipeline {
             withCredentials([string(credentialsId: 'AdminTokenSonarQube', variable: 'SQ_TOKEN')]) {
               if (("master" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME)) {
                 sh "mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.login=${env.SQ_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
+              } else if (env.BRANCH_NAME.startsWith("release")) {
+                sh "mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.login=${env.SQ_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=master sonar:sonar"
               } else {
                 sh "mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.login=${env.SQ_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=develop sonar:sonar"
               }
