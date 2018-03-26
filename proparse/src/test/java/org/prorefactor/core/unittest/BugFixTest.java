@@ -340,6 +340,11 @@ public class BugFixTest {
   }
 
   @Test
+  public void testAssignOld() throws ANTLRException {
+    genericTest("assign_old.p");
+  }
+
+  @Test
   public void testIncludeInComment() throws ANTLRException {
     genericTest("include_comment.p");
   }
