@@ -340,8 +340,8 @@ public class BugFixTest {
   }
 
   @Test
-  public void testAssignOld() throws ANTLRException {
-    genericTest("assign_old.p");
+  public void testOnStatement() throws ANTLRException {
+    genericTest("on_statement.p");
   }
 
   @Test
