@@ -84,7 +84,6 @@ public class OpenEdgeSettings {
   private final FileSystem fileSystem;
 
   // Internal use
-  
   private final List<Path> sourcePaths = new ArrayList<>();
   private final List<Path> binariesDirs = new ArrayList<>();
   private final List<File> propath = new ArrayList<>();
@@ -94,14 +93,11 @@ public class OpenEdgeSettings {
   private final Set<String> cpdProcedures = new HashSet<>();
   private final Set<Integer> xrefBytes = new HashSet<>();
 
-  private final Path basePath;
-
   private RefactorSession proparseSession;
 
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem) {
     this.config = config;
     this.fileSystem = fileSystem;
-    this.basePath = fileSystem.baseDir().toPath().toAbsolutePath();
 
     LOG.info("Loading OpenEdge settings for server ID '{}' '{}'", config.get(CoreProperties.SERVER_ID).orElse(""),
         config.get(CoreProperties.PERMANENT_SERVER_ID).orElse(""));
@@ -206,10 +202,12 @@ public class OpenEdgeSettings {
   }
 
   public final void parseHierarchy(InputFile file) {
-    String relPath = InputFileUtils.getRelativePath(file, fileSystem);
-    String fileInPropath = searchInPropath(relPath);
-    File rcd = getRCode(fileInPropath);
-    LOG.debug("Parsing hierarchy of {} -- In PROPATH {} - Rcode '{}'", relPath, fileInPropath, rcd);
+    String relPath = getRelativePathToSourceDirs(file);
+    LOG.debug("Parsing hierarchy of '{}' - Relative '{}'", file, relPath);
+    if (relPath == null)
+      return;
+    File rcd = getRCode(relPath);
+    LOG.debug("  RCode found: '{}'", rcd);
     if ((rcd != null) && rcd.exists()) {
       TypeInfo info = parseRCode(rcd);
       if (info != null) {
@@ -369,24 +367,16 @@ public class OpenEdgeSettings {
     return null;
   }
 
-  public static String getPathRelativeToSourceDirs(Path file, List<String> propath) {
-    for (String entry : propath) {
-      String s  = new File(entry).toPath().relativize(file).toString().replace('\\', '/');
-      if (s.length() != 0)
-        return s;
-    }
-    return "";
-  }
-
-  public String getRelativePath(InputFile file) {
-    return basePath.relativize(Paths.get(file.uri())).toString().replace('\\', '/');
-  }
-
   public String getRelativePathToSourceDirs(InputFile file) {
     for (Path p : sourcePaths) {
-      String s = p.toAbsolutePath().relativize(Paths.get(file.uri())).toString();
-      if (!Strings.isNullOrEmpty(s) && !s.startsWith(".."))
-        return s;
+      try {
+        String s = p.toAbsolutePath().relativize(Paths.get(file.uri())).toString();
+        if (!Strings.isNullOrEmpty(s) && !s.startsWith(".."))
+          return s;
+      } catch (IllegalArgumentException uncaught) {
+        // Path#relativize() can throw IllegalArgumentException
+        // We just swallow it...
+      }
     }
     return "";
   }
@@ -429,17 +419,6 @@ public class OpenEdgeSettings {
     }
 
     return fileName;
-  }
-
-  public String searchInPropath(String fileName) {
-    Path target = Paths.get(fileName);
-    for (File entry : propath) {
-      Path relPath = entry.toPath().relativize(target);
-      if (!relPath.startsWith(".."))
-        return relPath.toString();
-    }
-
-    return "";
   }
 
   /**
