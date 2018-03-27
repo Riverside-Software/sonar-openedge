@@ -224,7 +224,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
     } else {
       LOG.debug("Listing file for '{}' not found or contains space character - Was looking for '{}'", file,
-          listingFile.getAbsolutePath());
+          listingFile);
     }
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.TRANSACTIONS).withValue(
         Joiner.on(",").join(trxBlocks)).save();
