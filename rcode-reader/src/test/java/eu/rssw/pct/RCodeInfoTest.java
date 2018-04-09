@@ -30,6 +30,7 @@ import java.io.IOException;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
+import eu.rssw.pct.elements.MethodElement;
 import eu.rssw.pct.elements.PropertyElement;
 
 public class RCodeInfoTest {
@@ -127,7 +128,7 @@ public class RCodeInfoTest {
   @Test
   public void testProcedure2() throws IOException {
     try (FileInputStream input = new FileInputStream("src/test/resources/rcode/AbstractTTCollection.r")) {
-      RCodeInfo rci = new RCodeInfo(input);
+      RCodeInfo rci = new RCodeInfo(input, System.out);
       assertTrue(rci.isClass());
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
@@ -149,6 +150,17 @@ public class RCodeInfoTest {
     try (FileInputStream input = new FileInputStream("src/test/resources/rcode/_dmpincr.r")) {
       RCodeInfo rci = new RCodeInfo(input);
       assertFalse(rci.isClass());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testV12() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/WebRequest.r")) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      assertEquals(rci.getVersion(), -1210);
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }

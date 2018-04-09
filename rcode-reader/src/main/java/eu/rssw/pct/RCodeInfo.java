@@ -170,6 +170,12 @@ public class RCodeInfo {
     } else {
       throw new InvalidRCodeException("Only v11 rcode is supported");
     }
+
+    if (((Math.abs(version) & 0x3FFF) >= 1200) && (input.skip(16) != 16)) {
+      // OE12 header is 16 bytes larger, so we just consume them...
+      // And OE12 ESAP version number is negative
+      throw new InvalidRCodeException("Not enough bytes in OE12 header");
+    }
   }
 
   private final void processSignatureBlock(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {
