@@ -14,7 +14,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.List;
 
@@ -130,6 +132,17 @@ public class ParserTest {
     assertEquals(stmts.get(2).query(ABLNodeType.GETCODEPAGES).size(), 1);
     assertEquals(stmts.get(3).query(ABLNodeType.GETCODEPAGE).size(), 0);
     assertEquals(stmts.get(3).query(ABLNodeType.GETCODEPAGES).size(), 1);
+  }
+
+  @Test
+  public void testInvalidCode() throws ANTLRException {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("connect database dialog box".getBytes()), "<unnamed>", session);
+    try {
+      unit.parse();
+      fail("Invalid code, should fail");
+    } catch (ANTLRException caught) {
+      // And shouldn't be stuck in endless loop
+    }
   }
 
   /**
