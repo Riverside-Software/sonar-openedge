@@ -854,6 +854,28 @@ public class JPNode implements AST {
     }
   }
 
+  /**
+   * @return Number total number of JPNode objects 
+   */
+  public int size() {
+    int sz = 1;
+    for (JPNode node : getDirectChildren()) {
+      sz += node.size();
+    }
+    return sz;
+  }
+
+  /**
+   * @return Number total number of natural JPNode objects 
+   */
+  public int naturalSize() {
+    int sz = isNatural() ? 1 : 0;
+    for (JPNode node : getDirectChildren()) {
+      sz += node.naturalSize();
+    }
+    return sz;
+  }
+
   @Override
   public String toString() {
     StringBuilder buff = new StringBuilder();
