@@ -18,10 +18,12 @@ import static org.testng.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.StringWriter;
 import java.util.List;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -135,14 +137,10 @@ public class ParserTest {
   }
 
   @Test
-  public void testInvalidCode() throws ANTLRException {
+  public void testConnectDatabase() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("connect database dialog box".getBytes()), "<unnamed>", session);
-    try {
-      unit.parse();
-      fail("Invalid code, should fail");
-    } catch (ANTLRException caught) {
-      // And shouldn't be stuck in endless loop
-    }
+    unit.parse();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CONNECT).size(), 1);
   }
 
   /**
