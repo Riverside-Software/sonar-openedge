@@ -1123,7 +1123,7 @@ filename_part:
     // PERIOD has space after it, and we don't allow '.' at the end of a filename.
     // NAMEDOT has no space after it, and '.' is OK in the middle of a filename.
     // "run abc(def.p." and "run abc{def.p." do not compile.
-    ~( EOF | PERIOD | LEXCOLON | RIGHTANGLE | LEFTANGLE | LEFTPAREN | LEFTCURLY )
+    ~( PERIOD | LEXCOLON | RIGHTANGLE | LEFTANGLE | LEFTPAREN | LEFTCURLY )
   ;
 
 type_name:
