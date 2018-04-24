@@ -118,7 +118,7 @@ public class OpenEdgeSettings {
     Optional<String> sonarSources = config.get(ProjectDefinition.SOURCES_PROPERTY);
     if (sonarSources.isPresent()) {
       for (String str : Splitter.on(',').trimResults().split(sonarSources.get())) {
-        sourcePaths.add(new File(fileSystem.baseDir(), str).toPath().normalize());
+        sourcePaths.add(fileSystem.baseDir().toPath().resolve(str).normalize());
       }
     } else {
       sourcePaths.add(fileSystem.baseDir().toPath().normalize());
