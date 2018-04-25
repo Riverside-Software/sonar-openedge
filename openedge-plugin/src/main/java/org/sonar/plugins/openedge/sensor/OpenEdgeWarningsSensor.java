@@ -93,7 +93,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
 
             FilePredicate fp1 = predicates.hasRelativePath(w.file);
             FilePredicate fp2 = predicates.hasAbsolutePath(
-                new File(context.fileSystem().baseDir(), w.file).toPath().normalize().toString());
+                context.fileSystem().baseDir().toPath().resolve(w.file).normalize().toString());
 
             // XXX FilePredicate.or() doesn't work...
             InputFile target = context.fileSystem().inputFile(fp1);
