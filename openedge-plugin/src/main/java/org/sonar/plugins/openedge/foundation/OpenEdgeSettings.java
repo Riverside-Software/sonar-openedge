@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -118,7 +119,11 @@ public class OpenEdgeSettings {
     Optional<String> sonarSources = config.get(ProjectDefinition.SOURCES_PROPERTY);
     if (sonarSources.isPresent()) {
       for (String str : Splitter.on(',').trimResults().split(sonarSources.get())) {
-        sourcePaths.add(fileSystem.baseDir().toPath().resolve(str).normalize());
+        try {
+          sourcePaths.add(fileSystem.baseDir().toPath().resolve(str).normalize());
+        } catch (InvalidPathException caught) {
+          LOG.error("Unable to resolve source directory '{}'", str);
+        }
       }
     } else {
       sourcePaths.add(fileSystem.baseDir().toPath().normalize());
@@ -129,7 +134,11 @@ public class OpenEdgeSettings {
     Optional<String> binariesSetting = config.get(Constants.BINARIES);
     if (binariesSetting.isPresent()) {
       for (String str : Splitter.on(',').trimResults().split(binariesSetting.get())) {
-        binariesDirs.add(fileSystem.baseDir().toPath().resolve(str));
+        try {
+          binariesDirs.add(fileSystem.baseDir().toPath().resolve(str).normalize());
+        } catch (InvalidPathException caught) {
+          LOG.error("Unable to resolve binaries directory '{}'", str);
+        }
       }
     } else {
       LOG.debug("No sonar.oe.binaries property, defaults to source directories");
