@@ -4732,6 +4732,7 @@ unreservedkeyword:
  | OK
  | OKCANCEL
  | ONLY
+ | OPTIONS
  | ORDER
  | ORDEREDJOIN
  | ORDINAL
