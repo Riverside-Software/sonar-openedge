@@ -531,4 +531,10 @@ public class BugFixTest {
   public void testDefineMenu() throws ANTLRException {
     genericTest("definemenu.p");
   }
+
+  @Test
+  public void testOptionsField() throws ANTLRException {
+    genericTest("options_field.p");
+  }
+
 }
