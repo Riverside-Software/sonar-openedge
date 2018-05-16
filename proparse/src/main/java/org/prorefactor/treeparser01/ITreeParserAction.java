@@ -379,7 +379,7 @@ public interface ITreeParserAction {
   }
 
   /** An expression being passed as a parameter (as part of a call). */
-  default void paramExpression(JPNode exprAST) throws SemanticException {
+  default void paramExpression(JPNode exprAST, ContextQualifier cq) throws SemanticException {
   }
 
   /** Called with the direction node (BUFFER|INPUT|OUTPUT|INPUTOUTPUT) for a new call arg. */

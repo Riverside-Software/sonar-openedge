@@ -212,14 +212,14 @@ parameter { /* RULE_INIT */ action.paramForCall(parameter_AST_in); }:
           action.paramSymbol(#bt);
         }
       )
-    |  #(OUTPUT parameter_arg )
-    |  #(INPUTOUTPUT parameter_arg )
-    |  #(INPUT parameter_arg )
+    |  #(OUTPUT parameter_arg2[ContextQualifier.UPDATING] )
+    |  #(INPUTOUTPUT parameter_arg2[ContextQualifier.REFUP] )
+    |  #(INPUT parameter_arg2[ContextQualifier.REF] )
     )
 {action.paramEnd();}
   ;
   
-parameter_arg:
+parameter_arg2[ContextQualifier contextQualifier]:
     (  TABLEHANDLE thf:fld[ContextQualifier.INIT] parameter_dataset_options
       {action.paramSymbol(#thf);}
     |  TABLE (FOR)? tt:tbl[ContextQualifier.TEMPTABLESYMBOL] parameter_dataset_options
@@ -236,7 +236,7 @@ parameter_arg:
     |  PARAMETER expression EQUAL expression // for RUN STORED-PROCEDURE.
       {action.paramProgressType(PARAMETER);}
     |  ID AS {action.paramNoName(parameter_arg_AST_in);} (CLASS TYPE_NAME | datatype_com_native | datatype_var )
-    |  ex:expression (AS datatype_com)? {action.paramExpression(#ex);}
+    |  ex:expression (AS datatype_com)? {action.paramExpression(#ex, contextQualifier);}
     )
     (BYPOINTER|BYVARIANTPOINTER)?
   ;
