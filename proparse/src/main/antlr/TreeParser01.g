@@ -235,7 +235,7 @@ parameter_arg2[ContextQualifier contextQualifier]:
       {action.paramSymbol(#dsh);}
     |  PARAMETER expression EQUAL expression // for RUN STORED-PROCEDURE.
       {action.paramProgressType(PARAMETER);}
-    |  ID AS {action.paramNoName(parameter_arg_AST_in);} (CLASS TYPE_NAME | datatype_com_native | datatype_var )
+    |  ID AS {action.paramNoName(parameter_arg2_AST_in);} (CLASS TYPE_NAME | datatype_com_native | datatype_var )
     |  ex:expression (AS datatype_com)? {action.paramExpression(#ex, contextQualifier);}
     )
     (BYPOINTER|BYVARIANTPOINTER)?
