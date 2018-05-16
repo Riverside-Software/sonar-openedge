@@ -277,3 +277,12 @@
 &IF SUBSTRING('abcdef', 2, 2, 'CHARACTER') EQ 'bc' &THEN
  DEF VAR var75 AS CHAR.
 &ENDIF
+
+// Should be true in unit test
+&IF PROPATH BEGINS 'src' &THEN
+ DEF VAR var76 AS CHAR.
+&ENDIF
+// Should be false in unit test
+&IF PROPATH MATCHES 'zzzz' &THEN
+ DEF VAR var77 AS CHAR.
+&ENDIF
