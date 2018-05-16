@@ -501,6 +501,12 @@ public class BugFixTest {
   }
 
   @Test
+  public void testDefined() {
+    // https://github.com/Riverside-Software/sonar-openedge/issues/515
+    genericTest("defined.p");
+  }
+
+  @Test
   public void testTTLikeDB02() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/bugsfixed/ttlikedb02.p"), session);
     assertNull(unit.getTopNode());
