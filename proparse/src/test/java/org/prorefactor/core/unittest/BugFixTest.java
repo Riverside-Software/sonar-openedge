@@ -537,9 +537,4 @@ public class BugFixTest {
     genericTest("options_field.p");
   }
 
-  @Test
-  public void testOptionsField2() throws ANTLRException {
-    genericTest("test_param.p");
-  }
-
 }
