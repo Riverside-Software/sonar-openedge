@@ -138,7 +138,7 @@ public class BugFixTest {
     assertEquals(unit.getRootScope().getVariable("x1").getNumWrites(), 2);
     assertEquals(unit.getRootScope().getVariable("x1").getNumReads(), 1);
     assertEquals(unit.getRootScope().getVariable("x2").getNumWrites(), 1);
-    assertEquals(unit.getRootScope().getVariable("x2").getNumReads(), 1);
+    assertEquals(unit.getRootScope().getVariable("x2").getNumReads(), 2);
     assertEquals(unit.getRootScope().getVariable("x3").getNumWrites(), 1);
     assertEquals(unit.getRootScope().getVariable("x3").getNumReads(), 0);
   }
@@ -535,6 +535,11 @@ public class BugFixTest {
   @Test
   public void testOptionsField() throws ANTLRException {
     genericTest("options_field.p");
+  }
+
+  @Test
+  public void testOptionsField2() throws ANTLRException {
+    genericTest("test_param.p");
   }
 
 }
