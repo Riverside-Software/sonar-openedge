@@ -216,30 +216,22 @@ parameter { /* RULE_INIT */ action.paramForCall(parameter_AST_in); }:
     |  #(INPUTOUTPUT parameter_arg2[ContextQualifier.REFUP] )
     |  #(INPUT parameter_arg2[ContextQualifier.REF] )
     )
-{action.paramEnd();}
+    { action.paramEnd(); }
   ;
   
 parameter_arg2[ContextQualifier contextQualifier]:
-    (  TABLEHANDLE thf:fld[ContextQualifier.INIT] parameter_dataset_options
-      {action.paramSymbol(#thf);}
-    |  TABLE (FOR)? tt:tbl[ContextQualifier.TEMPTABLESYMBOL] parameter_dataset_options
-      {  action.paramProgressType(TEMPTABLE);
-        action.paramSymbol(#tt);
-      }
-    |  DATASET ds:ID parameter_dataset_options
-      {  action.setSymbol(DATASET, #ds);
-        action.paramProgressType(DATASET);
-        action.paramSymbol(#ds);
-      }
-    |  DATASETHANDLE dsh:fld[ContextQualifier.INIT] parameter_dataset_options
-      {action.paramSymbol(#dsh);}
-    |  PARAMETER expression EQUAL expression // for RUN STORED-PROCEDURE.
-      {action.paramProgressType(PARAMETER);}
-    |  ID AS {action.paramNoName(parameter_arg2_AST_in);} (CLASS TYPE_NAME | datatype_com_native | datatype_var )
-    |  ex:expression (AS datatype_com)? {action.paramExpression(#ex, contextQualifier);}
+    (
+      TABLEHANDLE thf:fld[ContextQualifier.INIT] parameter_dataset_options { action.paramSymbol(#thf); action.noteReference(#thf, contextQualifier); }
+    | TABLE (FOR)? tt:tbl[ContextQualifier.TEMPTABLESYMBOL] parameter_dataset_options {  action.paramProgressType(TEMPTABLE); action.paramSymbol(#tt); }
+    | DATASET ds:ID parameter_dataset_options { action.setSymbol(DATASET, #ds); action.paramProgressType(DATASET); action.paramSymbol(#ds); }
+    | DATASETHANDLE dsh:fld[ContextQualifier.INIT] parameter_dataset_options { action.paramSymbol(#dsh); action.noteReference(#dsh, contextQualifier); }
+    | PARAMETER expression EQUAL expression /* for RUN STORED-PROCEDURE. */ { action.paramProgressType(PARAMETER); }
+    | ID AS { action.paramNoName(parameter_arg2_AST_in); } (CLASS TYPE_NAME | datatype_com_native | datatype_var )
+    | ex:expression (AS datatype_com)? { action.paramExpression(#ex, contextQualifier); }
     )
-    (BYPOINTER|BYVARIANTPOINTER)?
+    ( BYPOINTER | BYVARIANTPOINTER )?
   ;
+
 parameter_dataset_options:
    (APPEND)? (BYVALUE|BYREFERENCE| BIND {action.paramBind();} )?
   ;

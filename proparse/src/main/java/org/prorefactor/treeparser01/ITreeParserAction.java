@@ -478,6 +478,12 @@ public interface ITreeParserAction {
   }
 
   /**
+   * Adds read/update reference to symbol
+   */
+  default void noteReference(JPNode node, ContextQualifier cq) throws SemanticException {
+  }
+
+  /**
    * Create a "strong" buffer scope. This is called within a DO FOR or REPEAT FOR statement.
    * 
    * @param anode Is the RECORD_NAME node. It must already have the BufferSymbol linked to it.

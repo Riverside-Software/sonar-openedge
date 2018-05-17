@@ -1197,6 +1197,13 @@ public class TP01Support implements ITreeParserAction {
     idNode.setSymbol(currentScope.lookupSymbol(symbolType, idNode.getText()));
   }
 
+  @Override
+  public void noteReference(JPNode node, ContextQualifier cq) throws SemanticException {
+    if ((node.getSymbol() != null) && ((cq == ContextQualifier.UPDATING) || (cq == ContextQualifier.REFUP))) {
+      node.getSymbol().noteReference(cq);
+    }
+  }
+
   /**
    * Create a "strong" buffer scope. This is called within a DO FOR or REPEAT FOR statement.
    * 
