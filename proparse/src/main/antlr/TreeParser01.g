@@ -160,7 +160,7 @@ pseudfn:
   |  #(PUTUNSIGNEDLONG LEFTPAREN ex10:expression COMMA expression RIGHTPAREN ) { action.noteReference(#ex10, ContextQualifier.UPDATING); }
   |  #(PUTUNSIGNEDSHORT LEFTPAREN ex11:expression COMMA expression RIGHTPAREN ) { action.noteReference(#ex11, ContextQualifier.UPDATING); }
   |  #(SETBYTEORDER funargs )
-  |  #(SETPOINTERVALUE LEFTPAREN ex12:expression RIGHTPAREN ) { action.noteReference(#ex12, ContextQualifier.UPDATING); } )
+  |  #(SETPOINTERVALUE LEFTPAREN ex12:expression RIGHTPAREN ) { action.noteReference(#ex12, ContextQualifier.UPDATING); }
   |  #(SETSIZE LEFTPAREN ex13:expression RIGHTPAREN ) { action.noteReference(#ex13, ContextQualifier.UPDATING); }
   |  AAMSG // not the whole func - we don't want its arguments here
   |  currentvaluefunc
