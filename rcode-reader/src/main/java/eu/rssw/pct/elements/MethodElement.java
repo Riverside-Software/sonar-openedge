@@ -88,7 +88,7 @@ public class MethodElement extends AbstractAccessibleElement {
     return String.format("Method %s(%d arguments) returns %s", name, parameters.length, returnType); 
   }
 
-  protected String getReturnTypeName() {
+  public String getReturnTypeName() {
     return returnTypeName;
   }
 

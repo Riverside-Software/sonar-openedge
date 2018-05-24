@@ -67,7 +67,7 @@ public class VariableElement extends AbstractAccessibleElement {
     return new VariableElement(name2, accessType, dataType, extent, flags, typeName);
   }
 
-  protected String getTypeName() {
+  public String getTypeName() {
     return typeName;
   }
 
