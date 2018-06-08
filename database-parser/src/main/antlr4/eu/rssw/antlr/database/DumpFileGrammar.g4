@@ -187,7 +187,7 @@ addFieldOption:
   | 'VALEXP' ('?' | QUOTED_STRING)          # fieldValExp
   | 'VALMSG' QUOTED_STRING                  # fieldValMsg
   | 'VALMSG-SA' QUOTED_STRING               # fieldValMsgSA
-  | 'HELP' QUOTED_STRING                    # fieldHelp
+  | 'HELP' ('?' | QUOTED_STRING )           # fieldHelp
   | 'HELP-SA' QUOTED_STRING                 # fieldHelpSA
   | 'EXTENT' val=NUMBER                     # fieldExtent 
   | 'DECIMALS' ('?' | NUMBER)               # fieldDecimals
