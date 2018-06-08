@@ -77,7 +77,7 @@ addSequenceOption:
   ;
 
 addTable:
-    'ADD' 'TABLE' table=QUOTED_STRING ('TYPE' ('SQL' | 'MSS' | 'ORACLE' | 'ODBC'))? options=addTableOption* triggers=tableTrigger*;
+    'ADD' 'TABLE' table=QUOTED_STRING ('TYPE' ('SQL' | 'MSS' | 'ORACLE' | 'ODBC' | 'PROGRESS'))? options=addTableOption* triggers=tableTrigger*;
 
 addTableOption:
     'MULTITENANT' val=('yes' | 'no')   # tableMultitenant
