@@ -20,7 +20,7 @@
 grammar DumpFileGrammar;
 
 dump:
-  dump_type* footer?;
+  dump_type* footer? EOF;
 
 dump_type:
   annotation | addDatabase | addSequence | addTable | addField | addIndex | addConstraint | updateField | renameField | renameIndex | updateIndex | updateIndexBP | dropIndex | dropField | dropTable | updateTable;
