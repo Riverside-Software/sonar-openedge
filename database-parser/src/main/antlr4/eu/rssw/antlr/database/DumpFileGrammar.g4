@@ -148,7 +148,7 @@ tableTrigger:
       | 'DELETE');
 
 updateTable:
-    'UPDATE' 'TABLE' table=QUOTED_STRING (addTableOption | updateTableOption)* triggers=tableTrigger*;
+    ( 'UPDATE' | 'CHANGE' ) 'TABLE' table=(QUOTED_STRING | UNQUOTED_STRING) (addTableOption | updateTableOption)* triggers=tableTrigger*;
 
 dropTable:
     'DROP' 'TABLE' table=QUOTED_STRING;
