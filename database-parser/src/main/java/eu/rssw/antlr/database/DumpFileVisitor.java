@@ -246,6 +246,9 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
     index.setLastLine(ctx.getStop().getLine());
     indexes.push(index);
 
+    if (ctx.uniq != null)
+      index.setUnique(true);
+
     // Search for Table object for this field
     Table table = null;
     for (Table t : tables) {
