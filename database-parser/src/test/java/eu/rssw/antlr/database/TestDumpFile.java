@@ -77,6 +77,8 @@ public class TestDumpFile {
     assertTrue(idx1.isInAlternateBufferPool());
     Index idx2 = db.getTable("Warehouse").getIndex("warehousename");
     assertFalse(idx2.isInAlternateBufferPool());
+    Index idx3 = db.getTable("BillTo").getIndex("custnumbillto");
+    assertTrue(idx3.isUnique());
   }
 
   @Test
