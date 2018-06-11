@@ -246,7 +246,7 @@ dropField:
     'DROP' 'FIELD' field=QUOTED_STRING 'OF' table=QUOTED_STRING;
 
 addIndex:
-    'ADD' 'INDEX' index=QUOTED_STRING 'ON' table=QUOTED_STRING addIndexOption* indexField*;
+    'ADD' uniq='UNIQUE'? 'INDEX' index=QUOTED_STRING 'ON' table=QUOTED_STRING addIndexOption* indexField*;
 
 addIndexOption:
     'IS-LOCAL'                      # indexIsLocal
