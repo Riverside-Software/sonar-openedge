@@ -1073,27 +1073,12 @@ assignment_list: // SEMITRANSLATED
   | ( assign_equal when_exp? | assign_field when_exp? )*
   ;
 
-// Old method
-/* assignstate2:
-    field EQUAL expression NOERROR_KW? state_end
-;
-
-assignstate3:
-    pseudfn EQUAL expression NOERROR_KW? state_end
-;
-  
-assignstate4:
-    widattr EQUAL expression NOERROR_KW? state_end
-; */
-
-assignStatement1: // TODO Set operator
+assignStatement1: // TRANSLATED
     ( pseudfn | widattr | field ) EQUAL expression NOERROR_KW? state_end
-;
+  ;
 
-assign_equal // TODO Nettoyer
-  :  /*(pseudfn) // =>*/ pseudfn e1=EQUAL expression // {support.attrOp(#e1);}
-  |  /*(widattr) // =>*/ widattr e3=EQUAL expression // {support.attrOp(#e3);}
-  |  field e2=EQUAL expression // {support.attrOp(#e2);}
+assign_equal: // TRANSLATED
+   ( pseudfn | widattr | field ) EQUAL expression
   ;
 
 assign_field: // TRANSLATED
@@ -1222,8 +1207,8 @@ case_end: // TRANSLATED
   ;
 
 catchstate: // TRANSLATED
-    CATCH /* TODO */
-    ID AS class_type_name { support.defVarInline(); }
+    CATCH
+    n=ID AS class_type_name { support.defVar($n.text); }
     block_colon code_block ( EOF | catch_end state_end )
   ;
 
@@ -2729,7 +2714,6 @@ interface_end: // TRANSLATED
     END INTERFACE?
   ;
 
-
 io_phrase_state_end: // TRANSLATED
     // Order of options is important
     io_osdir io_opt* state_end
@@ -2748,7 +2732,7 @@ io_phrase_any_tokens_sub: // TRANSLATED
     // Also note that unix commands like echo, lp paged, etc, are not uncommon, so we have to do
     // full lookahead/backtracking like an LALR parser would.
     io_opt* state_end  # ioPhraseAnyTokensSub1
-  | { _input.LA(2) == LEFTPAREN }? valueexpression io_phrase_any_tokens # ioPhraseAnyTokensSub2
+  | valueexpression io_phrase_any_tokens # ioPhraseAnyTokensSub2
   | t1=. io_phrase_any_tokens # ioPhraseAnyTokensSub3
   ;
 
@@ -2757,18 +2741,22 @@ io_opt: // TRANSLATED
     APPEND
   | BINARY
   | COLLATE
-  | CONVERT ( ( SOURCE | TARGET ) expression )* | NOCONVERT
-  | ECHO | NOECHO
+  | CONVERT ( ( SOURCE | TARGET ) expression )*
+  | NOCONVERT
+  | ECHO
+  | NOECHO
   | KEEPMESSAGES 
   | LANDSCAPE
   | LOBDIR filenameorvalue
-  | MAP anyorvalue | NOMAP
+  | MAP anyorvalue
+  | NOMAP
   | NUMCOPIES anyorvalue
   | PAGED
   | PAGESIZE_KW anyorvalue
   | PORTRAIT
   | UNBUFFERED 
   ;
+
 io_osdir: // TRANSLATED
     OSDIR LEFTPAREN expression RIGHTPAREN NOATTRLIST?
   ;
