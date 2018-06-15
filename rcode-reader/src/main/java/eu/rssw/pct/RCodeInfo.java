@@ -126,8 +126,9 @@ public class RCodeInfo {
     }
 
     if (typeBlockSize > 0) {
-      long bytesRead = input.skip(rcodeSize - debugSegmentOffset - debugSegmentSize);
-      if (bytesRead != rcodeSize - debugSegmentOffset - debugSegmentSize) {
+      int skip = debugSegmentOffset > 0 ? rcodeSize - debugSegmentOffset - debugSegmentSize : rcodeSize - initialValueSegmentSize - debugSegmentSize;
+      long bytesRead = input.skip(skip);
+      if (bytesRead != skip) {
         throw new InvalidRCodeException("Not enough bytes to reach type block");
       }
       processTypeBlock(input, out);
