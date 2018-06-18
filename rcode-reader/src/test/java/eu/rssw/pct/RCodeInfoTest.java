@@ -115,6 +115,17 @@ public class RCodeInfoTest {
   }
 
   @Test
+  public void testClassMinSize() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/ClassMinSize.r")) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      assertEquals(rci.getTypeInfo().getProperties().size(), 2);
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
   public void testProcedure() throws IOException {
     try (FileInputStream input = new FileInputStream("src/test/resources/rcode/compile.r")) {
       RCodeInfo rci = new RCodeInfo(input);
