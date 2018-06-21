@@ -1611,18 +1611,23 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitIo_phrase_any_tokens(Io_phrase_any_tokensContext ctx) {
-    JPNodeHolder holder = visitChildren(ctx);
-    // TODO Verify
-    support.filenameMerge(holder.getFirstNode());
-    return holder;
-  }
-
-  @Override
   public JPNodeHolder visitIoPhraseAnyTokensSub3(IoPhraseAnyTokensSub3Context ctx) {
-    JPNodeHolder holder = visitChildren(ctx);
-    holder.getFirstNode().setType(ABLNodeType.FILENAME.getType());
-    return holder;
+    // TODO Syntax to be confirmed
+
+    ProToken start = (ProToken) ctx.getStart();
+    StringBuilder sb = new StringBuilder(start.getText());
+    for (int zz = 1; zz < ctx.not_state_end().size(); zz++) {
+      JPNodeHolder comp = visit(ctx.not_state_end(zz));
+      sb.append(comp.getFirstNode().getText());
+    }
+    start.setType(ABLNodeType.FILENAME.getType());
+    start.setText(sb.toString());
+    JPNode node = (JPNode) factory.create(new org.prorefactor.core.ProToken(
+        start.getNodeType() == ABLNodeType.EOF_ANTLR4 ? ABLNodeType.EOF : start.getNodeType(), start.getText(),
+        start.getFileIndex(), "", start.getLine(), start.getCharPositionInLine(), start.getEndFileIndex(),
+        start.getEndLine(), start.getEndCharPositionInLine(), start.getMacroSourceNum(), start.getAnalyzeSuspend(),
+        false));
+    return new JPNodeHolder(node);
   }
 
   @Override

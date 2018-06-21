@@ -2719,7 +2719,8 @@ io_phrase_state_end: // TRANSLATED
     io_osdir io_opt* state_end
   | io_printer io_opt* state_end
   | TERMINAL io_opt* state_end
-  | io_phrase_any_tokens
+  | // TODO This syntax and next three nodes to be confirmed
+    io_phrase_any_tokens state_end
   ;
 
 io_phrase_any_tokens: // TRANSLATED
@@ -2731,9 +2732,9 @@ io_phrase_any_tokens_sub: // TRANSLATED
     // and any of those arguments could be a VALUE(expression).
     // Also note that unix commands like echo, lp paged, etc, are not uncommon, so we have to do
     // full lookahead/backtracking like an LALR parser would.
-    io_opt* state_end  # ioPhraseAnyTokensSub1
-  | valueexpression io_phrase_any_tokens # ioPhraseAnyTokensSub2
-  | t1=. io_phrase_any_tokens # ioPhraseAnyTokensSub3
+    io_opt*  # ioPhraseAnyTokensSub1
+  | valueexpression # ioPhraseAnyTokensSub2
+  | not_state_end* # ioPhraseAnyTokensSub3
   ;
 
 io_opt: // TRANSLATED
