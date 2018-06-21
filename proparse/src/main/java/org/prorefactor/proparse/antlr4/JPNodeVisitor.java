@@ -68,7 +68,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitLabeled_block(Labeled_blockContext ctx) {
-    return createTreeWithoutFirstNode(ctx, ABLNodeType.BLOCK_LABEL);
+    return createTreeFromFirstNode(ctx);
   }
 
   @Override
@@ -216,6 +216,19 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   public JPNodeHolder visitExpressionComparison(ExpressionComparisonContext ctx) {
     JPNodeHolder holder = createTreeFromSecondNode(ctx);
     holder.getFirstNode().setOperator();
+    if (holder.getFirstNode().getNodeType() == ABLNodeType.LEFTANGLE)
+      holder.getFirstNode().setType(ABLNodeType.LTHAN.getType());
+    else if (holder.getFirstNode().getNodeType() == ABLNodeType.LTOREQUAL)
+      holder.getFirstNode().setType(ABLNodeType.LE.getType());
+    else if (holder.getFirstNode().getNodeType() == ABLNodeType.RIGHTANGLE)
+      holder.getFirstNode().setType(ABLNodeType.GTHAN.getType());
+    else if (holder.getFirstNode().getNodeType() == ABLNodeType.GTOREQUAL)
+      holder.getFirstNode().setType(ABLNodeType.GE.getType());
+    else if (holder.getFirstNode().getNodeType() == ABLNodeType.GTORLT)
+      holder.getFirstNode().setType(ABLNodeType.NE.getType());
+    else if (holder.getFirstNode().getNodeType() == ABLNodeType.EQUAL)
+      holder.getFirstNode().setType(ABLNodeType.EQ.getType());
+
     return holder;
   }
 
@@ -261,8 +274,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitExprtExprt2(ExprtExprt2Context ctx) {
-    // TODO attr_colon? has to be in {##=#([Widget_ref],##);}
-    return super.visitExprtExprt2(ctx);
+    if (ctx.attr_colon() != null) {
+      return createTree(ctx, ABLNodeType.WIDGET_REF);
+    }
+    return visitChildren(ctx);
   }
 
   @Override
@@ -272,7 +287,9 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitExprt2ParenCall(Exprt2ParenCallContext ctx) {
-    return createTreeWithoutFirstNode(ctx, ABLNodeType.getNodeType(support.isMethodOrFunc(ctx.fname.getText())));
+    JPNodeHolder holder = createTreeFromFirstNode(ctx);
+    holder.getFirstNode().setType(support.isMethodOrFunc(ctx.fname.getText()));
+    return holder;
   }
 
   @Override
@@ -282,7 +299,9 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitExprt2ParenCall2(Exprt2ParenCall2Context ctx) {
-    return createTreeWithoutFirstNode(ctx, ABLNodeType.LOCAL_METHOD_REF);
+    JPNodeHolder holder = createTreeFromFirstNode(ctx);
+    holder.getFirstNode().setType(ABLNodeType.LOCAL_METHOD_REF.getType());
+    return holder;
   }
 
   @Override
@@ -380,15 +399,20 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
         n.getEndLine(), n.getEndColumn(), 0, "", false);
 
     RecordNameNode node = (RecordNameNode) factory.create(newTok, ctx.filn().getText());
-    node.setStoreType(support.recordExpression(ctx.filn().getText()));
+    FieldType type = support.recordExpression(ctx.filn().getText());
+    if (type != null)
+      node.setStoreType(support.recordExpression(ctx.filn().getText()));
+    else
+      LOGGER.error("Found null field type for " + ctx.filn().getText());
 
     return new JPNodeHolder(node);
   }
 
   @Override
   public JPNodeHolder visitBlocklabel(BlocklabelContext ctx) {
-    // TODO #blocklabel.setType(BLOCK_LABEL);
-    return visitChildren(ctx);
+    JPNodeHolder holder = visitChildren(ctx);
+    holder.getFirstNode().setType(ABLNodeType.BLOCK_LABEL.getType());
+    return holder;
   }
 
   @Override
@@ -436,8 +460,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
     ProToken start = (ProToken) ctx.p1.start;
     StringBuilder sb = new StringBuilder(ctx.p1.getText());
     for (int zz = 1; zz < ctx.type_name_part().size(); zz++) {
-      JPNodeHolder comp = visit(ctx.type_name_part(zz));
-      sb.append(comp.getFirstNode().getText());
+      sb.append(ctx.type_name_part(zz).getText());
     }
     start.setType(ABLNodeType.TYPE_NAME.getType());
     start.setText(sb.toString());
@@ -504,15 +527,26 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
+  public JPNodeHolder visitApplystate2(Applystate2Context ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
   public JPNodeHolder visitAssign_opt(Assign_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
   public JPNodeHolder visitAssign_opt2(Assign_opt2Context ctx) {
-    JPNodeHolder holder = createTreeFromSecondNode(ctx);
-    holder.getFirstNode().setOperator();
-    return holder;
+    JPNodeHolder equal = visit(ctx.EQUAL());
+    JPNodeHolder left = visit(ctx.getChild(0));
+    JPNodeHolder right = visit(ctx.getChild(2));
+
+    equal.getFirstNode().setOperator();
+    equal.getFirstNode().addChild(left.getFirstNode());
+    equal.getFirstNode().addChild(right.getFirstNode());
+
+    return equal;
   }
 
   @Override
@@ -528,6 +562,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
     JPNodeHolder right = visit(ctx.getChild(2));
 
     JPNodeHolder holder = new JPNodeHolder((JPNode) factory.create(ABLNodeType.ASSIGN.getType()));
+    holder.getFirstNode().setStatementHead();
     holder.getFirstNode().addChild(equal.getFirstNode());
     equal.getFirstNode().addChild(left.getFirstNode());
     equal.getFirstNode().addChild(right.getFirstNode());
@@ -653,6 +688,19 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
+  public JPNodeHolder visitCaseExpression2(CaseExpression2Context ctx) {
+    JPNodeHolder or = visit(ctx.OR());
+    JPNodeHolder left = visit(ctx.getChild(0));
+    JPNodeHolder right = visit(ctx.getChild(2));
+
+    or.getFirstNode().setOperator();
+    or.getFirstNode().addChild(left.getFirstNode());
+    or.getFirstNode().addChild(right.getFirstNode());
+
+    return or;
+  }
+
+  @Override
   public JPNodeHolder visitCase_expr_term(Case_expr_termContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
@@ -739,7 +787,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitClosestored_where(Closestored_whereContext ctx) {
-    // TODO {#e.setType(EQ);}
     return createTreeFromFirstNode(ctx);
   }
 
@@ -821,7 +868,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitCompile_lang(Compile_langContext ctx) {
-    // TODO c:OBJCOLON {#c.setType(LEXCOLON);}
     return visitChildren(ctx);
   }
 
@@ -859,9 +905,9 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitConstructorstate(ConstructorstateContext ctx) {
-    // TODO CONSTRUCTOR<AST=BlockNode>
-    // TODO support.typenameThis(#tn);
-    return createStatementTreeFromFirstNode(ctx);
+    JPNodeHolder holder = createStatementTreeFromFirstNode(ctx);
+    support.attrTypeName(holder.getFirstNode().findDirectChild(ABLNodeType.TYPE_NAME.getType()));
+    return holder;
   }
 
   @Override
@@ -1036,10 +1082,88 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitDefinestatement(DefinestatementContext ctx) {
-    JPNodeHolder node = createTreeFromFirstNode(ctx);
-    node.getFirstNode().setStatementHead();
-    return node;
+  public JPNodeHolder visitDefinebrowsestate(DefinebrowsestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.BROWSE);
+  }
+
+  @Override
+  public JPNodeHolder visitDefinebufferstate(DefinebufferstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.BUFFER);
+  }
+
+  @Override
+  public JPNodeHolder visitDefinedatasetstate(DefinedatasetstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.DATASET);
+  }
+
+  @Override
+  public JPNodeHolder visitDefinedatasourcestate(DefinedatasourcestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.DATASOURCE);
+  }
+
+  @Override
+  public JPNodeHolder visitDefineeventstate(DefineeventstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.EVENT);
+  }
+
+  @Override
+  public JPNodeHolder visitDefineframestate(DefineframestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.FRAME);
+  }
+
+  @Override
+  public JPNodeHolder visitDefineimagestate(DefineimagestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.IMAGE);
+  }
+
+  @Override
+  public JPNodeHolder visitDefinemenustate(DefinemenustateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.MENU);
+  }
+
+  @Override
+  public JPNodeHolder visitDefineparameterstate(DefineparameterstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.PARAMETER);
+  }
+
+  @Override
+  public JPNodeHolder visitDefinepropertystate(DefinepropertystateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.PROPERTY);
+  }
+
+  @Override
+  public JPNodeHolder visitDefinequerystate(DefinequerystateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.QUERY);
+  }
+
+  @Override
+  public JPNodeHolder visitDefinerectanglestate(DefinerectanglestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.RECTANGLE);
+  }
+
+  @Override
+  public JPNodeHolder visitDefinestreamstate(DefinestreamstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.STREAM);
+  }
+
+  @Override
+  public JPNodeHolder visitDefinesubmenustate(DefinesubmenustateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.SUBMENU);
+  }
+
+  @Override
+  public JPNodeHolder visitDefinetemptablestate(DefinetemptablestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.TEMPTABLE);
+  }
+
+  @Override
+  public JPNodeHolder visitDefineworktablestate(DefineworktablestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.WORKTABLE);
+  }
+
+  @Override
+  public JPNodeHolder visitDefinevariablestate(DefinevariablestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.VARIABLE);
   }
 
   @Override
@@ -1069,10 +1193,20 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitDefinebuttonstate(DefinebuttonstateContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
+    JPNodeHolder holder = visitChildren(ctx);
     if (holder.getFirstNode().getNodeType() == ABLNodeType.BUTTONS)
       holder.getFirstNode().setType(ABLNodeType.BUTTON.getType());
+    holder.getFirstNode().setStatementHead(ABLNodeType.BUTTON.getType());
+
     return holder;
+  }
+
+  @Override
+  public JPNodeHolder visitButton_opt(Button_optContext ctx) {
+    if ((ctx.IMAGEDOWN() != null) || (ctx.IMAGE() != null) || (ctx.IMAGEUP() != null)
+        || (ctx.IMAGEINSENSITIVE() != null) || (ctx.MOUSEPOINTER() != null) || (ctx.NOFOCUS() != null))
+      return createTreeFromFirstNode(ctx);
+    return visitChildren(ctx);
   }
 
   @Override
@@ -1093,12 +1227,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   @Override
   public JPNodeHolder visitDatarelation_nested(Datarelation_nestedContext ctx) {
     return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitSource_buffer_phrase(Source_buffer_phraseContext ctx) {
-    // TODO astFactory.makeASTRoot(currentAST, #r);
-    return super.visitSource_buffer_phrase(ctx);
   }
 
   @Override
@@ -1138,6 +1266,15 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   @Override
   public JPNodeHolder visitDefineparam_as(Defineparam_asContext ctx) {
     return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNodeHolder visitDefineproperty_accessor(Defineproperty_accessorContext ctx) {
+    if (ctx.SET().isEmpty()) {
+      return createTree(ctx, ABLNodeType.PROPERTY_GETTER);
+    } else {
+      return createTree(ctx, ABLNodeType.PROPERTY_SETTER);
+    }
   }
 
   @Override
@@ -1210,9 +1347,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitDestructorstate(DestructorstateContext ctx) {
-    // TODO DESTRUCTOR<AST=BlockNode>
     JPNodeHolder holder = createStatementTreeFromFirstNode(ctx);
-    // TODO { support.typenameThis($tn); }
+    support.attrTypeName(holder.getFirstNode().findDirectChild(ABLNodeType.TYPE_NAME.getType()));
     return holder;
   }
 
@@ -1258,7 +1394,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitDostate(DostateContext ctx) {
-    // TODO DO<AST=BlockNode>
     return createStatementTreeFromFirstNode(ctx);
   }
 
@@ -1277,6 +1412,19 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
     JPNodeHolder holder = createTree(ctx, ABLNodeType.ASSIGN_DYNAMIC_NEW);
     holder.getFirstNode().setStatementHead();
     return holder;
+  }
+
+  @Override
+  public JPNodeHolder visitField_equal_dynamic_new(Field_equal_dynamic_newContext ctx) {
+    JPNodeHolder equal = visit(ctx.EQUAL());
+    JPNodeHolder left = visit(ctx.getChild(0));
+    JPNodeHolder right = visit(ctx.getChild(2));
+
+    equal.getFirstNode().setOperator();
+    equal.getFirstNode().addChild(left.getFirstNode());
+    equal.getFirstNode().addChild(right.getFirstNode());
+
+    return equal;
   }
 
   @Override
@@ -1385,7 +1533,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitForstate(ForstateContext ctx) {
-    // TODO FOR<AST=BlockNode>
     return createStatementTreeFromFirstNode(ctx);
   }
 
@@ -1406,7 +1553,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitFormatphrase(FormatphraseContext ctx) {
-    // TODO Triple check
     return createTree(ctx, ABLNodeType.FORMAT_PHRASE);
   }
 
@@ -1465,8 +1611,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitFunctionstate(FunctionstateContext ctx) {
-    // TODO f=FUNCTION<AST=BlockNode>
     return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNodeHolder visitFunction_end(Function_endContext ctx) {
+    return createTreeFromFirstNode(ctx);
   }
 
   @Override
@@ -1612,12 +1762,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitIoPhraseAnyTokensSub3(IoPhraseAnyTokensSub3Context ctx) {
-    // TODO Syntax to be confirmed
-
     ProToken start = (ProToken) ctx.getStart();
     StringBuilder sb = new StringBuilder(start.getText());
-    for (int zz = 1; zz < ctx.not_state_end().size(); zz++) {
-      JPNodeHolder comp = visit(ctx.not_state_end(zz));
+    for (int zz = 0; zz < ctx.not_io_opt().size(); zz++) {
+      JPNodeHolder comp = visit(ctx.not_io_opt(zz));
       sb.append(comp.getFirstNode().getText());
     }
     start.setType(ABLNodeType.FILENAME.getType());
@@ -1682,7 +1830,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitLoadstate(LoadstateContext ctx) {
-    return super.visitLoadstate(ctx);
+    return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
@@ -1702,7 +1850,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitMessage_opt(Message_optContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createTreeFromFirstNode(ctx);
   }
 
   @Override
@@ -1747,7 +1895,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitOnstate(OnstateContext ctx) {
-    // TODO ON<AST=BlockNode>
     return createStatementTreeFromFirstNode(ctx);
   }
 
@@ -1778,7 +1925,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitOpenquery_opt(Openquery_optContext ctx) {
-    // TODO MAXROWS^
+    if (ctx.MAXROWS() != null)
+      return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
@@ -1844,7 +1992,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitPause_opt(Pause_optContext ctx) {
-    // TODO Implement ^
+    if (ctx.MESSAGE() != null)
+      return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
@@ -1856,14 +2005,15 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   @Override
   public JPNodeHolder visitProcedurestate(ProcedurestateContext ctx) {
     JPNodeHolder holder = createStatementTreeFromFirstNode(ctx);
-    // TODO PROCEDURE<AST=BlockNode>
     holder.getFirstNode().nextNode().setType(ABLNodeType.ID.getType());
     return holder;
   }
 
   @Override
   public JPNodeHolder visitProcedure_opt(Procedure_optContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    if (ctx.EXTERNAL() != null)
+      return createTreeFromFirstNode(ctx);
+    return visitChildren(ctx);
   }
 
   @Override
@@ -1930,7 +2080,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitQuerytuning_opt(Querytuning_optContext ctx) {
-    // TODO Implement ^
+    if ((ctx.CACHESIZE() != null) || (ctx.DEBUG() != null) || (ctx.HINT() != null))
+      return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
@@ -1969,7 +2120,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitRepeatstate(RepeatstateContext ctx) {
-    // TODO <AST=BlockNode>
     return createStatementTreeFromFirstNode(ctx);
   }
 
@@ -1989,7 +2139,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitRecord_opt(Record_optContext ctx) {
-    // TODO LEFT^ OF^ WHERE^ ...
+    if ((ctx.LEFT() != null) || (ctx.OF() != null) || (ctx.WHERE() != null) || (ctx.USEINDEX() != null) || (ctx.USING() != null))
+      return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
@@ -2021,12 +2172,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   @Override
   public JPNodeHolder visitReturnstate(ReturnstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitReturn_options(Return_optionsContext ctx) {
-    // TODO Conversion to be verified
-    return visitChildren(ctx);
   }
 
   @Override
@@ -2106,7 +2251,9 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitSelectionlist_opt(Selectionlist_optContext ctx) {
-    // TODO LISTITEMS^ LISTITEMPAIRS^ INNERCHARS^ INNERLINES^
+    if ((ctx.LISTITEMS() != null) || (ctx.LISTITEMPAIRS() != null) || (ctx.INNERCHARS() != null)
+        || (ctx.INNERLINES() != null))
+      return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
@@ -2142,7 +2289,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitSlider_opt(Slider_optContext ctx) {
-    // TODO MAXVALUE^ MINVALUE^ TICMARKS^
+    if ((ctx.MAXVALUE() != null) || (ctx.MINVALUE() != null) || (ctx.TICMARKS() != null))
+      return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
@@ -2208,7 +2356,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitSysdiafont_opt(Sysdiafont_optContext ctx) {
-    // TODO MAXSIZE^ MINSIZE^
+    if ((ctx.MAXSIZE() != null) || (ctx.MINSIZE() != null))
+      return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
@@ -2219,8 +2368,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitSystemdialoggetdir_opt(Systemdialoggetdir_optContext ctx) {
-    // TODO INITIALDIR^ TITLE^ UPDATE^
-    return visitChildren(ctx);
+    return createTreeFromFirstNode(ctx);
   }
 
   @Override
@@ -2230,7 +2378,9 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitSysdiagetfile_opt(Sysdiagetfile_optContext ctx) {
-    // TODO FILTER^ DEFAULTEXTENSION^ INITIALDIR^ UPDATE^
+    if ((ctx.FILTERS() != null) || (ctx.DEFAULTEXTENSION() != null) || (ctx.INITIALDIR() != null)
+        || (ctx.UPDATE() != null))
+      return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
@@ -2246,7 +2396,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitSysdiapri_opt(Sysdiapri_optContext ctx) {
-    // TODO NUMCOPIES^
+    if (ctx.NUMCOPIES() != null)
+      return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
@@ -2330,7 +2481,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitTrigger_on(Trigger_onContext ctx) {
-    // TODO ON^<AST=BlockNode>
     return createTreeFromFirstNode(ctx);
   }
 
@@ -2424,11 +2574,18 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   @Override
   public JPNodeHolder visitUsingstate(UsingstateContext ctx) {
     String typeName = ctx.type.getText() + (ctx.star != null ? "*" : "");
-    support.usingState(typeName);
 
-    JPNodeHolder holder = createStatementTreeFromFirstNode(ctx);
-    holder.getFirstNode().findDirectChild(ABLNodeType.TYPE_NAME).setText(typeName);
-    return holder;
+    JPNodeHolder node = visit(ctx.USING());
+    addHolderToNode(node.getFirstNode(), visit(ctx.type));
+    if (ctx.using_from() != null)
+      addHolderToNode(node.getFirstNode(), visit(ctx.using_from()));
+    addHolderToNode(node.getFirstNode(), visit(ctx.state_end()));
+
+    support.usingState(typeName);
+    node.getFirstNode().setStatementHead();
+    node.getFirstNode().getFirstChild().setText(typeName);
+
+    return node;
   }
 
   @Override

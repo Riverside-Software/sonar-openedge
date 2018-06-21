@@ -316,8 +316,12 @@ public class ParserSupport {
     node.attrSet(IConstants.QUALIFIED_CLASS_INT, classFinder.lookup(node.getText()));
   }
 
-  void attrTypeName(JPNode node) {
-    node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
+  public void attrTypeName(JPNode node) {
+    if (node == null) {
+      LOG.error("Unable to assign attribute QUALIFIED_CLASS_INT");
+    } else {
+      node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
+    }
   }
 
   /**

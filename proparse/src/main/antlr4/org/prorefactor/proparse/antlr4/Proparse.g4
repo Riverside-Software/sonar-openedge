@@ -217,7 +217,24 @@ statement: // TRANSLATED
   |  dderequeststate
   |  ddesendstate
   |  ddeterminatestate
-  |  definestatement
+  |  definebrowsestate
+  |  definebufferstate
+  |  definebuttonstate
+  |  definedatasetstate
+  |  definedatasourcestate
+  |  defineeventstate
+  |  defineframestate
+  |  defineimagestate
+  |  definemenustate
+  |  defineparameterstate
+  |  definepropertystate
+  |  definequerystate
+  |  definerectanglestate
+  |  definestreamstate
+  |  definesubmenustate
+  |  definetemptablestate
+  |  defineworktablestate
+  |  definevariablestate
   |  destructorstate
   |  dictionarystate
   |  deletewidgetpoolstate
@@ -792,7 +809,7 @@ widattr: // TRANSLATED
   ;
 
 attr_colon: // TRANSLATED
-    ( (OBJCOLON|DOUBLECOLON) . array_subscript? method_param_list? )+ inuic? ( AS . )?
+    ( ( OBJCOLON | DOUBLECOLON ) . array_subscript? method_param_list? )+ inuic? ( AS . )?
   ;
 
 gwidget: // TRANSLATED
@@ -1049,7 +1066,11 @@ annotation: // TRANSLATED
 
 applystate: // TRANSLATED
     // apply is not necessarily an IO statement. See the language ref.
-    APPLY expression ( TO gwidget )? state_end
+    APPLY expression applystate2? state_end
+  ;
+
+applystate2: // TRANSLATED
+    TO gwidget
   ;
 
 assign_opt: // TRANSLATED
@@ -1057,7 +1078,7 @@ assign_opt: // TRANSLATED
     ASSIGN assign_opt2+
   ;
 
-assign_opt2: // SEMITRANSLATED
+assign_opt2: // TRANSLATED
     . EQUAL expression
   ;
 
@@ -1190,8 +1211,9 @@ case_when: // TRANSLATED
     WHEN case_expression THEN blockorstate
   ;
 
-case_expression: // TODO
-    case_expr_term ( OR case_expr_term {LOGGER.error("support.attrOp(##);"); })*
+case_expression:
+    case_expr_term                    # caseExpression1
+  | case_expression OR case_expr_term # caseExpression2
   ;
 
 case_expr_term: // TRANSLATED
@@ -1418,7 +1440,7 @@ compile_opt: // TRANSLATED
 
 compile_lang: // TRANSLATED
     valueexpression
-  | compile_lang2 (OBJCOLON compile_lang2)*
+  | compile_lang2 ( OBJCOLON compile_lang2 )*
   ;
 
 compile_lang2: // TRANSLATED
@@ -1674,41 +1696,12 @@ default_expr: // TRANSLATED
     DEFAULT expression
   ;
 
-definestatement // TOBETRANSLATED
-  :  DEFINE define_share
-    (  PRIVATE
-    |  PROTECTED
-    |  PUBLIC
-    |  ABSTRACT
-    |  STATIC
-    |  OVERRIDE
-    )*
-    (  definebrowsestate  //{sthd(##,BROWSE);}
-    |  definebufferstate  //{sthd(##,BUFFER);}
-    |  definebuttonstate  //{sthd(##,BUTTON);}
-    |  definedatasetstate  //{sthd(##,DATASET);}
-    |  definedatasourcestate  //{sthd(##,DATASOURCE);}
-    |  defineeventstate  //{sthd(##,EVENT);}
-    |  defineframestate  //{sthd(##,FRAME);}
-    |  defineimagestate  //{sthd(##,IMAGE);}
-    |  definemenustate    //{sthd(##,MENU);}
-    |  defineparameterstate // {sthd(##,PARAMETER);}
-    |  definepropertystate  //{sthd(##,PROPERTY);}
-    |  definequerystate  //{sthd(##,QUERY);}
-    |  definerectanglestate // {sthd(##,RECTANGLE);}
-    |  definestreamstate  //{sthd(##,STREAM);}
-    |  definesubmenustate  //{sthd(##,SUBMENU);}
-    |  definetemptablestate  //{sthd(##,TEMPTABLE);}
-    |  defineworktablestate  //{sthd(##,WORKTABLE);}
-    |  definevariablestate // {sthd(##,VARIABLE);}
-    )
-  ;
-
 define_share: // TRANSLATED
     ( ( NEW GLOBAL? )? SHARED )?
   ;
 
 definebrowsestate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     BROWSE n=identifier query_queryname? ( lockhow | NOWAIT )*
     ( def_browse_display def_browse_enable? )?
     display_with*
@@ -1723,10 +1716,9 @@ def_browse_display: // TRANSLATED
   ;
 
 def_browse_display_items_or_record: // TRANSLATED
-    // If there's more than one display item, then it cannot be a table name.
-    def_browse_display_item+
-  | { isTableName() }? recordAsFormItem
-  | def_browse_display_item*
+    // TODO Inject in visitor -- If there's more than one display item, then it cannot be a table name.
+    { isTableName() }? recordAsFormItem
+  | def_browse_display_item+
   ;
 
 def_browse_display_item: // TRANSLATED
@@ -1749,6 +1741,7 @@ def_browse_enable_item: // TRANSLATED
   ;
 
 definebufferstate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     // For the table type: we can assume that if it's not in tableDict, it's a db table.
     // For db buffers:
     //   - set "FullName" to db.tablename (not db.buffername). Required for field lookups. See support library.
@@ -1764,11 +1757,12 @@ definebufferstate: // TRANSLATED
   ;
 
 definebuttonstate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     ( BUTTON | BUTTONS ) n=identifier button_opt* triggerphrase? state_end
     { support.defVar($n.text); }
   ;
 
-button_opt: // SEMITRANSLATED
+button_opt: // TRANSLATED
     AUTOGO
   | AUTOENDKEY
   | DEFAULT
@@ -1791,6 +1785,7 @@ button_opt: // SEMITRANSLATED
   ;
 
 definedatasetstate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     DATASET identifier
     namespace_uri? namespace_prefix? xml_node_name? serialize_name? xml_node_type? SERIALIZEHIDDEN?
     REFERENCEONLY?
@@ -1833,6 +1828,7 @@ datarelation_nested: // TRANSLATED
   ;
 
 definedatasourcestate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     DATASOURCE n=identifier FOR 
     query_queryname?
     source_buffer_phrase?
@@ -1852,6 +1848,7 @@ source_buffer_phrase: // TRANSLATED
   ;
 
 defineeventstate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     EVENT n=identifier
     ( event_signature | event_delegate )
     state_end
@@ -1869,6 +1866,7 @@ event_delegate: // TRANSLATED
   ;
 
 defineframestate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     // PSC's grammar: uses <xfield> and <fmt-item>. <xfield> is <field> with <fdio-mod> which with <fdio-opt>
     // maps to our formatphrase. <fmt-item> is skip, space, or constant. Our form_item covers all this.
     // The syntax here should always be identical to the FORM statement (formstate).
@@ -1877,6 +1875,7 @@ defineframestate: // TRANSLATED
   ;
 
 defineimagestate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     IMAGE n=identifier defineimage_opt* triggerphrase? state_end
     { support.defVar($n.text); }
   ;
@@ -1893,6 +1892,7 @@ defineimage_opt: // TRANSLATED
   ;
 
 definemenustate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     MENU n=identifier menu_opt*
     ( menu_list_item
       ( {_input.LA(2) == RULE || _input.LA(2) == SKIP || _input.LA(2) == SUBMENU || _input.LA(2) == MENUITEM }? PERIOD )?
@@ -1912,6 +1912,7 @@ menu_opt: // TRANSLATED
   ;
 
 menu_list_item: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     MENUITEM n=identifier menu_item_opt* triggerphrase?
     { support.defVar($n.text); }
   | SUBMENU s=identifier ( DISABLED | label_constant | font_expr | color_expr )*
@@ -1931,15 +1932,18 @@ menu_item_opt: // TRANSLATED
   ;
 
 defineparameterstate: // TRANSLATED
-    PARAMETER BUFFER bn=identifier FOR TEMPTABLE? bf=record
-    PRESELECT? label_constant? fields_fields? state_end
-    { support.defBuffer($bn.text, $bf.text); }
-  | ( INPUT | OUTPUT | INPUTOUTPUT | RETURN ) PARAMETER
-    ( TABLE FOR record ( APPEND | BIND | BYVALUE )*
-    | TABLEHANDLE FOR? pn2=identifier ( APPEND | BIND | BYVALUE )* { support.defVar($pn2.text); }
-    | DATASET FOR identifier ( APPEND | BIND | BYVALUE )*
-    | DATASETHANDLE dsh=identifier ( APPEND | BIND | BYVALUE )* { support.defVar($dsh.text); }
-    | pn=identifier defineparam_var triggerphrase? { support.defVar($pn.text); }
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    (
+      PARAMETER BUFFER bn=identifier FOR TEMPTABLE? bf=record
+      PRESELECT? label_constant? fields_fields? state_end
+      { support.defBuffer($bn.text, $bf.text); }
+    | ( INPUT | OUTPUT | INPUTOUTPUT | RETURN ) PARAMETER
+      ( TABLE FOR record ( APPEND | BIND | BYVALUE )*
+      | TABLEHANDLE FOR? pn2=identifier ( APPEND | BIND | BYVALUE )* { support.defVar($pn2.text); }
+      | DATASET FOR identifier ( APPEND | BIND | BYVALUE )*
+      | DATASETHANDLE dsh=identifier ( APPEND | BIND | BYVALUE )* { support.defVar($dsh.text); }
+      | pn=identifier defineparam_var triggerphrase? { support.defVar($pn.text); }
+      )
     )
     state_end
   ;
@@ -1961,13 +1965,14 @@ defineparam_as: // TRANSLATED
   ;
 
 definepropertystate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     PROPERTY n=new_identifier AS datatype
     ( extentphrase | initial_constant | NOUNDO )*
     defineproperty_accessor defineproperty_accessor?
     { support.defVar($n.text); }
   ;
 
-defineproperty_accessor: // TOBETRANSLATED
+defineproperty_accessor: // TRANSLATED
     ( PUBLIC | PROTECTED | PRIVATE )?
     ( GET PERIOD
     | SET PERIOD
@@ -1977,6 +1982,7 @@ defineproperty_accessor: // TOBETRANSLATED
   ;
 
 definequerystate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     QUERY n=identifier
     FOR record record_fields?
     ( COMMA record record_fields? )*
@@ -1986,6 +1992,7 @@ definequerystate: // TRANSLATED
   ;
 
 definerectanglestate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     RECTANGLE n=identifier rectangle_opt* triggerphrase? state_end
     { support.defVar($n.text); }
   ;
@@ -2004,11 +2011,13 @@ rectangle_opt: // TRANSLATED
   ;
    
 definestreamstate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     STREAM n=identifier state_end
     { support.defVar($n.text); }
   ;
 
 definesubmenustate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     SUBMENU n=identifier menu_opt*
     (  menu_list_item
       ( {_input.LA(2) == RULE || _input.LA(2) == SKIP || _input.LA(2) == SUBMENU || _input.LA(2) == MENUITEM }? PERIOD )?
@@ -2018,6 +2027,7 @@ definesubmenustate: // TRANSLATED
   ;
    
 definetemptablestate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     TEMPTABLE tn=identifier
     { support.defTable($tn.text, SymbolScope.FieldType.TTABLE); }
     ( UNDO | NOUNDO )?
@@ -2064,6 +2074,7 @@ def_table_index: // TRANSLATED
   ;
    
 defineworktablestate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     // Token WORKTABLE can be "work-file" or abbreviated forms of "work-table"
     WORKTABLE tn=identifier
     { support.defTable($tn.text, SymbolScope.FieldType.WTABLE); }
@@ -2075,6 +2086,7 @@ defineworktablestate: // TRANSLATED
   ;
 
 definevariablestate: // TRANSLATED
+    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     VARIABLE n=new_identifier fieldoption* triggerphrase? state_end
     { support.defVar($n.text); }
   ;
@@ -2155,10 +2167,9 @@ displaystate: // TRANSLATED
   ;
 
 display_items_or_record: // TRANSLATED
-    // If there's more than one display item, then it cannot be a table name.
-    display_item+
-  | { isTableName() }? recordAsFormItem
-  | display_item*
+    // TODO Inject in visitor -- If there's more than one display item, then it cannot be a table name.
+    { isTableName() }? recordAsFormItem
+  | display_item+
   ;
 
 display_item: // TRANSLATED
@@ -2205,7 +2216,7 @@ dynamicnewstate: // TRANSLATED
     field_equal_dynamic_new NOERROR_KW? state_end
   ;
 
-field_equal_dynamic_new: // TOBETRANSLATED
+field_equal_dynamic_new: // TRANSLATED
     (widattr | field) EQUAL dynamic_new
   ;
 
@@ -2342,10 +2353,8 @@ format_expr: // TRANSLATED
   ;
 
 form_items_or_record: // TRANSLATED
-    // If there's more than one display item, then it cannot be a table name.
-    form_item form_item+
-  | { isTableName() }? recordAsFormItem
-  | form_item*
+    // TODO Redefine in parser -- If there's more than one display item, then it cannot be a table name.
+    form_item*
   ;
 
 form_item: // TRANSLATED
@@ -2359,7 +2368,7 @@ form_item: // TRANSLATED
     |  widget_id
     |  CARET
     |  field ( aggregatephrase | formatphrase )*
-    |  { isTableName() }? record
+    |  { isTableName() }? recordAsFormItem
     )
   ;
 
@@ -2543,9 +2552,14 @@ functionstate: // TRANSLATED
     | (MAP TO? identifier)? IN_KW expression ( LEXCOLON | PERIOD | EOF )
     | block_colon
       code_block
-      ( EOF | END FUNCTION? state_end /* TODO Weird syntax in proparse.g */ )
+      function_end
+      state_end
     )
     { support.funcEnd(); }
+  ;
+
+function_end:
+    END FUNCTION?
   ;
 
 function_params: // TRANSLATED
@@ -2720,7 +2734,7 @@ io_phrase_state_end: // TRANSLATED
   | io_printer io_opt* state_end
   | TERMINAL io_opt* state_end
   | // TODO This syntax and next three nodes to be confirmed
-    io_phrase_any_tokens state_end
+    io_phrase_any_tokens* state_end
   ;
 
 io_phrase_any_tokens: // TRANSLATED
@@ -2732,9 +2746,9 @@ io_phrase_any_tokens_sub: // TRANSLATED
     // and any of those arguments could be a VALUE(expression).
     // Also note that unix commands like echo, lp paged, etc, are not uncommon, so we have to do
     // full lookahead/backtracking like an LALR parser would.
-    io_opt*  # ioPhraseAnyTokensSub1
+    io_opt  # ioPhraseAnyTokensSub1
   | valueexpression # ioPhraseAnyTokensSub2
-  | not_state_end* # ioPhraseAnyTokensSub3
+  | ~( PERIOD | VALUE ) not_io_opt* # ioPhraseAnyTokensSub3
   ;
 
 io_opt: // TRANSLATED
@@ -2756,6 +2770,29 @@ io_opt: // TRANSLATED
   | PAGESIZE_KW anyorvalue
   | PORTRAIT
   | UNBUFFERED 
+  ;
+
+not_io_opt:
+  ~(
+    PERIOD
+  | APPEND
+  | BINARY
+  | COLLATE
+  | CONVERT
+  | NOCONVERT
+  | ECHO
+  | NOECHO
+  | KEEPMESSAGES
+  | LANDSCAPE
+  | LOBDIR
+  | MAP
+  | NOMAP
+  | NUMCOPIES
+  | PAGED
+  | PAGESIZE_KW
+  | PORTRAIT
+  | UNBUFFERED
+  )
   ;
 
 io_osdir: // TRANSLATED
@@ -3130,7 +3167,8 @@ query_queryname: // TRANSLATED
 querytuningphrase: // TRANSLATED
     QUERYTUNING LEFTPAREN querytuning_opt* RIGHTPAREN
   ;
-querytuning_opt: // SEMITRANSLATED
+
+querytuning_opt: // TRANSLATED
     ARRAYMESSAGE | NOARRAYMESSAGE
   | BINDWHERE | NOBINDWHERE
   | CACHESIZE NUMBER (ROW|BYTE)?
@@ -3212,7 +3250,7 @@ recordphrase: // TRANSLATED
     rec=record record_fields? ( TODAY |NOW | constant )? record_opt*
   ;
 
-record_opt: // SEMITRANSLATED
+record_opt: // TRANSLATED
     LEFT? OUTERJOIN
   | OF record
     // Believe it or not, WHERE compiles without <expression>
@@ -3221,14 +3259,15 @@ record_opt: // SEMITRANSLATED
     // We (intentionally, for now) don't parse something that Progress runs fine with:
     //    FOR EACH customer WHERE NO-LOCK=6209:
     // (The constant NO-LOCK value is 6209).
-  |  WHERE expression?
-  |  USEINDEX identifier
-  |  USING field (AND field)*
-  |  lockhow
-  |  NOWAIT
-  |  NOPREFETCH
-  |  NOERROR_KW
-  |  TABLESCAN
+  | WHERE expression?
+  | TENANTWHERE expression? 
+  | USEINDEX identifier
+  | USING field (AND field)*
+  | lockhow
+  | NOWAIT
+  | NOPREFETCH
+  | NOERROR_KW
+  | TABLESCAN
   ;
 
 releasestatement: // TRANSLATED
@@ -3268,7 +3307,7 @@ returnstate: // TRANSLATED
     RETURN return_options state_end
   ;
 
-return_options: // SEMITRANSLATED
+return_options: // TRANSLATED
     ( ERROR | NOAPPLY )?
     expression?
   ;
@@ -3338,7 +3377,8 @@ seekstate: // TRANSLATED
 selectionlistphrase: // TRANSLATED
     SELECTIONLIST selectionlist_opt*
   ;
-selectionlist_opt: // SEMITRANSLATED
+
+selectionlist_opt: // TRANSLATED
      SINGLE
   |  MULTIPLE
   |  NODRAG
@@ -3383,7 +3423,8 @@ skipphrase: // TRANSLATED
 sliderphrase: // TRANSLATED
     SLIDER slider_opt*
   ;
-slider_opt: // SEMITRANSLATED
+
+slider_opt: // TRANSLATED
     HORIZONTAL
   | MAXVALUE expression
   | MINVALUE expression
@@ -3394,6 +3435,7 @@ slider_opt: // SEMITRANSLATED
   | tooltip_expr
   | sizephrase
   ;
+
 slider_frequency: // TRANSLATED
     FREQUENCY expression
   ;
@@ -3454,7 +3496,7 @@ systemdialogfontstate: // TRANSLATED
     SYSTEMDIALOG FONT expression sysdiafont_opt* state_end
   ;
 
-sysdiafont_opt: // SEMITRANSLATED
+sysdiafont_opt: // TRANSLATED
     ANSIONLY
   | FIXEDONLY
   | MAXSIZE expression
@@ -3467,7 +3509,7 @@ systemdialoggetdirstate: // TRANSLATED
     SYSTEMDIALOG GETDIR field systemdialoggetdir_opt* state_end
   ;
 
-systemdialoggetdir_opt: // SEMITRANSLATED
+systemdialoggetdir_opt: // TRANSLATED
     INITIALDIR expression
   | RETURNTOSTARTDIR
   | TITLE expression
@@ -3478,7 +3520,7 @@ systemdialoggetfilestate: // TRANSLATED
     SYSTEMDIALOG GETFILE field sysdiagetfile_opt* state_end
   ;
 
-sysdiagetfile_opt: // SEMITRANSLATED
+sysdiagetfile_opt: // TRANSLATED
      FILTERS expression expression (COMMA expression expression)* sysdiagetfile_initfilter?
   |  ASKOVERWRITE
   |  CREATETESTFILE
@@ -3501,7 +3543,7 @@ systemdialogprintersetupstate: // TRANSLATED
     SYSTEMDIALOG PRINTERSETUP sysdiapri_opt* state_end
   ;
 
-sysdiapri_opt: // SEMITRANSLATED
+sysdiapri_opt: // TRANSLATED
     ( NUMCOPIES expression | update_field | LANDSCAPE | PORTRAIT | in_window_expr )
   ;
 
@@ -3579,7 +3621,7 @@ trigger_block: // TRANSLATED
     trigger_on*
   ;
 
-trigger_on: // SEMITRANSLATED
+trigger_on: // TRANSLATED
     ON eventlist ANYWHERE? ( PERSISTENT runstate | blockorstate )
   ;
 
