@@ -876,6 +876,40 @@ public class JPNode implements AST {
     return sz;
   }
 
+  /**
+   * Internal use only, should be removed after migration to ANTLR4
+   * @return 0 if identical node objects, &gt; 0 if different
+   */
+  public int compareTo(JPNode other) {
+    if (other == null) {
+      // Not available
+      return 1;
+    }
+    if (!token.equals(other.token)) {
+      // Different token
+      return 2;
+    }
+
+    // Difference on 'down' node
+    if ((down == null) && (other.down != null)) {
+      return 3;
+    } else if ((down != null) && (down.compareTo(other.down) != 0)) {
+      return 4;
+    }
+
+    // Difference on 'right' node
+    if ((right == null) && (other.right != null)) {
+      return 5;
+    } else if ((right != null) && (right.compareTo(other.right) != 0)) {
+      return 6;
+    }
+
+    // Top and left don't have to be compared as they are computed after the parse phase
+    // Attributes are not yet compared
+
+    return 0;
+  }
+
   @Override
   public String toString() {
     StringBuilder buff = new StringBuilder();
