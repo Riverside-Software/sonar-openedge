@@ -12,6 +12,7 @@
  *******************************************************************************/ 
 package org.prorefactor.core;
 
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -880,27 +881,43 @@ public class JPNode implements AST {
    * Internal use only, should be removed after migration to ANTLR4
    * @return 0 if identical node objects, &gt; 0 if different
    */
-  public int compareTo(JPNode other) {
+  public int compareTo(JPNode other, int level) {
     if (other == null) {
+      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- No token");
       // Not available
       return 1;
     }
     if (!token.equals(other.token)) {
+      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- Token: " + this.token + " -- " + other.token);
       // Different token
       return 2;
     }
 
+    // On attributes
+    if (attrMap != null) {
+      for (Map.Entry<Integer,Integer> entry : attrMap.entrySet()) {
+        if (!entry.getValue().equals(other.attrGet(entry.getKey()))) {
+          System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- AttrMap[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGet(entry.getKey()));
+          return 7;
+        }
+      }
+    }
+
     // Difference on 'down' node
     if ((down == null) && (other.down != null)) {
+      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- No down: " + this);
       return 3;
-    } else if ((down != null) && (down.compareTo(other.down) != 0)) {
+    } else if ((down != null) && (down.compareTo(other.down, level + 1) != 0)) {
+      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- Down: " + this.down + " -- " + other.down);
       return 4;
     }
 
     // Difference on 'right' node
     if ((right == null) && (other.right != null)) {
+      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- No right: " + this);
       return 5;
-    } else if ((right != null) && (right.compareTo(other.right) != 0)) {
+    } else if ((right != null) && (right.compareTo(other.right, level) != 0)) {
+      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- Right: " + this.right + " -- " + other.right);
       return 6;
     }
 
