@@ -30,11 +30,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
     this.stream = stream;
   }
 
-  public JPNodeVisitor(ProgressLexer lexer, ParserSupport support) {
-    this.lexer = lexer;
-    this.support = support;
-  }
-
   @Override
   public JPNodeHolder visitProgram(ProgramContext ctx) {
     return createTree(ctx, ABLNodeType.PROGRAM_ROOT, ABLNodeType.PROGRAM_TAIL);
@@ -398,12 +393,14 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
         ctx.filn().getText(), n.getFileIndex(), n.getFilename(), n.getLine(), n.getColumn(), n.getEndFileIndex(),
         n.getEndLine(), n.getEndColumn(), 0, "", false);
 
-    RecordNameNode node = (RecordNameNode) factory.create(newTok, ctx.filn().getText());
-    FieldType type = support.recordExpression(ctx.filn().getText());
+    String filnName = ctx.filn().getText();
+    RecordNameNode node = (RecordNameNode) factory.create(newTok, filnName);
+    n.copyHiddenBefore(node);
+    FieldType type = support.recordExpression(filnName);
     if (type != null)
-      node.setStoreType(support.recordExpression(ctx.filn().getText()));
+      node.setStoreType(support.recordExpression(filnName));
     else
-      LOGGER.error("Found null field type for " + ctx.filn().getText());
+      LOGGER.error("Found null field type for " + filnName);
 
     return new JPNodeHolder(node);
   }
@@ -1855,11 +1852,13 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitMethodstate(MethodstateContext ctx) {
+    support.pushRuleContext(ctx);
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
   public JPNodeHolder visitMethod_end(Method_endContext ctx) {
+    support.popRuleContext();
     return createTreeFromFirstNode(ctx);
   }
 
@@ -1895,6 +1894,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitOnstate(OnstateContext ctx) {
+    // TODO Add support#pushRuleContext (easy), and find a way to execute popRuleContext() 
     return createStatementTreeFromFirstNode(ctx);
   }
 
@@ -2004,6 +2004,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitProcedurestate(ProcedurestateContext ctx) {
+    support.pushRuleContext(ctx);
     JPNodeHolder holder = createStatementTreeFromFirstNode(ctx);
     holder.getFirstNode().nextNode().setType(ABLNodeType.ID.getType());
     return holder;
@@ -2023,6 +2024,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
 
   @Override
   public JPNodeHolder visitProcedure_end(Procedure_endContext ctx) {
+    support.popRuleContext();
     return createTreeFromFirstNode(ctx);
   }
 
@@ -2686,8 +2688,35 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
         tok.getFileIndex(), lexer.getFilename(tok.getFileIndex()), tok.getLine(), tok.getCharPositionInLine(),
         tok.getEndFileIndex(), tok.getEndLine(), tok.getEndCharPositionInLine(), tok.getMacroSourceNum(),
         tok.getAnalyzeSuspend(), false);
+    JPNode jp = (JPNode) factory.create(tok2);
 
-    return new JPNodeHolder((JPNode) factory.create(tok2));
+    org.prorefactor.core.ProToken lastHiddenTok = null;
+    org.prorefactor.core.ProToken firstHiddenTok = null;
+    
+    ProToken t = node.getSymbol().getTokenIndex() > 0 ? (ProToken) stream.get(node.getSymbol().getTokenIndex() - 1) : null;
+    while ((t != null) && (t.getChannel() != org.antlr.v4.runtime.Token.DEFAULT_CHANNEL)) {
+      org.prorefactor.core.ProToken hidden = new org.prorefactor.core.ProToken(
+          t.getNodeType() == ABLNodeType.EOF_ANTLR4 ? ABLNodeType.EOF : t.getNodeType(), t.getText(),
+              t.getFileIndex(), lexer.getFilename(t.getFileIndex()), t.getLine(), t.getCharPositionInLine(),
+              t.getEndFileIndex(), t.getEndLine(), t.getEndCharPositionInLine(), t.getMacroSourceNum(),
+              t.getAnalyzeSuspend(), false);
+      if (firstHiddenTok == null) {
+        firstHiddenTok = hidden;
+        lastHiddenTok = hidden;
+      } else {
+        lastHiddenTok.setHiddenBefore(hidden);
+        lastHiddenTok = hidden;
+      }
+      
+      if (t.getTokenIndex() > 0)
+        t =  (ProToken)stream.get(t.getTokenIndex()  - 1);
+      else
+        t = null;
+    }
+    if (firstHiddenTok != null)
+      jp.setHiddenBefore(firstHiddenTok);
+    
+    return new JPNodeHolder(jp);
   }
 
   @Override

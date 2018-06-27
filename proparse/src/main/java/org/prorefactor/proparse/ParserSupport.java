@@ -12,9 +12,12 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse;
 
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
+import org.antlr.v4.runtime.RuleContext;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
@@ -55,11 +58,23 @@ public class ParserSupport {
   private JPNode lastFieldRefNode;
   private JPNode lastFieldIDNode;
 
+  // For JPNodeVisitor
+  private Map<RuleContext, SymbolScope> scopesMap = new HashMap<>();
+  private Deque<RuleContext> ruleContexts = new LinkedList<>();
+
   public ParserSupport(RefactorSession session) {
     this.session = session;
     this.unitScope = new RootSymbolScope(session);
     this.currentScope = unitScope;
     this.classFinder = new ClassFinder(session);
+  }
+
+  public void pushRuleContext(RuleContext ctx) {
+    ruleContexts.push(ctx);
+  }
+
+  public void popRuleContext() {
+    ruleContexts.pop();
   }
 
   /**
@@ -99,6 +114,11 @@ public class ParserSupport {
 
   public void addInnerScope() {
     currentScope = new SymbolScope(session, currentScope);
+  }
+
+  public void addInnerScope(RuleContext ctx) {
+    addInnerScope();
+    scopesMap.put(ctx, currentScope);
   }
 
   // Functions triggered from proparse.g
@@ -219,10 +239,14 @@ public class ParserSupport {
     return (schemaTablePriority ? isTableSchemaFirst(recname.toLowerCase()) : isTable(recname.toLowerCase())) != null;
   }
 
-  public FieldType recordExpression(String recName ) {
-    return (schemaTablePriority ? isTableSchemaFirst(recName.toLowerCase()) : isTable(recName.toLowerCase()));
+  public FieldType recordExpression(String recName) {
+    SymbolScope scope = scopesMap.get(ruleContexts.peek());
+    if (scope == null)
+      scope = unitScope;
+    return (schemaTablePriority ? scope.isTableSchemaFirst(recName.toLowerCase())
+        : scope.isTable(recName.toLowerCase()));
   }
-  
+
   public FieldType isTable(String inName) {
     return currentScope.isTable(inName);
   }

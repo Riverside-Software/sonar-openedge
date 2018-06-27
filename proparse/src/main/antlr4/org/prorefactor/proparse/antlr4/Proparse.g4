@@ -1697,11 +1697,11 @@ default_expr: // TRANSLATED
   ;
 
 define_share: // TRANSLATED
-    ( ( NEW GLOBAL? )? SHARED )?
+    ( NEW GLOBAL? )? SHARED
   ;
 
 definebrowsestate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     BROWSE n=identifier query_queryname? ( lockhow | NOWAIT )*
     ( def_browse_display def_browse_enable? )?
     display_with*
@@ -1741,7 +1741,7 @@ def_browse_enable_item: // TRANSLATED
   ;
 
 definebufferstate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     // For the table type: we can assume that if it's not in tableDict, it's a db table.
     // For db buffers:
     //   - set "FullName" to db.tablename (not db.buffername). Required for field lookups. See support library.
@@ -1757,7 +1757,7 @@ definebufferstate: // TRANSLATED
   ;
 
 definebuttonstate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     ( BUTTON | BUTTONS ) n=identifier button_opt* triggerphrase? state_end
     { support.defVar($n.text); }
   ;
@@ -1785,7 +1785,7 @@ button_opt: // TRANSLATED
   ;
 
 definedatasetstate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     DATASET identifier
     namespace_uri? namespace_prefix? xml_node_name? serialize_name? xml_node_type? SERIALIZEHIDDEN?
     REFERENCEONLY?
@@ -1828,7 +1828,7 @@ datarelation_nested: // TRANSLATED
   ;
 
 definedatasourcestate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     DATASOURCE n=identifier FOR 
     query_queryname?
     source_buffer_phrase?
@@ -1848,7 +1848,7 @@ source_buffer_phrase: // TRANSLATED
   ;
 
 defineeventstate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     EVENT n=identifier
     ( event_signature | event_delegate )
     state_end
@@ -1866,7 +1866,7 @@ event_delegate: // TRANSLATED
   ;
 
 defineframestate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     // PSC's grammar: uses <xfield> and <fmt-item>. <xfield> is <field> with <fdio-mod> which with <fdio-opt>
     // maps to our formatphrase. <fmt-item> is skip, space, or constant. Our form_item covers all this.
     // The syntax here should always be identical to the FORM statement (formstate).
@@ -1875,7 +1875,7 @@ defineframestate: // TRANSLATED
   ;
 
 defineimagestate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     IMAGE n=identifier defineimage_opt* triggerphrase? state_end
     { support.defVar($n.text); }
   ;
@@ -1892,7 +1892,7 @@ defineimage_opt: // TRANSLATED
   ;
 
 definemenustate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     MENU n=identifier menu_opt*
     ( menu_list_item
       ( {_input.LA(2) == RULE || _input.LA(2) == SKIP || _input.LA(2) == SUBMENU || _input.LA(2) == MENUITEM }? PERIOD )?
@@ -1912,7 +1912,7 @@ menu_opt: // TRANSLATED
   ;
 
 menu_list_item: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     MENUITEM n=identifier menu_item_opt* triggerphrase?
     { support.defVar($n.text); }
   | SUBMENU s=identifier ( DISABLED | label_constant | font_expr | color_expr )*
@@ -1932,7 +1932,7 @@ menu_item_opt: // TRANSLATED
   ;
 
 defineparameterstate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     (
       PARAMETER BUFFER bn=identifier FOR TEMPTABLE? bf=record
       PRESELECT? label_constant? fields_fields? state_end
@@ -1965,7 +1965,7 @@ defineparam_as: // TRANSLATED
   ;
 
 definepropertystate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     PROPERTY n=new_identifier AS datatype
     ( extentphrase | initial_constant | NOUNDO )*
     defineproperty_accessor defineproperty_accessor?
@@ -1982,7 +1982,7 @@ defineproperty_accessor: // TRANSLATED
   ;
 
 definequerystate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     QUERY n=identifier
     FOR record record_fields?
     ( COMMA record record_fields? )*
@@ -1992,7 +1992,7 @@ definequerystate: // TRANSLATED
   ;
 
 definerectanglestate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     RECTANGLE n=identifier rectangle_opt* triggerphrase? state_end
     { support.defVar($n.text); }
   ;
@@ -2011,13 +2011,13 @@ rectangle_opt: // TRANSLATED
   ;
    
 definestreamstate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     STREAM n=identifier state_end
     { support.defVar($n.text); }
   ;
 
 definesubmenustate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     SUBMENU n=identifier menu_opt*
     (  menu_list_item
       ( {_input.LA(2) == RULE || _input.LA(2) == SKIP || _input.LA(2) == SUBMENU || _input.LA(2) == MENUITEM }? PERIOD )?
@@ -2027,7 +2027,7 @@ definesubmenustate: // TRANSLATED
   ;
    
 definetemptablestate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     TEMPTABLE tn=identifier
     { support.defTable($tn.text, SymbolScope.FieldType.TTABLE); }
     ( UNDO | NOUNDO )?
@@ -2074,7 +2074,7 @@ def_table_index: // TRANSLATED
   ;
    
 defineworktablestate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     // Token WORKTABLE can be "work-file" or abbreviated forms of "work-table"
     WORKTABLE tn=identifier
     { support.defTable($tn.text, SymbolScope.FieldType.WTABLE); }
@@ -2086,7 +2086,7 @@ defineworktablestate: // TRANSLATED
   ;
 
 definevariablestate: // TRANSLATED
-    DEFINE define_share ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     VARIABLE n=new_identifier fieldoption* triggerphrase? state_end
     { support.defVar($n.text); }
   ;
@@ -2874,9 +2874,6 @@ message_opt: // TRANSLATED
   ;
 
 methodstate locals [ boolean abs = false ]: // TRANSLATED
-    // Note that when we hit the CLASS node, we scan ahead through all tokens to
-    // find method names. If the syntax changes here, then that scan-ahead will
-    // probably have to change as well.
     METHOD
     (  PRIVATE
     |  PROTECTED
@@ -2886,13 +2883,13 @@ methodstate locals [ boolean abs = false ]: // TRANSLATED
     |  OVERRIDE
     |  FINAL
     )*
-    ( VOID | datatype ( extentphrase | ) )
+    ( VOID | datatype extentphrase? )
     id=new_identifier
     function_params
     (  { $abs || support.isInterface() }?
       ( PERIOD | LEXCOLON ) // An INTERFACE declares without defining, ditto ABSTRACT.
     |  block_colon
-      { support.addInnerScope(); }
+      { support.addInnerScope(_localctx); }
       code_block
       method_end
       { support.dropInnerScope(); }
@@ -2928,13 +2925,13 @@ nullphrase: // TRANSLATED
   ;
 
 onstate: // TRANSLATED
-    ON //<AST=BlockNode>
+    ON
     (  ASSIGN OF field trigger_table_label?
        ( OLD VALUE? f=identifier defineparam_var? { support.defVar($f.text); } )?
        OVERRIDE?
        ( REVERT state_end
        | PERSISTENT runstate
-       | { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
+       | { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
        )
     |  // ON event OF database-object
       (
@@ -2950,7 +2947,7 @@ onstate: // TRANSLATED
       OVERRIDE?
       (  REVERT state_end
       |  PERSISTENT runstate
-      |  { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
+      |  { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
       )
     |  // ON key-label keyfunction.
       . . state_end
@@ -2962,7 +2959,7 @@ onstate: // TRANSLATED
       )
       (  REVERT state_end
       |  PERSISTENT RUN filenameorvalue (in_expr)? (onstate_run_params)? state_end
-      |  { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
+      |  { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
       )
     )
   ;
@@ -3076,7 +3073,7 @@ procedurestate: // TRANSLATED
     PROCEDURE
     filename
     procedure_opt? block_colon
-    { support.addInnerScope(); }
+    { support.addInnerScope(_localctx); }
     code_block
     { support.dropInnerScope(); }
     (  EOF
