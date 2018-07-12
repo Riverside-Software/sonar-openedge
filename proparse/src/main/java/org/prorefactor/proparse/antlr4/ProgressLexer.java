@@ -168,6 +168,13 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     wrapper = new FunctionKeywordTokenFilter(filter2);
   }
 
+  /**
+   * @see Lexer#setMergeNameDotInId(boolean)
+   */
+  public void setMergeNameDotInId(boolean merge) {
+    lexer.setMergeNameDotInId(merge);
+  }
+
   public String getMainFileName() {
     return filenameList.getValue(0);
   }
