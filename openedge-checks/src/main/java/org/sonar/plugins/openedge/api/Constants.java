@@ -47,6 +47,8 @@ public class Constants {
   public static final String BACKSLASH_ESCAPE = "sonar.oe.backslash.escape";
   public static final String OE_ANALYTICS = "sonar.oe.analytics";
   public static final String SKIP_RCODE = "sonar.oe.rcode.skip";
+  public static final String ANTLR4_TEST = "sonar.oe.antlr4";
+  public static final String ANTLR4_PROFILER = "sonar.oe.antlr4.profiler";
 
   private Constants() {
     

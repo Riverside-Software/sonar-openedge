@@ -43,6 +43,7 @@ public class ParserSupport {
   // Current scope might be "unitScope" or an inner method/subprocedure scope
   private SymbolScope currentScope;
 
+  private boolean schemaTablePriority = false;
   private boolean unitIsInterface = false;
   private boolean inDynamicNew = false;
 
@@ -54,7 +55,7 @@ public class ParserSupport {
   private JPNode lastFieldRefNode;
   private JPNode lastFieldIDNode;
 
-  ParserSupport(RefactorSession session) {
+  public ParserSupport(RefactorSession session) {
     this.session = session;
     this.unitScope = new RootSymbolScope(session);
     this.currentScope = unitScope;
@@ -75,7 +76,7 @@ public class ParserSupport {
    * <li>widget-h: widg
    * </ul>
    */
-  int abbrevDatatype(String text) {
+  public int abbrevDatatype(String text) {
     String s = text.toLowerCase();
     if ("cha".startsWith(s))
       return ProParserTokenTypes.CHARACTER;
@@ -96,62 +97,69 @@ public class ParserSupport {
     return 0;
   }
 
-  void addInnerScope() {
+  public void addInnerScope() {
     currentScope = new SymbolScope(session, currentScope);
   }
 
   // Functions triggered from proparse.g
 
-  void defBuffer(String bufferName, String tableName) {
+  public void defBuffer(String bufferName, String tableName) {
     LOG.trace("defBuffer {} to {}", bufferName, tableName);
     currentScope.defineBuffer(bufferName, tableName);
   }
 
   void defineClass(JPNode classNode) {
-    LOG.trace("defineClass");
-    JPNode idNode = classNode.getFirstChild();
-    className = ClassFinder.dequote(idNode.getText());
+    defineClass(classNode.getFirstChild().getText());
+  }
+
+  public void defineClass(String name) {
+    LOG.trace("defineClass '{}'", name);
+    className = ClassFinder.dequote(name);
     unitScope.attachTypeInfo(session.getTypeInfo(className));
   }
 
   void defInterface(JPNode interfaceNode) {
+    defInterface(interfaceNode.getFirstChild().getText());
+  }
+
+  public void defInterface(String name) {
     LOG.trace("defineInterface");
     unitIsInterface = true;
-    className = ClassFinder.dequote(interfaceNode.getFirstChild().getText());
+    className = ClassFinder.dequote(name);
   }
 
   void defMethod(JPNode idNode) {
     // Not used anymore
   }
 
-  void defTable(String name, SymbolScope.FieldType ttype) {
+  public void defTable(String name, SymbolScope.FieldType ttype) {
     // I think the compiler will only allow table defs at the class/unit scope,
     // but we don't need to enforce that here. It'll go in the right spot by the
     // nature of the code.
-    currentScope.defineTable(name, ttype);
+    currentScope.defineTable(name.toLowerCase(), ttype);
   }
 
-  void defVar(String name) {
+  public void defVar(String name) {
     currentScope.defineVar(name);
   }
 
-  void defVarInline() {
+  public void defVarInline() {
     currentScope.defineVar(lastFieldIDNode.getText());
     // I'm not sure if this would ever be inheritable. Doesn't hurt to check.
     lastFieldRefNode.attrSet(IConstants.INLINE_VAR_DEF, IConstants.TRUE);
   }
 
-  void dropInnerScope() {
+  public void dropInnerScope() {
     assert currentScope != unitScope;
     currentScope = currentScope.getSuperScope();
   }
 
-  void fieldReference(JPNode refNode, JPNode idNode) {
+  public void fieldReference(JPNode refNode, JPNode idNode) {
     lastFieldRefNode = refNode;
     lastFieldIDNode = idNode;
   }
 
-  void filenameMerge(JPNode node) {
+  public void filenameMerge(JPNode node) {
     JPNode currNode = node;
     JPNode nextNode = node.getNextSibling();
     while (nextNode != null) {
@@ -169,8 +177,11 @@ public class ParserSupport {
   }
 
   void funcBegin(JPNode idNode) {
-    // Check if the function was forward declared.
-    String lowername = idNode.getText().toLowerCase();
+    funcBegin(idNode.getText());
+  }
+
+  public void funcBegin(String name) {
+    String lowername = name.toLowerCase();
     SymbolScope ss = funcScopeMap.get(lowername);
     if (ss != null) {
       currentScope = ss;
@@ -184,21 +195,39 @@ public class ParserSupport {
     }
   }
 
-  void funcEnd() {
+  public void funcEnd() {
     currentScope = currentScope.getSuperScope();
   }
 
-  void usingState(JPNode typeNameNode) {
+  public void usingState(JPNode typeNameNode) {
     classFinder.addPath(typeNameNode.getText());
+  }
+
+  public void usingState(String typeName) {
+    classFinder.addPath(typeName);
   }
 
   // End of functions triggered from proparse.g
 
-  FieldType isTable(String inName) {
+  public boolean recordSemanticPredicate(org.antlr.v4.runtime.Token lt1,
+      org.antlr.v4.runtime.Token lt2, org.antlr.v4.runtime.Token lt3) {
+    String recname = lt1.getText();
+    if (lt2.getType() == ABLNodeType.NAMEDOT.getType()) {
+      recname += ".";
+      recname += lt3.getText();
+    }
+    return (schemaTablePriority ? isTableSchemaFirst(recname.toLowerCase()) : isTable(recname.toLowerCase())) != null;
+  }
+
+  public FieldType recordExpression(String recName ) {
+    return (schemaTablePriority ? isTableSchemaFirst(recName.toLowerCase()) : isTable(recName.toLowerCase()));
+  }
+  
+  public FieldType isTable(String inName) {
     return currentScope.isTable(inName);
   }
 
-  FieldType isTableSchemaFirst(String inName) {
+  public FieldType isTableSchemaFirst(String inName) {
     return currentScope.isTableSchemaFirst(inName);
   }
 
@@ -218,42 +247,72 @@ public class ParserSupport {
     return null != isTable(name.toLowerCase());
   }
 
-  boolean isVar(String name) {
+  /** Returns true if the lookahead is a table name, and not a var name. */
+  public boolean isTableNameANTLR4(org.antlr.v4.runtime.Token lt1, org.antlr.v4.runtime.Token lt2, org.antlr.v4.runtime.Token lt3, org.antlr.v4.runtime.Token lt4) {
+    String name = lt1.getText();
+    if (lt2.getType() == ProParserTokenTypes.NAMEDOT) {
+      if (lt4.getType() == ProParserTokenTypes.NAMEDOT) {
+        // Can't be more than one dot (db.table) in a table reference.
+        // Maybe this is a field reference, but it sure isn't a table.
+        return false;
+      }
+      name = name + "." + lt3.getText();
+    }
+    if (isVar(name))
+      return false;
+    return null != isTable(name.toLowerCase());
+  }
+
+  public boolean isVar(String name) {
     return currentScope.isVariable(name);
   }
 
-  int isMethodOrFunc(String name) {
+  public int isMethodOrFunc(String name) {
     // Methods and user functions are only at the "unit" (class) scope.
     // Methods can also be inherited from superclasses.
     return unitScope.isMethodOrFunction(name);
   }
 
+  public int isMethodOrFunc(org.antlr.v4.runtime.Token token) {
+    if (token == null)
+      return 0;
+    return unitScope.isMethodOrFunction(token.getText());
+  }
+
   /**
    * @return True if parsing a class or interface
    */
-  boolean isClass() {
+  public boolean isClass() {
     return !Strings.isNullOrEmpty(className);
   }
 
   /**
    * @return True if parsing an interface
    */
-  boolean isInterface() {
+  public boolean isInterface() {
     return unitIsInterface;
+  }
+
+  public boolean isSchemaTablePriority() {
+    return schemaTablePriority;
+  }
+
+  public void setSchemaTablePriority(boolean priority) {
+    this.schemaTablePriority = priority;
   }
 
   /**
    * @return True if the parser in the middle of a DYNAMIC-NEW statement
    */
-  boolean isInDynamicNew() {
+  public boolean isInDynamicNew() {
     return inDynamicNew;
   }
 
-  void setInDynamicNew(boolean flag) {
+  public void setInDynamicNew(boolean flag) {
     inDynamicNew = flag;
   }
 
-  void attrTypeNameLookup(JPNode node) {
+  public void attrTypeNameLookup(JPNode node) {
     node.attrSet(IConstants.QUALIFIED_CLASS_INT, classFinder.lookup(node.getText()));
   }
 
@@ -271,8 +330,12 @@ public class ParserSupport {
   /**
    * @see ProToken#getHiddenBefore()
    */
-  static boolean hasHiddenBefore(Token token) {
+  public static boolean hasHiddenBefore(Token token) {
     return ((ProToken) token).getHiddenBefore() != null;
   }
 
+  public int compareTo(ParserSupport other) {
+    
+    return 0;
+  }
 }
