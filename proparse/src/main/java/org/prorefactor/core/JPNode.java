@@ -902,6 +902,22 @@ public class JPNode implements AST {
         }
       }
     }
+    if (attrMapStrings != null) {
+      for (Map.Entry<String, String> entry : attrMapStrings.entrySet()) {
+        if (!entry.getValue().equals(other.attrGetS(entry.getKey()))) {
+          System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- AttrMapStrings[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGetS(entry.getKey()));
+          return 8;
+        }
+      }
+    }
+    if (stringAttributes != null) {
+      for (Map.Entry<Integer, String> entry : stringAttributes.entrySet()) {
+        if (!entry.getValue().equals(other.attrGetS(entry.getKey()))) {
+          System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- StringAttributes[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGetS(entry.getKey()));
+          return 9;
+        }
+      }
+    }
 
     // Difference on 'down' node
     if ((down == null) && (other.down != null)) {
