@@ -124,6 +124,9 @@ public class OpenEdgeProparseSensor implements Sensor {
   private long parse4Tree = 0L;
   private long xmlParseTime = 0L;
   private long maxParseTime = 0L;
+  private Map<Integer, Long> decisionTime = new HashMap<>();
+  private Map<Integer, Long> maxK = new HashMap<>();
+
   // Proparse debug
   List<String> debugFiles = new ArrayList<>();
 
@@ -374,6 +377,20 @@ public class OpenEdgeProparseSensor implements Sensor {
     ruleTime.entrySet().stream().sorted(
         (Entry<String, Long> obj1, Entry<String, Long> obj2) -> obj1.getKey().compareTo(obj2.getKey())).forEach(
             (Entry<String, Long> entry) -> LOG.info("Rule {} | time={} ms", entry.getKey(), entry.getValue()));
+    if (!decisionTime.isEmpty()) {
+      LOG.info("ANTRL4 - 25 longest rules");
+      decisionTime.entrySet().stream().sorted((o1, o2) -> o2.getValue().compareTo(o1.getValue())).limit(25).forEach(
+          entry -> LOG.info("Rule {} - {} | time={} ms", entry.getKey().intValue(),
+              Proparse.ruleNames[Proparse._ATN.getDecisionState(entry.getKey().intValue()).ruleIndex],
+              entry.getValue()));
+    }
+    if (!maxK.isEmpty()) {
+      LOG.info("ANTRL4 - 25 Max lookeahead rules");
+      maxK.entrySet().stream().sorted((o1, o2) -> o2.getValue().compareTo(o1.getValue())).limit(25).forEach(
+          entry -> LOG.info("Rule {} - {} | Max lookahead: {}", entry.getKey().intValue(),
+              Proparse.ruleNames[Proparse._ATN.getDecisionState(entry.getKey().intValue()).ruleIndex],
+              entry.getValue()));
+    }
   }
 
   private void testAntlr4(SensorContext context, InputFile file, RefactorSession session) {
@@ -431,6 +448,14 @@ public class OpenEdgeProparseSensor implements Sensor {
                     decision.timeInPrediction / 1000000, decision.invocations, decision.SLL_TotalLook,
                     decision.SLL_MaxLook, decision.ambiguities.size(), decision.errors.size(),
                     Proparse.ruleNames[Proparse._ATN.getDecisionState(decision.decision).ruleIndex])));
+        // MaxK + prediction time stats
+        Arrays.stream(info.getDecisionInfo()).filter(decision -> decision.SLL_MaxLook > 0).forEach(decision -> {
+          if ((maxK.get(decision.decision) == null) || (maxK.get(decision.decision) < decision.SLL_MaxLook))
+            maxK.put(decision.decision, decision.SLL_MaxLook);
+        });
+        Arrays.stream(info.getDecisionInfo()).filter(decision -> decision.timeInPrediction > 0).forEach(
+            decision -> decisionTime.put(decision.decision, (decision.timeInPrediction / 1000000) 
+                + (decisionTime.get(decision.decision) == null ? 0 : decisionTime.get(decision.decision))));
       }
     } catch (IOException caught) {
       LOG.error("Unable to write proparse debug file", caught);

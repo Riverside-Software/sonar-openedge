@@ -275,11 +275,6 @@ public class ANTLR4ParserTest {
   }
 
   @Test(enabled=true)
-  public void test32() throws Exception {
-    genericTest("data/bugsfixed/bug32.p");
-  }
-
-  @Test(enabled=true)
   public void test33() throws Exception {
     genericTest("data/bugsfixed/bug33.cls");
   }
@@ -318,7 +313,7 @@ public class ANTLR4ParserTest {
       ProgramRootNode root4 = (ProgramRootNode) visitor.visit(tree).getFirstNode();
       root4.backLinkAndFinalize();
       displayParseInfo(parser.getParseInfo());
-      displayRootNode(root4, "antlr4.txt");
+      displayRootNode(root4, "target/antlr4.txt");
 
       ProgressLexer lexer2 = new ProgressLexer(session, new FileInputStream(file), file.getAbsolutePath(), false);
       ProParser parser2 = new ProParser(lexer2.getANTLR2TokenStream(true));
@@ -327,7 +322,7 @@ public class ANTLR4ParserTest {
       ProgramRootNode root2 = (ProgramRootNode) parser2.getAST();
       root2.backLinkAndFinalize();
       lexer2.parseComplete();
-      displayRootNode(root2, "antlr2.txt");
+      displayRootNode(root2, "target/antlr2.txt");
 
       assertEquals(root2.compareTo(root4, 0), 0);
       assertEquals(parser2.support.compareTo(parser.getParserSupport()), 0);
@@ -338,8 +333,18 @@ public class ANTLR4ParserTest {
 
   @SuppressWarnings("unused")
   private void displayParseInfo(ParseInfo info) {
+    System.out.println("Rules longer than 100ms");
     Arrays.stream(info.getDecisionInfo()).filter(decision -> decision.timeInPrediction > 100000000).sorted(
         (d1, d2) -> Long.compare(d2.timeInPrediction, d1.timeInPrediction)).forEach(
+            decision -> System.out.println(
+                String.format("Time: %d in %d calls - LL_Lookaheads: %d Max k: %d Ambiguities: %d Errors: %d Rule: %s",
+                    decision.timeInPrediction / 1000000, decision.invocations, decision.SLL_TotalLook,
+                    decision.SLL_MaxLook, decision.ambiguities.size(), decision.errors.size(),
+                    Proparse.ruleNames[Proparse._ATN.getDecisionState(decision.decision).ruleIndex])));
+
+    System.out.println("Rules with max-k greater than 50");
+    Arrays.stream(info.getDecisionInfo()).filter(decision -> decision.SLL_MaxLook > 50).sorted(
+        (d1, d2) -> Long.compare(d2.SLL_MaxLook, d1.SLL_MaxLook)).forEach(
             decision -> System.out.println(
                 String.format("Time: %d in %d calls - LL_Lookaheads: %d Max k: %d Ambiguities: %d Errors: %d Rule: %s",
                     decision.timeInPrediction / 1000000, decision.invocations, decision.SLL_TotalLook,
