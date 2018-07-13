@@ -951,8 +951,8 @@ filn { /* RULE_INIT */ String fn; }:
         fn += ".";
         fn += #t2.getText();
         #t2.copyHiddenAfter(#t1);
+        #t1.updateEndPosition(#t2.getEndFileIndex(), #t2.getEndLine(), #t2.getEndColumn());
       }
-      // TODO Update end position of token, see dot_comment
       #t1.setText(fn);
     }
   ;
@@ -967,10 +967,11 @@ fieldn { /* RULE_INIT */ String fn; }:
           fn += ".";
           fn += #t3.getText();
           #t3.copyHiddenAfter(#t1);
+          #t1.updateEndPosition(#t3.getEndFileIndex(), #t3.getEndLine(), #t3.getEndColumn());
         } else {
           #t2.copyHiddenAfter(#t1);
+          #t1.updateEndPosition(#t2.getEndFileIndex(), #t2.getEndLine(), #t2.getEndColumn());
         }
-        // TODO Update end position of token, see dot_comment
         #t1.setText(fn);
       }
     }
@@ -1106,10 +1107,9 @@ new_identifier:
 filename { /* RULE_INIT */ StringBuilder theText = new StringBuilder(); }:
     t1:filename_part { theText.append(#t1.getText()); }
     (options{greedy=true;}: { /* RULE_PREDICATE */ (LA(1) != Token.EOF_TYPE) && !ParserSupport.hasHiddenBefore(LT(1))}?
-      t2:filename_part! { theText.append(#t2.getText()); }
+      t2:filename_part! { theText.append(#t2.getText()); #t1.updateEndPosition(#t2.getEndFileIndex(), #t2.getEndLine(), #t2.getEndColumn()); }
     )*
     {
-      // TODO Update end position, see dot_comment
       #t1.setType(FILENAME);
       #t1.setText(theText.toString());
     }
@@ -1134,10 +1134,9 @@ type_name:
 type_name2 { /* RULE_INIT */ StringBuilder theText = new StringBuilder(); }:
     p1:type_name_part { theText.append(#p1.getText()); }
     ( options{greedy=true;}: { /* RULE_PREDICATE */ (LA(1) != Token.EOF_TYPE) && !ParserSupport.hasHiddenBefore(LT(1)) }?
-      p2:type_name_part! { theText.append(#p2.getText()); }
+      p2:type_name_part! { theText.append(#p2.getText()); #p1.updateEndPosition(#p2.getEndFileIndex(), #p2.getEndLine(), #p2.getEndColumn()); }
     )*
     { 
-      // TODO Update end position, see dot_comment
       #p1.setType(TYPE_NAME);
       #p1.setText(theText.toString());
     }
