@@ -42,6 +42,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.atn.ParseInfo;
 import org.antlr.v4.runtime.atn.PredictionMode;
@@ -379,6 +380,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     long startTime = System.currentTimeMillis();
     try {
       ProgressLexer lexer = new ProgressLexer(session, InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), false);
+      lexer.setMergeNameDotInId(true);
       Proparse parser = new Proparse(new CommonTokenStream(lexer));
       if (settings.useANTLR4Profiler())
         parser.setProfile(true);
@@ -389,7 +391,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       ParseTree tree = parser.program();
       long time1 = System.currentTimeMillis() - startTime;
       parse4Time += time1;
-      JPNodeVisitor visitor = new JPNodeVisitor(lexer, parser.getParserSupport());
+      JPNodeVisitor visitor = new JPNodeVisitor(lexer, parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
       ProgramRootNode root4 = (ProgramRootNode) visitor.visit(tree).getFirstNode();
       root4.backLinkAndFinalize();
       long time2 = System.currentTimeMillis() - startTime - time1;
@@ -416,16 +418,19 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
   }
 
-  private void generateAntlr4Stats(String fileName, long parseTree, long treeVisitor, /*long numHidden, long timeHidden,*/  ParseInfo info) {
+  private void generateAntlr4Stats(String fileName, long parseTree, long treeVisitor, ParseInfo info) {
     File f = new File(".proparse/antlr4-timings/" + fileName.replace('\\', '_').replace('/', '_').replace(':', '_'));
     f.getParentFile().mkdirs();
     try (PrintWriter writer = new PrintWriter(f)) {
-      writer.println(fileName.replace(':', '_') + " : " + parseTree + " : " + treeVisitor /* + " : " + numHidden + " : " + timeHidden*/ );
+      writer.println(fileName.replace(':', '_') + " : " + parseTree + " : " + treeVisitor);
       if ((info != null) && (info.getDecisionInfo() != null)) {
-        Arrays.stream(info.getDecisionInfo()).filter(decision -> decision.invocations > 0).sorted(
-            (d1, d2) -> Long.compare(d2.timeInPrediction, d1.timeInPrediction)).forEach(
-                e -> writer.println(String.format("Time: %d SLL_Lookaheads: %d Ambiguities: %d Errors: %d Rule: %s", e.timeInPrediction / 1000000, e.SLL_TotalLook, e.ambiguities.size(), e.errors.size(),
-                    Proparse.ruleNames[Proparse._ATN.getDecisionState(e.decision).ruleIndex])));
+        Arrays.stream(info.getDecisionInfo()).filter(decision -> decision.SLL_MaxLook > 0).sorted(
+            (d1, d2) -> Long.compare(d2.SLL_MaxLook, d1.SLL_MaxLook)).forEach(
+                decision -> writer.println(String.format(
+                    "Time: %d in %d calls - LL_Lookaheads: %d Max k: %d Ambiguities: %d Errors: %d Rule: %s",
+                    decision.timeInPrediction / 1000000, decision.invocations, decision.SLL_TotalLook,
+                    decision.SLL_MaxLook, decision.ambiguities.size(), decision.errors.size(),
+                    Proparse.ruleNames[Proparse._ATN.getDecisionState(decision.decision).ruleIndex])));
       }
     } catch (IOException caught) {
       LOG.error("Unable to write proparse debug file", caught);
