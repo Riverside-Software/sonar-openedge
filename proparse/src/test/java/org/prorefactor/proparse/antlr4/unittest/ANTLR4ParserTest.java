@@ -94,7 +94,7 @@ public class ANTLR4ParserTest {
 
   }
   
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test00() throws Exception {
     // Only in order to initialize Proparse class
     try {
@@ -105,7 +105,7 @@ public class ANTLR4ParserTest {
     }
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void testOpenEdgeClasses() throws Exception {
     Files.walk(new File("src/test/resources/OpenEdge").toPath()).filter(
         p -> p.toFile().isFile() && p.getFileName().toString().endsWith(".cls")).map(
@@ -119,157 +119,157 @@ public class ANTLR4ParserTest {
             p -> new File("src\\test\\resources").toPath().relativize(p)).forEach(path -> genericTest(path.toString()));
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test01() throws Exception {
     genericTest("data/bugsfixed/bug01.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test02() throws Exception {
     genericTest("data/bugsfixed/bug02.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test03() throws Exception {
     genericTest("data/bugsfixed/bug03.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test04() throws Exception {
     genericTest("data/bugsfixed/bug04.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test05() throws Exception {
     genericTest("data/bugsfixed/bug05.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test06() throws Exception {
     genericTest("data/bugsfixed/bug06.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test07() throws Exception {
     genericTest("data/bugsfixed/interface07.cls");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test08() throws Exception {
     genericTest("data/bugsfixed/bug08.cls");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test09() throws Exception {
     genericTest("data/bugsfixed/bug09.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test10() throws Exception {
     genericTest("data/bugsfixed/bug10.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test11() throws Exception {
     genericTest("data/bugsfixed/bug11.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test12() throws Exception {
     genericTest("data/bugsfixed/bug12.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test13() throws Exception {
     genericTest("data/bugsfixed/bug13.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test14() throws Exception {
     genericTest("data/bugsfixed/bug14.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test15() throws Exception {
     genericTest("data/bugsfixed/bug15.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test16() throws Exception {
     genericTest("data/bugsfixed/bug16.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test17() throws Exception {
     genericTest("data/bugsfixed/bug17.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test18() throws Exception {
     genericTest("data/bugsfixed/bug18.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test19() throws Exception {
     genericTest("data/bugsfixed/bug19.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test20() throws Exception {
     genericTest("data/bugsfixed/bug20.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test21() throws Exception {
     genericTest("data/bugsfixed/bug21.cls");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test22() throws Exception {
     genericTest("data/bugsfixed/bug22.cls");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test23() throws Exception {
     genericTest("data/bugsfixed/bug23.cls");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test24() throws Exception {
     genericTest("data/bugsfixed/bug24.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test25() throws Exception {
     genericTest("data/bugsfixed/bug25.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test26() throws Exception {
     genericTest("data/bugsfixed/bug26.cls");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test27() throws Exception {
     genericTest("data/bugsfixed/bug27.cls");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test28() throws Exception {
     genericTest("data/bugsfixed/bug28.cls");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test29() throws Exception {
     genericTest("data/bugsfixed/bug29.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test30() throws Exception {
     genericTest("data/bugsfixed/bug30.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test31() throws Exception {
     genericTest("data/bugsfixed/bug31.cls");
   }
@@ -279,7 +279,7 @@ public class ANTLR4ParserTest {
     genericTest("data/bugsfixed/bug32.p");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void test33() throws Exception {
     genericTest("data/bugsfixed/bug33.cls");
   }
@@ -295,7 +295,7 @@ public class ANTLR4ParserTest {
     genericTest("data/bugsfixed/CacheChild.cls");
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void testSaxWriter() throws Exception {
     genericTest("data/bugsfixed/sax-writer.p");
   }

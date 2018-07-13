@@ -334,4 +334,8 @@ public class ParserSupport {
     return ((ProToken) token).getHiddenBefore() != null;
   }
 
+  public int compareTo(ParserSupport other) {
+    
+    return 0;
+  }
 }
