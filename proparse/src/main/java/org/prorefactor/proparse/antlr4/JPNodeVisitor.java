@@ -448,25 +448,9 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   @Override
   public JPNodeHolder visitType_name(Type_nameContext ctx) {
     JPNodeHolder node = visitChildren(ctx);
+    node.getFirstNode().setType(ABLNodeType.TYPE_NAME.getType());
     support.attrTypeNameLookup(node.getFirstNode());
     return node;
-  }
-
-  @Override
-  public JPNodeHolder visitType_name2(Type_name2Context ctx) {
-    ProToken start = (ProToken) ctx.p1.start;
-    StringBuilder sb = new StringBuilder(ctx.p1.getText());
-    for (int zz = 1; zz < ctx.type_name_part().size(); zz++) {
-      sb.append(ctx.type_name_part(zz).getText());
-    }
-    start.setType(ABLNodeType.TYPE_NAME.getType());
-    start.setText(sb.toString());
-    JPNode node = (JPNode) factory.create(new org.prorefactor.core.ProToken(
-        start.getNodeType() == ABLNodeType.EOF_ANTLR4 ? ABLNodeType.EOF : start.getNodeType(), start.getText(),
-        start.getFileIndex(), "", start.getLine(), start.getCharPositionInLine(), start.getEndFileIndex(),
-        start.getEndLine(), start.getEndCharPositionInLine(), start.getMacroSourceNum(), start.getAnalyzeSuspend(),
-        false));
-    return new JPNodeHolder(node);
   }
 
   // **********

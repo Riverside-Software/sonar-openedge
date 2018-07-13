@@ -188,6 +188,7 @@ public class ParserSupport {
         currNode.setHiddenAfter(nextNode.getHiddenAfter());
         currNode.setText(currNode.getText() + nextNode.getText());
         currNode.setNextSibling(nextNode.getNextSibling());
+        currNode.updateEndPosition(nextNode.getEndFileIndex(), nextNode.getEndLine(), nextNode.getEndColumn());
         nextNode = currNode.getNextSibling();
         continue;
       }

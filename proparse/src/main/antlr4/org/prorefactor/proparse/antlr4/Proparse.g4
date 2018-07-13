@@ -670,8 +670,8 @@ parameter: // TRANSLATED
     BUFFER identifier FOR record # parameterBufferFor
   | 
     // BUFFER parameter. Be careful not to pick up BUFFER customer:whatever or BUFFER sports2000.customer:whatever or BUFFER foo::fld1  or BUFFER sports2000.foo::fld1
-    { (_input.LA(3) != OBJCOLON) && (_input.LA(3) != DOUBLECOLON) && (_input.LA(3) != NAMEDOT || _input.LA(5) != OBJCOLON) && (_input.LA(3) != NAMEDOT || _input.LA(5) != DOUBLECOLON) }?
-    BUFFER record   # parameterBufferRecord
+    { (_input.LA(3) != OBJCOLON) && (_input.LA(3) != DOUBLECOLON) }?
+    BUFFER record  # parameterBufferRecord
   |  p=( OUTPUT | INPUTOUTPUT | INPUT )?
     (
        TABLEHANDLE field parameter_dataset_options
@@ -953,22 +953,8 @@ filename_part: // TRANSLATED
     ~( PERIOD | LEXCOLON | RIGHTANGLE | LEFTANGLE | LEFTPAREN | LEFTCURLY )
   ;
 
-type_name: // TRANSLATED
-    type_name2
-  ;
-
-type_name2: // TRANSLATED
-    p1=type_name_part
-    ( { ( _input.LA(1) != Token.EOF) && !hasHiddenBefore(0) }? p2=type_name_part )*
-  ;
-
-type_name_predicate: // TRANSLATED
-    { ( _input.LA(2) != Token.EOF) && !hasHiddenBefore(1) }? type_name_part type_name_part
-  ;
-
-type_name_part: // TRANSLATED
-    // A type name part can have <...> for .Net generics, and [] for .Net arrays.
-    non_punctuating | LEFTBRACE | RIGHTBRACE | LEFTANGLE | RIGHTANGLE
+type_name:
+    non_punctuating
   ;
 
 constant: // TRANSLATED
@@ -1004,9 +990,10 @@ widgettype: // TRANSLATED
   ;
 
 non_punctuating: // TRANSLATED
-     ~(  EOF|PERIOD|SLASH|LEXCOLON|OBJCOLON|LEXAT|LEFTBRACE|RIGHTBRACE|CARET|COMMA|EXCLAMATION
-    |  EQUAL|LEFTPAREN|RIGHTPAREN|SEMI|STAR|UNKNOWNVALUE|BACKTICK|GTOREQUAL|RIGHTANGLE|GTORLT
-    |  LTOREQUAL|LEFTANGLE|PLUS|MINUS
+   ~( 
+      EOF | PERIOD | SLASH | LEXCOLON | OBJCOLON | LEXAT | LEFTBRACE | RIGHTBRACE | CARET | COMMA | EXCLAMATION
+    | EQUAL | LEFTPAREN | RIGHTPAREN | SEMI | STAR | UNKNOWNVALUE | BACKTICK | GTOREQUAL | RIGHTANGLE | GTORLT
+    | LTOREQUAL | LEFTANGLE | PLUS | MINUS
     )
   ;
 
@@ -1266,7 +1253,7 @@ class_type_name: // TRANSLATED
   ;
 
 enumstate: // TRANSLATED
-    ENUM type_name2 FLAGS? block_colon
+    ENUM type_name FLAGS? block_colon
     defenumstate+
     enum_end
     state_end
@@ -1277,7 +1264,7 @@ defenumstate: // TRANSLATED
   ;
 
 enum_member: // TRANSLATED
-    type_name2 ( EQUAL ( NUMBER | type_name2 (COMMA type_name2)*))?
+    type_name ( EQUAL ( NUMBER | type_name (COMMA type_name)*))?
   ;
 
 enum_end: // TRANSLATED
@@ -1285,7 +1272,7 @@ enum_end: // TRANSLATED
   ;
 
 classstate: // TRANSLATED
-    CLASS tn=type_name2
+    CLASS tn=type_name
     ( class_inherits | class_implements | USEWIDGETPOOL | ABSTRACT | FINAL | SERIALIZABLE )*
     { support.defineClass($tn.text); }
     block_colon
@@ -1470,7 +1457,7 @@ connectstate: // TRANSLATED
 constructorstate: // TRANSLATED
     CONSTRUCTOR
     ( PUBLIC | PROTECTED | PRIVATE | STATIC )?
-    tn=type_name2 function_params block_colon
+    tn=type_name function_params block_colon
     code_block
     constructor_end state_end
   ;
@@ -2126,7 +2113,7 @@ delimiter_constant: // TRANSLATED
 
 destructorstate: // TRANSLATED
     DESTRUCTOR
-    PUBLIC? tn=type_name2 LEFTPAREN RIGHTPAREN block_colon
+    PUBLIC? tn=type_name LEFTPAREN RIGHTPAREN block_colon
     code_block
     destructor_end
     state_end
@@ -2713,7 +2700,7 @@ insertstate: // TRANSLATED
   ;
 
 interfacestate: // TRANSLATED
-    INTERFACE name=type_name2 interface_inherits? block_colon
+    INTERFACE name=type_name interface_inherits? block_colon
     { support.defInterface($name.text); }
     code_block
     interface_end
@@ -3704,7 +3691,7 @@ using_row: // TRANSLATED
   ;
 
 usingstate: // TRANSLATED
-    USING type=type_name2 star=STAR?
+    USING type=type_name star=STAR?
     using_from?
     state_end
   ;

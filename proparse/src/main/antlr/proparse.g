@@ -4211,7 +4211,7 @@ using_row:
 usingstate:
     USING^
     tn:type_name2
-    ( STAR! { /* TODO Update end position, see dot_comment */ #tn.setText(#tn.getText() + "*"); } )?
+    ( s:STAR! { #tn.setText(#tn.getText() + "*"); #tn.updateEndPosition(#s.getEndFileIndex(), #s.getEndLine(), #s.getEndColumn()); } )?
     (using_from)?
     state_end
     {  sthd(##,0);
