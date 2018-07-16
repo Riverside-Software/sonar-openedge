@@ -40,6 +40,7 @@ import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.unittest.util.EmptyDatabase;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.ProParser;
+import org.prorefactor.proparse.antlr4.DescriptiveErrorListener;
 import org.prorefactor.proparse.antlr4.JPNodeVisitor;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.proparse.antlr4.Proparse;
@@ -87,7 +88,7 @@ public class ANTLR4ParserTest {
     ProgressLexer lexer = new ProgressLexer(session, new StringBufferInputStream(sampleClass), "SampleClass.cls", false);
     lexer.setMergeNameDotInId(true);
     Proparse parser = new Proparse(new CommonTokenStream(lexer));
-    parser.initAntlr4(session);
+    parser.initAntlr4(session, lexer.getFilenameList());
     ParseTree tree = parser.program();
     System.out.println("Sample class parsed - " + tree.getChildCount() + " children");
     System.out.println("  ==> " + (System.currentTimeMillis() - start) + " ms");
@@ -302,10 +303,13 @@ public class ANTLR4ParserTest {
     try {
       ProgressLexer lexer = new ProgressLexer(session, new FileInputStream(file), file.getAbsolutePath(), false);
       lexer.setMergeNameDotInId(true);
+      
       // lexer.addTypeNameTokenFilter();
       Proparse parser = new Proparse(new CommonTokenStream(lexer));
-      parser.initAntlr4(session);
+      parser.initAntlr4(session, lexer.getFilenameList());
       parser.setProfile(true);
+      parser.removeErrorListeners();
+      parser.addErrorListener(new DescriptiveErrorListener());
       // parser.setTrace(true);
       // parser.addErrorListener(new DiagnosticErrorListener(false));
       ParseTree tree = parser.program();

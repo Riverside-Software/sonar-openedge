@@ -38,8 +38,8 @@ options {
 
   private ParserSupport support;
 
-  public void initAntlr4(RefactorSession session) {
-    this.support = new ParserSupport(session);
+  public void initAntlr4(RefactorSession session, IntegerIndex<String> fileNameList) {
+    this.support = new ParserSupport(session, fileNameList);
   }
 
   public ParserSupport getParserSupport() {

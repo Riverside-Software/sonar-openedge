@@ -46,6 +46,7 @@ import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.atn.ParseInfo;
 import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
@@ -54,6 +55,7 @@ import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.TreeNodeLister;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.proparse.antlr4.DescriptiveErrorListener;
 import org.prorefactor.proparse.antlr4.IncludeFileNotFoundException;
 import org.prorefactor.proparse.antlr4.JPNodeVisitor;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
@@ -402,9 +404,11 @@ public class OpenEdgeProparseSensor implements Sensor {
       if (settings.useANTLR4Profiler())
         parser.setProfile(true);
       parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+      parser.removeErrorListeners();
+      parser.addErrorListener(new DescriptiveErrorListener());
       parser.setErrorHandler(new BailErrorStrategy());
       
-      parser.initAntlr4(session);
+      parser.initAntlr4(session, lexer.getFilenameList());
       ParseTree tree = parser.program();
       long time1 = System.currentTimeMillis() - startTime;
       parse4Time += time1;
@@ -415,9 +419,22 @@ public class OpenEdgeProparseSensor implements Sensor {
       parse4Tree += time2;
 
       generateProparseFlatFiles(root4, true, InputFileUtils.getRelativePath(file, context.fileSystem()));
-      generateAntlr4Stats(InputFileUtils.getRelativePath(file, context.fileSystem()), time1, time2, /*parser.numberOfTimes, parser.timeInHiddenBeforeAfter,*/ parser.getParseInfo());
+      generateAntlr4Stats(InputFileUtils.getRelativePath(file, context.fileSystem()), time1, time2, parser.getParseInfo());
 
       LOG.info("File {} - {} ms ANTLR4 - {} ms visitor",InputFileUtils.getRelativePath(file, context.fileSystem()), time1, time2);
+    } catch (UncheckedIOException caught) {
+      if ((caught.getCause() != null) && (caught.getCause() instanceof XCodedFileException)) {
+        XCodedFileException cause = (XCodedFileException) caught.getCause();
+        LOG.error("Unable to parse {} - Can't read xcode'd file {}", file, cause.getFileName());
+      } else if ((caught.getCause() != null) && (caught.getCause() instanceof IncludeFileNotFoundException)) {
+        IncludeFileNotFoundException cause = (IncludeFileNotFoundException) caught.getCause();
+        LOG.error("Unable to parse {} - Can't find include file '{}' from '{}'", file, cause.getIncludeName(), cause.getFileName());
+      } else {
+        LOG.error("Unable to parse " + file + " - IOException was caught - Please report this issue", caught);
+      }
+      return;
+    } catch (ParseCancellationException caught) {
+      LOG.error("Parse cancelled for {}", InputFileUtils.getRelativePath(file, context.fileSystem()));
     } catch (Throwable caught) {
       LOG.error("Error during code parsing for " + InputFileUtils.getRelativePath(file, context.fileSystem()), caught);
     }

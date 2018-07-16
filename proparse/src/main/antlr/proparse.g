@@ -67,7 +67,7 @@ options {
   }
 
   public void initAntlr4(RefactorSession session, IntegerIndex<String> filenameList) {
-    support = new ParserSupport(session);
+    support = new ParserSupport(session, filenameList);
     astFactory = new NodeFactory();
   }
 
