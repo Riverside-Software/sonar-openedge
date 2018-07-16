@@ -167,9 +167,13 @@ public class ParserSupport {
   }
 
   public void defVarInline() {
-    currentScope.defineVar(lastFieldIDNode.getText());
-    // I'm not sure if this would ever be inheritable. Doesn't hurt to check.
-    lastFieldRefNode.attrSet(IConstants.INLINE_VAR_DEF, IConstants.TRUE);
+    if (lastFieldIDNode == null) {
+      LOG.warn("Trying to define inline variable, but no ID symbol availble");
+    } else {
+      currentScope.defineVar(lastFieldIDNode.getText());
+      // I'm not sure if this would ever be inheritable. Doesn't hurt to check.
+      lastFieldRefNode.attrSet(IConstants.INLINE_VAR_DEF, IConstants.TRUE);
+    }
   }
 
   public void dropInnerScope() {
