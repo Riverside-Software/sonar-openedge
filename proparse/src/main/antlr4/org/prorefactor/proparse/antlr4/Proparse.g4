@@ -2873,9 +2873,8 @@ methodstate locals [ boolean abs = false ]: // TRANSLATED
     ( VOID | datatype extentphrase? )
     id=new_identifier
     function_params
-    (  { $abs || support.isInterface() }?
-      ( PERIOD | LEXCOLON ) // An INTERFACE declares without defining, ditto ABSTRACT.
-    |  block_colon
+    ( { $abs || support.isInterface() }? PERIOD // An INTERFACE declares without defining, ditto ABSTRACT.
+    | LEXCOLON
       { support.addInnerScope(_localctx); }
       code_block
       method_end
