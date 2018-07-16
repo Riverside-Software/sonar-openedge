@@ -2614,11 +2614,11 @@ hidestate: // TRANSLATED
 ifstate: // TRANSLATED
     // Plplt. Progress compiles this fine: DO: IF FALSE THEN END.
     // i.e. you don't have to have anything after the THEN or the ELSE.
-    IF expression THEN blockorstate? if_else?
+    IF expression THEN blockorstate if_else?
   ;
 
 if_else: // TRANSLATED
-    ELSE blockorstate?
+    ELSE blockorstate
   ;
 
 in_expr: // TRANSLATED
