@@ -1643,7 +1643,7 @@ datatype_var: // SEMITRANSLATED
   | ROW { LOGGER.error("#r.setType(ROWID);");}
   | WIDGET { LOGGER.error("#w.setType(WIDGETHANDLE);");}
   | // Assignment of datatype returns value of assignment, if non-zero, is a valid abbreviation.
-    { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID { /* TODO #id.setType(datatype); */ }
+    { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID { LOGGER.error("#id.setType(datatype);"); }
   | type_name
   ;
 
@@ -2608,7 +2608,7 @@ help_const: // TRANSLATED
 
 hidestate: // TRANSLATED
     HIDE stream_name_or_handle?
-    ( ALL | MESSAGE | gwidget* )? NOPAUSE? in_window_expr? state_end
+    ( ALL | MESSAGE | gwidget* /*  FIXME Should be + */ )? NOPAUSE? in_window_expr? state_end
   ;
 
 ifstate: // TRANSLATED
