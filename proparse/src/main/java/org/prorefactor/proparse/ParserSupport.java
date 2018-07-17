@@ -27,6 +27,7 @@ import org.prorefactor.refactor.RefactorSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 
 import antlr.Token;
@@ -280,19 +281,13 @@ public class ParserSupport {
   }
 
   /** Returns true if the lookahead is a table name, and not a var name. */
-  public boolean isTableNameANTLR4(org.antlr.v4.runtime.Token lt1, org.antlr.v4.runtime.Token lt2, org.antlr.v4.runtime.Token lt3, org.antlr.v4.runtime.Token lt4) {
-    String name = lt1.getText();
-    if (lt2.getType() == ProParserTokenTypes.NAMEDOT) {
-      if (lt4.getType() == ProParserTokenTypes.NAMEDOT) {
-        // Can't be more than one dot (db.table) in a table reference.
-        // Maybe this is a field reference, but it sure isn't a table.
-        return false;
-      }
-      name = name + "." + lt3.getText();
-    }
-    if (isVar(name))
+  public boolean isTableNameANTLR4(org.antlr.v4.runtime.Token lt1) {
+    int numDots = CharMatcher.is('.').countIn(lt1.getText());
+    if (numDots >= 2)
       return false;
-    return null != isTable(name.toLowerCase());
+    if (isVar(lt1.getText()))
+      return false;
+    return null != isTable(lt1.getText().toLowerCase());
   }
 
   public boolean isVar(String name) {

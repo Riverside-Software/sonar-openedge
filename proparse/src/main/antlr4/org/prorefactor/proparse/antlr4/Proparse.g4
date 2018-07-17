@@ -48,7 +48,7 @@ options {
 
   /** Do the upcoming tokens name a table? */
   boolean isTableName() {
-    return support.isTableNameANTLR4(_input.LT(1), _input.LT(2), _input.LT(3), _input.LT(4));
+    return support.isTableNameANTLR4(_input.LT(1));
   }
 
   private boolean hasHiddenBefore(int offset) {
