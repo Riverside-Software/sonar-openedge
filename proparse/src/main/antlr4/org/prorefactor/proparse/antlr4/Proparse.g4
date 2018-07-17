@@ -2156,7 +2156,7 @@ displaystate: // TRANSLATED
 display_items_or_record: // TRANSLATED
     // TODO Inject in visitor -- If there's more than one display item, then it cannot be a table name.
     { isTableName() }? recordAsFormItem
-  | display_item+
+  | display_item*
   ;
 
 display_item: // TRANSLATED
