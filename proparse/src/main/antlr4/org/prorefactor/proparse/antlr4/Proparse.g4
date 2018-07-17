@@ -1638,12 +1638,12 @@ datatype_var: // SEMITRANSLATED
     CHARACTER | COMHANDLE | DATE | DATETIME | DATETIMETZ
   | DECIMAL | HANDLE | INTEGER | INT64 | LOGICAL | LONGCHAR | MEMPTR
   | RAW | RECID | ROWID | WIDGETHANDLE
-  | IN_KW { LOGGER.error("#i.setType(INTEGER);");}
-  | LOG { LOGGER.error("#l.setType(LOGICAL);");}
-  | ROW { LOGGER.error("#r.setType(ROWID);");}
-  | WIDGET { LOGGER.error("#w.setType(WIDGETHANDLE);");}
+  | IN_KW
+  | LOG
+  | ROW
+  | WIDGET
   | // Assignment of datatype returns value of assignment, if non-zero, is a valid abbreviation.
-    { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID { LOGGER.error("#id.setType(datatype);"); }
+    { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID
   | type_name
   ;
 

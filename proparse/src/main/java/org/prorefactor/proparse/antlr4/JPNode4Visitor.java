@@ -946,6 +946,23 @@ public class JPNode4Visitor extends ProparseBaseVisitor<JPNode.Builder> {
   }
 
   @Override
+  public Builder visitDatatype_var(Datatype_varContext ctx) {
+    JPNode.Builder builder = visitChildren(ctx);
+    if (builder.getNodeType() == ABLNodeType.IN)
+      builder.changeType(ABLNodeType.INTEGER);
+    else if (builder.getNodeType() == ABLNodeType.LOG)
+      builder.changeType(ABLNodeType.LOGICAL);
+    else if (builder.getNodeType() == ABLNodeType.ROW)
+      builder.changeType(ABLNodeType.ROWID);
+    else if (builder.getNodeType() == ABLNodeType.WIDGET)
+      builder.changeType(ABLNodeType.WIDGETHANDLE);
+    else if (ctx.id != null)
+      builder.changeType(ABLNodeType.getNodeType(support.abbrevDatatype(ctx.id.getText())));
+
+    return builder;
+  }
+
+  @Override
   public JPNode.Builder visitDdeadvisestate(DdeadvisestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.ADVISE);
   }
