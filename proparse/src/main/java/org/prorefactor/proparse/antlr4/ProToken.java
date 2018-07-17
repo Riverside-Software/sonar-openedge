@@ -75,7 +75,8 @@ public class ProToken implements WritableToken {
     this.type = type;
     this.channel = DEFAULT_CHANNEL;
     this.text = text;
-    this.fileIndex = -1;
+    this.fileIndex = 0;
+    this.charPositionInLine = 0;
   }
 
   public ProToken(int type, int channel, int start, int stop, int line, int col) {

@@ -57,7 +57,7 @@ import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.proparse.antlr4.DescriptiveErrorListener;
 import org.prorefactor.proparse.antlr4.IncludeFileNotFoundException;
-import org.prorefactor.proparse.antlr4.JPNodeVisitor;
+import org.prorefactor.proparse.antlr4.JPNode4Visitor;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
@@ -412,9 +412,8 @@ public class OpenEdgeProparseSensor implements Sensor {
       ParseTree tree = parser.program();
       long time1 = System.currentTimeMillis() - startTime;
       parse4Time += time1;
-      JPNodeVisitor visitor = new JPNodeVisitor(lexer, parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
-      ProgramRootNode root4 = (ProgramRootNode) visitor.visit(tree).getFirstNode();
-      root4.backLinkAndFinalize();
+      JPNode4Visitor visitor = new JPNode4Visitor(lexer, parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
+      org.prorefactor.proparse.antlr4.ProgramRootNode root4 = (org.prorefactor.proparse.antlr4.ProgramRootNode) visitor.visit(tree).build();
       long time2 = System.currentTimeMillis() - startTime - time1;
       parse4Tree += time2;
 
@@ -445,7 +444,19 @@ public class OpenEdgeProparseSensor implements Sensor {
     f.getParentFile().mkdirs();
 
     try (PrintWriter writer = new PrintWriter(f)) {
-      TreeNodeLister nodeLister = new TreeNodeLister(rootNode, writer, ABLNodeType.INVALID_NODE);
+      TreeNodeLister nodeLister = new TreeNodeLister(rootNode, writer, ABLNodeType.INVALID_NODE, ABLNodeType.ANNOTATION);
+      nodeLister.print();
+    } catch (IOException caught) {
+      LOG.error("Unable to write proparse debug file", caught);
+    }
+  }
+
+  private void generateProparseFlatFiles(org.prorefactor.proparse.antlr4.ProgramRootNode rootNode, boolean version, String fileName) {
+    File f = new File(".proparse/" + (version ? "antlr4/" : "antlr2/") + fileName.replace('\\', '_').replace('/', '_').replace(':', '_'));
+    f.getParentFile().mkdirs();
+
+    try (PrintWriter writer = new PrintWriter(f)) {
+      org.prorefactor.proparse.antlr4.TreeNodeLister nodeLister = new org.prorefactor.proparse.antlr4.TreeNodeLister(rootNode, writer, ABLNodeType.INVALID_NODE, ABLNodeType.ANNOTATION);
       nodeLister.print();
     } catch (IOException caught) {
       LOG.error("Unable to write proparse debug file", caught);
