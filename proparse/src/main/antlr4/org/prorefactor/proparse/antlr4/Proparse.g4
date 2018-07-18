@@ -1630,18 +1630,27 @@ datatype_param: // TRANSLATED
   ;
 
 // Ambig: An unreservedkeyword can be a class name (user defined type).
-datatype_var: // SEMITRANSLATED
-    // I ran into a problem with a class name of: da.project.ClassName. This consumed "da" here
-    // as a valid abbreviation for "date", and then got stuck. So, check for a valid combined
-    // name, and then assume type_name rather than a built-in type.
-    // FIXME type_name_predicate =>  type_name
-    CHARACTER | COMHANDLE | DATE | DATETIME | DATETIMETZ
-  | DECIMAL | HANDLE | INTEGER | INT64 | LOGICAL | LONGCHAR | MEMPTR
-  | RAW | RECID | ROWID | WIDGETHANDLE
-  | IN_KW
-  | LOG
-  | ROW
-  | WIDGET
+datatype_var: // TRANSLATED
+    CHARACTER
+  | COMHANDLE
+  | DATE
+  | DATETIME
+  | DATETIMETZ
+  | DECIMAL
+  | HANDLE
+  | INTEGER
+  | INT64
+  | LOGICAL
+  | LONGCHAR
+  | MEMPTR
+  | RAW
+  | RECID
+  | ROWID
+  | WIDGETHANDLE
+  | IN_KW  // Works for INTEGER
+  | LOG    // Works for LOGICAL
+  | ROW    // Works for ROWID
+  | WIDGET // Works for WIDGET-HANDLE
   | // Assignment of datatype returns value of assignment, if non-zero, is a valid abbreviation.
     { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID
   | type_name
