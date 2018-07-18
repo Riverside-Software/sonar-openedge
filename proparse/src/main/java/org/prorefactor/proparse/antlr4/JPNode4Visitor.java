@@ -1,6 +1,7 @@
 package org.prorefactor.proparse.antlr4;
 
 import org.antlr.v4.runtime.BufferedTokenStream;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.prorefactor.core.ABLNodeType;
@@ -14,12 +15,10 @@ import org.slf4j.LoggerFactory;
 public class JPNode4Visitor extends ProparseBaseVisitor<JPNode.Builder> {
   private static final Logger LOGGER = LoggerFactory.getLogger(JPNode4Visitor.class);
 
-  private final ProgressLexer lexer;
   private final ParserSupport support;
   private final BufferedTokenStream stream;
 
-  public JPNode4Visitor(ProgressLexer lexer, ParserSupport support, BufferedTokenStream stream) {
-    this.lexer = lexer;
+  public JPNode4Visitor(ParserSupport support, BufferedTokenStream stream) {
     this.support = support;
     this.stream = stream;
   }
@@ -2599,43 +2598,26 @@ public class JPNode4Visitor extends ProparseBaseVisitor<JPNode.Builder> {
    */
   @Override
   public JPNode.Builder visitTerminal(TerminalNode node) {
-    //LOGGER.trace("Entering visitTerminal {}", node.getSymbol());
-
     ProToken tok = (ProToken) node.getSymbol();
-    // TODO AJouter les commentaires
-    /*Token tok2 = new org.prorefactor.core.ProToken(
-        tok.getNodeType() == ABLNodeType.EOF_ANTLR4 ? ABLNodeType.EOF : tok.getNodeType(), tok.getText(),
-        tok.getFileIndex(), lexer.getFilename(tok.getFileIndex()), tok.getLine(), tok.getCharPositionInLine(),
-        tok.getEndFileIndex(), tok.getEndLine(), tok.getEndCharPositionInLine(), tok.getMacroSourceNum(),
-        tok.getAnalyzeSuspend(), false);
-    JPNode jp = (JPNode) factory.create(tok2);
 
-    org.prorefactor.core.ProToken lastHiddenTok = null;
-    org.prorefactor.core.ProToken firstHiddenTok = null;
-    
-    ProToken t = node.getSymbol().getTokenIndex() > 0 ? (ProToken) stream.get(node.getSymbol().getTokenIndex() - 1) : null;
-    while ((t != null) && (t.getChannel() != org.antlr.v4.runtime.Token.DEFAULT_CHANNEL)) {
-      org.prorefactor.core.ProToken hidden = new org.prorefactor.core.ProToken(
-          t.getNodeType() == ABLNodeType.EOF_ANTLR4 ? ABLNodeType.EOF : t.getNodeType(), t.getText(),
-              t.getFileIndex(), lexer.getFilename(t.getFileIndex()), t.getLine(), t.getCharPositionInLine(),
-              t.getEndFileIndex(), t.getEndLine(), t.getEndCharPositionInLine(), t.getMacroSourceNum(),
-              t.getAnalyzeSuspend(), false);
+    ProToken lastHiddenTok = null;
+    ProToken firstHiddenTok = null;
+
+    ProToken t = node.getSymbol().getTokenIndex() > 0 ? (ProToken) stream.get(node.getSymbol().getTokenIndex() - 1)
+        : null;
+    while ((t != null) && (t.getChannel() == Token.HIDDEN_CHANNEL)) {
       if (firstHiddenTok == null) {
-        firstHiddenTok = hidden;
-        lastHiddenTok = hidden;
+        firstHiddenTok = t;
       } else {
-        lastHiddenTok.setHiddenBefore(hidden);
-        lastHiddenTok = hidden;
+        lastHiddenTok.setHiddenBefore(t);
       }
-      
-      if (t.getTokenIndex() > 0)
-        t =  (ProToken)stream.get(t.getTokenIndex()  - 1);
-      else
-        t = null;
+      lastHiddenTok = t;
+
+      t = t.getTokenIndex() > 0 ? (ProToken) stream.get(t.getTokenIndex() - 1) : null;
     }
     if (firstHiddenTok != null)
-      jp.setHiddenBefore(firstHiddenTok);*/
-    
+      tok.setHiddenBefore(firstHiddenTok);
+
     return new JPNode.Builder(tok);
   }
 
@@ -2666,7 +2648,8 @@ public class JPNode4Visitor extends ProparseBaseVisitor<JPNode.Builder> {
       return null;
     JPNode.Builder node = visit(ctx.getChild(0));
 
-    JPNode.Builder firstChild = node.getDown(); // Can 
+    // Can be null, as some rules can be empty (as of today, will perhpas be fixed one day)
+    JPNode.Builder firstChild = node.getDown();
     JPNode.Builder lastChild = firstChild == null ? null : firstChild.getLast();
 
     for (int zz = 1; zz < ctx.getChildCount(); zz++) {
@@ -2701,8 +2684,7 @@ public class JPNode4Visitor extends ProparseBaseVisitor<JPNode.Builder> {
    * ANTLR2 construct ruleName: exp OR^ exp ...
    */
   private JPNode.Builder createTreeFromSecondNode(RuleNode ctx) {
-    if (ctx.getChildCount() < 3)
-      return null;
+    assert ctx.getChildCount() >= 3;
 
     JPNode.Builder node = visit(ctx.getChild(1));
     JPNode.Builder left = visit(ctx.getChild(0));

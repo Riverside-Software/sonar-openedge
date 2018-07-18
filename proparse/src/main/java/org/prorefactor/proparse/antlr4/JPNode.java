@@ -28,15 +28,11 @@ import org.prorefactor.treeparser.Call;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 import org.prorefactor.treeparser.symbols.Symbol;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import antlr.Token;
-import antlr.collections.ASTEnumeration;
-
 /**
- * Implementation of antlr.AST. Most "simple" methods are just copy/pasted from antlr.BaseAST.
+ * ANTLR4 version of JPNode.
  */
 public class JPNode implements AST {
   private ProToken token;

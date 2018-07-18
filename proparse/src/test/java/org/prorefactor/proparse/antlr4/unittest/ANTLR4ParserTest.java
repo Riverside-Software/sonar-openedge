@@ -315,8 +315,8 @@ public class ANTLR4ParserTest {
       // parser.setTrace(true);
       // parser.addErrorListener(new DiagnosticErrorListener(false));
       ParseTree tree = parser.program();
-      JPNode root4 = new JPNode4Visitor(lexer, parser.getParserSupport(),
-          (BufferedTokenStream) parser.getInputStream()).visit(tree).build();
+      JPNode root4 = new JPNode4Visitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream()).visit(
+          tree).build();
       displayParseInfo(parser.getParseInfo());
       displayRootNode4(root4, "target/antlr4.txt");
 

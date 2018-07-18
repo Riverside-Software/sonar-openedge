@@ -2,6 +2,9 @@ package org.prorefactor.proparse.antlr4;
 
 import org.prorefactor.core.ABLNodeType;
 
+/**
+ * ANTLR4 version of antlr.AST, where only the interesting methods are kept. 
+ */
 public interface AST {
 
   /**

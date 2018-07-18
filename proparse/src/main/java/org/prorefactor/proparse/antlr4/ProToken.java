@@ -70,6 +70,7 @@ public class ProToken implements WritableToken {
   private int macroSourceNum;
 
   private String analyzeSuspend = null;
+  private ProToken hiddenBefore = null;
 
   public ProToken(ABLNodeType type, String text) {
     this.type = type;
@@ -231,6 +232,10 @@ public class ProToken implements WritableToken {
   @Override
   public void setTokenIndex(int index) {
     this.index = index;
+  }
+
+  public void setHiddenBefore(ProToken hiddenBefore) {
+    this.hiddenBefore = hiddenBefore;
   }
 
   @Override
