@@ -73,6 +73,10 @@ public class ParserSupport {
     this.fileNameList = fileNameList;
   }
 
+  public String getClassName() {
+    return className;
+  }
+
   public void pushRuleContext(RuleContext ctx) {
     ruleContexts.push(ctx);
   }

@@ -400,7 +400,7 @@ public class JPNode4Visitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitType_name(Type_nameContext ctx) {
-    return visitChildren(ctx).changeType(ABLNodeType.TYPE_NAME);
+    return visitChildren(ctx).changeType(ABLNodeType.TYPE_NAME).setClassname(ctx.getText());
   }
 
   // **********
@@ -815,7 +815,12 @@ public class JPNode4Visitor extends ProparseBaseVisitor<JPNode.Builder> {
   @Override
   public JPNode.Builder visitConstructorstate(ConstructorstateContext ctx) {
     JPNode.Builder holder = createStatementTreeFromFirstNode(ctx);
-    // TODO support.attrTypeName(holder.getFirstNode().findDirectChild(ABLNodeType.TYPE_NAME.getType()));
+    JPNode.Builder typeName = holder.getDown();
+    if (typeName.getNodeType() != ABLNodeType.TYPE_NAME)
+      typeName = typeName.getRight();
+    if (typeName.getNodeType() == ABLNodeType.TYPE_NAME) {
+      typeName.setClassname(support.getClassName());
+    }
     return holder;
   }
 

@@ -1,6 +1,5 @@
 /*******************************************************************************
- * Original work Copyright (c) 2003-2015 John Green
- * Modified work Copyright (c) 2015-2018 Riverside Software
+ * Modified work Copyright (c) 2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +11,6 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse.antlr4;
 
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -71,6 +69,7 @@ public class JPNode implements AST {
     private ABLNodeType stmt2;
     private boolean operator;
     private FieldType tabletype;
+    private String className;
     public Builder(ProToken tok) {
       this.tok = tok;
     }
@@ -115,6 +114,7 @@ public class JPNode implements AST {
       this.tabletype = tabletype;
       return this;
     }
+    public Builder setClassname(String name) { this.className = name ; return this; }
     public ABLNodeType getNodeType() {
       return tok.getNodeType();
     }
@@ -136,6 +136,7 @@ public class JPNode implements AST {
           node =  new JPNode(tok);
           break;
       }
+      if (className != null) node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
       if (stmt) node.setStatementHead(stmt2 == null ? 0 : stmt2.getType());
       if (operator) node.setOperator();
       if (tabletype != null) {
@@ -160,9 +161,6 @@ public class JPNode implements AST {
       if (right != null) {
         node.right = right.build();
         node.right.left = node;
-      }
-      if (tok.getNodeType() == ABLNodeType.TYPE_NAME) {
-        node.attrSet(IConstants.QUALIFIED_CLASS_INT, tok.getText());
       }
       return node;
     }
@@ -753,72 +751,6 @@ public class JPNode implements AST {
       sz += node.naturalSize();
     }
     return sz;
-  }
-
-  /**
-   * Internal use only, should be removed after migration to ANTLR4
-   * @return 0 if identical node objects, &gt; 0 if different
-   */
-  public int compareTo(JPNode other, int level) {
-    if (other == null) {
-      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- No token");
-      // Not available
-      return 1;
-    }
-    if (!token.equals(other.token)) {
-      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- Token: " + this.token + " -- " + other.token);
-      // Different token
-      return 2;
-    }
-
-    // On attributes
-    if (attrMap != null) {
-      for (Map.Entry<Integer,Integer> entry : attrMap.entrySet()) {
-        if (!entry.getValue().equals(other.attrGet(entry.getKey()))) {
-          System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- AttrMap[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGet(entry.getKey()));
-          return 7;
-        }
-      }
-    }
-    if (attrMapStrings != null) {
-      for (Map.Entry<String, String> entry : attrMapStrings.entrySet()) {
-        if (!entry.getValue().equals(other.attrGetS(entry.getKey()))) {
-          System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- AttrMapStrings[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGetS(entry.getKey()));
-          return 8;
-        }
-      }
-    }
-    if (stringAttributes != null) {
-      for (Map.Entry<Integer, String> entry : stringAttributes.entrySet()) {
-        if (!entry.getValue().equals(other.attrGetS(entry.getKey()))) {
-          System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- StringAttributes[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGetS(entry.getKey()));
-          return 9;
-        }
-      }
-    }
-
-    // Difference on 'down' node
-    if ((down == null) && (other.down != null)) {
-      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- No down: " + this);
-      return 3;
-    } else if ((down != null) && (down.compareTo(other.down, level + 1) != 0)) {
-      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- Down: " + this.down + " -- " + other.down);
-      return 4;
-    }
-
-    // Difference on 'right' node
-    if ((right == null) && (other.right != null)) {
-      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- No right: " + this);
-      return 5;
-    } else if ((right != null) && (right.compareTo(other.right, level) != 0)) {
-      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- Right: " + this.right + " -- " + other.right);
-      return 6;
-    }
-
-    // Top and left don't have to be compared as they are computed after the parse phase
-    // Attributes are not yet compared
-
-    return 0;
   }
 
   @Override

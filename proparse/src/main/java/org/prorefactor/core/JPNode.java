@@ -896,7 +896,7 @@ public class JPNode implements AST {
     }
 
     // On attributes
-    /*if (attrMap != null) {
+    if (attrMap != null) {
       for (Map.Entry<Integer,Integer> entry : attrMap.entrySet()) {
         if (!entry.getValue().equals(other.attrGet(entry.getKey()))) {
           System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- AttrMap[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGet(entry.getKey()));
@@ -919,7 +919,7 @@ public class JPNode implements AST {
           return 9;
         }
       }
-    }*/
+    }
 
     // Difference on 'down' node
     if ((down == null) && (other.getFirstChild() != null)) {

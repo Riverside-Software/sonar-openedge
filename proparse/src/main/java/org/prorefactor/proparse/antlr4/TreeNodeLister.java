@@ -17,6 +17,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.IConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,13 +70,14 @@ public class TreeNodeLister {
   private void printAttributes(JPNode node, int tabs) throws IOException {
     ofile.write(String.format("%3s %s", tabs, java.nio.CharBuffer.allocate(tabs).toString().replace('\0', ' ')));
     ofile.write(node.getNodeType() + (node.isStateHead() ? "^ " : " ") + (node.isStateHead() && node.getState2() != 0 ? node.getState2() : ""));
+    if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE)
+      ofile.write("°");
     if ((node.getNodeType() == ABLNodeType.ID) || (node.getNodeType() == ABLNodeType.TYPE_NAME)) {
       ofile.write("[");
       ofile.write(node.getText().replace('\'', ' ').replace('"', ' '));
       ofile.write("] ");
     }
-    ofile.write(String.format("@F%d:%d:%d to F%d:%d:%d", node.getFileIndex(), node.getLine(), node.getColumn(),
-        node.getEndFileIndex(), node.getEndLine(), node.getEndColumn()));
+    ofile.write(String.format("@F%d:%d:%d", node.getFileIndex(), node.getLine(), node.getColumn()));
     ofile.write("\n");
   }
 
