@@ -1,0 +1,7 @@
+IF 1 = 2 THEN .
+IF 2 = 3 THEN .
+  ELSE .
+IF 1 = 2 THEN MESSAGE "Hello".
+IF 2 = 3 THEN MESSAGE "Hello". ELSE MESSAGE "Hello".
+IF 1 = 2 THEN DO: MESSAGE "Hello". END.
+IF 2 = 3 THEN DO: MESSAGE "Hello". END. ELSE DO: MESSAGE "Hello". END.

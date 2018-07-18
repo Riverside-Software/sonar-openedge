@@ -21,6 +21,7 @@ package org.sonar.plugins.openedge.foundation;
 
 import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.checks.LargeTransactionScope;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 
@@ -42,7 +43,8 @@ public class OpenEdgeProfile implements BuiltInQualityProfilesDefinition {
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, SharedObjectsAnalyzer.class.getName());
     profile.activateRule(Constants.STD_REPOSITORY_KEY, LargeTransactionScope.class.getName());
-    
+    profile.activateRule(Constants.STD_REPOSITORY_KEY, ClumsySyntax.class.getName());
+
     profile.done();
   }
 }
