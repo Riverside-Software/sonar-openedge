@@ -4,7 +4,6 @@ import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.proparse.NodeFactory;
 import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.proparse.antlr4.JPNode.Builder;
@@ -12,12 +11,9 @@ import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import antlr.ASTFactory;
-
 public class JPNode4Visitor extends ProparseBaseVisitor<JPNode.Builder> {
   private static final Logger LOGGER = LoggerFactory.getLogger(JPNode4Visitor.class);
 
-  private final ASTFactory factory = new NodeFactory();
   private final ProgressLexer lexer;
   private final ParserSupport support;
   private final BufferedTokenStream stream;
@@ -38,19 +34,23 @@ public class JPNode4Visitor extends ProparseBaseVisitor<JPNode.Builder> {
     return createTree(ctx, ABLNodeType.CODE_BLOCK);
   }
 
-  /* @Override
+  @Override
   public JPNode.Builder visitDot_comment(Dot_commentContext ctx) {
-    StringBuilder sb = new StringBuilder(ctx.NAMEDOT().getText());
+    ProToken start = (ProToken) ctx.getStart();
+    StringBuilder sb = new StringBuilder(".");
     for (int zz = 0; zz < ctx.not_state_end().size(); zz++) {
-      JPNode.Builder comp = visit(ctx.not_state_end(zz));
-      sb.append(comp.getFirstNode().allLeadingHiddenText()).append(comp.getFirstNode().getText());
+      sb.append(ctx.not_state_end(zz).getText()).append(' ');
     }
-    JPNode.Builder comp3 = visit(ctx.state_end());
-    sb.append(comp3.getFirstNode().allLeadingHiddenText()).append(comp3.getFirstNode().getText());
+    ProToken last = (ProToken) ctx.state_end().stop;
 
-    JPNode node = (JPNode) factory.create(ABLNodeType.DOT_COMMENT.getType(), sb.toString());
-    return new JPNode.Builder(node);
-  } */
+    start.setType(ABLNodeType.DOT_COMMENT.getType());
+    start.setText(sb.toString());
+    start.setEndFileIndex(last.getEndFileIndex());
+    start.setEndLine(last.getEndLine());
+    start.setEndCharPositionInLine(last.getEndCharPositionInLine());
+
+    return new JPNode.Builder(start);
+  }
 
   @Override
   public JPNode.Builder visitExpression_statement(Expression_statementContext ctx) {
