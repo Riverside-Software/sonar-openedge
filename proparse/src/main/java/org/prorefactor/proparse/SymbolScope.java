@@ -157,6 +157,15 @@ public class SymbolScope {
     return superScope.isMethodOrFunction(name);
   }
 
+  public int compareTo(SymbolScope other) {
+    if (!String.join(",", varSet).equals(String.join(",", other.varSet))) {
+      System.err.println("Variables: " + String.join(",", varSet) + " *** " + String.join(",", other.varSet));
+      return 1;
+    }
+
+    return 0;
+  }
+
   // Field and table types
   public enum FieldType {
     VARIABLE(1), DBTABLE(2), TTABLE(3), WTABLE(4);

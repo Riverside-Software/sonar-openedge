@@ -374,7 +374,24 @@ public class ParserSupport {
   }
 
   public int compareTo(ParserSupport other) {
-    
+    if (classFinder.compareTo(other.classFinder) != 0) {
+      return 4;
+    }
+    if (unitScope.compareTo(other.unitScope) != 0) {
+      return 3;
+    }
+
+    // TODO How to compare standard SymbolScopes ?
+
+    if (!className.equals(other.className)) {
+      System.err.println("Classname: " + className + " -- " + other.className);
+      return 1;
+    }
+    if (unitIsInterface != other.unitIsInterface) {
+      System.err.println("Interface: " + unitIsInterface + " -- " + other.unitIsInterface);
+      return 2;
+      
+    }
     return 0;
   }
 }

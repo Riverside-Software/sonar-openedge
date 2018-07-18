@@ -103,4 +103,20 @@ public class RootSymbolScope extends SymbolScope {
     return 0;
   }
 
+  public int compareTo(RootSymbolScope other) {
+    if (super.compareTo(other) != 0) {
+      return 3;
+    }
+
+    if (!String.join(",", functionSet).equals(String.join(",", other.functionSet))) {
+      System.err.println("Functions: " + String.join(",", functionSet) + " *** " + String.join(",", other.functionSet));
+      return 1;
+    }
+    if (!String.join(",", methodSet).equals(String.join(",", other.methodSet))) {
+      System.err.println("Methods: " + String.join(",", methodSet) + " *** " + String.join(",", other.methodSet));
+      return 2;
+    }
+
+    return 0;
+  }
 }
