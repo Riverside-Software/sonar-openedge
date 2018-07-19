@@ -57,7 +57,7 @@ import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.proparse.antlr4.DescriptiveErrorListener;
 import org.prorefactor.proparse.antlr4.IncludeFileNotFoundException;
-import org.prorefactor.proparse.antlr4.JPNode4Visitor;
+import org.prorefactor.proparse.antlr4.JPNodeVisitor;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
@@ -412,7 +412,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       ParseTree tree = parser.program();
       long time1 = System.currentTimeMillis() - startTime;
       parse4Time += time1;
-      JPNode4Visitor visitor = new JPNode4Visitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
+      JPNodeVisitor visitor = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
       org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode root4 = (org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode) visitor.visit(tree).build();
       long time2 = System.currentTimeMillis() - startTime - time1;
       parse4Tree += time2;
