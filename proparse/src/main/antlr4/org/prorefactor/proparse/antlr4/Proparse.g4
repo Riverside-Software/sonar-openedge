@@ -3188,26 +3188,13 @@ radioset_opt: // TOBETRANSLATED
     HORIZONTAL EXPAND?
   | VERTICAL
   | sizephrase
-  | RADIOBUTTONS radio_label COMMA ( constant | TODAY | NOW )
-    // Greedy. Try to consume COMMA... here first.
-    // Otherwise, this becomes ambiguous with SQL field lists (like in SELECT).
-    /*(options{greedy=true;}:   (COMMA radio_label COMMA (constant|TODAY|NOW)
-      )=>*/ COMMA radio_label COMMA (constant|TODAY|NOW)
-   // |  // impossible alt - just to prevent antlr from complaining
-      // about the syntactic predicate being superfluous.
-      // Both of these alternatives have to start with the same tokens, otherwise
-      // antlr thinks that it can disregard the syntactic predicate. Use the
-      // same beginning tokens, in case we increase the lookahead.
-      /*(COMMA radio_label COMMA IMPOSSIBLE_TOKEN
-      )=> {
-          throw new NoViableAltException(LT(1), "Got an IMPOSSIBLE_TOKEN " + getFilename());
-        }
-    )* */
+  | RADIOBUTTONS radio_label COMMA ( constant | TODAY | NOW | QSTRING )
+           ( COMMA radio_label COMMA ( constant | TODAY | NOW | QSTRING) )*
   |  tooltip_expr
   ;
 
 radio_label: // TRANSLATED
-    ( FILENAME | ID | unreservedkeyword | constant )
+    ( QSTRING | FILENAME | ID | unreservedkeyword | constant )
   ;
 
 rawfunc: // TRANSLATED

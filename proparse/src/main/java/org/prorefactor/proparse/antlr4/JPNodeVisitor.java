@@ -441,7 +441,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   public JPNode.Builder visitAggregate_opt(Aggregate_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
-  
+
+  @Override
+  public Builder visitAll_except_fields(All_except_fieldsContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
   @Override
   public JPNode.Builder visitAnalyzestate(AnalyzestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
@@ -518,7 +523,13 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitAtphraseab(AtphraseabContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    JPNode.Builder builder = createTreeFromFirstNode(ctx);
+    if (builder.getNodeType() == ABLNodeType.COLUMNS)
+      builder.changeType(ABLNodeType.COLUMN);
+    else if (builder.getNodeType() == ABLNodeType.COLOF)
+      builder.changeType(ABLNodeType.COLUMNOF);
+
+    return builder;
   }
 
   @Override
@@ -2013,6 +2024,14 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   @Override
   public JPNode.Builder visitRadiosetphrase(RadiosetphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public Builder visitRadioset_opt(Radioset_optContext ctx) {
+    if (ctx.RADIOBUTTONS() != null)
+      return createTreeFromFirstNode(ctx);
+    else
+      return visitChildren(ctx);
   }
 
   @Override
