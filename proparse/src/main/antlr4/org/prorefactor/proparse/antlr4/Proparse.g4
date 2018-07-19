@@ -957,6 +957,11 @@ type_name:
     non_punctuating
   ;
 
+// Different action in the visitor (no class lookup in type_name2)
+type_name2:
+    non_punctuating
+  ;
+
 constant: // TRANSLATED
      // These are necessarily reserved keywords.
      TRUE_KW | FALSE_KW | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL_KW
@@ -1253,7 +1258,7 @@ class_type_name: // TRANSLATED
   ;
 
 enumstate: // TRANSLATED
-    ENUM type_name FLAGS? block_colon
+    ENUM type_name2 FLAGS? block_colon
     defenumstate+
     enum_end
     state_end
@@ -1264,7 +1269,7 @@ defenumstate: // TRANSLATED
   ;
 
 enum_member: // TRANSLATED
-    type_name ( EQUAL ( NUMBER | type_name (COMMA type_name)*))?
+    type_name2 ( EQUAL ( NUMBER | type_name2 (COMMA type_name2)*))?
   ;
 
 enum_end: // TRANSLATED
@@ -1272,7 +1277,7 @@ enum_end: // TRANSLATED
   ;
 
 classstate: // TRANSLATED
-    CLASS tn=type_name
+    CLASS tn=type_name2
     ( class_inherits | class_implements | USEWIDGETPOOL | ABSTRACT | FINAL | SERIALIZABLE )*
     { support.defineClass($tn.text); }
     block_colon
@@ -1457,7 +1462,7 @@ connectstate: // TRANSLATED
 constructorstate: // TRANSLATED
     CONSTRUCTOR
     ( PUBLIC | PROTECTED | PRIVATE | STATIC )?
-    tn=type_name function_params block_colon
+    tn=type_name2 function_params block_colon
     code_block
     constructor_end state_end
   ;
@@ -2122,7 +2127,7 @@ delimiter_constant: // TRANSLATED
 
 destructorstate: // TRANSLATED
     DESTRUCTOR
-    PUBLIC? tn=type_name LEFTPAREN RIGHTPAREN block_colon
+    PUBLIC? tn=type_name2 LEFTPAREN RIGHTPAREN block_colon
     code_block
     destructor_end
     state_end
@@ -2709,7 +2714,7 @@ insertstate: // TRANSLATED
   ;
 
 interfacestate: // TRANSLATED
-    INTERFACE name=type_name interface_inherits? block_colon
+    INTERFACE name=type_name2 interface_inherits? block_colon
     { support.defInterface($name.text); }
     code_block
     interface_end
@@ -3188,26 +3193,13 @@ radioset_opt: // TOBETRANSLATED
     HORIZONTAL EXPAND?
   | VERTICAL
   | sizephrase
-  | RADIOBUTTONS radio_label COMMA ( constant | TODAY | NOW )
-    // Greedy. Try to consume COMMA... here first.
-    // Otherwise, this becomes ambiguous with SQL field lists (like in SELECT).
-    /*(options{greedy=true;}:   (COMMA radio_label COMMA (constant|TODAY|NOW)
-      )=>*/ COMMA radio_label COMMA (constant|TODAY|NOW)
-   // |  // impossible alt - just to prevent antlr from complaining
-      // about the syntactic predicate being superfluous.
-      // Both of these alternatives have to start with the same tokens, otherwise
-      // antlr thinks that it can disregard the syntactic predicate. Use the
-      // same beginning tokens, in case we increase the lookahead.
-      /*(COMMA radio_label COMMA IMPOSSIBLE_TOKEN
-      )=> {
-          throw new NoViableAltException(LT(1), "Got an IMPOSSIBLE_TOKEN " + getFilename());
-        }
-    )* */
+  | RADIOBUTTONS radio_label COMMA ( constant | TODAY | NOW | QSTRING )
+           ( COMMA radio_label COMMA ( constant | TODAY | NOW | QSTRING) )*
   |  tooltip_expr
   ;
 
 radio_label: // TRANSLATED
-    ( FILENAME | ID | unreservedkeyword | constant )
+    ( QSTRING | FILENAME | ID | unreservedkeyword | constant )
   ;
 
 rawfunc: // TRANSLATED
@@ -3699,7 +3691,7 @@ using_row: // TRANSLATED
   ;
 
 usingstate: // TRANSLATED
-    USING type=type_name star=STAR?
+    USING type=type_name2 star=STAR?
     using_from?
     state_end
   ;

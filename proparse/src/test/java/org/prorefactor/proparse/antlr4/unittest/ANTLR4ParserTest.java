@@ -42,7 +42,6 @@ import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.antlr4.DescriptiveErrorListener;
 import org.prorefactor.proparse.antlr4.JPNode;
-import org.prorefactor.proparse.antlr4.JPNode4Visitor;
 import org.prorefactor.proparse.antlr4.JPNodeVisitor;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.proparse.antlr4.Proparse;
@@ -315,7 +314,7 @@ public class ANTLR4ParserTest {
       // parser.setTrace(true);
       // parser.addErrorListener(new DiagnosticErrorListener(false));
       ParseTree tree = parser.program();
-      JPNode root4 = new JPNode4Visitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream()).visit(
+      JPNode root4 = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream()).visit(
           tree).build();
       displayParseInfo(parser.getParseInfo());
       displayRootNode4(root4, "target/antlr4.txt");

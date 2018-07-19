@@ -1,98 +1,93 @@
 package org.prorefactor.proparse.antlr4;
 
 import org.antlr.v4.runtime.BufferedTokenStream;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.JPNode;
-import org.prorefactor.core.nodetypes.RecordNameNode;
-import org.prorefactor.proparse.NodeFactory;
 import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.SymbolScope.FieldType;
+import org.prorefactor.proparse.antlr4.JPNode.Builder;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import antlr.ASTFactory;
-import antlr.Token;
-
-public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
+public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   private static final Logger LOGGER = LoggerFactory.getLogger(JPNodeVisitor.class);
 
-  private final ASTFactory factory = new NodeFactory();
-  private final ProgressLexer lexer;
   private final ParserSupport support;
   private final BufferedTokenStream stream;
 
-  public JPNodeVisitor(ProgressLexer lexer, ParserSupport support, BufferedTokenStream stream) {
-    this.lexer = lexer;
+  public JPNodeVisitor(ParserSupport support, BufferedTokenStream stream) {
     this.support = support;
     this.stream = stream;
   }
 
   @Override
-  public JPNodeHolder visitProgram(ProgramContext ctx) {
+  public JPNode.Builder visitProgram(ProgramContext ctx) {
     return createTree(ctx, ABLNodeType.PROGRAM_ROOT, ABLNodeType.PROGRAM_TAIL);
   }
 
   @Override
-  public JPNodeHolder visitCode_block(Code_blockContext ctx) {
+  public JPNode.Builder visitCode_block(Code_blockContext ctx) {
     return createTree(ctx, ABLNodeType.CODE_BLOCK);
   }
 
   @Override
-  public JPNodeHolder visitDot_comment(Dot_commentContext ctx) {
-    StringBuilder sb = new StringBuilder(ctx.NAMEDOT().getText());
+  public JPNode.Builder visitDot_comment(Dot_commentContext ctx) {
+    ProToken start = (ProToken) ctx.getStart();
+    StringBuilder sb = new StringBuilder(".");
     for (int zz = 0; zz < ctx.not_state_end().size(); zz++) {
-      JPNodeHolder comp = visit(ctx.not_state_end(zz));
-      sb.append(comp.getFirstNode().allLeadingHiddenText()).append(comp.getFirstNode().getText());
+      sb.append(ctx.not_state_end(zz).getText()).append(' ');
     }
-    JPNodeHolder comp3 = visit(ctx.state_end());
-    sb.append(comp3.getFirstNode().allLeadingHiddenText()).append(comp3.getFirstNode().getText());
+    ProToken last = (ProToken) ctx.state_end().stop;
 
-    JPNode node = (JPNode) factory.create(ABLNodeType.DOT_COMMENT.getType(), sb.toString());
-    return new JPNodeHolder(node);
+    start.setType(ABLNodeType.DOT_COMMENT.getType());
+    start.setText(sb.toString());
+    start.setEndFileIndex(last.getEndFileIndex());
+    start.setEndLine(last.getEndLine());
+    start.setEndCharPositionInLine(last.getEndCharPositionInLine());
+
+    return new JPNode.Builder(start);
   }
 
   @Override
-  public JPNodeHolder visitExpression_statement(Expression_statementContext ctx) {
-    JPNodeHolder node = createTree(ctx, ABLNodeType.EXPR_STATEMENT);
-    node.getFirstNode().setStatementHead();
-    return node;
+  public JPNode.Builder visitExpression_statement(Expression_statementContext ctx) {
+    return createTree(ctx, ABLNodeType.EXPR_STATEMENT).setStatement();
   }
 
   @Override
-  public JPNodeHolder visitLabeled_block(Labeled_blockContext ctx) {
+  public JPNode.Builder visitLabeled_block(Labeled_blockContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitBlock_for(Block_forContext ctx) {
+  public JPNode.Builder visitBlock_for(Block_forContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitBlock_opt_iterator(Block_opt_iteratorContext ctx) {
+  public JPNode.Builder visitBlock_opt_iterator(Block_opt_iteratorContext ctx) {
     return createTree(ctx, ABLNodeType.BLOCK_ITERATOR);
   }
 
   @Override
-  public JPNodeHolder visitBlock_opt_while(Block_opt_whileContext ctx) {
+  public JPNode.Builder visitBlock_opt_while(Block_opt_whileContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitBlock_opt_group_by(Block_opt_group_byContext ctx) {
+  public JPNode.Builder visitBlock_opt_group_by(Block_opt_group_byContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitBlock_preselect(Block_preselectContext ctx) {
+  public JPNode.Builder visitBlock_preselect(Block_preselectContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitPseudfn(PseudfnContext ctx) {
+  public JPNode.Builder visitPseudfn(PseudfnContext ctx) {
     if (ctx.funargs() == null)
       return visitChildren(ctx);
     else
@@ -100,7 +95,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitBuiltinfunc(BuiltinfuncContext ctx) {
+  public JPNode.Builder visitBuiltinfunc(BuiltinfuncContext ctx) {
     if (ctx.getChild(0) instanceof TerminalNode) {
       return createTreeFromFirstNode(ctx);
     }
@@ -108,35 +103,35 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitArgfunc(ArgfuncContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
-    if (holder.getFirstNode().getNodeType() == ABLNodeType.COMPARES)
-      holder.getFirstNode().setType(ABLNodeType.COMPARE.getType());
+  public JPNode.Builder visitArgfunc(ArgfuncContext ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
+    if (holder.getNodeType() == ABLNodeType.COMPARES)
+      holder.changeType(ABLNodeType.COMPARE);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitOptargfunc(OptargfuncContext ctx) {
+  public JPNode.Builder visitOptargfunc(OptargfuncContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRecordfunc(RecordfuncContext ctx) {
+  public JPNode.Builder visitRecordfunc(RecordfuncContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitParameterBufferFor(ParameterBufferForContext ctx) {
+  public JPNode.Builder visitParameterBufferFor(ParameterBufferForContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitParameterBufferRecord(ParameterBufferRecordContext ctx) {
+  public JPNode.Builder visitParameterBufferRecord(ParameterBufferRecordContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitParameterOther(ParameterOtherContext ctx) {
+  public JPNode.Builder visitParameterOther(ParameterOtherContext ctx) {
     if (ctx.p == null) {
       return createTree(ctx, ABLNodeType.INPUT);
     } else {
@@ -145,29 +140,29 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitParameterlist(ParameterlistContext ctx) {
+  public JPNode.Builder visitParameterlist(ParameterlistContext ctx) {
     return createTree(ctx, ABLNodeType.PARAMETER_LIST);
   }
 
   @Override
-  public JPNodeHolder visitEventlist(EventlistContext ctx) {
+  public JPNode.Builder visitEventlist(EventlistContext ctx) {
     return createTree(ctx, ABLNodeType.EVENT_LIST);
   }
 
   @Override
-  public JPNodeHolder visitAnyOrValueValue(AnyOrValueValueContext ctx) {
+  public JPNode.Builder visitAnyOrValueValue(AnyOrValueValueContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitAnyOrValueAny(AnyOrValueAnyContext ctx) {
-    JPNodeHolder holder = createTree(ctx);
-    holder.getFirstNode().setType(ABLNodeType.TYPELESS_TOKEN.getType());
+  public JPNode.Builder visitAnyOrValueAny(AnyOrValueAnyContext ctx) {
+    JPNode.Builder holder = createNode(ctx);
+    holder.changeType(ABLNodeType.TYPELESS_TOKEN);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitValueexpression(ValueexpressionContext ctx) {
+  public JPNode.Builder visitValueexpression(ValueexpressionContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
@@ -176,81 +171,71 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   // ----------
 
   @Override
-  public JPNodeHolder visitExpressionMinus(ExpressionMinusContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
-    holder.getFirstNode().setType(ABLNodeType.UNARY_MINUS.getType());
+  public JPNode.Builder visitExpressionMinus(ExpressionMinusContext ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
+    holder.changeType(ABLNodeType.UNARY_MINUS);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitExpressionPlus(ExpressionPlusContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
-    holder.getFirstNode().setType(ABLNodeType.UNARY_PLUS.getType());
+  public JPNode.Builder visitExpressionPlus(ExpressionPlusContext ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
+    holder.changeType(ABLNodeType.UNARY_PLUS);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitExpressionOp1(ExpressionOp1Context ctx) {
-    JPNodeHolder holder = createTreeFromSecondNode(ctx);
-    holder.getFirstNode().setOperator();
-    if (holder.getFirstNode().getNodeType() == ABLNodeType.STAR)
-      holder.getFirstNode().setType(ABLNodeType.MULTIPLY.getType());
-    else if (holder.getFirstNode().getNodeType() == ABLNodeType.SLASH)
-      holder.getFirstNode().setType(ABLNodeType.DIVIDE.getType());
+  public JPNode.Builder visitExpressionOp1(ExpressionOp1Context ctx) {
+    JPNode.Builder holder = createTreeFromSecondNode(ctx).setOperator();
+    if (holder.getNodeType() == ABLNodeType.STAR)
+      holder.changeType(ABLNodeType.MULTIPLY);
+    else if (holder.getNodeType() == ABLNodeType.SLASH)
+      holder.changeType(ABLNodeType.DIVIDE);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitExpressionOp2(ExpressionOp2Context ctx) {
-    JPNodeHolder holder = createTreeFromSecondNode(ctx);
-    holder.getFirstNode().setOperator();
+  public JPNode.Builder visitExpressionOp2(ExpressionOp2Context ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
+  }
+
+  @Override
+  public JPNode.Builder visitExpressionComparison(ExpressionComparisonContext ctx) {
+    JPNode.Builder holder = createTreeFromSecondNode(ctx).setOperator();
+    if (holder.getNodeType() == ABLNodeType.LEFTANGLE)
+      holder.changeType(ABLNodeType.LTHAN);
+    else if (holder.getNodeType() == ABLNodeType.LTOREQUAL)
+      holder.changeType(ABLNodeType.LE);
+    else if (holder.getNodeType() == ABLNodeType.RIGHTANGLE)
+      holder.changeType(ABLNodeType.GTHAN);
+    else if (holder.getNodeType() == ABLNodeType.GTOREQUAL)
+      holder.changeType(ABLNodeType.GE);
+    else if (holder.getNodeType() == ABLNodeType.GTORLT)
+      holder.changeType(ABLNodeType.NE);
+    else if (holder.getNodeType() == ABLNodeType.EQUAL)
+      holder.changeType(ABLNodeType.EQ);
+
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitExpressionComparison(ExpressionComparisonContext ctx) {
-    JPNodeHolder holder = createTreeFromSecondNode(ctx);
-    holder.getFirstNode().setOperator();
-    if (holder.getFirstNode().getNodeType() == ABLNodeType.LEFTANGLE)
-      holder.getFirstNode().setType(ABLNodeType.LTHAN.getType());
-    else if (holder.getFirstNode().getNodeType() == ABLNodeType.LTOREQUAL)
-      holder.getFirstNode().setType(ABLNodeType.LE.getType());
-    else if (holder.getFirstNode().getNodeType() == ABLNodeType.RIGHTANGLE)
-      holder.getFirstNode().setType(ABLNodeType.GTHAN.getType());
-    else if (holder.getFirstNode().getNodeType() == ABLNodeType.GTOREQUAL)
-      holder.getFirstNode().setType(ABLNodeType.GE.getType());
-    else if (holder.getFirstNode().getNodeType() == ABLNodeType.GTORLT)
-      holder.getFirstNode().setType(ABLNodeType.NE.getType());
-    else if (holder.getFirstNode().getNodeType() == ABLNodeType.EQUAL)
-      holder.getFirstNode().setType(ABLNodeType.EQ.getType());
-
-    return holder;
+  public JPNode.Builder visitExpressionStringComparison(ExpressionStringComparisonContext ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
   }
 
   @Override
-  public JPNodeHolder visitExpressionStringComparison(ExpressionStringComparisonContext ctx) {
-    JPNodeHolder holder = createTreeFromSecondNode(ctx);
-    holder.getFirstNode().setOperator();
-    return holder;
-  }
-
-  @Override
-  public JPNodeHolder visitExpressionNot(ExpressionNotContext ctx) {
+  public JPNode.Builder visitExpressionNot(ExpressionNotContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitExpressionAnd(ExpressionAndContext ctx) {
-    JPNodeHolder holder = createTreeFromSecondNode(ctx);
-    holder.getFirstNode().setOperator();
-    return holder;
+  public JPNode.Builder visitExpressionAnd(ExpressionAndContext ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
   }
 
   @Override
-  public JPNodeHolder visitExpressionOr(ExpressionOrContext ctx) {
-    JPNodeHolder holder = createTreeFromSecondNode(ctx);
-    holder.getFirstNode().setOperator();
-    return holder;
+  public JPNode.Builder visitExpressionOr(ExpressionOrContext ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
   }
 
   // ---------------
@@ -258,17 +243,17 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   // ---------------
 
   @Override
-  public JPNodeHolder visitExprtNoReturnValue(ExprtNoReturnValueContext ctx) {
+  public JPNode.Builder visitExprtNoReturnValue(ExprtNoReturnValueContext ctx) {
     return createTree(ctx, ABLNodeType.WIDGET_REF);
   }
 
   @Override
-  public JPNodeHolder visitExprtWidName(ExprtWidNameContext ctx) {
+  public JPNode.Builder visitExprtWidName(ExprtWidNameContext ctx) {
     return createTree(ctx, ABLNodeType.WIDGET_REF);
   }
 
   @Override
-  public JPNodeHolder visitExprtExprt2(ExprtExprt2Context ctx) {
+  public JPNode.Builder visitExprtExprt2(ExprtExprt2Context ctx) {
     if (ctx.attr_colon() != null) {
       return createTree(ctx, ABLNodeType.WIDGET_REF);
     }
@@ -276,31 +261,31 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitExprt2ParenExpr(Exprt2ParenExprContext ctx) {
+  public JPNode.Builder visitExprt2ParenExpr(Exprt2ParenExprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitExprt2ParenCall(Exprt2ParenCallContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
-    holder.getFirstNode().setType(support.isMethodOrFunc(ctx.fname.getText()));
+  public JPNode.Builder visitExprt2ParenCall(Exprt2ParenCallContext ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
+    holder.changeType(ABLNodeType.getNodeType(support.isMethodOrFunc(ctx.fname.getText())));
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitExprt2New(Exprt2NewContext ctx) {
+  public JPNode.Builder visitExprt2New(Exprt2NewContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitExprt2ParenCall2(Exprt2ParenCall2Context ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
-    holder.getFirstNode().setType(ABLNodeType.LOCAL_METHOD_REF.getType());
+  public JPNode.Builder visitExprt2ParenCall2(Exprt2ParenCall2Context ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
+    holder.changeType(ABLNodeType.LOCAL_METHOD_REF);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitExprt2Field(Exprt2FieldContext ctx) {
+  public JPNode.Builder visitExprt2Field(Exprt2FieldContext ctx) {
     if (ctx.ENTERED() != null)
       return createTree(ctx, ABLNodeType.ENTERED_FUNC);
     else
@@ -308,149 +293,119 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitWidattrWidName(WidattrWidNameContext ctx) {
+  public JPNode.Builder visitWidattrWidName(WidattrWidNameContext ctx) {
     return createTree(ctx, ABLNodeType.WIDGET_REF);
   }
 
   @Override
-  public JPNodeHolder visitWidattrExprt2(WidattrExprt2Context ctx) {
+  public JPNode.Builder visitWidattrExprt2(WidattrExprt2Context ctx) {
     return createTree(ctx, ABLNodeType.WIDGET_REF);
   }
 
   @Override
-  public JPNodeHolder visitGwidget(GwidgetContext ctx) {
+  public JPNode.Builder visitGwidget(GwidgetContext ctx) {
     return createTree(ctx, ABLNodeType.WIDGET_REF);
   }
 
   @Override
-  public JPNodeHolder visitFiln(FilnContext ctx) {
-    JPNodeHolder holder = visitChildren(ctx);
-    StringBuilder sb = new StringBuilder(ctx.t1.getText());
-    if (ctx.t2 != null) {
-      sb.append('.').append(ctx.t2.getText());
-      holder.getFirstNode().setText(sb.toString());
-      // TODO A verifier / Ou inverse ??
-      holder.getFirstNode().copyHiddenAfter(holder.getNodes()[2]);
-    }
-    return new JPNodeHolder(holder.getFirstNode());
+  public JPNode.Builder visitFiln(FilnContext ctx) {
+    return visitChildren(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFieldn(FieldnContext ctx) {
-    JPNodeHolder holder = visitChildren(ctx);
-    StringBuilder sb = new StringBuilder(ctx.t1.getText());
-    if (ctx.t2 != null) {
-      sb.append('.').append(ctx.t2.getText());
-      // TODO A verifier Ou inverse ??
-      holder.getFirstNode().copyHiddenAfter(holder.getNodes()[2]);
-      if (ctx.t3 != null) {
-        sb.append('.').append(ctx.t3.getText());
-        // TODO A verifier / Ou inverse ??
-        holder.getFirstNode().copyHiddenAfter(holder.getNodes()[4]);
-      }
-      holder.getFirstNode().setText(sb.toString());
-    }
-    return new JPNodeHolder(holder.getFirstNode());
+  public JPNode.Builder visitFieldn(FieldnContext ctx) {
+    return visitChildren(ctx);
   }
 
   @Override
-  public JPNodeHolder visitField(FieldContext ctx) {
-    JPNodeHolder holder = createTree(ctx, ABLNodeType.FIELD_REF);
+  public JPNode.Builder visitField(FieldContext ctx) {
+    JPNode.Builder holder = createTree(ctx, ABLNodeType.FIELD_REF);
     // XXX support.fieldReference();
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitField_frame_or_browse(Field_frame_or_browseContext ctx) {
+  public JPNode.Builder visitField_frame_or_browse(Field_frame_or_browseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitArray_subscript(Array_subscriptContext ctx) {
+  public JPNode.Builder visitArray_subscript(Array_subscriptContext ctx) {
     return createTree(ctx, ABLNodeType.ARRAY_SUBSCRIPT);
   }
 
   @Override
-  public JPNodeHolder visitMethod_param_list(Method_param_listContext ctx) {
+  public JPNode.Builder visitMethod_param_list(Method_param_listContext ctx) {
     return createTree(ctx, ABLNodeType.METHOD_PARAM_LIST);
   }
 
   @Override
-  public JPNodeHolder visitInuicIn(InuicInContext ctx) {
+  public JPNode.Builder visitInuicIn(InuicInContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRecordAsFormItem(RecordAsFormItemContext ctx) {
+  public JPNode.Builder visitRecordAsFormItem(RecordAsFormItemContext ctx) {
     return createTree(ctx, ABLNodeType.FORM_ITEM);
   }
 
 
   @Override
-  public JPNodeHolder visitRecord(RecordContext ctx) {
-    JPNode n = visitChildren(ctx).getFirstNode();
-    org.prorefactor.core.ProToken newTok = new org.prorefactor.core.ProToken(ABLNodeType.RECORD_NAME,
-        ctx.filn().getText(), n.getFileIndex(), n.getFilename(), n.getLine(), n.getColumn(), n.getEndFileIndex(),
-        n.getEndLine(), n.getEndColumn(), 0, "", false);
-
+  public JPNode.Builder visitRecord(RecordContext ctx) {
+    JPNode.Builder builder = visitChildren(ctx);
+    builder.changeType(ABLNodeType.RECORD_NAME);
     String filnName = ctx.filn().getText();
-    RecordNameNode node = (RecordNameNode) factory.create(newTok, filnName);
-    n.copyHiddenBefore(node);
     FieldType type = support.recordExpression(filnName);
     if (type != null)
-      node.setStoreType(support.recordExpression(filnName));
+      builder.setStoreType(support.recordExpression(filnName));
     else
       LOGGER.error("Found null field type for " + filnName);
 
-    return new JPNodeHolder(node);
+    return builder;
   }
 
   @Override
-  public JPNodeHolder visitBlocklabel(BlocklabelContext ctx) {
-    JPNodeHolder holder = visitChildren(ctx);
-    holder.getFirstNode().setType(ABLNodeType.BLOCK_LABEL.getType());
-    return holder;
+  public JPNode.Builder visitBlocklabel(BlocklabelContext ctx) {
+    return visitChildren(ctx).changeType(ABLNodeType.BLOCK_LABEL);
   }
 
   @Override
-  public JPNodeHolder visitIdentifierUKW(IdentifierUKWContext ctx) {
-    JPNodeHolder holder = visitChildren(ctx);
-    holder.getFirstNode().setType(ABLNodeType.ID.getType());
-    return holder;
+  public JPNode.Builder visitIdentifierUKW(IdentifierUKWContext ctx) {
+    return visitChildren(ctx).changeType(ABLNodeType.ID);
   }
 
   @Override
-  public JPNodeHolder visitNew_identifier(New_identifierContext ctx) {
-    JPNodeHolder holder = visitChildren(ctx);
-    holder.getFirstNode().setType(ABLNodeType.ID.getType());
-    return holder;
+  public JPNode.Builder visitNew_identifier(New_identifierContext ctx) {
+    return visitChildren(ctx).changeType(ABLNodeType.ID);
   }
 
 
   @Override
-  public JPNodeHolder visitFilename(FilenameContext ctx) {
+  public JPNode.Builder visitFilename(FilenameContext ctx) {
     ProToken start = (ProToken) ctx.t1.start;
+    ProToken last = start;
     StringBuilder sb = new StringBuilder(ctx.t1.getText());
     for (int zz = 1; zz < ctx.filename_part().size(); zz++) {
-      JPNodeHolder comp = visit(ctx.filename_part(zz));
-      sb.append(comp.getFirstNode().getText());
+      last = (ProToken) ctx.filename_part(zz).start;
+      sb.append(last.getText());
     }
+    
     start.setType(ABLNodeType.FILENAME.getType());
     start.setText(sb.toString());
-    JPNode node = (JPNode) factory.create(new org.prorefactor.core.ProToken(
-        start.getNodeType() == ABLNodeType.EOF_ANTLR4 ? ABLNodeType.EOF : start.getNodeType(), start.getText(),
-        start.getFileIndex(), "", start.getLine(), start.getCharPositionInLine(), start.getEndFileIndex(),
-        start.getEndLine(), start.getEndCharPositionInLine(), start.getMacroSourceNum(), start.getAnalyzeSuspend(),
-        false));
-    return new JPNodeHolder(node);
+    start.setEndFileIndex(last.getEndFileIndex());
+    start.setEndLine(last.getEndLine());
+    start.setEndCharPositionInLine(last.getEndCharPositionInLine());
+    return new JPNode.Builder(start);
   }
 
   @Override
-  public JPNodeHolder visitType_name(Type_nameContext ctx) {
-    JPNodeHolder node = visitChildren(ctx);
-    node.getFirstNode().setType(ABLNodeType.TYPE_NAME.getType());
-    support.attrTypeNameLookup(node.getFirstNode());
-    return node;
+  public JPNode.Builder visitType_name(Type_nameContext ctx) {
+    return visitChildren(ctx).changeType(ABLNodeType.TYPE_NAME).setClassname(support.lookupClassName(ctx.getText()));
+  }
+
+  @Override
+  public Builder visitType_name2(Type_name2Context ctx) {
+    return visitChildren(ctx).changeType(ABLNodeType.TYPE_NAME).setClassname(ctx.getText());
   }
 
   // **********
@@ -458,549 +413,542 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   // **********
 
   @Override
-  public JPNodeHolder visitAatraceclosestate(AatraceclosestateContext ctx) {
+  public JPNode.Builder visitAatraceclosestate(AatraceclosestateContext ctx) {
     return  createStatementTreeFromFirstNode(ctx, ABLNodeType.CLOSE);
   }
 
   @Override
-  public JPNodeHolder visitAatraceonoffstate(AatraceonoffstateContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
+  public JPNode.Builder visitAatraceonoffstate(AatraceonoffstateContext ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
     if (ctx.OFF() != null)
-      holder.getFirstNode().setStatementHead(ABLNodeType.OFF.getType());
+      holder.setStatement(ABLNodeType.OFF);
     else
-      holder.getFirstNode().setStatementHead(ABLNodeType.ON.getType());
+      holder.setStatement(ABLNodeType.ON);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitAatracestate(AatracestateContext ctx) {
+  public JPNode.Builder visitAatracestate(AatracestateContext ctx) {
     return  createStatementTreeFromFirstNode(ctx);
     }
 
   @Override
-  public JPNodeHolder visitAccumulatestate(AccumulatestateContext ctx) {
+  public JPNode.Builder visitAccumulatestate(AccumulatestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitAggregatephrase(AggregatephraseContext ctx) {
+  public JPNode.Builder visitAggregatephrase(AggregatephraseContext ctx) {
     return createTree(ctx, ABLNodeType.AGGREGATE_PHRASE);
   }
 
   @Override
-  public JPNodeHolder visitAggregate_opt(Aggregate_optContext ctx) {
+  public JPNode.Builder visitAggregate_opt(Aggregate_optContext ctx) {
     return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public Builder visitAll_except_fields(All_except_fieldsContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitAnalyzestate(AnalyzestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitAnnotation(AnnotationContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitApplystate(ApplystateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitApplystate2(Applystate2Context ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitAssign_opt(Assign_optContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitAssign_opt2(Assign_opt2Context ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
+  }
+
+  @Override
+  public JPNode.Builder visitAssignstate(AssignstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitAssignStatement1(AssignStatement1Context ctx) {
+    JPNode.Builder node1 = createTreeFromSecondNode(ctx).setOperator();
+
+    JPNode.Builder holder = new JPNode.Builder(ABLNodeType.ASSIGN).setStatement().setDown(node1);
+    /* holder.getFirstNode().setStatementHead();
+    holder.getFirstNode().addChild(equal.getFirstNode());
+    equal.getFirstNode().addChild(left.getFirstNode());
+    equal.getFirstNode().addChild(right.getFirstNode()); */
+
+    JPNode.Builder lastNode = node1;
+    for (int zz = 3; zz < ctx.getChildCount(); zz++) {
+      lastNode = lastNode.setRight(visit(ctx.getChild(zz))).getLast();
+      // addHolderToNode(holder.getFirstNode(), comp);
+    }
+
+    return holder;
+  }
+
+  @Override
+  public JPNode.Builder visitAssign_equal(Assign_equalContext ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
+  }
+
+  @Override
+  public JPNode.Builder visitAssign_field(Assign_fieldContext ctx) {
+    return createTree(ctx, ABLNodeType.ASSIGN_FROM_BUFFER);
+  }
+
+  @Override
+  public JPNode.Builder visitAt_expr(At_exprContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitAtphrase(AtphraseContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitAtphraseab(AtphraseabContext ctx) {
+    JPNode.Builder builder = createTreeFromFirstNode(ctx);
+    if (builder.getNodeType() == ABLNodeType.COLUMNS)
+      builder.changeType(ABLNodeType.COLUMN);
+    else if (builder.getNodeType() == ABLNodeType.COLOF)
+      builder.changeType(ABLNodeType.COLUMNOF);
+
+    return builder;
+  }
+
+  @Override
+  public JPNode.Builder visitBellstate(BellstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitBuffercomparestate(BuffercomparestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitBuffercompare_save(Buffercompare_saveContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitBuffercompare_result(Buffercompare_resultContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitBuffercompares_block(Buffercompares_blockContext ctx) {
+    return createTree(ctx, ABLNodeType.CODE_BLOCK);
+  }
+
+  @Override
+  public JPNode.Builder visitBuffercompare_when(Buffercompare_whenContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitBuffercompares_end(Buffercompares_endContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitBuffercopystate(BuffercopystateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitBuffercopy_assign(Buffercopy_assignContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitBy_expr(By_exprContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCache_expr(Cache_exprContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCallstate(CallstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCasesensNot(CasesensNotContext ctx) {
+    return createTree(ctx, ABLNodeType.NOT_CASESENS);
+  }
+
+  @Override
+  public JPNode.Builder visitCasestate(CasestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCase_block(Case_blockContext ctx) {
+    return createTree(ctx, ABLNodeType.CODE_BLOCK);
+  }
+
+  @Override
+  public JPNode.Builder visitCase_when(Case_whenContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public Builder visitCaseExpression1(CaseExpression1Context ctx) {
+    return visitChildren(ctx);
   }
   
   @Override
-  public JPNodeHolder visitAnalyzestate(AnalyzestateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+  public JPNode.Builder visitCaseExpression2(CaseExpression2Context ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
   }
 
   @Override
-  public JPNodeHolder visitAnnotation(AnnotationContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitApplystate(ApplystateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitApplystate2(Applystate2Context ctx) {
+  public JPNode.Builder visitCase_expr_term(Case_expr_termContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitAssign_opt(Assign_optContext ctx) {
+  public JPNode.Builder visitCase_otherwise(Case_otherwiseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitAssign_opt2(Assign_opt2Context ctx) {
-    JPNodeHolder equal = visit(ctx.EQUAL());
-    JPNodeHolder left = visit(ctx.getChild(0));
-    JPNodeHolder right = visit(ctx.getChild(2));
-
-    equal.getFirstNode().setOperator();
-    equal.getFirstNode().addChild(left.getFirstNode());
-    equal.getFirstNode().addChild(right.getFirstNode());
-
-    return equal;
+  public JPNode.Builder visitCase_end(Case_endContext ctx) {
+    return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitAssignstate(AssignstateContext ctx) {
+  public JPNode.Builder visitCatchstate(CatchstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitAssignStatement1(AssignStatement1Context ctx) {
-    JPNodeHolder equal = visit(ctx.EQUAL());
-    equal.getFirstNode().setOperator();
-    JPNodeHolder left = visit(ctx.getChild(0));
-    JPNodeHolder right = visit(ctx.getChild(2));
+  public JPNode.Builder visitCatch_end(Catch_endContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
 
-    JPNodeHolder holder = new JPNodeHolder((JPNode) factory.create(ABLNodeType.ASSIGN.getType()));
-    holder.getFirstNode().setStatementHead();
-    holder.getFirstNode().addChild(equal.getFirstNode());
-    equal.getFirstNode().addChild(left.getFirstNode());
-    equal.getFirstNode().addChild(right.getFirstNode());
+  @Override
+  public JPNode.Builder visitChoosestate(ChoosestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
 
-    for (int zz = 3; zz < ctx.getChildCount(); zz++) {
-      JPNodeHolder comp = visit(ctx.getChild(zz));
-      addHolderToNode(holder.getFirstNode(), comp);
+  @Override
+  public JPNode.Builder visitChoose_field(Choose_fieldContext ctx) {
+    return createTree(ctx, ABLNodeType.FORM_ITEM);
+  }
+
+  @Override
+  public JPNode.Builder visitEnumstate(EnumstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitDefenumstate(DefenumstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.ENUM);
+  }
+
+  @Override
+  public JPNode.Builder visitEnum_end(Enum_endContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitClassstate(ClassstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitClass_inherits(Class_inheritsContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitClass_implements(Class_implementsContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitClass_end(Class_endContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitClearstate(ClearstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitClosequerystate(ClosequerystateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.QUERY);
+  }
+
+  @Override
+  public JPNode.Builder visitClosestoredprocedurestate(ClosestoredprocedurestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.STOREDPROCEDURE);
+  }
+
+  @Override
+  public JPNode.Builder visitClosestored_where(Closestored_whereContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCollatephrase(CollatephraseContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitColor_anyorvalue(Color_anyorvalueContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitColor_expr(Color_exprContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitColorspecification(ColorspecificationContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitColor_display(Color_displayContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitColor_prompt(Color_promptContext ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
+    if (holder.getNodeType() == ABLNodeType.PROMPTFOR)
+      holder.changeType(ABLNodeType.PROMPT);
+    return holder;
+  }
+
+  @Override
+  public JPNode.Builder visitColorstate(ColorstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitColumn_expr(Column_exprContext ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
+    if (holder.getNodeType() == ABLNodeType.COLUMNS)
+      holder.changeType(ABLNodeType.COLUMN);
+    return holder;
+  }
+
+  @Override
+  public JPNode.Builder visitColumnformat(ColumnformatContext ctx) {
+    return createTree(ctx, ABLNodeType.FORMAT_PHRASE);
+  }
+
+  @Override
+  public JPNode.Builder visitColumnformat_opt(Columnformat_optContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitComboboxphrase(ComboboxphraseContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCombobox_opt(Combobox_optContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCompilestate(CompilestateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCompile_opt(Compile_optContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCompile_lang(Compile_langContext ctx) {
+    return visitChildren(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCompile_lang2(Compile_lang2Context ctx) {
+    return visitChildren(ctx).changeType(ABLNodeType.TYPELESS_TOKEN);
+  }
+
+  @Override
+  public JPNode.Builder visitCompile_into(Compile_intoContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCompile_equal(Compile_equalContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCompile_append(Compile_appendContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCompile_page(Compile_pageContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitConnectstate(ConnectstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitConstructorstate(ConstructorstateContext ctx) {
+    JPNode.Builder holder = createStatementTreeFromFirstNode(ctx);
+    JPNode.Builder typeName = holder.getDown();
+    if (typeName.getNodeType() != ABLNodeType.TYPE_NAME)
+      typeName = typeName.getRight();
+    if (typeName.getNodeType() == ABLNodeType.TYPE_NAME) {
+      typeName.setClassname(support.getClassName());
     }
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitAssign_equal(Assign_equalContext ctx) {
-    JPNodeHolder equal = visit(ctx.EQUAL());
-    JPNodeHolder left = visit(ctx.getChild(0));
-    JPNodeHolder right = visit(ctx.getChild(2));
-
-    equal.getFirstNode().setOperator();
-    equal.getFirstNode().addChild(left.getFirstNode());
-    equal.getFirstNode().addChild(right.getFirstNode());
-
-    return equal;
-  }
-
-  @Override
-  public JPNodeHolder visitAssign_field(Assign_fieldContext ctx) {
-    return createTree(ctx, ABLNodeType.ASSIGN_FROM_BUFFER);
-  }
-
-  @Override
-  public JPNodeHolder visitAt_expr(At_exprContext ctx) {
+  public JPNode.Builder visitConstructor_end(Constructor_endContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitAtphrase(AtphraseContext ctx) {
+  public JPNode.Builder visitContexthelpid_expr(Contexthelpid_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitAtphraseab(AtphraseabContext ctx) {
+  public JPNode.Builder visitConvertphrase(ConvertphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitBellstate(BellstateContext ctx) {
+  public JPNode.Builder visitCopylobstate(CopylobstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitBuffercomparestate(BuffercomparestateContext ctx) {
+  public JPNode.Builder visitCopylob_for(Copylob_forContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCopylob_starting(Copylob_startingContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitFor_tenant(For_tenantContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitCreatestate(CreatestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitBuffercompare_save(Buffercompare_saveContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitBuffercompare_result(Buffercompare_resultContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitBuffercompares_block(Buffercompares_blockContext ctx) {
-    return createTree(ctx, ABLNodeType.CODE_BLOCK);
-  }
-
-  @Override
-  public JPNodeHolder visitBuffercompare_when(Buffercompare_whenContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitBuffercompares_end(Buffercompares_endContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitBuffercopystate(BuffercopystateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitBuffercopy_assign(Buffercopy_assignContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitBy_expr(By_exprContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCache_expr(Cache_exprContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCallstate(CallstateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCasesensNot(CasesensNotContext ctx) {
-    return createTree(ctx, ABLNodeType.NOT_CASESENS);
-  }
-
-  @Override
-  public JPNodeHolder visitCasestate(CasestateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCase_block(Case_blockContext ctx) {
-    return createTree(ctx, ABLNodeType.CODE_BLOCK);
-  }
-
-  @Override
-  public JPNodeHolder visitCase_when(Case_whenContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCaseExpression2(CaseExpression2Context ctx) {
-    JPNodeHolder or = visit(ctx.OR());
-    JPNodeHolder left = visit(ctx.getChild(0));
-    JPNodeHolder right = visit(ctx.getChild(2));
-
-    or.getFirstNode().setOperator();
-    or.getFirstNode().addChild(left.getFirstNode());
-    or.getFirstNode().addChild(right.getFirstNode());
-
-    return or;
-  }
-
-  @Override
-  public JPNodeHolder visitCase_expr_term(Case_expr_termContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCase_otherwise(Case_otherwiseContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCase_end(Case_endContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCatchstate(CatchstateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCatch_end(Catch_endContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitChoosestate(ChoosestateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitChoose_field(Choose_fieldContext ctx) {
-    return createTree(ctx, ABLNodeType.FORM_ITEM);
-  }
-
-  @Override
-  public JPNodeHolder visitEnumstate(EnumstateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitDefenumstate(DefenumstateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx, ABLNodeType.ENUM);
-  }
-
-  @Override
-  public JPNodeHolder visitEnum_end(Enum_endContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitClassstate(ClassstateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitClass_inherits(Class_inheritsContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitClass_implements(Class_implementsContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitClass_end(Class_endContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitClearstate(ClearstateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitClosequerystate(ClosequerystateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx, ABLNodeType.QUERY);
-  }
-
-  @Override
-  public JPNodeHolder visitClosestoredprocedurestate(ClosestoredprocedurestateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx, ABLNodeType.STOREDPROCEDURE);
-  }
-
-  @Override
-  public JPNodeHolder visitClosestored_where(Closestored_whereContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCollatephrase(CollatephraseContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitColor_anyorvalue(Color_anyorvalueContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitColor_expr(Color_exprContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitColorspecification(ColorspecificationContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitColor_display(Color_displayContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitColor_prompt(Color_promptContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
-    if (holder.getFirstNode().getNodeType() == ABLNodeType.PROMPTFOR)
-      holder.getFirstNode().setType(ABLNodeType.PROMPT.getType());
+  public JPNode.Builder visitCreate_whatever_state(Create_whatever_stateContext ctx) {
+    JPNode.Builder holder = createStatementTreeFromFirstNode(ctx);
+    holder.setStatement(holder.getDown().getNodeType());
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitColorstate(ColorstateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitColumn_expr(Column_exprContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
-    if (holder.getFirstNode().getNodeType() == ABLNodeType.COLUMNS)
-      holder.getFirstNode().setType(ABLNodeType.COLUMN.getType());
-    return holder;
-  }
-
-  @Override
-  public JPNodeHolder visitColumnformat(ColumnformatContext ctx) {
-    return createTree(ctx, ABLNodeType.FORMAT_PHRASE);
-  }
-
-  @Override
-  public JPNodeHolder visitColumnformat_opt(Columnformat_optContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitComboboxphrase(ComboboxphraseContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCombobox_opt(Combobox_optContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCompilestate(CompilestateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCompile_opt(Compile_optContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCompile_lang(Compile_langContext ctx) {
-    return visitChildren(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCompile_lang2(Compile_lang2Context ctx) {
-    JPNodeHolder holder = visitChildren(ctx);
-    holder.getFirstNode().setType(ABLNodeType.TYPELESS_TOKEN.getType());
-    return holder;
-  }
-
-  @Override
-  public JPNodeHolder visitCompile_into(Compile_intoContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCompile_equal(Compile_equalContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCompile_append(Compile_appendContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCompile_page(Compile_pageContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitConnectstate(ConnectstateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitConstructorstate(ConstructorstateContext ctx) {
-    JPNodeHolder holder = createStatementTreeFromFirstNode(ctx);
-    support.attrTypeName(holder.getFirstNode().findDirectChild(ABLNodeType.TYPE_NAME.getType()));
-    return holder;
-  }
-
-  @Override
-  public JPNodeHolder visitConstructor_end(Constructor_endContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitContexthelpid_expr(Contexthelpid_exprContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitConvertphrase(ConvertphraseContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCopylobstate(CopylobstateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCopylob_for(Copylob_forContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCopylob_starting(Copylob_startingContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitFor_tenant(For_tenantContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCreatestate(CreatestateContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNodeHolder visitCreate_whatever_state(Create_whatever_stateContext ctx) {
-    JPNodeHolder holder = createStatementTreeFromFirstNode(ctx);
-    JPNode nextNode = holder.getFirstNode().nextNode();
-    holder.getFirstNode().setStatementHead(nextNode.getType());
-    return holder;
-  }
-
-  @Override
-  public JPNodeHolder visitCreatealiasstate(CreatealiasstateContext ctx) {
+  public JPNode.Builder visitCreatealiasstate(CreatealiasstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.ALIAS);
   }
 
   @Override
-  public JPNodeHolder visitCreate_connect(Create_connectContext ctx) {
+  public JPNode.Builder visitCreate_connect(Create_connectContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitCreatebrowsestate(CreatebrowsestateContext ctx) {
+  public JPNode.Builder visitCreatebrowsestate(CreatebrowsestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.BROWSE);
   }
 
   @Override
-  public JPNodeHolder visitCreatequerystate(CreatequerystateContext ctx) {
+  public JPNode.Builder visitCreatequerystate(CreatequerystateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.QUERY);
   }
 
   @Override
-  public JPNodeHolder visitCreatebufferstate(CreatebufferstateContext ctx) {
+  public JPNode.Builder visitCreatebufferstate(CreatebufferstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.BUFFER);
   }
 
   @Override
-  public JPNodeHolder visitCreatebuffer_name(Createbuffer_nameContext ctx) {
+  public JPNode.Builder visitCreatebuffer_name(Createbuffer_nameContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitCreatedatabasestate(CreatedatabasestateContext ctx) {
+  public JPNode.Builder visitCreatedatabasestate(CreatedatabasestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.DATABASE);
   }
 
   @Override
-  public JPNodeHolder visitCreatedatabase_from(Createdatabase_fromContext ctx) {
+  public JPNode.Builder visitCreatedatabase_from(Createdatabase_fromContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitCreateserverstate(CreateserverstateContext ctx) {
+  public JPNode.Builder visitCreateserverstate(CreateserverstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.SERVER);
   }
 
   @Override
-  public JPNodeHolder visitCreateserversocketstate(CreateserversocketstateContext ctx) {
+  public JPNode.Builder visitCreateserversocketstate(CreateserversocketstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.SERVERSOCKET);
   }
 
   @Override
-  public JPNodeHolder visitCreatesocketstate(CreatesocketstateContext ctx) {
+  public JPNode.Builder visitCreatesocketstate(CreatesocketstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.SOCKET);
   }
 
   @Override
-  public JPNodeHolder visitCreatetemptablestate(CreatetemptablestateContext ctx) {
+  public JPNode.Builder visitCreatetemptablestate(CreatetemptablestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.TEMPTABLE);
   }
 
   @Override
-  public JPNodeHolder visitCreatewidgetstate(CreatewidgetstateContext ctx) {
+  public JPNode.Builder visitCreatewidgetstate(CreatewidgetstateContext ctx) {
     if (ctx.create_connect() == null)
       return createStatementTreeFromFirstNode(ctx, ABLNodeType.WIDGET);
     else
@@ -1008,182 +956,197 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitCreatewidgetpoolstate(CreatewidgetpoolstateContext ctx) {
+  public JPNode.Builder visitCreatewidgetpoolstate(CreatewidgetpoolstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.WIDGETPOOL);
   }
 
   @Override
-  public JPNodeHolder visitCurrentvaluefunc(CurrentvaluefuncContext ctx) {
+  public JPNode.Builder visitCurrentvaluefunc(CurrentvaluefuncContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDdeadvisestate(DdeadvisestateContext ctx) {
+  public Builder visitDatatype_var(Datatype_varContext ctx) {
+    JPNode.Builder builder = visitChildren(ctx);
+    if (builder.getNodeType() == ABLNodeType.IN)
+      builder.changeType(ABLNodeType.INTEGER);
+    else if (builder.getNodeType() == ABLNodeType.LOG)
+      builder.changeType(ABLNodeType.LOGICAL);
+    else if (builder.getNodeType() == ABLNodeType.ROW)
+      builder.changeType(ABLNodeType.ROWID);
+    else if (builder.getNodeType() == ABLNodeType.WIDGET)
+      builder.changeType(ABLNodeType.WIDGETHANDLE);
+    else if (ctx.id != null)
+      builder.changeType(ABLNodeType.getNodeType(support.abbrevDatatype(ctx.id.getText())));
+
+    return builder;
+  }
+
+  @Override
+  public JPNode.Builder visitDdeadvisestate(DdeadvisestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.ADVISE);
   }
 
   @Override
-  public JPNodeHolder visitDdeexecutestate(DdeexecutestateContext ctx) {
+  public JPNode.Builder visitDdeexecutestate(DdeexecutestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.EXECUTE);
   }
 
   @Override
-  public JPNodeHolder visitDdegetstate(DdegetstateContext ctx) {
+  public JPNode.Builder visitDdegetstate(DdegetstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.GET);
   }
 
   @Override
-  public JPNodeHolder visitDdeinitiatestate(DdeinitiatestateContext ctx) {
+  public JPNode.Builder visitDdeinitiatestate(DdeinitiatestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.INITIATE);
   }
 
   @Override
-  public JPNodeHolder visitDderequeststate(DderequeststateContext ctx) {
+  public JPNode.Builder visitDderequeststate(DderequeststateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.REQUEST);
   }
 
   @Override
-  public JPNodeHolder visitDdesendstate(DdesendstateContext ctx) {
+  public JPNode.Builder visitDdesendstate(DdesendstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.SEND);
   }
 
   @Override
-  public JPNodeHolder visitDdeterminatestate(DdeterminatestateContext ctx) {
+  public JPNode.Builder visitDdeterminatestate(DdeterminatestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.TERMINATE);
   }
 
   @Override
-  public JPNodeHolder visitDecimals_expr(Decimals_exprContext ctx) {
+  public JPNode.Builder visitDecimals_expr(Decimals_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDefault_expr(Default_exprContext ctx) {
+  public JPNode.Builder visitDefault_expr(Default_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDefinebrowsestate(DefinebrowsestateContext ctx) {
+  public JPNode.Builder visitDefinebrowsestate(DefinebrowsestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.BROWSE);
   }
 
   @Override
-  public JPNodeHolder visitDefinebufferstate(DefinebufferstateContext ctx) {
+  public JPNode.Builder visitDefinebufferstate(DefinebufferstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.BUFFER);
   }
 
   @Override
-  public JPNodeHolder visitDefinedatasetstate(DefinedatasetstateContext ctx) {
+  public JPNode.Builder visitDefinedatasetstate(DefinedatasetstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.DATASET);
   }
 
   @Override
-  public JPNodeHolder visitDefinedatasourcestate(DefinedatasourcestateContext ctx) {
+  public JPNode.Builder visitDefinedatasourcestate(DefinedatasourcestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.DATASOURCE);
   }
 
   @Override
-  public JPNodeHolder visitDefineeventstate(DefineeventstateContext ctx) {
+  public JPNode.Builder visitDefineeventstate(DefineeventstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.EVENT);
   }
 
   @Override
-  public JPNodeHolder visitDefineframestate(DefineframestateContext ctx) {
+  public JPNode.Builder visitDefineframestate(DefineframestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.FRAME);
   }
 
   @Override
-  public JPNodeHolder visitDefineimagestate(DefineimagestateContext ctx) {
+  public JPNode.Builder visitDefineimagestate(DefineimagestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.IMAGE);
   }
 
   @Override
-  public JPNodeHolder visitDefinemenustate(DefinemenustateContext ctx) {
+  public JPNode.Builder visitDefinemenustate(DefinemenustateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.MENU);
   }
 
   @Override
-  public JPNodeHolder visitDefineparameterstate(DefineparameterstateContext ctx) {
+  public JPNode.Builder visitDefineparameterstate(DefineparameterstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.PARAMETER);
   }
 
   @Override
-  public JPNodeHolder visitDefinepropertystate(DefinepropertystateContext ctx) {
+  public JPNode.Builder visitDefinepropertystate(DefinepropertystateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.PROPERTY);
   }
 
   @Override
-  public JPNodeHolder visitDefinequerystate(DefinequerystateContext ctx) {
+  public JPNode.Builder visitDefinequerystate(DefinequerystateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.QUERY);
   }
 
   @Override
-  public JPNodeHolder visitDefinerectanglestate(DefinerectanglestateContext ctx) {
+  public JPNode.Builder visitDefinerectanglestate(DefinerectanglestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.RECTANGLE);
   }
 
   @Override
-  public JPNodeHolder visitDefinestreamstate(DefinestreamstateContext ctx) {
+  public JPNode.Builder visitDefinestreamstate(DefinestreamstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.STREAM);
   }
 
   @Override
-  public JPNodeHolder visitDefinesubmenustate(DefinesubmenustateContext ctx) {
+  public JPNode.Builder visitDefinesubmenustate(DefinesubmenustateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.SUBMENU);
   }
 
   @Override
-  public JPNodeHolder visitDefinetemptablestate(DefinetemptablestateContext ctx) {
+  public JPNode.Builder visitDefinetemptablestate(DefinetemptablestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.TEMPTABLE);
   }
 
   @Override
-  public JPNodeHolder visitDefineworktablestate(DefineworktablestateContext ctx) {
+  public JPNode.Builder visitDefineworktablestate(DefineworktablestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.WORKTABLE);
   }
 
   @Override
-  public JPNodeHolder visitDefinevariablestate(DefinevariablestateContext ctx) {
+  public JPNode.Builder visitDefinevariablestate(DefinevariablestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.VARIABLE);
   }
 
   @Override
-  public JPNodeHolder visitDefine_share(Define_shareContext ctx) {
+  public JPNode.Builder visitDefine_share(Define_shareContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDef_browse_display(Def_browse_displayContext ctx) {
+  public JPNode.Builder visitDef_browse_display(Def_browse_displayContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDef_browse_display_item(Def_browse_display_itemContext ctx) {
+  public JPNode.Builder visitDef_browse_display_item(Def_browse_display_itemContext ctx) {
     return createTree(ctx, ABLNodeType.FORM_ITEM);
   }
 
   @Override
-  public JPNodeHolder visitDef_browse_enable(Def_browse_enableContext ctx) {
+  public JPNode.Builder visitDef_browse_enable(Def_browse_enableContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDef_browse_enable_item(Def_browse_enable_itemContext ctx) {
+  public JPNode.Builder visitDef_browse_enable_item(Def_browse_enable_itemContext ctx) {
     return createTree(ctx, ABLNodeType.FORM_ITEM);
   }
 
   @Override
-  public JPNodeHolder visitDefinebuttonstate(DefinebuttonstateContext ctx) {
-    JPNodeHolder holder = visitChildren(ctx);
-    if (holder.getFirstNode().getNodeType() == ABLNodeType.BUTTONS)
-      holder.getFirstNode().setType(ABLNodeType.BUTTON.getType());
-    holder.getFirstNode().setStatementHead(ABLNodeType.BUTTON.getType());
-
-    return holder;
+  public JPNode.Builder visitDefinebuttonstate(DefinebuttonstateContext ctx) {
+    JPNode.Builder builder = createStatementTreeFromFirstNode(ctx, ABLNodeType.BUTTON);
+    if (builder.getDown().getNodeType() == ABLNodeType.BUTTONS)
+      builder.getDown().changeType(ABLNodeType.BUTTON);
+    return builder;
   }
 
   @Override
-  public JPNodeHolder visitButton_opt(Button_optContext ctx) {
+  public JPNode.Builder visitButton_opt(Button_optContext ctx) {
     if ((ctx.IMAGEDOWN() != null) || (ctx.IMAGE() != null) || (ctx.IMAGEUP() != null)
         || (ctx.IMAGEINSENSITIVE() != null) || (ctx.MOUSEPOINTER() != null) || (ctx.NOFOCUS() != null))
       return createTreeFromFirstNode(ctx);
@@ -1191,27 +1154,27 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitData_relation(Data_relationContext ctx) {
+  public JPNode.Builder visitData_relation(Data_relationContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitParent_id_relation(Parent_id_relationContext ctx) {
+  public JPNode.Builder visitParent_id_relation(Parent_id_relationContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitField_mapping_phrase(Field_mapping_phraseContext ctx) {
+  public JPNode.Builder visitField_mapping_phrase(Field_mapping_phraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDatarelation_nested(Datarelation_nestedContext ctx) {
+  public JPNode.Builder visitDatarelation_nested(Datarelation_nestedContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitEvent_signature(Event_signatureContext ctx) {
+  public JPNode.Builder visitEvent_signature(Event_signatureContext ctx) {
     if (ctx.SIGNATURE() != null)
       return createTreeFromFirstNode(ctx);
     else
@@ -1219,7 +1182,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitEvent_delegate(Event_delegateContext ctx) {
+  public JPNode.Builder visitEvent_delegate(Event_delegateContext ctx) {
     if (ctx.DELEGATE() != null)
       return createTreeFromFirstNode(ctx);
     else
@@ -1227,7 +1190,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitDefineimage_opt(Defineimage_optContext ctx) {
+  public JPNode.Builder visitDefineimage_opt(Defineimage_optContext ctx) {
     if (ctx.STRETCHTOFIT() != null)
       return createTreeFromFirstNode(ctx);
     else
@@ -1235,22 +1198,22 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitMenu_list_item(Menu_list_itemContext ctx) {
+  public JPNode.Builder visitMenu_list_item(Menu_list_itemContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitMenu_item_opt(Menu_item_optContext ctx) {
+  public JPNode.Builder visitMenu_item_opt(Menu_item_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDefineparam_as(Defineparam_asContext ctx) {
+  public JPNode.Builder visitDefineparam_as(Defineparam_asContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDefineproperty_accessor(Defineproperty_accessorContext ctx) {
+  public JPNode.Builder visitDefineproperty_accessor(Defineproperty_accessorContext ctx) {
     if (ctx.SET().isEmpty()) {
       return createTree(ctx, ABLNodeType.PROPERTY_GETTER);
     } else {
@@ -1259,359 +1222,355 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitRectangle_opt(Rectangle_optContext ctx) {
+  public JPNode.Builder visitRectangle_opt(Rectangle_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDef_table_beforetable(Def_table_beforetableContext ctx) {
+  public JPNode.Builder visitDef_table_beforetable(Def_table_beforetableContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDef_table_like(Def_table_likeContext ctx) {
+  public JPNode.Builder visitDef_table_like(Def_table_likeContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDef_table_useindex(Def_table_useindexContext ctx) {
+  public JPNode.Builder visitDef_table_useindex(Def_table_useindexContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDef_table_field(Def_table_fieldContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
-    if (holder.getFirstNode().getNodeType() == ABLNodeType.FIELDS)
-      holder.getFirstNode().setType(ABLNodeType.FIELD.getType());
+  public JPNode.Builder visitDef_table_field(Def_table_fieldContext ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
+    if (holder.getNodeType() == ABLNodeType.FIELDS)
+      holder.changeType(ABLNodeType.FIELD);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitDef_table_index(Def_table_indexContext ctx) {
+  public JPNode.Builder visitDef_table_index(Def_table_indexContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDeletestate(DeletestateContext ctx) {
+  public JPNode.Builder visitDeletestate(DeletestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDeletealiasstate(DeletealiasstateContext ctx) {
+  public JPNode.Builder visitDeletealiasstate(DeletealiasstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.ALIAS);
   }
 
   @Override
-  public JPNodeHolder visitDeleteobjectstate(DeleteobjectstateContext ctx) {
+  public JPNode.Builder visitDeleteobjectstate(DeleteobjectstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.OBJECT);
   }
 
   @Override
-  public JPNodeHolder visitDeleteprocedurestate(DeleteprocedurestateContext ctx) {
+  public JPNode.Builder visitDeleteprocedurestate(DeleteprocedurestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.PROCEDURE);
   }
 
   @Override
-  public JPNodeHolder visitDeletewidgetstate(DeletewidgetstateContext ctx) {
+  public JPNode.Builder visitDeletewidgetstate(DeletewidgetstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.WIDGET);
   }
 
   @Override
-  public JPNodeHolder visitDeletewidgetpoolstate(DeletewidgetpoolstateContext ctx) {
+  public JPNode.Builder visitDeletewidgetpoolstate(DeletewidgetpoolstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.WIDGETPOOL);
   }
 
   @Override
-  public JPNodeHolder visitDelimiter_constant(Delimiter_constantContext ctx) {
+  public JPNode.Builder visitDelimiter_constant(Delimiter_constantContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDestructorstate(DestructorstateContext ctx) {
-    JPNodeHolder holder = createStatementTreeFromFirstNode(ctx);
-    support.attrTypeName(holder.getFirstNode().findDirectChild(ABLNodeType.TYPE_NAME.getType()));
+  public JPNode.Builder visitDestructorstate(DestructorstateContext ctx) {
+    JPNode.Builder holder = createStatementTreeFromFirstNode(ctx);
+    JPNode.Builder typeName = holder.getDown();
+    if (typeName.getNodeType() != ABLNodeType.TYPE_NAME)
+      typeName = typeName.getRight();
+    if (typeName.getNodeType() == ABLNodeType.TYPE_NAME) {
+      typeName.setClassname(support.getClassName());
+    }
+
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitDestructor_end(Destructor_endContext ctx) {
+  public JPNode.Builder visitDestructor_end(Destructor_endContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDictionarystate(DictionarystateContext ctx) {
+  public JPNode.Builder visitDictionarystate(DictionarystateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDisablestate(DisablestateContext ctx) {
+  public JPNode.Builder visitDisablestate(DisablestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDisabletriggersstate(DisabletriggersstateContext ctx) {
+  public JPNode.Builder visitDisabletriggersstate(DisabletriggersstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.TRIGGERS);
   }
 
   @Override
-  public JPNodeHolder visitDisconnectstate(DisconnectstateContext ctx) {
+  public JPNode.Builder visitDisconnectstate(DisconnectstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDisplaystate(DisplaystateContext ctx) {
+  public JPNode.Builder visitDisplaystate(DisplaystateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDisplay_item(Display_itemContext ctx) {
+  public JPNode.Builder visitDisplay_item(Display_itemContext ctx) {
     return createTree(ctx, ABLNodeType.FORM_ITEM);
   }
 
   @Override
-  public JPNodeHolder visitDisplay_with(Display_withContext ctx) {
+  public JPNode.Builder visitDisplay_with(Display_withContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDostate(DostateContext ctx) {
+  public JPNode.Builder visitDostate(DostateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDownstate(DownstateContext ctx) {
+  public JPNode.Builder visitDownstate(DownstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDynamiccurrentvaluefunc(DynamiccurrentvaluefuncContext ctx) {
+  public JPNode.Builder visitDynamiccurrentvaluefunc(DynamiccurrentvaluefuncContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitDynamicnewstate(DynamicnewstateContext ctx) {
-    JPNodeHolder holder = createTree(ctx, ABLNodeType.ASSIGN_DYNAMIC_NEW);
-    holder.getFirstNode().setStatementHead();
-    return holder;
+  public JPNode.Builder visitDynamicnewstate(DynamicnewstateContext ctx) {
+    return createTree(ctx, ABLNodeType.ASSIGN_DYNAMIC_NEW).setStatement();
   }
 
   @Override
-  public JPNodeHolder visitField_equal_dynamic_new(Field_equal_dynamic_newContext ctx) {
-    JPNodeHolder equal = visit(ctx.EQUAL());
-    JPNodeHolder left = visit(ctx.getChild(0));
-    JPNodeHolder right = visit(ctx.getChild(2));
-
-    equal.getFirstNode().setOperator();
-    equal.getFirstNode().addChild(left.getFirstNode());
-    equal.getFirstNode().addChild(right.getFirstNode());
-
-    return equal;
+  public JPNode.Builder visitField_equal_dynamic_new(Field_equal_dynamic_newContext ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
   }
 
   @Override
-  public JPNodeHolder visitDynamic_new(Dynamic_newContext ctx) {
+  public JPNode.Builder visitDynamic_new(Dynamic_newContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitEditorphrase(EditorphraseContext ctx) {
+  public JPNode.Builder visitEditorphrase(EditorphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitEditor_opt(Editor_optContext ctx) {
+  public JPNode.Builder visitEditor_opt(Editor_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitEmptytemptablestate(EmptytemptablestateContext ctx) {
+  public JPNode.Builder visitEmptytemptablestate(EmptytemptablestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitEnablestate(EnablestateContext ctx) {
+  public JPNode.Builder visitEnablestate(EnablestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitEditingphrase(EditingphraseContext ctx) {
+  public JPNode.Builder visitEditingphrase(EditingphraseContext ctx) {
     // TODO Double check
     return createTree(ctx, ABLNodeType.EDITING_PHRASE);
   }
 
   @Override
-  public JPNodeHolder visitEntryfunc(EntryfuncContext ctx) {
+  public JPNode.Builder visitEntryfunc(EntryfuncContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitExcept_fields(Except_fieldsContext ctx) {
+  public JPNode.Builder visitExcept_fields(Except_fieldsContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitExcept_using_fields(Except_using_fieldsContext ctx) {
+  public JPNode.Builder visitExcept_using_fields(Except_using_fieldsContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitExportstate(ExportstateContext ctx) {
+  public JPNode.Builder visitExportstate(ExportstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitExtentphrase(ExtentphraseContext ctx) {
+  public JPNode.Builder visitExtentphrase(ExtentphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitField_form_item(Field_form_itemContext ctx) {
+  public JPNode.Builder visitField_form_item(Field_form_itemContext ctx) {
     return createTree(ctx, ABLNodeType.FORM_ITEM);
   }
 
   @Override
-  public JPNodeHolder visitField_list(Field_listContext ctx) {
+  public JPNode.Builder visitField_list(Field_listContext ctx) {
     return createTree(ctx, ABLNodeType.FIELD_LIST);
   }
 
   @Override
-  public JPNodeHolder visitFields_fields(Fields_fieldsContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
-    if (holder.getFirstNode().getType() == ABLNodeType.FIELD.getType())
-      holder.getFirstNode().setType(ABLNodeType.FIELDS.getType());
+  public JPNode.Builder visitFields_fields(Fields_fieldsContext ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
+    if (holder.getNodeType() == ABLNodeType.FIELD)
+      holder.changeType(ABLNodeType.FIELDS);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitFieldoption(FieldoptionContext ctx) {
+  public JPNode.Builder visitFieldoption(FieldoptionContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFillinphrase(FillinphraseContext ctx) {
+  public JPNode.Builder visitFillinphrase(FillinphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFinallystate(FinallystateContext ctx) {
+  public JPNode.Builder visitFinallystate(FinallystateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFinally_end(Finally_endContext ctx) {
+  public JPNode.Builder visitFinally_end(Finally_endContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFindstate(FindstateContext ctx) {
+  public JPNode.Builder visitFindstate(FindstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFont_expr(Font_exprContext ctx) {
+  public JPNode.Builder visitFont_expr(Font_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitForstate(ForstateContext ctx) {
+  public JPNode.Builder visitForstate(ForstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFormat_expr(Format_exprContext ctx) {
+  public JPNode.Builder visitFormat_expr(Format_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitForm_item(Form_itemContext ctx) {
+  public JPNode.Builder visitForm_item(Form_itemContext ctx) {
     return createTree(ctx, ABLNodeType.FORM_ITEM);
   }
 
   @Override
-  public JPNodeHolder visitFormstate(FormstateContext ctx) {
+  public JPNode.Builder visitFormstate(FormstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFormatphrase(FormatphraseContext ctx) {
+  public JPNode.Builder visitFormatphrase(FormatphraseContext ctx) {
     return createTree(ctx, ABLNodeType.FORMAT_PHRASE);
   }
 
   @Override
-  public JPNodeHolder visitFormat_opt(Format_optContext ctx) {
+  public JPNode.Builder visitFormat_opt(Format_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFrame_widgetname(Frame_widgetnameContext ctx) {
+  public JPNode.Builder visitFrame_widgetname(Frame_widgetnameContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFramephrase(FramephraseContext ctx) {
+  public JPNode.Builder visitFramephrase(FramephraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFrame_exp_col(Frame_exp_colContext ctx) {
+  public JPNode.Builder visitFrame_exp_col(Frame_exp_colContext ctx) {
     return createTree(ctx, ABLNodeType.WITH_COLUMNS);
   }
 
   @Override
-  public JPNodeHolder visitFrame_exp_down(Frame_exp_downContext ctx) {
+  public JPNode.Builder visitFrame_exp_down(Frame_exp_downContext ctx) {
     return createTree(ctx, ABLNodeType.WITH_DOWN);
   }
 
   @Override
-  public JPNodeHolder visitBrowse_opt(Browse_optContext ctx) {
+  public JPNode.Builder visitBrowse_opt(Browse_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFrame_opt(Frame_optContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
-    if (holder.getFirstNode().getType() == ABLNodeType.COLUMNS.getType())
-      holder.getFirstNode().setType(ABLNodeType.COLUMN.getType());
+  public JPNode.Builder visitFrame_opt(Frame_optContext ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
+    if (holder.getNodeType() == ABLNodeType.COLUMNS)
+      holder.changeType(ABLNodeType.COLUMN);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitFrameviewas(FrameviewasContext ctx) {
+  public JPNode.Builder visitFrameviewas(FrameviewasContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFrameviewas_opt(Frameviewas_optContext ctx) {
+  public JPNode.Builder visitFrameviewas_opt(Frameviewas_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFrom_pos(From_posContext ctx) {
+  public JPNode.Builder visitFrom_pos(From_posContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFunctionstate(FunctionstateContext ctx) {
+  public JPNode.Builder visitFunctionstate(FunctionstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFunction_end(Function_endContext ctx) {
+  public JPNode.Builder visitFunction_end(Function_endContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFunction_params(Function_paramsContext ctx) {
+  public JPNode.Builder visitFunction_params(Function_paramsContext ctx) {
     return createTree(ctx, ABLNodeType.PARAMETER_LIST);
   }
 
   @Override
-  public JPNodeHolder visitFunctionParamBufferFor(FunctionParamBufferForContext ctx) {
+  public JPNode.Builder visitFunctionParamBufferFor(FunctionParamBufferForContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitFunctionParamStandard(FunctionParamStandardContext ctx) {
+  public JPNode.Builder visitFunctionParamStandard(FunctionParamStandardContext ctx) {
     if (ctx.qualif == null)
       return createTree(ctx, ABLNodeType.INPUT);
     else
@@ -1619,624 +1578,629 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitGetstate(GetstateContext ctx) {
+  public JPNode.Builder visitGetstate(GetstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitGetkeyvaluestate(GetkeyvaluestateContext ctx) {
+  public JPNode.Builder visitGetkeyvaluestate(GetkeyvaluestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitGoonphrase(GoonphraseContext ctx) {
+  public JPNode.Builder visitGoonphrase(GoonphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitHeader_background(Header_backgroundContext ctx) {
+  public JPNode.Builder visitHeader_background(Header_backgroundContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitHelp_const(Help_constContext ctx) {
+  public JPNode.Builder visitHelp_const(Help_constContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitHidestate(HidestateContext ctx) {
+  public JPNode.Builder visitHidestate(HidestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitIfstate(IfstateContext ctx) {
+  public JPNode.Builder visitIfstate(IfstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitIf_else(If_elseContext ctx) {
+  public JPNode.Builder visitIf_else(If_elseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitIn_expr(In_exprContext ctx) {
+  public JPNode.Builder visitIn_expr(In_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitIn_window_expr(In_window_exprContext ctx) {
+  public JPNode.Builder visitIn_window_expr(In_window_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitImagephrase_opt(Imagephrase_optContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
-    if (holder.getFirstNode().getType() == ABLNodeType.FILENAME.getType())
-      holder.getFirstNode().setType(ABLNodeType.FILENAME.getType());
+  public JPNode.Builder visitImagephrase_opt(Imagephrase_optContext ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitImportstate(ImportstateContext ctx) {
+  public JPNode.Builder visitImportstate(ImportstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitIn_widgetpool_expr(In_widgetpool_exprContext ctx) {
+  public JPNode.Builder visitIn_widgetpool_expr(In_widgetpool_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitInitial_constant(Initial_constantContext ctx) {
+  public JPNode.Builder visitInitial_constant(Initial_constantContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitInputclearstate(InputclearstateContext ctx) {
+  public JPNode.Builder visitInputclearstate(InputclearstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.CLEAR);
   }
 
   @Override
-  public JPNodeHolder visitInputclosestate(InputclosestateContext ctx) {
+  public JPNode.Builder visitInputclosestate(InputclosestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.CLOSE);
   }
 
   @Override
-  public JPNodeHolder visitInputfromstate(InputfromstateContext ctx) {
+  public JPNode.Builder visitInputfromstate(InputfromstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.FROM);
   }
 
   @Override
-  public JPNodeHolder visitInputthroughstate(InputthroughstateContext ctx) {
+  public JPNode.Builder visitInputthroughstate(InputthroughstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.THROUGH);
   }
 
   @Override
-  public JPNodeHolder visitInputoutputclosestate(InputoutputclosestateContext ctx) {
+  public JPNode.Builder visitInputoutputclosestate(InputoutputclosestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.CLOSE);
   }
 
   @Override
-  public JPNodeHolder visitInputoutputthroughstate(InputoutputthroughstateContext ctx) {
+  public JPNode.Builder visitInputoutputthroughstate(InputoutputthroughstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.THROUGH);
   }
 
   @Override
-  public JPNodeHolder visitInsertstate(InsertstateContext ctx) {
+  public JPNode.Builder visitInsertstate(InsertstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitInterfacestate(InterfacestateContext ctx) {
+  public JPNode.Builder visitInterfacestate(InterfacestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitInterface_inherits(Interface_inheritsContext ctx) {
+  public JPNode.Builder visitInterface_inherits(Interface_inheritsContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitInterface_end(Interface_endContext ctx) {
+  public JPNode.Builder visitInterface_end(Interface_endContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitIoPhraseAnyTokensSub3(IoPhraseAnyTokensSub3Context ctx) {
+  public JPNode.Builder visitIoPhraseAnyTokensSub3(IoPhraseAnyTokensSub3Context ctx) {
     ProToken start = (ProToken) ctx.getStart();
+    ProToken last = start;
     StringBuilder sb = new StringBuilder(start.getText());
-    for (int zz = 0; zz < ctx.not_io_opt().size(); zz++) {
-      JPNodeHolder comp = visit(ctx.not_io_opt(zz));
-      sb.append(comp.getFirstNode().getText());
+    for (int zz = 1; zz < ctx.not_io_opt().size(); zz++) {
+      last = (ProToken) ctx.not_io_opt(zz).start;
+      sb.append(last.getText());
     }
+    
     start.setType(ABLNodeType.FILENAME.getType());
     start.setText(sb.toString());
-    JPNode node = (JPNode) factory.create(new org.prorefactor.core.ProToken(
-        start.getNodeType() == ABLNodeType.EOF_ANTLR4 ? ABLNodeType.EOF : start.getNodeType(), start.getText(),
-        start.getFileIndex(), "", start.getLine(), start.getCharPositionInLine(), start.getEndFileIndex(),
-        start.getEndLine(), start.getEndCharPositionInLine(), start.getMacroSourceNum(), start.getAnalyzeSuspend(),
-        false));
-    return new JPNodeHolder(node);
+    start.setEndFileIndex(last.getEndFileIndex());
+    start.setEndLine(last.getEndLine());
+    start.setEndCharPositionInLine(last.getEndCharPositionInLine());
+
+    return new JPNode.Builder(start);
   }
 
   @Override
-  public JPNodeHolder visitIo_opt(Io_optContext ctx) {
+  public JPNode.Builder visitIo_opt(Io_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitIo_osdir(Io_osdirContext ctx) {
+  public JPNode.Builder visitIo_osdir(Io_osdirContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitIo_printer(Io_printerContext ctx) {
+  public JPNode.Builder visitIo_printer(Io_printerContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitLabel_constant(Label_constantContext ctx) {
+  public JPNode.Builder visitLabel_constant(Label_constantContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitLdbnamefunc(LdbnamefuncContext ctx) {
+  public JPNode.Builder visitLdbnamefunc(LdbnamefuncContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitLdbname_opt1(Ldbname_opt1Context ctx) {
+  public JPNode.Builder visitLdbname_opt1(Ldbname_opt1Context ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitLeavestate(LeavestateContext ctx) {
+  public JPNode.Builder visitLeavestate(LeavestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitLengthfunc(LengthfuncContext ctx) {
+  public JPNode.Builder visitLengthfunc(LengthfuncContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitLike_field(Like_fieldContext ctx) {
+  public JPNode.Builder visitLike_field(Like_fieldContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitLike_widgetname(Like_widgetnameContext ctx) {
+  public JPNode.Builder visitLike_widgetname(Like_widgetnameContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitLoadstate(LoadstateContext ctx) {
+  public JPNode.Builder visitLoadstate(LoadstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitLoad_opt(Load_optContext ctx) {
+  public JPNode.Builder visitLoad_opt(Load_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitMessagestate(MessagestateContext ctx) {
+  public JPNode.Builder visitMessagestate(MessagestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitMessage_item(Message_itemContext ctx) {
+  public JPNode.Builder visitMessage_item(Message_itemContext ctx) {
     return createTree(ctx, ABLNodeType.FORM_ITEM);
   }
 
   @Override
-  public JPNodeHolder visitMessage_opt(Message_optContext ctx) {
+  public JPNode.Builder visitMessage_opt(Message_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitMethodstate(MethodstateContext ctx) {
+  public JPNode.Builder visitMethodstate(MethodstateContext ctx) {
     support.pushRuleContext(ctx);
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitMethod_end(Method_endContext ctx) {
+  public JPNode.Builder visitMethod_end(Method_endContext ctx) {
     support.popRuleContext();
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitNamespace_prefix(Namespace_prefixContext ctx) {
+  public JPNode.Builder visitNamespace_prefix(Namespace_prefixContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitNamespace_uri(Namespace_uriContext ctx) {
+  public JPNode.Builder visitNamespace_uri(Namespace_uriContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitNextstate(NextstateContext ctx) {
+  public JPNode.Builder visitNextstate(NextstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitNextpromptstate(NextpromptstateContext ctx) {
+  public JPNode.Builder visitNextpromptstate(NextpromptstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitNextvaluefunc(NextvaluefuncContext ctx) {
+  public JPNode.Builder visitNextvaluefunc(NextvaluefuncContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitNullphrase(NullphraseContext ctx) {
+  public JPNode.Builder visitNullphrase(NullphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitOnstate(OnstateContext ctx) {
+  public JPNode.Builder visitOnstate(OnstateContext ctx) {
     // TODO Add support#pushRuleContext (easy), and find a way to execute popRuleContext() 
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitOnstate_run_params(Onstate_run_paramsContext ctx) {
+  public JPNode.Builder visitOnstate_run_params(Onstate_run_paramsContext ctx) {
     return createTree(ctx, ABLNodeType.PARAMETER_LIST);
   }
 
   @Override
-  public JPNodeHolder visitOn___phrase(On___phraseContext ctx) {
+  public JPNode.Builder visitOn___phrase(On___phraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitOn_undo(On_undoContext ctx) {
+  public JPNode.Builder visitOn_undo(On_undoContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitOn_action(On_actionContext ctx) {
+  public JPNode.Builder visitOn_action(On_actionContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitOpenquerystate(OpenquerystateContext ctx) {
+  public JPNode.Builder visitOpenquerystate(OpenquerystateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.QUERY);
   }
 
   @Override
-  public JPNodeHolder visitOpenquery_opt(Openquery_optContext ctx) {
+  public JPNode.Builder visitOpenquery_opt(Openquery_optContext ctx) {
     if (ctx.MAXROWS() != null)
       return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
   @Override
-  public JPNodeHolder visitOsappendstate(OsappendstateContext ctx) {
+  public JPNode.Builder visitOsappendstate(OsappendstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitOscommandstate(OscommandstateContext ctx) {
+  public JPNode.Builder visitOscommandstate(OscommandstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitOscopystate(OscopystateContext ctx) {
+  public JPNode.Builder visitOscopystate(OscopystateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitOscreatedirstate(OscreatedirstateContext ctx) {
+  public JPNode.Builder visitOscreatedirstate(OscreatedirstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitOsdeletestate(OsdeletestateContext ctx) {
+  public JPNode.Builder visitOsdeletestate(OsdeletestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitOsrenamestate(OsrenamestateContext ctx) {
+  public JPNode.Builder visitOsrenamestate(OsrenamestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitOutputclosestate(OutputclosestateContext ctx) {
+  public JPNode.Builder visitOutputclosestate(OutputclosestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.CLOSE);
   }
 
   @Override
-  public JPNodeHolder visitOutputthroughstate(OutputthroughstateContext ctx) {
+  public JPNode.Builder visitOutputthroughstate(OutputthroughstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.THROUGH);
   }
 
   @Override
-  public JPNodeHolder visitOutputtostate(OutputtostateContext ctx) {
+  public JPNode.Builder visitOutputtostate(OutputtostateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.TO);
   }
 
   @Override
-  public JPNodeHolder visitPagestate(PagestateContext ctx) {
+  public JPNode.Builder visitPagestate(PagestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitPause_expr(Pause_exprContext ctx) {
+  public JPNode.Builder visitPause_expr(Pause_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitPausestate(PausestateContext ctx) {
+  public JPNode.Builder visitPausestate(PausestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitPause_opt(Pause_optContext ctx) {
+  public JPNode.Builder visitPause_opt(Pause_optContext ctx) {
     if (ctx.MESSAGE() != null)
       return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
   @Override
-  public JPNodeHolder visitProcedure_expr(Procedure_exprContext ctx) {
+  public JPNode.Builder visitProcedure_expr(Procedure_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitProcedurestate(ProcedurestateContext ctx) {
+  public JPNode.Builder visitProcedurestate(ProcedurestateContext ctx) {
     support.pushRuleContext(ctx);
-    JPNodeHolder holder = createStatementTreeFromFirstNode(ctx);
-    holder.getFirstNode().nextNode().setType(ABLNodeType.ID.getType());
+    JPNode.Builder holder = createStatementTreeFromFirstNode(ctx);
+    holder.getDown().changeType(ABLNodeType.ID);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitProcedure_opt(Procedure_optContext ctx) {
+  public JPNode.Builder visitProcedure_opt(Procedure_optContext ctx) {
     if (ctx.EXTERNAL() != null)
       return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
   @Override
-  public JPNodeHolder visitProcedure_dll_opt(Procedure_dll_optContext ctx) {
+  public JPNode.Builder visitProcedure_dll_opt(Procedure_dll_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitProcedure_end(Procedure_endContext ctx) {
+  public JPNode.Builder visitProcedure_end(Procedure_endContext ctx) {
     support.popRuleContext();
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitProcesseventsstate(ProcesseventsstateContext ctx) {
+  public JPNode.Builder visitProcesseventsstate(ProcesseventsstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitPromptforstate(PromptforstateContext ctx) {
-    JPNodeHolder holder = createStatementTreeFromFirstNode(ctx);
-    holder.getFirstNode().setType(ABLNodeType.PROMPTFOR.getType());
-    return holder;
+  public JPNode.Builder visitPromptforstate(PromptforstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx).changeType(ABLNodeType.PROMPTFOR);
   }
 
   @Override
-  public JPNodeHolder visitPublishstate(PublishstateContext ctx) {
+  public JPNode.Builder visitPublishstate(PublishstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitPublish_opt1(Publish_opt1Context ctx) {
+  public JPNode.Builder visitPublish_opt1(Publish_opt1Context ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitPutstate(PutstateContext ctx) {
+  public JPNode.Builder visitPutstate(PutstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitPutcursorstate(PutcursorstateContext ctx) {
+  public JPNode.Builder visitPutcursorstate(PutcursorstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.CURSOR);
   }
 
   @Override
-  public JPNodeHolder visitPutscreenstate(PutscreenstateContext ctx) {
+  public JPNode.Builder visitPutscreenstate(PutscreenstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.SCREEN);
   }
 
   @Override
-  public JPNodeHolder visitPutkeyvaluestate(PutkeyvaluestateContext ctx) {
+  public JPNode.Builder visitPutkeyvaluestate(PutkeyvaluestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitQuery_queryname(Query_querynameContext ctx) {
+  public JPNode.Builder visitQuery_queryname(Query_querynameContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitQuerytuningphrase(QuerytuningphraseContext ctx) {
+  public JPNode.Builder visitQuerytuningphrase(QuerytuningphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitQuerytuning_opt(Querytuning_optContext ctx) {
+  public JPNode.Builder visitQuerytuning_opt(Querytuning_optContext ctx) {
     if ((ctx.CACHESIZE() != null) || (ctx.DEBUG() != null) || (ctx.HINT() != null))
       return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
   @Override
-  public JPNodeHolder visitQuitstate(QuitstateContext ctx) {
+  public JPNode.Builder visitQuitstate(QuitstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRadiosetphrase(RadiosetphraseContext ctx) {
+  public JPNode.Builder visitRadiosetphrase(RadiosetphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRadio_label(Radio_labelContext ctx) {
-    JPNodeHolder holder = visitChildren(ctx);
-    if (holder.getFirstNode().getType() != ABLNodeType.QSTRING.getType())
-      holder.getFirstNode().setType(ABLNodeType.UNQUOTEDSTRING.getType());
+  public Builder visitRadioset_opt(Radioset_optContext ctx) {
+    if (ctx.RADIOBUTTONS() != null)
+      return createTreeFromFirstNode(ctx);
+    else
+      return visitChildren(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitRadio_label(Radio_labelContext ctx) {
+    JPNode.Builder holder = visitChildren(ctx);
+    if (holder.getNodeType() != ABLNodeType.QSTRING)
+      holder.changeType(ABLNodeType.UNQUOTEDSTRING);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitRawfunc(RawfuncContext ctx) {
+  public JPNode.Builder visitRawfunc(RawfuncContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRawtransferstate(RawtransferstateContext ctx) {
+  public JPNode.Builder visitRawtransferstate(RawtransferstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitReadkeystate(ReadkeystateContext ctx) {
+  public JPNode.Builder visitReadkeystate(ReadkeystateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRepeatstate(RepeatstateContext ctx) {
+  public JPNode.Builder visitRepeatstate(RepeatstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRecord_fields(Record_fieldsContext ctx) {
-    JPNodeHolder holder = createTreeFromFirstNode(ctx);
-    if (holder.getFirstNode().getType() == ABLNodeType.FIELD.getType())
-      holder.getFirstNode().setType(ABLNodeType.FIELDS.getType());
+  public JPNode.Builder visitRecord_fields(Record_fieldsContext ctx) {
+    JPNode.Builder holder = createTreeFromFirstNode(ctx);
+    if (holder.getNodeType() == ABLNodeType.FIELD)
+      holder.changeType(ABLNodeType.FIELDS);
     return holder;
   }
 
   @Override
-  public JPNodeHolder visitRecordphrase(RecordphraseContext ctx) {
+  public JPNode.Builder visitRecordphrase(RecordphraseContext ctx) {
     // TODO {astFactory.makeASTRoot(currentAST, #r);}
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRecord_opt(Record_optContext ctx) {
+  public JPNode.Builder visitRecord_opt(Record_optContext ctx) {
     if ((ctx.LEFT() != null) || (ctx.OF() != null) || (ctx.WHERE() != null) || (ctx.USEINDEX() != null) || (ctx.USING() != null))
       return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
   @Override
-  public JPNodeHolder visitReleasestate(ReleasestateContext ctx) {
+  public JPNode.Builder visitReleasestate(ReleasestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitReleaseexternalstate(ReleaseexternalstateContext ctx) {
+  public JPNode.Builder visitReleaseexternalstate(ReleaseexternalstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.EXTERNAL);
   }
 
   @Override
-  public JPNodeHolder visitReleaseobjectstate(ReleaseobjectstateContext ctx) {
+  public JPNode.Builder visitReleaseobjectstate(ReleaseobjectstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.OBJECT);
   }
 
   @Override
-  public JPNodeHolder visitRepositionstate(RepositionstateContext ctx) {
+  public JPNode.Builder visitRepositionstate(RepositionstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitReposition_opt(Reposition_optContext ctx) {
+  public JPNode.Builder visitReposition_opt(Reposition_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitReturnstate(ReturnstateContext ctx) {
+  public JPNode.Builder visitReturnstate(ReturnstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRoutinelevelstate(RoutinelevelstateContext ctx) {
+  public JPNode.Builder visitRoutinelevelstate(RoutinelevelstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitBlocklevelstate(BlocklevelstateContext ctx) {
+  public JPNode.Builder visitBlocklevelstate(BlocklevelstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRow_expr(Row_exprContext ctx) {
+  public JPNode.Builder visitRow_expr(Row_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRunstate(RunstateContext ctx) {
+  public JPNode.Builder visitRunstate(RunstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRunOptPersistent(RunOptPersistentContext ctx) {
+  public JPNode.Builder visitRunOptPersistent(RunOptPersistentContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRunOptServer(RunOptServerContext ctx) {
+  public JPNode.Builder visitRunOptServer(RunOptServerContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRunOptAsync(RunOptAsyncContext ctx) {
+  public JPNode.Builder visitRunOptAsync(RunOptAsyncContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRun_event(Run_eventContext ctx) {
+  public JPNode.Builder visitRun_event(Run_eventContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRun_set(Run_setContext ctx) {
+  public JPNode.Builder visitRun_set(Run_setContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitRunstoredprocedurestate(RunstoredprocedurestateContext ctx) {
+  public JPNode.Builder visitRunstoredprocedurestate(RunstoredprocedurestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.STOREDPROCEDURE);
   }
 
   @Override
-  public JPNodeHolder visitRunsuperstate(RunsuperstateContext ctx) {
+  public JPNode.Builder visitRunsuperstate(RunsuperstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.SUPER);
   }
 
   @Override
-  public JPNodeHolder visitSavecachestate(SavecachestateContext ctx) {
+  public JPNode.Builder visitSavecachestate(SavecachestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitScrollstate(ScrollstateContext ctx) {
+  public JPNode.Builder visitScrollstate(ScrollstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSeekstate(SeekstateContext ctx) {
+  public JPNode.Builder visitSeekstate(SeekstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSelectionlistphrase(SelectionlistphraseContext ctx) {
+  public JPNode.Builder visitSelectionlistphrase(SelectionlistphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSelectionlist_opt(Selectionlist_optContext ctx) {
+  public JPNode.Builder visitSelectionlist_opt(Selectionlist_optContext ctx) {
     if ((ctx.LISTITEMS() != null) || (ctx.LISTITEMPAIRS() != null) || (ctx.INNERCHARS() != null)
         || (ctx.INNERLINES() != null))
       return createTreeFromFirstNode(ctx);
@@ -2244,126 +2208,126 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitSerialize_name(Serialize_nameContext ctx) {
+  public JPNode.Builder visitSerialize_name(Serialize_nameContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSetstate(SetstateContext ctx) {
+  public JPNode.Builder visitSetstate(SetstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitShowstatsstate(ShowstatsstateContext ctx) {
+  public JPNode.Builder visitShowstatsstate(ShowstatsstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSizephrase(SizephraseContext ctx) {
+  public JPNode.Builder visitSizephrase(SizephraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSkipphrase(SkipphraseContext ctx) {
+  public JPNode.Builder visitSkipphrase(SkipphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSliderphrase(SliderphraseContext ctx) {
+  public JPNode.Builder visitSliderphrase(SliderphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSlider_opt(Slider_optContext ctx) {
+  public JPNode.Builder visitSlider_opt(Slider_optContext ctx) {
     if ((ctx.MAXVALUE() != null) || (ctx.MINVALUE() != null) || (ctx.TICMARKS() != null))
       return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSlider_frequency(Slider_frequencyContext ctx) {
+  public JPNode.Builder visitSlider_frequency(Slider_frequencyContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSpacephrase(SpacephraseContext ctx) {
+  public JPNode.Builder visitSpacephrase(SpacephraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitStatusstate(StatusstateContext ctx) {
+  public JPNode.Builder visitStatusstate(StatusstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitStatus_opt(Status_optContext ctx) {
+  public JPNode.Builder visitStatus_opt(Status_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitStop_after(Stop_afterContext ctx) {
+  public JPNode.Builder visitStop_after(Stop_afterContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitStopstate(StopstateContext ctx) {
+  public JPNode.Builder visitStopstate(StopstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitStream_name_or_handle(Stream_name_or_handleContext ctx) {
+  public JPNode.Builder visitStream_name_or_handle(Stream_name_or_handleContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSubscribestate(SubscribestateContext ctx) {
+  public JPNode.Builder visitSubscribestate(SubscribestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSubscribe_run(Subscribe_runContext ctx) {
+  public JPNode.Builder visitSubscribe_run(Subscribe_runContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSubstringfunc(SubstringfuncContext ctx) {
+  public JPNode.Builder visitSubstringfunc(SubstringfuncContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSystemdialogcolorstate(SystemdialogcolorstateContext ctx) {
+  public JPNode.Builder visitSystemdialogcolorstate(SystemdialogcolorstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.COLOR);
   }
 
   @Override
-  public JPNodeHolder visitSystemdialogfontstate(SystemdialogfontstateContext ctx) {
+  public JPNode.Builder visitSystemdialogfontstate(SystemdialogfontstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.FONT);
   }
 
   @Override
-  public JPNodeHolder visitSysdiafont_opt(Sysdiafont_optContext ctx) {
+  public JPNode.Builder visitSysdiafont_opt(Sysdiafont_optContext ctx) {
     if ((ctx.MAXSIZE() != null) || (ctx.MINSIZE() != null))
       return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSystemdialoggetdirstate(SystemdialoggetdirstateContext ctx) {
+  public JPNode.Builder visitSystemdialoggetdirstate(SystemdialoggetdirstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.GETDIR);
   }
 
   @Override
-  public JPNodeHolder visitSystemdialoggetdir_opt(Systemdialoggetdir_optContext ctx) {
+  public JPNode.Builder visitSystemdialoggetdir_opt(Systemdialoggetdir_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSystemdialoggetfilestate(SystemdialoggetfilestateContext ctx) {
+  public JPNode.Builder visitSystemdialoggetfilestate(SystemdialoggetfilestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.GETFILE);
   }
 
   @Override
-  public JPNodeHolder visitSysdiagetfile_opt(Sysdiagetfile_optContext ctx) {
+  public JPNode.Builder visitSysdiagetfile_opt(Sysdiagetfile_optContext ctx) {
     if ((ctx.FILTERS() != null) || (ctx.DEFAULTEXTENSION() != null) || (ctx.INITIALDIR() != null)
         || (ctx.UPDATE() != null))
       return createTreeFromFirstNode(ctx);
@@ -2371,34 +2335,34 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitSysdiagetfile_initfilter(Sysdiagetfile_initfilterContext ctx) {
+  public JPNode.Builder visitSysdiagetfile_initfilter(Sysdiagetfile_initfilterContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSystemdialogprintersetupstate(SystemdialogprintersetupstateContext ctx) {
+  public JPNode.Builder visitSystemdialogprintersetupstate(SystemdialogprintersetupstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.PRINTERSETUP);
   }
 
   @Override
-  public JPNodeHolder visitSysdiapri_opt(Sysdiapri_optContext ctx) {
+  public JPNode.Builder visitSysdiapri_opt(Sysdiapri_optContext ctx) {
     if (ctx.NUMCOPIES() != null)
       return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSystemhelpstate(SystemhelpstateContext ctx) {
+  public JPNode.Builder visitSystemhelpstate(SystemhelpstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSystemhelp_window(Systemhelp_windowContext ctx) {
+  public JPNode.Builder visitSystemhelp_window(Systemhelp_windowContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitSystemhelp_opt(Systemhelp_optContext ctx) {
+  public JPNode.Builder visitSystemhelp_opt(Systemhelp_optContext ctx) {
     if (ctx.children.size() > 1)
       return createTreeFromFirstNode(ctx);
     else
@@ -2406,78 +2370,78 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitText_opt(Text_optContext ctx) {
+  public JPNode.Builder visitText_opt(Text_optContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitTextphrase(TextphraseContext ctx) {
+  public JPNode.Builder visitTextphrase(TextphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitThisobjectstate(ThisobjectstateContext ctx) {
+  public JPNode.Builder visitThisobjectstate(ThisobjectstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitTitle_expr(Title_exprContext ctx) {
+  public JPNode.Builder visitTitle_expr(Title_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitTime_expr(Time_exprContext ctx) {
+  public JPNode.Builder visitTime_expr(Time_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitTitlephrase(TitlephraseContext ctx) {
+  public JPNode.Builder visitTitlephrase(TitlephraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitTo_expr(To_exprContext ctx) {
+  public JPNode.Builder visitTo_expr(To_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitToggleboxphrase(ToggleboxphraseContext ctx) {
+  public JPNode.Builder visitToggleboxphrase(ToggleboxphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitTooltip_expr(Tooltip_exprContext ctx) {
+  public JPNode.Builder visitTooltip_expr(Tooltip_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitTransactionmodeautomaticstate(TransactionmodeautomaticstateContext ctx) {
+  public JPNode.Builder visitTransactionmodeautomaticstate(TransactionmodeautomaticstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitTriggerphrase(TriggerphraseContext ctx) {
+  public JPNode.Builder visitTriggerphrase(TriggerphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitTrigger_block(Trigger_blockContext ctx) {
+  public JPNode.Builder visitTrigger_block(Trigger_blockContext ctx) {
     return createTree(ctx, ABLNodeType.CODE_BLOCK);
   }
 
   @Override
-  public JPNodeHolder visitTrigger_on(Trigger_onContext ctx) {
+  public JPNode.Builder visitTrigger_on(Trigger_onContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitTriggers_end(Triggers_endContext ctx) {
+  public JPNode.Builder visitTriggers_end(Triggers_endContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitTriggerprocedurestate(TriggerprocedurestateContext ctx) {
-    JPNodeHolder node = createStatementTreeFromFirstNode(ctx);
+  public JPNode.Builder visitTriggerprocedurestate(TriggerprocedurestateContext ctx) {
+    JPNode.Builder node = createStatementTreeFromFirstNode(ctx);
     if (ctx.buff != null) {
       if (ctx.newBuff != null)
         support.defBuffer(ctx.newBuff.getText(), ctx.buff.getText());
@@ -2488,161 +2452,169 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
   }
 
   @Override
-  public JPNodeHolder visitTrigger_of(Trigger_ofContext ctx) {
-    JPNodeHolder node = createTreeFromFirstNode(ctx);
+  public JPNode.Builder visitTrigger_of(Trigger_ofContext ctx) {
+    JPNode.Builder node = createTreeFromFirstNode(ctx);
     if (ctx.id != null)
       support.defVar(ctx.id.getText());
     return node;
   }
 
   @Override
-  public JPNodeHolder visitTrigger_table_label(Trigger_table_labelContext ctx) {
+  public JPNode.Builder visitTrigger_table_label(Trigger_table_labelContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitTrigger_old(Trigger_oldContext ctx) {
-    JPNodeHolder node = createTreeFromFirstNode(ctx);
+  public JPNode.Builder visitTrigger_old(Trigger_oldContext ctx) {
+    JPNode.Builder node = createTreeFromFirstNode(ctx);
     support.defVar(ctx.id.getText());
     return node;
   }
 
   @Override
-  public JPNodeHolder visitUnderlinestate(UnderlinestateContext ctx) {
+  public JPNode.Builder visitUnderlinestate(UnderlinestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitUndostate(UndostateContext ctx) {
+  public JPNode.Builder visitUndostate(UndostateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitUndo_action(Undo_actionContext ctx) {
+  public JPNode.Builder visitUndo_action(Undo_actionContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitUnloadstate(UnloadstateContext ctx) {
+  public JPNode.Builder visitUnloadstate(UnloadstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitUnsubscribestate(UnsubscribestateContext ctx) {
+  public JPNode.Builder visitUnsubscribestate(UnsubscribestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitUpstate(UpstateContext ctx) {
+  public JPNode.Builder visitUpstate(UpstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitUpdate_field(Update_fieldContext ctx) {
+  public JPNode.Builder visitUpdate_field(Update_fieldContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitUpdatestate(UpdatestateContext ctx) {
+  public JPNode.Builder visitUpdatestate(UpdatestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitUsestate(UsestateContext ctx) {
+  public JPNode.Builder visitUsestate(UsestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitUsing_row(Using_rowContext ctx) {
+  public JPNode.Builder visitUsing_row(Using_rowContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitUsingstate(UsingstateContext ctx) {
-    String typeName = ctx.type.getText() + (ctx.star != null ? "*" : "");
+  public JPNode.Builder visitUsingstate(UsingstateContext ctx) {
+    JPNode.Builder using = visit(ctx.USING());
+    using.setStatement();
+    
+    ProToken typ = (ProToken) ctx.type.start;
+    typ.setNodeType(ABLNodeType.TYPE_NAME);
+    if (ctx.star != null) {
+      typ.setText(typ.getText() + "*");
+      typ.setEndFileIndex(((ProToken) ctx.star) .getEndFileIndex());
+      typ.setEndLine(((ProToken) ctx.star).getEndLine());
+      typ.setEndCharPositionInLine(((ProToken) ctx.star).getEndCharPositionInLine());
+    }
+    JPNode.Builder child1 = new JPNode.Builder(typ);
+    using.setDown(child1);
 
-    JPNodeHolder node = visit(ctx.USING());
-    addHolderToNode(node.getFirstNode(), visit(ctx.type));
-    if (ctx.using_from() != null)
-      addHolderToNode(node.getFirstNode(), visit(ctx.using_from()));
-    addHolderToNode(node.getFirstNode(), visit(ctx.state_end()));
+    JPNode.Builder last = child1.getLast();
+    if (ctx.using_from() != null) {
+      last = last.setRight(visit(ctx.using_from())).getRight();
+    }
+    last = last.setRight(visit(ctx.state_end())).getRight();
 
-    support.usingState(typeName);
-    node.getFirstNode().setStatementHead();
-    node.getFirstNode().getFirstChild().setText(typeName);
+    support.usingState(typ.getText());
 
-    return node;
+    return using;
   }
 
   @Override
-  public JPNodeHolder visitUsing_from(Using_fromContext ctx) {
+  public JPNode.Builder visitUsing_from(Using_fromContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitValidatephrase(ValidatephraseContext ctx) {
+  public JPNode.Builder visitValidatephrase(ValidatephraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitValidatestate(ValidatestateContext ctx) {
+  public JPNode.Builder visitValidatestate(ValidatestateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitViewstate(ViewstateContext ctx) {
+  public JPNode.Builder visitViewstate(ViewstateContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitViewasphrase(ViewasphraseContext ctx) {
+  public JPNode.Builder visitViewasphrase(ViewasphraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitWaitforstate(WaitforstateContext ctx) {
-    JPNodeHolder holder = createStatementTreeFromFirstNode(ctx);
-    holder.getFirstNode().setType(ABLNodeType.WAITFOR.getType());
-    return holder;
+  public JPNode.Builder visitWaitforstate(WaitforstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx).changeType(ABLNodeType.WAITFOR);
   }
 
   @Override
-  public JPNodeHolder visitWaitfor_or(Waitfor_orContext ctx) {
+  public JPNode.Builder visitWaitfor_or(Waitfor_orContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitWaitfor_focus(Waitfor_focusContext ctx) {
+  public JPNode.Builder visitWaitfor_focus(Waitfor_focusContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitWaitfor_set(Waitfor_setContext ctx) {
+  public JPNode.Builder visitWaitfor_set(Waitfor_setContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitWhen_exp(When_expContext ctx) {
+  public JPNode.Builder visitWhen_exp(When_expContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitWidget_id(Widget_idContext ctx) {
+  public JPNode.Builder visitWidget_id(Widget_idContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitXml_data_type(Xml_data_typeContext ctx) {
+  public JPNode.Builder visitXml_data_type(Xml_data_typeContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitXml_node_name(Xml_node_nameContext ctx) {
+  public JPNode.Builder visitXml_node_name(Xml_node_nameContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
   @Override
-  public JPNodeHolder visitXml_node_type(Xml_node_typeContext ctx) {
+  public JPNode.Builder visitXml_node_type(Xml_node_typeContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
@@ -2654,158 +2626,137 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNodeHolder> {
    * Default behavior for each ParseTree node is to create an array of JPNode
    */
   @Override
-  public JPNodeHolder visitChildren(RuleNode ctx) {
-    LOGGER.trace("Entering visitChildren {}", ctx.getClass().getSimpleName());
-    return createTree(ctx);
+  public JPNode.Builder visitChildren(RuleNode ctx) {
+    return createNode(ctx);
   }
 
   /**
-   * Generate JPNodeHolder with only one JPNode object
+   * Generate JPNode.Builder with only one JPNode object
    */
   @Override
-  public JPNodeHolder visitTerminal(TerminalNode node) {
-    LOGGER.trace("Entering visitTerminal {}", node.getSymbol());
-
+  public JPNode.Builder visitTerminal(TerminalNode node) {
     ProToken tok = (ProToken) node.getSymbol();
-    Token tok2 = new org.prorefactor.core.ProToken(
-        tok.getNodeType() == ABLNodeType.EOF_ANTLR4 ? ABLNodeType.EOF : tok.getNodeType(), tok.getText(),
-        tok.getFileIndex(), lexer.getFilename(tok.getFileIndex()), tok.getLine(), tok.getCharPositionInLine(),
-        tok.getEndFileIndex(), tok.getEndLine(), tok.getEndCharPositionInLine(), tok.getMacroSourceNum(),
-        tok.getAnalyzeSuspend(), false);
-    JPNode jp = (JPNode) factory.create(tok2);
 
-    org.prorefactor.core.ProToken lastHiddenTok = null;
-    org.prorefactor.core.ProToken firstHiddenTok = null;
-    
-    ProToken t = node.getSymbol().getTokenIndex() > 0 ? (ProToken) stream.get(node.getSymbol().getTokenIndex() - 1) : null;
-    while ((t != null) && (t.getChannel() != org.antlr.v4.runtime.Token.DEFAULT_CHANNEL)) {
-      org.prorefactor.core.ProToken hidden = new org.prorefactor.core.ProToken(
-          t.getNodeType() == ABLNodeType.EOF_ANTLR4 ? ABLNodeType.EOF : t.getNodeType(), t.getText(),
-              t.getFileIndex(), lexer.getFilename(t.getFileIndex()), t.getLine(), t.getCharPositionInLine(),
-              t.getEndFileIndex(), t.getEndLine(), t.getEndCharPositionInLine(), t.getMacroSourceNum(),
-              t.getAnalyzeSuspend(), false);
+    ProToken lastHiddenTok = null;
+    ProToken firstHiddenTok = null;
+
+    ProToken t = node.getSymbol().getTokenIndex() > 0 ? (ProToken) stream.get(node.getSymbol().getTokenIndex() - 1)
+        : null;
+    while ((t != null) && (t.getChannel() == Token.HIDDEN_CHANNEL)) {
       if (firstHiddenTok == null) {
-        firstHiddenTok = hidden;
-        lastHiddenTok = hidden;
+        firstHiddenTok = t;
       } else {
-        lastHiddenTok.setHiddenBefore(hidden);
-        lastHiddenTok = hidden;
+        lastHiddenTok.setHiddenBefore(t);
       }
-      
-      if (t.getTokenIndex() > 0)
-        t =  (ProToken)stream.get(t.getTokenIndex()  - 1);
-      else
-        t = null;
+      lastHiddenTok = t;
+
+      t = t.getTokenIndex() > 0 ? (ProToken) stream.get(t.getTokenIndex() - 1) : null;
     }
     if (firstHiddenTok != null)
-      jp.setHiddenBefore(firstHiddenTok);
-    
-    return new JPNodeHolder(jp);
+      tok.setHiddenBefore(firstHiddenTok);
+
+    return new JPNode.Builder(tok);
   }
 
   @Override
-  protected JPNodeHolder aggregateResult(JPNodeHolder aggregate, JPNodeHolder nextResult) {
+  protected JPNode.Builder aggregateResult(JPNode.Builder aggregate, JPNode.Builder nextResult) {
     throw new UnsupportedOperationException("Not implemented");
   }
 
-  // TODO Rename to createArray or createFlatArray
   /**
    * ANTLR2 construct ruleName: TOKEN TOKEN | rule TOKEN | rule ...
    */
-  private JPNodeHolder createTree(RuleNode ctx) {
-    JPNodeHolder node = new JPNodeHolder();
-    for (int zz = 0; zz < ctx.getChildCount(); zz++) {
-      JPNodeHolder comp = visit(ctx.getChild(zz));
-      node.addHolder(comp);
+  private JPNode.Builder createNode(RuleNode ctx) {
+    if (ctx.getChildCount() == 0)
+      return null;
+    JPNode.Builder firstNode = visit(ctx.getChild(0));
+    JPNode.Builder lastNode = firstNode.getLast();
+    for (int zz = 1; zz < ctx.getChildCount(); zz++) {
+      lastNode = lastNode.setRight(visit(ctx.getChild(zz))).getLast();
     }
-    return node;
+    return firstNode;
   }
 
   /**
    * ANTLR2 construct ruleName: TOKEN^ (TOKEN | rule)....
    */
-  private JPNodeHolder createTreeFromFirstNode(RuleNode ctx) {
-    // assert ctx.getChildCount() > 0;
+  private JPNode.Builder createTreeFromFirstNode(RuleNode ctx) {
     if (ctx.getChildCount() == 0)
-      return new JPNodeHolder();
-    JPNodeHolder node = visit(ctx.getChild(0));
+      return null;
+    JPNode.Builder node = visit(ctx.getChild(0));
+
+    // Can be null, as some rules can be empty (as of today, will perhpas be fixed one day)
+    JPNode.Builder firstChild = node.getDown();
+    JPNode.Builder lastChild = firstChild == null ? null : firstChild.getLast();
+
     for (int zz = 1; zz < ctx.getChildCount(); zz++) {
-      JPNodeHolder comp = visit(ctx.getChild(zz));
-      addHolderToNode(node.getFirstNode(), comp);
+      JPNode.Builder xx = visit(ctx.getChild(zz));
+      if (lastChild != null) {
+        lastChild = lastChild.setRight(xx).getLast();
+      } else if (xx != null) {
+        firstChild = xx;
+        lastChild = firstChild.getLast();
+      }
     }
+    node.setDown(firstChild);
+    
     return node;
   }
 
   /**
    * ANTLR2 construct ruleName: TOKEN^ (TOKEN | rule).... { ##.setStatementHead(); }
    */
-  private JPNodeHolder createStatementTreeFromFirstNode(RuleNode ctx) {
-    JPNodeHolder node = createTreeFromFirstNode(ctx);
-    node.getFirstNode().setStatementHead();
-    return node;
+  private JPNode.Builder createStatementTreeFromFirstNode(RuleNode ctx) {
+    return createTreeFromFirstNode(ctx).setStatement();
   }
 
   /**
    * ANTLR2 construct ruleName: TOKEN^ (TOKEN | rule).... { ##.setStatementHead(state2); }
    */
-  private JPNodeHolder createStatementTreeFromFirstNode(RuleNode ctx, ABLNodeType state2) {
-    JPNodeHolder node = createStatementTreeFromFirstNode(ctx);
-    node.getFirstNode().setStatementHead(state2.getType());
-    return node;
+  private JPNode.Builder createStatementTreeFromFirstNode(RuleNode ctx, ABLNodeType state2) {
+    return createTreeFromFirstNode(ctx).setStatement(state2);
   }
 
   /**
-   * ANTLR2 construct ruleName: exp OR^ exp
+   * ANTLR2 construct ruleName: exp OR^ exp ...
    */
-  private JPNodeHolder createTreeFromSecondNode(RuleNode ctx) {
-    assert ctx.getChildCount() > 1;
-    JPNodeHolder node = visit(ctx.getChild(1));
-    addHolderToNode(node.getFirstNode(), visit(ctx.getChild(0)));
-    for (int zz = 2; zz < ctx.getChildCount(); zz++) {
-      JPNodeHolder comp = visit(ctx.getChild(zz));
-      addHolderToNode(node.getFirstNode(), comp);
+  private JPNode.Builder createTreeFromSecondNode(RuleNode ctx) {
+    assert ctx.getChildCount() >= 3;
+
+    JPNode.Builder node = visit(ctx.getChild(1));
+    JPNode.Builder left = visit(ctx.getChild(0));
+    JPNode.Builder right = visit(ctx.getChild(2));
+    node.setDown(left);
+    left.getLast().setRight(right);
+    JPNode.Builder lastNode = node.getLast();
+    for (int zz = 3; zz < ctx.getChildCount(); zz++) {
+      lastNode = lastNode.setRight(visit(ctx.getChild(zz))).getLast();
     }
+
     return node;
   }
 
   /**
    * ANTLR2 construct ruleName: rule | token ... {## = #([NodeType], ##);}
    */
-  private JPNodeHolder createTree(RuleNode ctx, ABLNodeType parentType) {
-    JPNode node = (JPNode) factory.create(parentType.getType());
-    for (int zz = 0; zz < ctx.getChildCount(); zz++) {
-      JPNodeHolder comp = visit(ctx.getChild(zz));
-      addHolderToNode(node, comp);
-    }
-    return new JPNodeHolder(node);
-  }
-
-  /**
-   * ANTLR2 construct ruleName: xx:rule! { astFactory.makeASTRoot(currentAST, #xx); } rule rule...
-   */
-  private JPNodeHolder createTreeWithoutFirstNode(RuleNode ctx, ABLNodeType parentType) {
-    assert ctx.getChildCount() > 1;
-    JPNodeHolder node = new JPNodeHolder((JPNode) factory.create(parentType.getType()));
-    for (int zz = 1; zz < ctx.getChildCount(); zz++) {
-      JPNodeHolder comp = visit(ctx.getChild(zz));
-      addHolderToNode(node.getFirstNode(), comp);
-    }
-    return node;
+  private JPNode.Builder createTree(RuleNode ctx, ABLNodeType parentType) {
+    return new JPNode.Builder(parentType).setDown(createNode(ctx));
   }
 
   /**
    * ANTLR2 construct ruleName: rule | token ... {## = #([NodeType], ##, [TailNodeType]);}
    */
-  private JPNodeHolder createTree(RuleNode context, ABLNodeType parentType, ABLNodeType tail) {
-    JPNodeHolder node = createTree(context, parentType);
-    node.getFirstNode().addChild((JPNode) factory.create(tail.getType()));
+  private JPNode.Builder createTree(RuleNode ctx, ABLNodeType parentType, ABLNodeType tail) {
+    JPNode.Builder node = new JPNode.Builder(parentType);
+    JPNode.Builder down = createNode(ctx);
+    node.setDown(down);
+    if (down == null) {
+      node.setDown(new JPNode.Builder(tail));
+    } else {
+      down.getLast().setRight(new JPNode.Builder(tail));
+    }
     return node;
   }
 
-  private void addHolderToNode(JPNode node, JPNodeHolder holder) {
-    for (JPNode n : holder.getNodes()) {
-      node.addChild(n);
-    }
-  }
 }
 

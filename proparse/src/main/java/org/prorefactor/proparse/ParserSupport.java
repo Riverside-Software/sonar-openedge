@@ -343,6 +343,10 @@ public class ParserSupport {
     inDynamicNew = flag;
   }
 
+  public String lookupClassName(String text) {
+    return classFinder.lookup(text);
+  }
+
   public void attrTypeNameLookup(JPNode node) {
     node.attrSet(IConstants.QUALIFIED_CLASS_INT, classFinder.lookup(node.getText()));
   }
