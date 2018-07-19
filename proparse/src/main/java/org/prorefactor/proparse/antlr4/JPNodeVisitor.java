@@ -6,7 +6,6 @@ import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.proparse.ParserSupport;
-import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.proparse.antlr4.JPNode.Builder;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.slf4j.Logger;
@@ -352,16 +351,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitRecord(RecordContext ctx) {
-    JPNode.Builder builder = visitChildren(ctx);
-    builder.changeType(ABLNodeType.RECORD_NAME);
-    String filnName = ctx.filn().getText();
-    FieldType type = support.recordExpression(filnName);
-    if (type != null)
-      builder.setStoreType(support.recordExpression(filnName));
-    else
-      LOGGER.error("Found null field type for " + filnName);
-
-    return builder;
+    return visitChildren(ctx).changeType(ABLNodeType.RECORD_NAME).setStoreType(support.getRecordExpression(ctx));
   }
 
   @Override
@@ -1794,13 +1784,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitMethodstate(MethodstateContext ctx) {
-    support.pushRuleContext(ctx);
     return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
   public JPNode.Builder visitMethod_end(Method_endContext ctx) {
-    support.popRuleContext();
     return createTreeFromFirstNode(ctx);
   }
 
@@ -1946,7 +1934,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitProcedurestate(ProcedurestateContext ctx) {
-    support.pushRuleContext(ctx);
     JPNode.Builder holder = createStatementTreeFromFirstNode(ctx);
     holder.getDown().changeType(ABLNodeType.ID);
     return holder;
@@ -1966,7 +1953,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitProcedure_end(Procedure_endContext ctx) {
-    support.popRuleContext();
     return createTreeFromFirstNode(ctx);
   }
 

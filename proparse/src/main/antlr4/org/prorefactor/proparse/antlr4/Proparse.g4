@@ -891,7 +891,7 @@ recordAsFormItem: // TRANSLATED
 
 record: // TRANSLATED
     // RECORD can be any db table name, work/temp table name, buffer name.
-    { support.recordSemanticPredicate(_input.LT(1), _input.LT(2), _input.LT(3)) }? filn
+    { support.recordSemanticPredicate(_input.LT(1), _input.LT(2), _input.LT(3)) }? f=filn { support.pushRecordExpression(_localctx, $f.text); }
   ;
 
 ////  Names  ////
@@ -2889,7 +2889,7 @@ methodstate locals [ boolean abs = false ]: // TRANSLATED
     function_params
     ( { $abs || support.isInterface() }? PERIOD // An INTERFACE declares without defining, ditto ABSTRACT.
     | LEXCOLON
-      { support.addInnerScope(_localctx); }
+      { support.addInnerScope(); }
       code_block
       method_end
       { support.dropInnerScope(); }
@@ -2931,7 +2931,7 @@ onstate: // TRANSLATED
        OVERRIDE?
        ( REVERT state_end
        | PERSISTENT runstate
-       | { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
+       | { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
        )
     |  // ON event OF database-object
       (
@@ -2947,7 +2947,7 @@ onstate: // TRANSLATED
       OVERRIDE?
       (  REVERT state_end
       |  PERSISTENT runstate
-      |  { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
+      |  { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
       )
     |  // ON key-label keyfunction.
       . . state_end
@@ -2959,7 +2959,7 @@ onstate: // TRANSLATED
       )
       (  REVERT state_end
       |  PERSISTENT RUN filenameorvalue (in_expr)? (onstate_run_params)? state_end
-      |  { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
+      |  { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
       )
     )
   ;
@@ -3073,7 +3073,7 @@ procedurestate: // TRANSLATED
     PROCEDURE
     filename
     procedure_opt? block_colon
-    { support.addInnerScope(_localctx); }
+    { support.addInnerScope(); }
     code_block
     { support.dropInnerScope(); }
     (  EOF

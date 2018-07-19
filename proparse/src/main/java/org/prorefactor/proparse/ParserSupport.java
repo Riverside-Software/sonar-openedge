@@ -12,12 +12,14 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse;
 
-import java.util.Deque;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
@@ -61,9 +63,10 @@ public class ParserSupport {
   private JPNode lastFieldRefNode;
   private JPNode lastFieldIDNode;
 
-  // For JPNodeVisitor
-  private Map<RuleContext, SymbolScope> scopesMap = new HashMap<>();
-  private Deque<RuleContext> ruleContexts = new LinkedList<>();
+  private ParseTreeProperty<FieldType> recordExpressions = new ParseTreeProperty<>();
+
+  // TODO Only for ANTLR4 migration
+  private List<SymbolScope> innerScopes = new ArrayList<>();
 
   public ParserSupport(RefactorSession session, IntegerIndex<String> fileNameList) {
     this.session = session;
@@ -75,14 +78,6 @@ public class ParserSupport {
 
   public String getClassName() {
     return className;
-  }
-
-  public void pushRuleContext(RuleContext ctx) {
-    ruleContexts.push(ctx);
-  }
-
-  public void popRuleContext() {
-    ruleContexts.pop();
   }
 
   /**
@@ -122,11 +117,7 @@ public class ParserSupport {
 
   public void addInnerScope() {
     currentScope = new SymbolScope(session, currentScope);
-  }
-
-  public void addInnerScope(RuleContext ctx) {
-    addInnerScope();
-    scopesMap.put(ctx, currentScope);
+    innerScopes.add(currentScope);
   }
 
   // Functions triggered from proparse.g
@@ -252,12 +243,13 @@ public class ParserSupport {
     return (schemaTablePriority ? isTableSchemaFirst(recname.toLowerCase()) : isTable(recname.toLowerCase())) != null;
   }
 
-  public FieldType recordExpression(String recName) {
-    SymbolScope scope = scopesMap.get(ruleContexts.peek());
-    if (scope == null)
-      scope = unitScope;
-    return (schemaTablePriority ? scope.isTableSchemaFirst(recName.toLowerCase())
-        : scope.isTable(recName.toLowerCase()));
+  public void pushRecordExpression(RuleContext ctx, String recName) {
+    recordExpressions.put(ctx, schemaTablePriority ? currentScope.isTableSchemaFirst(recName.toLowerCase())
+        : currentScope.isTable(recName.toLowerCase()));
+  }
+
+  public FieldType getRecordExpression(RuleContext ctx) {
+    return recordExpressions.get(ctx);
   }
 
   public FieldType isTable(String inName) {
@@ -385,8 +377,18 @@ public class ParserSupport {
       return 3;
     }
 
-    // TODO How to compare standard SymbolScopes ?
-
+    Iterator<SymbolScope> iter1 = innerScopes.iterator();
+    Iterator<SymbolScope> iter2 = innerScopes.iterator();
+    while (iter1.hasNext() && iter2.hasNext()) {
+      if (iter1.next().compareTo(iter2.next()) != 0) {
+        return 5;
+      }
+    }
+    if (iter1.hasNext() || iter2.hasNext()) {
+      System.err.println("Remaining scopes...");
+      return 6;
+    }
+      
     if (!className.equals(other.className)) {
       System.err.println("Classname: " + className + " -- " + other.className);
       return 1;
