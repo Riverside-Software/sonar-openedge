@@ -504,8 +504,6 @@ public class JPNode implements AST {
       return attrMap.get(key);
     }
     switch (key) {
-      case IConstants.NODE_TYPE_KEYWORD:
-        return getNodeType().isKeyword() ? 1 : 0;
       case IConstants.ABBREVIATED:
         return isAbbreviated() ? 1 : 0;
       case IConstants.SOURCENUM:

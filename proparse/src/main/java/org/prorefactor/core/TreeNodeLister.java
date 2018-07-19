@@ -70,11 +70,15 @@ public class TreeNodeLister {
     ofile.write(node.getNodeType() + (node.isStateHead() ? "^ " : " ") + (node.isStateHead() && node.getState2() != 0 ? node.getState2() : ""));
     if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE)
       ofile.write("°");
+    if (node.attrGet(IConstants.STORETYPE) > 0)
+      ofile.write(" StoreType " + node.attrGet(IConstants.STORETYPE));
     if ((node.getNodeType() == ABLNodeType.ID) || (node.getNodeType() == ABLNodeType.TYPE_NAME)) {
       ofile.write("[");
       ofile.write(node.getText().replace('\'', ' ').replace('"', ' '));
       ofile.write("] ");
     }
+    if (!"".equals(node.attrGetS(IConstants.QUALIFIED_CLASS_INT)))
+      ofile.write(" Qualified name: '" + node.attrGetS(IConstants.QUALIFIED_CLASS_INT) + "'");
     ofile.write(String.format("@F%d:%d:%d", node.getFileIndex(), node.getLine(), node.getColumn()));
     ofile.write("\n");
   }
