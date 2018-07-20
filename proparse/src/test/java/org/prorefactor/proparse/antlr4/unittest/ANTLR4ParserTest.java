@@ -37,7 +37,6 @@ import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.TreeNodeLister;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.schema.Schema;
-import org.prorefactor.core.unittest.util.EmptyDatabase;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.ProParser;
