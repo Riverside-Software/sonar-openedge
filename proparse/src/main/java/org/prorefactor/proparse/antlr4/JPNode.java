@@ -1,38 +1,38 @@
 /*******************************************************************************
- * Original work Copyright (c) 2003-2015 John Green
- * Modified work Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    John Green - initial API and implementation and/or initial documentation
- *    Gilles Querret - Almost anything written after 2015
+ *    Gilles Querret
  *******************************************************************************/ 
-package org.prorefactor.core;
+package org.prorefactor.proparse.antlr4;
 
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.AttributeKey;
+import org.prorefactor.core.AttributeValue;
+import org.prorefactor.core.IConstants;
+import org.prorefactor.proparse.SymbolScope.FieldType;
+import org.prorefactor.proparse.antlr4.nodetypes.BlockNode;
+import org.prorefactor.proparse.antlr4.nodetypes.FieldRefNode;
+import org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode;
 import org.prorefactor.treeparser.Call;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 import org.prorefactor.treeparser.symbols.Symbol;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import antlr.Token;
-import antlr.collections.AST;
-import antlr.collections.ASTEnumeration;
-
 /**
- * Implementation of antlr.AST. Most "simple" methods are just copy/pasted from antlr.BaseAST.
+ * ANTLR4 version of JPNode.
  */
 public class JPNode implements AST {
   private ProToken token;
@@ -60,58 +60,15 @@ public class JPNode implements AST {
     }
   }
 
-  public JPNode(ProToken t) {
+
+  protected JPNode(ProToken t) {
     this.token = t;
-    setType(t.getType());
-  }
-
-  /**
-   * Set parent and prevSibling links
-   */
-  protected void backLink() {
-    JPNode currNode = down;
-    while (currNode != null) {
-      currNode.up = this;
-      currNode.backLink();
-      JPNode nextNode = currNode.right;
-      if (nextNode != null)
-        nextNode.left = currNode;
-      currNode = nextNode;
-    }
-  }
-
-  protected void finalizeTrailingHidden() {
-    /*
-     * The node passed in should be the Program_root. The last child of the Program_root should be the Program_tail, as
-     * set by the parser. (See propar.g) We want to find the last descendant of the last child before Program_tail, and
-     * then set up Program_tail with that node's hiddenAfter. Program_tail is the holder node for any trailing hidden
-     * tokens. This function will have to change slightly if we change the layout of hidden tokens.
-     */
-    JPNode tailNode = down;
-    if (tailNode == null || tailNode.getNodeType() == ABLNodeType.PROGRAM_TAIL)
-      return;
-    JPNode lastNode = tailNode;
-    while (tailNode != null && tailNode.getNodeType() != ABLNodeType.PROGRAM_TAIL) {
-      lastNode = tailNode;
-      tailNode = tailNode.getNextSibling();
-    }
-    if (tailNode == null || tailNode.getNodeType() != ABLNodeType.PROGRAM_TAIL)
-      return;
-    lastNode = lastNode.getLastDescendant();
-    ProToken lastT = lastNode.getHiddenAfter();
-    ProToken tempT = lastT;
-    while (tempT != null) {
-      lastT = tempT;
-      tempT = (ProToken) tempT.getHiddenAfter();
-    }
-    tailNode.setHiddenBefore(lastT);
   }
 
   // *************
   // AST interface
   // *************
 
-  @Override
   public void addChild(AST child) {
     if (child == null)
       return;
@@ -141,24 +98,6 @@ public class JPNode implements AST {
     return n;
   }
 
-  @Override
-  public void initialize(int t, String txt) {
-    setType(t);
-    setText(txt);
-  }
-
-  @Override
-  public void initialize(AST t) {
-    setType(t.getType());
-    setText(t.getText());
-  }
-
-  @Override
-  public void initialize(Token t) {
-    this.token = (ProToken) t;
-    setType(t.getType());
-  }
-
 
   @Override
   public JPNode getFirstChild() {
@@ -177,7 +116,7 @@ public class JPNode implements AST {
 
   @Override
   public int getType() {
-    return token.getType();
+    return token.getNodeType().getType();
   }
 
   @Override
@@ -187,77 +126,7 @@ public class JPNode implements AST {
 
   @Override
   public int getColumn() {
-    return token.getColumn();
-  }
-
-  @Override
-  public void setFirstChild(AST c) {
-    down = (JPNode) c;
-  }
-
-  @Override
-  public void setNextSibling(AST n) {
-    right = (JPNode) n;
-  }
-
-  @Override
-  public void setText(String text) {
-    token.setText(text);
-  }
-
-  @Override
-  public void setType(int type) {
-    token.setType(type);
-  }
-
-  public void updateEndPosition(int file, int line, int col) {
-    token = new ProToken(token.getNodeType(), token.getText(), token.getFileIndex(), token.getFilename(),
-        token.getLine(), token.getColumn(), file, line, col, token.getMacroSourceNum(), token.getAnalyzeSuspend(), token.isSynthetic());
-  }
-
-  @Override
-  public boolean equals(AST t) { // NOSONAR
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public String toStringList() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public String toStringTree() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public boolean equalsList(AST t) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public boolean equalsListPartial(AST sub) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public boolean equalsTree(AST t) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public boolean equalsTreePartial(AST sub) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public ASTEnumeration findAll(AST target) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public ASTEnumeration findAllPartial(AST sub) {
-    throw new UnsupportedOperationException();
+    return token.getCharPositionInLine();
   }
 
   // ********************
@@ -284,12 +153,12 @@ public class JPNode implements AST {
   }
 
   public int getEndColumn() {
-    return token.getEndColumn();
+    return token.getEndCharPositionInLine();
   }
 
-  public String getFilename() {
-    return token.getFilename();
-  }
+  /* public String getFilename() {
+    return token.getFileIndex();
+  } */
 
   public int getFileIndex() {
     return token.getFileIndex();
@@ -298,15 +167,6 @@ public class JPNode implements AST {
   public int getEndFileIndex() {
     return token.getEndFileIndex();
   }
-
-  public ProToken getHiddenAfter() {
-    return (ProToken) token.getHiddenAfter();
-  }
-
-  public ProToken getHiddenBefore() {
-    return (ProToken) token.getHiddenBefore();
-  }
-
 
   public String getAnalyzeSuspend() {
     return token.getAnalyzeSuspend();
@@ -332,12 +192,7 @@ public class JPNode implements AST {
    * natural node, then it is returned.
    */
   public JPNode firstNaturalChild() {
-    if (token.isNatural())
-      return this;
-    for (JPNode n = down; n != null; n = n.down) {
-      if (n.token.isNatural())
-        return n;
-    }
+    // TODO
     return null;
   }
 
@@ -620,36 +475,7 @@ public class JPNode implements AST {
   }
 
   public boolean hasProparseDirective(String directive) {
-    ProToken tok = getHiddenBefore();
-    while (tok != null) {
-      if (tok.getNodeType() == ABLNodeType.PROPARSEDIRECTIVE) {
-        String str = tok.getText().trim();
-        if (str.startsWith("prolint-nowarn(") && str.charAt(str.length() - 1) == ')') {
-          for (String rule : Splitter.on(',').omitEmptyStrings().trimResults().split(
-              str.substring(15, str.length() - 1))) {
-            if (rule.equals(directive))
-              return true;
-          }
-        }
-      }
-      tok = (ProToken) tok.getHiddenBefore();
-    }
-    // If token has been generated by the parser (ie synthetic token), then we look for hidden token attached to the
-    // first child
-    if (token.isSynthetic()) {
-      JPNode child = down;
-      if ((child != null) && (child.hasProparseDirective(directive))) {
-        return true;
-      }
-      // And for synthetic ASSIGN statements, we have to look for the first grandchild
-      // See root node of assignstate2
-      if ((child != null) && (token.getNodeType() == ABLNodeType.ASSIGN)) {
-        child = child.getFirstChild();
-        if ((child != null) && child.hasProparseDirective(directive))
-          return true;
-      }
-    }
-
+    // TODO
     return false;
   }
 
@@ -663,26 +489,8 @@ public class JPNode implements AST {
    * @return null if no comments.
    */
   public String getComments() {
-    String ret = (String) getLink(IConstants.COMMENTS);
-    if (ret != null)
-      return ret;
-    StringBuilder buff = new StringBuilder();
-    boolean hasComment = false;
-    int filenum = getFileIndex();
-    for (ProToken t = getHiddenBefore(); t != null; t = (ProToken) t.getHiddenBefore()) {
-      if (t.getFileIndex() != filenum)
-        break;
-      if (t.getNodeType() == ABLNodeType.WS) {
-        if (t.getText().indexOf('\n') > -1)
-          buff.insert(0, '\n');
-      } else if (t.getNodeType() == ABLNodeType.COMMENT) {
-        buff.insert(0, t.getText());
-        hasComment = true;
-      } else {
-        break;
-      }
-    }
-    return hasComment ? buff.toString() : null;
+    // TODO
+    return null;
   }
 
   /**
@@ -695,27 +503,13 @@ public class JPNode implements AST {
   }
 
   public ProToken getHiddenFirst() {
-    // Some day, I'd like to change the structure for the hidden tokens,
-    // so that nodes only store a reference to "first before", and each of those
-    // only store a pointer to "next".
-    ProToken t = getHiddenBefore();
-    if (t != null) {
-      ProToken ttemp = t;
-      while (ttemp != null) {
-        t = ttemp;
-        ttemp = (ProToken) t.getHiddenBefore();
-      }
-    }
-    return t;
+    // TODO
+    return null;
   }
 
   public List<ProToken> getHiddenTokens() {
     LinkedList<ProToken> ret = new LinkedList<>();
-    ProToken tkn = getHiddenBefore();
-    while (tkn != null) {
-      ret.addFirst(tkn);
-      tkn = (ProToken) tkn.getHiddenBefore();
-    }
+    // TODO
     return ret;
   }
 
@@ -780,14 +574,17 @@ public class JPNode implements AST {
    * @return True if token is part of an editable section in AppBuilder managed code
    */
   public boolean isEditableInAB() {
-    return firstNaturalChild().token.isEditableInAB();
+    // TODO
+    return false;
+
   }
 
   /**
    * Is this a natural node (from real source text)? If not, then it is a synthetic node, added just for tree structure.
    */
   public boolean isNatural() {
-    return token.isNatural();
+    // TODO
+    return false;
   }
 
   /** Does this node have the Proparse STATEHEAD attribute? */
@@ -827,32 +624,6 @@ public class JPNode implements AST {
     setLink(IConstants.SYMBOL, symbol);
   }
 
-  public void copyHiddenAfter(JPNode to) {
-    to.setHiddenAfter(getHiddenAfter());
-  }
-
-  public void copyHiddenBefore(JPNode to) {
-    to.setHiddenBefore(getHiddenBefore());
-  }
-
-  public void setHiddenAfter(ProToken t) {
-    token.setHiddenAfter(t);
-  }
-
-  public void setHiddenBefore(ProToken t) {
-    token.setHiddenBefore(t);
-  }
-
-  public void setNextSiblingWithLinks(AST n) {
-    for (AST next = getNextSibling(); next != null; next = next.getNextSibling()) {
-      ((JPNode) next).up = null;
-    }
-    setNextSibling(n);
-    for (AST next = getNextSibling(); next != null; next = next.getNextSibling()) {
-      ((JPNode) next).up = this.up;
-    }
-  }
-
   /**
    * @return Number total number of JPNode objects 
    */
@@ -875,101 +646,12 @@ public class JPNode implements AST {
     return sz;
   }
 
-  /**
-   * Internal use only, should be removed after migration to ANTLR4
-   * @return 0 if identical node objects, &gt; 0 if different
-   */
-  // TEMP-ANTLR4
-  public int compareTo(org.prorefactor.proparse.antlr4.JPNode other, int level) {
-    if ((token.getNodeType() == ABLNodeType.EOF) && (other.getNodeType() == ABLNodeType.EOF_ANTLR4))
-      return 0;
-    if (other == null) {
-      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- No token");
-      // Not available
-      return 1;
-    }
-    if (!token.getText().equals(other.getText()) || (token.getNodeType() != other.getNodeType())) {
-      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- Token: " + this.token + " -- " + other.getText() + " ** " + other.getNodeType());
-      // Different token
-      return 2;
-    }
-
-    // On attributes
-    if (attrMap != null) {
-      for (Map.Entry<Integer,Integer> entry : attrMap.entrySet()) {
-        if (!entry.getValue().equals(other.attrGet(entry.getKey()))) {
-          System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- AttrMap[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGet(entry.getKey()));
-          return 7;
-        }
-      }
-    }
-    if (attrMapStrings != null) {
-      for (Map.Entry<String, String> entry : attrMapStrings.entrySet()) {
-        if (!entry.getValue().equals(other.attrGetS(entry.getKey()))) {
-          System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- AttrMapStrings[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGetS(entry.getKey()));
-          return 8;
-        }
-      }
-    }
-    if (stringAttributes != null) {
-      for (Map.Entry<Integer, String> entry : stringAttributes.entrySet()) {
-        if (!entry.getValue().equals(other.attrGetS(entry.getKey()))) {
-          System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- StringAttributes[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGetS(entry.getKey()));
-          return 9;
-        }
-      }
-    }
-
-    // Difference on 'down' node
-    if ((down == null) && (other.getFirstChild() != null)) {
-      System.err.println(CharBuffer.allocate(level+1).toString().replace('\0', ' ') + " -- No down: " + this);
-      return 3;
-    } else if ((down != null) && (down.compareTo(other.getFirstChild(), level + 1) != 0)) {
-      System.err.println(CharBuffer.allocate(level+1).toString().replace('\0', ' ') + " -- Down:  " + this.down + " -- " + other.getFirstChild());
-      return 4;
-    }
-
-    // Difference on 'right' node
-    if ((right == null) && (other.getNextSibling() != null)) {
-      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- No right: " + this);
-      return 5;
-    } else if ((right != null) && (right.compareTo(other.getNextSibling(), level) != 0)) {
-      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- Right: " + this.right + " -- " + other.getNextSibling());
-      return 6;
-    }
-
-    // Top and left don't have to be compared as they are computed after the parse phase
-    // Attributes are not yet compared
-
-    return 0;
-  }
-
   @Override
   public String toString() {
     StringBuilder buff = new StringBuilder();
     buff.append(token.getNodeType()).append(" \"").append(getText()).append("\" F").append(
         getFileIndex()).append('/').append(getLine()).append(':').append(getColumn());
     return buff.toString();
-  }
-
-  /**
-   * Get the full, preprocessed text from a node. When run on top node, the result is very comparable to
-   * COMPILE..PREPROCESS. This is the same as the old C++ Proparse API writeNode(). Also see org.joanju.proparse.Iwdiff.
-   */
-  public String toStringFulltext() {
-    ICallback<List<JPNode>> callback = new FlatListBuilder();
-    walk(callback);
-    List<JPNode> list = callback.getResult();
-    StringBuilder bldr = new StringBuilder();
-    for (JPNode node : list) {
-      for (ProToken t = node.getHiddenFirst(); t != null; t = t.getNext()) {
-        if ((t.getNodeType() == ABLNodeType.COMMENT) || (t.getNodeType() == ABLNodeType.WS))
-          bldr.append(t.getText());
-      }
-      bldr.append(node.getText());
-    }
-
-    return bldr.toString();
   }
 
   /**
@@ -985,14 +667,141 @@ public class JPNode implements AST {
   }
 
   public String allLeadingHiddenText() {
-    String ret = "";
-    ProToken t = getHiddenFirst();
-    while (t != null) {
-      ret += t.getText();
-      t = (ProToken) t.getHiddenAfter();
-    }
-    return ret;
+    // TODO
+    return null;
   }
 
+  public static class Builder {
+    private ProToken tok;
+    private Builder right;
+    private Builder down;
+    private boolean stmt;
+    private ABLNodeType stmt2;
+    private boolean operator;
+    private FieldType tabletype;
+    private String className;
+
+    public Builder(ProToken tok) {
+      this.tok = tok;
+    }
+
+    public Builder(ABLNodeType type) {
+      this(type, "");
+    }
+
+    public Builder(ABLNodeType type, String text) {
+      this(new ProToken(type, text));
+    }
+
+    public Builder setRight(Builder right) {
+      this.right = right;
+      return this;
+    }
+
+    public Builder setDown(Builder down) {
+      this.down = down;
+      return this;
+    }
+
+    public Builder getDown() {
+      return down;
+    }
+
+    public Builder getRight() {
+      return right;
+    }
+
+    public Builder changeType(ABLNodeType type) {
+      this.tok.setNodeType(type);
+      return this;
+    }
+
+    public Builder getLast() {
+      if (right == null)
+        return this;
+      return right.getLast();
+    }
+
+    public Builder setStatement() {
+      this.stmt = true;
+      return this;
+    }
+
+    public Builder setStatement(ABLNodeType stmt2) {
+      this.stmt = true;
+      this.stmt2 = stmt2;
+      return this;
+    }
+
+    public Builder setOperator() {
+      this.operator = true;
+      return this;
+    }
+
+    public Builder setStoreType(FieldType tabletype) {
+      this.tabletype = tabletype;
+      return this;
+    }
+
+    public Builder setClassname(String name) {
+      this.className = name;
+      return this;
+    }
+
+    public ABLNodeType getNodeType() {
+      return tok.getNodeType();
+    }
+
+    public JPNode build() {
+      JPNode node;
+      switch (tok.getNodeType()) {
+        case FIELD_REF:
+          node = new FieldRefNode(tok);
+          break;
+        case PROGRAM_ROOT:
+          node = new ProgramRootNode(tok);
+          break;
+
+        case PROPERTY_GETTER:
+        case PROPERTY_SETTER:
+          node = new BlockNode(tok);
+          break;
+        default:
+          node = new JPNode(tok);
+          break;
+      }
+      if (className != null)
+        node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
+      if (stmt)
+        node.setStatementHead(stmt2 == null ? 0 : stmt2.getType());
+      if (operator)
+        node.setOperator();
+      if (tabletype != null) {
+        switch (tabletype) {
+          case DBTABLE:
+            node.attrSet(IConstants.STORETYPE, IConstants.ST_DBTABLE);
+            break;
+          case TTABLE:
+            node.attrSet(IConstants.STORETYPE, IConstants.ST_TTABLE);
+            break;
+          case WTABLE:
+            node.attrSet(IConstants.STORETYPE, IConstants.ST_WTABLE);
+            break;
+          case VARIABLE:
+            // Never happens
+            break;
+        }
+      }
+      if (down != null) {
+        node.down = down.build();
+        node.down.up = node;
+      }
+      if (right != null) {
+        node.right = right.build();
+        node.right.left = node;
+      }
+      return node;
+    }
+  }
 
 }

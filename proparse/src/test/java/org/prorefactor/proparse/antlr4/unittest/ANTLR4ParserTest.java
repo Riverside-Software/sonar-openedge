@@ -10,21 +10,43 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse.antlr4.unittest;
 
+import static org.testng.Assert.assertEquals;
+
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringBufferInputStream;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 
+import org.antlr.v4.runtime.BufferedTokenStream;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.atn.ParseInfo;
 import org.antlr.v4.runtime.misc.Utils;
 import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.Tree;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProparseRuntimeException;
+import org.prorefactor.core.TreeNodeLister;
+import org.prorefactor.core.nodetypes.ProgramRootNode;
+import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.proparse.ParserSupport;
+import org.prorefactor.proparse.ProParser;
+import org.prorefactor.proparse.antlr4.DescriptiveErrorListener;
+import org.prorefactor.proparse.antlr4.JPNode;
+import org.prorefactor.proparse.antlr4.JPNodeVisitor;
+import org.prorefactor.proparse.antlr4.ProgressLexer;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.refactor.settings.ProparseSettings;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
@@ -40,7 +62,7 @@ import antlr.ANTLRException;
  * change, so no other tests should be added other than the expectation that they parse clean.
  */
 public class ANTLR4ParserTest {
-  private final static String SRC_DIR = "src/test/resources/data/bugsfixed";
+  private final static String SRC_DIR = "src/test/resources";
   private final static String TEMP_DIR = "target/nodes-lister/data/bugsfixed";
 
   private RefactorSession session;
@@ -55,216 +77,300 @@ public class ANTLR4ParserTest {
     tempDir.mkdirs();
   }
 
-  @Test(enabled=false)
+  static {
+    long start = System.currentTimeMillis();
+    System.out.println("Loading class Proparse - " + Proparse._ATN.getNumberOfDecisions() + " decisions in ATN");
+    System.out.println("  ==> " + (System.currentTimeMillis() - start) + " ms");
+    start = System.currentTimeMillis();
+
+    // Sample schema
+    RefactorSession session = new RefactorSession(new ProparseSettings(""), new Schema());
+    String sampleClass = "class SampleClass inherits Progress.Lang.Object: method public void foo(): end method. end class.";
+    ProgressLexer lexer = new ProgressLexer(session, new StringBufferInputStream(sampleClass), "SampleClass.cls", false);
+    lexer.setMergeNameDotInId(true);
+    Proparse parser = new Proparse(new CommonTokenStream(lexer));
+    parser.initAntlr4(session, lexer.getFilenameList());
+    ParseTree tree = parser.program();
+    System.out.println("Sample class parsed - " + tree.getChildCount() + " children");
+    System.out.println("  ==> " + (System.currentTimeMillis() - start) + " ms");
+
+  }
+  
+  @Test(enabled=true)
   public void test00() throws Exception {
     // Only in order to initialize Proparse class
     try {
-      ParseUnit unit = new ParseUnit(new File(SRC_DIR, "bug01.p"), session);
+      ParseUnit unit = new ParseUnit(new File(SRC_DIR, "data/bugsfixed/bug01.p"), session);
       unit.lex4().nextToken();
     } catch (Throwable uncaught) {
       
     }
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
+  public void testOpenEdgeClasses() throws Exception {
+    Files.walk(new File("src/test/resources/OpenEdge").toPath()).filter(
+        p -> p.toFile().isFile() && p.getFileName().toString().endsWith(".cls")).map(
+            p -> new File("src\\test\\resources").toPath().relativize(p)).forEach(path -> genericTest(path.toString()));
+  }
+
+  @Test(enabled=true)
+  public void testRiversideClasses() throws Exception {
+    Files.walk(new File("src/test/resources/rssw").toPath()).filter(
+        p -> p.toFile().isFile() && p.getFileName().toString().endsWith(".cls")).map(
+            p -> new File("src\\test\\resources").toPath().relativize(p)).forEach(path -> genericTest(path.toString()));
+  }
+
+  @Test(enabled=true)
   public void test01() throws Exception {
-    genericTest("bug01.p");
+    genericTest("data/bugsfixed/bug01.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test02() throws Exception {
-    genericTest("bug02.p");
+    genericTest("data/bugsfixed/bug02.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test03() throws Exception {
-    genericTest("bug03.p");
+    genericTest("data/bugsfixed/bug03.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test04() throws Exception {
-    genericTest("bug04.p");
+    genericTest("data/bugsfixed/bug04.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test05() throws Exception {
-    genericTest("bug05.p");
+    genericTest("data/bugsfixed/bug05.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test06() throws Exception {
-    genericTest("bug06.p");
+    genericTest("data/bugsfixed/bug06.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test07() throws Exception {
-    genericTest("interface07.cls");
+    genericTest("data/bugsfixed/interface07.cls");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test08() throws Exception {
-    genericTest("bug08.cls");
+    genericTest("data/bugsfixed/bug08.cls");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test09() throws Exception {
-    genericTest("bug09.p");
+    genericTest("data/bugsfixed/bug09.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test10() throws Exception {
-    genericTest("bug10.p");
+    genericTest("data/bugsfixed/bug10.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test11() throws Exception {
-    genericTest("bug11.p");
+    genericTest("data/bugsfixed/bug11.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test12() throws Exception {
-    genericTest("bug12.p");
+    genericTest("data/bugsfixed/bug12.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test13() throws Exception {
-    genericTest("bug13.p");
+    genericTest("data/bugsfixed/bug13.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test14() throws Exception {
-    genericTest("bug14.p");
+    genericTest("data/bugsfixed/bug14.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test15() throws Exception {
-    genericTest("bug15.p");
+    genericTest("data/bugsfixed/bug15.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test16() throws Exception {
-    genericTest("bug16.p");
+    genericTest("data/bugsfixed/bug16.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test17() throws Exception {
-    genericTest("bug17.p");
+    genericTest("data/bugsfixed/bug17.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test18() throws Exception {
-    genericTest("bug18.p");
+    genericTest("data/bugsfixed/bug18.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test19() throws Exception {
-    genericTest("bug19.p");
+    genericTest("data/bugsfixed/bug19.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test20() throws Exception {
-    genericTest("bug20.p");
+    genericTest("data/bugsfixed/bug20.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test21() throws Exception {
-    genericTest("bug21.cls");
+    genericTest("data/bugsfixed/bug21.cls");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test22() throws Exception {
-    genericTest("bug22.cls");
+    genericTest("data/bugsfixed/bug22.cls");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test23() throws Exception {
-    genericTest("bug23.cls");
+    genericTest("data/bugsfixed/bug23.cls");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test24() throws Exception {
-    genericTest("bug24.p");
+    genericTest("data/bugsfixed/bug24.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test25() throws Exception {
-    genericTest("bug25.p");
+    genericTest("data/bugsfixed/bug25.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test26() throws Exception {
-    genericTest("bug26.cls");
+    genericTest("data/bugsfixed/bug26.cls");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test27() throws Exception {
-    genericTest("bug27.cls");
+    genericTest("data/bugsfixed/bug27.cls");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test28() throws Exception {
-    genericTest("bug28.cls");
+    genericTest("data/bugsfixed/bug28.cls");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test29() throws Exception {
-    genericTest("bug29.p");
+    genericTest("data/bugsfixed/bug29.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test30() throws Exception {
-    genericTest("bug30.p");
+    genericTest("data/bugsfixed/bug30.p");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test31() throws Exception {
-    genericTest("bug31.cls");
+    genericTest("data/bugsfixed/bug31.cls");
   }
 
-  @Test(enabled=false)
-  public void test32() throws Exception {
-    genericTest("bug32.p");
-  }
-
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void test33() throws Exception {
-    genericTest("bug33.cls");
+    genericTest("data/bugsfixed/bug33.cls");
   }
 
   // Next two tests : same exception should be thrown in both cases
   @Test(enabled=false, expectedExceptions = {ProparseRuntimeException.class})
   public void testCache1() throws Exception {
-    genericTest("CacheChild.cls");
+    genericTest("data/bugsfixed/CacheChild.cls");
   }
 
   @Test(enabled=false, expectedExceptions = {ProparseRuntimeException.class})
   public void testCache2() throws Exception {
-    genericTest("CacheChild.cls");
+    genericTest("data/bugsfixed/CacheChild.cls");
   }
 
-  @Test(enabled=false)
+  @Test(enabled=true)
   public void testSaxWriter() throws Exception {
-    genericTest("sax-writer.p");
+    genericTest("data/bugsfixed/sax-writer.p");
   }
 
-  private void genericTest(String fileName) throws ANTLRException, IOException {
-//    executeTokenizerTest(new File(SRC_DIR, fileName));
-    executeAntlr2Test(new File(SRC_DIR, fileName));
+  private void genericTest(String fileName) /* throws ANTLRException, IOException */ {
+    File file = new File(SRC_DIR, fileName);
+    System.out.println("Generic test: " + fileName);
+
+    try {
+      ProgressLexer lexer = new ProgressLexer(session, new FileInputStream(file), file.getAbsolutePath(), false);
+      lexer.setMergeNameDotInId(true);
+      
+      // lexer.addTypeNameTokenFilter();
+      Proparse parser = new Proparse(new CommonTokenStream(lexer));
+      parser.initAntlr4(session, lexer.getFilenameList());
+      parser.setProfile(true);
+      parser.removeErrorListeners();
+      parser.addErrorListener(new DescriptiveErrorListener());
+      // parser.setTrace(true);
+      // parser.addErrorListener(new DiagnosticErrorListener(false));
+      ParseTree tree = parser.program();
+      JPNode root4 = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream()).visit(
+          tree).build();
+      displayParseInfo(parser.getParseInfo());
+      displayRootNode4(root4, parser.getParserSupport(), "target/antlr4.txt");
+
+      ProgressLexer lexer2 = new ProgressLexer(session, new FileInputStream(file), file.getAbsolutePath(), false);
+      ProParser parser2 = new ProParser(lexer2.getANTLR2TokenStream(true));
+      parser2.initAntlr4(session, lexer2.getFilenameList());
+      parser2.program();
+      ProgramRootNode root2 = (ProgramRootNode) parser2.getAST();
+      root2.backLinkAndFinalize();
+      lexer2.parseComplete();
+      displayRootNode(root2, parser2.support, "target/antlr2.txt");
+
+      assertEquals(root2.compareTo(root4, 0), 0);
+      assertEquals(parser2.support.compareTo(parser.getParserSupport()), 0);
+    } catch (ANTLRException | IOException uncaught) {
+      System.err.println(uncaught);
+    }
   }
 
   @SuppressWarnings("unused")
-  private void executeTokenizerTest(File file) throws ANTLRException, IOException {
-    // ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
-    // Proparse parser = new Proparse(new CommonTokenStream(dp));
-    // ParseTree tree = parser.program();
-    // Assert.assertNotNull(tree);
+  private void displayParseInfo(ParseInfo info) {
+    System.out.println("Rules longer than 100ms");
+    Arrays.stream(info.getDecisionInfo()).filter(decision -> decision.timeInPrediction > 100000000).sorted(
+        (d1, d2) -> Long.compare(d2.timeInPrediction, d1.timeInPrediction)).forEach(
+            decision -> System.out.println(
+                String.format("Time: %d in %d calls - LL_Lookaheads: %d Max k: %d Ambiguities: %d Errors: %d Rule: %s",
+                    decision.timeInPrediction / 1000000, decision.invocations, decision.SLL_TotalLook,
+                    decision.SLL_MaxLook, decision.ambiguities.size(), decision.errors.size(),
+                    Proparse.ruleNames[Proparse._ATN.getDecisionState(decision.decision).ruleIndex])));
+
+    System.out.println("Rules with max-k greater than 50");
+    Arrays.stream(info.getDecisionInfo()).filter(decision -> decision.SLL_MaxLook > 50).sorted(
+        (d1, d2) -> Long.compare(d2.SLL_MaxLook, d1.SLL_MaxLook)).forEach(
+            decision -> System.out.println(
+                String.format("Time: %d in %d calls - LL_Lookaheads: %d Max k: %d Ambiguities: %d Errors: %d Rule: %s",
+                    decision.timeInPrediction / 1000000, decision.invocations, decision.SLL_TotalLook,
+                    decision.SLL_MaxLook, decision.ambiguities.size(), decision.errors.size(),
+                    Proparse.ruleNames[Proparse._ATN.getDecisionState(decision.decision).ruleIndex])));
   }
 
-  private void executeAntlr2Test(File file) throws ANTLRException, IOException {
-    // ProgressLexer dp = new ProgressLexer(session, file.getAbsolutePath());
-    // ProParser parser = new ProParser(dp.getANTLR2TokenStream(true));
-    // parser.initAntlr4(session, dp.getFilenameList());
-    // parser.program();
+  @SuppressWarnings("unused")
+  private void displayRootNode(ProgramRootNode rootNode, ParserSupport support, String s) {
+    try (FileWriter writer = new FileWriter(s)) {
+      new TreeNodeLister(rootNode, support, writer, ABLNodeType.INVALID_NODE).print();
+    } catch (IOException uncaught) {
+      
+    }
+  }
+
+  private void displayRootNode4(JPNode rootNode, ParserSupport support, String s) {
+    try (FileWriter writer = new FileWriter(s)) {
+      new org.prorefactor.proparse.antlr4.TreeNodeLister(rootNode, support, writer, ABLNodeType.INVALID_NODE).print();
+    } catch (IOException uncaught) {
+      
+    }
   }
 
   /** Print out a whole tree in LISP form. {@link #getNodeText} is used on the

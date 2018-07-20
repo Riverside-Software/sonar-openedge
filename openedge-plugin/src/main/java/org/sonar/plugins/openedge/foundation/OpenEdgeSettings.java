@@ -461,6 +461,14 @@ public class OpenEdgeSettings {
     return config.getBoolean(Constants.XREF_FILTER).orElse(false);
   }
 
+  public boolean useANTLR4() {
+    return config.getBoolean(Constants.ANTLR4_TEST).orElse(false);
+  }
+
+  public boolean useANTLR4Profiler() {
+    return config.getBoolean(Constants.ANTLR4_PROFILER).orElse(false);
+  }
+
   /**
    * @return False only if property is present and set to false
    */

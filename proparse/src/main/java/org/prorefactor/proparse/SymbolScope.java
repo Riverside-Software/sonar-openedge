@@ -12,6 +12,8 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -155,6 +157,33 @@ public class SymbolScope {
    */
   int isMethodOrFunction(String name) {
     return superScope.isMethodOrFunction(name);
+  }
+
+  // TEMP-ANTLR4
+  public int compareTo(SymbolScope other) {
+    if (!String.join(",", varSet).equals(String.join(",", other.varSet))) {
+      System.err.println("Variables: " + String.join(",", varSet) + " *** " + String.join(",", other.varSet));
+      return 1;
+    }
+
+    return 0;
+  }
+
+  // TEMP-ANTLR4
+  public void writeScope(Writer writer) throws IOException {
+    writer.write("** SymbolScope ** \n");
+    varSet.stream().sorted().forEach(e -> {
+      try {
+        writer.write("Variable " + e + "\n");
+      } catch (IOException uncaught) {
+      }
+    });
+    tableMap.entrySet().stream().sorted((e1, e2) -> e1.getKey().compareTo(e2.getKey())).forEach(e -> {
+      try {
+        writer.write("Table " + e.getKey() + ": " + e.getValue().fullName + "\n");
+      } catch (IOException uncaught) {
+      }
+    });
   }
 
   // Field and table types

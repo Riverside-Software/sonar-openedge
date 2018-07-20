@@ -56,11 +56,7 @@ public class IConstants {
   //
 
   /** See Proparse documentation, "Node Attributes Reference". */
-  public static final int NODE_TYPE_KEYWORD = 1600;
-  /** See Proparse documentation, "Node Attributes Reference". */
   public static final int ABBREVIATED = 1700;
-  /** See Proparse documentation, "Node Attributes Reference". */
-  public static final int FULLTEXT = 1800;
   /** See Proparse documentation, "Node Attributes Reference". */
   public static final int INLINE_VAR_DEF = 2000;
 

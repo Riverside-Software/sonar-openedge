@@ -41,8 +41,9 @@ public class Lexer  {
   private int currStringType;
   private StringBuilder currText = new StringBuilder();
 
-  private ProgressLexer prepro;
+  private final ProgressLexer prepro;
 
+  private boolean mergeNameDotInId = false;
   private boolean gettingAmpIfDefArg = false;
   private boolean preserve = false;
   private int preserveFile;
@@ -802,6 +803,13 @@ public class Lexer  {
           if (ttype == ABLNodeType.ID)
             ttype = ABLNodeType.FILENAME;
           break;
+        case '.':
+          if (mergeNameDotInId && prepro.isNameDot()) {
+            append();
+            getChar();
+            break;
+          } else
+            break for_loop;
         default:
           if (currInt >= 128 && currInt <= 255) {
             append();
@@ -1135,6 +1143,14 @@ public class Lexer  {
 
   public ProgressLexer getPreprocessor() {
     return prepro;
+  }
+
+  /**
+   * Only for ANTLR4, don't produce NAMEDOT tokens but merge them in ID tokens
+   */
+  // TEMP-ANTLR4
+  public void setMergeNameDotInId(boolean merge) {
+    this.mergeNameDotInId = merge;
   }
 
 }

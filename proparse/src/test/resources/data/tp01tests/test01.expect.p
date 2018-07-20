@@ -9,10 +9,10 @@ DEF WORK-TABLE  /* 0:wt1 */ wt1 FIELD  /* 0:wt1.f1 */ f1 AS INT.
 FIND FIRST  /* 0:sports2000.Customer */ customer NO-ERROR.
 FIND FIRST  /* 0:sports2000.Customer abbrev */ cust NO-ERROR.
 DISPLAY /* 0:sports2000.Customer.Address unqualfield */  address /* 0:sports2000.Customer.Balance abbrev unqualfield */  bal.
-DISPLAY /* 0:sports2000.Customer.Discount */  customer.discount.
-DISPLAY /* 0:sports2000.Customer.Discount abbrev */  customer.disc.
-DISPLAY /* 0:sports2000.Customer.Discount abbrev */  cust.discount.
-DISPLAY /* 0:sports2000.Customer.Comments abbrev */  sports2000.cust.comm.
+DISPLAY /* 0:sports2000.Customer.Discount */ customer.discount.
+DISPLAY /* 0:sports2000.Customer.Discount abbrev */ customer.disc.
+DISPLAY /* 0:sports2000.Customer.Discount abbrev */ cust.discount.
+DISPLAY /* 0:sports2000.Customer.Comments abbrev */ sports2000.cust.comm.
 
 DEF VAR  /* 0:outer1 */ outer1 AS INT.
 
@@ -27,7 +27,7 @@ DEF VAR  /* 0:outer1 */ outer1 AS INT.
   FIND FIRST  /* 0:wt1 */ wt1 NO-ERROR.
   FIND FIRST  /* 1:b_tt1 */ b_tt1 NO-ERROR.
   FIND FIRST  /* 1:sports2000.b_cust */ b_cust NO-ERROR.
-  DISPLAY /* 1:sports2000.b_cust.Comments abbrev */  b_cust.comm.
+  DISPLAY /* 1:sports2000.b_cust.Comments abbrev */ b_cust.comm.
 END.
 
 DEF VAR  /* 0:outer2 */ outer2 AS INT.
@@ -72,7 +72,7 @@ def temp-table  /* 0:tt12a */ tt12a
   field  /* 0:tt12a.f1 */ f1 as char.
 def temp-table  /* 0:tt12 */ tt12 no-undo like  /* 0:tt12a */ tt12a.
 find first  /* 0:tt12 */ tt12.
-display /* 0:tt12.f1 */  tt12.f1.
+display /* 0:tt12.f1 */ tt12.f1.
 
 
 /* Make sure MESSAGE..UPDATE..AS works.
@@ -91,11 +91,11 @@ display /* 0:state */  state.
  */
 define buffer  /* 0:sports2000.bs */ bs for  /* 0:sports2000.State */ state.
 find first  /* 0:sports2000.bs */ bs.
-display /* 0:sports2000.bs.State */  bs.state.
+display /* 0:sports2000.bs.State */ bs.state.
 
 
 /* There used to be a problem with references like this... */
 DEFINE TEMP-TABLE  /* 0:state */ state NO-UNDO LIKE  /* 0:sports2000.State */ state
-       Field  /* 0:state.oldstate */ oldstate like /* 0:state.State */  state.state.
+       Field  /* 0:state.oldstate */ oldstate like /* 0:state.State */ state.state.
 
 

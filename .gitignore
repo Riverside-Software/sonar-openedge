@@ -4,3 +4,6 @@
 **/dependency-reduced-pom.xml
 **/target
 **/test-output
+proparse/src/test/resources/OpenEdge
+proparse/src/test/resources/rssw
+
