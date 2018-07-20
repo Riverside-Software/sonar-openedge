@@ -73,7 +73,7 @@ public class TreeNodeLister {
     if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE)
       ofile.write("°");
     if (node.attrGet(IConstants.STORETYPE) > 0)
-      ofile.write(" StoreType " + node.attrGet(IConstants.STORETYPE));
+      ofile.write("StoreType " + node.attrGet(IConstants.STORETYPE) + " ");
     if ((node.getNodeType() == ABLNodeType.ID) || (node.getNodeType() == ABLNodeType.TYPE_NAME)) {
       ofile.write("[");
       ofile.write(node.getText().replace('\'', ' ').replace('"', ' '));

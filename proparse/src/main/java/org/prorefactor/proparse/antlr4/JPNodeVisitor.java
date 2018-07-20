@@ -395,7 +395,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public Builder visitType_name2(Type_name2Context ctx) {
-    return visitChildren(ctx).changeType(ABLNodeType.TYPE_NAME).setClassname(ctx.getText());
+    return visitChildren(ctx).changeType(ABLNodeType.TYPE_NAME);
   }
 
   // **********

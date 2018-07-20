@@ -70,8 +70,9 @@ public class TreeNodeLister {
     ofile.write(node.getNodeType() + (node.isStateHead() ? "^ " : " ") + (node.isStateHead() && node.getState2() != 0 ? node.getState2() : ""));
     if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE)
       ofile.write("°");
-    if (node.attrGet(IConstants.STORETYPE) > 0)
-      ofile.write(" StoreType " + node.attrGet(IConstants.STORETYPE));
+    // TODO Temporary workaround - Don't display StoreType for FIELD_REF is TreeParser converted to ANTLR4
+    if ((node.getNodeType() != ABLNodeType.FIELD_REF) && (node.attrGet(IConstants.STORETYPE) > 0))
+      ofile.write("StoreType " + node.attrGet(IConstants.STORETYPE) + " ");
     if ((node.getNodeType() == ABLNodeType.ID) || (node.getNodeType() == ABLNodeType.TYPE_NAME)) {
       ofile.write("[");
       ofile.write(node.getText().replace('\'', ' ').replace('"', ' '));
