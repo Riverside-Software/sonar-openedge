@@ -159,6 +159,7 @@ public class SymbolScope {
     return superScope.isMethodOrFunction(name);
   }
 
+  // TEMP-ANTLR4
   public int compareTo(SymbolScope other) {
     if (!String.join(",", varSet).equals(String.join(",", other.varSet))) {
       System.err.println("Variables: " + String.join(",", varSet) + " *** " + String.join(",", other.varSet));

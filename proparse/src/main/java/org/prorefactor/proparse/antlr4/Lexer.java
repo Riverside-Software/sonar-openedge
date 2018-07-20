@@ -1148,6 +1148,7 @@ public class Lexer  {
   /**
    * Only for ANTLR4, don't produce NAMEDOT tokens but merge them in ID tokens
    */
+  // TEMP-ANTLR4
   public void setMergeNameDotInId(boolean merge) {
     this.mergeNameDotInId = merge;
   }

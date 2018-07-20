@@ -1,6 +1,5 @@
 /*
- * Original work Copyright (c) 2003-2015 John Green
- * Modified work Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +10,7 @@
  *    Gilles Querret - Almost anything written after 2015
  */
 
-// Annotations: TRANSLATED, SEMITRANSLATED, TOBETRANSLATED
+// Annotations: TRANSLATED, SEMITRANSLATED
 
 parser grammar Proparse;
 
@@ -3189,7 +3188,7 @@ radiosetphrase: // TRANSLATED
     RADIOSET radioset_opt*
   ;
 
-radioset_opt: // TOBETRANSLATED
+radioset_opt:
     HORIZONTAL EXPAND?
   | VERTICAL
   | sizephrase

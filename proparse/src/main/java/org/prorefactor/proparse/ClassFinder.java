@@ -123,6 +123,7 @@ public class ClassFinder {
     return "";
   }
 
+  // TEMP-ANTLR4
   public int compareTo(ClassFinder other) {
     if (!String.join(",", paths).equals(String.join(",", other.paths))) {
       System.err.println("ClassFinder paths: " + String.join(",", paths) + " *** " + String.join(",", other.paths));

@@ -1,13 +1,12 @@
 /*******************************************************************************
- * Modified work Copyright (c) 2018 Riverside Software
+ * Copyright (c) 2018 Riverside Software
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    John Green - initial API and implementation and/or initial documentation
- *    Gilles Querret - Almost anything written after 2015
+ *    Gilles Querret
  *******************************************************************************/ 
 package org.prorefactor.proparse.antlr4;
 
@@ -61,112 +60,8 @@ public class JPNode implements AST {
     }
   }
 
-  public static class Builder {
-    private ProToken tok;
-    private Builder right;
-    private Builder down;
-    private boolean stmt;
-    private ABLNodeType stmt2;
-    private boolean operator;
-    private FieldType tabletype;
-    private String className;
-    public Builder(ProToken tok) {
-      this.tok = tok;
-    }
-    public Builder (ABLNodeType type) {
-      this(type, "");
-    }
-    public Builder (ABLNodeType type, String text) {
-      this(new ProToken(type, text));
-    }
-    public Builder setRight(Builder right) {
-      this.right = right;
-      return this;
-    }
-    public Builder setDown(Builder down) {
-      this.down = down;
-      return this;
-    }
-    public Builder getDown() { return down; }
-    public Builder getRight() { return right; }
-    public Builder changeType(ABLNodeType type) {
-      this.tok.setNodeType(type);
-      return this;
-    }
-    public Builder getLast() {
-      if (right == null) return this;
-      return right.getLast();
-    }
-    public Builder setStatement() {
-      this.stmt = true;
-      return this;
-    }
-    public Builder setStatement(ABLNodeType stmt2) {
-      this.stmt = true;
-      this.stmt2 = stmt2;
-      return this;
-    }
-    public Builder setOperator() {
-      this.operator = true;
-      return this;
-    }
-    public Builder setStoreType(FieldType tabletype) {
-      this.tabletype = tabletype;
-      return this;
-    }
-    public Builder setClassname(String name) { this.className = name ; return this; }
-    public ABLNodeType getNodeType() {
-      return tok.getNodeType();
-    }
-    public JPNode build() {
-      JPNode node;
-      switch (tok.getNodeType()) {
-        case FIELD_REF:
-          node =  new FieldRefNode(tok);
-          break;
-        case PROGRAM_ROOT:
-          node =  new ProgramRootNode(tok);
-          break;
-        
-        case PROPERTY_GETTER:
-        case PROPERTY_SETTER:
-          node =  new BlockNode(tok);
-          break;
-        default:
-          node =  new JPNode(tok);
-          break;
-      }
-      if (className != null) node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
-      if (stmt) node.setStatementHead(stmt2 == null ? 0 : stmt2.getType());
-      if (operator) node.setOperator();
-      if (tabletype != null) {
-      switch (tabletype) {
-        case DBTABLE:
-          node.attrSet(IConstants.STORETYPE, IConstants.ST_DBTABLE);
-          break;
-        case TTABLE:
-          node.attrSet(IConstants.STORETYPE, IConstants.ST_TTABLE);
-          break;
-        case WTABLE:
-          node.attrSet(IConstants.STORETYPE, IConstants.ST_WTABLE);
-          break;
-        case VARIABLE:
-          // Never happens
-          break;
-      }}
-      if (down != null) {
-        node.down = down.build();
-        node.down.up = node;
-      }
-      if (right != null) {
-        node.right = right.build();
-        node.right.left = node;
-      }
-      return node;
-    }
-  } 
 
-  public JPNode(ProToken t) {
+  protected JPNode(ProToken t) {
     this.token = t;
   }
 
@@ -776,5 +671,137 @@ public class JPNode implements AST {
     return null;
   }
 
+  public static class Builder {
+    private ProToken tok;
+    private Builder right;
+    private Builder down;
+    private boolean stmt;
+    private ABLNodeType stmt2;
+    private boolean operator;
+    private FieldType tabletype;
+    private String className;
+
+    public Builder(ProToken tok) {
+      this.tok = tok;
+    }
+
+    public Builder(ABLNodeType type) {
+      this(type, "");
+    }
+
+    public Builder(ABLNodeType type, String text) {
+      this(new ProToken(type, text));
+    }
+
+    public Builder setRight(Builder right) {
+      this.right = right;
+      return this;
+    }
+
+    public Builder setDown(Builder down) {
+      this.down = down;
+      return this;
+    }
+
+    public Builder getDown() {
+      return down;
+    }
+
+    public Builder getRight() {
+      return right;
+    }
+
+    public Builder changeType(ABLNodeType type) {
+      this.tok.setNodeType(type);
+      return this;
+    }
+
+    public Builder getLast() {
+      if (right == null)
+        return this;
+      return right.getLast();
+    }
+
+    public Builder setStatement() {
+      this.stmt = true;
+      return this;
+    }
+
+    public Builder setStatement(ABLNodeType stmt2) {
+      this.stmt = true;
+      this.stmt2 = stmt2;
+      return this;
+    }
+
+    public Builder setOperator() {
+      this.operator = true;
+      return this;
+    }
+
+    public Builder setStoreType(FieldType tabletype) {
+      this.tabletype = tabletype;
+      return this;
+    }
+
+    public Builder setClassname(String name) {
+      this.className = name;
+      return this;
+    }
+
+    public ABLNodeType getNodeType() {
+      return tok.getNodeType();
+    }
+
+    public JPNode build() {
+      JPNode node;
+      switch (tok.getNodeType()) {
+        case FIELD_REF:
+          node = new FieldRefNode(tok);
+          break;
+        case PROGRAM_ROOT:
+          node = new ProgramRootNode(tok);
+          break;
+
+        case PROPERTY_GETTER:
+        case PROPERTY_SETTER:
+          node = new BlockNode(tok);
+          break;
+        default:
+          node = new JPNode(tok);
+          break;
+      }
+      if (className != null)
+        node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
+      if (stmt)
+        node.setStatementHead(stmt2 == null ? 0 : stmt2.getType());
+      if (operator)
+        node.setOperator();
+      if (tabletype != null) {
+        switch (tabletype) {
+          case DBTABLE:
+            node.attrSet(IConstants.STORETYPE, IConstants.ST_DBTABLE);
+            break;
+          case TTABLE:
+            node.attrSet(IConstants.STORETYPE, IConstants.ST_TTABLE);
+            break;
+          case WTABLE:
+            node.attrSet(IConstants.STORETYPE, IConstants.ST_WTABLE);
+            break;
+          case VARIABLE:
+            // Never happens
+            break;
+        }
+      }
+      if (down != null) {
+        node.down = down.build();
+        node.down.up = node;
+      }
+      if (right != null) {
+        node.right = right.build();
+        node.right.left = node;
+      }
+      return node;
+    }
+  }
 
 }

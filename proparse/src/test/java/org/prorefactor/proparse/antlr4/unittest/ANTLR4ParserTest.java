@@ -85,7 +85,7 @@ public class ANTLR4ParserTest {
     start = System.currentTimeMillis();
 
     // Sample schema
-    RefactorSession session = new RefactorSession(new ProparseSettings(""), new Schema(new EmptyDatabase()));
+    RefactorSession session = new RefactorSession(new ProparseSettings(""), new Schema());
     String sampleClass = "class SampleClass inherits Progress.Lang.Object: method public void foo(): end method. end class.";
     ProgressLexer lexer = new ProgressLexer(session, new StringBufferInputStream(sampleClass), "SampleClass.cls", false);
     lexer.setMergeNameDotInId(true);

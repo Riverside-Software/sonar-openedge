@@ -105,6 +105,7 @@ public class RootSymbolScope extends SymbolScope {
     return 0;
   }
 
+  // TEMP-ANTLR4
   public int compareTo(RootSymbolScope other) {
     if (super.compareTo(other) != 0) {
       return 3;

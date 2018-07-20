@@ -879,6 +879,7 @@ public class JPNode implements AST {
    * Internal use only, should be removed after migration to ANTLR4
    * @return 0 if identical node objects, &gt; 0 if different
    */
+  // TEMP-ANTLR4
   public int compareTo(org.prorefactor.proparse.antlr4.JPNode other, int level) {
     if ((token.getNodeType() == ABLNodeType.EOF) && (other.getNodeType() == ABLNodeType.EOF_ANTLR4))
       return 0;

@@ -396,6 +396,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
   }
 
+  // TEMP-ANTLR4
   private void testAntlr4(SensorContext context, InputFile file, RefactorSession session) {
     long startTime = System.currentTimeMillis();
     try {
@@ -470,6 +471,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
   }
 
+  // TEMP-ANTLR4
   private void generateAntlr4Stats(String fileName, long parseTree, long treeVisitor, ParseInfo info) {
     File f = new File(".proparse/antlr4-timings/" + fileName.replace('\\', '_').replace('/', '_').replace(':', '_'));
     f.getParentFile().mkdirs();

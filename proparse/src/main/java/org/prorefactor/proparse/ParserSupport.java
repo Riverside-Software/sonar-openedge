@@ -380,6 +380,7 @@ public class ParserSupport {
     return ((ProToken) token).getHiddenBefore() != null;
   }
 
+  // TEMP-ANTLR4
   public int compareTo(ParserSupport other) {
     if (classFinder.compareTo(other.classFinder) != 0) {
       return 4;
