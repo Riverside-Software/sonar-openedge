@@ -335,6 +335,7 @@ public class ParserSupport {
     inDynamicNew = flag;
   }
 
+  // TODO Speed issue in this function, multiplied JPNode tree generation time by a factor 10
   public String lookupClassName(String text) {
     return classFinder.lookup(text);
   }
