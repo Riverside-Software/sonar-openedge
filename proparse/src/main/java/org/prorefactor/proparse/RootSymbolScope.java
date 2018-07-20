@@ -12,6 +12,8 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -119,4 +121,13 @@ public class RootSymbolScope extends SymbolScope {
 
     return 0;
   }
+
+  // TEMP-ANTLR4
+  public void writeScope(Writer writer) throws IOException {
+    writer.write("*** RootSymbolScope *** \n");
+    super.writeScope(writer);
+    functionSet.stream().sorted().forEach(e -> { try { writer.write("Function " + e + "\n"); } catch (IOException uncaught) { } } );
+    methodSet.stream().sorted().forEach(e -> { try { writer.write("Method " + e + "\n"); } catch (IOException uncaught) { } } );
+  }
+
 }

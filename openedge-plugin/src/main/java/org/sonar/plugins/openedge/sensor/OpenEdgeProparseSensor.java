@@ -54,6 +54,7 @@ import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.TreeNodeLister;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
+import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.proparse.antlr4.DescriptiveErrorListener;
 import org.prorefactor.proparse.antlr4.IncludeFileNotFoundException;
@@ -303,7 +304,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       return;
     }
     if (settings.useANTLR4())
-      generateProparseFlatFiles(unit.getTopNode(), false, InputFileUtils.getRelativePath(file, context.fileSystem()));
+      generateProparseFlatFiles(unit.getTopNode(), unit.getSupport(), false, InputFileUtils.getRelativePath(file, context.fileSystem()));
 
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
       computeCpd(context, file, unit);
@@ -417,7 +418,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       long time2 = System.currentTimeMillis() - startTime - time1;
       parse4Tree += time2;
 
-      generateProparseFlatFiles(root4, true, InputFileUtils.getRelativePath(file, context.fileSystem()));
+      generateProparseFlatFiles(root4, parser.getParserSupport(), true, InputFileUtils.getRelativePath(file, context.fileSystem()));
       generateAntlr4Stats(InputFileUtils.getRelativePath(file, context.fileSystem()), time1, time2, parser.getParseInfo());
 
       LOG.info("File {} - {} ms ANTLR4 - {} ms visitor",InputFileUtils.getRelativePath(file, context.fileSystem()), time1, time2);
@@ -439,24 +440,30 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
   }
 
-  private void generateProparseFlatFiles(ProgramRootNode rootNode, boolean version, String fileName) {
-    File f = new File(".proparse/" + (version ? "antlr4/" : "antlr2/") + fileName.replace('\\', '_').replace('/', '_').replace(':', '_'));
+  // TEMP-ANTLR4
+  private void generateProparseFlatFiles(ProgramRootNode rootNode, ParserSupport support, boolean version,
+      String fileName) {
+    File f = new File(".proparse/antlr2/" + fileName.replace('\\', '_').replace('/', '_').replace(':', '_'));
     f.getParentFile().mkdirs();
 
     try (PrintWriter writer = new PrintWriter(f)) {
-      TreeNodeLister nodeLister = new TreeNodeLister(rootNode, writer, ABLNodeType.INVALID_NODE, ABLNodeType.ANNOTATION);
+      TreeNodeLister nodeLister = new TreeNodeLister(rootNode, support, writer, ABLNodeType.INVALID_NODE,
+          ABLNodeType.ANNOTATION);
       nodeLister.print();
     } catch (IOException caught) {
       LOG.error("Unable to write proparse debug file", caught);
     }
   }
 
-  private void generateProparseFlatFiles(org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode rootNode, boolean version, String fileName) {
-    File f = new File(".proparse/" + (version ? "antlr4/" : "antlr2/") + fileName.replace('\\', '_').replace('/', '_').replace(':', '_'));
+  // TEMP-ANTLR4
+  private void generateProparseFlatFiles(org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode rootNode,
+      ParserSupport support, boolean version, String fileName) {
+    File f = new File(".proparse/antlr4/" + fileName.replace('\\', '_').replace('/', '_').replace(':', '_'));
     f.getParentFile().mkdirs();
 
     try (PrintWriter writer = new PrintWriter(f)) {
-      org.prorefactor.proparse.antlr4.TreeNodeLister nodeLister = new org.prorefactor.proparse.antlr4.TreeNodeLister(rootNode, writer, ABLNodeType.INVALID_NODE, ABLNodeType.ANNOTATION);
+      org.prorefactor.proparse.antlr4.TreeNodeLister nodeLister = new org.prorefactor.proparse.antlr4.TreeNodeLister(
+          rootNode, support, writer, ABLNodeType.INVALID_NODE, ABLNodeType.ANNOTATION);
       nodeLister.print();
     } catch (IOException caught) {
       LOG.error("Unable to write proparse debug file", caught);

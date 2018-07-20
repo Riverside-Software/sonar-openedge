@@ -31,6 +31,7 @@ import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
 import org.prorefactor.proparse.IntegerIndex;
+import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.refactor.RefactorSession;
@@ -71,6 +72,8 @@ public class ParseUnit {
   private Document xref = null;
   private TypeInfo typeInfo = null;
   private List<Integer> trxBlocks;
+  // TEMP-ANTLR4
+  private ParserSupport support;
 
   public ParseUnit(File file, RefactorSession session) {
     this(file, file.getPath(), session);
@@ -198,6 +201,7 @@ public class ParseUnit {
     sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
     metrics = lexer.getMetrics();
     topNode = (ProgramRootNode) parser.getAST();
+    support = parser.support;
 
     LOGGER.trace("Exiting ParseUnit#parse()");
   }
@@ -261,6 +265,11 @@ public class ParseUnit {
 
   public List<Integer> getTransactionBlocks() {
     return trxBlocks;
+  }
+
+  // TEMP-ANTLR4
+  public ParserSupport getSupport() {
+    return support;
   }
 
   public RefactorSession getSession() {

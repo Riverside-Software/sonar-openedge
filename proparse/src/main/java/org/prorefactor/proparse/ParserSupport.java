@@ -65,7 +65,7 @@ public class ParserSupport {
 
   private ParseTreeProperty<FieldType> recordExpressions = new ParseTreeProperty<>();
 
-  // TODO Only for ANTLR4 migration
+  // TEMP-ANTLR4
   private List<SymbolScope> innerScopes = new ArrayList<>();
 
   public ParserSupport(RefactorSession session, IntegerIndex<String> fileNameList) {
@@ -118,6 +118,16 @@ public class ParserSupport {
   public void addInnerScope() {
     currentScope = new SymbolScope(session, currentScope);
     innerScopes.add(currentScope);
+  }
+
+  // TEMP-ANTLR4
+  public RootSymbolScope getUnitScope() {
+    return unitScope;
+  }
+
+  // TEMP-ANTLR4
+  public List<SymbolScope> getInnerScopes() {
+    return innerScopes;
   }
 
   // Functions triggered from proparse.g

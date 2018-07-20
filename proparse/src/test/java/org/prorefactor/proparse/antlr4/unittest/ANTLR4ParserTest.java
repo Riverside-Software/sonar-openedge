@@ -39,6 +39,7 @@ import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.unittest.util.EmptyDatabase;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.antlr4.DescriptiveErrorListener;
 import org.prorefactor.proparse.antlr4.JPNode;
@@ -317,7 +318,7 @@ public class ANTLR4ParserTest {
       JPNode root4 = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream()).visit(
           tree).build();
       displayParseInfo(parser.getParseInfo());
-      displayRootNode4(root4, "target/antlr4.txt");
+      displayRootNode4(root4, parser.getParserSupport(), "target/antlr4.txt");
 
       ProgressLexer lexer2 = new ProgressLexer(session, new FileInputStream(file), file.getAbsolutePath(), false);
       ProParser parser2 = new ProParser(lexer2.getANTLR2TokenStream(true));
@@ -326,7 +327,7 @@ public class ANTLR4ParserTest {
       ProgramRootNode root2 = (ProgramRootNode) parser2.getAST();
       root2.backLinkAndFinalize();
       lexer2.parseComplete();
-      displayRootNode(root2, "target/antlr2.txt");
+      displayRootNode(root2, parser2.support, "target/antlr2.txt");
 
       assertEquals(root2.compareTo(root4, 0), 0);
       assertEquals(parser2.support.compareTo(parser.getParserSupport()), 0);
@@ -357,17 +358,17 @@ public class ANTLR4ParserTest {
   }
 
   @SuppressWarnings("unused")
-  private void displayRootNode(ProgramRootNode rootNode, String s) {
+  private void displayRootNode(ProgramRootNode rootNode, ParserSupport support, String s) {
     try (FileWriter writer = new FileWriter(s)) {
-      new TreeNodeLister(rootNode, writer, ABLNodeType.INVALID_NODE).print();
+      new TreeNodeLister(rootNode, support, writer, ABLNodeType.INVALID_NODE).print();
     } catch (IOException uncaught) {
       
     }
   }
 
-  private void displayRootNode4(JPNode rootNode, String s) {
+  private void displayRootNode4(JPNode rootNode, ParserSupport support, String s) {
     try (FileWriter writer = new FileWriter(s)) {
-      new org.prorefactor.proparse.antlr4.TreeNodeLister(rootNode, writer, ABLNodeType.INVALID_NODE).print();
+      new org.prorefactor.proparse.antlr4.TreeNodeLister(rootNode, support, writer, ABLNodeType.INVALID_NODE).print();
     } catch (IOException uncaught) {
       
     }

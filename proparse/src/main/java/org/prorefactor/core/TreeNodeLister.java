@@ -16,6 +16,8 @@ import java.io.Writer;
 import java.util.EnumSet;
 import java.util.Set;
 
+import org.prorefactor.proparse.ParserSupport;
+import org.prorefactor.proparse.SymbolScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,11 +30,13 @@ public class TreeNodeLister {
   private final JPNode topNode;
   private final Writer ofile;
   private final Set<ABLNodeType> ignored;
+  private final ParserSupport support;
 
-  public TreeNodeLister(JPNode topNode, Writer writer, ABLNodeType ignoredKw, ABLNodeType... ignoredKws) {
+  public TreeNodeLister(JPNode topNode, ParserSupport support, Writer writer, ABLNodeType ignoredKw, ABLNodeType... ignoredKws) {
     this.topNode = topNode;
     this.ofile = writer;
     this.ignored = EnumSet.of(ignoredKw, ignoredKws);
+    this.support = support;
   }
 
   /**
@@ -41,6 +45,13 @@ public class TreeNodeLister {
   public void print() {
     try {
       printSub(topNode, 0);
+      ofile.write("\n\n\n");
+      support.getUnitScope().writeScope(ofile);
+      ofile.write("\n\n\n");
+      for (SymbolScope scope : support.getInnerScopes()) {
+        scope.writeScope(ofile);
+        ofile.write("\n\n\n");
+      }
     } catch (IOException uncaught) {
       LOG.error("Unable to write output", uncaught);
     }
