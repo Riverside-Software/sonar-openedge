@@ -43,6 +43,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   }
 
   @Override
+  public Builder visitClass_code_block(Class_code_blockContext ctx) {
+    return createTree(ctx, ABLNodeType.CODE_BLOCK);
+  }
+
+  @Override
   public JPNode.Builder visitDot_comment(Dot_commentContext ctx) {
     ProToken start = (ProToken) ctx.getStart();
     StringBuilder sb = new StringBuilder(".");
@@ -1944,6 +1949,13 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitProcedurestate(ProcedurestateContext ctx) {
+    JPNode.Builder holder = createStatementTreeFromFirstNode(ctx);
+    holder.getDown().changeType(ABLNodeType.ID);
+    return holder;
+  }
+
+  @Override
+  public Builder visitExt_procedurestate(Ext_procedurestateContext ctx) {
     JPNode.Builder holder = createStatementTreeFromFirstNode(ctx);
     holder.getDown().changeType(ABLNodeType.ID);
     return holder;
