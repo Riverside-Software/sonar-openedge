@@ -107,14 +107,14 @@ public class ANTLR4ParserTest {
     }
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void testOpenEdgeClasses() throws Exception {
     Files.walk(new File("src/test/resources/OpenEdge").toPath()).filter(
         p -> p.toFile().isFile() && p.getFileName().toString().endsWith(".cls")).map(
             p -> new File("src\\test\\resources").toPath().relativize(p)).forEach(path -> genericTest(path.toString()));
   }
 
-  @Test(enabled=true)
+  @Test(enabled=false)
   public void testRiversideClasses() throws Exception {
     Files.walk(new File("src/test/resources/rssw").toPath()).filter(
         p -> p.toFile().isFile() && p.getFileName().toString().endsWith(".cls")).map(
