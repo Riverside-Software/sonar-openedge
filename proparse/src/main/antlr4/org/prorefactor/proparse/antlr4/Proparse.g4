@@ -432,6 +432,7 @@ builtinfunc: // TRANSLATED
   |  GETCLASS LEFTPAREN type_name RIGHTPAREN
   |  (USERID | USER) funargs  // also noarg
   |  argfunc
+  |  optargfunc
   |  recordfunc
   ;
 
@@ -1932,7 +1933,7 @@ defineparameterstate: // TRANSLATED
     DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     (
       PARAMETER BUFFER bn=identifier FOR TEMPTABLE? bf=record
-      PRESELECT? label_constant? fields_fields? state_end
+      PRESELECT? label_constant? fields_fields?
       { support.defBuffer($bn.text, $bf.text); }
     | ( INPUT | OUTPUT | INPUTOUTPUT | RETURN ) PARAMETER
       ( TABLE FOR record ( APPEND | BIND | BYVALUE )*
@@ -3614,8 +3615,8 @@ triggerprocedurestate: // TRANSLATED
       (
         ( CREATE | DELETE_KW | FIND | REPLICATIONCREATE | REPLICATIONDELETE ) OF record label_constant?
       | ( WRITE | REPLICATIONWRITE ) OF buff=record label_constant?
-           ( NEW BUFFER? newBuff=identifier label_constant? )?
-           ( OLD BUFFER? oldBuff=identifier label_constant? )?
+           ( NEW BUFFER? newBuff=identifier label_constant? { support.defBuffer($newBuff.text, $buff.text); } )?
+           ( OLD BUFFER? oldBuff=identifier label_constant? { support.defBuffer($oldBuff.text, $buff.text); } )?
       |  ASSIGN trigger_of? trigger_old?
       )
     state_end
