@@ -2427,7 +2427,7 @@ framephrase: // TRANSLATED
       // Basically, accidental syntax rules.  :-/
       ( NOBOX | NOUNDERLINE | SIDELABELS )
     | // ick
-      frame_widgetname .
+      frame_widgetname not_state_end
     | // If you *can* evaluate to <expression DOWN>, then you must,
       // even if we get into expression on a non-reserved keyword like SCROLLABLE.
       // Try compiling SCROLLABLE DOWN as frame options, where you haven't defined
