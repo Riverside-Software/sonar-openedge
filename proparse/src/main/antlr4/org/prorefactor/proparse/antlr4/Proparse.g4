@@ -1912,11 +1912,8 @@ menu_opt: // TRANSLATED
   ;
 
 menu_list_item: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
-    MENUITEM n=identifier menu_item_opt* triggerphrase?
-    { support.defVar($n.text); }
-  | SUBMENU s=identifier ( DISABLED | label_constant | font_expr | color_expr )*
-    { support.defVar($s.text); }
+    MENUITEM n=identifier menu_item_opt* triggerphrase? { support.defVar($n.text); }
+  | SUBMENU n=identifier ( DISABLED | label_constant | font_expr | color_expr )* { support.defVar($n.text); }
   | RULE ( font_expr | color_expr )*
   | SKIP
   ;
