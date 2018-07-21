@@ -2002,8 +2002,8 @@ defineproperty_accessor: // TRANSLATED
     ( PUBLIC | PROTECTED | PRIVATE )?
     ( GET PERIOD
     | SET PERIOD
-    | GET function_params? LEXCOLON code_block END GET? PERIOD
-    | SET function_params LEXCOLON code_block END SET? PERIOD
+    | GET function_params? block_colon code_block END GET? PERIOD
+    | SET function_params block_colon code_block END SET? PERIOD
     )
   ;
 
