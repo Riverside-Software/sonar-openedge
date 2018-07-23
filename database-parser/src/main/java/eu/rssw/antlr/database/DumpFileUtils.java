@@ -32,15 +32,9 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 
 import org.antlr.v4.runtime.ANTLRErrorListener;
-import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.DefaultErrorStrategy;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
@@ -48,7 +42,6 @@ import com.google.common.io.LineProcessor;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
 
 public final class DumpFileUtils {
-  private static final Logger LOG = LoggerFactory.getLogger(DumpFileUtils.class);
 
   private DumpFileUtils() {
     // Not instantiated
@@ -86,24 +79,12 @@ public final class DumpFileUtils {
     lexer.removeErrorListeners();
     lexer.addErrorListener(listener);
 
+    // Using SLL first proved not to be useful for the DF parser, so we directly parse with LL prediction mode
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     DumpFileGrammarParser parser = new DumpFileGrammarParser(tokens);
-    parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
-    parser.setErrorHandler(new BailErrorStrategy());
-
-    ParseTree tree;
-    try {
-      tree = parser.dump();
-    } catch (ParseCancellationException caught) {
-      LOG.warn("DF parser switching to LL prediction mode");
-      parser.getInterpreter().setPredictionMode(PredictionMode.LL);
-      parser.setErrorHandler(new DefaultErrorStrategy());
-      parser.removeErrorListeners();
-      parser.addErrorListener(listener);
-      tree = parser.dump();
-    }
-
-    return tree;
+    parser.removeErrorListeners();
+    parser.addErrorListener(listener);
+    return parser.dump();
   }
 
   public static final DatabaseDescription getDatabaseDescription(File file) throws IOException {
