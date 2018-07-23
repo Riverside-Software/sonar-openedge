@@ -84,6 +84,7 @@ public final class DumpFileUtils {
     DumpFileGrammarParser parser = new DumpFileGrammarParser(tokens);
     parser.removeErrorListeners();
     parser.addErrorListener(listener);
+
     return parser.dump();
   }
 
