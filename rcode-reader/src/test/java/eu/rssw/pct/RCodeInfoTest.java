@@ -165,4 +165,15 @@ public class RCodeInfoTest {
     }
   }
 
+  @Test
+  public void testV12() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/WebRequest.r")) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      assertEquals(rci.getVersion(), -1210);
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
 }
