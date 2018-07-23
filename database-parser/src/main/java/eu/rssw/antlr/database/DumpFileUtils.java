@@ -32,9 +32,15 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 
 import org.antlr.v4.runtime.ANTLRErrorListener;
+import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.DefaultErrorStrategy;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
@@ -42,6 +48,7 @@ import com.google.common.io.LineProcessor;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
 
 public final class DumpFileUtils {
+  private static final Logger LOG = LoggerFactory.getLogger(DumpFileUtils.class);
 
   private DumpFileUtils() {
     // Not instantiated
@@ -78,12 +85,25 @@ public final class DumpFileUtils {
     DumpFileGrammarLexer lexer = new DumpFileGrammarLexer(CharStreams.fromReader(reader));
     lexer.removeErrorListeners();
     lexer.addErrorListener(listener);
+
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     DumpFileGrammarParser parser = new DumpFileGrammarParser(tokens);
-    parser.removeErrorListeners();
-    parser.addErrorListener(listener);
+    parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+    parser.setErrorHandler(new BailErrorStrategy());
 
-    return parser.dump();
+    ParseTree tree;
+    try {
+      tree = parser.dump();
+    } catch (ParseCancellationException caught) {
+      LOG.warn("DF parser switching to LL prediction mode");
+      parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+      parser.setErrorHandler(new DefaultErrorStrategy());
+      parser.removeErrorListeners();
+      parser.addErrorListener(listener);
+      tree = parser.dump();
+    }
+
+    return tree;
   }
 
   public static final DatabaseDescription getDatabaseDescription(File file) throws IOException {
