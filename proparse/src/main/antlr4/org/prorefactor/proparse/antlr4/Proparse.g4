@@ -15,10 +15,7 @@
 parser grammar Proparse;
 
 @header {
-  import com.google.common.base.Strings;
   import org.antlr.v4.runtime.BufferedTokenStream;
-  import org.antlr.v4.runtime.CommonTokenStream;
-  import org.antlr.v4.runtime.FailedPredicateException;
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
   import org.prorefactor.core.ABLNodeType;
@@ -87,6 +84,10 @@ code_block: // TRANSLATED
     blockorstate*
   ;
 
+class_code_block:
+    class_blockorstate*
+  ;
+
 blockorstate: // TRANSLATED
     // Method calls and other expressions can stand alone as statements.
     // Many functions are ambiguous with statements on the first few tokens.
@@ -110,6 +111,12 @@ blockorstate: // TRANSLATED
     // so we don't have to worry about reserved keyword method names here.
     // We might not know what all the method names are due to inheritance from .r files
     // (no source code available, like progress.lang.*).
+  ;
+
+class_blockorstate:
+    PERIOD
+  | annotation
+  | class_statement
   ;
 
 dot_comment: // TRANSLATED
@@ -190,7 +197,6 @@ statement: // TRANSLATED
   |  colorstate
   |  compilestate
   |  connectstate  
-  |  constructorstate
   |  copylobstate
   |  // "CREATE WIDGET-POOL." truly is ambiguous if you have a table named "widget-pool".
      // Progress seems to treat this as a CREATE WIDGET-POOL statement rather than a
@@ -226,7 +232,6 @@ statement: // TRANSLATED
   |  defineimagestate
   |  definemenustate
   |  defineparameterstate
-  |  definepropertystate
   |  definequerystate
   |  definerectanglestate
   |  definestreamstate
@@ -234,7 +239,6 @@ statement: // TRANSLATED
   |  definetemptablestate
   |  defineworktablestate
   |  definevariablestate
-  |  destructorstate
   |  dictionarystate
   |  deletewidgetpoolstate
   |  deletestate
@@ -269,7 +273,6 @@ statement: // TRANSLATED
   |  leavestate
   |  loadstate  
   |  messagestate
-  |  methodstate
   |  nextstate
   |  nextpromptstate
   |  onstate  
@@ -328,6 +331,31 @@ statement: // TRANSLATED
   |  validatestate
   |  viewstate
   |  waitforstate
+  ;
+
+class_statement:
+     definebrowsestate
+  |  definebufferstate
+  |  definebuttonstate
+  |  definedatasetstate
+  |  definedatasourcestate
+  |  defineeventstate
+  |  defineframestate
+  |  defineimagestate
+  |  definemenustate
+  |  defineparameterstate
+  |  definepropertystate
+  |  definequerystate
+  |  definerectanglestate
+  |  definestreamstate
+  |  definesubmenustate
+  |  definetemptablestate
+  |  defineworktablestate
+  |  definevariablestate
+  |  constructorstate
+  |  destructorstate
+  |  methodstate
+  |  ext_procedurestate // Only external procedures are accepted
   ;
 
 pseudfn: // TRANSLATED
@@ -1281,7 +1309,7 @@ classstate: // TRANSLATED
     ( class_inherits | class_implements | USEWIDGETPOOL | ABSTRACT | FINAL | SERIALIZABLE )*
     { support.defineClass($tn.text); }
     block_colon
-    code_block
+    class_code_block
     class_end state_end
   ;
 
@@ -1974,8 +2002,8 @@ defineproperty_accessor: // TRANSLATED
     ( PUBLIC | PROTECTED | PRIVATE )?
     ( GET PERIOD
     | SET PERIOD
-    | GET function_params? LEXCOLON code_block END GET? PERIOD
-    | SET function_params LEXCOLON code_block END SET? PERIOD
+    | GET function_params? block_colon code_block END GET? PERIOD
+    | SET function_params block_colon code_block END SET? PERIOD
     )
   ;
 
@@ -2712,7 +2740,7 @@ insertstate: // TRANSLATED
 interfacestate: // TRANSLATED
     INTERFACE name=type_name2 interface_inherits? block_colon
     { support.defInterface($name.text); }
-    code_block
+    class_code_block
     interface_end
     state_end
   ;
@@ -2883,8 +2911,9 @@ methodstate locals [ boolean abs = false ]: // TRANSLATED
     ( VOID | datatype extentphrase? )
     id=new_identifier
     function_params
-    ( { $abs || support.isInterface() }? PERIOD // An INTERFACE declares without defining, ditto ABSTRACT.
-    | LEXCOLON
+    ( { $abs || support.isInterface() }? block_colon // An INTERFACE declares without defining, ditto ABSTRACT.
+    | { !$abs && !support.isInterface() }?
+      block_colon
       { support.addInnerScope(); }
       code_block
       method_end
@@ -3063,6 +3092,16 @@ pause_opt: // TRANSLATED
 
 procedure_expr: // TRANSLATED
     PROCEDURE expression
+  ;
+
+ext_procedurestate:
+    PROCEDURE
+    filename
+    EXTERNAL constant procedure_dll_opt* block_colon
+    { support.addInnerScope(); }
+    code_block
+    { support.dropInnerScope(); }
+    procedure_end state_end
   ;
 
 procedurestate: // TRANSLATED

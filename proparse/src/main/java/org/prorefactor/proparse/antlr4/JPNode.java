@@ -16,10 +16,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.antlr.v4.runtime.tree.RuleNode;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.AttributeKey;
 import org.prorefactor.core.AttributeValue;
 import org.prorefactor.core.IConstants;
+import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.proparse.antlr4.nodetypes.BlockNode;
 import org.prorefactor.proparse.antlr4.nodetypes.FieldRefNode;
@@ -673,6 +675,7 @@ public class JPNode implements AST {
 
   public static class Builder {
     private ProToken tok;
+    private RuleNode ctx;
     private Builder right;
     private Builder down;
     private boolean stmt;
@@ -691,6 +694,11 @@ public class JPNode implements AST {
 
     public Builder(ABLNodeType type, String text) {
       this(new ProToken(type, text));
+    }
+
+    public Builder setRuleNode(RuleNode ctx) {
+      this.ctx = ctx;
+      return this;
     }
 
     public Builder setRight(Builder right) {
@@ -752,7 +760,7 @@ public class JPNode implements AST {
       return tok.getNodeType();
     }
 
-    public JPNode build() {
+    public JPNode build(ParserSupport support) {
       JPNode node;
       switch (tok.getNodeType()) {
         case FIELD_REF:
@@ -793,13 +801,15 @@ public class JPNode implements AST {
         }
       }
       if (down != null) {
-        node.down = down.build();
+        node.down = down.build(support);
         node.down.up = node;
       }
       if (right != null) {
-        node.right = right.build();
+        node.right = right.build(support);
         node.right.left = node;
       }
+      if (ctx != null)
+        support.pushNode(ctx, node);
       return node;
     }
   }

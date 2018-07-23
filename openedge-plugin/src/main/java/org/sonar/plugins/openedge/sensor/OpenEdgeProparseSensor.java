@@ -415,7 +415,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       long time1 = System.currentTimeMillis() - startTime;
       parse4Time += time1;
       JPNodeVisitor visitor = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
-      org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode root4 = (org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode) visitor.visit(tree).build();
+      org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode root4 = (org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode) visitor.visit(tree).build(parser.getParserSupport());
       long time2 = System.currentTimeMillis() - startTime - time1;
       parse4Tree += time2;
 

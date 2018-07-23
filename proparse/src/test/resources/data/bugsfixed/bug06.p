@@ -26,11 +26,6 @@ THIS-OBJECT:DataAccessObject =
                     (THIS-OBJECT:DatasetHandle) .
 
 
-/* unexpected AST node: FINAL */
-method public final void whatever():
-end method.
-
-
 def var obj as progress.lang.object.
 def var classname as char.
 os-delete value(classname).
