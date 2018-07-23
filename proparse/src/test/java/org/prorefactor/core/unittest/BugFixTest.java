@@ -138,9 +138,11 @@ public class BugFixTest {
     assertEquals(unit.getRootScope().getVariable("x1").getNumWrites(), 2);
     assertEquals(unit.getRootScope().getVariable("x1").getNumReads(), 1);
     assertEquals(unit.getRootScope().getVariable("x2").getNumWrites(), 1);
-    assertEquals(unit.getRootScope().getVariable("x2").getNumReads(), 1);
+    assertEquals(unit.getRootScope().getVariable("x2").getNumReads(), 2);
     assertEquals(unit.getRootScope().getVariable("x3").getNumWrites(), 1);
     assertEquals(unit.getRootScope().getVariable("x3").getNumReads(), 0);
+    assertEquals(unit.getRootScope().getVariable("x4").getNumReads(), 1);
+    assertEquals(unit.getRootScope().getVariable("x4").getNumWrites(), 0);
   }
 
   @Test

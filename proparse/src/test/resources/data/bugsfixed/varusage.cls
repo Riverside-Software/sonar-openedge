@@ -2,6 +2,7 @@ class bugsfixed.varusage:
   define private static variable x1 as char.
   define private variable x2 as char.
   define private variable x3 as char.
+  define private variable x4 as char.
 
   constructor varusage(prm as char):
     bugsfixed.varusage:x1 = prm.
@@ -15,7 +16,7 @@ class bugsfixed.varusage:
   end.
 
   method public void mthd2(x as char, y as char):
-    
+    if lookup("abc", x4) > 0 then return.
   end.
 
 end.

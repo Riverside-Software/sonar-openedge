@@ -144,6 +144,52 @@ block_preselect:
     #(PRESELECT for_record_spec2[ContextQualifier.INITWEAK] )
   ;
 
+pseudfn:
+     #(EXTENT funargs )
+  |  #(FIXCODEPAGE funargs )
+  |  #(OVERLAY funargs )
+  |  #(PUTBITS LEFTPAREN ex1:expression COMMA expression COMMA expression RIGHTPAREN ) { action.noteReference(#ex1, ContextQualifier.UPDATING); }
+  |  #(PUTBYTE LEFTPAREN ex2:expression COMMA expression RIGHTPAREN ) { action.noteReference(#ex2, ContextQualifier.UPDATING); }
+  |  #(PUTBYTES LEFTPAREN ex3:expression COMMA expression RIGHTPAREN ) { action.noteReference(#ex3, ContextQualifier.UPDATING); }
+  |  #(PUTDOUBLE LEFTPAREN ex4:expression COMMA expression RIGHTPAREN ) { action.noteReference(#ex4, ContextQualifier.UPDATING); }
+  |  #(PUTFLOAT LEFTPAREN ex5:expression COMMA expression RIGHTPAREN ) { action.noteReference(#ex5, ContextQualifier.UPDATING); }
+  |  #(PUTINT64 LEFTPAREN ex6:expression COMMA expression RIGHTPAREN ) { action.noteReference(#ex6, ContextQualifier.UPDATING); }
+  |  #(PUTLONG LEFTPAREN ex7:expression COMMA expression RIGHTPAREN ) { action.noteReference(#ex7, ContextQualifier.UPDATING); }
+  |  #(PUTSHORT LEFTPAREN ex8:expression COMMA expression RIGHTPAREN ) { action.noteReference(#ex8, ContextQualifier.UPDATING); }
+  |  #(PUTSTRING LEFTPAREN ex9:expression COMMA expression (COMMA expression)? RIGHTPAREN ) { action.noteReference(#ex9, ContextQualifier.UPDATING); }
+  |  #(PUTUNSIGNEDLONG LEFTPAREN ex10:expression COMMA expression RIGHTPAREN ) { action.noteReference(#ex10, ContextQualifier.UPDATING); }
+  |  #(PUTUNSIGNEDSHORT LEFTPAREN ex11:expression COMMA expression RIGHTPAREN ) { action.noteReference(#ex11, ContextQualifier.UPDATING); }
+  |  #(SETBYTEORDER funargs )
+  |  #(SETPOINTERVALUE LEFTPAREN ex12:expression RIGHTPAREN ) { action.noteReference(#ex12, ContextQualifier.UPDATING); }
+  |  #(SETSIZE LEFTPAREN ex13:expression RIGHTPAREN ) { action.noteReference(#ex13, ContextQualifier.UPDATING); }
+  |  AAMSG // not the whole func - we don't want its arguments here
+  |  currentvaluefunc
+  |  CURRENTWINDOW
+  |  dynamiccurrentvaluefunc
+  |  entryfunc
+  |  lengthfunc
+  |  nextvaluefunc
+  |  rawfunc
+  |  substringfunc
+  |  widattr
+  // Keywords from <optargfn> and <noargfn>. Assignments to those
+  // are accepted by the compiler, however, assignment to them seems to have
+  // no affect at runtime.
+  // The following are from <optargfn>
+  | PAGESIZE_KW | LINECOUNTER | PAGENUMBER | FRAMECOL
+  | FRAMEDOWN | FRAMELINE | FRAMEROW | USERID | ETIME_KW
+  // The following are from <noargfn>
+  | DBNAME | TIME | OPSYS | RETRY | AASERIAL | AACONTROL
+  | MESSAGELINES | TERMINAL | PROPATH | CURRENTLANGUAGE | PROMSGS
+  | SCREENLINES | LASTKEY
+  | FRAMEFIELD | FRAMEFILE | FRAMEVALUE | GOPENDING
+  | PROGRESS | FRAMEINDEX | FRAMEDB | FRAMENAME | DATASERVERS
+  | NUMDBS | NUMALIASES | ISATTRSPACE | PROCSTATUS
+  | PROCHANDLE | CURSOR | OSERROR | RETURNVALUE | OSDRIVES
+  | PROVERSION | TRANSACTION | MACHINECLASS 
+  | AAPCONTROL | GETCODEPAGES | COMSELF
+  ;
+
 functioncall:
     #(ACCUMULATE accum_what (#(BY expression (DESCENDING)?))? expression )
   |  #(ADDINTERVAL LEFTPAREN expression COMMA expression COMMA expression RIGHTPAREN )
@@ -212,34 +258,26 @@ parameter { /* RULE_INIT */ action.paramForCall(parameter_AST_in); }:
           action.paramSymbol(#bt);
         }
       )
-    |  #(OUTPUT parameter_arg )
-    |  #(INPUTOUTPUT parameter_arg )
-    |  #(INPUT parameter_arg )
+    |  #(OUTPUT parameter_arg2[ContextQualifier.UPDATING] )
+    |  #(INPUTOUTPUT parameter_arg2[ContextQualifier.REFUP] )
+    |  #(INPUT parameter_arg2[ContextQualifier.REF] )
     )
-{action.paramEnd();}
+    { action.paramEnd(); }
   ;
   
-parameter_arg:
-    (  TABLEHANDLE thf:fld[ContextQualifier.INIT] parameter_dataset_options
-      {action.paramSymbol(#thf);}
-    |  TABLE (FOR)? tt:tbl[ContextQualifier.TEMPTABLESYMBOL] parameter_dataset_options
-      {  action.paramProgressType(TEMPTABLE);
-        action.paramSymbol(#tt);
-      }
-    |  DATASET ds:ID parameter_dataset_options
-      {  action.setSymbol(DATASET, #ds);
-        action.paramProgressType(DATASET);
-        action.paramSymbol(#ds);
-      }
-    |  DATASETHANDLE dsh:fld[ContextQualifier.INIT] parameter_dataset_options
-      {action.paramSymbol(#dsh);}
-    |  PARAMETER expression EQUAL expression // for RUN STORED-PROCEDURE.
-      {action.paramProgressType(PARAMETER);}
-    |  ID AS {action.paramNoName(parameter_arg_AST_in);} (CLASS TYPE_NAME | datatype_com_native | datatype_var )
-    |  ex:expression (AS datatype_com)? {action.paramExpression(#ex);}
+parameter_arg2[ContextQualifier contextQualifier]:
+    (
+      TABLEHANDLE thf:fld[ContextQualifier.INIT] parameter_dataset_options { action.paramSymbol(#thf); action.noteReference(#thf, contextQualifier); }
+    | TABLE (FOR)? tt:tbl[ContextQualifier.TEMPTABLESYMBOL] parameter_dataset_options {  action.paramProgressType(TEMPTABLE); action.paramSymbol(#tt); }
+    | DATASET ds:ID parameter_dataset_options { action.setSymbol(DATASET, #ds); action.paramProgressType(DATASET); action.paramSymbol(#ds); }
+    | DATASETHANDLE dsh:fld[ContextQualifier.INIT] parameter_dataset_options { action.paramSymbol(#dsh); action.noteReference(#dsh, contextQualifier); }
+    | PARAMETER expression EQUAL expression /* for RUN STORED-PROCEDURE. */ { action.paramProgressType(PARAMETER); }
+    | ID AS { action.paramNoName(parameter_arg2_AST_in); } (CLASS TYPE_NAME | datatype_com_native | datatype_var )
+    | ex:expression (AS datatype_com)? { action.paramExpression(#ex, contextQualifier); }
     )
-    (BYPOINTER|BYVARIANTPOINTER)?
+    ( BYPOINTER | BYVARIANTPOINTER )?
   ;
+
 parameter_dataset_options:
    (APPEND)? (BYVALUE|BYREFERENCE| BIND {action.paramBind();} )?
   ;
@@ -570,6 +608,21 @@ constructorstate:
       def_modifiers TYPE_NAME function_params
       block_colon code_block #(END (CONSTRUCTOR|METHOD)? ) state_end
       {action.structorEnd(#c);}
+    )
+  ;
+
+copylobstate:
+    #(  COPYLOB (FROM)?
+      ( FILE expression | (OBJECT)? expression )
+      ( #(STARTING AT expression) )?
+      ( #(FOR expression) )?
+      TO
+      (  FILE expression (APPEND)?
+      |  (OBJECT)? ex:expression (OVERLAY AT expression (TRIM)?)? { action.noteReference(#ex, ContextQualifier.UPDATING); }
+      )
+      ( NOCONVERT | convertphrase )?
+      ( NOERROR_KW )?
+      state_end
     )
   ;
 

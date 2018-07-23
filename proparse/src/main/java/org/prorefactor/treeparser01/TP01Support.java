@@ -912,11 +912,13 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public void paramExpression(JPNode exprNode) {
+  public void paramExpression(JPNode exprNode, ContextQualifier cq) {
     LOG.trace("Entering paramExpression {}", exprNode);
     // The expression may or may not be a Field_ref node with a symbol. We don't dig any deeper.
     // As a result, the symbol for an expression parameter might be null.
     wipParameters.getFirst().setSymbol(exprNode.getSymbol());
+    if (exprNode.getSymbol() != null)
+      exprNode.getSymbol().noteReference(cq);
   }
 
   @Override
@@ -1193,6 +1195,13 @@ public class TP01Support implements ITreeParserAction {
   @Override
   public void setSymbol(int symbolType, JPNode idNode) {
     idNode.setSymbol(currentScope.lookupSymbol(symbolType, idNode.getText()));
+  }
+
+  @Override
+  public void noteReference(JPNode node, ContextQualifier cq) throws SemanticException {
+    if ((node.getSymbol() != null) && ((cq == ContextQualifier.UPDATING) || (cq == ContextQualifier.REFUP))) {
+      node.getSymbol().noteReference(cq);
+    }
   }
 
   /**
