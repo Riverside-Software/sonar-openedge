@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.RuleNode;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
@@ -64,6 +65,7 @@ public class ParserSupport {
   private JPNode lastFieldIDNode;
 
   private ParseTreeProperty<FieldType> recordExpressions = new ParseTreeProperty<>();
+  private ParseTreeProperty<org.prorefactor.proparse.antlr4.JPNode> nodes = new ParseTreeProperty<>();
 
   // TEMP-ANTLR4
   private List<SymbolScope> innerScopes = new ArrayList<>();
@@ -251,6 +253,10 @@ public class ParserSupport {
       recname += lt3.getText();
     }
     return (schemaTablePriority ? isTableSchemaFirst(recname.toLowerCase()) : isTable(recname.toLowerCase())) != null;
+  }
+
+  public void pushNode(RuleNode ctx, org.prorefactor.proparse.antlr4.JPNode node) {
+    nodes.put(ctx, node);
   }
 
   public void pushRecordExpression(RuleContext ctx, String recName) {

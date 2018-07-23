@@ -2707,7 +2707,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
       }
     }
     node.setDown(firstChild);
-    
+    node.setRuleNode(ctx);
     return node;
   }
 
@@ -2740,7 +2740,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
     for (int zz = 3; zz < ctx.getChildCount(); zz++) {
       lastNode = lastNode.setRight(visit(ctx.getChild(zz))).getLast();
     }
-
+    node.setRuleNode(ctx);
     return node;
   }
 
