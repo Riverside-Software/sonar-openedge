@@ -30,7 +30,6 @@ import java.io.IOException;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
-import eu.rssw.pct.elements.MethodElement;
 import eu.rssw.pct.elements.PropertyElement;
 
 public class RCodeInfoTest {
@@ -128,7 +127,7 @@ public class RCodeInfoTest {
   @Test
   public void testProcedure2() throws IOException {
     try (FileInputStream input = new FileInputStream("src/test/resources/rcode/AbstractTTCollection.r")) {
-      RCodeInfo rci = new RCodeInfo(input, System.out);
+      RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
