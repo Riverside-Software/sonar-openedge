@@ -2678,9 +2678,16 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
     if (ctx.getChildCount() == 0)
       return null;
     JPNode.Builder firstNode = visit(ctx.getChild(0));
-    JPNode.Builder lastNode = firstNode.getLast();
+    JPNode.Builder lastNode = firstNode == null ? null : firstNode.getLast();
+
     for (int zz = 1; zz < ctx.getChildCount(); zz++) {
-      lastNode = lastNode.setRight(visit(ctx.getChild(zz))).getLast();
+      JPNode.Builder xx = visit(ctx.getChild(zz));
+      if (lastNode != null) {
+        lastNode = lastNode.setRight(xx).getLast();
+      } else if (xx != null) {
+        firstNode = xx;
+        lastNode = firstNode.getLast();
+      }
     }
     return firstNode;
   }
