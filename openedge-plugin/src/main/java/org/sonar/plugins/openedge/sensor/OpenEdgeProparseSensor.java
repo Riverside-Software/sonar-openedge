@@ -44,7 +44,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.atn.ParseInfo;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -62,6 +61,7 @@ import org.prorefactor.proparse.antlr4.IncludeFileNotFoundException;
 import org.prorefactor.proparse.antlr4.JPNodeVisitor;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.proparse.antlr4.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -416,7 +416,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       } catch (ParseCancellationException caught) {
         LOG.warn("Parser switching to LL prediction mode for {}", InputFileUtils.getRelativePath(file, context.fileSystem()));
         parser.getInterpreter().setPredictionMode(PredictionMode.LL);
-        parser.setErrorHandler(new DefaultErrorStrategy());
+        parser.setErrorHandler(new ProparseErrorStrategy());
         parser.removeErrorListeners();
         parser.addErrorListener(new DescriptiveErrorListener());
         tree = parser.program();
