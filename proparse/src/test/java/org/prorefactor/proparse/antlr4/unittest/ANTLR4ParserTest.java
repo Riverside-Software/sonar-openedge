@@ -21,11 +21,14 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 
+import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.atn.ParseInfo;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.misc.Utils;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -45,6 +48,7 @@ import org.prorefactor.proparse.antlr4.JPNode;
 import org.prorefactor.proparse.antlr4.JPNodeVisitor;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.proparse.antlr4.ProparseErrorStrategy;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.prorefactor.treeparser.ParseUnit;
@@ -73,6 +77,7 @@ public class ANTLR4ParserTest {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
+    session.getSchema().createAlias("dictdb", "sports2000");
 
     tempDir.mkdirs();
   }
@@ -304,16 +309,24 @@ public class ANTLR4ParserTest {
     try {
       ProgressLexer lexer = new ProgressLexer(session, new FileInputStream(file), file.getAbsolutePath(), false);
       lexer.setMergeNameDotInId(true);
-      
-      // lexer.addTypeNameTokenFilter();
+
       Proparse parser = new Proparse(new CommonTokenStream(lexer));
       parser.initAntlr4(session, lexer.getFilenameList());
       parser.setProfile(true);
-      parser.removeErrorListeners();
-      parser.addErrorListener(new DescriptiveErrorListener());
-      // parser.setTrace(true);
-      // parser.addErrorListener(new DiagnosticErrorListener(false));
-      ParseTree tree = parser.program();
+      parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+      parser.setErrorHandler(new BailErrorStrategy());
+
+      ParseTree tree;
+      try {
+        tree = parser.program();
+      } catch (ParseCancellationException caught) {
+        System.err.println("Switching to LL mode");
+        parser.setErrorHandler(new ProparseErrorStrategy());
+        parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+        parser.removeErrorListeners();
+        parser.addErrorListener(new DescriptiveErrorListener());
+        tree = parser.program();
+      }
       JPNode root4 = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream()).visit(
           tree).build(parser.getParserSupport());
       displayParseInfo(parser.getParseInfo());

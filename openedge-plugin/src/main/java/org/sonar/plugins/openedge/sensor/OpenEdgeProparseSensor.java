@@ -61,6 +61,7 @@ import org.prorefactor.proparse.antlr4.IncludeFileNotFoundException;
 import org.prorefactor.proparse.antlr4.JPNodeVisitor;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.proparse.antlr4.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -403,15 +404,24 @@ public class OpenEdgeProparseSensor implements Sensor {
       ProgressLexer lexer = new ProgressLexer(session, InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), false);
       lexer.setMergeNameDotInId(true);
       Proparse parser = new Proparse(new CommonTokenStream(lexer));
+      parser.initAntlr4(session, lexer.getFilenameList());
       if (settings.useANTLR4Profiler())
         parser.setProfile(true);
       parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
-      parser.removeErrorListeners();
-      parser.addErrorListener(new DescriptiveErrorListener());
       parser.setErrorHandler(new BailErrorStrategy());
-      
-      parser.initAntlr4(session, lexer.getFilenameList());
-      ParseTree tree = parser.program();
+
+      ParseTree tree;
+      try {
+        tree = parser.program();
+      } catch (ParseCancellationException caught) {
+        LOG.warn("Parser switching to LL prediction mode for {}", InputFileUtils.getRelativePath(file, context.fileSystem()));
+        parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+        parser.setErrorHandler(new ProparseErrorStrategy());
+        parser.removeErrorListeners();
+        parser.addErrorListener(new DescriptiveErrorListener());
+        tree = parser.program();
+      }
+
       long time1 = System.currentTimeMillis() - startTime;
       parse4Time += time1;
       JPNodeVisitor visitor = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
@@ -434,8 +444,6 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.error("Unable to parse " + file + " - IOException was caught - Please report this issue", caught);
       }
       return;
-    } catch (ParseCancellationException caught) {
-      LOG.error("Parse cancelled for {}", InputFileUtils.getRelativePath(file, context.fileSystem()));
     } catch (Throwable caught) {
       LOG.error("Error during code parsing for " + InputFileUtils.getRelativePath(file, context.fileSystem()), caught);
     }
