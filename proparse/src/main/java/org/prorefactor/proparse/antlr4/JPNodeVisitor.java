@@ -2739,6 +2739,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
     assert ctx.getChildCount() >= 3;
 
     JPNode.Builder node = visit(ctx.getChild(1));
+    if (node == null)
+      return null;
     JPNode.Builder left = visit(ctx.getChild(0));
     JPNode.Builder right = visit(ctx.getChild(2));
     node.setDown(left);
