@@ -343,7 +343,7 @@ public class ANTLR4ParserTest {
 
       assertEquals(root2.compareTo(root4, 0), 0);
       assertEquals(parser2.support.compareTo(parser.getParserSupport()), 0);
-    } catch (ANTLRException | IOException uncaught) {
+    } catch (ANTLRException | IOException | RuntimeException uncaught) {
       System.err.println(uncaught);
     }
   }
