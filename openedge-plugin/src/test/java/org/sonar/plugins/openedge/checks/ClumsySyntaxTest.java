@@ -36,7 +36,7 @@ public class ClumsySyntaxTest extends AbstractTest {
     ruleKey = RuleKey.parse("rssw-oe-main:ClumsySyntax");
   }
 
-  @Test
+  @Test(enabled=false)
   public void test1() {
     InputFile inputFile = getInputFile("clumsy01.p");
     ClumsySyntax rule = new ClumsySyntax(ruleKey, context, null);

@@ -41,25 +41,6 @@ public class ClumsySyntax extends OpenEdgeProparseCheck {
 
   @Override
   public void execute(InputFile file, ParseUnit unit) {
-    for (JPNode node : unit.getTopNode().queryStateHead(ABLNodeType.IF)) {
-      JPNode expression = node.getFirstChild();
-      JPNode then = expression.getNextSibling();
-      JPNode block = then.getNextSibling();
-      if ((block == null) || (block.getNodeType() == ABLNodeType.PERIOD) || (block.getNodeType() == ABLNodeType.ELSE)) {
-        reportIssue(file, node, "No code block in IF statement");
-      }
-
-      JPNode elseNode = block;
-      while ((elseNode != null) && (elseNode.getNodeType() != ABLNodeType.EOF)
-          && (elseNode.getNodeType() != ABLNodeType.ELSE)) {
-        elseNode = elseNode.getNextSibling();
-      }
-      if (elseNode != null) {
-        if ((elseNode.getFirstChild() == null) || (elseNode.getFirstChild().getNodeType() == ABLNodeType.PERIOD)) {
-          reportIssue(file, elseNode, "No code block in ELSE statement");
-        }
-      }
-    }
     if (unit.getRootScope().isInterface() || unit.getRootScope().isAbstractClass()) {
       for (JPNode node : unit.getTopNode().queryStateHead(ABLNodeType.METHOD)) {
         JPNode lastChild = node.getLastDescendant();
