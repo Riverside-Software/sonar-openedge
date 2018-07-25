@@ -4,7 +4,7 @@
 
   <groupId>eu.rssw.openedge.parsers</groupId>
   <artifactId>profiler-parser</artifactId>
-  <version>2.1.6</version>
+  <version>2.1.7-SNAPSHOT</version>
 
   <name>OpenEdge profiler output lexer and parser</name>
   <url>https://github.com/Riverside-Software/sonar-openedge</url>
