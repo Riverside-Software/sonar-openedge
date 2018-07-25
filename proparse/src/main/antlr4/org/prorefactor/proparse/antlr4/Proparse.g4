@@ -356,6 +356,7 @@ class_statement:
   |  destructorstate
   |  methodstate
   |  ext_procedurestate // Only external procedures are accepted
+  |  ext_functionstate  // Only FUNCTION ... IN ... are accepted
   ;
 
 pseudfn: // TRANSLATED
@@ -2618,6 +2619,21 @@ function_param: // TRANSLATED
        // ## = #([INPUT], ##);
     }
     # functionParamStandard
+  ;
+
+ext_functionstate:
+    // You don't see it in PSC's grammar, but the compiler really does insist on a datatype.
+    f=FUNCTION
+    id=identifier { support.funcBegin($id.text); }
+    ( RETURNS | RETURN )? ( CLASS type_name | datatype_var )
+    extentphrase?
+    PRIVATE?
+    function_params?
+    ( { _input.LA(2) == SUPER }? IN_KW SUPER
+    | ( MAP TO? identifier )? IN_KW expression
+    )
+    ( LEXCOLON | PERIOD )
+    { support.funcEnd(); }
   ;
 
 getstate: // TRANSLATED
