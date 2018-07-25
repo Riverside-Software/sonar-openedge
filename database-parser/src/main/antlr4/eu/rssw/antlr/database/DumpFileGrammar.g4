@@ -20,7 +20,7 @@
 grammar DumpFileGrammar;
 
 dump:
-  dump_type* footer?;
+  dump_type* footer? EOF;
 
 dump_type:
   annotation | addDatabase | addSequence | addTable | addField | addIndex | addConstraint | updateField | renameField | renameIndex | updateIndex | updateIndexBP | dropIndex | dropField | dropTable | updateTable;
@@ -77,7 +77,7 @@ addSequenceOption:
   ;
 
 addTable:
-    'ADD' 'TABLE' table=QUOTED_STRING ('TYPE' ('SQL' | 'MSS' | 'ORACLE' | 'ODBC'))? options=addTableOption* triggers=tableTrigger*;
+    'ADD' 'TABLE' table=QUOTED_STRING ('TYPE' ('SQL' | 'MSS' | 'ORACLE' | 'ODBC' | 'PROGRESS'))? ( addTableOption | tableTrigger)*;
 
 addTableOption:
     'MULTITENANT' val=('yes' | 'no')   # tableMultitenant
@@ -148,7 +148,7 @@ tableTrigger:
       | 'DELETE');
 
 updateTable:
-    'UPDATE' 'TABLE' table=QUOTED_STRING (addTableOption | updateTableOption)* triggers=tableTrigger*;
+    ( 'UPDATE' | 'CHANGE' ) 'TABLE' table=(QUOTED_STRING | UNQUOTED_STRING) (addTableOption | updateTableOption)* triggers=tableTrigger*;
 
 dropTable:
     'DROP' 'TABLE' table=QUOTED_STRING;
@@ -187,7 +187,7 @@ addFieldOption:
   | 'VALEXP' ('?' | QUOTED_STRING)          # fieldValExp
   | 'VALMSG' QUOTED_STRING                  # fieldValMsg
   | 'VALMSG-SA' QUOTED_STRING               # fieldValMsgSA
-  | 'HELP' QUOTED_STRING                    # fieldHelp
+  | 'HELP' ('?' | QUOTED_STRING )           # fieldHelp
   | 'HELP-SA' QUOTED_STRING                 # fieldHelpSA
   | 'EXTENT' val=NUMBER                     # fieldExtent 
   | 'DECIMALS' ('?' | NUMBER)               # fieldDecimals
@@ -246,7 +246,7 @@ dropField:
     'DROP' 'FIELD' field=QUOTED_STRING 'OF' table=QUOTED_STRING;
 
 addIndex:
-    'ADD' 'INDEX' index=QUOTED_STRING 'ON' table=QUOTED_STRING addIndexOption* indexField*;
+    'ADD' uniq='UNIQUE'? 'INDEX' index=QUOTED_STRING 'ON' table=QUOTED_STRING addIndexOption* indexField*;
 
 addIndexOption:
     'IS-LOCAL'                      # indexIsLocal

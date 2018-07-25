@@ -12,6 +12,8 @@
  *******************************************************************************/ 
 package org.prorefactor.proparse;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -101,6 +103,32 @@ public class RootSymbolScope extends SymbolScope {
       return ABLNodeType.USER_FUNC.getType();
 
     return 0;
+  }
+
+  // TEMP-ANTLR4
+  public int compareTo(RootSymbolScope other) {
+    if (super.compareTo(other) != 0) {
+      return 3;
+    }
+
+    if (!String.join(",", functionSet).equals(String.join(",", other.functionSet))) {
+      System.err.println("Functions: " + String.join(",", functionSet) + " *** " + String.join(",", other.functionSet));
+      return 1;
+    }
+    if (!String.join(",", methodSet).equals(String.join(",", other.methodSet))) {
+      System.err.println("Methods: " + String.join(",", methodSet) + " *** " + String.join(",", other.methodSet));
+      return 2;
+    }
+
+    return 0;
+  }
+
+  // TEMP-ANTLR4
+  public void writeScope(Writer writer) throws IOException {
+    writer.write("*** RootSymbolScope *** \n");
+    super.writeScope(writer);
+    functionSet.stream().sorted().forEach(e -> { try { writer.write("Function " + e + "\n"); } catch (IOException uncaught) { } } );
+    methodSet.stream().sorted().forEach(e -> { try { writer.write("Method " + e + "\n"); } catch (IOException uncaught) { } } );
   }
 
 }

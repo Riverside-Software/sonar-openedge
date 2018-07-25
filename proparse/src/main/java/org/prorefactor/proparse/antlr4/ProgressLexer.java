@@ -142,11 +142,11 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    * @param lexOnly Don't use preprocessor
    * @throws UncheckedIOException 
    */
-  public ProgressLexer(RefactorSession session, InputStream input, String fileName, IntegerIndex<String> filenameList, boolean lexOnly) {
+  public ProgressLexer(RefactorSession session, InputStream input, String fileName, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
+    this.filenameList = new IntegerIndex<>();
     this.ppSettings = session.getProparseSettings();
     this.session = session;
-    this.filenameList = filenameList;
     this.lexOnly = lexOnly;
 
     // Create input source with flag isPrimaryInput=true
@@ -166,6 +166,13 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     TokenSource filter1 = new TokenList(postlexer);
     TokenSource filter2 = new MultiChannelTokenSource(filter1);
     wrapper = new FunctionKeywordTokenFilter(filter2);
+  }
+
+  /**
+   * @see Lexer#setMergeNameDotInId(boolean)
+   */
+  public void setMergeNameDotInId(boolean merge) {
+    lexer.setMergeNameDotInId(merge);
   }
 
   public String getMainFileName() {

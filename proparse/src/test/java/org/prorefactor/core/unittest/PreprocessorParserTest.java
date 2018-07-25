@@ -267,8 +267,6 @@ public class PreprocessorParserTest {
     testVariable(unit.getTopNode(), "var34");
   }
 
-  // TODO OPSYS, PROVERSION and PROPATH functions
-
   @Test
   public void testRIndex1()  {
     testVariable(unit.getTopNode(), "var35");
@@ -376,4 +374,17 @@ public class PreprocessorParserTest {
   public void testSubstring5()  {
     testVariable(unit.getTopNode(), "var75");
   }
+
+  // TODO OPSYS, PROVERSION functions
+  @Test
+  public void testPropath() {
+    testVariable(unit.getTopNode(), "var76");
+  }
+
+  // TODO OPSYS, PROVERSION functions
+  @Test
+  public void testPropath2() {
+    testNoVariable(unit.getTopNode(), "var77");
+  }
+
 }

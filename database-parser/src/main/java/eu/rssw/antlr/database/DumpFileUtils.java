@@ -78,6 +78,8 @@ public final class DumpFileUtils {
     DumpFileGrammarLexer lexer = new DumpFileGrammarLexer(CharStreams.fromReader(reader));
     lexer.removeErrorListeners();
     lexer.addErrorListener(listener);
+
+    // Using SLL first proved not to be useful for the DF parser, so we directly parse with LL prediction mode
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     DumpFileGrammarParser parser = new DumpFileGrammarParser(tokens);
     parser.removeErrorListeners();

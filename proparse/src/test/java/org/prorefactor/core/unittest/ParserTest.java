@@ -14,12 +14,16 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.StringWriter;
 import java.util.List;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -130,6 +134,13 @@ public class ParserTest {
     assertEquals(stmts.get(2).query(ABLNodeType.GETCODEPAGES).size(), 1);
     assertEquals(stmts.get(3).query(ABLNodeType.GETCODEPAGE).size(), 0);
     assertEquals(stmts.get(3).query(ABLNodeType.GETCODEPAGES).size(), 1);
+  }
+
+  @Test
+  public void testConnectDatabase() throws ANTLRException {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("connect database dialog box".getBytes()), "<unnamed>", session);
+    unit.parse();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CONNECT).size(), 1);
   }
 
   /**

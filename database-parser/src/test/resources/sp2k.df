@@ -254,9 +254,8 @@ ADD FIELD "Phone" OF "BillTo" AS character
   HELP "Please enter the phone number."
   ORDER 100
 
-ADD INDEX "custnumbillto" ON "BillTo" 
+ADD UNIQUE INDEX "custnumbillto" ON "BillTo" 
   AREA "Order"
-  UNIQUE
   PRIMARY
   INDEX-FIELD "CustNum" ASCENDING 
   INDEX-FIELD "BillToID" ASCENDING 

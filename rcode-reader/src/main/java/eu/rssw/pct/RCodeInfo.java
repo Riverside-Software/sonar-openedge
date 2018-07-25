@@ -67,9 +67,16 @@ public class RCodeInfo {
 
   // Segment table values
   private static final int SEGMENT_TABLE_OFFSET_INITIAL_VALUE_SEGMENT_OFFSET = 0;
-  private static final int SEGMENT_TABLE_OFFSET_INITIAL_VALUE_SEGMENT_SIZE = 16;
+  private static final int SEGMENT_TABLE_OFFSET_ACTION_SEGMENT_OFFSET = 4;
+  private static final int SEGMENT_TABLE_OFFSET_ECODE_SEGMENT_OFFSET = 8;
   private static final int SEGMENT_TABLE_OFFSET_DEBUG_SEGMENT_OFFSET = 12;
+  private static final int SEGMENT_TABLE_OFFSET_INITIAL_VALUE_SEGMENT_SIZE = 16;
+  private static final int SEGMENT_TABLE_OFFSET_ACTION_SEGMENT_SIZE = 20;
+  private static final int SEGMENT_TABLE_OFFSET_ECODE_SEGMENT_SIZE = 24;
   private static final int SEGMENT_TABLE_OFFSET_DEBUG_SEGMENT_SIZE = 28;
+  private static final int SEGMENT_TABLE_OFFSET_IPACS_TABLE_SIZE = 32;
+  private static final int SEGMENT_TABLE_OFFSET_FRAME_SEGMENT_TABLE_SIZE = 34;
+  private static final int SEGMENT_TABLE_OFFSET_TEXT_SEGMENT_TABLE_SIZE = 36;
 
   protected ByteOrder order;
   protected int version;
@@ -85,6 +92,13 @@ public class RCodeInfo {
   protected int initialValueSegmentSize;
   protected int debugSegmentOffset;
   protected int debugSegmentSize;
+  protected int actionSegmentOffset;
+  protected int actionSegmentSize;
+  protected int ecodeSegmentOffset;
+  protected int ecodeSegmentSize;
+  protected int ipacsTableSize;
+  protected int frameSegmentTableSize;
+  protected int textSegmentTableSize;
 
   // From type block
   private boolean isClass = false;
@@ -126,8 +140,10 @@ public class RCodeInfo {
     }
 
     if (typeBlockSize > 0) {
-      long bytesRead = input.skip(rcodeSize - debugSegmentOffset - debugSegmentSize);
-      if (bytesRead != rcodeSize - debugSegmentOffset - debugSegmentSize) {
+      int skip = debugSegmentOffset > 0 ? rcodeSize - debugSegmentOffset - debugSegmentSize
+          : rcodeSize - initialValueSegmentSize - debugSegmentSize;
+      long bytesRead = input.skip(skip);
+      if (bytesRead != skip) {
         throw new InvalidRCodeException("Not enough bytes to reach type block");
       }
       processTypeBlock(input, out);
@@ -169,6 +185,12 @@ public class RCodeInfo {
       rcodeSize = ByteBuffer.wrap(header, HEADER_OFFSET_RCODE_SIZE, Integer.BYTES).order(order).getInt();
     } else {
       throw new InvalidRCodeException("Only v11 rcode is supported");
+    }
+
+    if (((Math.abs(version) & 0x3FFF) >= 1200) && (input.skip(16) != 16)) {
+      // OE12 header is 16 bytes larger, so we just consume them...
+      // And OE12 ESAP version number is negative
+      throw new InvalidRCodeException("Not enough bytes in OE12 header");
     }
   }
 
@@ -221,8 +243,16 @@ public class RCodeInfo {
 
     initialValueSegmentOffset = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_INITIAL_VALUE_SEGMENT_OFFSET, Integer.BYTES).order(order).getInt();
     initialValueSegmentSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_INITIAL_VALUE_SEGMENT_SIZE, Integer.BYTES).order(order).getInt();
+    actionSegmentOffset = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_ACTION_SEGMENT_OFFSET, Integer.BYTES).order(order).getInt();
+    actionSegmentSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_ACTION_SEGMENT_SIZE, Integer.BYTES).order(order).getInt();
+    ecodeSegmentOffset = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_ECODE_SEGMENT_OFFSET, Integer.BYTES).order(order).getInt();
+    ecodeSegmentSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_ECODE_SEGMENT_SIZE, Integer.BYTES).order(order).getInt();
     debugSegmentOffset = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_DEBUG_SEGMENT_OFFSET, Integer.BYTES).order(order).getInt();
     debugSegmentSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_DEBUG_SEGMENT_SIZE, Integer.BYTES).order(order).getInt();
+    
+    ipacsTableSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_IPACS_TABLE_SIZE, Short.BYTES).order(order).getShort();
+    frameSegmentTableSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_FRAME_SEGMENT_TABLE_SIZE, Short.BYTES).order(order).getShort();
+    textSegmentTableSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_TEXT_SEGMENT_TABLE_SIZE, Short.BYTES).order(order).getShort();
   }
 
   void processTypeBlock(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {

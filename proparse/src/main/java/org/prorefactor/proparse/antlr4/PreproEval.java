@@ -41,6 +41,7 @@ import org.prorefactor.proparse.antlr4.PreprocessorParser.OpsysFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.OrContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.PlusContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.PreproIfEvalContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.PropathFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.ProversionFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.QuotedStringContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.RIndexFunctionContext;
@@ -252,6 +253,11 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
       return StringFuncs.rtrim(getString(visit(ctx.expr(0))), getString(visit(ctx.trimChars)));
     else
       return StringFuncs.rtrim(getString(visit(ctx.expr(0))));
+  }
+
+  @Override
+  public Object visitPropathFunction(PropathFunctionContext ctx) {
+    return propath(settings);
   }
 
   @Override

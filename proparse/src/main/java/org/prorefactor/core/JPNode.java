@@ -12,6 +12,7 @@
  *******************************************************************************/ 
 package org.prorefactor.core;
 
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -503,8 +504,6 @@ public class JPNode implements AST {
       return attrMap.get(key);
     }
     switch (key) {
-      case IConstants.NODE_TYPE_KEYWORD:
-        return getNodeType().isKeyword() ? 1 : 0;
       case IConstants.ABBREVIATED:
         return isAbbreviated() ? 1 : 0;
       case IConstants.SOURCENUM:
@@ -852,6 +851,97 @@ public class JPNode implements AST {
     for (AST next = getNextSibling(); next != null; next = next.getNextSibling()) {
       ((JPNode) next).up = this.up;
     }
+  }
+
+  /**
+   * @return Number total number of JPNode objects 
+   */
+  public int size() {
+    int sz = 1;
+    for (JPNode node : getDirectChildren()) {
+      sz += node.size();
+    }
+    return sz;
+  }
+
+  /**
+   * @return Number total number of natural JPNode objects 
+   */
+  public int naturalSize() {
+    int sz = isNatural() ? 1 : 0;
+    for (JPNode node : getDirectChildren()) {
+      sz += node.naturalSize();
+    }
+    return sz;
+  }
+
+  /**
+   * Internal use only, should be removed after migration to ANTLR4
+   * @return 0 if identical node objects, &gt; 0 if different
+   */
+  // TEMP-ANTLR4
+  public int compareTo(org.prorefactor.proparse.antlr4.JPNode other, int level) {
+    if ((token.getNodeType() == ABLNodeType.EOF) && (other.getNodeType() == ABLNodeType.EOF_ANTLR4))
+      return 0;
+    if (other == null) {
+      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- No token");
+      // Not available
+      return 1;
+    }
+    if (!token.getText().equals(other.getText()) || (token.getNodeType() != other.getNodeType())) {
+      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- Token: " + this.token + " -- " + other.getText() + " ** " + other.getNodeType());
+      // Different token
+      return 2;
+    }
+
+    // On attributes
+    if (attrMap != null) {
+      for (Map.Entry<Integer,Integer> entry : attrMap.entrySet()) {
+        if (!entry.getValue().equals(other.attrGet(entry.getKey()))) {
+          System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- AttrMap[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGet(entry.getKey()));
+          return 7;
+        }
+      }
+    }
+    if (attrMapStrings != null) {
+      for (Map.Entry<String, String> entry : attrMapStrings.entrySet()) {
+        if (!entry.getValue().equals(other.attrGetS(entry.getKey()))) {
+          System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- AttrMapStrings[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGetS(entry.getKey()));
+          return 8;
+        }
+      }
+    }
+    if (stringAttributes != null) {
+      for (Map.Entry<Integer, String> entry : stringAttributes.entrySet()) {
+        if (!entry.getValue().equals(other.attrGetS(entry.getKey()))) {
+          System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- StringAttributes[" + entry.getKey() + "]: " + entry.getValue() + " -- " + other.attrGetS(entry.getKey()));
+          return 9;
+        }
+      }
+    }
+
+    // Difference on 'down' node
+    if ((down == null) && (other.getFirstChild() != null)) {
+      System.err.println(CharBuffer.allocate(level+1).toString().replace('\0', ' ') + " -- No down: " + this);
+      return 3;
+    } else if ((down != null) && (down.compareTo(other.getFirstChild(), level + 1) != 0)) {
+      System.err.println(CharBuffer.allocate(level+1).toString().replace('\0', ' ') + " -- Down:  " + this.down + " -- " + other.getFirstChild());
+      return 4;
+    }
+
+    // Difference on 'right' node
+    if ((right == null) && (other.getNextSibling() != null)) {
+      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- No right: " + this);
+      return 5;
+    } else if ((right != null) && (right.compareTo(other.getNextSibling(), level) != 0)) {
+      System.err.println(CharBuffer.allocate(level).toString().replace('\0', ' ') + " -- Right: " + this.right + " -- " + other.getNextSibling());
+      return 6;
+    }
+
+    // Top and left don't have to be compared as they are computed after the parse phase
+    // Attributes are not yet compared
+
+    return 0;
   }
 
   @Override

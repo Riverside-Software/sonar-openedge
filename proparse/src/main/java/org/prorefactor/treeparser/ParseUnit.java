@@ -31,6 +31,7 @@ import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
 import org.prorefactor.proparse.IntegerIndex;
+import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.refactor.RefactorSession;
@@ -60,8 +61,8 @@ public class ParseUnit {
   private final File file;
   private final InputStream input;
   private final String relativeName;
-  private final IntegerIndex<String> fileNameList;
 
+  private IntegerIndex<String> fileNameList;
   private ProgramRootNode topNode;
   private IncludeRef macroGraph;
   private boolean appBuilderCode;
@@ -71,6 +72,8 @@ public class ParseUnit {
   private Document xref = null;
   private TypeInfo typeInfo = null;
   private List<Integer> trxBlocks;
+  // TEMP-ANTLR4
+  private ParserSupport support;
 
   public ParseUnit(File file, RefactorSession session) {
     this(file, file.getPath(), session);
@@ -81,7 +84,6 @@ public class ParseUnit {
     this.input = null;
     this.relativeName = relativeName;
     this.session = session;
-    this.fileNameList = new IntegerIndex<>();
   }
 
   public ParseUnit(InputStream input, String relativeName, RefactorSession session) {
@@ -89,7 +91,6 @@ public class ParseUnit {
     this.input = input;
     this.relativeName = relativeName;
     this.session = session;
-    this.fileNameList = new IntegerIndex<>();
   }
 
   public TreeParserRootSymbolScope getRootScope() {
@@ -110,6 +111,8 @@ public class ParseUnit {
   }
 
   public String getIncludeFileName(int index) {
+    if (fileNameList == null)
+      return "";
     return Strings.nullToEmpty(fileNameList.getValue(index));
   }
   /** 
@@ -139,11 +142,11 @@ public class ParseUnit {
    * @throws UncheckedIOException If main file can't be opened
    */
   public TokenSource lex4() {
-    return new ProgressLexer(session, getInputStream(), relativeName, fileNameList, true);
+    return new ProgressLexer(session, getInputStream(), relativeName, true);
   }
 
   public TokenSource preprocess4() {
-    return new ProgressLexer(session, getInputStream(), relativeName, fileNameList, false);
+    return new ProgressLexer(session, getInputStream(), relativeName, false);
   }
 
   /**
@@ -152,12 +155,12 @@ public class ParseUnit {
    * @throws UncheckedIOException If main file can't be opened
    */
   public TokenStream lex() {
-    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, fileNameList, true);
+    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, true);
     return lexer.getANTLR2TokenStream(false);
   }
 
   public TokenStream preprocess() {
-    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, fileNameList, false);
+    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, false);
     return lexer.getANTLR2TokenStream(true);
   }
 
@@ -168,7 +171,7 @@ public class ParseUnit {
    */
   public void lexAndGenerateMetrics() {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
-    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, fileNameList, true);
+    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, true);
     TokenStream stream = lexer.getANTLR2TokenStream(false);
     try {
       Token tok = stream.nextToken();
@@ -185,18 +188,20 @@ public class ParseUnit {
   public void parse() throws ANTLRException {
     LOGGER.trace("Entering ParseUnit#parse()");
     
-    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, fileNameList, false);
+    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, false);
     ProParser parser = new ProParser(lexer.getANTLR2TokenStream(true));
     parser.initAntlr4(session, lexer.getFilenameList());
     parser.program();
     ((ProgramRootNode) parser.getAST()).backLinkAndFinalize();
     lexer.parseComplete();
 
+    fileNameList = lexer.getFilenameList();
     macroGraph = lexer.getMacroGraph();
     appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
     sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
     metrics = lexer.getMetrics();
     topNode = (ProgramRootNode) parser.getAST();
+    support = parser.support;
 
     LOGGER.trace("Exiting ParseUnit#parse()");
   }
@@ -260,6 +265,11 @@ public class ParseUnit {
 
   public List<Integer> getTransactionBlocks() {
     return trxBlocks;
+  }
+
+  // TEMP-ANTLR4
+  public ParserSupport getSupport() {
+    return support;
   }
 
   public RefactorSession getSession() {

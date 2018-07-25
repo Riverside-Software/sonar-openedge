@@ -27,6 +27,7 @@ import org.sonar.plugins.openedge.api.CheckRegistrar;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
+import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.checks.LargeTransactionScope;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 
@@ -50,7 +51,7 @@ public class OpenEdgeRulesRegistrar implements CheckRegistrar {
    */
   @SuppressWarnings("unchecked")
   public static Class<? extends OpenEdgeProparseCheck>[] ppCheckClasses() {
-    return new Class[] {SharedObjectsAnalyzer.class, LargeTransactionScope.class};
+    return new Class[] {SharedObjectsAnalyzer.class, LargeTransactionScope.class, ClumsySyntax.class};
   }
 
   /**

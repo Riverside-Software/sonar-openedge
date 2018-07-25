@@ -70,12 +70,14 @@ public class ProToken implements WritableToken {
   private int macroSourceNum;
 
   private String analyzeSuspend = null;
+  private ProToken hiddenBefore = null;
 
   public ProToken(ABLNodeType type, String text) {
     this.type = type;
     this.channel = DEFAULT_CHANNEL;
     this.text = text;
-    this.fileIndex = -1;
+    this.fileIndex = 0;
+    this.charPositionInLine = 0;
   }
 
   public ProToken(int type, int channel, int start, int stop, int line, int col) {
@@ -230,6 +232,10 @@ public class ProToken implements WritableToken {
   @Override
   public void setTokenIndex(int index) {
     this.index = index;
+  }
+
+  public void setHiddenBefore(ProToken hiddenBefore) {
+    this.hiddenBefore = hiddenBefore;
   }
 
   @Override
