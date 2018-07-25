@@ -3,19 +3,6 @@ Furthermore, they slow down the internal parser, so support for those quirks wil
 
 <h2>Syntax #1</h2>
 <pre>
-// Code block is optional after THEN or ELSE
-IF TRUE THEN . ELSE .
-// Use this syntax:
-IF TRUE THEN DO:
-  // No code
-END.
-ELSE DO:
-  // No code
-END.
-</pre>
-
-<h2>Syntax #2</h2>
-<pre>
 // Abstract methods or method prototypes defined in interfaces can be ended with a colon instead of a period
 METHOD PUBLIC ABSTRACT VOID mthd1():  // Ending with colon is OK for the compiler
 METHOD PUBLIC ABSTRACT VOID mthd2().
