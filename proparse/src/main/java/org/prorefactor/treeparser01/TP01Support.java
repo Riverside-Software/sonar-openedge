@@ -418,7 +418,7 @@ public class TP01Support implements ITreeParserAction {
    * @see #defineTableFieldFinalize(Object)
    */
   @Override
-  public Object defineTableFieldInitialize(JPNode idNode) {
+  public Symbol defineTableFieldInitialize(JPNode idNode) {
     LOG.trace("Entering defineTableFieldInitialize {}", idNode);
     FieldBuffer fieldBuff = rootScope.defineTableFieldDelayedAttach(idNode.getText(), currDefTable);
     currSymbol = fieldBuff;
