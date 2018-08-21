@@ -95,26 +95,14 @@ class_code_block:
 blockorstate: // TRANSLATED
     // Method calls and other expressions can stand alone as statements.
     // Many functions are ambiguous with statements on the first few tokens.
-    // The order listed here is important.
-    // Check on assignment before statement. Something like <empty = 1.> would
-    // otherwise take us into the EMPTY TEMPTABLE statement, and then barf when
-    // we don't get a TEMPTABLE token.
     PERIOD
   | annotation
   | dot_comment 
   | labeled_block
   | dynamicnewstate
-  | assignStatement1
+  | assignstate2
   | statement
-    // Anything followed by an OBJCOLON is going to be an expression statement.
-    // We have to disambiguate, for example, THIS-OBJECT:whatever from the THIS-OBJECT statement.
-    // (I don't know why the lookahead didn't take care of that.)
   | expression_statement
-    // Any possible identifier followed by a parameterlist is assumed to be a function or method call.
-    // Method names that are reserved keywords must be prefixed with an object reference or THIS-OBJECT,
-    // so we don't have to worry about reserved keyword method names here.
-    // We might not know what all the method names are due to inheritance from .r files
-    // (no source code available, like progress.lang.*).
   ;
 
 class_blockorstate:
@@ -469,7 +457,7 @@ builtinfunc: // TRANSLATED
   |  recordfunc
   ;
 
-// ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
+// If you add a function keyword here, also add option NodeTypesOption.MAY_BE_REGULAR_FUNC to ABLNodeType entry
 argfunc: // TRANSLATED 
     (  AACBIT
     |  AAMSG
@@ -616,7 +604,7 @@ optargfunc: // TRANSLATED
     optfunargs
     ;
 
-// ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
+// If you add a function keyword here, also add option NodeTypesOption.MAY_BE_REGULAR_FUNC to ABLNodeType entry
 recordfunc: // TRANSLATED
     (  AMBIGUOUS
     |  AVAILABLE
@@ -634,7 +622,7 @@ recordfunc: // TRANSLATED
     (LEFTPAREN record RIGHTPAREN | record)
   ;
 
-// ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
+// If you add a function keyword here, also add option NodeTypesOption.MAY_BE_NO_ARG_FUNC to ABLNodeType entry
 noargfunc: // TRANSLATED
      AACONTROL
   |  AAPCONTROL
@@ -787,7 +775,7 @@ lockhow: // TRANSLATED
 expression: // TRANSLATED
     MINUS exprt  # expressionMinus
   | PLUS exprt   # expressionPlus
-  | expression ( STAR | MULTIPLY | SLASH | DIVIDE | MODULO) expression # expressionOp1
+  | expression ( STAR | MULTIPLY | SLASH | DIVIDE | MODULO ) expression # expressionOp1
   | expression ( PLUS | MINUS) expression # expressionOp2
   | expression ( EQUAL | EQ | GTORLT | NE | RIGHTANGLE | GTHAN | GTOREQUAL | GE | LEFTANGLE | LTHAN | LTOREQUAL | LE ) expression # expressionComparison
   | expression ( MATCHES | BEGINS | CONTAINS ) expression # expressionStringComparison
@@ -838,7 +826,6 @@ exprt2: // TRANSLATED
 widattr: // TRANSLATED
     widname attr_colon  # widattrWidName
   | exprt2 attr_colon   # widattrExprt2
-  | # widattrEmpty // empty alternative (pseudo hoisting)
   ;
 
 attr_colon: // TRANSLATED
@@ -902,8 +889,7 @@ method_param_list: // TRANSLATED
   ;
 
 inuic: // TRANSLATED
-    IN_KW ( MENU | FRAME | BROWSE | SUBMENU | BUFFER ) widgetname   # inuicIn
-  | # inuicEmpty // empty alternative (pseudo hoisting)
+    IN_KW ( MENU | FRAME | BROWSE | SUBMENU | BUFFER ) widgetname
   ;
 
 var_rec_field: // TRANSLATED
@@ -1119,7 +1105,7 @@ assignment_list: // SEMITRANSLATED
   | ( assign_equal when_exp? | assign_field when_exp? )*
   ;
 
-assignStatement1: // TRANSLATED
+assignstate2: // TRANSLATED
     ( pseudfn | widattr | field ) EQUAL expression NOERROR_KW? state_end
   ;
 
@@ -1981,18 +1967,8 @@ defineparameterstate: // TRANSLATED
 
 defineparam_var: // TRANSLATED
     // See PSC's <varprm> rule.
-    defineparam_as?
-    ( casesens_or_not | format_expr | decimals_expr | like_field
-      | initial_constant | label_constant | NOUNDO | extentphrase )*
-  ;
-
-defineparam_as: // TRANSLATED
-    AS
-    ( // Only parameters in a DLL procedure can have HANDLE phrase.
-      HANDLE (TO)? datatype_dll
-    | CLASS type_name
-    | datatype_param
-    )
+    ( AS HANDLE TO? datatype_dll | AS CLASS type_name | AS datatype_param | LIKE field )
+    ( casesens_or_not | format_expr | decimals_expr | initial_constant | label_constant | NOUNDO | extentphrase )*
   ;
 
 definepropertystate: // TRANSLATED
@@ -2666,7 +2642,7 @@ help_const: // TRANSLATED
 
 hidestate: // TRANSLATED
     HIDE stream_name_or_handle?
-    ( ALL | MESSAGE | gwidget* /*  FIXME Should be + */ )? NOPAUSE? in_window_expr? state_end
+    ( ALL | MESSAGE | gwidget+ )? NOPAUSE? in_window_expr? state_end
   ;
 
 ifstate: // TRANSLATED
@@ -3003,7 +2979,7 @@ onstate: // TRANSLATED
         ANYWHERE?
       )
       (  REVERT state_end
-      |  PERSISTENT RUN filenameorvalue (in_expr)? (onstate_run_params)? state_end
+      |  PERSISTENT RUN filenameorvalue in_expr? onstate_run_params? state_end
       |  { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
       )
     )
