@@ -342,6 +342,9 @@ public class OpenEdgeSettings {
     return cpdAnnotations.contains(annotation);
   }
 
+  public boolean displayStackTraceOnError() {
+    return config.getBoolean(Constants.PROPARSE_ERROR_STACKTRACE).orElse(true);
+  }
   /**
    * Returns true if method should be skipped by CPD engine
    * 

@@ -278,7 +278,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       return;
     } catch (RecognitionException caught) {
       LOG.error("Error during code parsing for " + file + " at position " + caught.getFilename() + ":"
-          + caught.getLine() + ":" + caught.getColumn(), caught);
+          + caught.getLine() + ":" + caught.getColumn(), (settings.displayStackTraceOnError() ? caught : null));
       numFailures++;
       NewIssue issue = context.newIssue().forRule(
           RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY));
