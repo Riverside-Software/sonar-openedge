@@ -12,6 +12,12 @@
     <name>Riverside Software</name>
     <url>http://riverside-software.fr</url>
   </organization>
+  <licenses>
+    <license>
+      <name>EPL 1.0</name>
+      <url>https://www.eclipse.org/org/documents/epl-v10.html</url>
+    </license>
+  </licenses>
   <issueManagement>
     <system>GitHub</system>
     <url>https://github.com/Riverside-Software/sonar-openedge/issues</url>
