@@ -1,4 +1,4 @@
-/********************************************************************************
+/*
  * Copyright (c) 2003-2015 John Green
  * Copyright (c) 2015-2018 Riverside Software
  *
@@ -12,7 +12,7 @@
  * which is available at https://www.gnu.org/licenses/lgpl-3.0.txt
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
- ********************************************************************************/
+ */
 
 /*
 
