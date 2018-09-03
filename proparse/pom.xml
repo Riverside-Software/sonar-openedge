@@ -14,8 +14,8 @@
   </organization>
   <licenses>
     <license>
-      <name>EPL 1.0</name>
-      <url>https://www.eclipse.org/org/documents/epl-v10.html</url>
+      <name>EPL 2.0</name>
+      <url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
     </license>
   </licenses>
   <issueManagement>
