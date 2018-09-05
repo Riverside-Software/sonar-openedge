@@ -17,6 +17,10 @@
       <name>EPL 2.0</name>
       <url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
     </license>
+    <license>
+      <name>LGPL 3.0</name>
+      <url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
+    </license>
   </licenses>
   <issueManagement>
     <system>GitHub</system>
@@ -26,6 +30,16 @@
     <system>Jenkins</system>
     <url>https://ci.rssw.eu</url>
   </ciManagement>
+  <scm>
+    <url>https://github.com/Riverside-Software/sonar-openedge</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>gquerret</id>
+      <name>Gilles QUERRET</name>
+    </developer>
+  </developers>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -190,7 +204,7 @@
             <configuration>
               <serverId>ossrh</serverId>
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+              <autoReleaseAfterClose>false</autoReleaseAfterClose>
             </configuration>
           </plugin>
         </plugins>

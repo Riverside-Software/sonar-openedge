@@ -21,7 +21,6 @@
       <url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
     </license>
   </licenses>
-
   <issueManagement>
     <system>GitHub</system>
     <url>https://github.com/Riverside-Software/sonar-openedge/issues</url>
@@ -238,7 +237,7 @@
             <configuration>
               <serverId>ossrh</serverId>
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+              <autoReleaseAfterClose>false</autoReleaseAfterClose>
             </configuration>
           </plugin>
         </plugins>
