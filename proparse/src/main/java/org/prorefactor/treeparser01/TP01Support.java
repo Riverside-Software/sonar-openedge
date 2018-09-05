@@ -948,7 +948,7 @@ public class TP01Support implements ITreeParserAction {
    * However, we *do* need to have a WIP Symbol that can be assigned to the Parameter object, get any EXTENT assigned to
    * it, etc.
    * 
-   * @param datatypeAST The node of the datatype, might be a CLASS node.
+   * @param typeNode The node of the datatype, might be a CLASS node.
    */
   @Override
   public void paramNoName(JPNode typeNode) {

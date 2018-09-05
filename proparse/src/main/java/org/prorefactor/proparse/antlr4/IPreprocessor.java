@@ -24,14 +24,14 @@ public interface IPreprocessor {
   String defined(String argName);
 
   /**
-   * Implementation of &GLOBAL-DEFINE preprocessor function
+   * Implementation of &amp;GLOBAL-DEFINE preprocessor function
    * @param argName Variable name
    * @param argVal And value
    */
   void defGlobal(String argName, String argVal);
 
   /**
-   * Implementation of &SCOPED-DEFINE preprocessor function
+   * Implementation of &amp;SCOPED-DEFINE preprocessor function
    * @param argName Variable name
    * @param argVal And value
    */
@@ -52,20 +52,19 @@ public interface IPreprocessor {
   String getArgText(String argName);
 
   /**
-   * Implementation of &UNDEFINE preprocessor function
+   * Implementation of &amp;UNDEFINE preprocessor function
    * @param argName
    */
   void undef(String argName);
 
   /**
-   * Implementation of &ANALYZE-SUSPEND 
+   * Implementation of &amp;ANALYZE-SUSPEND 
    * @param analyzeSuspend Attributes
    */
   void analyzeSuspend(String analyzeSuspend);
 
   /**
-   * Implementation of &ANALYZE-RESUME 
-   * @param analyzeSuspend Attributes
+   * Implementation of &amp;ANALYZE-RESUME 
    */
   void analyzeResume();
 }

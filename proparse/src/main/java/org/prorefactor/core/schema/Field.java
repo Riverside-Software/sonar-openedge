@@ -35,7 +35,6 @@ public class Field implements IField {
    * Standard constructor.
    * 
    * @param table Use null if you want to assign the field to a table as a separate step.
-   * @see #setTable(Table)
    */
   public Field(String inName, ITable table) {
     this.name = inName;

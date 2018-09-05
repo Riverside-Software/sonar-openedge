@@ -1653,9 +1653,6 @@ public enum ABLNodeType {
 
   /**
    * Get the type name (different than the keyword literal text) for a type number. Any "_KW" suffix is stripped.
-   * 
-   * @param n type number
-   * @return null if out of range
    */
   public String getTypeName() {
     String ret = ProParser._tokenNames[typeNum];

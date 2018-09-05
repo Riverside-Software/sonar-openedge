@@ -354,8 +354,7 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
 
   /**
    * Perfect :-)
-   * 
-   * @see https://xkcd.com/221/
+   * See https://xkcd.com/221/
    */
   @Override
   public Object visitRandomFunction(RandomFunctionContext ctx) {
