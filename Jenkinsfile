@@ -13,6 +13,7 @@ pipeline {
         script {
           withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
             if (("master" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME) || (env.BRANCH_NAME.startsWith("release"))) {
+              // Maven Central deployment:  'mvn -P release clean package verify deploy'
               sh "git rev-parse HEAD > current-commit"
               def currCommit = readFile('current-commit').replace("\n", "").replace("\r", "")
               sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true -Dgit.commit=${currCommit}"
