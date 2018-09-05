@@ -364,7 +364,7 @@ public interface ITreeParserAction {
   /**
    * Called by the tree parser at EVENT statement
    * 
-   * @param methodAST The EVENT node
+   * @param eventAST The EVENT node
    * @param idAST The ID node (event name)
    */
   default void eventBegin(JPNode eventAST, JPNode idAST) throws SemanticException {

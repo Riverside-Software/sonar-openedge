@@ -275,8 +275,6 @@ public class JPNode implements AST {
 
   /**
    * Source number in the macro tree.
-   * 
-   * @see org.prorefactor.macrolevel.PreprocessorEventListener#sourceArray()
    */
   public int getSourceNum() {
     return token.getMacroSourceNum();

@@ -35,8 +35,6 @@ public interface CheckRegistrar {
    * plugin
    * 
    * @param registrarContext the context that will be used by the openedgedb-plugin to retrieve the classes for checks.
-   * @see https://github.com/SonarSource/sonar-java/blob/master/java-squid/src/main/java/org/sonar/plugins/java/api/
-   *      CheckRegistrar.java
    */
   void register(RegistrarContext registrarContext);
 

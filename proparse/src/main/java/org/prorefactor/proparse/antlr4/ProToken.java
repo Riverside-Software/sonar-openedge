@@ -138,7 +138,7 @@ public class ProToken implements WritableToken {
   }
 
   /**
-   * @return Comma-separated list of &ANALYZE-SUSPEND options. Null for code not managed by AppBuilder.
+   * @return Comma-separated list of &amp;ANALYZE-SUSPEND options. Null for code not managed by AppBuilder.
    */
   public String getAnalyzeSuspend() {
     return analyzeSuspend;

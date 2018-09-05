@@ -140,9 +140,8 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    * @param session Current parser session
    * @param input File object of main file
    * @param fileName Referenced under which name
-   * @param filenameList 
    * @param lexOnly Don't use preprocessor
-   * @throws UncheckedIOException 
+   * @throws UncheckedIOException
    */
   public ProgressLexer(RefactorSession session, InputStream input, String fileName, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);

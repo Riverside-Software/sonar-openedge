@@ -54,16 +54,11 @@ import com.google.common.collect.Sets;
 
 /**
  * Utility class which helps setting up an implementation of {@link RulesDefinition} with a list of rule classes
- * annotated with {@link Rule}, {@link RuleProperty} and SQALE annotations:
- * <ul>
- * <li>{@link SqaleSubCharacteristic}</li>
- * <li>Exactly one of:
+ * annotated with {@link Rule}, {@link RuleProperty} and one of:
  * <ul>
  * <li>{@link SqaleConstantRemediation}</li>
  * <li>{@link SqaleLinearRemediation}</li>
  * <li>{@link SqaleLinearWithOffsetRemediation}</li>
- * </ul>
- * </li>
  * </ul>
  * Names and descriptions are also retrieved based on the legacy SonarQube conventions:
  * <ul>
