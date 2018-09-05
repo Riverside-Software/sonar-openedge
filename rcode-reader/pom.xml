@@ -4,7 +4,7 @@
 
   <groupId>eu.rssw.openedge</groupId>
   <artifactId>rcode-reader</artifactId>
-  <version>2.1.7-SNAPSHOT</version>
+  <version>2.1.7</version>
 
   <name>rcode-reader</name>
   <description>rcode reader</description>
