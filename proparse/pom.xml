@@ -52,7 +52,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>eu.rssw.openedge</groupId>
+      <groupId>eu.rssw.openedge.rcode</groupId>
       <artifactId>rcode-reader</artifactId>
       <version>2.1.7</version>
     </dependency>
