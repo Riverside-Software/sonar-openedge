@@ -1,13 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2017-2018 Riverside Software
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/********************************************************************************
+ * Copyright (c) 2015-2018 Riverside Software
  *
- * Contributors:
- *    Gilles Querret - initial API and implementation and/or initial documentation
- *******************************************************************************/ 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * This Source Code may also be made available under the following Secondary
+ * Licenses when the conditions for such availability set forth in the Eclipse
+ * Public License, v. 2.0 are satisfied: GNU Lesser General Public License v3.0
+ * which is available at https://www.gnu.org/licenses/lgpl-3.0.txt
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
+ ********************************************************************************/
 package org.prorefactor.proparse.antlr4;
 
 public interface IPreprocessor {
@@ -20,14 +24,14 @@ public interface IPreprocessor {
   String defined(String argName);
 
   /**
-   * Implementation of &GLOBAL-DEFINE preprocessor function
+   * Implementation of &amp;GLOBAL-DEFINE preprocessor function
    * @param argName Variable name
    * @param argVal And value
    */
   void defGlobal(String argName, String argVal);
 
   /**
-   * Implementation of &SCOPED-DEFINE preprocessor function
+   * Implementation of &amp;SCOPED-DEFINE preprocessor function
    * @param argName Variable name
    * @param argVal And value
    */
@@ -48,20 +52,19 @@ public interface IPreprocessor {
   String getArgText(String argName);
 
   /**
-   * Implementation of &UNDEFINE preprocessor function
+   * Implementation of &amp;UNDEFINE preprocessor function
    * @param argName
    */
   void undef(String argName);
 
   /**
-   * Implementation of &ANALYZE-SUSPEND 
+   * Implementation of &amp;ANALYZE-SUSPEND 
    * @param analyzeSuspend Attributes
    */
   void analyzeSuspend(String analyzeSuspend);
 
   /**
-   * Implementation of &ANALYZE-RESUME 
-   * @param analyzeSuspend Attributes
+   * Implementation of &amp;ANALYZE-RESUME 
    */
   void analyzeResume();
 }
