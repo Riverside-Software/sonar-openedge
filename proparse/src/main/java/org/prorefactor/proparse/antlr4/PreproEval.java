@@ -168,7 +168,7 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
       case PreprocessorParser.MODULO:
         Double m1 = getFloat(visit(ctx.expr(0))) + .5;
         Double m2 = getFloat(visit(ctx.expr(1))) + .5;
-        return new Integer(m1.intValue() % m2.intValue());
+        return Integer.valueOf(m1.intValue() % m2.intValue());
       default:
         return null;
     }
@@ -176,7 +176,7 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
 
   @Override
   public Object visitNot(NotContext ctx) {
-    return new Boolean(!getBool(visit(ctx.expr())));
+    return Boolean.valueOf(!getBool(visit(ctx.expr())));
   }
 
   @Override
