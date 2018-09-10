@@ -33,8 +33,11 @@ public class OpenEdgeProjectHelper {
    * @return ServerID based on the SonarQube version
    */
   public static String getServerId(SensorContext context) {
-    return context.config().get(context.getSonarQubeVersion().isGreaterThanOrEqual(Version.parse("6.7"))
+    String str = context.config().get(context.getSonarQubeVersion().isGreaterThanOrEqual(Version.parse("6.7"))
             ? CoreProperties.SERVER_ID : CoreProperties.PERMANENT_SERVER_ID).orElse("");
+    int dashIndex = str.indexOf('-');
+
+    return (dashIndex == 8) && (str.length() >= 20) ? str.substring(dashIndex + 1) : str;
   }
 
 }
