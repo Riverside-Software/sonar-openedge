@@ -32,10 +32,7 @@ import org.sonarsource.api.sonarlint.SonarLintSide;
 @ScannerSide
 @SonarLintSide
 @ServerSide
-public interface LicenceRegistrar {
-
-  @Deprecated
-  default void register(Licence license) { }
+public interface LicenseRegistrar {
 
   /**
    * Register set of licenses
@@ -44,45 +41,32 @@ public interface LicenceRegistrar {
   default void register(LicenseContext context) { }
 
   public class LicenseContext {
-    private Collection<Licence> licenses = new ArrayList<>();
+    private Collection<License> licenses = new ArrayList<>();
 
-    public final Iterable<Licence> getLicenses() {
+    public final Iterable<License> getLicenses() {
       return licenses;
     }
 
-    public void registerLicence(String permanentId, String customerName, String salt, String repoName, LicenceType type,
+    public void registerLicense(String permanentId, String customerName, String salt, String repoName, LicenseType type,
         byte[] signature, long expirationDate) {
-      licenses.add(new Licence(permanentId, customerName, salt, repoName, type, signature, expirationDate));
+      licenses.add(new License(permanentId, customerName, salt, repoName, type, signature, expirationDate));
     }
   }
 
-  public class Licence {
+  public class License {
     private String permanentId;
     private String customerName;
     private String repositoryName;
-    private LicenceType type;
+    private LicenseType type;
     private long expirationDate;
     private String salt;
     private byte[] signature;
 
-    @Deprecated
-    public Licence() {
-      // For legacy licenses
+    public License() {
+      
     }
 
-    public Licence(String permanentId, String customerName, String salt, String repoName, LicenceType type,
-        byte[] signature, long expirationDate) {
-      this.permanentId = permanentId;
-      this.customerName = customerName;
-      this.repositoryName = repoName;
-      this.salt = salt;
-      this.type = type;
-      this.signature = signature;
-      this.expirationDate = expirationDate;
-    }
-
-    @Deprecated
-    public void registerLicence(String permanentId, String customerName, String salt, String repoName, LicenceType type,
+    public License(String permanentId, String customerName, String salt, String repoName, LicenseType type,
         byte[] signature, long expirationDate) {
       this.permanentId = permanentId;
       this.customerName = customerName;
@@ -117,12 +101,12 @@ public interface LicenceRegistrar {
       return salt;
     }
 
-    public LicenceType getType() {
+    public LicenseType getType() {
       return type;
     }
   }
 
-  public enum LicenceType {
+  public enum LicenseType {
     EVALUATION, COMMERCIAL;
   }
 }

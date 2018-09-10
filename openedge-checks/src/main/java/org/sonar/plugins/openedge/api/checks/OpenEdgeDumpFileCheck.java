@@ -23,8 +23,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.plugins.openedge.api.InvalidLicenceException;
-import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
+import org.sonar.plugins.openedge.api.InvalidLicenseException;
+import org.sonar.plugins.openedge.api.LicenseRegistrar.License;
 
 /**
  * Extend this class to implement an XREF analyzer
@@ -36,12 +36,12 @@ public abstract class OpenEdgeDumpFileCheck extends OpenEdgeCheck<ParseTree> {
    * 
    * @param ruleKey Rule key
    * @param context Sensor context
-   * @param licence May be null
+   * @param license May be null
    * 
-   * @throws InvalidLicenceException In case of licence check failure
+   * @throws InvalidLicenseException In case of license check failure
    */
-  public OpenEdgeDumpFileCheck(RuleKey ruleKey, SensorContext context, Licence licence) {
-    super(ruleKey, context, licence);
+  public OpenEdgeDumpFileCheck(RuleKey ruleKey, SensorContext context, License license) {
+    super(ruleKey, context, license);
   }
 
   @Override

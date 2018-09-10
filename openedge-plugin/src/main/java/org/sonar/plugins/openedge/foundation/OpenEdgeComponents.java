@@ -42,9 +42,9 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.CheckRegistrar;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.api.InvalidLicenceException;
-import org.sonar.plugins.openedge.api.LicenceRegistrar;
-import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
+import org.sonar.plugins.openedge.api.InvalidLicenseException;
+import org.sonar.plugins.openedge.api.LicenseRegistrar;
+import org.sonar.plugins.openedge.api.LicenseRegistrar.License;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck.CheckType;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
@@ -67,7 +67,7 @@ public class OpenEdgeComponents {
   private final List<OpenEdgeProparseCheck> ppChecks = new ArrayList<>();
   private final List<OpenEdgeDumpFileCheck> dfChecks = new ArrayList<>();
 
-  private final Collection<Licence> licenses = new ArrayList<>();
+  private final Collection<License> licenses = new ArrayList<>();
 
   public OpenEdgeComponents() {
     this(null, null);
@@ -77,11 +77,11 @@ public class OpenEdgeComponents {
     this(checkRegistrars, null);
   }
 
-  public OpenEdgeComponents(LicenceRegistrar[] licRegistrars) {
+  public OpenEdgeComponents(LicenseRegistrar[] licRegistrars) {
     this(null, licRegistrars);
   }
 
-  public OpenEdgeComponents(CheckRegistrar[] checkRegistrars, LicenceRegistrar[] licRegistrars) {
+  public OpenEdgeComponents(CheckRegistrar[] checkRegistrars, LicenseRegistrar[] licRegistrars) {
     if (checkRegistrars != null) {
       registerChecks(checkRegistrars);
     }
@@ -105,22 +105,17 @@ public class OpenEdgeComponents {
     }
   }
 
-  private void registerLicences(LicenceRegistrar[] licRegistrars) {
-    for (LicenceRegistrar registrar : licRegistrars) {
-      // Deprecated...
-      LicenceRegistrar.Licence lic = new Licence();
-      registrar.register(lic);
-      registerLicense(lic);
-
-      LicenceRegistrar.LicenseContext context = new LicenceRegistrar.LicenseContext();
+  private void registerLicences(LicenseRegistrar[] licRegistrars) {
+    for (LicenseRegistrar registrar : licRegistrars) {
+      LicenseRegistrar.LicenseContext context = new LicenseRegistrar.LicenseContext();
       registrar.register(context);
-      for (Licence l : context.getLicenses()) {
+      for (License l : context.getLicenses()) {
         registerLicense(l);
       }
     }
-    for (Licence entry : licenses) {
+    for (License entry : licenses) {
       LOG.info(
-          "Licence summary - Repository '{}' associated with {} licence permanent ID '{}' - Customer '{}' - Expiration date {}",
+          "License summary - Repository '{}' associated with {} license permanent ID '{}' - Customer '{}' - Expiration date {}",
           entry.getRepositoryName(),
           entry.getType().toString(), entry.getPermanentId(),
           entry.getCustomerName(), DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(
@@ -128,14 +123,14 @@ public class OpenEdgeComponents {
     }
   }
 
-  private void registerLicense(Licence lic) {
+  private void registerLicense(License lic) {
     if (Strings.isNullOrEmpty(lic.getRepositoryName()))
       return;
-    LOG.debug("Found {} licence - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
+    LOG.debug("Found {} license - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
         lic.getType().toString(), lic.getPermanentId(), lic.getCustomerName(), lic.getRepositoryName(),
         DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date(lic.getExpirationDate())));
-    // Only one licence per repository / permID
-    Licence existingLic = getLicence(lic.getRepositoryName(), lic.getPermanentId());
+    // Only one license per repository / permID
+    License existingLic = getLicense(lic.getRepositoryName(), lic.getPermanentId());
     if (existingLic == null) {
       licenses.add(lic);
     } else if (existingLic.getExpirationDate() < lic.getExpirationDate()) {
@@ -175,7 +170,7 @@ public class OpenEdgeComponents {
     RuleKey ruleKey = rule.ruleKey();
     // AFAIK, no way to be sure if a rule is based on a template or not
     String clsName = rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey();
-    OpenEdgeCheck<?> lint = getAnalyzer(clsName, ruleKey, context, getLicence(ruleKey.repository(), permId));
+    OpenEdgeCheck<?> lint = getAnalyzer(clsName, ruleKey, context, getLicense(ruleKey.repository(), permId));
     if (lint != null) {
       configureFields(rule, lint);
       lint.initialize();
@@ -200,31 +195,31 @@ public class OpenEdgeComponents {
     return Collections.unmodifiableMap(dfChecksMap);
   }
 
-  public Licence getLicence(String repoName, String permId) {
+  public License getLicense(String repoName, String permId) {
     if (permId == null)
       return null;
-    for (Licence lic : licenses) {
+    for (License lic : licenses) {
       if (repoName.equals(lic.getRepositoryName()) && permId.equals(lic.getPermanentId()))
         return lic;
     }
     return null;
   }
 
-  public Collection<Licence> getLicences() {
+  public Collection<License> getLicenses() {
     return licenses;
   }
 
-  private OpenEdgeCheck<?> getAnalyzer(String internalKey, RuleKey ruleKey, SensorContext context, Licence licence) {
+  private OpenEdgeCheck<?> getAnalyzer(String internalKey, RuleKey ruleKey, SensorContext context, License license) {
     try {
       for (Class<? extends OpenEdgeCheck<?>> clz : checkClasses) {
         if (clz.getCanonicalName().equalsIgnoreCase(internalKey)) {
-          return clz.getConstructor(RuleKey.class, SensorContext.class, Licence.class).newInstance(
-              ruleKey, context, licence);
+          return clz.getConstructor(RuleKey.class, SensorContext.class, License.class).newInstance(
+              ruleKey, context, license);
         }
       }
       return null;
     } catch (ReflectiveOperationException caught) {
-      if (caught.getCause() instanceof InvalidLicenceException) {
+      if (caught.getCause() instanceof InvalidLicenseException) {
         LOG.error("Unable to instantiate rule {} - {}", internalKey, caught.getCause().getMessage());
       } else {
         LOG.error("Unable to instantiate rule " + internalKey, caught);
