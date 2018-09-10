@@ -229,7 +229,7 @@ public class OpenEdgeComponents {
       } else {
         LOG.error("Unable to instantiate rule " + internalKey, caught);
       }
-      return null;
+      throw new RuntimeException("Stopping analyzer due to previous exception");
     }
   }
 
