@@ -482,16 +482,72 @@ public class LexerTest {
     tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
-    
+
     // Back to first include file
     tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertTrue(tok.getAnalyzeSuspend().isEmpty());
     assertFalse(tok.isEditableInAB());
-    
+
     // Back to main file
     tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
+  }
+
+  @Test
+  public void testQuotedStringPosition() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer11.p"), session);
+    TokenStream stream = unit.lex();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.DO);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 2);
+
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WHILE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.RIGHTANGLE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 15);
+    assertEquals(tok.getEndLine(), 1);
+    // The important test here, end column has to be 16 even when followed by ':'
+    assertEquals(tok.getEndColumn(), 16);
+  }
+
+  @Test
+  public void testQuotedStringPosition2() throws TokenStreamException {
+    // Same as previous test, but with a space before the colon
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer11-2.p"), session);
+    TokenStream stream = unit.lex();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.DO);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 2);
+
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WHILE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.RIGHTANGLE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 15);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 16);
   }
 }
