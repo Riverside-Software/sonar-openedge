@@ -85,13 +85,14 @@ public class CPDCallbackTest {
     callback.getResult().save();
     
     List<TokensLine> lines = context.cpdTokens(inputFile.key());
-    assertEquals(lines.size(), 4);
+    assertEquals(lines.size(), 5);
     // Keyword expansion
     assertEquals(lines.get(0).getValue(), "definetemp-tabletttestresultfielddisplayinbrowserascharacter.");
     assertEquals(lines.get(1).getValue(), "procedureenable_ui:");
-    // Nothing from the preprocessor
-    assertEquals(lines.get(2).getValue(), "viewresultswindow.");
-    assertEquals(lines.get(3).getValue(), "endprocedure.");
+    // See issue LexerTest#testMacroExpansion, we still get the period from prepro expansion
+    assertEquals(lines.get(2).getValue(), ".");
+    assertEquals(lines.get(3).getValue(), "viewresultswindow.");
+    assertEquals(lines.get(4).getValue(), "endprocedure.");
   }
 
   @Test
