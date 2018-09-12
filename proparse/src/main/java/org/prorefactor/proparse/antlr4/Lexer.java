@@ -479,6 +479,12 @@ public class Lexer  {
       if (isStringAttributes) {
         append(theText);
         preserveDrop();
+      } else {
+        // Fix current end position
+        prevCol--;
+        ProToken tok = makeToken(ABLNodeType.QSTRING);
+        prevCol++;
+        return tok;
       }
     } // currChar==':'
 
