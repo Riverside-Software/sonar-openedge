@@ -134,7 +134,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     }
 
     try {
-      TextRange range = file.newRange(node.getLine(), node.getColumn(), node.getEndLine(), node.getEndColumn() + 1);
+      TextRange range = file.newRange(node.getLine(), node.getColumn() - 1, node.getEndLine(), node.getEndColumn());
       cpdTokens.addToken(range, str);
     } catch (IllegalArgumentException uncaught) {
       LOG.debug("Unable to create CPD token at position {}:{} to {}:{} - Cause {}", node.getLine(), node.getColumn(),
@@ -146,7 +146,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     List<JPNode> children = node.getDirectChildren();
     JPNode lastSibling = children.isEmpty() ? node : children.get(children.size() - 1);
     try {
-      TextRange range = file.newRange(node.getLine(), node.getColumn(), lastSibling.getEndLine(), lastSibling.getEndColumn());
+      TextRange range = file.newRange(node.getLine(), node.getColumn() - 1, lastSibling.getEndLine(), lastSibling.getEndColumn() - 1);
       cpdTokens.addToken(range, UUID.randomUUID().toString());
     } catch (IllegalArgumentException uncaught) {
       LOG.debug("Unable to create CPD token at position {}:{} to {}:{} - Cause {}", node.getLine(), node.getColumn(),
