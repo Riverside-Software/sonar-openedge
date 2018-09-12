@@ -215,7 +215,8 @@ public class JPNode implements AST {
 
   public void updateEndPosition(int file, int line, int col) {
     token = new ProToken(token.getNodeType(), token.getText(), token.getFileIndex(), token.getFilename(),
-        token.getLine(), token.getColumn(), file, line, col, token.getMacroSourceNum(), token.getAnalyzeSuspend(), token.isSynthetic());
+        token.getLine(), token.getColumn(), file, line, col, token.getMacroSourceNum(), token.getAnalyzeSuspend(),
+        token.isSynthetic(), token.isMacroExpansion());
   }
 
   @Override
@@ -308,6 +309,9 @@ public class JPNode implements AST {
     return (ProToken) token.getHiddenBefore();
   }
 
+  public boolean isMacroExpansion() {
+    return token.isMacroExpansion();
+  }
 
   public String getAnalyzeSuspend() {
     return token.getAnalyzeSuspend();

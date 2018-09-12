@@ -73,6 +73,7 @@ public class ProToken implements WritableToken {
 
   private String analyzeSuspend = null;
   private ProToken hiddenBefore = null;
+  private boolean macroExpansion;
 
   public ProToken(ABLNodeType type, String text) {
     this.type = type;
@@ -135,6 +136,18 @@ public class ProToken implements WritableToken {
 
   public void setAnalyzeSuspend(String analyzeSuspend) {
     this.analyzeSuspend = analyzeSuspend;
+  }
+
+  public void setMacroExpansion(boolean macroExpansion) {
+    this.macroExpansion = macroExpansion;
+  }
+
+  /**
+   * Returns true if last character of token was generated from a macro expansion, i.e. {&amp;SOMETHING}.
+   * This doesn't mean that all characters were generated from a macro, e.g. {&prefix}VarName will return false 
+   */
+  public boolean isMacroExpansion() {
+    return macroExpansion;
   }
 
   /**

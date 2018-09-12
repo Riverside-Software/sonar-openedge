@@ -37,13 +37,14 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
   private final int endLine;
   private final int endColumn;
   private final String analyzeSuspend;
+  private final boolean macroExpansion;
 
   public ProToken(ABLNodeType type, String txt) {
-    this(type, txt, 0, "", 0, 0, 0, 0, 0, 0, "", true);
+    this(type, txt, 0, "", 0, 0, 0, 0, 0, 0, "", true, false);
   }
 
   public ProToken(@Nonnull ABLNodeType type, @Nonnull String txt, int file, String fileName, int line, int col, int endFile, int endLine, int endCol,
-      int macroSourceNum, @Nonnull String analyzeSuspend, boolean synthetic) {
+      int macroSourceNum, @Nonnull String analyzeSuspend, boolean synthetic, boolean macroExpansion) {
     // Make sure that the type field is completely hidden in base Token class 
     super(0, txt);
 
@@ -58,6 +59,7 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
     this.endColumn = endCol;
     this.analyzeSuspend = analyzeSuspend;
     this.synthetic = synthetic;
+    this.macroExpansion = macroExpansion;
   }
 
   @Override
@@ -141,6 +143,13 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
    */
   public String getAnalyzeSuspend() {
     return analyzeSuspend;
+  }
+
+  /**
+   * @see org.prorefactor.proparse.antlr4.ProToken#isMacroExpansion()
+   */
+  public boolean isMacroExpansion() {
+    return macroExpansion;
   }
 
   /**
