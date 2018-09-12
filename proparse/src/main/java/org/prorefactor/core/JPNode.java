@@ -978,13 +978,19 @@ public class JPNode implements AST {
   }
 
   /**
-   * Walk the tree from the input node down
+   * Walk down the tree from the input node
    */
   public void walk(ICallback<?> callback) {
-    boolean visitChildren = callback.visitNode(this);
-    if (visitChildren) {
-      for (JPNode child : getDirectChildren()) {
-        child.walk(callback);
+    if (attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
+      // Assuming OPERATORs only have two children (which should be the case)
+      getFirstChild().walk(callback);
+      callback.visitNode(this);
+      getFirstChild().getNextSibling().walk(callback);
+    } else {
+      if (callback.visitNode(this)) {
+        for (JPNode child : getDirectChildren()) {
+          child.walk(callback);
+        }
       }
     }
   }
