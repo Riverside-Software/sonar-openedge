@@ -624,4 +624,23 @@ public class LexerTest {
     assertEquals(tok.getEndLine(), 3);
     assertEquals(tok.getEndColumn(), 9);
   }
+
+  @Test(enabled = false)
+  public void testMacroExpansion() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer12.p"), session);
+    TokenStream stream = unit.preprocess();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
+    assertTrue(tok.isMacroExpansion());
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertTrue(tok.isMacroExpansion());
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.PERIOD);
+    // Bug lies here in the lexer
+    assertTrue(tok.isMacroExpansion());
+  }  
 }
