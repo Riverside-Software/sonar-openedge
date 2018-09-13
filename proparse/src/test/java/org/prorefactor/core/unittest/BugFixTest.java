@@ -453,6 +453,11 @@ public class BugFixTest {
   }
 
   @Test
+  public void testStopAfter() throws ANTLRException {
+    genericTest("stopafter.p");
+  }
+
+  @Test
   public void testTTLikeDB02() throws ANTLRException {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/bugsfixed/ttlikedb02.p"), session);
     assertNull(unit.getTopNode());
