@@ -1289,7 +1289,7 @@ public enum ABLNodeType {
   STOMPFREQUENCY(ProParserTokenTypes.STOMPFREQUENCY, "stomp-frequency", NodeTypesOption.KEYWORD,
       NodeTypesOption.RESERVED),
   STOP(ProParserTokenTypes.STOP, "stop", NodeTypesOption.KEYWORD),
-  STOPAFTER(ProParserTokenTypes.STOPAFTER, "stop-after", NodeTypesOption.KEYWORD),
+  STOPAFTER(ProParserTokenTypes.STOPAFTER, "stop-after", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   STOREDPROCEDURE(ProParserTokenTypes.STOREDPROCEDURE, "stored-procedure", 11, NodeTypesOption.KEYWORD),
   STREAM(ProParserTokenTypes.STREAM, "stream", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   STREAMHANDLE(ProParserTokenTypes.STREAMHANDLE, "stream-handle", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
