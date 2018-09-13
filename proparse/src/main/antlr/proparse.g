@@ -130,7 +130,7 @@ blockorstate:
       // otherwise take us into the EMPTY TEMPTABLE statement, and then barf when
       // we don't get a TEMPTABLE token.
        options { greedy=true; generateAmbigWarnings=false; }
-    :  PERIOD
+    :  PERIOD { sthd(##,0); }
     |  annotation
     |  dot_comment // ".anything" is a dotcomment if it's where a statement would fit.
     |  (blocklabel LEXCOLON ( DO | FOR | REPEAT )) => labeled_block

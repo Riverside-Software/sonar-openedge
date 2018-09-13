@@ -95,7 +95,7 @@ class_code_block:
 blockorstate: // TRANSLATED
     // Method calls and other expressions can stand alone as statements.
     // Many functions are ambiguous with statements on the first few tokens.
-    PERIOD
+    empty_statement
   | annotation
   | dot_comment 
   | labeled_block
@@ -106,9 +106,13 @@ blockorstate: // TRANSLATED
   ;
 
 class_blockorstate:
-    PERIOD
+    empty_statement
   | annotation
   | class_statement
+  ;
+
+empty_statement:
+    PERIOD
   ;
 
 dot_comment: // TRANSLATED

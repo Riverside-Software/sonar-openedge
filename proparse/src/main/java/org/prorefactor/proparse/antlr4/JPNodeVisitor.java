@@ -52,6 +52,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   }
 
   @Override
+  public Builder visitEmpty_statement(Empty_statementContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
   public JPNode.Builder visitDot_comment(Dot_commentContext ctx) {
     ProToken start = (ProToken) ctx.getStart();
     StringBuilder sb = new StringBuilder(".");
