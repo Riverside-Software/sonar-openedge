@@ -23,9 +23,9 @@ header {
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
   import org.prorefactor.core.JPNode;
-  import org.prorefactor.refactor.RefactorSession;
   import org.prorefactor.treeparser.ContextQualifier;
   import org.prorefactor.treeparser.IJPTreeParser;
+  import org.prorefactor.treeparser.symbols.ISymbol;
   import org.prorefactor.treeparser01.ITreeParserAction.TableNameResolution;
   import java.util.Deque;
   import java.util.LinkedList;
@@ -61,7 +61,7 @@ options {
   // it in the support class. If we move grammar and actions around
   // within this .g, the effect on the stack should be highly visible.
   // Deque implementation has to support null elements
-  private Deque stack = new LinkedList();
+  private Deque<ISymbol> stack = new LinkedList<>();
 
   private String indent() {
     return java.nio.CharBuffer.allocate(traceDepth).toString().replace('\0', ' ');

@@ -358,7 +358,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   }
 
   @Override
-  public JPNode.Builder visitInuicIn(InuicInContext ctx) {
+  public Builder visitInuic(InuicContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
@@ -497,7 +497,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   }
 
   @Override
-  public JPNode.Builder visitAssignStatement1(AssignStatement1Context ctx) {
+  public Builder visitAssignstate2(Assignstate2Context ctx) {
     JPNode.Builder node1 = createTreeFromSecondNode(ctx).setOperator();
 
     JPNode.Builder holder = new JPNode.Builder(ABLNodeType.ASSIGN).setStatement().setDown(node1);
@@ -1213,11 +1213,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitMenu_item_opt(Menu_item_optContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public JPNode.Builder visitDefineparam_as(Defineparam_asContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 
