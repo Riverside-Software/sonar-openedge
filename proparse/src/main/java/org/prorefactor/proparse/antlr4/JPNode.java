@@ -762,6 +762,25 @@ public class JPNode implements AST {
       return tok.getNodeType();
     }
 
+    /**
+     * Transforms <pre>x1 - x2 - x3</pre> into
+     * <pre>
+     * x1 - x3
+     * |
+     * x2
+     * </pre>
+     * @return
+     */
+    public Builder moveRightToDown() {
+      if ((down != null) || (right == null))
+        throw new NullPointerException();
+      this.down = right;
+      this.right = this.down.right;
+      this.down.right = null;
+
+      return this;
+    }
+
     public JPNode build(ParserSupport support) {
       JPNode node;
       switch (tok.getNodeType()) {

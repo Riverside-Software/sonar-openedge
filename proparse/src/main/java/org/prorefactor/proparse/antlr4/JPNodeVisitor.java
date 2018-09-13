@@ -1087,6 +1087,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   }
 
   @Override
+  public JPNode.Builder visitDefineparam_var(Defineparam_varContext ctx) {
+    return visitChildren(ctx).moveRightToDown();
+  }
+
+  @Override
   public JPNode.Builder visitDefinepropertystate(DefinepropertystateContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.PROPERTY);
   }
@@ -1962,6 +1967,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   public Builder visitExt_procedurestate(Ext_procedurestateContext ctx) {
     JPNode.Builder holder = createStatementTreeFromFirstNode(ctx);
     holder.getDown().changeType(ABLNodeType.ID);
+    holder.getDown().getRight().moveRightToDown();
+
     return holder;
   }
 
