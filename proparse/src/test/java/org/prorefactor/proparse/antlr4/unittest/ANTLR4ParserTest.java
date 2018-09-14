@@ -316,6 +316,11 @@ public class ANTLR4ParserTest {
   }
 
   @Test(enabled=true)
+  public void test39() throws Exception {
+    genericTest("data/bugsfixed/bug39.p");
+  }
+
+  @Test(enabled=true)
   public void test40() throws Exception {
     genericTest("data/bugsfixed/bug40.p");
   }
