@@ -291,8 +291,23 @@ public class ANTLR4ParserTest {
   }
 
   @Test(enabled=true)
+  public void test34() throws Exception {
+    genericTest("data/bugsfixed/bug34.p");
+  }
+
+  @Test(enabled=true)
+  public void test35() throws Exception {
+    genericTest("data/bugsfixed/bug35.p");
+  }
+
+  @Test(enabled=true)
   public void test36() throws Exception {
     genericTest("data/bugsfixed/bug36.p");
+  }
+
+  @Test(enabled=true)
+  public void test40() throws Exception {
+    genericTest("data/bugsfixed/bug40.p");
   }
 
   // Next two tests : same exception should be thrown in both cases

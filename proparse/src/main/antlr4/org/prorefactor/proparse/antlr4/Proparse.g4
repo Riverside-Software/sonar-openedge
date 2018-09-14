@@ -877,6 +877,7 @@ fieldn: // TRANSLATED
 
 field: // TRANSLATED
     INPUT? field_frame_or_browse? id=fieldn array_subscript?
+    { support.fieldReference($id.text); }
   ;
 
 field_frame_or_browse: // TRANSLATED
@@ -2401,7 +2402,7 @@ formatphrase: // TRANSLATED
   ;
 
 format_opt: // TRANSLATED
-     AS datatype_var { support.defVarInline(); }
+     AS datatype_var { support.defVarInlineAntlr4(); }
   |  atphrase
   |  ATTRSPACE
   |  NOATTRSPACE
@@ -2418,7 +2419,7 @@ format_opt: // TRANSLATED
   |  help_const
   |  label_constant
   |  LEXAT field formatphrase?
-  |  LIKE { support.defVarInline(); } field
+  |  LIKE { support.defVarInlineAntlr4(); } field
   |  NOLABELS
   |  NOTABSTOP
   |  PASSWORDFIELD
@@ -2549,7 +2550,7 @@ from_pos_elem: // TRANSLATED
 functionstate: // TRANSLATED
     // You don't see it in PSC's grammar, but the compiler really does insist on a datatype.
     f=FUNCTION
-    id=identifier { support.funcBegin($id.text); }
+    id=identifier { support.funcBegin($id.text, _localctx); }
     ( RETURNS | RETURN )? ( CLASS type_name | datatype_var )
     extentphrase?
     PRIVATE?
@@ -2608,7 +2609,7 @@ function_param: // TRANSLATED
 ext_functionstate:
     // You don't see it in PSC's grammar, but the compiler really does insist on a datatype.
     f=FUNCTION
-    id=identifier { support.funcBegin($id.text); }
+    id=identifier { support.funcBegin($id.text, _localctx); }
     ( RETURNS | RETURN )? ( CLASS type_name | datatype_var )
     extentphrase?
     PRIVATE?
@@ -2914,7 +2915,7 @@ methodstate locals [ boolean abs = false ]: // TRANSLATED
     ( { $abs || support.isInterface() }? block_colon // An INTERFACE declares without defining, ditto ABSTRACT.
     | { !$abs && !support.isInterface() }?
       block_colon
-      { support.addInnerScope(); }
+      { support.addInnerScope(_localctx); }
       code_block
       method_end
       { support.dropInnerScope(); }
@@ -2956,7 +2957,7 @@ onstate: // TRANSLATED
        OVERRIDE?
        ( REVERT state_end
        | PERSISTENT runstate
-       | { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
+       | { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
        )
     |  // ON event OF database-object
       (
@@ -2972,7 +2973,7 @@ onstate: // TRANSLATED
       OVERRIDE?
       (  REVERT state_end
       |  PERSISTENT runstate
-      |  { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
+      |  { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
       )
     |  // ON key-label keyfunction.
       . . state_end
@@ -2984,7 +2985,7 @@ onstate: // TRANSLATED
       )
       (  REVERT state_end
       |  PERSISTENT RUN filenameorvalue in_expr? onstate_run_params? state_end
-      |  { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
+      |  { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
       )
     )
   ;
@@ -3098,7 +3099,7 @@ ext_procedurestate:
     PROCEDURE
     filename
     EXTERNAL constant procedure_dll_opt* block_colon
-    { support.addInnerScope(); }
+    { support.addInnerScope(_localctx); }
     code_block
     { support.dropInnerScope(); }
     procedure_end state_end
@@ -3108,7 +3109,7 @@ procedurestate: // TRANSLATED
     PROCEDURE
     filename
     procedure_opt? block_colon
-    { support.addInnerScope(); }
+    { support.addInnerScope(_localctx); }
     code_block
     { support.dropInnerScope(); }
     (  EOF

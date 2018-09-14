@@ -19,6 +19,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.IConstants;
 import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.antlr4.JPNode.Builder;
 import org.prorefactor.proparse.antlr4.Proparse.*;
@@ -43,7 +44,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitCode_block(Code_blockContext ctx) {
-    return createTree(ctx, ABLNodeType.CODE_BLOCK);
+    support.visitorEnterScope(ctx.getParent());
+    JPNode.Builder retVal = createTree(ctx, ABLNodeType.CODE_BLOCK);
+    support.visitorExitScope(ctx.getParent());
+
+    return retVal;
   }
 
   @Override
@@ -343,7 +348,9 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   @Override
   public JPNode.Builder visitField(FieldContext ctx) {
     JPNode.Builder holder = createTree(ctx, ABLNodeType.FIELD_REF);
-    // XXX support.fieldReference();
+    if (support.isInlineVar(ctx.getText())) {
+      holder.setInlineVar();
+    }
     return holder;
   }
 
