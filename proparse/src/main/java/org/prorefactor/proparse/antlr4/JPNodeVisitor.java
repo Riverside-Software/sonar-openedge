@@ -1576,6 +1576,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   }
 
   @Override
+  public Builder visitExt_functionstate(Ext_functionstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
   public JPNode.Builder visitFunction_end(Function_endContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
