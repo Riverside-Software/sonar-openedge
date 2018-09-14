@@ -1621,7 +1621,7 @@ createwidgetpoolstate: // TRANSLATED
   ;
 
 currentvaluefunc: // TRANSLATED
-    CURRENTVALUE LEFTPAREN sequencename ( COMMA identifier )? RIGHTPAREN
+    CURRENTVALUE LEFTPAREN sequencename ( COMMA expression ( COMMA expression )? )? RIGHTPAREN
   ;
 
 // Basic variable class or primitive datatype syntax.
