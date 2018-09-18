@@ -2373,8 +2373,9 @@ format_expr: // TRANSLATED
   ;
 
 form_items_or_record: // TRANSLATED
-    // TODO Redefine in parser -- If there's more than one display item, then it cannot be a table name.
-    form_item*
+    form_item form_item+
+  | { isTableName() }? recordAsFormItem
+  | form_item*
   ;
 
 form_item: // TRANSLATED
