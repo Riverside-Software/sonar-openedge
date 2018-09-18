@@ -282,28 +282,35 @@ public class OpenEdgeProparseSensor implements Sensor {
           + caught.getLine() + ":" + caught.getColumn(), caught);
       numFailures++;
 
-      NewAnalysisError analysisError = context.newAnalysisError();
-      analysisError.onFile(file);
-      analysisError.message(Strings.nullToEmpty(caught.getMessage()) + " in " + caught.getFilename() + ":" + caught.getLine()
-          + ":" + caught.getColumn());
-
-      NewIssue issue = context.newIssue().forRule(
-          RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY));
-      NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()) + " in "
-          + caught.getFilename() + ":" + caught.getLine() + ":" + caught.getColumn());
+      TextPointer strt = null;
+      TextPointer end = null;
       if (InputFileUtils.getRelativePath(file, context.fileSystem()).equals(caught.getFilename())) {
         try {
-          TextPointer strt = file.newPointer(caught.getLine(), caught.getColumn() - 1);
-          TextPointer end = file.newPointer(caught.getLine(), caught.getColumn());
-          loc.at(file.newRange(strt, end));
-          analysisError.at(strt);
+          strt = file.newPointer(caught.getLine(), caught.getColumn() - 1);
+          end = file.newPointer(caught.getLine(), caught.getColumn());
         } catch (IllegalArgumentException uncaught) { // NO-SONAR
           // Nothing
         }
       }
-      issue.at(loc);
-      issue.save();
-      analysisError.save();
+
+      if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
+        NewAnalysisError analysisError = context.newAnalysisError();
+        analysisError.onFile(file);
+        analysisError.message(Strings.nullToEmpty(caught.getMessage()) + " in " + caught.getFilename() + ":" + caught.getLine()
+            + ":" + caught.getColumn());
+        if (strt != null)
+          analysisError.at(strt);
+        analysisError.save();
+      } else {
+        NewIssue issue = context.newIssue().forRule(
+            RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY));
+        NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()) + " in "
+            + caught.getFilename() + ":" + caught.getLine() + ":" + caught.getColumn());
+        if ((strt != null) && (end != null))
+          loc.at(file.newRange(strt, end));
+        issue.at(loc);
+        issue.save();
+      }
 
       return;
     } catch (RuntimeException | ANTLRException caught) {
