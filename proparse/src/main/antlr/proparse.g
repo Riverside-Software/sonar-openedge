@@ -2099,7 +2099,7 @@ definebufferstate:
     {schemaTablePriority=true;}
     FOR (options{greedy=true;}: TEMPTABLE {schemaTablePriority=false;} )? bf:record
     {schemaTablePriority=false;}
-    (PRESELECT)? (label_constant)? (namespace_uri)? (namespace_prefix)? (xml_node_name)?
+    (PRESELECT)? (label_constant)? (namespace_uri)? (namespace_prefix)? (xml_node_name)? (serialize_name)?
     (fields_fields)?
     state_end
     {support.defBuffer(#n.getText(), #bf.getText());}

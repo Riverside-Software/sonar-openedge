@@ -290,6 +290,11 @@ public class ANTLR4ParserTest {
     genericTest("data/bugsfixed/bug33.cls");
   }
 
+  @Test(enabled=true)
+  public void test36() throws Exception {
+    genericTest("data/bugsfixed/bug36.p");
+  }
+
   // Next two tests : same exception should be thrown in both cases
   @Test(enabled=false, expectedExceptions = {ProparseRuntimeException.class})
   public void testCache1() throws Exception {
