@@ -738,7 +738,7 @@ definebufferstate:
         | rec2:tbl[ContextQualifier.SYMBOL] { action.defineBuffer(#def, #id, #rec2, false); }
         )
       (PRESELECT)? (label_constant)?
-      (namespace_uri)? (namespace_prefix)? (xml_node_name)?
+      (namespace_uri)? (namespace_prefix)? (xml_node_name)? ( #(SERIALIZENAME QSTRING) )?
       (#(FIELDS (fld1[ContextQualifier.SYMBOL])* ))? state_end
     )
   ;

@@ -1438,7 +1438,7 @@ definebrowsestate:
 definebufferstate:
     #(  DEFINE (def_shared)? def_modifiers BUFFER ID
       FOR (TEMPTABLE)? RECORD_NAME (PRESELECT)? (label_constant)?
-      (namespace_uri)? (namespace_prefix)? (xml_node_name)?
+      (namespace_uri)? (namespace_prefix)? (xml_node_name)? ( #(SERIALIZENAME QSTRING) )?
       (#(FIELDS (field)* ))? state_end
     )
   ;

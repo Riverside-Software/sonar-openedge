@@ -1774,7 +1774,7 @@ definebufferstate: // TRANSLATED
     { support.setSchemaTablePriority(true); }
     FOR ( TEMPTABLE { support.setSchemaTablePriority(false); } )? bf=record
     { support.setSchemaTablePriority(false); }
-    PRESELECT? label_constant? namespace_uri? namespace_prefix? xml_node_name?
+    PRESELECT? label_constant? namespace_uri? namespace_prefix? xml_node_name? serialize_name?
     fields_fields?
     state_end
     { support.defBuffer($n.text, $bf.text); }
