@@ -1829,7 +1829,14 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitMessage_opt(Message_optContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    JPNode.Builder builder = createTreeFromFirstNode(ctx);
+    JPNode.Builder tmp = builder.getDown();
+    while (tmp != null) {
+      if (tmp.getNodeType() == ABLNodeType.BUTTON)
+        tmp.changeType(ABLNodeType.BUTTONS);
+      tmp = tmp.getRight();
+    }
+    return builder;
   }
 
   @Override

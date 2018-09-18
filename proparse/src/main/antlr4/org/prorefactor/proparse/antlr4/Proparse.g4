@@ -2686,7 +2686,7 @@ importstate: // TRANSLATED
     IMPORT stream_name_or_handle?
     ( delimiter_constant | UNFORMATTED )?
     (  // If there's more than one, then we've got fields, not a record
-      ( field | CARET )+
+      ( ( field | CARET ) ( field | CARET )+ )
     | var_rec_field
     | CARET
     )?
