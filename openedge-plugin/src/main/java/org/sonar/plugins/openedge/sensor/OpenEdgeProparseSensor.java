@@ -76,6 +76,7 @@ import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.batch.sensor.error.NewAnalysisError;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.measures.CoreMetrics;
@@ -280,21 +281,37 @@ public class OpenEdgeProparseSensor implements Sensor {
       LOG.error("Error during code parsing for " + file + " at position " + caught.getFilename() + ":"
           + caught.getLine() + ":" + caught.getColumn(), caught);
       numFailures++;
-      NewIssue issue = context.newIssue().forRule(
-          RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY));
-      NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()) + " in "
-          + caught.getFilename() + ":" + caught.getLine() + ":" + caught.getColumn());
+
+      TextPointer strt = null;
+      TextPointer end = null;
       if (InputFileUtils.getRelativePath(file, context.fileSystem()).equals(caught.getFilename())) {
         try {
-          TextPointer strt = file.newPointer(caught.getLine(), caught.getColumn() - 1);
-          TextPointer end = file.newPointer(caught.getLine(), caught.getColumn());
-          loc.at(file.newRange(strt, end));
+          strt = file.newPointer(caught.getLine(), caught.getColumn() - 1);
+          end = file.newPointer(caught.getLine(), caught.getColumn());
         } catch (IllegalArgumentException uncaught) { // NO-SONAR
           // Nothing
         }
       }
-      issue.at(loc);
-      issue.save();
+
+      if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
+        NewAnalysisError analysisError = context.newAnalysisError();
+        analysisError.onFile(file);
+        analysisError.message(Strings.nullToEmpty(caught.getMessage()) + " in " + caught.getFilename() + ":" + caught.getLine()
+            + ":" + caught.getColumn());
+        if (strt != null)
+          analysisError.at(strt);
+        analysisError.save();
+      } else {
+        NewIssue issue = context.newIssue().forRule(
+            RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY));
+        NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()) + " in "
+            + caught.getFilename() + ":" + caught.getLine() + ":" + caught.getColumn());
+        if ((strt != null) && (end != null))
+          loc.at(file.newRange(strt, end));
+        issue.at(loc);
+        issue.save();
+      }
+
       return;
     } catch (RuntimeException | ANTLRException caught) {
       LOG.error("Error during code parsing for " + InputFileUtils.getRelativePath(file, context.fileSystem()), caught);
