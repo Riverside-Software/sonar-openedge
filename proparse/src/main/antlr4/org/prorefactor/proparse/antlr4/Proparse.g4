@@ -101,6 +101,7 @@ blockorstate: // TRANSLATED
   | labeled_block
   | dynamicnewstate
   | assignstate2
+  | { support.isMethodOrFunc(_input.LT(1)) != 0 }? func_call_statement
   | statement
   | expression_statement
   ;
@@ -119,6 +120,14 @@ dot_comment: // TRANSLATED
     NAMEDOT
     not_state_end*
     state_end
+  ;
+
+func_call_statement:
+    func_call_statement2 NOERROR_KW? state_end
+  ;
+
+func_call_statement2:
+    fname=identifier parameterlist_noroot
   ;
 
 expression_statement: // TRANSLATED
@@ -687,7 +696,6 @@ noargfunc: // TRANSLATED
   |  USERID
   |  USER
   ;
-
 
 parameter: // TRANSLATED
     // This is the syntax for parameters when calling or running something.

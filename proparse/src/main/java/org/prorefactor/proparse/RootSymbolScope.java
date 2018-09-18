@@ -24,7 +24,6 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.refactor.RefactorSession;
 
 import eu.rssw.pct.TypeInfo;
-import eu.rssw.pct.elements.MethodElement;
 
 /**
  * Symbol scope associated with the compilation unit (class or main block of a procedure). It never has a super scope,
@@ -34,7 +33,6 @@ public class RootSymbolScope extends SymbolScope {
   private TypeInfo typeInfo;
 
   private final Set<String> functionSet = new HashSet<>();
-  private final Set<String> methodSet = new HashSet<>();
 
   public RootSymbolScope(RefactorSession session) {
     super(session);
@@ -42,11 +40,6 @@ public class RootSymbolScope extends SymbolScope {
 
   public void attachTypeInfo(TypeInfo typeInfo) {
     this.typeInfo = typeInfo;
-    if ((typeInfo != null) && (typeInfo.getMethods() != null)) {
-      for (MethodElement elem : typeInfo.getMethods()) {
-        methodSet.add(elem.getName());
-      }
-    }
   }
 
   void defFunc(String name) {
@@ -100,8 +93,14 @@ public class RootSymbolScope extends SymbolScope {
     String lname = name.toLowerCase();
     // Methods take precedent over built-in functions. The compiler (10.2b)
     // does not seem to try recognize by function/method signature.
-    if (methodSet.contains(lname))
-      return ABLNodeType.LOCAL_METHOD_REF.getType();
+    TypeInfo info = typeInfo;
+    while (info != null) {
+      if (info.hasMethod(name)) {
+        return ABLNodeType.LOCAL_METHOD_REF.getType();
+      }
+      info = getSession().getTypeInfo(info.getParentTypeName());
+    }
+
     if (functionSet.contains(lname))
       return ABLNodeType.USER_FUNC.getType();
 
@@ -118,10 +117,6 @@ public class RootSymbolScope extends SymbolScope {
       System.err.println("Functions: " + String.join(",", functionSet) + " *** " + String.join(",", other.functionSet));
       return 1;
     }
-    if (!String.join(",", methodSet).equals(String.join(",", other.methodSet))) {
-      System.err.println("Methods: " + String.join(",", methodSet) + " *** " + String.join(",", other.methodSet));
-      return 2;
-    }
 
     return 0;
   }
@@ -131,7 +126,6 @@ public class RootSymbolScope extends SymbolScope {
     writer.write("*** RootSymbolScope *** \n");
     super.writeScope(writer);
     functionSet.stream().sorted().forEach(e -> { try { writer.write("Function " + e + "\n"); } catch (IOException uncaught) { } } );
-    methodSet.stream().sorted().forEach(e -> { try { writer.write("Method " + e + "\n"); } catch (IOException uncaught) { } } );
   }
 
 }

@@ -19,7 +19,6 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.IConstants;
 import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.antlr4.JPNode.Builder;
 import org.prorefactor.proparse.antlr4.Proparse.*;
@@ -77,6 +76,17 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
     start.setEndCharPositionInLine(last.getEndCharPositionInLine());
 
     return new JPNode.Builder(start);
+  }
+
+  @Override
+  public JPNode.Builder visitFunc_call_statement(Func_call_statementContext ctx) {
+    return createTree(ctx, ABLNodeType.EXPR_STATEMENT).setStatement();
+  }
+
+  @Override
+  public Builder visitFunc_call_statement2(Func_call_statement2Context ctx) {
+    return createTreeFromFirstNode(ctx).changeType(
+        ABLNodeType.getNodeType(support.isMethodOrFunc(ctx.fname.getText())));
   }
 
   @Override
@@ -348,7 +358,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   @Override
   public JPNode.Builder visitField(FieldContext ctx) {
     JPNode.Builder holder = createTree(ctx, ABLNodeType.FIELD_REF);
-    if (support.isInlineVar(ctx.getText())) {
+    if ((ctx.getParent() instanceof Message_optContext) && support.isInlineVar(ctx.getText())) {
       holder.setInlineVar();
     }
     return holder;
