@@ -73,6 +73,14 @@ public class TypeInfo {
     return false;
   }
 
+  public boolean hasMethod(String name) {
+    for (MethodElement mthd : methods) {
+      if (mthd.getName().equalsIgnoreCase(name))
+        return true;
+    }
+    return false;
+  }
+
   public TableElement getTempTable(String inName) {
     for (TableElement tbl : tables) {
       if (tbl.getName().equalsIgnoreCase(inName)) {

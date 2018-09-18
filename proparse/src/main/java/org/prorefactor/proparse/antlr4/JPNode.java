@@ -685,6 +685,7 @@ public class JPNode implements AST {
     private boolean operator;
     private FieldType tabletype;
     private String className;
+    private boolean inline;
 
     public Builder(ProToken tok) {
       this.tok = tok;
@@ -762,21 +763,41 @@ public class JPNode implements AST {
       return tok.getNodeType();
     }
 
+    public Builder setInlineVar() {
+      this.inline = true;
+      return this;
+    }
+
     /**
-     * Transforms <pre>x1 - x2 - x3</pre> into
+     * Transforms <pre>x1 - x2 - x3 - x4</pre> into
      * <pre>
-     * x1 - x3
+     * x1 - x3 - x4
      * |
      * x2
+     * </pre>
+     * Then to: <pre>
+     * x1 - x4
+     * |
+     * x2 - x3 
      * </pre>
      * @return
      */
     public Builder moveRightToDown() {
-      if ((down != null) || (right == null))
+      if (this.right == null)
         throw new NullPointerException();
-      this.down = right;
-      this.right = this.down.right;
-      this.down.right = null;
+      if (this.down == null) {
+        this.down = this.right;
+        this.right = this.down.right;
+        this.down.right = null;
+      } else {
+        Builder target = this.down;
+        while (target.getRight() != null) {
+          target = target.getRight();
+        }
+        target.right = this.right;
+        this.right = target.right.right;
+        target.right.right = null;
+      }
 
       return this;
     }
@@ -805,6 +826,8 @@ public class JPNode implements AST {
         node.setStatementHead(stmt2 == null ? 0 : stmt2.getType());
       if (operator)
         node.setOperator();
+      if (inline)
+        node.attrSet(IConstants.INLINE_VAR_DEF, IConstants.TRUE);
       if (tabletype != null) {
         switch (tabletype) {
           case DBTABLE:

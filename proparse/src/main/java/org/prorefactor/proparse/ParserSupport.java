@@ -39,8 +39,7 @@ import com.google.common.base.Strings;
 import antlr.Token;
 
 /**
- * Helper class when parsing procedure or class.
- * One instance per class being parsed.
+ * Helper class when parsing procedure or class. One instance per ParseUnit.
  */
 public class ParserSupport {
   private static final Logger LOG = LoggerFactory.getLogger(ParserSupport.class);
@@ -66,12 +65,15 @@ public class ParserSupport {
   // Last field referenced. Used for inline defines using LIKE or AS.
   private JPNode lastFieldRefNode;
   private JPNode lastFieldIDNode;
+  // TEMP-ANTLR4
+  private String lastFieldIDStr;
 
   private ParseTreeProperty<FieldType> recordExpressions = new ParseTreeProperty<>();
   private ParseTreeProperty<org.prorefactor.proparse.antlr4.JPNode> nodes = new ParseTreeProperty<>();
 
   // TEMP-ANTLR4
   private List<SymbolScope> innerScopes = new ArrayList<>();
+  private Map<RuleContext, SymbolScope> innerScopesMap = new HashMap<>();
 
   public ParserSupport(RefactorSession session, IntegerIndex<String> fileNameList) {
     this.session = session;
@@ -120,9 +122,36 @@ public class ParserSupport {
     return 0;
   }
 
+  // TEMP-ANTLR4
+  public void visitorResetScope(RuleContext ctx) {
+    currentScope = unitScope;
+  }
+
+  // TEMP-ANTLR4
+  public void visitorEnterScope(RuleContext ctx) {
+    SymbolScope scope = innerScopesMap.get(ctx);
+    if (scope != null) {
+      currentScope = scope;
+    }
+  }
+
+  // TEMP-ANTLR4
+  public void visitorExitScope(RuleContext ctx) {
+    SymbolScope scope = innerScopesMap.get(ctx);
+    if (scope != null) {
+      currentScope = currentScope.getSuperScope();
+    }
+  }
+
   public void addInnerScope() {
     currentScope = new SymbolScope(session, currentScope);
     innerScopes.add(currentScope);
+  }
+
+  // TEMP-ANTLR4
+  public void addInnerScope(RuleContext ctx) {
+    addInnerScope();
+    innerScopesMap.put(ctx, currentScope);
   }
 
   // TEMP-ANTLR4
@@ -181,9 +210,18 @@ public class ParserSupport {
     if (lastFieldIDNode == null) {
       LOG.warn("Trying to define inline variable, but no ID symbol availble");
     } else {
-      currentScope.defineVar(lastFieldIDNode.getText());
+      currentScope.defineInlineVar(lastFieldIDNode.getText());
       // I'm not sure if this would ever be inheritable. Doesn't hurt to check.
       lastFieldRefNode.attrSet(IConstants.INLINE_VAR_DEF, IConstants.TRUE);
+    }
+  }
+
+  // TEMP-ANTLR4
+  public void defVarInlineAntlr4() {
+    if (lastFieldIDStr == null) {
+      LOG.warn("Trying to define inline variable, but no ID symbol availble");
+    } else {
+      currentScope.defineInlineVar(lastFieldIDStr);
     }
   }
 
@@ -195,6 +233,10 @@ public class ParserSupport {
   public void fieldReference(JPNode refNode, JPNode idNode) {
     lastFieldRefNode = refNode;
     lastFieldIDNode = idNode;
+  }
+
+  public void fieldReference(String idNode) {
+    lastFieldIDStr = idNode;
   }
 
   public void filenameMerge(JPNode node) {
@@ -216,18 +258,20 @@ public class ParserSupport {
   }
 
   void funcBegin(JPNode idNode) {
-    funcBegin(idNode.getText());
+    funcBegin(idNode.getText(), null);
   }
 
-  public void funcBegin(String name) {
+  public void funcBegin(String name, RuleContext ctx) {
     String lowername = name.toLowerCase();
     SymbolScope ss = funcScopeMap.get(lowername);
     if (ss != null) {
       currentScope = ss;
     } else {
-      SymbolScope newScope = new SymbolScope(session, currentScope);
-      currentScope = newScope;
-      funcScopeMap.put(lowername, newScope);
+      currentScope = new SymbolScope(session, currentScope);
+      innerScopes.add(currentScope);
+      if (ctx != null)
+        innerScopesMap.put(ctx, currentScope);
+      funcScopeMap.put(lowername, currentScope);
       // User functions are always at the "unit" scope.
       unitScope.defFunc(lowername);
       // User funcs are not inheritable.
@@ -307,6 +351,10 @@ public class ParserSupport {
 
   public boolean isVar(String name) {
     return currentScope.isVariable(name);
+  }
+
+  public boolean isInlineVar(String name) {
+    return currentScope.isInlineVariable(name);
   }
 
   public int isMethodOrFunc(String name) {

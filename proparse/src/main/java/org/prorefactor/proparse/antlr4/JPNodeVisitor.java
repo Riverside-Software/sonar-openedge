@@ -43,7 +43,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitCode_block(Code_blockContext ctx) {
-    return createTree(ctx, ABLNodeType.CODE_BLOCK);
+    support.visitorEnterScope(ctx.getParent());
+    JPNode.Builder retVal = createTree(ctx, ABLNodeType.CODE_BLOCK);
+    support.visitorExitScope(ctx.getParent());
+
+    return retVal;
   }
 
   @Override
@@ -72,6 +76,17 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
     start.setEndCharPositionInLine(last.getEndCharPositionInLine());
 
     return new JPNode.Builder(start);
+  }
+
+  @Override
+  public JPNode.Builder visitFunc_call_statement(Func_call_statementContext ctx) {
+    return createTree(ctx, ABLNodeType.EXPR_STATEMENT).setStatement();
+  }
+
+  @Override
+  public Builder visitFunc_call_statement2(Func_call_statement2Context ctx) {
+    return createTreeFromFirstNode(ctx).changeType(
+        ABLNodeType.getNodeType(support.isMethodOrFunc(ctx.fname.getText())));
   }
 
   @Override
@@ -343,7 +358,9 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   @Override
   public JPNode.Builder visitField(FieldContext ctx) {
     JPNode.Builder holder = createTree(ctx, ABLNodeType.FIELD_REF);
-    // XXX support.fieldReference();
+    if ((ctx.getParent() instanceof Message_optContext) && support.isInlineVar(ctx.getText())) {
+      holder.setInlineVar();
+    }
     return holder;
   }
 
@@ -1088,7 +1105,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitDefineparam_var(Defineparam_varContext ctx) {
-    return visitChildren(ctx).moveRightToDown();
+    JPNode.Builder retVal = visitChildren(ctx).moveRightToDown();
+    if (retVal.getDown().getNodeType() == ABLNodeType.CLASS)
+      retVal.moveRightToDown();
+
+    return retVal;
   }
 
   @Override
@@ -1569,6 +1590,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   }
 
   @Override
+  public Builder visitExt_functionstate(Ext_functionstateContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
   public JPNode.Builder visitFunction_end(Function_endContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
@@ -1803,7 +1829,14 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitMessage_opt(Message_optContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    JPNode.Builder builder = createTreeFromFirstNode(ctx);
+    JPNode.Builder tmp = builder.getDown();
+    while (tmp != null) {
+      if (tmp.getNodeType() == ABLNodeType.BUTTON)
+        tmp.changeType(ABLNodeType.BUTTONS);
+      tmp = tmp.getRight();
+    }
+    return builder;
   }
 
   @Override

@@ -32,6 +32,7 @@ public class SymbolScope {
 
   private final Map<String, TableRef> tableMap = new HashMap<>();
   private final Set<String> varSet = new HashSet<>();
+  private final Set<String> inlineVarSet = new HashSet<>();
 
   SymbolScope(RefactorSession session) {
     this(session, null);
@@ -89,6 +90,11 @@ public class SymbolScope {
 
   void defineVar(String name) {
     varSet.add(name.toLowerCase());
+  }
+
+  void defineInlineVar(String name) {
+    defineVar(name);
+    inlineVarSet.add(name.toLowerCase());
   }
 
   /** Returns null if false, else, the table type */
@@ -151,6 +157,13 @@ public class SymbolScope {
       return true;
     if (superScope != null)
       return superScope.isVariable(name);
+    return false;
+  }
+
+  boolean isInlineVariable(String name) {
+    if (inlineVarSet.contains(name.toLowerCase()))
+      return true;
+
     return false;
   }
 
