@@ -769,20 +769,35 @@ public class JPNode implements AST {
     }
 
     /**
-     * Transforms <pre>x1 - x2 - x3</pre> into
+     * Transforms <pre>x1 - x2 - x3 - x4</pre> into
      * <pre>
-     * x1 - x3
+     * x1 - x3 - x4
      * |
      * x2
+     * </pre>
+     * Then to: <pre>
+     * x1 - x4
+     * |
+     * x2 - x3 
      * </pre>
      * @return
      */
     public Builder moveRightToDown() {
-      if ((down != null) || (right == null))
+      if (this.right == null)
         throw new NullPointerException();
-      this.down = right;
-      this.right = this.down.right;
-      this.down.right = null;
+      if (this.down == null) {
+        this.down = this.right;
+        this.right = this.down.right;
+        this.down.right = null;
+      } else {
+        Builder target = this.down;
+        while (target.getRight() != null) {
+          target = target.getRight();
+        }
+        target.right = this.right;
+        this.right = target.right.right;
+        target.right.right = null;
+      }
 
       return this;
     }

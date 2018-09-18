@@ -1105,7 +1105,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitDefineparam_var(Defineparam_varContext ctx) {
-    return visitChildren(ctx).moveRightToDown();
+    JPNode.Builder retVal = visitChildren(ctx).moveRightToDown();
+    if (retVal.getDown().getNodeType() == ABLNodeType.CLASS)
+      retVal.moveRightToDown();
+
+    return retVal;
   }
 
   @Override
