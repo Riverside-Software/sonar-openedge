@@ -1148,19 +1148,19 @@ public class TP01Support implements ITreeParserAction {
   @Override
   public void runInHandle(JPNode exprNode) {
     wipCalls.getFirst().setRunHandleNode(exprNode);
-    Symbol var = exprNode.getSymbol();
+    /* Symbol var = exprNode.getSymbol();
     if (var == null)
-      var = currentScope.getVariable(exprNode.getText());
+      var = currentScope.getVariable(exprNode.getText(), true);
     if (var != null) {
       var.noteReference(ContextQualifier.REF);
-    }
+    } */
   }
 
   @Override
   public void runOnHandle(JPNode exprNode) throws SemanticException {
     Symbol var = exprNode.getSymbol();
     if (var == null)
-      var = currentScope.getVariable(exprNode.getText());
+      var = currentScope.getVariable(exprNode.getText(), true);
     if (var != null) {
       var.noteReference(ContextQualifier.REF);
     }

@@ -146,6 +146,15 @@ public class BugFixTest {
     assertEquals(unit.getRootScope().getVariable("x3").getNumReads(), 0);
     assertEquals(unit.getRootScope().getVariable("x4").getNumReads(), 1);
     assertEquals(unit.getRootScope().getVariable("x4").getNumWrites(), 0);
+
+    assertEquals(unit.getRootScope().getVariable("lProcedure1").getNumReads(), 1);
+    assertEquals(unit.getRootScope().getVariable("lProcedure1").getNumWrites(), 0);
+    assertEquals(unit.getRootScope().getVariable("lProcedure2").getNumReads(), 1);
+    assertEquals(unit.getRootScope().getVariable("lProcedure2").getNumWrites(), 0);
+    assertEquals(unit.getRootScope().getVariable("lApsv").getNumReads(), 1);
+    assertEquals(unit.getRootScope().getVariable("lApsv").getNumWrites(), 0);
+    assertEquals(unit.getRootScope().getVariable("lRun").getNumReads(), 0);
+    assertEquals(unit.getRootScope().getVariable("lRun").getNumWrites(), 1);
   }
 
   @Test
