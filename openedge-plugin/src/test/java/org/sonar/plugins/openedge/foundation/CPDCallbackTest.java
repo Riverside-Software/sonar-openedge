@@ -34,6 +34,7 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
+import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.cpd.NewCpdTokens;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.internal.google.common.io.Files;
@@ -47,7 +48,6 @@ import antlr.ANTLRException;
 public class CPDCallbackTest {
   private static final String BASEDIR = "src/test/resources/";
 
-  protected SensorContextTester context;
   private RefactorSession session;
 
   @BeforeMethod
@@ -55,14 +55,10 @@ public class CPDCallbackTest {
     session = new RefactorSession(new ProparseSettings("src/test/resources"), new Schema(), StandardCharsets.UTF_8);
   }
 
-  @BeforeMethod
-  public void initTest() throws IOException {
-    context = SensorContextTester.create(new File(BASEDIR));
-  }
-
   @Test
   public void test1() {
-    InputFile inputFile = getInputFile("cpd01.p");
+    SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
+    InputFile inputFile = getInputFile(context, "cpd01.p");
     ParseUnit unit = getParseUnit(inputFile);
     ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
     unit.getTopNode().walk(callback);
@@ -78,7 +74,8 @@ public class CPDCallbackTest {
 
   @Test
   public void test2() {
-    InputFile inputFile = getInputFile("cpd02.p");
+    SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
+    InputFile inputFile = getInputFile(context, "cpd02.p");
     ParseUnit unit = getParseUnit(inputFile);
     ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
     unit.getTopNode().walk(callback);
@@ -97,7 +94,8 @@ public class CPDCallbackTest {
 
   @Test
   public void test3() {
-    InputFile inputFile = getInputFile("cpd03.p");
+    SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
+    InputFile inputFile = getInputFile(context, "cpd03.p");
     ParseUnit unit = getParseUnit(inputFile);
     ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
     unit.getTopNode().walk(callback);
@@ -111,7 +109,66 @@ public class CPDCallbackTest {
     assertEquals(lines.get(1).getValue(), "fieldbarxxxbarascharacter.");
   }
 
-  private InputFile getInputFile(String file) {
+  @Test
+  public void testNoProperties() {
+    SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
+    InputFile inputFile = getInputFile(context, "cpd04.p");
+    ParseUnit unit = getParseUnit(inputFile);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
+    unit.getTopNode().walk(callback);
+    callback.getResult().save();
+    List<TokensLine> lines = context.cpdTokens(inputFile.key());
+    // 4 lines per procedure + one annotation
+    assertEquals(lines.size(), 13);
+  }
+
+  @Test
+  public void testAnnotations() {
+    SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
+    InputFile inputFile = getInputFile(context, "cpd04.p");
+    ParseUnit unit = getParseUnit(inputFile);
+    context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated");
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
+    unit.getTopNode().walk(callback);
+    callback.getResult().save();
+    
+    List<TokensLine> lines = context.cpdTokens(inputFile.key());
+    // 4 lines per procedure + one placeholder
+    assertEquals(lines.size(), 9);
+  }
+
+  @Test
+  public void testProcedures() {
+    SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
+    InputFile inputFile = getInputFile(context, "cpd04.p");
+    ParseUnit unit = getParseUnit(inputFile);
+    context.settings().setProperty(Constants.CPD_PROCEDURES, "p1,p4,p3");
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
+    unit.getTopNode().walk(callback);
+    callback.getResult().save();
+    
+    List<TokensLine> lines = context.cpdTokens(inputFile.key());
+    // 4 lines per procedure + one annotation + two placeholders
+    assertEquals(lines.size(), 7);
+  }
+
+  @Test
+  public void testAnnotationsAndProcedures() {
+    SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
+    InputFile inputFile = getInputFile(context, "cpd04.p");
+    ParseUnit unit = getParseUnit(inputFile);
+    context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated");
+    context.settings().setProperty(Constants.CPD_PROCEDURES, "p1,p4,p5");
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
+    unit.getTopNode().walk(callback);
+    callback.getResult().save();
+    
+    List<TokensLine> lines = context.cpdTokens(inputFile.key());
+    // 4 lines per procedure + two placeholders
+    assertEquals(lines.size(), 6);
+  }
+
+  private InputFile getInputFile(SensorContextTester context, String file) {
     try {
       InputFile inputFile = TestInputFileBuilder.create(BASEDIR, file).setLanguage(Constants.LANGUAGE_KEY).setType(
           Type.MAIN).setCharset(StandardCharsets.UTF_8).setContents(
