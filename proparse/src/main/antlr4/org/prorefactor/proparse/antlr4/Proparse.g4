@@ -3369,6 +3369,8 @@ runstate: // TRANSLATED
 
 run_opt: // TRANSLATED
     PERSISTENT run_set?    # runOptPersistent
+  | SINGLERUN run_set?     # runOptSingleRun
+  | SINGLETON run_set?     # runOptSingleton
   | run_set                # runOptSet
   | ON SERVER? expression ( TRANSACTION DISTINCT? )?  # runOptServer
   | in_expr                # runOptIn

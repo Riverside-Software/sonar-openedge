@@ -2202,6 +2202,16 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   }
 
   @Override
+  public Builder visitRunOptSingleRun(RunOptSingleRunContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public Builder visitRunOptSingleton(RunOptSingletonContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
   public JPNode.Builder visitRunOptServer(RunOptServerContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
