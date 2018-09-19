@@ -31,6 +31,7 @@ public class Constants {
   // Sonar analysis properties
   public static final String SKIP_PROPARSE_PROPERTY = "sonar.oe.skipProparse";
   public static final String PROPARSE_DEBUG = "sonar.oe.proparse.debug";
+  public static final String PROPARSE_ERROR_STACKTRACE = "sonar.oe.proparse.error.stacktrace";
   public static final String BINARIES = "sonar.oe.binaries";
   public static final String DLC = "sonar.oe.dlc";
   public static final String PROPATH = "sonar.oe.propath";
