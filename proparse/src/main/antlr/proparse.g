@@ -3809,12 +3809,12 @@ runstate:
 
 run_opt:
     PERSISTENT^ (options{greedy=true;}: run_set)?
-  |  run_set
-  |  ON^ (options{greedy=true;}: SERVER)? expression (options{greedy=true;}: TRANSACTION (options{greedy=true;}: DISTINCT)? )?
-  |  in_expr
-  |  ASYNCHRONOUS^ (options{greedy=true;}: run_set)? (options{greedy=true;}: run_event)? (options{greedy=true;}: in_expr)?
   | SINGLETON^ (options{greedy=true;}: run_set)?
   | SINGLERUN^ (options{greedy=true;}: run_set)?
+  | run_set
+  | ON^ (options{greedy=true;}: SERVER)? expression (options{greedy=true;}: TRANSACTION (options{greedy=true;}: DISTINCT)? )?
+  | in_expr
+  | ASYNCHRONOUS^ (options{greedy=true;}: run_set)? (options{greedy=true;}: run_event)? (options{greedy=true;}: in_expr)?
   ;
 
 run_event:

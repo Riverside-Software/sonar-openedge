@@ -1701,8 +1701,8 @@ runstate:
       |  #(SINGLERUN ( #(SET (fld[ContextQualifier.UPDATING])? ) )? )
       |  #(SINGLETON ( #(SET (fld[ContextQualifier.UPDATING])? ) )? )
       |  #(SET (fld[ContextQualifier.UPDATING])? )
-      |  #(ON (SERVER)? expression (TRANSACTION (DISTINCT)?)? )
-      |  #(IN_KW hexp:expression) { action.runInHandle(#hexp); } 
+      |  #(ON (SERVER)? hexp:expression (TRANSACTION (DISTINCT)?)? { action.runOnHandle(#hexp); } )
+      |  #(IN_KW hexp2:expression) { action.runInHandle(#hexp2); }
       |  #(  ASYNCHRONOUS ( #(SET (fld[ContextQualifier.UPDATING])? ) )?
           (#(EVENTPROCEDURE expression ) )?
           (#(IN_KW expression))?

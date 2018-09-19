@@ -452,6 +452,14 @@ public interface ITreeParserAction {
   }
 
   /**
+   * Action to take in a RUNSTATE of the form run <pre>on &lt;handle expression&gt;</pre>.
+   * 
+   * @param node - the node for &lt;handle expression&gt;.
+   */
+  default void runOnHandle(JPNode node) throws SemanticException {
+  }
+
+  /**
    * Action to take in RUNSTATE of the form run &lt;p&gt; persistent set &lt;handle&gt;.
    * 
    * @param fld - the field node for &lt;handle&gt;.
