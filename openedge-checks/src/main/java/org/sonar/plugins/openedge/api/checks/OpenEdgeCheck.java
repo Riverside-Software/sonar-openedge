@@ -26,8 +26,8 @@ import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.plugins.openedge.api.InvalidLicenceException;
-import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
+import org.sonar.plugins.openedge.api.InvalidLicenseException;
+import org.sonar.plugins.openedge.api.LicenseRegistrar.License;
 
 /**
  * Parent class of all OpenEdge checks
@@ -41,11 +41,11 @@ public abstract class OpenEdgeCheck<T> {
    * 
    * @param ruleKey Rule key
    * @param context Sensor context
-   * @param licence May be null
+   * @param license May be null
    * 
-   * @throws InvalidLicenceException In case of licence check failure
+   * @throws InvalidLicenseException In case of license check failure
    */
-  public OpenEdgeCheck(RuleKey ruleKey, SensorContext context, Licence licence) {
+  public OpenEdgeCheck(RuleKey ruleKey, SensorContext context, License license) {
     this.ruleKey = ruleKey;
     this.context = context;
   }
