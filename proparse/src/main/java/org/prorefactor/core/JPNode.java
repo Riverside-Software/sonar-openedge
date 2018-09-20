@@ -215,7 +215,8 @@ public class JPNode implements AST {
 
   public void updateEndPosition(int file, int line, int col) {
     token = new ProToken(token.getNodeType(), token.getText(), token.getFileIndex(), token.getFilename(),
-        token.getLine(), token.getColumn(), file, line, col, token.getMacroSourceNum(), token.getAnalyzeSuspend(), token.isSynthetic());
+        token.getLine(), token.getColumn(), file, line, col, token.getMacroSourceNum(), token.getAnalyzeSuspend(),
+        token.isSynthetic(), token.isMacroExpansion());
   }
 
   @Override
@@ -308,6 +309,9 @@ public class JPNode implements AST {
     return (ProToken) token.getHiddenBefore();
   }
 
+  public boolean isMacroExpansion() {
+    return token.isMacroExpansion();
+  }
 
   public String getAnalyzeSuspend() {
     return token.getAnalyzeSuspend();
@@ -974,13 +978,19 @@ public class JPNode implements AST {
   }
 
   /**
-   * Walk the tree from the input node down
+   * Walk down the tree from the input node
    */
   public void walk(ICallback<?> callback) {
-    boolean visitChildren = callback.visitNode(this);
-    if (visitChildren) {
-      for (JPNode child : getDirectChildren()) {
-        child.walk(callback);
+    if (attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
+      // Assuming OPERATORs only have two children (which should be the case)
+      getFirstChild().walk(callback);
+      callback.visitNode(this);
+      getFirstChild().getNextSibling().walk(callback);
+    } else {
+      if (callback.visitNode(this)) {
+        for (JPNode child : getDirectChildren()) {
+          child.walk(callback);
+        }
       }
     }
   }

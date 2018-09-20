@@ -95,6 +95,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private int currSourceNum;
   private int currLine;
   private int currCol;
+  private boolean currMacroExpansion;
 
   // Are we in the middle of a comment?
   private boolean doingComment;
@@ -450,6 +451,10 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     return currCol;
   }
 
+  boolean getMacroExpansion() {
+    return currMacroExpansion;
+  }
+
   int getFileIndex() {
     return currFile;
   }
@@ -541,6 +546,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     currLine = currentInput.getNextLine();
     currCol = currentInput.getNextCol();
     currChar = currentInput.get();
+    currMacroExpansion = currentInput.isMacroExpansion();
     if (currChar == 65533) {
       // This is the 'replacement' character in Unicode, used by Java as a
       // placeholder for a character which could not be converted.
@@ -560,6 +566,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
           currLine = currentInput.getNextLine();
           currCol = currentInput.getNextCol();
           currSourceNum = currentInput.getSourceNum();
+          currMacroExpansion = currentInput.isMacroExpansion();
           currChar = ' ';
           return;
         case 2: // popped a macro ref or include arg ref
@@ -568,6 +575,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
           currCol = currentInput.getNextCol();
           currChar = currentInput.get(); // might be another EOF
           currSourceNum = currentInput.getSourceNum();
+          currMacroExpansion = currentInput.isMacroExpansion();
           break;
         default:
           throw new IllegalStateException("Proparse error. popInput() returned unexpected value.");
@@ -1108,7 +1116,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       return new ProToken(tok.getNodeType() == ABLNodeType.EOF_ANTLR4 ? ABLNodeType.EOF : tok.getNodeType(),
           tok.getText(), tok.getFileIndex(), Strings.nullToEmpty(filenameList.getValue(tok.getFileIndex())),
           tok.getLine(), tok.getCharPositionInLine(), tok.getEndFileIndex(), tok.getEndLine(),
-          tok.getEndCharPositionInLine(), tok.getMacroSourceNum(), tok.getAnalyzeSuspend(), false);
+          tok.getEndCharPositionInLine(), tok.getMacroSourceNum(), tok.getAnalyzeSuspend(), false, tok.isMacroExpansion());
     }
   }
 

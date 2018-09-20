@@ -114,6 +114,10 @@ public class InputSource {
     return fileIndex;
   }
 
+  public boolean isMacroExpansion() {
+    return macroExpansion;
+  }
+
   public int getSourceNum() {
     return sourceNum;
   }

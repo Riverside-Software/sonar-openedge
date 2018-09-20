@@ -25,11 +25,8 @@ import java.util.UUID;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ICallback;
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.macrolevel.MacroEvent;
-import org.prorefactor.macrolevel.NamedMacroRef;
 import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
@@ -39,7 +36,7 @@ import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
 /**
- * This class generated CPD tokens for the CPD engine, by skipping tokens within annotated code blocks and also by
+ * This class generates CPD tokens for the CPD engine, by skipping tokens within annotated code blocks and also by
  * reverting preprocessor, as CPD engine doesn't want tokens to overlap.
  */
 public class CPDCallback implements ICallback<NewCpdTokens> {
@@ -64,10 +61,10 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
 
   @Override
   public boolean visitNode(JPNode node) {
-    // Periods, colons and CPD annotations not taken into account
-    if ((node.getNodeType() == ABLNodeType.PERIOD) || (node.getNodeType() == ABLNodeType.OBJCOLON)) {
-      return false;
-    }
+    if (!node.isNatural()) 
+      return true;
+
+    // CPD annotations not taken into account
     if ((node.getNodeType() == ABLNodeType.ANNOTATION) && settings.skipCPD(node.getAnnotationName())) {
         return false;
     }
@@ -104,15 +101,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
       }
     }
 
-    if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
-      // Consider that an operator only has 2 children
-      visitNode(node.getFirstChild());
-      visitCpdNode(node);
-      visitNode(node.getFirstChild().getNextSibling());
-      return false;
-    } else {
-      visitCpdNode(node);
-    }
+    visitCpdNode(node);
     return true;
   }
 
@@ -129,33 +118,12 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     return false;
   }
 
-  private String undoPreprocessing(JPNode node, String str) {
-    String foo = str;
-    for (MacroEvent evt : unit.getMacroGraph().macroEventList) {
-      if (evt instanceof NamedMacroRef) {
-        NamedMacroRef nmr = (NamedMacroRef) evt;
-        if (nmr.getLine() > node.getLine()) {
-          break;
-        }
-        // Reduce expanded prepro variable back to {&VAR_NAME}
-        if ((nmr.getMacroDef() != null) && NamedMacroRef.isInRange(nmr.getLine(), nmr.getColumn(),
-            new int[] {node.getLine(), node.getColumn() - 1}, new int[] {node.getEndLine(), node.getEndColumn() - 1})) {
-          foo = foo.replace(nmr.getMacroDef().getValue(), "{&" + nmr.getMacroDef().getName() + "}");
-        }
-      }
-    }
-    return foo;
-  }
-
   private void visitCpdNode(JPNode node) {
-    // We only take care of nodes in main file, and of real nodes
-    if ((node.getFileIndex() > 0) || (node.getLine() <= 0) || (node.getFileIndex() != node.getEndFileIndex())){
+    // We only take care of nodes in main file, not generated from preprocessor expansion
+    if (node.isMacroExpansion() || (node.getFileIndex() > 0) || (node.getLine() <= 0) || (node.getFileIndex() != node.getEndFileIndex())){
       return;
     }
-    if ((node.getLine() == node.getEndLine()) && (node.getColumn() == node.getEndColumn())) {
-      return;
-    }
-    String str = node.getNodeType().getText();
+    String str = node.getNodeType() == ABLNodeType.NUMBER ? node.getText() : node.getNodeType().getText();
     // Identifiers are also using the same case
     if ((str == null) || (str.trim().length() == 0)) {
       if (node.getNodeType() == ABLNodeType.ID) {
@@ -164,10 +132,9 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
         str = node.getText().trim();
       }
     }
-    str = undoPreprocessing(node, str);
 
     try {
-      TextRange range = file.newRange(node.getLine(), node.getColumn(), node.getEndLine(), node.getEndColumn());
+      TextRange range = file.newRange(node.getLine(), node.getColumn() - 1, node.getEndLine(), node.getEndColumn());
       cpdTokens.addToken(range, str);
     } catch (IllegalArgumentException uncaught) {
       LOG.debug("Unable to create CPD token at position {}:{} to {}:{} - Cause {}", node.getLine(), node.getColumn(),
@@ -179,7 +146,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     List<JPNode> children = node.getDirectChildren();
     JPNode lastSibling = children.isEmpty() ? node : children.get(children.size() - 1);
     try {
-      TextRange range = file.newRange(node.getLine(), node.getColumn(), lastSibling.getEndLine(), lastSibling.getEndColumn());
+      TextRange range = file.newRange(node.getLine(), node.getColumn() - 1, lastSibling.getEndLine(), lastSibling.getEndColumn() - 1);
       cpdTokens.addToken(range, UUID.randomUUID().toString());
     } catch (IllegalArgumentException uncaught) {
       LOG.debug("Unable to create CPD token at position {}:{} to {}:{} - Cause {}", node.getLine(), node.getColumn(),
