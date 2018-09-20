@@ -296,18 +296,9 @@ public class TreeParserSymbolScope {
   }
 
   public Variable getVariable(String name) {
-    return getVariable(name, false);
+    return variableMap.get(name.toLowerCase());
   }
 
-  public Variable getVariable(String name, boolean recurse) {
-    Variable var = variableMap.get(name.toLowerCase());
-    if (var != null)
-      return var;
-    if (recurse && (parentScope != null)) {
-      return parentScope.getVariable(name, true);
-    } else
-      return null;
-  }
   /**
    * Answer whether the scope has a Routine named by param.
    * 
