@@ -2587,8 +2587,8 @@ field_equal_dynamic_new:
 
 dynamic_new:
     { support.disallowUnknownMethodCalls(); }
-  DYNAMICNEW^ expression parameterlist
-  { support.allowUnknownMethodCalls(); }
+    DYNAMICNEW^ expression parameterlist
+    { support.allowUnknownMethodCalls(); }
   ;
 
 editorphrase:
