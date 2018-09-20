@@ -828,7 +828,7 @@ exprt2: // TRANSLATED
     // point in expression evaluation, if we have anything followed by a left-paren,
     // we're going to assume it's a method call.
     // Method names which are reserved keywords must be prefixed with THIS-OBJECT:.
-    { support.isClass() && !support.isInDynamicNew() }? methodname=identifier parameterlist_noroot  # exprt2ParenCall2
+    { support.isClass() && support.unknownMehodCallsAllowed() }? methodname=identifier parameterlist_noroot  # exprt2ParenCall2
   | constant   # exprt2Constant
   | noargfunc  # exprt2NoArgFunc
   | systemhandlename  # exprt2SystemHandleName
@@ -2241,9 +2241,9 @@ field_equal_dynamic_new: // TRANSLATED
   ;
 
 dynamic_new: // TRANSLATED
-    { support.setInDynamicNew(true); }
+    { support.disallowUnknownMethodCalls(); }
     DYNAMICNEW expression parameterlist
-    { support.setInDynamicNew(false); }
+    { support.allowUnknownMethodCalls(); }
   ;
 
 editorphrase: // TRANSLATED

@@ -889,7 +889,7 @@ exprt2 { /* RULE_INIT */ int ntype = 0; }:
     // point in expression evaluation, if we have anything followed by a left-paren,
     // we're going to assume it's a method call.
     // Method names which are reserved keywords must be prefixed with THIS-OBJECT:.
-    ({ /* RULE_INIT */support.isClass() && !support.isInDynamicNew()}? identifier LEFTPAREN)=>
+    ({ /* RULE_INIT */support.isClass() && support.unknownMehodCallsAllowed()}? identifier LEFTPAREN)=>
       methodname:identifier!
       {  #methodname.setType(LOCAL_METHOD_REF);
         astFactory.makeASTRoot(currentAST, #methodname);
@@ -2586,9 +2586,9 @@ field_equal_dynamic_new:
   ;
 
 dynamic_new:
-    { support.setInDynamicNew(true); }
+    { support.disallowUnknownMethodCalls(); }
   DYNAMICNEW^ expression parameterlist
-  { support.setInDynamicNew(false); }
+  { support.allowUnknownMethodCalls(); }
   ;
 
 editorphrase:
@@ -3042,9 +3042,11 @@ ifstate:
 if_else:
     ELSE^ (options{greedy=true;}: blockorstate)?
   ;
-
+ 
 in_expr:
+    { support.disallowUnknownMethodCalls(); }
     IN_KW^ expression
+    { support.allowUnknownMethodCalls(); }
   ;
 
 in_window_expr:
