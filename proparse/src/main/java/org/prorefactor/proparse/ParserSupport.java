@@ -56,7 +56,7 @@ public class ParserSupport {
 
   private boolean schemaTablePriority = false;
   private boolean unitIsInterface = false;
-  private boolean inDynamicNew = false;
+  private boolean allowUnknownMethodCalls = true;
 
   private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
 
@@ -391,15 +391,19 @@ public class ParserSupport {
     this.schemaTablePriority = priority;
   }
 
-  /**
-   * @return True if the parser in the middle of a DYNAMIC-NEW statement
-   */
-  public boolean isInDynamicNew() {
-    return inDynamicNew;
+  public void allowUnknownMethodCalls() {
+    this.allowUnknownMethodCalls = true;
   }
 
-  public void setInDynamicNew(boolean flag) {
-    inDynamicNew = flag;
+  public void disallowUnknownMethodCalls() {
+    this.allowUnknownMethodCalls = false;
+  }
+
+  /**
+   * @return False if unknown method calls are not allowed in exprt2 rule. Usually returns true except when in DYNAMIC-NEW or RUN ... IN|ON statements 
+   */
+  public boolean unknownMehodCallsAllowed() {
+    return allowUnknownMethodCalls;
   }
 
   // TODO Speed issue in this function, multiplied JPNode tree generation time by a factor 10

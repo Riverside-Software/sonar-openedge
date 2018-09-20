@@ -1248,6 +1248,8 @@ public enum ABLNodeType {
   SILENT(ProParserTokenTypes.SILENT, "silent", NodeTypesOption.KEYWORD),
   SIMPLE(ProParserTokenTypes.SIMPLE, "simple", NodeTypesOption.KEYWORD),
   SINGLE(ProParserTokenTypes.SINGLE, "single", NodeTypesOption.KEYWORD),
+  SINGLERUN(ProParserTokenTypes.SINGLERUN, "single-run", NodeTypesOption.KEYWORD),
+  SINGLETON(ProParserTokenTypes.SINGLETON, "singleton", NodeTypesOption.KEYWORD),
   SINGLEQUOTE(ProParserTokenTypes.SINGLEQUOTE, "'", NodeTypesOption.SYMBOL),
   SIZE(ProParserTokenTypes.SIZE, "size", NodeTypesOption.KEYWORD),
   SIZECHARS(ProParserTokenTypes.SIZECHARS, "size-chars", 6, NodeTypesOption.KEYWORD),

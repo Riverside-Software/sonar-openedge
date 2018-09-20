@@ -2564,6 +2564,8 @@ runstate:
     #(  RUN filenameorvalue
       (LEFTANGLE LEFTANGLE filenameorvalue RIGHTANGLE RIGHTANGLE)?
       (  #(PERSISTENT ( #(SET (field)? ) )? )
+      |  #(SINGLERUN ( #(SET (field)? ) )? )
+      |  #(SINGLETON ( #(SET (field)? ) )? )
       |  #(SET (field)? )
       |  #(ON (SERVER)? expression (TRANSACTION (DISTINCT)?)? )
       |  #(IN_KW expression)

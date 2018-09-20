@@ -1698,9 +1698,11 @@ runstate:
     #(  r:RUN filenameorvalue { action.runBegin(#r); } 
       (LEFTANGLE LEFTANGLE filenameorvalue RIGHTANGLE RIGHTANGLE)?
       (  #(PERSISTENT ( #(SET (hnd:fld[ContextQualifier.UPDATING] { action.runPersistentSet(#hnd); } )? ) )? )
+      |  #(SINGLERUN ( #(SET (fld[ContextQualifier.UPDATING])? ) )? )
+      |  #(SINGLETON ( #(SET (fld[ContextQualifier.UPDATING])? ) )? )
       |  #(SET (fld[ContextQualifier.UPDATING])? )
       |  #(ON (SERVER)? expression (TRANSACTION (DISTINCT)?)? )
-      |  #(IN_KW hexp:expression) { action.runInHandle(#hexp); } 
+      |  #(IN_KW hexp:expression) { action.runInHandle(#hexp); }
       |  #(  ASYNCHRONOUS ( #(SET (fld[ContextQualifier.UPDATING])? ) )?
           (#(EVENTPROCEDURE expression ) )?
           (#(IN_KW expression))?

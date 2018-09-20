@@ -1147,7 +1147,7 @@ public class TP01Support implements ITreeParserAction {
    */
   @Override
   public void runInHandle(JPNode exprNode) {
-    wipCalls.getFirst().setRunHandleNode((JPNode) exprNode);
+    wipCalls.getFirst().setRunHandleNode(exprNode);
   }
 
   /**
