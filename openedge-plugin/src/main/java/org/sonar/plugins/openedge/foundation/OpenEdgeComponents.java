@@ -21,6 +21,9 @@ package org.sonar.plugins.openedge.foundation;
 
 import java.lang.reflect.Field;
 import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -96,14 +99,6 @@ public class OpenEdgeComponents {
     for (LicenseRegistration registration : registrations) {
       registration.register(licenseRegistrar);
     }
-    for (License entry : licenseRegistrar.getLicenses()) {
-      LOG.info(
-          "License summary - Repository '{}' associated with {} license permanent ID '{}' - Customer '{}' - Expiration date {}",
-          entry.getRepositoryName(),
-          entry.getType().toString(), entry.getPermanentId(),
-          entry.getCustomerName(), DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(
-              new Date(entry.getExpirationDate())));
-    }
   }
 
   public Iterable<License> getLicenses() {
@@ -112,6 +107,19 @@ public class OpenEdgeComponents {
 
   public License getLicense(String repoName, String permId) {
     return licenseRegistrar.getLicense(repoName, permId);
+  }
+
+  public void initializeLicense(SensorContext context) {
+    String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "")
+        + OpenEdgeProjectHelper.getServerId(context);
+    for (License entry : licenseRegistrar.getLicenses()) {
+      if (permId.equals(entry.getPermanentId())) {
+        LOG.info("Repository '{}' associated with {} license permanent ID '{}' - Customer '{}' - Expiration date {}",
+            entry.getRepositoryName(), entry.getType().toString(), entry.getPermanentId(), entry.getCustomerName(),
+            LocalDateTime.ofEpochSecond(entry.getExpirationDate() / 1000, 0, ZoneOffset.UTC).format(
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+      }
+    }
   }
 
   public void initializeChecks(SensorContext context) {
@@ -281,9 +289,9 @@ public class OpenEdgeComponents {
       allChecks.add(check);
     }
 
-    public Class<? extends OpenEdgeCheck<?>> getCheck(String str) {
+    public Class<? extends OpenEdgeCheck<?>> getCheck(String className) {
       for (Class<? extends OpenEdgeCheck<?>> clz : allChecks) {
-        if (clz.getCanonicalName().equalsIgnoreCase(str)) {
+        if (clz.getCanonicalName().equalsIgnoreCase(className)) {
           return clz;
         }
       }
