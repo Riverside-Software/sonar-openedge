@@ -49,7 +49,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     NewRepository repository = context.createRepository(Constants.STD_REPOSITORY_KEY, Constants.LANGUAGE_KEY).setName(REPOSITORY_NAME);
 
     AnnotationBasedRulesDefinition annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY);
-    annotationLoader.addRuleClasses(false, Arrays.<Class> asList(OpenEdgeRulesRegistrar.ppCheckClasses()));
+    annotationLoader.addRuleClasses(false, Arrays.<Class> asList(BasicChecksRegistration.ppCheckClasses()));
 
     // Manually created rules for compiler warnings
     createWarningRule(repository, COMPILER_WARNING_RULEKEY, "Compiler warnings", "2h", Priority.MINOR);

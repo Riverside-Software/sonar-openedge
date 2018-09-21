@@ -26,29 +26,14 @@ import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.plugins.openedge.api.InvalidLicenseException;
-import org.sonar.plugins.openedge.api.LicenseRegistrar.License;
+import org.sonar.plugins.openedge.api.LicenseRegistration.License;
 
 /**
  * Parent class of all OpenEdge checks
  */
 public abstract class OpenEdgeCheck<T> {
-  private final RuleKey ruleKey;
-  private final SensorContext context;
-
-  /**
-   * Standard constructor of a Proparse based check
-   * 
-   * @param ruleKey Rule key
-   * @param context Sensor context
-   * @param license May be null
-   * 
-   * @throws InvalidLicenseException In case of license check failure
-   */
-  public OpenEdgeCheck(RuleKey ruleKey, SensorContext context, License license) {
-    this.ruleKey = ruleKey;
-    this.context = context;
-  }
+  private RuleKey ruleKey;
+  private SensorContext context;
 
   public final RuleKey getRuleKey() {
     return ruleKey;
@@ -59,30 +44,36 @@ public abstract class OpenEdgeCheck<T> {
   }
 
   /**
-   * Executed only once just after rule instantiation and properties assignment. Has to be used to initialize the
-   * context.
+   * Internal method for context setup
    */
-  public abstract void initialize();
+  public void setContext(RuleKey ruleKey, SensorContext context, License license) {
+    this.ruleKey = ruleKey;
+    this.context = context;
+  }
+
+  /**
+   * Executed only once just after rule instantiation and properties assignment.
+   */
+  public void initialize() {
+    // No-op
+  }
 
   /**
    * Only for internal SonarQube usage
-   * @param file
-   * @param o
    */
   public abstract void sensorExecute(InputFile file, T o);
 
   /**
    * Main method of the check
-   * 
-   * @param file
-   * @param o
    */
   public abstract void execute(InputFile file, T o);
 
   /**
    * Triggered after all files have been analyzed
    */
-  public abstract void postJob();
+  public void postJob() {
+    // No-op
+  }
 
   public abstract CheckType getCheckType();
 

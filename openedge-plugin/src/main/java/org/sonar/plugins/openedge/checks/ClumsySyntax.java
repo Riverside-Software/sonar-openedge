@@ -23,21 +23,14 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.rule.RuleKey;
 import org.sonar.check.Priority;
 import org.sonar.check.Rule;
-import org.sonar.plugins.openedge.api.LicenseRegistrar.License;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
 
 @Rule(priority = Priority.BLOCKER, name = "Valid yet clumsy ABL syntax", tags = {"clumsy", "confusing"})
 @SqaleConstantRemediation(value = "15min")
 public class ClumsySyntax extends OpenEdgeProparseCheck {
-
-  public ClumsySyntax(RuleKey ruleKey, SensorContext context, License license) {
-    super(ruleKey, context, license);
-  }
 
   @Override
   public void execute(InputFile file, ParseUnit unit) {

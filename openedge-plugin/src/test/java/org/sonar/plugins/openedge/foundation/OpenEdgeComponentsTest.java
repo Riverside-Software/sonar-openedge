@@ -23,8 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 
-import org.sonar.plugins.openedge.api.CheckRegistrar;
-import org.sonar.plugins.openedge.api.LicenseRegistrar;
+import org.sonar.plugins.openedge.api.CheckRegistration;
+import org.sonar.plugins.openedge.api.LicenseRegistration;
 import org.testng.annotations.Test;
 
 public class OpenEdgeComponentsTest {
@@ -32,93 +32,93 @@ public class OpenEdgeComponentsTest {
   public void testNoLicenses() throws IOException {
     OpenEdgeComponents components1 = new OpenEdgeComponents();
     assertThat(components1.getLicenses()).hasSize(0);
-    OpenEdgeComponents components2 = new OpenEdgeComponents(new LicenseRegistrar[] {});
+    OpenEdgeComponents components2 = new OpenEdgeComponents(new LicenseRegistration[] {});
     assertThat(components2.getLicenses()).hasSize(0);
-    OpenEdgeComponents components3 = new OpenEdgeComponents(new CheckRegistrar[] {}, new LicenseRegistrar[] {});
+    OpenEdgeComponents components3 = new OpenEdgeComponents(new CheckRegistration[] {}, new LicenseRegistration[] {});
     assertThat(components3.getLicenses()).hasSize(0);
   }
 
   @Test
   public void testOneLicense() throws IOException {
-    OpenEdgeComponents components = new OpenEdgeComponents(new LicenseRegistrar[] {LICENSE_ME_OE_2015});
+    OpenEdgeComponents components = new OpenEdgeComponents(new LicenseRegistration[] {LICENSE_ME_OE_2015});
     assertThat(components.getLicenses()).hasSize(1);
   }
 
   @Test
   public void testTwoLicenses() throws IOException {
     OpenEdgeComponents components = new OpenEdgeComponents(
-        new LicenseRegistrar[] {LICENSE_ME_OE_2015, LICENSE_ME_OE_2025});
+        new LicenseRegistration[] {LICENSE_ME_OE_2015, LICENSE_ME_OE_2025});
     assertThat(components.getLicenses()).hasSize(1);
   }
 
   @Test
   public void testTwoPermId() throws IOException {
     OpenEdgeComponents components = new OpenEdgeComponents(
-        new LicenseRegistrar[] {LICENSE_ME_OE_2015, LICENSE_YOU_OE_2025});
+        new LicenseRegistration[] {LICENSE_ME_OE_2015, LICENSE_YOU_OE_2025});
     assertThat(components.getLicenses()).hasSize(2);
   }
 
   @Test
   public void testTwoRepositories() throws IOException {
     OpenEdgeComponents components = new OpenEdgeComponents(
-        new LicenseRegistrar[] {LICENSE_ME_OE_2015, LICENSE_YOU_OTHER_2015});
+        new LicenseRegistration[] {LICENSE_ME_OE_2015, LICENSE_YOU_OTHER_2015});
     assertThat(components.getLicenses()).hasSize(2);
   }
 
   @Test
   public void testThreeLicenses() throws IOException {
     OpenEdgeComponents components = new OpenEdgeComponents(
-        new LicenseRegistrar[] {LICENSE_ME_OE_2015, LICENSE_ME_OE_2030, LICENSE_ME_OE_2025});
+        new LicenseRegistration[] {LICENSE_ME_OE_2015, LICENSE_ME_OE_2030, LICENSE_ME_OE_2025});
     assertThat(components.getLicenses()).hasSize(1);
   }
 
   @Test
   public void testMixedLicenses() throws IOException {
-    OpenEdgeComponents components = new OpenEdgeComponents(new LicenseRegistrar[] {
+    OpenEdgeComponents components = new OpenEdgeComponents(new LicenseRegistration[] {
         LICENSE_ME_OE_2015, LICENSE_ME_OE_2030, LICENSE_ME_OE_2025, LICENSE_YOU_OTHER_2015, LICENSE_YOU_OE_2015,
         LICENSE_YOU_OE_2015});
     assertThat(components.getLicenses()).hasSize(3);
   }
 
-  private final static LicenseRegistrar LICENSE_ME_OE_2015 = new LicenseRegistrar() {
+  private final static LicenseRegistration LICENSE_ME_OE_2015 = new LicenseRegistration() {
     @Override
-    public void register(LicenseContext context) {
-      context.registerLicense("123456789", "Me", "salt", "rssw-oe-main", LicenseRegistrar.LicenseType.COMMERCIAL,
+    public void register(Registrar context) {
+      context.registerLicense("123456789", "Me", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
           new byte[] {}, 1420074061000L);
     }
   };
-  private final static LicenseRegistrar LICENSE_YOU_OE_2015 = new LicenseRegistrar() {
+  private final static LicenseRegistration LICENSE_YOU_OE_2015 = new LicenseRegistration() {
     @Override
-    public void register(LicenseContext context) {
-      context.registerLicense("987654321", "You", "salt", "rssw-oe-main", LicenseRegistrar.LicenseType.COMMERCIAL,
+    public void register(Registrar context) {
+      context.registerLicense("987654321", "You", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
           new byte[] {}, 1420074061000L);
     }
   };
-  private final static LicenseRegistrar LICENSE_YOU_OTHER_2015 = new LicenseRegistrar() {
+  private final static LicenseRegistration LICENSE_YOU_OTHER_2015 = new LicenseRegistration() {
     @Override
-    public void register(LicenseContext context) {
-      context.registerLicense("987654321", "You", "salt", "other-repo", LicenseRegistrar.LicenseType.COMMERCIAL,
+    public void register(Registrar context) {
+      context.registerLicense("987654321", "You", "salt", "other-repo", LicenseRegistration.LicenseType.COMMERCIAL,
           new byte[] {}, 1420074061000L);
     }
   };
-  private final static LicenseRegistrar LICENSE_ME_OE_2025 = new LicenseRegistrar() {
+  private final static LicenseRegistration LICENSE_ME_OE_2025 = new LicenseRegistration() {
     @Override
-    public void register(LicenseContext context) {
-      context.registerLicense("123456789", "Me", "salt", "rssw-oe-main", LicenseRegistrar.LicenseType.COMMERCIAL,
+    public void register(Registrar context) {
+      context.registerLicense("123456789", "Me", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
           new byte[] {}, 1735693261000L);
     }
   };
-  private final static LicenseRegistrar LICENSE_YOU_OE_2025 = new LicenseRegistrar() {
+  private final static LicenseRegistration LICENSE_YOU_OE_2025 = new LicenseRegistration() {
     @Override
-    public void register(LicenseContext context) {
-      context.registerLicense("987654321", "You", "salt", "rssw-oe-main", LicenseRegistrar.LicenseType.COMMERCIAL,
+    public void register(Registrar context) {
+      context.registerLicense("987654321", "You", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
           new byte[] {}, 1735693261000L);
     }
   };
-  private final static LicenseRegistrar LICENSE_ME_OE_2030 = new LicenseRegistrar() {
+  private final static LicenseRegistration LICENSE_ME_OE_2030 = new LicenseRegistration() {
     @Override
-    public void register(LicenseContext context) {
-      context.registerLicense("123456789", "Me", "salt", "rssw-oe-main", LicenseRegistrar.LicenseType.COMMERCIAL,
+    public void register(Registrar context) {
+      context.registerLicense("123456789", "Me", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
           new byte[] {}, 1893459661000L);
     }
   };

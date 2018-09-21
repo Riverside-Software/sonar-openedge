@@ -30,10 +30,16 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
+import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
+import org.sonar.api.batch.rule.internal.NewActiveRule;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.rule.RuleKey;
+import org.sonar.plugins.openedge.api.CheckRegistration;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
+import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.annotations.Test;
@@ -56,6 +62,22 @@ public class OpenEdgeProparseSensorTest {
     assertEquals(context.cpdTokens(BASEDIR + ":" + FILE3).size(), 7);
     assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
     assertEquals(context.cpdTokens(BASEDIR + ":" + CLASS1).size(), 11);
+  }
+
+  @Test
+  public void testRules() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    ActiveRulesBuilder rulesBuilder = new ActiveRulesBuilder();
+    rulesBuilder.create(RuleKey.of(Constants.STD_REPOSITORY_KEY, ClumsySyntax.class.getCanonicalName())).setLanguage(
+        Constants.LANGUAGE_KEY).activate();
+    context.setActiveRules(rulesBuilder.build());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
+    OpenEdgeComponents components = new OpenEdgeComponents(new CheckRegistration[] {new BasicChecksRegistration()},
+        null);
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    assertEquals(components.getProparseRules().size(), 1);
   }
 
   @Test
