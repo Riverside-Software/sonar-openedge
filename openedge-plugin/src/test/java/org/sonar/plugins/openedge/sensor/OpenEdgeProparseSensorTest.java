@@ -39,7 +39,7 @@ import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
-import org.sonar.plugins.openedge.foundation.OpenEdgeRulesRegistrar;
+import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.annotations.Test;
@@ -68,10 +68,12 @@ public class OpenEdgeProparseSensorTest {
   public void testRules() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
     ActiveRulesBuilder rulesBuilder = new ActiveRulesBuilder();
-    rulesBuilder.create(RuleKey.of(Constants.STD_REPOSITORY_KEY, ClumsySyntax.class.getCanonicalName())).setLanguage(Constants.LANGUAGE_KEY).activate();
+    rulesBuilder.create(RuleKey.of(Constants.STD_REPOSITORY_KEY, ClumsySyntax.class.getCanonicalName())).setLanguage(
+        Constants.LANGUAGE_KEY).activate();
     context.setActiveRules(rulesBuilder.build());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
-    OpenEdgeComponents components = new OpenEdgeComponents(new CheckRegistration[] { new OpenEdgeRulesRegistrar() }, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(new CheckRegistration[] {new BasicChecksRegistration()},
+        null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 

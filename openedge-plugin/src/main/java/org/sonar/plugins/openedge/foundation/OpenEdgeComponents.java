@@ -26,10 +26,10 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.sonar.api.SonarProduct;
@@ -147,12 +147,12 @@ public class OpenEdgeComponents {
     initialized = true;
   }
 
-  public Set<Map.Entry<ActiveRule, OpenEdgeProparseCheck>> getProparseRules() {
-    return ppChecksMap.entrySet();
+  public Map<ActiveRule, OpenEdgeProparseCheck> getProparseRules() { 
+    return Collections.unmodifiableMap(ppChecksMap);  
   }
 
-  public Set<Map.Entry<ActiveRule, OpenEdgeDumpFileCheck>> getDumpFileRules() {
-    return dfChecksMap.entrySet();
+  public Map<ActiveRule, OpenEdgeDumpFileCheck> getDumpFileRules() {  
+    return Collections.unmodifiableMap(dfChecksMap);  
   }
 
   private OpenEdgeCheck<?> initializeCheck(SensorContext context, ActiveRule rule, String permId) {

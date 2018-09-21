@@ -159,7 +159,7 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     components.initializeLicense(context);
     components.initializeChecks(context);
-    for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules()) {
+    for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
     RefactorSession session = settings.getProparseSession(context.runtime().getProduct() == SonarProduct.SONARLINT);
@@ -337,7 +337,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
 
     try {
-      for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules()) {
+      for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
         LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}", entry.getKey().internalKey(),
             entry.getKey().ruleKey().repository(), entry.getKey().ruleKey().rule());
         startTime = System.currentTimeMillis();

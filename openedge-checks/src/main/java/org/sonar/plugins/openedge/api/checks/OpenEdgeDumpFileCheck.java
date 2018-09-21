@@ -23,23 +23,13 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.sonar.api.batch.fs.InputFile;
 
 /**
- * Extend this class to implement an XREF analyzer
+ * Extend this class to implement an DumpFile check
  */
 public abstract class OpenEdgeDumpFileCheck extends OpenEdgeCheck<ParseTree> {
 
   @Override
   public final void sensorExecute(InputFile file, ParseTree unit) {
     execute(file, unit);
-  }
-
-  @Override
-  public void postJob() {
-    // No implementation here
-  }
-
-  @Override
-  public void initialize() {
-    // No implementation here
   }
 
   @Override

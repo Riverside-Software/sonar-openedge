@@ -41,19 +41,10 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
 
   private ParseUnit unit;
 
+  @Override
   public final void sensorExecute(InputFile file, ParseUnit unit) {
     this.unit = unit;
     execute(file, unit);
-  }
-
-  @Override
-  public void postJob() {
-    // No implementation here
-  }
-
-  @Override
-  public void initialize() {
-    // No implementation here
   }
 
   @Override
@@ -148,8 +139,6 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    * @param msg
    */
   protected void reportIssue(InputFile file, String fileName, int lineNumber, String msg) {
-    LOG.trace("Adding issue {} to {} line {}",
-        getRuleKey() == null ? null : getRuleKey().rule(), fileName, lineNumber);
     NewIssue issue = getContext().newIssue();
     InputFile targetFile = getContext().fileSystem().inputFile(
         getContext().fileSystem().predicates().hasRelativePath(fileName));

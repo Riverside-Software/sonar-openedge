@@ -26,7 +26,6 @@ import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.plugins.openedge.api.InvalidLicenseException;
 import org.sonar.plugins.openedge.api.LicenseRegistration.License;
 
 /**
@@ -35,7 +34,6 @@ import org.sonar.plugins.openedge.api.LicenseRegistration.License;
 public abstract class OpenEdgeCheck<T> {
   private RuleKey ruleKey;
   private SensorContext context;
-  private License license;
 
   public final RuleKey getRuleKey() {
     return ruleKey;
@@ -51,27 +49,22 @@ public abstract class OpenEdgeCheck<T> {
   public void setContext(RuleKey ruleKey, SensorContext context, License license) {
     this.ruleKey = ruleKey;
     this.context = context;
-    this.license = license;
   }
 
   /**
-   * Executed only once just after rule instantiation and properties assignment. Has to be used to initialize the
-   * context.
+   * Executed only once just after rule instantiation and properties assignment.
    */
-  public abstract void initialize();
+  public void initialize() {
+    // No-op
+  }
 
   /**
    * Only for internal SonarQube usage
-   * @param file
-   * @param o
    */
   public abstract void sensorExecute(InputFile file, T o);
 
   /**
    * Main method of the check
-   * 
-   * @param file
-   * @param o
    */
   public abstract void execute(InputFile file, T o);
 

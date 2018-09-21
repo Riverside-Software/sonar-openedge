@@ -28,15 +28,15 @@ import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.checks.LargeTransactionScope;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 
-public class OpenEdgeRulesRegistrar implements CheckRegistration {
-  private static final Logger LOGGER = Loggers.get(OpenEdgeRulesRegistrar.class);
+public class BasicChecksRegistration implements CheckRegistration {
+  private static final Logger LOGGER = Loggers.get(BasicChecksRegistration.class);
 
   /**
    * Register the classes that will be used to instantiate checks during analysis.
    */
   @Override
   public void register(Registrar registrar) {
-    LOGGER.debug("Registering CheckRegistrar {}", OpenEdgeRulesRegistrar.class.toString());
+    LOGGER.debug("Registering CheckRegistrar {}", BasicChecksRegistration.class.toString());
 
     for (Class<? extends OpenEdgeProparseCheck> clz : ppCheckClasses()) {
       registrar.registerParserCheck(clz);
