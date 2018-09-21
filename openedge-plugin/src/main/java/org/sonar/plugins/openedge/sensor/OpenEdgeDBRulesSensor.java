@@ -61,7 +61,7 @@ public class OpenEdgeDBRulesSensor implements Sensor {
     long parseTime = 0L;
     components.initializeChecks(context);
 
-    for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules().entrySet()) {
+    for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
 
@@ -74,7 +74,7 @@ public class OpenEdgeDBRulesSensor implements Sensor {
         ParseTree tree = DumpFileUtils.getDumpFileParseTree(file.inputStream(), file.charset());
         parseTime += (System.currentTimeMillis() - time);
 
-        for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules().entrySet()) {
+        for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules()) {
           LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}", entry.getKey().internalKey(),
               entry.getKey().ruleKey().repository(), entry.getKey().ruleKey().rule());
           long startTime = System.currentTimeMillis();

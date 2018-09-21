@@ -19,38 +19,29 @@
  */
 package org.sonar.plugins.openedge.api;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.server.ServerSide;
 import org.sonarsource.api.sonarlint.SonarLintSide;
 
 /**
- * Implement this interface to add OpenEdge rules licenses
+ * Implement this interface to register licenses
  */
 @ScannerSide
 @SonarLintSide
 @ServerSide
-public interface LicenseRegistrar {
+public interface LicenseRegistration {
 
   /**
    * Register set of licenses
-   * @param context
    */
-  default void register(LicenseContext context) { }
+  default void register(Registrar registrar) { }
 
-  public class LicenseContext {
-    private Collection<License> licenses = new ArrayList<>();
-
-    public final Iterable<License> getLicenses() {
-      return licenses;
-    }
-
+  interface Registrar {
+    /**
+     * Register customer license for a given permanentID and rules repository  
+     */
     public void registerLicense(String permanentId, String customerName, String salt, String repoName, LicenseType type,
-        byte[] signature, long expirationDate) {
-      licenses.add(new License(permanentId, customerName, salt, repoName, type, signature, expirationDate));
-    }
+        byte[] signature, long expirationDate);
   }
 
   public class License {
@@ -61,10 +52,6 @@ public interface LicenseRegistrar {
     private long expirationDate;
     private String salt;
     private byte[] signature;
-
-    public License() {
-      
-    }
 
     public License(String permanentId, String customerName, String salt, String repoName, LicenseType type,
         byte[] signature, long expirationDate) {

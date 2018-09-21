@@ -17,33 +17,28 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.plugins.openedge.api.checks;
+package org.sonar.plugins.openedge.api;
 
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.ExtensionPoint;
+import org.sonar.api.server.ServerSide;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
+import org.sonarsource.api.sonarlint.SonarLintSide;
 
-/**
- * Extend this class to implement an XREF analyzer
- */
-public abstract class OpenEdgeDumpFileCheck extends OpenEdgeCheck<ParseTree> {
+@ServerSide
+@SonarLintSide
+@ExtensionPoint
+public interface CheckRegistration {
 
-  @Override
-  public final void sensorExecute(InputFile file, ParseTree unit) {
-    execute(file, unit);
+  /**
+   * Executed when the server is started
+   */
+  void register(Registrar registrar);
+
+  interface Registrar {
+    public void registerParserCheck(Class<? extends OpenEdgeProparseCheck> check);
+
+    public void registerDumpFileCheck(Class<? extends OpenEdgeDumpFileCheck> check);
   }
 
-  @Override
-  public void postJob() {
-    // No implementation here
-  }
-
-  @Override
-  public void initialize() {
-    // No implementation here
-  }
-
-  @Override
-  public OpenEdgeCheck.CheckType getCheckType() {
-    return CheckType.DUMP_FILE;
-  }
 }

@@ -19,31 +19,31 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
-import java.util.Arrays;
-
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
-import org.sonar.plugins.openedge.api.CheckRegistrar;
-import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.api.CheckRegistration;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.checks.LargeTransactionScope;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 
-public class OpenEdgeRulesRegistrar implements CheckRegistrar {
+public class OpenEdgeRulesRegistrar implements CheckRegistration {
   private static final Logger LOGGER = Loggers.get(OpenEdgeRulesRegistrar.class);
 
   /**
    * Register the classes that will be used to instantiate checks during analysis.
    */
   @Override
-  public void register(RegistrarContext registrarContext) {
+  public void register(Registrar registrar) {
     LOGGER.debug("Registering CheckRegistrar {}", OpenEdgeRulesRegistrar.class.toString());
 
-    // Call to registerClassesForRepository to associate the classes with the correct repository key
-    registrarContext.registerClassesForRepository(Constants.STD_REPOSITORY_KEY,
-         Arrays.asList(ppCheckClasses()), Arrays.asList(dbCheckClasses()));
+    for (Class<? extends OpenEdgeProparseCheck> clz : ppCheckClasses()) {
+      registrar.registerParserCheck(clz);
+    }
+    for (Class<? extends OpenEdgeDumpFileCheck> clz : dbCheckClasses()) {
+      registrar.registerDumpFileCheck(clz);
+    }
   }
 
   /**

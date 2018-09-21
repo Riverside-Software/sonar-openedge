@@ -28,12 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
-import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
-import org.sonar.api.rule.RuleKey;
-import org.sonar.plugins.openedge.api.InvalidLicenseException;
-import org.sonar.plugins.openedge.api.LicenseRegistrar.License;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -44,19 +40,6 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   private static final String INC_MESSAGE = "From {0} - {1}";
 
   private ParseUnit unit;
-
-  /**
-   * Standard constructor of a Proparse based check
-   * 
-   * @param ruleKey Rule key
-   * @param context Sensor context
-   * @param license May be null
-   * 
-   * @throws InvalidLicenseException In case of license check failure
-   */
-  public OpenEdgeProparseCheck(RuleKey ruleKey, SensorContext context, License license) {
-    super(ruleKey, context, license);
-  }
 
   public final void sensorExecute(InputFile file, ParseUnit unit) {
     this.unit = unit;

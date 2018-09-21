@@ -27,28 +27,15 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.InvalidLicenseException;
-import org.sonar.plugins.openedge.api.LicenseRegistrar.License;
+import org.sonar.plugins.openedge.api.LicenseRegistration.License;
 
 /**
  * Parent class of all OpenEdge checks
  */
 public abstract class OpenEdgeCheck<T> {
-  private final RuleKey ruleKey;
-  private final SensorContext context;
-
-  /**
-   * Standard constructor of a Proparse based check
-   * 
-   * @param ruleKey Rule key
-   * @param context Sensor context
-   * @param license May be null
-   * 
-   * @throws InvalidLicenseException In case of license check failure
-   */
-  public OpenEdgeCheck(RuleKey ruleKey, SensorContext context, License license) {
-    this.ruleKey = ruleKey;
-    this.context = context;
-  }
+  private RuleKey ruleKey;
+  private SensorContext context;
+  private License license;
 
   public final RuleKey getRuleKey() {
     return ruleKey;
@@ -56,6 +43,15 @@ public abstract class OpenEdgeCheck<T> {
 
   public final SensorContext getContext() {
     return context;
+  }
+
+  /**
+   * Internal method for context setup
+   */
+  public void setContext(RuleKey ruleKey, SensorContext context, License license) {
+    this.ruleKey = ruleKey;
+    this.context = context;
+    this.license = license;
   }
 
   /**
@@ -82,7 +78,9 @@ public abstract class OpenEdgeCheck<T> {
   /**
    * Triggered after all files have been analyzed
    */
-  public abstract void postJob();
+  public void postJob() {
+    // No-op
+  }
 
   public abstract CheckType getCheckType();
 

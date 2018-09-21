@@ -27,11 +27,8 @@ import javax.xml.xpath.XPathFactory;
 
 import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.rule.RuleKey;
 import org.sonar.check.Priority;
 import org.sonar.check.Rule;
-import org.sonar.plugins.openedge.api.LicenseRegistrar.License;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.w3c.dom.NodeList;
@@ -41,10 +38,6 @@ public class SharedObjectsAnalyzer extends OpenEdgeProparseCheck {
   private static XPathExpression shrTTExpr;
   private static XPathExpression shrDSExpr;
   private static XPathExpression shrVarExpr;
-
-  public SharedObjectsAnalyzer(RuleKey ruleKey, SensorContext context, License license) {
-    super(ruleKey, context, license);
-  }
 
   static {
     XPath xPath = XPathFactory.newInstance().newXPath();

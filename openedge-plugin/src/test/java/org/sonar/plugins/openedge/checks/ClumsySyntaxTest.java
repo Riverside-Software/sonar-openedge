@@ -39,7 +39,8 @@ public class ClumsySyntaxTest extends AbstractTest {
   @Test(enabled=false)
   public void test1() {
     InputFile inputFile = getInputFile("clumsy01.p");
-    ClumsySyntax rule = new ClumsySyntax(ruleKey, context, null);
+    ClumsySyntax rule = new ClumsySyntax();
+    rule.setContext(ruleKey, context, null);
     rule.sensorExecute(inputFile, getParseUnit(inputFile));
 
     Assert.assertEquals(context.allIssues().size(), 3);
@@ -55,7 +56,8 @@ public class ClumsySyntaxTest extends AbstractTest {
   @Test
   public void test2() {
     InputFile inputFile = getInputFile("clumsy02.cls");
-    ClumsySyntax rule = new ClumsySyntax(ruleKey, context, null);
+    ClumsySyntax rule = new ClumsySyntax();
+    rule.setContext(ruleKey, context, null);
     rule.sensorExecute(inputFile, getParseUnit(inputFile));
 
     Assert.assertEquals(context.allIssues().size(), 1);
