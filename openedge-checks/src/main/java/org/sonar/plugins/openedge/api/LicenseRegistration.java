@@ -21,12 +21,14 @@ package org.sonar.plugins.openedge.api;
 
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.server.ServerSide;
+import org.sonarsource.api.sonarlint.SonarLintSide;
 
 /**
  * Implement this interface to register licenses
  */
 @ServerSide
 @ScannerSide
+@SonarLintSide
 public interface LicenseRegistration {
 
   /**
