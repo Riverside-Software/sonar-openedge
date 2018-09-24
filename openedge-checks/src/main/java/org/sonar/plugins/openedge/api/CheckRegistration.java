@@ -23,12 +23,14 @@ import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.server.ServerSide;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
+import org.sonarsource.api.sonarlint.SonarLintSide;
 
 /**
  * Implement this interface to register Proparse or DumpFile checks
  */
 @ServerSide
 @ScannerSide
+@SonarLintSide
 public interface CheckRegistration {
 
   void register(Registrar registrar);

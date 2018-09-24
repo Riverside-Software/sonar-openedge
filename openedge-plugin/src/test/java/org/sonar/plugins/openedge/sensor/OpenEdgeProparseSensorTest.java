@@ -31,15 +31,14 @@ import static org.testng.Assert.assertTrue;
 
 import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
-import org.sonar.api.batch.rule.internal.NewActiveRule;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.CheckRegistration;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
+import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
-import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.annotations.Test;
