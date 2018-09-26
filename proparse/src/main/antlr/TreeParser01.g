@@ -23,9 +23,9 @@ header {
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
   import org.prorefactor.core.JPNode;
-  import org.prorefactor.refactor.RefactorSession;
   import org.prorefactor.treeparser.ContextQualifier;
   import org.prorefactor.treeparser.IJPTreeParser;
+  import org.prorefactor.treeparser.symbols.ISymbol;
   import org.prorefactor.treeparser01.ITreeParserAction.TableNameResolution;
   import java.util.Deque;
   import java.util.LinkedList;
@@ -61,7 +61,7 @@ options {
   // it in the support class. If we move grammar and actions around
   // within this .g, the effect on the stack should be highly visible.
   // Deque implementation has to support null elements
-  private Deque stack = new LinkedList();
+  private Deque<ISymbol> stack = new LinkedList<>();
 
   private String indent() {
     return java.nio.CharBuffer.allocate(traceDepth).toString().replace('\0', ' ');
@@ -738,7 +738,7 @@ definebufferstate:
         | rec2:tbl[ContextQualifier.SYMBOL] { action.defineBuffer(#def, #id, #rec2, false); }
         )
       (PRESELECT)? (label_constant)?
-      (namespace_uri)? (namespace_prefix)? (xml_node_name)?
+      (namespace_uri)? (namespace_prefix)? (xml_node_name)? ( #(SERIALIZENAME QSTRING) )?
       (#(FIELDS (fld1[ContextQualifier.SYMBOL])* ))? state_end
     )
   ;
@@ -1698,9 +1698,11 @@ runstate:
     #(  r:RUN filenameorvalue { action.runBegin(#r); } 
       (LEFTANGLE LEFTANGLE filenameorvalue RIGHTANGLE RIGHTANGLE)?
       (  #(PERSISTENT ( #(SET (hnd:fld[ContextQualifier.UPDATING] { action.runPersistentSet(#hnd); } )? ) )? )
+      |  #(SINGLERUN ( #(SET (fld[ContextQualifier.UPDATING])? ) )? )
+      |  #(SINGLETON ( #(SET (fld[ContextQualifier.UPDATING])? ) )? )
       |  #(SET (fld[ContextQualifier.UPDATING])? )
       |  #(ON (SERVER)? expression (TRANSACTION (DISTINCT)?)? )
-      |  #(IN_KW hexp:expression) { action.runInHandle(#hexp); } 
+      |  #(IN_KW hexp:expression) { action.runInHandle(#hexp); }
       |  #(  ASYNCHRONOUS ( #(SET (fld[ContextQualifier.UPDATING])? ) )?
           (#(EVENTPROCEDURE expression ) )?
           (#(IN_KW expression))?

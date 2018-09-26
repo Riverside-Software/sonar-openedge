@@ -34,7 +34,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeDBProfile;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProfile;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
-import org.sonar.plugins.openedge.foundation.OpenEdgeRulesRegistrar;
+import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.sensor.OpenEdgeCodeColorizer;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBColorizer;
@@ -55,7 +55,9 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(OpenEdge.class, OpenEdgeDB.class, OpenEdgeSettings.class);
 
     // Profile and rules
-    context.addExtensions(OpenEdgeRulesDefinition.class, OpenEdgeRulesRegistrar.class, OpenEdgeProfile.class,
+    if (context.getRuntime().getProduct() == SonarProduct.SONARQUBE)
+      context.addExtension(OpenEdgeRulesDefinition.class);
+    context.addExtensions(BasicChecksRegistration.class, OpenEdgeProfile.class,
         OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
 
     // Syntax highlight

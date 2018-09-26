@@ -80,10 +80,14 @@ public class TreeNodeLister {
   }
 
   private void printAttributes(JPNode node, int tabs) throws IOException {
+    if (node.getNodeType() == ABLNodeType.EOF)
+      return;
     ofile.write(String.format("%3s %s", tabs, java.nio.CharBuffer.allocate(tabs).toString().replace('\0', ' ')));
     ofile.write(node.getNodeType() + (node.isStateHead() ? "^ " : " ") + (node.isStateHead() && node.getState2() != 0 ? node.getState2() : ""));
     if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE)
-      ofile.write("°");
+      ofile.write("*OP* ");
+    if (node.attrGet(IConstants.INLINE_VAR_DEF) == IConstants.TRUE)
+      ofile.write("*IN* ");
     // TODO Temporary workaround - Don't display StoreType for FIELD_REF is TreeParser converted to ANTLR4
     if ((node.getNodeType() != ABLNodeType.FIELD_REF) && (node.attrGet(IConstants.STORETYPE) > 0))
       ofile.write("StoreType " + node.attrGet(IConstants.STORETYPE) + " ");

@@ -38,6 +38,7 @@ public class Lexer  {
   /** Current character, before being lowercased */
   private int currInt;
   private int currFile, currLine, currCol;
+  private boolean currMacro, prevMacro;
   private int prevFile, prevLine, prevCol;
 
   private int currStringType;
@@ -478,6 +479,12 @@ public class Lexer  {
       if (isStringAttributes) {
         append(theText);
         preserveDrop();
+      } else {
+        // Fix current end position
+        prevCol--;
+        ProToken tok = makeToken(ABLNodeType.QSTRING);
+        prevCol++;
+        return tok;
       }
     } // currChar==':'
 
@@ -1023,9 +1030,11 @@ public class Lexer  {
     prevFile = currFile;
     prevLine = currLine;
     prevCol = currCol;
+    prevMacro = currMacro;
     currFile = prepro.getFileIndex();
     currLine = prepro.getLine2();
     currCol = prepro.getColumn();
+    currMacro = prepro.getMacroExpansion();
   }
 
   void macroDefine(int defType) {
@@ -1098,6 +1107,7 @@ public class Lexer  {
     tok.setEndFileIndex(prevFile);
     tok.setEndLine(prevLine);
     tok.setEndCharPositionInLine(prevCol);
+    tok.setMacroExpansion(prevMacro);
     tok.setMacroSourceNum(textStartSource);
     tok.setAnalyzeSuspend(prepro.getCurrentAnalyzeSuspend());
 

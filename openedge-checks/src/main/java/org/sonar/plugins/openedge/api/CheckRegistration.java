@@ -17,23 +17,28 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.plugins.openedge.api.checks;
+package org.sonar.plugins.openedge.api;
 
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.ScannerSide;
+import org.sonar.api.server.ServerSide;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
+import org.sonarsource.api.sonarlint.SonarLintSide;
 
 /**
- * Extend this class to implement an DumpFile check
+ * Implement this interface to register Proparse or DumpFile checks
  */
-public abstract class OpenEdgeDumpFileCheck extends OpenEdgeCheck<ParseTree> {
+@ServerSide
+@ScannerSide
+@SonarLintSide
+public interface CheckRegistration {
 
-  @Override
-  public final void sensorExecute(InputFile file, ParseTree unit) {
-    execute(file, unit);
+  void register(Registrar registrar);
+
+  interface Registrar {
+    public void registerParserCheck(Class<? extends OpenEdgeProparseCheck> check);
+
+    public void registerDumpFileCheck(Class<? extends OpenEdgeDumpFileCheck> check);
   }
 
-  @Override
-  public OpenEdgeCheck.CheckType getCheckType() {
-    return CheckType.DUMP_FILE;
-  }
 }

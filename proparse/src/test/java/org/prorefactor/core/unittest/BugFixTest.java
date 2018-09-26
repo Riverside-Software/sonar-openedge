@@ -146,6 +146,15 @@ public class BugFixTest {
     assertEquals(unit.getRootScope().getVariable("x3").getNumReads(), 0);
     assertEquals(unit.getRootScope().getVariable("x4").getNumReads(), 1);
     assertEquals(unit.getRootScope().getVariable("x4").getNumWrites(), 0);
+
+    assertEquals(unit.getRootScope().getVariable("lProcedure1").getNumReads(), 1);
+    assertEquals(unit.getRootScope().getVariable("lProcedure1").getNumWrites(), 0);
+    assertEquals(unit.getRootScope().getVariable("lProcedure2").getNumReads(), 1);
+    assertEquals(unit.getRootScope().getVariable("lProcedure2").getNumWrites(), 0);
+    assertEquals(unit.getRootScope().getVariable("lApsv").getNumReads(), 1);
+    assertEquals(unit.getRootScope().getVariable("lApsv").getNumWrites(), 0);
+    assertEquals(unit.getRootScope().getVariable("lRun").getNumReads(), 0);
+    assertEquals(unit.getRootScope().getVariable("lRun").getNumWrites(), 1);
   }
 
   @Test
@@ -323,6 +332,11 @@ public class BugFixTest {
     genericTest("bug35.p");
   }
 
+  @Test
+  public void test36() throws ANTLRException {
+    genericTest("bug36.p");
+  }
+
   // Next two tests : same exception should be thrown in both cases
 //  @Test(expectedExceptions = {ProparseRuntimeException.class})
 //  public void testCache1() throws ANTLRException {
@@ -450,6 +464,11 @@ public class BugFixTest {
   @Test
   public void testTTLikeDB01() throws ANTLRException {
     genericTest("ttlikedb01.p");
+  }
+
+  @Test
+  public void testStopAfter() throws ANTLRException {
+    genericTest("stopafter.p");
   }
 
   @Test

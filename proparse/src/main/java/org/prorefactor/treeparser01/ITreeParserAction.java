@@ -187,7 +187,7 @@ public interface ITreeParserAction {
   }
 
   /** Called by the tree parser at the beginning of a temp or work table field definition. */
-  default Object defineTableFieldInitialize(JPNode idNode) throws SemanticException {
+  default Symbol defineTableFieldInitialize(JPNode idNode) throws SemanticException {
     return null;
   }
 

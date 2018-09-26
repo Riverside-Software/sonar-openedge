@@ -130,7 +130,7 @@ blockorstate:
       // otherwise take us into the EMPTY TEMPTABLE statement, and then barf when
       // we don't get a TEMPTABLE token.
        options { greedy=true; generateAmbigWarnings=false; }
-    :  PERIOD
+    :  PERIOD { sthd(##,0); }
     |  annotation
     |  dot_comment // ".anything" is a dotcomment if it's where a statement would fit.
     |  (blocklabel LEXCOLON ( DO | FOR | REPEAT )) => labeled_block
@@ -889,7 +889,7 @@ exprt2 { /* RULE_INIT */ int ntype = 0; }:
     // point in expression evaluation, if we have anything followed by a left-paren,
     // we're going to assume it's a method call.
     // Method names which are reserved keywords must be prefixed with THIS-OBJECT:.
-    ({ /* RULE_INIT */support.isClass() && !support.isInDynamicNew()}? identifier LEFTPAREN)=>
+    ({ /* RULE_INIT */support.isClass() && support.unknownMehodCallsAllowed()}? identifier LEFTPAREN)=>
       methodname:identifier!
       {  #methodname.setType(LOCAL_METHOD_REF);
         astFactory.makeASTRoot(currentAST, #methodname);
@@ -2099,7 +2099,7 @@ definebufferstate:
     {schemaTablePriority=true;}
     FOR (options{greedy=true;}: TEMPTABLE {schemaTablePriority=false;} )? bf:record
     {schemaTablePriority=false;}
-    (PRESELECT)? (label_constant)? (namespace_uri)? (namespace_prefix)? (xml_node_name)?
+    (PRESELECT)? (label_constant)? (namespace_uri)? (namespace_prefix)? (xml_node_name)? (serialize_name)?
     (fields_fields)?
     state_end
     {support.defBuffer(#n.getText(), #bf.getText());}
@@ -2586,9 +2586,9 @@ field_equal_dynamic_new:
   ;
 
 dynamic_new:
-    { support.setInDynamicNew(true); }
-  DYNAMICNEW^ expression parameterlist
-  { support.setInDynamicNew(false); }
+    { support.disallowUnknownMethodCalls(); }
+    DYNAMICNEW^ expression parameterlist
+    { support.allowUnknownMethodCalls(); }
   ;
 
 editorphrase:
@@ -3044,7 +3044,9 @@ if_else:
   ;
 
 in_expr:
+    { support.disallowUnknownMethodCalls(); }
     IN_KW^ expression
+    { support.allowUnknownMethodCalls(); }
   ;
 
 in_window_expr:
@@ -3809,6 +3811,8 @@ runstate:
 
 run_opt:
     PERSISTENT^ (options{greedy=true;}: run_set)?
+  | SINGLETON^ (options{greedy=true;}: run_set)?
+  | SINGLERUN^ (options{greedy=true;}: run_set)?
   |  run_set
   |  ON^ (options{greedy=true;}: SERVER)? expression (options{greedy=true;}: TRANSACTION (options{greedy=true;}: DISTINCT)? )?
   |  in_expr
@@ -4893,7 +4897,6 @@ unreservedkeyword:
  | STATUSBAR
  | STDCALL_KW
  | STOP
- | STOPAFTER
  | STOREDPROCEDURE
  | STRETCHTOFIT
  | STRING

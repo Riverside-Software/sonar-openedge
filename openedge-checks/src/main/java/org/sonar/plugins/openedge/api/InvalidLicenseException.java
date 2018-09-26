@@ -19,14 +19,14 @@
  */
 package org.sonar.plugins.openedge.api;
 
-public class InvalidLicenceException extends RuntimeException {
+public class InvalidLicenseException extends RuntimeException {
   private static final long serialVersionUID = 654481851472132930L;
 
-  public InvalidLicenceException(String message) {
+  public InvalidLicenseException(String message) {
     super(message);
   }
 
-  public InvalidLicenceException(String message, Throwable cause) {
+  public InvalidLicenseException(String message, Throwable cause) {
     super(message, cause);
   }
 }

@@ -95,38 +95,39 @@ class_code_block:
 blockorstate: // TRANSLATED
     // Method calls and other expressions can stand alone as statements.
     // Many functions are ambiguous with statements on the first few tokens.
-    // The order listed here is important.
-    // Check on assignment before statement. Something like <empty = 1.> would
-    // otherwise take us into the EMPTY TEMPTABLE statement, and then barf when
-    // we don't get a TEMPTABLE token.
-    PERIOD
+    empty_statement
   | annotation
   | dot_comment 
   | labeled_block
   | dynamicnewstate
-  | assignStatement1
+  | assignstate2
+  | { support.isMethodOrFunc(_input.LT(1)) != 0 }? func_call_statement
   | statement
-    // Anything followed by an OBJCOLON is going to be an expression statement.
-    // We have to disambiguate, for example, THIS-OBJECT:whatever from the THIS-OBJECT statement.
-    // (I don't know why the lookahead didn't take care of that.)
   | expression_statement
-    // Any possible identifier followed by a parameterlist is assumed to be a function or method call.
-    // Method names that are reserved keywords must be prefixed with an object reference or THIS-OBJECT,
-    // so we don't have to worry about reserved keyword method names here.
-    // We might not know what all the method names are due to inheritance from .r files
-    // (no source code available, like progress.lang.*).
   ;
 
 class_blockorstate:
-    PERIOD
+    empty_statement
   | annotation
   | class_statement
+  ;
+
+empty_statement:
+    PERIOD
   ;
 
 dot_comment: // TRANSLATED
     NAMEDOT
     not_state_end*
     state_end
+  ;
+
+func_call_statement:
+    func_call_statement2 NOERROR_KW? state_end
+  ;
+
+func_call_statement2:
+    fname=identifier parameterlist_noroot
   ;
 
 expression_statement: // TRANSLATED
@@ -469,7 +470,7 @@ builtinfunc: // TRANSLATED
   |  recordfunc
   ;
 
-// ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
+// If you add a function keyword here, also add option NodeTypesOption.MAY_BE_REGULAR_FUNC to ABLNodeType entry
 argfunc: // TRANSLATED 
     (  AACBIT
     |  AAMSG
@@ -616,7 +617,7 @@ optargfunc: // TRANSLATED
     optfunargs
     ;
 
-// ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
+// If you add a function keyword here, also add option NodeTypesOption.MAY_BE_REGULAR_FUNC to ABLNodeType entry
 recordfunc: // TRANSLATED
     (  AMBIGUOUS
     |  AVAILABLE
@@ -634,7 +635,7 @@ recordfunc: // TRANSLATED
     (LEFTPAREN record RIGHTPAREN | record)
   ;
 
-// ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
+// If you add a function keyword here, also add option NodeTypesOption.MAY_BE_NO_ARG_FUNC to ABLNodeType entry
 noargfunc: // TRANSLATED
      AACONTROL
   |  AAPCONTROL
@@ -695,7 +696,6 @@ noargfunc: // TRANSLATED
   |  USERID
   |  USER
   ;
-
 
 parameter: // TRANSLATED
     // This is the syntax for parameters when calling or running something.
@@ -787,7 +787,7 @@ lockhow: // TRANSLATED
 expression: // TRANSLATED
     MINUS exprt  # expressionMinus
   | PLUS exprt   # expressionPlus
-  | expression ( STAR | MULTIPLY | SLASH | DIVIDE | MODULO) expression # expressionOp1
+  | expression ( STAR | MULTIPLY | SLASH | DIVIDE | MODULO ) expression # expressionOp1
   | expression ( PLUS | MINUS) expression # expressionOp2
   | expression ( EQUAL | EQ | GTORLT | NE | RIGHTANGLE | GTHAN | GTOREQUAL | GE | LEFTANGLE | LTHAN | LTOREQUAL | LE ) expression # expressionComparison
   | expression ( MATCHES | BEGINS | CONTAINS ) expression # expressionStringComparison
@@ -828,7 +828,7 @@ exprt2: // TRANSLATED
     // point in expression evaluation, if we have anything followed by a left-paren,
     // we're going to assume it's a method call.
     // Method names which are reserved keywords must be prefixed with THIS-OBJECT:.
-    { support.isClass() && !support.isInDynamicNew() }? methodname=identifier parameterlist_noroot  # exprt2ParenCall2
+    { support.isClass() && support.unknownMehodCallsAllowed() }? methodname=identifier parameterlist_noroot  # exprt2ParenCall2
   | constant   # exprt2Constant
   | noargfunc  # exprt2NoArgFunc
   | systemhandlename  # exprt2SystemHandleName
@@ -838,7 +838,6 @@ exprt2: // TRANSLATED
 widattr: // TRANSLATED
     widname attr_colon  # widattrWidName
   | exprt2 attr_colon   # widattrExprt2
-  | # widattrEmpty // empty alternative (pseudo hoisting)
   ;
 
 attr_colon: // TRANSLATED
@@ -886,6 +885,7 @@ fieldn: // TRANSLATED
 
 field: // TRANSLATED
     INPUT? field_frame_or_browse? id=fieldn array_subscript?
+    { support.fieldReference($id.text); }
   ;
 
 field_frame_or_browse: // TRANSLATED
@@ -902,8 +902,7 @@ method_param_list: // TRANSLATED
   ;
 
 inuic: // TRANSLATED
-    IN_KW ( MENU | FRAME | BROWSE | SUBMENU | BUFFER ) widgetname   # inuicIn
-  | # inuicEmpty // empty alternative (pseudo hoisting)
+    IN_KW ( MENU | FRAME | BROWSE | SUBMENU | BUFFER ) widgetname
   ;
 
 var_rec_field: // TRANSLATED
@@ -1119,7 +1118,7 @@ assignment_list: // SEMITRANSLATED
   | ( assign_equal when_exp? | assign_field when_exp? )*
   ;
 
-assignStatement1: // TRANSLATED
+assignstate2: // TRANSLATED
     ( pseudfn | widattr | field ) EQUAL expression NOERROR_KW? state_end
   ;
 
@@ -1631,7 +1630,7 @@ createwidgetpoolstate: // TRANSLATED
   ;
 
 currentvaluefunc: // TRANSLATED
-    CURRENTVALUE LEFTPAREN sequencename ( COMMA identifier )? RIGHTPAREN
+    CURRENTVALUE LEFTPAREN sequencename ( COMMA expression ( COMMA expression )? )? RIGHTPAREN
   ;
 
 // Basic variable class or primitive datatype syntax.
@@ -1784,7 +1783,7 @@ definebufferstate: // TRANSLATED
     { support.setSchemaTablePriority(true); }
     FOR ( TEMPTABLE { support.setSchemaTablePriority(false); } )? bf=record
     { support.setSchemaTablePriority(false); }
-    PRESELECT? label_constant? namespace_uri? namespace_prefix? xml_node_name?
+    PRESELECT? label_constant? namespace_uri? namespace_prefix? xml_node_name? serialize_name?
     fields_fields?
     state_end
     { support.defBuffer($n.text, $bf.text); }
@@ -1981,18 +1980,8 @@ defineparameterstate: // TRANSLATED
 
 defineparam_var: // TRANSLATED
     // See PSC's <varprm> rule.
-    defineparam_as?
-    ( casesens_or_not | format_expr | decimals_expr | like_field
-      | initial_constant | label_constant | NOUNDO | extentphrase )*
-  ;
-
-defineparam_as: // TRANSLATED
-    AS
-    ( // Only parameters in a DLL procedure can have HANDLE phrase.
-      HANDLE (TO)? datatype_dll
-    | CLASS type_name
-    | datatype_param
-    )
+    ( AS HANDLE TO? datatype_dll | AS CLASS type_name | AS datatype_param | LIKE field )
+    ( casesens_or_not | format_expr | decimals_expr | initial_constant | label_constant | NOUNDO | extentphrase )*
   ;
 
 definepropertystate: // TRANSLATED
@@ -2252,9 +2241,9 @@ field_equal_dynamic_new: // TRANSLATED
   ;
 
 dynamic_new: // TRANSLATED
-    { support.setInDynamicNew(true); }
+    { support.disallowUnknownMethodCalls(); }
     DYNAMICNEW expression parameterlist
-    { support.setInDynamicNew(false); }
+    { support.allowUnknownMethodCalls(); }
   ;
 
 editorphrase: // TRANSLATED
@@ -2384,8 +2373,9 @@ format_expr: // TRANSLATED
   ;
 
 form_items_or_record: // TRANSLATED
-    // TODO Redefine in parser -- If there's more than one display item, then it cannot be a table name.
-    form_item*
+    form_item form_item+
+  | { isTableName() }? recordAsFormItem
+  | form_item*
   ;
 
 form_item: // TRANSLATED
@@ -2421,7 +2411,7 @@ formatphrase: // TRANSLATED
   ;
 
 format_opt: // TRANSLATED
-     AS datatype_var { support.defVarInline(); }
+     AS datatype_var { support.defVarInlineAntlr4(); }
   |  atphrase
   |  ATTRSPACE
   |  NOATTRSPACE
@@ -2438,7 +2428,7 @@ format_opt: // TRANSLATED
   |  help_const
   |  label_constant
   |  LEXAT field formatphrase?
-  |  LIKE { support.defVarInline(); } field
+  |  LIKE { support.defVarInlineAntlr4(); } field
   |  NOLABELS
   |  NOTABSTOP
   |  PASSWORDFIELD
@@ -2569,7 +2559,7 @@ from_pos_elem: // TRANSLATED
 functionstate: // TRANSLATED
     // You don't see it in PSC's grammar, but the compiler really does insist on a datatype.
     f=FUNCTION
-    id=identifier { support.funcBegin($id.text); }
+    id=identifier { support.funcBegin($id.text, _localctx); }
     ( RETURNS | RETURN )? ( CLASS type_name | datatype_var )
     extentphrase?
     PRIVATE?
@@ -2628,7 +2618,7 @@ function_param: // TRANSLATED
 ext_functionstate:
     // You don't see it in PSC's grammar, but the compiler really does insist on a datatype.
     f=FUNCTION
-    id=identifier { support.funcBegin($id.text); }
+    id=identifier { support.funcBegin($id.text, _localctx); }
     ( RETURNS | RETURN )? ( CLASS type_name | datatype_var )
     extentphrase?
     PRIVATE?
@@ -2666,7 +2656,7 @@ help_const: // TRANSLATED
 
 hidestate: // TRANSLATED
     HIDE stream_name_or_handle?
-    ( ALL | MESSAGE | gwidget* /*  FIXME Should be + */ )? NOPAUSE? in_window_expr? state_end
+    ( ALL | MESSAGE | gwidget+ )? NOPAUSE? in_window_expr? state_end
   ;
 
 ifstate: // TRANSLATED
@@ -2697,7 +2687,7 @@ importstate: // TRANSLATED
     IMPORT stream_name_or_handle?
     ( delimiter_constant | UNFORMATTED )?
     (  // If there's more than one, then we've got fields, not a record
-      ( field | CARET )+
+      ( ( field | CARET ) ( field | CARET )+ )
     | var_rec_field
     | CARET
     )?
@@ -2934,7 +2924,7 @@ methodstate locals [ boolean abs = false ]: // TRANSLATED
     ( { $abs || support.isInterface() }? block_colon // An INTERFACE declares without defining, ditto ABSTRACT.
     | { !$abs && !support.isInterface() }?
       block_colon
-      { support.addInnerScope(); }
+      { support.addInnerScope(_localctx); }
       code_block
       method_end
       { support.dropInnerScope(); }
@@ -2976,7 +2966,7 @@ onstate: // TRANSLATED
        OVERRIDE?
        ( REVERT state_end
        | PERSISTENT runstate
-       | { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
+       | { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
        )
     |  // ON event OF database-object
       (
@@ -2992,7 +2982,7 @@ onstate: // TRANSLATED
       OVERRIDE?
       (  REVERT state_end
       |  PERSISTENT runstate
-      |  { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
+      |  { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
       )
     |  // ON key-label keyfunction.
       . . state_end
@@ -3003,8 +2993,8 @@ onstate: // TRANSLATED
         ANYWHERE?
       )
       (  REVERT state_end
-      |  PERSISTENT RUN filenameorvalue (in_expr)? (onstate_run_params)? state_end
-      |  { support.addInnerScope(); } blockorstate { support.dropInnerScope(); }
+      |  PERSISTENT RUN filenameorvalue in_expr? onstate_run_params? state_end
+      |  { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
       )
     )
   ;
@@ -3118,7 +3108,7 @@ ext_procedurestate:
     PROCEDURE
     filename
     EXTERNAL constant procedure_dll_opt* block_colon
-    { support.addInnerScope(); }
+    { support.addInnerScope(_localctx); }
     code_block
     { support.dropInnerScope(); }
     procedure_end state_end
@@ -3128,7 +3118,7 @@ procedurestate: // TRANSLATED
     PROCEDURE
     filename
     procedure_opt? block_colon
-    { support.addInnerScope(); }
+    { support.addInnerScope(_localctx); }
     code_block
     { support.dropInnerScope(); }
     (  EOF
@@ -3379,6 +3369,8 @@ runstate: // TRANSLATED
 
 run_opt: // TRANSLATED
     PERSISTENT run_set?    # runOptPersistent
+  | SINGLERUN run_set?     # runOptSingleRun
+  | SINGLETON run_set?     # runOptSingleton
   | run_set                # runOptSet
   | ON SERVER? expression ( TRANSACTION DISTINCT? )?  # runOptServer
   | in_expr                # runOptIn
@@ -4417,7 +4409,6 @@ unreservedkeyword:
  | STATUSBAR
  | STDCALL_KW
  | STOP
- | STOPAFTER
  | STOREDPROCEDURE
  | STRETCHTOFIT
  | STRING

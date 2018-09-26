@@ -662,10 +662,16 @@ public class JPNode implements AST {
    * Walk the tree from the input node down
    */
   public void walk(ICallback<?> callback) {
-    boolean visitChildren = callback.visitNode(this);
-    if (visitChildren) {
-      for (JPNode child : getDirectChildren()) {
-        child.walk(callback);
+    if (attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
+      getFirstChild().walk(callback);
+      callback.visitNode(this);
+      getFirstChild().getNextSibling().walk(callback);
+    } else {
+      boolean visitChildren = callback.visitNode(this);
+      if (visitChildren) {
+        for (JPNode child : getDirectChildren()) {
+          child.walk(callback);
+        }
       }
     }
   }
@@ -685,6 +691,7 @@ public class JPNode implements AST {
     private boolean operator;
     private FieldType tabletype;
     private String className;
+    private boolean inline;
 
     public Builder(ProToken tok) {
       this.tok = tok;
@@ -762,6 +769,45 @@ public class JPNode implements AST {
       return tok.getNodeType();
     }
 
+    public Builder setInlineVar() {
+      this.inline = true;
+      return this;
+    }
+
+    /**
+     * Transforms <pre>x1 - x2 - x3 - x4</pre> into
+     * <pre>
+     * x1 - x3 - x4
+     * |
+     * x2
+     * </pre>
+     * Then to: <pre>
+     * x1 - x4
+     * |
+     * x2 - x3 
+     * </pre>
+     * @return
+     */
+    public Builder moveRightToDown() {
+      if (this.right == null)
+        throw new NullPointerException();
+      if (this.down == null) {
+        this.down = this.right;
+        this.right = this.down.right;
+        this.down.right = null;
+      } else {
+        Builder target = this.down;
+        while (target.getRight() != null) {
+          target = target.getRight();
+        }
+        target.right = this.right;
+        this.right = target.right.right;
+        target.right.right = null;
+      }
+
+      return this;
+    }
+
     public JPNode build(ParserSupport support) {
       JPNode node;
       switch (tok.getNodeType()) {
@@ -786,6 +832,8 @@ public class JPNode implements AST {
         node.setStatementHead(stmt2 == null ? 0 : stmt2.getType());
       if (operator)
         node.setOperator();
+      if (inline)
+        node.attrSet(IConstants.INLINE_VAR_DEF, IConstants.TRUE);
       if (tabletype != null) {
         switch (tabletype) {
           case DBTABLE:

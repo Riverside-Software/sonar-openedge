@@ -482,16 +482,165 @@ public class LexerTest {
     tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
-    
+
     // Back to first include file
     tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertTrue(tok.getAnalyzeSuspend().isEmpty());
     assertFalse(tok.isEditableInAB());
-    
+
     // Back to main file
     tok = nextToken(stream, ABLNodeType.MESSAGE);
     assertNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
   }
+
+  @Test
+  public void testQuotedStringPosition() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer11.p"), session);
+    TokenStream stream = unit.lex();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.DO);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 2);
+
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WHILE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.RIGHTANGLE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    // Quoted string
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 15);
+    assertEquals(tok.getEndLine(), 1);
+    // The important test here, end column has to be 16 even when followed by ':'
+    assertEquals(tok.getEndColumn(), 16);
+
+    // Colon
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.LEXCOLON);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 17);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 17);
+  }
+
+  @Test
+  public void testQuotedStringPosition2() throws TokenStreamException {
+    // Same as previous test, but with a space before the colon
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer11-2.p"), session);
+    TokenStream stream = unit.lex();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.DO);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 2);
+
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WHILE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.RIGHTANGLE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+
+    // Quoted string
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 15);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 16);
+
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+
+    // Colon
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.LEXCOLON);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 18);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 18);
+  }
+
+  @Test
+  public void testQuotedStringPosition3() throws TokenStreamException {
+    // Same as previous test, but with a space before the colon
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer11-3.p"), session);
+    TokenStream stream = unit.lex();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 10);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 11);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 11);
+
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getLine(), 2);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 2);
+    assertEquals(tok.getEndColumn(), 6);
+    
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(tok.getLine(), 2);
+    assertEquals(tok.getColumn(), 7);
+    assertEquals(tok.getEndLine(), 2);
+    assertEquals(tok.getEndColumn(), 7);
+
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getLine(), 3);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 3);
+    assertEquals(tok.getEndColumn(), 8);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(tok.getLine(), 3);
+    assertEquals(tok.getColumn(), 9);
+    assertEquals(tok.getEndLine(), 3);
+    assertEquals(tok.getEndColumn(), 9);
+  }
+
+  @Test(enabled = false)
+  public void testMacroExpansion() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer12.p"), session);
+    TokenStream stream = unit.preprocess();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
+    assertTrue(tok.isMacroExpansion());
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertTrue(tok.isMacroExpansion());
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.PERIOD);
+    // Bug lies here in the lexer
+    assertTrue(tok.isMacroExpansion());
+  }  
 }

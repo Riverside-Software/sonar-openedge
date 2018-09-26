@@ -1438,7 +1438,7 @@ definebrowsestate:
 definebufferstate:
     #(  DEFINE (def_shared)? def_modifiers BUFFER ID
       FOR (TEMPTABLE)? RECORD_NAME (PRESELECT)? (label_constant)?
-      (namespace_uri)? (namespace_prefix)? (xml_node_name)?
+      (namespace_uri)? (namespace_prefix)? (xml_node_name)? ( #(SERIALIZENAME QSTRING) )?
       (#(FIELDS (field)* ))? state_end
     )
   ;
@@ -2564,6 +2564,8 @@ runstate:
     #(  RUN filenameorvalue
       (LEFTANGLE LEFTANGLE filenameorvalue RIGHTANGLE RIGHTANGLE)?
       (  #(PERSISTENT ( #(SET (field)? ) )? )
+      |  #(SINGLERUN ( #(SET (field)? ) )? )
+      |  #(SINGLETON ( #(SET (field)? ) )? )
       |  #(SET (field)? )
       |  #(ON (SERVER)? expression (TRANSACTION (DISTINCT)?)? )
       |  #(IN_KW expression)

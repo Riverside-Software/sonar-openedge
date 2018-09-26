@@ -28,12 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
-import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
-import org.sonar.api.rule.RuleKey;
-import org.sonar.plugins.openedge.api.InvalidLicenceException;
-import org.sonar.plugins.openedge.api.LicenceRegistrar.Licence;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -45,32 +41,10 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
 
   private ParseUnit unit;
 
-  /**
-   * Standard constructor of a Proparse based check
-   * 
-   * @param ruleKey Rule key
-   * @param context Sensor context
-   * @param licence May be null
-   * 
-   * @throws InvalidLicenceException In case of licence check failure
-   */
-  public OpenEdgeProparseCheck(RuleKey ruleKey, SensorContext context, Licence licence) {
-    super(ruleKey, context, licence);
-  }
-
+  @Override
   public final void sensorExecute(InputFile file, ParseUnit unit) {
     this.unit = unit;
     execute(file, unit);
-  }
-
-  @Override
-  public void postJob() {
-    // No implementation here
-  }
-
-  @Override
-  public void initialize() {
-    // No implementation here
   }
 
   @Override
@@ -165,8 +139,6 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    * @param msg
    */
   protected void reportIssue(InputFile file, String fileName, int lineNumber, String msg) {
-    LOG.trace("Adding issue {} to {} line {}",
-        getRuleKey() == null ? null : getRuleKey().rule(), fileName, lineNumber);
     NewIssue issue = getContext().newIssue();
     InputFile targetFile = getContext().fileSystem().inputFile(
         getContext().fileSystem().predicates().hasRelativePath(fileName));
