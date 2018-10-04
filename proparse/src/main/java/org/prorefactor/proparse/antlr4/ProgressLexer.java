@@ -554,10 +554,6 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       LOGGER.error("Character conversion error in {} at line {} column {} from encoding {}", getFilename(), currLine, currCol, session.getCharset().name());
       currChar = ' ';
     }
-    if (currChar == 0xFEFF) {
-      // Byte order mark
-      currChar = ' ';
-    }
     while (currChar == EOF_CHAR) {
       switch (popInput()) {
         case 0: // nothing left to pop
