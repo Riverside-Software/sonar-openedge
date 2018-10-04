@@ -87,6 +87,7 @@ public class InputSource {
     }
     this.fileContent = src.asCharSource(charset).read();
     this.macroExpansion = false;
+    int x = 0;
     // Skip first character if it's a BOM
     if (!fileContent.isEmpty() && fileContent.charAt(0) == 0xFEFF)
       currPos++;
