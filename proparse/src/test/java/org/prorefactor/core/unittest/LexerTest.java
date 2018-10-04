@@ -21,18 +21,22 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.charset.Charset;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
+import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.refactor.settings.ProparseSettings;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Charsets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -642,5 +646,30 @@ public class LexerTest {
     assertEquals(tok.getType(), ProParserTokenTypes.PERIOD);
     // Bug lies here in the lexer
     assertTrue(tok.isMacroExpansion());
-  }  
+  }
+
+  @Test
+  public void testUnicodeBom() throws TokenStreamException {
+    RefactorSession session2 = new RefactorSession(new ProparseSettings("src/test/resources/data"), new Schema(), Charsets.UTF_8);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer13.p"), session2);
+    TokenStream stream = unit.preprocess();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+  }
 }

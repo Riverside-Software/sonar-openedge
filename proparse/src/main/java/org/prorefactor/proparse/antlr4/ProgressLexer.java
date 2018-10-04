@@ -547,7 +547,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     currCol = currentInput.getNextCol();
     currChar = currentInput.get();
     currMacroExpansion = currentInput.isMacroExpansion();
-    if (currChar == 65533) {
+    if (currChar == 0xFFFD) {
       // This is the 'replacement' character in Unicode, used by Java as a
       // placeholder for a character which could not be converted.
       // We replace those characters at runtime with a space, and log an error
