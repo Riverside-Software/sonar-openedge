@@ -50,6 +50,7 @@ public class Constants {
   public static final String SKIP_RCODE = "sonar.oe.rcode.skip";
   public static final String ANTLR4_TEST = "sonar.oe.antlr4";
   public static final String ANTLR4_PROFILER = "sonar.oe.antlr4.profiler";
+  public static final String FAIL_XCODE = "sonar.oe.xcode.skip";
 
   private Constants() {
     

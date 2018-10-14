@@ -286,3 +286,11 @@
 &IF PROPATH MATCHES 'zzzz' &THEN
  DEF VAR var77 AS CHAR.
 &ENDIF
+
+// Should be evaluated as false
+&IF &THEN
+ DEFINE VARIABLE var78 AS CHAR.
+&ENDIF
+&IF {&xxxxxx} &THEN
+ DEFINE VARIABLE var79 AS CHAR.
+&ENDIF

@@ -21,7 +21,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
-import java.nio.charset.Charset;
+import java.io.UncheckedIOException;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
@@ -671,5 +671,55 @@ public class LexerTest {
 
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+  }
+
+  @Test
+  public void testXCode1() throws TokenStreamException {
+    // Default behavior is that it shouldn't fail
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session);
+    TokenStream stream = unit.preprocess();
+
+    // lexer14.i contains 'message "xcode".'
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
+    assertEquals(tok.getLine(), 2);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 2);
+    assertEquals(tok.getEndColumn(), 7);
+    
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+  }
+
+  @Test
+  public void testXCode2() throws TokenStreamException {
+    // Test with customFailOnXCode set to false
+    ProparseSettings settings = new ProparseSettings("src/test/resources/data");
+    settings.setCustomFailOnXCode(false);
+    RefactorSession session2 = new RefactorSession(settings, new Schema(), Charsets.UTF_8);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
+    TokenStream stream = unit.preprocess();
+
+    // lexer14.i contains 'message "xcode".'
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
+    assertEquals(tok.getLine(), 2);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 2);
+    assertEquals(tok.getEndColumn(), 7);
+    
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+  }
+
+  @Test(expectedExceptions = UncheckedIOException.class)
+  public void testXCode3() throws TokenStreamException {
+    // Test with customFailOnXCode set to false
+    ProparseSettings settings = new ProparseSettings("src/test/resources/data");
+    settings.setCustomFailOnXCode(true);
+    RefactorSession session2 = new RefactorSession(settings, new Schema(), Charsets.UTF_8);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
+    // Has to fail here
+    unit.preprocess();
   }
 }

@@ -456,6 +456,10 @@ public class OpenEdgeSettings {
     return config.getBoolean(Constants.SKIP_PROPARSE_PROPERTY).orElse(false);
   }
 
+  public boolean skipXCode() {
+    return config.getBoolean(Constants.FAIL_XCODE).orElse(true);
+  }
+
   public boolean useProparseDebug() {
     return config.getBoolean(Constants.PROPARSE_DEBUG).orElse(false);
   }
@@ -529,6 +533,10 @@ public class OpenEdgeSettings {
       Optional<String> processArch = config.get("sonar.oe.preprocessor.process-architecture");
       if (processArch.isPresent())
         ppSettings.setCustomProcessArchitecture(processArch.get());
+
+      Optional<Boolean> failOnXCode = config.getBoolean(Constants.FAIL_XCODE);
+      if (failOnXCode.isPresent())
+        ppSettings.setCustomFailOnXCode(failOnXCode.get());
 
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
       proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());

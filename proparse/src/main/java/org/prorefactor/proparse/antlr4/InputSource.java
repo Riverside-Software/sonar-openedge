@@ -68,25 +68,29 @@ public class InputSource {
     this.nextCol = col;
   }
 
-  public InputSource(int sourceNum, File file, Charset charset, int fileIndex) throws IOException {
-    this(sourceNum, file, charset, fileIndex, false);
+  public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean failOnXCode) throws IOException {
+    this(sourceNum, file, charset, fileIndex, false, failOnXCode);
   }
 
-  public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean isPrimary) throws IOException {
-    this(sourceNum, file.getName(), new FileInputStream(file), charset, fileIndex, isPrimary);
+  public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean isPrimary, boolean failOnXCode) throws IOException {
+    this(sourceNum, file.getName(), new FileInputStream(file), charset, fileIndex, isPrimary, failOnXCode);
   }
 
-  public InputSource(int sourceNum, String fileName, InputStream file, Charset charset, int fileIndex, boolean isPrimary) throws IOException {
+  public InputSource(int sourceNum, String fileName, InputStream file, Charset charset, int fileIndex, boolean isPrimary, boolean failOnXCode) throws IOException {
     LOGGER.trace("New InputSource object for include stream '{}'", fileName);
     this.sourceNum = sourceNum;
     this.primaryInput = isPrimary;
     this.fileIndex = fileIndex;
+    this.macroExpansion = false;
     ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(file));
     if (src.read(new XCodedFileByteProcessor())) {
-      throw new XCodedFileException(fileName);
+      if (failOnXCode)
+        throw new XCodedFileException(fileName);
+      else
+        this.fileContent = " ";
+    } else {
+      this.fileContent = src.asCharSource(charset).read();
     }
-    this.fileContent = src.asCharSource(charset).read();
-    this.macroExpansion = false;
     // Skip first character if it's a BOM
     if (!fileContent.isEmpty() && fileContent.charAt(0) == 0xFEFF)
       currPos++;
