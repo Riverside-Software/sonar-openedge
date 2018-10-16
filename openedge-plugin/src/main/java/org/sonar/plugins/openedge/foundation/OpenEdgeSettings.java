@@ -457,7 +457,7 @@ public class OpenEdgeSettings {
   }
 
   public boolean skipXCode() {
-    return config.getBoolean(Constants.FAIL_XCODE).orElse(true);
+    return config.getBoolean(Constants.SKIP_XCODE).orElse(true);
   }
 
   public boolean useProparseDebug() {
@@ -534,7 +534,7 @@ public class OpenEdgeSettings {
       if (processArch.isPresent())
         ppSettings.setCustomProcessArchitecture(processArch.get());
 
-      Optional<Boolean> failOnXCode = config.getBoolean(Constants.FAIL_XCODE);
+      Optional<Boolean> failOnXCode = config.getBoolean(Constants.SKIP_XCODE);
       if (failOnXCode.isPresent())
         ppSettings.setCustomFailOnXCode(failOnXCode.get());
 
