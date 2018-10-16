@@ -722,4 +722,36 @@ public class LexerTest {
     // Has to fail here
     unit.preprocess();
   }
+
+  @Test
+  public void testXCode4() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14-2.p"), session);
+    TokenStream stream = unit.preprocess();
+
+    // lexer14.i contains 'message "xcode".'
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 27);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 33);
+    assertNotNull(tok.getHiddenBefore());
+    assertEquals(tok.getHiddenBefore().getType(), ABLNodeType.WS.getType());
+    assertNull(tok.getHiddenBefore().getHiddenBefore());
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 72);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 84);
+    // Two xcoded include files are replaced by a two whitespaces leading to one token
+    assertNotNull(tok.getHiddenBefore());
+    assertEquals(tok.getHiddenBefore().getType(), ABLNodeType.WS.getType());
+    assertNull(tok.getHiddenBefore().getHiddenBefore());
+  }
+
 }
