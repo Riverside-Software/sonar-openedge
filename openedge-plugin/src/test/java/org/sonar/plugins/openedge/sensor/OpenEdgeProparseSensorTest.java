@@ -108,7 +108,7 @@ public class OpenEdgeProparseSensorTest {
     assertFalse(oeSettings.getProparseSession(false).getProparseSettings().getBatchMode());
     assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getWindowSystem(), "foobar");
     assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getOpSys(), OperatingSystem.UNIX);
-    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProcessArchitecture(), "32");
+    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProcessArchitecture(), Integer.valueOf(32));
     assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProversion(), "12.0");
   }
 
@@ -118,7 +118,7 @@ public class OpenEdgeProparseSensorTest {
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
     assertTrue(oeSettings.getProparseSession(false).getProparseSettings().getBatchMode());
-    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProcessArchitecture(), "64");
+    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProcessArchitecture(), Integer.valueOf(64));
     assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProversion(), "11.7");
   }
 
