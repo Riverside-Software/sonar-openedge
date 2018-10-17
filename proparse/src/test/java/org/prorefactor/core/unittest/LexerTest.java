@@ -693,9 +693,9 @@ public class LexerTest {
 
   @Test
   public void testXCode2() throws TokenStreamException {
-    // Test with customFailOnXCode set to false
+    // Test with customSkipXCode set to true
     ProparseSettings settings = new ProparseSettings("src/test/resources/data");
-    settings.setCustomFailOnXCode(false);
+    settings.setCustomSkipXCode(true);
     RefactorSession session2 = new RefactorSession(settings, new Schema(), Charsets.UTF_8);
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
     TokenStream stream = unit.preprocess();
@@ -714,9 +714,9 @@ public class LexerTest {
 
   @Test(expectedExceptions = UncheckedIOException.class)
   public void testXCode3() throws TokenStreamException {
-    // Test with customFailOnXCode set to false
+    // Test with customSkipXCode set to false
     ProparseSettings settings = new ProparseSettings("src/test/resources/data");
-    settings.setCustomFailOnXCode(true);
+    settings.setCustomSkipXCode(false);
     RefactorSession session2 = new RefactorSession(settings, new Schema(), Charsets.UTF_8);
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
     // Has to fail here

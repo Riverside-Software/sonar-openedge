@@ -536,7 +536,7 @@ public class OpenEdgeSettings {
 
       Optional<Boolean> failOnXCode = config.getBoolean(Constants.SKIP_XCODE);
       if (failOnXCode.isPresent())
-        ppSettings.setCustomFailOnXCode(failOnXCode.get());
+        ppSettings.setCustomSkipXCode(failOnXCode.get());
 
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
       proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());

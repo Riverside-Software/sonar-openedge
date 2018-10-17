@@ -32,5 +32,5 @@ public interface IProparseSettings {
   String getProversion();
   String getWindowSystem();
   String getProcessArchitecture();
-  boolean getFailOnXCode();
+  boolean getSkipXCode();
 }

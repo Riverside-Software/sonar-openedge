@@ -852,7 +852,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       throw new UncheckedIOException(new IncludeFileNotFoundException(getFilename(), referencedWithName));
     }
     try {
-      currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName), ppSettings.getFailOnXCode());
+      currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName), ppSettings.getSkipXCode());
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }

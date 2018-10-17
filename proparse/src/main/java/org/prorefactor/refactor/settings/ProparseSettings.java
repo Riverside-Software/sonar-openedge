@@ -27,7 +27,7 @@ public class ProparseSettings implements IProparseSettings {
   private final OperatingSystem os;
   private final String processArchitecture;
   private final boolean batchMode;
-  private final boolean failOnXCode;
+  private final boolean skipXCode;
   private final String propath;
   private final String proversion;
   private final List<String> path = new ArrayList<>();
@@ -37,7 +37,7 @@ public class ProparseSettings implements IProparseSettings {
   private String customProcessArchitecture;
   private Boolean customBatchMode;
   private String customProversion;
-  private Boolean customFailOnXCode;
+  private Boolean customSkipXCode;
 
   public ProparseSettings(String propath) {
     this(propath, false);
@@ -48,7 +48,7 @@ public class ProparseSettings implements IProparseSettings {
   }
 
   public ProparseSettings(boolean proparseDirectives, boolean multiParse, boolean backslashEscape, boolean batchMode,
-      OperatingSystem os, String propath, String proversion, String processArchitecture, boolean failOnXCode) {
+      OperatingSystem os, String propath, String proversion, String processArchitecture, boolean skipXCode) {
     this.multiParse = multiParse;
     this.proparseDirectives = proparseDirectives;
     this.backslashEscape = backslashEscape;
@@ -57,7 +57,7 @@ public class ProparseSettings implements IProparseSettings {
     this.propath = propath;
     this.proversion = proversion;
     this.processArchitecture = processArchitecture;
-    this.failOnXCode = failOnXCode;
+    this.skipXCode = skipXCode;
     path.addAll(Arrays.asList(propath.split(",")));
   }
 
@@ -112,8 +112,8 @@ public class ProparseSettings implements IProparseSettings {
   }
 
   @Override
-  public boolean getFailOnXCode() {
-    return customFailOnXCode == null ? failOnXCode : customFailOnXCode;
+  public boolean getSkipXCode() {
+    return customSkipXCode == null ? skipXCode : customSkipXCode;
   }
 
   public void setCustomBatchMode(boolean customBatchMode) {
@@ -140,8 +140,8 @@ public class ProparseSettings implements IProparseSettings {
     this.customProversion = customProversion;
   }
 
-  public void setCustomFailOnXCode(boolean failOnXCode) {
-    this.customFailOnXCode = failOnXCode;
+  public void setCustomSkipXCode(boolean skipXCode) {
+    this.customSkipXCode = skipXCode;
   }
 
   public enum OperatingSystem {
