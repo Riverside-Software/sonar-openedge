@@ -689,6 +689,7 @@ public class LexerTest {
     
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"hello world\"");
   }
 
   @Test
@@ -710,6 +711,7 @@ public class LexerTest {
     
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"hello world\"");
   }
 
   @Test(expectedExceptions = UncheckedIOException.class)

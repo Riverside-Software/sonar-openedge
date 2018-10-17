@@ -44,7 +44,7 @@ public class ProparseSettings implements IProparseSettings {
   }
 
   public ProparseSettings(String propath, boolean backslashAsEscape) {
-    this(true, true, backslashAsEscape, true, OperatingSystem.getOS(), propath, "11.7", "64", false);
+    this(true, true, backslashAsEscape, true, OperatingSystem.getOS(), propath, "11.7", "64", true);
   }
 
   public ProparseSettings(boolean proparseDirectives, boolean multiParse, boolean backslashEscape, boolean batchMode,
