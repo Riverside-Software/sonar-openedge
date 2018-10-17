@@ -534,9 +534,9 @@ public class OpenEdgeSettings {
       if (processArch.isPresent())
         ppSettings.setCustomProcessArchitecture(processArch.get());
 
-      Optional<Boolean> failOnXCode = config.getBoolean(Constants.SKIP_XCODE);
-      if (failOnXCode.isPresent())
-        ppSettings.setCustomSkipXCode(failOnXCode.get());
+      Optional<Boolean> skipXCode = config.getBoolean(Constants.SKIP_XCODE);
+      if (skipXCode.isPresent())
+        ppSettings.setCustomSkipXCode(skipXCode.get());
 
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
       proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());
