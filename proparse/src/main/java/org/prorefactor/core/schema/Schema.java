@@ -235,11 +235,14 @@ public class Schema implements ISchema {
   /** Lookup a qualified table name */
   private ITable lookupTable2(String inName) {
     String[] parts = inName.split("\\.");
-    if (parts == null) {
+    if ((parts == null) || (parts.length == 0)) {
       // Only in the case 'inName' equals '.'
       return null;
+    } else if (parts.length == 1) {
+      return lookupTable(parts[0]);
+    } else {
+      return lookupTable(parts[0], parts[1]);
     }
-    return lookupTable(parts[0], parts[1]);
   }
 
   /**
