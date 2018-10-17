@@ -756,4 +756,104 @@ public class LexerTest {
     assertNull(tok.getHiddenBefore().getHiddenBefore());
   }
 
+  @Test
+  public void testProparseDirectiveLexPhase() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer15.p"), session);
+    TokenStream stream = unit.lex();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+  }
+
+  @Test
+  public void testProparseDirectivePreprocessPhase() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer15.p"), session);
+    TokenStream stream = unit.preprocess();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "custnum");
+    assertNotNull(tok.getHiddenBefore());
+    assertEquals(((ProToken) tok.getHiddenBefore()).getNodeType(), ABLNodeType.WS);
+    assertNotNull(tok.getHiddenBefore().getHiddenBefore());
+    assertEquals(((ProToken) tok.getHiddenBefore().getHiddenBefore()).getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "customer");
+    assertNotNull(tok.getHiddenBefore());
+    assertEquals(((ProToken) tok.getHiddenBefore()).getNodeType(), ABLNodeType.WS);
+    assertNotNull(tok.getHiddenBefore().getHiddenBefore());
+    assertEquals(((ProToken) tok.getHiddenBefore().getHiddenBefore()).getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+  }
+
 }
