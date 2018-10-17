@@ -153,7 +153,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
     // Create input source with flag isPrimaryInput=true
     try {
-      currentInput = new InputSource(++sourceCounter, fileName, input, session.getCharset(), currFile, true);
+      currentInput = new InputSource(++sourceCounter, fileName, input, session.getCharset(), currFile, true, true);
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
@@ -852,7 +852,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       throw new UncheckedIOException(new IncludeFileNotFoundException(getFilename(), referencedWithName));
     }
     try {
-      currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName));
+      currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName), ppSettings.getSkipXCode());
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }

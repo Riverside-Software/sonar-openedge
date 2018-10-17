@@ -27,6 +27,7 @@ public class ProparseSettings implements IProparseSettings {
   private final OperatingSystem os;
   private final String processArchitecture;
   private final boolean batchMode;
+  private final boolean skipXCode;
   private final String propath;
   private final String proversion;
   private final List<String> path = new ArrayList<>();
@@ -36,17 +37,18 @@ public class ProparseSettings implements IProparseSettings {
   private String customProcessArchitecture;
   private Boolean customBatchMode;
   private String customProversion;
+  private Boolean customSkipXCode;
 
   public ProparseSettings(String propath) {
     this(propath, false);
   }
 
   public ProparseSettings(String propath, boolean backslashAsEscape) {
-    this(true, true, backslashAsEscape, true, OperatingSystem.getOS(), propath, "11.7", "64");
+    this(true, true, backslashAsEscape, true, OperatingSystem.getOS(), propath, "11.7", "64", true);
   }
 
   public ProparseSettings(boolean proparseDirectives, boolean multiParse, boolean backslashEscape, boolean batchMode,
-      OperatingSystem os, String propath, String proversion, String processArchitecture) {
+      OperatingSystem os, String propath, String proversion, String processArchitecture, boolean skipXCode) {
     this.multiParse = multiParse;
     this.proparseDirectives = proparseDirectives;
     this.backslashEscape = backslashEscape;
@@ -55,6 +57,7 @@ public class ProparseSettings implements IProparseSettings {
     this.propath = propath;
     this.proversion = proversion;
     this.processArchitecture = processArchitecture;
+    this.skipXCode = skipXCode;
     path.addAll(Arrays.asList(propath.split(",")));
   }
 
@@ -108,6 +111,11 @@ public class ProparseSettings implements IProparseSettings {
     return customProcessArchitecture == null ? processArchitecture : customProcessArchitecture;
   }
 
+  @Override
+  public boolean getSkipXCode() {
+    return customSkipXCode == null ? skipXCode : customSkipXCode;
+  }
+
   public void setCustomBatchMode(boolean customBatchMode) {
     this.customBatchMode = customBatchMode;
   }
@@ -130,6 +138,10 @@ public class ProparseSettings implements IProparseSettings {
 
   public void setCustomProversion(String customProversion) {
     this.customProversion = customProversion;
+  }
+
+  public void setCustomSkipXCode(boolean skipXCode) {
+    this.customSkipXCode = skipXCode;
   }
 
   public enum OperatingSystem {
