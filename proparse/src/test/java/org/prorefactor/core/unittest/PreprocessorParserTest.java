@@ -391,9 +391,4 @@ public class PreprocessorParserTest {
     testNoVariable(unit.getTopNode(), "var77");
   }
 
-  @Test
-  public void testEmptyExpression() {
-    testNoVariable(unit.getTopNode(), "var78");
-    testNoVariable(unit.getTopNode(), "var79");
-  }
 }
