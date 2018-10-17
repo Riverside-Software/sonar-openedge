@@ -68,17 +68,15 @@ public class FieldRefNode extends JPNode {
   }
 
   /**
-   * Get the Symbol for a Field_ref node. TODO Currently returns null if the Field_ref is actually a reference to a
-   * METHOD.
+   * Get the Symbol for a Field_ref node.
    * 
    * @return Always returns one of two Symbol types: Variable or FieldBuffer.
    */
   @Override
   public Symbol getSymbol() {
-    Symbol symbol = (Symbol) getLink(IConstants.SYMBOL);
     // Can't assert symbol != null, because we aren't currently resolving
     // references to METHODs (like in eventVar:Subscribe(MethodName).
-    return symbol;
+    return (Symbol) getLink(IConstants.SYMBOL);
   }
 
   public void setBufferScope(BufferScope bufferScope) {
