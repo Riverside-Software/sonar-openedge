@@ -83,7 +83,7 @@ function:
   | OPSYS                                                       # opsysFunction
   | PROPATH                                                     # propathFunction
   | PROVERSION                                                  # proversionFunction
-  | PROCESSARCH                                                 # processArch
+  | PROCESSARCHITECTURE                                         # processArchitectureFunction
   | RINDEX LEFTPAREN source=expr COMMA target=expr (COMMA starting=expr)? RIGHTPAREN
                                                                 # rIndexFunction
   | RANDOM LEFTPAREN low=expr COMMA high=expr RIGHTPAREN        # randomFunction

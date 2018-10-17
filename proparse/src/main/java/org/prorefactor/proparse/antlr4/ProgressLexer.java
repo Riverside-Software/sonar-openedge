@@ -324,7 +324,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     if ("opsys".equals(argName))
       return ppSettings.getOpSys().getName();
     if ("process-architecture".equals(argName))
-      return ppSettings.getProcessArchitecture();
+      return ppSettings.getProcessArchitecture().toString();
     if ("window-system".equals(argName))
       return ppSettings.getWindowSystem();
     if ("file-name".equals(argName)) {

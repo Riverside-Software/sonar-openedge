@@ -45,7 +45,7 @@ import org.prorefactor.proparse.antlr4.PreprocessorParser.OpsysFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.OrContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.PlusContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.PreproIfEvalContext;
-import org.prorefactor.proparse.antlr4.PreprocessorParser.ProcessArchContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.ProcessArchitectureFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.PropathFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.ProversionFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.QuotedStringContext;
@@ -271,9 +271,8 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   }
 
   @Override
-  public Object visitProcessArch(ProcessArchContext ctx) {
-    // TODO Use settings
-    return Integer.valueOf(64);
+  public Object visitProcessArchitectureFunction(ProcessArchitectureFunctionContext ctx) {
+    return settings.getProcessArchitecture();
   }
 
   @Override
