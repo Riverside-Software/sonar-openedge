@@ -31,6 +31,6 @@ public interface IProparseSettings {
   OperatingSystem getOpSys();
   String getProversion();
   String getWindowSystem();
-  String getProcessArchitecture();
+  Integer getProcessArchitecture();
   boolean getSkipXCode();
 }

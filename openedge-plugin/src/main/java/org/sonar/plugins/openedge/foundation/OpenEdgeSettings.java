@@ -65,6 +65,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
+import com.google.common.primitives.Ints;
 
 import eu.rssw.antlr.database.DumpFileUtils;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
@@ -531,8 +532,9 @@ public class OpenEdgeSettings {
         ppSettings.setCustomBatchMode(batchMode.get());
 
       Optional<String> processArch = config.get("sonar.oe.preprocessor.process-architecture");
-      if (processArch.isPresent())
-        ppSettings.setCustomProcessArchitecture(processArch.get());
+      Integer processArchInt = processArch.isPresent() ? Ints.tryParse(processArch.get()) : null;
+      if (processArchInt != null)
+        ppSettings.setCustomProcessArchitecture(processArchInt);
 
       Optional<Boolean> skipXCode = config.getBoolean(Constants.SKIP_XCODE);
       if (skipXCode.isPresent())

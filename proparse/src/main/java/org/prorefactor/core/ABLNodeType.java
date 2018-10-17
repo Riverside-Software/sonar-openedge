@@ -1024,6 +1024,8 @@ public enum ABLNodeType {
   PROCEDURECALLTYPE(ProParserTokenTypes.PROCEDURECALLTYPE, "procedure-call-type", NodeTypesOption.KEYWORD,
       NodeTypesOption.RESERVED),
   PROCESS(ProParserTokenTypes.PROCESS, "process", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
+  PROCESSARCHITECTURE(ProParserTokenTypes.PROCESSARCHITECTURE, "process-architecture", NodeTypesOption.KEYWORD,
+      NodeTypesOption.MAY_BE_NO_ARG_FUNC),
   PROCHANDLE(ProParserTokenTypes.PROCHANDLE, "proc-handle", 7, NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED,
       NodeTypesOption.MAY_BE_NO_ARG_FUNC),
   PROCSTATUS(ProParserTokenTypes.PROCSTATUS, "proc-status", 7, NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED,
