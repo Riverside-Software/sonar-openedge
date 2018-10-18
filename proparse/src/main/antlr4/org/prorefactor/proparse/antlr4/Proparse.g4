@@ -2374,9 +2374,7 @@ format_expr: // TRANSLATED
   ;
 
 form_items_or_record: // TRANSLATED
-    form_item form_item+
-  | { isTableName() }? recordAsFormItem
-  | form_item*
+    form_item*
   ;
 
 form_item: // TRANSLATED

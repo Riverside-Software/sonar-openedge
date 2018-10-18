@@ -20,6 +20,7 @@ import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.proparse.ParserSupport;
+import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.proparse.antlr4.JPNode.Builder;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.slf4j.Logger;
@@ -1514,6 +1515,22 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
   @Override
   public JPNode.Builder visitFormat_expr(Format_exprContext ctx) {
     return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public JPNode.Builder visitForm_items_or_record(Form_items_or_recordContext ctx) {
+    JPNode.Builder node = visitChildren(ctx);
+    if (ctx.form_item().size() != 1)
+      return node;
+
+    // If only one form_item and if it's a table name, then we change type to RECORD_NAME
+    FieldType fType = support.isTable(ctx.form_item(0).getText().toLowerCase());
+    if (fType != null) {
+      // Transform FORM_ITEM -> FIELD_REF -> ID into FORM_ITEM -> RECORD_NAME[based on ID]
+      // In short, just get rid of FIELD_REF node
+      node.setDown(node.getDown().getDown()).getDown().changeType(ABLNodeType.RECORD_NAME).setStoreType(fType);
+    }
+    return node;
   }
 
   @Override
