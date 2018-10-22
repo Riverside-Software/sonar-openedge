@@ -16,12 +16,12 @@
 package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE DATA-SOURCE. */
 public class Datasource extends Symbol {
 
-  public Datasource(String name, TreeParserSymbolScope scope) {
+  public Datasource(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 

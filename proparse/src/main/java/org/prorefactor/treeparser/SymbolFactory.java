@@ -37,7 +37,7 @@ public final class SymbolFactory {
     // Shouldn't be instantiated
   }
 
-  public static ISymbol create(int symbolType, String name, TreeParserSymbolScope scope) {
+  public static ISymbol create(int symbolType, String name, ITreeParserSymbolScope scope) {
     switch (symbolType) {
       case ProParserTokenTypes.DATASET:
         return new Dataset(name, scope);

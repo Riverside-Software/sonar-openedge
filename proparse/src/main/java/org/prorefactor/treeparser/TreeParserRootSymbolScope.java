@@ -40,7 +40,7 @@ import eu.rssw.pct.elements.BufferElement;
  * A ScopeRoot object is created for each compile unit, and it represents the program (topmost) scope. For classes, it
  * is the class scope, but it may also have a super class scope by way of inheritance.
  */
-public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
+public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements ITreeParserRootSymbolScope {
   private final RefactorSession refSession;
   private Map<String, ITable> tableMap = new HashMap<>();
   private String className = null;
@@ -54,10 +54,12 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     this.refSession = session;
   }
 
+  @Override
   public RefactorSession getRefactorSession() {
     return refSession;
   }
 
+  @Override
   public void addTableDefinitionIfNew(ITable table) {
     String lowerName = table.getName().toLowerCase();
     if (tableMap.get(lowerName) == null)
@@ -145,6 +147,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     return serializableClass;
   }
 
+  @Override
   public TableBuffer getLocalTableBuffer(ITable table) {
     assert table.getStoretype() != IConstants.ST_DBTABLE;
     return bufferMap.get(table.getName().toLowerCase());
@@ -232,12 +235,8 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     return null;
   }
 
-  /**
-   * Lookup an unqualified temp/work table field name. Does not test for uniqueness. That job is left to the compiler.
-   * (In fact, anywhere this is run, the compiler would check that the field name is also unique against schema tables.)
-   * Returns null if nothing found.
-   */
-  protected IField lookupUnqualifiedField(String name) {
+  @Override
+  public IField lookupUnqualifiedField(String name) {
     IField field;
     for (ITable table : tableMap.values()) {
       field = table.lookupField(name);

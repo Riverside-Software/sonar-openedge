@@ -18,7 +18,7 @@ package org.prorefactor.treeparser.symbols;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 
 public interface ISymbol {
 
@@ -64,7 +64,7 @@ public interface ISymbol {
    */
   ABLNodeType getProgressType();
 
-  TreeParserSymbolScope getScope();
+  ITreeParserSymbolScope getScope();
 
   /**
    * Take note of a symbol reference (read, write, reference by name)

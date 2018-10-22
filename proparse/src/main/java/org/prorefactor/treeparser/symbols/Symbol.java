@@ -18,7 +18,7 @@ package org.prorefactor.treeparser.symbols;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 
 /**
  * Base class for any type of symbol which needs to be kept track of when parsing a 4gl compile unit's AST.
@@ -37,15 +37,15 @@ public abstract class Symbol implements ISymbol {
   private JPNode likeNode;
 
   // What scope this symbol was defined in
-  private TreeParserSymbolScope scope;
+  private ITreeParserSymbolScope scope;
   // Stores the full name, original (mixed) case as in definition
   private final String name;
 
-  public Symbol(String name, TreeParserSymbolScope scope) {
+  public Symbol(String name, ITreeParserSymbolScope scope) {
     this(name, scope, false);
   }
 
-  public Symbol(String name, TreeParserSymbolScope scope, boolean parameter) {
+  public Symbol(String name, ITreeParserSymbolScope scope, boolean parameter) {
     this.name = name;
     this.scope = scope;
     this.parameter = parameter;
@@ -119,7 +119,7 @@ public abstract class Symbol implements ISymbol {
   }
 
   @Override
-  public TreeParserSymbolScope getScope() {
+  public ITreeParserSymbolScope getScope() {
     return scope;
   }
 

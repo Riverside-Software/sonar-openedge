@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.core.unittest.util;
 
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser01.TP01Support;
 
@@ -39,7 +39,7 @@ public class RoutineHandler {
 		return name;
 	}
 	
-	public TreeParserSymbolScope getRoutineScope(){
+	public ITreeParserSymbolScope getRoutineScope(){
 		return routine.getRoutineScope();
 	}
 }

@@ -39,18 +39,12 @@ import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.Widget;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
-/**
- * For keeping track of PROCEDURE, FUNCTION, and trigger scopes within a 4gl compile unit. Note that scopes are nested.
- * There is the outer program scope, and within it the other types of scopes which may themselves nest trigger scopes.
- * (Trigger scopes may be deeply nested). These scopes are defined <b>Symbol</b> scopes. They have nothing to do with
- * record or frame scoping!
- */
-public class TreeParserSymbolScope {
-  protected final TreeParserSymbolScope parentScope;
+public class TreeParserSymbolScope implements ITreeParserSymbolScope {
+  protected final ITreeParserSymbolScope parentScope;
+  protected final List<ITreeParserSymbolScope> childScopes = new ArrayList<>();
 
   protected List<ISymbol> allSymbols = new ArrayList<>();
   protected List<Call> callList = new ArrayList<>();
-  protected List<TreeParserSymbolScope> childScopes = new ArrayList<>();
   protected Block rootBlock;
   protected Routine routine;
   protected Map<String, TableBuffer> bufferMap = new HashMap<>();
@@ -80,6 +74,7 @@ public class TreeParserSymbolScope {
     fieldLevelWidgetMap.put(widget.getName().toLowerCase(), widget);
   }
 
+  @Override
   public void setRoutine(Routine routine) {
     if (this.routine != null) {
       throw new IllegalStateException();
@@ -87,6 +82,7 @@ public class TreeParserSymbolScope {
     this.routine = routine;
   }
 
+  @Override
   public Routine getRoutine() {
     return routine;
   }
@@ -126,7 +122,7 @@ public class TreeParserSymbolScope {
       bufferMap.put(name.toLowerCase(), buffer);
   }
 
-  /** Add a Symbol for names lookup. */
+  @Override
   public void add(ISymbol symbol) {
     if (symbol instanceof IFieldLevelWidget) {
       add((IFieldLevelWidget) symbol);
@@ -146,54 +142,41 @@ public class TreeParserSymbolScope {
     }
   }
 
-  /** Add a new scope to this scope. */
+  @Override
   public TreeParserSymbolScope addScope() {
     TreeParserSymbolScope newScope = new TreeParserSymbolScope(this);
     childScopes.add(newScope);
     return newScope;
   }
 
-  /**
-   * All symbols within this scope are added to this scope's symbol list. This method has "package" visibility, since
-   * the Symbol object adds itself to its scope.
-   */
+  @Override
   public void addSymbol(ISymbol symbol) {
     allSymbols.add(symbol);
   }
 
-  /**
-   * Define a new BufferSymbol.
-   * 
-   * @param name Input "" for a default or unnamed buffer, otherwise the "named buffer" name.
-   */
+  @Override
   public TableBuffer defineBuffer(String name, ITable table) {
     TableBuffer buffer = new TableBuffer(name, this, table);
     addTableBuffer(name, table, buffer);
     return buffer;
   }
 
-  /**
-   * Get the integer "depth" of the scope. Zero might be either the unit (program/class) scope, or if this is a class
-   * which inherits from super classes, then zero would be the top of the inheritance chain. Functions and procedures
-   * will always be depth: (unitDepth + 1), and trigger scopes can be nested, so they will always be one or greater. I
-   * use this function for unit testing - I want to be able to examine the scope of a symbol, and make sure that the
-   * symbol belongs to the scope that I expect.
-   */
+  @Override
   public int depth() {
     int depth = 0;
-    TreeParserSymbolScope scope = this;
+    ITreeParserSymbolScope scope = this;
     while ((scope = scope.getParentScope()) != null)
       depth++;
     return depth;
   }
 
-  /** Get a *copy* of the list of all symbols in this scope */
+  @Override
   public List<ISymbol> getAllSymbols() {
     return new ArrayList<>(allSymbols);
   }
 
-  /** Get a list of this scope's symbols which match a given class */
   @SuppressWarnings("unchecked")
+  @Override
   public <T extends ISymbol> List<T> getAllSymbols(Class<T> klass) {
     ArrayList<T> ret = new ArrayList<>();
     for (ISymbol s : allSymbols) {
@@ -203,30 +186,30 @@ public class TreeParserSymbolScope {
     return ret;
   }
 
-  /** Get a list of this scope's symbols, and all symbols of all descendant scopes. */
+  @Override
   public List<ISymbol> getAllSymbolsDeep() {
     ArrayList<ISymbol> ret = new ArrayList<>(allSymbols);
-    for (TreeParserSymbolScope child : childScopes) {
+    for (ITreeParserSymbolScope child : childScopes) {
       ret.addAll(child.getAllSymbolsDeep());
     }
     return ret;
   }
 
-  /** Get a list of this scope's symbols, and all symbols of all descendant scopes, which match a given class. */
+  @Override
   public <T extends ISymbol> List<T> getAllSymbolsDeep(Class<T> klass) {
     List<T> ret = getAllSymbols(klass);
-    for (TreeParserSymbolScope child : childScopes) {
+    for (ITreeParserSymbolScope child : childScopes) {
       ret.addAll(child.getAllSymbols(klass));
     }
     return ret;
   }
 
-  /** Get the set of named buffers */
+  @Override
   public Set<Entry<String, TableBuffer>> getBufferSet() {
     return bufferMap.entrySet();
   }
 
-  /** Given a name, find a BufferSymbol (or create if necessary for unnamed buffer). */
+  @Override
   public TableBuffer getBufferSymbol(String inName) {
     TableBuffer symbol = lookupBuffer(inName);
     if (symbol != null)
@@ -240,53 +223,62 @@ public class TreeParserSymbolScope {
     return getUnnamedBuffer(table);
   }
 
+  @Override
   public List<Call> getCallList() {
     return callList;
   }
 
-  /** Get a *copy* of the list of child scopes */
-  public List<TreeParserSymbolScope> getChildScopes() {
+  @Override
+  public List<ITreeParserSymbolScope> getChildScopes() {
     return new ArrayList<>(childScopes);
   }
 
-  /** Get a list of all child scopes, and their child scopes, etc */
-  public List<TreeParserSymbolScope> getChildScopesDeep() {
-    ArrayList<TreeParserSymbolScope> ret = new ArrayList<>();
-    for (TreeParserSymbolScope child : childScopes) {
+  @Override
+  public List<ITreeParserSymbolScope> getChildScopesDeep() {
+    ArrayList<ITreeParserSymbolScope> ret = new ArrayList<>();
+    for (ITreeParserSymbolScope child : childScopes) {
       ret.add(child);
       ret.addAll(child.getChildScopesDeep());
     }
     return ret;
   }
 
-  public TreeParserSymbolScope getParentScope() {
+  @Override
+  public ITreeParserSymbolScope getParentScope() {
     return parentScope;
   }
 
+  @Override
   public Block getRootBlock() {
     return rootBlock;
   }
 
-  public TreeParserRootSymbolScope getRootScope() {
+  @Override
+  public ITreeParserRootSymbolScope getRootScope() {
     if (parentScope == null) {
-      return (TreeParserRootSymbolScope) this;
+      return (ITreeParserRootSymbolScope) this;
     } else {
       return parentScope.getRootScope();
     }
   }
 
+  @Override
+  public Map<ITable, TableBuffer> getUnnamedBuffers() {
+    return unnamedBuffers;
+  }
+  
   /** Get or create the unnamed buffer for a schema table. */
   public TableBuffer getUnnamedBuffer(ITable table) {
     assert table.getStoretype() == IConstants.ST_DBTABLE;
     // Check this and parents for the unnamed buffer. Table triggers
     // can scope an unnamed buffer - that's why we don't go straight to
     // the root scope.
-    TreeParserSymbolScope nextScope = this;
+    ITreeParserSymbolScope nextScope = this;
     while (nextScope != null) {
-      TableBuffer buffer = nextScope.unnamedBuffers.get(table);
+      TableBuffer buffer = nextScope.getUnnamedBuffers().get(table);
       if (buffer != null)
         return buffer;
-      nextScope = nextScope.parentScope;
+      nextScope = nextScope.getParentScope();
     }
     return getRootScope().defineBuffer("", table);
   }
@@ -315,11 +307,11 @@ public class TreeParserSymbolScope {
    * Is this scope active in the input scope? In other words, is this scope the input scope, or any of the parents of
    * the input scope?
    */
-  public boolean isActiveIn(TreeParserSymbolScope theScope) {
+  public boolean isActiveIn(ITreeParserSymbolScope theScope) {
     while (theScope != null) {
       if (this == theScope)
         return true;
-      theScope = theScope.parentScope;
+      theScope = theScope.getParentScope();
     }
     return false;
   }

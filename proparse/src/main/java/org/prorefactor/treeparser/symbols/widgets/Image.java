@@ -16,12 +16,12 @@
 package org.prorefactor.treeparser.symbols.widgets;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Widget;
 
 public class Image extends Widget implements IFieldLevelWidget {
 
-  public Image(String name, TreeParserSymbolScope scope) {
+  public Image(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 

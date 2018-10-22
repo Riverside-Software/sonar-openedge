@@ -64,8 +64,8 @@ import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.antlr4.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.ParseUnit;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
@@ -588,7 +588,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     int numProcs = 0;
     int numFuncs = 0;
     int numMethds = 0;
-    for (TreeParserSymbolScope child : unit.getRootScope().getChildScopesDeep()) {
+    for (ITreeParserSymbolScope child : unit.getRootScope().getChildScopesDeep()) {
       int scopeType = child.getRootBlock().getNode().getType();
       switch (scopeType) {
         case ProParserTokenTypes.PROCEDURE:

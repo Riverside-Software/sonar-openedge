@@ -16,14 +16,14 @@
 package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 
 /**
  * A Symbol defined with DEFINE STREAM or any other syntax which implicitly define a stream.
  */
 public class Stream extends Symbol {
 
-  public Stream(String name, TreeParserSymbolScope scope) {
+  public Stream(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 

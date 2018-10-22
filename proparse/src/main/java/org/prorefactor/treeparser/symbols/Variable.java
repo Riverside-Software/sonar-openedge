@@ -19,8 +19,8 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ClassSupport;
 import org.prorefactor.treeparser.DataType;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.Primative;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.Value;
 
 /**
@@ -34,11 +34,11 @@ public class Variable extends Symbol implements Primative, Value {
   private String className = null;
   private boolean refInFrame = false;
 
-  public Variable(String name, TreeParserSymbolScope scope) {
+  public Variable(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 
-  public Variable(String name, TreeParserSymbolScope scope, boolean parameter) {
+  public Variable(String name, ITreeParserSymbolScope scope, boolean parameter) {
     super(name, scope, parameter);
   }
 

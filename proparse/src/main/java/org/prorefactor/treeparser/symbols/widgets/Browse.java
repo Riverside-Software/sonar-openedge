@@ -16,12 +16,12 @@
 package org.prorefactor.treeparser.symbols.widgets;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 
 public class Browse extends FieldContainer implements IFieldLevelWidget {
 
-  public Browse(String name, TreeParserSymbolScope scope) {
+  public Browse(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 

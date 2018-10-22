@@ -25,8 +25,8 @@ import java.io.File;
 import org.prorefactor.core.unittest.util.RoutineHandler;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.ParseUnit;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser01.TP01Support;
 import org.prorefactor.treeparser01.TreeParser01;
 import org.testng.annotations.BeforeTest;
@@ -112,7 +112,7 @@ public class TP01SymbolActionTest {
     assertNull(walkAction.getRootScope().lookupVariable(aNewSrcDir));
 
     // Get get-compile-list scope.
-    TreeParserSymbolScope routineScope = getCompileList.getRoutineScope();
+    ITreeParserSymbolScope routineScope = getCompileList.getRoutineScope();
 
     // Variables expected in get-compile-list scope.
     assertNotNull(routineScope.lookupVariable(aFile));
@@ -127,7 +127,7 @@ public class TP01SymbolActionTest {
 
     // Variables and parameters from the 'foo' function scope
     RoutineHandler fooList = new RoutineHandler("foo", walkAction);
-    TreeParserSymbolScope fooScope = fooList.getRoutineScope();
+    ITreeParserSymbolScope fooScope = fooList.getRoutineScope();
     assertNotNull(fooScope.lookupVariable("yy"));
     assertTrue(fooScope.lookupVariable("yy").isParameter());
     assertNotNull(fooScope.lookupVariable("abc"));

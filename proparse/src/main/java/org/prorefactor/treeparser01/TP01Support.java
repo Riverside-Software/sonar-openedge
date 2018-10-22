@@ -41,6 +41,8 @@ import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Expression;
 import org.prorefactor.treeparser.FieldLookupResult;
+import org.prorefactor.treeparser.ITreeParserRootSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.Primative;
@@ -81,7 +83,7 @@ public class TP01Support implements ITreeParserAction {
   private Block currentBlock;
   private Expression wipExpression;
   private FrameStack frameStack = new FrameStack();
-  private Map<String, TreeParserSymbolScope> funcForwards = new HashMap<>();
+  private Map<String, ITreeParserSymbolScope> funcForwards = new HashMap<>();
   /** There may be more than one WIP call, since a functioncall is a perfectly valid parameter. */
   private Deque<Call> wipCalls = new LinkedList<>();
   /** Since there can be more than one WIP Call, there can be more than one WIP Parameter. */
@@ -100,7 +102,7 @@ public class TP01Support implements ITreeParserAction {
    */
   private ISymbol currSymbol;
 
-  private TreeParserSymbolScope currentScope;
+  private ITreeParserSymbolScope currentScope;
   private TableBuffer lastTableReferenced;
   private TableBuffer prevTableReferenced;
   private TableBuffer currDefTable;
@@ -799,7 +801,7 @@ public class TP01Support implements ITreeParserAction {
     // just a funcScope map generally?
     scopeAdd(funcAST);
     BlockNode blockNode = (BlockNode) idNode.getParent();
-    TreeParserSymbolScope definingScope = currentScope.getParentScope();
+    ITreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(idNode.getText(), definingScope, currentScope);
     r.setProgressType(ABLNodeType.FUNCTION);
     r.setDefOrIdNode(blockNode);
@@ -821,7 +823,7 @@ public class TP01Support implements ITreeParserAction {
      */
     if (!currentRoutine.getParameters().isEmpty())
       return;
-    TreeParserSymbolScope forwardScope = funcForwards.get(idAST.getText());
+    ITreeParserSymbolScope forwardScope = funcForwards.get(idAST.getText());
     if (forwardScope != null) {
       Routine routine = (Routine) forwardScope.getRootBlock().getNode().getSymbol();
       scopeSwap(forwardScope);
@@ -858,7 +860,7 @@ public class TP01Support implements ITreeParserAction {
 
     scopeAdd(blockAST);
     BlockNode blockNode = (BlockNode) idNode.getParent();
-    TreeParserSymbolScope definingScope = currentScope.getParentScope();
+    ITreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(idNode.getText(), definingScope, currentScope);
     r.setProgressType(ABLNodeType.METHOD);
     r.setDefOrIdNode(blockNode);
@@ -879,7 +881,7 @@ public class TP01Support implements ITreeParserAction {
     LOG.trace("Entering propGetSetBegin {}", propAST);
     scopeAdd(propAST);
     BlockNode blockNode = (BlockNode) propAST;
-    TreeParserSymbolScope definingScope = currentScope.getParentScope();
+    ITreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(propAST.getText(), definingScope, currentScope);
     r.setProgressType(propAST.getNodeType());
     r.setDefOrIdNode(blockNode);
@@ -980,7 +982,7 @@ public class TP01Support implements ITreeParserAction {
   public void procedureBegin(JPNode procAST, JPNode idAST) {
     LOG.trace("Entering procedureBegin {} - {}", procAST, idAST);
     BlockNode blockNode = (BlockNode) procAST;
-    TreeParserSymbolScope definingScope = currentScope;
+    ITreeParserSymbolScope definingScope = currentScope;
     scopeAdd(blockNode);
     Routine r = new Routine(idAST.getText(), definingScope, currentScope);
     r.setProgressType(ABLNodeType.PROCEDURE);
@@ -1017,11 +1019,11 @@ public class TP01Support implements ITreeParserAction {
   public void programTail() throws SemanticException {
     LOG.trace("Entering programTail");
     // Now that we know what all the internal Routines are, wrap up the Calls.
-    List<TreeParserSymbolScope> allScopes = new ArrayList<>();
+    List<ITreeParserSymbolScope> allScopes = new ArrayList<>();
     allScopes.add(rootScope);
     allScopes.addAll(rootScope.getChildScopesDeep());
     LinkedList<Call> calls = new LinkedList<>();
-    for (TreeParserSymbolScope scope : allScopes) {
+    for (ITreeParserSymbolScope scope : allScopes) {
       for (Call call : scope.getCallList()) {
         // Process IN HANDLE last to make sure PERSISTENT SET is processed first.
         if (call.isInHandle()) {
@@ -1190,7 +1192,7 @@ public class TP01Support implements ITreeParserAction {
    * definitions. We have to do this because the definition itself may have left out the parameter list - it's not
    * required - it just uses the parameter list from the declaration.
    */
-  private void scopeSwap(TreeParserSymbolScope scope) {
+  private void scopeSwap(ITreeParserSymbolScope scope) {
     currentScope = scope;
     blockEnd(); // pop the unused block from the stack
     currentBlock = pushBlock(scope.getRootBlock());
@@ -1226,7 +1228,7 @@ public class TP01Support implements ITreeParserAction {
      */
     scopeAdd(blockAST);
     BlockNode blockNode = (BlockNode) blockAST;
-    TreeParserSymbolScope definingScope = currentScope.getParentScope();
+    ITreeParserSymbolScope definingScope = currentScope.getParentScope();
     // 'structors don't have names, so use empty string.
     Routine r = new Routine("", definingScope, currentScope);
     r.setProgressType(blockNode.getNodeType());
@@ -1267,11 +1269,11 @@ public class TP01Support implements ITreeParserAction {
     return block;
   }
 
-  public TreeParserSymbolScope getCurrentScope() {
+  public ITreeParserSymbolScope getCurrentScope() {
     return currentScope;
   }
 
-  public TreeParserRootSymbolScope getRootScope() {
+  public ITreeParserRootSymbolScope getRootScope() {
     return rootScope;
   }
 

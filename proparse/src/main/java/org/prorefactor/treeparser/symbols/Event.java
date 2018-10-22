@@ -16,14 +16,14 @@
 package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 
 /**
  * A Symbol defined with DEFINE EVENT
  */
 public class Event extends Symbol {
 
-  public Event(String name, TreeParserSymbolScope scope) {
+  public Event(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 

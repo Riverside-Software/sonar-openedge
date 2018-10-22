@@ -20,20 +20,20 @@ import java.util.List;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.Parameter;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * Represents the definition of a Routine. Is a Symbol - used as an entry in the symbol table. A Routine is a
  * Program_root, PROCEDURE, FUNCTION, or METHOD.
  */
 public class Routine extends Symbol {
-  private final TreeParserSymbolScope routineScope;
+  private final ITreeParserSymbolScope routineScope;
   private final List<Parameter> parameters = new ArrayList<>();
   private JPNode returnDatatypeNode = null;
   private ABLNodeType progressType;
 
-  public Routine(String name, TreeParserSymbolScope definingScope, TreeParserSymbolScope routineScope) {
+  public Routine(String name, ITreeParserSymbolScope definingScope, ITreeParserSymbolScope routineScope) {
     super(name, definingScope);
     this.routineScope = routineScope;
     this.routineScope.setRoutine(this);
@@ -69,7 +69,7 @@ public class Routine extends Symbol {
     return returnDatatypeNode;
   }
 
-  public TreeParserSymbolScope getRoutineScope() {
+  public ITreeParserSymbolScope getRoutineScope() {
     return routineScope;
   }
 

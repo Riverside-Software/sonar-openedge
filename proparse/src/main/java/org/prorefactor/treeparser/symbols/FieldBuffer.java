@@ -21,8 +21,8 @@ import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.treeparser.DataType;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.Primative;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * FieldBuffer is the Symbol object linked to from the AST for schema, temp, and work table fields, and FieldBuffer
@@ -35,7 +35,7 @@ public class FieldBuffer extends Symbol implements Primative {
   /**
    * When you create a FieldBuffer object, you do not set the name, because that comes from the Field object.
    */
-  public FieldBuffer(TreeParserSymbolScope scope, TableBuffer buffer, IField field) {
+  public FieldBuffer(ITreeParserSymbolScope scope, TableBuffer buffer, IField field) {
     super("", scope);
     this.buffer = buffer;
     this.field = field;

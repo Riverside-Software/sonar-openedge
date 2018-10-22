@@ -17,7 +17,7 @@ package org.prorefactor.treeparser.symbols.widgets;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.Block;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 
 public class Frame extends FieldContainer {
@@ -26,7 +26,7 @@ public class Frame extends FieldContainer {
   private Block frameScopeBlock = null;
 
   /** Unlike other symbols, Frames are automatically added to the scope, right here at creation time. */
-  public Frame(String name, TreeParserSymbolScope scope) {
+  public Frame(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
     scope.add(this);
   }

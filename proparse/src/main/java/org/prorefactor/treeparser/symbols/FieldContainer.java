@@ -22,7 +22,7 @@ import java.util.Set;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.schema.Field;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 
 /**
  * Frame and Browse widgets are FieldContainers. This class provides the services for looking up fields/variables in a
@@ -36,7 +36,7 @@ public abstract class FieldContainer extends Widget {
   private Set<ISymbol> otherSymbols = new HashSet<>();
   private Set<Variable> variableSet = new HashSet<>();
 
-  public FieldContainer(String name, TreeParserSymbolScope scope) {
+  public FieldContainer(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 
