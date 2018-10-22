@@ -26,6 +26,7 @@ import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
@@ -73,11 +74,11 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
    * @param type IConstants.ST_TTABLE or IConstants.ST_WTABLE.
    * @return A newly created BufferSymbol for this temp/work table.
    */
-  public TableBuffer defineTable(String name, int type) {
+  public ITableBuffer defineTable(String name, int type) {
     ITable table = new Table(name, type);
     tableMap.put(name.toLowerCase(), table);
     // Pass empty string for name for default buffer.
-    TableBuffer bufferSymbol = new TableBuffer("", this, table);
+    ITableBuffer bufferSymbol = new TableBuffer("", this, table);
     // The default buffer for a temp/work table is not "unnamed" the way
     // that the default buffer for schema tables work. So, the buffer
     // goes into the regular bufferMap, rather than the unnamedBuffers map.
@@ -86,7 +87,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
   } // defineTable()
 
   /** Define a temp or work table field */
-  public FieldBuffer defineTableField(String name, TableBuffer buffer) {
+  public FieldBuffer defineTableField(String name, ITableBuffer buffer) {
     ITable table = buffer.getTable();
     IField field = new Field(name, table);
     return new FieldBuffer(this, buffer, field);
@@ -96,7 +97,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
    * Define a temp or work table field. Does not attach the field to the table. That is expected to be done in a
    * separate step.
    */
-  public FieldBuffer defineTableFieldDelayedAttach(String name, TableBuffer buffer) {
+  public FieldBuffer defineTableFieldDelayedAttach(String name, ITableBuffer buffer) {
     IField field = new Field(name, null);
     return new FieldBuffer(this, buffer, field);
   }
@@ -148,7 +149,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
   }
 
   @Override
-  public TableBuffer getLocalTableBuffer(ITable table) {
+  public ITableBuffer getLocalTableBuffer(ITable table) {
     assert table.getStoretype() != IConstants.ST_DBTABLE;
     return bufferMap.get(table.getName().toLowerCase());
   }
@@ -192,8 +193,8 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
   }
 
   @Override
-  public TableBuffer lookupBuffer(String name) {
-    TableBuffer buff = super.lookupBuffer(name);
+  public ITableBuffer lookupBuffer(String name) {
+    ITableBuffer buff = super.lookupBuffer(name);
     if (buff != null) {
       return buff;
     }
@@ -220,8 +221,8 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
   }
 
   @Override
-  public TableBuffer lookupTempTable(String name) {
-    TableBuffer buff = super.lookupTempTable(name);
+  public ITableBuffer lookupTempTable(String name) {
+    ITableBuffer buff = super.lookupTempTable(name);
     if (buff != null) {
       return buff;
     }

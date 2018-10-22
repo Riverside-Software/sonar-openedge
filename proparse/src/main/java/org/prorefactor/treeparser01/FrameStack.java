@@ -34,8 +34,8 @@ import org.prorefactor.treeparser.FieldLookupResult;
 import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.FieldContainer;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.Symbol;
-import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.Browse;
 import org.prorefactor.treeparser.symbols.widgets.Frame;
@@ -82,7 +82,7 @@ public class FrameStack {
     assert formItemNode.getType() == ProParserTokenTypes.Form_item;
     assert formItemNode.getFirstChild().getType() == ProParserTokenTypes.RECORD_NAME;
     RecordNameNode recordNameNode = (RecordNameNode) formItemNode.getFirstChild();
-    TableBuffer tableBuffer = recordNameNode.getTableBuffer();
+    ITableBuffer tableBuffer = recordNameNode.getTableBuffer();
     HashSet<IField> fieldSet = new HashSet<>(tableBuffer.getTable().getFieldSet());
     JPNode exceptNode = formItemNode.getParent().findDirectChild(ProParserTokenTypes.EXCEPT);
     if (exceptNode != null)

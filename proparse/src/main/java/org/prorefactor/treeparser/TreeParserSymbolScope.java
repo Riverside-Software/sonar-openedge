@@ -30,6 +30,7 @@ import org.prorefactor.core.schema.ITable;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
 import org.prorefactor.treeparser.symbols.ISymbol;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Stream;
@@ -47,10 +48,10 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   protected List<Call> callList = new ArrayList<>();
   protected Block rootBlock;
   protected Routine routine;
-  protected Map<String, TableBuffer> bufferMap = new HashMap<>();
+  protected Map<String, ITableBuffer> bufferMap = new HashMap<>();
   protected Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
   protected Map<String, Routine> routineMap = new HashMap<>();
-  protected Map<ITable, TableBuffer> unnamedBuffers = new HashMap<>();
+  protected Map<ITable, ITableBuffer> unnamedBuffers = new HashMap<>();
   protected Map<ABLNodeType, Map<String, ISymbol>> typeMap = new HashMap<>();
   protected Map<String, Variable> variableMap = new HashMap<>();
 
@@ -100,7 +101,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
    * Add a TableBuffer for names lookup. This is called when copying a SymbolScopeSuper's symbols for inheritance
    * purposes.
    */
-  private void add(TableBuffer tableBuffer) {
+  private void add(ITableBuffer tableBuffer) {
     ITable table = tableBuffer.getTable();
     addTableBuffer(tableBuffer.getName(), table, tableBuffer);
     getRootScope().addTableDefinitionIfNew(table);
@@ -112,7 +113,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   }
 
   /** Add a TableBuffer to the appropriate map. */
-  private void addTableBuffer(String name, ITable table, TableBuffer buffer) {
+  private void addTableBuffer(String name, ITable table, ITableBuffer buffer) {
     if (name.length() == 0) {
       if (table.getStoretype() == IConstants.ST_DBTABLE)
         unnamedBuffers.put(table, buffer);
@@ -130,8 +131,8 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
       add((Variable) symbol);
     } else if (symbol instanceof Routine) {
       add((Routine) symbol);
-    } else if (symbol instanceof TableBuffer) {
-      add((TableBuffer) symbol);
+    } else if (symbol instanceof ITableBuffer) {
+      add((ITableBuffer) symbol);
     } else {
       Map<String, ISymbol> map = typeMap.get(symbol.getProgressType());
       if (map == null) {
@@ -155,8 +156,8 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   }
 
   @Override
-  public TableBuffer defineBuffer(String name, ITable table) {
-    TableBuffer buffer = new TableBuffer(name, this, table);
+  public ITableBuffer defineBuffer(String name, ITable table) {
+    ITableBuffer buffer = new TableBuffer(name, this, table);
     addTableBuffer(name, table, buffer);
     return buffer;
   }
@@ -205,13 +206,13 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   }
 
   @Override
-  public Set<Entry<String, TableBuffer>> getBufferSet() {
+  public Set<Entry<String, ITableBuffer>> getBufferSet() {
     return bufferMap.entrySet();
   }
 
   @Override
-  public TableBuffer getBufferSymbol(String inName) {
-    TableBuffer symbol = lookupBuffer(inName);
+  public ITableBuffer getBufferSymbol(String inName) {
+    ITableBuffer symbol = lookupBuffer(inName);
     if (symbol != null)
       return symbol;
     // The default buffer for temp and work tables was defined at
@@ -263,19 +264,19 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   }
 
   @Override
-  public Map<ITable, TableBuffer> getUnnamedBuffers() {
+  public Map<ITable, ITableBuffer> getUnnamedBuffers() {
     return unnamedBuffers;
   }
   
   /** Get or create the unnamed buffer for a schema table. */
-  public TableBuffer getUnnamedBuffer(ITable table) {
+  public ITableBuffer getUnnamedBuffer(ITable table) {
     assert table.getStoretype() == IConstants.ST_DBTABLE;
     // Check this and parents for the unnamed buffer. Table triggers
     // can scope an unnamed buffer - that's why we don't go straight to
     // the root scope.
     ITreeParserSymbolScope nextScope = this;
     while (nextScope != null) {
-      TableBuffer buffer = nextScope.getUnnamedBuffers().get(table);
+      ITableBuffer buffer = nextScope.getUnnamedBuffers().get(table);
       if (buffer != null)
         return buffer;
       nextScope = nextScope.getParentScope();
@@ -322,7 +323,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
    * @param inName String buffer name
    * @return A TableBuffer, or null if not found.
    */
-  public TableBuffer lookupBuffer(String inName) {
+  public ITableBuffer lookupBuffer(String inName) {
     // - Buffer names cannot be abbreviated.
     // - Buffer names *can* be qualified with a database name.
     // - Buffer names *are* unique in a given scope: you cannot have two buffers with the same name in the same scope
@@ -336,11 +337,11 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
       dbPart = parts[0];
       bufferPart = parts[1];
     }
-    TableBuffer symbol = bufferMap.get(bufferPart.toLowerCase());
+    ITableBuffer symbol = bufferMap.get(bufferPart.toLowerCase());
     if (symbol == null || (!dbPart.isEmpty() && !dbPart.equalsIgnoreCase(symbol.getTable().getDatabase().getName()))
         || (!dbPart.isEmpty() && (symbol.getTable().getStoretype() == IConstants.ST_TTABLE))) {
       if (parentScope != null) {
-        TableBuffer tb = parentScope.lookupBuffer(inName);
+        ITableBuffer tb = parentScope.lookupBuffer(inName);
         if (tb != null) {
           return tb;
         }
@@ -398,14 +399,14 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
    * Lookup a Table or a BufferSymbol, schema table first. It seems to work like this: unabbreviated schema name, then
    * buffer/temp/work name, then abbreviated schema names. Sheesh.
    */
-  public TableBuffer lookupTableOrBufferSymbol(String inName) {
+  public ITableBuffer lookupTableOrBufferSymbol(String inName) {
     String tblName = inName.indexOf('.') == -1 ? inName : inName.substring(inName.indexOf('.') + 1);
 
     ITable table = getRootScope().getRefactorSession().getSchema().lookupTable(tblName);
     if ((table != null) && tblName.equalsIgnoreCase(table.getName()))
       return getUnnamedBuffer(table);
 
-    TableBuffer ret2 = lookupBuffer(tblName);
+    ITableBuffer ret2 = lookupBuffer(tblName);
     if (ret2 != null)
       return ret2;
     if (table != null)
@@ -415,8 +416,8 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
     return parentScope.lookupTableOrBufferSymbol(inName);
   }
 
-  public TableBuffer lookupTempTable(String name) {
-    TableBuffer buff = bufferMap.get(name.toLowerCase());
+  public ITableBuffer lookupTempTable(String name) {
+    ITableBuffer buff = bufferMap.get(name.toLowerCase());
     if (buff != null)
       return buff;
     if (parentScope == null)

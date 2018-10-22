@@ -20,7 +20,7 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.treeparser.BufferScope;
-import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
 
 public class RecordNameNode extends JPNode {
   public RecordNameNode(ProToken t) {
@@ -33,8 +33,8 @@ public class RecordNameNode extends JPNode {
     return bufferScope;
   }
 
-  public TableBuffer getTableBuffer() {
-    TableBuffer buffer = (TableBuffer) getLink(IConstants.SYMBOL);
+  public ITableBuffer getTableBuffer() {
+    ITableBuffer buffer = (ITableBuffer) getLink(IConstants.SYMBOL);
     assert buffer != null;
     return buffer;
   }
@@ -44,7 +44,7 @@ public class RecordNameNode extends JPNode {
     setLink(IConstants.BUFFERSCOPE, bufferScope);
   }
 
-  public void setTableBuffer(TableBuffer buffer) {
+  public void setTableBuffer(ITableBuffer buffer) {
     setLink(IConstants.SYMBOL, buffer);
   }
 

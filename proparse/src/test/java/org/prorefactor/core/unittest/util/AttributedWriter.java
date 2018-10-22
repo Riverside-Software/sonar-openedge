@@ -28,8 +28,8 @@ import org.prorefactor.core.ProToken;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.Symbol;
-import org.prorefactor.treeparser.symbols.TableBuffer;
 
 import antlr.ANTLRException;
 
@@ -54,14 +54,14 @@ public class AttributedWriter {
     Block block = (Block) node.getLink(IConstants.BLOCK);
     if (block == null)
       return;
-    TableBuffer[] buffers = block.getBlockBuffers();
+    ITableBuffer[] buffers = block.getBlockBuffers();
     if (buffers.length == 0)
       return;
     // Collect the names in a sorted set, so we can write them in
     // a consistent (sorted) order. Important for running automated
     // unit/regression tests.
     TreeSet<String> names = new TreeSet<String>();
-    for (TableBuffer buffSymbol : buffers) {
+    for (ITableBuffer buffSymbol : buffers) {
       StringBuffer name = new StringBuffer();
       if (buffSymbol.getTable().getStoretype() == IConstants.ST_DBTABLE) {
         name.append(buffSymbol.getTable().getDatabase().getName());

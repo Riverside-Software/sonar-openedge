@@ -1,4 +1,4 @@
-package org.prorefactor.treeparser;
+  package org.prorefactor.treeparser;
 
 import java.util.Collection;
 import java.util.List;
@@ -11,10 +11,10 @@ import org.prorefactor.core.schema.ITable;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
 import org.prorefactor.treeparser.symbols.ISymbol;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Stream;
-import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.Widget;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
@@ -59,20 +59,20 @@ public interface ITreeParserSymbolScope {
    * 
    * @param name Input "" for a default or unnamed buffer, otherwise the "named buffer" name.
    */
-  TableBuffer defineBuffer(String name, ITable table);
+  ITableBuffer defineBuffer(String name, ITable table);
 
   /** Get the set of named buffers */
-  Set<Entry<String, TableBuffer>> getBufferSet();
+  Set<Entry<String, ITableBuffer>> getBufferSet();
   /** Given a name, find a BufferSymbol (or create if necessary for unnamed buffer). */
-  TableBuffer getBufferSymbol(String inName);
+  ITableBuffer getBufferSymbol(String inName);
   // Nettoyer paramètre
   void setRoutine(Routine routine);
   Routine getRoutine();
   List<Call> getCallList();
   Block getRootBlock() ;
   // A supprimer, uniquement pour migration
-  Map<ITable, TableBuffer> getUnnamedBuffers();
-  TableBuffer getUnnamedBuffer(ITable table);
+  Map<ITable, ITableBuffer> getUnnamedBuffers();
+  ITableBuffer getUnnamedBuffer(ITable table);
   Collection<Variable> getVariables() ;
   Variable getVariable(String name);
   
@@ -90,7 +90,7 @@ public interface ITreeParserSymbolScope {
   /** Get a list of this scope's symbols, and all symbols of all descendant scopes, which match a given class. */
   <T extends ISymbol> List<T> getAllSymbolsDeep(Class<T> klass);
 
-  TableBuffer lookupBuffer(String inName);
+  ITableBuffer lookupBuffer(String inName);
   Dataset lookupDataset(String name) ;
   Datasource lookupDatasource(String name) ;
   IFieldLevelWidget lookupFieldLevelWidget(String inName);
@@ -99,8 +99,8 @@ public interface ITreeParserSymbolScope {
   Stream lookupStream(String name);
   ISymbol lookupSymbol(ABLNodeType symbolType, String name);
   ISymbol lookupSymbolLocally(ABLNodeType symbolType, String name);
-  TableBuffer lookupTableOrBufferSymbol(String inName) ;
-  TableBuffer lookupTempTable(String name);
+  ITableBuffer lookupTableOrBufferSymbol(String inName) ;
+  ITableBuffer lookupTempTable(String name);
   Variable lookupVariable(String inName);
   Widget lookupWidget(ABLNodeType widgetType, String name) ;
 }

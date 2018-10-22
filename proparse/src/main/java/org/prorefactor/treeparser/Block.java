@@ -29,7 +29,7 @@ import org.prorefactor.core.schema.IField;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.ISymbol;
-import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.widgets.Frame;
 
 /**
@@ -106,7 +106,7 @@ public class Block {
    * @param node The RECORD_NAME node. Must have the BufferSymbol linked to it already.
    */
   public void addHiddenCursor(RecordNameNode node) {
-    TableBuffer symbol = node.getTableBuffer();
+    ITableBuffer symbol = node.getTableBuffer();
     BufferScope buff = new BufferScope(this, symbol, BufferScope.Strength.HIDDEN_CURSOR);
     bufferScopes.add(buff);
     // Note the difference compared to addStrong and addWeak - we don't add
@@ -122,7 +122,7 @@ public class Block {
    * @param node The RECORD_NAME node. It must already have the BufferSymbol linked to it.
    */
   public void addStrongBufferScope(RecordNameNode node) {
-    TableBuffer symbol = node.getTableBuffer();
+    ITableBuffer symbol = node.getTableBuffer();
     BufferScope buff = new BufferScope(this, symbol, BufferScope.Strength.STRONG);
     bufferScopes.add(buff);
     addBufferScopeReferences(buff);
@@ -134,7 +134,7 @@ public class Block {
    * 
    * @param symbol The RECORD_NAME node. It must already have the BufferSymbol linked to it.
    */
-  public BufferScope addWeakBufferScope(TableBuffer symbol) {
+  public BufferScope addWeakBufferScope(ITableBuffer symbol) {
     BufferScope buff = getBufferScope(symbol, BufferScope.Strength.WEAK);
     if (buff == null)
       buff = new BufferScope(this, symbol, BufferScope.Strength.WEAK);
@@ -147,7 +147,7 @@ public class Block {
   } // addWeakBufferScope
 
   /** Can a buffer reference be scoped to this block? */
-  private boolean canScopeBufferReference(TableBuffer symbol) {
+  private boolean canScopeBufferReference(ITableBuffer symbol) {
     // REPEAT, FOR, and Program_root blocks can scope a buffer.
     switch (blockStatementNode.getType()) {
       case ProParserTokenTypes.REPEAT:
@@ -172,7 +172,7 @@ public class Block {
   }
 
   /** Find nearest BufferScope for a BufferSymbol, if any */
-  private BufferScope findBufferScope(TableBuffer symbol) {
+  private BufferScope findBufferScope(ITableBuffer symbol) {
     for (BufferScope buff : bufferScopes) {
       if (buff.getSymbol() != symbol)
         continue;
@@ -185,19 +185,19 @@ public class Block {
   }
 
   /** Get the buffers that are scoped to this block */
-  public TableBuffer[] getBlockBuffers() {
+  public ITableBuffer[] getBlockBuffers() {
     // We can't just return bufferScopes, because it also contains
     // references to BufferScope objects which are scoped to child blocks.
-    Set<TableBuffer> set = new HashSet<>();
+    Set<ITableBuffer> set = new HashSet<>();
     for (BufferScope buff : bufferScopes) {
       if (buff.getBlock() == this)
         set.add(buff.getSymbol());
     }
-    return (TableBuffer[]) set.toArray(new TableBuffer[set.size()]);
+    return set.toArray(new ITableBuffer[set.size()]);
   } // getBlockBuffers
 
   /** Find or create a buffer for the input BufferSymbol */
-  public BufferScope getBufferForReference(TableBuffer symbol) {
+  public BufferScope getBufferForReference(ITableBuffer symbol) {
     BufferScope buffer = getBufferScope(symbol, BufferScope.Strength.REFERENCE);
     if (buffer == null)
       buffer = getBufferForReferenceSub(symbol);
@@ -208,14 +208,14 @@ public class Block {
     return buffer;
   } // getBufferForReference
 
-  private BufferScope getBufferForReferenceSub(TableBuffer symbol) {
+  private BufferScope getBufferForReferenceSub(ITableBuffer symbol) {
     if (!canScopeBufferReference(symbol))
       return parent.getBufferForReferenceSub(symbol);
     return new BufferScope(this, symbol, BufferScope.Strength.REFERENCE);
   }
 
   /** Attempt to get or raise a BufferScope in this block. */
-  private BufferScope getBufferScope(TableBuffer symbol, BufferScope.Strength creating) {
+  private BufferScope getBufferScope(ITableBuffer symbol, BufferScope.Strength creating) {
     // First try to find an existing buffer scope for this symbol.
     BufferScope buff = findBufferScope(symbol);
     if (buff != null)
@@ -223,7 +223,7 @@ public class Block {
     return getBufferScopeSub(symbol, creating);
   }
 
-  private BufferScope getBufferScopeSub(TableBuffer symbol, BufferScope.Strength creating) {
+  private BufferScope getBufferScopeSub(ITableBuffer symbol, BufferScope.Strength creating) {
     // First try to get a buffer from outermost blocks.
     if (parent != null && symbol.getScope().getRootBlock() != this) {
       BufferScope buff = parent.getBufferScopeSub(symbol, creating);
@@ -325,7 +325,7 @@ public class Block {
    */
   public FieldLookupResult lookupField(String name, boolean getBufferScope) {
     FieldLookupResult result = new FieldLookupResult();
-    TableBuffer tableBuff;
+    ITableBuffer tableBuff;
     int lastDot = name.lastIndexOf('.');
     // Variable or unqualified field
     if (lastDot == -1) {
@@ -397,10 +397,10 @@ public class Block {
    * uniqueness here. We don't, we just find the first possible and return it.
    */
   protected FieldLookupResult lookupUnqualifiedField(String name) {
-    Map<TableBuffer, BufferScope> buffs = new HashMap<>();
+    Map<ITableBuffer, BufferScope> buffs = new HashMap<>();
     FieldLookupResult result = null;
     for (BufferScope buff : bufferScopes) {
-      TableBuffer symbol = buff.getSymbol();
+      ITableBuffer symbol = buff.getSymbol();
       if (buff.getBlock() == this) {
         buffs.put(symbol, buff);
         continue;
@@ -415,7 +415,7 @@ public class Block {
       buffs.put(symbol, buff);
     }
     for (BufferScope buffScope : buffs.values()) {
-      TableBuffer tableBuff = buffScope.getSymbol();
+      ITableBuffer tableBuff = buffScope.getSymbol();
       // Check for strong scope preventing raise to this block.
       if (buffScope.isStrong() && !isBufferLocal(buffScope))
         continue;

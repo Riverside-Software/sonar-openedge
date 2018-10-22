@@ -29,13 +29,13 @@ import org.prorefactor.treeparser.Primative;
  * provides the link to the Field object.
  */
 public class FieldBuffer extends Symbol implements Primative {
-  private final TableBuffer buffer;
+  private final ITableBuffer buffer;
   private final IField field;
 
   /**
    * When you create a FieldBuffer object, you do not set the name, because that comes from the Field object.
    */
-  public FieldBuffer(ITreeParserSymbolScope scope, TableBuffer buffer, IField field) {
+  public FieldBuffer(ITreeParserSymbolScope scope, ITableBuffer buffer, IField field) {
     super("", scope);
     this.buffer = buffer;
     this.field = field;
@@ -86,7 +86,7 @@ public class FieldBuffer extends Symbol implements Primative {
     return buff.toString();
   }
 
-  public TableBuffer getBuffer() {
+  public ITableBuffer getBuffer() {
     return buffer;
   }
 

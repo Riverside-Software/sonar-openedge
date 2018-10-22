@@ -49,14 +49,14 @@ import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.SymbolFactory;
 import org.prorefactor.treeparser.TreeParserException;
 import org.prorefactor.treeparser.TreeParserRootSymbolScope;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
-import org.prorefactor.treeparser.symbols.TableBuffer;
+//import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.Browse;
 import org.slf4j.Logger;
@@ -103,9 +103,9 @@ public class TP01Support implements ITreeParserAction {
   private ISymbol currSymbol;
 
   private ITreeParserSymbolScope currentScope;
-  private TableBuffer lastTableReferenced;
-  private TableBuffer prevTableReferenced;
-  private TableBuffer currDefTable;
+  private ITableBuffer lastTableReferenced;
+  private ITableBuffer prevTableReferenced;
+  private ITableBuffer currDefTable;
   private Index currDefIndex;
   // LIKE tables management for index copy
   private boolean currDefTableUseIndex = false;
@@ -161,7 +161,7 @@ public class TP01Support implements ITreeParserAction {
   @Override
   public void bufferRef(JPNode idAST) {
     LOG.trace("Entering bufferRef {}", idAST);
-    TableBuffer tableBuffer = currentScope.lookupBuffer(idAST.getText());
+    ITableBuffer tableBuffer = currentScope.lookupBuffer(idAST.getText());
     if (tableBuffer != null) {
       tableBuffer.noteReference(ContextQualifier.SYMBOL);
     }
@@ -235,7 +235,7 @@ public class TP01Support implements ITreeParserAction {
     String buffName = recordAST.getText();
     ITable table;
     boolean isDefault;
-    TableBuffer tableBuffer = currentScope.lookupBuffer(buffName);
+    ITableBuffer tableBuffer = currentScope.lookupBuffer(buffName);
     if (tableBuffer != null) {
       table = tableBuffer.getTable();
       isDefault = tableBuffer.isDefault();
@@ -245,7 +245,7 @@ public class TP01Support implements ITreeParserAction {
       table = refSession.getSchema().lookupTable(buffName);
       isDefault = true;
     }
-    TableBuffer newBuff = currentScope.defineBuffer(isDefault ? "" : buffName, table);
+    ITableBuffer newBuff = currentScope.defineBuffer(isDefault ? "" : buffName, table);
     recordNode.setTableBuffer(newBuff);
     currentBlock.addHiddenCursor(recordNode);
   }
@@ -358,7 +358,7 @@ public class TP01Support implements ITreeParserAction {
   public void defineBuffer(JPNode defAST, JPNode idNode, JPNode tableAST, boolean init) {
     LOG.trace("Entering defineBuffer {} {} {} {}", defAST, idNode, tableAST, init);
     ITable table = astTableLink(tableAST);
-    TableBuffer bufSymbol = currentScope.defineBuffer(idNode.getText(), table);
+    ITableBuffer bufSymbol = currentScope.defineBuffer(idNode.getText(), table);
     currSymbol = bufSymbol;
     bufSymbol.setDefOrIdNode((JPNode) defAST);
     idNode.setLink(IConstants.SYMBOL, bufSymbol);
@@ -377,7 +377,7 @@ public class TP01Support implements ITreeParserAction {
   public void defineBufferForTrigger(JPNode tableAST) {
     LOG.trace("Entering defineBufferForTrigger {}", tableAST);
     ITable table = astTableLink(tableAST);
-    TableBuffer bufSymbol = currentScope.defineBuffer("", table);
+    ITableBuffer bufSymbol = currentScope.defineBuffer("", table);
     currentBlock.getBufferForReference(bufSymbol); // Create the BufferScope
     currSymbol = bufSymbol;
   }
@@ -474,7 +474,7 @@ public class TP01Support implements ITreeParserAction {
 
   public void defineTable(JPNode defNode, JPNode idNode, int storeType) {
     LOG.trace("Entering defineTable {} {} {}", defNode, idNode, storeType);
-    TableBuffer buffer = rootScope.defineTable(idNode.getText(), storeType);
+    ITableBuffer buffer = rootScope.defineTable(idNode.getText(), storeType);
     buffer.setDefOrIdNode(defNode);
     currSymbol = buffer;
     currDefTable = buffer;
@@ -651,7 +651,7 @@ public class TP01Support implements ITreeParserAction {
       // The field lookup in Table expects an unqualified name.
       String[] parts = name.split("\\.");
       String fieldPart = parts[parts.length - 1];
-      TableBuffer ourBuffer = resolution == TableNameResolution.PREVIOUS ? prevTableReferenced : lastTableReferenced;
+      ITableBuffer ourBuffer = resolution == TableNameResolution.PREVIOUS ? prevTableReferenced : lastTableReferenced;
       IField field = ourBuffer.getTable().lookupField(fieldPart);
       if (field == null) {
         // The OpenEdge compiler seems to ignore invalid tokens in a FIELDS phrase.
@@ -1040,7 +1040,7 @@ public class TP01Support implements ITreeParserAction {
   }
 
   /** For a RECORD_NAME node, do checks and assignments for the TableBuffer. */
-  private void recordNodeSymbol(JPNode node, TableBuffer buffer) throws SemanticException {
+  private void recordNodeSymbol(JPNode node, ITableBuffer buffer) throws SemanticException {
     String nodeText = node.getText();
     if (buffer == null) {
       throw new TreeParserException("Could not resolve table '" + nodeText + "'", node.getFilename(), node.getLine(), node.getColumn());
@@ -1064,7 +1064,7 @@ public class TP01Support implements ITreeParserAction {
     LOG.trace("Entering recordNameNode {} {}", anode, contextQualifier);
     RecordNameNode recordNode = (RecordNameNode) anode;
     recordNode.attrSet(IConstants.CONTEXT_QUALIFIER, contextQualifier.toString());
-    TableBuffer buffer = null;
+    ITableBuffer buffer = null;
     switch (contextQualifier) {
       case INIT:
       case INITWEAK:
@@ -1280,7 +1280,7 @@ public class TP01Support implements ITreeParserAction {
   /** Get the Table symbol linked from a RECORD_NAME AST. */
   private ITable astTableLink(JPNode tableAST) {
     LOG.trace("Entering astTableLink {}", tableAST);
-    TableBuffer buffer = (TableBuffer) tableAST.getLink(IConstants.SYMBOL);
+    ITableBuffer buffer = (ITableBuffer) tableAST.getLink(IConstants.SYMBOL);
     assert buffer != null;
     return buffer.getTable();
   }

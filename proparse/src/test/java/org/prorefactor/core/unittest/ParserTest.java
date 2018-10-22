@@ -18,20 +18,17 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.StringWriter;
 import java.util.List;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
-import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -155,47 +152,47 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ttindex01.p"), session);
     unit.treeParser01();
 
-    TableBuffer tt01 = unit.getRootScope().lookupTempTable("tt01");
+    ITableBuffer tt01 = unit.getRootScope().lookupTempTable("tt01");
     assertNotNull(tt01);
     assertNotNull(tt01.getTable());
     assertEquals(tt01.getTable().getIndexes().size(), 3);
 
-    TableBuffer tt02 = unit.getRootScope().lookupTempTable("tt02");
+    ITableBuffer tt02 = unit.getRootScope().lookupTempTable("tt02");
     assertNotNull(tt02);
     assertNotNull(tt02.getTable());
     assertEquals(tt02.getTable().getIndexes().size(), 5);
 
-    TableBuffer tt03 = unit.getRootScope().lookupTempTable("tt03");
+    ITableBuffer tt03 = unit.getRootScope().lookupTempTable("tt03");
     assertNotNull(tt03);
     assertNotNull(tt03.getTable());
     assertEquals(tt03.getTable().getIndexes().size(), 2);
 
-    TableBuffer tt04 = unit.getRootScope().lookupTempTable("tt04");
+    ITableBuffer tt04 = unit.getRootScope().lookupTempTable("tt04");
     assertNotNull(tt04);
     assertNotNull(tt04.getTable());
     assertEquals(tt04.getTable().getIndexes().size(), 2);
 
-    TableBuffer tt05 = unit.getRootScope().lookupTempTable("tt05");
+    ITableBuffer tt05 = unit.getRootScope().lookupTempTable("tt05");
     assertNotNull(tt05);
     assertNotNull(tt05.getTable());
     assertEquals(tt05.getTable().getIndexes().size(), 1);
 
-    TableBuffer tt06 = unit.getRootScope().lookupTempTable("tt06");
+    ITableBuffer tt06 = unit.getRootScope().lookupTempTable("tt06");
     assertNotNull(tt06);
     assertNotNull(tt06.getTable());
     assertEquals(tt06.getTable().getIndexes().size(), 3);
 
-    TableBuffer tt07 = unit.getRootScope().lookupTempTable("tt07");
+    ITableBuffer tt07 = unit.getRootScope().lookupTempTable("tt07");
     assertNotNull(tt07);
     assertNotNull(tt07.getTable());
     assertEquals(tt07.getTable().getIndexes().size(), 2);
 
-    TableBuffer tt08 = unit.getRootScope().lookupTempTable("tt08");
+    ITableBuffer tt08 = unit.getRootScope().lookupTempTable("tt08");
     assertNotNull(tt08);
     assertNotNull(tt08.getTable());
     assertEquals(tt08.getTable().getIndexes().size(), 2);
 
-    TableBuffer tt09 = unit.getRootScope().lookupTempTable("tt09");
+    ITableBuffer tt09 = unit.getRootScope().lookupTempTable("tt09");
     assertNotNull(tt09);
     assertNotNull(tt09.getTable());
     assertEquals(tt09.getTable().getIndexes().size(), 1);
