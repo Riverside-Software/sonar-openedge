@@ -10,20 +10,22 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
+import org.prorefactor.treeparser.symbols.IRoutine;
 import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.Query;
-import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Stream;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.Widget;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 /**
- * For keeping track of PROCEDURE, FUNCTION, and trigger scopes within a 4gl compile unit. Note that scopes are nested.
- * There is the outer program scope, and within it the other types of scopes which may themselves nest trigger scopes.
- * (Trigger scopes may be deeply nested). These scopes are defined <b>Symbol</b> scopes. They have nothing to do with
- * record or frame scoping!
+ * Keep track of PROCEDURE, FUNCTION, and trigger scopes within an ABL compilation unit.
+ * 
+ * Note that scopes are nested.There is the outer program scope, and within it the other types of scopes which may
+ * themselves nest trigger scopes. (Trigger scopes may be deeply nested).
+ * 
+ * These scopes are defined <b>Symbol</b> scopes. They have nothing to do with record or frame scoping!
  */
 public interface ITreeParserSymbolScope {
 
@@ -65,9 +67,11 @@ public interface ITreeParserSymbolScope {
   Set<Entry<String, ITableBuffer>> getBufferSet();
   /** Given a name, find a BufferSymbol (or create if necessary for unnamed buffer). */
   ITableBuffer getBufferSymbol(String inName);
+
   // Nettoyer paramètre
-  void setRoutine(Routine routine);
-  Routine getRoutine();
+  void setRoutine(IRoutine routine);
+  IRoutine getRoutine();
+
   List<Call> getCallList();
   Block getRootBlock() ;
   // A supprimer, uniquement pour migration
@@ -95,7 +99,7 @@ public interface ITreeParserSymbolScope {
   Datasource lookupDatasource(String name) ;
   IFieldLevelWidget lookupFieldLevelWidget(String inName);
   Query lookupQuery(String name);
-  Routine lookupRoutine(String name);
+  IRoutine lookupRoutine(String name);
   Stream lookupStream(String name);
   ISymbol lookupSymbol(ABLNodeType symbolType, String name);
   ISymbol lookupSymbolLocally(ABLNodeType symbolType, String name);

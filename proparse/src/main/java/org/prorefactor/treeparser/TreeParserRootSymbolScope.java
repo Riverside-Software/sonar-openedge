@@ -26,8 +26,8 @@ import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.IRoutine;
 import org.prorefactor.treeparser.symbols.ITableBuffer;
-import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.sonar.plugins.openedge.api.objects.RCodeTTWrapper;
@@ -250,7 +250,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
   /**
    * @return a Collection containing all Routine objects defined in this RootSymbolScope.
    */
-  public Map<String, Routine> getRoutineMap() {
+  public Map<String, IRoutine> getRoutineMap() {
     return routineMap;
   }
 

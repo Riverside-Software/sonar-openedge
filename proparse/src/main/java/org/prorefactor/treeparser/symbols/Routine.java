@@ -27,7 +27,7 @@ import org.prorefactor.treeparser.Parameter;
  * Represents the definition of a Routine. Is a Symbol - used as an entry in the symbol table. A Routine is a
  * Program_root, PROCEDURE, FUNCTION, or METHOD.
  */
-public class Routine extends Symbol {
+public class Routine extends Symbol implements IRoutine {
   private final ITreeParserSymbolScope routineScope;
   private final List<Parameter> parameters = new ArrayList<>();
   private JPNode returnDatatypeNode = null;

@@ -29,10 +29,10 @@ import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
+import org.prorefactor.treeparser.symbols.IRoutine;
 import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.Query;
-import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Stream;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -47,10 +47,10 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   protected List<ISymbol> allSymbols = new ArrayList<>();
   protected List<Call> callList = new ArrayList<>();
   protected Block rootBlock;
-  protected Routine routine;
+  protected IRoutine routine;
   protected Map<String, ITableBuffer> bufferMap = new HashMap<>();
   protected Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
-  protected Map<String, Routine> routineMap = new HashMap<>();
+  protected Map<String, IRoutine> routineMap = new HashMap<>();
   protected Map<ITable, ITableBuffer> unnamedBuffers = new HashMap<>();
   protected Map<ABLNodeType, Map<String, ISymbol>> typeMap = new HashMap<>();
   protected Map<String, Variable> variableMap = new HashMap<>();
@@ -76,7 +76,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   }
 
   @Override
-  public void setRoutine(Routine routine) {
+  public void setRoutine(IRoutine routine) {
     if (this.routine != null) {
       throw new IllegalStateException();
     }
@@ -84,7 +84,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   }
 
   @Override
-  public Routine getRoutine() {
+  public IRoutine getRoutine() {
     return routine;
   }
 
@@ -93,7 +93,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
    * declaration, as well as a local definition. The local definition should be the one in this map, but as it stands,
    * the *last added* is what will be found.
    */
-  private void add(Routine routine) {
+  private void add(IRoutine routine) {
     routineMap.put(routine.getName().toLowerCase(), routine);
   }
 
@@ -129,8 +129,8 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
       add((IFieldLevelWidget) symbol);
     } else if (symbol instanceof Variable) {
       add((Variable) symbol);
-    } else if (symbol instanceof Routine) {
-      add((Routine) symbol);
+    } else if (symbol instanceof IRoutine) {
+      add((IRoutine) symbol);
     } else if (symbol instanceof ITableBuffer) {
       add((ITableBuffer) symbol);
     } else {
@@ -371,7 +371,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
     return (Query) lookupSymbolLocally(ABLNodeType.QUERY, name);
   }
 
-  public Routine lookupRoutine(String name) {
+  public IRoutine lookupRoutine(String name) {
     return routineMap.get(name.toLowerCase());
   }
 
