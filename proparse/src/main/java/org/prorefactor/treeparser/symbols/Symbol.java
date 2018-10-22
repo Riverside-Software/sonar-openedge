@@ -139,13 +139,7 @@ public abstract class Symbol implements ISymbol {
     return fullName();
   }
 
-  public void setParameter(boolean parameter) {
-    this.parameter = parameter;
-  }
-
-  /**
-   * @return True if this variable is a procedure/function/method parameter
-   */
+  @Override
   public boolean isParameter() {
     return parameter;
   }

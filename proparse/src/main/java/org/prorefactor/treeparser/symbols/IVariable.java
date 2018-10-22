@@ -13,22 +13,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.treeparser;
+package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.treeparser.symbols.Event;
-import org.prorefactor.treeparser.symbols.FieldBuffer;
-import org.prorefactor.treeparser.symbols.IVariable;
-import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
+import org.prorefactor.treeparser.DataType;
 
-/**
- * For field lookups, we need to be able to pass back the BufferScope object as well as the Field object.
- */
-public class FieldLookupResult {
-  public boolean isAbbreviated = false;
-  public boolean isUnqualified = false;
-  public BufferScope bufferScope = null;
-  public IVariable variable = null;
-  public IFieldLevelWidget fieldLevelWidget = null;
-  public FieldBuffer field = null;
-  public Event event = null;
+public interface IVariable extends ISymbol {
+  boolean isReferencedInFrame();
+  DataType getDataType();
 }

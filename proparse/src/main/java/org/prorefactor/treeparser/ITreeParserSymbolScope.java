@@ -3,19 +3,15 @@
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.treeparser.symbols.Dataset;
-import org.prorefactor.treeparser.symbols.Datasource;
 import org.prorefactor.treeparser.symbols.IRoutine;
 import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.ITableBuffer;
-import org.prorefactor.treeparser.symbols.Query;
-import org.prorefactor.treeparser.symbols.Stream;
-import org.prorefactor.treeparser.symbols.Variable;
+import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.Widget;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
@@ -75,12 +71,23 @@ public interface ITreeParserSymbolScope {
   List<Call> getCallList();
   Block getRootBlock() ;
   // A supprimer, uniquement pour migration
+  /** Get or create the unnamed buffer for a schema table. */
   Map<ITable, ITableBuffer> getUnnamedBuffers();
   ITableBuffer getUnnamedBuffer(ITable table);
-  Collection<Variable> getVariables() ;
-  Variable getVariable(String name);
+  /** Get the Variables. (vars, params, etc, etc.) */
+  Collection<IVariable> getVariables() ;
+  IVariable getVariable(String name);
   
+  /**
+   * Answer whether the scope has a Routine named by param.
+   * 
+   * @param name - the name of the routine.
+   */
   boolean hasRoutine(String name);
+  /**
+   * Is this scope active in the input scope? In other words, is this scope the input scope, or any of the parents of
+   * the input scope?
+   */
   boolean isActiveIn(ITreeParserSymbolScope theScope);
   void registerCall(Call call) ;
   void setRootBlock(Block block) ;
@@ -94,17 +101,31 @@ public interface ITreeParserSymbolScope {
   /** Get a list of this scope's symbols, and all symbols of all descendant scopes, which match a given class. */
   <T extends ISymbol> List<T> getAllSymbolsDeep(Class<T> klass);
 
+  /**
+   * Lookup a named record/table buffer in this scope or an enclosing scope.
+   * 
+   * @param inName String buffer name
+   * @return A ITableBuffer, or null if not found.
+   */
   ITableBuffer lookupBuffer(String inName);
-  Dataset lookupDataset(String name) ;
-  Datasource lookupDatasource(String name) ;
+  /** Lookup a FieldLevelWidget in this scope or an enclosing scope. */
   IFieldLevelWidget lookupFieldLevelWidget(String inName);
-  Query lookupQuery(String name);
   IRoutine lookupRoutine(String name);
-  Stream lookupStream(String name);
   ISymbol lookupSymbol(ABLNodeType symbolType, String name);
   ISymbol lookupSymbolLocally(ABLNodeType symbolType, String name);
+  /**
+   * Lookup a Table or a BufferSymbol, schema table first. It seems to work like this: unabbreviated schema name, then
+   * buffer/temp/work name, then abbreviated schema names. Sheesh.
+   */
   ITableBuffer lookupTableOrBufferSymbol(String inName) ;
   ITableBuffer lookupTempTable(String name);
-  Variable lookupVariable(String inName);
+  /**
+   * Lookup a Variable in this scope or an enclosing scope.
+   * 
+   * @param inName The string field name to lookup.
+   * @return A Variable, or null if not found.
+   */
+  IVariable lookupVariable(String inName);
+  /** Lookup a Widget based on TokenType (FRAME, BUTTON, etc) and the name in this scope or enclosing scope. */
   Widget lookupWidget(ABLNodeType widgetType, String name) ;
 }

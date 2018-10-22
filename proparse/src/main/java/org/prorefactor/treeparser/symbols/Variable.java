@@ -26,7 +26,7 @@ import org.prorefactor.treeparser.Value;
 /**
  * A Symbol defined with DEFINE VARIABLE or any of the other various syntaxes which implicitly define a variable.
  */
-public class Variable extends Symbol implements Primative, Value {
+public class Variable extends Symbol implements IVariable, Primative, Value {
 
   private int extent;
   private DataType dataType;
@@ -118,6 +118,7 @@ public class Variable extends Symbol implements Primative, Value {
     this.refInFrame = true;
   }
 
+  @Override
   public boolean isReferencedInFrame() {
     return refInFrame;
   }

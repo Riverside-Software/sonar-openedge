@@ -87,4 +87,9 @@ public interface ISymbol {
    */
   void setLikeNode(JPNode likeNode);
 
+  /**
+   * @return True if this variable is a procedure/function/method parameter
+   */
+  boolean isParameter();
+
 }

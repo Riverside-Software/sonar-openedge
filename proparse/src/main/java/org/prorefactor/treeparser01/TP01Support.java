@@ -54,6 +54,7 @@ import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.ITableBuffer;
+import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
 //import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -510,12 +511,12 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public Variable defineVariable(JPNode defAST, JPNode idAST) {
+  public IVariable defineVariable(JPNode defAST, JPNode idAST) {
     return defineVariable(defAST, idAST, false);
   }
 
   @Override
-  public Variable defineVariable(JPNode defNode, JPNode idNode, boolean parameter) {
+  public IVariable defineVariable(JPNode defNode, JPNode idNode, boolean parameter) {
     LOG.trace("Entering defineVariable {} {} {}", defNode, idNode, parameter);
     /*
      * Some notes: We need to create the Variable Symbol right away, because further actions in the grammar might need
@@ -541,29 +542,29 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public Variable defineVariable(JPNode defAST, JPNode idAST, int dataType) {
+  public IVariable defineVariable(JPNode defAST, JPNode idAST, int dataType) {
     return defineVariable(defAST, idAST, dataType, false);
   }
 
   @Override
-  public Variable defineVariable(JPNode defAST, JPNode idAST, int dataType, boolean parameter) {
+  public IVariable defineVariable(JPNode defAST, JPNode idAST, int dataType, boolean parameter) {
     assert dataType != ProParserTokenTypes.CLASS;
-    Variable v = defineVariable(defAST, idAST, parameter);
-    v.setDataType(DataType.getDataType(dataType));
+    IVariable v = defineVariable(defAST, idAST, parameter);
+    ((Variable) v).setDataType(DataType.getDataType(dataType));
     return v;
   }
 
   @Override
-  public Variable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST) {
+  public IVariable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST) {
     return defineVariable(defAST, idAST, likeAST, false);
   }
 
   @Override
-  public Variable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST, boolean parameter) {
-    Variable v = defineVariable(defAST, idAST, parameter);
+  public IVariable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST, boolean parameter) {
+    IVariable v = defineVariable(defAST, idAST, parameter);
     FieldRefNode likeRefNode = (FieldRefNode) likeAST;
-    v.setDataType(likeRefNode.getDataType());
-    v.setClassName(likeRefNode.getClassName());
+    ((Variable) v).setDataType(likeRefNode.getDataType());
+    ((Variable) v).setClassName(likeRefNode.getClassName());
     return v;
   }
 

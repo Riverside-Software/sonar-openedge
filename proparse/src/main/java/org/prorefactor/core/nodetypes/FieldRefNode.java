@@ -24,7 +24,7 @@ import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;
-import org.prorefactor.treeparser.symbols.Variable;
+import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 public class FieldRefNode extends JPNode {
@@ -94,7 +94,7 @@ public class FieldRefNode extends JPNode {
     setLink(IConstants.SYMBOL, symbol);
   }
 
-  public void setSymbol(Variable symbol) {
+  public void setSymbol(IVariable symbol) {
     assert symbol != null;
     setLink(IConstants.SYMBOL, symbol);
   }

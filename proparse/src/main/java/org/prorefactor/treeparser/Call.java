@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.symbols.ISymbol;
+import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.Variable;
 
 import antlr.SemanticException;
@@ -43,7 +44,7 @@ public class Call extends SemanticRecord {
   private String externalName = null;
   private String internalName = null;
   private String runArgument = null;
-  private Variable persistentHandleVar;
+  private IVariable persistentHandleVar;
 
   /**
    * Construct a call to an internal procedure in a specific containing procedure. The refererence is fully resolved.
@@ -141,7 +142,7 @@ public class Call extends SemanticRecord {
    * 
    * @param var
    */
-  public void setPersistentHandleVar(Variable var) {
+  public void setPersistentHandleVar(IVariable var) {
     persistentHandleVar = var;
   }
 
@@ -188,11 +189,11 @@ public class Call extends SemanticRecord {
       // Update the handle Variable; the variable is
       // shared by reference with the SymbolTable.
       ISymbol s = persistentHandleNode.getSymbol();
-      if (s != null && (s instanceof Variable)) {
-        persistentHandleVar = (Variable) s;
+      if (s != null && (s instanceof IVariable)) {
+        persistentHandleVar = (IVariable) s;
         RunHandle hValue = new RunHandle();
         hValue.setValue(externalName);
-        persistentHandleVar.setValue(hValue);
+        ((Variable) persistentHandleVar).setValue(hValue);
       }
     } else { // External procedure call - non persistent.
       internalName = null;

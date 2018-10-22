@@ -28,6 +28,7 @@ import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.IRoutine;
 import org.prorefactor.treeparser.symbols.ITableBuffer;
+import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.sonar.plugins.openedge.api.objects.RCodeTTWrapper;
@@ -155,8 +156,8 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
   }
 
   @Override
-  public Variable lookupVariable(String name) {
-    Variable var = super.lookupVariable(name);
+  public IVariable lookupVariable(String name) {
+    IVariable var = super.lookupVariable(name);
     if (var != null) {
       return var;
     }

@@ -32,11 +32,11 @@ import org.prorefactor.treeparser.symbols.Datasource;
 import org.prorefactor.treeparser.symbols.IRoutine;
 import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.ITableBuffer;
+import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.Stream;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
-import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.Widget;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
@@ -53,7 +53,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   protected Map<String, IRoutine> routineMap = new HashMap<>();
   protected Map<ITable, ITableBuffer> unnamedBuffers = new HashMap<>();
   protected Map<ABLNodeType, Map<String, ISymbol>> typeMap = new HashMap<>();
-  protected Map<String, Variable> variableMap = new HashMap<>();
+  protected Map<String, IVariable> variableMap = new HashMap<>();
 
   protected TreeParserSymbolScope() {
     this(null);
@@ -108,7 +108,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   }
 
   /** Add a Variable for names lookup. */
-  private void add(Variable var) {
+  private void add(IVariable var) {
     variableMap.put(var.getName().toLowerCase(), var);
   }
 
@@ -127,8 +127,8 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   public void add(ISymbol symbol) {
     if (symbol instanceof IFieldLevelWidget) {
       add((IFieldLevelWidget) symbol);
-    } else if (symbol instanceof Variable) {
-      add((Variable) symbol);
+    } else if (symbol instanceof IVariable) {
+      add((IVariable) symbol);
     } else if (symbol instanceof IRoutine) {
       add((IRoutine) symbol);
     } else if (symbol instanceof ITableBuffer) {
@@ -267,8 +267,8 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   public Map<ITable, ITableBuffer> getUnnamedBuffers() {
     return unnamedBuffers;
   }
-  
-  /** Get or create the unnamed buffer for a schema table. */
+
+  @Override
   public ITableBuffer getUnnamedBuffer(ITable table) {
     assert table.getStoretype() == IConstants.ST_DBTABLE;
     // Check this and parents for the unnamed buffer. Table triggers
@@ -284,30 +284,24 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
     return getRootScope().defineBuffer("", table);
   }
 
-  /** Get the Variables. (vars, params, etc, etc.) */
-  public Collection<Variable> getVariables() {
+  @Override
+  public Collection<IVariable> getVariables() {
     return variableMap.values();
   }
 
-  public Variable getVariable(String name) {
+  @Override
+  public IVariable getVariable(String name) {
     return variableMap.get(name.toLowerCase());
   }
 
-  /**
-   * Answer whether the scope has a Routine named by param.
-   * 
-   * @param name - the name of the routine.
-   */
+  @Override
   public boolean hasRoutine(String name) {
     if (name == null)
       return false;
     return routineMap.containsKey(name.toLowerCase());
   }
 
-  /**
-   * Is this scope active in the input scope? In other words, is this scope the input scope, or any of the parents of
-   * the input scope?
-   */
+  @Override
   public boolean isActiveIn(ITreeParserSymbolScope theScope) {
     while (theScope != null) {
       if (this == theScope)
@@ -317,12 +311,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
     return false;
   }
 
-  /**
-   * Lookup a named record/table buffer in this scope or an enclosing scope.
-   * 
-   * @param inName String buffer name
-   * @return A TableBuffer, or null if not found.
-   */
+  @Override
   public ITableBuffer lookupBuffer(String inName) {
     // - Buffer names cannot be abbreviated.
     // - Buffer names *can* be qualified with a database name.
@@ -359,7 +348,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
     return (Datasource) lookupSymbolLocally(ABLNodeType.DATASOURCE, name);
   }
 
-  /** Lookup a FieldLevelWidget in this scope or an enclosing scope. */
+  @Override
   public IFieldLevelWidget lookupFieldLevelWidget(String inName) {
     IFieldLevelWidget wid = fieldLevelWidgetMap.get(inName.toLowerCase());
     if (wid == null && parentScope != null)
@@ -371,6 +360,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
     return (Query) lookupSymbolLocally(ABLNodeType.QUERY, name);
   }
 
+  @Override
   public IRoutine lookupRoutine(String name) {
     return routineMap.get(name.toLowerCase());
   }
@@ -379,6 +369,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
     return (Stream) lookupSymbolLocally(ABLNodeType.STREAM, name);
   }
 
+  @Override
   public ISymbol lookupSymbol(ABLNodeType symbolType, String name) {
     ISymbol symbol = lookupSymbolLocally(symbolType, name);
     if (symbol != null)
@@ -388,6 +379,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
     return null;
   }
 
+  @Override
   public ISymbol lookupSymbolLocally(ABLNodeType symbolType, String name) {
     Map<String, ISymbol> map = typeMap.get(symbolType);
     if (map == null)
@@ -395,10 +387,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
     return map.get(name.toLowerCase());
   }
 
-  /**
-   * Lookup a Table or a BufferSymbol, schema table first. It seems to work like this: unabbreviated schema name, then
-   * buffer/temp/work name, then abbreviated schema names. Sheesh.
-   */
+  @Override
   public ITableBuffer lookupTableOrBufferSymbol(String inName) {
     String tblName = inName.indexOf('.') == -1 ? inName : inName.substring(inName.indexOf('.') + 1);
 
@@ -416,6 +405,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
     return parentScope.lookupTableOrBufferSymbol(inName);
   }
 
+  @Override
   public ITableBuffer lookupTempTable(String name) {
     ITableBuffer buff = bufferMap.get(name.toLowerCase());
     if (buff != null)
@@ -426,20 +416,15 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
     return parentScope.lookupTempTable(name);
   }
 
-  /**
-   * Lookup a Variable in this scope or an enclosing scope.
-   * 
-   * @param inName The string field name to lookup.
-   * @return A Variable, or null if not found.
-   */
-  public Variable lookupVariable(String inName) {
-    Variable var = variableMap.get(inName.toLowerCase());
+  @Override
+  public IVariable lookupVariable(String inName) {
+    IVariable var = variableMap.get(inName.toLowerCase());
     if (var == null && parentScope != null)
       return parentScope.lookupVariable(inName);
     return var;
   }
 
-  /** Lookup a Widget based on TokenType (FRAME, BUTTON, etc) and the name in this scope or enclosing scope. */
+  @Override
   public Widget lookupWidget(ABLNodeType widgetType, String name) {
     Widget ret = (Widget) lookupSymbolLocally(widgetType, name);
     if (ret == null && parentScope != null)
@@ -447,10 +432,12 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
     return ret;
   }
 
+  @Override
   public void registerCall(Call call) {
     callList.add(call);
   }
 
+  @Override
   public void setRootBlock(Block block) {
     rootBlock = block;
   }
