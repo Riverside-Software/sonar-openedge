@@ -32,4 +32,8 @@ public interface ITreeParserRootSymbolScope extends ITreeParserSymbolScope {
    * Returns null if nothing found.
    */
   IField lookupUnqualifiedField(String name);
+  /**
+   * @return True is parse unit is a CLASS or INTERFACE
+   */
+  boolean isClass() ;
 }
