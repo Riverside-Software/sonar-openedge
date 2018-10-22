@@ -18,9 +18,9 @@ package org.prorefactor.treeparser;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
+import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.Stream;
-import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.widgets.Browse;
 import org.prorefactor.treeparser.symbols.widgets.Button;
 import org.prorefactor.treeparser.symbols.widgets.Frame;
@@ -37,7 +37,7 @@ public final class SymbolFactory {
     // Shouldn't be instantiated
   }
 
-  public static Symbol create(int symbolType, String name, TreeParserSymbolScope scope) {
+  public static ISymbol create(int symbolType, String name, TreeParserSymbolScope scope) {
     switch (symbolType) {
       case ProParserTokenTypes.DATASET:
         return new Dataset(name, scope);

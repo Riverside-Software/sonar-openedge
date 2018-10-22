@@ -23,7 +23,7 @@ import org.prorefactor.treeparser.BufferScope;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
-import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
@@ -73,10 +73,10 @@ public class FieldRefNode extends JPNode {
    * @return Always returns one of two Symbol types: Variable or FieldBuffer.
    */
   @Override
-  public Symbol getSymbol() {
+  public ISymbol getSymbol() {
     // Can't assert symbol != null, because we aren't currently resolving
     // references to METHODs (like in eventVar:Subscribe(MethodName).
-    return (Symbol) getLink(IConstants.SYMBOL);
+    return (ISymbol) getLink(IConstants.SYMBOL);
   }
 
   public void setBufferScope(BufferScope bufferScope) {

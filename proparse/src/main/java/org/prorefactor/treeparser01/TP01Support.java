@@ -51,6 +51,7 @@ import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -97,7 +98,7 @@ public class TP01Support implements ITreeParserAction {
    * The symbol last, or currently being, defined. Needed when we have complex syntax like DEFINE id ... LIKE, where we
    * want to track the LIKE but it's not in the same grammar production as the DEFINE.
    */
-  private Symbol currSymbol;
+  private ISymbol currSymbol;
 
   private TreeParserSymbolScope currentScope;
   private TableBuffer lastTableReferenced;
@@ -393,7 +394,7 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public Symbol defineSymbol(int symbolType, JPNode defNode, JPNode idNode) {
+  public ISymbol defineSymbol(int symbolType, JPNode defNode, JPNode idNode) {
     LOG.trace("Entering defineSymbol {} - {} - {}", symbolType, defNode, idNode);
     /*
      * Some notes: We need to create the Symbol right away, because further actions in the grammar might need to set
@@ -401,7 +402,7 @@ public class TP01Support implements ITreeParserAction {
      * tree parser is responsible for calling addToScope at the end of the statement or when it is otherwise safe to do
      * so.
      */
-    Symbol symbol = SymbolFactory.create(symbolType, idNode.getText(), currentScope);
+    ISymbol symbol = SymbolFactory.create(symbolType, idNode.getText(), currentScope);
     symbol.setDefOrIdNode(defNode);
     currSymbol = symbol;
     idNode.setLink(IConstants.SYMBOL, symbol);
@@ -800,7 +801,7 @@ public class TP01Support implements ITreeParserAction {
     BlockNode blockNode = (BlockNode) idNode.getParent();
     TreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(idNode.getText(), definingScope, currentScope);
-    r.setProgressType(ProParserTokenTypes.FUNCTION);
+    r.setProgressType(ABLNodeType.FUNCTION);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     definingScope.add(r);
@@ -859,7 +860,7 @@ public class TP01Support implements ITreeParserAction {
     BlockNode blockNode = (BlockNode) idNode.getParent();
     TreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(idNode.getText(), definingScope, currentScope);
-    r.setProgressType(ProParserTokenTypes.METHOD);
+    r.setProgressType(ABLNodeType.METHOD);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     definingScope.add(r);
@@ -880,7 +881,7 @@ public class TP01Support implements ITreeParserAction {
     BlockNode blockNode = (BlockNode) propAST;
     TreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(propAST.getText(), definingScope, currentScope);
-    r.setProgressType(propAST.getType());
+    r.setProgressType(propAST.getNodeType());
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     definingScope.add(r);
@@ -982,7 +983,7 @@ public class TP01Support implements ITreeParserAction {
     TreeParserSymbolScope definingScope = currentScope;
     scopeAdd(blockNode);
     Routine r = new Routine(idAST.getText(), definingScope, currentScope);
-    r.setProgressType(ProParserTokenTypes.PROCEDURE);
+    r.setProgressType(ABLNodeType.PROCEDURE);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     definingScope.add(r);
@@ -1004,7 +1005,7 @@ public class TP01Support implements ITreeParserAction {
     blockNode.setBlock(currentBlock);
     getParseUnit().setRootScope(rootScope);
     Routine r = new Routine("", rootScope, rootScope);
-    r.setProgressType(ProParserTokenTypes.Program_root);
+    r.setProgressType(ABLNodeType.PROGRAM_ROOT);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     rootScope.add(r);
@@ -1196,7 +1197,7 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public void setSymbol(int symbolType, JPNode idNode) {
+  public void setSymbol(ABLNodeType symbolType, JPNode idNode) {
     idNode.setSymbol(currentScope.lookupSymbol(symbolType, idNode.getText()));
   }
 
@@ -1228,7 +1229,7 @@ public class TP01Support implements ITreeParserAction {
     TreeParserSymbolScope definingScope = currentScope.getParentScope();
     // 'structors don't have names, so use empty string.
     Routine r = new Routine("", definingScope, currentScope);
-    r.setProgressType(blockNode.getType());
+    r.setProgressType(blockNode.getNodeType());
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     currentRoutine = r;

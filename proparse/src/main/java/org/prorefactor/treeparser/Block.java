@@ -28,7 +28,7 @@ import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.symbols.Event;
-import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.widgets.Frame;
 
@@ -330,14 +330,14 @@ public class Block {
     // Variable or unqualified field
     if (lastDot == -1) {
       // Variables, FieldLevelWidgets, and Events come first.
-      Symbol s;
+      ISymbol s;
       result.variable = symbolScope.lookupVariable(name);
       if (result.variable != null)
         return result;
       result.fieldLevelWidget = symbolScope.lookupFieldLevelWidget(name);
       if (result.fieldLevelWidget != null)
         return result;
-      s = symbolScope.lookupSymbol(ProParserTokenTypes.EVENT, name);
+      s = symbolScope.lookupSymbol(ABLNodeType.EVENT, name);
       if (s != null) {
         result.event = (Event) s;
         return result;

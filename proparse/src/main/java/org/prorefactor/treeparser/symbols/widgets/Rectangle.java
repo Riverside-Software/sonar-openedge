@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols.widgets;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Widget;
 
@@ -26,11 +26,11 @@ public class Rectangle extends Widget implements IFieldLevelWidget {
   }
 
   /**
-   * @return NodeTypes.RECTANGLE
+   * @return ABLNodeType.RECTANGLE
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.RECTANGLE;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.RECTANGLE;
   }
 
 }

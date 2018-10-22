@@ -15,11 +15,11 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ISchema;
-import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -123,15 +123,15 @@ public class FieldBuffer extends Symbol implements Primative {
   }
 
   /**
-   * Always returns FIELD.
+   * Always returns ABLNodeType.FIELD
    * 
    * @see org.prorefactor.treeparser.symbols.Symbol#getProgressType() To see if this field buffer is for a schema table,
    *      temp-table, or work-table, see Table.getStoreType().
    * @see org.prorefactor.core.schema.ITable#getStoretype()
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.FIELD;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.FIELD;
   }
 
   /** Sets the underlying Field's className. */

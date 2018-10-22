@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.core.JPNode;
-import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Variable;
 
 import antlr.SemanticException;
@@ -171,7 +171,7 @@ public class Call extends SemanticRecord {
     if (isInHandle()) {
       // Internal procedure call - using a handle.
       internalName = runArgument;
-      Symbol s = runHandleNode.getSymbol();
+      ISymbol s = runHandleNode.getSymbol();
       if (s != null && (s instanceof Variable)) {
         runHandle = (RunHandle) ((Variable) s).getValue();
         if (runHandle != null)
@@ -187,7 +187,7 @@ public class Call extends SemanticRecord {
       externalName = runArgument;
       // Update the handle Variable; the variable is
       // shared by reference with the SymbolTable.
-      Symbol s = persistentHandleNode.getSymbol();
+      ISymbol s = persistentHandleNode.getSymbol();
       if (s != null && (s instanceof Variable)) {
         persistentHandleVar = (Variable) s;
         RunHandle hValue = new RunHandle();

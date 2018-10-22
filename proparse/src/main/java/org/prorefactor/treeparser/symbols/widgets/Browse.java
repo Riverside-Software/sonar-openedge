@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols.widgets;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 
@@ -26,11 +26,11 @@ public class Browse extends FieldContainer implements IFieldLevelWidget {
   }
 
   /**
-   * @return NodeTypes.BROWSE
+   * @return ABLNodeType.BROWSE
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.BROWSE;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.BROWSE;
   }
 
 }

@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -61,7 +62,7 @@ public interface ISymbol {
    * From TokenTypes: VARIABLE, FRAME, MENU, MENUITEM, etc. A TableBuffer object always returns BUFFER, regardless of
    * whether the object is a named buffer or a default buffer. A FieldBuffer object always returns FIELD.
    */
-  int getProgressType();
+  ABLNodeType getProgressType();
 
   TreeParserSymbolScope getScope();
 

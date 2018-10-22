@@ -24,11 +24,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
+import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Stream;
@@ -47,7 +48,7 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 public class TreeParserSymbolScope {
   protected final TreeParserSymbolScope parentScope;
 
-  protected List<Symbol> allSymbols = new ArrayList<>();
+  protected List<ISymbol> allSymbols = new ArrayList<>();
   protected List<Call> callList = new ArrayList<>();
   protected List<TreeParserSymbolScope> childScopes = new ArrayList<>();
   protected Block rootBlock;
@@ -56,7 +57,7 @@ public class TreeParserSymbolScope {
   protected Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
   protected Map<String, Routine> routineMap = new HashMap<>();
   protected Map<ITable, TableBuffer> unnamedBuffers = new HashMap<>();
-  protected Map<Integer, Map<String, Symbol>> typeMap = new HashMap<>();
+  protected Map<ABLNodeType, Map<String, ISymbol>> typeMap = new HashMap<>();
   protected Map<String, Variable> variableMap = new HashMap<>();
 
   protected TreeParserSymbolScope() {
@@ -71,7 +72,7 @@ public class TreeParserSymbolScope {
   @SuppressWarnings({"unchecked", "rawtypes"})
   private TreeParserSymbolScope(TreeParserSymbolScope parentScope) {
     this.parentScope = parentScope;
-    typeMap.put(ProParserTokenTypes.VARIABLE, Collections.checkedMap((Map) variableMap, String.class, Symbol.class));
+    typeMap.put(ABLNodeType.VARIABLE, Collections.checkedMap((Map) variableMap, String.class, Symbol.class));
   }
 
   /** Add a FieldLevelWidget for names lookup. */
@@ -126,7 +127,7 @@ public class TreeParserSymbolScope {
   }
 
   /** Add a Symbol for names lookup. */
-  public void add(Symbol symbol) {
+  public void add(ISymbol symbol) {
     if (symbol instanceof IFieldLevelWidget) {
       add((IFieldLevelWidget) symbol);
     } else if (symbol instanceof Variable) {
@@ -136,7 +137,7 @@ public class TreeParserSymbolScope {
     } else if (symbol instanceof TableBuffer) {
       add((TableBuffer) symbol);
     } else {
-      Map<String, Symbol> map = typeMap.get(symbol.getProgressType());
+      Map<String, ISymbol> map = typeMap.get(symbol.getProgressType());
       if (map == null) {
         map = new HashMap<>();
         typeMap.put(symbol.getProgressType(), map);
@@ -156,7 +157,7 @@ public class TreeParserSymbolScope {
    * All symbols within this scope are added to this scope's symbol list. This method has "package" visibility, since
    * the Symbol object adds itself to its scope.
    */
-  public void addSymbol(Symbol symbol) {
+  public void addSymbol(ISymbol symbol) {
     allSymbols.add(symbol);
   }
 
@@ -187,15 +188,15 @@ public class TreeParserSymbolScope {
   }
 
   /** Get a *copy* of the list of all symbols in this scope */
-  public List<Symbol> getAllSymbols() {
+  public List<ISymbol> getAllSymbols() {
     return new ArrayList<>(allSymbols);
   }
 
   /** Get a list of this scope's symbols which match a given class */
   @SuppressWarnings("unchecked")
-  public <T extends Symbol> List<T> getAllSymbols(Class<T> klass) {
+  public <T extends ISymbol> List<T> getAllSymbols(Class<T> klass) {
     ArrayList<T> ret = new ArrayList<>();
-    for (Symbol s : allSymbols) {
+    for (ISymbol s : allSymbols) {
       if (klass.isInstance(s))
         ret.add((T) s);
     }
@@ -203,8 +204,8 @@ public class TreeParserSymbolScope {
   }
 
   /** Get a list of this scope's symbols, and all symbols of all descendant scopes. */
-  public List<Symbol> getAllSymbolsDeep() {
-    ArrayList<Symbol> ret = new ArrayList<>(allSymbols);
+  public List<ISymbol> getAllSymbolsDeep() {
+    ArrayList<ISymbol> ret = new ArrayList<>(allSymbols);
     for (TreeParserSymbolScope child : childScopes) {
       ret.addAll(child.getAllSymbolsDeep());
     }
@@ -212,7 +213,7 @@ public class TreeParserSymbolScope {
   }
 
   /** Get a list of this scope's symbols, and all symbols of all descendant scopes, which match a given class. */
-  public <T extends Symbol> List<T> getAllSymbolsDeep(Class<T> klass) {
+  public <T extends ISymbol> List<T> getAllSymbolsDeep(Class<T> klass) {
     List<T> ret = getAllSymbols(klass);
     for (TreeParserSymbolScope child : childScopes) {
       ret.addAll(child.getAllSymbols(klass));
@@ -358,11 +359,11 @@ public class TreeParserSymbolScope {
   }
 
   public Dataset lookupDataset(String name) {
-    return (Dataset) lookupSymbolLocally(ProParserTokenTypes.DATASET, name);
+    return (Dataset) lookupSymbolLocally(ABLNodeType.DATASET, name);
   }
 
   public Datasource lookupDatasource(String name) {
-    return (Datasource) lookupSymbolLocally(ProParserTokenTypes.DATASOURCE, name);
+    return (Datasource) lookupSymbolLocally(ABLNodeType.DATASOURCE, name);
   }
 
   /** Lookup a FieldLevelWidget in this scope or an enclosing scope. */
@@ -374,7 +375,7 @@ public class TreeParserSymbolScope {
   }
 
   public Query lookupQuery(String name) {
-    return (Query) lookupSymbolLocally(ProParserTokenTypes.QUERY, name);
+    return (Query) lookupSymbolLocally(ABLNodeType.QUERY, name);
   }
 
   public Routine lookupRoutine(String name) {
@@ -382,11 +383,11 @@ public class TreeParserSymbolScope {
   }
 
   public Stream lookupStream(String name) {
-    return (Stream) lookupSymbolLocally(ProParserTokenTypes.STREAM, name);
+    return (Stream) lookupSymbolLocally(ABLNodeType.STREAM, name);
   }
 
-  public Symbol lookupSymbol(Integer symbolType, String name) {
-    Symbol symbol = lookupSymbolLocally(symbolType, name);
+  public ISymbol lookupSymbol(ABLNodeType symbolType, String name) {
+    ISymbol symbol = lookupSymbolLocally(symbolType, name);
     if (symbol != null)
       return symbol;
     if (parentScope != null)
@@ -394,8 +395,8 @@ public class TreeParserSymbolScope {
     return null;
   }
 
-  public Symbol lookupSymbolLocally(Integer symbolType, String name) {
-    Map<String, Symbol> map = typeMap.get(symbolType);
+  public ISymbol lookupSymbolLocally(ABLNodeType symbolType, String name) {
+    Map<String, ISymbol> map = typeMap.get(symbolType);
     if (map == null)
       return null;
     return map.get(name.toLowerCase());
@@ -446,7 +447,7 @@ public class TreeParserSymbolScope {
   }
 
   /** Lookup a Widget based on TokenType (FRAME, BUTTON, etc) and the name in this scope or enclosing scope. */
-  public Widget lookupWidget(int widgetType, String name) {
+  public Widget lookupWidget(ABLNodeType widgetType, String name) {
     Widget ret = (Widget) lookupSymbolLocally(widgetType, name);
     if (ret == null && parentScope != null)
       return parentScope.lookupWidget(widgetType, name);

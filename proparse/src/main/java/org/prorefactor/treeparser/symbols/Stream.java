@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
@@ -36,11 +36,11 @@ public class Stream extends Symbol {
   }
 
   /**
-   * Returns NodeTypes.STREAM
+   * Returns ABLNodeType.STREAM
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.STREAM;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.STREAM;
   }
 
 }

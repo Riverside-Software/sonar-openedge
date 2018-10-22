@@ -15,10 +15,12 @@
  ********************************************************************************/
 package org.prorefactor.treeparser01;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.Event;
+import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.Browse;
@@ -182,7 +184,7 @@ public interface ITreeParserAction {
   /**
    * Called by the tree parser to define anything other than buffers, temp/work tables, and variables/parameters.
    */
-  default Symbol defineSymbol(int symbolType, JPNode defAST, JPNode idAST) throws SemanticException {
+  default ISymbol defineSymbol(int symbolType, JPNode defAST, JPNode idAST) throws SemanticException {
     return null;
   }
 
@@ -477,7 +479,7 @@ public interface ITreeParserAction {
   }
 
   /** Lookup and assign a symbol to an ID node. */
-  default void setSymbol(int symbolType, JPNode idAST) throws SemanticException {
+  default void setSymbol(ABLNodeType symbolType, JPNode idAST) throws SemanticException {
   }
 
   /**

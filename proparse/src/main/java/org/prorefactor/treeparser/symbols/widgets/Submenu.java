@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols.widgets;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Widget;
 
@@ -26,11 +26,11 @@ public class Submenu extends Widget {
   }
 
   /**
-   * @return NodeTypes.SUBMENU
+   * @return ABLNodeType.SUBMENU
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.SUBMENU;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.SUBMENU;
   }
 
 }

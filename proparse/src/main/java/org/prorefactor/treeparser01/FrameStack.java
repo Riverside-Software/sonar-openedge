@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.BlockNode;
@@ -149,7 +150,7 @@ public class FrameStack {
 
   private Frame frameRefSet(JPNode idNode, TreeParserSymbolScope symbolScope) {
     String frameName = idNode.getText();
-    Frame frame = (Frame) symbolScope.lookupWidget(ProParserTokenTypes.FRAME, frameName);
+    Frame frame = (Frame) symbolScope.lookupWidget(ABLNodeType.FRAME, frameName);
     if (frame == null)
       frame = createFrame(frameName, symbolScope);
     idNode.setLink(IConstants.SYMBOL, frame);
@@ -274,7 +275,7 @@ public class FrameStack {
    */
   void nodeOfDefineFrame(JPNode defNode, JPNode idNode, TreeParserSymbolScope currentSymbolScope) {
     String frameName = idNode.getText();
-    Frame frame = (Frame) currentSymbolScope.lookupSymbolLocally(ProParserTokenTypes.FRAME, frameName);
+    Frame frame = (Frame) currentSymbolScope.lookupSymbolLocally(ABLNodeType.FRAME, frameName);
     if (frame == null)
       frame = createFrame(frameName, currentSymbolScope);
     frame.setDefOrIdNode(defNode);

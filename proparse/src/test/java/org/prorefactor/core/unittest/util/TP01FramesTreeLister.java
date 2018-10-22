@@ -17,7 +17,6 @@ package org.prorefactor.core.unittest.util;
 
 import java.io.PrintWriter;
 
-import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
@@ -74,7 +73,7 @@ public class TP01FramesTreeLister extends JPNodeLister {
     FieldContainer fieldContainer = node.getFieldContainer();
     if (fieldContainer == null)
       return;
-    buff.append(spacer).append(ABLNodeType.getNodeType(fieldContainer.getProgressType())).append("=");
+    buff.append(spacer).append(fieldContainer.getProgressType()).append("=");
     appendName(buff, fieldContainer);
   }
 

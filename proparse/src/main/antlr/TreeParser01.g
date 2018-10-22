@@ -22,6 +22,7 @@ header {
 
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
+  import org.prorefactor.core.ABLNodeType;
   import org.prorefactor.core.JPNode;
   import org.prorefactor.treeparser.ContextQualifier;
   import org.prorefactor.treeparser.IJPTreeParser;
@@ -272,7 +273,7 @@ parameter_arg2[ContextQualifier contextQualifier]:
     (
       TABLEHANDLE thf:fld[ContextQualifier.INIT] parameter_dataset_options { action.paramSymbol(#thf); action.noteReference(#thf, contextQualifier); }
     | TABLE (FOR)? tt:tbl[ContextQualifier.TEMPTABLESYMBOL] parameter_dataset_options {  action.paramProgressType(TEMPTABLE); action.paramSymbol(#tt); }
-    | DATASET ds:ID parameter_dataset_options { action.setSymbol(DATASET, #ds); action.paramProgressType(DATASET); action.paramSymbol(#ds); }
+    | DATASET ds:ID parameter_dataset_options { action.setSymbol(ABLNodeType.DATASET, #ds); action.paramProgressType(DATASET); action.paramSymbol(#ds); }
     | DATASETHANDLE dsh:fld[ContextQualifier.INIT] parameter_dataset_options { action.paramSymbol(#dsh); action.noteReference(#dsh, contextQualifier); }
     | PARAMETER expression EQUAL expression /* for RUN STORED-PROCEDURE. */ { action.paramProgressType(PARAMETER); }
     | ID AS { action.paramNoName(parameter_arg2_AST_in); } (CLASS TYPE_NAME | datatype_com_native | datatype_var )
@@ -943,7 +944,7 @@ defineparameterstate:
             action.paramSymbol(#id);
           }
         |  DATASET FOR ds:ID defineparam_ab
-          {  action.setSymbol(DATASET, #ds);
+          {  action.setSymbol(ABLNodeType.DATASET, #ds);
             action.paramProgressType(DATASET);
             action.paramSymbol(#ds);
           }
@@ -1461,7 +1462,7 @@ function_param_arg:
       action.paramSymbol(#id2);
     }
   |  DATASET (FOR)? ds:ID (APPEND)? (BIND {action.paramBind();})?
-    {  action.setSymbol(DATASET, #ds);
+    {  action.setSymbol(ABLNodeType.DATASET, #ds);
       action.paramProgressType(DATASET);
       action.paramSymbol(#ds);
     }

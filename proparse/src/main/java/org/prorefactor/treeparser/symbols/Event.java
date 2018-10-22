@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
@@ -36,11 +36,11 @@ public class Event extends Symbol {
   }
 
   /**
-   * Returns NodeTypes.EVENT.
+   * Returns ABLNodeType.EVENT
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.EVENT;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.EVENT;
   }
 
 }

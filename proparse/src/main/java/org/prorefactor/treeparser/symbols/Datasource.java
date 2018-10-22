@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE DATA-SOURCE. */
@@ -34,11 +34,11 @@ public class Datasource extends Symbol {
   }
 
   /**
-   * Returns NodeTypes.DATASOURCE
+   * Returns ABLNodeType.DATASOURCE
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.DATASOURCE;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.DATASOURCE;
   }
 
 }
