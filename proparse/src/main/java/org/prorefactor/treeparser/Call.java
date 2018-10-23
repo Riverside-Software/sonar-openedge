@@ -23,8 +23,6 @@ import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.Variable;
 
-import antlr.SemanticException;
-
 /**
  * Represents a Call to some 4GL procedure. The target procedure is identified by the external and internal procedure
  * names. The expected values for externalName and internalName are as follows: <pre>
@@ -36,7 +34,7 @@ import antlr.SemanticException;
  * 
  * @author pcd
  */
-public class Call extends SemanticRecord {
+public class Call extends SemanticRecord implements ICall {
   private List<Parameter> parameters = new ArrayList<>();
   private JPNode persistentHandleNode = null;
   private JPNode runHandleNode = null;
@@ -168,7 +166,7 @@ public class Call extends SemanticRecord {
   }
 
   /** Finish setting values for the Call. */
-  public void wrapUp(boolean definedInternal) throws SemanticException {
+  public void wrapUp(boolean definedInternal) {
     if (isInHandle()) {
       // Internal procedure call - using a handle.
       internalName = runArgument;

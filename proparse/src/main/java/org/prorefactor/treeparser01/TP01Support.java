@@ -41,6 +41,7 @@ import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Expression;
 import org.prorefactor.treeparser.FieldLookupResult;
+import org.prorefactor.treeparser.ICall;
 import org.prorefactor.treeparser.ITreeParserRootSymbolScope;
 import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.Parameter;
@@ -85,8 +86,8 @@ public class TP01Support implements ITreeParserAction {
   private Expression wipExpression;
   private FrameStack frameStack = new FrameStack();
   private Map<String, ITreeParserSymbolScope> funcForwards = new HashMap<>();
-  /** There may be more than one WIP call, since a functioncall is a perfectly valid parameter. */
-  private Deque<Call> wipCalls = new LinkedList<>();
+  /** There may be more than one WIP call, since a function call is a perfectly valid parameter. */
+  private Deque<ICall> wipCalls = new LinkedList<>();
   /** Since there can be more than one WIP Call, there can be more than one WIP Parameter. */
   private Deque<Parameter> wipParameters = new LinkedList<>();
 
@@ -1023,9 +1024,9 @@ public class TP01Support implements ITreeParserAction {
     List<ITreeParserSymbolScope> allScopes = new ArrayList<>();
     allScopes.add(rootScope);
     allScopes.addAll(rootScope.getChildScopesDeep());
-    LinkedList<Call> calls = new LinkedList<>();
+    LinkedList<ICall> calls = new LinkedList<>();
     for (ITreeParserSymbolScope scope : allScopes) {
-      for (Call call : scope.getCallList()) {
+      for (ICall call : scope.getCallList()) {
         // Process IN HANDLE last to make sure PERSISTENT SET is processed first.
         if (call.isInHandle()) {
           calls.addLast(call);
@@ -1034,7 +1035,7 @@ public class TP01Support implements ITreeParserAction {
         }
       }
     }
-    for (Call call : calls) {
+    for (ICall call : calls) {
       String routineId = call.getRunArgument();
       call.wrapUp(rootScope.hasRoutine(routineId));
     }
