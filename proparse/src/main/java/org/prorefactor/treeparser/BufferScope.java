@@ -45,7 +45,7 @@ public class BufferScope {
     }
   }
 
-  public BufferScope(Block block, ITableBuffer symbol, Strength strength) {
+  public BufferScope(IBlock block, ITableBuffer symbol, Strength strength) {
     this.block = block;
     this.symbol = symbol;
     this.strength = strength;
@@ -71,7 +71,7 @@ public class BufferScope {
     return strength == Strength.WEAK;
   }
 
-  public void setBlock(Block block) {
+  public void setBlock(IBlock block) {
     this.block = block;
   }
 
