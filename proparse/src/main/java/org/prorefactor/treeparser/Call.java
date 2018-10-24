@@ -171,7 +171,7 @@ public class Call extends SemanticRecord implements ICall {
       // Internal procedure call - using a handle.
       internalName = runArgument;
       ISymbol s = runHandleNode.getSymbol();
-      if (s != null && (s instanceof Variable)) {
+      if (s instanceof Variable) {
         runHandle = (RunHandle) ((Variable) s).getValue();
         if (runHandle != null)
           externalName = (String) runHandle.getValue();

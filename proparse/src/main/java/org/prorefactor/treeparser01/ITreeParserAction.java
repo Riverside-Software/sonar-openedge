@@ -23,7 +23,6 @@ import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.Symbol;
-import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.Browse;
 
 import antlr.SemanticException;

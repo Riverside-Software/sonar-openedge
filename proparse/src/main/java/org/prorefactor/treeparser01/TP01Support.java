@@ -59,7 +59,6 @@ import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
-//import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.Browse;
 import org.slf4j.Logger;
