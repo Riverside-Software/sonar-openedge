@@ -15,6 +15,8 @@
 package org.prorefactor.core.unittest;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 
@@ -62,6 +64,8 @@ public class PreprocessorDirectiveTest {
       h1 = (ProToken) h1.getHiddenBefore();
     }
     assertEquals(numDirectives, 1);
+    assertTrue(node1.hasProparseDirective("xyz"));
+    assertFalse(node1.hasProparseDirective("abc"));
 
     numDirectives = 0;
     ProToken h2 = node2.getHiddenBefore();
@@ -72,6 +76,10 @@ public class PreprocessorDirectiveTest {
       h2 = (ProToken) h2.getHiddenBefore();
     }
     assertEquals(numDirectives, 2);
+    assertTrue(node2.hasProparseDirective("abc"));
+    assertTrue(node2.hasProparseDirective("def"));
+    assertTrue(node2.hasProparseDirective("hij"));
+    assertFalse(node2.hasProparseDirective("klm"));
   }
 
   @Test(enabled = false)
