@@ -12,7 +12,7 @@ import org.prorefactor.treeparser.symbols.IRoutine;
 import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.IVariable;
-import org.prorefactor.treeparser.symbols.Widget;
+import org.prorefactor.treeparser.symbols.IWidget;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 /**
@@ -127,5 +127,5 @@ public interface ITreeParserSymbolScope {
    */
   IVariable lookupVariable(String inName);
   /** Lookup a Widget based on TokenType (FRAME, BUTTON, etc) and the name in this scope or enclosing scope. */
-  Widget lookupWidget(ABLNodeType widgetType, String name) ;
+  IWidget lookupWidget(ABLNodeType widgetType, String name) ;
 }

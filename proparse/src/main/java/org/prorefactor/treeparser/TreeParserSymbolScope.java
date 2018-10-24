@@ -33,11 +33,11 @@ import org.prorefactor.treeparser.symbols.IRoutine;
 import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.IVariable;
+import org.prorefactor.treeparser.symbols.IWidget;
 import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.Stream;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
-import org.prorefactor.treeparser.symbols.Widget;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 public class TreeParserSymbolScope implements ITreeParserSymbolScope {
@@ -425,8 +425,8 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   }
 
   @Override
-  public Widget lookupWidget(ABLNodeType widgetType, String name) {
-    Widget ret = (Widget) lookupSymbolLocally(widgetType, name);
+  public IWidget lookupWidget(ABLNodeType widgetType, String name) {
+    IWidget ret = (IWidget) lookupSymbolLocally(widgetType, name);
     if (ret == null && parentScope != null)
       return parentScope.lookupWidget(widgetType, name);
     return ret;
