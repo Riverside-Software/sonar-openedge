@@ -17,7 +17,7 @@ package org.prorefactor.treeparser;
 
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
-import org.prorefactor.treeparser.symbols.Variable;
+import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 /**
@@ -27,7 +27,7 @@ public class FieldLookupResult {
   public boolean isAbbreviated = false;
   public boolean isUnqualified = false;
   public BufferScope bufferScope = null;
-  public Variable variable = null;
+  public IVariable variable = null;
   public IFieldLevelWidget fieldLevelWidget = null;
   public FieldBuffer field = null;
   public Event event = null;

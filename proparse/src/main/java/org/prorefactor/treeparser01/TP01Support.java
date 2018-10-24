@@ -41,19 +41,24 @@ import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Expression;
 import org.prorefactor.treeparser.FieldLookupResult;
+import org.prorefactor.treeparser.IBlock;
+import org.prorefactor.treeparser.ICall;
+import org.prorefactor.treeparser.ITreeParserRootSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.SymbolFactory;
 import org.prorefactor.treeparser.TreeParserException;
 import org.prorefactor.treeparser.TreeParserRootSymbolScope;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.ISymbol;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
+import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
-import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.Browse;
 import org.slf4j.Logger;
@@ -75,14 +80,14 @@ public class TP01Support implements ITreeParserAction {
    * is always the program block, but a programmer may code a scope into a non-root block... which we need to make
    * current again once done inside the scope.
    */
-  private List<Block> blockStack = new ArrayList<>();
+  private List<IBlock> blockStack = new ArrayList<>();
 
-  private Block currentBlock;
+  private IBlock currentBlock;
   private Expression wipExpression;
   private FrameStack frameStack = new FrameStack();
-  private Map<String, TreeParserSymbolScope> funcForwards = new HashMap<>();
-  /** There may be more than one WIP call, since a functioncall is a perfectly valid parameter. */
-  private Deque<Call> wipCalls = new LinkedList<>();
+  private Map<String, ITreeParserSymbolScope> funcForwards = new HashMap<>();
+  /** There may be more than one WIP call, since a function call is a perfectly valid parameter. */
+  private Deque<ICall> wipCalls = new LinkedList<>();
   /** Since there can be more than one WIP Call, there can be more than one WIP Parameter. */
   private Deque<Parameter> wipParameters = new LinkedList<>();
 
@@ -97,12 +102,12 @@ public class TP01Support implements ITreeParserAction {
    * The symbol last, or currently being, defined. Needed when we have complex syntax like DEFINE id ... LIKE, where we
    * want to track the LIKE but it's not in the same grammar production as the DEFINE.
    */
-  private Symbol currSymbol;
+  private ISymbol currSymbol;
 
-  private TreeParserSymbolScope currentScope;
-  private TableBuffer lastTableReferenced;
-  private TableBuffer prevTableReferenced;
-  private TableBuffer currDefTable;
+  private ITreeParserSymbolScope currentScope;
+  private ITableBuffer lastTableReferenced;
+  private ITableBuffer prevTableReferenced;
+  private ITableBuffer currDefTable;
   private Index currDefIndex;
   // LIKE tables management for index copy
   private boolean currDefTableUseIndex = false;
@@ -158,7 +163,7 @@ public class TP01Support implements ITreeParserAction {
   @Override
   public void bufferRef(JPNode idAST) {
     LOG.trace("Entering bufferRef {}", idAST);
-    TableBuffer tableBuffer = currentScope.lookupBuffer(idAST.getText());
+    ITableBuffer tableBuffer = currentScope.lookupBuffer(idAST.getText());
     if (tableBuffer != null) {
       tableBuffer.noteReference(ContextQualifier.SYMBOL);
     }
@@ -224,7 +229,7 @@ public class TP01Support implements ITreeParserAction {
     LOG.trace("Entering canFindBegin {} - {}", canfindAST, recordAST);
     RecordNameNode recordNode = (RecordNameNode) recordAST;
     // Keep a ref to the current block...
-    Block b = currentBlock;
+    IBlock b = currentBlock;
     // ...create a can-find scope and block (assigns currentBlock)...
     scopeAdd(canfindAST);
     // ...and then set this "can-find block" to use it as its parent.
@@ -232,7 +237,7 @@ public class TP01Support implements ITreeParserAction {
     String buffName = recordAST.getText();
     ITable table;
     boolean isDefault;
-    TableBuffer tableBuffer = currentScope.lookupBuffer(buffName);
+    ITableBuffer tableBuffer = currentScope.lookupBuffer(buffName);
     if (tableBuffer != null) {
       table = tableBuffer.getTable();
       isDefault = tableBuffer.isDefault();
@@ -242,7 +247,7 @@ public class TP01Support implements ITreeParserAction {
       table = refSession.getSchema().lookupTable(buffName);
       isDefault = true;
     }
-    TableBuffer newBuff = currentScope.defineBuffer(isDefault ? "" : buffName, table);
+    ITableBuffer newBuff = currentScope.defineBuffer(isDefault ? "" : buffName, table);
     recordNode.setTableBuffer(newBuff);
     currentBlock.addHiddenCursor(recordNode);
   }
@@ -342,7 +347,7 @@ public class TP01Support implements ITreeParserAction {
   @Override
   public Browse defineBrowse(JPNode defAST, JPNode idAST) {
     LOG.trace("Entering defineBrowse {} - {}", defAST, idAST);
-    Browse browse = (Browse) defineSymbol(ProParserTokenTypes.BROWSE, defAST, idAST);
+    Browse browse = (Browse) defineSymbol(ABLNodeType.BROWSE, defAST, idAST);
     frameStack.nodeOfDefineBrowse(browse, (JPNode) defAST);
     return browse;
   }
@@ -355,7 +360,7 @@ public class TP01Support implements ITreeParserAction {
   public void defineBuffer(JPNode defAST, JPNode idNode, JPNode tableAST, boolean init) {
     LOG.trace("Entering defineBuffer {} {} {} {}", defAST, idNode, tableAST, init);
     ITable table = astTableLink(tableAST);
-    TableBuffer bufSymbol = currentScope.defineBuffer(idNode.getText(), table);
+    ITableBuffer bufSymbol = currentScope.defineBuffer(idNode.getText(), table);
     currSymbol = bufSymbol;
     bufSymbol.setDefOrIdNode((JPNode) defAST);
     idNode.setLink(IConstants.SYMBOL, bufSymbol);
@@ -374,7 +379,7 @@ public class TP01Support implements ITreeParserAction {
   public void defineBufferForTrigger(JPNode tableAST) {
     LOG.trace("Entering defineBufferForTrigger {}", tableAST);
     ITable table = astTableLink(tableAST);
-    TableBuffer bufSymbol = currentScope.defineBuffer("", table);
+    ITableBuffer bufSymbol = currentScope.defineBuffer("", table);
     currentBlock.getBufferForReference(bufSymbol); // Create the BufferScope
     currSymbol = bufSymbol;
   }
@@ -393,7 +398,7 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public Symbol defineSymbol(int symbolType, JPNode defNode, JPNode idNode) {
+  public ISymbol defineSymbol(ABLNodeType symbolType, JPNode defNode, JPNode idNode) {
     LOG.trace("Entering defineSymbol {} - {} - {}", symbolType, defNode, idNode);
     /*
      * Some notes: We need to create the Symbol right away, because further actions in the grammar might need to set
@@ -401,7 +406,7 @@ public class TP01Support implements ITreeParserAction {
      * tree parser is responsible for calling addToScope at the end of the statement or when it is otherwise safe to do
      * so.
      */
-    Symbol symbol = SymbolFactory.create(symbolType, idNode.getText(), currentScope);
+    ISymbol symbol = SymbolFactory.create(symbolType, idNode.getText(), currentScope);
     symbol.setDefOrIdNode(defNode);
     currSymbol = symbol;
     idNode.setLink(IConstants.SYMBOL, symbol);
@@ -471,7 +476,7 @@ public class TP01Support implements ITreeParserAction {
 
   public void defineTable(JPNode defNode, JPNode idNode, int storeType) {
     LOG.trace("Entering defineTable {} {} {}", defNode, idNode, storeType);
-    TableBuffer buffer = rootScope.defineTable(idNode.getText(), storeType);
+    ITableBuffer buffer = rootScope.defineTable(idNode.getText(), storeType);
     buffer.setDefOrIdNode(defNode);
     currSymbol = buffer;
     currDefTable = buffer;
@@ -507,12 +512,12 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public Variable defineVariable(JPNode defAST, JPNode idAST) {
+  public IVariable defineVariable(JPNode defAST, JPNode idAST) {
     return defineVariable(defAST, idAST, false);
   }
 
   @Override
-  public Variable defineVariable(JPNode defNode, JPNode idNode, boolean parameter) {
+  public IVariable defineVariable(JPNode defNode, JPNode idNode, boolean parameter) {
     LOG.trace("Entering defineVariable {} {} {}", defNode, idNode, parameter);
     /*
      * Some notes: We need to create the Variable Symbol right away, because further actions in the grammar might need
@@ -538,29 +543,29 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public Variable defineVariable(JPNode defAST, JPNode idAST, int dataType) {
+  public IVariable defineVariable(JPNode defAST, JPNode idAST, int dataType) {
     return defineVariable(defAST, idAST, dataType, false);
   }
 
   @Override
-  public Variable defineVariable(JPNode defAST, JPNode idAST, int dataType, boolean parameter) {
+  public IVariable defineVariable(JPNode defAST, JPNode idAST, int dataType, boolean parameter) {
     assert dataType != ProParserTokenTypes.CLASS;
-    Variable v = defineVariable(defAST, idAST, parameter);
-    v.setDataType(DataType.getDataType(dataType));
+    IVariable v = defineVariable(defAST, idAST, parameter);
+    ((Variable) v).setDataType(DataType.getDataType(dataType));
     return v;
   }
 
   @Override
-  public Variable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST) {
+  public IVariable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST) {
     return defineVariable(defAST, idAST, likeAST, false);
   }
 
   @Override
-  public Variable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST, boolean parameter) {
-    Variable v = defineVariable(defAST, idAST, parameter);
+  public IVariable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST, boolean parameter) {
+    IVariable v = defineVariable(defAST, idAST, parameter);
     FieldRefNode likeRefNode = (FieldRefNode) likeAST;
-    v.setDataType(likeRefNode.getDataType());
-    v.setClassName(likeRefNode.getClassName());
+    ((Variable) v).setDataType(likeRefNode.getDataType());
+    ((Variable) v).setClassName(likeRefNode.getClassName());
     return v;
   }
 
@@ -648,7 +653,7 @@ public class TP01Support implements ITreeParserAction {
       // The field lookup in Table expects an unqualified name.
       String[] parts = name.split("\\.");
       String fieldPart = parts[parts.length - 1];
-      TableBuffer ourBuffer = resolution == TableNameResolution.PREVIOUS ? prevTableReferenced : lastTableReferenced;
+      ITableBuffer ourBuffer = resolution == TableNameResolution.PREVIOUS ? prevTableReferenced : lastTableReferenced;
       IField field = ourBuffer.getTable().lookupField(fieldPart);
       if (field == null) {
         // The OpenEdge compiler seems to ignore invalid tokens in a FIELDS phrase.
@@ -798,9 +803,9 @@ public class TP01Support implements ITreeParserAction {
     // just a funcScope map generally?
     scopeAdd(funcAST);
     BlockNode blockNode = (BlockNode) idNode.getParent();
-    TreeParserSymbolScope definingScope = currentScope.getParentScope();
+    ITreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(idNode.getText(), definingScope, currentScope);
-    r.setProgressType(ProParserTokenTypes.FUNCTION);
+    r.setProgressType(ABLNodeType.FUNCTION);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     definingScope.add(r);
@@ -820,7 +825,7 @@ public class TP01Support implements ITreeParserAction {
      */
     if (!currentRoutine.getParameters().isEmpty())
       return;
-    TreeParserSymbolScope forwardScope = funcForwards.get(idAST.getText());
+    ITreeParserSymbolScope forwardScope = funcForwards.get(idAST.getText());
     if (forwardScope != null) {
       Routine routine = (Routine) forwardScope.getRootBlock().getNode().getSymbol();
       scopeSwap(forwardScope);
@@ -857,9 +862,9 @@ public class TP01Support implements ITreeParserAction {
 
     scopeAdd(blockAST);
     BlockNode blockNode = (BlockNode) idNode.getParent();
-    TreeParserSymbolScope definingScope = currentScope.getParentScope();
+    ITreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(idNode.getText(), definingScope, currentScope);
-    r.setProgressType(ProParserTokenTypes.METHOD);
+    r.setProgressType(ABLNodeType.METHOD);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     definingScope.add(r);
@@ -878,9 +883,9 @@ public class TP01Support implements ITreeParserAction {
     LOG.trace("Entering propGetSetBegin {}", propAST);
     scopeAdd(propAST);
     BlockNode blockNode = (BlockNode) propAST;
-    TreeParserSymbolScope definingScope = currentScope.getParentScope();
+    ITreeParserSymbolScope definingScope = currentScope.getParentScope();
     Routine r = new Routine(propAST.getText(), definingScope, currentScope);
-    r.setProgressType(propAST.getType());
+    r.setProgressType(propAST.getNodeType());
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     definingScope.add(r);
@@ -979,10 +984,10 @@ public class TP01Support implements ITreeParserAction {
   public void procedureBegin(JPNode procAST, JPNode idAST) {
     LOG.trace("Entering procedureBegin {} - {}", procAST, idAST);
     BlockNode blockNode = (BlockNode) procAST;
-    TreeParserSymbolScope definingScope = currentScope;
+    ITreeParserSymbolScope definingScope = currentScope;
     scopeAdd(blockNode);
     Routine r = new Routine(idAST.getText(), definingScope, currentScope);
-    r.setProgressType(ProParserTokenTypes.PROCEDURE);
+    r.setProgressType(ABLNodeType.PROCEDURE);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     definingScope.add(r);
@@ -1004,7 +1009,7 @@ public class TP01Support implements ITreeParserAction {
     blockNode.setBlock(currentBlock);
     getParseUnit().setRootScope(rootScope);
     Routine r = new Routine("", rootScope, rootScope);
-    r.setProgressType(ProParserTokenTypes.Program_root);
+    r.setProgressType(ABLNodeType.PROGRAM_ROOT);
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     rootScope.add(r);
@@ -1016,12 +1021,12 @@ public class TP01Support implements ITreeParserAction {
   public void programTail() throws SemanticException {
     LOG.trace("Entering programTail");
     // Now that we know what all the internal Routines are, wrap up the Calls.
-    List<TreeParserSymbolScope> allScopes = new ArrayList<>();
+    List<ITreeParserSymbolScope> allScopes = new ArrayList<>();
     allScopes.add(rootScope);
     allScopes.addAll(rootScope.getChildScopesDeep());
-    LinkedList<Call> calls = new LinkedList<>();
-    for (TreeParserSymbolScope scope : allScopes) {
-      for (Call call : scope.getCallList()) {
+    LinkedList<ICall> calls = new LinkedList<>();
+    for (ITreeParserSymbolScope scope : allScopes) {
+      for (ICall call : scope.getCallList()) {
         // Process IN HANDLE last to make sure PERSISTENT SET is processed first.
         if (call.isInHandle()) {
           calls.addLast(call);
@@ -1030,14 +1035,14 @@ public class TP01Support implements ITreeParserAction {
         }
       }
     }
-    for (Call call : calls) {
+    for (ICall call : calls) {
       String routineId = call.getRunArgument();
       call.wrapUp(rootScope.hasRoutine(routineId));
     }
   }
 
   /** For a RECORD_NAME node, do checks and assignments for the TableBuffer. */
-  private void recordNodeSymbol(JPNode node, TableBuffer buffer) throws SemanticException {
+  private void recordNodeSymbol(JPNode node, ITableBuffer buffer) throws SemanticException {
     String nodeText = node.getText();
     if (buffer == null) {
       throw new TreeParserException("Could not resolve table '" + nodeText + "'", node.getFilename(), node.getLine(), node.getColumn());
@@ -1061,7 +1066,7 @@ public class TP01Support implements ITreeParserAction {
     LOG.trace("Entering recordNameNode {} {}", anode, contextQualifier);
     RecordNameNode recordNode = (RecordNameNode) anode;
     recordNode.attrSet(IConstants.CONTEXT_QUALIFIER, contextQualifier.toString());
-    TableBuffer buffer = null;
+    ITableBuffer buffer = null;
     switch (contextQualifier) {
       case INIT:
       case INITWEAK:
@@ -1189,14 +1194,14 @@ public class TP01Support implements ITreeParserAction {
    * definitions. We have to do this because the definition itself may have left out the parameter list - it's not
    * required - it just uses the parameter list from the declaration.
    */
-  private void scopeSwap(TreeParserSymbolScope scope) {
+  private void scopeSwap(ITreeParserSymbolScope scope) {
     currentScope = scope;
     blockEnd(); // pop the unused block from the stack
     currentBlock = pushBlock(scope.getRootBlock());
   }
 
   @Override
-  public void setSymbol(int symbolType, JPNode idNode) {
+  public void setSymbol(ABLNodeType symbolType, JPNode idNode) {
     idNode.setSymbol(currentScope.lookupSymbol(symbolType, idNode.getText()));
   }
 
@@ -1225,10 +1230,10 @@ public class TP01Support implements ITreeParserAction {
      */
     scopeAdd(blockAST);
     BlockNode blockNode = (BlockNode) blockAST;
-    TreeParserSymbolScope definingScope = currentScope.getParentScope();
+    ITreeParserSymbolScope definingScope = currentScope.getParentScope();
     // 'structors don't have names, so use empty string.
     Routine r = new Routine("", definingScope, currentScope);
-    r.setProgressType(blockNode.getType());
+    r.setProgressType(blockNode.getNodeType());
     r.setDefOrIdNode(blockNode);
     blockNode.setSymbol(r);
     currentRoutine = r;
@@ -1256,28 +1261,28 @@ public class TP01Support implements ITreeParserAction {
     }
   }
 
-  private Block popBlock() {
+  private IBlock popBlock() {
     blockStack.remove(blockStack.size() - 1);
     return blockStack.get(blockStack.size() - 1);
   }
 
-  private Block pushBlock(Block block) {
+  private IBlock pushBlock(IBlock block) {
     blockStack.add(block);
     return block;
   }
 
-  public TreeParserSymbolScope getCurrentScope() {
+  public ITreeParserSymbolScope getCurrentScope() {
     return currentScope;
   }
 
-  public TreeParserRootSymbolScope getRootScope() {
+  public ITreeParserRootSymbolScope getRootScope() {
     return rootScope;
   }
 
   /** Get the Table symbol linked from a RECORD_NAME AST. */
   private ITable astTableLink(JPNode tableAST) {
     LOG.trace("Entering astTableLink {}", tableAST);
-    TableBuffer buffer = (TableBuffer) tableAST.getLink(IConstants.SYMBOL);
+    ITableBuffer buffer = (ITableBuffer) tableAST.getLink(IConstants.SYMBOL);
     assert buffer != null;
     return buffer.getTable();
   }

@@ -15,13 +15,13 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE QUERY. */
 public class Query extends Symbol {
 
-  public Query(String name, TreeParserSymbolScope scope) {
+  public Query(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 
@@ -34,11 +34,11 @@ public class Query extends Symbol {
   }
 
   /**
-   * @return NodeTypes.QUERY
+   * @return ABLNodeType.QUERY
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.QUERY;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.QUERY;
   }
 
 }

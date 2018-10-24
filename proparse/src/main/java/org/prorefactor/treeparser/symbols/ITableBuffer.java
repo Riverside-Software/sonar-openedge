@@ -15,32 +15,20 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.treeparser.ITreeParserSymbolScope;
+import org.prorefactor.core.schema.IField;
+import org.prorefactor.core.schema.ITable;
 
-/**
- * A Symbol defined with DEFINE EVENT
- */
-public class Event extends Symbol {
+public interface ITableBuffer extends ISymbol {
+  ITable getTable();
+  
+  /** Get or create a FieldBuffer for a Field. */
+  FieldBuffer getFieldBuffer(IField field);
+  
+  /** Is this the default (unnamed) buffer? */
+  boolean isDefault();
 
-  public Event(String name, ITreeParserSymbolScope scope) {
-    super(name, scope);
-  }
-
-  /**
-   * For this subclass of Symbol, fullName() returns the same value as getName()
-   */
-  @Override
-  public String fullName() {
-    return getName();
-  }
-
-  /**
-   * Returns ABLNodeType.EVENT
-   */
-  @Override
-  public ABLNodeType getProgressType() {
-    return ABLNodeType.EVENT;
-  }
-
+  /** Is this a default (unnamed) buffer for a schema table? */
+  boolean isDefaultSchema();
+  
+  void addFieldBuffer(FieldBuffer fieldBuffer);
 }

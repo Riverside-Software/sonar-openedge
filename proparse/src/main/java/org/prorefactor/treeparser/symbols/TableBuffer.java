@@ -19,16 +19,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * A TableBuffer is a Symbol which provides a link from the syntax tree to a Table object.
  */
-public class TableBuffer extends Symbol {
+public class TableBuffer extends Symbol implements ITableBuffer {
   private final ITable table;
   private final boolean isDefault;
   private final Map<IField, FieldBuffer> fieldBuffers = new HashMap<>();
@@ -44,7 +44,8 @@ public class TableBuffer extends Symbol {
     this.isDefault = name.isEmpty();
   }
 
-  void addFieldBuffer(FieldBuffer fieldBuffer) {
+  @Override
+  public void addFieldBuffer(FieldBuffer fieldBuffer) {
     fieldBuffers.put(fieldBuffer.getField(), fieldBuffer);
   }
 
@@ -71,11 +72,11 @@ public class TableBuffer extends Symbol {
    * @see org.prorefactor.core.schema.ITable#getStoretype()
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.BUFFER;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.BUFFER;
   }
 
-  /** Get or create a FieldBuffer for a Field. */
+  @Override
   public FieldBuffer getFieldBuffer(IField field) {
     assert field.getTable() == this.table;
     FieldBuffer ret = fieldBuffers.get(field);
@@ -98,16 +99,17 @@ public class TableBuffer extends Symbol {
     return super.getName();
   }
 
+  @Override
   public ITable getTable() {
     return table;
   }
 
-  /** Is this the default (unnamed) buffer? */
+  @Override
   public boolean isDefault() {
     return isDefault;
   }
 
-  /** Is this a default (unnamed) buffer for a schema table? */
+  @Override
   public boolean isDefaultSchema() {
     return isDefault && table.getStoretype() == IConstants.ST_DBTABLE;
   }

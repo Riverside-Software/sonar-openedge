@@ -22,6 +22,7 @@ header {
 
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
+  import org.prorefactor.core.ABLNodeType;
   import org.prorefactor.core.JPNode;
   import org.prorefactor.treeparser.ContextQualifier;
   import org.prorefactor.treeparser.IJPTreeParser;
@@ -272,7 +273,7 @@ parameter_arg2[ContextQualifier contextQualifier]:
     (
       TABLEHANDLE thf:fld[ContextQualifier.INIT] parameter_dataset_options { action.paramSymbol(#thf); action.noteReference(#thf, contextQualifier); }
     | TABLE (FOR)? tt:tbl[ContextQualifier.TEMPTABLESYMBOL] parameter_dataset_options {  action.paramProgressType(TEMPTABLE); action.paramSymbol(#tt); }
-    | DATASET ds:ID parameter_dataset_options { action.setSymbol(DATASET, #ds); action.paramProgressType(DATASET); action.paramSymbol(#ds); }
+    | DATASET ds:ID parameter_dataset_options { action.setSymbol(ABLNodeType.DATASET, #ds); action.paramProgressType(DATASET); action.paramSymbol(#ds); }
     | DATASETHANDLE dsh:fld[ContextQualifier.INIT] parameter_dataset_options { action.paramSymbol(#dsh); action.noteReference(#dsh, contextQualifier); }
     | PARAMETER expression EQUAL expression /* for RUN STORED-PROCEDURE. */ { action.paramProgressType(PARAMETER); }
     | ID AS { action.paramNoName(parameter_arg2_AST_in); } (CLASS TYPE_NAME | datatype_com_native | datatype_var )
@@ -745,7 +746,7 @@ definebufferstate:
 
 definebuttonstate:
     #(  def:DEFINE (def_shared)? def_modifiers BUTTON
-      id:ID { stack.push(action.defineSymbol(BUTTON, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(ABLNodeType.BUTTON, #def, #id)); }
       (  AUTOGO
       |  AUTOENDKEY
       |  DEFAULT
@@ -774,7 +775,7 @@ definebuttonstate:
 
 definedatasetstate:
     #(  def:DEFINE (def_shared)? def_modifiers DATASET
-      id:ID { stack.push(action.defineSymbol(DATASET, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(ABLNodeType.DATASET, #def, #id)); }
       (namespace_uri)? (namespace_prefix)? (xml_node_name)?
       ( #(SERIALIZENAME QSTRING) )?
       (xml_node_type)?
@@ -818,7 +819,7 @@ field_mapping_phrase:
 
 definedatasourcestate:
     #(  def:DEFINE (def_shared)? def_modifiers DATASOURCE
-      id:ID { stack.push(action.defineSymbol(DATASOURCE, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(ABLNodeType.DATASOURCE, #def, #id)); }
       FOR (#(QUERY ID))?
       (source_buffer_phrase)? (COMMA source_buffer_phrase)*
       state_end
@@ -863,7 +864,7 @@ defineframestate:
 
 defineimagestate:
     #(  def:DEFINE (def_shared)? def_modifiers IMAGE
-      id:ID { stack.push(action.defineSymbol(IMAGE, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(ABLNodeType.IMAGE, #def, #id)); }
       (  #(LIKE fld[ContextQualifier.SYMBOL] (VALIDATE)?)
       |  imagephrase_opt 
       |  sizephrase
@@ -881,7 +882,7 @@ defineimagestate:
 
 definemenustate:
     #(  def:DEFINE (def_shared)? def_modifiers MENU
-      id:ID { stack.push(action.defineSymbol(MENU, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(ABLNodeType.MENU, #def, #id)); }
       (menu_opt)* (menu_list_item)* state_end
       { action.addToSymbolScope(stack.pop()); }
     )
@@ -899,7 +900,7 @@ menu_opt:
 
 menu_list_item:
     (  #(  MENUITEM
-        id:ID { stack.push(action.defineSymbol(MENUITEM, #id, #id)); }
+        id:ID { stack.push(action.defineSymbol(ABLNodeType.MENUITEM, #id, #id)); }
         (  #(ACCELERATOR expression )
         |  color_expr
         |  DISABLED
@@ -912,7 +913,7 @@ menu_list_item:
         { action.addToSymbolScope(stack.pop()); }
       )
     |  #(  SUBMENU
-        id2:ID { stack.push(action.defineSymbol(SUBMENU, #id2, #id2)); }
+        id2:ID { stack.push(action.defineSymbol(ABLNodeType.SUBMENU, #id2, #id2)); }
         (DISABLED | label_constant | #(FONT expression) | color_expr)*
         { action.addToSymbolScope(stack.pop()); }
       )
@@ -943,7 +944,7 @@ defineparameterstate:
             action.paramSymbol(#id);
           }
         |  DATASET FOR ds:ID defineparam_ab
-          {  action.setSymbol(DATASET, #ds);
+          {  action.setSymbol(ABLNodeType.DATASET, #ds);
             action.paramProgressType(DATASET);
             action.paramSymbol(#ds);
           }
@@ -1008,7 +1009,7 @@ defineproperty_accessor:
 
 definequerystate:
     #(  def:DEFINE (def_shared)? def_modifiers QUERY
-      id:ID { stack.push(action.defineSymbol(QUERY, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(ABLNodeType.QUERY, #def, #id)); }
       FOR tbl[ContextQualifier.INIT] (record_fields)?
       (COMMA tbl[ContextQualifier.INIT] (record_fields)?)*
       ( #(CACHE expression) | SCROLLING | RCODEINFORMATION)*
@@ -1019,7 +1020,7 @@ definequerystate:
 
 definerectanglestate:
     #(  def:DEFINE (def_shared)? def_modifiers RECTANGLE
-      id:ID { stack.push(action.defineSymbol(RECTANGLE, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(ABLNodeType.RECTANGLE, #def, #id)); }
       (  NOFILL
       |  #(EDGECHARS expression )
       |  #(EDGEPIXELS expression )
@@ -1039,12 +1040,12 @@ definerectanglestate:
 
 definestreamstate:
     #(  def:DEFINE (def_shared)? def_modifiers STREAM id:ID state_end )
-    { action.addToSymbolScope(action.defineSymbol(STREAM, #def, #id)); }
+    { action.addToSymbolScope(action.defineSymbol(ABLNodeType.STREAM, #def, #id)); }
   ;
 
 definesubmenustate:
     #(  def:DEFINE (def_shared)? def_modifiers SUBMENU
-      id:ID { stack.push(action.defineSymbol(SUBMENU, #def, #id)); }
+      id:ID { stack.push(action.defineSymbol(ABLNodeType.SUBMENU, #def, #id)); }
       (menu_opt)* (menu_list_item)* state_end
     )
     { action.addToSymbolScope(stack.pop()); }
@@ -1461,7 +1462,7 @@ function_param_arg:
       action.paramSymbol(#id2);
     }
   |  DATASET (FOR)? ds:ID (APPEND)? (BIND {action.paramBind();})?
-    {  action.setSymbol(DATASET, #ds);
+    {  action.setSymbol(ABLNodeType.DATASET, #ds);
       action.paramProgressType(DATASET);
       action.paramSymbol(#ds);
     }

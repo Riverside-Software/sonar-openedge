@@ -17,14 +17,14 @@ package org.prorefactor.treeparser;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.proparse.ProParserTokenTypes;
-import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.ISymbol;
 
 public class Parameter {
 
   private boolean bind = false;
   private int progressType = ProParserTokenTypes.VARIABLE;
   private JPNode directionNode;
-  private Symbol symbol;
+  private ISymbol symbol;
 
   /** For a TEMP-TABLE or DATASET, was the BIND keyword used? */
   public boolean isBind() {
@@ -48,7 +48,7 @@ public class Parameter {
    * For call arguments that are expressions, there might be no symbol (null). For Routines, the symbol should always be
    * non-null.
    */
-  public Symbol getSymbol() {
+  public ISymbol getSymbol() {
     return symbol;
   }
 
@@ -68,7 +68,7 @@ public class Parameter {
   }
 
   /** Set by TreeParser01. */
-  public void setSymbol(Symbol symbol) {
+  public void setSymbol(ISymbol symbol) {
     this.symbol = symbol;
   }
 

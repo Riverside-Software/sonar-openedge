@@ -25,6 +25,7 @@ import org.prorefactor.core.unittest.util.RoutineHandler;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Call;
+import org.prorefactor.treeparser.ICall;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser01.TP01Support;
 import org.testng.annotations.BeforeTest;
@@ -80,21 +81,21 @@ public class TP01ProcessActionTest {
     expectedRootCalls.add(userActionCall);
 
     // Get actual calls found in code and test against expected.
-    List<Call> actualRootCalls = pu.getRootScope().getCallList();
+    List<ICall> actualRootCalls = pu.getRootScope().getCallList();
     assertTrue(actualRootCalls.containsAll(expectedRootCalls));
     assertTrue(!actualRootCalls.contains(setStateCall));
     assertTrue(!actualRootCalls.contains(getCompileListCall));
 
     // Internal proc enable-ui calls: setState.
-    List<Call> actualEnableUiCalls = enableUi.getRoutineScope().getCallList();
+    List<ICall> actualEnableUiCalls = enableUi.getRoutineScope().getCallList();
     assertTrue(actualEnableUiCalls.contains(setStateCall));
 
     // Internal proc user-action calls: get-compile-list.
-    List<Call> actualUserActionCalls = userAction.getRoutineScope().getCallList();
+    List<ICall> actualUserActionCalls = userAction.getRoutineScope().getCallList();
     assertTrue(actualUserActionCalls.contains(getCompileListCall));
 
     // Internal proc get-compile-list calls: setState x 3.
-    List<Call> actualGetCompileListCalls = getCompileList.getRoutineScope().getCallList();
+    List<ICall> actualGetCompileListCalls = getCompileList.getRoutineScope().getCallList();
     assertTrue(actualGetCompileListCalls.contains(setStateCall));
 
   }
@@ -134,12 +135,12 @@ public class TP01ProcessActionTest {
     expectedTest01Calls.add(test02InHandleCall);
 
     // Test actual root calls agains expected root calls.
-    List<Call> actualRootCalls = pu.getRootScope().getCallList();
+    List<ICall> actualRootCalls = pu.getRootScope().getCallList();
     assertTrue(actualRootCalls.containsAll(expectedRootCalls));
     assertTrue(!actualRootCalls.contains(test02InHandleCall));
 
     // Test actual calls in test_01 against expected calls.
-    List<Call> actualTest01Calls = test01.getRoutineScope().getCallList();
+    List<ICall> actualTest01Calls = test01.getRoutineScope().getCallList();
     assertTrue(actualTest01Calls.containsAll(expectedTest01Calls));
   }
 

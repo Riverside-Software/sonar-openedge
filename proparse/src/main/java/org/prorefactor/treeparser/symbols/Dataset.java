@@ -18,22 +18,22 @@ package org.prorefactor.treeparser.symbols;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE DATASET. */
 public class Dataset extends Symbol {
   // Keep the buffers, in order, as part of the DATASET signature
-  private final List<TableBuffer> buffers = new ArrayList<>();
+  private final List<ITableBuffer> buffers = new ArrayList<>();
 
-  public Dataset(String name, TreeParserSymbolScope scope) {
+  public Dataset(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 
   /**
    * The treeparser calls this at RECORD_NAME in <code>RECORD_NAME in FOR RECORD_NAME (COMMA RECORD_NAME)*</code>.
    */
-  public void addBuffer(TableBuffer buff) {
+  public void addBuffer(ITableBuffer buff) {
     buffers.add(buff);
   }
 
@@ -44,16 +44,16 @@ public class Dataset extends Symbol {
   }
 
   /** Get the list of buffers (in order) which make up this dataset's signature. */
-  public List<TableBuffer> getBuffers() {
+  public List<ITableBuffer> getBuffers() {
     return buffers;
   }
 
   /**
-   * Returns NodeTypes.DATASET.
+   * Returns ABLNodeType.DATASET
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.DATASET;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.DATASET;
   }
 
 }

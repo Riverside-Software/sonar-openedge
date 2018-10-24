@@ -15,12 +15,12 @@
  ********************************************************************************/
 package org.prorefactor.treeparser;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
+import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.Stream;
-import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.widgets.Browse;
 import org.prorefactor.treeparser.symbols.widgets.Button;
 import org.prorefactor.treeparser.symbols.widgets.Frame;
@@ -37,32 +37,32 @@ public final class SymbolFactory {
     // Shouldn't be instantiated
   }
 
-  public static Symbol create(int symbolType, String name, TreeParserSymbolScope scope) {
+  public static ISymbol create(ABLNodeType symbolType, String name, ITreeParserSymbolScope scope) {
     switch (symbolType) {
-      case ProParserTokenTypes.DATASET:
+      case DATASET:
         return new Dataset(name, scope);
-      case ProParserTokenTypes.DATASOURCE:
+      case DATASOURCE:
         return new Datasource(name, scope);
-      case ProParserTokenTypes.QUERY:
+      case QUERY:
         return new Query(name, scope);
-      case ProParserTokenTypes.STREAM:
+      case STREAM:
         return new Stream(name, scope);
       // Widgets
-      case ProParserTokenTypes.BROWSE:
+      case BROWSE:
         return new Browse(name, scope);
-      case ProParserTokenTypes.BUTTON:
+      case BUTTON:
         return new Button(name, scope);
-      case ProParserTokenTypes.FRAME:
+      case FRAME:
         return new Frame(name, scope);
-      case ProParserTokenTypes.IMAGE:
+      case IMAGE:
         return new Image(name, scope);
-      case ProParserTokenTypes.MENU:
+      case MENU:
         return new Menu(name, scope);
-      case ProParserTokenTypes.MENUITEM:
+      case MENUITEM:
         return new MenuItem(name, scope);
-      case ProParserTokenTypes.RECTANGLE:
+      case RECTANGLE:
         return new Rectangle(name, scope);
-      case ProParserTokenTypes.SUBMENU:
+      case SUBMENU:
         return new Submenu(name, scope);
       default:
         assert false : "Unexpected values for SymbolFactory" + " " + symbolType + " " + name;

@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 
 /**
  * A Symbol defined with DEFINE &lt;widget-type&gt; or any of the other various syntaxes which implicitly define a widget.
@@ -23,7 +23,7 @@ import org.prorefactor.treeparser.TreeParserSymbolScope;
  */
 public abstract class Widget extends Symbol implements IWidget {
 
-  public Widget(String name, TreeParserSymbolScope scope) {
+  public Widget(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 

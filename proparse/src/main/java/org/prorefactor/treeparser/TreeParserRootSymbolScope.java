@@ -26,7 +26,9 @@ import org.prorefactor.core.schema.Table;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
-import org.prorefactor.treeparser.symbols.Routine;
+import org.prorefactor.treeparser.symbols.IRoutine;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
+import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.sonar.plugins.openedge.api.objects.RCodeTTWrapper;
@@ -40,7 +42,7 @@ import eu.rssw.pct.elements.BufferElement;
  * A ScopeRoot object is created for each compile unit, and it represents the program (topmost) scope. For classes, it
  * is the class scope, but it may also have a super class scope by way of inheritance.
  */
-public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
+public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements ITreeParserRootSymbolScope {
   private final RefactorSession refSession;
   private Map<String, ITable> tableMap = new HashMap<>();
   private String className = null;
@@ -54,10 +56,12 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     this.refSession = session;
   }
 
+  @Override
   public RefactorSession getRefactorSession() {
     return refSession;
   }
 
+  @Override
   public void addTableDefinitionIfNew(ITable table) {
     String lowerName = table.getName().toLowerCase();
     if (tableMap.get(lowerName) == null)
@@ -71,11 +75,11 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
    * @param type IConstants.ST_TTABLE or IConstants.ST_WTABLE.
    * @return A newly created BufferSymbol for this temp/work table.
    */
-  public TableBuffer defineTable(String name, int type) {
+  public ITableBuffer defineTable(String name, int type) {
     ITable table = new Table(name, type);
     tableMap.put(name.toLowerCase(), table);
     // Pass empty string for name for default buffer.
-    TableBuffer bufferSymbol = new TableBuffer("", this, table);
+    ITableBuffer bufferSymbol = new TableBuffer("", this, table);
     // The default buffer for a temp/work table is not "unnamed" the way
     // that the default buffer for schema tables work. So, the buffer
     // goes into the regular bufferMap, rather than the unnamedBuffers map.
@@ -84,7 +88,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   } // defineTable()
 
   /** Define a temp or work table field */
-  public FieldBuffer defineTableField(String name, TableBuffer buffer) {
+  public FieldBuffer defineTableField(String name, ITableBuffer buffer) {
     ITable table = buffer.getTable();
     IField field = new Field(name, table);
     return new FieldBuffer(this, buffer, field);
@@ -94,7 +98,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
    * Define a temp or work table field. Does not attach the field to the table. That is expected to be done in a
    * separate step.
    */
-  public FieldBuffer defineTableFieldDelayedAttach(String name, TableBuffer buffer) {
+  public FieldBuffer defineTableFieldDelayedAttach(String name, ITableBuffer buffer) {
     IField field = new Field(name, null);
     return new FieldBuffer(this, buffer, field);
   }
@@ -145,14 +149,15 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     return serializableClass;
   }
 
-  public TableBuffer getLocalTableBuffer(ITable table) {
+  @Override
+  public ITableBuffer getLocalTableBuffer(ITable table) {
     assert table.getStoretype() != IConstants.ST_DBTABLE;
     return bufferMap.get(table.getName().toLowerCase());
   }
 
   @Override
-  public Variable lookupVariable(String name) {
-    Variable var = super.lookupVariable(name);
+  public IVariable lookupVariable(String name) {
+    IVariable var = super.lookupVariable(name);
     if (var != null) {
       return var;
     }
@@ -189,8 +194,8 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   }
 
   @Override
-  public TableBuffer lookupBuffer(String name) {
-    TableBuffer buff = super.lookupBuffer(name);
+  public ITableBuffer lookupBuffer(String name) {
+    ITableBuffer buff = super.lookupBuffer(name);
     if (buff != null) {
       return buff;
     }
@@ -217,8 +222,8 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   }
 
   @Override
-  public TableBuffer lookupTempTable(String name) {
-    TableBuffer buff = super.lookupTempTable(name);
+  public ITableBuffer lookupTempTable(String name) {
+    ITableBuffer buff = super.lookupTempTable(name);
     if (buff != null) {
       return buff;
     }
@@ -232,12 +237,8 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     return null;
   }
 
-  /**
-   * Lookup an unqualified temp/work table field name. Does not test for uniqueness. That job is left to the compiler.
-   * (In fact, anywhere this is run, the compiler would check that the field name is also unique against schema tables.)
-   * Returns null if nothing found.
-   */
-  protected IField lookupUnqualifiedField(String name) {
+  @Override
+  public IField lookupUnqualifiedField(String name) {
     IField field;
     for (ITable table : tableMap.values()) {
       field = table.lookupField(name);
@@ -250,7 +251,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   /**
    * @return a Collection containing all Routine objects defined in this RootSymbolScope.
    */
-  public Map<String, Routine> getRoutineMap() {
+  public Map<String, IRoutine> getRoutineMap() {
     return routineMap;
   }
 

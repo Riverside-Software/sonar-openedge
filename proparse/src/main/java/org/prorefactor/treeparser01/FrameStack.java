@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.BlockNode;
@@ -28,13 +29,13 @@ import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.proparse.ProParserTokenTypes;
-import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.FieldLookupResult;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.IBlock;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.FieldContainer;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.Symbol;
-import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.Browse;
 import org.prorefactor.treeparser.symbols.widgets.Frame;
@@ -62,12 +63,12 @@ public class FrameStack {
    * The ID node in a BROWSE ID pair. The ID node might have already had the symbol assigned to it at the point where
    * the statement head was processed.
    */
-  void browseRefNode(JPNode idNode, TreeParserSymbolScope symbolScope) {
+  void browseRefNode(JPNode idNode, ITreeParserSymbolScope symbolScope) {
     if (idNode.getSymbol() == null)
       browseRefSet(idNode, symbolScope);
   }
 
-  private Browse browseRefSet(JPNode idNode, TreeParserSymbolScope symbolScope) {
+  private Browse browseRefSet(JPNode idNode, ITreeParserSymbolScope symbolScope) {
     Browse browse = (Browse) symbolScope.lookupFieldLevelWidget(idNode.getText());
     idNode.setLink(IConstants.SYMBOL, browse);
     return browse;
@@ -81,7 +82,7 @@ public class FrameStack {
     assert formItemNode.getType() == ProParserTokenTypes.Form_item;
     assert formItemNode.getFirstChild().getType() == ProParserTokenTypes.RECORD_NAME;
     RecordNameNode recordNameNode = (RecordNameNode) formItemNode.getFirstChild();
-    TableBuffer tableBuffer = recordNameNode.getTableBuffer();
+    ITableBuffer tableBuffer = recordNameNode.getTableBuffer();
     HashSet<IField> fieldSet = new HashSet<>(tableBuffer.getTable().getFieldSet());
     JPNode exceptNode = formItemNode.getParent().findDirectChild(ProParserTokenTypes.EXCEPT);
     if (exceptNode != null)
@@ -101,7 +102,7 @@ public class FrameStack {
   /**
    * Create a frame object. Adds the new frame object to the MRU list.
    */
-  private Frame createFrame(String frameName, TreeParserSymbolScope symbolScope) {
+  private Frame createFrame(String frameName, ITreeParserSymbolScope symbolScope) {
     Frame frame = new Frame(frameName, symbolScope);
     frameMRU.addFirst(frame);
     return frame;
@@ -142,14 +143,14 @@ public class FrameStack {
   /**
    * The ID node in a FRAME ID pair. For "WITH FRAME id", the ID was already set when we processed the statement head.
    */
-  void frameRefNode(JPNode idNode, TreeParserSymbolScope symbolScope) {
+  void frameRefNode(JPNode idNode, ITreeParserSymbolScope symbolScope) {
     if (idNode.getSymbol() == null)
       frameRefSet(idNode, symbolScope);
   }
 
-  private Frame frameRefSet(JPNode idNode, TreeParserSymbolScope symbolScope) {
+  private Frame frameRefSet(JPNode idNode, ITreeParserSymbolScope symbolScope) {
     String frameName = idNode.getText();
-    Frame frame = (Frame) symbolScope.lookupWidget(ProParserTokenTypes.FRAME, frameName);
+    Frame frame = (Frame) symbolScope.lookupWidget(ABLNodeType.FRAME, frameName);
     if (frame == null)
       frame = createFrame(frameName, symbolScope);
     idNode.setLink(IConstants.SYMBOL, frame);
@@ -168,7 +169,7 @@ public class FrameStack {
   }
 
   /** Create the frame if necessary, set its scope if that hasn't already been done. */
-  private Frame initializeFrame(Frame frame, Block currentBlock) {
+  private Frame initializeFrame(Frame frame, IBlock currentBlock) {
     // If we don't have a frame then get or create the unnamed default frame for the block.
     if (frame == null)
       frame = currentBlock.getDefaultFrame();
@@ -194,7 +195,7 @@ public class FrameStack {
    * 
    * @see org.prorefactor.core.JPNode#getFieldContainer().
    */
-  FieldLookupResult inputFieldLookup(FieldRefNode fieldRefNode, TreeParserSymbolScope currentScope) {
+  FieldLookupResult inputFieldLookup(FieldRefNode fieldRefNode, ITreeParserSymbolScope currentScope) {
     JPNode idNode = fieldRefNode.getIdNode();
     Field.Name inputName = new Field.Name(idNode.getText().toLowerCase());
     FieldContainer fieldContainer = null;
@@ -247,7 +248,7 @@ public class FrameStack {
   }
 
   /** FOR|REPEAT|DO blocks need to be checked for explicit WITH FRAME phrase. */
-  void nodeOfBlock(JPNode blockNode, Block currentBlock) {
+  void nodeOfBlock(JPNode blockNode, IBlock currentBlock) {
     JPNode containerTypeNode = getContainerTypeNode(blockNode);
     if (containerTypeNode == null)
       return;
@@ -272,9 +273,9 @@ public class FrameStack {
    * symbol scope. A DEFINE FRAME statement is legal for a frame symbol already in use, sort of like how you can have
    * multiple FORM statements, I suppose. A DEFINE FRAME statement does not initialize the frame's scope.
    */
-  void nodeOfDefineFrame(JPNode defNode, JPNode idNode, TreeParserSymbolScope currentSymbolScope) {
+  void nodeOfDefineFrame(JPNode defNode, JPNode idNode, ITreeParserSymbolScope currentSymbolScope) {
     String frameName = idNode.getText();
-    Frame frame = (Frame) currentSymbolScope.lookupSymbolLocally(ProParserTokenTypes.FRAME, frameName);
+    Frame frame = (Frame) currentSymbolScope.lookupSymbolLocally(ABLNodeType.FRAME, frameName);
     if (frame == null)
       frame = createFrame(frameName, currentSymbolScope);
     frame.setDefOrIdNode(defNode);
@@ -289,7 +290,7 @@ public class FrameStack {
    * statement head node. This is not used from DEFINE FRAME, HIDE FRAME, or any other "frame" statements which would
    * not count as a "reference" for frame scoping purposes.
    */
-  void nodeOfInitializingStatement(JPNode stateNode, Block currentBlock) {
+  void nodeOfInitializingStatement(JPNode stateNode, IBlock currentBlock) {
     JPNode containerTypeNode = getContainerTypeNode(stateNode);
     JPNode idNode = null;
     if (containerTypeNode != null) {
@@ -314,7 +315,7 @@ public class FrameStack {
    * For frame init statements like VIEW and CLEAR which have no frame phrase. Called at the end of the statement, after
    * all symbols (including FRAME ID) have been resolved.
    */
-  void simpleFrameInitStatement(JPNode headNode, JPNode frameIDNode, Block currentBlock) {
+  void simpleFrameInitStatement(JPNode headNode, JPNode frameIDNode, IBlock currentBlock) {
     Frame frame = (Frame) frameIDNode.getSymbol();
     assert frame != null;
     initializeFrame(frame, currentBlock);

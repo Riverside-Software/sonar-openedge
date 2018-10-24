@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser;
 
-import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
 
 /**
  * A record of a BufferSymbol scope to a Block. Tells us if the scope is "strong" or not.
@@ -23,8 +23,8 @@ import org.prorefactor.treeparser.symbols.TableBuffer;
 public class BufferScope {
 
   private Strength strength;
-  private Block block;
-  private TableBuffer symbol;
+  private IBlock block;
+  private ITableBuffer symbol;
 
   enum Strength {
     STRONG(1), WEAK(2), REFERENCE(3),
@@ -45,13 +45,13 @@ public class BufferScope {
     }
   }
 
-  public BufferScope(Block block, TableBuffer symbol, Strength strength) {
+  public BufferScope(IBlock block, ITableBuffer symbol, Strength strength) {
     this.block = block;
     this.symbol = symbol;
     this.strength = strength;
   }
 
-  public Block getBlock() {
+  public IBlock getBlock() {
     return block;
   }
 
@@ -59,7 +59,7 @@ public class BufferScope {
     return strength;
   }
 
-  public TableBuffer getSymbol() {
+  public ITableBuffer getSymbol() {
     return symbol;
   }
 
@@ -71,7 +71,7 @@ public class BufferScope {
     return strength == Strength.WEAK;
   }
 
-  public void setBlock(Block block) {
+  public void setBlock(IBlock block) {
     this.block = block;
   }
 

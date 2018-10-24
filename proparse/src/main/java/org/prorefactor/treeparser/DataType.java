@@ -18,58 +18,77 @@ package org.prorefactor.treeparser;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
+import javax.annotation.Nullable;
 
-/**
- * One static instance of DataType is created for each data type in the 4GL. You can access each of those through this
- * class's public static final variables. This class was created just so that we could look up, and store, an object
- * instead of a String or int to represent data type. For example, we'll be adding datatype support into Field and
- * schemaLoad next.
- */
-public class DataType {
-  private static Map<String, DataType> nameMap = new HashMap<>();
-  private static Map<Integer, DataType> tokenTypeMap = new HashMap<>();
+import org.prorefactor.core.ABLNodeType;
 
-  public static final DataType BIGINT = new DataType(ProParserTokenTypes.BIGINT, "BIGINT");
-  public static final DataType BLOB = new DataType(ProParserTokenTypes.BLOB, "BLOB");
-  public static final DataType BYTE = new DataType(ProParserTokenTypes.BYTE, "BYTE");
-  public static final DataType CHARACTER = new DataType(ProParserTokenTypes.CHARACTER, "CHARACTER");
-  public static final DataType CLASS = new DataType(ProParserTokenTypes.CLASS, "CLASS");
-  public static final DataType CLOB = new DataType(ProParserTokenTypes.CLOB, "CLOB");
-  public static final DataType COMHANDLE = new DataType(ProParserTokenTypes.COMHANDLE, "COM-HANDLE");
-  public static final DataType DATE = new DataType(ProParserTokenTypes.DATE, "DATE");
-  public static final DataType DATETIME = new DataType(ProParserTokenTypes.DATETIME, "DATETIME");
-  public static final DataType DATETIMETZ = new DataType(ProParserTokenTypes.DATETIMETZ, "DATETIME-TZ");
-  public static final DataType DECIMAL = new DataType(ProParserTokenTypes.DECIMAL, "DECIMAL");
-  public static final DataType DOUBLE = new DataType(ProParserTokenTypes.DOUBLE, "DOUBLE");
-  public static final DataType FIXCHAR = new DataType(ProParserTokenTypes.FIXCHAR, "FIXCHAR");
-  public static final DataType FLOAT = new DataType(ProParserTokenTypes.FLOAT, "FLOAT");
-  public static final DataType HANDLE = new DataType(ProParserTokenTypes.HANDLE, "HANDLE");
-  public static final DataType INTEGER = new DataType(ProParserTokenTypes.INTEGER, "INTEGER");
-  public static final DataType INT64 = new DataType(ProParserTokenTypes.INT64, "INT64");
-  public static final DataType LONG = new DataType(ProParserTokenTypes.LONG, "LONG");
-  public static final DataType LONGCHAR = new DataType(ProParserTokenTypes.LONGCHAR, "LONGCHAR");
-  public static final DataType LOGICAL = new DataType(ProParserTokenTypes.LOGICAL, "LOGICAL");
-  public static final DataType MEMPTR = new DataType(ProParserTokenTypes.MEMPTR, "MEMPTR");
-  public static final DataType NUMERIC = new DataType(ProParserTokenTypes.NUMERIC, "NUMERIC");
-  public static final DataType RAW = new DataType(ProParserTokenTypes.RAW, "RAW");
-  public static final DataType RECID = new DataType(ProParserTokenTypes.RECID, "RECID");
-  public static final DataType ROWID = new DataType(ProParserTokenTypes.ROWID, "ROWID");
-  public static final DataType SHORT = new DataType(ProParserTokenTypes.SHORT, "SHORT");
-  public static final DataType TIME = new DataType(ProParserTokenTypes.TIME, "TIME");
-  public static final DataType TIMESTAMP = new DataType(ProParserTokenTypes.TIMESTAMP, "TIMESTAMP");
-  public static final DataType TYPE_NAME = CLASS;
-  public static final DataType UNSIGNEDSHORT = new DataType(ProParserTokenTypes.UNSIGNEDSHORT, "UNSIGNED-SHORT");
-  public static final DataType WIDGETHANDLE = new DataType(ProParserTokenTypes.WIDGETHANDLE, "WIDGET-HANDLE");
+public enum DataType {
+  BIGINT(ABLNodeType.BIGINT),
+  BLOB(ABLNodeType.BLOB),
+  BYTE(ABLNodeType.BYTE),
+  CHARACTER(ABLNodeType.CHARACTER),
+  CLASS(ABLNodeType.CLASS),
+  CLOB(ABLNodeType.CLOB),
+  COMHANDLE(ABLNodeType.COMHANDLE),
+  DATE(ABLNodeType.DATE),
+  DATETIME(ABLNodeType.DATETIME),
+  DATETIMETZ(ABLNodeType.DATETIMETZ),
+  DECIMAL(ABLNodeType.DECIMAL),
+  DOUBLE(ABLNodeType.DOUBLE),
+  FIXCHAR(ABLNodeType.FIXCHAR),
+  FLOAT(ABLNodeType.FLOAT),
+  HANDLE(ABLNodeType.HANDLE),
+  INTEGER(ABLNodeType.INTEGER),
+  INT64(ABLNodeType.INT64),
+  LONG(ABLNodeType.LONG),
+  LONGCHAR(ABLNodeType.LONGCHAR),
+  LOGICAL(ABLNodeType.LOGICAL),
+  MEMPTR(ABLNodeType.MEMPTR),
+  NUMERIC(ABLNodeType.NUMERIC),
+  RAW(ABLNodeType.RAW),
+  RECID(ABLNodeType.RECID),
+  ROWID(ABLNodeType.ROWID),
+  SHORT(ABLNodeType.SHORT),
+  TIME(ABLNodeType.TIME),
+  TIMESTAMP(ABLNodeType.TIMESTAMP),
+  // Kept only for compatibility reason...
+  TYPE_NAME(ABLNodeType.CLASS),
+  UNSIGNEDSHORT(ABLNodeType.UNSIGNEDSHORT),
+  WIDGETHANDLE(ABLNodeType.WIDGETHANDLE);
 
-  private Integer tokenType;
-  private String progressName;
+  private ABLNodeType type;
 
-  private DataType(int tokenType, String progressName) {
-    this.tokenType = tokenType;
-    this.progressName = progressName;
-    nameMap.put(progressName, this);
-    tokenTypeMap.put(this.tokenType, this);
+  private static final Map<Integer, DataType> LOOKUP = new HashMap<>();
+  private static final Map<String, DataType> STRING_LOOKUP = new HashMap<>();
+
+  private DataType(ABLNodeType type) {
+    this.type = type;
+  }
+
+  public ABLNodeType getType() {
+    return type;
+  }
+
+  public int getTokenType() {
+    return type.getType();
+  }
+
+  public String getProgressName() {
+    return type.getText();
+  }
+
+  @Override
+  public String toString() {
+    return getProgressName();
+  }
+
+  static {
+    for (DataType type : DataType.values()) {
+      if (type != TYPE_NAME) {
+        LOOKUP.put(type.getTokenType(), type);
+        STRING_LOOKUP.put(type.getProgressName().toUpperCase(), type);
+      }
+    }
   }
 
   /**
@@ -77,34 +96,16 @@ public class DataType {
    * check with assert or throw might be appropriate.
    */
   public static DataType getDataType(int tokenType) {
-    return tokenTypeMap.get(tokenType);
+    return LOOKUP.get(tokenType);
   }
 
   /**
-   * Get the DataType object for a String "progress data type name", ex: "COM-HANDLE". <b>Requires all caps characters,
-   * not abbreviated.</b> This can return null - when you use this function, adding a check with assert or throw might
-   * be appropriate.
+   * Get the DataType object for a String "progress data type name", ex: "COM-HANDLE". Type name can be in any case but
+   * can't be abbreviated
    */
+  @Nullable
   public static DataType getDataType(String progressCapsName) {
-    return nameMap.get(progressCapsName);
-  }
-
-  /** The progress name for the data type is all caps, ex: "COM-HANDLE" */
-  public String getProgressName() {
-    return progressName;
-  }
-
-  /** Returns the Proparse integer token type, ex: TokenTypes.COMHANDLE */
-  public int getTokenType() {
-    return tokenType.intValue();
-  }
-
-  /**
-   * Same as getProgressName.
-   */
-  @Override
-  public String toString() {
-    return progressName;
+    return STRING_LOOKUP.get(progressCapsName.toUpperCase());
   }
 
 }

@@ -15,22 +15,22 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols.widgets;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Widget;
 
 public class MenuItem extends Widget {
 
-  public MenuItem(String name, TreeParserSymbolScope scope) {
+  public MenuItem(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 
   /**
-   * @return NodeTypes.MENUITEM
+   * @return ABLNodeType.MENUITEM
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.MENUITEM;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.MENUITEM;
   }
 
 }

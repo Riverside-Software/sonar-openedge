@@ -15,12 +15,14 @@
  ********************************************************************************/
 package org.prorefactor.treeparser01;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.Event;
+import org.prorefactor.treeparser.symbols.ISymbol;
+import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.Symbol;
-import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.Browse;
 
 import antlr.SemanticException;
@@ -182,7 +184,7 @@ public interface ITreeParserAction {
   /**
    * Called by the tree parser to define anything other than buffers, temp/work tables, and variables/parameters.
    */
-  default Symbol defineSymbol(int symbolType, JPNode defAST, JPNode idAST) throws SemanticException {
+  default ISymbol defineSymbol(ABLNodeType symbolType, JPNode defAST, JPNode idAST) throws SemanticException {
     return null;
   }
 
@@ -220,30 +222,30 @@ public interface ITreeParserAction {
   }
 
   /** Called by the tree parser when a variable is defined. */
-  default Variable defineVariable(JPNode defAST, JPNode idNode) throws SemanticException {
+  default IVariable defineVariable(JPNode defAST, JPNode idNode) throws SemanticException {
     return null;
   }
 
-  default Variable defineVariable(JPNode defAST, JPNode idNode, boolean parameter) throws SemanticException {
+  default IVariable defineVariable(JPNode defAST, JPNode idNode, boolean parameter) throws SemanticException {
     return null;
   }
 
   /** Some syntaxes imply a data type without LIKE/AS. */
-  default Variable defineVariable(JPNode defAST, JPNode idAST, int dataType) throws SemanticException {
+  default IVariable defineVariable(JPNode defAST, JPNode idAST, int dataType) throws SemanticException {
     return null;
   }
 
-  default Variable defineVariable(JPNode defAST, JPNode idAST, int dataType, boolean parameter)
+  default IVariable defineVariable(JPNode defAST, JPNode idAST, int dataType, boolean parameter)
       throws SemanticException {
     return null;
   }
 
   /** Some syntaxes have an implicit LIKE. */
-  default Variable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST) throws SemanticException {
+  default IVariable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST) throws SemanticException {
     return null;
   }
 
-  default Variable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST, boolean parameter)
+  default IVariable defineVariable(JPNode defAST, JPNode idAST, JPNode likeAST, boolean parameter)
       throws SemanticException {
     return null;
   }
@@ -477,7 +479,7 @@ public interface ITreeParserAction {
   }
 
   /** Lookup and assign a symbol to an ID node. */
-  default void setSymbol(int symbolType, JPNode idAST) throws SemanticException {
+  default void setSymbol(ABLNodeType symbolType, JPNode idAST) throws SemanticException {
   }
 
   /**

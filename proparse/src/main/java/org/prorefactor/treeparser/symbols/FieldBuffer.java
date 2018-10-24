@@ -15,27 +15,27 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ISchema;
-import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.DataType;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.Primative;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
  * FieldBuffer is the Symbol object linked to from the AST for schema, temp, and work table fields, and FieldBuffer
  * provides the link to the Field object.
  */
 public class FieldBuffer extends Symbol implements Primative {
-  private final TableBuffer buffer;
+  private final ITableBuffer buffer;
   private final IField field;
 
   /**
    * When you create a FieldBuffer object, you do not set the name, because that comes from the Field object.
    */
-  public FieldBuffer(TreeParserSymbolScope scope, TableBuffer buffer, IField field) {
+  public FieldBuffer(ITreeParserSymbolScope scope, ITableBuffer buffer, IField field) {
     super("", scope);
     this.buffer = buffer;
     this.field = field;
@@ -86,7 +86,7 @@ public class FieldBuffer extends Symbol implements Primative {
     return buff.toString();
   }
 
-  public TableBuffer getBuffer() {
+  public ITableBuffer getBuffer() {
     return buffer;
   }
 
@@ -123,15 +123,15 @@ public class FieldBuffer extends Symbol implements Primative {
   }
 
   /**
-   * Always returns FIELD.
+   * Always returns ABLNodeType.FIELD
    * 
    * @see org.prorefactor.treeparser.symbols.Symbol#getProgressType() To see if this field buffer is for a schema table,
    *      temp-table, or work-table, see Table.getStoreType().
    * @see org.prorefactor.core.schema.ITable#getStoretype()
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.FIELD;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.FIELD;
   }
 
   /** Sets the underlying Field's className. */

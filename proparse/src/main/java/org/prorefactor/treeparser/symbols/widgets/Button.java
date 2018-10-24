@@ -15,22 +15,22 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols.widgets;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Widget;
 
 public class Button extends Widget implements IFieldLevelWidget {
 
-  public Button(String name, TreeParserSymbolScope scope) {
+  public Button(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 
   /**
-   * @return NodeTypes.BUTTON
+   * @return ABLNodeType.BUTTON
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.BUTTON;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.BUTTON;
   }
 
 }

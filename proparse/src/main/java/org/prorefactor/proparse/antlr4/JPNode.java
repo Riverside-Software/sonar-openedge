@@ -32,7 +32,7 @@ import org.prorefactor.proparse.antlr4.nodetypes.FieldRefNode;
 import org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode;
 import org.prorefactor.treeparser.Call;
 import org.prorefactor.treeparser.symbols.FieldContainer;
-import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.ISymbol;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -458,8 +458,8 @@ public class JPNode implements AST {
   }
 
   /** Certain nodes will have a link to a Symbol, set by TreeParser01. */
-  public Symbol getSymbol() {
-    return (Symbol) getLink(IConstants.SYMBOL);
+  public ISymbol getSymbol() {
+    return (ISymbol) getLink(IConstants.SYMBOL);
   }
 
   private static Integer attrEq(String attrName) {
@@ -624,7 +624,7 @@ public class JPNode implements AST {
   }
 
   /** Assigned by the tree parser. */
-  public void setSymbol(Symbol symbol) {
+  public void setSymbol(ISymbol symbol) {
     setLink(IConstants.SYMBOL, symbol);
   }
 

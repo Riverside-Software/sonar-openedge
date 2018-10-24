@@ -28,18 +28,18 @@ import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.symbols.Event;
-import org.prorefactor.treeparser.symbols.Symbol;
-import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.ISymbol;
+import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.widgets.Frame;
 
 /**
  * For keeping track of blocks, block attributes, and the things that are scoped within those blocks - especially buffer
  * scopes.
  */
-public class Block {
+public class Block implements IBlock {
 
   private List<Frame> frames = new ArrayList<>();
-  private Block parent;
+  private IBlock parent;
   private Frame defaultFrame = null;
   private JPNode blockStatementNode;
   private Set<BufferScope> bufferScopes = new HashSet<>();
@@ -48,13 +48,13 @@ public class Block {
    * The SymbolScope for a block is going to be the root program scope, unless the block is inside a method
    * (function/trigger/procedure).
    */
-  private TreeParserSymbolScope symbolScope;
+  private ITreeParserSymbolScope symbolScope;
 
   /** For constructing nested blocks */
-  public Block(Block parent, JPNode node) {
+  public Block(IBlock parent, JPNode node) {
     this.blockStatementNode = node;
     this.parent = parent;
-    this.symbolScope = parent.symbolScope;
+    this.symbolScope = parent.getSymbolScope();
   }
 
   /**
@@ -63,7 +63,7 @@ public class Block {
    * @param symbolScope
    * @param node Is the Program_root if this is the program root block.
    */
-  public Block(TreeParserSymbolScope symbolScope, JPNode node) {
+  public Block(ITreeParserSymbolScope symbolScope, JPNode node) {
     this.blockStatementNode = node;
     this.symbolScope = symbolScope;
     if (symbolScope.getParentScope() != null)
@@ -72,10 +72,7 @@ public class Block {
       this.parent = null; // is program-block
   }
 
-  /**
-   * Add a reference to a BufferScope to this and all outer blocks. These references are required for duplicating
-   * Progress's scope and "raise scope" behaviours. BufferScope references are not added up past the symbol's scope.
-   */
+  @Override
   public void addBufferScopeReferences(BufferScope bufferScope) {
     // References do not get added to DO blocks.
     if (blockStatementNode.getNodeType() != ABLNodeType.DO)
@@ -85,13 +82,8 @@ public class Block {
     }
   }
 
-  /**
-   * Called by Frame.setFrameScopeBlock() - not intended to be called by any client code. This should only be called by
-   * the Frame object itself. Adds a frame to this or the appropriate parent block. Returns the scoping block. Frames
-   * are scoped to FOR and REPEAT blocks, or else to a symbol scoping block. They may also be scoped with a DO WITH
-   * FRAME block, but that is handled elsewhere.
-   */
-  public Block addFrame(Frame frame) {
+  @Override
+  public IBlock addFrame(Frame frame) {
     if (canScopeFrame()) {
       frames.add(frame);
       return this;
@@ -99,14 +91,9 @@ public class Block {
       return parent.addFrame(frame);
   }
 
-  /**
-   * A "hidden cursor" is a BufferScope which has no side-effects on surrounding blocks like strong, weak, and reference
-   * scopes do. These are used within a CAN-FIND function. (2004.Sep:John: Maybe in triggers too? Haven't checked.)
-   * 
-   * @param node The RECORD_NAME node. Must have the BufferSymbol linked to it already.
-   */
+  @Override
   public void addHiddenCursor(RecordNameNode node) {
-    TableBuffer symbol = node.getTableBuffer();
+    ITableBuffer symbol = node.getTableBuffer();
     BufferScope buff = new BufferScope(this, symbol, BufferScope.Strength.HIDDEN_CURSOR);
     bufferScopes.add(buff);
     // Note the difference compared to addStrong and addWeak - we don't add
@@ -114,27 +101,17 @@ public class Block {
     node.setBufferScope(buff);
   }
 
-  /**
-   * Create a "strong" buffer scope. This is called within a DO FOR or REPEAT FOR statement. A STRONG scope prevents the
-   * scope from being raised to an enclosing block. Note that the compiler performs additional checks here that we
-   * don't.
-   * 
-   * @param node The RECORD_NAME node. It must already have the BufferSymbol linked to it.
-   */
+  @Override
   public void addStrongBufferScope(RecordNameNode node) {
-    TableBuffer symbol = node.getTableBuffer();
+    ITableBuffer symbol = node.getTableBuffer();
     BufferScope buff = new BufferScope(this, symbol, BufferScope.Strength.STRONG);
     bufferScopes.add(buff);
     addBufferScopeReferences(buff);
     node.setBufferScope(buff);
   } // addStrongBufferScope
 
-  /**
-   * Create a "weak" buffer scope. This is called within a FOR or PRESELECT statement.
-   * 
-   * @param symbol The RECORD_NAME node. It must already have the BufferSymbol linked to it.
-   */
-  public BufferScope addWeakBufferScope(TableBuffer symbol) {
+  @Override
+  public BufferScope addWeakBufferScope(ITableBuffer symbol) {
     BufferScope buff = getBufferScope(symbol, BufferScope.Strength.WEAK);
     if (buff == null)
       buff = new BufferScope(this, symbol, BufferScope.Strength.WEAK);
@@ -147,7 +124,7 @@ public class Block {
   } // addWeakBufferScope
 
   /** Can a buffer reference be scoped to this block? */
-  private boolean canScopeBufferReference(TableBuffer symbol) {
+  private boolean canScopeBufferReference(ITableBuffer symbol) {
     // REPEAT, FOR, and Program_root blocks can scope a buffer.
     switch (blockStatementNode.getType()) {
       case ProParserTokenTypes.REPEAT:
@@ -171,8 +148,8 @@ public class Block {
     return isRootBlock();
   }
 
-  /** Find nearest BufferScope for a BufferSymbol, if any */
-  private BufferScope findBufferScope(TableBuffer symbol) {
+  @Override
+  public BufferScope findBufferScope(ITableBuffer symbol) {
     for (BufferScope buff : bufferScopes) {
       if (buff.getSymbol() != symbol)
         continue;
@@ -185,19 +162,19 @@ public class Block {
   }
 
   /** Get the buffers that are scoped to this block */
-  public TableBuffer[] getBlockBuffers() {
+  public ITableBuffer[] getBlockBuffers() {
     // We can't just return bufferScopes, because it also contains
     // references to BufferScope objects which are scoped to child blocks.
-    Set<TableBuffer> set = new HashSet<>();
+    Set<ITableBuffer> set = new HashSet<>();
     for (BufferScope buff : bufferScopes) {
       if (buff.getBlock() == this)
         set.add(buff.getSymbol());
     }
-    return (TableBuffer[]) set.toArray(new TableBuffer[set.size()]);
+    return set.toArray(new ITableBuffer[set.size()]);
   } // getBlockBuffers
 
-  /** Find or create a buffer for the input BufferSymbol */
-  public BufferScope getBufferForReference(TableBuffer symbol) {
+  @Override
+  public BufferScope getBufferForReference(ITableBuffer symbol) {
     BufferScope buffer = getBufferScope(symbol, BufferScope.Strength.REFERENCE);
     if (buffer == null)
       buffer = getBufferForReferenceSub(symbol);
@@ -208,14 +185,15 @@ public class Block {
     return buffer;
   } // getBufferForReference
 
-  private BufferScope getBufferForReferenceSub(TableBuffer symbol) {
+  @Override
+  public BufferScope getBufferForReferenceSub(ITableBuffer symbol) {
     if (!canScopeBufferReference(symbol))
       return parent.getBufferForReferenceSub(symbol);
     return new BufferScope(this, symbol, BufferScope.Strength.REFERENCE);
   }
 
   /** Attempt to get or raise a BufferScope in this block. */
-  private BufferScope getBufferScope(TableBuffer symbol, BufferScope.Strength creating) {
+  private BufferScope getBufferScope(ITableBuffer symbol, BufferScope.Strength creating) {
     // First try to find an existing buffer scope for this symbol.
     BufferScope buff = findBufferScope(symbol);
     if (buff != null)
@@ -223,7 +201,8 @@ public class Block {
     return getBufferScopeSub(symbol, creating);
   }
 
-  private BufferScope getBufferScopeSub(TableBuffer symbol, BufferScope.Strength creating) {
+  @Override
+  public BufferScope getBufferScopeSub(ITableBuffer symbol, BufferScope.Strength creating) {
     // First try to get a buffer from outermost blocks.
     if (parent != null && symbol.getScope().getRootBlock() != this) {
       BufferScope buff = parent.getBufferScopeSub(symbol, creating);
@@ -260,10 +239,7 @@ public class Block {
     return raiseBuff;
   } // getBufferScopeSub
 
-  /**
-   * From the nearest frame scoping block, get the default (possibly unnamed) frame if it exists. Returns null if no
-   * default frame has been established yet.
-   */
+  @Override
   public Frame getDefaultFrame() {
     if (defaultFrame != null)
       return defaultFrame;
@@ -272,31 +248,29 @@ public class Block {
     return null;
   }
 
-  /** Get a copy of the list of frames scoped to this block. */
+  @Override
   public List<Frame> getFrames() {
     return new ArrayList<>(frames);
   }
 
-  /**
-   * Get the node for this block. Returns a node of one of these types:
-   * Program_root/DO/FOR/REPEAT/EDITING/PROCEDURE/FUNCTION/ON/TRIGGERS.
-   */
+  @Override
   public JPNode getNode() {
     return blockStatementNode;
   }
 
-  /** This returns the <em>block of the parent scope</em>. */
-  public Block getParent() {
+  @Override
+  public IBlock getParent() {
     return parent;
   }
 
-  public TreeParserSymbolScope getSymbolScope() {
+  @Override
+  public ITreeParserSymbolScope getSymbolScope() {
     return symbolScope;
   }
 
   /** Is a buffer scoped to this or any parent of this block. */
   public boolean isBufferLocal(BufferScope buff) {
-    for (Block block = this; block.parent != null; block = block.parent) {
+    for (IBlock block = this; block.getParent() != null; block = block.getParent()) {
       if (buff.getBlock() == block)
         return true;
     }
@@ -320,24 +294,22 @@ public class Block {
     return symbolScope.getRootBlock() == this;
   }
 
-  /**
-   * General lookup for Field or Variable. Does not guarantee uniqueness. That job is left to the compiler.
-   */
+  @Override
   public FieldLookupResult lookupField(String name, boolean getBufferScope) {
     FieldLookupResult result = new FieldLookupResult();
-    TableBuffer tableBuff;
+    ITableBuffer tableBuff;
     int lastDot = name.lastIndexOf('.');
     // Variable or unqualified field
     if (lastDot == -1) {
       // Variables, FieldLevelWidgets, and Events come first.
-      Symbol s;
+      ISymbol s;
       result.variable = symbolScope.lookupVariable(name);
       if (result.variable != null)
         return result;
       result.fieldLevelWidget = symbolScope.lookupFieldLevelWidget(name);
       if (result.fieldLevelWidget != null)
         return result;
-      s = symbolScope.lookupSymbol(ProParserTokenTypes.EVENT, name);
+      s = symbolScope.lookupSymbol(ABLNodeType.EVENT, name);
       if (s != null) {
         result.event = (Event) s;
         return result;
@@ -392,15 +364,12 @@ public class Block {
     return result;
   } // lookupField()
 
-  /**
-   * Find a field based on buffers which are referenced in nearest enclosing blocks. Note that the compiler enforces
-   * uniqueness here. We don't, we just find the first possible and return it.
-   */
-  protected FieldLookupResult lookupUnqualifiedField(String name) {
-    Map<TableBuffer, BufferScope> buffs = new HashMap<>();
+  @Override
+  public FieldLookupResult lookupUnqualifiedField(String name) {
+    Map<ITableBuffer, BufferScope> buffs = new HashMap<>();
     FieldLookupResult result = null;
     for (BufferScope buff : bufferScopes) {
-      TableBuffer symbol = buff.getSymbol();
+      ITableBuffer symbol = buff.getSymbol();
       if (buff.getBlock() == this) {
         buffs.put(symbol, buff);
         continue;
@@ -415,7 +384,7 @@ public class Block {
       buffs.put(symbol, buff);
     }
     for (BufferScope buffScope : buffs.values()) {
-      TableBuffer tableBuff = buffScope.getSymbol();
+      ITableBuffer tableBuff = buffScope.getSymbol();
       // Check for strong scope preventing raise to this block.
       if (buffScope.isStrong() && !isBufferLocal(buffScope))
         continue;
@@ -442,21 +411,14 @@ public class Block {
     return null;
   } // lookupUnqualifiedField
 
-  /**
-   * Explicitly set the default frame for this block. This should only be called by the Frame object itself. This is
-   * especially important to be called for DO WITH FRAME statements because DO blocks do not normally scope frames. This
-   * should also be called for REPEAT WITH FRAME and FOR WITH FRAME blocks.
-   */
+  @Override
   public void setDefaultFrameExplicit(Frame frame) {
     this.defaultFrame = frame;
     frames.add(frame);
   }
 
-  /**
-   * In the nearest frame scoping block, set the default implicit (unnamed) frame. This should only be called by the
-   * Frame object itself. Returns the Block that scopes the frame.
-   */
-  public Block setDefaultFrameImplicit(Frame frame) {
+  @Override
+  public IBlock setDefaultFrameImplicit(Frame frame) {
     if (canScopeFrame()) {
       this.defaultFrame = frame;
       frames.add(frame);
@@ -465,7 +427,8 @@ public class Block {
       return parent.setDefaultFrameImplicit(frame);
   }
 
-  public void setParent(Block parent) {
+  @Override
+  public void setParent(IBlock parent) {
     this.parent = parent;
   }
 

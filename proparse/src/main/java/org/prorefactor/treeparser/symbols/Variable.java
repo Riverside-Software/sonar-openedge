@@ -15,18 +15,18 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.treeparser.ClassSupport;
 import org.prorefactor.treeparser.DataType;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.Primative;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.Value;
 
 /**
  * A Symbol defined with DEFINE VARIABLE or any of the other various syntaxes which implicitly define a variable.
  */
-public class Variable extends Symbol implements Primative, Value {
+public class Variable extends Symbol implements IVariable, Primative, Value {
 
   private int extent;
   private DataType dataType;
@@ -34,11 +34,11 @@ public class Variable extends Symbol implements Primative, Value {
   private String className = null;
   private boolean refInFrame = false;
 
-  public Variable(String name, TreeParserSymbolScope scope) {
+  public Variable(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 
-  public Variable(String name, TreeParserSymbolScope scope, boolean parameter) {
+  public Variable(String name, ITreeParserSymbolScope scope, boolean parameter) {
     super(name, scope, parameter);
   }
 
@@ -81,8 +81,8 @@ public class Variable extends Symbol implements Primative, Value {
    * Returns NodeTypes.VARIABLE
    */
   @Override
-  public int getProgressType() {
-    return ProParserTokenTypes.VARIABLE;
+  public ABLNodeType getProgressType() {
+    return ABLNodeType.VARIABLE;
   }
 
   @Override
@@ -118,6 +118,7 @@ public class Variable extends Symbol implements Primative, Value {
     this.refInFrame = true;
   }
 
+  @Override
   public boolean isReferencedInFrame() {
     return refInFrame;
   }

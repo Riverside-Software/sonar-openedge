@@ -13,34 +13,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.treeparser.symbols;
+package org.prorefactor.treeparser;
 
-import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.treeparser.ITreeParserSymbolScope;
+import org.prorefactor.core.JPNode;
 
 /**
- * A Symbol defined with DEFINE EVENT
+ * Represents objects that have a value.
  */
-public class Event extends Symbol {
-
-  public Event(String name, ITreeParserSymbolScope scope) {
-    super(name, scope);
-  }
-
-  /**
-   * For this subclass of Symbol, fullName() returns the same value as getName()
-   */
-  @Override
-  public String fullName() {
-    return getName();
-  }
-
-  /**
-   * Returns ABLNodeType.EVENT
-   */
-  @Override
-  public ABLNodeType getProgressType() {
-    return ABLNodeType.EVENT;
-  }
-
+public interface ICall {
+  void addParameter(Parameter p);
+  boolean isInHandle();
+  String getRunArgument();
+  void wrapUp(boolean definedInternal);
+  void setRunHandleNode(JPNode node);
+  void setPersistentHandleNode(JPNode node);
 }

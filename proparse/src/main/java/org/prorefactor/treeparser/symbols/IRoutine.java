@@ -15,32 +15,14 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.core.ABLNodeType;
+import java.util.List;
+
+import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ITreeParserSymbolScope;
+import org.prorefactor.treeparser.Parameter;
 
-/**
- * A Symbol defined with DEFINE EVENT
- */
-public class Event extends Symbol {
-
-  public Event(String name, ITreeParserSymbolScope scope) {
-    super(name, scope);
-  }
-
-  /**
-   * For this subclass of Symbol, fullName() returns the same value as getName()
-   */
-  @Override
-  public String fullName() {
-    return getName();
-  }
-
-  /**
-   * Returns ABLNodeType.EVENT
-   */
-  @Override
-  public ABLNodeType getProgressType() {
-    return ABLNodeType.EVENT;
-  }
-
+public interface IRoutine extends ISymbol {
+  ITreeParserSymbolScope getRoutineScope();
+  List<Parameter> getParameters();
+  JPNode getReturnDatatypeNode();
 }

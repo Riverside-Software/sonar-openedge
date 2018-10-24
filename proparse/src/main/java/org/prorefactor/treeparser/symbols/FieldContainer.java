@@ -22,7 +22,7 @@ import java.util.Set;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.schema.Field;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 
 /**
  * Frame and Browse widgets are FieldContainers. This class provides the services for looking up fields/variables in a
@@ -32,11 +32,11 @@ public abstract class FieldContainer extends Widget {
 
   private List<JPNode> statementList = new ArrayList<>();
   private Set<FieldBuffer> fieldSet = new HashSet<>();
-  private Set<Symbol> enabledFields = new HashSet<>();
-  private Set<Symbol> otherSymbols = new HashSet<>();
+  private Set<ISymbol> enabledFields = new HashSet<>();
+  private Set<ISymbol> otherSymbols = new HashSet<>();
   private Set<Variable> variableSet = new HashSet<>();
 
-  public FieldContainer(String name, TreeParserSymbolScope scope) {
+  public FieldContainer(String name, ITreeParserSymbolScope scope) {
     super(name, scope);
   }
 
@@ -52,7 +52,7 @@ public abstract class FieldContainer extends Widget {
    * Add a FieldBuffer or Variable to this Frame or Browse object. Intended to be used by the tree parser only. The tree
    * parser passes 'true' for ENABLE|UPDATE|PROMPT-FOR.
    */
-  public void addSymbol(Symbol symbol, boolean statementIsEnabler) {
+  public void addSymbol(ISymbol symbol, boolean statementIsEnabler) {
     if (symbol instanceof FieldBuffer)
       fieldSet.add((FieldBuffer) symbol);
     else if (symbol instanceof Variable) {
@@ -68,8 +68,8 @@ public abstract class FieldContainer extends Widget {
   /**
    * Get the fields and variables in the frame. The entries in the return list are of type Variable and/or FieldBuffer.
    */
-  public List<Symbol> getAllFields() {
-    List<Symbol> ret = new ArrayList<>();
+  public List<ISymbol> getAllFields() {
+    List<ISymbol> ret = new ArrayList<>();
     ret.addAll(variableSet);
     ret.addAll(fieldSet);
     return ret;
@@ -78,8 +78,8 @@ public abstract class FieldContainer extends Widget {
   /**
    * Combines getAllFields() with all other widgets in the FieldContainer
    */
-  public List<Symbol> getAllFieldsAndWidgets() {
-    List<Symbol> ret = getAllFields();
+  public List<ISymbol> getAllFieldsAndWidgets() {
+    List<ISymbol> ret = getAllFields();
     ret.addAll(otherSymbols);
     return ret;
   }
@@ -88,8 +88,8 @@ public abstract class FieldContainer extends Widget {
    * Get the enabled fields and variables in the frame. The entries in the return list are of type Variable and/or
    * FieldBuffer.
    */
-  public List<Symbol> getEnabledFields() {
-    List<Symbol> ret = new ArrayList<>();
+  public List<ISymbol> getEnabledFields() {
+    List<ISymbol> ret = new ArrayList<>();
     ret.addAll(enabledFields);
     return ret;
   }
@@ -118,7 +118,7 @@ public abstract class FieldContainer extends Widget {
     }
 
     // Lookup in sub-containers (e.g. browse in a frame)
-    for (Symbol symbol : otherSymbols) {
+    for (ISymbol symbol : otherSymbols) {
       if (symbol instanceof FieldContainer) {
         Symbol s = ((FieldContainer) symbol).lookupFieldOrVar(name);
         if (s != null)

@@ -19,10 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.core.JPNode;
-import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.ISymbol;
+import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.Variable;
-
-import antlr.SemanticException;
 
 /**
  * Represents a Call to some 4GL procedure. The target procedure is identified by the external and internal procedure
@@ -35,7 +34,7 @@ import antlr.SemanticException;
  * 
  * @author pcd
  */
-public class Call extends SemanticRecord {
+public class Call extends SemanticRecord implements ICall {
   private List<Parameter> parameters = new ArrayList<>();
   private JPNode persistentHandleNode = null;
   private JPNode runHandleNode = null;
@@ -43,7 +42,7 @@ public class Call extends SemanticRecord {
   private String externalName = null;
   private String internalName = null;
   private String runArgument = null;
-  private Variable persistentHandleVar;
+  private IVariable persistentHandleVar;
 
   /**
    * Construct a call to an internal procedure in a specific containing procedure. The refererence is fully resolved.
@@ -57,7 +56,7 @@ public class Call extends SemanticRecord {
     super(node);
   }
 
-  /** Called by the tree parser. */
+  @Override
   public void addParameter(Parameter p) {
     parameters.add(p);
   }
@@ -99,14 +98,11 @@ public class Call extends SemanticRecord {
     return internalName;
   }
 
-  public String getLocalTarget() {
-    return internalName;
-  }
-
   public List<Parameter> getParameters() {
     return parameters;
   }
 
+  @Override
   public String getRunArgument() {
     return runArgument;
   }
@@ -127,10 +123,12 @@ public class Call extends SemanticRecord {
     return persistentHandleNode != null;
   }
 
+  @Override
   public boolean isInHandle() {
     return runHandleNode != null;
   }
 
+  @Override
   public void setPersistentHandleNode(JPNode node) {
     persistentHandleNode = node;
   }
@@ -141,7 +139,7 @@ public class Call extends SemanticRecord {
    * 
    * @param var
    */
-  public void setPersistentHandleVar(Variable var) {
+  public void setPersistentHandleVar(IVariable var) {
     persistentHandleVar = var;
   }
 
@@ -157,6 +155,7 @@ public class Call extends SemanticRecord {
     this.runHandle = handle;
   }
 
+  @Override
   public void setRunHandleNode(JPNode node) {
     runHandleNode = node;
   }
@@ -166,13 +165,13 @@ public class Call extends SemanticRecord {
     return id();
   }
 
-  /** Finish setting values for the Call. */
-  public void wrapUp(boolean definedInternal) throws SemanticException {
+  @Override
+  public void wrapUp(boolean definedInternal) {
     if (isInHandle()) {
       // Internal procedure call - using a handle.
       internalName = runArgument;
-      Symbol s = runHandleNode.getSymbol();
-      if (s != null && (s instanceof Variable)) {
+      ISymbol s = runHandleNode.getSymbol();
+      if (s instanceof Variable) {
         runHandle = (RunHandle) ((Variable) s).getValue();
         if (runHandle != null)
           externalName = (String) runHandle.getValue();
@@ -187,12 +186,12 @@ public class Call extends SemanticRecord {
       externalName = runArgument;
       // Update the handle Variable; the variable is
       // shared by reference with the SymbolTable.
-      Symbol s = persistentHandleNode.getSymbol();
-      if (s != null && (s instanceof Variable)) {
-        persistentHandleVar = (Variable) s;
+      ISymbol s = persistentHandleNode.getSymbol();
+      if (s != null && (s instanceof IVariable)) {
+        persistentHandleVar = (IVariable) s;
         RunHandle hValue = new RunHandle();
         hValue.setValue(externalName);
-        persistentHandleVar.setValue(hValue);
+        ((Variable) persistentHandleVar).setValue(hValue);
       }
     } else { // External procedure call - non persistent.
       internalName = null;

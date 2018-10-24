@@ -15,9 +15,10 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.ITreeParserSymbolScope;
 
 public interface ISymbol {
 
@@ -61,9 +62,9 @@ public interface ISymbol {
    * From TokenTypes: VARIABLE, FRAME, MENU, MENUITEM, etc. A TableBuffer object always returns BUFFER, regardless of
    * whether the object is a named buffer or a default buffer. A FieldBuffer object always returns FIELD.
    */
-  int getProgressType();
+  ABLNodeType getProgressType();
 
-  TreeParserSymbolScope getScope();
+  ITreeParserSymbolScope getScope();
 
   /**
    * Take note of a symbol reference (read, write, reference by name)
@@ -85,5 +86,10 @@ public interface ISymbol {
    * @see #getLikeNode()
    */
   void setLikeNode(JPNode likeNode);
+
+  /**
+   * @return True if this variable is a procedure/function/method parameter
+   */
+  boolean isParameter();
 
 }
