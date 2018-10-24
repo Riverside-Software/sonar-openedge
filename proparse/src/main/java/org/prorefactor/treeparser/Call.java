@@ -56,7 +56,7 @@ public class Call extends SemanticRecord implements ICall {
     super(node);
   }
 
-  /** Called by the tree parser. */
+  @Override
   public void addParameter(Parameter p) {
     parameters.add(p);
   }
@@ -98,14 +98,11 @@ public class Call extends SemanticRecord implements ICall {
     return internalName;
   }
 
-  public String getLocalTarget() {
-    return internalName;
-  }
-
   public List<Parameter> getParameters() {
     return parameters;
   }
 
+  @Override
   public String getRunArgument() {
     return runArgument;
   }
@@ -126,10 +123,12 @@ public class Call extends SemanticRecord implements ICall {
     return persistentHandleNode != null;
   }
 
+  @Override
   public boolean isInHandle() {
     return runHandleNode != null;
   }
 
+  @Override
   public void setPersistentHandleNode(JPNode node) {
     persistentHandleNode = node;
   }
@@ -156,6 +155,7 @@ public class Call extends SemanticRecord implements ICall {
     this.runHandle = handle;
   }
 
+  @Override
   public void setRunHandleNode(JPNode node) {
     runHandleNode = node;
   }
@@ -165,7 +165,7 @@ public class Call extends SemanticRecord implements ICall {
     return id();
   }
 
-  /** Finish setting values for the Call. */
+  @Override
   public void wrapUp(boolean definedInternal) {
     if (isInHandle()) {
       // Internal procedure call - using a handle.

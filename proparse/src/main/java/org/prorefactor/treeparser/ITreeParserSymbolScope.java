@@ -64,7 +64,6 @@ public interface ITreeParserSymbolScope {
   /** Given a name, find a BufferSymbol (or create if necessary for unnamed buffer). */
   ITableBuffer getBufferSymbol(String inName);
 
-  // Nettoyer paramètre
   void setRoutine(IRoutine routine);
   IRoutine getRoutine();
 
