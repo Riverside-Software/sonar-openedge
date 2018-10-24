@@ -29,8 +29,8 @@ import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.proparse.ProParserTokenTypes;
-import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.FieldLookupResult;
+import org.prorefactor.treeparser.IBlock;
 import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.FieldContainer;
@@ -169,7 +169,7 @@ public class FrameStack {
   }
 
   /** Create the frame if necessary, set its scope if that hasn't already been done. */
-  private Frame initializeFrame(Frame frame, Block currentBlock) {
+  private Frame initializeFrame(Frame frame, IBlock currentBlock) {
     // If we don't have a frame then get or create the unnamed default frame for the block.
     if (frame == null)
       frame = currentBlock.getDefaultFrame();
@@ -248,7 +248,7 @@ public class FrameStack {
   }
 
   /** FOR|REPEAT|DO blocks need to be checked for explicit WITH FRAME phrase. */
-  void nodeOfBlock(JPNode blockNode, Block currentBlock) {
+  void nodeOfBlock(JPNode blockNode, IBlock currentBlock) {
     JPNode containerTypeNode = getContainerTypeNode(blockNode);
     if (containerTypeNode == null)
       return;
@@ -290,7 +290,7 @@ public class FrameStack {
    * statement head node. This is not used from DEFINE FRAME, HIDE FRAME, or any other "frame" statements which would
    * not count as a "reference" for frame scoping purposes.
    */
-  void nodeOfInitializingStatement(JPNode stateNode, Block currentBlock) {
+  void nodeOfInitializingStatement(JPNode stateNode, IBlock currentBlock) {
     JPNode containerTypeNode = getContainerTypeNode(stateNode);
     JPNode idNode = null;
     if (containerTypeNode != null) {
@@ -315,7 +315,7 @@ public class FrameStack {
    * For frame init statements like VIEW and CLEAR which have no frame phrase. Called at the end of the statement, after
    * all symbols (including FRAME ID) have been resolved.
    */
-  void simpleFrameInitStatement(JPNode headNode, JPNode frameIDNode, Block currentBlock) {
+  void simpleFrameInitStatement(JPNode headNode, JPNode frameIDNode, IBlock currentBlock) {
     Frame frame = (Frame) frameIDNode.getSymbol();
     assert frame != null;
     initializeFrame(frame, currentBlock);

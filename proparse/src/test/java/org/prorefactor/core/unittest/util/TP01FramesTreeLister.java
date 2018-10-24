@@ -21,6 +21,7 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.treeparser.Block;
+import org.prorefactor.treeparser.IBlock;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 import org.prorefactor.treeparser.symbols.widgets.Frame;
 
@@ -53,7 +54,7 @@ public class TP01FramesTreeLister extends JPNodeLister {
   }
 
   private void blockNode(StringBuffer buff, BlockNode blockNode, char spacer) {
-    Block block = blockNode.getBlock();
+    IBlock block = blockNode.getBlock();
     if (block.getDefaultFrame() != null) {
       buff
         // .append(spacer)

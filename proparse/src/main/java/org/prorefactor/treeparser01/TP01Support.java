@@ -41,6 +41,7 @@ import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Expression;
 import org.prorefactor.treeparser.FieldLookupResult;
+import org.prorefactor.treeparser.IBlock;
 import org.prorefactor.treeparser.ICall;
 import org.prorefactor.treeparser.ITreeParserRootSymbolScope;
 import org.prorefactor.treeparser.ITreeParserSymbolScope;
@@ -80,9 +81,9 @@ public class TP01Support implements ITreeParserAction {
    * is always the program block, but a programmer may code a scope into a non-root block... which we need to make
    * current again once done inside the scope.
    */
-  private List<Block> blockStack = new ArrayList<>();
+  private List<IBlock> blockStack = new ArrayList<>();
 
-  private Block currentBlock;
+  private IBlock currentBlock;
   private Expression wipExpression;
   private FrameStack frameStack = new FrameStack();
   private Map<String, ITreeParserSymbolScope> funcForwards = new HashMap<>();
@@ -229,7 +230,7 @@ public class TP01Support implements ITreeParserAction {
     LOG.trace("Entering canFindBegin {} - {}", canfindAST, recordAST);
     RecordNameNode recordNode = (RecordNameNode) recordAST;
     // Keep a ref to the current block...
-    Block b = currentBlock;
+    IBlock b = currentBlock;
     // ...create a can-find scope and block (assigns currentBlock)...
     scopeAdd(canfindAST);
     // ...and then set this "can-find block" to use it as its parent.
@@ -1261,12 +1262,12 @@ public class TP01Support implements ITreeParserAction {
     }
   }
 
-  private Block popBlock() {
+  private IBlock popBlock() {
     blockStack.remove(blockStack.size() - 1);
     return blockStack.get(blockStack.size() - 1);
   }
 
-  private Block pushBlock(Block block) {
+  private IBlock pushBlock(IBlock block) {
     blockStack.add(block);
     return block;
   }

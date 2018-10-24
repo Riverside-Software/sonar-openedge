@@ -46,7 +46,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
 
   protected List<ISymbol> allSymbols = new ArrayList<>();
   protected List<ICall> callList = new ArrayList<>();
-  protected Block rootBlock;
+  protected IBlock rootBlock;
   protected IRoutine routine;
   protected Map<String, ITableBuffer> bufferMap = new HashMap<>();
   protected Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
@@ -250,7 +250,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   }
 
   @Override
-  public Block getRootBlock() {
+  public IBlock getRootBlock() {
     return rootBlock;
   }
 
@@ -438,7 +438,7 @@ public class TreeParserSymbolScope implements ITreeParserSymbolScope {
   }
 
   @Override
-  public void setRootBlock(Block block) {
+  public void setRootBlock(IBlock block) {
     rootBlock = block;
   }
 

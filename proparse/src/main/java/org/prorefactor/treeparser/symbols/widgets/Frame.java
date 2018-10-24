@@ -16,14 +16,14 @@
 package org.prorefactor.treeparser.symbols.widgets;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.treeparser.Block;
+import org.prorefactor.treeparser.IBlock;
 import org.prorefactor.treeparser.ITreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 
 public class Frame extends FieldContainer {
 
   private boolean initialized = false;
-  private Block frameScopeBlock = null;
+  private IBlock frameScopeBlock = null;
 
   /** Unlike other symbols, Frames are automatically added to the scope, right here at creation time. */
   public Frame(String name, ITreeParserSymbolScope scope) {
@@ -31,7 +31,7 @@ public class Frame extends FieldContainer {
     scope.add(this);
   }
 
-  public Block getFrameScopeBlock() {
+  public IBlock getFrameScopeBlock() {
     return frameScopeBlock;
   }
 
@@ -48,7 +48,7 @@ public class Frame extends FieldContainer {
    * 
    * @see #isInitialized()
    */
-  public Block initialize(Block block) {
+  public IBlock initialize(IBlock block) {
     if (initialized)
       return frameScopeBlock;
     initialized = true;
@@ -68,7 +68,7 @@ public class Frame extends FieldContainer {
   /**
    * This should be called for a block with an explicit default. i.e. {DO|FOR|REPEAT} WITH FRAME.
    */
-  public void setFrameScopeBlockExplicitDefault(Block block) {
+  public void setFrameScopeBlockExplicitDefault(IBlock block) {
     frameScopeBlock = block;
     block.setDefaultFrameExplicit(this);
   }
@@ -78,7 +78,7 @@ public class Frame extends FieldContainer {
    * the block that this unnamed/default frame got scoped to. That would be a REPEAT or FOR block, or else the frame's
    * symbol scope.
    */
-  public Block setFrameScopeUnnamedDefault(Block block) {
+  public IBlock setFrameScopeUnnamedDefault(IBlock block) {
     frameScopeBlock = block.setDefaultFrameImplicit(this);
     return frameScopeBlock;
   }

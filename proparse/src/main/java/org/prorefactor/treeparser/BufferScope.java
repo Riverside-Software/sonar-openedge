@@ -23,7 +23,7 @@ import org.prorefactor.treeparser.symbols.ITableBuffer;
 public class BufferScope {
 
   private Strength strength;
-  private Block block;
+  private IBlock block;
   private ITableBuffer symbol;
 
   enum Strength {
@@ -51,7 +51,7 @@ public class BufferScope {
     this.strength = strength;
   }
 
-  public Block getBlock() {
+  public IBlock getBlock() {
     return block;
   }
 
