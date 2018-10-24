@@ -589,11 +589,13 @@ public class OpenEdgeProparseSensor implements Sensor {
     int numFuncs = 0;
     int numMethds = 0;
     for (ITreeParserSymbolScope child : unit.getRootScope().getChildScopesDeep()) {
-      int scopeType = child.getRootBlock().getNode().getType();
+      // TEMP-ANTLR4
+      JPNode rootNode = (JPNode) child.getRootBlock().getNode();
+      int scopeType = rootNode.getType();
       switch (scopeType) {
         case ProParserTokenTypes.PROCEDURE:
           boolean externalProc = false;
-          for (JPNode node : child.getRootBlock().getNode().getDirectChildren()) {
+          for (JPNode node : rootNode.getDirectChildren()) {
             if ((node.getType() == ProParserTokenTypes.IN_KW) || (node.getType() == ProParserTokenTypes.SUPER)
                 || (node.getType() == ProParserTokenTypes.EXTERNAL)) {
               externalProc = true;
@@ -605,7 +607,7 @@ public class OpenEdgeProparseSensor implements Sensor {
           break;
         case ProParserTokenTypes.FUNCTION:
           boolean externalFunc = false;
-          for (JPNode node : child.getRootBlock().getNode().getDirectChildren()) {
+          for (JPNode node : rootNode.getDirectChildren()) {
             if ((node.getType() == ProParserTokenTypes.IN_KW) || (node.getType() == ProParserTokenTypes.FORWARDS)) {
               externalFunc = true;
             }

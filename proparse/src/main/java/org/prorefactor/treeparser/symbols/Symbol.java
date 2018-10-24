@@ -24,22 +24,23 @@ import org.prorefactor.treeparser.ITreeParserSymbolScope;
  * Base class for any type of symbol which needs to be kept track of when parsing a 4gl compile unit's AST.
  */
 public abstract class Symbol implements ISymbol {
+  // Stores the full name, original (mixed) case as in definition
+  private final String name;
+  private boolean parameter = false;
+
   private int allRefsCount = 0;
   private int numReads = 0;
   private int numWrites = 0;
   private int numRefd = 0;
-  private JPNode asNode;
-  private boolean parameter = false;
 
   // We store the DEFINE node if available and sensible. If defined in a syntax where there is no DEFINE node briefly
   // preceeding the ID node, then we store the ID node. If this is a schema symbol, then this member is null.
   private JPNode defNode;
   private JPNode likeNode;
+  private JPNode asNode;
 
-  // What scope this symbol was defined in
+  // Scope in which this symbol was defined
   private ITreeParserSymbolScope scope;
-  // Stores the full name, original (mixed) case as in definition
-  private final String name;
 
   public Symbol(String name, ITreeParserSymbolScope scope) {
     this(name, scope, false);
@@ -50,21 +51,6 @@ public abstract class Symbol implements ISymbol {
     this.scope = scope;
     this.parameter = parameter;
     scope.addSymbol(this);
-  }
-
-  @Override
-  public void setAsNode(JPNode asNode) {
-    this.asNode = asNode;
-  }
-
-  @Override
-  public void setDefOrIdNode(JPNode node) {
-    defNode = node;
-  }
-
-  @Override
-  public void setLikeNode(JPNode likeNode) {
-    this.likeNode = likeNode;
   }
 
   @Override
@@ -143,4 +129,21 @@ public abstract class Symbol implements ISymbol {
   public boolean isParameter() {
     return parameter;
   }
+
+  /**
+   * We store the <code>DEFINE | FUNCTION | METHOD | PROCEDURE</code> node if available and sensible. If defined in a
+   * syntax where there is no DEFINE node briefly preceeding the ID node, then we store the ID node.
+   */
+  public void setDefOrIdNode(JPNode node) {
+    defNode = node;
+  }
+
+  public void setLikeNode(JPNode likeNode) {
+    this.likeNode = likeNode;
+  }
+
+  public void setAsNode(JPNode asNode) {
+    this.asNode = asNode;
+  }
+
 }

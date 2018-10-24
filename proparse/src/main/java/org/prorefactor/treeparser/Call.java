@@ -129,8 +129,8 @@ public class Call extends SemanticRecord implements ICall {
   }
 
   @Override
-  public void setPersistentHandleNode(JPNode node) {
-    persistentHandleNode = node;
+  public void setPersistentHandleNode(Object node) {
+    persistentHandleNode = (JPNode) node;
   }
 
   /**
@@ -156,8 +156,8 @@ public class Call extends SemanticRecord implements ICall {
   }
 
   @Override
-  public void setRunHandleNode(JPNode node) {
-    runHandleNode = node;
+  public void setRunHandleNode(Object node) {
+    runHandleNode = (JPNode) node;
   }
 
   @Override

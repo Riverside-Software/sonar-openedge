@@ -22,6 +22,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.JPNode;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
@@ -74,8 +75,8 @@ public class ClassesTest {
     assertEquals(unit.getRootScope().getVariables().size(), 2);
 
     for (ITreeParserSymbolScope sc : unit.getRootScope().getChildScopesDeep()) {
-      if (sc.getRootBlock().getNode().getType() == ProParserTokenTypes.METHOD) continue;
-      if (sc.getRootBlock().getNode().getType() == ProParserTokenTypes.CATCH) continue;
+      if (((JPNode) (sc.getRootBlock().getNode())).getType() == ProParserTokenTypes.METHOD) continue;
+      if (((JPNode) (sc.getRootBlock().getNode())).getType() == ProParserTokenTypes.CATCH) continue;
       IVariable arg = sc.getVariable("arg");
       IVariable i = sc.getVariable("i");
       assertNotNull(arg, "Property var not in GET/SET scope");

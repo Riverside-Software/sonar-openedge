@@ -59,6 +59,7 @@ import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.IVariable;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.Browse;
 import org.slf4j.Logger;
@@ -102,7 +103,7 @@ public class TP01Support implements ITreeParserAction {
    * The symbol last, or currently being, defined. Needed when we have complex syntax like DEFINE id ... LIKE, where we
    * want to track the LIKE but it's not in the same grammar production as the DEFINE.
    */
-  private ISymbol currSymbol;
+  private Symbol currSymbol;
 
   private ITreeParserSymbolScope currentScope;
   private ITableBuffer lastTableReferenced;
@@ -361,8 +362,8 @@ public class TP01Support implements ITreeParserAction {
     LOG.trace("Entering defineBuffer {} {} {} {}", defAST, idNode, tableAST, init);
     ITable table = astTableLink(tableAST);
     ITableBuffer bufSymbol = currentScope.defineBuffer(idNode.getText(), table);
-    currSymbol = bufSymbol;
-    bufSymbol.setDefOrIdNode((JPNode) defAST);
+    currSymbol = (TableBuffer) bufSymbol;
+    currSymbol.setDefOrIdNode((JPNode) defAST);
     idNode.setLink(IConstants.SYMBOL, bufSymbol);
     if (init) {
       BufferScope bufScope = currentBlock.getBufferForReference(bufSymbol);
@@ -381,7 +382,7 @@ public class TP01Support implements ITreeParserAction {
     ITable table = astTableLink(tableAST);
     ITableBuffer bufSymbol = currentScope.defineBuffer("", table);
     currentBlock.getBufferForReference(bufSymbol); // Create the BufferScope
-    currSymbol = bufSymbol;
+    currSymbol = (TableBuffer) bufSymbol;
   }
 
   @Override
@@ -407,8 +408,8 @@ public class TP01Support implements ITreeParserAction {
      * so.
      */
     ISymbol symbol = SymbolFactory.create(symbolType, idNode.getText(), currentScope);
-    symbol.setDefOrIdNode(defNode);
-    currSymbol = symbol;
+    currSymbol = (Symbol) symbol;
+    currSymbol.setDefOrIdNode(defNode);
     idNode.setLink(IConstants.SYMBOL, symbol);
     return symbol;
   }
@@ -477,8 +478,8 @@ public class TP01Support implements ITreeParserAction {
   public void defineTable(JPNode defNode, JPNode idNode, int storeType) {
     LOG.trace("Entering defineTable {} {} {}", defNode, idNode, storeType);
     ITableBuffer buffer = rootScope.defineTable(idNode.getText(), storeType);
-    buffer.setDefOrIdNode(defNode);
-    currSymbol = buffer;
+    currSymbol = (TableBuffer) buffer;
+    currSymbol.setDefOrIdNode(defNode);
     currDefTable = buffer;
     currDefTableLike = null;
     currDefTableUseIndex = false;
@@ -827,7 +828,8 @@ public class TP01Support implements ITreeParserAction {
       return;
     ITreeParserSymbolScope forwardScope = funcForwards.get(idAST.getText());
     if (forwardScope != null) {
-      Routine routine = (Routine) forwardScope.getRootBlock().getNode().getSymbol();
+      JPNode node = (JPNode) forwardScope.getRootBlock().getNode();
+      Routine routine = (Routine) node.getSymbol();
       scopeSwap(forwardScope);
       BlockNode blocknode = (BlockNode) funcAST;
       blocknode.setBlock(currentBlock);
