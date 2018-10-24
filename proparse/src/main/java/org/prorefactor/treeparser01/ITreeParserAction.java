@@ -184,7 +184,7 @@ public interface ITreeParserAction {
   /**
    * Called by the tree parser to define anything other than buffers, temp/work tables, and variables/parameters.
    */
-  default ISymbol defineSymbol(int symbolType, JPNode defAST, JPNode idAST) throws SemanticException {
+  default ISymbol defineSymbol(ABLNodeType symbolType, JPNode defAST, JPNode idAST) throws SemanticException {
     return null;
   }
 

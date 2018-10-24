@@ -347,7 +347,7 @@ public class TP01Support implements ITreeParserAction {
   @Override
   public Browse defineBrowse(JPNode defAST, JPNode idAST) {
     LOG.trace("Entering defineBrowse {} - {}", defAST, idAST);
-    Browse browse = (Browse) defineSymbol(ProParserTokenTypes.BROWSE, defAST, idAST);
+    Browse browse = (Browse) defineSymbol(ABLNodeType.BROWSE, defAST, idAST);
     frameStack.nodeOfDefineBrowse(browse, (JPNode) defAST);
     return browse;
   }
@@ -398,7 +398,7 @@ public class TP01Support implements ITreeParserAction {
   }
 
   @Override
-  public ISymbol defineSymbol(int symbolType, JPNode defNode, JPNode idNode) {
+  public ISymbol defineSymbol(ABLNodeType symbolType, JPNode defNode, JPNode idNode) {
     LOG.trace("Entering defineSymbol {} - {} - {}", symbolType, defNode, idNode);
     /*
      * Some notes: We need to create the Symbol right away, because further actions in the grammar might need to set
