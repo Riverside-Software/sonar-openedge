@@ -161,7 +161,7 @@ block_opt: // TRANSLATED
   | stop_after           # block_opt_stop_after
   | on___phrase          # block_opt_on_phrase
   | framephrase          # block_opt_frame_phrase
-  | BREAK                # block_opt_brak
+  | BREAK                # block_opt_break
   | by_expr              # block_opt_by_expr
   | collatephrase        # block_opt_collate_phrase
   | // weird. Couldn't find GROUP BY in the docs, and couldn't even figure out how it gets through PSC's parser.
