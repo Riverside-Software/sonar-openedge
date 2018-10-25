@@ -15,8 +15,9 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
+import javax.annotation.Nullable;
+
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.ITreeParserSymbolScope;
 
@@ -37,24 +38,30 @@ public interface ISymbol {
   int getNumReferenced();
 
   /**
-   * If this was defined AS something, then we have an AS node
+   * If symbol is defined <code>AS something</code>, then return the <code>AS</code> node. Otherwise, return null.
    */
-  JPNode getAsNode();
+  @Nullable
+  Object getAsNode(); // TEMP-ANTLR4 Return JPNode object
 
   /**
-   * If this symbol was defined directly by a DEFINE syntax, then this returns the DEFINE node, otherwise null.
+   * If symbol is defined by a <code>DEFINE</code> syntax, then return the <code>DEFINE</code> node. Otherwise, return
+   * null.
    */
-  JPNode getDefineNode();
+  @Nullable
+  Object getDefineNode(); // TEMP-ANTLR4 Return JPNode object
 
   /**
-   * If this symbol was defined with syntax other than a direct DEFINE, then this returns the ID node, otherwise null.
+   * If symbol is defined with syntax other than a direct <code>DEFINE</code>, then return the <code>ID</code> node.
+   * Otherwise, return null.
    */
-  JPNode getIndirectDefineIdNode();
+  @Nullable
+  Object getIndirectDefineIdNode(); // TEMP-ANTLR4 Return JPNode object
 
   /**
-   * If this was defined LIKE something, then we have a LIKE node
+   * If symbol is defined <code>LIKE something</code>, then return the <code>LIKE</code> node. Otherwise, return null.
    */
-  JPNode getLikeNode();
+  @Nullable
+  Object getLikeNode(); // TEMP-ANTLR4 Return JPNode object
 
   String getName();
 
@@ -70,22 +77,6 @@ public interface ISymbol {
    * Take note of a symbol reference (read, write, reference by name)
    */
   void noteReference(ContextQualifier contextQualifier);
-
-  /**
-   * @see #getAsNode()
-   */
-  void setAsNode(JPNode asNode);
-
-  /**
-   * We store the DEFINE|FUNCTION|METHOD|PROCEDURE node if available and sensible. If defined in a syntax where there is
-   * no DEFINE node briefly preceeding the ID node, then we store the ID node.
-   */
-  void setDefOrIdNode(JPNode node);
-
-  /**
-   * @see #getLikeNode()
-   */
-  void setLikeNode(JPNode likeNode);
 
   /**
    * @return True if this variable is a procedure/function/method parameter

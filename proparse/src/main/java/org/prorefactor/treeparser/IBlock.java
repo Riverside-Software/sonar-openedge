@@ -17,7 +17,6 @@ package org.prorefactor.treeparser;
 
 import java.util.List;
 
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.treeparser.symbols.ITableBuffer;
 import org.prorefactor.treeparser.symbols.widgets.Frame;
@@ -30,7 +29,7 @@ public interface IBlock {
    * Get the node for this block. Returns a node of one of these types:
    * Program_root/DO/FOR/REPEAT/EDITING/PROCEDURE/FUNCTION/ON/TRIGGERS.
    */
-  JPNode getNode();
+  Object getNode();
 
   ITreeParserSymbolScope getSymbolScope();
 

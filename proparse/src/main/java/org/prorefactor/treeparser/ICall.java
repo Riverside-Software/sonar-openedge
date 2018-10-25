@@ -15,8 +15,6 @@
  ********************************************************************************/
 package org.prorefactor.treeparser;
 
-import org.prorefactor.core.JPNode;
-
 /**
  * Represents objects that have a value.
  */
@@ -25,6 +23,6 @@ public interface ICall {
   boolean isInHandle();
   String getRunArgument();
   void wrapUp(boolean definedInternal);
-  void setRunHandleNode(JPNode node);
-  void setPersistentHandleNode(JPNode node);
+  void setRunHandleNode(Object node);
+  void setPersistentHandleNode(Object node);
 }
