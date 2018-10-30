@@ -22,13 +22,7 @@ package eu.rssw.pct.elements;
 import java.util.Set;
 
 public abstract class AbstractAccessibleElement extends AbstractElement implements IAccessibleElement {
-  // TODO Make it protected
-  protected Set<AccessType> accessType;
-
-  public AbstractAccessibleElement(String name) {
-    // TODO Not null, but empty EnumSet
-    this(name, null);
-  }
+  private Set<AccessType> accessType;
 
   public AbstractAccessibleElement(String name, Set<AccessType> accessType) {
     super(name);

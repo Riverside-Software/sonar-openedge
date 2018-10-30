@@ -112,30 +112,6 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
   }
 
   @Override
-  public boolean isProtected() {
-    if (accessType != null)
-      return accessType.contains(AccessType.PROTECTED);
-    else
-      return (flags & PROTECTED_METHOD) != 0;
-  }
-
-  @Override
-  public boolean isPublic() {
-    if (accessType != null)
-      return accessType.contains(AccessType.PUBLIC);
-    else
-      return (flags & PUBLIC_METHOD) != 0;
-  }
-
-  @Override
-  public boolean isPrivate() {
-    if (accessType != null)
-      return accessType.contains(AccessType.PRIVATE);
-    else
-      return (flags & PRIVATE_METHOD) != 0;
-  }
-
-  @Override
   public boolean isStatic() {
     return (flags & STATIC_METHOD) != 0;
   }

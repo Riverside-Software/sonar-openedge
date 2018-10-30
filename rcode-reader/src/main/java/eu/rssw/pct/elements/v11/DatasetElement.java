@@ -30,14 +30,12 @@ import eu.rssw.pct.elements.IDataRelationElement;
 import eu.rssw.pct.elements.IDatasetElement;
 
 public class DatasetElement extends AbstractAccessibleElement implements IDatasetElement {
-  private final int prvte;
   private final String[] bufferNames;
   private final IDataRelationElement[] relations;
 
-  public DatasetElement(String name, Set<AccessType> accessType, int prvte, String[] bufferNames,
+  public DatasetElement(String name, Set<AccessType> accessType, String[] bufferNames,
       IDataRelationElement[] relations) {
     super(name, accessType);
-    this.prvte = prvte;
     this.bufferNames = bufferNames;
     this.relations = relations;
   }
@@ -46,9 +44,6 @@ public class DatasetElement extends AbstractAccessibleElement implements IDatase
       int textAreaOffset, ByteOrder order) {
     int bufferCount = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
     int relationshipCount = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
-    int prvte = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
-    // int flags = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
-    // int crc = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
@@ -67,7 +62,7 @@ public class DatasetElement extends AbstractAccessibleElement implements IDatase
       relations[zz] = param;
     }
 
-    return new DatasetElement(name2, accessType, prvte, bufferNames, relations);
+    return new DatasetElement(name2, accessType, bufferNames, relations);
   }
 
   @Override
