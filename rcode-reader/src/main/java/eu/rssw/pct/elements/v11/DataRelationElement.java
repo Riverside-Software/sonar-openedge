@@ -82,7 +82,7 @@ public class DataRelationElement extends AbstractElement implements IDataRelatio
   }
 
   @Override
-  public int size() {
+  public int getSizeInRCode() {
     return 24;
   }
 }

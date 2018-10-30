@@ -96,7 +96,7 @@ public class VariableElement extends AbstractAccessibleElement implements IVaria
   }
 
   @Override
-  public int size() {
+  public int getSizeInRCode() {
     return 24;
   }
 

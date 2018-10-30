@@ -81,7 +81,7 @@ public class DataSourceElement extends AbstractAccessibleElement implements IDat
   }
 
   @Override
-  public int size() {
+  public int getSizeInRCode() {
     int size = 24 + (this.bufferNames.length * 4);
     return size + 7 & -8;
   }

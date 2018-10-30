@@ -78,7 +78,7 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
     IParameter[] parameters = new IParameter[paramCount];
     for (int zz = 0; zz < paramCount; zz++) {
       IParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
-      currPos += param.size();
+      currPos += param.getSizeInRCode();
       parameters[zz] = param;
     }
     
@@ -95,10 +95,10 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
   }
 
   @Override
-  public int size() {
+  public int getSizeInRCode() {
     int size = 24;
     for (IParameter p : parameters) {
-      size += ((MethodParameter) p).size();
+      size += ((MethodParameter) p).getSizeInRCode();
     }
     return size;
   }

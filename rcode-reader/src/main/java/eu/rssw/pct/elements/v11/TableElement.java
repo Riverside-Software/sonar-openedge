@@ -62,14 +62,14 @@ public class TableElement extends AbstractAccessibleElement implements ITableEle
     int currPos = currentPos + 24;
     for (int zz = 0; zz < fieldCount; zz++) {
       IVariableElement var = VariableElement.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
-      currPos += var.size();
+      currPos += var.getSizeInRCode();
       fields[zz] = var;
     }
 
     IIndexElement[] indexes = new IndexElement[indexCount];
     for (int zz = 0; zz < indexCount; zz++) {
       IIndexElement idx = IndexElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
-      currPos += idx.size();
+      currPos += idx.getSizeInRCode();
       indexes[zz] = idx;
     }
 
@@ -96,13 +96,13 @@ public class TableElement extends AbstractAccessibleElement implements ITableEle
   }
 
   @Override
-  public int size() {
+  public int getSizeInRCode() {
     int size = 24;
     for (IVariableElement e : fields) {
-      size += e.size();
+      size += e.getSizeInRCode();
     }
     for (IIndexElement e : indexes) {
-      size += e.size();
+      size += e.getSizeInRCode();
     }
     return size;
   }

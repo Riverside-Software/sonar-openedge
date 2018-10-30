@@ -21,5 +21,5 @@ package eu.rssw.pct.elements;
 
 public interface IElement {
   String getName();
-  int size();
+  int getSizeInRCode();
 }

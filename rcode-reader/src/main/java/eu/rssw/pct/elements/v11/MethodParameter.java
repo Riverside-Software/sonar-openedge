@@ -77,7 +77,7 @@ public class MethodParameter extends AbstractElement implements IParameter {
   }
 
   @Override
-  public int size() {
+  public int getSizeInRCode() {
     return 24;
   }
 

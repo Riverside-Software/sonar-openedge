@@ -67,7 +67,7 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
     int currPos = currentPos + 8;
     if ((flags & PROPERTY_AS_VARIABLE) != 0) {
       variable = VariableElement.fromDebugSegment("", accessType, segment, currPos, textAreaOffset, order);
-      currPos += variable.size();
+      currPos += variable.getSizeInRCode();
     }
 
     IMethodElement getter = null;
@@ -78,7 +78,7 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
       if ((flags & PROTECTED_GETTER) != 0)
         atp.add(AccessType.PROTECTED);
       getter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
-      currPos += getter.size();
+      currPos += getter.getSizeInRCode();
     }
     IMethodElement setter = null;
     if ((flags & HAS_SETTER) != 0) {
@@ -107,16 +107,16 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
   }
 
   @Override
-  public int size() {
+  public int getSizeInRCode() {
     int size = 8;
     if (this.propertyAsVariable()) {
-      size += this.variable.size();
+      size += this.variable.getSizeInRCode();
     }
     if (this.hasGetter()) {
-      size += this.getter.size();
+      size += this.getter.getSizeInRCode();
     }
     if (this.hasSetter()) {
-      size += this.setter.size();
+      size += this.setter.getSizeInRCode();
     }
     return size;
   }

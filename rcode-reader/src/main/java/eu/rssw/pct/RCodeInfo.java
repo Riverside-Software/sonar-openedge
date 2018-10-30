@@ -319,47 +319,47 @@ public class RCodeInfo {
       switch (ElementKind.getKind(entry[2])) {
         case METHOD:
           IMethodElement mthd = MethodElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += mthd.size();
+          currOffset += mthd.getSizeInRCode();
           typeInfo.getMethods().add(mthd);
           break;
         case PROPERTY:
           IPropertyElement prop = PropertyElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset,
               order);
-          currOffset += prop.size();
+          currOffset += prop.getSizeInRCode();
           typeInfo.getProperties().add(prop);
           break;
         case VARIABLE:
           IVariableElement var = VariableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset,
               order);
-          currOffset += var.size();
+          currOffset += var.getSizeInRCode();
           typeInfo.getVariables().add(var);
           break;
         case TABLE:
           ITableElement tbl = TableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += tbl.size();
+          currOffset += tbl.getSizeInRCode();
           typeInfo.getTables().add(tbl);
           break;
         case BUFFER:
           IBufferElement buf = BufferElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += buf.size();
+          currOffset += buf.getSizeInRCode();
           typeInfo.getBuffers().add(buf);
           break;
         case QUERY:
           IQueryElement qry = QueryElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += qry.size();
+          currOffset += qry.getSizeInRCode();
           break;
         case DATASET:
           IDatasetElement ds = DatasetElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += ds.size();
+          currOffset += ds.getSizeInRCode();
           break;
         case DATASOURCE:
           IDataSourceElement dso = DataSourceElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset,
               order);
-          currOffset += dso.size();
+          currOffset += dso.getSizeInRCode();
           break;
         case EVENT:
           IEventElement evt = EventElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += evt.size();
+          currOffset += evt.getSizeInRCode();
           typeInfo.getEvents().add(evt);
           break;
         case UNKNOWN:

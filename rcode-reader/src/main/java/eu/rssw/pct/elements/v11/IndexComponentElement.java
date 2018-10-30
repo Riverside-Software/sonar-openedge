@@ -46,7 +46,7 @@ public class IndexComponentElement extends AbstractElement implements IIndexComp
   }
 
   @Override
-  public int size() {
+  public int getSizeInRCode() {
     return 8;
   }
 

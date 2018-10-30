@@ -76,7 +76,7 @@ public class BufferElement extends AbstractAccessibleElement implements IBufferE
   }
 
   @Override
-  public int size() {
+  public int getSizeInRCode() {
     return 24;
   }
 

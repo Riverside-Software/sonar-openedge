@@ -72,7 +72,7 @@ public class QueryElement extends AbstractAccessibleElement implements IQueryEle
   }
 
   @Override
-  public int size() {
+  public int getSizeInRCode() {
     return (24 + 4 * bufferNames.length) + 7 & -8;
   }
 

@@ -58,25 +58,11 @@ public class DatasetElement extends AbstractAccessibleElement implements IDatase
     IDataRelationElement[] relations = new DataRelationElement[relationshipCount];
     for (int zz = 0; zz < relationshipCount; zz++) {
       IDataRelationElement param = DataRelationElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
-      currPos += param.size();
+      currPos += param.getSizeInRCode();
       relations[zz] = param;
     }
 
     return new DatasetElement(name2, accessType, bufferNames, relations);
-  }
-
-  @Override
-  public String toString() {
-    return String.format("Dataset %s for %d buffer(s) and %d relations", name, bufferNames.length, relations.length);
-  }
-
-  @Override
-  public int size() {
-    int size = 24 + (bufferNames.length * 4);
-    for (IDataRelationElement elem : relations) {
-      size += elem.size();
-    }
-    return size + 7 & -8;
   }
 
   public IDataRelationElement[] getDataRelations() {
@@ -85,6 +71,20 @@ public class DatasetElement extends AbstractAccessibleElement implements IDatase
 
   public String[] getBufferNames() {
     return bufferNames;
+  }
+
+  @Override
+  public int getSizeInRCode() {
+    int size = 24 + (bufferNames.length * 4);
+    for (IDataRelationElement elem : relations) {
+      size += elem.getSizeInRCode();
+    }
+    return size + 7 & -8;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Dataset %s for %d buffer(s) and %d relations", name, bufferNames.length, relations.length);
   }
 
 }

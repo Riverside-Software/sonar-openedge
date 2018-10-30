@@ -68,7 +68,7 @@ public class EventElement extends AbstractAccessibleElement implements IEventEle
     IParameter[] parameters = new IParameter[parameterCount];
     for (int zz = 0; zz < parameterCount; zz++) {
       IParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
-      currPos += param.size();
+      currPos += param.getSizeInRCode();
       parameters[zz] = param;
     }
 
@@ -100,10 +100,10 @@ public class EventElement extends AbstractAccessibleElement implements IEventEle
   }
 
   @Override
-  public int size() {
+  public int getSizeInRCode() {
     int size = 24;
     for (IParameter p : parameters) {
-      size += ((MethodParameter) p).size();
+      size += ((MethodParameter) p).getSizeInRCode();
     }
 
     return size;

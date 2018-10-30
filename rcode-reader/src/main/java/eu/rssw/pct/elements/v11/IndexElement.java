@@ -55,7 +55,7 @@ public class IndexElement extends AbstractElement implements IIndexElement {
     IIndexComponentElement[] indexComponents = new IndexComponentElement[componentCount];
     for (int zz = 0; zz < componentCount; zz++) {
       IIndexComponentElement component = IndexComponentElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
-      currPos += component.size();
+      currPos += component.getSizeInRCode();
       indexComponents[zz] = component;
     }
 
@@ -88,10 +88,10 @@ public class IndexElement extends AbstractElement implements IIndexElement {
   }
 
   @Override
-  public int size() {
+  public int getSizeInRCode() {
     int size = 16;
     for (IIndexComponentElement elem : indexComponents) {
-      size += elem.size();
+      size += elem.getSizeInRCode();
     }
     return size;
   }
