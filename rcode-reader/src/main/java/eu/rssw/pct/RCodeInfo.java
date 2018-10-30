@@ -35,16 +35,27 @@ import java.util.Set;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 
-import eu.rssw.pct.elements.BufferElement;
-import eu.rssw.pct.elements.DataSourceElement;
-import eu.rssw.pct.elements.DatasetElement;
+import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.ElementKind;
-import eu.rssw.pct.elements.EventElement;
-import eu.rssw.pct.elements.MethodElement;
-import eu.rssw.pct.elements.PropertyElement;
-import eu.rssw.pct.elements.QueryElement;
-import eu.rssw.pct.elements.TableElement;
-import eu.rssw.pct.elements.VariableElement;
+import eu.rssw.pct.elements.IBufferElement;
+import eu.rssw.pct.elements.IDataSourceElement;
+import eu.rssw.pct.elements.IDatasetElement;
+import eu.rssw.pct.elements.IEventElement;
+import eu.rssw.pct.elements.IMethodElement;
+import eu.rssw.pct.elements.IPropertyElement;
+import eu.rssw.pct.elements.IQueryElement;
+import eu.rssw.pct.elements.ITableElement;
+import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.v11.BufferElement;
+import eu.rssw.pct.elements.v11.DataSourceElement;
+import eu.rssw.pct.elements.v11.DatasetElement;
+import eu.rssw.pct.elements.v11.EventElement;
+import eu.rssw.pct.elements.v11.MethodElement;
+import eu.rssw.pct.elements.v11.PropertyElement;
+import eu.rssw.pct.elements.v11.QueryElement;
+import eu.rssw.pct.elements.v11.TableElement;
+import eu.rssw.pct.elements.v11.VariableElement;
 
 /**
  * Import debug segment information from rcode.
@@ -305,48 +316,51 @@ public class RCodeInfo {
       String name = readNullTerminatedString(segment, textAreaOffset + entry[3]);
       Set<AccessType> set = AccessType.getTypeFromString(entry[1]);
 
-      switch(ElementKind.getKind(entry[2])) {
+      switch (ElementKind.getKind(entry[2])) {
         case METHOD:
-          MethodElement mthd = MethodElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
+          IMethodElement mthd = MethodElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
           currOffset += mthd.size();
           typeInfo.getMethods().add(mthd);
           break;
-        case PROPERTY:          
-            PropertyElement prop = PropertyElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += prop.size();
-            typeInfo.getProperties().add(prop);
-            break;
+        case PROPERTY:
+          IPropertyElement prop = PropertyElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset,
+              order);
+          currOffset += prop.size();
+          typeInfo.getProperties().add(prop);
+          break;
         case VARIABLE:
-            VariableElement var = VariableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += var.size();
-            typeInfo.getVariables().add(var);
+          IVariableElement var = VariableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset,
+              order);
+          currOffset += var.size();
+          typeInfo.getVariables().add(var);
           break;
         case TABLE:
-            TableElement tbl = TableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += tbl.size();
-            typeInfo.getTables().add(tbl);
+          ITableElement tbl = TableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
+          currOffset += tbl.size();
+          typeInfo.getTables().add(tbl);
           break;
         case BUFFER:
-            BufferElement buf =  BufferElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += buf.size();
-            typeInfo.getBuffers().add(buf);
+          IBufferElement buf = BufferElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
+          currOffset += buf.size();
+          typeInfo.getBuffers().add(buf);
           break;
         case QUERY:
-            QueryElement qry = QueryElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += qry.size();
+          IQueryElement qry = QueryElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
+          currOffset += qry.size();
           break;
         case DATASET:
-            DatasetElement ds = DatasetElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += ds.size();
+          IDatasetElement ds = DatasetElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
+          currOffset += ds.size();
           break;
         case DATASOURCE:
-           DataSourceElement dso = DataSourceElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += dso.size();
+          IDataSourceElement dso = DataSourceElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset,
+              order);
+          currOffset += dso.size();
           break;
         case EVENT:
-           EventElement evt = EventElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += evt.size();
-            typeInfo.getEvents().add(evt);
+          IEventElement evt = EventElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
+          currOffset += evt.size();
+          typeInfo.getEvents().add(evt);
           break;
         case UNKNOWN:
           throw new InvalidRCodeException("Found element kind " + entry[2]);
