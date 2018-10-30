@@ -17,7 +17,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements.v11;
+package eu.rssw.pct.elements.v12;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -25,31 +25,22 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import eu.rssw.pct.RCodeInfo;
-import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.IVariableElement;
 
-public class PropertyElement extends AbstractAccessibleElement implements IPropertyElement {
-
-  private final int flags;
-  private final IVariableElement variable;
-  private final IMethodElement getter;
-  private final IMethodElement setter;
+public class PropertyElement extends eu.rssw.pct.elements.v11.PropertyElement {
+  // TODO Implement enum support
 
   public PropertyElement(String name, Set<AccessType> accessType, int flags, IVariableElement var, IMethodElement getter, IMethodElement setter) {
-    super(name, accessType);
-    this.flags = flags;
-    this.variable = var;
-    this.getter = getter;
-    this.setter = setter;
+    super(name, accessType, flags, var, getter, setter);
   }
 
   public static IPropertyElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
-    int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
 
-    int nameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
+    int nameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     IVariableElement variable = null;
@@ -78,88 +69,14 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
         atp.add(AccessType.PROTECTED);
       setter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
     }
+    // TODO Implement enum support
     return new PropertyElement(name2, accessType, flags, variable, getter, setter);
-  }
-
-  public IVariableElement getVariable() {
-    return this.variable;
-  }
-
-  @Override
-  public IMethodElement getGetter() {
-    return this.getter;
-  }
-
-  @Override
-  public IMethodElement getSetter() {
-    return this.setter;
   }
 
   @Override
   public int getSizeInRCode() {
-    int size = 8;
-    if (this.propertyAsVariable()) {
-      size += this.variable.getSizeInRCode();
-    }
-    if (this.hasGetter()) {
-      size += this.getter.getSizeInRCode();
-    }
-    if (this.hasSetter()) {
-      size += this.setter.getSizeInRCode();
-    }
-    return size;
-  }
-
-  public boolean propertyAsVariable() {
-    return (flags & PROPERTY_AS_VARIABLE) != 0;
-  }
-
-  public boolean hasGetter() {
-    return (flags & HAS_GETTER) != 0;
-  }
-
-  public boolean hasSetter() {
-    return (flags & HAS_SETTER) != 0;
-  }
-
-  public boolean isGetterPublic() {
-    return (flags & PUBLIC_GETTER) != 0;
-  }
-
-  public boolean isGetterProtected() {
-    return (flags & PROTECTED_GETTER) != 0;
-  }
-
-  public boolean isGetterPrivate() {
-    return (flags & PRIVATE_GETTER) != 0;
-  }
-
-  public boolean isSetterPublic() {
-    return (flags & PUBLIC_SETTER) != 0;
-  }
-
-  public boolean isSetterProtected() {
-    return (flags & PROTECTED_SETTER) != 0;
-  }
-
-  public boolean isSetterPrivate() {
-    return (flags & PRIVATE_SETTER) != 0;
-  }
-
-  public boolean isIndexed() {
-    return (flags & PROPERTY_IS_INDEXED) != 0;
-  }
-
-  public boolean isDefault() {
-    return (flags & PROPERTY_IS_DEFAULT) != 0;
-  }
-
-  public boolean canRead() {
-    return (isGetterPrivate() || isGetterProtected() || isGetterPublic());
-  }
-
-  public boolean canWrite() {
-    return (isSetterPrivate() || isSetterProtected() || isSetterPublic());
+    // TODO Implement enum support
+    return super.getSizeInRCode();
   }
 
 }

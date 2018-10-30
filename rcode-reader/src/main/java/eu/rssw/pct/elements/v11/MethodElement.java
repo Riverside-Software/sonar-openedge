@@ -98,7 +98,7 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
   public int getSizeInRCode() {
     int size = 24;
     for (IParameter p : parameters) {
-      size += ((MethodParameter) p).getSizeInRCode();
+      size += p.getSizeInRCode();
     }
     return size;
   }
