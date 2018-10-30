@@ -23,12 +23,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import eu.rssw.pct.elements.BufferElement;
-import eu.rssw.pct.elements.EventElement;
-import eu.rssw.pct.elements.MethodElement;
-import eu.rssw.pct.elements.PropertyElement;
-import eu.rssw.pct.elements.TableElement;
-import eu.rssw.pct.elements.VariableElement;
+import eu.rssw.pct.elements.IBufferElement;
+import eu.rssw.pct.elements.IEventElement;
+import eu.rssw.pct.elements.IMethodElement;
+import eu.rssw.pct.elements.IPropertyElement;
+import eu.rssw.pct.elements.ITableElement;
+import eu.rssw.pct.elements.IVariableElement;
 
 public class TypeInfo {
   private static final int IS_FINAL = 1;
@@ -48,15 +48,15 @@ public class TypeInfo {
   protected int flags;
   private List<String> interfaces = new ArrayList<>();
 
-  private Collection<MethodElement> methods = new ArrayList<>();
-  private Collection<PropertyElement> properties = new ArrayList<>();
-  private Collection<EventElement> events = new ArrayList<>();
-  private Collection<VariableElement> variables = new ArrayList<>();
-  private Collection<TableElement> tables = new ArrayList<>();
-  private Collection<BufferElement> buffers = new ArrayList<>();
+  private Collection<IMethodElement> methods = new ArrayList<>();
+  private Collection<IPropertyElement> properties = new ArrayList<>();
+  private Collection<IEventElement> events = new ArrayList<>();
+  private Collection<IVariableElement> variables = new ArrayList<>();
+  private Collection<ITableElement> tables = new ArrayList<>();
+  private Collection<IBufferElement> buffers = new ArrayList<>();
 
-  public BufferElement getBufferFor(String name) {
-    for (BufferElement tbl : buffers) {
+  public IBufferElement getBufferFor(String name) {
+    for (IBufferElement tbl : buffers) {
       if (tbl.getName().equalsIgnoreCase(name)) {
         return tbl;
       }
@@ -65,7 +65,7 @@ public class TypeInfo {
   }
 
   public boolean hasTempTable(String inName) {
-    for (TableElement tbl : tables) {
+    for (ITableElement tbl : tables) {
       if (tbl.getName().equalsIgnoreCase(inName)) {
         return true;
       }
@@ -74,15 +74,15 @@ public class TypeInfo {
   }
 
   public boolean hasMethod(String name) {
-    for (MethodElement mthd : methods) {
+    for (IMethodElement mthd : methods) {
       if (mthd.getName().equalsIgnoreCase(name))
         return true;
     }
     return false;
   }
 
-  public TableElement getTempTable(String inName) {
-    for (TableElement tbl : tables) {
+  public ITableElement getTempTable(String inName) {
+    for (ITableElement tbl : tables) {
       if (tbl.getName().equalsIgnoreCase(inName)) {
         return tbl;
       }
@@ -91,16 +91,16 @@ public class TypeInfo {
   }
 
   public boolean hasProperty(String name) {
-    for (PropertyElement prop : properties) {
+    for (IPropertyElement prop : properties) {
       if (prop.getName().equalsIgnoreCase(name) && (prop.isPublic() || prop.isProtected()))
         return true;
     }
     return false;
   }
 
-  protected PropertyElement getProperty(String name) {
+  protected IPropertyElement getProperty(String name) {
     // Only for testing
-    for (PropertyElement prop : properties) {
+    for (IPropertyElement prop : properties) {
       if (prop.getName().equalsIgnoreCase(name))
         return prop;
     }
@@ -109,7 +109,7 @@ public class TypeInfo {
 
   public boolean hasBuffer(String inName) {
     // TODO Can it be abbreviated ??
-    for (BufferElement buf : buffers) {
+    for (IBufferElement buf : buffers) {
       if (buf.getName().equalsIgnoreCase(inName)) {
         return true;
       }
@@ -117,8 +117,8 @@ public class TypeInfo {
     return false;
   }
 
-  public BufferElement getBuffer(String inName) {
-    for (BufferElement buf : buffers) {
+  public IBufferElement getBuffer(String inName) {
+    for (IBufferElement buf : buffers) {
       if (buf.getName().equalsIgnoreCase(inName)) {
         return buf;
       }
@@ -126,27 +126,27 @@ public class TypeInfo {
     return null;
   }
 
-  public Collection<MethodElement> getMethods() {
+  public Collection<IMethodElement> getMethods() {
     return methods;
   }
 
-  public Collection<PropertyElement> getProperties() {
+  public Collection<IPropertyElement> getProperties() {
     return properties;
   }
 
-  public Collection<EventElement> getEvents() {
+  public Collection<IEventElement> getEvents() {
     return events;
   }
 
-  public Collection<VariableElement> getVariables() {
+  public Collection<IVariableElement> getVariables() {
     return variables;
   }
 
-  public Collection<TableElement> getTables() {
+  public Collection<ITableElement> getTables() {
     return tables;
   }
 
-  public Collection<BufferElement> getBuffers() {
+  public Collection<IBufferElement> getBuffers() {
     return buffers;
   }
 

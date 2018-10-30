@@ -17,12 +17,15 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class IndexComponentElement extends AbstractElement {
+import eu.rssw.pct.elements.AbstractElement;
+import eu.rssw.pct.elements.IIndexComponentElement;
+
+public class IndexComponentElement extends AbstractElement implements IIndexComponentElement {
   private final int ascending;
   private final int flags;
   private final int position;
@@ -33,7 +36,7 @@ public class IndexComponentElement extends AbstractElement {
     this.ascending = ascending;
   }
 
-  protected static IndexComponentElement fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
+  protected static IIndexComponentElement fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
     int ascending = segment[currentPos];
     int flags = segment[currentPos + 1];

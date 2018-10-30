@@ -23,8 +23,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 
-import eu.rssw.pct.elements.MethodElement;
-import eu.rssw.pct.elements.MethodParameter;
+import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.v11.MethodElement;
+import eu.rssw.pct.elements.v11.MethodParameter;
 
 public final class ProgressClasses {
   private static final IParameter[] EMPTY_PARAMETERS = new MethodParameter[] {};

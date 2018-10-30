@@ -17,30 +17,33 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.AbstractElement;
+import eu.rssw.pct.elements.IIndexComponentElement;
+import eu.rssw.pct.elements.IIndexElement;
 
-public class IndexElement extends AbstractElement {
+public class IndexElement extends AbstractElement implements IIndexElement {
   private static final int UNIQUE_INDEX = 2;
   private static final int WORD_INDEX = 8;
   private static final int DEFAULT_INDEX = 16;
 
+  private final IIndexComponentElement[] indexComponents;
   private final int primary;
   private final int flags;
-  private final IndexComponentElement[] indexComponents;
 
-  public IndexElement(String name, int primary, int flags, IndexComponentElement[] indexComponents) {
+  public IndexElement(String name, int primary, int flags, IIndexComponentElement[] indexComponents) {
     super(name);
     this.primary = primary;
     this.flags = flags;
     this.indexComponents = indexComponents;
   }
 
-  protected static IndexElement fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
+  protected static IIndexElement fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
     int primary = segment[currentPos];
     int flags = segment[currentPos + 1];
 
@@ -49,9 +52,9 @@ public class IndexElement extends AbstractElement {
     String name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int currPos = currentPos + 16;
-    IndexComponentElement[] indexComponents = new IndexComponentElement[componentCount];
+    IIndexComponentElement[] indexComponents = new IndexComponentElement[componentCount];
     for (int zz = 0; zz < componentCount; zz++) {
-      IndexComponentElement component = IndexComponentElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IIndexComponentElement component = IndexComponentElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += component.size();
       indexComponents[zz] = component;
     }
@@ -60,31 +63,37 @@ public class IndexElement extends AbstractElement {
   }
 
   @Override
+  public IIndexComponentElement[] getIndexComponents() {
+    return this.indexComponents;
+  }
+
+  @Override
+  public boolean isPrimary() {
+    return primary == 1;
+  }
+
+  @Override
+  public boolean isUnique() {
+    return (flags & UNIQUE_INDEX) != 0;
+  }
+
+  @Override
+  public boolean isWordIndex() {
+    return (flags & WORD_INDEX) != 0;
+  }
+
+  @Override
+  public boolean isDefaultIndex() {
+    return (flags & DEFAULT_INDEX) != 0;
+  }
+
+  @Override
   public int size() {
     int size = 16;
-    for (IndexComponentElement elem : indexComponents) {
+    for (IIndexComponentElement elem : indexComponents) {
       size += elem.size();
     }
     return size;
   }
 
-  public IndexComponentElement[] getIndexComponents() {
-    return this.indexComponents;
-  }
-
-  public boolean isPrimary() {
-    return primary == 1;
-  }
-
-  public boolean isUnique() {
-    return (flags & UNIQUE_INDEX) != 0;
-  }
-
-  public boolean isWordIndex() {
-    return (flags & WORD_INDEX) != 0;
-  }
-
-  public boolean isDefaultIndex() {
-    return (flags & DEFAULT_INDEX) != 0;
-  }
 }

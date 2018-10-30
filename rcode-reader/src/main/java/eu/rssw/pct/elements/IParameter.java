@@ -17,44 +17,13 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct;
+package eu.rssw.pct.elements;
 
-import java.util.EnumSet;
-import java.util.Set;
-
-public enum AccessType {
-  PUBLIC,
-  PRIVATE,
-  PROTECTED,
-  STATIC,
-  ABSTRACT,
-  FINAL,
-  CONSTRUCTOR;
-
-  public static Set<AccessType> getTypeFromString(int val) {
-    Set<AccessType> set = EnumSet.noneOf(AccessType.class);
-    switch (val & 0x07) {
-      case 1:
-        set.add(PUBLIC);
-        break;
-      case 2:
-        set.add(PROTECTED);
-        break;
-      case 4:
-        set.add(PRIVATE);
-        break;
-      default:
-        break;
-    }
-    if ((val & 0x08) != 0)
-      set.add(CONSTRUCTOR);
-    if ((val & 0x10) != 0)
-      set.add(FINAL);
-    if ((val & 0x20) != 0)
-      set.add(STATIC);
-    if ((val & 0x40) != 0)
-      set.add(ABSTRACT);
-
-    return set;
-  }
+public interface IParameter extends IElement {
+  public String getName();
+  public String getMode();
+  public int getExtent();
+  public String getDataType();
+  public ParameterType getParameterType();
+  public boolean isClassDataType();
 }

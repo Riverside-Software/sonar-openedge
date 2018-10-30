@@ -17,41 +17,9 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct;
+package eu.rssw.pct.elements;
 
-public enum ParameterType {
-  VARIABLE(2),
-  TABLE(3),
-  BUFFER(4),
-  QUERY(5),
-  DATASET(6),
-  DATA_SOURCE(7),
-  FORM(8),
-  BROWSE(9),
-  BUFFER_TEMP_TABLE(103),
-  UNKNOWN(-1);
-
-  private final int num;
-
-  private ParameterType(int num) {
-    this.num = num;
-  }
-
-  public int getNum() {
-    return this.num;
-  }
-
-  public String getName() {
-    return this.name().replace('_', '-');
-  }
-
-  public static ParameterType getParameterType(int type) {
-    for (ParameterType t : ParameterType.values()) {
-      if (t.num == type) {
-        return t;
-      }
-    }
-    return UNKNOWN;
-
-  }
+public interface IElement {
+  String getName();
+  int size();
 }

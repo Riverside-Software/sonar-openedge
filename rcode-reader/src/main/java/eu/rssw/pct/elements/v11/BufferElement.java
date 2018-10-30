@@ -17,16 +17,18 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Set;
 
-import eu.rssw.pct.AccessType;
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.AbstractAccessibleElement;
+import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.IBufferElement;
 
-public class BufferElement extends AbstractAccessibleElement {
+public class BufferElement extends AbstractAccessibleElement implements IBufferElement {
   private static final int TEMP_TABLE = 4;
 
   private final String tableName;
@@ -40,7 +42,7 @@ public class BufferElement extends AbstractAccessibleElement {
     this.flags = flags;
   }
 
-  public static BufferElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
+  public static IBufferElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
     int nameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
@@ -54,23 +56,23 @@ public class BufferElement extends AbstractAccessibleElement {
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + databaseNameOffset);
 
     int flags = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort();
-    // int crc = ByteBuffer.wrap(segment, currentPos + 14, Short.BYTES).order(order).getShort();
-    // int prvt = ByteBuffer.wrap(segment, currentPos + 16, Short.BYTES).order(order).getShort();
 
     return new BufferElement(name2, accessType, tableName, databaseName, flags);
   }
 
   @Override
-  public String toString() {
-    return String.format("Buffer %s for %s.%s", name, databaseName, tableName);
-  }
-
   public String getTableName() {
     return tableName;
   }
 
+  @Override
   public String getDatabaseName() {
     return databaseName;
+  }
+
+  @Override
+  public boolean isTempTableBuffer() {
+    return (flags & TEMP_TABLE) != 0;
   }
 
   @Override
@@ -78,8 +80,8 @@ public class BufferElement extends AbstractAccessibleElement {
     return 24;
   }
 
-  public boolean isTempTableBuffer() {
-    return (flags & TEMP_TABLE) != 0;
+  @Override
+  public String toString() {
+    return String.format("Buffer %s for %s.%s", name, databaseName, tableName);
   }
-
 }

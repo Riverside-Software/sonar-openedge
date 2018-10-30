@@ -17,16 +17,18 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Set;
 
-import eu.rssw.pct.AccessType;
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.AbstractAccessibleElement;
+import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.IDataSourceElement;
 
-public class DataSourceElement extends AbstractAccessibleElement {
+public class DataSourceElement extends AbstractAccessibleElement implements IDataSourceElement {
   private final String queryName;
   private final String keyComponentNames;
   private final String[] bufferNames;
@@ -39,11 +41,9 @@ public class DataSourceElement extends AbstractAccessibleElement {
     this.bufferNames = bufferNames;
   }
 
-  public static DataSourceElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment,
+  public static IDataSourceElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment,
       int currentPos, int textAreaOffset, ByteOrder order) {
     int bufferCount = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
-    // int flags = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
-    // int crc = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 12, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
@@ -65,22 +65,25 @@ public class DataSourceElement extends AbstractAccessibleElement {
     return new DataSourceElement(name2, accessType, queryName, keyComponentNames, bufferNames);
   }
 
+  @Override
   public String getQueryName() {
     return queryName;
   }
 
+  @Override
   public String getKeyComponents() {
     return keyComponentNames;
+  }
+
+  @Override
+  public String[] getBufferNames() {
+    return bufferNames;
   }
 
   @Override
   public int size() {
     int size = 24 + (this.bufferNames.length * 4);
     return size + 7 & -8;
-  }
-
-  public String[] getBufferNames() {
-    return bufferNames;
   }
 
 }

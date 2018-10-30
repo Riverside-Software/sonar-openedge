@@ -36,7 +36,7 @@ import org.sonar.plugins.openedge.api.objects.RCodeTTWrapper;
 import com.google.common.base.Strings;
 
 import eu.rssw.pct.TypeInfo;
-import eu.rssw.pct.elements.BufferElement;
+import eu.rssw.pct.elements.IBufferElement;
 
 /**
  * A ScopeRoot object is created for each compile unit, and it represents the program (topmost) scope. For classes, it
@@ -203,7 +203,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
     TypeInfo info = typeInfo;
     while (info != null) {
       if (info.hasBuffer(name)) {
-        BufferElement elem = info.getBuffer(name);
+        IBufferElement elem = info.getBuffer(name);
         ITable tbl = null;
         if (!Strings.isNullOrEmpty(elem.getDatabaseName())) {
           tbl = refSession.getSchema().lookupTable(elem.getDatabaseName(), elem.getTableName());

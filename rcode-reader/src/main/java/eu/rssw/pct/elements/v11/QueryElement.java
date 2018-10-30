@@ -17,16 +17,18 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Set;
 
-import eu.rssw.pct.AccessType;
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.AbstractAccessibleElement;
+import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.IQueryElement;
 
-public class QueryElement extends AbstractAccessibleElement {
+public class QueryElement extends AbstractAccessibleElement implements IQueryElement {
   private final String[] bufferNames;
   private final int prvte;
   private final int flags;
@@ -38,13 +40,11 @@ public class QueryElement extends AbstractAccessibleElement {
     this.prvte = prvte;
   }
 
-  public static QueryElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
+  public static IQueryElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
       int textAreaOffset, ByteOrder order) {
     int bufferCount = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
     int prvte = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
     int flags = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
-    // int cacheSize = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
-    // int crc = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
@@ -58,6 +58,11 @@ public class QueryElement extends AbstractAccessibleElement {
     return new QueryElement(name2, accessType, bufferNames, flags, prvte);
   }
 
+  @Override
+  public String[] getBufferNames() {
+    return bufferNames;
+  }
+
   public int getPrvte() {
     return prvte;
   }
@@ -69,10 +74,6 @@ public class QueryElement extends AbstractAccessibleElement {
   @Override
   public int size() {
     return (24 + 4 * bufferNames.length) + 7 & -8;
-  }
-
-  public String[] getBufferNames() {
-    return bufferNames;
   }
 
 }

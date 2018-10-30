@@ -17,18 +17,20 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Set;
 
-import eu.rssw.pct.AccessType;
-import eu.rssw.pct.DataType;
-import eu.rssw.pct.IParameter;
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.AbstractAccessibleElement;
+import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IMethodElement;
+import eu.rssw.pct.elements.IParameter;
 
-public class MethodElement extends AbstractAccessibleElement {
+public class MethodElement extends AbstractAccessibleElement implements IMethodElement {
   protected static final int METHOD_DESCRIPTOR_SIZE = 24;
   protected static final int FINAL_METHOD = 1;
   protected static final int PROTECTED_METHOD = 2;
@@ -57,7 +59,7 @@ public class MethodElement extends AbstractAccessibleElement {
     this.parameters = parameters;
   }
 
-  public static MethodElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
+  public static IMethodElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
     int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
     int returnType = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
@@ -75,7 +77,7 @@ public class MethodElement extends AbstractAccessibleElement {
     int currPos = currentPos + 24;
     IParameter[] parameters = new IParameter[paramCount];
     for (int zz = 0; zz < paramCount; zz++) {
-      MethodParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += param.size();
       parameters[zz] = param;
     }
@@ -146,18 +148,22 @@ public class MethodElement extends AbstractAccessibleElement {
     return (flags & FINAL_METHOD) != 0;
   }
 
+  @Override
   public boolean isFunction() {
     return (flags & FUNCTION_METHOD) != 0;
   }
 
+  @Override
   public boolean isConstructor() {
     return (flags & CONSTRUCTOR_METHOD) != 0;
   }
 
+  @Override
   public boolean isDestructor() {
     return (flags & DESTRUCTOR_METHOD) != 0;
   }
 
+  @Override
   public boolean isOverloaded() {
     return (flags & OVERLOADED_METHOD) != 0;
   }

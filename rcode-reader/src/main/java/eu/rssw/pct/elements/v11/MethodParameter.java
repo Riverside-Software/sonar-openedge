@@ -17,16 +17,17 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import eu.rssw.pct.DataType;
-import eu.rssw.pct.IParameter;
-import eu.rssw.pct.ParameterMode;
-import eu.rssw.pct.ParameterType;
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.AbstractElement;
+import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.ParameterMode;
+import eu.rssw.pct.elements.ParameterType;
 
 public class MethodParameter extends AbstractElement implements IParameter {
   private static final int PARAMETER_APPEND = 1;
@@ -45,8 +46,6 @@ public class MethodParameter extends AbstractElement implements IParameter {
   private final int paramMode;
   private final int dataType;
   private final String dataTypeName;
-  // private int crc;
-  // private int fullNameLength;
 
   public MethodParameter(int num, String name, int type, int mode, int flags, int dataType, String dataTypeName,
       int extent) {
@@ -60,15 +59,13 @@ public class MethodParameter extends AbstractElement implements IParameter {
     this.extent = extent;
   }
 
-  protected static MethodParameter fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
+  protected static IParameter fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
     int parameterType = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
     int paramMode = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
     int extent = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
     int dataType = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
-    // int crc = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(order).getShort();
     int flags = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(order).getShort();
-    // int fullNameLength = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort();
     int argumentNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 20, Integer.BYTES).order(order).getInt();
 

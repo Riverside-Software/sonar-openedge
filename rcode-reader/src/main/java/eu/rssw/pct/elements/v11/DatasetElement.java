@@ -17,29 +17,32 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Set;
 
-import eu.rssw.pct.AccessType;
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.AbstractAccessibleElement;
+import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.IDataRelationElement;
+import eu.rssw.pct.elements.IDatasetElement;
 
-public class DatasetElement extends AbstractAccessibleElement {
+public class DatasetElement extends AbstractAccessibleElement implements IDatasetElement {
   private final int prvte;
   private final String[] bufferNames;
-  private final DataRelationElement[] relations;
+  private final IDataRelationElement[] relations;
 
   public DatasetElement(String name, Set<AccessType> accessType, int prvte, String[] bufferNames,
-      DataRelationElement[] relations) {
+      IDataRelationElement[] relations) {
     super(name, accessType);
     this.prvte = prvte;
     this.bufferNames = bufferNames;
     this.relations = relations;
   }
 
-  public static DatasetElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
+  public static IDatasetElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
       int textAreaOffset, ByteOrder order) {
     int bufferCount = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
     int relationshipCount = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
@@ -57,9 +60,9 @@ public class DatasetElement extends AbstractAccessibleElement {
     }
 
     int currPos = currentPos + 4 * bufferCount;
-    DataRelationElement[] relations = new DataRelationElement[relationshipCount];
+    IDataRelationElement[] relations = new DataRelationElement[relationshipCount];
     for (int zz = 0; zz < relationshipCount; zz++) {
-      DataRelationElement param = DataRelationElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IDataRelationElement param = DataRelationElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += param.size();
       relations[zz] = param;
     }
@@ -75,13 +78,13 @@ public class DatasetElement extends AbstractAccessibleElement {
   @Override
   public int size() {
     int size = 24 + (bufferNames.length * 4);
-    for (DataRelationElement elem : relations) {
+    for (IDataRelationElement elem : relations) {
       size += elem.size();
     }
     return size + 7 & -8;
   }
 
-  public DataRelationElement[] getDataRelations() {
+  public IDataRelationElement[] getDataRelations() {
     return this.relations;
   }
 
@@ -89,7 +92,4 @@ public class DatasetElement extends AbstractAccessibleElement {
     return bufferNames;
   }
 
-  public int getPrvte() {
-    return prvte;
-  }
 }

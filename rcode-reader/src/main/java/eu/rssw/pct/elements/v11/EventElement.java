@@ -17,18 +17,20 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Set;
 
-import eu.rssw.pct.AccessType;
-import eu.rssw.pct.DataType;
-import eu.rssw.pct.IParameter;
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.AbstractAccessibleElement;
+import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IEventElement;
+import eu.rssw.pct.elements.IParameter;
 
-public class EventElement extends AbstractAccessibleElement {
+public class EventElement extends AbstractAccessibleElement implements IEventElement {
   private final int flags;
   private final int returnType;
   private final String returnTypeName;
@@ -45,7 +47,7 @@ public class EventElement extends AbstractAccessibleElement {
     this.parameters = parameters;
   }
 
-  public static EventElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
+  public static IEventElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
       int textAreaOffset, ByteOrder order) {
     int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
     int returnType = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
@@ -65,7 +67,7 @@ public class EventElement extends AbstractAccessibleElement {
     int currPos = currentPos + 24;
     IParameter[] parameters = new IParameter[parameterCount];
     for (int zz = 0; zz < parameterCount; zz++) {
-      MethodParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += param.size();
       parameters[zz] = param;
     }
@@ -73,6 +75,22 @@ public class EventElement extends AbstractAccessibleElement {
     return new EventElement(name2, accessType, flags, returnType, returnTypeName, delegateName, parameters);
   }
 
+  @Override
+  public DataType getReturnType() {
+    return DataType.getDataType(returnType);
+  }
+
+  @Override
+  public String getReturnTypeName() {
+    return returnTypeName;
+  }
+
+  @Override
+  public String getDelegateName() {
+    return delegateName;
+  }
+
+  @Override
   public IParameter[] getParameters() {
     return this.parameters;
   }
@@ -89,18 +107,6 @@ public class EventElement extends AbstractAccessibleElement {
     }
 
     return size;
-  }
-
-  public DataType getReturnType() {
-    return DataType.getDataType(returnType);
-  }
-
-  public String getDelegateName() {
-    return delegateName;
-  }
-
-  protected String getReturnTypeName() {
-    return returnTypeName;
   }
 
 }

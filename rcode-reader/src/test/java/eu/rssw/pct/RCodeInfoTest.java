@@ -30,7 +30,7 @@ import java.io.IOException;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
-import eu.rssw.pct.elements.PropertyElement;
+import eu.rssw.pct.elements.IPropertyElement;
 
 public class RCodeInfoTest {
 
@@ -74,28 +74,28 @@ public class RCodeInfoTest {
       assertNotNull(info.getProperties());
       assertEquals(info.getProperties().size(), 6);
 
-      PropertyElement prop1 = info.getProperty("prop1");
+      IPropertyElement prop1 = info.getProperty("prop1");
       assertNotNull(prop1);
       assertTrue(prop1.isPublic());
 
-      PropertyElement prop2 = info.getProperty("prop2");
+      IPropertyElement prop2 = info.getProperty("prop2");
       assertNotNull(prop2);
       assertTrue(prop2.isPrivate());
 
-      PropertyElement prop3 = info.getProperty("prop3");
+      IPropertyElement prop3 = info.getProperty("prop3");
       assertNotNull(prop3);
       assertTrue(prop3.isPublic());
 
-      PropertyElement prop4 = info.getProperty("prop4");
+      IPropertyElement prop4 = info.getProperty("prop4");
       assertNotNull(prop4);
       assertTrue(prop4.isProtected());
 
-      PropertyElement prop5 = info.getProperty("prop5");
+      IPropertyElement prop5 = info.getProperty("prop5");
       assertNotNull(prop5);
       assertTrue(prop5.isProtected());
       assertTrue(prop5.isAbstract());
 
-      PropertyElement prop6 = info.getProperty("prop6");
+      IPropertyElement prop6 = info.getProperty("prop6");
       assertNotNull(prop6);
       assertTrue(prop6.isPublic());
       assertTrue(prop6.isStatic());

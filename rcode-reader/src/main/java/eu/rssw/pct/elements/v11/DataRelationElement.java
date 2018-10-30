@@ -17,14 +17,16 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.AbstractElement;
+import eu.rssw.pct.elements.IDataRelationElement;
 
-public class DataRelationElement extends AbstractElement {
+public class DataRelationElement extends AbstractElement implements IDataRelationElement {
   private final String parentBufferName;
   private final String childBufferName;
   private final String fieldPairs;
@@ -40,7 +42,6 @@ public class DataRelationElement extends AbstractElement {
 
   public static DataRelationElement fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
-    // int pairCount = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
     int flags = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
 
     int parentBufferNameOffset = ByteBuffer.wrap(segment, currentPos + 8, Integer.BYTES).order(order).getInt();
@@ -61,14 +62,17 @@ public class DataRelationElement extends AbstractElement {
     return new DataRelationElement(name, parentBufferName, childBufferName, fieldPairs, flags);
   }
 
+  @Override
   public String getParentBufferName() {
     return parentBufferName;
   }
 
+  @Override
   public String getChildBufferName() {
     return childBufferName;
   }
 
+  @Override
   public String getFieldPairs() {
     return fieldPairs;
   }

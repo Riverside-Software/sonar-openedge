@@ -17,17 +17,21 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.EnumSet;
 import java.util.Set;
 
-import eu.rssw.pct.AccessType;
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.AbstractAccessibleElement;
+import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.IMethodElement;
+import eu.rssw.pct.elements.IPropertyElement;
+import eu.rssw.pct.elements.IVariableElement;
 
-public class PropertyElement extends AbstractAccessibleElement {
+public class PropertyElement extends AbstractAccessibleElement implements IPropertyElement {
   private static final int PUBLIC_GETTER = 1;
   private static final int PROTECTED_GETTER = 2;
   private static final int PRIVATE_GETTER = 4;
@@ -41,11 +45,11 @@ public class PropertyElement extends AbstractAccessibleElement {
   private static final int PROPERTY_IS_DEFAULT = 16384;
 
   private final int flags;
-  private final VariableElement variable;
-  private final MethodElement getter;
-  private final MethodElement setter;
+  private final IVariableElement variable;
+  private final IMethodElement getter;
+  private final IMethodElement setter;
 
-  public PropertyElement(String name, Set<AccessType> accessType, int flags, VariableElement var, MethodElement getter, MethodElement setter) {
+  public PropertyElement(String name, Set<AccessType> accessType, int flags, IVariableElement var, IMethodElement getter, IMethodElement setter) {
     super(name, accessType);
     this.flags = flags;
     this.variable = var;
@@ -53,20 +57,20 @@ public class PropertyElement extends AbstractAccessibleElement {
     this.setter = setter;
   }
 
-  public static PropertyElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
+  public static IPropertyElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
     int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
-    VariableElement variable = null;
+    IVariableElement variable = null;
     int currPos = currentPos + 8;
     if ((flags & PROPERTY_AS_VARIABLE) != 0) {
       variable = VariableElement.fromDebugSegment("", accessType, segment, currPos, textAreaOffset, order);
       currPos += variable.size();
     }
 
-    MethodElement getter = null;
+    IMethodElement getter = null;
     if ((flags & HAS_GETTER) != 0) {
       Set<AccessType> atp = EnumSet.noneOf(AccessType.class);
       if ((flags & PUBLIC_GETTER) != 0)
@@ -76,7 +80,7 @@ public class PropertyElement extends AbstractAccessibleElement {
       getter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
       currPos += getter.size();
     }
-    MethodElement setter = null;
+    IMethodElement setter = null;
     if ((flags & HAS_SETTER) != 0) {
       Set<AccessType> atp = EnumSet.noneOf(AccessType.class);
       if ((flags & PUBLIC_SETTER) != 0)
@@ -86,6 +90,20 @@ public class PropertyElement extends AbstractAccessibleElement {
       setter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
     }
     return new PropertyElement(name2, accessType, flags, variable, getter, setter);
+  }
+
+  public IVariableElement getVariable() {
+    return this.variable;
+  }
+
+  @Override
+  public IMethodElement getGetter() {
+    return this.getter;
+  }
+
+  @Override
+  public IMethodElement getSetter() {
+    return this.setter;
   }
 
   @Override
@@ -101,18 +119,6 @@ public class PropertyElement extends AbstractAccessibleElement {
       size += this.setter.size();
     }
     return size;
-  }
-
-  public VariableElement getVariable() {
-    return this.variable;
-  }
-
-  public MethodElement getGetter() {
-    return this.getter;
-  }
-
-  public MethodElement getSetter() {
-    return this.setter;
   }
 
   public boolean propertyAsVariable() {

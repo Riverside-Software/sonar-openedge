@@ -17,24 +17,28 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Set;
 
-import eu.rssw.pct.AccessType;
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.AbstractAccessibleElement;
+import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.IIndexElement;
+import eu.rssw.pct.elements.ITableElement;
+import eu.rssw.pct.elements.IVariableElement;
 
-public class TableElement extends AbstractAccessibleElement {
+public class TableElement extends AbstractAccessibleElement implements ITableElement {
   private final int flags;
   private final int prvte;
-  private final VariableElement[] fields;
-  private final IndexElement[] indexes;
-  private String beforeTableName;
+  private final IVariableElement[] fields;
+  private final IIndexElement[] indexes;
+  private final String beforeTableName;
 
-  public TableElement(String name, Set<AccessType> accessType, int flags, int prvte, VariableElement[] fields,
-      IndexElement[] indexes, String beforeTableName) {
+  public TableElement(String name, Set<AccessType> accessType, int flags, int prvte, IVariableElement[] fields,
+      IIndexElement[] indexes, String beforeTableName) {
     super(name, accessType);
     this.fields = fields;
     this.indexes = indexes;
@@ -43,15 +47,12 @@ public class TableElement extends AbstractAccessibleElement {
     this.prvte = prvte;
   }
 
-  public static TableElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
+  public static ITableElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
       int textAreaOffset, ByteOrder order) {
     int fieldCount = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
     int indexCount = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
     int flags = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    // int crc = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
     int prvte = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    // int indexComponentCount = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(
-    // ByteOrder.LITTLE_ENDIAN).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(ByteOrder.LITTLE_ENDIAN).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
@@ -60,26 +61,22 @@ public class TableElement extends AbstractAccessibleElement {
     String beforeTableName = beforeNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + beforeNameOffset);
 
-    VariableElement[] fields = new VariableElement[fieldCount];
+    IVariableElement[] fields = new VariableElement[fieldCount];
     int currPos = currentPos + 24;
     for (int zz = 0; zz < fieldCount; zz++) {
-      VariableElement var = VariableElement.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
+      IVariableElement var = VariableElement.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
       currPos += var.size();
       fields[zz] = var;
     }
 
-    IndexElement[] indexes = new IndexElement[indexCount];
+    IIndexElement[] indexes = new IndexElement[indexCount];
     for (int zz = 0; zz < indexCount; zz++) {
-      IndexElement idx = IndexElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IIndexElement idx = IndexElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += idx.size();
       indexes[zz] = idx;
     }
 
     return new TableElement(name2, accessType, flags, prvte, fields, indexes, beforeTableName);
-  }
-
-  public String getBeforeTableName() {
-    return beforeTableName;
   }
 
   public int getFlags() {
@@ -91,23 +88,30 @@ public class TableElement extends AbstractAccessibleElement {
   }
 
   @Override
-  public int size() {
-    int size = 24;
-    for (VariableElement e : fields) {
-      size += e.size();
-    }
-    for (IndexElement e : indexes) {
-      size += e.size();
-    }
-    return size;
-  }
-
-  public VariableElement[] getFields() {
+  public IVariableElement[] getFields() {
     return fields;
   }
 
-  public IndexElement[] getIndexes() {
+  @Override
+  public IIndexElement[] getIndexes() {
     return indexes;
+  }
+
+  @Override
+  public String getBeforeTableName() {
+    return beforeTableName;
+  }
+
+  @Override
+  public int size() {
+    int size = 24;
+    for (IVariableElement e : fields) {
+      size += e.size();
+    }
+    for (IIndexElement e : indexes) {
+      size += e.size();
+    }
+    return size;
   }
 
   @Override

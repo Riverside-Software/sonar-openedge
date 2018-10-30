@@ -17,17 +17,19 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Set;
 
-import eu.rssw.pct.AccessType;
-import eu.rssw.pct.DataType;
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.AbstractAccessibleElement;
+import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IVariableElement;
 
-public class VariableElement extends AbstractAccessibleElement {
+public class VariableElement extends AbstractAccessibleElement implements IVariableElement {
   private static final int READ_ONLY = 1;
   private static final int WRITE_ONLY = 2;
   private static final int BASE_IS_DOTNET = 4;
@@ -37,8 +39,6 @@ public class VariableElement extends AbstractAccessibleElement {
   private final int extent;
   private final int flags;
   private final String typeName;
-  // private int fullNameLength;
-  // private int recordPosition;
 
   public VariableElement(String name, Set<AccessType> accessType, int dataType, int extent, int flags,
       String typeName) {
@@ -49,13 +49,11 @@ public class VariableElement extends AbstractAccessibleElement {
     this.typeName = typeName;
   }
 
-  public static VariableElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment,
+  public static IVariableElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment,
       int currentPos, int textAreaOffset, ByteOrder order) {
     int dataType = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
-    // int recordPosition = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
     int extent = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
     int flags = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
-    // int fullNameLength = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 12, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
@@ -67,25 +65,18 @@ public class VariableElement extends AbstractAccessibleElement {
     return new VariableElement(name2, accessType, dataType, extent, flags, typeName);
   }
 
-  public String getTypeName() {
-    return typeName;
-  }
-
-  public String toString() {
-    return String.format("Variable %s [%d] - %s", name, extent, getDataType().toString());
-  }
-
-  public DataType getDataType() {
-    return DataType.getDataType(dataType);
-  }
-
+  @Override
   public int getExtent() {
     return this.extent;
   }
 
   @Override
-  public int size() {
-    return 24;
+  public DataType getDataType() {
+    return DataType.getDataType(dataType);
+  }
+
+  public String getTypeName() {
+    return typeName;
   }
 
   public boolean isReadOnly() {
@@ -102,6 +93,15 @@ public class VariableElement extends AbstractAccessibleElement {
 
   public boolean baseIsDotNet() {
     return (flags & BASE_IS_DOTNET) != 0;
+  }
+
+  @Override
+  public int size() {
+    return 24;
+  }
+
+  public String toString() {
+    return String.format("Variable %s [%d] - %s", name, extent, getDataType().toString());
   }
 
 }
