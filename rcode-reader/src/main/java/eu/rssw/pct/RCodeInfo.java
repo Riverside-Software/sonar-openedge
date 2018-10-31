@@ -35,16 +35,10 @@ import java.util.Set;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 
-import eu.rssw.pct.elements.BufferElement;
-import eu.rssw.pct.elements.DataSourceElement;
-import eu.rssw.pct.elements.DatasetElement;
-import eu.rssw.pct.elements.ElementKind;
-import eu.rssw.pct.elements.EventElement;
-import eu.rssw.pct.elements.MethodElement;
-import eu.rssw.pct.elements.PropertyElement;
-import eu.rssw.pct.elements.QueryElement;
-import eu.rssw.pct.elements.TableElement;
-import eu.rssw.pct.elements.VariableElement;
+import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.v11.TypeInfoV11;
+import eu.rssw.pct.elements.v12.TypeInfoV12;
 
 /**
  * Import debug segment information from rcode.
@@ -103,7 +97,7 @@ public class RCodeInfo {
   // From type block
   private boolean isClass = false;
 
-  private TypeInfo typeInfo = new TypeInfo();
+  private ITypeInfo typeInfo;
 
   public RCodeInfo(InputStream input) throws InvalidRCodeException, IOException {
     this(input, null);
@@ -176,7 +170,19 @@ public class RCodeInfo {
 
     version = ByteBuffer.wrap(header, HEADER_OFFSET_RCODE_VERSION, Short.BYTES).order(order).getShort();
     sixtyFourBits = (version & 0x4000) != 0;
-    if ((version & 0x3FFF) >= 1100) {
+    if ((version & 0x3FFF) >= 1200) {
+      byte[] header2 = new byte[16];
+      if (input.read(header2) != 16) {
+        throw new InvalidRCodeException("Not enough bytes in OE12 header");
+      }
+      
+      timeStamp = ByteBuffer.wrap(header, HEADER_OFFSET_TIMESTAMP, Integer.BYTES).order(order).getInt();
+      md5 = ByteBuffer.wrap(header, HEADER_OFFSET_MD5, Short.BYTES).order(order).getShort();
+      segmentTableSize = ByteBuffer.wrap(header, HEADER_OFFSET_SEGMENT_TABLE_SIZE, Short.BYTES).order(order).getShort();
+      signatureSize = ByteBuffer.wrap(header, HEADER_OFFSET_SIGNATURE_SIZE, Integer.BYTES).order(order).getInt();
+      typeBlockSize = ByteBuffer.wrap(header, HEADER_OFFSET_TYPEBLOCK_SIZE, Integer.BYTES).order(order).getInt();
+      rcodeSize = ByteBuffer.wrap(header2, 0xc, Integer.BYTES).order(order).getInt();
+    } else if ((version & 0x3FFF) >= 1100) {
       timeStamp = ByteBuffer.wrap(header, HEADER_OFFSET_TIMESTAMP, Integer.BYTES).order(order).getInt();
       md5 = ByteBuffer.wrap(header, HEADER_OFFSET_MD5, Short.BYTES).order(order).getShort();
       segmentTableSize = ByteBuffer.wrap(header, HEADER_OFFSET_SEGMENT_TABLE_SIZE, Short.BYTES).order(order).getShort();
@@ -185,12 +191,6 @@ public class RCodeInfo {
       rcodeSize = ByteBuffer.wrap(header, HEADER_OFFSET_RCODE_SIZE, Integer.BYTES).order(order).getInt();
     } else {
       throw new InvalidRCodeException("Only v11 rcode is supported");
-    }
-
-    if (((Math.abs(version) & 0x3FFF) >= 1200) && (input.skip(16) != 16)) {
-      // OE12 header is 16 bytes larger, so we just consume them...
-      // And OE12 ESAP version number is negative
-      throw new InvalidRCodeException("Not enough bytes in OE12 header");
     }
   }
 
@@ -266,91 +266,10 @@ public class RCodeInfo {
       printByteBuffer(out, segment);
     }
 
-    int publicElementCount = ByteBuffer.wrap(segment, 8, Short.BYTES).order(order).getShort();
-    int protectedElementCount = ByteBuffer.wrap(segment, 10, Short.BYTES).order(order).getShort();
-    int privateElementCount = ByteBuffer.wrap(segment, 12, Short.BYTES).order(order).getShort();
-    int constructorCount = ByteBuffer.wrap(segment, 14, Short.BYTES).order(order).getShort();
-    int interfaceCount = ByteBuffer.wrap(segment, 16, Short.BYTES).order(order).getShort();
-    // int textAreaSize = ByteBuffer.wrap(segment, 24, Integer.BYTES).order(order).getInt();
-    int textAreaOffset = ByteBuffer.wrap(segment, 40, Integer.BYTES).order(order).getInt();
-    
-    this.typeInfo.flags = ByteBuffer.wrap(segment, 20, Integer.BYTES).order(order).getInt();
-    int nameOffset = ByteBuffer.wrap(segment, 32, Integer.BYTES).order(order).getInt();
-    this.typeInfo.typeName = readNullTerminatedString(segment, textAreaOffset + nameOffset);
-    int assemblyNameOffset = ByteBuffer.wrap(segment, 36, Integer.BYTES).order(order).getInt();
-    this.typeInfo.assemblyName = readNullTerminatedString(segment, textAreaOffset + assemblyNameOffset);
-
-    // ID - Access type - Kind - Name offset
-    List<int[]> entries = new ArrayList<>();
-    for (int zz = 0; zz < publicElementCount + protectedElementCount + privateElementCount + constructorCount; zz++) {
-      entries.add(new int[] {
-          (int) ByteBuffer.wrap(segment, 80 + 0 + (16 * zz), Short.BYTES).order(order).getShort(),
-          (int) ByteBuffer.wrap(segment, 80 + 2 + (16 * zz), Short.BYTES).order(order).getShort(),
-          (int) ByteBuffer.wrap(segment, 80 + 4 + (16 * zz), Short.BYTES).order(order).getShort(),
-          ByteBuffer.wrap(segment, 80 + 12 + (16 * zz), Integer.BYTES).order(order).getInt()});
-    }
-
-    int currOffset = 80 + 16 * (publicElementCount + protectedElementCount + privateElementCount + constructorCount);
-    this.typeInfo.parentTypeName = readNullTerminatedString(segment, textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
-    currOffset += 24;
-    
-    for (int zz = 0; zz < interfaceCount; zz++) {
-      String str = readNullTerminatedString(segment,
-          textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
-      typeInfo.getInterfaces().add(str);
-      currOffset += 24;
-    }
-
-    for (int[] entry : entries) {
-      String name = readNullTerminatedString(segment, textAreaOffset + entry[3]);
-      Set<AccessType> set = AccessType.getTypeFromString(entry[1]);
-
-      switch(ElementKind.getKind(entry[2])) {
-        case METHOD:
-          MethodElement mthd = MethodElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += mthd.size();
-          typeInfo.getMethods().add(mthd);
-          break;
-        case PROPERTY:          
-            PropertyElement prop = PropertyElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += prop.size();
-            typeInfo.getProperties().add(prop);
-            break;
-        case VARIABLE:
-            VariableElement var = VariableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += var.size();
-            typeInfo.getVariables().add(var);
-          break;
-        case TABLE:
-            TableElement tbl = TableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += tbl.size();
-            typeInfo.getTables().add(tbl);
-          break;
-        case BUFFER:
-            BufferElement buf =  BufferElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += buf.size();
-            typeInfo.getBuffers().add(buf);
-          break;
-        case QUERY:
-            QueryElement qry = QueryElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += qry.size();
-          break;
-        case DATASET:
-            DatasetElement ds = DatasetElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += ds.size();
-          break;
-        case DATASOURCE:
-           DataSourceElement dso = DataSourceElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += dso.size();
-          break;
-        case EVENT:
-           EventElement evt = EventElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-            currOffset += evt.size();
-            typeInfo.getEvents().add(evt);
-          break;
-        case UNKNOWN:
-          throw new InvalidRCodeException("Found element kind " + entry[2]);
-      }
+    if ((version & 0x3FFF) >= 1200) {
+      this.typeInfo = TypeInfoV12.newTypeInfo(segment, order);
+    } else {
+      this.typeInfo = TypeInfoV11.newTypeInfo(segment, order);
     }
   }
 
@@ -379,7 +298,7 @@ public class RCodeInfo {
 
   }
 
-  public TypeInfo getTypeInfo() {
+  public ITypeInfo getTypeInfo() {
     return typeInfo;
   }
 

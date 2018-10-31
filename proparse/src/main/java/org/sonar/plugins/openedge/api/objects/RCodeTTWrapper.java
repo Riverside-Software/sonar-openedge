@@ -23,32 +23,32 @@ import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
 
-import eu.rssw.pct.elements.IndexElement;
-import eu.rssw.pct.elements.TableElement;
-import eu.rssw.pct.elements.VariableElement;
+import eu.rssw.pct.elements.IIndexElement;
+import eu.rssw.pct.elements.ITableElement;
+import eu.rssw.pct.elements.IVariableElement;
 
 public class RCodeTTWrapper implements ITable {
-  private final TableElement table;
+  private final ITableElement table;
 
   private final List<IField> fields = new ArrayList<>();
   private final List<IIndex> indexes = new ArrayList<>();
   private final SortedSet<IField> sortedFields = new TreeSet<>(Constants.FIELD_NAME_ORDER);
 
-  public RCodeTTWrapper(TableElement t) {
+  public RCodeTTWrapper(ITableElement t) {
     this.table = t;
 
-    for (VariableElement fld : table.getFields()) {
+    for (IVariableElement fld : table.getFields()) {
       IField iFld = new RCodeTTFieldWrapper(this, fld);
       fields.add(iFld);
       sortedFields.add(iFld);
     }
-    for (IndexElement idx : table.getIndexes()) {
+    for (IIndexElement idx : table.getIndexes()) {
       IIndex iIdx = new RCodeTTIndexWrapper(this, idx);
       indexes.add(iIdx);
     }
   }
 
-  public TableElement getBackingObject() {
+  public ITableElement getBackingObject() {
     return table;
   }
 

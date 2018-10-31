@@ -20,25 +20,25 @@ import org.prorefactor.core.schema.ITable;
 
 import com.google.common.base.Preconditions;
 
-import eu.rssw.pct.elements.IndexComponentElement;
-import eu.rssw.pct.elements.IndexElement;
+import eu.rssw.pct.elements.IIndexComponentElement;
+import eu.rssw.pct.elements.IIndexElement;
 
 public class RCodeTTIndexWrapper implements IIndex {
   private final ITable table;
-  private final IndexElement index;
+  private final IIndexElement index;
   private final List<IField> fields = new ArrayList<>();
 
-  public RCodeTTIndexWrapper(ITable table, IndexElement index) {
+  public RCodeTTIndexWrapper(ITable table, IIndexElement index) {
     Preconditions.checkNotNull(table);
     Preconditions.checkNotNull(index);
     this.table = table;
     this.index = index;
-    for (IndexComponentElement fld : index.getIndexComponents()) {
+    for (IIndexComponentElement fld : index.getIndexComponents()) {
       fields.add(table.getFieldPosOrder().get(fld.getFieldPosition()));
     }
   }
 
-  public IndexElement getBackingObject() {
+  public IIndexElement getBackingObject() {
     return index;
   }
 

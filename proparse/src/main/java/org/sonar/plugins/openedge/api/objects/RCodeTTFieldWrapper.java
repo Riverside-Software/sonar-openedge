@@ -18,20 +18,20 @@ import org.prorefactor.treeparser.Primative;
 
 import com.google.common.base.Preconditions;
 
-import eu.rssw.pct.elements.VariableElement;
+import eu.rssw.pct.elements.IVariableElement;
 
 public class RCodeTTFieldWrapper implements IField {
   private final ITable table;
-  private final VariableElement field;
+  private final IVariableElement field;
 
-  public RCodeTTFieldWrapper(ITable table, VariableElement field) {
+  public RCodeTTFieldWrapper(ITable table, IVariableElement field) {
     Preconditions.checkNotNull(table);
     Preconditions.checkNotNull(field);
     this.table = table;
     this.field = field;
   }
 
-  public VariableElement getBackingObject() {
+  public IVariableElement getBackingObject() {
     return field;
   }
 

@@ -30,7 +30,8 @@ import java.io.IOException;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
-import eu.rssw.pct.elements.PropertyElement;
+import eu.rssw.pct.elements.IPropertyElement;
+import eu.rssw.pct.elements.ITypeInfo;
 
 public class RCodeInfoTest {
 
@@ -69,33 +70,33 @@ public class RCodeInfoTest {
     try (FileInputStream input = new FileInputStream("src/test/resources/rcode/propList.r")) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
-      TypeInfo info = rci.getTypeInfo();
+      ITypeInfo info = rci.getTypeInfo();
       assertNotNull(info);
       assertNotNull(info.getProperties());
       assertEquals(info.getProperties().size(), 6);
 
-      PropertyElement prop1 = info.getProperty("prop1");
+      IPropertyElement prop1 = info.getProperty("prop1");
       assertNotNull(prop1);
       assertTrue(prop1.isPublic());
 
-      PropertyElement prop2 = info.getProperty("prop2");
+      IPropertyElement prop2 = info.getProperty("prop2");
       assertNotNull(prop2);
       assertTrue(prop2.isPrivate());
 
-      PropertyElement prop3 = info.getProperty("prop3");
+      IPropertyElement prop3 = info.getProperty("prop3");
       assertNotNull(prop3);
       assertTrue(prop3.isPublic());
 
-      PropertyElement prop4 = info.getProperty("prop4");
+      IPropertyElement prop4 = info.getProperty("prop4");
       assertNotNull(prop4);
       assertTrue(prop4.isProtected());
 
-      PropertyElement prop5 = info.getProperty("prop5");
+      IPropertyElement prop5 = info.getProperty("prop5");
       assertNotNull(prop5);
       assertTrue(prop5.isProtected());
       assertTrue(prop5.isAbstract());
 
-      PropertyElement prop6 = info.getProperty("prop6");
+      IPropertyElement prop6 = info.getProperty("prop6");
       assertNotNull(prop6);
       assertTrue(prop6.isPublic());
       assertTrue(prop6.isStatic());
@@ -166,11 +167,44 @@ public class RCodeInfoTest {
   }
 
   @Test
+  public void testV11() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/WebRequestV11.r")) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      assertEquals(rci.getVersion(), 1100);
+
+      assertNotNull(rci.getTypeInfo());
+      assertNotNull(rci.getTypeInfo().getMethods());
+      assertEquals(rci.getTypeInfo().getMethods().size(), 24);
+      assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isProtected()).count(), 0);
+      assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isPrivate()).count(), 6);
+      assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isConstructor()).count(), 1);
+      assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isPublic()).count(), 18);
+
+      assertNotNull(rci.getTypeInfo().getTables());
+      assertEquals(rci.getTypeInfo().getTables().size(), 0);
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
   public void testV12() throws IOException {
-    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/WebRequest.r")) {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/WebRequestV12.r")) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertEquals(rci.getVersion(), -1210);
+
+      assertNotNull(rci.getTypeInfo());
+      assertNotNull(rci.getTypeInfo().getMethods());
+      assertEquals(rci.getTypeInfo().getMethods().size(), 24);
+      assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isProtected()).count(), 0);
+      assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isPrivate()).count(), 6);
+      assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isConstructor()).count(), 1);
+      assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isPublic()).count(), 18);
+
+      assertNotNull(rci.getTypeInfo().getTables());
+      assertEquals(rci.getTypeInfo().getTables().size(), 0);
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }

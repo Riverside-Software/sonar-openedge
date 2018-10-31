@@ -17,22 +17,26 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v12;
 
-public abstract class AbstractElement implements IElement {
-  private String name;
+import java.nio.ByteOrder;
 
-  public AbstractElement() {
-    this("<noname>");
+import eu.rssw.pct.elements.AbstractElement;
+import eu.rssw.pct.elements.IEnumDescriptor;
+
+public class EnumDescriptorV12 extends AbstractElement implements IEnumDescriptor {
+
+  public EnumDescriptorV12(String name) {
+    super(name);
   }
 
-  public AbstractElement(String name) {
-    this.name = name == null ? "<noname>" : name;
+  public static IEnumDescriptor fromDebugSegment(String name, byte[] segment, int currentPos, int textAreaOffset,
+      ByteOrder order) {
+    return new EnumDescriptorV12(name);
   }
 
   @Override
-  public String getName() {
-    return name;
+  public int getSizeInRCode() {
+    return 16;
   }
-
 }

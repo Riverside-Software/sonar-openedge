@@ -22,6 +22,8 @@ package eu.rssw.pct;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import eu.rssw.pct.elements.DataType;
+
 public class DataTypeTest {
 
   @Test

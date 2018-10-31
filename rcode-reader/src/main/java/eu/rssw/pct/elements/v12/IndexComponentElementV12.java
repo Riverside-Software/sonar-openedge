@@ -17,22 +17,27 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.elements.v12;
 
-public abstract class AbstractElement implements IElement {
-  private String name;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
-  public AbstractElement() {
-    this("<noname>");
+import eu.rssw.pct.elements.IIndexComponentElement;
+import eu.rssw.pct.elements.v11.IndexComponentElementV11;
+
+public class IndexComponentElementV12 extends IndexComponentElementV11 {
+
+  public IndexComponentElementV12(int position, int flags, boolean ascending) {
+    super(position, flags, ascending);
   }
 
-  public AbstractElement(String name) {
-    this.name = name == null ? "<noname>" : name;
-  }
+  protected static IIndexComponentElement fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
+      ByteOrder order) {
+    int ascending = segment[currentPos + 6];
+    int flags = segment[currentPos + 7];
+    int position = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
 
-  @Override
-  public String getName() {
-    return name;
+    return new IndexComponentElementV12(position, flags, ascending == 105);
   }
 
 }

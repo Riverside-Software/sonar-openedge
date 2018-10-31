@@ -23,14 +23,14 @@ import java.util.Set;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.refactor.RefactorSession;
 
-import eu.rssw.pct.TypeInfo;
+import eu.rssw.pct.elements.ITypeInfo;
 
 /**
  * Symbol scope associated with the compilation unit (class or main block of a procedure). It never has a super scope,
  * but instead TypeInfo object in order to get info from rcode.
  */
 public class RootSymbolScope extends SymbolScope {
-  private TypeInfo typeInfo;
+  private ITypeInfo typeInfo;
 
   private final Set<String> functionSet = new HashSet<>();
 
@@ -38,7 +38,7 @@ public class RootSymbolScope extends SymbolScope {
     super(session);
   }
 
-  public void attachTypeInfo(TypeInfo typeInfo) {
+  public void attachTypeInfo(ITypeInfo typeInfo) {
     this.typeInfo = typeInfo;
   }
 
@@ -53,7 +53,7 @@ public class RootSymbolScope extends SymbolScope {
       return true;
 
     // Then look through rcode
-    TypeInfo info = typeInfo;
+    ITypeInfo info = typeInfo;
     while (info != null) {
       if (info.hasProperty(name)) {
         return true;
@@ -73,7 +73,7 @@ public class RootSymbolScope extends SymbolScope {
     }
 
     // Then look through rcode
-    TypeInfo info = typeInfo;
+    ITypeInfo info = typeInfo;
     while (info != null) {
       if (info.hasBuffer(inName)) {
         return FieldType.TTABLE;
@@ -93,7 +93,7 @@ public class RootSymbolScope extends SymbolScope {
     String lname = name.toLowerCase();
     // Methods take precedent over built-in functions. The compiler (10.2b)
     // does not seem to try recognize by function/method signature.
-    TypeInfo info = typeInfo;
+    ITypeInfo info = typeInfo;
     while (info != null) {
       if (info.hasMethod(name)) {
         return ABLNodeType.LOCAL_METHOD_REF.getType();

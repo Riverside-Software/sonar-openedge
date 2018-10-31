@@ -19,20 +19,33 @@
  */
 package eu.rssw.pct.elements;
 
-public abstract class AbstractElement implements IElement {
-  private String name;
+public enum ParameterMode {
+  INPUT(6028),
+  OUTPUT(6049),
+  INPUT_OUTPUT(6110),
+  BUFFER(1070),
+  RETURN(-1);
 
-  public AbstractElement() {
-    this("<noname>");
+  private final int num;
+
+  private ParameterMode(int num) {
+    this.num = num;
   }
 
-  public AbstractElement(String name) {
-    this.name = name == null ? "<noname>" : name;
+  public int getRCodeConstant() {
+    return this.num;
   }
 
-  @Override
   public String getName() {
-    return name;
+    return name().replace('_', '-');
   }
 
+  public static ParameterMode getParameterMode(int mode) {
+    for (ParameterMode m : ParameterMode.values()) {
+      if (m.num == mode) {
+        return m;
+      }
+    }
+    return INPUT;
+  }
 }

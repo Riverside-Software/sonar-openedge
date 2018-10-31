@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
-import eu.rssw.pct.TypeInfo;
+import eu.rssw.pct.elements.ITypeInfo;
 
 /**
  * This class provides an interface to an org.prorefactor.refactor session. Much of this class was originally put in
@@ -45,7 +45,7 @@ public class RefactorSession {
   private final Charset charset;
 
   // Structure from rcode
-  private final Map<String, TypeInfo> typeInfoMap = new HashMap<>();
+  private final Map<String, ITypeInfo> typeInfoMap = new HashMap<>();
 
   @Inject
   public RefactorSession(IProparseSettings proparseSettings, ISchema schema) {
@@ -75,11 +75,11 @@ public class RefactorSession {
   }
 
   @Nullable
-  public TypeInfo getTypeInfo(String clz) {
+  public ITypeInfo getTypeInfo(String clz) {
     if (clz == null) {
       return null;
     }
-    TypeInfo info = typeInfoMap.get(clz);
+    ITypeInfo info = typeInfoMap.get(clz);
     if (info == null) {
       LOG.debug("No TypeInfo found for {}", clz);
     }
@@ -87,13 +87,13 @@ public class RefactorSession {
     return info;
   }
 
-  public void injectTypeInfoCollection(Collection<TypeInfo> units) {
-    for (TypeInfo info : units) {
+  public void injectTypeInfoCollection(Collection<ITypeInfo> units) {
+    for (ITypeInfo info : units) {
       injectTypeInfo(info);
     }
   }
 
-  public void injectTypeInfo(TypeInfo unit) {
+  public void injectTypeInfo(ITypeInfo unit) {
     if ((unit == null) || Strings.isNullOrEmpty(unit.getTypeName()))
       return;
     typeInfoMap.put(unit.getTypeName(), unit);

@@ -19,20 +19,13 @@
  */
 package eu.rssw.pct.elements;
 
-public abstract class AbstractElement implements IElement {
-  private String name;
+public interface IVariableElement extends IAccessibleElement {
+  int getExtent();
+  DataType getDataType();
+  String getTypeName();
 
-  public AbstractElement() {
-    this("<noname>");
-  }
-
-  public AbstractElement(String name) {
-    this.name = name == null ? "<noname>" : name;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
+  boolean isReadOnly();
+  boolean isWriteOnly();
+  boolean isNoUndo();
+  boolean baseIsDotNet();
 }
