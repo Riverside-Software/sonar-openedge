@@ -2,6 +2,7 @@ package eu.rssw.pct.elements;
 
 
 public interface IPropertyElement extends IAccessibleElement {
+  // NO-SONAR
   public static final int PUBLIC_GETTER = 1;
   public static final int PROTECTED_GETTER = 2;
   public static final int PRIVATE_GETTER = 4;
@@ -14,6 +15,7 @@ public interface IPropertyElement extends IAccessibleElement {
   public static final int PROPERTY_IS_INDEXED = 8192;
   public static final int PROPERTY_IS_DEFAULT = 16384;
   public static final int PROPERTY_IS_ENUM = 65536;
+  // NO-SONAR-END
 
   IVariableElement getVariable();
   IMethodElement getGetter();

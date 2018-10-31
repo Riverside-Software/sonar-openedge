@@ -75,7 +75,7 @@ public class PropertyElementV12 extends PropertyElementV11 {
     }
     IEnumDescriptor enumDesc = null;
     if ((flags & PROPERTY_IS_ENUM) != 0) {
-      enumDesc = EnumDescriptorV12.fromDebugSegment("", segment, currentPos, textAreaOffset, order);
+      enumDesc = EnumDescriptorV12.fromDebugSegment("", segment, currPos, textAreaOffset, order);
     }
     return new PropertyElementV12(name2, accessType, flags, variable, getter, setter, enumDesc);
   }
