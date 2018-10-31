@@ -19,20 +19,39 @@
  */
 package eu.rssw.pct.elements;
 
-public abstract class AbstractElement implements IElement {
-  private String name;
+public enum ParameterType {
+  VARIABLE(2),
+  TABLE(3),
+  BUFFER(4),
+  QUERY(5),
+  DATASET(6),
+  DATA_SOURCE(7),
+  FORM(8),
+  BROWSE(9),
+  BUFFER_TEMP_TABLE(103),
+  UNKNOWN(-1);
 
-  public AbstractElement() {
-    this("<noname>");
+  private final int num;
+
+  private ParameterType(int num) {
+    this.num = num;
   }
 
-  public AbstractElement(String name) {
-    this.name = name == null ? "<noname>" : name;
+  public int getNum() {
+    return this.num;
   }
 
-  @Override
   public String getName() {
-    return name;
+    return this.name().replace('_', '-');
   }
 
+  public static ParameterType getParameterType(int type) {
+    for (ParameterType t : ParameterType.values()) {
+      if (t.num == type) {
+        return t;
+      }
+    }
+    return UNKNOWN;
+
+  }
 }

@@ -19,20 +19,15 @@
  */
 package eu.rssw.pct.elements;
 
-public abstract class AbstractElement implements IElement {
-  private String name;
+public interface IMethodElement extends IAccessibleElement {
+  DataType getReturnType();
+  String getReturnTypeName();
+  int getExtent();
+  IParameter[] getParameters();
 
-  public AbstractElement() {
-    this("<noname>");
-  }
-
-  public AbstractElement(String name) {
-    this.name = name == null ? "<noname>" : name;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
+  boolean isProcedure();
+  boolean isFunction();
+  boolean isConstructor();
+  boolean isDestructor();
+  boolean isOverloaded();
 }

@@ -19,20 +19,8 @@
  */
 package eu.rssw.pct.elements;
 
-public abstract class AbstractElement implements IElement {
-  private String name;
-
-  public AbstractElement() {
-    this("<noname>");
-  }
-
-  public AbstractElement(String name) {
-    this.name = name == null ? "<noname>" : name;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
+public interface IPropertyElement extends IAccessibleElement {
+  IVariableElement getVariable();
+  IMethodElement getGetter();
+  IMethodElement getSetter();
 }

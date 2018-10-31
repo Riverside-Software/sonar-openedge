@@ -33,8 +33,8 @@ import org.sonar.plugins.openedge.api.objects.RCodeTTWrapper;
 
 import com.google.common.base.Strings;
 
-import eu.rssw.pct.TypeInfo;
-import eu.rssw.pct.elements.BufferElement;
+import eu.rssw.pct.elements.IBufferElement;
+import eu.rssw.pct.elements.ITypeInfo;
 
 /**
  * A ScopeRoot object is created for each compile unit, and it represents the program (topmost) scope. For classes, it
@@ -44,7 +44,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   private final RefactorSession refSession;
   private Map<String, ITable> tableMap = new HashMap<>();
   private String className = null;
-  private TypeInfo typeInfo = null;
+  private ITypeInfo typeInfo = null;
   private boolean isInterface;
   private boolean abstractClass;
   private boolean serializableClass;
@@ -157,7 +157,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
       return var;
     }
 
-    TypeInfo info = typeInfo;
+    ITypeInfo info = typeInfo;
     while (info != null) {
       if (info.hasProperty(name)) {
         return new Variable(name, this);
@@ -195,10 +195,10 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
       return buff;
     }
 
-    TypeInfo info = typeInfo;
+    ITypeInfo info = typeInfo;
     while (info != null) {
       if (info.hasBuffer(name)) {
-        BufferElement elem = info.getBuffer(name);
+        IBufferElement elem = info.getBuffer(name);
         ITable tbl = null;
         if (!Strings.isNullOrEmpty(elem.getDatabaseName())) {
           tbl = refSession.getSchema().lookupTable(elem.getDatabaseName(), elem.getTableName());
@@ -222,7 +222,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     if (buff != null) {
       return buff;
     }
-    TypeInfo info = typeInfo;
+    ITypeInfo info = typeInfo;
     while (info != null) {
       if (info.hasTempTable(name)) {
         return new TableBuffer(name, this, new RCodeTTWrapper(info.getTempTable(name)));
@@ -258,7 +258,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     className = s;
   }
 
-  public void setTypeInfo(TypeInfo typeInfo) {
+  public void setTypeInfo(ITypeInfo typeInfo) {
     this.typeInfo = typeInfo;
   }
 }
