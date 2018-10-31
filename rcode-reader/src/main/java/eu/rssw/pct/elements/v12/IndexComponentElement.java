@@ -26,7 +26,7 @@ import eu.rssw.pct.elements.IIndexComponentElement;
 
 public class IndexComponentElement extends eu.rssw.pct.elements.v11.IndexComponentElement {
 
-  public IndexComponentElement(int position, int flags, int ascending) {
+  public IndexComponentElement(int position, int flags, boolean ascending) {
     super(position, flags, ascending);
   }
 
@@ -36,7 +36,7 @@ public class IndexComponentElement extends eu.rssw.pct.elements.v11.IndexCompone
     int flags = segment[currentPos + 7];
     int position = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
 
-    return new IndexComponentElement(position, flags, ascending);
+    return new IndexComponentElement(position, flags, ascending == 105);
   }
 
 }

@@ -162,4 +162,22 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
     return (isSetterPrivate() || isSetterProtected() || isSetterPublic());
   }
 
+  @Override
+  public String toString() {
+    return String.format("Property %s AS %s", getName(), getVariable().getDataType());
+  }
+
+  @Override
+  public int hashCode() {
+    return (getName() + "/" + variable.toString()).hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof IPropertyElement) {
+      IPropertyElement obj2 = (IPropertyElement) obj;
+      return getName().equals(obj2.getName()) && variable.equals(obj2.getVariable());
+    }
+    return false;
+  }
 }

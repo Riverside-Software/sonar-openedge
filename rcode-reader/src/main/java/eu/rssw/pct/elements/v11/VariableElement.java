@@ -101,7 +101,21 @@ public class VariableElement extends AbstractAccessibleElement implements IVaria
   }
 
   public String toString() {
-    return String.format("Variable %s [%d] - %s", name, extent, getDataType().toString());
+    return String.format("Variable %s [%d] - %s", getName(), extent, getDataType().toString());
   }
 
+  @Override
+  public int hashCode() {
+    return (getName() + "/" + getDataType() + "/" + getExtent()).hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof IVariableElement) {
+      IVariableElement obj2 = (IVariableElement) obj;
+      return getName().equals(obj2.getName()) && getDataType().equals(obj2.getDataType())
+          && (extent == obj2.getExtent());
+    }
+    return false;
+  }
 }

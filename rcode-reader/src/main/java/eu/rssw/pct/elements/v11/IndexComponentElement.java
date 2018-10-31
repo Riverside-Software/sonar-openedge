@@ -26,11 +26,11 @@ import eu.rssw.pct.elements.AbstractElement;
 import eu.rssw.pct.elements.IIndexComponentElement;
 
 public class IndexComponentElement extends AbstractElement implements IIndexComponentElement {
-  private final int ascending;
   private final int flags;
   private final int position;
+  private final boolean ascending;
 
-  public IndexComponentElement(int position, int flags, int ascending) {
+  public IndexComponentElement(int position, int flags, boolean ascending) {
     this.position = position;
     this.flags = flags;
     this.ascending = ascending;
@@ -42,12 +42,7 @@ public class IndexComponentElement extends AbstractElement implements IIndexComp
     int flags = segment[currentPos + 1];
     int position = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
 
-    return new IndexComponentElement(position, flags, ascending);
-  }
-
-  @Override
-  public int getSizeInRCode() {
-    return 8;
+    return new IndexComponentElement(position, flags, ascending == 106);
   }
 
   public int getFlags() {
@@ -58,12 +53,31 @@ public class IndexComponentElement extends AbstractElement implements IIndexComp
     return this.position;
   }
 
-  public boolean getAscending() {
-    return this.ascending == 105;
+  public boolean isAscending() {
+    return this.ascending;
   }
 
-  public boolean getDescending() {
-    return this.ascending == 106;
+  @Override
+  public int getSizeInRCode() {
+    return 8;
   }
 
+  @Override
+  public String toString() {
+    return String.format("Field #%d", position);
+  }
+
+  @Override
+  public int hashCode() {
+    return position * 7 + (ascending ? 3 : 1);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof IIndexComponentElement) {
+      IIndexComponentElement obj2 = (IIndexComponentElement) obj;
+      return (position == obj2.getFieldPosition()) && (ascending == obj2.isAscending());
+    }
+    return false;
+  }
 }

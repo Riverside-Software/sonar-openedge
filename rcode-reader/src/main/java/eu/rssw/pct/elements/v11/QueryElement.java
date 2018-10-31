@@ -21,7 +21,10 @@ package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Set;
+
+import com.google.common.base.Joiner;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
@@ -76,4 +79,22 @@ public class QueryElement extends AbstractAccessibleElement implements IQueryEle
     return (24 + 4 * bufferNames.length) + 7 & -8;
   }
 
+  @Override
+  public String toString() {
+    return String.format("Query %s for %d buffer(s)", getName(), bufferNames.length); 
+  }
+
+  @Override
+  public int hashCode() {
+    return (getName() + "/" + Joiner.on('-').join(bufferNames)).hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof IQueryElement) {
+      IQueryElement obj2 = (IQueryElement) obj;
+      return getName().equals(obj2.getName()) && Arrays.deepEquals(bufferNames, obj2.getBufferNames());
+    }
+    return false;
+  }
 }

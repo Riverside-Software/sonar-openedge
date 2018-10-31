@@ -19,6 +19,7 @@
  */
 package eu.rssw.pct.elements;
 
+import java.util.EnumSet;
 import java.util.Set;
 
 public abstract class AbstractAccessibleElement extends AbstractElement implements IAccessibleElement {
@@ -26,26 +27,26 @@ public abstract class AbstractAccessibleElement extends AbstractElement implemen
 
   public AbstractAccessibleElement(String name, Set<AccessType> accessType) {
     super(name);
-    this.accessType = accessType;
+    this.accessType = accessType == null ? EnumSet.noneOf(AccessType.class) : accessType;
   }
 
   public boolean isProtected() {
-    return (accessType != null) && accessType.contains(AccessType.PROTECTED);
+    return accessType.contains(AccessType.PROTECTED);
   }
 
   public boolean isPublic() {
-    return (accessType != null) && accessType.contains(AccessType.PUBLIC);
+    return accessType.contains(AccessType.PUBLIC);
   }
 
   public boolean isPrivate() {
-    return (accessType != null) && accessType.contains(AccessType.PRIVATE);
+    return accessType.contains(AccessType.PRIVATE);
   }
 
   public boolean isAbstract() {
-    return (accessType != null) && accessType.contains(AccessType.ABSTRACT);
+    return accessType.contains(AccessType.ABSTRACT);
   }
 
   public boolean isStatic() {
-    return (accessType != null) && accessType.contains(AccessType.STATIC);
+    return accessType.contains(AccessType.STATIC);
   }
 }

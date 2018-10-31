@@ -21,7 +21,10 @@ package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Set;
+
+import com.google.common.base.Joiner;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
@@ -85,22 +88,8 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
     return new MethodElement(name2, accessType, flags, returnType, typeName, extent, parameters);
   }
 
-  @Override
-  public String toString() {
-    return String.format("Method %s(%d arguments) returns %s", name, parameters.length, returnType); 
-  }
-
   public String getReturnTypeName() {
     return returnTypeName;
-  }
-
-  @Override
-  public int getSizeInRCode() {
-    int size = 24;
-    for (IParameter p : parameters) {
-      size += p.getSizeInRCode();
-    }
-    return size;
   }
 
   public DataType getReturnType() {
@@ -149,5 +138,34 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
       return -1;
     }
     return this.extent;
+  }
+
+  @Override
+  public int getSizeInRCode() {
+    int size = 24;
+    for (IParameter p : parameters) {
+      size += p.getSizeInRCode();
+    }
+    return size;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Method %s(%d arguments) returns %s", getName(), parameters.length, returnType); 
+  }
+
+  @Override
+  public int hashCode() {
+    return (getName() + "/" + getReturnType() + "/" + getExtent() + "/" + Joiner.on('/').join(parameters)).hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof IMethodElement) {
+      IMethodElement obj2 = (IMethodElement) obj;
+      return getName().equals(obj2.getName()) && getReturnType().equals(obj2.getReturnType())
+          && (extent == obj2.getExtent()) && Arrays.deepEquals(parameters, obj2.getParameters());
+    }
+    return false;
   }
 }

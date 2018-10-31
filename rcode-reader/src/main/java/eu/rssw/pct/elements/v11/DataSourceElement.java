@@ -21,7 +21,10 @@ package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Set;
+
+import com.google.common.base.Joiner;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
@@ -84,6 +87,26 @@ public class DataSourceElement extends AbstractAccessibleElement implements IDat
   public int getSizeInRCode() {
     int size = 24 + (this.bufferNames.length * 4);
     return size + 7 & -8;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Datasource %s for %d buffer(s)", queryName, bufferNames.length);
+  }
+
+  @Override
+  public int hashCode() {
+    return (queryName + "-" + keyComponentNames + "-" + Joiner.on('/').join(bufferNames)).hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof IDataSourceElement) {
+      IDataSourceElement obj2 = (IDataSourceElement) obj;
+      return queryName.equals(obj2.getQueryName()) && keyComponentNames.equals(obj2.getKeyComponents())
+          && Arrays.deepEquals(bufferNames, obj2.getBufferNames());
+    }
+    return false;
   }
 
 }

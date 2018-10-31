@@ -21,9 +21,9 @@ package eu.rssw.pct.elements;
 
 public interface IParameter extends IElement {
   public String getName();
-  public String getMode();
   public int getExtent();
   public String getDataType();
+  public ParameterMode getMode();
   public ParameterType getParameterType();
   public boolean isClassDataType();
 }

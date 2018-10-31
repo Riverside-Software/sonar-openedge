@@ -85,4 +85,24 @@ public class DataRelationElement extends AbstractElement implements IDataRelatio
   public int getSizeInRCode() {
     return 24;
   }
+
+  @Override
+  public String toString() {
+    return String.format("Data relation from %s to %s", parentBufferName, childBufferName);
+  }
+
+  @Override
+  public int hashCode() {
+    return (parentBufferName + "/" + childBufferName + "/" + fieldPairs).hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof IDataRelationElement) {
+      IDataRelationElement obj2 = (IDataRelationElement) obj;
+      return (parentBufferName.equals(obj2.getParentBufferName()) && childBufferName.equals(obj2.getChildBufferName())
+          && fieldPairs.equals(obj2.getFieldPairs()));
+    }
+    return false;
+  }
 }

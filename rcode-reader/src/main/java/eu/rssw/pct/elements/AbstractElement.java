@@ -20,14 +20,14 @@
 package eu.rssw.pct.elements;
 
 public abstract class AbstractElement implements IElement {
-  protected String name;
+  private String name;
 
   public AbstractElement() {
     this("<noname>");
   }
 
   public AbstractElement(String name) {
-    this.name = name;
+    this.name = name == null ? "<noname>" : name;
   }
 
   @Override

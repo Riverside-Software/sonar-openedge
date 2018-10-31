@@ -21,7 +21,10 @@ package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Set;
+
+import com.google.common.base.Joiner;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
@@ -109,6 +112,22 @@ public class TableElement extends AbstractAccessibleElement implements ITableEle
 
   @Override
   public String toString() {
-    return String.format("Table %s - BeforeTable %s", name, beforeTableName);
+    return String.format("Table %s - BeforeTable %s", getName(), beforeTableName);
   }
+
+  @Override
+  public int hashCode() {
+    return (getName() + "/" + Joiner.on('-').join(fields) + "/" + Joiner.on('-').join(indexes)).hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof ITableElement) {
+      ITableElement obj2 = (ITableElement) obj;
+      return getName().equals(obj2.getName()) && beforeTableName.equals(obj2.getBeforeTableName())
+          && Arrays.deepEquals(fields, obj2.getFields()) && Arrays.deepEquals(indexes, obj2.getIndexes());
+    }
+    return false;
+  }
+
 }

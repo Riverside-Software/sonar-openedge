@@ -21,7 +21,10 @@ package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Set;
+
+import com.google.common.base.Joiner;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
@@ -109,4 +112,24 @@ public class EventElement extends AbstractAccessibleElement implements IEventEle
     return size;
   }
 
+  @Override
+  public String toString() {
+    return String.format("Event %s", getName());
+  }
+
+  @Override
+  public int hashCode() {
+    return (getName() + "/" + delegateName + "/" + returnType + "/" + Joiner.on('-').join(parameters)).hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof IEventElement) {
+      IEventElement obj2 = (IEventElement) obj;
+      return getName().equals(obj2.getName()) && delegateName.equals(obj2.getDelegateName())
+          && (DataType.getDataType(returnType) == obj2.getReturnType())
+          && Arrays.deepEquals(parameters, obj2.getParameters());
+    }
+    return false;
+  }
 }

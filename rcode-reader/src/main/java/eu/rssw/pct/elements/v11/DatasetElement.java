@@ -21,7 +21,10 @@ package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Set;
+
+import com.google.common.base.Joiner;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
@@ -84,7 +87,23 @@ public class DatasetElement extends AbstractAccessibleElement implements IDatase
 
   @Override
   public String toString() {
-    return String.format("Dataset %s for %d buffer(s) and %d relations", name, bufferNames.length, relations.length);
+    return String.format("Dataset %s for %d buffer(s) and %d relations", getName(), bufferNames.length, relations.length);
   }
 
+  @Override
+  public int hashCode() {
+    String str1 = Joiner.on('/').join(bufferNames);
+    String str2 = Joiner.on('/').join(relations);
+    return (str1 + "-" + str2).hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof IDatasetElement) {
+      IDatasetElement obj2 = (IDatasetElement) obj;
+      return (Arrays.deepEquals(bufferNames, obj2.getBufferNames())
+          && Arrays.deepEquals(relations, obj2.getDataRelations()));
+    }
+    return false;
+  }
 }

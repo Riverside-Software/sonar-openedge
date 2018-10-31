@@ -77,11 +77,6 @@ public class MethodParameter extends AbstractElement implements IParameter {
   }
 
   @Override
-  public int getSizeInRCode() {
-    return 24;
-  }
-
-  @Override
   public int getExtent() {
     return extent;
   }
@@ -101,23 +96,19 @@ public class MethodParameter extends AbstractElement implements IParameter {
     return dataTypeName;
   }
 
-  public ParameterMode getABLMode() {
-    return ParameterMode.getParameterMode(paramMode);
-  }
-
   @Override
   public ParameterType getParameterType() {
     return ParameterType.getParameterType(this.parameterType);
   }
 
   @Override
-  public String getMode() {
-    return getABLMode().getName();
+  public ParameterMode getMode() {
+    return ParameterMode.getParameterMode(paramMode);
   }
 
   @Override
   public String getName() {
-    return name.isEmpty() ? "arg" + this.paramNum : name;
+    return getName().isEmpty() ? "arg" + this.paramNum : getName();
   }
 
   @Override
@@ -135,5 +126,30 @@ public class MethodParameter extends AbstractElement implements IParameter {
 
   public boolean isHandle() {
     return (flags & PARAMETER_HANDLE) != 0;
+  }
+
+  @Override
+  public int getSizeInRCode() {
+    return 24;
+  }
+
+  @Override
+  public String toString() {
+    return getMode() + " " + getParameterType() + " " + getName() + " AS " + getDataType();
+  }
+
+  @Override
+  public int hashCode() {
+    return (getMode() + "/" + getParameterType() + "/" + getName() + "/" + getDataType()).hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof IParameter) {
+      IParameter obj2 = (IParameter) obj;
+      return getName().equals(obj2.getName()) && getMode().equals(obj2.getMode())
+          && getParameterType().equals(obj2.getParameterType()) && getDataType().equals(obj2.getDataType());
+    }
+    return false;
   }
 }

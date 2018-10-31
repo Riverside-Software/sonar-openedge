@@ -82,6 +82,22 @@ public class BufferElement extends AbstractAccessibleElement implements IBufferE
 
   @Override
   public String toString() {
-    return String.format("Buffer %s for %s.%s", name, databaseName, tableName);
+    return String.format("Buffer %s for %s.%s", getName(), databaseName, tableName);
   }
+
+  @Override
+  public int hashCode() {
+    return (getName() + "/" + databaseName + "/" + tableName).hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof IBufferElement) {
+      IBufferElement obj2 = (IBufferElement) obj;
+      return (getName().equals(obj2.getName()) && databaseName.equals(obj2.getDatabaseName())
+          && tableName.equals(obj2.getTableName()));
+    }
+    return false;
+  }
+
 }

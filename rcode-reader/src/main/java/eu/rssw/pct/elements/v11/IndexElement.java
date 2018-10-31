@@ -21,6 +21,9 @@ package eu.rssw.pct.elements.v11;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
+
+import com.google.common.base.Joiner;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractElement;
@@ -96,4 +99,24 @@ public class IndexElement extends AbstractElement implements IIndexElement {
     return size;
   }
 
+  @Override
+  public String toString() {
+    return String.format("Index %s %s %s - %d field(s)", getName(), isPrimary() ? "PRIMARY" : "",
+        isUnique() ? "UNIQUE" : "", indexComponents.length);
+  }
+
+  @Override
+  public int hashCode() {
+    return (getName() + "/" + flags + "/" + Joiner.on('/').join(indexComponents)).hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof IIndexElement) {
+      IIndexElement obj2 = (IIndexElement) obj;
+      return getName().equals(obj2.getName()) && Arrays.deepEquals(indexComponents, obj2.getIndexComponents());
+    }
+    return false;
+
+  }
 }
