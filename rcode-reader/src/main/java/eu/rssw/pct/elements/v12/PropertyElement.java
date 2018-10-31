@@ -26,15 +26,17 @@ import java.util.Set;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.IEnumDescriptor;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.IVariableElement;
 
 public class PropertyElement extends eu.rssw.pct.elements.v11.PropertyElement {
-  // TODO Implement enum support
+  private final IEnumDescriptor enumDesc;
 
-  public PropertyElement(String name, Set<AccessType> accessType, int flags, IVariableElement var, IMethodElement getter, IMethodElement setter) {
+  public PropertyElement(String name, Set<AccessType> accessType, int flags, IVariableElement var, IMethodElement getter, IMethodElement setter, IEnumDescriptor enumDesc) {
     super(name, accessType, flags, var, getter, setter);
+    this.enumDesc = enumDesc;
   }
 
   public static IPropertyElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
@@ -44,7 +46,7 @@ public class PropertyElement extends eu.rssw.pct.elements.v11.PropertyElement {
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     IVariableElement variable = null;
-    int currPos = currentPos + 8;
+    int currPos = currentPos + 16;
     if ((flags & PROPERTY_AS_VARIABLE) != 0) {
       variable = VariableElement.fromDebugSegment("", accessType, segment, currPos, textAreaOffset, order);
       currPos += variable.getSizeInRCode();
@@ -68,15 +70,31 @@ public class PropertyElement extends eu.rssw.pct.elements.v11.PropertyElement {
       if ((flags & PROTECTED_SETTER) != 0)
         atp.add(AccessType.PROTECTED);
       setter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
+      currPos += setter.getSizeInRCode();
     }
-    // TODO Implement enum support
-    return new PropertyElement(name2, accessType, flags, variable, getter, setter);
+    IEnumDescriptor enumDesc = null;
+    if ((flags & PROPERTY_IS_ENUM) != 0) {
+      enumDesc = EnumDescriptor.fromDebugSegment("", segment, currentPos, textAreaOffset, order);
+    }
+    return new PropertyElement(name2, accessType, flags, variable, getter, setter, enumDesc);
   }
 
   @Override
   public int getSizeInRCode() {
-    // TODO Implement enum support
-    return super.getSizeInRCode();
+    int size = 16;
+    if (this.propertyAsVariable()) {
+      size += this.getVariable().getSizeInRCode();
+    }
+    if (this.hasGetter()) {
+      size += this.getGetter().getSizeInRCode();
+    }
+    if (this.hasSetter()) {
+      size += this.getSetter().getSizeInRCode();
+    }
+    if (enumDesc != null) {
+      size += enumDesc.getSizeInRCode();
+    }
+    return size;
   }
 
 }

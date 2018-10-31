@@ -151,7 +151,7 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
 
   @Override
   public String toString() {
-    return String.format("Method %s(%d arguments) returns %s", getName(), parameters.length, returnType); 
+    return String.format("Method %s(%d arguments) returns %s", getName(), parameters.length, getReturnType()); 
   }
 
   @Override

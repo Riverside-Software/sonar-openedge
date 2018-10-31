@@ -107,11 +107,6 @@ public class MethodParameter extends AbstractElement implements IParameter {
   }
 
   @Override
-  public String getName() {
-    return getName().isEmpty() ? "arg" + this.paramNum : getName();
-  }
-
-  @Override
   public boolean isClassDataType() {
     return dataType == DataType.CLASS.getNum();
   }
