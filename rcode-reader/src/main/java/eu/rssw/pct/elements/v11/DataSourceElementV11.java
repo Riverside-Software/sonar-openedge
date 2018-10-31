@@ -31,12 +31,12 @@ import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.IDataSourceElement;
 
-public class DataSourceElement extends AbstractAccessibleElement implements IDataSourceElement {
+public class DataSourceElementV11 extends AbstractAccessibleElement implements IDataSourceElement {
   private final String queryName;
   private final String keyComponentNames;
   private final String[] bufferNames;
 
-  public DataSourceElement(String name, Set<AccessType> accessType, String queryName, String keyComponentNames,
+  public DataSourceElementV11(String name, Set<AccessType> accessType, String queryName, String keyComponentNames,
       String[] bufferNames) {
     super(name, accessType);
     this.queryName = queryName;
@@ -65,7 +65,7 @@ public class DataSourceElement extends AbstractAccessibleElement implements IDat
           textAreaOffset + ByteBuffer.wrap(segment, currentPos + 24 + (zz * 4), Integer.BYTES).order(order).getInt());
     }
 
-    return new DataSourceElement(name2, accessType, queryName, keyComponentNames, bufferNames);
+    return new DataSourceElementV11(name2, accessType, queryName, keyComponentNames, bufferNames);
   }
 
   @Override

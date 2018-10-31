@@ -31,6 +31,7 @@ import org.testng.annotations.Test;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.IPropertyElement;
+import eu.rssw.pct.elements.ITypeInfo;
 
 public class RCodeInfoTest {
 
@@ -69,7 +70,7 @@ public class RCodeInfoTest {
     try (FileInputStream input = new FileInputStream("src/test/resources/rcode/propList.r")) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
-      TypeInfo info = rci.getTypeInfo();
+      ITypeInfo info = rci.getTypeInfo();
       assertNotNull(info);
       assertNotNull(info.getProperties());
       assertEquals(info.getProperties().size(), 6);

@@ -26,10 +26,11 @@ import java.util.Set;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.v11.VariableElementV11;
 
-public class VariableElement extends eu.rssw.pct.elements.v11.VariableElement {
+public class VariableElementV12 extends VariableElementV11 {
 
-  public VariableElement(String name, Set<AccessType> accessType, int dataType, int extent, int flags,
+  public VariableElementV12(String name, Set<AccessType> accessType, int dataType, int extent, int flags,
       String typeName) {
     super(name, accessType, dataType, extent, flags, typeName);
   }
@@ -47,7 +48,7 @@ public class VariableElement extends eu.rssw.pct.elements.v11.VariableElement {
     String typeName = typeNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
 
-    return new VariableElement(name2, accessType, dataType, extent, flags, typeName);
+    return new VariableElementV12(name2, accessType, dataType, extent, flags, typeName);
   }
 
 }

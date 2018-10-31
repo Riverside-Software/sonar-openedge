@@ -29,7 +29,7 @@ import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.ParameterType;
 
-public class MethodParameter extends AbstractElement implements IParameter {
+public class MethodParameterV11 extends AbstractElement implements IParameter {
   private static final int PARAMETER_APPEND = 1;
   private static final int PARAMETER_HANDLE = 2;
   private static final int PARAMETER_BIND = 4;
@@ -47,7 +47,7 @@ public class MethodParameter extends AbstractElement implements IParameter {
   private final int dataType;
   private final String dataTypeName;
 
-  public MethodParameter(int num, String name, int type, int mode, int flags, int dataType, String dataTypeName,
+  public MethodParameterV11(int num, String name, int type, int mode, int flags, int dataType, String dataTypeName,
       int extent) {
     super(name);
     this.paramNum = num;
@@ -73,7 +73,7 @@ public class MethodParameter extends AbstractElement implements IParameter {
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + argumentNameOffset);
     String name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
-    return new MethodParameter(0, name, parameterType, paramMode, flags, dataType, dataTypeName, extent);
+    return new MethodParameterV11(0, name, parameterType, paramMode, flags, dataType, dataTypeName, extent);
   }
 
   @Override

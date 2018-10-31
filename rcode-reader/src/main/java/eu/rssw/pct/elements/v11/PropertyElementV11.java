@@ -31,14 +31,14 @@ import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.IVariableElement;
 
-public class PropertyElement extends AbstractAccessibleElement implements IPropertyElement {
+public class PropertyElementV11 extends AbstractAccessibleElement implements IPropertyElement {
 
   private final int flags;
   private final IVariableElement variable;
   private final IMethodElement getter;
   private final IMethodElement setter;
 
-  public PropertyElement(String name, Set<AccessType> accessType, int flags, IVariableElement var, IMethodElement getter, IMethodElement setter) {
+  public PropertyElementV11(String name, Set<AccessType> accessType, int flags, IVariableElement var, IMethodElement getter, IMethodElement setter) {
     super(name, accessType);
     this.flags = flags;
     this.variable = var;
@@ -55,7 +55,7 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
     IVariableElement variable = null;
     int currPos = currentPos + 8;
     if ((flags & PROPERTY_AS_VARIABLE) != 0) {
-      variable = VariableElement.fromDebugSegment("", accessType, segment, currPos, textAreaOffset, order);
+      variable = VariableElementV11.fromDebugSegment("", accessType, segment, currPos, textAreaOffset, order);
       currPos += variable.getSizeInRCode();
     }
 
@@ -66,7 +66,7 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
         atp.add(AccessType.PUBLIC);
       if ((flags & PROTECTED_GETTER) != 0)
         atp.add(AccessType.PROTECTED);
-      getter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
+      getter = MethodElementV11.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
       currPos += getter.getSizeInRCode();
     }
     IMethodElement setter = null;
@@ -76,9 +76,9 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
         atp.add(AccessType.PUBLIC);
       if ((flags & PROTECTED_SETTER) != 0)
         atp.add(AccessType.PROTECTED);
-      setter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
+      setter = MethodElementV11.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
     }
-    return new PropertyElement(name2, accessType, flags, variable, getter, setter);
+    return new PropertyElementV11(name2, accessType, flags, variable, getter, setter);
   }
 
   public IVariableElement getVariable() {

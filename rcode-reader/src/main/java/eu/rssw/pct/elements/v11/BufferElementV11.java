@@ -28,14 +28,14 @@ import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.IBufferElement;
 
-public class BufferElement extends AbstractAccessibleElement implements IBufferElement {
+public class BufferElementV11 extends AbstractAccessibleElement implements IBufferElement {
   private static final int TEMP_TABLE = 4;
 
   private final String tableName;
   private final String databaseName;
   private final int flags;
 
-  public BufferElement(String name, Set<AccessType> accessType, String tableName, String dbName, int flags) {
+  public BufferElementV11(String name, Set<AccessType> accessType, String tableName, String dbName, int flags) {
     super(name, accessType);
     this.tableName = tableName;
     this.databaseName = dbName;
@@ -57,7 +57,7 @@ public class BufferElement extends AbstractAccessibleElement implements IBufferE
 
     int flags = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort();
 
-    return new BufferElement(name2, accessType, tableName, databaseName, flags);
+    return new BufferElementV11(name2, accessType, tableName, databaseName, flags);
   }
 
   @Override

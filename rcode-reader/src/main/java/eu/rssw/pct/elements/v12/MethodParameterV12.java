@@ -24,10 +24,11 @@ import java.nio.ByteOrder;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.v11.MethodParameterV11;
 
-public class MethodParameter extends eu.rssw.pct.elements.v11.MethodParameter {
+public class MethodParameterV12 extends MethodParameterV11 {
 
-  public MethodParameter(int num, String name, int type, int mode, int flags, int dataType, String dataTypeName,
+  public MethodParameterV12(int num, String name, int type, int mode, int flags, int dataType, String dataTypeName,
       int extent) {
     super(num, name, type, mode, flags, dataType, dataTypeName, extent);
   }
@@ -46,7 +47,7 @@ public class MethodParameter extends eu.rssw.pct.elements.v11.MethodParameter {
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + argumentNameOffset);
     String name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
-    return new MethodParameter(0, name, parameterType, paramMode, flags, dataType, dataTypeName, extent);
+    return new MethodParameterV12(0, name, parameterType, paramMode, flags, dataType, dataTypeName, extent);
   }
 
 }

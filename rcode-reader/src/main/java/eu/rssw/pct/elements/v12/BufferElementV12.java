@@ -26,10 +26,11 @@ import java.util.Set;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.IBufferElement;
+import eu.rssw.pct.elements.v11.BufferElementV11;
 
-public class BufferElement extends eu.rssw.pct.elements.v11.BufferElement {
+public class BufferElementV12 extends BufferElementV11 {
 
-  public BufferElement(String name, Set<AccessType> accessType, String tableName, String dbName, int flags) {
+  public BufferElementV12(String name, Set<AccessType> accessType, String tableName, String dbName, int flags) {
     super(name, accessType, tableName, dbName, flags);
   }
 
@@ -48,7 +49,7 @@ public class BufferElement extends eu.rssw.pct.elements.v11.BufferElement {
 
     int flags = ByteBuffer.wrap(segment, currentPos + 18, Short.BYTES).order(order).getShort();
 
-    return new BufferElement(name2, accessType, tableName, databaseName, flags);
+    return new BufferElementV12(name2, accessType, tableName, databaseName, flags);
   }
 
 }

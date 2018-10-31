@@ -33,14 +33,14 @@ import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IEventElement;
 import eu.rssw.pct.elements.IParameter;
 
-public class EventElement extends AbstractAccessibleElement implements IEventElement {
+public class EventElementV11 extends AbstractAccessibleElement implements IEventElement {
   private final int flags;
   private final int returnType;
   private final String returnTypeName;
   private final String delegateName;
   private final IParameter[] parameters;
 
-  public EventElement(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
+  public EventElementV11(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
       String delegateName, IParameter[] parameters) {
     super(name, accessType);
     this.flags = flags;
@@ -70,12 +70,12 @@ public class EventElement extends AbstractAccessibleElement implements IEventEle
     int currPos = currentPos + 24;
     IParameter[] parameters = new IParameter[parameterCount];
     for (int zz = 0; zz < parameterCount; zz++) {
-      IParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IParameter param = MethodParameterV11.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += param.getSizeInRCode();
       parameters[zz] = param;
     }
 
-    return new EventElement(name2, accessType, flags, returnType, returnTypeName, delegateName, parameters);
+    return new EventElementV11(name2, accessType, flags, returnType, returnTypeName, delegateName, parameters);
   }
 
   @Override
@@ -106,7 +106,7 @@ public class EventElement extends AbstractAccessibleElement implements IEventEle
   public int getSizeInRCode() {
     int size = 24;
     for (IParameter p : parameters) {
-      size += ((MethodParameter) p).getSizeInRCode();
+      size += ((MethodParameterV11) p).getSizeInRCode();
     }
 
     return size;

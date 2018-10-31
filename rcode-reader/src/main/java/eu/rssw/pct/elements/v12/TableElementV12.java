@@ -28,10 +28,11 @@ import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.IIndexElement;
 import eu.rssw.pct.elements.ITableElement;
 import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.v11.TableElementV11;
 
-public class TableElement extends eu.rssw.pct.elements.v11.TableElement {
+public class TableElementV12 extends TableElementV11 {
 
-  public TableElement(String name, Set<AccessType> accessType, int flags, IVariableElement[] fields,
+  public TableElementV12(String name, Set<AccessType> accessType, int flags, IVariableElement[] fields,
       IIndexElement[] indexes, String beforeTableName) {
     super(name, accessType, flags, fields, indexes, beforeTableName);
   }
@@ -49,22 +50,22 @@ public class TableElement extends eu.rssw.pct.elements.v11.TableElement {
     String beforeTableName = beforeNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + beforeNameOffset);
 
-    IVariableElement[] fields = new VariableElement[fieldCount];
+    IVariableElement[] fields = new VariableElementV12[fieldCount];
     int currPos = currentPos + 24;
     for (int zz = 0; zz < fieldCount; zz++) {
-      IVariableElement var = VariableElement.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
+      IVariableElement var = VariableElementV12.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
       currPos += var.getSizeInRCode();
       fields[zz] = var;
     }
 
-    IIndexElement[] indexes = new IndexElement[indexCount];
+    IIndexElement[] indexes = new IndexElementV12[indexCount];
     for (int zz = 0; zz < indexCount; zz++) {
-      IIndexElement idx = IndexElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IIndexElement idx = IndexElementV12.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += idx.getSizeInRCode();
       indexes[zz] = idx;
     }
 
-    return new TableElement(name2, accessType, flags, fields, indexes, beforeTableName);
+    return new TableElementV12(name2, accessType, flags, fields, indexes, beforeTableName);
   }
 
 }

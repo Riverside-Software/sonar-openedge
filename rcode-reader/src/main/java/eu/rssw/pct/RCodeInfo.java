@@ -35,27 +35,10 @@ import java.util.Set;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 
-import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.DataType;
-import eu.rssw.pct.elements.ElementKind;
-import eu.rssw.pct.elements.IBufferElement;
-import eu.rssw.pct.elements.IDataSourceElement;
-import eu.rssw.pct.elements.IDatasetElement;
-import eu.rssw.pct.elements.IEventElement;
-import eu.rssw.pct.elements.IMethodElement;
-import eu.rssw.pct.elements.IPropertyElement;
-import eu.rssw.pct.elements.IQueryElement;
-import eu.rssw.pct.elements.ITableElement;
-import eu.rssw.pct.elements.IVariableElement;
-import eu.rssw.pct.elements.v11.BufferElement;
-import eu.rssw.pct.elements.v11.DataSourceElement;
-import eu.rssw.pct.elements.v11.DatasetElement;
-import eu.rssw.pct.elements.v11.EventElement;
-import eu.rssw.pct.elements.v11.MethodElement;
-import eu.rssw.pct.elements.v11.PropertyElement;
-import eu.rssw.pct.elements.v11.QueryElement;
-import eu.rssw.pct.elements.v11.TableElement;
-import eu.rssw.pct.elements.v11.VariableElement;
+import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.v11.TypeInfoV11;
+import eu.rssw.pct.elements.v12.TypeInfoV12;
 
 /**
  * Import debug segment information from rcode.
@@ -114,7 +97,7 @@ public class RCodeInfo {
   // From type block
   private boolean isClass = false;
 
-  private TypeInfo typeInfo = new TypeInfo();
+  private ITypeInfo typeInfo;
 
   public RCodeInfo(InputStream input) throws InvalidRCodeException, IOException {
     this(input, null);
@@ -283,152 +266,10 @@ public class RCodeInfo {
       printByteBuffer(out, segment);
     }
 
-    int publicElementCount;
-    int protectedElementCount;
-    int privateElementCount;
-    int constructorCount;
-    int interfaceCount;
-    int textAreaOffset;
-    int nameOffset;
-    int assemblyNameOffset;
-
     if ((version & 0x3FFF) >= 1200) {
-      publicElementCount = ByteBuffer.wrap(segment, 2, Short.BYTES).order(order).getShort();
-      protectedElementCount = ByteBuffer.wrap(segment, 4, Short.BYTES).order(order).getShort();
-      privateElementCount = ByteBuffer.wrap(segment, 6, Short.BYTES).order(order).getShort();
-      constructorCount = ByteBuffer.wrap(segment, 8, Short.BYTES).order(order).getShort();
-      interfaceCount = ByteBuffer.wrap(segment, 10, Short.BYTES).order(order).getShort();
-      // int textAreaSize = ByteBuffer.wrap(segment, 24, Integer.BYTES).order(order).getInt();
-      textAreaOffset = ByteBuffer.wrap(segment, 24, Integer.BYTES).order(order).getInt();
-    
-      this.typeInfo.flags = ByteBuffer.wrap(segment, 32, Integer.BYTES).order(order).getInt();
-      nameOffset = ByteBuffer.wrap(segment, 12, Integer.BYTES).order(order).getInt();
-      this.typeInfo.typeName = readNullTerminatedString(segment, textAreaOffset + nameOffset);
-      assemblyNameOffset = ByteBuffer.wrap(segment, 16, Integer.BYTES).order(order).getInt();
-      this.typeInfo.assemblyName = readNullTerminatedString(segment, textAreaOffset + assemblyNameOffset);
+      this.typeInfo = TypeInfoV12.newTypeInfo(segment, order);
     } else {
-      publicElementCount = ByteBuffer.wrap(segment, 8, Short.BYTES).order(order).getShort();
-      protectedElementCount = ByteBuffer.wrap(segment, 10, Short.BYTES).order(order).getShort();
-      privateElementCount = ByteBuffer.wrap(segment, 12, Short.BYTES).order(order).getShort();
-      constructorCount = ByteBuffer.wrap(segment, 14, Short.BYTES).order(order).getShort();
-      interfaceCount = ByteBuffer.wrap(segment, 16, Short.BYTES).order(order).getShort();
-      // int textAreaSize = ByteBuffer.wrap(segment, 24, Integer.BYTES).order(order).getInt();
-      textAreaOffset = ByteBuffer.wrap(segment, 40, Integer.BYTES).order(order).getInt();
-    
-      this.typeInfo.flags = ByteBuffer.wrap(segment, 20, Integer.BYTES).order(order).getInt();
-      nameOffset = ByteBuffer.wrap(segment, 32, Integer.BYTES).order(order).getInt();
-      this.typeInfo.typeName = readNullTerminatedString(segment, textAreaOffset + nameOffset);
-      assemblyNameOffset = ByteBuffer.wrap(segment, 36, Integer.BYTES).order(order).getInt();
-      this.typeInfo.assemblyName = readNullTerminatedString(segment, textAreaOffset + assemblyNameOffset);
-    }
-
-    // ID - Access type - Kind - Name offset
-    int entryListOffset = ((version & 0x3FFF) >= 1200) ? 112 : 80;
-    List<int[]> entries = new ArrayList<>();
-    for (int zz = 0; zz < publicElementCount + protectedElementCount + privateElementCount + constructorCount; zz++) {
-      if ((version & 0x3FFF) >= 1200) {
-        entries.add(new int[] {
-            (int) ByteBuffer.wrap(segment, entryListOffset + 10 + (16 * zz), Short.BYTES).order(order).getShort(),
-            (int) ByteBuffer.wrap(segment, entryListOffset + 12 + (16 * zz), Short.BYTES).order(order).getShort(),
-            (int) ByteBuffer.wrap(segment, entryListOffset + 14 + (16 * zz), Short.BYTES).order(order).getShort(),
-            ByteBuffer.wrap(segment, entryListOffset + 0 + (16 * zz), Integer.BYTES).order(order).getInt()});
-      } else {
-        entries.add(new int[] {
-            (int) ByteBuffer.wrap(segment, entryListOffset + 0 + (16 * zz), Short.BYTES).order(order).getShort(),
-            (int) ByteBuffer.wrap(segment, entryListOffset + 2 + (16 * zz), Short.BYTES).order(order).getShort(),
-            (int) ByteBuffer.wrap(segment, entryListOffset + 4 + (16 * zz), Short.BYTES).order(order).getShort(),
-            ByteBuffer.wrap(segment, entryListOffset + 12 + (16 * zz), Integer.BYTES).order(order).getInt()});
-      }
-    }
-
-    int currOffset = entryListOffset + 16 * (publicElementCount + protectedElementCount + privateElementCount + constructorCount);
-    this.typeInfo.parentTypeName = readNullTerminatedString(segment, textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
-    currOffset += 24;
-    
-    for (int zz = 0; zz < interfaceCount; zz++) {
-      String str = readNullTerminatedString(segment,
-          textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
-      typeInfo.getInterfaces().add(str);
-      currOffset += 24;
-    }
-
-    for (int[] entry : entries) {
-      String name = readNullTerminatedString(segment, textAreaOffset + entry[3]);
-      Set<AccessType> set = AccessType.getTypeFromString(entry[1]);
-
-      switch (ElementKind.getKind(entry[2])) {
-        case METHOD:
-          IMethodElement mthd = ((version & 0x3FFF) >= 1200)
-              ? eu.rssw.pct.elements.v12.MethodElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset,
-                  order)
-              : MethodElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += mthd.getSizeInRCode();
-          typeInfo.getMethods().add(mthd);
-          break;
-        case PROPERTY:
-          IPropertyElement prop = ((version & 0x3FFF) >= 1200)
-              ? eu.rssw.pct.elements.v12.PropertyElement.fromDebugSegment(name, set, segment, currOffset,
-                  textAreaOffset, order)
-              : PropertyElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += prop.getSizeInRCode();
-          typeInfo.getProperties().add(prop);
-          break;
-        case VARIABLE:
-          IVariableElement var = ((version & 0x3FFF) >= 1200)
-              ? eu.rssw.pct.elements.v12.VariableElement.fromDebugSegment(name, set, segment, currOffset,
-                  textAreaOffset, order)
-              : VariableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += var.getSizeInRCode();
-          typeInfo.getVariables().add(var);
-          break;
-        case TABLE:
-          ITableElement tbl = ((version & 0x3FFF) >= 1200)
-              ? eu.rssw.pct.elements.v12.TableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset,
-                  order)
-              : TableElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += tbl.getSizeInRCode();
-          typeInfo.getTables().add(tbl);
-          break;
-        case BUFFER:
-          IBufferElement buf = ((version & 0x3FFF) >= 1200)
-              ? eu.rssw.pct.elements.v12.BufferElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset,
-                  order)
-              : BufferElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += buf.getSizeInRCode();
-          typeInfo.getBuffers().add(buf);
-          break;
-        case QUERY:
-          IQueryElement qry = ((version & 0x3FFF) >= 1200)
-              ? eu.rssw.pct.elements.v12.QueryElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset,
-                  order)
-              : QueryElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += qry.getSizeInRCode();
-          break;
-        case DATASET:
-          IDatasetElement ds = ((version & 0x3FFF) >= 1200)
-              ? eu.rssw.pct.elements.v12.DatasetElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset,
-                  order)
-              : DatasetElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += ds.getSizeInRCode();
-          break;
-        case DATASOURCE:
-          IDataSourceElement dso = ((version & 0x3FFF) >= 1200)
-              ? eu.rssw.pct.elements.v12.DataSourceElement.fromDebugSegment(name, set, segment, currOffset,
-                  textAreaOffset, order)
-              : DataSourceElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += dso.getSizeInRCode();
-          break;
-        case EVENT:
-          IEventElement evt = ((version & 0x3FFF) >= 1200)
-              ? eu.rssw.pct.elements.v12.EventElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset,
-                  order)
-              : EventElement.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += evt.getSizeInRCode();
-          typeInfo.getEvents().add(evt);
-          break;
-        case UNKNOWN:
-          throw new InvalidRCodeException("Found element kind " + entry[2]);
-      }
+      this.typeInfo = TypeInfoV11.newTypeInfo(segment, order);
     }
   }
 
@@ -457,7 +298,7 @@ public class RCodeInfo {
 
   }
 
-  public TypeInfo getTypeInfo() {
+  public ITypeInfo getTypeInfo() {
     return typeInfo;
   }
 

@@ -29,7 +29,7 @@ import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IVariableElement;
 
-public class VariableElement extends AbstractAccessibleElement implements IVariableElement {
+public class VariableElementV11 extends AbstractAccessibleElement implements IVariableElement {
   private static final int READ_ONLY = 1;
   private static final int WRITE_ONLY = 2;
   private static final int BASE_IS_DOTNET = 4;
@@ -40,7 +40,7 @@ public class VariableElement extends AbstractAccessibleElement implements IVaria
   private final int flags;
   private final String typeName;
 
-  public VariableElement(String name, Set<AccessType> accessType, int dataType, int extent, int flags,
+  public VariableElementV11(String name, Set<AccessType> accessType, int dataType, int extent, int flags,
       String typeName) {
     super(name, accessType);
     this.dataType = dataType;
@@ -62,7 +62,7 @@ public class VariableElement extends AbstractAccessibleElement implements IVaria
     String typeName = typeNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
 
-    return new VariableElement(name2, accessType, dataType, extent, flags, typeName);
+    return new VariableElementV11(name2, accessType, dataType, extent, flags, typeName);
   }
 
   @Override

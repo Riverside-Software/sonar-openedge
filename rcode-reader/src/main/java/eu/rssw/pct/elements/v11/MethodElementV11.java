@@ -33,7 +33,7 @@ import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IParameter;
 
-public class MethodElement extends AbstractAccessibleElement implements IMethodElement {
+public class MethodElementV11 extends AbstractAccessibleElement implements IMethodElement {
   protected static final int METHOD_DESCRIPTOR_SIZE = 24;
   protected static final int FINAL_METHOD = 1;
   protected static final int PROTECTED_METHOD = 2;
@@ -52,7 +52,7 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
   private final int extent;
   private final IParameter[] parameters;
 
-  public MethodElement(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
+  public MethodElementV11(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
       int extent, IParameter[] parameters) {
     super(name, accessType);
     this.flags = flags;
@@ -80,12 +80,12 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
     int currPos = currentPos + 24;
     IParameter[] parameters = new IParameter[paramCount];
     for (int zz = 0; zz < paramCount; zz++) {
-      IParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IParameter param = MethodParameterV11.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += param.getSizeInRCode();
       parameters[zz] = param;
     }
     
-    return new MethodElement(name2, accessType, flags, returnType, typeName, extent, parameters);
+    return new MethodElementV11(name2, accessType, flags, returnType, typeName, extent, parameters);
   }
 
   public String getReturnTypeName() {

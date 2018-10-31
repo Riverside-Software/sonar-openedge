@@ -25,30 +25,24 @@ import java.util.Set;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AccessType;
-import eu.rssw.pct.elements.IDataSourceElement;
+import eu.rssw.pct.elements.IDataRelationElement;
+import eu.rssw.pct.elements.IDatasetElement;
+import eu.rssw.pct.elements.v11.DatasetElementV11;
 
-public class DataSourceElement extends eu.rssw.pct.elements.v11.DataSourceElement {
+public class DatasetElementV12 extends DatasetElementV11 {
 
-  public DataSourceElement(String name, Set<AccessType> accessType, String queryName, String keyComponentNames,
-      String[] bufferNames) {
-    super(name, accessType, queryName, keyComponentNames, bufferNames);
+  public DatasetElementV12(String name, Set<AccessType> accessType, String[] bufferNames,
+      IDataRelationElement[] relations) {
+    super(name, accessType, bufferNames, relations);
   }
 
-  public static IDataSourceElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment,
-      int currentPos, int textAreaOffset, ByteOrder order) {
-    int bufferCount = ByteBuffer.wrap(segment, currentPos + 18, Short.BYTES).order(order).getShort();
-    // flags at position 20
+  public static IDatasetElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
+      int textAreaOffset, ByteOrder order) {
+    int bufferCount = ByteBuffer.wrap(segment, currentPos + 14, Short.BYTES).order(order).getShort();
+    int relationshipCount = ByteBuffer.wrap(segment, currentPos + 16, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
-
-    int queryNameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
-    String queryName = queryNameOffset == 0 ? ""
-        : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + queryNameOffset);
-
-    int keyComponentNamesOffset = ByteBuffer.wrap(segment, currentPos + 8, Integer.BYTES).order(order).getInt();
-    String keyComponentNames = keyComponentNamesOffset == 0 ? ""
-        : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + keyComponentNamesOffset);
 
     String[] bufferNames = new String[bufferCount];
     for (int zz = 0; zz < bufferCount; zz++) {
@@ -56,7 +50,15 @@ public class DataSourceElement extends eu.rssw.pct.elements.v11.DataSourceElemen
           textAreaOffset + ByteBuffer.wrap(segment, currentPos + 24 + (zz * 4), Integer.BYTES).order(order).getInt());
     }
 
-    return new DataSourceElement(name2, accessType, queryName, keyComponentNames, bufferNames);
+    int currPos = currentPos + 4 * bufferCount;
+    IDataRelationElement[] relations = new DataRelationElementV12[relationshipCount];
+    for (int zz = 0; zz < relationshipCount; zz++) {
+      IDataRelationElement param = DataRelationElementV12.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      currPos += param.getSizeInRCode();
+      relations[zz] = param;
+    }
+
+    return new DatasetElementV12(name2, accessType, bufferNames, relations);
   }
 
 }

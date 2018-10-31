@@ -23,14 +23,15 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.v11.DataRelationElementV11;
 
-public class DataRelationElement extends eu.rssw.pct.elements.v11.DataRelationElement {
+public class DataRelationElementV12 extends DataRelationElementV11 {
 
-  public DataRelationElement(String name, String parentBuffer, String childBuffer, String fieldPairs, int flags) {
+  public DataRelationElementV12(String name, String parentBuffer, String childBuffer, String fieldPairs, int flags) {
     super(name, parentBuffer, childBuffer, fieldPairs, flags);
   }
 
-  public static DataRelationElement fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
+  public static DataRelationElementV12 fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
     int flags = ByteBuffer.wrap(segment, currentPos + 22, Short.BYTES).order(order).getShort();
 
@@ -49,7 +50,7 @@ public class DataRelationElement extends eu.rssw.pct.elements.v11.DataRelationEl
     String fieldPairs = fieldPairsOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + fieldPairsOffset);
 
-    return new DataRelationElement(name, parentBufferName, childBufferName, fieldPairs, flags);
+    return new DataRelationElementV12(name, parentBufferName, childBufferName, fieldPairs, flags);
   }
 
 }

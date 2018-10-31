@@ -19,24 +19,25 @@
  */
 package eu.rssw.pct.elements.v12;
 
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import eu.rssw.pct.elements.AbstractElement;
-import eu.rssw.pct.elements.IEnumDescriptor;
+import eu.rssw.pct.elements.IIndexComponentElement;
+import eu.rssw.pct.elements.v11.IndexComponentElementV11;
 
-public class EnumDescriptor extends AbstractElement implements IEnumDescriptor {
+public class IndexComponentElementV12 extends IndexComponentElementV11 {
 
-  public EnumDescriptor(String name) {
-    super(name);
+  public IndexComponentElementV12(int position, int flags, boolean ascending) {
+    super(position, flags, ascending);
   }
 
-  public static IEnumDescriptor fromDebugSegment(String name, byte[] segment, int currentPos, int textAreaOffset,
+  protected static IIndexComponentElement fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
-    return new EnumDescriptor(name);
+    int ascending = segment[currentPos + 6];
+    int flags = segment[currentPos + 7];
+    int position = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
+
+    return new IndexComponentElementV12(position, flags, ascending == 105);
   }
 
-  @Override
-  public int getSizeInRCode() {
-    return 16;
-  }
 }

@@ -25,10 +25,11 @@ import java.nio.ByteOrder;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.IIndexComponentElement;
 import eu.rssw.pct.elements.IIndexElement;
+import eu.rssw.pct.elements.v11.IndexElementV11;
 
-public class IndexElement extends eu.rssw.pct.elements.v11.IndexElement {
+public class IndexElementV12 extends IndexElementV11 {
 
-  public IndexElement(String name, int primary, int flags, IIndexComponentElement[] indexComponents) {
+  public IndexElementV12(String name, int primary, int flags, IIndexComponentElement[] indexComponents) {
     super(name, primary, flags, indexComponents);
   }
 
@@ -41,14 +42,14 @@ public class IndexElement extends eu.rssw.pct.elements.v11.IndexElement {
     String name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int currPos = currentPos + 16;
-    IIndexComponentElement[] indexComponents = new IndexComponentElement[componentCount];
+    IIndexComponentElement[] indexComponents = new IndexComponentElementV12[componentCount];
     for (int zz = 0; zz < componentCount; zz++) {
-      IIndexComponentElement component = IndexComponentElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IIndexComponentElement component = IndexComponentElementV12.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += component.getSizeInRCode();
       indexComponents[zz] = component;
     }
 
-    return new IndexElement(name, primary, flags, indexComponents);
+    return new IndexElementV12(name, primary, flags, indexComponents);
   }
 
 }

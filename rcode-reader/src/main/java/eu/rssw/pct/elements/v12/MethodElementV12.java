@@ -27,10 +27,11 @@ import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.v11.MethodElementV11;
 
-public class MethodElement extends eu.rssw.pct.elements.v11.MethodElement {
+public class MethodElementV12 extends MethodElementV11 {
 
-  public MethodElement(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
+  public MethodElementV12(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
       int extent, IParameter[] parameters) {
     super(name, accessType, flags, returnType, returnTypeName, extent, parameters);
   }
@@ -53,12 +54,12 @@ public class MethodElement extends eu.rssw.pct.elements.v11.MethodElement {
     int currPos = currentPos + 40;
     IParameter[] parameters = new IParameter[paramCount];
     for (int zz = 0; zz < paramCount; zz++) {
-      IParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IParameter param = MethodParameterV12.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += param.getSizeInRCode();
       parameters[zz] = param;
     }
     
-    return new MethodElement(name2, accessType, flags, returnType, typeName, extent, parameters);
+    return new MethodElementV12(name2, accessType, flags, returnType, typeName, extent, parameters);
   }
 
   @Override

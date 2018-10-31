@@ -33,13 +33,13 @@ import eu.rssw.pct.elements.IIndexElement;
 import eu.rssw.pct.elements.ITableElement;
 import eu.rssw.pct.elements.IVariableElement;
 
-public class TableElement extends AbstractAccessibleElement implements ITableElement {
+public class TableElementV11 extends AbstractAccessibleElement implements ITableElement {
   private final int flags;
   private final IVariableElement[] fields;
   private final IIndexElement[] indexes;
   private final String beforeTableName;
 
-  public TableElement(String name, Set<AccessType> accessType, int flags, IVariableElement[] fields,
+  public TableElementV11(String name, Set<AccessType> accessType, int flags, IVariableElement[] fields,
       IIndexElement[] indexes, String beforeTableName) {
     super(name, accessType);
     this.fields = fields;
@@ -61,22 +61,22 @@ public class TableElement extends AbstractAccessibleElement implements ITableEle
     String beforeTableName = beforeNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + beforeNameOffset);
 
-    IVariableElement[] fields = new VariableElement[fieldCount];
+    IVariableElement[] fields = new VariableElementV11[fieldCount];
     int currPos = currentPos + 24;
     for (int zz = 0; zz < fieldCount; zz++) {
-      IVariableElement var = VariableElement.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
+      IVariableElement var = VariableElementV11.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
       currPos += var.getSizeInRCode();
       fields[zz] = var;
     }
 
-    IIndexElement[] indexes = new IndexElement[indexCount];
+    IIndexElement[] indexes = new IndexElementV11[indexCount];
     for (int zz = 0; zz < indexCount; zz++) {
-      IIndexElement idx = IndexElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IIndexElement idx = IndexElementV11.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += idx.getSizeInRCode();
       indexes[zz] = idx;
     }
 
-    return new TableElement(name2, accessType, flags, fields, indexes, beforeTableName);
+    return new TableElementV11(name2, accessType, flags, fields, indexes, beforeTableName);
   }
 
   public int getFlags() {

@@ -35,8 +35,8 @@ import org.sonar.plugins.openedge.api.objects.RCodeTTWrapper;
 
 import com.google.common.base.Strings;
 
-import eu.rssw.pct.TypeInfo;
 import eu.rssw.pct.elements.IBufferElement;
+import eu.rssw.pct.elements.ITypeInfo;
 
 /**
  * A ScopeRoot object is created for each compile unit, and it represents the program (topmost) scope. For classes, it
@@ -46,7 +46,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
   private final RefactorSession refSession;
   private Map<String, ITable> tableMap = new HashMap<>();
   private String className = null;
-  private TypeInfo typeInfo = null;
+  private ITypeInfo typeInfo = null;
   private boolean isInterface;
   private boolean abstractClass;
   private boolean serializableClass;
@@ -162,7 +162,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
       return var;
     }
 
-    TypeInfo info = typeInfo;
+    ITypeInfo info = typeInfo;
     while (info != null) {
       if (info.hasProperty(name)) {
         return new Variable(name, this);
@@ -200,7 +200,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
       return buff;
     }
 
-    TypeInfo info = typeInfo;
+    ITypeInfo info = typeInfo;
     while (info != null) {
       if (info.hasBuffer(name)) {
         IBufferElement elem = info.getBuffer(name);
@@ -227,7 +227,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
     if (buff != null) {
       return buff;
     }
-    TypeInfo info = typeInfo;
+    ITypeInfo info = typeInfo;
     while (info != null) {
       if (info.hasTempTable(name)) {
         return new TableBuffer(name, this, new RCodeTTWrapper(info.getTempTable(name)));
@@ -259,7 +259,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope implements 
     className = s;
   }
 
-  public void setTypeInfo(TypeInfo typeInfo) {
+  public void setTypeInfo(ITypeInfo typeInfo) {
     this.typeInfo = typeInfo;
   }
 }

@@ -29,25 +29,24 @@ import com.google.common.base.Joiner;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
-import eu.rssw.pct.elements.IQueryElement;
+import eu.rssw.pct.elements.IDataRelationElement;
+import eu.rssw.pct.elements.IDatasetElement;
 
-public class QueryElement extends AbstractAccessibleElement implements IQueryElement {
+public class DatasetElementV11 extends AbstractAccessibleElement implements IDatasetElement {
   private final String[] bufferNames;
-  private final int prvte;
-  private final int flags;
+  private final IDataRelationElement[] relations;
 
-  public QueryElement(String name, Set<AccessType> accessType, String[] buffers, int flags, int prvte) {
+  public DatasetElementV11(String name, Set<AccessType> accessType, String[] bufferNames,
+      IDataRelationElement[] relations) {
     super(name, accessType);
-    this.bufferNames = buffers;
-    this.flags = flags;
-    this.prvte = prvte;
+    this.bufferNames = bufferNames;
+    this.relations = relations;
   }
 
-  public static IQueryElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
+  public static IDatasetElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
       int textAreaOffset, ByteOrder order) {
     int bufferCount = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
-    int prvte = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
-    int flags = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
+    int relationshipCount = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
@@ -58,42 +57,52 @@ public class QueryElement extends AbstractAccessibleElement implements IQueryEle
           textAreaOffset + ByteBuffer.wrap(segment, currentPos + 24 + (zz * 4), Integer.BYTES).order(order).getInt());
     }
 
-    return new QueryElement(name2, accessType, bufferNames, flags, prvte);
+    int currPos = currentPos + 4 * bufferCount;
+    IDataRelationElement[] relations = new DataRelationElementV11[relationshipCount];
+    for (int zz = 0; zz < relationshipCount; zz++) {
+      IDataRelationElement param = DataRelationElementV11.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      currPos += param.getSizeInRCode();
+      relations[zz] = param;
+    }
+
+    return new DatasetElementV11(name2, accessType, bufferNames, relations);
   }
 
-  @Override
+  public IDataRelationElement[] getDataRelations() {
+    return this.relations;
+  }
+
   public String[] getBufferNames() {
     return bufferNames;
   }
 
-  public int getPrvte() {
-    return prvte;
-  }
-
-  public int getFlags() {
-    return flags;
-  }
-
   @Override
   public int getSizeInRCode() {
-    return (24 + 4 * bufferNames.length) + 7 & -8;
+    int size = 24 + (bufferNames.length * 4);
+    for (IDataRelationElement elem : relations) {
+      size += elem.getSizeInRCode();
+    }
+    return size + 7 & -8;
   }
 
   @Override
   public String toString() {
-    return String.format("Query %s for %d buffer(s)", getName(), bufferNames.length); 
+    return String.format("Dataset %s for %d buffer(s) and %d relations", getName(), bufferNames.length, relations.length);
   }
 
   @Override
   public int hashCode() {
-    return (getName() + "/" + Joiner.on('-').join(bufferNames)).hashCode();
+    String str1 = Joiner.on('/').join(bufferNames);
+    String str2 = Joiner.on('/').join(relations);
+    return (str1 + "-" + str2).hashCode();
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof IQueryElement) {
-      IQueryElement obj2 = (IQueryElement) obj;
-      return getName().equals(obj2.getName()) && Arrays.deepEquals(bufferNames, obj2.getBufferNames());
+    if (obj instanceof IDatasetElement) {
+      IDatasetElement obj2 = (IDatasetElement) obj;
+      return (Arrays.deepEquals(bufferNames, obj2.getBufferNames())
+          && Arrays.deepEquals(relations, obj2.getDataRelations()));
     }
     return false;
   }

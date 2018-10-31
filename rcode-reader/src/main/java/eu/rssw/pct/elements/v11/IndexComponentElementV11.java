@@ -25,12 +25,12 @@ import java.nio.ByteOrder;
 import eu.rssw.pct.elements.AbstractElement;
 import eu.rssw.pct.elements.IIndexComponentElement;
 
-public class IndexComponentElement extends AbstractElement implements IIndexComponentElement {
+public class IndexComponentElementV11 extends AbstractElement implements IIndexComponentElement {
   private final int flags;
   private final int position;
   private final boolean ascending;
 
-  public IndexComponentElement(int position, int flags, boolean ascending) {
+  public IndexComponentElementV11(int position, int flags, boolean ascending) {
     this.position = position;
     this.flags = flags;
     this.ascending = ascending;
@@ -42,7 +42,7 @@ public class IndexComponentElement extends AbstractElement implements IIndexComp
     int flags = segment[currentPos + 1];
     int position = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
 
-    return new IndexComponentElement(position, flags, ascending == 106);
+    return new IndexComponentElementV11(position, flags, ascending == 106);
   }
 
   public int getFlags() {

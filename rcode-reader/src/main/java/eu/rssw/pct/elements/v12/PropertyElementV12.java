@@ -30,11 +30,12 @@ import eu.rssw.pct.elements.IEnumDescriptor;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.v11.PropertyElementV11;
 
-public class PropertyElement extends eu.rssw.pct.elements.v11.PropertyElement {
+public class PropertyElementV12 extends PropertyElementV11 {
   private final IEnumDescriptor enumDesc;
 
-  public PropertyElement(String name, Set<AccessType> accessType, int flags, IVariableElement var, IMethodElement getter, IMethodElement setter, IEnumDescriptor enumDesc) {
+  public PropertyElementV12(String name, Set<AccessType> accessType, int flags, IVariableElement var, IMethodElement getter, IMethodElement setter, IEnumDescriptor enumDesc) {
     super(name, accessType, flags, var, getter, setter);
     this.enumDesc = enumDesc;
   }
@@ -48,7 +49,7 @@ public class PropertyElement extends eu.rssw.pct.elements.v11.PropertyElement {
     IVariableElement variable = null;
     int currPos = currentPos + 16;
     if ((flags & PROPERTY_AS_VARIABLE) != 0) {
-      variable = VariableElement.fromDebugSegment("", accessType, segment, currPos, textAreaOffset, order);
+      variable = VariableElementV12.fromDebugSegment("", accessType, segment, currPos, textAreaOffset, order);
       currPos += variable.getSizeInRCode();
     }
 
@@ -59,7 +60,7 @@ public class PropertyElement extends eu.rssw.pct.elements.v11.PropertyElement {
         atp.add(AccessType.PUBLIC);
       if ((flags & PROTECTED_GETTER) != 0)
         atp.add(AccessType.PROTECTED);
-      getter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
+      getter = MethodElementV12.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
       currPos += getter.getSizeInRCode();
     }
     IMethodElement setter = null;
@@ -69,14 +70,14 @@ public class PropertyElement extends eu.rssw.pct.elements.v11.PropertyElement {
         atp.add(AccessType.PUBLIC);
       if ((flags & PROTECTED_SETTER) != 0)
         atp.add(AccessType.PROTECTED);
-      setter = MethodElement.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
+      setter = MethodElementV12.fromDebugSegment("", atp, segment, currPos, textAreaOffset, order);
       currPos += setter.getSizeInRCode();
     }
     IEnumDescriptor enumDesc = null;
     if ((flags & PROPERTY_IS_ENUM) != 0) {
-      enumDesc = EnumDescriptor.fromDebugSegment("", segment, currentPos, textAreaOffset, order);
+      enumDesc = EnumDescriptorV12.fromDebugSegment("", segment, currentPos, textAreaOffset, order);
     }
-    return new PropertyElement(name2, accessType, flags, variable, getter, setter, enumDesc);
+    return new PropertyElementV12(name2, accessType, flags, variable, getter, setter, enumDesc);
   }
 
   @Override

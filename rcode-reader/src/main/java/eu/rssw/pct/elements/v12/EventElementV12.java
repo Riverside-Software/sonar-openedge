@@ -27,10 +27,11 @@ import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.IEventElement;
 import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.v11.EventElementV11;
 
-public class EventElement extends eu.rssw.pct.elements.v11.EventElement {
+public class EventElementV12 extends EventElementV11 {
 
-  public EventElement(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
+  public EventElementV12(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
       String delegateName, IParameter[] parameters) {
     super(name, accessType, flags, returnType, returnTypeName, delegateName, parameters);
   }
@@ -55,12 +56,12 @@ public class EventElement extends eu.rssw.pct.elements.v11.EventElement {
     int currPos = currentPos + 24;
     IParameter[] parameters = new IParameter[parameterCount];
     for (int zz = 0; zz < parameterCount; zz++) {
-      IParameter param = MethodParameter.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IParameter param = MethodParameterV12.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += param.getSizeInRCode();
       parameters[zz] = param;
     }
 
-    return new EventElement(name2, accessType, flags, returnType, returnTypeName, delegateName, parameters);
+    return new EventElementV12(name2, accessType, flags, returnType, returnTypeName, delegateName, parameters);
   }
 
 }

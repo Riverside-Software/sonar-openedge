@@ -30,7 +30,7 @@ import eu.rssw.pct.elements.AbstractElement;
 import eu.rssw.pct.elements.IIndexComponentElement;
 import eu.rssw.pct.elements.IIndexElement;
 
-public class IndexElement extends AbstractElement implements IIndexElement {
+public class IndexElementV11 extends AbstractElement implements IIndexElement {
   private static final int UNIQUE_INDEX = 2;
   private static final int WORD_INDEX = 8;
   private static final int DEFAULT_INDEX = 16;
@@ -39,7 +39,7 @@ public class IndexElement extends AbstractElement implements IIndexElement {
   private final int primary;
   private final int flags;
 
-  public IndexElement(String name, int primary, int flags, IIndexComponentElement[] indexComponents) {
+  public IndexElementV11(String name, int primary, int flags, IIndexComponentElement[] indexComponents) {
     super(name);
     this.primary = primary;
     this.flags = flags;
@@ -55,14 +55,14 @@ public class IndexElement extends AbstractElement implements IIndexElement {
     String name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int currPos = currentPos + 16;
-    IIndexComponentElement[] indexComponents = new IndexComponentElement[componentCount];
+    IIndexComponentElement[] indexComponents = new IndexComponentElementV11[componentCount];
     for (int zz = 0; zz < componentCount; zz++) {
-      IIndexComponentElement component = IndexComponentElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      IIndexComponentElement component = IndexComponentElementV11.fromDebugSegment(segment, currPos, textAreaOffset, order);
       currPos += component.getSizeInRCode();
       indexComponents[zz] = component;
     }
 
-    return new IndexElement(name, primary, flags, indexComponents);
+    return new IndexElementV11(name, primary, flags, indexComponents);
   }
 
   @Override

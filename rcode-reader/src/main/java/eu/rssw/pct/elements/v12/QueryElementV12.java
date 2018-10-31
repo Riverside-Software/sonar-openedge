@@ -25,20 +25,20 @@ import java.util.Set;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AccessType;
-import eu.rssw.pct.elements.IDataRelationElement;
-import eu.rssw.pct.elements.IDatasetElement;
+import eu.rssw.pct.elements.IQueryElement;
+import eu.rssw.pct.elements.v11.QueryElementV11;
 
-public class DatasetElement extends eu.rssw.pct.elements.v11.DatasetElement {
+public class QueryElementV12 extends QueryElementV11 {
 
-  public DatasetElement(String name, Set<AccessType> accessType, String[] bufferNames,
-      IDataRelationElement[] relations) {
-    super(name, accessType, bufferNames, relations);
+  public QueryElementV12(String name, Set<AccessType> accessType, String[] buffers, int flags, int prvte) {
+    super(name, accessType, buffers, flags, prvte);
   }
 
-  public static IDatasetElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
+  public static IQueryElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
       int textAreaOffset, ByteOrder order) {
     int bufferCount = ByteBuffer.wrap(segment, currentPos + 14, Short.BYTES).order(order).getShort();
-    int relationshipCount = ByteBuffer.wrap(segment, currentPos + 16, Short.BYTES).order(order).getShort();
+    int prvte = ByteBuffer.wrap(segment, currentPos + 16, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 20, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
@@ -49,15 +49,7 @@ public class DatasetElement extends eu.rssw.pct.elements.v11.DatasetElement {
           textAreaOffset + ByteBuffer.wrap(segment, currentPos + 24 + (zz * 4), Integer.BYTES).order(order).getInt());
     }
 
-    int currPos = currentPos + 4 * bufferCount;
-    IDataRelationElement[] relations = new DataRelationElement[relationshipCount];
-    for (int zz = 0; zz < relationshipCount; zz++) {
-      IDataRelationElement param = DataRelationElement.fromDebugSegment(segment, currPos, textAreaOffset, order);
-      currPos += param.getSizeInRCode();
-      relations[zz] = param;
-    }
-
-    return new DatasetElement(name2, accessType, bufferNames, relations);
+    return new QueryElementV12(name2, accessType, bufferNames, flags, prvte);
   }
 
 }
