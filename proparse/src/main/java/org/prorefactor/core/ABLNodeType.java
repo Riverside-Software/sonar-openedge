@@ -19,16 +19,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.antlr.v4.runtime.Token;
-import org.prorefactor.proparse.ProParser;
 import org.prorefactor.proparse.ProParserTokenTypes;
 
 import com.google.common.base.Strings;
 
 public enum ABLNodeType {
   // Placeholders and unknown tokens
+  EMPTY_NODE(-1000, NodeTypesOption.PLACEHOLDER),
   INVALID_NODE(Token.INVALID_TYPE, NodeTypesOption.PLACEHOLDER),
   EOF_ANTLR4(Token.EOF, NodeTypesOption.PLACEHOLDER),
-  EOF(antlr.Token.EOF_TYPE, NodeTypesOption.PLACEHOLDER),
   INCLUDEDIRECTIVE(ProParserTokenTypes.INCLUDEDIRECTIVE, NodeTypesOption.PLACEHOLDER),
 
   // A
@@ -1653,16 +1652,6 @@ public enum ABLNodeType {
 
   public boolean mayBeRegularFunc() {
     return options.contains(NodeTypesOption.MAY_BE_REGULAR_FUNC);
-  }
-
-  /**
-   * Get the type name (different than the keyword literal text) for a type number. Any "_KW" suffix is stripped.
-   */
-  public String getTypeName() {
-    String ret = ProParser._tokenNames[typeNum];
-    if (ret.endsWith("_KW"))
-      ret = ret.substring(0, ret.length() - 3);
-    return ret;
   }
 
   public boolean isAbbreviated(String txt) {

@@ -19,6 +19,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.macrolevel.MacroDef;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.slf4j.Logger;

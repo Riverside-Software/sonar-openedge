@@ -97,5 +97,3 @@ display /* 0:sports2000.bs.State */  bs.state.
 /* There used to be a problem with references like this... */
 DEFINE TEMP-TABLE  /* 0:state */ state NO-UNDO LIKE  /* 0:sports2000.State */ state
        Field  /* 0:state.oldstate */ oldstate like /* 0:state.State */  state.state.
-
-

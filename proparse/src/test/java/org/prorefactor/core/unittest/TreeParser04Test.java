@@ -33,8 +33,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 /**
  * Test frame scopes and implicit field associations to frames.
  */
@@ -44,7 +42,7 @@ public class TreeParser04Test {
   File outFile = new File("target/test-temp/treeparser04/frames.p");
 
   @Test
-  public void test01() throws ANTLRException, IOException {
+  public void test01() throws IOException {
     Injector injector = Guice.createInjector(new UnitTestModule());
     RefactorSession session = injector.getInstance(RefactorSession.class);
     outFile.getParentFile().mkdirs();

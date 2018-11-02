@@ -28,14 +28,12 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 public class OpSysTest {
   private final static boolean IS_WINDOWS = (System.getenv("windir") != null);
   private final static String SRC_DIR = "src/test/resources/data/bugsfixed";
 
   @Test
-  public void testBackslashNoEscape() throws ANTLRException {
+  public void testBackslashNoEscape() {
     // Backslash not considered an escape character on Windows, so it has to fail on Windows
     // UNIX test not executed
     if (!IS_WINDOWS)
@@ -44,7 +42,7 @@ public class OpSysTest {
     RefactorSession session = injector.getInstance(RefactorSession.class);
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char.p"), session);
     try {
-      pu.treeParser01();
+      pu.parse();
       Assert.fail("Should have failed");
     } catch (ProparseRuntimeException caught) {
 
@@ -52,16 +50,16 @@ public class OpSysTest {
   }
 
   @Test
-  public void testBackslashEscape() throws ANTLRException {
+  public void testBackslashEscape() {
     // Backslash considered an escape character on Windows, so it shouldn't fail on both Windows and Unix
     Injector injector = Guice.createInjector(new UnitTestBackslashModule());
     RefactorSession session = injector.getInstance(RefactorSession.class);
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char.p"), session);
-    pu.treeParser01();
+    pu.parse();
   }
 
   @Test
-  public void testBackslashInIncludeWindows() throws ANTLRException {
+  public void testBackslashInIncludeWindows() {
     // Backslash considered an escape character on Windows, so include file will fail
     if (!IS_WINDOWS)
       return;
@@ -70,7 +68,7 @@ public class OpSysTest {
     RefactorSession session = injector.getInstance(RefactorSession.class);
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char2.p"), session);
     try {
-      pu.treeParser01();
+      pu.parse();
       Assert.fail("Should have failed");
     } catch (UncheckedIOException caught) {
 
@@ -78,7 +76,7 @@ public class OpSysTest {
   }
 
   @Test
-  public void test2BackslashInIncludeWindows() throws ANTLRException {
+  public void test2BackslashInIncludeWindows() {
     // Backslash not considered an escape character on Windows, so include file is OK (standard behavior)
     if (!IS_WINDOWS)
       return;
@@ -86,11 +84,11 @@ public class OpSysTest {
     Injector injector = Guice.createInjector(new UnitTestModule());
     RefactorSession session = injector.getInstance(RefactorSession.class);
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char2.p"), session);
-    pu.treeParser01();
+    pu.parse();
   }
 
   @Test
-  public void testBackslashInIncludeLinux() throws ANTLRException {
+  public void testBackslashInIncludeLinux() {
     // Always fail on Linux
     if (IS_WINDOWS)
       return;
@@ -99,7 +97,7 @@ public class OpSysTest {
     RefactorSession session = injector.getInstance(RefactorSession.class);
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char2.p"), session);
     try {
-      pu.treeParser01();
+      pu.parse();
       Assert.fail("Should have failed");
     } catch (UncheckedIOException caught) {
 

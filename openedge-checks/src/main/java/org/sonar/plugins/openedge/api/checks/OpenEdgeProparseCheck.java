@@ -71,7 +71,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
       return file;
     } else {
       return getContext().fileSystem().inputFile(
-          getContext().fileSystem().predicates().hasRelativePath(node.getFilename()));
+          getContext().fileSystem().predicates().hasRelativePath(node.getFileName()));
     }
   }
 

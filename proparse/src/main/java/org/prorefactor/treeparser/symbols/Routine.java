@@ -18,7 +18,8 @@ package org.prorefactor.treeparser.symbols;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.prorefactor.core.JPNode;
+import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
@@ -29,8 +30,8 @@ import org.prorefactor.treeparser.TreeParserSymbolScope;
 public class Routine extends Symbol {
   private final TreeParserSymbolScope routineScope;
   private final List<Parameter> parameters = new ArrayList<>();
-  private JPNode returnDatatypeNode = null;
-  private int progressType;
+  private DataType returnDatatypeNode = null;
+  private ABLNodeType progressType;
 
   public Routine(String name, TreeParserSymbolScope definingScope, TreeParserSymbolScope routineScope) {
     super(name, definingScope);
@@ -56,16 +57,14 @@ public class Routine extends Symbol {
   /** Return TokenTypes: Program_root, PROCEDURE, FUNCTION, or METHOD. */
   @Override
   public int getProgressType() {
-    return progressType;
+    return progressType.getType();
   }
 
   /**
    * Null for PROCEDURE, node of the datatype for FUNCTION or METHOD. For a Class return value, won't be the CLASS node,
    * but the TYPE_NAME node.
-   * 
-   * TODO For 10.1B, anything that uses this might want to look up the fully qualified class name.
    */
-  public JPNode getReturnDatatypeNode() {
+  public DataType getReturnDatatypeNode() {
     return returnDatatypeNode;
   }
 
@@ -73,13 +72,13 @@ public class Routine extends Symbol {
     return routineScope;
   }
 
-  public Routine setProgressType(int t) {
+  public Routine setProgressType(ABLNodeType t) {
     progressType = t;
     return this;
   }
 
   /** Set by TreeParser01 for functions and methods. */
-  public void setReturnDatatypeNode(JPNode n) {
+  public void setReturnDatatypeNode(DataType n) {
     this.returnDatatypeNode = n;
   }
 

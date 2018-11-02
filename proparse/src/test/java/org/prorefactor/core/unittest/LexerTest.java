@@ -23,12 +23,15 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.io.UncheckedIOException;
 
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.proparse.antlr4.MultiChannelTokenSource;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.prorefactor.treeparser.ParseUnit;
@@ -39,11 +42,6 @@ import org.testng.annotations.Test;
 import com.google.common.base.Charsets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import antlr.ANTLRException;
-import antlr.Token;
-import antlr.TokenStream;
-import antlr.TokenStreamException;
 
 public class LexerTest {
   private final static String SRC_DIR = "src/test/resources/data/lexer";
@@ -57,317 +55,349 @@ public class LexerTest {
   }
 
   @Test
-  public void testTokenList01() throws TokenStreamException {
+  public void testTokenList01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist01.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource src = unit.lex();
 
     // CURRENT-WINDOW:HANDLE.
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.CURRENTWINDOW);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.HANDLE);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.CURRENTWINDOW);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.HANDLE);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
 
     // SESSION:FIRST-SERVER-SOCKET:HANDLE.
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.SESSION);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.HANDLE);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.SESSION);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.HANDLE);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
 
     // TEMP-TABLE tt1::fld1.
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.TEMPTABLE);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DOUBLECOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.TEMPTABLE);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.DOUBLECOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
 
     // DATASET ds1::tt1.
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DATASET);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DOUBLECOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.DATASET);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.DOUBLECOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
 
     // DATASET ds1::tt1:set-callback().
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DATASET);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DOUBLECOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.LEFTPAREN);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.RIGHTPAREN);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.DATASET);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.DOUBLECOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.LEFTPAREN);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.RIGHTPAREN);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test
-  public void testTokenList02() throws TokenStreamException {
+  public void testTokenList02() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist02.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource src = unit.lex();
 
     // Progress.Security.PAMStatus:AccessDenied.
-    ProToken tok = (ProToken) stream.nextToken();
+    ProToken tok = (ProToken) src.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 1);
-    assertEquals(tok.getEndColumn(), 27);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(tok.getEndCharPositionInLine(), 27);
+    assertEquals(tok.getChannel(), 0);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
 
     // Progress.Security.PAMStatus :AccessDenied.
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) src.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
     assertEquals(tok.getLine(), 2);
-    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 2);
-    assertEquals(tok.getEndColumn(), 27);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(tok.getEndCharPositionInLine(), 27);
+    assertEquals(tok.getChannel(), 0);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
 
     // Progress.Security.PAMStatus <bazinga> :AccessDenied.
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) src.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
     assertEquals(tok.getLine(), 3);
-    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 3);
-    assertEquals(tok.getEndColumn(), 27);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getEndCharPositionInLine(), 27);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) src.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.COMMENT);
     assertEquals(tok.getText(), "//Test");
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    tok = (ProToken) stream.nextToken();
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) src.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.COMMENT);
     assertEquals(tok.getText(), "//Test2");
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
 
     // Progress.117x.clsName:StaticProperty.
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) src.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.ID);
     assertEquals(tok.getText(), "Progress.117x.clsName");
     assertEquals(tok.getLine(), 7);
-    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 7);
-    assertEquals(tok.getEndColumn(), 21);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(tok.getEndCharPositionInLine(), 21);
+    assertEquals(tok.getChannel(), 0);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test(enabled = false)
-  public void testTokenList03() throws TokenStreamException {
+  public void testTokenList03() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist03.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource src = unit.lex();
 
     // MESSAGE Progress./* Holy shit */   Security.PAMStatus:AccessDenied.
     // The compiler accepts that...
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.MESSAGE);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    Token tok = stream.nextToken();
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.MESSAGE);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    Token tok = src.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
   }
 
   @Test
-  public void testTokenList04() throws TokenStreamException {
+  public void testTokenList04() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist04.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource src = unit.lex();
 
     // .Security.PAMStatus:AccessDenied.
     // Nothing recognized here, so we don't change the stream 
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test
-  public void testTokenList05() throws TokenStreamException {
+  public void testTokenList05() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist05.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource src = unit.lex();
 
     // MESSAGE customer.custnum Progress.Security.PAMStatus:AccessDenied.
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.MESSAGE);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.MESSAGE);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
 
     // MESSAGE customer.custnum. Progress.Security.PAMStatus:AccessDenied.
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.MESSAGE);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.MESSAGE);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test
-  public void testTokenList06() throws TokenStreamException {
+  public void testTokenList06() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist06.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource src = unit.lex();
 
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test
-  public void testTokenList07() throws TokenStreamException {
+  public void testTokenList07() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist07.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource src = unit.lex();
 
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test
-  public void testTokenList08() throws TokenStreamException {
+  public void testTokenList08() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist08.p"), session);
-    TokenStream stream = unit.lex();
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.COMMENT);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.FILE);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PLUS);
+    TokenSource src = unit.lex();
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.COMMENT);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.FILE);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(src.nextToken().getType(), ProParserTokenTypes.PLUS);
   }
 
   @Test
-  public void testPostLexer01() throws TokenStreamException {
+  public void testPostLexer01Init() {
+    // First time verifying the channel locations
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
-    TokenStream stream = unit.preprocess();
-    Token tok = stream.nextToken();
+    TokenSource src = unit.preprocess();
+    // Whitespaces on hidden channel
+    Token tok = src.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    assertEquals(tok.getChannel(), 1);
+    // Then scoped-define on a different channel again
+    tok = src.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.AMPSCOPEDDEFINE);
+    assertEquals(tok.getChannel(), 2);
+    // Whitespace again
+    tok = src.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    assertEquals(tok.getChannel(), 1);
+    // And again...
+    tok = src.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    assertEquals(tok.getChannel(), 1);
+    // Then the string
+    tok = src.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
     assertEquals(tok.getText(), "\"zz\"");
   }
 
   @Test
-  public void testPostLexer02() throws TokenStreamException {
+  public void testPostLexer01() {
+    // First time verifying the channel locations
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
+    TokenSource src = unit.preprocess();
+    // Whitespaces on hidden channel
+    Token tok = nextVisibleToken(src);
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getText(), "\"zz\"");
+  }
+
+  @Test
+  public void testPostLexer02() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer02.p"), session);
-    TokenStream stream = unit.preprocess();
-    Token tok = stream.nextToken();
+    TokenSource src = unit.preprocess();
+    Token tok = nextVisibleToken(src);
     assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
     assertEquals(tok.getText(), "\"yy\"");
   }
 
   @Test
-  public void testPostLexer03() throws TokenStreamException {
+  public void testPostLexer03() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer03.p"), session);
-    TokenStream stream = unit.preprocess();
-    Token tok = stream.nextToken();
+    TokenSource src = unit.preprocess();
+    Token tok = nextVisibleToken(src);
     assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
     assertEquals(tok.getText(), "\"zz\"");
   }
 
   @Test
-  public void testPostLexer04() throws TokenStreamException {
+  public void testPostLexer04() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer04.p"), session);
-    TokenStream stream = unit.preprocess();
-    Token tok = stream.nextToken();
+    TokenSource src = unit.preprocess();
+    Token tok = nextVisibleToken(src);
     assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
     // The best we can do right now... This is to cover edge cases in preprocessing...
     assertEquals(tok.getText(), "\"a'aabb'bxxx~\nyyy\"");
   }
 
   @Test
-  public void testEndOfFile() throws TokenStreamException {
+  public void testEndOfFile() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist01.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource src = unit.lex();
 
-    while (stream.nextToken().getType() != Token.EOF_TYPE) {
+    while (src.nextToken().getType() != Token.EOF) {
 
     }
     for (int zz = 0; zz < 1000; zz++) {
       // Verify safety net is not triggered
-      stream.nextToken();
+      src.nextToken();
     }
     // Make sure nextToken() always return EOF (and no null element or any exception)
-    assertEquals(stream.nextToken().getType(), Token.EOF_TYPE);
-    assertEquals(stream.nextToken().getType(), Token.EOF_TYPE);
+    assertEquals(src.nextToken().getType(), Token.EOF);
+    assertEquals(src.nextToken().getType(), Token.EOF);
   }
 
   @Test
-  public void testAnalyzeSuspend() throws TokenStreamException, ANTLRException {
+  public void testAnalyzeSuspend() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer05.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource src = unit.lex();
 
-    ProToken tok = nextToken(stream, ABLNodeType.MESSAGE);
+    ProToken tok = nextToken(src, ABLNodeType.MESSAGE);
     assertNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
-    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    tok = nextToken(src, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertFalse(tok.isEditableInAB());
-    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    tok = nextToken(src, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
-    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    tok = nextToken(src, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertFalse(tok.isEditableInAB());
-    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    tok = nextToken(src, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertFalse(tok.isEditableInAB());
-    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    tok = nextToken(src, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
-    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    tok = nextToken(src, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertFalse(tok.isEditableInAB());
-    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    tok = nextToken(src, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
-    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    tok = nextToken(src, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
-    tok = nextToken(stream, ABLNodeType.MESSAGE);
+    tok = nextToken(src, ABLNodeType.MESSAGE);
     assertNotNull(tok.getAnalyzeSuspend());
     assertTrue(tok.isEditableInAB());
 
@@ -379,11 +409,11 @@ public class LexerTest {
   }
 
   @Test
-  public void testPreproErrorMessages01() throws TokenStreamException {
+  public void testPreproErrorMessages01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer06.p"), session);
     try {
-      TokenStream stream = unit.preprocess();
-      while (stream.nextToken().getType() != Token.EOF_TYPE) {
+      TokenSource src = unit.preprocess();
+      while (src.nextToken().getType() != Token.EOF) {
 
       }
     } catch (ProparseRuntimeException caught) {
@@ -397,11 +427,11 @@ public class LexerTest {
   }
 
   @Test
-  public void testPreproErrorMessages02() throws TokenStreamException {
+  public void testPreproErrorMessages02() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer07.p"), session);
     try {
-      TokenStream stream = unit.preprocess();
-      while (stream.nextToken().getType() != Token.EOF_TYPE) {
+      TokenSource src = unit.preprocess();
+      while (src.nextToken().getType() != Token.EOF) {
 
       }
     } catch (ProparseRuntimeException caught) {
@@ -415,11 +445,11 @@ public class LexerTest {
   }
 
   @Test
-  public void testPreproErrorMessages03() throws TokenStreamException {
+  public void testPreproErrorMessages03() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer08.p"), session);
     try {
-      TokenStream stream = unit.preprocess();
-      while (stream.nextToken().getType() != Token.EOF_TYPE) {
+      TokenSource src = unit.preprocess();
+      while (src.nextToken().getType() != Token.EOF) {
 
       }
     } catch (ProparseRuntimeException caught) {
@@ -434,11 +464,11 @@ public class LexerTest {
   }
 
   @Test
-  public void testPreproErrorMessages04() throws TokenStreamException {
+  public void testPreproErrorMessages04() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer09.p"), session);
     try {
-      TokenStream stream = unit.preprocess();
-      while (stream.nextToken().getType() != Token.EOF_TYPE) {
+      TokenSource src = unit.preprocess();
+      while (src.nextToken().getType() != Token.EOF) {
 
       }
     } catch (ProparseRuntimeException caught) {
@@ -452,18 +482,10 @@ public class LexerTest {
     Assert.fail("No exception found");
   }
 
-  private ProToken nextToken(TokenStream stream, ABLNodeType type) throws TokenStreamException {
-    ProToken tok = (ProToken) stream.nextToken();
-    while (tok.getNodeType() != ABLNodeType.MESSAGE) {
-      tok = (ProToken) stream.nextToken();
-    }
-    return tok;
-  }
-
   @Test
-  public void testAnalyzeSuspendIncludeFile() throws TokenStreamException {
+  public void testAnalyzeSuspendIncludeFile() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer10.p"), session);
-    TokenStream stream = unit.preprocess();
+    TokenSource stream = unit.preprocess();
 
     // First MESSAGE in main file
     ProToken tok = nextToken(stream, ABLNodeType.MESSAGE);
@@ -500,16 +522,16 @@ public class LexerTest {
   }
 
   @Test
-  public void testQuotedStringPosition() throws TokenStreamException {
+  public void testQuotedStringPosition() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer11.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource stream = unit.lex();
 
     ProToken tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.DO);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 1);
-    assertEquals(tok.getEndColumn(), 2);
+    assertEquals(tok.getEndCharPositionInLine(), 2);
 
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WHILE);
@@ -522,32 +544,32 @@ public class LexerTest {
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getColumn(), 15);
+    assertEquals(tok.getCharPositionInLine(), 15);
     assertEquals(tok.getEndLine(), 1);
     // The important test here, end column has to be 16 even when followed by ':'
-    assertEquals(tok.getEndColumn(), 16);
+    assertEquals(tok.getEndCharPositionInLine(), 16);
 
     // Colon
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.LEXCOLON);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getColumn(), 17);
+    assertEquals(tok.getCharPositionInLine(), 17);
     assertEquals(tok.getEndLine(), 1);
-    assertEquals(tok.getEndColumn(), 17);
+    assertEquals(tok.getEndCharPositionInLine(), 17);
   }
 
   @Test
-  public void testQuotedStringPosition2() throws TokenStreamException {
+  public void testQuotedStringPosition2() {
     // Same as previous test, but with a space before the colon
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer11-2.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource stream = unit.lex();
 
     ProToken tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.DO);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 1);
-    assertEquals(tok.getEndColumn(), 2);
+    assertEquals(tok.getEndCharPositionInLine(), 2);
 
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WHILE);
@@ -561,9 +583,9 @@ public class LexerTest {
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getColumn(), 15);
+    assertEquals(tok.getCharPositionInLine(), 15);
     assertEquals(tok.getEndLine(), 1);
-    assertEquals(tok.getEndColumn(), 16);
+    assertEquals(tok.getEndCharPositionInLine(), 16);
 
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
 
@@ -571,68 +593,68 @@ public class LexerTest {
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.LEXCOLON);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getColumn(), 18);
+    assertEquals(tok.getCharPositionInLine(), 18);
     assertEquals(tok.getEndLine(), 1);
-    assertEquals(tok.getEndColumn(), 18);
+    assertEquals(tok.getEndCharPositionInLine(), 18);
   }
 
   @Test
-  public void testQuotedStringPosition3() throws TokenStreamException {
+  public void testQuotedStringPosition3() {
     // Same as previous test, but with a space before the colon
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer11-3.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource stream = unit.lex();
 
     ProToken tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 1);
-    assertEquals(tok.getEndColumn(), 10);
+    assertEquals(tok.getEndCharPositionInLine(), 10);
 
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.PERIOD);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getColumn(), 11);
+    assertEquals(tok.getCharPositionInLine(), 11);
     assertEquals(tok.getEndLine(), 1);
-    assertEquals(tok.getEndColumn(), 11);
+    assertEquals(tok.getEndCharPositionInLine(), 11);
 
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
 
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
     assertEquals(tok.getLine(), 2);
-    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 2);
-    assertEquals(tok.getEndColumn(), 6);
+    assertEquals(tok.getEndCharPositionInLine(), 6);
     
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.PERIOD);
     assertEquals(tok.getLine(), 2);
-    assertEquals(tok.getColumn(), 7);
+    assertEquals(tok.getCharPositionInLine(), 7);
     assertEquals(tok.getEndLine(), 2);
-    assertEquals(tok.getEndColumn(), 7);
+    assertEquals(tok.getEndCharPositionInLine(), 7);
 
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
 
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
     assertEquals(tok.getLine(), 3);
-    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 3);
-    assertEquals(tok.getEndColumn(), 8);
+    assertEquals(tok.getEndCharPositionInLine(), 8);
 
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.PERIOD);
     assertEquals(tok.getLine(), 3);
-    assertEquals(tok.getColumn(), 9);
+    assertEquals(tok.getCharPositionInLine(), 9);
     assertEquals(tok.getEndLine(), 3);
-    assertEquals(tok.getEndColumn(), 9);
+    assertEquals(tok.getEndCharPositionInLine(), 9);
   }
 
   @Test(enabled = false)
-  public void testMacroExpansion() throws TokenStreamException {
+  public void testMacroExpansion() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer12.p"), session);
-    TokenStream stream = unit.preprocess();
+    TokenSource stream = unit.preprocess();
 
     ProToken tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
@@ -649,73 +671,73 @@ public class LexerTest {
   }
 
   @Test
-  public void testUnicodeBom() throws TokenStreamException {
+  public void testUnicodeBom() {
     RefactorSession session2 = new RefactorSession(new ProparseSettings("src/test/resources/data"), new Schema(), Charsets.UTF_8);
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer13.p"), session2);
-    TokenStream stream = unit.preprocess();
+    TokenSource src = unit.preprocess();
 
-    ProToken tok = (ProToken) stream.nextToken();
+    ProToken tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
 
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
 
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
 
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
 
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
 
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
   }
 
   @Test
-  public void testXCode1() throws TokenStreamException {
+  public void testXCode1() {
     // Default behavior is that it shouldn't fail
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session);
-    TokenStream stream = unit.preprocess();
+    TokenSource src = unit.preprocess();
 
     // lexer14.i contains 'message "xcode".'
-    ProToken tok = (ProToken) stream.nextToken();
+    ProToken tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
     assertEquals(tok.getLine(), 2);
-    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 2);
-    assertEquals(tok.getEndColumn(), 7);
+    assertEquals(tok.getEndCharPositionInLine(), 7);
     
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getText(), "\"hello world\"");
   }
 
   @Test
-  public void testXCode2() throws TokenStreamException {
+  public void testXCode2() {
     // Test with customSkipXCode set to true
     ProparseSettings settings = new ProparseSettings("src/test/resources/data");
     settings.setCustomSkipXCode(true);
     RefactorSession session2 = new RefactorSession(settings, new Schema(), Charsets.UTF_8);
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
-    TokenStream stream = unit.preprocess();
+    TokenSource src = unit.preprocess();
 
     // lexer14.i contains 'message "xcode".'
-    ProToken tok = (ProToken) stream.nextToken();
+    ProToken tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
     assertEquals(tok.getLine(), 2);
-    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 2);
-    assertEquals(tok.getEndColumn(), 7);
+    assertEquals(tok.getEndCharPositionInLine(), 7);
     
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getText(), "\"hello world\"");
   }
 
   @Test(expectedExceptions = UncheckedIOException.class)
-  public void testXCode3() throws TokenStreamException {
+  public void testXCode3() {
     // Test with customSkipXCode set to false
     ProparseSettings settings = new ProparseSettings("src/test/resources/data");
     settings.setCustomSkipXCode(false);
@@ -726,44 +748,49 @@ public class LexerTest {
   }
 
   @Test
-  public void testXCode4() throws TokenStreamException {
+  public void testXCode4() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14-2.p"), session);
-    TokenStream stream = unit.preprocess();
+    TokenSource src = unit.preprocess();
 
     // lexer14.i contains 'message "xcode".'
-    ProToken tok = (ProToken) stream.nextToken();
+    ProToken tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
 
-    tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
-    assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getColumn(), 27);
-    assertEquals(tok.getEndLine(), 1);
-    assertEquals(tok.getEndColumn(), 33);
-    assertNotNull(tok.getHiddenBefore());
-    assertEquals(tok.getHiddenBefore().getType(), ABLNodeType.WS.getType());
-    assertNull(tok.getHiddenBefore().getHiddenBefore());
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    assertEquals(tok.getChannel(), Token.HIDDEN_CHANNEL);
 
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getColumn(), 72);
+    assertEquals(tok.getCharPositionInLine(), 27);
     assertEquals(tok.getEndLine(), 1);
-    assertEquals(tok.getEndColumn(), 84);
+    assertEquals(tok.getEndCharPositionInLine(), 33);
+    
     // Two xcoded include files are replaced by a two whitespaces leading to one token
-    assertNotNull(tok.getHiddenBefore());
-    assertEquals(tok.getHiddenBefore().getType(), ABLNodeType.WS.getType());
-    assertNull(tok.getHiddenBefore().getHiddenBefore());
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    assertEquals(tok.getChannel(), Token.HIDDEN_CHANNEL);
+
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getCharPositionInLine(), 72);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndCharPositionInLine(), 84);
   }
 
   @Test
-  public void testProparseDirectiveLexPhase() throws TokenStreamException {
+  public void testProparseDirectiveLexPhase() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer15.p"), session);
-    TokenStream stream = unit.lex();
+    TokenSource stream = unit.lex();
 
     ProToken tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getChannel(), MultiChannelTokenSource.PROPARSE_CHANNEL);
     tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    assertEquals(tok.getChannel(), Token.HIDDEN_CHANNEL);
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
     tok = (ProToken) stream.nextToken();
@@ -778,6 +805,7 @@ public class LexerTest {
     tok = (ProToken) stream.nextToken();
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getChannel(), MultiChannelTokenSource.PROPARSE_CHANNEL);
     tok = (ProToken) stream.nextToken();
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
@@ -797,6 +825,7 @@ public class LexerTest {
     tok = (ProToken) stream.nextToken();
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getChannel(), MultiChannelTokenSource.PROPARSE_CHANNEL);
     tok = (ProToken) stream.nextToken();
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
@@ -819,41 +848,62 @@ public class LexerTest {
   }
 
   @Test
-  public void testProparseDirectivePreprocessPhase() throws TokenStreamException {
+  public void testProparseDirectivePreprocessPhase() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer15.p"), session);
-    TokenStream stream = unit.preprocess();
+    TokenSource src = unit.preprocess();
 
-    ProToken tok = (ProToken) stream.nextToken();
+    ProToken tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
     assertEquals(tok.getText(), "custnum");
-    assertNotNull(tok.getHiddenBefore());
-    assertEquals(((ProToken) tok.getHiddenBefore()).getNodeType(), ABLNodeType.WS);
-    assertNotNull(tok.getHiddenBefore().getHiddenBefore());
-    assertEquals(((ProToken) tok.getHiddenBefore().getHiddenBefore()).getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
-    tok = (ProToken) stream.nextToken();
+    // FIXME Hidden tokens are attached in JPNodeVisitor, so this has to be tested in a later stage
+    // assertNotNull(tok.getHiddenBefore());
+    // assertEquals(((ProToken) tok.getHiddenBefore()).getNodeType(), ABLNodeType.WS);
+    // assertNotNull(tok.getHiddenBefore().getHiddenBefore());
+    // assertEquals(((ProToken) tok.getHiddenBefore().getHiddenBefore()).getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
 
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
     assertEquals(tok.getText(), "customer");
-    assertNotNull(tok.getHiddenBefore());
-    assertEquals(((ProToken) tok.getHiddenBefore()).getNodeType(), ABLNodeType.WS);
-    assertNotNull(tok.getHiddenBefore().getHiddenBefore());
-    assertEquals(((ProToken) tok.getHiddenBefore().getHiddenBefore()).getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
-    tok = (ProToken) stream.nextToken();
+    // assertNotNull(tok.getHiddenBefore());
+    // assertEquals(((ProToken) tok.getHiddenBefore()).getNodeType(), ABLNodeType.WS);
+    // assertNotNull(tok.getHiddenBefore().getHiddenBefore());
+    // assertEquals(((ProToken) tok.getHiddenBefore().getHiddenBefore()).getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
-    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
   }
 
+  /**
+   * Utility method for tests, returns next node of given type 
+   */
+  private ProToken nextToken(TokenSource stream, ABLNodeType type) {
+    ProToken tok = (ProToken) stream.nextToken();
+    while (tok.getNodeType() != ABLNodeType.MESSAGE) {
+      tok = (ProToken) stream.nextToken();
+    }
+    return tok;
+  }
+
+  /**
+   * Utility method for preprocess(), removes all tokens from hidden channels
+   */
+  private static Token nextVisibleToken(TokenSource src) {
+    Token tok = src.nextToken();
+    while ((tok.getType() != Token.EOF) && (tok.getChannel() != Token.DEFAULT_CHANNEL))
+      tok = src.nextToken();
+    return tok;
+  }
 }

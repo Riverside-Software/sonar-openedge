@@ -174,7 +174,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
 
   public void analyzeSuspend(String str, int line) {
     appBuilderCode = true;
-    if ((currInclude.getFileIndex() == 0) && ProToken.isEditableInAB(str)) {
+    if ((currInclude.getFileIndex() == 0) && ProToken.isTokenEditableInAB(str)) {
       currSection = new EditableCodeSection();
       currSection.fileNum = currInclude.getFileIndex();
       currSection.startLine = line;

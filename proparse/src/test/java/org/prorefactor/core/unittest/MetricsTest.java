@@ -27,8 +27,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 public class MetricsTest {
   private RefactorSession session;
 
@@ -39,16 +37,16 @@ public class MetricsTest {
   }
 
   @Test
-  public void test01() throws ANTLRException {
+  public void test01() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/include.p"), session);
-    unit.treeParser01();
+    unit.parse();
 
     assertEquals(unit.getMetrics().getLoc(), 2);
     assertEquals(unit.getMetrics().getComments(), 6);
   }
 
   @Test
-  public void test02() throws ANTLRException {
+  public void test02() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/inc3.i"), session);
     unit.lexAndGenerateMetrics();
 

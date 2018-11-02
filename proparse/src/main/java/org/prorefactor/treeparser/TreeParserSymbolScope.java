@@ -48,7 +48,6 @@ public class TreeParserSymbolScope {
   protected final TreeParserSymbolScope parentScope;
 
   protected List<Symbol> allSymbols = new ArrayList<>();
-  protected List<Call> callList = new ArrayList<>();
   protected List<TreeParserSymbolScope> childScopes = new ArrayList<>();
   protected Block rootBlock;
   protected Routine routine;
@@ -237,10 +236,6 @@ public class TreeParserSymbolScope {
     if (table == null)
       return null;
     return getUnnamedBuffer(table);
-  }
-
-  public List<Call> getCallList() {
-    return callList;
   }
 
   /** Get a *copy* of the list of child scopes */
@@ -451,10 +446,6 @@ public class TreeParserSymbolScope {
     if (ret == null && parentScope != null)
       return parentScope.lookupWidget(widgetType, name);
     return ret;
-  }
-
-  public void registerCall(Call call) {
-    callList.add(call);
   }
 
   public void setRootBlock(Block block) {

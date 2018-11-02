@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.JPNode;
 
 class JPNodeQuery implements ICallback<List<JPNode>> {
   private final List<JPNode> result = new ArrayList<>();

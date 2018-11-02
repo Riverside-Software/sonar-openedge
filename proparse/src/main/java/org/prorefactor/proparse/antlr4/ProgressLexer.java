@@ -31,9 +31,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
-import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNodeMetrics;
-import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.macrolevel.IPreprocessorEventListener;
 import org.prorefactor.macrolevel.IncludeRef;
@@ -45,11 +43,7 @@ import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
-
-import antlr.TokenStream;
-import antlr.TokenStreamHiddenTokenFilter;
 
 /**
  * A preprocessor contains one or more IncludeFiles.
@@ -1082,41 +1076,6 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     IncludeArg(String argName, String argVal) {
       this.argName = argName;
       this.argVal = argVal;
-    }
-  }
-
-  public TokenStream getANTLR2TokenStream(boolean hideNonDefaultChannel) {
-    TokenStream stream = new ANTRL2TokenStreamWrapper();
-    if (hideNonDefaultChannel) {
-      TokenStreamHiddenTokenFilter filter = new TokenStreamHiddenTokenFilter(stream); 
-      filter.hide(ABLNodeType.WS.getType());
-      filter.hide(ABLNodeType.COMMENT.getType());
-      filter.hide(ABLNodeType.AMPMESSAGE.getType());
-      filter.hide(ABLNodeType.AMPANALYZESUSPEND.getType());
-      filter.hide(ABLNodeType.AMPANALYZERESUME.getType());
-      filter.hide(ABLNodeType.AMPGLOBALDEFINE.getType());
-      filter.hide(ABLNodeType.AMPSCOPEDDEFINE.getType());
-      filter.hide(ABLNodeType.AMPUNDEFINE.getType());
-      filter.hide(ABLNodeType.PROPARSEDIRECTIVE.getType());
-      stream = filter;
-    }
-
-    return stream;
-  }
-
-  private class ANTRL2TokenStreamWrapper implements TokenStream {
-
-    @Override
-    public antlr.Token nextToken() {
-      return convertToken((org.prorefactor.proparse.antlr4.ProToken) wrapper.nextToken());
-    }
-
-    private antlr.Token convertToken(org.prorefactor.proparse.antlr4.ProToken tok) {
-      // Value of EOF is different in ANTLR2 and ANTLR4
-      return new ProToken(tok.getNodeType() == ABLNodeType.EOF_ANTLR4 ? ABLNodeType.EOF : tok.getNodeType(),
-          tok.getText(), tok.getFileIndex(), Strings.nullToEmpty(filenameList.getValue(tok.getFileIndex())),
-          tok.getLine(), tok.getCharPositionInLine(), tok.getEndFileIndex(), tok.getEndLine(),
-          tok.getEndCharPositionInLine(), tok.getMacroSourceNum(), tok.getAnalyzeSuspend(), false, tok.isMacroExpansion());
     }
   }
 

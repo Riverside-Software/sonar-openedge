@@ -19,6 +19,7 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.IntervalSet;
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.ProToken;
 
 /**
  * As tokens are manually generated in Proparse, method {@link DefaultErrorStrategy#getMissingSymbol} fails with

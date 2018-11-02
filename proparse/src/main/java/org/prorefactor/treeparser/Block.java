@@ -42,7 +42,7 @@ public class Block {
   private List<Frame> frames = new ArrayList<>();
   private Block parent;
   private Frame defaultFrame = null;
-  private JPNode blockStatementNode;
+  private final JPNode blockStatementNode;
   private Set<BufferScope> bufferScopes = new HashSet<>();
 
   /**

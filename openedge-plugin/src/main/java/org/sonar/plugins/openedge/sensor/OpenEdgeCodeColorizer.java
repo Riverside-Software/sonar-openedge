@@ -23,8 +23,8 @@ import java.io.UncheckedIOException;
 
 import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
-import org.prorefactor.proparse.antlr4.ProToken;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -80,7 +80,7 @@ public class OpenEdgeCodeColorizer implements Sensor {
   }
 
   private void highlightFile(SensorContext context, RefactorSession session, InputFile file) {
-    TokenSource stream = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session).lex4();
+    TokenSource stream = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session).lex();
 
     ProToken tok = (ProToken) stream.nextToken();
     ProToken nextTok = (ProToken) stream.nextToken();

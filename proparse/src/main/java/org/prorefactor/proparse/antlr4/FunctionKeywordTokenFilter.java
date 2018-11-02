@@ -22,6 +22,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.ProToken;
 
 /**
  * Convert some tokens to another type when not followed by LEFTPAREN:

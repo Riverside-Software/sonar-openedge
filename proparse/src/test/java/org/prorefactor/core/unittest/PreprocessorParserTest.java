@@ -28,8 +28,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 public class PreprocessorParserTest {
   private final static String SRC_DIR = "src/test/resources/data/preprocessor";
 
@@ -43,7 +41,7 @@ public class PreprocessorParserTest {
     try {
       unit = new ParseUnit(new File(SRC_DIR, "preprocessor01.p"), session);
       unit.parse();
-    } catch (ANTLRException | RuntimeException caught) {
+    } catch (RuntimeException caught) {
       // Just so that tests will throw NPE and fail (and not just be skipped)
       unit = null;
     }

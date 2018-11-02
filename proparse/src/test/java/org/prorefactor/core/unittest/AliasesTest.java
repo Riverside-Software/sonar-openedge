@@ -30,8 +30,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 public class AliasesTest {
   private RefactorSession session;
   // Just a shortcut for schema
@@ -47,7 +45,7 @@ public class AliasesTest {
   }
 
   @Test
-  public void test01() throws ANTLRException {
+  public void test01() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/aliases.p"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());

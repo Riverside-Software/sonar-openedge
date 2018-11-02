@@ -29,8 +29,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 public class TreeParser01Test {
 
   String expectName = "src/test/resources/treeparser01-expect/test01.p";
@@ -38,7 +36,7 @@ public class TreeParser01Test {
   File outFile = new File("target/test-temp/treeparser01/test01.p");
 
   @Test
-  public void test01() throws ANTLRException, IOException {
+  public void test01() throws IOException {
     Injector injector = Guice.createInjector(new UnitTestModule());
     RefactorSession session = injector.getInstance(RefactorSession.class);
     outFile.getParentFile().mkdirs();

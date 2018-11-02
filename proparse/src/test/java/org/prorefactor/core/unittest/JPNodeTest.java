@@ -30,8 +30,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 public class JPNodeTest {
   private final static String SRC_DIR = "src/test/resources/data/parser";
 
@@ -44,7 +42,7 @@ public class JPNodeTest {
   }
 
   @Test
-  public void testAscending01() throws ANTLRException {
+  public void testStatements() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "query01.p"), session);
     unit.parse();
 

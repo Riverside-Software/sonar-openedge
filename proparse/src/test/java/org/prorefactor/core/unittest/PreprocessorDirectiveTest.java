@@ -34,8 +34,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 public class PreprocessorDirectiveTest {
   private final static String SRC_DIR = "src/test/resources/data/preprocessor";
 
@@ -48,7 +46,7 @@ public class PreprocessorDirectiveTest {
   }
 
   @Test
-  public void test01() throws ANTLRException {
+  public void test01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor05.p"), session);
     unit.parse();
     Assert.assertEquals(unit.getTopNode().query(ABLNodeType.PROPARSEDIRECTIVE).size(), 0);
@@ -83,7 +81,7 @@ public class PreprocessorDirectiveTest {
   }
 
   @Test(enabled = false)
-  public void test02() throws ANTLRException {
+  public void test02() {
     // See issue #341 - Won't fix
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor07.p"), session);
     unit.parse();

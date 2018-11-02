@@ -30,6 +30,7 @@ public class DataType {
   private static Map<String, DataType> nameMap = new HashMap<>();
   private static Map<Integer, DataType> tokenTypeMap = new HashMap<>();
 
+  public static final DataType VOID = new DataType(ProParserTokenTypes.VOID, "VOID");
   public static final DataType BIGINT = new DataType(ProParserTokenTypes.BIGINT, "BIGINT");
   public static final DataType BLOB = new DataType(ProParserTokenTypes.BLOB, "BLOB");
   public static final DataType BYTE = new DataType(ProParserTokenTypes.BYTE, "BYTE");

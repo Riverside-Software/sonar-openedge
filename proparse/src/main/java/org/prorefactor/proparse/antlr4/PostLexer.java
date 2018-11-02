@@ -27,6 +27,7 @@ import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -24,6 +24,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.ProToken;
 
 /**
  * Review the token list at an OBJCOLON token.

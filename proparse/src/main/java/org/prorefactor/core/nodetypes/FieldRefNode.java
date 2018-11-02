@@ -59,6 +59,7 @@ public class FieldRefNode extends JPNode {
    * doesn't have any text. If we want the field/variable name, or the file/line/column, then we probably want to get
    * those from the ID node.
    */
+  @Override
   public JPNode getIdNode() {
     JPNode idNode = findDirectChild(ABLNodeType.ID.getType());
     assert idNode != null;

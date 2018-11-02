@@ -23,6 +23,7 @@ import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.symbols.FieldContainer;
+import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.widgets.Frame;
 
 public class TP01FramesTreeLister extends JPNodeLister {
@@ -79,7 +80,8 @@ public class TP01FramesTreeLister extends JPNodeLister {
   }
 
   private void fieldRefNode(StringBuffer buff, FieldRefNode refNode, char spacer) {
-    buff.append(spacer).append(refNode.getSymbol().fullName());
+    Symbol symbol = refNode.getSymbol();
+    buff.append(spacer).append(symbol == null ? "" : symbol.fullName());
   }
 
 }

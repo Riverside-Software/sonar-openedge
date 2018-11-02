@@ -15,9 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.core.JPNode;
 import org.prorefactor.proparse.ProParserTokenTypes;
-import org.prorefactor.treeparser.ClassSupport;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -88,12 +86,6 @@ public class Variable extends Symbol implements Primative, Value {
   @Override
   public Primative setClassName(String s) {
     this.className = s;
-    return this;
-  }
-
-  @Override
-  public Primative setClassName(JPNode typeNameNode) {
-    this.className = ClassSupport.qualifiedClassName(typeNameNode);
     return this;
   }
 

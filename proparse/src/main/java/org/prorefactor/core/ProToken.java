@@ -1,5 +1,4 @@
 /********************************************************************************
- * Copyright (c) 2003-2015 John Green
  * Copyright (c) 2015-2018 Riverside Software
  *
  * This program and the accompanying materials are made available under the
@@ -15,67 +14,62 @@
  ********************************************************************************/
 package org.prorefactor.core;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.WritableToken;
+
+import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 
-import antlr.CommonHiddenStreamToken;
+public class ProToken implements WritableToken {
+  private static final String INVALID_TYPE = "Invalid type number ";
 
-public class ProToken extends CommonHiddenStreamToken implements Serializable {
-  private static final long serialVersionUID = 6330218429653110333L;
+  // Fields coming from WritableToken
+  private ABLNodeType type;
+  private int line;
+  private int charPositionInLine = -1; // set to invalid position
+  private int channel = DEFAULT_CHANNEL;
+  private String text;
+  private int index = -1;
 
-  private ABLNodeType nodeType;
-  private final boolean synthetic;
-  private final int fileIndex;
-  private final String fileName;
-  private final int macroSourceNum;
-  private final int endFile;
-  private final int endLine;
-  private final int endColumn;
-  private final String analyzeSuspend;
-  private final boolean macroExpansion;
+  private int fileIndex;
+  private int endFileIndex;
+  private String fileName;
+  private int endLine;
+  private int endCharPositionInLine;
+  private int macroSourceNum;
 
-  public ProToken(ABLNodeType type, String txt) {
-    this(type, txt, 0, "", 0, 0, 0, 0, 0, 0, "", true, false);
-  }
+  private String analyzeSuspend = null;
+  private ProToken hiddenBefore = null;
+  private boolean macroExpansion;
+  private boolean synthetic = false;
 
-  public ProToken(@Nonnull ABLNodeType type, @Nonnull String txt, int file, String fileName, int line, int col, int endFile, int endLine, int endCol,
-      int macroSourceNum, @Nonnull String analyzeSuspend, boolean synthetic, boolean macroExpansion) {
-    // Make sure that the type field is completely hidden in base Token class 
-    super(0, txt);
-
-    this.nodeType = type;
-    this.fileIndex = file;
-    this.fileName = fileName;
-    this.macroSourceNum = macroSourceNum;
-    this.line = line;
-    this.col = col;
-    this.endFile = endFile;
-    this.endLine = endLine;
-    this.endColumn = endCol;
-    this.analyzeSuspend = analyzeSuspend;
-    this.synthetic = synthetic;
-    this.macroExpansion = macroExpansion;
+  public ProToken(ABLNodeType type, String text) {
+    this.type = type;
+    this.channel = DEFAULT_CHANNEL;
+    this.text = text;
+    this.fileIndex = 0;
+    this.charPositionInLine = 0;
   }
 
   @Override
   public int getType() {
-    return nodeType.getType();
+    return type.getType();
   }
 
   @Override
   public void setType(int type) {
-    this.nodeType = ABLNodeType.getNodeType(type);
-    if (this.nodeType == null)
-      throw new IllegalArgumentException("Invalid type number " + type);
+    this.type = ABLNodeType.getNodeType(type);
+    if (this.type == null)
+      throw new IllegalArgumentException(INVALID_TYPE + type);
   }
 
   public ABLNodeType getNodeType() {
-    return nodeType;
+    return type;
   }
 
   public int getFileIndex() {
@@ -86,56 +80,33 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
     return macroSourceNum;
   }
 
-  @Override
-  public String getFilename() {
+  public String getFileName() {
     return fileName;
   }
 
-  /**
-   * Convenience method for (ProToken) getHiddenAfter()
-   */
   public ProToken getNext() {
-    return (ProToken) getHiddenAfter();
+    throw new UnsupportedOperationException();
   }
 
-  /**
-   * Convenience method for (ProToken) getHiddenBefore()
-   */
   public ProToken getPrev() {
-    return (ProToken) getHiddenBefore();
+    return getHiddenBefore();
   }
 
-  public void setHiddenAfter(ProToken t) {
-    // In order to change visibility
-    super.setHiddenAfter(t);
-  }
-
-  public void setHiddenBefore(ProToken t) {
-    // In order to change visibility
-    super.setHiddenBefore(t);
-  }
-
-  /**
-   * @return Ending line of token. Not guaranteed to be identical to the start line
-   */
   public int getEndLine() {
     return endLine;
   }
 
-  /**
-   * @return Ending column of token. Not guaranteed to be greater than start column, as some tokens may include the
-   *         newline character
-   */
-  public int getEndColumn() {
-    return endColumn;
+  public int getEndCharPositionInLine() {
+    return endCharPositionInLine;
   }
 
-  /**
-   * @return File number of end of token. Not guaranteed to be identical to file index, as a token can be spread over
-   *         two different files, thanks to the magic of the preprocessor
-   */
+  @Deprecated
+  public int getEndColumn() {
+    return getEndCharPositionInLine();
+  }
+
   public int getEndFileIndex() {
-    return endFile;
+    return endFileIndex;
   }
 
   /**
@@ -146,7 +117,8 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
   }
 
   /**
-   * @see org.prorefactor.proparse.antlr4.ProToken#isMacroExpansion()
+   * Returns true if last character of token was generated from a macro expansion, i.e. {&amp;SOMETHING}.
+   * This doesn't mean that all characters were generated from a macro, e.g. {&prefix}VarName will return false 
    */
   public boolean isMacroExpansion() {
     return macroExpansion;
@@ -156,7 +128,7 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
    * @return True if token is part of an editable section in AppBuilder managed code
    */
   public boolean isEditableInAB() {
-    return (analyzeSuspend == null) || isEditableInAB(analyzeSuspend);
+    return (analyzeSuspend == null) || isTokenEditableInAB(analyzeSuspend);
   }
 
   /**
@@ -177,9 +149,9 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
   public boolean equals(Object obj) {
     if (obj instanceof ProToken) {
       ProToken tok = (ProToken) obj;
-      return ((tok.nodeType == this.nodeType) && (tok.text.equals(this.text)) && (tok.line == this.line)
-          && (tok.col == this.col) && (tok.fileIndex == this.fileIndex) && (tok.endFile == this.endFile)
-          && (tok.endLine == this.endLine) && (tok.endColumn == this.endColumn)
+      return ((tok.type == this.type) && (tok.text.equals(this.text)) && (tok.line == this.line)
+          && (tok.charPositionInLine == this.charPositionInLine) && (tok.fileIndex == this.fileIndex) && (tok.endFileIndex == this.endFileIndex)
+          && (tok.endLine == this.endLine) && (tok.endCharPositionInLine == this.endCharPositionInLine)
           && (tok.macroSourceNum == this.macroSourceNum));
     } else {
       return false;
@@ -188,20 +160,20 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(nodeType, text, line, col, fileIndex, endFile, endLine, endColumn, macroSourceNum);
+    return Objects.hashCode(type.toString(), text, line, charPositionInLine, fileIndex, endFileIndex, endLine, endCharPositionInLine, macroSourceNum);
   }
 
   @Override
   public String toString() {
-    return "[\"" + getText().replace('\r', ' ').replace('\n', ' ') + "\",<" + nodeType + ">,macro=" + macroSourceNum
-        + ",file=" + fileIndex + ":" + endFile + ",line=" + line + ":" + endLine + ",col=" + col + ":" + endColumn
-        + "]";
+    return "[\"" + text.replace('\r', ' ').replace('\n', ' ') + "\",<" + type + ">,macro=" + macroSourceNum + ",start="
+        + fileIndex + ":" + line + ":" + charPositionInLine + ",end=" + endFileIndex + ":" + endLine + ":"
+        + endCharPositionInLine + "]";
   }
 
   /**
    * @return True if token is part of an editable section in AppBuilder managed code
    */
-  public static boolean isEditableInAB(@Nonnull String str) {
+  public static boolean isTokenEditableInAB(@Nonnull String str) {
     List<String> attrs = Splitter.on(',').omitEmptyStrings().trimResults().splitToList(str);
     if (attrs.isEmpty() || !"_UIB-CODE-BLOCK".equalsIgnoreCase(attrs.get(0)))
       return false;
@@ -219,5 +191,130 @@ public class ProToken extends CommonHiddenStreamToken implements Serializable {
       return true;
 
     return false;
+  }
+
+  public void setEndFileIndex(int endFileIndex) {
+    this.endFileIndex = endFileIndex;
+  }
+
+  public void setEndLine(int endLine) {
+    this.endLine = endLine;
+  }
+
+  public void setEndCharPositionInLine(int endCharPositionInLine) {
+    this.endCharPositionInLine = endCharPositionInLine;
+  }
+
+  public void setMacroSourceNum(int macroSourceNum) {
+    this.macroSourceNum = macroSourceNum;
+  }
+
+  public void setFileIndex(int fileIndex) {
+    this.fileIndex = fileIndex;
+  }
+
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
+  }
+
+  public void setAnalyzeSuspend(String analyzeSuspend) {
+    this.analyzeSuspend = analyzeSuspend;
+  }
+
+  public void setMacroExpansion(boolean macroExpansion) {
+    this.macroExpansion = macroExpansion;
+  }
+
+  @Override
+  public String getText() {
+    return text;
+  }
+
+  @Override
+  public int getLine() {
+    return line;
+  }
+
+  @Override
+  public int getCharPositionInLine() {
+    return charPositionInLine;
+  }
+
+  @Deprecated
+  public int getColumn() {
+    return getCharPositionInLine();
+  }
+
+  @Override
+  public int getChannel() {
+    return channel;
+  }
+
+  @Override
+  public int getTokenIndex() {
+    return index;
+  }
+
+  @Override
+  public int getStartIndex() {
+    return -1;
+  }
+
+  @Override
+  public int getStopIndex() {
+    return -1;
+  }
+
+  @Override
+  public TokenSource getTokenSource() {
+    return null;
+  }
+
+  @Override
+  public CharStream getInputStream() {
+    return null;
+  }
+
+  @Override
+  public void setText(String text) {
+    this.text = text;
+  }
+
+  public void setSynthetic(boolean synthetic) {
+    this.synthetic = synthetic;
+  }
+
+  public void setNodeType(ABLNodeType type) {
+    if (type == null)
+      throw new IllegalArgumentException(INVALID_TYPE + type);
+    this.type = type;
+  }
+
+  @Override
+  public void setLine(int line) {
+    this.line = line;
+  }
+
+  @Override
+  public void setCharPositionInLine(int pos) {
+    this.charPositionInLine = pos;
+  }
+
+  @Override
+  public void setChannel(int channel) {
+    this.channel = channel;
+  }
+
+  @Override
+  public void setTokenIndex(int index) {
+    this.index = index;
+  }
+
+  public void setHiddenBefore(ProToken hiddenBefore) {
+    this.hiddenBefore = hiddenBefore;
+  }
+
+  public ProToken getHiddenBefore() {
+    return hiddenBefore;
   }
 }

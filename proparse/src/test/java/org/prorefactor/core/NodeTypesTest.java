@@ -25,7 +25,7 @@ public class NodeTypesTest {
   @Test
   public void testRange() {
     for (ABLNodeType type : ABLNodeType.values()) {
-      assertTrue(type.getType() >= -1);
+      assertTrue(type.getType() >= -1000);
       // assertTrue(type.getType() != 0);
       assertTrue(type.getType() < ProParserTokenTypes.Last_Token_Number);
     }

@@ -80,7 +80,7 @@ public class TreeNodeLister {
   }
 
   private void printAttributes(JPNode node, int tabs) throws IOException {
-    if (node.getNodeType() == ABLNodeType.EOF)
+    if (node.getNodeType() == ABLNodeType.EOF_ANTLR4)
       return;
     ofile.write(String.format("%3s %s", tabs, java.nio.CharBuffer.allocate(tabs).toString().replace('\0', ' ')));
     ofile.write(node.getNodeType() + (node.isStateHead() ? "^ " : " ") + (node.isStateHead() && node.getState2() != 0 ? node.getState2() : ""));
