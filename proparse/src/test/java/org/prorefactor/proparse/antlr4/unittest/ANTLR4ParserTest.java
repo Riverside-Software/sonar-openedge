@@ -337,6 +337,11 @@ public class ANTLR4ParserTest {
   }
 
   @Test
+  public void testOnStatement() throws Exception {
+    genericTest("data/bugsfixed/on_statement.p");
+  }
+
+  @Test
   public void testSaxWriter() throws Exception {
     genericTest("data/bugsfixed/sax-writer.p");
   }
