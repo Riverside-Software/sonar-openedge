@@ -2212,7 +2212,7 @@ display_item: // TRANSLATED
 
 display_with: // TRANSLATED
     // The compiler allows NO-ERROR, but I don't see in their grammar where it fits in.
-    WITH BROWSE widgetname
+    WITH BROWSE widgetname browse_opt*
   | framephrase
   ;
 
