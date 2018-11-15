@@ -32,7 +32,7 @@ import com.google.inject.Injector;
 
 import antlr.ANTLRException;
 
-public class TP02Test {
+public class TreeParser02Test {
 
   private RefactorSession session;
 
