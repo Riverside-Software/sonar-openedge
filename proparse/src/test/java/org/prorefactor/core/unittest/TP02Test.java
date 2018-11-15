@@ -17,11 +17,7 @@ package org.prorefactor.core.unittest;
 
 import static org.testng.Assert.assertTrue;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
@@ -40,88 +36,267 @@ public class TP02Test {
 
   private RefactorSession session;
 
-  File outFile;
-  File snippetFile;
-  String expectName = "src/test/resources/data/tp01tests/test02.expect.txt";
-  String inName = "src/test/resources/data/tp01tests/test02.in.txt";
-  String outName = "target/test-temp/tp02test/test02.out.txt";
-  String schemaName = "src/test/resources/data/sports2000.schema";
-  String snippetName = "target/test-temp/tp02test/tempsnippet.p";
-  String snippetOutName = "target/test-temp/tp02test/tempout.p";
-  File snippetOutFile = new File(snippetOutName);
-  String snippetSep = "--------------------------------" + System.getProperty("line.separator");
+  private final static String SOURCEDIR = "src/test/resources/treeparser02/";
+  private final static String TARGETDIR = "target/test-temp/treeparser02/";
+  private final static String EXPECTDIR = "src/test/resources/treeparser02-expect/";
 
   @BeforeTest
   public void setUp() {
-    outFile = new File(outName);
-    snippetFile = new File(snippetName);
-
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
-
-    // Create target directory for output result
-    snippetFile.getParentFile().mkdirs();
+    new File(TARGETDIR).mkdirs();
   }
 
   @Test
-  public void test01() throws IOException, ANTLRException {
-    BufferedWriter writer = null;
-    try (BufferedReader reader = new BufferedReader(new FileReader(inName))) {
-      outFile.delete();
-      String line = null;
-      snippet_loop : for (;;) {
-        writer = new BufferedWriter(new FileWriter(snippetFile));
-        for (;;) {
-          line = reader.readLine();
-          if (line == null || line.startsWith("--"))
-            break;
-          writer.write(line);
-          writer.newLine();
-        }
-        writer.close();
-        AttributedWriter attWriter = new AttributedWriter();
-        attWriter.write(snippetName, snippetOutFile, session);
-        fileAppend(outName, snippetOutName);
-        fileAppendString(outName, snippetSep);
-        if (line == null)
-          break snippet_loop;
-      } // snippet_loop
-      snippetFile.delete();
-    }
-    assertTrue(FileUtils.contentEquals(new File(expectName), new File(outName)));
+  public void test01() throws ANTLRException, IOException {
+    genericTest("test01.p");
   }
 
-  /**
-   * Append a string to a file.
-   * 
-   * @param target The file that gets appended to.
-   * @param source The string to append.
-   */
-  public static void fileAppendString(String target, String source) throws IOException {
-    BufferedWriter out = new BufferedWriter(new FileWriter(target, true));
-    out.write(source);
-    out.close();
+  @Test
+  public void test02() throws ANTLRException, IOException {
+    genericTest("test02.p");
   }
 
-  /**
-   * Append one file to another.
-   * 
-   * @param target The file that gets appended to.
-   * @param source The file to append.
-   */
-  public static void fileAppend(String target, String source) throws IOException {
-    fileThing(source, target, true);
+  @Test
+  public void test03() throws ANTLRException, IOException {
+    genericTest("test03.p");
   }
 
-  private static void fileThing(String from, String to, boolean append) throws IOException {
-    BufferedReader in = new BufferedReader(new FileReader(from));
-    BufferedWriter out = new BufferedWriter(new FileWriter(to, append));
-    int c;
-    while ((c = in.read()) != -1)
-      out.write(c);
-    in.close();
-    out.close();
+  @Test
+  public void test04() throws ANTLRException, IOException {
+    genericTest("test04.p");
+  }
+
+  @Test
+  public void test05() throws ANTLRException, IOException {
+    genericTest("test05.p");
+  }
+
+  @Test
+  public void test06() throws ANTLRException, IOException {
+    genericTest("test06.p");
+  }
+
+  @Test
+  public void test07() throws ANTLRException, IOException {
+    genericTest("test07.p");
+  }
+
+  @Test
+  public void test08() throws ANTLRException, IOException {
+    genericTest("test08.p");
+  }
+
+  @Test
+  public void test09() throws ANTLRException, IOException {
+    genericTest("test09.p");
+  }
+
+  @Test
+  public void test10() throws ANTLRException, IOException {
+    genericTest("test10.p");
+  }
+
+  @Test
+  public void test11() throws ANTLRException, IOException {
+    genericTest("test11.p");
+  }
+
+  @Test
+  public void test12() throws ANTLRException, IOException {
+    genericTest("test12.p");
+  }
+
+  @Test
+  public void test13() throws ANTLRException, IOException {
+    genericTest("test13.p");
+  }
+
+  @Test
+  public void test14() throws ANTLRException, IOException {
+    genericTest("test14.p");
+  }
+
+  @Test
+  public void test15() throws ANTLRException, IOException {
+    genericTest("test15.p");
+  }
+
+  @Test
+  public void test16() throws ANTLRException, IOException {
+    genericTest("test16.p");
+  }
+
+  @Test
+  public void test17() throws ANTLRException, IOException {
+    genericTest("test17.p");
+  }
+
+  @Test
+  public void test18() throws ANTLRException, IOException {
+    genericTest("test18.p");
+  }
+
+  @Test
+  public void test19() throws ANTLRException, IOException {
+    genericTest("test19.p");
+  }
+
+  @Test
+  public void test20() throws ANTLRException, IOException {
+    genericTest("test20.p");
+  }
+
+  @Test
+  public void test21() throws ANTLRException, IOException {
+    genericTest("test21.p");
+  }
+
+  @Test
+  public void test22() throws ANTLRException, IOException {
+    genericTest("test22.p");
+  }
+
+  @Test
+  public void test23() throws ANTLRException, IOException {
+    genericTest("test23.p");
+  }
+
+  @Test
+  public void test24() throws ANTLRException, IOException {
+    genericTest("test24.p");
+  }
+
+  @Test
+  public void test25() throws ANTLRException, IOException {
+    genericTest("test25.p");
+  }
+
+  @Test
+  public void test26() throws ANTLRException, IOException {
+    genericTest("test26.p");
+  }
+
+  @Test
+  public void test27() throws ANTLRException, IOException {
+    genericTest("test27.p");
+  }
+
+  @Test
+  public void test28() throws ANTLRException, IOException {
+    genericTest("test28.p");
+  }
+
+  @Test
+  public void test29() throws ANTLRException, IOException {
+    genericTest("test29.p");
+  }
+
+  @Test
+  public void test30() throws ANTLRException, IOException {
+    genericTest("test30.p");
+  }
+
+  @Test
+  public void test31() throws ANTLRException, IOException {
+    genericTest("test31.p");
+  }
+
+  @Test
+  public void test32() throws ANTLRException, IOException {
+    genericTest("test32.p");
+  }
+
+  @Test
+  public void test33() throws ANTLRException, IOException {
+    genericTest("test33.p");
+  }
+
+  @Test
+  public void test34() throws ANTLRException, IOException {
+    genericTest("test34.p");
+  }
+
+  @Test
+  public void test35() throws ANTLRException, IOException {
+    genericTest("test35.p");
+  }
+
+  @Test
+  public void test36() throws ANTLRException, IOException {
+    genericTest("test36.p");
+  }
+
+  @Test
+  public void test37() throws ANTLRException, IOException {
+    genericTest("test37.p");
+  }
+
+  @Test
+  public void test38() throws ANTLRException, IOException {
+    genericTest("test38.p");
+  }
+
+  @Test
+  public void test39() throws ANTLRException, IOException {
+    genericTest("test39.p");
+  }
+
+  @Test
+  public void test40() throws ANTLRException, IOException {
+    genericTest("test40.p");
+  }
+
+  @Test
+  public void test41() throws ANTLRException, IOException {
+    genericTest("test41.p");
+  }
+
+  @Test
+  public void test42() throws ANTLRException, IOException {
+    genericTest("test42.p");
+  }
+
+  @Test
+  public void test43() throws ANTLRException, IOException {
+    genericTest("test43.p");
+  }
+
+  @Test
+  public void test44() throws ANTLRException, IOException {
+    genericTest("test44.p");
+  }
+
+  @Test
+  public void test45() throws ANTLRException, IOException {
+    genericTest("test45.p");
+  }
+
+  @Test
+  public void test46() throws ANTLRException, IOException {
+    genericTest("test46.p");
+  }
+
+  @Test
+  public void test47() throws ANTLRException, IOException {
+    genericTest("test47.p");
+  }
+
+  @Test
+  public void test48() throws ANTLRException, IOException {
+    genericTest("test48.p");
+  }
+
+  @Test
+  public void test49() throws ANTLRException, IOException {
+    genericTest("test49.p");
+  }
+
+  private void genericTest(String name) throws ANTLRException, IOException {
+    AttributedWriter writer = new AttributedWriter();
+    writer.write(SOURCEDIR + name, new File(TARGETDIR + name), session);
+    assertTrue(FileUtils.contentEquals(new File(EXPECTDIR + name), new File(TARGETDIR + name)));
   }
 
 }
