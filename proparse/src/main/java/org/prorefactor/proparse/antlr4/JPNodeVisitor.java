@@ -1558,6 +1558,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<JPNode.Builder> {
 
   @Override
   public JPNode.Builder visitBrowse_opt(Browse_optContext ctx) {
+    if (ctx.DOWN() != null)
+      return createNode(ctx);
     return createTreeFromFirstNode(ctx);
   }
 
