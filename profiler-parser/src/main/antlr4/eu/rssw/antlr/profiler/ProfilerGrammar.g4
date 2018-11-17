@@ -29,7 +29,7 @@ module_data:
   module_data_line* CHR_DOT NEWLINE;
 
 module_data_line:
-  id=NUMBER name=STRING debugListingFile=STRING crc=NUMBER NEWLINE;
+  id=NUMBER name=STRING debugListingFile=STRING crc=NUMBER ( NUMBER STRING )? NEWLINE;
 
 call_tree_data:
   call_tree_data_line* CHR_DOT NEWLINE;

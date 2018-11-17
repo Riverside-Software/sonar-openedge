@@ -21,6 +21,11 @@ package eu.rssw.antlr.profiler;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
@@ -88,8 +93,8 @@ public class TestProfiler {
 
   @Test
   public void testProfiler7() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler6.out"));
-    Assert.assertEquals(session.getUser(), "gquerret");
+    // New file format in 11.7.4
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler7.out"));
+    Assert.assertEquals(session.getUser(), "SYSTEM");
   }
-
 }
