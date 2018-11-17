@@ -15,15 +15,15 @@
  ********************************************************************************/
 package org.prorefactor.core.unittest;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
+import org.prorefactor.core.unittest.util.AttributedWriter;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
-import org.prorefactor.treeparser.ParseUnit;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
@@ -31,34 +31,21 @@ import com.google.inject.Injector;
 
 import antlr.ANTLRException;
 
+public class TreeParser01Test {
 
-/** This class simply runs the tree parser through various code,
- * and as long as the tree parser does not throw any errors, then
- * the tests pass.
- */
-public class TP03Test {
-	private RefactorSession session;
-
-	@BeforeTest
-	public void setUp(){
-		Injector injector = Guice.createInjector(new UnitTestModule());
-		session = injector.getInstance(RefactorSession.class);
-	}
-
-	@Test
-	public void test01() throws ANTLRException {
-	  ParseUnit unit = new ParseUnit(new File("src/test/resources/data/tp01tests/test03.p"), session);
-		assertNull(unit.getTopNode());
-		unit.treeParser01();
-		assertNotNull(unit.getTopNode());
-	}
+  String expectName = "src/test/resources/treeparser01-expect/test01.p";
+  String inName = "src/test/resources/treeparser01/test01.p";
+  File outFile = new File("target/test-temp/treeparser01/test01.p");
 
   @Test
-	public void test02() throws ANTLRException {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/tp01tests/test0302.p"), session);
-    assertNull(unit.getTopNode());
-    unit.treeParser01();
-    assertNotNull(unit.getTopNode());
-	}
+  public void test01() throws ANTLRException, IOException {
+    Injector injector = Guice.createInjector(new UnitTestModule());
+    RefactorSession session = injector.getInstance(RefactorSession.class);
+    outFile.getParentFile().mkdirs();
+
+    AttributedWriter writer = new AttributedWriter();
+    writer.write(inName, outFile, session);
+    assertTrue(FileUtils.contentEquals(new File(expectName), outFile));
+  }
 
 }
