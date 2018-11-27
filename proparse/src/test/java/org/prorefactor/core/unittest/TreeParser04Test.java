@@ -28,7 +28,6 @@ import org.prorefactor.core.unittest.util.TP01FramesTreeLister;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
@@ -39,34 +38,26 @@ import antlr.ANTLRException;
 /**
  * Test frame scopes and implicit field associations to frames.
  */
-public class TP01FramesTest {
-  private RefactorSession session;
-
-  String expectFileName = "src/test/resources/data/tp01tests/frames.expect.txt";
-  String inFileName = "src/test/resources/data/tp01tests/frames.p";
-  File outFileName = new File("target/test-temp/tp01tests/frames.out.txt");
-
-  @BeforeTest
-  public void setUp() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
-
-    // Create target directory for output result
-    outFileName.getParentFile().mkdirs();
-  }
+public class TreeParser04Test {
+  String expectName = "src/test/resources/treeparser04-expect/frames.p";
+  String inName = "src/test/resources/treeparser04/frames.p";
+  File outFile = new File("target/test-temp/treeparser04/frames.p");
 
   @Test
   public void test01() throws ANTLRException, IOException {
-    ParseUnit pu = new ParseUnit(new File(inFileName), session);
+    Injector injector = Guice.createInjector(new UnitTestModule());
+    RefactorSession session = injector.getInstance(RefactorSession.class);
+    outFile.getParentFile().mkdirs();
+
+    ParseUnit pu = new ParseUnit(new File(inName), session);
     pu.treeParser01();
 
-    PrintWriter writer = new PrintWriter(new FileWriter(outFileName));
+    PrintWriter writer = new PrintWriter(new FileWriter(outFile));
     JPNodeLister nodeLister = new TP01FramesTreeLister(pu.getTopNode(), writer);
     nodeLister.print(' ');
     writer.close();
 
-    assertTrue(FileUtils.contentEquals(new File(expectFileName), outFileName),
-        "Differences in: " + expectFileName + " " + outFileName);
+    assertTrue(FileUtils.contentEquals(new File(expectName), outFile));
   }
 
 }
