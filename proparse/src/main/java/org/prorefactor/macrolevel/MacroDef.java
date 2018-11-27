@@ -32,9 +32,9 @@ public class MacroDef implements MacroEvent {
   private int type;
 
   /** For an UNDEFINE - undef what? */
-  public MacroDef undefWhat = null;
+  private MacroDef undefWhat = null;
   /** For an include argument - what include reference is it for? */
-  public IncludeRef includeRef = null;
+  private IncludeRef includeRef = null;
   private String name;
   private String value;
 
@@ -85,4 +85,19 @@ public class MacroDef implements MacroEvent {
     return new MacroPosition(parent.getPosition().getFileNum(), line, column);
   }
 
+  public void setUndefWhat(MacroDef macroDef) {
+    this.undefWhat = macroDef;
+  }
+
+  public MacroDef getUndefWhat() {
+    return undefWhat;
+  }
+
+  public void setIncludeRef(IncludeRef includeRef) {
+    this.includeRef = includeRef;
+  }
+
+  public IncludeRef getIncludeRef() {
+    return includeRef;
+  }
 }
