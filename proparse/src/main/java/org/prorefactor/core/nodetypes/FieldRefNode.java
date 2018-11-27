@@ -22,10 +22,8 @@ import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.BufferScope;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
-import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Symbol;
-import org.prorefactor.treeparser.symbols.Variable;
-import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 public class FieldRefNode extends JPNode {
   public FieldRefNode(ProToken t) {
@@ -84,17 +82,7 @@ public class FieldRefNode extends JPNode {
     setLink(IConstants.BUFFERSCOPE, bufferScope);
   }
 
-  public void setSymbol(FieldBuffer symbol) {
-    assert symbol != null;
-    setLink(IConstants.SYMBOL, symbol);
-  }
-
-  public void setSymbol(IFieldLevelWidget symbol) {
-    assert symbol != null;
-    setLink(IConstants.SYMBOL, symbol);
-  }
-
-  public void setSymbol(Variable symbol) {
+  public void setSymbol(ISymbol symbol) {
     assert symbol != null;
     setLink(IConstants.SYMBOL, symbol);
   }
