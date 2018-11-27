@@ -2374,8 +2374,10 @@ format_expr: // TRANSLATED
   ;
 
 form_items_or_record: // TRANSLATED
-    form_item form_item+
-  | { isTableName() }? recordAsFormItem
+    // ANTLR2 grammar had the two following lines:
+    // ( form_item form_item )=>  ( options{greedy=true;}: form_item )*
+    // If there's more than one display item, then it cannot be a table name.
+    { isTableName() }? recordAsFormItem
   | form_item*
   ;
 
