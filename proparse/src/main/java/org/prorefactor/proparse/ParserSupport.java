@@ -402,7 +402,7 @@ public class ParserSupport {
   /**
    * @return False if unknown method calls are not allowed in exprt2 rule. Usually returns true except when in DYNAMIC-NEW or RUN ... IN|ON statements 
    */
-  public boolean unknownMehodCallsAllowed() {
+  public boolean unknownMethodCallsAllowed() {
     return allowUnknownMethodCalls;
   }
 

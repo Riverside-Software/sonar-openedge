@@ -890,7 +890,7 @@ exprt2 { /* RULE_INIT */ int ntype = 0; }:
     // point in expression evaluation, if we have anything followed by a left-paren,
     // we're going to assume it's a method call.
     // Method names which are reserved keywords must be prefixed with THIS-OBJECT:.
-    ({ /* RULE_INIT */support.isClass() && support.unknownMehodCallsAllowed()}? identifier LEFTPAREN)=>
+    ({ /* RULE_INIT */support.isClass() && support.unknownMethodCallsAllowed()}? identifier LEFTPAREN)=>
       methodname:identifier!
       {  #methodname.setType(LOCAL_METHOD_REF);
         astFactory.makeASTRoot(currentAST, #methodname);
