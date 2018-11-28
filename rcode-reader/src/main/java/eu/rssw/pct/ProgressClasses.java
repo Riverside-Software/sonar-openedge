@@ -23,38 +23,42 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 
-import eu.rssw.pct.elements.MethodElement;
-import eu.rssw.pct.elements.MethodParameter;
+import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.v11.MethodElementV11;
+import eu.rssw.pct.elements.v11.MethodParameterV11;
+import eu.rssw.pct.elements.v11.TypeInfoV11;
 
 public final class ProgressClasses {
-  private static final IParameter[] EMPTY_PARAMETERS = new MethodParameter[] {};
+  private static final IParameter[] EMPTY_PARAMETERS = new IParameter[] {};
   private static final String PROGRESS_LANG_OBJECT = "Progress.Lang.Object";
 
   private ProgressClasses() {
     // No-op
   }
 
-  public static final Collection<TypeInfo> getProgressClasses() {
-    Collection<TypeInfo> coll = new ArrayList<>();
+  public static final Collection<ITypeInfo> getProgressClasses() {
+    Collection<ITypeInfo> coll = new ArrayList<>();
     coll.add(getProgressLangObject());
 
     return coll;
   }
 
-  private static final TypeInfo getProgressLangObject() {
-    TypeInfo info = new TypeInfo();
-    info.typeName = PROGRESS_LANG_OBJECT;
-    info.getMethods().add(new MethodElement("Clone", EnumSet.of(AccessType.PUBLIC), 0, DataType.CLASS.getNum(),
+  private static final ITypeInfo getProgressLangObject() {
+    ITypeInfo info = new TypeInfoV11(PROGRESS_LANG_OBJECT, "", "", 0);
+    info.getMethods().add(new MethodElementV11("Clone", EnumSet.of(AccessType.PUBLIC), 0, DataType.CLASS.getNum(),
         PROGRESS_LANG_OBJECT, 0, EMPTY_PARAMETERS));
     info.getMethods().add(
-        new MethodElement("Equals", EnumSet.of(AccessType.PUBLIC), 0, DataType.LOGICAL.getNum(), "", 0,
-            new MethodParameter[] {
-                new MethodParameter(0, "otherObj", 2, MethodParameter.PARAMETER_INPUT, 0, DataType.CLASS.getNum(),
+        new MethodElementV11("Equals", EnumSet.of(AccessType.PUBLIC), 0, DataType.LOGICAL.getNum(), "", 0,
+            new IParameter[] {
+                new MethodParameterV11(0, "otherObj", 2, MethodParameterV11.PARAMETER_INPUT, 0, DataType.CLASS.getNum(),
                     PROGRESS_LANG_OBJECT, 0)}));
-    info.getMethods().add(new MethodElement("GetClass", EnumSet.of(AccessType.PUBLIC), 0, DataType.CLASS.getNum(),
+    info.getMethods().add(new MethodElementV11("GetClass", EnumSet.of(AccessType.PUBLIC), 0, DataType.CLASS.getNum(),
         "Progress.Lang.Class", 0, EMPTY_PARAMETERS));
-    info.getMethods().add(new MethodElement("ToString", EnumSet.of(AccessType.PUBLIC), 0, DataType.CHARACTER.getNum(),
-        "", 0, EMPTY_PARAMETERS));
+    info.getMethods().add(new MethodElementV11("ToString", EnumSet.of(AccessType.PUBLIC), 0,
+        DataType.CHARACTER.getNum(), "", 0, EMPTY_PARAMETERS));
 
     return info;
   }

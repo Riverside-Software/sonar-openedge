@@ -73,7 +73,7 @@ import eu.rssw.pct.PLReader;
 import eu.rssw.pct.ProgressClasses;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
-import eu.rssw.pct.TypeInfo;
+import eu.rssw.pct.elements.ITypeInfo;
 
 @ScannerSide
 @SonarLintSide
@@ -218,20 +218,20 @@ public class OpenEdgeSettings {
     File rcd = getRCode(relPath);
     LOG.debug("  RCode found: '{}'", rcd);
     if ((rcd != null) && rcd.exists()) {
-      TypeInfo info = parseRCode(rcd);
+      ITypeInfo info = parseRCode(rcd);
       if (info != null) {
         parseHierarchy(info);
       }
     }
   }
 
-  private final void parseHierarchy(TypeInfo info) {
+  private final void parseHierarchy(ITypeInfo info) {
     LOG.info("Injecting type info '{}'", info);
     proparseSession.injectTypeInfo(info);
     if (info.getParentTypeName() != null) {
       File rcd = getRCode(info.getParentTypeName());
       if (rcd != null) {
-        TypeInfo inf = parseRCode(rcd);
+        ITypeInfo inf = parseRCode(rcd);
         if (inf != null) {
           parseHierarchy(inf);
         }
@@ -240,7 +240,7 @@ public class OpenEdgeSettings {
     for (String str : info.getInterfaces()) {
       File rcd = getRCode(str);
       if (rcd != null) {
-        TypeInfo inf = parseRCode(rcd);
+        ITypeInfo inf = parseRCode(rcd);
         if (inf != null) {
           parseHierarchy(inf);
         }
@@ -264,7 +264,7 @@ public class OpenEdgeSettings {
         if (f.getName().endsWith(".r")) {
           numRCode.incrementAndGet();
           service.submit(() -> {
-            TypeInfo info = parseRCode(f);
+            ITypeInfo info = parseRCode(f);
             if (info != null) {
               numClasses.incrementAndGet();
               numMethods.addAndGet(info.getMethods().size());
@@ -299,7 +299,7 @@ public class OpenEdgeSettings {
         System.currentTimeMillis() - currTime, numClasses.get(), numMethods.get(), numProperties.get());
   }
 
-  private TypeInfo parseRCode(File file) {
+  private ITypeInfo parseRCode(File file) {
     try (FileInputStream fis = new FileInputStream(file)) {
       LOG.debug("Parsing rcode {}", file.getAbsolutePath());
       RCodeInfo rci = new RCodeInfo(fis);

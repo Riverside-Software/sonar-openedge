@@ -51,7 +51,7 @@ import antlr.ANTLRException;
 import antlr.Token;
 import antlr.TokenStream;
 import antlr.TokenStreamException;
-import eu.rssw.pct.TypeInfo;
+import eu.rssw.pct.elements.ITypeInfo;
 
 /**
  * Provides parse unit information, such as the symbol table and a reference to the AST. TreeParser01 calls
@@ -73,7 +73,7 @@ public class ParseUnit {
   private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
   private Document xref = null;
-  private TypeInfo typeInfo = null;
+  private ITypeInfo typeInfo = null;
   private List<Integer> trxBlocks;
   // TEMP-ANTLR4
   private ParserSupport support;
@@ -248,7 +248,7 @@ public class ParseUnit {
     this.xref = xref;
   }
 
-  public void attachTypeInfo(TypeInfo unit) {
+  public void attachTypeInfo(ITypeInfo unit) {
     this.typeInfo = unit;
   }
 
@@ -262,7 +262,7 @@ public class ParseUnit {
   }
 
   @Nullable
-  public TypeInfo getTypeInfo() {
+  public ITypeInfo getTypeInfo() {
     return typeInfo;
   }
 
