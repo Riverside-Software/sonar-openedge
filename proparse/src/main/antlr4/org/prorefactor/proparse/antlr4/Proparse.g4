@@ -829,7 +829,7 @@ exprt2: // TRANSLATED
     // point in expression evaluation, if we have anything followed by a left-paren,
     // we're going to assume it's a method call.
     // Method names which are reserved keywords must be prefixed with THIS-OBJECT:.
-    { support.isClass() && support.unknownMehodCallsAllowed() }? methodname=identifier parameterlist_noroot  # exprt2ParenCall2
+    { support.isClass() && support.unknownMethodCallsAllowed() }? methodname=identifier parameterlist_noroot  # exprt2ParenCall2
   | constant   # exprt2Constant
   | noargfunc  # exprt2NoArgFunc
   | systemhandlename  # exprt2SystemHandleName
@@ -2673,7 +2673,9 @@ if_else: // TRANSLATED
   ;
 
 in_expr: // TRANSLATED
+    { support.disallowUnknownMethodCalls(); }
     IN_KW expression
+    { support.allowUnknownMethodCalls(); }
   ;
 
 in_window_expr: // TRANSLATED
@@ -4389,6 +4391,8 @@ unreservedkeyword:
  | SILENT
  | SIMPLE
  | SINGLE
+ | SINGLERUN
+ | SINGLETON
  | SIZE
  | SIZECHARS
  | SIZEPIXELS
