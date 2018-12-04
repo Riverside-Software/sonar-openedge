@@ -73,7 +73,18 @@ public class InputSource {
   }
 
   public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean isPrimary) throws IOException {
-    this(sourceNum, file.getName(), new FileInputStream(file), charset, fileIndex, isPrimary);
+    this.sourceNum = sourceNum;
+    this.primaryInput = isPrimary;
+    this.fileIndex = fileIndex;
+    try (InputStream input = new FileInputStream(file)) {
+      LOGGER.info("Opening input file '{}'", file.getName());
+      ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(input));
+      if (src.read(new XCodedFileByteProcessor())) {
+        throw new XCodedFileException(file.getName());
+      }
+      this.fileContent = src.asCharSource(charset).read();
+    }
+    this.macroExpansion = false;
   }
 
   public InputSource(int sourceNum, String fileName, InputStream file, Charset charset, int fileIndex, boolean isPrimary) throws IOException {
