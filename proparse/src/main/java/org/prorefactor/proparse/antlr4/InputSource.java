@@ -77,7 +77,6 @@ public class InputSource {
     this.primaryInput = isPrimary;
     this.fileIndex = fileIndex;
     try (InputStream input = new FileInputStream(file)) {
-      LOGGER.info("Opening input file '{}'", file.getName());
       ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(input));
       if (src.read(new XCodedFileByteProcessor())) {
         throw new XCodedFileException(file.getName());
