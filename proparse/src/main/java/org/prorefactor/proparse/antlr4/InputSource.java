@@ -91,13 +91,16 @@ public class InputSource {
     this.sourceNum = sourceNum;
     this.primaryInput = isPrimary;
     this.fileIndex = fileIndex;
-    ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(file));
-    if (src.read(new XCodedFileByteProcessor())) {
-      throw new XCodedFileException(fileName);
+    try {
+      ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(file));
+      if (src.read(new XCodedFileByteProcessor())) {
+        throw new XCodedFileException(fileName);
+      }
+      this.fileContent = src.asCharSource(charset).read();
+      this.macroExpansion = false;
+    } finally {
+      file.close();
     }
-    this.fileContent = src.asCharSource(charset).read();
-    this.macroExpansion = false;
-    file.close();
   }
 
   public int get() {
