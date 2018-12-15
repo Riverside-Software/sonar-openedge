@@ -120,16 +120,7 @@ public class OpenEdgeSettings {
     // Looking for source directories
     Optional<String> sonarSources = config.get(ProjectDefinition.SOURCES_PROPERTY);
     if (sonarSources.isPresent()) {
-      for (String str : Splitter.on(',').trimResults().split(sonarSources.get())) {
-        LOG.debug("Adding source directory '{}' ...", str);
-        try {
-          Path p = fileSystem.baseDir().toPath().resolve(str).normalize();
-          LOG.debug("  ... resolved to '{}'", p);
-          sourcePaths.add(p);
-        } catch (InvalidPathException caught) {
-          LOG.error("Unable to resolve source directory '{}'", str);
-        }
-      }
+      initializeDirectory(fileSystem, sonarSources.get(), "source", sourcePaths);
     } else {
       sourcePaths.add(fileSystem.baseDir().toPath().normalize());
       LOG.debug("No sonar.sources property, defaults to base directory");
@@ -138,16 +129,7 @@ public class OpenEdgeSettings {
     // Build directories
     Optional<String> binariesSetting = config.get(Constants.BINARIES);
     if (binariesSetting.isPresent()) {
-      for (String str : Splitter.on(',').trimResults().split(binariesSetting.get())) {
-        LOG.debug("Adding binaries directory '{}' ...", str);
-        try {
-          Path p = fileSystem.baseDir().toPath().resolve(str).normalize();
-          LOG.debug("  ... resolved to '{}'", p);
-          binariesDirs.add(p);
-        } catch (InvalidPathException caught) {
-          LOG.error("Unable to resolve binaries directory '{}'", str);
-        }
-      }
+      initializeDirectory(fileSystem, binariesSetting.get(), "binaries", binariesDirs);
     } else {
       LOG.debug("No sonar.oe.binaries property, defaults to source directories");
       binariesDirs.addAll(sourcePaths);
@@ -156,19 +138,23 @@ public class OpenEdgeSettings {
     // .PCT directories
     Optional<String> dotPctSetting = config.get(Constants.DOTPCT);
     if (dotPctSetting.isPresent()) {
-      for (String str : Splitter.on(',').trimResults().split(dotPctSetting.get())) {
-        LOG.debug("Adding .pct directory '{}' ...", str);
-        try {
-          Path p = fileSystem.baseDir().toPath().resolve(str).normalize();
-          LOG.debug("  ... resolved to '{}'", p);
-          pctDirs.add(p);
-        } catch (InvalidPathException caught) {
-          LOG.error("Unable to resolve .pct directory '{}'", str);
-        }
-      }
+      initializeDirectory(fileSystem, dotPctSetting.get(), ".pct", pctDirs);
     } else {
       LOG.debug("No sonar.oe.dotpct property, defaults to <binaries>/.pct directories");
       binariesDirs.forEach(dir -> pctDirs.add(Paths.get(dir.toString(), ".pct")));
+    }
+  }
+
+  private final void initializeDirectory(FileSystem fileSystem, String prop, String type, List<Path> paths) {
+    for (String str : Splitter.on(',').trimResults().split(prop)) {
+      LOG.debug("Adding {} directory '{}' ...", type, str);
+      try {
+        Path p = fileSystem.baseDir().toPath().resolve(str).normalize();
+        LOG.debug("  ... resolved to '{}'", p);
+        paths.add(p);
+      } catch (InvalidPathException caught) {
+        LOG.error("Unable to resolve {} directory '{}'", type, str);
+      }
     }
   }
 
