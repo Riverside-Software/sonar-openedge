@@ -88,6 +88,7 @@ public class OpenEdgeSettings {
   // Internal use
   private final List<Path> sourcePaths = new ArrayList<>();
   private final List<Path> binariesDirs = new ArrayList<>();
+  private final List<Path> pctDirs = new ArrayList<>();
   private final List<File> propath = new ArrayList<>();
   private final Set<String> includeExtensions = new HashSet<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
@@ -120,8 +121,11 @@ public class OpenEdgeSettings {
     Optional<String> sonarSources = config.get(ProjectDefinition.SOURCES_PROPERTY);
     if (sonarSources.isPresent()) {
       for (String str : Splitter.on(',').trimResults().split(sonarSources.get())) {
+        LOG.debug("Adding source directory '{}' ...", str);
         try {
-          sourcePaths.add(fileSystem.baseDir().toPath().resolve(str).normalize());
+          Path p = fileSystem.baseDir().toPath().resolve(str).normalize();
+          LOG.debug("  ... resolved to '{}'", p);
+          sourcePaths.add(p);
         } catch (InvalidPathException caught) {
           LOG.error("Unable to resolve source directory '{}'", str);
         }
@@ -135,8 +139,11 @@ public class OpenEdgeSettings {
     Optional<String> binariesSetting = config.get(Constants.BINARIES);
     if (binariesSetting.isPresent()) {
       for (String str : Splitter.on(',').trimResults().split(binariesSetting.get())) {
+        LOG.debug("Adding binaries directory '{}' ...", str);
         try {
-          binariesDirs.add(fileSystem.baseDir().toPath().resolve(str).normalize());
+          Path p = fileSystem.baseDir().toPath().resolve(str).normalize();
+          LOG.debug("  ... resolved to '{}'", p);
+          binariesDirs.add(p);
         } catch (InvalidPathException caught) {
           LOG.error("Unable to resolve binaries directory '{}'", str);
         }
@@ -144,6 +151,24 @@ public class OpenEdgeSettings {
     } else {
       LOG.debug("No sonar.oe.binaries property, defaults to source directories");
       binariesDirs.addAll(sourcePaths);
+    }
+
+    // .PCT directories
+    Optional<String> dotPctSetting = config.get(Constants.DOTPCT);
+    if (dotPctSetting.isPresent()) {
+      for (String str : Splitter.on(',').trimResults().split(dotPctSetting.get())) {
+        LOG.debug("Adding .pct directory '{}' ...", str);
+        try {
+          Path p = fileSystem.baseDir().toPath().resolve(str).normalize();
+          LOG.debug("  ... resolved to '{}'", p);
+          pctDirs.add(p);
+        } catch (InvalidPathException caught) {
+          LOG.error("Unable to resolve .pct directory '{}'", str);
+        }
+      }
+    } else {
+      LOG.debug("No sonar.oe.dotpct property, defaults to <binaries>/.pct directories");
+      binariesDirs.forEach(dir -> pctDirs.add(Paths.get(dir.toString(), ".pct")));
     }
   }
 
@@ -380,7 +405,41 @@ public class OpenEdgeSettings {
     return null;
   }
 
-  public String getRelativePathToSourceDirs(InputFile file) {
+  public File getWarningsFile(InputFile file) {
+    String relPath = getRelativePathToSourceDirs(file);
+    if (Strings.isNullOrEmpty(relPath))
+      return null;
+    else
+      return getFileFromPctDirs(relPath + ".warnings");
+  }
+
+  public File getXrefFile(InputFile file) {
+    String relPath = getRelativePathToSourceDirs(file);
+    if (Strings.isNullOrEmpty(relPath))
+      return null;
+    else
+      return getFileFromPctDirs(relPath + ".xref");
+  }
+
+  public File getListingFile(InputFile file) {
+    String relPath = getRelativePathToSourceDirs(file);
+    if (Strings.isNullOrEmpty(relPath))
+      return null;
+    else
+      return getFileFromPctDirs(relPath);
+  }
+
+  private File getFileFromPctDirs(String relPath) {
+    for (Path dir : pctDirs) {
+      Path path = dir.resolve(relPath);
+      if (path.toFile().exists())
+        return path.toFile();
+    }
+
+    return null;
+  }
+
+  private String getRelativePathToSourceDirs(InputFile file) {
     for (Path p : sourcePaths) {
       try {
         String s = p.toAbsolutePath().relativize(Paths.get(file.uri())).toString();
@@ -392,27 +451,6 @@ public class OpenEdgeSettings {
       }
     }
     return "";
-  }
-
-  public File getWarningsFile(InputFile file) {
-    String s = getRelativePathToSourceDirs(file);
-    if (!Strings.isNullOrEmpty(s))
-      return new File(getPctDir(), s + ".warnings");
-    return null;
-  }
-
-  public File getXrefFile(InputFile file) {
-    String s = getRelativePathToSourceDirs(file);
-    if (!Strings.isNullOrEmpty(s))
-      return new File(getPctDir(), s + ".xref");
-    return null;
-  }
-
-  public File getListingFile(InputFile file) {
-    String s = getRelativePathToSourceDirs(file);
-    if (!Strings.isNullOrEmpty(s))
-      return new File(getPctDir(), s);
-    return null;
   }
 
   /**
