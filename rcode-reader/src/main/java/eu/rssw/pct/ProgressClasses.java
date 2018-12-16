@@ -47,7 +47,7 @@ public final class ProgressClasses {
   }
 
   private static final ITypeInfo getProgressLangObject() {
-    ITypeInfo info = new TypeInfoV11(PROGRESS_LANG_OBJECT, "", "", 0);
+    ITypeInfo info = new TypeInfoV11(PROGRESS_LANG_OBJECT, null, null, 0);
     info.getMethods().add(new MethodElementV11("Clone", EnumSet.of(AccessType.PUBLIC), 0, DataType.CLASS.getNum(),
         PROGRESS_LANG_OBJECT, 0, EMPTY_PARAMETERS));
     info.getMethods().add(
