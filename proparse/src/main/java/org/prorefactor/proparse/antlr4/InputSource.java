@@ -73,9 +73,11 @@ public class InputSource {
   }
 
   public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean skipXCode, boolean isPrimary) throws IOException {
+    LOGGER.trace("New InputSource object for file '{}'", file.getName());
     this.sourceNum = sourceNum;
     this.primaryInput = isPrimary;
     this.fileIndex = fileIndex;
+    this.macroExpansion = false;
     try (InputStream input = new FileInputStream(file)) {
       ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(input));
       if (src.read(new XCodedFileByteProcessor())) {
@@ -87,7 +89,6 @@ public class InputSource {
         this.fileContent = src.asCharSource(charset).read();
       }
     }
-    this.macroExpansion = false;
     // Skip first character if it's a BOM
     if (!fileContent.isEmpty() && fileContent.charAt(0) == 0xFEFF)
       currPos++;
