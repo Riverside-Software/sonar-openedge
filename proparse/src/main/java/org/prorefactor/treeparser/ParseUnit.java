@@ -46,6 +46,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.google.common.base.Strings;
+import com.google.common.io.ByteSource;
+import com.google.common.io.ByteStreams;
 
 import antlr.ANTLRException;
 import antlr.Token;
@@ -145,11 +147,11 @@ public class ParseUnit {
    * @throws UncheckedIOException If main file can't be opened
    */
   public TokenSource lex4() {
-    return new ProgressLexer(session, getInputStream(), relativeName, true);
+    return new ProgressLexer(session, getByteSource(), relativeName, true);
   }
 
   public TokenSource preprocess4() {
-    return new ProgressLexer(session, getInputStream(), relativeName, false);
+    return new ProgressLexer(session, getByteSource(), relativeName, false);
   }
 
   /**
@@ -158,12 +160,12 @@ public class ParseUnit {
    * @throws UncheckedIOException If main file can't be opened
    */
   public TokenStream lex() {
-    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, true);
+    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, true);
     return lexer.getANTLR2TokenStream(false);
   }
 
   public TokenStream preprocess() {
-    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, false);
+    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
     return lexer.getANTLR2TokenStream(true);
   }
 
@@ -174,7 +176,7 @@ public class ParseUnit {
    */
   public void lexAndGenerateMetrics() {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
-    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, true);
+    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, true);
     TokenStream stream = lexer.getANTLR2TokenStream(false);
     try {
       Token tok = stream.nextToken();
@@ -190,8 +192,8 @@ public class ParseUnit {
 
   public void parse() throws ANTLRException {
     LOGGER.trace("Entering ParseUnit#parse()");
-    
-    ProgressLexer lexer = new ProgressLexer(session, getInputStream(), relativeName, false);
+
+    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
     ProParser parser = new ProParser(lexer.getANTLR2TokenStream(true));
     parser.initAntlr4(session, lexer.getFilenameList());
     parser.program();
@@ -293,17 +295,12 @@ public class ParseUnit {
     return false;
   }
 
-  /**
-   * Careful, returned object can be closed
-   */
-  private InputStream getInputStream() {
-    try {
-      if (input == null)
-        return new FileInputStream(file);
-      else
-        return input;
+  private ByteSource getByteSource() {
+    try (InputStream stream = input == null ? new FileInputStream(file) : input) {
+      return ByteSource.wrap(ByteStreams.toByteArray(stream));
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
   }
+
 }
