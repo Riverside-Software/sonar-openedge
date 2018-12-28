@@ -94,7 +94,7 @@ public class InputSource {
       currPos++;
   }
 
-  public InputSource(int sourceNum, String fileName, ByteSource src, Charset charset, int fileIndex, boolean isPrimary, boolean skipXCode) throws IOException {
+  public InputSource(int sourceNum, String fileName, ByteSource src, Charset charset, int fileIndex, boolean skipXCode, boolean isPrimary) throws IOException {
     LOGGER.trace("New InputSource object for include stream '{}'", fileName);
     this.sourceNum = sourceNum;
     this.primaryInput = isPrimary;
