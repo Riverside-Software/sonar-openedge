@@ -16,7 +16,6 @@ package org.prorefactor.proparse.antlr4;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
+import com.google.common.io.ByteSource;
 
 import antlr.TokenStream;
 import antlr.TokenStreamHiddenTokenFilter;
@@ -139,12 +139,12 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    * stream once parsing is complete.
    * 
    * @param session Current parser session
-   * @param input File object of main file
+   * @param src Byte array of source file
    * @param fileName Referenced under which name
    * @param lexOnly Don't use preprocessor
    * @throws UncheckedIOException
    */
-  public ProgressLexer(RefactorSession session, InputStream input, String fileName, boolean lexOnly) {
+  public ProgressLexer(RefactorSession session, ByteSource src, String fileName, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.filenameList = new IntegerIndex<>();
     this.ppSettings = session.getProparseSettings();
@@ -153,7 +153,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
     // Create input source with flag isPrimaryInput=true
     try {
-      currentInput = new InputSource(++sourceCounter, fileName, input, session.getCharset(), currFile, true, true);
+      currentInput = new InputSource(++sourceCounter, fileName, src, session.getCharset(), currFile, true, true);
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
@@ -852,7 +852,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       throw new UncheckedIOException(new IncludeFileNotFoundException(getFilename(), referencedWithName));
     }
     try {
-      currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName), ppSettings.getSkipXCode());
+      currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName), ppSettings.getSkipXCode(), false);
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }

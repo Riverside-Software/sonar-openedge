@@ -72,19 +72,35 @@ public class InputSource {
     this(sourceNum, file, charset, fileIndex, false, skipXCode);
   }
 
-  public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean isPrimary, boolean skipXCode) throws IOException {
-    this(sourceNum, file.getName(), new FileInputStream(file), charset, fileIndex, isPrimary, skipXCode);
+  public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean skipXCode, boolean isPrimary) throws IOException {
+    this.sourceNum = sourceNum;
+    this.primaryInput = isPrimary;
+    this.fileIndex = fileIndex;
+    try (InputStream input = new FileInputStream(file)) {
+      ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(input));
+      if (src.read(new XCodedFileByteProcessor())) {
+        if (skipXCode)
+          this.fileContent = " ";
+        else
+          throw new XCodedFileException(file.getName());
+      } else {
+        this.fileContent = src.asCharSource(charset).read();
+      }
+    }
+    this.macroExpansion = false;
+    // Skip first character if it's a BOM
+    if (!fileContent.isEmpty() && fileContent.charAt(0) == 0xFEFF)
+      currPos++;
   }
 
-  public InputSource(int sourceNum, String fileName, InputStream file, Charset charset, int fileIndex, boolean isPrimary, boolean skipCode) throws IOException {
+  public InputSource(int sourceNum, String fileName, ByteSource src, Charset charset, int fileIndex, boolean isPrimary, boolean skipXCode) throws IOException {
     LOGGER.trace("New InputSource object for include stream '{}'", fileName);
     this.sourceNum = sourceNum;
     this.primaryInput = isPrimary;
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
-    ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(file));
     if (src.read(new XCodedFileByteProcessor())) {
-      if (skipCode)
+      if (skipXCode)
         this.fileContent = " ";
       else
         throw new XCodedFileException(fileName);
