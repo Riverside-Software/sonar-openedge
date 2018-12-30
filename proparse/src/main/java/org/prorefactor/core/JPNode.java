@@ -384,12 +384,41 @@ public class JPNode implements AST {
   // Various queries
   // ***************
 
-  /** Get an ArrayList of the direct children of this node. */
+  /**
+   * Get list of the direct children of this node.
+   */
   public List<JPNode> getDirectChildren() {
     List<JPNode> ret = new ArrayList<>();
     JPNode n = getFirstChild();
     while (n != null) {
       ret.add(n);
+      n = n.getNextSibling();
+    }
+    return ret;
+  }
+
+  /**
+   * Return first direct child of a given type, or null if not found
+   */
+  public JPNode getFirstDirectChild(ABLNodeType type) {
+    JPNode n = getFirstChild();
+    while (n != null) {
+      if (n.getNodeType() == type)
+        return n;
+      n = n.getNextSibling();
+    }
+    return null;
+  }
+
+  /**
+   * Get a list of the direct children of a given type
+   */
+  public List<JPNode> getDirectChildren(ABLNodeType type) {
+    List<JPNode> ret = new ArrayList<>();
+    JPNode n = getFirstChild();
+    while (n != null) {
+      if (n.getNodeType() == type)
+        ret.add(n);
       n = n.getNextSibling();
     }
     return ret;
