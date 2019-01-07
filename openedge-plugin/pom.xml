@@ -8,7 +8,7 @@
   <packaging>sonar-plugin</packaging>
 
   <name>OpenEdge plugin for SonarQube</name>
-  <description>Enables analysis of OpenEdge projects</description>
+  <description>Code Analyzer for Progress ABL</description>
   <url>https://github.com/Riverside-Software/sonar-openedge/</url>
   <inceptionYear>2013</inceptionYear>
   <organization>
