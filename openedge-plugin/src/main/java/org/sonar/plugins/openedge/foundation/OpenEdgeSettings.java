@@ -330,6 +330,10 @@ public class OpenEdgeSettings {
     }
   }
 
+  public File getSonarLintXrefDir() {
+    return fileSystem.resolvePath(config.get(Constants.SLINT_XREF).orElse(""));
+  }
+
   public File getPctDir() {
     return new File(binariesDirs.get(0).toFile(), ".pct");
   }
@@ -404,6 +408,13 @@ public class OpenEdgeSettings {
     String s = getRelativePathToSourceDirs(file);
     if (!Strings.isNullOrEmpty(s))
       return new File(getPctDir(), s + ".xref");
+    return null;
+  }
+
+  public File getSonarlintXrefFile(InputFile file) {
+    String s = getRelativePathToSourceDirs(file);
+    if (!Strings.isNullOrEmpty(s))
+      return new File(getSonarLintXrefDir(), Files.getNameWithoutExtension(s) + ".xref.xml");
     return null;
   }
 

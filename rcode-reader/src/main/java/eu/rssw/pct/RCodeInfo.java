@@ -52,7 +52,8 @@ public class RCodeInfo {
   private static final int HEADER_SIZE = 68;
   private static final int HEADER_OFFSET_MAGIC = 0;
   private static final int HEADER_OFFSET_TIMESTAMP = 4;
-  private static final int HEADER_OFFSET_MD5 = 10;
+  private static final int HEADER_OFFSET_DIGEST = 10;
+  private static final int HEADER_OFFSET_DIGEST_V12 = 22;
   private static final int HEADER_OFFSET_RCODE_VERSION = 14;
   private static final int HEADER_OFFSET_SEGMENT_TABLE_SIZE = 0x1E;
   private static final int HEADER_OFFSET_SIGNATURE_SIZE = 56;
@@ -76,7 +77,7 @@ public class RCodeInfo {
   protected int version;
   protected boolean sixtyFourBits;
   protected long timeStamp;
-  protected int md5;
+  protected int digestOffset;
 
   protected int segmentTableSize;
   protected int signatureSize;
@@ -177,14 +178,14 @@ public class RCodeInfo {
       }
       
       timeStamp = ByteBuffer.wrap(header, HEADER_OFFSET_TIMESTAMP, Integer.BYTES).order(order).getInt();
-      md5 = ByteBuffer.wrap(header, HEADER_OFFSET_MD5, Short.BYTES).order(order).getShort();
+      digestOffset = ByteBuffer.wrap(header, HEADER_OFFSET_DIGEST_V12, Short.BYTES).order(order).getShort();
       segmentTableSize = ByteBuffer.wrap(header, HEADER_OFFSET_SEGMENT_TABLE_SIZE, Short.BYTES).order(order).getShort();
       signatureSize = ByteBuffer.wrap(header, HEADER_OFFSET_SIGNATURE_SIZE, Integer.BYTES).order(order).getInt();
       typeBlockSize = ByteBuffer.wrap(header, HEADER_OFFSET_TYPEBLOCK_SIZE, Integer.BYTES).order(order).getInt();
       rcodeSize = ByteBuffer.wrap(header2, 0xc, Integer.BYTES).order(order).getInt();
     } else if ((version & 0x3FFF) >= 1100) {
       timeStamp = ByteBuffer.wrap(header, HEADER_OFFSET_TIMESTAMP, Integer.BYTES).order(order).getInt();
-      md5 = ByteBuffer.wrap(header, HEADER_OFFSET_MD5, Short.BYTES).order(order).getShort();
+      digestOffset = ByteBuffer.wrap(header, HEADER_OFFSET_DIGEST, Short.BYTES).order(order).getShort();
       segmentTableSize = ByteBuffer.wrap(header, HEADER_OFFSET_SEGMENT_TABLE_SIZE, Short.BYTES).order(order).getShort();
       signatureSize = ByteBuffer.wrap(header, HEADER_OFFSET_SIGNATURE_SIZE, Integer.BYTES).order(order).getInt();
       typeBlockSize = ByteBuffer.wrap(header, HEADER_OFFSET_TYPEBLOCK_SIZE, Integer.BYTES).order(order).getInt();
