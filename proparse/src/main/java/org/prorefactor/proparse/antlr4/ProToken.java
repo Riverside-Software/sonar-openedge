@@ -144,7 +144,7 @@ public class ProToken implements WritableToken {
 
   /**
    * Returns true if last character of token was generated from a macro expansion, i.e. {&amp;SOMETHING}.
-   * This doesn't mean that all characters were generated from a macro, e.g. {&prefix}VarName will return false 
+   * This doesn't mean that all characters were generated from a macro, e.g. {&amp;prefix}VarName will return false
    */
   public boolean isMacroExpansion() {
     return macroExpansion;
