@@ -413,8 +413,8 @@ public class OpenEdgeSettings {
 
   public File getSonarlintXrefFile(InputFile file) {
     String s = getRelativePathToSourceDirs(file);
-    if (!Strings.isNullOrEmpty(s))
-      return new File(getSonarLintXrefDir(), Files.getNameWithoutExtension(s) + ".xref.xml");
+    if (!Strings.isNullOrEmpty(s) && !s.endsWith(".") && (s.indexOf('.') > -1))
+      return new File(getSonarLintXrefDir(), s.subSequence(0, s.lastIndexOf('.')) + ".xref.xml");
     return null;
   }
 
