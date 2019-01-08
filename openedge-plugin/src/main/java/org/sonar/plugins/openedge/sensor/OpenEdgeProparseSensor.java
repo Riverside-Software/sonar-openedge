@@ -217,14 +217,13 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
   }
 
-  private void parseMainFile(SensorContext context, InputFile file, RefactorSession session) {
-    File xrefFile = settings.getXrefFile(file);
+  private Document parseXREF(File xrefFile) {
     Document doc = null;
-    if ((context.runtime().getProduct() == SonarProduct.SONARQUBE) && (xrefFile != null) && xrefFile.exists()) {
+    if ((xrefFile != null) && xrefFile.exists()) {
       LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
       try (InputStream inpStream = new FileInputStream(xrefFile)) {
         long startTime = System.currentTimeMillis();
-        doc = dBuilder.parse(
+         doc = dBuilder.parse(
             settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
         xmlParseTime += (System.currentTimeMillis() - startTime);
         numXREF++;
@@ -232,7 +231,15 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
       }
     }
-    if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
+    return doc;
+  }
+
+  private void parseMainFile(SensorContext context, InputFile file, RefactorSession session) {
+    Document doc = null;
+    if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
+      doc = parseXREF(settings.getXrefFile(file));
+    } else if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
+      doc = parseXREF(settings.getSonarlintXrefFile(file));
       settings.parseHierarchy(file);
     }
 

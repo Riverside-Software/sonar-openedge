@@ -34,6 +34,7 @@ public class Constants {
   public static final String PROPARSE_ERROR_STACKTRACE = "sonar.oe.proparse.error.stacktrace";
   public static final String BINARIES = "sonar.oe.binaries";
   public static final String DOTPCT = "sonar.oe.dotpct";
+  public static final String SLINT_XREF = "sonar.oe.lint.xref";
   public static final String DLC = "sonar.oe.dlc";
   public static final String PROPATH = "sonar.oe.propath";
   public static final String PROPATH_DLC = "sonar.oe.propath.dlc";
