@@ -22,11 +22,14 @@ package org.sonar.plugins.openedge.sensor;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.sonar.api.SonarQubeSide;
 import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.batch.sensor.issue.Issue;
+import org.sonar.api.internal.SonarRuntimeImpl;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.api.utils.Version;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
@@ -35,11 +38,13 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class OpenEdgeWarningsSensorTest {
+  private static final Version VERSION = Version.parse("7.5");
+
   @Test
   public void testWarnings() throws IOException {
     SensorContextTester context = TestProjectSensorContext.createContext();
     context.setActiveRules(createRules());
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER));
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings);
     sensor.execute(context);
 

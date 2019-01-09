@@ -4,6 +4,6 @@
 **/dependency-reduced-pom.xml
 **/target
 **/test-output
+openedge-plugin/src/test/resources/project1/.sonarlint/src_schema_sp2k.df.bin
 proparse/src/test/resources/OpenEdge
 proparse/src/test/resources/rssw
-
