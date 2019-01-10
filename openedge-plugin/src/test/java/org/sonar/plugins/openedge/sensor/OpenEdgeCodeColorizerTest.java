@@ -24,19 +24,23 @@ import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE2;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
 
+import org.sonar.api.SonarQubeSide;
 import org.sonar.api.batch.sensor.highlighting.TypeOfText;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.internal.SonarRuntimeImpl;
+import org.sonar.api.utils.Version;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class OpenEdgeCodeColorizerTest {
+  private static final Version VERSION = Version.parse("7.5");
 
   @Test
   public void testSp2k() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER));
     OpenEdgeCodeColorizer sensor = new OpenEdgeCodeColorizer(oeSettings);
     sensor.execute(context);
 

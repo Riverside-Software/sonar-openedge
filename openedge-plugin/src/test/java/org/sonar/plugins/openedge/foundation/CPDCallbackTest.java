@@ -31,13 +31,15 @@ import org.prorefactor.core.schema.Schema;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.prorefactor.treeparser.ParseUnit;
+import org.sonar.api.SonarQubeSide;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
-import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.cpd.NewCpdTokens;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.internal.SonarRuntimeImpl;
 import org.sonar.api.internal.google.common.io.Files;
+import org.sonar.api.utils.Version;
 import org.sonar.duplications.internal.pmd.TokensLine;
 import org.sonar.plugins.openedge.api.Constants;
 import org.testng.annotations.BeforeMethod;
@@ -47,7 +49,7 @@ import antlr.ANTLRException;
 
 public class CPDCallbackTest {
   private static final String BASEDIR = "src/test/resources/";
-
+  private static final Version VERSION = Version.parse("7.5");
   private RefactorSession session;
 
   @BeforeMethod
@@ -60,7 +62,7 @@ public class CPDCallbackTest {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     InputFile inputFile = getInputFile(context, "cpd01.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER)), unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
     
@@ -77,7 +79,7 @@ public class CPDCallbackTest {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     InputFile inputFile = getInputFile(context, "cpd02.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER)), unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
     
@@ -97,7 +99,7 @@ public class CPDCallbackTest {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     InputFile inputFile = getInputFile(context, "cpd03.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER)), unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
     
@@ -114,7 +116,7 @@ public class CPDCallbackTest {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER)), unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
     List<TokensLine> lines = context.cpdTokens(inputFile.key());
@@ -128,7 +130,7 @@ public class CPDCallbackTest {
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
     context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated");
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER)), unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
     
@@ -143,7 +145,7 @@ public class CPDCallbackTest {
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
     context.settings().setProperty(Constants.CPD_PROCEDURES, "p1,p4,p3");
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER)), unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
     
@@ -159,7 +161,7 @@ public class CPDCallbackTest {
     ParseUnit unit = getParseUnit(inputFile);
     context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated");
     context.settings().setProperty(Constants.CPD_PROCEDURES, "p1,p4,p5");
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem()), unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER)), unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
     

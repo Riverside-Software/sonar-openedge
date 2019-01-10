@@ -30,9 +30,12 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
+import org.sonar.api.SonarQubeSide;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.internal.SonarRuntimeImpl;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.api.utils.Version;
 import org.sonar.plugins.openedge.api.CheckRegistration;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
@@ -44,6 +47,7 @@ import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.annotations.Test;
 
 public class OpenEdgeProparseSensorTest {
+  private static final Version VERSION = Version.parse("7.5");
 
   @SuppressWarnings("deprecation")
   @Test
@@ -52,7 +56,7 @@ public class OpenEdgeProparseSensorTest {
     context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
     context.settings().setProperty(Constants.CPD_METHODS, "TEST3");
     context.settings().setProperty(Constants.CPD_PROCEDURES, "adm-create-objects");
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER));
     OpenEdgeComponents components = new OpenEdgeComponents(null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
@@ -70,7 +74,7 @@ public class OpenEdgeProparseSensorTest {
     rulesBuilder.create(RuleKey.of(Constants.STD_REPOSITORY_KEY, ClumsySyntax.class.getCanonicalName())).setLanguage(
         Constants.LANGUAGE_KEY).activate();
     context.setActiveRules(rulesBuilder.build());
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER));
     OpenEdgeComponents components = new OpenEdgeComponents(new CheckRegistration[] {new BasicChecksRegistration()},
         null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
@@ -83,7 +87,7 @@ public class OpenEdgeProparseSensorTest {
   public void testListing() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER));
     OpenEdgeComponents components = new OpenEdgeComponents(null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
@@ -104,22 +108,22 @@ public class OpenEdgeProparseSensorTest {
     context.settings().setProperty("sonar.oe.preprocessor.process-architecture", "32");
     context.settings().setProperty("sonar.oe.preprocessor.proversion", "12.0");
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
-    assertFalse(oeSettings.getProparseSession(false).getProparseSettings().getBatchMode());
-    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getWindowSystem(), "foobar");
-    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getOpSys(), OperatingSystem.UNIX);
-    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProcessArchitecture(), "32");
-    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProversion(), "12.0");
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER));
+    assertFalse(oeSettings.getProparseSession().getProparseSettings().getBatchMode());
+    assertEquals(oeSettings.getProparseSession().getProparseSettings().getWindowSystem(), "foobar");
+    assertEquals(oeSettings.getProparseSession().getProparseSettings().getOpSys(), OperatingSystem.UNIX);
+    assertEquals(oeSettings.getProparseSession().getProparseSettings().getProcessArchitecture(), "32");
+    assertEquals(oeSettings.getProparseSession().getProparseSettings().getProversion(), "12.0");
   }
 
   @Test
   public void testPreprocessorSettings02() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem());
-    assertTrue(oeSettings.getProparseSession(false).getProparseSettings().getBatchMode());
-    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProcessArchitecture(), "64");
-    assertEquals(oeSettings.getProparseSession(false).getProparseSettings().getProversion(), "11.7");
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER));
+    assertTrue(oeSettings.getProparseSession().getProparseSettings().getBatchMode());
+    assertEquals(oeSettings.getProparseSession().getProparseSettings().getProcessArchitecture(), "64");
+    assertEquals(oeSettings.getProparseSession().getProparseSettings().getProversion(), "11.7");
   }
 
 }

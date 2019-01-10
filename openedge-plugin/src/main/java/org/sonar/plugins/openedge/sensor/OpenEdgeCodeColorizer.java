@@ -62,7 +62,7 @@ public class OpenEdgeCodeColorizer implements Sensor {
     if (context.runtime().getProduct() == SonarProduct.SONARLINT)
       return;
 
-    RefactorSession session = settings.getProparseSession(context.runtime().getProduct() == SonarProduct.SONARLINT);
+    RefactorSession session = settings.getProparseSession();
 
     for (InputFile file : context.fileSystem().inputFiles(
         context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
