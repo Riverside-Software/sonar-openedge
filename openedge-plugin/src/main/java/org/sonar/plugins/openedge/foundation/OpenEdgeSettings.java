@@ -49,6 +49,8 @@ import org.prorefactor.core.schema.Schema;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.sonar.api.CoreProperties;
+import org.sonar.api.SonarProduct;
+import org.sonar.api.SonarRuntime;
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.api.batch.fs.FileSystem;
@@ -84,6 +86,7 @@ public class OpenEdgeSettings {
   // IoC
   private final Configuration config;
   private final FileSystem fileSystem;
+  private final SonarRuntime runtime;
 
   // Internal use
   private final List<Path> sourcePaths = new ArrayList<>();
@@ -98,9 +101,10 @@ public class OpenEdgeSettings {
 
   private RefactorSession proparseSession;
 
-  public OpenEdgeSettings(Configuration config, FileSystem fileSystem) {
+  public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
     this.config = config;
     this.fileSystem = fileSystem;
+    this.runtime = runtime;
 
     LOG.info("Loading OpenEdge settings for server ID '{}' '{}'", config.get(CoreProperties.SERVER_ID).orElse(""),
         config.get(CoreProperties.PERMANENT_SERVER_ID).orElse(""));
@@ -543,9 +547,9 @@ public class OpenEdgeSettings {
     return Joiner.on(',').skipNulls().join(propath);
   }
 
-  public RefactorSession getProparseSession(boolean sonarLintSession) {
+  public RefactorSession getProparseSession() {
     if (proparseSession == null) {
-      Schema sch = readSchema(config, fileSystem, sonarLintSession);
+      Schema sch = readSchema(config, fileSystem);
       ProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
           config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
 
@@ -577,7 +581,7 @@ public class OpenEdgeSettings {
 
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
       proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());
-      if (!sonarLintSession) {
+      if (runtime.getProduct() == SonarProduct.SONARQUBE) {
         // Parse entire build directory if not in SonarLint
         parseBuildDirectory();
       }
@@ -598,10 +602,10 @@ public class OpenEdgeSettings {
     }
   }
 
-  private Schema readSchema(Configuration config, FileSystem fileSystem, boolean useCache) {
+  private Collection<IDatabase> readSchemaFromProp1(Configuration config, FileSystem fileSystem) {
+    Collection<IDatabase> dbs = new ArrayList<>();
     String dbList = config.get(Constants.DATABASES).orElse("");
     LOG.info("Using schema : {}", dbList);
-    Collection<IDatabase> dbs = new ArrayList<>();
 
     for (String str : Splitter.on(',').trimResults().omitEmptyStrings().split(dbList)) {
       String dbName;
@@ -615,10 +619,11 @@ public class OpenEdgeSettings {
 
       LOG.debug("Parsing {} with alias {}", fileSystem.resolvePath(str), dbName);
       File dfFile = fileSystem.resolvePath(str);
-      File serFile = new File(fileSystem.baseDir(), ".sonarlint/" + str.replace(':', '_').replace('\\', '_').replace('/', '_') + ".bin");
+      File serFile = new File(fileSystem.baseDir(),
+          ".sonarlint/" + str.replace(':', '_').replace('\\', '_').replace('/', '_') + ".bin");
       serFile.getParentFile().mkdir();
       DatabaseDescription desc = null;
-      if (useCache && (dfFile.lastModified() < serFile.lastModified())) {
+      if ((runtime.getProduct() == SonarProduct.SONARLINT) && (dfFile.lastModified() < serFile.lastModified())) {
         LOG.debug("SonarLint side, using serialized file");
         try (InputStream is = new FileInputStream(serFile)) {
           desc = DatabaseDescription.deserialize(is, dbName);
@@ -632,7 +637,7 @@ public class OpenEdgeSettings {
         } catch (IOException caught) {
           LOG.error("Unable to parse " + str, caught);
         }
-        if ((desc != null) && useCache) {
+        if ((desc != null) && (runtime.getProduct() == SonarProduct.SONARLINT)) {
           try (OutputStream os = new FileOutputStream(serFile)) {
             desc.serialize(os);
           } catch (IOException caught) {
@@ -643,6 +648,36 @@ public class OpenEdgeSettings {
       if (desc != null) {
         dbs.add(new DatabaseWrapper(desc));
       }
+    }
+
+    return dbs;
+  }
+
+  private Collection<IDatabase> readSchemaFromProp2(Configuration config, FileSystem fileSystem) {
+    Collection<IDatabase> dbs = new ArrayList<>();
+    for (String str : Splitter.on(',').trimResults().omitEmptyStrings().split(
+        config.get(Constants.SLINT_DATABASES).orElse(""))) {
+      String dbName = FilenameUtils.getBaseName(str);
+      LOG.debug("Parsing '{}' with db name {}", str, dbName);
+      try (InputStream is = new FileInputStream(new File(str))) {
+        dbs.add(new DatabaseWrapper(DatabaseDescription.deserialize(is, dbName)));
+      } catch (IOException caught) {
+        LOG.error("Unable to deserialize from '" + str + "'", caught);
+      }
+    }
+
+    return dbs;
+  }
+
+  private Schema readSchema(Configuration config, FileSystem fileSystem) {
+    Collection<IDatabase> dbs = new ArrayList<>();
+
+    // First use sonar.oe.databases property, even on SonarLint (for compatibility reasons)
+    if (config.get(Constants.DATABASES).orElse("").length() > 0) {
+      dbs = readSchemaFromProp1(config, fileSystem);
+    } else if ((runtime.getProduct() == SonarProduct.SONARLINT)
+        && (config.get(Constants.SLINT_DATABASES).orElse("").length() > 0)) {
+      dbs = readSchemaFromProp2(config, fileSystem);
     }
 
     Schema sch = new Schema(dbs.toArray(new IDatabase[] {}));

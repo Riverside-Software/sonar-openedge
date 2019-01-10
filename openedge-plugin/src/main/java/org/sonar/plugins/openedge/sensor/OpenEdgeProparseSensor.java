@@ -163,7 +163,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
-    RefactorSession session = settings.getProparseSession(context.runtime().getProduct() == SonarProduct.SONARLINT);
+    RefactorSession session = settings.getProparseSession();
 
     FilePredicates predicates = context.fileSystem().predicates();
     for (InputFile file : context.fileSystem().inputFiles(
