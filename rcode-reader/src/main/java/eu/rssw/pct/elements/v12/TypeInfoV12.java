@@ -90,21 +90,21 @@ public class TypeInfoV12 implements ITypeInfo {
     List<int[]> entries = new ArrayList<>();
     for (int zz = 0; zz < publicElementCount + protectedElementCount + privateElementCount + constructorCount; zz++) {
       entries.add(new int[] {
-          (int) ByteBuffer.wrap(segment, 112 + 10 + (16 * zz), Short.BYTES).order(order).getShort(),
-          (int) ByteBuffer.wrap(segment, 112 + 12 + (16 * zz), Short.BYTES).order(order).getShort(),
-          (int) ByteBuffer.wrap(segment, 112 + 14 + (16 * zz), Short.BYTES).order(order).getShort(),
-          ByteBuffer.wrap(segment, 112 + 0 + (16 * zz), Integer.BYTES).order(order).getInt()});
+          (int) ByteBuffer.wrap(segment, 192 + 10 + (16 * zz), Short.BYTES).order(order).getShort(),
+          (int) ByteBuffer.wrap(segment, 192 + 12 + (16 * zz), Short.BYTES).order(order).getShort(),
+          (int) ByteBuffer.wrap(segment, 192 + 14 + (16 * zz), Short.BYTES).order(order).getShort(),
+          ByteBuffer.wrap(segment, 192 + 0 + (16 * zz), Integer.BYTES).order(order).getInt()});
     }
 
-    int currOffset = 112 + 16 * (publicElementCount + protectedElementCount + privateElementCount + constructorCount);
+    int currOffset = 192 + 16 * (publicElementCount + protectedElementCount + privateElementCount + constructorCount);
     typeInfo.parentTypeName = RCodeInfo.readNullTerminatedString(segment, textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
-    currOffset += 24;
+    currOffset += 56;
     
     for (int zz = 0; zz < interfaceCount; zz++) {
       String str = RCodeInfo.readNullTerminatedString(segment,
           textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
       typeInfo.getInterfaces().add(str);
-      currOffset += 24;
+      currOffset += 56;
     }
 
     for (int[] entry : entries) {
