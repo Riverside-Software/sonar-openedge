@@ -51,7 +51,7 @@ public class MethodElementV12 extends MethodElementV11 {
     String typeName = typeNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
 
-    int currPos = currentPos + 40;
+    int currPos = currentPos + 56;
     IParameter[] parameters = new IParameter[paramCount];
     for (int zz = 0; zz < paramCount; zz++) {
       IParameter param = MethodParameterV12.fromDebugSegment(segment, currPos, textAreaOffset, order);
@@ -64,7 +64,7 @@ public class MethodElementV12 extends MethodElementV11 {
 
   @Override
   public int getSizeInRCode() {
-    int size = 40;
+    int size = 56;
     for (IParameter p : getParameters()) {
       size += p.getSizeInRCode();
     }

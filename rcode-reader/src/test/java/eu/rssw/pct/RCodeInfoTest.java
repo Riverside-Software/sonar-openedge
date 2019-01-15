@@ -193,15 +193,15 @@ public class RCodeInfoTest {
     try (FileInputStream input = new FileInputStream("src/test/resources/rcode/WebRequestV12.r")) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
-      assertEquals(rci.getVersion(), -1210);
+      assertEquals(rci.getVersion(), -1215);
 
       assertNotNull(rci.getTypeInfo());
       assertNotNull(rci.getTypeInfo().getMethods());
-      assertEquals(rci.getTypeInfo().getMethods().size(), 24);
+      assertEquals(rci.getTypeInfo().getMethods().size(), 26);
       assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isProtected()).count(), 0);
       assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isPrivate()).count(), 6);
       assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isConstructor()).count(), 1);
-      assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isPublic()).count(), 18);
+      assertEquals(rci.getTypeInfo().getMethods().stream().filter(m -> m.isPublic()).count(), 20);
 
       assertNotNull(rci.getTypeInfo().getTables());
       assertEquals(rci.getTypeInfo().getTables().size(), 0);
