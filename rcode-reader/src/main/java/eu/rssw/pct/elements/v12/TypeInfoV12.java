@@ -99,7 +99,9 @@ public class TypeInfoV12 implements ITypeInfo {
     int currOffset = 192 + 16 * (publicElementCount + protectedElementCount + privateElementCount + constructorCount);
     typeInfo.parentTypeName = RCodeInfo.readNullTerminatedString(segment, textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
     currOffset += 56;
-    
+    boolean isEnum = "Progress.Lang.Enum".equals(typeInfo.getParentTypeName())
+        || "Progress.Lang.FlagsEnum".equals(typeInfo.getParentTypeName());
+
     for (int zz = 0; zz < interfaceCount; zz++) {
       String str = RCodeInfo.readNullTerminatedString(segment,
           textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
@@ -110,6 +112,8 @@ public class TypeInfoV12 implements ITypeInfo {
     for (int[] entry : entries) {
       String name = RCodeInfo.readNullTerminatedString(segment, textAreaOffset + entry[3]);
       Set<AccessType> set = AccessType.getTypeFromString(entry[1]);
+      if ((isEnum) && (ElementKind.getKind(entry[2]) != ElementKind.PROPERTY))
+        return typeInfo;
 
       switch (ElementKind.getKind(entry[2])) {
         case METHOD:
@@ -118,7 +122,7 @@ public class TypeInfoV12 implements ITypeInfo {
           typeInfo.getMethods().add(mthd);
           break;
         case PROPERTY:
-          IPropertyElement prop =  PropertyElementV12.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
+          IPropertyElement prop =  PropertyElementV12.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order, isEnum);
           currOffset += prop.getSizeInRCode();
           typeInfo.getProperties().add(prop);
           break;

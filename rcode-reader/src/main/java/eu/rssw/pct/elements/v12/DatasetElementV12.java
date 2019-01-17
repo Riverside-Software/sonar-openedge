@@ -50,7 +50,8 @@ public class DatasetElementV12 extends DatasetElementV11 {
           textAreaOffset + ByteBuffer.wrap(segment, currentPos + 24 + (zz * 4), Integer.BYTES).order(order).getInt());
     }
 
-    int currPos = currentPos + 4 * bufferCount;
+    // Round to next byte
+    int currPos = currentPos + 24 + (bufferCount * 4 + 7 & -8);
     IDataRelationElement[] relations = new DataRelationElementV12[relationshipCount];
     for (int zz = 0; zz < relationshipCount; zz++) {
       IDataRelationElement param = DataRelationElementV12.fromDebugSegment(segment, currPos, textAreaOffset, order);

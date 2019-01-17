@@ -40,7 +40,7 @@ public class PropertyElementV12 extends PropertyElementV11 {
     this.enumDesc = enumDesc;
   }
 
-  public static IPropertyElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
+  public static IPropertyElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order, boolean isEnum) {
     int flags = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
@@ -74,7 +74,7 @@ public class PropertyElementV12 extends PropertyElementV11 {
       currPos += setter.getSizeInRCode();
     }
     IEnumDescriptor enumDesc = null;
-    if ((flags & PROPERTY_IS_ENUM) != 0) {
+    if (isEnum || ((flags & PROPERTY_IS_ENUM) != 0)) {
       enumDesc = EnumDescriptorV12.fromDebugSegment("", segment, currPos, textAreaOffset, order);
     }
     return new PropertyElementV12(name2, accessType, flags, variable, getter, setter, enumDesc);
