@@ -57,7 +57,8 @@ public class DatasetElementV11 extends AbstractAccessibleElement implements IDat
           textAreaOffset + ByteBuffer.wrap(segment, currentPos + 24 + (zz * 4), Integer.BYTES).order(order).getInt());
     }
 
-    int currPos = currentPos + 4 * bufferCount;
+    // Round to next byte
+    int currPos = currentPos + 24 + (bufferCount * 4 + 7 & -8);
     IDataRelationElement[] relations = new DataRelationElementV11[relationshipCount];
     for (int zz = 0; zz < relationshipCount; zz++) {
       IDataRelationElement param = DataRelationElementV11.fromDebugSegment(segment, currPos, textAreaOffset, order);
@@ -78,11 +79,11 @@ public class DatasetElementV11 extends AbstractAccessibleElement implements IDat
 
   @Override
   public int getSizeInRCode() {
-    int size = 24 + (bufferNames.length * 4);
+    int size = 24 + (bufferNames.length * 4 + 7 & -8);
     for (IDataRelationElement elem : relations) {
       size += elem.getSizeInRCode();
     }
-    return size + 7 & -8;
+    return size;
   }
 
   @Override
