@@ -31,7 +31,7 @@ import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.plugins.openedge.api.Constants;
 
 public class TestProjectSensorContext {
-  public final static String BASEDIR = "src/test/resources/project1";
+  public final static String BASEDIR = "target/test-classes/project1";
   public final static String DF1 = "src/schema/sp2k.df";
   public final static String FILE1 = "src/procedures/test1.p";
   public final static String FILE2 = "src/procedures/test2.p";
@@ -55,7 +55,7 @@ public class TestProjectSensorContext {
     context.setSettings(settings);
 
     context.fileSystem().add(
-        new TestInputFileBuilder("src/test/resources/project1", DF1).setLanguage(Constants.DB_LANGUAGE_KEY).setType(
+        new TestInputFileBuilder(BASEDIR, DF1).setLanguage(Constants.DB_LANGUAGE_KEY).setType(
             Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, DF1), Charset.defaultCharset())).build());
     context.fileSystem().add(
         new TestInputFileBuilder(BASEDIR, FILE1).setLanguage(Constants.LANGUAGE_KEY).setType(
