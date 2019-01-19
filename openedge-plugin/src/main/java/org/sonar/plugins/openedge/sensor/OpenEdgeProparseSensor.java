@@ -97,6 +97,7 @@ import org.xml.sax.SAXException;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 
 import antlr.ANTLRException;
@@ -425,8 +426,9 @@ public class OpenEdgeProparseSensor implements Sensor {
   // TEMP-ANTLR4
   private void testAntlr4(SensorContext context, InputFile file, RefactorSession session) {
     long startTime = System.currentTimeMillis();
-    try {
-      ProgressLexer lexer = new ProgressLexer(session, InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), false);
+    try (InputStream stream = InputFileUtils.getInputStream(file)) {
+      ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(stream));
+      ProgressLexer lexer = new ProgressLexer(session, src, InputFileUtils.getRelativePath(file, context.fileSystem()), false);
       lexer.setMergeNameDotInId(true);
       Proparse parser = new Proparse(new CommonTokenStream(lexer));
       parser.initAntlr4(session, lexer.getFilenameList());

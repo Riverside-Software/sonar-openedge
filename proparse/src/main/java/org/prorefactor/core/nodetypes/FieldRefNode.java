@@ -22,10 +22,8 @@ import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.BufferScope;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
-import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Symbol;
-import org.prorefactor.treeparser.symbols.Variable;
-import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 public class FieldRefNode extends JPNode {
   public FieldRefNode(ProToken t) {
@@ -43,11 +41,14 @@ public class FieldRefNode extends JPNode {
   }
 
   /**
-   * @see FieldRefNode#getSymbol() as it can be null
+   * Returns null if symbol is null or is a graphical component
    */
   public DataType getDataType() {
     if (getSymbol() == null) {
       // Just in order to avoid NPE
+      return null;
+    }
+    if (!(getSymbol() instanceof Primative)) {
       return null;
     }
     return ((Primative) getSymbol()).getDataType();
@@ -65,17 +66,15 @@ public class FieldRefNode extends JPNode {
   }
 
   /**
-   * Get the Symbol for a Field_ref node. TODO Currently returns null if the Field_ref is actually a reference to a
-   * METHOD.
+   * Get the Symbol for a Field_ref node.
    * 
    * @return Always returns one of two Symbol types: Variable or FieldBuffer.
    */
   @Override
   public Symbol getSymbol() {
-    Symbol symbol = (Symbol) getLink(IConstants.SYMBOL);
     // Can't assert symbol != null, because we aren't currently resolving
     // references to METHODs (like in eventVar:Subscribe(MethodName).
-    return symbol;
+    return (Symbol) getLink(IConstants.SYMBOL);
   }
 
   public void setBufferScope(BufferScope bufferScope) {
@@ -83,17 +82,7 @@ public class FieldRefNode extends JPNode {
     setLink(IConstants.BUFFERSCOPE, bufferScope);
   }
 
-  public void setSymbol(FieldBuffer symbol) {
-    assert symbol != null;
-    setLink(IConstants.SYMBOL, symbol);
-  }
-
-  public void setSymbol(IFieldLevelWidget symbol) {
-    assert symbol != null;
-    setLink(IConstants.SYMBOL, symbol);
-  }
-
-  public void setSymbol(Variable symbol) {
+  public void setSymbol(ISymbol symbol) {
     assert symbol != null;
     setLink(IConstants.SYMBOL, symbol);
   }

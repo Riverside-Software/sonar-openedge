@@ -161,7 +161,7 @@ block_opt: // TRANSLATED
   | stop_after           # block_opt_stop_after
   | on___phrase          # block_opt_on_phrase
   | framephrase          # block_opt_frame_phrase
-  | BREAK                # block_opt_brak
+  | BREAK                # block_opt_break
   | by_expr              # block_opt_by_expr
   | collatephrase        # block_opt_collate_phrase
   | // weird. Couldn't find GROUP BY in the docs, and couldn't even figure out how it gets through PSC's parser.
@@ -414,7 +414,7 @@ pseudfn: // TRANSLATED
   | NUMDBS | NUMALIASES | ISATTRSPACE | PROCSTATUS
   | PROCHANDLE | CURSOR | OSERROR | RETURNVALUE | OSDRIVES
   | TRANSACTION | MACHINECLASS 
-  | AAPCONTROL | GETCODEPAGES | COMSELF
+  | AAPCONTROL | GETCODEPAGES | COMSELF | PROCESSARCHITECTURE
   ;
 
 
@@ -666,6 +666,7 @@ noargfunc: // TRANSLATED
   |  OPSYS
   |  OSDRIVES
   |  OSERROR
+  |  PROCESSARCHITECTURE
   |  PROCHANDLE
   |  PROCSTATUS
   |  PROGRESS
@@ -828,7 +829,7 @@ exprt2: // TRANSLATED
     // point in expression evaluation, if we have anything followed by a left-paren,
     // we're going to assume it's a method call.
     // Method names which are reserved keywords must be prefixed with THIS-OBJECT:.
-    { support.isClass() && support.unknownMehodCallsAllowed() }? methodname=identifier parameterlist_noroot  # exprt2ParenCall2
+    { support.isClass() && support.unknownMethodCallsAllowed() }? methodname=identifier parameterlist_noroot  # exprt2ParenCall2
   | constant   # exprt2Constant
   | noargfunc  # exprt2NoArgFunc
   | systemhandlename  # exprt2SystemHandleName
@@ -2211,7 +2212,7 @@ display_item: // TRANSLATED
 
 display_with: // TRANSLATED
     // The compiler allows NO-ERROR, but I don't see in their grammar where it fits in.
-    WITH BROWSE widgetname
+    WITH BROWSE widgetname browse_opt*
   | framephrase
   ;
 
@@ -2373,8 +2374,10 @@ format_expr: // TRANSLATED
   ;
 
 form_items_or_record: // TRANSLATED
-    form_item form_item+
-  | { isTableName() }? recordAsFormItem
+    // ANTLR2 grammar had the two following lines:
+    // ( form_item form_item )=>  ( options{greedy=true;}: form_item )*
+    // If there's more than one display item, then it cannot be a table name.
+    { isTableName() }? recordAsFormItem
   | form_item*
   ;
 
@@ -2670,7 +2673,9 @@ if_else: // TRANSLATED
   ;
 
 in_expr: // TRANSLATED
+    { support.disallowUnknownMethodCalls(); }
     IN_KW expression
+    { support.allowUnknownMethodCalls(); }
   ;
 
 in_window_expr: // TRANSLATED
@@ -4386,6 +4391,8 @@ unreservedkeyword:
  | SILENT
  | SIMPLE
  | SINGLE
+ | SINGLERUN
+ | SINGLETON
  | SIZE
  | SIZECHARS
  | SIZEPIXELS

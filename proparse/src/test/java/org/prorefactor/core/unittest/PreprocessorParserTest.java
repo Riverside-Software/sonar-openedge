@@ -391,4 +391,13 @@ public class PreprocessorParserTest {
     testNoVariable(unit.getTopNode(), "var77");
   }
 
+  @Test
+  public void testProcessArchitecture1() {
+    testNoVariable(unit.getTopNode(), "var78");
+  }
+
+  @Test
+  public void testProcessArchitecture2() {
+    testVariable(unit.getTopNode(), "var79");
+  }
 }

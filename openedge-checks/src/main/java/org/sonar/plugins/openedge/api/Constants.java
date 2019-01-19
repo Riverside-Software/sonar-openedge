@@ -33,6 +33,7 @@ public class Constants {
   public static final String PROPARSE_DEBUG = "sonar.oe.proparse.debug";
   public static final String PROPARSE_ERROR_STACKTRACE = "sonar.oe.proparse.error.stacktrace";
   public static final String BINARIES = "sonar.oe.binaries";
+  public static final String DOTPCT = "sonar.oe.dotpct";
   public static final String SLINT_XREF = "sonar.oe.lint.xref";
   public static final String DLC = "sonar.oe.dlc";
   public static final String PROPATH = "sonar.oe.propath";
@@ -52,6 +53,7 @@ public class Constants {
   public static final String SKIP_RCODE = "sonar.oe.rcode.skip";
   public static final String ANTLR4_TEST = "sonar.oe.antlr4";
   public static final String ANTLR4_PROFILER = "sonar.oe.antlr4.profiler";
+  public static final String SKIP_XCODE = "sonar.oe.xcode.skip";
 
   private Constants() {
     

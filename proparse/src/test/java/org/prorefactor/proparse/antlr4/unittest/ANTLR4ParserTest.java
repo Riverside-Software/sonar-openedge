@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringBufferInputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -59,6 +60,8 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
+import com.google.common.io.ByteSource;
+import com.google.common.io.ByteStreams;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -95,7 +98,7 @@ public class ANTLR4ParserTest {
     // Sample schema
     RefactorSession session = new RefactorSession(new ProparseSettings(""), new Schema());
     String sampleClass = "class SampleClass inherits Progress.Lang.Object: method public void foo(): end method. end class.";
-    ProgressLexer lexer = new ProgressLexer(session, new StringBufferInputStream(sampleClass), "SampleClass.cls", false);
+    ProgressLexer lexer = new ProgressLexer(session, ByteSource.wrap(sampleClass.getBytes()), "SampleClass.cls", false);
     lexer.setMergeNameDotInId(true);
     Proparse parser = new Proparse(new CommonTokenStream(lexer));
     parser.initAntlr4(session, lexer.getFilenameList());
@@ -325,6 +328,31 @@ public class ANTLR4ParserTest {
     genericTest("data/bugsfixed/bug40.p");
   }
 
+  @Test
+  public void test41() throws Exception {
+    genericTest("data/bugsfixed/bug41.cls");
+  }
+
+  @Test
+  public void test42() throws Exception {
+    genericTest("data/bugsfixed/bug42.p");
+  }
+
+  @Test
+  public void test42bis() throws Exception {
+    genericTest("data/bugsfixed/bug42bis.p");
+  }
+
+  @Test
+  public void test42ter() throws Exception {
+    genericTest("data/bugsfixed/bug42ter.p");
+  }
+
+  @Test
+  public void testNoBox() throws Exception {
+    genericTest("data/bugsfixed/nobox.p");
+  }
+
   // Next two tests : same exception should be thrown in both cases
   @Test(enabled=false, expectedExceptions = {ProparseRuntimeException.class})
   public void testCache1() throws Exception {
@@ -337,6 +365,11 @@ public class ANTLR4ParserTest {
   }
 
   @Test
+  public void testOnStatement() throws Exception {
+    genericTest("data/bugsfixed/on_statement.p");
+  }
+
+  @Test
   public void testSaxWriter() throws Exception {
     genericTest("data/bugsfixed/sax-writer.p");
   }
@@ -345,8 +378,9 @@ public class ANTLR4ParserTest {
     File file = new File(SRC_DIR, fileName);
     System.out.println("Generic test: " + fileName);
 
-    try {
-      ProgressLexer lexer = new ProgressLexer(session, new FileInputStream(file), file.getAbsolutePath(), false);
+    try (InputStream stream = new FileInputStream(file)) {
+      ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(stream));
+      ProgressLexer lexer = new ProgressLexer(session, src, file.getAbsolutePath(), false);
       lexer.setMergeNameDotInId(true);
 
       Proparse parser = new Proparse(new CommonTokenStream(lexer));
@@ -371,7 +405,7 @@ public class ANTLR4ParserTest {
       displayParseInfo(parser.getParseInfo());
       displayRootNode4(root4, parser.getParserSupport(), "target/antlr4.txt");
 
-      ProgressLexer lexer2 = new ProgressLexer(session, new FileInputStream(file), file.getAbsolutePath(), false);
+      ProgressLexer lexer2 = new ProgressLexer(session, src, file.getAbsolutePath(), false);
       ProParser parser2 = new ProParser(lexer2.getANTLR2TokenStream(true));
       parser2.initAntlr4(session, lexer2.getFilenameList());
       parser2.program();

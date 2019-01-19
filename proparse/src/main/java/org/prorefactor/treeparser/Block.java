@@ -27,10 +27,11 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.proparse.ProParserTokenTypes;
-import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.Frame;
+import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 /**
  * For keeping track of blocks, block attributes, and the things that are scoped within those blocks - especially buffer
@@ -324,33 +325,34 @@ public class Block {
    * General lookup for Field or Variable. Does not guarantee uniqueness. That job is left to the compiler.
    */
   public FieldLookupResult lookupField(String name, boolean getBufferScope) {
-    FieldLookupResult result = new FieldLookupResult();
+    FieldLookupResult.Builder result = new FieldLookupResult.Builder();
     TableBuffer tableBuff;
     int lastDot = name.lastIndexOf('.');
     // Variable or unqualified field
     if (lastDot == -1) {
       // Variables, FieldLevelWidgets, and Events come first.
-      Symbol s;
-      result.variable = symbolScope.lookupVariable(name);
-      if (result.variable != null)
-        return result;
-      result.fieldLevelWidget = symbolScope.lookupFieldLevelWidget(name);
-      if (result.fieldLevelWidget != null)
-        return result;
-      s = symbolScope.lookupSymbol(ProParserTokenTypes.EVENT, name);
+      Variable v = symbolScope.lookupVariable(name);
+      if (v != null)
+        return result.setSymbol(v).build();
+
+      IFieldLevelWidget flw = symbolScope.lookupFieldLevelWidget(name);
+      if (flw != null)
+        return result.setSymbol(flw).build();
+
+      Symbol s = symbolScope.lookupSymbol(ProParserTokenTypes.EVENT, name);
       if (s != null) {
-        result.event = (Event) s;
-        return result;
+        return result.setSymbol(s).build();
       }
       // Lookup unqualified field by buffers in nearest scopes.
       result = lookupUnqualifiedField(name);
+
       // Lookup unqualified field by any table.
       // The compiler expects the name to be unique
       // amongst all schema and temp/work tables. We don't check for
       // uniqueness, we just take the first we find.
       if (result == null) {
         IField field;
-        result = new FieldLookupResult();
+        result = new FieldLookupResult.Builder();
         field = symbolScope.getRootScope().lookupUnqualifiedField(name);
         if (field != null) {
           tableBuff = symbolScope.getRootScope().getLocalTableBuffer(field.getTable());
@@ -360,11 +362,11 @@ public class Block {
             return null;
           tableBuff = symbolScope.getUnnamedBuffer(field.getTable());
         }
-        result.field = tableBuff.getFieldBuffer(field);
+        result.setSymbol(tableBuff.getFieldBuffer(field));
       }
-      result.isUnqualified = true;
-      if (name.length() < result.field.getName().length())
-        result.isAbbreviated = true;
+      result.setUnqualified();
+      if (name.length() < result.getField().getName().length())
+        result.setAbbreviated();
     } else { // Qualified Field Name
       String fieldPart = name.substring(lastDot + 1);
       String tablePart = name.substring(0, lastDot);
@@ -374,31 +376,31 @@ public class Block {
       IField field = tableBuff.getTable().lookupField(fieldPart);
       if (field == null)
         return null;
-      result.field = tableBuff.getFieldBuffer(field);
-      if (fieldPart.length() < result.field.getName().length())
-        result.isAbbreviated = true;
+      result.setSymbol(tableBuff.getFieldBuffer(field));
+      if (fieldPart.length() < result.getField().getName().length())
+        result.setAbbreviated();
       // Temp/work/buffer names can't be abbreviated, but direct refs to schema can be.
       if (tableBuff.isDefaultSchema()) {
         String[] parts = tablePart.split("\\.");
         String tblPart = parts[parts.length - 1];
         if (tblPart.length() < tableBuff.getTable().getName().length())
-          result.isAbbreviated = true;
+          result.setAbbreviated();
       }
     } // if ... Qualified Field Name
     if (getBufferScope) {
-      BufferScope buffScope = getBufferForReference(result.field.getBuffer());
-      result.bufferScope = buffScope;
+      BufferScope buffScope = getBufferForReference(result.getField().getBuffer());
+      result.setBufferScope(buffScope);
     }
-    return result;
+    return result.build();
   } // lookupField()
 
   /**
    * Find a field based on buffers which are referenced in nearest enclosing blocks. Note that the compiler enforces
    * uniqueness here. We don't, we just find the first possible and return it.
    */
-  protected FieldLookupResult lookupUnqualifiedField(String name) {
+  protected FieldLookupResult.Builder lookupUnqualifiedField(String name) {
     Map<TableBuffer, BufferScope> buffs = new HashMap<>();
-    FieldLookupResult result = null;
+    FieldLookupResult.Builder result = null;
     for (BufferScope buff : bufferScopes) {
       TableBuffer symbol = buff.getSymbol();
       if (buff.getBlock() == this) {
@@ -429,8 +431,7 @@ public class Block {
       // tables take priority. Default buffers for schema take lower priority.
       // So, if we got a named buffer or work/temp table, we return with it.
       // Otherwise, we just hang on to the result until the loop is done.
-      result = new FieldLookupResult();
-      result.field = tableBuff.getFieldBuffer(field);
+      result = new FieldLookupResult.Builder().setSymbol(tableBuff.getFieldBuffer(field));
       if (!tableBuff.isDefaultSchema())
         return result;
     }

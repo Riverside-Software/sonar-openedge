@@ -21,18 +21,22 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.io.UncheckedIOException;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
+import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.proparse.ProParserTokenTypes;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.refactor.settings.ProparseSettings;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Charsets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -642,5 +646,214 @@ public class LexerTest {
     assertEquals(tok.getType(), ProParserTokenTypes.PERIOD);
     // Bug lies here in the lexer
     assertTrue(tok.isMacroExpansion());
-  }  
+  }
+
+  @Test
+  public void testUnicodeBom() throws TokenStreamException {
+    RefactorSession session2 = new RefactorSession(new ProparseSettings("src/test/resources/data"), new Schema(), Charsets.UTF_8);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer13.p"), session2);
+    TokenStream stream = unit.preprocess();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+  }
+
+  @Test
+  public void testXCode1() throws TokenStreamException {
+    // Default behavior is that it shouldn't fail
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session);
+    TokenStream stream = unit.preprocess();
+
+    // lexer14.i contains 'message "xcode".'
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
+    assertEquals(tok.getLine(), 2);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 2);
+    assertEquals(tok.getEndColumn(), 7);
+    
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"hello world\"");
+  }
+
+  @Test
+  public void testXCode2() throws TokenStreamException {
+    // Test with customSkipXCode set to true
+    ProparseSettings settings = new ProparseSettings("src/test/resources/data");
+    settings.setCustomSkipXCode(true);
+    RefactorSession session2 = new RefactorSession(settings, new Schema(), Charsets.UTF_8);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
+    TokenStream stream = unit.preprocess();
+
+    // lexer14.i contains 'message "xcode".'
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
+    assertEquals(tok.getLine(), 2);
+    assertEquals(tok.getColumn(), 1);
+    assertEquals(tok.getEndLine(), 2);
+    assertEquals(tok.getEndColumn(), 7);
+    
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"hello world\"");
+  }
+
+  @Test(expectedExceptions = UncheckedIOException.class)
+  public void testXCode3() throws TokenStreamException {
+    // Test with customSkipXCode set to false
+    ProparseSettings settings = new ProparseSettings("src/test/resources/data");
+    settings.setCustomSkipXCode(false);
+    RefactorSession session2 = new RefactorSession(settings, new Schema(), Charsets.UTF_8);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
+    // Has to fail here
+    unit.preprocess();
+  }
+
+  @Test
+  public void testXCode4() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14-2.p"), session);
+    TokenStream stream = unit.preprocess();
+
+    // lexer14.i contains 'message "xcode".'
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 27);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 33);
+    assertNotNull(tok.getHiddenBefore());
+    assertEquals(tok.getHiddenBefore().getType(), ABLNodeType.WS.getType());
+    assertNull(tok.getHiddenBefore().getHiddenBefore());
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getColumn(), 72);
+    assertEquals(tok.getEndLine(), 1);
+    assertEquals(tok.getEndColumn(), 84);
+    // Two xcoded include files are replaced by a two whitespaces leading to one token
+    assertNotNull(tok.getHiddenBefore());
+    assertEquals(tok.getHiddenBefore().getType(), ABLNodeType.WS.getType());
+    assertNull(tok.getHiddenBefore().getHiddenBefore());
+  }
+
+  @Test
+  public void testProparseDirectiveLexPhase() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer15.p"), session);
+    TokenStream stream = unit.lex();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
+    tok = (ProToken) stream.nextToken();
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+  }
+
+  @Test
+  public void testProparseDirectivePreprocessPhase() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer15.p"), session);
+    TokenStream stream = unit.preprocess();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "custnum");
+    assertNotNull(tok.getHiddenBefore());
+    assertEquals(((ProToken) tok.getHiddenBefore()).getNodeType(), ABLNodeType.WS);
+    assertNotNull(tok.getHiddenBefore().getHiddenBefore());
+    assertEquals(((ProToken) tok.getHiddenBefore().getHiddenBefore()).getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "customer");
+    assertNotNull(tok.getHiddenBefore());
+    assertEquals(((ProToken) tok.getHiddenBefore()).getNodeType(), ABLNodeType.WS);
+    assertNotNull(tok.getHiddenBefore().getHiddenBefore());
+    assertEquals(((ProToken) tok.getHiddenBefore().getHiddenBefore()).getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+  }
+
 }

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -86,12 +87,15 @@ public final class ProfilerUtils {
         }
       }
 
-      Transformer tr = TransformerFactory.newInstance().newTransformer();
-      tr.setOutputProperty(OutputKeys.INDENT, "yes");
-      tr.setOutputProperty(OutputKeys.METHOD, "xml");
-      tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-      tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-      tr.transform(new DOMSource(document), new StreamResult(new FileOutputStream(xmlFile)));
+      TransformerFactory factory = TransformerFactory.newInstance();
+      factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+
+      Transformer transformer = factory.newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+      transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+      transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+      transformer.transform(new DOMSource(document), new StreamResult(new FileOutputStream(xmlFile)));
     } catch (ParserConfigurationException | TransformerException caught) {
       throw new IOException(caught);
     }

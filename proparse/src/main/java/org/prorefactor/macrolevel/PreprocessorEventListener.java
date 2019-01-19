@@ -117,7 +117,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
       currInclude.addNumberedArg(newArg);
     }
     newArg.setValue(value);
-    newArg.includeRef = currInclude;
+    newArg.setIncludeRef(currInclude);
   }
 
   @Override
@@ -149,25 +149,27 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
     Scope currScope = scopeStack.getFirst();
     // First look for local SCOPED define
     if (currScope.defMap.containsKey(name)) {
-      newDef.undefWhat = currScope.defMap.remove(name);
+      newDef.setUndefWhat(currScope.defMap.remove(name));
       return;
     }
     // Second look for a named include file argument
-    newDef.undefWhat = currInclude.undefine(name);
-    if (newDef.undefWhat != null)
+    MacroDef tmp = currInclude.undefine(name);
+    if (tmp != null) {
+      newDef.setUndefWhat(tmp);
       return;
+    }
     // Third look for a non-local SCOPED define
     Iterator<Scope> it = scopeStack.iterator();
     it.next(); // skip the current scope - already checked.
     while (it.hasNext()) {
       currScope = it.next();
       if (currScope.defMap.containsKey(name)) {
-        newDef.undefWhat = currScope.defMap.remove(name);
+        newDef.setUndefWhat(currScope.defMap.remove(name));
         return;
       }
     }
     // Fourth look for a GLOBAL define
-    newDef.undefWhat = globalDefMap.remove(name.toLowerCase(Locale.ENGLISH));
+    newDef.setUndefWhat(globalDefMap.remove(name.toLowerCase(Locale.ENGLISH)));
   }
 
   public void analyzeSuspend(String str, int line) {

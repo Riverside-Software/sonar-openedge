@@ -224,20 +224,16 @@ public class FrameStack {
       return null;
     }
     fieldRefNode.setFieldContainer(fieldContainer);
-    FieldLookupResult result = new FieldLookupResult();
-    if (fieldOrVariable instanceof Variable) {
-      // Variables cannot be abbreviated (or unqualified)
-      result.variable = (Variable) fieldOrVariable;
-    } else {
-      result.field = (FieldBuffer) fieldOrVariable;
+    FieldLookupResult.Builder result = new FieldLookupResult.Builder().setSymbol(fieldOrVariable);
+    if (!(fieldOrVariable instanceof Variable)) {
       Field.Name resName = new Field.Name(fieldOrVariable.fullName());
       if (inputName.getTable() == null)
-        result.isUnqualified = true;
+        result.setUnqualified();
       if (inputName.getField().length() < resName.getField().length()
           || (inputName.getTable() != null && (inputName.getTable().length() < resName.getTable().length())))
-        result.isAbbreviated = true;
+        result.setAbbreviated();
     }
-    return result;
+    return result.build();
   }
 
   /** Receive the node (will be a Field_ref) that follows an @ in a frame phrase. */

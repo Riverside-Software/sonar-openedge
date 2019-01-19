@@ -67,6 +67,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
+import com.google.common.primitives.Ints;
 
 import eu.rssw.antlr.database.DumpFileUtils;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
@@ -90,6 +91,7 @@ public class OpenEdgeSettings {
   // Internal use
   private final List<Path> sourcePaths = new ArrayList<>();
   private final List<Path> binariesDirs = new ArrayList<>();
+  private final List<Path> pctDirs = new ArrayList<>();
   private final List<File> propath = new ArrayList<>();
   private final Set<String> includeExtensions = new HashSet<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
@@ -122,13 +124,7 @@ public class OpenEdgeSettings {
     // Looking for source directories
     Optional<String> sonarSources = config.get(ProjectDefinition.SOURCES_PROPERTY);
     if (sonarSources.isPresent()) {
-      for (String str : Splitter.on(',').trimResults().split(sonarSources.get())) {
-        try {
-          sourcePaths.add(fileSystem.baseDir().toPath().resolve(str).normalize());
-        } catch (InvalidPathException caught) {
-          LOG.error("Unable to resolve source directory '{}'", str);
-        }
-      }
+      initializeDirectory(fileSystem, sonarSources.get(), "source", sourcePaths);
     } else {
       sourcePaths.add(fileSystem.baseDir().toPath().normalize());
       LOG.debug("No sonar.sources property, defaults to base directory");
@@ -137,16 +133,32 @@ public class OpenEdgeSettings {
     // Build directories
     Optional<String> binariesSetting = config.get(Constants.BINARIES);
     if (binariesSetting.isPresent()) {
-      for (String str : Splitter.on(',').trimResults().split(binariesSetting.get())) {
-        try {
-          binariesDirs.add(fileSystem.baseDir().toPath().resolve(str).normalize());
-        } catch (InvalidPathException caught) {
-          LOG.error("Unable to resolve binaries directory '{}'", str);
-        }
-      }
+      initializeDirectory(fileSystem, binariesSetting.get(), "binaries", binariesDirs);
     } else {
       LOG.debug("No sonar.oe.binaries property, defaults to source directories");
       binariesDirs.addAll(sourcePaths);
+    }
+
+    // .PCT directories
+    Optional<String> dotPctSetting = config.get(Constants.DOTPCT);
+    if (dotPctSetting.isPresent()) {
+      initializeDirectory(fileSystem, dotPctSetting.get(), ".pct", pctDirs);
+    } else {
+      LOG.debug("No sonar.oe.dotpct property, defaults to <binaries>/.pct directories");
+      binariesDirs.forEach(dir -> pctDirs.add(Paths.get(dir.toString(), ".pct")));
+    }
+  }
+
+  private final void initializeDirectory(FileSystem fileSystem, String prop, String type, List<Path> paths) {
+    for (String str : Splitter.on(',').trimResults().split(prop)) {
+      LOG.debug("Adding {} directory '{}' ...", type, str);
+      try {
+        Path p = fileSystem.baseDir().toPath().resolve(str).normalize();
+        LOG.debug("  ... resolved to '{}'", p);
+        paths.add(p);
+      } catch (InvalidPathException caught) {
+        LOG.error("Unable to resolve {} directory '{}'", type, str);
+      }
     }
   }
 
@@ -387,7 +399,48 @@ public class OpenEdgeSettings {
     return null;
   }
 
-  public String getRelativePathToSourceDirs(InputFile file) {
+  public File getWarningsFile(InputFile file) {
+    String relPath = getRelativePathToSourceDirs(file);
+    if (Strings.isNullOrEmpty(relPath))
+      return null;
+    else
+      return getFileFromPctDirs(relPath + ".warnings");
+  }
+
+  public File getXrefFile(InputFile file) {
+    String relPath = getRelativePathToSourceDirs(file);
+    if (Strings.isNullOrEmpty(relPath))
+      return null;
+    else
+      return getFileFromPctDirs(relPath + ".xref");
+  }
+
+  public File getSonarlintXrefFile(InputFile file) {
+    String s = getRelativePathToSourceDirs(file);
+    if (!Strings.isNullOrEmpty(s) && !s.endsWith(".") && (s.indexOf('.') > -1))
+      return new File(getSonarLintXrefDir(), s.subSequence(0, s.lastIndexOf('.')) + ".xref.xml");
+    return null;
+  }
+
+  public File getListingFile(InputFile file) {
+    String relPath = getRelativePathToSourceDirs(file);
+    if (Strings.isNullOrEmpty(relPath))
+      return null;
+    else
+      return getFileFromPctDirs(relPath);
+  }
+
+  private File getFileFromPctDirs(String relPath) {
+    for (Path dir : pctDirs) {
+      Path path = dir.resolve(relPath);
+      if (path.toFile().exists())
+        return path.toFile();
+    }
+
+    return null;
+  }
+
+  private String getRelativePathToSourceDirs(InputFile file) {
     for (Path p : sourcePaths) {
       try {
         String s = p.toAbsolutePath().relativize(Paths.get(file.uri())).toString();
@@ -399,34 +452,6 @@ public class OpenEdgeSettings {
       }
     }
     return "";
-  }
-
-  public File getWarningsFile(InputFile file) {
-    String s = getRelativePathToSourceDirs(file);
-    if (!Strings.isNullOrEmpty(s))
-      return new File(getPctDir(), s + ".warnings");
-    return null;
-  }
-
-  public File getXrefFile(InputFile file) {
-    String s = getRelativePathToSourceDirs(file);
-    if (!Strings.isNullOrEmpty(s))
-      return new File(getPctDir(), s + ".xref");
-    return null;
-  }
-
-  public File getSonarlintXrefFile(InputFile file) {
-    String s = getRelativePathToSourceDirs(file);
-    if (!Strings.isNullOrEmpty(s) && !s.endsWith(".") && (s.indexOf('.') > -1))
-      return new File(getSonarLintXrefDir(), s.subSequence(0, s.lastIndexOf('.')) + ".xref.xml");
-    return null;
-  }
-
-  public File getListingFile(InputFile file) {
-    String s = getRelativePathToSourceDirs(file);
-    if (!Strings.isNullOrEmpty(s))
-      return new File(getPctDir(), s);
-    return null;
   }
 
   /**
@@ -469,6 +494,10 @@ public class OpenEdgeSettings {
 
   public boolean skipProparseSensor() {
     return config.getBoolean(Constants.SKIP_PROPARSE_PROPERTY).orElse(false);
+  }
+
+  public boolean skipXCode() {
+    return config.getBoolean(Constants.SKIP_XCODE).orElse(true);
   }
 
   public boolean useProparseDebug() {
@@ -542,8 +571,13 @@ public class OpenEdgeSettings {
         ppSettings.setCustomBatchMode(batchMode.get());
 
       Optional<String> processArch = config.get("sonar.oe.preprocessor.process-architecture");
-      if (processArch.isPresent())
-        ppSettings.setCustomProcessArchitecture(processArch.get());
+      Integer processArchInt = processArch.isPresent() ? Ints.tryParse(processArch.get()) : null;
+      if (processArchInt != null)
+        ppSettings.setCustomProcessArchitecture(processArchInt);
+
+      Optional<Boolean> skipXCode = config.getBoolean(Constants.SKIP_XCODE);
+      if (skipXCode.isPresent())
+        ppSettings.setCustomSkipXCode(skipXCode.get());
 
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
       proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());
