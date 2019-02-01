@@ -47,6 +47,7 @@ import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.InvalidLicenseException;
 import org.sonar.plugins.openedge.api.LicenseRegistration;
 import org.sonar.plugins.openedge.api.LicenseRegistration.License;
+import org.sonar.plugins.openedge.api.LicenseRegistration.LicenseType;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck.CheckType;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
@@ -105,8 +106,8 @@ public class OpenEdgeComponents {
     return licenseRegistrar.getLicenses();
   }
 
-  public License getLicense(String repoName, String permId) {
-    return licenseRegistrar.getLicense(repoName, permId);
+  public License getLicense(SonarProduct product, String permId, String repoName) {
+    return licenseRegistrar.getLicense(product, permId, repoName);
   }
 
   public void initializeLicense(SensorContext context) {
@@ -126,19 +127,18 @@ public class OpenEdgeComponents {
     if (initialized)
       return;
 
-    String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "")
-        + OpenEdgeProjectHelper.getServerId(context);
+    String permId = OpenEdgeProjectHelper.getServerId(context);
 
     // Proparse and XREF rules
     for (ActiveRule rule : context.activeRules().findByLanguage(Constants.LANGUAGE_KEY)) {
-      OpenEdgeCheck<?> lint = initializeCheck(context, rule, permId);
+      OpenEdgeCheck<?> lint = initializeCheck(context, rule, context.runtime().getProduct(), permId);
       if ((lint != null) && (lint.getCheckType() == CheckType.PROPARSE)) {
         ppChecksMap.put(rule, (OpenEdgeProparseCheck) lint);
       }
     }
     // DB rules
     for (ActiveRule rule : context.activeRules().findByLanguage(Constants.DB_LANGUAGE_KEY)) {
-      OpenEdgeCheck<?> lint = initializeCheck(context, rule, permId);
+      OpenEdgeCheck<?> lint = initializeCheck(context, rule, context.runtime().getProduct(), permId);
       if ((lint != null) && (lint.getCheckType() == CheckType.DUMP_FILE)) {
         dfChecksMap.put(rule, (OpenEdgeDumpFileCheck) lint);
       }
@@ -155,7 +155,7 @@ public class OpenEdgeComponents {
     return Collections.unmodifiableMap(dfChecksMap);  
   }
 
-  private OpenEdgeCheck<?> initializeCheck(SensorContext context, ActiveRule rule, String permId) {
+  private OpenEdgeCheck<?> initializeCheck(SensorContext context, ActiveRule rule, SonarProduct product, String permId) {
     RuleKey ruleKey = rule.ruleKey();
     // AFAIK, no way to be sure if a rule is based on a template or not
     String clsName = rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey();
@@ -165,7 +165,7 @@ public class OpenEdgeComponents {
       if (clz == null)
         return null;
       OpenEdgeCheck<?> check = clz.getConstructor().newInstance();
-      check.setContext(ruleKey, context, getLicense(ruleKey.repository(), permId));
+      check.setContext(ruleKey, context, getLicense(product, permId, ruleKey.repository()));
       configureFields(rule, check);
       check.initialize();
 
@@ -245,14 +245,21 @@ public class OpenEdgeComponents {
 
     public void registerLicense(String permanentId, String customerName, String salt, String repoName,
         LicenseRegistration.LicenseType type, byte[] signature, long expirationDate) {
+      registerLicense(permanentId.replace("sonarlint-", ""),
+          permanentId.startsWith("sonarlint") ? SonarProduct.SONARLINT : SonarProduct.SONARQUBE, customerName, salt,
+          repoName, type, signature, expirationDate);
+    }
+
+    public void registerLicense(String permanentId, SonarProduct product, String customerName, String salt, String repoName,
+       LicenseRegistration.LicenseType type, byte[] signature, long expirationDate) {
       if (Strings.isNullOrEmpty(repoName))
         return;
       LOG.debug("Found {} license - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
           type.toString(), permanentId, customerName, repoName,
           DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(expirationDate)));
       // Only one license per repository / permID
-      License existingLic = getLicense(repoName, permanentId);
-      License newLic = new License(permanentId, customerName, salt, repoName, type, signature, expirationDate);
+      License existingLic = hasRegisteredLicense(repoName, permanentId);
+      License newLic = new License(permanentId, product, customerName, salt, repoName, type, signature, expirationDate);
       if (existingLic == null) {
         licenses.add(newLic);
       } else if (existingLic.getExpirationDate() < newLic.getExpirationDate()) {
@@ -265,11 +272,25 @@ public class OpenEdgeComponents {
       return licenses;
     }
 
-    private License getLicense(String repoName, String permId) {
+    private License hasRegisteredLicense(String repoName, String permId) {
       if ((permId == null) || (repoName == null))
         return null;
       for (License lic : licenses) {
-        if (repoName.equals(lic.getRepositoryName()) && permId.equals(lic.getPermanentId()))
+        if ((lic.getType() == LicenseType.COMMERCIAL) && repoName.equals(lic.getRepositoryName()) && permId.equals(lic.getPermanentId()))
+          return lic;
+      }
+      return null;
+    }
+
+    private License getLicense(SonarProduct product, String permId, String repoName) {
+      if ((permId == null) || (repoName == null))
+        return null;
+      for (License lic : licenses) {
+        if ((lic.getType() == LicenseType.COMMERCIAL) && (lic.getProduct() == product) && repoName.equals(lic.getRepositoryName()) && permId.equals(lic.getPermanentId()))
+          return lic;
+      }
+      for (License lic : licenses) {
+        if ((lic.getType() == LicenseType.EVALUATION) && (lic.getProduct() == product) && repoName.equals(lic.getRepositoryName()))
           return lic;
       }
       return null;

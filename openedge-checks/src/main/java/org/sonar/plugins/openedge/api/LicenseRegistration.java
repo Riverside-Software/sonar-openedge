@@ -19,6 +19,7 @@
  */
 package org.sonar.plugins.openedge.api;
 
+import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.server.ServerSide;
 import org.sonarsource.api.sonarlint.SonarLintSide;
@@ -42,10 +43,14 @@ public interface LicenseRegistration {
      */
     public void registerLicense(String permanentId, String customerName, String salt, String repoName, LicenseType type,
         byte[] signature, long expirationDate);
+
+    public void registerLicense(String permanentId, SonarProduct product, String customerName, String salt,
+        String repoName, LicenseType type, byte[] signature, long expirationDate);
   }
 
   public class License {
     private String permanentId;
+    private SonarProduct product;
     private String customerName;
     private String repositoryName;
     private LicenseType type;
@@ -53,9 +58,10 @@ public interface LicenseRegistration {
     private String salt;
     private byte[] signature;
 
-    public License(String permanentId, String customerName, String salt, String repoName, LicenseType type,
-        byte[] signature, long expirationDate) {
+    public License(String permanentId, SonarProduct product, String customerName, String salt, String repoName,
+        LicenseType type, byte[] signature, long expirationDate) {
       this.permanentId = permanentId;
+      this.product = product;
       this.customerName = customerName;
       this.repositoryName = repoName;
       this.salt = salt;
@@ -66,6 +72,10 @@ public interface LicenseRegistration {
 
     public String getPermanentId() {
       return permanentId;
+    }
+
+    public SonarProduct getProduct() {
+      return product;
     }
 
     public String getCustomerName() {
