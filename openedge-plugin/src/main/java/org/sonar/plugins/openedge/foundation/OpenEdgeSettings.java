@@ -89,6 +89,7 @@ public class OpenEdgeSettings {
   private final SonarRuntime runtime;
 
   // Internal use
+  private boolean init = false;
   private final List<Path> sourcePaths = new ArrayList<>();
   private final List<Path> binariesDirs = new ArrayList<>();
   private final List<Path> pctDirs = new ArrayList<>();
@@ -105,6 +106,11 @@ public class OpenEdgeSettings {
     this.config = config;
     this.fileSystem = fileSystem;
     this.runtime = runtime;
+  }
+
+  public final void init() {
+    if (init)
+      return;
 
     LOG.info("Loading OpenEdge settings for server ID '{}' '{}'", config.get(CoreProperties.SERVER_ID).orElse(""),
         config.get(CoreProperties.PERMANENT_SERVER_ID).orElse(""));
@@ -118,6 +124,7 @@ public class OpenEdgeSettings {
     if (useXrefFilter()) {
       LOG.info("XML XREF filter activated [{}]", getXrefBytesAsString());
     }
+    init = true;
   }
 
   private final void initializeDirectories(Configuration config, FileSystem fileSystem) {
@@ -352,6 +359,10 @@ public class OpenEdgeSettings {
 
   public File getPctDir() {
     return new File(binariesDirs.get(0).toFile(), ".pct");
+  }
+
+  public List<Path> getSourceDirs() {
+    return sourcePaths;
   }
 
   public List<Path> getBinariesDirs() {
