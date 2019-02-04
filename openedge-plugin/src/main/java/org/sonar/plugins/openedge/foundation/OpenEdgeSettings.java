@@ -361,10 +361,6 @@ public class OpenEdgeSettings {
     return new File(binariesDirs.get(0).toFile(), ".pct");
   }
 
-  public List<Path> getSourceDirs() {
-    return sourcePaths;
-  }
-
   public List<Path> getBinariesDirs() {
     return binariesDirs;
   }
