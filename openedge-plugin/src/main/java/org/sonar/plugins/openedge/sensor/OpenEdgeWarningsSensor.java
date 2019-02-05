@@ -67,7 +67,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
   public void execute(SensorContext context) {
     if (context.runtime().getProduct() == SonarProduct.SONARLINT)
       return;
-
+    settings.init();
     int warningsImportNum = 0;
     final RuleKey defaultWarningRuleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY,
         OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY);
