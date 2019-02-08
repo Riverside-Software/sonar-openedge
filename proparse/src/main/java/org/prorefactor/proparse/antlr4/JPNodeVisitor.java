@@ -64,25 +64,18 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitDotComment(DotCommentContext ctx) {
-    Builder node = visitTerminal(ctx.NAMEDOT()).setStatement().setRuleNode(ctx);
-    
-    List<NotStatementEndContext> list = ctx.notStatementEnd(); 
-    if (!list.isEmpty()) {
-      ProToken.Builder tok = new ProToken.Builder((ProToken) list.get(0).getStart()).setType(ABLNodeType.UNQUOTEDSTRING);
-      for (int zz = 1; zz < list.size(); zz++) {
-        ProToken t = (ProToken) list.get(zz).getStart();
-        tok.appendText(" ").appendText(t.getText());
-        tok.setEndFileIndex(t.getEndFileIndex());
-        tok.setEndLine(t.getEndLine());
-        tok.setEndCharPositionInLine(t.getEndCharPositionInLine());
-      }
+    Builder node = visitTerminal(ctx.NAMEDOT()).changeType(ABLNodeType.DOT_COMMENT).setStatement().setRuleNode(ctx);
 
-      Builder ch = new Builder(tok.build());
-      node.setDown(ch);
-      ch.setRight(visit(ctx.statementEnd()));
-    } else {
-      node.setDown(visit(ctx.statementEnd()));
+    List<NotStatementEndContext> list = ctx.notStatementEnd();
+    ProToken.Builder tok = new ProToken.Builder((ProToken) list.get(0).getStart()).setType(ABLNodeType.UNQUOTEDSTRING);
+    for (int zz = 1; zz < list.size(); zz++) {
+      tok.mergeWith((ProToken) list.get(zz).getStart());
     }
+
+    Builder ch = new Builder(tok.build());
+    node.setDown(ch);
+    ch.setRight(visit(ctx.statementEnd()));
+
     return node;
   }
 

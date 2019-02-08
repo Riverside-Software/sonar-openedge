@@ -117,7 +117,7 @@ emptyStatement:
   ;
 
 dotComment:
-    NAMEDOT notStatementEnd* statementEnd
+    NAMEDOT notStatementEnd+ statementEnd
   ;
 
 functionCallStatement:
