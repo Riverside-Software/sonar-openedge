@@ -847,8 +847,7 @@ public class JPNode implements AST {
     }
 
     public Builder(ABLNodeType type) {
-      this(new ProToken(type, ""));
-      tok.setSynthetic(true);
+      this(new ProToken.Builder(type, "").setSynthetic(true).build());
     }
 
     public Builder setRuleNode(ParseTree ctx) {
@@ -909,6 +908,10 @@ public class JPNode implements AST {
     public Builder setClassname(String name) {
       this.className = name;
       return this;
+    }
+
+    public ProToken getToken() {
+      return tok;
     }
 
     public ABLNodeType getNodeType() {

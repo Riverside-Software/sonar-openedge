@@ -102,7 +102,7 @@ public class PostLexer implements TokenSource {
     getNextToken();
     if (currToken.getType() != PreprocessorParser.RIGHTPAREN)
       throwMessage("Bad DEFINED function in &IF preprocessor condition");
-    return new ProToken(ABLNodeType.NUMBER, prepro.defined(argToken.getText().trim().toLowerCase()));
+    return new ProToken.Builder(ABLNodeType.NUMBER, prepro.defined(argToken.getText().trim().toLowerCase())).build();
   }
 
   private void getNextToken() {

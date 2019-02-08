@@ -14,6 +14,8 @@
  ********************************************************************************/
 package org.prorefactor.proparse.antlr4;
 
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import org.antlr.v4.runtime.BufferedTokenStream;
@@ -62,20 +64,26 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitDotComment(DotCommentContext ctx) {
-    ProToken start = (ProToken) ctx.getStart();
-    StringBuilder sb = new StringBuilder(".");
-    for (int zz = 0; zz < ctx.notStatementEnd().size(); zz++) {
-      sb.append(ctx.notStatementEnd(zz).getText()).append(' ');
+    Builder node = visitTerminal(ctx.NAMEDOT()).setStatement().setRuleNode(ctx);
+    
+    List<NotStatementEndContext> list = ctx.notStatementEnd(); 
+    if (!list.isEmpty()) {
+      ProToken.Builder tok = new ProToken.Builder((ProToken) list.get(0).getStart()).setType(ABLNodeType.UNQUOTEDSTRING);
+      for (int zz = 1; zz < list.size(); zz++) {
+        ProToken t = (ProToken) list.get(zz).getStart();
+        tok.appendText(" ").appendText(t.getText());
+        tok.setEndFileIndex(t.getEndFileIndex());
+        tok.setEndLine(t.getEndLine());
+        tok.setEndCharPositionInLine(t.getEndCharPositionInLine());
+      }
+
+      Builder ch = new Builder(tok.build());
+      node.setDown(ch);
+      ch.setRight(visit(ctx.statementEnd()));
+    } else {
+      node.setDown(visit(ctx.statementEnd()));
     }
-    ProToken last = (ProToken) ctx.statementEnd().stop;
-
-    start.setType(ABLNodeType.DOT_COMMENT.getType());
-    start.setText(sb.toString());
-    start.setEndFileIndex(last.getEndFileIndex());
-    start.setEndLine(last.getEndLine());
-    start.setEndCharPositionInLine(last.getEndCharPositionInLine());
-
-    return new Builder(start).setRuleNode(ctx);
+    return node;
   }
 
   @Override
@@ -413,20 +421,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitFilename(FilenameContext ctx) {
-    ProToken start = (ProToken) ctx.t1.start;
-    ProToken last = start;
-    StringBuilder sb = new StringBuilder(ctx.t1.getText());
+    ProToken.Builder tok = new ProToken.Builder((ProToken) ctx.t1.start).setType(ABLNodeType.FILENAME);
     for (int zz = 1; zz < ctx.filenamePart().size(); zz++) {
-      last = (ProToken) ctx.filenamePart(zz).start;
-      sb.append(last.getText());
+      tok.mergeWith((ProToken) ctx.filenamePart(zz).start);
     }
-    
-    start.setType(ABLNodeType.FILENAME.getType());
-    start.setText(sb.toString());
-    start.setEndFileIndex(last.getEndFileIndex());
-    start.setEndLine(last.getEndLine());
-    start.setEndCharPositionInLine(last.getEndCharPositionInLine());
-    return new Builder(start).setRuleNode(ctx);
+
+    return new Builder(tok.build()).setRuleNode(ctx);
   }
 
   @Override
@@ -495,7 +495,23 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitAnnotation(AnnotationContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    Builder node = visitTerminal(ctx.ANNOTATION()).setStatement().setRuleNode(ctx);
+    
+    List<NotStatementEndContext> list = ctx.notStatementEnd();
+    if (!list.isEmpty()) {
+      ProToken.Builder tok = new ProToken.Builder((ProToken) list.get(0).getStart()).setType(ABLNodeType.UNQUOTEDSTRING);
+      for (int zz = 1; zz < list.size(); zz++) {
+        tok.mergeWith((ProToken) list.get(zz).getStart());
+      }
+
+      Builder ch = new Builder(tok.build());
+      node.setDown(ch);
+      ch.setRight(visit(ctx.statementEnd()));
+    } else {
+      node.setDown(visit(ctx.statementEnd()));
+    }
+
+    return node;
   }
 
   @Override
@@ -1766,21 +1782,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitIoPhraseAnyTokensSub3(IoPhraseAnyTokensSub3Context ctx) {
-    ProToken start = (ProToken) ctx.getStart();
-    ProToken last = start;
-    StringBuilder sb = new StringBuilder(start.getText());
+    ProToken.Builder tok = new ProToken.Builder((ProToken) ctx.getStart()).setType(ABLNodeType.FILENAME);
     for (int zz = 1; zz < ctx.notIoOption().size(); zz++) {
-      last = (ProToken) ctx.notIoOption(zz).start;
-      sb.append(last.getText());
+      tok.mergeWith((ProToken) ctx.notIoOption(zz).start);
     }
-    
-    start.setType(ABLNodeType.FILENAME.getType());
-    start.setText(sb.toString());
-    start.setEndFileIndex(last.getEndFileIndex());
-    start.setEndLine(last.getEndLine());
-    start.setEndCharPositionInLine(last.getEndCharPositionInLine());
 
-    return new Builder(start).setRuleNode(ctx);
+    return new Builder(tok.build()).setRuleNode(ctx);
   }
 
   @Override
@@ -2605,26 +2612,13 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitUsingStatement(UsingStatementContext ctx) {
-    Builder using = visit(ctx.USING());
-    using.setStatement();
-    
-    ProToken typ = (ProToken) ctx.type.start;
-    typ.setNodeType(ABLNodeType.TYPE_NAME);
-    if (ctx.star != null) {
-      typ.setText(typ.getText() + "*");
-      typ.setEndFileIndex(((ProToken) ctx.star) .getEndFileIndex());
-      typ.setEndLine(((ProToken) ctx.star).getEndLine());
-      typ.setEndCharPositionInLine(((ProToken) ctx.star).getEndCharPositionInLine());
+    Builder using = createStatementTreeFromFirstNode(ctx);
+    if (ctx.STAR() != null) {
+      // Merge STAR with typeName
+      ProToken newTok = new ProToken.Builder(using.getDown().getToken()).mergeWith((ProToken) ctx.STAR().getSymbol()).build();
+      Builder tn2 = new Builder(newTok).setRight(using.getDown().getRight().getRight());
+      using.setDown(tn2);
     }
-    Builder child1 = new Builder(typ).setRuleNode(ctx);
-    using.setDown(child1);
-
-    Builder last = child1.getLast();
-    if (ctx.usingFrom() != null) {
-      last = last.setRight(visit(ctx.usingFrom())).getRight();
-    }
-    last.setRight(visit(ctx.statementEnd()));
-    support.usingState(typ.getText());
 
     return using;
   }
@@ -2729,7 +2723,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   /**
-   * Generate Builder with only one JPNode object
+   * Attach hidden tokens to current token, then generate Builder with only one JPNode object
    */
   @Override
   @Nonnull

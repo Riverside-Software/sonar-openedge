@@ -48,9 +48,7 @@ public class ProparseErrorStrategy extends DefaultErrorStrategy {
       current = lookback;
     }
 
-    ProToken tok = new ProToken(ABLNodeType.getNodeType(expectedTokenType), tokenText);
-    tok.setLine(current.getLine());
-    tok.setCharPositionInLine(current.getCharPositionInLine());
-    return tok;
+    return new ProToken.Builder(ABLNodeType.getNodeType(expectedTokenType), tokenText).setLine(
+        current.getLine()).setCharPositionInLine(current.getCharPositionInLine()).build();
   }
 }

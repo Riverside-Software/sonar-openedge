@@ -137,22 +137,18 @@ public class TokenList implements TokenSource {
 
     if (foundNamedot) {
       // Now merge all the parts into one ID token.
-      StringBuilder text = new StringBuilder(tok.getText());
-      tok.setType(PreprocessorParser.ID);
+      ProToken.Builder newTok = new ProToken.Builder(tok).setType(ABLNodeType.ID); 
       for (ProToken zz : clsName) {
-        text.append(zz.getText());
-        tok.setEndFileIndex(zz.getEndFileIndex());
-        tok.setEndLine(zz.getEndLine());
-        tok.setEndCharPositionInLine(zz.getEndCharPositionInLine());
+        newTok.mergeWith(zz);
       }
-      tok.setText(text.toString());
-      queue.addLast(tok);
+      queue.addLast(newTok.build());
       queue.addAll(comments);
     } else {
       // Not namedotted, so if it's reserved and not a system handle, convert to ID.
       if (tok.getNodeType().isReservedKeyword() && !tok.getNodeType().isSystemHandleName())
-        tok.setNodeType(ABLNodeType.ID);
-      queue.addLast(tok);
+        queue.addLast(new ProToken.Builder(tok).setType(ABLNodeType.ID).build());
+      else
+        queue.addLast(tok);
       queue.addAll(comments);
     }
     queue.add(objColonToken);

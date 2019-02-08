@@ -3491,9 +3491,8 @@ statementEnd:
     PERIOD | EOF
   ;
 
-// FIXME Probably not useful anymore
 notStatementEnd:
-    ~PERIOD // TODO Needed because labeled subrules not supported in Antlr 2.7.5.
+    ~PERIOD
   ;
 
 statusStatement:
@@ -3759,7 +3758,7 @@ usingRow:
   ;
 
 usingStatement:
-    USING type=typeName2 star=STAR?
+    USING typeName2 STAR?
     usingFrom?
     statementEnd
   ;
