@@ -498,7 +498,7 @@ PROGRAM_ROOT  defaultFrame: ""frames:  "" t12 t11 t10 f9 f8a f8b t6 t4a f3a f3b 
                 FIELD_REF   bBothFrames2
                     ID bBothFrames2 
                 OBJCOLON : 
-                ID SENSITIVE 
+                SENSITIVE SENSITIVE 
                 IN IN 
                     FRAME FRAME 
                     ID F2a 
