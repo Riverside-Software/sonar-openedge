@@ -796,7 +796,11 @@ expression:
   ;
 
 orExpression:
-     andExpression (options{greedy=true;}: OR^ andExpression { ##.setOperator(); } )*
+     xorExpression (options{greedy=true;}: OR^ xorExpression { ##.setOperator(); } )*
+  ;
+
+xorExpression:
+     andExpression (options{greedy=true;}: XOR^ andExpression { ##.setOperator(); } )*
   ;
 
 andExpression:

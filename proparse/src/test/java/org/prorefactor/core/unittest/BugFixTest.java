@@ -354,6 +354,11 @@ public class BugFixTest {
   }
 
   @Test
+  public void testXor() throws ANTLRException {
+    genericTest("xor.p");
+  }
+
+  @Test
   public void testSaxWriter() throws ANTLRException {
     genericTest("sax-writer.p");
   }

@@ -1512,6 +1512,7 @@ public enum ABLNodeType {
   XMLNODETYPE(ProParserTokenTypes.XMLNODETYPE, "xml-node-type", NodeTypesOption.KEYWORD),
   XNODEREF(ProParserTokenTypes.XNODEREF, "x-noderef", NodeTypesOption.KEYWORD),
   XOF(ProParserTokenTypes.XOF, "x-of", NodeTypesOption.KEYWORD),
+  XOR(ProParserTokenTypes.XOR, "xor", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   XREF(ProParserTokenTypes.XREF, "xref", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   XREFXML(ProParserTokenTypes.XREFXML, "xref-xml", NodeTypesOption.KEYWORD),
 

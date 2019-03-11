@@ -726,6 +726,7 @@ lockhow:
 
 expression:
     #(OR expression expression )
+  |  #(XOR expression expression )
   |  #(AND expression expression )
   |  #(NOT expression )
   |  #(MATCHES expression expression )
