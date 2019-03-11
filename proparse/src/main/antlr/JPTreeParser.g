@@ -1399,7 +1399,7 @@ def_shared:
   ;
 
 def_modifiers:
-    ( PRIVATE | PROTECTED | PUBLIC | STATIC | ABSTRACT | OVERRIDE | FINAL )*
+    ( PRIVATE | PROTECTED | PUBLIC | STATIC | ABSTRACT | OVERRIDE | FINAL | NONSERIALIZABLE | SERIALIZABLE )*
   ;
 
 definebrowsestate:

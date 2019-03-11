@@ -891,6 +891,7 @@ public enum ABLNodeType {
   NOMAP(ProParserTokenTypes.NOMAP, "no-map", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   NOMESSAGE(ProParserTokenTypes.NOMESSAGE, "no-message", 6, NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   NONE(ProParserTokenTypes.NONE, "none", NodeTypesOption.KEYWORD),
+  NONSERIALIZABLE(ProParserTokenTypes.NONSERIALIZABLE, "non-serializable", NodeTypesOption.KEYWORD),
   NOPAUSE(ProParserTokenTypes.NOPAUSE, "no-pause", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   NOPREFETCH(ProParserTokenTypes.NOPREFETCH, "no-prefetch", 8, NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   NORETURNVALUE(ProParserTokenTypes.NORETURNVALUE, "no-return-value", 13, NodeTypesOption.KEYWORD,

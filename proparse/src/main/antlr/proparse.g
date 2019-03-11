@@ -2021,6 +2021,8 @@ definestatement:
     |  ABSTRACT
     |  STATIC
     |  OVERRIDE
+    |  NONSERIALIZABLE
+    |  SERIALIZABLE
     )*
     (  definebrowsestate  {sthd(##,BROWSE);}
     |  definebufferstate  {sthd(##,BUFFER);}

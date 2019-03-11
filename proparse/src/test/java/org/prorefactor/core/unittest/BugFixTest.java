@@ -349,6 +349,11 @@ public class BugFixTest {
 //  }
 
   @Test
+  public void testSerializableKeyword() throws ANTLRException {
+    genericTest("serialkw.cls");
+  }
+
+  @Test
   public void testSaxWriter() throws ANTLRException {
     genericTest("sax-writer.p");
   }
