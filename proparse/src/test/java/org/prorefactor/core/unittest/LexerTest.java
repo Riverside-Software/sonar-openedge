@@ -856,4 +856,70 @@ public class LexerTest {
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
   }
 
+  @Test
+  public void testHexNumbers() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer16.p"), session);
+    TokenStream stream = unit.lex();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "125");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "0x65");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "0X66");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "0xfb");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "0xab");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "-0x01");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.PERIOD);
+  }
+
+  @Test
+  public void testHexNumbers2() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer17.p"), session);
+    TokenStream stream = unit.lex();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "125");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok.getText(), "0x2g8");
+  }
 }

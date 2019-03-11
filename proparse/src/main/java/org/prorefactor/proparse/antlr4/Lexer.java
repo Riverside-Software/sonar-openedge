@@ -213,6 +213,15 @@ public class Lexer  {
           return makeToken(ABLNodeType.BACKTICK);
 
         case '0':
+          getChar();
+          if ((currChar == 'x') || (currChar == 'X')) {
+            append();
+            getChar();
+            return digitStart(true);
+          } else {
+            return digitStart(false);
+          }
+
         case '1':
         case '2':
         case '3':
@@ -223,7 +232,7 @@ public class Lexer  {
         case '8':
         case '9':
           getChar();
-          return digitStart();
+          return digitStart(false);
 
         case '.':
           getChar();
@@ -491,7 +500,7 @@ public class Lexer  {
     return makeToken(ABLNodeType.QSTRING);
   }
 
-  ProToken digitStart() {
+  ProToken digitStart(boolean hex) {
     LOGGER.trace("Entering digitStart()");
 
     ABLNodeType ttype = ABLNodeType.NUMBER;
@@ -516,6 +525,17 @@ public class Lexer  {
         case 'd':
         case 'e':
         case 'f':
+          if (hex) {
+            append();
+            getChar();
+            break;
+          } else {
+            append();
+            getChar();
+            if (ttype != ABLNodeType.FILENAME)
+              ttype = ABLNodeType.ID;
+            break;
+          }
         case 'g':
         case 'h':
         case 'i':
@@ -579,15 +599,21 @@ public class Lexer  {
   }
 
   ProToken plusMinusStart(ABLNodeType inputType) {
-	  LOGGER.trace("Entering plusMinusStart()");
+    LOGGER.trace("Entering plusMinusStart()");
 	  ABLNodeType ttype = ABLNodeType.NUMBER;
     for_loop : for (;;) {
       switch (currChar) {
-        // We don't know here if the plus or minus is in the middle or at the end.
-        // Don't change ttype.
-        case '+':
-        case '-':
         case '0':
+          append();
+          getChar();
+          if ((currChar == 'x') || (currChar == 'X')) {
+            append();
+            getChar();
+            return digitStart(true);
+          } else {
+            return digitStart(false);
+          }
+
         case '1':
         case '2':
         case '3':
@@ -599,7 +625,8 @@ public class Lexer  {
         case '9':
           append();
           getChar();
-          break;
+          return digitStart(false);
+
         // Leave comma out of this. -1, might be part of an expression list.
         case '#':
         case '$':
