@@ -453,6 +453,9 @@ public class TP01Support implements ITreeParserAction {
     if (idx != null) {
       // ABL compiler quirk: idNode doesn't have to be a real index. Undefined behavior in this case
       currDefTable.getTable().add(new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary()));
+    } else {
+      // Mark idNode as INVALID_INDEX
+      idNode.attrSet(IConstants.INVALID_USEINDEX, IConstants.TRUE);
     }
     currDefTableUseIndex = true;
   }
