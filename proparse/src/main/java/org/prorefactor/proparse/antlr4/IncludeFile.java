@@ -87,7 +87,10 @@ public class IncludeFile {
       if (out.length() > 0) {
         out.append(' ');
       }
-      out.append('&').append(arg.name).append("=\"").append(arg.arg).append("\"");
+      out.append('&').append(arg.name).append("=\"");
+      // Parameters are read again by the lexer, so double quotes have to be escaped
+      out.append(arg.arg.replace("\"", "\"\""));
+      out.append("\"");
     }
     return out.toString();
   }

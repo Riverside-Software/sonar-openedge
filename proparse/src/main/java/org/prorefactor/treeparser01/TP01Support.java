@@ -450,7 +450,10 @@ public class TP01Support implements ITreeParserAction {
     LOG.trace("Entering defineUseIndex {}", idNode);
     ITable table = astTableLink(recNode);
     IIndex idx = table.lookupIndex(idNode.getText());
-    currDefTable.getTable().add(new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary()));
+    if (idx != null) {
+      // ABL compiler quirk: idNode doesn't have to be a real index. Undefined behavior in this case
+      currDefTable.getTable().add(new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary()));
+    }
     currDefTableUseIndex = true;
   }
 
