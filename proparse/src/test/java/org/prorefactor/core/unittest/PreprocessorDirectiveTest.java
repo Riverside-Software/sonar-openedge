@@ -19,6 +19,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
@@ -35,6 +36,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import antlr.ANTLRException;
+import antlr.Token;
+import antlr.TokenStream;
+import antlr.TokenStreamException;
 
 public class PreprocessorDirectiveTest {
   private final static String SRC_DIR = "src/test/resources/data/preprocessor";
@@ -87,6 +91,51 @@ public class PreprocessorDirectiveTest {
     // See issue #341 - Won't fix
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor07.p"), session);
     unit.parse();
+  }
+
+  @Test
+  public void test03() throws TokenStreamException, IOException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor09.p"), session);
+    TokenStream stream = unit.preprocess();
+
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.DEFINE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.VARIABLE);
+    Token tok = stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok.getText(), "aaa");
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.AS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.CHARACTER);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.MESSAGE);
+    tok = stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getText(), "\"text1 text2\"");
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.MESSAGE);
+    tok = stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok.getText(), "aaa");
+    tok = stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getText(), "\"text3\"");
+    tok = stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok.getText(), "aaa");
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.MESSAGE);
+    tok = stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok.getText(), "bbb");
+    tok = stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getText(), "'text4'");
+    tok = stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok.getText(), "bbb");
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
   }
 
 }

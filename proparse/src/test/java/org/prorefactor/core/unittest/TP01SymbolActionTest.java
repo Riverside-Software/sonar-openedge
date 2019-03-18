@@ -141,4 +141,10 @@ public class TP01SymbolActionTest {
     assertNotNull(routineScope.lookupVariable(test));
   }
 
+  @Test
+  public void testTreeParser01() throws ANTLRException {
+    ParseUnit pu = new ParseUnit(new File("src/test/resources/data/tp01ProcessTests/ttUseIdx.p"), session);
+    TP01Support walkAction = new TP01Support(session, pu);
+    pu.treeParser(new TreeParser01(walkAction));
+  }
 }
