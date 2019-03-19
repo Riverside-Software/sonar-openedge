@@ -938,7 +938,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     // out to be a space character.
     if (!gotLookahead)
       laGet();
-    nameDot = (laChar != EOF_CHAR && (!Character.isWhitespace(laChar)));
+    nameDot = (laChar != EOF_CHAR) && !Character.isWhitespace(laChar) && (laChar != '.');
   }
 
   public void setDoingComment(boolean doingComment) {

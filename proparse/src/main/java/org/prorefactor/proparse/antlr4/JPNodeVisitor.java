@@ -66,15 +66,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   public Builder visitDotComment(DotCommentContext ctx) {
     Builder node = visitTerminal(ctx.NAMEDOT()).changeType(ABLNodeType.DOT_COMMENT).setStatement().setRuleNode(ctx);
 
+    ProToken.Builder tok = new ProToken.Builder(node.getToken());
     List<NotStatementEndContext> list = ctx.notStatementEnd();
-    ProToken.Builder tok = new ProToken.Builder((ProToken) list.get(0).getStart()).setType(ABLNodeType.UNQUOTEDSTRING);
-    for (int zz = 1; zz < list.size(); zz++) {
+    for (int zz = 0; zz < list.size(); zz++) {
       tok.mergeWith((ProToken) list.get(zz).getStart());
     }
-
-    Builder ch = new Builder(tok.build());
-    node.setDown(ch);
-    ch.setRight(visit(ctx.statementEnd()));
+    node.updateToken(tok.build());
 
     return node;
   }

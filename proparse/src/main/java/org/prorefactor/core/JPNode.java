@@ -850,6 +850,11 @@ public class JPNode implements AST {
       this(new ProToken.Builder(type, "").setSynthetic(true).build());
     }
 
+    public Builder updateToken(ProToken tok) {
+      this.tok = tok;
+      return this;
+    }
+
     public Builder setRuleNode(ParseTree ctx) {
       this.ctx = ctx;
       return this;
