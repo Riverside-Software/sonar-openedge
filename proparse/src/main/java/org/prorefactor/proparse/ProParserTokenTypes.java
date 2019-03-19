@@ -1249,5 +1249,13 @@ public interface ProParserTokenTypes {
 	int SINGLERUN = 1235;
 	int SINGLETON = 1236;
 	int PROCESSARCHITECTURE = 1237;
-	int Last_Token_Number = 1238;
+	int NONSERIALIZABLE = 1238;
+	int CHECKED = 1239;
+	int SENSITIVE = 1240;
+	int HIDDEN = 1241;
+	int VISIBLE = 1242;
+	int CHARSET = 1243;
+	int SCREENVALUE = 1244;
+	int XOR = 1245;
+	int Last_Token_Number = 1246;
 }

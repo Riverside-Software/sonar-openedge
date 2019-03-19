@@ -886,6 +886,73 @@ public class LexerTest {
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
   }
 
+  @Test
+  public void testHexNumbers() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer16.p"), session);
+    TokenSource stream = unit.lex();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "125");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "0x65");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "0X66");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "0xfb");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "0xab");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "-0x01");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.PERIOD);
+  }
+
+  @Test
+  public void testHexNumbers2() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer17.p"), session);
+    TokenSource stream = unit.lex();
+
+    ProToken tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.MESSAGE);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.NUMBER);
+    assertEquals(tok.getText(), "125");
+
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.WS);
+    tok = (ProToken) stream.nextToken();
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok.getText(), "0x2g8");
+  }
+
   /**
    * Utility method for tests, returns next node of given type 
    */
@@ -900,7 +967,7 @@ public class LexerTest {
   /**
    * Utility method for preprocess(), removes all tokens from hidden channels
    */
-  private static Token nextVisibleToken(TokenSource src) {
+  protected static Token nextVisibleToken(TokenSource src) {
     Token tok = src.nextToken();
     while ((tok.getType() != Token.EOF) && (tok.getChannel() != Token.DEFAULT_CHANNEL))
       tok = src.nextToken();

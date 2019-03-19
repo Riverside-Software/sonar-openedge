@@ -146,6 +146,10 @@ public class IConstants {
    */
   public static final int FILE_NAME_ARRAY = -220;
 
+  // In statement: DEFINE TEMP-TABLE ... LIKE ... USE-INDEX xxx
+  // xxx can point to an invalid index
+  public static final int INVALID_USEINDEX = 2800;
+
   private IConstants() {
     // Shouldn't be instantiated
   }

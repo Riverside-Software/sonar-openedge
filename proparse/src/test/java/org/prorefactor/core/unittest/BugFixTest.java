@@ -336,6 +336,11 @@ public class BugFixTest {
     genericTest("bug36.p");
   }
 
+  @Test
+  public void test43() {
+    genericTest("bug43.p");
+  }
+
   // Next two tests : same exception should be thrown in both cases
 //  @Test(expectedExceptions = {ProparseRuntimeException.class})
 //  public void testCache1() {
@@ -346,6 +351,16 @@ public class BugFixTest {
 //  public void testCache2() {
 //    genericTest("CacheChild.cls");
 //  }
+
+  @Test
+  public void testSerializableKeyword() {
+    genericTest("serialkw.cls");
+  }
+
+  @Test
+  public void testXor() {
+    genericTest("xor.p");
+  }
 
   @Test
   public void testSaxWriter() {

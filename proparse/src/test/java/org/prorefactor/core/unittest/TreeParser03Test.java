@@ -15,11 +15,16 @@
  ********************************************************************************/
 package org.prorefactor.core.unittest;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 
+import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.IConstants;
+import org.prorefactor.core.JPNode;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -59,5 +64,33 @@ public class TreeParser03Test {
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
   }
+
+  @Test
+  public void testTreeParser01() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test03.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    boolean found1 = false;
+    boolean found2 = false;
+    for (JPNode node : unit.getTopNode().query(ABLNodeType.DEFINE)) {
+      if ((node.getState2() == ABLNodeType.TEMPTABLE.getType())
+          && "myTT2".equals(node.nextNode().nextNode().getText())) {
+        assertEquals(node.query(ABLNodeType.USEINDEX).get(0).nextNode().attrGet(IConstants.INVALID_USEINDEX),
+            IConstants.TRUE);
+        found1 = true;
+      }
+      if ((node.getState2() == ABLNodeType.TEMPTABLE.getType())
+          && "myTT3".equals(node.nextNode().nextNode().getText())) {
+        assertEquals(node.query(ABLNodeType.USEINDEX).get(0).nextNode().attrGet(IConstants.INVALID_USEINDEX), 0);
+        found2 = true;
+      }
+    }
+    assertTrue(found1);
+    assertTrue(found2);
+  }
+
 
 }

@@ -1292,7 +1292,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitDefTableUseIndex(DefTableUseIndexContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    Builder builder = createTreeFromFirstNode(ctx);
+    builder.getDown().setRuleNode(ctx.identifier());
+
+    return builder;
   }
 
   @Override

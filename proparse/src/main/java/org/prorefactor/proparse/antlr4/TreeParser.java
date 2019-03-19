@@ -1225,7 +1225,7 @@ public class TreeParser extends ProparseBaseListener {
   public void exitDefTableLike(DefTableLikeContext ctx) {
     defineTableLike(ctx.record());
     for (DefTableUseIndexContext useIndex : ctx.defTableUseIndex()) {
-      defineUseIndex(support.getNode(ctx.record()), useIndex.identifier().getText());
+      defineUseIndex(support.getNode(ctx.record()), support.getNode(useIndex.identifier()), useIndex.identifier().getText());
     }
   }
 
@@ -2437,10 +2437,16 @@ public class TreeParser extends ProparseBaseListener {
     }
   }
 
-  private void defineUseIndex(JPNode recNode, String name) {
+  private void defineUseIndex(JPNode recNode, JPNode idNode, String name) {
     ITable table = astTableLink(recNode);
     IIndex idx = table.lookupIndex(name);
-    currDefTable.getTable().add(new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary()));
+    if (idx != null) {
+      // ABL compiler quirk: idNode doesn't have to be a real index. Undefined behavior in this case
+      currDefTable.getTable().add(new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary()));
+    } else {
+      // Mark idNode as INVALID_INDEX
+      idNode.attrSet(IConstants.INVALID_USEINDEX, IConstants.TRUE);
+    }
     currDefTableUseIndex = true;
   }
 

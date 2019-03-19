@@ -19,7 +19,10 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
@@ -85,6 +88,51 @@ public class PreprocessorDirectiveTest {
     // See issue #341 - Won't fix
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor07.p"), session);
     unit.parse();
+  }
+
+  @Test
+  public void test03() throws IOException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor09.p"), session);
+    TokenSource stream = unit.preprocess();
+
+    assertEquals(LexerTest.nextVisibleToken(stream).getType(), ProParserTokenTypes.DEFINE);
+    assertEquals(LexerTest.nextVisibleToken(stream).getType(), ProParserTokenTypes.VARIABLE);
+    Token tok = LexerTest.nextVisibleToken(stream);
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok.getText(), "aaa");
+    assertEquals(LexerTest.nextVisibleToken(stream).getType(), ProParserTokenTypes.AS);
+    assertEquals(LexerTest.nextVisibleToken(stream).getType(), ProParserTokenTypes.CHARACTER);
+    assertEquals(LexerTest.nextVisibleToken(stream).getType(), ProParserTokenTypes.PERIOD);
+
+    assertEquals(LexerTest.nextVisibleToken(stream).getType(), ProParserTokenTypes.MESSAGE);
+    tok = LexerTest.nextVisibleToken(stream);
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getText(), "\"text1 text2\"");
+    assertEquals(LexerTest.nextVisibleToken(stream).getType(), ProParserTokenTypes.PERIOD);
+
+    assertEquals(LexerTest.nextVisibleToken(stream).getType(), ProParserTokenTypes.MESSAGE);
+    tok = LexerTest.nextVisibleToken(stream);
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok.getText(), "aaa");
+    tok = LexerTest.nextVisibleToken(stream);
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getText(), "\"text3\"");
+    tok = LexerTest.nextVisibleToken(stream);
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok.getText(), "aaa");
+    assertEquals(LexerTest.nextVisibleToken(stream).getType(), ProParserTokenTypes.PERIOD);
+
+    assertEquals(LexerTest.nextVisibleToken(stream).getType(), ProParserTokenTypes.MESSAGE);
+    tok = LexerTest.nextVisibleToken(stream);
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok.getText(), "bbb");
+    tok = LexerTest.nextVisibleToken(stream);
+    assertEquals(tok.getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(tok.getText(), "'text4'");
+    tok = LexerTest.nextVisibleToken(stream);
+    assertEquals(tok.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok.getText(), "bbb");
+    assertEquals(LexerTest.nextVisibleToken(stream).getType(), ProParserTokenTypes.PERIOD);
   }
 
 }
