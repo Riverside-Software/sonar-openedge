@@ -95,7 +95,6 @@ public class ANTLR4ParserTest {
     RefactorSession session = new RefactorSession(new ProparseSettings(""), new Schema());
     String sampleClass = "class SampleClass inherits Progress.Lang.Object: method public void foo(): end method. end class.";
     ProgressLexer lexer = new ProgressLexer(session, ByteSource.wrap(sampleClass.getBytes()), "SampleClass.cls", false);
-    lexer.setMergeNameDotInId(true);
     Proparse parser = new Proparse(new CommonTokenStream(lexer));
     parser.initAntlr4(session, lexer.getFilenameList());
     ParseTree tree = parser.program();
@@ -377,7 +376,6 @@ public class ANTLR4ParserTest {
     try (InputStream stream = new FileInputStream(file)) {
       ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(stream));
       ProgressLexer lexer = new ProgressLexer(session, src, file.getAbsolutePath(), false);
-      lexer.setMergeNameDotInId(true);
 
       Proparse parser = new Proparse(new CommonTokenStream(lexer));
       parser.initAntlr4(session, lexer.getFilenameList());

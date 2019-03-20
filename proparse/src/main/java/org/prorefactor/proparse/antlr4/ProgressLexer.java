@@ -159,16 +159,10 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     
     lexer = new Lexer(this);
     TokenSource postlexer = lexOnly ? new NoOpPostLexer(lexer) : new PostLexer(lexer);
-    TokenSource filter1 = new TokenList(postlexer);
+    TokenSource filter0 = new NameDotTokenFilter(postlexer);
+    TokenSource filter1 = new TokenList(filter0);
     TokenSource filter2 = new MultiChannelTokenSource(filter1);
     wrapper = new FunctionKeywordTokenFilter(filter2);
-  }
-
-  /**
-   * @see Lexer#setMergeNameDotInId(boolean)
-   */
-  public void setMergeNameDotInId(boolean merge) {
-    lexer.setMergeNameDotInId(merge);
   }
 
   public String getMainFileName() {

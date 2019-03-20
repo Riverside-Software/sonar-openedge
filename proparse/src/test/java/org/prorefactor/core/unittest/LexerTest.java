@@ -204,8 +204,6 @@ public class LexerTest {
     // Nothing recognized here, so we don't change the stream 
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(src.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
-    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
@@ -221,8 +219,6 @@ public class LexerTest {
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.MESSAGE);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(src.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
-    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.OBJCOLON);
@@ -233,8 +229,6 @@ public class LexerTest {
     // MESSAGE customer.custnum. Progress.Security.PAMStatus:AccessDenied.
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.MESSAGE);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(src.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.ID);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.PERIOD);
     assertEquals(src.nextToken().getType(), ProParserTokenTypes.WS);
@@ -287,9 +281,9 @@ public class LexerTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist09.p"), session);
     TokenSource stream = unit.lex();
     // First line
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    Token tok1 = stream.nextToken();
+    assertEquals(tok1.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok1.getText(), "customer.name");
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
     // Second line
@@ -300,18 +294,15 @@ public class LexerTest {
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
     // Third line: comment after period results in NAMEDOT
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.COMMENT);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    Token tok2 = stream.nextToken();
+    assertEquals(tok2.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok2.getText(), "customer.name");
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
     // Fourth line: same behaviour even if there's a space after the comment
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.COMMENT);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
-    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    Token tok3 = stream.nextToken();
+    assertEquals(tok3.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok3.getText(), "customer.name");
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
     // Fifth line: this line doesn't compile...
@@ -324,6 +315,13 @@ public class LexerTest {
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.QSTRING);
     assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    // Sixth line: same behaviour even if there's a space after the comment
+    Token tok4 = stream.nextToken();
+    assertEquals(tok4.getType(), ProParserTokenTypes.ID);
+    assertEquals(tok4.getText(), "customer.name");
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
   }
 
   @Test
@@ -853,10 +851,7 @@ public class LexerTest {
     tok = (ProToken) stream.nextToken();
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
-    tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
-    tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "customer.custnum");
     tok = (ProToken) stream.nextToken();
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
@@ -873,14 +868,7 @@ public class LexerTest {
     tok = (ProToken) stream.nextToken();
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
-    tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
-    tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.ID);
-    tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
-    tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "sp2k.customer.custnum");
     tok = (ProToken) stream.nextToken();
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
@@ -913,15 +901,7 @@ public class LexerTest {
 
     tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
-    assertEquals(tok.getText(), "customer");
-    // assertNotNull(tok.getHiddenBefore());
-    // assertEquals(((ProToken) tok.getHiddenBefore()).getNodeType(), ABLNodeType.WS);
-    // assertNotNull(tok.getHiddenBefore().getHiddenBefore());
-    // assertEquals(((ProToken) tok.getHiddenBefore().getHiddenBefore()).getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
-    tok = (ProToken) nextVisibleToken(src);
-    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
-    tok = (ProToken) nextVisibleToken(src);
-    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "customer.custnum");
     tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.EQUAL);
     tok = (ProToken) nextVisibleToken(src);

@@ -179,8 +179,6 @@ public class ParseUnit {
     LOGGER.trace("Entering ParseUnit#parse()");
     
     ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
-    lexer.setMergeNameDotInId(true);
-
     Proparse parser = new Proparse(new CommonTokenStream(lexer));
     parser.initAntlr4(session, lexer.getFilenameList());
     parser.getInterpreter().setPredictionMode(PredictionMode.SLL);

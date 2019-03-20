@@ -72,6 +72,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
       tok.mergeWith((ProToken) list.get(zz).getStart());
     }
     node.updateToken(tok.build());
+    node.setDown(visit(ctx.statementEnd()));
 
     return node;
   }

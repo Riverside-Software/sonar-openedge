@@ -18,6 +18,7 @@ package org.prorefactor.core;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -119,21 +120,19 @@ public class JPNodeTest {
     JPNode node = unit.getTopNode().firstNaturalChild();
     assertNotNull(node);
     assertEquals(node.getNodeType(), ABLNodeType.DOT_COMMENT);
-    assertEquals(node.getText(), ".");
+    // TODO Whitespaces should be kept...
+    assertTrue(node.getText().startsWith(".message"));
+    assertEquals(node.getLine(), 1);
+    assertEquals(node.getEndLine(), 3);
+    assertEquals(node.getColumn(), 1);
+    assertEquals(node.getEndColumn(), 27);
 
     assertNotNull(node.getFirstChild());
-    assertEquals(node.getFirstChild().getNodeType(), ABLNodeType.UNQUOTEDSTRING);
-    assertEquals(node.getFirstChild().getLine(), 1);
+    assertEquals(node.getFirstChild().getNodeType(), ABLNodeType.PERIOD);
+    assertEquals(node.getFirstChild().getLine(), 3);
     assertEquals(node.getFirstChild().getEndLine(), 3);
-    assertEquals(node.getFirstChild().getColumn(), 2);
-    assertEquals(node.getFirstChild().getEndColumn(), 27);
-
-    assertNotNull(node.getFirstChild().getNextSibling());
-    assertEquals(node.getFirstChild().getNextSibling().getNodeType(), ABLNodeType.PERIOD);
-    assertEquals(node.getFirstChild().getNextSibling().getLine(), 3);
-    assertEquals(node.getFirstChild().getNextSibling().getEndLine(), 3);
-    assertEquals(node.getFirstChild().getNextSibling().getColumn(), 29);
-    assertEquals(node.getFirstChild().getNextSibling().getEndColumn(), 29);
+    assertEquals(node.getFirstChild().getColumn(), 29);
+    assertEquals(node.getFirstChild().getEndColumn(), 29);
   }
 
   @Test
@@ -142,21 +141,19 @@ public class JPNodeTest {
     JPNode node = unit.getTopNode().firstNaturalChild();
     assertNotNull(node);
     assertEquals(node.getNodeType(), ABLNodeType.DOT_COMMENT);
-    assertEquals(node.getText(), ".");
+    assertEquals(node.getText(), ".message");
+
+    assertEquals(node.getLine(), 1);
+    assertEquals(node.getEndLine(), 1);
+    assertEquals(node.getColumn(), 1);
+    assertEquals(node.getEndColumn(), 8);
 
     assertNotNull(node.getFirstChild());
-    assertEquals(node.getFirstChild().getNodeType(), ABLNodeType.UNQUOTEDSTRING);
+    assertEquals(node.getFirstChild().getNodeType(), ABLNodeType.PERIOD);
     assertEquals(node.getFirstChild().getLine(), 1);
     assertEquals(node.getFirstChild().getEndLine(), 1);
-    assertEquals(node.getFirstChild().getColumn(), 2);
-    assertEquals(node.getFirstChild().getEndColumn(), 8);
-
-    assertNotNull(node.getFirstChild().getNextSibling());
-    assertEquals(node.getFirstChild().getNextSibling().getNodeType(), ABLNodeType.PERIOD);
-    assertEquals(node.getFirstChild().getNextSibling().getLine(), 1);
-    assertEquals(node.getFirstChild().getNextSibling().getEndLine(), 1);
-    assertEquals(node.getFirstChild().getNextSibling().getColumn(), 9);
-    assertEquals(node.getFirstChild().getNextSibling().getEndColumn(), 9);
+    assertEquals(node.getFirstChild().getColumn(), 9);
+    assertEquals(node.getFirstChild().getEndColumn(), 9);
   }
   
   @Test
