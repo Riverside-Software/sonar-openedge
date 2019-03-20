@@ -282,6 +282,51 @@ public class LexerTest {
   }
 
   @Test
+  public void testTokenList09() throws TokenStreamException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist09.p"), session);
+    TokenStream stream = unit.lex();
+    // First line
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    // Second line
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    // Third line: comment after period results in NAMEDOT
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.COMMENT);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    // Fourth line: same behaviour even if there's a space after the comment
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.COMMENT);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.ID);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    // Fifth line: this line doesn't compile...
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.MESSAGE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.NAMEDOT);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.COMMENT);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.MESSAGE);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.WS);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.QSTRING);
+    assertEquals(stream.nextToken().getType(), ProParserTokenTypes.PERIOD);
+  }
+
+
+  @Test
   public void testPostLexer01() throws TokenStreamException {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
     TokenStream stream = unit.preprocess();
