@@ -3669,7 +3669,7 @@ triggerProcedureStatement:
       (
         triggerProcedureStatementSub1
       | triggerProcedureStatementSub2
-      |  ASSIGN triggerOf? triggerOld?
+      | ASSIGN triggerOf? triggerOld?
       )
     statementEnd
   ;
@@ -3695,7 +3695,7 @@ triggerTableLabel:
   ;
 
 triggerOld:
-    OLD VALUE? id=identifier defineParamVar
+    OLD VALUE? id=identifier defineParamVar?
   ;
 
 underlineStatement:
