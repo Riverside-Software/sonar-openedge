@@ -23,6 +23,8 @@ import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convert some tokens to another type when not followed by LEFTPAREN:
@@ -33,6 +35,8 @@ import org.prorefactor.core.ProToken;
  * </ul>
  */
 public class FunctionKeywordTokenFilter implements TokenSource {
+  private static final Logger LOGGER = LoggerFactory.getLogger(FunctionKeywordTokenFilter.class);
+
   private final TokenSource source;
   private final Queue<Token> heap = new LinkedList<>();
 
@@ -43,7 +47,11 @@ public class FunctionKeywordTokenFilter implements TokenSource {
   @Override
   public Token nextToken() {
     if (!heap.isEmpty()) {
-      return heap.poll();
+      Token tok = heap.poll();
+      if (LOGGER.isTraceEnabled()) {
+        logToken(tok);
+      }
+      return tok;
     }
 
     ProToken currToken = (ProToken) source.nextToken();
@@ -65,7 +73,14 @@ public class FunctionKeywordTokenFilter implements TokenSource {
       } else if (currToken.getNodeType() == ABLNodeType.GETCODEPAGES)
         currToken.setNodeType(ABLNodeType.GETCODEPAGE);
     }
+    if (LOGGER.isTraceEnabled()) {
+      logToken(currToken);
+    }
     return currToken;
+  }
+
+  private void logToken(Token tok) {
+    LOGGER.trace("'{}' -- {}", tok.getText(), ABLNodeType.getNodeType(tok.getType()));
   }
 
   @Override
