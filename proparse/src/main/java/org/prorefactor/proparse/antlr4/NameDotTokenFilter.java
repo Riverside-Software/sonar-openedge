@@ -64,11 +64,7 @@ public class NameDotTokenFilter implements TokenSource {
       queue.offer(nameDot);
     } else if ((prev.getNodeType() == ABLNodeType.ID) || prev.getNodeType().isKeyword() || (prev.getNodeType() == ABLNodeType.ANNOTATION)) {
       ProToken nxt = (ProToken) source.nextToken();
-      if ((nxt.getNodeType() == ABLNodeType.ID) || nxt.getNodeType().isKeyword()) {
-        // Merge everything in first token
-        ProToken.Builder builder = new ProToken.Builder(prev).mergeWith(nameDot).mergeWith(nxt);
-        queue.offer(builder.build());
-      } else if (nxt.getNodeType() == ABLNodeType.COMMENT) {
+      if (nxt.getNodeType() == ABLNodeType.COMMENT) {
         // We can consume as much WS and COMMENT
         while ((nxt.getNodeType() == ABLNodeType.COMMENT) || (nxt.getNodeType() == ABLNodeType.WS)) {
           nxt = (ProToken) source.nextToken(); 
@@ -77,10 +73,9 @@ public class NameDotTokenFilter implements TokenSource {
         ProToken.Builder builder = new ProToken.Builder(prev).mergeWith(nameDot).mergeWith(nxt);
         queue.offer(builder.build());
       } else {
-        // Anything else, we just put tokens back in the queue
-        queue.offer(prev);
-        queue.offer(nameDot);
-        queue.offer(nxt);
+        // Merge everything in first token
+        ProToken.Builder builder = new ProToken.Builder(prev).mergeWith(nameDot).mergeWith(nxt);
+        queue.offer(builder.build());
       }
     } else {
       // Anything else, we just put tokens back in the queue

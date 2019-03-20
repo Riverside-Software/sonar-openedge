@@ -74,14 +74,6 @@ options {
 
 program:
     blockOrStatement*
-    { 
-      // Make sure we didn't stop, for any reason, in the middle of
-      // the program. This was a problem with extra periods (empty statements)
-      // and possibly with other things.
-      if (_input.LA(1) != Token.EOF) {
-        LOGGER.error("Tokens still available in the stream...");
-      }
-    }
   ;
 
 codeBlock:
@@ -3758,7 +3750,7 @@ usingRow:
   ;
 
 usingStatement:
-    USING typeName2 STAR?
+    USING typeName2
     usingFrom?
     statementEnd
   ;
@@ -3918,6 +3910,8 @@ unreservedkeyword:
  | CHAINED
  | CHARACTER
  | CHARACTERLENGTH
+ | CHARSET
+ | CHECKED
  | CHOOSE
  | CLASS
  | CLIENTPRINCIPAL
@@ -4108,6 +4102,7 @@ unreservedkeyword:
  | HELPTOPIC
  | HEXDECODE
  | HEXENCODE
+ | HIDDEN
  | HINT
  | HORIZONTAL
  | HTMLENDOFLINE
@@ -4249,6 +4244,7 @@ unreservedkeyword:
  | NOJOINBYSQLDB
  | NOLOOKAHEAD
  | NONE
+ | NONSERIALIZABLE
  | NORMAL
  | NORMALIZE
  | NOROWMARKERS
@@ -4373,6 +4369,7 @@ unreservedkeyword:
  | SAXATTRIBUTES
  | SAXREADER
  | SAXWRITER
+ | SCREENVALUE
  | SCROLLABLE
  | SCROLLBARHORIZONTAL
  | SCROLLBARVERTICAL
@@ -4382,6 +4379,7 @@ unreservedkeyword:
  | SELECTIONLIST
  | SEND
  | SENDSQLSTATEMENT
+ | SENSITIVE
  | SEPARATECONNECTION
  | SEPARATORS
  | SERIALIZABLE
@@ -4506,6 +4504,7 @@ unreservedkeyword:
  | VARIABLE
  | VERBOSE
  | VERTICAL
+ | VISIBLE
  | VMS
  | VOID
  | WAIT

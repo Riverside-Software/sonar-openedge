@@ -2606,15 +2606,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitUsingStatement(UsingStatementContext ctx) {
-    Builder using = createStatementTreeFromFirstNode(ctx);
-    if (ctx.STAR() != null) {
-      // Merge STAR with typeName
-      ProToken newTok = new ProToken.Builder(using.getDown().getToken()).mergeWith((ProToken) ctx.STAR().getSymbol()).build();
-      Builder tn2 = new Builder(newTok).setRight(using.getDown().getRight().getRight());
-      using.setDown(tn2);
-    }
-
-    return using;
+    return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
