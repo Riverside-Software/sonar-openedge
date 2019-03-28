@@ -36,6 +36,7 @@ public class ProfilerSession {
   // Description
   private final String description;
   private final String user;
+  private final int version;
   private Date timestamp;
 
   // Modules
@@ -48,9 +49,15 @@ public class ProfilerSession {
   // Internal use
   private int highestModuleId = -1;
 
-  public ProfilerSession(String description, String user, String timestamp) {
+  public ProfilerSession(String description, String user, String timestamp, String version) {
     this.description = description;
     this.user = user;
+    int tmp = -1;
+    try {
+      tmp = Integer.parseInt(version);
+    } catch (NumberFormatException uncaught) {
+    }
+    this.version = tmp;
     try {
       this.timestamp = DATE_FORMATTER.parse(timestamp);
     } catch (ParseException caught) {
@@ -58,10 +65,12 @@ public class ProfilerSession {
     }
   }
 
+  public int getVersionNumber() {
+    return version;
+  }
+
   /**
    * Returns description field of profiler session
-   * 
-   * @return Description
    */
   public String getDescription() {
     return description;
@@ -69,8 +78,6 @@ public class ProfilerSession {
 
   /**
    * Returns user name of profiler session
-   * 
-   * @return User name
    */
   public String getUser() {
     return user;
