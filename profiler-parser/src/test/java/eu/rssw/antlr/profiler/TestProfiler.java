@@ -54,6 +54,7 @@ public class TestProfiler {
   public void testProfiler2() throws IOException {
     ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler2.out"));
     Assert.assertEquals(session.getUser(), "gquerret");
+    Assert.assertEquals(session.getVersionNumber(), 1);
   }
 
   @Test
@@ -92,4 +93,19 @@ public class TestProfiler {
     ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler7.out"));
     Assert.assertEquals(session.getUser(), "SYSTEM");
   }
+
+  @Test
+  public void testProfiler8() throws IOException {
+    // New file format in 12.0
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler8.out"));
+    Assert.assertEquals(session.getVersionNumber(), 3);
+  }
+
+  @Test
+  public void testProfiler9() throws IOException {
+    // New file format in 12.0 + trace filter + user data
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler9.out"));
+    Assert.assertEquals(session.getVersionNumber(), 3);
+  }
+
 }

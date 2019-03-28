@@ -38,6 +38,9 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.DefaultErrorStrategy;
+import org.antlr.v4.runtime.FailedPredicateException;
+import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -56,6 +59,7 @@ public final class ProfilerUtils {
     ProfilerGrammarLexer lexer = new ProfilerGrammarLexer(CharStreams.fromStream(input));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     ProfilerGrammarParser parser = new ProfilerGrammarParser(tokens);
+    parser.setErrorHandler(new NoFailedPredicateErrorStrategy());
     ParseTree tree = parser.profiler();
 
     ProfilerSessionVisitor visitor = new ProfilerSessionVisitor();
@@ -118,5 +122,12 @@ public final class ProfilerUtils {
     }
 
     return fileName;
+  }
+
+  private static class NoFailedPredicateErrorStrategy extends DefaultErrorStrategy {
+    @Override
+    protected void reportFailedPredicate(Parser recognizer, FailedPredicateException e) {
+      // Nothing here...
+    }
   }
 }
