@@ -81,7 +81,7 @@ user_data:
   user_data_line* CHR_DOT NEWLINE;
 
 user_data_line:
-  TIME STRING NEWLINE;
+  FLOAT STRING NEWLINE;
 
 fragment INT:
   ('0'..'9');

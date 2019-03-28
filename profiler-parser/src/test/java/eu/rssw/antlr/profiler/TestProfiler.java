@@ -101,4 +101,11 @@ public class TestProfiler {
     Assert.assertEquals(session.getVersionNumber(), 3);
   }
 
+  @Test
+  public void testProfiler9() throws IOException {
+    // New file format in 12.0 + trace filter + user data
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler9.out"));
+    Assert.assertEquals(session.getVersionNumber(), 3);
+  }
+
 }
