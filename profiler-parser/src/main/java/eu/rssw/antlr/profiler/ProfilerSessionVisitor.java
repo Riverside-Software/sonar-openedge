@@ -50,7 +50,7 @@ public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
       throw new IllegalStateException("Session already created");
 
     session = new ProfilerSession(ctx.desc.getText(), ctx.author.getText(), ctx.date.getText() + " "
-        + ctx.time.getText());
+        + ctx.time.getText(), ctx.version.getText());
 
     return null;
   }

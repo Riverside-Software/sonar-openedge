@@ -19,11 +19,23 @@
  */
 grammar ProfilerGrammar;
 
+@parser::members {
+  private int versionNumber = -1;
+}
+
 profiler:
-  description module_data call_tree_data line_summary tracing_data coverage_data user_data;
+  description module_data call_tree_data line_summary tracing_data coverage_data coverage_data2 user_data;
 
 description:
-  NUMBER date=DATE desc=STRING time=TIME author=STRING NEWLINE CHR_DOT NEWLINE;
+  version=NUMBER
+    { try { versionNumber = Integer.parseInt($version.text) ; } catch (NumberFormatException uncaught) { } } 
+  date=DATE desc=STRING time=TIME author=STRING
+  json_data
+  NEWLINE CHR_DOT NEWLINE;
+
+json_data:
+  { versionNumber >= 3 }?
+  '{' STRING ':' ( NUMBER | FLOAT | STRING ) ( ',' STRING ':' ( NUMBER | FLOAT | STRING ) )* '}';
 
 module_data:
   module_data_line* CHR_DOT NEWLINE;
@@ -55,11 +67,15 @@ coverage_data:
 coverage_section:
   moduleId=NUMBER name=STRING lineCount=NUMBER NEWLINE coverage_section_line+ CHR_DOT NEWLINE;
 
-/*coverage_section_lines:
-  coverage_section_line+;*/
-  
 coverage_section_line:
   linenum=NUMBER NEWLINE;
+
+coverage_data2:
+  { versionNumber >= 3 }?
+  coverage_section2_line* CHR_DOT NEWLINE;
+
+coverage_section2_line:
+  NUMBER NUMBER NUMBER NUMBER NUMBER FLOAT NUMBER* NEWLINE;
 
 user_data:
   user_data_line* CHR_DOT NEWLINE;
