@@ -423,6 +423,11 @@ public class BugFixTest {
   }
 
   @Test
+  public void testDynProp() throws ANTLRException {
+    genericTest("dynprop.p");
+  }
+
+  @Test
   public void testTildeInComment() throws ANTLRException {
     TokenStream stream = genericLex("comment-tilde.p");
     Token tok = stream.nextToken();
