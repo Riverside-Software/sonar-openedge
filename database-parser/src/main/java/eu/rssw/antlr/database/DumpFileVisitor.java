@@ -309,7 +309,7 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
     }
     if (table != null) {
       IndexField idxFld = new IndexField(table.getField(ctx.field.getText()),
-          "ascending".equalsIgnoreCase(ctx.order.getText()));
+          ((ctx.order == null) || "ascending".equalsIgnoreCase(ctx.order.getText())));
       indexes.peek().addField(idxFld);
     } else {
       // Log error ?
