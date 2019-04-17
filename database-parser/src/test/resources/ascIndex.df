@@ -1,0 +1,13 @@
+ADD TABLE "Tab1"
+  DESCRIPTION "XYZ"
+  FROZEN
+  DUMP-NAME "Tab1"
+
+ADD FIELD "Fld1" OF "Tab1" AS character
+  FORMAT "x(24)"
+  MANDATORY
+
+ADD INDEX "Idx1" ON "Tab1"
+  PRIMARY
+  INDEX-FIELD "Fld1"
+.

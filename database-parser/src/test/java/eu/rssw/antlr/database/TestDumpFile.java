@@ -120,4 +120,14 @@ public class TestDumpFile {
     assertEquals(db2.getTable("Order").getIndex("CustOrder").getFields().size(), 2);
   }
 
+  @Test
+  public void testAscIndex() throws IOException {
+    // Delete triggers on table
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(new File("src/test/resources/ascIndex.df"));
+    assertNotNull(db.getTable("Tab1"));
+    assertNotNull(db.getTable("Tab1").getIndex("Idx1"));
+    assertNotNull(db.getTable("Tab1").getIndex("Idx1").getFields());
+    assertFalse(db.getTable("Tab1").getIndex("Idx1").getFields().isEmpty());
+    assertTrue(db.getTable("Tab1").getIndex("Idx1").getFields().get(0).isAscending());
+  }
 }
