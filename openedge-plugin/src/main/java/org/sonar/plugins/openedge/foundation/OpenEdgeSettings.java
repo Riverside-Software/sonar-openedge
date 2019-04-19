@@ -642,7 +642,14 @@ public class OpenEdgeSettings {
         try {
           desc = DumpFileUtils.getDatabaseDescription(fileSystem.resolvePath(str), dbName);
         } catch (IOException caught) {
-          LOG.error("Unable to parse " + str, caught);
+          // Interrupt SonarLint analysis as this is the only way to have a notification for invalid DF file
+          // By default, analysis log is not visible
+          if (runtime.getProduct() == SonarProduct.SONARLINT) {
+            throw new RuntimeException("Unable to read database schema from '" + dfFile.getName()
+                + "', please check value of property '" + Constants.DATABASES + "'", caught);
+          } else {
+            LOG.error("Unable to parse " + str, caught);
+          }
         }
         if ((desc != null) && (runtime.getProduct() == SonarProduct.SONARLINT)) {
           try (OutputStream os = new FileOutputStream(serFile)) {
