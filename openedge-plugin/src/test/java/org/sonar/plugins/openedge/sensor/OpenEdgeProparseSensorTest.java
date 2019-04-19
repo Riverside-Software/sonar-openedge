@@ -28,6 +28,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
 import org.sonar.api.SonarQubeSide;
@@ -124,6 +125,33 @@ public class OpenEdgeProparseSensorTest {
     assertTrue(oeSettings.getProparseSession().getProparseSettings().getBatchMode());
     assertEquals(oeSettings.getProparseSession().getProparseSettings().getProcessArchitecture(), Integer.valueOf(64));
     assertEquals(oeSettings.getProparseSession().getProparseSettings().getProversion(), "11.7");
+  }
+
+  @Test
+  public void testInvalidDBInSonarLint() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    context.settings().setProperty(Constants.DATABASES, "src/schema/invalid.df");
+    
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarLint(VERSION));
+    try {
+      oeSettings.getProparseSession();
+      fail("RuntimeException should have been thrown");
+    } catch (RuntimeException caught) {
+      
+    }
+  }
+
+  @Test
+  public void testInvalidDBInSonarQube() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    context.settings().setProperty(Constants.DATABASES, "src/schema/invalid.df");
+    
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER));
+    try {
+      oeSettings.getProparseSession();
+    } catch (RuntimeException caught) {
+      fail("No RuntimeException should have been thrown");
+    }
   }
 
 }
