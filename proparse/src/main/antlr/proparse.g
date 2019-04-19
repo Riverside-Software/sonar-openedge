@@ -501,6 +501,7 @@ argfunc:
     |  DECRYPT^
     |  DYNAMICCAST^
     |  DYNAMICNEXTVALUE^
+    |  DYNAMICPROPERTY^
     |  ENCODE^
     |  ENCRYPT^
     |  EXP^

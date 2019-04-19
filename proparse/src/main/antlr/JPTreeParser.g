@@ -488,6 +488,7 @@ argfunc:
   |  #(DECRYPT funargs )
   |  #(DYNAMICCAST funargs )
   |  #(DYNAMICNEXTVALUE funargs )
+  |  #(DYNAMICPROPERTY funargs )
   |  #(ENCODE funargs )
   |  #(ENCRYPT funargs )
   |  #(EXP funargs )

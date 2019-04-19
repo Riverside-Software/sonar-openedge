@@ -398,6 +398,8 @@ public enum ABLNodeType {
   DYNAMICNEW(ProParserTokenTypes.DYNAMICNEW, "dynamic-new", NodeTypesOption.KEYWORD),
   DYNAMICNEXTVALUE(ProParserTokenTypes.DYNAMICNEXTVALUE, "dynamic-next-value", NodeTypesOption.KEYWORD,
       NodeTypesOption.MAY_BE_REGULAR_FUNC),
+  DYNAMICPROPERTY(ProParserTokenTypes.DYNAMICPROPERTY, "dynamic-property", NodeTypesOption.KEYWORD,
+      NodeTypesOption.RESERVED),
 
   // E
   EACH(ProParserTokenTypes.EACH, "each", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
