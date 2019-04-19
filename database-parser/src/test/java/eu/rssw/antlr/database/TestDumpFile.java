@@ -127,7 +127,9 @@ public class TestDumpFile {
     assertNotNull(db.getTable("Tab1"));
     assertNotNull(db.getTable("Tab1").getIndex("Idx1"));
     assertNotNull(db.getTable("Tab1").getIndex("Idx1").getFields());
-    assertFalse(db.getTable("Tab1").getIndex("Idx1").getFields().isEmpty());
+    assertEquals(db.getTable("Tab1").getIndex("Idx1").getFields().size(), 3);
     assertTrue(db.getTable("Tab1").getIndex("Idx1").getFields().get(0).isAscending());
+    assertTrue(db.getTable("Tab1").getIndex("Idx1").getFields().get(1).isAscending());
+    assertFalse(db.getTable("Tab1").getIndex("Idx1").getFields().get(2).isAscending());
   }
 }

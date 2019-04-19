@@ -7,7 +7,17 @@ ADD FIELD "Fld1" OF "Tab1" AS character
   FORMAT "x(24)"
   MANDATORY
 
+ADD FIELD "Fld2" OF "Tab1" AS character
+  FORMAT "x(24)"
+  MANDATORY
+
+ADD FIELD "Fld2" OF "Tab1" AS character
+  FORMAT "x(24)"
+  MANDATORY
+
 ADD INDEX "Idx1" ON "Tab1"
   PRIMARY
   INDEX-FIELD "Fld1"
+  INDEX-FIELD "Fld2" ASCENDING
+  INDEX-FIELD "Fld3" DESCENDING
 .
