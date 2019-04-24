@@ -27,6 +27,7 @@ import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +102,7 @@ public class PostLexer implements TokenSource {
     getNextToken();
     if (currToken.getType() != PreprocessorParser.RIGHTPAREN)
       throwMessage("Bad DEFINED function in &IF preprocessor condition");
-    return new ProToken(ABLNodeType.NUMBER, prepro.defined(argToken.getText().trim().toLowerCase()));
+    return new ProToken.Builder(ABLNodeType.NUMBER, prepro.defined(argToken.getText().trim().toLowerCase())).build();
   }
 
   private void getNextToken() {

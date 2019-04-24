@@ -18,7 +18,7 @@ package org.prorefactor.treeparser;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.proparse.antlr4.Proparse;
 
 /**
  * One static instance of DataType is created for each data type in the 4GL. You can access each of those through this
@@ -30,37 +30,38 @@ public class DataType {
   private static Map<String, DataType> nameMap = new HashMap<>();
   private static Map<Integer, DataType> tokenTypeMap = new HashMap<>();
 
-  public static final DataType BIGINT = new DataType(ProParserTokenTypes.BIGINT, "BIGINT");
-  public static final DataType BLOB = new DataType(ProParserTokenTypes.BLOB, "BLOB");
-  public static final DataType BYTE = new DataType(ProParserTokenTypes.BYTE, "BYTE");
-  public static final DataType CHARACTER = new DataType(ProParserTokenTypes.CHARACTER, "CHARACTER");
-  public static final DataType CLASS = new DataType(ProParserTokenTypes.CLASS, "CLASS");
-  public static final DataType CLOB = new DataType(ProParserTokenTypes.CLOB, "CLOB");
-  public static final DataType COMHANDLE = new DataType(ProParserTokenTypes.COMHANDLE, "COM-HANDLE");
-  public static final DataType DATE = new DataType(ProParserTokenTypes.DATE, "DATE");
-  public static final DataType DATETIME = new DataType(ProParserTokenTypes.DATETIME, "DATETIME");
-  public static final DataType DATETIMETZ = new DataType(ProParserTokenTypes.DATETIMETZ, "DATETIME-TZ");
-  public static final DataType DECIMAL = new DataType(ProParserTokenTypes.DECIMAL, "DECIMAL");
-  public static final DataType DOUBLE = new DataType(ProParserTokenTypes.DOUBLE, "DOUBLE");
-  public static final DataType FIXCHAR = new DataType(ProParserTokenTypes.FIXCHAR, "FIXCHAR");
-  public static final DataType FLOAT = new DataType(ProParserTokenTypes.FLOAT, "FLOAT");
-  public static final DataType HANDLE = new DataType(ProParserTokenTypes.HANDLE, "HANDLE");
-  public static final DataType INTEGER = new DataType(ProParserTokenTypes.INTEGER, "INTEGER");
-  public static final DataType INT64 = new DataType(ProParserTokenTypes.INT64, "INT64");
-  public static final DataType LONG = new DataType(ProParserTokenTypes.LONG, "LONG");
-  public static final DataType LONGCHAR = new DataType(ProParserTokenTypes.LONGCHAR, "LONGCHAR");
-  public static final DataType LOGICAL = new DataType(ProParserTokenTypes.LOGICAL, "LOGICAL");
-  public static final DataType MEMPTR = new DataType(ProParserTokenTypes.MEMPTR, "MEMPTR");
-  public static final DataType NUMERIC = new DataType(ProParserTokenTypes.NUMERIC, "NUMERIC");
-  public static final DataType RAW = new DataType(ProParserTokenTypes.RAW, "RAW");
-  public static final DataType RECID = new DataType(ProParserTokenTypes.RECID, "RECID");
-  public static final DataType ROWID = new DataType(ProParserTokenTypes.ROWID, "ROWID");
-  public static final DataType SHORT = new DataType(ProParserTokenTypes.SHORT, "SHORT");
-  public static final DataType TIME = new DataType(ProParserTokenTypes.TIME, "TIME");
-  public static final DataType TIMESTAMP = new DataType(ProParserTokenTypes.TIMESTAMP, "TIMESTAMP");
+  public static final DataType VOID = new DataType(Proparse.VOID, "VOID");
+  public static final DataType BIGINT = new DataType(Proparse.BIGINT, "BIGINT");
+  public static final DataType BLOB = new DataType(Proparse.BLOB, "BLOB");
+  public static final DataType BYTE = new DataType(Proparse.BYTE, "BYTE");
+  public static final DataType CHARACTER = new DataType(Proparse.CHARACTER, "CHARACTER");
+  public static final DataType CLASS = new DataType(Proparse.CLASS, "CLASS");
+  public static final DataType CLOB = new DataType(Proparse.CLOB, "CLOB");
+  public static final DataType COMHANDLE = new DataType(Proparse.COMHANDLE, "COM-HANDLE");
+  public static final DataType DATE = new DataType(Proparse.DATE, "DATE");
+  public static final DataType DATETIME = new DataType(Proparse.DATETIME, "DATETIME");
+  public static final DataType DATETIMETZ = new DataType(Proparse.DATETIMETZ, "DATETIME-TZ");
+  public static final DataType DECIMAL = new DataType(Proparse.DECIMAL, "DECIMAL");
+  public static final DataType DOUBLE = new DataType(Proparse.DOUBLE, "DOUBLE");
+  public static final DataType FIXCHAR = new DataType(Proparse.FIXCHAR, "FIXCHAR");
+  public static final DataType FLOAT = new DataType(Proparse.FLOAT, "FLOAT");
+  public static final DataType HANDLE = new DataType(Proparse.HANDLE, "HANDLE");
+  public static final DataType INTEGER = new DataType(Proparse.INTEGER, "INTEGER");
+  public static final DataType INT64 = new DataType(Proparse.INT64, "INT64");
+  public static final DataType LONG = new DataType(Proparse.LONG, "LONG");
+  public static final DataType LONGCHAR = new DataType(Proparse.LONGCHAR, "LONGCHAR");
+  public static final DataType LOGICAL = new DataType(Proparse.LOGICAL, "LOGICAL");
+  public static final DataType MEMPTR = new DataType(Proparse.MEMPTR, "MEMPTR");
+  public static final DataType NUMERIC = new DataType(Proparse.NUMERIC, "NUMERIC");
+  public static final DataType RAW = new DataType(Proparse.RAW, "RAW");
+  public static final DataType RECID = new DataType(Proparse.RECID, "RECID");
+  public static final DataType ROWID = new DataType(Proparse.ROWID, "ROWID");
+  public static final DataType SHORT = new DataType(Proparse.SHORT, "SHORT");
+  public static final DataType TIME = new DataType(Proparse.TIME, "TIME");
+  public static final DataType TIMESTAMP = new DataType(Proparse.TIMESTAMP, "TIMESTAMP");
   public static final DataType TYPE_NAME = CLASS;
-  public static final DataType UNSIGNEDSHORT = new DataType(ProParserTokenTypes.UNSIGNEDSHORT, "UNSIGNED-SHORT");
-  public static final DataType WIDGETHANDLE = new DataType(ProParserTokenTypes.WIDGETHANDLE, "WIDGET-HANDLE");
+  public static final DataType UNSIGNEDSHORT = new DataType(Proparse.UNSIGNEDSHORT, "UNSIGNED-SHORT");
+  public static final DataType WIDGETHANDLE = new DataType(Proparse.WIDGETHANDLE, "WIDGET-HANDLE");
 
   private Integer tokenType;
   private String progressName;

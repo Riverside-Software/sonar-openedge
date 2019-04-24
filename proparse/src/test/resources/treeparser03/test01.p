@@ -8,3 +8,7 @@ def var redundant as integer.
 procedure redundantProcedure:
   def var redundant like redundant.
 end.
+def var redundant2 as Progress.Lang.Object.
+def var redundant3 like redundant2.
+def var redundant4 as Object.
+def var redundant5 like redundant4.

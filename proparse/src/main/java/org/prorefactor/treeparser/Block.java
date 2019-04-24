@@ -26,7 +26,7 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
@@ -42,7 +42,7 @@ public class Block {
   private List<Frame> frames = new ArrayList<>();
   private Block parent;
   private Frame defaultFrame = null;
-  private JPNode blockStatementNode;
+  private final JPNode blockStatementNode;
   private Set<BufferScope> bufferScopes = new HashSet<>();
 
   /**
@@ -96,8 +96,9 @@ public class Block {
     if (canScopeFrame()) {
       frames.add(frame);
       return this;
-    } else
+    } else {
       return parent.addFrame(frame);
+    }
   }
 
   /**
@@ -151,9 +152,9 @@ public class Block {
   private boolean canScopeBufferReference(TableBuffer symbol) {
     // REPEAT, FOR, and Program_root blocks can scope a buffer.
     switch (blockStatementNode.getType()) {
-      case ProParserTokenTypes.REPEAT:
-      case ProParserTokenTypes.FOR:
-      case ProParserTokenTypes.Program_root:
+      case Proparse.REPEAT:
+      case Proparse.FOR:
+      case Proparse.Program_root:
         return true;
     }
     // If this is the root block for the buffer's symbol, then the scope
@@ -339,7 +340,7 @@ public class Block {
       if (flw != null)
         return result.setSymbol(flw).build();
 
-      Symbol s = symbolScope.lookupSymbol(ProParserTokenTypes.EVENT, name);
+      Symbol s = symbolScope.lookupSymbol(Proparse.EVENT, name);
       if (s != null) {
         return result.setSymbol(s).build();
       }
@@ -462,8 +463,9 @@ public class Block {
       this.defaultFrame = frame;
       frames.add(frame);
       return this;
-    } else
+    } else {
       return parent.setDefaultFrameImplicit(frame);
+    }
   }
 
   public void setParent(Block parent) {

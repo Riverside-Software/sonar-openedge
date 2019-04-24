@@ -30,8 +30,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 public class MacroGraphTest {
   private final static String SRC_DIR = "src/test/resources/data/preprocessor";
 
@@ -39,7 +37,7 @@ public class MacroGraphTest {
   private ParseUnit unit;
 
   @BeforeTest
-  public void setUp() throws ANTLRException {
+  public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
@@ -77,11 +75,18 @@ public class MacroGraphTest {
 
   @Test
   public void testMacroGraph() {
-    Assert.assertEquals(unit.getMacroGraph().findExternalMacroReferences().size(), 1);
+    Assert.assertEquals(unit.getMacroGraph().findExternalMacroReferences().size(), 3);
     Assert.assertEquals(unit.getMacroGraph().findExternalMacroReferences(new int[] {1,1}, new int[] {5,1}).size(), 1);
     Assert.assertEquals(unit.getMacroGraph().findExternalMacroReferences(new int[] {1,1}, new int[] {2,1}).size(), 0);
-//    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(0), 1);
-//    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(1), 0);
+    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(0).size(), 1);
+    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(1).size(), 1);
+    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(2).size(), 1);
+    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(3).size(), 1);
+    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(4).size(), 0);
+    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(2).get(0).getArgNumber(0), null);
+    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(2).get(0).getArgNumber(1).getValue(), "123");
+    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(2).get(0).getArgNumber(2).getValue(), "456");
+    Assert.assertEquals(unit.getMacroGraph().findIncludeReferences(2).get(0).getArgNumber(3), null);
   }
 
   @Test

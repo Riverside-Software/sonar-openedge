@@ -19,7 +19,7 @@ import org.antlr.v4.runtime.IntStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
-import org.antlr.v4.runtime.WritableToken;
+import org.prorefactor.core.ProToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class MultiChannelTokenSource implements TokenSource {
     switch (currentToken.getType()) {
       case PreprocessorParser.COMMENT:
       case PreprocessorParser.WS:
-        ((WritableToken) currentToken).setChannel(Token.HIDDEN_CHANNEL);
+        ((ProToken) currentToken).setChannel(Token.HIDDEN_CHANNEL);
         break;
       case PreprocessorParser.AMPMESSAGE:
       case PreprocessorParser.AMPANALYZESUSPEND:
@@ -57,10 +57,10 @@ public class MultiChannelTokenSource implements TokenSource {
       case PreprocessorParser.AMPSCOPEDDEFINE:
       case PreprocessorParser.AMPUNDEFINE:
       case PreprocessorParser.INCLUDEDIRECTIVE:
-        ((WritableToken) currentToken).setChannel(PREPROCESSOR_CHANNEL);
+        ((ProToken) currentToken).setChannel(PREPROCESSOR_CHANNEL);
         break;
       case PreprocessorParser.PROPARSEDIRECTIVE:
-        ((WritableToken) currentToken).setChannel(PROPARSE_CHANNEL);
+        ((ProToken) currentToken).setChannel(PROPARSE_CHANNEL);
         break;
       default:
     }

@@ -27,32 +27,6 @@ public class MacroLevel {
   }
 
   /**
-   * Trace back nested macro definitions until we find the original source.
-   * 
-   * @return int[3] - file, line, column.
-   */
-  public static int[] getDefinitionPosition(MacroDef def) {
-    int[] ret = new int[3];
-    if (def.getIncludeRef() == null) {
-      if (def.getParent() instanceof NamedMacroRef) {
-        return getDefinitionPosition(((NamedMacroRef) def.getParent()).getMacroDef());
-      }
-      ret[0] = ((IncludeRef) def.getParent()).getFileIndex();
-      ret[1] = def.getPosition().getLine();
-      ret[2] = def.getPosition().getColumn();
-    } else {
-      // Include arguments don't get their file/line/col stored, so
-      // we have to find the include reference source.
-      if (!(def.getIncludeRef().getParent() instanceof IncludeRef))
-        return getDefinitionPosition(((NamedMacroRef) def.getIncludeRef().getParent()).getMacroDef());
-      ret[0] = ((IncludeRef) def.getIncludeRef().getParent()).getFileIndex();
-      ret[1] = def.getIncludeRef().getLine();
-      ret[2] = def.getIncludeRef().getColumn();
-    }
-    return ret;
-  }
-
-  /**
    * Build and return an array of the MacroRef objects, which would map to the SOURCENUM attribute from JPNode. Built
    * simply by walking the tree and adding every MacroRef to the array.
    */

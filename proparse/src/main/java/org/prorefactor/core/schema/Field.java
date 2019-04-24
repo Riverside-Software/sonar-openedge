@@ -15,8 +15,6 @@
  ********************************************************************************/
 package org.prorefactor.core.schema;
 
-import org.prorefactor.core.JPNode;
-import org.prorefactor.treeparser.ClassSupport;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 
@@ -100,12 +98,6 @@ public class Field implements IField {
   @Override
   public Primative setClassName(String s) {
     this.className = s;
-    return this;
-  }
-
-  @Override
-  public Primative setClassName(JPNode typeNameNode) {
-    this.className = ClassSupport.qualifiedClassName(typeNameNode);
     return this;
   }
 

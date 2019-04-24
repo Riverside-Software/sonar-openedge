@@ -20,6 +20,7 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
+import org.prorefactor.core.ProToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

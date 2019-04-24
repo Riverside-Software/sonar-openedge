@@ -17,7 +17,7 @@ package org.prorefactor.core;
 
 import static org.testng.Assert.assertTrue;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.testng.annotations.Test;
 
 public class NodeTypesTest {
@@ -25,9 +25,9 @@ public class NodeTypesTest {
   @Test
   public void testRange() {
     for (ABLNodeType type : ABLNodeType.values()) {
-      assertTrue(type.getType() >= -1);
+      assertTrue(type.getType() >= -1000);
       // assertTrue(type.getType() != 0);
-      assertTrue(type.getType() < ProParserTokenTypes.Last_Token_Number);
+      assertTrue(type.getType() < Proparse.Last_Token_Number);
     }
   }
 

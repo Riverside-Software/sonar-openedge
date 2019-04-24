@@ -15,15 +15,15 @@
  ********************************************************************************/
 package org.prorefactor.treeparser;
 
-import org.prorefactor.core.JPNode;
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.symbols.Symbol;
 
 public class Parameter {
 
   private boolean bind = false;
-  private int progressType = ProParserTokenTypes.VARIABLE;
-  private JPNode directionNode;
+  private int progressType = Proparse.VARIABLE;
+  private ABLNodeType directionNode;
   private Symbol symbol;
 
   /** For a TEMP-TABLE or DATASET, was the BIND keyword used? */
@@ -32,7 +32,7 @@ public class Parameter {
   }
 
   /** The node of (BUFFER|INPUT|OUTPUT|INPUTOUTPUT|RETURN). */
-  public JPNode getDirectionNode() {
+  public ABLNodeType getDirectionNode() {
     return directionNode;
   }
 
@@ -58,7 +58,7 @@ public class Parameter {
   }
 
   /** Set by TreeParser01. */
-  public void setDirectionNode(JPNode directionNode) {
+  public void setDirectionNode(ABLNodeType directionNode) {
     this.directionNode = directionNode;
   }
 

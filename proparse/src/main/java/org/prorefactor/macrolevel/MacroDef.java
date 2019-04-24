@@ -100,4 +100,31 @@ public class MacroDef implements MacroEvent {
   public IncludeRef getIncludeRef() {
     return includeRef;
   }
+
+  // TODO Migrated from existing code, but doesn't seem to be used anywhere. Remove ?
+  public int[] getDefinitionPosition() {
+    int[] ret = new int[3];
+
+    if (includeRef == null) {
+      if (parent instanceof NamedMacroRef) {
+        return ((NamedMacroRef) parent).getMacroDef().getDefinitionPosition();
+      }
+
+      ret[0] = ((IncludeRef) parent).getFileIndex();
+      ret[1] = line;
+      ret[2] = column;
+    } else {
+      // Include arguments don't get their file/line/col stored, so
+      // we have to find the include reference source.
+      if (!(includeRef.getParent() instanceof IncludeRef)) {
+        return ((NamedMacroRef) includeRef.getParent()).getMacroDef().getDefinitionPosition();
+      }
+
+      ret[0] = ((IncludeRef) includeRef.getParent()).getFileIndex();
+      ret[1] = includeRef.getLine();
+      ret[2] = includeRef.getColumn();
+    }
+    return ret;
+  }
+
 }

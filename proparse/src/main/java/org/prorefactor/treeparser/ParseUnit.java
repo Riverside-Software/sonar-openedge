@@ -25,7 +25,15 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BufferedTokenStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.macrolevel.IncludeRef;
@@ -35,12 +43,13 @@ import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
 import org.prorefactor.proparse.IntegerIndex;
 import org.prorefactor.proparse.ParserSupport;
-import org.prorefactor.proparse.ProParser;
+import org.prorefactor.proparse.antlr4.DescriptiveErrorListener;
+import org.prorefactor.proparse.antlr4.JPNodeVisitor;
 import org.prorefactor.proparse.antlr4.ProgressLexer;
+import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.proparse.antlr4.ProparseErrorStrategy;
+import org.prorefactor.proparse.antlr4.TreeParser;
 import org.prorefactor.refactor.RefactorSession;
-import org.prorefactor.treeparser01.ITreeParserAction;
-import org.prorefactor.treeparser01.TP01Support;
-import org.prorefactor.treeparser01.TreeParser01;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -49,10 +58,6 @@ import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 
-import antlr.ANTLRException;
-import antlr.Token;
-import antlr.TokenStream;
-import antlr.TokenStreamException;
 import eu.rssw.pct.elements.ITypeInfo;
 
 /**
@@ -68,6 +73,7 @@ public class ParseUnit {
   private final String relativeName;
 
   private IntegerIndex<String> fileNameList;
+  private ParseTree tree;
   private ProgramRootNode topNode;
   private IncludeRef macroGraph;
   private boolean appBuilderCode;
@@ -77,7 +83,6 @@ public class ParseUnit {
   private Document xref = null;
   private ITypeInfo typeInfo = null;
   private List<Integer> trxBlocks;
-  // TEMP-ANTLR4
   private ParserSupport support;
 
   public ParseUnit(File file, RefactorSession session) {
@@ -146,27 +151,12 @@ public class ParseUnit {
    * 
    * @throws UncheckedIOException If main file can't be opened
    */
-  public TokenSource lex4() {
+  public TokenSource lex() {
     return new ProgressLexer(session, getByteSource(), relativeName, true);
   }
 
-  public TokenSource preprocess4() {
+  public TokenSource preprocess() {
     return new ProgressLexer(session, getByteSource(), relativeName, false);
-  }
-
-  /**
-   * Returns a TokenStream object for the main file. Include files are not expanded, and preprocessor is not used
-   * 
-   * @throws UncheckedIOException If main file can't be opened
-   */
-  public TokenStream lex() {
-    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, true);
-    return lexer.getANTLR2TokenStream(false);
-  }
-
-  public TokenStream preprocess() {
-    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
-    return lexer.getANTLR2TokenStream(true);
   }
 
   /**
@@ -177,73 +167,53 @@ public class ParseUnit {
   public void lexAndGenerateMetrics() {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
     ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, true);
-    TokenStream stream = lexer.getANTLR2TokenStream(false);
-    try {
-      Token tok = stream.nextToken();
-      while (tok.getType() != Token.EOF_TYPE) {
-        tok = stream.nextToken();
-      }
-    } catch (TokenStreamException uncaught) {
-      // Never thrown
+    Token tok = lexer.nextToken();
+    while (tok.getType() != Token.EOF) {
+      tok = lexer.nextToken();
     }
     this.metrics = lexer.getMetrics();
     LOGGER.trace("Exiting ParseUnit#lex()");
   }
 
-  public void parse() throws ANTLRException {
+  public void parse() {
     LOGGER.trace("Entering ParseUnit#parse()");
 
     ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
-    ProParser parser = new ProParser(lexer.getANTLR2TokenStream(true));
+    Proparse parser = new Proparse(new CommonTokenStream(lexer));
     parser.initAntlr4(session, lexer.getFilenameList());
-    parser.program();
-    ((ProgramRootNode) parser.getAST()).backLinkAndFinalize();
-    lexer.parseComplete();
+    parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+    parser.setErrorHandler(new BailErrorStrategy());
+    parser.removeErrorListeners();
+    parser.addErrorListener(new DescriptiveErrorListener());
+
+    try {
+      tree = parser.program();
+    } catch (ParseCancellationException caught) {
+      parser.setErrorHandler(new ProparseErrorStrategy());
+      parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+      tree = parser.program();
+    }
+
+    topNode = (ProgramRootNode) new JPNodeVisitor(parser.getParserSupport(),
+        (BufferedTokenStream) parser.getInputStream()).visit(tree).build(parser.getParserSupport());
 
     fileNameList = lexer.getFilenameList();
     macroGraph = lexer.getMacroGraph();
     appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
     sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
     metrics = lexer.getMetrics();
-    topNode = (ProgramRootNode) parser.getAST();
-    support = parser.support;
+    support = parser.getParserSupport();
 
     LOGGER.trace("Exiting ParseUnit#parse()");
   }
 
-  /**
-   * Run any IJPTreeParser against the AST. This will call parse() if the JPNode AST has not already been built.
-   */
-  public void treeParser(IJPTreeParser tp) throws ANTLRException {
-    LOGGER.trace("Entering ParseUnit#treeParser()");
-    if (this.getTopNode() == null)
+  public void treeParser01() {
+    if (topNode == null)
       parse();
-    tp.program(getTopNode());
-    LOGGER.trace("Exiting ParseUnit#treeParser()");
-  }
-
-  /**
-   * Run TreeParser01. Takes care of calling parse() first, if that has not already been done.
-   */
-  public void treeParser01() throws ANTLRException {
-    LOGGER.trace("Entering ParseUnit#treeParser01()");
-    if (this.getTopNode() == null)
-      parse();
-    ITreeParserAction action = new TP01Support(session, this);
-    TreeParser01 tp = new TreeParser01(action);
-    treeParser(tp);
-    LOGGER.trace("Exiting ParseUnit#treeParser01()");
-  }
-
-  /**
-   * Run TreeParser01 with any TP01Action object. Takes care of calling parse() first, if that has not already been
-   * done.
-   */
-  public void treeParser01(ITreeParserAction action) throws ANTLRException {
-    if (this.getTopNode() == null)
-      parse();
-    TreeParser01 tp = new TreeParser01(action);
-    treeParser(tp);
+    ParseTreeWalker walker = new ParseTreeWalker();
+    TreeParser parser = new TreeParser(support, session);
+    walker.walk(parser, tree);
+    rootScope = parser.getRootScope();
   }
 
   public void attachXref(Document xref) {
@@ -272,7 +242,10 @@ public class ParseUnit {
     return trxBlocks;
   }
 
-  // TEMP-ANTLR4
+  public ParseTree getParseTree() {
+    return tree;
+  }
+
   public ParserSupport getSupport() {
     return support;
   }

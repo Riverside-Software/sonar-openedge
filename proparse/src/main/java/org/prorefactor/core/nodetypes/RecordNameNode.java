@@ -15,6 +15,9 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
@@ -27,29 +30,26 @@ public class RecordNameNode extends JPNode {
     super(t);
   }
 
+  @Nullable
   public BufferScope getBufferScope() {
-    BufferScope bufferScope = (BufferScope) getLink(IConstants.BUFFERSCOPE);
-    assert bufferScope != null;
-    return bufferScope;
+    return (BufferScope) getLink(IConstants.BUFFERSCOPE);
   }
 
+  @Nullable
   public TableBuffer getTableBuffer() {
-    TableBuffer buffer = (TableBuffer) getLink(IConstants.SYMBOL);
-    assert buffer != null;
-    return buffer;
+    return (TableBuffer) getLink(IConstants.SYMBOL);
   }
 
-  public void setBufferScope(BufferScope bufferScope) {
-    assert bufferScope != null;
+  public void setBufferScope(@Nonnull BufferScope bufferScope) {
     setLink(IConstants.BUFFERSCOPE, bufferScope);
   }
 
-  public void setTableBuffer(TableBuffer buffer) {
+  public void setTableBuffer(@Nonnull TableBuffer buffer) {
     setLink(IConstants.SYMBOL, buffer);
   }
 
   /** Set the 'store type' attribute on a RECORD_NAME node. */
-  public void setStoreType(FieldType tabletype) {
+  public void setStoreType(@Nonnull FieldType tabletype) {
     switch (tabletype) {
       case DBTABLE:
         attrSet(IConstants.STORETYPE, IConstants.ST_DBTABLE);

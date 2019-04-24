@@ -31,7 +31,6 @@ import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,27 +40,13 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.BufferedTokenStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.atn.ParseInfo;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.RecognitionException;
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
-import org.prorefactor.core.TreeNodeLister;
-import org.prorefactor.core.nodetypes.ProgramRootNode;
-import org.prorefactor.proparse.ParserSupport;
-import org.prorefactor.proparse.ProParserTokenTypes;
-import org.prorefactor.proparse.antlr4.DescriptiveErrorListener;
 import org.prorefactor.proparse.antlr4.IncludeFileNotFoundException;
-import org.prorefactor.proparse.antlr4.JPNodeVisitor;
-import org.prorefactor.proparse.antlr4.ProgressLexer;
 import org.prorefactor.proparse.antlr4.Proparse;
-import org.prorefactor.proparse.antlr4.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -97,11 +82,8 @@ import org.xml.sax.SAXException;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 
-import antlr.ANTLRException;
-import antlr.RecognitionException;
 import eu.rssw.listing.CodeBlock;
 import eu.rssw.listing.ListingParser;
 
@@ -126,8 +108,6 @@ public class OpenEdgeProparseSensor implements Sensor {
   // Timing statistics
   private Map<String, Long> ruleTime = new HashMap<>();
   private long parseTime = 0L;
-  private long parse4Time = 0L;
-  private long parse4Tree = 0L;
   private long xmlParseTime = 0L;
   private long maxParseTime = 0L;
   private Map<Integer, Long> decisionTime = new HashMap<>();
@@ -176,8 +156,6 @@ public class OpenEdgeProparseSensor implements Sensor {
         parseIncludeFile(context, file, session);
       } else {
         parseMainFile(context, file, session);
-        if (settings.useANTLR4())
-          testAntlr4(context, file, session);
       }
     }
 
@@ -288,16 +266,17 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
       return;
     } catch (RecognitionException caught) {
-      LOG.error("Error during code parsing for " + file + " at position " + caught.getFilename() + ":"
-          + caught.getLine() + ":" + caught.getColumn(), (settings.displayStackTraceOnError() ? caught : null));
+      ProToken tok = (ProToken) caught.getOffendingToken();
+      LOG.error("Error during code parsing for " + file + " at position " + tok.getFileName() + ":"
+          + tok.getLine() + ":" + tok.getCharPositionInLine(), (settings.displayStackTraceOnError() ? caught : null));
       numFailures++;
 
       TextPointer strt = null;
       TextPointer end = null;
-      if (InputFileUtils.getRelativePath(file, context.fileSystem()).equals(caught.getFilename())) {
+      if (InputFileUtils.getRelativePath(file, context.fileSystem()).equals(tok.getFileName())) {
         try {
-          strt = file.newPointer(caught.getLine(), caught.getColumn() - 1);
-          end = file.newPointer(caught.getLine(), caught.getColumn());
+          strt = file.newPointer(tok.getLine(), tok.getCharPositionInLine() - 1);
+          end = file.newPointer(tok.getLine(), tok.getCharPositionInLine());
         } catch (IllegalArgumentException uncaught) { // NO-SONAR
           // Nothing
         }
@@ -306,8 +285,8 @@ public class OpenEdgeProparseSensor implements Sensor {
       if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
         NewAnalysisError analysisError = context.newAnalysisError();
         analysisError.onFile(file);
-        analysisError.message(Strings.nullToEmpty(caught.getMessage()) + " in " + caught.getFilename() + ":" + caught.getLine()
-            + ":" + caught.getColumn());
+        analysisError.message(Strings.nullToEmpty(caught.getMessage()) + " in " + tok.getFileName() + ":" + tok.getLine()
+            + ":" + tok.getCharPositionInLine());
         if (strt != null)
           analysisError.at(strt);
         analysisError.save();
@@ -315,7 +294,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         NewIssue issue = context.newIssue().forRule(
             RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY));
         NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()) + " in "
-            + caught.getFilename() + ":" + caught.getLine() + ":" + caught.getColumn());
+            + tok.getFileName() + ":" + tok.getLine() + ":" + tok.getCharPositionInLine());
         if ((strt != null) && (end != null))
           loc.at(file.newRange(strt, end));
         issue.at(loc);
@@ -323,7 +302,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
 
       return;
-    } catch (RuntimeException | ANTLRException caught) {
+    } catch (RuntimeException caught) {
       LOG.error("Error during code parsing for " + InputFileUtils.getRelativePath(file, context.fileSystem()), caught);
       numFailures++;
       NewIssue issue = context.newIssue();
@@ -331,8 +310,6 @@ public class OpenEdgeProparseSensor implements Sensor {
           issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()))).save();
       return;
     }
-    if (settings.useANTLR4())
-      generateProparseFlatFiles(unit.getTopNode(), unit.getSupport(), false, InputFileUtils.getRelativePath(file, context.fileSystem()));
 
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
       computeCpd(context, file, unit);
@@ -402,8 +379,6 @@ public class OpenEdgeProparseSensor implements Sensor {
         numListings, numFailures, ncLocs);
     LOG.info("AST Generation | time={} ms", parseTime);
     LOG.info("XML Parsing    | time={} ms", xmlParseTime);
-    LOG.info("AST4Generation | time={} ms", parse4Time);
-    LOG.info("AST4Tree       | time={} ms", parse4Tree);
     // Sort entries by rule name
     ruleTime.entrySet().stream().sorted(
         (Entry<String, Long> obj1, Entry<String, Long> obj2) -> obj1.getKey().compareTo(obj2.getKey())).forEach(
@@ -411,127 +386,16 @@ public class OpenEdgeProparseSensor implements Sensor {
     if (!decisionTime.isEmpty()) {
       LOG.info("ANTRL4 - 25 longest rules");
       decisionTime.entrySet().stream().sorted((o1, o2) -> o2.getValue().compareTo(o1.getValue())).limit(25).forEach(
-          entry -> LOG.info("Rule {} - {} | time={} ms", entry.getKey().intValue(),
+          entry -> LOG.info("Rule {} - {} | time={} ms", entry.getKey(),
               Proparse.ruleNames[Proparse._ATN.getDecisionState(entry.getKey().intValue()).ruleIndex],
               entry.getValue()));
     }
     if (!maxK.isEmpty()) {
       LOG.info("ANTRL4 - 25 Max lookeahead rules");
       maxK.entrySet().stream().sorted((o1, o2) -> o2.getValue().compareTo(o1.getValue())).limit(25).forEach(
-          entry -> LOG.info("Rule {} - {} | Max lookahead: {}", entry.getKey().intValue(),
+          entry -> LOG.info("Rule {} - {} | Max lookahead: {}", entry.getKey(),
               Proparse.ruleNames[Proparse._ATN.getDecisionState(entry.getKey().intValue()).ruleIndex],
               entry.getValue()));
-    }
-  }
-
-  // TEMP-ANTLR4
-  private void testAntlr4(SensorContext context, InputFile file, RefactorSession session) {
-    long startTime = System.currentTimeMillis();
-    try (InputStream stream = InputFileUtils.getInputStream(file)) {
-      ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(stream));
-      ProgressLexer lexer = new ProgressLexer(session, src, InputFileUtils.getRelativePath(file, context.fileSystem()), false);
-      lexer.setMergeNameDotInId(true);
-      Proparse parser = new Proparse(new CommonTokenStream(lexer));
-      parser.initAntlr4(session, lexer.getFilenameList());
-      if (settings.useANTLR4Profiler())
-        parser.setProfile(true);
-      parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
-      parser.setErrorHandler(new BailErrorStrategy());
-
-      ParseTree tree;
-      try {
-        tree = parser.program();
-      } catch (ParseCancellationException caught) {
-        LOG.warn("Parser switching to LL prediction mode for {}", InputFileUtils.getRelativePath(file, context.fileSystem()));
-        parser.getInterpreter().setPredictionMode(PredictionMode.LL);
-        parser.setErrorHandler(new ProparseErrorStrategy());
-        parser.removeErrorListeners();
-        parser.addErrorListener(new DescriptiveErrorListener());
-        tree = parser.program();
-      }
-
-      long time1 = System.currentTimeMillis() - startTime;
-      parse4Time += time1;
-      JPNodeVisitor visitor = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
-      org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode root4 = (org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode) visitor.visit(tree).build(parser.getParserSupport());
-      long time2 = System.currentTimeMillis() - startTime - time1;
-      parse4Tree += time2;
-
-      generateProparseFlatFiles(root4, parser.getParserSupport(), true, InputFileUtils.getRelativePath(file, context.fileSystem()));
-      generateAntlr4Stats(InputFileUtils.getRelativePath(file, context.fileSystem()), time1, time2, parser.getParseInfo());
-
-      LOG.info("File {} - {} ms ANTLR4 - {} ms visitor",InputFileUtils.getRelativePath(file, context.fileSystem()), time1, time2);
-    } catch (UncheckedIOException caught) {
-      if ((caught.getCause() != null) && (caught.getCause() instanceof XCodedFileException)) {
-        XCodedFileException cause = (XCodedFileException) caught.getCause();
-        LOG.error("Unable to parse {} - Can't read xcode'd file {}", file, cause.getFileName());
-      } else if ((caught.getCause() != null) && (caught.getCause() instanceof IncludeFileNotFoundException)) {
-        IncludeFileNotFoundException cause = (IncludeFileNotFoundException) caught.getCause();
-        LOG.error("Unable to parse {} - Can't find include file '{}' from '{}'", file, cause.getIncludeName(), cause.getFileName());
-      } else {
-        LOG.error("Unable to parse " + file + " - IOException was caught - Please report this issue", caught);
-      }
-      return;
-    } catch (Throwable caught) {
-      LOG.error("Error during code parsing for " + InputFileUtils.getRelativePath(file, context.fileSystem()), caught);
-    }
-  }
-
-  // TEMP-ANTLR4
-  private void generateProparseFlatFiles(ProgramRootNode rootNode, ParserSupport support, boolean version,
-      String fileName) {
-    File f = new File(".proparse/antlr2/" + fileName.replace('\\', '_').replace('/', '_').replace(':', '_'));
-    f.getParentFile().mkdirs();
-
-    try (PrintWriter writer = new PrintWriter(f)) {
-      TreeNodeLister nodeLister = new TreeNodeLister(rootNode, support, writer, ABLNodeType.INVALID_NODE,
-          ABLNodeType.ANNOTATION);
-      nodeLister.print();
-    } catch (IOException caught) {
-      LOG.error("Unable to write proparse debug file", caught);
-    }
-  }
-
-  // TEMP-ANTLR4
-  private void generateProparseFlatFiles(org.prorefactor.proparse.antlr4.nodetypes.ProgramRootNode rootNode,
-      ParserSupport support, boolean version, String fileName) {
-    File f = new File(".proparse/antlr4/" + fileName.replace('\\', '_').replace('/', '_').replace(':', '_'));
-    f.getParentFile().mkdirs();
-
-    try (PrintWriter writer = new PrintWriter(f)) {
-      org.prorefactor.proparse.antlr4.TreeNodeLister nodeLister = new org.prorefactor.proparse.antlr4.TreeNodeLister(
-          rootNode, support, writer, ABLNodeType.INVALID_NODE, ABLNodeType.ANNOTATION);
-      nodeLister.print();
-    } catch (IOException caught) {
-      LOG.error("Unable to write proparse debug file", caught);
-    }
-  }
-
-  // TEMP-ANTLR4
-  private void generateAntlr4Stats(String fileName, long parseTree, long treeVisitor, ParseInfo info) {
-    File f = new File(".proparse/antlr4-timings/" + fileName.replace('\\', '_').replace('/', '_').replace(':', '_'));
-    f.getParentFile().mkdirs();
-    try (PrintWriter writer = new PrintWriter(f)) {
-      writer.println(fileName.replace(':', '_') + " : " + parseTree + " : " + treeVisitor);
-      if ((info != null) && (info.getDecisionInfo() != null)) {
-        Arrays.stream(info.getDecisionInfo()).filter(decision -> decision.SLL_MaxLook > 0).sorted(
-            (d1, d2) -> Long.compare(d2.SLL_MaxLook, d1.SLL_MaxLook)).forEach(
-                decision -> writer.println(String.format(
-                    "Time: %d in %d calls - LL_Lookaheads: %d Max k: %d Ambiguities: %d Errors: %d Rule: %s",
-                    decision.timeInPrediction / 1000000, decision.invocations, decision.SLL_TotalLook,
-                    decision.SLL_MaxLook, decision.ambiguities.size(), decision.errors.size(),
-                    Proparse.ruleNames[Proparse._ATN.getDecisionState(decision.decision).ruleIndex])));
-        // MaxK + prediction time stats
-        Arrays.stream(info.getDecisionInfo()).filter(decision -> decision.SLL_MaxLook > 0).forEach(decision -> {
-          if ((maxK.get(decision.decision) == null) || (maxK.get(decision.decision) < decision.SLL_MaxLook))
-            maxK.put(decision.decision, decision.SLL_MaxLook);
-        });
-        Arrays.stream(info.getDecisionInfo()).filter(decision -> decision.timeInPrediction > 0).forEach(
-            decision -> decisionTime.put(decision.decision, (decision.timeInPrediction / 1000000) 
-                + (decisionTime.get(decision.decision) == null ? 0 : decisionTime.get(decision.decision))));
-      }
-    } catch (IOException caught) {
-      LOG.error("Unable to write proparse debug file", caught);
     }
   }
 
@@ -601,30 +465,30 @@ public class OpenEdgeProparseSensor implements Sensor {
     for (TreeParserSymbolScope child : unit.getRootScope().getChildScopesDeep()) {
       int scopeType = child.getRootBlock().getNode().getType();
       switch (scopeType) {
-        case ProParserTokenTypes.PROCEDURE:
+        case Proparse.PROCEDURE:
           boolean externalProc = false;
-          for (JPNode node : child.getRootBlock().getNode().getDirectChildren()) {
+          /* FIXME for (JPNode node : child.getRootBlock().getNode().getDirectChildren()) {
             if ((node.getType() == ProParserTokenTypes.IN_KW) || (node.getType() == ProParserTokenTypes.SUPER)
                 || (node.getType() == ProParserTokenTypes.EXTERNAL)) {
               externalProc = true;
             }
-          }
+          } */
           if (!externalProc) {
             numProcs++;
           }
           break;
-        case ProParserTokenTypes.FUNCTION:
+        case Proparse.FUNCTION:
           boolean externalFunc = false;
-          for (JPNode node : child.getRootBlock().getNode().getDirectChildren()) {
+          /* FIXME for (JPNode node : child.getRootBlock().getNode().getDirectChildren()) {
             if ((node.getType() == ProParserTokenTypes.IN_KW) || (node.getType() == ProParserTokenTypes.FORWARDS)) {
               externalFunc = true;
             }
-          }
+          } */
           if (!externalFunc) {
             numFuncs++;
           }
           break;
-        case ProParserTokenTypes.METHOD:
+        case Proparse.METHOD:
           numMethds++;
           break;
         default:

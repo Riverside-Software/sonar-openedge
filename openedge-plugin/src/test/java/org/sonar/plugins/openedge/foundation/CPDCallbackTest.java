@@ -45,8 +45,6 @@ import org.sonar.plugins.openedge.api.Constants;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import antlr.ANTLRException;
-
 public class CPDCallbackTest {
   private static final String BASEDIR = "src/test/resources/";
   private static final Version VERSION = Version.parse("7.5");
@@ -199,12 +197,9 @@ public class CPDCallbackTest {
 
   private ParseUnit getParseUnit(InputFile file) {
     ParseUnit unit = new ParseUnit(file.file(), session);
-    try {
-      unit.treeParser01();
-      unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
-    } catch (ANTLRException caught) {
-      throw new RuntimeException("Unable to parse file", caught);
-    }
+    unit.treeParser01();
+    unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
+
     return unit;
   }
 

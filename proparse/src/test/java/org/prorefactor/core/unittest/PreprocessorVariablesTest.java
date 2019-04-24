@@ -28,8 +28,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 public class PreprocessorVariablesTest {
   private final static String SRC_DIR = "src/test/resources/data/preprocessor";
 
@@ -42,7 +40,7 @@ public class PreprocessorVariablesTest {
   }
 
   @Test
-  public void test03() throws ANTLRException {
+  public void test03() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor03.p"), session);
     unit.parse();
     testVariable(unit.getTopNode(), "var01");
@@ -66,7 +64,7 @@ public class PreprocessorVariablesTest {
   }
 
   @Test
-  public void test04() throws ANTLRException {
+  public void test04() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor04.p"), session);
     unit.parse();
     testVariable(unit.getTopNode(), "var01");
@@ -82,14 +80,14 @@ public class PreprocessorVariablesTest {
   }
 
   @Test
-  public void test06() throws ANTLRException {
+  public void test06() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor06.p"), session);
     unit.parse();
     Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
   }
 
   @Test
-  public void test08() throws ANTLRException {
+  public void test08() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor08.p"), session);
     unit.parse();
     Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 0);

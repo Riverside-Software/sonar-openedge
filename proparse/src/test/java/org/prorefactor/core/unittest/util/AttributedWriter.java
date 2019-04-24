@@ -31,8 +31,6 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 
-import antlr.ANTLRException;
-
 public class AttributedWriter {
 
   BufferedWriter writer = null;
@@ -87,7 +85,7 @@ public class AttributedWriter {
     nodeComments.append(symbol.getScope().depth());
     nodeComments.append(":");
     nodeComments.append(symbol.fullName());
-    if (node.attrGet(IConstants.ABBREVIATED) > 0)
+    if ((node.getNodeType() != ABLNodeType.DEFINE) && (node.attrGet(IConstants.ABBREVIATED) > 0))
       nodeComments.append(" abbrev");
     if (node.attrGet(IConstants.UNQUALIFIED_FIELD) > 0)
       nodeComments.append(" unqualfield");
@@ -115,12 +113,13 @@ public class AttributedWriter {
    * @param outName Name of the file to write out to.
    * @throws IOException 
    */
-  public void write(String inName, File outName, RefactorSession session) throws ANTLRException, IOException {
+  public void write(String inName, File outName, RefactorSession session) throws IOException {
     try {
       ParseUnit pu = new ParseUnit(new File(inName), session);
       pu.treeParser01();
       writer = new BufferedWriter(new FileWriter(outName));
       walker(pu.getTopNode(), true);
+      writer.newLine();
     } finally {
       if (writer != null)
         writer.close();
@@ -128,13 +127,13 @@ public class AttributedWriter {
   }
 
   private void writeNode(JPNode node) throws IOException {
-    ProToken t = node.getHiddenFirst();
-    while (t != null) {
+    for (ProToken t : node.getHiddenTokens()) {
       writer.write(t.getText());
-      t = t.getNext();
     }
     writer.write(getAttributes(node));
     writer.write(node.getText());
+    if ((node.getNodeType() == ABLNodeType.RUN) || (node.getNodeType() == ABLNodeType.PROCEDURE))
+      writer.write(' ');
   }
 
 }

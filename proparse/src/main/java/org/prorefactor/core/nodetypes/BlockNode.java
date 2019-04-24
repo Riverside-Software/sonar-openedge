@@ -15,23 +15,29 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.Block;
 
+/**
+ * Specialized type of JPNode for those token types: DO, FOR, REPEAT, FUNCTION, PROCEDURE, CONSTRUCTOR, DESTRUCTOR,
+ * METHOD, CANFIND, CATCH, ON, PROPERTY_GETTER, PROPERTY_SETTER
+ */
 public class BlockNode extends JPNode {
   public BlockNode(ProToken t) {
     super(t);
   }
 
+  @Nullable
   public Block getBlock() {
-    Block block = (Block) getLink(IConstants.BLOCK);
-    assert block != null;
-    return block;
+    return (Block) getLink(IConstants.BLOCK);
   }
 
-  public void setBlock(Block block) {
+  public void setBlock(@Nonnull Block block) {
     setLink(IConstants.BLOCK, block);
   }
 
