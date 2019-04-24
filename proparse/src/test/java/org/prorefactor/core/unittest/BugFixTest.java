@@ -422,6 +422,11 @@ public class BugFixTest {
   }
 
   @Test
+  public void testDynProp() {
+    genericTest("dynprop.p");
+  }
+
+  @Test
   public void testTildeInComment() {
     TokenSource stream = genericLex("comment-tilde.p");
     Token tok = stream.nextToken();

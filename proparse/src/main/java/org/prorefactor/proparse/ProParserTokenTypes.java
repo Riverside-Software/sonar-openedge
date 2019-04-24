@@ -1257,5 +1257,6 @@ public interface ProParserTokenTypes {
 	int CHARSET = 1243;
 	int SCREENVALUE = 1244;
 	int XOR = 1245;
-	int Last_Token_Number = 1246;
+	int DYNAMICPROPERTY= 1246;
+	int Last_Token_Number = 1247;
 }

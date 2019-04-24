@@ -484,6 +484,7 @@ argFunction: // TRANSLATED
     |  DECRYPT
     |  DYNAMICCAST
     |  DYNAMICNEXTVALUE
+    |  DYNAMICPROPERTY
     |  ENCODE
     |  ENCRYPT
     |  EXP

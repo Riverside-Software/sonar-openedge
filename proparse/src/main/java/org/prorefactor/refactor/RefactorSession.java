@@ -18,6 +18,7 @@ package org.prorefactor.refactor;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +46,7 @@ public class RefactorSession {
   private final Charset charset;
 
   // Structure from rcode
-  private final Map<String, ITypeInfo> typeInfoMap = new HashMap<>();
+  private final Map<String, ITypeInfo> typeInfoMap = Collections.synchronizedMap(new HashMap<>());
 
   @Inject
   public RefactorSession(IProparseSettings proparseSettings, ISchema schema) {
