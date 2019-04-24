@@ -14,7 +14,7 @@
  ********************************************************************************/
 
 // Based on original work by John Green
-// Annotations: TRANSLATED, SEMITRANSLATED
+// Annotations: SEMITRANSLATED
 
 parser grammar Proparse;
 
@@ -445,7 +445,7 @@ builtinFunction:
   ;
 
 // If you add a function keyword here, also add option NodeTypesOption.MAY_BE_REGULAR_FUNC to ABLNodeType entry
-argFunction: // TRANSLATED 
+argFunction: 
     (  AACBIT
     |  AAMSG
     |  ABSOLUTE
@@ -946,7 +946,7 @@ filename:
     ( { ( _input.LA(1) != Token.EOF) && !hasHiddenBefore(0) }? t2=filenamePart )*
   ;
 
-filenamePart: // TRANSLATED
+filenamePart:
     // RIGHTANGLE and LEFTANGLE can't be in a filename - see RUN statement.
     // LEXCOLON has a space after it, and a colon can't be the last character in a filename.
     // OBJCOLON has no whitespace after it, so it is allowed in the middle of a filename.
@@ -1013,19 +1013,19 @@ nonPunctuating:
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-aaTraceCloseStatement: // TRANSLATED
+aaTraceCloseStatement:
     AATRACE streamNameOrHandle? CLOSE statementEnd
   ;
 
-aaTraceOnOffStatement: // TRANSLATED
+aaTraceOnOffStatement:
     AATRACE ( OFF | ON AALIST? ) statementEnd
   ;
 
-aaTraceStatement: // TRANSLATED
+aaTraceStatement:
     AATRACE streamNameOrHandle? ( TO | FROM | THROUGH ) ioPhraseStateEnd
   ;
 
-accumulateWhat: // TRANSLATED
+accumulateWhat:
     AVERAGE | COUNT | MAXIMUM | MINIMUM | TOTAL | SUBAVERAGE | SUBCOUNT | SUBMAXIMUM | SUBMINIMUM | SUBTOTAL
   ;
 
@@ -3579,7 +3579,7 @@ systemDialogPrinterSetupStatement:
     SYSTEMDIALOG PRINTERSETUP systemDialogPrinterOption* statementEnd
   ;
 
-systemDialogPrinterOption: // TRANSLATED
+systemDialogPrinterOption:
     ( NUMCOPIES expression | updateField | LANDSCAPE | PORTRAIT | inWindowExpression )
   ;
 
