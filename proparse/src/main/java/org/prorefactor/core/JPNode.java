@@ -445,6 +445,16 @@ public class JPNode implements AST {
   }
 
   /**
+   * Get an array of all descendant statement nodes (including this node)
+   */
+  public List<JPNode> queryStateHead() {
+    JPNodeQuery query = new JPNodeQuery(true);
+    walk(query);
+
+    return query.getResult();
+  }
+
+  /**
    * Get an array of all descendant nodes (including this node) of a given type
    */
   public List<JPNode> queryStateHead(ABLNodeType type, ABLNodeType... findTypes) {
@@ -459,42 +469,6 @@ public class JPNode implements AST {
    */
   public List<JPNode> queryCurrentStatement(ABLNodeType type, ABLNodeType... findTypes) {
     JPNodeQuery query = new JPNodeQuery(false, false, this.getStatement(), type, findTypes);
-    walk(query);
-
-    return query.getResult();
-  }
-
-  /**
-   * Get an array of all descendant nodes (including this node) of a given type
-   * @deprecated Since 2.1.3, use {@link JPNode#query(ABLNodeType, ABLNodeType...)}
-   */
-  @Deprecated
-  public List<JPNode> query(Integer... findTypes) {
-    JPNodeQuery query = new JPNodeQuery(findTypes);
-    walk(query);
-
-    return query.getResult();
-  }
-
-  /**
-   * Get an array of all descendant nodes (including this node) of a given type
-   * @deprecated Since 2.1.3, use {@link JPNode#queryMainFile(ABLNodeType, ABLNodeType...)}
-   */
-  @Deprecated
-  public List<JPNode> queryMainFile(Integer... findTypes) {
-    JPNodeQuery query = new JPNodeQuery(false, true, null, findTypes);
-    walk(query);
-
-    return query.getResult();
-  }
-
-  /**
-   * Get an array of all descendant nodes (including this node) of a given type
-   * @deprecated Since 2.1.3, use {@link JPNode#queryStateHead(ABLNodeType, ABLNodeType...)}
-   */
-  @Deprecated
-  public List<JPNode> queryStateHead(Integer... findTypes) {
-    JPNodeQuery query = new JPNodeQuery(true, findTypes);
     walk(query);
 
     return query.getResult();
