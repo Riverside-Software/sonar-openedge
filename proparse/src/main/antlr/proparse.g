@@ -501,6 +501,7 @@ argfunc:
     |  DECRYPT^
     |  DYNAMICCAST^
     |  DYNAMICNEXTVALUE^
+    |  DYNAMICPROPERTY^
     |  ENCODE^
     |  ENCRYPT^
     |  EXP^
@@ -796,7 +797,11 @@ expression:
   ;
 
 orExpression:
-     andExpression (options{greedy=true;}: OR^ andExpression { ##.setOperator(); } )*
+     xorExpression (options{greedy=true;}: OR^ xorExpression { ##.setOperator(); } )*
+  ;
+
+xorExpression:
+     andExpression (options{greedy=true;}: XOR^ andExpression { ##.setOperator(); } )*
   ;
 
 andExpression:
@@ -2021,6 +2026,8 @@ definestatement:
     |  ABSTRACT
     |  STATIC
     |  OVERRIDE
+    |  NONSERIALIZABLE
+    |  SERIALIZABLE
     )*
     (  definebrowsestate  {sthd(##,BROWSE);}
     |  definebufferstate  {sthd(##,BUFFER);}
@@ -4390,6 +4397,8 @@ unreservedkeyword:
  | CHAINED
  | CHARACTER
  | CHARACTERLENGTH
+ | CHARSET
+ | CHECKED
  | CHOOSE
  | CLASS
  | CLIENTPRINCIPAL
@@ -4580,6 +4589,7 @@ unreservedkeyword:
  | HELPTOPIC
  | HEXDECODE
  | HEXENCODE
+ | HIDDEN
  | HINT
  | HORIZONTAL
  | HTMLENDOFLINE
@@ -4721,6 +4731,7 @@ unreservedkeyword:
  | NOJOINBYSQLDB
  | NOLOOKAHEAD
  | NONE
+ | NONSERIALIZABLE
  | NORMAL
  | NORMALIZE
  | NOROWMARKERS
@@ -4845,6 +4856,7 @@ unreservedkeyword:
  | SAXATTRIBUTES
  | SAXREADER
  | SAXWRITER
+ | SCREENVALUE
  | SCROLLABLE
  | SCROLLBARHORIZONTAL
  | SCROLLBARVERTICAL
@@ -4854,6 +4866,7 @@ unreservedkeyword:
  | SELECTIONLIST
  | SEND
  | SENDSQLSTATEMENT
+ | SENSITIVE
  | SEPARATECONNECTION
  | SEPARATORS
  | SERIALIZABLE
@@ -4976,6 +4989,7 @@ unreservedkeyword:
  | VARIABLE
  | VERBOSE
  | VERTICAL
+ | VISIBLE
  | VMS
  | VOID
  | WAIT

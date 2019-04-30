@@ -488,6 +488,7 @@ argfunc:
   |  #(DECRYPT funargs )
   |  #(DYNAMICCAST funargs )
   |  #(DYNAMICNEXTVALUE funargs )
+  |  #(DYNAMICPROPERTY funargs )
   |  #(ENCODE funargs )
   |  #(ENCRYPT funargs )
   |  #(EXP funargs )
@@ -726,6 +727,7 @@ lockhow:
 
 expression:
     #(OR expression expression )
+  |  #(XOR expression expression )
   |  #(AND expression expression )
   |  #(NOT expression )
   |  #(MATCHES expression expression )
@@ -1399,7 +1401,7 @@ def_shared:
   ;
 
 def_modifiers:
-    ( PRIVATE | PROTECTED | PUBLIC | STATIC | ABSTRACT | OVERRIDE | FINAL )*
+    ( PRIVATE | PROTECTED | PUBLIC | STATIC | ABSTRACT | OVERRIDE | FINAL | NONSERIALIZABLE | SERIALIZABLE )*
   ;
 
 definebrowsestate:

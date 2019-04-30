@@ -61,7 +61,7 @@ public class OpenEdgeCodeColorizer implements Sensor {
   public void execute(SensorContext context) {
     if (context.runtime().getProduct() == SonarProduct.SONARLINT)
       return;
-
+    settings.init();
     RefactorSession session = settings.getProparseSession();
 
     for (InputFile file : context.fileSystem().inputFiles(

@@ -337,6 +337,11 @@ public class BugFixTest {
     genericTest("bug36.p");
   }
 
+  @Test
+  public void test43() throws ANTLRException {
+    genericTest("bug43.p");
+  }
+
   // Next two tests : same exception should be thrown in both cases
 //  @Test(expectedExceptions = {ProparseRuntimeException.class})
 //  public void testCache1() throws ANTLRException {
@@ -347,6 +352,16 @@ public class BugFixTest {
 //  public void testCache2() throws ANTLRException {
 //    genericTest("CacheChild.cls");
 //  }
+
+  @Test
+  public void testSerializableKeyword() throws ANTLRException {
+    genericTest("serialkw.cls");
+  }
+
+  @Test
+  public void testXor() throws ANTLRException {
+    genericTest("xor.p");
+  }
 
   @Test
   public void testSaxWriter() throws ANTLRException {
@@ -405,6 +420,11 @@ public class BugFixTest {
   @Test
   public void testDoubleColon() throws ANTLRException {
     genericTest("double-colon.p");
+  }
+
+  @Test
+  public void testDynProp() throws ANTLRException {
+    genericTest("dynprop.p");
   }
 
   @Test

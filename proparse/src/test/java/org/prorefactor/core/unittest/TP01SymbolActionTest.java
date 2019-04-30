@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.core.unittest;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -22,6 +23,9 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 
+import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.IConstants;
+import org.prorefactor.core.JPNode;
 import org.prorefactor.core.unittest.util.RoutineHandler;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
@@ -146,5 +150,24 @@ public class TP01SymbolActionTest {
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/tp01ProcessTests/ttUseIdx.p"), session);
     TP01Support walkAction = new TP01Support(session, pu);
     pu.treeParser(new TreeParser01(walkAction));
+
+    boolean found1 = false;
+    boolean found2 = false;
+    for (JPNode node : pu.getTopNode().query(ABLNodeType.DEFINE)) {
+      if ((node.getState2() == ABLNodeType.TEMPTABLE.getType())
+          && "myTT2".equals(node.nextNode().nextNode().getText())) {
+        assertEquals(node.query(ABLNodeType.USEINDEX).get(0).nextNode().attrGet(IConstants.INVALID_USEINDEX),
+            IConstants.TRUE);
+        found1 = true;
+      }
+      if ((node.getState2() == ABLNodeType.TEMPTABLE.getType())
+          && "myTT3".equals(node.nextNode().nextNode().getText())) {
+        assertEquals(node.query(ABLNodeType.USEINDEX).get(0).nextNode().attrGet(IConstants.INVALID_USEINDEX), 0);
+        found2 = true;
+      }
+    }
+    assertTrue(found1);
+    assertTrue(found2);
   }
+
 }

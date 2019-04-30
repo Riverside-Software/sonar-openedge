@@ -1,6 +1,6 @@
-# OpenEdge plugin for SonarQube
+# CABL - Code Analyzer for ABL
 
-The OpenEdge plugin for SonarQube enables analysis of OpenEdge procedural and object-oriented code, and reports:
+CABL enables analysis of OpenEdge procedural and object-oriented code on the SonarQube platform, by reporting:
  * Metrics (lines of code, comment density, complexity, shared objects, ...)
  * Issues found in the source code and DF files, such as performance killers, usage of deprecated keywords, ...
  * Code coverage from unit tests
