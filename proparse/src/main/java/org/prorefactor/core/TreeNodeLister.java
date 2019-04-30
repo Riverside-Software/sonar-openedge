@@ -88,8 +88,7 @@ public class TreeNodeLister {
       ofile.write("*OP* ");
     if (node.attrGet(IConstants.INLINE_VAR_DEF) == IConstants.TRUE)
       ofile.write("*IN* ");
-    // TODO Temporary workaround - Don't display StoreType for FIELD_REF is TreeParser converted to ANTLR4
-    if ((node.getNodeType() != ABLNodeType.FIELD_REF) && (node.attrGet(IConstants.STORETYPE) > 0))
+    if (node.attrGet(IConstants.STORETYPE) > 0)
       ofile.write("StoreType " + node.attrGet(IConstants.STORETYPE) + " ");
     if ((node.getNodeType() == ABLNodeType.ID) || (node.getNodeType() == ABLNodeType.TYPE_NAME)) {
       ofile.write("[");
