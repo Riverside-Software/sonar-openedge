@@ -21,7 +21,6 @@ package eu.rssw.antlr.profiler;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.Set;
@@ -76,15 +75,6 @@ public class TestProfiler {
     Map<String, Set<LineData>> map = session.getCoverageByFile();
     Assert.assertNotNull(map);
     Assert.assertNotEquals(map.keySet().size(), 0);
-  }
-
-  @Test
-  public void testProfiler6() throws IOException {
-    CoverageSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler1.out")).getCoverage();
-    session.mergeWith(ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler2.out")).getCoverage());
-    session.mergeWith(ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler3.out")).getCoverage());
-
-    ProfilerUtils.dumpCoverageAsXml(session, new ArrayList<File>(), new File("target/foo.xml"));
   }
 
   @Test

@@ -86,13 +86,11 @@ public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
   @Override
   public Void visitLine_summary_line(Line_summary_lineContext ctx) {
     Module module = session.getModuleById(Integer.parseInt(ctx.moduleId.getText()));
-    if (module == null)
-      return null;
-    LineData lineData = new LineData(Integer.parseInt(ctx.lineNumber.getText()),
-        Integer.parseInt(ctx.execCount.getText()), Float.parseFloat(ctx.actualTime.getText()),
-        Float.parseFloat(ctx.cumulativeTime.getText()));
-    module.addLineSummary(lineData);
-
+    if (module != null) {
+      module.addLineSummary(
+          new LineData(Integer.parseInt(ctx.lineNumber.getText()), Integer.parseInt(ctx.execCount.getText()),
+              Float.parseFloat(ctx.actualTime.getText()), Float.parseFloat(ctx.cumulativeTime.getText())));
+    }
     return null;
   }
 

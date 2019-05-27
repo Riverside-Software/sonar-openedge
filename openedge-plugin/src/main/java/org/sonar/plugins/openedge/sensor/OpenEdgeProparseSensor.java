@@ -140,9 +140,10 @@ public class OpenEdgeProparseSensor implements Sensor {
     this.settings = settings;
     this.components = components;
 
-    this.dbFactory = DocumentBuilderFactory.newInstance();
+    dbFactory = DocumentBuilderFactory.newInstance();
     try {
-      this.dBuilder = dbFactory.newDocumentBuilder();
+      dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+      dBuilder = dbFactory.newDocumentBuilder();
     } catch (ParserConfigurationException caught) {
       throw new IllegalStateException(caught);
     }
