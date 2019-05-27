@@ -47,6 +47,8 @@ public class RefactorSession {
 
   // Structure from rcode
   private final Map<String, ITypeInfo> typeInfoMap = Collections.synchronizedMap(new HashMap<>());
+  // Cached entries from propath
+  private final Map<String, File> propathCache = new HashMap<>();
 
   @Inject
   public RefactorSession(IProparseSettings proparseSettings, ISchema schema) {
@@ -101,38 +103,31 @@ public class RefactorSession {
   }
 
   public File findFile3(String fileName) {
-    
-    // If we have an absolute path-filename, we don't search the path.
-    // If we have a relative (starts with dot) path-filename, ditto.
-    int len = fileName.length();
-    
-    // Windows drive letter, ex: "C:"
- // Relative path, "./" or "../"
-    if ((len > 0 && (fileName.charAt(0) == '/' || fileName.charAt(0) == '\\')) || (len > 1 && fileName.charAt(1) == ':')
-        || (len > 1 && fileName.charAt(0) == '.')) {
-      if (new File(fileName).exists())
-        return new File(fileName);
+    File f = propathCache.get(fileName);
+    if (f != null)
+      return f;
+
+    if (isRelativePath(fileName)) {
+      File f2 = new File(fileName);
+      if (f2.exists()) {
+        propathCache.put(fileName, f2);
+        return f2;
+      }
     }
 
     for (String p : proparseSettings.getPropathAsList()) {
       String tryPath = p + File.separatorChar + fileName;
-      if (new File(tryPath).exists())
+      if (new File(tryPath).exists()) {
+        propathCache.put(fileName, new File(tryPath));
         return new File(tryPath);
+      }
     }
 
     return null;
   }
 
   public String findFile(String fileName) {
-    // If we have an absolute path-filename, we don't search the path.
-    // If we have a relative (starts with dot) path-filename, ditto.
-    int len = fileName.length();
-    
-    // Windows drive letter, ex: "C:"
- // Relative path, "./" or "../"
-    if ((len > 0 && (fileName.charAt(0) == '/' || fileName.charAt(0) == '\\')) || (len > 1 && fileName.charAt(1) == ':')
-        || (len > 1 && fileName.charAt(0) == '.')) {
-      if (new File(fileName).exists())
+    if (isRelativePath(fileName) && new File(fileName).exists()) {
         return fileName;
     }
 
@@ -145,39 +140,11 @@ public class RefactorSession {
     return "";
   }
 
-  /**
-   * Find a file (or directory) on the propath
-   * 
-   * TODO Method probably redundant with the previous one
-   * 
-   * @return null if not found
-   */
-  public File findFile2(String filename) {
-    File inFile = new File(filename);
-    // "absolute" on windows means drive letter (i.e. c:)
-    // We don't search the path if it starts with '.', '/', or '\'
-    char c = filename.charAt(0);
-    if (inFile.isAbsolute() || c == '.' || c == '/' || c == '\\') {
-      if (inFile.exists())
-        return inFile;
-      return null;
-    }
-    String propath = proparseSettings.getPropath();
-    String[] parts = propath.split(",");
-    for (String part : parts) {
-      File retFile = new File(part + File.separator + filename);
-      if (retFile.exists())
-        return retFile;
-    }
-    return null;
-  } // findFile
-
-  /**
-   * Find a class file on propath, from the "package.classname"
-   * 
-   * @return null if not found.
-   */
-  public File findFileForClassName(String className) {
-    return findFile2(className.replace('.', '/') + ".cls");
+  private boolean isRelativePath(String fileName) {
+    // Windows drive letter, ex: "C:"
+    // Relative path, "./" or "../"
+    int len = fileName.length();
+    return ((len > 0) && (fileName.charAt(0) == '/' || fileName.charAt(0) == '\\'))
+        || ((len > 1) && (fileName.charAt(1) == ':' || fileName.charAt(0) == '.'));
   }
 }

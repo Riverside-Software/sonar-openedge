@@ -17,6 +17,7 @@ package org.prorefactor.proparse.antlr4;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -127,6 +128,9 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private Lexer lexer;
   private final RefactorSession session;
   private TokenSource wrapper;
+
+  // Cached include files for current lexer
+  private final Map<String, String> includeCache = new HashMap<>();
 
   /**
    * An existing reference to the input stream is required for construction. The caller is responsible for closing that
@@ -835,14 +839,24 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     String fName = referencedWithName.trim();
     if (isConsuming() || isLexOnly() || fName.length() == 0)
       return false;
-    File ff = session.findFile3(fName);
-    if (ff == null) {
-      throw new UncheckedIOException(new IncludeFileNotFoundException(getFilename(), referencedWithName));
-    }
-    try {
-      currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName), ppSettings.getSkipXCode(), false);
-    } catch (IOException caught) {
-      throw new UncheckedIOException(caught);
+    String str = includeCache.get(fName);
+    if (str != null) {
+      try  {
+        currentInput = new InputSource(++sourceCounter, fName, ByteSource.wrap(str.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8, addFilename(fName), ppSettings.getSkipXCode(), false);
+      } catch (IOException caught) {
+        throw new UncheckedIOException(caught);
+      }
+    } else {
+      File ff = session.findFile3(fName);
+      if (ff == null) {
+        throw new UncheckedIOException(new IncludeFileNotFoundException(getFilename(), referencedWithName));
+      }
+      try {
+        currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName), ppSettings.getSkipXCode(), false);
+        includeCache.put(fName, currentInput.getContent());
+      } catch (IOException caught) {
+        throw new UncheckedIOException(caught);
+      }
     }
     currentInclude = new IncludeFile(referencedWithName, currentInput);
     includeVector.add(currentInclude);
