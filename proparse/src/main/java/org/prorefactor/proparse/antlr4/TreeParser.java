@@ -472,8 +472,9 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterExprtExprt2(ExprtExprt2Context ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
-    if ((ctx.colonAttribute() != null) && (ctx.expressionTerm2() instanceof Exprt2FieldContext)) {
-      widattr(ctx, qual);
+    if ((ctx.colonAttribute() != null) && (ctx.expressionTerm2() instanceof Exprt2FieldContext)
+        && (ctx.colonAttribute().OBJCOLON(0) != null)) {
+      widattr((Exprt2FieldContext) ctx.expressionTerm2(), qual, ctx.colonAttribute().id.getText());
     } else {
       setContextQualifier(ctx.expressionTerm2(), qual);
       if (ctx.colonAttribute() != null)
@@ -496,7 +497,10 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterWidattrExprt2(WidattrExprt2Context ctx) {
-    widattr(ctx, contextQualifiers.removeFrom(ctx));
+    if ((ctx.expressionTerm2() instanceof Exprt2FieldContext) && (ctx.colonAttribute().OBJCOLON(0) != null)) {
+      widattr((Exprt2FieldContext) ctx.expressionTerm2(), contextQualifiers.removeFrom(ctx),
+          ctx.colonAttribute().id.getText());
+    }
   }
 
   @Override
@@ -1816,7 +1820,7 @@ public class TreeParser extends ProparseBaseListener {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     if (qual == null)
       qual = ContextQualifier.REF;
-    field(ctx, support.getNode(ctx), null, ctx.id.getText(), qual, tnr);
+    field(ctx, (FieldRefNode) support.getNode(ctx), null, ctx.id.getText(), qual, tnr);
   }
 
   @Override
@@ -2186,6 +2190,8 @@ public class TreeParser extends ProparseBaseListener {
         ITable table = refSession.getSchema().lookupTable(recordNode.getText());
         if (table != null)
           buffer = currentScope.getUnnamedBuffer(table);
+        break;
+      case STATIC:
         break;
     }
     if (buffer == null)
@@ -2597,7 +2603,7 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   // Called from widattr rule, widattrWidName option
-  // Check if THIS-OBJECT-SomeAttribute (same as previous rule)
+  // Check if THIS-OBJECT:SomeAttribute (same as previous rule)
   private void widattr(WidattrWidNameContext ctx, ContextQualifier cq) {
     if ((ctx.widName().systemHandleName() != null) && (ctx.widName().systemHandleName().THISOBJECT() != null)
         && !ctx.colonAttribute().OBJCOLON().isEmpty() && (ctx.colonAttribute().OBJCOLON(0) != null)) {
@@ -2612,54 +2618,29 @@ public class TreeParser extends ProparseBaseListener {
     }
   }
 
-  // Called from widattr rule, widattrExprt2 option
-  private void widattr(WidattrExprt2Context ctx, ContextQualifier cq) {
-    if (ctx.expressionTerm2() instanceof Exprt2FieldContext) {
-      Exprt2FieldContext ctx2 = (Exprt2FieldContext) ctx.expressionTerm2();
-      if (ctx.colonAttribute().OBJCOLON(0) != null) {
-        String clsRef = ctx2.field().getText();
-        String clsName = rootScope.getClassName();
-        if ((clsRef != null) && (clsName != null) && (clsRef.indexOf('.') == -1) && (clsName.indexOf('.') != -1))
-          clsName = clsName.substring(clsName.indexOf('.') + 1);
+  // Called from expressionTerm rule (expressionTerm2 option) and widattr rule (widattrExprt2 option)
+  // Tries to add references to variables/properties of current class
+  // Or references to static classes
+  private void widattr(Exprt2FieldContext ctx2, ContextQualifier cq, String right) {
 
-        if ((clsRef != null) && (clsName != null) && clsRef.equalsIgnoreCase(clsName)) {
-          String right = ctx.colonAttribute().id.getText();
+    String clsRef = ctx2.field().getText();
+    String clsName = rootScope.getClassName();
+    if ((clsRef != null) && (clsName != null) && (clsRef.indexOf('.') == -1) && (clsName.indexOf('.') != -1))
+      clsName = clsName.substring(clsName.indexOf('.') + 1);
 
-          FieldLookupResult result = currentBlock.lookupField(right, true);
-          if (result == null)
-            return;
+    if ((clsRef != null) && (clsName != null) && clsRef.equalsIgnoreCase(clsName)) {
+      FieldLookupResult result = currentBlock.lookupField(right, true);
+      if (result == null)
+        return;
 
-          // Variable
-          if (result.getSymbol() instanceof Variable) {
-            result.getSymbol().noteReference(cq);
-          }
-        }
+      // Variable
+      if (result.getSymbol() instanceof Variable) {
+        result.getSymbol().noteReference(cq);
       }
     }
-  }
-
-  private void widattr(ExprtExprt2Context ctx, ContextQualifier cq) {
-    if (ctx.expressionTerm2() instanceof Exprt2FieldContext) {
-      Exprt2FieldContext ctx2 = (Exprt2FieldContext) ctx.expressionTerm2();
-      if (ctx.colonAttribute().OBJCOLON(0) != null) {
-        String clsRef = ctx2.field().getText();
-        String clsName = rootScope.getClassName();
-        if ((clsRef != null) && (clsName != null) && (clsRef.indexOf('.') == -1) && (clsName.indexOf('.') != -1))
-          clsName = clsName.substring(clsName.indexOf('.') + 1);
-
-        if ((clsRef != null) && (clsName != null) && clsRef.equalsIgnoreCase(clsName)) {
-          String right = ctx.colonAttribute().id.getText();
-
-          FieldLookupResult result = currentBlock.lookupField(right, true);
-          if (result == null)
-            return;
-
-          // Variable
-          if (result.getSymbol() instanceof Variable) {
-            result.getSymbol().noteReference(cq);
-          }
-        }
-      }
+    
+    if ((ctx2.ENTERED() == null) && !Strings.isNullOrEmpty(support.getClassName(ctx2.field().getText()))) {
+      setContextQualifier(ctx2, ContextQualifier.STATIC);
     }
   }
 
@@ -2679,10 +2660,9 @@ public class TreeParser extends ProparseBaseListener {
     }
   }
 
-  private void field(ParseTree ctx, JPNode refAST, JPNode idNode, String name, ContextQualifier cq,
+  private void field(ParseTree ctx, FieldRefNode refNode, JPNode idNode, String name, ContextQualifier cq,
       TableNameResolution resolution) {
-    LOG.trace("Entering field {} {} {} {}", refAST, idNode, cq, resolution);
-    FieldRefNode refNode = (FieldRefNode) refAST;
+    LOG.trace("Entering field {} {} {} {}", refNode, idNode, cq, resolution);
     FieldLookupResult result = null;
 
     refNode.attrSet(IConstants.CONTEXT_QUALIFIER, cq.toString());
@@ -2690,9 +2670,13 @@ public class TreeParser extends ProparseBaseListener {
     // Check if this is a Field_ref being "inline defined"
     // If so, we define it right now.
     if (refNode.attrGet(IConstants.INLINE_VAR_DEF) == 1)
-      addToSymbolScope(defineVariable(ctx, refAST, name));
+      addToSymbolScope(defineVariable(ctx, refNode, name));
 
-    if ((refNode.getParent().getNodeType() == ABLNodeType.USING
+    if (cq == ContextQualifier.STATIC) {
+      // Nothing with static for now, but at least we don't check for external tables
+      if (LOG.isTraceEnabled())
+        LOG.trace("Static reference to {}", refNode.getIdNode().getText());
+    } else if ((refNode.getParent().getNodeType() == ABLNodeType.USING
         && refNode.getParent().getParent().getNodeType() == ABLNodeType.RECORD_NAME)
         || (refNode.getFirstChild().getNodeType() == ABLNodeType.INPUT
             && (refNode.getNextSibling() == null || refNode.getNextSibling().getNodeType() != ABLNodeType.OBJCOLON))) {
@@ -2730,7 +2714,6 @@ public class TreeParser extends ProparseBaseListener {
       result = new FieldLookupResult.Builder().setSymbol(fieldBuffer).build();
     }
 
-    // TODO Add static resolution
     if (result == null)
       return;
 
