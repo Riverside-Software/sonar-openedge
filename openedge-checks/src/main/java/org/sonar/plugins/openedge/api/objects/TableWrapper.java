@@ -88,9 +88,14 @@ public class TableWrapper implements ITable {
 
   @Override
   public IField lookupField(String lookupName) {
-    for (IField fld : fields) {
-      if (fld.getName().toLowerCase().startsWith(lookupName.toLowerCase()))
+    String s1 = lookupName.toLowerCase();
+    for (IField fld : sortedFields) {
+      String s2 = fld.getName().toLowerCase();
+      if (s2.startsWith(s1)) {
         return fld;
+      }
+      if (s2.compareTo(s1) > 0)
+        return null;
     }
     return null;
   }
