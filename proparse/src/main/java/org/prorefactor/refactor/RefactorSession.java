@@ -49,6 +49,8 @@ public class RefactorSession {
   private final Map<String, ITypeInfo> typeInfoMap = Collections.synchronizedMap(new HashMap<>());
   // Cached entries from propath
   private final Map<String, File> propathCache = new HashMap<>();
+  // Cached entries from propath again
+  private final Map<String, String> propathCache2 = new HashMap<>();
 
   @Inject
   public RefactorSession(IProparseSettings proparseSettings, ISchema schema) {
@@ -127,16 +129,23 @@ public class RefactorSession {
   }
 
   public String findFile(String fileName) {
+    if (propathCache2.containsKey(fileName))
+      return propathCache2.get(fileName);
+
     if (isRelativePath(fileName) && new File(fileName).exists()) {
-        return fileName;
+      propathCache2.put(fileName, fileName);
+      return fileName;
     }
 
     for (String p : proparseSettings.getPropathAsList()) {
       String tryPath = p + File.separatorChar + fileName;
-      if (new File(tryPath).exists())
+      if (new File(tryPath).exists()) {
+        propathCache2.put(fileName, tryPath);
         return tryPath;
+      }
     }
 
+    propathCache2.put(fileName, "");
     return "";
   }
 
