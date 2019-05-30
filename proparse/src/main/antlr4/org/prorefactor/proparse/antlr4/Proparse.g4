@@ -948,12 +948,12 @@ filenamePart:
   ;
 
 typeName:
-    nonPunctuating
+    t1=nonPunctuating ( { ( _input.LA(1) != Token.EOF) && !hasHiddenBefore(0) }? t2=nonPunctuating )*
   ;
 
 // Different action in the visitor (no class lookup in type_name2)
 typeName2:
-    nonPunctuating
+    t1=nonPunctuating ( { ( _input.LA(1) != Token.EOF) && !hasHiddenBefore(0) }? t2=nonPunctuating )*
   ;
 
 constant:

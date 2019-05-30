@@ -19,10 +19,12 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import org.antlr.v4.runtime.BufferedTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode.Builder;
 import org.prorefactor.core.ProToken;
@@ -422,12 +424,46 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitTypeName(TypeNameContext ctx) {
-    return visitChildren(ctx).changeType(ABLNodeType.TYPE_NAME).setClassname(support.lookupClassName(ctx.getText()));
+    ProToken.Builder tokB = new ProToken.Builder((ProToken) ctx.t1.start).setType(ABLNodeType.TYPE_NAME);
+    StringBuilder clsName = new StringBuilder(ctx.t1.getText());
+    for (int zz = 1; zz < ctx.nonPunctuating().size(); zz++) {
+      tokB.mergeWith((ProToken) ctx.nonPunctuating(zz).start);
+      clsName.append(ctx.nonPunctuating(zz).getText());
+    }
+    ProToken tok = tokB.build();
+    rewriteTypeNameContext(ctx, tok);
+
+    return new Builder(tok).setRuleNode(ctx).setClassname(support.lookupClassName(clsName.toString()));
   }
 
   @Override
   public Builder visitTypeName2(TypeName2Context ctx) {
-    return visitChildren(ctx).changeType(ABLNodeType.TYPE_NAME);
+    ProToken.Builder tokB = new ProToken.Builder((ProToken) ctx.t1.start).setType(ABLNodeType.TYPE_NAME);
+    for (int zz = 1; zz < ctx.nonPunctuating().size(); zz++) {
+      tokB.mergeWith((ProToken) ctx.nonPunctuating(zz).start);
+    }
+    ProToken tok = tokB.build();
+    rewriteTypeNameContext(ctx, tok);
+
+    return new Builder(tokB.build()).setRuleNode(ctx);
+  }
+
+  // FIXME Not a very good idea (at all) to rewrite the ParseTree, just waiting to be refactored
+  // This is used at least in TreeParser#defAs()
+  private void rewriteTypeNameContext(ParserRuleContext ctx, ProToken tok) {
+    Token oldToken = ctx.start;
+    while (ctx.getChildCount() > 0)
+      ctx.removeLastChild();
+    ctx.addChild(new TerminalNodeImpl(tok));
+    ctx.start = tok;
+    ctx.stop = tok;
+    // That's the ugliest part...
+    ParserRuleContext parent = (ParserRuleContext) ctx.parent;
+    while (parent.start == oldToken) {
+      parent.start = tok;
+      parent.stop = tok;
+      parent = parent.getParent();
+    }
   }
 
   @Override
