@@ -1,6 +1,6 @@
 
 
-    { preprocessor/preprocessor02.i }
+    { preprocessor/preprocessor02-01.i }
 
 &IF DEFINED(FOO) &THEN
  DEFINE VARIABLE var1 AS CHARACTER.
@@ -16,3 +16,7 @@
 &IF DEFINED(BAR) &THEN
  DEFINE VARIABLE var4 AS CHARACTER.
 &ENDIF
+
+{ preprocessor/preprocessor02-02.i 123 456 }
+
+{ preprocessor/preprocessor02-03.i }

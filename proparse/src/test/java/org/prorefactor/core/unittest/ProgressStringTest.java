@@ -23,9 +23,26 @@ import org.testng.annotations.Test;
 public class ProgressStringTest {
 
   @Test
-  public void testBasicFunctions() {
+  public void test1() {
     ProgressString pstring = new ProgressString("\"No more 'Hello world'!\":T");
-    assertEquals("No more 'Hello world'!", pstring.getText(), "Pstring.justText() failed");
+    assertEquals(pstring.getText(), "No more 'Hello world'!");
+    assertEquals(pstring.getAttributes(), ":T");
+    assertEquals(pstring.getQuote(), '\"');
+  }
+
+  @Test
+  public void test2() {
+    ProgressString pstring = new ProgressString("'No more \"Hello world\"!'");
+    assertEquals(pstring.getText(), "No more \"Hello world\"!");
+    assertEquals(pstring.getAttributes(), "");
+    assertEquals(pstring.getQuote(), '\'');
+  }
+
+  @Test
+  public void test3() {
+    assertEquals(ProgressString.dequote("No more \"Hello world\"!"), "No more \"Hello world\"!");
+    assertEquals(ProgressString.dequote("'No more \"Hello world\"!'"), "No more \"Hello world\"!");
+    assertEquals(ProgressString.dequote("\"No more \"Hello world\"!\""), "No more \"Hello world\"!");
   }
 
 }

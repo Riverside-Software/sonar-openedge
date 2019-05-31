@@ -107,21 +107,7 @@ public class RootSymbolScope extends SymbolScope {
     return 0;
   }
 
-  // TEMP-ANTLR4
-  public int compareTo(RootSymbolScope other) {
-    if (super.compareTo(other) != 0) {
-      return 3;
-    }
-
-    if (!String.join(",", functionSet).equals(String.join(",", other.functionSet))) {
-      System.err.println("Functions: " + String.join(",", functionSet) + " *** " + String.join(",", other.functionSet));
-      return 1;
-    }
-
-    return 0;
-  }
-
-  // TEMP-ANTLR4
+  @Override
   public void writeScope(Writer writer) throws IOException {
     writer.write("*** RootSymbolScope *** \n");
     super.writeScope(writer);

@@ -10,7 +10,6 @@
  *******************************************************************************/ 
 package org.sonar.plugins.openedge.api.objects;
 
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.treeparser.DataType;
@@ -74,11 +73,6 @@ public class RCodeTTFieldWrapper implements IField {
 
   @Override
   public Primative setClassName(String className) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Primative setClassName(JPNode typeNameNode) {
     throw new UnsupportedOperationException();
   }
 

@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE QUERY. */
@@ -38,7 +38,7 @@ public class Query extends Symbol {
    */
   @Override
   public int getProgressType() {
-    return ProParserTokenTypes.QUERY;
+    return Proparse.QUERY;
   }
 
 }

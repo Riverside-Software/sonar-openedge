@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import org.antlr.v4.runtime.RecognitionException;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
@@ -34,8 +35,6 @@ import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.plugins.openedge.api.Constants;
 import org.testng.annotations.BeforeMethod;
-
-import antlr.ANTLRException;
 
 public abstract class AbstractTest {
   private static final String BASEDIR = "src/test/resources/";
@@ -69,12 +68,9 @@ public abstract class AbstractTest {
 
   public ParseUnit getParseUnit(InputFile file) {
     ParseUnit unit = new ParseUnit(file.file(), session);
-    try {
-      unit.treeParser01();
-      unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
-    } catch (ANTLRException caught) {
-      throw new RuntimeException("Unable to parse file", caught);
-    }
+    unit.treeParser01();
+    unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
+
     return unit;
   }
 }

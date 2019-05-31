@@ -21,9 +21,11 @@ import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 public interface ISymbol {
 
+  String getName();
+
   /**
-   * Get the "full" name for this symbol. This is expected to be overridden in subclasses. For example, we might expect
-   * "database.buffer.field" to be the return for a field buffer.
+   * Get the "full" name for this symbol. For example, we might expect "database.buffer.field" to be the return value
+   * for a field buffer.
    */
   String fullName();
 
@@ -35,27 +37,12 @@ public interface ISymbol {
 
   int getNumReferenced();
 
-  /**
-   * If this was defined AS something, then we have an AS node
-   */
-  JPNode getAsNode();
+  void setDefinitionNode(JPNode node);
 
   /**
-   * If this symbol was defined directly by a DEFINE syntax, then this returns the DEFINE node, otherwise null.
+   * Returns tree object where symbol was defined. Can be a DEFINE keyword or directly the ID token.
    */
   JPNode getDefineNode();
-
-  /**
-   * If this symbol was defined with syntax other than a direct DEFINE, then this returns the ID node, otherwise null.
-   */
-  JPNode getIndirectDefineIdNode();
-
-  /**
-   * If this was defined LIKE something, then we have a LIKE node
-   */
-  JPNode getLikeNode();
-
-  String getName();
 
   /**
    * From TokenTypes: VARIABLE, FRAME, MENU, MENUITEM, etc. A TableBuffer object always returns BUFFER, regardless of
@@ -69,21 +56,5 @@ public interface ISymbol {
    * Take note of a symbol reference (read, write, reference by name)
    */
   void noteReference(ContextQualifier contextQualifier);
-
-  /**
-   * @see #getAsNode()
-   */
-  void setAsNode(JPNode asNode);
-
-  /**
-   * We store the DEFINE|FUNCTION|METHOD|PROCEDURE node if available and sensible. If defined in a syntax where there is
-   * no DEFINE node briefly preceeding the ID node, then we store the ID node.
-   */
-  void setDefOrIdNode(JPNode node);
-
-  /**
-   * @see #getLikeNode()
-   */
-  void setLikeNode(JPNode likeNode);
 
 }

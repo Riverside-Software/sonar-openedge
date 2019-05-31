@@ -84,7 +84,7 @@ public class JPNodeLister {
     if (showCol)
       ofile.append(Integer.toString(node.getColumn())).append(spacer);
     if (showFileName)
-      ofile.append(node.getFilename()).append(spacer);
+      ofile.append(Integer.toString(node.getFileIndex())).append(spacer);
     if (showStore) {
       String storetype = node.attrGetS(IConstants.STORETYPE);
       if (storetype.length() != 0)

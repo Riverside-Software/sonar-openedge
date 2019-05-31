@@ -40,8 +40,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 /**
  * For testing API and Backwards API access to the parser.
  */
@@ -55,7 +53,7 @@ public class ApiTest {
   }
 
   @Test
-  public void test01() throws ANTLRException {
+  public void test01() {
     File f = new File("src/test/resources/data/hello.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.treeParser01();
@@ -63,7 +61,7 @@ public class ApiTest {
   }
 
   @Test
-  public void test02() throws ANTLRException {
+  public void test02() {
     File f = new File("src/test/resources/data/no-undo.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.treeParser01();
@@ -72,7 +70,7 @@ public class ApiTest {
   }
 
   @Test
-  public void test03() throws ANTLRException {
+  public void test03() {
     File f = new File("src/test/resources/data/include.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.treeParser01();
@@ -87,7 +85,7 @@ public class ApiTest {
   }
 
   @Test
-  public void test04() throws ANTLRException {
+  public void test04() {
     File f = new File("src/test/resources/data/nowarn.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.parse();
@@ -129,7 +127,7 @@ public class ApiTest {
   }
 
   @Test
-  public void test05() throws ANTLRException {
+  public void test05() {
     File f = new File("src/test/resources/data/bugsfixed/bug19.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.parse();
@@ -137,7 +135,7 @@ public class ApiTest {
   }
 
   @Test
-  public void test06() throws ANTLRException {
+  public void test06() {
     File f = new File("src/test/resources/data/abbrev.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.parse();
@@ -150,7 +148,7 @@ public class ApiTest {
   }
 
   @Test
-  public void test07() throws ANTLRException {
+  public void test07() {
     File f = new File("src/test/resources/data/prepro.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.parse();
@@ -163,7 +161,7 @@ public class ApiTest {
   }
 
   @Test
-  public void test08() throws ANTLRException {
+  public void test08() {
     File f = new File("src/test/resources/data/prepro2.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.parse();
@@ -185,7 +183,7 @@ public class ApiTest {
   }
 
   @Test
-  public void test09() throws ANTLRException {
+  public void test09() {
     File f = new File("src/test/resources/data/prepro3.p");
     ParseUnit pu = new ParseUnit(f, session);
     pu.parse();

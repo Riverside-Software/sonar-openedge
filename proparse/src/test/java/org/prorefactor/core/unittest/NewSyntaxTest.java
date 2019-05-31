@@ -22,14 +22,12 @@ import java.io.IOException;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
-import org.prorefactor.treeparserbase.JPTreeParser;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 
@@ -51,270 +49,269 @@ public class NewSyntaxTest {
         new RCodeInfo(new FileInputStream("src/test/resources/data/newsyntax/101b/Test1.r")).getTypeInfo());
   }
 
-  private void testNewSyntax(String file) throws ANTLRException {
+  private void testNewSyntax(String file) {
     // Just run the TreeParser to see if file can be parsed without error
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/newsyntax", file), session);
-    pu.treeParser(new JPTreeParser());
     pu.treeParser01();
   }
 
   @Test
-  public void test01() throws ANTLRException {
+  public void test01() {
     testNewSyntax("101b/Test1.cls");
   }
 
   @Test
-  public void test02() throws ANTLRException {
+  public void test02() {
     testNewSyntax("101b/Test2.cls");
   }
 
   @Test
-  public void test03() throws ANTLRException {
+  public void test03() {
     testNewSyntax("101b/deep/FindMe.cls");
   }
 
   @Test
-  public void test04() throws ANTLRException {
+  public void test04() {
     testNewSyntax("101c102a/test01.p");
   }
 
   @Test
-  public void test05() throws ANTLRException {
+  public void test05() {
     testNewSyntax("101c102a/Test02.cls");
   }
 
   @Test
-  public void test06() throws ANTLRException {
+  public void test06() {
     testNewSyntax("102b/ClassDecl.cls");
   }
 
   @Test
-  public void test07() throws ANTLRException {
+  public void test07() {
     testNewSyntax("102b/CustomException.cls");
   }
 
   @Test
-  public void test08() throws ANTLRException {
+  public void test08() {
     testNewSyntax("102b/Display.cls");
   }
 
   @Test
-  public void test09() throws ANTLRException {
+  public void test09() {
     testNewSyntax("102b/DisplayTest.p");
   }
 
   @Test
-  public void test10() throws ANTLRException {
+  public void test10() {
     testNewSyntax("102b/ExtentTest.cls");
   }
 
   @Test
-  public void test11() throws ANTLRException {
+  public void test11() {
     testNewSyntax("102b/IEmpty.cls");
   }
 
   @Test
-  public void test12() throws ANTLRException {
+  public void test12() {
     testNewSyntax("102b/ITest.cls");
   }
 
   @Test
-  public void test13() throws ANTLRException {
+  public void test13() {
     testNewSyntax("102b/Kernel.cls");
   }
 
   @Test
-  public void test14() throws ANTLRException {
+  public void test14() {
     testNewSyntax("102b/KeywordMethodName.cls");
   }
 
   @Test
-  public void test15() throws ANTLRException {
+  public void test15() {
     testNewSyntax("102b/r-CustObj.cls");
   }
 
   @Test
-  public void test16() throws ANTLRException {
+  public void test16() {
     testNewSyntax("102b/r-CustObjAbstract.cls");
   }
 
   @Test
-  public void test17() throws ANTLRException {
+  public void test17() {
     testNewSyntax("102b/r-CustObjAbstractImpl.cls");
   }
 
   @Test
-  public void test18() throws ANTLRException {
+  public void test18() {
     testNewSyntax("102b/r-CustObjAbstractProc.p");
   }
 
   @Test
-  public void test19() throws ANTLRException {
+  public void test19() {
     testNewSyntax("102b/r-CustObjProc.p");
   }
 
   @Test
-  public void test20() throws ANTLRException {
+  public void test20() {
     testNewSyntax("102b/r-CustObjStatic.cls");
   }
 
   @Test
-  public void test21() throws ANTLRException {
+  public void test21() {
     testNewSyntax("102b/r-CustObjStaticProc.p");
   }
 
   @Test
-  public void test22() throws ANTLRException {
+  public void test22() {
     testNewSyntax("102b/r-DefineProperties1.cls");
   }
 
   @Test
-  public void test23() throws ANTLRException {
+  public void test23() {
     testNewSyntax("102b/r-DefineProperties2.cls");
   }
 
   @Test
-  public void test24() throws ANTLRException {
+  public void test24() {
     testNewSyntax("102b/r-EventPublish.cls");
   }
 
   @Test
-  public void test25() throws ANTLRException {
+  public void test25() {
     testNewSyntax("102b/r-EventPubSub.p");
   }
 
   @Test
-  public void test26() throws ANTLRException {
+  public void test26() {
     testNewSyntax("102b/r-EventSubscribe.cls");
   }
 
   @Test
-  public void test27() throws ANTLRException {
+  public void test27() {
     testNewSyntax("102b/r-ICustObj.cls");
   }
 
   @Test
-  public void test28() throws ANTLRException {
+  public void test28() {
     testNewSyntax("102b/r-ICustObjImpl.cls");
   }
 
   @Test
-  public void test29() throws ANTLRException {
+  public void test29() {
     testNewSyntax("102b/r-ICustObjImpl2.cls");
   }
 
   @Test
-  public void test30() throws ANTLRException {
+  public void test30() {
     testNewSyntax("102b/r-ICustObjProc.p");
   }
 
   @Test
-  public void test31() throws ANTLRException {
+  public void test31() {
     testNewSyntax("102b/r-ICustObjProc2.p");
   }
 
   @Test
-  public void test32() throws ANTLRException {
+  public void test32() {
     testNewSyntax("102b/Settings.cls");
   }
 
   @Test
-  public void test33() throws ANTLRException {
+  public void test33() {
     testNewSyntax("102b/stopafter.p");
   }
 
   @Test
-  public void test34() throws ANTLRException {
+  public void test34() {
     testNewSyntax("102b/type_names.p");
   }
 
   @Test
-  public void test35() throws ANTLRException {
+  public void test35() {
     testNewSyntax("11.4/BaseInterface.cls");
   }
 
   @Test
-  public void test36() throws ANTLRException {
+  public void test36() {
     testNewSyntax("11.4/ExtendedInterface.cls");
   }
 
   @Test
-  public void test37() throws ANTLRException {
+  public void test37() {
     testNewSyntax("11.4/getclass.p");
   }
 
   @Test
-  public void test38() throws ANTLRException {
+  public void test38() {
     testNewSyntax("11.4/SerializableClass.cls");
   }
 
   @Test
-  public void test39() throws ANTLRException {
+  public void test39() {
     testNewSyntax("11.4/StreamHandleClass.cls");
   }
 
   @Test
-  public void test40() throws ANTLRException {
+  public void test40() {
     testNewSyntax("11.4/StreamHandleClass2.cls");
   }
 
   @Test
-  public void test41() throws ANTLRException {
+  public void test41() {
     testNewSyntax("11.6/singlelinecomment.p");
   }
 
   @Test
-  public void test42() throws ANTLRException {
+  public void test42() {
     testNewSyntax("11n/Class01.cls");
   }
 
   @Test
-  public void test43() throws ANTLRException {
+  public void test43() {
     testNewSyntax("11n/Class02.cls");
   }
 
   @Test
-  public void test44() throws ANTLRException {
+  public void test44() {
     testNewSyntax("prolint/regrtest-oo/test1.cls");
   }
 
   @Test
-  public void test45() throws ANTLRException {
+  public void test45() {
     testNewSyntax("prolint/regrtest-oo/test2.cls");
   }
 
   @Test
-  public void test46() throws ANTLRException {
+  public void test46() {
     testNewSyntax("prolint/regrtest-oo/test3.cls");
   }
 
   @Test
-  public void test47() throws ANTLRException {
+  public void test47() {
     testNewSyntax("prolint/regrtest-oo/test4.cls");
   }
 
   @Test
-  public void test48() throws ANTLRException {
+  public void test48() {
     testNewSyntax("prolint/regrtest-oo/test5.cls");
   }
 
   @Test
-  public void test49() throws ANTLRException {
+  public void test49() {
     testNewSyntax("prolint/regrtest-oo/test6.cls");
   }
 
   @Test
-  public void test50() throws ANTLRException {
+  public void test50() {
     testNewSyntax("11n/Class03.cls");
   }
 
   @Test
-  public void test51() throws ANTLRException {
+  public void test51() {
     testNewSyntax("11n/ParameterHandleTo.p");
   }
 
   @Test
-  public void testTenantKeywords() throws ANTLRException {
+  public void testTenantKeywords() {
     testNewSyntax("11n/tenant.p");
   }
 

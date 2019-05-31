@@ -23,7 +23,7 @@ import java.io.File;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.unittest.util.UnitTestModule;
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -33,8 +33,6 @@ import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import antlr.ANTLRException;
 
 public class ClassesTest {
   private RefactorSession session;
@@ -46,7 +44,7 @@ public class ClassesTest {
   }
 
   @Test
-  public void test01() throws ANTLRException {
+  public void test01() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/LoadLogger.cls"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
@@ -58,7 +56,7 @@ public class ClassesTest {
   }
 
   @Test
-  public void test03() throws ANTLRException {
+  public void test03() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/ScopeTest.cls"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
@@ -69,23 +67,23 @@ public class ClassesTest {
     // Only zz and zz2 properties should be there
     Variable zz = unit.getRootScope().getVariable("zz");
     Variable zz2 = unit.getRootScope().getVariable("zz2");
+    assertEquals(unit.getRootScope().getVariables().size(), 2);
     assertNotNull(zz, "Property zz not in root scope");
     assertNotNull(zz2, "Property zz2 not in root scope");
-    assertEquals(unit.getRootScope().getVariables().size(), 2);
 
     for (TreeParserSymbolScope sc : unit.getRootScope().getChildScopesDeep()) {
-      if (sc.getRootBlock().getNode().getType() == ProParserTokenTypes.METHOD) continue;
-      if (sc.getRootBlock().getNode().getType() == ProParserTokenTypes.CATCH) continue;
+      if (sc.getRootBlock().getNode().getType() == Proparse.METHOD) continue;
+      if (sc.getRootBlock().getNode().getType() == Proparse.CATCH) continue;
       Variable arg = sc.getVariable("arg");
       Variable i = sc.getVariable("i");
+      assertEquals(sc.getVariables().size(), 2);
       assertNotNull(arg, "Property var not in GET/SET scope");
       assertNotNull(i, "Property i not in GET/SET scope");
-      assertEquals(sc.getVariables().size(), 2);
     }
   }
 
   @Test
-  public void testThisObject() throws ANTLRException {
+  public void testThisObject() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/TestThisObject.cls"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
@@ -96,11 +94,11 @@ public class ClassesTest {
     Variable prop1 = unit.getRootScope().getVariable("prop1");
     Variable prop2 = unit.getRootScope().getVariable("prop2");
     assertNotNull(prop1);
-    assertNotNull(prop1);
-    assertTrue(prop2.getNumReads() == 1);
-    assertTrue(prop2.getNumWrites() == 1);
-    assertTrue(prop1.getNumReads() == 1);
-    assertTrue(prop1.getNumWrites() == 1);
+    assertNotNull(prop2);
+    assertEquals(prop1.getNumReads(), 1);
+    assertEquals(prop1.getNumWrites(), 1);
+    assertEquals(prop2.getNumReads(), 1);
+    assertEquals(prop2.getNumWrites(), 1);
   }
 
 }

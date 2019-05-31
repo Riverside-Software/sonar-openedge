@@ -15,8 +15,6 @@
  ********************************************************************************/
 package org.prorefactor.treeparser;
 
-import org.prorefactor.core.JPNode;
-
 /**
  * Field and Variable implement Primative because they both have a "primative" Progress data type (INTEGER, CHARACTER,
  * etc).
@@ -42,8 +40,6 @@ public interface Primative {
   int getExtent();
 
   Primative setClassName(String className);
-
-  Primative setClassName(JPNode typeNameNode);
 
   Primative setDataType(DataType dataType);
 

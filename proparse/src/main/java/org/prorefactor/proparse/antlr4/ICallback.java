@@ -14,6 +14,8 @@
  ********************************************************************************/
 package org.prorefactor.proparse.antlr4;
 
+import org.prorefactor.core.JPNode;
+
 public interface ICallback<T> {
 
   /**

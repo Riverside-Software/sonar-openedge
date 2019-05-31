@@ -17,26 +17,24 @@ package org.prorefactor.proparse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.RuleNode;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.SymbolScope.FieldType;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
-
-import antlr.Token;
 
 /**
  * Helper class when parsing procedure or class. One instance per ParseUnit.
@@ -63,15 +61,11 @@ public class ParserSupport {
   private String className = "";
 
   // Last field referenced. Used for inline defines using LIKE or AS.
-  private JPNode lastFieldRefNode;
-  private JPNode lastFieldIDNode;
-  // TEMP-ANTLR4
   private String lastFieldIDStr;
 
   private ParseTreeProperty<FieldType> recordExpressions = new ParseTreeProperty<>();
-  private ParseTreeProperty<org.prorefactor.proparse.antlr4.JPNode> nodes = new ParseTreeProperty<>();
+  private ParseTreeProperty<JPNode> nodes = new ParseTreeProperty<>();
 
-  // TEMP-ANTLR4
   private List<SymbolScope> innerScopes = new ArrayList<>();
   private Map<RuleContext, SymbolScope> innerScopesMap = new HashMap<>();
 
@@ -104,27 +98,22 @@ public class ParserSupport {
   public int abbrevDatatype(String text) {
     String s = text.toLowerCase();
     if ("cha".startsWith(s))
-      return ProParserTokenTypes.CHARACTER;
+      return Proparse.CHARACTER;
     if ("da".equals(s) || "dat".equals(s))
-      return ProParserTokenTypes.DATE;
+      return Proparse.DATE;
     if ("de".equals(s))
-      return ProParserTokenTypes.DECIMAL;
+      return Proparse.DECIMAL;
     if ("i".equals(s) || "in".equals(s))
-      return ProParserTokenTypes.INTEGER;
+      return Proparse.INTEGER;
     if ("logical".startsWith(s))
-      return ProParserTokenTypes.LOGICAL;
+      return Proparse.LOGICAL;
     if ("rec".equals(s) || "reci".equals(s))
-      return ProParserTokenTypes.RECID;
+      return Proparse.RECID;
     if ("rowi".equals(s))
-      return ProParserTokenTypes.ROWID;
+      return Proparse.ROWID;
     if ("widget-h".startsWith(s) && s.length() >= 4)
-      return ProParserTokenTypes.WIDGETHANDLE;
+      return Proparse.WIDGETHANDLE;
     return 0;
-  }
-
-  // TEMP-ANTLR4
-  public void visitorResetScope(RuleContext ctx) {
-    currentScope = unitScope;
   }
 
   // TEMP-ANTLR4
@@ -171,28 +160,16 @@ public class ParserSupport {
     currentScope.defineBuffer(bufferName, tableName);
   }
 
-  void defineClass(JPNode classNode) {
-    defineClass(classNode.getFirstChild().getText());
-  }
-
   public void defineClass(String name) {
     LOG.trace("defineClass '{}'", name);
     className = ClassFinder.dequote(name);
     unitScope.attachTypeInfo(session.getTypeInfo(className));
   }
 
-  void defInterface(JPNode interfaceNode) {
-    defInterface(interfaceNode.getFirstChild().getText());
-  }
-
   public void defInterface(String name) {
     LOG.trace("defineInterface");
     unitIsInterface = true;
     className = ClassFinder.dequote(name);
-  }
-
-  void defMethod(JPNode idNode) {
-    // Not used anymore
   }
 
   public void defTable(String name, SymbolScope.FieldType ttype) {
@@ -206,59 +183,20 @@ public class ParserSupport {
     currentScope.defineVar(name);
   }
 
-  public void defVarInline() {
-    if (lastFieldIDNode == null) {
-      LOG.warn("Trying to define inline variable, but no ID symbol availble");
-    } else {
-      currentScope.defineInlineVar(lastFieldIDNode.getText());
-      // I'm not sure if this would ever be inheritable. Doesn't hurt to check.
-      lastFieldRefNode.attrSet(IConstants.INLINE_VAR_DEF, IConstants.TRUE);
-    }
-  }
-
-  // TEMP-ANTLR4
   public void defVarInlineAntlr4() {
     if (lastFieldIDStr == null) {
-      LOG.warn("Trying to define inline variable, but no ID symbol availble");
+      LOG.warn("Trying to define inline variable, but no ID symbol available");
     } else {
       currentScope.defineInlineVar(lastFieldIDStr);
     }
   }
 
   public void dropInnerScope() {
-    assert currentScope != unitScope;
     currentScope = currentScope.getSuperScope();
-  }
-
-  public void fieldReference(JPNode refNode, JPNode idNode) {
-    lastFieldRefNode = refNode;
-    lastFieldIDNode = idNode;
   }
 
   public void fieldReference(String idNode) {
     lastFieldIDStr = idNode;
-  }
-
-  public void filenameMerge(JPNode node) {
-    JPNode currNode = node;
-    JPNode nextNode = node.getNextSibling();
-    while (nextNode != null) {
-      if (currNode.getNodeType() == ABLNodeType.FILENAME && nextNode.getNodeType() == ABLNodeType.FILENAME
-          && nextNode.getHiddenBefore() == null) {
-        currNode.setHiddenAfter(nextNode.getHiddenAfter());
-        currNode.setText(currNode.getText() + nextNode.getText());
-        currNode.setNextSibling(nextNode.getNextSibling());
-        currNode.updateEndPosition(nextNode.getEndFileIndex(), nextNode.getEndLine(), nextNode.getEndColumn());
-        nextNode = currNode.getNextSibling();
-        continue;
-      }
-      currNode = currNode.getNextSibling();
-      nextNode = currNode.getNextSibling();
-    }
-  }
-
-  void funcBegin(JPNode idNode) {
-    funcBegin(idNode.getText(), null);
   }
 
   public void funcBegin(String name, RuleContext ctx) {
@@ -282,19 +220,16 @@ public class ParserSupport {
     currentScope = currentScope.getSuperScope();
   }
 
-  public void usingState(JPNode typeNameNode) {
-    classFinder.addPath(typeNameNode.getText());
-  }
-
   public void usingState(String typeName) {
     classFinder.addPath(typeName);
   }
 
   // End of functions triggered from proparse.g
 
-  public boolean recordSemanticPredicate(org.antlr.v4.runtime.Token lt1,
-      org.antlr.v4.runtime.Token lt2, org.antlr.v4.runtime.Token lt3) {
+  public boolean recordSemanticPredicate(Token lt1, Token lt2, Token lt3) {
     String recname = lt1.getText();
+    // Since ANTLR4 migration, NAMEDOT doesn't exist anymore in the token stream, as they're filtered out by NameDotTokenFilter
+    // So this 'if' block can probably be removed...
     if (lt2.getType() == ABLNodeType.NAMEDOT.getType()) {
       recname += ".";
       recname += lt3.getText();
@@ -302,8 +237,12 @@ public class ParserSupport {
     return (schemaTablePriority ? isTableSchemaFirst(recname.toLowerCase()) : isTable(recname.toLowerCase())) != null;
   }
 
-  public void pushNode(RuleNode ctx, org.prorefactor.proparse.antlr4.JPNode node) {
+  public void pushNode(ParseTree ctx, JPNode node) {
     nodes.put(ctx, node);
+  }
+
+  public JPNode getNode(ParseTree ctx) {
+    return nodes.get(ctx);
   }
 
   public void pushRecordExpression(RuleContext ctx, String recName) {
@@ -324,29 +263,13 @@ public class ParserSupport {
   }
 
   /** Returns true if the lookahead is a table name, and not a var name. */
-  boolean isTableName(Token lt1, Token lt2, Token lt3, Token lt4) {
-    String name = lt1.getText();
-    if (lt2.getType() == ProParserTokenTypes.NAMEDOT) {
-      if (lt4.getType() == ProParserTokenTypes.NAMEDOT) {
-        // Can't be more than one dot (db.table) in a table reference.
-        // Maybe this is a field reference, but it sure isn't a table.
-        return false;
-      }
-      name = name + "." + lt3.getText();
-    }
-    if (isVar(name))
-      return false;
-    return null != isTable(name.toLowerCase());
-  }
-
-  /** Returns true if the lookahead is a table name, and not a var name. */
-  public boolean isTableNameANTLR4(org.antlr.v4.runtime.Token lt1) {
-    int numDots = CharMatcher.is('.').countIn(lt1.getText());
+  public boolean isTableName(Token token) {
+    int numDots = CharMatcher.is('.').countIn(token.getText());
     if (numDots >= 2)
       return false;
-    if (isVar(lt1.getText()))
+    if (isVar(token.getText()))
       return false;
-    return null != isTable(lt1.getText().toLowerCase());
+    return null != isTable(token.getText().toLowerCase());
   }
 
   public boolean isVar(String name) {
@@ -363,7 +286,7 @@ public class ParserSupport {
     return unitScope.isMethodOrFunction(name);
   }
 
-  public int isMethodOrFunc(org.antlr.v4.runtime.Token token) {
+  public int isMethodOrFunc(Token token) {
     if (token == null)
       return 0;
     return unitScope.isMethodOrFunction(token.getText());
@@ -374,6 +297,10 @@ public class ParserSupport {
    */
   public boolean isClass() {
     return !Strings.isNullOrEmpty(className);
+  }
+
+  public String getClassName(String name) {
+    return classFinder.lookup(name);
   }
 
   /**
@@ -415,62 +342,8 @@ public class ParserSupport {
     node.attrSet(IConstants.QUALIFIED_CLASS_INT, classFinder.lookup(node.getText()));
   }
 
-  public void attrTypeName(JPNode node) {
-    if (node == null) {
-      LOG.error("Unable to assign attribute QUALIFIED_CLASS_INT");
-    } else {
-      node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
-    }
-  }
-
   public String getFilename(int fileIndex) {
     return fileNameList.getValue(fileIndex);
   }
 
-  /**
-   * @see ProToken#getHiddenAfter()
-   */
-  static boolean hasHiddenAfter(Token token) {
-    return ((ProToken) token).getHiddenAfter() != null;
-  }
-
-  /**
-   * @see ProToken#getHiddenBefore()
-   */
-  public static boolean hasHiddenBefore(Token token) {
-    return ((ProToken) token).getHiddenBefore() != null;
-  }
-
-  // TEMP-ANTLR4
-  public int compareTo(ParserSupport other) {
-    if (classFinder.compareTo(other.classFinder) != 0) {
-      return 4;
-    }
-    if (unitScope.compareTo(other.unitScope) != 0) {
-      return 3;
-    }
-
-    Iterator<SymbolScope> iter1 = innerScopes.iterator();
-    Iterator<SymbolScope> iter2 = innerScopes.iterator();
-    while (iter1.hasNext() && iter2.hasNext()) {
-      if (iter1.next().compareTo(iter2.next()) != 0) {
-        return 5;
-      }
-    }
-    if (iter1.hasNext() || iter2.hasNext()) {
-      System.err.println("Remaining scopes...");
-      return 6;
-    }
-      
-    if (!className.equals(other.className)) {
-      System.err.println("Classname: " + className + " -- " + other.className);
-      return 1;
-    }
-    if (unitIsInterface != other.unitIsInterface) {
-      System.err.println("Interface: " + unitIsInterface + " -- " + other.unitIsInterface);
-      return 2;
-      
-    }
-    return 0;
-  }
 }

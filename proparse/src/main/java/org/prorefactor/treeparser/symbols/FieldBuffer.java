@@ -15,11 +15,10 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ISchema;
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -131,20 +130,13 @@ public class FieldBuffer extends Symbol implements Primative {
    */
   @Override
   public int getProgressType() {
-    return ProParserTokenTypes.FIELD;
+    return Proparse.FIELD;
   }
 
   /** Sets the underlying Field's className. */
   @Override
   public Primative setClassName(String className) {
     field.setClassName(className);
-    return this;
-  }
-
-  /** Sets the underlying Field's className. */
-  @Override
-  public Primative setClassName(JPNode typeNameNode) {
-    field.setClassName(typeNameNode);
     return this;
   }
 

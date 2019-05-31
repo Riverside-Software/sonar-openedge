@@ -18,6 +18,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.IntStream;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
+import org.prorefactor.core.ProToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

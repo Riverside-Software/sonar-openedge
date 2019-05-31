@@ -14,14 +14,12 @@
  ********************************************************************************/
 
 // Based on original work by John Green
-// Annotations: TRANSLATED, SEMITRANSLATED
+// Annotations: SEMITRANSLATED
 
 parser grammar Proparse;
 
 @header {
   import org.antlr.v4.runtime.BufferedTokenStream;
-  import org.slf4j.Logger;
-  import org.slf4j.LoggerFactory;
   import org.prorefactor.core.ABLNodeType;
   import org.prorefactor.proparse.IntegerIndex;
   import org.prorefactor.proparse.ParserSupport;
@@ -34,8 +32,6 @@ options {
 }
 
 @members {
-  private final static Logger LOGGER = LoggerFactory.getLogger(Proparse.class);
-
   private ParserSupport support;
 
   public void initAntlr4(RefactorSession session, IntegerIndex<String> fileNameList) {
@@ -44,11 +40,6 @@ options {
 
   public ParserSupport getParserSupport() {
     return this.support;
-  }
-
-  /** Do the upcoming tokens name a table? */
-  boolean isTableName() {
-    return support.isTableNameANTLR4(_input.LT(1));
   }
 
   private boolean hasHiddenBefore(int offset) {
@@ -72,332 +63,304 @@ options {
 // Begin syntax
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-program: // TRANSLATED
-    blockorstate*
-    { 
-      // Make sure we didn't stop, for any reason, in the middle of
-      // the program. This was a problem with extra periods (empty statements)
-      // and possibly with other things.
-      if (_input.LA(1) != Token.EOF) {
-        LOGGER.error("Tokens still available in the stream...");
-      }
-    }
+program:
+    blockOrStatement*
   ;
 
-code_block: // TRANSLATED
-    blockorstate*
+codeBlock:
+    blockOrStatement*
   ;
 
-class_code_block:
-    class_blockorstate*
-  ;
-
-blockorstate: // TRANSLATED
+blockOrStatement:
     // Method calls and other expressions can stand alone as statements.
     // Many functions are ambiguous with statements on the first few tokens.
-    empty_statement
+    emptyStatement
   | annotation
-  | dot_comment 
-  | labeled_block
-  | dynamicnewstate
-  | assignstate2
-  | { support.isMethodOrFunc(_input.LT(1)) != 0 }? func_call_statement
+  | dotComment
+  | labeledBlock
+  | dynamicNewStatement
+  | assignStatement2
+  | { support.isMethodOrFunc(_input.LT(1)) != 0 }? functionCallStatement
   | statement
-  | expression_statement
+  | expressionStatement
   ;
 
-class_blockorstate:
-    empty_statement
+classCodeBlock:
+    classBlockOrStatement*
+  ;
+
+classBlockOrStatement:
+    emptyStatement
   | annotation
-  | class_statement
+  | inclassStatement
   ;
 
-empty_statement:
+emptyStatement:
     PERIOD
   ;
 
-dot_comment: // TRANSLATED
-    NAMEDOT
-    not_state_end*
-    state_end
+dotComment:
+    NAMEDOT notStatementEnd+ statementEnd
   ;
 
-func_call_statement:
-    func_call_statement2 NOERROR_KW? state_end
+functionCallStatement:
+    functionCallStatementSub NOERROR_KW? statementEnd
   ;
 
-func_call_statement2:
-    fname=identifier parameterlist_noroot
+functionCallStatementSub:
+    fname=identifier parameterListNoRoot
   ;
 
-expression_statement: // TRANSLATED
-    expression NOERROR_KW? state_end
+expressionStatement:
+    expression NOERROR_KW? statementEnd
   ;
 
-labeled_block: // TRANSLATED
-    blocklabel
-    LEXCOLON ( dostate | forstate | repeatstate )
+labeledBlock:
+    blockLabel
+    LEXCOLON ( doStatement | forStatement | repeatStatement )
   ;
 
-block_colon: // TRANSLATED
+blockColon:
     LEXCOLON | PERIOD
   ;
 
-block_end: // TRANSLATED
+blockEnd:
     EOF
-  | END state_end
+  | END statementEnd
   ;
 
-block_for: // TRANSLATED
+blockFor:
     // This is the FOR option, like, DO FOR..., REPEAT FOR...
-    FOR record (COMMA record)*
+    FOR record ( COMMA record )*
   ;
 
-block_opt: // TRANSLATED
-    field EQUAL expression TO expression (BY constant)? # block_opt_iterator
-  | querytuningphrase    # block_opt_querytuning
-  | WHILE expression     # block_opt_while
-  | TRANSACTION          # block_opt_transaction
-  | stop_after           # block_opt_stop_after
-  | on___phrase          # block_opt_on_phrase
-  | framephrase          # block_opt_frame_phrase
-  | BREAK                # block_opt_break
-  | by_expr              # block_opt_by_expr
-  | collatephrase        # block_opt_collate_phrase
+blockOption:
+    field EQUAL expression TO expression ( BY constant )? # blockOptionIterator
+  | queryTuningPhrase    # blockOptionQueryTuning
+  | WHILE expression     # blockOptionWhile
+  | TRANSACTION          # blockOptionTransaction
+  | stopAfter            # blockOptionStopAfter
+  | onPhrase             # blockOptionOnPhrase
+  | framePhrase          # blockOptionFramePhrase
+  | BREAK                # blockOptionBreak
+  | byExpr               # blockOptionByExpr
+  | collatePhrase        # blockOptionCollatePhrase
   | // weird. Couldn't find GROUP BY in the docs, and couldn't even figure out how it gets through PSC's parser.
-    GROUP by_expr+       # block_opt_group_by
+    GROUP byExpr+        # blockOptionGroupBy
   ;
 
-block_preselect: // TRANSLATED
-    PRESELECT for_record_spec
+blockPreselect:
+    PRESELECT forRecordSpec
   ;
 
-statement: // TRANSLATED
+statement:
 // Do not turn off warnings for the statement rule. We want to know if we have ambiguities here.
 // Many statements can be ambiguous on the first two terms with a built-in function. I have predicated those statements.
 // Some statement keywords are not reserved, and could be used as a field name in unreskeyword EQUAL expression.
 // However, there are no statements
 // that have an unreserved keyword followed by EQUAL or LEFTPAREN, so with ASSIGN and user def'd function predicated
 // at the top, we take care of our ambiguity.
-     aatraceonoffstate
-  |  aatraceclosestate
-  |  aatracestate
-  |  accumulatestate
-  |  analyzestate
-  |  applystate
-  |  assignstate
-  |  bellstate
-  |  blocklevelstate  
-  |  buffercomparestate
-  |  buffercopystate
-  |  callstate
-  |  casestate
-  |  catchstate
-  |  choosestate
-  |  classstate
-  |  enumstate
-  |  clearstate
-  |  closequerystate
-  |  closestoredprocedurestate
-  |  colorstate
-  |  compilestate
-  |  connectstate  
-  |  copylobstate
+     aaTraceOnOffStatement
+  |  aaTraceCloseStatement
+  |  aaTraceStatement
+  |  accumulateStatement
+  |  analyzeStatement
+  |  applyStatement
+  |  assignStatement
+  |  bellStatement
+  |  blockLevelStatement
+  |  bufferCompareStatement
+  |  bufferCopyStatement
+  |  callStatement
+  |  caseStatement
+  |  catchStatement
+  |  chooseStatement
+  |  classStatement
+  |  enumStatement
+  |  clearStatement
+  |  closeQueryStatement
+  |  closeStoredProcedureStatement
+  |  colorStatement
+  |  compileStatement
+  |  connectStatement
+  |  copyLobStatement
   |  // "CREATE WIDGET-POOL." truly is ambiguous if you have a table named "widget-pool".
-     // Progress seems to treat this as a CREATE WIDGET-POOL statement rather than a
-     // CREATE table statement. So, we'll resolve it the same way.
-     { _input.LA(2) == WIDGETPOOL }? createwidgetpoolstate
-  |  createstate
-  |  create_whatever_state
-  |  createaliasstate
-  |  createbrowsestate
-  |  createquerystate
-  |  createbufferstate
-  |  createdatabasestate
-  |  createserverstate
-  |  createserversocketstate
-  |  createsocketstate
-  |  createtemptablestate
-  |  createwidgetpoolstate
-  |  createwidgetstate
-  |  ddeadvisestate
-  |  ddeexecutestate
-  |  ddegetstate
-  |  ddeinitiatestate
-  |  dderequeststate
-  |  ddesendstate
-  |  ddeterminatestate
-  |  definebrowsestate
-  |  definebufferstate
-  |  definebuttonstate
-  |  definedatasetstate
-  |  definedatasourcestate
-  |  defineeventstate
-  |  defineframestate
-  |  defineimagestate
-  |  definemenustate
-  |  defineparameterstate
-  |  definequerystate
-  |  definerectanglestate
-  |  definestreamstate
-  |  definesubmenustate
-  |  definetemptablestate
-  |  defineworktablestate
-  |  definevariablestate
-  |  dictionarystate
-  |  deletewidgetpoolstate
-  |  deletestate
-  |  deletealiasstate
-  |  deleteobjectstate
-  |  deleteprocedurestate
-  |  deletewidgetstate
-  |  deletewidgetpoolstate
-  |  disablestate
-  |  disabletriggersstate
-  |  disconnectstate
-  |  displaystate
-  |  dostate
-  |  downstate
-  |  emptytemptablestate  
-  |  enablestate
-  |  exportstate
-  |  finallystate
-  |  findstate
-  |  forstate
-  |  formstate
-  |  functionstate
-  |  getstate
-  |  getkeyvaluestate  
-  |  hidestate
-  |  ifstate
-  |  importstate  
-  |  inputstatement
-  |  inputoutputstatement
-  |  insertstate
-  |  interfacestate
-  |  leavestate
-  |  loadstate  
-  |  messagestate
-  |  nextstate
-  |  nextpromptstate
-  |  onstate  
-  |  openquerystate
-  |  osappendstate
-  |  oscommandstate
-  |  oscopystate
-  |  oscreatedirstate  
-  |  osdeletestate
-  |  osrenamestate
-  |  outputstatement
-  |  pagestate  
-  |  pausestate
-  |  procedurestate
-  |  processeventsstate
-  |  promptforstate
-  |  publishstate
-  |  putcursorstate
-  |  putstate
-  |  putscreenstate
-  |  putkeyvaluestate
-  |  quitstate
-  |  rawtransferstate
-  |  readkeystate
-  |  releasestatement
-  |  repeatstate
-  |  repositionstate  
-  |  returnstate
-  |  routinelevelstate
-  |  runstatement
-  |  savecachestate
-  |  scrollstate
-  |  seekstate  
-  |  setstate
-  |  showstatsstate
-  |  statusstate  
-  |  stopstate
-  |  subscribestate
-  |  systemdialogcolorstate
-  |  systemdialogfontstate
-  |  systemdialoggetdirstate
-  |  systemdialoggetfilestate
-  |  systemdialogprintersetupstate
-  |  systemhelpstate
-  |  thisobjectstate
-  |  transactionmodeautomaticstate
-  |  triggerprocedurestate
-  |  underlinestate  
-  |  undostate
-  |  unloadstate
-  |  unsubscribestate
-  |  upstate  
-  |  updatestate
-  |  usestate
-  |  usingstate
-  |  validatestate
-  |  viewstate
-  |  waitforstate
+     // Progress seems to treat this as a CREATE WIDGET-POOL Statementment rather than a
+     // CREATE table Statementment. So, we'll resolve it the same way.
+     { _input.LA(2) == WIDGETPOOL }? createWidgetPoolStatement
+  |  createStatement
+  |  createWhateverStatement
+  |  createAliasStatement
+  |  createBrowseStatement
+  |  createQueryStatement
+  |  createBufferStatement
+  |  createDatabaseStatement
+  |  createServerStatement
+  |  createServerSocketStatement
+  |  createSocketStatement
+  |  createTempTableStatement
+  |  createWidgetPoolStatement
+  |  createWidgetStatement
+  |  ddeAdviseStatement
+  |  ddeExecuteStatement
+  |  ddeGetStatement
+  |  ddeInitiateStatement
+  |  ddeRequestStatement
+  |  ddeSendStatement
+  |  ddeTerminateStatement
+  |  defineBrowseStatement
+  |  defineBufferStatement
+  |  defineButtonStatement
+  |  defineDatasetStatement
+  |  defineDataSourceStatement
+  |  defineEventStatement
+  |  defineFrameStatement
+  |  defineImageStatement
+  |  defineMenuStatement
+  |  defineParameterStatement
+  |  defineQueryStatement
+  |  defineRectangleStatement
+  |  defineStreamStatement
+  |  defineSubMenuStatement
+  |  defineTempTableStatement
+  |  defineWorkTableStatement
+  |  defineVariableStatement
+  |  dictionaryStatement
+  |  deleteWidgetPoolStatement
+  |  deleteStatement
+  |  deleteAliasStatement
+  |  deleteObjectStatement
+  |  deleteProcedureStatement
+  |  deleteWidgetStatement
+  |  deleteWidgetPoolStatement
+  |  disableStatement
+  |  disableTriggersStatement
+  |  disconnectStatement
+  |  displayStatement
+  |  doStatement
+  |  downStatement
+  |  emptyTempTableStatement
+  |  enableStatement
+  |  exportStatement
+  |  finallyStatement
+  |  findStatement
+  |  forStatement
+  |  formStatement
+  |  functionStatement
+  |  getStatement
+  |  getKeyValueStatement
+  |  hideStatement
+  |  ifStatement
+  |  importStatement
+  |  inputStatement
+  |  inputOutputStatement
+  |  insertStatement
+  |  interfaceStatement
+  |  leaveStatement
+  |  loadStatement
+  |  messageStatement
+  |  nextStatement
+  |  nextPromptStatement
+  |  onStatement
+  |  openQueryStatement
+  |  osAppendStatement
+  |  osCommandStatement
+  |  osCopyStatement
+  |  osCreateDirStatement
+  |  osDeleteStatement
+  |  osRenameStatement
+  |  outputStatement
+  |  pageStatement
+  |  pauseStatement
+  |  procedureStatement
+  |  processEventsStatement
+  |  promptForStatement
+  |  publishStatement
+  |  putCursorStatement
+  |  putStatement
+  |  putScreenStatement
+  |  putKeyValueStatement
+  |  quitStatement
+  |  rawTransferStatement
+  |  readkeyStatement
+  |  releaseStatementWrapper
+  |  repeatStatement
+  |  repositionStatement
+  |  returnStatement
+  |  routineLevelStatement
+  |  runStatementWrapper
+  |  saveCacheStatement
+  |  scrollStatement
+  |  seekStatement
+  |  setStatement
+  |  showStatsStatement
+  |  statusStatement
+  |  stopStatement
+  |  subscribeStatement
+  |  systemDialogColorStatement
+  |  systemDialogFontStatement
+  |  systemDialogGetDirStatement
+  |  systemDialogGetFileStatement
+  |  systemDialogPrinterSetupStatement
+  |  systemHelpStatement
+  |  thisObjectStatement
+  |  transactionModeAutomaticStatement
+  |  triggerProcedureStatement
+  |  underlineStatement
+  |  undoStatement
+  |  unloadStatement
+  |  unsubscribeStatement
+  |  upStatement
+  |  updateStatement
+  |  useStatement
+  |  usingStatement
+  |  validateStatement
+  |  viewStatement
+  |  waitForStatement
   ;
 
-class_statement:
-     definebrowsestate
-  |  definebufferstate
-  |  definebuttonstate
-  |  definedatasetstate
-  |  definedatasourcestate
-  |  defineeventstate
-  |  defineframestate
-  |  defineimagestate
-  |  definemenustate
-  |  defineparameterstate
-  |  definepropertystate
-  |  definequerystate
-  |  definerectanglestate
-  |  definestreamstate
-  |  definesubmenustate
-  |  definetemptablestate
-  |  defineworktablestate
-  |  definevariablestate
-  |  constructorstate
-  |  destructorstate
-  |  methodstate
-  |  ext_procedurestate // Only external procedures are accepted
-  |  ext_functionstate  // Only FUNCTION ... IN ... are accepted
+inclassStatement:
+     defineBrowseStatement
+  |  defineBufferStatement
+  |  defineButtonStatement
+  |  defineDatasetStatement
+  |  defineDataSourceStatement
+  |  defineEventStatement
+  |  defineFrameStatement
+  |  defineImageStatement
+  |  defineMenuStatement
+  |  defineParameterStatement
+  |  definePropertyStatement
+  |  defineQueryStatement
+  |  defineRectangleStatement
+  |  defineStreamStatement
+  |  defineSubMenuStatement
+  |  defineTempTableStatement
+  |  defineWorkTableStatement
+  |  defineVariableStatement
+  |  constructorStatement
+  |  destructorStatement
+  |  methodStatement
+  |  externalProcedureStatement // Only external procedures are accepted
+  |  externalFunctionStatement  // Only FUNCTION ... IN ... are accepted
   ;
 
-pseudfn: // TRANSLATED
+pseudoFunction:
 // See PSC's grammar for <pseudfn> and for <asignmt>.
 // These are functions that can (or, in some cases, must) be an l-value.
 // Productions that are named *_pseudfn /must/ be l-values.
 // Widget attributes are ambiguous with pretty much anything, because
 // the first bit before the colon can be any expression.
-    (  EXTENT
-    |  FIXCODEPAGE
-    |  OVERLAY
-    |  PUTBITS
-    |  PUTBYTE
-    |  PUTBYTES
-    |  PUTDOUBLE
-    |  PUTFLOAT
-    |  PUTINT64
-    |  PUTLONG
-    |  PUTSHORT
-    |  PUTSTRING
-    |  PUTUNSIGNEDLONG
-    |  PUTUNSIGNEDSHORT
-    |  SETBYTEORDER
-    |  SETPOINTERVALUE
-    |  SETSIZE
-    )
-    funargs
+    memoryManagementFunction
   | AAMSG  // not the whole func - we don't want its arguments here
-  | currentvaluefunc
+  | currentValueFunction
   | CURRENTWINDOW
-  | dynamiccurrentvaluefunc
-  | entryfunc
-  | lengthfunc
-  | nextvaluefunc
-  | rawfunc
-  | substringfunc
+  | dynamicCurrentValueFunction
+  | entryFunction
+  | lengthFunction
+  | nextValueFunction
+  | rawFunction
+  | substringFunction
   // Keywords from <optargfn> and <noargfn>. Assignments to those
   // are accepted by the compiler, however, assignment to them seems to have
   // no affect at runtime.
@@ -417,61 +380,63 @@ pseudfn: // TRANSLATED
   | AAPCONTROL | GETCODEPAGES | COMSELF | PROCESSARCHITECTURE
   ;
 
+memoryManagementFunction:
+    ( EXTENT | FIXCODEPAGE | OVERLAY | PUTBITS | PUTBYTE | PUTBYTES | PUTDOUBLE | PUTFLOAT | PUTINT64 | PUTLONG | PUTSHORT | PUTSTRING | PUTUNSIGNEDLONG | PUTUNSIGNEDSHORT | SETBYTEORDER | SETPOINTERVALUE | SETSIZE )
+    functionArgs
+  ;
 
-// Predicates not in alpha order because they give ambiguous warnings if they're below
-// maximumfunc or minimumfunc. Judy
 // ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
-builtinfunc: // TRANSLATED
-     ACCUMULATE accum_what ( by_expr expression | expression )
+builtinFunction:
+     ACCUMULATE accumulateWhat ( byExpr expression | expression )
   |  ADDINTERVAL LEFTPAREN expression COMMA expression COMMA expression RIGHTPAREN
   |  AUDITENABLED LEFTPAREN expression? RIGHTPAREN
-  |  CANFIND LEFTPAREN findwhich? recordphrase RIGHTPAREN
-  |  CAST LEFTPAREN expression COMMA type_name RIGHTPAREN
-  |  currentvaluefunc // is also a pseudfn.
-  |  dynamiccurrentvaluefunc // is also a pseudfn.
-  |  DYNAMICFUNCTION LEFTPAREN expression in_expr? (COMMA parameter)* RIGHTPAREN NOERROR_KW?
+  |  canFindFunction
+  |  CAST LEFTPAREN expression COMMA typeName RIGHTPAREN
+  |  currentValueFunction // is also a pseudfn.
+  |  dynamicCurrentValueFunction // is also a pseudfn.
+  |  DYNAMICFUNCTION LEFTPAREN expression inExpression? (COMMA parameter)* RIGHTPAREN NOERROR_KW?
   |  DYNAMICINVOKE
        LEFTPAREN
-       ( exprt | type_name )
+       ( expressionTerm | typeName )
        COMMA expression
        (COMMA parameter)*
        RIGHTPAREN
   // ENTERED and NOTENTERED are only dealt with as part of an expression term. See: exprt.
-  |  entryfunc // is also a pseudfn.
-  |  ETIME_KW funargs  // also noarg
+  |  entryFunction // is also a pseudfn.
+  |  ETIME_KW functionArgs  // also noarg
   |  EXTENT LEFTPAREN expression RIGHTPAREN
   |  FRAMECOL LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMEDOWN LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMELINE LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMEROW LEFTPAREN widgetname RIGHTPAREN  // also noarg
-  |  GETCODEPAGE funargs
+  |  GETCODEPAGE functionArgs
   |  GUID LEFTPAREN expression? RIGHTPAREN
   |  IF expression THEN expression ELSE expression
-  |  ldbnamefunc 
-  |  lengthfunc // is also a pseudfn.
+  |  ldbnameFunction
+  |  lengthFunction // is also a pseudfn.
   |  LINECOUNTER LEFTPAREN streamname RIGHTPAREN  // also noarg
-  |  MTIME funargs  // also noarg
-  |  nextvaluefunc // is also a pseudfn.
+  |  MTIME functionArgs  // also noarg
+  |  nextValueFunction // is also a pseudfn.
   |  PAGENUMBER LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  PAGESIZE_KW LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  PROVERSION LEFTPAREN expression RIGHTPAREN
-  |  rawfunc // is also a pseudfn.
+  |  rawFunction // is also a pseudfn.
   |  SEEK LEFTPAREN ( INPUT | OUTPUT | streamname | STREAMHANDLE expression ) RIGHTPAREN // streamname, /not/ stream_name_or_handle.
-  |  substringfunc // is also a pseudfn.
-  |  SUPER parameterlist  // also noarg
+  |  substringFunction // is also a pseudfn.
+  |  SUPER parameterList  // also noarg
   |  TENANTID LEFTPAREN expression? RIGHTPAREN
   |  TENANTNAME LEFTPAREN expression? RIGHTPAREN
-  |  TIMEZONE funargs  // also noarg
-  |  TYPEOF LEFTPAREN expression COMMA type_name RIGHTPAREN
-  |  GETCLASS LEFTPAREN type_name RIGHTPAREN
-  |  (USERID | USER) funargs  // also noarg
-  |  argfunc
-  |  optargfunc
-  |  recordfunc
+  |  TIMEZONE functionArgs  // also noarg
+  |  TYPEOF LEFTPAREN expression COMMA typeName RIGHTPAREN
+  |  GETCLASS LEFTPAREN typeName RIGHTPAREN
+  |  (USERID | USER) functionArgs  // also noarg
+  |  argFunction
+  |  optionalArgFunction
+  |  recordFunction
   ;
 
 // If you add a function keyword here, also add option NodeTypesOption.MAY_BE_REGULAR_FUNC to ABLNodeType entry
-argfunc: // TRANSLATED 
+argFunction:
     (  AACBIT
     |  AAMSG
     |  ABSOLUTE
@@ -510,6 +475,7 @@ argfunc: // TRANSLATED
     |  DECRYPT
     |  DYNAMICCAST
     |  DYNAMICNEXTVALUE
+    |  DYNAMICPROPERTY
     |  ENCODE
     |  ENCRYPT
     |  EXP
@@ -606,19 +572,19 @@ argfunc: // TRANSLATED
     |  WIDGETHANDLE
     |  YEAR
     )
-    funargs
+    functionArgs
     ;
 
-optargfunc: // TRANSLATED
+optionalArgFunction:
     (  GETDBCLIENT
     |  GETEFFECTIVETENANTID
     |  GETEFFECTIVETENANTNAME
     )
-    optfunargs
+    optionalFunctionArgs
     ;
 
 // If you add a function keyword here, also add option NodeTypesOption.MAY_BE_REGULAR_FUNC to ABLNodeType entry
-recordfunc: // TRANSLATED
+recordFunction:
     (  AMBIGUOUS
     |  AVAILABLE
     |  CURRENTCHANGED
@@ -632,11 +598,11 @@ recordfunc: // TRANSLATED
     |  ROWID
     |  ROWSTATE
     )
-    (LEFTPAREN record RIGHTPAREN | record)
+    ( LEFTPAREN record RIGHTPAREN | record )
   ;
 
 // If you add a function keyword here, also add option NodeTypesOption.MAY_BE_NO_ARG_FUNC to ABLNodeType entry
-noargfunc: // TRANSLATED
+noArgFunction:
      AACONTROL
   |  AAPCONTROL
   |  AASERIAL
@@ -698,7 +664,7 @@ noargfunc: // TRANSLATED
   |  USER
   ;
 
-parameter: // TRANSLATED
+parameter:
     // This is the syntax for parameters when calling or running something.
     // This can refer to a buffer/tablehandle, but it doesn't define one.
     BUFFER identifier FOR record # parameterBufferFor
@@ -707,44 +673,47 @@ parameter: // TRANSLATED
     { (_input.LA(3) != OBJCOLON) && (_input.LA(3) != DOUBLECOLON) }?
     BUFFER record  # parameterBufferRecord
   |  p=( OUTPUT | INPUTOUTPUT | INPUT )?
-    (
-       TABLEHANDLE field parameter_dataset_options
-    |  TABLE FOR? record parameter_dataset_options
-    |  { _input.LA(3) != OBJCOLON && _input.LA(3) != DOUBLECOLON }? DATASET identifier parameter_dataset_options
-    |  DATASETHANDLE field parameter_dataset_options
-    |  PARAMETER field EQUAL expression // for RUN STORED-PROCEDURE
-    |  n=identifier AS ( CLASS type_name | datatype_com_native | datatype_var )
-      { support.defVar($n.text); }
-    |  expression ( AS datatype_com )?
-    )
+    parameterArg
     ( BYPOINTER | BYVARIANTPOINTER )?  
     # parameterOther
   ;
 
-parameter_dataset_options: // TRANSLATED
+parameterArg:
+    TABLEHANDLE field parameterDatasetOptions  # parameterArgTableHandle
+  | TABLE FOR? record parameterDatasetOptions  # parameterArgTable
+  | { _input.LA(3) != OBJCOLON && _input.LA(3) != DOUBLECOLON }? DATASET identifier parameterDatasetOptions  # parameterArgDataset
+  | DATASETHANDLE field parameterDatasetOptions # parameterArgDatasetHandle
+  | PARAMETER field EQUAL expression  # parameterArgStoredProcedure  // for RUN STORED-PROCEDURE
+  | n=identifier AS ( CLASS typeName | datatypeComNative | datatypeVar ) { support.defVar($n.text); } # parameterArgAs
+  | expression ( AS datatypeCom )? # parameterArgComDatatype
+  ;
+
+// FIXME Can be empty
+parameterDatasetOptions:
     APPEND? ( BYVALUE | BYREFERENCE | BIND )?
   ;
 
-parameterlist: // TRANSLATED
-    parameterlist_noroot
+parameterList:
+    parameterListNoRoot
   ;
 
-parameterlist_noroot: // TRANSLATED
+// FIXME Verify all those calls
+parameterListNoRoot:
     // This is used by user defd funcs, because the udfunc name /is/ the root for its parameter list.
     // Using a Parameter_list node would be unnecessary and silly.
     LEFTPAREN ( parameter ( COMMA parameter )* )? RIGHTPAREN
   ;
 
-eventlist: // TRANSLATED
+eventList:
     . ( COMMA . )*
   ;
 
-funargs: // TRANSLATED
+functionArgs:
     // Use funargs /only/ if it is the child of a root-node keyword.
     LEFTPAREN expression ( COMMA expression )* RIGHTPAREN
   ;
 
-optfunargs: // TRANSLATED
+optionalFunctionArgs:
     // Use optfunargs /only/ if it is the child of a root-node keyword.
     LEFTPAREN ( expression ( COMMA expression )* )? RIGHTPAREN
   ;
@@ -752,32 +721,32 @@ optfunargs: // TRANSLATED
 // ... or value phrases
 // There are a number of situations where you can have name, filename,
 // or "Anything", or that can be substituted with "value(expression)".
-anyorvalue: // TRANSLATED
+anyOrValue:
     VALUE LEFTPAREN expression RIGHTPAREN # anyOrValueValue
   | ~( PERIOD | VALUE )  # anyOrValueAny 
   ;
 
-filenameorvalue: // TRANSLATED
-     valueexpression | filename
+filenameOrValue:
+     valueExpression | filename
   ;
 
-valueexpression: // TRANSLATED
+valueExpression:
     VALUE LEFTPAREN expression RIGHTPAREN
   ;
 
-qstringorvalue: // TRANSLATED
-     valueexpression | QSTRING
+quotedStringOrValue:
+     valueExpression | QSTRING
   ;
 
-expressionorvalue: // TRANSLATED
-    valueexpression | expression
+expressionOrValue:
+    valueExpression | expression
   ;
 
-findwhich: // TRANSLATED
+findWhich:
     CURRENT | EACH | FIRST | LAST | NEXT | PREV
   ;
 
-lockhow: // TRANSLATED
+lockHow:
     SHARELOCK | EXCLUSIVELOCK | NOLOCK
   ;
 
@@ -785,9 +754,9 @@ lockhow: // TRANSLATED
 // expression
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-expression: // TRANSLATED
-    MINUS exprt  # expressionMinus
-  | PLUS exprt   # expressionPlus
+expression:
+    MINUS expressionTerm  # expressionMinus
+  | PLUS expressionTerm   # expressionPlus
   | expression ( STAR | MULTIPLY | SLASH | DIVIDE | MODULO ) expression # expressionOp1
   | expression ( PLUS | MINUS) expression # expressionOp2
   | expression ( EQUAL | EQ | GTORLT | NE | RIGHTANGLE | GTHAN | GTOREQUAL | GE | LEFTANGLE | LTHAN | LTOREQUAL | LE ) expression # expressionComparison
@@ -795,7 +764,7 @@ expression: // TRANSLATED
   | NOT expression  # expressionNot
   | expression AND expression # expressionAnd
   | expression OR expression # expressionOr
-  | exprt # expressionExprt
+  | expressionTerm # expressionExprt
   ;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -804,15 +773,15 @@ expression: // TRANSLATED
 
 // Expression term: constant, function, fields, attributes, methods.
 
-exprt: // TRANSLATED
-    NORETURNVALUE s_widget attr_colon  # exprtNoReturnValue
+expressionTerm:
+    NORETURNVALUE sWidget colonAttribute  # exprtNoReturnValue
   | // Widget attributes has to be checked before field or func, because they can be ambiguous up to the OBJCOLON. Think about no-arg functions like SUPER.
     // Also has to be checked before systemhandlename, because you want to pick up all of FILE-INFO:FILE-TYPE rather than just FILE-INFO, for example.
-    widname attr_colon     # exprtWidName
-  | exprt2 attr_colon?     # exprtExprt2
+    widName colonAttribute     # exprtWidName
+  | expressionTerm2 colonAttribute?     # exprtExprt2
   ;
 
-exprt2: // TRANSLATED
+expressionTerm2:
     LEFTPAREN expression RIGHTPAREN # exprt2ParenExpr
   | // methodOrFunc returns zero, and the assignment evaluates to false, if
     // the identifier cannot be resolved to a method or user function name.
@@ -820,45 +789,45 @@ exprt2: // TRANSLATED
     // or USER_FUNC.
     // Methods take precedent over built-in functions. The compiler (10.2b) 
     // does not seem to try recognize by function/method signature.
-    { support.isMethodOrFunc(_input.LT(1)) != 0 }? fname=identifier parameterlist_noroot  # exprt2ParenCall
-  | NEW type_name parameterlist # exprt2New
+    { support.isMethodOrFunc(_input.LT(1)) != 0 }? fname=identifier parameterListNoRoot  # exprt2ParenCall
+  | NEW typeName parameterList # exprt2New
   | // Have to predicate all of builtinfunc, because it can be ambiguous with method call.
-    builtinfunc  # exprt2BuiltinFunc
+    builtinFunction  # exprt2BuiltinFunc
   | // We are going to have lots of cases where we are inheriting methods
     // from a superclass which we don't have the source for. At this
     // point in expression evaluation, if we have anything followed by a left-paren,
     // we're going to assume it's a method call.
     // Method names which are reserved keywords must be prefixed with THIS-OBJECT:.
-    { support.isClass() && support.unknownMethodCallsAllowed() }? methodname=identifier parameterlist_noroot  # exprt2ParenCall2
+    { support.isClass() && support.unknownMethodCallsAllowed() }? methodname=identifier parameterListNoRoot # exprt2ParenCall2
   | constant   # exprt2Constant
-  | noargfunc  # exprt2NoArgFunc
-  | systemhandlename  # exprt2SystemHandleName
+  | noArgFunction  # exprt2NoArgFunc
+  | systemHandleName  # exprt2SystemHandleName
   | field ( NOT? ENTERED )?  # exprt2Field
   ;
 
-widattr: // TRANSLATED
-    widname attr_colon  # widattrWidName
-  | exprt2 attr_colon   # widattrExprt2
+widattr:
+    widName colonAttribute  # widattrWidName
+  | expressionTerm2 colonAttribute   # widattrExprt2
   ;
 
-attr_colon: // TRANSLATED
-    ( ( OBJCOLON | DOUBLECOLON ) . array_subscript? method_param_list? )+ inuic? ( AS . )?
+colonAttribute:
+    ( ( OBJCOLON | DOUBLECOLON ) id=. arraySubscript? methodParamList? )+ inuic? ( AS . )?
   ;
 
-gwidget: // TRANSLATED
-    s_widget inuic?
+gWidget:
+    sWidget inuic?
   ;
 
-widgetlist: // TRANSLATED
-    gwidget ( COMMA gwidget )*
+widgetList:
+    gWidget ( COMMA gWidget )*
   ;
 
-s_widget: // TRANSLATED
-    widname | field
+sWidget:
+    widName | field
   ;
 
-widname: // TRANSLATED
-     systemhandlename
+widName:
+     systemHandleName
   |  DATASET identifier
   |  DATASOURCE identifier
   |  FIELD field
@@ -876,37 +845,37 @@ widname: // TRANSLATED
   |  STREAM streamname
   ;
 
-filn: // TRANSLATED
+filn:
     t1=identifier ( NAMEDOT t2=identifier )?
   ;
 
-fieldn: // TRANSLATED
+fieldn:
     t1=identifier ( NAMEDOT t2=identifier ( NAMEDOT t3=identifier )? )?
   ;
 
-field: // TRANSLATED
-    INPUT? field_frame_or_browse? id=fieldn array_subscript?
+field:
+    INPUT? fieldFrameOrBrowse? id=fieldn arraySubscript?
     { support.fieldReference($id.text); }
   ;
 
-field_frame_or_browse: // TRANSLATED
+fieldFrameOrBrowse:
      FRAME widgetname
   |  BROWSE widgetname
   ;
 
-array_subscript: // TRANSLATED
+arraySubscript:
     LEFTBRACE expression ( FOR expression )? RIGHTBRACE
   ;
 
-method_param_list: // TRANSLATED
+methodParamList:
     LEFTPAREN parameter? ( COMMA parameter? )* RIGHTPAREN
   ;
 
-inuic: // TRANSLATED
+inuic:
     IN_KW ( MENU | FRAME | BROWSE | SUBMENU | BUFFER ) widgetname
   ;
 
-var_rec_field: // TRANSLATED
+varRecField:
     // If there's junk in front, like INPUT FRAME, then it won't get picked up
     // as a record - we don't have to worry about that. So, we can look at the
     // very next token, and if it's an identifier it might be record - check its name.
@@ -918,44 +887,36 @@ var_rec_field: // TRANSLATED
   | field
   ;
 
-recordAsFormItem: // TRANSLATED
+recordAsFormItem:
     record
   ;
 
-record: // TRANSLATED
+record:
     // RECORD can be any db table name, work/temp table name, buffer name.
     { support.recordSemanticPredicate(_input.LT(1), _input.LT(2), _input.LT(3)) }? f=filn { support.pushRecordExpression(_localctx, $f.text); }
   ;
 
 ////  Names  ////
 
-blocklabel: // TRANSLATED
+blockLabel:
     // Block labels can begin with [#|$|%], which are picked up as FILENAME by the lexer.
     { _input.LT(1).getType() != ABLNodeType.FINALLY.getType() }?
     identifier | FILENAME
   ;
 
-cursorname: // TRANSLATED
+sequencename:
     identifier
   ;
 
-queryname: // TRANSLATED
+streamname:
     identifier
   ;
 
-sequencename: // TRANSLATED
+widgetname:
     identifier
   ;
 
-streamname: // TRANSLATED
-    identifier
-  ;
-
-widgetname: // TRANSLATED
-    identifier
-  ;
-
-identifier: // TRANSLATED
+identifier:
     // identifier gets us an ID node for an unqualified (local) reference.
     // Only an ID or unreservedkeyword can be used as an unqualified reference.
     // Reserved keywords as names can be referenced if they are prefixed with
@@ -964,18 +925,18 @@ identifier: // TRANSLATED
   | unreservedkeyword # identifierUKW
   ;
 
-new_identifier: // TRANSLATED
+newIdentifier:
     // new_identifier gets us an ID node when naming (defining) a new named thing.
     // Reserved keywords can be used as names.
     .
   ;
 
-filename: // TRANSLATED
-    t1=filename_part
-    ( { ( _input.LA(1) != Token.EOF) && !hasHiddenBefore(0) }? t2=filename_part )*
+filename:
+    t1=filenamePart
+    ( { ( _input.LA(1) != Token.EOF) && !hasHiddenBefore(0) }? t2=filenamePart )*
   ;
 
-filename_part: // TRANSLATED
+filenamePart:
     // RIGHTANGLE and LEFTANGLE can't be in a filename - see RUN statement.
     // LEXCOLON has a space after it, and a colon can't be the last character in a filename.
     // OBJCOLON has no whitespace after it, so it is allowed in the middle of a filename.
@@ -986,16 +947,16 @@ filename_part: // TRANSLATED
     ~( PERIOD | LEXCOLON | RIGHTANGLE | LEFTANGLE | LEFTPAREN | LEFTCURLY )
   ;
 
-type_name:
-    non_punctuating
+typeName:
+    t1=nonPunctuating ( { ( _input.LA(1) != Token.EOF) && !hasHiddenBefore(0) }? t2=nonPunctuating )*
   ;
 
 // Different action in the visitor (no class lookup in type_name2)
-type_name2:
-    non_punctuating
+typeName2:
+    t1=nonPunctuating ( { ( _input.LA(1) != Token.EOF) && !hasHiddenBefore(0) }? t2=nonPunctuating )*
   ;
 
-constant: // TRANSLATED
+constant:
      // These are necessarily reserved keywords.
      TRUE_KW | FALSE_KW | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL_KW
   |  NOWAIT | SHARELOCK | EXCLUSIVELOCK | NOLOCK
@@ -1010,7 +971,7 @@ constant: // TRANSLATED
   |  WINDOWDELAYEDMINIMIZE | WINDOWMINIMIZED | WINDOWNORMAL | WINDOWMAXIMIZED
   ;
 
-systemhandlename: // TRANSLATED
+systemHandleName:
      // ## IMPORTANT ## If you change this list you also have to change NodeTypes.
      AAMEMORY | ACTIVEWINDOW | AUDITCONTROL | AUDITPOLICY | CLIPBOARD | CODEBASELOCATOR | COLORTABLE | COMPILER
   |  COMSELF | CURRENTWINDOW | DEBUGGER | DEFAULTWINDOW
@@ -1019,7 +980,7 @@ systemhandlename: // TRANSLATED
   |  SOURCEPROCEDURE | SUPER | TARGETPROCEDURE | TEXTCURSOR | THISOBJECT | THISPROCEDURE | WEBCONTEXT | ACTIVEFORM
   ;
 
-widgettype: // TRANSLATED
+widgetType:
      BROWSE | BUFFER | BUTTON | BUTTONS /* {#btns.setType(BUTTON);} */ | COMBOBOX | CONTROLFRAME | DIALOGBOX
   |  EDITOR | FILLIN | FIELD | FRAME | IMAGE | MENU
   |   MENUITEM | QUERY | RADIOSET | RECTANGLE | SELECTIONLIST 
@@ -1027,7 +988,7 @@ widgettype: // TRANSLATED
   |  XDOCUMENT | XNODEREF
   ;
 
-non_punctuating: // TRANSLATED
+nonPunctuating:
    ~( 
       EOF | PERIOD | SLASH | LEXCOLON | OBJCOLON | LEXAT | LEFTBRACE | RIGHTBRACE | CARET | COMMA | EXCLAMATION
     | EQUAL | LEFTPAREN | RIGHTPAREN | SEMI | STAR | UNKNOWNVALUE | BACKTICK | GTOREQUAL | RIGHTANGLE | GTORLT
@@ -1042,365 +1003,359 @@ non_punctuating: // TRANSLATED
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-aatraceclosestate: // TRANSLATED
-    AATRACE stream_name_or_handle? CLOSE state_end
+aaTraceCloseStatement:
+    AATRACE streamNameOrHandle? CLOSE statementEnd
   ;
 
-aatraceonoffstate: // TRANSLATED
-    AATRACE ( OFF | ON AALIST? ) state_end
+aaTraceOnOffStatement:
+    AATRACE ( OFF | ON AALIST? ) statementEnd
   ;
 
-aatracestate: // TRANSLATED
-    AATRACE stream_name_or_handle? ( TO | FROM | THROUGH ) io_phrase_state_end
+aaTraceStatement:
+    AATRACE streamNameOrHandle? ( TO | FROM | THROUGH ) ioPhraseStateEnd
   ;
 
-accum_what: // TRANSLATED
+accumulateWhat:
     AVERAGE | COUNT | MAXIMUM | MINIMUM | TOTAL | SUBAVERAGE | SUBCOUNT | SUBMAXIMUM | SUBMINIMUM | SUBTOTAL
   ;
 
-accumulatestate: // TRANSLATED
-    ACCUMULATE display_item* state_end
+accumulateStatement:
+    ACCUMULATE displayItem* statementEnd
   ;
 
-aggregatephrase: // TRANSLATED
-    LEFTPAREN aggregate_opt+ by_expr* RIGHTPAREN
+aggregatePhrase:
+    LEFTPAREN aggregateOption+ byExpr* RIGHTPAREN
   ;
 
-aggregate_opt: // SEMITRANSLATED
-    accum_what label_constant?
+aggregateOption: // SEMITRANSLATED
+    accumulateWhat labelConstant?
   ;
 
-all_except_fields: // TRANSLATED
-    ALL except_fields?
+allExceptFields:
+    ALL exceptFields?
   ;
 
-analyzestate: // TRANSLATED
+analyzeStatement:
     // Don't ask me - I don't know. I just found it in PSC's grammar.
-    ANALYZE filenameorvalue filenameorvalue analyzestate2?
+    ANALYZE filenameOrValue filenameOrValue ( OUTPUT filenameOrValue )?
     ( APPEND | ALL | NOERROR_KW )*
-    state_end
+    statementEnd
   ;
 
-analyzestate2: // TRANSLATED
-    OUTPUT filenameorvalue
+annotation:
+    ANNOTATION notStatementEnd* statementEnd
   ;
 
-annotation: // TRANSLATED
-    ANNOTATION not_state_end* state_end
+applyStatement:
+    // APPLY is not necessarily an IO statement. See the language ref.
+    APPLY expression applyStatementSub? statementEnd
   ;
 
-applystate: // TRANSLATED
-    // apply is not necessarily an IO statement. See the language ref.
-    APPLY expression applystate2? state_end
+applyStatementSub:
+    TO gWidget
   ;
 
-applystate2: // TRANSLATED
-    TO gwidget
-  ;
-
-assign_opt: // TRANSLATED
+assignOption:
     // Used in defining widgets - sets widget attributes
-    ASSIGN assign_opt2+
+    ASSIGN assignOptionSub+
   ;
 
-assign_opt2: // TRANSLATED
+assignOptionSub:
     . EQUAL expression
   ;
 
-assignstate: // TRANSLATED
-    ASSIGN assignment_list NOERROR_KW? state_end
+assignStatement:
+    ASSIGN assignmentList NOERROR_KW? statementEnd
   ;
 
-assignment_list: // SEMITRANSLATED
-    record except_fields
+assignmentList: // SEMITRANSLATED
+    record exceptFields
   | // We want to pick up record only if it can't be a variable name
     { _input.LA(2) == NAMEDOT || !support.isVar(_input.LT(1).getText()) }?
     record
-  | ( assign_equal when_exp? | assign_field when_exp? )*
+  | ( assignEqual whenExpression? | assignField whenExpression? )*
   ;
 
-assignstate2: // TRANSLATED
-    ( pseudfn | widattr | field ) EQUAL expression NOERROR_KW? state_end
+assignStatement2:
+    ( pseudoFunction | widattr | field ) EQUAL expression NOERROR_KW? statementEnd
   ;
 
-assign_equal: // TRANSLATED
-   ( pseudfn | widattr | field ) EQUAL expression
+assignEqual:
+   ( pseudoFunction | widattr | field ) EQUAL expression
   ;
 
-assign_field: // TRANSLATED
+assignField:
     field
   ;
 
-at_expr: // TRANSLATED
+atExpression:
     AT expression
   ;
 
-atphrase: // TRANSLATED
-    AT
-    ( atphraseab atphraseab | expression )
-    ( COLONALIGNED | LEFTALIGNED | RIGHTALIGNED )?
+atPhrase:
+    AT ( atPhraseSub atPhraseSub | expression ) ( COLONALIGNED | LEFTALIGNED | RIGHTALIGNED )?
   ;
 
-atphraseab: // TRANSLATED
+atPhraseSub:
      (COLUMN|c1=COLUMNS) expression
-  |  (COLUMNOF|c=COLOF) referencepoint
+  |  (COLUMNOF|c=COLOF) referencePoint
   |  ROW expression
-  |  ROWOF referencepoint
+  |  ROWOF referencePoint
   |  X expression
-  |  XOF referencepoint
+  |  XOF referencePoint
   |  Y expression
-  |  YOF referencepoint
+  |  YOF referencePoint
   ;
 
-referencepoint: // TRANSLATED
+referencePoint:
     field ( ( PLUS | MINUS ) expression )?
   ;
 
-bellstate: // TRANSLATED
-    BELL state_end
+bellStatement:
+    BELL statementEnd
   ;
 
-buffercomparestate: // TRANSLATED
-    BUFFERCOMPARE record except_using_fields? TO record
+blockLevelStatement:
+    BLOCKLEVEL ON ERROR UNDO COMMA THROW statementEnd
+  ;
+
+bufferCompareStatement:
+    BUFFERCOMPARE record exceptUsingFields? TO record
     ( CASESENSITIVE | BINARY )?
-    buffercompare_save?
+    bufferCompareSave?
     EXPLICIT?
     (
       ( COMPARES | COMPARE )
       NOERROR_KW?
-      block_colon
-      buffercompares_block
-      buffercompares_end
+      blockColon
+      bufferComparesBlock
+      bufferComparesEnd
     )?
     NOLOBS?
     NOERROR_KW?
-    state_end
+    statementEnd
   ;
 
-buffercompare_save: // TRANSLATED
-    SAVE buffercompare_result? field
+bufferCompareSave:
+    SAVE bufferCompareResult? field
   ;
 
-buffercompare_result: // TRANSLATED
+bufferCompareResult:
     RESULT IN_KW
   ;
 
-buffercompares_block: // TRANSLATED
-    buffercompare_when*
+bufferComparesBlock:
+    bufferCompareWhen*
   ;
 
-buffercompare_when: // TRANSLATED
-    WHEN expression THEN blockorstate
+bufferCompareWhen:
+    WHEN expression THEN blockOrStatement
   ;
 
-buffercompares_end: // TRANSLATED
+bufferComparesEnd:
     END ( COMPARES | COMPARE )?
   ;
 
-buffercopystate: // TRANSLATED
-    BUFFERCOPY record except_using_fields? TO record
-    buffercopy_assign? NOLOBS? NOERROR_KW? state_end
+bufferCopyStatement:
+    BUFFERCOPY record exceptUsingFields? TO record
+    bufferCopyAssign? NOLOBS? NOERROR_KW? statementEnd
   ;
 
-buffercopy_assign: // TRANSLATED
-    ASSIGN assignment_list
+bufferCopyAssign:
+    ASSIGN assignmentList
   ;
 
-by_expr: // TRANSLATED
+byExpr:
     BY expression DESCENDING?
   ;
 
-cache_expr: // TRANSLATED
+cacheExpr:
     CACHE expression
   ;
 
-callstate: // TRANSLATED
-    CALL filenameorvalue expressionorvalue* state_end
+callStatement:
+    CALL filenameOrValue expressionOrValue* statementEnd
   ;
 
-casesens_or_not: // TRANSLATED
+caseSensitiveOrNot:
      // NOT is an operator. Can't use it for root.
      NOT CASESENSITIVE  # casesensNot
   |  CASESENSITIVE      # caseSensYes
   ;
 
-casestate: // TRANSLATED
-    CASE expression block_colon case_block case_otherwise? (EOF | case_end state_end)
+caseStatement:
+    CASE expression blockColon caseBlock caseOtherwise? (EOF | caseEnd statementEnd)
   ;
 
-case_block: // TRANSLATED
-    case_when*
+caseBlock:
+    caseWhen*
   ;
 
-case_when: // TRANSLATED
-    WHEN case_expression THEN blockorstate
+caseWhen:
+    WHEN caseExpression THEN blockOrStatement
   ;
 
-case_expression:
-    case_expr_term                    # caseExpression1
-  | case_expression OR case_expr_term # caseExpression2
+caseExpression:
+    caseExprTerm                    # caseExpression1
+  | caseExpression OR caseExprTerm  # caseExpression2
   ;
 
-case_expr_term: // TRANSLATED
+caseExprTerm:
     WHEN? expression
   ;
 
-case_otherwise: // TRANSLATED
-    OTHERWISE blockorstate
+caseOtherwise:
+    OTHERWISE blockOrStatement
   ;
 
-case_end: // TRANSLATED
+caseEnd:
     END CASE?
   ;
 
-catchstate: // TRANSLATED
+catchStatement:
     CATCH
-    n=ID AS class_type_name { support.defVar($n.text); }
-    block_colon code_block ( EOF | catch_end state_end )
+    n=ID AS classTypeName { support.defVar($n.text); }
+    blockColon codeBlock ( EOF | catchEnd statementEnd )
   ;
 
-catch_end: // TRANSLATED
+catchEnd:
     END CATCH?
   ;
 
-choosestate: // TRANSLATED
+chooseStatement:
     CHOOSE
-    (  ROW
-    |  FIELD
-    |  FIELDS /* TODO */
-    )
-    choose_field+ choose_opt* framephrase? state_end
+    ( ROW | FIELD | FIELDS )
+    chooseField+ chooseOption* framePhrase? statementEnd
   ;
 
-choose_field: // TRANSLATED
-    field help_const?
+chooseField:
+    field helpConstant?
   ;
 
-choose_opt: // TRANSLATED
+chooseOption:
     AUTORETURN 
-  | color_anyorvalue
-  | goonphrase
-  | KEYS field // TODO
+  | colorAnyOrValue
+  | goOnPhrase
+  | KEYS field
   | NOERROR_KW
-  | pause_expr
+  | pauseExpression
   ;
 
-class_type_name: // TRANSLATED
-    { hasHiddenAfter(0) }? CLASS type_name
-  | type_name
+classTypeName:
+    { hasHiddenAfter(0) }? CLASS typeName
+  | typeName
   ;
 
-enumstate: // TRANSLATED
-    ENUM type_name2 FLAGS? block_colon
-    defenumstate+
-    enum_end
-    state_end
-  ;
-
-defenumstate: // TRANSLATED
-    DEFINE ENUM enum_member+ PERIOD
-  ;
-
-enum_member: // TRANSLATED
-    type_name2 ( EQUAL ( NUMBER | type_name2 (COMMA type_name2)*))?
-  ;
-
-enum_end: // TRANSLATED
-    END ENUM?
-  ;
-
-classstate: // TRANSLATED
-    CLASS tn=type_name2
-    ( class_inherits | class_implements | USEWIDGETPOOL | ABSTRACT | FINAL | SERIALIZABLE )*
+classStatement:
+    CLASS tn=typeName2
+    ( classInherits | classImplements | USEWIDGETPOOL | ABSTRACT | FINAL | SERIALIZABLE )*
     { support.defineClass($tn.text); }
-    block_colon
-    class_code_block
-    class_end state_end
+    blockColon
+    classCodeBlock
+    classEnd statementEnd
   ;
 
-class_inherits: // TRANSLATED
-    INHERITS type_name
+classInherits:
+    INHERITS typeName
   ;
 
-class_implements: // TRANSLATED
-    IMPLEMENTS type_name (COMMA type_name)*
+classImplements:
+    IMPLEMENTS typeName (COMMA typeName)*
   ;
 
-class_end: // TRANSLATED
+classEnd:
     END (CLASS)?
   ;
 
-clearstate: // TRANSLATED
-    CLEAR ( {_input.LA(3) != OBJCOLON }? frame_widgetname)? ALL? NOPAUSE? state_end
+enumStatement:
+    ENUM typeName2 FLAGS? blockColon
+    defEnumStatement+
+    enumEnd
+    statementEnd
   ;
 
-
-closequerystate: // TRANSLATED
-    CLOSE QUERY queryname state_end
+defEnumStatement:
+    DEFINE ENUM enumMember+ PERIOD
   ;
 
-closestoredprocedurestate: // TRANSLATED
-    CLOSE STOREDPROCEDURE identifier closestored_field? closestored_where? state_end
+enumMember:
+    typeName2 ( EQUAL ( NUMBER | typeName2 (COMMA typeName2)*))?
   ;
 
-closestored_field: // TRANSLATED
-    field EQUAL PROCSTATUS {LOGGER.error("support.attrOp(##);");}
+enumEnd:
+    END ENUM?
   ;
 
-closestored_where: // TRANSLATED
+clearStatement:
+    CLEAR ( {_input.LA(3) != OBJCOLON }? frameWidgetName)? ALL? NOPAUSE? statementEnd
+  ;
+
+closeQueryStatement:
+    CLOSE QUERY identifier statementEnd
+  ;
+
+closeStoredProcedureStatement:
+    CLOSE STOREDPROCEDURE identifier closeStoredField? closeStoredWhere? statementEnd
+  ;
+
+closeStoredField:
+    field EQUAL PROCSTATUS
+  ;
+
+closeStoredWhere:
     WHERE PROCHANDLE ( EQUAL | EQ ) field
   ;
 
-collatephrase: // TRANSLATED
-    COLLATE funargs DESCENDING?
+collatePhrase:
+    COLLATE functionArgs DESCENDING?
   ;
 
-color_anyorvalue: // TRANSLATED
-    COLOR anyorvalue
+colorAnyOrValue:
+    COLOR anyOrValue
   ;
 
-color_expr: // TRANSLATED
+colorExpression:
     ( BGCOLOR | DCOLOR | FGCOLOR | PFCOLOR ) expression
   ;
 
-colorspecification: // TRANSLATED
-    color_expr+
-  | COLOR DISPLAY? anyorvalue color_prompt?
+colorSpecification:
+    colorExpression+
+  | COLOR DISPLAY? anyOrValue colorPrompt?
   ;
 
-color_display: // TRANSLATED
-    DISPLAY anyorvalue
+colorDisplay:
+    DISPLAY anyOrValue
   ;
 
-color_prompt: // TRANSLATED
-    ( PROMPT | PROMPTFOR ) anyorvalue
+colorPrompt:
+    ( PROMPT | PROMPTFOR ) anyOrValue
   ;
 
 // I'm having trouble figuring this one out. From the docs, it looks like DISPLAY
 // is optional. From PSC's grammar, PROMPT looks optional.(?!).
 // From testing, it looks like /neither/ keyword is optional.
-colorstate: // TRANSLATED
+colorStatement:
     COLOR
-    ( ( color_display | color_prompt ) ( color_display | color_prompt )? )?
-    field_form_item*
-    framephrase?
-    state_end
+    ( ( colorDisplay | colorPrompt ) ( colorDisplay | colorPrompt )? )?
+    fieldFormItem*
+    framePhrase?
+    statementEnd
   ;
 
-column_expr: // TRANSLATED
+columnExpression:
     // The compiler really lets you PUT SCREEN ... COLUMNS, but I don't see
     // how their grammar allows for it.
     ( COLUMN | COLUMNS ) expression
   ;
 
-columnformat: // TRANSLATED
-    columnformat_opt+
+columnFormat:
+    columnFormatOption+
   ;
 
-columnformat_opt: // TRANSLATED
+columnFormatOption:
     // See PSC's <fbrs-opt>
-    format_expr
-  | label_constant
+    formatExpression
+  | labelConstant
   | NOLABELS
   | ( HEIGHT | HEIGHTPIXELS | HEIGHTCHARS ) NUMBER
   | ( WIDTH | WIDTHPIXELS | WIDTHCHARS ) NUMBER
@@ -1413,262 +1368,267 @@ columnformat_opt: // TRANSLATED
   | LABELDCOLOR expression
   | LABELBGCOLOR expression
   | LABELFGCOLOR expression
-  | LEXAT field columnformat?
+  | LEXAT field columnFormat?
   ;
 
-comboboxphrase: // TRANSLATED
-    COMBOBOX combobox_opt*
+comboBoxPhrase:
+    COMBOBOX comboBoxOption*
   ;
 
-combobox_opt: // TRANSLATED
+comboBoxOption:
     LISTITEMS constant ( COMMA constant )*
   | LISTITEMPAIRS constant ( COMMA constant )*
   | INNERLINES expression
   | SORT
-  | tooltip_expr
+  | tooltipExpression
   | SIMPLE
   | DROPDOWN
   | DROPDOWNLIST
   | MAXCHARS NUMBER
   | AUTOCOMPLETION UNIQUEMATCH?
-  | sizephrase
+  | sizePhrase
   ;
 
-compilestate: // TRANSLATED
-    COMPILE filenameorvalue compile_opt* state_end
+compileStatement:
+    COMPILE filenameOrValue compileOption* statementEnd
   ;
 
-compile_opt: // TRANSLATED
-    ATTRSPACE compile_equal?
+compileOption:
+    ATTRSPACE compileEqual?
   | NOATTRSPACE
-  | SAVE compile_equal? compile_into?
-  | LISTING filenameorvalue (compile_append|compile_page)*
+  | SAVE compileEqual? compileInto?
+  | LISTING filenameOrValue ( compileAppend | compilePage )*
   | XCODE expression
-  | XREF filenameorvalue compile_append?
-  | XREFXML filenameorvalue
-  | STRINGXREF filenameorvalue compile_append?
-  | STREAMIO compile_equal?
-  | MINSIZE compile_equal?
-  | LANGUAGES LEFTPAREN (compile_lang (COMMA compile_lang)* )? RIGHTPAREN
-  | TEXTSEGGROW compile_equal
-  | DEBUGLIST filenameorvalue
-  | DEFAULTNOXLATE compile_equal?
-  | GENERATEMD5 compile_equal?
-  | PREPROCESS filenameorvalue
-  | USEREVVIDEO compile_equal?
-  | USEUNDERLINE compile_equal?
-  | V6FRAME compile_equal?
-  | OPTIONS exprt
-  | OPTIONSFILE filenameorvalue
+  | XREF filenameOrValue compileAppend?
+  | XREFXML filenameOrValue
+  | STRINGXREF filenameOrValue compileAppend?
+  | STREAMIO compileEqual?
+  | MINSIZE compileEqual?
+  | LANGUAGES LEFTPAREN (compileLang (COMMA compileLang)* )? RIGHTPAREN
+  | TEXTSEGGROW compileEqual
+  | DEBUGLIST filenameOrValue
+  | DEFAULTNOXLATE compileEqual?
+  | GENERATEMD5 compileEqual?
+  | PREPROCESS filenameOrValue
+  | USEREVVIDEO compileEqual?
+  | USEUNDERLINE compileEqual?
+  | V6FRAME compileEqual?
+  | OPTIONS expressionTerm
+  | OPTIONSFILE filenameOrValue
   | NOERROR_KW
   ;
 
-compile_lang: // TRANSLATED
-    valueexpression
-  | compile_lang2 ( OBJCOLON compile_lang2 )*
+compileLang:
+    valueExpression
+  | compileLang2 ( OBJCOLON compileLang2 )*
   ;
 
-compile_lang2: // TRANSLATED
+compileLang2:
     unreservedkeyword | ID
   ;
 
-compile_into: // TRANSLATED
-    INTO filenameorvalue
+compileInto:
+    INTO filenameOrValue
   ;
 
-compile_equal: // TRANSLATED
+compileEqual:
     EQUAL expression
   ;
 
-compile_append: // TRANSLATED
-    APPEND compile_equal?
+compileAppend:
+    APPEND compileEqual?
   ;
 
-compile_page: // TRANSLATED
+compilePage:
     ( PAGESIZE_KW | PAGEWIDTH ) expression
   ;
 
-connectstate: // TRANSLATED
-    CONNECT ( NOERROR_KW | DDE | filenameorvalue )* state_end
+connectStatement:
+    CONNECT ( NOERROR_KW | DDE | filenameOrValue )* statementEnd
   ;
 
-constructorstate: // TRANSLATED
+constructorStatement:
     CONSTRUCTOR
     ( PUBLIC | PROTECTED | PRIVATE | STATIC )?
-    tn=type_name2 function_params block_colon
-    code_block
-    constructor_end state_end
+    tn=typeName2 functionParams blockColon
+    codeBlock
+    constructorEnd statementEnd
   ;
 
-constructor_end: // TRANSLATED
+constructorEnd:
     END ( CONSTRUCTOR | METHOD )?
   ;
 
-contexthelpid_expr: // TRANSLATED
+contextHelpIdExpression:
     CONTEXTHELPID expression
   ;
 
-convertphrase: // TRANSLATED
-    CONVERT convertphrase_opt+ /* TODO Should be limited to two */
+convertPhrase:
+    CONVERT convertPhraseOption+
   ;
 
-convertphrase_opt: // TRANSLATED
+convertPhraseOption:
     ( SOURCE | TARGET ) ( BASE64 | CODEPAGE expression BASE64? )
   ;
     
-copylobstate: // TRANSLATED
+copyLobStatement:
     COPYLOB FROM?
     ( FILE expression | OBJECT? expression )
-    copylob_starting? copylob_for?
+    copyLobStarting? copyLobFor?
     TO
     ( FILE expression APPEND? | OBJECT? expression ( OVERLAY AT expression TRIM? )? )
-    ( NOCONVERT | convertphrase )?
+    ( NOCONVERT | convertPhrase )?
     NOERROR_KW?
-    state_end
+    statementEnd
   ;
 
-copylob_for: // TRANSLATED
+copyLobFor:
     FOR expression
   ;
 
-copylob_starting: // TRANSLATED
+copyLobStarting:
     STARTING AT expression
   ;
 
-for_tenant: // TRANSLATED
+forTenant:
     FOR TENANT expression
   ;
 
-createstate: // TRANSLATED
-    CREATE record for_tenant? using_row? NOERROR_KW? state_end
+createStatement:
+    CREATE record forTenant? usingRow? NOERROR_KW? statementEnd
   ;
 
-create_whatever_state: // TRANSLATED
+createWhateverStatement:
     CREATE
     ( CALL | CLIENTPRINCIPAL | DATASET | DATASOURCE | SAXATTRIBUTES | SAXREADER | SAXWRITER | SOAPHEADER | SOAPHEADERENTRYREF
       | XDOCUMENT | XNODEREF )
-    exprt in_widgetpool_expr? NOERROR_KW? state_end
+    expressionTerm inWidgetPoolExpression? NOERROR_KW? statementEnd
   ;
 
-createaliasstate: // TRANSLATED
-    CREATE ALIAS anyorvalue FOR DATABASE anyorvalue NOERROR_KW? state_end
+createAliasStatement:
+    CREATE ALIAS anyOrValue FOR DATABASE anyOrValue NOERROR_KW? statementEnd
   ;
 
-create_connect: // TRANSLATED
-    CONNECT to_expr?
-  ;
-
-createbrowsestate: // TRANSLATED
-    CREATE BROWSE exprt
-    in_widgetpool_expr?
+createBrowseStatement:
+    CREATE BROWSE expressionTerm
+    inWidgetPoolExpression?
     NOERROR_KW?
-    assign_opt?
-    triggerphrase?
-    state_end
+    assignOption?
+    triggerPhrase?
+    statementEnd
   ;
 
-createquerystate: // TRANSLATED
-    CREATE QUERY exprt
-    in_widgetpool_expr?
+createQueryStatement:
+    CREATE QUERY expressionTerm
+    inWidgetPoolExpression?
     NOERROR_KW?
-    state_end
+    statementEnd
   ;
 
-createbufferstate: // TRANSLATED
-    CREATE BUFFER exprt FOR TABLE expression
-    createbuffer_name?
-    in_widgetpool_expr?
+createBufferStatement:
+    CREATE BUFFER expressionTerm FOR TABLE expression
+    createBufferName?
+    inWidgetPoolExpression?
     NOERROR_KW?
-    state_end
+    statementEnd
   ;
-createbuffer_name: // TRANSLATED
+
+createBufferName:
     BUFFERNAME expression
   ;
 
-createdatabasestate: // TRANSLATED
-    CREATE DATABASE expression createdatabase_from? REPLACE? NOERROR_KW? state_end
+createDatabaseStatement:
+    CREATE DATABASE expression createDatabaseFrom? REPLACE? NOERROR_KW? statementEnd
   ;
 
-createdatabase_from: // TRANSLATED
+createDatabaseFrom:
     FROM expression NEWINSTANCE?
   ;
 
-createserverstate: // TRANSLATED
-    CREATE SERVER exprt assign_opt? state_end
+createServerStatement:
+    CREATE SERVER expressionTerm assignOption? statementEnd
   ;
 
-createserversocketstate: // TRANSLATED
-    CREATE SERVERSOCKET exprt NOERROR_KW? state_end
+createServerSocketStatement:
+    CREATE SERVERSOCKET expressionTerm NOERROR_KW? statementEnd
   ;
 
-createsocketstate: // TRANSLATED
-    CREATE SOCKET exprt NOERROR_KW? state_end
+createSocketStatement:
+    CREATE SOCKET expressionTerm NOERROR_KW? statementEnd
   ;
 
-createtemptablestate: // TRANSLATED
-    CREATE TEMPTABLE exprt in_widgetpool_expr? NOERROR_KW? state_end
+createTempTableStatement:
+    CREATE TEMPTABLE expressionTerm inWidgetPoolExpression? NOERROR_KW? statementEnd
   ;
 
-createwidgetstate: // TRANSLATED
+createConnect:
+    CONNECT toExpression?
+  ;
+
+createWidgetStatement:
     CREATE
-    (  qstringorvalue
+    (  quotedStringOrValue
     |  BUTTON | BUTTONS
     |  COMBOBOX | CONTROLFRAME | DIALOGBOX | EDITOR | FILLIN | FRAME | IMAGE
     |  MENU | MENUITEM | RADIOSET | RECTANGLE | SELECTIONLIST | SLIDER
     |  SUBMENU | TEXT | TOGGLEBOX | WINDOW
     )
     field
-    in_widgetpool_expr?
-    create_connect?
+    inWidgetPoolExpression?
+    createConnect?
     NOERROR_KW?
-    assign_opt?
-    triggerphrase?
-    state_end
+    assignOption?
+    triggerPhrase?
+    statementEnd
   ;
 
-createwidgetpoolstate: // TRANSLATED
-    CREATE WIDGETPOOL expression? PERSISTENT? NOERROR_KW? state_end
+createWidgetPoolStatement:
+    CREATE WIDGETPOOL expression? PERSISTENT? NOERROR_KW? statementEnd
   ;
 
-currentvaluefunc: // TRANSLATED
+canFindFunction:
+    CANFIND LEFTPAREN findWhich? recordphrase RIGHTPAREN
+  ;
+
+currentValueFunction:
     CURRENTVALUE LEFTPAREN sequencename ( COMMA expression ( COMMA expression )? )? RIGHTPAREN
   ;
 
 // Basic variable class or primitive datatype syntax.
-datatype: // TRANSLATED
-    CLASS type_name
-  | datatype_var
+datatype:
+    CLASS typeName
+  | datatypeVar
   ;
 
-datatype_com: // TRANSLATED
-    INT64 | datatype_com_native
+datatypeCom:
+    INT64 | datatypeComNative
   ;
 
-datatype_com_native: // TRANSLATED
+datatypeComNative:
     SHORT | FLOAT | CURRENCY | UNSIGNEDBYTE | ERRORCODE | IUNKNOWN
   ;
 
-datatype_dll: // TRANSLATED
-    CHARACTER | INT64 | datatype_dll_native
-  | { support.abbrevDatatype(_input.LT(1).getText()) == CHARACTER }? id=ID { /* TODO #id.setType(CHARACTER); */ }
+datatypeDll:
+    CHARACTER | INT64 | datatypeDllNative
+  | { support.abbrevDatatype(_input.LT(1).getText()) == CHARACTER }? id=ID
   ;
 
-datatype_dll_native: // TRANSLATED
+datatypeDllNative:
     BYTE | DOUBLE | FLOAT | LONG | SHORT | UNSIGNEDSHORT
   ;
 
-datatype_field: // TRANSLATED
+datatypeField:
     // Ambig: An unreservedkeyword can be a class name (user defined type). First option to match wins.
-    BLOB | CLOB | datatype_var
+    BLOB | CLOB | datatypeVar
   ;
 
-datatype_param: // TRANSLATED
+datatypeParam:
     // Ambig: An unreservedkeyword can be a class name (user defined type). First option to match wins.
-    datatype_dll_native | datatype_var
+    datatypeDllNative | datatypeVar
   ;
 
 // Ambig: An unreservedkeyword can be a class name (user defined type).
-datatype_var: // TRANSLATED
+datatypeVar:
     CHARACTER
   | COMHANDLE
   | DATE
@@ -1691,91 +1651,91 @@ datatype_var: // TRANSLATED
   | WIDGET // Works for WIDGET-HANDLE
   | // Assignment of datatype returns value of assignment, if non-zero, is a valid abbreviation.
     { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID
-  | type_name
+  | typeName
   ;
 
-ddeadvisestate: // TRANSLATED
-    DDE ADVISE expression ( START | STOP ) ITEM expression time_expr? NOERROR_KW? state_end
+ddeAdviseStatement:
+    DDE ADVISE expression ( START | STOP ) ITEM expression timeExpression? NOERROR_KW? statementEnd
   ;
 
-ddeexecutestate: // TRANSLATED
-    DDE EXECUTE expression COMMAND expression time_expr? NOERROR_KW? state_end
+ddeExecuteStatement:
+    DDE EXECUTE expression COMMAND expression timeExpression? NOERROR_KW? statementEnd
   ;
 
-ddegetstate: // TRANSLATED
-    DDE GET expression TARGET field ITEM expression time_expr? NOERROR_KW? state_end
+ddeGetStatement:
+    DDE GET expression TARGET field ITEM expression timeExpression? NOERROR_KW? statementEnd
   ;
 
-ddeinitiatestate: // TRANSLATED
-    DDE INITIATE field FRAME expression APPLICATION expression TOPIC expression NOERROR_KW? state_end
+ddeInitiateStatement:
+    DDE INITIATE field FRAME expression APPLICATION expression TOPIC expression NOERROR_KW? statementEnd
   ;
 
-dderequeststate: // TRANSLATED
-    DDE REQUEST expression TARGET field ITEM expression time_expr? NOERROR_KW? state_end
+ddeRequestStatement:
+    DDE REQUEST expression TARGET field ITEM expression timeExpression? NOERROR_KW? statementEnd
   ;
 
-ddesendstate: // TRANSLATED
-    DDE SEND expression SOURCE expression ITEM expression time_expr? NOERROR_KW? state_end
+ddeSendStatement:
+    DDE SEND expression SOURCE expression ITEM expression timeExpression? NOERROR_KW? statementEnd
   ;
 
-ddeterminatestate: // TRANSLATED
-    DDE TERMINATE expression NOERROR_KW? state_end
+ddeTerminateStatement:
+    DDE TERMINATE expression NOERROR_KW? statementEnd
   ;
 
-decimals_expr: // TRANSLATED
+decimalsExpr:
     DECIMALS expression
   ;
 
-default_expr: // TRANSLATED
+defaultExpr:
     DEFAULT expression
   ;
 
-define_share: // TRANSLATED
+defineShare:
     ( NEW GLOBAL? )? SHARED
   ;
 
-definebrowsestate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
-    BROWSE n=identifier query_queryname? ( lockhow | NOWAIT )*
-    ( def_browse_display def_browse_enable? )?
-    display_with*
-    tooltip_expr?
-    contexthelpid_expr?
-    state_end
+defineBrowseStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    BROWSE n=identifier queryName? ( lockHow | NOWAIT )*
+    ( defBrowseDisplay defBrowseEnable? )?
+    displayWith*
+    tooltipExpression?
+    contextHelpIdExpression?
+    statementEnd
     { support.defVar($n.text); }
   ;
 
-def_browse_display: // TRANSLATED
-    DISPLAY def_browse_display_items_or_record except_fields?
+defBrowseDisplay:
+    DISPLAY defBrowseDisplayItemsOrRecord exceptFields?
   ;
 
-def_browse_display_items_or_record: // TRANSLATED
-    // TODO Inject in visitor -- If there's more than one display item, then it cannot be a table name.
-    { isTableName() }? recordAsFormItem
-  | def_browse_display_item+
+defBrowseDisplayItemsOrRecord:
+    // If there's more than one display item, then it cannot be a table name.
+    { support.isTableName(_input.LT(1)) }? recordAsFormItem
+  | defBrowseDisplayItem+
   ;
 
-def_browse_display_item: // TRANSLATED
-    (  expression columnformat? viewasphrase?
-    |  spacephrase
+defBrowseDisplayItem:
+    (  expression columnFormat? viewAsPhrase?
+    |  spacePhrase
     )
   ;
 
-def_browse_enable: // TRANSLATED
-    ENABLE (all_except_fields | def_browse_enable_item* )
+defBrowseEnable:
+    ENABLE ( allExceptFields | defBrowseEnableItem* )
   ;
 
-def_browse_enable_item: // TRANSLATED
+defBrowseEnableItem:
     field
-    (  help_const
-    |  validatephrase
+    (  helpConstant
+    |  validatePhrase
     |  AUTORETURN
     |  DISABLEAUTOZAP
     )*
   ;
 
-definebufferstate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+defineBufferStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     // For the table type: we can assume that if it's not in tableDict, it's a db table.
     // For db buffers:
     //   - set "FullName" to db.tablename (not db.buffername). Required for field lookups. See support library.
@@ -1784,65 +1744,65 @@ definebufferstate: // TRANSLATED
     { support.setSchemaTablePriority(true); }
     FOR ( TEMPTABLE { support.setSchemaTablePriority(false); } )? bf=record
     { support.setSchemaTablePriority(false); }
-    PRESELECT? label_constant? namespace_uri? namespace_prefix? xml_node_name? serialize_name?
-    fields_fields?
-    state_end
+    PRESELECT? labelConstant? namespaceUri? namespacePrefix? xmlNodeName? serializeName?
+    fieldsFields?
+    statementEnd
     { support.defBuffer($n.text, $bf.text); }
   ;
 
-definebuttonstate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
-    ( BUTTON | BUTTONS ) n=identifier button_opt* triggerphrase? state_end
+defineButtonStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    ( BUTTON | BUTTONS ) n=identifier buttonOption* triggerPhrase? statementEnd
     { support.defVar($n.text); }
   ;
 
-button_opt: // TRANSLATED
+buttonOption:
     AUTOGO
   | AUTOENDKEY
   | DEFAULT
-  | color_expr
-  | contexthelpid_expr
+  | colorExpression
+  | contextHelpIdExpression
   | DROPTARGET
-  | font_expr
-  | IMAGEDOWN imagephrase_opt+
-  | IMAGE imagephrase_opt+
-  | IMAGEUP imagephrase_opt+
-  | IMAGEINSENSITIVE imagephrase_opt+
+  | fontExpression
+  | IMAGEDOWN imagePhraseOption+
+  | IMAGE imagePhraseOption+
+  | IMAGEUP imagePhraseOption+
+  | IMAGEINSENSITIVE imagePhraseOption+
   | MOUSEPOINTER expression
-  | label_constant
-  | like_field
+  | labelConstant
+  | likeField
   | FLATBUTTON
   | NOFOCUS FLATBUTTON?
   | NOCONVERT3DCOLORS
-  | tooltip_expr
-  | sizephrase MARGINEXTRA?
+  | tooltipExpression
+  | sizePhrase MARGINEXTRA?
   ;
 
-definedatasetstate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+defineDatasetStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     DATASET identifier
-    namespace_uri? namespace_prefix? xml_node_name? serialize_name? xml_node_type? SERIALIZEHIDDEN?
+    namespaceUri? namespacePrefix? xmlNodeName? serializeName? xmlNodeType? SERIALIZEHIDDEN?
     REFERENCEONLY?
     FOR record (COMMA record)*
-    (data_relation ( COMMA? data_relation)* )?
-    ( parent_id_relation ( COMMA? parent_id_relation)* )?
-    state_end
+    (dataRelation ( COMMA? dataRelation)* )?
+    ( parentIdRelation ( COMMA? parentIdRelation)* )?
+    statementEnd
   ;
 
-data_relation: // TRANSLATED
+dataRelation:
     DATARELATION n=identifier?
     FOR record COMMA record
     (
-      field_mapping_phrase
+      fieldMappingPhrase
     | REPOSITION
-    | datarelation_nested
+    | dataRelationNested
     | NOTACTIVE
     | RECURSIVE
     )*
     { if ($n.ctx != null) support.defVar($n.text); }
   ;
 
-parent_id_relation: // TRANSLATED
+parentIdRelation:
     PARENTIDRELATION identifier?
     FOR record COMMA record
     PARENTIDFIELD field
@@ -1850,28 +1810,28 @@ parent_id_relation: // TRANSLATED
     ( PARENTFIELDSAFTER  LEFTPAREN field (COMMA field)* RIGHTPAREN)?
   ;
 
-field_mapping_phrase: // TRANSLATED
+fieldMappingPhrase:
     RELATIONFIELDS  LEFTPAREN
     field COMMA field
     ( COMMA field COMMA field )*
     RIGHTPAREN
   ;
 
-datarelation_nested: // TRANSLATED
+dataRelationNested:
     NESTED FOREIGNKEYHIDDEN?
   ;
 
-definedatasourcestate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+defineDataSourceStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     DATASOURCE n=identifier FOR 
-    query_queryname?
-    source_buffer_phrase?
-    ( COMMA source_buffer_phrase )*
-    state_end
+    queryName?
+    sourceBufferPhrase?
+    ( COMMA sourceBufferPhrase )*
+    statementEnd
     { support.defVar($n.text); }
   ;
 
-source_buffer_phrase: // TRANSLATED
+sourceBufferPhrase:
     r=record
     ( KEYS LEFTPAREN
       (  { _input.LA(2) == RIGHTPAREN }? ROWID
@@ -1881,319 +1841,334 @@ source_buffer_phrase: // TRANSLATED
     )?
   ;
 
-defineeventstate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+defineEventStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     EVENT n=identifier
-    ( event_signature | event_delegate )
-    state_end
+    ( eventSignature | eventDelegate )
+    statementEnd
     { support.defVar($n.text); }
   ;
 
-event_signature: // TRANSLATED
-    SIGNATURE VOID function_params
-  | VOID function_params
+eventSignature:
+    SIGNATURE VOID functionParams
+  | VOID functionParams
   ;
 
-event_delegate: // TRANSLATED
-    DELEGATE class_type_name
-  | class_type_name
+eventDelegate:
+    DELEGATE classTypeName
+  | classTypeName
   ;
 
-defineframestate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+defineFrameStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     // PSC's grammar: uses <xfield> and <fmt-item>. <xfield> is <field> with <fdio-mod> which with <fdio-opt>
     // maps to our formatphrase. <fmt-item> is skip, space, or constant. Our form_item covers all this.
     // The syntax here should always be identical to the FORM statement (formstate).
-    FRAME n=identifier form_items_or_record header_background? except_fields? framephrase? state_end
+    FRAME n=identifier formItemsOrRecord headerBackground? exceptFields? framePhrase? statementEnd
     { support.defVar($n.text); }
   ;
 
-defineimagestate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
-    IMAGE n=identifier defineimage_opt* triggerphrase? state_end
+defineImageStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    IMAGE n=identifier defineImageOption* triggerPhrase? statementEnd
     { support.defVar($n.text); }
   ;
 
-defineimage_opt: // TRANSLATED
-    like_field
-  | imagephrase_opt 
-  | sizephrase
-  | color_expr
+defineImageOption:
+    likeField
+  | imagePhraseOption
+  | sizePhrase
+  | colorExpression
   | CONVERT3DCOLORS
-  | tooltip_expr
+  | tooltipExpression
   | STRETCHTOFIT RETAINSHAPE?
   | TRANSPARENT
   ;
 
-definemenustate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
-    MENU n=identifier menu_opt*
-    ( menu_list_item
+defineMenuStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    MENU n=identifier menuOption*
+    ( menuListItem
       ( {_input.LA(2) == RULE || _input.LA(2) == SKIP || _input.LA(2) == SUBMENU || _input.LA(2) == MENUITEM }? PERIOD )?
     )*
-    state_end
+    statementEnd
     { support.defVar($n.text); }
   ;
 
-menu_opt: // TRANSLATED
-    color_expr
-  | font_expr
-  | like_field
-  | title_expr
+menuOption:
+    colorExpression
+  | fontExpression
+  | likeField
+  | titleExpression
   | MENUBAR
   | PINNABLE
   | SUBMENUHELP
   ;
 
-menu_list_item: // TRANSLATED
-    MENUITEM n=identifier menu_item_opt* triggerphrase? { support.defVar($n.text); }
-  | SUBMENU n=identifier ( DISABLED | label_constant | font_expr | color_expr )* { support.defVar($n.text); }
-  | RULE ( font_expr | color_expr )*
+menuListItem:
+    MENUITEM n=identifier menuItemOption* triggerPhrase? { support.defVar($n.text); }
+  | SUBMENU n=identifier ( DISABLED | labelConstant | fontExpression | colorExpression )* { support.defVar($n.text); }
+  | RULE ( fontExpression | colorExpression )*
   | SKIP
   ;
 
-menu_item_opt: // TRANSLATED
+menuItemOption:
      ACCELERATOR expression
-  |  color_expr
+  |  colorExpression
   |  DISABLED
-  |  font_expr
-  |  label_constant
+  |  fontExpression
+  |  labelConstant
   |  READONLY
   |  TOGGLEBOX
   ;
 
-defineparameterstate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
-    (
-      PARAMETER BUFFER bn=identifier FOR TEMPTABLE? bf=record
-      PRESELECT? label_constant? fields_fields?
-      { support.defBuffer($bn.text, $bf.text); }
-    | ( INPUT | OUTPUT | INPUTOUTPUT | RETURN ) PARAMETER
-      ( TABLE FOR record ( APPEND | BIND | BYVALUE )*
-      | TABLEHANDLE FOR? pn2=identifier ( APPEND | BIND | BYVALUE )* { support.defVar($pn2.text); }
-      | DATASET FOR identifier ( APPEND | BIND | BYVALUE )*
-      | DATASETHANDLE dsh=identifier ( APPEND | BIND | BYVALUE )* { support.defVar($dsh.text); }
-      | pn=identifier defineparam_var triggerphrase? { support.defVar($pn.text); }
-      )
-    )
-    state_end
+defineParameterStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    ( defineParameterStatementSub1 | qualif=( INPUT | OUTPUT | INPUTOUTPUT | RETURN ) PARAMETER defineParameterStatementSub2 )
+    statementEnd
   ;
 
-defineparam_var: // TRANSLATED
+defineParameterStatementSub1:
+    PARAMETER BUFFER bn=identifier FOR TEMPTABLE? bf=record PRESELECT? labelConstant? fieldsFields? { support.defBuffer($bn.text, $bf.text); }
+  ;
+
+defineParameterStatementSub2:
+    TABLE FOR record ( APPEND | BIND | BYVALUE )* # defineParameterStatementSub2Table
+  | TABLEHANDLE FOR? pn2=identifier ( APPEND | BIND | BYVALUE )* { support.defVar($pn2.text); } # defineParameterStatementSub2TableHandle
+  | DATASET FOR identifier ( APPEND | BIND | BYVALUE )* # defineParameterStatementSub2Dataset
+  | DATASETHANDLE dsh=identifier ( APPEND | BIND | BYVALUE )* { support.defVar($dsh.text); } # defineParameterStatementSub2DatasetHandle
+  | pn=identifier defineParamVar triggerPhrase? { support.defVar($pn.text); } # defineParameterStatementSub2Variable
+  | pn=identifier defineParamVarLike triggerPhrase? { support.defVar($pn.text); } # defineParameterStatementSub2VariableLike
+  ;
+
+defineParamVar:
     // See PSC's <varprm> rule.
-    ( AS HANDLE TO? datatype_dll | AS CLASS type_name | AS datatype_param | LIKE field )
-    ( casesens_or_not | format_expr | decimals_expr | initial_constant | label_constant | NOUNDO | extentphrase )*
+    ( AS HANDLE TO? datatypeDll | AS CLASS typeName | AS datatypeParam )
+    ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase2 )*
   ;
 
-definepropertystate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
-    PROPERTY n=new_identifier AS datatype
-    ( extentphrase | initial_constant | NOUNDO )*
-    defineproperty_accessor defineproperty_accessor?
+defineParamVarLike:
+    // See PSC's <varprm> rule.
+    LIKE field
+    ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase )*
+  ;
+
+definePropertyStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    PROPERTY n=newIdentifier definePropertyAs
+    definePropertyAccessor definePropertyAccessor?
     { support.defVar($n.text); }
   ;
 
-defineproperty_accessor: // TRANSLATED
-    ( PUBLIC | PROTECTED | PRIVATE )?
-    ( GET PERIOD
-    | SET PERIOD
-    | GET function_params? block_colon code_block END GET? PERIOD
-    | SET function_params block_colon code_block END SET? PERIOD
-    )
+definePropertyAs:
+    AS datatype
+    ( extentPhrase2 | initialConstant | NOUNDO )*
   ;
 
-definequerystate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+definePropertyAccessor:
+    ( definePropertyAccessorGetBlock | definePropertyAccessorSetBlock )
+  ;
+
+definePropertyAccessorGetBlock:
+    ( PUBLIC | PROTECTED | PRIVATE )? GET ( functionParams? blockColon codeBlock END GET? )? PERIOD
+  ;
+
+definePropertyAccessorSetBlock:
+    ( PUBLIC | PROTECTED | PRIVATE )? SET ( functionParams? blockColon codeBlock END SET? )? PERIOD
+  ;
+
+defineQueryStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     QUERY n=identifier
-    FOR record record_fields?
-    ( COMMA record record_fields? )*
-    ( cache_expr | SCROLLING | RCODEINFORMATION )*
-    state_end
+    FOR record recordFields?
+    ( COMMA record recordFields? )*
+    ( cacheExpr | SCROLLING | RCODEINFORMATION )*
+    statementEnd
     { support.defVar($n.text); }
   ;
 
-definerectanglestate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
-    RECTANGLE n=identifier rectangle_opt* triggerphrase? state_end
+defineRectangleStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    RECTANGLE n=identifier rectangleOption* triggerPhrase? statementEnd
     { support.defVar($n.text); }
   ;
 
-rectangle_opt: // TRANSLATED
+rectangleOption:
     NOFILL
   | EDGECHARS expression
   | EDGEPIXELS expression
-  | color_expr
+  | colorExpression
   | GRAPHICEDGE
-  | like_field
-  | sizephrase
-  | tooltip_expr
+  | likeField
+  | sizePhrase
+  | tooltipExpression
   | ROUNDED
   | GROUPBOX
   ;
    
-definestreamstate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
-    STREAM n=identifier state_end
+defineStreamStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    STREAM n=identifier statementEnd
     { support.defVar($n.text); }
   ;
 
-definesubmenustate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
-    SUBMENU n=identifier menu_opt*
-    (  menu_list_item
+defineSubMenuStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    SUBMENU n=identifier menuOption*
+    (  menuListItem
       ( {_input.LA(2) == RULE || _input.LA(2) == SKIP || _input.LA(2) == SUBMENU || _input.LA(2) == MENUITEM }? PERIOD )?
     )*
-    state_end
+    statementEnd
     { support.defVar($n.text); }
   ;
    
-definetemptablestate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+defineTempTableStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     TEMPTABLE tn=identifier
     { support.defTable($tn.text, SymbolScope.FieldType.TTABLE); }
     ( UNDO | NOUNDO )?
-    namespace_uri? namespace_prefix? xml_node_name? serialize_name?
+    namespaceUri? namespacePrefix? xmlNodeName? serializeName?
     REFERENCEONLY?
-    def_table_like?
-    label_constant?
-    def_table_beforetable?
+    defTableLike?
+    labelConstant?
+    defTableBeforeTable?
     RCODEINFORMATION?
-    def_table_field*
-    def_table_index*
-    state_end
+    defTableField*
+    defTableIndex*
+    statementEnd
   ;
 
-def_table_beforetable: // TRANSLATED
+defTableBeforeTable:
     BEFORETABLE i=identifier
     { support.defTable($i.text, SymbolScope.FieldType.TTABLE); }
   ;
 
-def_table_like: // TRANSLATED
+defTableLike:
     ( LIKE | LIKESEQUENTIAL )
     { support.setSchemaTablePriority(true); }
     record
     { support.setSchemaTablePriority(false); }
-    VALIDATE? def_table_useindex*
+    VALIDATE? defTableUseIndex*
   ;
 
-def_table_useindex: // TRANSLATED
+defTableUseIndex:
     USEINDEX identifier ( ( AS | IS ) PRIMARY )?
   ;
 
-def_table_field: // TRANSLATED
+defTableField:
     // Compiler allows FIELDS here. Sheesh.
     ( FIELD | FIELDS )
     identifier
-    fieldoption*
+    fieldOption*
   ;
 
-def_table_index: // TRANSLATED
+defTableIndex:
     // Yes, the compiler really lets you use AS instead of IS here.
     // (AS|IS) is not optional the first time, but it is on subsequent uses.
     INDEX identifier ( ( AS | IS )? ( UNIQUE | PRIMARY | WORDINDEX ) )*
     (identifier ( ASCENDING | ASC | DESCENDING | CASESENSITIVE )* )+
   ;
    
-defineworktablestate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+defineWorkTableStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     // Token WORKTABLE can be "work-file" or abbreviated forms of "work-table"
     WORKTABLE tn=identifier
     { support.defTable($tn.text, SymbolScope.FieldType.WTABLE); }
     NOUNDO?
-    def_table_like?
-    label_constant?
-    def_table_field*
-    state_end
+    defTableLike?
+    labelConstant?
+    defTableField*
+    statementEnd
   ;
 
-definevariablestate: // TRANSLATED
-    DEFINE define_share? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
-    VARIABLE n=new_identifier fieldoption* triggerphrase? state_end
+defineVariableStatement:
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | STATIC | SERIALIZABLE | NONSERIALIZABLE )*
+    VARIABLE n=newIdentifier fieldOption* triggerPhrase? statementEnd
     { support.defVar($n.text); }
   ;
 
-deletestate: // TRANSLATED
-    DELETE_KW record validatephrase? NOERROR_KW? state_end
+deleteStatement:
+    DELETE_KW record validatePhrase? NOERROR_KW? statementEnd
   ;
 
-deletealiasstate: // TRANSLATED
+deleteAliasStatement:
     DELETE_KW ALIAS
     (  identifier
     |  QSTRING
-    |  valueexpression
+    |  valueExpression
     )
-    state_end
+    statementEnd
   ;
 
-deleteobjectstate: // TRANSLATED
-    DELETE_KW OBJECT expression NOERROR_KW? state_end
+deleteObjectStatement:
+    DELETE_KW OBJECT expression NOERROR_KW? statementEnd
   ;
 
-deleteprocedurestate: // TRANSLATED
-    DELETE_KW PROCEDURE expression NOERROR_KW? state_end
+deleteProcedureStatement:
+    DELETE_KW PROCEDURE expression NOERROR_KW? statementEnd
   ;
 
-deletewidgetstate: // TRANSLATED
-    DELETE_KW WIDGET gwidget* state_end
+deleteWidgetStatement:
+    DELETE_KW WIDGET gWidget* statementEnd
   ;
 
-deletewidgetpoolstate: // TRANSLATED
-    DELETE_KW WIDGETPOOL expression? NOERROR_KW? state_end
+deleteWidgetPoolStatement:
+    DELETE_KW WIDGETPOOL expression? NOERROR_KW? statementEnd
   ;
 
-delimiter_constant: // TRANSLATED
+delimiterConstant:
     DELIMITER constant
   ;
 
-destructorstate: // TRANSLATED
+destructorStatement:
     DESTRUCTOR
-    PUBLIC? tn=type_name2 LEFTPAREN RIGHTPAREN block_colon
-    code_block
-    destructor_end
-    state_end
+    PUBLIC? tn=typeName2 LEFTPAREN RIGHTPAREN blockColon
+    codeBlock
+    destructorEnd
+    statementEnd
   ;
 
-destructor_end: // TRANSLATED
+destructorEnd:
     END ( DESTRUCTOR | METHOD )?
   ;
 
-dictionarystate: // TRANSLATED
-    DICTIONARY state_end
+dictionaryStatement:
+    DICTIONARY statementEnd
   ;
 
-disablestate: // TRANSLATED
+disableStatement:
     // Does not allow DISABLE <record buffer name>
     DISABLE UNLESSHIDDEN? 
-    (all_except_fields | form_item+ )? 
-    framephrase? 
-    state_end
+    ( allExceptFields | formItem+ )?
+    framePhrase?
+    statementEnd
   ;
 
-disabletriggersstate: // TRANSLATED
-    DISABLE TRIGGERS FOR ( DUMP | LOAD ) OF record ALLOWREPLICATION? state_end
+disableTriggersStatement:
+    DISABLE TRIGGERS FOR ( DUMP | LOAD ) OF record ALLOWREPLICATION? statementEnd
   ;
 
-disconnectstate: // TRANSLATED
-    DISCONNECT filenameorvalue NOERROR_KW? state_end
+disconnectStatement:
+    DISCONNECT filenameOrValue NOERROR_KW? statementEnd
   ;
 
-displaystate: // TRANSLATED
+displayStatement:
     DISPLAY
-    stream_name_or_handle?
-    UNLESSHIDDEN? display_items_or_record
-    except_fields? in_window_expr?
-    display_with*
+    streamNameOrHandle?
+    UNLESSHIDDEN? displayItemsOrRecord
+    exceptFields? inWindowExpression?
+    displayWith*
     NOERROR_KW?
-    state_end
+    statementEnd
   ;
 
-display_items_or_record: // TRANSLATED
-    // TODO Inject in visitor -- If there's more than one display item, then it cannot be a table name.
-    { isTableName() }? recordAsFormItem
-  | display_item*
+displayItemsOrRecord:
+    // If there's more than one display item, then it cannot be a table name.
+    { support.isTableName(_input.LT(1)) }? recordAsFormItem
+  | displayItem*
   ;
 
-display_item: // TRANSLATED
+displayItem:
     // See PSC's <dfflist> . <dfitem> . <disp_exp> . <exp> [<fdio-mod>]
     // We cannot move aggregate phrase down into formatphrase, as PSC has done in their
     // grammar with <fdio-opt> and <gen-fn>. That is because our parser tries to consume
@@ -2204,54 +2179,58 @@ display_item: // TRANSLATED
     //   too ambiguous - they could have (sub-average + i) where sub-average
     //   is a variable name rather than the keyword. It's things like this
     //   where Progress's LR grammar makes it miserable to build an LL parser.
-    (  expression ( aggregatephrase | formatphrase )*
-    |  spacephrase
-    |  skipphrase
+    (  expression ( aggregatePhrase | formatPhrase )*
+    |  spacePhrase
+    |  skipPhrase
     )
   ;
 
-display_with: // TRANSLATED
+displayWith:
     // The compiler allows NO-ERROR, but I don't see in their grammar where it fits in.
-    WITH BROWSE widgetname browse_opt*
-  | framephrase
+    WITH BROWSE widgetname browseOption*
+  | framePhrase
   ;
 
-dostate: // TRANSLATED
-    DO block_for? block_preselect? block_opt* block_colon code_block block_end
+doStatement:
+    DO blockFor? blockPreselect? blockOption* doStatementSub
   ;
 
-downstate: // TRANSLATED
+doStatementSub:
+    blockColon codeBlock blockEnd
+  ;
+
+downStatement:
     DOWN
     // The STREAM phrase may come before or after the expression, ex: DOWN 1 STREAM  MyStream.
-    stream_name_or_handle?
+    streamNameOrHandle?
     expression?
-    stream_name_or_handle?
-    framephrase? state_end
+    streamNameOrHandle?
+    framePhrase? statementEnd
   ;
 
-dynamiccurrentvaluefunc: // TRANSLATED
-    DYNAMICCURRENTVALUE funargs
+dynamicCurrentValueFunction:
+    DYNAMICCURRENTVALUE functionArgs
   ;
 
-dynamicnewstate: // TRANSLATED
-    field_equal_dynamic_new NOERROR_KW? state_end
+dynamicNewStatement:
+    fieldEqualDynamicNew NOERROR_KW? statementEnd
   ;
 
-field_equal_dynamic_new: // TRANSLATED
-    (widattr | field) EQUAL dynamic_new
+fieldEqualDynamicNew:
+    (widattr | field) EQUAL dynamicNew
   ;
 
-dynamic_new: // TRANSLATED
+dynamicNew:
     { support.disallowUnknownMethodCalls(); }
-    DYNAMICNEW expression parameterlist
+    DYNAMICNEW expression parameterList
     { support.allowUnknownMethodCalls(); }
   ;
 
-editorphrase: // TRANSLATED
-    EDITOR editor_opt*
+editorPhrase:
+    EDITOR editorOption*
   ;
 
-editor_opt: // TRANSLATED
+editorOption:
      INNERCHARS expression 
   |  INNERLINES expression
   |  BUFFERCHARS expression
@@ -2262,219 +2241,230 @@ editor_opt: // TRANSLATED
   |  NOWORDWRAP
   |  SCROLLBARHORIZONTAL
   |  SCROLLBARVERTICAL
-  |  tooltip_expr
-  |  sizephrase
+  |  tooltipExpression
+  |  sizePhrase
   ;
 
-emptytemptablestate: // TRANSLATED
-    EMPTY TEMPTABLE record NOERROR_KW? state_end
+emptyTempTableStatement:
+    EMPTY TEMPTABLE record NOERROR_KW? statementEnd
   ;
 
-enablestate: // TRANSLATED
+enableStatement:
     // Does not allow ENABLE <record buffer name>
-    ENABLE UNLESSHIDDEN? ( all_except_fields | form_item+ )?
-    in_window_expr? framephrase?
-    state_end
+    ENABLE UNLESSHIDDEN? ( allExceptFields | formItem+ )?
+    inWindowExpression? framePhrase?
+    statementEnd
   ;
 
-editingphrase: // TRANSLATED
-    ( identifier LEXCOLON )? EDITING block_colon blockorstate* END
+editingPhrase:
+    ( identifier LEXCOLON )? EDITING blockColon blockOrStatement* END
   ;
 
-entryfunc: // TRANSLATED
-    ENTRY funargs
+entryFunction:
+    ENTRY functionArgs
   ;
 
-except_fields: // TRANSLATED
+exceptFields:
     EXCEPT field*
   ;
-except_using_fields: // TRANSLATED
+
+exceptUsingFields:
     ( EXCEPT | USING ) field*
   ;
 
-exportstate: // TRANSLATED
-    EXPORT stream_name_or_handle? delimiter_constant?
-    display_items_or_record except_fields?
+exportStatement:
+    EXPORT streamNameOrHandle? delimiterConstant?
+    displayItemsOrRecord exceptFields?
     NOLOBS?
-    state_end
+    statementEnd
   ;
 
-extentphrase: // TRANSLATED
+extentPhrase:
     EXTENT constant?
   ;
 
-field_form_item: // TRANSLATED
-    field formatphrase?
+extentPhrase2:
+    EXTENT constant?
   ;
 
-field_list: // TRANSLATED
+fieldFormItem:
+    field formatPhrase?
+  ;
+
+fieldList:
     LEFTPAREN field ( COMMA field )* RIGHTPAREN
   ;
 
-fields_fields: // TRANSLATED
+fieldsFields:
     ( FIELDS | FIELD ) field*
   ;
 
-fieldoption: // TRANSLATED
-    AS ( CLASS type_name | datatype_field )
-  | casesens_or_not
-  | color_expr
+fieldOption:
+    AS asDataTypeField
+  | caseSensitiveOrNot
+  | colorExpression
   | COLUMNCODEPAGE expression
-  | contexthelpid_expr
-  | decimals_expr
+  | contextHelpIdExpression
+  | decimalsExpr
   | DROPTARGET
-  | extentphrase
-  | font_expr
-  | format_expr
-  | help_const
-  | initial_constant
-  | label_constant
+  | extentPhrase2
+  | fontExpression
+  | formatExpression
+  | helpConstant
+  | initialConstant
+  | labelConstant
   | LIKE field VALIDATE?
   | MOUSEPOINTER expression
   | NOUNDO
-  | viewasphrase
+  | viewAsPhrase
   | TTCODEPAGE
-  | xml_data_type
-  | xml_node_name
-  | xml_node_type
-  | serialize_name
+  | xmlDataType
+  | xmlNodeName
+  | xmlNodeType
+  | serializeName
   | SERIALIZEHIDDEN
   ;
 
-fillinphrase: // TRANSLATED
-    FILLIN ( NATIVE | sizephrase | tooltip_expr )*
+asDataTypeField:
+    ( CLASS typeName | datatypeField )
   ;
 
-finallystate: // TRANSLATED
-    FINALLY block_colon code_block ( EOF | finally_end state_end )
+asDataTypeVar:
+    ( CLASS typeName | datatypeVar )
   ;
 
-finally_end: // TRANSLATED
+fillInPhrase:
+    FILLIN ( NATIVE | sizePhrase | tooltipExpression )*
+  ;
+
+finallyStatement:
+    FINALLY blockColon codeBlock ( EOF | finallyEnd statementEnd )
+  ;
+
+finallyEnd:
     END FINALLY?
   ;
 
-findstate: // TRANSLATED
-    FIND findwhich? recordphrase ( NOWAIT | NOPREFETCH | NOERROR_KW )* state_end
+findStatement:
+    FIND findWhich? recordphrase ( NOWAIT | NOPREFETCH | NOERROR_KW )* statementEnd
   ;
 
-font_expr: // TRANSLATED
+fontExpression:
     FONT expression
   ;
 
-forstate: // TRANSLATED
-    FOR for_record_spec block_opt* block_colon code_block block_end
+forStatement:
+    FOR forRecordSpec blockOption* forstate_sub
   ;
 
-for_record_spec: // TRANSLATED
-    findwhich? recordphrase (COMMA findwhich? recordphrase)*
+forstate_sub:
+    blockColon codeBlock blockEnd
   ;
 
-format_expr: // TRANSLATED
+forRecordSpec:
+    findWhich? recordphrase (COMMA findWhich? recordphrase)*
+  ;
+
+formatExpression:
     FORMAT expression
   ;
 
-form_items_or_record: // TRANSLATED
+formItemsOrRecord:
     // ANTLR2 grammar had the two following lines:
     // ( form_item form_item )=>  ( options{greedy=true;}: form_item )*
     // If there's more than one display item, then it cannot be a table name.
-    { isTableName() }? recordAsFormItem
-  | form_item*
+    { support.isTableName(_input.LT(1)) }? recordAsFormItem
+  | formItem*
   ;
 
-form_item: // TRANSLATED
+formItem:
     // Note that if record buffername is allowed, 
     // the calling syntax must sort out var/rec/field name precedences.
-    (  text_opt
-    |  assign_equal
-    |  constant formatphrase?
-    |  spacephrase
-    |  skipphrase
-    |  widget_id
+    (  textOption
+    |  assignEqual
+    |  constant formatPhrase?
+    |  spacePhrase
+    |  skipPhrase
+    |  widgetId
     |  CARET
-    |  field ( aggregatephrase | formatphrase )*
-    |  { isTableName() }? recordAsFormItem
+    |  field ( aggregatePhrase | formatPhrase )*
+    |  { support.isTableName(_input.LT(1)) }? recordAsFormItem
     )
   ;
 
-formstate: // TRANSLATED
+formStatement:
     // FORM is really short for FORMAT. I don't have a keyword called FORM.
     // The syntax here should always be identical to DEFINE FRAME.
-    FORMAT form_items_or_record
-    header_background? except_fields? framephrase? state_end
+    FORMAT formItemsOrRecord
+    headerBackground? exceptFields? framePhrase? statementEnd
   ;
 
-formatphrase: // TRANSLATED
-    // There's a hack in here to break us out of a loop for format_opt because in
-    // a MESSAGE statement, you can have UPDATE myVar AS LOGICAL VIEW-AS ALERT-BOX...
-    // which antlr doesn't handle well because of its "simulated lookahead".
-    // Once again, we are bitten here by LL vs. LR.
-    ( { if (_input.LA(1) == VIEWAS && _input.LA(2) == ALERTBOX) break; }
-      format_opt
-    )+
+formatPhrase:
+    formatOption+
   ;
 
-format_opt: // TRANSLATED
-     AS datatype_var { support.defVarInlineAntlr4(); }
-  |  atphrase
+formatOption:
+     AS datatypeVar { support.defVarInlineAntlr4(); }
+  |  atPhrase
   |  ATTRSPACE
   |  NOATTRSPACE
   |  AUTORETURN
-  |  color_expr
-  |  contexthelpid_expr
+  |  colorExpression
+  |  contextHelpIdExpression
   |  BLANK 
   |  COLON expression 
-  |  to_expr
+  |  toExpression
   |  DEBLANK 
   |  DISABLEAUTOZAP 
-  |  font_expr 
-  |  format_expr
-  |  help_const
-  |  label_constant
-  |  LEXAT field formatphrase?
+  |  fontExpression
+  |  formatExpression
+  |  helpConstant
+  |  labelConstant
+  |  LEXAT field formatPhrase?
   |  LIKE { support.defVarInlineAntlr4(); } field
   |  NOLABELS
   |  NOTABSTOP
   |  PASSWORDFIELD
-  |  validatephrase
-  |  when_exp
-  |  viewasphrase
-  |  widget_id
+  |  validatePhrase
+  |  whenExpression
+  |  viewAsPhrase
+  |  widgetId
   ;
 
-frame_widgetname: // TRANSLATED
+frameWidgetName:
     FRAME widgetname
   ;
 
-framephrase: // TRANSLATED
+framePhrase:
     WITH
     ( // In front of COLUMN[S] must be a number constant. See PSC's grammar.
-      frame_exp_col
+      frameExpressionCol
     | // See PSC's grammar. The following come before <expression DOWN>.
       // Basically, accidental syntax rules.  :-/
       ( NOBOX | NOUNDERLINE | SIDELABELS )
-    | frame_widgetname ( NOBOX | NOUNDERLINE | SIDELABELS )
+    | frameWidgetName ( NOBOX | NOUNDERLINE | SIDELABELS )
     | // If you *can* evaluate to <expression DOWN>, then you must,
       // even if we get into expression on a non-reserved keyword like SCROLLABLE.
       // Try compiling SCROLLABLE DOWN as frame options, where you haven't defined
       // SCROLLABLE as a variable! Progress compiler gives an error.
-      frame_exp_down
-    | frame_opt
+      frameExpressionDown
+    | frameOption
     )*
   ;
 
-frame_exp_col: // TRANSLATED
+frameExpressionCol:
     expression ( COLUMN | COLUMNS )
   ;
 
-frame_exp_down: // TRANSLATED
+frameExpressionDown:
     expression DOWN
   ;
 
-browse_opt: // TRANSLATED
+browseOption:
        NUMBER? DOWN
     |  (WIDTH|WIDTHCHARS) expression
-    |  sizephrase
-    |  color_expr
+    |  sizePhrase
+    |  colorExpression
     |  LABELFONT expression
     |  LABELDCOLOR expression
     |  LABELFGCOLOR expression
@@ -2485,7 +2475,7 @@ browse_opt: // TRANSLATED
     |  NOLABELS
     |  NOBOX
     |  FONT expression
-    |  titlephrase 
+    |  titlePhrase
     |  NOVALIDATE
     |  NOSCROLLBARVERTICAL | SCROLLBARVERTICAL
     |  ROWHEIGHTCHARS expression
@@ -2496,7 +2486,7 @@ browse_opt: // TRANSLATED
     |  DROPTARGET
     |  NOAUTOVALIDATE;
 
-frame_opt: // TRANSLATED
+frameOption:
     (  ACCUMULATE expression?
     |  ATTRSPACE | NOATTRSPACE
     |  CANCELBUTTON field
@@ -2508,7 +2498,7 @@ frame_opt: // TRANSLATED
     |  FITLASTCOLUMN
     |  FONT expression
     |  FONTBASEDLAYOUT
-    |  frame_widgetname
+    |  frameWidgetName
     |  INHERITBGCOLOR | NOINHERITBGCOLOR | INHERITFGCOLOR | NOINHERITFGCOLOR
     |  LABELFONT expression
     |  LABELDCOLOR expression
@@ -2526,106 +2516,97 @@ frame_opt: // TRANSLATED
     |  SCREENIO | STREAMIO
     |  SCROLL expression
     |  SCROLLABLE | SIDELABELS 
-    |  stream_name_or_handle | THREED
-    |  tooltip_expr
+    |  streamNameOrHandle | THREED
+    |  tooltipExpression
     |  TOPONLY | USETEXT
     |  V6FRAME | USEREVVIDEO | USEUNDERLINE
-    |  frameviewas
+    |  frameViewAs
     |  ( WIDTH | WIDTHCHARS ) expression
-    |  widget_id
-    |  in_window_expr
-    |  colorspecification | atphrase | sizephrase | titlephrase 
+    |  widgetId
+    |  inWindowExpression
+    |  colorSpecification | atPhrase | sizePhrase | titlePhrase
     |  DOWN
     |  WITH // yup, this is really valid
     )
   ;
 
-frameviewas: // TRANSLATED
-    VIEWAS frameviewas_opt
+frameViewAs:
+    VIEWAS frameViewAsOption
   ;
 
-frameviewas_opt: // TRANSLATED
+frameViewAsOption:
     DIALOGBOX ( DIALOGHELP expression? )?
   | MESSAGELINE
   | STATUSBAR
   | TOOLBAR ( ATTACHMENT ( TOP | BOTTOM | LEFT | RIGHT ) )?
   ;
 
-from_pos: // TRANSLATED
-    FROM from_pos_elem from_pos_elem
+fromPos:
+    FROM fromPosElement fromPosElement
   ;
 
-from_pos_elem: // TRANSLATED
+fromPosElement:
     X expression | Y expression | ROW expression | COLUMN expression
   ;
 
-functionstate: // TRANSLATED
+functionStatement:
     // You don't see it in PSC's grammar, but the compiler really does insist on a datatype.
     f=FUNCTION
     id=identifier { support.funcBegin($id.text, _localctx); }
-    ( RETURNS | RETURN )? ( CLASS type_name | datatype_var )
-    extentphrase?
+    ( RETURNS | RETURN )? ( CLASS typeName | datatypeVar )
+    extentPhrase?
     PRIVATE?
-    function_params?
+    functionParams?
     // A function can be FORWARD declared and then later defined IN...
     // It's also not illegal to define them IN.. more than once, so we can't
     // drop the scope the first time it's defined.
     ( FORWARDS ( LEXCOLON | PERIOD | EOF )
     | { _input.LA(2) == SUPER }? IN_KW SUPER ( LEXCOLON | PERIOD | EOF )
     | (MAP TO? identifier)? IN_KW expression ( LEXCOLON | PERIOD | EOF )
-    | block_colon
-      code_block
-      function_end
-      state_end
+    | blockColon
+      codeBlock
+      functionEnd
+      statementEnd
     )
     { support.funcEnd(); }
   ;
 
-function_end:
+functionEnd:
     END FUNCTION?
   ;
 
-function_params: // TRANSLATED
-    LEFTPAREN function_param? ( COMMA function_param )* RIGHTPAREN
+functionParams:
+    LEFTPAREN functionParam? ( COMMA functionParam )* RIGHTPAREN
   ;
 
-function_param: // TRANSLATED
+functionParam:
     BUFFER bn=identifier? FOR bf=record PRESELECT?
     { if ($bn.ctx != null) support.defBuffer($bn.text, $bf.text); }
     # functionParamBufferFor
   | qualif=( INPUT | OUTPUT | INPUTOUTPUT )?
-    ( { _input.LA(2) == AS }?
-      n=identifier AS ( CLASS type_name | datatype_var )
-      extentphrase?
-      { support.defVar($n.text); }
-    | { _input.LA(2) == LIKE }?
-      n2=identifier like_field
-      extentphrase?
-      { support.defVar($n2.text); }
-    | { _input.LA(2) != NAMEDOT }? TABLE FOR? record APPEND? BIND?
-    | { _input.LA(2) != NAMEDOT }? TABLEHANDLE FOR? hn=identifier APPEND? BIND?
-      { support.defVar($hn.text); }
-    | { _input.LA(2) != NAMEDOT}? DATASET FOR? identifier APPEND? BIND?
-    | { _input.LA(2) != NAMEDOT}? DATASETHANDLE FOR? hn2=identifier APPEND? BIND?
-      { support.defVar($hn2.text); }
-    | // When declaring a function, it's possible to just list the datatype without an identifier AS.
-      ( CLASS type_name | datatype_var )
-      extentphrase?
-    )
-    {  //if (p1==null && p2==null && p3==null)
-       // ## = #([INPUT], ##);
-    }
+    functionParamStd
     # functionParamStandard
   ;
 
-ext_functionstate:
+functionParamStd:
+    n=identifier AS asDataTypeVar extentPhrase? { support.defVar($n.text); } # functionParamStandardAs
+  | n2=identifier likeField extentPhrase? { support.defVar($n2.text); } # functionParamStandardLike
+  | { _input.LA(2) != NAMEDOT }? TABLE FOR? record APPEND? BIND? # functionParamStandardTable
+  | { _input.LA(2) != NAMEDOT }? TABLEHANDLE FOR? hn=identifier APPEND? BIND? { support.defVar($hn.text); } # functionParamStandardTableHandle
+  | { _input.LA(2) != NAMEDOT}? DATASET FOR? identifier APPEND? BIND?  # functionParamStandardDataset
+  | { _input.LA(2) != NAMEDOT}? DATASETHANDLE FOR? hn2=identifier APPEND? BIND? { support.defVar($hn2.text); }  # functionParamStandardDatasetHandle
+  | // When declaring a function, it's possible to just list the datatype without an identifier AS
+    ( CLASS typeName | datatypeVar ) extentPhrase2? # functionParamStandardOther
+  ;
+
+externalFunctionStatement:
     // You don't see it in PSC's grammar, but the compiler really does insist on a datatype.
     f=FUNCTION
     id=identifier { support.funcBegin($id.text, _localctx); }
-    ( RETURNS | RETURN )? ( CLASS type_name | datatype_var )
-    extentphrase?
+    ( RETURNS | RETURN )? ( CLASS typeName | datatypeVar )
+    extentPhrase?
     PRIVATE?
-    function_params?
+    functionParams?
     ( { _input.LA(2) == SUPER }? IN_KW SUPER
     | ( MAP TO? identifier )? IN_KW expression
     )
@@ -2633,186 +2614,174 @@ ext_functionstate:
     { support.funcEnd(); }
   ;
 
-getstate: // TRANSLATED
-    GET findwhich queryname ( lockhow | NOWAIT )* state_end
+getStatement:
+    GET findWhich identifier ( lockHow | NOWAIT )* statementEnd
   ;
 
-getkeyvaluestate: // TRANSLATED
-    GETKEYVALUE SECTION expression KEY ( DEFAULT | expression ) VALUE field state_end
+getKeyValueStatement:
+    GETKEYVALUE SECTION expression KEY ( DEFAULT | expression ) VALUE field statementEnd
   ;
 
-goonphrase: // TRANSLATED
-    GOON LEFTPAREN goon_elem ( COMMA? goon_elem )* RIGHTPAREN
+goOnPhrase:
+    GOON LEFTPAREN goOnElement ( COMMA? goOnElement )* RIGHTPAREN
   ;
 
-goon_elem: // TRANSLATED
-    ~RIGHTPAREN ( OF gwidget )?
+goOnElement:
+    ~RIGHTPAREN ( OF gWidget )?
   ;
 
-header_background: // TRANSLATED
-    ( HEADER | BACKGROUND ) display_item+
+headerBackground:
+    ( HEADER | BACKGROUND ) displayItem+
   ;
 
-help_const: // TRANSLATED
+helpConstant:
     HELP constant
   ;
 
-hidestate: // TRANSLATED
-    HIDE stream_name_or_handle?
-    ( ALL | MESSAGE | gwidget+ )? NOPAUSE? in_window_expr? state_end
+hideStatement:
+    HIDE streamNameOrHandle?
+    ( ALL | MESSAGE | gWidget+ )? NOPAUSE? inWindowExpression? statementEnd
   ;
 
-ifstate: // TRANSLATED
+ifStatement:
     // Plplt. Progress compiles this fine: DO: IF FALSE THEN END.
     // i.e. you don't have to have anything after the THEN or the ELSE.
-    IF expression THEN blockorstate if_else?
+    IF expression THEN blockOrStatement ifElse?
   ;
 
-if_else: // TRANSLATED
-    ELSE blockorstate
+ifElse:
+    ELSE blockOrStatement
   ;
 
-in_expr: // TRANSLATED
+inExpression:
     { support.disallowUnknownMethodCalls(); }
     IN_KW expression
     { support.allowUnknownMethodCalls(); }
   ;
 
-in_window_expr: // TRANSLATED
+inWindowExpression:
     IN_KW WINDOW expression
   ;
 
-imagephrase_opt: // TRANSLATED
+imagePhraseOption:
     ( FILE | FILENAME ) expression
   | ( IMAGESIZE | IMAGESIZECHARS | IMAGESIZEPIXELS ) expression BY expression
-  | from_pos
+  | fromPos
   ;
 
-importstate: // TRANSLATED
-    IMPORT stream_name_or_handle?
-    ( delimiter_constant | UNFORMATTED )?
+importStatement:
+    IMPORT streamNameOrHandle?
+    ( delimiterConstant | UNFORMATTED )?
     (  // If there's more than one, then we've got fields, not a record
       ( ( field | CARET ) ( field | CARET )+ )
-    | var_rec_field
+    | varRecField
     | CARET
     )?
-    except_fields? NOLOBS? NOERROR_KW? state_end
+    exceptFields? NOLOBS? NOERROR_KW? statementEnd
   ;
 
-in_widgetpool_expr: // TRANSLATED
+inWidgetPoolExpression:
     IN_KW WIDGETPOOL expression
   ;
 
-initial_constant: // TRANSLATED
+initialConstant:
     INITIAL
-    (  LEFTBRACE (TODAY|NOW|constant) (COMMA (TODAY|NOW|constant))* RIGHTBRACE
-    |  (TODAY|NOW|constant)
+    (  LEFTBRACE ( TODAY | NOW | constant ) ( COMMA ( TODAY | NOW | constant ))* RIGHTBRACE
+    |  ( TODAY | NOW | constant )
     )
   ;
 
-inputstatement: // TRANSLATED
-    inputclearstate
-  | inputclosestate
-  | inputfromstate
-  | inputthroughstate
+inputStatement:
+    inputClearStatement
+  | inputCloseStatement
+  | inputFromStatement
+  | inputThroughStatement
   ;
 
-inputclearstate: // TRANSLATED
-    INPUT CLEAR state_end
+inputClearStatement:
+    INPUT CLEAR statementEnd
   ;
 
-inputclosestate: // TRANSLATED
-    INPUT stream_name_or_handle? CLOSE state_end
+inputCloseStatement:
+    INPUT streamNameOrHandle? CLOSE statementEnd
   ;
 
-inputfromstate: // TRANSLATED
-    INPUT stream_name_or_handle? FROM io_phrase_state_end
+inputFromStatement:
+    INPUT streamNameOrHandle? FROM ioPhraseStateEnd
   ;
    
-inputthroughstate: // TRANSLATED
-    INPUT stream_name_or_handle? THROUGH io_phrase_state_end
+inputThroughStatement:
+    INPUT streamNameOrHandle? THROUGH ioPhraseStateEnd
   ;
 
-inputoutputstatement: // TRANSLATED
-    inputoutputclosestate
-  | inputoutputthroughstate
+inputOutputStatement:
+    inputOutputCloseStatement
+  | inputOutputThroughStatement
   ;
 
-inputoutputclosestate: // TRANSLATED
-    INPUTOUTPUT stream_name_or_handle? CLOSE state_end
+inputOutputCloseStatement:
+    INPUTOUTPUT streamNameOrHandle? CLOSE statementEnd
   ;
 
-inputoutputthroughstate: // TRANSLATED
-    INPUTOUTPUT stream_name_or_handle? THROUGH io_phrase_state_end
+inputOutputThroughStatement:
+    INPUTOUTPUT streamNameOrHandle? THROUGH ioPhraseStateEnd
   ;
 
-insertstate: // TRANSLATED
-    INSERT record except_fields?
-    using_row?
-    framephrase? NOERROR_KW? state_end
+insertStatement:
+    INSERT record exceptFields?
+    usingRow?
+    framePhrase? NOERROR_KW? statementEnd
   ;
 
-interfacestate: // TRANSLATED
-    INTERFACE name=type_name2 interface_inherits? block_colon
+interfaceStatement:
+    INTERFACE name=typeName2 interfaceInherits? blockColon
     { support.defInterface($name.text); }
-    class_code_block
-    interface_end
-    state_end
+    classCodeBlock
+    interfaceEnd
+    statementEnd
   ;
 
-interface_inherits: // TRANSLATED
-    INHERITS type_name (COMMA type_name)*
+interfaceInherits:
+    INHERITS typeName ( COMMA typeName )*
   ;
 
-interface_end: // TRANSLATED
+interfaceEnd:
     END INTERFACE?
   ;
 
-io_phrase_state_end: // TRANSLATED
+ioPhraseStateEnd:
     // Order of options is important
-    io_osdir io_opt* state_end
-  | io_printer io_opt* state_end
-  | TERMINAL io_opt* state_end
-  | // TODO This syntax and next three nodes to be confirmed
-    io_phrase_any_tokens* state_end
+    ioOsDir ioOption* statementEnd
+  | ioPrinter ioOption* statementEnd
+  | TERMINAL ioOption* statementEnd
+  | ioPhraseAnyTokens
   ;
 
-io_phrase_any_tokens: // TRANSLATED
-    io_phrase_any_tokens_sub
+/* ioPhraseAnyTokens:
+    ioPhraseAnyTokensSub
   ;
 
-io_phrase_any_tokens_sub: // TRANSLATED
-    // With input/output THROUGH, we can have a program name followed by any number of arguments,
-    // and any of those arguments could be a VALUE(expression).
-    // Also note that unix commands like echo, lp paged, etc, are not uncommon, so we have to do
-    // full lookahead/backtracking like an LALR parser would.
-    io_opt  # ioPhraseAnyTokensSub1
-  | valueexpression # ioPhraseAnyTokensSub2
-  | ~( PERIOD | VALUE ) not_io_opt* # ioPhraseAnyTokensSub3
+ioPhraseAnyTokensSub:
+    // With input/output THROUGH, we can have a program name followed by any number of arguments, and any of those arguments could be a VALUE(expression).
+    // Also note that unix commands like echo, lp paged, etc, are not uncommon
+    ioOption* statementEnd                 # ioPhraseAnyTokensSub1
+  | valueExpression ioPhraseAnyTokens      # ioPhraseAnyTokensSub2
+  | ~( PERIOD | VALUE ) ioPhraseAnyTokens  # ioPhraseAnyTokensSub3
+  ; */
+
+ioPhraseAnyTokens:
+    // With input/output THROUGH, we can have a program name followed by any number of arguments, and any of those arguments could be a VALUE(expression).
+    // Also note that unix commands like echo, lp paged, etc, are not uncommon
+    ioOption* statementEnd                 # ioPhraseAnyTokensSub1
+  | valueExpression ioOption* statementEnd # ioPhraseAnyTokensSub2
+  | fname1=notPeriodOrValue notIoOption* ioOption* statementEnd  # ioPhraseAnyTokensSub3
   ;
 
-io_opt: // TRANSLATED
-    // If you add a keyword here, then it probably needs to be added to the FILENAME exclusion list above.
-    APPEND
-  | BINARY
-  | COLLATE
-  | CONVERT ( ( SOURCE | TARGET ) expression )*
-  | NOCONVERT
-  | ECHO
-  | NOECHO
-  | KEEPMESSAGES 
-  | LANDSCAPE
-  | LOBDIR filenameorvalue
-  | MAP anyorvalue
-  | NOMAP
-  | NUMCOPIES anyorvalue
-  | PAGED
-  | PAGESIZE_KW anyorvalue
-  | PORTRAIT
-  | UNBUFFERED 
+notPeriodOrValue:
+    ~( PERIOD | VALUE )
   ;
 
-not_io_opt:
+notIoOption:
   ~(
     PERIOD
   | APPEND
@@ -2835,53 +2804,75 @@ not_io_opt:
   )
   ;
 
-io_osdir: // TRANSLATED
+
+ioOption:
+    // If you add a keyword here, then it probably needs to be added to the FILENAME exclusion list above.
+    APPEND
+  | BINARY
+  | COLLATE
+  | CONVERT ( ( SOURCE | TARGET ) expression )*
+  | NOCONVERT
+  | ECHO
+  | NOECHO
+  | KEEPMESSAGES 
+  | LANDSCAPE
+  | LOBDIR filenameOrValue
+  | MAP anyOrValue
+  | NOMAP
+  | NUMCOPIES anyOrValue
+  | PAGED
+  | PAGESIZE_KW anyOrValue
+  | PORTRAIT
+  | UNBUFFERED 
+  ;
+
+ioOsDir:
     OSDIR LEFTPAREN expression RIGHTPAREN NOATTRLIST?
   ;
 
-io_printer: // TRANSLATED
+ioPrinter:
     PRINTER  // A unix printer name could be just about anything.
-    ( valueexpression
+    ( valueExpression
     | ~( VALUE | NUMCOPIES | COLLATE | LANDSCAPE | PORTRAIT | APPEND | BINARY | ECHO | NOECHO | KEEPMESSAGES
          | NOMAP | MAP | PAGED | PAGESIZE_KW | UNBUFFERED | NOCONVERT | CONVERT | PERIOD | EOF )
     )?
   ;
 
-label_constant: // TRANSLATED
+labelConstant:
     ( COLUMNLABEL | LABEL ) constant ( COMMA constant )*
   ;
 
-ldbnamefunc: // TRANSLATED
+ldbnameFunction:
     LDBNAME LEFTPAREN
-    ( ldbname_opt1 | expression )
+    ( ldbnameOption | expression )
     RIGHTPAREN
   ;
 
-ldbname_opt1: // TRANSLATED
+ldbnameOption:
     BUFFER record
   ;
 
-leavestate: // TRANSLATED
-    LEAVE blocklabel? state_end
+leaveStatement:
+    LEAVE blockLabel? statementEnd
   ;
 
-lengthfunc: // TRANSLATED
-    LENGTH funargs
+lengthFunction:
+    LENGTH functionArgs
   ;
 
-like_field: // TRANSLATED
+likeField:
     LIKE field VALIDATE?
   ;
 
-like_widgetname: // TRANSLATED
+likeWidgetName:
     LIKE widgetname
   ;
 
-loadstate: // TRANSLATED
-    LOAD expression load_opt* state_end
+loadStatement:
+    LOAD expression loadOption* statementEnd
   ;
 
-load_opt: // TRANSLATED
+loadOption:
     DIR expression
   | APPLICATION
   | DYNAMIC
@@ -2890,30 +2881,30 @@ load_opt: // TRANSLATED
   | NOERROR_KW
   ;
 
-messagestate: // TRANSLATED
+messageStatement:
     MESSAGE
-    color_anyorvalue?
-    message_item*
-    message_opt*
-    in_window_expr?
-    state_end
+    colorAnyOrValue?
+    messageItem*
+    messageOption*
+    inWindowExpression?
+    statementEnd
   ;
 
-message_item: // TRANSLATED
-    skipphrase
+messageItem:
+    skipPhrase
   | expression
   ;
 
-message_opt: // TRANSLATED
+messageOption:
     VIEWAS ALERTBOX
     ( MESSAGE | QUESTION | INFORMATION | ERROR | WARNING )?
     ( ( BUTTONS | BUTTON ) ( YESNO | YESNOCANCEL | OK | OKCANCEL | RETRYCANCEL ) )?
-    title_expr?  
-  | SET field ( { _input.LA(2) != ALERTBOX }? formatphrase? | )
-  | UPDATE field ( { _input.LA(2) != ALERTBOX }? formatphrase? | )
+    titleExpression?
+  | SET field ( { _input.LA(2) != ALERTBOX }? formatPhrase? | )
+  | UPDATE field ( { _input.LA(2) != ALERTBOX }? formatPhrase? | )
   ;
 
-methodstate locals [ boolean abs = false ]: // TRANSLATED
+methodStatement locals [ boolean abs = false ]:
     METHOD
     (  PRIVATE
     |  PROTECTED
@@ -2923,221 +2914,234 @@ methodstate locals [ boolean abs = false ]: // TRANSLATED
     |  OVERRIDE
     |  FINAL
     )*
-    ( VOID | datatype extentphrase? )
-    id=new_identifier
-    function_params
-    ( { $abs || support.isInterface() }? block_colon // An INTERFACE declares without defining, ditto ABSTRACT.
+    ( VOID | datatype extentPhrase? )
+    id=newIdentifier
+    functionParams
+    ( { $abs || support.isInterface() }? blockColon // An INTERFACE declares without defining, ditto ABSTRACT.
     | { !$abs && !support.isInterface() }?
-      block_colon
+      blockColon
       { support.addInnerScope(_localctx); }
-      code_block
-      method_end
+      codeBlock
+      methodEnd
       { support.dropInnerScope(); }
-      state_end
+      statementEnd
     )
   ;
 
-method_end: // TRANSLATED
+methodEnd:
     END METHOD?
   ;
 
-namespace_prefix: // TRANSLATED
+namespacePrefix:
     NAMESPACEPREFIX constant
   ;
-namespace_uri: // TRANSLATED
+
+namespaceUri:
     NAMESPACEURI constant
   ;
 
-nextstate: // TRANSLATED
-    NEXT blocklabel? state_end
+nextStatement:
+    NEXT blockLabel? statementEnd
   ;
 
-nextpromptstate: // TRANSLATED
-    NEXTPROMPT field framephrase? state_end
+nextPromptStatement:
+    NEXTPROMPT field framePhrase? statementEnd
   ;
 
-nextvaluefunc: // TRANSLATED
+nextValueFunction:
     NEXTVALUE LEFTPAREN sequencename ( COMMA identifier )* RIGHTPAREN
   ;
 
-nullphrase: // TRANSLATED
-    NULL_KW funargs?
+nullPhrase:
+    NULL_KW functionArgs?
   ;
 
-onstate: // TRANSLATED
+onStatement:
     ON
-    (  ASSIGN OF field trigger_table_label?
-       ( OLD VALUE? f=identifier defineparam_var? { support.defVar($f.text); } )?
-       OVERRIDE?
-       ( REVERT state_end
-       | PERSISTENT runstate
-       | { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
-       )
-    |  // ON event OF database-object
-      (
-         ( CREATE | DELETE_KW | FIND ) OF record label_constant?
-      |  WRITE OF bf=record label_constant?
-        ( NEW BUFFER? n=identifier label_constant?
-          { support.defBuffer($n.text, $bf.text); }
-        )? 
-        ( OLD BUFFER? o=identifier label_constant?
-          { support.defBuffer($o.text, $bf.text); }
-        )? 
-      )
-      OVERRIDE?
-      (  REVERT state_end
-      |  PERSISTENT runstate
-      |  { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
-      )
+    (  onAssign
+    |  onEventOfDbObject
     |  // ON key-label keyfunction.
-      . . state_end
-    | eventlist
+      . . statementEnd
+    | eventList
       ( ANYWHERE
-      | OF widgetlist
-        ( OR eventlist OF widgetlist )*
+      | OF widgetList
+        ( OR eventList OF widgetList )*
         ANYWHERE?
       )
-      (  REVERT state_end
-      |  PERSISTENT RUN filenameorvalue in_expr? onstate_run_params? state_end
-      |  { support.addInnerScope(_localctx); } blockorstate { support.dropInnerScope(); }
+      (  REVERT statementEnd
+      |  PERSISTENT RUN filenameOrValue inExpression? onstateRunParams? statementEnd
+      |  { support.addInnerScope(_localctx); } blockOrStatement { support.dropInnerScope(); }
       )
     )
   ;
 
-onstate_run_params: // TRANSLATED
+onAssign:
+    ASSIGN OF field triggerTableLabel?
+       onAssignOldValue?
+       OVERRIDE?
+       ( REVERT statementEnd
+       | PERSISTENT runStatement
+       | { support.addInnerScope(_localctx.parent); } blockOrStatement { support.dropInnerScope(); }
+       )
+  ;
+
+onAssignOldValue:
+    OLD VALUE? f=identifier defineParamVar? { support.defVar($f.text); }
+  ;
+
+onEventOfDbObject:
+    ( onOtherOfDbObject | onWriteOfDbObject )
+    OVERRIDE?
+    (  REVERT statementEnd
+    |  PERSISTENT runStatement
+    |  { support.addInnerScope(_localctx); } blockOrStatement { support.dropInnerScope(); }
+    )
+  ;
+
+onOtherOfDbObject:
+    ( CREATE | DELETE_KW | FIND ) OF record labelConstant?
+  ;
+
+onWriteOfDbObject:
+    WRITE OF bf=record labelConstant?
+    ( NEW BUFFER? n=identifier labelConstant? { support.defBuffer($n.text, $bf.text); } )?
+    ( OLD BUFFER? o=identifier labelConstant? { support.defBuffer($o.text, $bf.text); } )?
+  ;
+
+onstateRunParams:
     LEFTPAREN INPUT? expression ( COMMA INPUT? expression )* RIGHTPAREN
   ;
 
-on___phrase: // TRANSLATED
-    ON ( ENDKEY | ERROR | STOP | QUIT ) on_undo? ( COMMA on_action )?
+onPhrase:
+    ON ( ENDKEY | ERROR | STOP | QUIT ) onUndo? ( COMMA onAction )?
   ;
 
-on_undo: // TRANSLATED
-    UNDO blocklabel?
+onUndo:
+    UNDO blockLabel?
   ;
 
-on_action: // TRANSLATED
-    ( LEAVE | NEXT | RETRY ) blocklabel?
-  | RETURN return_options
+onAction:
+    ( LEAVE | NEXT | RETRY ) blockLabel?
+  | RETURN returnOption
   | THROW
   ;
 
-openquerystate: // TRANSLATED
-    OPEN QUERY queryname ( FOR | PRESELECT ) for_record_spec
-    openquery_opt*
-    state_end
+openQueryStatement:
+    OPEN QUERY identifier ( FOR | PRESELECT ) forRecordSpec
+    openQueryOption*
+    statementEnd
   ;
 
-openquery_opt: // TRANSLATED
-    querytuningphrase
+openQueryOption:
+    queryTuningPhrase
   | BREAK
-  | by_expr
-  | collatephrase
+  | byExpr
+  | collatePhrase
   | INDEXEDREPOSITION
   | MAXROWS expression
   ;
 
-osappendstate: // TRANSLATED
-    OSAPPEND filenameorvalue filenameorvalue state_end
+osAppendStatement:
+    OSAPPEND filenameOrValue filenameOrValue statementEnd
   ;
 
-oscommandstate: // TRANSLATED
+osCommandStatement:
     ( OS400 | BTOS | DOS | MPE | OS2 | OSCOMMAND | UNIX | VMS )
     ( SILENT | NOWAIT | NOCONSOLE )?
-    anyorvalue*
-    state_end
+    anyOrValue*
+    statementEnd
   ;
 
-oscopystate: // TRANSLATED
-    OSCOPY filenameorvalue filenameorvalue state_end
+osCopyStatement:
+    OSCOPY filenameOrValue filenameOrValue statementEnd
   ;
 
-oscreatedirstate: // TRANSLATED
-    OSCREATEDIR filenameorvalue anyorvalue* state_end
+osCreateDirStatement:
+    OSCREATEDIR filenameOrValue anyOrValue* statementEnd
   ;
 
-osdeletestate: // TRANSLATED
+osDeleteStatement:
     OSDELETE
-    ( valueexpression
+    ( valueExpression
     | ~( RECURSIVE | PERIOD | EOF )
     )+
-    RECURSIVE? state_end
+    RECURSIVE? statementEnd
   ;
 
-osrenamestate: // TRANSLATED
-    OSRENAME filenameorvalue filenameorvalue state_end
+osRenameStatement:
+    OSRENAME filenameOrValue filenameOrValue statementEnd
   ;
 
-outputstatement: // TRANSLATED
-    outputclosestate
-  | outputthroughstate
-  | outputtostate
+outputStatement:
+    outputCloseStatement
+  | outputThroughStatement
+  | outputToStatement
   ;
 
-outputclosestate: // TRANSLATED
-    OUTPUT stream_name_or_handle? CLOSE state_end
+outputCloseStatement:
+    OUTPUT streamNameOrHandle? CLOSE statementEnd
   ;
 
-outputthroughstate: // TRANSLATED
-    OUTPUT stream_name_or_handle? THROUGH io_phrase_state_end
+outputThroughStatement:
+    OUTPUT streamNameOrHandle? THROUGH ioPhraseStateEnd
   ;
 
-outputtostate: // TRANSLATED
-    OUTPUT stream_name_or_handle? TO io_phrase_state_end
+outputToStatement:
+    OUTPUT streamNameOrHandle? TO ioPhraseStateEnd
   ;
 
-pagestate: // TRANSLATED
-    PAGE stream_name_or_handle? state_end
+pageStatement:
+    PAGE streamNameOrHandle? statementEnd
   ;
 
-pause_expr: // TRANSLATED
+pauseExpression:
     PAUSE expression
   ;
 
-pausestate: // TRANSLATED
-    PAUSE expression? pause_opt* state_end
+pauseStatement:
+    PAUSE expression? pauseOption* statementEnd
   ;
 
-pause_opt: // TRANSLATED
+pauseOption:
     BEFOREHIDE
   | MESSAGE constant
   | NOMESSAGE
-  | in_window_expr
+  | inWindowExpression
   ;
 
-procedure_expr: // TRANSLATED
+procedureExpression:
     PROCEDURE expression
   ;
 
-ext_procedurestate:
+externalProcedureStatement:
     PROCEDURE
     filename
-    EXTERNAL constant procedure_dll_opt* block_colon
+    EXTERNAL constant procedureDllOption* blockColon
     { support.addInnerScope(_localctx); }
-    code_block
+    codeBlock
     { support.dropInnerScope(); }
-    procedure_end state_end
+    procedureEnd statementEnd
   ;
 
-procedurestate: // TRANSLATED
+procedureStatement:
     PROCEDURE
     filename
-    procedure_opt? block_colon
+    procedureOption? blockColon
     { support.addInnerScope(_localctx); }
-    code_block
+    codeBlock
     { support.dropInnerScope(); }
     (  EOF
-    |  procedure_end state_end
+    |  procedureEnd statementEnd
     )
   ;
 
-procedure_opt: // TRANSLATED
-    EXTERNAL constant procedure_dll_opt*
+procedureOption:
+    EXTERNAL constant procedureDllOption*
   | PRIVATE
   | IN_KW SUPER
   ;
 
-procedure_dll_opt: // TRANSLATED
+procedureDllOption:
     CDECL_KW
   | PASCAL_KW
   | STDCALL_KW
@@ -3145,77 +3149,77 @@ procedure_dll_opt: // TRANSLATED
   | PERSISTENT
   ;
 
-procedure_end: // TRANSLATED
+procedureEnd:
     END PROCEDURE?
   ;
 
-processeventsstate: // TRANSLATED
-    PROCESS EVENTS state_end
+processEventsStatement:
+    PROCESS EVENTS statementEnd
   ;
 
-promptforstate: // TRANSLATED
+promptForStatement:
     ( PROMPTFOR | PROMPT )
-    stream_name_or_handle?
-    UNLESSHIDDEN? form_items_or_record
-    goonphrase?
-    except_fields?
-    in_window_expr?
-    framephrase?
-    editingphrase?
-    state_end
+    streamNameOrHandle?
+    UNLESSHIDDEN? formItemsOrRecord
+    goOnPhrase?
+    exceptFields?
+    inWindowExpression?
+    framePhrase?
+    editingPhrase?
+    statementEnd
   ;
 
-publishstate: // TRANSLATED
-    PUBLISH expression publish_opt1? parameterlist? state_end
+publishStatement:
+    PUBLISH expression publishOption? parameterList? statementEnd
   ;
 
-publish_opt1: // TRANSLATED
+publishOption:
     FROM expression
   ;
 
-putstate: // TRANSLATED
-    PUT stream_name_or_handle? ( CONTROL | UNFORMATTED )?
-    (  nullphrase
-    |  skipphrase
-    |  spacephrase
-    |  expression ( format_expr | at_expr | to_expr )*
+putStatement:
+    PUT streamNameOrHandle? ( CONTROL | UNFORMATTED )?
+    (  nullPhrase
+    |  skipPhrase
+    |  spacePhrase
+    |  expression ( formatExpression | atExpression | toExpression )*
     )*
-    state_end
+    statementEnd
   ;
 
-putcursorstate: // TRANSLATED
-    PUT CURSOR ( OFF | ( row_expr | column_expr )* ) state_end
+putCursorStatement:
+    PUT CURSOR ( OFF | ( rowExpression | columnExpression )* ) statementEnd
   ;
 
-putscreenstate: // TRANSLATED
+putScreenStatement:
     PUT SCREEN
     (  ATTRSPACE
     |  NOATTRSPACE
-    |  color_anyorvalue
-    |  column_expr
-    |  row_expr
+    |  colorAnyOrValue
+    |  columnExpression
+    |  rowExpression
     |  expression
     )*
-    state_end
+    statementEnd
   ;
 
-putkeyvaluestate: // TRANSLATED
+putKeyValueStatement:
     PUTKEYVALUE
     ( SECTION expression KEY ( DEFAULT | expression ) VALUE expression
     | ( COLOR | FONT ) ( expression | ALL )
     )
-    NOERROR_KW? state_end
+    NOERROR_KW? statementEnd
   ;
 
-query_queryname: // TRANSLATED
-    QUERY queryname
+queryName:
+    QUERY identifier
   ;
 
-querytuningphrase: // TRANSLATED
-    QUERYTUNING LEFTPAREN querytuning_opt* RIGHTPAREN
+queryTuningPhrase:
+    QUERYTUNING LEFTPAREN queryTuningOption* RIGHTPAREN
   ;
 
-querytuning_opt: // TRANSLATED
+queryTuningOption:
     ARRAYMESSAGE | NOARRAYMESSAGE
   | BINDWHERE | NOBINDWHERE
   | CACHESIZE NUMBER (ROW|BYTE)?
@@ -3231,60 +3235,63 @@ querytuning_opt: // TRANSLATED
   | SEPARATECONNECTION | NOSEPARATECONNECTION
   ;
 
-quitstate: // TRANSLATED
-    QUIT state_end
+quitStatement:
+    QUIT statementEnd
   ;
 
-radiosetphrase: // TRANSLATED
-    RADIOSET radioset_opt*
+radiosetPhrase:
+    RADIOSET radiosetOption*
   ;
 
-radioset_opt:
+radiosetOption:
     HORIZONTAL EXPAND?
   | VERTICAL
-  | sizephrase
-  | RADIOBUTTONS radio_label COMMA ( constant | TODAY | NOW | QSTRING )
-           ( COMMA radio_label COMMA ( constant | TODAY | NOW | QSTRING) )*
-  |  tooltip_expr
+  | sizePhrase
+  | RADIOBUTTONS radioLabel COMMA ( constant | TODAY | NOW | QSTRING )
+           ( COMMA radioLabel COMMA ( constant | TODAY | NOW | QSTRING) )*
+  | tooltipExpression
   ;
 
-radio_label: // TRANSLATED
+radioLabel:
     ( QSTRING | FILENAME | ID | unreservedkeyword | constant )
   ;
 
-rawfunc: // TRANSLATED
-    RAW funargs
+rawFunction:
+    RAW functionArgs
   ;
 
-rawtransferstate: // TRANSLATED
-    RAWTRANSFER rawtransfer_elem TO rawtransfer_elem NOERROR_KW? state_end
+rawTransferStatement:
+    RAWTRANSFER rawTransferElement TO rawTransferElement NOERROR_KW? statementEnd
   ;
 
-rawtransfer_elem: // TRANSLATED
+rawTransferElement:
     BUFFER record
   | FIELD field
-  | var_rec_field
+  | varRecField
   ;
 
-readkeystate: // TRANSLATED
-    READKEY stream_name_or_handle? pause_expr? state_end
+readkeyStatement:
+    READKEY streamNameOrHandle? pauseExpression? statementEnd
   ;
 
-repeatstate: // TRANSLATED
-    REPEAT
-    block_for? block_preselect? block_opt* block_colon code_block block_end
+repeatStatement:
+    REPEAT blockFor? blockPreselect? blockOption* repeatStatementSub
   ;
 
-record_fields: // TRANSLATED
+repeatStatementSub:
+    blockColon codeBlock blockEnd
+  ;
+
+recordFields:
     // It may not look like it from the grammar, but the compiler really does allow FIELD here.
-    ( FIELDS | FIELD | EXCEPT ) ( LEFTPAREN ( field when_exp? )* RIGHTPAREN )?
+    ( FIELDS | FIELD | EXCEPT ) ( LEFTPAREN ( field whenExpression? )* RIGHTPAREN )?
   ;
 
-recordphrase: // TRANSLATED
-    rec=record record_fields? ( TODAY |NOW | constant )? record_opt*
+recordphrase:
+    rec=record recordFields? ( TODAY | NOW | constant )? recordOption*
   ;
 
-record_opt: // TRANSLATED
+recordOption:
     LEFT? OUTERJOIN
   | OF record
     // Believe it or not, WHERE compiles without <expression>
@@ -3297,36 +3304,36 @@ record_opt: // TRANSLATED
   | TENANTWHERE expression? 
   | USEINDEX identifier
   | USING field (AND field)*
-  | lockhow
+  | lockHow
   | NOWAIT
   | NOPREFETCH
   | NOERROR_KW
   | TABLESCAN
   ;
 
-releasestatement: // TRANSLATED
-    releasestate
-  | releaseexternalstate
-  | releaseobjectstate
+releaseStatementWrapper:
+    releaseStatement
+  | releaseExternalStatement
+  | releaseObjectStatement
   ;
 
-releasestate: // TRANSLATED
-    RELEASE record NOERROR_KW? state_end
+releaseStatement:
+    RELEASE record NOERROR_KW? statementEnd
   ;
 
-releaseexternalstate: // TRANSLATED
-    RELEASE EXTERNAL PROCEDURE? expression NOERROR_KW? state_end
+releaseExternalStatement:
+    RELEASE EXTERNAL PROCEDURE? expression NOERROR_KW? statementEnd
   ;
 
-releaseobjectstate: // TRANSLATED
-    RELEASE OBJECT expression NOERROR_KW? state_end
+releaseObjectStatement:
+    RELEASE OBJECT expression NOERROR_KW? statementEnd
   ;
 
-repositionstate: // TRANSLATED
-    REPOSITION queryname reposition_opt NOERROR_KW? state_end
+repositionStatement:
+    REPOSITION identifier repositionOption NOERROR_KW? statementEnd
   ;
 
-reposition_opt: // TRANSLATED
+repositionOption:
     TO
     (  ROWID expression (COMMA expression)* 
     |  RECID expression
@@ -3337,84 +3344,80 @@ reposition_opt: // TRANSLATED
   |  BACKWARDS expression
   ;
 
-returnstate: // TRANSLATED
-    RETURN return_options state_end
+returnStatement:
+    RETURN returnOption statementEnd
   ;
 
-return_options: // TRANSLATED
+returnOption:
     ( ERROR | NOAPPLY )?
     expression?
   ;
 
-routinelevelstate: // TRANSLATED
-    ROUTINELEVEL ON ERROR UNDO COMMA THROW state_end
+routineLevelStatement:
+    ROUTINELEVEL ON ERROR UNDO COMMA THROW statementEnd
   ;
 
-blocklevelstate: // TRANSLATED
-    BLOCKLEVEL ON ERROR UNDO COMMA THROW state_end
-  ;
-
-row_expr: // TRANSLATED
+rowExpression:
     ROW expression
   ;
 
-runstatement: // TRANSLATED
-    runstoredprocedurestate
-  | runsuperstate
-  | runstate
+runStatementWrapper:
+    runStoredProcedureStatement
+  | runSuperStatement
+  | runStatement
   ;
 
-runstate: // TRANSLATED
-    RUN filenameorvalue
-    ( LEFTANGLE LEFTANGLE filenameorvalue RIGHTANGLE RIGHTANGLE )?
-    run_opt* parameterlist?
-    ( NOERROR_KW | anyorvalue )*
-    state_end
+runStatement:
+    RUN filenameOrValue
+    ( LEFTANGLE LEFTANGLE filenameOrValue RIGHTANGLE RIGHTANGLE )?
+    runOption* parameterList?
+    ( NOERROR_KW | anyOrValue )*
+    statementEnd
   ;
 
-run_opt: // TRANSLATED
-    PERSISTENT run_set?    # runOptPersistent
-  | SINGLERUN run_set?     # runOptSingleRun
-  | SINGLETON run_set?     # runOptSingleton
-  | run_set                # runOptSet
+runOption:
+    PERSISTENT runSet?    # runOptPersistent
+  | SINGLERUN runSet?     # runOptSingleRun
+  | SINGLETON runSet?     # runOptSingleton
+  | runSet                # runOptSet
   | ON SERVER? expression ( TRANSACTION DISTINCT? )?  # runOptServer
-  | in_expr                # runOptIn
-  | ASYNCHRONOUS run_set? run_event? in_expr? # runOptAsync
+  | inExpression          # runOptIn
+  | ASYNCHRONOUS runSet? runEvent? inExpression? # runOptAsync
   ;
 
-run_event: // TRANSLATED
+runEvent:
     EVENTPROCEDURE expression
   ;
 
-run_set: // TRANSLATED
+runSet:
     SET field?
   ;
 
-runstoredprocedurestate: // TRANSLATED
-    RUN STOREDPROCEDURE identifier assign_equal? NOERROR_KW? parameterlist? state_end
+runStoredProcedureStatement:
+    RUN STOREDPROCEDURE identifier assignEqual? NOERROR_KW? parameterList? statementEnd
   ;
 
-runsuperstate: // TRANSLATED
-    RUN SUPER parameterlist? NOERROR_KW? state_end
+runSuperStatement:
+    RUN SUPER parameterList? NOERROR_KW? statementEnd
   ;
 
-savecachestate: // TRANSLATED
-    SAVE CACHE ( CURRENT | COMPLETE ) anyorvalue TO filenameorvalue NOERROR_KW? state_end
+saveCacheStatement:
+    SAVE CACHE ( CURRENT | COMPLETE ) anyOrValue TO filenameOrValue NOERROR_KW? statementEnd
   ;
 
-scrollstate: // TRANSLATED
-    SCROLL FROMCURRENT? UP? DOWN? framephrase? state_end
+scrollStatement:
+    SCROLL FROMCURRENT? UP? DOWN? framePhrase? statementEnd
   ;
 
-seekstate: // TRANSLATED
-    SEEK ( INPUT | OUTPUT | stream_name_or_handle ) TO ( expression | END ) state_end
+seekStatement:
+    SEEK ( INPUT | OUTPUT | streamNameOrHandle ) TO ( expression | END ) statementEnd
   ;
 
-selectionlistphrase: // TRANSLATED
-    SELECTIONLIST selectionlist_opt*
+selectionlistphrase:
+    SELECTIONLIST selectionListOption*
   ;
 
-selectionlist_opt: // TRANSLATED
+selectionListOption:
      SINGLE
   |  MULTIPLE
   |  NODRAG
@@ -3425,139 +3428,139 @@ selectionlist_opt: // TRANSLATED
   |  INNERCHARS expression
   |  INNERLINES expression
   |  SORT
-  |  tooltip_expr
-  |  sizephrase
+  |  tooltipExpression
+  |  sizePhrase
   ;
 
-serialize_name: // TRANSLATED
+serializeName:
     SERIALIZENAME QSTRING
   ;
 
-setstate: // TRANSLATED
-    SET stream_name_or_handle? UNLESSHIDDEN? form_items_or_record
-    goonphrase?
-    except_fields?
-    in_window_expr?
-    framephrase?
-    editingphrase?
+setStatement:
+    SET streamNameOrHandle? UNLESSHIDDEN? formItemsOrRecord
+    goOnPhrase?
+    exceptFields?
+    inWindowExpression?
+    framePhrase?
+    editingPhrase?
     NOERROR_KW?
-    state_end
+    statementEnd
   ;
 
-showstatsstate: // TRANSLATED
-    SHOWSTATS CLEAR? state_end
+showStatsStatement:
+    SHOWSTATS CLEAR? statementEnd
   ;
 
-sizephrase: // TRANSLATED
+sizePhrase:
     ( SIZE | SIZECHARS | SIZEPIXELS ) expression BY expression
   ;
 
-skipphrase: // TRANSLATED
-    SKIP funargs?
+skipPhrase:
+    SKIP functionArgs?
   ;
 
-sliderphrase: // TRANSLATED
-    SLIDER slider_opt*
+sliderPhrase:
+    SLIDER sliderOption*
   ;
 
-slider_opt: // TRANSLATED
+sliderOption:
     HORIZONTAL
   | MAXVALUE expression
   | MINVALUE expression
   | VERTICAL
   | NOCURRENTVALUE
   | LARGETOSMALL
-  | TICMARKS ( NONE | TOP | BOTTOM | LEFT | RIGHT | BOTH) slider_frequency?
-  | tooltip_expr
-  | sizephrase
+  | TICMARKS ( NONE | TOP | BOTTOM | LEFT | RIGHT | BOTH) sliderFrequency?
+  | tooltipExpression
+  | sizePhrase
   ;
 
-slider_frequency: // TRANSLATED
+sliderFrequency:
     FREQUENCY expression
   ;
 
-spacephrase: // TRANSLATED
-    SPACE funargs?
+spacePhrase:
+    SPACE functionArgs?
   ;
 
-state_end: // TRANSLATED
+statementEnd:
     PERIOD | EOF
   ;
 
-not_state_end: // TRANSLATED
-    ~PERIOD // TODO Needed because labeled subrules not supported in Antlr 2.7.5.
+notStatementEnd:
+    ~PERIOD
   ;
 
-statusstate: // TRANSLATED
-    STATUS status_opt in_window_expr? state_end
+statusStatement:
+    STATUS statusOption inWindowExpression? statementEnd
   ;
 
-status_opt: // TRANSLATED
+statusOption:
     DEFAULT expression?
   | INPUT ( OFF | expression )?
   ;
 
-stop_after: // TRANSLATED
+stopAfter:
     STOPAFTER expression
   ;
 
-stopstate: // TRANSLATED
-    STOP state_end
+stopStatement:
+    STOP statementEnd
   ;
 
-stream_name_or_handle: // TRANSLATED
+streamNameOrHandle:
     STREAM streamname
   | STREAMHANDLE expression
   ;
 
-subscribestate: // TRANSLATED
-    SUBSCRIBE procedure_expr? TO? expression
-    (ANYWHERE | in_expr)
-    subscribe_run? NOERROR_KW? state_end
+subscribeStatement:
+    SUBSCRIBE procedureExpression? TO? expression
+    ( ANYWHERE | inExpression )
+    subscribeRun? NOERROR_KW? statementEnd
   ;
 
-subscribe_run: // TRANSLATED
+subscribeRun:
     RUNPROCEDURE expression
   ;
    
-substringfunc: // TRANSLATED
-    SUBSTRING funargs
+substringFunction:
+    SUBSTRING functionArgs
   ;
 
-systemdialogcolorstate: // TRANSLATED
-    SYSTEMDIALOG COLOR expression update_field? in_window_expr? state_end
+systemDialogColorStatement:
+    SYSTEMDIALOG COLOR expression updateField? inWindowExpression? statementEnd
   ;
 
-systemdialogfontstate: // TRANSLATED
-    SYSTEMDIALOG FONT expression sysdiafont_opt* state_end
+systemDialogFontStatement:
+    SYSTEMDIALOG FONT expression systemDialogFontOption* statementEnd
   ;
 
-sysdiafont_opt: // TRANSLATED
+systemDialogFontOption:
     ANSIONLY
   | FIXEDONLY
   | MAXSIZE expression
   | MINSIZE expression
-  | update_field
-  | in_window_expr
+  | updateField
+  | inWindowExpression
   ;
 
-systemdialoggetdirstate: // TRANSLATED
-    SYSTEMDIALOG GETDIR field systemdialoggetdir_opt* state_end
+systemDialogGetDirStatement:
+    SYSTEMDIALOG GETDIR field systemDialogGetDirOption* statementEnd
   ;
 
-systemdialoggetdir_opt: // TRANSLATED
+systemDialogGetDirOption:
     INITIALDIR expression
   | RETURNTOSTARTDIR
   | TITLE expression
   | UPDATE field
   ;
 
-systemdialoggetfilestate: // TRANSLATED
-    SYSTEMDIALOG GETFILE field sysdiagetfile_opt* state_end
+systemDialogGetFileStatement:
+    SYSTEMDIALOG GETFILE field systemDialogGetFileOption* statementEnd
   ;
 
-sysdiagetfile_opt: // TRANSLATED
-     FILTERS expression expression (COMMA expression expression)* sysdiagetfile_initfilter?
+systemDialogGetFileOption:
+     FILTERS expression expression (COMMA expression expression)* systemDialogGetFileInitFilter?
   |  ASKOVERWRITE
   |  CREATETESTFILE
   |  DEFAULTEXTENSION expression
@@ -3565,33 +3568,33 @@ sysdiagetfile_opt: // TRANSLATED
   |  MUSTEXIST
   |  RETURNTOSTARTDIR
   |  SAVEAS
-  |  title_expr
+  |  titleExpression
   |  USEFILENAME
   |  UPDATE field
-  |  in_window_expr
+  |  inWindowExpression
   ;
 
-sysdiagetfile_initfilter: // TRANSLATED
+systemDialogGetFileInitFilter:
     INITIALFILTER expression
   ;
 
-systemdialogprintersetupstate: // TRANSLATED
-    SYSTEMDIALOG PRINTERSETUP sysdiapri_opt* state_end
+systemDialogPrinterSetupStatement:
+    SYSTEMDIALOG PRINTERSETUP systemDialogPrinterOption* statementEnd
   ;
 
-sysdiapri_opt: // TRANSLATED
-    ( NUMCOPIES expression | update_field | LANDSCAPE | PORTRAIT | in_window_expr )
+systemDialogPrinterOption:
+    ( NUMCOPIES expression | updateField | LANDSCAPE | PORTRAIT | inWindowExpression )
   ;
 
-systemhelpstate: // TRANSLATED
-    SYSTEMHELP expression systemhelp_window? systemhelp_opt state_end
+systemHelpStatement:
+    SYSTEMHELP expression systemHelpWindow? systemHelpOption statementEnd
   ;
 
-systemhelp_window: // TRANSLATED
+systemHelpWindow:
     WINDOWNAME expression
   ;
 
-systemhelp_opt: // TRANSLATED
+systemHelpOption:
      ALTERNATEKEY expression
   |  CONTEXT expression
   |  CONTENTS 
@@ -3609,220 +3612,226 @@ systemhelp_opt: // TRANSLATED
   |  QUIT
   ;
 
-text_opt: // TRANSLATED
-    TEXT LEFTPAREN form_item* RIGHTPAREN
+textOption:
+    TEXT LEFTPAREN formItem* RIGHTPAREN
   ;
 
-textphrase: // TRANSLATED
-    TEXT ( sizephrase | tooltip_expr )*
+textPhrase:
+    TEXT ( sizePhrase | tooltipExpression )*
   ;
 
-thisobjectstate: // TRANSLATED
-    THISOBJECT parameterlist_noroot state_end
+thisObjectStatement:
+    THISOBJECT parameterListNoRoot statementEnd
   ;
 
-title_expr: // TRANSLATED
+titleExpression:
     TITLE expression
   ;
 
-time_expr: // TRANSLATED
+timeExpression:
     TIME expression
   ;
 
-titlephrase: // TRANSLATED
-    TITLE ( color_expr | color_anyorvalue | font_expr )* expression
+titlePhrase:
+    TITLE ( colorExpression | colorAnyOrValue | fontExpression )* expression
   ;
 
-to_expr: // TRANSLATED
+toExpression:
     TO expression
   ;
 
-toggleboxphrase: // TRANSLATED
-    TOGGLEBOX ( sizephrase | tooltip_expr )*
+toggleBoxPhrase:
+    TOGGLEBOX ( sizePhrase | tooltipExpression )*
   ;
 
-tooltip_expr: // TRANSLATED
-    TOOLTIP ( valueexpression | constant )
+tooltipExpression:
+    TOOLTIP ( valueExpression | constant )
   ;
 
-transactionmodeautomaticstate: // TRANSLATED
-    TRANSACTIONMODE AUTOMATIC CHAINED? state_end
+transactionModeAutomaticStatement:
+    TRANSACTIONMODE AUTOMATIC CHAINED? statementEnd
   ;
 
-triggerphrase: // TRANSLATED
-    TRIGGERS block_colon trigger_block triggers_end
+triggerPhrase:
+    TRIGGERS blockColon triggerBlock triggersEnd
   ;
 
-trigger_block: // TRANSLATED
-    trigger_on*
+triggerBlock:
+    triggerOn*
   ;
 
-trigger_on: // TRANSLATED
-    ON eventlist ANYWHERE? ( PERSISTENT runstate | blockorstate )
+triggerOn:
+    ON eventList ANYWHERE? ( PERSISTENT runStatementWrapper | blockOrStatement )
   ;
 
-triggers_end: // TRANSLATED
+triggersEnd:
     END TRIGGERS?
   ;
 
-triggerprocedurestate: // TRANSLATED
+triggerProcedureStatement:
     TRIGGER PROCEDURE FOR
       (
-        ( CREATE | DELETE_KW | FIND | REPLICATIONCREATE | REPLICATIONDELETE ) OF record label_constant?
-      | ( WRITE | REPLICATIONWRITE ) OF buff=record label_constant?
-           ( NEW BUFFER? newBuff=identifier label_constant? { support.defBuffer($newBuff.text, $buff.text); } )?
-           ( OLD BUFFER? oldBuff=identifier label_constant? { support.defBuffer($oldBuff.text, $buff.text); } )?
-      |  ASSIGN trigger_of? trigger_old?
+        triggerProcedureStatementSub1
+      | triggerProcedureStatementSub2
+      | ASSIGN triggerOf? triggerOld?
       )
-    state_end
+    statementEnd
   ;
 
-trigger_of: // TRANSLATED
-    OF field trigger_table_label?
-  | NEW VALUE? id=identifier defineparam_var
+triggerProcedureStatementSub1:
+    ( CREATE | DELETE_KW | FIND | REPLICATIONCREATE | REPLICATIONDELETE ) OF record labelConstant?
   ;
 
-trigger_table_label: // TRANSLATED
+triggerProcedureStatementSub2:
+    ( WRITE | REPLICATIONWRITE ) OF buff=record labelConstant?
+           ( NEW BUFFER? newBuff=identifier labelConstant? { support.defBuffer($newBuff.text, $buff.text); } )?
+           ( OLD BUFFER? oldBuff=identifier labelConstant? { support.defBuffer($oldBuff.text, $buff.text); } )?
+  ;
+
+triggerOf:
+    OF field triggerTableLabel?  # triggerOfSub1
+  | NEW VALUE? id=identifier defineParamVar # triggerOfSub2
+  ;
+
+triggerTableLabel:
     // Found this in PSC's grammar
     TABLE LABEL constant
   ;
 
-trigger_old: // TRANSLATED
-    OLD VALUE? id=identifier defineparam_var
+triggerOld:
+    OLD VALUE? id=identifier defineParamVar?
   ;
 
-underlinestate: // TRANSLATED
-    UNDERLINE stream_name_or_handle? field_form_item* framephrase? state_end
+underlineStatement:
+    UNDERLINE streamNameOrHandle? fieldFormItem* framePhrase? statementEnd
   ;
 
-undostate: // TRANSLATED
-    UNDO blocklabel? ( COMMA undo_action )? state_end
+undoStatement:
+    UNDO blockLabel? ( COMMA undoAction )? statementEnd
   ;
 
-undo_action: // TRANSLATED
-    LEAVE blocklabel?
-  | NEXT blocklabel?
-  | RETRY blocklabel?
-  | RETURN return_options
+undoAction:
+    LEAVE blockLabel?
+  | NEXT blockLabel?
+  | RETRY blockLabel?
+  | RETURN returnOption
   | THROW expression
   ;
 
-unloadstate: // TRANSLATED
-    UNLOAD expression NOERROR_KW? state_end
+unloadStatement:
+    UNLOAD expression NOERROR_KW? statementEnd
   ;
 
-unsubscribestate: // TRANSLATED
-    UNSUBSCRIBE procedure_expr? TO? ( expression | ALL ) in_expr? state_end
+unsubscribeStatement:
+    UNSUBSCRIBE procedureExpression? TO? ( expression | ALL ) inExpression? statementEnd
   ;
 
-upstate: // TRANSLATED
-    UP stream_name_or_handle? expression? framephrase? state_end
+upStatement:
+    UP streamNameOrHandle? expression? framePhrase? statementEnd
   ;
 
-update_field: // TRANSLATED
+updateField:
     UPDATE field
   ;
 
-updatestate: // TRANSLATED
-    UPDATE UNLESSHIDDEN? form_items_or_record
-    goonphrase?
-    except_fields?
-    in_window_expr?
-    framephrase?
-    editingphrase?
+updateStatement:
+    UPDATE UNLESSHIDDEN? formItemsOrRecord
+    goOnPhrase?
+    exceptFields?
+    inWindowExpression?
+    framePhrase?
+    editingPhrase?
     NOERROR_KW?
-    state_end
+    statementEnd
   ;
 
-usestate: // TRANSLATED
-    USE expression NOERROR_KW? state_end
+useStatement:
+    USE expression NOERROR_KW? statementEnd
   ;
 
-using_row: // TRANSLATED
+usingRow:
     USING ( ROWID | RECID ) expression
   ;
 
-usingstate: // TRANSLATED
-    USING type=type_name2 star=STAR?
-    using_from?
-    state_end
+usingStatement:
+    USING tn=typeName2
+    usingFrom?
+    statementEnd
+    { support.usingState($tn.text); }
   ;
 
-using_from: // TRANSLATED
+usingFrom:
     FROM ( ASSEMBLY | PROPATH )
   ;
 
-validatephrase: // TRANSLATED
-    VALIDATE funargs
+validatePhrase:
+    VALIDATE functionArgs
   ;
 
-validatestate: // TRANSLATED
-    VALIDATE record NOERROR_KW? state_end
+validateStatement:
+    VALIDATE record NOERROR_KW? statementEnd
   ;
 
-viewstate: // TRANSLATED
-    VIEW stream_name_or_handle? gwidget* in_window_expr? state_end
+viewStatement:
+    VIEW streamNameOrHandle? gWidget* inWindowExpression? statementEnd
   ;
 
-viewasphrase: // TRANSLATED
+viewAsPhrase:
     VIEWAS
-    (  comboboxphrase
-    |  editorphrase
-    |  fillinphrase
-    |  radiosetphrase
+    (  comboBoxPhrase
+    |  editorPhrase
+    |  fillInPhrase
+    |  radiosetPhrase
     |  selectionlistphrase
-    |  sliderphrase
-    |  textphrase
-    |  toggleboxphrase
+    |  sliderPhrase
+    |  textPhrase
+    |  toggleBoxPhrase
     )
   ;
 
-waitforstate: // TRANSLATED
+waitForStatement:
     ( WAITFOR | WAIT )
     (
-      eventlist OF widgetlist
-      waitfor_or*
-      waitfor_focus?
-      pause_expr?
-      waitfor_exclusiveweb?
+      eventList OF widgetList
+      waitForOr*
+      waitForFocus?
+      pauseExpression?
+      ( EXCLUSIVEWEBUSER expression? )?
     |  // This is for a .Net WAIT-FOR, and will be in the tree as #(Widget_ref ...)
-      exprt waitfor_set?
+      expressionTerm waitForSet?
     )
-    state_end
+    statementEnd
   ;
 
-waitfor_or: // TRANSLATED
-    OR eventlist OF widgetlist
+waitForOr:
+    OR eventList OF widgetList
   ;
 
-waitfor_focus: // TRANSLATED
-    FOCUS gwidget
+waitForFocus:
+    FOCUS gWidget
   ;
 
-waitfor_exclusiveweb: // TRANSLATED
-    EXCLUSIVEWEBUSER expression?
-  ;
-
-waitfor_set: // TRANSLATED
+waitForSet:
     SET field
   ;
 
-when_exp: // TRANSLATED
+whenExpression:
     WHEN expression
   ;
 
-widget_id: // TRANSLATED
-    WIDGETID expression ;
+widgetId:
+    WIDGETID expression
+  ;
 
-xml_data_type: // TRANSLATED
+xmlDataType:
     XMLDATATYPE constant
   ;
 
-xml_node_name: // TRANSLATED
+xmlNodeName:
     XMLNODENAME constant
   ;
 
-xml_node_type: // TRANSLATED
+xmlNodeType:
     XMLNODETYPE constant
   ;
 
@@ -3906,6 +3915,8 @@ unreservedkeyword:
  | CHAINED
  | CHARACTER
  | CHARACTERLENGTH
+ | CHARSET
+ | CHECKED
  | CHOOSE
  | CLASS
  | CLIENTPRINCIPAL
@@ -4096,6 +4107,7 @@ unreservedkeyword:
  | HELPTOPIC
  | HEXDECODE
  | HEXENCODE
+ | HIDDEN
  | HINT
  | HORIZONTAL
  | HTMLENDOFLINE
@@ -4237,6 +4249,7 @@ unreservedkeyword:
  | NOJOINBYSQLDB
  | NOLOOKAHEAD
  | NONE
+ | NONSERIALIZABLE
  | NORMAL
  | NORMALIZE
  | NOROWMARKERS
@@ -4361,6 +4374,7 @@ unreservedkeyword:
  | SAXATTRIBUTES
  | SAXREADER
  | SAXWRITER
+ | SCREENVALUE
  | SCROLLABLE
  | SCROLLBARHORIZONTAL
  | SCROLLBARVERTICAL
@@ -4370,6 +4384,7 @@ unreservedkeyword:
  | SELECTIONLIST
  | SEND
  | SENDSQLSTATEMENT
+ | SENSITIVE
  | SEPARATECONNECTION
  | SEPARATORS
  | SERIALIZABLE
@@ -4494,6 +4509,7 @@ unreservedkeyword:
  | VARIABLE
  | VERBOSE
  | VERTICAL
+ | VISIBLE
  | VMS
  | VOID
  | WAIT

@@ -56,7 +56,11 @@ public enum ContextQualifier {
   /**
    * INIT, but for a "weak" scoped buffer
    */
-  INITWEAK;
+  INITWEAK,
+  /**
+   * Static reference to class
+   */
+  STATIC;
 
   /**
    * Is symbol's value "read" in this context?

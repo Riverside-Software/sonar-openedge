@@ -106,45 +106,40 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitFieldDescription(FieldDescriptionContext ctx) {
-    if (fields.isEmpty())
-      return null;
-    fields.peek().setDescription(ctx.val.getText());
+    if (!fields.isEmpty())
+      fields.peek().setDescription(ctx.val.getText());
 
     return null;
   }
 
   @Override
   public Void visitFieldExtent(FieldExtentContext ctx) {
-    if (fields.isEmpty())
-      return null;
-    fields.peek().setExtent(Integer.parseInt(ctx.val.getText()));
+    if (!fields.isEmpty())
+      fields.peek().setExtent(Integer.parseInt(ctx.val.getText()));
 
     return null;
   }
 
   @Override
   public Void visitFieldFormat(FieldFormatContext ctx) {
-    if (fields.isEmpty())
-      return null;
-    fields.peek().setFormat(ctx.val.getText());
+    if (!fields.isEmpty())
+      fields.peek().setFormat(ctx.val.getText());
 
     return super.visitFieldFormat(ctx);
   }
 
   @Override
   public Void visitFieldMaxWidth(FieldMaxWidthContext ctx) {
-    if (fields.isEmpty())
-      return null;
-    fields.peek().setMaxWidth(Integer.parseInt(ctx.val.getText()));
+    if (!fields.isEmpty())
+      fields.peek().setMaxWidth(Integer.parseInt(ctx.val.getText()));
 
     return null;
   }
 
   @Override
   public Void visitFieldOrder(FieldOrderContext ctx) {
-    if (fields.isEmpty())
-      return null;
-    fields.peek().setOrder(Integer.parseInt(ctx.val.getText()));
+    if (!fields.isEmpty())
+      fields.peek().setOrder(Integer.parseInt(ctx.val.getText()));
 
     return null;
   }
@@ -186,36 +181,32 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitTableArea(TableAreaContext ctx) {
-    if (tables.isEmpty())
-      return null;
-    tables.peek().setArea(ctx.val.getText());
+    if (!tables.isEmpty())
+      tables.peek().setArea(ctx.val.getText());
 
     return null;
   }
 
   @Override
   public Void visitTableDescription(TableDescriptionContext ctx) {
-    if (tables.isEmpty())
-      return null;
-    tables.peek().setDescription(ctx.val.getText());
+    if (!tables.isEmpty())
+      tables.peek().setDescription(ctx.val.getText());
 
     return null;
   }
 
   @Override
   public Void visitTableDumpName(TableDumpNameContext ctx) {
-    if (tables.isEmpty())
-      return null;
-    tables.peek().setDumpName(ctx.val.getText());
+    if (!tables.isEmpty())
+      tables.peek().setDumpName(ctx.val.getText());
     
     return null;
   }
 
   @Override
   public Void visitTableValMsg(TableValMsgContext ctx) {
-    if (tables.isEmpty())
-      return null;
-    tables.peek().setValMsg(ctx.val.getText());
+    if (!tables.isEmpty())
+      tables.peek().setValMsg(ctx.val.getText());
 
     return null;
   }
@@ -266,33 +257,33 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitIndexArea(IndexAreaContext ctx) {
-    if (indexes.isEmpty())
-      return null;
-    indexes.peek().setArea(ctx.val.getText());
+    if (!indexes.isEmpty())
+      indexes.peek().setArea(ctx.val.getText());
+
     return null;
   }
 
   @Override
   public Void visitIndexUnique(IndexUniqueContext ctx) {
-    if (indexes.isEmpty())
-      return null;
-    indexes.peek().setUnique(true);
+    if (!indexes.isEmpty())
+      indexes.peek().setUnique(true);
+
     return null;
   }
 
   @Override
   public Void visitIndexPrimary(IndexPrimaryContext ctx) {
-    if (indexes.isEmpty())
-      return null;
-    indexes.peek().setPrimary(true);
+    if (!indexes.isEmpty())
+      indexes.peek().setPrimary(true);
+
     return null;
   }
 
   @Override
   public Void visitIndexWord(IndexWordContext ctx) {
-    if (indexes.isEmpty())
-      return null;
-    indexes.peek().setWord(true);
+    if (!indexes.isEmpty())
+      indexes.peek().setWord(true);
+
     return null;
   }
 
@@ -350,18 +341,15 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitSeqCycleOnLimit(SeqCycleOnLimitContext ctx) {
-    if (sequences.isEmpty())
-      return null;
-    sequences.peek().setCycleOnLimit("yes".equalsIgnoreCase(ctx.val.getText()));
+    if (!sequences.isEmpty())
+      sequences.peek().setCycleOnLimit("yes".equalsIgnoreCase(ctx.val.getText()));
 
     return null;
   }
 
   @Override
   public Void visitSeqIncrement(SeqIncrementContext ctx) {
-    if (sequences.isEmpty())
-      return null;
-    if (!"?".equals(ctx.val.getText()))
+    if (!sequences.isEmpty() && !"?".equals(ctx.val.getText()))
       sequences.peek().setIncrement(Long.parseLong(ctx.val.getText()));
 
     return null;
@@ -369,9 +357,7 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitSeqInitial(SeqInitialContext ctx) {
-    if (sequences.isEmpty())
-      return null;
-    if (!"?".equals(ctx.val.getText()))
+    if (!sequences.isEmpty() && !"?".equals(ctx.val.getText()))
       sequences.peek().setInitialValue(Long.parseLong(ctx.val.getText()));
 
     return null;
@@ -379,9 +365,7 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitSeqMinVal(SeqMinValContext ctx) {
-    if (sequences.isEmpty())
-      return null;
-    if (!"?".equals(ctx.val.getText()))
+    if (!sequences.isEmpty() && !"?".equals(ctx.val.getText()))
       sequences.peek().setMinValue(Long.parseLong(ctx.val.getText()));
 
     return null;
@@ -389,9 +373,7 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitSeqMaxVal(SeqMaxValContext ctx) {
-    if (sequences.isEmpty())
-      return null;
-    if (!"?".equals(ctx.val.getText()))
+    if (!sequences.isEmpty() && !"?".equals(ctx.val.getText()))
       sequences.peek().setMaxValue(Long.parseLong(ctx.val.getText()));
 
     return null;

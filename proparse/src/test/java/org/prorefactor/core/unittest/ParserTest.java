@@ -35,8 +35,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 public class ParserTest {
   private final static String SRC_DIR = "src/test/resources/data/parser";
 
@@ -50,7 +48,7 @@ public class ParserTest {
   }
 
   @Test
-  public void testAscending01() throws ANTLRException {
+  public void testAscending01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending01.p"), session);
     unit.parse();
 
@@ -64,8 +62,9 @@ public class ParserTest {
     assertFalse(stmts.get(2).query(ABLNodeType.ASCENDING).get(0).isAbbreviated());
   }
 
-  @Test
-  public void testAscending02() throws ANTLRException {
+  // SQL not recognized anymore
+  @Test(enabled=false)
+  public void testAscending02() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending02.p"), session);
     unit.parse();
 
@@ -80,7 +79,7 @@ public class ParserTest {
   }
 
   @Test
-  public void testAscending03() throws ANTLRException {
+  public void testAscending03() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending03.p"), session);
     unit.parse();
 
@@ -94,7 +93,7 @@ public class ParserTest {
   }
 
   @Test
-  public void testLogical01() throws ANTLRException {
+  public void testLogical01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "logical01.p"), session);
     unit.parse();
 
@@ -112,7 +111,7 @@ public class ParserTest {
   }
 
   @Test
-  public void testLogical02() throws ANTLRException {
+  public void testLogical02() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "logical02.p"), session);
     unit.parse();
 
@@ -122,7 +121,7 @@ public class ParserTest {
   }
 
   @Test
-  public void testGetCodepage() throws ANTLRException {
+  public void testGetCodepage() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "getcodepage.p"), session);
     unit.parse();
 
@@ -138,7 +137,7 @@ public class ParserTest {
   }
 
   @Test
-  public void testConnectDatabase() throws ANTLRException {
+  public void testConnectDatabase() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("connect database dialog box".getBytes()), "<unnamed>", session);
     unit.parse();
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CONNECT).size(), 1);
@@ -148,7 +147,7 @@ public class ParserTest {
    * TODO Yes, should probably move to TreeParserTest.  
    */
   @Test
-  public void tesTTIndex01() throws ANTLRException {
+  public void tesTTIndex01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ttindex01.p"), session);
     unit.treeParser01();
 

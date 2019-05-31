@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols.widgets;
 
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.FieldContainer;
@@ -40,7 +40,7 @@ public class Frame extends FieldContainer {
    */
   @Override
   public int getProgressType() {
-    return ProParserTokenTypes.FRAME;
+    return Proparse.FRAME;
   }
 
   /**

@@ -19,6 +19,7 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.IntervalSet;
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.ProToken;
 
 /**
  * As tokens are manually generated in Proparse, method {@link DefaultErrorStrategy#getMissingSymbol} fails with
@@ -47,9 +48,7 @@ public class ProparseErrorStrategy extends DefaultErrorStrategy {
       current = lookback;
     }
 
-    ProToken tok = new ProToken(ABLNodeType.getNodeType(expectedTokenType), tokenText);
-    tok.setLine(current.getLine());
-    tok.setCharPositionInLine(current.getCharPositionInLine());
-    return tok;
+    return new ProToken.Builder(ABLNodeType.getNodeType(expectedTokenType), tokenText).setLine(
+        current.getLine()).setCharPositionInLine(current.getCharPositionInLine()).build();
   }
 }

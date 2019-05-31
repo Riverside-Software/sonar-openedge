@@ -49,12 +49,27 @@ public class TableWrapperTest {
     Assert.assertNotNull(tbl1);
     ITable tbl2 = sch.lookupTable("custome");
     Assert.assertNotNull(tbl2);
+    ITable tbl3 = sch.lookupTable("bin");
+    Assert.assertNotNull(tbl3);
+    IField fld4 = tbl3.lookupField("binnum");
+    Assert.assertNotNull(fld4);
+    Assert.assertEquals(fld4.getName(), "BinNum");
+    IField fld5 = tbl3.lookupField("binnu");
+    Assert.assertNotNull(fld5);
+    Assert.assertEquals(fld5.getName(), "BinNum");
+    IField fld6 = tbl3.lookupField("binna");
+    Assert.assertNotNull(fld6);
+    Assert.assertEquals(fld6.getName(), "BinName");
+    // TODO Ambiguous field, should return null
+    // IField fld7 = tbl3.lookupField("binn");
+    // Assert.assertNull(fld7);
   }
 
   @Test
   public void testFromDotDF() throws IOException {
     DatabaseDescription dbDesc = DumpFileUtils.getDatabaseDescription(new File("src/test/resources/project1/src/schema/sp2k.df"));
     Schema sch = new Schema(new DatabaseWrapper(dbDesc));
+
     IField fld1 = sch.lookupUnqualifiedField("minqty");
     Assert.assertNotNull(fld1);
     IField fld2 = sch.lookupUnqualifiedField("minqt");
@@ -67,6 +82,20 @@ public class TableWrapperTest {
     Assert.assertNotNull(tbl1);
     ITable tbl2 = sch.lookupTable("custome");
     Assert.assertNotNull(tbl2);
+    ITable tbl3 = sch.lookupTable("bin");
+    Assert.assertNotNull(tbl3);
+    IField fld4 = tbl3.lookupField("binnum");
+    Assert.assertNotNull(fld4);
+    Assert.assertEquals(fld4.getName(), "BinNum");
+    IField fld5 = tbl3.lookupField("binnu");
+    Assert.assertNotNull(fld5);
+    Assert.assertEquals(fld5.getName(), "BinNum");
+    IField fld6 = tbl3.lookupField("binna");
+    Assert.assertNotNull(fld6);
+    Assert.assertEquals(fld6.getName(), "BinName");
+    // TODO Ambiguous field, should return null
+    // IField fld7 = tbl3.lookupField("binn");
+    // Assert.assertNull(fld7);
   }
 
 }

@@ -88,9 +88,13 @@ public class ClassFinder {
   }
 
   /**
-   * Lookup a qualified class name on the USING list and/or PROPATH. - If input name is already qualified, just returns
-   * that name dequoted. - Checks for explicit USING. - Checks for USING globs on PROPATH. - Checks for "no package"
-   * class file on PROPATH. - Returns empty String if all of the above fail.
+   * Lookup a qualified class name on the USING list and/or PROPATH:<ul>
+   * <li>If input name is already qualified, just returns that name dequoted</li>
+   * <li>Checks for explicit USING</li>
+   * <li>Checks for USING globs on PROPATH</li>
+   * <li>Checks for "no package" class file on PROPATH</li>
+   * <li>Returns empty String if all of the above fail</li>
+   * </ul>
    */
   String lookup(String rawRefName) {
     LOGGER.trace("Entering lookup {}", rawRefName);
@@ -105,6 +109,12 @@ public class ClassFinder {
     if (ret != null)
       return ret;
 
+    // Check USING package globs and classes injected in RefactorSession
+    for (String path : paths) {
+      if (session.getTypeInfo(path.replace('/', '.') + dequotedName) != null)
+        return path.replace('/', '.') + dequotedName;
+    }
+
     // Check USING package globs and files on the PROPATH.
     String withExtension = dequotedName + ".cls";
     for (String path : paths) {
@@ -116,7 +126,9 @@ public class ClassFinder {
       }
     }
 
-    // The last chance is for a "no package" name on the path.
+    // The last chance is for a "no package" name in RefactorSession and on the path
+    if (session.getTypeInfo(dequotedName) != null)
+      return dequotedName;
     if (session.findFile(dequotedName + ".cls").length() > 0) {
       namesMap.put(dequotedName.toLowerCase(), dequotedName);
       return dequotedName;
@@ -124,16 +136,6 @@ public class ClassFinder {
 
     // No class source was found, return empty String.
     return "";
-  }
-
-  // TEMP-ANTLR4
-  public int compareTo(ClassFinder other) {
-    if (!String.join(",", paths).equals(String.join(",", other.paths))) {
-      System.err.println("ClassFinder paths: " + String.join(",", paths) + " *** " + String.join(",", other.paths));
-      return 1;
-    }
-
-    return 0;
   }
 
 }

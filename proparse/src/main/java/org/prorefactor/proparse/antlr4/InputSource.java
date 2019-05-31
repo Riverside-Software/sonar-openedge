@@ -175,6 +175,10 @@ public class InputSource {
     this.nextLine = nextLine;
   }
 
+  public String getContent() {
+    return fileContent;
+  }
+
   /**
    * XCode'd files start with byte 0x11 or 0x13
    */

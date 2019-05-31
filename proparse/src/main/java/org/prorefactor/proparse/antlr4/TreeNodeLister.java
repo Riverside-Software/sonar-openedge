@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
+import org.prorefactor.core.JPNode;
 import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.SymbolScope;
 import org.slf4j.Logger;

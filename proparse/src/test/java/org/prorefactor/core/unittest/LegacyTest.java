@@ -30,8 +30,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import antlr.ANTLRException;
-
 /**
  * Test the tree parsers against problematic syntax. These tests just run the tree parsers against the data/bugsfixed
  * directory. If no exceptions are thrown, then the tests pass. The files in the "bugsfixed" directories are subject to
@@ -52,7 +50,7 @@ public class LegacyTest {
   }
 
   @Test
-  public void testAppendProgram() throws ANTLRException {
+  public void testAppendProgram() {
       ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/appendprogram/t01/test/t01.p"), session);
       pu1.treeParser01();
       assertNotNull(pu1.getTopNode());
@@ -67,7 +65,7 @@ public class LegacyTest {
   }
 
   @Test
-  public void testBubbleProgram01() throws ANTLRException {
+  public void testBubbleProgram01() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/test/bubbledecs.p"), session);
     pu1.treeParser01();
     assertNotNull(pu1.getTopNode());
@@ -82,7 +80,7 @@ public class LegacyTest {
   }
 
   @Test
-  public void testBubbleProgram02() throws ANTLRException {
+  public void testBubbleProgram02() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/test2/bubb2.p"), session);
     pu1.treeParser01();
     assertNotNull(pu1.getTopNode());
@@ -91,7 +89,7 @@ public class LegacyTest {
   }
 
   @Test
-  public void testBubbleProgram03() throws ANTLRException {
+  public void testBubbleProgram03() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/x03_test/x03.p"), session);
     pu1.treeParser01();
     assertNotNull(pu1.getTopNode());
@@ -100,7 +98,7 @@ public class LegacyTest {
   }
 
   @Test
-  public void testBubbleProgram04() throws ANTLRException {
+  public void testBubbleProgram04() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/x04/test/x04.p"), session);
     pu1.treeParser01();
     assertNotNull(pu1.getTopNode());
@@ -109,7 +107,7 @@ public class LegacyTest {
   }
 
   @Test
-  public void testBubbleProgram05() throws ANTLRException {
+  public void testBubbleProgram05() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/x05/test/x05.p"), session);
     pu1.treeParser01();
     assertNotNull(pu1.getTopNode());
@@ -118,7 +116,7 @@ public class LegacyTest {
   }
 
   @Test
-  public void testExtractMethod() throws ANTLRException {
+  public void testExtractMethod() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/extractmethod/t01/test/t01a.p"), session);
     pu1.treeParser01();
     assertNotNull(pu1.getTopNode());
@@ -127,7 +125,7 @@ public class LegacyTest {
   }
 
   @Test
-  public void testNames() throws ANTLRException {
+  public void testNames() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/names/billto.p"), session);
     pu1.treeParser01();
     assertNotNull(pu1.getTopNode());
@@ -146,7 +144,7 @@ public class LegacyTest {
   }
 
   @Test
-  public void testQualifyFields() throws ANTLRException {
+  public void testQualifyFields() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/qualifyfields/t01/test/t01a.p"), session);
     ParseUnit pu2 = new ParseUnit(new File("src/test/resources/legacy/qualifyfields/t01/test/t01b.p"), session);
     ParseUnit pu3 = new ParseUnit(new File("src/test/resources/legacy/qualifyfields/t01/test/t01c.p"), session);
@@ -171,21 +169,21 @@ public class LegacyTest {
   }
 
   @Test
-  public void testAmbiguous() throws ANTLRException {
+  public void testAmbiguous() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/Sports2000/Customer/Name.cls"), session);
     pu1.treeParser01();
     // TODO Add assertions
   }
 
   @Test
-  public void testWrapProcedure() throws ANTLRException {
+  public void testWrapProcedure() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/wrapprocedure/t01/test/t01.p"), session);
     pu1.treeParser01();
     // TODO Add assertions
   }
 
   @Test
-  public void testBaseDir() throws ANTLRException {
+  public void testBaseDir() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/c-win.w"), session);
     ParseUnit pu3 = new ParseUnit(new File("src/test/resources/legacy/empty.p"), session);
     ParseUnit pu4 = new ParseUnit(new File("src/test/resources/legacy/hello2.p"), session);

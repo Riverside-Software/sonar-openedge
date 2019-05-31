@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
 import org.prorefactor.treeparser.symbols.Query;
@@ -48,7 +48,6 @@ public class TreeParserSymbolScope {
   protected final TreeParserSymbolScope parentScope;
 
   protected List<Symbol> allSymbols = new ArrayList<>();
-  protected List<Call> callList = new ArrayList<>();
   protected List<TreeParserSymbolScope> childScopes = new ArrayList<>();
   protected Block rootBlock;
   protected Routine routine;
@@ -71,7 +70,7 @@ public class TreeParserSymbolScope {
   @SuppressWarnings({"unchecked", "rawtypes"})
   private TreeParserSymbolScope(TreeParserSymbolScope parentScope) {
     this.parentScope = parentScope;
-    typeMap.put(ProParserTokenTypes.VARIABLE, Collections.checkedMap((Map) variableMap, String.class, Symbol.class));
+    typeMap.put(Proparse.VARIABLE, Collections.checkedMap((Map) variableMap, String.class, Symbol.class));
   }
 
   /** Add a FieldLevelWidget for names lookup. */
@@ -121,8 +120,9 @@ public class TreeParserSymbolScope {
         unnamedBuffers.put(table, buffer);
       else // default buffers for temp/work tables go into the "named" buffer map
         bufferMap.put(table.getName().toLowerCase(), buffer);
-    } else
+    } else {
       bufferMap.put(name.toLowerCase(), buffer);
+    }
   }
 
   /** Add a Symbol for names lookup. */
@@ -167,7 +167,8 @@ public class TreeParserSymbolScope {
    */
   public TableBuffer defineBuffer(String name, ITable table) {
     TableBuffer buffer = new TableBuffer(name, this, table);
-    addTableBuffer(name, table, buffer);
+    if (table != null)
+      addTableBuffer(name, table, buffer);
     return buffer;
   }
 
@@ -239,10 +240,6 @@ public class TreeParserSymbolScope {
     return getUnnamedBuffer(table);
   }
 
-  public List<Call> getCallList() {
-    return callList;
-  }
-
   /** Get a *copy* of the list of child scopes */
   public List<TreeParserSymbolScope> getChildScopes() {
     return new ArrayList<>(childScopes);
@@ -276,7 +273,6 @@ public class TreeParserSymbolScope {
 
   /** Get or create the unnamed buffer for a schema table. */
   public TableBuffer getUnnamedBuffer(ITable table) {
-    assert table.getStoretype() == IConstants.ST_DBTABLE;
     // Check this and parents for the unnamed buffer. Table triggers
     // can scope an unnamed buffer - that's why we don't go straight to
     // the root scope.
@@ -358,11 +354,11 @@ public class TreeParserSymbolScope {
   }
 
   public Dataset lookupDataset(String name) {
-    return (Dataset) lookupSymbolLocally(ProParserTokenTypes.DATASET, name);
+    return (Dataset) lookupSymbolLocally(Proparse.DATASET, name);
   }
 
   public Datasource lookupDatasource(String name) {
-    return (Datasource) lookupSymbolLocally(ProParserTokenTypes.DATASOURCE, name);
+    return (Datasource) lookupSymbolLocally(Proparse.DATASOURCE, name);
   }
 
   /** Lookup a FieldLevelWidget in this scope or an enclosing scope. */
@@ -374,7 +370,7 @@ public class TreeParserSymbolScope {
   }
 
   public Query lookupQuery(String name) {
-    return (Query) lookupSymbolLocally(ProParserTokenTypes.QUERY, name);
+    return (Query) lookupSymbolLocally(Proparse.QUERY, name);
   }
 
   public Routine lookupRoutine(String name) {
@@ -382,7 +378,7 @@ public class TreeParserSymbolScope {
   }
 
   public Stream lookupStream(String name) {
-    return (Stream) lookupSymbolLocally(ProParserTokenTypes.STREAM, name);
+    return (Stream) lookupSymbolLocally(Proparse.STREAM, name);
   }
 
   public Symbol lookupSymbol(Integer symbolType, String name) {
@@ -451,10 +447,6 @@ public class TreeParserSymbolScope {
     if (ret == null && parentScope != null)
       return parentScope.lookupWidget(widgetType, name);
     return ret;
-  }
-
-  public void registerCall(Call call) {
-    callList.add(call);
   }
 
   public void setRootBlock(Block block) {

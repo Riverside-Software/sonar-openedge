@@ -1,0 +1,3 @@
+
+&UNDEFINE FOO
+

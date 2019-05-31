@@ -17,10 +17,4 @@ package org.prorefactor.treeparser.symbols;
 
 public interface IWidget extends ISymbol {
 
-  /**
-   * For this subclass of Symbol, fullName() returns the same value as getName()
-   */
-  @Override
-  String fullName();
-
 }

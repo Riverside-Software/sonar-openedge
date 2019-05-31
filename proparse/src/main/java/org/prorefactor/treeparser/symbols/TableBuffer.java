@@ -22,7 +22,7 @@ import java.util.Map;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.proparse.ProParserTokenTypes;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
@@ -72,7 +72,7 @@ public class TableBuffer extends Symbol {
    */
   @Override
   public int getProgressType() {
-    return ProParserTokenTypes.BUFFER;
+    return Proparse.BUFFER;
   }
 
   /** Get or create a FieldBuffer for a Field. */
