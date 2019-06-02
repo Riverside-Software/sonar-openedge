@@ -159,7 +159,7 @@ public class ProToken implements Token {
    * TODO Can probably be removed in the future
    *
    * @return True if last character of token was generated from a macro expansion, i.e. {&amp;SOMETHING}. This doesn't
-   *         mean that all characters were generated from a macro, e.g. {&prefix}VarName will return false
+   *         mean that all characters were generated from a macro, e.g. {&amp;prefix}VarName will return false
    */
   public boolean isMacroExpansion() {
     return macroExpansion;
