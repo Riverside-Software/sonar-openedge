@@ -150,6 +150,15 @@ public class ParserTest {
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
   }
 
+  @Test
+  public void testParameterLike() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define input parameter ipPrm no-undo like customer.custnum.".getBytes()), "<unnamed>", session);
+    unit.parse();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
+    JPNode node = unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0);
+    assertEquals(node.query(ABLNodeType.NOUNDO).size(), 1);
+  }
+
   /**
    * TODO Yes, should probably move to TreeParserTest.  
    */
