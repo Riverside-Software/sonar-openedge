@@ -1942,13 +1942,13 @@ defineParameterStatementSub2:
   ;
 
 defineParamVar:
-    // See PSC's <varprm> rule.
     ( AS HANDLE TO? datatypeDll | AS CLASS typeName | AS datatypeParam )
     ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase2 )*
   ;
 
 defineParamVarLike:
-    // See PSC's <varprm> rule.
+    // 'LIKE field' can only be provided once, but other options can appear anywhere
+    ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase )*
     LIKE field
     ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase )*
   ;
