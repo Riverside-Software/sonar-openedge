@@ -151,6 +151,13 @@ public class ParserTest {
   }
 
   @Test
+  public void testInputFunction() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "inputfunc.p"), session);
+    unit.parse();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.ON).size(), 1);
+  }
+
+  @Test
   public void testParameterLike() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define input parameter ipPrm no-undo like customer.custnum.".getBytes()), "<unnamed>", session);
     unit.parse();
