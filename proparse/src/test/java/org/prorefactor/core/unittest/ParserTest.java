@@ -121,6 +121,15 @@ public class ParserTest {
   }
 
   @Test
+  public void testObjectInDynamicFunction() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "objindynfunc.p"), session);
+    unit.parse();
+
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+  }
+
+
+  @Test
   public void testGetCodepage() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "getcodepage.p"), session);
     unit.parse();
