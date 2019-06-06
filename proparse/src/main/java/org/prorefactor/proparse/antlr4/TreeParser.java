@@ -140,8 +140,8 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterProgram(ProgramContext ctx) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> Entering program", indent());
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Entering program", indent());
 
     if (rootRoutine != null) {
       // Executing TreeParser more than once on a ParseTree would just result in meaningless result
@@ -165,8 +165,8 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void exitProgram(ProgramContext ctx) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> Exiting program", indent());
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Exiting program", indent());
   }
 
   @Override
@@ -179,8 +179,8 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void exitBlockFor(BlockForContext ctx) {
     for (RecordContext record : ctx.record()) {
-      if (LOG.isDebugEnabled())
-        LOG.debug("{}> Adding strong buffer scope for {} to current block", indent(), record.getText());
+      if (LOG.isTraceEnabled())
+        LOG.trace("{}> Adding strong buffer scope for {} to current block", indent(), record.getText());
 
       RecordNameNode recNode = (RecordNameNode) support.getNode(record);
       currentBlock.addStrongBufferScope(recNode);
@@ -1582,8 +1582,8 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterFunctionStatement(FunctionStatementContext ctx) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> New function definition '{}'", indent(), ctx.id.getText());
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> New function definition '{}'", indent(), ctx.id.getText());
 
     TreeParserSymbolScope definingScope = currentScope;
     BlockNode blockNode = (BlockNode) support.getNode(ctx);
@@ -1602,18 +1602,18 @@ public class TreeParser extends ProparseBaseListener {
     currentRoutine = r;
 
     if (ctx.FORWARDS() != null) {
-      if (LOG.isDebugEnabled())
-        LOG.debug("{}> FORWARDS definition", indent());
+      if (LOG.isTraceEnabled())
+        LOG.trace("{}> FORWARDS definition", indent());
       funcForwards.put(ctx.id.getText(), currentScope);
     } else if ((ctx.functionParams() == null)
         || (ctx.functionParams().getChildCount() == 2 /* LEFTPAREN RIGHTPAREN */)) {
-      if (LOG.isDebugEnabled())
-        LOG.debug("{}> No parameter, trying to find them in FORWARDS declaration", indent());
+      if (LOG.isTraceEnabled())
+        LOG.trace("{}> No parameter, trying to find them in FORWARDS declaration", indent());
       // No parameter defined, then we inherit from FORWARDS declaration (if available)
       TreeParserSymbolScope forwardScope = funcForwards.get(ctx.id.getText());
       if (forwardScope != null) {
-        if (LOG.isDebugEnabled())
-          LOG.debug("{}> Inherits from FORWARDS definition", indent());
+        if (LOG.isTraceEnabled())
+          LOG.trace("{}> Inherits from FORWARDS definition", indent());
         Routine r2 = forwardScope.getRoutine();
         scopeSwap(forwardScope);
         blockNode.setBlock(currentBlock);
@@ -2144,30 +2144,30 @@ public class TreeParser extends ProparseBaseListener {
 
   /** Called at the *end* of the statement that defines the symbol. */
   private void addToSymbolScope(Symbol symbol) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> Adding symbol '{}' to current scope", indent(), symbol);
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Adding symbol '{}' to current scope", indent(), symbol);
     if (inDefineEvent)
       return;
     currentScope.add(symbol);
   }
 
   private Block pushBlock(Block block) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> Pushing block '{}' to stack", indent(), block);
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Pushing block '{}' to stack", indent(), block);
     blockStack.add(block);
     return block;
   }
 
   private Block popBlock() {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> Popping block from stack", indent());
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Popping block from stack", indent());
     blockStack.remove(blockStack.size() - 1);
     return blockStack.get(blockStack.size() - 1);
   }
 
   private void recordNameNode(RecordNameNode recordNode, ContextQualifier contextQualifier) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("Entering recordNameNode {} {}", recordNode, contextQualifier);
+    if (LOG.isTraceEnabled())
+      LOG.trace("Entering recordNameNode {} {}", recordNode, contextQualifier);
 
     recordNode.attrSet(IConstants.CONTEXT_QUALIFIER, contextQualifier.toString());
     TableBuffer buffer = null;
@@ -2216,8 +2216,8 @@ public class TreeParser extends ProparseBaseListener {
 
   /** For a RECORD_NAME node, do checks and assignments for the TableBuffer. */
   private void recordNodeSymbol(RecordNameNode node, TableBuffer buffer) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("Entering recordNodeSymbol {} {}", node, buffer);
+    if (LOG.isTraceEnabled())
+      LOG.trace("Entering recordNodeSymbol {} {}", node, buffer);
 
     String nodeText = node.getText();
     if (buffer == null) {
@@ -2241,22 +2241,22 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   private void blockBegin(ParseTree ctx) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> Creating new block", indent());
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Creating new block", indent());
     BlockNode blockNode = (BlockNode) support.getNode(ctx);
     currentBlock = pushBlock(new Block(currentBlock, blockNode));
     blockNode.setBlock(currentBlock);
   }
 
   private void blockEnd() {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> End of block", indent());
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> End of block", indent());
     currentBlock = popBlock();
   }
 
   private void scopeAdd(JPNode anode) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> Creating new scope for block {}", indent(), anode.getNodeType());
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Creating new scope for block {}", indent(), anode.getNodeType());
 
     BlockNode blockNode = (BlockNode) anode;
     currentScope = currentScope.addScope();
@@ -2266,8 +2266,8 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   private void scopeClose() {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> End of scope", indent());
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> End of scope", indent());
 
     currentScope = currentScope.getParentScope();
     blockEnd();
@@ -2280,8 +2280,8 @@ public class TreeParser extends ProparseBaseListener {
    * required - it just uses the parameter list from the declaration.
    */
   private void scopeSwap(TreeParserSymbolScope scope) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> Swapping scope...", indent());
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Swapping scope...", indent());
 
     currentScope = scope;
     blockEnd(); // pop the unused block from the stack
@@ -2312,15 +2312,15 @@ public class TreeParser extends ProparseBaseListener {
 
   private Variable defineVariable(ParseTree ctx, JPNode defAST, String name, DataType dataType, boolean parameter) {
     Variable v = defineVariable(ctx, defAST, name, parameter);
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> Adding datatype {}", indent(), dataType);
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Adding datatype {}", indent(), dataType);
     v.setDataType(dataType);
     return v;
   }
 
   private Variable defineVariable(ParseTree ctx, JPNode defNode, String name, boolean parameter) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> New variable {} (parameter: {})", indent(), name, parameter);
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> New variable {} (parameter: {})", indent(), name, parameter);
 
     // We need to create the Variable Symbol right away, because further actions in the grammar might need to set
     // attributes on it. We can't add it to the scope yet, because of statements like this: def var xyz like xyz.
@@ -2339,8 +2339,8 @@ public class TreeParser extends ProparseBaseListener {
 
   /** The tree parser calls this at an AS node */
   public void defAs(ParserRuleContext ctx) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> Variable AS '{}'", indent(), ctx.getText());
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Variable AS '{}'", indent(), ctx.getText());
 
     Primative primative = (Primative) currSymbol;
     if ((ctx.getStart().getType() == ABLNodeType.CLASS.getType())
@@ -2353,8 +2353,8 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   public void defExtent(String text) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> Variable extent '{}'", indent(), text);
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Variable extent '{}'", indent(), text);
 
     Primative primative = (Primative) currSymbol;
     if (primative == null)
@@ -2378,8 +2378,8 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   public Symbol defineSymbol(ABLNodeType symbolType, JPNode defNode, JPNode idNode, String name) {
-    if (LOG.isDebugEnabled())
-      LOG.debug("{}> Entering defineSymbol {} - {}", indent(), symbolType, defNode);
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Entering defineSymbol {} - {}", indent(), symbolType, defNode);
     /*
      * Some notes: We need to create the Symbol right away, because further actions in the grammar might need to set
      * attributes on it. We can't add it to the scope yet, because of statements like this: def var xyz like xyz. The
@@ -2473,7 +2473,7 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   private void defineTable(JPNode defNode, JPNode idNode, String name, int storeType) {
-    if (LOG.isDebugEnabled())
+    if (LOG.isTraceEnabled())
       LOG.trace("{}> Table definition {} {}", indent(), defNode, storeType);
 
     TableBuffer buffer = rootScope.defineTable(name, storeType);
@@ -2487,7 +2487,7 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   private void postDefineTempTable() {
-    if (LOG.isDebugEnabled())
+    if (LOG.isTraceEnabled())
       LOG.trace("{}> End of table definition", indent());
 
     // In case of DEFINE TT LIKE, indexes are copied only if USE-INDEX and INDEX are never used
