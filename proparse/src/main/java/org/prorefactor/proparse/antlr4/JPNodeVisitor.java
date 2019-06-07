@@ -1706,6 +1706,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitFunctionParamStandardLike(FunctionParamStandardLikeContext ctx) {
+    return visitChildren(ctx).setRuleNode(ctx);
+  }
+
+  @Override
   public Builder visitFunctionParamStandardTableHandle(FunctionParamStandardTableHandleContext ctx) {
     return visitChildren(ctx).setRuleNode(ctx);
   }

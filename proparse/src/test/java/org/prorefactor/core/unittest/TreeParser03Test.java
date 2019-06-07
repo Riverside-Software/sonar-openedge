@@ -28,8 +28,10 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.DataType;
+import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.Routine;
+import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -195,6 +197,25 @@ public class TreeParser03Test {
     assertNotNull(unit.getRootScope());
     Variable xxx = unit.getRootScope().getVariable("xxx");
     assertNotNull(xxx);
+  }
+
+  @Test
+  public void test11() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test11.cls"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    Routine r1 = unit.getRootScope().getRoutineMap().get("foo1");
+    assertNotNull(r1);
+    assertEquals(r1.getParameters().size(), 1);
+    Parameter p1 = r1.getParameters().get(0);
+    Symbol s1 = p1.getSymbol();
+    assertNotNull(s1);
+    assertEquals(s1.getName(), "ipPrm");
+    assertTrue(s1 instanceof Variable);
+    assertEquals(((Variable) s1).getDataType(), DataType.INTEGER);
+    assertNotNull(s1.getDefineNode());
   }
 
   @Test
