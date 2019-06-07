@@ -4477,6 +4477,7 @@ unreservedkeyword:
  | TOP
  | TOPIC
  | TOPNAVQUERY
+ | TOROWID
  | TOTAL
  | TRAILING
  | TRANSACTIONMODE

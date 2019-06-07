@@ -143,6 +143,13 @@ public class ParserTest {
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CONNECT).size(), 1);
   }
 
+  @Test
+  public void testReservedKeyword() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define temp-table xxx field to-rowid as character.".getBytes()), "<unnamed>", session);
+    unit.parse();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
+  }
+
   /**
    * TODO Yes, should probably move to TreeParserTest.  
    */
