@@ -169,6 +169,32 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     wrapper = new FunctionKeywordTokenFilter(filter2);
   }
 
+  /**
+   * Test-only constructor, no token filters added
+   */
+  protected ProgressLexer(RefactorSession session, ByteSource src, String fileName) {
+    LOGGER.trace("New ProgressLexer instance {}", fileName);
+    this.filenameList = new IntegerIndex<>();
+    this.ppSettings = session.getProparseSettings();
+    this.session = session;
+    this.lexOnly = false;
+
+    // Create input source with flag isPrimaryInput=true
+    try {
+      currentInput = new InputSource(++sourceCounter, fileName, src, session.getCharset(), currFile, true, true);
+    } catch (IOException caught) {
+      throw new UncheckedIOException(caught);
+    }
+    currFile = addFilename(fileName);
+    currentInclude = new IncludeFile(fileName, currentInput);
+    includeVector.add(currentInclude);
+    currSourceNum = currentInput.getSourceNum();
+    lstListener = new PreprocessorEventListener();
+    
+    lexer = new Lexer(this);
+    wrapper = new NoOpPostLexer(lexer);
+  }
+
   public String getMainFileName() {
     return filenameList.getValue(0);
   }
@@ -188,6 +214,11 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   // **********************
   // TokenSource interface
   // **********************
+
+  // Only exposed to unit test classes
+  protected TokenSource getTokenSource() {
+    return wrapper;
+  }
 
   @Override
   public Token nextToken() {
