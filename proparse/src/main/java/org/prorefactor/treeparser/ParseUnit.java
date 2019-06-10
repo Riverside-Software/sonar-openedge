@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -30,6 +31,7 @@ import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.atn.DecisionInfo;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -185,6 +187,7 @@ public class ParseUnit {
     parser.setErrorHandler(new BailErrorStrategy());
     parser.removeErrorListeners();
     parser.addErrorListener(new DescriptiveErrorListener());
+    parser.setProfile(true);
 
     try {
       tree = parser.program();
@@ -193,6 +196,14 @@ public class ParseUnit {
       parser.getInterpreter().setPredictionMode(PredictionMode.LL);
       tree = parser.program();
     }
+
+    Arrays.stream(parser.getParseInfo().getDecisionInfo()).filter(decision -> decision.SLL_MaxLook > 0).sorted(
+        (d1, d2) -> Long.compare(d2.SLL_MaxLook, d1.SLL_MaxLook)).forEach(
+            decision -> System.out.println(String.format(
+                "Time: %d in %d calls - LL_Lookaheads: %d Max k: %d Ambiguities: %d Errors: %d Rule: %s",
+                decision.timeInPrediction / 1000000, decision.invocations, decision.SLL_TotalLook,
+                decision.SLL_MaxLook, decision.ambiguities.size(), decision.errors.size(),
+                Proparse.ruleNames[Proparse._ATN.getDecisionState(decision.decision).ruleIndex])));
 
     topNode = (ProgramRootNode) new JPNodeVisitor(parser.getParserSupport(),
         (BufferedTokenStream) parser.getInputStream()).visit(tree).build(parser.getParserSupport());
