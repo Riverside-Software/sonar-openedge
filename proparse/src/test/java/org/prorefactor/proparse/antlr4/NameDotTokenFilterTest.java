@@ -182,9 +182,15 @@ public class NameDotTokenFilterTest {
     assertNotNull(tok);
     assertEquals(tok.getNodeType(), ABLNodeType.ANNOTATION);
     assertEquals(tok.getText(), "@Riverside.Lang.Object");
-    tok = (ProToken) lexer.nextToken();
+    tok = (ProToken) filter.nextToken();
     assertNotNull(tok);
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+    tok = (ProToken) filter.nextToken();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) filter.nextToken();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
   }
 
   @Test
@@ -196,7 +202,7 @@ public class NameDotTokenFilterTest {
     assertNotNull(tok);
     assertEquals(tok.getNodeType(), ABLNodeType.ANNOTATION);
     assertEquals(tok.getText(), "@Riverside.20190101.Object");
-    tok = (ProToken) lexer.nextToken();
+    tok = (ProToken) filter.nextToken();
     assertNotNull(tok);
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
   }
