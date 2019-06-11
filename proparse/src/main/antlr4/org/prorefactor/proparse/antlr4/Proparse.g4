@@ -933,12 +933,12 @@ filenamePart:
   ;
 
 typeName:
-    t1=nonPunctuating ( { ( _input.LA(1) != Token.EOF) && !support.hasHiddenBefore(_input) }? t2=nonPunctuating )*
+    nonPunctuating
   ;
 
-// Different action in the visitor (no class lookup in type_name2)
+// Different action in the visitor (no class lookup in typeName2)
 typeName2:
-    t1=nonPunctuating ( { ( _input.LA(1) != Token.EOF) && !support.hasHiddenBefore(_input) }? t2=nonPunctuating )*
+    nonPunctuating
   ;
 
 constant:
