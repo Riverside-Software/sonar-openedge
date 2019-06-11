@@ -1,6 +1,6 @@
 using Progress.Lang.*.
 
-class pkgname.test01 inherits pkgname.2018010.clzName:
+class pkgname.test01 inherits pkgname.2018010.clzName implements pkgname.2018010.clzName, pkgname.2018010.clzName :
 
   method public void method1():
     message "xxxx".
