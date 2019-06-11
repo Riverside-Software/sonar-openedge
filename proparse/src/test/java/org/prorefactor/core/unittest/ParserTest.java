@@ -159,6 +159,20 @@ public class ParserTest {
     assertEquals(node.query(ABLNodeType.NOUNDO).size(), 1);
   }
 
+  @Test
+  public void testAnnotation01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("@Progress.Lang.Annotation. MESSAGE 'Hello1'. MESSAGE 'Hello2'.".getBytes()), "<unnamed>", session);
+    unit.parse();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
+  }
+
+  @Test
+  public void testAnnotation02() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("@Progress.Lang.Annotation(foo='bar'). MESSAGE 'Hello1'. MESSAGE 'Hello2'.".getBytes()), "<unnamed>", session);
+    unit.parse();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
+  }
+
   /**
    * TODO Yes, should probably move to TreeParserTest.  
    */
