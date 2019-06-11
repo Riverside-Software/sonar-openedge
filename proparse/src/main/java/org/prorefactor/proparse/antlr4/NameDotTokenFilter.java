@@ -67,6 +67,8 @@ public class NameDotTokenFilter implements TokenSource {
     } else if ((prev.getNodeType() == ABLNodeType.ID) || prev.getNodeType().isKeyword() || (prev.getNodeType() == ABLNodeType.ANNOTATION)) {
       // Merge both tokens in first one
       ProToken.Builder builder = new ProToken.Builder(prev).mergeWith(nameDot);
+      if (prev.getNodeType() != ABLNodeType.ANNOTATION)
+        builder.setType(ABLNodeType.ID);
       queue.offer(builder.build());
     } else {
       // Anything else, we just put tokens back in the queue
@@ -93,10 +95,14 @@ public class NameDotTokenFilter implements TokenSource {
         }
         // Then we merge everything in first token
         ProToken.Builder builder = new ProToken.Builder(prev).mergeWith(nameDot).mergeWith(nxt);
+        if (prev.getNodeType() != ABLNodeType.ANNOTATION)
+          builder.setType(ABLNodeType.ID);
         queue.offer(builder.build());
       } else {
         // Merge everything in first token
         ProToken.Builder builder = new ProToken.Builder(prev).mergeWith(nameDot).mergeWith(nxt);
+        if (prev.getNodeType() != ABLNodeType.ANNOTATION)
+          builder.setType(ABLNodeType.ID);
         queue.offer(builder.build());
       }
     } else {

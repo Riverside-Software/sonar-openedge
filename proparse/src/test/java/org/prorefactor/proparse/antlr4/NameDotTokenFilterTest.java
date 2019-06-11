@@ -115,9 +115,9 @@ public class NameDotTokenFilterTest {
     assertNotNull(tok);
     assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) filter.nextToken();
+    // Changed from ABLNodeType.PROGRESS to ABLNodeType.ID
     assertNotNull(tok);
-    // FIXME
-    assertEquals(tok.getNodeType(), ABLNodeType.PROGRESS);
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
     assertEquals(tok.getText(), "Progress.Lang.Object");
     tok = (ProToken) filter.nextToken();
     assertNotNull(tok);
