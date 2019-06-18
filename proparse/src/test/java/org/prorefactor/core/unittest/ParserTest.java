@@ -120,6 +120,16 @@ public class ParserTest {
     assertEquals(stmts.get(0).query(ABLNodeType.LOGICAL).size(), 0);
   }
 
+  @Test(enabled = false)
+  public void testObjectInDynamicFunction() {
+    // Issue https://github.com/Riverside-Software/sonar-openedge/issues/673
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "objindynfunc.cls"), session);
+    unit.parse();
+
+    assertEquals(unit.getTopNode().query(ABLNodeType.DYNAMICFUNCTION).size(), 3);
+  }
+
+
   @Test
   public void testGetCodepage() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "getcodepage.p"), session);
