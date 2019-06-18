@@ -81,7 +81,8 @@ public class FunctionKeywordTokenFilter implements TokenSource {
   }
 
   private void logToken(Token tok) {
-    LOGGER.trace("'{}' -- {}", tok.getText(), ABLNodeType.getNodeType(tok.getType()));
+    if (LOGGER.isTraceEnabled())
+      LOGGER.trace("'{}' -- {}", tok.getText().replace('\n', ' ').replace('\r', ' '), ABLNodeType.getNodeType(tok.getType()));
   }
 
   @Override
