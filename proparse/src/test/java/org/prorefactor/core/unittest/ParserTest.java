@@ -165,6 +165,7 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "inputfunc.p"), session);
     unit.parse();
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.ON).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.IF).get(0).queryStateHead().size(), 2);
   }
 
   @Test
