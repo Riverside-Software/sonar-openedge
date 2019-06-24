@@ -528,11 +528,12 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterWidName(WidNameContext ctx) {
+    // TODO Verify missing cases
     if (ctx.FRAME() != null) {
       frameRef(support.getNode(ctx).nextNode());
     } else if (ctx.BROWSE() != null) {
       browseRef(support.getNode(ctx).nextNode());
-    } else if (ctx.BUFFER() != null) {
+    } else if ((ctx.BUFFER() != null) || (ctx.TEMPTABLE() != null)) {
       bufferRef(ctx.filn().getText());
     } else if (ctx.FIELD() != null) {
       setContextQualifier(ctx.field(), ContextQualifier.REF);
