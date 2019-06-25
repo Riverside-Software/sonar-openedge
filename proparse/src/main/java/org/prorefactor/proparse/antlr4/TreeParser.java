@@ -90,7 +90,7 @@ public class TreeParser extends ProparseBaseListener {
   private Index currDefIndex;
   // LIKE tables management for index copy
   private boolean currDefTableUseIndex = false;
-  private ITable currDefTableLike = null;
+  private TableBuffer currDefTableLike = null;
 
   private boolean formItem2 = false;
 
@@ -2373,6 +2373,7 @@ public class TreeParser extends ProparseBaseListener {
     Primative newPrim = (Primative) currSymbol;
     if (likePrim != null) {
       newPrim.assignAttributesLike(likePrim);
+      currSymbol.setLikeSymbol(likeNode.getSymbol());
     } else {
       LOG.error("Failed to find LIKE datatype at {} line {}", likeNode.getFileIndex(), likeNode.getLine());
     }
@@ -2437,13 +2438,13 @@ public class TreeParser extends ProparseBaseListener {
 
   private void defineTableLike(ParseTree ctx) {
     // Get table for "LIKE table"
-    ITable table = astTableLink(support.getNode(ctx));
-    if (table == null)
-      return;
-    currDefTableLike = table;
-    // For each field in "table", create a field def in currDefTable
-    for (IField field : table.getFieldPosOrder()) {
-      rootScope.defineTableField(field.getName(), currDefTable).assignAttributesLike(field);
+    currDefTableLike = astTableBufferLink(support.getNode(ctx));
+    currDefTable.setLikeSymbol(currDefTableLike);
+    if (currDefTableLike != null) {
+      // For each field in "table", create a field def in currDefTable
+      for (IField field : currDefTableLike.getTable().getFieldPosOrder()) {
+        rootScope.defineTableField(field.getName(), currDefTable).assignAttributesLike(field);
+      }
     }
   }
 
@@ -2494,7 +2495,7 @@ public class TreeParser extends ProparseBaseListener {
     // In case of DEFINE TT LIKE, indexes are copied only if USE-INDEX and INDEX are never used
     if ((currDefTableLike != null) && !currDefTableUseIndex && currDefTable.getTable().getIndexes().isEmpty()) {
       LOG.trace("Copying all indexes from {}", currDefTableLike.getName());
-      for (IIndex idx : currDefTableLike.getIndexes()) {
+      for (IIndex idx : currDefTableLike.getTable().getIndexes()) {
         Index newIdx = new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary());
         for (IField fld : idx.getFields()) {
           IField ifld = newIdx.getTable().lookupField(fld.getName());
@@ -2516,10 +2517,15 @@ public class TreeParser extends ProparseBaseListener {
   /** Get the Table symbol linked from a RECORD_NAME AST. */
   private ITable astTableLink(JPNode tableAST) {
     LOG.trace("Entering astTableLink {}", tableAST);
-    TableBuffer buffer = (TableBuffer) tableAST.getLink(IConstants.SYMBOL);
+    TableBuffer buffer = (TableBuffer) tableAST.getSymbol();
     return buffer == null ? null : buffer.getTable();
   }
 
+  /** Get the TableBuffer symbol linked from a RECORD_NAME AST. */
+  private TableBuffer astTableBufferLink(JPNode tableAST) {
+    return (TableBuffer) tableAST.getSymbol();
+  }
+  
   /**
    * Define a buffer. If the buffer is initialized at the same time it is defined (as in a buffer parameter), then
    * parameter init should be true.
