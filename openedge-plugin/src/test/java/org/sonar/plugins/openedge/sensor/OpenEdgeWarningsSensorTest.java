@@ -22,9 +22,11 @@ package org.sonar.plugins.openedge.sensor;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarQubeSide;
 import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
+import org.sonar.api.batch.rule.internal.NewActiveRule;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.batch.sensor.issue.Issue;
 import org.sonar.api.internal.SonarRuntimeImpl;
@@ -44,7 +46,7 @@ public class OpenEdgeWarningsSensorTest {
   public void testWarnings() throws IOException {
     SensorContextTester context = TestProjectSensorContext.createContext();
     context.setActiveRules(createRules());
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER));
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings);
     sensor.execute(context);
 
@@ -71,8 +73,9 @@ public class OpenEdgeWarningsSensorTest {
   }
 
   private ActiveRules createRules() {
-    return new ActiveRulesBuilder().create(RuleKey.of(Constants.STD_REPOSITORY_KEY,
-        OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY)).activate().build();
+    return new ActiveRulesBuilder().addRule(new NewActiveRule.Builder().setRuleKey(
+        RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY)).setLanguage(
+            Constants.LANGUAGE_KEY).build()).build();
   }
 
 }

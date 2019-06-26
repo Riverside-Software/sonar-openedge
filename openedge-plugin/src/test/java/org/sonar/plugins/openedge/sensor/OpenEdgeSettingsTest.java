@@ -27,6 +27,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 
 import org.prorefactor.refactor.RefactorSession;
+import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarQubeSide;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
@@ -40,7 +41,7 @@ import org.testng.annotations.Test;
 
 public class OpenEdgeSettingsTest {
   private static final Version VERSION = Version.parse("7.5");
-  private static final SonarRuntime SQ_RUNTIME = SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER);
+  private static final SonarRuntime SQ_RUNTIME = SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY);
   private static final SonarRuntime SL_RUNTIME = SonarRuntimeImpl.forSonarLint(VERSION);
 
   @Test

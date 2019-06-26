@@ -20,6 +20,7 @@
 package org.sonar.plugins.openedge;
 
 import org.sonar.api.Plugin;
+import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarQubeSide;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.internal.SonarRuntimeImpl;
@@ -40,7 +41,7 @@ public class OpenEdgePluginTest {
 
   @Test
   public void testExtensionsSonarQube() {
-    SonarRuntime runtime = SonarRuntimeImpl.forSonarQube(Version.parse("6.2"), SonarQubeSide.SCANNER);
+    SonarRuntime runtime = SonarRuntimeImpl.forSonarQube(Version.parse("6.2"), SonarQubeSide.SCANNER, SonarEdition.COMMUNITY);
     Plugin.Context context = new Plugin.Context(runtime);
     new OpenEdgePlugin().define(context);
     assertThat(context.getExtensions()).hasSize(28);
