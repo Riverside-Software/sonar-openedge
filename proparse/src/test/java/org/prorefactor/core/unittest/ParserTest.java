@@ -120,6 +120,16 @@ public class ParserTest {
     assertEquals(stmts.get(0).query(ABLNodeType.LOGICAL).size(), 0);
   }
 
+  @Test(enabled = false)
+  public void testObjectInDynamicFunction() {
+    // Issue https://github.com/Riverside-Software/sonar-openedge/issues/673
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "objindynfunc.cls"), session);
+    unit.parse();
+
+    assertEquals(unit.getTopNode().query(ABLNodeType.DYNAMICFUNCTION).size(), 3);
+  }
+
+
   @Test
   public void testGetCodepage() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "getcodepage.p"), session);
@@ -141,6 +151,44 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("connect database dialog box".getBytes()), "<unnamed>", session);
     unit.parse();
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CONNECT).size(), 1);
+  }
+
+  @Test
+  public void testReservedKeyword() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define temp-table xxx field to-rowid as character.".getBytes()), "<unnamed>", session);
+    unit.parse();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
+  }
+
+  @Test
+  public void testInputFunction() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "inputfunc.p"), session);
+    unit.parse();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.ON).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.IF).get(0).queryStateHead().size(), 2);
+  }
+
+  @Test
+  public void testParameterLike() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define input parameter ipPrm no-undo like customer.custnum.".getBytes()), "<unnamed>", session);
+    unit.parse();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
+    JPNode node = unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0);
+    assertEquals(node.query(ABLNodeType.NOUNDO).size(), 1);
+  }
+
+  @Test
+  public void testAnnotation01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("@Progress.Lang.Annotation. MESSAGE 'Hello1'. MESSAGE 'Hello2'.".getBytes()), "<unnamed>", session);
+    unit.parse();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
+  }
+
+  @Test
+  public void testAnnotation02() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("@Progress.Lang.Annotation(foo='bar'). MESSAGE 'Hello1'. MESSAGE 'Hello2'.".getBytes()), "<unnamed>", session);
+    unit.parse();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
   }
 
   /**

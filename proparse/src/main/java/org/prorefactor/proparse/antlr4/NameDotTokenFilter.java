@@ -25,9 +25,9 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 
 /**
- * Merge NAMEDOT with previous and next tokens with the following rules
- *  -> ( ID | keyword ) NAMEDOT ( ID | keyword )
- *  -> A comment can follow immediately NAMEDOT. If so, then an unlimited number of WS and COMMENT can follow NAMEDOT before the ID
+ * Merge NAMEDOT with previous and next tokens with the following rules:<ul>
+ *  <li> ( ID | keyword ) NAMEDOT ( ID | keyword ) </li>
+ *  <li> A comment can follow immediately NAMEDOT. If so, then an unlimited number of WS and COMMENT can follow NAMEDOT before the ID</li></ul>
  */
 public class NameDotTokenFilter implements TokenSource {
   private final TokenSource source;
@@ -49,10 +49,34 @@ public class NameDotTokenFilter implements TokenSource {
         type = reviewFileName();
       } else if (nxt.getNodeType() == ABLNodeType.NAMEDOT) {
         type = reviewNameDot();
+      } else if ((nxt.getNodeType() == ABLNodeType.NUMBER) && nxt.getText().startsWith(".")) {
+        type = reviewNumber();
       }
       // NAMEDOTs can be chained, so we stay in the loop until an expected end of statement
       loop = (type != ABLNodeType.EOF_ANTLR4) && (type != ABLNodeType.PERIOD);
     }
+  }
+
+  private ABLNodeType reviewNumber() {
+    ProToken nameDot = queue.removeLast();
+    ProToken prev = queue.pollLast();
+    if (prev == null) {
+      // In case NUMBER is the only one in queue (e.g. first token in procedure), we just exit safely by putting
+      // it back in the queue
+      queue.offer(nameDot);
+    } else if ((prev.getNodeType() == ABLNodeType.ID) || prev.getNodeType().isKeyword() || (prev.getNodeType() == ABLNodeType.ANNOTATION)) {
+      // Merge both tokens in first one
+      ProToken.Builder builder = new ProToken.Builder(prev).mergeWith(nameDot);
+      if (prev.getNodeType() != ABLNodeType.ANNOTATION)
+        builder.setType(ABLNodeType.ID);
+      queue.offer(builder.build());
+    } else {
+      // Anything else, we just put tokens back in the queue
+      queue.offer(prev);
+      queue.offer(nameDot);
+    }
+
+    return queue.peekLast().getNodeType();
   }
 
   private ABLNodeType reviewNameDot() {
@@ -60,7 +84,7 @@ public class NameDotTokenFilter implements TokenSource {
     ProToken prev = queue.pollLast();
     if (prev == null) {
       // In case NAMEDOT is the only one in queue (e.g. first token in procedure), we just exit safely by putting
-      // NAMEDOT back in the queue
+      // it back in the queue
       queue.offer(nameDot);
     } else if ((prev.getNodeType() == ABLNodeType.ID) || prev.getNodeType().isKeyword() || (prev.getNodeType() == ABLNodeType.ANNOTATION)) {
       ProToken nxt = (ProToken) source.nextToken();
@@ -71,10 +95,14 @@ public class NameDotTokenFilter implements TokenSource {
         }
         // Then we merge everything in first token
         ProToken.Builder builder = new ProToken.Builder(prev).mergeWith(nameDot).mergeWith(nxt);
+        if (prev.getNodeType() != ABLNodeType.ANNOTATION)
+          builder.setType(ABLNodeType.ID);
         queue.offer(builder.build());
       } else {
         // Merge everything in first token
         ProToken.Builder builder = new ProToken.Builder(prev).mergeWith(nameDot).mergeWith(nxt);
+        if (prev.getNodeType() != ABLNodeType.ANNOTATION)
+          builder.setType(ABLNodeType.ID);
         queue.offer(builder.build());
       }
     } else {

@@ -467,7 +467,7 @@ public class JPNode implements AST {
       attrSet(IConstants.STATE2, state2);
   }
 
-  /** Certain nodes will have a link to a Symbol, set by TreeParser01. */
+  /** Certain nodes will have a link to a Symbol, set by TreeParser. */
   public Symbol getSymbol() {
     return (Symbol) getLink(IConstants.SYMBOL);
   }

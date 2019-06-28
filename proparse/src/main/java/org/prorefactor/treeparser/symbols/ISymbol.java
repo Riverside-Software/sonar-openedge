@@ -57,4 +57,10 @@ public interface ISymbol {
    */
   void noteReference(ContextQualifier contextQualifier);
 
+  void setLikeSymbol(ISymbol symbol);
+
+  /**
+   * If symbol was defined LIKE another symbol, then returns this original symbol. Otherwise returns null.
+   */
+  ISymbol getLikeSymbol();
 }

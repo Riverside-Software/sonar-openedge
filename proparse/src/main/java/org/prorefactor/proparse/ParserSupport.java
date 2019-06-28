@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.prorefactor.core.ABLNodeType;
@@ -346,4 +347,21 @@ public class ParserSupport {
     return fileNameList.getValue(fileIndex);
   }
 
+  public boolean hasHiddenBefore(TokenStream stream) {
+    int currIndex = stream.index();
+    // Obviously no hidden token for first token
+    if (currIndex == 0)
+      return false;
+    // Otherwise see if token is in different channel
+    return stream.get(currIndex - 1).getChannel() != Token.DEFAULT_CHANNEL;
+  }
+
+  public boolean hasHiddenAfter(TokenStream stream) {
+    int currIndex = stream.index();
+    // Obviously no hidden token for last token
+    if (currIndex == stream.size() - 1)
+      return false;
+    // Otherwise see if token is in different channel
+    return stream.get(currIndex + 1).getChannel() != Token.DEFAULT_CHANNEL;
+  }
 }

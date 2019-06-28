@@ -13,7 +13,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.core.unittest.util;
+package org.prorefactor.proparse.antlr4;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -54,6 +54,7 @@ public class JPNodeLister {
    */
   public void print(char spacer, boolean showLine, boolean showCol, boolean showFileName, boolean showStore) {
     print_sub(topNode, 0, spacer, showLine, showCol, showFileName, showStore);
+    ofile.flush();
   }
 
   protected String getExtraInfo(JPNode node, char spacer) {

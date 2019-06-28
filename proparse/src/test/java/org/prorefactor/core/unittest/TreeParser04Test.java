@@ -23,9 +23,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.apache.commons.io.FileUtils;
-import org.prorefactor.core.unittest.util.JPNodeLister;
 import org.prorefactor.core.unittest.util.TP01FramesTreeLister;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.proparse.antlr4.JPNodeLister;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.Test;

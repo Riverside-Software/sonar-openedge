@@ -42,21 +42,6 @@ options {
     return this.support;
   }
 
-  private boolean hasHiddenBefore(int offset) {
-    BufferedTokenStream stream = (BufferedTokenStream) _input;
-    if (stream.index() == 0)
-      return false;
-    List<Token> list = stream.getHiddenTokensToLeft(stream.index() + offset);
-    return ((list != null) && !list.isEmpty());
-  }
-
-  private boolean hasHiddenAfter(int offset) {
-    BufferedTokenStream stream = (BufferedTokenStream) _input;
-    if (stream.index() == 0)
-      return false;
-    List<Token> list = stream.getHiddenTokensToRight(stream.index() + offset);
-    return ((list != null) && !list.isEmpty());
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -933,7 +918,7 @@ newIdentifier:
 
 filename:
     t1=filenamePart
-    ( { ( _input.LA(1) != Token.EOF) && !hasHiddenBefore(0) }? t2=filenamePart )*
+    ( { ( _input.LA(1) != Token.EOF) && !support.hasHiddenBefore(_input) }? t2=filenamePart )*
   ;
 
 filenamePart:
@@ -948,12 +933,12 @@ filenamePart:
   ;
 
 typeName:
-    t1=nonPunctuating ( { ( _input.LA(1) != Token.EOF) && !hasHiddenBefore(0) }? t2=nonPunctuating )*
+    nonPunctuating
   ;
 
-// Different action in the visitor (no class lookup in type_name2)
+// Different action in the visitor (no class lookup in typeName2)
 typeName2:
-    t1=nonPunctuating ( { ( _input.LA(1) != Token.EOF) && !hasHiddenBefore(0) }? t2=nonPunctuating )*
+    nonPunctuating
   ;
 
 constant:
@@ -1242,7 +1227,7 @@ chooseOption:
   ;
 
 classTypeName:
-    { hasHiddenAfter(0) }? CLASS typeName
+    { support.hasHiddenAfter(_input) }? CLASS typeName
   | typeName
   ;
 
@@ -1942,13 +1927,13 @@ defineParameterStatementSub2:
   ;
 
 defineParamVar:
-    // See PSC's <varprm> rule.
     ( AS HANDLE TO? datatypeDll | AS CLASS typeName | AS datatypeParam )
     ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase2 )*
   ;
 
 defineParamVarLike:
-    // See PSC's <varprm> rule.
+    // 'LIKE field' can only be provided once, but other options can appear anywhere
+    ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase )*
     LIKE field
     ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase )*
   ;
@@ -4477,6 +4462,7 @@ unreservedkeyword:
  | TOP
  | TOPIC
  | TOPNAVQUERY
+ | TOROWID
  | TOTAL
  | TRAILING
  | TRANSACTIONMODE

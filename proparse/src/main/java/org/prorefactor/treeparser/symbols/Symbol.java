@@ -29,6 +29,8 @@ public abstract class Symbol implements ISymbol {
   private int numRefd = 0;
   private boolean parameter = false;
 
+  private ISymbol like;
+
   // We store the DEFINE node if available and sensible. If defined in a syntax where there is no DEFINE node briefly
   // preceeding the ID node, then we store the ID node. If this is a schema symbol, then this member is null.
   private JPNode defNode;
@@ -117,5 +119,15 @@ public abstract class Symbol implements ISymbol {
    */
   public boolean isParameter() {
     return parameter;
+  }
+
+  @Override
+  public void setLikeSymbol(ISymbol symbol) {
+    this.like = symbol;
+  }
+
+  @Override
+  public ISymbol getLikeSymbol() {
+    return like;
   }
 }
