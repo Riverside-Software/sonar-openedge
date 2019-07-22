@@ -34,6 +34,7 @@ import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.proparse.antlr4.JPNodeLister;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -344,6 +345,11 @@ public class BugFixTest {
   @Test
   public void test43() {
     genericTest("bug43.p");
+  }
+
+  @Test
+  public void test44() {
+    genericTest("bug44.cls");
   }
 
   // Next two tests : same exception should be thrown in both cases
