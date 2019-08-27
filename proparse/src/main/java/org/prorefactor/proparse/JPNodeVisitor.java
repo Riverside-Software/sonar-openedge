@@ -34,9 +34,30 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   private final ParserSupport support;
   private final BufferedTokenStream stream;
 
+  private boolean isClass;
+  private boolean isInterface;
+  private boolean isAbstract;
+  private String className;
+
   public JPNodeVisitor(ParserSupport support, BufferedTokenStream stream) {
     this.support = support;
     this.stream = stream;
+  }
+
+  public boolean isClass() {
+    return isClass;
+  }
+
+  public boolean isInterface() {
+    return isInterface;
+  }
+
+  public boolean isAbstractClass() {
+    return isAbstract;
+  }
+
+  public String getClassName() {
+    return className;
   }
 
   @Override
@@ -735,6 +756,9 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitClassStatement(ClassStatementContext ctx) {
+    isClass = true;
+    className = ctx.tn.getText();
+    isAbstract = !ctx.ABSTRACT().isEmpty();
     return createStatementTreeFromFirstNode(ctx);
   }
 
@@ -1799,6 +1823,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitInterfaceStatement(InterfaceStatementContext ctx) {
+    isInterface = true;
+    className = ctx.name.getText();
     return createStatementTreeFromFirstNode(ctx);
   }
 

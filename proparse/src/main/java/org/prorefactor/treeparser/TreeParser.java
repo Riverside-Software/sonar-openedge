@@ -54,12 +54,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
+import com.google.inject.Inject;
 
 public class TreeParser extends ProparseBaseListener {
   private static final Logger LOG = LoggerFactory.getLogger(TreeParser.class);
 
   private static final String LOG_ADDING_QUAL_TO = "{}> Adding {} qualifier to '{}'";
 
+  private final ParseUnit unit;
   private final ParserSupport support;
   private final IProparseEnvironment refSession;
   private final TreeParserRootSymbolScope rootScope;
@@ -113,9 +115,11 @@ public class TreeParser extends ProparseBaseListener {
   // Temporary work-around
   private boolean inDefineEvent = false;
 
-  public TreeParser(ParserSupport support, IProparseEnvironment session) {
-    this.support = support;
-    this.refSession = session;
+  @Inject
+  public TreeParser(ParseUnit unit) {
+    this.unit = unit;
+    this.support = unit.getSupport();
+    this.refSession = unit.getSession();
     this.rootScope = new TreeParserRootSymbolScope(refSession);
     this.currentScope = rootScope;
   }
@@ -162,6 +166,7 @@ public class TreeParser extends ProparseBaseListener {
   public void exitProgram(ProgramContext ctx) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Exiting program", indent());
+    unit.setRootScope(rootScope);
   }
 
   @Override

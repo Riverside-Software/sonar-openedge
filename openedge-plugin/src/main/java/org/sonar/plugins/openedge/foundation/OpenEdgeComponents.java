@@ -29,14 +29,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.prorefactor.proparse.antlr4.ProparseListener;
 import org.sonar.api.SonarProduct;
+import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.platform.Server;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.server.ServerSide;
 import org.sonar.api.utils.MessageException;
 import org.sonar.api.utils.log.Logger;
@@ -48,6 +50,7 @@ import org.sonar.plugins.openedge.api.InvalidLicenseException;
 import org.sonar.plugins.openedge.api.LicenseRegistration;
 import org.sonar.plugins.openedge.api.LicenseRegistration.License;
 import org.sonar.plugins.openedge.api.LicenseRegistration.LicenseType;
+import org.sonar.plugins.openedge.api.TreeParserRegistration;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck.CheckType;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
@@ -68,6 +71,8 @@ public class OpenEdgeComponents {
   private final Server server;
   private final CheckRegistrar checkRegistrar = new CheckRegistrar();
   private final LicenseRegistrar licenseRegistrar = new LicenseRegistrar();
+  private final TreeParserRegistrar parserRegistrar = new TreeParserRegistrar();
+
   private boolean initialized = false;
 
   public OpenEdgeComponents(Server server) {
@@ -83,12 +88,21 @@ public class OpenEdgeComponents {
   }
 
   public OpenEdgeComponents(Server server, CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars) {
+    this(server, checkRegistrars, licRegistrars, null);
+  }
+
+
+  public OpenEdgeComponents(Server server, CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars,
+      TreeParserRegistration[] tpRegistrars) {
     this.server = server;
-    if (checkRegistrars != null) {
+	if (checkRegistrars != null) {
       registerChecks(checkRegistrars);
     }
     if (licRegistrars != null) {
       registerLicences(licRegistrars);
+    }
+    if (tpRegistrars != null) {
+      registerTreeParser(tpRegistrars);
     }
   }
 
@@ -102,6 +116,16 @@ public class OpenEdgeComponents {
     for (LicenseRegistration registration : registrations) {
       registration.register(licenseRegistrar);
     }
+  }
+
+  private void registerTreeParser(TreeParserRegistration[] registrations) {
+    for (TreeParserRegistration registration : registrations) {
+      registration.register(parserRegistrar);
+    }
+  }
+
+  public Iterable<Class<? extends ProparseListener>> getProparseListeners() {
+    return Collections.unmodifiableList(parserRegistrar.allListeners);
   }
 
   public Collection<License> getLicenses() {
@@ -327,4 +351,14 @@ public class OpenEdgeComponents {
       return null;
     }
   }
+
+  private static class TreeParserRegistrar implements TreeParserRegistration.Registrar {
+    private final List<Class<? extends ProparseListener>> allListeners = new ArrayList<>();
+
+    @Override
+    public void registerTreeParser(Class<? extends ProparseListener> listener) {
+      allListeners.add(listener);
+    }
+  }
+
 }

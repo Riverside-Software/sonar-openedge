@@ -57,6 +57,7 @@ import org.prorefactor.proparse.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.IntegerIndex;
+import org.prorefactor.proparse.antlr4.ProparseListener;
 import org.prorefactor.proparse.support.ParserSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,6 +115,11 @@ public class ParseUnit {
   private long treeParseTime;
   private long xrefAttachTime;
   private boolean switchToLL;
+
+  private boolean isClass;
+  private boolean isInterface;
+  private boolean isAbstract;
+  private String className;
 
   public ParseUnit(File file, IProparseEnvironment session) {
     this(file, file.getPath(), session);
@@ -206,7 +212,7 @@ public class ParseUnit {
     return Strings.nullToEmpty(fileNameList.getValue(index));
   }
 
-  /** 
+  /**
    * @return IncludeRef object
    */
   public @Nullable IncludeRef getMacroGraph() {
@@ -319,8 +325,13 @@ public class ParseUnit {
 
     lexer.parseComplete();
     long startTimeNs = System.nanoTime();
-    topNode = (ProgramRootNode) new JPNodeVisitor(parser.getParserSupport(),
-        (BufferedTokenStream) parser.getInputStream()).visit(tree).build(parser.getParserSupport());
+    JPNodeVisitor visitor = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
+    topNode = (ProgramRootNode) visitor.visit(tree).build(parser.getParserSupport());
+    isClass = visitor.isClass();
+    isInterface = visitor.isInterface();
+    isAbstract = visitor.isAbstractClass();
+    className = visitor.getClassName();
+
     jpNodeTime = System.nanoTime() - startTimeNs;
 
     fileNameList = lexer.getFilenameList();
@@ -343,13 +354,17 @@ public class ParseUnit {
   public void treeParser01() {
     if (topNode == null)
       parse();
-    ParseTreeWalker walker = new ParseTreeWalker();
-    TreeParser parser = new TreeParser(support, session);
-    long startTimeNs = System.nanoTime();
-    walker.walk(parser, tree);
-    treeParseTime = System.nanoTime() - startTimeNs;
-    rootScope = parser.getRootScope();
+    treeParser(new TreeParser(this));
+  }
 
+  public void treeParser(ProparseListener listener) {
+    if (topNode == null)
+      parse();
+
+    ParseTreeWalker walker = new ParseTreeWalker();
+    long startTimeNs = System.nanoTime();
+    walker.walk(listener, tree);
+    treeParseTime = System.nanoTime() - startTimeNs;
     startTimeNs = System.nanoTime();
     finalizeXrefInfo();
     xrefAttachTime = System.nanoTime() - startTimeNs;
@@ -362,6 +377,10 @@ public class ParseUnit {
 
   public void attachXref(CrossReference xref) {
     this.xref = xref;
+  }
+
+  public void setRootScope(TreeParserRootSymbolScope scope) {
+    this.rootScope = scope;
   }
 
   private static boolean isReferenceAssociatedToRecordNode(RecordNameNode recNode, Source src, Reference ref,
@@ -522,6 +541,22 @@ public class ParseUnit {
 
   public boolean hasSyntaxError() {
     return syntaxError;
+  }
+
+  public boolean isClass() {
+    return isClass;
+  }
+
+  public boolean isInterface() {
+    return isInterface;
+  }
+
+  public boolean isAbstractClass() {
+    return isAbstract;
+  }
+
+  public String getClassName() {
+    return className;
   }
 
   public boolean isInEditableSection(int file, int line) {
