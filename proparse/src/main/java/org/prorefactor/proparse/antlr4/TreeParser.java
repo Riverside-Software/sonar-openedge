@@ -732,9 +732,18 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
-  public void enterCopyLobStatement(CopyLobStatementContext ctx) {
-    setContextQualifier(ctx.expression(0), ContextQualifier.REF);
-    setContextQualifier(ctx.expression(1), ContextQualifier.UPDATING);
+  public void enterCopyLobFrom(CopyLobFromContext ctx) {
+    setContextQualifier(ctx.expression(), ContextQualifier.REF);
+  }
+
+  @Override
+  public void enterCopyLobTo(CopyLobToContext ctx) {
+    if (ctx.FILE() == null) {
+      setContextQualifier(ctx.expression(0), ContextQualifier.UPDATING);
+    } else {
+      // COPY-LOB ... TO FILE xxx : xxx is only referenced in this case, the value is not updated
+      setContextQualifier(ctx.expression(0), ContextQualifier.REF);
+    }
   }
 
   @Override
