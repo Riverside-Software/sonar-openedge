@@ -20,10 +20,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BufferedTokenStream;
@@ -34,8 +39,12 @@ import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.IConstants;
+import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
+import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
@@ -53,6 +62,9 @@ import org.prorefactor.refactor.RefactorSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
@@ -219,6 +231,50 @@ public class ParseUnit {
 
   public void attachXref(Document xref) {
     this.xref = xref;
+    if (xref == null)
+      return;
+
+    List<JPNode> recordNodes = getTopNode().query(ABLNodeType.RECORD_NAME);
+    try {
+      XPathFactory factory = XPathFactory.newInstance();
+      XPathExpression sourceExpr = factory.newXPath().compile("/Cross-reference/Source");
+      XPathExpression wholeIndexExpr = factory.newXPath().compile(
+          "Reference[@Reference-type='SEARCH' and Temp-ref='']");
+
+      NodeList srcList = (NodeList) sourceExpr.evaluate(xref, XPathConstants.NODESET);
+      LOGGER.debug("Parsing {} Source nodes in XREF", srcList.getLength());
+      for (int kk = 0; kk < srcList.getLength(); kk++) {
+        Element srcElement = (Element) srcList.item(kk);
+        File srcFile = new File(srcElement.getAttribute("File-name"));
+
+        NodeList nodeList = (NodeList) wholeIndexExpr.evaluate(srcElement, XPathConstants.NODESET);
+        LOGGER.debug("Entering Source node '{}' - {} SEARCH references found", srcFile.getPath(), nodeList.getLength());
+        for (int zz = 0; zz < nodeList.getLength(); zz++) {
+          Element n = (Element) nodeList.item(zz);
+
+          String tableName = n.getAttribute("Object-identifier");
+          String idxName = getChildNodeValue(n, "Object-context");
+          int lineNumber = Integer.parseInt(getChildNodeValue(n, "Line-num"));
+          String detail = getChildNodeValue(n, "Detail");
+
+          for (JPNode node : recordNodes) {
+            RecordNameNode recNode = (RecordNameNode) node;
+            if ((recNode.getStatement().getLine() == lineNumber)
+                && tableName.equalsIgnoreCase(recNode.getTableBuffer().fullName())
+                && (recNode.attrGet(IConstants.STORETYPE) == IConstants.ST_DBTABLE)
+                && Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath())) {
+              recNode.setLink(IConstants.WHOLE_INDEX, "WHOLE-INDEX".equals(detail));
+              recNode.setLink(IConstants.SEARCH_INDEX_NAME, idxName);
+              break;
+            }
+          }
+        }
+      }
+    } catch (XPathExpressionException caught) {
+      throw new IllegalStateException("Unable to compile XPath expression...", caught);
+    } catch (IOException caught) {
+      LOGGER.error("Unexpected IOException, skipping XREF information", caught);
+    }
   }
 
   public void attachTypeInfo(ITypeInfo unit) {
@@ -275,6 +331,17 @@ public class ParseUnit {
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
+  }
+
+  private static String getChildNodeValue(Node node, String nodeName) {
+    NodeList list = node.getChildNodes();
+    for (int idx = 0; idx < list.getLength(); idx++) {
+      Node subNode = list.item(idx);
+      if (nodeName.equals(subNode.getNodeName()) && (subNode.getChildNodes().getLength() > 0)) {
+        return ((Element) subNode).getChildNodes().item(0).getNodeValue();
+      }
+    }
+    return null;
   }
 
 }
