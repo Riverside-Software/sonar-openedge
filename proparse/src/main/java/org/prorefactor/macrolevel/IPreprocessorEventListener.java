@@ -23,7 +23,7 @@ public interface IPreprocessorEventListener {
   void macroRef(int line, int column, String macroName);
   void macroRefEnd();
   void include(int line, int column, int currentFile, String incFile);
-  void includeArgument(String argName, String value);
+  void includeArgument(String argName, String value, boolean undefined);
   void includeEnd();
   void define(int line, int column, String name, String value, int type);
   void undefine(int line, int column, String name);
