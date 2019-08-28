@@ -341,6 +341,7 @@ pseudoFunction:
   | currentValueFunction
   | CURRENTWINDOW
   | dynamicCurrentValueFunction
+  | dynamicPropertyFunction
   | entryFunction
   | lengthFunction
   | nextValueFunction
@@ -2200,6 +2201,10 @@ dynamicCurrentValueFunction:
 
 dynamicNewStatement:
     fieldEqualDynamicNew NOERROR_KW? statementEnd
+  ;
+
+dynamicPropertyFunction:
+    DYNAMICPROPERTY functionArgs
   ;
 
 fieldEqualDynamicNew:
