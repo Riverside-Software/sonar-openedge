@@ -34,8 +34,8 @@ options {
 @members {
   private ParserSupport support;
 
-  public void initAntlr4(RefactorSession session, IntegerIndex<String> fileNameList) {
-    this.support = new ParserSupport(session, fileNameList);
+  public void initAntlr4(RefactorSession session) {
+    this.support = new ParserSupport(session);
   }
 
   public ParserSupport getParserSupport() {

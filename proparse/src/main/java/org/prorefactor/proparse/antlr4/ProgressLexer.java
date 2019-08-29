@@ -80,7 +80,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private final IProparseSettings ppSettings;
   // Do we only read tokens ?
   private final boolean lexOnly;
-  private final IntegerIndex<String> filenameList;
+  private final IntegerIndex<String> filenameList = new IntegerIndex<>();
 
   // How many levels of &IF FALSE are we currently into?
   private int consuming = 0;
@@ -130,7 +130,8 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private TokenSource wrapper;
 
   // Cached include files for current lexer
-  private final Map<String, String> includeCache = new HashMap<>();
+  private final Map<String, Integer> includeCache = new HashMap<>();
+  private final Map<Integer, String> includeCache2 = new HashMap<>();
 
   /**
    * An existing reference to the input stream is required for construction. The caller is responsible for closing that
@@ -144,7 +145,6 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    */
   public ProgressLexer(RefactorSession session, ByteSource src, String fileName, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
-    this.filenameList = new IntegerIndex<>();
     this.ppSettings = session.getProparseSettings();
     this.session = session;
     this.lexOnly = lexOnly;
@@ -174,7 +174,6 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    */
   protected ProgressLexer(RefactorSession session, ByteSource src, String fileName) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
-    this.filenameList = new IntegerIndex<>();
     this.ppSettings = session.getProparseSettings();
     this.session = session;
     this.lexOnly = false;
@@ -208,6 +207,9 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   }
 
   protected int addFilename(String filename) {
+    if (filenameList.hasValue(filename))
+      return filenameList.getIndex(filename);
+
     return filenameList.add(filename);
   }
 
@@ -242,7 +244,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
 
   @Override
   public String getSourceName() {
-    return wrapper.getSourceName();
+    return getFilename();
   }
 
   @Override
@@ -867,24 +869,38 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     // Progress doesn't enter include files if &IF FALSE
     // It *is* possible to get here with a blank include file
     // name. See bug#034. Don't enter if the includefilename is blank.
-    String fName = referencedWithName.trim();
+    String fName = referencedWithName.trim().replace('\\', '/');
     if (isConsuming() || isLexOnly() || fName.length() == 0)
       return false;
-    String str = includeCache.get(fName);
-    if (str != null) {
-      try  {
-        currentInput = new InputSource(++sourceCounter, fName, ByteSource.wrap(str.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8, addFilename(fName), ppSettings.getSkipXCode(), false);
+
+    File incFile = null;
+    // Did we ever read file with same referenced name ?
+    Integer idx = includeCache.get(fName);
+    if (idx == null) {
+      // No, then we have to read file
+      incFile = session.findFile3(fName);
+      if (incFile == null) {
+        throw new UncheckedIOException(new IncludeFileNotFoundException(getFilename(), referencedWithName));
+      }
+      // Try searching again with normalized name
+      includeCache.put(fName, idx);
+      idx = addFilename(incFile.getPath());
+    }
+
+    if (includeCache2.get(idx) != null) {
+      try {
+        currentInput = new InputSource(++sourceCounter, fName,
+            ByteSource.wrap(includeCache2.get(idx).getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8, idx,
+            ppSettings.getSkipXCode(), false);
       } catch (IOException caught) {
         throw new UncheckedIOException(caught);
       }
     } else {
-      File ff = session.findFile3(fName);
-      if (ff == null) {
-        throw new UncheckedIOException(new IncludeFileNotFoundException(getFilename(), referencedWithName));
-      }
       try {
-        currentInput = new InputSource(++sourceCounter, ff, session.getCharset(), addFilename(fName), ppSettings.getSkipXCode(), false);
-        includeCache.put(fName, currentInput.getContent());
+        currentInput = new InputSource(++sourceCounter, incFile, session.getCharset(), idx, ppSettings.getSkipXCode(),
+            false);
+        includeCache2.put(idx, currentInput.getContent());
+
       } catch (IOException caught) {
         throw new UncheckedIOException(caught);
       }
@@ -933,13 +949,14 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
    * Cleanup work, once the parse is complete.
    */
   public void parseComplete() {
-    // Things to do once the parse is complete
-    // Release input streams, so that files can be written to by other processes.
-    // Otherwise, these hang around until the next parse or until the Progress
-    // session closes, and nothing else can write to the include files.
     while (popInput() != 0) {
       // No-op
     }
+    // Clean up the temporary junk
+    includeCache.clear();
+    includeCache2.clear();
+    currentInclude = null;
+    currentInput = null;
   }
 
   /**

@@ -1122,10 +1122,18 @@ public class Lexer  {
     } else if ((textStartFile == 0) && (type != ABLNodeType.WS) && (type != ABLNodeType.EOF_ANTLR4) && (textStartLine > 0)) {
       loc.add(textStartLine);
     }
-    return new ProToken.Builder(type, text).setFileIndex(textStartFile).setLine(textStartLine).setCharPositionInLine(
-        textStartCol).setEndFileIndex(prevFile).setEndLine(prevLine).setEndCharPositionInLine(
-            prevCol).setMacroExpansion(prevMacro).setMacroSourceNum(textStartSource).setAnalyzeSuspend(
-                prepro.getCurrentAnalyzeSuspend()).build();
+    return new ProToken.Builder(type, text) //
+      .setFileIndex(textStartFile) //
+      .setFileName(prepro.getFilename(textStartFile)) //
+      .setLine(textStartLine) //
+      .setCharPositionInLine(textStartCol) //
+      .setEndFileIndex(prevFile) //
+      .setEndLine(prevLine) //
+      .setEndCharPositionInLine(prevCol) //
+      .setMacroExpansion(prevMacro) //
+      .setMacroSourceNum(textStartSource) //
+      .setAnalyzeSuspend(prepro.getCurrentAnalyzeSuspend()) //
+      .build();
   }
 
   /**
