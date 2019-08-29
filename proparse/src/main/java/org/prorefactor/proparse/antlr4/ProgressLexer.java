@@ -869,7 +869,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     // Progress doesn't enter include files if &IF FALSE
     // It *is* possible to get here with a blank include file
     // name. See bug#034. Don't enter if the includefilename is blank.
-    String fName = referencedWithName.trim();
+    String fName = referencedWithName.trim().replace('\\', '/');
     if (isConsuming() || isLexOnly() || fName.length() == 0)
       return false;
 
