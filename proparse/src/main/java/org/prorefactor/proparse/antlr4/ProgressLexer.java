@@ -888,16 +888,19 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     }
 
     if (includeCache2.get(idx) != null) {
-      try  {
-        currentInput = new InputSource(++sourceCounter, fName, ByteSource.wrap(includeCache2.get(idx).getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8, idx, ppSettings.getSkipXCode(), false);
+      try {
+        currentInput = new InputSource(++sourceCounter, fName,
+            ByteSource.wrap(includeCache2.get(idx).getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8, idx,
+            ppSettings.getSkipXCode(), false);
       } catch (IOException caught) {
         throw new UncheckedIOException(caught);
       }
     } else {
       try {
-        currentInput = new InputSource(++sourceCounter, incFile, session.getCharset(), idx, ppSettings.getSkipXCode(), false);
+        currentInput = new InputSource(++sourceCounter, incFile, session.getCharset(), idx, ppSettings.getSkipXCode(),
+            false);
         includeCache2.put(idx, currentInput.getContent());
-        
+
       } catch (IOException caught) {
         throw new UncheckedIOException(caught);
       }
