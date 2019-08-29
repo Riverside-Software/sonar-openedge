@@ -30,6 +30,7 @@ import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.core.unittest.util.UnitTestWindowsModule;
 import org.prorefactor.proparse.antlr4.MultiChannelTokenSource;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
@@ -979,6 +980,9 @@ public class LexerTest {
 
   @Test
   public void testFileNumName() {
+    // Use Windows settings here in order to use backlash directory separator
+    Injector injector = Guice.createInjector(new UnitTestWindowsModule());
+    RefactorSession session = injector.getInstance(RefactorSession.class);
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer18.p"), session);
     TokenSource src = unit.preprocess();
 
