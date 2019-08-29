@@ -47,8 +47,6 @@ public class ParserSupport {
   private final ClassFinder classFinder;
   // Scope for the compile unit or class. It might be "sub" to a super scope in a class hierarchy
   private final RootSymbolScope unitScope;
-  // For later reference
-  private final IntegerIndex<String> fileNameList;
 
   // Current scope might be "unitScope" or an inner method/subprocedure scope
   private SymbolScope currentScope;
@@ -70,12 +68,11 @@ public class ParserSupport {
   private List<SymbolScope> innerScopes = new ArrayList<>();
   private Map<RuleContext, SymbolScope> innerScopesMap = new HashMap<>();
 
-  public ParserSupport(RefactorSession session, IntegerIndex<String> fileNameList) {
+  public ParserSupport(RefactorSession session) {
     this.session = session;
     this.unitScope = new RootSymbolScope(session);
     this.currentScope = unitScope;
     this.classFinder = new ClassFinder(session);
-    this.fileNameList = fileNameList;
   }
 
   public String getClassName() {
@@ -341,10 +338,6 @@ public class ParserSupport {
 
   public void attrTypeNameLookup(JPNode node) {
     node.attrSet(IConstants.QUALIFIED_CLASS_INT, classFinder.lookup(node.getText()));
-  }
-
-  public String getFilename(int fileIndex) {
-    return fileNameList.getValue(fileIndex);
   }
 
   public boolean hasHiddenBefore(TokenStream stream) {

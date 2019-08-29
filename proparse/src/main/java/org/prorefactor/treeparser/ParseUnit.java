@@ -125,6 +125,7 @@ public class ParseUnit {
       return "";
     return Strings.nullToEmpty(fileNameList.getValue(index));
   }
+
   /** 
    * @return IncludeRef object
    */
@@ -180,7 +181,7 @@ public class ParseUnit {
 
     ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
     Proparse parser = new Proparse(new CommonTokenStream(lexer));
-    parser.initAntlr4(session, lexer.getFilenameList());
+    parser.initAntlr4(session);
     parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
     parser.setErrorHandler(new BailErrorStrategy());
     parser.removeErrorListeners();
@@ -193,7 +194,7 @@ public class ParseUnit {
       parser.getInterpreter().setPredictionMode(PredictionMode.LL);
       tree = parser.program();
     }
-
+    lexer.parseComplete();
     topNode = (ProgramRootNode) new JPNodeVisitor(parser.getParserSupport(),
         (BufferedTokenStream) parser.getInputStream()).visit(tree).build(parser.getParserSupport());
 

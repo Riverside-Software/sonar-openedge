@@ -515,8 +515,8 @@ public class LexerTest {
       }
     } catch (ProparseRuntimeException caught) {
       Assert.assertTrue(caught.getMessage().replace('\\', '/').startsWith(
-          "File '" + SRC_DIR + "/lexer09.p' - Current position 'data/lexer/lexer09.i':2"));
-      Assert.assertTrue(caught.getMessage().endsWith("Unexpected &THEN"));
+          "File '" + SRC_DIR + "/lexer09.p' - Current position 'src/test/resources/data/lexer/lexer09.i':2"), caught.getMessage());
+      Assert.assertTrue(caught.getMessage().endsWith("Unexpected &THEN"), caught.getMessage());
       return;
     } catch (Exception caught) {
       Assert.fail("Unwanted exception...");
@@ -975,6 +975,54 @@ public class LexerTest {
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getType(), Proparse.ID);
     assertEquals(tok.getText(), "0x2g8");
+  }
+
+  @Test
+  public void testFileNumName() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer18.p"), session);
+    TokenSource src = unit.preprocess();
+
+    ProToken tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.STOP);
+    assertEquals(tok.getTokenIndex(), 0);
+    assertEquals(tok.getFileIndex(), 0);
+    assertEquals(tok.getFileName().replace('\\', '/'), "src/test/resources/data/lexer/lexer18.p");
+
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(tok.getTokenIndex(), 2);
+    assertEquals(tok.getFileIndex(), 1);
+    assertEquals(tok.getFileName().replace('\\', '/'), "src/test/resources/data/lexer/lexer18.i");
+
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(tok.getTokenIndex(), 4);
+    assertEquals(tok.getFileIndex(), 1);
+    assertEquals(tok.getFileName().replace('\\', '/'), "src/test/resources/data/lexer/lexer18.i");
+
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QUIT);
+    assertEquals(tok.getTokenIndex(), 6);
+    assertEquals(tok.getFileIndex(), 2);
+    assertEquals(tok.getFileName().replace('\\', '/'), "src/test/resources/data/lexer/lexer18-2.i");
+
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(tok.getTokenIndex(), 8);
+    assertEquals(tok.getFileIndex(), 1);
+    assertEquals(tok.getFileName().replace('\\', '/'), "src/test/resources/data/lexer/lexer18.i");
+
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(tok.getTokenIndex(), 10);
+    assertEquals(tok.getFileIndex(), 1);
+    assertEquals(tok.getFileName().replace('\\', '/'), "src/test/resources/data/lexer/lexer18.i");
+
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.STOP);
+    assertEquals(tok.getTokenIndex(), 12);
+    assertEquals(tok.getFileIndex(), 0);
+    assertEquals(tok.getFileName().replace('\\', '/'), "src/test/resources/data/lexer/lexer18.p");
   }
 
   /**
