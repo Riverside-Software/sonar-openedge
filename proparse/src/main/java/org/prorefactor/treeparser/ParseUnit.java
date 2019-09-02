@@ -272,7 +272,7 @@ public class ParseUnit {
             }
           }
           if (!lFound && "WHOLE-INDEX".equals(detail)) {
-            LOGGER.info("WHOLE-INDEX search on {} with index {} couldn't be assigned to {} at line {}", tableName,
+            LOGGER.debug("WHOLE-INDEX search on '{}' with index '{}' couldn't be assigned to {} at line {}", tableName,
                 idxName, srcFile.getPath(), lineNumber);
           }
         }
