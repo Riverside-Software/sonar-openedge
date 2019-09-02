@@ -49,6 +49,16 @@ public class TableBuffer extends Symbol {
   }
 
   /**
+   * Return fully qualified table name (with DB) of the table buffer is pointing to
+   */
+  public String getTargetFullName() {
+    if (table.getStoretype() == IConstants.ST_DBTABLE)
+      return new StringBuilder(table.getDatabase().getName()).append(".").append(table.getName()).toString();
+    else
+      return table.getName();
+  }
+
+  /**
    * Get the "database.buffer" name for schema buffers, get "buffer" for temp/work table buffers.
    */
   @Override

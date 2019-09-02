@@ -146,13 +146,17 @@ public class IConstants {
    */
   public static final int FILE_NAME_ARRAY = -220;
   /**
-   * A value fo setLink() and getLink(). Used to indicate index name used in RecordNameNode
+   * A value fo setLink() and getLink(). Store index name used in SEARCH nodes
    */
   public static final int SEARCH_INDEX_NAME = -221;
   /**
    * A value fo setLink() and getLink(). Boolean set to True if WHOLE-INDEX search
    */
-  public static final int WHOLE_INDEX = -222; 
+  public static final int WHOLE_INDEX = -222;
+  /**
+   * A value fo setLink() and getLink(). Store field name in SORT-ACCESS nodes
+   */
+  public static final int SORT_ACCESS = -223;
 
   // In statement: DEFINE TEMP-TABLE ... LIKE ... USE-INDEX xxx
   // xxx can point to an invalid index
