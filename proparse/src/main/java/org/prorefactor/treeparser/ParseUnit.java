@@ -257,6 +257,7 @@ public class ParseUnit {
           int lineNumber = Integer.parseInt(getChildNodeValue(n, "Line-num"));
           String detail = getChildNodeValue(n, "Detail");
 
+          boolean lFound = false;
           for (JPNode node : recordNodes) {
             RecordNameNode recNode = (RecordNameNode) node;
             if ((recNode.getStatement().getLine() == lineNumber)
@@ -265,8 +266,13 @@ public class ParseUnit {
                 && Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath())) {
               recNode.setLink(IConstants.WHOLE_INDEX, "WHOLE-INDEX".equals(detail));
               recNode.setLink(IConstants.SEARCH_INDEX_NAME, idxName);
+              lFound = true;
               break;
             }
+          }
+          if (!lFound && "WHOLE-INDEX".equals(detail)) {
+            LOGGER.info("WHOLE-INDEX search on {} with index {} couldn't be assigned to {} at line {}", tableName,
+                idxName, srcFile.getPath(), lineNumber);
           }
         }
       }
