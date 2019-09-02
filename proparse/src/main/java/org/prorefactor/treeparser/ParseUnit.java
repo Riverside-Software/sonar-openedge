@@ -257,6 +257,9 @@ public class ParseUnit {
           int lineNumber = Integer.parseInt(getChildNodeValue(n, "Line-num"));
           String detail = getChildNodeValue(n, "Detail");
           boolean tempTable = "T".equalsIgnoreCase(getChildNodeValue(n, "Temp-ref"));
+          if (tempTable && (tableName.lastIndexOf(':') != -1)) {
+            tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
+          }
 
           boolean lFound = false;
           for (JPNode node : recordNodes) {
@@ -286,6 +289,9 @@ public class ParseUnit {
           String fieldName = getChildNodeValue(n, "Object-context");
           int lineNumber = Integer.parseInt(getChildNodeValue(n, "Line-num"));
           boolean tempTable = "T".equalsIgnoreCase(getChildNodeValue(n, "Temp-ref"));
+          if (tempTable && (tableName.lastIndexOf(':') != -1)) {
+            tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
+          }
 
           for (JPNode node : recordNodes) {
             RecordNameNode recNode = (RecordNameNode) node;
