@@ -25,10 +25,6 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BufferedTokenStream;
@@ -62,13 +58,13 @@ import org.prorefactor.refactor.RefactorSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
+import com.progress.xref.CrossReference;
+import com.progress.xref.CrossReference.Source;
+import com.progress.xref.CrossReference.Source.Reference;
 
 import eu.rssw.pct.elements.ITypeInfo;
 
@@ -92,7 +88,8 @@ public class ParseUnit {
   private List<EditableCodeSection> sections;
   private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
-  private Document xref = null;
+  private Document doc = null;
+  private CrossReference xref = null;
   private ITypeInfo typeInfo = null;
   private List<Integer> trxBlocks;
   private ParserSupport support;
@@ -229,84 +226,74 @@ public class ParseUnit {
     rootScope = parser.getRootScope();
   }
 
-  public void attachXref(Document xref) {
+  public void attachXref(Document doc) {
+    this.doc = doc;
+  }
+
+  public void attachXref(CrossReference xref) {
     this.xref = xref;
     if (xref == null)
       return;
+    attachXrefToTreeParser(xref);
+  }
 
+  private void attachXrefToTreeParser(CrossReference xref) {
     List<JPNode> recordNodes = getTopNode().query(ABLNodeType.RECORD_NAME);
     try {
-      XPathFactory factory = XPathFactory.newInstance();
-      XPathExpression sourceExpr = factory.newXPath().compile("/Cross-reference/Source");
-      XPathExpression wholeIndexExpr = factory.newXPath().compile("Reference[@Reference-type='SEARCH']");
-      XPathExpression sortAccessExpr = factory.newXPath().compile("Reference[@Reference-type='SORT-ACCESS']");
-
-      NodeList srcList = (NodeList) sourceExpr.evaluate(xref, XPathConstants.NODESET);
-      LOGGER.debug("Parsing {} Source nodes in XREF", srcList.getLength());
-      for (int kk = 0; kk < srcList.getLength(); kk++) {
-        Element srcElement = (Element) srcList.item(kk);
-        File srcFile = new File(srcElement.getAttribute("File-name"));
-
-        NodeList nodeList = (NodeList) wholeIndexExpr.evaluate(srcElement, XPathConstants.NODESET);
-        LOGGER.debug("Entering Source node '{}' - {} SEARCH references found", srcFile.getPath(), nodeList.getLength());
-        for (int zz = 0; zz < nodeList.getLength(); zz++) {
-          Element n = (Element) nodeList.item(zz);
-
-          String tableName = n.getAttribute("Object-identifier");
-          String idxName = getChildNodeValue(n, "Object-context");
-          int lineNumber = Integer.parseInt(getChildNodeValue(n, "Line-num"));
-          String detail = getChildNodeValue(n, "Detail");
-          boolean tempTable = "T".equalsIgnoreCase(getChildNodeValue(n, "Temp-ref"));
-          if (tempTable && (tableName.lastIndexOf(':') != -1)) {
-            tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
-          }
-
-          boolean lFound = false;
-          for (JPNode node : recordNodes) {
-            RecordNameNode recNode = (RecordNameNode) node;
-            if ((recNode.getStatement().getLine() == lineNumber)
-                && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
-                && (recNode.attrGet(IConstants.STORETYPE) == (tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE))
-                && Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath())) {
-              recNode.setLink(IConstants.WHOLE_INDEX, "WHOLE-INDEX".equals(detail));
-              recNode.setLink(IConstants.SEARCH_INDEX_NAME, idxName);
-              lFound = true;
-              break;
+      for (Source src : xref.getSource()) {
+        File srcFile = new File(src.getFileName());
+        for (Reference ref : src.getReference()) {
+          if ("search".equalsIgnoreCase(ref.getReferenceType())) {
+            String tableName = ref.getObjectIdentifier();
+            String idxName = ref.getObjectContext();
+            int lineNumber = ref.getLineNum();
+            String detail = ref.getDetail();
+            boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
+            if (tempTable && (tableName.lastIndexOf(':') != -1)) {
+              tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
             }
-          }
-          if (!lFound && "WHOLE-INDEX".equals(detail)) {
-            LOGGER.debug("WHOLE-INDEX search on '{}' with index '{}' couldn't be assigned to {} at line {}", tableName,
-                idxName, srcFile.getPath(), lineNumber);
-          }
-        }
 
-        nodeList = (NodeList) sortAccessExpr.evaluate(srcElement, XPathConstants.NODESET);
-        LOGGER.debug("{} SORT-ACCESS references found", nodeList.getLength());
-        for (int zz = 0; zz < nodeList.getLength(); zz++) {
-          Element n = (Element) nodeList.item(zz);
+            boolean lFound = false;
+            for (JPNode node : recordNodes) {
+              RecordNameNode recNode = (RecordNameNode) node;
+              if ((recNode.getStatement().getLine() == lineNumber)
+                  && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
+                  && (recNode.attrGet(
+                      IConstants.STORETYPE) == (tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE))
+                  && Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath())) {
+                recNode.setLink(IConstants.WHOLE_INDEX, "WHOLE-INDEX".equals(detail));
+                recNode.setLink(IConstants.SEARCH_INDEX_NAME, idxName);
+                lFound = true;
+                break;
+              }
+            }
+            if (!lFound && "WHOLE-INDEX".equals(detail)) {
+              LOGGER.debug("WHOLE-INDEX search on '{}' with index '{}' couldn't be assigned to {} at line {}", tableName,
+                  idxName, srcFile.getPath(), lineNumber);
+            }
+          } else if ("sort-access".equalsIgnoreCase(ref.getReferenceType())) {
+            String tableName = ref.getObjectIdentifier();
+            String fieldName = ref.getObjectContext();
+            int lineNumber = ref.getLineNum();
+            boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
+            if (tempTable && (tableName.lastIndexOf(':') != -1)) {
+              tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
+            }
 
-          String tableName = n.getAttribute("Object-identifier");
-          String fieldName = getChildNodeValue(n, "Object-context");
-          int lineNumber = Integer.parseInt(getChildNodeValue(n, "Line-num"));
-          boolean tempTable = "T".equalsIgnoreCase(getChildNodeValue(n, "Temp-ref"));
-          if (tempTable && (tableName.lastIndexOf(':') != -1)) {
-            tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
-          }
-
-          for (JPNode node : recordNodes) {
-            RecordNameNode recNode = (RecordNameNode) node;
-            if ((recNode.getStatement().getLine() == lineNumber)
-                && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
-                && (recNode.attrGet(IConstants.STORETYPE) == (tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE))
-                && Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath())) {
-              recNode.setSortAccess(fieldName);
-              break;
+            for (JPNode node : recordNodes) {
+              RecordNameNode recNode = (RecordNameNode) node;
+              if ((recNode.getStatement().getLine() == lineNumber)
+                  && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
+                  && (recNode.attrGet(
+                      IConstants.STORETYPE) == (tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE))
+                  && Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath())) {
+                recNode.setSortAccess(fieldName);
+                break;
+              }
             }
           }
         }
       }
-    } catch (XPathExpressionException caught) {
-      throw new IllegalStateException("Unable to compile XPath expression...", caught);
     } catch (IOException caught) {
       LOGGER.error("Unexpected IOException, skipping XREF information", caught);
     }
@@ -321,7 +308,12 @@ public class ParseUnit {
   }
 
   @Nullable
-  public Document getXref() {
+  public Document getXRefDocument() {
+    return doc;
+  }
+
+  @Nullable
+  public CrossReference getXref() {
     return xref;
   }
 
@@ -366,17 +358,6 @@ public class ParseUnit {
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
-  }
-
-  private static String getChildNodeValue(Node node, String nodeName) {
-    NodeList list = node.getChildNodes();
-    for (int idx = 0; idx < list.getLength(); idx++) {
-      Node subNode = list.item(idx);
-      if (nodeName.equals(subNode.getNodeName()) && (subNode.getChildNodes().getLength() > 0)) {
-        return ((Element) subNode).getChildNodes().item(0).getNodeValue();
-      }
-    }
-    return null;
   }
 
 }

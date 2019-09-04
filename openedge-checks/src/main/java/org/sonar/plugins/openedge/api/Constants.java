@@ -54,6 +54,7 @@ public class Constants {
   public static final String ANTLR4_TEST = "sonar.oe.antlr4";
   public static final String ANTLR4_PROFILER = "sonar.oe.antlr4.profiler";
   public static final String SKIP_XCODE = "sonar.oe.xcode.skip";
+  public static final String XML_DOCUMENT_RULES = "sonar.oe.xml.doc";
 
   private Constants() {
     
