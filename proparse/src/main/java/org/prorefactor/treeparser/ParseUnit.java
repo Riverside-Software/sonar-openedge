@@ -274,7 +274,7 @@ public class ParseUnit {
             }
           }
           if (!lFound && "WHOLE-INDEX".equals(ref.getDetail())) {
-            LOGGER.info("WHOLE-INDEX search on '{}' with index '{}' couldn't be assigned to {} at line {}", tableName,
+            LOGGER.debug("WHOLE-INDEX search on '{}' with index '{}' couldn't be assigned to {} at line {}", tableName,
                 ref.getObjectContext(), srcFile.getPath(), ref.getLineNum());
           }
         } else if ("sort-access".equalsIgnoreCase(ref.getReferenceType())) {
@@ -298,7 +298,6 @@ public class ParseUnit {
                   && ((src.getFileNum() == 1 && recNode.getFileIndex() == 0)
                       || Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath()))) {
                 recNode.setSortAccess(ref.getObjectContext());
-                System.out.println("ca marche");
                 break;
               }
             } catch (IOException uncaught) {
