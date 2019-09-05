@@ -234,68 +234,79 @@ public class ParseUnit {
     this.xref = xref;
     if (xref == null)
       return;
-    attachXrefToTreeParser(xref);
+    attachXrefToTreeParser(getTopNode(), xref);
   }
 
-  private void attachXrefToTreeParser(CrossReference xref) {
-    List<JPNode> recordNodes = getTopNode().query(ABLNodeType.RECORD_NAME);
-    try {
-      for (Source src : xref.getSource()) {
-        File srcFile = new File(src.getFileName());
-        for (Reference ref : src.getReference()) {
-          if ("search".equalsIgnoreCase(ref.getReferenceType())) {
-            String tableName = ref.getObjectIdentifier();
-            String idxName = ref.getObjectContext();
-            int lineNumber = ref.getLineNum();
-            String detail = ref.getDetail();
-            boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
-            if (tempTable && (tableName.lastIndexOf(':') != -1)) {
-              tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
-            }
+  public static void attachXrefToTreeParser(ProgramRootNode root, CrossReference xref) {
+    List<JPNode> recordNodes = root.query(ABLNodeType.RECORD_NAME);
+    for (Source src : xref.getSource()) {
+      File srcFile = new File(src.getFileName());
+      for (Reference ref : src.getReference()) {
+        if ("search".equalsIgnoreCase(ref.getReferenceType())) {
+          String tableName = ref.getObjectIdentifier();
+          boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
+          int tableType = tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE;
+          if (tempTable && (tableName.lastIndexOf(':') != -1)) {
+            // Temp-table defined in classes are prefixed by the class name
+            tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
+          }
+          if (!tempTable && (tableName.indexOf("._") != -1)) {
+            // DBName._Metaschema -> skip
+            continue;
+          }
 
-            boolean lFound = false;
-            for (JPNode node : recordNodes) {
-              RecordNameNode recNode = (RecordNameNode) node;
-              if ((recNode.getStatement().getLine() == lineNumber)
+          boolean lFound = false;
+          for (JPNode node : recordNodes) {
+            RecordNameNode recNode = (RecordNameNode) node;
+            try {
+              if ((recNode.getStatement().getLine() == ref.getLineNum())
                   && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
-                  && (recNode.attrGet(
-                      IConstants.STORETYPE) == (tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE))
-                  && Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath())) {
-                recNode.setLink(IConstants.WHOLE_INDEX, "WHOLE-INDEX".equals(detail));
-                recNode.setLink(IConstants.SEARCH_INDEX_NAME, idxName);
+                  && (recNode.attrGet(IConstants.STORETYPE) == tableType)
+                  && ((src.getFileNum() == 1 && recNode.getFileIndex() == 0)
+                      || Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath()))) {
+                recNode.setLink(IConstants.WHOLE_INDEX, "WHOLE-INDEX".equals(ref.getDetail()));
+                recNode.setLink(IConstants.SEARCH_INDEX_NAME, ref.getObjectContext());
                 lFound = true;
                 break;
               }
+            } catch (IOException uncaught) {
+              // Nothing
             }
-            if (!lFound && "WHOLE-INDEX".equals(detail)) {
-              LOGGER.debug("WHOLE-INDEX search on '{}' with index '{}' couldn't be assigned to {} at line {}", tableName,
-                  idxName, srcFile.getPath(), lineNumber);
-            }
-          } else if ("sort-access".equalsIgnoreCase(ref.getReferenceType())) {
-            String tableName = ref.getObjectIdentifier();
-            String fieldName = ref.getObjectContext();
-            int lineNumber = ref.getLineNum();
-            boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
-            if (tempTable && (tableName.lastIndexOf(':') != -1)) {
-              tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
-            }
+          }
+          if (!lFound && "WHOLE-INDEX".equals(ref.getDetail())) {
+            LOGGER.info("WHOLE-INDEX search on '{}' with index '{}' couldn't be assigned to {} at line {}", tableName,
+                ref.getObjectContext(), srcFile.getPath(), ref.getLineNum());
+          }
+        } else if ("sort-access".equalsIgnoreCase(ref.getReferenceType())) {
+          String tableName = ref.getObjectIdentifier();
+          boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
+          int tableType = tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE;
+          if (tempTable && (tableName.lastIndexOf(':') != -1)) {
+            tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
+          }
+          if (!tempTable && (tableName.indexOf("._") != -1)) {
+            // DBName._Metaschema -> skip
+            continue;
+          }
 
-            for (JPNode node : recordNodes) {
-              RecordNameNode recNode = (RecordNameNode) node;
-              if ((recNode.getStatement().getLine() == lineNumber)
+          for (JPNode node : recordNodes) {
+            RecordNameNode recNode = (RecordNameNode) node;
+            try {
+              if ((recNode.getStatement().getLine() == ref.getLineNum())
                   && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
-                  && (recNode.attrGet(
-                      IConstants.STORETYPE) == (tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE))
-                  && Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath())) {
-                recNode.setSortAccess(fieldName);
+                  && (recNode.attrGet(IConstants.STORETYPE) == tableType)
+                  && ((src.getFileNum() == 1 && recNode.getFileIndex() == 0)
+                      || Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath()))) {
+                recNode.setSortAccess(ref.getObjectContext());
+                System.out.println("ca marche");
                 break;
               }
+            } catch (IOException uncaught) {
+              // Nothing
             }
           }
         }
       }
-    } catch (IOException caught) {
-      LOGGER.error("Unexpected IOException, skipping XREF information", caught);
     }
   }
 
