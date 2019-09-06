@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.unittest.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -243,6 +244,31 @@ public class ParserTest {
     assertNotNull(tt09);
     assertNotNull(tt09.getTable());
     assertEquals(tt09.getTable().getIndexes().size(), 1);
+  }
 
+  /**
+   * TODO Yes, should probably move to TreeParserTest.  
+   */
+  @Test
+  public void testRecordNameNode() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "recordName.p"), session);
+    unit.treeParser01();
+
+    for (JPNode node : unit.getTopNode().query(ABLNodeType.RECORD_NAME)) {
+      RecordNameNode recNode = (RecordNameNode) node;
+      String tbl = recNode.getTableBuffer().getTargetFullName();
+      if (recNode.getLine() == 5)
+        assertEquals(tbl, "tt01");
+      if (recNode.getLine() == 6)
+        assertEquals(tbl, "sports2000.Customer");
+      if (recNode.getLine() == 8)
+        assertEquals(tbl, "sports2000.Customer");
+      if (recNode.getLine() == 9)
+        assertEquals(tbl, "tt01");
+      if (recNode.getLine() == 10)
+        assertEquals(tbl, "tt01");
+      if (recNode.getLine() == 11)
+        assertEquals(tbl, "sports2000.Customer");
+    }
   }
 }

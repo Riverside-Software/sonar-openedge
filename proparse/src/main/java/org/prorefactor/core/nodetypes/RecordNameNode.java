@@ -25,6 +25,8 @@ import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.treeparser.BufferScope;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 
+import com.google.common.base.Strings;
+
 public class RecordNameNode extends JPNode {
   public RecordNameNode(ProToken t) {
     super(t);
@@ -46,6 +48,18 @@ public class RecordNameNode extends JPNode {
 
   public void setTableBuffer(@Nonnull TableBuffer buffer) {
     setLink(IConstants.SYMBOL, buffer);
+  }
+
+  public void setSortAccess(String str) {
+    if (Strings.isNullOrEmpty(str))
+      return;
+
+    Object o = getLink(IConstants.SORT_ACCESS);
+    if (o != null) {
+      setLink(IConstants.SORT_ACCESS, o.toString() + "," + str);
+    } else {
+      setLink(IConstants.SORT_ACCESS, str);
+    }
   }
 
   /** Set the 'store type' attribute on a RECORD_NAME node. */

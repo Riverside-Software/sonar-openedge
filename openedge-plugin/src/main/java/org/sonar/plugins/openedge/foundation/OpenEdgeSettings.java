@@ -372,6 +372,11 @@ public class OpenEdgeSettings {
   public boolean displayStackTraceOnError() {
     return config.getBoolean(Constants.PROPARSE_ERROR_STACKTRACE).orElse(true);
   }
+
+  public boolean parseXrefDocument() {
+    return config.getBoolean(Constants.XML_DOCUMENT_RULES).orElse(false);
+  }
+
   /**
    * Returns true if method should be skipped by CPD engine
    * 

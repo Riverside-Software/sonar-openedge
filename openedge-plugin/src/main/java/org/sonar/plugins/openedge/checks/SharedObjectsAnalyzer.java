@@ -19,60 +19,43 @@
  */
 package org.sonar.plugins.openedge.checks;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
 import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.check.Priority;
 import org.sonar.check.Rule;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
-import org.w3c.dom.NodeList;
+
+import com.progress.xref.CrossReference.Source;
+import com.progress.xref.CrossReference.Source.Reference;
 
 @Rule(priority = Priority.MAJOR, name = "Shared objects analyzer")
 public class SharedObjectsAnalyzer extends OpenEdgeProparseCheck {
-  private static XPathExpression shrTTExpr;
-  private static XPathExpression shrDSExpr;
-  private static XPathExpression shrVarExpr;
-
-  static {
-    XPath xPath = XPathFactory.newInstance().newXPath();
-    try {
-      shrTTExpr = xPath.compile("//Reference[@Reference-type='NEW-SHR-TEMPTABLE']");
-      shrDSExpr = xPath.compile("//Reference[@Reference-type='NEW-SHR-DATASET']");
-      shrVarExpr = xPath.compile("//Reference[@Reference-type='NEW-SHR-VARIABLE']");
-    } catch (XPathExpressionException caught) {
-      throw new RuntimeException(caught);
-    }
-  }
 
   @Override
   public void execute(InputFile file, ParseUnit unit) {
     if (unit.getXref() == null)
       return;
 
-    int numShrTT = 0, numShrDS = 0, numShrVar = 0;
-    try {
-      NodeList nodeList = (NodeList) shrTTExpr.evaluate(unit.getXref(), XPathConstants.NODESET);
-      numShrTT = nodeList.getLength();
-    } catch (XPathExpressionException uncaught) {
-
-    }
-    try {
-      NodeList nodeList = (NodeList) shrDSExpr.evaluate(unit.getXref(), XPathConstants.NODESET);
-      numShrDS = nodeList.getLength();
-    } catch (XPathExpressionException uncaught) {
-
-    }
-    try {
-      NodeList nodeList = (NodeList) shrVarExpr.evaluate(unit.getXref(), XPathConstants.NODESET);
-      numShrVar = nodeList.getLength();
-    } catch (XPathExpressionException uncaught) {
-
+    int numShrTT = 0;
+    int numShrDS = 0;
+    int numShrVar = 0;
+    for (Source src : unit.getXref().getSource()) {
+      for (Reference ref : src.getReference()) {
+        switch (ref.getReferenceType().toLowerCase()) {
+          case "NEW-SHR-TEMPTABLE":
+            numShrTT++;
+            break;
+          case "NEW-SHR-DATASET":
+            numShrDS++;
+            break;
+          case "NEW-SHR-VARIABLE":
+            numShrVar++;
+            break;
+          default:
+            break;
+        }
+      }
     }
 
     reportMeasure(file, OpenEdgeMetrics.SHR_TT, numShrTT);

@@ -900,7 +900,6 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
         currentInput = new InputSource(++sourceCounter, incFile, session.getCharset(), idx, ppSettings.getSkipXCode(),
             false);
         includeCache2.put(idx, currentInput.getContent());
-
       } catch (IOException caught) {
         throw new UncheckedIOException(caught);
       }

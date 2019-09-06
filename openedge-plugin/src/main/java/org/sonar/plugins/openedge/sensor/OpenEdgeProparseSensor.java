@@ -36,6 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -83,6 +86,7 @@ import org.xml.sax.SAXException;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
+import com.progress.xref.CrossReference;
 
 import eu.rssw.listing.CodeBlock;
 import eu.rssw.listing.ListingParser;
@@ -97,6 +101,8 @@ public class OpenEdgeProparseSensor implements Sensor {
   // Internal use
   private final DocumentBuilderFactory dbFactory;
   private final DocumentBuilder dBuilder;
+  private final JAXBContext context;
+  private final Unmarshaller unmarshaller;
 
   // File statistics
   private int numFiles;
@@ -124,7 +130,9 @@ public class OpenEdgeProparseSensor implements Sensor {
     try {
       dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
       dBuilder = dbFactory.newDocumentBuilder();
-    } catch (ParserConfigurationException caught) {
+      context = JAXBContext.newInstance(CrossReference.class);
+      unmarshaller = context.createUnmarshaller();
+    } catch (ParserConfigurationException | JAXBException caught) {
       throw new IllegalStateException(caught);
     }
   }
@@ -202,7 +210,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
       try (InputStream inpStream = new FileInputStream(xrefFile)) {
         long startTime = System.currentTimeMillis();
-         doc = dBuilder.parse(
+        doc = dBuilder.parse(
             settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
         xmlParseTime += (System.currentTimeMillis() - startTime);
         numXREF++;
@@ -210,15 +218,39 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
       }
     }
+
+    return doc;
+  }
+
+  private CrossReference jaxbXREF(File xrefFile) {
+    CrossReference doc = null;
+    if ((xrefFile != null) && xrefFile.exists()) {
+      LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
+      try (InputStream inpStream = new FileInputStream(xrefFile)) {
+        long startTime = System.currentTimeMillis();
+        doc = (CrossReference) unmarshaller.unmarshal(
+            settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
+        xmlParseTime += (System.currentTimeMillis() - startTime);
+        numXREF++;
+      } catch (JAXBException | IOException caught) {
+        LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
+      }
+    }
+
     return doc;
   }
 
   private void parseMainFile(SensorContext context, InputFile file, RefactorSession session) {
+    CrossReference xref = null;
     Document doc = null;
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
-      doc = parseXREF(settings.getXrefFile(file));
+      xref = jaxbXREF(settings.getXrefFile(file));
+      if (settings.parseXrefDocument())
+        doc = parseXREF(settings.getXrefFile(file));
     } else if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
-      doc = parseXREF(settings.getSonarlintXrefFile(file));
+      xref = jaxbXREF(settings.getSonarlintXrefFile(file));
+      if (settings.parseXrefDocument())
+        doc = parseXREF(settings.getSonarlintXrefFile(file));
       settings.parseHierarchy(file);
     }
 
@@ -250,6 +282,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       unit = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session);
       unit.treeParser01();
       unit.attachXref(doc);
+      unit.attachXref(xref);
       unit.attachTransactionBlocks(trxBlocks);
       unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
       updateParseTime(System.currentTimeMillis() - startTime);
