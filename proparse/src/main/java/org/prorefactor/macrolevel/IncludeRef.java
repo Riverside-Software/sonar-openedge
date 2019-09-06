@@ -62,8 +62,7 @@ public class IncludeRef extends MacroRef {
 
   /**
    * Get the string that was used for referencing the include file name. For example, if the code was {includeMe.i},
-   * then the string "includeMe.i" is returned. Note: For Proparse versions earlier than 3.1C, this will return and
-   * empty string.
+   * then the string "includeMe.i" is returned.
    */
   public String getFileRefName() {
     return fileRefName;

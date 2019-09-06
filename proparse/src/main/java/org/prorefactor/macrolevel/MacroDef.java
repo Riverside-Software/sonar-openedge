@@ -37,7 +37,7 @@ public class MacroDef implements MacroEvent {
   private IncludeRef includeRef = null;
   private String name;
   private String value;
-  // If named argument doesn't have any defined value 
+  // If named argument doesn't have any defined value
   private boolean undefined;
 
   public MacroDef(MacroRef parent, int type) {
@@ -76,7 +76,7 @@ public class MacroDef implements MacroEvent {
   public void setUndefined(boolean undefined) {
     this.undefined = undefined;
   }
-  
+
   public boolean isUndefined() {
     return undefined;
   }
