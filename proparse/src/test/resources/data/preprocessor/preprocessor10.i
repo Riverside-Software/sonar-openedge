@@ -1,0 +1,5 @@
+&IF DEFINED(myParam) = 0 &THEN
+  FALSE.
+&ELSE
+  TRUE.
+&ENDIF

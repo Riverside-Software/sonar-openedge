@@ -18,6 +18,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -27,6 +28,7 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -135,4 +137,47 @@ public class PreprocessorDirectiveTest {
     assertEquals(LexerTest.nextVisibleToken(stream).getType(), Proparse.PERIOD);
   }
 
+  @Test
+  public void test04() throws IOException {
+    ParseUnit unit01 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &myParam=1 }".getBytes()), "<unnamed>", session);
+    TokenSource stream01 = unit01.preprocess();
+    assertEquals(LexerTest.nextVisibleToken(stream01).getType(), Proparse.TRUE_KW);
+
+    ParseUnit unit02 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &abc=1 &myParam }".getBytes()), "<unnamed>", session);
+    TokenSource stream02 = unit02.preprocess();
+    assertEquals(LexerTest.nextVisibleToken(stream02).getType(), Proparse.TRUE_KW);
+    IncludeRef events02 = (IncludeRef) unit02.getMacroSourceArray()[1];
+    assertEquals(events02.numArgs(), 2);
+    assertEquals(events02.getArgNumber(1).getName(), "abc");
+    assertEquals(events02.getArgNumber(1).getValue(), "1");
+    assertFalse(events02.getArgNumber(1).isUndefined());
+    assertEquals(events02.getArgNumber(2).getName(), "myParam");
+    assertTrue(events02.getArgNumber(2).isUndefined());
+
+    ParseUnit unit03 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &abc &myParam }".getBytes()), "<unnamed>", session);
+    TokenSource stream03 = unit03.preprocess();
+    assertEquals(LexerTest.nextVisibleToken(stream03).getType(), Proparse.TRUE_KW);
+
+    ParseUnit unit04 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &myParam &abc }".getBytes()), "<unnamed>", session);
+    TokenSource stream04 = unit04.preprocess();
+    // Different behavior in ABL
+    assertEquals(LexerTest.nextVisibleToken(stream04).getType(), Proparse.TRUE_KW);
+    IncludeRef events04 = (IncludeRef) unit04.getMacroSourceArray()[1];
+    assertEquals(events04.numArgs(), 2);
+    assertEquals(events04.getArgNumber(1).getName(), "myParam");
+    assertTrue(events04.getArgNumber(1).isUndefined());
+    assertEquals(events04.getArgNumber(2).getName(), "abc");
+    assertTrue(events04.getArgNumber(2).isUndefined());
+
+    ParseUnit unit05 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &abc &myParam=1 }".getBytes()), "<unnamed>", session);
+    TokenSource stream05 = unit05.preprocess();
+    assertEquals(LexerTest.nextVisibleToken(stream05).getType(), Proparse.TRUE_KW);
+    IncludeRef events05 = (IncludeRef) unit05.getMacroSourceArray()[1];
+    assertEquals(events05.numArgs(), 2);
+    assertEquals(events05.getArgNumber(1).getName(), "abc");
+    assertTrue(events05.getArgNumber(1).isUndefined());
+    assertEquals(events05.getArgNumber(2).getName(), "myParam");
+    assertEquals(events05.getArgNumber(2).getValue(), "1");
+    assertFalse(events05.getArgNumber(2).isUndefined());
+  }
 }

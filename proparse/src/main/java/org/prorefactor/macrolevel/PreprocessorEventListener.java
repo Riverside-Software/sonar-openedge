@@ -101,7 +101,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   }
 
   @Override
-  public void includeArgument(String argName, String value) {
+  public void includeArgument(String argName, String value, boolean undefined) {
     int argNum = 0;
     try {
       argNum = Integer.parseInt(argName);
@@ -117,6 +117,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
       currInclude.addNumberedArg(newArg);
     }
     newArg.setValue(value);
+    newArg.setUndefined(undefined);
     newArg.setIncludeRef(currInclude);
   }
 

@@ -794,7 +794,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
           // discard all WS
           argName = "";
           while (cp.pos != refTextEnd) {
-            if (cp.pos == closingCurly || cp.chars[cp.pos] == '=')
+            if (cp.pos == closingCurly || cp.chars[cp.pos] == '=' || cp.chars[cp.pos] == '&' )
               break;
             if (!(Character.isWhitespace(cp.chars[cp.pos])))
               argName += cp.chars[cp.pos];
@@ -802,7 +802,9 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
           }
 
           argVal = "";
+          boolean undefined = true;
           if (cp.chars[cp.pos] == '=') {
+            undefined = false;
             // '=' with optional WS
             ++cp.pos;
             while (cp.pos != closingCurly && Character.isWhitespace(cp.chars[cp.pos]))
@@ -813,7 +815,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
           }
 
           // Add the argument name/val pair
-          incArgs.add(new IncludeArg(argName, argVal));
+          incArgs.add(new IncludeArg(argName, argVal, undefined));
 
           // Anything not beginning with & is discarded
           while (cp.pos != refTextEnd && cp.chars[cp.pos] != '&')
@@ -856,7 +858,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
             currentInclude.addNamedArgument(incarg.argName, incarg.argVal);
           else
             currentInclude.addArgument(incarg.argVal);
-          lstListener.includeArgument(usingNamed ? incarg.argName : Integer.toString(argNum), incarg.argVal);
+          lstListener.includeArgument(usingNamed ? incarg.argName : Integer.toString(argNum), incarg.argVal, incarg.undefined);
           argNum++;
         }
       }
@@ -1128,10 +1130,16 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
   private static class IncludeArg {
     private final String argName;
     private final String argVal;
-    
+    private final boolean undefined;
+
     IncludeArg(String argName, String argVal) {
+      this(argName, argVal, false);
+    }
+
+    IncludeArg(String argName, String argVal, boolean undefined) {
       this.argName = argName;
       this.argVal = argVal;
+      this.undefined = undefined;
     }
   }
 

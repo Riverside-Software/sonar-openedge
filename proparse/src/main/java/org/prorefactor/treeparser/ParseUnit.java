@@ -166,7 +166,14 @@ public class ParseUnit {
   }
 
   public TokenSource preprocess() {
-    return new ProgressLexer(session, getByteSource(), relativeName, false);
+    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
+    fileNameList = lexer.getFilenameList();
+    macroGraph = lexer.getMacroGraph();
+    appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
+    sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
+    metrics = lexer.getMetrics();
+
+    return lexer;
   }
 
   /**
