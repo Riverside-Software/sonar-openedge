@@ -247,4 +247,22 @@ public class TreeParser03Test {
     Routine r4 = unit.getRootScope().getRoutineMap().get("foo4");
     assertEquals(r4.getReturnDatatypeNode(), DataType.CHARACTER);
   }
+
+  @Test
+  public void test13() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test13.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    Variable xxx = unit.getRootScope().getVariable("xxx");
+    assertNotNull(xxx);
+    assertEquals(xxx.getNumReads(), 1);
+    assertEquals(xxx.getNumWrites(), 0);
+    Variable yyy = unit.getRootScope().getVariable("yyy");
+    assertNotNull(yyy);
+    assertEquals(yyy.getNumReads(), 0);
+    assertEquals(yyy.getNumWrites(), 1);
+  }
+
 }

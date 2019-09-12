@@ -1457,22 +1457,23 @@ convertPhraseOption:
   ;
     
 copyLobStatement:
-    COPYLOB FROM?
+    COPYLOB FROM? copyLobFrom copyLobStarting? copyLobFor? TO copyLobTo ( NOCONVERT | convertPhrase )? NOERROR_KW? statementEnd
+  ;
+
+copyLobFrom:
     ( FILE expression | OBJECT? expression )
-    copyLobStarting? copyLobFor?
-    TO
-    ( FILE expression APPEND? | OBJECT? expression ( OVERLAY AT expression TRIM? )? )
-    ( NOCONVERT | convertPhrase )?
-    NOERROR_KW?
-    statementEnd
+  ;
+
+copyLobStarting:
+    STARTING AT expression
   ;
 
 copyLobFor:
     FOR expression
   ;
 
-copyLobStarting:
-    STARTING AT expression
+copyLobTo:
+    ( FILE expression APPEND? | OBJECT? expression ( OVERLAY AT expression TRIM? )? )
   ;
 
 forTenant:
