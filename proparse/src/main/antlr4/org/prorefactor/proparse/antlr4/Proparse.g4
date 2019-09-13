@@ -382,7 +382,7 @@ builtinFunction:
   |  DYNAMICFUNCTION LEFTPAREN expression inExpression? (COMMA parameter)* RIGHTPAREN NOERROR_KW?
   |  DYNAMICINVOKE
        LEFTPAREN
-       ( expressionTerm | typeName )
+       ( expression | typeName )
        COMMA expression
        (COMMA parameter)*
        RIGHTPAREN
