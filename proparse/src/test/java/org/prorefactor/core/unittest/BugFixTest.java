@@ -348,7 +348,8 @@ public class BugFixTest {
 
   @Test
   public void test44() {
-    genericTest("bug44.cls");
+    ParseUnit unit = genericTest("bug44.cls");
+    assertEquals(unit.getTopNode().queryStateHead().size(), 6);
   }
 
   // Next two tests : same exception should be thrown in both cases
