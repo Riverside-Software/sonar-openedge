@@ -13,7 +13,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.core.unittest;
+package org.prorefactor.core;
 
 import static org.testng.Assert.assertTrue;
 
@@ -21,8 +21,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.prorefactor.core.unittest.util.AttributedWriter;
-import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.core.util.AttributedWriter;
+import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.testng.annotations.Test;
 

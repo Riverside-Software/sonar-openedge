@@ -12,14 +12,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.core.unittest;
+package org.prorefactor.core;
 
 import java.io.File;
 import java.util.List;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.macrolevel.MacroEvent;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;

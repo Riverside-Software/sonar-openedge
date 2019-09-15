@@ -12,14 +12,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.core.unittest.util;
+package org.prorefactor.core.util;
 
-import java.io.IOException;
+import org.prorefactor.refactor.settings.ProparseSettings;
 
-import org.prorefactor.core.schema.Schema;
-
-public class SportsSchema extends Schema {
-  public SportsSchema() throws IOException {
-    super("src/test/resources/projects/sports2000/sports2000.cache", true);
+public class UnitTestBackslashProparseSettings extends ProparseSettings {
+  public UnitTestBackslashProparseSettings() {
+    super("src/test/resources,src/test/resources/data", true);
   }
 }

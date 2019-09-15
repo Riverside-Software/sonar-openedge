@@ -12,13 +12,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.core.unittest.util;
+package org.prorefactor.core.util;
 
 import org.prorefactor.refactor.settings.ProparseSettings;
 
-public class UnitTestWindowsSettings extends ProparseSettings {
-  public UnitTestWindowsSettings() {
-    super(true, true, false, true, OperatingSystem.WINDOWS, "src/test/resources,src/test/resources/data", "11.7", 64,
-        true);
+public class UnitTestProparseSettings extends ProparseSettings {
+  public UnitTestProparseSettings() {
+    super("src/test/resources,src/test/resources/data", false);
   }
 }

@@ -13,7 +13,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.core.unittest.util;
+package org.prorefactor.core.util;
 
 import java.io.BufferedWriter;
 import java.io.File;
