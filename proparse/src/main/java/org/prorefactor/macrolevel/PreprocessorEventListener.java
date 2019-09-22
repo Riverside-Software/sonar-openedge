@@ -59,11 +59,11 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   }
 
   @Override
-  public void define(int line, int column, String name, String value, int type) {
+  public void define(int line, int column, String name, String value, MacroDefinitionType type) {
     MacroDef newDef = new MacroDef(currRef, type, line, column, name, value);
-    if (type == MacroDef.GLOBAL)
+    if (type == MacroDefinitionType.GLOBAL) {
       globalDefMap.put(name, newDef);
-    if (type == MacroDef.SCOPED) {
+    } else if (type == MacroDefinitionType.SCOPED) {
       Scope currScope = scopeStack.getFirst();
       currScope.defMap.put(name, newDef);
     }
@@ -109,11 +109,10 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
     }
     MacroDef newArg;
     if ((argNum == 0) || (argNum != currInclude.numArgs() + 1)) {
-      newArg = new MacroDef(currInclude.getParent(), MacroDef.NAMEDARG);
-      newArg.setName(argName);
+      newArg = new MacroDef(currInclude.getParent(), MacroDefinitionType.NAMEDARG, argName);
       currInclude.addNamedArg(newArg);
     } else {
-      newArg = new MacroDef(currInclude.getParent(), MacroDef.NUMBEREDARG);
+      newArg = new MacroDef(currInclude.getParent(), MacroDefinitionType.NUMBEREDARG);
       currInclude.addNumberedArg(newArg);
     }
     newArg.setValue(value);
@@ -143,7 +142,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   @Override
   public void undefine(int line, int column, String name) {
     // Add an object for this macro event.
-    MacroDef newDef = new MacroDef(currRef, MacroDef.UNDEFINE, line, column, name, "");
+    MacroDef newDef = new MacroDef(currRef, MacroDefinitionType.UNDEFINE, line, column, name, "");
     currRef.macroEventList.add(newDef);
 
     // Now process the undefine.
@@ -204,8 +203,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   }
 
   /**
-   * Find a MacroDef by name. NOTE: I have not yet implemented {*} and other such built-in macro reference tricks. Not
-   * sure how soon I'll need those. There's a good chance that this function will return null.
+   * Find a MacroDef by name. NOTE: {*} and other such built-in macro reference are not yet implemented.
    */
   private MacroDef findMacroDef(String name) {
     MacroDef ret;

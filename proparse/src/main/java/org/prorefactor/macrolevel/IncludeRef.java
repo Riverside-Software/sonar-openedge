@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.macrolevel;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,4 +93,13 @@ public class IncludeRef extends MacroRef {
     return null;
   }
 
+  public void print(PrintStream stream) {
+    stream.println("Include #" + fileIndex + " - " + fileRefName);
+    for (MacroEvent event : macroEventList) {
+      if (event instanceof IncludeRef)
+        ((IncludeRef) event).print(stream);
+      else
+        stream.println(event.toString());
+    }
+  }
 }

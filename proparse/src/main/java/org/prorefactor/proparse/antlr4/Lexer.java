@@ -20,7 +20,7 @@ import java.util.Set;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.macrolevel.MacroDef;
+import org.prorefactor.macrolevel.MacroDefinitionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1081,7 +1081,7 @@ public class Lexer  {
     defText = defText.trim();
     // Do listing before lowercasing the name
     prepro.getLstListener().define(textStartLine, textStartCol, macroName.toLowerCase(Locale.ENGLISH), defText,
-            defType == Proparse.AMPGLOBALDEFINE ? MacroDef.GLOBAL : MacroDef.SCOPED);
+            defType == Proparse.AMPGLOBALDEFINE ? MacroDefinitionType.GLOBAL : MacroDefinitionType.SCOPED);
     if (defType == Proparse.AMPGLOBALDEFINE)
       prepro.defGlobal(macroName.toLowerCase(), defText);
     else
