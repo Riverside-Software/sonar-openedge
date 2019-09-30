@@ -25,7 +25,7 @@ public interface IPreprocessorEventListener {
   void include(int line, int column, int currentFile, String incFile);
   void includeArgument(String argName, String value, boolean undefined);
   void includeEnd();
-  void define(int line, int column, String name, String value, int type);
+  void define(int line, int column, String name, String value, MacroDefinitionType type);
   void undefine(int line, int column, String name);
   void preproIf(int line, int column, boolean value);
   void preproElse(int line, int column);

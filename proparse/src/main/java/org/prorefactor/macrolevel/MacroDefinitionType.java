@@ -15,32 +15,10 @@
  ********************************************************************************/
 package org.prorefactor.macrolevel;
 
-/**
- * A reference to a macro argument, i.e. {1} or {&amp;name}. Origin might be an include argument or an &amp;DEFINE.
- */
-public class NamedMacroRef extends MacroRef {
-  private final MacroDef macroDef;
-
-  public NamedMacroRef(MacroDef macro, MacroRef parent, int line, int column) {
-    super(parent, line, column);
-    this.macroDef = macro;
-  }
-
-  public MacroDef getMacroDef() {
-    return macroDef;
-  }
-
-  @Override
-  public int getFileIndex() {
-    return getParent().getFileIndex();
-  }
-
-  @Override
-  public String toString() {
-    if (macroDef == null) {
-      return "Reference to unknown macro";
-    } else {
-      return "Reference to " + macroDef.getName() + " defined in file #" + macroDef.getParent().getFileIndex();
-    }
-  }
+public enum MacroDefinitionType {
+  GLOBAL,
+  SCOPED,
+  UNDEFINE,
+  NAMEDARG,
+  NUMBEREDARG;
 }

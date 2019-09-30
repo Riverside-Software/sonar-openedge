@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.macrolevel;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,4 +93,18 @@ public class IncludeRef extends MacroRef {
     return null;
   }
 
+  @Override
+  public String toString() {
+    return "Include file at line " + getLine();
+  }
+
+  public void printMacroEvents(PrintStream stream) {
+    stream.println("Include #" + fileIndex + " - " + fileRefName);
+    for (MacroEvent event : macroEventList) {
+      stream.println("  " + event.toString());
+      if (event instanceof IncludeRef) {
+        ((IncludeRef) event).printMacroEvents(stream);
+      }
+    }
+  }
 }
