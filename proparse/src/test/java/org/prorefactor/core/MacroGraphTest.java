@@ -42,10 +42,6 @@ public class MacroGraphTest {
     session = injector.getInstance(RefactorSession.class);
     unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
     unit.parse();
-    unit.getMacroGraph().print(System.out);
-    System.out.println(unit.getIncludeFileName(0));
-    System.out.println(unit.getIncludeFileName(1));
-    System.out.println(unit.getIncludeFileName(2));
   }
 
   private void testVariable(JPNode topNode, String variable) {

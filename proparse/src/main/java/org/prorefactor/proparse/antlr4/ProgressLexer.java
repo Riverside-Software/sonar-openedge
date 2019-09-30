@@ -884,8 +884,11 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
       if (incFile == null) {
         throw new UncheckedIOException(new IncludeFileNotFoundException(getFilename(), referencedWithName));
       }
-      // Try searching again with normalized name
-      idx = addFilename(incFile.getPath());
+      try {
+        idx = addFilename(incFile.getCanonicalPath());
+      } catch (IOException caught) {
+        throw new UncheckedIOException(caught);
+      }
       includeCache.put(fName, idx);
     }
 

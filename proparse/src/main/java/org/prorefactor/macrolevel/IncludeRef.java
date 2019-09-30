@@ -93,13 +93,13 @@ public class IncludeRef extends MacroRef {
     return null;
   }
 
-  public void print(PrintStream stream) {
+  public void printMacroEvents(PrintStream stream) {
     stream.println("Include #" + fileIndex + " - " + fileRefName);
     for (MacroEvent event : macroEventList) {
       if (event instanceof IncludeRef)
-        ((IncludeRef) event).print(stream);
+        ((IncludeRef) event).printMacroEvents(stream);
       else
-        stream.println(event.toString());
+        stream.println("  " + event.toString());
     }
   }
 }

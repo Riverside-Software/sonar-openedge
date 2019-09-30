@@ -35,16 +35,16 @@ public class MacroDef implements MacroEvent {
   // If named argument doesn't have any defined value
   private boolean undefined;
 
-  public MacroDef(@Nonnull MacroRef parent, @Nonnull MacroDefinitionType type) {
+  public MacroDef(MacroRef parent, @Nonnull MacroDefinitionType type) {
     this(parent, type, 0, 0, "", "");
   }
 
-  public MacroDef(@Nonnull MacroRef parent, @Nonnull MacroDefinitionType type, @Nonnull String name) {
+  public MacroDef(MacroRef parent, @Nonnull MacroDefinitionType type, @Nonnull String name) {
     this(parent, type, 0, 0, name, "");
   }
 
-  public MacroDef(@Nonnull MacroRef parent, @Nonnull MacroDefinitionType type, int line, int column,
-      @Nonnull String name, @Nonnull String value) {
+  public MacroDef(MacroRef parent, @Nonnull MacroDefinitionType type, int line, int column,
+      @Nonnull String name, String value) {
     this.parent = parent;
     this.type = type;
     this.line = line;
@@ -57,7 +57,7 @@ public class MacroDef implements MacroEvent {
     return name;
   }
 
-  public void setValue(@Nonnull String value) {
+  public void setValue(String value) {
     this.value = value;
   }
 
