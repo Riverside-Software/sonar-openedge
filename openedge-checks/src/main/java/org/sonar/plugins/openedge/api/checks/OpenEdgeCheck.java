@@ -25,6 +25,7 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
+import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.LicenseRegistration.License;
 
@@ -89,8 +90,12 @@ public abstract class OpenEdgeCheck<T> {
    * Reports an issue on specified file and at given line number
    */
   public void reportIssue(InputFile file, int lineNumber, String msg) {
-    NewIssue issue = context.newIssue();
-    issue.forRule(getRuleKey()).at(issue.newLocation().on(file).at(file.selectLine(lineNumber)).message(msg)).save();
+    NewIssue issue = context.newIssue().forRule(getRuleKey());
+    NewIssueLocation loc = issue.newLocation().on(file).message(msg);
+    if (lineNumber > 0) {
+      loc.at(file.selectLine(lineNumber));
+    }
+    issue.save();
   }
 
   /**

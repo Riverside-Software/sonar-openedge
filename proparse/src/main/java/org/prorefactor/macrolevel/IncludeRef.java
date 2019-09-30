@@ -93,13 +93,18 @@ public class IncludeRef extends MacroRef {
     return null;
   }
 
+  @Override
+  public String toString() {
+    return "Include file at line " + getLine();
+  }
+
   public void printMacroEvents(PrintStream stream) {
     stream.println("Include #" + fileIndex + " - " + fileRefName);
     for (MacroEvent event : macroEventList) {
-      if (event instanceof IncludeRef)
+      stream.println("  " + event.toString());
+      if (event instanceof IncludeRef) {
         ((IncludeRef) event).printMacroEvents(stream);
-      else
-        stream.println("  " + event.toString());
+      }
     }
   }
 }
