@@ -93,12 +93,16 @@ public class ClassesTest {
 
     Variable prop1 = unit.getRootScope().getVariable("prop1");
     Variable prop2 = unit.getRootScope().getVariable("prop2");
+    Variable var1 = unit.getRootScope().getVariable("var1");
     assertNotNull(prop1);
     assertNotNull(prop2);
+    assertNotNull(var1);
     assertEquals(prop1.getNumReads(), 1);
     assertEquals(prop1.getNumWrites(), 1);
     assertEquals(prop2.getNumReads(), 1);
     assertEquals(prop2.getNumWrites(), 1);
+    assertEquals(var1.getNumReads(), 0);
+    assertEquals(var1.getNumWrites(), 1);
   }
 
 }

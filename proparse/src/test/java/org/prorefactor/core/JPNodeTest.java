@@ -354,7 +354,7 @@ public class JPNodeTest {
     unit.attachXref(doc);
 
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.RECORD_NAME);
-    assertEquals(nodes.size(), 3);
+    assertEquals(nodes.size(), 5);
     RecordNameNode warehouse = (RecordNameNode) nodes.get(0);
     RecordNameNode customer = (RecordNameNode) nodes.get(1);
     RecordNameNode item = (RecordNameNode) nodes.get(2);
