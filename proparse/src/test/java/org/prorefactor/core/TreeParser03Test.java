@@ -265,4 +265,17 @@ public class TreeParser03Test {
     assertEquals(yyy.getNumWrites(), 1);
   }
 
+  @Test
+  public void test14() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test14.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Variable xxx = unit.getRootScope().getVariable("xxx");
+    assertNotNull(xxx);
+    assertEquals(xxx.getNumReads(), 1);
+    assertEquals(xxx.getNumWrites(), 3);
+  }
 }
