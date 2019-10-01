@@ -267,6 +267,7 @@ public class ParseUnit {
             RecordNameNode recNode = (RecordNameNode) node;
             try {
               if ((recNode.getStatement().getLine() == ref.getLineNum())
+                  && (recNode.getTableBuffer() != null)
                   && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
                   && (recNode.attrGet(IConstants.STORETYPE) == tableType)
                   && ((src.getFileNum() == 1 && recNode.getFileIndex() == 0)
