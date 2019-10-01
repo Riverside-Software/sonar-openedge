@@ -218,13 +218,24 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
-  public void enterMemoryManagementFunction(MemoryManagementFunctionContext ctx) {
-    if ((ctx.PUTBITS() != null) || (ctx.PUTBYTE() != null) || (ctx.PUTBYTES() != null) || (ctx.PUTDOUBLE() != null)
-        || (ctx.PUTFLOAT() != null) || (ctx.PUTINT64() != null) || (ctx.PUTLONG() != null) || (ctx.PUTSHORT() != null)
-        || (ctx.PUTSTRING() != null) || (ctx.PUTUNSIGNEDLONG() != null) || (ctx.PUTUNSIGNEDSHORT() != null)
-        || (ctx.SETPOINTERVALUE() != null) || (ctx.SETSIZE() != null)) {
-      setContextQualifier(ctx.functionArgs().expression(0), ContextQualifier.UPDATING);
+  public void enterPseudoFunction(PseudoFunctionContext ctx) {
+    if (ctx.entryFunction() != null) {
+      setContextQualifier(ctx.entryFunction().functionArgs().expression(1), ContextQualifier.UPDATING);
     }
+    if (ctx.lengthFunction() != null) {
+      setContextQualifier(ctx.lengthFunction().functionArgs().expression(0), ContextQualifier.UPDATING);
+    }
+    if (ctx.rawFunction() != null) {
+      setContextQualifier(ctx.rawFunction().functionArgs().expression(0), ContextQualifier.UPDATING);
+    }
+    if (ctx.substringFunction() != null) {
+      setContextQualifier(ctx.substringFunction().functionArgs().expression(0), ContextQualifier.UPDATING);
+    }
+  }
+
+  @Override
+  public void enterMemoryManagementFunction(MemoryManagementFunctionContext ctx) {
+    setContextQualifier(ctx.functionArgs().expression(0), ContextQualifier.UPDATING);
   }
 
   @Override
