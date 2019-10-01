@@ -1439,6 +1439,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitDynamicPropertyFunction(DynamicPropertyFunctionContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
   public Builder visitFieldEqualDynamicNew(FieldEqualDynamicNewContext ctx) {
     return createTreeFromSecondNode(ctx).setOperator();
   }
