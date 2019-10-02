@@ -370,7 +370,9 @@ public class OpenEdgeSettings {
   }
 
   public boolean displayStackTraceOnError() {
-    return config.getBoolean(Constants.PROPARSE_ERROR_STACKTRACE).orElse(true);
+    // Default is to hide stack traces in SonarLint, unless overidden by property
+    return config.getBoolean(Constants.PROPARSE_ERROR_STACKTRACE).orElse(
+        runtime.getProduct() == SonarProduct.SONARQUBE);
   }
 
   public boolean parseXrefDocument() {
