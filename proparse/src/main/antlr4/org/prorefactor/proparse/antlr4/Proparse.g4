@@ -1941,7 +1941,7 @@ defineParamVarLike:
   ;
 
 definePropertyStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE | SERIALIZABLE | NONSERIALIZABLE )*
     PROPERTY n=newIdentifier definePropertyAs
     definePropertyAccessor definePropertyAccessor?
     { support.defVar($n.text); }
@@ -2010,7 +2010,7 @@ defineSubMenuStatement:
   ;
    
 defineTempTableStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE | SERIALIZABLE | NONSERIALIZABLE )*
     TEMPTABLE tn=identifier
     { support.defTable($tn.text, SymbolScope.FieldType.TTABLE); }
     ( UNDO | NOUNDO )?
