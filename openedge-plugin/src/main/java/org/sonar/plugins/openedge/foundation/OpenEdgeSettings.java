@@ -593,6 +593,14 @@ public class OpenEdgeSettings {
       if (skipXCode.isPresent())
         ppSettings.setCustomSkipXCode(skipXCode.get());
 
+      // ANTLR Token Deletion
+      ppSettings.setAntlrTokenDeletion(config.getBoolean("sonar.oe.proparse.token.deletion").orElse(true));
+      // ANTLR Token Insertion
+      ppSettings.setAntlrTokenInsertion(config.getBoolean("sonar.oe.proparse.token.insertion").orElse(true));
+      // ANTLR Recover, set to false by default in SonarLint
+      ppSettings.setAntlrRecover(
+          config.getBoolean("sonar.oe.proparse.recover").orElse(runtime.getProduct() == SonarProduct.SONARQUBE));
+
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
       proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());
       if (runtime.getProduct() == SonarProduct.SONARQUBE) {

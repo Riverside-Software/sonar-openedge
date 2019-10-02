@@ -206,8 +206,10 @@ public class ParseUnit {
     try {
       tree = parser.program();
     } catch (ParseCancellationException caught) {
-      parser.setErrorHandler(new ProparseErrorStrategy());
+      parser.setErrorHandler(new ProparseErrorStrategy(session.getProparseSettings().allowAntlrTokenDeletion(),
+          session.getProparseSettings().allowAntlrTokenInsertion(), session.getProparseSettings().allowAntlrRecover()));
       parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+      // Another ParseCancellationException can be thrown in recover fails again
       tree = parser.program();
     }
     lexer.parseComplete();

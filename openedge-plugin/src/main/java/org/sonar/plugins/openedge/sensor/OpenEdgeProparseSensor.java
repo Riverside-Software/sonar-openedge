@@ -44,6 +44,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.ProToken;
@@ -298,10 +299,16 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.error("Unable to parse " + file + " - IOException was caught - Please report this issue", caught);
       }
       return;
-    } catch (RecognitionException caught) {
-      ProToken tok = (ProToken) caught.getOffendingToken();
-      LOG.error("Error during code parsing for " + file + " at position " + tok.getFileName() + ":"
-          + tok.getLine() + ":" + tok.getCharPositionInLine(), (settings.displayStackTraceOnError() ? caught : null));
+    } catch (ParseCancellationException caught) {
+      RecognitionException cause = (RecognitionException) caught.getCause();
+      ProToken tok = (ProToken) cause.getOffendingToken();
+      if (settings.displayStackTraceOnError()) {
+        LOG.error("Error during code parsing for " + file + " at position " + tok.getFileName() + ":" + tok.getLine()
+            + ":" + tok.getCharPositionInLine(), cause);
+      } else {
+        LOG.error("Error during code parsing for {} at position {}:{}:{}", file, tok.getFileName(), tok.getLine(),
+            tok.getCharPositionInLine());
+      }
       numFailures++;
 
       TextPointer strt = null;
@@ -318,7 +325,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
         NewAnalysisError analysisError = context.newAnalysisError();
         analysisError.onFile(file);
-        analysisError.message(Strings.nullToEmpty(caught.getMessage()) + " in " + tok.getFileName() + ":" + tok.getLine()
+        analysisError.message(Strings.nullToEmpty(cause.getMessage()) + " in " + tok.getFileName() + ":" + tok.getLine()
             + ":" + tok.getCharPositionInLine());
         if (strt != null)
           analysisError.at(strt);
@@ -326,7 +333,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       } else {
         NewIssue issue = context.newIssue().forRule(
             RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY));
-        NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()) + " in "
+        NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(cause.getMessage()) + " in "
             + tok.getFileName() + ":" + tok.getLine() + ":" + tok.getCharPositionInLine());
         if ((strt != null) && (end != null))
           loc.at(file.newRange(strt, end));

@@ -29,10 +29,11 @@ public class DescriptiveErrorListener extends BaseErrorListener {
       String msg, RecognitionException e) {
     ProToken tok = (ProToken) offendingSymbol;
     if (tok.getFileIndex() != 0) {
-      LOG.error("Syntax error -- {} -- {}:{}:{} -- {}", recognizer.getInputStream().getSourceName(), tok.getFileName(), line,
-          charPositionInLine, msg);
+      LOG.error("Syntax error -- {} -- {}:{}:{} -- {} -- {}", recognizer.getInputStream().getSourceName(),
+          tok.getFileName(), line, charPositionInLine, msg, e != null ? "Recover" : "");
     } else {
-      LOG.error("Syntax error -- {}:{}:{} -- {}", tok.getFileName(), line, charPositionInLine, msg);
+      LOG.error("Syntax error -- {}:{}:{} -- {} -- {}", tok.getFileName(), line, charPositionInLine, msg,
+          e != null ? "Recover" : "");
     }
   }
 }

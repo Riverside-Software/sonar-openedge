@@ -33,4 +33,8 @@ public interface IProparseSettings {
   String getWindowSystem();
   Integer getProcessArchitecture();
   boolean getSkipXCode();
+
+  boolean allowAntlrTokenInsertion();
+  boolean allowAntlrTokenDeletion();
+  boolean allowAntlrRecover();
 }

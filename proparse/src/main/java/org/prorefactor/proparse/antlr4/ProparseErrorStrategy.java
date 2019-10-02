@@ -16,10 +16,13 @@ package org.prorefactor.proparse.antlr4;
 
 import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.misc.IntervalSet;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * As tokens are manually generated in Proparse, method {@link DefaultErrorStrategy#getMissingSymbol} fails with
@@ -28,27 +31,53 @@ import org.prorefactor.core.ProToken;
  * We just use the same implementation with a different token creation type
  */
 public class ProparseErrorStrategy extends DefaultErrorStrategy {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProparseErrorStrategy.class);
+
+  private final boolean allowDeletion;
+  private final boolean allowInsertion;
+  private final boolean allowRecover;
+
+  public ProparseErrorStrategy(boolean allowDeletion, boolean allowInsertion, boolean allowRecover) {
+    super();
+    this.allowDeletion = allowDeletion;
+    this.allowInsertion = allowInsertion;
+    this.allowRecover = allowRecover;
+  }
+
+  @Override
+  public void recover(Parser recognizer, RecognitionException e) {
+    if (allowRecover) {
+      super.recover(recognizer, e);
+    } else {
+      throw new ParseCancellationException(e);
+    }
+  }
+
+  @Override
+  protected Token singleTokenDeletion(Parser recognizer) {
+    if (allowDeletion) {
+      return super.singleTokenDeletion(recognizer);
+    } else {
+      return null;
+    }
+  }
+
+  @Override
+  protected boolean singleTokenInsertion(Parser recognizer) {
+    if (allowInsertion) {
+      return super.singleTokenInsertion(recognizer);
+    } else {
+      return false;
+    }
+  }
 
   @Override
   protected Token getMissingSymbol(Parser recognizer) {
-    Token currentSymbol = recognizer.getCurrentToken();
-    IntervalSet expecting = getExpectedTokens(recognizer);
-    int expectedTokenType = Token.INVALID_TYPE;
-    if (!expecting.isNil()) {
-      expectedTokenType = expecting.getMinElement(); // get any element
-    }
-    String tokenText;
-    if (expectedTokenType == Token.EOF)
-      tokenText = "<missing EOF>";
-    else
-      tokenText = "<missing " + recognizer.getVocabulary().getDisplayName(expectedTokenType) + ">";
-    Token current = currentSymbol;
-    Token lookback = recognizer.getInputStream().LT(-1);
-    if (current.getType() == Token.EOF && lookback != null) {
-      current = lookback;
-    }
-
-    return new ProToken.Builder(ABLNodeType.getNodeType(expectedTokenType), tokenText).setLine(
-        current.getLine()).setCharPositionInLine(current.getCharPositionInLine()).build();
+    // Just convert into ProToken type
+    Token tok = super.getMissingSymbol(recognizer);
+    LOGGER.debug("Injecting missing token {} at line {} - column {}", ABLNodeType.getNodeType(tok.getType()),
+        tok.getLine(), tok.getCharPositionInLine());
+    return new ProToken.Builder(ABLNodeType.getNodeType(tok.getType()), tok.getText()).setLine(
+        tok.getLine()).setCharPositionInLine(tok.getCharPositionInLine()).build();
   }
 }
