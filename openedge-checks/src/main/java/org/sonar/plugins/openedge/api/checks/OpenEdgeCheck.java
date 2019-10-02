@@ -79,7 +79,7 @@ public abstract class OpenEdgeCheck<T> {
   public abstract CheckType getCheckType();
 
   /**
-   * Reports an issue on specified file and at given line number
+   * Reports an issue on specified file
    */
   public void reportIssue(InputFile file, String msg) {
     NewIssue issue = context.newIssue();
