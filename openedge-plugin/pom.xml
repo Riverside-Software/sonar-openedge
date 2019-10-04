@@ -56,7 +56,7 @@
     <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>
       <artifactId>sonar-plugin-api</artifactId>
-      <version>6.6</version>
+      <version>6.7</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -115,7 +115,7 @@
           <pluginKey>${sonar.pluginKey}</pluginKey>
           <pluginName>${sonar.pluginName}</pluginName>
           <pluginClass>${sonar.pluginClass}</pluginClass>
-          <sonarQubeMinVersion>6.6</sonarQubeMinVersion>
+          <sonarQubeMinVersion>6.7</sonarQubeMinVersion>
           <sonarLintSupported>true</sonarLintSupported>
           <archive>
             <manifestEntries>
