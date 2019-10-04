@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -46,6 +46,16 @@ public class TableBuffer extends Symbol {
 
   void addFieldBuffer(FieldBuffer fieldBuffer) {
     fieldBuffers.put(fieldBuffer.getField(), fieldBuffer);
+  }
+
+  /**
+   * Return fully qualified table name (with DB) of the table buffer is pointing to
+   */
+  public String getTargetFullName() {
+    if (table.getStoretype() == IConstants.ST_DBTABLE)
+      return new StringBuilder(table.getDatabase().getName()).append(".").append(table.getName()).toString();
+    else
+      return table.getName();
   }
 
   /**

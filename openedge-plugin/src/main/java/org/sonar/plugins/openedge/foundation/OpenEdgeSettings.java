@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -370,8 +370,15 @@ public class OpenEdgeSettings {
   }
 
   public boolean displayStackTraceOnError() {
-    return config.getBoolean(Constants.PROPARSE_ERROR_STACKTRACE).orElse(true);
+    // Default is to hide stack traces in SonarLint, unless overidden by property
+    return config.getBoolean(Constants.PROPARSE_ERROR_STACKTRACE).orElse(
+        runtime.getProduct() == SonarProduct.SONARQUBE);
   }
+
+  public boolean parseXrefDocument() {
+    return config.getBoolean(Constants.XML_DOCUMENT_RULES).orElse(false);
+  }
+
   /**
    * Returns true if method should be skipped by CPD engine
    * 
@@ -585,6 +592,14 @@ public class OpenEdgeSettings {
       Optional<Boolean> skipXCode = config.getBoolean(Constants.SKIP_XCODE);
       if (skipXCode.isPresent())
         ppSettings.setCustomSkipXCode(skipXCode.get());
+
+      // ANTLR Token Deletion
+      ppSettings.setAntlrTokenDeletion(config.getBoolean("sonar.oe.proparse.token.deletion").orElse(true));
+      // ANTLR Token Insertion
+      ppSettings.setAntlrTokenInsertion(config.getBoolean("sonar.oe.proparse.token.insertion").orElse(true));
+      // ANTLR Recover, set to false by default in SonarLint
+      ppSettings.setAntlrRecover(
+          config.getBoolean("sonar.oe.proparse.recover").orElse(runtime.getProduct() == SonarProduct.SONARQUBE));
 
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
       proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());

@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -36,11 +36,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.ProToken;
@@ -83,6 +87,7 @@ import org.xml.sax.SAXException;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
+import com.progress.xref.CrossReference;
 
 import eu.rssw.listing.CodeBlock;
 import eu.rssw.listing.ListingParser;
@@ -97,6 +102,8 @@ public class OpenEdgeProparseSensor implements Sensor {
   // Internal use
   private final DocumentBuilderFactory dbFactory;
   private final DocumentBuilder dBuilder;
+  private final JAXBContext context;
+  private final Unmarshaller unmarshaller;
 
   // File statistics
   private int numFiles;
@@ -124,7 +131,9 @@ public class OpenEdgeProparseSensor implements Sensor {
     try {
       dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
       dBuilder = dbFactory.newDocumentBuilder();
-    } catch (ParserConfigurationException caught) {
+      context = JAXBContext.newInstance(CrossReference.class);
+      unmarshaller = context.createUnmarshaller();
+    } catch (ParserConfigurationException | JAXBException caught) {
       throw new IllegalStateException(caught);
     }
   }
@@ -202,7 +211,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
       try (InputStream inpStream = new FileInputStream(xrefFile)) {
         long startTime = System.currentTimeMillis();
-         doc = dBuilder.parse(
+        doc = dBuilder.parse(
             settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
         xmlParseTime += (System.currentTimeMillis() - startTime);
         numXREF++;
@@ -210,15 +219,39 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
       }
     }
+
+    return doc;
+  }
+
+  private CrossReference jaxbXREF(File xrefFile) {
+    CrossReference doc = null;
+    if ((xrefFile != null) && xrefFile.exists()) {
+      LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
+      try (InputStream inpStream = new FileInputStream(xrefFile)) {
+        long startTime = System.currentTimeMillis();
+        doc = (CrossReference) unmarshaller.unmarshal(
+            settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
+        xmlParseTime += (System.currentTimeMillis() - startTime);
+        numXREF++;
+      } catch (JAXBException | IOException caught) {
+        LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
+      }
+    }
+
     return doc;
   }
 
   private void parseMainFile(SensorContext context, InputFile file, RefactorSession session) {
+    CrossReference xref = null;
     Document doc = null;
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
-      doc = parseXREF(settings.getXrefFile(file));
+      xref = jaxbXREF(settings.getXrefFile(file));
+      if (settings.parseXrefDocument())
+        doc = parseXREF(settings.getXrefFile(file));
     } else if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
-      doc = parseXREF(settings.getSonarlintXrefFile(file));
+      xref = jaxbXREF(settings.getSonarlintXrefFile(file));
+      if (settings.parseXrefDocument())
+        doc = parseXREF(settings.getSonarlintXrefFile(file));
       settings.parseHierarchy(file);
     }
 
@@ -250,6 +283,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       unit = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session);
       unit.treeParser01();
       unit.attachXref(doc);
+      unit.attachXref(xref);
       unit.attachTransactionBlocks(trxBlocks);
       unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
       updateParseTime(System.currentTimeMillis() - startTime);
@@ -265,10 +299,16 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.error("Unable to parse " + file + " - IOException was caught - Please report this issue", caught);
       }
       return;
-    } catch (RecognitionException caught) {
-      ProToken tok = (ProToken) caught.getOffendingToken();
-      LOG.error("Error during code parsing for " + file + " at position " + tok.getFileName() + ":"
-          + tok.getLine() + ":" + tok.getCharPositionInLine(), (settings.displayStackTraceOnError() ? caught : null));
+    } catch (ParseCancellationException caught) {
+      RecognitionException cause = (RecognitionException) caught.getCause();
+      ProToken tok = (ProToken) cause.getOffendingToken();
+      if (settings.displayStackTraceOnError()) {
+        LOG.error("Error during code parsing for " + file + " at position " + tok.getFileName() + ":" + tok.getLine()
+            + ":" + tok.getCharPositionInLine(), cause);
+      } else {
+        LOG.error("Error during code parsing for {} at position {}:{}:{}", file, tok.getFileName(), tok.getLine(),
+            tok.getCharPositionInLine());
+      }
       numFailures++;
 
       TextPointer strt = null;
@@ -285,7 +325,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
         NewAnalysisError analysisError = context.newAnalysisError();
         analysisError.onFile(file);
-        analysisError.message(Strings.nullToEmpty(caught.getMessage()) + " in " + tok.getFileName() + ":" + tok.getLine()
+        analysisError.message(Strings.nullToEmpty(cause.getMessage()) + " in " + tok.getFileName() + ":" + tok.getLine()
             + ":" + tok.getCharPositionInLine());
         if (strt != null)
           analysisError.at(strt);
@@ -293,7 +333,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       } else {
         NewIssue issue = context.newIssue().forRule(
             RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY));
-        NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()) + " in "
+        NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(cause.getMessage()) + " in "
             + tok.getFileName() + ":" + tok.getLine() + ":" + tok.getCharPositionInLine());
         if ((strt != null) && (end != null))
           loc.at(file.newRange(strt, end));

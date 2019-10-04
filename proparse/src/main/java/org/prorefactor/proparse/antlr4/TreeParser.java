@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -218,13 +218,24 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
-  public void enterMemoryManagementFunction(MemoryManagementFunctionContext ctx) {
-    if ((ctx.PUTBITS() != null) || (ctx.PUTBYTE() != null) || (ctx.PUTBYTES() != null) || (ctx.PUTDOUBLE() != null)
-        || (ctx.PUTFLOAT() != null) || (ctx.PUTINT64() != null) || (ctx.PUTLONG() != null) || (ctx.PUTSHORT() != null)
-        || (ctx.PUTSTRING() != null) || (ctx.PUTUNSIGNEDLONG() != null) || (ctx.PUTUNSIGNEDSHORT() != null)
-        || (ctx.SETPOINTERVALUE() != null) || (ctx.SETSIZE() != null)) {
-      setContextQualifier(ctx.functionArgs().expression(0), ContextQualifier.UPDATING);
+  public void enterPseudoFunction(PseudoFunctionContext ctx) {
+    if (ctx.entryFunction() != null) {
+      setContextQualifier(ctx.entryFunction().functionArgs().expression(1), ContextQualifier.UPDATING);
     }
+    if (ctx.lengthFunction() != null) {
+      setContextQualifier(ctx.lengthFunction().functionArgs().expression(0), ContextQualifier.UPDATING);
+    }
+    if (ctx.rawFunction() != null) {
+      setContextQualifier(ctx.rawFunction().functionArgs().expression(0), ContextQualifier.UPDATING);
+    }
+    if (ctx.substringFunction() != null) {
+      setContextQualifier(ctx.substringFunction().functionArgs().expression(0), ContextQualifier.UPDATING);
+    }
+  }
+
+  @Override
+  public void enterMemoryManagementFunction(MemoryManagementFunctionContext ctx) {
+    setContextQualifier(ctx.functionArgs().expression(0), ContextQualifier.UPDATING);
   }
 
   @Override
@@ -732,9 +743,18 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
-  public void enterCopyLobStatement(CopyLobStatementContext ctx) {
-    setContextQualifier(ctx.expression(0), ContextQualifier.REF);
-    setContextQualifier(ctx.expression(1), ContextQualifier.UPDATING);
+  public void enterCopyLobFrom(CopyLobFromContext ctx) {
+    setContextQualifier(ctx.expression(), ContextQualifier.REF);
+  }
+
+  @Override
+  public void enterCopyLobTo(CopyLobToContext ctx) {
+    if (ctx.FILE() == null) {
+      setContextQualifier(ctx.expression(0), ContextQualifier.UPDATING);
+    } else {
+      // COPY-LOB ... TO FILE xxx : xxx is only referenced in this case, the value is not updated
+      setContextQualifier(ctx.expression(0), ContextQualifier.REF);
+    }
   }
 
   @Override

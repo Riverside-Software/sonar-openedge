@@ -34,8 +34,8 @@ options {
 @members {
   private ParserSupport support;
 
-  public void initAntlr4(RefactorSession session, IntegerIndex<String> fileNameList) {
-    this.support = new ParserSupport(session, fileNameList);
+  public void initAntlr4(RefactorSession session) {
+    this.support = new ParserSupport(session);
   }
 
   public ParserSupport getParserSupport() {
@@ -341,6 +341,7 @@ pseudoFunction:
   | currentValueFunction
   | CURRENTWINDOW
   | dynamicCurrentValueFunction
+  | dynamicPropertyFunction
   | entryFunction
   | lengthFunction
   | nextValueFunction
@@ -382,7 +383,7 @@ builtinFunction:
   |  DYNAMICFUNCTION LEFTPAREN expression inExpression? (COMMA parameter)* RIGHTPAREN NOERROR_KW?
   |  DYNAMICINVOKE
        LEFTPAREN
-       ( expressionTerm | typeName )
+       ( expression | typeName )
        COMMA expression
        (COMMA parameter)*
        RIGHTPAREN
@@ -1457,22 +1458,23 @@ convertPhraseOption:
   ;
     
 copyLobStatement:
-    COPYLOB FROM?
+    COPYLOB FROM? copyLobFrom copyLobStarting? copyLobFor? TO copyLobTo ( NOCONVERT | convertPhrase )? NOERROR_KW? statementEnd
+  ;
+
+copyLobFrom:
     ( FILE expression | OBJECT? expression )
-    copyLobStarting? copyLobFor?
-    TO
-    ( FILE expression APPEND? | OBJECT? expression ( OVERLAY AT expression TRIM? )? )
-    ( NOCONVERT | convertPhrase )?
-    NOERROR_KW?
-    statementEnd
+  ;
+
+copyLobStarting:
+    STARTING AT expression
   ;
 
 copyLobFor:
     FOR expression
   ;
 
-copyLobStarting:
-    STARTING AT expression
+copyLobTo:
+    ( FILE expression APPEND? | OBJECT? expression ( OVERLAY AT expression TRIM? )? )
   ;
 
 forTenant:
@@ -1939,7 +1941,7 @@ defineParamVarLike:
   ;
 
 definePropertyStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE | SERIALIZABLE | NONSERIALIZABLE )*
     PROPERTY n=newIdentifier definePropertyAs
     definePropertyAccessor definePropertyAccessor?
     { support.defVar($n.text); }
@@ -2008,7 +2010,7 @@ defineSubMenuStatement:
   ;
    
 defineTempTableStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE | SERIALIZABLE | NONSERIALIZABLE )*
     TEMPTABLE tn=identifier
     { support.defTable($tn.text, SymbolScope.FieldType.TTABLE); }
     ( UNDO | NOUNDO )?
@@ -2199,6 +2201,10 @@ dynamicCurrentValueFunction:
 
 dynamicNewStatement:
     fieldEqualDynamicNew NOERROR_KW? statementEnd
+  ;
+
+dynamicPropertyFunction:
+    DYNAMICPROPERTY functionArgs
   ;
 
 fieldEqualDynamicNew:

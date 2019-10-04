@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -15,48 +15,42 @@
  ********************************************************************************/
 package org.prorefactor.macrolevel;
 
+import javax.annotation.Nonnull;
+
 /**
  * A macro DEFINE (global or scoped) or UNDEFINE or an include argument (named or numbered/positional).
  */
 public class MacroDef implements MacroEvent {
-  public static final int GLOBAL = 1;
-  public static final int SCOPED = 2;
-  public static final int UNDEFINE = 3;
-  public static final int NAMEDARG = 4;
-  public static final int NUMBEREDARG = 5;
-
   private final MacroRef parent;
+  private final MacroDefinitionType type;
   private final int column;
   private final int line;
-  /** One of this class's values: GLOBAL, SCOPED, UNDEFINE, NAMEDARG, NUMBEREDARG */
-  private int type;
+  private final String name;
 
   /** For an UNDEFINE - undef what? */
   private MacroDef undefWhat = null;
   /** For an include argument - what include reference is it for? */
   private IncludeRef includeRef = null;
-  private String name;
   private String value;
+  // If named argument doesn't have any defined value
+  private boolean undefined;
 
-  public MacroDef(MacroRef parent, int type) {
-    this(parent, type, 0, 0);
+  public MacroDef(MacroRef parent, @Nonnull MacroDefinitionType type) {
+    this(parent, type, 0, 0, "", "");
   }
 
-  public MacroDef(MacroRef parent, int type, int line, int column) {
-    this(parent, type, line, column, "", "");
+  public MacroDef(MacroRef parent, @Nonnull MacroDefinitionType type, @Nonnull String name) {
+    this(parent, type, 0, 0, name, "");
   }
 
-  public MacroDef(MacroRef parent, int type, int line, int column, String name, String value) {
+  public MacroDef(MacroRef parent, @Nonnull MacroDefinitionType type, int line, int column,
+      @Nonnull String name, String value) {
     this.parent = parent;
     this.type = type;
     this.line = line;
     this.column = column;
     this.name = name;
     this.value = value;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public String getName() {
@@ -71,12 +65,20 @@ public class MacroDef implements MacroEvent {
     return value;
   }
 
+  public void setUndefined(boolean undefined) {
+    this.undefined = undefined;
+  }
+
+  public boolean isUndefined() {
+    return undefined;
+  }
+
   @Override
   public MacroRef getParent() {
     return parent;
   }
 
-  public int getType() {
+  public MacroDefinitionType getType() {
     return type;
   }
 
@@ -101,30 +103,8 @@ public class MacroDef implements MacroEvent {
     return includeRef;
   }
 
-  // TODO Migrated from existing code, but doesn't seem to be used anywhere. Remove ?
-  public int[] getDefinitionPosition() {
-    int[] ret = new int[3];
-
-    if (includeRef == null) {
-      if (parent instanceof NamedMacroRef) {
-        return ((NamedMacroRef) parent).getMacroDef().getDefinitionPosition();
-      }
-
-      ret[0] = ((IncludeRef) parent).getFileIndex();
-      ret[1] = line;
-      ret[2] = column;
-    } else {
-      // Include arguments don't get their file/line/col stored, so
-      // we have to find the include reference source.
-      if (!(includeRef.getParent() instanceof IncludeRef)) {
-        return ((NamedMacroRef) includeRef.getParent()).getMacroDef().getDefinitionPosition();
-      }
-
-      ret[0] = ((IncludeRef) includeRef.getParent()).getFileIndex();
-      ret[1] = includeRef.getLine();
-      ret[2] = includeRef.getColumn();
-    }
-    return ret;
+  @Override
+  public String toString() {
+    return type + " macro '" + name + "' at position " + line + ":" + column;
   }
-
 }

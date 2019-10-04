@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -28,7 +28,12 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.prorefactor.core.unittest.util.UnitTestModule;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
+import org.prorefactor.core.nodetypes.RecordNameNode;
+import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.AfterTest;
@@ -37,6 +42,7 @@ import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.progress.xref.CrossReference;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
@@ -50,6 +56,9 @@ public class JPNodeTest {
   private final static String SRC_DIR = "src/test/resources/jpnode";
   private final static String TEMP_DIR = "target/nodes-lister/jpnode";
 
+  private JAXBContext context;
+  private Unmarshaller unmarshaller;
+
   private RefactorSession session;
   private File tempDir = new File(TEMP_DIR);
 
@@ -58,6 +67,13 @@ public class JPNodeTest {
 
   @BeforeTest
   public void setUp() throws IOException, InvalidRCodeException {
+    try {
+      context = JAXBContext.newInstance(CrossReference.class);
+      unmarshaller = context.createUnmarshaller();
+    } catch (JAXBException caught) {
+      throw new IllegalStateException(caught);
+    }
+
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
@@ -328,6 +344,30 @@ public class JPNodeTest {
     assertEquals(nodes.get(0).getDirectChildren().get(1).getNodeType(), ABLNodeType.UPDATE);
     assertEquals(nodes.get(0).getDirectChildren().get(2).getNodeType(), ABLNodeType.VIEWAS);
     assertEquals(nodes.get(0).getDirectChildren().get(3).getNodeType(), ABLNodeType.PERIOD);
+  }
+
+  @Test
+  public void testXref01() throws JAXBException, IOException {
+    ParseUnit unit = genericTest("xref.p");
+    unit.treeParser01();
+    CrossReference doc = (CrossReference) unmarshaller.unmarshal(new FileInputStream(SRC_DIR + "/xref.p.xref"));
+    unit.attachXref(doc);
+
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.RECORD_NAME);
+    assertEquals(nodes.size(), 5);
+    RecordNameNode warehouse = (RecordNameNode) nodes.get(0);
+    RecordNameNode customer = (RecordNameNode) nodes.get(1);
+    RecordNameNode item = (RecordNameNode) nodes.get(2);
+
+    assertEquals(warehouse.getLink(IConstants.WHOLE_INDEX), Boolean.TRUE);
+    assertEquals(warehouse.getLink(IConstants.SEARCH_INDEX_NAME), "warehousenum");
+
+    assertEquals(customer.getLink(IConstants.WHOLE_INDEX), Boolean.FALSE);
+    assertEquals(customer.getLink(IConstants.SEARCH_INDEX_NAME), "CountryPost");
+    assertEquals(customer.getLink(IConstants.SORT_ACCESS), "Address");
+
+    assertEquals(item.getLink(IConstants.WHOLE_INDEX), Boolean.TRUE);
+    assertEquals(item.getLink(IConstants.SEARCH_INDEX_NAME), "ItemNum");
   }
 
 }

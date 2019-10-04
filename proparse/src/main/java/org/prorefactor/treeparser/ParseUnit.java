@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -34,8 +35,12 @@ import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.IConstants;
+import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
+import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
@@ -57,6 +62,9 @@ import org.w3c.dom.Document;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
+import com.progress.xref.CrossReference;
+import com.progress.xref.CrossReference.Source;
+import com.progress.xref.CrossReference.Source.Reference;
 
 import eu.rssw.pct.elements.ITypeInfo;
 
@@ -80,7 +88,8 @@ public class ParseUnit {
   private List<EditableCodeSection> sections;
   private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
-  private Document xref = null;
+  private Document doc = null;
+  private CrossReference xref = null;
   private ITypeInfo typeInfo = null;
   private List<Integer> trxBlocks;
   private ParserSupport support;
@@ -125,6 +134,7 @@ public class ParseUnit {
       return "";
     return Strings.nullToEmpty(fileNameList.getValue(index));
   }
+
   /** 
    * @return IncludeRef object
    */
@@ -156,7 +166,14 @@ public class ParseUnit {
   }
 
   public TokenSource preprocess() {
-    return new ProgressLexer(session, getByteSource(), relativeName, false);
+    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
+    fileNameList = lexer.getFilenameList();
+    macroGraph = lexer.getMacroGraph();
+    appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
+    sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
+    metrics = lexer.getMetrics();
+
+    return lexer;
   }
 
   /**
@@ -180,7 +197,7 @@ public class ParseUnit {
 
     ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
     Proparse parser = new Proparse(new CommonTokenStream(lexer));
-    parser.initAntlr4(session, lexer.getFilenameList());
+    parser.initAntlr4(session);
     parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
     parser.setErrorHandler(new BailErrorStrategy());
     parser.removeErrorListeners();
@@ -189,11 +206,13 @@ public class ParseUnit {
     try {
       tree = parser.program();
     } catch (ParseCancellationException caught) {
-      parser.setErrorHandler(new ProparseErrorStrategy());
+      parser.setErrorHandler(new ProparseErrorStrategy(session.getProparseSettings().allowAntlrTokenDeletion(),
+          session.getProparseSettings().allowAntlrTokenInsertion(), session.getProparseSettings().allowAntlrRecover()));
       parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+      // Another ParseCancellationException can be thrown in recover fails again
       tree = parser.program();
     }
-
+    lexer.parseComplete();
     topNode = (ProgramRootNode) new JPNodeVisitor(parser.getParserSupport(),
         (BufferedTokenStream) parser.getInputStream()).visit(tree).build(parser.getParserSupport());
 
@@ -216,8 +235,88 @@ public class ParseUnit {
     rootScope = parser.getRootScope();
   }
 
-  public void attachXref(Document xref) {
+  public void attachXref(Document doc) {
+    this.doc = doc;
+  }
+
+  public void attachXref(CrossReference xref) {
     this.xref = xref;
+    if (xref == null)
+      return;
+    attachXrefToTreeParser(getTopNode(), xref);
+  }
+
+  public static void attachXrefToTreeParser(ProgramRootNode root, CrossReference xref) {
+    List<JPNode> recordNodes = root.query(ABLNodeType.RECORD_NAME);
+    for (Source src : xref.getSource()) {
+      File srcFile = new File(src.getFileName());
+      for (Reference ref : src.getReference()) {
+        if ("search".equalsIgnoreCase(ref.getReferenceType())) {
+          String tableName = ref.getObjectIdentifier();
+          boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
+          int tableType = tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE;
+          if (tempTable && (tableName.lastIndexOf(':') != -1)) {
+            // Temp-table defined in classes are prefixed by the class name
+            tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
+          }
+          if (!tempTable && (tableName.indexOf("._") != -1)) {
+            // DBName._Metaschema -> skip
+            continue;
+          }
+
+          boolean lFound = false;
+          for (JPNode node : recordNodes) {
+            RecordNameNode recNode = (RecordNameNode) node;
+            try {
+              if ((recNode.getStatement().getLine() == ref.getLineNum())
+                  && (recNode.getTableBuffer() != null)
+                  && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
+                  && (recNode.attrGet(IConstants.STORETYPE) == tableType)
+                  && ((src.getFileNum() == 1 && recNode.getFileIndex() == 0)
+                      || Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath()))) {
+                recNode.setLink(IConstants.WHOLE_INDEX, "WHOLE-INDEX".equals(ref.getDetail()));
+                recNode.setLink(IConstants.SEARCH_INDEX_NAME, ref.getObjectContext());
+                lFound = true;
+                break;
+              }
+            } catch (IOException uncaught) {
+              // Nothing
+            }
+          }
+          if (!lFound && "WHOLE-INDEX".equals(ref.getDetail())) {
+            LOGGER.debug("WHOLE-INDEX search on '{}' with index '{}' couldn't be assigned to {} at line {}", tableName,
+                ref.getObjectContext(), srcFile.getPath(), ref.getLineNum());
+          }
+        } else if ("sort-access".equalsIgnoreCase(ref.getReferenceType())) {
+          String tableName = ref.getObjectIdentifier();
+          boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
+          int tableType = tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE;
+          if (tempTable && (tableName.lastIndexOf(':') != -1)) {
+            tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
+          }
+          if (!tempTable && (tableName.indexOf("._") != -1)) {
+            // DBName._Metaschema -> skip
+            continue;
+          }
+
+          for (JPNode node : recordNodes) {
+            RecordNameNode recNode = (RecordNameNode) node;
+            try {
+              if ((recNode.getStatement().getLine() == ref.getLineNum())
+                  && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
+                  && (recNode.attrGet(IConstants.STORETYPE) == tableType)
+                  && ((src.getFileNum() == 1 && recNode.getFileIndex() == 0)
+                      || Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath()))) {
+                recNode.setSortAccess(ref.getObjectContext());
+                break;
+              }
+            } catch (IOException uncaught) {
+              // Nothing
+            }
+          }
+        }
+      }
+    }
   }
 
   public void attachTypeInfo(ITypeInfo unit) {
@@ -229,7 +328,12 @@ public class ParseUnit {
   }
 
   @Nullable
-  public Document getXref() {
+  public Document getXRefDocument() {
+    return doc;
+  }
+
+  @Nullable
+  public CrossReference getXref() {
     return xref;
   }
 

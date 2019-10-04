@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -136,7 +136,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     try {
       TextRange range = file.newRange(node.getLine(), node.getColumn() - 1, node.getEndLine(), node.getEndColumn());
       cpdTokens.addToken(range, str);
-    } catch (IllegalArgumentException uncaught) {
+    } catch (IllegalArgumentException | IllegalStateException uncaught) {
       LOG.debug("Unable to create CPD token at position {}:{} to {}:{} - Cause {}", node.getLine(), node.getColumn(),
           node.getEndLine(), node.getEndColumn(), uncaught.getMessage());
     }
@@ -148,7 +148,7 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
     try {
       TextRange range = file.newRange(node.getLine(), node.getColumn() - 1, lastSibling.getEndLine(), lastSibling.getEndColumn() - 1);
       cpdTokens.addToken(range, UUID.randomUUID().toString());
-    } catch (IllegalArgumentException uncaught) {
+    } catch (IllegalArgumentException | IllegalStateException uncaught) {
       LOG.debug("Unable to create CPD token at position {}:{} to {}:{} - Cause {}", node.getLine(), node.getColumn(),
           lastSibling.getEndLine(), lastSibling.getEndColumn(), uncaught.getMessage());
     }

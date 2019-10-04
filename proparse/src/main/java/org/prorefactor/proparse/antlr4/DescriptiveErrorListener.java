@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -18,7 +18,6 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.proparse.ParserSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +28,12 @@ public class DescriptiveErrorListener extends BaseErrorListener {
   public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
       String msg, RecognitionException e) {
     ProToken tok = (ProToken) offendingSymbol;
-    ParserSupport support = ((Proparse) recognizer).getParserSupport();
     if (tok.getFileIndex() != 0) {
-      LOG.error("Syntax error -- {} -- {}:{}:{} -- {}", support.getFilename(0), support.getFilename(tok.getFileIndex()),
-          line, charPositionInLine, msg);
+      LOG.error("Syntax error -- {} -- {}:{}:{} -- {} -- {}", recognizer.getInputStream().getSourceName(),
+          tok.getFileName(), line, charPositionInLine, msg, e != null ? "Recover" : "");
     } else {
-      LOG.error("Syntax error -- {}:{}:{} -- {}", support.getFilename(tok.getFileIndex()), line, charPositionInLine,
-          msg);
+      LOG.error("Syntax error -- {}:{}:{} -- {} -- {}", tok.getFileName(), line, charPositionInLine, msg,
+          e != null ? "Recover" : "");
     }
   }
 }

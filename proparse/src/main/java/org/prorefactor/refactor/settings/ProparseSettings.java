@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -38,6 +38,9 @@ public class ProparseSettings implements IProparseSettings {
   private Boolean customBatchMode;
   private String customProversion;
   private Boolean customSkipXCode;
+  private boolean antlrTokenInsertion = true;
+  private boolean antlrTokenDeletion = true;
+  private boolean antlrRecover = true;
 
   public ProparseSettings(String propath) {
     this(propath, false);
@@ -114,6 +117,33 @@ public class ProparseSettings implements IProparseSettings {
   @Override
   public boolean getSkipXCode() {
     return customSkipXCode == null ? skipXCode : customSkipXCode;
+  }
+
+  @Override
+  public boolean allowAntlrTokenInsertion() {
+    return antlrTokenInsertion;
+  }
+
+  public void setAntlrTokenInsertion(boolean insertion) {
+    this.antlrTokenInsertion = insertion;
+  }
+
+  @Override
+  public boolean allowAntlrTokenDeletion() {
+    return antlrTokenDeletion;
+  }
+
+  public void setAntlrTokenDeletion(boolean deletion) {
+    this.antlrTokenDeletion = deletion;
+  }
+
+  @Override
+  public boolean allowAntlrRecover() {
+    return antlrRecover;
+  }
+
+  public void setAntlrRecover(boolean recover) {
+    this.antlrRecover = recover;
   }
 
   public void setCustomBatchMode(boolean customBatchMode) {

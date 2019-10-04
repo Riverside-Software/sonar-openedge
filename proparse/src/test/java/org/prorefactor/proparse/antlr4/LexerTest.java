@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.core.unittest.util.UnitTestModule;
+import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;

@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.macrolevel;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,8 +63,7 @@ public class IncludeRef extends MacroRef {
 
   /**
    * Get the string that was used for referencing the include file name. For example, if the code was {includeMe.i},
-   * then the string "includeMe.i" is returned. Note: For Proparse versions earlier than 3.1C, this will return and
-   * empty string.
+   * then the string "includeMe.i" is returned.
    */
   public String getFileRefName() {
     return fileRefName;
@@ -93,4 +93,18 @@ public class IncludeRef extends MacroRef {
     return null;
   }
 
+  @Override
+  public String toString() {
+    return "Include file at line " + getLine();
+  }
+
+  public void printMacroEvents(PrintStream stream) {
+    stream.println("Include #" + fileIndex + " - " + fileRefName);
+    for (MacroEvent event : macroEventList) {
+      stream.println("  " + event.toString());
+      if (event instanceof IncludeRef) {
+        ((IncludeRef) event).printMacroEvents(stream);
+      }
+    }
+  }
 }

@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -23,9 +23,9 @@ public interface IPreprocessorEventListener {
   void macroRef(int line, int column, String macroName);
   void macroRefEnd();
   void include(int line, int column, int currentFile, String incFile);
-  void includeArgument(String argName, String value);
+  void includeArgument(String argName, String value, boolean undefined);
   void includeEnd();
-  void define(int line, int column, String name, String value, int type);
+  void define(int line, int column, String name, String value, MacroDefinitionType type);
   void undefine(int line, int column, String name);
   void preproIf(int line, int column, boolean value);
   void preproElse(int line, int column);

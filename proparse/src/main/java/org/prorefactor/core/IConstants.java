@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -145,6 +145,18 @@ public class IConstants {
    * Program_root node to a copy of the array of filenames.
    */
   public static final int FILE_NAME_ARRAY = -220;
+  /**
+   * A value fo setLink() and getLink(). Store index name used in SEARCH nodes
+   */
+  public static final int SEARCH_INDEX_NAME = -221;
+  /**
+   * A value fo setLink() and getLink(). Boolean set to True if WHOLE-INDEX search
+   */
+  public static final int WHOLE_INDEX = -222;
+  /**
+   * A value fo setLink() and getLink(). Store field name in SORT-ACCESS nodes
+   */
+  public static final int SORT_ACCESS = -223;
 
   // In statement: DEFINE TEMP-TABLE ... LIKE ... USE-INDEX xxx
   // xxx can point to an invalid index

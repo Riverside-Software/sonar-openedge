@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -1436,6 +1436,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitDynamicNewStatement(DynamicNewStatementContext ctx) {
     return createTree(ctx, ABLNodeType.ASSIGN_DYNAMIC_NEW).setStatement();
+  }
+
+  @Override
+  public Builder visitDynamicPropertyFunction(DynamicPropertyFunctionContext ctx) {
+    return createTreeFromFirstNode(ctx);
   }
 
   @Override

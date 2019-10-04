@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -43,11 +43,6 @@ public class TestServer extends Server {
 
   @Override
   public File getRootDir() {
-    return null;
-  }
-
-  @Override
-  public File getDeployDir() {
     return null;
   }
 

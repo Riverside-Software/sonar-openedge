@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -276,12 +276,18 @@ public class JPNode implements AST {
   /**
    * Get a list of the direct children of a given type
    */
-  public List<JPNode> getDirectChildren(ABLNodeType type) {
+  public List<JPNode> getDirectChildren(ABLNodeType type, ABLNodeType... types) {
     List<JPNode> ret = new ArrayList<>();
     JPNode n = getFirstChild();
     while (n != null) {
       if (n.getNodeType() == type)
         ret.add(n);
+      if (types != null) {
+        for (ABLNodeType t : types) {
+          if (n.getNodeType() == t)
+            ret.add(n);
+        }
+      }
       n = n.getNextSibling();
     }
     return ret;

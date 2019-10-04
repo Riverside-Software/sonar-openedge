@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2019 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -71,7 +71,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
       return file;
     } else {
       return getContext().fileSystem().inputFile(
-          getContext().fileSystem().predicates().hasRelativePath(unit.getIncludeFileName(node.getFileIndex())));
+          getContext().fileSystem().predicates().hasRelativePath(node.getFileName()));
     }
   }
 
