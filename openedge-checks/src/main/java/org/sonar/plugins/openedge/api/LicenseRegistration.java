@@ -41,6 +41,7 @@ public interface LicenseRegistration {
     /**
      * Register customer license for a given permanentID and rules repository  
      */
+    @Deprecated
     public void registerLicense(String permanentId, String customerName, String salt, String repoName, LicenseType type,
         byte[] signature, long expirationDate);
 
