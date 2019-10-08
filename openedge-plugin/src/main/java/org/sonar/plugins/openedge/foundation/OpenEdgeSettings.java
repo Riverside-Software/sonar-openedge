@@ -472,8 +472,9 @@ public class OpenEdgeSettings {
    * Returns absolute file name if found in work directory or in propath
    */
   public String getFilePath(String fileName) {
-    if (new File(fileName).exists())
-      return fileName;
+    File f = new File(fileName);
+    if (f.exists())
+      return f.getAbsolutePath();
 
     for (File file : propath) {
       File stdName = new File(file, fileName);
