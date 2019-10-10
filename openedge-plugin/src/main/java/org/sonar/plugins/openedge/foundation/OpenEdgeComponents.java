@@ -257,8 +257,8 @@ public class OpenEdgeComponents {
       LOG.debug("Found {} license - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
           type.toString(), permanentId, customerName, repoName,
           DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(expirationDate)));
-      // Only one license per repository / permID
-      License existingLic = hasRegisteredLicense(repoName, permanentId);
+      // Only one license per product/ repository / permID
+      License existingLic = hasRegisteredLicense(product, repoName, permanentId);
       License newLic = new License(permanentId, product, customerName, salt, repoName, type, signature, expirationDate);
       if (existingLic == null) {
         licenses.add(newLic);
@@ -272,11 +272,11 @@ public class OpenEdgeComponents {
       return licenses;
     }
 
-    private License hasRegisteredLicense(String repoName, String permId) {
+    private License hasRegisteredLicense(SonarProduct product, String repoName, String permId) {
       if ((permId == null) || (repoName == null))
         return null;
       for (License lic : licenses) {
-        if ((lic.getType() == LicenseType.COMMERCIAL) && repoName.equals(lic.getRepositoryName()) && permId.equals(lic.getPermanentId()))
+        if ((lic.getType() == LicenseType.COMMERCIAL) && (lic.getProduct() == product) && repoName.equals(lic.getRepositoryName()) && permId.equals(lic.getPermanentId()))
           return lic;
       }
       return null;

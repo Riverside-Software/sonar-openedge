@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 
+import org.sonar.api.SonarProduct;
 import org.sonar.plugins.openedge.api.CheckRegistration;
 import org.sonar.plugins.openedge.api.LicenseRegistration;
 import org.testng.annotations.Test;
@@ -80,46 +81,67 @@ public class OpenEdgeComponentsTest {
     assertThat(components.getLicenses()).hasSize(3);
   }
 
+  @Test
+  public void testSLPlusSQLicenses() throws IOException {
+    OpenEdgeComponents components = new OpenEdgeComponents(new LicenseRegistration[] {
+        LICENSE_ME_OE_2025, LICENSE_SL_ME_OE_2025, LICENSE_SL_YOU_OE_2025});
+    assertThat(components.getLicenses()).hasSize(3);
+  }
+
   private final static LicenseRegistration LICENSE_ME_OE_2015 = new LicenseRegistration() {
     @Override
     public void register(Registrar context) {
-      context.registerLicense("123456789", "Me", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
+      context.registerLicense("123456789", SonarProduct.SONARQUBE, "Me", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
           new byte[] {}, 1420074061000L);
     }
   };
   private final static LicenseRegistration LICENSE_YOU_OE_2015 = new LicenseRegistration() {
     @Override
     public void register(Registrar context) {
-      context.registerLicense("987654321", "You", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
+      context.registerLicense("987654321", SonarProduct.SONARQUBE, "You", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
           new byte[] {}, 1420074061000L);
     }
   };
   private final static LicenseRegistration LICENSE_YOU_OTHER_2015 = new LicenseRegistration() {
     @Override
     public void register(Registrar context) {
-      context.registerLicense("987654321", "You", "salt", "other-repo", LicenseRegistration.LicenseType.COMMERCIAL,
+      context.registerLicense("987654321", SonarProduct.SONARQUBE, "You", "salt", "other-repo", LicenseRegistration.LicenseType.COMMERCIAL,
           new byte[] {}, 1420074061000L);
     }
   };
   private final static LicenseRegistration LICENSE_ME_OE_2025 = new LicenseRegistration() {
     @Override
     public void register(Registrar context) {
-      context.registerLicense("123456789", "Me", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
+      context.registerLicense("123456789", SonarProduct.SONARQUBE, "Me", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
           new byte[] {}, 1735693261000L);
     }
   };
   private final static LicenseRegistration LICENSE_YOU_OE_2025 = new LicenseRegistration() {
     @Override
     public void register(Registrar context) {
-      context.registerLicense("987654321", "You", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
+      context.registerLicense("987654321", SonarProduct.SONARQUBE, "You", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
           new byte[] {}, 1735693261000L);
     }
   };
   private final static LicenseRegistration LICENSE_ME_OE_2030 = new LicenseRegistration() {
     @Override
     public void register(Registrar context) {
-      context.registerLicense("123456789", "Me", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
+      context.registerLicense("123456789", SonarProduct.SONARQUBE, "Me", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
           new byte[] {}, 1893459661000L);
+    }
+  };
+  private final static LicenseRegistration LICENSE_SL_ME_OE_2025 = new LicenseRegistration() {
+    @Override
+    public void register(Registrar context) {
+      context.registerLicense("123456789", SonarProduct.SONARLINT, "Me", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
+          new byte[] {}, 1735693261000L);
+    }
+  };
+  private final static LicenseRegistration LICENSE_SL_YOU_OE_2025 = new LicenseRegistration() {
+    @Override
+    public void register(Registrar context) {
+      context.registerLicense("987654321", SonarProduct.SONARLINT, "You", "salt", "rssw-oe-main", LicenseRegistration.LicenseType.COMMERCIAL,
+          new byte[] {}, 1735693261000L);
     }
   };
 }
