@@ -16,7 +16,7 @@ pipeline {
               // Maven Central deployment:  'mvn -P release clean package verify deploy'
               sh "git rev-parse HEAD > current-commit"
               def currCommit = readFile('current-commit').replace("\n", "").replace("\r", "")
-              sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true -Dgit.commit=${currCommit}"
+              sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent javadoc:javadoc install -Dmaven.test.failure.ignore=true -Dgit.commit=${currCommit}"
             } else {
               sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package -Dmaven.test.failure.ignore=true"
             }
