@@ -38,148 +38,148 @@ import javax.xml.bind.annotation.XmlType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="Source" maxOccurs="unbounded" minOccurs="0">
- *           &lt;complexType>
- *             &lt;complexContent>
- *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                 &lt;sequence>
- *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                   &lt;element name="File-num" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                   &lt;element name="Reference" maxOccurs="unbounded" minOccurs="0">
- *                     &lt;complexType>
- *                       &lt;complexContent>
- *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                           &lt;sequence>
- *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                             &lt;element name="File-num" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                             &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                             &lt;element name="Line-num" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                             &lt;element name="Object-context" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                             &lt;element name="Access-mode" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                             &lt;element name="Data-member-ref" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                             &lt;element name="Temp-ref" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                             &lt;element name="Detail" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                             &lt;element name="Is-static" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *                             &lt;element name="Is-abstract" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *                             &lt;element name="Class-ref" maxOccurs="unbounded" minOccurs="0">
- *                               &lt;complexType>
- *                                 &lt;complexContent>
- *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                                     &lt;sequence>
- *                                       &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                                       &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="Implements-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="Has-use-pool" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *                                       &lt;element name="Is-final" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *                                       &lt;element name="Is-serializable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *                                     &lt;/sequence>
- *                                   &lt;/restriction>
- *                                 &lt;/complexContent>
- *                               &lt;/complexType>
- *                             &lt;/element>
- *                             &lt;element name="String-ref" maxOccurs="unbounded" minOccurs="0">
- *                               &lt;complexType>
- *                                 &lt;complexContent>
- *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                                     &lt;sequence>
- *                                       &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                                       &lt;element name="Max-length" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                                       &lt;element name="Justification" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="Translatable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *                                     &lt;/sequence>
- *                                   &lt;/restriction>
- *                                 &lt;/complexContent>
- *                               &lt;/complexType>
- *                             &lt;/element>
- *                             &lt;element name="Parameter-ref" maxOccurs="unbounded" minOccurs="0">
- *                               &lt;complexType>
- *                                 &lt;complexContent>
- *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                                     &lt;sequence>
- *                                       &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                                       &lt;element name="Dimension" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                                       &lt;element name="Is-append" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *                                       &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                     &lt;/sequence>
- *                                     &lt;attribute name="Order" type="{http://www.w3.org/2001/XMLSchema}int" />
- *                                     &lt;attribute name="Parameter-mode" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                                     &lt;attribute name="Parameter-name" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                                     &lt;attribute name="Parameter-type" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                                   &lt;/restriction>
- *                                 &lt;/complexContent>
- *                               &lt;/complexType>
- *                             &lt;/element>
- *                             &lt;element name="Dataset-ref" maxOccurs="unbounded" minOccurs="0">
- *                               &lt;complexType>
- *                                 &lt;complexContent>
- *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                                     &lt;sequence>
- *                                       &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                                       &lt;element name="N-uri" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="N-prefix" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="Is-reference" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *                                       &lt;element name="Buffer-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="Data-links" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                                       &lt;element name="Relation" maxOccurs="unbounded" minOccurs="0">
- *                                         &lt;complexType>
- *                                           &lt;complexContent>
- *                                             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                                               &lt;sequence>
- *                                                 &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                                 &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                                 &lt;element name="Parent-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                                 &lt;element name="Child-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                                 &lt;element name="Relation-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                               &lt;/sequence>
- *                                               &lt;attribute name="Relation-name" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                                             &lt;/restriction>
- *                                           &lt;/complexContent>
- *                                         &lt;/complexType>
- *                                       &lt;/element>
- *                                     &lt;/sequence>
- *                                   &lt;/restriction>
- *                                 &lt;/complexContent>
- *                               &lt;/complexType>
- *                             &lt;/element>
- *                             &lt;element name="Interface-ref" maxOccurs="unbounded" minOccurs="0">
- *                               &lt;complexType>
- *                                 &lt;complexContent>
- *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                                     &lt;sequence>
- *                                       &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                                       &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                     &lt;/sequence>
- *                                   &lt;/restriction>
- *                                 &lt;/complexContent>
- *                               &lt;/complexType>
- *                             &lt;/element>
- *                           &lt;/sequence>
- *                           &lt;attribute name="Reference-type" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                           &lt;attribute name="Object-identifier" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                         &lt;/restriction>
- *                       &lt;/complexContent>
- *                     &lt;/complexType>
- *                   &lt;/element>
- *                 &lt;/sequence>
- *                 &lt;attribute name="File-name" type="{http://www.w3.org/2001/XMLSchema}string" />
- *               &lt;/restriction>
- *             &lt;/complexContent>
- *           &lt;/complexType>
- *         &lt;/element>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="Source" maxOccurs="unbounded" minOccurs="0"&gt;
+ *           &lt;complexType&gt;
+ *             &lt;complexContent&gt;
+ *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *                 &lt;sequence&gt;
+ *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                   &lt;element name="File-num" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *                   &lt;element name="Reference" maxOccurs="unbounded" minOccurs="0"&gt;
+ *                     &lt;complexType&gt;
+ *                       &lt;complexContent&gt;
+ *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *                           &lt;sequence&gt;
+ *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                             &lt;element name="File-num" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *                             &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *                             &lt;element name="Line-num" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *                             &lt;element name="Object-context" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                             &lt;element name="Access-mode" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                             &lt;element name="Data-member-ref" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                             &lt;element name="Temp-ref" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                             &lt;element name="Detail" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                             &lt;element name="Is-static" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *                             &lt;element name="Is-abstract" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *                             &lt;element name="Class-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+ *                               &lt;complexType&gt;
+ *                                 &lt;complexContent&gt;
+ *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *                                     &lt;sequence&gt;
+ *                                       &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                       &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *                                       &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                       &lt;element name="Implements-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                       &lt;element name="Has-use-pool" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *                                       &lt;element name="Is-final" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *                                       &lt;element name="Is-serializable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *                                     &lt;/sequence&gt;
+ *                                   &lt;/restriction&gt;
+ *                                 &lt;/complexContent&gt;
+ *                               &lt;/complexType&gt;
+ *                             &lt;/element&gt;
+ *                             &lt;element name="String-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+ *                               &lt;complexType&gt;
+ *                                 &lt;complexContent&gt;
+ *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *                                     &lt;sequence&gt;
+ *                                       &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                       &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *                                       &lt;element name="Max-length" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *                                       &lt;element name="Justification" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                       &lt;element name="Translatable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *                                     &lt;/sequence&gt;
+ *                                   &lt;/restriction&gt;
+ *                                 &lt;/complexContent&gt;
+ *                               &lt;/complexType&gt;
+ *                             &lt;/element&gt;
+ *                             &lt;element name="Parameter-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+ *                               &lt;complexType&gt;
+ *                                 &lt;complexContent&gt;
+ *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *                                     &lt;sequence&gt;
+ *                                       &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                       &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *                                       &lt;element name="Dimension" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *                                       &lt;element name="Is-append" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *                                       &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                     &lt;/sequence&gt;
+ *                                     &lt;attribute name="Order" type="{http://www.w3.org/2001/XMLSchema}int" /&gt;
+ *                                     &lt;attribute name="Parameter-mode" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                                     &lt;attribute name="Parameter-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                                     &lt;attribute name="Parameter-type" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                                   &lt;/restriction&gt;
+ *                                 &lt;/complexContent&gt;
+ *                               &lt;/complexType&gt;
+ *                             &lt;/element&gt;
+ *                             &lt;element name="Dataset-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+ *                               &lt;complexType&gt;
+ *                                 &lt;complexContent&gt;
+ *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *                                     &lt;sequence&gt;
+ *                                       &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                       &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                       &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *                                       &lt;element name="N-uri" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                       &lt;element name="N-prefix" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                       &lt;element name="Is-reference" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *                                       &lt;element name="Buffer-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                       &lt;element name="Data-links" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *                                       &lt;element name="Relation" maxOccurs="unbounded" minOccurs="0"&gt;
+ *                                         &lt;complexType&gt;
+ *                                           &lt;complexContent&gt;
+ *                                             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *                                               &lt;sequence&gt;
+ *                                                 &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                                 &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                                 &lt;element name="Parent-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                                 &lt;element name="Child-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                                 &lt;element name="Relation-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                               &lt;/sequence&gt;
+ *                                               &lt;attribute name="Relation-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                                             &lt;/restriction&gt;
+ *                                           &lt;/complexContent&gt;
+ *                                         &lt;/complexType&gt;
+ *                                       &lt;/element&gt;
+ *                                     &lt;/sequence&gt;
+ *                                   &lt;/restriction&gt;
+ *                                 &lt;/complexContent&gt;
+ *                               &lt;/complexType&gt;
+ *                             &lt;/element&gt;
+ *                             &lt;element name="Interface-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+ *                               &lt;complexType&gt;
+ *                                 &lt;complexContent&gt;
+ *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *                                     &lt;sequence&gt;
+ *                                       &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                       &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *                                       &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *                                     &lt;/sequence&gt;
+ *                                   &lt;/restriction&gt;
+ *                                 &lt;/complexContent&gt;
+ *                               &lt;/complexType&gt;
+ *                             &lt;/element&gt;
+ *                           &lt;/sequence&gt;
+ *                           &lt;attribute name="Reference-type" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                           &lt;attribute name="Object-identifier" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                         &lt;/restriction&gt;
+ *                       &lt;/complexContent&gt;
+ *                     &lt;/complexType&gt;
+ *                   &lt;/element&gt;
+ *                 &lt;/sequence&gt;
+ *                 &lt;attribute name="File-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *               &lt;/restriction&gt;
+ *             &lt;/complexContent&gt;
+ *           &lt;/complexType&gt;
+ *         &lt;/element&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -230,138 +230,138 @@ public class CrossReference {
      * <p>The following schema fragment specifies the expected content contained within this class.
      * 
      * <pre>
-     * &lt;complexType>
-     *   &lt;complexContent>
-     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *       &lt;sequence>
-     *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *         &lt;element name="File-num" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *         &lt;element name="Reference" maxOccurs="unbounded" minOccurs="0">
-     *           &lt;complexType>
-     *             &lt;complexContent>
-     *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *                 &lt;sequence>
-     *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                   &lt;element name="File-num" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *                   &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *                   &lt;element name="Line-num" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *                   &lt;element name="Object-context" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                   &lt;element name="Access-mode" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                   &lt;element name="Data-member-ref" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                   &lt;element name="Temp-ref" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                   &lt;element name="Detail" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                   &lt;element name="Is-static" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-     *                   &lt;element name="Is-abstract" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-     *                   &lt;element name="Class-ref" maxOccurs="unbounded" minOccurs="0">
-     *                     &lt;complexType>
-     *                       &lt;complexContent>
-     *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *                           &lt;sequence>
-     *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *                             &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="Implements-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="Has-use-pool" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-     *                             &lt;element name="Is-final" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-     *                             &lt;element name="Is-serializable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-     *                           &lt;/sequence>
-     *                         &lt;/restriction>
-     *                       &lt;/complexContent>
-     *                     &lt;/complexType>
-     *                   &lt;/element>
-     *                   &lt;element name="String-ref" maxOccurs="unbounded" minOccurs="0">
-     *                     &lt;complexType>
-     *                       &lt;complexContent>
-     *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *                           &lt;sequence>
-     *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *                             &lt;element name="Max-length" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *                             &lt;element name="Justification" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="Translatable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-     *                           &lt;/sequence>
-     *                         &lt;/restriction>
-     *                       &lt;/complexContent>
-     *                     &lt;/complexType>
-     *                   &lt;/element>
-     *                   &lt;element name="Parameter-ref" maxOccurs="unbounded" minOccurs="0">
-     *                     &lt;complexType>
-     *                       &lt;complexContent>
-     *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *                           &lt;sequence>
-     *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *                             &lt;element name="Dimension" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *                             &lt;element name="Is-append" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-     *                             &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                           &lt;/sequence>
-     *                           &lt;attribute name="Order" type="{http://www.w3.org/2001/XMLSchema}int" />
-     *                           &lt;attribute name="Parameter-mode" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *                           &lt;attribute name="Parameter-name" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *                           &lt;attribute name="Parameter-type" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *                         &lt;/restriction>
-     *                       &lt;/complexContent>
-     *                     &lt;/complexType>
-     *                   &lt;/element>
-     *                   &lt;element name="Dataset-ref" maxOccurs="unbounded" minOccurs="0">
-     *                     &lt;complexType>
-     *                       &lt;complexContent>
-     *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *                           &lt;sequence>
-     *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *                             &lt;element name="N-uri" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="N-prefix" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="Is-reference" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-     *                             &lt;element name="Buffer-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="Data-links" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *                             &lt;element name="Relation" maxOccurs="unbounded" minOccurs="0">
-     *                               &lt;complexType>
-     *                                 &lt;complexContent>
-     *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *                                     &lt;sequence>
-     *                                       &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                                       &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                                       &lt;element name="Parent-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                                       &lt;element name="Child-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                                       &lt;element name="Relation-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                                     &lt;/sequence>
-     *                                     &lt;attribute name="Relation-name" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *                                   &lt;/restriction>
-     *                                 &lt;/complexContent>
-     *                               &lt;/complexType>
-     *                             &lt;/element>
-     *                           &lt;/sequence>
-     *                         &lt;/restriction>
-     *                       &lt;/complexContent>
-     *                     &lt;/complexType>
-     *                   &lt;/element>
-     *                   &lt;element name="Interface-ref" maxOccurs="unbounded" minOccurs="0">
-     *                     &lt;complexType>
-     *                       &lt;complexContent>
-     *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *                           &lt;sequence>
-     *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *                             &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                           &lt;/sequence>
-     *                         &lt;/restriction>
-     *                       &lt;/complexContent>
-     *                     &lt;/complexType>
-     *                   &lt;/element>
-     *                 &lt;/sequence>
-     *                 &lt;attribute name="Reference-type" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *                 &lt;attribute name="Object-identifier" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *               &lt;/restriction>
-     *             &lt;/complexContent>
-     *           &lt;/complexType>
-     *         &lt;/element>
-     *       &lt;/sequence>
-     *       &lt;attribute name="File-name" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *     &lt;/restriction>
-     *   &lt;/complexContent>
-     * &lt;/complexType>
+     * &lt;complexType&gt;
+     *   &lt;complexContent&gt;
+     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+     *       &lt;sequence&gt;
+     *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *         &lt;element name="File-num" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+     *         &lt;element name="Reference" maxOccurs="unbounded" minOccurs="0"&gt;
+     *           &lt;complexType&gt;
+     *             &lt;complexContent&gt;
+     *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+     *                 &lt;sequence&gt;
+     *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                   &lt;element name="File-num" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+     *                   &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+     *                   &lt;element name="Line-num" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+     *                   &lt;element name="Object-context" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                   &lt;element name="Access-mode" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                   &lt;element name="Data-member-ref" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                   &lt;element name="Temp-ref" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                   &lt;element name="Detail" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                   &lt;element name="Is-static" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+     *                   &lt;element name="Is-abstract" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+     *                   &lt;element name="Class-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+     *                     &lt;complexType&gt;
+     *                       &lt;complexContent&gt;
+     *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+     *                           &lt;sequence&gt;
+     *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                             &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+     *                             &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                             &lt;element name="Implements-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                             &lt;element name="Has-use-pool" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+     *                             &lt;element name="Is-final" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+     *                             &lt;element name="Is-serializable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+     *                           &lt;/sequence&gt;
+     *                         &lt;/restriction&gt;
+     *                       &lt;/complexContent&gt;
+     *                     &lt;/complexType&gt;
+     *                   &lt;/element&gt;
+     *                   &lt;element name="String-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+     *                     &lt;complexType&gt;
+     *                       &lt;complexContent&gt;
+     *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+     *                           &lt;sequence&gt;
+     *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                             &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+     *                             &lt;element name="Max-length" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+     *                             &lt;element name="Justification" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                             &lt;element name="Translatable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+     *                           &lt;/sequence&gt;
+     *                         &lt;/restriction&gt;
+     *                       &lt;/complexContent&gt;
+     *                     &lt;/complexType&gt;
+     *                   &lt;/element&gt;
+     *                   &lt;element name="Parameter-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+     *                     &lt;complexType&gt;
+     *                       &lt;complexContent&gt;
+     *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+     *                           &lt;sequence&gt;
+     *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                             &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+     *                             &lt;element name="Dimension" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+     *                             &lt;element name="Is-append" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+     *                             &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                           &lt;/sequence&gt;
+     *                           &lt;attribute name="Order" type="{http://www.w3.org/2001/XMLSchema}int" /&gt;
+     *                           &lt;attribute name="Parameter-mode" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *                           &lt;attribute name="Parameter-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *                           &lt;attribute name="Parameter-type" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *                         &lt;/restriction&gt;
+     *                       &lt;/complexContent&gt;
+     *                     &lt;/complexType&gt;
+     *                   &lt;/element&gt;
+     *                   &lt;element name="Dataset-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+     *                     &lt;complexType&gt;
+     *                       &lt;complexContent&gt;
+     *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+     *                           &lt;sequence&gt;
+     *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                             &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                             &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+     *                             &lt;element name="N-uri" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                             &lt;element name="N-prefix" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                             &lt;element name="Is-reference" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+     *                             &lt;element name="Buffer-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                             &lt;element name="Data-links" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+     *                             &lt;element name="Relation" maxOccurs="unbounded" minOccurs="0"&gt;
+     *                               &lt;complexType&gt;
+     *                                 &lt;complexContent&gt;
+     *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+     *                                     &lt;sequence&gt;
+     *                                       &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                                       &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                                       &lt;element name="Parent-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                                       &lt;element name="Child-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                                       &lt;element name="Relation-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                                     &lt;/sequence&gt;
+     *                                     &lt;attribute name="Relation-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *                                   &lt;/restriction&gt;
+     *                                 &lt;/complexContent&gt;
+     *                               &lt;/complexType&gt;
+     *                             &lt;/element&gt;
+     *                           &lt;/sequence&gt;
+     *                         &lt;/restriction&gt;
+     *                       &lt;/complexContent&gt;
+     *                     &lt;/complexType&gt;
+     *                   &lt;/element&gt;
+     *                   &lt;element name="Interface-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+     *                     &lt;complexType&gt;
+     *                       &lt;complexContent&gt;
+     *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+     *                           &lt;sequence&gt;
+     *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                             &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+     *                             &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+     *                           &lt;/sequence&gt;
+     *                         &lt;/restriction&gt;
+     *                       &lt;/complexContent&gt;
+     *                     &lt;/complexType&gt;
+     *                   &lt;/element&gt;
+     *                 &lt;/sequence&gt;
+     *                 &lt;attribute name="Reference-type" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *                 &lt;attribute name="Object-identifier" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *               &lt;/restriction&gt;
+     *             &lt;/complexContent&gt;
+     *           &lt;/complexType&gt;
+     *         &lt;/element&gt;
+     *       &lt;/sequence&gt;
+     *       &lt;attribute name="File-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *     &lt;/restriction&gt;
+     *   &lt;/complexContent&gt;
+     * &lt;/complexType&gt;
      * </pre>
      * 
      * 
@@ -491,125 +491,125 @@ public class CrossReference {
          * <p>The following schema fragment specifies the expected content contained within this class.
          * 
          * <pre>
-         * &lt;complexType>
-         *   &lt;complexContent>
-         *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-         *       &lt;sequence>
-         *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *         &lt;element name="File-num" type="{http://www.w3.org/2001/XMLSchema}int"/>
-         *         &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-         *         &lt;element name="Line-num" type="{http://www.w3.org/2001/XMLSchema}int"/>
-         *         &lt;element name="Object-context" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *         &lt;element name="Access-mode" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *         &lt;element name="Data-member-ref" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *         &lt;element name="Temp-ref" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *         &lt;element name="Detail" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *         &lt;element name="Is-static" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-         *         &lt;element name="Is-abstract" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-         *         &lt;element name="Class-ref" maxOccurs="unbounded" minOccurs="0">
-         *           &lt;complexType>
-         *             &lt;complexContent>
-         *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-         *                 &lt;sequence>
-         *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-         *                   &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="Implements-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="Has-use-pool" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-         *                   &lt;element name="Is-final" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-         *                   &lt;element name="Is-serializable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-         *                 &lt;/sequence>
-         *               &lt;/restriction>
-         *             &lt;/complexContent>
-         *           &lt;/complexType>
-         *         &lt;/element>
-         *         &lt;element name="String-ref" maxOccurs="unbounded" minOccurs="0">
-         *           &lt;complexType>
-         *             &lt;complexContent>
-         *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-         *                 &lt;sequence>
-         *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-         *                   &lt;element name="Max-length" type="{http://www.w3.org/2001/XMLSchema}int"/>
-         *                   &lt;element name="Justification" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="Translatable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-         *                 &lt;/sequence>
-         *               &lt;/restriction>
-         *             &lt;/complexContent>
-         *           &lt;/complexType>
-         *         &lt;/element>
-         *         &lt;element name="Parameter-ref" maxOccurs="unbounded" minOccurs="0">
-         *           &lt;complexType>
-         *             &lt;complexContent>
-         *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-         *                 &lt;sequence>
-         *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-         *                   &lt;element name="Dimension" type="{http://www.w3.org/2001/XMLSchema}int"/>
-         *                   &lt;element name="Is-append" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-         *                   &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                 &lt;/sequence>
-         *                 &lt;attribute name="Order" type="{http://www.w3.org/2001/XMLSchema}int" />
-         *                 &lt;attribute name="Parameter-mode" type="{http://www.w3.org/2001/XMLSchema}string" />
-         *                 &lt;attribute name="Parameter-name" type="{http://www.w3.org/2001/XMLSchema}string" />
-         *                 &lt;attribute name="Parameter-type" type="{http://www.w3.org/2001/XMLSchema}string" />
-         *               &lt;/restriction>
-         *             &lt;/complexContent>
-         *           &lt;/complexType>
-         *         &lt;/element>
-         *         &lt;element name="Dataset-ref" maxOccurs="unbounded" minOccurs="0">
-         *           &lt;complexType>
-         *             &lt;complexContent>
-         *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-         *                 &lt;sequence>
-         *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-         *                   &lt;element name="N-uri" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="N-prefix" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="Is-reference" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-         *                   &lt;element name="Buffer-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="Data-links" type="{http://www.w3.org/2001/XMLSchema}int"/>
-         *                   &lt;element name="Relation" maxOccurs="unbounded" minOccurs="0">
-         *                     &lt;complexType>
-         *                       &lt;complexContent>
-         *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-         *                           &lt;sequence>
-         *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                             &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                             &lt;element name="Parent-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                             &lt;element name="Child-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                             &lt;element name="Relation-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                           &lt;/sequence>
-         *                           &lt;attribute name="Relation-name" type="{http://www.w3.org/2001/XMLSchema}string" />
-         *                         &lt;/restriction>
-         *                       &lt;/complexContent>
-         *                     &lt;/complexType>
-         *                   &lt;/element>
-         *                 &lt;/sequence>
-         *               &lt;/restriction>
-         *             &lt;/complexContent>
-         *           &lt;/complexType>
-         *         &lt;/element>
-         *         &lt;element name="Interface-ref" maxOccurs="unbounded" minOccurs="0">
-         *           &lt;complexType>
-         *             &lt;complexContent>
-         *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-         *                 &lt;sequence>
-         *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-         *                   &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                 &lt;/sequence>
-         *               &lt;/restriction>
-         *             &lt;/complexContent>
-         *           &lt;/complexType>
-         *         &lt;/element>
-         *       &lt;/sequence>
-         *       &lt;attribute name="Reference-type" type="{http://www.w3.org/2001/XMLSchema}string" />
-         *       &lt;attribute name="Object-identifier" type="{http://www.w3.org/2001/XMLSchema}string" />
-         *     &lt;/restriction>
-         *   &lt;/complexContent>
-         * &lt;/complexType>
+         * &lt;complexType&gt;
+         *   &lt;complexContent&gt;
+         *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+         *       &lt;sequence&gt;
+         *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *         &lt;element name="File-num" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+         *         &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+         *         &lt;element name="Line-num" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+         *         &lt;element name="Object-context" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *         &lt;element name="Access-mode" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *         &lt;element name="Data-member-ref" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *         &lt;element name="Temp-ref" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *         &lt;element name="Detail" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *         &lt;element name="Is-static" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+         *         &lt;element name="Is-abstract" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+         *         &lt;element name="Class-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+         *           &lt;complexType&gt;
+         *             &lt;complexContent&gt;
+         *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+         *                 &lt;sequence&gt;
+         *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                   &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+         *                   &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                   &lt;element name="Implements-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                   &lt;element name="Has-use-pool" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+         *                   &lt;element name="Is-final" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+         *                   &lt;element name="Is-serializable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+         *                 &lt;/sequence&gt;
+         *               &lt;/restriction&gt;
+         *             &lt;/complexContent&gt;
+         *           &lt;/complexType&gt;
+         *         &lt;/element&gt;
+         *         &lt;element name="String-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+         *           &lt;complexType&gt;
+         *             &lt;complexContent&gt;
+         *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+         *                 &lt;sequence&gt;
+         *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                   &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+         *                   &lt;element name="Max-length" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+         *                   &lt;element name="Justification" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                   &lt;element name="Translatable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+         *                 &lt;/sequence&gt;
+         *               &lt;/restriction&gt;
+         *             &lt;/complexContent&gt;
+         *           &lt;/complexType&gt;
+         *         &lt;/element&gt;
+         *         &lt;element name="Parameter-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+         *           &lt;complexType&gt;
+         *             &lt;complexContent&gt;
+         *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+         *                 &lt;sequence&gt;
+         *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                   &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+         *                   &lt;element name="Dimension" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+         *                   &lt;element name="Is-append" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+         *                   &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                 &lt;/sequence&gt;
+         *                 &lt;attribute name="Order" type="{http://www.w3.org/2001/XMLSchema}int" /&gt;
+         *                 &lt;attribute name="Parameter-mode" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+         *                 &lt;attribute name="Parameter-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+         *                 &lt;attribute name="Parameter-type" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+         *               &lt;/restriction&gt;
+         *             &lt;/complexContent&gt;
+         *           &lt;/complexType&gt;
+         *         &lt;/element&gt;
+         *         &lt;element name="Dataset-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+         *           &lt;complexType&gt;
+         *             &lt;complexContent&gt;
+         *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+         *                 &lt;sequence&gt;
+         *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                   &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                   &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+         *                   &lt;element name="N-uri" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                   &lt;element name="N-prefix" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                   &lt;element name="Is-reference" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+         *                   &lt;element name="Buffer-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                   &lt;element name="Data-links" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+         *                   &lt;element name="Relation" maxOccurs="unbounded" minOccurs="0"&gt;
+         *                     &lt;complexType&gt;
+         *                       &lt;complexContent&gt;
+         *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+         *                           &lt;sequence&gt;
+         *                             &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                             &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                             &lt;element name="Parent-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                             &lt;element name="Child-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                             &lt;element name="Relation-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                           &lt;/sequence&gt;
+         *                           &lt;attribute name="Relation-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+         *                         &lt;/restriction&gt;
+         *                       &lt;/complexContent&gt;
+         *                     &lt;/complexType&gt;
+         *                   &lt;/element&gt;
+         *                 &lt;/sequence&gt;
+         *               &lt;/restriction&gt;
+         *             &lt;/complexContent&gt;
+         *           &lt;/complexType&gt;
+         *         &lt;/element&gt;
+         *         &lt;element name="Interface-ref" maxOccurs="unbounded" minOccurs="0"&gt;
+         *           &lt;complexType&gt;
+         *             &lt;complexContent&gt;
+         *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+         *                 &lt;sequence&gt;
+         *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                   &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+         *                   &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+         *                 &lt;/sequence&gt;
+         *               &lt;/restriction&gt;
+         *             &lt;/complexContent&gt;
+         *           &lt;/complexType&gt;
+         *         &lt;/element&gt;
+         *       &lt;/sequence&gt;
+         *       &lt;attribute name="Reference-type" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+         *       &lt;attribute name="Object-identifier" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+         *     &lt;/restriction&gt;
+         *   &lt;/complexContent&gt;
+         * &lt;/complexType&gt;
          * </pre>
          * 
          * 
@@ -1136,21 +1136,21 @@ public class CrossReference {
              * <p>The following schema fragment specifies the expected content contained within this class.
              * 
              * <pre>
-             * &lt;complexType>
-             *   &lt;complexContent>
-             *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-             *       &lt;sequence>
-             *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-             *         &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="Implements-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="Has-use-pool" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-             *         &lt;element name="Is-final" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-             *         &lt;element name="Is-serializable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-             *       &lt;/sequence>
-             *     &lt;/restriction>
-             *   &lt;/complexContent>
-             * &lt;/complexType>
+             * &lt;complexType&gt;
+             *   &lt;complexContent&gt;
+             *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+             *       &lt;sequence&gt;
+             *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *         &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+             *         &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *         &lt;element name="Implements-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *         &lt;element name="Has-use-pool" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+             *         &lt;element name="Is-final" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+             *         &lt;element name="Is-serializable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+             *       &lt;/sequence&gt;
+             *     &lt;/restriction&gt;
+             *   &lt;/complexContent&gt;
+             * &lt;/complexType&gt;
              * </pre>
              * 
              * 
@@ -1359,38 +1359,38 @@ public class CrossReference {
              * <p>The following schema fragment specifies the expected content contained within this class.
              * 
              * <pre>
-             * &lt;complexType>
-             *   &lt;complexContent>
-             *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-             *       &lt;sequence>
-             *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-             *         &lt;element name="N-uri" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="N-prefix" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="Is-reference" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-             *         &lt;element name="Buffer-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="Data-links" type="{http://www.w3.org/2001/XMLSchema}int"/>
-             *         &lt;element name="Relation" maxOccurs="unbounded" minOccurs="0">
-             *           &lt;complexType>
-             *             &lt;complexContent>
-             *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-             *                 &lt;sequence>
-             *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *                   &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *                   &lt;element name="Parent-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *                   &lt;element name="Child-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *                   &lt;element name="Relation-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *                 &lt;/sequence>
-             *                 &lt;attribute name="Relation-name" type="{http://www.w3.org/2001/XMLSchema}string" />
-             *               &lt;/restriction>
-             *             &lt;/complexContent>
-             *           &lt;/complexType>
-             *         &lt;/element>
-             *       &lt;/sequence>
-             *     &lt;/restriction>
-             *   &lt;/complexContent>
-             * &lt;/complexType>
+             * &lt;complexType&gt;
+             *   &lt;complexContent&gt;
+             *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+             *       &lt;sequence&gt;
+             *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *         &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *         &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+             *         &lt;element name="N-uri" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *         &lt;element name="N-prefix" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *         &lt;element name="Is-reference" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+             *         &lt;element name="Buffer-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *         &lt;element name="Data-links" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+             *         &lt;element name="Relation" maxOccurs="unbounded" minOccurs="0"&gt;
+             *           &lt;complexType&gt;
+             *             &lt;complexContent&gt;
+             *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+             *                 &lt;sequence&gt;
+             *                   &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *                   &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *                   &lt;element name="Parent-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *                   &lt;element name="Child-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *                   &lt;element name="Relation-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *                 &lt;/sequence&gt;
+             *                 &lt;attribute name="Relation-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+             *               &lt;/restriction&gt;
+             *             &lt;/complexContent&gt;
+             *           &lt;/complexType&gt;
+             *         &lt;/element&gt;
+             *       &lt;/sequence&gt;
+             *     &lt;/restriction&gt;
+             *   &lt;/complexContent&gt;
+             * &lt;/complexType&gt;
              * </pre>
              * 
              * 
@@ -1656,20 +1656,20 @@ public class CrossReference {
                  * <p>The following schema fragment specifies the expected content contained within this class.
                  * 
                  * <pre>
-                 * &lt;complexType>
-                 *   &lt;complexContent>
-                 *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-                 *       &lt;sequence>
-                 *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-                 *         &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-                 *         &lt;element name="Parent-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/>
-                 *         &lt;element name="Child-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/>
-                 *         &lt;element name="Relation-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-                 *       &lt;/sequence>
-                 *       &lt;attribute name="Relation-name" type="{http://www.w3.org/2001/XMLSchema}string" />
-                 *     &lt;/restriction>
-                 *   &lt;/complexContent>
-                 * &lt;/complexType>
+                 * &lt;complexType&gt;
+                 *   &lt;complexContent&gt;
+                 *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+                 *       &lt;sequence&gt;
+                 *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+                 *         &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+                 *         &lt;element name="Parent-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+                 *         &lt;element name="Child-buffer-name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+                 *         &lt;element name="Relation-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+                 *       &lt;/sequence&gt;
+                 *       &lt;attribute name="Relation-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+                 *     &lt;/restriction&gt;
+                 *   &lt;/complexContent&gt;
+                 * &lt;/complexType&gt;
                  * </pre>
                  * 
                  * 
@@ -1852,17 +1852,17 @@ public class CrossReference {
              * <p>The following schema fragment specifies the expected content contained within this class.
              * 
              * <pre>
-             * &lt;complexType>
-             *   &lt;complexContent>
-             *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-             *       &lt;sequence>
-             *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-             *         &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *       &lt;/sequence>
-             *     &lt;/restriction>
-             *   &lt;/complexContent>
-             * &lt;/complexType>
+             * &lt;complexType&gt;
+             *   &lt;complexContent&gt;
+             *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+             *       &lt;sequence&gt;
+             *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *         &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+             *         &lt;element name="Inherited-list" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *       &lt;/sequence&gt;
+             *     &lt;/restriction&gt;
+             *   &lt;/complexContent&gt;
+             * &lt;/complexType&gt;
              * </pre>
              * 
              * 
@@ -1963,23 +1963,23 @@ public class CrossReference {
              * <p>The following schema fragment specifies the expected content contained within this class.
              * 
              * <pre>
-             * &lt;complexType>
-             *   &lt;complexContent>
-             *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-             *       &lt;sequence>
-             *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-             *         &lt;element name="Dimension" type="{http://www.w3.org/2001/XMLSchema}int"/>
-             *         &lt;element name="Is-append" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-             *         &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *       &lt;/sequence>
-             *       &lt;attribute name="Order" type="{http://www.w3.org/2001/XMLSchema}int" />
-             *       &lt;attribute name="Parameter-mode" type="{http://www.w3.org/2001/XMLSchema}string" />
-             *       &lt;attribute name="Parameter-name" type="{http://www.w3.org/2001/XMLSchema}string" />
-             *       &lt;attribute name="Parameter-type" type="{http://www.w3.org/2001/XMLSchema}string" />
-             *     &lt;/restriction>
-             *   &lt;/complexContent>
-             * &lt;/complexType>
+             * &lt;complexType&gt;
+             *   &lt;complexContent&gt;
+             *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+             *       &lt;sequence&gt;
+             *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *         &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+             *         &lt;element name="Dimension" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+             *         &lt;element name="Is-append" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+             *         &lt;element name="Dataset-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *       &lt;/sequence&gt;
+             *       &lt;attribute name="Order" type="{http://www.w3.org/2001/XMLSchema}int" /&gt;
+             *       &lt;attribute name="Parameter-mode" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+             *       &lt;attribute name="Parameter-name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+             *       &lt;attribute name="Parameter-type" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+             *     &lt;/restriction&gt;
+             *   &lt;/complexContent&gt;
+             * &lt;/complexType&gt;
              * </pre>
              * 
              * 
@@ -2238,19 +2238,19 @@ public class CrossReference {
              * <p>The following schema fragment specifies the expected content contained within this class.
              * 
              * <pre>
-             * &lt;complexType>
-             *   &lt;complexContent>
-             *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-             *       &lt;sequence>
-             *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/>
-             *         &lt;element name="Max-length" type="{http://www.w3.org/2001/XMLSchema}int"/>
-             *         &lt;element name="Justification" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="Translatable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
-             *       &lt;/sequence>
-             *     &lt;/restriction>
-             *   &lt;/complexContent>
-             * &lt;/complexType>
+             * &lt;complexType&gt;
+             *   &lt;complexContent&gt;
+             *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+             *       &lt;sequence&gt;
+             *         &lt;element name="Source-guid" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *         &lt;element name="Ref-seq" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+             *         &lt;element name="Max-length" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+             *         &lt;element name="Justification" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+             *         &lt;element name="Translatable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+             *       &lt;/sequence&gt;
+             *     &lt;/restriction&gt;
+             *   &lt;/complexContent&gt;
+             * &lt;/complexType&gt;
              * </pre>
              * 
              * 
