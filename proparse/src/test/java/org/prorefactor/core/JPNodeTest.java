@@ -31,6 +31,9 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.sax.SAXSource;
 
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.util.UnitTestModule;
@@ -39,6 +42,9 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -68,7 +74,7 @@ public class JPNodeTest {
   @BeforeTest
   public void setUp() throws IOException, InvalidRCodeException {
     try {
-      context = JAXBContext.newInstance(CrossReference.class);
+      context = JAXBContext.newInstance("com.progress.xref", this.getClass().getClassLoader());
       unmarshaller = context.createUnmarshaller();
     } catch (JAXBException caught) {
       throw new IllegalStateException(caught);
@@ -347,10 +353,17 @@ public class JPNodeTest {
   }
 
   @Test
-  public void testXref01() throws JAXBException, IOException {
+  public void testXref01() throws JAXBException, IOException, SAXException, ParserConfigurationException {
     ParseUnit unit = genericTest("xref.p");
     unit.treeParser01();
-    CrossReference doc = (CrossReference) unmarshaller.unmarshal(new FileInputStream(SRC_DIR + "/xref.p.xref"));
+
+    InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref.p.xref"));
+    SAXParserFactory sax = SAXParserFactory.newInstance();
+    sax.setNamespaceAware(false);
+    XMLReader reader = sax.newSAXParser().getXMLReader();
+    SAXSource source = new SAXSource(reader, is);
+
+    CrossReference doc = (CrossReference) unmarshaller.unmarshal(source);
     unit.attachXref(doc);
 
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.RECORD_NAME);
