@@ -373,14 +373,14 @@ public class JPNodeTest {
     RecordNameNode item = (RecordNameNode) nodes.get(2);
 
     assertEquals(warehouse.getLink(IConstants.WHOLE_INDEX), Boolean.TRUE);
-    assertEquals(warehouse.getLink(IConstants.SEARCH_INDEX_NAME), "warehousenum");
+    assertEquals(warehouse.getLink(IConstants.SEARCH_INDEX_NAME), "Warehouse.warehousenum");
 
     assertEquals(customer.getLink(IConstants.WHOLE_INDEX), Boolean.FALSE);
-    assertEquals(customer.getLink(IConstants.SEARCH_INDEX_NAME), "CountryPost");
+    assertEquals(customer.getLink(IConstants.SEARCH_INDEX_NAME), "Customer.CountryPost");
     assertEquals(customer.getLink(IConstants.SORT_ACCESS), "Address");
 
     assertEquals(item.getLink(IConstants.WHOLE_INDEX), Boolean.TRUE);
-    assertEquals(item.getLink(IConstants.SEARCH_INDEX_NAME), "ItemNum");
+    assertEquals(item.getLink(IConstants.SEARCH_INDEX_NAME), "Item.ItemNum");
   }
 
 }

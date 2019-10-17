@@ -275,7 +275,8 @@ public class ParseUnit {
                   && ((src.getFileNum() == 1 && recNode.getFileIndex() == 0)
                       || Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath()))) {
                 recNode.setLink(IConstants.WHOLE_INDEX, "WHOLE-INDEX".equals(ref.getDetail()));
-                recNode.setLink(IConstants.SEARCH_INDEX_NAME, ref.getObjectContext());
+                recNode.setLink(IConstants.SEARCH_INDEX_NAME,
+                    recNode.getTableBuffer().getTable().getName() + "." + ref.getObjectContext());
                 lFound = true;
                 break;
               }
