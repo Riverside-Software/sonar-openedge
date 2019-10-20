@@ -185,9 +185,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "source"
-})
+@XmlType(name = "", propOrder = {"source"})
 @XmlRootElement(name = "Cross-reference")
 public class CrossReference {
 
