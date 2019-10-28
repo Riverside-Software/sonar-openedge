@@ -87,7 +87,7 @@ fragment INT:
   ('0'..'9');
 
 NUMBER:
-  INT+;
+  '-'? INT+;
 
 FLOAT:
   NUMBER '.' NUMBER;

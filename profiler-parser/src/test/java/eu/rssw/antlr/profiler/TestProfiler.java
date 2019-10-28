@@ -98,4 +98,13 @@ public class TestProfiler {
     Assert.assertEquals(session.getVersionNumber(), 3);
   }
 
+  @Test
+  public void testProfiler10() throws IOException {
+    // New file format in 12.1 - Line -2 is for Garbage Collection
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler10.out"));
+    Assert.assertEquals(session.getVersionNumber(), 3);
+    Assert.assertNotNull(session.getModuleById(1));
+    Assert.assertTrue(session.getModuleById(1).getLinesToCover().contains(-2));
+  }
+
 }
