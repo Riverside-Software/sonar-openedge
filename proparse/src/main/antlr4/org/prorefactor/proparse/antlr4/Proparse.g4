@@ -1693,7 +1693,7 @@ defineBrowseStatement:
   ;
 
 defBrowseDisplay:
-    DISPLAY defBrowseDisplayItemsOrRecord exceptFields?
+    DISPLAY defBrowseDisplayItemsOrRecord? exceptFields?
   ;
 
 defBrowseDisplayItemsOrRecord:

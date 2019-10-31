@@ -359,6 +359,12 @@ public class BugFixTest {
   }
 
   @Test
+  public void test46() {
+    ParseUnit unit = genericTest("bug46.p");
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
   public void test47() {
     ParseUnit unit = genericTest("bug47.cls");
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
