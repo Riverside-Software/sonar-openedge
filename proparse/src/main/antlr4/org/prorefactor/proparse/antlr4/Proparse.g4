@@ -1949,7 +1949,7 @@ definePropertyStatement:
 
 definePropertyAs:
     AS datatype
-    ( extentPhrase2 | initialConstant | NOUNDO )*
+    ( extentPhrase2 | initialConstant | NOUNDO | serializeName )*
   ;
 
 definePropertyAccessor:
