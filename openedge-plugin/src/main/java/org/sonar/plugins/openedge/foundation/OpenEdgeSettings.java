@@ -19,12 +19,15 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -111,7 +114,7 @@ public class OpenEdgeSettings {
   public final void init() {
     if (init)
       return;
-
+    LOG.info("OpenEdge plugin version: {}", readPluginVersion(this.getClass().getClassLoader(), "sonar-openedge.txt"));
     LOG.info("Loading OpenEdge settings for server ID '{}' '{}'", config.get(CoreProperties.SERVER_ID).orElse(""),
         config.get(CoreProperties.PERMANENT_SERVER_ID).orElse(""));
     initializeDirectories(config, fileSystem);
@@ -724,5 +727,19 @@ public class OpenEdgeSettings {
     }
 
     return sch;
+  }
+
+  public String readPluginVersion(ClassLoader cl, String file) {
+    String retVal = "";
+    try (InputStream inp = cl.getResourceAsStream(file);
+        Reader r1 = new InputStreamReader(inp);
+        BufferedReader r2 = new BufferedReader(r1)) {
+      retVal = r2.readLine();
+    } catch (IOException caught) {
+      LOG.debug("Unable to read '" + file + "'", caught);
+      retVal = file + " not found";
+    }
+
+    return retVal;
   }
 }
