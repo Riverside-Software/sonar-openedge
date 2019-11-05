@@ -42,6 +42,8 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.sax.SAXSource;
 
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -82,7 +84,9 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
@@ -104,6 +108,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   private final DocumentBuilder dBuilder;
   private final JAXBContext context;
   private final Unmarshaller unmarshaller;
+  private final SAXParserFactory sax;
 
   // File statistics
   private int numFiles;
@@ -126,12 +131,14 @@ public class OpenEdgeProparseSensor implements Sensor {
   public OpenEdgeProparseSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
     this.settings = settings;
     this.components = components;
-
     dbFactory = DocumentBuilderFactory.newInstance();
+    sax = SAXParserFactory.newInstance();
+    sax.setNamespaceAware(false);
+
     try {
       dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
       dBuilder = dbFactory.newDocumentBuilder();
-      context = JAXBContext.newInstance(CrossReference.class);
+      context = JAXBContext.newInstance("com.progress.xref", CrossReference.class.getClassLoader());
       unmarshaller = context.createUnmarshaller();
     } catch (ParserConfigurationException | JAXBException caught) {
       throw new IllegalStateException(caught);
@@ -214,7 +221,6 @@ public class OpenEdgeProparseSensor implements Sensor {
         doc = dBuilder.parse(
             settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
         xmlParseTime += (System.currentTimeMillis() - startTime);
-        numXREF++;
       } catch (SAXException | IOException caught) {
         LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
       }
@@ -229,11 +235,14 @@ public class OpenEdgeProparseSensor implements Sensor {
       LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
       try (InputStream inpStream = new FileInputStream(xrefFile)) {
         long startTime = System.currentTimeMillis();
-        doc = (CrossReference) unmarshaller.unmarshal(
+        InputSource is = new InputSource(
             settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
+        XMLReader reader = sax.newSAXParser().getXMLReader();
+        SAXSource source = new SAXSource(reader, is);
+        doc = (CrossReference) unmarshaller.unmarshal(source);
         xmlParseTime += (System.currentTimeMillis() - startTime);
         numXREF++;
-      } catch (JAXBException | IOException caught) {
+      } catch (JAXBException | SAXException | ParserConfigurationException | IOException caught) {
         LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
       }
     }
