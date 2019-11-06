@@ -107,4 +107,23 @@ public class TestProfiler {
     Assert.assertTrue(session.getModuleById(1).getLinesToCover().contains(-2));
   }
 
+  @Test
+  public void testProfiler11() throws IOException {
+    // New file format in 12.1 - Module name includes callee name when using super:xxx() or methods not overidden in child class
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler11.out"));
+    Assert.assertEquals(session.getVersionNumber(), 3);
+    Assert.assertEquals(session.getModules().size(), 7);
+    Assert.assertNotNull(session.getModuleByName("MyLogger"));
+    Assert.assertEquals(session.getModuleByName("MyLogger").getCoveredLines().size(), 3);
+    Assert.assertEquals(session.getModuleByName("MyLogger").getLinesToCover().size(), 3);
+
+    // Same test but using 11.7 profiler
+    ProfilerSession session2 = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler12.out"));
+    Assert.assertEquals(session2.getVersionNumber(), 1);
+    Assert.assertEquals(session2.getModules().size(), 7);
+    Assert.assertNotNull(session2.getModuleByName("MyLogger"));
+    Assert.assertEquals(session2.getModuleByName("MyLogger").getCoveredLines().size(), 3);
+    Assert.assertEquals(session2.getModuleByName("MyLogger").getLinesToCover().size(), 3);
+  }
+
 }
