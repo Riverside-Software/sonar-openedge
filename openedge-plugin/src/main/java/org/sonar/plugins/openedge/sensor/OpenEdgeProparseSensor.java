@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -86,6 +87,8 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 
 import com.google.common.base.Joiner;
@@ -108,7 +111,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   private final DocumentBuilder dBuilder;
   private final JAXBContext context;
   private final Unmarshaller unmarshaller;
-  private final SAXParserFactory sax;
+  private final SAXParserFactory saxParserFactory;
 
   // File statistics
   private int numFiles;
@@ -132,15 +135,16 @@ public class OpenEdgeProparseSensor implements Sensor {
     this.settings = settings;
     this.components = components;
     dbFactory = DocumentBuilderFactory.newInstance();
-    sax = SAXParserFactory.newInstance();
-    sax.setNamespaceAware(false);
+    saxParserFactory = SAXParserFactory.newInstance();
+    saxParserFactory.setNamespaceAware(false);
 
     try {
       dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+      saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
       dBuilder = dbFactory.newDocumentBuilder();
       context = JAXBContext.newInstance("com.progress.xref", CrossReference.class.getClassLoader());
       unmarshaller = context.createUnmarshaller();
-    } catch (ParserConfigurationException | JAXBException caught) {
+    } catch (ParserConfigurationException | JAXBException | SAXNotRecognizedException | SAXNotSupportedException caught) {
       throw new IllegalStateException(caught);
     }
   }
@@ -237,7 +241,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         long startTime = System.currentTimeMillis();
         InputSource is = new InputSource(
             settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
-        XMLReader reader = sax.newSAXParser().getXMLReader();
+        XMLReader reader = saxParserFactory.newSAXParser().getXMLReader();
         SAXSource source = new SAXSource(reader, is);
         doc = (CrossReference) unmarshaller.unmarshal(source);
         xmlParseTime += (System.currentTimeMillis() - startTime);
