@@ -68,12 +68,18 @@ public class Module implements Comparable<Module> {
    * sous-répertoire et extension
    */
   public String getModuleObject() {
+    // Up to 12.0 : name contains either file name or (internal procedure + file name)
+    // Starting from 12.1: third entry (optional), callee name when using super:xxx() or methods not overidden in child
+    // class
     if (name.indexOf(' ') > -1) {
-      return name.substring(name.indexOf(' ') + 1);
+      String tmp = name.substring(name.indexOf(' ') + 1);
+      if (tmp.indexOf(' ') > -1)
+        return tmp.substring(0, tmp.indexOf(' '));
+      else
+        return tmp;
     } else {
       return name;
     }
-
   }
 
   /**
