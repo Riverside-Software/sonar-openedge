@@ -31,7 +31,6 @@ import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.core.util.UnitTestWindowsModule;
-import org.prorefactor.proparse.antlr4.MultiChannelTokenSource;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
@@ -830,7 +829,7 @@ public class LexerTest {
 
     ProToken tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
-    assertEquals(tok.getChannel(), MultiChannelTokenSource.PROPARSE_CHANNEL);
+    assertEquals(tok.getChannel(), ProToken.PROPARSE_CHANNEL);
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.WS);
     assertEquals(tok.getChannel(), Token.HIDDEN_CHANNEL);
@@ -848,7 +847,7 @@ public class LexerTest {
     tok = (ProToken) stream.nextToken();
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
-    assertEquals(tok.getChannel(), MultiChannelTokenSource.PROPARSE_CHANNEL);
+    assertEquals(tok.getChannel(), ProToken.PROPARSE_CHANNEL);
     tok = (ProToken) stream.nextToken();
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
@@ -865,7 +864,7 @@ public class LexerTest {
     tok = (ProToken) stream.nextToken();
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
-    assertEquals(tok.getChannel(), MultiChannelTokenSource.PROPARSE_CHANNEL);
+    assertEquals(tok.getChannel(), ProToken.PROPARSE_CHANNEL);
     tok = (ProToken) stream.nextToken();
     tok = (ProToken) stream.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.ID);

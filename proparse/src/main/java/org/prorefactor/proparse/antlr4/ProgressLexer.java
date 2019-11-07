@@ -165,8 +165,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     TokenSource postlexer = lexOnly ? new NoOpPostLexer(lexer) : new PostLexer(lexer);
     TokenSource filter0 = new NameDotTokenFilter(postlexer);
     TokenSource filter1 = new TokenList(filter0);
-    TokenSource filter2 = new MultiChannelTokenSource(filter1);
-    wrapper = new FunctionKeywordTokenFilter(filter2);
+    wrapper = new FunctionKeywordTokenFilter(filter1);
   }
 
   /**
