@@ -20,6 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
@@ -27,7 +29,6 @@ import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.SymbolScope.FieldType;
-import org.prorefactor.proparse.antlr4.AST;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Symbol;
@@ -37,15 +38,14 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 /**
- * ANTLR4 version of JPNode.
+ * TreeNode
  */
-public class JPNode implements AST {
-  private ProToken token;
-
-  private JPNode down;
-  private JPNode right;
-  private JPNode left;
-  private JPNode up;
+public class JPNode {
+  private final ProToken token;
+  private final JPNode parent;
+  private final int childNum;
+  @Nullable
+  private final List<JPNode> children;
 
   private Map<Integer, Integer> attrMap;
   private Map<String, String> attrMapStrings;
@@ -65,73 +65,11 @@ public class JPNode implements AST {
     }
   }
 
-
-  protected JPNode(ProToken t) {
-    this.token = t;
-  }
-
-  // *************
-  // AST interface
-  // *************
-
-  public void addChild(AST child) {
-    if (child == null)
-      return;
-    JPNode node = down;
-    if (node != null) {
-      while (node.right != null) {
-        node = node.right;
-      }
-      node.right = (JPNode) child;
-    } else {
-      down = (JPNode) child;
-    }
-  }
-
-  @Override
-  public int getNumberOfChildren() {
-    int n = 0;
-    JPNode node = down;
-    if (node != null) {
-      n = 1;
-      while (node.right != null) {
-        node = node.right;
-        n++;
-      }
-      return n;
-    }
-    return n;
-  }
-
-
-  @Override
-  public JPNode getFirstChild() {
-    return down;
-  }
-
-  @Override
-  public JPNode getNextSibling() {
-    return right;
-  }
-
-  @Override
-  public String getText() {
-    return token.getText();
-  }
-
-  @Override
-  public int getType() {
-    return token.getNodeType().getType();
-  }
-
-  @Override
-  public int getLine() {
-    return token.getLine();
-  }
-
-  @Override
-  public int getColumn() {
-    return token.getCharPositionInLine();
+  protected JPNode(ProToken token, JPNode parent, int num, boolean hasChildren) {
+    this.token = token;
+    this.parent = parent;
+    this.childNum = num;
+    this.children = hasChildren ? new ArrayList<>() : null;
   }
 
   // ********************
@@ -140,33 +78,79 @@ public class JPNode implements AST {
 
   // Attributes from ProToken
 
+  /**
+   * @see ProToken#getText()
+   */
+  public String getText() {
+    return token.getText();
+  }
+
+  /**
+   * @see ProToken#getNodeType()
+   */
   public ABLNodeType getNodeType() {
     return token.getNodeType();
   }
 
   /**
-   * Source number in the macro tree.
+   * @see ProToken#getType()
+   */
+  public int getType() {
+    return token.getNodeType().getType();
+  }
+
+  /**
+   * @see ProToken#getMacroSourceNum()
    */
   public int getSourceNum() {
     return token.getMacroSourceNum();
   }
 
+  /**
+   * @see ProToken#getLine()
+   */
+  public int getLine() {
+    return token.getLine();
+  }
+
+  /**
+   * @see ProToken#getEndLine()
+   */
   public int getEndLine() {
     return token.getEndLine();
   }
 
+  /**
+   * @see ProToken#getColumn()
+   */
+  public int getColumn() {
+    return token.getCharPositionInLine();
+  }
+
+  /**
+   * @see ProToken#getEndColumn()
+   */
   public int getEndColumn() {
     return token.getEndCharPositionInLine();
   }
 
+  /**
+   * @see ProToken#getFileIndex()
+   */
   public int getFileIndex() {
     return token.getFileIndex();
   }
 
+  /**
+   * @see ProToken#getFileName()
+   */
   public String getFileName() {
     return token.getFileName();
   }
 
+  /**
+   * @see ProToken#getEndFileIndex()
+   */
   public int getEndFileIndex() {
     return token.getEndFileIndex();
   }
@@ -186,16 +170,32 @@ public class JPNode implements AST {
   // ******************
   // Navigation methods
   // ******************
+  
+  private List<JPNode> getChildren() {
+    return children == null ? new ArrayList<>() : children;
+  }
+
+  public int getNumberOfChildren() {
+    return children == null ? 0 : children.size();
+  }
+
+  public JPNode getFirstChild() {
+    return children == null || children.isEmpty() ? null : children.get(0);
+  }
+
+  public JPNode getNextSibling() {
+    return (parent != null) && (parent.getChildren().size() > childNum + 1) ? parent.getChildren().get(childNum + 1) : null;
+  }
 
   public JPNode getParent() {
-    return up;
+    return parent;
   }
 
   /**
    * @return Previous sibling in line before this one
    */
   public JPNode getPreviousSibling() {
-    return left;
+    return (childNum > 0) && (parent != null) ? parent.getChildren().get(childNum - 1) : null;
   }
 
   /**
@@ -205,7 +205,7 @@ public class JPNode implements AST {
   public JPNode firstNaturalChild() {
     if (token.isNatural())
       return this;
-    for (JPNode n = down; n != null; n = n.down) {
+    for (JPNode n =  getFirstChild(); n != null; n = n.getFirstChild()) {
       if (n.token.isNatural())
         return n;
     }
@@ -216,27 +216,23 @@ public class JPNode implements AST {
    * @return Last child of the last child of the...
    */
   public JPNode getLastDescendant() {
-    if (down == null)
+    if (children == null || children.isEmpty())
       return this;
-    JPNode node = down;
-    while (node.right != null) {
-      node = node.right;
-    }
-    return node.getLastDescendant();
+    return children.get(children.size() - 1).getLastDescendant();
   }
 
   /**
    * @return First child if there is one, otherwise next sibling
    */
   public JPNode nextNode() {
-    return (down == null ? right : down);
+    return children == null || children.isEmpty() ? getNextSibling() : children.get(0);
   }
 
   /** 
    * @return Previous sibling if there is one, otherwise parent
    */
   public JPNode getPreviousNode() {
-    return (left == null ? up : left);
+    return childNum > 0 ? getPreviousSibling() : getParent();
   }
 
   // *************************
@@ -363,7 +359,9 @@ public class JPNode implements AST {
 
   /** Find the first direct child with a given node type. */
   public JPNode findDirectChild(ABLNodeType nodeType) {
-    for (JPNode node = down; node != null; node = node.getNextSibling()) {
+    if (children == null)
+      return null;
+    for (JPNode node: children) {
       if (node.getNodeType() == nodeType)
         return node;
     }
@@ -512,7 +510,7 @@ public class JPNode implements AST {
     // If token has been generated by the parser (ie synthetic token), then we look for hidden token attached to the
     // first child
     if (token.isSynthetic()) {
-      JPNode child = down;
+      JPNode child = getFirstChild();
       if ((child != null) && (child.hasProparseDirective(directive))) {
         return true;
       }
@@ -624,7 +622,7 @@ public class JPNode implements AST {
     if (getNodeType() != ABLNodeType.ANNOTATION)
       return "";
     StringBuilder annName = new StringBuilder(token.getText().substring(1));
-    JPNode tok = down;
+    JPNode tok = getFirstChild();
     while ((tok != null) && (tok.getNodeType() != ABLNodeType.PERIOD) && (tok.getNodeType() != ABLNodeType.LEFTPAREN)) {
       annName.append(tok.getText());
       tok = tok.getNextSibling();
@@ -944,26 +942,27 @@ public class JPNode implements AST {
     }
 
     public JPNode build(ParserSupport support) {
-      return build(support, null, null);
+      return build(support, null, 0);
     }
 
-    private JPNode build(ParserSupport support, JPNode up, JPNode left) {
+    private JPNode build(ParserSupport support, JPNode up, int num) {
       JPNode node;
+      boolean hasChildren = (down != null) && ((down.getNodeType() != ABLNodeType.EMPTY_NODE) || down.right != null || down.down != null);
       switch (tok.getNodeType()) {
         case EMPTY_NODE:
           throw new IllegalStateException("Empty node can't generate JPNode");
         case RECORD_NAME:
-          node = new RecordNameNode(tok);
+          node = new RecordNameNode(tok, up, num, hasChildren);
           break;
         case FIELD_REF:
-          node = new FieldRefNode(tok);
+          node = new FieldRefNode(tok, up, num, hasChildren);
           break;
         case PROGRAM_ROOT:
-          node = new ProgramRootNode(tok);
+          node = new ProgramRootNode(tok, up, num, hasChildren);
           break;
         case FOR:
           // FOR in 'DEFINE BUFFER x FOR y' is not a BlockNode
-          node = stmt ? new BlockNode(tok) : new JPNode(tok);
+          node = stmt ? new BlockNode(tok, up, num, hasChildren) : new JPNode(tok, up, num, hasChildren);
           break;
         case DO:
         case REPEAT:
@@ -977,14 +976,12 @@ public class JPNode implements AST {
         case ON:
         case PROPERTY_GETTER:
         case PROPERTY_SETTER:
-          node = new BlockNode(tok);
+          node = new BlockNode(tok, up, num, hasChildren);
           break;
         default:
-          node = new JPNode(tok);
+          node = new JPNode(tok, up, num, hasChildren);
           break;
       }
-      node.up = up;
-      node.left = left;
 
       if (className != null)
         node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
@@ -1015,6 +1012,7 @@ public class JPNode implements AST {
         support.pushNode(ctx, node);
       // Attach first non-empty builder node to node.down
       Builder tmp = down;
+      Builder tmpRight = null;
       while (tmp != null) {
         if (tmp.getNodeType() == ABLNodeType.EMPTY_NODE) {
           // Safety net: EMPTY_NODE can't have children
@@ -1023,22 +1021,23 @@ public class JPNode implements AST {
           }
           tmp = tmp.right;
         } else {
-          node.down = tmp.build(support, node, null);
+          node.children.add(tmp.build(support, node, 0));
+          tmpRight = tmp.right;
           tmp = null;
         }
       }
+      int numCh = 1;
       // Same for node.right
-      tmp = right;
-      while (tmp != null) {
-        if (tmp.getNodeType() == ABLNodeType.EMPTY_NODE) {
+      while (tmpRight != null) {
+        if (tmpRight.getNodeType() == ABLNodeType.EMPTY_NODE) {
           // Safety net: EMPTY_NODE can't have children
-          if (tmp.down != null) {
-            throw new IllegalStateException("Found EMPTY_NODE with children (first is " + tmp.down.getNodeType());
+          if (tmpRight.down != null) {
+            throw new IllegalStateException("Found EMPTY_NODE with children (first is " + tmpRight.down.getNodeType());
           }
-          tmp = tmp.right;
+          tmpRight = tmpRight.right;
         } else {
-          node.right = tmp.build(support, up, node);
-          tmp = null;
+          node.children.add(tmpRight.build(support, node, numCh++));
+          tmpRight = tmpRight.right;
         }
       }
 

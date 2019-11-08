@@ -28,8 +28,8 @@ import org.prorefactor.treeparser.symbols.TableBuffer;
 import com.google.common.base.Strings;
 
 public class RecordNameNode extends JPNode {
-  public RecordNameNode(ProToken t) {
-    super(t);
+  public RecordNameNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+    super(t, parent, num, hasChildren);
   }
 
   @Nullable

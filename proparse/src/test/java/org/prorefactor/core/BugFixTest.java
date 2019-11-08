@@ -620,4 +620,10 @@ public class BugFixTest {
     genericTest("options_field.p");
   }
 
+  @Test
+  public void testTooManyStatements() {
+    // Verifies that lots of statements (5000 here) don't raise a stack overflow exception
+    genericTest("tooManyStatements.p");
+  }
+
 }

@@ -27,8 +27,8 @@ import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 
 public class FieldRefNode extends JPNode {
-  public FieldRefNode(ProToken t) {
-    super(t);
+  public FieldRefNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+    super(t, parent, num, hasChildren);
   }
 
   /**

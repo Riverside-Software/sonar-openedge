@@ -28,8 +28,8 @@ import org.prorefactor.treeparser.Block;
  * METHOD, CANFIND, CATCH, ON, PROPERTY_GETTER, PROPERTY_SETTER
  */
 public class BlockNode extends JPNode {
-  public BlockNode(ProToken t) {
-    super(t);
+  public BlockNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+    super(t, parent, num, hasChildren);
   }
 
   @Nullable

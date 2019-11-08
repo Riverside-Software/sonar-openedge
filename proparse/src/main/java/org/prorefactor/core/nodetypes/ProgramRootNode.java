@@ -15,11 +15,12 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 
 public class ProgramRootNode extends BlockNode {
-  public ProgramRootNode(ProToken t) {
-    super(t);
+  public ProgramRootNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+    super(t, parent, num, hasChildren);
   }
 
 }
