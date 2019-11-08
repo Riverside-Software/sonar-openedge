@@ -16,50 +16,57 @@
 package org.prorefactor.core.nodetypes;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.SymbolScope.FieldType;
-import org.prorefactor.treeparser.BufferScope;
-import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.ContextQualifier;
 
 import com.google.common.base.Strings;
 
 public class RecordNameNode extends JPNode {
+  private String sortAccess = "";
+  private boolean wholeIndex;
+  private String searchIndexName = "";
+  private ContextQualifier qualifier;
+
   public RecordNameNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
   }
 
-  @Nullable
-  public BufferScope getBufferScope() {
-    return (BufferScope) getLink(IConstants.BUFFERSCOPE);
+  public void setContextQualifier(ContextQualifier qualifier) {
+    this.qualifier = qualifier;
   }
 
-  @Nullable
-  public TableBuffer getTableBuffer() {
-    return (TableBuffer) getLink(IConstants.SYMBOL);
+  public ContextQualifier getQualifier() {
+    return qualifier;
   }
 
-  public void setBufferScope(@Nonnull BufferScope bufferScope) {
-    setLink(IConstants.BUFFERSCOPE, bufferScope);
+  public String getSortAccess() {
+    return sortAccess;
   }
 
-  public void setTableBuffer(@Nonnull TableBuffer buffer) {
-    setLink(IConstants.SYMBOL, buffer);
+  public boolean isWholeIndex() {
+    return wholeIndex;
+  }
+
+  public String getSearchIndexName() {
+    return searchIndexName;
   }
 
   public void setSortAccess(String str) {
     if (Strings.isNullOrEmpty(str))
       return;
+    sortAccess = sortAccess + (sortAccess.isEmpty() ? "" : ',') + str;
+  }
 
-    Object o = getLink(IConstants.SORT_ACCESS);
-    if (o != null) {
-      setLink(IConstants.SORT_ACCESS, o.toString() + "," + str);
-    } else {
-      setLink(IConstants.SORT_ACCESS, str);
-    }
+  public void setWholeIndex(boolean wholeIndex) {
+    this.wholeIndex = wholeIndex;
+  }
+
+  public void setSearchIndexName(String indexName) {
+    this.searchIndexName = indexName;
   }
 
   /** Set the 'store type' attribute on a RECORD_NAME node. */

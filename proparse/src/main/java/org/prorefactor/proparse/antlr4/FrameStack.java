@@ -22,7 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
@@ -73,7 +72,7 @@ public class FrameStack {
 
   private Browse browseRefSet(JPNode idNode, TreeParserSymbolScope symbolScope) {
     Browse browse = (Browse) symbolScope.lookupFieldLevelWidget(idNode.getText());
-    idNode.setLink(IConstants.SYMBOL, browse);
+    idNode.setSymbol(browse);
     return browse;
   }
 
@@ -160,7 +159,7 @@ public class FrameStack {
     Frame frame = (Frame) symbolScope.lookupWidget(Proparse.FRAME, frameName);
     if (frame == null)
       frame = createFrame(frameName, symbolScope);
-    idNode.setLink(IConstants.SYMBOL, frame);
+    idNode.setSymbol(frame);
     return frame;
   }
 
@@ -289,7 +288,7 @@ public class FrameStack {
     if (frame == null)
       frame = createFrame(frameName, currentSymbolScope);
     frame.setDefinitionNode(defNode.getIdNode());
-    defNode.setLink(IConstants.SYMBOL, frame);
+    defNode.setSymbol(frame);
     defNode.setFieldContainer(frame);
     containerForCurrentStatement = frame;
     containerForCurrentStatement.addStatement(defNode2);

@@ -30,8 +30,7 @@ public class BufferScope {
     STRONG(1), WEAK(2), REFERENCE(3),
     /**
      * A "hidden cursor" is a BufferScope which has no side-effects on surrounding blocks like strong, weak, and
-     * reference scopes do. These are used within a CAN-FIND function. (2004.Sep:John: Maybe in triggers too? Haven't
-     * checked.)
+     * reference scopes do. These are used within a CAN-FIND function.
      */
     HIDDEN_CURSOR(4);
     int value;

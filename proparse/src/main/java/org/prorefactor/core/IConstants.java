@@ -41,9 +41,9 @@ public class IConstants {
 
   /**
    * For attribute key "storetype", this attribute value indicates that the reference is to a local variable within the
-   * 4gl compile unit. This node attribute is set by TreeParser01.
+   * 4gl compile unit. This node attribute is set by TreeParser.
    */
-  public static final int ST_VAR = 1105; // belongs to TreeParser01
+  public static final int ST_VAR = 1105;
 
   /** See Proparse documentation, "Node Attributes Reference". */
   public static final int OPERATOR = 1200;
@@ -51,8 +51,6 @@ public class IConstants {
   public static final int STATE2 = 1300;
   /** See Proparse documentation, "Node Attributes Reference". */
   public static final int STATEHEAD = 1400;
-  /** See Proparse documentation, "Node Attributes Reference". */
-  public static final int PROPARSEDIRECTIVE = 1500;
 
   //
   // From version 1.2
@@ -62,17 +60,6 @@ public class IConstants {
   public static final int ABBREVIATED = 1700;
   /** See Proparse documentation, "Node Attributes Reference". */
   public static final int INLINE_VAR_DEF = 2000;
-
-  //
-  // From version 1.3
-  //
-
-  /** See Proparse documentation, "Node Attributes Reference". */
-  public static final int SOURCENUM = 2300;
-
-  /** See Proparse documentation, "Node Attributes Reference". */
-  public static final String QUALIFIED_CLASS_STRING = "qualified-class";
-  public static final int QUALIFIED_CLASS_INT = 2400;
 
   //
   // From TreeParser01
@@ -92,21 +79,9 @@ public class IConstants {
    */
   public static final int CONTEXT_QUALIFIER = 10160;
 
-  //
-  // From "org.prorefactor.refactor"
-  //
-
-  /** A scanner token which is scheduled to be cut from the token list */
-  public static final int TO_BE_CUT = 11010;
-
-  // Joanju uses 49000-49999 for scratch and otherwise non-persistent attributes.
-  // Attributes 50000+ are reserved for non-Joanju use.
-
   // From JPNode, to be moved into an enum
   /** A valid value for setLink() and getLink() */
   public static final int SYMBOL = -210;
-  /** A valid value for setLink() and getLink() */
-  public static final int TET_NODE = -211;
 
   /**
    * A valid value for setLink() and getLink(). Link to a BufferScope object, set by tp01 for RECORD_NAME nodes and for
@@ -121,13 +96,6 @@ public class IConstants {
    * @see org.prorefactor.core.nodetypes.BlockNode
    */
   public static final int BLOCK = -214;
-  /** A valid value for setLink() and getLink() */
-  public static final int COMMENTS = -215;
-  /**
-   * A valid value for setLink() and getLink(). If this AST was constructed from another, then this is the link to the
-   * original.
-   */
-  public static final int ORIGINAL = -216;
   /**
    * A valid value for setLink() and getLink().
    */
@@ -136,15 +104,6 @@ public class IConstants {
    * A valid value for setLink() and getLink(). A link to a Call object, set by TreeParser01.
    */
   public static final int CALL = -218;
-  /**
-   * A value for setLink() and getLink(). A link from a CLASS node to the class's superclass's syntax tree.
-   */
-  public static final int SUPER_CLASS_TREE = -219;
-  /**
-   * A value for setLink() and getLink(). Used only for DataXferStream in ProgramRootNode.java. A link from a
-   * Program_root node to a copy of the array of filenames.
-   */
-  public static final int FILE_NAME_ARRAY = -220;
   /**
    * A value fo setLink() and getLink(). Store index name used in SEARCH nodes
    */

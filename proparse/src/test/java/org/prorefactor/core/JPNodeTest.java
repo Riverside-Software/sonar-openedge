@@ -16,6 +16,7 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -372,15 +373,15 @@ public class JPNodeTest {
     RecordNameNode customer = (RecordNameNode) nodes.get(1);
     RecordNameNode item = (RecordNameNode) nodes.get(2);
 
-    assertEquals(warehouse.getLink(IConstants.WHOLE_INDEX), Boolean.TRUE);
-    assertEquals(warehouse.getLink(IConstants.SEARCH_INDEX_NAME), "Warehouse.warehousenum");
+    assertTrue(warehouse.isWholeIndex());
+    assertEquals(warehouse.getSearchIndexName(), "Warehouse.warehousenum");
 
-    assertEquals(customer.getLink(IConstants.WHOLE_INDEX), Boolean.FALSE);
-    assertEquals(customer.getLink(IConstants.SEARCH_INDEX_NAME), "Customer.CountryPost");
-    assertEquals(customer.getLink(IConstants.SORT_ACCESS), "Address");
+    assertFalse(customer.isWholeIndex());
+    assertEquals(customer.getSearchIndexName(), "Customer.CountryPost");
+    assertEquals(customer.getSortAccess(), "Address");
 
-    assertEquals(item.getLink(IConstants.WHOLE_INDEX), Boolean.TRUE);
-    assertEquals(item.getLink(IConstants.SEARCH_INDEX_NAME), "Item.ItemNum");
+    assertTrue(item.isWholeIndex());
+    assertEquals(item.getSearchIndexName(), "Item.ItemNum");
   }
 
 }

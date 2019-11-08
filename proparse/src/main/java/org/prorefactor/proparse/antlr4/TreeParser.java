@@ -2190,7 +2190,7 @@ public class TreeParser extends ProparseBaseListener {
     if (LOG.isTraceEnabled())
       LOG.trace("Entering recordNameNode {} {}", recordNode, contextQualifier);
 
-    recordNode.attrSet(IConstants.CONTEXT_QUALIFIER, contextQualifier.toString());
+    recordNode.setContextQualifier(contextQualifier);
     TableBuffer buffer = null;
     switch (contextQualifier) {
       case INIT:
@@ -2411,7 +2411,7 @@ public class TreeParser extends ProparseBaseListener {
     Symbol symbol = SymbolFactory.create(symbolType, name, currentScope);
     currSymbol = symbol;
     currSymbol.setDefinitionNode(defNode.getIdNode());
-    defNode.getIdNode().setLink(IConstants.SYMBOL, symbol);
+    defNode.getIdNode().setSymbol(symbol);
     return symbol;
   }
 
@@ -2428,7 +2428,7 @@ public class TreeParser extends ProparseBaseListener {
     Event event = new Event(name, currentScope);
     event.setDefinitionNode(defNode.getIdNode());
     currSymbol = event;
-    defNode.getIdNode().setLink(IConstants.SYMBOL, event);
+    defNode.getIdNode().setSymbol(event);
 
     return event;
   }
@@ -2447,7 +2447,7 @@ public class TreeParser extends ProparseBaseListener {
     FieldBuffer fieldBuff = rootScope.defineTableFieldDelayedAttach(text, currDefTable);
     currSymbol = fieldBuff;
     fieldBuff.setDefinitionNode(idNode.getFirstChild());
-    idNode.getFirstChild().setLink(IConstants.SYMBOL, fieldBuff);
+    idNode.getFirstChild().setSymbol(fieldBuff);
     return fieldBuff;
   }
 
@@ -2505,7 +2505,7 @@ public class TreeParser extends ProparseBaseListener {
     currDefTableLike = null;
     currDefTableUseIndex = false;
 
-    defNode.getIdNode().setLink(IConstants.SYMBOL, buffer);
+    defNode.getIdNode().setSymbol(buffer);
   }
 
   private void postDefineTempTable() {
@@ -2560,10 +2560,10 @@ public class TreeParser extends ProparseBaseListener {
     TableBuffer bufSymbol = currentScope.defineBuffer(name, table);
     currSymbol = bufSymbol;
     currSymbol.setDefinitionNode(defAST.getIdNode());
-    defAST.getIdNode().setLink(IConstants.SYMBOL, bufSymbol);
+    defAST.getIdNode().setSymbol(bufSymbol);
     if (init) {
       BufferScope bufScope = currentBlock.getBufferForReference(bufSymbol);
-      defAST.setLink(IConstants.BUFFERSCOPE, bufScope);
+      defAST.setBufferScope(bufScope);
     }
     return bufSymbol;
   }
@@ -2692,7 +2692,7 @@ public class TreeParser extends ProparseBaseListener {
     LOG.trace("Entering field {} {} {} {}", refNode, idNode, cq, resolution);
     FieldLookupResult result = null;
 
-    refNode.attrSet(IConstants.CONTEXT_QUALIFIER, cq.toString());
+    refNode.setContextQualifier(cq);
 
     // Check if this is a Field_ref being "inline defined"
     // If so, we define it right now.
@@ -2754,7 +2754,7 @@ public class TreeParser extends ProparseBaseListener {
       refNode.setBufferScope(result.getBufferScope());
     }
 
-    refNode.setSymbol(result.getSymbol());
+    refNode.setSymbol((Symbol) result.getSymbol());
     result.getSymbol().noteReference(cq);
     if (result.getSymbol() instanceof FieldBuffer) {
       FieldBuffer fb = (FieldBuffer) result.getSymbol();

@@ -27,15 +27,16 @@ import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
+import org.prorefactor.core.nodetypes.TypeNameNode;
 import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.SymbolScope.FieldType;
+import org.prorefactor.treeparser.Block;
+import org.prorefactor.treeparser.BufferScope;
 import org.prorefactor.treeparser.symbols.FieldContainer;
-import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.TableBuffer;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 
 /**
  * TreeNode
@@ -47,23 +48,12 @@ public class JPNode {
   @Nullable
   private final List<JPNode> children;
 
+  // Fields are usually set in TreeParser
+  private Symbol symbol;
+  private FieldContainer container;
+  private BufferScope bufferScope;
+
   private Map<Integer, Integer> attrMap;
-  private Map<String, String> attrMapStrings;
-  private Map<Integer, Object> linkMap;
-  private Map<Integer, String> stringAttributes;
-
-  private static final BiMap<Integer, String> attrStrEqs;
-
-  // Static class initializer.
-  static {
-    attrStrEqs = HashBiMap.create();
-    for (AttributeKey attr : AttributeKey.values()) {
-      attrStrEqs.put(attr.getKey(), attr.getName());
-    }
-    for (AttributeValue attr : AttributeValue.values()) {
-      attrStrEqs.put(attr.getKey(), attr.getName());
-    }
-  }
 
   protected JPNode(ProToken token, JPNode parent, int num, boolean hasChildren) {
     this.token = token;
@@ -71,10 +61,6 @@ public class JPNode {
     this.childNum = num;
     this.children = hasChildren ? new ArrayList<>() : null;
   }
-
-  // ********************
-  // End of AST interface
-  // ********************
 
   // Attributes from ProToken
 
@@ -247,13 +233,7 @@ public class JPNode {
    * Get list of the direct children of this node.
    */
   public List<JPNode> getDirectChildren() {
-    List<JPNode> ret = new ArrayList<>();
-    JPNode n = getFirstChild();
-    while (n != null) {
-      ret.add(n);
-      n = n.getNextSibling();
-    }
-    return ret;
+    return getChildren();
   }
 
   /**
@@ -274,8 +254,7 @@ public class JPNode {
    */
   public List<JPNode> getDirectChildren(ABLNodeType type, ABLNodeType... types) {
     List<JPNode> ret = new ArrayList<>();
-    JPNode n = getFirstChild();
-    while (n != null) {
+    for (JPNode n : children) {
       if (n.getNodeType() == type)
         ret.add(n);
       if (types != null) {
@@ -284,7 +263,6 @@ public class JPNode {
             ret.add(n);
         }
       }
-      n = n.getNextSibling();
     }
     return ret;
   }
@@ -384,40 +362,9 @@ public class JPNode {
     switch (key) {
       case IConstants.ABBREVIATED:
         return isAbbreviated() ? 1 : 0;
-      case IConstants.SOURCENUM:
-        return token.getMacroSourceNum();
       default:
         return 0;
     }
-  }
-
-  public String attrGetS(int attrNum) {
-    if (attrNum != IConstants.QUALIFIED_CLASS_INT)
-      throw new IllegalArgumentException("Invalid value " + attrNum);
-    if ((stringAttributes != null) && stringAttributes.containsKey(attrNum)) {
-      return stringAttributes.get(attrNum);
-    }
-    return "";
-  }
-
-  public String attrGetS(String attrName) {
-    if (IConstants.QUALIFIED_CLASS_STRING.equalsIgnoreCase(attrName))
-      throw new IllegalArgumentException("Invalid value " + attrName);
-    if (attrMapStrings != null) {
-      String ret = attrMapStrings.get(attrName);
-      if (ret != null)
-        return ret;
-    }
-    Integer intKey = attrEq(attrName);
-    if (intKey != null)
-      return attrGetS(intKey);
-    return "";
-  }
-
-  public void attrSet(int key, String value) {
-    if (stringAttributes == null)
-      stringAttributes = new HashMap<>();
-    stringAttributes.put(key, value);
   }
 
   public void attrSet(Integer key, int val) {
@@ -426,33 +373,11 @@ public class JPNode {
     attrMap.put(key, val);
   }
 
-  public void attrSetS(String key, String value) {
-    if (attrMapStrings == null)
-      attrMapStrings = new HashMap<>();
-    attrMapStrings.put(key, value);
-  }
-
   /**
    * Mark a node as "operator"
    */
   public void setOperator() {
     attrSet(IConstants.OPERATOR, IConstants.TRUE);
-  }
-
-  /**
-   * Get a link to an arbitrary object. Integers from -200 through -499 are reserved for Joanju.
-   */
-  public Object getLink(Integer key) {
-    if (linkMap == null)
-      return null;
-    return linkMap.get(key);
-  }
-
-  /** If this AST was constructed from another, then get the original. */
-  public JPNode getOriginal() {
-    if (linkMap == null)
-      return null;
-    return (JPNode) linkMap.get(IConstants.ORIGINAL);
   }
 
   public int getState2() {
@@ -473,23 +398,62 @@ public class JPNode {
 
   /** Certain nodes will have a link to a Symbol, set by TreeParser. */
   public Symbol getSymbol() {
-    return (Symbol) getLink(IConstants.SYMBOL);
-  }
-
-  private static Integer attrEq(String attrName) {
-    return attrStrEqs.inverse().get(attrName);
+    return symbol;
   }
 
   public boolean hasTableBuffer() {
-    return getLink(IConstants.SYMBOL) != null;
+    return symbol != null;
   }
 
   public boolean hasBufferScope() {
-    return getLink(IConstants.BUFFERSCOPE) != null;
+    return bufferScope != null;
   }
 
   public boolean hasBlock() {
-    return getLink(IConstants.BLOCK) != null;
+    return false;
+  }
+
+  @Nullable
+  public Block getBlock() {
+    return null;
+  }
+
+  public TableBuffer getTableBuffer() {
+    return (TableBuffer) symbol;
+  }
+
+  /**
+   * Get the FieldContainer (Frame or Browse) for a statement head node or a frame field reference. This value is set by
+   * TreeParser01. Head nodes for statements with the [WITH FRAME | WITH BROWSE] option have this value set. Is also
+   * available on the Field_ref node for #(Field_ref INPUT ...) and for #(USING #(Field_ref...)...).
+   */
+  public FieldContainer getFieldContainer() {
+    return container;
+  }
+
+  public BufferScope getBufferScope() {
+    return bufferScope;
+  }
+
+  public void setSymbol(Symbol symbol) {
+    this.symbol = symbol;
+  }
+
+  public void setBufferScope(BufferScope scope) {
+    this.bufferScope = scope;
+  }
+
+  /** @see #getFieldContainer() */
+  public void setFieldContainer(FieldContainer fieldContainer) {
+    this.container = fieldContainer;
+  }
+
+  public void setBlock(Block block) {
+    throw new IllegalArgumentException("Not a Block node");
+  }
+
+  public void setTableBuffer(TableBuffer buffer) {
+    setSymbol(buffer);
   }
 
   public boolean hasProparseDirective(String directive) {
@@ -526,46 +490,6 @@ public class JPNode {
     return false;
   }
 
-  /**
-   * Get the comments that precede this node. Gets the <b>consecutive</b> comments from Proparse if "connected",
-   * otherwise gets the comments stored within this node object. CAUTION: We want to know if line breaks exist between
-   * comments and nodes, and if they exist between consecutive comments. To preserve that information, the String
-   * returned here may have "\n" in front of the first comment, may have "\n" separating comments, and may have "\n"
-   * appended to the last comment. We do not preserve the number of newlines, nor do we preserve any other whitespace.
-   * 
-   * @return null if no comments.
-   */
-  public String getComments() {
-    String ret = (String) getLink(IConstants.COMMENTS);
-    if (ret != null)
-      return ret;
-    StringBuilder buff = new StringBuilder();
-    boolean hasComment = false;
-    int filenum = getFileIndex();
-    for (ProToken t = getHiddenBefore(); t != null; t = t.getHiddenBefore()) {
-      if (t.getFileIndex() != filenum)
-        break;
-      if (t.getNodeType() == ABLNodeType.WS) {
-        if (t.getText().indexOf('\n') > -1)
-          buff.insert(0, '\n');
-      } else if (t.getNodeType() == ABLNodeType.COMMENT) {
-        buff.insert(0, t.getText());
-        hasComment = true;
-      } else {
-        break;
-      }
-    }
-    return hasComment ? buff.toString() : null;
-  }
-
-  /**
-   * Get the FieldContainer (Frame or Browse) for a statement head node or a frame field reference. This value is set by
-   * TreeParser01. Head nodes for statements with the [WITH FRAME | WITH BROWSE] option have this value set. Is also
-   * available on the Field_ref node for #(Field_ref INPUT ...) and for #(USING #(Field_ref...)...).
-   */
-  public FieldContainer getFieldContainer() {
-    return (FieldContainer) getLink(IConstants.FIELD_CONTAINER);
-  }
 
   public ProToken getHiddenFirst() {
     // Some day, I'd like to change the structure for the hidden tokens,
@@ -639,12 +563,6 @@ public class JPNode {
     }
   }
 
-  private void initLinkMap() {
-    if (linkMap == null) {
-      linkMap = new HashMap<>();
-    }
-  }
-
   public boolean isAbbreviated() {
     return token.getNodeType().isAbbreviated(getText());
   }
@@ -668,31 +586,6 @@ public class JPNode {
     return attrGet(IConstants.STATEHEAD) == IConstants.TRUE;
   }
 
-  /**
-   * Set the comments preceding this node. CAUTION: Does not change any values in Proparse. Only use this if the JPNode
-   * tree is "disconnected", because getComments returns the comments from the "hidden tokens" in Proparse in
-   * "connected" mode.
-   */
-  public void setComments(String comments) {
-    setLink(IConstants.COMMENTS, comments);
-  }
-
-  /** @see #getFieldContainer() */
-  public void setFieldContainer(FieldContainer fieldContainer) {
-    setLink(IConstants.FIELD_CONTAINER, fieldContainer);
-  }
-
-  /** @see #getLink(Integer) */
-  public void setLink(Integer key, Object value) {
-    if (linkMap == null)
-      initLinkMap();
-    linkMap.put(key, value);
-  }
-
-  /** Assigned by the tree parser. */
-  public void setSymbol(ISymbol symbol) {
-    setLink(IConstants.SYMBOL, symbol);
-  }
 
   /**
    * Used by TreeParser in order to assign Symbol to the right node
@@ -964,6 +857,9 @@ public class JPNode {
           // FOR in 'DEFINE BUFFER x FOR y' is not a BlockNode
           node = stmt ? new BlockNode(tok, up, num, hasChildren) : new JPNode(tok, up, num, hasChildren);
           break;
+        case TYPE_NAME:
+          node = new TypeNameNode(tok, up, num, hasChildren, className);
+          break;
         case DO:
         case REPEAT:
         case FUNCTION:
@@ -983,8 +879,6 @@ public class JPNode {
           break;
       }
 
-      if (className != null)
-        node.attrSet(IConstants.QUALIFIED_CLASS_INT, className);
       if (stmt)
         node.setStatementHead(stmt2 == null ? 0 : stmt2.getType());
       if (operator)

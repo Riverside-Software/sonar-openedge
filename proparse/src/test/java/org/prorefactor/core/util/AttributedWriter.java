@@ -49,7 +49,7 @@ public class AttributedWriter {
   } // getAttributes
 
   private void getAttributesForBlock(JPNode node, StringBuffer nodeComments) {
-    Block block = (Block) node.getLink(IConstants.BLOCK);
+    Block block = (Block) node.getBlock();
     if (block == null)
       return;
     TableBuffer[] buffers = block.getBlockBuffers();
@@ -78,7 +78,7 @@ public class AttributedWriter {
   }
 
   private void getAttributesForSymbol(JPNode node, StringBuffer nodeComments) {
-    Symbol symbol = (Symbol) node.getLink(IConstants.SYMBOL);
+    Symbol symbol = node.getSymbol();
     if (symbol == null)
       return;
     nodeComments.append(" ");
