@@ -107,14 +107,14 @@ public class JPNode {
   }
 
   /**
-   * @see ProToken#getColumn()
+   * @see ProToken#getCharPositionInLine()
    */
   public int getColumn() {
     return token.getCharPositionInLine();
   }
 
   /**
-   * @see ProToken#getEndColumn()
+   * @see ProToken#getEndCharPositionInLine()
    */
   public int getEndColumn() {
     return token.getEndCharPositionInLine();
