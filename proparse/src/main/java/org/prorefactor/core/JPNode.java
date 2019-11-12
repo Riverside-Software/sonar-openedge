@@ -254,16 +254,19 @@ public class JPNode {
    */
   public List<JPNode> getDirectChildren(ABLNodeType type, ABLNodeType... types) {
     List<JPNode> ret = new ArrayList<>();
-    for (JPNode n : children) {
-      if (n.getNodeType() == type)
-        ret.add(n);
-      if (types != null) {
-        for (ABLNodeType t : types) {
-          if (n.getNodeType() == t)
-            ret.add(n);
+    if (children != null) {
+      for (JPNode n : children) {
+        if (n.getNodeType() == type)
+          ret.add(n);
+        if (types != null) {
+          for (ABLNodeType t : types) {
+            if (n.getNodeType() == t)
+              ret.add(n);
+          }
         }
       }
     }
+
     return ret;
   }
 
