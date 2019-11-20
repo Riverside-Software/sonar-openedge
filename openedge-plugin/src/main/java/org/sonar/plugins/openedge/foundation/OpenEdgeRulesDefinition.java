@@ -21,6 +21,7 @@ package org.sonar.plugins.openedge.foundation;
 
 import java.util.Arrays;
 
+import org.sonar.api.SonarRuntime;
 import org.sonar.api.rules.RuleType;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.check.Priority;
@@ -43,12 +44,18 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
   private static final String COMPILER_WARNING_TAG = "compiler-warnings";
   private static final String HTML_DOC_PATH = "/org/sonar/l10n/%s/rules/%s/%s.html";
 
+  private final SonarRuntime runtime;
+
+  public OpenEdgeRulesDefinition(SonarRuntime runtime) {
+    this.runtime = runtime;
+  }
+
   @SuppressWarnings("rawtypes")
   @Override
   public void define(Context context) {
     NewRepository repository = context.createRepository(Constants.STD_REPOSITORY_KEY, Constants.LANGUAGE_KEY).setName(REPOSITORY_NAME);
 
-    AnnotationBasedRulesDefinition annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY);
+    AnnotationBasedRulesDefinition annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY, runtime);
     annotationLoader.addRuleClasses(false, Arrays.<Class> asList(BasicChecksRegistration.ppCheckClasses()));
 
     // Manually created rules for compiler warnings
