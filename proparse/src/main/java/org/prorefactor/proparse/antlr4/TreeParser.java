@@ -76,6 +76,7 @@ public class TreeParser extends ProparseBaseListener {
   private TreeParserSymbolScope currentScope;
   private Routine currentRoutine;
   private Routine rootRoutine;
+  private JPNode lastStatement;
   /**
    * The symbol last, or currently being, defined. Needed when we have complex syntax like DEFINE id ... LIKE, where we
    * want to track the LIKE but it's not in the same grammar production as the DEFINE.
@@ -2173,16 +2174,28 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   private Block pushBlock(Block block) {
+    return pushBlock(block, false);
+  }
+
+  private Block pushBlock(Block block, boolean fromSwap) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Pushing block '{}' to stack", indent(), block);
     blockStack.add(block);
+
+    if (!fromSwap && (lastStatement != null)) {
+      lastStatement.setNextStatement(block.getNode());
+      block.getNode().setPreviousStatement(lastStatement);
+    }
+    lastStatement = null;
+
     return block;
   }
 
   private Block popBlock() {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Popping block from stack", indent());
-    blockStack.remove(blockStack.size() - 1);
+    Block bb = blockStack.remove(blockStack.size() - 1);
+    lastStatement = bb.getNode();
     return blockStack.get(blockStack.size() - 1);
   }
 
@@ -2306,7 +2319,7 @@ public class TreeParser extends ProparseBaseListener {
 
     currentScope = scope;
     blockEnd(); // pop the unused block from the stack
-    currentBlock = pushBlock(scope.getRootBlock());
+    currentBlock = pushBlock(scope.getRootBlock(), true);
   }
 
   /** This is a specialization of frameInitializingStatement, called for ENABLE|UPDATE|PROMPT-FOR. */
@@ -2776,6 +2789,10 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void exitEveryRule(ParserRuleContext ctx) {
+    JPNode n = support.getNode(ctx);
+    if ((n != null) && n.isStateHead() && !(ctx instanceof FunctionStatementContext)) {
+      enterNewStatement(ctx, n);
+    }
     currentLevel--;
   }
 
@@ -2783,4 +2800,15 @@ public class TreeParser extends ProparseBaseListener {
     return java.nio.CharBuffer.allocate(currentLevel).toString().replace('\0', ' ');
   }
 
+  // Attach current statement to the previous one
+  private void enterNewStatement(ParserRuleContext ctx, JPNode node) {
+    if ((lastStatement != null) && (node != lastStatement)) {
+      lastStatement.setNextStatement(node);
+      node.setPreviousStatement(lastStatement);
+    }
+    lastStatement = node;
+    node.setInBlock(currentBlock);
+    if (currentBlock.getNode().getFirstStatement() == null) 
+      currentBlock.getNode().setFirstStatement(node);
+  }
 }

@@ -28,9 +28,18 @@ import org.prorefactor.treeparser.Block;
  */
 public class BlockNode extends JPNode {
   private Block block;
+  private JPNode firstStatement;
 
   public BlockNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
+  }
+
+  public void setFirstStatement(JPNode firstStatement) {
+    this.firstStatement = firstStatement;
+  }
+
+  public JPNode getFirstStatement() {
+    return firstStatement;
   }
 
   @Nullable

@@ -48,6 +48,12 @@ public class JPNode {
   @Nullable
   private final List<JPNode> children;
 
+  // Only for statement nodes: previous and next statement
+  private JPNode previousStatement;
+  private JPNode nextStatement;
+  // Only for statement nodes and block nodes: enclosing block
+  private Block inBlock;
+
   // Fields are usually set in TreeParser
   private Symbol symbol;
   private FieldContainer container;
@@ -705,6 +711,22 @@ public class JPNode {
     return ret.toString();
   }
 
+  public void setPreviousStatement(JPNode previousStatement) {
+    this.previousStatement = previousStatement;
+  }
+
+  public void setNextStatement(JPNode nextStatement) {
+    this.nextStatement = nextStatement;
+  }
+
+  public JPNode getNextStatement() {
+    return nextStatement;
+  }
+
+  public void setInBlock(Block inBlock) {
+    this.inBlock = inBlock;
+  }
+
   public static class Builder {
     private ProToken tok;
     private ParseTree ctx;
@@ -732,6 +754,11 @@ public class JPNode {
 
     public Builder setRuleNode(ParseTree ctx) {
       this.ctx = ctx;
+      return this;
+    }
+
+    public Builder unsetRuleNode() {
+      this.ctx = null;
       return this;
     }
 
