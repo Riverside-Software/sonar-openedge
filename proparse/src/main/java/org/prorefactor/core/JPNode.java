@@ -15,10 +15,12 @@
 package org.prorefactor.core;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -274,6 +276,38 @@ public class JPNode {
     }
 
     return ret;
+  }
+
+
+  /**
+   * Get an array of all descendant nodes (including this node) of a given type
+   */
+  public List<JPNode> query2(Predicate<JPNode> pred) {
+    JPNodePredicateQuery query = new JPNodePredicateQuery(pred);
+    walk(query);
+
+    return query.getResult();
+  }
+
+  /**
+   * Get an array of all descendant nodes (including this node) of a given type
+   */
+  public List<JPNode> query2(Predicate<JPNode> pred, Predicate<JPNode> other) {
+    JPNodePredicateQuery query = new JPNodePredicateQuery(pred, other);
+    walk(query);
+
+    return query.getResult();
+  }
+  
+  /**
+   * Get an array of all descendant nodes (including this node) of a given type
+   */
+  public List<JPNode> query2(ABLNodeType type, ABLNodeType... findTypes) {
+    final EnumSet<ABLNodeType> tmp = EnumSet.of(type, findTypes);
+    JPNodePredicateQuery query = new JPNodePredicateQuery(node -> tmp.contains(node.getNodeType()));
+    walk(query);
+
+    return query.getResult();
   }
 
   /**
@@ -713,6 +747,10 @@ public class JPNode {
 
   public void setPreviousStatement(JPNode previousStatement) {
     this.previousStatement = previousStatement;
+  }
+
+  public JPNode getPreviousStatement() {
+    return previousStatement;
   }
 
   public void setNextStatement(JPNode nextStatement) {
