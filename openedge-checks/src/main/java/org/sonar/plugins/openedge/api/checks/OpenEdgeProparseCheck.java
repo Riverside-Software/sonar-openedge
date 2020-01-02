@@ -113,6 +113,22 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return issue;
   }
 
+  protected void addLocation(NewIssue issue, InputFile file, JPNode node, String msg) {
+    InputFile targetFile = getInputFile(file, node);
+    if (targetFile == null) {
+      return;
+    }
+    NewIssueLocation location = issue.newLocation().on(targetFile);
+    if (node.getLine() > 0) {
+      location.at(targetFile.newRange(node.getLine(), node.getColumn() - 1, node.getEndLine(), node.getEndColumn()));
+    }
+    if (targetFile == file) {
+      location.message(msg);
+    } else {
+      location.message(MessageFormat.format(INC_MESSAGE, file.relativePath(), msg));
+    }
+  }
+
   protected void reportIssue(InputFile file, JPNode node, String msg) {
     reportIssue(file, node, msg, false);
   }
