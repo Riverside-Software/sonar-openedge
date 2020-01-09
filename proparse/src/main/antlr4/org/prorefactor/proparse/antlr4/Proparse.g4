@@ -3038,7 +3038,7 @@ osAppendStatement:
 
 osCommandStatement:
     ( OS400 | BTOS | DOS | MPE | OS2 | OSCOMMAND | UNIX | VMS )
-    ( SILENT | NOWAIT | NOCONSOLE )?
+    ( SILENT | NOWAIT | NOCONSOLE )*
     anyOrValue*
     statementEnd
   ;
