@@ -42,7 +42,7 @@ public class DataRelationElementV11 extends AbstractElement implements IDataRela
 
   public static DataRelationElementV11 fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
-    int flags = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort() & 0xffff;
 
     int parentBufferNameOffset = ByteBuffer.wrap(segment, currentPos + 8, Integer.BYTES).order(order).getInt();
     String parentBufferName = parentBufferNameOffset == 0 ? ""

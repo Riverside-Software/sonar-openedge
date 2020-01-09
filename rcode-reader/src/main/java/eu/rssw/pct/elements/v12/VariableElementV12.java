@@ -39,7 +39,7 @@ public class VariableElementV12 extends VariableElementV11 {
       int currentPos, int textAreaOffset, ByteOrder order) {
     int dataType = ByteBuffer.wrap(segment, currentPos + 14, Short.BYTES).order(order).getShort();
     int extent = ByteBuffer.wrap(segment, currentPos + 18, Short.BYTES).order(order).getShort();
-    int flags = ByteBuffer.wrap(segment, currentPos + 20, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 20, Short.BYTES).order(order).getShort() & 0xffff;
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);

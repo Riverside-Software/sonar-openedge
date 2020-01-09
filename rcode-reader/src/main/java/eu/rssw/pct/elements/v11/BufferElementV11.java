@@ -55,7 +55,7 @@ public class BufferElementV11 extends AbstractAccessibleElement implements IBuff
     String databaseName = databaseNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + databaseNameOffset);
 
-    int flags = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort() & 0xffff;
 
     return new BufferElementV11(name2, accessType, tableName, databaseName, flags);
   }

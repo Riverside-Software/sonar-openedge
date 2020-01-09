@@ -41,7 +41,7 @@ public class PropertyElementV12 extends PropertyElementV11 {
   }
 
   public static IPropertyElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order, boolean isEnum) {
-    int flags = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort() & 0xffff;
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);

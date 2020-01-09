@@ -38,7 +38,7 @@ public class QueryElementV12 extends QueryElementV11 {
       int textAreaOffset, ByteOrder order) {
     int bufferCount = ByteBuffer.wrap(segment, currentPos + 14, Short.BYTES).order(order).getShort();
     int prvte = ByteBuffer.wrap(segment, currentPos + 16, Short.BYTES).order(order).getShort();
-    int flags = ByteBuffer.wrap(segment, currentPos + 20, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 20, Short.BYTES).order(order).getShort() & 0xffff;
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);

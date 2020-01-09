@@ -52,7 +52,7 @@ public class EventElementV11 extends AbstractAccessibleElement implements IEvent
 
   public static IEventElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
       int textAreaOffset, ByteOrder order) {
-    int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort() & 0xffff;
     int returnType = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
     int parameterCount = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
 

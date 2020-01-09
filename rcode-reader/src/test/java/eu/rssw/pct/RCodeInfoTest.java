@@ -210,4 +210,16 @@ public class RCodeInfoTest {
     }
   }
 
+  @Test
+  public void testV121() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/NMSTrace.r")) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      assertNotNull(rci.getTypeInfo());
+      assertEquals(rci.getTypeInfo().getProperties().size(), 5);
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
 }

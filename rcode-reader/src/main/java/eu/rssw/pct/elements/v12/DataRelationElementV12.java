@@ -33,7 +33,7 @@ public class DataRelationElementV12 extends DataRelationElementV11 {
 
   public static DataRelationElementV12 fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
-    int flags = ByteBuffer.wrap(segment, currentPos + 22, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 22, Short.BYTES).order(order).getShort() & 0xffff;
 
     int parentBufferNameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
     String parentBufferName = parentBufferNameOffset == 0 ? ""

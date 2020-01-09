@@ -53,7 +53,7 @@ public class VariableElementV11 extends AbstractAccessibleElement implements IVa
       int currentPos, int textAreaOffset, ByteOrder order) {
     int dataType = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
     int extent = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
-    int flags = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort() & 0xffff;
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 12, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);

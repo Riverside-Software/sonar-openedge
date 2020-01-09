@@ -38,7 +38,7 @@ public class MethodElementV12 extends MethodElementV11 {
 
   public static IMethodElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
-    int flags = ByteBuffer.wrap(segment, currentPos + 14, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 14, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort() & 0xffff;
     int returnType = ByteBuffer.wrap(segment, currentPos + 16, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
     int paramCount = ByteBuffer.wrap(segment, currentPos + 18, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
     int extent = ByteBuffer.wrap(segment, currentPos + 22, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
