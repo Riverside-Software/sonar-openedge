@@ -50,14 +50,13 @@ public class TableElementV11 extends AbstractAccessibleElement implements ITable
 
   public static ITableElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
       int textAreaOffset, ByteOrder order) {
-    int fieldCount = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    int indexCount = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    int flags = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort() & 0xffff;
+    int fieldCount = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
+    int indexCount = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort() & 0xffff;
 
-    int nameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(ByteOrder.LITTLE_ENDIAN).getInt();
+    int nameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
-    int beforeNameOffset = ByteBuffer.wrap(segment, currentPos + 20, Integer.BYTES).order(
-        ByteOrder.LITTLE_ENDIAN).getInt();
+    int beforeNameOffset = ByteBuffer.wrap(segment, currentPos + 20, Integer.BYTES).order(order).getInt();
     String beforeTableName = beforeNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + beforeNameOffset);
 
