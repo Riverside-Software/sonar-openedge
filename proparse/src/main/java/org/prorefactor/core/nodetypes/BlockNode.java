@@ -53,4 +53,8 @@ public class BlockNode extends JPNode {
     this.block = block;
   }
 
+  @Override
+  public boolean hasBlock() {
+    return block != null;
+  }
 }

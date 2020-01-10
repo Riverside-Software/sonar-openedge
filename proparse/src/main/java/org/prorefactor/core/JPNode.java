@@ -445,7 +445,7 @@ public class JPNode {
   }
 
   public boolean hasTableBuffer() {
-    return symbol != null;
+    return false;
   }
 
   public boolean hasBufferScope() {
@@ -461,8 +461,9 @@ public class JPNode {
     return null;
   }
 
+  @Nullable
   public TableBuffer getTableBuffer() {
-    return (TableBuffer) symbol;
+    return null;
   }
 
   /**
@@ -496,7 +497,7 @@ public class JPNode {
   }
 
   public void setTableBuffer(TableBuffer buffer) {
-    setSymbol(buffer);
+    throw new IllegalArgumentException("Not a Block node");
   }
 
   public boolean hasProparseDirective(String directive) {
@@ -763,6 +764,10 @@ public class JPNode {
 
   public void setInBlock(Block inBlock) {
     this.inBlock = inBlock;
+  }
+
+  public Block getEnclosingBlock() {
+    return inBlock;
   }
 
   public static class Builder {

@@ -22,6 +22,8 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.treeparser.ContextQualifier;
+import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.TableBuffer;
 
 import com.google.common.base.Strings;
 
@@ -67,6 +69,22 @@ public class RecordNameNode extends JPNode {
 
   public void setSearchIndexName(String indexName) {
     this.searchIndexName = indexName;
+  }
+
+  @Override
+  public void setTableBuffer(TableBuffer buffer) {
+    setSymbol(buffer);
+  }
+
+  @Override
+  public TableBuffer getTableBuffer() {
+    Symbol symbol = getSymbol();
+    return symbol instanceof TableBuffer ? (TableBuffer) symbol : null;
+  }
+
+  @Override
+  public boolean hasTableBuffer() {
+    return getSymbol() instanceof TableBuffer;
   }
 
   /** Set the 'store type' attribute on a RECORD_NAME node. */
