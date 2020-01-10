@@ -290,15 +290,25 @@ public class JPNode {
   }
 
   /**
-   * Get an array of all descendant nodes (including this node) of a given type
+   * @see JPNode#query2(Predicate)
    */
-  public List<JPNode> query2(Predicate<JPNode> pred, Predicate<JPNode> other) {
-    JPNodePredicateQuery query = new JPNodePredicateQuery(pred, other);
+  public List<JPNode> query2(Predicate<JPNode> pred1, Predicate<JPNode> pred2) {
+    JPNodePredicateQuery query = new JPNodePredicateQuery(pred1, pred2);
     walk(query);
 
     return query.getResult();
   }
-  
+
+  /**
+   * @see JPNode#query2(Predicate)
+   */
+  public List<JPNode> query2(Predicate<JPNode> pred1, Predicate<JPNode> pred2, Predicate<JPNode> pred3) {
+    JPNodePredicateQuery query = new JPNodePredicateQuery(pred1, pred2, pred3);
+    walk(query);
+
+    return query.getResult();
+  }
+
   /**
    * Get an array of all descendant nodes (including this node) of a given type
    */
