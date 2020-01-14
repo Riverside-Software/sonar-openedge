@@ -384,4 +384,25 @@ public class JPNodeTest {
     assertEquals(item.getSearchIndexName(), "Item.ItemNum");
   }
 
+  @Test
+  public void testXref02() throws JAXBException, IOException, SAXException, ParserConfigurationException {
+    ParseUnit unit = genericTest("xref2.cls");
+    unit.treeParser01();
+
+    InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref2.cls.xref"));
+    SAXParserFactory sax = SAXParserFactory.newInstance();
+    sax.setNamespaceAware(false);
+    XMLReader reader = sax.newSAXParser().getXMLReader();
+    SAXSource source = new SAXSource(reader, is);
+
+    CrossReference doc = (CrossReference) unmarshaller.unmarshal(source);
+    unit.attachXref(doc);
+
+    assertEquals(unit.getTopNode().query(ABLNodeType.RECORD_NAME).size(), 3);
+    for (JPNode node : unit.getTopNode().query(ABLNodeType.RECORD_NAME)) {
+      RecordNameNode rec = (RecordNameNode) node;
+      assertEquals(rec.getTableBuffer().getTable().getName(), "ttFoo");
+      assertTrue(rec.isWholeIndex());
+    }
+  }
 }
