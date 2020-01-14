@@ -321,6 +321,21 @@ public class JPNode {
   }
 
   /**
+   * Does this node contain another node ?
+   */
+  public boolean contains(JPNode node) {
+    if (this == node)
+      return true;
+    if (children == null)
+      return false;
+    for (JPNode ch : children) {
+      if ((ch == node) || ch.contains(node))
+        return true;
+    }
+    return false;
+  }
+
+  /**
    * Get an array of all descendant nodes (including this node) of a given type
    */
   public List<JPNode> query(ABLNodeType type, ABLNodeType... findTypes) {
