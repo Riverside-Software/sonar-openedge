@@ -50,6 +50,7 @@ import org.xml.sax.XMLReader;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.progress.xref.CrossReference;
+import com.progress.xref.EmptyCrossReference;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
@@ -120,7 +121,12 @@ public class JPNodeTest {
   }
 
   private ParseUnit genericTest(String file) {
+    return genericTest(file, new EmptyCrossReference());
+  }
+
+  private ParseUnit genericTest(String file, CrossReference xref) {
     ParseUnit pu = new ParseUnit(new File(SRC_DIR, file), session);
+    pu.attachXref(xref);
     assertNull(pu.getTopNode());
     pu.parse();
     assertNotNull(pu.getTopNode());
@@ -355,17 +361,15 @@ public class JPNodeTest {
 
   @Test
   public void testXref01() throws JAXBException, IOException, SAXException, ParserConfigurationException {
-    ParseUnit unit = genericTest("xref.p");
-    unit.treeParser01();
-
     InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref.p.xref"));
     SAXParserFactory sax = SAXParserFactory.newInstance();
     sax.setNamespaceAware(false);
     XMLReader reader = sax.newSAXParser().getXMLReader();
     SAXSource source = new SAXSource(reader, is);
+    CrossReference xref = (CrossReference) unmarshaller.unmarshal(source);
 
-    CrossReference doc = (CrossReference) unmarshaller.unmarshal(source);
-    unit.attachXref(doc);
+    ParseUnit unit = genericTest("xref.p", xref);
+    unit.treeParser01();
 
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.RECORD_NAME);
     assertEquals(nodes.size(), 5);
@@ -386,17 +390,15 @@ public class JPNodeTest {
 
   @Test
   public void testXref02() throws JAXBException, IOException, SAXException, ParserConfigurationException {
-    ParseUnit unit = genericTest("xref2.cls");
-    unit.treeParser01();
-
     InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref2.cls.xref"));
     SAXParserFactory sax = SAXParserFactory.newInstance();
     sax.setNamespaceAware(false);
     XMLReader reader = sax.newSAXParser().getXMLReader();
     SAXSource source = new SAXSource(reader, is);
+    CrossReference xref = (CrossReference) unmarshaller.unmarshal(source);
 
-    CrossReference doc = (CrossReference) unmarshaller.unmarshal(source);
-    unit.attachXref(doc);
+    ParseUnit unit = genericTest("xref2.cls", xref);
+    unit.treeParser01();
 
     assertEquals(unit.getTopNode().query(ABLNodeType.RECORD_NAME).size(), 3);
     for (JPNode node : unit.getTopNode().query(ABLNodeType.RECORD_NAME)) {

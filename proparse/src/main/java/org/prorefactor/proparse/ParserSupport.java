@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
+import com.progress.xref.CrossReference;
+import com.progress.xref.EmptyCrossReference;
 
 /**
  * Helper class when parsing procedure or class. One instance per ParseUnit.
@@ -46,6 +48,7 @@ public class ParserSupport {
   private final ClassFinder classFinder;
   // Scope for the compile unit or class. It might be "sub" to a super scope in a class hierarchy
   private final RootSymbolScope unitScope;
+  private final CrossReference xref;
 
   // Current scope might be "unitScope" or an inner method/subprocedure scope
   private SymbolScope currentScope;
@@ -67,11 +70,12 @@ public class ParserSupport {
   private List<SymbolScope> innerScopes = new ArrayList<>();
   private Map<RuleContext, SymbolScope> innerScopesMap = new HashMap<>();
 
-  public ParserSupport(RefactorSession session) {
+  public ParserSupport(RefactorSession session, CrossReference xref) {
     this.session = session;
     this.unitScope = new RootSymbolScope(session);
     this.currentScope = unitScope;
     this.classFinder = new ClassFinder(session);
+    this.xref = xref == null ? new EmptyCrossReference() : xref;
   }
 
   public String getClassName() {

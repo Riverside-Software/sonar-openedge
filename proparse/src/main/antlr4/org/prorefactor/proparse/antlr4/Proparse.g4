@@ -25,6 +25,7 @@ parser grammar Proparse;
   import org.prorefactor.proparse.ParserSupport;
   import org.prorefactor.proparse.SymbolScope;
   import org.prorefactor.refactor.RefactorSession;
+  import com.progress.xref.CrossReference;
 }
 
 options {
@@ -34,8 +35,8 @@ options {
 @members {
   private ParserSupport support;
 
-  public void initAntlr4(RefactorSession session) {
-    this.support = new ParserSupport(session);
+  public void initAntlr4(RefactorSession session, CrossReference xref) {
+    this.support = new ParserSupport(session, xref);
   }
 
   public ParserSupport getParserSupport() {

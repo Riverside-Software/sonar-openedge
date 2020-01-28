@@ -311,9 +311,9 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     try {
       unit = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session);
-      unit.treeParser01();
       unit.attachXref(doc);
       unit.attachXref(xref);
+      unit.treeParser01();
       unit.attachTransactionBlocks(trxBlocks);
       unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
       updateParseTime(System.currentTimeMillis() - startTime);
