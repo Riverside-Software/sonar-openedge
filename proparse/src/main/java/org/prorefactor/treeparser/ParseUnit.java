@@ -268,7 +268,7 @@ public class ParseUnit {
           for (JPNode node : recordNodes) {
             RecordNameNode recNode = (RecordNameNode) node;
             try {
-              if ((recNode.getStatement().getLine() == ref.getLineNum())
+              if ((recNode.getStatement().firstNaturalChild().getLine() == ref.getLineNum())
                   && (recNode.getTableBuffer() != null)
                   && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
                   && (recNode.attrGet(IConstants.STORETYPE) == tableType)
@@ -303,7 +303,7 @@ public class ParseUnit {
           for (JPNode node : recordNodes) {
             RecordNameNode recNode = (RecordNameNode) node;
             try {
-              if ((recNode.getStatement().getLine() == ref.getLineNum())
+              if ((recNode.getStatement().firstNaturalChild().getLine() == ref.getLineNum())
                   && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
                   && (recNode.attrGet(IConstants.STORETYPE) == tableType)
                   && ((src.getFileNum() == 1 && recNode.getFileIndex() == 0)

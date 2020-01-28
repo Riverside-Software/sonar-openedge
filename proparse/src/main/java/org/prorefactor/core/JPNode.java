@@ -193,16 +193,19 @@ public class JPNode {
   }
 
   /**
-   * First Natural Child is found by repeating firstChild() until a natural node is found. If the start node is a
-   * natural node, then it is returned.
+   * @return First child node associated to a physical token in the source code.
    */
   public JPNode firstNaturalChild() {
     if (token.isNatural())
       return this;
-    for (JPNode n =  getFirstChild(); n != null; n = n.getFirstChild()) {
-      if (n.token.isNatural())
-        return n;
+    if (children != null) {
+      for (JPNode ch : children) {
+        JPNode natCh = ch.firstNaturalChild();
+        if (natCh != null)
+          return natCh;
+      }
     }
+
     return null;
   }
 
