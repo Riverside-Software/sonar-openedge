@@ -73,48 +73,105 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
 
     // Properties
-    context.addExtension(PropertyDefinition.builder(Constants.SKIP_RCODE).name("Skip rcode parsing").description(
-        "Skip rcode parsing").type(PropertyType.BOOLEAN).category(CATEGORY_OPENEDGE).subCategory(
-            SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT).defaultValue(
-                Boolean.FALSE.toString()).build());
-    context.addExtension(PropertyDefinition.builder(Constants.OE_ANALYTICS).name("Enable analytics").description(
-        "Ping remote server for usage analytics").type(PropertyType.BOOLEAN).category(
-            CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                Qualifiers.PROJECT).defaultValue(Boolean.TRUE.toString()).build());
-    context.addExtension(PropertyDefinition.builder(Constants.SKIP_PROPARSE_PROPERTY).name("Skip ProParse step").description(
-        "Skip Proparse AST generation and lint rules").type(PropertyType.BOOLEAN).category(
-            CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                Qualifiers.PROJECT).defaultValue(Boolean.FALSE.toString()).build());
-    context.addExtension(PropertyDefinition.builder(Constants.PROPARSE_DEBUG).name("Proparse debug files").description(
-        "Generate JPNodeLister debug file in .proparse directory").type(PropertyType.BOOLEAN).category(
-            CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_DEBUG).defaultValue(Boolean.FALSE.toString()).onQualifiers(
-                Qualifiers.MODULE, Qualifiers.PROJECT).build());
-    context.addExtension(PropertyDefinition.builder(Constants.SUFFIXES).name("File suffixes").description(
-        "Comma-separated list of suffixes of OpenEdge files to analyze, e.g. 'p,w,t'").type(PropertyType.STRING).defaultValue(
-            "").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                Qualifiers.PROJECT).build());
-    context.addExtension(PropertyDefinition.builder(Constants.INCLUDE_SUFFIXES).name("Include file suffixes").description(
-        "Comma-separated list of suffixes of OpenEdge include files to analyze, e.g. 'i,v,f'").type(PropertyType.STRING).defaultValue(
-            "").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                Qualifiers.PROJECT).build());
-    context.addExtension(PropertyDefinition.builder(Constants.CPD_ANNOTATIONS).name("CPD annotations").description(
-        "Comma-separated list of annotations disabling CPD").type(PropertyType.STRING).defaultValue(
-            "Generated").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                Qualifiers.PROJECT).build());
-    context.addExtension(PropertyDefinition.builder(Constants.XREF_FILTER).name("Filter invalid XML files").description(
-        "Use filter to discard malformed characters from XML XREF files").type(PropertyType.BOOLEAN).defaultValue(
-            Boolean.FALSE.toString()).category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(
-                Qualifiers.MODULE, Qualifiers.PROJECT).build());
-    context.addExtension(
-        PropertyDefinition.builder(Constants.XREF_FILTER_BYTES).name("Bytes to be filtered from XML files").description(
-            "Comma-separated list of ranges, i.e. 1-2,4-7,9,11-13").type(PropertyType.STRING).defaultValue("1-4").category(
-                CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                    Qualifiers.PROJECT).build());
-    context.addExtension(
-        PropertyDefinition.builder(Constants.BACKSLASH_ESCAPE).name("Backslash as escape char").description(
-            "Does backslash escape next character on Windows ?").type(PropertyType.BOOLEAN).defaultValue(Boolean.FALSE.toString()).category(
-                CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                    Qualifiers.PROJECT).build());
+    context.addExtension(PropertyDefinition.builder(Constants.SKIP_RCODE) //
+      .name("Skip rcode parsing") //
+      .description("Skip rcode parsing") //
+      .type(PropertyType.BOOLEAN) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .defaultValue(Boolean.FALSE.toString()) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.OE_ANALYTICS) //
+      .name("Enable analytics") //
+      .description("Ping remote server for usage analytics") //
+      .type(PropertyType.BOOLEAN) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .defaultValue(Boolean.TRUE.toString()) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.SKIP_PROPARSE_PROPERTY) //
+      .name("Skip ProParse step") //
+      .description("Skip Proparse AST generation and lint rules") //
+      .type(PropertyType.BOOLEAN) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .defaultValue(Boolean.FALSE.toString()) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.PROPARSE_DEBUG) //
+      .name("Proparse debug files") //
+      .description("Generate JPNodeLister debug file in .proparse directory") //
+      .type(PropertyType.BOOLEAN) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_DEBUG) //
+      .defaultValue(Boolean.FALSE.toString()) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.SUFFIXES) //
+      .name("File suffixes") //
+      .description("Comma-separated list of suffixes of OpenEdge files to analyze, e.g. 'p,w,t'") //
+      .type(PropertyType.STRING) //
+      .defaultValue("") //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.INCLUDE_SUFFIXES) //
+      .name("Include file suffixes") //
+      .description("Comma-separated list of suffixes of OpenEdge include files to analyze, e.g. 'i,v,f'") //
+      .type(PropertyType.STRING) //
+      .defaultValue("") //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.CPD_ANNOTATIONS) //
+      .name("CPD annotations") //
+      .description("Comma-separated list of annotations disabling CPD") //
+      .type(PropertyType.STRING) //
+      .defaultValue("Generated") //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.XREF_FILTER) //
+      .name("Filter invalid XML files") //
+      .description("Use filter to discard malformed characters from XML XREF files") //
+      .type(PropertyType.BOOLEAN) //
+      .defaultValue(Boolean.FALSE.toString()) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.XREF_FILTER_BYTES) //
+      .name("Bytes to be filtered from XML files") //
+      .description("Comma-separated list of ranges, i.e. 1-2,4-7,9,11-13") //
+      .type(PropertyType.STRING) //
+      .defaultValue("1-4") //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.BACKSLASH_ESCAPE) //
+      .name("Backslash as escape char") //
+      .description("Does backslash escape next character on Windows ?") //
+      .type(PropertyType.BOOLEAN) //
+      .defaultValue(Boolean.FALSE.toString()) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
   }
 
 }
