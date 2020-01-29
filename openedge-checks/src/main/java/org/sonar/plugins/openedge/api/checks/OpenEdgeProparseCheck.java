@@ -66,13 +66,18 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return false;
   }
 
-  protected InputFile getInputFile(InputFile file, JPNode node) {
-    if (node.getFileIndex() == 0) {
-      return file;
+  protected InputFile getInputFile(String fileName) {
+    InputFile input = getContext().fileSystem().inputFile(
+        getContext().fileSystem().predicates().hasRelativePath(fileName));
+    if (input == null) {
+      return getContext().fileSystem().inputFile(getContext().fileSystem().predicates().hasAbsolutePath(fileName));
     } else {
-      return getContext().fileSystem().inputFile(
-          getContext().fileSystem().predicates().hasRelativePath(node.getFileName()));
+      return input;
     }
+  }
+
+  protected InputFile getInputFile(InputFile file, JPNode node) {
+    return node.getFileIndex() == 0 ? file : getInputFile(node.getFileName());
   }
 
   protected NewIssue createIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
@@ -156,14 +161,9 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    */
   protected void reportIssue(InputFile file, String fileName, int lineNumber, String msg) {
     NewIssue issue = getContext().newIssue();
-    InputFile targetFile = getContext().fileSystem().inputFile(
-        getContext().fileSystem().predicates().hasRelativePath(fileName));
-    if (targetFile == null) {
-      targetFile = getContext().fileSystem().inputFile(
-          getContext().fileSystem().predicates().hasAbsolutePath(fileName));
-      if (targetFile == null)
-        return;
-    }
+    InputFile targetFile = getInputFile(fileName);
+    if (targetFile == null)
+      return;
     NewIssueLocation location = issue.newLocation().on(targetFile);
     if (targetFile == file) {
       location.message(msg);
