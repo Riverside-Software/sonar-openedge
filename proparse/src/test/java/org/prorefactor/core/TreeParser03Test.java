@@ -16,6 +16,7 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -278,4 +279,51 @@ public class TreeParser03Test {
     assertEquals(xxx.getNumReads(), 1);
     assertEquals(xxx.getNumWrites(), 3);
   }
+
+  @Test
+  public void test15() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test15.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    assertEquals(unit.getRootScope().getVariables().size(), 2);
+    Variable v1 = unit.getRootScope().getVariable("v1");
+    Variable v2 = unit.getRootScope().getVariable("v2");
+    assertNotNull(v1);
+    assertNotNull(v2);
+    Routine dummy = unit.getRootScope().getRoutineMap().get("dummy");
+    assertNotNull(dummy);
+    assertEquals(dummy.getParameters().size(), 1);
+    assertEquals(dummy.getParameters().get(0).getSymbol().getName(), "p1");
+  }
+
+  @Test
+  public void test16() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test16.cls"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable hInstance = unit.getRootScope().getVariable("hInstance");
+    assertNotNull(hInstance);
+
+    Routine dummy = unit.getRootScope().getRoutineMap().get("dummy");
+    assertNotNull(dummy);
+    assertEquals(dummy.getParameters().size(), 1);
+    assertEquals(dummy.getParameters().get(0).getSymbol().getName(), "picVariable");
+
+    Routine doIt = unit.getRootScope().getRoutineMap().get("doit");
+    assertNotNull(doIt);
+    assertEquals(doIt.getParameters().size(), 1);
+    assertEquals(doIt.getParameters().get(0).getSymbol().getName(), "picVariable");
+
+    // Should not be the same object
+    assertNotEquals(dummy.getParameters().get(0), doIt.getParameters().get(0));
+    assertNotEquals(dummy.getParameters().get(0).getSymbol(), doIt.getParameters().get(0).getSymbol());
+  }
+
 }

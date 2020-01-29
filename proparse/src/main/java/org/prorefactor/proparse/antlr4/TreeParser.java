@@ -1654,6 +1654,34 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
+  public void enterExternalFunctionStatement(ExternalFunctionStatementContext ctx) {
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> New external function definition '{}'", indent(), ctx.id.getText());
+
+    TreeParserSymbolScope definingScope = currentScope;
+    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    scopeAdd(blockNode);
+
+    Routine r = new Routine(ctx.id.getText(), definingScope, currentScope);
+    if (ctx.typeName() != null) {
+      r.setReturnDatatypeNode(DataType.CLASS);
+    } else {
+      r.setReturnDatatypeNode(DataType.getDataType(ctx.datatypeVar().getStart().getType()));
+    }
+    r.setProgressType(ABLNodeType.FUNCTION);
+    r.setDefinitionNode(blockNode);
+    blockNode.setSymbol(r);
+    definingScope.add(r);
+    currentRoutine = r;
+  }
+
+  @Override
+  public void exitExternalFunctionStatement(ExternalFunctionStatementContext ctx) {
+    scopeClose();
+    currentRoutine = rootRoutine;
+  }
+
+  @Override
   public void enterGetKeyValueStatement(GetKeyValueStatementContext ctx) {
     setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
   }
