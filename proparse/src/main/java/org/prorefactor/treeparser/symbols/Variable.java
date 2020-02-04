@@ -16,6 +16,7 @@
 package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -31,6 +32,7 @@ public class Variable extends Symbol implements Primative, Value {
   private Object value;
   private String className = null;
   private boolean refInFrame = false;
+  private boolean graphicalComponent = false;
 
   public Variable(String name, TreeParserSymbolScope scope) {
     super(name, scope);
@@ -114,4 +116,14 @@ public class Variable extends Symbol implements Primative, Value {
     return refInFrame;
   }
 
+  public boolean isGraphicalComponent() {
+    return graphicalComponent;
+  }
+
+  @Override
+  public void noteReference(ContextQualifier contextQualifier) {
+    super.noteReference(contextQualifier);
+    if (contextQualifier == ContextQualifier.UPDATING_UI)
+      graphicalComponent = true;
+  }
 }

@@ -16,6 +16,7 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -326,4 +327,28 @@ public class TreeParser03Test {
     assertNotEquals(dummy.getParameters().get(0).getSymbol(), doIt.getParameters().get(0).getSymbol());
   }
 
+  @Test
+  public void test17() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test17.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    assertEquals(unit.getRootScope().getVariables().size(), 4);
+
+    Variable hMenuItem = unit.getRootScope().getVariable("hMenuItem");
+    assertNotNull(hMenuItem);
+    assertTrue(hMenuItem.isGraphicalComponent());
+    Variable hQuery = unit.getRootScope().getVariable("hQuery");
+    assertNotNull(hQuery);
+    assertFalse(hQuery.isGraphicalComponent());
+    Variable hbCust = unit.getRootScope().getVariable("hbCust");
+    assertNotNull(hbCust);
+    assertTrue(hbCust.isGraphicalComponent());
+    Variable hSock = unit.getRootScope().getVariable("hSock");
+    assertNotNull(hSock);
+    assertFalse(hSock.isGraphicalComponent());
+
+  }
 }

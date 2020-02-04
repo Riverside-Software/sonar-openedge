@@ -70,14 +70,6 @@ public class IConstants {
    * "customer.name" is qualified, but "name" is unqualified. This node attribute is set by TreeParser01.
    */
   public static final int UNQUALIFIED_FIELD = 10150;
-  /**
-   * Node attribute key, the value of which is a org.prorefactor.treeparser.CQ "Context Qualifier" value representing
-   * read, write, init, etc. Set by TreeParser01, and as of 2004.7.16, this is only set for Field_ref and RECORD_NAME
-   * nodes.
-   * 
-   * @see org.prorefactor.treeparser.ContextQualifier
-   */
-  public static final int CONTEXT_QUALIFIER = 10160;
 
   // From JPNode, to be moved into an enum
   /** A valid value for setLink() and getLink() */

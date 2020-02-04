@@ -37,6 +37,10 @@ public enum ContextQualifier {
    */
   UPDATING,
   /**
+   * Creating (thus updating) symbol's value with a GUI component
+   */
+  UPDATING_UI,
+  /**
    * We are strictly referencing the symbol - not its value. Used both for field and table symbols. For table symbols,
    * the lookup is done by schema symbols first, buffer symbols second.
    */
@@ -84,6 +88,7 @@ public enum ContextQualifier {
     switch (cq) {
       case REFUP:
       case UPDATING:
+      case UPDATING_UI:
         return true;
       default:
         return false;

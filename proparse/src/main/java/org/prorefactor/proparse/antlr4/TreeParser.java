@@ -770,7 +770,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterCreateBrowseStatement(CreateBrowseStatementContext ctx) {
-    setContextQualifier(ctx.expressionTerm(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.expressionTerm(), ContextQualifier.UPDATING_UI);
   }
 
   @Override
@@ -805,7 +805,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterCreateWidgetStatement(CreateWidgetStatementContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.field(), ContextQualifier.UPDATING_UI);
   }
 
   @Override
@@ -2239,6 +2239,7 @@ public class TreeParser extends ProparseBaseListener {
       case REF:
       case REFUP:
       case UPDATING:
+      case UPDATING_UI:
       case BUFFERSYMBOL:
         buffer = currentScope.getBufferSymbol(recordNode.getText());
         break;
