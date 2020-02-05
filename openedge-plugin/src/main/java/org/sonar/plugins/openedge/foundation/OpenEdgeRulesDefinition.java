@@ -40,6 +40,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
   public static final String COMPILER_WARNING_14789_RULEKEY = "compiler.warning.14789";
   public static final String COMPILER_WARNING_15090_RULEKEY = "compiler.warning.15090";
   public static final String COMPILER_WARNING_18494_RULEKEY = "compiler.warning.18494";
+  public static final String COMPILER_WARNING_19822_RULEKEY = "compiler.warning.19822";
   public static final String PROPARSE_ERROR_RULEKEY = "proparse.error";
   private static final String COMPILER_WARNING_TAG = "compiler-warnings";
   private static final String HTML_DOC_PATH = "/org/sonar/l10n/%s/rules/%s/%s.html";
@@ -67,8 +68,9 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     createWarningRule(repository, COMPILER_WARNING_12115_RULEKEY, "Expression evaluates to a constant", "1h");
     createWarningRule(repository, COMPILER_WARNING_14786_RULEKEY, "Table and field names must appear as they are in the schema", "20min", Priority.CRITICAL);
     createWarningRule(repository, COMPILER_WARNING_14789_RULEKEY, "Fields must be qualified with table name", "15min", Priority.MAJOR);
-    createWarningRule(repository, COMPILER_WARNING_18494_RULEKEY, "Abbreviated keywords are not authorized", "5min", Priority.INFO);
     createWarningRule(repository, COMPILER_WARNING_15090_RULEKEY, "Dead code", "4h");
+    createWarningRule(repository, COMPILER_WARNING_18494_RULEKEY, "Abbreviated keywords are not authorized", "5min", Priority.INFO);
+    createWarningRule(repository, COMPILER_WARNING_19822_RULEKEY, "All code paths in a function or a method must return a value", "15min", Priority.MAJOR);
 
     // Manually created rule for proparse errors
     NewRule proparseRule = repository.createRule(PROPARSE_ERROR_RULEKEY).setName("Proparse error").setSeverity(

@@ -32,15 +32,17 @@ public class OpenEdgeProfile implements BuiltInQualityProfilesDefinition {
   public void define(Context context) {
     NewBuiltInQualityProfile profile = context.createBuiltInQualityProfile(PROFILE_NAME, Constants.LANGUAGE_KEY);
 
+    profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_214_RULEKEY);
+    profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_2965_RULEKEY);
+    profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_4788_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_12115_RULEKEY);
-    profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_15090_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_14786_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_14789_RULEKEY);
+    profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_15090_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_18494_RULEKEY);
-    profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_2965_RULEKEY);
-    profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY);
+    profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_19822_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, SharedObjectsAnalyzer.class.getName());
     profile.activateRule(Constants.STD_REPOSITORY_KEY, LargeTransactionScope.class.getName());
     profile.activateRule(Constants.STD_REPOSITORY_KEY, ClumsySyntax.class.getName());

@@ -1,0 +1,25 @@
+<p>All code paths in a function or a method must return a value. Method or function will return an unkwnown value (i.e. ?) if no RETURN statement is found in the body, while the consumer of the method / function would expect the specified return data type.</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+  FUNCTION f1 RETURNS CHARACTER:
+    IF (condition) THEN DO:
+      // Logic here
+      RETURN "XYZ".
+    END.
+    // If condition evaluates to false, then ? will be returned
+  END FUNCTION.
+</pre>
+
+<h2>Compliant Solution</h2>
+<pre>
+  FUNCTION f1 RETURNS CHARACTER:
+    IF (condition) THEN DO:
+      // Logic here
+      RETURN "XYZ".
+    END.
+    ELSE
+      RETURN "ABC".
+
+  END FUNCTION.
+</pre>
