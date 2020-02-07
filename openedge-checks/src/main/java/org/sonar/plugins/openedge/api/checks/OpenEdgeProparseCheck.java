@@ -20,6 +20,8 @@
 package org.sonar.plugins.openedge.api.checks;
 
 import java.text.MessageFormat;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ParseUnit;
@@ -40,6 +42,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   private static final String INC_MESSAGE = "From {0} - {1}";
 
   private ParseUnit unit;
+  private Set<String> incReports = new HashSet<>();
 
   @Override
   public final void sensorExecute(InputFile file, ParseUnit unit) {
@@ -57,6 +60,10 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    */
   public String getNoSonarKeyword() {
     return "";
+  }
+
+  protected boolean reportOnlyOnceInIncludeFile() {
+    return true;
   }
 
   /**
@@ -90,6 +97,13 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     InputFile targetFile = getInputFile(file, node);
     if (targetFile == null) {
       return null;
+    }
+    if (!targetFile.equals(file) && reportOnlyOnceInIncludeFile()) {
+      // Check if issue has already been reported
+      if (incReports.contains(targetFile.relativePath() + ":" + node.getLine()))
+        return null;
+      else
+        incReports.add(targetFile.relativePath() + ":" + node.getLine());
     }
 
     int lineNumber = node.getLine();
