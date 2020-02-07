@@ -2437,7 +2437,10 @@ public class TreeParser extends ProparseBaseListener {
       newPrim.assignAttributesLike(likePrim);
       currSymbol.setLikeSymbol(likeNode.getSymbol());
     } else {
-      LOG.error("Failed to find LIKE datatype at {} line {}", likeNode.getFileIndex(), likeNode.getLine());
+      JPNode naturalNode = likeNode.firstNaturalChild();
+      if (naturalNode != null) {
+        LOG.error("Failed to find LIKE datatype at {} line {}", naturalNode.getFileName(), naturalNode.getLine());
+      }
     }
   }
 
