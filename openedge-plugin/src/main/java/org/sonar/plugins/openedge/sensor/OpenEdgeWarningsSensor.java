@@ -80,52 +80,61 @@ public class OpenEdgeWarningsSensor implements Sensor {
     for (InputFile file : context.fileSystem().inputFiles(predicates.and(
         predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       LOG.debug("Looking for warnings of {}", file);
-
-      File listingFile = settings.getWarningsFile(file);
-      if ((listingFile != null) && (listingFile.exists())) {
-        LOG.debug("Import warnings for {}", file);
-
-        try {
-          WarningsProcessor processor = new WarningsProcessor();
-          Files.asCharSource(listingFile, StandardCharsets.UTF_8).readLines(processor);
-          for (Warning w : processor.getResult()) {
-            RuleKey ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
-
-            FilePredicate fp1 = predicates.hasRelativePath(w.file);
-            FilePredicate fp2 = predicates.hasAbsolutePath(
-                context.fileSystem().baseDir().toPath().resolve(w.file).normalize().toString());
-
-            // XXX FilePredicate.or() doesn't work...
-            InputFile target = context.fileSystem().inputFile(fp1);
-            if (target == null) {
-              target = context.fileSystem().inputFile(fp2);
-            }
-
-            if (target != null) {
-              LOG.debug("Warning File {} - Line {} - Message {}", target, w.line, w.msg);
-              NewIssue issue = context.newIssue().forRule(context.activeRules().find(ruleKey) == null ? defaultWarningRuleKey : ruleKey);
-              NewIssueLocation location = issue.newLocation().on(target);
-              if (w.line > 0) {
-                location.at(target.selectLine(w.line));
-              }
-              if (target == file) {
-                location.message(w.msg);
-              } else {
-                location.message("From " + InputFileUtils.getRelativePath(file, context.fileSystem()) + " - " + w.msg);
-              }
-              issue.at(location).save();
-            } else {
-              LOG.info("Found warning on non-existing file {}", w.file);
-            }
-          }
-
-          warningsImportNum++;
-        } catch (IOException caught) {
-          // Nothing...
-        }
+      processFile(context, file);
+      warningsImportNum++;
+      if (context.isCancelled()) {
+        LOG.info("Analysis cancelled...");
+        return;
       }
     }
     LOG.info("{} warning files imported", warningsImportNum);
+  }
+
+  private void processFile(SensorContext context, InputFile file) {
+    File listingFile = settings.getWarningsFile(file);
+    if ((listingFile != null) && (listingFile.exists())) {
+      LOG.debug("Import warnings for {}", file);
+
+      try {
+        WarningsProcessor processor = new WarningsProcessor();
+        Files.asCharSource(listingFile, StandardCharsets.UTF_8).readLines(processor);
+        for (Warning w : processor.getResult()) {
+          RuleKey ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY,
+              OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
+
+          FilePredicate fp1 = context.fileSystem().predicates().hasRelativePath(w.file);
+          FilePredicate fp2 = context.fileSystem().predicates().hasAbsolutePath(
+              context.fileSystem().baseDir().toPath().resolve(w.file).normalize().toString());
+
+          // XXX FilePredicate.or() doesn't work...
+          InputFile target = context.fileSystem().inputFile(fp1);
+          if (target == null) {
+            target = context.fileSystem().inputFile(fp2);
+          }
+
+          if (target != null) {
+            LOG.debug("Warning File {} - Line {} - Message {}", target, w.line, w.msg);
+            NewIssue issue = context.newIssue().forRule(context.activeRules().find(ruleKey) == null
+                ? RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY) : ruleKey);
+            NewIssueLocation location = issue.newLocation().on(target);
+            if (w.line > 0) {
+              location.at(target.selectLine(w.line));
+            }
+            if (target == file) {
+              location.message(w.msg);
+            } else {
+              location.message("From " + InputFileUtils.getRelativePath(file, context.fileSystem()) + " - " + w.msg);
+            }
+            issue.at(location).save();
+          } else {
+            LOG.info("Found warning on non-existing file {}", w.file);
+          }
+        }
+
+      } catch (IOException caught) {
+        // Nothing...
+      }
+    }
   }
 
   private class WarningsProcessor implements LineProcessor<List<Warning>> {

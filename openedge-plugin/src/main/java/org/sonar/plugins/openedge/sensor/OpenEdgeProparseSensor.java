@@ -177,6 +177,10 @@ public class OpenEdgeProparseSensor implements Sensor {
       } else {
         parseMainFile(context, file, session);
       }
+      if (context.isCancelled()) {
+        LOG.info("Analysis cancelled...");
+        return;
+      }
     }
 
     executeAnalytics(context);
