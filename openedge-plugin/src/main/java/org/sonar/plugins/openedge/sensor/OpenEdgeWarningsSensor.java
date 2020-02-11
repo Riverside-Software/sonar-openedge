@@ -149,7 +149,15 @@ public class OpenEdgeWarningsSensor implements Sensor {
         msgNum = Ints.tryParse(line.substring(lastOpeningParen + 1, lastClosingParen));
       }
       String fileName = line.substring(pos1 + 3, pos2);
-      results.add(new Warning(fileName, lineNumber == null ? 0 : lineNumber, line.substring(pos2 + 2), msgNum == null ? -1 : msgNum));
+      String msg = line.substring(pos2 + 2);
+      if (msgNum > -1) {
+        // Brackets found, so trim right part
+        msg = msg.substring(0, lastOpeningParen);
+      }
+      if (msg.startsWith("WARNING: ")) {
+        msg = msg.substring(8);
+      }
+      results.add(new Warning(fileName, lineNumber == null ? 0 : lineNumber, msg.trim(), msgNum == null ? -1 : msgNum));
 
       return true;
     }
