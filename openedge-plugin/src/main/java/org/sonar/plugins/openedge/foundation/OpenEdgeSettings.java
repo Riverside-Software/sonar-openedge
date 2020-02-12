@@ -534,6 +534,10 @@ public class OpenEdgeSettings {
     return config.getBoolean(Constants.ANTLR4_PROFILER).orElse(false);
   }
 
+  public boolean useSimpleCPD() {
+    return config.getBoolean(Constants.USE_SIMPLE_CPD).orElse(false);
+  }
+
   /**
    * @return False only if property is present and set to false
    */

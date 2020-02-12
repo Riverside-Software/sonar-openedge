@@ -24,9 +24,11 @@ import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.CLASS1;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE2;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE4;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -68,6 +70,27 @@ public class OpenEdgeProparseSensorTest {
     assertEquals(context.cpdTokens(BASEDIR + ":" + FILE3).size(), 7);
     assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
     assertEquals(context.cpdTokens(BASEDIR + ":" + CLASS1).size(), 11);
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE4));
+    assertEquals(context.cpdTokens(BASEDIR + ":" + FILE4).size(), 2);
+  }
+
+  @SuppressWarnings("deprecation")
+  @Test
+  public void testCPDPreprocessorExpansion02() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated,rssw.lang.Generated");
+    context.settings().setProperty(Constants.CPD_METHODS, "TEST3");
+    context.settings().setProperty(Constants.CPD_PROCEDURES, "adm-create-objects");
+    // No CPD data from ProparseSensor if simple CPD is enabled
+    context.settings().setProperty(Constants.USE_SIMPLE_CPD, true);
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
+    OpenEdgeComponents components = new OpenEdgeComponents(null, null);
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    assertNull(context.cpdTokens(BASEDIR + ":" + FILE3));
+    assertNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
+    assertNull(context.cpdTokens(BASEDIR + ":" + FILE4));
   }
 
   @Test

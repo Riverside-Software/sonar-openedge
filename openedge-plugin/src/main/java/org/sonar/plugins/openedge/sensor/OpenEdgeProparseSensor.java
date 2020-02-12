@@ -47,6 +47,7 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.sax.SAXSource;
 
 import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JsonNodeLister;
@@ -151,7 +152,8 @@ public class OpenEdgeProparseSensor implements Sensor {
 
   @Override
   public void describe(SensorDescriptor descriptor) {
-    descriptor.onlyOnLanguage(Constants.LANGUAGE_KEY).name(getClass().getSimpleName());
+    descriptor.onlyOnLanguage(Constants.LANGUAGE_KEY).name(getClass().getSimpleName()).onlyWhenConfiguration(
+        config -> !config.getBoolean(Constants.SKIP_PROPARSE_PROPERTY).orElse(false));
   }
 
   @Override
@@ -213,6 +215,17 @@ public class OpenEdgeProparseSensor implements Sensor {
       ncLocs += lexUnit.getMetrics().getLoc();
       context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
           lexUnit.getMetrics().getComments()).save();
+    }
+
+    if (!settings.useSimpleCPD()) {
+      try {
+        lexUnit = new ParseUnit(InputFileUtils.getInputStream(file),
+            InputFileUtils.getRelativePath(file, context.fileSystem()), session);
+        TokenSource stream = lexUnit.lex();
+        OpenEdgeCPDSensor.processTokenSource(file, context.newCpdTokens().onFile(file), stream);
+      } catch (UncheckedIOException | ProparseRuntimeException caught) {
+        // Nothing here
+      }
     }
   }
 
@@ -365,7 +378,9 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
 
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
-      computeCpd(context, file, unit);
+      if (!settings.useSimpleCPD()) {
+        computeCpd(context, file, unit);
+      }
       computeSimpleMetrics(context, file, unit);
       computeCommonMetrics(context, file, unit);
       computeComplexity(context, file, unit);
