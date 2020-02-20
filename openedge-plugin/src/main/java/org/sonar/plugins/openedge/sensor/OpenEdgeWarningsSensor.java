@@ -133,6 +133,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
 
     @Override
     public boolean processLine(String line) throws IOException {
+      // Line format [LineNumber] [FileName] Message...
       // Closing bracket after line number
       int pos1 = line.indexOf(']', 1);
       if (pos1 == -1)
@@ -141,15 +142,15 @@ public class OpenEdgeWarningsSensor implements Sensor {
       int pos2 = line.indexOf(']', pos1 + 2);
       // Line number
       Integer lineNumber = Ints.tryParse(line.substring(1, pos1));
-      // Trying to get Progress message number
-      int lastOpeningParen = line.lastIndexOf('(');
-      int lastClosingParen = line.lastIndexOf(')');
-      Integer msgNum = -1;
-      if ((lastOpeningParen > -1) && (lastClosingParen > -1)) {
-        msgNum = Ints.tryParse(line.substring(lastOpeningParen + 1, lastClosingParen));
-      }
       String fileName = line.substring(pos1 + 3, pos2);
       String msg = line.substring(pos2 + 2);
+      // Trying to get Progress message number
+      int lastOpeningParen = msg.lastIndexOf('(');
+      int lastClosingParen = msg.lastIndexOf(')');
+      Integer msgNum = -1;
+      if ((lastOpeningParen > -1) && (lastClosingParen > -1)) {
+        msgNum = Ints.tryParse(msg.substring(lastOpeningParen + 1, lastClosingParen));
+      }
       if (msgNum > -1) {
         // Brackets found, so trim right part
         msg = msg.substring(0, lastOpeningParen);
