@@ -19,6 +19,8 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
+import static org.testng.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -57,19 +59,22 @@ public class OpenEdgeWarningsSensorTest {
 
     // Starts with ../
     issue = issues.next();
-    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+    assertEquals(issue.primaryLocation().inputComponent().key(),
         TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
-    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 2);
+    assertEquals(issue.primaryLocation().textRange().start().line(), 2);
 
     issue = issues.next();
-    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+    assertEquals(issue.primaryLocation().inputComponent().key(),
         TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
-    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 3);
+    assertEquals(issue.primaryLocation().textRange().start().line(), 3);
 
     issue = issues.next();
-    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+    assertEquals(issue.primaryLocation().inputComponent().key(),
         TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE1);
-    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 1);
+    assertEquals(issue.primaryLocation().textRange().start().line(), 1);
+    // Verify that leading 'WARNING' is removed, as well as the message number
+    assertEquals(issue.primaryLocation().message(),
+        "Program src\\procedures\\sample\\inc\\test.i, Line 1 is an expression statement that evaluates to a constant.");
   }
 
   private ActiveRules createRules() {
