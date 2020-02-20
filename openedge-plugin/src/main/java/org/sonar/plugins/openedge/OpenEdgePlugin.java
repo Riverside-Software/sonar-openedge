@@ -36,6 +36,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeProfile;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+import org.sonar.plugins.openedge.sensor.OpenEdgeCPDSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeCodeColorizer;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBColorizer;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBRulesSensor;
@@ -60,9 +61,9 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(BasicChecksRegistration.class, OpenEdgeProfile.class,
         OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
 
-    // Syntax highlight
+    // Syntax highlight and simple CPD
     if (context.getRuntime().getProduct() == SonarProduct.SONARQUBE) {
-      context.addExtensions(OpenEdgeCodeColorizer.class, OpenEdgeDBColorizer.class);
+      context.addExtensions(OpenEdgeCodeColorizer.class, OpenEdgeDBColorizer.class, OpenEdgeCPDSensor.class);
     }
 
     // Sensors
@@ -102,6 +103,16 @@ public class OpenEdgePlugin implements Plugin {
       .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
       .defaultValue(Boolean.FALSE.toString()) //
       .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.USE_SIMPLE_CPD) //
+        .name("Simple CPD engine") //
+        .description("Doesn't need full parser to execute the CPD engine") //
+        .type(PropertyType.BOOLEAN) //
+        .category(CATEGORY_OPENEDGE) //
+        .subCategory(SUBCATEGORY_GENERAL) //
+        .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+        .defaultValue(Boolean.FALSE.toString()) //
+        .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.PROPARSE_DEBUG) //
       .name("Proparse debug files") //

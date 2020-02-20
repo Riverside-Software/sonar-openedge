@@ -36,7 +36,7 @@ public class OpenEdgePluginTest {
     SonarRuntime runtime = SonarRuntimeImpl.forSonarLint(Version.parse("6.2"));
     Plugin.Context context = new Plugin.Context(runtime);
     new OpenEdgePlugin().define(context);
-    assertThat(context.getExtensions()).hasSize(25);
+    assertThat(context.getExtensions()).hasSize(26);
   }
 
   @Test
@@ -44,7 +44,7 @@ public class OpenEdgePluginTest {
     SonarRuntime runtime = SonarRuntimeImpl.forSonarQube(Version.parse("6.2"), SonarQubeSide.SCANNER, SonarEdition.COMMUNITY);
     Plugin.Context context = new Plugin.Context(runtime);
     new OpenEdgePlugin().define(context);
-    assertThat(context.getExtensions()).hasSize(28);
+    assertThat(context.getExtensions()).hasSize(30);
   }
 
 }
