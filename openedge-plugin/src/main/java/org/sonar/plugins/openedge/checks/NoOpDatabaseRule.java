@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2019-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -17,21 +17,22 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.plugins.openedge.foundation;
+package org.sonar.plugins.openedge.checks;
 
-import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
-import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.checks.NoOpDatabaseRule;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.sonar.api.batch.fs.InputFile;
+import org.sonar.check.Priority;
+import org.sonar.check.Rule;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
+import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
 
-public class OpenEdgeDBProfile implements BuiltInQualityProfilesDefinition {
-  public static final String PROFILE_NAME = "Sonar way";
+@Rule(priority = Priority.INFO, name = "No-op database rule")
+@SqaleConstantRemediation(value = "1min")
+public class NoOpDatabaseRule extends OpenEdgeDumpFileCheck {
 
   @Override
-  public void define(Context context) {
-    NewBuiltInQualityProfile profile = context.createBuiltInQualityProfile(PROFILE_NAME,
-        Constants.DB_LANGUAGE_KEY).setDefault(true);
-    profile.activateRule(Constants.STD_DB_REPOSITORY_KEY, NoOpDatabaseRule.class.getName());
-    profile.done();
+  public void execute(InputFile file, ParseTree o) {
+    // No-op
   }
 
 }

@@ -57,7 +57,6 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
   @Override
   public void define(Context context) {
     NewRepository repository = context.createRepository(Constants.STD_REPOSITORY_KEY, Constants.LANGUAGE_KEY).setName(REPOSITORY_NAME);
-
     AnnotationBasedRulesDefinition annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY, runtime);
     annotationLoader.addRuleClasses(false, Arrays.<Class> asList(BasicChecksRegistration.ppCheckClasses()));
 
@@ -93,6 +92,11 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
         Constants.STD_REPOSITORY_KEY, proparseRule.key())));
 
     repository.done();
+
+    NewRepository repository2 = context.createRepository(Constants.STD_DB_REPOSITORY_KEY, Constants.DB_LANGUAGE_KEY).setName(REPOSITORY_NAME);
+    AnnotationBasedRulesDefinition annotationLoader2 = new AnnotationBasedRulesDefinition(repository2, Constants.DB_LANGUAGE_KEY, runtime);
+    annotationLoader2.addRuleClasses(false, Arrays.<Class> asList(BasicChecksRegistration.dbCheckClasses()));
+    repository2.done();
   }
 
   private void createWarningRule(NewRepository repository, String ruleKey, String name, String remediationCost) {

@@ -25,6 +25,7 @@ public class Constants {
 
   // Key of the default rule repository
   public static final String STD_REPOSITORY_KEY = "rssw-oe";
+  public static final String STD_DB_REPOSITORY_KEY = "rssw-oedb";
   public static final String RSSW_REPOSITORY_KEY = "rssw-oe-main";
   public static final String RSSW_DB_REPOSITORY_KEY = "rssw-oedb-main";
 
