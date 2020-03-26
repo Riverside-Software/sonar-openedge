@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -18,7 +18,6 @@ package org.prorefactor.core.nodetypes;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.Block;
@@ -28,17 +27,34 @@ import org.prorefactor.treeparser.Block;
  * METHOD, CANFIND, CATCH, ON, PROPERTY_GETTER, PROPERTY_SETTER
  */
 public class BlockNode extends JPNode {
-  public BlockNode(ProToken t) {
-    super(t);
+  private Block block;
+  private JPNode firstStatement;
+
+  public BlockNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+    super(t, parent, num, hasChildren);
+  }
+
+  public void setFirstStatement(JPNode firstStatement) {
+    this.firstStatement = firstStatement;
+  }
+
+  public JPNode getFirstStatement() {
+    return firstStatement;
   }
 
   @Nullable
+  @Override
   public Block getBlock() {
-    return (Block) getLink(IConstants.BLOCK);
+    return block;
   }
 
+  @Override
   public void setBlock(@Nonnull Block block) {
-    setLink(IConstants.BLOCK, block);
+    this.block = block;
   }
 
+  @Override
+  public boolean hasBlock() {
+    return block != null;
+  }
 }

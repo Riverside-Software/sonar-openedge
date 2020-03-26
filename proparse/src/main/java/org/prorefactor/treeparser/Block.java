@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.JPNode;
+import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.proparse.antlr4.Proparse;
@@ -38,11 +38,10 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
  * scopes.
  */
 public class Block {
-
+  private final BlockNode blockStatementNode;
   private List<Frame> frames = new ArrayList<>();
   private Block parent;
   private Frame defaultFrame = null;
-  private final JPNode blockStatementNode;
   private Set<BufferScope> bufferScopes = new HashSet<>();
 
   /**
@@ -52,7 +51,7 @@ public class Block {
   private TreeParserSymbolScope symbolScope;
 
   /** For constructing nested blocks */
-  public Block(Block parent, JPNode node) {
+  public Block(Block parent, BlockNode node) {
     this.blockStatementNode = node;
     this.parent = parent;
     this.symbolScope = parent.symbolScope;
@@ -64,7 +63,7 @@ public class Block {
    * @param symbolScope
    * @param node Is the Program_root if this is the program root block.
    */
-  public Block(TreeParserSymbolScope symbolScope, JPNode node) {
+  public Block(TreeParserSymbolScope symbolScope, BlockNode node) {
     this.blockStatementNode = node;
     this.symbolScope = symbolScope;
     if (symbolScope.getParentScope() != null)
@@ -283,7 +282,7 @@ public class Block {
    * Get the node for this block. Returns a node of one of these types:
    * Program_root/DO/FOR/REPEAT/EDITING/PROCEDURE/FUNCTION/ON/TRIGGERS.
    */
-  public JPNode getNode() {
+  public BlockNode getNode() {
     return blockStatementNode;
   }
 

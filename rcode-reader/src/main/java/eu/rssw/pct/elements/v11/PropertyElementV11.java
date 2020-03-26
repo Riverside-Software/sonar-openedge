@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -59,7 +59,7 @@ public class PropertyElementV11 extends AbstractAccessibleElement implements IPr
   }
 
   public static IPropertyElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
-    int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort() & 0xffff;
 
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);

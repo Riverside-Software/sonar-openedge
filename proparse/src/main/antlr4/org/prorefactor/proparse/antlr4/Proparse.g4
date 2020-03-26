@@ -1693,7 +1693,7 @@ defineBrowseStatement:
   ;
 
 defBrowseDisplay:
-    DISPLAY defBrowseDisplayItemsOrRecord exceptFields?
+    DISPLAY defBrowseDisplayItemsOrRecord? exceptFields?
   ;
 
 defBrowseDisplayItemsOrRecord:
@@ -1949,7 +1949,7 @@ definePropertyStatement:
 
 definePropertyAs:
     AS datatype
-    ( extentPhrase2 | initialConstant | NOUNDO )*
+    ( extentPhrase2 | initialConstant | NOUNDO | serializeName )*
   ;
 
 definePropertyAccessor:
@@ -3038,7 +3038,7 @@ osAppendStatement:
 
 osCommandStatement:
     ( OS400 | BTOS | DOS | MPE | OS2 | OSCOMMAND | UNIX | VMS )
-    ( SILENT | NOWAIT | NOCONSOLE )?
+    ( SILENT | NOWAIT | NOCONSOLE )*
     anyOrValue*
     statementEnd
   ;

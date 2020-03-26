@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -36,6 +36,10 @@ public enum ContextQualifier {
    * Updating the symbol's value.
    */
   UPDATING,
+  /**
+   * Creating (thus updating) symbol's value with a GUI component
+   */
+  UPDATING_UI,
   /**
    * We are strictly referencing the symbol - not its value. Used both for field and table symbols. For table symbols,
    * the lookup is done by schema symbols first, buffer symbols second.
@@ -84,6 +88,7 @@ public enum ContextQualifier {
     switch (cq) {
       case REFUP:
       case UPDATING:
+      case UPDATING_UI:
         return true;
       default:
         return false;

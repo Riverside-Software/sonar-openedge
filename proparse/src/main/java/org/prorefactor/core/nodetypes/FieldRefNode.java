@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -15,20 +15,26 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.treeparser.BufferScope;
+import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 
 public class FieldRefNode extends JPNode {
-  public FieldRefNode(ProToken t) {
-    super(t);
+  private ContextQualifier qualifier;
+
+  public FieldRefNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+    super(t, parent, num, hasChildren);
+  }
+
+  public void setContextQualifier(ContextQualifier qualifier) {
+    this.qualifier = qualifier;
+  }
+
+  public ContextQualifier getQualifier() {
+    return qualifier;
   }
 
   /**
@@ -53,15 +59,6 @@ public class FieldRefNode extends JPNode {
   @Override
   public JPNode getIdNode() {
     return findDirectChild(ABLNodeType.ID.getType());
-  }
-
-  @Nullable
-  public BufferScope getBufferScope() {
-    return (BufferScope) getLink(IConstants.BUFFERSCOPE);
-  }
-
-  public void setBufferScope(@Nonnull BufferScope bufferScope) {
-    setLink(IConstants.BUFFERSCOPE, bufferScope);
   }
 
 }

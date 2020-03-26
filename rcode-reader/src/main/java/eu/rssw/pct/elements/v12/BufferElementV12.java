@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -47,7 +47,7 @@ public class BufferElementV12 extends BufferElementV11 {
     String databaseName = databaseNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + databaseNameOffset);
 
-    int flags = ByteBuffer.wrap(segment, currentPos + 18, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 18, Short.BYTES).order(order).getShort() & 0xffff;
 
     return new BufferElementV12(name2, accessType, tableName, databaseName, flags);
   }

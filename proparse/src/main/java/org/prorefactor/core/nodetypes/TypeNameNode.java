@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -12,29 +12,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.core;
+package org.prorefactor.core.nodetypes;
 
-public enum AttributeKey {
-  STORETYPE(IConstants.STORETYPE),
-  OPERATOR(IConstants.OPERATOR),
-  STATE2(IConstants.STATE2),
-  STATEHEAD(IConstants.STATEHEAD),
-  PROPARSEDIRECTIVE(IConstants.PROPARSEDIRECTIVE),
-  ABBREVIATED(IConstants.ABBREVIATED),
-  INLINE_VAR_DEF(IConstants.INLINE_VAR_DEF),
-  QUALIFIED_CLASS(IConstants.QUALIFIED_CLASS_INT);
+import org.prorefactor.core.JPNode;
+import org.prorefactor.core.ProToken;
 
-  private int key;
+/**
+ * Specialized type of JPNode for TYPE_NAME nodes
+ */
+public class TypeNameNode extends JPNode {
+  private String qualName;
 
-  private AttributeKey(int key) {
-    this.key = key;
+  public TypeNameNode(ProToken t, JPNode parent, int num, boolean hasChildren, String qualName) {
+    super(t, parent, num, hasChildren);
+    this.qualName = qualName;
   }
 
-  public int getKey() {
-    return key;
-  }
-
-  public String getName() {
-    return name().toLowerCase().replace('_', '-');
+  public String getQualName() {
+    return qualName;
   }
 }

@@ -1,1 +1,1 @@
-${project.version} ${git.commit}
+${project.version}-${git.commit}

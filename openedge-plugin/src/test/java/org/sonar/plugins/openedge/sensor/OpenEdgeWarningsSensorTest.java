@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -19,12 +19,16 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
+import static org.testng.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarQubeSide;
 import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
+import org.sonar.api.batch.rule.internal.NewActiveRule;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.batch.sensor.issue.Issue;
 import org.sonar.api.internal.SonarRuntimeImpl;
@@ -44,7 +48,7 @@ public class OpenEdgeWarningsSensorTest {
   public void testWarnings() throws IOException {
     SensorContextTester context = TestProjectSensorContext.createContext();
     context.setActiveRules(createRules());
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER));
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings);
     sensor.execute(context);
 
@@ -55,24 +59,28 @@ public class OpenEdgeWarningsSensorTest {
 
     // Starts with ../
     issue = issues.next();
-    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+    assertEquals(issue.primaryLocation().inputComponent().key(),
         TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
-    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 2);
+    assertEquals(issue.primaryLocation().textRange().start().line(), 2);
 
     issue = issues.next();
-    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+    assertEquals(issue.primaryLocation().inputComponent().key(),
         TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
-    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 3);
+    assertEquals(issue.primaryLocation().textRange().start().line(), 3);
 
     issue = issues.next();
-    Assert.assertEquals(issue.primaryLocation().inputComponent().key(),
+    assertEquals(issue.primaryLocation().inputComponent().key(),
         TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE1);
-    Assert.assertEquals(issue.primaryLocation().textRange().start().line(), 1);
+    assertEquals(issue.primaryLocation().textRange().start().line(), 1);
+    // Verify that leading 'WARNING' is removed, as well as the message number
+    assertEquals(issue.primaryLocation().message(),
+        "Program src\\procedures\\sample\\inc\\test.i, Line 1 is an expression statement that evaluates to a constant.");
   }
 
   private ActiveRules createRules() {
-    return new ActiveRulesBuilder().create(RuleKey.of(Constants.STD_REPOSITORY_KEY,
-        OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY)).activate().build();
+    return new ActiveRulesBuilder().addRule(new NewActiveRule.Builder().setRuleKey(
+        RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY)).setLanguage(
+            Constants.LANGUAGE_KEY).build()).build();
   }
 
 }

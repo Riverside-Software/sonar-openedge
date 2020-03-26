@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -104,6 +104,7 @@ public class OpenEdgeSettings {
   private final Set<Integer> xrefBytes = new HashSet<>();
 
   private RefactorSession proparseSession;
+  private String oePluginVersion;
 
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
     this.config = config;
@@ -114,7 +115,8 @@ public class OpenEdgeSettings {
   public final void init() {
     if (init)
       return;
-    LOG.info("OpenEdge plugin version: {}", readPluginVersion(this.getClass().getClassLoader(), "sonar-openedge.txt"));
+    oePluginVersion = readPluginVersion(this.getClass().getClassLoader(), "sonar-openedge.txt");
+    LOG.info("OpenEdge plugin version: {}", oePluginVersion);
     LOG.info("Loading OpenEdge settings for server ID '{}' '{}'", config.get(CoreProperties.SERVER_ID).orElse(""),
         config.get(CoreProperties.PERMANENT_SERVER_ID).orElse(""));
     initializeDirectories(config, fileSystem);
@@ -534,6 +536,10 @@ public class OpenEdgeSettings {
     return config.getBoolean(Constants.ANTLR4_PROFILER).orElse(false);
   }
 
+  public boolean useSimpleCPD() {
+    return config.getBoolean(Constants.USE_SIMPLE_CPD).orElse(false);
+  }
+
   /**
    * @return False only if property is present and set to false
    */
@@ -559,6 +565,10 @@ public class OpenEdgeSettings {
 
   public List<File> getPropath() {
     return propath;
+  }
+
+  public String getOpenEdgePluginVersion() {
+    return this.oePluginVersion;
   }
 
   public String getPropathAsString() {

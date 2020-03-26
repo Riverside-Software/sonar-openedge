@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -26,7 +26,6 @@ import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.proparse.SymbolScope.FieldType;
 import org.prorefactor.proparse.antlr4.Proparse;
@@ -82,7 +81,8 @@ public class ParserSupport {
   /**
    * An AS phrase allows further abbreviations on the datatype names. Input a token's text, this returns 0 if it is not
    * a datatype abbreviation, otherwise returns the integer token type for the abbreviation. Here's the normal keyword
-   * abbreviation, with what AS phrase allows:<ul>
+   * abbreviation, with what AS phrase allows:
+   * <ul>
    * <li>char: c
    * <li>date: da
    * <li>dec: de
@@ -226,7 +226,8 @@ public class ParserSupport {
 
   public boolean recordSemanticPredicate(Token lt1, Token lt2, Token lt3) {
     String recname = lt1.getText();
-    // Since ANTLR4 migration, NAMEDOT doesn't exist anymore in the token stream, as they're filtered out by NameDotTokenFilter
+    // Since ANTLR4 migration, NAMEDOT doesn't exist anymore in the token stream, as they're filtered out by
+    // NameDotTokenFilter
     // So this 'if' block can probably be removed...
     if (lt2.getType() == ABLNodeType.NAMEDOT.getType()) {
       recname += ".";
@@ -325,7 +326,8 @@ public class ParserSupport {
   }
 
   /**
-   * @return False if unknown method calls are not allowed in exprt2 rule. Usually returns true except when in DYNAMIC-NEW or RUN ... IN|ON statements 
+   * @return False if unknown method calls are not allowed in exprt2 rule. Usually returns true except when in
+   *         DYNAMIC-NEW or RUN ... IN|ON statements
    */
   public boolean unknownMethodCallsAllowed() {
     return allowUnknownMethodCalls;
@@ -334,10 +336,6 @@ public class ParserSupport {
   // TODO Speed issue in this function, multiplied JPNode tree generation time by a factor 10
   public String lookupClassName(String text) {
     return classFinder.lookup(text);
-  }
-
-  public void attrTypeNameLookup(JPNode node) {
-    node.attrSet(IConstants.QUALIFIED_CLASS_INT, classFinder.lookup(node.getText()));
   }
 
   public boolean hasHiddenBefore(TokenStream stream) {

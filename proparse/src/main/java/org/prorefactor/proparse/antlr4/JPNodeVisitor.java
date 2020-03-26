@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -79,7 +79,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitFunctionCallStatement(FunctionCallStatementContext ctx) {
-    return createTree(ctx, ABLNodeType.EXPR_STATEMENT).setStatement();
+    return createTree(ctx, ABLNodeType.EXPR_STATEMENT).setStatement().setRuleNode(ctx);
   }
 
   @Override
@@ -90,7 +90,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExpressionStatement(ExpressionStatementContext ctx) {
-    return createTree(ctx, ABLNodeType.EXPR_STATEMENT).setStatement();
+    return createTree(ctx, ABLNodeType.EXPR_STATEMENT).setStatement().setRuleNode(ctx);
   }
 
   @Override
@@ -533,9 +533,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitAssignStatement2(AssignStatement2Context ctx) {
-    Builder node1 = createTreeFromSecondNode(ctx).setOperator();
+    // Unset rule node, as it's in fact assigned to the parent node
+    Builder node1 = createTreeFromSecondNode(ctx).setOperator().unsetRuleNode();
 
-    Builder holder = new Builder(ABLNodeType.ASSIGN).setStatement().setDown(node1);
+    Builder holder = new Builder(ABLNodeType.ASSIGN).setStatement().setDown(node1).setRuleNode(ctx);
     Builder lastNode = node1;
     for (int zz = 3; zz < ctx.getChildCount(); zz++) {
       lastNode = lastNode.setRight(visit(ctx.getChild(zz))).getLast();

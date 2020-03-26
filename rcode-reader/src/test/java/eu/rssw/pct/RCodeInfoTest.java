@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -205,6 +205,18 @@ public class RCodeInfoTest {
 
       assertNotNull(rci.getTypeInfo().getTables());
       assertEquals(rci.getTypeInfo().getTables().size(), 0);
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testV121() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/NMSTrace.r")) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      assertNotNull(rci.getTypeInfo());
+      assertEquals(rci.getTypeInfo().getProperties().size(), 5);
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }

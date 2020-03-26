@@ -16,9 +16,9 @@ pipeline {
               // Maven Central deployment:  'mvn -P release clean package verify deploy'
               sh "git rev-parse HEAD > current-commit"
               def currCommit = readFile('current-commit').replace("\n", "").replace("\r", "")
-              sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true -Dgit.commit=${currCommit}"
+              sh "mvn clean javadoc:javadoc install -Dmaven.test.failure.ignore=true -Dgit.commit=${currCommit}"
             } else {
-              sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package -Dmaven.test.failure.ignore=true"
+              sh "mvn clean package -Dmaven.test.failure.ignore=true"
             }
           }
         }
@@ -26,17 +26,17 @@ pipeline {
         step([$class: 'Publisher', reportFilenamePattern: '**/target/surefire-reports/testng-results.xml'])
       }
     }
+
     stage ('SonarQube analysis') {
       steps {
         script {
           withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
-            withCredentials([string(credentialsId: 'AdminTokenSonarQube', variable: 'SQ_TOKEN')]) {
+            withSonarQubeEnv(credentialsId: 'SQToken', installationName: 'RSSW') {
               if (("master" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME)) {
-                sh "mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.login=${env.SQ_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} org.sonarsource.scanner.maven:sonar-maven-plugin:3.6.0.1398:sonar"
-              } else if (env.BRANCH_NAME.startsWith("release") || env.BRANCH_NAME.startsWith("hotfix")) {
-                sh "mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.login=${env.SQ_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=master org.sonarsource.scanner.maven:sonar-maven-plugin:3.6.0.1398:sonar"
+                sh "mvn -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
               } else {
-                sh "mvn -Dsonar.host.url=http://sonar.riverside-software.fr -Dsonar.login=${env.SQ_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=develop org.sonarsource.scanner.maven:sonar-maven-plugin:3.6.0.1398:sonar"
+                def targetBranch = env.BRANCH_NAME.startsWith("release") ? "master" : "develop"
+                sh "mvn -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=${targetBranch} sonar:sonar"
               }
             }
           }

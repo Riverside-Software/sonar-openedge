@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -22,6 +22,7 @@ import java.util.Set;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.nodetypes.TypeNameNode;
 import org.prorefactor.proparse.ParserSupport;
 import org.prorefactor.proparse.SymbolScope;
 import org.slf4j.Logger;
@@ -98,8 +99,11 @@ public class TreeNodeLister {
       ofile.write(node.getText().replace('\'', ' ').replace('"', ' '));
       ofile.write("] ");
     }
-    if (!"".equals(node.attrGetS(IConstants.QUALIFIED_CLASS_INT)))
-      ofile.write(" Qualified name: '" + node.attrGetS(IConstants.QUALIFIED_CLASS_INT) + "'");
+    if (node instanceof TypeNameNode) {
+      String qualName = ((TypeNameNode) node).getQualName();
+      if (qualName != null)
+        ofile.write(" Qualified name: '" + qualName + "'");
+    }
     ofile.write(String.format("@F%d:%d:%d", node.getFileIndex(), node.getLine(), node.getColumn()));
     ofile.write("\n");
   }

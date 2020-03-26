@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -25,11 +25,13 @@ public class Constants {
 
   // Key of the default rule repository
   public static final String STD_REPOSITORY_KEY = "rssw-oe";
+  public static final String STD_DB_REPOSITORY_KEY = "rssw-oedb";
   public static final String RSSW_REPOSITORY_KEY = "rssw-oe-main";
   public static final String RSSW_DB_REPOSITORY_KEY = "rssw-oedb-main";
 
   // Sonar analysis properties
   public static final String SKIP_PROPARSE_PROPERTY = "sonar.oe.skipProparse";
+  public static final String USE_SIMPLE_CPD = "sonar.oe.simplecpd";
   public static final String PROPARSE_DEBUG = "sonar.oe.proparse.debug";
   public static final String PROPARSE_ERROR_STACKTRACE = "sonar.oe.proparse.error.stacktrace";
   public static final String BINARIES = "sonar.oe.binaries";

@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -38,7 +38,7 @@ public class EventElementV12 extends EventElementV11 {
 
   public static IEventElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
       int textAreaOffset, ByteOrder order) {
-    int flags = ByteBuffer.wrap(segment, currentPos +  18, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos +  18, Short.BYTES).order(order).getShort() & 0xffff;
     int returnType = ByteBuffer.wrap(segment, currentPos + 20, Short.BYTES).order(order).getShort();
     int parameterCount = ByteBuffer.wrap(segment, currentPos + 22, Short.BYTES).order(order).getShort();
 

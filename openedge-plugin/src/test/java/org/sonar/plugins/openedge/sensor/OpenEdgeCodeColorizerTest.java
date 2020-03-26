@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -24,6 +24,7 @@ import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE2;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
 
+import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarQubeSide;
 import org.sonar.api.batch.sensor.highlighting.TypeOfText;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
@@ -40,7 +41,7 @@ public class OpenEdgeCodeColorizerTest {
   @Test
   public void testSp2k() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER));
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
     OpenEdgeCodeColorizer sensor = new OpenEdgeCodeColorizer(oeSettings);
     sensor.execute(context);
 

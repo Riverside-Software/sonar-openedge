@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -246,6 +246,29 @@ public class ParseUnit {
     attachXrefToTreeParser(getTopNode(), xref);
   }
 
+  private static boolean isReferenceAssociatedToRecordNode(RecordNameNode recNode, Source src, Reference ref,
+      String tableName, int tableType) {
+    // On the same line number
+    if (recNode.getStatement().firstNaturalChild().getLine() != ref.getLineNum())
+      return false;
+    // On the same table
+    if ((recNode.getTableBuffer() == null) || !tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
+        || (recNode.attrGet(IConstants.STORETYPE) != tableType))
+      return false;
+    // In the main file ?
+    if ((src.getFileNum() == 1) && (recNode.getFileIndex() == 0))
+      return true;
+    else {
+      try {
+        // Or in the same include file ?
+        return ((src.getFileNum() > 1) && (recNode.getStatement().getFileName() != null) && Files.isSameFile(
+            new File(src.getFileName()).toPath(), new File(recNode.getStatement().getFileName()).toPath()));
+      } catch (IOException uncaught) {
+        return false;
+      }
+    }
+  }
+
   public static void attachXrefToTreeParser(ProgramRootNode root, CrossReference xref) {
     List<JPNode> recordNodes = root.query(ABLNodeType.RECORD_NAME);
     for (Source src : xref.getSource()) {
@@ -267,21 +290,11 @@ public class ParseUnit {
           boolean lFound = false;
           for (JPNode node : recordNodes) {
             RecordNameNode recNode = (RecordNameNode) node;
-            try {
-              if ((recNode.getStatement().getLine() == ref.getLineNum())
-                  && (recNode.getTableBuffer() != null)
-                  && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
-                  && (recNode.attrGet(IConstants.STORETYPE) == tableType)
-                  && ((src.getFileNum() == 1 && recNode.getFileIndex() == 0)
-                      || Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath()))) {
-                recNode.setLink(IConstants.WHOLE_INDEX, "WHOLE-INDEX".equals(ref.getDetail()));
-                recNode.setLink(IConstants.SEARCH_INDEX_NAME,
-                    recNode.getTableBuffer().getTable().getName() + "." + ref.getObjectContext());
-                lFound = true;
-                break;
-              }
-            } catch (IOException uncaught) {
-              // Nothing
+            if (isReferenceAssociatedToRecordNode(recNode, src, ref, tableName, tableType)) {
+              recNode.setWholeIndex("WHOLE-INDEX".equals(ref.getDetail()));
+              recNode.setSearchIndexName(recNode.getTableBuffer().getTable().getName() + "." + ref.getObjectContext());
+              lFound = true;
+              break;
             }
           }
           if (!lFound && "WHOLE-INDEX".equals(ref.getDetail())) {
@@ -302,17 +315,9 @@ public class ParseUnit {
 
           for (JPNode node : recordNodes) {
             RecordNameNode recNode = (RecordNameNode) node;
-            try {
-              if ((recNode.getStatement().getLine() == ref.getLineNum())
-                  && tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
-                  && (recNode.attrGet(IConstants.STORETYPE) == tableType)
-                  && ((src.getFileNum() == 1 && recNode.getFileIndex() == 0)
-                      || Files.isSameFile(srcFile.toPath(), new File(recNode.getStatement().getFileName()).toPath()))) {
-                recNode.setSortAccess(ref.getObjectContext());
-                break;
-              }
-            } catch (IOException uncaught) {
-              // Nothing
+            if (isReferenceAssociatedToRecordNode(recNode, src, ref, tableName, tableType)) {
+              recNode.setSortAccess(ref.getObjectContext());
+              break;
             }
           }
         }

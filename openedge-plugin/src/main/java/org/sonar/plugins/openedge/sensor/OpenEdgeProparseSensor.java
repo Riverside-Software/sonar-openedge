@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -46,6 +47,7 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.sax.SAXSource;
 
 import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JsonNodeLister;
@@ -86,6 +88,8 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 
 import com.google.common.base.Joiner;
@@ -108,7 +112,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   private final DocumentBuilder dBuilder;
   private final JAXBContext context;
   private final Unmarshaller unmarshaller;
-  private final SAXParserFactory sax;
+  private final SAXParserFactory saxParserFactory;
 
   // File statistics
   private int numFiles;
@@ -132,22 +136,24 @@ public class OpenEdgeProparseSensor implements Sensor {
     this.settings = settings;
     this.components = components;
     dbFactory = DocumentBuilderFactory.newInstance();
-    sax = SAXParserFactory.newInstance();
-    sax.setNamespaceAware(false);
+    saxParserFactory = SAXParserFactory.newInstance();
+    saxParserFactory.setNamespaceAware(false);
 
     try {
       dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+      saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
       dBuilder = dbFactory.newDocumentBuilder();
       context = JAXBContext.newInstance("com.progress.xref", CrossReference.class.getClassLoader());
       unmarshaller = context.createUnmarshaller();
-    } catch (ParserConfigurationException | JAXBException caught) {
+    } catch (ParserConfigurationException | JAXBException | SAXNotRecognizedException | SAXNotSupportedException caught) {
       throw new IllegalStateException(caught);
     }
   }
 
   @Override
   public void describe(SensorDescriptor descriptor) {
-    descriptor.onlyOnLanguage(Constants.LANGUAGE_KEY).name(getClass().getSimpleName());
+    descriptor.onlyOnLanguage(Constants.LANGUAGE_KEY).name(getClass().getSimpleName()).onlyWhenConfiguration(
+        config -> !config.getBoolean(Constants.SKIP_PROPARSE_PROPERTY).orElse(false));
   }
 
   @Override
@@ -172,6 +178,10 @@ public class OpenEdgeProparseSensor implements Sensor {
         parseIncludeFile(context, file, session);
       } else {
         parseMainFile(context, file, session);
+      }
+      if (context.isCancelled()) {
+        LOG.info("Analysis cancelled...");
+        return;
       }
     }
 
@@ -210,6 +220,17 @@ public class OpenEdgeProparseSensor implements Sensor {
       context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
           lexUnit.getMetrics().getComments()).save();
     }
+
+    if (!settings.useSimpleCPD()) {
+      try {
+        lexUnit = new ParseUnit(InputFileUtils.getInputStream(file),
+            InputFileUtils.getRelativePath(file, context.fileSystem()), session);
+        TokenSource stream = lexUnit.lex();
+        OpenEdgeCPDSensor.processTokenSource(file, context.newCpdTokens().onFile(file), stream);
+      } catch (UncheckedIOException | ProparseRuntimeException caught) {
+        // Nothing here
+      }
+    }
   }
 
   private Document parseXREF(File xrefFile) {
@@ -237,7 +258,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         long startTime = System.currentTimeMillis();
         InputSource is = new InputSource(
             settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
-        XMLReader reader = sax.newSAXParser().getXMLReader();
+        XMLReader reader = saxParserFactory.newSAXParser().getXMLReader();
         SAXSource source = new SAXSource(reader, is);
         doc = (CrossReference) unmarshaller.unmarshal(source);
         xmlParseTime += (System.currentTimeMillis() - startTime);
@@ -361,7 +382,9 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
 
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
-      computeCpd(context, file, unit);
+      if (!settings.useSimpleCPD()) {
+        computeCpd(context, file, unit);
+      }
       computeSimpleMetrics(context, file, unit);
       computeCommonMetrics(context, file, unit);
       computeComplexity(context, file, unit);
@@ -398,9 +421,10 @@ public class OpenEdgeProparseSensor implements Sensor {
       return;
 
     StringBuilder data = new StringBuilder(String.format( // NOSONAR Influx requires LF
-        "proparse,product=%1$s,sid=%2$s files=%3$d,failures=%4$d,parseTime=%5$d,maxParseTime=%6$d,version=\"%7$s\",ncloc=%8$d\n",
+        "proparse,product=%1$s,sid=%2$s files=%3$d,failures=%4$d,parseTime=%5$d,maxParseTime=%6$d,version=\"%7$s\",ncloc=%8$d,oeversion=\"%9$s\"\n",
         context.runtime().getProduct().toString().toLowerCase(), OpenEdgeProjectHelper.getServerId(context), numFiles,
-        numFailures, parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs));
+        numFailures, parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs,
+        settings.getOpenEdgePluginVersion()));
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       data.append(String.format("rule,product=%1$s,sid=%2$s,rulename=%3$s ruleTime=%4$d\n", // NOSONAR
           context.runtime().getProduct().toString().toLowerCase(), OpenEdgeProjectHelper.getServerId(context),

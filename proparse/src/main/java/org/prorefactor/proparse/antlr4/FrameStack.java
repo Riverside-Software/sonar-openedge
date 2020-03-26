@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -22,7 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
@@ -65,7 +64,7 @@ public class FrameStack {
    * the statement head was processed.
    */
   void browseRefNode(JPNode idNode, TreeParserSymbolScope symbolScope) {
-    LOG.debug("Enter FrameStack#browseRefNode");
+    LOG.trace("Enter FrameStack#browseRefNode");
 
     if (idNode.getSymbol() == null)
       browseRefSet(idNode, symbolScope);
@@ -73,7 +72,7 @@ public class FrameStack {
 
   private Browse browseRefSet(JPNode idNode, TreeParserSymbolScope symbolScope) {
     Browse browse = (Browse) symbolScope.lookupFieldLevelWidget(idNode.getText());
-    idNode.setLink(IConstants.SYMBOL, browse);
+    idNode.setSymbol(browse);
     return browse;
   }
 
@@ -120,7 +119,7 @@ public class FrameStack {
    * containerForCurrentStatement==null, and this function is a no-op.
    */
   void formItem(JPNode formItemNode) {
-    LOG.debug("Enter FrameStack#formItem");
+    LOG.trace("Enter FrameStack#formItem");
 
     if (containerForCurrentStatement == null)
       return;
@@ -149,7 +148,7 @@ public class FrameStack {
    * The ID node in a FRAME ID pair. For "WITH FRAME id", the ID was already set when we processed the statement head.
    */
   void frameRefNode(JPNode idNode, TreeParserSymbolScope symbolScope) {
-    LOG.debug("Enter FrameStack#frameRefNode");
+    LOG.trace("Enter FrameStack#frameRefNode");
 
     if (idNode.getSymbol() == null)
       frameRefSet(idNode, symbolScope);
@@ -160,7 +159,7 @@ public class FrameStack {
     Frame frame = (Frame) symbolScope.lookupWidget(Proparse.FRAME, frameName);
     if (frame == null)
       frame = createFrame(frameName, symbolScope);
-    idNode.setLink(IConstants.SYMBOL, frame);
+    idNode.setSymbol(frame);
     return frame;
   }
 
@@ -228,7 +227,7 @@ public class FrameStack {
       }
     }
     if (fieldOrVariable == null) {
-      LOG.error("Could not find input field {} {}:{}", idNode.getText(), idNode.getFileIndex(), idNode.getLine());
+      LOG.error("Could not find input field {} {}:{}", idNode.getText(), idNode.getFileName(), idNode.getLine());
       return null;
     }
     fieldRefNode.setFieldContainer(fieldContainer);
@@ -246,7 +245,7 @@ public class FrameStack {
 
   /** Receive the node (will be a Field_ref) that follows an @ in a frame phrase. */
   void lexAt(JPNode fieldRefNode) {
-    LOG.debug("Enter FrameStack#lexAt");
+    LOG.trace("Enter FrameStack#lexAt");
 
     if (containerForCurrentStatement != null)
       containerForCurrentStatement.addSymbol(fieldRefNode.getSymbol(), currStatementIsEnabler);
@@ -254,7 +253,7 @@ public class FrameStack {
 
   /** FOR|REPEAT|DO blocks need to be checked for explicit WITH FRAME phrase. */
   void nodeOfBlock(JPNode blockNode, Block currentBlock) {
-    LOG.debug("Enter FrameStack#nodeOfBlock");
+    LOG.trace("Enter FrameStack#nodeOfBlock");
 
     JPNode containerTypeNode = getContainerTypeNode(blockNode);
     if (containerTypeNode == null)
@@ -271,7 +270,7 @@ public class FrameStack {
 
   /** Called at tree parser DEFINE BROWSE statement. */
   void nodeOfDefineBrowse(Browse newBrowseSymbol, JPNode defNode, ParseTree defNode2) {
-    LOG.debug("Enter FrameStack#nodeOfDefineBrowse");
+    LOG.trace("Enter FrameStack#nodeOfDefineBrowse");
 
     containerForCurrentStatement = newBrowseSymbol;
     containerForCurrentStatement.addStatement(defNode2);
@@ -283,13 +282,13 @@ public class FrameStack {
    * multiple FORM statements, I suppose. A DEFINE FRAME statement does not initialize the frame's scope.
    */
   void nodeOfDefineFrame(ParseTree defNode2, JPNode defNode, JPNode idNode, String frameName, TreeParserSymbolScope currentSymbolScope) {
-    LOG.debug("Enter FrameStack#nodeOfDefineFrame");
+    LOG.trace("Enter FrameStack#nodeOfDefineFrame");
 
     Frame frame = (Frame) currentSymbolScope.lookupSymbolLocally(Proparse.FRAME, frameName);
     if (frame == null)
       frame = createFrame(frameName, currentSymbolScope);
     frame.setDefinitionNode(defNode.getIdNode());
-    defNode.setLink(IConstants.SYMBOL, frame);
+    defNode.setSymbol(frame);
     defNode.setFieldContainer(frame);
     containerForCurrentStatement = frame;
     containerForCurrentStatement.addStatement(defNode2);
@@ -301,7 +300,7 @@ public class FrameStack {
    * not count as a "reference" for frame scoping purposes.
    */
   void nodeOfInitializingStatement(ParseTree stateNode2, JPNode stateNode, Block currentBlock) {
-    LOG.debug("Enter FrameStack#nodeOfInitializingStatement");
+    LOG.trace("Enter FrameStack#nodeOfInitializingStatement");
 
     JPNode containerTypeNode = getContainerTypeNode(stateNode);
     JPNode idNode = null;
@@ -328,7 +327,7 @@ public class FrameStack {
    * all symbols (including FRAME ID) have been resolved.
    */
   void simpleFrameInitStatement(ParseTree headNode2, JPNode headNode, JPNode frameIDNode, Block currentBlock) {
-    LOG.debug("Enter FrameStack#simpleFrameInitStatement");
+    LOG.trace("Enter FrameStack#simpleFrameInitStatement");
 
     Frame frame = (Frame) frameIDNode.nextNode().getSymbol();
     assert frame != null;
@@ -339,7 +338,7 @@ public class FrameStack {
 
   /** Called at the end of a frame affecting statement. */
   void statementEnd() {
-    LOG.debug("Enter FrameStack#statementEnd");
+    LOG.trace("Enter FrameStack#statementEnd");
 
     // For something like DISPLAY customer, we delay adding the fields to the frame until the end of the statement.
     // That's because any fields in an EXCEPT fields phrase need to have their symbols resolved first.

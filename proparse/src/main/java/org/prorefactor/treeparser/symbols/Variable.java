@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -16,6 +16,7 @@
 package org.prorefactor.treeparser.symbols;
 
 import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -31,6 +32,7 @@ public class Variable extends Symbol implements Primative, Value {
   private Object value;
   private String className = null;
   private boolean refInFrame = false;
+  private boolean graphicalComponent = false;
 
   public Variable(String name, TreeParserSymbolScope scope) {
     super(name, scope);
@@ -114,4 +116,14 @@ public class Variable extends Symbol implements Primative, Value {
     return refInFrame;
   }
 
+  public boolean isGraphicalComponent() {
+    return graphicalComponent;
+  }
+
+  @Override
+  public void noteReference(ContextQualifier contextQualifier) {
+    super.noteReference(contextQualifier);
+    if (contextQualifier == ContextQualifier.UPDATING_UI)
+      graphicalComponent = true;
+  }
 }

@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -20,6 +20,8 @@
 package org.sonar.plugins.openedge.api.checks;
 
 import java.text.MessageFormat;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ParseUnit;
@@ -40,6 +42,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   private static final String INC_MESSAGE = "From {0} - {1}";
 
   private ParseUnit unit;
+  private Set<String> incReports = new HashSet<>();
 
   @Override
   public final void sensorExecute(InputFile file, ParseUnit unit) {
@@ -59,6 +62,10 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return "";
   }
 
+  protected boolean reportOnlyOnceInIncludeFile() {
+    return true;
+  }
+
   /**
    * Override this method if you don't want to report issues on AppBuilder code 
    */
@@ -66,13 +73,18 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return false;
   }
 
-  protected InputFile getInputFile(InputFile file, JPNode node) {
-    if (node.getFileIndex() == 0) {
-      return file;
+  protected InputFile getInputFile(String fileName) {
+    InputFile input = getContext().fileSystem().inputFile(
+        getContext().fileSystem().predicates().hasRelativePath(fileName));
+    if (input == null) {
+      return getContext().fileSystem().inputFile(getContext().fileSystem().predicates().hasAbsolutePath(fileName));
     } else {
-      return getContext().fileSystem().inputFile(
-          getContext().fileSystem().predicates().hasRelativePath(node.getFileName()));
+      return input;
     }
+  }
+
+  protected InputFile getInputFile(InputFile file, JPNode node) {
+    return node.getFileIndex() == 0 ? file : getInputFile(node.getFileName());
   }
 
   protected NewIssue createIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
@@ -85,6 +97,13 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     InputFile targetFile = getInputFile(file, node);
     if (targetFile == null) {
       return null;
+    }
+    if (!targetFile.equals(file) && reportOnlyOnceInIncludeFile()) {
+      // Check if issue has already been reported
+      if (incReports.contains(targetFile.relativePath() + ":" + node.getLine()))
+        return null;
+      else
+        incReports.add(targetFile.relativePath() + ":" + node.getLine());
     }
 
     int lineNumber = node.getLine();
@@ -111,6 +130,22 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     issue.at(location);
 
     return issue;
+  }
+
+  protected void addLocation(NewIssue issue, InputFile file, JPNode node, String msg) {
+    InputFile targetFile = getInputFile(file, node);
+    if (targetFile == null) {
+      return;
+    }
+    NewIssueLocation location = issue.newLocation().on(targetFile);
+    if (node.getLine() > 0) {
+      location.at(targetFile.newRange(node.getLine(), node.getColumn() - 1, node.getEndLine(), node.getEndColumn()));
+    }
+    if (targetFile == file) {
+      location.message(msg);
+    } else {
+      location.message(MessageFormat.format(INC_MESSAGE, file.relativePath(), msg));
+    }
   }
 
   protected void reportIssue(InputFile file, JPNode node, String msg) {
@@ -140,14 +175,9 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    */
   protected void reportIssue(InputFile file, String fileName, int lineNumber, String msg) {
     NewIssue issue = getContext().newIssue();
-    InputFile targetFile = getContext().fileSystem().inputFile(
-        getContext().fileSystem().predicates().hasRelativePath(fileName));
-    if (targetFile == null) {
-      targetFile = getContext().fileSystem().inputFile(
-          getContext().fileSystem().predicates().hasAbsolutePath(fileName));
-      if (targetFile == null)
-        return;
-    }
+    InputFile targetFile = getInputFile(fileName);
+    if (targetFile == null)
+      return;
     NewIssueLocation location = issue.newLocation().on(targetFile);
     if (targetFile == file) {
       location.message(msg);

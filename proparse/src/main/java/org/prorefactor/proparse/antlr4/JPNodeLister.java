@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -87,9 +87,9 @@ public class JPNodeLister {
     if (showFileName)
       ofile.append(Integer.toString(node.getFileIndex())).append(spacer);
     if (showStore) {
-      String storetype = node.attrGetS(IConstants.STORETYPE);
-      if (storetype.length() != 0)
-        ofile.append(storetype).append(spacer);
+      int storetype = node.attrGet(IConstants.STORETYPE);
+      if (storetype != 0)
+        ofile.append(Integer.toString(storetype)).append(spacer);
     }
     ofile.append(getExtraInfo(node, spacer));
     ofile.println();

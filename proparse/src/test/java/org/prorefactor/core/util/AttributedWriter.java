@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -49,7 +49,7 @@ public class AttributedWriter {
   } // getAttributes
 
   private void getAttributesForBlock(JPNode node, StringBuffer nodeComments) {
-    Block block = (Block) node.getLink(IConstants.BLOCK);
+    Block block = (Block) node.getBlock();
     if (block == null)
       return;
     TableBuffer[] buffers = block.getBlockBuffers();
@@ -78,7 +78,7 @@ public class AttributedWriter {
   }
 
   private void getAttributesForSymbol(JPNode node, StringBuffer nodeComments) {
-    Symbol symbol = (Symbol) node.getLink(IConstants.SYMBOL);
+    Symbol symbol = node.getSymbol();
     if (symbol == null)
       return;
     nodeComments.append(" ");

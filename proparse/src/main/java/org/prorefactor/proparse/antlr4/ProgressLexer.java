@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -165,8 +165,7 @@ public class ProgressLexer implements TokenSource, IPreprocessor {
     TokenSource postlexer = lexOnly ? new NoOpPostLexer(lexer) : new PostLexer(lexer);
     TokenSource filter0 = new NameDotTokenFilter(postlexer);
     TokenSource filter1 = new TokenList(filter0);
-    TokenSource filter2 = new MultiChannelTokenSource(filter1);
-    wrapper = new FunctionKeywordTokenFilter(filter2);
+    wrapper = new FunctionKeywordTokenFilter(filter1);
   }
 
   /**

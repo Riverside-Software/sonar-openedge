@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -21,13 +21,17 @@ package org.sonar.plugins.openedge.foundation;
 
 import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.checks.NoOpDatabaseRule;
 
 public class OpenEdgeDBProfile implements BuiltInQualityProfilesDefinition {
   public static final String PROFILE_NAME = "Sonar way";
 
   @Override
   public void define(Context context) {
-    context.createBuiltInQualityProfile(PROFILE_NAME, Constants.DB_LANGUAGE_KEY).done();
+    NewBuiltInQualityProfile profile = context.createBuiltInQualityProfile(PROFILE_NAME,
+        Constants.DB_LANGUAGE_KEY).setDefault(true);
+    profile.activateRule(Constants.STD_DB_REPOSITORY_KEY, NoOpDatabaseRule.class.getName());
+    profile.done();
   }
 
 }

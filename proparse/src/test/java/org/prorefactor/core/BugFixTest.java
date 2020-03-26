@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -358,6 +358,18 @@ public class BugFixTest {
     assertEquals(unit.getTopNode().queryStateHead().size(), 5);
   }
 
+  @Test
+  public void test46() {
+    ParseUnit unit = genericTest("bug46.p");
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void test47() {
+    ParseUnit unit = genericTest("bug47.cls");
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+  }
+
   // Next two tests : same exception should be thrown in both cases
 //  @Test(expectedExceptions = {ProparseRuntimeException.class})
 //  public void testCache1() {
@@ -530,7 +542,7 @@ public class BugFixTest {
     JPNode node = unit.getTopNode().queryStateHead(ABLNodeType.FIND).get(0);
     assertNotNull(node);
     assertEquals(node.query(ABLNodeType.RECORD_NAME).size(), 1);
-    Object obj = node.query(ABLNodeType.RECORD_NAME).get(0).getLink(IConstants.SYMBOL);
+    Object obj = node.query(ABLNodeType.RECORD_NAME).get(0).getSymbol();
     assertNotNull(obj);
     assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_DBTABLE);
 
@@ -538,7 +550,7 @@ public class BugFixTest {
     node = unit.getTopNode().queryStateHead(ABLNodeType.FIND).get(1);
     assertNotNull(node);
     assertEquals(node.query(ABLNodeType.RECORD_NAME).size(), 1);
-    obj = node.query(ABLNodeType.RECORD_NAME).get(0).getLink(IConstants.SYMBOL);
+    obj = node.query(ABLNodeType.RECORD_NAME).get(0).getSymbol();
     assertNotNull(obj);
     assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_TTABLE);
 
@@ -546,7 +558,7 @@ public class BugFixTest {
     node = unit.getTopNode().queryStateHead(ABLNodeType.FIND).get(2);
     assertNotNull(node);
     assertEquals(node.query(ABLNodeType.RECORD_NAME).size(), 1);
-    obj = node.query(ABLNodeType.RECORD_NAME).get(0).getLink(IConstants.SYMBOL);
+    obj = node.query(ABLNodeType.RECORD_NAME).get(0).getSymbol();
     assertNotNull(obj);
     assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_DBTABLE);
 
@@ -554,7 +566,7 @@ public class BugFixTest {
     node = unit.getTopNode().queryStateHead(ABLNodeType.FIND).get(3);
     assertNotNull(node);
     assertEquals(node.query(ABLNodeType.RECORD_NAME).size(), 1);
-    obj = node.query(ABLNodeType.RECORD_NAME).get(0).getLink(IConstants.SYMBOL);
+    obj = node.query(ABLNodeType.RECORD_NAME).get(0).getSymbol();
     assertNotNull(obj);
     assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_TTABLE);
   }
@@ -606,6 +618,12 @@ public class BugFixTest {
   @Test
   public void testOptionsField() {
     genericTest("options_field.p");
+  }
+
+  @Test
+  public void testTooManyStatements() {
+    // Verifies that lots of statements (5000 here) don't raise a stack overflow exception
+    genericTest("tooManyStatements.p");
   }
 
 }

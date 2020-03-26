@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -473,6 +473,7 @@ public enum ABLNodeType {
   FILENAME(Proparse.FILENAME),
   FILL(Proparse.FILL, "fill", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED,
       NodeTypesOption.MAY_BE_REGULAR_FUNC),
+  FILLWHERESTRING(Proparse.FILLWHERESTRING, "fill-where-string", NodeTypesOption.KEYWORD),
   FILLIN(Proparse.FILLIN, "fill-in", NodeTypesOption.KEYWORD),
   FILTERS(Proparse.FILTERS, "filters", NodeTypesOption.KEYWORD),
   FINAL(Proparse.FINAL, "final", NodeTypesOption.KEYWORD),
@@ -1080,6 +1081,7 @@ public enum ABLNodeType {
   QUERYCLOSE(Proparse.QUERYCLOSE, "query-close", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   QUERYOFFEND(Proparse.QUERYOFFEND, "query-off-end", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED,
       NodeTypesOption.MAY_BE_REGULAR_FUNC),
+  QUERYPREPARE(Proparse.QUERYPREPARE, "query-prepare", NodeTypesOption.KEYWORD),
   QUERYTUNING(Proparse.QUERYTUNING, "query-tuning", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   QUESTION(Proparse.QUESTION, "question", NodeTypesOption.KEYWORD),
   QUIT(Proparse.QUIT, "quit", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
@@ -1171,6 +1173,7 @@ public enum ABLNodeType {
   SAVE(Proparse.SAVE, "save", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   SAVEAS(Proparse.SAVEAS, "save-as", NodeTypesOption.KEYWORD),
   SAVECACHE(Proparse.SAVECACHE, "savecache", NodeTypesOption.KEYWORD),
+  SAVEWHERESTRING(Proparse.SAVEWHERESTRING, "save-where-string", NodeTypesOption.KEYWORD),
   SAXATTRIBUTES(Proparse.SAXATTRIBUTES, "sax-attributes", NodeTypesOption.KEYWORD),
   SAXCOMPLETE(Proparse.SAXCOMPLETE, "sax-complete", 10, NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   SAXPARSERERROR(Proparse.SAXPARSERERROR, "sax-parser-error", NodeTypesOption.KEYWORD,

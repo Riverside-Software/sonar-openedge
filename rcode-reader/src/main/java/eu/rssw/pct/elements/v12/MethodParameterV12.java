@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -39,7 +39,7 @@ public class MethodParameterV12 extends MethodParameterV11 {
     int paramMode = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort();
     int extent = ByteBuffer.wrap(segment, currentPos + 14, Short.BYTES).order(order).getShort();
     int dataType = ByteBuffer.wrap(segment, currentPos + 16, Short.BYTES).order(order).getShort();
-    int flags = ByteBuffer.wrap(segment, currentPos + 18, Short.BYTES).order(order).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos + 18, Short.BYTES).order(order).getShort() & 0xffff;
     int argumentNameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
 

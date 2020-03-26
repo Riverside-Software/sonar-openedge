@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -21,6 +21,7 @@ package org.sonar.plugins.openedge.foundation;
 
 import java.util.Arrays;
 
+import org.sonar.api.SonarRuntime;
 import org.sonar.api.rules.RuleType;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.check.Priority;
@@ -32,36 +33,55 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
 
   public static final String COMPILER_WARNING_RULEKEY = "compiler.warning";
   public static final String COMPILER_WARNING_214_RULEKEY = "compiler.warning.214";
+  public static final String COMPILER_WARNING_2750_RULEKEY = "compiler.warning.2750";
   public static final String COMPILER_WARNING_2965_RULEKEY = "compiler.warning.2965";
   public static final String COMPILER_WARNING_4788_RULEKEY = "compiler.warning.4788";
+  public static final String COMPILER_WARNING_5378_RULEKEY = "compiler.warning.5378";
   public static final String COMPILER_WARNING_12115_RULEKEY = "compiler.warning.12115";
   public static final String COMPILER_WARNING_14786_RULEKEY = "compiler.warning.14786";
   public static final String COMPILER_WARNING_14789_RULEKEY = "compiler.warning.14789";
   public static final String COMPILER_WARNING_15090_RULEKEY = "compiler.warning.15090";
   public static final String COMPILER_WARNING_18494_RULEKEY = "compiler.warning.18494";
+  public static final String COMPILER_WARNING_19822_RULEKEY = "compiler.warning.19822";
   public static final String PROPARSE_ERROR_RULEKEY = "proparse.error";
   private static final String COMPILER_WARNING_TAG = "compiler-warnings";
   private static final String HTML_DOC_PATH = "/org/sonar/l10n/%s/rules/%s/%s.html";
+
+  private final SonarRuntime runtime;
+
+  public OpenEdgeRulesDefinition(SonarRuntime runtime) {
+    this.runtime = runtime;
+  }
 
   @SuppressWarnings("rawtypes")
   @Override
   public void define(Context context) {
     NewRepository repository = context.createRepository(Constants.STD_REPOSITORY_KEY, Constants.LANGUAGE_KEY).setName(REPOSITORY_NAME);
-
-    AnnotationBasedRulesDefinition annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY);
+    AnnotationBasedRulesDefinition annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY, runtime);
     annotationLoader.addRuleClasses(false, Arrays.<Class> asList(BasicChecksRegistration.ppCheckClasses()));
 
     // Manually created rules for compiler warnings
-    createWarningRule(repository, COMPILER_WARNING_RULEKEY, "Compiler warnings", "2h", Priority.MINOR);
-    createWarningRule(repository, COMPILER_WARNING_214_RULEKEY, "TRANSACTION keyword given within actual transaction level", "3h");
-    createWarningRule(repository, COMPILER_WARNING_2965_RULEKEY, "Invalid use of nonconstant elements in preprocessor expression", "30min", Priority.BLOCKER);
+    createWarningRule(repository, COMPILER_WARNING_RULEKEY, "Compiler warnings", "15min", Priority.MINOR);
+    createWarningRule(repository, COMPILER_WARNING_214_RULEKEY,
+        "TRANSACTION keyword given within actual transaction level", "30min");
+    createWarningRule(repository, COMPILER_WARNING_2750_RULEKEY,
+        "RETURN statement in UDF or method is missing a return value expression", "5min");
+    createWarningRule(repository, COMPILER_WARNING_2965_RULEKEY,
+        "Invalid use of nonconstant elements in preprocessor expression", "10min", Priority.BLOCKER);
     createWarningRule(repository, COMPILER_WARNING_4788_RULEKEY, "Translation exceeds allocated length", "30min",
         Priority.CRITICAL, new String[] {COMPILER_WARNING_TAG, "tranman"});
-    createWarningRule(repository, COMPILER_WARNING_12115_RULEKEY, "Expression evaluates to a constant", "1h");
-    createWarningRule(repository, COMPILER_WARNING_14786_RULEKEY, "Table and field names must appear as they are in the schema", "20min", Priority.CRITICAL);
-    createWarningRule(repository, COMPILER_WARNING_14789_RULEKEY, "Fields must be qualified with table name", "15min", Priority.MAJOR);
-    createWarningRule(repository, COMPILER_WARNING_18494_RULEKEY, "Abbreviated keywords are not authorized", "5min", Priority.INFO);
-    createWarningRule(repository, COMPILER_WARNING_15090_RULEKEY, "Dead code", "4h");
+    createWarningRule(repository, COMPILER_WARNING_5378_RULEKEY,
+        "The EXCEPT or USING phrase of the BUFFER-COPY statement only honors fields in the source buffer", "5min");
+    createWarningRule(repository, COMPILER_WARNING_12115_RULEKEY, "Expression evaluates to a constant", "5min");
+    createWarningRule(repository, COMPILER_WARNING_14786_RULEKEY,
+        "Table and field names must appear as they are in the schema", "2min", Priority.MAJOR);
+    createWarningRule(repository, COMPILER_WARNING_14789_RULEKEY, "Fields must be qualified with table name", "2min",
+        Priority.MAJOR);
+    createWarningRule(repository, COMPILER_WARNING_15090_RULEKEY, "Dead code", "30min");
+    createWarningRule(repository, COMPILER_WARNING_18494_RULEKEY, "Abbreviated keywords are not authorized", "1min",
+        Priority.INFO);
+    createWarningRule(repository, COMPILER_WARNING_19822_RULEKEY,
+        "All code paths in a function or a method must return a value", "15min", Priority.CRITICAL);
 
     // Manually created rule for proparse errors
     NewRule proparseRule = repository.createRule(PROPARSE_ERROR_RULEKEY).setName("Proparse error").setSeverity(
@@ -72,10 +92,15 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
         Constants.STD_REPOSITORY_KEY, proparseRule.key())));
 
     repository.done();
+
+    NewRepository repository2 = context.createRepository(Constants.STD_DB_REPOSITORY_KEY, Constants.DB_LANGUAGE_KEY).setName(REPOSITORY_NAME);
+    AnnotationBasedRulesDefinition annotationLoader2 = new AnnotationBasedRulesDefinition(repository2, Constants.DB_LANGUAGE_KEY, runtime);
+    annotationLoader2.addRuleClasses(false, Arrays.<Class> asList(BasicChecksRegistration.dbCheckClasses()));
+    repository2.done();
   }
 
   private void createWarningRule(NewRepository repository, String ruleKey, String name, String remediationCost) {
-    createWarningRule(repository, ruleKey, name, remediationCost, Priority.CRITICAL);
+    createWarningRule(repository, ruleKey, name, remediationCost, Priority.MINOR);
   }
 
   private void createWarningRule(NewRepository repository, String ruleKey, String name, String remediationCost, Priority priority) {

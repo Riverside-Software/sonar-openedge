@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -36,6 +36,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeProfile;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+import org.sonar.plugins.openedge.sensor.OpenEdgeCPDSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeCodeColorizer;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBColorizer;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBRulesSensor;
@@ -43,6 +44,8 @@ import org.sonar.plugins.openedge.sensor.OpenEdgeDBSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeProparseSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeWarningsSensor;
+import org.sonar.plugins.openedge.web.OpenEdgeWebService;
+import org.sonar.plugins.openedge.web.UiPageDefinition;
 
 public class OpenEdgePlugin implements Plugin {
   private static final String CATEGORY_OPENEDGE = "OpenEdge";
@@ -60,9 +63,9 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(BasicChecksRegistration.class, OpenEdgeProfile.class,
         OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
 
-    // Syntax highlight
+    // Syntax highlight and simple CPD
     if (context.getRuntime().getProduct() == SonarProduct.SONARQUBE) {
-      context.addExtensions(OpenEdgeCodeColorizer.class, OpenEdgeDBColorizer.class);
+      context.addExtensions(OpenEdgeCodeColorizer.class, OpenEdgeDBColorizer.class, OpenEdgeCPDSensor.class);
     }
 
     // Sensors
@@ -72,49 +75,121 @@ public class OpenEdgePlugin implements Plugin {
     // Decorators
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
 
+    // Web page + Web service handler
+    if (context.getRuntime().getProduct() == SonarProduct.SONARQUBE) {
+      context.addExtensions(UiPageDefinition.class, OpenEdgeWebService.class);
+    }
+
     // Properties
-    context.addExtension(PropertyDefinition.builder(Constants.SKIP_RCODE).name("Skip rcode parsing").description(
-        "Skip rcode parsing").type(PropertyType.BOOLEAN).category(CATEGORY_OPENEDGE).subCategory(
-            SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT).defaultValue(
-                Boolean.FALSE.toString()).build());
-    context.addExtension(PropertyDefinition.builder(Constants.OE_ANALYTICS).name("Enable analytics").description(
-        "Ping remote server for usage analytics").type(PropertyType.BOOLEAN).category(
-            CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                Qualifiers.PROJECT).defaultValue(Boolean.TRUE.toString()).build());
-    context.addExtension(PropertyDefinition.builder(Constants.SKIP_PROPARSE_PROPERTY).name("Skip ProParse step").description(
-        "Skip Proparse AST generation and lint rules").type(PropertyType.BOOLEAN).category(
-            CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                Qualifiers.PROJECT).defaultValue(Boolean.FALSE.toString()).build());
-    context.addExtension(PropertyDefinition.builder(Constants.PROPARSE_DEBUG).name("Proparse debug files").description(
-        "Generate JPNodeLister debug file in .proparse directory").type(PropertyType.BOOLEAN).category(
-            CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_DEBUG).defaultValue(Boolean.FALSE.toString()).onQualifiers(
-                Qualifiers.MODULE, Qualifiers.PROJECT).build());
-    context.addExtension(PropertyDefinition.builder(Constants.SUFFIXES).name("File suffixes").description(
-        "Comma-separated list of suffixes of OpenEdge files to analyze, e.g. 'p,w,t'").type(PropertyType.STRING).defaultValue(
-            "").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                Qualifiers.PROJECT).build());
-    context.addExtension(PropertyDefinition.builder(Constants.INCLUDE_SUFFIXES).name("Include file suffixes").description(
-        "Comma-separated list of suffixes of OpenEdge include files to analyze, e.g. 'i,v,f'").type(PropertyType.STRING).defaultValue(
-            "").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                Qualifiers.PROJECT).build());
-    context.addExtension(PropertyDefinition.builder(Constants.CPD_ANNOTATIONS).name("CPD annotations").description(
-        "Comma-separated list of annotations disabling CPD").type(PropertyType.STRING).defaultValue(
-            "Generated").category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                Qualifiers.PROJECT).build());
-    context.addExtension(PropertyDefinition.builder(Constants.XREF_FILTER).name("Filter invalid XML files").description(
-        "Use filter to discard malformed characters from XML XREF files").type(PropertyType.BOOLEAN).defaultValue(
-            Boolean.FALSE.toString()).category(CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(
-                Qualifiers.MODULE, Qualifiers.PROJECT).build());
-    context.addExtension(
-        PropertyDefinition.builder(Constants.XREF_FILTER_BYTES).name("Bytes to be filtered from XML files").description(
-            "Comma-separated list of ranges, i.e. 1-2,4-7,9,11-13").type(PropertyType.STRING).defaultValue("1-4").category(
-                CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                    Qualifiers.PROJECT).build());
-    context.addExtension(
-        PropertyDefinition.builder(Constants.BACKSLASH_ESCAPE).name("Backslash as escape char").description(
-            "Does backslash escape next character on Windows ?").type(PropertyType.BOOLEAN).defaultValue(Boolean.FALSE.toString()).category(
-                CATEGORY_OPENEDGE).subCategory(SUBCATEGORY_GENERAL).onQualifiers(Qualifiers.MODULE,
-                    Qualifiers.PROJECT).build());
+    context.addExtension(PropertyDefinition.builder(Constants.SKIP_RCODE) //
+      .name("Skip rcode parsing") //
+      .description("Skip rcode parsing") //
+      .type(PropertyType.BOOLEAN) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .defaultValue(Boolean.FALSE.toString()) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.OE_ANALYTICS) //
+      .name("Enable analytics") //
+      .description("Ping remote server for usage analytics") //
+      .type(PropertyType.BOOLEAN) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .defaultValue(Boolean.TRUE.toString()) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.SKIP_PROPARSE_PROPERTY) //
+      .name("Skip ProParse step") //
+      .description("Skip Proparse AST generation and lint rules") //
+      .type(PropertyType.BOOLEAN) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .defaultValue(Boolean.FALSE.toString()) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.USE_SIMPLE_CPD) //
+        .name("Simple CPD engine") //
+        .description("Doesn't need full parser to execute the CPD engine") //
+        .type(PropertyType.BOOLEAN) //
+        .category(CATEGORY_OPENEDGE) //
+        .subCategory(SUBCATEGORY_GENERAL) //
+        .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+        .defaultValue(Boolean.FALSE.toString()) //
+        .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.PROPARSE_DEBUG) //
+      .name("Proparse debug files") //
+      .description("Generate JPNodeLister debug file in .proparse directory") //
+      .type(PropertyType.BOOLEAN) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_DEBUG) //
+      .defaultValue(Boolean.FALSE.toString()) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.SUFFIXES) //
+      .name("File suffixes") //
+      .description("Comma-separated list of suffixes of OpenEdge files to analyze, e.g. 'p,w,t'") //
+      .type(PropertyType.STRING) //
+      .defaultValue("") //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.INCLUDE_SUFFIXES) //
+      .name("Include file suffixes") //
+      .description("Comma-separated list of suffixes of OpenEdge include files to analyze, e.g. 'i,v,f'") //
+      .type(PropertyType.STRING) //
+      .defaultValue("") //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.CPD_ANNOTATIONS) //
+      .name("CPD annotations") //
+      .description("Comma-separated list of annotations disabling CPD") //
+      .type(PropertyType.STRING) //
+      .defaultValue("Generated") //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.XREF_FILTER) //
+      .name("Filter invalid XML files") //
+      .description("Use filter to discard malformed characters from XML XREF files") //
+      .type(PropertyType.BOOLEAN) //
+      .defaultValue(Boolean.FALSE.toString()) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.XREF_FILTER_BYTES) //
+      .name("Bytes to be filtered from XML files") //
+      .description("Comma-separated list of ranges, i.e. 1-2,4-7,9,11-13") //
+      .type(PropertyType.STRING) //
+      .defaultValue("1-4") //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
+
+    context.addExtension(PropertyDefinition.builder(Constants.BACKSLASH_ESCAPE) //
+      .name("Backslash as escape char") //
+      .description("Does backslash escape next character on Windows ?") //
+      .type(PropertyType.BOOLEAN) //
+      .defaultValue(Boolean.FALSE.toString()) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .build());
   }
 
 }

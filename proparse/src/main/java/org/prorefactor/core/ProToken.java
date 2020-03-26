@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -27,6 +27,11 @@ import com.google.common.base.Splitter;
 
 public class ProToken implements Token {
   private static final String INVALID_TYPE = "Invalid type number ";
+
+  // All preprocessor statements (&MESSAGE, &ANALYZE-SUSPEND and RESUME, &GLOBAL/SCOPED DEFINE and &UNDEFINE) go to this channel
+  public static final int PREPROCESSOR_CHANNEL = 2;
+  // All &_PROPARSE statements go to this channel
+  public static final int PROPARSE_CHANNEL = 3;
 
   private ABLNodeType type;
   private int line;
@@ -261,7 +266,6 @@ public class ProToken implements Token {
     private int endFileIndex;
     private String fileName;
 
-    private int channel = DEFAULT_CHANNEL;
     private int macroSourceNum;
 
     private String analyzeSuspend = null;
@@ -279,7 +283,6 @@ public class ProToken implements Token {
       this.text = new StringBuilder(token.text);
       this.line = token.line;
       this.charPositionInLine = token.charPositionInLine;
-      this.channel = token.channel;
       this.fileIndex = token.fileIndex;
       this.endFileIndex = token.endFileIndex;
       this.fileName = token.fileName;
@@ -329,11 +332,6 @@ public class ProToken implements Token {
 
     public Builder setFileName(String fileName) {
       this.fileName = fileName;
-      return this;
-    }
-
-    public Builder setChannel(int channel) {
-      this.channel = channel;
       return this;
     }
 
@@ -398,12 +396,31 @@ public class ProToken implements Token {
       tok.fileIndex = fileIndex;
       tok.endFileIndex = endFileIndex;
       tok.fileName = fileName;
-      tok.channel = channel;
       tok.macroSourceNum = macroSourceNum;
       tok.macroExpansion = macroExpansion;
       tok.analyzeSuspend = analyzeSuspend;
       tok.hiddenBefore = hiddenBefore;
       tok.synthetic = synthetic;
+
+      switch (type) {
+        case COMMENT:
+        case WS:
+          tok.channel = Token.HIDDEN_CHANNEL;
+          break;
+        case AMPMESSAGE:
+        case AMPANALYZESUSPEND:
+        case AMPANALYZERESUME:
+        case AMPGLOBALDEFINE:
+        case AMPSCOPEDDEFINE:
+        case AMPUNDEFINE:
+        case INCLUDEDIRECTIVE:
+          tok.channel = PREPROCESSOR_CHANNEL;
+          break;
+        case PROPARSEDIRECTIVE:
+          tok.channel = PROPARSE_CHANNEL;
+          break;
+        default:
+      }
 
       return tok;
     }

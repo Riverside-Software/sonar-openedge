@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -76,6 +76,7 @@ public class TreeParser extends ProparseBaseListener {
   private TreeParserSymbolScope currentScope;
   private Routine currentRoutine;
   private Routine rootRoutine;
+  private JPNode lastStatement;
   /**
    * The symbol last, or currently being, defined. Needed when we have complex syntax like DEFINE id ... LIKE, where we
    * want to track the LIKE but it's not in the same grammar production as the DEFINE.
@@ -769,7 +770,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterCreateBrowseStatement(CreateBrowseStatementContext ctx) {
-    setContextQualifier(ctx.expressionTerm(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.expressionTerm(), ContextQualifier.UPDATING_UI);
   }
 
   @Override
@@ -804,7 +805,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterCreateWidgetStatement(CreateWidgetStatementContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.field(), ContextQualifier.UPDATING_UI);
   }
 
   @Override
@@ -1653,6 +1654,34 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
+  public void enterExternalFunctionStatement(ExternalFunctionStatementContext ctx) {
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> New external function definition '{}'", indent(), ctx.id.getText());
+
+    TreeParserSymbolScope definingScope = currentScope;
+    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    scopeAdd(blockNode);
+
+    Routine r = new Routine(ctx.id.getText(), definingScope, currentScope);
+    if (ctx.typeName() != null) {
+      r.setReturnDatatypeNode(DataType.CLASS);
+    } else {
+      r.setReturnDatatypeNode(DataType.getDataType(ctx.datatypeVar().getStart().getType()));
+    }
+    r.setProgressType(ABLNodeType.FUNCTION);
+    r.setDefinitionNode(blockNode);
+    blockNode.setSymbol(r);
+    definingScope.add(r);
+    currentRoutine = r;
+  }
+
+  @Override
+  public void exitExternalFunctionStatement(ExternalFunctionStatementContext ctx) {
+    scopeClose();
+    currentRoutine = rootRoutine;
+  }
+
+  @Override
   public void enterGetKeyValueStatement(GetKeyValueStatementContext ctx) {
     setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
   }
@@ -2173,16 +2202,28 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   private Block pushBlock(Block block) {
+    return pushBlock(block, false);
+  }
+
+  private Block pushBlock(Block block, boolean fromSwap) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Pushing block '{}' to stack", indent(), block);
     blockStack.add(block);
+
+    if (!fromSwap && (lastStatement != null)) {
+      lastStatement.setNextStatement(block.getNode());
+      block.getNode().setPreviousStatement(lastStatement);
+    }
+    lastStatement = null;
+
     return block;
   }
 
   private Block popBlock() {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Popping block from stack", indent());
-    blockStack.remove(blockStack.size() - 1);
+    Block bb = blockStack.remove(blockStack.size() - 1);
+    lastStatement = bb.getNode();
     return blockStack.get(blockStack.size() - 1);
   }
 
@@ -2190,7 +2231,7 @@ public class TreeParser extends ProparseBaseListener {
     if (LOG.isTraceEnabled())
       LOG.trace("Entering recordNameNode {} {}", recordNode, contextQualifier);
 
-    recordNode.attrSet(IConstants.CONTEXT_QUALIFIER, contextQualifier.toString());
+    recordNode.setContextQualifier(contextQualifier);
     TableBuffer buffer = null;
     switch (contextQualifier) {
       case INIT:
@@ -2198,6 +2239,7 @@ public class TreeParser extends ProparseBaseListener {
       case REF:
       case REFUP:
       case UPDATING:
+      case UPDATING_UI:
       case BUFFERSYMBOL:
         buffer = currentScope.getBufferSymbol(recordNode.getText());
         break;
@@ -2306,7 +2348,7 @@ public class TreeParser extends ProparseBaseListener {
 
     currentScope = scope;
     blockEnd(); // pop the unused block from the stack
-    currentBlock = pushBlock(scope.getRootBlock());
+    currentBlock = pushBlock(scope.getRootBlock(), true);
   }
 
   /** This is a specialization of frameInitializingStatement, called for ENABLE|UPDATE|PROMPT-FOR. */
@@ -2395,7 +2437,10 @@ public class TreeParser extends ProparseBaseListener {
       newPrim.assignAttributesLike(likePrim);
       currSymbol.setLikeSymbol(likeNode.getSymbol());
     } else {
-      LOG.error("Failed to find LIKE datatype at {} line {}", likeNode.getFileIndex(), likeNode.getLine());
+      JPNode naturalNode = likeNode.firstNaturalChild();
+      if (naturalNode != null) {
+        LOG.error("Failed to find LIKE datatype at {} line {}", naturalNode.getFileName(), naturalNode.getLine());
+      }
     }
   }
 
@@ -2411,7 +2456,7 @@ public class TreeParser extends ProparseBaseListener {
     Symbol symbol = SymbolFactory.create(symbolType, name, currentScope);
     currSymbol = symbol;
     currSymbol.setDefinitionNode(defNode.getIdNode());
-    defNode.getIdNode().setLink(IConstants.SYMBOL, symbol);
+    defNode.getIdNode().setSymbol(symbol);
     return symbol;
   }
 
@@ -2428,7 +2473,7 @@ public class TreeParser extends ProparseBaseListener {
     Event event = new Event(name, currentScope);
     event.setDefinitionNode(defNode.getIdNode());
     currSymbol = event;
-    defNode.getIdNode().setLink(IConstants.SYMBOL, event);
+    defNode.getIdNode().setSymbol(event);
 
     return event;
   }
@@ -2447,7 +2492,7 @@ public class TreeParser extends ProparseBaseListener {
     FieldBuffer fieldBuff = rootScope.defineTableFieldDelayedAttach(text, currDefTable);
     currSymbol = fieldBuff;
     fieldBuff.setDefinitionNode(idNode.getFirstChild());
-    idNode.getFirstChild().setLink(IConstants.SYMBOL, fieldBuff);
+    idNode.getFirstChild().setSymbol(fieldBuff);
     return fieldBuff;
   }
 
@@ -2505,7 +2550,7 @@ public class TreeParser extends ProparseBaseListener {
     currDefTableLike = null;
     currDefTableUseIndex = false;
 
-    defNode.getIdNode().setLink(IConstants.SYMBOL, buffer);
+    defNode.getIdNode().setSymbol(buffer);
   }
 
   private void postDefineTempTable() {
@@ -2560,10 +2605,10 @@ public class TreeParser extends ProparseBaseListener {
     TableBuffer bufSymbol = currentScope.defineBuffer(name, table);
     currSymbol = bufSymbol;
     currSymbol.setDefinitionNode(defAST.getIdNode());
-    defAST.getIdNode().setLink(IConstants.SYMBOL, bufSymbol);
+    defAST.getIdNode().setSymbol(bufSymbol);
     if (init) {
       BufferScope bufScope = currentBlock.getBufferForReference(bufSymbol);
-      defAST.setLink(IConstants.BUFFERSCOPE, bufScope);
+      defAST.setBufferScope(bufScope);
     }
     return bufSymbol;
   }
@@ -2692,7 +2737,7 @@ public class TreeParser extends ProparseBaseListener {
     LOG.trace("Entering field {} {} {} {}", refNode, idNode, cq, resolution);
     FieldLookupResult result = null;
 
-    refNode.attrSet(IConstants.CONTEXT_QUALIFIER, cq.toString());
+    refNode.setContextQualifier(cq);
 
     // Check if this is a Field_ref being "inline defined"
     // If so, we define it right now.
@@ -2754,7 +2799,7 @@ public class TreeParser extends ProparseBaseListener {
       refNode.setBufferScope(result.getBufferScope());
     }
 
-    refNode.setSymbol(result.getSymbol());
+    refNode.setSymbol((Symbol) result.getSymbol());
     result.getSymbol().noteReference(cq);
     if (result.getSymbol() instanceof FieldBuffer) {
       FieldBuffer fb = (FieldBuffer) result.getSymbol();
@@ -2776,6 +2821,10 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void exitEveryRule(ParserRuleContext ctx) {
+    JPNode n = support.getNode(ctx);
+    if ((n != null) && n.isStateHead() && !(ctx instanceof FunctionStatementContext)) {
+      enterNewStatement(ctx, n);
+    }
     currentLevel--;
   }
 
@@ -2783,4 +2832,15 @@ public class TreeParser extends ProparseBaseListener {
     return java.nio.CharBuffer.allocate(currentLevel).toString().replace('\0', ' ');
   }
 
+  // Attach current statement to the previous one
+  private void enterNewStatement(ParserRuleContext ctx, JPNode node) {
+    if ((lastStatement != null) && (node != lastStatement)) {
+      lastStatement.setNextStatement(node);
+      node.setPreviousStatement(lastStatement);
+    }
+    lastStatement = node;
+    node.setInBlock(currentBlock);
+    if (currentBlock.getNode().getFirstStatement() == null) 
+      currentBlock.getNode().setFirstStatement(node);
+  }
 }

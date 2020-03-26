@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -25,27 +25,32 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.sonar.api.SonarRuntime;
+import org.sonar.api.rules.RuleType;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.api.server.rule.RulesDefinition.NewParam;
 import org.sonar.api.server.rule.RulesDefinition.NewRepository;
 import org.sonar.api.server.rule.RulesDefinition.NewRule;
+import org.sonar.api.server.rule.RulesDefinition.OwaspTop10;
 import org.sonar.api.server.rule.RulesDefinitionAnnotationLoader;
 import org.sonar.api.utils.AnnotationUtils;
+import org.sonar.api.utils.Version;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.model.RuleTemplate;
+import org.sonar.plugins.openedge.api.model.SecurityHotspot;
 import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
 import org.sonar.plugins.openedge.api.model.SqaleLinearRemediation;
 import org.sonar.plugins.openedge.api.model.SqaleLinearWithOffsetRemediation;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Charsets;
 import com.google.common.base.Predicates;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
@@ -75,20 +80,14 @@ public class AnnotationBasedRulesDefinition {
   private final NewRepository repository;
   private final String languageKey;
   private final ExternalDescriptionLoader externalDescriptionLoader;
+  private final SonarRuntime runtime;
 
-  public AnnotationBasedRulesDefinition(NewRepository repository, String languageKey) {
+  public AnnotationBasedRulesDefinition(NewRepository repository, String languageKey, SonarRuntime runtime) {
     this.repository = repository;
     this.languageKey = languageKey;
     String externalDescriptionBasePath = String.format("/org/sonar/l10n/%s/rules/%s", languageKey, repository.key());
     this.externalDescriptionLoader = new ExternalDescriptionLoader(repository, externalDescriptionBasePath);
-  }
-
-  /**
-   * Adds annotated rule classes to an instance of NewRepository. Fails if one the classes has no SQALE annotation.
-   */
-  @SuppressWarnings("rawtypes")
-  public static void load(NewRepository repository, String languageKey, Iterable<Class> ruleClasses) {
-    new AnnotationBasedRulesDefinition(repository, languageKey).addRuleClasses(true, ruleClasses);
+    this.runtime = runtime;
   }
 
   @SuppressWarnings("rawtypes")
@@ -103,6 +102,18 @@ public class AnnotationBasedRulesDefinition {
     for (Class<?> ruleClass : ruleClasses) {
       NewRule rule = newRule(ruleClass, failIfNoExplicitKey);
       externalDescriptionLoader.addHtmlDescription(rule, ruleClass);
+      SecurityHotspot annotation = AnnotationUtils.getAnnotation(ruleClass, SecurityHotspot.class);
+      if (runtime.getApiVersion().isGreaterThanOrEqual(Version.create(7, 3)) && (annotation != null)) {
+        rule.setType(RuleType.SECURITY_HOTSPOT);
+        for (String str : annotation.owasp()) {
+          OwaspTop10 owasp = OwaspTop10.valueOf(str);
+          if (owasp != null)
+            rule.addOwaspTop10(owasp);
+        }
+        for (int tmp : annotation.cwe()) { 
+          rule.addCwe(tmp);
+        }
+      }
       rule.setTemplate(AnnotationUtils.getAnnotation(ruleClass, RuleTemplate.class) != null);
       try {
         setupSqaleModel(rule, ruleClass);
@@ -210,7 +221,7 @@ public class AnnotationBasedRulesDefinition {
       cnx.setUseCaches(false);
 
       StringBuilder str = new StringBuilder();
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(cnx.getInputStream(), Charsets.UTF_8))) {
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(cnx.getInputStream(), StandardCharsets.UTF_8))) {
         String s;
         while ((s = reader.readLine()) != null) {
           str.append(s).append('\n');

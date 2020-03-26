@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -64,16 +64,15 @@ public class MethodElementV11 extends AbstractAccessibleElement implements IMeth
 
   public static IMethodElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
-    int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    int returnType = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    int paramCount = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    int extent = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort() & 0xffff;
+    int returnType = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
+    int paramCount = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
+    int extent = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(order).getShort();
 
-    int nameOffset = ByteBuffer.wrap(segment, currentPos + 12, Integer.BYTES).order(ByteOrder.LITTLE_ENDIAN).getInt();
+    int nameOffset = ByteBuffer.wrap(segment, currentPos + 12, Integer.BYTES).order(order).getInt();
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
-    int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(
-        ByteOrder.LITTLE_ENDIAN).getInt();
+    int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
     String typeName = typeNameOffset == 0 ? ""
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
 

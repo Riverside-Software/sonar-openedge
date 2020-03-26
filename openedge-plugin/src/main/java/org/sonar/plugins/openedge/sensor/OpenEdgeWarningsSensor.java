@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -80,52 +80,61 @@ public class OpenEdgeWarningsSensor implements Sensor {
     for (InputFile file : context.fileSystem().inputFiles(predicates.and(
         predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       LOG.debug("Looking for warnings of {}", file);
-
-      File listingFile = settings.getWarningsFile(file);
-      if ((listingFile != null) && (listingFile.exists())) {
-        LOG.debug("Import warnings for {}", file);
-
-        try {
-          WarningsProcessor processor = new WarningsProcessor();
-          Files.asCharSource(listingFile, StandardCharsets.UTF_8).readLines(processor);
-          for (Warning w : processor.getResult()) {
-            RuleKey ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
-
-            FilePredicate fp1 = predicates.hasRelativePath(w.file);
-            FilePredicate fp2 = predicates.hasAbsolutePath(
-                context.fileSystem().baseDir().toPath().resolve(w.file).normalize().toString());
-
-            // XXX FilePredicate.or() doesn't work...
-            InputFile target = context.fileSystem().inputFile(fp1);
-            if (target == null) {
-              target = context.fileSystem().inputFile(fp2);
-            }
-
-            if (target != null) {
-              LOG.debug("Warning File {} - Line {} - Message {}", target, w.line, w.msg);
-              NewIssue issue = context.newIssue().forRule(context.activeRules().find(ruleKey) == null ? defaultWarningRuleKey : ruleKey);
-              NewIssueLocation location = issue.newLocation().on(target);
-              if (w.line > 0) {
-                location.at(target.selectLine(w.line));
-              }
-              if (target == file) {
-                location.message(w.msg);
-              } else {
-                location.message("From " + InputFileUtils.getRelativePath(file, context.fileSystem()) + " - " + w.msg);
-              }
-              issue.at(location).save();
-            } else {
-              LOG.info("Found warning on non-existing file {}", w.file);
-            }
-          }
-
-          warningsImportNum++;
-        } catch (IOException caught) {
-          // Nothing...
-        }
+      processFile(context, file);
+      warningsImportNum++;
+      if (context.isCancelled()) {
+        LOG.info("Analysis cancelled...");
+        return;
       }
     }
     LOG.info("{} warning files imported", warningsImportNum);
+  }
+
+  private void processFile(SensorContext context, InputFile file) {
+    File listingFile = settings.getWarningsFile(file);
+    if ((listingFile != null) && (listingFile.exists())) {
+      LOG.debug("Import warnings for {}", file);
+
+      try {
+        WarningsProcessor processor = new WarningsProcessor();
+        Files.asCharSource(listingFile, StandardCharsets.UTF_8).readLines(processor);
+        for (Warning w : processor.getResult()) {
+          RuleKey ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY,
+              OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
+
+          FilePredicate fp1 = context.fileSystem().predicates().hasRelativePath(w.file);
+          FilePredicate fp2 = context.fileSystem().predicates().hasAbsolutePath(
+              context.fileSystem().baseDir().toPath().resolve(w.file).normalize().toString());
+
+          // XXX FilePredicate.or() doesn't work...
+          InputFile target = context.fileSystem().inputFile(fp1);
+          if (target == null) {
+            target = context.fileSystem().inputFile(fp2);
+          }
+
+          if (target != null) {
+            LOG.debug("Warning File {} - Line {} - Message {}", target, w.line, w.msg);
+            NewIssue issue = context.newIssue().forRule(context.activeRules().find(ruleKey) == null
+                ? RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY) : ruleKey);
+            NewIssueLocation location = issue.newLocation().on(target);
+            if (w.line > 0) {
+              location.at(target.selectLine(w.line));
+            }
+            if (target == file) {
+              location.message(w.msg);
+            } else {
+              location.message("From " + InputFileUtils.getRelativePath(file, context.fileSystem()) + " - " + w.msg);
+            }
+            issue.at(location).save();
+          } else {
+            LOG.info("Found warning on non-existing file {}", w.file);
+          }
+        }
+
+      } catch (IOException caught) {
+        // Nothing...
+      }
+    }
   }
 
   private class WarningsProcessor implements LineProcessor<List<Warning>> {
@@ -133,6 +142,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
 
     @Override
     public boolean processLine(String line) throws IOException {
+      // Line format [LineNumber] [FileName] Message...
       // Closing bracket after line number
       int pos1 = line.indexOf(']', 1);
       if (pos1 == -1)
@@ -141,15 +151,23 @@ public class OpenEdgeWarningsSensor implements Sensor {
       int pos2 = line.indexOf(']', pos1 + 2);
       // Line number
       Integer lineNumber = Ints.tryParse(line.substring(1, pos1));
+      String fileName = line.substring(pos1 + 3, pos2);
+      String msg = line.substring(pos2 + 2);
       // Trying to get Progress message number
-      int lastOpeningParen = line.lastIndexOf('(');
-      int lastClosingParen = line.lastIndexOf(')');
+      int lastOpeningParen = msg.lastIndexOf('(');
+      int lastClosingParen = msg.lastIndexOf(')');
       Integer msgNum = -1;
       if ((lastOpeningParen > -1) && (lastClosingParen > -1)) {
-        msgNum = Ints.tryParse(line.substring(lastOpeningParen + 1, lastClosingParen));
+        msgNum = Ints.tryParse(msg.substring(lastOpeningParen + 1, lastClosingParen));
       }
-      String fileName = line.substring(pos1 + 3, pos2);
-      results.add(new Warning(fileName, lineNumber == null ? 0 : lineNumber, line.substring(pos2 + 2), msgNum == null ? -1 : msgNum));
+      if (msgNum > -1) {
+        // Brackets found, so trim right part
+        msg = msg.substring(0, lastOpeningParen);
+      }
+      if (msg.startsWith("WARNING: ")) {
+        msg = msg.substring(8);
+      }
+      results.add(new Warning(fileName, lineNumber == null ? 0 : lineNumber, msg.trim(), msgNum == null ? -1 : msgNum));
 
       return true;
     }

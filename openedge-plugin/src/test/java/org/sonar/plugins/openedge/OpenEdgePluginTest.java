@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -20,6 +20,7 @@
 package org.sonar.plugins.openedge;
 
 import org.sonar.api.Plugin;
+import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarQubeSide;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.internal.SonarRuntimeImpl;
@@ -35,15 +36,15 @@ public class OpenEdgePluginTest {
     SonarRuntime runtime = SonarRuntimeImpl.forSonarLint(Version.parse("6.2"));
     Plugin.Context context = new Plugin.Context(runtime);
     new OpenEdgePlugin().define(context);
-    assertThat(context.getExtensions()).hasSize(25);
+    assertThat(context.getExtensions()).hasSize(26);
   }
 
   @Test
   public void testExtensionsSonarQube() {
-    SonarRuntime runtime = SonarRuntimeImpl.forSonarQube(Version.parse("6.2"), SonarQubeSide.SCANNER);
+    SonarRuntime runtime = SonarRuntimeImpl.forSonarQube(Version.parse("6.2"), SonarQubeSide.SCANNER, SonarEdition.COMMUNITY);
     Plugin.Context context = new Plugin.Context(runtime);
     new OpenEdgePlugin().define(context);
-    assertThat(context.getExtensions()).hasSize(28);
+    assertThat(context.getExtensions()).hasSize(32);
   }
 
 }

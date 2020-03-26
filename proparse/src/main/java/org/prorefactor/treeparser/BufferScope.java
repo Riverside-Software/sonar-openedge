@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2020 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -30,8 +30,7 @@ public class BufferScope {
     STRONG(1), WEAK(2), REFERENCE(3),
     /**
      * A "hidden cursor" is a BufferScope which has no side-effects on surrounding blocks like strong, weak, and
-     * reference scopes do. These are used within a CAN-FIND function. (2004.Sep:John: Maybe in triggers too? Haven't
-     * checked.)
+     * reference scopes do. These are used within a CAN-FIND function.
      */
     HIDDEN_CURSOR(4);
     int value;
