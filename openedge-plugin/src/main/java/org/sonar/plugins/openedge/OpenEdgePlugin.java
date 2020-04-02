@@ -44,6 +44,8 @@ import org.sonar.plugins.openedge.sensor.OpenEdgeDBSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeProparseSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeWarningsSensor;
+import org.sonar.plugins.openedge.web.OpenEdgeWebService;
+import org.sonar.plugins.openedge.web.UiPageDefinition;
 
 public class OpenEdgePlugin implements Plugin {
   private static final String CATEGORY_OPENEDGE = "OpenEdge";
@@ -72,6 +74,11 @@ public class OpenEdgePlugin implements Plugin {
 
     // Decorators
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
+
+    // Web page + Web service handler
+    if (context.getRuntime().getProduct() == SonarProduct.SONARQUBE) {
+      context.addExtensions(UiPageDefinition.class, OpenEdgeWebService.class);
+    }
 
     // Properties
     context.addExtension(PropertyDefinition.builder(Constants.SKIP_RCODE) //

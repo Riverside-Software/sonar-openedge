@@ -26,6 +26,7 @@ import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.checks.LargeTransactionScope;
+import org.sonar.plugins.openedge.checks.NoOpDatabaseRule;
 import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 
 public class BasicChecksRegistration implements CheckRegistration {
@@ -59,7 +60,7 @@ public class BasicChecksRegistration implements CheckRegistration {
    */
   @SuppressWarnings("unchecked")
   public static Class<? extends OpenEdgeDumpFileCheck>[] dbCheckClasses() {
-    return new Class[] {};
+    return new Class[] {NoOpDatabaseRule.class};
   }
 
 }

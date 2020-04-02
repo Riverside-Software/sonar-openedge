@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (C) 2013-2020 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -17,21 +17,15 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.plugins.openedge.foundation;
+package org.sonar.plugins.openedge.web;
 
-import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
-import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.checks.NoOpDatabaseRule;
+import org.sonar.api.web.page.Context;
+import org.sonar.api.web.page.Page;
+import org.sonar.api.web.page.PageDefinition;
 
-public class OpenEdgeDBProfile implements BuiltInQualityProfilesDefinition {
-  public static final String PROFILE_NAME = "Sonar way";
-
+public class UiPageDefinition implements PageDefinition {
   @Override
   public void define(Context context) {
-    NewBuiltInQualityProfile profile = context.createBuiltInQualityProfile(PROFILE_NAME,
-        Constants.DB_LANGUAGE_KEY).setDefault(true);
-    profile.activateRule(Constants.STD_DB_REPOSITORY_KEY, NoOpDatabaseRule.class.getName());
-    profile.done();
+    context.addPage(Page.builder("openedge/license_recap").setName("OpenEdge rules licenses").setAdmin(true).build());
   }
-
 }

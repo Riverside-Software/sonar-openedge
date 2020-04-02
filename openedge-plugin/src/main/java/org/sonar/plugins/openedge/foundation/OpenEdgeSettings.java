@@ -104,6 +104,7 @@ public class OpenEdgeSettings {
   private final Set<Integer> xrefBytes = new HashSet<>();
 
   private RefactorSession proparseSession;
+  private String oePluginVersion;
 
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
     this.config = config;
@@ -114,7 +115,8 @@ public class OpenEdgeSettings {
   public final void init() {
     if (init)
       return;
-    LOG.info("OpenEdge plugin version: {}", readPluginVersion(this.getClass().getClassLoader(), "sonar-openedge.txt"));
+    oePluginVersion = readPluginVersion(this.getClass().getClassLoader(), "sonar-openedge.txt");
+    LOG.info("OpenEdge plugin version: {}", oePluginVersion);
     LOG.info("Loading OpenEdge settings for server ID '{}' '{}'", config.get(CoreProperties.SERVER_ID).orElse(""),
         config.get(CoreProperties.PERMANENT_SERVER_ID).orElse(""));
     initializeDirectories(config, fileSystem);
@@ -563,6 +565,10 @@ public class OpenEdgeSettings {
 
   public List<File> getPropath() {
     return propath;
+  }
+
+  public String getOpenEdgePluginVersion() {
+    return this.oePluginVersion;
   }
 
   public String getPropathAsString() {

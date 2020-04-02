@@ -30,7 +30,8 @@ public class OpenEdgeProfile implements BuiltInQualityProfilesDefinition {
 
   @Override
   public void define(Context context) {
-    NewBuiltInQualityProfile profile = context.createBuiltInQualityProfile(PROFILE_NAME, Constants.LANGUAGE_KEY);
+    NewBuiltInQualityProfile profile = context.createBuiltInQualityProfile(PROFILE_NAME,
+        Constants.LANGUAGE_KEY).setDefault(true);
 
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY);
