@@ -19,6 +19,8 @@
  */
 package org.sonar.plugins.openedge;
 
+import static org.testng.Assert.assertEquals;
+
 import org.sonar.api.Plugin;
 import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarQubeSide;
@@ -27,8 +29,6 @@ import org.sonar.api.internal.SonarRuntimeImpl;
 import org.sonar.api.utils.Version;
 import org.testng.annotations.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class OpenEdgePluginTest {
 
   @Test
@@ -36,7 +36,7 @@ public class OpenEdgePluginTest {
     SonarRuntime runtime = SonarRuntimeImpl.forSonarLint(Version.parse("6.2"));
     Plugin.Context context = new Plugin.Context(runtime);
     new OpenEdgePlugin().define(context);
-    assertThat(context.getExtensions()).hasSize(26);
+    assertEquals(context.getExtensions().size(), 26);
   }
 
   @Test
@@ -44,7 +44,7 @@ public class OpenEdgePluginTest {
     SonarRuntime runtime = SonarRuntimeImpl.forSonarQube(Version.parse("6.2"), SonarQubeSide.SCANNER, SonarEdition.COMMUNITY);
     Plugin.Context context = new Plugin.Context(runtime);
     new OpenEdgePlugin().define(context);
-    assertThat(context.getExtensions()).hasSize(32);
+    assertEquals(context.getExtensions().size(), 32);
   }
 
 }
