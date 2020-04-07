@@ -1,0 +1,1445 @@
+[
+    {
+        "name": "Progress.ApplicationServer.AdapterTypes",
+        "baseTypes": [
+            "Progress.Lang.Enum"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": true,
+        "isInterface": false,
+        "methods": [
+            "GetEnum"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": [
+            "Unexpected",
+            "APSV",
+            "SOAP",
+            "REST",
+            "WEB"
+        ]
+    },
+    {
+        "name": "Progress.ApplicationServer.AgentInfo",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "GetAgentStatTableHandle",
+            "GetAgentThreadTableHandle",
+            "GetAgentSessionTableHandle",
+            "GetAgentConnectionTableHandle",
+            "GetAgentRequestTableHandle",
+            "GetAgentStacks",
+            "GetAgentSessionStack",
+            "GetAgentSessionID",
+            "GetClientSessionID"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": [
+            "ArchiveAgentStats"
+        ]
+    },
+    {
+        "name": "Progress.ApplicationServer.AgentManager",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "CancelRequest",
+            "TerminateSession",
+            "TerminateFreeSessions",
+            "StopAgent",
+            "InitiateDebugger",
+            "DynamicPropertiesUpdate",
+            "TerminateFreeSession",
+            "DebugTest",
+            "TrackABLObjects",
+            "GetABLObjectsReport",
+            "TrackingABLObjects",
+            "TrackMemoryUse",
+            "GetMemoryUseReport",
+            "TrackingMemoryUse"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.BPMError",
+        "baseTypes": [
+            "Progress.Lang.SysError"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.DataSlot",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [
+            "Name",
+            "BPMDataTypeName",
+            "Choices",
+            "DataTypeName",
+            "ReadOnly",
+            "Value",
+            "WriteOnly"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.DataSlotTemplate",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [
+            "Name",
+            "BPMDataTypeName",
+            "Choices",
+            "DataTypeName",
+            "ProcessTemplateName",
+            "ReadOnly",
+            "Value",
+            "WriteOnly"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.Filter.ITaskFilter",
+        "baseTypes": [],
+        "isAbstract": false,
+        "isClass": false,
+        "isEnum": false,
+        "isInterface": true,
+        "methods": [
+            "Is"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.Filter.TaskActivityFilter",
+        "baseTypes": [
+            "Progress.Lang.Object",
+            "Progress.BPM.Filter.ITaskFilter"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Is"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "FilterValue"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.Filter.TaskCreatorFilter",
+        "baseTypes": [
+            "Progress.Lang.Object",
+            "Progress.BPM.Filter.ITaskFilter"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Is"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "FilterValue"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.Filter.TaskDueDateFilter",
+        "baseTypes": [
+            "Progress.Lang.Object",
+            "Progress.BPM.Filter.ITaskFilter"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Is"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "FilterValue",
+            "RelationshipOperator"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.Filter.TaskNameFilter",
+        "baseTypes": [
+            "Progress.Lang.Object",
+            "Progress.BPM.Filter.ITaskFilter"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Is"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "FilterValue"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.Filter.TaskPerformerFilter",
+        "baseTypes": [
+            "Progress.Lang.Object",
+            "Progress.BPM.Filter.ITaskFilter"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Is"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "FilterValue"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.Filter.TaskPriorityFilter",
+        "baseTypes": [
+            "Progress.Lang.Object",
+            "Progress.BPM.Filter.ITaskFilter"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Is"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "FilterValue"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.Filter.TaskProcessFilter",
+        "baseTypes": [
+            "Progress.Lang.Object",
+            "Progress.BPM.Filter.ITaskFilter"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Is"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "FilterValue"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.Filter.TaskProcessTemplateFilter",
+        "baseTypes": [
+            "Progress.Lang.Object",
+            "Progress.BPM.Filter.ITaskFilter"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Is"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "FilterValue"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.Filter.TaskTimeStartedFilter",
+        "baseTypes": [
+            "Progress.Lang.Object",
+            "Progress.BPM.Filter.ITaskFilter"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Is"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "FilterValue",
+            "RelationshipOperator"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.Process",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "GetDataSlots",
+            "UpdateDataSlots",
+            "ActivateWorkstep",
+            "CompleteWorkstep",
+            "Remove"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "Name",
+            "Id",
+            "Priority"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.Task",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Complete",
+            "Assign",
+            "Reassign",
+            "GetDataSlots",
+            "MakeAvailable",
+            "GetAvailablePresentationTypes",
+            "GetPresentationUI"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "Name",
+            "DueDate",
+            "Performer",
+            "Creator",
+            "Priority",
+            "Status",
+            "TimeStarted",
+            "ActivityName",
+            "ProcessName",
+            "ProcessTemplateName"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.BPM.UserSession",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Connect",
+            "Disconnect",
+            "StartProcess",
+            "GetTask",
+            "GetProcessTemplateNames",
+            "GetAssignedTasks",
+            "GetAvailableTasks",
+            "GetDataSlotTemplates",
+            "GetProcess",
+            "GetProcesses",
+            "GetClientPrincipal"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "SessionID",
+            "Connected"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.IO.BinarySerializer",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Serialize",
+            "Deserialize"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.IO.FileInputStream",
+        "baseTypes": [
+            "Progress.IO.InputStream"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Read",
+            "SkipBytes",
+            "Close"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "FileName"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.IO.FileOutputStream",
+        "baseTypes": [
+            "Progress.IO.OutputStream"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Write",
+            "Close",
+            "Flush"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "FileName",
+            "Append"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.IO.InputStream",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Read",
+            "SkipBytes",
+            "Close"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "Closed"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.IO.JsonSerializer",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Serialize",
+            "Deserialize"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "Formatted"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.IO.OutputStream",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Write",
+            "Close",
+            "Flush"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "Closed"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Json.JsonError",
+        "baseTypes": [
+            "Progress.Lang.SysError"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Json.JsonParser",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [
+            "IgnoreComments"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Json.JsonParserError",
+        "baseTypes": [
+            "Progress.Json.JsonError"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [
+            "Offset"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Json.ObjectModel.JsonArray",
+        "baseTypes": [
+            "Progress.Json.ObjectModel.JsonConstruct"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Add",
+            "AddNull",
+            "AddNumber",
+            "Clone",
+            "GetType",
+            "GetJsonText",
+            "GetCharacter",
+            "GetCOMHandle",
+            "GetDate",
+            "GetDatetime",
+            "GetDatetimeTZ",
+            "GetDecimal",
+            "GetHandle",
+            "GetInt64",
+            "GetInteger",
+            "GetJsonArray",
+            "GetJsonObject",
+            "GetLogical",
+            "GetLongchar",
+            "GetMemptr",
+            "GetRaw",
+            "GetRecid",
+            "GetRowid",
+            "IsNull",
+            "Read",
+            "Remove",
+            "Set",
+            "SetNull",
+            "SetNumber",
+            "Write",
+            "WriteFile",
+            "WriteStream"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "Length"
+        ],
+        "staticProperties": [
+            "END_OF_ARRAY"
+        ]
+    },
+    {
+        "name": "Progress.Json.ObjectModel.JsonConstruct",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Write",
+            "WriteFile",
+            "WriteStream"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Json.ObjectModel.JsonDataType",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": [
+            "STRING",
+            "NUMBER",
+            "BOOLEAN",
+            "OBJECT",
+            "ARRAY",
+            "NULL"
+        ]
+    },
+    {
+        "name": "Progress.Json.ObjectModel.JsonObject",
+        "baseTypes": [
+            "Progress.Json.ObjectModel.JsonConstruct"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Add",
+            "AddNull",
+            "AddNumber",
+            "GetJsonText",
+            "Clone",
+            "GetNames",
+            "GetType",
+            "GetCharacter",
+            "GetCOMHandle",
+            "GetDate",
+            "GetDatetime",
+            "GetDatetimeTZ",
+            "GetDecimal",
+            "GetHandle",
+            "GetInt64",
+            "GetInteger",
+            "GetJsonArray",
+            "GetJsonObject",
+            "GetLogical",
+            "GetLongchar",
+            "GetMemptr",
+            "GetRaw",
+            "GetRecid",
+            "GetRowid",
+            "Has",
+            "IsNull",
+            "Remove",
+            "Read",
+            "Set",
+            "SetNull",
+            "SetNumber",
+            "Write",
+            "WriteFile",
+            "WriteStream"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Json.ObjectModel.ObjectModelParser",
+        "baseTypes": [
+            "Progress.Json.JsonParser"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Parse",
+            "ParseFile"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.AppError",
+        "baseTypes": [
+            "Progress.Lang.ProError"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "AddMessage",
+            "RemoveMessage"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "ReturnValue"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.Class",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "IsInterface",
+            "IsFinal",
+            "GetClass",
+            "New",
+            "Invoke",
+            "GetPropertyValue",
+            "SetPropertyValue",
+            "GetMethod",
+            "GetMethods",
+            "GetConstructor",
+            "GetConstructors",
+            "IsA",
+            "HasStatics",
+            "IsAbstract",
+            "HasWidgetPool",
+            "IsSerializable",
+            "GetInterfaces",
+            "IsGeneric",
+            "IsIndexed",
+            "IsEnum",
+            "IsFlagsEnum",
+            "GetEnumName",
+            "GetEnumValue",
+            "GetEnumNames",
+            "GetEnumValues",
+            "GetProperties",
+            "GetVariables",
+            "GetEvents",
+            "GetProperty",
+            "GetVariable",
+            "GetEvent"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "TypeName",
+            "Package",
+            "SuperClass"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.Enum",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "GetValue",
+            "CompareTo",
+            "ToObject",
+            "ToString",
+            "Equals"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.Error",
+        "baseTypes": [],
+        "isAbstract": false,
+        "isClass": false,
+        "isEnum": false,
+        "isInterface": true,
+        "methods": [
+            "GetMessage",
+            "GetMessageNum"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "NumMessages",
+            "CallStack",
+            "Severity"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.FlagsEnum",
+        "baseTypes": [
+            "Progress.Lang.Enum"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": true,
+        "isInterface": false,
+        "methods": [
+            "IsFlagSet",
+            "ToString"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.LockConflict",
+        "baseTypes": [
+            "Progress.Lang.Stop"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [
+            "TableName",
+            "User",
+            "Device"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.Object",
+        "baseTypes": [],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "GetClass",
+            "ToString",
+            "Equals",
+            "Clone"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "Next-Sibling",
+            "Prev-Sibling"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.OERequestInfo",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "GetClientPrincipal",
+            "SetClientPrincipal"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "ClientContextId",
+            "RequestId",
+            "VersionInfo",
+            "ProcedureName",
+            "AgentId",
+            "SessionId",
+            "ThreadId",
+            "AdapterType"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.OEVersionInfo",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [
+            "OEMajorVersion",
+            "OEMinorVersion",
+            "OEMaintVersion",
+            "OEClientType"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.ParameterList",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "SetParameter",
+            "Clear"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "NumParameters",
+            "SignatureList"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.ProError",
+        "baseTypes": [
+            "Progress.Lang.Object",
+            "Progress.Lang.Error"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "GetMessage",
+            "GetMessageNum"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "NumMessages",
+            "CallStack",
+            "Severity"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.SoapFaultError",
+        "baseTypes": [
+            "Progress.Lang.SysError"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [
+            "SoapFault"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.Stop",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [
+            "CallStack"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.StopAfter",
+        "baseTypes": [
+            "Progress.Lang.Stop"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.StopError",
+        "baseTypes": [
+            "Progress.Lang.SysError"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.SysError",
+        "baseTypes": [
+            "Progress.Lang.ProError"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Lang.UserInterrupt",
+        "baseTypes": [
+            "Progress.Lang.Stop"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Reflect.AccessMode",
+        "baseTypes": [
+            "Progress.Lang.Enum"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": true,
+        "isInterface": false,
+        "methods": [
+            "GetEnum"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": [
+            "Public",
+            "Protected",
+            "Private"
+        ]
+    },
+    {
+        "name": "Progress.Reflect.Constructor",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "GetParameters",
+            "Invoke",
+            "ToString"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "Name",
+            "NumParameters",
+            "AccessMode",
+            "OriginatingClass"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Reflect.DataType",
+        "baseTypes": [
+            "Progress.Lang.Enum"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": true,
+        "isInterface": false,
+        "methods": [
+            "GetEnum"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": [
+            "AnyType",
+            "Buffer",
+            "Byte",
+            "Character",
+            "COMHandle",
+            "DataSet",
+            "DataSetHandle",
+            "Date",
+            "DateTime",
+            "DateTimeTZ",
+            "Decimal",
+            "Double",
+            "Float",
+            "Handle",
+            "Int64",
+            "Integer",
+            "Logical",
+            "Longchar",
+            "Memptr",
+            "Object",
+            "Raw",
+            "Recid",
+            "Rowid",
+            "Short",
+            "SingleCharacter",
+            "Table",
+            "TableHandle",
+            "UnsignedByte",
+            "UnsignedInt",
+            "UnsignedInt64",
+            "UnsignedShort",
+            "Void"
+        ]
+    },
+    {
+        "name": "Progress.Reflect.Event",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "GetHandlerParameters",
+            "Subscribe",
+            "Publish",
+            "ToString"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "Name",
+            "DeclaringClass",
+            "OriginatingClass",
+            "IsStatic",
+            "IsAbstract",
+            "IsOverride",
+            "AccessMode",
+            "NumHandlerParameters"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Reflect.Flags",
+        "baseTypes": [
+            "Progress.Lang.FlagsEnum"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "GetEnum",
+            "SetFlag",
+            "UnsetFlag",
+            "ToggleFlag"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": [
+            "Public",
+            "Protected",
+            "Private",
+            "Static",
+            "Instance",
+            "DeclaredOnly"
+        ]
+    },
+    {
+        "name": "Progress.Reflect.Method",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "GetParameters",
+            "Invoke",
+            "ToString"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "Name",
+            "NumParameters",
+            "ReturnType",
+            "ReturnTypeName",
+            "ReturnExtent",
+            "AccessMode",
+            "IsAbstract",
+            "IsStatic",
+            "IsOverride",
+            "IsFinal",
+            "DeclaringClass",
+            "OriginatingClass"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Reflect.Parameter",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "ToString"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "Name",
+            "Mode",
+            "DataType",
+            "DataTypeName",
+            "Position",
+            "Extent"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Reflect.ParameterMode",
+        "baseTypes": [
+            "Progress.Lang.FlagsEnum"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "GetEnum",
+            "SetFlag",
+            "UnsetFlag",
+            "ToggleFlag"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": [
+            "Input",
+            "Output",
+            "InputOutput",
+            "Append",
+            "Bind",
+            "ByReference"
+        ]
+    },
+    {
+        "name": "Progress.Reflect.Property",
+        "baseTypes": [
+            "Progress.Reflect.Variable"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Get",
+            "Set",
+            "ToString"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "GetterAccessMode",
+            "SetterAccessMode",
+            "IsAbstract",
+            "IsOverride",
+            "IsIndexed",
+            "CanRead",
+            "CanWrite"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Reflect.Variable",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "Get",
+            "Set",
+            "ToString"
+        ],
+        "staticMethods": [],
+        "properties": [
+            "Name",
+            "AccessMode",
+            "DataType",
+            "DataTypeName",
+            "Extent",
+            "IsStatic",
+            "DeclaringClass",
+            "OriginatingClass"
+        ],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Security.PAMStatus",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": [
+            "Success",
+            "PermissionDenied",
+            "AuthenticationFailed",
+            "MissingCredentials",
+            "AuthenticationAccess",
+            "UnknownUser",
+            "AccountExpired",
+            "PasswordExpired",
+            "MaxTries",
+            "InvalidConfiguration",
+            "Custom",
+            "AccountDisabled",
+            "AccessRevoked",
+            "LoginDenied",
+            "AccessDenied",
+            "LoginLockout"
+        ]
+    },
+    {
+        "name": "Progress.Security.Realm.IHybridRealm",
+        "baseTypes": [],
+        "isAbstract": false,
+        "isClass": false,
+        "isEnum": false,
+        "isInterface": true,
+        "methods": [
+            "GetAttribute",
+            "GetAttributeNames",
+            "GetUserNames",
+            "GetUserNamesByQuery",
+            "RemoveAttribute",
+            "SetAttribute",
+            "ValidatePassword",
+            "ValidateUser"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Web.AbstractWebRouter",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "HandleRequest"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Web.InternalWebHandler",
+        "baseTypes": [
+            "Progress.Lang.Object"
+        ],
+        "isAbstract": false,
+        "isClass": true,
+        "isEnum": false,
+        "isInterface": false,
+        "methods": [
+            "HandleRequest"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    },
+    {
+        "name": "Progress.Web.IWebHandler",
+        "baseTypes": [],
+        "isAbstract": false,
+        "isClass": false,
+        "isEnum": false,
+        "isInterface": true,
+        "methods": [
+            "HandleRequest"
+        ],
+        "staticMethods": [],
+        "properties": [],
+        "staticProperties": []
+    }
+]

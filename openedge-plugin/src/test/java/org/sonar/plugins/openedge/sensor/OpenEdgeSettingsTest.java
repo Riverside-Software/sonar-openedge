@@ -39,6 +39,8 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.annotations.Test;
 
+import eu.rssw.pct.elements.ITypeInfo;
+
 public class OpenEdgeSettingsTest {
   private static final Version VERSION = Version.parse("7.5");
   private static final SonarRuntime SQ_RUNTIME = SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY);
@@ -194,4 +196,25 @@ public class OpenEdgeSettingsTest {
     assertTrue(cache.exists());
   }
 
+  @Test
+  public void testAssemblyCatalog() throws Exception {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(Constants.ASSEMBLY_CATALOG,
+        new File(TestProjectSensorContext.BASEDIR, "assemblies.json").getAbsolutePath());
+    settings.setProperty(Constants.DATABASES, "");
+    settings.setProperty("sonar.sources", "src");
+
+    SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
+    context.setSettings(settings);
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SL_RUNTIME);
+    RefactorSession session = oeSettings.getProparseSession();
+
+    ITypeInfo info = session.getTypeInfo("Progress.Json.ObjectModel.JsonArray");
+    assertNotNull(info);
+    ITypeInfo info2 = session.getTypeInfo("Progress.Lang.Object");
+    assertNotNull(info2);
+    ITypeInfo info3 = session.getTypeInfo("System.AppContextDefaultValues");
+    assertNotNull(info3);
+  }
 }

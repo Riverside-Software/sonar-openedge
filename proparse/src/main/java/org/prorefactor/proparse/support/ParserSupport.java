@@ -306,10 +306,6 @@ public class ParserSupport {
     return !Strings.isNullOrEmpty(className);
   }
 
-  public String getClassName(String name) {
-    return classFinder.lookup(name);
-  }
-
   /**
    * @return True if parsing an interface
    */
