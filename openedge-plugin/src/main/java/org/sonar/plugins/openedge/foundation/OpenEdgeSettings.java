@@ -55,11 +55,11 @@ import org.prorefactor.refactor.settings.ProparseSettings;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.SonarRuntime;
-import org.sonar.api.batch.ScannerSide;
-import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.config.Configuration;
+import org.sonar.api.platform.Server;
+import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
@@ -90,6 +90,7 @@ public class OpenEdgeSettings {
   private final Configuration config;
   private final FileSystem fileSystem;
   private final SonarRuntime runtime;
+  private final Server server;
 
   // Internal use
   private boolean init = false;
@@ -108,10 +109,11 @@ public class OpenEdgeSettings {
   private RefactorSession proparseSession;
   private String oePluginVersion;
 
-  public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
+  public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime, Server server) {
     this.config = config;
     this.fileSystem = fileSystem;
     this.runtime = runtime;
+    this.server = server;
   }
 
   public final void init() {
@@ -119,8 +121,7 @@ public class OpenEdgeSettings {
       return;
     oePluginVersion = readPluginVersion(this.getClass().getClassLoader(), "sonar-openedge.txt");
     LOG.info("OpenEdge plugin version: {}", oePluginVersion);
-    LOG.info("Loading OpenEdge settings for server ID '{}' '{}'", config.get(CoreProperties.SERVER_ID).orElse(""),
-        config.get(CoreProperties.PERMANENT_SERVER_ID).orElse(""));
+    LOG.info("Loading OpenEdge settings for server ID '{}'", server.getId());
     initializeDirectories(config, fileSystem);
     initializePropath(config, fileSystem);
     initializeCPD(config);
@@ -136,7 +137,7 @@ public class OpenEdgeSettings {
 
   private final void initializeDirectories(Configuration config, FileSystem fileSystem) {
     // Looking for source directories
-    Optional<String> sonarSources = config.get(ProjectDefinition.SOURCES_PROPERTY);
+    Optional<String> sonarSources = config.get("sonar.sources");
     if (sonarSources.isPresent()) {
       initializeDirectory(fileSystem, sonarSources.get(), "source", sourcePaths);
     } else {
@@ -584,6 +585,13 @@ public class OpenEdgeSettings {
 
   public String getOpenEdgePluginVersion() {
     return this.oePluginVersion;
+  }
+
+  public String getServerId() {
+    String str = server.getId();
+    int dashIndex = str.indexOf('-');
+
+    return (dashIndex == 8) && (str.length() >= 20) ? str.substring(dashIndex + 1) : str;
   }
 
   public String getPropathAsString() {

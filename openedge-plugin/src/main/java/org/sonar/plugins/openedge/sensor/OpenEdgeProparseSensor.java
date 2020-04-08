@@ -82,7 +82,6 @@ import org.sonar.plugins.openedge.foundation.CPDCallback;
 import org.sonar.plugins.openedge.foundation.InputFileUtils;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
-import org.sonar.plugins.openedge.foundation.OpenEdgeProjectHelper;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.w3c.dom.Document;
@@ -422,12 +421,12 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     StringBuilder data = new StringBuilder(String.format( // NOSONAR Influx requires LF
         "proparse,product=%1$s,sid=%2$s files=%3$d,failures=%4$d,parseTime=%5$d,maxParseTime=%6$d,version=\"%7$s\",ncloc=%8$d,oeversion=\"%9$s\"\n",
-        context.runtime().getProduct().toString().toLowerCase(), OpenEdgeProjectHelper.getServerId(context), numFiles,
+        context.runtime().getProduct().toString().toLowerCase(), settings.getServerId(), numFiles,
         numFailures, parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs,
         settings.getOpenEdgePluginVersion()));
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       data.append(String.format("rule,product=%1$s,sid=%2$s,rulename=%3$s ruleTime=%4$d\n", // NOSONAR
-          context.runtime().getProduct().toString().toLowerCase(), OpenEdgeProjectHelper.getServerId(context),
+          context.runtime().getProduct().toString().toLowerCase(), settings.getServerId(),
           entry.getKey(), entry.getValue()));
     }
 

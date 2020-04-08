@@ -20,7 +20,7 @@
 package org.sonar.plugins.openedge.api;
 
 import org.sonar.api.SonarProduct;
-import org.sonar.api.batch.ScannerSide;
+import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.server.ServerSide;
 import org.sonarsource.api.sonarlint.SonarLintSide;
 

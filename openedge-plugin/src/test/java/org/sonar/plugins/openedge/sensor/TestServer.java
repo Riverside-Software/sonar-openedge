@@ -28,17 +28,17 @@ public class TestServer extends Server {
 
   @Override
   public String getId() {
-    return null;
+    return "";
   }
 
   @Override
   public String getVersion() {
-    return null;
+    return "7.6";
   }
 
   @Override
   public Date getStartedAt() {
-    return null;
+    return new Date();
   }
 
   @Override
@@ -48,12 +48,12 @@ public class TestServer extends Server {
 
   @Override
   public String getContextPath() {
-    return null;
+    return "";
   }
 
   @Override
   public String getPublicRootUrl() {
-    return null;
+    return "http://localhost";
   }
 
   @Override
@@ -68,7 +68,7 @@ public class TestServer extends Server {
 
   @Override
   public String getURL() {
-    return null;
+    return "http://localhost";
   }
 
   @Override

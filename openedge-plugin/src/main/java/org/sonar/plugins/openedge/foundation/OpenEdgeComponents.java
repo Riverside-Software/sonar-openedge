@@ -32,10 +32,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.sonar.api.SonarProduct;
-import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.platform.Server;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.server.ServerSide;
 import org.sonar.api.utils.MessageException;
 import org.sonar.api.utils.log.Logger;
@@ -64,23 +65,25 @@ public class OpenEdgeComponents {
   private final Map<ActiveRule, OpenEdgeProparseCheck> ppChecksMap = new HashMap<>();
   private final Map<ActiveRule, OpenEdgeDumpFileCheck> dfChecksMap = new HashMap<>();
 
+  private final Server server;
   private final CheckRegistrar checkRegistrar = new CheckRegistrar();
   private final LicenseRegistrar licenseRegistrar = new LicenseRegistrar();
   private boolean initialized = false;
 
-  public OpenEdgeComponents() {
-    this(null, null);
+  public OpenEdgeComponents(Server server) {
+    this(server, null, null);
   }
 
-  public OpenEdgeComponents(CheckRegistration[] checkRegistrars) {
-    this(checkRegistrars, null);
+  public OpenEdgeComponents(Server server, CheckRegistration[] checkRegistrars) {
+    this(server, checkRegistrars, null);
   }
 
-  public OpenEdgeComponents(LicenseRegistration[] licRegistrars) {
-    this(null, licRegistrars);
+  public OpenEdgeComponents(Server server, LicenseRegistration[] licRegistrars) {
+    this(server, null, licRegistrars);
   }
 
-  public OpenEdgeComponents(CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars) {
+  public OpenEdgeComponents(Server server, CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars) {
+    this.server = server;
     if (checkRegistrars != null) {
       registerChecks(checkRegistrars);
     }
@@ -110,8 +113,7 @@ public class OpenEdgeComponents {
   }
 
   public void initializeLicense(SensorContext context) {
-    String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "")
-        + OpenEdgeProjectHelper.getServerId(context);
+    String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "") + getServerId();
     for (License entry : licenseRegistrar.getLicenses()) {
       if (permId.equals(entry.getPermanentId())) {
         LOG.info("Repository '{}' associated with {} license permanent ID '{}' - Customer '{}' - Expiration date {}",
@@ -126,7 +128,7 @@ public class OpenEdgeComponents {
     if (initialized)
       return;
 
-    String permId = OpenEdgeProjectHelper.getServerId(context);
+    String permId = getServerId();
 
     // Proparse and XREF rules
     for (ActiveRule rule : context.activeRules().findByLanguage(Constants.LANGUAGE_KEY)) {
@@ -147,11 +149,11 @@ public class OpenEdgeComponents {
   }
 
   public Map<ActiveRule, OpenEdgeProparseCheck> getProparseRules() { 
-    return Collections.unmodifiableMap(ppChecksMap);  
+    return Collections.unmodifiableMap(ppChecksMap);
   }
 
   public Map<ActiveRule, OpenEdgeDumpFileCheck> getDumpFileRules() {  
-    return Collections.unmodifiableMap(dfChecksMap);  
+    return Collections.unmodifiableMap(dfChecksMap);
   }
 
   private OpenEdgeCheck<?> initializeCheck(SensorContext context, ActiveRule rule, SonarProduct product, String permId) {
@@ -235,6 +237,13 @@ public class OpenEdgeComponents {
       }
     }
     return null;
+  }
+
+  public String getServerId() {
+    String str = server.getId();
+    int dashIndex = str.indexOf('-');
+
+    return (dashIndex == 8) && (str.length() >= 20) ? str.substring(dashIndex + 1) : str;
   }
 
   private static class LicenseRegistrar implements LicenseRegistration.Registrar {

@@ -21,9 +21,9 @@ package org.sonar.plugins.openedge.checks;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.antlr.v4.runtime.RecognitionException;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
@@ -42,10 +42,9 @@ public abstract class AbstractTest {
   protected SensorContextTester context;
   private RefactorSession session;
 
-  // FIXME Should be BeforeTest
   @BeforeMethod
   public void initContext() throws IOException {
-    session = new RefactorSession(new ProparseSettings("src/test/resources"), new Schema(), StandardCharsets.UTF_8);
+    session = new RefactorSession(new ProparseSettings(BASEDIR), new Schema(), StandardCharsets.UTF_8);
   }
 
   @BeforeMethod
@@ -67,10 +66,14 @@ public abstract class AbstractTest {
   }
 
   public ParseUnit getParseUnit(InputFile file) {
-    ParseUnit unit = new ParseUnit(file.file(), session);
-    unit.treeParser01();
-    unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
+    try (InputStream input = file.inputStream()) {
+      ParseUnit unit = new ParseUnit(file.inputStream(), file.toString(), session);
+      unit.treeParser01();
+      unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
 
-    return unit;
+      return unit;
+    } catch (IOException caught) {
+      return null;
+    }
   }
 }
