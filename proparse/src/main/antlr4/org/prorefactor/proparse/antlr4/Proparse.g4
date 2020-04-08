@@ -1682,7 +1682,7 @@ defineShare:
   ;
 
 defineBrowseStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? PRIVATE?
     BROWSE n=identifier queryName? ( lockHow | NOWAIT )*
     ( defBrowseDisplay defBrowseEnable? )?
     displayWith*
@@ -1722,7 +1722,7 @@ defBrowseEnableItem:
   ;
 
 defineBufferStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? ( PRIVATE | PROTECTED | STATIC )*
     // For the table type: we can assume that if it's not in tableDict, it's a db table.
     // For db buffers:
     //   - set "FullName" to db.tablename (not db.buffername). Required for field lookups. See support library.
@@ -1738,7 +1738,7 @@ defineBufferStatement:
   ;
 
 defineButtonStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? PRIVATE?
     ( BUTTON | BUTTONS ) n=identifier buttonOption* triggerPhrase? statementEnd
     { support.defVar($n.text); }
   ;
@@ -1766,7 +1766,7 @@ buttonOption:
   ;
 
 defineDatasetStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? ( PRIVATE | PROTECTED | STATIC )*
     DATASET identifier
     namespaceUri? namespacePrefix? xmlNodeName? serializeName? xmlNodeType? SERIALIZEHIDDEN?
     REFERENCEONLY?
@@ -1809,7 +1809,7 @@ dataRelationNested:
   ;
 
 defineDataSourceStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? ( PRIVATE | PROTECTED | STATIC )*
     DATASOURCE n=identifier FOR 
     queryName?
     sourceBufferPhrase?
@@ -1829,7 +1829,7 @@ sourceBufferPhrase:
   ;
 
 defineEventStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? ( PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
     EVENT n=identifier
     ( eventSignature | eventDelegate )
     statementEnd
@@ -1847,7 +1847,7 @@ eventDelegate:
   ;
 
 defineFrameStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? PRIVATE?
     // PSC's grammar: uses <xfield> and <fmt-item>. <xfield> is <field> with <fdio-mod> which with <fdio-opt>
     // maps to our formatphrase. <fmt-item> is skip, space, or constant. Our form_item covers all this.
     // The syntax here should always be identical to the FORM statement (formstate).
@@ -1856,7 +1856,7 @@ defineFrameStatement:
   ;
 
 defineImageStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? PRIVATE?
     IMAGE n=identifier defineImageOption* triggerPhrase? statementEnd
     { support.defVar($n.text); }
   ;
@@ -1873,7 +1873,7 @@ defineImageOption:
   ;
 
 defineMenuStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? PRIVATE?
     MENU n=identifier menuOption*
     ( menuListItem
       ( {_input.LA(2) == RULE || _input.LA(2) == SKIP || _input.LA(2) == SUBMENU || _input.LA(2) == MENUITEM }? PERIOD )?
@@ -1941,7 +1941,7 @@ defineParamVarLike:
   ;
 
 definePropertyStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE | SERIALIZABLE | NONSERIALIZABLE )*
+    DEFINE defineShare? ( PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE | SERIALIZABLE | NONSERIALIZABLE )*
     PROPERTY n=newIdentifier definePropertyAs
     definePropertyAccessor definePropertyAccessor?
     { support.defVar($n.text); }
@@ -1965,7 +1965,7 @@ definePropertyAccessorSetBlock:
   ;
 
 defineQueryStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? ( PRIVATE | PROTECTED | STATIC )*
     QUERY n=identifier
     FOR record recordFields?
     ( COMMA record recordFields? )*
@@ -1975,7 +1975,7 @@ defineQueryStatement:
   ;
 
 defineRectangleStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? PRIVATE?
     RECTANGLE n=identifier rectangleOption* triggerPhrase? statementEnd
     { support.defVar($n.text); }
   ;
@@ -1994,13 +1994,13 @@ rectangleOption:
   ;
    
 defineStreamStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? PRIVATE?
     STREAM n=identifier statementEnd
     { support.defVar($n.text); }
   ;
 
 defineSubMenuStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? PRIVATE?
     SUBMENU n=identifier menuOption*
     (  menuListItem
       ( {_input.LA(2) == RULE || _input.LA(2) == SKIP || _input.LA(2) == SUBMENU || _input.LA(2) == MENUITEM }? PERIOD )?
@@ -2010,7 +2010,7 @@ defineSubMenuStatement:
   ;
    
 defineTempTableStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE | SERIALIZABLE | NONSERIALIZABLE )*
+    DEFINE defineShare? ( PRIVATE | PROTECTED | STATIC | SERIALIZABLE | NONSERIALIZABLE )*
     TEMPTABLE tn=identifier
     { support.defTable($tn.text, SymbolScope.FieldType.TTABLE); }
     ( UNDO | NOUNDO )?
@@ -2057,7 +2057,7 @@ defTableIndex:
   ;
    
 defineWorkTableStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE defineShare? PRIVATE?
     // Token WORKTABLE can be "work-file" or abbreviated forms of "work-table"
     WORKTABLE tn=identifier
     { support.defTable($tn.text, SymbolScope.FieldType.WTABLE); }
@@ -2069,7 +2069,7 @@ defineWorkTableStatement:
   ;
 
 defineVariableStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | STATIC | SERIALIZABLE | NONSERIALIZABLE )*
+    DEFINE defineShare? ( PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | STATIC | SERIALIZABLE | NONSERIALIZABLE )*
     VARIABLE n=newIdentifier fieldOption* triggerPhrase? statementEnd
     { support.defVar($n.text); }
   ;
@@ -2898,7 +2898,9 @@ messageOption:
 methodStatement locals [ boolean abs = false ]:
     METHOD
     (  PRIVATE
+    |  PACKAGEPRIVATE
     |  PROTECTED
+    |  PACKAGEPROTECTED
     |  PUBLIC // default
     |  STATIC
     |  ABSTRACT { $abs = true; }
