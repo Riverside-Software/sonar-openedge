@@ -973,6 +973,8 @@ public enum ABLNodeType {
   OVERRIDE(Proparse.OVERRIDE, "override", NodeTypesOption.KEYWORD),
 
   // P
+  PACKAGEPROTECTED(Proparse.PACKAGEPROTECTED, "package-protected", NodeTypesOption.KEYWORD),
+  PACKAGEPRIVATE(Proparse.PACKAGEPRIVATE, "package-private",  NodeTypesOption.KEYWORD),
   PAGE(Proparse.PAGE, "page", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   PAGEBOTTOM(Proparse.PAGEBOTTOM, "page-bottom", 8, NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   PAGED(Proparse.PAGED, "paged", NodeTypesOption.KEYWORD),
