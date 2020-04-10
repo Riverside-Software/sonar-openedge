@@ -23,8 +23,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.List;
 
-import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
@@ -271,4 +269,13 @@ public class ParserTest {
         assertEquals(tbl, "sports2000.Customer");
     }
   }
+
+  @Test
+  public void testPackagePrivate() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "package.cls"), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 3);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.METHOD).size(), 2);
+  }
+
 }
