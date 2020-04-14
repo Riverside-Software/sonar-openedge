@@ -171,10 +171,7 @@ statement:
   |  compileStatement
   |  connectStatement
   |  copyLobStatement
-  |  // "CREATE WIDGET-POOL." truly is ambiguous if you have a table named "widget-pool".
-     // Progress seems to treat this as a CREATE WIDGET-POOL Statementment rather than a
-     // CREATE table Statementment. So, we'll resolve it the same way.
-     { _input.LA(2) == WIDGETPOOL }? createWidgetPoolStatement
+  |  createWidgetPoolStatement // CREATE WIDGET-POOL is ambiguous if you have a table named "widget-pool". ABL seems to treat this as a CREATE WIDGET-POOL Statement
   |  createStatement
   |  createWhateverStatement
   |  createAliasStatement

@@ -17,6 +17,7 @@ package org.prorefactor.core;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -24,6 +25,11 @@ import java.io.File;
 import java.util.List;
 
 import org.prorefactor.core.nodetypes.RecordNameNode;
+import org.prorefactor.core.schema.Database;
+import org.prorefactor.core.schema.IDatabase;
+import org.prorefactor.core.schema.ISchema;
+import org.prorefactor.core.schema.Schema;
+import org.prorefactor.core.schema.Table;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -43,7 +49,6 @@ public class ParserTest {
   public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
-    session.getSchema();
   }
 
   @Test
@@ -278,4 +283,34 @@ public class ParserTest {
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.METHOD).size(), 2);
   }
 
+  @Test
+  public void testCreateWidgetPool() {
+    // No widget-pool table, statement is about creating a widget-pool
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("create widget-pool. message 'hello'.".getBytes()), "<unnamed>", session);
+    unit.treeParser01();
+    assertNull(session.getSchema().lookupTable("widget-pool"));
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).getState2(), ABLNodeType.WIDGETPOOL.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
+
+    // widget-pool table available, statement is still about creating a widget-pool
+    // I don't know how to create a new row in this table...
+    ISchema schema = new Schema(session.getSchema().lookupDatabase("sports2000"), createWidgetPoolDB());
+    RefactorSession session2 = new RefactorSession(session.getProparseSettings(), schema);
+    assertNotNull(session2.getSchema().lookupTable("widget-pool"));
+
+    ParseUnit unit2 = new ParseUnit(new ByteArrayInputStream("create widget-pool. message 'hello'.".getBytes()), "<unnamed>", session2);
+    unit2.treeParser01();
+    assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
+    assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).getState2(), ABLNodeType.WIDGETPOOL.getType());
+    assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
+
+  }
+
+  private IDatabase createWidgetPoolDB() {
+    IDatabase retVal = new Database("mydb");
+    retVal.add(new Table("widget-pool", IConstants.ST_DBTABLE));
+
+    return retVal;
+  }
 }
