@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
@@ -82,7 +83,7 @@ public class FrameStack {
    */
   private List<FieldBuffer> calculateFormItemTableFields(JPNode formItemNode) {
     assert formItemNode.getType() == Proparse.Form_item;
-    assert formItemNode.getFirstChild().getType() == Proparse.RECORD_NAME;
+    assert formItemNode.getFirstChild().getNodeType() == ABLNodeType.RECORD_NAME;
     RecordNameNode recordNameNode = (RecordNameNode) formItemNode.getFirstChild();
     TableBuffer tableBuffer = recordNameNode.getTableBuffer();
     HashSet<IField> fieldSet = new HashSet<>(tableBuffer.getTable().getFieldSet());
@@ -125,7 +126,7 @@ public class FrameStack {
       return;
     assert formItemNode.getType() == Proparse.Form_item;
     JPNode firstChild = formItemNode.getFirstChild();
-    if (firstChild.getType() == Proparse.RECORD_NAME) {
+    if (firstChild.getNodeType() == ABLNodeType.RECORD_NAME) {
       // Delay processing until the end of the statement. We need any EXCEPT fields resolved first.
       currStatementWholeTableFormItemNode = formItemNode;
     } else {
