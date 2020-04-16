@@ -17,7 +17,6 @@ package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
 
-import org.prorefactor.core.ProgressString;
 import org.testng.annotations.Test;
 
 public class ProgressStringTest {

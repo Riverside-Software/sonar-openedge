@@ -17,7 +17,6 @@ package org.prorefactor.core;
 import java.io.File;
 import java.io.UncheckedIOException;
 
-import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.util.UnitTestBackslashModule;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;

@@ -17,8 +17,6 @@ package org.prorefactor.core;
 import java.io.File;
 import java.util.List;
 
-import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.macrolevel.MacroEvent;
 import org.prorefactor.refactor.RefactorSession;

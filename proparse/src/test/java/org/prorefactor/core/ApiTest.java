@@ -24,10 +24,6 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 
-import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.IConstants;
-import org.prorefactor.core.JPNode;
-import org.prorefactor.core.ProToken;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroDef;

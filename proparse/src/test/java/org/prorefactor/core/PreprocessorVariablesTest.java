@@ -16,8 +16,6 @@ package org.prorefactor.core;
 
 import java.io.File;
 
-import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;

@@ -21,7 +21,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 
-import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;

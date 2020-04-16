@@ -25,18 +25,11 @@ public class NodeTypesTest {
   @Test
   public void testRange() {
     for (ABLNodeType type : ABLNodeType.values()) {
-      assertTrue(type.getType() >= -1000);
-      // assertTrue(type.getType() != 0);
-      assertTrue(type.getType() < Proparse.Last_Token_Number);
+      assertTrue(type.getType() >= -1020);
+      // This test ensures that no token is created during the parser generation (i.e. tokens found in proparse.g4,
+      // but not found in BaseTokenTypes.tokens)
+      assertTrue(type.getType() < Proparse.Last_Token_Number, "Invalid token: " + type.toString());
     }
   }
 
-  @Test(enabled = false)
-  public void generateKeywordList() {
-    // Only for proparse.g
-    for (ABLNodeType nodeType : ABLNodeType.values()) {
-      if (nodeType.isUnreservedKeywordType())
-        System.out.println(" | " + nodeType);
-    }
-  }
 }

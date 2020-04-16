@@ -25,9 +25,6 @@ import java.io.UncheckedIOException;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
-import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.ProToken;
-import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.core.util.UnitTestWindowsModule;

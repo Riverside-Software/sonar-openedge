@@ -19,7 +19,6 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 
-import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;

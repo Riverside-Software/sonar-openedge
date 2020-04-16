@@ -29,10 +29,6 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
-import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.IConstants;
-import org.prorefactor.core.JPNode;
-import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
