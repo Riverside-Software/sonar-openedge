@@ -92,7 +92,7 @@ dotComment:
   ;
 
 functionCallStatement:
-    functionCallStatementSub NOERROR_KW? statementEnd
+    functionCallStatementSub NOERROR? statementEnd
   ;
 
 functionCallStatementSub:
@@ -100,7 +100,7 @@ functionCallStatementSub:
   ;
 
 expressionStatement:
-    expression NOERROR_KW? statementEnd
+    expression NOERROR? statementEnd
   ;
 
 labeledBlock:
@@ -351,8 +351,8 @@ pseudoFunction:
   // are accepted by the compiler, however, assignment to them seems to have
   // no affect at runtime.
   // The following are from <optargfn>
-  | PAGESIZE_KW | LINECOUNTER | PAGENUMBER | FRAMECOL
-  | FRAMEDOWN | FRAMELINE | FRAMEROW | USERID | ETIME_KW
+  | PAGESIZE | LINECOUNTER | PAGENUMBER | FRAMECOL
+  | FRAMEDOWN | FRAMELINE | FRAMEROW | USERID | ETIME
   | PROVERSION
   // The following are from <noargfn>
   | DBNAME | TIME | OPSYS | RETRY | AASERIAL | AACONTROL
@@ -380,7 +380,7 @@ builtinFunction:
   |  CAST LEFTPAREN expression COMMA typeName RIGHTPAREN
   |  currentValueFunction // is also a pseudfn.
   |  dynamicCurrentValueFunction // is also a pseudfn.
-  |  DYNAMICFUNCTION LEFTPAREN expression inExpression? (COMMA parameter)* RIGHTPAREN NOERROR_KW?
+  |  DYNAMICFUNCTION LEFTPAREN expression inExpression? (COMMA parameter)* RIGHTPAREN NOERROR?
   |  DYNAMICINVOKE
        LEFTPAREN
        ( expression | typeName )
@@ -389,7 +389,7 @@ builtinFunction:
        RIGHTPAREN
   // ENTERED and NOTENTERED are only dealt with as part of an expression term. See: exprt.
   |  entryFunction // is also a pseudfn.
-  |  ETIME_KW functionArgs  // also noarg
+  |  ETIME functionArgs  // also noarg
   |  EXTENT LEFTPAREN expression RIGHTPAREN
   |  FRAMECOL LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMEDOWN LEFTPAREN widgetname RIGHTPAREN  // also noarg
@@ -404,7 +404,7 @@ builtinFunction:
   |  MTIME functionArgs  // also noarg
   |  nextValueFunction // is also a pseudfn.
   |  PAGENUMBER LEFTPAREN streamname RIGHTPAREN  // also noarg
-  |  PAGESIZE_KW LEFTPAREN streamname RIGHTPAREN  // also noarg
+  |  PAGESIZE LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  PROVERSION LEFTPAREN expression RIGHTPAREN
   |  rawFunction // is also a pseudfn.
   |  SEEK LEFTPAREN ( INPUT | OUTPUT | streamname | STREAMHANDLE expression ) RIGHTPAREN // streamname, /not/ stream_name_or_handle.
@@ -658,7 +658,7 @@ methodParamList:
   ;
 
 inuic:
-    IN_KW ( MENU | FRAME | BROWSE | SUBMENU | BUFFER ) widgetname
+    IN ( MENU | FRAME | BROWSE | SUBMENU | BUFFER ) widgetname
   ;
 
 varRecField:
@@ -744,7 +744,7 @@ typeName2:
 
 constant:
      // These are necessarily reserved keywords.
-     TRUE_KW | FALSE_KW | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL_KW
+     TRUE | FALSE | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL
   |  NOWAIT | SHARELOCK | EXCLUSIVELOCK | NOLOCK
   |  BIGENDIAN
   |  FINDCASESENSITIVE | FINDGLOBAL | FINDNEXTOCCURRENCE | FINDPREVOCCURRENCE | FINDSELECT | FINDWRAPAROUND
@@ -816,7 +816,7 @@ allExceptFields:
 analyzeStatement:
     // Don't ask me - I don't know. I just found it in PSC's grammar.
     ANALYZE filenameOrValue filenameOrValue ( OUTPUT filenameOrValue )?
-    ( APPEND | ALL | NOERROR_KW )*
+    ( APPEND | ALL | NOERROR )*
     statementEnd
   ;
 
@@ -843,7 +843,7 @@ assignOptionSub:
   ;
 
 assignStatement:
-    ASSIGN assignmentList NOERROR_KW? statementEnd
+    ASSIGN assignmentList NOERROR? statementEnd
   ;
 
 assignmentList: // SEMITRANSLATED
@@ -855,7 +855,7 @@ assignmentList: // SEMITRANSLATED
   ;
 
 assignStatement2:
-    ( pseudoFunction | widattr | field ) EQUAL expression NOERROR_KW? statementEnd
+    ( pseudoFunction | widattr | field ) EQUAL expression NOERROR? statementEnd
   ;
 
 assignEqual:
@@ -904,13 +904,13 @@ bufferCompareStatement:
     EXPLICIT?
     (
       ( COMPARES | COMPARE )
-      NOERROR_KW?
+      NOERROR?
       blockColon
       bufferComparesBlock
       bufferComparesEnd
     )?
     NOLOBS?
-    NOERROR_KW?
+    NOERROR?
     statementEnd
   ;
 
@@ -919,7 +919,7 @@ bufferCompareSave:
   ;
 
 bufferCompareResult:
-    RESULT IN_KW
+    RESULT IN
   ;
 
 bufferComparesBlock:
@@ -936,7 +936,7 @@ bufferComparesEnd:
 
 bufferCopyStatement:
     BUFFERCOPY record exceptUsingFields? TO record
-    bufferCopyAssign? NOLOBS? NOERROR_KW? statementEnd
+    bufferCopyAssign? NOLOBS? NOERROR? statementEnd
   ;
 
 bufferCopyAssign:
@@ -1015,7 +1015,7 @@ chooseOption:
   | colorAnyOrValue
   | goOnPhrase
   | KEYS field
-  | NOERROR_KW
+  | NOERROR
   | pauseExpression
   ;
 
@@ -1183,7 +1183,7 @@ compileOption:
   | STREAMIO compileEqual?
   | MINSIZE compileEqual?
   | LANGUAGES LEFTPAREN (compileLang (COMMA compileLang)* )? RIGHTPAREN
-  | TEXTSEGGROW compileEqual
+  | TEXTSEGGROWTH compileEqual
   | DEBUGLIST filenameOrValue
   | DEFAULTNOXLATE compileEqual?
   | GENERATEMD5 compileEqual?
@@ -1193,7 +1193,7 @@ compileOption:
   | V6FRAME compileEqual?
   | OPTIONS expressionTerm
   | OPTIONSFILE filenameOrValue
-  | NOERROR_KW
+  | NOERROR
   ;
 
 compileLang:
@@ -1218,11 +1218,11 @@ compileAppend:
   ;
 
 compilePage:
-    ( PAGESIZE_KW | PAGEWIDTH ) expression
+    ( PAGESIZE | PAGEWIDTH ) expression
   ;
 
 connectStatement:
-    CONNECT ( NOERROR_KW | DDE | filenameOrValue )* statementEnd
+    CONNECT ( NOERROR | DDE | filenameOrValue )* statementEnd
   ;
 
 constructorStatement:
@@ -1250,7 +1250,7 @@ convertPhraseOption:
   ;
     
 copyLobStatement:
-    COPYLOB FROM? copyLobFrom copyLobStarting? copyLobFor? TO copyLobTo ( NOCONVERT | convertPhrase )? NOERROR_KW? statementEnd
+    COPYLOB FROM? copyLobFrom copyLobStarting? copyLobFor? TO copyLobTo ( NOCONVERT | convertPhrase )? NOERROR? statementEnd
   ;
 
 copyLobFrom:
@@ -1274,24 +1274,24 @@ forTenant:
   ;
 
 createStatement:
-    CREATE record forTenant? usingRow? NOERROR_KW? statementEnd
+    CREATE record forTenant? usingRow? NOERROR? statementEnd
   ;
 
 createWhateverStatement:
     CREATE
     ( CALL | CLIENTPRINCIPAL | DATASET | DATASOURCE | SAXATTRIBUTES | SAXREADER | SAXWRITER | SOAPHEADER | SOAPHEADERENTRYREF
       | XDOCUMENT | XNODEREF )
-    expressionTerm inWidgetPoolExpression? NOERROR_KW? statementEnd
+    expressionTerm inWidgetPoolExpression? NOERROR? statementEnd
   ;
 
 createAliasStatement:
-    CREATE ALIAS anyOrValue FOR DATABASE anyOrValue NOERROR_KW? statementEnd
+    CREATE ALIAS anyOrValue FOR DATABASE anyOrValue NOERROR? statementEnd
   ;
 
 createBrowseStatement:
     CREATE BROWSE expressionTerm
     inWidgetPoolExpression?
-    NOERROR_KW?
+    NOERROR?
     assignOption?
     triggerPhrase?
     statementEnd
@@ -1300,7 +1300,7 @@ createBrowseStatement:
 createQueryStatement:
     CREATE QUERY expressionTerm
     inWidgetPoolExpression?
-    NOERROR_KW?
+    NOERROR?
     statementEnd
   ;
 
@@ -1308,7 +1308,7 @@ createBufferStatement:
     CREATE BUFFER expressionTerm FOR TABLE expression
     createBufferName?
     inWidgetPoolExpression?
-    NOERROR_KW?
+    NOERROR?
     statementEnd
   ;
 
@@ -1317,7 +1317,7 @@ createBufferName:
   ;
 
 createDatabaseStatement:
-    CREATE DATABASE expression createDatabaseFrom? REPLACE? NOERROR_KW? statementEnd
+    CREATE DATABASE expression createDatabaseFrom? REPLACE? NOERROR? statementEnd
   ;
 
 createDatabaseFrom:
@@ -1329,15 +1329,15 @@ createServerStatement:
   ;
 
 createServerSocketStatement:
-    CREATE SERVERSOCKET expressionTerm NOERROR_KW? statementEnd
+    CREATE SERVERSOCKET expressionTerm NOERROR? statementEnd
   ;
 
 createSocketStatement:
-    CREATE SOCKET expressionTerm NOERROR_KW? statementEnd
+    CREATE SOCKET expressionTerm NOERROR? statementEnd
   ;
 
 createTempTableStatement:
-    CREATE TEMPTABLE expressionTerm inWidgetPoolExpression? NOERROR_KW? statementEnd
+    CREATE TEMPTABLE expressionTerm inWidgetPoolExpression? NOERROR? statementEnd
   ;
 
 createConnect:
@@ -1355,14 +1355,14 @@ createWidgetStatement:
     field
     inWidgetPoolExpression?
     createConnect?
-    NOERROR_KW?
+    NOERROR?
     assignOption?
     triggerPhrase?
     statementEnd
   ;
 
 createWidgetPoolStatement:
-    CREATE WIDGETPOOL expression? PERSISTENT? NOERROR_KW? statementEnd
+    CREATE WIDGETPOOL expression? PERSISTENT? NOERROR? statementEnd
   ;
 
 canFindFunction:
@@ -1424,7 +1424,7 @@ datatypeVar:
   | RECID
   | ROWID
   | WIDGETHANDLE
-  | IN_KW  // Works for INTEGER
+  | IN  // Works for INTEGER
   | LOG    // Works for LOGICAL
   | ROW    // Works for ROWID
   | WIDGET // Works for WIDGET-HANDLE
@@ -1434,31 +1434,31 @@ datatypeVar:
   ;
 
 ddeAdviseStatement:
-    DDE ADVISE expression ( START | STOP ) ITEM expression timeExpression? NOERROR_KW? statementEnd
+    DDE ADVISE expression ( START | STOP ) ITEM expression timeExpression? NOERROR? statementEnd
   ;
 
 ddeExecuteStatement:
-    DDE EXECUTE expression COMMAND expression timeExpression? NOERROR_KW? statementEnd
+    DDE EXECUTE expression COMMAND expression timeExpression? NOERROR? statementEnd
   ;
 
 ddeGetStatement:
-    DDE GET expression TARGET field ITEM expression timeExpression? NOERROR_KW? statementEnd
+    DDE GET expression TARGET field ITEM expression timeExpression? NOERROR? statementEnd
   ;
 
 ddeInitiateStatement:
-    DDE INITIATE field FRAME expression APPLICATION expression TOPIC expression NOERROR_KW? statementEnd
+    DDE INITIATE field FRAME expression APPLICATION expression TOPIC expression NOERROR? statementEnd
   ;
 
 ddeRequestStatement:
-    DDE REQUEST expression TARGET field ITEM expression timeExpression? NOERROR_KW? statementEnd
+    DDE REQUEST expression TARGET field ITEM expression timeExpression? NOERROR? statementEnd
   ;
 
 ddeSendStatement:
-    DDE SEND expression SOURCE expression ITEM expression timeExpression? NOERROR_KW? statementEnd
+    DDE SEND expression SOURCE expression ITEM expression timeExpression? NOERROR? statementEnd
   ;
 
 ddeTerminateStatement:
-    DDE TERMINATE expression NOERROR_KW? statementEnd
+    DDE TERMINATE expression NOERROR? statementEnd
   ;
 
 decimalsExpr:
@@ -1867,11 +1867,11 @@ defineVariableStatement:
   ;
 
 deleteStatement:
-    DELETE_KW record validatePhrase? NOERROR_KW? statementEnd
+    DELETE record validatePhrase? NOERROR? statementEnd
   ;
 
 deleteAliasStatement:
-    DELETE_KW ALIAS
+    DELETE ALIAS
     (  identifier
     |  QSTRING
     |  valueExpression
@@ -1880,19 +1880,19 @@ deleteAliasStatement:
   ;
 
 deleteObjectStatement:
-    DELETE_KW OBJECT expression NOERROR_KW? statementEnd
+    DELETE OBJECT expression NOERROR? statementEnd
   ;
 
 deleteProcedureStatement:
-    DELETE_KW PROCEDURE expression NOERROR_KW? statementEnd
+    DELETE PROCEDURE expression NOERROR? statementEnd
   ;
 
 deleteWidgetStatement:
-    DELETE_KW WIDGET gWidget* statementEnd
+    DELETE WIDGET gWidget* statementEnd
   ;
 
 deleteWidgetPoolStatement:
-    DELETE_KW WIDGETPOOL expression? NOERROR_KW? statementEnd
+    DELETE WIDGETPOOL expression? NOERROR? statementEnd
   ;
 
 delimiterConstant:
@@ -1928,7 +1928,7 @@ disableTriggersStatement:
   ;
 
 disconnectStatement:
-    DISCONNECT filenameOrValue NOERROR_KW? statementEnd
+    DISCONNECT filenameOrValue NOERROR? statementEnd
   ;
 
 displayStatement:
@@ -1937,7 +1937,7 @@ displayStatement:
     UNLESSHIDDEN? displayItemsOrRecord
     exceptFields? inWindowExpression?
     displayWith*
-    NOERROR_KW?
+    NOERROR?
     statementEnd
   ;
 
@@ -1992,7 +1992,7 @@ dynamicCurrentValueFunction:
   ;
 
 dynamicNewStatement:
-    fieldEqualDynamicNew NOERROR_KW? statementEnd
+    fieldEqualDynamicNew NOERROR? statementEnd
   ;
 
 dynamicPropertyFunction:
@@ -2029,7 +2029,7 @@ editorOption:
   ;
 
 emptyTempTableStatement:
-    EMPTY TEMPTABLE record NOERROR_KW? statementEnd
+    EMPTY TEMPTABLE record NOERROR? statementEnd
   ;
 
 enableStatement:
@@ -2129,7 +2129,7 @@ finallyEnd:
   ;
 
 findStatement:
-    FIND findWhich? recordphrase ( NOWAIT | NOPREFETCH | NOERROR_KW )* statementEnd
+    FIND findWhich? recordphrase ( NOWAIT | NOPREFETCH | NOERROR )* statementEnd
   ;
 
 fontExpression:
@@ -2344,8 +2344,8 @@ functionStatement:
     // It's also not illegal to define them IN.. more than once, so we can't
     // drop the scope the first time it's defined.
     ( FORWARDS ( LEXCOLON | PERIOD | EOF )
-    | { _input.LA(2) == SUPER }? IN_KW SUPER ( LEXCOLON | PERIOD | EOF )
-    | (MAP TO? identifier)? IN_KW expression ( LEXCOLON | PERIOD | EOF )
+    | { _input.LA(2) == SUPER }? IN SUPER ( LEXCOLON | PERIOD | EOF )
+    | (MAP TO? identifier)? IN expression ( LEXCOLON | PERIOD | EOF )
     | blockColon
       codeBlock
       functionEnd
@@ -2390,8 +2390,8 @@ externalFunctionStatement:
     extentPhrase?
     PRIVATE?
     functionParams?
-    ( { _input.LA(2) == SUPER }? IN_KW SUPER
-    | ( MAP TO? identifier )? IN_KW expression
+    ( { _input.LA(2) == SUPER }? IN SUPER
+    | ( MAP TO? identifier )? IN expression
     )
     ( LEXCOLON | PERIOD )
     { support.funcEnd(); }
@@ -2438,12 +2438,12 @@ ifElse:
 
 inExpression:
     { support.disallowUnknownMethodCalls(); }
-    IN_KW expression
+    IN expression
     { support.allowUnknownMethodCalls(); }
   ;
 
 inWindowExpression:
-    IN_KW WINDOW expression
+    IN WINDOW expression
   ;
 
 imagePhraseOption:
@@ -2460,11 +2460,11 @@ importStatement:
     | varRecField
     | CARET
     )?
-    exceptFields? NOLOBS? NOERROR_KW? statementEnd
+    exceptFields? NOLOBS? NOERROR? statementEnd
   ;
 
 inWidgetPoolExpression:
-    IN_KW WIDGETPOOL expression
+    IN WIDGETPOOL expression
   ;
 
 initialConstant:
@@ -2513,7 +2513,7 @@ inputOutputThroughStatement:
 insertStatement:
     INSERT record exceptFields?
     usingRow?
-    framePhrase? NOERROR_KW? statementEnd
+    framePhrase? NOERROR? statementEnd
   ;
 
 interfaceStatement:
@@ -2581,7 +2581,7 @@ notIoOption:
   | NOMAP
   | NUMCOPIES
   | PAGED
-  | PAGESIZE_KW
+  | PAGESIZE
   | PORTRAIT
   | UNBUFFERED
   )
@@ -2604,7 +2604,7 @@ ioOption:
   | NOMAP
   | NUMCOPIES anyOrValue
   | PAGED
-  | PAGESIZE_KW anyOrValue
+  | PAGESIZE anyOrValue
   | PORTRAIT
   | UNBUFFERED 
   ;
@@ -2617,7 +2617,7 @@ ioPrinter:
     PRINTER  // A unix printer name could be just about anything.
     ( valueExpression
     | ~( VALUE | NUMCOPIES | COLLATE | LANDSCAPE | PORTRAIT | APPEND | BINARY | ECHO | NOECHO | KEEPMESSAGES
-         | NOMAP | MAP | PAGED | PAGESIZE_KW | UNBUFFERED | NOCONVERT | CONVERT | PERIOD | EOF )
+         | NOMAP | MAP | PAGED | PAGESIZE | UNBUFFERED | NOCONVERT | CONVERT | PERIOD | EOF )
     )?
   ;
 
@@ -2661,7 +2661,7 @@ loadOption:
   | DYNAMIC
   | NEW
   | BASEKEY expression
-  | NOERROR_KW
+  | NOERROR
   ;
 
 messageStatement:
@@ -2738,7 +2738,7 @@ nextValueFunction:
   ;
 
 nullPhrase:
-    NULL_KW functionArgs?
+    NULL functionArgs?
   ;
 
 onStatement:
@@ -2784,7 +2784,7 @@ onEventOfDbObject:
   ;
 
 onOtherOfDbObject:
-    ( CREATE | DELETE_KW | FIND ) OF record labelConstant?
+    ( CREATE | DELETE | FIND ) OF record labelConstant?
   ;
 
 onWriteOfDbObject:
@@ -2923,13 +2923,13 @@ procedureStatement:
 procedureOption:
     EXTERNAL constant procedureDllOption*
   | PRIVATE
-  | IN_KW SUPER
+  | IN SUPER
   ;
 
 procedureDllOption:
-    CDECL_KW
-  | PASCAL_KW
-  | STDCALL_KW
+    CDECL
+  | PASCAL
+  | STDCALL
   | ORDINAL expression
   | PERSISTENT
   ;
@@ -2993,7 +2993,7 @@ putKeyValueStatement:
     ( SECTION expression KEY ( DEFAULT | expression ) VALUE expression
     | ( COLOR | FONT ) ( expression | ALL )
     )
-    NOERROR_KW? statementEnd
+    NOERROR? statementEnd
   ;
 
 queryName:
@@ -3046,7 +3046,7 @@ rawFunction:
   ;
 
 rawTransferStatement:
-    RAWTRANSFER rawTransferElement TO rawTransferElement NOERROR_KW? statementEnd
+    RAWTRANSFER rawTransferElement TO rawTransferElement NOERROR? statementEnd
   ;
 
 rawTransferElement:
@@ -3092,7 +3092,7 @@ recordOption:
   | lockHow
   | NOWAIT
   | NOPREFETCH
-  | NOERROR_KW
+  | NOERROR
   | TABLESCAN
   ;
 
@@ -3103,19 +3103,19 @@ releaseStatementWrapper:
   ;
 
 releaseStatement:
-    RELEASE record NOERROR_KW? statementEnd
+    RELEASE record NOERROR? statementEnd
   ;
 
 releaseExternalStatement:
-    RELEASE EXTERNAL PROCEDURE? expression NOERROR_KW? statementEnd
+    RELEASE EXTERNAL PROCEDURE? expression NOERROR? statementEnd
   ;
 
 releaseObjectStatement:
-    RELEASE OBJECT expression NOERROR_KW? statementEnd
+    RELEASE OBJECT expression NOERROR? statementEnd
   ;
 
 repositionStatement:
-    REPOSITION identifier repositionOption NOERROR_KW? statementEnd
+    REPOSITION identifier repositionOption NOERROR? statementEnd
   ;
 
 repositionOption:
@@ -3156,7 +3156,7 @@ runStatement:
     RUN filenameOrValue
     ( LEFTANGLE LEFTANGLE filenameOrValue RIGHTANGLE RIGHTANGLE )?
     runOption* parameterList?
-    ( NOERROR_KW | anyOrValue )*
+    ( NOERROR | anyOrValue )*
     statementEnd
   ;
 
@@ -3179,15 +3179,15 @@ runSet:
   ;
 
 runStoredProcedureStatement:
-    RUN STOREDPROCEDURE identifier assignEqual? NOERROR_KW? parameterList? statementEnd
+    RUN STOREDPROCEDURE identifier assignEqual? NOERROR? parameterList? statementEnd
   ;
 
 runSuperStatement:
-    RUN SUPER parameterList? NOERROR_KW? statementEnd
+    RUN SUPER parameterList? NOERROR? statementEnd
   ;
 
 saveCacheStatement:
-    SAVE CACHE ( CURRENT | COMPLETE ) anyOrValue TO filenameOrValue NOERROR_KW? statementEnd
+    SAVE CACHE ( CURRENT | COMPLETE ) anyOrValue TO filenameOrValue NOERROR? statementEnd
   ;
 
 scrollStatement:
@@ -3228,7 +3228,7 @@ setStatement:
     inWindowExpression?
     framePhrase?
     editingPhrase?
-    NOERROR_KW?
+    NOERROR?
     statementEnd
   ;
 
@@ -3301,7 +3301,7 @@ streamNameOrHandle:
 subscribeStatement:
     SUBSCRIBE procedureExpression? TO? expression
     ( ANYWHERE | inExpression )
-    subscribeRun? NOERROR_KW? statementEnd
+    subscribeRun? NOERROR? statementEnd
   ;
 
 subscribeRun:
@@ -3464,7 +3464,7 @@ triggerProcedureStatement:
   ;
 
 triggerProcedureStatementSub1:
-    ( CREATE | DELETE_KW | FIND | REPLICATIONCREATE | REPLICATIONDELETE ) OF record labelConstant?
+    ( CREATE | DELETE | FIND | REPLICATIONCREATE | REPLICATIONDELETE ) OF record labelConstant?
   ;
 
 triggerProcedureStatementSub2:
@@ -3504,7 +3504,7 @@ undoAction:
   ;
 
 unloadStatement:
-    UNLOAD expression NOERROR_KW? statementEnd
+    UNLOAD expression NOERROR? statementEnd
   ;
 
 unsubscribeStatement:
@@ -3526,12 +3526,12 @@ updateStatement:
     inWindowExpression?
     framePhrase?
     editingPhrase?
-    NOERROR_KW?
+    NOERROR?
     statementEnd
   ;
 
 useStatement:
-    USE expression NOERROR_KW? statementEnd
+    USE expression NOERROR? statementEnd
   ;
 
 usingRow:
@@ -3554,7 +3554,7 @@ validatePhrase:
   ;
 
 validateStatement:
-    VALIDATE record NOERROR_KW? statementEnd
+    VALIDATE record NOERROR? statementEnd
   ;
 
 viewStatement:

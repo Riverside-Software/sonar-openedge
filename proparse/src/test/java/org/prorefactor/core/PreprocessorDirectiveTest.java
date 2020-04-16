@@ -138,11 +138,11 @@ public class PreprocessorDirectiveTest {
   public void test04() throws IOException {
     ParseUnit unit01 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &myParam=1 }".getBytes()), "<unnamed>", session);
     TokenSource stream01 = unit01.preprocess();
-    assertEquals(LexerTest.nextVisibleToken(stream01).getType(), Proparse.TRUE_KW);
+    assertEquals(LexerTest.nextVisibleToken(stream01).getType(), Proparse.TRUE);
 
     ParseUnit unit02 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &abc=1 &myParam }".getBytes()), "<unnamed>", session);
     TokenSource stream02 = unit02.preprocess();
-    assertEquals(LexerTest.nextVisibleToken(stream02).getType(), Proparse.TRUE_KW);
+    assertEquals(LexerTest.nextVisibleToken(stream02).getType(), Proparse.TRUE);
     IncludeRef events02 = (IncludeRef) unit02.getMacroSourceArray()[1];
     assertEquals(events02.numArgs(), 2);
     assertEquals(events02.getArgNumber(1).getName(), "abc");
@@ -153,12 +153,12 @@ public class PreprocessorDirectiveTest {
 
     ParseUnit unit03 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &abc &myParam }".getBytes()), "<unnamed>", session);
     TokenSource stream03 = unit03.preprocess();
-    assertEquals(LexerTest.nextVisibleToken(stream03).getType(), Proparse.TRUE_KW);
+    assertEquals(LexerTest.nextVisibleToken(stream03).getType(), Proparse.TRUE);
 
     ParseUnit unit04 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &myParam &abc }".getBytes()), "<unnamed>", session);
     TokenSource stream04 = unit04.preprocess();
     // Different behavior in ABL
-    assertEquals(LexerTest.nextVisibleToken(stream04).getType(), Proparse.TRUE_KW);
+    assertEquals(LexerTest.nextVisibleToken(stream04).getType(), Proparse.TRUE);
     IncludeRef events04 = (IncludeRef) unit04.getMacroSourceArray()[1];
     assertEquals(events04.numArgs(), 2);
     assertEquals(events04.getArgNumber(1).getName(), "myParam");
@@ -168,7 +168,7 @@ public class PreprocessorDirectiveTest {
 
     ParseUnit unit05 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &abc &myParam=1 }".getBytes()), "<unnamed>", session);
     TokenSource stream05 = unit05.preprocess();
-    assertEquals(LexerTest.nextVisibleToken(stream05).getType(), Proparse.TRUE_KW);
+    assertEquals(LexerTest.nextVisibleToken(stream05).getType(), Proparse.TRUE);
     IncludeRef events05 = (IncludeRef) unit05.getMacroSourceArray()[1];
     assertEquals(events05.numArgs(), 2);
     assertEquals(events05.getArgNumber(1).getName(), "abc");
