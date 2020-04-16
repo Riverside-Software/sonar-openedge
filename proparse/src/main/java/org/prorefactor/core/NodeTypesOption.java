@@ -21,8 +21,5 @@ public enum NodeTypesOption {
   STRUCTURE,
   KEYWORD,
   RESERVED,
-  SYMBOL,
-  MAY_BE_REGULAR_FUNC,
-  MAY_BE_NO_ARG_FUNC,
-  SYSHDL;
+  SYMBOL
 }
