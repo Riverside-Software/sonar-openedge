@@ -100,4 +100,48 @@ public class LexerTest {
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
   }
 
+  @Test
+  public void testKeywords01() {
+    ProgressLexer lexer = new ProgressLexer(session,
+        ByteSource.wrap(
+            "AUTO-ENDKEY AUTO-END-KEY CAPS UPPER COM-HANDLE COMPONENT-HANDLE EXCLUSIVE EXCLUSIVE-LOCK ".getBytes()),
+        "file.txt");
+    assertNextToken(lexer, ABLNodeType.AUTOENDKEY, "AUTO-ENDKEY");
+    assertNextToken(lexer, ABLNodeType.AUTOENDKEY, "AUTO-END-KEY");
+    assertNextToken(lexer, ABLNodeType.CAPS, "CAPS");
+    assertNextToken(lexer, ABLNodeType.CAPS, "UPPER");
+    assertNextToken(lexer, ABLNodeType.COMHANDLE, "COM-HANDLE");
+    assertNextToken(lexer, ABLNodeType.COMHANDLE, "COMPONENT-HANDLE");
+    assertNextToken(lexer, ABLNodeType.EXCLUSIVELOCK, "EXCLUSIVE");
+    assertNextToken(lexer, ABLNodeType.EXCLUSIVELOCK, "EXCLUSIVE-LOCK");
+
+    ProgressLexer lexer2 = new ProgressLexer(session,
+        ByteSource.wrap(
+            "INIT INITIAL LC LOWER NO-ATTR NO-ATTR-SPACE NO-ATTR-LIST TRANS TRANSAC TRANSACT TRANSACTION ".getBytes()),
+        "file.txt");
+    assertNextToken(lexer2, ABLNodeType.INITIAL, "INIT");
+    assertNextToken(lexer2, ABLNodeType.INITIAL, "INITIAL");
+    assertNextToken(lexer2, ABLNodeType.LC, "LC");
+    assertNextToken(lexer2, ABLNodeType.LC, "LOWER");
+    assertNextToken(lexer2, ABLNodeType.NOATTRSPACE, "NO-ATTR");
+    assertNextToken(lexer2, ABLNodeType.NOATTRSPACE, "NO-ATTR-SPACE");
+    assertNextToken(lexer2, ABLNodeType.NOATTRLIST, "NO-ATTR-LIST");
+    assertNextToken(lexer2, ABLNodeType.TRANSACTION, "TRANS");
+    assertNextToken(lexer2, ABLNodeType.ID, "TRANSAC");
+    assertNextToken(lexer2, ABLNodeType.TRANSACTION, "TRANSACT");
+    assertNextToken(lexer2, ABLNodeType.TRANSACTION, "TRANSACTION");
+
+    ProgressLexer lexer3 = new ProgressLexer(session, ByteSource.wrap("USERID USER-ID ".getBytes()), "file.txt");
+    assertNextToken(lexer3, ABLNodeType.USERID, "USERID");
+    assertNextToken(lexer3, ABLNodeType.ID, "USER-ID");
+  }
+
+  private static void assertNextToken(ProgressLexer lexer, ABLNodeType type, String text) {
+    ProToken tok = (ProToken) lexer.nextToken();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), type);
+    assertEquals(tok.getText(), text);
+    tok = (ProToken) lexer.nextToken();
+    assertNotNull(tok);
+  }
 }

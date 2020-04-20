@@ -313,4 +313,59 @@ public class ParserTest {
 
     return retVal;
   }
+
+  @Test
+  public void testExpression01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "def image img1 file 'f1' size 1 by 1. def frame f1 img1 at row 1 col 1. img1:load-image('f2') in frame f1.".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 2);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).getState2(), ABLNodeType.IMAGE.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(1).getState2(), ABLNodeType.FRAME.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).get(0).query(ABLNodeType.FRAME).size(),
+        1);
+  }
+
+  @Test
+  public void testExpression02() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "def var xxx as widget-handle. def var yyy as char. def frame zzz yyy. create control-frame xxx. xxx:move-after(yyy:handle in frame zzz).".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 3);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).getState2(),
+        ABLNodeType.VARIABLE.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(1).getState2(),
+        ABLNodeType.VARIABLE.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(2).getState2(), ABLNodeType.FRAME.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).getState2(), ABLNodeType.WIDGET.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
+  }
+
+  @Test
+  public void testExpression03() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("def var xxx as handle. message xxx::yyy.".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
+  }
+
+  @Test
+  public void testExpression04() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "def var xxx as System.Reflection.PropertyInfo. xxx:SetValue('xxx', xxx as long, 'xx' + 'yy' + 'zz').".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
+    JPNode expr = unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).get(0);
+    assertEquals(expr.query(ABLNodeType.METHOD_PARAM_LIST).size(), 1);
+    // Comma and paren are counted
+    assertEquals(expr.query(ABLNodeType.METHOD_PARAM_LIST).get(0).getNumberOfChildren(), 7);
+  }
+
 }
