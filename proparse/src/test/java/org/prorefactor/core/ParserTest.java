@@ -22,8 +22,13 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
+import org.antlr.v4.runtime.atn.DecisionInfo;
+import org.antlr.v4.runtime.atn.ParseInfo;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Database;
 import org.prorefactor.core.schema.IDatabase;
@@ -31,6 +36,7 @@ import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -368,4 +374,17 @@ public class ParserTest {
     assertEquals(expr.query(ABLNodeType.METHOD_PARAM_LIST).get(0).getNumberOfChildren(), 7);
   }
 
+  @Test
+  public void testVeryLongMaxK01() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "maxk.p"), session);
+    unit.enableProfiler();
+    unit.parse();
+    ParseInfo info = unit.getParseInfo();
+
+    // Not really a unit test, but if max_k is less then 450, then the grammar rules have changed (in a good way)
+    Optional<DecisionInfo> decision = Arrays.stream(info.getDecisionInfo()).max(
+        (d1, d2) -> Long.compare(d1.SLL_MaxLook, d2.SLL_MaxLook));
+    assertTrue(decision.isPresent());
+    assertTrue(decision.get().SLL_MaxLook > 450);
+  }
 }

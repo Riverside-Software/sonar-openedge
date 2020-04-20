@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -31,6 +32,8 @@ import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.atn.DecisionInfo;
+import org.antlr.v4.runtime.atn.ParseInfo;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -93,6 +96,8 @@ public class ParseUnit {
   private ITypeInfo typeInfo = null;
   private List<Integer> trxBlocks;
   private ParserSupport support;
+  private boolean profiler;
+  private ParseInfo parseInfo;
 
   public ParseUnit(File file, RefactorSession session) {
     this(file, file.getPath(), session);
@@ -112,12 +117,16 @@ public class ParseUnit {
     this.session = session;
   }
 
-  public TreeParserRootSymbolScope getRootScope() {
-    return rootScope;
+  public void enableProfiler() {
+    profiler = true;
   }
 
-  public void setRootScope(TreeParserRootSymbolScope rootScope) {
-    this.rootScope = rootScope;
+  public ParseInfo getParseInfo() {
+    return parseInfo;
+  }
+
+  public TreeParserRootSymbolScope getRootScope() {
+    return rootScope;
   }
 
   /** Get the syntax tree top (Program_root) node */
@@ -197,6 +206,7 @@ public class ParseUnit {
 
     ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
     Proparse parser = new Proparse(new CommonTokenStream(lexer));
+    parser.setProfile(profiler);
     parser.initAntlr4(session, xref);
     parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
     parser.setErrorHandler(new BailErrorStrategy());
@@ -222,6 +232,11 @@ public class ParseUnit {
     sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
     metrics = lexer.getMetrics();
     support = parser.getParserSupport();
+
+    if (profiler) {
+      parseInfo = parser.getParseInfo();
+      printLongestRules(parseInfo);
+    }
 
     LOGGER.trace("Exiting ParseUnit#parse()");
   }
@@ -384,6 +399,27 @@ public class ParseUnit {
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
+  }
+
+  private void printLongestRules(ParseInfo parseInfo) {
+    Arrays.stream(parseInfo.getDecisionInfo()).filter(decision -> decision.SLL_MaxLook > 10).sorted(
+        (d1, d2) -> Long.compare(d2.SLL_MaxLook, d1.SLL_MaxLook)).forEach(
+            decision -> System.out.println(String.format(
+                "Time: %d in %d calls - LL_Lookaheads: %d - Max k: %d - Ambiguities: %d - Errors: %d - Rule: %s - Code: %s",
+                decision.timeInPrediction / 1000000, decision.invocations, decision.SLL_TotalLook, decision.SLL_MaxLook,
+                decision.ambiguities.size(), decision.errors.size(),
+                Proparse.ruleNames[Proparse._ATN.getDecisionState(decision.decision).ruleIndex],
+                getCodeFromMaxLookEvent(decision))));
+  }
+
+  private static String getCodeFromMaxLookEvent(DecisionInfo info) {
+    StringBuilder bldr = new StringBuilder();
+    for (int zz = info.SLL_MaxLookEvent.startIndex; zz <= info.SLL_MaxLookEvent.stopIndex; zz++) {
+      if (info.SLL_MaxLookEvent.input.get(zz).getChannel() == Token.DEFAULT_CHANNEL)
+        bldr.append(info.SLL_MaxLookEvent.input.get(zz).getText()).append(' ');
+    }
+
+    return bldr.toString();
   }
 
 }
