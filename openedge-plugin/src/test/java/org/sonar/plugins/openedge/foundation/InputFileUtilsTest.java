@@ -42,6 +42,10 @@ public class InputFileUtilsTest {
 
   @Test
   public void testDifferentFileSystem() throws Exception {
+    // Only on Windows...
+    if (!System.getProperty("os.name").toLowerCase().startsWith("win"))
+      return;
+
     SensorContextTester context = TestProjectSensorContext.createContext();
     InputFile f1 = context.fileSystem().inputFile(context.fileSystem().predicates().hasFilename("test1.p"));
     // Different file system, we just return the file name
