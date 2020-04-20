@@ -19,7 +19,10 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
+import java.io.File;
+
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.internal.DefaultFileSystem;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.Assert;
@@ -33,6 +36,17 @@ public class InputFileUtilsTest {
     SensorContextTester context = TestProjectSensorContext.createContext();
     InputFile f1 = context.fileSystem().inputFile(context.fileSystem().predicates().hasFilename("test1.p"));
     Assert.assertEquals(InputFileUtils.getFile(f1), f1.file());
+    System.out.println(f1.toString());
     Assert.assertEquals(InputFileUtils.getRelativePath(f1, context.fileSystem()), f1.relativePath());
   }
+
+  @Test
+  public void testDifferentFileSystem() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    InputFile f1 = context.fileSystem().inputFile(context.fileSystem().predicates().hasFilename("test1.p"));
+    // Different file system, we just return the file name
+    // Will fail in the unexpected case when unit tests are executed on the X: drive
+    Assert.assertEquals(InputFileUtils.getRelativePath(f1, new DefaultFileSystem(new File("X:\\"))), "test1.p");
+  }
+
 }
