@@ -421,35 +421,6 @@ builtinFunction:
   |  recordFunction
   ;
 
-
-
-optionalArgFunction:
-    (  GETDBCLIENT
-    |  GETEFFECTIVETENANTID
-    |  GETEFFECTIVETENANTNAME
-    )
-    optionalFunctionArgs
-    ;
-
-// If you add a function keyword here, also add option NodeTypesOption.MAY_BE_REGULAR_FUNC to ABLNodeType entry
-recordFunction:
-    (  AMBIGUOUS
-    |  AVAILABLE
-    |  CURRENTCHANGED
-    |  DATASOURCEMODIFIED
-    |  ERROR
-    |  LOCKED
-    |  NEW
-    |  RECID
-    |  RECORDLENGTH
-    |  REJECTED
-    |  ROWID
-    |  ROWSTATE
-    )
-    ( LEFTPAREN record RIGHTPAREN | record )
-  ;
-
-
 parameter:
     // This is the syntax for parameters when calling or running something.
     // This can refer to a buffer/tablehandle, but it doesn't define one.

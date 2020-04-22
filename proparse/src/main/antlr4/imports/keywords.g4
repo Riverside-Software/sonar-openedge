@@ -13,11 +13,9 @@ argFunction:
   | ABSOLUTE
   | ADDINTERVAL
   | ALIAS
-  | AMBIGUOUS
   | ASC
   | ASCENDING
   | AUDITENABLED
-  | AVAILABLE
   | AVG
   | BASE64DECODE
   | BASE64ENCODE
@@ -40,10 +38,8 @@ argFunction:
   | CONNECTED
   | COUNT
   | COUNTOF
-  | CURRENTCHANGED
   | CURRENTRESULTROW
   | CURRENTVALUE
-  | DATASOURCEMODIFIED
   | DATE
   | DATETIME
   | DATETIMETZ
@@ -67,7 +63,6 @@ argFunction:
   | ENCODE
   | ENCRYPT
   | ENTRY
-  | ERROR
   | ETIME
   | EXP
   | EXTENT
@@ -87,10 +82,7 @@ argFunction:
   | GETCODEPAGE
   | GETCODEPAGES
   | GETCOLLATIONS
-  | GETDBCLIENT
   | GETDOUBLE
-  | GETEFFECTIVETENANTID
-  | GETEFFECTIVETENANTNAME
   | GETFLOAT
   | GETINT64
   | GETLICENSE
@@ -133,7 +125,6 @@ argFunction:
   | LISTSETATTRS
   | LISTWIDGETS
   | LOADPICTURE
-  | LOCKED
   | LOG
   | LOGICAL
   | LOOKUP
@@ -144,7 +135,6 @@ argFunction:
   | MINIMUM
   | MONTH
   | MTIME
-  | NEW
   | NEXTVALUE
   | NORMALIZE
   | NUMENTRIES
@@ -158,16 +148,11 @@ argFunction:
   | QUOTER
   | RANDOM
   | RAW
-  | RECID
-  | RECORDLENGTH
-  | REJECTED
   | REPLACE
   | RGBVALUE
   | RIGHTTRIM
   | RINDEX
   | ROUND
-  | ROWID
-  | ROWSTATE
   | SDBNAME
   | SEARCH
   | SEEK
@@ -201,6 +186,33 @@ argFunction:
   | YEAR
   )
   functionArgs
+;
+
+recordFunction:
+  (
+    AMBIGUOUS
+  | AVAILABLE
+  | CURRENTCHANGED
+  | DATASOURCEMODIFIED
+  | ERROR
+  | LOCKED
+  | NEW
+  | RECID
+  | RECORDLENGTH
+  | REJECTED
+  | ROWID
+  | ROWSTATE
+  )
+  ( LEFTPAREN record RIGHTPAREN | record )
+;
+
+optionalArgFunction:
+  (
+    GETDBCLIENT
+  | GETEFFECTIVETENANTID
+  | GETEFFECTIVETENANTNAME
+  )
+  optionalFunctionArgs
 ;
 
 noArgFunction:

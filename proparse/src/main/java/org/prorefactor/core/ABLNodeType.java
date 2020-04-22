@@ -14,11 +14,14 @@
  ********************************************************************************/
 package org.prorefactor.core;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.antlr.v4.runtime.Token;
 import org.prorefactor.proparse.antlr4.Proparse;
@@ -1407,7 +1410,7 @@ public enum ABLNodeType {
       USER, //
       USERID //
   );
-  
+
   private static final EnumSet<ABLNodeType> REGULAR_FUNCTIONS = EnumSet.of( //
       AACBIT, //
       AAMSG, //
@@ -1601,7 +1604,28 @@ public enum ABLNodeType {
       WIDGETHANDLE, //
       YEAR //
   );
-  
+
+  private static final EnumSet<ABLNodeType> RECORD_FUNCTIONS = EnumSet.of( //
+      AMBIGUOUS, //
+      AVAILABLE, //
+      CURRENTCHANGED, //
+      DATASOURCEMODIFIED, //
+      ERROR, //
+      LOCKED, //
+      NEW, //
+      RECID, //
+      RECORDLENGTH, //
+      REJECTED, //
+      ROWID, //
+      ROWSTATE //
+  );
+
+  private static final EnumSet<ABLNodeType> OPTIONAL_ARG_FUNCTIONS = EnumSet.of( //
+      GETDBCLIENT, //
+      GETEFFECTIVETENANTID, //
+      GETEFFECTIVETENANTNAME //
+  );
+
   private static final EnumSet<ABLNodeType> SYSTEM_HANDLES = EnumSet.of( //
       AAMEMORY, //
       ACTIVEFORM, //
@@ -1933,37 +1957,70 @@ public enum ABLNodeType {
   }
 
   private static void generateKeywordsG4(final PrintStream out) {
+    out.println("// Generated file - Do not manually edit");
+    out.println();
+    out.println("parser grammar keywords;");
+    out.println();
+    out.println("options {");
+    out.println("  tokenVocab=BaseTokenTypes;");
+    out.println("}");
+    out.println();
+
+    final Comparator<ABLNodeType> naturalOrder = (ABLNodeType t1,
+        ABLNodeType t2) -> t1.toString().compareTo(t2.toString());
+    final Predicate<ABLNodeType> p1 = type -> !RECORD_FUNCTIONS.contains(type)
+        && !OPTIONAL_ARG_FUNCTIONS.contains(type);
     out.println("argFunction:");
     out.println("  (");
-    REGULAR_FUNCTIONS.stream().sorted(
-        (ABLNodeType t1, ABLNodeType t2) -> t1.toString().compareTo(t2.toString())).forEach(
-            type -> out.println("  | " + type));
+    REGULAR_FUNCTIONS.stream().filter(p1).sorted(naturalOrder).findFirst().ifPresent(
+        type -> out.println("    " + type));
+    REGULAR_FUNCTIONS.stream().filter(p1).sorted(naturalOrder).skip(1).forEach(type -> out.println("  | " + type));
     out.println("  )");
     out.println("  functionArgs");
     out.println(";");
     out.println();
 
+    out.println("recordFunction:");
+    out.println("  (");
+    RECORD_FUNCTIONS.stream().sorted(naturalOrder).findFirst().ifPresent(type -> out.println("    " + type));
+    RECORD_FUNCTIONS.stream().sorted(naturalOrder).skip(1).forEach(type -> out.println("  | " + type));
+    out.println("  )");
+    out.println("  ( LEFTPAREN record RIGHTPAREN | record )");
+    out.println(";");
+    out.println();
+
+    out.println("optionalArgFunction:");
+    out.println("  (");
+    OPTIONAL_ARG_FUNCTIONS.stream().sorted(naturalOrder).findFirst().ifPresent(type -> out.println("    " + type));
+    OPTIONAL_ARG_FUNCTIONS.stream().sorted(naturalOrder).skip(1).forEach(type -> out.println("  | " + type));
+    out.println("  )");
+    out.println("  optionalFunctionArgs");
+    out.println(";");
+    out.println();
+
     out.println("noArgFunction:");
-    NO_ARGUMENT_FUNCTIONS.stream().sorted(
-        (ABLNodeType t1, ABLNodeType t2) -> t1.toString().compareTo(t2.toString())).forEach(
-            type -> out.println("| " + type));
+    NO_ARGUMENT_FUNCTIONS.stream().sorted(naturalOrder).findFirst().ifPresent(type -> out.println("  " + type));
+    NO_ARGUMENT_FUNCTIONS.stream().sorted(naturalOrder).skip(1).forEach(type -> out.println("| " + type));
     out.println(";");
     out.println();
 
     out.println("systemHandleName:");
-    SYSTEM_HANDLES.stream().sorted((ABLNodeType t1, ABLNodeType t2) -> t1.toString().compareTo(t2.toString())).forEach(
-        type -> out.println("| " + type));
+    SYSTEM_HANDLES.stream().sorted(naturalOrder).findFirst().ifPresent(type -> out.println("  " + type));
+    SYSTEM_HANDLES.stream().sorted(naturalOrder).skip(1).forEach(type -> out.println("| " + type));
     out.println(";");
     out.println();
 
     out.println("unreservedkeyword:");
     Arrays.stream(ABLNodeType.values()).filter(ABLNodeType::isUnreservedKeywordType).sorted(
-        (ABLNodeType t1, ABLNodeType t2) -> t1.toString().compareTo(t2.toString())).forEach(
-            type -> out.println("| " + type));
+        naturalOrder).findFirst().ifPresent(type -> out.println("  " + type));
+    Arrays.stream(ABLNodeType.values()).filter(ABLNodeType::isUnreservedKeywordType).sorted(naturalOrder).skip(
+        1).forEach(type -> out.println("| " + type));
     out.println(";");
   }
 
-  public static void main(String[] args) {
-    generateKeywordsG4(System.out);
+  public static void main(String[] args) throws IOException {
+    try (PrintStream output = new PrintStream("src/main/antlr4/imports/keywords.g4")) {
+      generateKeywordsG4(output);
+    }
   }
 }

@@ -387,4 +387,14 @@ public class ParserTest {
     assertTrue(decision.isPresent());
     assertTrue(decision.get().SLL_MaxLook > 450);
   }
+
+  @Test
+  public void testRecordNameNode01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "find first _file. display recid(_file).".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().query(ABLNodeType.RECORD_NAME).size(), 2);
+  }
+
 }
