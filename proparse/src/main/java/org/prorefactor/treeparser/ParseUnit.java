@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.atn.DecisionInfo;
@@ -72,8 +73,8 @@ import com.progress.xref.CrossReference.Source.Reference;
 import eu.rssw.pct.elements.ITypeInfo;
 
 /**
- * Provides parse unit information, such as the symbol table and a reference to the AST. TreeParser01 calls
- * symbolUsage() in this class in order to build the symbol table.
+ * Executes the lexer, parser and semantic analysis, then provides access to the Abstract Syntax Tree and to the
+ * SymbolScope objects.
  */
 public class ParseUnit {
   private static final Logger LOGGER = LoggerFactory.getLogger(ParseUnit.class);
@@ -96,8 +97,12 @@ public class ParseUnit {
   private ITypeInfo typeInfo = null;
   private List<Integer> trxBlocks;
   private ParserSupport support;
+
+  // ANTLR4 debug and profiler switches
   private boolean profiler;
   private ParseInfo parseInfo;
+  private boolean trace;
+  private boolean ambiguityReport;
 
   public ParseUnit(File file, RefactorSession session) {
     this(file, file.getPath(), session);
@@ -117,24 +122,48 @@ public class ParseUnit {
     this.session = session;
   }
 
+  /**
+   * Enables profiler mode in the parsing phase. Should not be activated in production, CPU intensive
+   * @see ParseUnit#getParseInfo()
+   */
   public void enableProfiler() {
     profiler = true;
   }
 
-  public ParseInfo getParseInfo() {
+  /**
+   * Enables trace mode in the parsing phase. Should not be activated in production, extremely verbose
+   */
+  public void enableTrace() {
+    trace = true;
+  }
+
+  /**
+   * Enables trace mode in the parsing phase. Should not be activated in production, CPU intensive and extremely verbose
+   */
+  public void reportAmbiguity() {
+    ambiguityReport = true;
+  }
+
+  /**
+   * @return Null if profiler is not enabled, or a ParseInfo object (after #parse() has been called)
+   * @see ParseUnit#enableProfiler()
+   */
+  public @Nullable ParseInfo getParseInfo() {
     return parseInfo;
   }
 
-  public TreeParserRootSymbolScope getRootScope() {
+  public @Nullable TreeParserRootSymbolScope getRootScope() {
     return rootScope;
   }
 
-  /** Get the syntax tree top (Program_root) node */
-  public ProgramRootNode getTopNode() {
+  /**
+   * @return The syntax tree top node, or null if file has not been parsed
+   */
+  public @Nullable ProgramRootNode getTopNode() {
     return topNode;
   }
 
-  public JPNodeMetrics getMetrics() {
+  public @Nullable JPNodeMetrics getMetrics() {
     return metrics;
   }
 
@@ -206,22 +235,32 @@ public class ParseUnit {
 
     ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
     Proparse parser = new Proparse(new CommonTokenStream(lexer));
+    parser.setTrace(trace);
     parser.setProfile(profiler);
     parser.initAntlr4(session, xref);
-    parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
-    parser.setErrorHandler(new BailErrorStrategy());
-    parser.removeErrorListeners();
-    parser.addErrorListener(new DescriptiveErrorListener());
+    if (ambiguityReport) {
+      parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
+      parser.addErrorListener(new DiagnosticErrorListener(true));
+      tree = parser.program();
+    } else {
+      // Two-stage parsing
+      parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+      parser.setErrorHandler(new BailErrorStrategy());
+      parser.removeErrorListeners();
+      parser.addErrorListener(new DescriptiveErrorListener());
 
-    try {
-      tree = parser.program();
-    } catch (ParseCancellationException caught) {
-      parser.setErrorHandler(new ProparseErrorStrategy(session.getProparseSettings().allowAntlrTokenDeletion(),
-          session.getProparseSettings().allowAntlrTokenInsertion(), session.getProparseSettings().allowAntlrRecover()));
-      parser.getInterpreter().setPredictionMode(PredictionMode.LL);
-      // Another ParseCancellationException can be thrown in recover fails again
-      tree = parser.program();
+      try {
+        tree = parser.program();
+      } catch (ParseCancellationException uncaught) {
+        LOGGER.trace("Switching to LL prediction mode");
+        parser.setErrorHandler(new ProparseErrorStrategy(session.getProparseSettings().allowAntlrTokenDeletion(),
+            session.getProparseSettings().allowAntlrTokenInsertion(), session.getProparseSettings().allowAntlrRecover()));
+        parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+        // Another ParseCancellationException can be thrown if recover fails again
+        tree = parser.program();
+      }
     }
+
     lexer.parseComplete();
     topNode = (ProgramRootNode) new JPNodeVisitor(parser.getParserSupport(),
         (BufferedTokenStream) parser.getInputStream()).visit(tree).build(parser.getParserSupport());

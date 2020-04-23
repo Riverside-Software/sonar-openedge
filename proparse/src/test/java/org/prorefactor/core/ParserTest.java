@@ -389,12 +389,29 @@ public class ParserTest {
   }
 
   @Test
-  public void testRecordNameNode01() {
+  public void testAmbiguityReport() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "maxk.p"), session);
+    unit.reportAmbiguity();
+    unit.parse();
+  }
+
+  @Test
+  public void testRecordFunction01() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
         "find first _file. display recid(_file).".getBytes()),
         "<unnamed>", session);
     unit.treeParser01();
     assertEquals(unit.getTopNode().query(ABLNodeType.RECORD_NAME).size(), 2);
+  }
+
+  @Test
+  public void testOptionalArgFunction01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "get-db-client('sp2k'). get-db-client().".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    assertEquals(unit.getTopNode().query(ABLNodeType.GETDBCLIENT).size(), 2);
   }
 
 }
