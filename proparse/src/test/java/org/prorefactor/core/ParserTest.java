@@ -414,4 +414,13 @@ public class ParserTest {
     assertEquals(unit.getTopNode().query(ABLNodeType.GETDBCLIENT).size(), 2);
   }
 
+  @Test
+  public void testDatatype01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "interface rssw.test: method public Progress.Lang.Object getService(input xxx as class Progress.Lang.Class). end interface.".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+  }
+
 }

@@ -425,8 +425,8 @@ parameterArg:
   | { _input.LA(3) != OBJCOLON && _input.LA(3) != DOUBLECOLON }? DATASET identifier parameterDatasetOptions  # parameterArgDataset
   | DATASETHANDLE field parameterDatasetOptions # parameterArgDatasetHandle
   | PARAMETER field EQUAL expression  # parameterArgStoredProcedure  // for RUN STORED-PROCEDURE
-  | n=identifier AS ( CLASS typeName | datatypeComNative | datatypeVar ) { support.defVar($n.text); } # parameterArgAs
-  | expression ( AS datatypeCom )? # parameterArgComDatatype
+  | id=identifier AS datatype { support.defVar($id.text); } # parameterArgAs
+  | expression ( AS datatype )? # parameterArgComDatatype
   ;
 
 // FIXME Can be empty
@@ -1334,33 +1334,6 @@ datatype:
   | datatypeVar
   ;
 
-datatypeCom:
-    INT64 | datatypeComNative
-  ;
-
-datatypeComNative:
-    SHORT | FLOAT | CURRENCY | UNSIGNEDBYTE | ERRORCODE | IUNKNOWN
-  ;
-
-datatypeDll:
-    CHARACTER | INT64 | datatypeDllNative
-  | { support.abbrevDatatype(_input.LT(1).getText()) == CHARACTER }? id=ID
-  ;
-
-datatypeDllNative:
-    BYTE | DOUBLE | FLOAT | LONG | SHORT | UNSIGNEDSHORT
-  ;
-
-datatypeField:
-    // Ambig: An unreservedkeyword can be a class name (user defined type). First option to match wins.
-    BLOB | CLOB | datatypeVar
-  ;
-
-datatypeParam:
-    // Ambig: An unreservedkeyword can be a class name (user defined type). First option to match wins.
-    datatypeDllNative | datatypeVar
-  ;
-
 // Ambig: An unreservedkeyword can be a class name (user defined type).
 datatypeVar:
     CHARACTER
@@ -1383,9 +1356,19 @@ datatypeVar:
   | LOG    // Works for LOGICAL
   | ROW    // Works for ROWID
   | WIDGET // Works for WIDGET-HANDLE
+  | BLOB
+  | CLOB
+  | BYTE
+  | DOUBLE
+  | FLOAT
+  | LONG
+  | SHORT
+  | UNSIGNEDBYTE
+  | UNSIGNEDSHORT
+  | UNSIGNEDINTEGER
   | // Assignment of datatype returns value of assignment, if non-zero, is a valid abbreviation.
     { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID
-  | typeName
+  | { !support.isDataTypeVariable(_input.LT(1)) }? typeName
   ;
 
 ddeAdviseStatement:
@@ -1676,7 +1659,7 @@ defineParameterStatementSub2:
   ;
 
 defineParamVar:
-    ( AS HANDLE TO? datatypeDll | AS CLASS typeName | AS datatypeParam )
+    ( AS HANDLE TO? datatypeVar | AS datatype )
     ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase2 )*
   ;
 
@@ -2038,7 +2021,7 @@ fieldsFields:
   ;
 
 fieldOption:
-    AS asDataTypeField
+    AS datatype
   | caseSensitiveOrNot
   | colorExpression
   | COLUMNCODEPAGE expression
@@ -2061,14 +2044,6 @@ fieldOption:
   | xmlNodeType
   | serializeName
   | SERIALIZEHIDDEN
-  ;
-
-asDataTypeField:
-    ( CLASS typeName | datatypeField )
-  ;
-
-asDataTypeVar:
-    ( CLASS typeName | datatypeVar )
   ;
 
 fillInPhrase:
@@ -2142,7 +2117,7 @@ formatPhrase:
   ;
 
 formatOption:
-     AS datatypeVar { support.defVarInlineAntlr4(); }
+     AS datatype { support.defVarInlineAntlr4(); }
   |  atPhrase
   |  ATTRSPACE
   |  NOATTRSPACE
@@ -2291,7 +2266,7 @@ functionStatement:
     // You don't see it in PSC's grammar, but the compiler really does insist on a datatype.
     f=FUNCTION
     id=identifier { support.funcBegin($id.text, _localctx); }
-    ( RETURNS | RETURN )? ( CLASS typeName | datatypeVar )
+    ( RETURNS | RETURN )? datatype
     extentPhrase?
     PRIVATE?
     functionParams?
@@ -2327,21 +2302,21 @@ functionParam:
   ;
 
 functionParamStd:
-    n=identifier AS asDataTypeVar extentPhrase? { support.defVar($n.text); } # functionParamStandardAs
+    n=identifier AS datatype extentPhrase? { support.defVar($n.text); } # functionParamStandardAs
   | n2=identifier likeField extentPhrase? { support.defVar($n2.text); } # functionParamStandardLike
   | { _input.LA(2) != NAMEDOT }? TABLE FOR? record APPEND? BIND? # functionParamStandardTable
   | { _input.LA(2) != NAMEDOT }? TABLEHANDLE FOR? hn=identifier APPEND? BIND? { support.defVar($hn.text); } # functionParamStandardTableHandle
   | { _input.LA(2) != NAMEDOT}? DATASET FOR? identifier APPEND? BIND?  # functionParamStandardDataset
   | { _input.LA(2) != NAMEDOT}? DATASETHANDLE FOR? hn2=identifier APPEND? BIND? { support.defVar($hn2.text); }  # functionParamStandardDatasetHandle
   | // When declaring a function, it's possible to just list the datatype without an identifier AS
-    ( CLASS typeName | datatypeVar ) extentPhrase2? # functionParamStandardOther
+    datatype extentPhrase2? # functionParamStandardOther
   ;
 
 externalFunctionStatement:
     // You don't see it in PSC's grammar, but the compiler really does insist on a datatype.
     f=FUNCTION
     id=identifier { support.funcBegin($id.text, _localctx); }
-    ( RETURNS | RETURN )? ( CLASS typeName | datatypeVar )
+    ( RETURNS | RETURN )? datatype
     extentPhrase?
     PRIVATE?
     functionParams?

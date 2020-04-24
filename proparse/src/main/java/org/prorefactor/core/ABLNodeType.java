@@ -193,7 +193,7 @@ public enum ABLNodeType {
   AATRACE(Proparse.AATRACE, "_trace", NodeTypesOption.KEYWORD),
 
   // Special keywords, usually with alternate syntax, weird abbreviation form
-  // This list also includes a few unusual or almst unknown keywords
+  // This list also includes a few unusual or almost unknown keywords
   // In short, anything which doesn't comply with -zgenkwlist
   ANALYZE(Proparse.ANALYZE, "analyze", 6, NodeTypesOption.KEYWORD),
   ASC(Proparse.ASC, "asc", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
@@ -259,6 +259,7 @@ public enum ABLNodeType {
   TIMESTAMP(Proparse.TIMESTAMP, "timestamp", NodeTypesOption.KEYWORD),
   TOOLBAR(Proparse.TOOLBAR, "tool-bar", NodeTypesOption.KEYWORD),
   TRANSACTION(Proparse.TRANSACTION, "trans", 5, "transaction", 8, NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
+  UNSIGNEDINTEGER(Proparse.UNSIGNEDINTEGER, "unsigned-integer", NodeTypesOption.KEYWORD),
   WORKTABLE(Proparse.WORKTABLE, "work-table", 8, "workfile", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
 
   // A
@@ -1646,6 +1647,40 @@ public enum ABLNodeType {
       WEBCONTEXT //
   );
 
+  private static final EnumSet<ABLNodeType> DATATYPE_IN_VARIABLE = EnumSet.of( //
+      CHARACTER, //
+      COMHANDLE, //
+      DATE, //
+      DATETIME, //
+      DATETIMETZ, //
+      DECIMAL, //
+      HANDLE, //
+      INTEGER, //
+      INT64, //
+      LOGICAL, //
+      LONGCHAR, //
+      MEMPTR, //
+      RAW, //
+      RECID, //
+      ROWID, //
+      WIDGETHANDLE, //
+      IN, // Works for INTEGER
+      LOG, // Works for LOGICAL
+      ROW, // Works for ROWID
+      WIDGET, // Works for WIDGETHANDLE
+      BLOB, //
+      CLOB, //
+      BYTE, //
+      DOUBLE, //
+      FLOAT, //
+      LONG, //
+      SHORT, //
+      UNSIGNEDBYTE, //
+      UNSIGNEDSHORT, //
+      UNSIGNEDINTEGER, //
+      VOID
+  );
+
   private static final String ERR_INIT = "Error while initializing typeMap - Duplicate key ";
   private static Map<String, ABLNodeType> literalsMap = new HashMap<>();
   private static Map<Integer, ABLNodeType> typeMap = new HashMap<>();
@@ -1775,6 +1810,10 @@ public enum ABLNodeType {
 
   public boolean isSystemHandleName() {
     return SYSTEM_HANDLES.contains(this);
+  }
+
+  public boolean isValidDatatype() {
+    return DATATYPE_IN_VARIABLE.contains(this);
   }
 
   public boolean mayBeNoArgFunc() {
@@ -1925,6 +1964,13 @@ public enum ABLNodeType {
     if (type == null)
       return false;
     return type.isSystemHandleName();
+  }
+
+  public static boolean isValidDatatype(int nodeType) {
+    ABLNodeType type = typeMap.get(nodeType);
+    if (type == null)
+      return false;
+    return type.isValidDatatype();
   }
 
   static boolean mayBeNoArgFunc(int nodeType) {

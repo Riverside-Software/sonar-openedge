@@ -1026,15 +1026,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
-  public Builder visitDatatypeDll(DatatypeDllContext ctx) {
-    Builder node = visitChildren(ctx);
-    if ((ctx.id != null) && (support.abbrevDatatype(ctx.id.getText()) == Proparse.CHARACTER))
-      node.changeType(ABLNodeType.CHARACTER);
-
-    return node;
-  }
-
-  @Override
   public Builder visitDatatypeVar(DatatypeVarContext ctx) {
     Builder builder = visitChildren(ctx);
     if (builder.getNodeType() == ABLNodeType.IN)

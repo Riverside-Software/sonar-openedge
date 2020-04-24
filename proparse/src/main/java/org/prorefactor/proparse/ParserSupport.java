@@ -275,6 +275,10 @@ public class ParserSupport {
     return null != isTable(token.getText().toLowerCase());
   }
 
+  public boolean isDataTypeVariable(Token token) {
+    return ABLNodeType.isValidDatatype(token.getType());
+  }
+
   public boolean isVar(String name) {
     return currentScope.isVariable(name);
   }

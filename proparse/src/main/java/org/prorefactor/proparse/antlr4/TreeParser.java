@@ -304,14 +304,14 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterParameterArgAs(ParameterArgAsContext ctx) {
     Variable variable = new Variable("", currentScope);
-    if (ctx.datatypeComNative() != null) {
-      variable.setDataType(DataType.getDataType(ctx.datatypeComNative().start.getType()));
-    } else if (ctx.datatypeVar() != null) {
-      variable.setDataType(DataType.getDataType(ctx.datatypeVar().start.getType()));
-    } else {
+    if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
+        || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
       variable.setDataType(DataType.CLASS);
-      variable.setClassName(ctx.typeName().getText());
+      variable.setClassName(ctx.datatype().getStop().getText());
+    } else {
+      variable.setDataType(DataType.getDataType(ctx.datatype().getStop().getType()));
     }
+
     currSymbol = variable;
   }
 
@@ -366,7 +366,7 @@ public class TreeParser extends ProparseBaseListener {
     Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), true);
     wipParameters.getFirst().setSymbol(var);
     addToSymbolScope(var);
-    defAs(ctx.asDataTypeVar());
+    defAs(ctx.datatype());
   }
 
   @Override
@@ -1476,7 +1476,7 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterFieldOption(FieldOptionContext ctx) {
     if (ctx.AS() != null) {
-      defAs(ctx.asDataTypeField());
+      defAs(ctx.datatype());
     } else if (ctx.LIKE() != null) {
       setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
     }
@@ -1612,11 +1612,13 @@ public class TreeParser extends ProparseBaseListener {
     scopeAdd(blockNode);
 
     Routine r = new Routine(ctx.id.getText(), definingScope, currentScope);
-    if (ctx.typeName() != null) {
+    if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
+        || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
       r.setReturnDatatypeNode(DataType.CLASS);
     } else {
-      r.setReturnDatatypeNode(DataType.getDataType(ctx.datatypeVar().getStart().getType()));
+      r.setReturnDatatypeNode(DataType.getDataType(ctx.datatype().getStop().getType()));
     }
+
     r.setProgressType(ABLNodeType.FUNCTION);
     r.setDefinitionNode(blockNode);
     blockNode.setSymbol(r);
@@ -1663,10 +1665,11 @@ public class TreeParser extends ProparseBaseListener {
     scopeAdd(blockNode);
 
     Routine r = new Routine(ctx.id.getText(), definingScope, currentScope);
-    if (ctx.typeName() != null) {
+    if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
+        || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
       r.setReturnDatatypeNode(DataType.CLASS);
     } else {
-      r.setReturnDatatypeNode(DataType.getDataType(ctx.datatypeVar().getStart().getType()));
+      r.setReturnDatatypeNode(DataType.getDataType(ctx.datatype().getStop().getType()));
     }
     r.setProgressType(ABLNodeType.FUNCTION);
     r.setDefinitionNode(blockNode);
