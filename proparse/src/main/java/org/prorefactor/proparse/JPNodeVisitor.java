@@ -231,26 +231,41 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExpressionMinus(ExpressionMinusContext ctx) {
-    Builder holder = createTreeFromFirstNode(ctx);
-    holder.changeType(ABLNodeType.UNARY_MINUS);
-    return holder;
+    return createTreeFromFirstNode(ctx).changeType(ABLNodeType.UNARY_MINUS);
+  }
+
+  @Override
+  public Builder visitExpressionNoEqMinus(ExpressionNoEqMinusContext ctx) {
+    return createTreeFromFirstNode(ctx).changeType(ABLNodeType.UNARY_MINUS);
   }
 
   @Override
   public Builder visitExpressionPlus(ExpressionPlusContext ctx) {
-    Builder holder = createTreeFromFirstNode(ctx);
-    holder.changeType(ABLNodeType.UNARY_PLUS);
-    return holder;
+    return createTreeFromFirstNode(ctx).changeType(ABLNodeType.UNARY_PLUS);
   }
 
   @Override
-  public Builder visitExpressionOp1(ExpressionOp1Context ctx) {
+  public Builder visitExpressionNoEqPlus(ExpressionNoEqPlusContext ctx) {
+    return createTreeFromFirstNode(ctx).changeType(ABLNodeType.UNARY_PLUS);
+  }
+
+  private Builder expressionOp1(RuleNode ctx) {
     Builder holder = createTreeFromSecondNode(ctx).setOperator();
     if (holder.getNodeType() == ABLNodeType.STAR)
       holder.changeType(ABLNodeType.MULTIPLY);
     else if (holder.getNodeType() == ABLNodeType.SLASH)
       holder.changeType(ABLNodeType.DIVIDE);
     return holder;
+  }
+  
+  @Override
+  public Builder visitExpressionOp1(ExpressionOp1Context ctx) {
+    return expressionOp1(ctx);
+  }
+
+  @Override
+  public Builder visitExpressionNoEqOp1(ExpressionNoEqOp1Context ctx) {
+    return expressionOp1(ctx);
   }
 
   @Override
@@ -259,7 +274,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
-  public Builder visitExpressionComparison(ExpressionComparisonContext ctx) {
+  public Builder visitExpressionNoEqOp2(ExpressionNoEqOp2Context ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
+  }
+
+  private Builder expressionComparison(RuleNode ctx) {
     Builder holder = createTreeFromSecondNode(ctx).setOperator();
     if (holder.getNodeType() == ABLNodeType.LEFTANGLE)
       holder.changeType(ABLNodeType.LTHAN);
@@ -278,7 +297,22 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitExpressionComparison(ExpressionComparisonContext ctx) {
+    return expressionComparison(ctx);
+  }
+
+  @Override
+  public Builder visitExpressionNoEqComparison(ExpressionNoEqComparisonContext ctx) {
+    return expressionComparison(ctx);
+  }
+
+  @Override
   public Builder visitExpressionStringComparison(ExpressionStringComparisonContext ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
+  }
+
+  @Override
+  public Builder visitExpressionNoEqStringComparison(ExpressionNoEqStringComparisonContext ctx) {
     return createTreeFromSecondNode(ctx).setOperator();
   }
 
@@ -288,12 +322,27 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitExpressionNoEqNot(ExpressionNoEqNotContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
   public Builder visitExpressionAnd(ExpressionAndContext ctx) {
     return createTreeFromSecondNode(ctx).setOperator();
   }
 
   @Override
+  public Builder visitExpressionNoEqAnd(ExpressionNoEqAndContext ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
+  }
+
+  @Override
   public Builder visitExpressionOr(ExpressionOrContext ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
+  }
+
+  @Override
+  public Builder visitExpressionNoEqOr(ExpressionNoEqOrContext ctx) {
     return createTreeFromSecondNode(ctx).setOperator();
   }
 

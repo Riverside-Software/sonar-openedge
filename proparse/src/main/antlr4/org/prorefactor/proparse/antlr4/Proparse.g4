@@ -100,7 +100,7 @@ functionCallStatementSub:
   ;
 
 expressionStatement:
-    expression NOERROR? statementEnd
+    expressionNoEq NOERROR? statementEnd
   ;
 
 labeledBlock:
@@ -501,6 +501,20 @@ expression:
   | expression AND expression # expressionAnd
   | expression OR expression # expressionOr
   | expressionTerm # expressionExprt
+  ;
+
+// Exactly similar to expression, except that it's not possible to have the '=' sign, as this case is handled by assignStatement2
+expressionNoEq:
+    MINUS expressionTerm  # expressionNoEqMinus
+  | PLUS expressionTerm   # expressionNoEqPlus
+  | expression ( STAR | MULTIPLY | SLASH | DIVIDE | MODULO ) expression # expressionNoEqOp1
+  | expression ( PLUS | MINUS) expression # expressionNoEqOp2
+  | expression ( EQ | GTORLT | NE | RIGHTANGLE | GTHAN | GTOREQUAL | GE | LEFTANGLE | LTHAN | LTOREQUAL | LE ) expression # expressionNoEqComparison
+  | expression ( MATCHES | BEGINS | CONTAINS ) expression # expressionNoEqStringComparison
+  | NOT expression  # expressionNoEqNot
+  | expression AND expression # expressionNoEqAnd
+  | expression OR expression # expressionNoEqOr
+  | expressionTerm # expressionNoEqExprt
   ;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
