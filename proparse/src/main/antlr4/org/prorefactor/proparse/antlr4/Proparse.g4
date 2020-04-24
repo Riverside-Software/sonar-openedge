@@ -374,8 +374,6 @@ memoryManagementFunction:
 // ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
 builtinFunction:
      ACCUMULATE accumulateWhat ( byExpr expression | expression )
-  |  ADDINTERVAL LEFTPAREN expression COMMA expression COMMA expression RIGHTPAREN
-  |  AUDITENABLED LEFTPAREN expression? RIGHTPAREN
   |  canFindFunction
   |  CAST LEFTPAREN expression COMMA typeName RIGHTPAREN
   |  currentValueFunction // is also a pseudfn.
@@ -388,34 +386,20 @@ builtinFunction:
        (COMMA parameter)*
        RIGHTPAREN
   // ENTERED and NOTENTERED are only dealt with as part of an expression term. See: exprt.
-  |  entryFunction // is also a pseudfn.
-  |  ETIME functionArgs  // also noarg
-  |  EXTENT LEFTPAREN expression RIGHTPAREN
   |  FRAMECOL LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMEDOWN LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMELINE LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMEROW LEFTPAREN widgetname RIGHTPAREN  // also noarg
-  |  GETCODEPAGE functionArgs
-  |  GUID LEFTPAREN expression? RIGHTPAREN
+  |  GETCLASS LEFTPAREN typeName RIGHTPAREN
   |  IF expression THEN expression ELSE expression
   |  ldbnameFunction
-  |  lengthFunction // is also a pseudfn.
   |  LINECOUNTER LEFTPAREN streamname RIGHTPAREN  // also noarg
-  |  MTIME functionArgs  // also noarg
   |  nextValueFunction // is also a pseudfn.
   |  PAGENUMBER LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  PAGESIZE LEFTPAREN streamname RIGHTPAREN  // also noarg
-  |  PROVERSION LEFTPAREN expression RIGHTPAREN
-  |  rawFunction // is also a pseudfn.
   |  SEEK LEFTPAREN ( INPUT | OUTPUT | streamname | STREAMHANDLE expression ) RIGHTPAREN // streamname, /not/ stream_name_or_handle.
-  |  substringFunction // is also a pseudfn.
   |  SUPER parameterList  // also noarg
-  |  TENANTID LEFTPAREN expression? RIGHTPAREN
-  |  TENANTNAME LEFTPAREN expression? RIGHTPAREN
-  |  TIMEZONE functionArgs  // also noarg
   |  TYPEOF LEFTPAREN expression COMMA typeName RIGHTPAREN
-  |  GETCLASS LEFTPAREN typeName RIGHTPAREN
-  |  (USERID | USER) functionArgs  // also noarg
   |  argFunction
   |  optionalArgFunction
   |  recordFunction

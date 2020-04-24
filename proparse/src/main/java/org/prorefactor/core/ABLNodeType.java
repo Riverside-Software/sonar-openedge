@@ -1420,7 +1420,6 @@ public enum ABLNodeType {
       AMBIGUOUS, //
       ASC, //
       ASCENDING, //
-      AUDITENABLED, //
       AVAILABLE, //
       AVG, //
       BASE64DECODE, //
@@ -1431,11 +1430,9 @@ public enum ABLNodeType {
       BUFFERTENANTNAME, //
       BUFFERTENANTID, //
       CANDO, //
-      CANFIND, //
       CANQUERY, //
       CANSET, //
       CAPS, //
-      CAST, //
       CHR, //
       CODEPAGECONVERT, //
       COLLATE, //
@@ -1446,7 +1443,6 @@ public enum ABLNodeType {
       COUNTOF, //
       CURRENTCHANGED, //
       CURRENTRESULTROW, //
-      CURRENTVALUE, //
       DATASOURCEMODIFIED, //
       DATE, //
       DATETIME, //
@@ -1463,9 +1459,6 @@ public enum ABLNodeType {
       DECIMAL, //
       DECRYPT, //
       DYNAMICCAST, //
-      DYNAMICCURRENTVALUE, //
-      DYNAMICFUNCTION, //
-      DYNAMICINVOKE, //
       DYNAMICNEXTVALUE, //
       DYNAMICPROPERTY, //
       ENCODE, //
@@ -1478,16 +1471,11 @@ public enum ABLNodeType {
       FILL, //
       FIRST, //
       FIRSTOF, //
-      FRAMECOL, //
-      FRAMEDOWN, //
-      FRAMELINE, //
-      FRAMEROW, //
       GENERATEPBEKEY, //
       GETBITS, //
       GETBYTE, //
       GETBYTEORDER, //
       GETBYTES, //
-      GETCLASS, //
       GETCODEPAGE, //
       GETCODEPAGES, //
       GETCOLLATIONS, //
@@ -1505,7 +1493,6 @@ public enum ABLNodeType {
       GETSTRING, //
       GETUNSIGNEDLONG, //
       GETUNSIGNEDSHORT, //
-      GUID, //
       HANDLE, //
       HEXDECODE, //
       HEXENCODE, //
@@ -1531,7 +1518,6 @@ public enum ABLNodeType {
       LEFTTRIM, //
       LENGTH, //
       LIBRARY, //
-      LINECOUNTER, //
       LISTEVENTS, //
       LISTQUERYATTRS, //
       LISTSETATTRS, //
@@ -1549,15 +1535,13 @@ public enum ABLNodeType {
       MONTH, //
       MTIME, //
       NEW, //
-      NEXTVALUE, //
       NORMALIZE, //
       NUMENTRIES, //
       NUMRESULTS, //
       OSGETENV, //
-      PAGENUMBER, //
-      PAGESIZE, //
       PDBNAME, //
       PROGRAMNAME, //
+      PROVERSION, //
       QUERYOFFEND, //
       QUOTER, //
       RANDOM, //
@@ -1574,7 +1558,6 @@ public enum ABLNodeType {
       ROWSTATE, //
       SDBNAME, //
       SEARCH, //
-      SEEK, //
       SETDBCLIENT, //
       SETEFFECTIVETENANT, //
       SETUSERID, //
@@ -1585,7 +1568,6 @@ public enum ABLNodeType {
       SUBSTITUTE, //
       SUBSTRING, //
       SUM, //
-      SUPER, //
       TENANTID, //
       TENANTNAME, //
       TENANTNAMETOID, //
@@ -1593,7 +1575,6 @@ public enum ABLNodeType {
       TOROWID, //
       TRIM, //
       TRUNCATE, //
-      TYPEOF, //
       UNBOX, //
       USER, //
       USERID, //
@@ -1621,9 +1602,13 @@ public enum ABLNodeType {
   );
 
   private static final EnumSet<ABLNodeType> OPTIONAL_ARG_FUNCTIONS = EnumSet.of( //
+      AUDITENABLED, //
       GETDBCLIENT, //
       GETEFFECTIVETENANTID, //
-      GETEFFECTIVETENANTNAME //
+      GETEFFECTIVETENANTNAME,//
+      GUID, //
+      TENANTID, //
+      TENANTNAME //
   );
 
   private static final EnumSet<ABLNodeType> SYSTEM_HANDLES = EnumSet.of( //
