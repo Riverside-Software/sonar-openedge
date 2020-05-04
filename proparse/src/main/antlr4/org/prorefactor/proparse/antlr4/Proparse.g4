@@ -1659,7 +1659,7 @@ defineParameterStatementSub2:
   ;
 
 defineParamVar:
-    ( AS HANDLE TO? datatypeVar | AS datatype )
+    ( AS datatype | AS HANDLE TO? datatypeVar )
     ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase2 )*
   ;
 

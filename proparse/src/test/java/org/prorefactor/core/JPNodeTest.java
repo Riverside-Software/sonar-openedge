@@ -360,6 +360,14 @@ public class JPNodeTest {
   }
 
   @Test
+  public void testDefineVarAsHandle() {
+    ParseUnit unit = genericTest("defvar01.p");
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.DEFINE);
+    assertEquals(nodes.size(), 1);
+    assertFalse(nodes.get(0).query(ABLNodeType.NOUNDO).isEmpty());
+  }
+
+  @Test
   public void testXref01() throws JAXBException, IOException, SAXException, ParserConfigurationException {
     InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref.p.xref"));
     SAXParserFactory sax = SAXParserFactory.newInstance();
