@@ -349,6 +349,41 @@ public class TreeParser03Test {
     Variable hSock = unit.getRootScope().getVariable("hSock");
     assertNotNull(hSock);
     assertFalse(hSock.isGraphicalComponent());
+  }
 
+  @Test
+  public void test18() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test18.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    assertEquals(unit.getRootScope().getVariables().size(), 11);
+    Variable var1 = unit.getRootScope().getVariable("prm1");
+    assertEquals(var1.getDataType(), DataType.INTEGER);
+    Variable var2 = unit.getRootScope().getVariable("prm2");
+    assertEquals(var2.getDataType(), DataType.INTEGER);
+    Variable var3 = unit.getRootScope().getVariable("prm3");
+    assertEquals(var3.getDataType(), DataType.INTEGER);
+    Variable var4 = unit.getRootScope().getVariable("prm4");
+    assertEquals(var4.getDataType(), DataType.INTEGER);
+    Variable var5 = unit.getRootScope().getVariable("prm5");
+    assertEquals(var5.getDataType(), DataType.INTEGER);
+    Variable var6 = unit.getRootScope().getVariable("prm6");
+    assertEquals(var6.getDataType(), DataType.CHARACTER);
+    Variable var7 = unit.getRootScope().getVariable("prm7");
+    assertEquals(var7.getDataType(), DataType.LONGCHAR);
+    Variable var8 = unit.getRootScope().getVariable("prm8");
+    assertEquals(var8.getDataType(), DataType.HANDLE);
+    Variable var9 = unit.getRootScope().getVariable("prm9");
+    assertEquals(var9.getDataType(), DataType.CLASS);
+    assertEquals(var9.getClassName(), "Progress.Lang.Object");
+    Variable var10 = unit.getRootScope().getVariable("prm10");
+    assertEquals(var10.getDataType(), DataType.CLASS);
+    assertEquals(var10.getClassName(), "Progress.Lang.Object");
+    Variable var11 = unit.getRootScope().getVariable("prm11");
+    assertEquals(var11.getDataType(), DataType.CLASS);
+    assertEquals(var9.getClassName(), "Progress.Lang.Object");
   }
 }
