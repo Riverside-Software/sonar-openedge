@@ -1126,7 +1126,15 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineParamVar(DefineParamVarContext ctx) {
-    defAs(ctx);
+    if (ctx.datatypeDll() != null) {
+      // AS HANDLE TO datatype
+      Primative primative = (Primative) currSymbol;
+      primative.setDataType(DataType.HANDLE);
+    } else if (ctx.datatypeParam() != null) {
+      defAs(ctx.datatypeParam());
+    } else {
+      defAs(ctx.typeName());
+    }
   }
 
   @Override
@@ -2403,8 +2411,7 @@ public class TreeParser extends ProparseBaseListener {
     return variable;
   }
 
-  /** The tree parser calls this at an AS node */
-  public void defAs(ParserRuleContext ctx) {
+  private void defAs(ParserRuleContext ctx) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Variable AS '{}'", indent(), ctx.getText());
 
@@ -2418,7 +2425,7 @@ public class TreeParser extends ProparseBaseListener {
     }
   }
 
-  public void defExtent(String text) {
+  private void defExtent(String text) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Variable extent '{}'", indent(), text);
 
@@ -2432,7 +2439,7 @@ public class TreeParser extends ProparseBaseListener {
     }
   }
 
-  public void defLike(JPNode likeNode) {
+  private void defLike(JPNode likeNode) {
     LOG.trace("Entering defLike {}", likeNode);
     Primative likePrim = (Primative) likeNode.getSymbol();
     Primative newPrim = (Primative) currSymbol;
