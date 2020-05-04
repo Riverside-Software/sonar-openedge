@@ -1126,14 +1126,12 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineParamVar(DefineParamVarContext ctx) {
-    if (ctx.datatypeDll() != null) {
+    if (ctx.datatypeVar() != null) {
       // AS HANDLE TO datatype
       Primative primative = (Primative) currSymbol;
       primative.setDataType(DataType.HANDLE);
-    } else if (ctx.datatypeParam() != null) {
-      defAs(ctx.datatypeParam());
     } else {
-      defAs(ctx.typeName());
+      defAs(ctx.datatype());
     }
   }
 
