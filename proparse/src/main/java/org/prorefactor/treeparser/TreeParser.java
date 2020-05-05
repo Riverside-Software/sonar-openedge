@@ -2488,7 +2488,11 @@ public class TreeParser extends ProparseBaseListener {
     if ((ctx.getStart().getType() == ABLNodeType.CLASS.getType())
         || (ctx.getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
       primative.setDataType(DataType.CLASS);
-      primative.setClassName(ctx.getStop().getText());
+      String qualName = support.lookupClassName(ctx.getStop().getText());
+      if (Strings.isNullOrEmpty(qualName))
+        primative.setClassName(ctx.getStop().getText());
+      else
+        primative.setClassName(qualName);
     } else {
       primative.setDataType(DataType.getDataType(ctx.getStop().getType()));
     }

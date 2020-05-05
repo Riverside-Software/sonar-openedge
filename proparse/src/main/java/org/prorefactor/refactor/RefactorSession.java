@@ -177,9 +177,7 @@ public class RefactorSession {
   public List<String> getAllClassesFromPackage(String pkgName) {
     if (Strings.isNullOrEmpty(pkgName))
       return Collections.emptyList();
-    List<ITypeInfo> clsList = classesPerPkg.get(pkgName);
-    if (clsList == null)
-      return Collections.emptyList();
+    List<ITypeInfo> clsList = classesPerPkg.getOrDefault(pkgName, Collections.emptyList());
 
     List<String> retVal = new ArrayList<>();
     for (ITypeInfo info : clsList) {
