@@ -1084,11 +1084,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
-  public Builder visitDefaultExpr(DefaultExprContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
   public Builder visitDefineBrowseStatement(DefineBrowseStatementContext ctx) {
     return createStatementTreeFromFirstNode(ctx, ABLNodeType.BROWSE);
   }
@@ -1507,11 +1502,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
-  public Builder visitFieldList(FieldListContext ctx) {
-    return createTree(ctx, ABLNodeType.FIELD_LIST);
-  }
-
-  @Override
   public Builder visitFieldsFields(FieldsFieldsContext ctx) {
     Builder holder = createTreeFromFirstNode(ctx);
     if (holder.getNodeType() == ABLNodeType.FIELD)
@@ -1863,11 +1853,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitLikeField(LikeFieldContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public Builder visitLikeWidgetName(LikeWidgetNameContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
 

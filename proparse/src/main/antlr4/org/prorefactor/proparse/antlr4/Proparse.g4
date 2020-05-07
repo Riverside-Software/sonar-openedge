@@ -61,7 +61,6 @@ codeBlock:
 
 blockOrStatement:
     // Method calls and other expressions can stand alone as statements.
-    // Many functions are ambiguous with statements on the first few tokens.
     emptyStatement
   | annotation
   | dotComment
@@ -142,12 +141,6 @@ blockPreselect:
   ;
 
 statement:
-// Do not turn off warnings for the statement rule. We want to know if we have ambiguities here.
-// Many statements can be ambiguous on the first two terms with a built-in function. I have predicated those statements.
-// Some statement keywords are not reserved, and could be used as a field name in unreskeyword EQUAL expression.
-// However, there are no statements
-// that have an unreserved keyword followed by EQUAL or LEFTPAREN, so with ASSIGN and user def'd function predicated
-// at the top, we take care of our ambiguity.
      aaTraceOnOffStatement
   |  aaTraceCloseStatement
   |  aaTraceStatement
@@ -429,7 +422,6 @@ parameterArg:
   | expression ( AS datatype )? # parameterArgComDatatype
   ;
 
-// FIXME Can be empty
 parameterDatasetOptions:
     APPEND? ( BYVALUE | BYREFERENCE | BIND )?
   ;
@@ -511,8 +503,6 @@ expression:
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Expression bits
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Expression term: constant, function, fields, attributes, methods.
 
 expressionTerm:
     NORETURNVALUE sWidget colonAttribute  # exprtNoReturnValue
@@ -621,9 +611,6 @@ varRecField:
     // as a record - we don't have to worry about that. So, we can look at the
     // very next token, and if it's an identifier it might be record - check its name.
     { _input.LA(2) != NAMEDOT && support.isVar(_input.LT(1).getText()) }? field
-  // No more syntactic predicate in ANTLR4. Should be verified
-  // If we consume record and there's a leftover name part, then it's a field...
-  // (record NAMEDOT) // => field
   | record
   | field
   ;
@@ -710,15 +697,6 @@ constant:
   |  SAXCOMPLETE | SAXPARSERERROR | SAXRUNNING | SAXUNINITIALIZED | SAXWRITEBEGIN | SAXWRITECOMPLETE | SAXWRITECONTENT | SAXWRITEELEMENT | SAXWRITEERROR | SAXWRITEIDLE | SAXWRITETAG
   |  SEARCHSELF | SEARCHTARGET
   |  WINDOWDELAYEDMINIMIZE | WINDOWMINIMIZED | WINDOWNORMAL | WINDOWMAXIMIZED
-  ;
-
-
-widgetType:
-     BROWSE | BUFFER | BUTTON | BUTTONS /* {#btns.setType(BUTTON);} */ | COMBOBOX | CONTROLFRAME | DIALOGBOX
-  |  EDITOR | FILLIN | FIELD | FRAME | IMAGE | MENU
-  |   MENUITEM | QUERY | RADIOSET | RECTANGLE | SELECTIONLIST 
-  |  SLIDER | SOCKET | SUBMENU | TEMPTABLE | TEXT | TOGGLEBOX | WINDOW
-  |  XDOCUMENT | XNODEREF
   ;
 
 nonPunctuating:
@@ -1352,7 +1330,7 @@ datatypeVar:
   | RECID
   | ROWID
   | WIDGETHANDLE
-  | IN  // Works for INTEGER
+  | IN     // Works for INTEGER
   | LOG    // Works for LOGICAL
   | ROW    // Works for ROWID
   | WIDGET // Works for WIDGET-HANDLE
@@ -1366,8 +1344,7 @@ datatypeVar:
   | UNSIGNEDBYTE
   | UNSIGNEDSHORT
   | UNSIGNEDINTEGER
-  | // Assignment of datatype returns value of assignment, if non-zero, is a valid abbreviation.
-    { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID
+  | { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID // Like 'i' for INTEGER or 'de' for DECIMAL
   | { !support.isDataTypeVariable(_input.LT(1)) }? typeName
   ;
 
@@ -1401,10 +1378,6 @@ ddeTerminateStatement:
 
 decimalsExpr:
     DECIMALS expression
-  ;
-
-defaultExpr:
-    DEFAULT expression
   ;
 
 defineShare:
@@ -2012,10 +1985,6 @@ fieldFormItem:
     field formatPhrase?
   ;
 
-fieldList:
-    LEFTPAREN field ( COMMA field )* RIGHTPAREN
-  ;
-
 fieldsFields:
     ( FIELDS | FIELD ) field*
   ;
@@ -2575,10 +2544,6 @@ lengthFunction:
 
 likeField:
     LIKE field VALIDATE?
-  ;
-
-likeWidgetName:
-    LIKE widgetname
   ;
 
 loadStatement:
