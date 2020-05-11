@@ -30,7 +30,11 @@ import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenFactory;
+import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.misc.Pair;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
@@ -71,6 +75,7 @@ public class Lexer implements IPreprocessor {
   private int sourceCounter;
 
   private final ABLLexer prepro;
+  private final TokenFactory<ProToken> factory;
 
   private int ppCurrChar;
   // Current character, before being lowercased
@@ -121,6 +126,7 @@ public class Lexer implements IPreprocessor {
 
   protected Lexer(ABLLexer prepro, ByteSource src, String fileName) {
     this.prepro = prepro;
+    this.factory = new ProTokenFactory();
     try {
       currentInput = new InputSource(0, fileName, src, prepro.getRefactorSession().getCharset(), 0, true, true);
     } catch (IOException caught) {
@@ -1345,6 +1351,10 @@ public class Lexer implements IPreprocessor {
     return prepro.getFilenameList().add(filename);
   }
 
+  public TokenFactory<ProToken> getTokenFactory() {
+    return factory;
+  }
+
   private int ppGetChar() {
     wasEscape = false;
     for (;;) {
@@ -1438,8 +1448,6 @@ public class Lexer implements IPreprocessor {
   }
 
   private void ppMacroReference() {
-    ArrayList<IncludeArg> incArgs = new ArrayList<>();
-
     macroStartPos = new FilePos(currFile, currLine, currCol, currSourceNum);
     // Preserve the macro reference start point, because textStart get messed with if this macro reference itself
     // contains any macro references.
@@ -1493,6 +1501,7 @@ public class Lexer implements IPreprocessor {
       ppNewMacroRef(argName, refPos);
     } else {
       // If we got here, it's an include file reference
+      ArrayList<IncludeArg> incArgs = new ArrayList<>();
       boolean usingNamed = false;
       String argName;
       String argVal;
@@ -1954,6 +1963,20 @@ public class Lexer implements IPreprocessor {
     MacroCharPos(char[] c, int p) {
       chars = c;
       pos = p;
+    }
+  }
+
+  private static class ProTokenFactory implements TokenFactory<ProToken> {
+    @Override
+    public ProToken create(Pair<TokenSource, CharStream> source, int type, String text, int channel, int start,
+        int stop, int line, int charPositionInLine) {
+      return new ProToken.Builder(ABLNodeType.getNodeType(type), text).setLine(line).setCharPositionInLine(
+          charPositionInLine).setSynthetic(true).build();
+    }
+
+    @Override
+    public ProToken create(int type, String text) {
+      return new ProToken.Builder(ABLNodeType.getNodeType(type), text).setSynthetic(true).build();
     }
   }
 

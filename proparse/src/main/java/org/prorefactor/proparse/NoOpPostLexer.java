@@ -69,7 +69,7 @@ public class NoOpPostLexer implements TokenSource {
 
   @Override
   public TokenFactory<?> getTokenFactory() {
-    return null;
+    return lexer.getTokenFactory();
   }
 
 }

@@ -415,6 +415,13 @@ public class ProToken implements Token {
         case AMPUNDEFINE:
         case INCLUDEDIRECTIVE:
         case INCLUDEDIRECTIVE_END:
+        case AMPIF:
+        case AMPELSE:
+        case AMPELSEIF:
+        case AMPENDIF:
+        case AMPTHEN:
+        case PREPROEXPR_TRUE:
+        case PREPROEXPR_FALSE:
           tok.channel = PREPROCESSOR_CHANNEL;
           break;
         case PROPARSEDIRECTIVE:

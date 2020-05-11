@@ -17,19 +17,24 @@ package org.prorefactor.proparse;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.IntStream;
 import org.antlr.v4.runtime.ListTokenSource;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
+import org.prorefactor.macrolevel.PreprocessorExpressionVisitor;
 import org.prorefactor.proparse.antlr4.PreprocessorParser;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.PreproIfEvalContext;
+import org.prorefactor.proparse.antlr4.Proparse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +51,8 @@ public class PostLexer implements TokenSource {
   private final LinkedList<PreproIfState> preproIfVec = new LinkedList<>();
   private ProToken currToken;
 
+  private final Queue<Token> heap = new LinkedList<>();
+
   public PostLexer(ABLLexer parent, Lexer lexer) {
     this.lexer = lexer;
     this.prepro = parent;
@@ -53,45 +60,50 @@ public class PostLexer implements TokenSource {
   }
 
   @Override
-  public ProToken nextToken() {
+  public Token nextToken() {
     LOGGER.trace("Entering nextToken()");
-      for (;;) {
 
-        getNextToken();
+    if (!heap.isEmpty()) {
+      return heap.poll();
+    }
 
-        switch (currToken.getType()) {
+    while (true) {
+      getNextToken();
 
-          case PreprocessorParser.AMPIF:
-            preproIf();
-            break; // loop again
+      switch (currToken.getType()) {
+        case PreprocessorParser.AMPIF:
+          preproIf();
+          return heap.poll();
 
-          case PreprocessorParser.AMPTHEN:
-            // &then are consumed by preproIf()
-            throwMessage("Unexpected &THEN");
-            break;
+        case PreprocessorParser.AMPTHEN:
+          // &then are consumed by preproIf()
+          throwMessage("Unexpected &THEN");
+          break;
 
-          case PreprocessorParser.AMPELSEIF:
-            preproElseif();
-            break; // loop again
+        case PreprocessorParser.AMPELSEIF:
+          heap.offer(currToken);
+          preproElseif();
+          return heap.poll();
 
-          case PreprocessorParser.AMPELSE:
-            preproElse();
-            break; // loop again
+        case PreprocessorParser.AMPELSE:
+          heap.offer(currToken);
+          preproElse();
+          return heap.poll();
 
-          case PreprocessorParser.AMPENDIF:
-            preproEndif();
-            break; // loop again
+        case PreprocessorParser.AMPENDIF:
+          preproEndif();
+          return currToken;
 
-          default:
-            return currToken;
+        default:
+          return currToken;
 
-        }
       }
+    }
   }
 
   private ProToken defined() {
     LOGGER.trace("Entering defined()");
-    // Progress DEFINED() returns a single digit: 0,1,2, or 3.
+    // Progress DEFINED() returns a single digit: 0, 1, 2, or 3.
     // The text between the parens can be pretty arbitrary, and can
     // have embedded comments, so this calls a specific lexer function for it.
     getNextToken();
@@ -129,9 +141,10 @@ public class PostLexer implements TokenSource {
           preproElse();
           break;
         case PreprocessorParser.AMPENDIF:
+          heap.offer(currToken);
           preproEndif();
           break;
-        case PreprocessorParser.EOF:
+        case Token.EOF:
           throwMessage("Unexpected end of input when consuming discarded &IF/&ELSEIF/&ELSE text");
           break;
         default:
@@ -152,8 +165,7 @@ public class PostLexer implements TokenSource {
     PreproIfState preproIfState = new PreproIfState();
     preproIfVec.add(preproIfState);
     // Only evaluate if we aren't consuming from an outer &IF.
-    boolean isTrue = preproIfCond(!prepro.isConsuming());
-    if (isTrue) {
+    if (preproIfCond(!prepro.isConsuming())) {
       prepro.getLstListener().preproIf(currLine, currCol, true);
       preproIfState.done = true;
     } else {
@@ -213,25 +225,25 @@ public class PostLexer implements TokenSource {
   private void preproEndif() {
     LOGGER.trace("Entering preproEndif()");
     prepro.getLstListener().preproEndIf(currToken.getLine(), currToken.getCharPositionInLine());
-    // XXX Got a case where removeLast() fails with NoSuchElementException
     if (!preproIfVec.isEmpty())
       preproIfVec.removeLast();
   }
 
+  // Returns result of &IF expression evaluation
   private boolean preproIfCond(boolean evaluate) {
     LOGGER.trace("Entering preproIfCond()");
 
-    
-    // Notes
+    if (evaluate)
+      heap.offer(currToken);
+
     // An &IF here in this &IF condition is not legal. Progress would barf on it.
     // That allows us to simply use a global flag to watch for &THEN.
-
-    List<ProToken> tokenVector = new ArrayList<>();
+    List<ProToken> tokens = new ArrayList<>();
     boolean done = false;
     while (!done) {
       getNextToken();
       switch (currToken.getType()) {
-        case PreprocessorParser.EOF:
+        case Token.EOF:
           throwMessage("Unexpected end of input after &IF or &ELSEIF");
           break;
         case PreprocessorParser.AMPTHEN:
@@ -240,30 +252,34 @@ public class PostLexer implements TokenSource {
         case PreprocessorParser.DEFINED:
           if (evaluate)
             // If not evaluating, just discard
-            tokenVector.add(defined());
+            tokens.add(defined());
           break;
         case PreprocessorParser.COMMENT:
         case PreprocessorParser.WS:
-        case PreprocessorParser.PREPROCESSTOKEN:
           break;
         default:
           if (evaluate)
             // If not evaluating, just discard
-            tokenVector.add(currToken);
+            tokens.add(currToken);
       }
     }
 
     // If it's blank or the the evaluate argument is false, we don't evaluate
-    if (tokenVector.isEmpty() || !evaluate)
+    if (tokens.isEmpty() || !evaluate) {
       return false;
-    else {
-      CommonTokenStream cts = new CommonTokenStream(new ListTokenSource(tokenVector));
+    } else {
+      CommonTokenStream cts = new CommonTokenStream(new ListTokenSource(tokens));
       PreprocessorParser parser = new PreprocessorParser(cts);
       parser.setErrorHandler(new BailErrorStrategy());
       parser.removeErrorListeners();
-      parser.addErrorListener(new PreprocessorErrorListener(prepro, tokenVector));
+      parser.addErrorListener(new PreprocessorErrorListener(prepro, tokens));
       try {
-        return eval.visitPreproIfEval(parser.preproIfEval());
+        PreproIfEvalContext tree = parser.preproIfEval();
+        boolean expressionResult = eval.visitPreproIfEval(tree);
+        PreprocessorExpressionVisitor vv = new PreprocessorExpressionVisitor();
+        heap.offer(getTokenFactory().create(expressionResult ? Proparse.PREPROEXPRTRUE : Proparse.PREPROEXPRFALSE, vv.visitPreproIfEval(tree)));
+        heap.offer(currToken); // &THEN token
+        return eval.visitPreproIfEval(tree);
       } catch (ParseCancellationException caught) {
         return false;
       }
@@ -307,7 +323,7 @@ public class PostLexer implements TokenSource {
 
   @Override
   public TokenFactory<?> getTokenFactory() {
-    return null;
+    return lexer.getTokenFactory();
   }
 
 }

@@ -175,7 +175,7 @@ public class LexerTest {
     assertEquals(src.nextToken().getType(), Proparse.WS);
   }
 
-  @Test(enabled = false)
+  @Test
   public void testTokenList03() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "tokenlist03.p"), session);
     TokenSource src = unit.lex();
@@ -326,25 +326,37 @@ public class LexerTest {
     // First time verifying the channel locations
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
     TokenSource src = unit.preprocess();
-    // Whitespaces on hidden channel
-    Token tok = src.nextToken();
-    assertEquals(tok.getType(), Proparse.WS);
+    // &IF
+    ProToken tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPIF);
+    assertEquals(tok.getChannel(), ProToken.PREPROCESSOR_CHANNEL);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PREPROEXPR_TRUE);
+    assertEquals(tok.getChannel(), ProToken.PREPROCESSOR_CHANNEL);
+    assertEquals(tok.getText(), "TRUE || INTEGER(00) == 0 && (2 + 3) == 5");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPTHEN);
+    assertEquals(tok.getChannel(), ProToken.PREPROCESSOR_CHANNEL);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
     assertEquals(tok.getChannel(), 1);
     // Then scoped-define on a different channel again
-    tok = src.nextToken();
-    assertEquals(tok.getType(), Proparse.AMPSCOPEDDEFINE);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPSCOPEDDEFINE);
     assertEquals(tok.getChannel(), 2);
-    // Whitespace again
-    tok = src.nextToken();
-    assertEquals(tok.getType(), Proparse.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
     assertEquals(tok.getChannel(), 1);
-    // And again...
-    tok = src.nextToken();
-    assertEquals(tok.getType(), Proparse.WS);
+    // &ENDIF
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPENDIF);
+    assertEquals(tok.getChannel(), ProToken.PREPROCESSOR_CHANNEL);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
     assertEquals(tok.getChannel(), 1);
     // Then the string
-    tok = src.nextToken();
-    assertEquals(tok.getType(), Proparse.QSTRING);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getText(), "\"zz\"");
   }
 
@@ -1051,10 +1063,10 @@ public class LexerTest {
   /**
    * Utility method for preprocess(), removes all tokens from hidden channels
    */
-  protected static Token nextVisibleToken(TokenSource src) {
-    Token tok = src.nextToken();
+  protected static ProToken nextVisibleToken(TokenSource src) {
+    ProToken tok = (ProToken) src.nextToken();
     while ((tok.getType() != Token.EOF) && (tok.getChannel() != Token.DEFAULT_CHANNEL))
-      tok = src.nextToken();
+      tok = (ProToken) src.nextToken();
     return tok;
   }
 }
