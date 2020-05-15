@@ -6,5 +6,6 @@
 **/dependency-reduced-pom.xml
 **/target
 **/test-output
+current-commit
 proparse/src/test/resources/OpenEdge
 proparse/src/test/resources/rssw
