@@ -25,7 +25,7 @@ import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
-import org.prorefactor.proparse.antlr4.XCodedFileException;
+import org.prorefactor.proparse.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.SonarProduct;

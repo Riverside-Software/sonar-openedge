@@ -21,9 +21,9 @@ parser grammar Proparse;
 @header {
   import org.antlr.v4.runtime.BufferedTokenStream;
   import org.prorefactor.core.ABLNodeType;
-  import org.prorefactor.proparse.IntegerIndex;
-  import org.prorefactor.proparse.ParserSupport;
-  import org.prorefactor.proparse.SymbolScope;
+  import org.prorefactor.proparse.support.IntegerIndex;
+  import org.prorefactor.proparse.support.ParserSupport;
+  import org.prorefactor.proparse.support.SymbolScope;
   import org.prorefactor.refactor.RefactorSession;
   import com.progress.xref.CrossReference;
 }

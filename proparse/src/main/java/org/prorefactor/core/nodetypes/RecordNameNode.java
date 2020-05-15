@@ -20,7 +20,7 @@ import javax.annotation.Nonnull;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.proparse.SymbolScope.FieldType;
+import org.prorefactor.proparse.support.SymbolScope.FieldType;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;

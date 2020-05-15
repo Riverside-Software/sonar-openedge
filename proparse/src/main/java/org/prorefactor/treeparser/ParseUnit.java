@@ -50,14 +50,13 @@ import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
-import org.prorefactor.proparse.IntegerIndex;
-import org.prorefactor.proparse.ParserSupport;
-import org.prorefactor.proparse.antlr4.DescriptiveErrorListener;
-import org.prorefactor.proparse.antlr4.JPNodeVisitor;
-import org.prorefactor.proparse.antlr4.ProgressLexer;
+import org.prorefactor.proparse.ABLLexer;
+import org.prorefactor.proparse.DescriptiveErrorListener;
+import org.prorefactor.proparse.JPNodeVisitor;
+import org.prorefactor.proparse.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.Proparse;
-import org.prorefactor.proparse.antlr4.ProparseErrorStrategy;
-import org.prorefactor.proparse.antlr4.TreeParser;
+import org.prorefactor.proparse.support.IntegerIndex;
+import org.prorefactor.proparse.support.ParserSupport;
 import org.prorefactor.refactor.RefactorSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -200,11 +199,11 @@ public class ParseUnit {
    * @throws UncheckedIOException If main file can't be opened
    */
   public TokenSource lex() {
-    return new ProgressLexer(session, getByteSource(), relativeName, true);
+    return new ABLLexer(session, getByteSource(), relativeName, true);
   }
 
   public TokenSource preprocess() {
-    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
+    ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
     fileNameList = lexer.getFilenameList();
     macroGraph = lexer.getMacroGraph();
     appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
@@ -221,7 +220,7 @@ public class ParseUnit {
    */
   public void lexAndGenerateMetrics() {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
-    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, true);
+    ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, true);
     Token tok = lexer.nextToken();
     while (tok.getType() != Token.EOF) {
       tok = lexer.nextToken();
@@ -233,7 +232,7 @@ public class ParseUnit {
   public void parse() {
     LOGGER.trace("Entering ParseUnit#parse()");
 
-    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
+    ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
     Proparse parser = new Proparse(new CommonTokenStream(lexer));
     parser.setTrace(trace);
     parser.setProfile(profiler);
