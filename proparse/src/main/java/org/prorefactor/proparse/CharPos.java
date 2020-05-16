@@ -14,12 +14,12 @@
  ********************************************************************************/
 package org.prorefactor.proparse;
 
-public class CharPos {
-  protected final int ch;
-  protected final int file;
-  protected final int line;
-  protected final int col;
-  protected final int sourceNum;
+public final class CharPos {
+  final int ch;
+  final int file;
+  final int line;
+  final int col;
+  final int sourceNum;
 
   public CharPos(int ch, int file, int line, int col, int sourceNum) {
     this.ch = ch;
@@ -27,14 +27,6 @@ public class CharPos {
     this.line = line;
     this.col = col;
     this.sourceNum = sourceNum;
-  }
-
-  public CharPos(CharPos other) {
-    this.ch = other.ch;
-    this.file = other.file;
-    this.line = other.line;
-    this.col = other.col;
-    this.sourceNum = other.sourceNum;
   }
 
   public int getFile() {

@@ -14,11 +14,11 @@
  ********************************************************************************/
 package org.prorefactor.proparse;
 
-public class FilePos {
-  protected final int file;
-  protected final int line;
-  protected final int col;
-  protected final int sourceNum;
+public final class FilePos {
+  final int file;
+  final int line;
+  final int col;
+  final int sourceNum;
 
   public FilePos(int file, int line, int col, int sourceNum) {
     this.file = file;

@@ -125,9 +125,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
 
   @Override
   public String getSourceName() {
-    // XXX A verifier
     return wrapper.getSourceName();
-    // return getFilename();
   }
 
   @Override
