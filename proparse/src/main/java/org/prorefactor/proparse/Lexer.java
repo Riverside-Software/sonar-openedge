@@ -60,6 +60,7 @@ public class Lexer implements IPreprocessor {
   private static final int SKIP_CHAR = -100;
   private static final int PROPARSE_DIRECTIVE = -101;
   private static final int INCLUDE_DIRECTIVE = -102;
+  private static final int INCLUDE_DIRECTIVE_END = -103;
 
   // Cached include files for current lexer
   private final Map<String, Integer> includeCache = new HashMap<>();
@@ -162,6 +163,10 @@ public class Lexer implements IPreprocessor {
         tokenStartPos = new FilePos(macroStartPos);
         getChar();
         return makeToken(ABLNodeType.INCLUDEDIRECTIVE, includeDirectiveText);
+      } else if (currInt == INCLUDE_DIRECTIVE_END) {
+        tokenStartPos = new FilePos(macroStartPos);
+        getChar();
+        return makeToken(ABLNodeType.INCLUDEDIRECTIVE_END, "");
       }
       tokenStartPos = new FilePos(currFile, currLine, currCol, currSourceNum);
       currText.setLength(1);
@@ -1329,7 +1334,8 @@ public class Lexer implements IPreprocessor {
     // out to be a space character.
     if (la == null)
       laGet();
-    nameDot = (la.ch != Token.EOF) && !Character.isWhitespace(la.ch) && (la.ch != '.');
+    nameDot = (la.ch != Token.EOF) && (la.ch != INCLUDE_DIRECTIVE_END) && !Character.isWhitespace(la.ch)
+        && (la.ch != '.');
   }
 
   int addFilename(String filename) {
@@ -1415,7 +1421,7 @@ public class Lexer implements IPreprocessor {
           currCol = currentInput.getNextCol();
           currSourceNum = currentInput.getSourceNum();
           currMacroExpansion = currentInput.isMacroExpansion();
-          ppCurrChar = ' ';
+          ppCurrChar = INCLUDE_DIRECTIVE_END;
           return;
         case 2: // popped a macro ref or include arg ref
           currFile = currentInput.getFileIndex();

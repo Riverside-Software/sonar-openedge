@@ -48,6 +48,7 @@ public enum ABLNodeType {
   AMPUNDEFINE(Proparse.AMPUNDEFINE, NodeTypesOption.PREPROCESSOR),
   PROPARSEDIRECTIVE(Proparse.PROPARSEDIRECTIVE, NodeTypesOption.PREPROCESSOR),
   INCLUDEDIRECTIVE(Proparse.INCLUDEDIRECTIVE, NodeTypesOption.PLACEHOLDER),
+  INCLUDEDIRECTIVE_END(Proparse.INCLUDEDIRECTIVE_END, NodeTypesOption.PLACEHOLDER),
   // Could be removed
   PREPROCESSTOKEN(Proparse.PREPROCESSTOKEN, NodeTypesOption.PREPROCESSOR),
   // Next elements are not used anymore
