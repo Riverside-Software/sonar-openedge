@@ -103,6 +103,14 @@ public class ParseUnit {
   private boolean trace;
   private boolean ambiguityReport;
 
+  // Timings (in ns)
+  private long parseTimeSLL;
+  private long parseTimeLL;
+  private long jpNodeTime;
+  private long treeParseTime;
+  private long xrefAttachTime;
+  private boolean switchToLL;
+
   public ParseUnit(File file, RefactorSession session) {
     this(file, file.getPath(), session);
   }
@@ -240,7 +248,9 @@ public class ParseUnit {
     if (ambiguityReport) {
       parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
       parser.addErrorListener(new DiagnosticErrorListener(true));
+      long startTimeNs = System.nanoTime();
       tree = parser.program();
+      parseTimeLL = System.nanoTime() - startTimeNs;
     } else {
       // Two-stage parsing
       parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
@@ -248,21 +258,30 @@ public class ParseUnit {
       parser.removeErrorListeners();
       parser.addErrorListener(new DescriptiveErrorListener());
 
+      long startTimeNs = System.nanoTime();
       try {
         tree = parser.program();
+        parseTimeSLL = System.nanoTime() - startTimeNs;
       } catch (ParseCancellationException uncaught) {
+        // Not really precise as it includes exception trapping
+        parseTimeSLL = System.nanoTime() - startTimeNs;
         LOGGER.trace("Switching to LL prediction mode");
+        switchToLL = true;
         parser.setErrorHandler(new ProparseErrorStrategy(session.getProparseSettings().allowAntlrTokenDeletion(),
             session.getProparseSettings().allowAntlrTokenInsertion(), session.getProparseSettings().allowAntlrRecover()));
         parser.getInterpreter().setPredictionMode(PredictionMode.LL);
         // Another ParseCancellationException can be thrown if recover fails again
+        startTimeNs = System.nanoTime();
         tree = parser.program();
+        parseTimeLL = System.nanoTime() - startTimeNs;
       }
     }
 
     lexer.parseComplete();
+    long startTimeNs = System.nanoTime();
     topNode = (ProgramRootNode) new JPNodeVisitor(parser.getParserSupport(),
         (BufferedTokenStream) parser.getInputStream()).visit(tree).build(parser.getParserSupport());
+    jpNodeTime = System.nanoTime() - startTimeNs;
 
     fileNameList = lexer.getFilenameList();
     macroGraph = lexer.getMacroGraph();
@@ -273,7 +292,6 @@ public class ParseUnit {
 
     if (profiler) {
       parseInfo = parser.getParseInfo();
-      printLongestRules(parseInfo);
     }
 
     LOGGER.trace("Exiting ParseUnit#parse()");
@@ -284,9 +302,14 @@ public class ParseUnit {
       parse();
     ParseTreeWalker walker = new ParseTreeWalker();
     TreeParser parser = new TreeParser(support, session);
+    long startTimeNs = System.nanoTime();
     walker.walk(parser, tree);
+    treeParseTime = System.nanoTime() - startTimeNs;
     rootScope = parser.getRootScope();
+
+    startTimeNs = System.nanoTime();
     finalizeXrefInfo();
+    xrefAttachTime = System.nanoTime() - startTimeNs;
   }
 
   public void attachXref(Document doc) {
@@ -421,6 +444,30 @@ public class ParseUnit {
     return appBuilderCode;
   }
 
+  public long getParseTimeLL() {
+    return parseTimeLL / 1000000;
+  }
+
+  public long getParseTimeSLL() {
+    return parseTimeSLL / 1000000;
+  }
+
+  public long getJpNodeTime() {
+    return jpNodeTime / 1000000;
+  }
+
+  public long getXrefAttachTime() {
+    return xrefAttachTime / 1000000;
+  }
+
+  public long getTreeParseTime() {
+    return treeParseTime / 1000000;
+  }
+
+  public boolean hasSwitchedToLL() {
+    return switchToLL;
+  }
+
   public boolean isInEditableSection(int file, int line) {
     if (!appBuilderCode || (file > 0))
       return true;
@@ -439,7 +486,7 @@ public class ParseUnit {
     }
   }
 
-  private void printLongestRules(ParseInfo parseInfo) {
+  public static void printLongestRules(ParseInfo parseInfo) {
     Arrays.stream(parseInfo.getDecisionInfo()).filter(decision -> decision.SLL_MaxLook > 10).sorted(
         (d1, d2) -> Long.compare(d2.SLL_MaxLook, d1.SLL_MaxLook)).forEach(
             decision -> System.out.println(String.format(
@@ -450,7 +497,7 @@ public class ParseUnit {
                 getCodeFromMaxLookEvent(decision))));
   }
 
-  private static String getCodeFromMaxLookEvent(DecisionInfo info) {
+  public static String getCodeFromMaxLookEvent(DecisionInfo info) {
     StringBuilder bldr = new StringBuilder();
     for (int zz = info.SLL_MaxLookEvent.startIndex; zz <= info.SLL_MaxLookEvent.stopIndex; zz++) {
       if (info.SLL_MaxLookEvent.input.get(zz).getChannel() == Token.DEFAULT_CHANNEL)
