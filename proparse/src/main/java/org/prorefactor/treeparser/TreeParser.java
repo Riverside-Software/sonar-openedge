@@ -1986,7 +1986,9 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterRunOptAsync(RunOptAsyncContext ctx) {
-    setContextQualifier(((RunStatementContext) ctx.parent).parameterList().parameterListNoRoot(), ContextQualifier.ASYNCHRONOUS);
+    RunStatementContext rsc = (RunStatementContext) ctx.parent;
+    if (rsc.parameterList() != null)
+      setContextQualifier(rsc.parameterList().parameterListNoRoot(), ContextQualifier.ASYNCHRONOUS);
   }
 
   @Override
@@ -2271,6 +2273,7 @@ public class TreeParser extends ProparseBaseListener {
           buffer = currentScope.getUnnamedBuffer(table);
         break;
       case STATIC:
+      case ASYNCHRONOUS:
         break;
     }
     if (buffer == null)
