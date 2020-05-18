@@ -310,6 +310,7 @@ public class ParseUnit {
     startTimeNs = System.nanoTime();
     finalizeXrefInfo();
     xrefAttachTime = System.nanoTime() - startTimeNs;
+    xref = null; // No need to keep the entire XREF in memory
   }
 
   public void attachXref(Document doc) {
