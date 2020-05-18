@@ -256,9 +256,10 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterParameterOther(ParameterOtherContext ctx) {
+    ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     if (ctx.p != null) {
       if (ctx.OUTPUT() != null) {
-        setContextQualifier(ctx.parameterArg(), ContextQualifier.UPDATING);
+        setContextQualifier(ctx.parameterArg(), qual == ContextQualifier.ASYNCHRONOUS ? ContextQualifier.REFUP : ContextQualifier.UPDATING);
       } else if (ctx.INPUTOUTPUT() != null) {
         setContextQualifier(ctx.parameterArg(), ContextQualifier.REFUP);
       } else {
@@ -309,6 +310,16 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterParameterArgComDatatype(ParameterArgComDatatypeContext ctx) {
     setContextQualifier(ctx.expression(), contextQualifiers.removeFrom(ctx));
+  }
+
+  @Override
+  public void enterParameterListNoRoot(ParameterListNoRootContext ctx) {
+    ContextQualifier qual = contextQualifiers.removeFrom(ctx);
+    if (qual != null) {
+      for (ParameterContext rc : ctx.parameter()) {
+        setContextQualifier(rc, qual);
+      }
+    }
   }
 
   @Override
@@ -1971,6 +1982,11 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void exitRepeatStatement(RepeatStatementContext ctx) {
     blockEnd();
+  }
+
+  @Override
+  public void enterRunOptAsync(RunOptAsyncContext ctx) {
+    setContextQualifier(((RunStatementContext) ctx.parent).parameterList().parameterListNoRoot(), ContextQualifier.ASYNCHRONOUS);
   }
 
   @Override

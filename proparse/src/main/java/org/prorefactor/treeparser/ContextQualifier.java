@@ -64,7 +64,11 @@ public enum ContextQualifier {
   /**
    * Static reference to class
    */
-  STATIC;
+  STATIC,
+  /**
+   * Asynchronous RUN, or OUTPUT parameter
+   */
+  ASYNCHRONOUS;
 
   /**
    * Is symbol's value "read" in this context?

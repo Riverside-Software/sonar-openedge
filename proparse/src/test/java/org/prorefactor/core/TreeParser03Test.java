@@ -383,4 +383,18 @@ public class TreeParser03Test {
     assertEquals(var11.getDataType(), DataType.CLASS);
     assertEquals(var9.getClassName(), "Progress.Lang.Object");
   }
+
+  @Test
+  public void test19() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test19.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable var1 = unit.getRootScope().getVariable("xxx1");
+    assertEquals(var1.getNumReads(), 1);
+    assertEquals(var1.getNumWrites(), 1);
+  }
 }
