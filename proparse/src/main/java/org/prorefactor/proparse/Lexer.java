@@ -1477,7 +1477,8 @@ public class Lexer implements IPreprocessor {
       // This will be counted as a source whether picked up here or picked
       // up as a normal macro ref.
       ++sourceCounter;
-      prepro.getLstListener().macroRef(refPos.line, refPos.col, "_proparse");
+      prepro.getLstListener().macroRef(refPos.line, refPos.col, "_proparse_");
+      prepro.getLstListener().macroRefEnd();
     } else if ("{*}".equals(refText)) {
       // {*} -- all arguments
       ppNewMacroRef("*", refPos);
