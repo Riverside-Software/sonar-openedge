@@ -2709,10 +2709,8 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   // Called from expressionTerm rule (expressionTerm2 option) and widattr rule (widattrExprt2 option)
-  // Tries to add references to variables/properties of current class
-  // Or references to static classes
+  // Tries to add references to variables/properties of current class, or references to static classes
   private void widattr(Exprt2FieldContext ctx2, ContextQualifier cq, String right) {
-
     String clsRef = ctx2.field().getText();
     String clsName = rootScope.getClassName();
     if ((clsRef != null) && (clsName != null) && (clsRef.indexOf('.') == -1) && (clsName.indexOf('.') != -1))
@@ -2730,7 +2728,10 @@ public class TreeParser extends ProparseBaseListener {
     }
 
     if ((ctx2.ENTERED() == null) && !Strings.isNullOrEmpty(support.lookupClassName(ctx2.field().getText()))) {
-      setContextQualifier(ctx2, ContextQualifier.STATIC);
+      // First check if there's a variable name by this name
+      FieldLookupResult result = currentBlock.lookupField(clsRef, true);
+      if (result == null)
+        setContextQualifier(ctx2, ContextQualifier.STATIC);
     }
   }
 
