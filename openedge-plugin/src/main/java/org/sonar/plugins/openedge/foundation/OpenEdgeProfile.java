@@ -36,9 +36,11 @@ public class OpenEdgeProfile implements BuiltInQualityProfilesDefinition {
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_214_RULEKEY);
+    profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_1688_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_2750_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_2965_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_4788_RULEKEY);
+    profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_4958_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_5378_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_12115_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_14786_RULEKEY);

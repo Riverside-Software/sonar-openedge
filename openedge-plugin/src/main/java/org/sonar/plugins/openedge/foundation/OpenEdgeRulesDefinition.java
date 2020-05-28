@@ -31,11 +31,15 @@ import org.sonar.plugins.openedge.api.Constants;
 public class OpenEdgeRulesDefinition implements RulesDefinition {
   public static final String REPOSITORY_NAME = "Standard rules";
 
+  public static final int[] WARNING_MSGS = {
+      214, 1688, 2750, 2965, 4788, 4958, 4983, 5378, 12115, 14786, 14789, 15090, 18494, 19822};
   public static final String COMPILER_WARNING_RULEKEY = "compiler.warning";
   public static final String COMPILER_WARNING_214_RULEKEY = "compiler.warning.214";
+  public static final String COMPILER_WARNING_1688_RULEKEY = "compiler.warning.1688";
   public static final String COMPILER_WARNING_2750_RULEKEY = "compiler.warning.2750";
   public static final String COMPILER_WARNING_2965_RULEKEY = "compiler.warning.2965";
   public static final String COMPILER_WARNING_4788_RULEKEY = "compiler.warning.4788";
+  public static final String COMPILER_WARNING_4958_RULEKEY = "compiler.warning.4958";
   public static final String COMPILER_WARNING_5378_RULEKEY = "compiler.warning.5378";
   public static final String COMPILER_WARNING_12115_RULEKEY = "compiler.warning.12115";
   public static final String COMPILER_WARNING_14786_RULEKEY = "compiler.warning.14786";
@@ -64,12 +68,16 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     createWarningRule(repository, COMPILER_WARNING_RULEKEY, "Compiler warnings", "15min", Priority.MINOR);
     createWarningRule(repository, COMPILER_WARNING_214_RULEKEY,
         "TRANSACTION keyword given within actual transaction level", "30min");
+    createWarningRule(repository, COMPILER_WARNING_1688_RULEKEY,
+        "Subscript on array field in CONTAINS phrase ignored", "5min");
     createWarningRule(repository, COMPILER_WARNING_2750_RULEKEY,
         "RETURN statement in UDF or method is missing a return value expression", "5min");
     createWarningRule(repository, COMPILER_WARNING_2965_RULEKEY,
         "Invalid use of nonconstant elements in preprocessor expression", "10min", Priority.BLOCKER);
     createWarningRule(repository, COMPILER_WARNING_4788_RULEKEY, "Translation exceeds allocated length", "30min",
         Priority.CRITICAL, new String[] {COMPILER_WARNING_TAG, "tranman"});
+    createWarningRule(repository, COMPILER_WARNING_4958_RULEKEY,
+        "IMPORT UNFORMATTED statement references more than one field", "5min");
     createWarningRule(repository, COMPILER_WARNING_5378_RULEKEY,
         "The EXCEPT or USING phrase of the BUFFER-COPY statement only honors fields in the source buffer", "5min");
     createWarningRule(repository, COMPILER_WARNING_12115_RULEKEY, "Expression evaluates to a constant", "5min");

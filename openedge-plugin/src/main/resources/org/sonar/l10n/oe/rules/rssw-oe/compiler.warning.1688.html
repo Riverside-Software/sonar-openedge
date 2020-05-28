@@ -1,0 +1,23 @@
+<p>CONTAINS query cannot be executed on individual elements of arrays (when array is part of a word-index). Query can only be executed on the entire array</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+DEFINE TEMP-TABLE tt
+  FIELD fld1 AS CHARACTER EXTENT 10
+  INDEX idx1 IS WORD-INDEX fld1
+ 
+FOR EACH tt WHERE tt.fld1[1] CONTAINS "foobar":
+  // Code here...
+END.
+</pre>
+
+<h2>Compliant Solution</h2>
+<pre>
+DEFINE TEMP-TABLE tt
+  FIELD fld1 AS CHARACTER EXTENT 10
+  INDEX idx1 IS WORD-INDEX fld1
+ 
+FOR EACH tt WHERE tt.fld1 CONTAINS "foobar":
+  // Code here...
+END.
+</pre>
