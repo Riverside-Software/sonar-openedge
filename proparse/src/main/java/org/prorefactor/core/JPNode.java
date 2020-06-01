@@ -636,7 +636,7 @@ public class JPNode {
   }
 
   public boolean isAbbreviated() {
-    return token.getNodeType().isAbbreviated(getText());
+    return token.isAbbreviated();
   }
 
   /**

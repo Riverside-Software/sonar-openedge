@@ -38,7 +38,7 @@ public class MetricsTest {
 
   @Test
   public void test01() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/include.p"), session);
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/preprocessor/preprocessor14.p"), session);
     unit.parse();
 
     assertEquals(unit.getMetrics().getLoc(), 2);

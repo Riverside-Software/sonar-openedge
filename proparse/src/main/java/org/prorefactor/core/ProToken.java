@@ -142,6 +142,10 @@ public class ProToken implements Token {
     return endFileIndex;
   }
 
+  public boolean isAbbreviated() {
+    return type.isAbbreviated(text);
+  }
+
   /**
    * TODO Improve implementation
    *

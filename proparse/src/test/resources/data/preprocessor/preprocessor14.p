@@ -1,7 +1,7 @@
 /* First comment */
 MESSAGE "1".
 
-{ inc.i }
+{ preprocessor/preprocessor14-01.i }
 
 /*
 Multi line

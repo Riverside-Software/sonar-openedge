@@ -14,7 +14,6 @@
  ********************************************************************************/
 package org.prorefactor.core;
 
-import static org.prorefactor.core.LexerTest.nextVisibleToken;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -22,11 +21,14 @@ import static org.testng.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.macrolevel.IncludeRef;
+import org.prorefactor.macrolevel.MacroDef;
+import org.prorefactor.macrolevel.NamedMacroRef;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -274,4 +276,104 @@ public class PreprocessorDirectiveTest {
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.AMPENDIF);
   }
+
+  @Test
+  public void test08() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor14.p"), session);
+    unit.parse();
+    // Three include file (including main file)
+    assertEquals(unit.getMacroSourceArray().length, 3);
+    // First is inc.i, at line 3
+    assertEquals(((IncludeRef) unit.getMacroSourceArray()[1]).getFileRefName(), "preprocessor/preprocessor14-01.i");
+    assertEquals(((IncludeRef) unit.getMacroSourceArray()[1]).getPosition().getLine(), 4);
+    // Second is inc2.i, at line 2 (in inc.i)
+    assertEquals(((IncludeRef) unit.getMacroSourceArray()[2]).getFileRefName(), "preprocessor/preprocessor14-02.i");
+    assertEquals(((IncludeRef) unit.getMacroSourceArray()[2]).getPosition().getLine(), 2);
+  }
+
+  @Test
+  public void test09() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor15.p"), session);
+    unit.parse();
+    IncludeRef incRef = unit.getMacroGraph();
+    assertEquals(incRef.macroEventList.size(), 2);
+    assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
+    assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
+    NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
+    assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
+  }
+
+  @Test
+  public void test10() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor16.p"), session);
+    unit.parse();
+    IncludeRef incRef = unit.getMacroGraph();
+    assertEquals(incRef.macroEventList.size(), 3);
+    assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
+    assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
+    NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
+    assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.DEFINE);
+    assertEquals(nodes.size(), 1);
+    // Preprocessor magic... Keywords can start in main file, and end in include file...
+    assertEquals(nodes.get(0).getFileIndex(), 0);
+    assertEquals(nodes.get(0).getEndFileIndex(), 1);
+    assertEquals(nodes.get(0).getLine(), 6);
+    assertEquals(nodes.get(0).getEndLine(), 1);
+    assertEquals(nodes.get(0).getColumn(), 1);
+    assertEquals(nodes.get(0).getEndColumn(), 3);
+  }
+
+  @Test
+  public void test11() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor17.p"), session);
+    unit.parse();
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.SUBSTITUTE);
+    assertEquals(nodes.size(), 2);
+    JPNode substNode = nodes.get(0);
+    JPNode leftParen = substNode.nextNode();
+    JPNode str = leftParen.nextNode();
+    assertEquals(leftParen.getLine(), 2);
+    assertEquals(leftParen.getColumn(), 19);
+    assertEquals(leftParen.getEndLine(), 2);
+    assertEquals(leftParen.getEndColumn(), 19);
+    assertEquals(str.getLine(), 2);
+    assertEquals(str.getColumn(), 20);
+    assertEquals(str.getEndLine(), 2);
+    assertEquals(str.getEndColumn(), 24);
+
+    JPNode substNode2 = nodes.get(1);
+    JPNode leftParen2 = substNode2.nextNode();
+    JPNode str2 = leftParen2.nextNode();
+    assertEquals(leftParen2.getLine(), 3);
+    assertEquals(leftParen2.getColumn(), 19);
+    assertEquals(leftParen2.getEndLine(), 3);
+    assertEquals(leftParen2.getEndColumn(), 19);
+    assertEquals(str2.getLine(), 3);
+    assertEquals(str2.getColumn(), 20);
+    assertEquals(str2.getEndLine(), 3);
+    // FIXME Wrong value, should be 25
+    assertEquals(str2.getEndColumn(), 20);
+
+    List<JPNode> dispNodes = unit.getTopNode().query(ABLNodeType.DISPLAY);
+    assertEquals(dispNodes.size(), 1);
+    JPNode dispNode = dispNodes.get(0);
+    JPNode str3 = dispNode.nextNode().nextNode();
+    assertEquals(str3.getLine(), 4);
+    assertEquals(str3.getEndLine(), 4);
+    assertEquals(str3.getColumn(), 9);
+    // FIXME Wrong value, should be 14
+    assertEquals(str3.getEndColumn(), 9);
+  }
+
+  /**
+   * Utility method for preprocess(), removes all tokens from hidden channels
+   */
+  protected static ProToken nextVisibleToken(TokenSource src) {
+    ProToken tok = (ProToken) src.nextToken();
+    while ((tok.getType() != Token.EOF) && (tok.getChannel() != Token.DEFAULT_CHANNEL))
+      tok = (ProToken) src.nextToken();
+    return tok;
+  }
+
 }

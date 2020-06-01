@@ -421,4 +421,45 @@ public class ParserTest {
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
   }
 
+  @Test
+  public void testDirective() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "directive.p"), session);
+    unit.parse();
+
+    // Looking for the DEFINE node
+    JPNode node1 = (JPNode) unit.getTopNode().findDirectChild(ABLNodeType.DEFINE);
+    assertNotNull(node1);
+    assertTrue(node1.isStateHead());
+
+    // Looking for the NO-UNDO node, and trying to get the state-head node
+    JPNode node2 = (JPNode) unit.getTopNode().query(ABLNodeType.NOUNDO).get(0);
+    JPNode parent = node2;
+    while (!parent.isStateHead()) {
+      parent = parent.getPreviousNode();
+    }
+    assertEquals(node1, parent);
+
+    // No proparse directive as nodes anymore
+    JPNode left = node1.getPreviousSibling();
+    assertNull(left);
+    
+    // But as ProToken
+    ProToken tok = node1.getHiddenBefore();
+    assertNotNull(tok);
+    // First WS, then proparse directive
+    tok = (ProToken) tok.getHiddenBefore();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "prolint-nowarn(shared)");
+
+    // First WS
+    tok = (ProToken) tok.getHiddenBefore();
+    assertNotNull(tok);
+    // Then previous directive
+    tok = (ProToken) tok.getHiddenBefore();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "prolint-nowarn(something)");
+  }
+
 }

@@ -3,4 +3,4 @@
 &scoped-define FOO LongLongName
 MESSAGE "{&FOO}" VIEW-AS 
   ALERT-BOX.
-DEF{ data/prepro.i } VAR zz AS INT NO-UNDO.
+DEF{ preprocessor/preprocessor16.i } VAR zz AS INT NO-UNDO.

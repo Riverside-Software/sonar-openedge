@@ -244,7 +244,8 @@ public class BugFixTest {
 
   @Test
   public void test19() {
-    genericTest("bug19.p");
+    ParseUnit unit = genericTest("bug19.p");
+    assertEquals("MESSAGE \"Hello\".", unit.getTopNode().toStringFulltext().trim());
   }
 
   @Test

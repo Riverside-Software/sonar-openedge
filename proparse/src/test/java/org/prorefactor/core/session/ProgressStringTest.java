@@ -13,10 +13,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.core;
+package org.prorefactor.core.session;
 
 import static org.testng.Assert.assertEquals;
 
+import org.prorefactor.core.ProgressString;
 import org.testng.annotations.Test;
 
 public class ProgressStringTest {

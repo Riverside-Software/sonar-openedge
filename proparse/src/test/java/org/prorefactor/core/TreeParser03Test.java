@@ -71,7 +71,7 @@ public class TreeParser03Test {
   }
 
   @Test
-  public void testTreeParser01() {
+  public void test03() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test03.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -397,4 +397,20 @@ public class TreeParser03Test {
     assertEquals(var1.getNumReads(), 1);
     assertEquals(var1.getNumWrites(), 1);
   }
+
+  @Test
+  public void test20() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test20.p"), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().query(ABLNodeType.DISPLAY).size(), 1);
+  }
+
+  @Test
+  public void test21() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test21.p"), session);
+    unit.treeParser01();
+    JPNode node = unit.getTopNode().findDirectChild(ABLNodeType.DEFINE);
+    assertEquals(ABLNodeType.VARIABLE.getType(), node.attrGet(IConstants.STATE2));
+  }
+
 }

@@ -13,10 +13,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.core;
+package org.prorefactor.core.session;
 
 import static org.testng.Assert.assertTrue;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.testng.annotations.Test;
 

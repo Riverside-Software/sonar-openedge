@@ -1,15 +1,8 @@
-/* n o - u n d o . p
- * This file contains tests for our  N O - U N D O  refactoring.
- * IMPORTANT!! Comments containing "u n d o" (without the spaces)
- * have an impact on the refactoring's behaviour!
- */
-
-
 {&_proparse_ prolint-nowarn(noundo)}
 DEFINE VARIABLE myInt AS INTEGER.
 
 PROCEDURE myProc1:
-  DEFINE INPUT PARAMETER p1 AS LOGICAL NO-UNDO.
+  DEFINE INPUT PARAMETER p1 AS LOGICAL.
 END.
 
 PROCEDURE myProc2 EXTERNAL "whatever.dll":
@@ -19,8 +12,8 @@ END.
 
 /* Test for  U N D O  statement. */
 DEFINE VARIABLE myChar AS CHARACTER.
-DEFINE VARIABLE myChar2 AS CHARACTER NO-UNDO.
-DEFINE VARIABLE myChar3 AS CHARACTER NO-UNDO.
+DEFINE VARIABLE myChar2 AS CHARACTER.
+DEFINE VARIABLE myChar3 AS CHARACTER.
 DO:
   myChar3 = "".
   DO:
@@ -44,7 +37,7 @@ DO:
 END.
 
 PROCEDURE changeVal:
-  DEFINE OUTPUT PARAMETER changed AS CHARACTER NO-UNDO.
+  DEFINE OUTPUT PARAMETER changed AS CHARACTER.
 END.
 
 
@@ -63,8 +56,8 @@ DEFINE VARIABLE c4 AS CHARACTER. /* not no-undo */
    because of the blank line between the comment and the statement.
 */
 
-DEFINE VARIABLE c5 AS CHARACTER NO-UNDO.
+DEFINE VARIABLE c5 AS CHARACTER.
 
-DEFINE VARIABLE c6 AS CHARACTER NO-UNDO.
+DEFINE VARIABLE c6 AS CHARACTER.
 /* Comment on line after does not change UNDO for previous statement. */
 
