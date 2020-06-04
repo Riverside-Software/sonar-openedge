@@ -500,4 +500,88 @@ public class ParserTest {
     assertEquals(assign1.getFirstChild().getNodeType(), ABLNodeType.EQUAL);
     assertEquals(assign1.getFirstChild().getDirectChildren().get(1).getNodeType(), ABLNodeType.EQ);
   }
+
+  @Test
+  public void testVarStatement01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CHAR s1, s2, s3, s4.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement02() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT x, y, z = 3.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement03() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS mypackage.subdir.myclass myobj1, myobj2, myobj3.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement04() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR mypackage.subdir.myclass myobj1.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement05() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR DATE d1, d2 = 1/1/2020, d3 = TODAY.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+  @Test
+  public void testVarStatement06() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR PROTECTED DATE d1, d2 = 1/1/2020.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement07() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[3] x = [1, 2], y, z = [100, 200, 300].".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement08() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement09() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y = [1,2,3].".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement10() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x = [1,2], y = [1,2,3].".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement11() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS foo[2] classArray.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement12() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR \"System.Collections.Generic.List<char>\" cList.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
 }

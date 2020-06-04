@@ -15,6 +15,7 @@
 package org.prorefactor.treeparser;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -27,6 +28,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.ProgressString;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
@@ -35,13 +37,14 @@ import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Index;
 import org.prorefactor.proparse.antlr4.Proparse;
-import org.prorefactor.proparse.antlr4.ProparseBaseListener;
 import org.prorefactor.proparse.antlr4.Proparse.*;
+import org.prorefactor.proparse.antlr4.ProparseBaseListener;
 import org.prorefactor.proparse.support.ParserSupport;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;
+import org.prorefactor.treeparser.symbols.Modifier;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -365,7 +368,8 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void exitFunctionParamStandardAs(FunctionParamStandardAsContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), true);
+    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.PARAMETER);
+    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     wipParameters.getFirst().setSymbol(var);
     addToSymbolScope(var);
     defAs(ctx.datatype());
@@ -373,7 +377,8 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterFunctionParamStandardLike(FunctionParamStandardLikeContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n2.getText(), true);
+    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n2.getText(), Variable.Type.PARAMETER);
+    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     wipParameters.getFirst().setSymbol(var);
     stack.push(var);
   }
@@ -392,7 +397,8 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterFunctionParamStandardTableHandle(FunctionParamStandardTableHandleContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.hn.getText(), DataType.HANDLE, true);
+    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.hn.getText(), DataType.HANDLE, Variable.Type.PARAMETER);
+    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     wipParameters.getFirst().setSymbol(var);
     wipParameters.getFirst().setProgressType(ABLNodeType.TABLEHANDLE.getType());
     addToSymbolScope(var);
@@ -400,7 +406,8 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterFunctionParamStandardDatasetHandle(FunctionParamStandardDatasetHandleContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.hn2.getText(), DataType.HANDLE, true);
+    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.hn2.getText(), DataType.HANDLE, Variable.Type.PARAMETER);
+    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     wipParameters.getFirst().setSymbol(var);
     wipParameters.getFirst().setProgressType(ABLNodeType.DATASETHANDLE.getType());
 
@@ -558,7 +565,7 @@ public class TreeParser extends ProparseBaseListener {
   public void enterAggregateOption(AggregateOptionContext ctx) {
     addToSymbolScope(
         defineVariable(ctx, support.getNode(ctx), ABLNodeType.getFullText(ctx.accumulateWhat().getStart().getType()),
-            ctx.accumulateWhat().COUNT() != null ? DataType.INTEGER : DataType.DECIMAL, false));
+            ctx.accumulateWhat().COUNT() != null ? DataType.INTEGER : DataType.DECIMAL, Variable.Type.VARIABLE));
   }
 
   @Override
@@ -681,7 +688,7 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterCatchStatement(CatchStatementContext ctx) {
     scopeAdd(support.getNode(ctx));
-    addToSymbolScope(defineVariable(ctx, support.getNode(ctx).getFirstChild(), ctx.n.getText()));
+    addToSymbolScope(defineVariable(ctx, support.getNode(ctx).getFirstChild(), ctx.n.getText(), Variable.Type.VARIABLE));
     defAs(ctx.classTypeName());
   }
 
@@ -1106,7 +1113,9 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineParameterStatementSub2Variable(DefineParameterStatementSub2VariableContext ctx) {
-    stack.push(defineVariable(ctx.parent, support.getNode(ctx.parent), ctx.identifier().getText(), true));
+    Variable var = defineVariable(ctx.parent, support.getNode(ctx.parent), ctx.identifier().getText(), Variable.Type.PARAMETER);
+    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    stack.push(var);
   }
 
   @Override
@@ -1117,7 +1126,9 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineParameterStatementSub2VariableLike(DefineParameterStatementSub2VariableLikeContext ctx) {
-    stack.push(defineVariable(ctx.parent, support.getNode(ctx.parent), ctx.identifier().getText(), true));
+    Variable var = defineVariable(ctx.parent, support.getNode(ctx.parent), ctx.identifier().getText(), Variable.Type.PARAMETER);
+    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    stack.push(var);
   }
 
   @Override
@@ -1135,11 +1146,17 @@ public class TreeParser extends ProparseBaseListener {
     } else {
       defAs(ctx.datatype());
     }
+    if ((ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+      defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
+    }
   }
 
   @Override
   public void exitDefineParamVarLike(DefineParamVarLikeContext ctx) {
     defLike(support.getNode(ctx.field()));
+    if ((ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+      defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
+    }
   }
 
   @Override
@@ -1151,24 +1168,34 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterDefineParameterStatementSub2TableHandle(DefineParameterStatementSub2TableHandleContext ctx) {
     wipParameters.getFirst().setProgressType(ABLNodeType.TABLEHANDLE.getType());
-    addToSymbolScope(defineVariable(ctx, support.getNode(ctx.parent), ctx.pn2.getText(), DataType.HANDLE, true));
+    Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.pn2.getText(), DataType.HANDLE, Variable.Type.PARAMETER);
+    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    addToSymbolScope(var);
   }
 
   @Override
   public void enterDefineParameterStatementSub2DatasetHandle(DefineParameterStatementSub2DatasetHandleContext ctx) {
     wipParameters.getFirst().setProgressType(ABLNodeType.DATASETHANDLE.getType());
-    addToSymbolScope(defineVariable(ctx, support.getNode(ctx.parent), ctx.dsh.getText(), DataType.HANDLE, true));
+    Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.dsh.getText(), DataType.HANDLE, Variable.Type.PARAMETER);
+    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    addToSymbolScope(var);
   }
 
   @Override
   public void enterDefinePropertyStatement(DefinePropertyStatementContext ctx) {
-    stack.push(defineVariable(ctx, support.getNode(ctx), ctx.n.getText()));
-
+    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.PROPERTY);
+    for (DefinePropertyModifierContext ctx2 : ctx.definePropertyModifier()) {
+      var.addModifier(Modifier.getModifier(ctx2.getStart().getType()));
+    }
+    stack.push(var);
   }
 
   @Override
   public void enterDefinePropertyAs(DefinePropertyAsContext ctx) {
     defAs(ctx.datatype());
+    if ((ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+      defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
+    }
   }
 
   @Override
@@ -1303,7 +1330,37 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineVariableStatement(DefineVariableStatementContext ctx) {
-    stack.push(defineVariable(ctx, support.getNode(ctx), ctx.n.getText()));
+    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.VARIABLE);
+    for (DefineVariableModifierContext ctx2 : ctx.defineVariableModifier()) {
+      var.addModifier(Modifier.getModifier(ctx2.getStart().getType()));
+    }
+    stack.push(var);
+  }
+
+  @Override
+  public void enterVarStatement(VarStatementContext ctx) {
+    for (VarStatementSubContext xx : ctx.varStatementSub()) {
+      Variable symbol = defineVariable(xx, support.getNode(xx), xx.newIdentifier().getText(), Variable.Type.VARIABLE);
+      for (VarStatementModifierContext mod : ctx.varStatementModifier()) {
+        symbol.addModifier(Modifier.getModifier(mod.getStart().getType()));
+      }
+      defAs((Primative) symbol, ctx.datatype());
+      addToSymbolScope(symbol);
+      if (xx.initialValue != null) {
+        defineInitialValue(symbol, xx.initialValue);
+      }
+      if (ctx.extent != null) {
+        int xt = 0;
+        if (ctx.extent.NUMBER() != null) {
+          try {
+           xt = Integer.parseInt(ctx.extent.NUMBER().getText());
+          } catch (NumberFormatException caught)  {
+            
+          }
+        }
+        symbol.setExtent(xt);
+      }
+    }
   }
 
   @Override
@@ -1487,6 +1544,8 @@ public class TreeParser extends ProparseBaseListener {
       defAs(ctx.datatype());
     } else if (ctx.LIKE() != null) {
       setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
+    } else if (ctx.initialConstant() != null) {
+      ((Variable) currSymbol).setInitialValue(new Object());
     }
   }
 
@@ -1952,7 +2011,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterOnAssignOldValue(OnAssignOldValueContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.f.getText());
+    Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.f.getText(), Variable.Type.VARIABLE);
     currSymbol = var;
     stack.push(var);
   }
@@ -2110,7 +2169,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterTriggerOfSub2(TriggerOfSub2Context ctx) {
-    stack.push(defineVariable(ctx, support.getNode(ctx), ctx.id.getText()));
+    stack.push(defineVariable(ctx, support.getNode(ctx), ctx.id.getText(), Variable.Type.VARIABLE));
   }
 
   @Override
@@ -2120,7 +2179,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterTriggerOld(TriggerOldContext ctx) {
-    stack.push(defineVariable(ctx, support.getNode(ctx), ctx.id.getText()));
+    stack.push(defineVariable(ctx, support.getNode(ctx), ctx.id.getText(), Variable.Type.VARIABLE));
   }
 
   @Override
@@ -2388,27 +2447,23 @@ public class TreeParser extends ProparseBaseListener {
     frameStack.nodeOfBlock(ast, currentBlock);
   }
 
-  private Variable defineVariable(ParseTree ctx, JPNode defAST, String name) {
-    return defineVariable(ctx, defAST, name, false);
-  }
-
-  private Variable defineVariable(ParseTree ctx, JPNode defAST, String name, DataType dataType, boolean parameter) {
-    Variable v = defineVariable(ctx, defAST, name, parameter);
+  private Variable defineVariable(ParseTree ctx, JPNode defAST, String name, DataType dataType, Variable.Type type) {
+    Variable v = defineVariable(ctx, defAST, name, type);
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Adding datatype {}", indent(), dataType);
     v.setDataType(dataType);
     return v;
   }
 
-  private Variable defineVariable(ParseTree ctx, JPNode defNode, String name, boolean parameter) {
+  private Variable defineVariable(ParseTree ctx, JPNode defNode, String name, Variable.Type type) {
     if (LOG.isTraceEnabled())
-      LOG.trace("{}> New variable {} (parameter: {})", indent(), name, parameter);
+      LOG.trace("{}> New {}: {}", indent(), type, name);
 
     // We need to create the Variable Symbol right away, because further actions in the grammar might need to set
     // attributes on it. We can't add it to the scope yet, because of statements like this: def var xyz like xyz.
     // The tree parser is responsible for calling addToScope at the end of the statement or when it is otherwise safe to
     // do so.
-    Variable variable = new Variable(name, currentScope, parameter);
+    Variable variable = new Variable(name, currentScope, type);
     if (defNode == null)
       LOG.warn("Unable to set JPNode symbol for variable {}", ctx.getText());
     else {
@@ -2420,16 +2475,53 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   private void defAs(ParserRuleContext ctx) {
+    defAs((Primative) currSymbol, ctx);
+  }
+
+  private void defAs(Primative primative, ParserRuleContext ctx) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Variable AS '{}'", indent(), ctx.getText());
 
-    Primative primative = (Primative) currSymbol;
     if ((ctx.getStart().getType() == ABLNodeType.CLASS.getType())
         || (ctx.getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
       primative.setDataType(DataType.CLASS);
       primative.setClassName(ctx.getStop().getText());
     } else {
       primative.setDataType(DataType.getDataType(ctx.getStop().getType()));
+    }
+  }
+
+  private void defineInitialValue(Variable var, VarStatementInitialValueContext ctx) {
+    
+    if (ctx.varStatementInitialValueArray() != null) {
+      // Just set initial value to Array, no matter what the values are
+      var.setInitialValue(Variable.CONSTANT_ARRAY);
+    } else {
+      VarStatementInitialValueSubContext ctx2 = ctx.varStatementInitialValueSub();
+     if (ctx2.TODAY() != null){
+      var.setInitialValue(Variable.CONSTANT_TODAY);
+    } else if (ctx2.NOW() != null) {
+      var.setInitialValue(Variable.CONSTANT_NOW);
+    } else 
+      if ((ctx2.TRUE() != null)|| (ctx2.YES() != null)) {
+        var.setInitialValue(Boolean.TRUE);
+      } else if ((ctx2.FALSE() != null) || (ctx2.NO() != null)) {
+        var.setInitialValue(Boolean.FALSE);
+      } else if (ctx2.UNKNOWNVALUE() != null) {
+        var.setInitialValue(Variable.CONSTANT_NULL);
+      } else if (ctx2.QSTRING() != null) {
+        var.setInitialValue(ProgressString.dequote(ctx2.getText()));
+      } else if (ctx2.NUMBER() != null) {
+        Double dbl = Double.valueOf(ctx2.getText());
+        if (dbl == 0)
+          var.setInitialValue(Variable.CONSTANT_ZERO);
+        else
+          var.setInitialValue(Double.valueOf(ctx2.getText()));
+      } else if (ctx2.LEXDATE() != null) {
+        var.setInitialValue(new Date());
+      } else {
+        var.setInitialValue(Variable.CONSTANT_OTHER);
+      }
     }
   }
 
@@ -2761,7 +2853,7 @@ public class TreeParser extends ProparseBaseListener {
     // Check if this is a Field_ref being "inline defined"
     // If so, we define it right now.
     if (refNode.attrGet(IConstants.INLINE_VAR_DEF) == 1)
-      addToSymbolScope(defineVariable(ctx, refNode, name));
+      addToSymbolScope(defineVariable(ctx, refNode, name, Variable.Type.VARIABLE));
 
     if (cq == ContextQualifier.STATIC) {
       // Nothing with static for now, but at least we don't check for external tables

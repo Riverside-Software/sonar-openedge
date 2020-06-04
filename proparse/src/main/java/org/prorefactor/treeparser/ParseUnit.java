@@ -122,6 +122,13 @@ public class ParseUnit {
     this.session = session;
   }
 
+  public ParseUnit(InputStream input, RefactorSession session) {
+    this.file = null;
+    this.input = input;
+    this.relativeName = "<unnamed>";
+    this.session = session;
+  }
+
   public ParseUnit(InputStream input, String relativeName, RefactorSession session) {
     this.file = null;
     this.input = input;

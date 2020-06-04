@@ -203,6 +203,7 @@ statement:
   |  defineTempTableStatement
   |  defineWorkTableStatement
   |  defineVariableStatement
+  |  varStatement
   |  dictionaryStatement
   |  deleteWidgetPoolStatement
   |  deleteStatement
@@ -316,6 +317,7 @@ inclassStatement:
   |  defineTempTableStatement
   |  defineWorkTableStatement
   |  defineVariableStatement
+  |  varStatement
   |  constructorStatement
   |  destructorStatement
   |  methodStatement
@@ -1613,7 +1615,7 @@ menuItemOption:
   ;
 
 defineParameterStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE
     ( defineParameterStatementSub1 | qualif=( INPUT | OUTPUT | INPUTOUTPUT | RETURN ) PARAMETER defineParameterStatementSub2 )
     statementEnd
   ;
@@ -1644,10 +1646,14 @@ defineParamVarLike:
   ;
 
 definePropertyStatement:
-    DEFINE defineShare? ( PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE | SERIALIZABLE | NONSERIALIZABLE )*
+    DEFINE defineShare? modifiers=definePropertyModifier*
     PROPERTY n=newIdentifier definePropertyAs
     definePropertyAccessor definePropertyAccessor?
     { support.defVar($n.text); }
+  ;
+
+definePropertyModifier:
+    PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE | SERIALIZABLE | NONSERIALIZABLE
   ;
 
 definePropertyAs:
@@ -1772,9 +1778,42 @@ defineWorkTableStatement:
   ;
 
 defineVariableStatement:
-    DEFINE defineShare? ( PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | STATIC | SERIALIZABLE | NONSERIALIZABLE )*
-    VARIABLE n=newIdentifier fieldOption* triggerPhrase? statementEnd
+    DEFINE defineShare? modifiers=defineVariableModifier*
+    ( VARIABLE | VAR ) n=newIdentifier fieldOption* triggerPhrase? statementEnd
     { support.defVar($n.text); }
+  ;
+
+defineVariableModifier:
+    PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | STATIC | SERIALIZABLE | NONSERIALIZABLE
+  ;
+
+varStatement:
+    VAR modifiers=varStatementModifier* datatype extent=varStatementSub2?
+      varStatementSub ( COMMA varStatementSub )* statementEnd
+  ;
+
+varStatementModifier:
+    PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | STATIC | SERIALIZABLE | NONSERIALIZABLE
+  ;
+
+varStatementSub:
+    newIdentifier ( EQUAL initialValue=varStatementInitialValue )?
+  ;
+
+varStatementSub2:
+    LEFTBRACE NUMBER? RIGHTBRACE
+  ;
+
+varStatementInitialValue:
+    varStatementInitialValueArray | varStatementInitialValueSub
+  ;
+
+varStatementInitialValueArray:
+    LEFTBRACE varStatementInitialValueSub ( COMMA varStatementInitialValueSub )* RIGHTBRACE
+  ;
+
+varStatementInitialValueSub:
+    TODAY | NOW | TRUE | FALSE | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL
   ;
 
 deleteStatement:
@@ -2367,10 +2406,7 @@ inWidgetPoolExpression:
   ;
 
 initialConstant:
-    INITIAL
-    (  LEFTBRACE ( TODAY | NOW | constant ) ( COMMA ( TODAY | NOW | constant ))* RIGHTBRACE
-    |  ( TODAY | NOW | constant )
-    )
+    INITIAL varStatementInitialValue
   ;
 
 inputStatement:

@@ -24,12 +24,14 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.Date;
 
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.treeparser.symbols.Modifier;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.Variable;
@@ -214,8 +216,13 @@ public class TreeParser03Test {
     assertNotNull(s1);
     assertEquals(s1.getName(), "ipPrm");
     assertTrue(s1 instanceof Variable);
-    assertEquals(((Variable) s1).getDataType(), DataType.INTEGER);
+    Variable v1 = (Variable) s1;
+    assertEquals(v1.getDataType(), DataType.INTEGER);
+    assertEquals(v1.getModifiers().size(), 1);
+    assertTrue(v1.containsModifier(Modifier.OUTPUT));
     assertNotNull(s1.getDefineNode());
+    assertEquals(s1.getDefineNode().getNodeType(), ABLNodeType.ID);
+    assertEquals(s1.getDefineNode().getText(), "ipPrm");
   }
 
   @Test
@@ -413,4 +420,294 @@ public class TreeParser03Test {
     assertEquals(ABLNodeType.VARIABLE.getType(), node.attrGet(IConstants.STATE2));
   }
 
+  @Test
+  public void testVarStatement01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CHAR s1, s2, s3.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+    assertEquals(unit.getRootScope().getVariables().size(), 3);
+    Variable v1 = null, v2 = null, v3 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("s1".equals(var.getName()))
+        v1 = var;
+      if ("s2".equals(var.getName()))
+        v2 = var;
+      if ("s3".equals(var.getName()))
+        v3 = var;
+    }
+    assertNotNull(v1);
+    assertNotNull(v2);
+    assertNotNull(v3);
+    assertEquals(v1.getDataType(), DataType.CHARACTER);
+    assertEquals(v2.getDataType(), DataType.CHARACTER);
+    assertEquals(v3.getDataType(), DataType.CHARACTER);
+    assertNotNull(v1.getDefineNode());
+    assertNotNull(v2.getDefineNode());
+    assertNotNull(v3.getDefineNode());
+    assertEquals(v1.getDefineNode().getNodeType(), ABLNodeType.ID);
+    assertEquals(v2.getDefineNode().getNodeType(), ABLNodeType.ID);
+    assertEquals(v3.getDefineNode().getNodeType(), ABLNodeType.ID);
+    assertEquals(v1.getDefineNode().getText(), "s1");
+    assertEquals(v2.getDefineNode().getText(), "s2");
+    assertEquals(v3.getDefineNode().getText(), "s3");
+  }
+
+  @Test
+  public void testVarStatement02() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT s1, s2, s3 = 3.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 3);
+    Variable v1 = null, v2 = null, v3 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("s1".equals(var.getName()))
+        v1 = var;
+      if ("s2".equals(var.getName()))
+        v2 = var;
+      if ("s3".equals(var.getName()))
+        v3 = var;
+    }
+    assertNotNull(v1);
+    assertNotNull(v2);
+    assertNotNull(v3);
+    assertEquals(v1.getDataType(), DataType.INTEGER);
+    assertEquals(v2.getDataType(), DataType.INTEGER);
+    assertEquals(v3.getDataType(), DataType.INTEGER);
+    assertNull(v1.getInitialValue());
+    assertNull(v2.getInitialValue());
+    assertNotNull(v3.getInitialValue());
+    assertEquals(v3.getInitialValue(), Double.valueOf(3));
+  }
+
+  @Test
+  public void testVarStatement03() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS mypackage.subdir.myclass myobj1, myobj2, myobj3.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 3);
+    Variable v1 = null, v2 = null, v3 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("myobj1".equals(var.getName()))
+        v1 = var;
+      if ("myobj2".equals(var.getName()))
+        v2 = var;
+      if ("myobj3".equals(var.getName()))
+        v3 = var;
+    }
+    assertNotNull(v1);
+    assertNotNull(v2);
+    assertNotNull(v3);
+    assertEquals(v1.getDataType(), DataType.CLASS);
+    assertEquals(v2.getDataType(), DataType.CLASS);
+    assertEquals(v3.getDataType(), DataType.CLASS);
+    assertEquals(v1.getClassName(), "mypackage.subdir.myclass");
+    assertEquals(v2.getClassName(), "mypackage.subdir.myclass");
+    assertEquals(v3.getClassName(), "mypackage.subdir.myclass");
+  }
+
+  @Test
+  public void testVarStatement04() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR mypackage.subdir.myclass myobj1.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable v1 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("myobj1".equals(var.getName()))
+        v1 = var;
+    }
+    assertNotNull(v1);
+    assertEquals(v1.getDataType(), DataType.CLASS);
+    assertEquals(v1.getClassName(), "mypackage.subdir.myclass");
+  }
+
+  @Test
+  public void testVarStatement05() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR DATE d1, d2 = 1/1/2020, d3 = TODAY.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 3);
+    Variable v1 = null, v2 = null, v3 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("d1".equals(var.getName()))
+        v1 = var;
+      if ("d2".equals(var.getName()))
+        v2 = var;
+      if ("d3".equals(var.getName()))
+        v3 = var;
+    }
+    assertNotNull(v1);
+    assertNotNull(v2);
+    assertNotNull(v3);
+    assertEquals(v1.getDataType(), DataType.DATE);
+    assertEquals(v2.getDataType(), DataType.DATE);
+    assertEquals(v3.getDataType(), DataType.DATE);
+    assertNull(v1.getInitialValue());
+    assertNotNull(v2.getInitialValue());
+    assertNotNull(v3.getInitialValue());
+    assertTrue(v2.getInitialValue() instanceof Date);
+    assertEquals(v3.getInitialValue(), Variable.CONSTANT_TODAY);
+  }
+
+  @Test
+  public void testVarStatement06() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR PROTECTED DATE d1, d2 = 1/1/2020.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 2);
+    Variable v1 = null, v2 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("d1".equals(var.getName()))
+        v1 = var;
+      if ("d2".equals(var.getName()))
+        v2 = var;
+    }
+    assertNotNull(v1);
+    assertNotNull(v2);
+    assertEquals(v1.getDataType(), DataType.DATE);
+    assertEquals(v2.getDataType(), DataType.DATE);
+    assertTrue(v1.containsModifier(Modifier.PROTECTED));
+    assertTrue(v2.containsModifier(Modifier.PROTECTED));
+  }
+
+  @Test
+  public void testVarStatement07() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[3] x = [1, 2], y, z = [100, 200, 300].".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 3);
+    Variable v1 = null, v2 = null, v3 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("x".equals(var.getName()))
+        v1 = var;
+      if ("y".equals(var.getName()))
+        v2 = var;
+      if ("z".equals(var.getName()))
+        v3 = var;
+    }
+    assertNotNull(v1);
+    assertNotNull(v2);
+    assertNotNull(v3);
+    assertEquals(v1.getDataType(), DataType.INTEGER);
+    assertEquals(v2.getDataType(), DataType.INTEGER);
+    assertEquals(v3.getDataType(), DataType.INTEGER);
+    assertEquals(v1.getExtent(), 3);
+    assertEquals(v2.getExtent(), 3);
+    assertEquals(v3.getExtent(), 3);
+    assertNotNull(v1.getInitialValue());
+    assertNull(v2.getInitialValue());
+    assertNotNull(v3.getInitialValue());
+    assertEquals(v1.getInitialValue(), Variable.CONSTANT_ARRAY);
+    assertEquals(v3.getInitialValue(), Variable.CONSTANT_ARRAY);
+  }
+
+  @Test
+  public void testVarStatement08() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 2);
+    Variable v1 = null, v2 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("x".equals(var.getName()))
+        v1 = var;
+      if ("y".equals(var.getName()))
+        v2 = var;
+    }
+    assertNotNull(v1);
+    assertNotNull(v2);
+    assertEquals(v1.getDataType(), DataType.INTEGER);
+    assertEquals(v2.getDataType(), DataType.INTEGER);
+    assertEquals(v1.getExtent(), 0);
+    assertEquals(v2.getExtent(), 0);
+  }
+
+  @Test
+  public void testVarStatement09() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y = [1,2,3].".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 2);
+    Variable v1 = null, v2 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("x".equals(var.getName()))
+        v1 = var;
+      if ("y".equals(var.getName()))
+        v2 = var;
+    }
+    assertNotNull(v1);
+    assertNotNull(v2);
+    assertEquals(v1.getDataType(), DataType.INTEGER);
+    assertEquals(v2.getDataType(), DataType.INTEGER);
+    assertEquals(v1.getExtent(), 0);
+    assertEquals(v2.getExtent(), 0);
+  }
+
+  @Test
+  public void testVarStatement10() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x = [1,2], y = [1,2,3].".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 2);
+    Variable v1 = null, v2 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("x".equals(var.getName()))
+        v1 = var;
+      if ("y".equals(var.getName()))
+        v2 = var;
+    }
+    assertNotNull(v1);
+    assertNotNull(v2);
+    assertEquals(v1.getDataType(), DataType.INTEGER);
+    assertEquals(v2.getDataType(), DataType.INTEGER);
+    assertEquals(v1.getInitialValue(), Variable.CONSTANT_ARRAY);
+    assertEquals(v2.getInitialValue(), Variable.CONSTANT_ARRAY);
+    assertEquals(v1.getExtent(), 0);
+    assertEquals(v2.getExtent(), 0);
+  }
+
+  @Test
+  public void testVarStatement11() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS foo[2] classArray.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+    
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable v1 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("classArray".equals(var.getName()))
+        v1 = var;
+    }
+    assertNotNull(v1);
+    assertEquals(v1.getDataType(), DataType.CLASS);
+    assertEquals(v1.getClassName(), "foo");
+    assertEquals(v1.getExtent(), 2);
+  }
+
+  @Test
+  public void testVarStatement12() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR \"System.Collections.Generic.List<char>\" cList.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable v1 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("cList".equals(var.getName()))
+        v1 = var;
+    }
+    assertNotNull(v1);
+    assertEquals(v1.getDataType(), DataType.CLASS);
+    assertEquals(v1.getClassName(), "System.Collections.Generic.List<char>");
+    assertEquals(v1.getExtent(), -1);
+  }
 }

@@ -291,7 +291,7 @@ public class ABLLexerTest {
   public void testKeywords01() {
     ABLLexer lexer = new ABLLexer(session,
         ByteSource.wrap(
-            "AUTO-ENDKEY AUTO-END-KEY CAPS UPPER COM-HANDLE COMPONENT-HANDLE EXCLUSIVE EXCLUSIVE-LOCK ".getBytes()),
+            "AUTO-ENDKEY AUTO-END-KEY CAPS UPPER COM-HANDLE COMPONENT-HANDLE EXCLUSIVE EXCLUSIVE-LOCK".getBytes()),
         "file.txt");
     assertNextTokenTypeWS(lexer, ABLNodeType.AUTOENDKEY, "AUTO-ENDKEY");
     assertNextTokenTypeWS(lexer, ABLNodeType.AUTOENDKEY, "AUTO-END-KEY");
@@ -304,7 +304,7 @@ public class ABLLexerTest {
 
     ABLLexer lexer2 = new ABLLexer(session,
         ByteSource.wrap(
-            "INIT INITIAL LC LOWER NO-ATTR NO-ATTR-SPACE NO-ATTR-LIST TRANS TRANSAC TRANSACT TRANSACTION ".getBytes()),
+            "INIT INITIAL LC LOWER NO-ATTR NO-ATTR-SPACE NO-ATTR-LIST TRANS TRANSAC TRANSACT TRANSACTION VAR VARI VARIABLE".getBytes()),
         "file.txt");
     assertNextTokenTypeWS(lexer2, ABLNodeType.INITIAL, "INIT");
     assertNextTokenTypeWS(lexer2, ABLNodeType.INITIAL, "INITIAL");
@@ -317,6 +317,9 @@ public class ABLLexerTest {
     assertNextTokenTypeWS(lexer2, ABLNodeType.ID, "TRANSAC");
     assertNextTokenTypeWS(lexer2, ABLNodeType.TRANSACTION, "TRANSACT");
     assertNextTokenTypeWS(lexer2, ABLNodeType.TRANSACTION, "TRANSACTION");
+    assertNextTokenTypeWS(lexer2, ABLNodeType.VAR, "VAR");
+    assertNextTokenTypeWS(lexer2, ABLNodeType.VARIABLE, "VARI");
+    assertNextTokenTypeWS(lexer2, ABLNodeType.VARIABLE, "VARIABLE");
 
     ABLLexer lexer3 = new ABLLexer(session, ByteSource.wrap("USERID USER-ID ".getBytes()), "file.txt");
     assertNextTokenTypeWS(lexer3, ABLNodeType.USERID, "USERID");

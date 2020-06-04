@@ -1184,7 +1184,26 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitDefineVariableStatement(DefineVariableStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx, ABLNodeType.VARIABLE);
+    Builder b = createStatementTreeFromFirstNode(ctx, ABLNodeType.VARIABLE);
+    // Change (if applicable) VAR node to VARIABLE
+    Builder ch = b.getDown();
+    while (ch != null) {
+      if (ch.getNodeType() == ABLNodeType.VAR)
+        ch.changeType(ABLNodeType.VARIABLE);
+      ch = ch.getRight();
+    }
+
+    return b;
+  }
+
+  @Override
+  public Builder visitVarStatement(VarStatementContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public Builder visitVarStatementSub(VarStatementSubContext ctx) {
+    return visitChildren(ctx).setRuleNode(ctx);
   }
 
   @Override

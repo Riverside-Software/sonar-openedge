@@ -97,7 +97,7 @@ public class PreprocessorDirectiveTest {
     TokenSource stream = unit.preprocess();
 
     assertEquals(nextVisibleToken(stream).getType(), Proparse.DEFINE);
-    assertEquals(nextVisibleToken(stream).getType(), Proparse.VARIABLE);
+    assertEquals(nextVisibleToken(stream).getType(), Proparse.VAR);
     Token tok = nextVisibleToken(stream);
     assertEquals(tok.getType(), Proparse.ID);
     assertEquals(tok.getText(), "aaa");

@@ -261,6 +261,7 @@ public enum ABLNodeType {
   TOOLBAR(Proparse.TOOLBAR, "tool-bar", NodeTypesOption.KEYWORD),
   TRANSACTION(Proparse.TRANSACTION, "trans", 5, "transaction", 8, NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   UNSIGNEDINTEGER(Proparse.UNSIGNEDINTEGER, "unsigned-integer", NodeTypesOption.KEYWORD),
+  VAR(Proparse.VAR, "var", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   WORKTABLE(Proparse.WORKTABLE, "work-table", 8, "workfile", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
 
   // A
@@ -1296,7 +1297,7 @@ public enum ABLNodeType {
   VALUE(Proparse.VALUE, "value", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   VALUECHANGED(Proparse.VALUECHANGED, "value-changed", NodeTypesOption.KEYWORD),
   VALUES(Proparse.VALUES, "values", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
-  VARIABLE(Proparse.VARIABLE, "variable", 3, NodeTypesOption.KEYWORD),
+  VARIABLE(Proparse.VARIABLE, "variable", 4, NodeTypesOption.KEYWORD),
   VERBOSE(Proparse.VERBOSE, "verbose", 4, NodeTypesOption.KEYWORD),
   VERTICAL(Proparse.VERTICAL, "vertical", 4, NodeTypesOption.KEYWORD),
   VIEW(Proparse.VIEW, "view", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
