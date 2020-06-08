@@ -44,7 +44,7 @@ public class TypeInfo implements ITypeInfo {
   private static final int HAS_DOTNETBASE = 4096;
   private static final int IS_ABSTRACT = 32768;
   private static final int IS_SERIALIZABLE = 65536;
-  
+
   protected String typeName;
   protected String parentTypeName;
   protected String assemblyName;
@@ -59,7 +59,7 @@ public class TypeInfo implements ITypeInfo {
     this.parentTypeName = parentTypeName;
     this.assemblyName = assemblyName;
     this.interfaces.addAll(Arrays.asList(interfaces));
-    this.flags = (iface ? IS_INTERFACE : 0) & (abstrct ? IS_ABSTRACT : 0);
+    this.flags = (iface ? IS_INTERFACE : 0) | (abstrct ? IS_ABSTRACT : 0);
   }
 
   public void addMethod(IMethodElement element) {

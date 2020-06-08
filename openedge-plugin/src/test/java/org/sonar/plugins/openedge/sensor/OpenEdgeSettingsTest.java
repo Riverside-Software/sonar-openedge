@@ -19,6 +19,7 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -216,5 +217,14 @@ public class OpenEdgeSettingsTest {
     assertNotNull(info2);
     ITypeInfo info3 = session.getTypeInfo("System.AppContextDefaultValues");
     assertNotNull(info3);
+    assertEquals(info3.getParentTypeName(), "System.Object");
+    assertFalse(info3.isInterface());
+    assertTrue(info3.isAbstract());
+    assertTrue(info3.hasMethod("GetHashCode"));
+    assertTrue(info3.hasMethod("PopulateDefaultValues"));
+    ITypeInfo info4 = session.getTypeInfo("Microsoft.Win32.IInternetSecurityManager");
+    assertNotNull(info4);
+    assertTrue(info4.isAbstract());
+    assertTrue(info4.isInterface());
   }
 }
