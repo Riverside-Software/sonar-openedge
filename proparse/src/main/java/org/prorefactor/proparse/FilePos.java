@@ -41,22 +41,6 @@ public final class FilePos {
     this.sourceNum = other.sourceNum;
   }
 
-  public int getFile() {
-    return file;
-  }
-
-  public int getLine() {
-    return line;
-  }
-
-  public int getCol() {
-    return col;
-  }
-
-  public int getSourceNum() {
-    return sourceNum;
-  }
-
   @Override
   public int hashCode() {
     return (13 * file) + (17 * line) + (31 * col) + (37 * sourceNum);
