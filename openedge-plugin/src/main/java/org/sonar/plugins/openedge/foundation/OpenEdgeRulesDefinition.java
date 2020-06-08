@@ -20,6 +20,7 @@
 package org.sonar.plugins.openedge.foundation;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.rules.RuleType;
@@ -31,7 +32,7 @@ import org.sonar.plugins.openedge.api.Constants;
 public class OpenEdgeRulesDefinition implements RulesDefinition {
   public static final String REPOSITORY_NAME = "Standard rules";
 
-  public static final int[] WARNING_MSGS = {
+  private static final int[] WARNING_MSGS = {
       214, 1688, 2750, 2965, 4788, 4958, 4983, 5378, 12115, 14786, 14789, 15090, 18494, 19822};
   public static final String COMPILER_WARNING_RULEKEY = "compiler.warning";
   public static final String COMPILER_WARNING_214_RULEKEY = "compiler.warning.214";
@@ -105,6 +106,10 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     AnnotationBasedRulesDefinition annotationLoader2 = new AnnotationBasedRulesDefinition(repository2, Constants.DB_LANGUAGE_KEY, runtime);
     annotationLoader2.addRuleClasses(false, Arrays.<Class> asList(BasicChecksRegistration.dbCheckClasses()));
     repository2.done();
+  }
+
+  public static boolean isWarningManagedByCABL(int warningNum) {
+    return IntStream.of(OpenEdgeRulesDefinition.WARNING_MSGS).anyMatch(x -> x == warningNum);
   }
 
   private void createWarningRule(NewRepository repository, String ruleKey, String name, String remediationCost) {

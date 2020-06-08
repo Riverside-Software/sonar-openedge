@@ -102,7 +102,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
         for (Warning w : processor.getResult()) {
           RuleKey ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY,
               OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
-          boolean isManagedByCABL = IntStream.of(OpenEdgeRulesDefinition.WARNING_MSGS).anyMatch(x -> x == w.msgNum);
+          boolean isManagedByCABL = OpenEdgeRulesDefinition.isWarningManagedByCABL(w.msgNum);
           if (context.activeRules().find(ruleKey) == null) {
             if (isManagedByCABL)
               // Rule is managed by CABL *and* is specifically inactive in the profile, so the issue is discarded
