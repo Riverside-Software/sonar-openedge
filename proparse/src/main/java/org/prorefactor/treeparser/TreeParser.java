@@ -1545,7 +1545,10 @@ public class TreeParser extends ProparseBaseListener {
     } else if (ctx.LIKE() != null) {
       setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
     } else if (ctx.initialConstant() != null) {
-      defineInitialValue((Variable) currSymbol, ctx.initialConstant().varStatementInitialValue());
+      if (currSymbol instanceof Variable) {
+        // Initial value only set for variables, not for TT fields
+        defineInitialValue((Variable) currSymbol, ctx.initialConstant().varStatementInitialValue());
+      }
     }
   }
 
