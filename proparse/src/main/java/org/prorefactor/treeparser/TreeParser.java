@@ -1339,15 +1339,15 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterVarStatement(VarStatementContext ctx) {
-    for (VarStatementSubContext xx : ctx.varStatementSub()) {
-      Variable symbol = defineVariable(xx, support.getNode(xx), xx.newIdentifier().getText(), Variable.Type.VARIABLE);
+    for (VarStatementSubContext varCtx : ctx.varStatementSub()) {
+      Variable symbol = defineVariable(varCtx, support.getNode(varCtx), varCtx.newIdentifier().getText(), Variable.Type.VARIABLE);
       for (VarStatementModifierContext mod : ctx.varStatementModifier()) {
         symbol.addModifier(Modifier.getModifier(mod.getStart().getType()));
       }
       defAs((Primative) symbol, ctx.datatype());
       addToSymbolScope(symbol);
-      if (xx.initialValue != null) {
-        defineInitialValue(symbol, xx.initialValue);
+      if (varCtx.initialValue != null) {
+        defineInitialValue(symbol, varCtx.initialValue);
       }
       if (ctx.extent != null) {
         int xt = 0;
@@ -1545,7 +1545,7 @@ public class TreeParser extends ProparseBaseListener {
     } else if (ctx.LIKE() != null) {
       setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
     } else if (ctx.initialConstant() != null) {
-      ((Variable) currSymbol).setInitialValue(new Object());
+      defineInitialValue((Variable) currSymbol, ctx.initialConstant().varStatementInitialValue());
     }
   }
 
@@ -2492,7 +2492,6 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   private void defineInitialValue(Variable var, VarStatementInitialValueContext ctx) {
-    
     if (ctx.varStatementInitialValueArray() != null) {
       // Just set initial value to Array, no matter what the values are
       var.setInitialValue(Variable.CONSTANT_ARRAY);
