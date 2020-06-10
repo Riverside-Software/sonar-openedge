@@ -442,7 +442,7 @@ public class ParserTest {
     // No proparse directive as nodes anymore
     JPNode left = node1.getPreviousSibling();
     assertNull(left);
-    
+
     // But as ProToken
     ProToken tok = node1.getHiddenBefore();
     assertNotNull(tok);
@@ -462,4 +462,42 @@ public class ParserTest {
     assertEquals(tok.getText(), "prolint-nowarn(something)");
   }
 
+  @Test
+  public void testExpressionEngine01() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "expression01.p"), session);
+    unit.parse();
+
+    // Looking for the DEFINE node
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.EXPR_STATEMENT);
+    assertNotNull(nodes);
+    assertEquals(nodes.size(), 4);
+
+    JPNode expr1 = nodes.get(0).getFirstChild();
+    assertEquals(expr1.getNodeType(), ABLNodeType.PLUS);
+    assertEquals(expr1.getDirectChildren().get(0).getNodeType(), ABLNodeType.PLUS);
+    JPNode expr2 = nodes.get(1).getFirstChild();
+    assertEquals(expr2.getNodeType(), ABLNodeType.PLUS);
+    assertEquals(expr2.getDirectChildren().get(1).getNodeType(), ABLNodeType.MULTIPLY);
+    JPNode expr3 = nodes.get(2).getFirstChild();
+    assertEquals(expr3.getNodeType(), ABLNodeType.EQ);
+    assertEquals(expr3.getFirstChild().getNodeType(), ABLNodeType.PLUS);
+    JPNode expr4 = nodes.get(3).getFirstChild();
+    assertEquals(expr4.getNodeType(), ABLNodeType.OR);
+    assertEquals(expr4.getFirstChild().getNodeType(), ABLNodeType.OR);
+    assertEquals(expr4.getDirectChildren().get(1).getNodeType(), ABLNodeType.EQ);
+    assertEquals(expr4.getFirstChild().getFirstChild().getNodeType(), ABLNodeType.LTHAN);
+    assertEquals(expr4.getFirstChild().getDirectChildren().get(1).getNodeType(), ABLNodeType.GTHAN);
+    JPNode eqExpr = expr4.getDirectChildren().get(1);
+    assertEquals(eqExpr.getDirectChildren().get(1).getNodeType(), ABLNodeType.FIELD_REF);
+    assertEquals(eqExpr.getFirstChild().getNodeType(), ABLNodeType.PLUS);
+    assertEquals(eqExpr.getFirstChild().getDirectChildren().get(1).getNodeType(), ABLNodeType.MULTIPLY);
+
+    nodes = unit.getTopNode().query(ABLNodeType.ASSIGN);
+    assertNotNull(nodes);
+    assertEquals(nodes.size(), 1);
+
+    JPNode assign1 = nodes.get(0);
+    assertEquals(assign1.getFirstChild().getNodeType(), ABLNodeType.EQUAL);
+    assertEquals(assign1.getFirstChild().getDirectChildren().get(1).getNodeType(), ABLNodeType.EQ);
+  }
 }
