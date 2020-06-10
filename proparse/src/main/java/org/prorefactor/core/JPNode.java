@@ -193,7 +193,8 @@ public class JPNode {
   }
 
   /**
-   * @return First child node associated to a physical token in the source code.
+   * @return First child node associated to a physical token in the source code. If token is an operator, it's not
+   *         really the first token, but the operator itself
    */
   public JPNode firstNaturalChild() {
     if (token.isNatural())
