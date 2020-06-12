@@ -29,7 +29,12 @@ window.registerExtension('openedge/license_recap', function (options) {
 
       theadCol = document.createElement('th');
       theadCol.textContent = 'Product';
-      theadCol.width = 150
+      theadCol.width = 100
+      theadLine.appendChild(theadCol);
+
+      theadCol = document.createElement('th');
+      theadCol.textContent = 'Type';
+      theadCol.width = 100
       theadLine.appendChild(theadCol);
 
       theadCol = document.createElement('th');
@@ -62,12 +67,16 @@ window.registerExtension('openedge/license_recap', function (options) {
         ln.appendChild(fld3);
 
         var fld4 = document.createElement('td');
-        fld4.textContent = response.licenses[i].repository;
+        fld4.textContent = response.licenses[i].type;
         ln.appendChild(fld4);
 
         var fld5 = document.createElement('td');
-        fld5.textContent = response.licenses[i].expiration;
+        fld5.textContent = response.licenses[i].repository;
         ln.appendChild(fld5);
+
+        var fld6 = document.createElement('td');
+        fld6.textContent = response.licenses[i].expiration;
+        ln.appendChild(fld6);
       }
 
       var hr1 = document.createElement('hr');
