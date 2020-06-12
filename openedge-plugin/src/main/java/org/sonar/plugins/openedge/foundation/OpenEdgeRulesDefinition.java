@@ -68,7 +68,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     // Manually created rules for compiler warnings
     createWarningRule(repository, COMPILER_WARNING_RULEKEY, "Compiler warnings", "15min", Priority.MINOR);
     createWarningRule(repository, COMPILER_WARNING_214_RULEKEY,
-        "TRANSACTION keyword given within actual transaction level", "30min");
+        "TRANSACTION keyword given within actual transaction level", "30min", Priority.CRITICAL);
     createWarningRule(repository, COMPILER_WARNING_1688_RULEKEY,
         "Subscript on array field in CONTAINS phrase ignored", "5min");
     createWarningRule(repository, COMPILER_WARNING_2750_RULEKEY,
@@ -86,7 +86,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
         "Table and field names must appear as they are in the schema", "2min", Priority.MAJOR);
     createWarningRule(repository, COMPILER_WARNING_14789_RULEKEY, "Fields must be qualified with table name", "2min",
         Priority.MAJOR);
-    createWarningRule(repository, COMPILER_WARNING_15090_RULEKEY, "Dead code", "30min");
+    createWarningRule(repository, COMPILER_WARNING_15090_RULEKEY, "Dead code", "30min", Priority.CRITICAL);
     createWarningRule(repository, COMPILER_WARNING_18494_RULEKEY, "Abbreviated keywords are not authorized", "1min",
         Priority.INFO);
     createWarningRule(repository, COMPILER_WARNING_19822_RULEKEY,

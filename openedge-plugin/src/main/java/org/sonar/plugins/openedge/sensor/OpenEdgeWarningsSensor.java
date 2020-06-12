@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.FilePredicate;
