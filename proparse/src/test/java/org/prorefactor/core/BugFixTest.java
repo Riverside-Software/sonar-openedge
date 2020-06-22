@@ -623,4 +623,9 @@ public class BugFixTest {
     genericTest("tooManyStatements.p");
   }
 
+  @Test
+  public void testCatchError() {
+    genericTest("catchError.p");
+  }
+
 }

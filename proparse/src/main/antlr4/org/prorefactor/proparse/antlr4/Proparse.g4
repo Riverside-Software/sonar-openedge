@@ -927,7 +927,7 @@ caseEnd:
 
 catchStatement:
     CATCH
-    n=ID AS classTypeName { support.defVar($n.text); }
+    n=identifier AS classTypeName { support.defVar($n.text); }
     blockColon codeBlock ( EOF | catchEnd statementEnd )
   ;
 
