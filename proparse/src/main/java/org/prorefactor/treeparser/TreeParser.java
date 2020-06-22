@@ -2518,11 +2518,17 @@ public class TreeParser extends ProparseBaseListener {
       } else if (ctx2.QSTRING() != null) {
         var.setInitialValue(ProgressString.dequote(ctx2.getText()));
       } else if (ctx2.NUMBER() != null) {
-        Double dbl = Double.valueOf(ctx2.getText());
-        if (dbl == 0)
-          var.setInitialValue(Variable.CONSTANT_ZERO);
-        else
-          var.setInitialValue(Double.valueOf(ctx2.getText()));
+        try {
+          Double dbl = Double.valueOf(ctx2.getText());
+          if (dbl == 0)
+            var.setInitialValue(Variable.CONSTANT_ZERO);
+          else
+            var.setInitialValue(dbl);
+        } catch (NumberFormatException caught) {
+          // Assume it's a non-zero value if we have an exception
+          // Also, dates can be recognized as numbers
+          var.setInitialValue(Double.valueOf(1));
+        }
       } else if (ctx2.LEXDATE() != null) {
         var.setInitialValue(new Date());
       } else {
