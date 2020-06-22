@@ -15,9 +15,12 @@
 package org.prorefactor.proparse;
 
 import org.antlr.v4.runtime.DefaultErrorStrategy;
+import org.antlr.v4.runtime.InputMismatchException;
+import org.antlr.v4.runtime.NoViableAltException;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
@@ -45,11 +48,16 @@ public class ProparseErrorStrategy extends DefaultErrorStrategy {
   }
 
   @Override
-  public void recover(Parser recognizer, RecognitionException e) {
+  public void recover(Parser recognizer, RecognitionException cause) {
     if (allowRecover) {
-      super.recover(recognizer, e);
+      super.recover(recognizer, cause);
     } else {
-      throw new ParseCancellationException(e);
+      String msg = "Syntax error";
+      if (cause instanceof NoViableAltException)
+        msg = getMsgForNoViableAlternative(recognizer, (NoViableAltException) cause);
+      else if (cause instanceof InputMismatchException)
+        msg = getMsgForInputMismatch(recognizer, (InputMismatchException) cause);
+      throw new ParseCancellationException(msg, cause);
     }
   }
 
@@ -80,4 +88,25 @@ public class ProparseErrorStrategy extends DefaultErrorStrategy {
     return new ProToken.Builder(ABLNodeType.getNodeType(tok.getType()), tok.getText()).setLine(
         tok.getLine()).setCharPositionInLine(tok.getCharPositionInLine()).build();
   }
+
+  private String getMsgForInputMismatch(Parser recognizer, InputMismatchException e) {
+    return "Mismatched input '" + getTokenErrorDisplay(e.getOffendingToken()) + "', expecting '"
+        + e.getExpectedTokens().toString(recognizer.getVocabulary()) + "'";
+  }
+  
+  private String getMsgForNoViableAlternative(Parser recognizer, NoViableAltException e) {
+    TokenStream tokens = recognizer.getInputStream();
+    String input;
+    if (tokens != null) {
+      if (e.getStartToken().getType() == Token.EOF)
+        input = "<EOF>";
+      else
+        input = tokens.getText(e.getStartToken(), e.getOffendingToken());
+    } else {
+      input = "<unknown input>";
+    }
+    String msg = "No viable alternative at input " + escapeWSAndQuote(input);
+    return msg;
+  }
+
 }

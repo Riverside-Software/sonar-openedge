@@ -21,19 +21,18 @@ import org.prorefactor.core.ProToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DescriptiveErrorListener extends BaseErrorListener {
-  private static final Logger LOG = LoggerFactory.getLogger(DescriptiveErrorListener.class);
+public class ProparseErrorListener extends BaseErrorListener {
+  private static final Logger LOG = LoggerFactory.getLogger(ProparseErrorListener.class);
 
   @Override
   public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
       String msg, RecognitionException e) {
     ProToken tok = (ProToken) offendingSymbol;
     if (tok.getFileIndex() != 0) {
-      LOG.error("Syntax error -- {} -- {}:{}:{} -- {} -- {}", recognizer.getInputStream().getSourceName(),
-          tok.getFileName(), line, charPositionInLine, msg, e != null ? "Recover" : "");
+      LOG.error("Syntax error -- {} -- {}:{}:{} -- {}", recognizer.getInputStream().getSourceName(),
+          tok.getFileName(), line, charPositionInLine, msg);
     } else {
-      LOG.error("Syntax error -- {}:{}:{} -- {} -- {}", tok.getFileName(), line, charPositionInLine, msg,
-          e != null ? "Recover" : "");
+      LOG.error("Syntax error -- {}:{}:{} -- {}", tok.getFileName(), line, charPositionInLine, msg);
     }
   }
 }

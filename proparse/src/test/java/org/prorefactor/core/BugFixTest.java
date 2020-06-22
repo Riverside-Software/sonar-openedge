@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
@@ -521,7 +522,7 @@ public class BugFixTest {
     genericTest("stopafter.p");
   }
 
-  @Test
+  @Test(expectedExceptions = {ParseCancellationException.class})
   public void testDefined() {
     // https://github.com/Riverside-Software/sonar-openedge/issues/515
     genericTest("defined.p");

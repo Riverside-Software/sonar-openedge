@@ -51,7 +51,7 @@ import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
 import org.prorefactor.proparse.ABLLexer;
-import org.prorefactor.proparse.DescriptiveErrorListener;
+import org.prorefactor.proparse.ProparseErrorListener;
 import org.prorefactor.proparse.JPNodeVisitor;
 import org.prorefactor.proparse.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.Proparse;
@@ -88,6 +88,7 @@ public class ParseUnit {
   private ProgramRootNode topNode;
   private IncludeRef macroGraph;
   private boolean appBuilderCode;
+  private boolean syntaxError;
   private List<EditableCodeSection> sections;
   private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
@@ -263,7 +264,6 @@ public class ParseUnit {
       parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
       parser.setErrorHandler(new BailErrorStrategy());
       parser.removeErrorListeners();
-      parser.addErrorListener(new DescriptiveErrorListener());
 
       long startTimeNs = System.nanoTime();
       try {
@@ -274,13 +274,20 @@ public class ParseUnit {
         parseTimeSLL = System.nanoTime() - startTimeNs;
         LOGGER.trace("Switching to LL prediction mode");
         switchToLL = true;
+        parser.addErrorListener(new ProparseErrorListener());
         parser.setErrorHandler(new ProparseErrorStrategy(session.getProparseSettings().allowAntlrTokenDeletion(),
             session.getProparseSettings().allowAntlrTokenInsertion(), session.getProparseSettings().allowAntlrRecover()));
         parser.getInterpreter().setPredictionMode(PredictionMode.LL);
-        // Another ParseCancellationException can be thrown if recover fails again
+        // Another ParseCancellationException can be thrown if recover fails again (only if ProparseSettings.allowRecover is set to false)
         startTimeNs = System.nanoTime();
-        tree = parser.program();
-        parseTimeLL = System.nanoTime() - startTimeNs;
+        try {
+          tree = parser.program();
+          parseTimeLL = System.nanoTime() - startTimeNs;
+        } catch (ParseCancellationException uncaught2) {
+          parseTimeLL = System.nanoTime() - startTimeNs;
+          syntaxError = true;
+          throw uncaught2;
+        }
       }
     }
 
@@ -474,6 +481,10 @@ public class ParseUnit {
 
   public boolean hasSwitchedToLL() {
     return switchToLL;
+  }
+
+  public boolean hasSyntaxError() {
+    return syntaxError;
   }
 
   public boolean isInEditableSection(int file, int line) {

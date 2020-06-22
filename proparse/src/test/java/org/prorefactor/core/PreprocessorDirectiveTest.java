@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroDef;
@@ -84,7 +85,7 @@ public class PreprocessorDirectiveTest {
     assertFalse(node2.hasProparseDirective("klm"));
   }
 
-  @Test
+  @Test(expectedExceptions = {ParseCancellationException.class})
   public void test02() {
     // See issue #341 - Won't fix
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor07.p"), session);

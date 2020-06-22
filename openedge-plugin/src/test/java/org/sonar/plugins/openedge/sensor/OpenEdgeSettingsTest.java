@@ -177,7 +177,7 @@ public class OpenEdgeSettingsTest {
     settings.setProperty("sonar.sources", "src");
 
     File cache = new File(TestProjectSensorContext.BASEDIR, ".sonarlint/src_schema_sp2k.df.bin");
-    assertFalse(cache.exists());
+    cache.delete();
 
     SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
     context.setSettings(settings);

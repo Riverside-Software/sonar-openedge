@@ -57,7 +57,7 @@ public class ParserRecoverTest {
     ((ProparseSettings) session.getProparseSettings()).setAntlrTokenDeletion(true);
     // Doesn't compile but recover is on, so should be silently discarded
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define variable xyz character no-undo.".getBytes()), "<unnamed>", session);
-    unit.parse();
+    unit.treeParser01();
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 0);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.PERIOD).size(), 1);
   }
@@ -65,11 +65,11 @@ public class ParserRecoverTest {
   @Test(expectedExceptions = ParseCancellationException.class )
   public void test03() {
     ((ProparseSettings) session.getProparseSettings()).setAntlrRecover(false);
-    ((ProparseSettings) session.getProparseSettings()).setAntlrTokenInsertion(true);
-    ((ProparseSettings) session.getProparseSettings()).setAntlrTokenDeletion(true);
+    ((ProparseSettings) session.getProparseSettings()).setAntlrTokenInsertion(false);
+    ((ProparseSettings) session.getProparseSettings()).setAntlrTokenDeletion(false);
     // Doesn't compile and recover is off, so should throw ParseCancellationException
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define variable xyz character no-undo.".getBytes()), "<unnamed>", session);
-    unit.parse();
+    unit.treeParser01();
   }
 
 }

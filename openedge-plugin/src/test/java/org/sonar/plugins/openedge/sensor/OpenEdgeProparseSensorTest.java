@@ -38,6 +38,7 @@ import org.sonar.api.SonarQubeSide;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.rule.internal.NewActiveRule;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.batch.sensor.issue.Issue;
 import org.sonar.api.internal.SonarRuntimeImpl;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.Version;
@@ -47,6 +48,7 @@ import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
+import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.annotations.Test;
@@ -157,7 +159,8 @@ public class OpenEdgeProparseSensorTest {
   public void testInvalidDBInSonarLint() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
     context.settings().setProperty(Constants.DATABASES, "src/schema/invalid.df");
-    
+    context.setRuntime(SonarRuntimeImpl.forSonarLint(VERSION));
+
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarLint(VERSION));
     try {
       oeSettings.getProparseSession();
@@ -171,13 +174,61 @@ public class OpenEdgeProparseSensorTest {
   public void testInvalidDBInSonarQube() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
     context.settings().setProperty(Constants.DATABASES, "src/schema/invalid.df");
-    
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
     try {
       oeSettings.getProparseSession();
     } catch (RuntimeException caught) {
       fail("No RuntimeException should have been thrown");
     }
+  }
+
+  @Test
+  public void testProparseError() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
+    OpenEdgeComponents components = new OpenEdgeComponents(null, null);
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    assertEquals(context.allAnalysisErrors().size(), 0);
+    assertEquals(context.allIssues().size(), 1);
+    Issue issue = context.allIssues().iterator().next();
+    assertEquals(issue.ruleKey().rule(), OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY);
+  }
+
+  @Test
+  public void testProparseErrorSonarLint() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    context.setRuntime(SonarRuntimeImpl.forSonarLint(VERSION));
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        SonarRuntimeImpl.forSonarLint(VERSION));
+    OpenEdgeComponents components = new OpenEdgeComponents(null, null);
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    assertEquals(context.allIssues().size(), 0);
+    assertEquals(context.allAnalysisErrors().size(), 1);
+  }
+
+  @Test
+  public void testNoProparseError() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    context.settings().setProperty("sonar.oe.proparse.recover", true);
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
+    
+    OpenEdgeComponents components = new OpenEdgeComponents(null, null);
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    assertEquals(context.allAnalysisErrors().size(), 0);
+    assertEquals(context.allIssues().size(), 0);
   }
 
 }
