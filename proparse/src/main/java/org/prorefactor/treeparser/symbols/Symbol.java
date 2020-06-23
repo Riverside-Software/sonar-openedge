@@ -15,6 +15,9 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -27,7 +30,6 @@ public abstract class Symbol implements ISymbol {
   private int numReads = 0;
   private int numWrites = 0;
   private int numRefd = 0;
-  private boolean parameter = false;
 
   private ISymbol like;
 
@@ -36,18 +38,14 @@ public abstract class Symbol implements ISymbol {
   private JPNode defNode;
 
   // What scope this symbol was defined in
-  private TreeParserSymbolScope scope;
+  private final TreeParserSymbolScope scope;
   // Stores the full name, original (mixed) case as in definition
   private final String name;
+  private EnumSet<Modifier> modifiers = EnumSet.noneOf(Modifier.class);
 
   public Symbol(String name, TreeParserSymbolScope scope) {
-    this(name, scope, false);
-  }
-
-  public Symbol(String name, TreeParserSymbolScope scope, boolean parameter) {
     this.name = name;
     this.scope = scope;
-    this.parameter = parameter;
     scope.addSymbol(this);
   }
 
@@ -110,17 +108,6 @@ public abstract class Symbol implements ISymbol {
     return fullName();
   }
 
-  public void setParameter(boolean parameter) {
-    this.parameter = parameter;
-  }
-
-  /**
-   * @return True if this variable is a procedure/function/method parameter
-   */
-  public boolean isParameter() {
-    return parameter;
-  }
-
   @Override
   public void setLikeSymbol(ISymbol symbol) {
     this.like = symbol;
@@ -129,5 +116,31 @@ public abstract class Symbol implements ISymbol {
   @Override
   public ISymbol getLikeSymbol() {
     return like;
+  }
+
+  public void addModifier(Modifier modifier) {
+    if (modifier != null)
+      modifiers.add(modifier);
+  }
+
+  public boolean containsModifier(Modifier modifier) {
+    return modifiers.contains(modifier);
+  }
+
+  public boolean containsModifier(Modifier modifier, Modifier... others) {
+    boolean retVal = modifiers.contains(modifier);
+    if (retVal)
+      return true;
+
+    for (Modifier m : others) {
+      if (modifiers.contains(m))
+        return true;
+    }
+    return false;
+  }
+
+  // Returns unmodifiable instance
+  public Set<Modifier> getModifiers() {
+    return EnumSet.copyOf(modifiers);
   }
 }

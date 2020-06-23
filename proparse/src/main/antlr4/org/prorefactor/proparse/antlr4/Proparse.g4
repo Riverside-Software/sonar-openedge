@@ -21,10 +21,11 @@ parser grammar Proparse;
 @header {
   import org.antlr.v4.runtime.BufferedTokenStream;
   import org.prorefactor.core.ABLNodeType;
-  import org.prorefactor.proparse.IntegerIndex;
-  import org.prorefactor.proparse.ParserSupport;
-  import org.prorefactor.proparse.SymbolScope;
+  import org.prorefactor.proparse.support.IntegerIndex;
+  import org.prorefactor.proparse.support.ParserSupport;
+  import org.prorefactor.proparse.support.SymbolScope;
   import org.prorefactor.refactor.RefactorSession;
+  import com.progress.xref.CrossReference;
 }
 
 options {
@@ -34,8 +35,8 @@ options {
 @members {
   private ParserSupport support;
 
-  public void initAntlr4(RefactorSession session) {
-    this.support = new ParserSupport(session);
+  public void initAntlr4(RefactorSession session, CrossReference xref) {
+    this.support = new ParserSupport(session, xref);
   }
 
   public ParserSupport getParserSupport() {
@@ -43,6 +44,8 @@ options {
   }
 
 }
+
+import keywords;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Begin syntax
@@ -58,7 +61,6 @@ codeBlock:
 
 blockOrStatement:
     // Method calls and other expressions can stand alone as statements.
-    // Many functions are ambiguous with statements on the first few tokens.
     emptyStatement
   | annotation
   | dotComment
@@ -89,7 +91,7 @@ dotComment:
   ;
 
 functionCallStatement:
-    functionCallStatementSub NOERROR_KW? statementEnd
+    functionCallStatementSub NOERROR? statementEnd
   ;
 
 functionCallStatementSub:
@@ -97,7 +99,7 @@ functionCallStatementSub:
   ;
 
 expressionStatement:
-    expression NOERROR_KW? statementEnd
+    expression NOERROR? statementEnd
   ;
 
 labeledBlock:
@@ -139,12 +141,6 @@ blockPreselect:
   ;
 
 statement:
-// Do not turn off warnings for the statement rule. We want to know if we have ambiguities here.
-// Many statements can be ambiguous on the first two terms with a built-in function. I have predicated those statements.
-// Some statement keywords are not reserved, and could be used as a field name in unreskeyword EQUAL expression.
-// However, there are no statements
-// that have an unreserved keyword followed by EQUAL or LEFTPAREN, so with ASSIGN and user def'd function predicated
-// at the top, we take care of our ambiguity.
      aaTraceOnOffStatement
   |  aaTraceCloseStatement
   |  aaTraceStatement
@@ -169,10 +165,7 @@ statement:
   |  compileStatement
   |  connectStatement
   |  copyLobStatement
-  |  // "CREATE WIDGET-POOL." truly is ambiguous if you have a table named "widget-pool".
-     // Progress seems to treat this as a CREATE WIDGET-POOL Statementment rather than a
-     // CREATE table Statementment. So, we'll resolve it the same way.
-     { _input.LA(2) == WIDGETPOOL }? createWidgetPoolStatement
+  |  createWidgetPoolStatement // CREATE WIDGET-POOL is ambiguous if you have a table named "widget-pool". ABL seems to treat this as a CREATE WIDGET-POOL Statement
   |  createStatement
   |  createWhateverStatement
   |  createAliasStatement
@@ -210,6 +203,7 @@ statement:
   |  defineTempTableStatement
   |  defineWorkTableStatement
   |  defineVariableStatement
+  |  varStatement
   |  dictionaryStatement
   |  deleteWidgetPoolStatement
   |  deleteStatement
@@ -323,6 +317,7 @@ inclassStatement:
   |  defineTempTableStatement
   |  defineWorkTableStatement
   |  defineVariableStatement
+  |  varStatement
   |  constructorStatement
   |  destructorStatement
   |  methodStatement
@@ -351,8 +346,8 @@ pseudoFunction:
   // are accepted by the compiler, however, assignment to them seems to have
   // no affect at runtime.
   // The following are from <optargfn>
-  | PAGESIZE_KW | LINECOUNTER | PAGENUMBER | FRAMECOL
-  | FRAMEDOWN | FRAMELINE | FRAMEROW | USERID | ETIME_KW
+  | PAGESIZE | LINECOUNTER | PAGENUMBER | FRAMECOL
+  | FRAMEDOWN | FRAMELINE | FRAMEROW | USERID | ETIME
   | PROVERSION
   // The following are from <noargfn>
   | DBNAME | TIME | OPSYS | RETRY | AASERIAL | AACONTROL
@@ -374,13 +369,11 @@ memoryManagementFunction:
 // ## IMPORTANT ## If you add a function keyword here, also add it to NodeTypes.
 builtinFunction:
      ACCUMULATE accumulateWhat ( byExpr expression | expression )
-  |  ADDINTERVAL LEFTPAREN expression COMMA expression COMMA expression RIGHTPAREN
-  |  AUDITENABLED LEFTPAREN expression? RIGHTPAREN
   |  canFindFunction
   |  CAST LEFTPAREN expression COMMA typeName RIGHTPAREN
   |  currentValueFunction // is also a pseudfn.
   |  dynamicCurrentValueFunction // is also a pseudfn.
-  |  DYNAMICFUNCTION LEFTPAREN expression inExpression? (COMMA parameter)* RIGHTPAREN NOERROR_KW?
+  |  DYNAMICFUNCTION LEFTPAREN expression inExpression? (COMMA parameter)* RIGHTPAREN NOERROR?
   |  DYNAMICINVOKE
        LEFTPAREN
        ( expression | typeName )
@@ -388,266 +381,23 @@ builtinFunction:
        (COMMA parameter)*
        RIGHTPAREN
   // ENTERED and NOTENTERED are only dealt with as part of an expression term. See: exprt.
-  |  entryFunction // is also a pseudfn.
-  |  ETIME_KW functionArgs  // also noarg
-  |  EXTENT LEFTPAREN expression RIGHTPAREN
   |  FRAMECOL LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMEDOWN LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMELINE LEFTPAREN widgetname RIGHTPAREN  // also noarg
   |  FRAMEROW LEFTPAREN widgetname RIGHTPAREN  // also noarg
-  |  GETCODEPAGE functionArgs
-  |  GUID LEFTPAREN expression? RIGHTPAREN
+  |  GETCLASS LEFTPAREN typeName RIGHTPAREN
   |  IF expression THEN expression ELSE expression
   |  ldbnameFunction
-  |  lengthFunction // is also a pseudfn.
   |  LINECOUNTER LEFTPAREN streamname RIGHTPAREN  // also noarg
-  |  MTIME functionArgs  // also noarg
   |  nextValueFunction // is also a pseudfn.
   |  PAGENUMBER LEFTPAREN streamname RIGHTPAREN  // also noarg
-  |  PAGESIZE_KW LEFTPAREN streamname RIGHTPAREN  // also noarg
-  |  PROVERSION LEFTPAREN expression RIGHTPAREN
-  |  rawFunction // is also a pseudfn.
+  |  PAGESIZE LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  SEEK LEFTPAREN ( INPUT | OUTPUT | streamname | STREAMHANDLE expression ) RIGHTPAREN // streamname, /not/ stream_name_or_handle.
-  |  substringFunction // is also a pseudfn.
   |  SUPER parameterList  // also noarg
-  |  TENANTID LEFTPAREN expression? RIGHTPAREN
-  |  TENANTNAME LEFTPAREN expression? RIGHTPAREN
-  |  TIMEZONE functionArgs  // also noarg
   |  TYPEOF LEFTPAREN expression COMMA typeName RIGHTPAREN
-  |  GETCLASS LEFTPAREN typeName RIGHTPAREN
-  |  (USERID | USER) functionArgs  // also noarg
   |  argFunction
   |  optionalArgFunction
   |  recordFunction
-  ;
-
-// If you add a function keyword here, also add option NodeTypesOption.MAY_BE_REGULAR_FUNC to ABLNodeType entry
-argFunction:
-    (  AACBIT
-    |  AAMSG
-    |  ABSOLUTE
-    |  ALIAS
-    |  ASC
-    |  BASE64DECODE
-    |  BASE64ENCODE
-    |  BOX
-    |  BUFFERTENANTID
-    |  BUFFERTENANTNAME
-    |  CANDO
-    |  CANQUERY
-    |  CANSET
-    |  CAPS
-    |  CHR
-    |  CODEPAGECONVERT
-    |  COLLATE // See docs for BY phrase in FOR, PRESELECT, etc.
-    |  COMPARE
-    |  COMPARES
-    |  CONNECTED
-    |  COUNTOF
-    |  CURRENTRESULTROW
-    |  DATE
-    |  DATETIME
-    |  DATETIMETZ
-    |  DAY
-    |  DBCODEPAGE
-    |  DBCOLLATION
-    |  DBPARAM
-    |  DBREMOTEHOST
-    |  DBRESTRICTIONS
-    |  DBTASKID
-    |  DBTYPE
-    |  DBVERSION
-    |  DECIMAL
-    |  DECRYPT
-    |  DYNAMICCAST
-    |  DYNAMICNEXTVALUE
-    |  DYNAMICPROPERTY
-    |  ENCODE
-    |  ENCRYPT
-    |  EXP
-    |  FILL
-    |  FIRST
-    |  FIRSTOF
-    |  GENERATEPBEKEY
-    |  GETBITS
-    |  GETBYTE
-    |  GETBYTEORDER
-    |  GETBYTES
-    |  GETCOLLATIONS
-    |  GETDOUBLE
-    |  GETFLOAT
-    |  GETINT64
-    |  GETLICENSE
-    |  GETLONG
-    |  GETPOINTERVALUE
-    |  GETSHORT
-    |  GETSIZE
-    |  GETSTRING
-    |  GETUNSIGNEDLONG
-    |  GETUNSIGNEDSHORT
-    |  HANDLE
-    |  HEXDECODE
-    |  HEXENCODE
-    |  INDEX
-    |  INT64
-    |  INTEGER
-    |  INTERVAL
-    |  ISCODEPAGEFIXED
-    |  ISCOLUMNCODEPAGE
-    |  ISDBMULTITENANT
-    |  ISLEADBYTE
-    |  ISODATE
-    |  KBLABEL
-    |  KEYCODE
-    |  KEYFUNCTION
-    |  KEYLABEL
-    |  KEYWORD
-    |  KEYWORDALL
-    |  LAST
-    |  LASTOF
-    |  LC
-    |  LEFTTRIM
-    |  LIBRARY
-    |  LISTEVENTS
-    |  LISTQUERYATTRS
-    |  LISTSETATTRS
-    |  LISTWIDGETS
-    |  LOADPICTURE // Args are required, contrary to ref manual.
-    |  LOG
-    |  LOGICAL
-    |  LOOKUP
-    |  MAXIMUM
-    |  MD5DIGEST
-    |  MEMBER
-    |  MESSAGEDIGEST
-    |  MINIMUM
-    |  MONTH
-    |  NORMALIZE
-    |  NUMENTRIES
-    |  NUMRESULTS
-    |  OSGETENV
-    |  PDBNAME
-    |  PROGRAMNAME
-    |  QUERYOFFEND
-    |  QUOTER
-    |  RINDEX
-    |  RANDOM
-    |  REPLACE
-    |  RGBVALUE
-    |  RIGHTTRIM
-    |  ROUND
-    |  SDBNAME
-    |  SEARCH
-    |  SETDBCLIENT
-    |  SETEFFECTIVETENANT
-    |  SETUSERID
-    |  SHA1DIGEST
-    |  SQRT
-    |  SSLSERVERNAME
-    |  STRING
-    |  SUBSTITUTE
-    |  TENANTNAMETOID
-    |  TOROWID
-    |  TRIM
-    |  TRUNCATE
-    |  UNBOX
-    |  VALIDEVENT
-    |  VALIDHANDLE
-    |  VALIDOBJECT
-    |  WEEKDAY
-    |  WIDGETHANDLE
-    |  YEAR
-    )
-    functionArgs
-    ;
-
-optionalArgFunction:
-    (  GETDBCLIENT
-    |  GETEFFECTIVETENANTID
-    |  GETEFFECTIVETENANTNAME
-    )
-    optionalFunctionArgs
-    ;
-
-// If you add a function keyword here, also add option NodeTypesOption.MAY_BE_REGULAR_FUNC to ABLNodeType entry
-recordFunction:
-    (  AMBIGUOUS
-    |  AVAILABLE
-    |  CURRENTCHANGED
-    |  DATASOURCEMODIFIED
-    |  ERROR
-    |  LOCKED
-    |  NEW
-    |  RECID
-    |  RECORDLENGTH
-    |  REJECTED
-    |  ROWID
-    |  ROWSTATE
-    )
-    ( LEFTPAREN record RIGHTPAREN | record )
-  ;
-
-// If you add a function keyword here, also add option NodeTypesOption.MAY_BE_NO_ARG_FUNC to ABLNodeType entry
-noArgFunction:
-     AACONTROL
-  |  AAPCONTROL
-  |  AASERIAL
-  |  CURRENTLANGUAGE
-  |  CURSOR
-  |  DATASERVERS
-  |  DBNAME
-  |  FRAMEDB
-  |  FRAMEFIELD
-  |  FRAMEFILE
-  |  FRAMEINDEX
-  |  FRAMENAME
-  |  FRAMEVALUE
-  |  GENERATEPBESALT
-  |  GENERATERANDOMKEY
-  |  GENERATEUUID
-  |  GATEWAYS
-  |  GOPENDING
-  |  GUID
-  |  ISATTRSPACE
-  |  LASTKEY
-  |  MACHINECLASS
-  |  MESSAGELINES
-  |  NOW
-  |  NUMALIASES
-  |  NUMDBS
-  |  OPSYS
-  |  OSDRIVES
-  |  OSERROR
-  |  PROCESSARCHITECTURE
-  |  PROCHANDLE
-  |  PROCSTATUS
-  |  PROGRESS
-  |  PROMSGS
-  |  PROPATH
-  |  RETRY
-  |  RETURNVALUE
-  |  SCREENLINES
-  |  TERMINAL
-  |  TIME
-  |  TODAY
-  |  TRANSACTION
-    // The following are built-in functions with optional arguments.
-    // You will also find them listed in builtinfunc. 
-  |  PROVERSION
-  |  ETIME_KW
-  |  FRAMECOL
-  |  FRAMEDOWN
-  |  FRAMELINE
-  |  FRAMEROW
-  |  GETCODEPAGES
-  |  LINECOUNTER
-  |  MTIME
-  |  PAGENUMBER
-  |  PAGESIZE_KW
-  |  SUPER
-  |  TIMEZONE
-  |  USERID
-  |  USER
   ;
 
 parameter:
@@ -670,11 +420,10 @@ parameterArg:
   | { _input.LA(3) != OBJCOLON && _input.LA(3) != DOUBLECOLON }? DATASET identifier parameterDatasetOptions  # parameterArgDataset
   | DATASETHANDLE field parameterDatasetOptions # parameterArgDatasetHandle
   | PARAMETER field EQUAL expression  # parameterArgStoredProcedure  // for RUN STORED-PROCEDURE
-  | n=identifier AS ( CLASS typeName | datatypeComNative | datatypeVar ) { support.defVar($n.text); } # parameterArgAs
-  | expression ( AS datatypeCom )? # parameterArgComDatatype
+  | id=identifier AS datatype { support.defVar($id.text); } # parameterArgAs
+  | expression ( AS datatype )? # parameterArgComDatatype
   ;
 
-// FIXME Can be empty
 parameterDatasetOptions:
     APPEND? ( BYVALUE | BYREFERENCE | BIND )?
   ;
@@ -756,8 +505,6 @@ expression:
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Expression bits
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Expression term: constant, function, fields, attributes, methods.
 
 expressionTerm:
     NORETURNVALUE sWidget colonAttribute  # exprtNoReturnValue
@@ -858,7 +605,7 @@ methodParamList:
   ;
 
 inuic:
-    IN_KW ( MENU | FRAME | BROWSE | SUBMENU | BUFFER ) widgetname
+    IN ( MENU | FRAME | BROWSE | SUBMENU | BUFFER ) widgetname
   ;
 
 varRecField:
@@ -866,9 +613,6 @@ varRecField:
     // as a record - we don't have to worry about that. So, we can look at the
     // very next token, and if it's an identifier it might be record - check its name.
     { _input.LA(2) != NAMEDOT && support.isVar(_input.LT(1).getText()) }? field
-  // No more syntactic predicate in ANTLR4. Should be verified
-  // If we consume record and there's a leftover name part, then it's a field...
-  // (record NAMEDOT) // => field
   | record
   | field
   ;
@@ -944,7 +688,7 @@ typeName2:
 
 constant:
      // These are necessarily reserved keywords.
-     TRUE_KW | FALSE_KW | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL_KW
+     TRUE | FALSE | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL
   |  NOWAIT | SHARELOCK | EXCLUSIVELOCK | NOLOCK
   |  BIGENDIAN
   |  FINDCASESENSITIVE | FINDGLOBAL | FINDNEXTOCCURRENCE | FINDPREVOCCURRENCE | FINDSELECT | FINDWRAPAROUND
@@ -955,23 +699,6 @@ constant:
   |  SAXCOMPLETE | SAXPARSERERROR | SAXRUNNING | SAXUNINITIALIZED | SAXWRITEBEGIN | SAXWRITECOMPLETE | SAXWRITECONTENT | SAXWRITEELEMENT | SAXWRITEERROR | SAXWRITEIDLE | SAXWRITETAG
   |  SEARCHSELF | SEARCHTARGET
   |  WINDOWDELAYEDMINIMIZE | WINDOWMINIMIZED | WINDOWNORMAL | WINDOWMAXIMIZED
-  ;
-
-systemHandleName:
-     // ## IMPORTANT ## If you change this list you also have to change NodeTypes.
-     AAMEMORY | ACTIVEWINDOW | AUDITCONTROL | AUDITPOLICY | CLIPBOARD | CODEBASELOCATOR | COLORTABLE | COMPILER
-  |  COMSELF | CURRENTWINDOW | DEBUGGER | DEFAULTWINDOW
-  |  ERRORSTATUS | FILEINFORMATION | FOCUS | FONTTABLE | LASTEVENT | LOGMANAGER
-  |  MOUSE | PROFILER | RCODEINFORMATION | SECURITYPOLICY | SELF | SESSION
-  |  SOURCEPROCEDURE | SUPER | TARGETPROCEDURE | TEXTCURSOR | THISOBJECT | THISPROCEDURE | WEBCONTEXT | ACTIVEFORM
-  ;
-
-widgetType:
-     BROWSE | BUFFER | BUTTON | BUTTONS /* {#btns.setType(BUTTON);} */ | COMBOBOX | CONTROLFRAME | DIALOGBOX
-  |  EDITOR | FILLIN | FIELD | FRAME | IMAGE | MENU
-  |   MENUITEM | QUERY | RADIOSET | RECTANGLE | SELECTIONLIST 
-  |  SLIDER | SOCKET | SUBMENU | TEMPTABLE | TEXT | TOGGLEBOX | WINDOW
-  |  XDOCUMENT | XNODEREF
   ;
 
 nonPunctuating:
@@ -1024,7 +751,7 @@ allExceptFields:
 analyzeStatement:
     // Don't ask me - I don't know. I just found it in PSC's grammar.
     ANALYZE filenameOrValue filenameOrValue ( OUTPUT filenameOrValue )?
-    ( APPEND | ALL | NOERROR_KW )*
+    ( APPEND | ALL | NOERROR )*
     statementEnd
   ;
 
@@ -1051,7 +778,7 @@ assignOptionSub:
   ;
 
 assignStatement:
-    ASSIGN assignmentList NOERROR_KW? statementEnd
+    ASSIGN assignmentList NOERROR? statementEnd
   ;
 
 assignmentList: // SEMITRANSLATED
@@ -1063,7 +790,7 @@ assignmentList: // SEMITRANSLATED
   ;
 
 assignStatement2:
-    ( pseudoFunction | widattr | field ) EQUAL expression NOERROR_KW? statementEnd
+    ( pseudoFunction | widattr | field ) EQUAL expression NOERROR? statementEnd
   ;
 
 assignEqual:
@@ -1112,13 +839,13 @@ bufferCompareStatement:
     EXPLICIT?
     (
       ( COMPARES | COMPARE )
-      NOERROR_KW?
+      NOERROR?
       blockColon
       bufferComparesBlock
       bufferComparesEnd
     )?
     NOLOBS?
-    NOERROR_KW?
+    NOERROR?
     statementEnd
   ;
 
@@ -1127,7 +854,7 @@ bufferCompareSave:
   ;
 
 bufferCompareResult:
-    RESULT IN_KW
+    RESULT IN
   ;
 
 bufferComparesBlock:
@@ -1144,7 +871,7 @@ bufferComparesEnd:
 
 bufferCopyStatement:
     BUFFERCOPY record exceptUsingFields? TO record
-    bufferCopyAssign? NOLOBS? NOERROR_KW? statementEnd
+    bufferCopyAssign? NOLOBS? NOERROR? statementEnd
   ;
 
 bufferCopyAssign:
@@ -1200,7 +927,7 @@ caseEnd:
 
 catchStatement:
     CATCH
-    n=ID AS classTypeName { support.defVar($n.text); }
+    n=identifier AS classTypeName { support.defVar($n.text); }
     blockColon codeBlock ( EOF | catchEnd statementEnd )
   ;
 
@@ -1223,7 +950,7 @@ chooseOption:
   | colorAnyOrValue
   | goOnPhrase
   | KEYS field
-  | NOERROR_KW
+  | NOERROR
   | pauseExpression
   ;
 
@@ -1391,7 +1118,7 @@ compileOption:
   | STREAMIO compileEqual?
   | MINSIZE compileEqual?
   | LANGUAGES LEFTPAREN (compileLang (COMMA compileLang)* )? RIGHTPAREN
-  | TEXTSEGGROW compileEqual
+  | TEXTSEGGROWTH compileEqual
   | DEBUGLIST filenameOrValue
   | DEFAULTNOXLATE compileEqual?
   | GENERATEMD5 compileEqual?
@@ -1401,7 +1128,7 @@ compileOption:
   | V6FRAME compileEqual?
   | OPTIONS expressionTerm
   | OPTIONSFILE filenameOrValue
-  | NOERROR_KW
+  | NOERROR
   ;
 
 compileLang:
@@ -1426,11 +1153,11 @@ compileAppend:
   ;
 
 compilePage:
-    ( PAGESIZE_KW | PAGEWIDTH ) expression
+    ( PAGESIZE | PAGEWIDTH ) expression
   ;
 
 connectStatement:
-    CONNECT ( NOERROR_KW | DDE | filenameOrValue )* statementEnd
+    CONNECT ( NOERROR | DDE | filenameOrValue )* statementEnd
   ;
 
 constructorStatement:
@@ -1458,7 +1185,7 @@ convertPhraseOption:
   ;
     
 copyLobStatement:
-    COPYLOB FROM? copyLobFrom copyLobStarting? copyLobFor? TO copyLobTo ( NOCONVERT | convertPhrase )? NOERROR_KW? statementEnd
+    COPYLOB FROM? copyLobFrom copyLobStarting? copyLobFor? TO copyLobTo ( NOCONVERT | convertPhrase )? NOERROR? statementEnd
   ;
 
 copyLobFrom:
@@ -1482,24 +1209,24 @@ forTenant:
   ;
 
 createStatement:
-    CREATE record forTenant? usingRow? NOERROR_KW? statementEnd
+    CREATE record forTenant? usingRow? NOERROR? statementEnd
   ;
 
 createWhateverStatement:
     CREATE
     ( CALL | CLIENTPRINCIPAL | DATASET | DATASOURCE | SAXATTRIBUTES | SAXREADER | SAXWRITER | SOAPHEADER | SOAPHEADERENTRYREF
       | XDOCUMENT | XNODEREF )
-    expressionTerm inWidgetPoolExpression? NOERROR_KW? statementEnd
+    expressionTerm inWidgetPoolExpression? NOERROR? statementEnd
   ;
 
 createAliasStatement:
-    CREATE ALIAS anyOrValue FOR DATABASE anyOrValue NOERROR_KW? statementEnd
+    CREATE ALIAS anyOrValue FOR DATABASE anyOrValue NOERROR? statementEnd
   ;
 
 createBrowseStatement:
     CREATE BROWSE expressionTerm
     inWidgetPoolExpression?
-    NOERROR_KW?
+    NOERROR?
     assignOption?
     triggerPhrase?
     statementEnd
@@ -1508,7 +1235,7 @@ createBrowseStatement:
 createQueryStatement:
     CREATE QUERY expressionTerm
     inWidgetPoolExpression?
-    NOERROR_KW?
+    NOERROR?
     statementEnd
   ;
 
@@ -1516,7 +1243,7 @@ createBufferStatement:
     CREATE BUFFER expressionTerm FOR TABLE expression
     createBufferName?
     inWidgetPoolExpression?
-    NOERROR_KW?
+    NOERROR?
     statementEnd
   ;
 
@@ -1525,7 +1252,7 @@ createBufferName:
   ;
 
 createDatabaseStatement:
-    CREATE DATABASE expression createDatabaseFrom? REPLACE? NOERROR_KW? statementEnd
+    CREATE DATABASE expression createDatabaseFrom? REPLACE? NOERROR? statementEnd
   ;
 
 createDatabaseFrom:
@@ -1537,15 +1264,15 @@ createServerStatement:
   ;
 
 createServerSocketStatement:
-    CREATE SERVERSOCKET expressionTerm NOERROR_KW? statementEnd
+    CREATE SERVERSOCKET expressionTerm NOERROR? statementEnd
   ;
 
 createSocketStatement:
-    CREATE SOCKET expressionTerm NOERROR_KW? statementEnd
+    CREATE SOCKET expressionTerm NOERROR? statementEnd
   ;
 
 createTempTableStatement:
-    CREATE TEMPTABLE expressionTerm inWidgetPoolExpression? NOERROR_KW? statementEnd
+    CREATE TEMPTABLE expressionTerm inWidgetPoolExpression? NOERROR? statementEnd
   ;
 
 createConnect:
@@ -1563,14 +1290,14 @@ createWidgetStatement:
     field
     inWidgetPoolExpression?
     createConnect?
-    NOERROR_KW?
+    NOERROR?
     assignOption?
     triggerPhrase?
     statementEnd
   ;
 
 createWidgetPoolStatement:
-    CREATE WIDGETPOOL expression? PERSISTENT? NOERROR_KW? statementEnd
+    CREATE WIDGETPOOL expression? PERSISTENT? NOERROR? statementEnd
   ;
 
 canFindFunction:
@@ -1585,33 +1312,6 @@ currentValueFunction:
 datatype:
     CLASS typeName
   | datatypeVar
-  ;
-
-datatypeCom:
-    INT64 | datatypeComNative
-  ;
-
-datatypeComNative:
-    SHORT | FLOAT | CURRENCY | UNSIGNEDBYTE | ERRORCODE | IUNKNOWN
-  ;
-
-datatypeDll:
-    CHARACTER | INT64 | datatypeDllNative
-  | { support.abbrevDatatype(_input.LT(1).getText()) == CHARACTER }? id=ID
-  ;
-
-datatypeDllNative:
-    BYTE | DOUBLE | FLOAT | LONG | SHORT | UNSIGNEDSHORT
-  ;
-
-datatypeField:
-    // Ambig: An unreservedkeyword can be a class name (user defined type). First option to match wins.
-    BLOB | CLOB | datatypeVar
-  ;
-
-datatypeParam:
-    // Ambig: An unreservedkeyword can be a class name (user defined type). First option to match wins.
-    datatypeDllNative | datatypeVar
   ;
 
 // Ambig: An unreservedkeyword can be a class name (user defined type).
@@ -1632,49 +1332,54 @@ datatypeVar:
   | RECID
   | ROWID
   | WIDGETHANDLE
-  | IN_KW  // Works for INTEGER
+  | IN     // Works for INTEGER
   | LOG    // Works for LOGICAL
   | ROW    // Works for ROWID
   | WIDGET // Works for WIDGET-HANDLE
-  | // Assignment of datatype returns value of assignment, if non-zero, is a valid abbreviation.
-    { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID
-  | typeName
+  | BLOB
+  | CLOB
+  | BYTE
+  | DOUBLE
+  | FLOAT
+  | LONG
+  | SHORT
+  | UNSIGNEDBYTE
+  | UNSIGNEDSHORT
+  | UNSIGNEDINTEGER
+  | { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID // Like 'i' for INTEGER or 'de' for DECIMAL
+  | { !support.isDataTypeVariable(_input.LT(1)) }? typeName
   ;
 
 ddeAdviseStatement:
-    DDE ADVISE expression ( START | STOP ) ITEM expression timeExpression? NOERROR_KW? statementEnd
+    DDE ADVISE expression ( START | STOP ) ITEM expression timeExpression? NOERROR? statementEnd
   ;
 
 ddeExecuteStatement:
-    DDE EXECUTE expression COMMAND expression timeExpression? NOERROR_KW? statementEnd
+    DDE EXECUTE expression COMMAND expression timeExpression? NOERROR? statementEnd
   ;
 
 ddeGetStatement:
-    DDE GET expression TARGET field ITEM expression timeExpression? NOERROR_KW? statementEnd
+    DDE GET expression TARGET field ITEM expression timeExpression? NOERROR? statementEnd
   ;
 
 ddeInitiateStatement:
-    DDE INITIATE field FRAME expression APPLICATION expression TOPIC expression NOERROR_KW? statementEnd
+    DDE INITIATE field FRAME expression APPLICATION expression TOPIC expression NOERROR? statementEnd
   ;
 
 ddeRequestStatement:
-    DDE REQUEST expression TARGET field ITEM expression timeExpression? NOERROR_KW? statementEnd
+    DDE REQUEST expression TARGET field ITEM expression timeExpression? NOERROR? statementEnd
   ;
 
 ddeSendStatement:
-    DDE SEND expression SOURCE expression ITEM expression timeExpression? NOERROR_KW? statementEnd
+    DDE SEND expression SOURCE expression ITEM expression timeExpression? NOERROR? statementEnd
   ;
 
 ddeTerminateStatement:
-    DDE TERMINATE expression NOERROR_KW? statementEnd
+    DDE TERMINATE expression NOERROR? statementEnd
   ;
 
 decimalsExpr:
     DECIMALS expression
-  ;
-
-defaultExpr:
-    DEFAULT expression
   ;
 
 defineShare:
@@ -1910,7 +1615,7 @@ menuItemOption:
   ;
 
 defineParameterStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE )*
+    DEFINE
     ( defineParameterStatementSub1 | qualif=( INPUT | OUTPUT | INPUTOUTPUT | RETURN ) PARAMETER defineParameterStatementSub2 )
     statementEnd
   ;
@@ -1929,7 +1634,7 @@ defineParameterStatementSub2:
   ;
 
 defineParamVar:
-    ( AS HANDLE TO? datatypeDll | AS CLASS typeName | AS datatypeParam )
+    ( AS datatype | AS HANDLE TO? datatypeVar )
     ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase2 )*
   ;
 
@@ -1941,10 +1646,14 @@ defineParamVarLike:
   ;
 
 definePropertyStatement:
-    DEFINE defineShare? ( PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE | SERIALIZABLE | NONSERIALIZABLE )*
+    DEFINE defineShare? modifiers=definePropertyModifier*
     PROPERTY n=newIdentifier definePropertyAs
     definePropertyAccessor definePropertyAccessor?
     { support.defVar($n.text); }
+  ;
+
+definePropertyModifier:
+    PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | ABSTRACT | STATIC | OVERRIDE | SERIALIZABLE | NONSERIALIZABLE
   ;
 
 definePropertyAs:
@@ -2069,17 +1778,50 @@ defineWorkTableStatement:
   ;
 
 defineVariableStatement:
-    DEFINE defineShare? ( PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | STATIC | SERIALIZABLE | NONSERIALIZABLE )*
-    VARIABLE n=newIdentifier fieldOption* triggerPhrase? statementEnd
+    DEFINE defineShare? modifiers=defineVariableModifier*
+    ( VARIABLE | VAR ) n=newIdentifier fieldOption* triggerPhrase? statementEnd
     { support.defVar($n.text); }
   ;
 
+defineVariableModifier:
+    PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | STATIC | SERIALIZABLE | NONSERIALIZABLE
+  ;
+
+varStatement:
+    VAR modifiers=varStatementModifier* datatype extent=varStatementSub2?
+      varStatementSub ( COMMA varStatementSub )* statementEnd
+  ;
+
+varStatementModifier:
+    PRIVATE | PACKAGEPRIVATE | PROTECTED | PACKAGEPROTECTED | PUBLIC | STATIC | SERIALIZABLE | NONSERIALIZABLE
+  ;
+
+varStatementSub:
+    newIdentifier ( EQUAL initialValue=varStatementInitialValue )?
+  ;
+
+varStatementSub2:
+    LEFTBRACE NUMBER? RIGHTBRACE
+  ;
+
+varStatementInitialValue:
+    varStatementInitialValueArray | varStatementInitialValueSub
+  ;
+
+varStatementInitialValueArray:
+    LEFTBRACE varStatementInitialValueSub ( COMMA varStatementInitialValueSub )* RIGHTBRACE
+  ;
+
+varStatementInitialValueSub:
+    TODAY | NOW | TRUE | FALSE | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL
+  ;
+
 deleteStatement:
-    DELETE_KW record validatePhrase? NOERROR_KW? statementEnd
+    DELETE record validatePhrase? NOERROR? statementEnd
   ;
 
 deleteAliasStatement:
-    DELETE_KW ALIAS
+    DELETE ALIAS
     (  identifier
     |  QSTRING
     |  valueExpression
@@ -2088,19 +1830,19 @@ deleteAliasStatement:
   ;
 
 deleteObjectStatement:
-    DELETE_KW OBJECT expression NOERROR_KW? statementEnd
+    DELETE OBJECT expression NOERROR? statementEnd
   ;
 
 deleteProcedureStatement:
-    DELETE_KW PROCEDURE expression NOERROR_KW? statementEnd
+    DELETE PROCEDURE expression NOERROR? statementEnd
   ;
 
 deleteWidgetStatement:
-    DELETE_KW WIDGET gWidget* statementEnd
+    DELETE WIDGET gWidget* statementEnd
   ;
 
 deleteWidgetPoolStatement:
-    DELETE_KW WIDGETPOOL expression? NOERROR_KW? statementEnd
+    DELETE WIDGETPOOL expression? NOERROR? statementEnd
   ;
 
 delimiterConstant:
@@ -2136,7 +1878,7 @@ disableTriggersStatement:
   ;
 
 disconnectStatement:
-    DISCONNECT filenameOrValue NOERROR_KW? statementEnd
+    DISCONNECT filenameOrValue NOERROR? statementEnd
   ;
 
 displayStatement:
@@ -2145,7 +1887,7 @@ displayStatement:
     UNLESSHIDDEN? displayItemsOrRecord
     exceptFields? inWindowExpression?
     displayWith*
-    NOERROR_KW?
+    NOERROR?
     statementEnd
   ;
 
@@ -2200,7 +1942,7 @@ dynamicCurrentValueFunction:
   ;
 
 dynamicNewStatement:
-    fieldEqualDynamicNew NOERROR_KW? statementEnd
+    fieldEqualDynamicNew NOERROR? statementEnd
   ;
 
 dynamicPropertyFunction:
@@ -2237,7 +1979,7 @@ editorOption:
   ;
 
 emptyTempTableStatement:
-    EMPTY TEMPTABLE record NOERROR_KW? statementEnd
+    EMPTY TEMPTABLE record NOERROR? statementEnd
   ;
 
 enableStatement:
@@ -2282,16 +2024,12 @@ fieldFormItem:
     field formatPhrase?
   ;
 
-fieldList:
-    LEFTPAREN field ( COMMA field )* RIGHTPAREN
-  ;
-
 fieldsFields:
     ( FIELDS | FIELD ) field*
   ;
 
 fieldOption:
-    AS asDataTypeField
+    AS datatype
   | caseSensitiveOrNot
   | colorExpression
   | COLUMNCODEPAGE expression
@@ -2316,14 +2054,6 @@ fieldOption:
   | SERIALIZEHIDDEN
   ;
 
-asDataTypeField:
-    ( CLASS typeName | datatypeField )
-  ;
-
-asDataTypeVar:
-    ( CLASS typeName | datatypeVar )
-  ;
-
 fillInPhrase:
     FILLIN ( NATIVE | sizePhrase | tooltipExpression )*
   ;
@@ -2337,7 +2067,7 @@ finallyEnd:
   ;
 
 findStatement:
-    FIND findWhich? recordphrase ( NOWAIT | NOPREFETCH | NOERROR_KW )* statementEnd
+    FIND findWhich? recordphrase ( NOWAIT | NOPREFETCH | NOERROR )* statementEnd
   ;
 
 fontExpression:
@@ -2395,7 +2125,7 @@ formatPhrase:
   ;
 
 formatOption:
-     AS datatypeVar { support.defVarInlineAntlr4(); }
+     AS datatype { support.defVarInlineAntlr4(); }
   |  atPhrase
   |  ATTRSPACE
   |  NOATTRSPACE
@@ -2544,7 +2274,7 @@ functionStatement:
     // You don't see it in PSC's grammar, but the compiler really does insist on a datatype.
     f=FUNCTION
     id=identifier { support.funcBegin($id.text, _localctx); }
-    ( RETURNS | RETURN )? ( CLASS typeName | datatypeVar )
+    ( RETURNS | RETURN )? datatype
     extentPhrase?
     PRIVATE?
     functionParams?
@@ -2552,8 +2282,8 @@ functionStatement:
     // It's also not illegal to define them IN.. more than once, so we can't
     // drop the scope the first time it's defined.
     ( FORWARDS ( LEXCOLON | PERIOD | EOF )
-    | { _input.LA(2) == SUPER }? IN_KW SUPER ( LEXCOLON | PERIOD | EOF )
-    | (MAP TO? identifier)? IN_KW expression ( LEXCOLON | PERIOD | EOF )
+    | { _input.LA(2) == SUPER }? IN SUPER ( LEXCOLON | PERIOD | EOF )
+    | (MAP TO? identifier)? IN expression ( LEXCOLON | PERIOD | EOF )
     | blockColon
       codeBlock
       functionEnd
@@ -2580,26 +2310,26 @@ functionParam:
   ;
 
 functionParamStd:
-    n=identifier AS asDataTypeVar extentPhrase? { support.defVar($n.text); } # functionParamStandardAs
+    n=identifier AS datatype extentPhrase? { support.defVar($n.text); } # functionParamStandardAs
   | n2=identifier likeField extentPhrase? { support.defVar($n2.text); } # functionParamStandardLike
   | { _input.LA(2) != NAMEDOT }? TABLE FOR? record APPEND? BIND? # functionParamStandardTable
   | { _input.LA(2) != NAMEDOT }? TABLEHANDLE FOR? hn=identifier APPEND? BIND? { support.defVar($hn.text); } # functionParamStandardTableHandle
   | { _input.LA(2) != NAMEDOT}? DATASET FOR? identifier APPEND? BIND?  # functionParamStandardDataset
   | { _input.LA(2) != NAMEDOT}? DATASETHANDLE FOR? hn2=identifier APPEND? BIND? { support.defVar($hn2.text); }  # functionParamStandardDatasetHandle
   | // When declaring a function, it's possible to just list the datatype without an identifier AS
-    ( CLASS typeName | datatypeVar ) extentPhrase2? # functionParamStandardOther
+    datatype extentPhrase2? # functionParamStandardOther
   ;
 
 externalFunctionStatement:
     // You don't see it in PSC's grammar, but the compiler really does insist on a datatype.
     f=FUNCTION
     id=identifier { support.funcBegin($id.text, _localctx); }
-    ( RETURNS | RETURN )? ( CLASS typeName | datatypeVar )
+    ( RETURNS | RETURN )? datatype
     extentPhrase?
     PRIVATE?
     functionParams?
-    ( { _input.LA(2) == SUPER }? IN_KW SUPER
-    | ( MAP TO? identifier )? IN_KW expression
+    ( { _input.LA(2) == SUPER }? IN SUPER
+    | ( MAP TO? identifier )? IN expression
     )
     ( LEXCOLON | PERIOD )
     { support.funcEnd(); }
@@ -2646,12 +2376,12 @@ ifElse:
 
 inExpression:
     { support.disallowUnknownMethodCalls(); }
-    IN_KW expression
+    IN expression
     { support.allowUnknownMethodCalls(); }
   ;
 
 inWindowExpression:
-    IN_KW WINDOW expression
+    IN WINDOW expression
   ;
 
 imagePhraseOption:
@@ -2668,18 +2398,15 @@ importStatement:
     | varRecField
     | CARET
     )?
-    exceptFields? NOLOBS? NOERROR_KW? statementEnd
+    exceptFields? NOLOBS? NOERROR? statementEnd
   ;
 
 inWidgetPoolExpression:
-    IN_KW WIDGETPOOL expression
+    IN WIDGETPOOL expression
   ;
 
 initialConstant:
-    INITIAL
-    (  LEFTBRACE ( TODAY | NOW | constant ) ( COMMA ( TODAY | NOW | constant ))* RIGHTBRACE
-    |  ( TODAY | NOW | constant )
-    )
+    INITIAL varStatementInitialValue
   ;
 
 inputStatement:
@@ -2721,7 +2448,7 @@ inputOutputThroughStatement:
 insertStatement:
     INSERT record exceptFields?
     usingRow?
-    framePhrase? NOERROR_KW? statementEnd
+    framePhrase? NOERROR? statementEnd
   ;
 
 interfaceStatement:
@@ -2789,7 +2516,7 @@ notIoOption:
   | NOMAP
   | NUMCOPIES
   | PAGED
-  | PAGESIZE_KW
+  | PAGESIZE
   | PORTRAIT
   | UNBUFFERED
   )
@@ -2812,7 +2539,7 @@ ioOption:
   | NOMAP
   | NUMCOPIES anyOrValue
   | PAGED
-  | PAGESIZE_KW anyOrValue
+  | PAGESIZE anyOrValue
   | PORTRAIT
   | UNBUFFERED 
   ;
@@ -2825,7 +2552,7 @@ ioPrinter:
     PRINTER  // A unix printer name could be just about anything.
     ( valueExpression
     | ~( VALUE | NUMCOPIES | COLLATE | LANDSCAPE | PORTRAIT | APPEND | BINARY | ECHO | NOECHO | KEEPMESSAGES
-         | NOMAP | MAP | PAGED | PAGESIZE_KW | UNBUFFERED | NOCONVERT | CONVERT | PERIOD | EOF )
+         | NOMAP | MAP | PAGED | PAGESIZE | UNBUFFERED | NOCONVERT | CONVERT | PERIOD | EOF )
     )?
   ;
 
@@ -2855,10 +2582,6 @@ likeField:
     LIKE field VALIDATE?
   ;
 
-likeWidgetName:
-    LIKE widgetname
-  ;
-
 loadStatement:
     LOAD expression loadOption* statementEnd
   ;
@@ -2869,7 +2592,7 @@ loadOption:
   | DYNAMIC
   | NEW
   | BASEKEY expression
-  | NOERROR_KW
+  | NOERROR
   ;
 
 messageStatement:
@@ -2946,7 +2669,7 @@ nextValueFunction:
   ;
 
 nullPhrase:
-    NULL_KW functionArgs?
+    NULL functionArgs?
   ;
 
 onStatement:
@@ -2992,7 +2715,7 @@ onEventOfDbObject:
   ;
 
 onOtherOfDbObject:
-    ( CREATE | DELETE_KW | FIND ) OF record labelConstant?
+    ( CREATE | DELETE | FIND ) OF record labelConstant?
   ;
 
 onWriteOfDbObject:
@@ -3131,13 +2854,13 @@ procedureStatement:
 procedureOption:
     EXTERNAL constant procedureDllOption*
   | PRIVATE
-  | IN_KW SUPER
+  | IN SUPER
   ;
 
 procedureDllOption:
-    CDECL_KW
-  | PASCAL_KW
-  | STDCALL_KW
+    CDECL
+  | PASCAL
+  | STDCALL
   | ORDINAL expression
   | PERSISTENT
   ;
@@ -3201,7 +2924,7 @@ putKeyValueStatement:
     ( SECTION expression KEY ( DEFAULT | expression ) VALUE expression
     | ( COLOR | FONT ) ( expression | ALL )
     )
-    NOERROR_KW? statementEnd
+    NOERROR? statementEnd
   ;
 
 queryName:
@@ -3219,7 +2942,7 @@ queryTuningOption:
   | DEBUG ( SQL | EXTENDED | CURSOR | DATABIND | PERFORMANCE | VERBOSE | SUMMARY | NUMBER )?
   | NODEBUG
   | DEFERLOBFETCH
-  | HINT expression
+  | HINT QSTRING
   | INDEXHINT | NOINDEXHINT
   | JOINBYSQLDB | NOJOINBYSQLDB
   | LOOKAHEAD | NOLOOKAHEAD
@@ -3254,7 +2977,7 @@ rawFunction:
   ;
 
 rawTransferStatement:
-    RAWTRANSFER rawTransferElement TO rawTransferElement NOERROR_KW? statementEnd
+    RAWTRANSFER rawTransferElement TO rawTransferElement NOERROR? statementEnd
   ;
 
 rawTransferElement:
@@ -3300,7 +3023,7 @@ recordOption:
   | lockHow
   | NOWAIT
   | NOPREFETCH
-  | NOERROR_KW
+  | NOERROR
   | TABLESCAN
   ;
 
@@ -3311,19 +3034,19 @@ releaseStatementWrapper:
   ;
 
 releaseStatement:
-    RELEASE record NOERROR_KW? statementEnd
+    RELEASE record NOERROR? statementEnd
   ;
 
 releaseExternalStatement:
-    RELEASE EXTERNAL PROCEDURE? expression NOERROR_KW? statementEnd
+    RELEASE EXTERNAL PROCEDURE? expression NOERROR? statementEnd
   ;
 
 releaseObjectStatement:
-    RELEASE OBJECT expression NOERROR_KW? statementEnd
+    RELEASE OBJECT expression NOERROR? statementEnd
   ;
 
 repositionStatement:
-    REPOSITION identifier repositionOption NOERROR_KW? statementEnd
+    REPOSITION identifier repositionOption NOERROR? statementEnd
   ;
 
 repositionOption:
@@ -3364,7 +3087,7 @@ runStatement:
     RUN filenameOrValue
     ( LEFTANGLE LEFTANGLE filenameOrValue RIGHTANGLE RIGHTANGLE )?
     runOption* parameterList?
-    ( NOERROR_KW | anyOrValue )*
+    ( NOERROR | anyOrValue )*
     statementEnd
   ;
 
@@ -3387,15 +3110,15 @@ runSet:
   ;
 
 runStoredProcedureStatement:
-    RUN STOREDPROCEDURE identifier assignEqual? NOERROR_KW? parameterList? statementEnd
+    RUN STOREDPROCEDURE identifier assignEqual? NOERROR? parameterList? statementEnd
   ;
 
 runSuperStatement:
-    RUN SUPER parameterList? NOERROR_KW? statementEnd
+    RUN SUPER parameterList? NOERROR? statementEnd
   ;
 
 saveCacheStatement:
-    SAVE CACHE ( CURRENT | COMPLETE ) anyOrValue TO filenameOrValue NOERROR_KW? statementEnd
+    SAVE CACHE ( CURRENT | COMPLETE ) anyOrValue TO filenameOrValue NOERROR? statementEnd
   ;
 
 scrollStatement:
@@ -3436,7 +3159,7 @@ setStatement:
     inWindowExpression?
     framePhrase?
     editingPhrase?
-    NOERROR_KW?
+    NOERROR?
     statementEnd
   ;
 
@@ -3509,7 +3232,7 @@ streamNameOrHandle:
 subscribeStatement:
     SUBSCRIBE procedureExpression? TO? expression
     ( ANYWHERE | inExpression )
-    subscribeRun? NOERROR_KW? statementEnd
+    subscribeRun? NOERROR? statementEnd
   ;
 
 subscribeRun:
@@ -3672,7 +3395,7 @@ triggerProcedureStatement:
   ;
 
 triggerProcedureStatementSub1:
-    ( CREATE | DELETE_KW | FIND | REPLICATIONCREATE | REPLICATIONDELETE ) OF record labelConstant?
+    ( CREATE | DELETE | FIND | REPLICATIONCREATE | REPLICATIONDELETE ) OF record labelConstant?
   ;
 
 triggerProcedureStatementSub2:
@@ -3712,7 +3435,7 @@ undoAction:
   ;
 
 unloadStatement:
-    UNLOAD expression NOERROR_KW? statementEnd
+    UNLOAD expression NOERROR? statementEnd
   ;
 
 unsubscribeStatement:
@@ -3734,12 +3457,12 @@ updateStatement:
     inWindowExpression?
     framePhrase?
     editingPhrase?
-    NOERROR_KW?
+    NOERROR?
     statementEnd
   ;
 
 useStatement:
-    USE expression NOERROR_KW? statementEnd
+    USE expression NOERROR? statementEnd
   ;
 
 usingRow:
@@ -3762,7 +3485,7 @@ validatePhrase:
   ;
 
 validateStatement:
-    VALIDATE record NOERROR_KW? statementEnd
+    VALIDATE record NOERROR? statementEnd
   ;
 
 viewStatement:
@@ -3828,710 +3551,5 @@ xmlNodeType:
     XMLNODETYPE constant
   ;
 
-// Regenerate this list every time there are new keywords
-unreservedkeyword:
-   AACBIT
- | AACONTROL
- | AALIST
- | AAMEMORY
- | AAMSG
- | AAPCONTROL
- | AASERIAL
- | AATRACE
- | ABSOLUTE
- | ABSTRACT
- | ACCELERATOR
- | ADDINTERVAL
- | ADVISE
- | ALERTBOX
- | ALLOWREPLICATION
- | ALTERNATEKEY
- | ANALYZE
- | ANSIONLY
- | ANYWHERE
- | APPEND
- | APPLICATION
- | ARRAYMESSAGE
- | AS
- | ASC
- | ASKOVERWRITE
- | ASSEMBLY
- | ASYNCHRONOUS
- | ATTACHMENT
- | AUDITENABLED
- | AUTOCOMPLETION
- | AUTOENDKEY
- | AUTOGO
- | AUTOMATIC
- | AVERAGE
- | AVG
- | BACKWARDS
- | BASE64
- | BASE64DECODE
- | BASE64ENCODE
- | BASEKEY
- | BATCHSIZE
- | BEFORETABLE
- | BGCOLOR
- | BIGINT
- | BINARY
- | BIND
- | BINDWHERE
- | BLOB
- | BLOCKLEVEL
- | BOTH
- | BOTTOM
- | BOX
- | BROWSE
- | BTOS
- | BUFFER
- | BUFFERCHARS
- | BUFFERGROUPID
- | BUFFERGROUPNAME
- | BUFFERLINES
- | BUFFERNAME
- | BUFFERTENANTNAME
- | BUFFERTENANTID
- | BUTTON
- | BUTTONS
- | BYREFERENCE
- | BYTE
- | BYVALUE
- | CACHE
- | CACHESIZE
- | CANCELBUTTON
- | CANQUERY
- | CANSET
- | CAPS
- | CATCH
- | CDECL_KW
- | CHAINED
- | CHARACTER
- | CHARACTERLENGTH
- | CHARSET
- | CHECKED
- | CHOOSE
- | CLASS
- | CLIENTPRINCIPAL
- | CLOB
- | CLOSE
- | CODEBASELOCATOR
- | CODEPAGE
- | CODEPAGECONVERT
- | COLLATE
- | COLOF
- | COLONALIGNED
- | COLORTABLE
- | COLUMN
- | COLUMNBGCOLOR
- | COLUMNCODEPAGE
- | COLUMNDCOLOR
- | COLUMNFGCOLOR
- | COLUMNFONT
- | COLUMNOF
- | COLUMNPFCOLOR
- | COLUMNS
- | COMBOBOX
- | COMHANDLE
- | COMMAND
- | COMPARE
- | COMPARES
- | COMPILE
- | COMPLETE
- | CONFIGNAME
- | CONNECT
- | CONSTRUCTOR
- | CONTAINS
- | CONTENTS
- | CONTEXT
- | CONTEXTHELP
- | CONTEXTHELPFILE
- | CONTEXTHELPID
- | CONTEXTPOPUP
- | CONTROLFRAME
- | CONVERT
- | CONVERT3DCOLORS
- | COPYDATASET
- | COPYTEMPTABLE
- | COUNT
- | CREATELIKESEQUENTIAL
- | CREATETESTFILE
- | CURRENCY
- | CURRENTENVIRONMENT
- | CURRENTQUERY
- | CURRENTRESULTROW
- | CURRENTVALUE
- | DATABIND
- | DATASOURCE
- | DATASOURCEMODIFIED
- | DATASOURCEROWID
- | DATE
- | DATETIME
- | DATETIMETZ
- | DAY
- | DBIMS
- | DBREMOTEHOST
- | DCOLOR
- | DEBUG
- | DECIMAL
- | DECRYPT
- | DEFAULTBUTTON
- | DEFAULTEXTENSION
- | DEFAULTNOXLATE
- | DEFAULTVALUE
- | DEFERLOBFETCH
- | DEFINED
- | DELEGATE
- | DELETECHARACTER
- | DELETERESULTLISTENTRY
- | DESELECTION
- | DESTRUCTOR
- | DIALOGBOX
- | DIALOGHELP
- | DIR
- | DISABLED
- | DOUBLE
- | DROPDOWN
- | DROPDOWNLIST
- | DROPFILENOTIFY
- | DROPTARGET
- | DUMP
- | DYNAMIC
- | DYNAMICCAST
- | DYNAMICCURRENTVALUE
- | DYNAMICNEW
- | DYNAMICNEXTVALUE
- | ECHO
- | EDGECHARS
- | EDGEPIXELS
- | EDITOR
- | EDITUNDO
- | EMPTY
- | ENABLEDFIELDS
- | ENCRYPT
- | ENCRYPTIONSALT
- | ENDKEY
- | ENDMOVE
- | ENDRESIZE
- | ENDROWRESIZE
- | ENTERED
- | ENUM
- | EQ
- | ERROR
- | ERRORCODE
- | ERRORSTACKTRACE
- | EVENT
- | EVENTPROCEDURE
- | EVENTS
- | EXCLUSIVEID
- | EXCLUSIVEWEBUSER
- | EXECUTE
- | EXP
- | EXPAND
- | EXPANDABLE
- | EXPLICIT
- | EXTENDED
- | EXTENT
- | EXTERNAL
- | FGCOLOR
- | FILE
- | FILLIN
- | FILTERS
- | FINAL
- | FINALLY
- | FINDER
- | FIRSTFORM
- | FITLASTCOLUMN
- | FIXCHAR
- | FIXCODEPAGE
- | FIXEDONLY
- | FLAGS
- | FLATBUTTON
- | FLOAT
- | FONTBASEDLAYOUT
- | FONTTABLE
- | FORCEFILE
- | FOREIGNKEYHIDDEN
- | FORMINPUT
- | FORMLONGINPUT
- | FORWARDS
- | FREQUENCY
- | FROMCURRENT
- | FUNCTION
- | GE
- | GENERATEMD5
- | GENERATEPBEKEY
- | GENERATEPBESALT
- | GENERATERANDOMKEY
- | GENERATEUUID
- | GET
- | GETBITS
- | GETBYTE
- | GETBYTEORDER
- | GETBYTES
- | GETCGILIST
- | GETCGILONGVALUE
- | GETCGIVALUE
- | GETCLASS
- | GETCONFIGVALUE
- | GETDBCLIENT
- | GETDIR
- | GETDOUBLE
- | GETEFFECTIVETENANTID
- | GETEFFECTIVETENANTNAME
- | GETFILE
- | GETFLOAT
- | GETINT64
- | GETLICENSE
- | GETLONG
- | GETPOINTERVALUE
- | GETSHORT
- | GETSIZE
- | GETSTRING
- | GETUNSIGNEDLONG
- | GETUNSIGNEDSHORT
- | GROUPBOX
- | GTHAN
- | GUID
- | HANDLE
- | HEIGHT
- | HEIGHTCHARS
- | HEIGHTPIXELS
- | HELPTOPIC
- | HEXDECODE
- | HEXENCODE
- | HIDDEN
- | HINT
- | HORIZONTAL
- | HTMLENDOFLINE
- | HTMLFRAMEBEGIN
- | HTMLFRAMEEND
- | HTMLHEADERBEGIN
- | HTMLHEADEREND
- | HTMLTITLEBEGIN
- | HTMLTITLEEND
- | IMAGE
- | IMAGEDOWN
- | IMAGEINSENSITIVE
- | IMAGESIZE
- | IMAGESIZECHARS
- | IMAGESIZEPIXELS
- | IMAGEUP
- | IMPLEMENTS
- | INCREMENTEXCLUSIVEID
- | INDEXEDREPOSITION
- | INDEXHINT
- | INFORMATION
- | INHERITBGCOLOR
- | INHERITFGCOLOR
- | INHERITS
- | INITIAL
- | INITIALDIR
- | INITIALFILTER
- | INITIATE
- | INNER
- | INNERCHARS
- | INNERLINES
- | INT64
- | INTEGER
- | INTERFACE
- | INTERVAL
- | ISCODEPAGEFIXED
- | ISCOLUMNCODEPAGE
- | ISDBMULTITENANT
- | ISMULTITENANT
- | ISODATE
- | ITEM
- | IUNKNOWN
- | JOINBYSQLDB
- | KEEPMESSAGES
- | KEEPTABORDER
- | KEY
- | KEYCODE
- | KEYFUNCTION
- | KEYLABEL
- | KEYWORDALL
- | LABELBGCOLOR
- | LABELDCOLOR
- | LABELFGCOLOR
- | LABELFONT
- | LANDSCAPE
- | LANGUAGES
- | LARGE
- | LARGETOSMALL
- | LASTBATCH
- | LASTFORM
- | LC
- | LE
- | LEFT
- | LEFTALIGNED
- | LEFTTRIM
- | LENGTH
- | LISTEVENTS
- | LISTITEMPAIRS
- | LISTITEMS
- | LISTQUERYATTRS
- | LISTSETATTRS
- | LISTWIDGETS
- | LOAD
- | LOADPICTURE
- | LOBDIR
- | LOG
- | LOGICAL
- | LONG
- | LONGCHAR
- | LOOKAHEAD
- | LTHAN
- | MACHINECLASS
- | MARGINEXTRA
- | MARKNEW
- | MARKROWSTATE
- | MATCHES
- | MAXCHARS
- | MAXIMIZE
- | MAXIMUM
- | MAXIMUMLEVEL
- | MAXROWS
- | MAXSIZE
- | MAXVALUE
- | MD5DIGEST
- | MEMPTR
- | MENU
- | MENUBAR
- | MENUITEM
- | MERGEBYFIELD
- | MESSAGEDIGEST
- | MESSAGELINE
- | METHOD
- | MINIMUM
- | MINSIZE
- | MINVALUE
- | MODULO
- | MONTH
- | MOUSE
- | MOUSEPOINTER
- | MPE
- | MTIME
- | MULTIPLE
- | MULTIPLEKEY
- | MUSTEXIST
- | NAMESPACEPREFIX
- | NAMESPACEURI
- | NATIVE
- | NE
- | NESTED
- | NEWINSTANCE
- | NEXTVALUE
- | NOAPPLY
- | NOASSIGN
- | NOAUTOVALIDATE
- | NOBINDWHERE
- | NOBOX
- | NOCOLUMNSCROLLING
- | NOCONSOLE
- | NOCONVERT
- | NOCONVERT3DCOLORS
- | NOCURRENTVALUE
- | NODEBUG
- | NODRAG
- | NOECHO
- | NOEMPTYSPACE
- | NOINDEXHINT
- | NOINHERITBGCOLOR
- | NOINHERITFGCOLOR
- | NOJOINBYSQLDB
- | NOLOOKAHEAD
- | NONE
- | NONSERIALIZABLE
- | NORMAL
- | NORMALIZE
- | NOROWMARKERS
- | NOSCROLLBARVERTICAL
- | NOSEPARATECONNECTION
- | NOSEPARATORS
- | NOTACTIVE
- | NOTABSTOP
- | NOUNDERLINE
- | NOWORDWRAP
- | NUMCOPIES
- | NUMERIC
- | NUMRESULTS
- | OBJECT
- | OCTETLENGTH
- | OK
- | OKCANCEL
- | ONLY
- | OPTIONS
- | ORDER
- | ORDEREDJOIN
- | ORDINAL
- | OS2
- | OS400
- | OSDRIVES
- | OSERROR
- | OSGETENV
- | OUTER
- | OUTERJOIN
- | OVERRIDE
- | PAGED
- | PAGESIZE_KW
- | PAGEWIDTH
- | PARENT
- | PARENTFIELDSAFTER
- | PARENTFIELDSBEFORE
- | PARENTIDFIELD
- | PARENTIDRELATION
- | PARTIALKEY
- | PASCAL_KW
- | PBEHASHALGORITHM
- | PBEKEYROUNDS
- | PERFORMANCE
- | PFCOLOR
- | PINNABLE
- | PORTRAIT
- | POSITION
- | PRECISION
- | PREFERDATASET
- | PRESELECT
- | PREV
- | PRIMARY
- | PRINTER
- | PRINTERSETUP
- | PRIVATE
- | PROCEDURE
- | PROCTEXT
- | PROCTEXTBUFFER
- | PROFILER
- | PROMPT
- | PROPERTY
- | PROTECTED
- | PUBLIC
- | PUBLISH
- | PUTBITS
- | PUTBYTES
- | PUTDOUBLE
- | PUTFLOAT
- | PUTINT64
- | PUTLONG
- | PUTSHORT
- | PUTSTRING
- | PUTUNSIGNEDLONG
- | PUTUNSIGNEDSHORT
- | QUESTION
- | QUOTER
- | RADIOBUTTONS
- | RADIOSET
- | RANDOM
- | RAW
- | RAWTRANSFER
- | READ
- | READONLY
- | REAL
- | RECORDLENGTH
- | RECURSIVE
- | REFERENCEONLY
- | REJECTED
- | RELATIONFIELDS
- | REPLACE
- | REPLICATIONCREATE
- | REPLICATIONDELETE
- | REPLICATIONWRITE
- | REPOSITIONFORWARD
- | REPOSITIONMODE
- | REQUEST
- | RESTARTROW
- | RESULT
- | RETAINSHAPE
- | RETRYCANCEL
- | RETURNS
- | RETURNTOSTARTDIR
- | RETURNVALUE
- | REVERSEFROM
- | RGBVALUE
- | RIGHT
- | RIGHTALIGNED
- | RIGHTTRIM
- | ROUND
- | ROUNDED
- | ROUTINELEVEL
- | ROW
- | ROWHEIGHTCHARS
- | ROWHEIGHTPIXELS
- | ROWID
- | ROWOF
- | ROWSTATE
- | RULE
- | RUNPROCEDURE
- | SAVEAS
- | SAVECACHE
- | SAXATTRIBUTES
- | SAXREADER
- | SAXWRITER
- | SCREENVALUE
- | SCROLLABLE
- | SCROLLBARHORIZONTAL
- | SCROLLBARVERTICAL
- | SCROLLING
- | SECTION
- | SELECTION
- | SELECTIONLIST
- | SEND
- | SENDSQLSTATEMENT
- | SENSITIVE
- | SEPARATECONNECTION
- | SEPARATORS
- | SERIALIZABLE
- | SERIALIZEHIDDEN
- | SERIALIZENAME
- | SERVER
- | SERVERSOCKET
- | SETBYTEORDER
- | SETCONTENTS
- | SETCURRENTVALUE
- | SETDBCLIENT
- | SETEFFECTIVETENANT
- | SETPOINTERVALUE
- | SETSIZE
- | SHA1DIGEST
- | SHORT
- | SIDELABELS
- | SIGNATURE
- | SILENT
- | SIMPLE
- | SINGLE
- | SINGLERUN
- | SINGLETON
- | SIZE
- | SIZECHARS
- | SIZEPIXELS
- | SLIDER
- | SMALLINT
- | SOAPHEADER
- | SOAPHEADERENTRYREF
- | SOCKET
- | SORT
- | SOURCE
- | SOURCEPROCEDURE
- | SQL
- | SQRT
- | SSLSERVERNAME
- | START
- | STARTING
- | STARTMOVE
- | STARTRESIZE
- | STARTROWRESIZE
- | STATIC
- | STATUSBAR
- | STDCALL_KW
- | STOP
- | STOREDPROCEDURE
- | STRETCHTOFIT
- | STRING
- | STRINGXREF
- | SUBAVERAGE
- | SUBCOUNT
- | SUBMAXIMUM
- | SUBMENU
- | SUBMENUHELP
- | SUBMINIMUM
- | SUBSCRIBE
- | SUBSTITUTE
- | SUBSTRING
- | SUBTOTAL
- | SUM
- | SUMMARY
- | SUPER
- | SYMMETRICENCRYPTIONALGORITHM
- | SYMMETRICENCRYPTIONIV
- | SYMMETRICENCRYPTIONKEY
- | SYMMETRICSUPPORT
- | SYSTEMHELP
- | TABLESCAN
- | TARGET
- | TARGETPROCEDURE
- | TEMPTABLE
- | TENANT
- | TENANTID
- | TENANTNAME
- | TENANTNAMETOID
- | TERMINATE
- | TEXTCURSOR
- | TEXTSEGGROW
- | THREED
- | THROUGH
- | THROW
- | TICMARKS
- | TIMESTAMP
- | TIMEZONE
- | TODAY
- | TOGGLEBOX
- | TOOLBAR
- | TOOLTIP
- | TOP
- | TOPIC
- | TOPNAVQUERY
- | TOROWID
- | TOTAL
- | TRAILING
- | TRANSACTIONMODE
- | TRANSINITPROCEDURE
- | TRANSPARENT
- | TRUNCATE
- | TTCODEPAGE
- | TYPEOF
- | UNBOX
- | UNBUFFERED
- | UNIQUEMATCH
- | UNLOAD
- | UNSIGNEDBYTE
- | UNSIGNEDSHORT
- | UNSUBSCRIBE
- | URLDECODE
- | URLENCODE
- | USE
- | USEDICTEXPS
- | USEFILENAME
- | USER
- | USEREVVIDEO
- | USETEXT
- | USEUNDERLINE
- | USEWIDGETPOOL
- | VALIDATE
- | VALIDEVENT
- | VALIDHANDLE
- | VALIDOBJECT
- | VARIABLE
- | VERBOSE
- | VERTICAL
- | VISIBLE
- | VMS
- | VOID
- | WAIT
- | WARNING
- | WEBCONTEXT
- | WEEKDAY
- | WIDGET
- | WIDGETHANDLE
- | WIDGETID
- | WIDGETPOOL
- | WIDTH
- | WIDTHCHARS
- | WIDTHPIXELS
- | WINDOWNAME
- | WORDINDEX
- | X
- | XDOCUMENT
- | XMLDATATYPE
- | XMLNODENAME
- | XMLNODETYPE
- | XNODEREF
- | XOF
- | XREFXML
- | Y
- | YEAR
- | YESNO
- | YESNOCANCEL
- | YOF
-  ;
 
 // The End

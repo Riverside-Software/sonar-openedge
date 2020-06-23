@@ -20,3 +20,8 @@
 { preprocessor/preprocessor02-02.i 123 456 }
 
 { preprocessor/preprocessor02-03.i }
+
+{&_proparse_ prolint-nowarn(messagekeywordmatch)}
+{&_proparse_ prolint-nowarn(messagekeywordmatch)}
+{&_proparse_ prolint-nowarn(messagekeywordmatch)}
+{ preprocessor/preprocessor02-03.i }

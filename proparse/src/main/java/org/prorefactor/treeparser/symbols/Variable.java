@@ -15,31 +15,39 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
+import org.prorefactor.core.ProgressString;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
-import org.prorefactor.treeparser.Value;
 
 /**
  * A Symbol defined with DEFINE VARIABLE or any of the other various syntaxes which implicitly define a variable.
  */
-public class Variable extends Symbol implements Primative, Value {
+public class Variable extends Symbol implements Primative {
+  public static final Object CONSTANT_NOW = new Object();
+  public static final Object CONSTANT_TODAY = new Object();
+  public static final Object CONSTANT_NULL = new Object();
+  public static final Object CONSTANT_OTHER = new Object();
+  public static final Object CONSTANT_ARRAY = new Object();
+  public static final Object CONSTANT_ZERO = new Object();
 
-  private int extent;
+  private int extent = -1;
   private DataType dataType;
-  private Object value;
+  private Object initialValue = null;
   private String className = null;
   private boolean refInFrame = false;
   private boolean graphicalComponent = false;
+  private final Type type;
 
   public Variable(String name, TreeParserSymbolScope scope) {
-    super(name, scope);
+    this(name, scope, Type.VARIABLE);
   }
 
-  public Variable(String name, TreeParserSymbolScope scope, boolean parameter) {
-    super(name, scope, parameter);
+  public Variable(String name, TreeParserSymbolScope scope, Type type) {
+    super(name, scope);
+    this.type = type;
   }
 
   @Override
@@ -57,6 +65,10 @@ public class Variable extends Symbol implements Primative, Value {
     return getName();
   }
 
+  public Type getType() {
+    return type;
+  }
+
   @Override
   public String getClassName() {
     return className;
@@ -72,9 +84,8 @@ public class Variable extends Symbol implements Primative, Value {
     return extent;
   }
 
-  @Override
-  public Object getValue() {
-    return value;
+  public Object getInitialValue() {
+    return initialValue;
   }
 
   /**
@@ -87,7 +98,9 @@ public class Variable extends Symbol implements Primative, Value {
 
   @Override
   public Primative setClassName(String s) {
-    this.className = s;
+    if (s != null)  {
+      this.className = ProgressString.dequote(s);
+    }
     return this;
   }
 
@@ -103,9 +116,8 @@ public class Variable extends Symbol implements Primative, Value {
     return this;
   }
 
-  @Override
-  public void setValue(Object value) {
-    this.value = value;
+  public void setInitialValue(Object value) {
+    this.initialValue = value;
   }
 
   public void referencedInFrame() {
@@ -126,4 +138,9 @@ public class Variable extends Symbol implements Primative, Value {
     if (contextQualifier == ContextQualifier.UPDATING_UI)
       graphicalComponent = true;
   }
+
+  public enum Type {
+    VARIABLE, PROPERTY, PARAMETER;
+  }
+
 }

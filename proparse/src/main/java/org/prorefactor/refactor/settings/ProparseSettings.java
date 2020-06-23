@@ -38,9 +38,9 @@ public class ProparseSettings implements IProparseSettings {
   private Boolean customBatchMode;
   private String customProversion;
   private Boolean customSkipXCode;
-  private boolean antlrTokenInsertion = true;
-  private boolean antlrTokenDeletion = true;
-  private boolean antlrRecover = true;
+  private boolean antlrTokenInsertion = false;
+  private boolean antlrTokenDeletion = false;
+  private boolean antlrRecover = false;
 
   public ProparseSettings(String propath) {
     this(propath, false);

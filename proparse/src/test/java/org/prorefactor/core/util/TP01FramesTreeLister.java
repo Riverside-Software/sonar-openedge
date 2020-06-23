@@ -21,7 +21,7 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
-import org.prorefactor.proparse.antlr4.JPNodeLister;
+import org.prorefactor.proparse.support.JPNodeLister;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 import org.prorefactor.treeparser.symbols.Symbol;

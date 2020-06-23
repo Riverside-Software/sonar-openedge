@@ -25,8 +25,6 @@ import java.io.IOException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import eu.rssw.listing.ListingParser;
-
 public class TestListing {
 
   @Test

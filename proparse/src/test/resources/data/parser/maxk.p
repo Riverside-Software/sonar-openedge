@@ -1,0 +1,11 @@
+// Two parameters required, otherwise max-k stays at very low value
+xxx:ADD-NEW-FIELD('WebToHdlr', 'CHAR').
+
+DEFINE NEW GLOBAL SHARED VARIABLE GATEWAY_INTERFACE AS character NO-UNDO.
+
+DEFINE NEW GLOBAL SHARED VARIABLE SERVER_SOFTWARE   AS character FORMAT "x(20)":U NO-UNDO.
+DEFINE NEW GLOBAL SHARED VARIABLE SERVER_PROTOCOL   AS character NO-UNDO.
+DEFINE NEW GLOBAL SHARED VARIABLE SERVER_NAME       AS character FORMAT "x(40)":U NO-UNDO.
+
+FUNCTION getEnv                RETURNS CHARACTER
+  (INPUT p_name                 AS CHARACTER) in web-utilities-hdl.

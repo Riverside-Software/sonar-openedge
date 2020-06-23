@@ -37,6 +37,7 @@ public class TestProjectSensorContext {
   public final static String FILE2 = "src/procedures/test2.p";
   public final static String FILE3 = "src/procedures/test3.p";
   public final static String FILE4 = "src/procedures/test3.i";
+  public final static String FILE5 = "src/procedures/invalid.p";
   public final static String CLASS1 = "src/classes/rssw/testclass.cls";
 
   private TestProjectSensorContext() {
@@ -50,6 +51,7 @@ public class TestProjectSensorContext {
     settings.setProperty(Constants.BINARIES, "build");
     settings.setProperty(Constants.DATABASES, "src/schema/sp2k.df");
     settings.setProperty(Constants.SKIP_RCODE, true);
+    settings.setProperty(Constants.PROPARSE_ERROR_STACKTRACE, false);
 
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     context.setSettings(settings);
@@ -70,9 +72,11 @@ public class TestProjectSensorContext {
         new TestInputFileBuilder(BASEDIR, FILE4).setLanguage(Constants.LANGUAGE_KEY).setType(
             Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, FILE4), Charset.defaultCharset())).build());
     context.fileSystem().add(
+        new TestInputFileBuilder(BASEDIR, FILE5).setLanguage(Constants.LANGUAGE_KEY).setType(
+            Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, FILE5), Charset.defaultCharset())).build());
+    context.fileSystem().add(
         new TestInputFileBuilder(BASEDIR, CLASS1).setLanguage(Constants.LANGUAGE_KEY).setType(
             Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, CLASS1), Charset.defaultCharset())).build());
-
 
     return context;
   }

@@ -53,9 +53,9 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
-import org.prorefactor.proparse.antlr4.IncludeFileNotFoundException;
+import org.prorefactor.proparse.IncludeFileNotFoundException;
+import org.prorefactor.proparse.XCodedFileException;
 import org.prorefactor.proparse.antlr4.Proparse;
-import org.prorefactor.proparse.antlr4.XCodedFileException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -311,9 +311,9 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     try {
       unit = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session);
-      unit.treeParser01();
       unit.attachXref(doc);
       unit.attachXref(xref);
+      unit.treeParser01();
       unit.attachTransactionBlocks(trxBlocks);
       unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
       updateParseTime(System.currentTimeMillis() - startTime);
@@ -363,7 +363,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       } else {
         NewIssue issue = context.newIssue().forRule(
             RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY));
-        NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(cause.getMessage()) + " in "
+        NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()) + " in "
             + tok.getFileName() + ":" + tok.getLine() + ":" + tok.getCharPositionInLine());
         if ((strt != null) && (end != null))
           loc.at(file.newRange(strt, end));

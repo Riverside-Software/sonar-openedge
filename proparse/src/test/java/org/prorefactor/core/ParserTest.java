@@ -17,13 +17,23 @@ package org.prorefactor.core;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import org.antlr.v4.runtime.atn.DecisionInfo;
+import org.antlr.v4.runtime.atn.ParseInfo;
 import org.prorefactor.core.nodetypes.RecordNameNode;
+import org.prorefactor.core.schema.Database;
+import org.prorefactor.core.schema.IDatabase;
+import org.prorefactor.core.schema.ISchema;
+import org.prorefactor.core.schema.Schema;
+import org.prorefactor.core.schema.Table;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -43,7 +53,6 @@ public class ParserTest {
   public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
-    session.getSchema();
   }
 
   @Test
@@ -276,6 +285,303 @@ public class ParserTest {
     unit.treeParser01();
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 3);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.METHOD).size(), 2);
+  }
+
+  @Test
+  public void testCreateWidgetPool() {
+    // No widget-pool table, statement is about creating a widget-pool
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("create widget-pool. message 'hello'.".getBytes()), "<unnamed>", session);
+    unit.treeParser01();
+    assertNull(session.getSchema().lookupTable("widget-pool"));
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).getState2(), ABLNodeType.WIDGETPOOL.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
+
+    // widget-pool table available, statement is still about creating a widget-pool
+    // I don't know how to create a new row in this table...
+    ISchema schema = new Schema(session.getSchema().lookupDatabase("sports2000"), createWidgetPoolDB());
+    RefactorSession session2 = new RefactorSession(session.getProparseSettings(), schema);
+    assertNotNull(session2.getSchema().lookupTable("widget-pool"));
+
+    ParseUnit unit2 = new ParseUnit(new ByteArrayInputStream("create widget-pool. message 'hello'.".getBytes()), "<unnamed>", session2);
+    unit2.treeParser01();
+    assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
+    assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).getState2(), ABLNodeType.WIDGETPOOL.getType());
+    assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
+
+  }
+
+  private IDatabase createWidgetPoolDB() {
+    IDatabase retVal = new Database("mydb");
+    retVal.add(new Table("widget-pool", IConstants.ST_DBTABLE));
+
+    return retVal;
+  }
+
+  @Test
+  public void testExpression01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "def image img1 file 'f1' size 1 by 1. def frame f1 img1 at row 1 col 1. img1:load-image('f2') in frame f1.".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 2);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).getState2(), ABLNodeType.IMAGE.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(1).getState2(), ABLNodeType.FRAME.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).get(0).query(ABLNodeType.FRAME).size(),
+        1);
+  }
+
+  @Test
+  public void testExpression02() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "def var xxx as widget-handle. def var yyy as char. def frame zzz yyy. create control-frame xxx. xxx:move-after(yyy:handle in frame zzz).".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 3);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).getState2(),
+        ABLNodeType.VARIABLE.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(1).getState2(),
+        ABLNodeType.VARIABLE.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(2).getState2(), ABLNodeType.FRAME.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).getState2(), ABLNodeType.WIDGET.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
+  }
+
+  @Test
+  public void testExpression03() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("def var xxx as handle. message xxx::yyy.".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
+  }
+
+  @Test
+  public void testExpression04() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "def var xxx as System.Reflection.PropertyInfo. xxx:SetValue('xxx', xxx as long, 'xx' + 'yy' + 'zz').".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
+    JPNode expr = unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).get(0);
+    assertEquals(expr.query(ABLNodeType.METHOD_PARAM_LIST).size(), 1);
+    // Comma and paren are counted
+    assertEquals(expr.query(ABLNodeType.METHOD_PARAM_LIST).get(0).getNumberOfChildren(), 7);
+  }
+
+  @Test
+  public void testVeryLongMaxK01() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "maxk.p"), session);
+    unit.enableProfiler();
+    unit.parse();
+    ParseInfo info = unit.getParseInfo();
+
+    // Not really a unit test, but if max_k is less then 450, then the grammar rules have changed (in a good way)
+    Optional<DecisionInfo> decision = Arrays.stream(info.getDecisionInfo()).max(
+        (d1, d2) -> Long.compare(d1.SLL_MaxLook, d2.SLL_MaxLook));
+    assertTrue(decision.isPresent());
+    assertTrue(decision.get().SLL_MaxLook > 90, "MaxK: " + decision.get().SLL_MaxLook + " less than threshold");
+  }
+
+  @Test
+  public void testAmbiguityReport() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "maxk.p"), session);
+    unit.reportAmbiguity();
+    unit.parse();
+  }
+
+  @Test
+  public void testRecordFunction01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "find first _file. display recid(_file).".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().query(ABLNodeType.RECORD_NAME).size(), 2);
+  }
+
+  @Test
+  public void testOptionalArgFunction01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "get-db-client('sp2k'). get-db-client().".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    assertEquals(unit.getTopNode().query(ABLNodeType.GETDBCLIENT).size(), 2);
+  }
+
+  @Test
+  public void testDatatype01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "interface rssw.test: method public Progress.Lang.Object getService(input xxx as class Progress.Lang.Class). end interface.".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+  }
+
+  @Test
+  public void testDirective() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "directive.p"), session);
+    unit.parse();
+
+    // Looking for the DEFINE node
+    JPNode node1 = (JPNode) unit.getTopNode().findDirectChild(ABLNodeType.DEFINE);
+    assertNotNull(node1);
+    assertTrue(node1.isStateHead());
+
+    // Looking for the NO-UNDO node, and trying to get the state-head node
+    JPNode node2 = (JPNode) unit.getTopNode().query(ABLNodeType.NOUNDO).get(0);
+    JPNode parent = node2;
+    while (!parent.isStateHead()) {
+      parent = parent.getPreviousNode();
+    }
+    assertEquals(node1, parent);
+
+    // No proparse directive as nodes anymore
+    JPNode left = node1.getPreviousSibling();
+    assertNull(left);
+
+    // But as ProToken
+    ProToken tok = node1.getHiddenBefore();
+    assertNotNull(tok);
+    // First WS, then proparse directive
+    tok = (ProToken) tok.getHiddenBefore();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "prolint-nowarn(shared)");
+
+    // First WS
+    tok = (ProToken) tok.getHiddenBefore();
+    assertNotNull(tok);
+    // Then previous directive
+    tok = (ProToken) tok.getHiddenBefore();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "prolint-nowarn(something)");
+  }
+
+  @Test
+  public void testExpressionEngine01() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "expression01.p"), session);
+    unit.parse();
+
+    // Looking for the DEFINE node
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.EXPR_STATEMENT);
+    assertNotNull(nodes);
+    assertEquals(nodes.size(), 4);
+
+    JPNode expr1 = nodes.get(0).getFirstChild();
+    assertEquals(expr1.getNodeType(), ABLNodeType.PLUS);
+    assertEquals(expr1.getDirectChildren().get(0).getNodeType(), ABLNodeType.PLUS);
+    JPNode expr2 = nodes.get(1).getFirstChild();
+    assertEquals(expr2.getNodeType(), ABLNodeType.PLUS);
+    assertEquals(expr2.getDirectChildren().get(1).getNodeType(), ABLNodeType.MULTIPLY);
+    JPNode expr3 = nodes.get(2).getFirstChild();
+    assertEquals(expr3.getNodeType(), ABLNodeType.EQ);
+    assertEquals(expr3.getFirstChild().getNodeType(), ABLNodeType.PLUS);
+    JPNode expr4 = nodes.get(3).getFirstChild();
+    assertEquals(expr4.getNodeType(), ABLNodeType.OR);
+    assertEquals(expr4.getFirstChild().getNodeType(), ABLNodeType.OR);
+    assertEquals(expr4.getDirectChildren().get(1).getNodeType(), ABLNodeType.EQ);
+    assertEquals(expr4.getFirstChild().getFirstChild().getNodeType(), ABLNodeType.LTHAN);
+    assertEquals(expr4.getFirstChild().getDirectChildren().get(1).getNodeType(), ABLNodeType.GTHAN);
+    JPNode eqExpr = expr4.getDirectChildren().get(1);
+    assertEquals(eqExpr.getDirectChildren().get(1).getNodeType(), ABLNodeType.FIELD_REF);
+    assertEquals(eqExpr.getFirstChild().getNodeType(), ABLNodeType.PLUS);
+    assertEquals(eqExpr.getFirstChild().getDirectChildren().get(1).getNodeType(), ABLNodeType.MULTIPLY);
+
+    nodes = unit.getTopNode().query(ABLNodeType.ASSIGN);
+    assertNotNull(nodes);
+    assertEquals(nodes.size(), 1);
+
+    JPNode assign1 = nodes.get(0);
+    assertEquals(assign1.getFirstChild().getNodeType(), ABLNodeType.EQUAL);
+    assertEquals(assign1.getFirstChild().getDirectChildren().get(1).getNodeType(), ABLNodeType.EQ);
+  }
+
+  @Test
+  public void testVarStatement01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CHAR s1, s2, s3, s4.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement02() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT x, y, z = 3.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement03() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS mypackage.subdir.myclass myobj1, myobj2, myobj3.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement04() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR mypackage.subdir.myclass myobj1.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement05() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR DATE d1, d2 = 1/1/2020, d3 = TODAY.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+  @Test
+  public void testVarStatement06() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR PROTECTED DATE d1, d2 = 1/1/2020.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement07() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[3] x = [1, 2], y, z = [100, 200, 300].".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement08() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement09() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y = [1,2,3].".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement10() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x = [1,2], y = [1,2,3].".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement11() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS foo[2] classArray.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement12() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR \"System.Collections.Generic.List<char>\" cList.".getBytes()), session);
+    unit.treeParser01();
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
 }

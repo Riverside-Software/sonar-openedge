@@ -29,10 +29,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
-import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.IConstants;
-import org.prorefactor.core.JPNode;
-import org.prorefactor.core.JsonNodeLister;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
@@ -248,7 +245,8 @@ public class BugFixTest {
 
   @Test
   public void test19() {
-    genericTest("bug19.p");
+    ParseUnit unit = genericTest("bug19.p");
+    assertEquals("MESSAGE \"Hello\".", unit.getTopNode().toStringFulltext().trim());
   }
 
   @Test
@@ -524,7 +522,7 @@ public class BugFixTest {
     genericTest("stopafter.p");
   }
 
-  @Test
+  @Test(expectedExceptions = {ParseCancellationException.class})
   public void testDefined() {
     // https://github.com/Riverside-Software/sonar-openedge/issues/515
     genericTest("defined.p");
@@ -624,6 +622,11 @@ public class BugFixTest {
   public void testTooManyStatements() {
     // Verifies that lots of statements (5000 here) don't raise a stack overflow exception
     genericTest("tooManyStatements.p");
+  }
+
+  @Test
+  public void testCatchError() {
+    genericTest("catchError.p");
   }
 
 }

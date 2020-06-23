@@ -65,7 +65,12 @@ public class InputFileUtils {
    * @return Relative path of InputFile
    */
   public static String getRelativePath(InputFile file, FileSystem fs) {
-    return fs.baseDir().toPath().toAbsolutePath().relativize(Paths.get(file.uri())).toString().replace('\\', '/');
+    try {
+      return fs.baseDir().toPath().toAbsolutePath().relativize(Paths.get(file.uri())).toString().replace('\\', '/');
+    } catch (IllegalArgumentException caught) {
+      // If files is on a different filesystem, we just return the file name
+      return file.filename();
+    }
   }
 
 }

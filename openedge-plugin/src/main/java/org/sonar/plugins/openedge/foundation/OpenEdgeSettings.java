@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -76,7 +77,6 @@ import eu.rssw.antlr.database.DumpFileUtils;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
 import eu.rssw.pct.FileEntry;
 import eu.rssw.pct.PLReader;
-import eu.rssw.pct.ProgressClasses;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.ITypeInfo;
@@ -97,6 +97,8 @@ public class OpenEdgeSettings {
   private final List<Path> binariesDirs = new ArrayList<>();
   private final List<Path> pctDirs = new ArrayList<>();
   private final List<File> propath = new ArrayList<>();
+  private final List<File> propathFull = new ArrayList<>();
+  private final List<File> propathDlc = new ArrayList<>();
   private final Set<String> includeExtensions = new HashSet<>();
   private final Set<String> cpdAnnotations = new HashSet<>();
   private final Set<String> cpdMethods = new HashSet<>();
@@ -189,11 +191,14 @@ public class OpenEdgeSettings {
     if (dlcInPropath && !Strings.isNullOrEmpty(dlcInstallDir)) {
       File dlc = new File(dlcInstallDir);
       LOG.info("Adding DLC directory '{}' to PROPATH", dlc.getAbsolutePath());
-      propath.add(new File(dlc, "gui"));
-      propath.add(new File(dlc, "tty"));
-      propath.add(new File(dlc, "src"));
-      propath.add(dlc);
+      propathDlc.add(new File(dlc, "gui"));
+      propathDlc.add(new File(dlc, "tty"));
+      propathDlc.add(new File(dlc, "src"));
+      propathDlc.add(dlc);
     }
+
+    propathFull.addAll(propath);
+    propathFull.addAll(propathDlc);
   }
 
   private final void initializeCPD(Configuration config) {
@@ -276,55 +281,65 @@ public class OpenEdgeSettings {
     }
   }
 
-  public final void parseBuildDirectory() {
+  private final void parseBuildDirectory() {
     if (config.getBoolean(Constants.SKIP_RCODE).orElse(false))
       return;
-
-    AtomicInteger numClasses = new AtomicInteger(0);
-    AtomicInteger numMethods = new AtomicInteger(0);
-    AtomicInteger numProperties = new AtomicInteger(0);
-    // Multi-threaded pool
     long currTime = System.currentTimeMillis();
-    AtomicInteger numRCode = new AtomicInteger(0);
-    ExecutorService service = Executors.newFixedThreadPool(4);
+    RCodeInjectorService srv = new RCodeInjectorService();
     for (Path binDir : binariesDirs) {
-      Files.fileTraverser().depthFirstPreOrder(binDir.toFile()).forEach(f -> {
-        if (f.getName().endsWith(".r")) {
-          numRCode.incrementAndGet();
-          service.submit(() -> {
-            ITypeInfo info = parseRCode(f);
-            if (info != null) {
-              numClasses.incrementAndGet();
-              numMethods.addAndGet(info.getMethods().size());
-              numProperties.addAndGet(info.getProperties().size());
-              proparseSession.injectTypeInfo(info);
-            }
-          });
-        }
-      });
+      parseRCodeInPath(binDir.toFile(), srv);
     }
 
-    // Include PL files in $DLC/gui
+    // Include files in $DLC/gui
     String dlcInstallDir = config.get(Constants.DLC).orElse(null);
     boolean dlcInPropath = config.getBoolean(Constants.PROPATH_DLC).orElse(false);
     if (dlcInPropath && !Strings.isNullOrEmpty(dlcInstallDir)) {
       File dlc = new File(dlcInstallDir);
-
-      Files.fileTraverser().depthFirstPreOrder(new File(dlc, "gui")).forEach(f -> {
-        if (f.getName().endsWith(".pl")) {
-          service.submit(() -> parseLibrary(f));
-        }
-      });
+      parseRCodeInPath(new File(dlc, "gui"), srv);
     }
-    
+
+    // Include files in propath
+    for (File entry : propath) {
+      if (entry.getName().endsWith(".pl")) {
+        srv.service.submit(() -> {
+          parseLibrary(entry);
+        });
+      } else {
+        parseRCodeInPath(entry, srv);
+      }
+    }
+
     try {
-      service.shutdown();
-      service.awaitTermination(10, TimeUnit.MINUTES);
+      srv.service.shutdown();
+      srv.service.awaitTermination(10, TimeUnit.MINUTES);
     } catch (InterruptedException caught) {
       LOG.error("Unable to finish parsing rcode...", caught);
     }
-    LOG.info("{} RCode read in {} ms - {} classes - {} methods - {} properties", numRCode.get(),
-        System.currentTimeMillis() - currTime, numClasses.get(), numMethods.get(), numProperties.get());
+    LOG.info("{} RCode read in {} ms - {} classes - {} methods - {} properties", srv.numRCode.get(),
+        System.currentTimeMillis() - currTime, srv.numClasses.get(), srv.numMethods.get(), srv.numProperties.get());
+  }
+
+  private void parseRCodeInPath(File path, RCodeInjectorService srv) {
+    LOG.debug("Parsing rcode in directory {}", path.getAbsolutePath());
+    Files.fileTraverser().depthFirstPreOrder(path).forEach(f -> {
+      if (f.getName().endsWith(".r")) {
+        srv.numRCode.incrementAndGet();
+        srv.service.submit(() -> {
+          ITypeInfo info = parseRCode(f);
+          if (info != null) {
+            srv.numClasses.incrementAndGet();
+            srv.numMethods.addAndGet(info.getMethods().size());
+            srv.numProperties.addAndGet(info.getProperties().size());
+            proparseSession.injectTypeInfo(info);
+          }
+        });
+      } else if (f.getName().endsWith(".pl")) {
+        srv.service.submit(() -> {
+          parseLibrary(f);
+        });
+
+      }
+    });
   }
 
   private ITypeInfo parseRCode(File file) {
@@ -342,7 +357,7 @@ public class OpenEdgeSettings {
   }
 
   private void parseLibrary(File lib) {
-    LOG.debug("Parsing PL " + lib.getAbsolutePath());
+    LOG.debug("Parsing PL {}", lib.getAbsolutePath());
     PLReader pl = new PLReader(lib);
     for (FileEntry entry : pl.getFileList()) {
       if (entry.getFileName().endsWith(".r")) {
@@ -481,7 +496,7 @@ public class OpenEdgeSettings {
     if (f.exists())
       return f.getAbsolutePath();
 
-    for (File file : propath) {
+    for (File file : propathFull) {
       File stdName = new File(file, fileName);
       if (stdName.exists())
         return stdName.getAbsolutePath();
@@ -564,7 +579,7 @@ public class OpenEdgeSettings {
   }
 
   public List<File> getPropath() {
-    return propath;
+    return propathFull;
   }
 
   public String getOpenEdgePluginVersion() {
@@ -572,7 +587,7 @@ public class OpenEdgeSettings {
   }
 
   public String getPropathAsString() {
-    return Joiner.on(',').skipNulls().join(propath);
+    return Joiner.on(',').skipNulls().join(propathFull);
   }
 
   public RefactorSession getProparseSession() {
@@ -608,15 +623,22 @@ public class OpenEdgeSettings {
         ppSettings.setCustomSkipXCode(skipXCode.get());
 
       // ANTLR Token Deletion
-      ppSettings.setAntlrTokenDeletion(config.getBoolean("sonar.oe.proparse.token.deletion").orElse(true));
+      ppSettings.setAntlrTokenDeletion(config.getBoolean("sonar.oe.proparse.token.deletion").orElse(false));
       // ANTLR Token Insertion
-      ppSettings.setAntlrTokenInsertion(config.getBoolean("sonar.oe.proparse.token.insertion").orElse(true));
-      // ANTLR Recover, set to false by default in SonarLint
-      ppSettings.setAntlrRecover(
-          config.getBoolean("sonar.oe.proparse.recover").orElse(runtime.getProduct() == SonarProduct.SONARQUBE));
+      ppSettings.setAntlrTokenInsertion(config.getBoolean("sonar.oe.proparse.token.insertion").orElse(false));
+      // ANTLR Recover
+      ppSettings.setAntlrRecover(config.getBoolean("sonar.oe.proparse.recover").orElse(false));
 
       proparseSession = new RefactorSession(ppSettings, sch, encoding());
-      proparseSession.injectTypeInfoCollection(ProgressClasses.getProgressClasses());
+      Optional<String> assemblyCatalog = config.get(Constants.ASSEMBLY_CATALOG);
+      if (assemblyCatalog.isPresent()) {
+        try (Reader reader = new FileReader(assemblyCatalog.get())) {
+          proparseSession.injectClassesFromCatalog(reader);
+        } catch (IOException caught) {
+          LOG.error("Unable to read assembly catalog '" + assemblyCatalog.get() + "'", caught);
+        }
+      }
+
       if (runtime.getProduct() == SonarProduct.SONARQUBE) {
         // Parse entire build directory if not in SonarLint
         parseBuildDirectory();
@@ -751,5 +773,13 @@ public class OpenEdgeSettings {
     }
 
     return retVal;
+  }
+
+  private class RCodeInjectorService {
+    AtomicInteger numClasses = new AtomicInteger(0);
+    AtomicInteger numMethods = new AtomicInteger(0);
+    AtomicInteger numProperties = new AtomicInteger(0);
+    AtomicInteger numRCode = new AtomicInteger(0);
+    ExecutorService service = Executors.newFixedThreadPool(4);
   }
 }

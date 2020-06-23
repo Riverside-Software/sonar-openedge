@@ -25,7 +25,7 @@ import java.io.PrintWriter;
 import org.apache.commons.io.FileUtils;
 import org.prorefactor.core.util.TP01FramesTreeLister;
 import org.prorefactor.core.util.UnitTestModule;
-import org.prorefactor.proparse.antlr4.JPNodeLister;
+import org.prorefactor.proparse.support.JPNodeLister;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.Test;

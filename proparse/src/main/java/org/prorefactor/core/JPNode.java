@@ -30,8 +30,8 @@ import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.nodetypes.TypeNameNode;
-import org.prorefactor.proparse.ParserSupport;
-import org.prorefactor.proparse.SymbolScope.FieldType;
+import org.prorefactor.proparse.support.ParserSupport;
+import org.prorefactor.proparse.support.SymbolScope.FieldType;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.BufferScope;
 import org.prorefactor.treeparser.symbols.FieldContainer;
@@ -193,7 +193,8 @@ public class JPNode {
   }
 
   /**
-   * @return First child node associated to a physical token in the source code.
+   * @return First child node associated to a physical token in the source code. If token is an operator, it's not
+   *         really the first token, but the operator itself
    */
   public JPNode firstNaturalChild() {
     if (token.isNatural())
@@ -636,7 +637,7 @@ public class JPNode {
   }
 
   public boolean isAbbreviated() {
-    return token.getNodeType().isAbbreviated(getText());
+    return token.isAbbreviated();
   }
 
   /**

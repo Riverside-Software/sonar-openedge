@@ -101,12 +101,24 @@ public class OpenEdgeWarningsSensor implements Sensor {
         for (Warning w : processor.getResult()) {
           RuleKey ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY,
               OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
+          boolean isManagedByCABL = OpenEdgeRulesDefinition.isWarningManagedByCABL(w.msgNum);
+          if (context.activeRules().find(ruleKey) == null) {
+            if (isManagedByCABL)
+              // Rule is managed by CABL *and* is specifically inactive in the profile, so the issue is discarded
+              continue;
+            else {
+              // Not managed by CABL, we use the default rule
+              ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY);
+              // And append message number so it's easier to find warning reported by compiler
+              w.msg = w.msg + " (" + w.msgNum + ")";
+            }
+          }
 
           FilePredicate fp1 = context.fileSystem().predicates().hasRelativePath(w.file);
           FilePredicate fp2 = context.fileSystem().predicates().hasAbsolutePath(
               context.fileSystem().baseDir().toPath().resolve(w.file).normalize().toString());
 
-          // XXX FilePredicate.or() doesn't work...
+          // TODO FilePredicate.or() doesn't work...
           InputFile target = context.fileSystem().inputFile(fp1);
           if (target == null) {
             target = context.fileSystem().inputFile(fp2);
@@ -114,8 +126,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
 
           if (target != null) {
             LOG.debug("Warning File {} - Line {} - Message {}", target, w.line, w.msg);
-            NewIssue issue = context.newIssue().forRule(context.activeRules().find(ruleKey) == null
-                ? RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY) : ruleKey);
+            NewIssue issue = context.newIssue().forRule(ruleKey);
             NewIssueLocation location = issue.newLocation().on(target);
             if (w.line > 0) {
               location.at(target.selectLine(w.line));

@@ -31,7 +31,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.rule.ActiveRule;
@@ -102,7 +101,7 @@ public class OpenEdgeComponents {
     }
   }
 
-  public Iterable<License> getLicenses() {
+  public Collection<License> getLicenses() {
     return licenseRegistrar.getLicenses();
   }
 
@@ -186,7 +185,7 @@ public class OpenEdgeComponents {
         throw MessageException.of("The field " + param
             + " does not exist or is not annotated with @RuleProperty in the class " + check.getClass().getName());
       }
-      if (StringUtils.isNotBlank(activeRule.param(param))) {
+      if (Strings.nullToEmpty(activeRule.param(param)).trim().length() > 0) {
         configureField(check, field, activeRule.param(param));
       }
     }
@@ -231,10 +230,8 @@ public class OpenEdgeComponents {
     Field[] fields = check.getClass().getDeclaredFields();
     for (Field field : fields) {
       RuleProperty propertyAnnotation = field.getAnnotation(RuleProperty.class);
-      if (propertyAnnotation != null) {
-        if (StringUtils.equals(key, field.getName()) || StringUtils.equals(key, propertyAnnotation.key())) {
-          return field;
-        }
+      if ((propertyAnnotation != null) && (key.equals(field.getName()) || key.equals(propertyAnnotation.key()))) {
+        return field;
       }
     }
     return null;
@@ -268,7 +265,7 @@ public class OpenEdgeComponents {
       }
     }
 
-    private Iterable<License> getLicenses() {
+    private Collection<License> getLicenses() {
       return licenses;
     }
 

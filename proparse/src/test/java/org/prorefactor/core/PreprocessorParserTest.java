@@ -16,8 +16,6 @@ package org.prorefactor.core;
 
 import java.io.File;
 
-import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -397,5 +395,10 @@ public class PreprocessorParserTest {
   @Test
   public void testProcessArchitecture2() {
     testVariable(unit.getTopNode(), "var79");
+  }
+
+  @Test
+  public void testExpression() {
+    testVariable(unit.getTopNode(), "var80");
   }
 }

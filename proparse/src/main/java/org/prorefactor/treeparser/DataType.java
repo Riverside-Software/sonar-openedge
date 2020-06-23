@@ -18,7 +18,7 @@ package org.prorefactor.treeparser;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.core.ABLNodeType;
 
 /**
  * One static instance of DataType is created for each data type in the 4GL. You can access each of those through this
@@ -30,41 +30,47 @@ public class DataType {
   private static Map<String, DataType> nameMap = new HashMap<>();
   private static Map<Integer, DataType> tokenTypeMap = new HashMap<>();
 
-  public static final DataType VOID = new DataType(Proparse.VOID, "VOID");
-  public static final DataType BIGINT = new DataType(Proparse.BIGINT, "BIGINT");
-  public static final DataType BLOB = new DataType(Proparse.BLOB, "BLOB");
-  public static final DataType BYTE = new DataType(Proparse.BYTE, "BYTE");
-  public static final DataType CHARACTER = new DataType(Proparse.CHARACTER, "CHARACTER");
-  public static final DataType CLASS = new DataType(Proparse.CLASS, "CLASS");
-  public static final DataType CLOB = new DataType(Proparse.CLOB, "CLOB");
-  public static final DataType COMHANDLE = new DataType(Proparse.COMHANDLE, "COM-HANDLE");
-  public static final DataType DATE = new DataType(Proparse.DATE, "DATE");
-  public static final DataType DATETIME = new DataType(Proparse.DATETIME, "DATETIME");
-  public static final DataType DATETIMETZ = new DataType(Proparse.DATETIMETZ, "DATETIME-TZ");
-  public static final DataType DECIMAL = new DataType(Proparse.DECIMAL, "DECIMAL");
-  public static final DataType DOUBLE = new DataType(Proparse.DOUBLE, "DOUBLE");
-  public static final DataType FIXCHAR = new DataType(Proparse.FIXCHAR, "FIXCHAR");
-  public static final DataType FLOAT = new DataType(Proparse.FLOAT, "FLOAT");
-  public static final DataType HANDLE = new DataType(Proparse.HANDLE, "HANDLE");
-  public static final DataType INTEGER = new DataType(Proparse.INTEGER, "INTEGER");
-  public static final DataType INT64 = new DataType(Proparse.INT64, "INT64");
-  public static final DataType LONG = new DataType(Proparse.LONG, "LONG");
-  public static final DataType LONGCHAR = new DataType(Proparse.LONGCHAR, "LONGCHAR");
-  public static final DataType LOGICAL = new DataType(Proparse.LOGICAL, "LOGICAL");
-  public static final DataType MEMPTR = new DataType(Proparse.MEMPTR, "MEMPTR");
-  public static final DataType NUMERIC = new DataType(Proparse.NUMERIC, "NUMERIC");
-  public static final DataType RAW = new DataType(Proparse.RAW, "RAW");
-  public static final DataType RECID = new DataType(Proparse.RECID, "RECID");
-  public static final DataType ROWID = new DataType(Proparse.ROWID, "ROWID");
-  public static final DataType SHORT = new DataType(Proparse.SHORT, "SHORT");
-  public static final DataType TIME = new DataType(Proparse.TIME, "TIME");
-  public static final DataType TIMESTAMP = new DataType(Proparse.TIMESTAMP, "TIMESTAMP");
+  public static final DataType VOID = new DataType(ABLNodeType.VOID);
+  public static final DataType BIGINT = new DataType(ABLNodeType.BIGINT);
+  public static final DataType BLOB = new DataType(ABLNodeType.BLOB);
+  public static final DataType BYTE = new DataType(ABLNodeType.BYTE);
+  public static final DataType CHARACTER = new DataType(ABLNodeType.CHARACTER);
+  public static final DataType CLASS = new DataType(ABLNodeType.CLASS);
+  public static final DataType CLOB = new DataType(ABLNodeType.CLOB);
+  public static final DataType COMHANDLE = new DataType(ABLNodeType.COMHANDLE);
+  public static final DataType DATE = new DataType(ABLNodeType.DATE);
+  public static final DataType DATETIME = new DataType(ABLNodeType.DATETIME);
+  public static final DataType DATETIMETZ = new DataType(ABLNodeType.DATETIMETZ);
+  public static final DataType DECIMAL = new DataType(ABLNodeType.DECIMAL);
+  public static final DataType DOUBLE = new DataType(ABLNodeType.DOUBLE);
+  public static final DataType FIXCHAR = new DataType(ABLNodeType.FIXCHAR);
+  public static final DataType FLOAT = new DataType(ABLNodeType.FLOAT);
+  public static final DataType HANDLE = new DataType(ABLNodeType.HANDLE);
+  public static final DataType INTEGER = new DataType(ABLNodeType.INTEGER);
+  public static final DataType INT64 = new DataType(ABLNodeType.INT64);
+  public static final DataType LONG = new DataType(ABLNodeType.LONG);
+  public static final DataType LOGICAL = new DataType(ABLNodeType.LOGICAL);
+  public static final DataType LONGCHAR = new DataType(ABLNodeType.LONGCHAR);
+  public static final DataType MEMPTR = new DataType(ABLNodeType.MEMPTR);
+  public static final DataType NUMERIC = new DataType(ABLNodeType.NUMERIC);
+  public static final DataType RAW = new DataType(ABLNodeType.RAW);
+  public static final DataType RECID = new DataType(ABLNodeType.RECID);
+  public static final DataType ROWID = new DataType(ABLNodeType.ROWID);
+  public static final DataType SHORT = new DataType(ABLNodeType.SHORT);
+  public static final DataType TIME = new DataType(ABLNodeType.TIME);
+  public static final DataType TIMESTAMP = new DataType(ABLNodeType.TIMESTAMP);
   public static final DataType TYPE_NAME = CLASS;
-  public static final DataType UNSIGNEDSHORT = new DataType(Proparse.UNSIGNEDSHORT, "UNSIGNED-SHORT");
-  public static final DataType WIDGETHANDLE = new DataType(Proparse.WIDGETHANDLE, "WIDGET-HANDLE");
+  public static final DataType UNSIGNEDBYTE = new DataType(ABLNodeType.UNSIGNEDBYTE);
+  public static final DataType UNSIGNEDSHORT = new DataType(ABLNodeType.UNSIGNEDSHORT);
+  public static final DataType UNSIGNEDINTEGER = new DataType(ABLNodeType.UNSIGNEDINTEGER);
+  public static final DataType WIDGETHANDLE = new DataType(ABLNodeType.WIDGETHANDLE);
 
   private Integer tokenType;
   private String progressName;
+
+  private DataType(ABLNodeType nodeType) {
+    this(nodeType.getType(), nodeType.getText().toUpperCase());
+  }
 
   private DataType(int tokenType, String progressName) {
     this.tokenType = tokenType;

@@ -142,6 +142,10 @@ public class ProToken implements Token {
     return endFileIndex;
   }
 
+  public boolean isAbbreviated() {
+    return type.isAbbreviated(text);
+  }
+
   /**
    * TODO Improve implementation
    *
@@ -414,6 +418,14 @@ public class ProToken implements Token {
         case AMPSCOPEDDEFINE:
         case AMPUNDEFINE:
         case INCLUDEDIRECTIVE:
+        case INCLUDEDIRECTIVE_END:
+        case AMPIF:
+        case AMPELSE:
+        case AMPELSEIF:
+        case AMPENDIF:
+        case AMPTHEN:
+        case PREPROEXPR_TRUE:
+        case PREPROEXPR_FALSE:
           tok.channel = PREPROCESSOR_CHANNEL;
           break;
         case PROPARSEDIRECTIVE:

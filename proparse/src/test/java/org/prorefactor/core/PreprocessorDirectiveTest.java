@@ -21,18 +21,18 @@ import static org.testng.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
-import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.JPNode;
-import org.prorefactor.core.ProToken;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.macrolevel.IncludeRef;
+import org.prorefactor.macrolevel.MacroDef;
+import org.prorefactor.macrolevel.NamedMacroRef;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
-import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -54,7 +54,7 @@ public class PreprocessorDirectiveTest {
   public void test01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor05.p"), session);
     unit.parse();
-    Assert.assertEquals(unit.getTopNode().query(ABLNodeType.PROPARSEDIRECTIVE).size(), 0);
+    assertEquals(unit.getTopNode().query(ABLNodeType.PROPARSEDIRECTIVE).size(), 0);
     JPNode node1 = unit.getTopNode().query(ABLNodeType.MESSAGE).get(0);
     JPNode node2 = unit.getTopNode().query(ABLNodeType.MESSAGE).get(1);
 
@@ -85,7 +85,7 @@ public class PreprocessorDirectiveTest {
     assertFalse(node2.hasProparseDirective("klm"));
   }
 
-  @Test(enabled = false)
+  @Test(expectedExceptions = {ParseCancellationException.class})
   public void test02() {
     // See issue #341 - Won't fix
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor07.p"), session);
@@ -97,55 +97,55 @@ public class PreprocessorDirectiveTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor09.p"), session);
     TokenSource stream = unit.preprocess();
 
-    assertEquals(LexerTest.nextVisibleToken(stream).getType(), Proparse.DEFINE);
-    assertEquals(LexerTest.nextVisibleToken(stream).getType(), Proparse.VARIABLE);
-    Token tok = LexerTest.nextVisibleToken(stream);
+    assertEquals(nextVisibleToken(stream).getType(), Proparse.DEFINE);
+    assertEquals(nextVisibleToken(stream).getType(), Proparse.VAR);
+    Token tok = nextVisibleToken(stream);
     assertEquals(tok.getType(), Proparse.ID);
     assertEquals(tok.getText(), "aaa");
-    assertEquals(LexerTest.nextVisibleToken(stream).getType(), Proparse.AS);
-    assertEquals(LexerTest.nextVisibleToken(stream).getType(), Proparse.CHARACTER);
-    assertEquals(LexerTest.nextVisibleToken(stream).getType(), Proparse.PERIOD);
+    assertEquals(nextVisibleToken(stream).getType(), Proparse.AS);
+    assertEquals(nextVisibleToken(stream).getType(), Proparse.CHARACTER);
+    assertEquals(nextVisibleToken(stream).getType(), Proparse.PERIOD);
 
-    assertEquals(LexerTest.nextVisibleToken(stream).getType(), Proparse.MESSAGE);
-    tok = LexerTest.nextVisibleToken(stream);
+    assertEquals(nextVisibleToken(stream).getType(), Proparse.MESSAGE);
+    tok = nextVisibleToken(stream);
     assertEquals(tok.getType(), Proparse.QSTRING);
     assertEquals(tok.getText(), "\"text1 text2\"");
-    assertEquals(LexerTest.nextVisibleToken(stream).getType(), Proparse.PERIOD);
+    assertEquals(nextVisibleToken(stream).getType(), Proparse.PERIOD);
 
-    assertEquals(LexerTest.nextVisibleToken(stream).getType(), Proparse.MESSAGE);
-    tok = LexerTest.nextVisibleToken(stream);
+    assertEquals(nextVisibleToken(stream).getType(), Proparse.MESSAGE);
+    tok = nextVisibleToken(stream);
     assertEquals(tok.getType(), Proparse.ID);
     assertEquals(tok.getText(), "aaa");
-    tok = LexerTest.nextVisibleToken(stream);
+    tok = nextVisibleToken(stream);
     assertEquals(tok.getType(), Proparse.QSTRING);
     assertEquals(tok.getText(), "\"text3\"");
-    tok = LexerTest.nextVisibleToken(stream);
+    tok = nextVisibleToken(stream);
     assertEquals(tok.getType(), Proparse.ID);
     assertEquals(tok.getText(), "aaa");
-    assertEquals(LexerTest.nextVisibleToken(stream).getType(), Proparse.PERIOD);
+    assertEquals(nextVisibleToken(stream).getType(), Proparse.PERIOD);
 
-    assertEquals(LexerTest.nextVisibleToken(stream).getType(), Proparse.MESSAGE);
-    tok = LexerTest.nextVisibleToken(stream);
+    assertEquals(nextVisibleToken(stream).getType(), Proparse.MESSAGE);
+    tok = nextVisibleToken(stream);
     assertEquals(tok.getType(), Proparse.ID);
     assertEquals(tok.getText(), "bbb");
-    tok = LexerTest.nextVisibleToken(stream);
+    tok = nextVisibleToken(stream);
     assertEquals(tok.getType(), Proparse.QSTRING);
     assertEquals(tok.getText(), "'text4'");
-    tok = LexerTest.nextVisibleToken(stream);
+    tok = nextVisibleToken(stream);
     assertEquals(tok.getType(), Proparse.ID);
     assertEquals(tok.getText(), "bbb");
-    assertEquals(LexerTest.nextVisibleToken(stream).getType(), Proparse.PERIOD);
+    assertEquals(nextVisibleToken(stream).getType(), Proparse.PERIOD);
   }
 
   @Test
   public void test04() throws IOException {
     ParseUnit unit01 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &myParam=1 }".getBytes()), "<unnamed>", session);
     TokenSource stream01 = unit01.preprocess();
-    assertEquals(LexerTest.nextVisibleToken(stream01).getType(), Proparse.TRUE_KW);
+    assertEquals(nextVisibleToken(stream01).getType(), Proparse.TRUE);
 
     ParseUnit unit02 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &abc=1 &myParam }".getBytes()), "<unnamed>", session);
     TokenSource stream02 = unit02.preprocess();
-    assertEquals(LexerTest.nextVisibleToken(stream02).getType(), Proparse.TRUE_KW);
+    assertEquals(nextVisibleToken(stream02).getType(), Proparse.TRUE);
     IncludeRef events02 = (IncludeRef) unit02.getMacroSourceArray()[1];
     assertEquals(events02.numArgs(), 2);
     assertEquals(events02.getArgNumber(1).getName(), "abc");
@@ -156,12 +156,12 @@ public class PreprocessorDirectiveTest {
 
     ParseUnit unit03 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &abc &myParam }".getBytes()), "<unnamed>", session);
     TokenSource stream03 = unit03.preprocess();
-    assertEquals(LexerTest.nextVisibleToken(stream03).getType(), Proparse.TRUE_KW);
+    assertEquals(nextVisibleToken(stream03).getType(), Proparse.TRUE);
 
     ParseUnit unit04 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &myParam &abc }".getBytes()), "<unnamed>", session);
     TokenSource stream04 = unit04.preprocess();
     // Different behavior in ABL
-    assertEquals(LexerTest.nextVisibleToken(stream04).getType(), Proparse.TRUE_KW);
+    assertEquals(nextVisibleToken(stream04).getType(), Proparse.TRUE);
     IncludeRef events04 = (IncludeRef) unit04.getMacroSourceArray()[1];
     assertEquals(events04.numArgs(), 2);
     assertEquals(events04.getArgNumber(1).getName(), "myParam");
@@ -171,7 +171,7 @@ public class PreprocessorDirectiveTest {
 
     ParseUnit unit05 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &abc &myParam=1 }".getBytes()), "<unnamed>", session);
     TokenSource stream05 = unit05.preprocess();
-    assertEquals(LexerTest.nextVisibleToken(stream05).getType(), Proparse.TRUE_KW);
+    assertEquals(nextVisibleToken(stream05).getType(), Proparse.TRUE);
     IncludeRef events05 = (IncludeRef) unit05.getMacroSourceArray()[1];
     assertEquals(events05.numArgs(), 2);
     assertEquals(events05.getArgNumber(1).getName(), "abc");
@@ -180,4 +180,201 @@ public class PreprocessorDirectiveTest {
     assertEquals(events05.getArgNumber(2).getValue(), "1");
     assertFalse(events05.getArgNumber(2).isUndefined());
   }
+
+  @Test
+  public void test05() throws IOException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor11.p"), session);
+    TokenSource src = unit.preprocess();
+    ProToken tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.DISPLAY);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPIF);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PREPROEXPR_TRUE);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPTHEN);
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"xx\"");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPIF);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PREPROEXPR_FALSE);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPTHEN);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPENDIF);
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"zz\"");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPENDIF);
+  }
+
+  @Test
+  public void test06() throws IOException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor12.p"), session);
+    TokenSource src = unit.preprocess();
+    ProToken tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.DISPLAY);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPIF);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PREPROEXPR_FALSE);
+    assertEquals(tok.getText(), "FALSE");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPTHEN);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPENDIF);
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"zz2\"");
+  }
+
+  @Test
+  public void test07() throws IOException {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor13.p"), session);
+    TokenSource src = unit.preprocess();
+    ProToken tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.DISPLAY);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPIF);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PREPROEXPR_FALSE);
+    assertEquals(tok.getText(), "FALSE");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPTHEN);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPELSEIF);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PREPROEXPR_FALSE);
+    assertEquals(tok.getText(), "FALSE");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPTHEN);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPELSEIF);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PREPROEXPR_TRUE);
+    assertEquals(tok.getText(), "TRUE");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPTHEN);
+
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"zz\"");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPENDIF);
+  }
+
+  @Test
+  public void test08() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor14.p"), session);
+    unit.parse();
+    // Three include file (including main file)
+    assertEquals(unit.getMacroSourceArray().length, 3);
+    // First is inc.i, at line 3
+    assertEquals(((IncludeRef) unit.getMacroSourceArray()[1]).getFileRefName(), "preprocessor/preprocessor14-01.i");
+    assertEquals(((IncludeRef) unit.getMacroSourceArray()[1]).getPosition().getLine(), 4);
+    // Second is inc2.i, at line 2 (in inc.i)
+    assertEquals(((IncludeRef) unit.getMacroSourceArray()[2]).getFileRefName(), "preprocessor/preprocessor14-02.i");
+    assertEquals(((IncludeRef) unit.getMacroSourceArray()[2]).getPosition().getLine(), 2);
+  }
+
+  @Test
+  public void test09() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor15.p"), session);
+    unit.parse();
+    IncludeRef incRef = unit.getMacroGraph();
+    assertEquals(incRef.macroEventList.size(), 2);
+    assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
+    assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
+    NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
+    assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
+  }
+
+  @Test
+  public void test10() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor16.p"), session);
+    unit.parse();
+    IncludeRef incRef = unit.getMacroGraph();
+    assertEquals(incRef.macroEventList.size(), 3);
+    assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
+    assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
+    NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
+    assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.DEFINE);
+    assertEquals(nodes.size(), 1);
+    // Preprocessor magic... Keywords can start in main file, and end in include file...
+    assertEquals(nodes.get(0).getFileIndex(), 0);
+    assertEquals(nodes.get(0).getEndFileIndex(), 1);
+    assertEquals(nodes.get(0).getLine(), 6);
+    assertEquals(nodes.get(0).getEndLine(), 1);
+    assertEquals(nodes.get(0).getColumn(), 1);
+    assertEquals(nodes.get(0).getEndColumn(), 3);
+  }
+
+  @Test
+  public void test11() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor17.p"), session);
+    unit.parse();
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.SUBSTITUTE);
+    assertEquals(nodes.size(), 2);
+    JPNode substNode = nodes.get(0);
+    JPNode leftParen = substNode.nextNode();
+    JPNode str = leftParen.nextNode();
+    assertEquals(leftParen.getLine(), 2);
+    assertEquals(leftParen.getColumn(), 19);
+    assertEquals(leftParen.getEndLine(), 2);
+    assertEquals(leftParen.getEndColumn(), 19);
+    assertEquals(str.getLine(), 2);
+    assertEquals(str.getColumn(), 20);
+    assertEquals(str.getEndLine(), 2);
+    assertEquals(str.getEndColumn(), 24);
+
+    JPNode substNode2 = nodes.get(1);
+    JPNode leftParen2 = substNode2.nextNode();
+    JPNode str2 = leftParen2.nextNode();
+    assertEquals(leftParen2.getLine(), 3);
+    assertEquals(leftParen2.getColumn(), 19);
+    assertEquals(leftParen2.getEndLine(), 3);
+    assertEquals(leftParen2.getEndColumn(), 19);
+    assertEquals(str2.getLine(), 3);
+    assertEquals(str2.getColumn(), 20);
+    assertEquals(str2.getEndLine(), 3);
+    // FIXME Wrong value, should be 25
+    assertEquals(str2.getEndColumn(), 20);
+
+    List<JPNode> dispNodes = unit.getTopNode().query(ABLNodeType.DISPLAY);
+    assertEquals(dispNodes.size(), 1);
+    JPNode dispNode = dispNodes.get(0);
+    JPNode str3 = dispNode.nextNode().nextNode();
+    assertEquals(str3.getLine(), 4);
+    assertEquals(str3.getEndLine(), 4);
+    assertEquals(str3.getColumn(), 9);
+    // FIXME Wrong value, should be 14
+    assertEquals(str3.getEndColumn(), 9);
+  }
+
+  /**
+   * Utility method for preprocess(), removes all tokens from hidden channels
+   */
+  protected static ProToken nextVisibleToken(TokenSource src) {
+    ProToken tok = (ProToken) src.nextToken();
+    while ((tok.getType() != Token.EOF) && (tok.getChannel() != Token.DEFAULT_CHANNEL))
+      tok = (ProToken) src.nextToken();
+    return tok;
+  }
+
 }

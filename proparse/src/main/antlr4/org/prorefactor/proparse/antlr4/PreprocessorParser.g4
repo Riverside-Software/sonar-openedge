@@ -40,8 +40,8 @@ expr:
 atom:
     NUMBER                    # number
   | QSTRING                   # quotedString
-  | ( YES | TRUE_KW )         # trueExpr
-  | ( NO | FALSE_KW )         # falseExpr
+  | ( YES | TRUE )            # trueExpr
+  | ( NO | FALSE )            # falseExpr
   | UNKNOWNVALUE              # unknownExpr
   | LEFTPAREN expr RIGHTPAREN # exprInParen
 ;
@@ -58,7 +58,7 @@ function:
   | ENCODE LEFTPAREN expr RIGHTPAREN                            # encodeFunction
   | ENTRY LEFTPAREN element=expr COMMA list=expr (COMMA character=expr)? RIGHTPAREN
                                                                 # entryFunction
-  | ETIME_KW (LEFTPAREN expr RIGHTPAREN)?                       # etimeFunction
+  | ETIME (LEFTPAREN expr RIGHTPAREN)?                          # etimeFunction
   | EXP LEFTPAREN base=expr COMMA exponent=expr RIGHTPAREN      # expFunction
   | FILL LEFTPAREN expr COMMA repeats=expr RIGHTPAREN           # fillFunction
   | INDEX LEFTPAREN source=expr COMMA target=expr (COMMA starting=expr)? RIGHTPAREN

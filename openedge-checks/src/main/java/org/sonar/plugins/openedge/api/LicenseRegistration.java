@@ -105,6 +105,6 @@ public interface LicenseRegistration {
   }
 
   public enum LicenseType {
-    EVALUATION, COMMERCIAL;
+    EVALUATION, COMMERCIAL, PARTNER;
   }
 }

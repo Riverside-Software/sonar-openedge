@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -29,8 +30,11 @@ import javax.annotation.Nullable;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.atn.DecisionInfo;
+import org.antlr.v4.runtime.atn.ParseInfo;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -46,14 +50,13 @@ import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
-import org.prorefactor.proparse.IntegerIndex;
-import org.prorefactor.proparse.ParserSupport;
-import org.prorefactor.proparse.antlr4.DescriptiveErrorListener;
-import org.prorefactor.proparse.antlr4.JPNodeVisitor;
-import org.prorefactor.proparse.antlr4.ProgressLexer;
+import org.prorefactor.proparse.ABLLexer;
+import org.prorefactor.proparse.ProparseErrorListener;
+import org.prorefactor.proparse.JPNodeVisitor;
+import org.prorefactor.proparse.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.Proparse;
-import org.prorefactor.proparse.antlr4.ProparseErrorStrategy;
-import org.prorefactor.proparse.antlr4.TreeParser;
+import org.prorefactor.proparse.support.IntegerIndex;
+import org.prorefactor.proparse.support.ParserSupport;
 import org.prorefactor.refactor.RefactorSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,8 +72,8 @@ import com.progress.xref.CrossReference.Source.Reference;
 import eu.rssw.pct.elements.ITypeInfo;
 
 /**
- * Provides parse unit information, such as the symbol table and a reference to the AST. TreeParser01 calls
- * symbolUsage() in this class in order to build the symbol table.
+ * Executes the lexer, parser and semantic analysis, then provides access to the Abstract Syntax Tree and to the
+ * SymbolScope objects.
  */
 public class ParseUnit {
   private static final Logger LOGGER = LoggerFactory.getLogger(ParseUnit.class);
@@ -85,6 +88,7 @@ public class ParseUnit {
   private ProgramRootNode topNode;
   private IncludeRef macroGraph;
   private boolean appBuilderCode;
+  private boolean syntaxError;
   private List<EditableCodeSection> sections;
   private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
@@ -93,6 +97,20 @@ public class ParseUnit {
   private ITypeInfo typeInfo = null;
   private List<Integer> trxBlocks;
   private ParserSupport support;
+
+  // ANTLR4 debug and profiler switches
+  private boolean profiler;
+  private ParseInfo parseInfo;
+  private boolean trace;
+  private boolean ambiguityReport;
+
+  // Timings (in ns)
+  private long parseTimeSLL;
+  private long parseTimeLL;
+  private long jpNodeTime;
+  private long treeParseTime;
+  private long xrefAttachTime;
+  private boolean switchToLL;
 
   public ParseUnit(File file, RefactorSession session) {
     this(file, file.getPath(), session);
@@ -105,6 +123,13 @@ public class ParseUnit {
     this.session = session;
   }
 
+  public ParseUnit(InputStream input, RefactorSession session) {
+    this.file = null;
+    this.input = input;
+    this.relativeName = "<unnamed>";
+    this.session = session;
+  }
+
   public ParseUnit(InputStream input, String relativeName, RefactorSession session) {
     this.file = null;
     this.input = input;
@@ -112,20 +137,48 @@ public class ParseUnit {
     this.session = session;
   }
 
-  public TreeParserRootSymbolScope getRootScope() {
+  /**
+   * Enables profiler mode in the parsing phase. Should not be activated in production, CPU intensive
+   * @see ParseUnit#getParseInfo()
+   */
+  public void enableProfiler() {
+    profiler = true;
+  }
+
+  /**
+   * Enables trace mode in the parsing phase. Should not be activated in production, extremely verbose
+   */
+  public void enableTrace() {
+    trace = true;
+  }
+
+  /**
+   * Enables trace mode in the parsing phase. Should not be activated in production, CPU intensive and extremely verbose
+   */
+  public void reportAmbiguity() {
+    ambiguityReport = true;
+  }
+
+  /**
+   * @return Null if profiler is not enabled, or a ParseInfo object (after #parse() has been called)
+   * @see ParseUnit#enableProfiler()
+   */
+  public @Nullable ParseInfo getParseInfo() {
+    return parseInfo;
+  }
+
+  public @Nullable TreeParserRootSymbolScope getRootScope() {
     return rootScope;
   }
 
-  public void setRootScope(TreeParserRootSymbolScope rootScope) {
-    this.rootScope = rootScope;
-  }
-
-  /** Get the syntax tree top (Program_root) node */
-  public ProgramRootNode getTopNode() {
+  /**
+   * @return The syntax tree top node, or null if file has not been parsed
+   */
+  public @Nullable ProgramRootNode getTopNode() {
     return topNode;
   }
 
-  public JPNodeMetrics getMetrics() {
+  public @Nullable JPNodeMetrics getMetrics() {
     return metrics;
   }
 
@@ -162,11 +215,11 @@ public class ParseUnit {
    * @throws UncheckedIOException If main file can't be opened
    */
   public TokenSource lex() {
-    return new ProgressLexer(session, getByteSource(), relativeName, true);
+    return new ABLLexer(session, getByteSource(), relativeName, true);
   }
 
   public TokenSource preprocess() {
-    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
+    ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
     fileNameList = lexer.getFilenameList();
     macroGraph = lexer.getMacroGraph();
     appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
@@ -183,7 +236,7 @@ public class ParseUnit {
    */
   public void lexAndGenerateMetrics() {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
-    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, true);
+    ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, true);
     Token tok = lexer.nextToken();
     while (tok.getType() != Token.EOF) {
       tok = lexer.nextToken();
@@ -195,26 +248,54 @@ public class ParseUnit {
   public void parse() {
     LOGGER.trace("Entering ParseUnit#parse()");
 
-    ProgressLexer lexer = new ProgressLexer(session, getByteSource(), relativeName, false);
+    ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
     Proparse parser = new Proparse(new CommonTokenStream(lexer));
-    parser.initAntlr4(session);
-    parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
-    parser.setErrorHandler(new BailErrorStrategy());
-    parser.removeErrorListeners();
-    parser.addErrorListener(new DescriptiveErrorListener());
+    parser.setTrace(trace);
+    parser.setProfile(profiler);
+    parser.initAntlr4(session, xref);
+    if (ambiguityReport) {
+      parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
+      parser.addErrorListener(new DiagnosticErrorListener(true));
+      long startTimeNs = System.nanoTime();
+      tree = parser.program();
+      parseTimeLL = System.nanoTime() - startTimeNs;
+    } else {
+      // Two-stage parsing
+      parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+      parser.setErrorHandler(new BailErrorStrategy());
+      parser.removeErrorListeners();
 
-    try {
-      tree = parser.program();
-    } catch (ParseCancellationException caught) {
-      parser.setErrorHandler(new ProparseErrorStrategy(session.getProparseSettings().allowAntlrTokenDeletion(),
-          session.getProparseSettings().allowAntlrTokenInsertion(), session.getProparseSettings().allowAntlrRecover()));
-      parser.getInterpreter().setPredictionMode(PredictionMode.LL);
-      // Another ParseCancellationException can be thrown in recover fails again
-      tree = parser.program();
+      long startTimeNs = System.nanoTime();
+      try {
+        tree = parser.program();
+        parseTimeSLL = System.nanoTime() - startTimeNs;
+      } catch (ParseCancellationException uncaught) {
+        // Not really precise as it includes exception trapping
+        parseTimeSLL = System.nanoTime() - startTimeNs;
+        LOGGER.trace("Switching to LL prediction mode");
+        switchToLL = true;
+        parser.addErrorListener(new ProparseErrorListener());
+        parser.setErrorHandler(new ProparseErrorStrategy(session.getProparseSettings().allowAntlrTokenDeletion(),
+            session.getProparseSettings().allowAntlrTokenInsertion(), session.getProparseSettings().allowAntlrRecover()));
+        parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+        // Another ParseCancellationException can be thrown if recover fails again (only if ProparseSettings.allowRecover is set to false)
+        startTimeNs = System.nanoTime();
+        try {
+          tree = parser.program();
+          parseTimeLL = System.nanoTime() - startTimeNs;
+        } catch (ParseCancellationException uncaught2) {
+          parseTimeLL = System.nanoTime() - startTimeNs;
+          syntaxError = true;
+          throw uncaught2;
+        }
+      }
     }
+
     lexer.parseComplete();
+    long startTimeNs = System.nanoTime();
     topNode = (ProgramRootNode) new JPNodeVisitor(parser.getParserSupport(),
         (BufferedTokenStream) parser.getInputStream()).visit(tree).build(parser.getParserSupport());
+    jpNodeTime = System.nanoTime() - startTimeNs;
 
     fileNameList = lexer.getFilenameList();
     macroGraph = lexer.getMacroGraph();
@@ -222,6 +303,10 @@ public class ParseUnit {
     sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
     metrics = lexer.getMetrics();
     support = parser.getParserSupport();
+
+    if (profiler) {
+      parseInfo = parser.getParseInfo();
+    }
 
     LOGGER.trace("Exiting ParseUnit#parse()");
   }
@@ -231,8 +316,15 @@ public class ParseUnit {
       parse();
     ParseTreeWalker walker = new ParseTreeWalker();
     TreeParser parser = new TreeParser(support, session);
+    long startTimeNs = System.nanoTime();
     walker.walk(parser, tree);
+    treeParseTime = System.nanoTime() - startTimeNs;
     rootScope = parser.getRootScope();
+
+    startTimeNs = System.nanoTime();
+    finalizeXrefInfo();
+    xrefAttachTime = System.nanoTime() - startTimeNs;
+    xref = null; // No need to keep the entire XREF in memory
   }
 
   public void attachXref(Document doc) {
@@ -241,9 +333,6 @@ public class ParseUnit {
 
   public void attachXref(CrossReference xref) {
     this.xref = xref;
-    if (xref == null)
-      return;
-    attachXrefToTreeParser(getTopNode(), xref);
   }
 
   private static boolean isReferenceAssociatedToRecordNode(RecordNameNode recNode, Source src, Reference ref,
@@ -269,8 +358,10 @@ public class ParseUnit {
     }
   }
 
-  public static void attachXrefToTreeParser(ProgramRootNode root, CrossReference xref) {
-    List<JPNode> recordNodes = root.query(ABLNodeType.RECORD_NAME);
+  private void finalizeXrefInfo() {
+    if ((topNode == null) || (xref == null))
+      return;
+    List<JPNode> recordNodes = topNode.query(ABLNodeType.RECORD_NAME);
     for (Source src : xref.getSource()) {
       File srcFile = new File(src.getFileName());
       for (Reference ref : src.getReference()) {
@@ -368,6 +459,34 @@ public class ParseUnit {
     return appBuilderCode;
   }
 
+  public long getParseTimeLL() {
+    return parseTimeLL / 1000000;
+  }
+
+  public long getParseTimeSLL() {
+    return parseTimeSLL / 1000000;
+  }
+
+  public long getJpNodeTime() {
+    return jpNodeTime / 1000000;
+  }
+
+  public long getXrefAttachTime() {
+    return xrefAttachTime / 1000000;
+  }
+
+  public long getTreeParseTime() {
+    return treeParseTime / 1000000;
+  }
+
+  public boolean hasSwitchedToLL() {
+    return switchToLL;
+  }
+
+  public boolean hasSyntaxError() {
+    return syntaxError;
+  }
+
   public boolean isInEditableSection(int file, int line) {
     if (!appBuilderCode || (file > 0))
       return true;
@@ -384,6 +503,27 @@ public class ParseUnit {
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
+  }
+
+  public static void printLongestRules(ParseInfo parseInfo) {
+    Arrays.stream(parseInfo.getDecisionInfo()).filter(decision -> decision.SLL_MaxLook > 10).sorted(
+        (d1, d2) -> Long.compare(d2.SLL_MaxLook, d1.SLL_MaxLook)).forEach(
+            decision -> System.out.println(String.format(
+                "Time: %d in %d calls - LL_Lookaheads: %d - Max k: %d - Ambiguities: %d - Errors: %d - Rule: %s - Code: %s",
+                decision.timeInPrediction / 1000000, decision.invocations, decision.SLL_TotalLook, decision.SLL_MaxLook,
+                decision.ambiguities.size(), decision.errors.size(),
+                Proparse.ruleNames[Proparse._ATN.getDecisionState(decision.decision).ruleIndex],
+                getCodeFromMaxLookEvent(decision))));
+  }
+
+  public static String getCodeFromMaxLookEvent(DecisionInfo info) {
+    StringBuilder bldr = new StringBuilder();
+    for (int zz = info.SLL_MaxLookEvent.startIndex; zz <= info.SLL_MaxLookEvent.stopIndex; zz++) {
+      if (info.SLL_MaxLookEvent.input.get(zz).getChannel() == Token.DEFAULT_CHANNEL)
+        bldr.append(info.SLL_MaxLookEvent.input.get(zz).getText()).append(' ');
+    }
+
+    return bldr.toString();
   }
 
 }

@@ -15,15 +15,11 @@
 package org.prorefactor.core;
 
 public enum NodeTypesOption {
-  // EXTRA_LITERAL,
   PLACEHOLDER,
   NONPRINTABLE,
   PREPROCESSOR,
   STRUCTURE,
   KEYWORD,
-  SYMBOL,
   RESERVED,
-  MAY_BE_REGULAR_FUNC,
-  MAY_BE_NO_ARG_FUNC,
-  SYSHDL;
+  SYMBOL
 }

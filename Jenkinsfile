@@ -1,9 +1,10 @@
 pipeline {
-  agent { label 'master' }
+  agent { label 'Linux-Office' }
   options {
     buildDiscarder(logRotator(numToKeepStr:'10'))
     timeout(time: 15, unit: 'MINUTES')
     skipDefaultCheckout()
+    disableConcurrentBuilds()
   }
 
   stages {
@@ -12,11 +13,10 @@ pipeline {
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: scm.userRemoteConfigs])
         script {
           withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
-            if (("master" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME) || env.BRANCH_NAME.startsWith("release") || env.BRANCH_NAME.startsWith("hotfix")) {
-              // Maven Central deployment:  'mvn -P release clean package verify deploy'
-              sh "git rev-parse HEAD > current-commit"
-              def currCommit = readFile('current-commit').replace("\n", "").replace("\r", "")
-              sh "mvn clean javadoc:javadoc install -Dmaven.test.failure.ignore=true -Dgit.commit=${currCommit}"
+            if ("master" == env.BRANCH_NAME) {
+              sh "mvn -P release clean package verify deploy -Dgit.commit=\$(git rev-parse --short HEAD)"
+            } else if (("develop" == env.BRANCH_NAME) || env.BRANCH_NAME.startsWith("release") || env.BRANCH_NAME.startsWith("hotfix")) {
+              sh "mvn clean javadoc:javadoc install -Dmaven.test.failure.ignore=true -Dgit.commit=\$(git rev-parse --short HEAD)"
             } else {
               sh "mvn clean package -Dmaven.test.failure.ignore=true"
             }
