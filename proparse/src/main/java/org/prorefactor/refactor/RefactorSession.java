@@ -63,7 +63,7 @@ public class RefactorSession {
   private final Map<String, ITypeInfo> classInfo = new HashMap<>();
   private final Map<String, ITypeInfo> lcClassInfo = new HashMap<>();
   // List of classes per package
-  private final Map<String, List<ITypeInfo>> classesPerPkg = new HashMap<>();
+  private final Map<String, List<ITypeInfo>> classesPerPkg = Collections.synchronizedMap(new HashMap<>());
 
   // Cached entries from propath
   private final Map<String, File> propathCache = new HashMap<>();
