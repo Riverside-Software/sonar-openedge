@@ -15,6 +15,9 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.io.File;
@@ -36,14 +39,11 @@ public class MacroGraphTest {
   private final static String SRC_DIR = "src/test/resources/data/preprocessor";
 
   private RefactorSession session;
-  private ParseUnit unit;
 
   @BeforeTest
   public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
-    unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
-    unit.parse();
   }
 
   private void testVariable(JPNode topNode, String variable) {
@@ -65,6 +65,9 @@ public class MacroGraphTest {
 
   @Test
   public void testGlobalDefine() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
+    unit.parse();
+
     testVariable(unit.getTopNode(), "var1");
     testVariable(unit.getTopNode(), "var2");
     testNoVariable(unit.getTopNode(), "var3");
@@ -72,11 +75,17 @@ public class MacroGraphTest {
 
   @Test
   public void testScopedDefine() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
+    unit.parse();
+
     testNoVariable(unit.getTopNode(), "var4");
   }
 
   @Test
   public void testMacroGraph() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
+    unit.parse();
+
     assertEquals(unit.getMacroGraph().findExternalMacroReferences().size(), 4);
     assertEquals(unit.getMacroGraph().findExternalMacroReferences(new int[] {1,1}, new int[] {5,1}).size(), 1);
     assertEquals(unit.getMacroGraph().findExternalMacroReferences(new int[] {1,1}, new int[] {2,1}).size(), 0);
@@ -106,9 +115,54 @@ public class MacroGraphTest {
 
   @Test
   public void testMacroGraphPosition() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
+    unit.parse();
+
     List<MacroEvent> list = unit.getMacroGraph().findExternalMacroReferences();
     assertEquals(list.get(0).getPosition().getLine(), 3);
     assertEquals(list.get(0).getPosition().getColumn(), 5);
     assertEquals(list.get(0).getPosition().getFileNum(), 0);
   }
+
+  @Test
+  public void testIncludeParameter01() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor18.p"), session);
+    unit.parse();
+
+    List<MacroEvent> list = unit.getMacroGraph().findExternalMacroReferences();
+    assertNotNull(list);
+    assertEquals(list.size(), 1);
+    assertTrue(list.get(0) instanceof IncludeRef);
+    IncludeRef ref = (IncludeRef) list.get(0);
+    assertNotNull(ref.getArgNumber(1));
+    assertEquals(ref.getArgNumber(1).getName(), "param1");
+    assertEquals(ref.getArgNumber(1).getValue(), "value1");
+    assertNotNull(ref.getArgNumber(2));
+    assertEquals(ref.getArgNumber(2).getName(), "param2");
+    assertEquals(ref.getArgNumber(2).getValue(), "value2");
+    assertNull(ref.getArgNumber(3));
+  }
+
+  @Test
+  public void testIncludeParameter02() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor18-2.p"), session);
+    unit.parse();
+
+    List<MacroEvent> list = unit.getMacroGraph().findExternalMacroReferences();
+    assertNotNull(list);
+    assertEquals(list.size(), 1);
+    assertTrue(list.get(0) instanceof IncludeRef);
+    IncludeRef ref = (IncludeRef) list.get(0);
+    assertNotNull(ref.getArgNumber(1));
+    assertEquals(ref.getArgNumber(1).getName(), "param1");
+    assertEquals(ref.getArgNumber(1).getValue(), "value1");
+    assertNotNull(ref.getArgNumber(2));
+    assertEquals(ref.getArgNumber(2).getName(), "&param2");
+    assertEquals(ref.getArgNumber(2).getValue(), "value2");
+    assertNotNull(ref.getArgNumber(3));
+    assertEquals(ref.getArgNumber(3).getName(), "pa&ram3");
+    assertEquals(ref.getArgNumber(3).getValue(), "value3");
+    assertNull(ref.getArgNumber(4));
+  }
+
 }

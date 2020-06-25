@@ -1531,16 +1531,17 @@ public class Lexer implements IPreprocessor {
         while (cp.pos != refTextEnd && cp.chars[cp.pos] == '&') {
           ++cp.pos; // skip '&'
 
-          // Arg name
-          // Consume to '=' or closing '}'
-          // discard all WS
+          // Argument name, consume up to whitespace, '=' or closing '}'
           argName = "";
           while (cp.pos != refTextEnd) {
-            if (cp.pos == closingCurly || cp.chars[cp.pos] == '=' || cp.chars[cp.pos] == '&')
+            if (cp.pos == closingCurly || cp.chars[cp.pos] == '=' || Character.isWhitespace(cp.chars[cp.pos]))
               break;
-            if (!(Character.isWhitespace(cp.chars[cp.pos])))
-              argName += cp.chars[cp.pos];
-            ++cp.pos;
+            argName += cp.chars[cp.pos];
+            cp.pos++;
+          }
+          // Consume all whitespaces
+          while ((cp.pos != refTextEnd) && Character.isWhitespace(cp.chars[cp.pos])) {
+            cp.pos++;
           }
 
           argVal = "";
