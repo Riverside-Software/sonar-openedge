@@ -30,7 +30,7 @@ public abstract class Symbol implements ISymbol {
   private int numReads = 0;
   private int numWrites = 0;
   private int numRefd = 0;
-
+  private boolean outputPrm = false;
   private ISymbol like;
 
   // We store the DEFINE node if available and sensible. If defined in a syntax where there is no DEFINE node briefly
@@ -90,6 +90,15 @@ public abstract class Symbol implements ISymbol {
     return scope;
   }
 
+  // Dirty hack, do not rely on that
+  public void setAssignedFromOutputParam() {
+    outputPrm = true;
+  }
+
+  public boolean isAssignedFromOutputParam() {
+    return outputPrm;
+  }
+
   @Override
   public void noteReference(ContextQualifier contextQualifier) {
     if (contextQualifier == null)
@@ -97,8 +106,10 @@ public abstract class Symbol implements ISymbol {
     allRefsCount++;
     if (ContextQualifier.isRead(contextQualifier))
       numReads++;
-    if (ContextQualifier.isWrite(contextQualifier))
+    if (ContextQualifier.isWrite(contextQualifier)) {
       numWrites++;
+      outputPrm = (contextQualifier == ContextQualifier.OUTPUT);
+    }
     if (ContextQualifier.isReference(contextQualifier))
       numRefd++;
   }

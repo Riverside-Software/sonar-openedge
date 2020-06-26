@@ -262,7 +262,7 @@ public class TreeParser extends ProparseBaseListener {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     if (ctx.p != null) {
       if (ctx.OUTPUT() != null) {
-        setContextQualifier(ctx.parameterArg(), qual == ContextQualifier.ASYNCHRONOUS ? ContextQualifier.REFUP : ContextQualifier.UPDATING);
+        setContextQualifier(ctx.parameterArg(), qual == ContextQualifier.ASYNCHRONOUS ? ContextQualifier.REFUP : ContextQualifier.OUTPUT);
       } else if (ctx.INPUTOUTPUT() != null) {
         setContextQualifier(ctx.parameterArg(), ContextQualifier.REFUP);
       } else {
@@ -2334,6 +2334,7 @@ public class TreeParser extends ProparseBaseListener {
         if (table != null)
           buffer = currentScope.getUnnamedBuffer(table);
         break;
+      case OUTPUT:
       case STATIC:
       case ASYNCHRONOUS:
         break;
@@ -2750,8 +2751,8 @@ public class TreeParser extends ProparseBaseListener {
     defineTable(defAST, idAST, name, IConstants.ST_WTABLE);
   }
 
-  public void noteReference(JPNode node, ContextQualifier cq) {
-    if ((node.getSymbol() != null) && ((cq == ContextQualifier.UPDATING) || (cq == ContextQualifier.REFUP))) {
+  private void noteReference(JPNode node, ContextQualifier cq) {
+    if ((node.getSymbol() != null) && ((cq == ContextQualifier.UPDATING) || (cq == ContextQualifier.REFUP) || (cq == ContextQualifier.OUTPUT))) {
       node.getSymbol().noteReference(cq);
     }
   }
