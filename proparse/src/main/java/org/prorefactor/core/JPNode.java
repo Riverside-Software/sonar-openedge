@@ -725,7 +725,7 @@ public class JPNode {
 
   /**
    * Get the full, preprocessed text from a node. When run on top node, the result is very comparable to
-   * COMPILE..PREPROCESS. This is the same as the old C++ Proparse API writeNode(). Also see org.joanju.proparse.Iwdiff.
+   * COMPILE ... PREPROCESS.
    */
   public String toStringFulltext() {
     ICallback<List<JPNode>> callback = new FlatListBuilder();
@@ -741,6 +741,20 @@ public class JPNode {
         tok = tok.getHiddenBefore();
       }
       bldr.append(hiddenText.toString());
+      bldr.append(node.getText());
+    }
+
+    return bldr.toString();
+  }
+
+  public String toExpressionString() {
+    ICallback<List<JPNode>> callback = new FlatListBuilder();
+    walk(callback);
+    List<JPNode> list = callback.getResult();
+    StringBuilder bldr = new StringBuilder();
+    for (JPNode node : list) {
+      if (node.getHiddenBefore() != null)
+        bldr.append(' ');
       bldr.append(node.getText());
     }
 
