@@ -56,9 +56,7 @@ import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 
 /**
- * Test the tree parsers against problematic syntax. These tests just run the tree parsers against the data/bugsfixed
- * directory. If no exceptions are thrown, then the tests pass. The files in the "bugsfixed" directories are subject to
- * change, so no other tests should be added other than the expectation that they parse clean.
+ * Tests for JPNodeVisitor
  */
 public class JPNodeTest {
   private final static String SRC_DIR = "src/test/resources/jpnode";
@@ -66,6 +64,7 @@ public class JPNodeTest {
 
   private JAXBContext context;
   private Unmarshaller unmarshaller;
+  private XMLReader reader;
 
   private RefactorSession session;
   private File tempDir = new File(TEMP_DIR);
@@ -78,7 +77,11 @@ public class JPNodeTest {
     try {
       context = JAXBContext.newInstance("com.progress.xref", this.getClass().getClassLoader());
       unmarshaller = context.createUnmarshaller();
-    } catch (JAXBException caught) {
+
+      SAXParserFactory sax = SAXParserFactory.newInstance();
+      sax.setNamespaceAware(false);
+      reader = sax.newSAXParser().getXMLReader();
+    } catch (JAXBException | SAXException | ParserConfigurationException caught) {
       throw new IllegalStateException(caught);
     }
 
@@ -368,15 +371,12 @@ public class JPNodeTest {
   }
 
   @Test
-  public void testXref01() throws JAXBException, IOException, SAXException, ParserConfigurationException {
-    InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref.p.xref"));
-    SAXParserFactory sax = SAXParserFactory.newInstance();
-    sax.setNamespaceAware(false);
-    XMLReader reader = sax.newSAXParser().getXMLReader();
+  public void testXref01() throws JAXBException, IOException {
+    InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref01.p.xref"));
     SAXSource source = new SAXSource(reader, is);
     CrossReference xref = (CrossReference) unmarshaller.unmarshal(source);
 
-    ParseUnit unit = genericTest("xref.p", xref);
+    ParseUnit unit = genericTest("xref01.p", xref);
     unit.treeParser01();
 
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.RECORD_NAME);
@@ -397,15 +397,12 @@ public class JPNodeTest {
   }
 
   @Test
-  public void testXref02() throws JAXBException, IOException, SAXException, ParserConfigurationException {
-    InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref2.cls.xref"));
-    SAXParserFactory sax = SAXParserFactory.newInstance();
-    sax.setNamespaceAware(false);
-    XMLReader reader = sax.newSAXParser().getXMLReader();
+  public void testXref02() throws JAXBException, IOException {
+    InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref02.cls.xref"));
     SAXSource source = new SAXSource(reader, is);
     CrossReference xref = (CrossReference) unmarshaller.unmarshal(source);
 
-    ParseUnit unit = genericTest("xref2.cls", xref);
+    ParseUnit unit = genericTest("xref02.cls", xref);
     unit.treeParser01();
 
     assertEquals(unit.getTopNode().query(ABLNodeType.RECORD_NAME).size(), 3);
@@ -414,5 +411,29 @@ public class JPNodeTest {
       assertEquals(rec.getTableBuffer().getTable().getName(), "ttFoo");
       assertTrue(rec.isWholeIndex());
     }
+  }
+
+  @Test
+  public void testXref03() throws JAXBException, IOException {
+    InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref03.p.xref"));
+    SAXSource source = new SAXSource(reader, is);
+    CrossReference xref = (CrossReference) unmarshaller.unmarshal(source);
+
+    ParseUnit unit = genericTest("xref03.p", xref);
+    unit.treeParser01();
+
+    List<JPNode> recNodes = unit.getTopNode().query(ABLNodeType.RECORD_NAME);
+    assertEquals(recNodes.size(), 10);
+    // One can-find, search index should be set
+    assertEquals(((RecordNameNode) recNodes.get(3)).getSearchIndexName(), "Customer.Name");
+    // Two can-find on different tables, should be ok
+    assertEquals(((RecordNameNode) recNodes.get(4)).getSearchIndexName(), "Customer.Name");
+    assertEquals(((RecordNameNode) recNodes.get(5)).getSearchIndexName(), "Item.ItemNum");
+    // Two can-find on same buffer, not ok
+    assertEquals(((RecordNameNode) recNodes.get(6)).getSearchIndexName(), "");
+    assertEquals(((RecordNameNode) recNodes.get(7)).getSearchIndexName(), "");
+    // Two can-find on different buffer, but same table, not ok
+    assertEquals(((RecordNameNode) recNodes.get(8)).getSearchIndexName(), "");
+    assertEquals(((RecordNameNode) recNodes.get(9)).getSearchIndexName(), "");
   }
 }

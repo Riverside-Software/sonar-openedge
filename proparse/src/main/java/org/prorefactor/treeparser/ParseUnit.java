@@ -344,6 +344,14 @@ public class ParseUnit {
     if ((recNode.getTableBuffer() == null) || !tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
         || (recNode.attrGet(IConstants.STORETYPE) != tableType))
       return false;
+    // Does this statement have multiple RecordName nodes pointing to the same table ?
+    // If so, we discard the Reference as it's currently not possible to assign to the right object
+    List<JPNode> list = recNode.getStatement().queryCurrentStatement(ABLNodeType.RECORD_NAME);
+    for (JPNode ch : list) {
+      if ((ch != recNode) && (ch.getTableBuffer() != null)
+          && tableName.equalsIgnoreCase(ch.getTableBuffer().getTargetFullName()))
+        return false;
+    }
     // In the main file ?
     if ((src.getFileNum() == 1) && (recNode.getFileIndex() == 0))
       return true;
