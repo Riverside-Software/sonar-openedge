@@ -1,7 +1,7 @@
 pipeline {
   agent { label 'Linux-Office' }
   options {
-    buildDiscarder(logRotator(numToKeepStr:'10'))
+    buildDiscarder(logRotator(daysToKeepStr:'10'))
     timeout(time: 15, unit: 'MINUTES')
     skipDefaultCheckout()
     disableConcurrentBuilds()

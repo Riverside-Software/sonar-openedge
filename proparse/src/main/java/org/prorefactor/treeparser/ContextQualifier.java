@@ -33,6 +33,10 @@ public enum ContextQualifier {
    */
   REFUP,
   /**
+   * Updating the symbol's value as an output parameter of a procedure
+   */
+  OUTPUT,
+  /**
    * Updating the symbol's value.
    */
   UPDATING,
@@ -93,6 +97,7 @@ public enum ContextQualifier {
       case REFUP:
       case UPDATING:
       case UPDATING_UI:
+      case OUTPUT:
         return true;
       default:
         return false;

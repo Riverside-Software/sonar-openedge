@@ -27,8 +27,7 @@ class FlatListBuilder implements ICallback<List<JPNode>> {
 
   @Override
   public boolean visitNode(JPNode node) {
-    result.add(node);
-    return true;
+    return result.add(node);
   }
 
 }
