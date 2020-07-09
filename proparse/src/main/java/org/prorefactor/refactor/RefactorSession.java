@@ -22,7 +22,6 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +62,8 @@ public class RefactorSession {
   private final Map<String, ITypeInfo> classInfo = new HashMap<>();
   private final Map<String, ITypeInfo> lcClassInfo = new HashMap<>();
   // List of classes per package
-  private final Map<String, List<ITypeInfo>> classesPerPkg = Collections.synchronizedMap(new HashMap<>());
+  private final Map<String, List<ITypeInfo>> classesPerPkg = new HashMap<>();
+  private final Object pkgLock = new Object();
 
   // Cached entries from propath
   private final Map<String, File> propathCache = new HashMap<>();
@@ -123,7 +123,9 @@ public class RefactorSession {
 
       int dotPos = info.name.lastIndexOf('.');
       String pkgName = dotPos >= 1 ? info.name.substring(0, dotPos) : "";
-      classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(typeInfo);
+      synchronized(pkgLock) {
+        classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(typeInfo);
+      }
     }
   }
 
@@ -187,12 +189,6 @@ public class RefactorSession {
     return retVal;
   }
 
-  public void injectTypeInfoCollection(Collection<ITypeInfo> units) {
-    for (ITypeInfo info : units) {
-      injectTypeInfo(info);
-    }
-  }
-
   public void injectTypeInfo(ITypeInfo unit) {
     if ((unit == null) || Strings.isNullOrEmpty(unit.getTypeName()))
       return;
@@ -201,7 +197,9 @@ public class RefactorSession {
 
     int dotPos = unit.getTypeName().lastIndexOf('.');
     String pkgName = dotPos >= 1 ? unit.getTypeName().substring(0, dotPos) : "";
-    classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(unit);
+    synchronized(pkgLock) { 
+      classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(unit);
+    }
   }
 
   public File findFile3(String fileName) {
