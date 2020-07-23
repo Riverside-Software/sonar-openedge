@@ -1084,7 +1084,7 @@ public class Lexer implements IPreprocessor {
         }
         continue;
       }
-      if (currInt == Token.EOF)
+      if ((currInt == Token.EOF) || (currInt == Lexer.INCLUDE_DIRECTIVE_END))
         break;
       append();
       // Unescaped newline character or escaped newline where previous char is not tilde

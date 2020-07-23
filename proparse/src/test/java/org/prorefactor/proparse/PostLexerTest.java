@@ -601,6 +601,21 @@ public class PostLexerTest {
     assertTrue(tok.getFileName().replace('\\', '/').endsWith("src/test/resources/data/lexer/lexer18.p"));
   }
 
+  @Test
+  public void testDirectiveEOF() {
+    Injector injector = Guice.createInjector(new UnitTestWindowsModule());
+    RefactorSession session = injector.getInstance(RefactorSession.class);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer19.p"), session);
+    TokenSource src = unit.preprocess();
+
+    ProToken tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.IF);
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.YES);
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.THEN);
+  }
+
   /**
    * Utility method for tests, returns next node of given type
    */
