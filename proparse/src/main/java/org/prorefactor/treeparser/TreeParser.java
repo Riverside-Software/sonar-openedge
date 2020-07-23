@@ -2832,7 +2832,7 @@ public class TreeParser extends ProparseBaseListener {
       }
     }
 
-    if ((ctx2.ENTERED() == null) && !Strings.isNullOrEmpty(support.lookupClassName(ctx2.field().getText()))) {
+    if ((ctx2.ENTERED() == null) && !Strings.isNullOrEmpty(support.lookupClassName(clsRef))) {
       // First check if there's a variable name by this name
       FieldLookupResult result = currentBlock.lookupField(clsRef, true);
       if (result == null)
