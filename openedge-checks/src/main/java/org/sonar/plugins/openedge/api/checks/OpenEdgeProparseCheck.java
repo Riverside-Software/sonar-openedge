@@ -67,26 +67,15 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   }
 
   /**
-   * Override this method if you don't want to report issues on AppBuilder code 
+   * Override this method if you don't want to report issues on AppBuilder code
    */
-  public boolean reportIssueOnAppBuilderCode() {
+  protected boolean reportIssueOnAppBuilderCode() {
     return false;
   }
 
-  protected InputFile getInputFile(String fileName) {
-    InputFile input = getContext().fileSystem().inputFile(
-        getContext().fileSystem().predicates().hasRelativePath(fileName));
-    if (input == null) {
-      return getContext().fileSystem().inputFile(getContext().fileSystem().predicates().hasAbsolutePath(fileName));
-    } else {
-      return input;
-    }
-  }
-
-  protected InputFile getInputFile(InputFile file, JPNode node) {
-    return node.getFileIndex() == 0 ? file : getInputFile(node.getFileName());
-  }
-
+  /**
+   * Tries to create a new issue. Will return null if the issue can't be created.
+   */
   protected NewIssue createIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
     if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {
       return null;
@@ -100,10 +89,10 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     }
     if (!targetFile.equals(file) && reportOnlyOnceInIncludeFile()) {
       // Check if issue has already been reported
-      if (incReports.contains(targetFile.relativePath() + ":" + node.getLine()))
+      if (incReports.contains(targetFile.toString() + ":" + node.getLine()))
         return null;
       else
-        incReports.add(targetFile.relativePath() + ":" + node.getLine());
+        incReports.add(targetFile.toString() + ":" + node.getLine());
     }
 
     int lineNumber = node.getLine();
@@ -115,7 +104,8 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
         location.at(targetFile.newRange(node.getLine(), node.getColumn() - 1, node.getEndLine(), node.getEndColumn()));
       } else {
         TextRange range = targetFile.selectLine(lineNumber);
-        if (IS_WINDOWS && (getContext().runtime().getProduct() == SonarProduct.SONARLINT) && (range.end().lineOffset() > 1)) {
+        if (IS_WINDOWS && (getContext().runtime().getProduct() == SonarProduct.SONARLINT)
+            && (range.end().lineOffset() > 1)) {
           location.at(targetFile.newRange(lineNumber, 0, lineNumber, range.end().lineOffset() - 1));
         } else {
           location.at(range);
@@ -125,7 +115,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     if (targetFile == file) {
       location.message(msg);
     } else {
-      location.message(MessageFormat.format(INC_MESSAGE, file.relativePath(), msg));
+      location.message(MessageFormat.format(INC_MESSAGE, file.toString(), msg));
     }
     issue.at(location);
 
@@ -144,7 +134,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     if (targetFile == file) {
       location.message(msg);
     } else {
-      location.message(MessageFormat.format(INC_MESSAGE, file.relativePath(), msg));
+      location.message(MessageFormat.format(INC_MESSAGE, file.toString(), msg));
     }
   }
 
@@ -157,7 +147,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
    * 
    * @param file InputFile
    * @param node Node where issue happened
-   * @param msg Additional message
+   * @param msg  Additional message
    */
   protected void reportIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
     NewIssue issue = createIssue(file, node, msg, exactLocation);
@@ -169,7 +159,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   /**
    * Reports issue on given file name
    * 
-   * @param fileName Relative file name
+   * @param fileName   Relative file name
    * @param lineNumber Line number (must be greater than 0)
    * @param msg
    */
@@ -182,12 +172,48 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     if (targetFile == file) {
       location.message(msg);
     } else {
-      location.message(MessageFormat.format(INC_MESSAGE, file.relativePath(), msg));
+      location.message(MessageFormat.format(INC_MESSAGE, file.toString(), msg));
     }
     if (lineNumber > 0) {
       location.at(targetFile.selectLine(lineNumber));
     }
     issue.forRule(getRuleKey()).at(location).save();
+  }
+
+  protected void reportIssue(InputFile file, Element element, String msg) {
+    if (!"Reference".equals(element.getNodeName())) {
+      throw new IllegalArgumentException("Invalid 'Reference' element");
+    }
+    InputFile file2 = getSourceFile(file, element);
+    int lineNumber = Integer.parseInt(getChildNodeValue(element, "Line-num"));
+    if (file2 != null) {
+      NewIssue issue = getContext().newIssue().forRule(getRuleKey());
+      NewIssueLocation location = issue.newLocation().on(file2);
+      if (lineNumber > 0) {
+        if (lineNumber <= file2.lines()) {
+          location.at(file2.selectLine(lineNumber));
+        } else {
+          LOG.error("Invalid line number {} in XREF file {} (base file {})", lineNumber, file2, file);
+        }
+      }
+      if (file2 == file) {
+        location.message(msg);
+      } else {
+        location.message(MessageFormat.format(INC_MESSAGE, file.toString(), msg));
+      }
+      issue.at(location).save();
+    }
+  }
+
+  private static String getChildNodeValue(Node node, String nodeName) {
+    NodeList list = node.getChildNodes();
+    for (int idx = 0; idx < list.getLength(); idx++) {
+      Node subNode = list.item(idx);
+      if (nodeName.equals(subNode.getNodeName())) {
+        return ((Element) subNode).getChildNodes().item(0).getNodeValue();
+      }
+    }
+    return null;
   }
 
   private boolean skipIssue(JPNode node) {
@@ -204,45 +230,6 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return parent.hasProparseDirective(getNoSonarKeyword());
   }
 
-  protected static String getChildNodeValue(Node node, String nodeName) {
-    NodeList list = node.getChildNodes();
-    for (int idx = 0; idx < list.getLength(); idx++) {
-      Node subNode = list.item(idx);
-      if (nodeName.equals(subNode.getNodeName())) {
-        return ((Element) subNode).getChildNodes().item(0).getNodeValue();
-      }
-    }
-    return null;
-  }
-
-  protected void reportIssue(InputFile file, Element element, String msg) {
-    if (!"Reference".equals(element.getNodeName())) {
-      throw new IllegalArgumentException("Invalid 'Reference' element");
-    }
-    InputFile file2 = getSourceFile(file, element);
-    int lineNumber = Integer.parseInt(getChildNodeValue(element, "Line-num"));
-    if (file2 == null) {
-      return;
-    } else {
-      NewIssue issue = getContext().newIssue().forRule(getRuleKey());
-      NewIssueLocation location = issue.newLocation().on(file2);
-      if (lineNumber > 0) {
-        if (lineNumber <= file2.lines()) {
-          location.at(file2.selectLine(lineNumber));
-        } else {
-          LOG.error("Invalid line number {} in XREF file {} (base file {})", lineNumber, file2.relativePath(),
-              file.relativePath());
-        }
-      }
-      if (file2 == file) {
-        location.message(msg);
-      } else {
-        location.message(MessageFormat.format(INC_MESSAGE, file.relativePath(), msg));
-      }
-      issue.at(location).save();
-    }
-  }
-
   private InputFile getSourceFile(InputFile file, Element refElement) {
     Element parentNode = (Element) refElement.getParentNode();
     String fileNum = getChildNodeValue(refElement, "File-num");
@@ -253,4 +240,19 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
           getContext().fileSystem().predicates().hasRelativePath(parentNode.getAttribute("File-name")));
     }
   }
+
+  private InputFile getInputFile(String fileName) {
+    InputFile input = getContext().fileSystem().inputFile(
+        getContext().fileSystem().predicates().hasRelativePath(fileName));
+    if (input == null) {
+      return getContext().fileSystem().inputFile(getContext().fileSystem().predicates().hasAbsolutePath(fileName));
+    } else {
+      return input;
+    }
+  }
+
+  protected InputFile getInputFile(InputFile file, JPNode node) {
+    return node.getFileIndex() == 0 ? file : getInputFile(node.getFileName());
+  }
+
 }

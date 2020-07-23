@@ -273,7 +273,9 @@ public class OpenEdgeComponents {
       if ((permId == null) || (repoName == null))
         return null;
       for (License lic : licenses) {
-        if ((lic.getType() == LicenseType.COMMERCIAL) && (lic.getProduct() == product) && repoName.equals(lic.getRepositoryName()) && permId.equals(lic.getPermanentId()))
+        if (((lic.getType() == LicenseType.COMMERCIAL) || (lic.getType() == LicenseType.PARTNER))
+            && (lic.getProduct() == product) && repoName.equals(lic.getRepositoryName())
+            && permId.equals(lic.getPermanentId()))
           return lic;
       }
       return null;
@@ -283,7 +285,7 @@ public class OpenEdgeComponents {
       if ((permId == null) || (repoName == null))
         return null;
       for (License lic : licenses) {
-        if ((lic.getType() == LicenseType.COMMERCIAL) && (lic.getProduct() == product) && repoName.equals(lic.getRepositoryName()) && permId.equals(lic.getPermanentId()))
+        if (((lic.getType() == LicenseType.COMMERCIAL) || (lic.getType() == LicenseType.PARTNER)) && (lic.getProduct() == product) && repoName.equals(lic.getRepositoryName()) && permId.equals(lic.getPermanentId()))
           return lic;
       }
       for (License lic : licenses) {
