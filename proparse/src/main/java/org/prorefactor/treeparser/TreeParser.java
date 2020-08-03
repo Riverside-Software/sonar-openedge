@@ -2785,7 +2785,7 @@ public class TreeParser extends ProparseBaseListener {
     if ((ctx == null) || (ctx2 == null))
       return;
     if ((ctx.systemHandleName() != null) && (ctx.systemHandleName().THISOBJECT() != null)) {
-      FieldLookupResult result = currentBlock.lookupField(ctx2.colonAttributeSub(0).id.getText(), true);
+      FieldLookupResult result = rootScope.getRootBlock().lookupField(ctx2.colonAttributeSub(0).id.getText(), true);
       if (result == null)
         return;
 
