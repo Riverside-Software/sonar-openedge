@@ -616,6 +616,27 @@ public class PostLexerTest {
     assertEquals(tok.getNodeType(), ABLNodeType.THEN);
   }
 
+  @Test
+  public void testUndefine() {
+    Injector injector = Guice.createInjector(new UnitTestWindowsModule());
+    RefactorSession session = injector.getInstance(RefactorSession.class);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer20.p"), session);
+    TokenSource src = unit.preprocess();
+
+    ProToken tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    assertEquals(tok.getText(), "123123");
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    assertEquals(tok.getText(), "123123");
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    assertEquals(tok.getText(), "123456");
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
+    assertEquals(tok.getText(), "123123");
+  }
+
   /**
    * Utility method for tests, returns next node of given type
    */

@@ -996,6 +996,8 @@ public class Lexer implements IPreprocessor {
         append();
         getChar();
       }
+      macroUndefine();
+
       // &UNDEFINE consumes up to *and including* the first whitespace
       // after the token it undefines.
       // At least that seems to be what Progress is doing.
@@ -1010,7 +1012,6 @@ public class Lexer implements IPreprocessor {
         append();
         getChar();
       }
-      macroUndefine();
       return makeToken(ABLNodeType.AMPUNDEFINE);
     }
 
