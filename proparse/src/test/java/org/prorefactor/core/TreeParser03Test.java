@@ -421,6 +421,20 @@ public class TreeParser03Test {
   }
 
   @Test
+  public void test22() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test22.cls"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable var1 = unit.getRootScope().getVariable("yyy");
+    assertEquals(var1.getNumReads(), 1);
+    assertEquals(var1.getNumWrites(), 1);
+  }
+
+  @Test
   public void testVarStatement01() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CHAR s1, s2, s3.".getBytes()), session);
     unit.treeParser01();

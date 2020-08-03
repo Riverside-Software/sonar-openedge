@@ -487,20 +487,33 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterExprtWidName(ExprtWidNameContext ctx) {
-    widattr(ctx, contextQualifiers.removeFrom(ctx));
+    widattr(ctx.widName(), ctx.colonAttribute(), contextQualifiers.removeFrom(ctx));
   }
 
   @Override
   public void enterExprtExprt2(ExprtExprt2Context ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     if ((ctx.colonAttribute() != null) && (ctx.expressionTerm2() instanceof Exprt2FieldContext)
-        && (ctx.colonAttribute().OBJCOLON(0) != null)) {
-      widattr((Exprt2FieldContext) ctx.expressionTerm2(), qual, ctx.colonAttribute().id.getText());
+        && (ctx.colonAttribute().colonAttributeSub(0).OBJCOLON() != null)) {
+      widattr((Exprt2FieldContext) ctx.expressionTerm2(), qual, ctx.colonAttribute().colonAttributeSub(0).id.getText());
     } else {
       setContextQualifier(ctx.expressionTerm2(), qual);
       if (ctx.colonAttribute() != null)
         setContextQualifier(ctx.colonAttribute(), qual);
     }
+  }
+
+  @Override
+  public void enterWidattrExprt2(WidattrExprt2Context ctx) {
+    if ((ctx.expressionTerm2() instanceof Exprt2FieldContext) && (ctx.colonAttribute().colonAttributeSub(0).id != null)) {
+      widattr((Exprt2FieldContext) ctx.expressionTerm2(), contextQualifiers.removeFrom(ctx),
+          ctx.colonAttribute().colonAttributeSub(0).id.getText());
+    }
+  }
+
+  @Override
+  public void enterWidattrWidName(WidattrWidNameContext ctx) {
+    widattr(ctx.widName(), ctx.colonAttribute(), contextQualifiers.removeFrom(ctx));
   }
 
   @Override
@@ -514,19 +527,6 @@ public class TreeParser extends ProparseBaseListener {
     if ((qual == null) || (qual == ContextQualifier.SYMBOL))
       qual = ContextQualifier.REF;
     setContextQualifier(ctx.field(), qual);
-  }
-
-  @Override
-  public void enterWidattrExprt2(WidattrExprt2Context ctx) {
-    if ((ctx.expressionTerm2() instanceof Exprt2FieldContext) && (ctx.colonAttribute().OBJCOLON(0) != null)) {
-      widattr((Exprt2FieldContext) ctx.expressionTerm2(), contextQualifiers.removeFrom(ctx),
-          ctx.colonAttribute().id.getText());
-    }
-  }
-
-  @Override
-  public void enterWidattrWidName(WidattrWidNameContext ctx) {
-    widattr(ctx, contextQualifiers.removeFrom(ctx));
   }
 
   @Override
@@ -2781,28 +2781,11 @@ public class TreeParser extends ProparseBaseListener {
     currentRoutine = rootRoutine;
   }
 
-  // Called from expressionTerm2 rule, exprtWidName option
-  // Check if THIS-OBJECT:SomeAttribute 
-  private void widattr(ExprtWidNameContext ctx, ContextQualifier cq) {
-    if ((ctx.widName().systemHandleName() != null) && (ctx.widName().systemHandleName().THISOBJECT() != null)
-        && !ctx.colonAttribute().OBJCOLON().isEmpty() && (ctx.colonAttribute().OBJCOLON(0) != null)) {
-      FieldLookupResult result = currentBlock.lookupField(ctx.colonAttribute().id.getText(), true);
-      if (result == null)
-        return;
-
-      // Variable
-      if (result.getSymbol() instanceof Variable) {
-        result.getSymbol().noteReference(cq);
-      }
-    }
-  }
-
-  // Called from widattr rule, widattrWidName option
-  // Check if THIS-OBJECT:SomeAttribute (same as previous rule)
-  private void widattr(WidattrWidNameContext ctx, ContextQualifier cq) {
-    if ((ctx.widName().systemHandleName() != null) && (ctx.widName().systemHandleName().THISOBJECT() != null)
-        && !ctx.colonAttribute().OBJCOLON().isEmpty() && (ctx.colonAttribute().OBJCOLON(0) != null)) {
-      FieldLookupResult result = currentBlock.lookupField(ctx.colonAttribute().id.getText(), true);
+  private void widattr(WidNameContext ctx, ColonAttributeContext ctx2, ContextQualifier cq) {
+    if ((ctx == null) || (ctx2 == null))
+      return;
+    if ((ctx.systemHandleName() != null) && (ctx.systemHandleName().THISOBJECT() != null)) {
+      FieldLookupResult result = currentBlock.lookupField(ctx2.colonAttributeSub(0).id.getText(), true);
       if (result == null)
         return;
 

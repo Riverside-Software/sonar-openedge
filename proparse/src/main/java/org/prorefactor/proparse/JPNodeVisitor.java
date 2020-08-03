@@ -299,6 +299,16 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitWidattrWidName(WidattrWidNameContext ctx) {
+    return createTree(ctx, ABLNodeType.WIDGET_REF);
+  }
+
+  @Override
+  public Builder visitWidattrExprt2(WidattrExprt2Context ctx) {
+    return createTree(ctx, ABLNodeType.WIDGET_REF);
+  }
+
+  @Override
   public Builder visitExprt2ParenExpr(Exprt2ParenExprContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
@@ -328,16 +338,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
       return createTree(ctx, ABLNodeType.ENTERED_FUNC);
     else
       return visitChildren(ctx);
-  }
-
-  @Override
-  public Builder visitWidattrWidName(WidattrWidNameContext ctx) {
-    return createTree(ctx, ABLNodeType.WIDGET_REF);
-  }
-
-  @Override
-  public Builder visitWidattrExprt2(WidattrExprt2Context ctx) {
-    return createTree(ctx, ABLNodeType.WIDGET_REF);
   }
 
   @Override
