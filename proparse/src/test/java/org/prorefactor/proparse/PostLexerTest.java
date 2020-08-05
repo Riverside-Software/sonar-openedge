@@ -637,12 +637,37 @@ public class PostLexerTest {
     assertEquals(tok.getText(), "123123");
   }
 
+  @Test
+  public void testEndOfIncInIncludeParameter() {
+    Injector injector = Guice.createInjector(new UnitTestWindowsModule());
+    RefactorSession session = injector.getInstance(RefactorSession.class);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer21.p"), session);
+    TokenSource src = unit.preprocess();
+
+    ProToken tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.FIND);
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.COMMENT);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.INCLUDEDIRECTIVE_END);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+  }
+
   /**
    * Utility method for tests, returns next node of given type
    */
   private ProToken nextToken(TokenSource stream, ABLNodeType type) {
     ProToken tok = (ProToken) stream.nextToken();
-    while (tok.getNodeType() != ABLNodeType.MESSAGE) {
+    while (tok.getNodeType() != type) {
       tok = (ProToken) stream.nextToken();
     }
     return tok;
