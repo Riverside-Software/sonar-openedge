@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.core.session;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
@@ -50,6 +51,7 @@ public class AliasesTest {
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
   }

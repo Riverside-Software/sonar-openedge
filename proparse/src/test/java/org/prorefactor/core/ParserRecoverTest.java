@@ -15,6 +15,7 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 import java.io.ByteArrayInputStream;
 
@@ -47,6 +48,7 @@ public class ParserRecoverTest {
     // Everything should be fine here
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define variable xyz as character no-undo.".getBytes()), "<unnamed>", session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
   }
 
@@ -55,11 +57,11 @@ public class ParserRecoverTest {
     ((ProparseSettings) session.getProparseSettings()).setAntlrRecover(true);
     ((ProparseSettings) session.getProparseSettings()).setAntlrTokenInsertion(true);
     ((ProparseSettings) session.getProparseSettings()).setAntlrTokenDeletion(true);
-    // Doesn't compile but recover is on, so should be silently discarded
+    // Doesn't compile but recover is on, so should be silently discarded and token insertion is on
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define variable xyz character no-undo.".getBytes()), "<unnamed>", session);
     unit.treeParser01();
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 0);
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.PERIOD).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.PERIOD).size(), 0);
   }
 
   @Test(expectedExceptions = ParseCancellationException.class )

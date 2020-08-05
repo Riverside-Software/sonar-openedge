@@ -14,6 +14,8 @@
  ********************************************************************************/
 package org.prorefactor.core;
 
+import static org.testng.Assert.assertFalse;
+
 import java.io.File;
 
 import org.prorefactor.core.util.UnitTestModule;
@@ -41,6 +43,7 @@ public class PreprocessorVariablesTest {
   public void test03() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor03.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     testVariable(unit.getTopNode(), "var01");
   }
 
@@ -65,6 +68,7 @@ public class PreprocessorVariablesTest {
   public void test04() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor04.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     testVariable(unit.getTopNode(), "var01");
     testNoVariable(unit.getTopNode(), "var02");
     testVariable(unit.getTopNode(), "var03");
@@ -81,6 +85,7 @@ public class PreprocessorVariablesTest {
   public void test06() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor06.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
   }
 
@@ -88,6 +93,7 @@ public class PreprocessorVariablesTest {
   public void test08() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor08.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 0);
   }
 

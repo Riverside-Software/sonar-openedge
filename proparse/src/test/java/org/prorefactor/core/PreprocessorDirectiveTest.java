@@ -54,6 +54,7 @@ public class PreprocessorDirectiveTest {
   public void test01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor05.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().query(ABLNodeType.PROPARSEDIRECTIVE).size(), 0);
     JPNode node1 = unit.getTopNode().query(ABLNodeType.MESSAGE).get(0);
     JPNode node2 = unit.getTopNode().query(ABLNodeType.MESSAGE).get(1);
@@ -282,6 +283,7 @@ public class PreprocessorDirectiveTest {
   public void test08() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor14.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     // Three include file (including main file)
     assertEquals(unit.getMacroSourceArray().length, 3);
     // First is inc.i, at line 3
@@ -296,6 +298,7 @@ public class PreprocessorDirectiveTest {
   public void test09() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor15.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     IncludeRef incRef = unit.getMacroGraph();
     assertEquals(incRef.macroEventList.size(), 2);
     assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
@@ -308,6 +311,7 @@ public class PreprocessorDirectiveTest {
   public void test10() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor16.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     IncludeRef incRef = unit.getMacroGraph();
     assertEquals(incRef.macroEventList.size(), 3);
     assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
@@ -329,6 +333,7 @@ public class PreprocessorDirectiveTest {
   public void test11() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor17.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.SUBSTITUTE);
     assertEquals(nodes.size(), 2);
     JPNode substNode = nodes.get(0);

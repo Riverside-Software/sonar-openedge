@@ -132,6 +132,7 @@ public class JPNodeTest {
     pu.attachXref(xref);
     assertNull(pu.getTopNode());
     pu.parse();
+    assertFalse(pu.hasSyntaxError());
     assertNotNull(pu.getTopNode());
 
     StringWriter writer = new StringWriter();
@@ -150,6 +151,7 @@ public class JPNodeTest {
   public void testStatements() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "query01.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     List<JPNode> doStmts = unit.getTopNode().queryStateHead(ABLNodeType.DO);
     List<JPNode> msgStmts = unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE);
@@ -378,6 +380,7 @@ public class JPNodeTest {
 
     ParseUnit unit = genericTest("xref01.p", xref);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
 
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.RECORD_NAME);
     assertEquals(nodes.size(), 5);
@@ -404,6 +407,7 @@ public class JPNodeTest {
 
     ParseUnit unit = genericTest("xref02.cls", xref);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
 
     assertEquals(unit.getTopNode().query(ABLNodeType.RECORD_NAME).size(), 3);
     for (JPNode node : unit.getTopNode().query(ABLNodeType.RECORD_NAME)) {
@@ -421,6 +425,7 @@ public class JPNodeTest {
 
     ParseUnit unit = genericTest("xref03.p", xref);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
 
     List<JPNode> recNodes = unit.getTopNode().query(ABLNodeType.RECORD_NAME);
     assertEquals(recNodes.size(), 10);

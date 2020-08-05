@@ -59,6 +59,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test01.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
   }
@@ -68,6 +69,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test02.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
   }
@@ -77,6 +79,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test03.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
@@ -104,6 +107,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test04.cls"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
     Variable xx = unit.getRootScope().getVariable("xx");
@@ -119,6 +123,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test05.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
@@ -160,6 +165,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test06.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
   }
@@ -169,6 +175,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test07.cls"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
     Variable prop = unit.getRootScope().getVariable("cNextSalesRepName");
@@ -182,6 +189,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test08.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
     Variable xx = unit.getRootScope().getChildScopes().get(0).getVariable("xx");
@@ -195,6 +203,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test09.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
     Variable xxx = unit.getRootScope().getVariable("xxx");
@@ -206,6 +215,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test11.cls"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
     Routine r1 = unit.getRootScope().getRoutineMap().get("foo1");
@@ -230,6 +240,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define input parameter ipPrm no-undo like customer.custnum.".getBytes()), "<unnamed>", session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
     Variable ipPrm = unit.getRootScope().getVariable("ipPrm");
@@ -242,6 +253,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test12.cls"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
     Routine r1 = unit.getRootScope().getRoutineMap().get("foo1");
@@ -259,6 +271,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test13.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
     Variable xxx = unit.getRootScope().getVariable("xxx");
@@ -276,6 +289,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test14.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
@@ -290,6 +304,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test15.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
@@ -309,6 +324,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test16.cls"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
@@ -336,6 +352,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test17.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
@@ -360,6 +377,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test18.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
@@ -396,6 +414,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test19.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
@@ -409,6 +428,7 @@ public class TreeParser03Test {
   public void test20() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test20.p"), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().query(ABLNodeType.DISPLAY).size(), 1);
   }
 
@@ -416,6 +436,7 @@ public class TreeParser03Test {
   public void test21() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test21.p"), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     JPNode node = unit.getTopNode().findDirectChild(ABLNodeType.DEFINE);
     assertEquals(ABLNodeType.VARIABLE.getType(), node.attrGet(IConstants.STATE2));
   }
@@ -425,6 +446,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test22.cls"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
@@ -439,6 +461,7 @@ public class TreeParser03Test {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test23.cls"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
@@ -458,6 +481,7 @@ public class TreeParser03Test {
   public void testVarStatement01() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CHAR s1, s2, s3.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
     assertEquals(unit.getRootScope().getVariables().size(), 3);
     Variable v1 = null, v2 = null, v3 = null;
@@ -490,6 +514,7 @@ public class TreeParser03Test {
   public void testVarStatement02() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT s1, s2, s3 = 3.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
 
     assertEquals(unit.getRootScope().getVariables().size(), 3);
@@ -518,6 +543,7 @@ public class TreeParser03Test {
   public void testVarStatement03() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS mypackage.subdir.myclass myobj1, myobj2, myobj3.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
 
     assertEquals(unit.getRootScope().getVariables().size(), 3);
@@ -545,6 +571,7 @@ public class TreeParser03Test {
   public void testVarStatement04() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR mypackage.subdir.myclass myobj1.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
 
     assertEquals(unit.getRootScope().getVariables().size(), 1);
@@ -562,6 +589,7 @@ public class TreeParser03Test {
   public void testVarStatement05() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR DATE d1, d2 = 1/1/2020, d3 = TODAY.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
 
     assertEquals(unit.getRootScope().getVariables().size(), 3);
@@ -591,6 +619,7 @@ public class TreeParser03Test {
   public void testVarStatement06() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR PROTECTED DATE d1, d2 = 1/1/2020.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
 
     assertEquals(unit.getRootScope().getVariables().size(), 2);
@@ -613,6 +642,7 @@ public class TreeParser03Test {
   public void testVarStatement07() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[3] x = [1, 2], y, z = [100, 200, 300].".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
 
     assertEquals(unit.getRootScope().getVariables().size(), 3);
@@ -645,6 +675,7 @@ public class TreeParser03Test {
   public void testVarStatement08() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
 
     assertEquals(unit.getRootScope().getVariables().size(), 2);
@@ -667,6 +698,7 @@ public class TreeParser03Test {
   public void testVarStatement09() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y = [1,2,3].".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
 
     assertEquals(unit.getRootScope().getVariables().size(), 2);
@@ -689,6 +721,7 @@ public class TreeParser03Test {
   public void testVarStatement10() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x = [1,2], y = [1,2,3].".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
 
     assertEquals(unit.getRootScope().getVariables().size(), 2);
@@ -713,6 +746,7 @@ public class TreeParser03Test {
   public void testVarStatement11() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS foo[2] classArray.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
     
     assertEquals(unit.getRootScope().getVariables().size(), 1);
@@ -731,6 +765,7 @@ public class TreeParser03Test {
   public void testVarStatement12() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR \"System.Collections.Generic.List<char>\" cList.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
 
     assertEquals(unit.getRootScope().getVariables().size(), 1);

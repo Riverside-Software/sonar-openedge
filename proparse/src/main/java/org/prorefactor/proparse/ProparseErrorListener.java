@@ -15,9 +15,11 @@
 package org.prorefactor.proparse;
 
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.FailedPredicateException;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.proparse.antlr4.Proparse.RecordContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,13 +28,20 @@ public class ProparseErrorListener extends BaseErrorListener {
 
   @Override
   public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
-      String msg, RecognitionException e) {
+      String msg, RecognitionException caught) {
     ProToken tok = (ProToken) offendingSymbol;
+    String displayMsg = msg;
+    if (caught instanceof FailedPredicateException) {
+      FailedPredicateException predExc = (FailedPredicateException) caught;
+      if (predExc.getCtx() instanceof RecordContext) {
+        displayMsg = "Unknown table: " + tok.getText();
+      }
+    }
     if (tok.getFileIndex() != 0) {
       LOG.error("Syntax error -- {} -- {}:{}:{} -- {}", recognizer.getInputStream().getSourceName(),
-          tok.getFileName(), line, charPositionInLine, msg);
+          tok.getFileName(), line, charPositionInLine, displayMsg);
     } else {
-      LOG.error("Syntax error -- {}:{}:{} -- {}", tok.getFileName(), line, charPositionInLine, msg);
+      LOG.error("Syntax error -- {}:{}:{} -- {}", tok.getFileName(), line, charPositionInLine, displayMsg);
     }
   }
 }

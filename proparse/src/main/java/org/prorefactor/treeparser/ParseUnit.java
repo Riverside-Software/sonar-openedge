@@ -33,6 +33,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.atn.DecisionInfo;
 import org.antlr.v4.runtime.atn.ParseInfo;
 import org.antlr.v4.runtime.atn.PredictionMode;
@@ -249,7 +250,8 @@ public class ParseUnit {
     LOGGER.trace("Entering ParseUnit#parse()");
 
     ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
-    Proparse parser = new Proparse(new CommonTokenStream(lexer));
+    TokenStream stream = new CommonTokenStream(lexer);
+    Proparse parser = new Proparse(stream);
     parser.setTrace(trace);
     parser.setProfile(profiler);
     parser.initAntlr4(session, xref);
@@ -274,6 +276,7 @@ public class ParseUnit {
         parseTimeSLL = System.nanoTime() - startTimeNs;
         LOGGER.trace("Switching to LL prediction mode");
         switchToLL = true;
+        stream.seek(0);
         parser.addErrorListener(new ProparseErrorListener());
         parser.setErrorHandler(new ProparseErrorStrategy(session.getProparseSettings().allowAntlrTokenDeletion(),
             session.getProparseSettings().allowAntlrTokenInsertion(), session.getProparseSettings().allowAntlrRecover()));

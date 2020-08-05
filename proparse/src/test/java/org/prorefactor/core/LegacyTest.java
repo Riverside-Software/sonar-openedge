@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.core;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
@@ -52,6 +53,7 @@ public class LegacyTest {
   public void testAppendProgram() {
       ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/appendprogram/t01/test/t01.p"), session);
       pu1.treeParser01();
+      assertFalse(pu1.hasSyntaxError());
       assertNotNull(pu1.getTopNode());
       assertNotNull(pu1.getRootScope());
       // TODO Add assertions
@@ -67,12 +69,14 @@ public class LegacyTest {
   public void testBubbleProgram01() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/test/bubbledecs.p"), session);
     pu1.treeParser01();
+    assertFalse(pu1.hasSyntaxError());
     assertNotNull(pu1.getTopNode());
     assertNotNull(pu1.getRootScope());
     // TODO Add assertions
 
     ParseUnit pu2 = new ParseUnit(new File("src/test/resources/legacy/bubble/test/test2.p"), session);
     pu2.treeParser01();
+    assertFalse(pu2.hasSyntaxError());
     assertNotNull(pu2.getTopNode());
     assertNotNull(pu2.getRootScope());
     // TODO Add assertions
@@ -82,6 +86,7 @@ public class LegacyTest {
   public void testBubbleProgram02() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/test2/bubb2.p"), session);
     pu1.treeParser01();
+    assertFalse(pu1.hasSyntaxError());
     assertNotNull(pu1.getTopNode());
     assertNotNull(pu1.getRootScope());
     // TODO Add assertions
@@ -91,6 +96,7 @@ public class LegacyTest {
   public void testBubbleProgram03() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/x03_test/x03.p"), session);
     pu1.treeParser01();
+    assertFalse(pu1.hasSyntaxError());
     assertNotNull(pu1.getTopNode());
     assertNotNull(pu1.getRootScope());
     // TODO Add assertions
@@ -100,6 +106,7 @@ public class LegacyTest {
   public void testBubbleProgram04() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/x04/test/x04.p"), session);
     pu1.treeParser01();
+    assertFalse(pu1.hasSyntaxError());
     assertNotNull(pu1.getTopNode());
     assertNotNull(pu1.getRootScope());
     // TODO Add assertions
@@ -109,6 +116,7 @@ public class LegacyTest {
   public void testBubbleProgram05() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/bubble/x05/test/x05.p"), session);
     pu1.treeParser01();
+    assertFalse(pu1.hasSyntaxError());
     assertNotNull(pu1.getTopNode());
     assertNotNull(pu1.getRootScope());
     // TODO Add assertions
@@ -118,6 +126,7 @@ public class LegacyTest {
   public void testExtractMethod() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/extractmethod/t01/test/t01a.p"), session);
     pu1.treeParser01();
+    assertFalse(pu1.hasSyntaxError());
     assertNotNull(pu1.getTopNode());
     assertNotNull(pu1.getRootScope());
     // TODO Add assertions
@@ -127,16 +136,19 @@ public class LegacyTest {
   public void testNames() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/names/billto.p"), session);
     pu1.treeParser01();
+    assertFalse(pu1.hasSyntaxError());
     assertNotNull(pu1.getTopNode());
     assertNotNull(pu1.getRootScope());
     // TODO Add assertions
     ParseUnit pu2 = new ParseUnit(new File("src/test/resources/legacy/names/customer.p"), session);
     pu2.treeParser01();
+    assertFalse(pu2.hasSyntaxError());
     assertNotNull(pu2.getTopNode());
     assertNotNull(pu2.getRootScope());
     // TODO Add assertions
     ParseUnit pu3 = new ParseUnit(new File("src/test/resources/legacy/names/shipto.p"), session);
     pu3.treeParser01();
+    assertFalse(pu1.hasSyntaxError());
     assertNotNull(pu3.getTopNode());
     assertNotNull(pu3.getRootScope());
     // TODO Add assertions
@@ -164,13 +176,23 @@ public class LegacyTest {
     pu8.treeParser01();
     pu9.treeParser01();
     pu10.treeParser01();
-    // TODO Add assertions
+    assertFalse(pu1.hasSyntaxError());
+    assertFalse(pu2.hasSyntaxError());
+    assertFalse(pu3.hasSyntaxError());
+    assertFalse(pu4.hasSyntaxError());
+    assertFalse(pu5.hasSyntaxError());
+    assertFalse(pu6.hasSyntaxError());
+    assertFalse(pu7.hasSyntaxError());
+    assertFalse(pu8.hasSyntaxError());
+    assertFalse(pu9.hasSyntaxError());
+    assertFalse(pu10.hasSyntaxError());
   }
 
   @Test
   public void testAmbiguous() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/Sports2000/Customer/Name.cls"), session);
     pu1.treeParser01();
+    assertFalse(pu1.hasSyntaxError());
     // TODO Add assertions
   }
 
@@ -178,6 +200,7 @@ public class LegacyTest {
   public void testWrapProcedure() {
     ParseUnit pu1 = new ParseUnit(new File("src/test/resources/legacy/wrapprocedure/t01/test/t01.p"), session);
     pu1.treeParser01();
+    assertFalse(pu1.hasSyntaxError());
     // TODO Add assertions
   }
 
@@ -199,6 +222,14 @@ public class LegacyTest {
     pu7.treeParser01();
     pu8.treeParser01();
     pu9.treeParser01();
+    assertFalse(pu1.hasSyntaxError());
+    assertFalse(pu3.hasSyntaxError());
+    assertFalse(pu4.hasSyntaxError());
+    assertFalse(pu5.hasSyntaxError());
+    assertFalse(pu6.hasSyntaxError());
+    assertFalse(pu7.hasSyntaxError());
+    assertFalse(pu8.hasSyntaxError());
+    assertFalse(pu9.hasSyntaxError());
 
     Assert.assertEquals(pu1.getTopNode().query(ABLNodeType.BGCOLOR).size(), 1);
     Assert.assertNotNull(pu1.getTopNode().query(ABLNodeType.BGCOLOR).get(0));

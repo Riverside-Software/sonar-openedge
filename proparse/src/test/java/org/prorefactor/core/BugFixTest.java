@@ -16,6 +16,7 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
@@ -106,6 +107,7 @@ public class BugFixTest {
     assertNull(pu.getRootScope());
     pu.parse();
     pu.treeParser01();
+    assertFalse(pu.hasSyntaxError());
     assertNotNull(pu.getTopNode());
     assertNotNull(pu.getRootScope());
 
@@ -534,6 +536,7 @@ public class BugFixTest {
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
 
     // First FIND statement
@@ -575,6 +578,7 @@ public class BugFixTest {
      assertNull(unit.getTopNode());
      assertNull(unit.getRootScope());
      unit.treeParser01();
+     assertFalse(unit.hasSyntaxError());
      assertNotNull(unit.getTopNode());
    }
 
@@ -584,6 +588,7 @@ public class BugFixTest {
      assertNull(unit.getTopNode());
      assertNull(unit.getRootScope());
      unit.treeParser01();
+     assertFalse(unit.hasSyntaxError());
      assertNotNull(unit.getTopNode());
    }
 
@@ -593,6 +598,7 @@ public class BugFixTest {
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
 
     // Message statement

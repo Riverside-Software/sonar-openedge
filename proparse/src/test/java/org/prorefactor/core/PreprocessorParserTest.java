@@ -14,6 +14,8 @@
  ********************************************************************************/
 package org.prorefactor.core;
 
+import static org.testng.Assert.assertFalse;
+
 import java.io.File;
 
 import org.prorefactor.core.util.UnitTestModule;
@@ -39,6 +41,7 @@ public class PreprocessorParserTest {
     try {
       unit = new ParseUnit(new File(SRC_DIR, "preprocessor01.p"), session);
       unit.parse();
+      assertFalse(unit.hasSyntaxError());
     } catch (RuntimeException caught) {
       // Just so that tests will throw NPE and fail (and not just be skipped)
       unit = null;
