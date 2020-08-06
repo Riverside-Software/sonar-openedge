@@ -401,4 +401,10 @@ public class PreprocessorParserTest {
   public void testExpression() {
     testVariable(unit.getTopNode(), "var80");
   }
+
+  @Test
+  public void testQStrings() {
+    testVariable(unit.getTopNode(), "var81");
+  }
+
 }

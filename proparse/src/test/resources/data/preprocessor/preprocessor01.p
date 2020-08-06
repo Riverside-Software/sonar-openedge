@@ -297,3 +297,8 @@
 &IF 1 > 2 or 3 < 2 or 1 + 3 * 3 = 10 &THEN
  DEF VAR var80 AS CHAR.
 &ENDIF
+
+&GLOB FOOBAR ""
+&IF "{&FOOBAR}" = '"' &THEN
+ DEF VAR var81 AS CHAR.
+&ENDIF

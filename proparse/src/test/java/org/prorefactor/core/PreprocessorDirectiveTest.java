@@ -367,6 +367,22 @@ public class PreprocessorDirectiveTest {
     assertEquals(str3.getEndColumn(), 9);
   }
 
+  @Test
+  public void test19() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor19.p"), session);
+    TokenSource src = unit.preprocess();
+    ProToken tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPSCOPEDDEFINE);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPIF);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PREPROEXPR_FALSE);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPTHEN);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPENDIF);
+  }
+
   /**
    * Utility method for preprocess(), removes all tokens from hidden channels
    */

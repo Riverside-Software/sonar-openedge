@@ -64,7 +64,7 @@ public class StringFuncs {
     int endQuotePos = s.lastIndexOf(quoteType);
     if (endQuotePos < 1)
       return s;
-    return s.substring(1, endQuotePos);
+    return s.substring(1, endQuotePos).replace(String.valueOf(quoteType) + String.valueOf(quoteType), String.valueOf(quoteType)); 
   }
 
   static HashSet<Character> setOfMatchChars(String s) {
