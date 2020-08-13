@@ -79,9 +79,10 @@ public class ProgressString {
 
   /** Strip attributes and quotes, if quoted. */
   public static String dequote(String orig) {
-    if (isQuoted(orig)) {
-      ProgressString pstring = new ProgressString(orig);
-      return pstring.getText().trim();
+    if (orig == null) {
+      return "";
+    } else if (isQuoted(orig)) {
+      return new ProgressString(orig).getText();
     } else {
       return orig;
     }

@@ -45,4 +45,10 @@ public class ProgressStringTest {
     assertEquals(ProgressString.dequote("\"No more \"Hello world\"!\""), "No more \"Hello world\"!");
   }
 
+  @Test
+  public void test4() {
+    assertEquals(ProgressString.dequote(null), "");
+    assertEquals(ProgressString.dequote(" "), " ");
+  }
+
 }

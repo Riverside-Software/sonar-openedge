@@ -2505,12 +2505,11 @@ public class TreeParser extends ProparseBaseListener {
       var.setInitialValue(Variable.CONSTANT_ARRAY);
     } else {
       VarStatementInitialValueSubContext ctx2 = ctx.varStatementInitialValueSub();
-     if (ctx2.TODAY() != null){
-      var.setInitialValue(Variable.CONSTANT_TODAY);
-    } else if (ctx2.NOW() != null) {
-      var.setInitialValue(Variable.CONSTANT_NOW);
-    } else 
-      if ((ctx2.TRUE() != null)|| (ctx2.YES() != null)) {
+      if (ctx2.TODAY() != null) {
+        var.setInitialValue(Variable.CONSTANT_TODAY);
+      } else if (ctx2.NOW() != null) {
+        var.setInitialValue(Variable.CONSTANT_NOW);
+      } else if ((ctx2.TRUE() != null) || (ctx2.YES() != null)) {
         var.setInitialValue(Boolean.TRUE);
       } else if ((ctx2.FALSE() != null) || (ctx2.NO() != null)) {
         var.setInitialValue(Boolean.FALSE);

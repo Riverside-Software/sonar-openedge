@@ -99,7 +99,7 @@ public class Variable extends Symbol implements Primative {
   @Override
   public Primative setClassName(String s) {
     if (s != null)  {
-      this.className = ProgressString.dequote(s);
+      this.className = ProgressString.dequote(s).trim();
     }
     return this;
   }
