@@ -388,6 +388,23 @@ public class PreprocessorDirectiveTest {
     assertEquals(tok.getNodeType(), ABLNodeType.AMPENDIF);
   }
 
+  @Test
+  public void test20() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor20.p"), session);
+    TokenSource src = unit.preprocess();
+    ProToken tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPGLOBALDEFINE);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"    XXX BAR BAR XXX   test \"");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+  }
+
   /**
    * Utility method for preprocess(), removes all tokens from hidden channels
    */

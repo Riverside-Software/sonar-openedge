@@ -1666,20 +1666,28 @@ public class Lexer implements IPreprocessor {
   }
 
   /*
-   * Get the next include reference arg, reposition the charpos. A doublequote will start a string - all this means is
-   * that we'll collect whitespace. A singlequote does not have this effect.
+   * Get the next include reference arg, and reposition charpos. Assertion is that first character is not a whitespace.
+   * A doublequote will start a string - all this means is that we'll collect whitespace. A singlequote does not have this effect.
+   * If not a doublequote, we collect characters until we find a whitespace
    */
   private String ppIncludeRefArg(MacroCharPos cp) {
+    StringBuilder retVal = new StringBuilder();
     boolean gobbleWS = false;
-    StringBuilder theRet = new StringBuilder();
-    // Iterate up to, but not including, closing curly.
+    char c = cp.chars[cp.pos++];
+    if (c == '"') {
+      gobbleWS = true;
+    } else {
+      retVal.append(c);
+    }
+
+    // Iterate up to, but not including, closing curly
     while (cp.pos < cp.chars.length - 1) {
-      char c = cp.chars[cp.pos];
+      c = cp.chars[cp.pos];
       switch (c) {
         case '"':
           if (cp.chars[cp.pos + 1] == '"') {
             // quoted quote - does not open/close a string
-            theRet.append('"');
+            retVal.append('"');
             ++cp.pos;
             ++cp.pos;
           } else {
@@ -1693,19 +1701,19 @@ public class Lexer implements IPreprocessor {
         case '\n':
         case '\r':
           if (gobbleWS) {
-            theRet.append(c);
+            retVal.append(c);
             ++cp.pos;
           } else {
-            return theRet.toString();
+            return retVal.toString();
           }
           break;
         default:
-          theRet.append(c);
+          retVal.append(c);
           ++cp.pos;
           break;
       }
     }
-    return theRet.toString();
+    return retVal.toString();
   }
 
   private boolean ppNewInclude(String referencedWithName) {
