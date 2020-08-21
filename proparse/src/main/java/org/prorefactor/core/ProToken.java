@@ -391,10 +391,6 @@ public class ProToken implements Token {
     public ProToken build() {
       if (type == null)
         throw new IllegalArgumentException(INVALID_TYPE + type);
-      // Ugly hack, but include files can be expanded almost anywhere, and this sometimes lead to EOI being transformed
-      // to ID
-      if ((text.length() == 1) && (text.charAt(0) == (char) -103))
-        type = ABLNodeType.INCLUDEDIRECTIVE_END;
 
       ProToken tok = new ProToken(type, text.toString());
       tok.line = line;
@@ -422,7 +418,6 @@ public class ProToken implements Token {
         case AMPSCOPEDDEFINE:
         case AMPUNDEFINE:
         case INCLUDEDIRECTIVE:
-        case INCLUDEDIRECTIVE_END:
         case AMPIF:
         case AMPELSE:
         case AMPELSEIF:

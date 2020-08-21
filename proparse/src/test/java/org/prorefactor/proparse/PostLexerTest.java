@@ -362,9 +362,6 @@ public class PostLexerTest {
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.WS);
     assertEquals(tok.getChannel(), Token.HIDDEN_CHANNEL);
-    tok = (ProToken) src.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.INCLUDEDIRECTIVE_END);
-    assertEquals(tok.getChannel(), ProToken.PREPROCESSOR_CHANNEL);
 
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
@@ -377,15 +374,6 @@ public class PostLexerTest {
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.WS);
     assertEquals(tok.getChannel(), Token.HIDDEN_CHANNEL);
-    tok = (ProToken) src.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.INCLUDEDIRECTIVE_END);
-    assertEquals(tok.getChannel(), ProToken.PREPROCESSOR_CHANNEL);
-    tok = (ProToken) src.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.WS);
-    assertEquals(tok.getChannel(), Token.HIDDEN_CHANNEL);
-    tok = (ProToken) src.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.INCLUDEDIRECTIVE_END);
-    assertEquals(tok.getChannel(), ProToken.PREPROCESSOR_CHANNEL);
 
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
@@ -572,31 +560,31 @@ public class PostLexerTest {
 
     tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(tok.getTokenIndex(), 5);
+    assertEquals(tok.getTokenIndex(), 4);
     assertEquals(tok.getFileIndex(), 1);
     assertTrue(tok.getFileName().replace('\\', '/').endsWith("src/test/resources/data/lexer/lexer18.i"));
 
     tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.QUIT);
-    assertEquals(tok.getTokenIndex(), 8);
+    assertEquals(tok.getTokenIndex(), 6);
     assertEquals(tok.getFileIndex(), 2);
     assertTrue(tok.getFileName().replace('\\', '/').endsWith("src/test/resources/data/lexer/lexer18-2.i"));
 
     tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(tok.getTokenIndex(), 11);
+    assertEquals(tok.getTokenIndex(), 8);
     assertEquals(tok.getFileIndex(), 1);
     assertTrue(tok.getFileName().replace('\\', '/').endsWith("src/test/resources/data/lexer/lexer18.i"));
 
     tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(tok.getTokenIndex(), 14);
+    assertEquals(tok.getTokenIndex(), 10);
     assertEquals(tok.getFileIndex(), 1);
     assertTrue(tok.getFileName().replace('\\', '/').endsWith("src/test/resources/data/lexer/lexer18.i"));
 
     tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.STOP);
-    assertEquals(tok.getTokenIndex(), 17);
+    assertEquals(tok.getTokenIndex(), 12);
     assertEquals(tok.getFileIndex(), 0);
     assertTrue(tok.getFileName().replace('\\', '/').endsWith("src/test/resources/data/lexer/lexer18.p"));
   }
@@ -652,10 +640,6 @@ public class PostLexerTest {
     assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.COMMENT);
-    tok = (ProToken) src.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.WS);
-    tok = (ProToken) src.nextToken();
-    assertEquals(tok.getNodeType(), ABLNodeType.INCLUDEDIRECTIVE_END);
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) src.nextToken();
