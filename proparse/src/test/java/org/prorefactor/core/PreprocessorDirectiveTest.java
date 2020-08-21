@@ -403,6 +403,26 @@ public class PreprocessorDirectiveTest {
     assertEquals(tok.getText(), "\"    XXX BAR BAR XXX   test \"");
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"\"");
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"value1\"");
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"value2\"");
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"value3\":U");
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"value4\"");
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "' '");
   }
 
   /**

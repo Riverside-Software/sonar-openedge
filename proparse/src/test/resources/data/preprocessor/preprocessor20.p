@@ -6,3 +6,4 @@
       &param4 = "{ preprocessor/preprocessor20-2.i {&FOO}}"
       &param5 = " test "
       }
+{ preprocessor/preprocessor20-3.i "" "value1" value2 ""value3"":U ""value4"" " " }

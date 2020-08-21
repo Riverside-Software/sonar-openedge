@@ -1510,7 +1510,7 @@ public class Lexer implements IPreprocessor {
         ++cp.pos;
 
       // filename
-      String includeFilename = ppIncludeRefArg(cp);
+      String includeFilename = ppIncludeRefArg(cp, false);
 
       // whitespace?
       while (Character.isWhitespace(cp.chars[cp.pos]))
@@ -1549,7 +1549,7 @@ public class Lexer implements IPreprocessor {
               ++cp.pos;
             // Arg val
             if (cp.pos != closingCurly)
-              argVal = ppIncludeRefArg(cp);
+              argVal = ppIncludeRefArg(cp, false);
           }
 
           // Add the argument name/val pair
@@ -1570,7 +1570,7 @@ public class Lexer implements IPreprocessor {
           // Are we at closing curly?
           if (cp.pos == closingCurly)
             break;
-          incArgs.add(new IncludeArg("", ppIncludeRefArg(cp)));
+          incArgs.add(new IncludeArg("", ppIncludeRefArg(cp, true)));
         }
       } // numbered args
 
@@ -1670,14 +1670,18 @@ public class Lexer implements IPreprocessor {
    * A doublequote will start a string - all this means is that we'll collect whitespace. A singlequote does not have this effect.
    * If not a doublequote, we collect characters until we find a whitespace
    */
-  private String ppIncludeRefArg(MacroCharPos cp) {
+  private String ppIncludeRefArg(MacroCharPos cp, boolean numberedArg) {
     StringBuilder retVal = new StringBuilder();
     boolean gobbleWS = false;
-    char c = cp.chars[cp.pos++];
-    if (c == '"') {
-      gobbleWS = true;
-    } else {
-      retVal.append(c);
+    char c = cp.chars[cp.pos];
+    
+    if (!numberedArg) {
+      if (c == '"') {
+        gobbleWS = true;
+      } else {
+        retVal.append(c);
+      }
+      cp.pos++;
     }
 
     // Iterate up to, but not including, closing curly
