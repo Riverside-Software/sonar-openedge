@@ -35,6 +35,7 @@ import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.UnitTestModule2;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -625,4 +626,95 @@ public class ParserTest {
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
+  @Test
+  public void testDbQualifierSports2000() {
+    // Standard schema, lower-case database name
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "dbqualifier01.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    // Looking for the FIND node
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.FIND);
+    assertNotNull(nodes);
+    assertEquals(nodes.size(), 4);
+
+    JPNode findNode = nodes.get(0);
+    JPNode ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    RecordNameNode rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "sports2000.Customer");
+
+    findNode = nodes.get(1);
+    ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "sports2000.Customer");
+
+    findNode = nodes.get(2);
+    ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "sports2000.Customer");
+
+    findNode = nodes.get(3);
+    ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "sports2000.Customer");
+  }
+
+  @Test
+  public void testDbQualifierSP2K() {
+    Injector injector = Guice.createInjector(new UnitTestModule2());
+    RefactorSession session2 = injector.getInstance(RefactorSession.class);
+
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "dbqualifier02.p"), session2);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    // Looking for the FIND node
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.FIND);
+    assertNotNull(nodes);
+    assertEquals(nodes.size(), 4);
+
+    JPNode findNode = nodes.get(0);
+    JPNode ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    RecordNameNode rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
+
+    findNode = nodes.get(1);
+    ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
+
+    findNode = nodes.get(2);
+    ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
+
+    findNode = nodes.get(3);
+    ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
+  }
 }
