@@ -56,7 +56,7 @@ import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.proparse.IncludeFileNotFoundException;
 import org.prorefactor.proparse.XCodedFileException;
 import org.prorefactor.proparse.antlr4.Proparse;
-import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.sonar.api.SonarProduct;
@@ -79,6 +79,7 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.foundation.CPDCallback;
+import org.sonar.plugins.openedge.foundation.IRefactorSessionEnv;
 import org.sonar.plugins.openedge.foundation.InputFileUtils;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
@@ -165,7 +166,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
-    RefactorSession session = settings.getProparseSession();
+    IRefactorSessionEnv sessions = settings.getProparseSessions();
 
     FilePredicates predicates = context.fileSystem().predicates();
     for (InputFile file : context.fileSystem().inputFiles(
@@ -173,6 +174,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       LOG.debug("Parsing {}", file);
       numFiles++;
 
+      IProparseEnvironment session = sessions.getSession(file.relativePath());
       if (settings.isIncludeFile(file.filename())) {
         parseIncludeFile(context, file, session);
       } else {
@@ -190,7 +192,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  private void parseIncludeFile(SensorContext context, InputFile file, RefactorSession session) {
+  private void parseIncludeFile(SensorContext context, InputFile file, IProparseEnvironment session) {
     long startTime = System.currentTimeMillis();
     ParseUnit lexUnit = null;
     try {
@@ -270,7 +272,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     return doc;
   }
 
-  private void parseMainFile(SensorContext context, InputFile file, RefactorSession session) {
+  private void parseMainFile(SensorContext context, InputFile file, IProparseEnvironment session) {
     CrossReference xref = null;
     Document doc = null;
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {

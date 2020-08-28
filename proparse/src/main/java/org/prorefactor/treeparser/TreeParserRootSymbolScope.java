@@ -23,7 +23,7 @@ import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
-import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.Routine;
@@ -41,7 +41,7 @@ import eu.rssw.pct.elements.ITypeInfo;
  * is the class scope, but it may also have a super class scope by way of inheritance.
  */
 public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
-  private final RefactorSession refSession;
+  private final IProparseEnvironment refSession;
   private Map<String, ITable> tableMap = new HashMap<>();
   private String className = null;
   private ITypeInfo typeInfo = null;
@@ -50,11 +50,11 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   private boolean serializableClass;
   private boolean finalClass;
 
-  public TreeParserRootSymbolScope(RefactorSession session) {
+  public TreeParserRootSymbolScope(IProparseEnvironment session) {
     this.refSession = session;
   }
 
-  public RefactorSession getRefactorSession() {
+  public IProparseEnvironment getRefactorSession() {
     return refSession;
   }
 

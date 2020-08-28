@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.prorefactor.core.schema.ISchema;
+import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.refactor.settings.IProparseSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ import eu.rssw.pct.elements.fixed.TypeInfo;
  * This class provides an interface to an org.prorefactor.refactor session. Much of this class was originally put in
  * place for use of Proparse within an Eclipse environment, with references to multiple projects within Eclipse.
  */
-public class RefactorSession {
+public class RefactorSession implements IProparseEnvironment {
   private static final Logger LOG = LoggerFactory.getLogger(RefactorSession.class);
 
   private final IProparseSettings proparseSettings;
@@ -56,13 +57,13 @@ public class RefactorSession {
   private final Charset charset;
 
   // Structure from rcode
-  private final Map<String, ITypeInfo> typeInfoMap = Collections.synchronizedMap(new HashMap<>());
-  private final Map<String, ITypeInfo> lcTypeInfoMap = Collections.synchronizedMap(new HashMap<>());
+  private final Map<String, ITypeInfo> typeInfoMap;
+  private final Map<String, ITypeInfo> lcTypeInfoMap;
   // Read from internal classes list and assembly catalog
-  private final Map<String, ITypeInfo> classInfo = new HashMap<>();
-  private final Map<String, ITypeInfo> lcClassInfo = new HashMap<>();
+  private final Map<String, ITypeInfo> classInfo;
+  private final Map<String, ITypeInfo> lcClassInfo;
   // List of classes per package
-  private final Map<String, List<ITypeInfo>> classesPerPkg = new HashMap<>();
+  private final Map<String, List<ITypeInfo>> classesPerPkg;
   private final Object pkgLock = new Object();
 
   // Cached entries from propath
@@ -80,6 +81,28 @@ public class RefactorSession {
     this.proparseSettings = proparseSettings;
     this.schema = schema;
     this.charset = charset;
+
+    typeInfoMap = Collections.synchronizedMap(new HashMap<>());
+    lcTypeInfoMap = Collections.synchronizedMap(new HashMap<>());
+    classInfo = new HashMap<>();
+    lcClassInfo = new HashMap<>();
+    classesPerPkg = new HashMap<>();
+
+    initializeProgressClasses();
+  }
+
+  public RefactorSession(IProparseSettings proparseSettings, ISchema schema,
+      Charset charset, RefactorSession copy) {
+    this.proparseSettings = proparseSettings;
+    this.schema = schema;
+    this.charset = charset;
+
+    typeInfoMap = copy.typeInfoMap;
+    lcTypeInfoMap = copy.lcTypeInfoMap;
+    classInfo = copy.classInfo;
+    lcClassInfo = copy.lcClassInfo;
+    classesPerPkg = copy.classesPerPkg;
+
     initializeProgressClasses();
   }
 

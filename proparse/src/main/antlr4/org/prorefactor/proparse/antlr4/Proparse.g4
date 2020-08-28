@@ -21,10 +21,11 @@ parser grammar Proparse;
 @header {
   import org.antlr.v4.runtime.BufferedTokenStream;
   import org.prorefactor.core.ABLNodeType;
+  import org.prorefactor.proparse.support.IProparseEnvironment;
   import org.prorefactor.proparse.support.IntegerIndex;
   import org.prorefactor.proparse.support.ParserSupport;
   import org.prorefactor.proparse.support.SymbolScope;
-  import org.prorefactor.refactor.RefactorSession;
+  
   import com.progress.xref.CrossReference;
 }
 
@@ -35,7 +36,7 @@ options {
 @members {
   private ParserSupport support;
 
-  public void initAntlr4(RefactorSession session, CrossReference xref) {
+  public void initAntlr4(IProparseEnvironment session, CrossReference xref) {
     this.support = new ParserSupport(session, xref);
   }
 

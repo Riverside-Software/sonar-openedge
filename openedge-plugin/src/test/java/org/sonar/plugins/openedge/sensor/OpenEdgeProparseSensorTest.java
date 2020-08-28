@@ -148,11 +148,11 @@ public class OpenEdgeProparseSensorTest {
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
-    assertFalse(oeSettings.getProparseSession().getProparseSettings().getBatchMode());
-    assertEquals(oeSettings.getProparseSession().getProparseSettings().getWindowSystem(), "foobar");
-    assertEquals(oeSettings.getProparseSession().getProparseSettings().getOpSys(), OperatingSystem.UNIX);
-    assertEquals(oeSettings.getProparseSession().getProparseSettings().getProcessArchitecture(), Integer.valueOf(32));
-    assertEquals(oeSettings.getProparseSession().getProparseSettings().getProversion(), "12.0");
+    assertFalse(oeSettings.getProparseSessions().getDefaultSession().getProparseSettings().getBatchMode());
+    assertEquals(oeSettings.getProparseSessions().getDefaultSession().getProparseSettings().getWindowSystem(), "foobar");
+    assertEquals(oeSettings.getProparseSessions().getDefaultSession().getProparseSettings().getOpSys(), OperatingSystem.UNIX);
+    assertEquals(oeSettings.getProparseSessions().getDefaultSession().getProparseSettings().getProcessArchitecture(), Integer.valueOf(32));
+    assertEquals(oeSettings.getProparseSessions().getDefaultSession().getProparseSettings().getProversion(), "12.0");
   }
 
   @Test
@@ -161,9 +161,9 @@ public class OpenEdgeProparseSensorTest {
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
-    assertTrue(oeSettings.getProparseSession().getProparseSettings().getBatchMode());
-    assertEquals(oeSettings.getProparseSession().getProparseSettings().getProcessArchitecture(), Integer.valueOf(64));
-    assertEquals(oeSettings.getProparseSession().getProparseSettings().getProversion(), "11.7");
+    assertTrue(oeSettings.getProparseSessions().getDefaultSession().getProparseSettings().getBatchMode());
+    assertEquals(oeSettings.getProparseSessions().getDefaultSession().getProparseSettings().getProcessArchitecture(), Integer.valueOf(64));
+    assertEquals(oeSettings.getProparseSessions().getDefaultSession().getProparseSettings().getProversion(), "11.7");
   }
 
   @Test
@@ -178,7 +178,7 @@ public class OpenEdgeProparseSensorTest {
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARLINT_RUNTIME, OpenEdgePluginTest.SERVER);
     try {
-      oeSettings.getProparseSession();
+      oeSettings.getProparseSessions();
       fail("RuntimeException should have been thrown");
     } catch (RuntimeException caught) {
 
@@ -196,7 +196,7 @@ public class OpenEdgeProparseSensorTest {
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
     try {
-      oeSettings.getProparseSession();
+      oeSettings.getProparseSessions();
     } catch (RuntimeException caught) {
       fail("No RuntimeException should have been thrown");
     }

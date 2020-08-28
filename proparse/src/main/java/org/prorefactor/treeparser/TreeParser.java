@@ -39,8 +39,8 @@ import org.prorefactor.core.schema.Index;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.prorefactor.proparse.antlr4.ProparseBaseListener;
+import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
-import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;
@@ -61,7 +61,7 @@ public class TreeParser extends ProparseBaseListener {
   private static final String LOG_ADDING_QUAL_TO = "{}> Adding {} qualifier to '{}'";
 
   private final ParserSupport support;
-  private final RefactorSession refSession;
+  private final IProparseEnvironment refSession;
   private final TreeParserRootSymbolScope rootScope;
 
   private int currentLevel;
@@ -113,7 +113,7 @@ public class TreeParser extends ProparseBaseListener {
   // Temporary work-around
   private boolean inDefineEvent = false;
 
-  public TreeParser(ParserSupport support, RefactorSession session) {
+  public TreeParser(ParserSupport support, IProparseEnvironment session) {
     this.support = support;
     this.refSession = session;
     this.rootScope = new TreeParserRootSymbolScope(refSession);

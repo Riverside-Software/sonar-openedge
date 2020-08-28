@@ -52,13 +52,13 @@ import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
 import org.prorefactor.proparse.ABLLexer;
-import org.prorefactor.proparse.ProparseErrorListener;
 import org.prorefactor.proparse.JPNodeVisitor;
+import org.prorefactor.proparse.ProparseErrorListener;
 import org.prorefactor.proparse.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.IntegerIndex;
 import org.prorefactor.proparse.support.ParserSupport;
-import org.prorefactor.refactor.RefactorSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -79,7 +79,7 @@ import eu.rssw.pct.elements.ITypeInfo;
 public class ParseUnit {
   private static final Logger LOGGER = LoggerFactory.getLogger(ParseUnit.class);
 
-  private final RefactorSession session;
+  private final IProparseEnvironment session;
   private final File file;
   private final InputStream input;
   private final String relativeName;
@@ -113,25 +113,25 @@ public class ParseUnit {
   private long xrefAttachTime;
   private boolean switchToLL;
 
-  public ParseUnit(File file, RefactorSession session) {
+  public ParseUnit(File file, IProparseEnvironment session) {
     this(file, file.getPath(), session);
   }
 
-  public ParseUnit(File file, String relativeName, RefactorSession session) {
+  public ParseUnit(File file, String relativeName, IProparseEnvironment session) {
     this.file = file;
     this.input = null;
     this.relativeName = relativeName;
     this.session = session;
   }
 
-  public ParseUnit(InputStream input, RefactorSession session) {
+  public ParseUnit(InputStream input, IProparseEnvironment session) {
     this.file = null;
     this.input = input;
     this.relativeName = "<unnamed>";
     this.session = session;
   }
 
-  public ParseUnit(InputStream input, String relativeName, RefactorSession session) {
+  public ParseUnit(InputStream input, String relativeName, IProparseEnvironment session) {
     this.file = null;
     this.input = input;
     this.relativeName = relativeName;
@@ -462,7 +462,7 @@ public class ParseUnit {
     return support;
   }
 
-  public RefactorSession getSession() {
+  public IProparseEnvironment getSession() {
     return session;
   }
 

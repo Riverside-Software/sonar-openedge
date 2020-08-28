@@ -24,26 +24,25 @@ import java.util.Set;
 
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
-import org.prorefactor.refactor.RefactorSession;
 
 public class SymbolScope {
-  private final RefactorSession session;
+  private final IProparseEnvironment session;
   private final SymbolScope superScope;
 
   private final Map<String, TableRef> tableMap = new HashMap<>();
   private final Set<String> varSet = new HashSet<>();
   private final Set<String> inlineVarSet = new HashSet<>();
 
-  SymbolScope(RefactorSession session) {
+  SymbolScope(IProparseEnvironment session) {
     this(session, null);
   }
 
-  SymbolScope(RefactorSession session, SymbolScope superScope) {
+  SymbolScope(IProparseEnvironment session, SymbolScope superScope) {
     this.session = session;
     this.superScope = superScope;
   }
 
-  public RefactorSession getSession() {
+  public IProparseEnvironment getSession() {
     return session;
   }
 
