@@ -294,7 +294,7 @@ addConstraintOption:
   | 'CONSTRAINT-EXPR'  exprConstraint=QUOTED_STRING   # constraintExpr;
 
 footer:
- '.' 'PSC'? ('bufpool' '=' 'yes')? (UNQUOTED_STRING '=' UNQUOTED_STRING)? '.' NUMBER?;
+ '.' 'PSC'? ('bufpool' '=' 'yes')? (UNQUOTED_STRING '=' UNQUOTED_STRING)? ( '.' NUMBER? )?;
 
 fragment INT:
   ('0'..'9');
