@@ -167,13 +167,24 @@ public class OpenEdgeProparseSensor implements Sensor {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
     IRefactorSessionEnv sessions = settings.getProparseSessions();
-
     FilePredicates predicates = context.fileSystem().predicates();
+
+    // Just counting total number of files
+    int totFiles = 0;
+    for (InputFile file : context.fileSystem().inputFiles(
+        predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
+      totFiles++;
+    }
+    long prevMessage = System.currentTimeMillis();
     for (InputFile file : context.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       LOG.debug("Parsing {}", file);
       numFiles++;
 
+      if (System.currentTimeMillis() - prevMessage > 30000L) {
+        prevMessage = System.currentTimeMillis();
+        LOG.info("{}/{} - Current file: {}", numFiles, totFiles, file.relativePath());
+      }
       IProparseEnvironment session = sessions.getSession(file.relativePath());
       if (settings.isIncludeFile(file.filename())) {
         parseIncludeFile(context, file, session);
