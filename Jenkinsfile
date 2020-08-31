@@ -32,12 +32,7 @@ pipeline {
         script {
           withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
             withSonarQubeEnv(credentialsId: 'SQToken', installationName: 'RSSW') {
-              if (("master" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME)) {
-                sh "mvn -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
-              } else {
-                def targetBranch = env.BRANCH_NAME.startsWith("release") ? "master" : "develop"
-                sh "mvn -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=${targetBranch} sonar:sonar"
-              }
+              sh "mvn -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
             }
           }
         }
