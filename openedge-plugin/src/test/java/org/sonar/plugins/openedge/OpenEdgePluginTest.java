@@ -26,23 +26,30 @@ import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarQubeSide;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.internal.SonarRuntimeImpl;
+import org.sonar.api.platform.Server;
 import org.sonar.api.utils.Version;
+import org.sonar.plugins.openedge.sensor.TestServer;
 import org.testng.annotations.Test;
 
 public class OpenEdgePluginTest {
+  public static final Version VERSION = Version.parse("7.6");
+
+  public static final SonarRuntime SONARLINT_RUNTIME = SonarRuntimeImpl.forSonarLint(VERSION);
+  public static final SonarRuntime SONARQUBE_RUNTIME = SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER,
+      SonarEdition.COMMUNITY);
+
+  public static final Server SERVER = new TestServer();
 
   @Test
   public void testExtensionsSonarLint() {
-    SonarRuntime runtime = SonarRuntimeImpl.forSonarLint(Version.parse("6.2"));
-    Plugin.Context context = new Plugin.Context(runtime);
+    Plugin.Context context = new Plugin.Context(SONARLINT_RUNTIME);
     new OpenEdgePlugin().define(context);
     assertEquals(context.getExtensions().size(), 26);
   }
 
   @Test
   public void testExtensionsSonarQube() {
-    SonarRuntime runtime = SonarRuntimeImpl.forSonarQube(Version.parse("6.2"), SonarQubeSide.SCANNER, SonarEdition.COMMUNITY);
-    Plugin.Context context = new Plugin.Context(runtime);
+    Plugin.Context context = new Plugin.Context(SONARQUBE_RUNTIME);
     new OpenEdgePlugin().define(context);
     assertEquals(context.getExtensions().size(), 32);
   }

@@ -18,17 +18,16 @@ package org.prorefactor.proparse.support;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.prorefactor.refactor.RefactorSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ClassFinder {
   private static final Logger LOGGER = LoggerFactory.getLogger(ClassFinder.class);
 
-  private RefactorSession session;
+  private IProparseEnvironment session;
   private Map<String, String> namesMap = new HashMap<>();
 
-  public ClassFinder(RefactorSession session) {
+  public ClassFinder(IProparseEnvironment session) {
     this.session = session;
   }
 

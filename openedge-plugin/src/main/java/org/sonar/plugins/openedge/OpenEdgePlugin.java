@@ -87,7 +87,7 @@ public class OpenEdgePlugin implements Plugin {
       .type(PropertyType.BOOLEAN) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .defaultValue(Boolean.FALSE.toString()) //
       .build());
 
@@ -97,7 +97,7 @@ public class OpenEdgePlugin implements Plugin {
       .type(PropertyType.BOOLEAN) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .defaultValue(Boolean.TRUE.toString()) //
       .build());
 
@@ -107,7 +107,7 @@ public class OpenEdgePlugin implements Plugin {
       .type(PropertyType.BOOLEAN) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .defaultValue(Boolean.FALSE.toString()) //
       .build());
 
@@ -117,7 +117,7 @@ public class OpenEdgePlugin implements Plugin {
         .type(PropertyType.BOOLEAN) //
         .category(CATEGORY_OPENEDGE) //
         .subCategory(SUBCATEGORY_GENERAL) //
-        .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+        .onQualifiers(Qualifiers.PROJECT) //
         .defaultValue(Boolean.FALSE.toString()) //
         .build());
 
@@ -128,7 +128,7 @@ public class OpenEdgePlugin implements Plugin {
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_DEBUG) //
       .defaultValue(Boolean.FALSE.toString()) //
-      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.SUFFIXES) //
@@ -138,7 +138,7 @@ public class OpenEdgePlugin implements Plugin {
       .defaultValue("") //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.INCLUDE_SUFFIXES) //
@@ -148,7 +148,7 @@ public class OpenEdgePlugin implements Plugin {
       .defaultValue("") //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.CPD_ANNOTATIONS) //
@@ -158,7 +158,7 @@ public class OpenEdgePlugin implements Plugin {
       .defaultValue("Generated") //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.XREF_FILTER) //
@@ -168,7 +168,7 @@ public class OpenEdgePlugin implements Plugin {
       .defaultValue(Boolean.FALSE.toString()) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.XREF_FILTER_BYTES) //
@@ -178,7 +178,7 @@ public class OpenEdgePlugin implements Plugin {
       .defaultValue("1-4") //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.BACKSLASH_ESCAPE) //
@@ -188,7 +188,7 @@ public class OpenEdgePlugin implements Plugin {
       .defaultValue(Boolean.FALSE.toString()) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onQualifiers(Qualifiers.MODULE, Qualifiers.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
   }
 

@@ -54,6 +54,7 @@ public class PreprocessorDirectiveTest {
   public void test01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor05.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().query(ABLNodeType.PROPARSEDIRECTIVE).size(), 0);
     JPNode node1 = unit.getTopNode().query(ABLNodeType.MESSAGE).get(0);
     JPNode node2 = unit.getTopNode().query(ABLNodeType.MESSAGE).get(1);
@@ -282,6 +283,7 @@ public class PreprocessorDirectiveTest {
   public void test08() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor14.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     // Three include file (including main file)
     assertEquals(unit.getMacroSourceArray().length, 3);
     // First is inc.i, at line 3
@@ -296,6 +298,7 @@ public class PreprocessorDirectiveTest {
   public void test09() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor15.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     IncludeRef incRef = unit.getMacroGraph();
     assertEquals(incRef.macroEventList.size(), 2);
     assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
@@ -308,6 +311,7 @@ public class PreprocessorDirectiveTest {
   public void test10() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor16.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     IncludeRef incRef = unit.getMacroGraph();
     assertEquals(incRef.macroEventList.size(), 3);
     assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
@@ -329,6 +333,7 @@ public class PreprocessorDirectiveTest {
   public void test11() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor17.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.SUBSTITUTE);
     assertEquals(nodes.size(), 2);
     JPNode substNode = nodes.get(0);
@@ -365,6 +370,59 @@ public class PreprocessorDirectiveTest {
     assertEquals(str3.getColumn(), 9);
     // FIXME Wrong value, should be 14
     assertEquals(str3.getEndColumn(), 9);
+  }
+
+  @Test
+  public void test19() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor19.p"), session);
+    TokenSource src = unit.preprocess();
+    ProToken tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPSCOPEDDEFINE);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPIF);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PREPROEXPR_FALSE);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPTHEN);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPENDIF);
+  }
+
+  @Test
+  public void test20() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor20.p"), session);
+    TokenSource src = unit.preprocess();
+    ProToken tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPGLOBALDEFINE);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"    XXX BAR BAR XXX   test \"");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"\"");
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"value1\"");
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"value2\"");
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"value3\":U");
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "\"value4\"");
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tok.getText(), "' '");
   }
 
   /**

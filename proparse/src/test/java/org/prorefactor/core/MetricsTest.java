@@ -15,6 +15,7 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 import java.io.File;
 
@@ -40,6 +41,7 @@ public class MetricsTest {
   public void test01() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/preprocessor/preprocessor14.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     assertEquals(unit.getMetrics().getLoc(), 2);
     assertEquals(unit.getMetrics().getComments(), 6);

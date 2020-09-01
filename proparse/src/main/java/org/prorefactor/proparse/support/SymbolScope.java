@@ -24,26 +24,25 @@ import java.util.Set;
 
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
-import org.prorefactor.refactor.RefactorSession;
 
 public class SymbolScope {
-  private final RefactorSession session;
+  private final IProparseEnvironment session;
   private final SymbolScope superScope;
 
   private final Map<String, TableRef> tableMap = new HashMap<>();
   private final Set<String> varSet = new HashSet<>();
   private final Set<String> inlineVarSet = new HashSet<>();
 
-  SymbolScope(RefactorSession session) {
+  SymbolScope(IProparseEnvironment session) {
     this(session, null);
   }
 
-  SymbolScope(RefactorSession session, SymbolScope superScope) {
+  SymbolScope(IProparseEnvironment session, SymbolScope superScope) {
     this.session = session;
     this.superScope = superScope;
   }
 
-  public RefactorSession getSession() {
+  public IProparseEnvironment getSession() {
     return session;
   }
 
@@ -69,16 +68,15 @@ public class SymbolScope {
         newRef.dbName = table.getDatabase().getName();
         newRef.fullName = newRef.dbName + "." + table.getName();
       }
-      // Create a db.buffername entry.
-      // If the db name was specified, then we have to use that
-      // (whether it's a db alias or not) See bug #053.
+      // Create a db.buffername entry. If the db name was specified, then we have to use that (whether it's a db alias
+      // or not)
       Table.Name tn = new Table.Name(tableName);
-      String dbRefName = (tn.getDb() != null ? tn.getDb() : table.getDatabase().getName()) + "." + bufferName;
+      String dbRefName = (tn.getDb() != null ? tn.getDb() : newRef.dbName) + "." + bufferName;
 
       TableRef dbRef = new TableRef();
       dbRef.bufferFor = tableName;
       dbRef.tableType = bufferType;
-      tableMap.put(dbRefName, dbRef);
+      tableMap.put(dbRefName.toLowerCase(), dbRef);
     }
   }
 
@@ -161,10 +159,7 @@ public class SymbolScope {
   }
 
   boolean isInlineVariable(String name) {
-    if (inlineVarSet.contains(name.toLowerCase()))
-      return true;
-
-    return false;
+    return inlineVarSet.contains(name.toLowerCase());
   }
 
   /**
@@ -205,7 +200,6 @@ public class SymbolScope {
     FieldType tableType;
     @SuppressWarnings("unused")
     String bufferFor;
-    @SuppressWarnings("unused")
     String fullName;
     String dbName;
   }

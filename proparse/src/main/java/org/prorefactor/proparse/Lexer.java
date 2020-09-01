@@ -64,7 +64,6 @@ public class Lexer implements IPreprocessor {
   private static final int SKIP_CHAR = -100;
   private static final int PROPARSE_DIRECTIVE = -101;
   private static final int INCLUDE_DIRECTIVE = -102;
-  private static final int INCLUDE_DIRECTIVE_END = -103;
 
   // Cached include files for current lexer
   private final Map<String, Integer> includeCache = new HashMap<>();
@@ -169,10 +168,6 @@ public class Lexer implements IPreprocessor {
         tokenStartPos = new FilePos(macroStartPos);
         getChar();
         return makeToken(ABLNodeType.INCLUDEDIRECTIVE, includeDirectiveText);
-      } else if (currInt == INCLUDE_DIRECTIVE_END) {
-        tokenStartPos = new FilePos(macroStartPos);
-        getChar();
-        return makeToken(ABLNodeType.INCLUDEDIRECTIVE_END, "");
       }
       tokenStartPos = new FilePos(currFile, currLine, currCol, currSourceNum);
       currText.setLength(1);
@@ -996,6 +991,8 @@ public class Lexer implements IPreprocessor {
         append();
         getChar();
       }
+      macroUndefine();
+
       // &UNDEFINE consumes up to *and including* the first whitespace
       // after the token it undefines.
       // At least that seems to be what Progress is doing.
@@ -1010,7 +1007,6 @@ public class Lexer implements IPreprocessor {
         append();
         getChar();
       }
-      macroUndefine();
       return makeToken(ABLNodeType.AMPUNDEFINE);
     }
 
@@ -1340,8 +1336,7 @@ public class Lexer implements IPreprocessor {
     // out to be a space character.
     if (la == null)
       laGet();
-    nameDot = (la.ch != Token.EOF) && (la.ch != INCLUDE_DIRECTIVE_END) && !Character.isWhitespace(la.ch)
-        && (la.ch != '.');
+    nameDot = (la.ch != Token.EOF) && !Character.isWhitespace(la.ch) && (la.ch != '.');
   }
 
   int addFilename(String filename) {
@@ -1431,7 +1426,7 @@ public class Lexer implements IPreprocessor {
           currCol = currentInput.getNextCol();
           currSourceNum = currentInput.getSourceNum();
           currMacroExpansion = currentInput.isMacroExpansion();
-          ppCurrChar = INCLUDE_DIRECTIVE_END;
+          ppCurrChar = ' ';
           return;
         case 2: // popped a macro ref or include arg ref
           currFile = currentInput.getFileIndex();
@@ -1515,7 +1510,7 @@ public class Lexer implements IPreprocessor {
         ++cp.pos;
 
       // filename
-      String includeFilename = ppIncludeRefArg(cp);
+      String includeFilename = ppIncludeRefArg(cp, false);
 
       // whitespace?
       while (Character.isWhitespace(cp.chars[cp.pos]))
@@ -1554,7 +1549,7 @@ public class Lexer implements IPreprocessor {
               ++cp.pos;
             // Arg val
             if (cp.pos != closingCurly)
-              argVal = ppIncludeRefArg(cp);
+              argVal = ppIncludeRefArg(cp, false);
           }
 
           // Add the argument name/val pair
@@ -1575,7 +1570,7 @@ public class Lexer implements IPreprocessor {
           // Are we at closing curly?
           if (cp.pos == closingCurly)
             break;
-          incArgs.add(new IncludeArg("", ppIncludeRefArg(cp)));
+          incArgs.add(new IncludeArg("", ppIncludeRefArg(cp, true)));
         }
       } // numbered args
 
@@ -1671,20 +1666,32 @@ public class Lexer implements IPreprocessor {
   }
 
   /*
-   * Get the next include reference arg, reposition the charpos. A doublequote will start a string - all this means is
-   * that we'll collect whitespace. A singlequote does not have this effect.
+   * Get the next include reference arg, and reposition charpos. Assertion is that first character is not a whitespace.
+   * A doublequote will start a string - all this means is that we'll collect whitespace. A singlequote does not have this effect.
+   * If not a doublequote, we collect characters until we find a whitespace
    */
-  private String ppIncludeRefArg(MacroCharPos cp) {
+  private String ppIncludeRefArg(MacroCharPos cp, boolean numberedArg) {
+    StringBuilder retVal = new StringBuilder();
     boolean gobbleWS = false;
-    StringBuilder theRet = new StringBuilder();
-    // Iterate up to, but not including, closing curly.
+    char c = cp.chars[cp.pos];
+    
+    if (!numberedArg) {
+      if (c == '"') {
+        gobbleWS = true;
+      } else {
+        retVal.append(c);
+      }
+      cp.pos++;
+    }
+
+    // Iterate up to, but not including, closing curly
     while (cp.pos < cp.chars.length - 1) {
-      char c = cp.chars[cp.pos];
+      c = cp.chars[cp.pos];
       switch (c) {
         case '"':
           if (cp.chars[cp.pos + 1] == '"') {
             // quoted quote - does not open/close a string
-            theRet.append('"');
+            retVal.append('"');
             ++cp.pos;
             ++cp.pos;
           } else {
@@ -1698,19 +1705,19 @@ public class Lexer implements IPreprocessor {
         case '\n':
         case '\r':
           if (gobbleWS) {
-            theRet.append(c);
+            retVal.append(c);
             ++cp.pos;
           } else {
-            return theRet.toString();
+            return retVal.toString();
           }
           break;
         default:
-          theRet.append(c);
+          retVal.append(c);
           ++cp.pos;
           break;
       }
     }
-    return theRet.toString();
+    return retVal.toString();
   }
 
   private boolean ppNewInclude(String referencedWithName) {

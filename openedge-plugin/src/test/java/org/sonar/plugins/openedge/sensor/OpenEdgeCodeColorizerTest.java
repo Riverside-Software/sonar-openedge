@@ -24,29 +24,26 @@ import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE2;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
 
-import org.sonar.api.SonarEdition;
-import org.sonar.api.SonarQubeSide;
 import org.sonar.api.batch.sensor.highlighting.TypeOfText;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.internal.SonarRuntimeImpl;
-import org.sonar.api.utils.Version;
+import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class OpenEdgeCodeColorizerTest {
-  private static final Version VERSION = Version.parse("7.5");
 
   @Test
   public void testSp2k() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
     OpenEdgeCodeColorizer sensor = new OpenEdgeCodeColorizer(oeSettings);
     sensor.execute(context);
 
     // Comments
-    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + FILE1 , 1, 10));
+    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + FILE1, 1, 10));
     Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE1, 1, 10).size(), 1);
     Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE1, 1, 10).get(0), TypeOfText.COMMENT);
 
@@ -63,7 +60,8 @@ public class OpenEdgeCodeColorizerTest {
     // Preprocessor
     Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 3, 25));
     Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 3, 25).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 3, 25).get(0), TypeOfText.PREPROCESS_DIRECTIVE);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 3, 25).get(0),
+        TypeOfText.PREPROCESS_DIRECTIVE);
     Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 4, 10));
     Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 4, 10).size(), 1);
     Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 4, 10).get(0), TypeOfText.STRING);
@@ -77,9 +75,11 @@ public class OpenEdgeCodeColorizerTest {
     // Include file
     Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 21, 3));
     Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 21, 3).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 21, 3).get(0), TypeOfText.PREPROCESS_DIRECTIVE);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 21, 3).get(0),
+        TypeOfText.PREPROCESS_DIRECTIVE);
     Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 21, 20).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 21, 20).get(0), TypeOfText.PREPROCESS_DIRECTIVE);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 21, 20).get(0),
+        TypeOfText.PREPROCESS_DIRECTIVE);
   }
 
 }

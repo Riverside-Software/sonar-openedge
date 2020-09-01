@@ -23,6 +23,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -31,24 +32,22 @@ import org.prorefactor.core.schema.Schema;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.prorefactor.treeparser.ParseUnit;
-import org.sonar.api.SonarEdition;
-import org.sonar.api.SonarQubeSide;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.cpd.NewCpdTokens;
 import org.sonar.api.batch.sensor.cpd.internal.TokensLine;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.internal.SonarRuntimeImpl;
+import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.internal.google.common.io.Files;
-import org.sonar.api.utils.Version;
+import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.Constants;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class CPDCallbackTest {
   private static final String BASEDIR = "src/test/resources/";
-  private static final Version VERSION = Version.parse("7.5");
+
   private RefactorSession session;
 
   @BeforeMethod
@@ -59,14 +58,15 @@ public class CPDCallbackTest {
   @Test
   public void test1() {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
-    OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
+    OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
     settings.init();
     InputFile inputFile = getInputFile(context, "cpd01.p");
     ParseUnit unit = getParseUnit(inputFile);
     ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings, unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
-    
+
     List<TokensLine> lines = context.cpdTokens(inputFile.key());
     assertEquals(lines.size(), 3);
     // Keyword expansion
@@ -78,14 +78,15 @@ public class CPDCallbackTest {
   @Test
   public void test2() {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
-    OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
+    OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
     settings.init();
     InputFile inputFile = getInputFile(context, "cpd02.p");
     ParseUnit unit = getParseUnit(inputFile);
     ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings, unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
-    
+
     List<TokensLine> lines = context.cpdTokens(inputFile.key());
     assertEquals(lines.size(), 5);
     // Keyword expansion
@@ -100,14 +101,15 @@ public class CPDCallbackTest {
   @Test
   public void test3() {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
-    OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
+    OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
     settings.init();
     InputFile inputFile = getInputFile(context, "cpd03.p");
     ParseUnit unit = getParseUnit(inputFile);
     ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings, unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
-    
+
     List<TokensLine> lines = context.cpdTokens(inputFile.key());
     assertEquals(lines.size(), 2);
     // TT name is expanded from preprocessor so doesn't appear
@@ -119,7 +121,8 @@ public class CPDCallbackTest {
   @Test
   public void testNoProperties() {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
-    OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
+    OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
     settings.init();
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
@@ -133,16 +136,21 @@ public class CPDCallbackTest {
 
   @Test
   public void testAnnotations() {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(Constants.CPD_ANNOTATIONS, "Generated");
+
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
-    context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated");
-    OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
-    settings.init();
+    context.setSettings(settings);
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+    oeSettings.init();
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings, unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, oeSettings, unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
-    
+
     List<TokensLine> lines = context.cpdTokens(inputFile.key());
     // 4 lines per procedure + one placeholder
     assertEquals(lines.size(), 9);
@@ -150,16 +158,21 @@ public class CPDCallbackTest {
 
   @Test
   public void testProcedures() {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(Constants.CPD_PROCEDURES, "p1,p4,p3");
+
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
-    context.settings().setProperty(Constants.CPD_PROCEDURES, "p1,p4,p3");
-    OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
-    settings.init();
+    context.setSettings(settings);
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+    oeSettings.init();
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings, unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, oeSettings, unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
-    
+
     List<TokensLine> lines = context.cpdTokens(inputFile.key());
     // 4 lines per procedure + one annotation + two placeholders
     assertEquals(lines.size(), 7);
@@ -167,17 +180,23 @@ public class CPDCallbackTest {
 
   @Test
   public void testAnnotationsAndProcedures() {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(Constants.CPD_ANNOTATIONS, "Generated");
+    settings.setProperty(Constants.CPD_PROCEDURES, "p1,p4,p5");
+
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
-    context.settings().setProperty(Constants.CPD_ANNOTATIONS, "Generated");
-    context.settings().setProperty(Constants.CPD_PROCEDURES, "p1,p4,p5");
-    OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
-    settings.init();
+    context.setSettings(settings);
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+    oeSettings.init();
+
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings, unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, oeSettings, unit);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
-    
+
     List<TokensLine> lines = context.cpdTokens(inputFile.key());
     // 4 lines per procedure + two placeholders
     assertEquals(lines.size(), 6);
@@ -196,12 +215,16 @@ public class CPDCallbackTest {
     }
   }
 
-  private ParseUnit getParseUnit(InputFile file) {
-    ParseUnit unit = new ParseUnit(file.file(), session);
-    unit.treeParser01();
-    unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
+  public ParseUnit getParseUnit(InputFile file) {
+    try (InputStream input = file.inputStream()) {
+      ParseUnit unit = new ParseUnit(file.inputStream(), file.toString(), session);
+      unit.treeParser01();
+      unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
 
-    return unit;
+      return unit;
+    } catch (IOException caught) {
+      return null;
+    }
   }
 
 }

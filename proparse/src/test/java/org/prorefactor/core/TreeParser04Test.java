@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.core;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -50,6 +51,7 @@ public class TreeParser04Test {
 
     ParseUnit pu = new ParseUnit(new File(inName), session);
     pu.treeParser01();
+    assertFalse(pu.hasSyntaxError());
 
     PrintWriter writer = new PrintWriter(new FileWriter(outFile));
     JPNodeLister nodeLister = new TP01FramesTreeLister(pu.getTopNode(), writer);

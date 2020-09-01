@@ -15,6 +15,7 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -48,6 +49,7 @@ public class ClassesTest {
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
     assertTrue(unit.getTopNode().query(ABLNodeType.ANNOTATION).size() == 1);
@@ -60,6 +62,7 @@ public class ClassesTest {
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
@@ -87,6 +90,7 @@ public class ClassesTest {
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 

@@ -24,8 +24,8 @@ import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.macrolevel.IPreprocessorEventListener;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
+import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.IntegerIndex;
-import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.IProparseSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   // Do we only read tokens ? Or do we expand include files ?
   private final boolean lexOnly;
   private final IProparseSettings ppSettings;
-  private final RefactorSession session;
+  private final IProparseEnvironment session;
   private final IntegerIndex<String> filenameList = new IntegerIndex<>();
   private final IPreprocessorEventListener lstListener = new PreprocessorEventListener();
   private final Lexer lexer;
@@ -56,7 +56,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
    * @param lexOnly Don't use preprocessor
    * @throws UncheckedIOException
    */
-  public ABLLexer(RefactorSession session, ByteSource src, String fileName, boolean lexOnly) {
+  public ABLLexer(IProparseEnvironment session, ByteSource src, String fileName, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.ppSettings = session.getProparseSettings();
     this.session = session;
@@ -72,7 +72,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   /**
    * Test-only constructor, no filters added
    */
-  protected ABLLexer(RefactorSession session, ByteSource src, String fileName) {
+  protected ABLLexer(IProparseEnvironment session, ByteSource src, String fileName) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.ppSettings = session.getProparseSettings();
     this.session = session;
@@ -173,7 +173,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
     return lstListener;
   }
 
-  public RefactorSession getRefactorSession() {
+  public IProparseEnvironment getRefactorSession() {
     return session;
   }
 

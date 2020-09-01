@@ -15,6 +15,8 @@
  ********************************************************************************/
 package org.prorefactor.core;
 
+import static org.testng.Assert.assertFalse;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -53,6 +55,7 @@ public class NewSyntaxTest {
     // Just run the TreeParser to see if file can be parsed without error
     ParseUnit pu = new ParseUnit(new File("src/test/resources/data/newsyntax", file), session);
     pu.treeParser01();
+    assertFalse(pu.hasSyntaxError());
   }
 
   @Test

@@ -29,7 +29,6 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.support.SymbolScope.FieldType;
-import org.prorefactor.refactor.RefactorSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +43,7 @@ import com.progress.xref.EmptyCrossReference;
 public class ParserSupport {
   private static final Logger LOG = LoggerFactory.getLogger(ParserSupport.class);
 
-  private final RefactorSession session;
+  private final IProparseEnvironment session;
   private final ClassFinder classFinder;
   // Scope for the compile unit or class. It might be "sub" to a super scope in a class hierarchy
   private final RootSymbolScope unitScope;
@@ -70,7 +69,7 @@ public class ParserSupport {
   private List<SymbolScope> innerScopes = new ArrayList<>();
   private Map<RuleContext, SymbolScope> innerScopesMap = new HashMap<>();
 
-  public ParserSupport(RefactorSession session, CrossReference xref) {
+  public ParserSupport(IProparseEnvironment session, CrossReference xref) {
     this.session = session;
     this.unitScope = new RootSymbolScope(session);
     this.currentScope = unitScope;

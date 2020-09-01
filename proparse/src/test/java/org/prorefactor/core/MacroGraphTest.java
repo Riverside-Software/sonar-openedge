@@ -15,6 +15,7 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -67,6 +68,7 @@ public class MacroGraphTest {
   public void testGlobalDefine() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     testVariable(unit.getTopNode(), "var1");
     testVariable(unit.getTopNode(), "var2");
@@ -77,6 +79,7 @@ public class MacroGraphTest {
   public void testScopedDefine() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     testNoVariable(unit.getTopNode(), "var4");
   }
@@ -85,6 +88,7 @@ public class MacroGraphTest {
   public void testMacroGraph() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     assertEquals(unit.getMacroGraph().findExternalMacroReferences().size(), 4);
     assertEquals(unit.getMacroGraph().findExternalMacroReferences(new int[] {1,1}, new int[] {5,1}).size(), 1);
@@ -117,6 +121,7 @@ public class MacroGraphTest {
   public void testMacroGraphPosition() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     List<MacroEvent> list = unit.getMacroGraph().findExternalMacroReferences();
     assertEquals(list.get(0).getPosition().getLine(), 3);
@@ -128,6 +133,7 @@ public class MacroGraphTest {
   public void testIncludeParameter01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor18.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     List<MacroEvent> list = unit.getMacroGraph().findExternalMacroReferences();
     assertNotNull(list);
@@ -147,6 +153,7 @@ public class MacroGraphTest {
   public void testIncludeParameter02() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor18-2.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     List<MacroEvent> list = unit.getMacroGraph().findExternalMacroReferences();
     assertNotNull(list);

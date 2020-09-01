@@ -21,45 +21,32 @@ package org.sonar.plugins.openedge.sensor;
 
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.BASEDIR;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.CLASS1;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE2;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE4;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
-import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
-import org.sonar.api.SonarEdition;
-import org.sonar.api.SonarQubeSide;
-import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
-import org.sonar.api.batch.rule.internal.NewActiveRule;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.internal.SonarRuntimeImpl;
-import org.sonar.api.rule.RuleKey;
-import org.sonar.api.utils.Version;
-import org.sonar.plugins.openedge.api.CheckRegistration;
+import org.sonar.api.config.internal.MapSettings;
+import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.Constants;
-import org.sonar.plugins.openedge.checks.ClumsySyntax;
-import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
-import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
-import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.annotations.Test;
 
 public class OpenEdgeCPDSensorTest {
-  private static final Version VERSION = Version.parse("7.5");
 
-  @SuppressWarnings("deprecation")
   @Test
   public void testCPDSensor() throws Exception {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(Constants.USE_SIMPLE_CPD, true);
+
     SensorContextTester context = TestProjectSensorContext.createContext();
-    context.settings().setProperty(Constants.USE_SIMPLE_CPD, true);
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
+    context.setSettings(settings);
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
     OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings);
     sensor.execute(context);
 
@@ -71,11 +58,11 @@ public class OpenEdgeCPDSensorTest {
     assertEquals(context.cpdTokens(BASEDIR + ":" + FILE4).size(), 2);
   }
 
-  @SuppressWarnings("deprecation")
   @Test
   public void testCPDSensor02() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY));
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
     OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings);
     sensor.execute(context);
 

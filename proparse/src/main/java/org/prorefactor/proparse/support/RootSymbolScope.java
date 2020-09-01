@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.refactor.RefactorSession;
 
 import eu.rssw.pct.elements.ITypeInfo;
 
@@ -34,7 +33,7 @@ public class RootSymbolScope extends SymbolScope {
 
   private final Set<String> functionSet = new HashSet<>();
 
-  public RootSymbolScope(RefactorSession session) {
+  public RootSymbolScope(IProparseEnvironment session) {
     super(session);
   }
 

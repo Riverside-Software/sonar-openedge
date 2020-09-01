@@ -27,7 +27,7 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.proparse.XCodedFileException;
-import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.InputFile;
@@ -39,6 +39,7 @@ import org.sonar.api.batch.sensor.cpd.NewCpdTokens;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.IRefactorSessionEnv;
 import org.sonar.plugins.openedge.foundation.InputFileUtils;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
@@ -64,11 +65,12 @@ public class OpenEdgeCPDSensor implements Sensor {
     if ((context.runtime().getProduct() == SonarProduct.SONARLINT) || !settings.useSimpleCPD())
       return;
     settings.init();
-    RefactorSession session = settings.getProparseSession();
+    IRefactorSessionEnv sessions = settings.getProparseSessions();
 
     for (InputFile file : context.fileSystem().inputFiles(
         context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("CPD on {}", file);
+      IProparseEnvironment session = sessions.getSession(file.relativePath());
       try {
         processFile(context, session, file);
       } catch (UncheckedIOException | ProparseRuntimeException caught) {
@@ -81,7 +83,7 @@ public class OpenEdgeCPDSensor implements Sensor {
     }
   }
 
-  private void processFile(SensorContext context, RefactorSession session, InputFile file) {
+  private void processFile(SensorContext context, IProparseEnvironment session, InputFile file) {
     TokenSource stream = new ParseUnit(InputFileUtils.getInputStream(file),
         InputFileUtils.getRelativePath(file, context.fileSystem()), session).lex();
     if (stream == null)

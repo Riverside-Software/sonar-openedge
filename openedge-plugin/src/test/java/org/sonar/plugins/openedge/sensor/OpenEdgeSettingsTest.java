@@ -22,30 +22,53 @@ package org.sonar.plugins.openedge.sensor;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 
-import org.prorefactor.refactor.RefactorSession;
-import org.sonar.api.SonarEdition;
-import org.sonar.api.SonarQubeSide;
-import org.sonar.api.SonarRuntime;
+import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
-import org.sonar.api.internal.SonarRuntimeImpl;
-import org.sonar.api.utils.Version;
+import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
+import org.sonar.plugins.openedge.utils.TestProjectSensorContextExtra;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.elements.ITypeInfo;
 
 public class OpenEdgeSettingsTest {
-  private static final Version VERSION = Version.parse("7.5");
-  private static final SonarRuntime SQ_RUNTIME = SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER, SonarEdition.COMMUNITY);
-  private static final SonarRuntime SL_RUNTIME = SonarRuntimeImpl.forSonarLint(VERSION);
+
+  @Test
+  public void testSameObject() throws Exception {
+    SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
+    context.setSettings(new MapSettings());
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+    IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
+    assertSame(ppSess, oeSettings.getProparseSessions().getDefaultSession());
+  }
+
+  @Test
+  public void testTwoSessions() throws Exception {
+    SensorContextTester context = TestProjectSensorContextExtra.createContext();
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+    IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
+    assertSame(ppSess, oeSettings.getProparseSessions().getDefaultSession());
+    assertSame(ppSess, oeSettings.getProparseSessions().getSession("src/procedures/test1.p"));
+
+    IProparseEnvironment sess2 = oeSettings.getProparseSessions().getSession("src/procedures/test4.p");
+    assertNotSame(ppSess, sess2);
+    assertNotNull(sess2.getSchema().lookupTable("extraTab1"));
+    assertNull(sess2.getSchema().lookupTable("customer"));
+  }
 
   @Test
   public void testSonarDatabasesFromSonarQube01() throws Exception {
@@ -57,8 +80,9 @@ public class OpenEdgeSettingsTest {
     SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
     context.setSettings(settings);
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SQ_RUNTIME);
-    RefactorSession ppSess = oeSettings.getProparseSession();
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+    IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertNotNull(ppSess);
     assertNotNull(ppSess.getSchema());
     assertNull(ppSess.getSchema().lookupTable("item"));
@@ -74,8 +98,9 @@ public class OpenEdgeSettingsTest {
     SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
     context.setSettings(settings);
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SQ_RUNTIME);
-    RefactorSession ppSess = oeSettings.getProparseSession();
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+    IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertNotNull(ppSess);
     assertNotNull(ppSess.getSchema());
     assertNotNull(ppSess.getSchema().lookupDatabase("sp2k"));
@@ -98,8 +123,9 @@ public class OpenEdgeSettingsTest {
     SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
     context.setSettings(settings);
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SQ_RUNTIME);
-    RefactorSession ppSess = oeSettings.getProparseSession();
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+    IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertNotNull(ppSess);
     assertNotNull(ppSess.getSchema());
     assertNull(ppSess.getSchema().lookupDatabase("sp2k"));
@@ -123,8 +149,9 @@ public class OpenEdgeSettingsTest {
     SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
     context.setSettings(settings);
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SQ_RUNTIME);
-    RefactorSession ppSess = oeSettings.getProparseSession();
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+    IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertNotNull(ppSess);
     assertNotNull(ppSess.getSchema());
     assertNull(ppSess.getSchema().lookupDatabase("sp2k"));
@@ -152,8 +179,9 @@ public class OpenEdgeSettingsTest {
     SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
     context.setSettings(settings);
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SL_RUNTIME);
-    RefactorSession ppSess = oeSettings.getProparseSession();
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARLINT_RUNTIME, OpenEdgePluginTest.SERVER);
+    IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertNotNull(ppSess);
     assertNotNull(ppSess.getSchema());
     assertNotNull(ppSess.getSchema().lookupDatabase("sp2k"));
@@ -182,8 +210,9 @@ public class OpenEdgeSettingsTest {
     SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
     context.setSettings(settings);
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SL_RUNTIME);
-    RefactorSession ppSess = oeSettings.getProparseSession();
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARLINT_RUNTIME, OpenEdgePluginTest.SERVER);
+    IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertNotNull(ppSess);
     assertNotNull(ppSess.getSchema());
     assertNull(ppSess.getSchema().lookupDatabase("sp2k"));
@@ -208,8 +237,9 @@ public class OpenEdgeSettingsTest {
     SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
     context.setSettings(settings);
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), SL_RUNTIME);
-    RefactorSession session = oeSettings.getProparseSession();
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARLINT_RUNTIME, OpenEdgePluginTest.SERVER);
+    IProparseEnvironment session = oeSettings.getProparseSessions().getDefaultSession();
 
     ITypeInfo info = session.getTypeInfo("Progress.Json.ObjectModel.JsonArray");
     assertNotNull(info);

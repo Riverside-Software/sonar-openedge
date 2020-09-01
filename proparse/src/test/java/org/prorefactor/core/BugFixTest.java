@@ -16,6 +16,7 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
@@ -106,6 +107,7 @@ public class BugFixTest {
     assertNull(pu.getRootScope());
     pu.parse();
     pu.treeParser01();
+    assertFalse(pu.hasSyntaxError());
     assertNotNull(pu.getTopNode());
     assertNotNull(pu.getRootScope());
 
@@ -368,6 +370,12 @@ public class BugFixTest {
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
   }
 
+  @Test
+  public void test48() {
+    ParseUnit unit = genericTest("bug48.p");
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
+  }
+
   // Next two tests : same exception should be thrown in both cases
 //  @Test(expectedExceptions = {ProparseRuntimeException.class})
 //  public void testCache1() {
@@ -534,6 +542,7 @@ public class BugFixTest {
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
 
     // First FIND statement
@@ -575,6 +584,7 @@ public class BugFixTest {
      assertNull(unit.getTopNode());
      assertNull(unit.getRootScope());
      unit.treeParser01();
+     assertFalse(unit.hasSyntaxError());
      assertNotNull(unit.getTopNode());
    }
 
@@ -584,6 +594,7 @@ public class BugFixTest {
      assertNull(unit.getTopNode());
      assertNull(unit.getRootScope());
      unit.treeParser01();
+     assertFalse(unit.hasSyntaxError());
      assertNotNull(unit.getTopNode());
    }
 
@@ -593,6 +604,7 @@ public class BugFixTest {
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
 
     // Message statement

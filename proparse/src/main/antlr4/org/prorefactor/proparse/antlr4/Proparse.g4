@@ -21,10 +21,11 @@ parser grammar Proparse;
 @header {
   import org.antlr.v4.runtime.BufferedTokenStream;
   import org.prorefactor.core.ABLNodeType;
+  import org.prorefactor.proparse.support.IProparseEnvironment;
   import org.prorefactor.proparse.support.IntegerIndex;
   import org.prorefactor.proparse.support.ParserSupport;
   import org.prorefactor.proparse.support.SymbolScope;
-  import org.prorefactor.refactor.RefactorSession;
+  
   import com.progress.xref.CrossReference;
 }
 
@@ -35,7 +36,7 @@ options {
 @members {
   private ParserSupport support;
 
-  public void initAntlr4(RefactorSession session, CrossReference xref) {
+  public void initAntlr4(IProparseEnvironment session, CrossReference xref) {
     this.support = new ParserSupport(session, xref);
   }
 
@@ -510,8 +511,13 @@ expressionTerm:
     NORETURNVALUE sWidget colonAttribute  # exprtNoReturnValue
   | // Widget attributes has to be checked before field or func, because they can be ambiguous up to the OBJCOLON. Think about no-arg functions like SUPER.
     // Also has to be checked before systemhandlename, because you want to pick up all of FILE-INFO:FILE-TYPE rather than just FILE-INFO, for example.
-    widName colonAttribute     # exprtWidName
-  | expressionTerm2 colonAttribute?     # exprtExprt2
+    widName colonAttribute           # exprtWidName
+  | expressionTerm2 colonAttribute?  # exprtExprt2
+  ;
+
+widattr:
+    widName colonAttribute           # widattrWidName
+  | expressionTerm2 colonAttribute   # widattrExprt2
   ;
 
 expressionTerm2:
@@ -538,13 +544,31 @@ expressionTerm2:
   | field ( NOT? ENTERED )?  # exprt2Field
   ;
 
-widattr:
-    widName colonAttribute  # widattrWidName
-  | expressionTerm2 colonAttribute   # widattrExprt2
+widName:
+    systemHandleName
+  | DATASET identifier
+  | DATASOURCE identifier
+  | FIELD field
+  | FRAME identifier
+  | MENU identifier
+  | SUBMENU identifier
+  | MENUITEM identifier
+  | BROWSE identifier
+  | QUERY identifier
+  | TEMPTABLE filn
+  | BUFFER filn
+  | XDOCUMENT filn
+  | XNODEREF filn
+  | SOCKET filn
+  | STREAM streamname
   ;
 
 colonAttribute:
-    ( ( OBJCOLON | DOUBLECOLON ) id=. arraySubscript? methodParamList? )+ inuic? ( AS . )?
+    colonAttributeSub+ inuic? ( AS . )?
+  ;
+
+colonAttributeSub:
+    ( OBJCOLON | DOUBLECOLON ) id=. arraySubscript? methodParamList?
   ;
 
 gWidget:
@@ -559,24 +583,6 @@ sWidget:
     widName | field
   ;
 
-widName:
-     systemHandleName
-  |  DATASET identifier
-  |  DATASOURCE identifier
-  |  FIELD field
-  |  FRAME identifier
-  |  MENU identifier
-  |  SUBMENU identifier
-  |  MENUITEM identifier
-  |  BROWSE identifier
-  |  QUERY identifier
-  |  TEMPTABLE filn
-  |  BUFFER filn
-  |  XDOCUMENT filn
-  |  XNODEREF filn
-  |  SOCKET filn
-  |  STREAM streamname
-  ;
 
 filn:
     t1=identifier ( NAMEDOT t2=identifier )?

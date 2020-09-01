@@ -418,7 +418,6 @@ public class ProToken implements Token {
         case AMPSCOPEDDEFINE:
         case AMPUNDEFINE:
         case INCLUDEDIRECTIVE:
-        case INCLUDEDIRECTIVE_END:
         case AMPIF:
         case AMPELSE:
         case AMPELSEIF:

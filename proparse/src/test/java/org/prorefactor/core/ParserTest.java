@@ -35,6 +35,7 @@ import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.UnitTestModule2;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -59,6 +60,7 @@ public class ParserTest {
   public void testAscending01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending01.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     List<JPNode> stmts = unit.getTopNode().queryStateHead(ABLNodeType.DEFINE);
     for (JPNode stmt : stmts) {
@@ -75,6 +77,7 @@ public class ParserTest {
   public void testAscending02() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending02.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     List<JPNode> stmts = unit.getTopNode().queryStateHead(ABLNodeType.SELECT);
     for (JPNode stmt : stmts) {
@@ -90,6 +93,7 @@ public class ParserTest {
   public void testAscending03() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending03.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     for (JPNode stmt : unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE)) {
       assertEquals(stmt.query(ABLNodeType.ASC).size(), 2);
@@ -104,6 +108,7 @@ public class ParserTest {
   public void testLogical01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "logical01.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     List<JPNode> stmts = unit.getTopNode().queryStateHead(ABLNodeType.DEFINE);
     for (JPNode stmt : stmts) {
@@ -122,6 +127,7 @@ public class ParserTest {
   public void testLogical02() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "logical02.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     List<JPNode> stmts = unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE);
     assertEquals(stmts.get(0).query(ABLNodeType.LOG).size(), 1);
@@ -133,6 +139,7 @@ public class ParserTest {
     // Issue https://github.com/Riverside-Software/sonar-openedge/issues/673
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "objindynfunc.cls"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     assertEquals(unit.getTopNode().query(ABLNodeType.DYNAMICFUNCTION).size(), 3);
   }
@@ -142,6 +149,7 @@ public class ParserTest {
   public void testGetCodepage() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "getcodepage.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     List<JPNode> stmts = unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE);
     assertEquals(stmts.get(0).query(ABLNodeType.GETCODEPAGE).size(), 1);
@@ -158,6 +166,7 @@ public class ParserTest {
   public void testConnectDatabase() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("connect database dialog box".getBytes()), "<unnamed>", session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CONNECT).size(), 1);
   }
 
@@ -165,6 +174,7 @@ public class ParserTest {
   public void testReservedKeyword() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define temp-table xxx field to-rowid as character.".getBytes()), "<unnamed>", session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
   }
 
@@ -172,6 +182,7 @@ public class ParserTest {
   public void testInputFunction() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "inputfunc.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.ON).size(), 1);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.IF).get(0).queryStateHead().size(), 2);
   }
@@ -180,6 +191,7 @@ public class ParserTest {
   public void testParameterLike() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define input parameter ipPrm no-undo like customer.custnum.".getBytes()), "<unnamed>", session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
     JPNode node = unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0);
     assertEquals(node.query(ABLNodeType.NOUNDO).size(), 1);
@@ -189,6 +201,7 @@ public class ParserTest {
   public void testAnnotation01() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("@Progress.Lang.Annotation. MESSAGE 'Hello1'. MESSAGE 'Hello2'.".getBytes()), "<unnamed>", session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
   }
 
@@ -196,6 +209,7 @@ public class ParserTest {
   public void testAnnotation02() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("@Progress.Lang.Annotation(foo='bar'). MESSAGE 'Hello1'. MESSAGE 'Hello2'.".getBytes()), "<unnamed>", session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
   }
 
@@ -206,6 +220,7 @@ public class ParserTest {
   public void tesTTIndex01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ttindex01.p"), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
 
     TableBuffer tt01 = unit.getRootScope().lookupTempTable("tt01");
     assertNotNull(tt01);
@@ -260,6 +275,7 @@ public class ParserTest {
   public void testRecordNameNode() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "recordName.p"), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
 
     for (JPNode node : unit.getTopNode().query(ABLNodeType.RECORD_NAME)) {
       RecordNameNode recNode = (RecordNameNode) node;
@@ -283,6 +299,7 @@ public class ParserTest {
   public void testPackagePrivate() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "package.cls"), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 3);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.METHOD).size(), 2);
   }
@@ -292,6 +309,7 @@ public class ParserTest {
     // No widget-pool table, statement is about creating a widget-pool
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("create widget-pool. message 'hello'.".getBytes()), "<unnamed>", session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertNull(session.getSchema().lookupTable("widget-pool"));
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).getState2(), ABLNodeType.WIDGETPOOL.getType());
@@ -324,6 +342,7 @@ public class ParserTest {
         "def image img1 file 'f1' size 1 by 1. def frame f1 img1 at row 1 col 1. img1:load-image('f2') in frame f1.".getBytes()),
         "<unnamed>", session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 2);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).getState2(), ABLNodeType.IMAGE.getType());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(1).getState2(), ABLNodeType.FRAME.getType());
@@ -338,6 +357,7 @@ public class ParserTest {
         "def var xxx as widget-handle. def var yyy as char. def frame zzz yyy. create control-frame xxx. xxx:move-after(yyy:handle in frame zzz).".getBytes()),
         "<unnamed>", session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 3);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).getState2(),
         ABLNodeType.VARIABLE.getType());
@@ -354,6 +374,7 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("def var xxx as handle. message xxx::yyy.".getBytes()),
         "<unnamed>", session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
   }
@@ -364,6 +385,7 @@ public class ParserTest {
         "def var xxx as System.Reflection.PropertyInfo. xxx:SetValue('xxx', xxx as long, 'xx' + 'yy' + 'zz').".getBytes()),
         "<unnamed>", session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
     JPNode expr = unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).get(0);
@@ -377,6 +399,7 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "maxk.p"), session);
     unit.enableProfiler();
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
     ParseInfo info = unit.getParseInfo();
 
     // Not really a unit test, but if max_k is less then 450, then the grammar rules have changed (in a good way)
@@ -391,6 +414,7 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "maxk.p"), session);
     unit.reportAmbiguity();
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
   }
 
   @Test
@@ -399,6 +423,7 @@ public class ParserTest {
         "find first _file. display recid(_file).".getBytes()),
         "<unnamed>", session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().query(ABLNodeType.RECORD_NAME).size(), 2);
   }
 
@@ -408,6 +433,7 @@ public class ParserTest {
         "get-db-client('sp2k'). get-db-client().".getBytes()),
         "<unnamed>", session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
     assertEquals(unit.getTopNode().query(ABLNodeType.GETDBCLIENT).size(), 2);
   }
@@ -418,6 +444,7 @@ public class ParserTest {
         "interface rssw.test: method public Progress.Lang.Object getService(input xxx as class Progress.Lang.Class). end interface.".getBytes()),
         "<unnamed>", session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
   }
 
@@ -425,6 +452,7 @@ public class ParserTest {
   public void testDirective() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "directive.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     // Looking for the DEFINE node
     JPNode node1 = (JPNode) unit.getTopNode().findDirectChild(ABLNodeType.DEFINE);
@@ -466,6 +494,7 @@ public class ParserTest {
   public void testExpressionEngine01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "expression01.p"), session);
     unit.parse();
+    assertFalse(unit.hasSyntaxError());
 
     // Looking for the DEFINE node
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.EXPR_STATEMENT);
@@ -505,6 +534,7 @@ public class ParserTest {
   public void testVarStatement01() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CHAR s1, s2, s3, s4.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
@@ -512,6 +542,7 @@ public class ParserTest {
   public void testVarStatement02() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT x, y, z = 3.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
@@ -519,6 +550,7 @@ public class ParserTest {
   public void testVarStatement03() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS mypackage.subdir.myclass myobj1, myobj2, myobj3.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
@@ -526,6 +558,7 @@ public class ParserTest {
   public void testVarStatement04() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR mypackage.subdir.myclass myobj1.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
@@ -533,12 +566,15 @@ public class ParserTest {
   public void testVarStatement05() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR DATE d1, d2 = 1/1/2020, d3 = TODAY.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
+
   @Test
   public void testVarStatement06() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR PROTECTED DATE d1, d2 = 1/1/2020.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
@@ -546,6 +582,7 @@ public class ParserTest {
   public void testVarStatement07() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[3] x = [1, 2], y, z = [100, 200, 300].".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
@@ -553,6 +590,7 @@ public class ParserTest {
   public void testVarStatement08() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
@@ -560,6 +598,7 @@ public class ParserTest {
   public void testVarStatement09() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y = [1,2,3].".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
@@ -567,6 +606,7 @@ public class ParserTest {
   public void testVarStatement10() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x = [1,2], y = [1,2,3].".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
@@ -574,6 +614,7 @@ public class ParserTest {
   public void testVarStatement11() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS foo[2] classArray.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
@@ -581,7 +622,99 @@ public class ParserTest {
   public void testVarStatement12() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR \"System.Collections.Generic.List<char>\" cList.".getBytes()), session);
     unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
 
+  @Test
+  public void testDbQualifierSports2000() {
+    // Standard schema, lower-case database name
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "dbqualifier01.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    // Looking for the FIND node
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.FIND);
+    assertNotNull(nodes);
+    assertEquals(nodes.size(), 4);
+
+    JPNode findNode = nodes.get(0);
+    JPNode ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    RecordNameNode rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "sports2000.Customer");
+
+    findNode = nodes.get(1);
+    ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "sports2000.Customer");
+
+    findNode = nodes.get(2);
+    ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "sports2000.Customer");
+
+    findNode = nodes.get(3);
+    ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "sports2000.Customer");
+  }
+
+  @Test
+  public void testDbQualifierSP2K() {
+    Injector injector = Guice.createInjector(new UnitTestModule2());
+    RefactorSession session2 = injector.getInstance(RefactorSession.class);
+
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "dbqualifier02.p"), session2);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    // Looking for the FIND node
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.FIND);
+    assertNotNull(nodes);
+    assertEquals(nodes.size(), 4);
+
+    JPNode findNode = nodes.get(0);
+    JPNode ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    RecordNameNode rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
+
+    findNode = nodes.get(1);
+    ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
+
+    findNode = nodes.get(2);
+    ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
+
+    findNode = nodes.get(3);
+    ch1 = findNode.getFirstChild();
+    assertNotNull(ch1);
+    assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
+    rec1 = (RecordNameNode) ch1;
+    assertNotNull(rec1.getTableBuffer());
+    assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
+  }
 }
