@@ -26,7 +26,6 @@ import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.IntegerIndex;
-import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.IProparseSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
