@@ -72,6 +72,7 @@ public class Lexer implements IPreprocessor {
   private IncludeFile currentInclude;
   private InputSource currentInput;
   private int sourceCounter;
+  private boolean writableTokens;
 
   private final ABLLexer prepro;
   private final TokenFactory<ProToken> factory;
@@ -123,7 +124,7 @@ public class Lexer implements IPreprocessor {
   private Map<String, String> globalDefdNames = new HashMap<>();
   private int sequence = 0;
 
-  protected Lexer(ABLLexer prepro, ByteSource src, String fileName) {
+  Lexer(ABLLexer prepro, ByteSource src, String fileName) {
     this.prepro = prepro;
     this.factory = new ProTokenFactory();
     try {
@@ -137,6 +138,10 @@ public class Lexer implements IPreprocessor {
     currSourceNum = currentInput.getSourceNum();
 
     getChar(); // We always assume "currChar" is available.
+  }
+
+  void enableWritableTokens() {
+    this.writableTokens = true;
   }
 
   //////////////// Lexical productions listed first, support functions follow.
@@ -1123,6 +1128,7 @@ public class Lexer implements IPreprocessor {
       loc.add(tokenStartPos.line);
     }
     return new ProToken.Builder(type, text) //
+      .setWritable(writableTokens) //
       .setFileIndex(tokenStartPos.file) //
       .setFileName(prepro.getFilename(tokenStartPos.file)) //
       .setLine(tokenStartPos.line) //

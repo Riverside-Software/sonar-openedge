@@ -94,6 +94,10 @@ public class ABLLexer implements TokenSource, IPreprocessor {
     return filenameList.getValue(fileIndex);
   }
 
+  public void enableWritableTokens() {
+    lexer.enableWritableTokens();
+  }
+
   // **********************
   // TokenSource interface
   // **********************

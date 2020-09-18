@@ -33,7 +33,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
-import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.atn.DecisionInfo;
 import org.antlr.v4.runtime.atn.ParseInfo;
 import org.antlr.v4.runtime.atn.PredictionMode;
@@ -102,8 +101,11 @@ public class ParseUnit {
   // ANTLR4 debug and profiler switches
   private boolean profiler;
   private ParseInfo parseInfo;
+  private boolean keepStream;
+  private CommonTokenStream stream;
   private boolean trace;
   private boolean ambiguityReport;
+  private boolean writableTokens;
 
   // Timings (in ns)
   private long parseTimeSLL;
@@ -139,11 +141,26 @@ public class ParseUnit {
   }
 
   /**
+   * Generates WritableProToken instead of immutable ProToken in the lexer phase
+   */
+  public void enableWritableTokens() {
+    this.writableTokens = true;
+  }
+
+  /**
    * Enables profiler mode in the parsing phase. Should not be activated in production, CPU intensive
    * @see ParseUnit#getParseInfo()
    */
   public void enableProfiler() {
     profiler = true;
+  }
+
+  public void keepStream() {
+    keepStream = true;
+  }
+
+  public CommonTokenStream getStream() {
+    return stream;
   }
 
   /**
@@ -221,6 +238,8 @@ public class ParseUnit {
 
   public TokenSource preprocess() {
     ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
+    if (writableTokens)
+      lexer.enableWritableTokens();
     fileNameList = lexer.getFilenameList();
     macroGraph = lexer.getMacroGraph();
     appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
@@ -238,6 +257,8 @@ public class ParseUnit {
   public void lexAndGenerateMetrics() {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
     ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, true);
+    if (writableTokens)
+      lexer.enableWritableTokens();
     Token tok = lexer.nextToken();
     while (tok.getType() != Token.EOF) {
       tok = lexer.nextToken();
@@ -250,7 +271,9 @@ public class ParseUnit {
     LOGGER.trace("Entering ParseUnit#parse()");
 
     ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
-    TokenStream stream = new CommonTokenStream(lexer);
+    if (writableTokens)
+      lexer.enableWritableTokens();
+    CommonTokenStream stream = new CommonTokenStream(lexer);
     Proparse parser = new Proparse(stream);
     parser.setTrace(trace);
     parser.setProfile(profiler);
@@ -309,6 +332,9 @@ public class ParseUnit {
 
     if (profiler) {
       parseInfo = parser.getParseInfo();
+    }
+    if (keepStream) {
+      this.stream = stream;
     }
 
     LOGGER.trace("Exiting ParseUnit#parse()");
@@ -510,6 +536,7 @@ public class ParseUnit {
 
   private ByteSource getByteSource() {
     try (InputStream stream = input == null ? new FileInputStream(file) : input) {
+      input.reset();
       return ByteSource.wrap(ByteStreams.toByteArray(stream));
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
