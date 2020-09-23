@@ -535,9 +535,10 @@ public class ParseUnit {
   }
 
   private ByteSource getByteSource() {
-    try (InputStream stream = input == null ? new FileInputStream(file) : input) {
-      input.reset();
-      return ByteSource.wrap(ByteStreams.toByteArray(stream));
+    try (InputStream s = input == null ? new FileInputStream(file) : input) {
+      if (s.markSupported())
+        s.reset();
+      return ByteSource.wrap(ByteStreams.toByteArray(s));
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
