@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.StreamSupport;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -169,12 +170,10 @@ public class OpenEdgeProparseSensor implements Sensor {
     IRefactorSessionEnv sessions = settings.getProparseSessions();
     FilePredicates predicates = context.fileSystem().predicates();
 
-    // Just counting total number of files
-    int totFiles = 0;
-    for (InputFile file : context.fileSystem().inputFiles(
-        predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
-      totFiles++;
-    }
+    // Counting total number of files
+    long totFiles = StreamSupport.stream(context.fileSystem().inputFiles(
+        predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN))).spliterator(),
+        false).count();
     long prevMessage = System.currentTimeMillis();
     for (InputFile file : context.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
