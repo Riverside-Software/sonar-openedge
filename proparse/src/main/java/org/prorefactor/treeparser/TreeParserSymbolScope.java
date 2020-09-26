@@ -453,8 +453,4 @@ public class TreeParserSymbolScope {
     rootBlock = block;
   }
 
-  @Override
-  public String toString() {
-    return new StringBuilder("SymbolScope associated with ").append(rootBlock.toString()).toString();
-  }
 }

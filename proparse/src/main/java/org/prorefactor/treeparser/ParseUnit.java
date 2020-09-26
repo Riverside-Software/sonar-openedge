@@ -354,7 +354,20 @@ public class ParseUnit {
   public void treeParser01() {
     if (topNode == null)
       parse();
-    treeParser(new TreeParser(this));
+
+    long startTimeNs = System.nanoTime();
+    ParseTreeWalker walker = new ParseTreeWalker();
+    walker.walk(new TreeParserBlocks(this), tree);
+    TreeParserVariableDefinition tp02 = new TreeParserVariableDefinition(this);
+    walker.walk(tp02, tree);
+    TreeParserComputeReferences tp03 = new TreeParserComputeReferences(tp02);
+    walker.walk(tp03, tree);
+    treeParseTime = System.nanoTime() - startTimeNs;
+
+    startTimeNs = System.nanoTime();
+    finalizeXrefInfo();
+    xrefAttachTime = System.nanoTime() - startTimeNs;
+    xref = null; // No need to keep the entire XREF in memory
   }
 
   public void treeParser(ProparseListener listener) {
@@ -365,10 +378,6 @@ public class ParseUnit {
     long startTimeNs = System.nanoTime();
     walker.walk(listener, tree);
     treeParseTime = System.nanoTime() - startTimeNs;
-    startTimeNs = System.nanoTime();
-    finalizeXrefInfo();
-    xrefAttachTime = System.nanoTime() - startTimeNs;
-    xref = null; // No need to keep the entire XREF in memory
   }
 
   public void attachXref(Document doc) {

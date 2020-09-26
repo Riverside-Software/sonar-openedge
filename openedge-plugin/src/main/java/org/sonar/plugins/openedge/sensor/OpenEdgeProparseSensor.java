@@ -330,6 +330,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       unit.attachXref(doc);
       unit.attachXref(xref);
       unit.parse();
+      unit.treeParser01();
       for (Class<? extends ProparseListener> clz : components.getProparseListeners()) {
         Injector injector = Guice.createInjector(new TreeParserModule(clz, unit));
         ProparseListener listener = injector.getInstance(ProparseListener.class);

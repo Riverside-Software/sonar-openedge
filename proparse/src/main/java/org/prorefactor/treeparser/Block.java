@@ -34,7 +34,7 @@ import org.prorefactor.treeparser.symbols.widgets.Frame;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 
 /**
- * For keeping track of blocks, block attributes, and the things that are scoped within those blocks - especially buffer
+ * For keeping track of blocks, block attributes, and things that are scoped within those blocks - especially buffer
  * scopes.
  */
 public class Block {
@@ -194,7 +194,7 @@ public class Block {
       if (buff.getBlock() == this)
         set.add(buff.getSymbol());
     }
-    return (TableBuffer[]) set.toArray(new TableBuffer[set.size()]);
+    return set.toArray(new TableBuffer[set.size()]);
   } // getBlockBuffers
 
   /** Find or create a buffer for the input BufferSymbol */
@@ -471,8 +471,4 @@ public class Block {
     this.parent = parent;
   }
 
-  @Override
-  public String toString() {
-    return new StringBuilder("Block ").append(blockStatementNode.toString()).toString();
-  }
 }

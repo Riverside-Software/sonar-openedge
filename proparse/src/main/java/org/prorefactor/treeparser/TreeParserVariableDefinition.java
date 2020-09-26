@@ -14,22 +14,16 @@
  ********************************************************************************/
 package org.prorefactor.treeparser;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProgressString;
-import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
@@ -38,14 +32,10 @@ import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Index;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.antlr4.Proparse.*;
-import org.prorefactor.proparse.antlr4.ProparseBaseListener;
-import org.prorefactor.proparse.support.IProparseEnvironment;
-import org.prorefactor.proparse.support.ParserSupport;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Modifier;
-import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
@@ -56,23 +46,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
-public class TreeParser extends ProparseBaseListener {
-  private static final Logger LOG = LoggerFactory.getLogger(TreeParser.class);
-
-  private static final String LOG_ADDING_QUAL_TO = "{}> Adding {} qualifier to '{}'";
-
-  private final ParseUnit unit;
-  private final ParserSupport support;
-  private final IProparseEnvironment refSession;
-  private final TreeParserRootSymbolScope rootScope;
+public class TreeParserVariableDefinition extends AbstractBlockProparseListener {
+  private static final Logger LOG = LoggerFactory.getLogger(TreeParserVariableDefinition.class);
 
   private int currentLevel;
 
-  private Block currentBlock;
-  private TreeParserSymbolScope currentScope;
-  private Routine currentRoutine;
-  private Routine rootRoutine;
-  private JPNode lastStatement;
   /**
    * The symbol last, or currently being, defined. Needed when we have complex syntax like DEFINE id ... LIKE, where we
    * want to track the LIKE but it's not in the same grammar production as the DEFINE.
@@ -100,73 +78,12 @@ public class TreeParser extends ProparseBaseListener {
   // Since there can be more than one WIP Call, there can be more than one WIP Parameter
   private Deque<Parameter> wipParameters = new LinkedList<>();
 
-  /*
-   * Note that blockStack is *only* valid for determining the current block - the stack itself cannot be used for
-   * determining a block's parent, buffer scopes, etc. That logic is found within the Block class. Conversely, we cannot
-   * use Block.parent to find the current block when we close out a block. That is because a scope's root block parent
-   * is always the program block, but a programmer may code a scope into a non-root block... which we need to make
-   * current again once done inside the scope.
-   */
-  private List<Block> blockStack = new ArrayList<>();
-  private Map<String, TreeParserSymbolScope> funcForwards = new HashMap<>();
-  private ParseTreeProperty<ContextQualifier> contextQualifiers = new ParseTreeProperty<>();
-  private ParseTreeProperty<TableNameResolution> nameResolution = new ParseTreeProperty<>();
-
   // Temporary work-around
   private boolean inDefineEvent = false;
 
   @Inject
-  public TreeParser(ParseUnit unit) {
-    this.unit = unit;
-    this.support = unit.getSupport();
-    this.refSession = unit.getSession();
-    this.rootScope = new TreeParserRootSymbolScope(refSession);
-    this.currentScope = rootScope;
-  }
-
-  public TreeParserRootSymbolScope getRootScope() {
-    return rootScope;
-  }
-
-  private void setContextQualifier(ParseTree ctx, ContextQualifier cq) {
-    if ((cq == null) || (ctx == null))
-      return;
-    if (LOG.isTraceEnabled()) {
-      LOG.trace(LOG_ADDING_QUAL_TO, indent(), cq, ctx.getText());
-    }
-    contextQualifiers.put(ctx, cq);
-  }
-
-  @Override
-  public void enterProgram(ProgramContext ctx) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> Entering program", indent());
-
-    if (rootRoutine != null) {
-      // Executing TreeParser more than once on a ParseTree would just result in meaningless result
-      throw new IllegalStateException("TreeParser has already been executed...");
-    }
-
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    currentBlock = pushBlock(new Block(rootScope, blockNode));
-    rootScope.setRootBlock(currentBlock);
-    blockNode.setBlock(currentBlock);
-
-    Routine routine = new Routine("", rootScope, rootScope);
-    routine.setProgressType(ABLNodeType.PROGRAM_ROOT);
-    routine.setDefinitionNode(blockNode);
-    blockNode.setSymbol(routine);
-
-    rootScope.add(routine);
-    currentRoutine = routine;
-    rootRoutine = routine;
-  }
-
-  @Override
-  public void exitProgram(ProgramContext ctx) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> Exiting program", indent());
-    unit.setRootScope(rootScope);
+  public TreeParserVariableDefinition(ParseUnit unit) {
+    super(unit);
   }
 
   @Override
@@ -179,11 +96,7 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void exitBlockFor(BlockForContext ctx) {
     for (RecordContext record : ctx.record()) {
-      if (LOG.isTraceEnabled())
-        LOG.trace("{}> Adding strong buffer scope for {} to current block", indent(), record.getText());
-
-      RecordNameNode recNode = (RecordNameNode) support.getNode(record);
-      currentBlock.addStrongBufferScope(recNode);
+      currentBlock.addStrongBufferScope((RecordNameNode) support.getNode(record));
     }
   }
 
@@ -267,7 +180,8 @@ public class TreeParser extends ProparseBaseListener {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     if (ctx.p != null) {
       if (ctx.OUTPUT() != null) {
-        setContextQualifier(ctx.parameterArg(), qual == ContextQualifier.ASYNCHRONOUS ? ContextQualifier.REFUP : ContextQualifier.OUTPUT);
+        setContextQualifier(ctx.parameterArg(),
+            qual == ContextQualifier.ASYNCHRONOUS ? ContextQualifier.REFUP : ContextQualifier.OUTPUT);
       } else if (ctx.INPUTOUTPUT() != null) {
         setContextQualifier(ctx.parameterArg(), ContextQualifier.REFUP);
       } else {
@@ -282,11 +196,6 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
-  public void exitParameterArgTableHandle(ParameterArgTableHandleContext ctx) {
-    noteReference(support.getNode(ctx.field()), contextQualifiers.removeFrom(ctx));
-  }
-
-  @Override
   public void enterParameterArgTable(ParameterArgTableContext ctx) {
     setContextQualifier(ctx.record(), ContextQualifier.TEMPTABLESYMBOL);
   }
@@ -294,11 +203,6 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterParameterArgDatasetHandle(ParameterArgDatasetHandleContext ctx) {
     setContextQualifier(ctx.field(), ContextQualifier.INIT);
-  }
-
-  @Override
-  public void exitParameterArgDatasetHandle(ParameterArgDatasetHandleContext ctx) {
-    noteReference(support.getNode(ctx.field()), contextQualifiers.removeFrom(ctx));
   }
 
   @Override
@@ -346,8 +250,7 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void exitFunctionParamBufferFor(FunctionParamBufferForContext ctx) {
     if (ctx.bn != null) {
-      TableBuffer buf = defineBuffer(support.getNode(ctx), support.getNode(ctx), ctx.bn.getText(),
-          support.getNode(ctx.record()), true);
+      TableBuffer buf = defineBuffer(support.getNode(ctx), ctx.bn.getText(), support.getNode(ctx.record()), true);
       wipParameters.getFirst().setSymbol(buf);
     }
     wipParameters.removeFirst();
@@ -402,7 +305,8 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterFunctionParamStandardTableHandle(FunctionParamStandardTableHandleContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.hn.getText(), DataType.HANDLE, Variable.Type.PARAMETER);
+    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.hn.getText(), DataType.HANDLE,
+        Variable.Type.PARAMETER);
     var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     wipParameters.getFirst().setSymbol(var);
     wipParameters.getFirst().setProgressType(ABLNodeType.TABLEHANDLE.getType());
@@ -411,7 +315,8 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterFunctionParamStandardDatasetHandle(FunctionParamStandardDatasetHandleContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.hn2.getText(), DataType.HANDLE, Variable.Type.PARAMETER);
+    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.hn2.getText(), DataType.HANDLE,
+        Variable.Type.PARAMETER);
     var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     wipParameters.getFirst().setSymbol(var);
     wipParameters.getFirst().setProgressType(ABLNodeType.DATASETHANDLE.getType());
@@ -491,17 +396,13 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
-  public void enterExprtWidName(ExprtWidNameContext ctx) {
-    widattr(ctx.widName(), ctx.colonAttribute(), contextQualifiers.removeFrom(ctx));
-  }
-
-  @Override
   public void enterExprtExprt2(ExprtExprt2Context ctx) {
-    ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     if ((ctx.colonAttribute() != null) && (ctx.expressionTerm2() instanceof Exprt2FieldContext)
         && (ctx.colonAttribute().colonAttributeSub(0).OBJCOLON() != null)) {
+      ContextQualifier qual = contextQualifiers.get(ctx);
       widattr((Exprt2FieldContext) ctx.expressionTerm2(), qual, ctx.colonAttribute().colonAttributeSub(0).id.getText());
     } else {
+      ContextQualifier qual = contextQualifiers.removeFrom(ctx);
       setContextQualifier(ctx.expressionTerm2(), qual);
       if (ctx.colonAttribute() != null)
         setContextQualifier(ctx.colonAttribute(), qual);
@@ -510,15 +411,11 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterWidattrExprt2(WidattrExprt2Context ctx) {
-    if ((ctx.expressionTerm2() instanceof Exprt2FieldContext) && (ctx.colonAttribute().colonAttributeSub(0).id != null)) {
-      widattr((Exprt2FieldContext) ctx.expressionTerm2(), contextQualifiers.removeFrom(ctx),
+    if ((ctx.expressionTerm2() instanceof Exprt2FieldContext)
+        && (ctx.colonAttribute().colonAttributeSub(0).id != null)) {
+      widattr((Exprt2FieldContext) ctx.expressionTerm2(), contextQualifiers.get(ctx),
           ctx.colonAttribute().colonAttributeSub(0).id.getText());
     }
-  }
-
-  @Override
-  public void enterWidattrWidName(WidattrWidNameContext ctx) {
-    widattr(ctx.widName(), ctx.colonAttribute(), contextQualifiers.removeFrom(ctx));
   }
 
   @Override
@@ -559,8 +456,6 @@ public class TreeParser extends ProparseBaseListener {
       frameRef(support.getNode(ctx).nextNode());
     } else if (ctx.BROWSE() != null) {
       browseRef(support.getNode(ctx).nextNode());
-    } else if ((ctx.BUFFER() != null) || (ctx.TEMPTABLE() != null)) {
-      bufferRef(ctx.filn().getText());
     } else if (ctx.FIELD() != null) {
       setContextQualifier(ctx.field(), ContextQualifier.REF);
     }
@@ -667,22 +562,6 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
-  public void enterClassStatement(ClassStatementContext ctx) {
-    rootScope.setClassName(ctx.tn.getText());
-    rootScope.setTypeInfo(refSession.getTypeInfo(ctx.tn.getText()));
-    rootScope.setAbstractClass(!ctx.ABSTRACT().isEmpty());
-    rootScope.setSerializableClass(!ctx.SERIALIZABLE().isEmpty());
-    rootScope.setFinalClass(!ctx.FINAL().isEmpty());
-  }
-
-  @Override
-  public void enterInterfaceStatement(InterfaceStatementContext ctx) {
-    rootScope.setClassName(ctx.name.getText());
-    rootScope.setTypeInfo(refSession.getTypeInfo(ctx.name.getText()));
-    rootScope.setInterface(true);
-  }
-
-  @Override
   public void exitClearStatement(ClearStatementContext ctx) {
     if (ctx.frameWidgetName() != null) {
       frameStack.simpleFrameInitStatement(ctx, support.getNode(ctx), support.getNode(ctx.frameWidgetName()),
@@ -692,14 +571,12 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterCatchStatement(CatchStatementContext ctx) {
-    scopeAdd(support.getNode(ctx));
-    addToSymbolScope(defineVariable(ctx, support.getNode(ctx).getFirstChild(), ctx.n.getText(), Variable.Type.VARIABLE));
-    defAs(ctx.classTypeName());
-  }
+    super.enterCatchStatement(ctx);
 
-  @Override
-  public void exitCatchStatement(CatchStatementContext ctx) {
-    scopeClose();
+    addToSymbolScope(
+        defineVariable(ctx, support.getNode(ctx).getFirstChild(), ctx.n.getText(), Variable.Type.VARIABLE));
+    defAs(ctx.classTypeName());
+    LOG.trace("EnterCatch2 Block '{}' -- Scope '{}' -- Routine '{}'", currentBlock, currentScope, currentRoutine);
   }
 
   @Override
@@ -732,29 +609,6 @@ public class TreeParser extends ProparseBaseListener {
       setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
       frameStack.lexAt(support.getNode(ctx.field()));
     }
-  }
-
-  @Override
-  public void enterConstructorStatement(ConstructorStatementContext ctx) {
-    /*
-     * Since 'structors don't have a name, we don't add them to any sort of map in the parent scope.
-     */
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    TreeParserSymbolScope definingScope = currentScope;
-    scopeAdd(blockNode);
-
-    // 'structors don't have names, so use empty string.
-    Routine r = new Routine("", definingScope, currentScope);
-    r.setProgressType(blockNode.getNodeType());
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    currentRoutine = r;
-  }
-
-  @Override
-  public void exitConstructorStatement(ConstructorStatementContext ctx) {
-    scopeClose();
-    currentRoutine = rootRoutine;
   }
 
   @Override
@@ -824,13 +678,9 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterCanFindFunction(CanFindFunctionContext ctx) {
+    super.enterCanFindFunction(ctx);
+
     RecordNameNode recordNode = (RecordNameNode) support.getNode(ctx.recordphrase().record());
-    // Keep a ref to the current block...
-    Block b = currentBlock;
-    // ...create a can-find scope and block (assigns currentBlock)...
-    scopeAdd(support.getNode(ctx));
-    // ...and then set this "can-find block" to use it as its parent.
-    currentBlock.setParent(b);
     String buffName = ctx.recordphrase().record().getText();
     ITable table;
     boolean isDefault;
@@ -838,8 +688,6 @@ public class TreeParser extends ProparseBaseListener {
     if (tableBuffer != null) {
       table = tableBuffer.getTable();
       isDefault = tableBuffer.isDefault();
-      // Notify table buffer that it's used in a CAN-FIND
-      tableBuffer.noteReference(ContextQualifier.INIT);
     } else {
       table = refSession.getSchema().lookupTable(buffName);
       isDefault = true;
@@ -849,11 +697,6 @@ public class TreeParser extends ProparseBaseListener {
     currentBlock.addHiddenCursor(recordNode);
 
     setContextQualifier(ctx.recordphrase().record(), ContextQualifier.INIT);
-  }
-
-  @Override
-  public void exitCanFindFunction(CanFindFunctionContext ctx) {
-    scopeClose();
   }
 
   @Override
@@ -939,14 +782,12 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void exitDefineBufferStatement(DefineBufferStatementContext ctx) {
-    defineBuffer(support.getNode(ctx), support.getNode(ctx).getIdNode(), ctx.n.getText(),
-        support.getNode(ctx.record()), false);
+    defineBuffer(support.getNode(ctx), ctx.n.getText(), support.getNode(ctx.record()), false);
   }
 
   @Override
   public void enterDefineButtonStatement(DefineButtonStatementContext ctx) {
-    stack.push(defineSymbol(ABLNodeType.BUTTON, support.getNode(ctx), support.getNode(ctx.identifier()),
-        ctx.identifier().getText()));
+    stack.push(defineSymbol(ABLNodeType.BUTTON, support.getNode(ctx), ctx.identifier().getText()));
   }
 
   @Override
@@ -963,8 +804,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineDatasetStatement(DefineDatasetStatementContext ctx) {
-    stack.push(defineSymbol(ABLNodeType.DATASET, support.getNode(ctx), support.getNode(ctx.identifier()),
-        ctx.identifier().getText()));
+    stack.push(defineSymbol(ABLNodeType.DATASET, support.getNode(ctx), ctx.identifier().getText()));
     for (RecordContext record : ctx.record()) {
       setContextQualifier(record, ContextQualifier.INIT);
     }
@@ -1004,8 +844,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineDataSourceStatement(DefineDataSourceStatementContext ctx) {
-    stack.push(defineSymbol(ABLNodeType.DATASOURCE, support.getNode(ctx), support.getNode(ctx.identifier()),
-        ctx.identifier().getText()));
+    stack.push(defineSymbol(ABLNodeType.DATASOURCE, support.getNode(ctx), ctx.identifier().getText()));
   }
 
   @Override
@@ -1057,8 +896,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineImageStatement(DefineImageStatementContext ctx) {
-    stack.push(defineSymbol(ABLNodeType.IMAGE, support.getNode(ctx), support.getNode(ctx.identifier()),
-        ctx.identifier().getText()));
+    stack.push(defineSymbol(ABLNodeType.IMAGE, support.getNode(ctx), ctx.identifier().getText()));
   }
 
   @Override
@@ -1075,8 +913,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineMenuStatement(DefineMenuStatementContext ctx) {
-    stack.push(defineSymbol(ABLNodeType.MENU, support.getNode(ctx), support.getNode(ctx.identifier()),
-        ctx.identifier().getText()));
+    stack.push(defineSymbol(ABLNodeType.MENU, support.getNode(ctx), ctx.identifier().getText()));
   }
 
   @Override
@@ -1112,13 +949,13 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void exitDefineParameterStatementSub1(DefineParameterStatementSub1Context ctx) {
-    defineBuffer(support.getNode(ctx.parent), support.getNode(ctx.parent).getIdNode(), ctx.bn.getText(),
-        support.getNode(ctx.record()), true);
+    defineBuffer(support.getNode(ctx.parent), ctx.bn.getText(), support.getNode(ctx.record()), true);
   }
 
   @Override
   public void enterDefineParameterStatementSub2Variable(DefineParameterStatementSub2VariableContext ctx) {
-    Variable var = defineVariable(ctx.parent, support.getNode(ctx.parent), ctx.identifier().getText(), Variable.Type.PARAMETER);
+    Variable var = defineVariable(ctx.parent, support.getNode(ctx.parent), ctx.identifier().getText(),
+        Variable.Type.PARAMETER);
     var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     stack.push(var);
   }
@@ -1131,7 +968,8 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineParameterStatementSub2VariableLike(DefineParameterStatementSub2VariableLikeContext ctx) {
-    Variable var = defineVariable(ctx.parent, support.getNode(ctx.parent), ctx.identifier().getText(), Variable.Type.PARAMETER);
+    Variable var = defineVariable(ctx.parent, support.getNode(ctx.parent), ctx.identifier().getText(),
+        Variable.Type.PARAMETER);
     var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     stack.push(var);
   }
@@ -1173,7 +1011,8 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterDefineParameterStatementSub2TableHandle(DefineParameterStatementSub2TableHandleContext ctx) {
     wipParameters.getFirst().setProgressType(ABLNodeType.TABLEHANDLE.getType());
-    Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.pn2.getText(), DataType.HANDLE, Variable.Type.PARAMETER);
+    Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.pn2.getText(), DataType.HANDLE,
+        Variable.Type.PARAMETER);
     var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     addToSymbolScope(var);
   }
@@ -1181,7 +1020,8 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterDefineParameterStatementSub2DatasetHandle(DefineParameterStatementSub2DatasetHandleContext ctx) {
     wipParameters.getFirst().setProgressType(ABLNodeType.DATASETHANDLE.getType());
-    Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.dsh.getText(), DataType.HANDLE, Variable.Type.PARAMETER);
+    Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.dsh.getText(), DataType.HANDLE,
+        Variable.Type.PARAMETER);
     var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     addToSymbolScope(var);
   }
@@ -1209,33 +1049,8 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
-  public void enterDefinePropertyAccessorGetBlock(DefinePropertyAccessorGetBlockContext ctx) {
-    if (ctx.codeBlock() != null)
-      propGetSetBegin(support.getNode(ctx));
-  }
-
-  @Override
-  public void enterDefinePropertyAccessorSetBlock(DefinePropertyAccessorSetBlockContext ctx) {
-    if (ctx.codeBlock() != null)
-      propGetSetBegin(support.getNode(ctx));
-  }
-
-  @Override
-  public void exitDefinePropertyAccessorGetBlock(DefinePropertyAccessorGetBlockContext ctx) {
-    if (ctx.codeBlock() != null)
-      propGetSetEnd();
-  }
-
-  @Override
-  public void exitDefinePropertyAccessorSetBlock(DefinePropertyAccessorSetBlockContext ctx) {
-    if (ctx.codeBlock() != null)
-      propGetSetEnd();
-  }
-
-  @Override
   public void enterDefineQueryStatement(DefineQueryStatementContext ctx) {
-    stack.push(defineSymbol(ABLNodeType.QUERY, support.getNode(ctx), support.getNode(ctx.identifier()),
-        ctx.identifier().getText()));
+    stack.push(defineSymbol(ABLNodeType.QUERY, support.getNode(ctx), ctx.identifier().getText()));
     for (RecordContext record : ctx.record()) {
       setContextQualifier(record, ContextQualifier.INIT);
     }
@@ -1248,8 +1063,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineRectangleStatement(DefineRectangleStatementContext ctx) {
-    stack.push(defineSymbol(ABLNodeType.RECTANGLE, support.getNode(ctx), support.getNode(ctx.identifier()),
-        ctx.identifier().getText()));
+    stack.push(defineSymbol(ABLNodeType.RECTANGLE, support.getNode(ctx), ctx.identifier().getText()));
   }
 
   @Override
@@ -1266,14 +1080,12 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void exitDefineStreamStatement(DefineStreamStatementContext ctx) {
-    addToSymbolScope(defineSymbol(ABLNodeType.STREAM, support.getNode(ctx), support.getNode(ctx.identifier()),
-        ctx.identifier().getText()));
+    addToSymbolScope(defineSymbol(ABLNodeType.STREAM, support.getNode(ctx), ctx.identifier().getText()));
   }
 
   @Override
   public void enterDefineSubMenuStatement(DefineSubMenuStatementContext ctx) {
-    stack.push(defineSymbol(ABLNodeType.SUBMENU, support.getNode(ctx), support.getNode(ctx.identifier()),
-        ctx.identifier().getText()));
+    stack.push(defineSymbol(ABLNodeType.SUBMENU, support.getNode(ctx), ctx.identifier().getText()));
   }
 
   @Override
@@ -1283,12 +1095,12 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineTempTableStatement(DefineTempTableStatementContext ctx) {
-    defineTempTable(support.getNode(ctx), support.getNode(ctx.identifier()), ctx.identifier().getText());
+    defineTempTable(support.getNode(ctx), ctx.identifier().getText());
   }
 
   @Override
   public void enterDefTableBeforeTable(DefTableBeforeTableContext ctx) {
-    defineBuffer(support.getNode(ctx), support.getNode(ctx), ctx.i.getText(), support.getNode(ctx.parent), false);
+    defineBuffer(support.getNode(ctx), ctx.i.getText(), support.getNode(ctx.parent), false);
   }
 
   @Override
@@ -1330,7 +1142,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDefineWorkTableStatement(DefineWorkTableStatementContext ctx) {
-    defineWorktable(support.getNode(ctx), support.getNode(ctx.identifier()), ctx.identifier().getText());
+    defineWorktable(support.getNode(ctx), ctx.identifier().getText());
   }
 
   @Override
@@ -1345,7 +1157,8 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterVarStatement(VarStatementContext ctx) {
     for (VarStatementSubContext varCtx : ctx.varStatementSub()) {
-      Variable symbol = defineVariable(varCtx, support.getNode(varCtx), varCtx.newIdentifier().getText(), Variable.Type.VARIABLE);
+      Variable symbol = defineVariable(varCtx, support.getNode(varCtx), varCtx.newIdentifier().getText(),
+          Variable.Type.VARIABLE);
       for (VarStatementModifierContext mod : ctx.varStatementModifier()) {
         symbol.addModifier(Modifier.getModifier(mod.getStart().getType()));
       }
@@ -1358,9 +1171,9 @@ public class TreeParser extends ProparseBaseListener {
         int xt = 0;
         if (ctx.extent.NUMBER() != null) {
           try {
-           xt = Integer.parseInt(ctx.extent.NUMBER().getText());
-          } catch (NumberFormatException caught)  {
-            
+            xt = Integer.parseInt(ctx.extent.NUMBER().getText());
+          } catch (NumberFormatException caught) {
+
           }
         }
         symbol.setExtent(xt);
@@ -1376,29 +1189,6 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterDeleteStatement(DeleteStatementContext ctx) {
     setContextQualifier(ctx.record(), ContextQualifier.UPDATING);
-  }
-
-  @Override
-  public void enterDestructorStatement(DestructorStatementContext ctx) {
-    /*
-     * Since 'structors don't have a name, we don't add them to any sort of map in the parent scope.
-     */
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    TreeParserSymbolScope definingScope = currentScope;
-    scopeAdd(blockNode);
-
-    // 'structors don't have names, so use empty string.
-    Routine r = new Routine("", definingScope, currentScope);
-    r.setProgressType(blockNode.getNodeType());
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    currentRoutine = r;
-  }
-
-  @Override
-  public void exitDestructorStatement(DestructorStatementContext ctx) {
-    scopeClose();
-    currentRoutine = rootRoutine;
   }
 
   @Override
@@ -1476,18 +1266,13 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterDoStatement(DoStatementContext ctx) {
-    blockBegin(ctx);
+    super.enterDoStatement(ctx);
     frameBlockCheck(support.getNode(ctx));
   }
 
   @Override
   public void enterDoStatementSub(DoStatementSubContext ctx) {
     frameStack.statementEnd();
-  }
-
-  @Override
-  public void exitDoStatement(DoStatementContext ctx) {
-    blockEnd();
   }
 
   @Override
@@ -1549,11 +1334,9 @@ public class TreeParser extends ProparseBaseListener {
       defAs(ctx.datatype());
     } else if (ctx.LIKE() != null) {
       setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
-    } else if (ctx.initialConstant() != null) {
-      if (currSymbol instanceof Variable) {
-        // Initial value only set for variables, not for TT fields
-        defineInitialValue((Variable) currSymbol, ctx.initialConstant().varStatementInitialValue());
-      }
+    } else if ((ctx.initialConstant() != null) && (currSymbol instanceof Variable)) {
+      // Initial value only set for variables, not for TT fields
+      defineInitialValue((Variable) currSymbol, ctx.initialConstant().varStatementInitialValue());
     }
   }
 
@@ -1571,7 +1354,7 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterForStatement(ForStatementContext ctx) {
-    blockBegin(ctx);
+    super.enterForStatement(ctx);
     frameBlockCheck(support.getNode(ctx));
 
     setContextQualifier(ctx.forRecordSpec(), ContextQualifier.INITWEAK);
@@ -1580,11 +1363,6 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterForstate_sub(Forstate_subContext ctx) {
     frameStack.statementEnd();
-  }
-
-  @Override
-  public void exitForStatement(ForStatementContext ctx) {
-    blockEnd();
   }
 
   @Override
@@ -1678,88 +1456,6 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
-  public void enterFunctionStatement(FunctionStatementContext ctx) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> New function definition '{}'", indent(), ctx.id.getText());
-
-    TreeParserSymbolScope definingScope = currentScope;
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    scopeAdd(blockNode);
-
-    Routine r = new Routine(ctx.id.getText(), definingScope, currentScope);
-    if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
-        || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
-      r.setReturnDatatypeNode(DataType.CLASS);
-    } else {
-      r.setReturnDatatypeNode(DataType.getDataType(ctx.datatype().getStop().getType()));
-    }
-
-    r.setProgressType(ABLNodeType.FUNCTION);
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
-
-    if (ctx.FORWARDS() != null) {
-      if (LOG.isTraceEnabled())
-        LOG.trace("{}> FORWARDS definition", indent());
-      funcForwards.put(ctx.id.getText(), currentScope);
-    } else if ((ctx.functionParams() == null)
-        || (ctx.functionParams().getChildCount() == 2 /* LEFTPAREN RIGHTPAREN */)) {
-      if (LOG.isTraceEnabled())
-        LOG.trace("{}> No parameter, trying to find them in FORWARDS declaration", indent());
-      // No parameter defined, then we inherit from FORWARDS declaration (if available)
-      TreeParserSymbolScope forwardScope = funcForwards.get(ctx.id.getText());
-      if (forwardScope != null) {
-        if (LOG.isTraceEnabled())
-          LOG.trace("{}> Inherits from FORWARDS definition", indent());
-        Routine r2 = forwardScope.getRoutine();
-        scopeSwap(forwardScope);
-        blockNode.setBlock(currentBlock);
-        blockNode.setSymbol(r2);
-        r2.setDefinitionNode(blockNode);
-        definingScope.add(r2);
-        currentRoutine = r2;
-      }
-    }
-  }
-
-  @Override
-  public void exitFunctionStatement(FunctionStatementContext ctx) {
-    scopeClose();
-    currentRoutine = rootRoutine;
-  }
-
-  @Override
-  public void enterExternalFunctionStatement(ExternalFunctionStatementContext ctx) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> New external function definition '{}'", indent(), ctx.id.getText());
-
-    TreeParserSymbolScope definingScope = currentScope;
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    scopeAdd(blockNode);
-
-    Routine r = new Routine(ctx.id.getText(), definingScope, currentScope);
-    if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
-        || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
-      r.setReturnDatatypeNode(DataType.CLASS);
-    } else {
-      r.setReturnDatatypeNode(DataType.getDataType(ctx.datatype().getStop().getType()));
-    }
-    r.setProgressType(ABLNodeType.FUNCTION);
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
-  }
-
-  @Override
-  public void exitExternalFunctionStatement(ExternalFunctionStatementContext ctx) {
-    scopeClose();
-    currentRoutine = rootRoutine;
-  }
-
-  @Override
   public void enterGetKeyValueStatement(GetKeyValueStatementContext ctx) {
     setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
   }
@@ -1813,39 +1509,6 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
-  public void enterMethodStatement(MethodStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    TreeParserSymbolScope definingScope = currentScope;
-    scopeAdd(blockNode);
-
-    Routine r = new Routine(ctx.id.getText(), definingScope, currentScope);
-    r.setProgressType(ABLNodeType.METHOD);
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
-
-    if (ctx.VOID() != null) {
-      currentRoutine.setReturnDatatypeNode(DataType.VOID);
-    } else {
-      if (ctx.datatype().CLASS() != null) {
-        currentRoutine.setReturnDatatypeNode(DataType.CLASS);
-      } else {
-        if (ctx.datatype().datatypeVar().typeName() != null)
-          currentRoutine.setReturnDatatypeNode(DataType.CLASS);
-        else
-          currentRoutine.setReturnDatatypeNode(DataType.getDataType(support.getNode(ctx.datatype().datatypeVar()).getType()));
-      }
-    }
-  }
-
-  @Override
-  public void exitMethodStatement(MethodStatementContext ctx) {
-    scopeClose();
-    currentRoutine = rootRoutine;
-  }
-
-  @Override
   public void enterNextPromptStatement(NextPromptStatementContext ctx) {
     setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
   }
@@ -1853,46 +1516,6 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void enterOpenQueryStatement(OpenQueryStatementContext ctx) {
     setContextQualifier(ctx.forRecordSpec(), ContextQualifier.INIT);
-  }
-
-  @Override
-  public void enterExternalProcedureStatement(ExternalProcedureStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    TreeParserSymbolScope definingScope = currentScope;
-    scopeAdd(blockNode);
-
-    Routine r = new Routine(ctx.filename().getText(), definingScope, currentScope);
-    r.setProgressType(ABLNodeType.PROCEDURE);
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
-  }
-
-  @Override
-  public void exitExternalProcedureStatement(ExternalProcedureStatementContext ctx) {
-    scopeClose();
-    currentRoutine = rootRoutine;
-  }
-
-  @Override
-  public void enterProcedureStatement(ProcedureStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    TreeParserSymbolScope definingScope = currentScope;
-    scopeAdd(blockNode);
-
-    Routine r = new Routine(ctx.filename().getText(), definingScope, currentScope);
-    r.setProgressType(ABLNodeType.PROCEDURE);
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
-  }
-
-  @Override
-  public void exitProcedureStatement(ProcedureStatementContext ctx) {
-    scopeClose();
-    currentRoutine = rootRoutine;
   }
 
   @Override
@@ -1942,10 +1565,10 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void exitField(FieldContext ctx) {
-    TableNameResolution tnr = nameResolution.removeFrom(ctx);
+    TableNameResolution tnr = nameResolution.get(ctx);
     if (tnr == null)
       tnr = TableNameResolution.ANY;
-    ContextQualifier qual = contextQualifiers.removeFrom(ctx);
+    ContextQualifier qual = contextQualifiers.get(ctx);
     if (qual == null)
       qual = ContextQualifier.REF;
     field(ctx, (FieldRefNode) support.getNode(ctx), null, ctx.id.getText(), qual, tnr);
@@ -1973,16 +1596,6 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   @Override
-  public void enterOnStatement(OnStatementContext ctx) {
-    scopeAdd(support.getNode(ctx));
-  }
-
-  @Override
-  public void exitOnStatement(OnStatementContext ctx) {
-    scopeClose();
-  }
-
-  @Override
   public void enterOnOtherOfDbObject(OnOtherOfDbObjectContext ctx) {
     setContextQualifier(ctx.record(), ContextQualifier.SYMBOL);
   }
@@ -2000,14 +1613,14 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void exitOnWriteOfDbObject(OnWriteOfDbObjectContext ctx) {
     if (ctx.n != null) {
-      defineBuffer(support.getNode(ctx.parent.parent).findDirectChild(ABLNodeType.NEW), null, ctx.n.getText(),
+      defineBuffer(support.getNode(ctx.parent.parent).findDirectChild(ABLNodeType.NEW), ctx.n.getText(),
           support.getNode(ctx.bf), true);
     } else {
       defineBufferForTrigger(support.getNode(ctx.bf));
     }
 
     if (ctx.o != null) {
-      defineBuffer(support.getNode(ctx.parent.parent).findDirectChild(ABLNodeType.OLD), null, ctx.o.getText(),
+      defineBuffer(support.getNode(ctx.parent.parent).findDirectChild(ABLNodeType.OLD), ctx.o.getText(),
           support.getNode(ctx.bf), true);
     }
   }
@@ -2037,18 +1650,13 @@ public class TreeParser extends ProparseBaseListener {
 
   @Override
   public void enterRepeatStatement(RepeatStatementContext ctx) {
-    blockBegin(ctx);
+    super.enterRepeatStatement(ctx);
     frameBlockCheck(support.getNode(ctx));
   }
 
   @Override
   public void enterRepeatStatementSub(RepeatStatementSubContext ctx) {
     frameStack.statementEnd();
-  }
-
-  @Override
-  public void exitRepeatStatement(RepeatStatementContext ctx) {
-    blockEnd();
   }
 
   @Override
@@ -2158,14 +1766,14 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void exitTriggerProcedureStatementSub2(TriggerProcedureStatementSub2Context ctx) {
     if (ctx.newBuff != null) {
-      defineBuffer(support.getNode(ctx.parent).findDirectChild(ABLNodeType.NEW), null, ctx.newBuff.getText(),
+      defineBuffer(support.getNode(ctx.parent).findDirectChild(ABLNodeType.NEW), ctx.newBuff.getText(),
           support.getNode(ctx.buff), true);
     } else {
       defineBufferForTrigger(support.getNode(ctx.buff));
     }
 
     if (ctx.oldBuff != null) {
-      defineBuffer(support.getNode(ctx.parent).findDirectChild(ABLNodeType.OLD), null, ctx.oldBuff.getText(),
+      defineBuffer(support.getNode(ctx.parent).findDirectChild(ABLNodeType.OLD), ctx.oldBuff.getText(),
           support.getNode(ctx.buff), true);
     }
   }
@@ -2193,16 +1801,6 @@ public class TreeParser extends ProparseBaseListener {
   @Override
   public void exitTriggerOld(TriggerOldContext ctx) {
     addToSymbolScope(stack.pop());
-  }
-
-  @Override
-  public void enterTriggerOn(TriggerOnContext ctx) {
-    scopeAdd(support.getNode(ctx));
-  }
-
-  @Override
-  public void exitTriggerOn(TriggerOnContext ctx) {
-    scopeClose();
   }
 
   @Override
@@ -2286,32 +1884,6 @@ public class TreeParser extends ProparseBaseListener {
     currentScope.add(symbol);
   }
 
-  private Block pushBlock(Block block) {
-    return pushBlock(block, false);
-  }
-
-  private Block pushBlock(Block block, boolean fromSwap) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> Pushing block '{}' to stack", indent(), block);
-    blockStack.add(block);
-
-    if (!fromSwap && (lastStatement != null)) {
-      lastStatement.setNextStatement(block.getNode());
-      block.getNode().setPreviousStatement(lastStatement);
-    }
-    lastStatement = null;
-
-    return block;
-  }
-
-  private Block popBlock() {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> Popping block from stack", indent());
-    Block bb = blockStack.remove(blockStack.size() - 1);
-    lastStatement = bb.getNode();
-    return blockStack.get(blockStack.size() - 1);
-  }
-
   private void recordNameNode(RecordNameNode recordNode, ContextQualifier contextQualifier) {
     if (LOG.isTraceEnabled())
       LOG.trace("Entering recordNameNode {} {}", recordNode, contextQualifier);
@@ -2361,7 +1933,6 @@ public class TreeParser extends ProparseBaseListener {
       default:
         break;
     }
-    buffer.noteReference(contextQualifier);
   }
 
   /** For a RECORD_NAME node, do checks and assignments for the TableBuffer. */
@@ -2390,54 +1961,6 @@ public class TreeParser extends ProparseBaseListener {
     }
   }
 
-  private void blockBegin(ParseTree ctx) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> Creating new block", indent());
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    currentBlock = pushBlock(new Block(currentBlock, blockNode));
-    blockNode.setBlock(currentBlock);
-  }
-
-  private void blockEnd() {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> End of block", indent());
-    currentBlock = popBlock();
-  }
-
-  private void scopeAdd(JPNode anode) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> Creating new scope for block {}", indent(), anode.getNodeType());
-
-    BlockNode blockNode = (BlockNode) anode;
-    currentScope = currentScope.addScope();
-    currentBlock = pushBlock(new Block(currentScope, blockNode));
-    currentScope.setRootBlock(currentBlock);
-    blockNode.setBlock(currentBlock);
-  }
-
-  private void scopeClose() {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> End of scope", indent());
-
-    currentScope = currentScope.getParentScope();
-    blockEnd();
-  }
-
-  /**
-   * In the case of a function definition that comes some time after a function forward declaration, we want to use the
-   * scope that was created with the forward declaration, because it is the scope that has all of the parameter
-   * definitions. We have to do this because the definition itself may have left out the parameter list - it's not
-   * required - it just uses the parameter list from the declaration.
-   */
-  private void scopeSwap(TreeParserSymbolScope scope) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> Swapping scope...", indent());
-
-    currentScope = scope;
-    blockEnd(); // pop the unused block from the stack
-    currentBlock = pushBlock(scope.getRootBlock(), true);
-  }
-
   /** This is a specialization of frameInitializingStatement, called for ENABLE|UPDATE|PROMPT-FOR. */
   private void frameEnablingStatement(ParseTree ctx) {
     LOG.trace("Entering frameEnablingStatement");
@@ -2447,7 +1970,7 @@ public class TreeParser extends ProparseBaseListener {
     frameStack.nodeOfInitializingStatement(ctx, support.getNode(ctx), currentBlock);
   }
 
-  public void frameInitializingStatement(ParseTree ctx) {
+  private void frameInitializingStatement(ParseTree ctx) {
     frameStack.nodeOfInitializingStatement(ctx, support.getNode(ctx), currentBlock);
   }
 
@@ -2571,7 +2094,7 @@ public class TreeParser extends ProparseBaseListener {
     }
   }
 
-  public Symbol defineSymbol(ABLNodeType symbolType, JPNode defNode, JPNode idNode, String name) {
+  private Symbol defineSymbol(ABLNodeType symbolType, JPNode defNode, String name) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Entering defineSymbol {} - {}", indent(), symbolType, defNode);
     /*
@@ -2588,14 +2111,14 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   /** Called at the start of a DEFINE BROWSE statement. */
-  public Browse defineBrowse(ParseTree defSymbol, JPNode defAST, JPNode idAST, String name) {
+  private Browse defineBrowse(ParseTree defSymbol, JPNode defAST, JPNode idAST, String name) {
     LOG.trace("Entering defineBrowse {} - {}", defAST, idAST);
-    Browse browse = (Browse) defineSymbol(ABLNodeType.BROWSE, defAST, idAST, name);
-    frameStack.nodeOfDefineBrowse(browse, (JPNode) defAST, defSymbol);
+    Browse browse = (Browse) defineSymbol(ABLNodeType.BROWSE, defAST, name);
+    frameStack.nodeOfDefineBrowse(browse, defAST, defSymbol);
     return browse;
   }
 
-  public Event defineEvent(JPNode defNode, JPNode idNode, String name) {
+  private Event defineEvent(JPNode defNode, JPNode idNode, String name) {
     LOG.trace("Entering defineEvent {} - {}", defNode, idNode);
     Event event = new Event(name, currentScope);
     event.setDefinitionNode(defNode.getIdNode());
@@ -2614,7 +2137,7 @@ public class TreeParser extends ProparseBaseListener {
    * @return The Object that is expected to be passed as an argument to defineTableFieldFinalize.
    * @see #defineTableFieldFinalize(Object)
    */
-  public Symbol defineTableFieldInitialize(JPNode idNode, String text) {
+  private Symbol defineTableFieldInitialize(JPNode idNode, String text) {
     LOG.trace("Entering defineTableFieldInitialize {}", idNode);
     FieldBuffer fieldBuff = rootScope.defineTableFieldDelayedAttach(text, currDefTable);
     currSymbol = fieldBuff;
@@ -2623,7 +2146,7 @@ public class TreeParser extends ProparseBaseListener {
     return fieldBuff;
   }
 
-  public void defineTableFieldFinalize(Object obj) {
+  private void defineTableFieldFinalize(Object obj) {
     LOG.trace("Entering defineTableFieldFinalize {}", obj);
     ((FieldBuffer) obj).getField().setTable(currDefTable.getTable());
   }
@@ -2666,7 +2189,7 @@ public class TreeParser extends ProparseBaseListener {
       currDefIndex.addField(fld);
   }
 
-  private void defineTable(JPNode defNode, JPNode idNode, String name, int storeType) {
+  private void defineTable(JPNode defNode, String name, int storeType) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Table definition {} {}", indent(), defNode, storeType);
 
@@ -2702,8 +2225,8 @@ public class TreeParser extends ProparseBaseListener {
     }
   }
 
-  private void defineTempTable(JPNode defAST, JPNode idAST, String name) {
-    defineTable(defAST, idAST, name, IConstants.ST_TTABLE);
+  private void defineTempTable(JPNode defAST, String name) {
+    defineTable(defAST, name, IConstants.ST_TTABLE);
   }
 
   /** Get the Table symbol linked from a RECORD_NAME AST. */
@@ -2717,13 +2240,12 @@ public class TreeParser extends ProparseBaseListener {
   private TableBuffer astTableBufferLink(JPNode tableAST) {
     return (TableBuffer) tableAST.getSymbol();
   }
-  
+
   /**
    * Define a buffer. If the buffer is initialized at the same time it is defined (as in a buffer parameter), then
    * parameter init should be true.
    */
-  public TableBuffer defineBuffer(JPNode defAST, JPNode idNode, String name, JPNode tableAST,
-      boolean init) {
+  private TableBuffer defineBuffer(JPNode defAST, String name, JPNode tableAST, boolean init) {
     LOG.trace("Entering defineBuffer {} {} {}", defAST, tableAST, init);
     ITable table = astTableLink(tableAST.getIdNode());
     if (table == null)
@@ -2743,7 +2265,7 @@ public class TreeParser extends ProparseBaseListener {
   /**
    * Define an unnamed buffer which is scoped (symbol and buffer) to the trigger scope/block.
    */
-  public void defineBufferForTrigger(JPNode tableAST) {
+  private void defineBufferForTrigger(JPNode tableAST) {
     LOG.trace("Entering defineBufferForTrigger {}", tableAST);
     ITable table = astTableLink(tableAST);
     TableBuffer bufSymbol = currentScope.defineBuffer("", table);
@@ -2751,73 +2273,14 @@ public class TreeParser extends ProparseBaseListener {
     currSymbol = bufSymbol;
   }
 
-  private void defineWorktable(JPNode defAST, JPNode idAST, String name) {
-    defineTable(defAST, idAST, name, IConstants.ST_WTABLE);
-  }
-
-  private void noteReference(JPNode node, ContextQualifier cq) {
-    if ((node.getSymbol() != null) && ((cq == ContextQualifier.UPDATING) || (cq == ContextQualifier.REFUP) || (cq == ContextQualifier.OUTPUT))) {
-      node.getSymbol().noteReference(cq);
-    }
-  }
-
-  public void propGetSetBegin(JPNode propAST) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("Entering propGetSetBegin {}", propAST);
-
-    scopeAdd(propAST);
-    BlockNode blockNode = (BlockNode) propAST;
-    TreeParserSymbolScope definingScope = currentScope.getParentScope();
-
-    Routine r = new Routine(propAST.getText(), definingScope, currentScope);
-    r.setProgressType(propAST.getNodeType());
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
-  }
-
-  private void propGetSetEnd() {
-    if (LOG.isTraceEnabled())
-      LOG.trace("Entering propGetSetEnd");
-
-    scopeClose();
-    currentRoutine = rootRoutine;
-  }
-
-  private void widattr(WidNameContext ctx, ColonAttributeContext ctx2, ContextQualifier cq) {
-    if ((ctx == null) || (ctx2 == null))
-      return;
-    if ((ctx.systemHandleName() != null) && (ctx.systemHandleName().THISOBJECT() != null)) {
-      FieldLookupResult result = rootScope.getRootBlock().lookupField(ctx2.colonAttributeSub(0).id.getText(), true);
-      if (result == null)
-        return;
-
-      // Variable
-      if (result.getSymbol() instanceof Variable) {
-        result.getSymbol().noteReference(cq);
-      }
-    }
+  private void defineWorktable(JPNode defAST, String name) {
+    defineTable(defAST, name, IConstants.ST_WTABLE);
   }
 
   // Called from expressionTerm rule (expressionTerm2 option) and widattr rule (widattrExprt2 option)
   // Tries to add references to variables/properties of current class, or references to static classes
   private void widattr(Exprt2FieldContext ctx2, ContextQualifier cq, String right) {
     String clsRef = ctx2.field().getText();
-    String clsName = rootScope.getClassName();
-    if ((clsRef != null) && (clsName != null) && (clsRef.indexOf('.') == -1) && (clsName.indexOf('.') != -1))
-      clsName = clsName.substring(clsName.indexOf('.') + 1);
-
-    if ((clsRef != null) && (clsName != null) && clsRef.equalsIgnoreCase(clsName)) {
-      FieldLookupResult result = currentBlock.lookupField(right, true);
-      if (result == null)
-        return;
-
-      // Variable
-      if (result.getSymbol() instanceof Variable) {
-        result.getSymbol().noteReference(cq);
-      }
-    }
 
     if ((ctx2.ENTERED() == null) && !Strings.isNullOrEmpty(support.lookupClassName(clsRef))) {
       // First check if there's a variable name by this name
@@ -2832,15 +2295,7 @@ public class TreeParser extends ProparseBaseListener {
   }
 
   private void browseRef(JPNode idAST) {
-    LOG.trace("Entering browseRef {}", idAST);
     frameStack.browseRefNode(idAST, currentScope);
-  }
-
-  private void bufferRef(String name) {
-    TableBuffer tableBuffer = currentScope.lookupBuffer(name);
-    if (tableBuffer != null) {
-      tableBuffer.noteReference(ContextQualifier.SYMBOL);
-    }
   }
 
   private void field(ParseTree ctx, FieldRefNode refNode, JPNode idNode, String name, ContextQualifier cq,
@@ -2911,47 +2366,16 @@ public class TreeParser extends ProparseBaseListener {
     }
 
     refNode.setSymbol((Symbol) result.getSymbol());
-    result.getSymbol().noteReference(cq);
     if (result.getSymbol() instanceof FieldBuffer) {
       FieldBuffer fb = (FieldBuffer) result.getSymbol();
       refNode.attrSet(IConstants.STORETYPE, fb.getField().getTable().getStoretype());
-      if (fb.getBuffer() != null) {
-        fb.getBuffer().noteReference(cq);
-      }
     } else {
       refNode.attrSet(IConstants.STORETYPE, IConstants.ST_VAR);
     }
-  }
-
-  @Override
-  public void enterEveryRule(ParserRuleContext ctx) {
-    currentLevel++;
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> {}", indent(), Proparse.ruleNames[ctx.getRuleIndex()]);
-  }
-
-  @Override
-  public void exitEveryRule(ParserRuleContext ctx) {
-    JPNode n = support.getNode(ctx);
-    if ((n != null) && n.isStateHead() && !(ctx instanceof FunctionStatementContext)) {
-      enterNewStatement(ctx, n);
-    }
-    currentLevel--;
   }
 
   private String indent() {
     return java.nio.CharBuffer.allocate(currentLevel).toString().replace('\0', ' ');
   }
 
-  // Attach current statement to the previous one
-  private void enterNewStatement(ParserRuleContext ctx, JPNode node) {
-    if ((lastStatement != null) && (node != lastStatement)) {
-      lastStatement.setNextStatement(node);
-      node.setPreviousStatement(lastStatement);
-    }
-    lastStatement = node;
-    node.setInBlock(currentBlock);
-    if (currentBlock.getNode().getFirstStatement() == null) 
-      currentBlock.getNode().setFirstStatement(node);
-  }
 }
