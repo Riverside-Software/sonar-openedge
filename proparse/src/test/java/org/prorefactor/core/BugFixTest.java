@@ -156,6 +156,17 @@ public class BugFixTest {
   }
 
   @Test
+  public void testVarUsage2() {
+    ParseUnit unit = genericTest("varusage2.cls");
+    assertEquals(unit.getRootScope().getVariable("x1").getNumWrites(), 1);
+    assertEquals(unit.getRootScope().getVariable("x1").getNumReads(), 0);
+    assertEquals(unit.getRootScope().getVariable("x2").getNumWrites(), 1);
+    assertEquals(unit.getRootScope().getVariable("x2").getNumReads(), 2);
+    assertEquals(unit.getRootScope().getVariable("x3").getNumWrites(), 2);
+    assertEquals(unit.getRootScope().getVariable("x3").getNumReads(), 1);
+  }
+
+  @Test
   public void test01() {
     genericTest("bug01.p");
   }
