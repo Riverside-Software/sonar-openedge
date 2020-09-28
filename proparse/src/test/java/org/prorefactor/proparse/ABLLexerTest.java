@@ -15,6 +15,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.core.WritableProToken;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
@@ -351,6 +352,23 @@ public class ABLLexerTest {
     lexer = new ABLLexer(session, ByteSource.wrap("SUBSTITUTE('').".getBytes()), "file.txt");
     tok = (ProToken) lexer.nextToken();
     assertFalse(tok.isAbbreviated());
+  }
+
+  @Test
+  public void testWritableTokens() {
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("  MESSAGE 'Hello'".getBytes()), "file.txt");
+    lexer.enableWritableTokens();
+    Token tok = lexer.nextToken();
+    tok = lexer.nextToken();
+    assertNotNull(tok);
+    assertTrue(tok instanceof WritableProToken);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getCharPositionInLine(), 3);
+    WritableProToken tok2 = (WritableProToken) tok;
+    tok2.setLine(5);
+    tok2.setCharPositionInLine(4);
+    assertEquals(tok.getLine(), 5);
+    assertEquals(tok.getCharPositionInLine(), 4);
   }
 
   // *********
