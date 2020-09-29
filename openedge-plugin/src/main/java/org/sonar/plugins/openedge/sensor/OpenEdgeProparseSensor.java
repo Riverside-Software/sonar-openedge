@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.xml.XMLConstants;
@@ -94,7 +96,6 @@ import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Binder;
@@ -151,7 +152,8 @@ public class OpenEdgeProparseSensor implements Sensor {
       dBuilder = dbFactory.newDocumentBuilder();
       context = JAXBContext.newInstance("com.progress.xref", CrossReference.class.getClassLoader());
       unmarshaller = context.createUnmarshaller();
-    } catch (ParserConfigurationException | JAXBException | SAXNotRecognizedException | SAXNotSupportedException caught) {
+    } catch (ParserConfigurationException | JAXBException | SAXNotRecognizedException
+        | SAXNotSupportedException caught) {
       throw new IllegalStateException(caught);
     }
   }
@@ -287,6 +289,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     return doc;
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private void parseMainFile(SensorContext context, InputFile file, IProparseEnvironment session) {
     CrossReference xref = null;
     Document doc = null;
@@ -305,7 +308,8 @@ public class OpenEdgeProparseSensor implements Sensor {
     List<Integer> trxBlocks = new ArrayList<>();
     if ((listingFile != null) && listingFile.exists() && (listingFile.getAbsolutePath().indexOf(' ') == -1)) {
       try {
-        ListingParser parser = new ListingParser(listingFile, InputFileUtils.getRelativePath(file, context.fileSystem()));
+        ListingParser parser = new ListingParser(listingFile,
+            InputFileUtils.getRelativePath(file, context.fileSystem()));
         for (CodeBlock block : parser.getTransactionBlocks()) {
           trxBlocks.add(block.getLineNumber());
         }
@@ -318,7 +322,7 @@ public class OpenEdgeProparseSensor implements Sensor {
           listingFile);
     }
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.TRANSACTIONS).withValue(
-        Joiner.on(",").join(trxBlocks)).save();
+        trxBlocks.stream().map(Object::toString).collect(Collectors.joining(","))).save();
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TRANSACTIONS).withValue(
         trxBlocks.size()).save();
 
@@ -326,7 +330,8 @@ public class OpenEdgeProparseSensor implements Sensor {
     long startTime = System.currentTimeMillis();
 
     try {
-      unit = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session);
+      unit = new ParseUnit(InputFileUtils.getInputStream(file),
+          InputFileUtils.getRelativePath(file, context.fileSystem()), session);
       unit.attachXref(doc);
       unit.attachXref(xref);
       unit.parse();
@@ -347,7 +352,8 @@ public class OpenEdgeProparseSensor implements Sensor {
         LOG.error("Unable to parse {} - Can't read xcode'd file {}", file, cause.getFileName());
       } else if (caught.getCause() instanceof IncludeFileNotFoundException) {
         IncludeFileNotFoundException cause = (IncludeFileNotFoundException) caught.getCause();
-        LOG.error("Unable to parse {} - Can't find include file '{}' from '{}'", file, cause.getIncludeName(), cause.getFileName());
+        LOG.error("Unable to parse {} - Can't find include file '{}' from '{}'", file, cause.getIncludeName(),
+            cause.getFileName());
       } else {
         LOG.error("Unable to parse " + file + " - IOException was caught - Please report this issue", caught);
       }
@@ -445,13 +451,13 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     StringBuilder data = new StringBuilder(String.format( // NOSONAR Influx requires LF
         "proparse,product=%1$s,sid=%2$s files=%3$d,failures=%4$d,parseTime=%5$d,maxParseTime=%6$d,version=\"%7$s\",ncloc=%8$d,oeversion=\"%9$s\"\n",
-        context.runtime().getProduct().toString().toLowerCase(), settings.getServerId(), numFiles,
-        numFailures, parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs,
+        context.runtime().getProduct().toString().toLowerCase(), settings.getServerId(), numFiles, numFailures,
+        parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs,
         settings.getOpenEdgePluginVersion()));
     for (Entry<String, Long> entry : ruleTime.entrySet()) {
       data.append(String.format("rule,product=%1$s,sid=%2$s,rulename=%3$s ruleTime=%4$d\n", // NOSONAR
-          context.runtime().getProduct().toString().toLowerCase(), settings.getServerId(),
-          entry.getKey(), entry.getValue()));
+          context.runtime().getProduct().toString().toLowerCase(), settings.getServerId(), entry.getKey(),
+          entry.getValue()));
     }
 
     try {
@@ -559,32 +565,20 @@ public class OpenEdgeProparseSensor implements Sensor {
     int numFuncs = 0;
     int numMethds = 0;
 
-    for (JPNode node : unit.getTopNode().query(ABLNodeType.PROCEDURE, ABLNodeType.FUNCTION, ABLNodeType.METHOD)) {
-      if ((node.getPreviousNode() != null) && (node.getPreviousNode().getNodeType() == ABLNodeType.END))
-        continue;
+    // Search for nodes starting a procedure, function or method
+    Predicate<JPNode> p1 = node -> (node.getNodeType() == ABLNodeType.PROCEDURE)
+        || (node.getNodeType() == ABLNodeType.FUNCTION) || (node.getNodeType() == ABLNodeType.METHOD);
+    Predicate<JPNode> p2 = node -> (node.getPreviousNode() == null)
+        || (node.getPreviousNode().getNodeType() != ABLNodeType.END);
+    for (JPNode node : unit.getTopNode().query2(p1.or(p2))) {
       switch (node.getNodeType()) {
         case PROCEDURE:
-          boolean externalProc = false;
-          for (JPNode child : node.getDirectChildren()) {
-            if ((child.getNodeType() == ABLNodeType.IN) || (child.getNodeType() == ABLNodeType.SUPER)
-                || (child.getNodeType() == ABLNodeType.EXTERNAL)) {
-              externalProc = true;
-            }
-          }
-          if (!externalProc) {
+          if (node.getDirectChildren(ABLNodeType.IN, ABLNodeType.SUPER, ABLNodeType.EXTERNAL).isEmpty())
             numProcs++;
-          }
           break;
         case FUNCTION:
-          boolean externalFunc = false;
-          for (JPNode child : node.getDirectChildren()) {
-            if ((child.getNodeType() == ABLNodeType.IN) || (child.getNodeType() == ABLNodeType.FORWARDS)) {
-              externalFunc = true;
-            }
-          }
-          if (!externalFunc) {
+          if (node.getDirectChildren(ABLNodeType.IN, ABLNodeType.FORWARDS).isEmpty())
             numFuncs++;
-          }
           break;
         case METHOD:
           numMethds++;
@@ -614,11 +608,11 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
 
     complexity += unit.getTopNode().queryMainFile(ABLNodeType.IF, ABLNodeType.REPEAT, ABLNodeType.FOR, ABLNodeType.WHEN,
-        ABLNodeType.AND, ABLNodeType.OR, ABLNodeType.RETURN, ABLNodeType.PROCEDURE, ABLNodeType.FUNCTION, ABLNodeType.METHOD,
-        ABLNodeType.ENUM).size();
+        ABLNodeType.AND, ABLNodeType.OR, ABLNodeType.RETURN, ABLNodeType.PROCEDURE, ABLNodeType.FUNCTION,
+        ABLNodeType.METHOD, ABLNodeType.ENUM).size();
     complexityWithInc += unit.getTopNode().query(ABLNodeType.IF, ABLNodeType.REPEAT, ABLNodeType.FOR, ABLNodeType.WHEN,
-        ABLNodeType.AND, ABLNodeType.OR, ABLNodeType.RETURN, ABLNodeType.PROCEDURE, ABLNodeType.FUNCTION, ABLNodeType.METHOD,
-        ABLNodeType.ENUM).size();
+        ABLNodeType.AND, ABLNodeType.OR, ABLNodeType.RETURN, ABLNodeType.PROCEDURE, ABLNodeType.FUNCTION,
+        ABLNodeType.METHOD, ABLNodeType.ENUM).size();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMPLEXITY).withValue(complexity).save();
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.COMPLEXITY).withValue(complexityWithInc).save();
   }
