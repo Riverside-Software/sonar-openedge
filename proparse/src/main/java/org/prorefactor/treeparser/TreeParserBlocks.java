@@ -151,17 +151,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterConstructorStatement(ConstructorStatementContext ctx) {
-    // Since 'structors don't have a name, we don't add them to any sort of map in the parent scope.
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    TreeParserSymbolScope definingScope = currentScope;
-    scopeAdd(blockNode);
-
-    // 'structors don't have names, so use empty string.
-    Routine r = new Routine("", definingScope, currentScope);
-    r.setProgressType(blockNode.getNodeType());
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    currentRoutine = r;
+    newRoutine((BlockNode) support.getNode(ctx), "", ABLNodeType.CONSTRUCTOR);
   }
 
   @Override
@@ -187,14 +177,18 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterDefinePropertyAccessorGetBlock(DefinePropertyAccessorGetBlockContext ctx) {
-    if (ctx.codeBlock() != null)
-      propGetSetBegin(support.getNode(ctx));
+    if (ctx.codeBlock() != null) {
+      BlockNode node = (BlockNode) support.getNode(ctx);
+      newRoutine(node, node.getText(), node.getNodeType());
+    }
   }
 
   @Override
   public void enterDefinePropertyAccessorSetBlock(DefinePropertyAccessorSetBlockContext ctx) {
-    if (ctx.codeBlock() != null)
-      propGetSetBegin(support.getNode(ctx));
+    if (ctx.codeBlock() != null) {
+      BlockNode node = (BlockNode) support.getNode(ctx);
+      newRoutine(node, node.getText(), node.getNodeType());
+    }
   }
 
   @Override
@@ -211,17 +205,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterDestructorStatement(DestructorStatementContext ctx) {
-    // Since 'structors don't have a name, we don't add them to any sort of map in the parent scope
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    TreeParserSymbolScope definingScope = currentScope;
-    scopeAdd(blockNode);
-
-    // 'structors don't have names, so use empty string.
-    Routine r = new Routine("", definingScope, currentScope);
-    r.setProgressType(blockNode.getNodeType());
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    currentRoutine = r;
+    newRoutine((BlockNode) support.getNode(ctx), "", ABLNodeType.DESTRUCTOR);
   }
 
   @Override
@@ -257,21 +241,13 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
     TreeParserSymbolScope definingScope = currentScope;
     BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    scopeAdd(blockNode);
-
-    Routine r = new Routine(ctx.id.getText(), definingScope, currentScope);
+    newRoutine((BlockNode) support.getNode(ctx), ctx.id.getText(), ABLNodeType.FUNCTION);
     if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
         || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
-      r.setReturnDatatypeNode(DataType.CLASS);
+      currentRoutine.setReturnDatatypeNode(DataType.CLASS);
     } else {
-      r.setReturnDatatypeNode(DataType.getDataType(ctx.datatype().getStop().getType()));
+      currentRoutine.setReturnDatatypeNode(DataType.getDataType(ctx.datatype().getStop().getType()));
     }
-
-    r.setProgressType(ABLNodeType.FUNCTION);
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
 
     if (ctx.FORWARDS() != null) {
       if (LOG.isTraceEnabled())
@@ -307,23 +283,14 @@ public class TreeParserBlocks extends ProparseBaseListener {
   public void enterExternalFunctionStatement(ExternalFunctionStatementContext ctx) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> New external function definition '{}'", indent(), ctx.id.getText());
+    newRoutine((BlockNode) support.getNode(ctx), ctx.id.getText(), ABLNodeType.FUNCTION);
 
-    TreeParserSymbolScope definingScope = currentScope;
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    scopeAdd(blockNode);
-
-    Routine r = new Routine(ctx.id.getText(), definingScope, currentScope);
     if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
         || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
-      r.setReturnDatatypeNode(DataType.CLASS);
+      currentRoutine.setReturnDatatypeNode(DataType.CLASS);
     } else {
-      r.setReturnDatatypeNode(DataType.getDataType(ctx.datatype().getStop().getType()));
+      currentRoutine.setReturnDatatypeNode(DataType.getDataType(ctx.datatype().getStop().getType()));
     }
-    r.setProgressType(ABLNodeType.FUNCTION);
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
   }
 
   @Override
@@ -334,16 +301,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterMethodStatement(MethodStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    TreeParserSymbolScope definingScope = currentScope;
-    scopeAdd(blockNode);
-
-    Routine r = new Routine(ctx.id.getText(), definingScope, currentScope);
-    r.setProgressType(ABLNodeType.METHOD);
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
+    newRoutine((BlockNode) support.getNode(ctx), ctx.id.getText(), ABLNodeType.METHOD);
 
     if (ctx.VOID() != null) {
       currentRoutine.setReturnDatatypeNode(DataType.VOID);
@@ -368,16 +326,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterExternalProcedureStatement(ExternalProcedureStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    TreeParserSymbolScope definingScope = currentScope;
-    scopeAdd(blockNode);
-
-    Routine r = new Routine(ctx.filename().getText(), definingScope, currentScope);
-    r.setProgressType(ABLNodeType.PROCEDURE);
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
+    newRoutine((BlockNode) support.getNode(ctx), ctx.filename().getText(), ABLNodeType.PROCEDURE);
   }
 
   @Override
@@ -388,16 +337,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterProcedureStatement(ProcedureStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    TreeParserSymbolScope definingScope = currentScope;
-    scopeAdd(blockNode);
-
-    Routine r = new Routine(ctx.filename().getText(), definingScope, currentScope);
-    r.setProgressType(ABLNodeType.PROCEDURE);
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
+    newRoutine((BlockNode) support.getNode(ctx), ctx.filename().getText(), ABLNodeType.PROCEDURE);
   }
 
   @Override
@@ -439,6 +379,18 @@ public class TreeParserBlocks extends ProparseBaseListener {
   // ******************
   // INTERNAL METHODS
   // ******************
+
+  private void newRoutine(BlockNode blockNode, String routineName, ABLNodeType routineType) {
+    TreeParserSymbolScope definingScope = currentScope;
+    scopeAdd(blockNode);
+
+    Routine r = new Routine(routineName, definingScope, currentScope);
+    r.setProgressType(routineType);
+    r.setDefinitionNode(blockNode);
+    blockNode.setSymbol(r);
+    definingScope.add(r);
+    currentRoutine = r;
+  }
 
   private Block pushBlock(Block block) {
     return pushBlock(block, false);
@@ -512,19 +464,6 @@ public class TreeParserBlocks extends ProparseBaseListener {
     currentScope = scope;
     blockEnd(); // pop the unused block from the stack
     currentBlock = pushBlock(scope.getRootBlock(), true);
-  }
-
-  private void propGetSetBegin(JPNode propAST) {
-    scopeAdd(propAST);
-    BlockNode blockNode = (BlockNode) propAST;
-    TreeParserSymbolScope definingScope = currentScope.getParentScope();
-
-    Routine r = new Routine(propAST.getText(), definingScope, currentScope);
-    r.setProgressType(propAST.getNodeType());
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
   }
 
   private void propGetSetEnd() {

@@ -66,31 +66,6 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
     this.nameResolution = listener.nameResolution;
   }
 
-  public Block getCurrentBlock() {
-    return currentBlock;
-  }
-
-  public TreeParserSymbolScope getCurrentScope() {
-    return currentScope;
-  }
-
-  public Routine getCurrentRoutine() {
-    return currentRoutine;
-  }
-
-  void setContext(ParseTreeProperty<ContextQualifier> contextQualifiers, ParseTreeProperty<TableNameResolution> nameResolution) {
-    this.contextQualifiers = contextQualifiers;
-    this.nameResolution = nameResolution;
-  }
-
-  public ParseTreeProperty<ContextQualifier> getContextQualifiers() {
-    return contextQualifiers;
-  }
-
-  public ParseTreeProperty<TableNameResolution> getNameResolution() {
-    return nameResolution;
-  }
-
   void setContextQualifier(ParseTree ctx, ContextQualifier cq) {
     if ((cq == null) || (ctx == null))
       return;
