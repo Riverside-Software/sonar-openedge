@@ -88,7 +88,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitCatchStatement(CatchStatementContext ctx) {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();
   }
 
@@ -102,7 +102,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitConstructorStatement(ConstructorStatementContext ctx) {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
   }
@@ -116,7 +116,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitCanFindFunction(CanFindFunctionContext ctx) {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();
   }
 
@@ -154,7 +154,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitDestructorStatement(DestructorStatementContext ctx) {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
   }
@@ -166,7 +166,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitDoStatement(DoStatementContext ctx) {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
   }
   
   @Override
@@ -176,7 +176,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitForStatement(ForStatementContext ctx) {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
   }
 
   @Override
@@ -189,7 +189,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitFunctionStatement(FunctionStatementContext ctx) {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
   }
@@ -204,7 +204,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitExternalFunctionStatement(ExternalFunctionStatementContext ctx) {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
   }
@@ -219,7 +219,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitMethodStatement(MethodStatementContext ctx) {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
   }
@@ -234,7 +234,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitExternalProcedureStatement(ExternalProcedureStatementContext ctx) {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
   }
@@ -249,7 +249,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitProcedureStatement(ProcedureStatementContext ctx) {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
   }
@@ -263,8 +263,8 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitOnStatement(OnStatementContext ctx) {
+    currentBlock = currentBlock.getParentBlock();
     currentScope = currentScope.getParentScope();
-    currentBlock = currentScope.getRootBlock();
   }
 
   @Override
@@ -275,7 +275,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitRepeatStatement(RepeatStatementContext ctx) {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
   }
 
   @Override
@@ -287,8 +287,8 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitTriggerOn(TriggerOnContext ctx) {
+    currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();
-    currentBlock = currentScope.getRootBlock();
   }
 
   public void propGetSetBegin(JPNode propAST) {
@@ -298,7 +298,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
   }
 
   private void propGetSetEnd() {
-    currentBlock = currentBlock.getParent();
+    currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
   }

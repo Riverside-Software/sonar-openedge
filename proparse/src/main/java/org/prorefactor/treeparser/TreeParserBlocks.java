@@ -102,7 +102,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
     }
 
     BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    currentBlock = pushBlock(new Block(rootScope, blockNode));
+    currentBlock = pushBlock(new Block(rootScope, blockNode, null));
     rootScope.setRootBlock(currentBlock);
     blockNode.setBlock(currentBlock);
 
@@ -162,12 +162,8 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterCanFindFunction(CanFindFunctionContext ctx) {
-    // Keep a ref to the current block...
-    Block b = currentBlock;
     // ...create a can-find scope and block (assigns currentBlock)...
-    scopeAdd(support.getNode(ctx));
-    // ...and then set this "can-find block" to use it as its parent.
-    currentBlock.setParent(b);
+    scopeAdd((BlockNode) support.getNode(ctx));
   }
 
   @Override
@@ -348,7 +344,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterOnStatement(OnStatementContext ctx) {
-    scopeAdd(support.getNode(ctx));
+    scopeAdd((BlockNode) support.getNode(ctx));
   }
 
   @Override
@@ -368,7 +364,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterTriggerOn(TriggerOnContext ctx) {
-    scopeAdd(support.getNode(ctx));
+    scopeAdd((BlockNode) support.getNode(ctx));
   }
 
   @Override
@@ -432,13 +428,12 @@ public class TreeParserBlocks extends ProparseBaseListener {
     currentBlock = popBlock();
   }
 
-  private void scopeAdd(JPNode anode) {
+  private void scopeAdd(BlockNode blockNode) {
     if (LOG.isTraceEnabled())
-      LOG.trace("{}> Creating new scope for block {}", indent(), anode.getNodeType());
+      LOG.trace("{}> Creating new scope for block {}", indent(), blockNode.getNodeType());
 
-    BlockNode blockNode = (BlockNode) anode;
     currentScope = currentScope.addScope();
-    currentBlock = pushBlock(new Block(currentScope, blockNode));
+    currentBlock = pushBlock(new Block(currentScope, blockNode, currentBlock));
     currentScope.setRootBlock(currentBlock);
     blockNode.setBlock(currentBlock);
   }

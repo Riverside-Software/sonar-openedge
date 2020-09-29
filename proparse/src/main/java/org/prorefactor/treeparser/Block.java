@@ -40,20 +40,19 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 public class Block {
   private final BlockNode blockStatementNode;
   private List<Frame> frames = new ArrayList<>();
-  private Block parent;
-  private Frame defaultFrame = null;
   private Set<BufferScope> bufferScopes = new HashSet<>();
-
-  /**
-   * The SymbolScope for a block is going to be the root program scope, unless the block is inside a method
-   * (function/trigger/procedure).
-   */
+  private Frame defaultFrame = null;
+  private Block parentScopeBlock;
+  private Block parentBlock;
+  // The SymbolScope for a block is going to be the root program scope, unless the block is inside a method
+  // (function/trigger/procedure).
   private TreeParserSymbolScope symbolScope;
 
   /** For constructing nested blocks */
   public Block(Block parent, BlockNode node) {
     this.blockStatementNode = node;
-    this.parent = parent;
+    this.parentScopeBlock = parent;
+    this.parentBlock = parent;
     this.symbolScope = parent.symbolScope;
   }
 
@@ -63,13 +62,15 @@ public class Block {
    * @param symbolScope
    * @param node Is the Program_root if this is the program root block.
    */
-  public Block(TreeParserSymbolScope symbolScope, BlockNode node) {
+  public Block(TreeParserSymbolScope symbolScope, BlockNode node, Block parentBlock) {
     this.blockStatementNode = node;
     this.symbolScope = symbolScope;
+    this.parentBlock = parentBlock;
     if (symbolScope.getParentScope() != null)
-      this.parent = symbolScope.getParentScope().getRootBlock();
+      this.parentScopeBlock = symbolScope.getParentScope().getRootBlock();
     else
-      this.parent = null; // is program-block
+      this.parentScopeBlock = null; // is program-block
+    
   }
 
   /**
@@ -80,8 +81,8 @@ public class Block {
     // References do not get added to DO blocks.
     if (blockStatementNode.getNodeType() != ABLNodeType.DO)
       bufferScopes.add(bufferScope);
-    if (parent != null && bufferScope.getSymbol().getScope().getRootBlock() != this) {
-      parent.addBufferScopeReferences(bufferScope);
+    if (parentScopeBlock != null && bufferScope.getSymbol().getScope().getRootBlock() != this) {
+      parentScopeBlock.addBufferScopeReferences(bufferScope);
     }
   }
 
@@ -96,7 +97,7 @@ public class Block {
       frames.add(frame);
       return this;
     } else {
-      return parent.addFrame(frame);
+      return parentScopeBlock.addFrame(frame);
     }
   }
 
@@ -147,21 +148,19 @@ public class Block {
     return buff;
   } // addWeakBufferScope
 
-  /** Can a buffer reference be scoped to this block? */
+  // Can a buffer reference be scoped to this block?
   private boolean canScopeBufferReference(TableBuffer symbol) {
     // REPEAT, FOR, and Program_root blocks can scope a buffer.
-    switch (blockStatementNode.getType()) {
-      case Proparse.REPEAT:
-      case Proparse.FOR:
-      case Proparse.Program_root:
-        return true;
+    if ((blockStatementNode.getNodeType() == ABLNodeType.REPEAT)
+        || (blockStatementNode.getNodeType() == ABLNodeType.FOR)
+        || (blockStatementNode.getNodeType() == ABLNodeType.PROGRAM_ROOT)) {
+      return true;
     }
-    // If this is the root block for the buffer's symbol, then the scope
-    // cannot be any higher.
+    // If this is the root block for the buffer's symbol, then the scope cannot be any higher.
     if (symbol.getScope().getRootBlock() == this)
       return true;
     return false;
-  } // canScopeBufferReference
+  }
 
   /** Can a frame be scoped to this block? */
   private boolean canScopeFrame() {
@@ -180,8 +179,8 @@ public class Block {
       if (buff.getBlock() == this)
         return buff;
     }
-    if (parent != null && symbol.getScope().getRootBlock() != this)
-      return parent.findBufferScope(symbol);
+    if (parentScopeBlock != null && symbol.getScope().getRootBlock() != this)
+      return parentScopeBlock.findBufferScope(symbol);
     return null;
   }
 
@@ -211,7 +210,7 @@ public class Block {
 
   private BufferScope getBufferForReferenceSub(TableBuffer symbol) {
     if (!canScopeBufferReference(symbol))
-      return parent.getBufferForReferenceSub(symbol);
+      return parentScopeBlock.getBufferForReferenceSub(symbol);
     return new BufferScope(this, symbol, BufferScope.Strength.REFERENCE);
   }
 
@@ -226,8 +225,8 @@ public class Block {
 
   private BufferScope getBufferScopeSub(TableBuffer symbol, BufferScope.Strength creating) {
     // First try to get a buffer from outermost blocks.
-    if (parent != null && symbol.getScope().getRootBlock() != this) {
-      BufferScope buff = parent.getBufferScopeSub(symbol, creating);
+    if (parentScopeBlock != null && symbol.getScope().getRootBlock() != this) {
+      BufferScope buff = parentScopeBlock.getBufferScopeSub(symbol, creating);
       if (buff != null)
         return buff;
     }
@@ -269,7 +268,7 @@ public class Block {
     if (defaultFrame != null)
       return defaultFrame;
     if (!canScopeFrame())
-      return parent.getDefaultFrame();
+      return parentScopeBlock.getDefaultFrame();
     return null;
   }
 
@@ -287,8 +286,12 @@ public class Block {
   }
 
   /** This returns the <em>block of the parent scope</em>. */
-  public Block getParent() {
-    return parent;
+  public Block getParentScopeBlock() {
+    return parentScopeBlock;
+  }
+
+  public Block getParentBlock() {
+    return parentBlock;
   }
 
   public TreeParserSymbolScope getSymbolScope() {
@@ -297,7 +300,7 @@ public class Block {
 
   /** Is a buffer scoped to this or any parent of this block. */
   public boolean isBufferLocal(BufferScope buff) {
-    for (Block block = this; block.parent != null; block = block.parent) {
+    for (Block block = this; block.parentScopeBlock != null; block = block.parentScopeBlock) {
       if (buff.getBlock() == block)
         return true;
     }
@@ -438,8 +441,8 @@ public class Block {
     if (result != null)
       return result;
     // Resolving names is done by looking at inner blocks first, then outer blocks.
-    if (parent != null)
-      return parent.lookupUnqualifiedField(name);
+    if (parentScopeBlock != null)
+      return parentScopeBlock.lookupUnqualifiedField(name);
     return null;
   } // lookupUnqualifiedField
 
@@ -463,12 +466,8 @@ public class Block {
       frames.add(frame);
       return this;
     } else {
-      return parent.setDefaultFrameImplicit(frame);
+      return parentScopeBlock.setDefaultFrameImplicit(frame);
     }
-  }
-
-  public void setParent(Block parent) {
-    this.parent = parent;
   }
 
 }
