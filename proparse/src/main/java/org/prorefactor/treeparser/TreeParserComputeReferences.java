@@ -107,27 +107,28 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
   @Override
   public void enterRecord(RecordContext ctx) {
+    RecordNameNode node = (RecordNameNode) support.getNode(ctx);
     ContextQualifier qual = contextQualifiers.get(ctx);
-    if (qual != null) {
-      recordNameNode((RecordNameNode) support.getNode(ctx), qual);
-    }
+    if ((qual != null) && (node.getTableBuffer() != null))
+      node.getTableBuffer().noteReference(qual);
   }
 
   @Override
   public void exitField(FieldContext ctx) {
-    TableNameResolution tnr = nameResolution.get(ctx);
-    if (tnr == null)
-      tnr = TableNameResolution.ANY;
+    FieldRefNode refNode = (FieldRefNode) support.getNode(ctx);
     ContextQualifier qual = contextQualifiers.get(ctx);
     if (qual == null)
       qual = ContextQualifier.REF;
 
-    field((FieldRefNode) support.getNode(ctx), null, ctx.id.getText(), qual, tnr);
-  }
-
-  private void recordNameNode(RecordNameNode recordNode, ContextQualifier contextQualifier) {
-    if (recordNode.getTableBuffer() != null)
-      recordNode.getTableBuffer().noteReference(recordNode.getQualifier());
+    if (refNode.getSymbol() != null) {
+      refNode.getSymbol().noteReference(refNode.getQualifier());
+      if (refNode.getSymbol() instanceof FieldBuffer) {
+        FieldBuffer fb = (FieldBuffer) refNode.getSymbol();
+        if (fb.getBuffer() != null) {
+          fb.getBuffer().noteReference(qual);
+        }
+      }
+    }
   }
 
   private void noteReference(JPNode node, ContextQualifier cq) {
@@ -168,18 +169,6 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
       // Variable
       if (result.getSymbol() instanceof Variable) {
         result.getSymbol().noteReference(cq);
-      }
-    }
-  }
-
-  private void field(FieldRefNode refNode, JPNode idNode, String name, ContextQualifier cq,
-      TableNameResolution resolution) {
-    if (refNode.getSymbol() != null)
-      refNode.getSymbol().noteReference(refNode.getQualifier());
-    if (refNode.getSymbol() instanceof FieldBuffer) {
-      FieldBuffer fb = (FieldBuffer) refNode.getSymbol();
-      if (fb.getBuffer() != null) {
-        fb.getBuffer().noteReference(cq);
       }
     }
   }
