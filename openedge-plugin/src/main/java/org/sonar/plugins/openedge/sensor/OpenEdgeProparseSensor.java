@@ -566,11 +566,11 @@ public class OpenEdgeProparseSensor implements Sensor {
     int numMethds = 0;
 
     // Search for nodes starting a procedure, function or method
-    Predicate<JPNode> p1 = node -> (node.getNodeType() == ABLNodeType.PROCEDURE)
-        || (node.getNodeType() == ABLNodeType.FUNCTION) || (node.getNodeType() == ABLNodeType.METHOD);
+    Predicate<JPNode> p1 = node -> node.isStateHead() && ((node.getNodeType() == ABLNodeType.PROCEDURE)
+        || (node.getNodeType() == ABLNodeType.FUNCTION) || (node.getNodeType() == ABLNodeType.METHOD));
     Predicate<JPNode> p2 = node -> (node.getPreviousNode() == null)
         || (node.getPreviousNode().getNodeType() != ABLNodeType.END);
-    for (JPNode node : unit.getTopNode().query2(p1.or(p2))) {
+    for (JPNode node : unit.getTopNode().query2(p1.and(p2))) {
       switch (node.getNodeType()) {
         case PROCEDURE:
           if (node.getDirectChildren(ABLNodeType.IN, ABLNodeType.SUPER, ABLNodeType.EXTERNAL).isEmpty())
