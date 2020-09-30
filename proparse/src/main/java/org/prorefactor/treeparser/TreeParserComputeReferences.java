@@ -96,21 +96,10 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
   }
 
   @Override
-  public void enterCanFindFunction(CanFindFunctionContext ctx) {
-    super.enterCanFindFunction(ctx);
-
-    String buffName = ctx.recordphrase().record().getText();
-    TableBuffer tableBuffer = currentScope.lookupBuffer(buffName);
-    if (tableBuffer != null)
-      tableBuffer.noteReference(ContextQualifier.INIT);
-  }
-
-  @Override
   public void enterRecord(RecordContext ctx) {
     RecordNameNode node = (RecordNameNode) support.getNode(ctx);
-    ContextQualifier qual = contextQualifiers.get(ctx);
-    if ((qual != null) && (node.getTableBuffer() != null))
-      node.getTableBuffer().noteReference(qual);
+    if ((node != null) && (node.getTableBuffer() != null))
+      node.getTableBuffer().noteReference(node.getQualifier());
   }
 
   @Override

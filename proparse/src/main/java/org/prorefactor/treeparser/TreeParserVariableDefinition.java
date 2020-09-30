@@ -688,6 +688,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     if (tableBuffer != null) {
       table = tableBuffer.getTable();
       isDefault = tableBuffer.isDefault();
+      // Doing it early so that we don't have to query it again in next phase
+      tableBuffer.noteReference(ContextQualifier.INIT);
     } else {
       table = refSession.getSchema().lookupTable(buffName);
       isDefault = true;
