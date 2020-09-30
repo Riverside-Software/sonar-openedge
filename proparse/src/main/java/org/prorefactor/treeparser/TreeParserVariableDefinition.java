@@ -576,7 +576,6 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     addToSymbolScope(
         defineVariable(ctx, support.getNode(ctx).getFirstChild(), ctx.n.getText(), Variable.Type.VARIABLE));
     defAs(ctx.classTypeName());
-    LOG.trace("EnterCatch2 Block '{}' -- Scope '{}' -- Routine '{}'", currentBlock, currentScope, currentRoutine);
   }
 
   @Override

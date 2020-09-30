@@ -17,7 +17,7 @@ package org.prorefactor.treeparser;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
-import org.prorefactor.proparse.antlr4.Proparse.CanFindFunctionContext;
+import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ColonAttributeContext;
 import org.prorefactor.proparse.antlr4.Proparse.Exprt2FieldContext;
 import org.prorefactor.proparse.antlr4.Proparse.ExprtExprt2Context;
@@ -93,6 +93,12 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
         tableBuffer.noteReference(ContextQualifier.SYMBOL);
       }
     }
+  }
+
+  @Override
+  public void enterCatchStatement(CatchStatementContext ctx) {
+    super.enterCatchStatement(ctx);
+    currentScope.getVariable(ctx.n.getText()).noteReference(ContextQualifier.UPDATING);
   }
 
   @Override
