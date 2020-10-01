@@ -141,9 +141,11 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
       if (result == null)
         return;
 
-      // Variable
       if (result.getSymbol() instanceof Variable) {
         result.getSymbol().noteReference(cq);
+        // If using chained expression, then we add a REF reference
+        if ((cq != ContextQualifier.REF) && (ctx2.colonAttributeSub().size() > 1))
+          result.getSymbol().noteReference(ContextQualifier.REF);
       }
     }
   }

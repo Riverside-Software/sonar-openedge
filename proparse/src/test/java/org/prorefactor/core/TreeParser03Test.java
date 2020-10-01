@@ -465,16 +465,19 @@ public class TreeParser03Test {
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    assertEquals(unit.getRootScope().getVariables().size(), 2);
     Variable var1 = unit.getRootScope().getVariable("xxx");
     assertEquals(var1.getNumReads(), 0);
     assertEquals(var1.getNumWrites(), 1);
+    Variable var2 = unit.getRootScope().getVariable("yyy");
+    assertEquals(var2.getNumReads(), 1);
+    assertEquals(var2.getNumWrites(), 2);
     
-    assertEquals(unit.getRootScope().getChildScopes().size(), 1);
-    Variable var2 = unit.getRootScope().getChildScopes().get(0).getVariable("xxx");
-    assertNotNull(var2);
-    assertEquals(var2.getNumReads(), 0);
-    assertEquals(var2.getNumWrites(), 1);
+    assertEquals(unit.getRootScope().getChildScopes().size(), 2);
+    Variable var3 = unit.getRootScope().getChildScopes().get(0).getVariable("xxx");
+    assertNotNull(var3);
+    assertEquals(var3.getNumReads(), 0);
+    assertEquals(var3.getNumWrites(), 1);
   }
 
   @Test
