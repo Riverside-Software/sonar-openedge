@@ -1811,8 +1811,11 @@ varStatementSub2:
   ;
 
 varStatementInitialValue:
-    varStatementInitialValueArray | varStatementInitialValueSub
+    varStatementInitialValueArray | varStatementInitialValueNew | varStatementInitialValueSub
   ;
+
+varStatementInitialValueNew:
+    NEW typeName parameterList;
 
 varStatementInitialValueArray:
     LEFTBRACE varStatementInitialValueSub ( COMMA varStatementInitialValueSub )* RIGHTBRACE

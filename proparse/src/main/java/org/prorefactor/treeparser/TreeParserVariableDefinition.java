@@ -2037,6 +2037,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     if (ctx.varStatementInitialValueArray() != null) {
       // Just set initial value to Array, no matter what the values are
       var.setInitialValue(Variable.CONSTANT_ARRAY);
+    } else if (ctx.varStatementInitialValueNew() != null) {
+      var.setInitialValue(Variable.CONSTANT_OBJECT);
     } else {
       VarStatementInitialValueSubContext ctx2 = ctx.varStatementInitialValueSub();
       if (ctx2.TODAY() != null) {

@@ -784,6 +784,64 @@ public class TreeParser03Test {
   }
 
   @Test
+  public void testVarStatement13() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR Progress.Lang.Object obj1 = new Progress.Lang.Object().".getBytes()), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable obj1 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("obj1".equals(var.getName()))
+        obj1 = var;
+    }
+    assertNotNull(obj1);
+    assertEquals(obj1.getDataType(), DataType.CLASS);
+    assertEquals(obj1.getClassName(), "Progress.Lang.Object");
+    assertEquals(obj1.getInitialValue(), Variable.CONSTANT_OBJECT);
+    assertEquals(obj1.getExtent(), -1);
+  }
+
+  @Test
+  public void testVarStatement14() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR Progress.Lang.Object obj1 = new Progress.Lang.Object(), obj2, obj3 = new Progress.Lang.Object(1, 2, 3).".getBytes()), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 3);
+    Variable obj1 = null;
+    Variable obj2 = null;
+    Variable obj3 = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("obj1".equals(var.getName()))
+        obj1 = var;
+      else if ("obj2".equals(var.getName()))
+        obj2 = var;
+      else if ("obj3".equals(var.getName()))
+        obj3 = var;
+    }
+    assertNotNull(obj1);
+    assertEquals(obj1.getDataType(), DataType.CLASS);
+    assertEquals(obj1.getClassName(), "Progress.Lang.Object");
+    assertEquals(obj1.getInitialValue(), Variable.CONSTANT_OBJECT);
+    assertEquals(obj1.getExtent(), -1);
+
+    assertNotNull(obj2);
+    assertEquals(obj2.getDataType(), DataType.CLASS);
+    assertEquals(obj2.getClassName(), "Progress.Lang.Object");
+    assertNull(obj2.getInitialValue());
+    assertEquals(obj2.getExtent(), -1);
+
+    assertNotNull(obj3);
+    assertEquals(obj3.getDataType(), DataType.CLASS);
+    assertEquals(obj3.getClassName(), "Progress.Lang.Object");
+    assertEquals(obj3.getInitialValue(), Variable.CONSTANT_OBJECT);
+    assertEquals(obj3.getExtent(), -1);
+  }
+
+  @Test
   public void testShorthandOperator01() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT i1. ASSIGN i1 += 1.".getBytes()), session);
     unit.treeParser01();
