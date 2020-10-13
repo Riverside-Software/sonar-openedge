@@ -782,4 +782,18 @@ public class TreeParser03Test {
     assertEquals(v1.getClassName(), "System.Collections.Generic.List<char>");
     assertEquals(v1.getExtent(), -1);
   }
+
+  @Test
+  public void testShorthandOperator01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT i1. ASSIGN i1 += 1.".getBytes()), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable i1 =  unit.getRootScope().getVariable("i1");
+    assertNotNull(i1);
+    assertEquals(i1.getNumReads(), 1);
+    assertEquals(i1.getNumWrites(), 1);
+  }
 }

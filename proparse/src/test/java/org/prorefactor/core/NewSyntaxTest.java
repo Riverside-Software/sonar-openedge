@@ -318,4 +318,8 @@ public class NewSyntaxTest {
     testNewSyntax("11n/tenant.p");
   }
 
+  @Test
+  public void testShorthandOperators() {
+    testNewSyntax("12.3/operators.p");
+  }
 }

@@ -208,7 +208,11 @@ public class Lexer implements IPreprocessor {
 
         case '/':
           getChar();
-          if (currChar == '*') {
+          if (currChar == '=') {
+            append();
+            getChar();
+            return makeToken(ABLNodeType.SLASHEQUAL);
+          } else if (currChar == '*') {
             return comment();
           } else if (currChar == '/') {
             return singleLineComment();
@@ -266,7 +270,13 @@ public class Lexer implements IPreprocessor {
           return makeToken(ABLNodeType.SEMI);
         case '*':
           getChar();
-          return makeToken(ABLNodeType.STAR);
+          if (currChar == '=') {
+            append();
+            getChar();
+            return makeToken(ABLNodeType.STAREQUAL);
+          } else {
+            return makeToken(ABLNodeType.STAR);
+          }
         case '?':
           getChar();
           return makeToken(ABLNodeType.UNKNOWNVALUE);
@@ -326,10 +336,22 @@ public class Lexer implements IPreprocessor {
 
         case '+':
           getChar();
-          return plusMinusStart(ABLNodeType.PLUS);
+          if (currChar == '=') {
+            append();
+            getChar();
+            return makeToken(ABLNodeType.PLUSEQUAL);
+          } else {
+            return plusMinusStart(ABLNodeType.PLUS);
+          }
         case '-':
           getChar();
-          return plusMinusStart(ABLNodeType.MINUS);
+          if (currChar == '=') {
+            append();
+            getChar();
+            return makeToken(ABLNodeType.MINUSEQUAL);
+          } else {
+            return plusMinusStart(ABLNodeType.MINUS);
+          }
 
         case '#':
         case '|':

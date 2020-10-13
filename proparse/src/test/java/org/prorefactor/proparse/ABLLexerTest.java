@@ -39,6 +39,32 @@ public class ABLLexerTest {
   }
 
   @Test
+  public void testSymbols() {
+    final String source = "+ - +123 -123 += -= * *= / /= ";
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+
+    assertEquals(lexer.nextToken().getType(), Proparse.PLUS);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.MINUS);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.NUMBER);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.NUMBER);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.PLUSEQUAL);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.MINUSEQUAL);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.STAR);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.STAREQUAL);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.SLASH);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.SLASHEQUAL);
+  }
+
+  @Test
   public void testEndOfFile() {
     // Could be anything...
     final String source = "CURRENT-WINDOW:HANDLE. SESSION:FIRST-SERVER-SOCKET:HANDLE. TEMP-TABLE tt1::fld1. DATASET ds1::tt1. DATASET ds1::tt1:set-callback().";
