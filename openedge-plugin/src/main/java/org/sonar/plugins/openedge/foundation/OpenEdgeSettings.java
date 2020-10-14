@@ -110,6 +110,10 @@ public class OpenEdgeSettings {
   private RefactorSession defaultSession;
   private String oePluginVersion;
 
+  public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
+    this(config, fileSystem, runtime, null);
+  }
+
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime, Server server) {
     this.config = config;
     this.fileSystem = fileSystem;
@@ -124,7 +128,7 @@ public class OpenEdgeSettings {
 
     oePluginVersion = readPluginVersion(this.getClass().getClassLoader(), "sonar-openedge.txt");
     LOG.info("OpenEdge plugin version: {}", oePluginVersion);
-    LOG.info("Loading OpenEdge settings for server ID '{}'", server.getId());
+    LOG.info("Loading OpenEdge settings for server ID '{}'", server == null ? "" : server.getId());
     initializeDirectories(config, fileSystem);
     initializePropathDlc(config);
     initializeDefaultPropath(config, fileSystem);
@@ -204,7 +208,7 @@ public class OpenEdgeSettings {
     List<File> retVal = new ArrayList<>();
     LOG.info("Using PROPATH : {}", propValue);
     for (String str : Splitter.on(',').trimResults().split(propValue)) {
-      File entry = fileSystem.resolvePath(str);
+      File entry = resolvePath(str);
       LOG.debug("Adding {} to PROPATH", entry.getAbsolutePath());
       retVal.add(entry);
     }
@@ -384,7 +388,7 @@ public class OpenEdgeSettings {
   }
 
   public File getSonarLintXrefDir() {
-    return fileSystem.resolvePath(config.get(Constants.SLINT_XREF).orElse(""));
+    return resolvePath(config.get(Constants.SLINT_XREF).orElse(""));
   }
 
   public File getPctDir() {
@@ -597,6 +601,8 @@ public class OpenEdgeSettings {
   }
 
   public String getServerId() {
+    if (server == null)
+      return "";
     String str = server.getId();
     int dashIndex = str.indexOf('-');
 
@@ -731,8 +737,8 @@ public class OpenEdgeSettings {
         str = str.substring(0, colonPos);
       }
 
-      LOG.debug("Parsing {} with alias {}", fileSystem.resolvePath(str), dbName);
-      File dfFile = fileSystem.resolvePath(str);
+      LOG.debug("Parsing {} with alias {}", resolvePath(str), dbName);
+      File dfFile = resolvePath(str);
       File serFile = new File(fileSystem.baseDir(),
           ".sonarlint/" + str.replace(':', '_').replace('\\', '_').replace('/', '_') + ".bin");
       serFile.getParentFile().mkdir();
@@ -747,7 +753,7 @@ public class OpenEdgeSettings {
         }
       } else {
         try {
-          desc = DumpFileUtils.getDatabaseDescription(fileSystem.resolvePath(str), dbName);
+          desc = DumpFileUtils.getDatabaseDescription(resolvePath(str), dbName);
         } catch (IOException caught) {
           // Interrupt SonarLint analysis as this is the only way to have a notification for invalid DF file
           // By default, analysis log is not visible
@@ -829,6 +835,19 @@ public class OpenEdgeSettings {
     }
 
     return retVal;
+  }
+
+  private File resolvePath(String path) {
+    File file = new File(path);
+    if (file.isAbsolute())
+      return file;
+
+    try {
+      file = new File(fileSystem.baseDir(), path).getCanonicalFile();
+    } catch (IOException e) {
+      throw new IllegalArgumentException("Unable to resolve path '" + path + "'", e);
+    }
+    return file;
   }
 
   private class RCodeInjectorService {

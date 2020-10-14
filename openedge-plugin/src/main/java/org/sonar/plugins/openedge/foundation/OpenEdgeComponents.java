@@ -75,27 +75,47 @@ public class OpenEdgeComponents {
 
   private boolean initialized = false;
 
+  public OpenEdgeComponents() {
+    this(null, null, null, null);
+  }
+
   public OpenEdgeComponents(Server server) {
-    this(server, null, null);
+    this(server, null, null, null);
+  }
+
+  public OpenEdgeComponents(CheckRegistration[] checkRegistrars) {
+    this(null, checkRegistrars, null, null);
   }
 
   public OpenEdgeComponents(Server server, CheckRegistration[] checkRegistrars) {
-    this(server, checkRegistrars, null);
+    this(server, checkRegistrars, null, null);
+  }
+
+  public OpenEdgeComponents(LicenseRegistration[] licRegistrars) {
+    this(null, null, licRegistrars, null);
   }
 
   public OpenEdgeComponents(Server server, LicenseRegistration[] licRegistrars) {
-    this(server, null, licRegistrars);
+    this(server, null, licRegistrars, null);
+  }
+
+  public OpenEdgeComponents(CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars) {
+    this(null, checkRegistrars, licRegistrars, null);
   }
 
   public OpenEdgeComponents(Server server, CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars) {
     this(server, checkRegistrars, licRegistrars, null);
   }
 
+  public OpenEdgeComponents(CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars,
+      TreeParserRegistration[] tpRegistrars) {
+    this(null, checkRegistrars, licRegistrars, tpRegistrars);
+  }
 
   public OpenEdgeComponents(Server server, CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars,
       TreeParserRegistration[] tpRegistrars) {
     this.server = server;
-	if (checkRegistrars != null) {
+    if (checkRegistrars != null) {
       registerChecks(checkRegistrars);
     }
     if (licRegistrars != null) {
@@ -172,15 +192,16 @@ public class OpenEdgeComponents {
     initialized = true;
   }
 
-  public Map<ActiveRule, OpenEdgeProparseCheck> getProparseRules() { 
+  public Map<ActiveRule, OpenEdgeProparseCheck> getProparseRules() {
     return Collections.unmodifiableMap(ppChecksMap);
   }
 
-  public Map<ActiveRule, OpenEdgeDumpFileCheck> getDumpFileRules() {  
+  public Map<ActiveRule, OpenEdgeDumpFileCheck> getDumpFileRules() {
     return Collections.unmodifiableMap(dfChecksMap);
   }
 
-  private OpenEdgeCheck<?> initializeCheck(SensorContext context, ActiveRule rule, SonarProduct product, String permId) {
+  private OpenEdgeCheck<?> initializeCheck(SensorContext context, ActiveRule rule, SonarProduct product,
+      String permId) {
     RuleKey ruleKey = rule.ruleKey();
     // AFAIK, no way to be sure if a rule is based on a template or not
     String clsName = rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey();
@@ -264,6 +285,9 @@ public class OpenEdgeComponents {
   }
 
   public String getServerId() {
+    if (server == null)
+      return "";
+
     String str = server.getId();
     int dashIndex = str.indexOf('-');
 
@@ -280,8 +304,8 @@ public class OpenEdgeComponents {
           repoName, type, signature, expirationDate);
     }
 
-    public void registerLicense(String permanentId, SonarProduct product, String customerName, String salt, String repoName,
-       LicenseRegistration.LicenseType type, byte[] signature, long expirationDate) {
+    public void registerLicense(String permanentId, SonarProduct product, String customerName, String salt,
+        String repoName, LicenseRegistration.LicenseType type, byte[] signature, long expirationDate) {
       if (Strings.isNullOrEmpty(repoName))
         return;
       LOG.debug("Found {} license - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
@@ -318,11 +342,14 @@ public class OpenEdgeComponents {
       if ((permId == null) || (repoName == null))
         return null;
       for (License lic : licenses) {
-        if (((lic.getType() == LicenseType.COMMERCIAL) || (lic.getType() == LicenseType.PARTNER)) && (lic.getProduct() == product) && repoName.equals(lic.getRepositoryName()) && permId.equals(lic.getPermanentId()))
+        if (((lic.getType() == LicenseType.COMMERCIAL) || (lic.getType() == LicenseType.PARTNER))
+            && (lic.getProduct() == product) && repoName.equals(lic.getRepositoryName())
+            && permId.equals(lic.getPermanentId()))
           return lic;
       }
       for (License lic : licenses) {
-        if ((lic.getType() == LicenseType.EVALUATION) && (lic.getProduct() == product) && repoName.equals(lic.getRepositoryName()))
+        if ((lic.getType() == LicenseType.EVALUATION) && (lic.getProduct() == product)
+            && repoName.equals(lic.getRepositoryName()))
           return lic;
       }
       return null;
