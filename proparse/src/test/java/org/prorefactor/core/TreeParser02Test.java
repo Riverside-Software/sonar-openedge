@@ -291,6 +291,16 @@ public class TreeParser02Test {
     genericTest("test49.p");
   }
 
+  @Test
+  public void test50() throws IOException {
+    genericTest("test50.p");
+  }
+
+  @Test
+  public void test51() throws IOException {
+    genericTest("test51.p");
+  }
+
   private void genericTest(String name) throws IOException {
     AttributedWriter writer = new AttributedWriter();
     writer.write(SOURCEDIR + name, new File(TARGETDIR + name), session);

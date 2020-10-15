@@ -33,7 +33,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
-import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.atn.DecisionInfo;
 import org.antlr.v4.runtime.atn.ParseInfo;
 import org.antlr.v4.runtime.atn.PredictionMode;
@@ -58,6 +57,7 @@ import org.prorefactor.proparse.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.IntegerIndex;
+import org.prorefactor.proparse.antlr4.ProparseListener;
 import org.prorefactor.proparse.support.ParserSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,8 +102,11 @@ public class ParseUnit {
   // ANTLR4 debug and profiler switches
   private boolean profiler;
   private ParseInfo parseInfo;
+  private boolean keepStream;
+  private CommonTokenStream stream;
   private boolean trace;
   private boolean ambiguityReport;
+  private boolean writableTokens;
 
   // Timings (in ns)
   private long parseTimeSLL;
@@ -112,6 +115,11 @@ public class ParseUnit {
   private long treeParseTime;
   private long xrefAttachTime;
   private boolean switchToLL;
+
+  private boolean isClass;
+  private boolean isInterface;
+  private boolean isAbstract;
+  private String className;
 
   public ParseUnit(File file, IProparseEnvironment session) {
     this(file, file.getPath(), session);
@@ -139,11 +147,26 @@ public class ParseUnit {
   }
 
   /**
+   * Generates WritableProToken instead of immutable ProToken in the lexer phase
+   */
+  public void enableWritableTokens() {
+    this.writableTokens = true;
+  }
+
+  /**
    * Enables profiler mode in the parsing phase. Should not be activated in production, CPU intensive
    * @see ParseUnit#getParseInfo()
    */
   public void enableProfiler() {
     profiler = true;
+  }
+
+  public void keepStream() {
+    keepStream = true;
+  }
+
+  public CommonTokenStream getStream() {
+    return stream;
   }
 
   /**
@@ -189,7 +212,7 @@ public class ParseUnit {
     return Strings.nullToEmpty(fileNameList.getValue(index));
   }
 
-  /** 
+  /**
    * @return IncludeRef object
    */
   public @Nullable IncludeRef getMacroGraph() {
@@ -221,6 +244,8 @@ public class ParseUnit {
 
   public TokenSource preprocess() {
     ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
+    if (writableTokens)
+      lexer.enableWritableTokens();
     fileNameList = lexer.getFilenameList();
     macroGraph = lexer.getMacroGraph();
     appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
@@ -238,6 +263,8 @@ public class ParseUnit {
   public void lexAndGenerateMetrics() {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
     ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, true);
+    if (writableTokens)
+      lexer.enableWritableTokens();
     Token tok = lexer.nextToken();
     while (tok.getType() != Token.EOF) {
       tok = lexer.nextToken();
@@ -250,7 +277,9 @@ public class ParseUnit {
     LOGGER.trace("Entering ParseUnit#parse()");
 
     ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
-    TokenStream stream = new CommonTokenStream(lexer);
+    if (writableTokens)
+      lexer.enableWritableTokens();
+    CommonTokenStream stream = new CommonTokenStream(lexer);
     Proparse parser = new Proparse(stream);
     parser.setTrace(trace);
     parser.setProfile(profiler);
@@ -296,8 +325,13 @@ public class ParseUnit {
 
     lexer.parseComplete();
     long startTimeNs = System.nanoTime();
-    topNode = (ProgramRootNode) new JPNodeVisitor(parser.getParserSupport(),
-        (BufferedTokenStream) parser.getInputStream()).visit(tree).build(parser.getParserSupport());
+    JPNodeVisitor visitor = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
+    topNode = (ProgramRootNode) visitor.visit(tree).build(parser.getParserSupport());
+    isClass = visitor.isClass();
+    isInterface = visitor.isInterface();
+    isAbstract = visitor.isAbstractClass();
+    className = visitor.getClassName();
+
     jpNodeTime = System.nanoTime() - startTimeNs;
 
     fileNameList = lexer.getFilenameList();
@@ -310,6 +344,9 @@ public class ParseUnit {
     if (profiler) {
       parseInfo = parser.getParseInfo();
     }
+    if (keepStream) {
+      this.stream = stream;
+    }
 
     LOGGER.trace("Exiting ParseUnit#parse()");
   }
@@ -317,17 +354,30 @@ public class ParseUnit {
   public void treeParser01() {
     if (topNode == null)
       parse();
-    ParseTreeWalker walker = new ParseTreeWalker();
-    TreeParser parser = new TreeParser(support, session);
+
     long startTimeNs = System.nanoTime();
-    walker.walk(parser, tree);
+    ParseTreeWalker walker = new ParseTreeWalker();
+    walker.walk(new TreeParserBlocks(this), tree);
+    TreeParserVariableDefinition tp02 = new TreeParserVariableDefinition(this);
+    walker.walk(tp02, tree);
+    TreeParserComputeReferences tp03 = new TreeParserComputeReferences(tp02);
+    walker.walk(tp03, tree);
     treeParseTime = System.nanoTime() - startTimeNs;
-    rootScope = parser.getRootScope();
 
     startTimeNs = System.nanoTime();
     finalizeXrefInfo();
     xrefAttachTime = System.nanoTime() - startTimeNs;
     xref = null; // No need to keep the entire XREF in memory
+  }
+
+  public void treeParser(ProparseListener listener) {
+    if (topNode == null)
+      parse();
+
+    ParseTreeWalker walker = new ParseTreeWalker();
+    long startTimeNs = System.nanoTime();
+    walker.walk(listener, tree);
+    treeParseTime = System.nanoTime() - startTimeNs;
   }
 
   public void attachXref(Document doc) {
@@ -336,6 +386,10 @@ public class ParseUnit {
 
   public void attachXref(CrossReference xref) {
     this.xref = xref;
+  }
+
+  public void setRootScope(TreeParserRootSymbolScope scope) {
+    this.rootScope = scope;
   }
 
   private static boolean isReferenceAssociatedToRecordNode(RecordNameNode recNode, Source src, Reference ref,
@@ -498,6 +552,22 @@ public class ParseUnit {
     return syntaxError;
   }
 
+  public boolean isClass() {
+    return isClass;
+  }
+
+  public boolean isInterface() {
+    return isInterface;
+  }
+
+  public boolean isAbstractClass() {
+    return isAbstract;
+  }
+
+  public String getClassName() {
+    return className;
+  }
+
   public boolean isInEditableSection(int file, int line) {
     if (!appBuilderCode || (file > 0))
       return true;
@@ -509,8 +579,10 @@ public class ParseUnit {
   }
 
   private ByteSource getByteSource() {
-    try (InputStream stream = input == null ? new FileInputStream(file) : input) {
-      return ByteSource.wrap(ByteStreams.toByteArray(stream));
+    try (InputStream s = input == null ? new FileInputStream(file) : input) {
+      if (s.markSupported())
+        s.reset();
+      return ByteSource.wrap(ByteStreams.toByteArray(s));
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }

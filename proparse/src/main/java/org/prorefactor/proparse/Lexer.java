@@ -72,6 +72,7 @@ public class Lexer implements IPreprocessor {
   private IncludeFile currentInclude;
   private InputSource currentInput;
   private int sourceCounter;
+  private boolean writableTokens;
 
   private final ABLLexer prepro;
   private final TokenFactory<ProToken> factory;
@@ -123,7 +124,7 @@ public class Lexer implements IPreprocessor {
   private Map<String, String> globalDefdNames = new HashMap<>();
   private int sequence = 0;
 
-  protected Lexer(ABLLexer prepro, ByteSource src, String fileName) {
+  Lexer(ABLLexer prepro, ByteSource src, String fileName) {
     this.prepro = prepro;
     this.factory = new ProTokenFactory();
     try {
@@ -137,6 +138,10 @@ public class Lexer implements IPreprocessor {
     currSourceNum = currentInput.getSourceNum();
 
     getChar(); // We always assume "currChar" is available.
+  }
+
+  void enableWritableTokens() {
+    this.writableTokens = true;
   }
 
   //////////////// Lexical productions listed first, support functions follow.
@@ -203,7 +208,11 @@ public class Lexer implements IPreprocessor {
 
         case '/':
           getChar();
-          if (currChar == '*') {
+          if (currChar == '=') {
+            append();
+            getChar();
+            return makeToken(ABLNodeType.SLASHEQUAL);
+          } else if (currChar == '*') {
             return comment();
           } else if (currChar == '/') {
             return singleLineComment();
@@ -261,7 +270,13 @@ public class Lexer implements IPreprocessor {
           return makeToken(ABLNodeType.SEMI);
         case '*':
           getChar();
-          return makeToken(ABLNodeType.STAR);
+          if (currChar == '=') {
+            append();
+            getChar();
+            return makeToken(ABLNodeType.STAREQUAL);
+          } else {
+            return makeToken(ABLNodeType.STAR);
+          }
         case '?':
           getChar();
           return makeToken(ABLNodeType.UNKNOWNVALUE);
@@ -321,10 +336,22 @@ public class Lexer implements IPreprocessor {
 
         case '+':
           getChar();
-          return plusMinusStart(ABLNodeType.PLUS);
+          if (currChar == '=') {
+            append();
+            getChar();
+            return makeToken(ABLNodeType.PLUSEQUAL);
+          } else {
+            return plusMinusStart(ABLNodeType.PLUS);
+          }
         case '-':
           getChar();
-          return plusMinusStart(ABLNodeType.MINUS);
+          if (currChar == '=') {
+            append();
+            getChar();
+            return makeToken(ABLNodeType.MINUSEQUAL);
+          } else {
+            return plusMinusStart(ABLNodeType.MINUS);
+          }
 
         case '#':
         case '|':
@@ -1123,6 +1150,7 @@ public class Lexer implements IPreprocessor {
       loc.add(tokenStartPos.line);
     }
     return new ProToken.Builder(type, text) //
+      .setWritable(writableTokens) //
       .setFileIndex(tokenStartPos.file) //
       .setFileName(prepro.getFilename(tokenStartPos.file)) //
       .setLine(tokenStartPos.line) //

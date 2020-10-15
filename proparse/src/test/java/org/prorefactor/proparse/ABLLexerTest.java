@@ -15,6 +15,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.core.WritableProToken;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
@@ -35,6 +36,32 @@ public class ABLLexerTest {
   public void setUp() throws IOException, InvalidRCodeException {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
+  }
+
+  @Test
+  public void testSymbols() {
+    final String source = "+ - +123 -123 += -= * *= / /= ";
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+
+    assertEquals(lexer.nextToken().getType(), Proparse.PLUS);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.MINUS);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.NUMBER);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.NUMBER);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.PLUSEQUAL);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.MINUSEQUAL);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.STAR);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.STAREQUAL);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.SLASH);
+    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(lexer.nextToken().getType(), Proparse.SLASHEQUAL);
   }
 
   @Test
@@ -351,6 +378,23 @@ public class ABLLexerTest {
     lexer = new ABLLexer(session, ByteSource.wrap("SUBSTITUTE('').".getBytes()), "file.txt");
     tok = (ProToken) lexer.nextToken();
     assertFalse(tok.isAbbreviated());
+  }
+
+  @Test
+  public void testWritableTokens() {
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("  MESSAGE 'Hello'".getBytes()), "file.txt");
+    lexer.enableWritableTokens();
+    Token tok = lexer.nextToken();
+    tok = lexer.nextToken();
+    assertNotNull(tok);
+    assertTrue(tok instanceof WritableProToken);
+    assertEquals(tok.getLine(), 1);
+    assertEquals(tok.getCharPositionInLine(), 3);
+    WritableProToken tok2 = (WritableProToken) tok;
+    tok2.setLine(5);
+    tok2.setCharPositionInLine(4);
+    assertEquals(tok.getLine(), 5);
+    assertEquals(tok.getCharPositionInLine(), 4);
   }
 
   // *********

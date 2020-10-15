@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PreprocessorErrorListener extends BaseErrorListener {
-  private static final Logger LOGGER = LoggerFactory.getLogger(PostLexer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(PreprocessorErrorListener.class);
 
   private final ABLLexer lexer;
   private final List<ProToken> tokens;

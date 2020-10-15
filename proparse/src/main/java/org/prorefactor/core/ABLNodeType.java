@@ -102,6 +102,10 @@ public enum ABLNodeType {
   UNARY_MINUS(Proparse.UNARY_MINUS, "-", NodeTypesOption.SYMBOL),
   UNARY_PLUS(Proparse.UNARY_PLUS, "+", NodeTypesOption.SYMBOL),
   UNKNOWNVALUE(Proparse.UNKNOWNVALUE, "?", NodeTypesOption.SYMBOL),
+  PLUSEQUAL(Proparse.PLUSEQUAL, "+=", NodeTypesOption.SYMBOL),
+  MINUSEQUAL(Proparse.MINUSEQUAL, "-=", NodeTypesOption.SYMBOL),
+  STAREQUAL(Proparse.STAREQUAL, "*=", NodeTypesOption.SYMBOL),
+  SLASHEQUAL(Proparse.SLASHEQUAL, "/=", NodeTypesOption.SYMBOL),
 
   // Lexer (and later) elements
   ANNOTATION(Proparse.ANNOTATION),

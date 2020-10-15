@@ -22,7 +22,6 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 
 public class ProToken implements Token {
@@ -52,7 +51,7 @@ public class ProToken implements Token {
   private boolean macroExpansion;
   private boolean synthetic = false;
 
-  private ProToken(ABLNodeType type, String text) {
+  ProToken(ABLNodeType type, String text) {
     this.type = type;
     this.text = text;
   }
@@ -189,24 +188,6 @@ public class ProToken implements Token {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof ProToken) {
-      ProToken tok = (ProToken) obj;
-      return ((tok.type == this.type) && (tok.text.equals(this.text)) && (tok.line == this.line)
-          && (tok.charPositionInLine == this.charPositionInLine) && (tok.fileIndex == this.fileIndex) && (tok.endFileIndex == this.endFileIndex)
-          && (tok.endLine == this.endLine) && (tok.endCharPositionInLine == this.endCharPositionInLine)
-          && (tok.macroSourceNum == this.macroSourceNum));
-    } else {
-      return false;
-    }
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(type.toString(), text, line, charPositionInLine, fileIndex, endFileIndex, endLine, endCharPositionInLine, macroSourceNum);
-  }
-
-  @Override
   public String toString() {
     return "[\"" + text.replace('\r', ' ').replace('\n', ' ') + "\",<" + type + ">,macro=" + macroSourceNum + ",start="
         + fileIndex + ":" + line + ":" + charPositionInLine + ",end=" + endFileIndex + ":" + endLine + ":"
@@ -276,6 +257,7 @@ public class ProToken implements Token {
     private ProToken hiddenBefore = null;
     private boolean macroExpansion;
     private boolean synthetic = false;
+    private boolean writable = false;
 
     public Builder(ABLNodeType type, String text) {
       this.type = type;
@@ -297,6 +279,12 @@ public class ProToken implements Token {
       this.hiddenBefore = token.hiddenBefore;
       this.macroExpansion = token.macroExpansion;
       this.synthetic = token.synthetic;
+      this.writable = token instanceof WritableProToken;
+    }
+
+    public Builder setWritable(boolean writable) {
+      this.writable = writable;
+      return this;
     }
 
     public Builder setType(ABLNodeType type) {
@@ -392,7 +380,7 @@ public class ProToken implements Token {
       if (type == null)
         throw new IllegalArgumentException(INVALID_TYPE + type);
 
-      ProToken tok = new ProToken(type, text.toString());
+      ProToken tok = writable ? new WritableProToken(type, text.toString()) : new ProToken(type, text.toString());
       tok.line = line;
       tok.endLine = endLine;
       tok.charPositionInLine = charPositionInLine;

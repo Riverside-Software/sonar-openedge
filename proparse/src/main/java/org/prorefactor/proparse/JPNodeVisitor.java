@@ -34,9 +34,30 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   private final ParserSupport support;
   private final BufferedTokenStream stream;
 
+  private boolean isClass;
+  private boolean isInterface;
+  private boolean isAbstract;
+  private String className;
+
   public JPNodeVisitor(ParserSupport support, BufferedTokenStream stream) {
     this.support = support;
     this.stream = stream;
+  }
+
+  public boolean isClass() {
+    return isClass;
+  }
+
+  public boolean isInterface() {
+    return isInterface;
+  }
+
+  public boolean isAbstractClass() {
+    return isAbstract;
+  }
+
+  public String getClassName() {
+    return className;
   }
 
   @Override
@@ -389,10 +410,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
     return createTree(ctx, ABLNodeType.FORM_ITEM).setRuleNode(ctx);
   }
 
-
   @Override
   public Builder visitRecord(RecordContext ctx) {
-    return visitChildren(ctx).changeType(ABLNodeType.RECORD_NAME).setStoreType(support.getRecordExpression(ctx)).setRuleNode(ctx);
+    return visitChildren(ctx).changeType(ABLNodeType.RECORD_NAME).setStoreType(
+        support.getRecordExpression(ctx)).setRuleNode(ctx);
   }
 
   @Override
@@ -409,7 +430,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   public Builder visitNewIdentifier(NewIdentifierContext ctx) {
     return visitChildren(ctx).changeType(ABLNodeType.ID);
   }
-
 
   @Override
   public Builder visitFilename(FilenameContext ctx) {
@@ -443,7 +463,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitAaTraceCloseStatement(AaTraceCloseStatementContext ctx) {
-    return  createStatementTreeFromFirstNode(ctx, ABLNodeType.CLOSE);
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.CLOSE);
   }
 
   @Override
@@ -458,8 +478,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitAaTraceStatement(AaTraceStatementContext ctx) {
-    return  createStatementTreeFromFirstNode(ctx);
-    }
+    return createStatementTreeFromFirstNode(ctx);
+  }
 
   @Override
   public Builder visitAccumulateStatement(AccumulateStatementContext ctx) {
@@ -492,7 +512,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
     List<NotStatementEndContext> list = ctx.notStatementEnd();
     if (!list.isEmpty()) {
-      ProToken.Builder tok = new ProToken.Builder((ProToken) list.get(0).getStart()).setType(ABLNodeType.UNQUOTEDSTRING);
+      ProToken.Builder tok = new ProToken.Builder((ProToken) list.get(0).getStart()).setType(
+          ABLNodeType.UNQUOTEDSTRING);
       for (int zz = 1; zz < list.size(); zz++) {
         tok.mergeWith(visit(list.get(zz)).getToken());
       }
@@ -666,7 +687,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   public Builder visitCaseExpression1(CaseExpression1Context ctx) {
     return visitChildren(ctx);
   }
-  
+
   @Override
   public Builder visitCaseExpression2(CaseExpression2Context ctx) {
     return createTreeFromSecondNode(ctx).setOperator();
@@ -735,6 +756,9 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitClassStatement(ClassStatementContext ctx) {
+    isClass = true;
+    className = ctx.tn.getText();
+    isAbstract = !ctx.ABSTRACT().isEmpty();
     return createStatementTreeFromFirstNode(ctx);
   }
 
@@ -1799,6 +1823,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitInterfaceStatement(InterfaceStatementContext ctx) {
+    isInterface = true;
+    className = ctx.name.getText();
     return createStatementTreeFromFirstNode(ctx);
   }
 
@@ -2212,7 +2238,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitRecordOption(RecordOptionContext ctx) {
-    if ((ctx.LEFT() != null) || (ctx.OF() != null) || (ctx.WHERE() != null) || (ctx.USEINDEX() != null) || (ctx.USING() != null))
+    if ((ctx.LEFT() != null) || (ctx.OF() != null) || (ctx.WHERE() != null) || (ctx.USEINDEX() != null)
+        || (ctx.USING() != null))
       return createTreeFromFirstNode(ctx);
     return visitChildren(ctx);
   }
@@ -2725,8 +2752,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   // ------------------
 
   /**
-   * Default behavior for each ParseTree node is to create an array of JPNode.
-   * ANTLR2 construct ruleName: TOKEN TOKEN | rule TOKEN | rule ...
+   * Default behavior for each ParseTree node is to create an array of JPNode. ANTLR2 construct ruleName: TOKEN TOKEN |
+   * rule TOKEN | rule ...
    */
   @Override
   @Nonnull
@@ -2869,4 +2896,3 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
 }
-

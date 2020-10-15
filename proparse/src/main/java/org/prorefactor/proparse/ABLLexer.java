@@ -63,10 +63,11 @@ public class ABLLexer implements TokenSource, IPreprocessor {
     this.lexOnly = lexOnly;
 
     lexer = new Lexer(this, src, fileName);
-    TokenSource postlexer = lexOnly ? new NoOpPostLexer(lexer) : new PostLexer(this, lexer);
-    TokenSource filter0 = new NameDotTokenFilter(postlexer);
-    TokenSource filter1 = new TokenList(filter0);
-    wrapper = new FunctionKeywordTokenFilter(filter1);
+    TokenSource postLexer = lexOnly ? new NoOpPostLexer(lexer) : new PostLexer(this, lexer);
+    TokenSource filter0 = new ProparseSkipFilter(postLexer);
+    TokenSource filter1 = new NameDotTokenFilter(filter0);
+    TokenSource filter2 = new TokenList(filter1);
+    wrapper = new FunctionKeywordTokenFilter(filter2);
   }
 
   /**
@@ -92,6 +93,10 @@ public class ABLLexer implements TokenSource, IPreprocessor {
 
   public String getFilename(int fileIndex) {
     return filenameList.getValue(fileIndex);
+  }
+
+  public void enableWritableTokens() {
+    lexer.enableWritableTokens();
   }
 
   // **********************

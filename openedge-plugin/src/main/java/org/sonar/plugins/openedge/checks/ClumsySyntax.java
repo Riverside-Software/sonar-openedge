@@ -34,7 +34,7 @@ public class ClumsySyntax extends OpenEdgeProparseCheck {
 
   @Override
   public void execute(InputFile file, ParseUnit unit) {
-    if (unit.getRootScope().isInterface() || unit.getRootScope().isAbstractClass()) {
+    if (unit.isInterface() || unit.isAbstractClass()) {
       for (JPNode node : unit.getTopNode().queryStateHead(ABLNodeType.METHOD)) {
         JPNode lastChild = node.getLastDescendant();
         if (lastChild.getNodeType() == ABLNodeType.LEXCOLON) {

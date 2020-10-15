@@ -796,11 +796,11 @@ assignmentList: // SEMITRANSLATED
   ;
 
 assignStatement2:
-    ( pseudoFunction | widattr | field ) EQUAL expression NOERROR? statementEnd
+    ( pseudoFunction | widattr | field ) ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) expression NOERROR? statementEnd
   ;
 
 assignEqual:
-   ( pseudoFunction | widattr | field ) EQUAL expression
+   ( pseudoFunction | widattr | field ) ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) expression
   ;
 
 assignField:
@@ -816,8 +816,8 @@ atPhrase:
   ;
 
 atPhraseSub:
-     (COLUMN|c1=COLUMNS) expression
-  |  (COLUMNOF|c=COLOF) referencePoint
+     ( COLUMN | COLUMNS ) expression
+  |  ( COLUMNOF | COLOF ) referencePoint
   |  ROW expression
   |  ROWOF referencePoint
   |  X expression
