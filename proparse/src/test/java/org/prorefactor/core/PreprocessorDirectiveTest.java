@@ -440,7 +440,7 @@ public class PreprocessorDirectiveTest {
     assertEquals(tok.getText(), "skip-section");
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
-    assertEquals(tok.getText(), "end-skip-section");
+    assertEquals(tok.getText(), "skip-section-end");
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) src.nextToken();
@@ -481,7 +481,7 @@ public class PreprocessorDirectiveTest {
     assertEquals(tok.getText(), "skip-section");
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
-    assertEquals(tok.getText(), "end-skip-section");
+    assertEquals(tok.getText(), "skip-section-end");
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) src.nextToken();

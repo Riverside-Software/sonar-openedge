@@ -23,7 +23,7 @@ import org.prorefactor.core.ProToken;
 
 /**
  * Skip sections of code enclosed in <code>{&amp;_proparse_ skip-section}</code> and
- * <code>{&amp;_proparse_ end-skip-section}</code>
+ * <code>{&amp;_proparse_ skip-section-end}</code>
  */
 public class ProparseSkipFilter implements TokenSource {
   private final TokenSource source;
@@ -57,7 +57,7 @@ public class ProparseSkipFilter implements TokenSource {
         if (tok.getNodeType() == ABLNodeType.EOF_ANTLR4)
           return;
         else if ((tok.getNodeType() == ABLNodeType.PROPARSEDIRECTIVE)
-            && "end-skip-section".equalsIgnoreCase(tok.getText())) {
+            && "skip-section-end".equalsIgnoreCase(tok.getText())) {
           endToken = tok;
           return;
         } else {
