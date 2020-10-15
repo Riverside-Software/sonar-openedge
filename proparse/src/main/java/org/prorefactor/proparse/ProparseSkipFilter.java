@@ -22,8 +22,8 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 
 /**
- * Skip sections of code enclosed in <code>{&_proparse_ skip-section}</code> and
- * <code>{&_proparse_ end-skip-section}</code>
+ * Skip sections of code enclosed in <code>{&amp;_proparse_ skip-section}</code> and
+ * <code>{&amp;_proparse_ end-skip-section}</code>
  */
 public class ProparseSkipFilter implements TokenSource {
   private final TokenSource source;
