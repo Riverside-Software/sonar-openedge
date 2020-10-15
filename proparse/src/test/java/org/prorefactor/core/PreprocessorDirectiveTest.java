@@ -425,6 +425,69 @@ public class PreprocessorDirectiveTest {
     assertEquals(tok.getText(), "' '");
   }
 
+  @Test
+  public void test21() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor21.p"), session);
+    TokenSource src = unit.preprocess();
+    ProToken tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "skip-section");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "end-skip-section");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.VIEWAS);
+  }
+
+  @Test
+  public void test22() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor22.p"), session);
+    TokenSource src = unit.preprocess();
+    ProToken tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "skip-section");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.EOF_ANTLR4);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.EOF_ANTLR4);
+  }
+
+  @Test
+  public void test23() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor23.p"), session);
+    TokenSource src = unit.preprocess();
+    ProToken tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "skip-section");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "end-skip-section");
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.VIEWAS);
+  }
+
   /**
    * Utility method for preprocess(), removes all tokens from hidden channels
    */
