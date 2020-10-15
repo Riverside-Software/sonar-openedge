@@ -29,7 +29,6 @@ public class Variable extends Symbol implements Primative {
   public static final Object CONSTANT_NOW = new Object();
   public static final Object CONSTANT_TODAY = new Object();
   public static final Object CONSTANT_NULL = new Object();
-  public static final Object CONSTANT_OBJECT = new Object();
   public static final Object CONSTANT_OTHER = new Object();
   public static final Object CONSTANT_ARRAY = new Object();
   public static final Object CONSTANT_ZERO = new Object();
