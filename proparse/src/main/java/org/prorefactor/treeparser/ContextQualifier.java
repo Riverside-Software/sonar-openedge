@@ -108,10 +108,7 @@ public enum ContextQualifier {
    * Is the symbol's value "referenced" in this context?
    */
   public static boolean isReference(ContextQualifier cq) {
-    if (cq == SYMBOL) {
-      return true;
-    }
-    return false;
+    return cq == SYMBOL;
   }
 
 }

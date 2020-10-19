@@ -308,7 +308,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExprtWidName(ExprtWidNameContext ctx) {
-    return createTree(ctx, ABLNodeType.WIDGET_REF);
+    return createTree(ctx, ABLNodeType.WIDGET_REF).setRuleNode(ctx);
   }
 
   @Override

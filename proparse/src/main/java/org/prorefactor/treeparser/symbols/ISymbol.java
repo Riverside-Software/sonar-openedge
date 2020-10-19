@@ -55,7 +55,7 @@ public interface ISymbol {
   /**
    * Take note of a symbol reference (read, write, reference by name)
    */
-  void noteReference(ContextQualifier contextQualifier);
+  void noteReference(JPNode node, ContextQualifier contextQualifier);
 
   void setLikeSymbol(ISymbol symbol);
 

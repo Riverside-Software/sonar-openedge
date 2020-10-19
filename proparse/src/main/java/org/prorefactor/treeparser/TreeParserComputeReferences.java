@@ -59,7 +59,7 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
   @Override
   public void enterExprtWidName(ExprtWidNameContext ctx) {
-    widattr(ctx.widName(), ctx.colonAttribute(), contextQualifiers.get(ctx));
+    widattr(ctx.widName(), ctx.colonAttribute(), support.getNode(ctx), contextQualifiers.get(ctx));
   }
 
   @Override
@@ -82,7 +82,7 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
   @Override
   public void enterWidattrWidName(WidattrWidNameContext ctx) {
-    widattr(ctx.widName(), ctx.colonAttribute(), contextQualifiers.get(ctx));
+    widattr(ctx.widName(), ctx.colonAttribute(), support.getNode(ctx.getParent()), contextQualifiers.get(ctx));
   }
 
   @Override
@@ -90,7 +90,7 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
     if ((ctx.BUFFER() != null) || (ctx.TEMPTABLE() != null)) {
       TableBuffer tableBuffer = currentScope.lookupBuffer(ctx.filn().getText());
       if (tableBuffer != null) {
-        tableBuffer.noteReference(ContextQualifier.SYMBOL);
+        tableBuffer.noteReference(support.getNode(ctx), ContextQualifier.SYMBOL);
       }
     }
   }
@@ -98,14 +98,14 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
   @Override
   public void enterCatchStatement(CatchStatementContext ctx) {
     super.enterCatchStatement(ctx);
-    currentScope.getVariable(ctx.n.getText()).noteReference(ContextQualifier.UPDATING);
+    currentScope.getVariable(ctx.n.getText()).noteReference(support.getNode(ctx), ContextQualifier.UPDATING);
   }
 
   @Override
   public void enterRecord(RecordContext ctx) {
     RecordNameNode node = (RecordNameNode) support.getNode(ctx);
     if ((node != null) && (node.getTableBuffer() != null))
-      node.getTableBuffer().noteReference(node.getQualifier());
+      node.getTableBuffer().noteReference(node, node.getQualifier());
   }
 
   @Override
@@ -116,11 +116,11 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
       qual = ContextQualifier.REF;
 
     if (refNode.getSymbol() != null) {
-      refNode.getSymbol().noteReference(refNode.getQualifier());
+      refNode.getSymbol().noteReference(refNode, refNode.getQualifier());
       if (refNode.getSymbol() instanceof FieldBuffer) {
         FieldBuffer fb = (FieldBuffer) refNode.getSymbol();
         if (fb.getBuffer() != null) {
-          fb.getBuffer().noteReference(qual);
+          fb.getBuffer().noteReference(refNode, qual);
         }
       }
     }
@@ -129,11 +129,11 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
   private void noteReference(JPNode node, ContextQualifier cq) {
     if ((node.getSymbol() != null)
         && ((cq == ContextQualifier.UPDATING) || (cq == ContextQualifier.REFUP) || (cq == ContextQualifier.OUTPUT))) {
-      node.getSymbol().noteReference(cq);
+      node.getSymbol().noteReference(node, cq);
     }
   }
 
-  private void widattr(WidNameContext ctx, ColonAttributeContext ctx2, ContextQualifier cq) {
+  private void widattr(WidNameContext ctx, ColonAttributeContext ctx2, JPNode node, ContextQualifier cq) {
     if ((ctx == null) || (ctx2 == null))
       return;
     if ((ctx.systemHandleName() != null) && (ctx.systemHandleName().THISOBJECT() != null)) {
@@ -142,10 +142,10 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
         return;
 
       if (result.getSymbol() instanceof Variable) {
-        result.getSymbol().noteReference(cq);
+        result.getSymbol().noteReference(node, cq);
         // If using chained expression, then we add a REF reference
         if ((cq != ContextQualifier.REF) && (ctx2.colonAttributeSub().size() > 1))
-          result.getSymbol().noteReference(ContextQualifier.REF);
+          result.getSymbol().noteReference(node, ContextQualifier.REF);
       }
     }
   }
@@ -165,7 +165,7 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
       // Variable
       if (result.getSymbol() instanceof Variable) {
-        result.getSymbol().noteReference(cq);
+        result.getSymbol().noteReference(support.getNode(ctx2.getParent().getParent()), cq);
       }
     }
   }

@@ -100,7 +100,7 @@ public abstract class Symbol implements ISymbol {
   }
 
   @Override
-  public void noteReference(ContextQualifier contextQualifier) {
+  public void noteReference(JPNode node, ContextQualifier contextQualifier) {
     if (contextQualifier == null)
       return;
     allRefsCount++;
