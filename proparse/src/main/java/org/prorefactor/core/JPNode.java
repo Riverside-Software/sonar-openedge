@@ -452,6 +452,10 @@ public class JPNode {
     attrSet(IConstants.OPERATOR, IConstants.TRUE);
   }
 
+  public boolean isOperator() {
+    return attrGet(IConstants.OPERATOR) == IConstants.TRUE;
+  }
+
   public int getState2() {
     return attrGet(IConstants.STATE2);
   }

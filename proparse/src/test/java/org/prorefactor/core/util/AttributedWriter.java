@@ -94,7 +94,7 @@ public class AttributedWriter {
   private void walker(JPNode node, boolean showSiblings) throws IOException {
     if (node == null)
       return;
-    if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
+    if (node.isOperator()) {
       walker(node.getFirstChild(), false);
       writeNode(node);
       walker(node.getFirstChild().getNextSibling(), true);
