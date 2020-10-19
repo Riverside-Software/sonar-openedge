@@ -91,14 +91,6 @@ public class OpenEdgeComponents {
     this(server, checkRegistrars, null, null);
   }
 
-  public OpenEdgeComponents(LicenseRegistration[] licRegistrars) {
-    this(null, null, licRegistrars, null);
-  }
-
-  public OpenEdgeComponents(Server server, LicenseRegistration[] licRegistrars) {
-    this(server, null, licRegistrars, null);
-  }
-
   public OpenEdgeComponents(CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars) {
     this(null, checkRegistrars, licRegistrars, null);
   }
