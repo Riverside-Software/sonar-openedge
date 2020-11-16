@@ -23,13 +23,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import eu.rssw.antlr.profiler.ProfilerGrammarParser.Call_tree_dataContext;
-import eu.rssw.antlr.profiler.ProfilerGrammarParser.Call_tree_data_lineContext;
-import eu.rssw.antlr.profiler.ProfilerGrammarParser.Coverage_sectionContext;
+import eu.rssw.antlr.profiler.ProfilerGrammarParser.CallTreeDataContext;
+import eu.rssw.antlr.profiler.ProfilerGrammarParser.CallTreeDataLineContext;
+import eu.rssw.antlr.profiler.ProfilerGrammarParser.CoverageSection2LineContext;
+import eu.rssw.antlr.profiler.ProfilerGrammarParser.CoverageSectionContext;
 import eu.rssw.antlr.profiler.ProfilerGrammarParser.Coverage_section_lineContext;
 import eu.rssw.antlr.profiler.ProfilerGrammarParser.DescriptionContext;
-import eu.rssw.antlr.profiler.ProfilerGrammarParser.Line_summary_lineContext;
-import eu.rssw.antlr.profiler.ProfilerGrammarParser.Module_data_lineContext;
+import eu.rssw.antlr.profiler.ProfilerGrammarParser.JsonDataContext;
+import eu.rssw.antlr.profiler.ProfilerGrammarParser.LineSummaryLineContext;
+import eu.rssw.antlr.profiler.ProfilerGrammarParser.ModuleDataLineContext;
+import eu.rssw.antlr.profiler.ProfilerGrammarParser.Stats1LineContext;
+import eu.rssw.antlr.profiler.ProfilerGrammarParser.TracingDataLineContext;
+import eu.rssw.antlr.profiler.ProfilerGrammarParser.UserDataLineContext;
 
 public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
   private final List<Module> modules;
@@ -49,14 +54,20 @@ public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
     if (session != null)
       throw new IllegalStateException("Session already created");
 
-    session = new ProfilerSession(ctx.desc.getText(), ctx.author.getText(), ctx.date.getText() + " "
-        + ctx.time.getText(), ctx.version.getText());
+    session = new ProfilerSession(ctx.desc.getText(), ctx.author.getText(),
+        ctx.date.getText() + " " + ctx.time.getText(), ctx.version.getText());
 
+    return visitChildren(ctx);
+  }
+
+  @Override
+  public Void visitJsonData(JsonDataContext ctx) {
+    session.setJsonDescription(ctx.getText());
     return null;
   }
 
   @Override
-  public Void visitModule_data_line(Module_data_lineContext ctx) {
+  public Void visitModuleDataLine(ModuleDataLineContext ctx) {
     modules.add(new Module(Integer.parseInt(ctx.id.getText()), ctx.name.getText(), ctx.debugListingFile.getText(),
         Integer.parseInt(ctx.crc.getText())));
 
@@ -64,7 +75,7 @@ public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
   }
 
   @Override
-  public Void visitCall_tree_data(Call_tree_dataContext ctx) {
+  public Void visitCallTreeData(CallTreeDataContext ctx) {
     // Modules are parsed, adding them to ProfilerSession
     Collections.sort(modules);
     for (Module m : modules) {
@@ -76,7 +87,7 @@ public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
   }
 
   @Override
-  public Void visitCall_tree_data_line(Call_tree_data_lineContext ctx) {
+  public Void visitCallTreeDataLine(CallTreeDataLineContext ctx) {
     session.addCall(Integer.parseInt(ctx.callerId.getText()), Integer.parseInt(ctx.calleeId.getText()),
         Integer.parseInt(ctx.callCount.getText()));
 
@@ -84,7 +95,7 @@ public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
   }
 
   @Override
-  public Void visitLine_summary_line(Line_summary_lineContext ctx) {
+  public Void visitLineSummaryLine(LineSummaryLineContext ctx) {
     Module module = session.getModuleById(Integer.parseInt(ctx.moduleId.getText()));
     if (module != null) {
       module.addLineSummary(
@@ -95,7 +106,18 @@ public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
   }
 
   @Override
-  public Void visitCoverage_section(Coverage_sectionContext ctx) {
+  public Void visitTracingDataLine(TracingDataLineContext ctx) {
+    try {
+      session.addTraceLine(Integer.parseInt(ctx.moduleId.getText()), Integer.parseInt(ctx.lineNumber.getText()),
+          Float.parseFloat(ctx.execTime.getText()), Float.parseFloat(ctx.timestamp.getText()));
+    } catch (NumberFormatException uncaught) {
+      //
+    }
+    return null;
+  }
+
+  @Override
+  public Void visitCoverageSection(CoverageSectionContext ctx) {
     lastModule = session.getModuleById(Integer.parseInt(ctx.moduleId.getText()));
 
     return visitChildren(ctx);
@@ -104,7 +126,25 @@ public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
   @Override
   public Void visitCoverage_section_line(Coverage_section_lineContext ctx) {
     lastModule.addLineToCover(Integer.parseInt(ctx.linenum.getText()));
-
     return null;
   }
+
+  @Override
+  public Void visitCoverageSection2Line(CoverageSection2LineContext ctx) {
+    session.addModuleInfo(Integer.parseInt(ctx.NUMBER(0).getText()));
+    return null;
+  }
+
+  @Override
+  public Void visitStats1Line(Stats1LineContext ctx) {
+    session.addStats1(ctx.STRING().getText());
+    return null;
+  }
+
+  @Override
+  public Void visitUserDataLine(UserDataLineContext ctx) {
+    session.addUserData(Float.parseFloat(ctx.FLOAT().getText()), ctx.STRING().getText());
+    return null;
+  }
+
 }

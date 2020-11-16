@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,6 +44,17 @@ public class ProfilerSession {
   private Map<Integer, Module> modules = new HashMap<>();
   private Map<String, Module> modulesLookup = new HashMap<>();
   private int[][] adjMatrix = null;
+  // User data
+  private List<String> userData = new ArrayList<>();
+  // Trace lines
+  private List<TraceLine> traceLines = new ArrayList<>();
+  // Statistics 1
+  private List<String> stats1 = new ArrayList<>();
+  // Json description
+  private String json;
+  // Coverage 2
+  private List<ModuleInfo> modInfos = new ArrayList<>();
+  private boolean hasModuleInfo;
 
   // Internal use
   private int highestModuleId = -1;
@@ -86,6 +98,55 @@ public class ProfilerSession {
     return timestamp;
   }
 
+  public void setJsonDescription(String json) {
+    this.json = json;
+  }
+
+  public String getJsonDescription() {
+    return json;
+  }
+
+  public void addModuleInfo(int moduleId) {
+    this.hasModuleInfo = true;
+  }
+
+  public boolean hasModuleInfo() {
+    return hasModuleInfo;
+  }
+
+  public void addTraceLine(int moduleId, int lineNumber, float execTime, float timestamp) {
+    TraceLine line = new TraceLine();
+    line.module = getModuleById(moduleId);
+    line.lineNumber = lineNumber;
+    line.execTime = execTime;
+    line.timestamp = timestamp;
+    traceLines.add(line);
+  }
+
+  public boolean hasTracingData() {
+    return !traceLines.isEmpty();
+  }
+
+  public List<TraceLine> getTraceLines() {
+    return traceLines;
+  }
+
+  public void addStats1(String stats) {
+    this.stats1.add(stats);
+  }
+
+  public List<String> getStats1() {
+    return stats1;
+  }
+
+  public void addUserData(float time, String str) {
+    userData.add(str);
+  }
+
+  public List<String> getUserData() {
+    return userData;
+  }
+
   public void addCall(int callerId, int calleeId, int count) {
     adjMatrix[callerId][calleeId] += count;
   }
@@ -114,7 +175,7 @@ public class ProfilerSession {
     for (Module module : moduleList) {
       session.addCoverage(module);
     }
-    
+
     return session;
   }
 
@@ -158,28 +219,49 @@ public class ProfilerSession {
 
     return map;
   }
-  
+
   public void printCallTree(PrintStream out) {
-    for (int zz = 0; zz < adjMatrix.length; zz ++) {
+    for (int zz = 0; zz < adjMatrix.length; zz++) {
       for (int yy = 0; yy < adjMatrix.length; yy++) {
         out.print(adjMatrix[zz][yy] + " ");
       }
       out.println();
     }
-    
+
     out.println("SESSION : ");
     printCallTreeLine(out, 0, 2);
   }
-  
+
   private void printCallTreeLine(PrintStream out, int moduleId, int tabs) {
     for (int zz = 0; zz < moduleList.size(); zz++) {
       int calleeId = adjMatrix[moduleId][zz];
       if (calleeId != 0) {
-        for (int kk = 0 ; kk < tabs; kk++)
+        for (int kk = 0; kk < tabs; kk++)
           out.print(" ");
         out.println(moduleId + " -- " + modules.get(zz).toString());
         printCallTreeLine(out, zz, tabs + 1);
       }
     }
+  }
+
+  private class ProfilerDescription {
+    private long StmtCnt;
+    private long DataPts;
+    private long NumWrites;
+    private double TotTime;
+    private long BufferSize;
+    private String Directory;
+    private String propath;
+  }
+
+  private class TraceLine {
+    private Module module;
+    private int lineNumber;
+    private float execTime;
+    private float timestamp;
+  }
+
+  private class ModuleInfo {
+    
   }
 }

@@ -19,13 +19,18 @@
  */
 package eu.rssw.antlr.profiler;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.Set;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class TestProfiler {
@@ -33,97 +38,237 @@ public class TestProfiler {
   @Test
   public void testProfiler1() throws IOException {
     ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler1.out"));
-    Assert.assertEquals(session.getUser(), "gquerret");
-    Assert.assertEquals(session.getDescription(), "Default description");
+    assertEquals(session.getUser(), "gquerret");
+    assertEquals(session.getDescription(), "Default description");
 
     Calendar cal = Calendar.getInstance();
     cal.setTime(session.getTimestamp());
-    Assert.assertEquals(cal.get(Calendar.DAY_OF_MONTH), 21);
-    Assert.assertEquals(cal.get(Calendar.MONTH), 2);
-    Assert.assertEquals(cal.get(Calendar.YEAR), 2013);
-    Assert.assertEquals(cal.get(Calendar.HOUR_OF_DAY), 14);
-    Assert.assertEquals(cal.get(Calendar.MINUTE), 6);
-    Assert.assertEquals(cal.get(Calendar.SECOND), 34);
+    assertEquals(cal.get(Calendar.DAY_OF_MONTH), 21);
+    assertEquals(cal.get(Calendar.MONTH), 2);
+    assertEquals(cal.get(Calendar.YEAR), 2013);
+    assertEquals(cal.get(Calendar.HOUR_OF_DAY), 14);
+    assertEquals(cal.get(Calendar.MINUTE), 6);
+    assertEquals(cal.get(Calendar.SECOND), 34);
 
-    Assert.assertEquals(session.getModules().size(), 15);
-    Assert.assertNotNull(session.getModuleByName("Consultingwerk.Studio.ClassDocumentation.DocumentationWriter"));
+    assertEquals(session.getModules().size(), 15);
+    assertNotNull(session.getModuleByName("Consultingwerk.Studio.ClassDocumentation.DocumentationWriter"));
   }
 
   @Test
   public void testProfiler2() throws IOException {
     ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler2.out"));
-    Assert.assertEquals(session.getUser(), "gquerret");
-    Assert.assertEquals(session.getVersionNumber(), 1);
+    assertEquals(session.getUser(), "gquerret");
+    assertEquals(session.getVersionNumber(), 1);
   }
 
   @Test
   public void testProfiler3() throws IOException {
     ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler3.out"));
-    Assert.assertEquals(session.getUser(), "gquerret");
+    assertEquals(session.getUser(), "gquerret");
   }
 
   @Test
   public void testProfiler4() throws IOException {
     ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler4.out"));
-    Assert.assertEquals(session.getUser(), "gquerret");
+    assertEquals(session.getUser(), "gquerret");
   }
 
   @Test
   public void testProfiler5() throws IOException {
     ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler5.out"));
-    Assert.assertEquals(session.getUser(), "gquerret");
+    assertEquals(session.getUser(), "gquerret");
     Map<String, Set<LineData>> map = session.getCoverageByFile();
-    Assert.assertNotNull(map);
-    Assert.assertNotEquals(map.keySet().size(), 0);
+    assertNotNull(map);
+    assertNotEquals(map.keySet().size(), 0);
   }
 
   @Test
   public void testProfiler7() throws IOException {
     // New file format in 11.7.4
     ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler7.out"));
-    Assert.assertEquals(session.getUser(), "SYSTEM");
+    assertEquals(session.getUser(), "SYSTEM");
   }
 
   @Test
   public void testProfiler8() throws IOException {
     // New file format in 12.0
     ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler8.out"));
-    Assert.assertEquals(session.getVersionNumber(), 3);
+    assertEquals(session.getVersionNumber(), 3);
   }
 
   @Test
   public void testProfiler9() throws IOException {
     // New file format in 12.0 + trace filter + user data
     ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler9.out"));
-    Assert.assertEquals(session.getVersionNumber(), 3);
+    assertEquals(session.getVersionNumber(), 3);
   }
 
   @Test
   public void testProfiler10() throws IOException {
     // New file format in 12.1 - Line -2 is for Garbage Collection
     ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler10.out"));
-    Assert.assertEquals(session.getVersionNumber(), 3);
-    Assert.assertNotNull(session.getModuleById(1));
-    Assert.assertTrue(session.getModuleById(1).getLinesToCover().contains(-2));
+    assertEquals(session.getVersionNumber(), 3);
+    assertNotNull(session.getModuleById(1));
+    assertTrue(session.getModuleById(1).getLinesToCover().contains(-2));
   }
 
   @Test
   public void testProfiler11() throws IOException {
     // New file format in 12.1 - Module name includes callee name when using super:xxx() or methods not overidden in child class
     ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler11.out"));
-    Assert.assertEquals(session.getVersionNumber(), 3);
-    Assert.assertEquals(session.getModules().size(), 7);
-    Assert.assertNotNull(session.getModuleByName("MyLogger"));
-    Assert.assertEquals(session.getModuleByName("MyLogger").getCoveredLines().size(), 3);
-    Assert.assertEquals(session.getModuleByName("MyLogger").getLinesToCover().size(), 3);
+    assertEquals(session.getVersionNumber(), 3);
+    assertEquals(session.getModules().size(), 7);
+    assertNotNull(session.getModuleByName("MyLogger"));
+    assertEquals(session.getModuleByName("MyLogger").getCoveredLines().size(), 3);
+    assertEquals(session.getModuleByName("MyLogger").getLinesToCover().size(), 3);
 
     // Same test but using 11.7 profiler
     ProfilerSession session2 = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler12.out"));
-    Assert.assertEquals(session2.getVersionNumber(), 1);
-    Assert.assertEquals(session2.getModules().size(), 7);
-    Assert.assertNotNull(session2.getModuleByName("MyLogger"));
-    Assert.assertEquals(session2.getModuleByName("MyLogger").getCoveredLines().size(), 3);
-    Assert.assertEquals(session2.getModuleByName("MyLogger").getLinesToCover().size(), 3);
+    assertEquals(session2.getVersionNumber(), 1);
+    assertEquals(session2.getModules().size(), 7);
+    assertNotNull(session2.getModuleByName("MyLogger"));
+    assertEquals(session2.getModuleByName("MyLogger").getCoveredLines().size(), 3);
+    assertEquals(session2.getModuleByName("MyLogger").getLinesToCover().size(), 3);
+  }
+
+  @Test
+  public void testProfilerStatistics01() throws IOException {
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-11.7.9.out"));
+    assertEquals(session.getVersionNumber(), 1);
+    assertNotNull(session.getJsonDescription());
+    assertTrue(session.getJsonDescription().trim().isEmpty());
+    assertEquals(session.getModules().size(), 3);
+    assertFalse(session.hasModuleInfo());
+    assertFalse(session.hasTracingData());
+    assertTrue(session.getStats1().isEmpty());
+    for (Module m : session.getModules()) {
+      assertEquals(m.getCoveredLines().size(), m.getLinesToCover().size());
+    }
+    assertEquals(session.getUserData().size(),1);
+    assertEquals(session.getUserData().get(0),"User data in profiler");
+  }
+  
+  @Test
+  public void testProfilerStatistics02() throws IOException {
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-12.2.4.out"));
+    assertEquals(session.getVersionNumber(), 3);
+    assertNotNull(session.getJsonDescription());
+    assertTrue(session.getJsonDescription().length() > 10);
+    assertEquals(session.getModules().size(), 3);
+    assertTrue(session.hasModuleInfo());
+    assertFalse(session.hasTracingData());
+    assertTrue(session.getStats1().isEmpty());
+    for (Module m : session.getModules()) {
+      assertEquals(m.getCoveredLines().size(), m.getLinesToCover().size());
+    }
+    assertEquals(session.getUserData().size(),1);
+    assertEquals(session.getUserData().get(0),"User data in profiler");
+  }
+  
+  @Test
+  public void testProfilerStatistics03() throws IOException {
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-coverage-11.7.9.out"));
+    assertEquals(session.getVersionNumber(), 1);
+    assertNotNull(session.getJsonDescription());
+    assertTrue(session.getJsonDescription().trim().isEmpty());
+    assertEquals(session.getModules().size(), 3);
+    assertFalse(session.hasModuleInfo());
+    assertFalse(session.hasTracingData());
+    assertTrue(session.getStats1().isEmpty());
+    for (Module m : session.getModules()) {
+      // Coverage data is present
+      assertTrue(m.getCoveredLines().size() <= m.getLinesToCover().size());
+    }
+    assertEquals(session.getUserData().size(),1);
+    assertEquals(session.getUserData().get(0),"User data in profiler");
+  }
+  
+  @Test
+  public void testProfilerStatistics04() throws IOException {
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-coverage-12.2.4.out"));
+    assertEquals(session.getVersionNumber(), 3);
+    assertNotNull(session.getJsonDescription());
+    assertTrue(session.getJsonDescription().length() > 10);
+    assertEquals(session.getModules().size(), 3);
+    assertTrue(session.hasModuleInfo());
+    assertFalse(session.hasTracingData());
+    assertTrue(session.getStats1().isEmpty());
+    for (Module m : session.getModules()) {
+      // Coverage data is present
+      assertTrue(m.getCoveredLines().size() <= m.getLinesToCover().size());
+    }
+    assertEquals(session.getUserData().size(),1);
+    assertEquals(session.getUserData().get(0),"User data in profiler");
+  }
+
+  @Test
+  public void testProfilerStatistics05() throws IOException {
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-statistics-11.7.9.out"));
+    assertEquals(session.getVersionNumber(), 2);
+    assertNotNull(session.getJsonDescription());
+    assertTrue(session.getJsonDescription().trim().isEmpty());
+    assertEquals(session.getModules().size(), 3);
+    assertFalse(session.hasModuleInfo());
+    assertFalse(session.hasTracingData());
+    assertFalse(session.getStats1().isEmpty());
+    assertTrue(session.getStats1().contains("ENTRY"));
+    assertTrue(session.getStats1().contains("RETVAL"));
+    for (Module m : session.getModules()) {
+      assertEquals(m.getCoveredLines().size(), m.getLinesToCover().size());
+    }
+    assertEquals(session.getUserData().size(),1);
+    assertEquals(session.getUserData().get(0),"User data in profiler");
+  }
+
+  @Test
+  public void testProfilerStatistics06() throws IOException {
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-statistics-12.2.4.out"));
+    assertEquals(session.getVersionNumber(), 4);
+    assertNotNull(session.getJsonDescription());
+    assertTrue(session.getJsonDescription().length() > 10);
+    assertEquals(session.getModules().size(), 3);
+    assertTrue(session.hasModuleInfo());
+    assertFalse(session.hasTracingData());
+    assertFalse(session.getStats1().isEmpty());
+    assertTrue(session.getStats1().contains("ENTRY"));
+    assertTrue(session.getStats1().contains("RETVAL"));
+    for (Module m : session.getModules()) {
+      assertEquals(m.getCoveredLines().size(), m.getLinesToCover().size());
+    }
+    assertEquals(session.getUserData().size(),1);
+    assertEquals(session.getUserData().get(0),"User data in profiler");
+  }
+
+  @Test
+  public void testProfilerStatistics07() throws IOException {
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-tracestart-11.7.9.out"));
+    assertEquals(session.getVersionNumber(), 1);
+    assertEquals(session.getModules().size(), 3);
+    assertFalse(session.hasModuleInfo());
+    assertTrue(session.hasTracingData());
+    assertEquals(session.getTraceLines().size(), 27);
+    assertTrue(session.getStats1().isEmpty());
+    for (Module m : session.getModules()) {
+      assertEquals(m.getCoveredLines().size(), m.getLinesToCover().size());
+    }
+    assertEquals(session.getUserData().size(),1);
+    assertEquals(session.getUserData().get(0),"User data in profiler");
+  }
+
+  @Test
+  public void testProfilerStatistics08() throws IOException {
+    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-tracestart-12.2.4.out"));
+    assertEquals(session.getVersionNumber(), 3);
+    assertEquals(session.getModules().size(), 3);
+    assertTrue(session.hasModuleInfo());
+    assertTrue(session.hasTracingData());
+    assertEquals(session.getTraceLines().size(), 25);
+    assertTrue(session.getStats1().isEmpty());
+    for (Module m : session.getModules()) {
+      assertEquals(m.getCoveredLines().size(), m.getLinesToCover().size());
+    }
+    assertEquals(session.getUserData().size(),1);
+    assertEquals(session.getUserData().get(0),"User data in profiler");
   }
 
 }
