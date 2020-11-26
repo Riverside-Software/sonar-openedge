@@ -30,9 +30,9 @@ pipeline {
     stage ('SonarQube analysis') {
       steps {
         script {
-          withEnv(["PATH+MAVEN=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}/bin"]) {
-            withSonarQubeEnv(credentialsId: 'SQToken', installationName: 'RSSW') {
-              sh "mvn -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
+          withEnv(["MVN_HOME=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}", "JAVA_HOME=${tool name: 'Corretto 11', type: 'jdk'}"]) {
+            withSonarQubeEnv(installationName: 'SonarCloud') {
+              sh "$MVN_HOME/bin/mvn -Dsonar.organization=rssw -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
             }
           }
         }
