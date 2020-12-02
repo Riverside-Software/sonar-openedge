@@ -24,6 +24,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.BlockNode;
+import org.prorefactor.core.nodetypes.IfNode;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.antlr4.Proparse.CanFindFunctionContext;
 import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
@@ -37,6 +38,8 @@ import org.prorefactor.proparse.antlr4.Proparse.ExternalFunctionStatementContext
 import org.prorefactor.proparse.antlr4.Proparse.ExternalProcedureStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ForStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.FunctionStatementContext;
+import org.prorefactor.proparse.antlr4.Proparse.IfElseContext;
+import org.prorefactor.proparse.antlr4.Proparse.IfStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.InterfaceStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.MethodStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.OnStatementContext;
@@ -67,6 +70,8 @@ public class TreeParserBlocks extends ProparseBaseListener {
   private Routine rootRoutine;
   private JPNode lastStatement;
   private int currentLevel;
+  private boolean inIfStmt;
+  private boolean inElseStmt;
 
   private Block currentBlock;
   private TreeParserSymbolScope currentScope;
@@ -228,6 +233,16 @@ public class TreeParserBlocks extends ProparseBaseListener {
   @Override
   public void exitForStatement(ForStatementContext ctx) {
     blockEnd();
+  }
+
+  @Override
+  public void enterIfStatement(IfStatementContext ctx) {
+    inIfStmt = true;
+  }
+
+  @Override
+  public void enterIfElse(IfElseContext ctx) {
+    inElseStmt = true;
   }
 
   @Override
@@ -397,10 +412,11 @@ public class TreeParserBlocks extends ProparseBaseListener {
       LOG.trace("{}> Pushing block '{}' to stack", indent(), block);
     blockStack.add(block);
 
-    if (!fromSwap && (lastStatement != null)) {
+    /*if (!fromSwap && (lastStatement != null) && (lastStatement.getNodeType() != ABLNodeType.IF)
+        && (lastStatement.getNodeType() != ABLNodeType.ELSE)) {
       lastStatement.setNextStatement(block.getNode());
       block.getNode().setPreviousStatement(lastStatement);
-    }
+    }*/
     lastStatement = null;
 
     return block;
@@ -411,6 +427,11 @@ public class TreeParserBlocks extends ProparseBaseListener {
       LOG.trace("{}> Popping block from stack", indent());
     Block bb = blockStack.remove(blockStack.size() - 1);
     lastStatement = bb.getNode();
+    if (lastStatement.getParent().getNodeType() == ABLNodeType.IF) {
+      lastStatement = lastStatement.getParent();
+    } else if (lastStatement.getParent().getNodeType() == ABLNodeType.ELSE) {
+      lastStatement = lastStatement.getParent().getParent();
+    }
     return blockStack.get(blockStack.size() - 1);
   }
 
@@ -468,16 +489,23 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterEveryRule(ParserRuleContext ctx) {
+    // Executed before the enterXXX method
     currentLevel++;
     if (LOG.isTraceEnabled())
       LOG.trace("{}> {}", indent(), Proparse.ruleNames[ctx.getRuleIndex()]);
+
+    JPNode node = support.getNode(ctx);
+    if ((node != null) && node.isStateHead() && !(ctx instanceof FunctionStatementContext)) {
+      enterNewStatement(node);
+    }
   }
 
   @Override
   public void exitEveryRule(ParserRuleContext ctx) {
+    // Executed after the exitXXX method
     JPNode n = support.getNode(ctx);
     if ((n != null) && n.isStateHead() && !(ctx instanceof FunctionStatementContext)) {
-      enterNewStatement(n);
+      exitNewStatement(n);
     }
     currentLevel--;
   }
@@ -488,14 +516,30 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   // Attach current statement to the previous one
   private void enterNewStatement(JPNode node) {
-    if ((lastStatement != null) && (node != lastStatement)) {
-      lastStatement.setNextStatement(node);
-      node.setPreviousStatement(lastStatement);
+    if (inIfStmt && (node != lastStatement) && (lastStatement instanceof IfNode)) {
+      ((IfNode) lastStatement).setIfStatement(node);
+      inIfStmt = false;
+    } else if (inElseStmt && (node != lastStatement) && (lastStatement instanceof IfNode)) {
+      ((IfNode) lastStatement).setElseStatement(node);
+      inElseStmt = false;
+    } else {
+      if ((lastStatement != null) && (node != lastStatement)) {
+        lastStatement.setNextStatement(node);
+        node.setPreviousStatement(lastStatement);
+      }
+      lastStatement = node;
     }
-    lastStatement = node;
+
     node.setInBlock(currentBlock);
     if (currentBlock.getNode().getFirstStatement() == null)
       currentBlock.getNode().setFirstStatement(node);
+  }
+
+  // Blocks are created later, so can only be attached after 
+  private void exitNewStatement(JPNode node) {
+    /*node.setInBlock(currentBlock);
+    if (currentBlock.getNode().getFirstStatement() == null)
+      currentBlock.getNode().setFirstStatement(node);*/
   }
 
 }

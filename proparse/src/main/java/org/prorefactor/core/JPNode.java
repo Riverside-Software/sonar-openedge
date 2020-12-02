@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
+import org.prorefactor.core.nodetypes.IfNode;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.nodetypes.TypeNameNode;
@@ -993,6 +994,9 @@ public class JPNode {
         case PROPERTY_GETTER:
         case PROPERTY_SETTER:
           node = new BlockNode(tok, up, num, hasChildren);
+          break;
+        case IF:
+          node = new IfNode(tok, up, num, hasChildren);
           break;
         default:
           node = new JPNode(tok, up, num, hasChildren);
