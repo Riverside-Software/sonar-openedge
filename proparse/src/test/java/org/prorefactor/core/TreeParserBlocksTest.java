@@ -273,4 +273,48 @@ public class TreeParserBlocksTest {
     assertNotNull(subNode5.getNextStatement());
   }
 
+  @Test
+  public void test04() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser05/test04.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    JPNode currStmt = unit.getTopNode().getFirstStatement();
+    assertNotNull(currStmt);
+    assertEquals(currStmt.getNodeType(), ABLNodeType.FUNCTION);
+    assertEquals(currStmt.getLine(), 2);
+    assertNull(currStmt.getPreviousStatement());
+    assertNotNull(currStmt.getNextStatement());
+
+    currStmt = currStmt.getNextStatement();
+    assertNotNull(currStmt);
+    assertEquals(currStmt.getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(currStmt.getLine(), 5);
+    assertNotNull(currStmt.getPreviousStatement());
+    assertNotNull(currStmt.getNextStatement());
+
+    currStmt = currStmt.getNextStatement();
+    assertNotNull(currStmt);
+    assertEquals(currStmt.getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(currStmt.getLine(), 6);
+    assertNotNull(currStmt.getPreviousStatement());
+    assertNotNull(currStmt.getNextStatement());
+
+    currStmt = currStmt.getNextStatement();
+    assertNotNull(currStmt);
+    assertEquals(currStmt.getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(currStmt.getLine(), 7);
+    assertNotNull(currStmt.getPreviousStatement());
+    assertNotNull(currStmt.getNextStatement());
+
+    currStmt = currStmt.getNextStatement();
+    assertNotNull(currStmt);
+    assertEquals(currStmt.getNodeType(), ABLNodeType.FUNCTION);
+    assertEquals(currStmt.getLine(), 10);
+    assertNotNull(currStmt.getPreviousStatement());
+    assertNull(currStmt.getNextStatement());
+  }
 }
