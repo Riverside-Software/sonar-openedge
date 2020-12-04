@@ -122,19 +122,29 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return issue;
   }
 
-  protected void addLocation(NewIssue issue, InputFile file, JPNode node, String msg) {
-    InputFile targetFile = getInputFile(file, node);
-    if (targetFile == null) {
-      return;
-    }
-    NewIssueLocation location = issue.newLocation().on(targetFile);
-    if (node.getLine() > 0) {
-      location.at(targetFile.newRange(node.getLine(), node.getColumn() - 1, node.getEndLine(), node.getEndColumn()));
-    }
-    if (targetFile == file) {
-      location.message(msg);
-    } else {
-      location.message(MessageFormat.format(INC_MESSAGE, file.toString(), msg));
+  protected void addLocation(NewIssue issue, InputFile file, JPNode node, String msg, boolean exactLocation) {
+    InputFile targetFile = getInputFile(file, node.firstNaturalChild());
+    if (targetFile != null) {
+      JPNode naturalChild = node.firstNaturalChild();
+      NewIssueLocation location = issue.newLocation().on(targetFile);
+
+      int lineNumber = naturalChild.getLine();
+      if (lineNumber > 0) {
+        if (exactLocation) {
+          location.at(targetFile.newRange(naturalChild.getLine(), naturalChild.getColumn() - 1,
+              naturalChild.getEndLine(), naturalChild.getEndColumn()));
+        } else {
+          TextRange range = targetFile.selectLine(lineNumber);
+          if (IS_WINDOWS && (getContext().runtime().getProduct() == SonarProduct.SONARLINT)
+              && (range.end().lineOffset() > 1)) {
+            location.at(targetFile.newRange(lineNumber, 0, lineNumber, range.end().lineOffset() - 1));
+          } else {
+            location.at(range);
+          }
+        }
+        location.message(msg);
+        issue.addLocation(location);
+      }
     }
   }
 
