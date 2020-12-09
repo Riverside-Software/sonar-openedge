@@ -69,7 +69,6 @@ import org.sonarsource.api.sonarlint.SonarLintSide;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 import com.google.common.primitives.Ints;
 
@@ -104,7 +103,6 @@ public class OpenEdgeSettings {
   private final Set<String> cpdAnnotations = new HashSet<>();
   private final Set<String> cpdMethods = new HashSet<>();
   private final Set<String> cpdProcedures = new HashSet<>();
-  private final Set<Integer> xrefBytes = new HashSet<>();
 
   private RefactorSessionEnv sessionsEnv;
   private RefactorSession defaultSession;
@@ -133,13 +131,10 @@ public class OpenEdgeSettings {
     initializePropathDlc(config);
     initializeDefaultPropath(config, fileSystem);
     initializeCPD(config);
-    initializeXrefBytes(config);
     initializeIncludeExtensions(config);
 
     LOG.debug("Using backslash as escape character : {}", config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
-    if (useXrefFilter()) {
-      LOG.info("XML XREF filter activated [{}]", getXrefBytesAsString());
-    }
+    LOG.info("XML XREF filter activated");
     init = true;
   }
 
@@ -231,24 +226,6 @@ public class OpenEdgeSettings {
     for (String str : config.get(Constants.CPD_PROCEDURES).orElse("").split(",")) {
       LOG.debug("CPD skip procedure : '{}'", str);
       cpdProcedures.add(str.toLowerCase(Locale.ENGLISH));
-    }
-  }
-
-  private final void initializeXrefBytes(Configuration config) {
-    // XREF invalid bytes
-    for (String str : config.get(Constants.XREF_FILTER_BYTES).orElse("").split(",")) {
-      try {
-        if (str.indexOf('-') != -1) {
-          for (int zz = Integer.parseInt(str.substring(0, str.indexOf('-'))); zz <= Integer.parseInt(
-              str.substring(str.indexOf('-') + 1)); zz++) {
-            xrefBytes.add(zz);
-          }
-        } else if (!str.isEmpty()) {
-          xrefBytes.add(Integer.parseInt(str));
-        }
-      } catch (NumberFormatException caught) {
-        throw new IllegalArgumentException("Invalid '" + Constants.XREF_FILTER_BYTES + "' property : " + str, caught);
-      }
     }
   }
 
@@ -553,10 +530,6 @@ public class OpenEdgeSettings {
     return config.getBoolean(Constants.PROPARSE_DEBUG).orElse(false);
   }
 
-  public boolean useXrefFilter() {
-    return config.getBoolean(Constants.XREF_FILTER).orElse(false);
-  }
-
   public boolean useANTLR4() {
     return config.getBoolean(Constants.ANTLR4_TEST).orElse(false);
   }
@@ -574,22 +547,6 @@ public class OpenEdgeSettings {
    */
   public boolean useAnalytics() {
     return config.getBoolean(Constants.OE_ANALYTICS).orElse(true);
-  }
-
-  public Set<Integer> getXrefBytes() {
-    return ImmutableSet.copyOf(xrefBytes);
-  }
-
-  public String getXrefBytesAsString() {
-    StringBuilder sb = new StringBuilder();
-    for (Integer xx : xrefBytes) {
-      if (sb.length() > 0) {
-        sb.append(',');
-      }
-      sb.append(String.format("%#04x", xx));
-    }
-
-    return sb.toString();
   }
 
   public List<File> getPropath() {
