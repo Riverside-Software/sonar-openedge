@@ -18,6 +18,7 @@
     <module>listing-parser</module>
     <module>openedge-checks</module>
     <module>openedge-plugin</module>
+    <module>coverage-report</module>
   </modules>
 
   <build>

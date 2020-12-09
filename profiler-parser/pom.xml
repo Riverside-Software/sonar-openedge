@@ -44,6 +44,7 @@
     <antlr4.listener>false</antlr4.listener>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../coverage-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
   <dependencies>
@@ -84,9 +85,9 @@
           </execution>
           <execution>
             <id>report</id>
-            <phase>prepare-package</phase>
+            <phase>verify</phase>
             <goals>
-              <goal>report</goal>
+              <goal>report-aggregate</goal>
             </goals>
           </execution>
         </executions>
