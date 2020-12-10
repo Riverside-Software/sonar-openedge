@@ -29,42 +29,25 @@ import org.sonar.api.rule.RuleKey;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class ClumsySyntaxTest extends AbstractTest {
+public class MultiLineIssueTest extends AbstractTest {
   private RuleKey ruleKey;
 
   @BeforeTest
   public void init() {
-    ruleKey = RuleKey.parse("rssw-oe-main:ClumsySyntax");
-  }
-
-  @Test(enabled=false)
-  public void test1() {
-    InputFile inputFile = getInputFile("clumsy01.p");
-    ClumsySyntax rule = new ClumsySyntax();
-    rule.setContext(ruleKey, context, null);
-    rule.sensorExecute(inputFile, getParseUnit(inputFile));
-
-    assertEquals(context.allIssues().size(), 3);
-    Iterator<Issue> iter = context.allIssues().iterator();
-    Issue issue1 = iter.next();
-    Issue issue2 = iter.next();
-    Issue issue3 = iter.next();
-    assertEquals(issue1.primaryLocation().textRange().start().line(), 1);
-    assertEquals(issue2.primaryLocation().textRange().start().line(), 2);
-    assertEquals(issue3.primaryLocation().textRange().start().line(), 3);
+    ruleKey = RuleKey.parse("rssw-oe-main:MultiLine");
   }
 
   @Test
-  public void test2() {
-    InputFile inputFile = getInputFile("clumsy02.cls");
-    ClumsySyntax rule = new ClumsySyntax();
+  public void test1() {
+    InputFile inputFile = getInputFile("multi01.p");
+    MultiLineIssue rule = new MultiLineIssue();
     rule.setContext(ruleKey, context, null);
     rule.sensorExecute(inputFile, getParseUnit(inputFile));
 
     assertEquals(context.allIssues().size(), 1);
     Iterator<Issue> iter = context.allIssues().iterator();
     Issue issue1 = iter.next();
-    assertEquals(issue1.primaryLocation().textRange().start().line(), 5);
+    assertEquals(issue1.primaryLocation().textRange().start().line(), 1);
   }
 
 }
