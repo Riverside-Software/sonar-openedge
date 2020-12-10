@@ -19,6 +19,10 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -28,6 +32,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.testng.annotations.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -50,7 +56,11 @@ public class InvalidXMLFilterStreamTest {
     InvalidXMLFilterStream input2 = new InvalidXMLFilterStream(input);
 
     try {
-      DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(input2);
+      Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(input2);
+      assertNotNull(doc.getFirstChild());
+      assertTrue(doc.getFirstChild().getChildNodes().getLength() > 2);
+      Node node = doc.getFirstChild().getChildNodes().item(1);
+      assertEquals(node.getAttributes().getNamedItem("File-name").getNodeValue(), "src\\procedures\\ sample\\test7.p");
     } catch (ParserConfigurationException | SAXException uncaught) {
       throw new RuntimeException(uncaught);
     }

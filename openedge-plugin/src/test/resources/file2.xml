@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Cross-reference xmlns="uri:schemas-progress-com:XREFD:0005" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <Source xmlns="uri:schemas-progress-com:XREFD:0005" File-name="src\procedures\sample\test7.p">
+  <Source xmlns="uri:schemas-progress-com:XREFD:0005" File-name="src\procedures\	sample\test7.p">
     <Source-guid>3YBZVvDxmpkYFM1FCL8Kdw</Source-guid>
     <File-num>1</File-num>
     <Reference Reference-type="COMPILE" Object-identifier="sample\test7.p">
