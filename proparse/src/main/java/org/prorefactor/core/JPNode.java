@@ -71,6 +71,10 @@ public class JPNode {
     this.children = hasChildren ? new ArrayList<>() : null;
   }
 
+  public ProToken getToken() {
+    return token;
+  }
+
   // Attributes from ProToken
 
   /**

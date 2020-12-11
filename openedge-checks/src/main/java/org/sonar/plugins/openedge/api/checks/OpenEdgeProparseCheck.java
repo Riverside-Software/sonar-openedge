@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.ParseUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,35 +74,27 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return false;
   }
 
-  /**
-   * Tries to create a new issue. Will return null if the issue can't be created.
-   */
-  protected NewIssue createIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
-    if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {
-      return null;
-    }
-    if (unit.isAppBuilderCode() && !reportIssueOnAppBuilderCode() && !node.isEditableInAB())
-      return null;
-
-    InputFile targetFile = getInputFile(file, node);
+  protected NewIssue createIssue(InputFile file, ProToken token, String msg, boolean exactLocation) {
+    InputFile targetFile = getInputFile(file, token);
     if (targetFile == null) {
       return null;
     }
     if (!targetFile.equals(file) && reportOnlyOnceInIncludeFile()) {
       // Check if issue has already been reported
-      if (incReports.contains(targetFile.toString() + ":" + node.getLine()))
+      if (incReports.contains(targetFile.toString() + ":" + token.getLine()))
         return null;
       else
-        incReports.add(targetFile.toString() + ":" + node.getLine());
+        incReports.add(targetFile.toString() + ":" + token.getLine());
     }
 
-    int lineNumber = node.getLine();
+    int lineNumber = token.getLine();
     LOG.trace("Adding issue {} to {} line {}", getRuleKey(), targetFile, lineNumber);
     NewIssue issue = getContext().newIssue().forRule(getRuleKey());
     NewIssueLocation location = issue.newLocation().on(targetFile);
     if (lineNumber > 0) {
       if (exactLocation) {
-        location.at(targetFile.newRange(node.getLine(), node.getColumn() - 1, node.getEndLine(), node.getEndColumn()));
+        location.at(targetFile.newRange(token.getLine(), token.getCharPositionInLine() - 1, token.getEndLine(),
+            token.getEndCharPositionInLine()));
       } else {
         TextRange range = targetFile.selectLine(lineNumber);
         if (IS_WINDOWS && (getContext().runtime().getProduct() == SonarProduct.SONARLINT)
@@ -120,6 +113,19 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     issue.at(location);
 
     return issue;
+  }
+
+  /**
+   * Tries to create a new issue. Will return null if the issue can't be created.
+   */
+  protected NewIssue createIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
+    if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {
+      return null;
+    }
+    if (unit.isAppBuilderCode() && !reportIssueOnAppBuilderCode() && !node.isEditableInAB())
+      return null;
+
+    return createIssue(file, node.getToken(), msg, exactLocation);
   }
 
   protected void addLocation(NewIssue issue, InputFile file, JPNode node, String msg, boolean exactLocation) {
@@ -263,6 +269,10 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
 
   protected InputFile getInputFile(InputFile file, JPNode node) {
     return node.getFileIndex() == 0 ? file : getInputFile(node.getFileName());
+  }
+
+  protected InputFile getInputFile(InputFile file, ProToken token) {
+    return token.getFileIndex() == 0 ? file : getInputFile(token.getFileName());
   }
 
 }

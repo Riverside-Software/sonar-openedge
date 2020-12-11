@@ -113,6 +113,7 @@ public class Lexer implements IPreprocessor {
 
   // Are we in the middle of a comment?
   private boolean doingComment;
+  private boolean nestedComment;
   // Is the current '.' a name dot? (i.e. not followed by whitespace) */
   private boolean nameDot;
 
@@ -468,6 +469,7 @@ public class Lexer implements IPreprocessor {
     // Note that macros are *not* expanded inside comments.
     // (See the preprocessor source)
     doingComment = true;
+    nestedComment = false;
     append(); // currChar=='*'
     int commentLevel = 1;
     while (commentLevel > 0) {
@@ -476,8 +478,10 @@ public class Lexer implements IPreprocessor {
       if (currChar == '/') {
         getChar();
         unEscapedAppend();
-        if (currChar == '*')
+        if (currChar == '*') {
           commentLevel++;
+          nestedComment = true;
+        }
       } else if (currChar == '*') {
         while (currChar == '*') {
           getChar();
@@ -501,6 +505,7 @@ public class Lexer implements IPreprocessor {
     // everything till end of line is considered comment - no escape
     // character to look after
     doingComment = true;
+    nestedComment = false;
     append(); // currChar=='/'
 
     while (true) {
@@ -1161,6 +1166,7 @@ public class Lexer implements IPreprocessor {
       .setMacroExpansion(prevMacroExpansion) //
       .setMacroSourceNum(tokenStartPos.sourceNum) //
       .setAnalyzeSuspend(getCurrentAnalyzeSuspend()) //
+      .setNestedComments(nestedComment) //
       .build();
   }
 

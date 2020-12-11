@@ -50,6 +50,7 @@ public class ProToken implements Token {
   private ProToken hiddenBefore = null;
   private boolean macroExpansion;
   private boolean synthetic = false;
+  private boolean nestedComments = false;
 
   ProToken(ABLNodeType type, String text) {
     this.type = type;
@@ -143,6 +144,10 @@ public class ProToken implements Token {
 
   public boolean isAbbreviated() {
     return type.isAbbreviated(text);
+  }
+
+  public boolean hasNestedComments() {
+    return nestedComments;
   }
 
   /**
@@ -258,6 +263,7 @@ public class ProToken implements Token {
     private boolean macroExpansion;
     private boolean synthetic = false;
     private boolean writable = false;
+    private boolean nestedComments = false;
 
     public Builder(ABLNodeType type, String text) {
       this.type = type;
@@ -280,6 +286,7 @@ public class ProToken implements Token {
       this.macroExpansion = token.macroExpansion;
       this.synthetic = token.synthetic;
       this.writable = token instanceof WritableProToken;
+      this.nestedComments = token.nestedComments;
     }
 
     public Builder setWritable(boolean writable) {
@@ -362,6 +369,11 @@ public class ProToken implements Token {
       return this;
     }
 
+    public Builder setNestedComments(boolean nestedComments) {
+      this.nestedComments = nestedComments;
+      return this;
+    }
+
     /**
      * Merge current builder with another token. Some information is lost in the process.
      */
@@ -393,6 +405,7 @@ public class ProToken implements Token {
       tok.analyzeSuspend = analyzeSuspend;
       tok.hiddenBefore = hiddenBefore;
       tok.synthetic = synthetic;
+      tok.nestedComments = nestedComments;
 
       switch (type) {
         case COMMENT:
