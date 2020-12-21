@@ -127,7 +127,7 @@ public class RCodeInfo {
     }
 
     if ((debugSegmentOffset > 0) && (debugSegmentSize > 0)) {
-      long bytesRead = input.skip(debugSegmentOffset - initialValueSegmentSize);
+      long bytesRead = input.skip((long) debugSegmentOffset - initialValueSegmentSize);
       if (bytesRead != debugSegmentOffset - initialValueSegmentSize) {
         throw new InvalidRCodeException("Not enough bytes to reach debug segment");
       }
