@@ -306,6 +306,7 @@ public class OpenEdgeSettings {
       srv.service.awaitTermination(10, TimeUnit.MINUTES);
     } catch (InterruptedException caught) {
       LOG.error("Unable to finish parsing rcode...", caught);
+      Thread.currentThread().interrupt();
     }
     LOG.info("{} RCode read in {} ms - {} classes - {} methods - {} properties", srv.numRCode.get(),
         System.currentTimeMillis() - currTime, srv.numClasses.get(), srv.numMethods.get(), srv.numProperties.get());
