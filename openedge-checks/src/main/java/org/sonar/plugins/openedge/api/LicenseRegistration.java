@@ -49,11 +49,12 @@ public interface LicenseRegistration {
     public void registerLicense(String permanentId, SonarProduct product, String customerName, String salt,
         String repoName, LicenseType type, byte[] signature, long expirationDate);
 
-    public void registerLicense(String permanentId, SonarProduct product, String customerName, String salt,
+    public void registerLicense(int version, String permanentId, SonarProduct product, String customerName, String salt,
         String repoName, LicenseType type, byte[] signature, long expirationDate, long lines);
   }
 
   public class License {
+    private int version;
     private String permanentId;
     private SonarProduct product;
     private String customerName;
@@ -64,8 +65,9 @@ public interface LicenseRegistration {
     private String salt;
     private byte[] signature;
 
-    public License(String permanentId, SonarProduct product, String customerName, String salt, String repoName,
+    public License(int version, String permanentId, SonarProduct product, String customerName, String salt, String repoName,
         LicenseType type, byte[] signature, long expirationDate, long lines) {
+      this.version = version;
       this.permanentId = permanentId;
       this.product = product;
       this.customerName = customerName;
@@ -75,6 +77,10 @@ public interface LicenseRegistration {
       this.signature = signature;
       this.expirationDate = expirationDate;
       this.lines = lines;
+    }
+
+    public int getVersion() {
+      return version;
     }
 
     public String getPermanentId() {
