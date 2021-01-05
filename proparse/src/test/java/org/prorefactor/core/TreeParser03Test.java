@@ -491,6 +491,21 @@ public class TreeParser03Test {
     assertNotNull(var3);
     assertEquals(var3.getNumReads(), 0);
     assertEquals(var3.getNumWrites(), 1);
+
+    JPNode fooBlock = unit.getRootScope().getChildScopes().get(0).getRootBlock().getNode().findDirectChild(
+        ABLNodeType.CODE_BLOCK);
+    assertEquals(fooBlock.getDirectChildren().get(0).getFirstChild().getFirstChild().getNodeType(),
+        ABLNodeType.WIDGET_REF);
+    assertEquals(fooBlock.getDirectChildren().get(0).getFirstChild().getFirstChild().getSymbol(), var1);
+
+    JPNode barBlock = unit.getRootScope().getChildScopes().get(1).getRootBlock().getNode().findDirectChild(
+        ABLNodeType.CODE_BLOCK);
+    assertEquals(barBlock.getDirectChildren().get(0).getFirstChild().getFirstChild().getNodeType(),
+        ABLNodeType.WIDGET_REF);
+    assertEquals(barBlock.getDirectChildren().get(0).getFirstChild().getFirstChild().getSymbol(), var2);
+    assertEquals(barBlock.getDirectChildren().get(1).getFirstChild().getFirstChild().getNodeType(),
+        ABLNodeType.WIDGET_REF);
+    assertNull(barBlock.getDirectChildren().get(1).getFirstChild().getFirstChild().getSymbol());
   }
 
   @Test

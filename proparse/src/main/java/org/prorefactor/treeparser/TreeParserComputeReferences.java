@@ -144,8 +144,11 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
       if (result.getSymbol() instanceof Variable) {
         result.getSymbol().noteReference(node, cq);
         // If using chained expression, then we add a REF reference
-        if ((cq != ContextQualifier.REF) && (ctx2.colonAttributeSub().size() > 1))
+        if ((cq != ContextQualifier.REF) && (ctx2.colonAttributeSub().size() > 1)) {
           result.getSymbol().noteReference(node, ContextQualifier.REF);
+        } else if (support.getNode(ctx) != null) { // Try to associate Symbol to WidgetRef object
+          support.getNode(ctx).getParent().setSymbol((Variable) result.getSymbol());
+        }
       }
     }
   }
