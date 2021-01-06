@@ -279,8 +279,8 @@ public class ParseUnit {
     ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
     if (writableTokens)
       lexer.enableWritableTokens();
-    CommonTokenStream stream = new CommonTokenStream(lexer);
-    Proparse parser = new Proparse(stream);
+    CommonTokenStream tokStream = new CommonTokenStream(lexer);
+    Proparse parser = new Proparse(tokStream);
     parser.setTrace(trace);
     parser.setProfile(profiler);
     parser.initAntlr4(session, xref);
@@ -305,7 +305,7 @@ public class ParseUnit {
         parseTimeSLL = System.nanoTime() - startTimeNs;
         LOGGER.trace("Switching to LL prediction mode");
         switchToLL = true;
-        stream.seek(0);
+        tokStream.seek(0);
         parser.addErrorListener(new ProparseErrorListener());
         parser.setErrorHandler(new ProparseErrorStrategy(session.getProparseSettings().allowAntlrTokenDeletion(),
             session.getProparseSettings().allowAntlrTokenInsertion(), session.getProparseSettings().allowAntlrRecover()));
@@ -345,7 +345,7 @@ public class ParseUnit {
       parseInfo = parser.getParseInfo();
     }
     if (keepStream) {
-      this.stream = stream;
+      this.stream = tokStream;
     }
 
     LOGGER.trace("Exiting ParseUnit#parse()");
