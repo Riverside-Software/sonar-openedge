@@ -161,6 +161,16 @@ public class OpenEdgePlugin implements Plugin {
       .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
+    context.addExtension(PropertyDefinition.builder(Constants.SKIP_ANNOTATIONS) //
+        .name("Skip issue annotations") //
+        .description("Comma-separated list of annotations where issues will be skipped") //
+        .type(PropertyType.STRING) //
+        .defaultValue("@InitializeComponent") //
+        .category(CATEGORY_OPENEDGE) //
+        .subCategory(SUBCATEGORY_GENERAL) //
+        .onQualifiers(Qualifiers.PROJECT) //
+        .build());
+
     context.addExtension(PropertyDefinition.builder(Constants.BACKSLASH_ESCAPE) //
       .name("Backslash as escape char") //
       .description("Does backslash escape next character on Windows ?") //

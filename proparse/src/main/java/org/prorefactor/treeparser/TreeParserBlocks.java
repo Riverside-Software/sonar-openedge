@@ -520,6 +520,13 @@ public class TreeParserBlocks extends ProparseBaseListener {
     node.setInBlock(currentBlock);
     if (currentBlock.getNode().getFirstStatement() == null)
       currentBlock.getNode().setFirstStatement(node);
+
+    // Assign annotations to statement
+    JPNode prev = node.getPreviousStatement();
+    while ((prev != null) && (prev.getNodeType() == ABLNodeType.ANNOTATION)) {
+      node.addAnnotation(prev.getText());
+      prev = prev.getPreviousStatement();
+    }
   }
 
 }

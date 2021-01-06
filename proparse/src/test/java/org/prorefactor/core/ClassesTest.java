@@ -53,7 +53,19 @@ public class ClassesTest {
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
     assertTrue(unit.getTopNode().query(ABLNodeType.ANNOTATION).size() == 1);
-    assertEquals("Progress.Lang.Deprecated", unit.getTopNode().query(ABLNodeType.ANNOTATION).get(0).getAnnotationName());
+    assertEquals(unit.getTopNode().query(ABLNodeType.ANNOTATION).get(0).getAnnotationName(),
+        "Progress.Lang.Deprecated");
+    JPNode method = unit.getTopNode().query(ABLNodeType.ANNOTATION).get(0).getNextStatement();
+    assertNotNull(method);
+    assertEquals(method.getNodeType(), ABLNodeType.METHOD);
+    assertNotNull(method.getAnnotations());
+    assertEquals(method.getAnnotations().size(), 1);
+    assertEquals(method.getAnnotations().get(0), "@Progress.Lang.Deprecated");
+    assertTrue(method.hasAnnotation("@Progress.Lang.Deprecated"));
+    assertFalse(method.hasAnnotation("@Progress.Deprecated"));
+    JPNode inMethodStmt = method.getFirstDirectChild(ABLNodeType.CODE_BLOCK).queryStateHead(ABLNodeType.RETURN).get(0);
+    assertTrue(inMethodStmt.hasAnnotation("@Progress.Lang.Deprecated"));
+    assertFalse(inMethodStmt.hasAnnotation("@Progress.Deprecated"));
   }
 
   @Test

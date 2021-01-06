@@ -23,4 +23,8 @@ public class ProgramRootNode extends BlockNode {
     super(t, parent, num, hasChildren);
   }
 
+  @Override
+  public boolean hasAnnotation(String str) {
+    return false;
+  }
 }

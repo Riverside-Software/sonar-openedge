@@ -56,6 +56,8 @@ public class JPNode {
   private JPNode nextStatement;
   // Only for statement nodes and block nodes: enclosing block
   private Block inBlock;
+  // Annotations found on statements (and blocks)
+  private List<String> annotations;
 
   // Fields are usually set in TreeParser
   private Symbol symbol;
@@ -816,6 +818,30 @@ public class JPNode {
 
   public void setInBlock(Block inBlock) {
     this.inBlock = inBlock;
+  }
+
+  public void addAnnotation(String annotation) {
+    if (annotations == null)
+      annotations = new ArrayList<>();
+    annotations.add(annotation);
+  }
+
+  public List<String> getAnnotations() {
+    return annotations;
+  }
+
+  public boolean hasAnnotation(String str) {
+    if (isStateHead()) {
+      if ((annotations != null) && annotations.contains(str))
+        return true;
+      else if ((inBlock != null) && (inBlock.getNode() != null))
+        return inBlock.getNode().hasAnnotation(str);
+
+      else
+        return false;
+    } else {
+      return getStatement().hasAnnotation(str);
+    }
   }
 
   public Block getEnclosingBlock() {

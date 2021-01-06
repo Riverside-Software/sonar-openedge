@@ -20,6 +20,7 @@
 package org.sonar.plugins.openedge.api.checks;
 
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,8 +32,12 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
+import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
+import org.sonar.api.rule.RuleKey;
+import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.api.LicenseRegistration.License;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -44,7 +49,8 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
 
   private ParseUnit unit;
   private Set<String> incReports = new HashSet<>();
-
+  private Set<String> issueAnnotations = new HashSet<>();
+  
   @Override
   public final void sensorExecute(InputFile file, ParseUnit unit) {
     this.unit = unit;
@@ -54,6 +60,12 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   @Override
   public OpenEdgeCheck.CheckType getCheckType() {
     return CheckType.PROPARSE;
+  }
+
+  @Override
+  public void setContext(RuleKey ruleKey, SensorContext context, License license) {
+    super.setContext(ruleKey, context, license);
+    Collections.addAll(issueAnnotations, context.config().get(Constants.SKIP_ANNOTATIONS).orElse("").split(","));
   }
 
   /**
@@ -122,6 +134,8 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {
       return null;
     }
+    if (skipIssueAnnotation(node))
+      return null;
     if (unit.isAppBuilderCode() && !reportIssueOnAppBuilderCode() && !node.isEditableInAB())
       return null;
 
@@ -230,6 +244,14 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
       }
     }
     return null;
+  }
+
+  private boolean skipIssueAnnotation(JPNode node) {
+    for (String ann : issueAnnotations) {
+      if (node.hasAnnotation(ann))
+        return true;
+    }
+    return false;
   }
 
   private boolean skipIssue(JPNode node) {

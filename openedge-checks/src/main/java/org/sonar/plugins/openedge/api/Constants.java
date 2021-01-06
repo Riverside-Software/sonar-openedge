@@ -46,6 +46,7 @@ public class Constants {
   public static final String CPD_ANNOTATIONS = "sonar.oe.cpd.annotations";
   public static final String CPD_METHODS = "sonar.oe.cpd.skip_methods";
   public static final String CPD_PROCEDURES = "sonar.oe.cpd.skip_procedures";
+  public static final String SKIP_ANNOTATIONS = "sonar.oe.issues.annotations";
   public static final String SUFFIXES = "sonar.oe.file.suffixes";
   public static final String INCLUDE_SUFFIXES = "sonar.oe.include.suffixes";
   public static final String BACKSLASH_ESCAPE = "sonar.oe.backslash.escape";
