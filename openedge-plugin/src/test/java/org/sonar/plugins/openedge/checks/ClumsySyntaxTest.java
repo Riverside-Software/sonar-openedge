@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2019-2020 Riverside Software
+ * Copyright (c) 2019-2021 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -19,12 +19,13 @@
  */
 package org.sonar.plugins.openedge.checks;
 
+import static org.testng.Assert.assertEquals;
+
 import java.util.Iterator;
 
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.issue.Issue;
 import org.sonar.api.rule.RuleKey;
-import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -43,14 +44,14 @@ public class ClumsySyntaxTest extends AbstractTest {
     rule.setContext(ruleKey, context, null);
     rule.sensorExecute(inputFile, getParseUnit(inputFile));
 
-    Assert.assertEquals(context.allIssues().size(), 3);
+    assertEquals(context.allIssues().size(), 3);
     Iterator<Issue> iter = context.allIssues().iterator();
     Issue issue1 = iter.next();
     Issue issue2 = iter.next();
     Issue issue3 = iter.next();
-    Assert.assertEquals(issue1.primaryLocation().textRange().start().line(), 1);
-    Assert.assertEquals(issue2.primaryLocation().textRange().start().line(), 2);
-    Assert.assertEquals(issue3.primaryLocation().textRange().start().line(), 3);
+    assertEquals(issue1.primaryLocation().textRange().start().line(), 1);
+    assertEquals(issue2.primaryLocation().textRange().start().line(), 2);
+    assertEquals(issue3.primaryLocation().textRange().start().line(), 3);
   }
 
   @Test
@@ -60,10 +61,10 @@ public class ClumsySyntaxTest extends AbstractTest {
     rule.setContext(ruleKey, context, null);
     rule.sensorExecute(inputFile, getParseUnit(inputFile));
 
-    Assert.assertEquals(context.allIssues().size(), 1);
+    assertEquals(context.allIssues().size(), 1);
     Iterator<Issue> iter = context.allIssues().iterator();
     Issue issue1 = iter.next();
-    Assert.assertEquals(issue1.primaryLocation().textRange().start().line(), 5);
+    assertEquals(issue1.primaryLocation().textRange().start().line(), 5);
   }
 
 }

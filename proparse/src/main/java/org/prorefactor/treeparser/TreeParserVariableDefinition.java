@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -693,7 +693,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       table = tableBuffer.getTable();
       isDefault = tableBuffer.isDefault();
       // Doing it early so that we don't have to query it again in next phase
-      tableBuffer.noteReference(ContextQualifier.INIT);
+      tableBuffer.noteReference(recordNode, ContextQualifier.INIT);
     } else {
       table = refSession.getSchema().lookupTable(buffName);
       isDefault = true;
@@ -1870,6 +1870,12 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
         return;
       }
     }
+  }
+
+  @Override
+  public void enterWaitForStatement(WaitForStatementContext ctx) {
+    if (ctx.expressionTerm() != null)
+      setContextQualifier(ctx.expressionTerm(), ContextQualifier.REF);
   }
 
   @Override

@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -35,7 +35,7 @@ public class OpenEdgeComponentsTest {
   public void testNoLicenses() throws IOException {
     OpenEdgeComponents components1 = new OpenEdgeComponents(OpenEdgePluginTest.SERVER);
     assertEquals(components1.getLicenses().size(), 0);
-    OpenEdgeComponents components2 = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, new LicenseRegistration[] {});
+    OpenEdgeComponents components2 = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, new CheckRegistration[] {});
     assertEquals(components2.getLicenses().size(), 0);
     OpenEdgeComponents components3 = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, new CheckRegistration[] {},
         new LicenseRegistration[] {});
@@ -43,43 +43,56 @@ public class OpenEdgeComponentsTest {
   }
 
   @Test
+  public void testNoServer() throws IOException {
+    OpenEdgeComponents components1 = new OpenEdgeComponents();
+    assertEquals(components1.getServerId(), "");
+    assertEquals(components1.getLicenses().size(), 0);
+    OpenEdgeComponents components2 = new OpenEdgeComponents(new CheckRegistration[] {});
+    assertEquals(components2.getServerId(), "");
+    assertEquals(components2.getLicenses().size(), 0);
+    OpenEdgeComponents components3 = new OpenEdgeComponents(new CheckRegistration[] {}, new LicenseRegistration[] {});
+    assertEquals(components3.getServerId(), "");
+    assertEquals(components3.getLicenses().size(), 0);
+  }
+
+  @Test
   public void testOneLicense() throws IOException {
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER,
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_ME_OE_2015});
     assertEquals(components.getLicenses().size(), 1);
   }
 
   @Test
   public void testTwoLicenses() throws IOException {
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER,
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_ME_OE_2015, LICENSE_ME_OE_2025});
     assertEquals(components.getLicenses().size(), 1);
   }
 
   @Test
   public void testTwoPermId() throws IOException {
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER,
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_ME_OE_2015, LICENSE_YOU_OE_2025});
     assertEquals(components.getLicenses().size(), 2);
   }
 
   @Test
   public void testTwoRepositories() throws IOException {
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER,
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_ME_OE_2015, LICENSE_YOU_OTHER_2015});
     assertEquals(components.getLicenses().size(), 2);
   }
 
   @Test
   public void testThreeLicenses() throws IOException {
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER,
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_ME_OE_2015, LICENSE_ME_OE_2030, LICENSE_ME_OE_2025});
     assertEquals(components.getLicenses().size(), 1);
   }
 
   @Test
   public void testMixedLicenses() throws IOException {
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER,
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, new CheckRegistration[] {},
         new LicenseRegistration[] {
             LICENSE_ME_OE_2015, LICENSE_ME_OE_2030, LICENSE_ME_OE_2025, LICENSE_YOU_OTHER_2015, LICENSE_YOU_OE_2015,
             LICENSE_YOU_OE_2015});
@@ -88,7 +101,7 @@ public class OpenEdgeComponentsTest {
 
   @Test
   public void testSLPlusSQLicenses() throws IOException {
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER,
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_ME_OE_2025, LICENSE_SL_ME_OE_2025, LICENSE_SL_YOU_OE_2025});
     assertEquals(components.getLicenses().size(), 3);
   }

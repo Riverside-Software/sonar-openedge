@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -127,7 +127,7 @@ public class RCodeInfo {
     }
 
     if ((debugSegmentOffset > 0) && (debugSegmentSize > 0)) {
-      long bytesRead = input.skip(debugSegmentOffset - initialValueSegmentSize);
+      long bytesRead = input.skip((long) debugSegmentOffset - initialValueSegmentSize);
       if (bytesRead != debugSegmentOffset - initialValueSegmentSize) {
         throw new InvalidRCodeException("Not enough bytes to reach debug segment");
       }

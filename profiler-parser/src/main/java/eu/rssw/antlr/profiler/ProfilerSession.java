@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class ProfilerSession {
-  private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-
   // Description
   private final String description;
   private final String user;
@@ -48,6 +46,7 @@ public class ProfilerSession {
 
   // Internal use
   private int highestModuleId = -1;
+  private final DateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
   public ProfilerSession(String description, String user, String timestamp, String version) {
     this.description = description;
@@ -59,7 +58,7 @@ public class ProfilerSession {
     }
     this.version = tmp;
     try {
-      this.timestamp = DATE_FORMATTER.parse(timestamp);
+      this.timestamp = dateFormatter.parse(timestamp);
     } catch (ParseException caught) {
       this.timestamp = new Date(System.currentTimeMillis());
     }

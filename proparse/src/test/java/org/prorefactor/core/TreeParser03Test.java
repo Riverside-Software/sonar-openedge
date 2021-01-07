@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -35,6 +35,8 @@ import org.prorefactor.treeparser.symbols.Modifier;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.Variable;
+import org.prorefactor.treeparser.symbols.Variable.ReadWrite;
+import org.prorefactor.treeparser.symbols.Variable.ReadWriteReference;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -130,9 +132,15 @@ public class TreeParser03Test {
     Routine f1 = unit.getRootScope().lookupRoutine("f1");
     assertNotNull(f1);
     assertEquals(f1.getParameters().size(), 1);
-    assertEquals(f1.getParameters().get(0).getSymbol().getName(), "zz");
-    assertEquals(f1.getParameters().get(0).getSymbol().getNumReads(), 1);
-    assertEquals(f1.getParameters().get(0).getSymbol().getNumWrites(), 0);
+    Variable var1 = (Variable) f1.getParameters().get(0).getSymbol();
+    assertEquals(var1.getName(), "zz");
+    assertEquals(var1.getNumReads(), 1);
+    assertEquals(var1.getNumWrites(), 0);
+    assertEquals(var1.getReadWriteReferences().size(), 1);
+    ReadWriteReference ref1 = var1.getReadWriteReferences().get(0);
+    assertEquals(ref1.getType(), ReadWrite.READ);
+    assertEquals(ref1.getNode().getStatement().getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(ref1.getNode().getStatement().getLine(), 8);
 
     Routine f2 = unit.getRootScope().lookupRoutine("f2");
     assertNotNull(f2);
@@ -140,9 +148,14 @@ public class TreeParser03Test {
     assertEquals(f2.getParameters().get(0).getSymbol().getName(), "a");
     assertEquals(f2.getParameters().get(0).getSymbol().getNumReads(), 0);
     assertEquals(f2.getParameters().get(0).getSymbol().getNumWrites(), 0);
-    assertEquals(f2.getParameters().get(1).getSymbol().getName(), "zz");
-    assertEquals(f2.getParameters().get(1).getSymbol().getNumReads(), 1);
-    assertEquals(f2.getParameters().get(1).getSymbol().getNumWrites(), 0);
+    Variable var2 = (Variable) f2.getParameters().get(1).getSymbol();
+    assertEquals(var2.getName(), "zz");
+    assertEquals(var2.getNumReads(), 1);
+    assertEquals(var2.getNumWrites(), 0);
+    ReadWriteReference ref2 = var2.getReadWriteReferences().get(0);
+    assertEquals(ref2.getType(), ReadWrite.READ);
+    assertEquals(ref2.getNode().getStatement().getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(ref2.getNode().getStatement().getLine(), 13);
 
     Routine f3 = unit.getRootScope().lookupRoutine("f3");
     assertNotNull(f3);
@@ -478,6 +491,45 @@ public class TreeParser03Test {
     assertNotNull(var3);
     assertEquals(var3.getNumReads(), 0);
     assertEquals(var3.getNumWrites(), 1);
+
+    JPNode fooBlock = unit.getRootScope().getChildScopes().get(0).getRootBlock().getNode().findDirectChild(
+        ABLNodeType.CODE_BLOCK);
+    assertEquals(fooBlock.getDirectChildren().get(0).getFirstChild().getFirstChild().getNodeType(),
+        ABLNodeType.WIDGET_REF);
+    assertEquals(fooBlock.getDirectChildren().get(0).getFirstChild().getFirstChild().getSymbol(), var1);
+
+    JPNode barBlock = unit.getRootScope().getChildScopes().get(1).getRootBlock().getNode().findDirectChild(
+        ABLNodeType.CODE_BLOCK);
+    assertEquals(barBlock.getDirectChildren().get(0).getFirstChild().getFirstChild().getNodeType(),
+        ABLNodeType.WIDGET_REF);
+    assertEquals(barBlock.getDirectChildren().get(0).getFirstChild().getFirstChild().getSymbol(), var2);
+    assertEquals(barBlock.getDirectChildren().get(1).getFirstChild().getFirstChild().getNodeType(),
+        ABLNodeType.WIDGET_REF);
+    assertNull(barBlock.getDirectChildren().get(1).getFirstChild().getFirstChild().getSymbol());
+  }
+
+  @Test
+  public void test24() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test24.cls"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    /* assertEquals(unit.getRootScope().getVariables().size(), 2);
+    Variable var1 = unit.getRootScope().getVariable("xxx");
+    assertEquals(var1.getNumReads(), 0);
+    assertEquals(var1.getNumWrites(), 1);
+    Variable var2 = unit.getRootScope().getVariable("yyy");
+    assertEquals(var2.getNumReads(), 1);
+    assertEquals(var2.getNumWrites(), 2);
+    
+    assertEquals(unit.getRootScope().getChildScopes().size(), 2);
+    Variable var3 = unit.getRootScope().getChildScopes().get(0).getVariable("xxx");
+    assertNotNull(var3);
+    assertEquals(var3.getNumReads(), 0);
+    assertEquals(var3.getNumWrites(), 1);*/
   }
 
   @Test

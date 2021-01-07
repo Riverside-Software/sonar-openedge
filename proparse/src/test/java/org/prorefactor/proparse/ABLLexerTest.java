@@ -397,6 +397,20 @@ public class ABLLexerTest {
     assertEquals(tok.getCharPositionInLine(), 4);
   }
 
+  @Test
+  public void testNestedComments() {
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("/* Gilles */ /* Gilles /* Querret */ Test */".getBytes()), "file.txt");
+    ProToken tok = (ProToken) lexer.nextToken();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.COMMENT);
+    assertFalse(tok.hasNestedComments());
+    tok = (ProToken) lexer.nextToken();
+    tok = (ProToken) lexer.nextToken();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.COMMENT);
+    assertTrue(tok.hasNestedComments());
+  }
+
   // *********
   // Utilities
   // *********

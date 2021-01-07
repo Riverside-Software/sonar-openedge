@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -117,15 +117,17 @@ public class ListingParser {
 
         if (sourceDone) {
           // New page and source is already parsed, then we skip header
-          reader.readLine();
-          reader.readLine();
-          reader.readLine();
+          String str1 = reader.readLine();
+          String str2 = reader.readLine();
+          String str3 = reader.readLine();
+          if ((str1 == null) || (str2 == null) || (str3 == null))
+            return;
         } else {
           // New page but source is not yet fully parsed, we verify if this page is still about source code
-          reader.readLine();
+          String str1 = reader.readLine();
           String str2 = reader.readLine();
-          reader.readLine();
-          if ((str2 != null) && !str2.startsWith("{} Line Blk")) {
+          String str3 = reader.readLine();
+          if ((str1 != null) && (str2 != null) && (str3 != null) && !str2.startsWith("{} Line Blk")) {
             // Entering blocks section
             sourceDone = true;
           }

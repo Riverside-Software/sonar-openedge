@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
+import org.prorefactor.core.nodetypes.IfNode;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.nodetypes.TypeNameNode;
@@ -55,6 +56,8 @@ public class JPNode {
   private JPNode nextStatement;
   // Only for statement nodes and block nodes: enclosing block
   private Block inBlock;
+  // Annotations found on statements (and blocks)
+  private List<String> annotations;
 
   // Fields are usually set in TreeParser
   private Symbol symbol;
@@ -68,6 +71,10 @@ public class JPNode {
     this.parent = parent;
     this.childNum = num;
     this.children = hasChildren ? new ArrayList<>() : null;
+  }
+
+  public ProToken getToken() {
+    return token;
   }
 
   // Attributes from ProToken
@@ -452,6 +459,10 @@ public class JPNode {
     attrSet(IConstants.OPERATOR, IConstants.TRUE);
   }
 
+  public boolean isOperator() {
+    return attrGet(IConstants.OPERATOR) == IConstants.TRUE;
+  }
+
   public int getState2() {
     return attrGet(IConstants.STATE2);
   }
@@ -809,6 +820,30 @@ public class JPNode {
     this.inBlock = inBlock;
   }
 
+  public void addAnnotation(String annotation) {
+    if (annotations == null)
+      annotations = new ArrayList<>();
+    annotations.add(annotation);
+  }
+
+  public List<String> getAnnotations() {
+    return annotations;
+  }
+
+  public boolean hasAnnotation(String str) {
+    if (isStateHead()) {
+      if ((annotations != null) && annotations.contains(str))
+        return true;
+      else if ((inBlock != null) && (inBlock.getNode() != null))
+        return inBlock.getNode().hasAnnotation(str);
+
+      else
+        return false;
+    } else {
+      return getStatement().hasAnnotation(str);
+    }
+  }
+
   public Block getEnclosingBlock() {
     return inBlock;
   }
@@ -989,6 +1024,9 @@ public class JPNode {
         case PROPERTY_GETTER:
         case PROPERTY_SETTER:
           node = new BlockNode(tok, up, num, hasChildren);
+          break;
+        case IF:
+          node = new IfNode(tok, up, num, hasChildren);
           break;
         default:
           node = new JPNode(tok, up, num, hasChildren);

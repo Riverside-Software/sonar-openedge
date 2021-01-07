@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -15,6 +15,10 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProgressString;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.ContextQualifier;
@@ -33,13 +37,14 @@ public class Variable extends Symbol implements Primative {
   public static final Object CONSTANT_ARRAY = new Object();
   public static final Object CONSTANT_ZERO = new Object();
 
+  private final Type type;
+  private final List<ReadWriteReference> readWriteRefs = new ArrayList<>();
   private int extent = -1;
   private DataType dataType;
   private Object initialValue = null;
   private String className = null;
   private boolean refInFrame = false;
   private boolean graphicalComponent = false;
-  private final Type type;
 
   public Variable(String name, TreeParserSymbolScope scope) {
     this(name, scope, Type.VARIABLE);
@@ -133,14 +138,45 @@ public class Variable extends Symbol implements Primative {
   }
 
   @Override
-  public void noteReference(ContextQualifier contextQualifier) {
-    super.noteReference(contextQualifier);
+  public void noteReference(JPNode node, ContextQualifier contextQualifier) {
+    super.noteReference(node, contextQualifier);
     if (contextQualifier == ContextQualifier.UPDATING_UI)
       graphicalComponent = true;
+    if ((node != null) && (contextQualifier != null)) {
+      if (ContextQualifier.isRead(contextQualifier))
+        readWriteRefs.add(new ReadWriteReference(ReadWrite.READ, node));
+      if (ContextQualifier.isWrite(contextQualifier))
+        readWriteRefs.add(new ReadWriteReference(ReadWrite.WRITE, node));
+    }
+  }
+
+  public List<ReadWriteReference> getReadWriteReferences() {
+    return readWriteRefs;
   }
 
   public enum Type {
     VARIABLE, PROPERTY, PARAMETER;
   }
 
+  public enum ReadWrite {
+    READ, WRITE;
+  }
+
+  public static class ReadWriteReference {
+    private ReadWrite type;
+    private JPNode node;
+
+    public ReadWriteReference(ReadWrite type, JPNode node) {
+      this.type = type;
+      this.node = node;
+    }
+
+    public ReadWrite getType() {
+      return type;
+    }
+
+    public JPNode getNode() {
+      return node;
+    }
+  }
 }

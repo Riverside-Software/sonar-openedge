@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -20,18 +20,24 @@
 package org.sonar.plugins.openedge.api.checks;
 
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.ParseUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
+import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
+import org.sonar.api.rule.RuleKey;
+import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.api.LicenseRegistration.License;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -43,7 +49,8 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
 
   private ParseUnit unit;
   private Set<String> incReports = new HashSet<>();
-
+  private Set<String> issueAnnotations = new HashSet<>();
+  
   @Override
   public final void sensorExecute(InputFile file, ParseUnit unit) {
     this.unit = unit;
@@ -53,6 +60,12 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   @Override
   public OpenEdgeCheck.CheckType getCheckType() {
     return CheckType.PROPARSE;
+  }
+
+  @Override
+  public void setContext(RuleKey ruleKey, SensorContext context, License license) {
+    super.setContext(ruleKey, context, license);
+    Collections.addAll(issueAnnotations, context.config().get(Constants.SKIP_ANNOTATIONS).orElse("").split(","));
   }
 
   /**
@@ -73,35 +86,27 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return false;
   }
 
-  /**
-   * Tries to create a new issue. Will return null if the issue can't be created.
-   */
-  protected NewIssue createIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
-    if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {
-      return null;
-    }
-    if (unit.isAppBuilderCode() && !reportIssueOnAppBuilderCode() && !node.isEditableInAB())
-      return null;
-
-    InputFile targetFile = getInputFile(file, node);
+  protected NewIssue createIssue(InputFile file, ProToken token, String msg, boolean exactLocation) {
+    InputFile targetFile = getInputFile(file, token);
     if (targetFile == null) {
       return null;
     }
     if (!targetFile.equals(file) && reportOnlyOnceInIncludeFile()) {
       // Check if issue has already been reported
-      if (incReports.contains(targetFile.toString() + ":" + node.getLine()))
+      if (incReports.contains(targetFile.toString() + ":" + token.getLine()))
         return null;
       else
-        incReports.add(targetFile.toString() + ":" + node.getLine());
+        incReports.add(targetFile.toString() + ":" + token.getLine());
     }
 
-    int lineNumber = node.getLine();
+    int lineNumber = token.getLine();
     LOG.trace("Adding issue {} to {} line {}", getRuleKey(), targetFile, lineNumber);
     NewIssue issue = getContext().newIssue().forRule(getRuleKey());
     NewIssueLocation location = issue.newLocation().on(targetFile);
     if (lineNumber > 0) {
       if (exactLocation) {
-        location.at(targetFile.newRange(node.getLine(), node.getColumn() - 1, node.getEndLine(), node.getEndColumn()));
+        location.at(targetFile.newRange(token.getLine(), token.getCharPositionInLine() - 1, token.getEndLine(),
+            token.getEndCharPositionInLine()));
       } else {
         TextRange range = targetFile.selectLine(lineNumber);
         if (IS_WINDOWS && (getContext().runtime().getProduct() == SonarProduct.SONARLINT)
@@ -122,19 +127,44 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return issue;
   }
 
-  protected void addLocation(NewIssue issue, InputFile file, JPNode node, String msg) {
-    InputFile targetFile = getInputFile(file, node);
-    if (targetFile == null) {
-      return;
+  /**
+   * Tries to create a new issue. Will return null if the issue can't be created.
+   */
+  protected NewIssue createIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
+    if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {
+      return null;
     }
-    NewIssueLocation location = issue.newLocation().on(targetFile);
-    if (node.getLine() > 0) {
-      location.at(targetFile.newRange(node.getLine(), node.getColumn() - 1, node.getEndLine(), node.getEndColumn()));
-    }
-    if (targetFile == file) {
-      location.message(msg);
-    } else {
-      location.message(MessageFormat.format(INC_MESSAGE, file.toString(), msg));
+    if (skipIssueAnnotation(node))
+      return null;
+    if (unit.isAppBuilderCode() && !reportIssueOnAppBuilderCode() && !node.isEditableInAB())
+      return null;
+
+    return createIssue(file, node.getToken(), msg, exactLocation);
+  }
+
+  protected void addLocation(NewIssue issue, InputFile file, JPNode node, String msg, boolean exactLocation) {
+    InputFile targetFile = getInputFile(file, node.firstNaturalChild());
+    if (targetFile != null) {
+      JPNode naturalChild = node.firstNaturalChild();
+      NewIssueLocation location = issue.newLocation().on(targetFile);
+
+      int lineNumber = naturalChild.getLine();
+      if (lineNumber > 0) {
+        if (exactLocation) {
+          location.at(targetFile.newRange(naturalChild.getLine(), naturalChild.getColumn() - 1,
+              naturalChild.getEndLine(), naturalChild.getEndColumn()));
+        } else {
+          TextRange range = targetFile.selectLine(lineNumber);
+          if (IS_WINDOWS && (getContext().runtime().getProduct() == SonarProduct.SONARLINT)
+              && (range.end().lineOffset() > 1)) {
+            location.at(targetFile.newRange(lineNumber, 0, lineNumber, range.end().lineOffset() - 1));
+          } else {
+            location.at(range);
+          }
+        }
+        location.message(msg);
+        issue.addLocation(location);
+      }
     }
   }
 
@@ -216,6 +246,14 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return null;
   }
 
+  private boolean skipIssueAnnotation(JPNode node) {
+    for (String ann : issueAnnotations) {
+      if (node.hasAnnotation(ann))
+        return true;
+    }
+    return false;
+  }
+
   private boolean skipIssue(JPNode node) {
     // Look on node itself
     if (node.hasProparseDirective(getNoSonarKeyword()))
@@ -253,6 +291,10 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
 
   protected InputFile getInputFile(InputFile file, JPNode node) {
     return node.getFileIndex() == 0 ? file : getInputFile(node.getFileName());
+  }
+
+  protected InputFile getInputFile(InputFile file, ProToken token) {
+    return token.getFileIndex() == 0 ? file : getInputFile(token.getFileName());
   }
 
 }

@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -161,25 +161,15 @@ public class OpenEdgePlugin implements Plugin {
       .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
-    context.addExtension(PropertyDefinition.builder(Constants.XREF_FILTER) //
-      .name("Filter invalid XML files") //
-      .description("Use filter to discard malformed characters from XML XREF files") //
-      .type(PropertyType.BOOLEAN) //
-      .defaultValue(Boolean.FALSE.toString()) //
-      .category(CATEGORY_OPENEDGE) //
-      .subCategory(SUBCATEGORY_GENERAL) //
-      .onQualifiers(Qualifiers.PROJECT) //
-      .build());
-
-    context.addExtension(PropertyDefinition.builder(Constants.XREF_FILTER_BYTES) //
-      .name("Bytes to be filtered from XML files") //
-      .description("Comma-separated list of ranges, i.e. 1-2,4-7,9,11-13") //
-      .type(PropertyType.STRING) //
-      .defaultValue("1-4") //
-      .category(CATEGORY_OPENEDGE) //
-      .subCategory(SUBCATEGORY_GENERAL) //
-      .onQualifiers(Qualifiers.PROJECT) //
-      .build());
+    context.addExtension(PropertyDefinition.builder(Constants.SKIP_ANNOTATIONS) //
+        .name("Skip issue annotations") //
+        .description("Comma-separated list of annotations where issues will be skipped") //
+        .type(PropertyType.STRING) //
+        .defaultValue("@InitializeComponent") //
+        .category(CATEGORY_OPENEDGE) //
+        .subCategory(SUBCATEGORY_GENERAL) //
+        .onQualifiers(Qualifiers.PROJECT) //
+        .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.BACKSLASH_ESCAPE) //
       .name("Backslash as escape char") //

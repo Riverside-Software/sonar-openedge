@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -142,23 +142,23 @@ public class PLReader {
       int zz = 0;
       while (!stop) {
         b1.position(0);
-        int kk = fc.read(b1, offset + ++zz);
+        int kk = fc.read(b1, (long) offset + ++zz);
         stop = (kk == -1) || (b1.get(0) == (byte) 0xFF);
       }
 
       return new FileEntry(zz);
     } else if (b1.get(0) == (byte) 0xFF) {
       b1.position(0);
-      fc.read(b1, offset + 1);
+      fc.read(b1, (long) offset + 1);
       int fNameSize = (int) b1.get(0) & 0xFF;
       if (fNameSize == 0)
         return new FileEntry(29);
       ByteBuffer b2 = ByteBuffer.allocate(fNameSize);
-      fc.read(b2, offset + 2);
+      fc.read(b2, (long) offset + 2);
       b2.position(0);
       String fName = charset.decode(b2).toString();
       ByteBuffer b3 = ByteBuffer.allocate(48); // Ou 47
-      fc.read(b3, offset + 2 + fNameSize);
+      fc.read(b3, (long) offset + 2 + fNameSize);
       int fileOffset = b3.getInt(6); // 7
       int fileSize = b3.getInt(11); // 12
       long added = b3.getInt(15) * 1000L; // 16

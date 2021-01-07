@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2019-2020 Riverside Software
+ * Copyright (c) 2019-2021 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -23,6 +23,7 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.check.Priority;
 import org.sonar.check.Rule;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
@@ -38,7 +39,9 @@ public class ClumsySyntax extends OpenEdgeProparseCheck {
       for (JPNode node : unit.getTopNode().queryStateHead(ABLNodeType.METHOD)) {
         JPNode lastChild = node.getLastDescendant();
         if (lastChild.getNodeType() == ABLNodeType.LEXCOLON) {
-          reportIssue(file, node, "METHOD ending with colon instead of period");
+          NewIssue issue = createIssue(file, node, "METHOD prototype declaration...", true);
+          addLocation(issue, file, lastChild, "... should end with a period and not a colon", true);
+          issue.save();
         }
       }
     }

@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -23,4 +23,8 @@ public class ProgramRootNode extends BlockNode {
     super(t, parent, num, hasChildren);
   }
 
+  @Override
+  public boolean hasAnnotation(String str) {
+    return false;
+  }
 }

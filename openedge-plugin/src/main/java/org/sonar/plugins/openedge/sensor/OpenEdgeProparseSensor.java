@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -257,8 +257,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
       try (InputStream inpStream = new FileInputStream(xrefFile)) {
         long startTime = System.currentTimeMillis();
-        doc = dBuilder.parse(
-            settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
+        doc = dBuilder.parse(new InvalidXMLFilterStream(inpStream));
         xmlParseTime += (System.currentTimeMillis() - startTime);
       } catch (SAXException | IOException caught) {
         LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
@@ -274,8 +273,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
       try (InputStream inpStream = new FileInputStream(xrefFile)) {
         long startTime = System.currentTimeMillis();
-        InputSource is = new InputSource(
-            settings.useXrefFilter() ? new InvalidXMLFilterStream(settings.getXrefBytes(), inpStream) : inpStream);
+        InputSource is = new InputSource(new InvalidXMLFilterStream(inpStream));
         XMLReader reader = saxParserFactory.newSAXParser().getXMLReader();
         SAXSource source = new SAXSource(reader, is);
         doc = (CrossReference) unmarshaller.unmarshal(source);

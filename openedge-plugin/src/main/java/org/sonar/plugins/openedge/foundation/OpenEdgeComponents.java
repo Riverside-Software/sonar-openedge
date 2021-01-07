@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -89,14 +89,6 @@ public class OpenEdgeComponents {
 
   public OpenEdgeComponents(Server server, CheckRegistration[] checkRegistrars) {
     this(server, checkRegistrars, null, null);
-  }
-
-  public OpenEdgeComponents(LicenseRegistration[] licRegistrars) {
-    this(null, null, licRegistrars, null);
-  }
-
-  public OpenEdgeComponents(Server server, LicenseRegistration[] licRegistrars) {
-    this(server, null, licRegistrars, null);
   }
 
   public OpenEdgeComponents(CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars) {
@@ -297,15 +289,23 @@ public class OpenEdgeComponents {
   private static class LicenseRegistrar implements LicenseRegistration.Registrar {
     private final Collection<License> licenses = new ArrayList<>();
 
+    @Override
     public void registerLicense(String permanentId, String customerName, String salt, String repoName,
         LicenseRegistration.LicenseType type, byte[] signature, long expirationDate) {
-      registerLicense(permanentId.replace("sonarlint-", ""),
+      registerLicense(1, permanentId.replace("sonarlint-", ""),
           permanentId.startsWith("sonarlint") ? SonarProduct.SONARLINT : SonarProduct.SONARQUBE, customerName, salt,
-          repoName, type, signature, expirationDate);
+          repoName, type, signature, expirationDate, 0);
     }
 
+    @Override
     public void registerLicense(String permanentId, SonarProduct product, String customerName, String salt,
         String repoName, LicenseRegistration.LicenseType type, byte[] signature, long expirationDate) {
+      registerLicense(1, permanentId, product, customerName, salt, repoName, type, signature, expirationDate, 0);
+    }
+
+    @Override
+    public void registerLicense(int version, String permanentId, SonarProduct product, String customerName, String salt,
+        String repoName, LicenseRegistration.LicenseType type, byte[] signature, long expirationDate, long lines) {
       if (Strings.isNullOrEmpty(repoName))
         return;
       LOG.debug("Found {} license - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
@@ -313,7 +313,8 @@ public class OpenEdgeComponents {
           DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(expirationDate)));
       // Only one license per product/ repository / permID
       License existingLic = hasRegisteredLicense(product, repoName, permanentId);
-      License newLic = new License(permanentId, product, customerName, salt, repoName, type, signature, expirationDate);
+      License newLic = new License(1, permanentId, product, customerName, salt, repoName, type, signature,
+          expirationDate, lines);
       if (existingLic == null) {
         licenses.add(newLic);
       } else if (existingLic.getExpirationDate() < newLic.getExpirationDate()) {

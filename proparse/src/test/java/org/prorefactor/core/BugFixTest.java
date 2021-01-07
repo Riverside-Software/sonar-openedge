@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2020 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -36,6 +36,8 @@ import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.Variable;
+import org.prorefactor.treeparser.symbols.Variable.ReadWrite;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -158,12 +160,28 @@ public class BugFixTest {
   @Test
   public void testVarUsage2() {
     ParseUnit unit = genericTest("varusage2.cls");
-    assertEquals(unit.getRootScope().getVariable("x1").getNumWrites(), 1);
-    assertEquals(unit.getRootScope().getVariable("x1").getNumReads(), 0);
-    assertEquals(unit.getRootScope().getVariable("x2").getNumWrites(), 1);
-    assertEquals(unit.getRootScope().getVariable("x2").getNumReads(), 2);
-    assertEquals(unit.getRootScope().getVariable("x3").getNumWrites(), 2);
-    assertEquals(unit.getRootScope().getVariable("x3").getNumReads(), 1);
+    Variable x1 = unit.getRootScope().getVariable("x1");
+    assertEquals(x1.getNumWrites(), 1);
+    assertEquals(x1.getNumReads(), 0);
+    assertEquals(x1.getReadWriteReferences().get(0).getNode().getStatement().firstNaturalChild().getLine(), 16);
+    Variable x2 = unit.getRootScope().getVariable("x2");
+    assertEquals(x2.getNumWrites(), 1);
+    assertEquals(x2.getNumReads(), 2);
+    assertEquals(x2.getReadWriteReferences().get(0).getNode().getStatement().firstNaturalChild().getLine(), 9);
+    assertEquals(x2.getReadWriteReferences().get(0).getType(), ReadWrite.WRITE);
+    assertEquals(x2.getReadWriteReferences().get(1).getNode().getStatement().firstNaturalChild().getLine(), 13);
+    assertEquals(x2.getReadWriteReferences().get(1).getType(), ReadWrite.READ);
+    assertEquals(x2.getReadWriteReferences().get(2).getNode().getStatement().firstNaturalChild().getLine(), 14);
+    assertEquals(x2.getReadWriteReferences().get(2).getType(), ReadWrite.READ);
+    Variable x3 = unit.getRootScope().getVariable("x3");
+    assertEquals(x3.getNumWrites(), 2);
+    assertEquals(x3.getNumReads(), 1);
+    assertEquals(x3.getReadWriteReferences().get(0).getNode().getStatement().firstNaturalChild().getLine(), 9);
+    assertEquals(x3.getReadWriteReferences().get(0).getType(), ReadWrite.READ);
+    assertEquals(x3.getReadWriteReferences().get(1).getNode().getStatement().firstNaturalChild().getLine(), 10);
+    assertEquals(x3.getReadWriteReferences().get(1).getType(), ReadWrite.WRITE);
+    assertEquals(x3.getReadWriteReferences().get(2).getNode().getStatement().firstNaturalChild().getLine(), 14);
+    assertEquals(x3.getReadWriteReferences().get(2).getType(), ReadWrite.WRITE);
   }
 
   @Test
