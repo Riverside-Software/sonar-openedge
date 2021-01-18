@@ -83,7 +83,7 @@ public class OpenEdgePlugin implements Plugin {
     // Properties
     context.addExtension(PropertyDefinition.builder(Constants.SKIP_RCODE) //
       .name("Skip rcode parsing") //
-      .description("Skip rcode parsing") //
+      .description("Don't parse rcode in the build directory and from dependencies") //
       .type(PropertyType.BOOLEAN) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
@@ -102,8 +102,8 @@ public class OpenEdgePlugin implements Plugin {
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.SKIP_PROPARSE_PROPERTY) //
-      .name("Skip ProParse step") //
-      .description("Skip Proparse AST generation and lint rules") //
+      .name("Skip Proparse step") //
+      .description("Don't generate syntax tree and skip lint rules") //
       .type(PropertyType.BOOLEAN) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
@@ -113,7 +113,7 @@ public class OpenEdgePlugin implements Plugin {
 
     context.addExtension(PropertyDefinition.builder(Constants.USE_SIMPLE_CPD) //
         .name("Simple CPD engine") //
-        .description("Doesn't need full parser to execute the CPD engine") //
+        .description("Use this simple CPD engine only when the parser can't compile your code (missing dependencies or encrypted source code)") //
         .type(PropertyType.BOOLEAN) //
         .category(CATEGORY_OPENEDGE) //
         .subCategory(SUBCATEGORY_GENERAL) //
@@ -123,7 +123,7 @@ public class OpenEdgePlugin implements Plugin {
 
     context.addExtension(PropertyDefinition.builder(Constants.PROPARSE_DEBUG) //
       .name("Proparse debug files") //
-      .description("Generate JPNodeLister debug file in .proparse directory") //
+      .description("Generate parser debug files in .proparse directory") //
       .type(PropertyType.BOOLEAN) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_DEBUG) //
@@ -133,7 +133,7 @@ public class OpenEdgePlugin implements Plugin {
 
     context.addExtension(PropertyDefinition.builder(Constants.SUFFIXES) //
       .name("File suffixes") //
-      .description("Comma-separated list of suffixes of OpenEdge files to analyze, e.g. 'p,w,t'") //
+      .description("Comma-separated list of suffixes of OpenEdge files") //
       .type(PropertyType.STRING) //
       .defaultValue(OpenEdge.DEFAULT_FILE_SUFFIXES) //
       .category(CATEGORY_OPENEDGE) //
@@ -143,7 +143,7 @@ public class OpenEdgePlugin implements Plugin {
 
     context.addExtension(PropertyDefinition.builder(Constants.INCLUDE_SUFFIXES) //
       .name("File suffixes of ABL include files") //
-      .description("Comma-separated list of suffixes of OpenEdge include files to analyze, e.g. 'i,v,f'") //
+      .description("Comma-separated list of suffixes of OpenEdge include files") //
       .type(PropertyType.STRING) //
       .defaultValue(OpenEdge.DEFAULT_INCLUDE_FILE_SUFFIXES) //
       .category(CATEGORY_OPENEDGE) //
@@ -173,7 +173,7 @@ public class OpenEdgePlugin implements Plugin {
 
     context.addExtension(PropertyDefinition.builder(Constants.BACKSLASH_ESCAPE) //
       .name("Backslash as escape char") //
-      .description("Does backslash escape next character on Windows ?") //
+      .description("Force or prevent backslash from escaping next character") //
       .type(PropertyType.BOOLEAN) //
       .defaultValue(Boolean.FALSE.toString()) //
       .category(CATEGORY_OPENEDGE) //
