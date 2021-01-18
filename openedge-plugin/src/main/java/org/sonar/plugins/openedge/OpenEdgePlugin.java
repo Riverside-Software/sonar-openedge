@@ -135,17 +135,17 @@ public class OpenEdgePlugin implements Plugin {
       .name("File suffixes") //
       .description("Comma-separated list of suffixes of OpenEdge files to analyze, e.g. 'p,w,t'") //
       .type(PropertyType.STRING) //
-      .defaultValue("") //
+      .defaultValue(OpenEdge.DEFAULT_FILE_SUFFIXES) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
       .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.INCLUDE_SUFFIXES) //
-      .name("Include file suffixes") //
+      .name("File suffixes of ABL include files") //
       .description("Comma-separated list of suffixes of OpenEdge include files to analyze, e.g. 'i,v,f'") //
       .type(PropertyType.STRING) //
-      .defaultValue("") //
+      .defaultValue(OpenEdge.DEFAULT_INCLUDE_FILE_SUFFIXES) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
       .onQualifiers(Qualifiers.PROJECT) //
