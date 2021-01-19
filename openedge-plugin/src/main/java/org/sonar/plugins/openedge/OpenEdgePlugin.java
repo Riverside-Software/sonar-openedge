@@ -27,6 +27,7 @@ import org.sonar.api.resources.Qualifiers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.decorator.CommonDBMetricsDecorator;
 import org.sonar.plugins.openedge.decorator.CommonMetricsDecorator;
+import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
@@ -34,7 +35,6 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeDBProfile;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeProfile;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
-import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.sensor.OpenEdgeCPDSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeCodeColorizer;
@@ -45,7 +45,6 @@ import org.sonar.plugins.openedge.sensor.OpenEdgeProparseSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeWarningsSensor;
 import org.sonar.plugins.openedge.web.OpenEdgeWebService;
-import org.sonar.plugins.openedge.web.UiPageDefinition;
 
 public class OpenEdgePlugin implements Plugin {
   private static final String CATEGORY_OPENEDGE = "OpenEdge";
@@ -75,9 +74,9 @@ public class OpenEdgePlugin implements Plugin {
     // Decorators
     context.addExtensions(CommonMetricsDecorator.class, CommonDBMetricsDecorator.class);
 
-    // Web page + Web service handler
+    // Web service handler
     if (context.getRuntime().getProduct() == SonarProduct.SONARQUBE) {
-      context.addExtensions(UiPageDefinition.class, OpenEdgeWebService.class);
+      context.addExtension(OpenEdgeWebService.class);
     }
 
     // Properties
