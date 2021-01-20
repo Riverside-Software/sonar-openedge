@@ -10,7 +10,7 @@ CABL enables analysis of OpenEdge procedural and object-oriented code on the Son
 
 <img src="https://github.com/Riverside-Software/sonar-openedge/wiki/img/main-page-01.png" align="center" vspace="5">
 
-# Documentation
+## Documentation
 
 Documentation is available [here](https://github.com/Riverside-Software/sonar-openedge/wiki)
 
