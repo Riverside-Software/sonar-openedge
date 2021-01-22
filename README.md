@@ -1,6 +1,6 @@
 # CABL - Code Analyzer for ABL
 
-CABL enables analysis of OpenEdge procedural and object-oriented code on the SonarQube platform, by reporting:
+CABL enables analysis of OpenEdge procedural and object-oriented code on the [SonarQube](https://www.sonarqube.org) platform, by reporting:
  * Metrics (lines of code, comment density, complexity, shared objects, ...)
  * Issues found in the source code and DF files, such as performance killers, usage of deprecated keywords, ...
  * Code coverage from unit tests
@@ -10,7 +10,9 @@ CABL enables analysis of OpenEdge procedural and object-oriented code on the Son
 
 <img src="https://github.com/Riverside-Software/sonar-openedge/wiki/img/main-page-01.png" align="center" vspace="5">
 
-Documentation available in the [wiki](https://github.com/Riverside-Software/sonar-openedge/wiki)
+## Documentation
+
+Documentation is available [here](https://github.com/Riverside-Software/sonar-openedge/wiki)
 
 ## How do I get started?
 

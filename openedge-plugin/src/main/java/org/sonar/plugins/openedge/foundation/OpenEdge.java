@@ -26,7 +26,8 @@ import org.sonar.plugins.openedge.api.Constants;
 import com.google.common.base.Splitter;
 
 public class OpenEdge extends AbstractLanguage {
-  private static final String DEFAULT_FILE_SUFFIXES = "p,w,i,cls";
+  public static final String DEFAULT_FILE_SUFFIXES = "p,w,i,cls";
+  public static final String DEFAULT_INCLUDE_FILE_SUFFIXES = "i";
 
   private final Configuration config;
 
