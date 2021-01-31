@@ -55,7 +55,7 @@ public class OpenEdgeCPDSensorTest {
     assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
     assertEquals(context.cpdTokens(BASEDIR + ":" + CLASS1).size(), 19);
     assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE4));
-    assertEquals(context.cpdTokens(BASEDIR + ":" + FILE4).size(), 2);
+    assertEquals(context.cpdTokens(BASEDIR + ":" + FILE4).size(), 3);
   }
 
   @Test

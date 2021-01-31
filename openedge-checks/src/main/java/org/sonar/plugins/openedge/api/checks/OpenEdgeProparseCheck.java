@@ -274,12 +274,15 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     if ("1".equals(fileNum)) {
       return file;
     } else {
-      return getContext().fileSystem().inputFile(
+      return getContext().runtime().getProduct() == SonarProduct.SONARLINT ? null : getContext().fileSystem().inputFile(
           getContext().fileSystem().predicates().hasRelativePath(parentNode.getAttribute("File-name")));
     }
   }
 
   private InputFile getInputFile(String fileName) {
+    if (getContext().runtime().getProduct() == SonarProduct.SONARLINT)
+      return null;
+
     InputFile input = getContext().fileSystem().inputFile(
         getContext().fileSystem().predicates().hasRelativePath(fileName));
     if (input == null) {
