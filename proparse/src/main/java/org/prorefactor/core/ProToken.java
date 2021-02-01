@@ -216,6 +216,8 @@ public class ProToken implements Token {
       return true;
     else if ((attrs.size() == 5) && "_PROCEDURE".equals(attrs.get(1)) && "_FREEFORM".equals(attrs.get(4)))
       return true;
+    else if ((attrs.size() == 5) && "_PROCEDURE".equals(attrs.get(1)) && "_DB-REQUIRED".equals(attrs.get(4)))
+      return true;
     else if ((attrs.size() >= 2) && "_FUNCTION".equals(attrs.get(1)))
       return true;
 

@@ -148,6 +148,7 @@ public class ABLLexerTest {
       nextMessageToken(lexer, true, true);
       nextMessageToken(lexer, true, true);
       nextMessageToken(lexer, true, true);
+      nextMessageToken(lexer, true, true);
     } catch (IOException uncaught) {
       fail("Unable to open file", uncaught);
     }
