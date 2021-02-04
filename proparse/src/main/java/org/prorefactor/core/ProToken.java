@@ -208,7 +208,7 @@ public class ProToken implements Token {
       return false;
 
     if ((attrs.size() >= 3) && "_CUSTOM".equalsIgnoreCase(attrs.get(1))
-        && "_DEFINITIONS".equalsIgnoreCase(attrs.get(2)))
+        && ("_DEFINITIONS".equalsIgnoreCase(attrs.get(2)) || "_MAIN-BLOCK".equalsIgnoreCase(attrs.get(2))))
       return true;
     else if ((attrs.size() >= 2) && "_CONTROL".equalsIgnoreCase(attrs.get(1)))
       return true;

@@ -142,7 +142,7 @@ public class ABLLexerTest {
       nextMessageToken(lexer, true, false);
       nextMessageToken(lexer, true, true);
       nextMessageToken(lexer, true, false);
-      nextMessageToken(lexer, true, false);
+      nextMessageToken(lexer, true, true);
       nextMessageToken(lexer, true, true);
       nextMessageToken(lexer, true, false);
       nextMessageToken(lexer, true, true);
