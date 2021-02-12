@@ -60,7 +60,7 @@
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4-runtime</artifactId>
-      <version>4.9</version>
+      <version>4.9.1</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -153,7 +153,7 @@
       <plugin>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-maven-plugin</artifactId>
-        <version>4.9</version>
+        <version>4.9.1</version>
         <configuration>
           <libDirectory>src/main/antlr4/imports</libDirectory>
         </configuration>
