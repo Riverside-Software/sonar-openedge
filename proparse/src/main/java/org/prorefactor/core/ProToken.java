@@ -207,21 +207,27 @@ public class ProToken implements Token {
     if (attrs.isEmpty() || !"_UIB-CODE-BLOCK".equalsIgnoreCase(attrs.get(0)))
       return false;
 
-    if ((attrs.size() >= 3) && "_CUSTOM".equalsIgnoreCase(attrs.get(1))
-        && ("_DEFINITIONS".equalsIgnoreCase(attrs.get(2)) || "_MAIN-BLOCK".equalsIgnoreCase(attrs.get(2))))
-      return true;
-    else if ((attrs.size() >= 2) && "_CONTROL".equalsIgnoreCase(attrs.get(1)))
-      return true;
-    else if ((attrs.size() == 4) && "_PROCEDURE".equals(attrs.get(1)))
-      return true;
-    else if ((attrs.size() == 5) && "_PROCEDURE".equals(attrs.get(1)) && "_FREEFORM".equals(attrs.get(4)))
-      return true;
-    else if ((attrs.size() == 5) && "_PROCEDURE".equals(attrs.get(1)) && "_DB-REQUIRED".equals(attrs.get(4)))
-      return true;
-    else if ((attrs.size() >= 2) && "_FUNCTION".equals(attrs.get(1)))
-      return true;
+    return (isCustom(attrs) || isEditableControl(attrs) || isEditableFunction(attrs) || isEditableProcedure(attrs));
+  }
 
-    return false;
+  private static boolean isEditableProcedure(List<String> attrs) {
+    if ((attrs.size() < 2) || !"_PROCEDURE".equals(attrs.get(1)))
+      return false;
+    return ((attrs.size() == 4)
+        || ((attrs.size() == 5) && ("_FREEFORM".equals(attrs.get(4)) || "_DB-REQUIRED".equals(attrs.get(4)))));
+  }
+
+  private static boolean isEditableFunction(List<String> attrs) {
+    return ((attrs.size() >= 2) && "_FUNCTION".equals(attrs.get(1)));
+  }
+
+  private static boolean isEditableControl(List<String> attrs) {
+    return ((attrs.size() >= 2) && "_CONTROL".equals(attrs.get(1)));
+  }
+
+  private static boolean isCustom(List<String> attrs) {
+    return ((attrs.size() >= 3) && "_CUSTOM".equalsIgnoreCase(attrs.get(1))
+        && ("_DEFINITIONS".equalsIgnoreCase(attrs.get(2)) || "_MAIN-BLOCK".equalsIgnoreCase(attrs.get(2))));
   }
 
   public ProToken getHiddenBefore() {
