@@ -627,6 +627,42 @@ public class ParserTest {
   }
 
   @Test
+  public void testVarStatement13() {
+    ParseUnit unit = new ParseUnit(
+        new ByteArrayInputStream("VAR INT a, b, x = a + b, y = a - b, z = x - y.".getBytes()), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement14() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT a, b. VAR INT[] x = [ a + b, a - b ].".getBytes()),
+        session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+  }
+
+  @Test
+  public void testVarStatement15() {
+    ParseUnit unit = new ParseUnit(
+        new ByteArrayInputStream("USING Progress.Lang.Object. VAR Object x = NEW Object().".getBytes()), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+  }
+
+  @Test
+  public void testVarStatement16() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR DATETIME dtm = DATETIME(TODAY,MTIME).".getBytes()),
+        session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
   public void testDbQualifierSports2000() {
     // Standard schema, lower-case database name
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "dbqualifier01.p"), session);

@@ -1819,7 +1819,7 @@ varStatementInitialValueArray:
   ;
 
 varStatementInitialValueSub:
-    TODAY | NOW | TRUE | FALSE | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL
+    TODAY | NOW | TRUE | FALSE | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL | expression
   ;
 
 deleteStatement:
