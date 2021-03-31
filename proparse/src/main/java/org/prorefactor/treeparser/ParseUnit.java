@@ -118,6 +118,7 @@ public class ParseUnit {
 
   private boolean isClass;
   private boolean isInterface;
+  private boolean isEnum;
   private boolean isAbstract;
   private String className;
 
@@ -329,6 +330,7 @@ public class ParseUnit {
     topNode = (ProgramRootNode) visitor.visit(tree).build(parser.getParserSupport());
     isClass = visitor.isClass();
     isInterface = visitor.isInterface();
+    isEnum = visitor.isEnum();
     isAbstract = visitor.isAbstractClass();
     className = visitor.getClassName();
 
@@ -558,6 +560,10 @@ public class ParseUnit {
 
   public boolean isInterface() {
     return isInterface;
+  }
+
+  public boolean isEnum() {
+    return isEnum;
   }
 
   public boolean isAbstractClass() {

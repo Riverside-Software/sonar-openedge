@@ -987,7 +987,7 @@ classEnd:
   ;
 
 enumStatement:
-    ENUM typeName2 FLAGS? blockColon
+    ENUM tn=typeName2 { support.defineEnum($tn.text); } FLAGS? blockColon
     defEnumStatement+
     enumEnd
     statementEnd
@@ -2459,7 +2459,7 @@ insertStatement:
 
 interfaceStatement:
     INTERFACE name=typeName2 interfaceInherits? blockColon
-    { support.defInterface($name.text); }
+    { support.defineInterface($name.text); }
     classCodeBlock
     interfaceEnd
     statementEnd

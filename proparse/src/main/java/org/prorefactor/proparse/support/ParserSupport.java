@@ -54,6 +54,7 @@ public class ParserSupport {
 
   private boolean schemaTablePriority = false;
   private boolean unitIsInterface = false;
+  private boolean unitIsEnum = false;
   private boolean allowUnknownMethodCalls = true;
 
   private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
@@ -167,9 +168,15 @@ public class ParserSupport {
     unitScope.attachTypeInfo(session.getTypeInfo(className));
   }
 
-  public void defInterface(String name) {
+  public void defineInterface(String name) {
     LOG.trace("defineInterface");
     unitIsInterface = true;
+    className = ClassFinder.dequote(name);
+  }
+
+  public void defineEnum(String name) {
+    LOG.trace("defineEnum");
+    unitIsEnum = true;
     className = ClassFinder.dequote(name);
   }
 
@@ -310,6 +317,10 @@ public class ParserSupport {
    */
   public boolean isInterface() {
     return unitIsInterface;
+  }
+
+  public boolean isEnum() {
+    return unitIsEnum;
   }
 
   public boolean isSchemaTablePriority() {

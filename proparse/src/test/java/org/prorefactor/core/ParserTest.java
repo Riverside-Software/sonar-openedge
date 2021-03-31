@@ -753,4 +753,15 @@ public class ParserTest {
     assertNotNull(rec1.getTableBuffer());
     assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
   }
+
+  @Test
+  public void testEnum() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "enum01.cls"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getSupport().getClassName(), "rssw.enum01");
+    assertTrue(unit.getSupport().isEnum());
+    assertEquals(unit.getClassName(), "rssw.enum01");
+    assertTrue(unit.isEnum());
+  }
 }
