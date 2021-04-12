@@ -324,6 +324,7 @@ inclassStatement:
   |  methodStatement
   |  externalProcedureStatement // Only external procedures are accepted
   |  externalFunctionStatement  // Only FUNCTION ... IN ... are accepted
+  |  onStatement
   ;
 
 pseudoFunction:
