@@ -83,8 +83,8 @@ public class BugFixTest {
   @AfterTest
   public void tearDown() throws IOException {
     PrintWriter writer = new PrintWriter(new File(tempDir, "index.html"));
-    writer.println("<!DOCTYPE html><html><head><meta charset=\"utf-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"http://riverside-software.fr/d3-style.css\" />");
-    writer.println("<script src=\"http://riverside-software.fr/jquery-1.10.2.min.js\"></script><script src=\"http://riverside-software.fr/d3.v3.min.js\"></script>");
+    writer.println("<!DOCTYPE html><html><head><meta charset=\"utf-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"https://dl.rssw.eu/d3-style.css\" />");
+    writer.println("<script src=\"https://dl.rssw.eu/jquery-1.10.2.min.js\"></script><script src=\"https://dl.rssw.eu/d3.v3.min.js\"></script>");
     writer.println("<script>var data= { \"files\": [");
     int zz = 1;
     for (String str : jsonNames) {
@@ -99,7 +99,7 @@ public class BugFixTest {
       writer.println("var json" + zz++ + " = " + str + ";");
     }
     writer.println("</script></head><body><div id=\"wrapper\"><div id=\"left\"></div><div id=\"tree-container\"></div></div>");
-    writer.println("<script src=\"http://riverside-software.fr/dndTreeDebug.js\"></script></body></html>");
+    writer.println("<script src=\"https://dl.rssw.eu/dndTreeDebug.js\"></script></body></html>");
     writer.close();
   }
 
