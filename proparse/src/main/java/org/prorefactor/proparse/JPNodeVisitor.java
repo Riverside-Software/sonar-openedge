@@ -298,6 +298,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitExpressionXor(ExpressionXorContext ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
+  }
+
+  @Override
   public Builder visitExpressionOr(ExpressionOrContext ctx) {
     return createTreeFromSecondNode(ctx).setOperator();
   }

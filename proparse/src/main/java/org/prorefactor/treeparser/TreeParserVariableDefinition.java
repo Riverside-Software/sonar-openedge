@@ -377,6 +377,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void enterExpressionXor(ExpressionXorContext ctx) {
+    enterExpression(ctx);
+  }
+
+  @Override
   public void enterExpressionOr(ExpressionOrContext ctx) {
     enterExpression(ctx);
   }

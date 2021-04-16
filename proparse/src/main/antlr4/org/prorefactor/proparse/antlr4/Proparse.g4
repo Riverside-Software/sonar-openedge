@@ -499,6 +499,7 @@ expression:
   | expression ( EQUAL | EQ | GTORLT | NE | RIGHTANGLE | GTHAN | GTOREQUAL | GE | LEFTANGLE | LTHAN | LTOREQUAL | LE ) expression # expressionComparison
   | expression ( MATCHES | BEGINS | CONTAINS ) expression # expressionStringComparison
   | NOT expression  # expressionNot
+  | expression XOR expression # expressionXor
   | expression AND expression # expressionAnd
   | expression OR expression # expressionOr
   | expressionTerm # expressionExprt
