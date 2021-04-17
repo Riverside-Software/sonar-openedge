@@ -1,0 +1,3 @@
+{ lexer/lexer23.i }
+&GLOBAL-DEFINE DEF1 IF TRUE THEN {&DEF2}.
+{&DEF1}

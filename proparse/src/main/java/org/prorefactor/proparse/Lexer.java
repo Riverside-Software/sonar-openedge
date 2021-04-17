@@ -87,6 +87,7 @@ public class Lexer implements IPreprocessor {
   private int currCol;
   private int currSourceNum;
   private boolean currMacroExpansion;
+  private boolean keepProparseDirective = false;
 
   private StringBuilder currText = new StringBuilder();
   private FilePos prevChar = new FilePos(0, 1, 1, 0);
@@ -997,14 +998,18 @@ public class Lexer implements IPreprocessor {
     String macroType = currText.toString().toLowerCase();
 
     if ("&global-define".startsWith(macroType) && macroType.length() >= 4) {
+      keepProparseDirective = true;
       appendToEOL();
+      keepProparseDirective = false;
       // We have to do the define *before* getting next char.
       macroDefine(Proparse.AMPGLOBALDEFINE);
       getChar();
       return makeToken(ABLNodeType.AMPGLOBALDEFINE);
     }
     if ("&scoped-define".startsWith(macroType) && macroType.length() >= 4) {
+      keepProparseDirective = true;
       appendToEOL();
+      keepProparseDirective = false;
       // We have to do the define *before* getting next char.
       macroDefine(Proparse.AMPSCOPEDDEFINE);
       getChar();
@@ -1415,7 +1420,10 @@ public class Lexer implements IPreprocessor {
             return ppCurrChar;
           else {
             ppMacroReference();
-            if ((ppCurrChar == PROPARSE_DIRECTIVE) || (ppCurrChar == INCLUDE_DIRECTIVE))
+            // Proparse directives are kept as is within GLOB | SCOP define. In this case, ppCurrChar is still a
+            // left curly brace, and input source is switched so that the remaining of the directive is returned
+            // during the next calls to getChar()
+            if ((ppCurrChar == '{') || (ppCurrChar == PROPARSE_DIRECTIVE) || (ppCurrChar == INCLUDE_DIRECTIVE))
               return ppCurrChar;
             // else do another loop
           }
@@ -1500,15 +1508,23 @@ public class Lexer implements IPreprocessor {
     int closingCurly = refTextEnd - 1;
 
     if (refText.toLowerCase().startsWith("{&_proparse_") && prepro.getProparseSettings().getProparseDirectives()) {
-      // Proparse Directive
-      ppCurrChar = PROPARSE_DIRECTIVE;
-      // We strip "{&_proparse_", trailing '}', and leading/trailing whitespace
-      proparseDirectiveText = refText.substring(12, closingCurly).trim();
-      // This will be counted as a source whether picked up here or picked
-      // up as a normal macro ref.
-      ++sourceCounter;
-      prepro.getLstListener().macroRef(refPos.line, refPos.col, "_proparse_");
-      prepro.getLstListener().macroRefEnd();
+      if (keepProparseDirective) { 
+        // We are within a GLOB | SCOP define, so we keep the directive as is
+        ppCurrChar = '{';
+        currentInput = new InputSource(++sourceCounter, refText.substring(1), refPos.file, refPos.line, refPos.col);
+        currentInclude.addInputSource(currentInput);
+        prepro.getLstListener().macroRef(refPos.line, refPos.col, "_proparse_");
+      } else {
+        // Proparse Directive
+        ppCurrChar = PROPARSE_DIRECTIVE;
+        // We strip "{&_proparse_", trailing '}', and leading/trailing whitespace
+        proparseDirectiveText = refText.substring(12, closingCurly).trim();
+        // This will be counted as a source whether picked up here or picked
+        // up as a normal macro ref.
+        ++sourceCounter;
+        prepro.getLstListener().macroRef(refPos.line, refPos.col, "_proparse_");
+        prepro.getLstListener().macroRefEnd();
+      }
     } else if ("{*}".equals(refText)) {
       // {*} -- all arguments
       ppNewMacroRef("*", refPos);

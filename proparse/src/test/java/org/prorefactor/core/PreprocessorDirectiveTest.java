@@ -86,9 +86,9 @@ public class PreprocessorDirectiveTest {
     assertFalse(node2.hasProparseDirective("klm"));
   }
 
-  @Test(expectedExceptions = {ParseCancellationException.class})
+  @Test
   public void test02() {
-    // See issue #341 - Won't fix
+    // Used to throw an exception, not the case anymore...
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor07.p"), session);
     unit.parse();
   }

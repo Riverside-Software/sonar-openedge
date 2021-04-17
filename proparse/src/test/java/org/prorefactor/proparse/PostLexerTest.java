@@ -646,6 +646,44 @@ public class PostLexerTest {
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
   }
 
+  @Test
+  public void test22() {
+    Injector injector = Guice.createInjector(new UnitTestWindowsModule());
+    RefactorSession session = injector.getInstance(RefactorSession.class);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer22.p"), session);
+    TokenSource src = unit.preprocess();
+    ProToken tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.IF);
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.TRUE);
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.THEN);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "prolint-nowarn(use-index)");
+  }
+
+  @Test
+  public void test23() {
+    Injector injector = Guice.createInjector(new UnitTestWindowsModule());
+    RefactorSession session = injector.getInstance(RefactorSession.class);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer23.p"), session);
+    TokenSource src = unit.preprocess();
+    ProToken tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.IF);
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.TRUE);
+    tok = (ProToken) nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.THEN);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
+    assertEquals(tok.getText(), "prolint-nowarn(use-index)");
+  }
+
   /**
    * Utility method for tests, returns next node of given type
    */
