@@ -74,6 +74,7 @@ public class OpenEdgeComponents {
   private final TreeParserRegistrar parserRegistrar = new TreeParserRegistrar();
 
   private boolean initialized = false;
+  private String analytics = "";
 
   public OpenEdgeComponents() {
     this(null, null, null, null);
@@ -182,6 +183,14 @@ public class OpenEdgeComponents {
     }
 
     initialized = true;
+  }
+
+  public void setAnalytics(String analytics) {
+    this.analytics = analytics;
+  }
+
+  public String getAnalytics() {
+    return analytics;
   }
 
   public Map<ActiveRule, OpenEdgeProparseCheck> getProparseRules() {
