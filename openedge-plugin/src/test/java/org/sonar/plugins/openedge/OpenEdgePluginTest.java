@@ -51,7 +51,7 @@ public class OpenEdgePluginTest {
   public void testExtensionsSonarQube() {
     Plugin.Context context = new Plugin.Context(SONARQUBE_RUNTIME);
     new OpenEdgePlugin().define(context);
-    assertEquals(context.getExtensions().size(), 30);
+    assertEquals(context.getExtensions().size(), 29);
   }
 
 }
