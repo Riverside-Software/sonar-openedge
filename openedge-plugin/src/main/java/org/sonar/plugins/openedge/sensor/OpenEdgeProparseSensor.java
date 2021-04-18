@@ -166,8 +166,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     if (settings.skipProparseSensor())
       return;
     settings.init();
-    components.initializeLicense(context);
-    components.initializeChecks(context);
+    components.init(context);
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }

@@ -59,7 +59,7 @@ public class OpenEdgeDBRulesSensor implements Sensor {
   public void execute(SensorContext context) {
     Map<String, Long> ruleTime = new HashMap<>();
     long parseTime = 0L;
-    components.initializeChecks(context);
+    components.init(context);
 
     for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);

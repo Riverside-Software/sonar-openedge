@@ -20,6 +20,7 @@
 package org.sonar.plugins.openedge.api;
 
 import org.sonar.api.SonarProduct;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.server.ServerSide;
 import org.sonarsource.api.sonarlint.SonarLintSide;
@@ -36,6 +37,11 @@ public interface LicenseRegistration {
    * Register set of licenses
    */
   default void register(Registrar registrar) { }
+
+  default void register(Configuration config, Registrar registrar) {
+    // Override this method if you need the Configuration object
+    register(registrar);
+  }
 
   interface Registrar {
     /**
