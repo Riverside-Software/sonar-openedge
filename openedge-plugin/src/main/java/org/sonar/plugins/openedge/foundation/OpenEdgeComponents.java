@@ -21,9 +21,6 @@ package org.sonar.plugins.openedge.foundation;
 
 import java.lang.reflect.Field;
 import java.text.DateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.prorefactor.proparse.antlr4.ProparseListener;
 import org.sonar.api.SonarProduct;
@@ -140,21 +138,8 @@ public class OpenEdgeComponents {
   public void init(SensorContext context) {
     if (initialized)
       return;
-    initializeLicense(context);
     initializeChecks(context);
     initialized = true;
-  }
-
-  private void initializeLicense(SensorContext context) {
-    String permId = (context.runtime().getProduct() == SonarProduct.SONARLINT ? "sonarlint-" : "") + getServerId();
-    for (License entry : licenseRegistrar.getLicenses()) {
-      if (permId.equals(entry.getPermanentId())) {
-        LOG.info("Repository '{}' associated with {} license permanent ID '{}' - Customer '{}' - Expiration date {}",
-            entry.getRepositoryName(), entry.getType().toString(), entry.getPermanentId(), entry.getCustomerName(),
-            LocalDateTime.ofEpochSecond(entry.getExpirationDate() / 1000, 0, ZoneOffset.UTC).format(
-                DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-      }
-    }
   }
 
   private void initializeChecks(SensorContext context) {
@@ -277,13 +262,7 @@ public class OpenEdgeComponents {
   }
 
   public String getServerId() {
-    if (server == null)
-      return "";
-
-    String str = server.getId();
-    int dashIndex = str.indexOf('-');
-
-    return (dashIndex == 8) && (str.length() >= 20) ? str.substring(dashIndex + 1) : str;
+    return server == null ? "" : server.getId();
   }
 
   private static class LicenseRegistrar implements LicenseRegistration.Registrar {
@@ -329,17 +308,27 @@ public class OpenEdgeComponents {
     private License getLicense(SonarProduct product, String permId, String repoName) {
       if ((permId == null) || (repoName == null))
         return null;
-      for (License lic : licenses) {
-        if (((lic.getType() == LicenseType.COMMERCIAL) || (lic.getType() == LicenseType.PARTNER))
-            && (lic.getProduct() == product) && repoName.equals(lic.getRepositoryName())
-            && permId.equals(lic.getPermanentId()))
-          return lic;
-      }
-      for (License lic : licenses) {
-        if ((lic.getType() == LicenseType.EVALUATION) && (lic.getProduct() == product)
-            && repoName.equals(lic.getRepositoryName()))
-          return lic;
-      }
+      // TODO Remove this code when old licenses are not used anymore
+      String miniPermId = (permId.indexOf('-') == 8) && (permId.length() >= 20)
+          ? permId.substring(permId.indexOf('-') + 1) : permId;
+
+      Optional<License> srch = licenses.stream() //
+        .filter(lic -> (lic.getType() == LicenseType.COMMERCIAL) || (lic.getType() == LicenseType.PARTNER)) //
+        .filter(lic -> lic.getProduct() == product) //
+        .filter(lic -> repoName.equals(lic.getRepositoryName())) //
+        .filter(lic -> (lic.getVersion() >= 3 && permId.equals(lic.getPermanentId()))
+            || miniPermId.equals(lic.getPermanentId())).findFirst();
+      if (srch.isPresent())
+        return srch.get();
+      srch = licenses.stream() //
+        .filter(lic -> lic.getType() == LicenseType.EVALUATION) //
+        .filter(lic -> lic.getProduct() == product) //
+        .filter(lic -> repoName.equals(lic.getRepositoryName())) //
+        .filter(lic -> (lic.getVersion() >= 3 && permId.equals(lic.getPermanentId()))
+            || miniPermId.equals(lic.getPermanentId())).findFirst();
+      if (srch.isPresent())
+        return srch.get();
+
       return null;
     }
   }
