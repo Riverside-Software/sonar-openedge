@@ -290,20 +290,6 @@ public class OpenEdgeComponents {
     private final Collection<License> licenses = new ArrayList<>();
 
     @Override
-    public void registerLicense(String permanentId, String customerName, String salt, String repoName,
-        LicenseRegistration.LicenseType type, byte[] signature, long expirationDate) {
-      registerLicense(1, permanentId.replace("sonarlint-", ""),
-          permanentId.startsWith("sonarlint") ? SonarProduct.SONARLINT : SonarProduct.SONARQUBE, customerName, salt,
-          repoName, type, signature, expirationDate, 0);
-    }
-
-    @Override
-    public void registerLicense(String permanentId, SonarProduct product, String customerName, String salt,
-        String repoName, LicenseRegistration.LicenseType type, byte[] signature, long expirationDate) {
-      registerLicense(1, permanentId, product, customerName, salt, repoName, type, signature, expirationDate, 0);
-    }
-
-    @Override
     public void registerLicense(int version, String permanentId, SonarProduct product, String customerName, String salt,
         String repoName, LicenseRegistration.LicenseType type, byte[] signature, long expirationDate, long lines) {
       if (Strings.isNullOrEmpty(repoName))
@@ -313,8 +299,9 @@ public class OpenEdgeComponents {
           DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(expirationDate)));
       // Only one license per product/ repository / permID
       License existingLic = hasRegisteredLicense(product, repoName, permanentId);
-      License newLic = new License(version, permanentId, product, customerName, salt, repoName, type, signature,
-          expirationDate, lines);
+      License newLic = new License.Builder().setVersion(version).setPermanentId(permanentId).setProduct(
+          product).setCustomerName(customerName).setSalt(salt).setRepositoryName(repoName).setType(type).setSignature(
+              signature).setExpirationDate(expirationDate).setLines(lines).build();
       if (existingLic == null) {
         licenses.add(newLic);
       } else if (existingLic.getExpirationDate() < newLic.getExpirationDate()) {
