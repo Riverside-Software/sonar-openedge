@@ -73,10 +73,6 @@ public class OpenEdgeComponents {
   private final LicenseRegistrar licenseRegistrar = new LicenseRegistrar();
   private final TreeParserRegistrar parserRegistrar = new TreeParserRegistrar();
 
-  private final List<CheckRegistration> checkRegs = new ArrayList<>();
-  private final List<LicenseRegistration> licenceRegs = new ArrayList<>();
-  private final List<TreeParserRegistration> tpRegs = new ArrayList<>();
-
   private boolean initialized = false;
   private String analytics = "";
 
@@ -112,12 +108,21 @@ public class OpenEdgeComponents {
   public OpenEdgeComponents(Server server, CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars,
       TreeParserRegistration[] tpRegistrars) {
     this.server = server;
-    if (checkRegistrars != null)
-      Collections.addAll(checkRegs, checkRegistrars);
-    if (licRegistrars != null)
-      Collections.addAll(licenceRegs, licRegistrars);
-    if (tpRegistrars != null)
-      Collections.addAll(tpRegs, tpRegistrars);
+    if (checkRegistrars != null) {
+      for (CheckRegistration registration : checkRegistrars) {
+        registration.register(checkRegistrar);
+      }
+    }
+    if (licRegistrars != null) {
+      for (LicenseRegistration registration : licRegistrars) {
+        registration.register(licenseRegistrar);
+      }
+    }
+    if (tpRegistrars != null) {
+      for (TreeParserRegistration registration : tpRegistrars) {
+        registration.register(parserRegistrar);
+      }
+    }
   }
 
   public Iterable<Class<? extends ProparseListener>> getProparseListeners() {
@@ -135,15 +140,6 @@ public class OpenEdgeComponents {
   public void init(SensorContext context) {
     if (initialized)
       return;
-    for (CheckRegistration registration : checkRegs) {
-      registration.register(checkRegistrar);
-    }
-    for (LicenseRegistration registration : licenceRegs) {
-      registration.register(context.config(), licenseRegistrar);
-    }
-    for (TreeParserRegistration registration : tpRegs) {
-      registration.register(parserRegistrar);
-    }
     initializeLicense(context);
     initializeChecks(context);
     initialized = true;
