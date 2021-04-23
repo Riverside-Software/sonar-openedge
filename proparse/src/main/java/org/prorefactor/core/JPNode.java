@@ -217,7 +217,7 @@ public class JPNode {
     return null;
   }
 
-  /** 
+  /**
    * @return Last child of the last child of the...
    */
   public JPNode getLastDescendant() {
@@ -228,12 +228,21 @@ public class JPNode {
 
   /**
    * @return First child if there is one, otherwise next sibling
+   * @deprecated Use JPNode#getNextNode()
    */
+  @Deprecated
   public JPNode nextNode() {
+    return getNextNode();
+  }
+
+  /**
+   * @return First child if there is one, otherwise next sibling
+   */
+  public JPNode getNextNode() {
     return children == null || children.isEmpty() ? getNextSibling() : children.get(0);
   }
 
-  /** 
+  /**
    * @return Previous sibling if there is one, otherwise parent
    */
   public JPNode getPreviousNode() {
