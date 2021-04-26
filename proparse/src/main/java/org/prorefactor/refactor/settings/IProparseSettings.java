@@ -34,6 +34,7 @@ public interface IProparseSettings {
   Integer getProcessArchitecture();
   boolean getSkipXCode();
 
+  char[] getTokenStartChars();
   boolean allowAntlrTokenInsertion();
   boolean allowAntlrTokenDeletion();
   boolean allowAntlrRecover();
