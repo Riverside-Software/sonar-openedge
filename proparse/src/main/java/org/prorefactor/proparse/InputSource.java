@@ -68,10 +68,6 @@ public class InputSource {
     this.nextCol = col;
   }
 
-  public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
-    this(sourceNum, file, charset, fileIndex, false, skipXCode);
-  }
-
   public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean skipXCode, boolean isPrimary) throws IOException {
     LOGGER.trace("New InputSource object for file '{}'", file.getName());
     this.sourceNum = sourceNum;

@@ -142,9 +142,10 @@ public class ABLLexerTest {
       nextMessageToken(lexer, true, false);
       nextMessageToken(lexer, true, true);
       nextMessageToken(lexer, true, false);
-      nextMessageToken(lexer, true, false);
+      nextMessageToken(lexer, true, true);
       nextMessageToken(lexer, true, true);
       nextMessageToken(lexer, true, false);
+      nextMessageToken(lexer, true, true);
       nextMessageToken(lexer, true, true);
       nextMessageToken(lexer, true, true);
       nextMessageToken(lexer, true, true);
@@ -411,9 +412,32 @@ public class ABLLexerTest {
     assertTrue(tok.hasNestedComments());
   }
 
+  @Test
+  public void testTilde() {
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("IF TRUE // W1\\rW2 ~\n THEN MESSAGE \"XXX\".\n ELSE MESSAGE \"YYY\".".getBytes()), "file.txt");
+    ProToken tok = firstToken(lexer, ABLNodeType.COMMENT);
+    assertNotNull(tok);
+    // Backslash and tildes are not escaped
+    assertEquals(tok.getText(), "// W1\\rW2 ~");
+    tok = (ProToken) lexer.nextToken();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
+    tok = (ProToken) lexer.nextToken();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.THEN);
+  }
+
   // *********
   // Utilities
   // *********
+
+  private ProToken firstToken(TokenSource lexer, ABLNodeType type) {
+    ProToken tok = (ProToken) lexer.nextToken();
+    while ((tok != null) && (tok.getNodeType() != type)) {
+      tok = (ProToken) lexer.nextToken();
+    }
+    return tok;
+  }
 
   private void nextMessageToken(TokenSource lexer, boolean suspend, boolean editable) {
     ProToken tok = (ProToken) lexer.nextToken();

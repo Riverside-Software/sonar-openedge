@@ -377,6 +377,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void enterExpressionXor(ExpressionXorContext ctx) {
+    enterExpression(ctx);
+  }
+
+  @Override
   public void enterExpressionOr(ExpressionOrContext ctx) {
     enterExpression(ctx);
   }
@@ -2042,8 +2047,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   private void defineInitialValue(Variable var, VarStatementInitialValueContext ctx) {
     if (ctx.varStatementInitialValueArray() != null) {
       // Just set initial value to Array, no matter what the values are
+      var.noteReference(support.getNode(ctx.varStatementInitialValueArray()), ContextQualifier.UPDATING);
       var.setInitialValue(Variable.CONSTANT_ARRAY);
-    } else {
+    } else if (ctx.varStatementInitialValueSub() != null) {
       VarStatementInitialValueSubContext ctx2 = ctx.varStatementInitialValueSub();
       if (ctx2.TODAY() != null) {
         var.setInitialValue(Variable.CONSTANT_TODAY);
@@ -2071,6 +2077,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
         }
       } else if (ctx2.LEXDATE() != null) {
         var.setInitialValue(new Date());
+      } else if (ctx2.expression() != null) {
+        var.setInitialValue(Variable.CONSTANT_EXPRESSION);
+        var.noteReference(support.getNode(ctx2.expression()), ContextQualifier.UPDATING);
       } else {
         var.setInitialValue(Variable.CONSTANT_OTHER);
       }

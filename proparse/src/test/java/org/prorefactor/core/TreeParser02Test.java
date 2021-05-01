@@ -16,11 +16,13 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
-import org.apache.commons.io.FileUtils;
 import org.prorefactor.core.util.AttributedWriter;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
@@ -304,7 +306,26 @@ public class TreeParser02Test {
   private void genericTest(String name) throws IOException {
     AttributedWriter writer = new AttributedWriter();
     writer.write(SOURCEDIR + name, new File(TARGETDIR + name), session);
-    assertTrue(FileUtils.contentEquals(new File(EXPECTDIR + name), new File(TARGETDIR + name)));
+    try (FileReader r1 = new FileReader(EXPECTDIR + name);
+        FileReader r2 = new FileReader(TARGETDIR + name);
+        BufferedReader br1 = new BufferedReader(r1);
+        BufferedReader br2 = new BufferedReader(r2)) {
+      assertTrue(contentEquals(br1, br2));
+    } catch (IOException caught) {
+      fail("Unable to find output file", caught);
+    }
   }
 
+  protected static boolean contentEquals(BufferedReader r1, BufferedReader r2) throws IOException {
+    String s1 = r1.readLine();
+    String s2 = r2.readLine();
+    while (s1 != null) {
+      if (!s1.equals(s2))
+        return false;
+      s1 = r1.readLine();
+      s2 = r2.readLine();
+    }
+
+    return true;
+  }
 }

@@ -79,7 +79,7 @@ public class NameDotTokenFilterTest {
     assertNotNull(tok);
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
   }
-  
+
   @Test
   public void testNameDot01() {
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("using Riverside.Lang.Object.".getBytes()), "file.txt");
@@ -171,6 +171,25 @@ public class NameDotTokenFilterTest {
     tok = (ProToken) filter.nextToken();
     assertNotNull(tok);
     assertEquals(tok.getNodeType(), ABLNodeType.EOF_ANTLR4);
+  }
+
+  @Test
+  public void testNameDot05() {
+    // Still a NAMEDOT if there's a tilde before the dot...
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("~.Lang.Object.".getBytes()), "file.txt");
+    TokenSource filter = new NameDotTokenFilter(lexer.getTokenSource());
+
+    ProToken tok = (ProToken) filter.nextToken();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.NAMEDOT);
+    assertEquals(tok.getText(), ".");
+    tok = (ProToken) filter.nextToken();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "Lang.Object");
+    tok = (ProToken) filter.nextToken();
+    assertNotNull(tok);
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
   }
 
   @Test

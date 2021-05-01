@@ -19,7 +19,6 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,8 +27,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -169,8 +166,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     if (settings.skipProparseSensor())
       return;
     settings.init();
-    components.initializeLicense(context);
-    components.initializeChecks(context);
+    components.init(context);
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
@@ -203,7 +199,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
     }
 
-    executeAnalytics(context);
+    computeAnalytics(context);
     logStatistics();
     generateProparseDebugIndex();
   }
@@ -443,35 +439,12 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
   }
 
-  private void executeAnalytics(SensorContext context) {
-    if (!settings.useAnalytics())
-      return;
-
-    StringBuilder data = new StringBuilder(String.format( // NOSONAR Influx requires LF
-        "proparse,product=%1$s,sid=%2$s files=%3$d,failures=%4$d,parseTime=%5$d,maxParseTime=%6$d,version=\"%7$s\",ncloc=%8$d,oeversion=\"%9$s\"\n",
-        context.runtime().getProduct().toString().toLowerCase(), settings.getServerId(), numFiles, numFailures,
-        parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs,
+  private void computeAnalytics(SensorContext context) {
+    // Store value in OpenEdgeComponents object
+    components.setAnalytics(String.format(
+        "files=%1$d,failures=%2$d,parseTime=%3$d,maxParseTime=%4$d,version=\"%5$s\",ncloc=%6$d,oeversion=\"%7$s\"",
+        numFiles, numFailures, parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs,
         settings.getOpenEdgePluginVersion()));
-    for (Entry<String, Long> entry : ruleTime.entrySet()) {
-      data.append(String.format("rule,product=%1$s,sid=%2$s,rulename=%3$s ruleTime=%4$d\n", // NOSONAR
-          context.runtime().getProduct().toString().toLowerCase(), settings.getServerId(), entry.getKey(),
-          entry.getValue()));
-    }
-
-    try {
-      final URL url = new URL("http://sonar-analytics.rssw.eu/write?db=sonar");
-      HttpURLConnection connx = (HttpURLConnection) url.openConnection();
-      connx.setRequestMethod("POST");
-      connx.setConnectTimeout(2000);
-      connx.setDoOutput(true);
-      DataOutputStream wr = new DataOutputStream(connx.getOutputStream());
-      wr.writeBytes(data.toString());
-      wr.flush();
-      wr.close();
-      connx.getResponseCode();
-    } catch (IOException uncaught) {
-      LOG.debug("Unable to send analytics: {}", uncaught.getMessage());
-    }
   }
 
   private void logStatistics() {

@@ -87,6 +87,7 @@ public class Lexer implements IPreprocessor {
   private int currCol;
   private int currSourceNum;
   private boolean currMacroExpansion;
+  private boolean keepProparseDirective = false;
 
   private StringBuilder currText = new StringBuilder();
   private FilePos prevChar = new FilePos(0, 1, 1, 0);
@@ -113,6 +114,7 @@ public class Lexer implements IPreprocessor {
 
   // Are we in the middle of a comment?
   private boolean doingComment;
+  private boolean doingSingleLineComment;
   private boolean nestedComment;
   // Is the current '.' a name dot? (i.e. not followed by whitespace) */
   private boolean nameDot;
@@ -463,11 +465,8 @@ public class Lexer implements IPreprocessor {
   ProToken comment() {
     LOGGER.trace("Entering comment()");
 
-    // Escapes in comments are processed because you can end a comment
-    // with something dumb like: ~*~/
-    // We preserve that text.
-    // Note that macros are *not* expanded inside comments.
-    // (See the preprocessor source)
+    // Escapes in comments are processed because you can end a comment with something dumb like: ~*~/
+    // We preserve that text. Note that macros are *not* expanded inside comments.
     doingComment = true;
     nestedComment = false;
     append(); // currChar=='*'
@@ -501,10 +500,10 @@ public class Lexer implements IPreprocessor {
   ProToken singleLineComment() {
     LOGGER.trace("Entering singleLineComment()");
 
-    // Single line comments are treated just like regular comments,
-    // everything till end of line is considered comment - no escape
-    // character to look after
+    // Single line comments are treated just like regular comments, everything till end of line is considered comment -
+    // no escape character to look after
     doingComment = true;
+    doingSingleLineComment = true;
     nestedComment = false;
     append(); // currChar=='/'
 
@@ -512,6 +511,7 @@ public class Lexer implements IPreprocessor {
       getChar();
       if ((currInt == Token.EOF) || (!escapeCurrent && (currChar == '\r' || currChar == '\n'))) {
         doingComment = false;
+        doingSingleLineComment = false;
         return makeToken(ABLNodeType.COMMENT);
       } else {
         unEscapedAppend();
@@ -998,14 +998,18 @@ public class Lexer implements IPreprocessor {
     String macroType = currText.toString().toLowerCase();
 
     if ("&global-define".startsWith(macroType) && macroType.length() >= 4) {
+      keepProparseDirective = true;
       appendToEOL();
+      keepProparseDirective = false;
       // We have to do the define *before* getting next char.
       macroDefine(Proparse.AMPGLOBALDEFINE);
       getChar();
       return makeToken(ABLNodeType.AMPGLOBALDEFINE);
     }
     if ("&scoped-define".startsWith(macroType) && macroType.length() >= 4) {
+      keepProparseDirective = true;
       appendToEOL();
+      keepProparseDirective = false;
       // We have to do the define *before* getting next char.
       macroDefine(Proparse.AMPSCOPEDDEFINE);
       getChar();
@@ -1246,8 +1250,7 @@ public class Lexer implements IPreprocessor {
    * We keep a record of discarded escape characters. This is in case the client wants to fetch those and use them.
    */
   private int escape() {
-    // We may have multiple contiguous discarded characters
-    // or a new escape sequence.
+    // We may have multiple contiguous discarded characters or a new escape sequence.
     if (wasEscape)
       escapeText += (char) ppCurrChar;
     else {
@@ -1394,12 +1397,16 @@ public class Lexer implements IPreprocessor {
         ppGetRawChar();
       switch (ppCurrChar) {
         case '\\':
-        case '~': {
-          // Escapes are *always* processed, even inside strings and comments.
+        case '~':
+          // Backlash is an escape character only on Windows. A switch can turn off this behavior
           if ((ppCurrChar == '\\') && (prepro.getProparseSettings().getOpSys() == OperatingSystem.WINDOWS)
               && !prepro.getProparseSettings().useBackslashAsEscape()) {
             return ppCurrChar;
           }
+          // No escape character in single line comments
+          if (doingSingleLineComment)
+            return ppCurrChar;
+          // Escapes are *always* processed, even inside strings and comments.
           int retChar = escape();
           if (retChar == '.')
             checkForNameDot();
@@ -1407,14 +1414,16 @@ public class Lexer implements IPreprocessor {
             return retChar;
           // else do another loop
           break;
-        }
         case '{':
           // Macros are processed inside strings, but not inside comments.
           if (doingComment)
             return ppCurrChar;
           else {
             ppMacroReference();
-            if ((ppCurrChar == PROPARSE_DIRECTIVE) || (ppCurrChar == INCLUDE_DIRECTIVE))
+            // Proparse directives are kept as is within GLOB | SCOP define. In this case, ppCurrChar is still a
+            // left curly brace, and input source is switched so that the remaining of the directive is returned
+            // during the next calls to getChar()
+            if ((ppCurrChar == '{') || (ppCurrChar == PROPARSE_DIRECTIVE) || (ppCurrChar == INCLUDE_DIRECTIVE))
               return ppCurrChar;
             // else do another loop
           }
@@ -1499,15 +1508,23 @@ public class Lexer implements IPreprocessor {
     int closingCurly = refTextEnd - 1;
 
     if (refText.toLowerCase().startsWith("{&_proparse_") && prepro.getProparseSettings().getProparseDirectives()) {
-      // Proparse Directive
-      ppCurrChar = PROPARSE_DIRECTIVE;
-      // We strip "{&_proparse_", trailing '}', and leading/trailing whitespace
-      proparseDirectiveText = refText.substring(12, closingCurly).trim();
-      // This will be counted as a source whether picked up here or picked
-      // up as a normal macro ref.
-      ++sourceCounter;
-      prepro.getLstListener().macroRef(refPos.line, refPos.col, "_proparse_");
-      prepro.getLstListener().macroRefEnd();
+      if (keepProparseDirective) { 
+        // We are within a GLOB | SCOP define, so we keep the directive as is
+        ppCurrChar = '{';
+        currentInput = new InputSource(++sourceCounter, refText.substring(1), refPos.file, refPos.line, refPos.col);
+        currentInclude.addInputSource(currentInput);
+        prepro.getLstListener().macroRef(refPos.line, refPos.col, "_proparse_");
+      } else {
+        // Proparse Directive
+        ppCurrChar = PROPARSE_DIRECTIVE;
+        // We strip "{&_proparse_", trailing '}', and leading/trailing whitespace
+        proparseDirectiveText = refText.substring(12, closingCurly).trim();
+        // This will be counted as a source whether picked up here or picked
+        // up as a normal macro ref.
+        ++sourceCounter;
+        prepro.getLstListener().macroRef(refPos.line, refPos.col, "_proparse_");
+        prepro.getLstListener().macroRefEnd();
+      }
     } else if ("{*}".equals(refText)) {
       // {*} -- all arguments
       ppNewMacroRef("*", refPos);

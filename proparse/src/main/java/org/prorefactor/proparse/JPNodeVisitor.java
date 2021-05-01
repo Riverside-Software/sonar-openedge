@@ -36,6 +36,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   private boolean isClass;
   private boolean isInterface;
+  private boolean isEnum;
   private boolean isAbstract;
   private String className;
 
@@ -50,6 +51,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   public boolean isInterface() {
     return isInterface;
+  }
+
+  public boolean isEnum() {
+    return isEnum;
   }
 
   public boolean isAbstractClass() {
@@ -289,6 +294,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExpressionAnd(ExpressionAndContext ctx) {
+    return createTreeFromSecondNode(ctx).setOperator();
+  }
+
+  @Override
+  public Builder visitExpressionXor(ExpressionXorContext ctx) {
     return createTreeFromSecondNode(ctx).setOperator();
   }
 
@@ -741,6 +751,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitEnumStatement(EnumStatementContext ctx) {
+    isEnum = true;
+    className = ctx.tn.getText();
     return createStatementTreeFromFirstNode(ctx);
   }
 

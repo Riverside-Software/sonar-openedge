@@ -16,11 +16,13 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
-import org.apache.commons.io.FileUtils;
 import org.prorefactor.core.util.AttributedWriter;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
@@ -43,7 +45,15 @@ public class TreeParser01Test {
 
     AttributedWriter writer = new AttributedWriter();
     writer.write(inName, outFile, session);
-    assertTrue(FileUtils.contentEquals(new File(expectName), outFile));
+    
+    try (FileReader r1 = new FileReader(expectName);
+        FileReader r2 = new FileReader(outFile);
+        BufferedReader br1 = new BufferedReader(r1);
+        BufferedReader br2 = new BufferedReader(r2)) {
+      assertTrue(TreeParser02Test.contentEquals(br1, br2));
+    } catch (IOException caught) {
+      fail("Unable to find output file", caught);
+    }
   }
 
 }

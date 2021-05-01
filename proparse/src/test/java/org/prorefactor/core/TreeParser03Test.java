@@ -836,6 +836,156 @@ public class TreeParser03Test {
   }
 
   @Test
+  public void testVarStatement13() {
+    ParseUnit unit = new ParseUnit(
+        new ByteArrayInputStream("VAR INT a, b, x = a + b, y = a - b, z = x - y.".getBytes()), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 5);
+    Variable varA = null;
+    Variable varB = null;
+    Variable varX = null;
+    Variable varY = null;
+    Variable varZ = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("a".equals(var.getName()))
+        varA = var;
+      else if ("b".equals(var.getName()))
+        varB = var;
+      else if ("x".equals(var.getName()))
+        varX = var;
+      else if ("y".equals(var.getName()))
+        varY = var;
+      else if ("z".equals(var.getName()))
+        varZ = var;
+    }
+    assertNotNull(varA);
+    assertEquals(varA.getDataType(), DataType.INTEGER);
+    assertEquals(varA.getExtent(), -1);
+    assertEquals(varA.getInitialValue(), null);
+    assertEquals(varA.getNumReads(), 2);
+    assertEquals(varA.getNumWrites(), 0);
+
+    assertNotNull(varB);
+    assertEquals(varB.getDataType(), DataType.INTEGER);
+    assertEquals(varB.getExtent(), -1);
+    assertEquals(varB.getInitialValue(), null);
+    assertEquals(varB.getNumReads(), 2);
+    assertEquals(varB.getNumWrites(), 0);
+
+    assertNotNull(varX);
+    assertEquals(varX.getDataType(), DataType.INTEGER);
+    assertEquals(varX.getExtent(), -1);
+    assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
+    assertEquals(varX.getNumReads(), 1);
+    assertEquals(varX.getNumWrites(), 1);
+
+    assertNotNull(varY);
+    assertEquals(varY.getDataType(), DataType.INTEGER);
+    assertEquals(varY.getExtent(), -1);
+    assertEquals(varY.getInitialValue(), Variable.CONSTANT_EXPRESSION);
+    assertEquals(varY.getNumReads(), 1);
+    assertEquals(varY.getNumWrites(), 1);
+
+    assertNotNull(varZ);
+    assertEquals(varZ.getDataType(), DataType.INTEGER);
+    assertEquals(varZ.getExtent(), -1);
+    assertEquals(varZ.getInitialValue(), Variable.CONSTANT_EXPRESSION);
+    assertEquals(varZ.getNumWrites(), 1);
+  }
+
+  @Test
+  public void testVarStatement14() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT a, b. VAR INT[] x = [ a + b, a - b ].".getBytes()),
+        session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 3);
+    Variable varA = null;
+    Variable varB = null;
+    Variable varX = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("a".equals(var.getName()))
+        varA = var;
+      else if ("b".equals(var.getName()))
+        varB = var;
+      else if ("x".equals(var.getName()))
+        varX = var;
+    }
+    assertNotNull(varA);
+    assertEquals(varA.getDataType(), DataType.INTEGER);
+    assertEquals(varA.getExtent(), -1);
+    assertEquals(varA.getInitialValue(), null);
+    assertEquals(varA.getNumReads(), 2);
+    assertEquals(varA.getNumWrites(), 0);
+
+    assertNotNull(varB);
+    assertEquals(varB.getDataType(), DataType.INTEGER);
+    assertEquals(varB.getExtent(), -1);
+    assertEquals(varB.getInitialValue(), null);
+    assertEquals(varB.getNumReads(), 2);
+    assertEquals(varB.getNumWrites(), 0);
+
+    assertNotNull(varX);
+    assertEquals(varX.getDataType(), DataType.INTEGER);
+    assertEquals(varX.getExtent(), 0);
+    assertEquals(varX.getInitialValue(), Variable.CONSTANT_ARRAY);
+    assertEquals(varX.getNumReads(), 0);
+    assertEquals(varX.getNumWrites(), 1);
+  }
+
+  @Test
+  public void testVarStatement15() {
+    ParseUnit unit = new ParseUnit(
+        new ByteArrayInputStream("USING Progress.Lang.Object. VAR Object x = NEW Object().".getBytes()), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable varX = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("x".equals(var.getName()))
+        varX = var;
+
+      assertNotNull(varX);
+      assertEquals(varX.getDataType(), DataType.CLASS);
+      assertEquals(varX.getClassName(), "Progress.Lang.Object");
+      assertEquals(varX.getExtent(), -1);
+      assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
+      assertEquals(varX.getNumReads(), 0);
+      assertEquals(varX.getNumWrites(), 1);
+    }
+  }
+
+  @Test
+  public void testVarStatement16() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR DATETIME dtm = DATETIME(TODAY,MTIME).".getBytes()),
+        session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable varX = null;
+    for (Variable var : unit.getRootScope().getVariables()) {
+      if ("dtm".equals(var.getName()))
+        varX = var;
+
+      assertNotNull(varX);
+      assertEquals(varX.getDataType(), DataType.DATETIME);
+      assertEquals(varX.getExtent(), -1);
+      assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
+      assertEquals(varX.getNumReads(), 0);
+      assertEquals(varX.getNumWrites(), 1);
+    }
+  }
+
+  @Test
   public void testShorthandOperator01() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT i1. ASSIGN i1 += 1.".getBytes()), session);
     unit.treeParser01();

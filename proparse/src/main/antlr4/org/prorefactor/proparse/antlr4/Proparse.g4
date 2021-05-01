@@ -324,6 +324,7 @@ inclassStatement:
   |  methodStatement
   |  externalProcedureStatement // Only external procedures are accepted
   |  externalFunctionStatement  // Only FUNCTION ... IN ... are accepted
+  |  onStatement
   ;
 
 pseudoFunction:
@@ -498,6 +499,7 @@ expression:
   | expression ( EQUAL | EQ | GTORLT | NE | RIGHTANGLE | GTHAN | GTOREQUAL | GE | LEFTANGLE | LTHAN | LTOREQUAL | LE ) expression # expressionComparison
   | expression ( MATCHES | BEGINS | CONTAINS ) expression # expressionStringComparison
   | NOT expression  # expressionNot
+  | expression XOR expression # expressionXor
   | expression AND expression # expressionAnd
   | expression OR expression # expressionOr
   | expressionTerm # expressionExprt
@@ -987,7 +989,7 @@ classEnd:
   ;
 
 enumStatement:
-    ENUM typeName2 FLAGS? blockColon
+    ENUM tn=typeName2 { support.defineEnum($tn.text); } FLAGS? blockColon
     defEnumStatement+
     enumEnd
     statementEnd
@@ -1819,7 +1821,7 @@ varStatementInitialValueArray:
   ;
 
 varStatementInitialValueSub:
-    TODAY | NOW | TRUE | FALSE | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL
+    TODAY | NOW | TRUE | FALSE | YES | NO | UNKNOWNVALUE | QSTRING | LEXDATE | NUMBER | NULL | expression
   ;
 
 deleteStatement:
@@ -2459,7 +2461,7 @@ insertStatement:
 
 interfaceStatement:
     INTERFACE name=typeName2 interfaceInherits? blockColon
-    { support.defInterface($name.text); }
+    { support.defineInterface($name.text); }
     classCodeBlock
     interfaceEnd
     statementEnd

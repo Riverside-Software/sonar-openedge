@@ -558,15 +558,6 @@ public class OpenEdgeSettings {
     return this.oePluginVersion;
   }
 
-  public String getServerId() {
-    if (server == null)
-      return "";
-    String str = server.getId();
-    int dashIndex = str.indexOf('-');
-
-    return (dashIndex == 8) && (str.length() >= 20) ? str.substring(dashIndex + 1) : str;
-  }
-
   public String getPropathAsString() {
     return Joiner.on(',').skipNulls().join(propathFull);
   }

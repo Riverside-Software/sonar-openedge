@@ -305,6 +305,15 @@ public class ParserTest {
   }
 
   @Test
+  public void testTriggerInClass() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "TriggerInClass.cls"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.METHOD).size(), 1);
+  }
+
+  @Test
   public void testCreateWidgetPool() {
     // No widget-pool table, statement is about creating a widget-pool
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("create widget-pool. message 'hello'.".getBytes()), "<unnamed>", session);
@@ -395,18 +404,21 @@ public class ParserTest {
   }
 
   @Test
-  public void testVeryLongMaxK01() {
+  public void testShortMaxK01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "maxk.p"), session);
     unit.enableProfiler();
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     ParseInfo info = unit.getParseInfo();
 
-    // Not really a unit test, but if max_k is less then 450, then the grammar rules have changed (in a good way)
+    // Once upon a time, that was a test to see if there were grammar improvements on some specific syntax
+    // MaxK is the maximum number of lookahead tokens required to decide between two rules. The shortest the number, the
+    // fastest the parser. An unrelated change on April '21 changed a large maxK to a very small value. Cause is
+    // unknown and probably related to ANTLR4 internals.
     Optional<DecisionInfo> decision = Arrays.stream(info.getDecisionInfo()).max(
         (d1, d2) -> Long.compare(d1.SLL_MaxLook, d2.SLL_MaxLook));
     assertTrue(decision.isPresent());
-    assertTrue(decision.get().SLL_MaxLook > 90, "MaxK: " + decision.get().SLL_MaxLook + " less than threshold");
+    assertTrue(decision.get().SLL_MaxLook < 20, "MaxK: " + decision.get().SLL_MaxLook + " less than threshold");
   }
 
   @Test
@@ -627,6 +639,42 @@ public class ParserTest {
   }
 
   @Test
+  public void testVarStatement13() {
+    ParseUnit unit = new ParseUnit(
+        new ByteArrayInputStream("VAR INT a, b, x = a + b, y = a - b, z = x - y.".getBytes()), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
+  public void testVarStatement14() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT a, b. VAR INT[] x = [ a + b, a - b ].".getBytes()),
+        session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+  }
+
+  @Test
+  public void testVarStatement15() {
+    ParseUnit unit = new ParseUnit(
+        new ByteArrayInputStream("USING Progress.Lang.Object. VAR Object x = NEW Object().".getBytes()), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+  }
+
+  @Test
+  public void testVarStatement16() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR DATETIME dtm = DATETIME(TODAY,MTIME).".getBytes()),
+        session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
+  @Test
   public void testDbQualifierSports2000() {
     // Standard schema, lower-case database name
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "dbqualifier01.p"), session);
@@ -716,5 +764,16 @@ public class ParserTest {
     rec1 = (RecordNameNode) ch1;
     assertNotNull(rec1.getTableBuffer());
     assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
+  }
+
+  @Test
+  public void testEnum() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "enum01.cls"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getSupport().getClassName(), "rssw.enum01");
+    assertTrue(unit.getSupport().isEnum());
+    assertEquals(unit.getClassName(), "rssw.enum01");
+    assertTrue(unit.isEnum());
   }
 }
