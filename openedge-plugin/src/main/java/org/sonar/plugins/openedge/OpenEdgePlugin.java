@@ -84,16 +84,6 @@ public class OpenEdgePlugin implements Plugin {
       .defaultValue(Boolean.FALSE.toString()) //
       .build());
 
-    context.addExtension(PropertyDefinition.builder(Constants.OE_ANALYTICS) //
-      .name("Enable analytics") //
-      .description("Ping remote server for usage analytics") //
-      .type(PropertyType.BOOLEAN) //
-      .category(CATEGORY_OPENEDGE) //
-      .subCategory(SUBCATEGORY_GENERAL) //
-      .onQualifiers(Qualifiers.PROJECT) //
-      .defaultValue(Boolean.TRUE.toString()) //
-      .build());
-
     context.addExtension(PropertyDefinition.builder(Constants.SKIP_PROPARSE_PROPERTY) //
       .name("Skip Proparse step") //
       .description("Don't generate syntax tree and skip lint rules") //
