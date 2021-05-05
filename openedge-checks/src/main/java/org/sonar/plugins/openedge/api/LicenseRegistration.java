@@ -182,12 +182,12 @@ public interface LicenseRegistration {
       }
 
       public Builder setProduct(SonarProduct product) {
-        this.product = product == null ? SonarProduct.SONARQUBE : product;
+        this.product = product;
         return this;
       }
 
       public Builder setType(LicenseType type) {
-        this.type = type == null ? LicenseType.EVALUATION : type;
+        this.type = type;
         return this;
       }
 
@@ -213,11 +213,11 @@ public interface LicenseRegistration {
         license.customerName = customerName;
         license.repositoryName = repositoryName;
         license.salt = salt;
-        license.product = product;
-        license.type = type;
+        license.product = product == null ? SonarProduct.SONARQUBE : product;
+        license.type = type == null ? LicenseType.EVALUATION : type;
         license.expirationDate = expirationDate;
         license.lines = lines;
-        license.signature = signature;
+        license.signature = signature == null ? new byte[0] : signature;
 
         return license;
       }
