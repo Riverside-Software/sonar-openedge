@@ -221,5 +221,27 @@ public class RCodeInfoTest {
       throw new RuntimeException("RCode should be valid", caught);
     }
   }
+  @Test
+  public void testPackageProtected() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/PkgLevelAttr.r")) {
+      RCodeInfo rci = new RCodeInfo(input, System.err);
+      assertTrue(rci.isClass());
+      assertNotNull(rci.getTypeInfo());
+      assertEquals(rci.getTypeInfo().getProperties().size(), 3);
+      IPropertyElement obj1 = rci.getTypeInfo().getProperty("obj0");
+      assertNotNull(obj1);
+      assertTrue(obj1.isPackageProtected());
+
+      IPropertyElement obj2 = rci.getTypeInfo().getProperty("obj1");
+      assertNotNull(obj2);
+      assertTrue(obj2.isPackagePrivate());
+
+      IPropertyElement obj3 = rci.getTypeInfo().getProperty("obj2");
+      assertNotNull(obj3);
+      assertTrue(obj3.isPublic());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
 
 }

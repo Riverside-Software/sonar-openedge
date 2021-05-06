@@ -44,6 +44,10 @@ public class PropertyElementV11 extends AbstractAccessibleElement implements IPr
   public static final int PROPERTY_IS_INDEXED = 8192;
   public static final int PROPERTY_IS_DEFAULT = 16384;
   public static final int PROPERTY_IS_ENUM = 65536;
+  public static final int PACKAGE_PRIVATE_GETTER = 0x20000;
+  public static final int PACKAGE_PROTECTED_GETTER = 0x40000;
+  public static final int PACKAGE_PRIVATE_SETTER = 0x80000;
+  public static final int PACKAGE_PROTECTED_SETTER = 0x100000;
 
   private final int flags;
   private final IVariableElement variable;

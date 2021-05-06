@@ -42,6 +42,16 @@ public abstract class AbstractAccessibleElement extends AbstractElement implemen
     return accessType.contains(AccessType.PRIVATE);
   }
 
+  @Override
+  public boolean isPackagePrivate() {
+    return accessType.contains(AccessType.PACKAGE_PRIVATE);
+  }
+
+  @Override
+  public boolean isPackageProtected() {
+    return accessType.contains(AccessType.PACKAGE_PROTECTED);
+  }
+
   public boolean isAbstract() {
     return accessType.contains(AccessType.ABSTRACT);
   }
