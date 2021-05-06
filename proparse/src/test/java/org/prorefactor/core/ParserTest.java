@@ -300,7 +300,7 @@ public class ParserTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "package.cls"), session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 3);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 4);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.METHOD).size(), 2);
   }
 
