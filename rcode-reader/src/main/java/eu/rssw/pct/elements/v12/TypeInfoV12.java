@@ -79,7 +79,9 @@ public class TypeInfoV12 implements ITypeInfo {
     int constructorCount = ByteBuffer.wrap(segment, 8, Short.BYTES).order(order).getShort();
     int interfaceCount = ByteBuffer.wrap(segment, 10, Short.BYTES).order(order).getShort();
     int textAreaOffset = ByteBuffer.wrap(segment, 24, Integer.BYTES).order(order).getInt();
-  
+    int packageProtectedElementCount = ByteBuffer.wrap(segment, 172, Short.BYTES).order(order).getShort();
+    int packagePrivateElementCount = ByteBuffer.wrap(segment, 174, Short.BYTES).order(order).getShort();
+
     typeInfo.flags = ByteBuffer.wrap(segment, 32, Integer.BYTES).order(order).getInt();
     int nameOffset = ByteBuffer.wrap(segment, 12, Integer.BYTES).order(order).getInt();
     typeInfo.typeName = RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
@@ -88,7 +90,7 @@ public class TypeInfoV12 implements ITypeInfo {
  
     // ID - Access type - Kind - Name offset
     List<int[]> entries = new ArrayList<>();
-    for (int zz = 0; zz < publicElementCount + protectedElementCount + privateElementCount + constructorCount; zz++) {
+    for (int zz = 0; zz < publicElementCount + protectedElementCount + privateElementCount + constructorCount + packagePrivateElementCount + packageProtectedElementCount; zz++) {
       entries.add(new int[] {
           (int) ByteBuffer.wrap(segment, 192 + 10 + (16 * zz), Short.BYTES).order(order).getShort(),
           (int) ByteBuffer.wrap(segment, 192 + 12 + (16 * zz), Short.BYTES).order(order).getShort(),
@@ -96,7 +98,7 @@ public class TypeInfoV12 implements ITypeInfo {
           ByteBuffer.wrap(segment, 192 + 0 + (16 * zz), Integer.BYTES).order(order).getInt()});
     }
 
-    int currOffset = 192 + 16 * (publicElementCount + protectedElementCount + privateElementCount + constructorCount);
+    int currOffset = 192 + 16 * (publicElementCount + protectedElementCount + privateElementCount + constructorCount + packagePrivateElementCount + packageProtectedElementCount);
     typeInfo.parentTypeName = RCodeInfo.readNullTerminatedString(segment, textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
     currOffset += 56;
     boolean isEnum = "Progress.Lang.Enum".equals(typeInfo.getParentTypeName())

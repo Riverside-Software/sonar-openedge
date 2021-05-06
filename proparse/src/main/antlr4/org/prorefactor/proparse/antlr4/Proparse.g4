@@ -1674,11 +1674,11 @@ definePropertyAccessor:
   ;
 
 definePropertyAccessorGetBlock:
-    ( PUBLIC | PROTECTED | PRIVATE )? GET ( functionParams? blockColon codeBlock END GET? )? PERIOD
+    ( PUBLIC | PROTECTED | PRIVATE | PACKAGEPRIVATE | PACKAGEPROTECTED )? GET ( functionParams? blockColon codeBlock END GET? )? PERIOD
   ;
 
 definePropertyAccessorSetBlock:
-    ( PUBLIC | PROTECTED | PRIVATE )? SET ( functionParams? blockColon codeBlock END SET? )? PERIOD
+    ( PUBLIC | PROTECTED | PRIVATE | PACKAGEPRIVATE | PACKAGEPROTECTED )? SET ( functionParams? blockColon codeBlock END SET? )? PERIOD
   ;
 
 defineQueryStatement:

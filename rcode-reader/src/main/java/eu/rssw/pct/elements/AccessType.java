@@ -26,6 +26,8 @@ public enum AccessType {
   PUBLIC,
   PRIVATE,
   PROTECTED,
+  PACKAGE_PRIVATE,
+  PACKAGE_PROTECTED,
   STATIC,
   ABSTRACT,
   FINAL,
@@ -33,19 +35,16 @@ public enum AccessType {
 
   public static Set<AccessType> getTypeFromString(int val) {
     Set<AccessType> set = EnumSet.noneOf(AccessType.class);
-    switch (val & 0x07) {
-      case 1:
-        set.add(PUBLIC);
-        break;
-      case 2:
-        set.add(PROTECTED);
-        break;
-      case 4:
-        set.add(PRIVATE);
-        break;
-      default:
-        break;
-    }
+    if ((val & 1) != 0)
+      set.add(PUBLIC);
+    if ((val & 2) != 0)
+      set.add(PROTECTED);
+    if ((val & 4) != 0)
+      set.add(PRIVATE);
+    if ((val & 512) != 0)
+      set.add(PACKAGE_PRIVATE);
+    if ((val & 1024) != 0)
+      set.add(PACKAGE_PROTECTED);
     if ((val & 0x08) != 0)
       set.add(CONSTRUCTOR);
     if ((val & 0x10) != 0)

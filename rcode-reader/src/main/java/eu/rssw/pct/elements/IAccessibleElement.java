@@ -25,4 +25,6 @@ public interface IAccessibleElement extends IElement {
   boolean isPrivate();
   boolean isAbstract();
   boolean isStatic();
+  boolean isPackageProtected();
+  boolean isPackagePrivate();
 }

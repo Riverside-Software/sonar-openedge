@@ -55,6 +55,7 @@ public class PropertyElementV12 extends PropertyElementV11 {
 
     IMethodElement getter = null;
     if ((flags & HAS_GETTER) != 0) {
+   // Doesn't seem to be set in case of package-* getter
       Set<AccessType> atp = EnumSet.noneOf(AccessType.class);
       if ((flags & PUBLIC_GETTER) != 0)
         atp.add(AccessType.PUBLIC);
@@ -65,6 +66,7 @@ public class PropertyElementV12 extends PropertyElementV11 {
     }
     IMethodElement setter = null;
     if ((flags & HAS_SETTER) != 0) {
+      // Doesn't seem to be set in case of package-* setter
       Set<AccessType> atp = EnumSet.noneOf(AccessType.class);
       if ((flags & PUBLIC_SETTER) != 0)
         atp.add(AccessType.PUBLIC);
