@@ -58,8 +58,8 @@ public class OpenEdgePlugin implements Plugin {
     // Profile and rules
     if (context.getRuntime().getProduct() == SonarProduct.SONARQUBE)
       context.addExtension(OpenEdgeRulesDefinition.class);
-    context.addExtensions(BasicChecksRegistration.class, OpenEdgeProfile.class,
-        OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
+    context.addExtensions(BasicChecksRegistration.class, OpenEdgeProfile.class, OpenEdgeDBProfile.class,
+        OpenEdgeMetrics.class, OpenEdgeComponents.class);
 
     // Syntax highlight and simple CPD
     if (context.getRuntime().getProduct() == SonarProduct.SONARQUBE) {
@@ -95,14 +95,15 @@ public class OpenEdgePlugin implements Plugin {
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.USE_SIMPLE_CPD) //
-        .name("Simple CPD engine") //
-        .description("Use this simple CPD engine only when the parser can't compile your code (missing dependencies or encrypted source code)") //
-        .type(PropertyType.BOOLEAN) //
-        .category(CATEGORY_OPENEDGE) //
-        .subCategory(SUBCATEGORY_GENERAL) //
-        .onQualifiers(Qualifiers.PROJECT) //
-        .defaultValue(Boolean.FALSE.toString()) //
-        .build());
+      .name("Simple CPD engine") //
+      .description(
+          "Use this simple CPD engine only when the parser can't compile your code (missing dependencies or encrypted source code)") //
+      .type(PropertyType.BOOLEAN) //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.PROJECT) //
+      .defaultValue(Boolean.FALSE.toString()) //
+      .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.PROPARSE_DEBUG) //
       .name("Proparse debug files") //
@@ -145,14 +146,14 @@ public class OpenEdgePlugin implements Plugin {
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.SKIP_ANNOTATIONS) //
-        .name("Skip issue annotations") //
-        .description("Comma-separated list of annotations where issues will be skipped") //
-        .type(PropertyType.STRING) //
-        .defaultValue("@InitializeComponent") //
-        .category(CATEGORY_OPENEDGE) //
-        .subCategory(SUBCATEGORY_GENERAL) //
-        .onQualifiers(Qualifiers.PROJECT) //
-        .build());
+      .name("Skip issue annotations") //
+      .description("Comma-separated list of annotations where issues will be skipped") //
+      .type(PropertyType.STRING) //
+      .defaultValue("@InitializeComponent") //
+      .category(CATEGORY_OPENEDGE) //
+      .subCategory(SUBCATEGORY_GENERAL) //
+      .onQualifiers(Qualifiers.PROJECT) //
+      .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.BACKSLASH_ESCAPE) //
       .name("Backslash as escape char") //
