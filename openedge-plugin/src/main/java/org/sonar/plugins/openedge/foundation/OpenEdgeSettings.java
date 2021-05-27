@@ -236,6 +236,7 @@ public class OpenEdgeSettings {
   }
 
   public final void parseHierarchy(InputFile file) {
+    // SonarLint only ; try to read rcode of InputFile
     String relPath = getRelativePathToSourceDirs(file);
     LOG.debug("Parsing hierarchy of '{}' - Relative '{}'", file, relPath);
     if (relPath == null)
@@ -254,21 +255,15 @@ public class OpenEdgeSettings {
     LOG.info("Injecting type info '{}'", info);
     defaultSession.injectTypeInfo(info);
     if (info.getParentTypeName() != null) {
-      File rcd = getRCode(info.getParentTypeName());
-      if (rcd != null) {
-        ITypeInfo inf = parseRCode(rcd);
-        if (inf != null) {
-          parseHierarchy(inf);
-        }
+      ITypeInfo inf = getRCode2(info.getParentTypeName());
+      if (inf != null) {
+        parseHierarchy(inf);
       }
     }
-    for (String str : info.getInterfaces()) {
-      File rcd = getRCode(str);
-      if (rcd != null) {
-        ITypeInfo inf = parseRCode(rcd);
-        if (inf != null) {
-          parseHierarchy(inf);
-        }
+    for (String iface : info.getInterfaces()) {
+      ITypeInfo inf = getRCode2(iface);
+      if (inf != null) {
+        parseHierarchy(inf);
       }
     }
   }
@@ -401,16 +396,11 @@ public class OpenEdgeSettings {
     return cpdMethods.contains(name.toLowerCase(Locale.ENGLISH));
   }
 
-  /**
-   * Return File pointer to rcode in sonar.oe.binaries directory if such rcode exists
-   * 
-   * @param fileName File name from profiler
-   */
   public File getRCode(String fileName) {
+    // Called from SonarLint to retrieve the rcode of the file currently being parsed
+    // Or from ProfilerSensor to retrieve the rcode of a file in the profiler output (so only looking in source/binary
+    // directories)
     for (Path binariesDir : binariesDirs) {
-      if (fileName.endsWith(".r"))
-        return new File(fileName);
-
       Path rCode = binariesDir.resolve(FilenameUtils.removeExtension(fileName) + ".r");
       if (rCode.toFile().exists())
         return rCode.toFile();
@@ -418,6 +408,42 @@ public class OpenEdgeSettings {
       Path rCode2 = binariesDir.resolve(fileName.replace('.', '/') + ".r");
       if (rCode2.toFile().exists())
         return rCode2.toFile();
+    }
+    return null;
+  }
+
+  /**
+   * Return File pointer to rcode in sonar.oe.binaries and from propath directory if such rcode exists
+   * 
+   * @param fileName File name from profiler
+   */
+  public ITypeInfo getRCode2(String fileName) {
+    for (Path binariesDir : binariesDirs) {
+      Path rCode = binariesDir.resolve(fileName.replace('.', '/') + ".r");
+      if (rCode.toFile().exists())
+        return parseRCode(rCode.toFile());
+    }
+
+    for (File ppEntry : propathFull) {
+      boolean isPL = "pl".equalsIgnoreCase(FilenameUtils.getExtension(ppEntry.getName()));
+      if (isPL) {
+        PLReader reader = new PLReader(ppEntry.toPath());
+        FileEntry entry = reader.getEntry(fileName.replace('.', '/') + ".r");
+        if (entry != null) {
+          try {
+            RCodeInfo rci = new RCodeInfo(reader.getInputStream(entry));
+            if (rci.isClass()) {
+              return rci.getTypeInfo();
+            }
+          } catch (InvalidRCodeException | IOException caught) {
+            // Nothing
+          }
+        }
+      } else {
+        Path rCode = ppEntry.toPath().resolve(fileName.replace('.', '/') + ".r");
+        if (rCode.toFile().exists())
+          return parseRCode(rCode.toFile());
+      }
     }
 
     return null;
