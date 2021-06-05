@@ -642,6 +642,21 @@ public class ABLLexerTest {
     assertEquals(tok.getNodeType(), ABLNodeType.THEN);
   }
 
+  @Test
+  public void testCommentInPrepro() {
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(
+        "&global-define /* foobar /*foobar2*/ foobar1 */ foo /* foobar */ bar /* foobar */ /* foobar */".getBytes()),
+        "file.txt");
+    assertNextTokenType(lexer, ABLNodeType.AMPGLOBALDEFINE, "&global-define  foo  bar  ");
+  }
+
+  @Test
+  public void testEscapeInPrepro() {
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("&GLOBAL-DEFINE machin truc ~\nchouette".getBytes()),
+        "file.txt");
+    assertNextTokenType(lexer, ABLNodeType.AMPGLOBALDEFINE, "&GLOBAL-DEFINE machin truc chouette");
+  }
+
   // *********
   // Utilities
   // *********

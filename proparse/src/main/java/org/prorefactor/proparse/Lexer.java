@@ -1139,12 +1139,14 @@ public class Lexer implements IPreprocessor {
     // As with the other "append" functions, the caller is responsible for calling getChar() after this
     while (!stop) {
       if (currChar == '/') {
+        int len = currText.length();
         append();
         getChar();
         if (currChar == '*') {
-          // comment() expects to start at '*',
-          // finishes on char after closing slash
+          // comment() expects to start at '*', finishes on char after closing slash
           comment();
+          // Reset length so that comment is not appended
+          currText.setLength(len);
         }
       } else if (currInt == Token.EOF) {
         stop = true;
