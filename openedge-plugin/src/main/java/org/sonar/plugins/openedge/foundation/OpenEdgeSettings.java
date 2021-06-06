@@ -608,6 +608,11 @@ public class OpenEdgeSettings {
       ProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
           config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
 
+      // Tokens may start with special chars
+      Optional<String> tokenStartChars = config.get("sonar.oe.proparse.tokenStartChars");
+      if (tokenStartChars.isPresent())
+        ppSettings.setTokenStartChars(tokenStartChars.get().toCharArray());
+
       // Some preprocessor values can be overridden at the project level
       Optional<String> opsys = config.get("sonar.oe.preprocessor.opsys");
       if (opsys.isPresent())
