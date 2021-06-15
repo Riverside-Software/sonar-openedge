@@ -440,9 +440,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterGWidget(GWidgetContext ctx) {
     if (ctx.inuic() != null) {
       if (ctx.inuic().FRAME() != null) {
-        frameRef(support.getNode(ctx.inuic()).nextNode().nextNode());
+        frameRef(support.getNode(ctx.inuic()).getNextNode().getNextNode());
       } else if (ctx.inuic().BROWSE() != null) {
-        browseRef(support.getNode(ctx.inuic()).nextNode().nextNode());
+        browseRef(support.getNode(ctx.inuic()).getNextNode().getNextNode());
       }
     }
   }
@@ -458,9 +458,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterWidName(WidNameContext ctx) {
     // TODO Verify missing cases
     if (ctx.FRAME() != null) {
-      frameRef(support.getNode(ctx).nextNode());
+      frameRef(support.getNode(ctx).getNextNode());
     } else if (ctx.BROWSE() != null) {
-      browseRef(support.getNode(ctx).nextNode());
+      browseRef(support.getNode(ctx).getNextNode());
     } else if (ctx.FIELD() != null) {
       setContextQualifier(ctx.field(), ContextQualifier.REF);
     }
@@ -1173,7 +1173,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       for (VarStatementModifierContext mod : ctx.varStatementModifier()) {
         symbol.addModifier(Modifier.getModifier(mod.getStart().getType()));
       }
-      defAs((Primative) symbol, ctx.datatype());
+      defAs(symbol, ctx.datatype());
       addToSymbolScope(symbol);
       if (varCtx.initialValue != null) {
         defineInitialValue(symbol, varCtx.initialValue);
