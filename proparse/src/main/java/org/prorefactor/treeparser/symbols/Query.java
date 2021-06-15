@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE QUERY. */
@@ -33,12 +33,14 @@ public class Query extends Symbol {
     return getName();
   }
 
-  /**
-   * @return NodeTypes.QUERY
-   */
+  @Override
+  public ABLNodeType getNodeType() {
+    return ABLNodeType.QUERY;
+  }
+
   @Override
   public int getProgressType() {
-    return Proparse.QUERY;
+    return getNodeType().getType();
   }
 
 }

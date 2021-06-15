@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols.widgets;
 
-import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Widget;
 
@@ -25,12 +25,14 @@ public class Button extends Widget implements IFieldLevelWidget {
     super(name, scope);
   }
 
-  /**
-   * @return NodeTypes.BUTTON
-   */
+  @Override
+  public ABLNodeType getNodeType() {
+    return ABLNodeType.BUTTON;
+  }
+
   @Override
   public int getProgressType() {
-    return Proparse.BUTTON;
+    return getNodeType().getType();
   }
 
 }

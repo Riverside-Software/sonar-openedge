@@ -54,10 +54,20 @@ public class Routine extends Symbol {
     return parameters;
   }
 
-  /** Return TokenTypes: Program_root, PROCEDURE, FUNCTION, or METHOD. */
+  /**
+   * Return Program_root, PROCEDURE, FUNCTION, or METHOD.
+   */
   @Override
   public int getProgressType() {
     return progressType.getType();
+  }
+
+  /**
+   * Return PROGRAM_ROOT, PROCEDURE, FUNCTION, or METHOD.
+   */
+  @Override
+  public ABLNodeType getNodeType() {
+    return progressType;
   }
 
   /**

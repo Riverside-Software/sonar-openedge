@@ -18,7 +18,7 @@ package org.prorefactor.treeparser.symbols;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE DATASET. */
@@ -48,12 +48,14 @@ public class Dataset extends Symbol {
     return buffers;
   }
 
-  /**
-   * Returns NodeTypes.DATASET.
-   */
+  @Override
+  public ABLNodeType getNodeType() {
+    return ABLNodeType.DATASET;
+  }
+
   @Override
   public int getProgressType() {
-    return Proparse.DATASET;
+    return getNodeType().getType();
   }
 
 }

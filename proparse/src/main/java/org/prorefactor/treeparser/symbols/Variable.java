@@ -18,9 +18,9 @@ package org.prorefactor.treeparser.symbols;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProgressString;
-import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
@@ -98,8 +98,13 @@ public class Variable extends Symbol implements Primative {
    * Returns NodeTypes.VARIABLE
    */
   @Override
+  public ABLNodeType getNodeType() {
+    return ABLNodeType.VARIABLE;
+  }
+
+  @Override
   public int getProgressType() {
-    return Proparse.VARIABLE;
+    return getNodeType().getType();
   }
 
   @Override

@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -49,6 +50,11 @@ public interface ISymbol {
    * whether the object is a named buffer or a default buffer. A FieldBuffer object always returns FIELD.
    */
   int getProgressType();
+
+  /**
+   * Return node type as VARIABLE, FRAME, MENU, MENUITEM, ... Implementation is likely to change in the future 
+   */
+  ABLNodeType getNodeType();
 
   TreeParserSymbolScope getScope();
 
