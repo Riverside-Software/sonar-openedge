@@ -26,7 +26,6 @@ import org.prorefactor.core.schema.Table;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
-import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.sonar.plugins.openedge.api.objects.RCodeTTWrapper;
@@ -59,9 +58,8 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   }
 
   public void addTableDefinitionIfNew(ITable table) {
-    String lowerName = table.getName().toLowerCase();
-    if (tableMap.get(lowerName) == null)
-      tableMap.put(lowerName, table);
+    String lcName = table.getName().toLowerCase();
+    tableMap.computeIfAbsent(lcName, key -> table);
   }
 
   /**
@@ -81,7 +79,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     // goes into the regular bufferMap, rather than the unnamedBuffers map.
     bufferMap.put(name.toLowerCase(), bufferSymbol);
     return bufferSymbol;
-  } // defineTable()
+  }
 
   /** Define a temp or work table field */
   public FieldBuffer defineTableField(String name, TableBuffer buffer) {
@@ -146,7 +144,6 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   }
 
   public TableBuffer getLocalTableBuffer(ITable table) {
-    assert table.getStoretype() != IConstants.ST_DBTABLE;
     return bufferMap.get(table.getName().toLowerCase());
   }
 
@@ -245,13 +242,6 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
         return field;
     }
     return null;
-  }
-
-  /**
-   * @return a Collection containing all Routine objects defined in this RootSymbolScope.
-   */
-  public Map<String, Routine> getRoutineMap() {
-    return routineMap;
   }
 
   public void setClassName(String s) {

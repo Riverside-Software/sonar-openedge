@@ -50,6 +50,21 @@ public class Routine extends Symbol {
     return getName();
   }
 
+  public String getSignature() {
+    StringBuilder val = new StringBuilder(getName()).append('(');
+    boolean first = true;
+    for (Parameter p : parameters) {
+      if (first) {
+        first = false;
+      } else {
+        val.append(',');
+      }
+      val.append(p.getSignatureString());
+    }
+    val.append(')');
+    return val.toString();
+  }
+
   public List<Parameter> getParameters() {
     return parameters;
   }

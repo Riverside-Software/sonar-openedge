@@ -16,14 +16,14 @@
 package org.prorefactor.treeparser;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.Variable;
 
 public class Parameter {
 
   private boolean bind = false;
-  private int progressType = Proparse.VARIABLE;
-  private ABLNodeType directionNode;
+  private ABLNodeType progressType = ABLNodeType.VARIABLE;
+  private ABLNodeType directionNode = ABLNodeType.INPUT;
   private Symbol symbol;
 
   /** For a TEMP-TABLE or DATASET, was the BIND keyword used? */
@@ -41,7 +41,7 @@ public class Parameter {
    * <code>PARAMETER field = expression</code> is for RUN STORED PROCEDURE, and for those there is no symbol.
    */
   public int getProgressType() {
-    return progressType;
+    return progressType.getType();
   }
 
   /**
@@ -63,8 +63,8 @@ public class Parameter {
   }
 
   /** Set by TreeParser01. */
-  public void setProgressType(int progressType) {
-    this.progressType = progressType;
+  public void setProgressType(ABLNodeType type) {
+    this.progressType = type;
   }
 
   /** Set by TreeParser01. */
@@ -72,4 +72,31 @@ public class Parameter {
     this.symbol = symbol;
   }
 
+  public String getSignatureString() {
+    StringBuilder sb = new StringBuilder();
+    switch (directionNode) {
+      case INPUTOUTPUT: sb.append('M'); break;
+      case OUTPUT: sb.append('O'); break;
+      case RETURN: sb.append('R'); break;
+      case BUFFER: return sb.append('B').toString();
+      default: sb.append('I'); // INPUT
+    }
+    switch(progressType) {
+      case TEMPTABLE: sb.append('T'); break;
+      case TABLEHANDLE: sb.append("TH"); break;
+      case DATASET: sb.append('D'); break;
+      case DATASETHANDLE: sb.append("DH"); break;
+      case VARIABLE:
+        Variable v = (Variable) symbol;
+        if (v.getDataType() == DataType.CLASS) {
+          sb.append('L').append(v.getClassName());
+        } else {
+          sb.append(v.getDataType().getSignature());
+        }
+        break;
+      default:
+        sb.append("??");
+    }
+    return sb.toString();
+  }
 }

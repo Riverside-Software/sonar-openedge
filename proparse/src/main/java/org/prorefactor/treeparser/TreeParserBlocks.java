@@ -252,6 +252,9 @@ public class TreeParserBlocks extends ProparseBaseListener {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> New function definition '{}'", indent(), ctx.id.getText());
 
+    TreeParserSymbolScope forwardScope = funcForwards.get(ctx.id.getText());
+    Routine fwdRoutine = forwardScope != null ? forwardScope.getRoutine() : null;
+
     TreeParserSymbolScope definingScope = currentScope;
     BlockNode blockNode = (BlockNode) support.getNode(ctx);
     newRoutine((BlockNode) support.getNode(ctx), ctx.id.getText(), ABLNodeType.FUNCTION);
@@ -271,17 +274,16 @@ public class TreeParserBlocks extends ProparseBaseListener {
       if (LOG.isTraceEnabled())
         LOG.trace("{}> No parameter, trying to find them in FORWARDS declaration", indent());
       // No parameter defined, then we inherit from FORWARDS declaration (if available)
-      TreeParserSymbolScope forwardScope = funcForwards.get(ctx.id.getText());
+
       if (forwardScope != null) {
         if (LOG.isTraceEnabled())
           LOG.trace("{}> Inherits from FORWARDS definition", indent());
-        Routine r2 = forwardScope.getRoutine();
         scopeSwap(forwardScope);
         blockNode.setBlock(currentBlock);
-        blockNode.setSymbol(r2);
-        r2.setDefinitionNode(blockNode);
-        definingScope.add(r2);
-        currentRoutine = r2;
+        blockNode.setSymbol(fwdRoutine);
+        fwdRoutine.setDefinitionNode(blockNode);
+        definingScope.add(fwdRoutine);
+        currentRoutine = fwdRoutine;
       }
     }
   }

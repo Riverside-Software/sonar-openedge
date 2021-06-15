@@ -21,12 +21,14 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.util.List;
 
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -66,6 +68,12 @@ public class ClassesTest {
     JPNode inMethodStmt = method.getFirstDirectChild(ABLNodeType.CODE_BLOCK).queryStateHead(ABLNodeType.RETURN).get(0);
     assertTrue(inMethodStmt.hasAnnotation("@Progress.Lang.Deprecated"));
     assertFalse(inMethodStmt.hasAnnotation("@Progress.Deprecated"));
+
+    List<Routine> lst = unit.getRootScope().lookupRoutines("addError");
+    assertNotNull(lst);
+    assertEquals(lst.size(), 2);
+    assertEquals(lst.get(0).getSignature(), "AddError(ILProgress.Lang.Error)");
+    assertEquals(lst.get(1).getSignature(), "AddError(IC)");
   }
 
   @Test
