@@ -78,6 +78,11 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
   }
 
   @Override
+  public boolean isFinal() {
+    return false;
+  }
+
+  @Override
   public boolean isProcedure() {
     return false;
   }

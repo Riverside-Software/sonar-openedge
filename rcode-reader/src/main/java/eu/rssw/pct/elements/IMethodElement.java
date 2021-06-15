@@ -30,4 +30,5 @@ public interface IMethodElement extends IAccessibleElement {
   boolean isConstructor();
   boolean isDestructor();
   boolean isOverloaded();
+  boolean isFinal();
 }
