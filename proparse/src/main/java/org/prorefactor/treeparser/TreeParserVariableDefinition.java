@@ -276,19 +276,25 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void exitFunctionParamStandardAs(FunctionParamStandardAsContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.PARAMETER);
-    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
-    wipParameters.getFirst().setSymbol(var);
-    addToSymbolScope(var);
+    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.PARAMETER);
+    if (ctx.extentPhrase() != null) {
+      defExtent(ctx.extentPhrase().constant() != null ? ctx.extentPhrase().constant().getText() : "");
+    }
+    v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    wipParameters.getFirst().setSymbol(v);
+    addToSymbolScope(v);
     defAs(ctx.datatype());
   }
 
   @Override
   public void enterFunctionParamStandardLike(FunctionParamStandardLikeContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n2.getText(), Variable.Type.PARAMETER);
-    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
-    wipParameters.getFirst().setSymbol(var);
-    stack.push(var);
+    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.n2.getText(), Variable.Type.PARAMETER);
+    if (ctx.extentPhrase() != null) {
+      defExtent(ctx.extentPhrase().constant() != null ? ctx.extentPhrase().constant().getText() : "");
+    }
+    v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    wipParameters.getFirst().setSymbol(v);
+    stack.push(v);
   }
 
   @Override
@@ -1179,7 +1185,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
         defineInitialValue(symbol, varCtx.initialValue);
       }
       if (ctx.extent != null) {
-        int xt = 0;
+        int xt = -32767;
         if (ctx.extent.NUMBER() != null) {
           try {
             xt = Integer.parseInt(ctx.extent.NUMBER().getText());
@@ -1335,8 +1341,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterExtentPhrase2(ExtentPhrase2Context ctx) {
-    if (ctx.constant() != null)
-      defExtent(ctx.constant().getText());
+    defExtent(ctx.constant() == null ? "" : ctx.constant().getText());
   }
 
   @Override
@@ -2096,7 +2101,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     try {
       primative.setExtent(Integer.parseInt(text));
     } catch (NumberFormatException caught) {
-      primative.setExtent(-1);
+      primative.setExtent(-32767);
     }
   }
 

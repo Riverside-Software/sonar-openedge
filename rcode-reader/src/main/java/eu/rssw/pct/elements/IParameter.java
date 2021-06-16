@@ -20,10 +20,53 @@
 package eu.rssw.pct.elements;
 
 public interface IParameter extends IElement {
-  public String getName();
-  public int getExtent();
-  public String getDataType();
-  public ParameterMode getMode();
-  public ParameterType getParameterType();
-  public boolean isClassDataType();
+  String getName();
+  int getExtent();
+  DataType getABLDataType();
+  String getDataType();
+  ParameterMode getMode();
+  ParameterType getParameterType();
+  boolean isClassDataType();
+
+  default String getSignature() {
+    StringBuilder sb = new StringBuilder();
+    switch (getMode()) {
+      case INPUT_OUTPUT:
+        sb.append('M');
+        break;
+      case OUTPUT:
+        sb.append('O');
+        break;
+      case RETURN:
+        sb.append('R');
+        break;
+      case BUFFER:
+        return sb.append('B').toString();
+      default:
+        sb.append('I'); // INPUT
+    }
+    switch (getParameterType()) {
+      case TABLE:
+      case BUFFER_TEMP_TABLE:
+        sb.append('T');
+        break;
+      case DATASET:
+        sb.append('D');
+        break;
+      case BROWSE:
+        return sb.append('W').toString();
+      case VARIABLE:
+        if (isClassDataType())
+          sb.append('L').append(getDataType());
+        else
+          sb.append(getABLDataType().getSignature());
+        break;
+      default:
+        sb.append("??");
+    }
+    if (getExtent() != 0)
+      sb.append("[]");
+    return sb.toString();
+  }
+
 }

@@ -52,7 +52,7 @@ public class DataType {
   public static final DataType INT64 = new DataType(ABLNodeType.INT64, "64");
   public static final DataType LONG = new DataType(ABLNodeType.LONG, "64");
   public static final DataType LOGICAL = new DataType(ABLNodeType.LOGICAL, "B");
-  public static final DataType LONGCHAR = new DataType(ABLNodeType.LONGCHAR);
+  public static final DataType LONGCHAR = new DataType(ABLNodeType.LONGCHAR, "LC");
   public static final DataType MEMPTR = new DataType(ABLNodeType.MEMPTR, "M");
   public static final DataType NUMERIC = new DataType(ABLNodeType.NUMERIC);
   public static final DataType RAW = new DataType(ABLNodeType.RAW, "RAW");

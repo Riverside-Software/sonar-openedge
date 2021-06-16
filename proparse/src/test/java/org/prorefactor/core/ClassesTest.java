@@ -74,6 +74,11 @@ public class ClassesTest {
     assertEquals(lst.size(), 2);
     assertEquals(lst.get(0).getSignature(), "AddError(ILProgress.Lang.Error)");
     assertEquals(lst.get(1).getSignature(), "AddError(IC)");
+
+    List<Routine> lst2 = unit.getRootScope().lookupRoutines("addWarnings");
+    assertNotNull(lst2);
+    assertEquals(lst2.size(), 1);
+    assertEquals(lst2.get(0).getSignature(), "AddWarnings(IC[])");
   }
 
   @Test

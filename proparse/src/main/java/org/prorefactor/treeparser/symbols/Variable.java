@@ -40,7 +40,7 @@ public class Variable extends Symbol implements Primative {
 
   private final Type type;
   private final List<ReadWriteReference> readWriteRefs = new ArrayList<>();
-  private int extent = -1;
+  private int extent = 0;
   private DataType dataType;
   private Object initialValue = null;
   private String className = null;

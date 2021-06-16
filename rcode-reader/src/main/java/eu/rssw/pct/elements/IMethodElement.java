@@ -31,4 +31,20 @@ public interface IMethodElement extends IAccessibleElement {
   boolean isDestructor();
   boolean isOverloaded();
   boolean isFinal();
+
+  default String getSignature() {
+    StringBuilder retVal = new StringBuilder(getName()).append('(');
+    boolean first = true;
+    for (IParameter p : getParameters()) {
+      if (first) {
+        first = false;
+      } else {
+        retVal.append(',');
+      }
+      retVal.append(p.getSignature());
+    }
+    retVal.append(')');
+    return retVal.toString();
+  }
+
 }

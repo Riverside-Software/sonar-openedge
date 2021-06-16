@@ -52,16 +52,16 @@ public class TableElementV12 extends TableElementV11 {
     IVariableElement[] fields = new VariableElementV12[fieldCount];
     int currPos = currentPos + 24;
     for (int zz = 0; zz < fieldCount; zz++) {
-      IVariableElement var = VariableElementV12.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
-      currPos += var.getSizeInRCode();
-      fields[zz] = var;
+      IVariableElement elem = VariableElementV12.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
+      currPos += elem.getSizeInRCode();
+      fields[zz] = elem;
     }
 
     IIndexElement[] indexes = new IndexElementV12[indexCount];
     for (int zz = 0; zz < indexCount; zz++) {
-      IIndexElement idx = IndexElementV12.fromDebugSegment(segment, currPos, textAreaOffset, order);
-      currPos += idx.getSizeInRCode();
-      indexes[zz] = idx;
+      IIndexElement elem = IndexElementV12.fromDebugSegment(segment, currPos, textAreaOffset, order);
+      currPos += elem.getSizeInRCode();
+      indexes[zz] = elem;
     }
 
     return new TableElementV12(name2, accessType, flags, fields, indexes, beforeTableName);

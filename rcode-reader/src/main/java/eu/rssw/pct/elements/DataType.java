@@ -81,6 +81,62 @@ public enum DataType {
     return num;
   }
 
+  public String getSignature() {
+    switch (this) {
+      case BLOB:
+      case CLOB:
+        return "LOB";
+      case CHARACTER:
+        return "C";
+      case CLASS:
+        return "L";
+      case COMPONENT_HANDLE:
+        return "CH";
+      case DATASET:
+        return "DS";
+      case DATASET_HANDLE:
+        return "DH";
+      case DATE:
+        return "D";
+      case DATETIME:
+        return "DT";
+      case DATETIME_TZ:
+        return "DTZ";
+      case DECIMAL:
+      case DOUBLE:
+      case FLOAT:
+        return "DE";
+      case HANDLE:
+        return "H";
+      case INT64:
+        return "64";
+      case INTEGER:
+        return "I";
+      case LOGICAL:
+        return "B";
+      case LONG:
+        return "64";
+      case LONGCHAR:
+        return "LC";
+      case MEMPTR:
+        return "M";
+      case RAW:
+        return "RAW";
+      case RECID:
+        return "REC";
+      case ROWID:
+        return "ROW";
+      case TABLE:
+        return "T";
+      case TABLE_HANDLE:
+        return "TH";
+      case VOID:
+        return "V";
+      default:
+        return "?";
+    }
+  }
+
   static {
     for (DataType type : DataType.values()) {
       LOOKUP[type.getNum()] = type;

@@ -66,6 +66,7 @@ public class TypeInfoV11 implements ITypeInfo {
   private Collection<IVariableElement> variables = new ArrayList<>();
   private Collection<ITableElement> tables = new ArrayList<>();
   private Collection<IBufferElement> buffers = new ArrayList<>();
+  private Collection<IDatasetElement> datasets = new ArrayList<>();
 
   private TypeInfoV11() {
     // No-op
@@ -273,6 +274,21 @@ public class TypeInfoV11 implements ITypeInfo {
   @Override
   public Collection<ITableElement> getTables() {
     return tables;
+  }
+
+  @Override
+  public Collection<IDatasetElement> getDatasets() {
+    return datasets;
+  }
+
+  @Override
+  public IDatasetElement getDataset(String name) {
+    for (IDatasetElement ds : datasets) {
+      if (ds.getName().equalsIgnoreCase(name)) {
+        return ds;
+      }
+    }
+    return null;
   }
 
   @Override

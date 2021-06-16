@@ -235,6 +235,19 @@ public class TreeParser03Test {
   }
 
   @Test
+  public void test10() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define input parameter ipPrm no-undo like customer.custnum.".getBytes()), "<unnamed>", session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    Variable ipPrm = unit.getRootScope().getVariable("ipPrm");
+    assertNotNull(ipPrm);
+    assertEquals(ipPrm.getDataType(), DataType.INTEGER);
+  }
+
+  @Test
   public void test11() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test11.cls"), session);
     assertNull(unit.getTopNode());
@@ -259,19 +272,6 @@ public class TreeParser03Test {
     assertNotNull(s1.getDefineNode());
     assertEquals(s1.getDefineNode().getNodeType(), ABLNodeType.ID);
     assertEquals(s1.getDefineNode().getText(), "ipPrm");
-  }
-
-  @Test
-  public void test10() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define input parameter ipPrm no-undo like customer.custnum.".getBytes()), "<unnamed>", session);
-    assertNull(unit.getTopNode());
-    unit.treeParser01();
-    assertFalse(unit.hasSyntaxError());
-    assertNotNull(unit.getTopNode());
-    assertNotNull(unit.getRootScope());
-    Variable ipPrm = unit.getRootScope().getVariable("ipPrm");
-    assertNotNull(ipPrm);
-    assertEquals(ipPrm.getDataType(), DataType.INTEGER);
   }
 
   @Test
@@ -774,8 +774,8 @@ public class TreeParser03Test {
     assertNotNull(v2);
     assertEquals(v1.getDataType(), DataType.INTEGER);
     assertEquals(v2.getDataType(), DataType.INTEGER);
-    assertEquals(v1.getExtent(), 0);
-    assertEquals(v2.getExtent(), 0);
+    assertEquals(v1.getExtent(), -32767);
+    assertEquals(v2.getExtent(), -32767);
   }
 
   @Test
@@ -797,8 +797,8 @@ public class TreeParser03Test {
     assertNotNull(v2);
     assertEquals(v1.getDataType(), DataType.INTEGER);
     assertEquals(v2.getDataType(), DataType.INTEGER);
-    assertEquals(v1.getExtent(), 0);
-    assertEquals(v2.getExtent(), 0);
+    assertEquals(v1.getExtent(), -32767);
+    assertEquals(v2.getExtent(), -32767);
   }
 
   @Test
@@ -822,8 +822,8 @@ public class TreeParser03Test {
     assertEquals(v2.getDataType(), DataType.INTEGER);
     assertEquals(v1.getInitialValue(), Variable.CONSTANT_ARRAY);
     assertEquals(v2.getInitialValue(), Variable.CONSTANT_ARRAY);
-    assertEquals(v1.getExtent(), 0);
-    assertEquals(v2.getExtent(), 0);
+    assertEquals(v1.getExtent(), -32767);
+    assertEquals(v2.getExtent(), -32767);
   }
 
   @Test
@@ -861,7 +861,7 @@ public class TreeParser03Test {
     assertNotNull(v1);
     assertEquals(v1.getDataType(), DataType.CLASS);
     assertEquals(v1.getClassName(), "System.Collections.Generic.List<char>");
-    assertEquals(v1.getExtent(), -1);
+    assertEquals(v1.getExtent(), 0);
   }
 
   @Test
@@ -892,35 +892,35 @@ public class TreeParser03Test {
     }
     assertNotNull(varA);
     assertEquals(varA.getDataType(), DataType.INTEGER);
-    assertEquals(varA.getExtent(), -1);
+    assertEquals(varA.getExtent(), 0);
     assertEquals(varA.getInitialValue(), null);
     assertEquals(varA.getNumReads(), 2);
     assertEquals(varA.getNumWrites(), 0);
 
     assertNotNull(varB);
     assertEquals(varB.getDataType(), DataType.INTEGER);
-    assertEquals(varB.getExtent(), -1);
+    assertEquals(varB.getExtent(), 0);
     assertEquals(varB.getInitialValue(), null);
     assertEquals(varB.getNumReads(), 2);
     assertEquals(varB.getNumWrites(), 0);
 
     assertNotNull(varX);
     assertEquals(varX.getDataType(), DataType.INTEGER);
-    assertEquals(varX.getExtent(), -1);
+    assertEquals(varX.getExtent(), 0);
     assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
     assertEquals(varX.getNumReads(), 1);
     assertEquals(varX.getNumWrites(), 1);
 
     assertNotNull(varY);
     assertEquals(varY.getDataType(), DataType.INTEGER);
-    assertEquals(varY.getExtent(), -1);
+    assertEquals(varY.getExtent(), 0);
     assertEquals(varY.getInitialValue(), Variable.CONSTANT_EXPRESSION);
     assertEquals(varY.getNumReads(), 1);
     assertEquals(varY.getNumWrites(), 1);
 
     assertNotNull(varZ);
     assertEquals(varZ.getDataType(), DataType.INTEGER);
-    assertEquals(varZ.getExtent(), -1);
+    assertEquals(varZ.getExtent(), 0);
     assertEquals(varZ.getInitialValue(), Variable.CONSTANT_EXPRESSION);
     assertEquals(varZ.getNumWrites(), 1);
   }
@@ -947,21 +947,21 @@ public class TreeParser03Test {
     }
     assertNotNull(varA);
     assertEquals(varA.getDataType(), DataType.INTEGER);
-    assertEquals(varA.getExtent(), -1);
+    assertEquals(varA.getExtent(), 0);
     assertEquals(varA.getInitialValue(), null);
     assertEquals(varA.getNumReads(), 2);
     assertEquals(varA.getNumWrites(), 0);
 
     assertNotNull(varB);
     assertEquals(varB.getDataType(), DataType.INTEGER);
-    assertEquals(varB.getExtent(), -1);
+    assertEquals(varB.getExtent(), 0);
     assertEquals(varB.getInitialValue(), null);
     assertEquals(varB.getNumReads(), 2);
     assertEquals(varB.getNumWrites(), 0);
 
     assertNotNull(varX);
     assertEquals(varX.getDataType(), DataType.INTEGER);
-    assertEquals(varX.getExtent(), 0);
+    assertEquals(varX.getExtent(), -32767);
     assertEquals(varX.getInitialValue(), Variable.CONSTANT_ARRAY);
     assertEquals(varX.getNumReads(), 0);
     assertEquals(varX.getNumWrites(), 1);
@@ -984,7 +984,7 @@ public class TreeParser03Test {
       assertNotNull(varX);
       assertEquals(varX.getDataType(), DataType.CLASS);
       assertEquals(varX.getClassName(), "Progress.Lang.Object");
-      assertEquals(varX.getExtent(), -1);
+      assertEquals(varX.getExtent(), 0);
       assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
       assertEquals(varX.getNumReads(), 0);
       assertEquals(varX.getNumWrites(), 1);
@@ -1007,7 +1007,7 @@ public class TreeParser03Test {
 
       assertNotNull(varX);
       assertEquals(varX.getDataType(), DataType.DATETIME);
-      assertEquals(varX.getExtent(), -1);
+      assertEquals(varX.getExtent(), 0);
       assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
       assertEquals(varX.getNumReads(), 0);
       assertEquals(varX.getNumWrites(), 1);

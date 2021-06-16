@@ -88,10 +88,16 @@ public class Parameter {
       case DATASETHANDLE: sb.append("DH"); break;
       case VARIABLE:
         Variable v = (Variable) symbol;
-        if (v.getDataType() == DataType.CLASS) {
-          sb.append('L').append(v.getClassName());
+        if (v != null) {
+          if (v.getDataType() == DataType.CLASS) {
+            sb.append('L').append(v.getClassName());
+          } else {
+            sb.append(v.getDataType().getSignature());
+          }
+          if (v.getExtent() != 0)
+            sb.append("[]");
         } else {
-          sb.append(v.getDataType().getSignature());
+          sb.append("??");
         }
         break;
       default:
