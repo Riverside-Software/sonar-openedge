@@ -377,6 +377,10 @@ public class TreeParserSymbolScope {
     return (Query) lookupSymbolLocally(Proparse.QUERY, name);
   }
 
+  public List<Routine> getRoutines() {
+    return new ArrayList<>(routineList);
+  }
+
   private Routine lookupRoutine(String name) {
     return routineList.stream().filter(r -> r.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
   }
