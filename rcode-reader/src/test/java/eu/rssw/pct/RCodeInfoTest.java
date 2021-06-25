@@ -310,6 +310,21 @@ public class RCodeInfoTest {
       assertNotNull(testMethod22);
       assertEquals(testMethod21.getParameters()[0].getExtent(), 0);
       assertEquals(testMethod22.getParameters()[0].getExtent(), -32767);
+
+      IMethodElement testMethod3 = null;
+      for (IMethodElement elem : rci.getTypeInfo().getMethods()) {
+        if ("testMethod3".equalsIgnoreCase(elem.getName()))
+          testMethod3 = elem;
+      }
+      assertNotNull(testMethod3);
+      assertNotNull(testMethod3.getParameters());
+      assertEquals(testMethod3.getParameters().length, 2);
+      assertEquals(testMethod3.getParameters()[0].getABLDataType(), DataType.HANDLE);
+      assertEquals(testMethod3.getParameters()[0].getMode(), ParameterMode.INPUT);
+      assertEquals(testMethod3.getParameters()[0].getParameterType(), ParameterType.TABLE);
+      assertEquals(testMethod3.getParameters()[1].getABLDataType(), DataType.HANDLE);
+      assertEquals(testMethod3.getParameters()[1].getMode(), ParameterMode.INPUT_OUTPUT);
+      assertEquals(testMethod3.getParameters()[1].getParameterType(), ParameterType.DATASET);
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }

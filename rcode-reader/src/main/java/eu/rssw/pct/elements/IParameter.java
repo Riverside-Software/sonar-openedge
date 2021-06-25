@@ -49,9 +49,13 @@ public interface IParameter extends IElement {
       case TABLE:
       case BUFFER_TEMP_TABLE:
         sb.append('T');
+        if (getABLDataType() == DataType.HANDLE)
+          sb.append('H');
         break;
       case DATASET:
         sb.append('D');
+        if (getABLDataType() == DataType.HANDLE)
+          sb.append('H');
         break;
       case BROWSE:
         return sb.append('W').toString();
