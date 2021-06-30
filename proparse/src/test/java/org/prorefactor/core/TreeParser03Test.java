@@ -1027,4 +1027,47 @@ public class TreeParser03Test {
     assertEquals(i1.getNumReads(), 1);
     assertEquals(i1.getNumWrites(), 1);
   }
+
+  @Test
+  public void testParameterAs() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test25.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    assertEquals(unit.getRootScope().getVariables().size(), 6);
+
+    Variable x1 = unit.getRootScope().getVariable("x1");
+    assertNotNull(x1);
+    assertEquals(x1.getNumReads(), 1);
+    assertEquals(x1.getNumWrites(), 0);
+
+    Variable x2 = unit.getRootScope().getVariable("x2");
+    assertNotNull(x2);
+    assertEquals(x2.getNumReads(), 1);
+    assertEquals(x2.getNumWrites(), 0);
+
+    Variable x3 = unit.getRootScope().getVariable("x3");
+    assertNotNull(x3);
+    assertEquals(x3.getNumReads(), 0);
+    assertEquals(x3.getNumWrites(), 1);
+
+    Variable x4 = unit.getRootScope().getVariable("x4");
+    assertNotNull(x4);
+    assertEquals(x4.getNumReads(), 0);
+    assertEquals(x4.getNumWrites(), 1);
+
+    Variable x5 = unit.getRootScope ().getVariable("x5");
+    assertNotNull(x5);
+    assertEquals(x5.getNumReads(), 1);
+    assertEquals(x5.getNumWrites(), 1);
+
+    Variable x6 = unit.getRootScope().getVariable("x6");
+    assertNotNull(x6);
+    assertEquals(x6.getNumReads(), 1);
+    assertEquals(x6.getNumWrites(), 1);
+  }
+
 }

@@ -206,21 +206,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
-  public void enterParameterArgAs(ParameterArgAsContext ctx) {
-    Variable variable = new Variable("", currentScope);
-    if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
-        || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
-      variable.setDataType(DataType.CLASS);
-      variable.setClassName(ctx.datatype().getStop().getText());
-    } else {
-      variable.setDataType(DataType.getDataType(ctx.datatype().getStop().getType()));
-    }
-
-    currSymbol = variable;
-  }
-
-  @Override
-  public void enterParameterArgComDatatype(ParameterArgComDatatypeContext ctx) {
+  public void enterParameterArgExpression(ParameterArgExpressionContext ctx) {
     setContextQualifier(ctx.expression(), contextQualifiers.removeFrom(ctx));
   }
 

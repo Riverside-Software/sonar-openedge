@@ -422,8 +422,7 @@ parameterArg:
   | { _input.LA(3) != OBJCOLON && _input.LA(3) != DOUBLECOLON }? DATASET identifier parameterDatasetOptions  # parameterArgDataset
   | DATASETHANDLE field parameterDatasetOptions # parameterArgDatasetHandle
   | PARAMETER field EQUAL expression  # parameterArgStoredProcedure  // for RUN STORED-PROCEDURE
-  | id=identifier AS datatype { support.defVar($id.text); } # parameterArgAs
-  | expression ( AS datatype )? # parameterArgComDatatype
+  | expression ( AS datatype )? # parameterArgExpression
   ;
 
 parameterDatasetOptions:

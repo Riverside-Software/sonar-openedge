@@ -404,6 +404,20 @@ public class ParserTest {
   }
 
   @Test
+  public void testExpression05() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "System.Math:Max(1 + 2 as unsigned-byte, 3 * 4 as unsigned-byte).".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
+    JPNode expr = unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).get(0);
+    assertEquals(expr.query(ABLNodeType.METHOD_PARAM_LIST).size(), 1);
+    // Comma and paren are counted
+    assertEquals(expr.query(ABLNodeType.METHOD_PARAM_LIST).get(0).getNumberOfChildren(), 5);
+  }
+
+  @Test
   public void testShortMaxK01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "maxk.p"), session);
     unit.enableProfiler();
