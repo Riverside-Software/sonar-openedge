@@ -287,6 +287,7 @@ public class RCodeInfoTest {
           testMethod = elem;
       }
       assertNotNull(testMethod);
+      assertEquals(testMethod.getSignature(), "testMethod(IT,OD,II[])");
       assertEquals(testMethod.getExtent(), -32767);
       assertEquals(testMethod.getParameters().length, 3);
       assertEquals(testMethod.getParameters()[0].getParameterType(), ParameterType.TABLE);
@@ -310,6 +311,8 @@ public class RCodeInfoTest {
       assertNotNull(testMethod22);
       assertEquals(testMethod21.getParameters()[0].getExtent(), 0);
       assertEquals(testMethod22.getParameters()[0].getExtent(), -32767);
+      assertEquals(testMethod21.getSignature(), "testMethod2(II)");
+      assertEquals(testMethod22.getSignature(), "testMethod2(II[])");
 
       IMethodElement testMethod3 = null;
       for (IMethodElement elem : rci.getTypeInfo().getMethods()) {
@@ -317,6 +320,7 @@ public class RCodeInfoTest {
           testMethod3 = elem;
       }
       assertNotNull(testMethod3);
+      assertEquals(testMethod3.getSignature(), "testMethod3(ITH,MDH)");
       assertNotNull(testMethod3.getParameters());
       assertEquals(testMethod3.getParameters().length, 2);
       assertEquals(testMethod3.getParameters()[0].getABLDataType(), DataType.HANDLE);
