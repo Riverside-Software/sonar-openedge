@@ -309,25 +309,25 @@ public class JPNodeTest {
     ParseUnit unit = genericTest("datatype01.p");
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.RETURNS);
     assertEquals(nodes.size(), 12);
-    assertEquals(nodes.get(0).nextNode().getNodeType(), ABLNodeType.INTEGER);
-    assertEquals(nodes.get(1).nextNode().getNodeType(), ABLNodeType.LOGICAL);
-    assertEquals(nodes.get(2).nextNode().getNodeType(), ABLNodeType.ROWID);
-    assertEquals(nodes.get(3).nextNode().getNodeType(), ABLNodeType.WIDGETHANDLE);
-    assertEquals(nodes.get(4).nextNode().getNodeType(), ABLNodeType.CHARACTER);
-    assertEquals(nodes.get(5).nextNode().getNodeType(), ABLNodeType.DATE);
-    assertEquals(nodes.get(6).nextNode().getNodeType(), ABLNodeType.DECIMAL);
-    assertEquals(nodes.get(7).nextNode().getNodeType(), ABLNodeType.INTEGER);
-    assertEquals(nodes.get(8).nextNode().getNodeType(), ABLNodeType.INTEGER);
-    assertEquals(nodes.get(9).nextNode().getNodeType(), ABLNodeType.RECID);
-    assertEquals(nodes.get(10).nextNode().getNodeType(), ABLNodeType.ROWID);
-    assertEquals(nodes.get(11).nextNode().getNodeType(), ABLNodeType.WIDGETHANDLE);
+    assertEquals(nodes.get(0).getNextNode().getNodeType(), ABLNodeType.INTEGER);
+    assertEquals(nodes.get(1).getNextNode().getNodeType(), ABLNodeType.LOGICAL);
+    assertEquals(nodes.get(2).getNextNode().getNodeType(), ABLNodeType.ROWID);
+    assertEquals(nodes.get(3).getNextNode().getNodeType(), ABLNodeType.WIDGETHANDLE);
+    assertEquals(nodes.get(4).getNextNode().getNodeType(), ABLNodeType.CHARACTER);
+    assertEquals(nodes.get(5).getNextNode().getNodeType(), ABLNodeType.DATE);
+    assertEquals(nodes.get(6).getNextNode().getNodeType(), ABLNodeType.DECIMAL);
+    assertEquals(nodes.get(7).getNextNode().getNodeType(), ABLNodeType.INTEGER);
+    assertEquals(nodes.get(8).getNextNode().getNodeType(), ABLNodeType.INTEGER);
+    assertEquals(nodes.get(9).getNextNode().getNodeType(), ABLNodeType.RECID);
+    assertEquals(nodes.get(10).getNextNode().getNodeType(), ABLNodeType.ROWID);
+    assertEquals(nodes.get(11).getNextNode().getNodeType(), ABLNodeType.WIDGETHANDLE);
     
 
     List<JPNode> nodes2 = unit.getTopNode().query(ABLNodeType.TO);
     assertEquals(nodes2.size(), 3);
-    assertEquals(nodes2.get(0).nextNode().getNodeType(), ABLNodeType.CHARACTER);
-    assertEquals(nodes2.get(1).nextNode().getNodeType(), ABLNodeType.INT64);
-    assertEquals(nodes2.get(2).nextNode().getNodeType(), ABLNodeType.DOUBLE);
+    assertEquals(nodes2.get(0).getNextNode().getNodeType(), ABLNodeType.CHARACTER);
+    assertEquals(nodes2.get(1).getNextNode().getNodeType(), ABLNodeType.INT64);
+    assertEquals(nodes2.get(2).getNextNode().getNodeType(), ABLNodeType.DOUBLE);
   }
 
   @Test

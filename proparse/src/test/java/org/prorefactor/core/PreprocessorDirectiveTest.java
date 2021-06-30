@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroDef;
@@ -337,8 +336,8 @@ public class PreprocessorDirectiveTest {
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.SUBSTITUTE);
     assertEquals(nodes.size(), 2);
     JPNode substNode = nodes.get(0);
-    JPNode leftParen = substNode.nextNode();
-    JPNode str = leftParen.nextNode();
+    JPNode leftParen = substNode.getNextNode();
+    JPNode str = leftParen.getNextNode();
     assertEquals(leftParen.getLine(), 2);
     assertEquals(leftParen.getColumn(), 19);
     assertEquals(leftParen.getEndLine(), 2);
@@ -349,8 +348,8 @@ public class PreprocessorDirectiveTest {
     assertEquals(str.getEndColumn(), 24);
 
     JPNode substNode2 = nodes.get(1);
-    JPNode leftParen2 = substNode2.nextNode();
-    JPNode str2 = leftParen2.nextNode();
+    JPNode leftParen2 = substNode2.getNextNode();
+    JPNode str2 = leftParen2.getNextNode();
     assertEquals(leftParen2.getLine(), 3);
     assertEquals(leftParen2.getColumn(), 19);
     assertEquals(leftParen2.getEndLine(), 3);
@@ -364,7 +363,7 @@ public class PreprocessorDirectiveTest {
     List<JPNode> dispNodes = unit.getTopNode().query(ABLNodeType.DISPLAY);
     assertEquals(dispNodes.size(), 1);
     JPNode dispNode = dispNodes.get(0);
-    JPNode str3 = dispNode.nextNode().nextNode();
+    JPNode str3 = dispNode.getNextNode().getNextNode();
     assertEquals(str3.getLine(), 4);
     assertEquals(str3.getEndLine(), 4);
     assertEquals(str3.getColumn(), 9);
