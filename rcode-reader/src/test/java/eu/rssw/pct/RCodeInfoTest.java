@@ -329,6 +329,14 @@ public class RCodeInfoTest {
       assertEquals(testMethod3.getParameters()[1].getABLDataType(), DataType.HANDLE);
       assertEquals(testMethod3.getParameters()[1].getMode(), ParameterMode.INPUT_OUTPUT);
       assertEquals(testMethod3.getParameters()[1].getParameterType(), ParameterType.DATASET);
+
+      IMethodElement testMethod4 = null;
+      for (IMethodElement elem : rci.getTypeInfo().getMethods()) {
+        if ("testMethod4".equalsIgnoreCase(elem.getName()))
+          testMethod4 = elem;
+      }
+      assertNotNull(testMethod4);
+      assertEquals(testMethod4.getSignature(), "testMethod4(IC,MLProgress.Lang.Object,OD,IDT,IDTZ,ODE,IH,I64,IB,ILC,OM,IRAW,IREC,IROW)");
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }

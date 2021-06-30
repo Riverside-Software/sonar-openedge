@@ -33,4 +33,21 @@ CLASS rcode.TestClassElements:
 
   END METHOD.
 
+  METHOD PUBLIC INT testMethod4(INPUT x1 AS CHAR,
+                   INPUT-OUTPUT x2 AS Progress.Lang.Object,
+                   OUTPUT x3 AS DATE,
+                   INPUT x4 AS DATETIME,
+                   INPUT x5 AS DATETIME-TZ,
+                   OUTPUT x6 AS DECIMAL,
+                   INPUT x7 AS HANDLE,
+                   INPUT x8 AS INT64,
+                   INPUT x9 AS LOGICAL,
+                   INPUT x10 AS LONGCHAR,
+                   OUTPUT x11 AS MEMPTR,
+                   INPUT x12 AS RAW,
+                   INPUT x13 AS RECID,
+                   INPUT x14 AS ROWID):
+
+  END METHOD.
+
 END CLASS.
