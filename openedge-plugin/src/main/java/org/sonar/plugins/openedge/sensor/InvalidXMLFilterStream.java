@@ -29,7 +29,7 @@ import java.io.InputStream;
  */
 public class InvalidXMLFilterStream extends FilterInputStream {
 
-  protected InvalidXMLFilterStream(InputStream in) {
+  public InvalidXMLFilterStream(InputStream in) {
     super(in);
   }
 
