@@ -93,9 +93,9 @@ public class TypeInfoV12 implements ITypeInfo {
     List<int[]> entries = new ArrayList<>();
     for (int zz = 0; zz < publicElementCount + protectedElementCount + privateElementCount + constructorCount + packagePrivateElementCount + packageProtectedElementCount; zz++) {
       entries.add(new int[] {
-          (int) ByteBuffer.wrap(segment, 192 + 10 + (16 * zz), Short.BYTES).order(order).getShort(),
-          (int) ByteBuffer.wrap(segment, 192 + 12 + (16 * zz), Short.BYTES).order(order).getShort(),
-          (int) ByteBuffer.wrap(segment, 192 + 14 + (16 * zz), Short.BYTES).order(order).getShort(),
+          ByteBuffer.wrap(segment, 192 + 10 + (16 * zz), Short.BYTES).order(order).getShort(),
+          ByteBuffer.wrap(segment, 192 + 12 + (16 * zz), Short.BYTES).order(order).getShort(),
+          ByteBuffer.wrap(segment, 192 + 14 + (16 * zz), Short.BYTES).order(order).getShort(),
           ByteBuffer.wrap(segment, 192 + 0 + (16 * zz), Integer.BYTES).order(order).getInt()});
     }
 
