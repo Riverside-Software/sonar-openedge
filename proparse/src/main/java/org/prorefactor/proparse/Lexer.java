@@ -65,6 +65,11 @@ public class Lexer implements IPreprocessor {
   private static final int PROPARSE_DIRECTIVE = -101;
   private static final int INCLUDE_DIRECTIVE = -102;
 
+  private final ABLLexer prepro;
+  private final TokenFactory<ProToken> factory;
+  private boolean writableTokens;
+  private char[] tokenStartChars = { };
+
   // Cached include files for current lexer
   private final Map<String, Integer> includeCache = new HashMap<>();
   private final Map<Integer, String> includeCache2 = new HashMap<>();
@@ -72,11 +77,6 @@ public class Lexer implements IPreprocessor {
   private IncludeFile currentInclude;
   private InputSource currentInput;
   private int sourceCounter;
-  private boolean writableTokens;
-
-  private final ABLLexer prepro;
-  private final TokenFactory<ProToken> factory;
-
   private int ppCurrChar;
   // Current character, before being lowercased
   private int currInt;
@@ -147,6 +147,10 @@ public class Lexer implements IPreprocessor {
     this.writableTokens = true;
   }
 
+  public void setTokenStartChars(char[] tokenStartChars) {
+    this.tokenStartChars = (tokenStartChars == null ? new char[]{ } : tokenStartChars);
+  }
+
   //////////////// Lexical productions listed first, support functions follow.
   public ProToken nextToken() {
     LOGGER.trace("Entering nextToken()");
@@ -188,7 +192,6 @@ public class Lexer implements IPreprocessor {
       }
 
       switch (currChar) {
-
         case '\t':
         case '\n':
         case '\f':
@@ -196,54 +199,19 @@ public class Lexer implements IPreprocessor {
         case ' ':
           getChar();
           return whitespace();
-
         case '"':
         case '\'':
-          if (escapeCurrent) {
-            getChar();
-            // Escaped quote does not start a string
-            return id(ABLNodeType.FILENAME);
-          } else {
-            int currStringType = currInt;
-            getChar();
-            return quotedString(currStringType);
-          }
-
+          return nextTokenFromQuote();
         case '/':
-          getChar();
-          if (currChar == '=') {
-            append();
-            getChar();
-            return makeToken(ABLNodeType.SLASHEQUAL);
-          } else if (currChar == '*') {
-            return comment();
-          } else if (currChar == '/') {
-            return singleLineComment();
-          } else if (currChar == '(' || currIsSpace()) {
-            // slash (division) can only be followed by whitespace or '('
-            // ...that's what I found empirically, anyway. (jag 2003/05/09)
-            return makeToken(ABLNodeType.SLASH);
-          } else {
-            append();
-            getChar();
-            return id(ABLNodeType.FILENAME);
-          }
-
+          return nextTokenFromSlash();
         case ':':
           getChar();
           return colon();
-
         case '&':
           getChar();
           return ampText();
         case '@':
-          getChar();
-          if (currIsSpace())
-            return makeToken(ABLNodeType.LEXAT);
-          else
-            append();
-          getChar();
-          return id(ABLNodeType.ANNOTATION);
+          return nextTokenFromAt();
         case '[':
           getChar();
           return makeToken(ABLNodeType.LEFTBRACE);
@@ -251,14 +219,12 @@ public class Lexer implements IPreprocessor {
           getChar();
           return makeToken(ABLNodeType.RIGHTBRACE);
         case '^':
-          getChar();
-          return makeToken(ABLNodeType.CARET);
+          return nextTokenFromSymbol('^', ABLNodeType.CARET, ABLNodeType.ID);
         case ',':
           getChar();
           return makeToken(ABLNodeType.COMMA);
         case '!':
-          getChar();
-          return makeToken(ABLNodeType.EXCLAMATION);
+          return nextTokenFromSymbol('!', ABLNodeType.EXCLAMATION, ABLNodeType.ID);
         case '=':
           getChar();
           return makeToken(ABLNodeType.EQUAL);
@@ -269,33 +235,17 @@ public class Lexer implements IPreprocessor {
           getChar();
           return makeToken(ABLNodeType.RIGHTPAREN);
         case ';':
-          getChar();
-          return makeToken(ABLNodeType.SEMI);
+          return nextTokenFromSymbol(';', ABLNodeType.SEMI, ABLNodeType.ID);
         case '*':
-          getChar();
-          if (currChar == '=') {
-            append();
-            getChar();
-            return makeToken(ABLNodeType.STAREQUAL);
-          } else {
-            return makeToken(ABLNodeType.STAR);
-          }
+          return nextTokenFromStar();
         case '?':
           getChar();
           return makeToken(ABLNodeType.UNKNOWNVALUE);
         case '`':
-          getChar();
-          return makeToken(ABLNodeType.BACKTICK);
+          return nextTokenFromSymbol('`', ABLNodeType.BACKTICK, ABLNodeType.ID);
 
         case '0':
-          getChar();
-          if ((currChar == 'x') || (currChar == 'X')) {
-            append();
-            getChar();
-            return digitStart(true);
-          } else {
-            return digitStart(false);
-          }
+          return nextTokenFromZero();
 
         case '1':
         case '2':
@@ -314,51 +264,19 @@ public class Lexer implements IPreprocessor {
           return periodStart();
 
         case '>':
-          getChar();
-          if (currChar == '=') {
-            append();
-            getChar();
-            return makeToken(ABLNodeType.GTOREQUAL);
-          } else {
-            return makeToken(ABLNodeType.RIGHTANGLE);
-          }
+          return nextTokenFromGT();
 
         case '<':
-          getChar();
-          if (currChar == '>') {
-            append();
-            getChar();
-            return makeToken(ABLNodeType.GTORLT);
-          } else if (currChar == '=') {
-            append();
-            getChar();
-            return makeToken(ABLNodeType.LTOREQUAL);
-          } else {
-            return makeToken(ABLNodeType.LEFTANGLE);
-          }
+          return nextTokenFromLT();
 
         case '+':
-          getChar();
-          if (currChar == '=') {
-            append();
-            getChar();
-            return makeToken(ABLNodeType.PLUSEQUAL);
-          } else {
-            return plusMinusStart(ABLNodeType.PLUS);
-          }
+          return nextTokenStartingWithPlusMinus('+');
         case '-':
-          getChar();
-          if (currChar == '=') {
-            append();
-            getChar();
-            return makeToken(ABLNodeType.MINUSEQUAL);
-          } else {
-            return plusMinusStart(ABLNodeType.MINUS);
-          }
+          return nextTokenStartingWithPlusMinus('-');
 
         case '#':
-        case '|':
         case '%':
+        case '|':
           getChar();
           return id(ABLNodeType.FILENAME);
 
@@ -370,11 +288,134 @@ public class Lexer implements IPreprocessor {
             getChar();
             return id(ABLNodeType.ID);
           }
-
       }
     }
   }
 
+  private boolean canTokenStartWith(char c) {
+    for (char x : tokenStartChars) {
+      if (x == c)
+        return true;
+    }
+    return false;
+  }
+
+  private ProToken nextTokenFromQuote() {
+    if (escapeCurrent) {
+      getChar();
+      // Escaped quote does not start a string
+      return id(ABLNodeType.FILENAME);
+    } else {
+      int currStringType = currInt;
+      getChar();
+      return quotedString(currStringType);
+    }
+  }
+
+  private ProToken nextTokenFromSlash() {
+    getChar();
+    if (currChar == '=') {
+      append();
+      getChar();
+      return makeToken(ABLNodeType.SLASHEQUAL);
+    } else if (currChar == '*') {
+      return comment();
+    } else if (currChar == '/') {
+      return singleLineComment();
+    } else if (!canTokenStartWith('/') || currChar == '(' || currIsSpace()) {
+      // slash (division) can only be followed by whitespace or '(' (found empirically)
+      return makeToken(ABLNodeType.SLASH);
+    } else {
+      append();
+      getChar();
+      return id(ABLNodeType.FILENAME);
+    }
+  }
+
+  private ProToken nextTokenFromAt() {
+    getChar();
+    if (currIsSpace())
+      return makeToken(ABLNodeType.LEXAT);
+    else
+      append();
+    getChar();
+    return id(ABLNodeType.ANNOTATION);
+  }
+
+  private ProToken nextTokenFromSymbol(char c, ABLNodeType type, ABLNodeType idType) {
+    getChar();
+    if (!canTokenStartWith(c) || currIsSpace()) {
+      return makeToken(type);
+    } else {
+      append();
+      getChar();
+      return id(idType);
+    }
+  }
+
+  private ProToken nextTokenFromStar() {
+    getChar();
+    if (currChar == '=') {
+      append();
+      getChar();
+      return makeToken(ABLNodeType.STAREQUAL);
+    } else if (!canTokenStartWith('*') || currIsSpace()) {
+      return makeToken(ABLNodeType.STAR);
+    } else {
+      append();
+      getChar();
+      return id(ABLNodeType.ID);
+    }
+  }
+
+  private ProToken nextTokenFromZero() {
+    getChar();
+    if ((currChar == 'x') || (currChar == 'X')) {
+      append();
+      getChar();
+      return digitStart(true);
+    } else {
+      return digitStart(false);
+    }
+  }
+
+  private ProToken nextTokenFromGT() {
+    getChar();
+    if (currChar == '=') {
+      append();
+      getChar();
+      return makeToken(ABLNodeType.GTOREQUAL);
+    } else {
+      return makeToken(ABLNodeType.RIGHTANGLE);
+    }
+  }
+
+  private ProToken nextTokenFromLT() {
+    getChar();
+    if (currChar == '>') {
+      append();
+      getChar();
+      return makeToken(ABLNodeType.GTORLT);
+    } else if (currChar == '=') {
+      append();
+      getChar();
+      return makeToken(ABLNodeType.LTOREQUAL);
+    } else {
+      return makeToken(ABLNodeType.LEFTANGLE);
+    }
+  }
+
+  private ProToken nextTokenStartingWithPlusMinus(char c) {
+    getChar();
+    if (currChar == '=') {
+      append();
+      getChar();
+      return c == '+' ? makeToken(ABLNodeType.PLUSEQUAL) : makeToken(ABLNodeType.MINUSEQUAL);
+    } else {
+      return plusMinusStart(c == '+' ? ABLNodeType.PLUS : ABLNodeType.MINUS);
+    }
+  }
+  
   /**
    * Get argument for &IF DEFINED(...). The nextToken function is necessarily the main entry point. This is just a
    * wrapper around that.
@@ -543,11 +584,11 @@ public class Lexer implements IPreprocessor {
 
     if (currChar == ':') {
       boolean isStringAttributes = false;
-      // Preserve the colon before calling getChar,
-      // in case it belongs in the next token.
+      // Preserve the colon before calling getChar, in case it belongs to the next token
       preserveCurrent();
-      String theText = ":";
-      for_loop : for (;;) {
+      StringBuilder theText = new StringBuilder(":");
+      boolean stop = false;
+      while (!stop) {
         getChar();
         switch (currChar) {
           case 'r':
@@ -566,15 +607,14 @@ public class Lexer implements IPreprocessor {
           case '7':
           case '8':
           case '9':
-            theText += (char) currInt;
+            theText.append((char) currInt);
             isStringAttributes = true;
             break;
           default:
-            break for_loop;
+            stop = true;
         }
       }
-      // either string attributes, or the preserved colon
-      // goes into the next token.
+      // Either string attributes, or the preserved colon goes into the next token
       if (isStringAttributes) {
         currText.append(theText);
         preserveDrop();
@@ -594,7 +634,8 @@ public class Lexer implements IPreprocessor {
     LOGGER.trace("Entering digitStart()");
 
     ABLNodeType ttype = ABLNodeType.NUMBER;
-    for_loop : for (;;) {
+    boolean stop = false;
+    while (!stop) {
       switch (currChar) {
         case '0':
         case '1':
@@ -606,6 +647,8 @@ public class Lexer implements IPreprocessor {
         case '7':
         case '8':
         case '9':
+        case '+':
+        case '-':
           append();
           getChar();
           break;
@@ -618,14 +661,13 @@ public class Lexer implements IPreprocessor {
           if (hex) {
             append();
             getChar();
-            break;
           } else {
             append();
             getChar();
             if (ttype != ABLNodeType.FILENAME)
               ttype = ABLNodeType.ID;
-            break;
           }
+          break;
         case 'g':
         case 'h':
         case 'i':
@@ -658,11 +700,6 @@ public class Lexer implements IPreprocessor {
           break;
         // We don't know here if the plus or minus is in the middle or at the end.
         // Don't change ttype.
-        case '+':
-        case '-':
-          append();
-          getChar();
-          break;
         case '/':
           append();
           getChar();
@@ -678,14 +715,15 @@ public class Lexer implements IPreprocessor {
           if (nameDot) {
             append();
             getChar();
-            break;
           } else {
-            break for_loop;
+            stop = true;
           }
+          break;
         default:
-          break for_loop;
+          stop = true;
       }
     }
+
     return makeToken(ttype);
   }
 
@@ -949,43 +987,37 @@ public class Lexer implements IPreprocessor {
     return makeToken(ttype);
   }
 
-  ProToken ampText() {
+  private ProToken ampText() {
     LOGGER.trace("Entering ampText()");
-    for (;;) {
-      if (Character.isLetterOrDigit(currInt) || (currInt >= 128 && currInt <= 255)) {
+    boolean stop = false;
+    while (!stop) {
+      if (Character.isLetterOrDigit(currInt) || (currInt >= 128 && currInt <= 255) || (currInt == '#' || currInt == '$'
+          || currInt == '%' || currInt == '&' || currInt == '-' || currInt == '_')) {
         append();
         getChar();
-        continue;
-      }
-      switch (currChar) {
-        case '#':
-        case '$':
-        case '%':
-        case '&':
-        case '-':
-        case '_':
-          append();
-          getChar();
-          continue;
-      }
-      if (currChar == '/') {
-        // You can embed comments in (or at the end of) an &token.
-        // I've no idea why. See the regression test for bug#083.
+      } else if (currChar == '/') {
+        // You can embed comments in (or at the end of) an &token, no idea why...
+        // This comment is dropped in order to avoid painful handling of preprocessor definition
         preserveCurrent();
         getChar();
         if (currChar == '*') {
           String s = currText.toString();
           comment();
-          currText.replace(0, currText.length(), s);
+          currText.setLength(0);
+          currText.append(s);
           preserveDrop();
-          continue;
+        } else {
+          currText.append('/');
+          append();
+          preserveDrop();
+          getChar();
         }
-      }
-      break;
+      } else
+        stop = true;
     }
-    ProToken t = directive();
-    if (t != null)
-      return t;
+    ProToken tok = directive();
+    if (tok != null)
+      return tok;
     return makeToken(ABLNodeType.FILENAME);
   }
 
@@ -1103,32 +1135,34 @@ public class Lexer implements IPreprocessor {
   }
 
   private void appendToEOL() {
-    // As with the other "append" functions, the caller is responsible for calling getChar() after this.
-    for (;;) {
+    boolean stop = false;
+    // As with the other "append" functions, the caller is responsible for calling getChar() after this
+    while (!stop) {
       if (currChar == '/') {
+        int len = currText.length();
         append();
         getChar();
         if (currChar == '*') {
-          // comment() expects to start at '*',
-          // finishes on char after closing slash
+          // comment() expects to start at '*', finishes on char after closing slash
           comment();
-          continue;
+          // Reset length so that comment is not appended
+          currText.setLength(len);
         }
-        continue;
+      } else if (currInt == Token.EOF) {
+        stop = true;
+      } else {
+        append();
+        // Unescaped newline character or escaped newline where previous char is not tilde
+        if ((currChar == '\n') && (!wasEscape || !currText.toString().endsWith("~\n"))) {
+          // We do not call getChar() here. That is because we cannot
+          // get the next character until after any &glob, &scoped, or &undefine
+          // have been dealt with. The next character might be a '{' which in
+          // turn leads to a reference to what is just now being defined or
+          // undefined.
+          stop = true;
+        } else
+          getChar();
       }
-      if (currInt == Token.EOF)
-        break;
-      append();
-      // Unescaped newline character or escaped newline where previous char is not tilde
-      if ((currChar == '\n') && (!wasEscape || (wasEscape && !currText.toString().endsWith("~\n")))) {
-        // We do not call getChar() here. That is because we cannot
-        // get the next character until after any &glob, &scoped, or &undefine
-        // have been dealt with. The next character might be a '{' which in
-        // turn leads to a reference to what is just now being defined or
-        // undefined.
-        break;
-      }
-      getChar();
     }
   }
 

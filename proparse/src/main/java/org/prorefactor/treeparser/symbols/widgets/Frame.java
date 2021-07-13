@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols.widgets;
 
-import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.FieldContainer;
@@ -35,12 +35,14 @@ public class Frame extends FieldContainer {
     return frameScopeBlock;
   }
 
-  /**
-   * @return NodeTypes.FRAME
-   */
+  @Override
+  public ABLNodeType getNodeType() {
+    return ABLNodeType.FRAME;
+  }
+
   @Override
   public int getProgressType() {
-    return Proparse.FRAME;
+    return getNodeType().getType();
   }
 
   /**

@@ -34,7 +34,7 @@ public interface Primative {
   DataType getDataType();
 
   /**
-   * @return -1 if not an array, 0 if undertermined array, or &gt; 0 if determined-length array
+   * @return -32767 if undertermined array, 0 if not an array, or &gt; 0 if determined-length array
    */
   int getExtent();
 

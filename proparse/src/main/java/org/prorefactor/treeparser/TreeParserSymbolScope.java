@@ -23,7 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.proparse.antlr4.Proparse;
@@ -51,9 +53,9 @@ public class TreeParserSymbolScope {
   protected List<TreeParserSymbolScope> childScopes = new ArrayList<>();
   protected Block rootBlock;
   protected Routine routine;
+  protected List<Routine> routineList = new ArrayList<>();
   protected Map<String, TableBuffer> bufferMap = new HashMap<>();
   protected Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
-  protected Map<String, Routine> routineMap = new HashMap<>();
   protected Map<ITable, TableBuffer> unnamedBuffers = new HashMap<>();
   protected Map<Integer, Map<String, Symbol>> typeMap = new HashMap<>();
   protected Map<String, Variable> variableMap = new HashMap<>();
@@ -95,7 +97,13 @@ public class TreeParserSymbolScope {
    * the *last added* is what will be found.
    */
   private void add(Routine routine) {
-    routineMap.put(routine.getName().toLowerCase(), routine);
+    if (routine.getNodeType() == ABLNodeType.FUNCTION) {
+      // Only one function per name (existing one is the FORWARDS definition)
+      Routine existingRoutine = lookupRoutine(routine.getName());
+      if ((existingRoutine != null) && (existingRoutine.getNodeType() == ABLNodeType.FUNCTION))
+        routineList.remove(existingRoutine);
+    }
+    routineList.add(routine);
   }
 
   /**
@@ -296,14 +304,10 @@ public class TreeParserSymbolScope {
   }
 
   /**
-   * Answer whether the scope has a Routine named by param.
-   * 
-   * @param name - the name of the routine.
+   * Answer whether the scope has at least one Routine with this name
    */
   public boolean hasRoutine(String name) {
-    if (name == null)
-      return false;
-    return routineMap.containsKey(name.toLowerCase());
+    return routineList.stream().anyMatch(r -> r.getName().equalsIgnoreCase(name));
   }
 
   /**
@@ -373,8 +377,16 @@ public class TreeParserSymbolScope {
     return (Query) lookupSymbolLocally(Proparse.QUERY, name);
   }
 
-  public Routine lookupRoutine(String name) {
-    return routineMap.get(name.toLowerCase());
+  public List<Routine> getRoutines() {
+    return new ArrayList<>(routineList);
+  }
+
+  private Routine lookupRoutine(String name) {
+    return routineList.stream().filter(r -> r.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+  }
+
+  public List<Routine> lookupRoutines(String name) {
+    return routineList.stream().filter(r -> r.getName().equalsIgnoreCase(name)).collect(Collectors.toList());
   }
 
   public Stream lookupStream(String name) {

@@ -57,4 +57,8 @@ CLASS rssw.pct.LoadLogger INHERITS rssw.pct.AbstractLoadLogger:
 
   END METHOD.
 
+  METHOD PUBLIC VOID AddWarnings( lines as char EXTENT) :
+    // Nothing
+  END METHOD.
+
 END CLASS.

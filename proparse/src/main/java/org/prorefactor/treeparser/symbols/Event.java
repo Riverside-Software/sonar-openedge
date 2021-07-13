@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
@@ -35,12 +35,14 @@ public class Event extends Symbol {
     return getName();
   }
 
-  /**
-   * Returns NodeTypes.EVENT.
-   */
+  @Override
+  public ABLNodeType getNodeType() {
+    return ABLNodeType.EVENT;
+  }
+
   @Override
   public int getProgressType() {
-    return Proparse.EVENT;
+    return getNodeType().getType();
   }
 
 }

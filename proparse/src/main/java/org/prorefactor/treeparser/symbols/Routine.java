@@ -50,14 +50,39 @@ public class Routine extends Symbol {
     return getName();
   }
 
+  public String getSignature() {
+    StringBuilder val = new StringBuilder(getName()).append('(');
+    boolean first = true;
+    for (Parameter p : parameters) {
+      if (first) {
+        first = false;
+      } else {
+        val.append(',');
+      }
+      val.append(p.getSignatureString());
+    }
+    val.append(')');
+    return val.toString();
+  }
+
   public List<Parameter> getParameters() {
     return parameters;
   }
 
-  /** Return TokenTypes: Program_root, PROCEDURE, FUNCTION, or METHOD. */
+  /**
+   * Return Program_root, PROCEDURE, FUNCTION, or METHOD.
+   */
   @Override
   public int getProgressType() {
     return progressType.getType();
+  }
+
+  /**
+   * Return PROGRAM_ROOT, PROCEDURE, FUNCTION, or METHOD.
+   */
+  @Override
+  public ABLNodeType getNodeType() {
+    return progressType;
   }
 
   /**

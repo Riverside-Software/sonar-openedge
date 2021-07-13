@@ -22,6 +22,7 @@ package eu.rssw.pct;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.FileInputStream;
@@ -30,8 +31,14 @@ import java.io.IOException;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
+import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IDatasetElement;
+import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IPropertyElement;
+import eu.rssw.pct.elements.ITableElement;
 import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.ParameterMode;
+import eu.rssw.pct.elements.ParameterType;
 
 public class RCodeInfoTest {
 
@@ -221,10 +228,11 @@ public class RCodeInfoTest {
       throw new RuntimeException("RCode should be valid", caught);
     }
   }
+
   @Test
   public void testPackageProtected() throws IOException {
     try (FileInputStream input = new FileInputStream("src/test/resources/rcode/PkgLevelAttr.r")) {
-      RCodeInfo rci = new RCodeInfo(input, System.err);
+      RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertNotNull(rci.getTypeInfo());
       assertEquals(rci.getTypeInfo().getProperties().size(), 3);
@@ -244,4 +252,117 @@ public class RCodeInfoTest {
     }
   }
 
+  @Test
+  public void testTempTable() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/TempTableAttrs.r")) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      assertNotNull(rci.getTypeInfo());
+
+      ITableElement tt1 = rci.getTypeInfo().getTempTable("tt1");
+      assertNotNull(tt1);
+      assertFalse(tt1.isNoUndo());
+      ITableElement tt2 = rci.getTypeInfo().getTempTable("tt2");
+      assertNotNull(tt2);
+      assertTrue(tt2.isNoUndo());
+      ITableElement tt3 = rci.getTypeInfo().getTempTable("tt3");
+      assertNotNull(tt3);
+      assertTrue(tt3.isSerializable());
+      ITableElement tt4 = rci.getTypeInfo().getTempTable("tt4");
+      assertNotNull(tt4);
+      assertTrue(tt4.isNonSerializable());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testElements() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/TestClassElements.r")) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      assertNotNull(rci.getTypeInfo());
+
+      assertNotNull(rci.getTypeInfo().getTables());
+      assertEquals(rci.getTypeInfo().getTables().size(), 2);
+      ITableElement tt1 = rci.getTypeInfo().getTempTable("tt1");
+      assertNotNull(tt1);
+      assertEquals(tt1.getFields().length, 3); // Always an empty field at the end (ROWID ?)
+      assertEquals(tt1.getIndexes().length, 1);
+      ITableElement tt2 = rci.getTypeInfo().getTempTable("tt2");
+      assertNotNull(tt2);
+      assertEquals(tt2.getFields().length, 3);
+      assertEquals(tt2.getIndexes().length, 1);
+      assertNull(rci.getTypeInfo().getTempTable("tt3"));
+
+      assertNotNull(rci.getTypeInfo().getDatasets());
+      assertEquals(rci.getTypeInfo().getDatasets().size(), 1);
+      IDatasetElement ds1 = rci.getTypeInfo().getDataset("ds1");
+      assertNotNull(ds1);
+      assertTrue(ds1.isProtected());
+      assertEquals(ds1.getBufferNames().length, 2);
+      assertEquals(ds1.getBufferNames()[0], "tt1");
+      assertEquals(ds1.getBufferNames()[1], "tt2");
+      assertNull(rci.getTypeInfo().getDataset("ds2"));
+
+      IMethodElement testMethod = null;
+      for (IMethodElement elem : rci.getTypeInfo().getMethods()) {
+        if ("testMethod".equalsIgnoreCase(elem.getName()))
+          testMethod = elem;
+      }
+      assertNotNull(testMethod);
+      assertEquals(testMethod.getSignature(), "testMethod(IT,OD,II[])");
+      assertEquals(testMethod.getExtent(), -32767);
+      assertEquals(testMethod.getParameters().length, 3);
+      assertEquals(testMethod.getParameters()[0].getParameterType(), ParameterType.TABLE);
+      assertEquals(testMethod.getParameters()[0].getMode(), ParameterMode.INPUT);
+      assertEquals(testMethod.getParameters()[1].getParameterType(), ParameterType.DATASET);
+      assertEquals(testMethod.getParameters()[1].getMode(), ParameterMode.OUTPUT);
+      assertEquals(testMethod.getParameters()[2].getParameterType(), ParameterType.VARIABLE);
+      assertEquals(testMethod.getParameters()[2].getMode(), ParameterMode.INPUT);
+      assertEquals(testMethod.getParameters()[2].getABLDataType(), DataType.INTEGER);
+      assertEquals(testMethod.getParameters()[2].getExtent(), 3);
+
+      IMethodElement testMethod21 = null;
+      IMethodElement testMethod22 = null;
+      for (IMethodElement elem : rci.getTypeInfo().getMethods()) {
+        if ("testMethod2".equalsIgnoreCase(elem.getName()) && elem.getExtent() != 0)
+          testMethod21 = elem;
+        else if ("testMethod2".equalsIgnoreCase(elem.getName()) && elem.getExtent() == 0)
+          testMethod22 = elem;
+      }
+      assertNotNull(testMethod21);
+      assertNotNull(testMethod22);
+      assertEquals(testMethod21.getParameters()[0].getExtent(), 0);
+      assertEquals(testMethod22.getParameters()[0].getExtent(), -32767);
+      assertEquals(testMethod21.getSignature(), "testMethod2(II)");
+      assertEquals(testMethod22.getSignature(), "testMethod2(II[])");
+
+      IMethodElement testMethod3 = null;
+      for (IMethodElement elem : rci.getTypeInfo().getMethods()) {
+        if ("testMethod3".equalsIgnoreCase(elem.getName()))
+          testMethod3 = elem;
+      }
+      assertNotNull(testMethod3);
+      assertEquals(testMethod3.getSignature(), "testMethod3(ITH,MDH)");
+      assertNotNull(testMethod3.getParameters());
+      assertEquals(testMethod3.getParameters().length, 2);
+      assertEquals(testMethod3.getParameters()[0].getABLDataType(), DataType.HANDLE);
+      assertEquals(testMethod3.getParameters()[0].getMode(), ParameterMode.INPUT);
+      assertEquals(testMethod3.getParameters()[0].getParameterType(), ParameterType.TABLE);
+      assertEquals(testMethod3.getParameters()[1].getABLDataType(), DataType.HANDLE);
+      assertEquals(testMethod3.getParameters()[1].getMode(), ParameterMode.INPUT_OUTPUT);
+      assertEquals(testMethod3.getParameters()[1].getParameterType(), ParameterType.DATASET);
+
+      IMethodElement testMethod4 = null;
+      for (IMethodElement elem : rci.getTypeInfo().getMethods()) {
+        if ("testMethod4".equalsIgnoreCase(elem.getName()))
+          testMethod4 = elem;
+      }
+      assertNotNull(testMethod4);
+      assertEquals(testMethod4.getSignature(), "testMethod4(IC,MLProgress.Lang.Object,OD,IDT,IDTZ,ODE,IH,I64,IB,ILC,OM,IRAW,IREC,IROW)");
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
 }

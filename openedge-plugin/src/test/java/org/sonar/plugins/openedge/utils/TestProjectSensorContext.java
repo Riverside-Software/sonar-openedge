@@ -43,9 +43,12 @@ public class TestProjectSensorContext {
   private TestProjectSensorContext() {
     // No-op
   }
-  
+
   public static SensorContextTester createContext() throws IOException {
-    MapSettings settings = new MapSettings();
+    return createContext(new MapSettings());
+  }
+
+  public static SensorContextTester createContext(MapSettings settings) throws IOException {
     settings.setProperty("sonar.sources", "src");
     settings.setProperty(Constants.PROPATH, new File(BASEDIR).getAbsolutePath());
     settings.setProperty(Constants.BINARIES, "build");

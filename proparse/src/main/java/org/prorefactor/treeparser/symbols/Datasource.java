@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser.symbols;
 
-import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /** A Symbol defined with DEFINE DATA-SOURCE. */
@@ -33,12 +33,14 @@ public class Datasource extends Symbol {
     return getName();
   }
 
-  /**
-   * Returns NodeTypes.DATASOURCE
-   */
+  @Override
+  public ABLNodeType getNodeType() {
+    return ABLNodeType.DATASOURCE;
+  }
+
   @Override
   public int getProgressType() {
-    return Proparse.DATASOURCE;
+    return getNodeType().getType();
   }
 
 }

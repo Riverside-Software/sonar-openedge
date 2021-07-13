@@ -66,6 +66,7 @@ public class TypeInfoV11 implements ITypeInfo {
   private Collection<IVariableElement> variables = new ArrayList<>();
   private Collection<ITableElement> tables = new ArrayList<>();
   private Collection<IBufferElement> buffers = new ArrayList<>();
+  private Collection<IDatasetElement> datasets = new ArrayList<>();
 
   private TypeInfoV11() {
     // No-op
@@ -99,9 +100,9 @@ public class TypeInfoV11 implements ITypeInfo {
     List<int[]> entries = new ArrayList<>();
     for (int zz = 0; zz < publicElementCount + protectedElementCount + privateElementCount + constructorCount; zz++) {
         entries.add(new int[] {
-            (int) ByteBuffer.wrap(segment, 80 + 0 + (16 * zz), Short.BYTES).order(order).getShort(),
-            (int) ByteBuffer.wrap(segment, 80 + 2 + (16 * zz), Short.BYTES).order(order).getShort(),
-            (int) ByteBuffer.wrap(segment, 80 + 4 + (16 * zz), Short.BYTES).order(order).getShort(),
+            ByteBuffer.wrap(segment, 80 + 0 + (16 * zz), Short.BYTES).order(order).getShort(),
+            ByteBuffer.wrap(segment, 80 + 2 + (16 * zz), Short.BYTES).order(order).getShort(),
+            ByteBuffer.wrap(segment, 80 + 4 + (16 * zz), Short.BYTES).order(order).getShort(),
             ByteBuffer.wrap(segment, 80 + 12 + (16 * zz), Integer.BYTES).order(order).getInt()});
     }
 
@@ -273,6 +274,21 @@ public class TypeInfoV11 implements ITypeInfo {
   @Override
   public Collection<ITableElement> getTables() {
     return tables;
+  }
+
+  @Override
+  public Collection<IDatasetElement> getDatasets() {
+    return datasets;
+  }
+
+  @Override
+  public IDatasetElement getDataset(String name) {
+    for (IDatasetElement ds : datasets) {
+      if (ds.getName().equalsIgnoreCase(name)) {
+        return ds;
+      }
+    }
+    return null;
   }
 
   @Override

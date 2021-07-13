@@ -44,11 +44,13 @@ public interface ITypeInfo {
   Collection<IVariableElement> getVariables();
   Collection<ITableElement> getTables();
   Collection<IBufferElement> getBuffers();
+  Collection<IDatasetElement> getDatasets();
 
   IBufferElement getBuffer(String inName);
   IBufferElement getBufferFor(String name);
   IPropertyElement getProperty(String name);
   ITableElement getTempTable(String inName);
+  IDatasetElement getDataset(String dataset);
 
   boolean hasTempTable(String inName);
   boolean hasMethod(String name);

@@ -38,6 +38,7 @@ public class ProparseSettings implements IProparseSettings {
   private Boolean customBatchMode;
   private String customProversion;
   private Boolean customSkipXCode;
+  private char[] tokenStartChars;
   private boolean antlrTokenInsertion = false;
   private boolean antlrTokenDeletion = false;
   private boolean antlrRecover = false;
@@ -120,6 +121,11 @@ public class ProparseSettings implements IProparseSettings {
   }
 
   @Override
+  public char[] getTokenStartChars() {
+    return tokenStartChars;
+  }
+
+  @Override
   public boolean allowAntlrTokenInsertion() {
     return antlrTokenInsertion;
   }
@@ -172,6 +178,10 @@ public class ProparseSettings implements IProparseSettings {
 
   public void setCustomSkipXCode(boolean skipXCode) {
     this.customSkipXCode = skipXCode;
+  }
+
+  public void setTokenStartChars(char[] tokenStartChars) {
+    this.tokenStartChars = tokenStartChars;
   }
 
   public enum OperatingSystem {

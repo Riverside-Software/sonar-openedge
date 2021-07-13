@@ -65,6 +65,7 @@ public class TypeInfoV12 implements ITypeInfo {
   private Collection<IVariableElement> variables = new ArrayList<>();
   private Collection<ITableElement> tables = new ArrayList<>();
   private Collection<IBufferElement> buffers = new ArrayList<>();
+  private Collection<IDatasetElement> datasets = new ArrayList<>();
 
   private TypeInfoV12() {
     // No-op
@@ -92,9 +93,9 @@ public class TypeInfoV12 implements ITypeInfo {
     List<int[]> entries = new ArrayList<>();
     for (int zz = 0; zz < publicElementCount + protectedElementCount + privateElementCount + constructorCount + packagePrivateElementCount + packageProtectedElementCount; zz++) {
       entries.add(new int[] {
-          (int) ByteBuffer.wrap(segment, 192 + 10 + (16 * zz), Short.BYTES).order(order).getShort(),
-          (int) ByteBuffer.wrap(segment, 192 + 12 + (16 * zz), Short.BYTES).order(order).getShort(),
-          (int) ByteBuffer.wrap(segment, 192 + 14 + (16 * zz), Short.BYTES).order(order).getShort(),
+          ByteBuffer.wrap(segment, 192 + 10 + (16 * zz), Short.BYTES).order(order).getShort(),
+          ByteBuffer.wrap(segment, 192 + 12 + (16 * zz), Short.BYTES).order(order).getShort(),
+          ByteBuffer.wrap(segment, 192 + 14 + (16 * zz), Short.BYTES).order(order).getShort(),
           ByteBuffer.wrap(segment, 192 + 0 + (16 * zz), Integer.BYTES).order(order).getInt()});
     }
 
@@ -129,9 +130,9 @@ public class TypeInfoV12 implements ITypeInfo {
           typeInfo.getProperties().add(prop);
           break;
         case VARIABLE:
-          IVariableElement var =  VariableElementV12.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += var.getSizeInRCode();
-          typeInfo.getVariables().add(var);
+          IVariableElement elem =  VariableElementV12.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
+          currOffset += elem.getSizeInRCode();
+          typeInfo.getVariables().add(elem);
           break;
         case TABLE:
           ITableElement tbl =  TableElementV12.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
@@ -150,6 +151,7 @@ public class TypeInfoV12 implements ITypeInfo {
         case DATASET:
           IDatasetElement ds =  DatasetElementV12.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
           currOffset += ds.getSizeInRCode();
+          typeInfo.getDatasets().add(ds);
           break;
         case DATASOURCE:
           IDataSourceElement dso =  DataSourceElementV12.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
@@ -275,6 +277,21 @@ public class TypeInfoV12 implements ITypeInfo {
   @Override
   public Collection<IBufferElement> getBuffers() {
     return buffers;
+  }
+
+  @Override
+  public Collection<IDatasetElement> getDatasets() {
+    return datasets;
+  }
+
+  @Override
+  public IDatasetElement getDataset(String name) {
+    for (IDatasetElement ds : datasets) {
+      if (ds.getName().equalsIgnoreCase(name)) {
+        return ds;
+      }
+    }
+    return null;
   }
 
   @Override

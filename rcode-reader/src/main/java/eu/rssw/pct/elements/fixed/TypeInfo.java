@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 import eu.rssw.pct.elements.IBufferElement;
+import eu.rssw.pct.elements.IDatasetElement;
 import eu.rssw.pct.elements.IEventElement;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IPropertyElement;
@@ -147,6 +148,16 @@ public class TypeInfo implements ITypeInfo {
   @Override
   public Collection<IBufferElement> getBuffers() {
     return Collections.emptyList();
+  }
+
+  @Override
+  public Collection<IDatasetElement> getDatasets() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public IDatasetElement getDataset(String dataset) {
+    return null;
   }
 
   @Override

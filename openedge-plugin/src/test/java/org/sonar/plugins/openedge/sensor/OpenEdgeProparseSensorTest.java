@@ -32,12 +32,18 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import java.io.File;
+import java.nio.charset.Charset;
+
 import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
+import org.sonar.api.batch.fs.InputFile.Type;
+import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.rule.internal.NewActiveRule;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.batch.sensor.issue.Issue;
 import org.sonar.api.config.internal.MapSettings;
+import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.CheckRegistration;
@@ -248,6 +254,49 @@ public class OpenEdgeProparseSensorTest {
     } catch (RuntimeException caught) {
       fail("No RuntimeException should have been thrown");
     }
+  }
+
+  @Test
+  public void testTokenStartChars01() throws Exception {
+    MapSettings settings = new MapSettings();
+    SensorContextTester context = TestProjectSensorContext.createContext(settings);
+
+    context.fileSystem().add(
+        new TestInputFileBuilder(BASEDIR, "src/procedures/test5.p").setLanguage(Constants.LANGUAGE_KEY).setType(
+            Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, "src/procedures/test5.p"), Charset.defaultCharset())).build());
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, null, null);
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    assertEquals(context.allAnalysisErrors().size(), 0);
+    assertEquals(context.allIssues().size(), 2); // Invalid.p + !function
+    Issue issue = context.allIssues().iterator().next();
+    assertEquals(issue.ruleKey().rule(), OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY);
+  }
+
+  @Test
+  public void testTokenStartChars02() throws Exception {
+    MapSettings settings = new MapSettings();
+    settings.setProperty("sonar.oe.proparse.tokenStartChars", ";!^");
+    SensorContextTester context = TestProjectSensorContext.createContext(settings);
+
+    context.fileSystem().add(
+        new TestInputFileBuilder(BASEDIR, "src/procedures/test5.p").setLanguage(Constants.LANGUAGE_KEY).setType(
+            Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, "src/procedures/test5.p"), Charset.defaultCharset())).build());
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, null, null);
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    assertEquals(context.allAnalysisErrors().size(), 0);
+    assertEquals(context.allIssues().size(), 1); // Just invalid.p
+    Issue issue = context.allIssues().iterator().next();
+    assertEquals(issue.ruleKey().rule(), OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY);
   }
 
   @Test

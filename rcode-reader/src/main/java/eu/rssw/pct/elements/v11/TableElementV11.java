@@ -83,6 +83,21 @@ public class TableElementV11 extends AbstractAccessibleElement implements ITable
   }
 
   @Override
+  public boolean isNoUndo() {
+    return (flags & 2) != 0;
+  }
+
+  @Override
+  public boolean isSerializable() {
+    return (flags & 4) != 0;
+  }
+
+  @Override
+  public boolean isNonSerializable() {
+    return (flags & 8) != 0;
+  }
+
+  @Override
   public IVariableElement[] getFields() {
     return fields;
   }

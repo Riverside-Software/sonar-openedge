@@ -25,6 +25,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
@@ -89,14 +90,14 @@ public class TreeParser03Test {
     boolean found2 = false;
     for (JPNode node : unit.getTopNode().query(ABLNodeType.DEFINE)) {
       if ((node.getState2() == ABLNodeType.TEMPTABLE.getType())
-          && "myTT2".equals(node.nextNode().nextNode().getText())) {
-        assertEquals(node.query(ABLNodeType.USEINDEX).get(0).nextNode().attrGet(IConstants.INVALID_USEINDEX),
+          && "myTT2".equals(node.getNextNode().getNextNode().getText())) {
+        assertEquals(node.query(ABLNodeType.USEINDEX).get(0).getNextNode().attrGet(IConstants.INVALID_USEINDEX),
             IConstants.TRUE);
         found1 = true;
       }
       if ((node.getState2() == ABLNodeType.TEMPTABLE.getType())
-          && "myTT3".equals(node.nextNode().nextNode().getText())) {
-        assertEquals(node.query(ABLNodeType.USEINDEX).get(0).nextNode().attrGet(IConstants.INVALID_USEINDEX), 0);
+          && "myTT3".equals(node.getNextNode().getNextNode().getText())) {
+        assertEquals(node.query(ABLNodeType.USEINDEX).get(0).getNextNode().attrGet(IConstants.INVALID_USEINDEX), 0);
         found2 = true;
       }
     }
@@ -129,8 +130,10 @@ public class TreeParser03Test {
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    Routine f1 = unit.getRootScope().lookupRoutine("f1");
-    assertNotNull(f1);
+    List<Routine> lst = unit.getRootScope().lookupRoutines("f1");
+    assertEquals(lst.size(), 1);
+    Routine f1 = lst.get(0);
+    assertEquals(f1.getSignature(), "f1(II)");
     assertEquals(f1.getParameters().size(), 1);
     Variable var1 = (Variable) f1.getParameters().get(0).getSymbol();
     assertEquals(var1.getName(), "zz");
@@ -142,8 +145,10 @@ public class TreeParser03Test {
     assertEquals(ref1.getNode().getStatement().getNodeType(), ABLNodeType.DISPLAY);
     assertEquals(ref1.getNode().getStatement().getLine(), 8);
 
-    Routine f2 = unit.getRootScope().lookupRoutine("f2");
-    assertNotNull(f2);
+    List<Routine> lst2 = unit.getRootScope().lookupRoutines("f2");
+    assertEquals(lst2.size(), 1);
+    Routine f2 = lst2.get(0);
+    assertEquals(f2.getSignature(), "f2(II,II)");
     assertEquals(f2.getParameters().size(), 2);
     assertEquals(f2.getParameters().get(0).getSymbol().getName(), "a");
     assertEquals(f2.getParameters().get(0).getSymbol().getNumReads(), 0);
@@ -157,19 +162,25 @@ public class TreeParser03Test {
     assertEquals(ref2.getNode().getStatement().getNodeType(), ABLNodeType.DISPLAY);
     assertEquals(ref2.getNode().getStatement().getLine(), 13);
 
-    Routine f3 = unit.getRootScope().lookupRoutine("f3");
-    assertNotNull(f3);
+    List<Routine> lst3 = unit.getRootScope().lookupRoutines("f3");
+    assertEquals(lst3.size(), 1);
+    Routine f3 = lst3.get(0);
+    assertEquals(f3.getSignature(), "f3(II)");
     assertEquals(f3.getParameters().size(), 1);
     assertEquals(f3.getParameters().get(0).getSymbol().getName(), "a");
     assertEquals(f3.getParameters().get(0).getSymbol().getNumReads(), 1);
     assertEquals(f3.getParameters().get(0).getSymbol().getNumWrites(), 0);
 
-    Routine f4 = unit.getRootScope().lookupRoutine("f4");
-    assertNotNull(f4);
+    List<Routine> lst4 = unit.getRootScope().lookupRoutines("f4");
+    assertEquals(lst4.size(), 1);
+    Routine f4 = lst4.get(0);
+    assertEquals(f4.getSignature(), "f4()");
     assertEquals(f4.getParameters().size(), 0);
 
-    Routine f5 = unit.getRootScope().lookupRoutine("f5");
-    assertNotNull(f5);
+    List<Routine> lst5 = unit.getRootScope().lookupRoutines("f5");
+    assertEquals(lst5.size(), 1);
+    Routine f5 = lst5.get(0);
+    assertEquals(f5.getSignature(), "f5()");
     assertEquals(f5.getParameters().size(), 0);
   }
 
@@ -224,6 +235,19 @@ public class TreeParser03Test {
   }
 
   @Test
+  public void test10() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define input parameter ipPrm no-undo like customer.custnum.".getBytes()), "<unnamed>", session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    Variable ipPrm = unit.getRootScope().getVariable("ipPrm");
+    assertNotNull(ipPrm);
+    assertEquals(ipPrm.getDataType(), DataType.INTEGER);
+  }
+
+  @Test
   public void test11() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test11.cls"), session);
     assertNull(unit.getTopNode());
@@ -231,8 +255,10 @@ public class TreeParser03Test {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
-    Routine r1 = unit.getRootScope().getRoutineMap().get("foo1");
-    assertNotNull(r1);
+    List<Routine> lst = unit.getRootScope().lookupRoutines("foo1");
+    assertEquals(lst.size(), 1);
+    Routine r1 = lst.get(0);
+    assertEquals(r1.getSignature(), "foo1(OI)");
     assertEquals(r1.getParameters().size(), 1);
     Parameter p1 = r1.getParameters().get(0);
     Symbol s1 = p1.getSymbol();
@@ -249,19 +275,6 @@ public class TreeParser03Test {
   }
 
   @Test
-  public void test10() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define input parameter ipPrm no-undo like customer.custnum.".getBytes()), "<unnamed>", session);
-    assertNull(unit.getTopNode());
-    unit.treeParser01();
-    assertFalse(unit.hasSyntaxError());
-    assertNotNull(unit.getTopNode());
-    assertNotNull(unit.getRootScope());
-    Variable ipPrm = unit.getRootScope().getVariable("ipPrm");
-    assertNotNull(ipPrm);
-    assertEquals(ipPrm.getDataType(), DataType.INTEGER);
-  }
-
-  @Test
   public void test12() {
     ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test12.cls"), session);
     assertNull(unit.getTopNode());
@@ -269,13 +282,25 @@ public class TreeParser03Test {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
-    Routine r1 = unit.getRootScope().getRoutineMap().get("foo1");
+
+    List<Routine> lst = unit.getRootScope().lookupRoutines("foo1");
+    assertEquals(lst.size(), 1);
+    Routine r1 = lst.get(0);
     assertEquals(r1.getReturnDatatypeNode(), DataType.CLASS);
-    Routine r2 = unit.getRootScope().getRoutineMap().get("foo2");
+
+    lst = unit.getRootScope().lookupRoutines("foo2");
+    assertEquals(lst.size(), 1);
+    Routine r2 = lst.get(0);
     assertEquals(r2.getReturnDatatypeNode(), DataType.CLASS);
-    Routine r3 = unit.getRootScope().getRoutineMap().get("foo3");
+
+    lst = unit.getRootScope().lookupRoutines("foo3");
+    assertEquals(lst.size(), 1);
+    Routine r3 = lst.get(0);
     assertEquals(r3.getReturnDatatypeNode(), DataType.INTEGER);
-    Routine r4 = unit.getRootScope().getRoutineMap().get("foo4");
+
+    lst = unit.getRootScope().lookupRoutines("foo4");
+    assertEquals(lst.size(), 1);
+    Routine r4 = lst.get(0);
     assertEquals(r4.getReturnDatatypeNode(), DataType.CHARACTER);
   }
 
@@ -326,8 +351,9 @@ public class TreeParser03Test {
     Variable v2 = unit.getRootScope().getVariable("v2");
     assertNotNull(v1);
     assertNotNull(v2);
-    Routine dummy = unit.getRootScope().getRoutineMap().get("dummy");
-    assertNotNull(dummy);
+    List<Routine> lst = unit.getRootScope().lookupRoutines("dummy");
+    assertEquals(lst.size(), 1);
+    Routine dummy = lst.get(0);
     assertEquals(dummy.getParameters().size(), 1);
     assertEquals(dummy.getParameters().get(0).getSymbol().getName(), "p1");
   }
@@ -345,12 +371,15 @@ public class TreeParser03Test {
     Variable hInstance = unit.getRootScope().getVariable("hInstance");
     assertNotNull(hInstance);
 
-    Routine dummy = unit.getRootScope().getRoutineMap().get("dummy");
-    assertNotNull(dummy);
+    List<Routine> lst = unit.getRootScope().lookupRoutines("dummy");
+    assertEquals(lst.size(), 1);
+    Routine dummy = lst.get(0);
     assertEquals(dummy.getParameters().size(), 1);
     assertEquals(dummy.getParameters().get(0).getSymbol().getName(), "picVariable");
 
-    Routine doIt = unit.getRootScope().getRoutineMap().get("doit");
+    List<Routine> lst2 = unit.getRootScope().lookupRoutines("doit");
+    assertEquals(lst2.size(), 1);
+    Routine doIt = lst2.get(0);
     assertNotNull(doIt);
     assertEquals(doIt.getParameters().size(), 1);
     assertEquals(doIt.getParameters().get(0).getSymbol().getName(), "picVariable");
@@ -745,8 +774,8 @@ public class TreeParser03Test {
     assertNotNull(v2);
     assertEquals(v1.getDataType(), DataType.INTEGER);
     assertEquals(v2.getDataType(), DataType.INTEGER);
-    assertEquals(v1.getExtent(), 0);
-    assertEquals(v2.getExtent(), 0);
+    assertEquals(v1.getExtent(), -32767);
+    assertEquals(v2.getExtent(), -32767);
   }
 
   @Test
@@ -768,8 +797,8 @@ public class TreeParser03Test {
     assertNotNull(v2);
     assertEquals(v1.getDataType(), DataType.INTEGER);
     assertEquals(v2.getDataType(), DataType.INTEGER);
-    assertEquals(v1.getExtent(), 0);
-    assertEquals(v2.getExtent(), 0);
+    assertEquals(v1.getExtent(), -32767);
+    assertEquals(v2.getExtent(), -32767);
   }
 
   @Test
@@ -793,8 +822,8 @@ public class TreeParser03Test {
     assertEquals(v2.getDataType(), DataType.INTEGER);
     assertEquals(v1.getInitialValue(), Variable.CONSTANT_ARRAY);
     assertEquals(v2.getInitialValue(), Variable.CONSTANT_ARRAY);
-    assertEquals(v1.getExtent(), 0);
-    assertEquals(v2.getExtent(), 0);
+    assertEquals(v1.getExtent(), -32767);
+    assertEquals(v2.getExtent(), -32767);
   }
 
   @Test
@@ -832,7 +861,7 @@ public class TreeParser03Test {
     assertNotNull(v1);
     assertEquals(v1.getDataType(), DataType.CLASS);
     assertEquals(v1.getClassName(), "System.Collections.Generic.List<char>");
-    assertEquals(v1.getExtent(), -1);
+    assertEquals(v1.getExtent(), 0);
   }
 
   @Test
@@ -863,35 +892,35 @@ public class TreeParser03Test {
     }
     assertNotNull(varA);
     assertEquals(varA.getDataType(), DataType.INTEGER);
-    assertEquals(varA.getExtent(), -1);
+    assertEquals(varA.getExtent(), 0);
     assertEquals(varA.getInitialValue(), null);
     assertEquals(varA.getNumReads(), 2);
     assertEquals(varA.getNumWrites(), 0);
 
     assertNotNull(varB);
     assertEquals(varB.getDataType(), DataType.INTEGER);
-    assertEquals(varB.getExtent(), -1);
+    assertEquals(varB.getExtent(), 0);
     assertEquals(varB.getInitialValue(), null);
     assertEquals(varB.getNumReads(), 2);
     assertEquals(varB.getNumWrites(), 0);
 
     assertNotNull(varX);
     assertEquals(varX.getDataType(), DataType.INTEGER);
-    assertEquals(varX.getExtent(), -1);
+    assertEquals(varX.getExtent(), 0);
     assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
     assertEquals(varX.getNumReads(), 1);
     assertEquals(varX.getNumWrites(), 1);
 
     assertNotNull(varY);
     assertEquals(varY.getDataType(), DataType.INTEGER);
-    assertEquals(varY.getExtent(), -1);
+    assertEquals(varY.getExtent(), 0);
     assertEquals(varY.getInitialValue(), Variable.CONSTANT_EXPRESSION);
     assertEquals(varY.getNumReads(), 1);
     assertEquals(varY.getNumWrites(), 1);
 
     assertNotNull(varZ);
     assertEquals(varZ.getDataType(), DataType.INTEGER);
-    assertEquals(varZ.getExtent(), -1);
+    assertEquals(varZ.getExtent(), 0);
     assertEquals(varZ.getInitialValue(), Variable.CONSTANT_EXPRESSION);
     assertEquals(varZ.getNumWrites(), 1);
   }
@@ -918,21 +947,21 @@ public class TreeParser03Test {
     }
     assertNotNull(varA);
     assertEquals(varA.getDataType(), DataType.INTEGER);
-    assertEquals(varA.getExtent(), -1);
+    assertEquals(varA.getExtent(), 0);
     assertEquals(varA.getInitialValue(), null);
     assertEquals(varA.getNumReads(), 2);
     assertEquals(varA.getNumWrites(), 0);
 
     assertNotNull(varB);
     assertEquals(varB.getDataType(), DataType.INTEGER);
-    assertEquals(varB.getExtent(), -1);
+    assertEquals(varB.getExtent(), 0);
     assertEquals(varB.getInitialValue(), null);
     assertEquals(varB.getNumReads(), 2);
     assertEquals(varB.getNumWrites(), 0);
 
     assertNotNull(varX);
     assertEquals(varX.getDataType(), DataType.INTEGER);
-    assertEquals(varX.getExtent(), 0);
+    assertEquals(varX.getExtent(), -32767);
     assertEquals(varX.getInitialValue(), Variable.CONSTANT_ARRAY);
     assertEquals(varX.getNumReads(), 0);
     assertEquals(varX.getNumWrites(), 1);
@@ -955,7 +984,7 @@ public class TreeParser03Test {
       assertNotNull(varX);
       assertEquals(varX.getDataType(), DataType.CLASS);
       assertEquals(varX.getClassName(), "Progress.Lang.Object");
-      assertEquals(varX.getExtent(), -1);
+      assertEquals(varX.getExtent(), 0);
       assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
       assertEquals(varX.getNumReads(), 0);
       assertEquals(varX.getNumWrites(), 1);
@@ -978,7 +1007,7 @@ public class TreeParser03Test {
 
       assertNotNull(varX);
       assertEquals(varX.getDataType(), DataType.DATETIME);
-      assertEquals(varX.getExtent(), -1);
+      assertEquals(varX.getExtent(), 0);
       assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
       assertEquals(varX.getNumReads(), 0);
       assertEquals(varX.getNumWrites(), 1);
@@ -998,4 +1027,47 @@ public class TreeParser03Test {
     assertEquals(i1.getNumReads(), 1);
     assertEquals(i1.getNumWrites(), 1);
   }
+
+  @Test
+  public void testParameterAs() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test25.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    assertEquals(unit.getRootScope().getVariables().size(), 6);
+
+    Variable x1 = unit.getRootScope().getVariable("x1");
+    assertNotNull(x1);
+    assertEquals(x1.getNumReads(), 1);
+    assertEquals(x1.getNumWrites(), 0);
+
+    Variable x2 = unit.getRootScope().getVariable("x2");
+    assertNotNull(x2);
+    assertEquals(x2.getNumReads(), 1);
+    assertEquals(x2.getNumWrites(), 0);
+
+    Variable x3 = unit.getRootScope().getVariable("x3");
+    assertNotNull(x3);
+    assertEquals(x3.getNumReads(), 0);
+    assertEquals(x3.getNumWrites(), 1);
+
+    Variable x4 = unit.getRootScope().getVariable("x4");
+    assertNotNull(x4);
+    assertEquals(x4.getNumReads(), 0);
+    assertEquals(x4.getNumWrites(), 1);
+
+    Variable x5 = unit.getRootScope ().getVariable("x5");
+    assertNotNull(x5);
+    assertEquals(x5.getNumReads(), 1);
+    assertEquals(x5.getNumWrites(), 1);
+
+    Variable x6 = unit.getRootScope().getVariable("x6");
+    assertNotNull(x6);
+    assertEquals(x6.getNumReads(), 1);
+    assertEquals(x6.getNumWrites(), 1);
+  }
+
 }

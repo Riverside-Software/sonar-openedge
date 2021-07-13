@@ -206,21 +206,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
-  public void enterParameterArgAs(ParameterArgAsContext ctx) {
-    Variable variable = new Variable("", currentScope);
-    if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
-        || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
-      variable.setDataType(DataType.CLASS);
-      variable.setClassName(ctx.datatype().getStop().getText());
-    } else {
-      variable.setDataType(DataType.getDataType(ctx.datatype().getStop().getType()));
-    }
-
-    currSymbol = variable;
-  }
-
-  @Override
-  public void enterParameterArgComDatatype(ParameterArgComDatatypeContext ctx) {
+  public void enterParameterArgExpression(ParameterArgExpressionContext ctx) {
     setContextQualifier(ctx.expression(), contextQualifiers.removeFrom(ctx));
   }
 
@@ -242,7 +228,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     wipParameters.addFirst(param);
 
     wipParameters.getFirst().setDirectionNode(ABLNodeType.BUFFER);
-    wipParameters.getFirst().setProgressType(ABLNodeType.BUFFER.getType());
+    wipParameters.getFirst().setProgressType(ABLNodeType.BUFFER);
 
     setContextQualifier(ctx.record(), ContextQualifier.SYMBOL);
   }
@@ -276,19 +262,25 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void exitFunctionParamStandardAs(FunctionParamStandardAsContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.PARAMETER);
-    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
-    wipParameters.getFirst().setSymbol(var);
-    addToSymbolScope(var);
+    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.PARAMETER);
+    if (ctx.extentPhrase() != null) {
+      defExtent(ctx.extentPhrase().constant() != null ? ctx.extentPhrase().constant().getText() : "");
+    }
+    v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    wipParameters.getFirst().setSymbol(v);
+    addToSymbolScope(v);
     defAs(ctx.datatype());
   }
 
   @Override
   public void enterFunctionParamStandardLike(FunctionParamStandardLikeContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n2.getText(), Variable.Type.PARAMETER);
-    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
-    wipParameters.getFirst().setSymbol(var);
-    stack.push(var);
+    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.n2.getText(), Variable.Type.PARAMETER);
+    if (ctx.extentPhrase() != null) {
+      defExtent(ctx.extentPhrase().constant() != null ? ctx.extentPhrase().constant().getText() : "");
+    }
+    v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    wipParameters.getFirst().setSymbol(v);
+    stack.push(v);
   }
 
   @Override
@@ -299,7 +291,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFunctionParamStandardTable(FunctionParamStandardTableContext ctx) {
-    wipParameters.getFirst().setProgressType(ABLNodeType.TEMPTABLE.getType());
+    wipParameters.getFirst().setProgressType(ABLNodeType.TEMPTABLE);
     setContextQualifier(ctx.record(), ContextQualifier.TEMPTABLESYMBOL);
   }
 
@@ -309,7 +301,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
         Variable.Type.PARAMETER);
     var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     wipParameters.getFirst().setSymbol(var);
-    wipParameters.getFirst().setProgressType(ABLNodeType.TABLEHANDLE.getType());
+    wipParameters.getFirst().setProgressType(ABLNodeType.TABLEHANDLE);
     addToSymbolScope(var);
   }
 
@@ -319,7 +311,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
         Variable.Type.PARAMETER);
     var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     wipParameters.getFirst().setSymbol(var);
-    wipParameters.getFirst().setProgressType(ABLNodeType.DATASETHANDLE.getType());
+    wipParameters.getFirst().setProgressType(ABLNodeType.DATASETHANDLE);
 
     addToSymbolScope(var);
   }
@@ -440,9 +432,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterGWidget(GWidgetContext ctx) {
     if (ctx.inuic() != null) {
       if (ctx.inuic().FRAME() != null) {
-        frameRef(support.getNode(ctx.inuic()).nextNode().nextNode());
+        frameRef(support.getNode(ctx.inuic()).getNextNode().getNextNode());
       } else if (ctx.inuic().BROWSE() != null) {
-        browseRef(support.getNode(ctx.inuic()).nextNode().nextNode());
+        browseRef(support.getNode(ctx.inuic()).getNextNode().getNextNode());
       }
     }
   }
@@ -458,9 +450,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterWidName(WidNameContext ctx) {
     // TODO Verify missing cases
     if (ctx.FRAME() != null) {
-      frameRef(support.getNode(ctx).nextNode());
+      frameRef(support.getNode(ctx).getNextNode());
     } else if (ctx.BROWSE() != null) {
-      browseRef(support.getNode(ctx).nextNode());
+      browseRef(support.getNode(ctx).getNextNode());
     } else if (ctx.FIELD() != null) {
       setContextQualifier(ctx.field(), ContextQualifier.REF);
     }
@@ -953,7 +945,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterDefineParameterStatementSub1(DefineParameterStatementSub1Context ctx) {
     wipParameters.getFirst().setDirectionNode(ABLNodeType.BUFFER);
-    wipParameters.getFirst().setProgressType(ABLNodeType.BUFFER.getType());
+    wipParameters.getFirst().setProgressType(ABLNodeType.BUFFER);
     setContextQualifier(ctx.record(),
         ctx.TEMPTABLE() == null ? ContextQualifier.SYMBOL : ContextQualifier.TEMPTABLESYMBOL);
   }
@@ -1015,13 +1007,13 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDefineParameterStatementSub2Table(DefineParameterStatementSub2TableContext ctx) {
-    wipParameters.getFirst().setProgressType(ABLNodeType.TEMPTABLE.getType());
+    wipParameters.getFirst().setProgressType(ABLNodeType.TEMPTABLE);
     setContextQualifier(ctx.record(), ContextQualifier.TEMPTABLESYMBOL);
   }
 
   @Override
   public void enterDefineParameterStatementSub2TableHandle(DefineParameterStatementSub2TableHandleContext ctx) {
-    wipParameters.getFirst().setProgressType(ABLNodeType.TABLEHANDLE.getType());
+    wipParameters.getFirst().setProgressType(ABLNodeType.TABLEHANDLE);
     Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.pn2.getText(), DataType.HANDLE,
         Variable.Type.PARAMETER);
     var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
@@ -1030,7 +1022,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDefineParameterStatementSub2DatasetHandle(DefineParameterStatementSub2DatasetHandleContext ctx) {
-    wipParameters.getFirst().setProgressType(ABLNodeType.DATASETHANDLE.getType());
+    wipParameters.getFirst().setProgressType(ABLNodeType.DATASETHANDLE);
     Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.dsh.getText(), DataType.HANDLE,
         Variable.Type.PARAMETER);
     var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
@@ -1173,13 +1165,13 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       for (VarStatementModifierContext mod : ctx.varStatementModifier()) {
         symbol.addModifier(Modifier.getModifier(mod.getStart().getType()));
       }
-      defAs((Primative) symbol, ctx.datatype());
+      defAs(symbol, ctx.datatype());
       addToSymbolScope(symbol);
       if (varCtx.initialValue != null) {
         defineInitialValue(symbol, varCtx.initialValue);
       }
       if (ctx.extent != null) {
-        int xt = 0;
+        int xt = -32767;
         if (ctx.extent.NUMBER() != null) {
           try {
             xt = Integer.parseInt(ctx.extent.NUMBER().getText());
@@ -1335,8 +1327,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterExtentPhrase2(ExtentPhrase2Context ctx) {
-    if (ctx.constant() != null)
-      defExtent(ctx.constant().getText());
+    defExtent(ctx.constant() == null ? "" : ctx.constant().getText());
   }
 
   @Override
@@ -2096,7 +2087,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     try {
       primative.setExtent(Integer.parseInt(text));
     } catch (NumberFormatException caught) {
-      primative.setExtent(-1);
+      primative.setExtent(-32767);
     }
   }
 
