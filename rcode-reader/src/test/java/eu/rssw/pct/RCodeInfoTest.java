@@ -253,6 +253,30 @@ public class RCodeInfoTest {
   }
 
   @Test
+  public void testTempTable() throws IOException {
+    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/TempTableAttrs.r")) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      assertNotNull(rci.getTypeInfo());
+
+      ITableElement tt1 = rci.getTypeInfo().getTempTable("tt1");
+      assertNotNull(tt1);
+      assertFalse(tt1.isNoUndo());
+      ITableElement tt2 = rci.getTypeInfo().getTempTable("tt2");
+      assertNotNull(tt2);
+      assertTrue(tt2.isNoUndo());
+      ITableElement tt3 = rci.getTypeInfo().getTempTable("tt3");
+      assertNotNull(tt3);
+      assertTrue(tt3.isSerializable());
+      ITableElement tt4 = rci.getTypeInfo().getTempTable("tt4");
+      assertNotNull(tt4);
+      assertTrue(tt4.isNonSerializable());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
   public void testElements() throws IOException {
     try (FileInputStream input = new FileInputStream("src/test/resources/rcode/TestClassElements.r")) {
       RCodeInfo rci = new RCodeInfo(input);
