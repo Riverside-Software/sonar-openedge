@@ -14,21 +14,21 @@
  ********************************************************************************/
 package org.prorefactor.treeparser;
 
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
-import org.prorefactor.proparse.antlr4.Proparse.ColonAttributeContext;
+import org.prorefactor.proparse.antlr4.Proparse.ExprTermAttributeContext;
+import org.prorefactor.proparse.antlr4.Proparse.ExprTermMethodCallContext;
+import org.prorefactor.proparse.antlr4.Proparse.ExprTermOtherContext;
+import org.prorefactor.proparse.antlr4.Proparse.ExprTermWidgetContext;
 import org.prorefactor.proparse.antlr4.Proparse.Exprt2FieldContext;
-import org.prorefactor.proparse.antlr4.Proparse.ExprtExprt2Context;
-import org.prorefactor.proparse.antlr4.Proparse.ExprtWidNameContext;
 import org.prorefactor.proparse.antlr4.Proparse.FieldContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgDatasetHandleContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgTableHandleContext;
 import org.prorefactor.proparse.antlr4.Proparse.RecordContext;
 import org.prorefactor.proparse.antlr4.Proparse.WidNameContext;
-import org.prorefactor.proparse.antlr4.Proparse.WidattrExprt2Context;
-import org.prorefactor.proparse.antlr4.Proparse.WidattrWidNameContext;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
@@ -58,37 +58,24 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
   }
 
   @Override
-  public void enterExprtWidName(ExprtWidNameContext ctx) {
-    widattr(ctx.widName(), ctx.colonAttribute(), support.getNode(ctx), contextQualifiers.get(ctx));
-  }
+  public void enterExprTermAttribute(ExprTermAttributeContext ctx) {
+    ContextQualifier cq = contextQualifiers.get(ctx.id);
 
-  @Override
-  public void enterExprtExprt2(ExprtExprt2Context ctx) {
-    if ((ctx.colonAttribute() != null) && (ctx.expressionTerm2() instanceof Exprt2FieldContext)
-        && (ctx.colonAttribute().colonAttributeSub(0).OBJCOLON() != null)) {
-      widattr((Exprt2FieldContext) ctx.expressionTerm2(), contextQualifiers.get(ctx),
-          ctx.colonAttribute().colonAttributeSub(0).id.getText());
+    if (ctx.expressionTerm() instanceof ExprTermOtherContext) {
+      ExprTermOtherContext ctx2 = (ExprTermOtherContext) ctx.expressionTerm();
+      if (ctx2.expressionTerm2() instanceof Exprt2FieldContext) {
+        Exprt2FieldContext fld = (Exprt2FieldContext) ctx2.expressionTerm2();
+        widattr(fld, cq, ctx.id.getText());
+      }
+    } else if (ctx.expressionTerm() instanceof ExprTermWidgetContext) {
+      widattr(ctx, (ExprTermWidgetContext) ctx.expressionTerm(), cq, ctx.id.getText());
     }
-  }
-
-  @Override
-  public void enterWidattrExprt2(WidattrExprt2Context ctx) {
-    if ((ctx.expressionTerm2() instanceof Exprt2FieldContext)
-        && (ctx.colonAttribute().colonAttributeSub(0).id != null)) {
-      widattr((Exprt2FieldContext) ctx.expressionTerm2(), contextQualifiers.get(ctx),
-          ctx.colonAttribute().colonAttributeSub(0).id.getText());
-    }
-  }
-
-  @Override
-  public void enterWidattrWidName(WidattrWidNameContext ctx) {
-    widattr(ctx.widName(), ctx.colonAttribute(), support.getNode(ctx.getParent()), contextQualifiers.get(ctx));
   }
 
   @Override
   public void enterWidName(WidNameContext ctx) {
     if ((ctx.BUFFER() != null) || (ctx.TEMPTABLE() != null)) {
-      TableBuffer tableBuffer = currentScope.lookupBuffer(ctx.filn().getText());
+      TableBuffer tableBuffer = currentScope.lookupBuffer(ctx.identifier().getText());
       if (tableBuffer != null) {
         tableBuffer.noteReference(support.getNode(ctx), ContextQualifier.SYMBOL);
       }
@@ -133,26 +120,6 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
     }
   }
 
-  private void widattr(WidNameContext ctx, ColonAttributeContext ctx2, JPNode node, ContextQualifier cq) {
-    if ((ctx == null) || (ctx2 == null))
-      return;
-    if ((ctx.systemHandleName() != null) && (ctx.systemHandleName().THISOBJECT() != null)) {
-      FieldLookupResult result = rootScope.getRootBlock().lookupField(ctx2.colonAttributeSub(0).id.getText(), true);
-      if (result == null)
-        return;
-
-      if (result.getSymbol() instanceof Variable) {
-        result.getSymbol().noteReference(node, cq);
-        // If using chained expression, then we add a REF reference
-        if ((cq != ContextQualifier.REF) && (ctx2.colonAttributeSub().size() > 1)) {
-          result.getSymbol().noteReference(node, ContextQualifier.REF);
-        } else if (support.getNode(ctx) != null) { // Try to associate Symbol to WidgetRef object
-          support.getNode(ctx).getParent().setSymbol((Variable) result.getSymbol());
-        }
-      }
-    }
-  }
-
   // Called from expressionTerm rule (expressionTerm2 option) and widattr rule (widattrExprt2 option)
   // Tries to add references to variables/properties of current class, or references to static classes
   private void widattr(Exprt2FieldContext ctx2, ContextQualifier cq, String right) {
@@ -169,6 +136,24 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
       // Variable
       if (result.getSymbol() instanceof Variable) {
         result.getSymbol().noteReference(support.getNode(ctx2.getParent().getParent()), cq);
+      }
+    }
+  }
+
+  private void widattr(ParseTree ctx, ExprTermWidgetContext ctx2, ContextQualifier cq, String right) {
+    if ((ctx2.widName().systemHandleName() != null) && (ctx2.widName().systemHandleName().THISOBJECT() != null)) {
+      FieldLookupResult result = rootScope.getRootBlock().lookupField(right, true);
+      if (result == null)
+        return;
+      if (result.getSymbol() instanceof Variable) {
+        result.getSymbol().noteReference(support.getNode(ctx), cq);
+        // If using chained expression, then we add a REF reference
+        if ((cq != ContextQualifier.REF) && ((ctx.getParent() instanceof ExprTermMethodCallContext)
+            || (ctx.getParent() instanceof ExprTermAttributeContext))) {
+          result.getSymbol().noteReference(support.getNode(ctx), ContextQualifier.REF);
+        } else if (support.getNode(ctx) != null) {
+          support.getNode(ctx).setSymbol((Variable) result.getSymbol());
+        }
       }
     }
   }

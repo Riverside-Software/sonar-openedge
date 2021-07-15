@@ -191,6 +191,14 @@ public class ParserTest {
   }
 
   @Test
+  public void testExpr() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("message xx. catch err as Progress.Lang.Error: message err:GetClass():TypeName. end.".getBytes()), "<unnamed>", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
+  }
+
+  @Test
   public void testConnectDatabase() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("connect database dialog box".getBytes()), "<unnamed>", session);
     unit.parse();

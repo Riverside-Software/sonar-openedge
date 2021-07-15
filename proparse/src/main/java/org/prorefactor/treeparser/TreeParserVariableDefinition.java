@@ -385,34 +385,47 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   // Expression term
 
+  private void setStaticQualifier(ExpressionTermContext ctx) {
+    if (ctx instanceof ExprTermOtherContext) {
+      ExprTermOtherContext ctx2 = (ExprTermOtherContext) ctx;
+      if (ctx2.expressionTerm2() instanceof Exprt2FieldContext) {
+        Exprt2FieldContext fld = (Exprt2FieldContext) ctx2.expressionTerm2();
+        String clsRef = fld.getText();
+        if ((fld.ENTERED() == null) && !Strings.isNullOrEmpty(support.lookupClassName(clsRef))) {
+          FieldLookupResult result = currentBlock.lookupField(clsRef, true);
+          if (result == null)
+            setContextQualifier(ctx2, ContextQualifier.STATIC);
+        }
+      }
+    }
+  }
+
   @Override
-  public void enterExprtNoReturnValue(ExprtNoReturnValueContext ctx) {
+  public void enterExprTermMethodCall(ExprTermMethodCallContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
-    setContextQualifier(ctx.sWidget(), qual);
-    setContextQualifier(ctx.colonAttribute(), qual);
+    setContextQualifier(ctx.expressionTerm(), ContextQualifier.REF);
+    setContextQualifier(ctx.id, qual);
+    setStaticQualifier(ctx.expressionTerm());
   }
 
   @Override
-  public void enterExprtExprt2(ExprtExprt2Context ctx) {
-    if ((ctx.colonAttribute() != null) && (ctx.expressionTerm2() instanceof Exprt2FieldContext)
-        && (ctx.colonAttribute().colonAttributeSub(0).OBJCOLON() != null)) {
-      ContextQualifier qual = contextQualifiers.get(ctx);
-      widattr((Exprt2FieldContext) ctx.expressionTerm2(), qual, ctx.colonAttribute().colonAttributeSub(0).id.getText());
-    } else {
-      ContextQualifier qual = contextQualifiers.removeFrom(ctx);
-      setContextQualifier(ctx.expressionTerm2(), qual);
-      if (ctx.colonAttribute() != null)
-        setContextQualifier(ctx.colonAttribute(), qual);
-    }
+  public void enterExprTermAttribute(ExprTermAttributeContext ctx) {
+    ContextQualifier qual = contextQualifiers.removeFrom(ctx);
+    setContextQualifier(ctx.expressionTerm(), ContextQualifier.REF);
+    setContextQualifier(ctx.id, qual);
+    setStaticQualifier(ctx.expressionTerm());
   }
 
   @Override
-  public void enterWidattrExprt2(WidattrExprt2Context ctx) {
-    if ((ctx.expressionTerm2() instanceof Exprt2FieldContext)
-        && (ctx.colonAttribute().colonAttributeSub(0).id != null)) {
-      widattr((Exprt2FieldContext) ctx.expressionTerm2(), contextQualifiers.get(ctx),
-          ctx.colonAttribute().colonAttributeSub(0).id.getText());
-    }
+  public void enterExprTermWidget(ExprTermWidgetContext ctx) {
+    ContextQualifier qual = contextQualifiers.removeFrom(ctx);
+    setContextQualifier(ctx.widName(), qual);
+  }
+
+  @Override
+  public void enterExprTermOther(ExprTermOtherContext ctx) {
+    ContextQualifier qual = contextQualifiers.removeFrom(ctx);
+    setContextQualifier(ctx.expressionTerm2(), qual);
   }
 
   @Override
@@ -482,8 +495,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterAssignStatement2(AssignStatement2Context ctx) {
     // Shorthand operator also read variable content
     ContextQualifier qual = ctx.EQUAL() == null ? ContextQualifier.REFUP : ContextQualifier.UPDATING;
-    if (ctx.widattr() != null) {
-      setContextQualifier(ctx.widattr(), qual);
+    if (ctx.expressionTerm() != null) {
+      setContextQualifier(ctx.expressionTerm(), qual);
     } else if (ctx.field() != null) {
       setContextQualifier(ctx.field(), qual);
     }
@@ -494,8 +507,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterAssignEqual(AssignEqualContext ctx) {
     // Shorthand operator also read variable content
     ContextQualifier qual = ctx.EQUAL() == null ? ContextQualifier.REFUP : ContextQualifier.UPDATING;
-    if (ctx.widattr() != null) {
-      setContextQualifier(ctx.widattr(), qual);
+    if (ctx.expressionTerm() != null) {
+      setContextQualifier(ctx.expressionTerm(), qual);
     } else if (ctx.field() != null) {
       setContextQualifier(ctx.field(), qual);
     }
@@ -1260,8 +1273,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFieldEqualDynamicNew(FieldEqualDynamicNewContext ctx) {
-    if (ctx.widattr() != null) {
-      setContextQualifier(ctx.widattr(), ContextQualifier.UPDATING);
+    if (ctx.expressionTerm() != null) {
+      setContextQualifier(ctx.expressionTerm(), ContextQualifier.UPDATING);
     } else if (ctx.field() != null) {
       setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
     }
@@ -2287,19 +2300,6 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   private void defineWorktable(JPNode defAST, String name) {
     defineTable(defAST, name, IConstants.ST_WTABLE);
-  }
-
-  // Called from expressionTerm rule (expressionTerm2 option) and widattr rule (widattrExprt2 option)
-  // Tries to add references to variables/properties of current class, or references to static classes
-  private void widattr(Exprt2FieldContext ctx2, ContextQualifier cq, String right) {
-    String clsRef = ctx2.field().getText();
-
-    if ((ctx2.ENTERED() == null) && !Strings.isNullOrEmpty(support.lookupClassName(clsRef))) {
-      // First check if there's a variable name by this name
-      FieldLookupResult result = currentBlock.lookupField(clsRef, true);
-      if (result == null)
-        setContextQualifier(ctx2, ContextQualifier.STATIC);
-    }
   }
 
   private void frameRef(JPNode idAST) {

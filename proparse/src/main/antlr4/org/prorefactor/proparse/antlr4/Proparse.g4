@@ -276,6 +276,7 @@ statement:
   |  showStatsStatement
   |  statusStatement
   |  stopStatement
+  |  superStatement
   |  subscribeStatement
   |  systemDialogColorStatement
   |  systemDialogFontStatement
@@ -395,7 +396,6 @@ builtinFunction:
   |  PAGENUMBER LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  PAGESIZE LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  SEEK LEFTPAREN ( INPUT | OUTPUT | streamname | STREAMHANDLE expression ) RIGHTPAREN // streamname, /not/ stream_name_or_handle.
-  |  SUPER parameterList  // also noarg
   |  TYPEOF LEFTPAREN expression COMMA typeName RIGHTPAREN
   |  argFunction
   |  optionalArgFunction
@@ -509,16 +509,12 @@ expression:
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 expressionTerm:
-    NORETURNVALUE sWidget colonAttribute  # exprtNoReturnValue
-  | // Widget attributes has to be checked before field or func, because they can be ambiguous up to the OBJCOLON. Think about no-arg functions like SUPER.
-    // Also has to be checked before systemhandlename, because you want to pick up all of FILE-INFO:FILE-TYPE rather than just FILE-INFO, for example.
-    widName colonAttribute           # exprtWidName
-  | expressionTerm2 colonAttribute?  # exprtExprt2
-  ;
-
-widattr:
-    widName colonAttribute           # widattrWidName
-  | expressionTerm2 colonAttribute   # widattrExprt2
+    expressionTerm ( OBJCOLON | DOUBLECOLON ) id=nonPunctuating methodParamList  # exprTermMethodCall
+  | expressionTerm ( OBJCOLON | DOUBLECOLON ) id=nonPunctuating                  # exprTermAttribute
+  | expressionTerm arraySubscript # exprTermArray
+  | expressionTerm inuic          # exprTermInUI
+  | widName                       # exprTermWidget
+  | expressionTerm2               # exprTermOther
   ;
 
 expressionTerm2:
@@ -541,7 +537,6 @@ expressionTerm2:
     { support.isClass() && support.unknownMethodCallsAllowed() }? methodname=identifier parameterListNoRoot # exprt2ParenCall2
   | constant   # exprt2Constant
   | noArgFunction  # exprt2NoArgFunc
-  | systemHandleName  # exprt2SystemHandleName
   | field ( NOT? ENTERED )?  # exprt2Field
   ;
 
@@ -556,20 +551,12 @@ widName:
   | MENUITEM identifier
   | BROWSE identifier
   | QUERY identifier
-  | TEMPTABLE filn
-  | BUFFER filn
-  | XDOCUMENT filn
-  | XNODEREF filn
-  | SOCKET filn
+  | TEMPTABLE identifier
+  | BUFFER identifier
+  | XDOCUMENT identifier
+  | XNODEREF identifier
+  | SOCKET identifier
   | STREAM streamname
-  ;
-
-colonAttribute:
-    colonAttributeSub+ inuic? ( AS . )?
-  ;
-
-colonAttributeSub:
-    ( OBJCOLON | DOUBLECOLON ) id=. arraySubscript? methodParamList?
   ;
 
 gWidget:
@@ -583,7 +570,6 @@ widgetList:
 sWidget:
     widName | field
   ;
-
 
 filn:
     t1=identifier ( NAMEDOT t2=identifier )?
@@ -797,11 +783,11 @@ assignmentList: // SEMITRANSLATED
   ;
 
 assignStatement2:
-    ( pseudoFunction | widattr | field ) ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) expression NOERROR? statementEnd
+    ( pseudoFunction | expressionTerm | field ) ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) expression NOERROR? statementEnd
   ;
 
 assignEqual:
-   ( pseudoFunction | widattr | field ) ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) expression
+   ( pseudoFunction | expressionTerm | field ) ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) expression
   ;
 
 assignField:
@@ -1957,7 +1943,7 @@ dynamicPropertyFunction:
   ;
 
 fieldEqualDynamicNew:
-    (widattr | field) EQUAL dynamicNew
+    ( expressionTerm | field ) EQUAL dynamicNew
   ;
 
 dynamicNew:
@@ -3229,6 +3215,10 @@ stopAfter:
 
 stopStatement:
     STOP statementEnd
+  ;
+
+superStatement:
+    SUPER LEFTPAREN ( parameter ( COMMA parameter )* )? RIGHTPAREN
   ;
 
 streamNameOrHandle:

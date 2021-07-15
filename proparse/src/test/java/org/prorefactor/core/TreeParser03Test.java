@@ -513,7 +513,7 @@ public class TreeParser03Test {
     assertEquals(var1.getNumWrites(), 1);
     Variable var2 = unit.getRootScope().getVariable("yyy");
     assertEquals(var2.getNumReads(), 1);
-    assertEquals(var2.getNumWrites(), 2);
+    assertEquals(var2.getNumWrites(), 1);
     
     assertEquals(unit.getRootScope().getChildScopes().size(), 2);
     Variable var3 = unit.getRootScope().getChildScopes().get(0).getVariable("xxx");
@@ -524,16 +524,16 @@ public class TreeParser03Test {
     JPNode fooBlock = unit.getRootScope().getChildScopes().get(0).getRootBlock().getNode().findDirectChild(
         ABLNodeType.CODE_BLOCK);
     assertEquals(fooBlock.getDirectChildren().get(0).getFirstChild().getFirstChild().getNodeType(),
-        ABLNodeType.WIDGET_REF);
+        ABLNodeType.ATTRIBUTE_REF);
     assertEquals(fooBlock.getDirectChildren().get(0).getFirstChild().getFirstChild().getSymbol(), var1);
 
     JPNode barBlock = unit.getRootScope().getChildScopes().get(1).getRootBlock().getNode().findDirectChild(
         ABLNodeType.CODE_BLOCK);
     assertEquals(barBlock.getDirectChildren().get(0).getFirstChild().getFirstChild().getNodeType(),
-        ABLNodeType.WIDGET_REF);
+        ABLNodeType.ATTRIBUTE_REF);
     assertEquals(barBlock.getDirectChildren().get(0).getFirstChild().getFirstChild().getSymbol(), var2);
     assertEquals(barBlock.getDirectChildren().get(1).getFirstChild().getFirstChild().getNodeType(),
-        ABLNodeType.WIDGET_REF);
+        ABLNodeType.ATTRIBUTE_REF);
     assertNull(barBlock.getDirectChildren().get(1).getFirstChild().getFirstChild().getSymbol());
   }
 

@@ -159,6 +159,7 @@ public enum ABLNodeType {
   FORMAT_PHRASE(Proparse.Format_phrase, NodeTypesOption.STRUCTURE),
   INLINE_DEFINITION(Proparse.Inline_definition, NodeTypesOption.STRUCTURE),
   LOCAL_METHOD_REF(Proparse.Local_method_ref, NodeTypesOption.STRUCTURE),
+  ATTRIBUTE_REF(Proparse.Attribute_ref, NodeTypesOption.STRUCTURE),
   LOOSE_END_KEEPER(Proparse.Loose_End_Keeper, NodeTypesOption.STRUCTURE),
   METHOD_PARAM_LIST(Proparse.Method_param_list, NodeTypesOption.STRUCTURE),
   METHOD_PARAMETER(Proparse.Method_parameter, NodeTypesOption.STRUCTURE),

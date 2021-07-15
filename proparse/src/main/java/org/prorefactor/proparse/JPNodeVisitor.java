@@ -26,8 +26,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode.Builder;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.proparse.antlr4.ProparseBaseVisitor;
 import org.prorefactor.proparse.antlr4.Proparse.*;
+import org.prorefactor.proparse.antlr4.ProparseBaseVisitor;
 import org.prorefactor.proparse.support.ParserSupport;
 
 public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
@@ -312,31 +312,21 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   // ---------------
 
   @Override
-  public Builder visitExprtNoReturnValue(ExprtNoReturnValueContext ctx) {
-    return createTree(ctx, ABLNodeType.WIDGET_REF);
+  public Builder visitExprTermMethodCall(ExprTermMethodCallContext ctx) {
+    return createTree(ctx, ABLNodeType.LOCAL_METHOD_REF).setRuleNode(ctx);
   }
 
   @Override
-  public Builder visitExprtWidName(ExprtWidNameContext ctx) {
-    return createTree(ctx, ABLNodeType.WIDGET_REF).setRuleNode(ctx);
+  public Builder visitExprTermAttribute(ExprTermAttributeContext ctx) {
+    return createTree(ctx, ABLNodeType.ATTRIBUTE_REF).setRuleNode(ctx);
   }
-
+  
   @Override
-  public Builder visitExprtExprt2(ExprtExprt2Context ctx) {
-    if (ctx.colonAttribute() != null) {
-      return createTree(ctx, ABLNodeType.WIDGET_REF);
-    }
-    return visitChildren(ctx);
-  }
-
-  @Override
-  public Builder visitWidattrWidName(WidattrWidNameContext ctx) {
-    return createTree(ctx, ABLNodeType.WIDGET_REF);
-  }
-
-  @Override
-  public Builder visitWidattrExprt2(WidattrExprt2Context ctx) {
-    return createTree(ctx, ABLNodeType.WIDGET_REF);
+  public Builder visitExprTermWidget(ExprTermWidgetContext ctx) {
+    if (ctx.widName().systemHandleName() == null)
+      return createTree(ctx, ABLNodeType.WIDGET_REF).setRuleNode(ctx);
+    else
+      return visitChildren(ctx).setRuleNode(ctx);
   }
 
   @Override
@@ -374,16 +364,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitGWidget(GWidgetContext ctx) {
     return createTree(ctx, ABLNodeType.WIDGET_REF);
-  }
-
-  @Override
-  public Builder visitFiln(FilnContext ctx) {
-    return visitChildren(ctx);
-  }
-
-  @Override
-  public Builder visitFieldn(FieldnContext ctx) {
-    return visitChildren(ctx);
   }
 
   @Override
@@ -565,15 +545,23 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitAssignStatement2(AssignStatement2Context ctx) {
-    // Unset rule node, as it's in fact assigned to the parent node
     Builder node1 = createTreeFromSecondNode(ctx).setOperator().unsetRuleNode();
 
+    // It is faster and easier to transform ASSIGN statement to EXPRESSION statement when the left-part
+    // of the assignment is a constant, rather than doing that directly in the grammar
+    if ((ctx.EQUAL() != null) && (ctx.expressionTerm() instanceof ExprTermOtherContext)) {
+      ExprTermOtherContext ctx2 = (ExprTermOtherContext) ctx.expressionTerm();
+      if (ctx2.expressionTerm2() instanceof Exprt2ConstantContext) {
+        return new Builder(ABLNodeType.EXPR_STATEMENT).setStatement().setDown(
+            node1.changeType(ABLNodeType.EQ)).setRuleNode(ctx);
+      }
+    }
+    // Unset rule node, as it's in fact assigned to the parent node
     Builder holder = new Builder(ABLNodeType.ASSIGN).setStatement().setDown(node1).setRuleNode(ctx);
     Builder lastNode = node1;
     for (int zz = 3; zz < ctx.getChildCount(); zz++) {
       lastNode = lastNode.setRight(visit(ctx.getChild(zz))).getLast();
     }
-
     return holder;
   }
 
@@ -691,11 +679,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitCaseWhen(CaseWhenContext ctx) {
     return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public Builder visitCaseExpression1(CaseExpression1Context ctx) {
-    return visitChildren(ctx);
   }
 
   @Override
@@ -883,11 +866,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitCompileOption(CompileOptionContext ctx) {
     return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public Builder visitCompileLang(CompileLangContext ctx) {
-    return visitChildren(ctx);
   }
 
   @Override
@@ -2764,8 +2742,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   // ------------------
 
   /**
-   * Default behavior for each ParseTree node is to create an array of JPNode. ANTLR2 construct ruleName: TOKEN TOKEN |
-   * rule TOKEN | rule ...
+   * Default behavior for each ParseTree node is to create an array of JPNode.
    */
   @Override
   @Nonnull
