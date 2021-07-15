@@ -25,9 +25,18 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 
 /**
- * Merge NAMEDOT with previous and next tokens with the following rules:<ul>
- *  <li> ( ID | keyword ) NAMEDOT ( ID | keyword ) </li>
- *  <li> A comment can follow immediately NAMEDOT. If so, then an unlimited number of WS and COMMENT can follow NAMEDOT before the ID</li></ul>
+ * Merge NAMEDOT with previous and next tokens with the following rules:
+ * <ul>
+ * <li><code>( ID | unreserved_keyword ) NAMEDOT ( ID | unreserved_keyword )</code></li>
+ * <li>A comment can immediately follow <code>NAMEDOT</code>. If so, then an unlimited number of <code>WS</code> and
+ * <code>COMMENT</code> can follow <code>NAMEDOT</code> before the <code>ID</code></li>
+ * </ul>
+ * 
+ * Merge <code>FILENAME</code> tokens with previous token if they immediately follow an <code>ID</code> or
+ * <code>ANNOTATION</code>
+ * 
+ * Merge <code>NUMBER</code> tokens with previous token if they immediately follow an <code>ID</code>,
+ * <code>ANNOTATION</code> or keyword
  */
 public class NameDotTokenFilter implements TokenSource {
   private final TokenSource source;
