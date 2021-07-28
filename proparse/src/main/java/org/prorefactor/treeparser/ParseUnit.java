@@ -304,7 +304,7 @@ public class ParseUnit {
       } catch (ParseCancellationException uncaught) {
         // Not really precise as it includes exception trapping
         parseTimeSLL = System.nanoTime() - startTimeNs;
-        LOGGER.trace("Switching to LL prediction mode");
+        LOGGER.info("Switching to LL prediction mode because of token: {}", tokStream.get(tokStream.index()));
         switchToLL = true;
         tokStream.seek(0);
         parser.addErrorListener(new ProparseErrorListener());
