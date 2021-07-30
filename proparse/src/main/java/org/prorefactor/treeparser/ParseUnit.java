@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,7 +50,7 @@ import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
-import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
+import org.prorefactor.macrolevel.PreprocessorEventListener.CodeSection;
 import org.prorefactor.proparse.ABLLexer;
 import org.prorefactor.proparse.JPNodeVisitor;
 import org.prorefactor.proparse.ProparseErrorListener;
@@ -90,7 +91,8 @@ public class ParseUnit {
   private IncludeRef macroGraph;
   private boolean appBuilderCode;
   private boolean syntaxError;
-  private List<EditableCodeSection> sections;
+  private List<CodeSection> appBuilderSections;
+
   private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
   private Document doc = null;
@@ -250,7 +252,7 @@ public class ParseUnit {
     fileNameList = lexer.getFilenameList();
     macroGraph = lexer.getMacroGraph();
     appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
-    sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
+    appBuilderSections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
     metrics = lexer.getMetrics();
 
     return lexer;
@@ -339,7 +341,7 @@ public class ParseUnit {
     fileNameList = lexer.getFilenameList();
     macroGraph = lexer.getMacroGraph();
     appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
-    sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
+    appBuilderSections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
     metrics = lexer.getMetrics();
     support = parser.getParserSupport();
 
@@ -577,7 +579,7 @@ public class ParseUnit {
   public boolean isInEditableSection(int file, int line) {
     if (!appBuilderCode || (file > 0))
       return true;
-    for (EditableCodeSection range : sections) {
+    for (CodeSection range : appBuilderSections) {
       if ((range.getFileNum() == file) && (range.getStartLine() <= line) && (range.getEndLine() >= line))
         return true;
     }

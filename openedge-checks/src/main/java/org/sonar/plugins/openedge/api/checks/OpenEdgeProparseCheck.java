@@ -68,6 +68,10 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     Collections.addAll(issueAnnotations, context.config().get(Constants.SKIP_ANNOTATIONS).orElse("").split(","));
   }
 
+  protected Set<String> getNoIssueAnnotations() {
+    return Collections.unmodifiableSet(issueAnnotations);
+  }
+
   /**
    * Extend this method to define the prolint-nowarn keyword to skip issues
    */
