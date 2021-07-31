@@ -480,6 +480,16 @@ public class ParserTest {
   }
 
   @Test
+  public void testSwitchLL() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("run procName(input frame frame-a fldName).".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    // Switch to LL is NOT good, but unit test is there to be aware of any change here
+    assertTrue(unit.hasSwitchedToLL());
+  }
+
+  @Test
   public void testRecordFunction01() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
         "find first _file. display recid(_file).".getBytes()),

@@ -433,7 +433,6 @@ parameterList:
     parameterListNoRoot
   ;
 
-// FIXME Verify all those calls
 parameterListNoRoot:
     // This is used by user defd funcs, because the udfunc name /is/ the root for its parameter list.
     // Using a Parameter_list node would be unnecessary and silly.
