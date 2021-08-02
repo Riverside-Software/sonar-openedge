@@ -423,11 +423,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitFilename(FilenameContext ctx) {
-    ProToken.Builder tok = new ProToken.Builder((ProToken) ctx.t1.start).setType(ABLNodeType.FILENAME);
+    ProToken.Builder tok = new ProToken.Builder((ProToken) ctx.t1.start).setType(ABLNodeType.FILENAME).setHiddenBefore(
+        getHiddenBefore(ctx.t1.start));
     for (int zz = 1; zz < ctx.filenamePart().size(); zz++) {
       tok.mergeWith((ProToken) ctx.filenamePart(zz).start);
     }
-
     return new Builder(tok.build()).setRuleNode(ctx);
   }
 
@@ -2766,24 +2766,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Nonnull
   public Builder visitTerminal(TerminalNode node) {
     ProToken tok = (ProToken) node.getSymbol();
-
-    ProToken lastHiddenTok = null;
-    ProToken firstHiddenTok = null;
-
-    ProToken t = node.getSymbol().getTokenIndex() > 0 ? (ProToken) stream.get(node.getSymbol().getTokenIndex() - 1)
-        : null;
-    while ((t != null) && (t.getChannel() != Token.DEFAULT_CHANNEL)) {
-      if (firstHiddenTok == null) {
-        firstHiddenTok = t;
-      } else {
-        lastHiddenTok.setHiddenBefore(t);
-      }
-      lastHiddenTok = t;
-
-      t = t.getTokenIndex() > 0 ? (ProToken) stream.get(t.getTokenIndex() - 1) : null;
-    }
-    if (firstHiddenTok != null)
-      tok.setHiddenBefore(firstHiddenTok);
+    tok.setHiddenBefore(getHiddenBefore(tok));
 
     return new Builder(tok);
   }
@@ -2803,6 +2786,25 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   protected Builder defaultResult() {
     throw new UnsupportedOperationException("Not implemented");
+  }
+
+  private ProToken getHiddenBefore(Token initialToken) {
+    ProToken lastHiddenTok = null;
+    ProToken firstHiddenTok = null;
+
+    ProToken t = initialToken.getTokenIndex() > 0 ? (ProToken) stream.get(initialToken.getTokenIndex() - 1)
+        : null;
+    while ((t != null) && (t.getChannel() != Token.DEFAULT_CHANNEL)) {
+      if (firstHiddenTok == null) {
+        firstHiddenTok = t;
+      } else {
+        lastHiddenTok.setHiddenBefore(t);
+      }
+      lastHiddenTok = t;
+
+      t = t.getTokenIndex() > 0 ? (ProToken) stream.get(t.getTokenIndex() - 1) : null;
+    }
+    return firstHiddenTok;
   }
 
   /**
