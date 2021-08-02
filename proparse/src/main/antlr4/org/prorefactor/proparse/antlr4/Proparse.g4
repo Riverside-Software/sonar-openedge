@@ -786,7 +786,11 @@ assignStatement2:
   ;
 
 assignEqual:
-   ( pseudoFunction | expressionTerm | field ) ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) expression
+    left=assignEqualLeft ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) right=expression
+  ;
+
+assignEqualLeft:
+    pseudoFunction | expressionTerm | field
   ;
 
 assignField:

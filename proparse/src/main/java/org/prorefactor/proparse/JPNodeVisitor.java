@@ -320,7 +320,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   public Builder visitExprTermAttribute(ExprTermAttributeContext ctx) {
     return createTree(ctx, ABLNodeType.ATTRIBUTE_REF).setRuleNode(ctx);
   }
-  
+
   @Override
   public Builder visitExprTermWidget(ExprTermWidgetContext ctx) {
     if (ctx.widName().systemHandleName() == null)
@@ -568,6 +568,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitAssignEqual(AssignEqualContext ctx) {
     return createTreeFromSecondNode(ctx).setOperator();
+  }
+
+  @Override
+  public Builder visitAssignEqualLeft(AssignEqualLeftContext ctx) {
+    return createTree(ctx, ABLNodeType.LEFT_PART);
   }
 
   @Override

@@ -785,7 +785,7 @@ public class JPNode {
    * Walk down the tree from the input node
    */
   public void walk(ICallback<?> callback) {
-    if (attrGet(IConstants.OPERATOR) == IConstants.TRUE) {
+    if (isOperator()) {
       // Assuming OPERATORs only have two children (which should be the case)
       getFirstChild().walk(callback);
       callback.visitNode(this);
