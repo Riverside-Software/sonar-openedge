@@ -1815,7 +1815,7 @@ public enum ABLNodeType {
     return options.contains(NodeTypesOption.KEYWORD) && !options.contains(NodeTypesOption.RESERVED);
   }
 
-  public boolean isSystemHandleName() {
+  public boolean isSystemHandle() {
     return SYSTEM_HANDLES.contains(this);
   }
 
@@ -1823,12 +1823,20 @@ public enum ABLNodeType {
     return DATATYPE_IN_VARIABLE.contains(this);
   }
 
-  public boolean mayBeNoArgFunc() {
+  public boolean isNoArgFunc() {
     return NO_ARGUMENT_FUNCTIONS.contains(this);
   }
 
-  public boolean mayBeRegularFunc() {
+  public boolean isOptionalArgFunction() {
+    return OPTIONAL_ARG_FUNCTIONS.contains(this);
+  }
+
+  public boolean isRegularFunc() {
     return REGULAR_FUNCTIONS.contains(this);
+  }
+
+  public boolean isRecordFunc() {
+    return RECORD_FUNCTIONS.contains(this);
   }
 
   public boolean isAbbreviated(String txt) {
@@ -1970,7 +1978,7 @@ public enum ABLNodeType {
     ABLNodeType type = typeMap.get(nodeType);
     if (type == null)
       return false;
-    return type.isSystemHandleName();
+    return type.isSystemHandle();
   }
 
   public static boolean isValidDatatype(int nodeType) {
@@ -1984,14 +1992,14 @@ public enum ABLNodeType {
     ABLNodeType type = typeMap.get(nodeType);
     if (type == null)
       return false;
-    return type.mayBeNoArgFunc();
+    return type.isNoArgFunc();
   }
 
-  static boolean mayBeRegularFunc(int nodeType) {
+  static boolean isRegularFunc(int nodeType) {
     ABLNodeType type = typeMap.get(nodeType);
     if (type == null)
       return false;
-    return type.mayBeRegularFunc();
+    return type.isRegularFunc();
   }
 
   private static void generateKeywordsG4(final PrintStream out) {

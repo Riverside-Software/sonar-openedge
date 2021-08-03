@@ -108,7 +108,7 @@ public class TokenList implements TokenSource {
       queue.addAll(comments);
     } else {
       // Not namedotted, so if it's reserved and not a system handle, convert to ID.
-      if (tok.getNodeType().isReservedKeyword() && !tok.getNodeType().isSystemHandleName())
+      if (tok.getNodeType().isReservedKeyword() && !tok.getNodeType().isSystemHandle())
         queue.addLast(new ProToken.Builder(tok).setType(ABLNodeType.ID).build());
       else
         queue.addLast(tok);
