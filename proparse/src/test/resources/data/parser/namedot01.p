@@ -1,4 +1,3 @@
- @@ -0,0 +1,10 @@
 DEFINE TEMP-TABLE tt
   FIELD fld1 AS CHAR.
 

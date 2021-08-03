@@ -56,7 +56,7 @@ public class ParserTest {
     session = injector.getInstance(RefactorSession.class);
   }
 
-  @Test(enabled = false)
+  @Test
   public void testNameDot01() {
     // Issue #897
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "namedot01.p"), session);
@@ -66,17 +66,23 @@ public class ParserTest {
     List<JPNode> stmts = unit.getTopNode().queryStateHead(ABLNodeType.FIND);
     assertEquals(stmts.size(), 6);
     JPNode ref1 = stmts.get(0).query(ABLNodeType.FIELD_REF).get(0);
-    assertEquals(ref1.getFirstChild().getText(), "tt.fld1");
+    assertEquals(ref1.getNumberOfChildren(), 3);
+    assertEquals(ref1.toStringFulltext().trim(), "tt .fld1");
     JPNode ref2 = stmts.get(1).query(ABLNodeType.FIELD_REF).get(0);
-    assertEquals(ref2.getFirstChild().getText(), "tt.fld1");
+    assertEquals(ref2.getNumberOfChildren(), 3);
+    assertEquals(ref2.toStringFulltext().trim(), "tt .fld1");
     JPNode ref3 = stmts.get(2).query(ABLNodeType.FIELD_REF).get(0);
-    assertEquals(ref3.getFirstChild().getText(), "tt.fld1.fld1");
+    assertEquals(ref3.getNumberOfChildren(), 3);
+    assertEquals(ref3.toStringFulltext().trim(), "tt.fld1 .fld1");
     JPNode ref4 = stmts.get(3).query(ABLNodeType.FIELD_REF).get(0);
-    assertEquals(ref4.getFirstChild().getText(), "tt.fld1");
+    assertEquals(ref4.getNumberOfChildren(), 1);
+    assertEquals(ref4.toStringFulltext().trim(), "tt.fld1");
     JPNode ref5 = stmts.get(4).query(ABLNodeType.FIELD_REF).get(0);
-    assertEquals(ref5.getFirstChild().getText(), "tt.fld1");
+    assertEquals(ref5.getNumberOfChildren(), 3);
+    assertEquals(ref5.toStringFulltext().trim(), "tt /* my eyes are bleeding */ /* yes */ .fld1");
     JPNode ref6 = stmts.get(5).query(ABLNodeType.FIELD_REF).get(0);
-    assertEquals(ref6.getFirstChild().getText(), "customer.name");
+    assertEquals(ref6.getNumberOfChildren(), 3);
+    assertEquals(ref6.toStringFulltext().trim(), "customer .name");
 
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DOT_COMMENT).size(), 0);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
