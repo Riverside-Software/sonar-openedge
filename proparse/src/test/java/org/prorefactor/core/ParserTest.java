@@ -490,6 +490,16 @@ public class ParserTest {
   }
 
   @Test
+  public void testSuperStatement() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("class foo: constructor foo(): super(). end. end class.".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.SUPER).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.PERIOD).size(), 0);
+  }
+
+  @Test
   public void testRecordFunction01() {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
         "find first _file. display recid(_file).".getBytes()),

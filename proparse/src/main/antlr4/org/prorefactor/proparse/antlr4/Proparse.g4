@@ -3221,7 +3221,7 @@ stopStatement:
   ;
 
 superStatement:
-    SUPER LEFTPAREN ( parameter ( COMMA parameter )* )? RIGHTPAREN
+    SUPER LEFTPAREN ( parameter ( COMMA parameter )* )? RIGHTPAREN statementEnd
   ;
 
 streamNameOrHandle:

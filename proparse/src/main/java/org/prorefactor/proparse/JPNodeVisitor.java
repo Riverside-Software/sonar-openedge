@@ -2425,6 +2425,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitSuperStatement(SuperStatementContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
   public Builder visitStreamNameOrHandle(StreamNameOrHandleContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
