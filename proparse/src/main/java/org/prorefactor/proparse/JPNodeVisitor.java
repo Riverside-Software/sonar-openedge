@@ -381,11 +381,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
-  public Builder visitArraySubscript(ArraySubscriptContext ctx) {
-    return createTree(ctx, ABLNodeType.ARRAY_SUBSCRIPT);
-  }
-
-  @Override
   public Builder visitMethodParamList(MethodParamListContext ctx) {
     return createTree(ctx, ABLNodeType.METHOD_PARAM_LIST);
   }
@@ -2224,11 +2219,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
     if (holder.getNodeType() == ABLNodeType.FIELD)
       holder.changeType(ABLNodeType.FIELDS);
     return holder;
-  }
-
-  @Override
-  public Builder visitRecordphrase(RecordphraseContext ctx) {
-    return createTreeFromFirstNode(ctx);
   }
 
   @Override

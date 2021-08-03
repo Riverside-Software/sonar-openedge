@@ -701,8 +701,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterCanFindFunction(CanFindFunctionContext ctx) {
     super.enterCanFindFunction(ctx);
 
-    RecordNameNode recordNode = (RecordNameNode) support.getNode(ctx.recordphrase().record());
-    String buffName = ctx.recordphrase().record().getText();
+    RecordNameNode recordNode = (RecordNameNode) support.getNode(ctx.recordPhrase().record());
+    String buffName = ctx.recordPhrase().record().getText();
     ITable table;
     boolean isDefault;
     TableBuffer tableBuffer = currentScope.lookupBuffer(buffName);
@@ -719,7 +719,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     recordNode.setTableBuffer(newBuff);
     currentBlock.addHiddenCursor(recordNode);
 
-    setContextQualifier(ctx.recordphrase().record(), ContextQualifier.INIT);
+    setContextQualifier(ctx.recordPhrase().record(), ContextQualifier.INIT);
   }
 
   @Override
@@ -1371,7 +1371,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFindStatement(FindStatementContext ctx) {
-    setContextQualifier(ctx.recordphrase().record(), ContextQualifier.INIT);
+    setContextQualifier(ctx.recordPhrase().record(), ContextQualifier.INIT);
   }
 
   @Override
@@ -1390,7 +1390,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterForRecordSpec(ForRecordSpecContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
-    for (RecordphraseContext rec : ctx.recordphrase()) {
+    for (RecordPhraseContext rec : ctx.recordPhrase()) {
       setContextQualifier(rec.record(), qual);
     }
   }
@@ -2334,7 +2334,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       if (LOG.isTraceEnabled())
         LOG.trace("Static reference to {}", refNode.getIdNode().getText());
     } else if ((refNode.getParent().getNodeType() == ABLNodeType.USING
-        && refNode.getParent().getParent().getNodeType() == ABLNodeType.RECORD_NAME)
+        && refNode.getParent().hasSibling(ABLNodeType.RECORD_NAME) != null)
         || (refNode.getFirstChild().getNodeType() == ABLNodeType.INPUT
             && (refNode.getNextSibling() == null || refNode.getNextSibling().getNodeType() != ABLNodeType.OBJCOLON))) {
       // First condition : there seems to be an implicit INPUT in USING phrases in a record phrase.

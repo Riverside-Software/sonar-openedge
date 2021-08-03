@@ -1297,7 +1297,7 @@ createWidgetPoolStatement:
   ;
 
 canFindFunction:
-    CANFIND LEFTPAREN findWhich? recordphrase RIGHTPAREN
+    CANFIND LEFTPAREN findWhich? recordPhrase RIGHTPAREN
   ;
 
 currentValueFunction:
@@ -2063,7 +2063,7 @@ finallyEnd:
   ;
 
 findStatement:
-    FIND findWhich? recordphrase ( NOWAIT | NOPREFETCH | NOERROR )* statementEnd
+    FIND findWhich? recordPhrase ( NOWAIT | NOPREFETCH | NOERROR )* statementEnd
   ;
 
 fontExpression:
@@ -2079,7 +2079,7 @@ forstate_sub:
   ;
 
 forRecordSpec:
-    findWhich? recordphrase (COMMA findWhich? recordphrase)*
+    findWhich? recordPhrase (COMMA findWhich? recordPhrase)*
   ;
 
 formatExpression:
@@ -2999,7 +2999,7 @@ recordFields:
     ( FIELDS | FIELD | EXCEPT ) ( LEFTPAREN ( field whenExpression? )* RIGHTPAREN )?
   ;
 
-recordphrase:
+recordPhrase:
     rec=record recordFields? ( TODAY | NOW | constant )? recordOption*
   ;
 
