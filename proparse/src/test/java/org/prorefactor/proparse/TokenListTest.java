@@ -141,13 +141,68 @@ public class TokenListTest {
   }
 
   @Test
+  public void testTokenList03bis() {
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("MESSAGE Progress. /* Holy shit */   Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
+    TokenSource filter0 = new NameDotTokenFilter(lexer);
+    TokenSource src = new TokenList(filter0);
+
+    // Recognized differently from the previous one (because of additional space between Progress. and comment ) */
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PROGRESS);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.COMMENT);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    ProToken tok = ((ProToken) src.nextToken());
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "Security.PAMStatus");
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+  }
+
+  @Test
+  public void testTokenList03ter() {
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("MESSAGE Progress /* Holy shit */   .Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
+    TokenSource filter0 = new NameDotTokenFilter(lexer);
+    TokenSource src = new TokenList(filter0);
+
+    // Recognized differently from the previous one
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    ProToken tok = ((ProToken) src.nextToken());
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "Progress.Security.PAMStatus");
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+  }
+
+  @Test
+  public void testTokenList03quater() {
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("MESSAGE Riverside /* Holy shit */   .Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
+    TokenSource filter0 = new NameDotTokenFilter(lexer);
+    TokenSource src = new TokenList(filter0);
+
+    // Recognized differently from the previous one
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    ProToken tok = ((ProToken) src.nextToken());
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "Riverside.Security.PAMStatus");
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+  }
+
+  @Test
   public void testTokenList04() {
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(".Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
     // Nothing recognized here, so we don't change the stream 
-    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.NAMEDOT);
     assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
     assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
     assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);

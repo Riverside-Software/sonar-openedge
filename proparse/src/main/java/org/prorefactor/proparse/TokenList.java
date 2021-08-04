@@ -16,7 +16,6 @@ package org.prorefactor.proparse;
 
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.NoSuchElementException;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.IntStream;
@@ -59,62 +58,82 @@ public class TokenList implements TokenSource {
   private void reviewObjcolon() {
     ProToken objColonToken = queue.removeLast();
     Deque<ProToken> comments = new LinkedList<>();
-    Deque<ProToken> clsName = new LinkedList<>();
+    Deque<ProToken> leftPart = new LinkedList<>();
 
-    boolean foundNamedot = false;
-    ProToken tok = null;
-    try {
-      // Store comments and whitespaces before the colon
-      tok = queue.removeLast();
-      while ((tok.getNodeType() == ABLNodeType.WS) || (tok.getNodeType() == ABLNodeType.COMMENT)) {
-        comments.addFirst(tok);
-        tok = queue.removeLast();
-      }
-  
-      foundNamedot = false;
-      while (true) {
-        // There can be space in front of a NAMEDOT in a table or field name. We don't want to fiddle with those here.
-        if ((tok.getNodeType() == ABLNodeType.WS) || (tok.getNodeType() == ABLNodeType.COMMENT)) {
-          break;
-        }
-  
-        // If previous is NAMEDOT, then we add both tokens
-        if ((queue.peekLast() != null) && (queue.peekLast().getNodeType() == ABLNodeType.NAMEDOT)) {
-          clsName.addFirst(tok);
-          clsName.addFirst(queue.removeLast());
-          tok = queue.removeLast();
-        } else if (tok.getText().startsWith(".")) {
-          clsName.addFirst(tok);
-          tok = queue.removeLast();
-        } else {
-          break;
-        }
-        foundNamedot = true;
-      }
-    } catch (NoSuchElementException caught) {
-      queue.addAll(clsName);
-      queue.addAll(comments);
+    // Save comments and whitespaces in list, and try to find first token on default channel
+    Deque<ProToken> prevTokens = getBackwardsFirstVisibleToken(queue);
+    if (prevTokens.isEmpty()) {
       queue.add(objColonToken);
       return;
     }
+    boolean lookBackwards = false;
+    ProToken tok = prevTokens.pollFirst();
+    if (tok.getChannel() == Token.DEFAULT_CHANNEL) {
+      leftPart.add(tok);
+      lookBackwards = (tok.getNodeType() == ABLNodeType.ID) || tok.getNodeType().isKeyword();
+    } else {
+      comments.add(tok);
+    }
+    comments.addAll(prevTokens);
 
-    if (foundNamedot) {
+    // Look backwards as far as possible...
+    while (lookBackwards) {
+      prevTokens = getBackwardsFirstVisibleToken(queue);
+      ProToken firstToken = prevTokens.peekFirst();
+      if (firstToken == null) {
+        // No more tokens, just stop
+        lookBackwards = false;
+      } else if ((firstToken.getNodeType() == ABLNodeType.NAMEDOT)
+          || ((firstToken.getNodeType() != ABLNodeType.PERIOD) && firstToken.getText().startsWith("."))) {
+        // NAMEDOT or something which starts with a dot but not just an end of statement ?
+        // Then add first token and first token from previous list
+        // Comments and whitespaces in between are discarded
+        leftPart.addFirst(prevTokens.peekFirst());
+        ProToken tmp = getBackwardsFirstVisibleToken(queue).peekFirst();
+        if (tmp != null)
+          leftPart.addFirst(tmp);
+      } else if ((prevTokens.size() == 1)
+          && ((firstToken.getNodeType() == ABLNodeType.ID) || firstToken.getNodeType().isKeyword())) {
+        // No space or comment ? Then this is attached to the next token
+        leftPart.addFirst(firstToken);
+      } else {
+        // Keep it as part of previous token
+        lookBackwards = false;
+        queue.addAll(prevTokens);
+      }
+    }
+
+    if (leftPart.size() > 1) {
       // Now merge all the parts into one ID token.
-      ProToken.Builder newTok = new ProToken.Builder(tok).setType(ABLNodeType.ID);
-      for (ProToken zz : clsName) {
+      ProToken.Builder newTok = new ProToken.Builder(leftPart.pollFirst()).setType(ABLNodeType.ID);
+      for (ProToken zz : leftPart) {
         newTok.mergeWith(zz);
       }
       queue.addLast(newTok.build());
-      queue.addAll(comments);
-    } else {
+    } else if (leftPart.size() == 1) {
+      ProToken tmp = leftPart.pollFirst();
       // Not namedotted, so if it's reserved and not a system handle, convert to ID.
-      if (tok.getNodeType().isReservedKeyword() && !tok.getNodeType().isSystemHandle())
-        queue.addLast(new ProToken.Builder(tok).setType(ABLNodeType.ID).build());
+      if (tmp.getNodeType().isReservedKeyword() && !tmp.getNodeType().isSystemHandle())
+        queue.addLast(new ProToken.Builder(tmp).setType(ABLNodeType.ID).build());
       else
-        queue.addLast(tok);
-      queue.addAll(comments);
+        queue.addLast(tmp);
+
     }
+    queue.addAll(comments);
     queue.add(objColonToken);
+  }
+
+  private Deque<ProToken> getBackwardsFirstVisibleToken(Deque<ProToken> queue) {
+    Deque<ProToken> retVal = new LinkedList<>();
+    ProToken tok = queue.pollLast();
+    while ((tok != null) && (tok.getChannel() != Token.DEFAULT_CHANNEL)) {
+      retVal.addFirst(tok);
+      tok = queue.pollLast();
+    }
+    if (tok != null)
+      retVal.addFirst(tok);
+
+    return retVal;
   }
 
   @Override
