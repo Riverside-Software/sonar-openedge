@@ -489,6 +489,18 @@ public class JPNode {
     return attrGet(IConstants.STATE2);
   }
 
+  /**
+   * @return Secondary node type, i.e. VARIABLE in DEFINE VARIABLE statement. Can be null
+   */
+  @Nullable
+  public ABLNodeType getNodeType2() {
+    int state2 = getState2();
+    if (state2 == 0)
+      return null;
+    else
+      return ABLNodeType.getNodeType(state2);
+  }
+
   /** Mark a node as a "statement head" */
   public void setStatementHead() {
     attrSet(IConstants.STATEHEAD, IConstants.TRUE);

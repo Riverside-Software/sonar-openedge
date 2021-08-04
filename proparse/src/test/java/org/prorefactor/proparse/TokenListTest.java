@@ -24,9 +24,9 @@ import java.io.InputStream;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.util.UnitTestModule;
-import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -55,69 +55,69 @@ public class TokenListTest {
       TokenSource src = new TokenList(filter0);
 
       // Progress.Security.PAMStatus:AccessDenied.
-      ProToken tok = (ProToken) src.nextToken();
-      assertEquals(tok.getType(), Proparse.ID);
+      ProToken tok = (ProToken) ((ProToken) src.nextToken());
+      assertEquals(tok.getNodeType(), ABLNodeType.ID);
       assertEquals(tok.getText(), "Progress.Security.PAMStatus");
       assertEquals(tok.getLine(), 1);
       assertEquals(tok.getCharPositionInLine(), 1);
       assertEquals(tok.getEndLine(), 1);
       assertEquals(tok.getEndCharPositionInLine(), 27);
       assertEquals(tok.getChannel(), 0);
-      assertEquals(src.nextToken().getType(), Proparse.OBJCOLON);
-      assertEquals(src.nextToken().getType(), Proparse.ID);
-      assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
 
       // Progress.Security.PAMStatus :AccessDenied.
-      tok = (ProToken) src.nextToken();
-      assertEquals(tok.getType(), Proparse.ID);
+      tok = (ProToken) ((ProToken) src.nextToken());
+      assertEquals(tok.getNodeType(), ABLNodeType.ID);
       assertEquals(tok.getText(), "Progress.Security.PAMStatus");
       assertEquals(tok.getLine(), 2);
       assertEquals(tok.getCharPositionInLine(), 1);
       assertEquals(tok.getEndLine(), 2);
       assertEquals(tok.getEndCharPositionInLine(), 27);
       assertEquals(tok.getChannel(), 0);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
-      assertEquals(src.nextToken().getType(), Proparse.OBJCOLON);
-      assertEquals(src.nextToken().getType(), Proparse.ID);
-      assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
 
       // Progress.Security.PAMStatus <bazinga> :AccessDenied.
-      tok = (ProToken) src.nextToken();
-      assertEquals(tok.getType(), Proparse.ID);
+      tok = (ProToken) ((ProToken) src.nextToken());
+      assertEquals(tok.getNodeType(), ABLNodeType.ID);
       assertEquals(tok.getText(), "Progress.Security.PAMStatus");
       assertEquals(tok.getLine(), 3);
       assertEquals(tok.getCharPositionInLine(), 1);
       assertEquals(tok.getEndLine(), 3);
       assertEquals(tok.getEndCharPositionInLine(), 27);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
-      tok = (ProToken) src.nextToken();
-      assertEquals(tok.getType(), Proparse.COMMENT);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+      tok = (ProToken) ((ProToken) src.nextToken());
+      assertEquals(tok.getNodeType(), ABLNodeType.COMMENT);
       assertEquals(tok.getText(), "//Test");
-      assertEquals(src.nextToken().getType(), Proparse.WS);
-      tok = (ProToken) src.nextToken();
-      assertEquals(tok.getType(), Proparse.COMMENT);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+      tok = (ProToken) ((ProToken) src.nextToken());
+      assertEquals(tok.getNodeType(), ABLNodeType.COMMENT);
       assertEquals(tok.getText(), "//Test2");
-      assertEquals(src.nextToken().getType(), Proparse.WS);
-      assertEquals(src.nextToken().getType(), Proparse.OBJCOLON);
-      assertEquals(src.nextToken().getType(), Proparse.ID);
-      assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
 
       // Progress.117x.clsName:StaticProperty.
-      tok = (ProToken) src.nextToken();
-      assertEquals(tok.getType(), Proparse.ID);
+      tok = (ProToken) ((ProToken) src.nextToken());
+      assertEquals(tok.getNodeType(), ABLNodeType.ID);
       assertEquals(tok.getText(), "Progress.117x.clsName");
       assertEquals(tok.getLine(), 7);
       assertEquals(tok.getCharPositionInLine(), 1);
       assertEquals(tok.getEndLine(), 7);
       assertEquals(tok.getEndCharPositionInLine(), 21);
       assertEquals(tok.getChannel(), 0);
-      assertEquals(src.nextToken().getType(), Proparse.OBJCOLON);
-      assertEquals(src.nextToken().getType(), Proparse.ID);
-      assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
     } catch (IOException caught) {
       fail("Unable to open file", caught);
     }
@@ -130,14 +130,14 @@ public class TokenListTest {
     TokenSource src = new TokenList(filter0);
 
     // The compiler accepts that...
-    assertEquals(src.nextToken().getType(), Proparse.MESSAGE);
-    assertEquals(src.nextToken().getType(), Proparse.WS);
-    Token tok = src.nextToken();
-    assertEquals(tok.getType(), Proparse.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    ProToken tok = ((ProToken) src.nextToken());
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
-    assertEquals(src.nextToken().getType(), Proparse.OBJCOLON);
-    assertEquals(src.nextToken().getType(), Proparse.ID);
-    assertEquals(src.nextToken().getType(), Proparse.PERIOD);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
   }
 
   @Test
@@ -147,11 +147,11 @@ public class TokenListTest {
     TokenSource src = new TokenList(filter0);
 
     // Nothing recognized here, so we don't change the stream 
-    assertEquals(src.nextToken().getType(), Proparse.NAMEDOT);
-    assertEquals(src.nextToken().getType(), Proparse.ID);
-    assertEquals(src.nextToken().getType(), Proparse.OBJCOLON);
-    assertEquals(src.nextToken().getType(), Proparse.ID);
-    assertEquals(src.nextToken().getType(), Proparse.PERIOD);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.NAMEDOT);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
   }
 
   @Test
@@ -161,26 +161,26 @@ public class TokenListTest {
     TokenSource src = new TokenList(filter0);
 
     // MESSAGE customer.custnum Progress.Security.PAMStatus:AccessDenied.
-    assertEquals(src.nextToken().getType(), Proparse.MESSAGE);
-    assertEquals(src.nextToken().getType(), Proparse.WS);
-    assertEquals(src.nextToken().getType(), Proparse.ID);
-    assertEquals(src.nextToken().getType(), Proparse.WS);
-    assertEquals(src.nextToken().getType(), Proparse.ID);
-    assertEquals(src.nextToken().getType(), Proparse.OBJCOLON);
-    assertEquals(src.nextToken().getType(), Proparse.ID);
-    assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-    assertEquals(src.nextToken().getType(), Proparse.WS);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
 
     // MESSAGE customer.custnum. Progress.Security.PAMStatus:AccessDenied.
-    assertEquals(src.nextToken().getType(), Proparse.MESSAGE);
-    assertEquals(src.nextToken().getType(), Proparse.WS);
-    assertEquals(src.nextToken().getType(), Proparse.ID);
-    assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-    assertEquals(src.nextToken().getType(), Proparse.WS);
-    assertEquals(src.nextToken().getType(), Proparse.ID);
-    assertEquals(src.nextToken().getType(), Proparse.OBJCOLON);
-    assertEquals(src.nextToken().getType(), Proparse.ID);
-    assertEquals(src.nextToken().getType(), Proparse.PERIOD);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
   }
 
   @Test
@@ -189,9 +189,9 @@ public class TokenListTest {
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
-    assertEquals(src.nextToken().getType(), Proparse.OBJCOLON);
-    assertEquals(src.nextToken().getType(), Proparse.ID);
-    assertEquals(src.nextToken().getType(), Proparse.PERIOD);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
   }
 
   @Test
@@ -200,12 +200,12 @@ public class TokenListTest {
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
-    assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-    assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-    assertEquals(src.nextToken().getType(), Proparse.WS);
-    assertEquals(src.nextToken().getType(), Proparse.OBJCOLON);
-    assertEquals(src.nextToken().getType(), Proparse.ID);
-    assertEquals(src.nextToken().getType(), Proparse.PERIOD);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
   }
 
   @Test
@@ -214,12 +214,12 @@ public class TokenListTest {
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
-    assertEquals(src.nextToken().getType(), Proparse.COMMENT);
-    assertEquals(src.nextToken().getType(), Proparse.WS);
-    assertEquals(src.nextToken().getType(), Proparse.OBJCOLON);
-    assertEquals(src.nextToken().getType(), Proparse.FILE);
-    assertEquals(src.nextToken().getType(), Proparse.WS);
-    assertEquals(src.nextToken().getType(), Proparse.PLUS);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.COMMENT);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.FILE);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PLUS);
   }
 
   @Test
@@ -230,47 +230,47 @@ public class TokenListTest {
       TokenSource src = new TokenList(filter0);
 
       // First line
-      Token tok1 = src.nextToken();
-      assertEquals(tok1.getType(), Proparse.ID);
+      ProToken tok1 = ((ProToken) src.nextToken());
+      assertEquals(tok1.getNodeType(), ABLNodeType.ID);
       assertEquals(tok1.getText(), "customer.name");
-      assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
       // Second line
-      assertEquals(src.nextToken().getType(), Proparse.ID);
-      assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
-      assertEquals(src.nextToken().getType(), Proparse.ID);
-      assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
       // Third line: comment after period results in NAMEDOT
-      Token tok2 = src.nextToken();
-      assertEquals(tok2.getType(), Proparse.ID);
+      ProToken tok2 = ((ProToken) src.nextToken());
+      assertEquals(tok2.getNodeType(), ABLNodeType.ID);
       assertEquals(tok2.getText(), "customer.name");
-      assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
       // Fourth line: same behaviour even if there's a space after the comment
-      Token tok3 = src.nextToken();
-      assertEquals(tok3.getType(), Proparse.ID);
+      ProToken tok3 = ((ProToken) src.nextToken());
+      assertEquals(tok3.getNodeType(), ABLNodeType.ID);
       assertEquals(tok3.getText(), "customer.name");
-      assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
       // Fifth line: this line doesn't compile...
-      assertEquals(src.nextToken().getType(), Proparse.MESSAGE);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
-      assertEquals(src.nextToken().getType(), Proparse.QSTRING);
-      assertEquals(src.nextToken().getType(), Proparse.NAMEDOT);
-      assertEquals(src.nextToken().getType(), Proparse.COMMENT);
-      assertEquals(src.nextToken().getType(), Proparse.MESSAGE);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
-      assertEquals(src.nextToken().getType(), Proparse.QSTRING);
-      assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.MESSAGE);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.QSTRING);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.NAMEDOT);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.COMMENT);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.MESSAGE);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.QSTRING);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
       // Sixth line: same behaviour even if there's a space after the comment
-      Token tok4 = src.nextToken();
-      assertEquals(tok4.getType(), Proparse.ID);
+      ProToken tok4 = ((ProToken) src.nextToken());
+      assertEquals(tok4.getNodeType(), ABLNodeType.ID);
       assertEquals(tok4.getText(), "customer.name");
-      assertEquals(src.nextToken().getType(), Proparse.PERIOD);
-      assertEquals(src.nextToken().getType(), Proparse.WS);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
     } catch (IOException caught) {
       fail("Unable to open file", caught);
     }
@@ -280,9 +280,9 @@ public class TokenListTest {
    * Utility method for preprocess(), removes all tokens from hidden channels
    */
   protected static ProToken nextVisibleToken(TokenSource src) {
-    ProToken tok = (ProToken) src.nextToken();
+    ProToken tok = (ProToken) ((ProToken) src.nextToken());
     while ((tok.getType() != Token.EOF) && (tok.getChannel() != Token.DEFAULT_CHANNEL))
-      tok = (ProToken) src.nextToken();
+      tok = (ProToken) ((ProToken) src.nextToken());
     return tok;
   }
 }
