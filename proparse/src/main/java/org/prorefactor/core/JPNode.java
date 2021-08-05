@@ -195,7 +195,7 @@ public class JPNode {
   /**
    * @return First sibling of given type
    */
-  public JPNode hasSibling(ABLNodeType type) {
+  public JPNode getSibling(ABLNodeType type) {
     if (parent == null)
       return null;
     for (JPNode node : parent.children) {

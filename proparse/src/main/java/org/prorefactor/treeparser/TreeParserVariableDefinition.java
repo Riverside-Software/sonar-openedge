@@ -2334,7 +2334,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       if (LOG.isTraceEnabled())
         LOG.trace("Static reference to {}", refNode.getIdNode().getText());
     } else if ((refNode.getParent().getNodeType() == ABLNodeType.USING
-        && refNode.getParent().hasSibling(ABLNodeType.RECORD_NAME) != null)
+        && refNode.getParent().getSibling(ABLNodeType.RECORD_NAME) != null)
         || (refNode.getFirstChild().getNodeType() == ABLNodeType.INPUT
             && (refNode.getNextSibling() == null || refNode.getNextSibling().getNodeType() != ABLNodeType.OBJCOLON))) {
       // First condition : there seems to be an implicit INPUT in USING phrases in a record phrase.
