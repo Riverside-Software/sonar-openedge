@@ -135,6 +135,7 @@ public class TokenListTest {
     ProToken tok = ((ProToken) src.nextToken());
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
+    assertEquals(tok.getRawText(), "Progress./* Holy shit */   Security.PAMStatus");
     assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
     assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
     assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
@@ -174,6 +175,7 @@ public class TokenListTest {
     ProToken tok = ((ProToken) src.nextToken());
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
     assertEquals(tok.getText(), "Progress.Security.PAMStatus");
+    assertEquals(tok.getRawText(), "Progress /* Holy shit */   .Security.PAMStatus");
     assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
     assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
     assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
@@ -191,6 +193,7 @@ public class TokenListTest {
     ProToken tok = ((ProToken) src.nextToken());
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
     assertEquals(tok.getText(), "Riverside.Security.PAMStatus");
+    assertEquals(tok.getRawText(), "Riverside /* Holy shit */   .Security.PAMStatus");
     assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
     assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
     assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);

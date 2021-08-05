@@ -89,9 +89,8 @@ public class TokenList implements TokenSource {
         // Then add first token and first token from previous list
         // Comments and whitespaces in between are discarded
         leftPart.addFirst(prevTokens.peekFirst());
-        ProToken tmp = getBackwardsFirstVisibleToken(queue).peekFirst();
-        if (tmp != null)
-          leftPart.addFirst(tmp);
+        Deque<ProToken> x = getBackwardsFirstVisibleToken(queue);
+        x.descendingIterator().forEachRemaining(leftPart::addFirst);
       } else if ((prevTokens.size() == 1)
           && ((firstToken.getNodeType() == ABLNodeType.ID) || firstToken.getNodeType().isKeyword())) {
         // No space or comment ? Then this is attached to the next token
@@ -105,10 +104,14 @@ public class TokenList implements TokenSource {
 
     if (leftPart.size() > 1) {
       // Now merge all the parts into one ID token.
+      StringBuilder origText = new StringBuilder(leftPart.peekFirst().getText());
       ProToken.Builder newTok = new ProToken.Builder(leftPart.pollFirst()).setType(ABLNodeType.ID);
       for (ProToken zz : leftPart) {
-        newTok.mergeWith(zz);
+        origText.append(zz.getText());
+        if (zz.getChannel() == Token.DEFAULT_CHANNEL)
+          newTok.mergeWith(zz);
       }
+      newTok.setRawText(origText.toString());
       queue.addLast(newTok.build());
     } else if (leftPart.size() == 1) {
       ProToken tmp = leftPart.pollFirst();
@@ -117,7 +120,6 @@ public class TokenList implements TokenSource {
         queue.addLast(new ProToken.Builder(tmp).setType(ABLNodeType.ID).build());
       else
         queue.addLast(tmp);
-
     }
     queue.addAll(comments);
     queue.add(objColonToken);

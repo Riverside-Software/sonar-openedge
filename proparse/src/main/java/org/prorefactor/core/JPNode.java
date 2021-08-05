@@ -87,6 +87,13 @@ public class JPNode {
   }
 
   /**
+   * @see ProToken#getRawText()
+   */
+  public String getRawText() {
+    return token.getRawText();
+  }
+
+  /**
    * @see ProToken#getNodeType()
    */
   public ABLNodeType getNodeType() {

@@ -37,6 +37,7 @@ public class ProToken implements Token {
   private int charPositionInLine = 0;
   private int channel = DEFAULT_CHANNEL;
   private String text;
+  private String rawText;
   private int index = -1;
 
   private int fileIndex = 0;
@@ -109,6 +110,14 @@ public class ProToken implements Token {
   @Override
   public CharStream getInputStream() {
     return null;
+  }
+
+  /**
+   * @return Usually null. For tokens being the merge result of several tokens (such as fieldn or filn rules), the
+   *         returned value is the initial text including comments and spaces.
+   */
+  public String getRawText() {
+    return rawText;
   }
 
   /**
@@ -255,6 +264,7 @@ public class ProToken implements Token {
   public static class Builder {
     private ABLNodeType type;
     private StringBuilder text;
+    private String rawText = null;
 
     private int line;
     private int endLine;
@@ -295,6 +305,7 @@ public class ProToken implements Token {
       this.synthetic = token.synthetic;
       this.writable = token instanceof WritableProToken;
       this.nestedComments = token.nestedComments;
+      this.rawText = token.rawText;
     }
 
     public Builder setWritable(boolean writable) {
@@ -377,6 +388,11 @@ public class ProToken implements Token {
       return this;
     }
 
+    public Builder setRawText(String rawText) {
+      this.rawText = rawText;
+      return this;
+    }
+
     public Builder setNestedComments(boolean nestedComments) {
       this.nestedComments = nestedComments;
       return this;
@@ -391,6 +407,8 @@ public class ProToken implements Token {
       this.endFileIndex = tok.endFileIndex;
       if (tok.hiddenBefore != null)
         appendText(" ");
+      if (rawText != null)
+        rawText += tok.text;
       appendText(tok.text);
 
       return this;
@@ -414,6 +432,7 @@ public class ProToken implements Token {
       tok.hiddenBefore = hiddenBefore;
       tok.synthetic = synthetic;
       tok.nestedComments = nestedComments;
+      tok.rawText = rawText;
 
       switch (type) {
         case COMMENT:

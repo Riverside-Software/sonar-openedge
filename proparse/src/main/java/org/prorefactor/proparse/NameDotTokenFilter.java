@@ -98,12 +98,14 @@ public class NameDotTokenFilter implements TokenSource {
     } else if ((prev.getNodeType() == ABLNodeType.ID) || prev.getNodeType().isKeyword() || (prev.getNodeType() == ABLNodeType.ANNOTATION)) {
       ProToken nxt = (ProToken) source.nextToken();
       if (nxt.getNodeType() == ABLNodeType.COMMENT) {
-        // We can consume as much WS and COMMENT
+        String commentText = "";
+        // We can consume as many WS and COMMENT as possible
         while ((nxt.getNodeType() == ABLNodeType.COMMENT) || (nxt.getNodeType() == ABLNodeType.WS)) {
+          commentText += nxt.getText();
           nxt = (ProToken) source.nextToken();
         }
         // Then we merge everything in first token
-        ProToken.Builder builder = new ProToken.Builder(prev).mergeWith(nameDot).mergeWith(nxt);
+        ProToken.Builder builder = new ProToken.Builder(prev).mergeWith(nameDot).mergeWith(nxt).setRawText(prev.getText() + nameDot.getText() + commentText + nxt.getText());
         if (prev.getNodeType() != ABLNodeType.ANNOTATION)
           builder.setType(ABLNodeType.ID);
         queue.offer(builder.build());

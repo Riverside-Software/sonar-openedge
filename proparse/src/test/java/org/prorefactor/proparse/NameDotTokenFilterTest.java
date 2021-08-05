@@ -165,6 +165,7 @@ public class NameDotTokenFilterTest {
     assertNotNull(tok);
     assertEquals(tok.getNodeType(), ABLNodeType.ID);
     assertEquals(tok.getText(), "Riverside.20190101.Object");
+    assertEquals(tok.getRawText(), "Riverside./* Woot */ /* Woot woot */20190101.Object");
     tok = (ProToken) filter.nextToken();
     assertNotNull(tok);
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);

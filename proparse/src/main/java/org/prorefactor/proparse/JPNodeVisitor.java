@@ -367,6 +367,79 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitFiln(FilnContext ctx) {
+    if (ctx.t2 == null)
+      return visitChildren(ctx).changeType(ABLNodeType.ID);
+
+    // Merge NameDot attribute into a single token 
+    ProToken.Builder tok = new ProToken.Builder((ProToken) ctx.t1.start).setType(ABLNodeType.ID);
+    String originalText = ctx.t1.start.getText();
+    boolean hiddenTokens = false;
+    ProToken h = getHiddenBefore(ctx.NAMEDOT().getSymbol());
+    if (h != null) {
+      hiddenTokens = true;
+      originalText += getHiddenText(h); 
+    }
+    tok.mergeWith((ProToken) ctx.NAMEDOT().getSymbol());
+    originalText += ctx.NAMEDOT().getText();
+    h = getHiddenBefore(ctx.t2.start);
+    if (h != null) {
+      hiddenTokens = true;
+      originalText += getHiddenText(h); 
+    }
+    originalText += ctx.t2.getText();
+    tok.mergeWith((ProToken) ctx.t2.start);
+
+    if (hiddenTokens)
+      tok.setRawText(originalText);
+    return new Builder(tok.build());
+  }
+
+  @Override
+  public Builder visitFieldn(FieldnContext ctx) {
+    if (ctx.t2 == null)
+      return visitChildren(ctx).changeType(ABLNodeType.ID);
+
+    ProToken.Builder tok = new ProToken.Builder((ProToken) ctx.t1.start).setType(ABLNodeType.ID);
+    String originalText = ctx.t1.start.getText();
+    boolean hiddenTokens = false;
+    ProToken h = getHiddenBefore(ctx.NAMEDOT(0).getSymbol());
+    if (h != null) {
+      hiddenTokens = true;
+      originalText += getHiddenText(h);
+    }
+    tok.mergeWith((ProToken) ctx.NAMEDOT(0).getSymbol());
+    originalText += ctx.NAMEDOT(0).getText();
+    h = getHiddenBefore(ctx.t2.start);
+    if (h != null) {
+      hiddenTokens = true;
+      originalText += getHiddenText(h);
+    }
+    originalText += ctx.t2.getText();
+    tok.mergeWith((ProToken) ctx.t2.start);
+
+    if (ctx.t3 != null) {
+      h = getHiddenBefore(ctx.NAMEDOT(1).getSymbol());
+      if (h != null) {
+        hiddenTokens = true;
+        originalText += getHiddenText(h);
+      }
+      tok.mergeWith((ProToken) ctx.NAMEDOT(1).getSymbol());
+      originalText += ctx.NAMEDOT(1).getText();
+      h = getHiddenBefore(ctx.t3.start);
+      if (h != null) {
+        hiddenTokens = true;
+        originalText += getHiddenText(h);
+      }
+      originalText += ctx.t3.getText();
+      tok.mergeWith((ProToken) ctx.t3.start);
+    }
+    if (hiddenTokens)
+      tok.setRawText(originalText);
+    return new Builder(tok.build());
+  }
+
+  @Override
   public Builder visitField(FieldContext ctx) {
     Builder holder = createTree(ctx, ABLNodeType.FIELD_REF).setRuleNode(ctx);
     if ((ctx.getParent() instanceof MessageOptionContext) && support.isInlineVar(ctx.getText())) {
@@ -2805,6 +2878,16 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
       t = t.getTokenIndex() > 0 ? (ProToken) stream.get(t.getTokenIndex() - 1) : null;
     }
     return firstHiddenTok;
+  }
+
+  private String getHiddenText(ProToken firstHiddenToken) {
+    String str = firstHiddenToken.getText();
+    ProToken curr = firstHiddenToken.getHiddenBefore();
+    while (curr != null) {
+      str = curr.getText() + str;
+      curr = curr.getHiddenBefore();
+    }
+    return str;
   }
 
   /**
