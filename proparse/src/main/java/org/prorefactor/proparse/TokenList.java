@@ -86,11 +86,9 @@ public class TokenList implements TokenSource {
       } else if ((firstToken.getNodeType() == ABLNodeType.NAMEDOT)
           || ((firstToken.getNodeType() != ABLNodeType.PERIOD) && firstToken.getText().startsWith("."))) {
         // NAMEDOT or something which starts with a dot but not just an end of statement ?
-        // Then add first token and first token from previous list
-        // Comments and whitespaces in between are discarded
-        leftPart.addFirst(prevTokens.peekFirst());
-        Deque<ProToken> x = getBackwardsFirstVisibleToken(queue);
-        x.descendingIterator().forEachRemaining(leftPart::addFirst);
+        // Then add first token and tokens from previous list
+        leftPart.addFirst(firstToken);
+        getBackwardsFirstVisibleToken(queue).descendingIterator().forEachRemaining(leftPart::addFirst);
       } else if ((prevTokens.size() == 1)
           && ((firstToken.getNodeType() == ABLNodeType.ID) || firstToken.getNodeType().isKeyword())) {
         // No space or comment ? Then this is attached to the next token
@@ -103,16 +101,21 @@ public class TokenList implements TokenSource {
     }
 
     if (leftPart.size() > 1) {
-      // Now merge all the parts into one ID token.
-      StringBuilder origText = new StringBuilder(leftPart.peekFirst().getText());
-      ProToken.Builder newTok = new ProToken.Builder(leftPart.pollFirst()).setType(ABLNodeType.ID);
-      for (ProToken zz : leftPart) {
-        origText.append(zz.getText());
-        if (zz.getChannel() == Token.DEFAULT_CHANNEL)
-          newTok.mergeWith(zz);
+      if (leftPart.peekFirst().getNodeType() == ABLNodeType.NAMEDOT) {
+        // NAMEDOT as the beginning of stream, kept as is
+        leftPart.iterator().forEachRemaining(queue::addLast);
+      } else {
+        // Now merge all the parts into one ID token.
+        StringBuilder origText = new StringBuilder(leftPart.peekFirst().getText());
+        ProToken.Builder newTok = new ProToken.Builder(leftPart.pollFirst()).setType(ABLNodeType.ID);
+        for (ProToken zz : leftPart) {
+          origText.append(zz.getText());
+          if (zz.getChannel() == Token.DEFAULT_CHANNEL)
+            newTok.mergeWith(zz);
+        }
+        newTok.setRawText(origText.toString());
+        queue.addLast(newTok.build());
       }
-      newTok.setRawText(origText.toString());
-      queue.addLast(newTok.build());
     } else if (leftPart.size() == 1) {
       ProToken tmp = leftPart.pollFirst();
       // Not namedotted, so if it's reserved and not a system handle, convert to ID.
