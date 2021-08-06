@@ -28,6 +28,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.IfNode;
+import org.prorefactor.core.nodetypes.MethodCallNode;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.nodetypes.TypeNameNode;
@@ -900,6 +901,8 @@ public class JPNode {
     private FieldType tabletype;
     private String className;
     private boolean inline;
+    private String xtra1;
+    private String xtra2;
 
     public Builder(ProToken tok) {
       this.tok = tok;
@@ -992,6 +995,16 @@ public class JPNode {
       return this;
     }
 
+    public Builder setExtraField1(String xtra1) {
+      this.xtra1 = xtra1;
+      return this;
+    }
+
+    public Builder setExtraField2(String xtra2) {
+      this.xtra2 = xtra2;
+      return this;
+    }
+
     /**
      * Transforms <pre>x1 - x2 - x3 - x4</pre> into
      * <pre>
@@ -1036,6 +1049,9 @@ public class JPNode {
       switch (tok.getNodeType()) {
         case EMPTY_NODE:
           throw new IllegalStateException("Empty node can't generate JPNode");
+        case LOCAL_METHOD_REF:
+          node = new MethodCallNode(tok, up, num, hasChildren, xtra1);
+          break;
         case RECORD_NAME:
           node = new RecordNameNode(tok, up, num, hasChildren);
           break;

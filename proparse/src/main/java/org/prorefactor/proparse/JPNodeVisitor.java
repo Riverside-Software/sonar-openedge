@@ -313,7 +313,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExprTermMethodCall(ExprTermMethodCallContext ctx) {
-    return createTree(ctx, ABLNodeType.LOCAL_METHOD_REF).setRuleNode(ctx);
+    return createTree(ctx, ABLNodeType.LOCAL_METHOD_REF).setExtraField1(ctx.id.getText()).setRuleNode(ctx);
   }
 
   @Override
