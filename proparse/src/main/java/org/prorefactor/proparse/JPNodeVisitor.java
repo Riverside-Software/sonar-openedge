@@ -236,21 +236,17 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExpressionMinus(ExpressionMinusContext ctx) {
-    Builder holder = createTreeFromFirstNode(ctx);
-    holder.changeType(ABLNodeType.UNARY_MINUS);
-    return holder;
+    return createTreeFromFirstNode(ctx).changeType(ABLNodeType.UNARY_MINUS).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionPlus(ExpressionPlusContext ctx) {
-    Builder holder = createTreeFromFirstNode(ctx);
-    holder.changeType(ABLNodeType.UNARY_PLUS);
-    return holder;
+    return createTreeFromFirstNode(ctx).changeType(ABLNodeType.UNARY_PLUS).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionOp1(ExpressionOp1Context ctx) {
-    Builder holder = createTreeFromSecondNode(ctx).setOperator();
+    Builder holder = createTreeFromSecondNode(ctx).setExpression(true);
     if (holder.getNodeType() == ABLNodeType.STAR)
       holder.changeType(ABLNodeType.MULTIPLY);
     else if (holder.getNodeType() == ABLNodeType.SLASH)
@@ -260,12 +256,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExpressionOp2(ExpressionOp2Context ctx) {
-    return createTreeFromSecondNode(ctx).setOperator();
+    return createTreeFromSecondNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionComparison(ExpressionComparisonContext ctx) {
-    Builder holder = createTreeFromSecondNode(ctx).setOperator();
+    Builder holder = createTreeFromSecondNode(ctx).setExpression(true);
     if (holder.getNodeType() == ABLNodeType.LEFTANGLE)
       holder.changeType(ABLNodeType.LTHAN);
     else if (holder.getNodeType() == ABLNodeType.LTOREQUAL)
@@ -284,27 +280,27 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExpressionStringComparison(ExpressionStringComparisonContext ctx) {
-    return createTreeFromSecondNode(ctx).setOperator();
+    return createTreeFromSecondNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionNot(ExpressionNotContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    return createTreeFromFirstNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionAnd(ExpressionAndContext ctx) {
-    return createTreeFromSecondNode(ctx).setOperator();
+    return createTreeFromSecondNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionXor(ExpressionXorContext ctx) {
-    return createTreeFromSecondNode(ctx).setOperator();
+    return createTreeFromSecondNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionOr(ExpressionOrContext ctx) {
-    return createTreeFromSecondNode(ctx).setOperator();
+    return createTreeFromSecondNode(ctx).setExpression(true);
   }
 
   // ---------------
@@ -313,52 +309,88 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExprTermMethodCall(ExprTermMethodCallContext ctx) {
-    return createTree(ctx, ABLNodeType.LOCAL_METHOD_REF).setExtraField1(ctx.id.getText()).setRuleNode(ctx);
+    return createTree(ctx, ABLNodeType.METHOD_REF).setExtraField1(ctx.id.getText()).setRuleNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExprTermAttribute(ExprTermAttributeContext ctx) {
-    return createTree(ctx, ABLNodeType.ATTRIBUTE_REF).setRuleNode(ctx);
+    return createTree(ctx, ABLNodeType.ATTRIBUTE_REF).setRuleNode(ctx).setExpression(true);
+  }
+
+  @Override
+  public Builder visitExprTermNamedMember(ExprTermNamedMemberContext ctx) {
+    return createTree(ctx, ABLNodeType.NAMED_MEMBER).setRuleNode(ctx).setExpression(true);
+  }
+
+  @Override
+  public Builder visitExprTermNamedMemberArray(ExprTermNamedMemberArrayContext ctx) {
+    return createTree(ctx, ABLNodeType.NAMED_MEMBER_ARRAY).setRuleNode(ctx).setExpression(true);
+  }
+
+  @Override
+  public Builder visitExprTermArray(ExprTermArrayContext ctx) {
+    return createTree(ctx, ABLNodeType.ARRAY_REFERENCE).setRuleNode(ctx).setExpression(true);
+  }
+
+  @Override
+  public Builder visitExprTermInUI(ExprTermInUIContext ctx) {
+    return createTree(ctx, ABLNodeType.IN_UI_REF).setRuleNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExprTermWidget(ExprTermWidgetContext ctx) {
     if (ctx.widName().systemHandleName() == null)
-      return createTree(ctx, ABLNodeType.WIDGET_REF).setRuleNode(ctx);
+      return createTree(ctx, ABLNodeType.WIDGET_REF).setRuleNode(ctx).setExpression(true);
     else
-      return visitChildren(ctx).setRuleNode(ctx);
+      return createTree(ctx, ABLNodeType.SYSTEM_HANDLE_REF).setRuleNode(ctx).setExpression(true);
   }
+
+  // EXPRESSION TERM2
 
   @Override
   public Builder visitExprt2ParenExpr(Exprt2ParenExprContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public Builder visitExprt2ParenCall(Exprt2ParenCallContext ctx) {
-    Builder holder = createTreeFromFirstNode(ctx);
-    holder.changeType(ABLNodeType.getNodeType(support.isMethodOrFunc(ctx.fname.getText())));
-    return holder;
+    return createTree(ctx, ABLNodeType.PAREN_EXPR).setExpression(true);
   }
 
   @Override
   public Builder visitExprt2New(Exprt2NewContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    return createTree(ctx, ABLNodeType.NEW_TYPE_REF).setExpression(true);
+  }
+
+  @Override
+  public Builder visitExprt2ParenCall(Exprt2ParenCallContext ctx) {
+    return createTreeFromFirstNode(ctx).changeType(
+        ABLNodeType.getNodeType(support.isMethodOrFunc(ctx.fname.getText()))).setExtraField1(
+            ctx.fname.getText()).setExpression(true);
+  }
+
+  @Override
+  public Builder visitExprt2BuiltinFunc(Exprt2BuiltinFuncContext ctx) {
+    return createTree(ctx, ABLNodeType.BUILTIN_REF).setExpression(true);
   }
 
   @Override
   public Builder visitExprt2ParenCall2(Exprt2ParenCall2Context ctx) {
-    Builder holder = createTreeFromFirstNode(ctx);
-    holder.changeType(ABLNodeType.LOCAL_METHOD_REF);
-    return holder;
+    return createTreeFromFirstNode(ctx).changeType(ABLNodeType.LOCAL_METHOD_REF).setExtraField1(
+        ctx.identifier().getText()).setExpression(true);
+  }
+
+  @Override
+  public Builder visitExprt2Constant(Exprt2ConstantContext ctx) {
+    return createTree(ctx, ABLNodeType.CONSTANT_REF).setExpression(true);
+  }
+
+  @Override
+  public Builder visitNoArgFunction(NoArgFunctionContext ctx) {
+    return createTree(ctx, ABLNodeType.BUILTIN_REF).setExpression(true);
   }
 
   @Override
   public Builder visitExprt2Field(Exprt2FieldContext ctx) {
     if (ctx.ENTERED() != null)
-      return createTree(ctx, ABLNodeType.ENTERED_FUNC);
+      return createTree(ctx, ABLNodeType.ENTERED_FUNC).setExpression(true);
     else
-      return visitChildren(ctx);
+      return visitChildren(ctx).setExpression(true);
   }
 
   @Override
@@ -437,6 +469,14 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
     if (hiddenTokens)
       tok.setRawText(originalText);
     return new Builder(tok.build());
+  }
+
+  @Override
+  public Builder visitFieldExpr(FieldExprContext ctx) {
+    if (ctx.LEFTBRACE() != null)
+      return createTree(ctx, ABLNodeType.ARRAY_REFERENCE).setRuleNode(ctx);
+    else
+      return visitChildren(ctx);
   }
 
   @Override

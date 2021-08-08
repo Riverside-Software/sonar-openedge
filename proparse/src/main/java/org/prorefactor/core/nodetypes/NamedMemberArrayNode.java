@@ -1,5 +1,4 @@
 /********************************************************************************
- * Copyright (c) 2003-2015 John Green
  * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
@@ -17,28 +16,28 @@ package org.prorefactor.core.nodetypes;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.proparse.support.ParserSupport;
-import org.prorefactor.treeparser.ParseUnit;
 
-public class ProgramRootNode extends BlockNode {
-  private final ParseUnit unit;
+import com.google.common.base.Strings;
 
-  public ProgramRootNode(ProToken t, JPNode parent, int num, boolean hasChildren, ParseUnit unit) {
+public class NamedMemberArrayNode extends JPNode implements IExpression {
+  private String namedMember = "";
+
+  public NamedMemberArrayNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+    this(t, parent, num, hasChildren, "");
+  }
+
+  public NamedMemberArrayNode(ProToken t, JPNode parent, int num, boolean hasChildren, String namedMember) {
     super(t, parent, num, hasChildren);
-    this.unit = unit;
+    this.namedMember = Strings.nullToEmpty(namedMember);
+  }
+
+  public String getNamedMember() {
+    return namedMember;
   }
 
   @Override
-  public boolean hasAnnotation(String str) {
-    return false;
+  public boolean isExpression() {
+    return true;
   }
 
-  public ParseUnit getParseUnit() {
-    return unit;
-  }
-
-  public ParserSupport getParserSupport() {
-    return unit.getSupport();
-  }
-  
 }

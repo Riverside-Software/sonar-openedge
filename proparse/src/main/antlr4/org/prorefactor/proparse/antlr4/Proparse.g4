@@ -508,9 +508,11 @@ expression:
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 expressionTerm:
-    expressionTerm ( OBJCOLON | DOUBLECOLON ) id=nonPunctuating methodParamList  # exprTermMethodCall
-  | expressionTerm ( OBJCOLON | DOUBLECOLON ) id=nonPunctuating                  # exprTermAttribute
-  | expressionTerm arraySubscript # exprTermArray
+    expressionTerm OBJCOLON id=nonPunctuating methodParamList          # exprTermMethodCall
+  | expressionTerm OBJCOLON id=nonPunctuating                          # exprTermAttribute
+  | expressionTerm DOUBLECOLON id=nonPunctuating                       # exprTermNamedMember
+  | expressionTerm DOUBLECOLON id=nonPunctuating methodParamList       # exprTermNamedMemberArray /* WTF... */
+  | expressionTerm LEFTBRACE expression ( FOR expression )? RIGHTBRACE # exprTermArray
   | expressionTerm inuic          # exprTermInUI
   | widName                       # exprTermWidget
   | expressionTerm2               # exprTermOther
@@ -584,10 +586,6 @@ fieldExpr:
 fieldFrameOrBrowse:
      FRAME widgetname
   |  BROWSE widgetname
-  ;
-
-arraySubscript:
-    LEFTBRACE expression ( FOR expression )? RIGHTBRACE
   ;
 
 methodParamList:

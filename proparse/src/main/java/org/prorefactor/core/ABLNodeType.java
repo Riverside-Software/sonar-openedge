@@ -144,13 +144,16 @@ public enum ABLNodeType {
 
   // Parser Structure Elements
   AGGREGATE_PHRASE(Proparse.Aggregate_phrase, NodeTypesOption.STRUCTURE),
-  ARRAY_SUBSCRIPT(Proparse.Array_subscript, NodeTypesOption.STRUCTURE),
+  ARRAY_REFERENCE(Proparse.Array_ref, NodeTypesOption.STRUCTURE),
   ASSIGN_DYNAMIC_NEW(Proparse.Assign_dynamic_new, NodeTypesOption.STRUCTURE),
   ASSIGN_FROM_BUFFER(Proparse.Assign_from_buffer, NodeTypesOption.STRUCTURE),
+  ATTRIBUTE_REF(Proparse.Attribute_ref, NodeTypesOption.STRUCTURE),
   AUTOMATION_OBJECT(Proparse.Automationobject, NodeTypesOption.STRUCTURE),
   BLOCK_ITERATOR(Proparse.Block_iterator, NodeTypesOption.STRUCTURE),
   BLOCK_LABEL(Proparse.Block_label, NodeTypesOption.STRUCTURE),
+  BUILTIN_REF(Proparse.Built_in_func, NodeTypesOption.STRUCTURE),
   CODE_BLOCK(Proparse.Code_block, NodeTypesOption.STRUCTURE),
+  CONSTANT_REF(Proparse.Constant_ref, NodeTypesOption.STRUCTURE),
   EDITING_PHRASE(Proparse.Editing_phrase, NodeTypesOption.STRUCTURE),
   ENTERED_FUNC(Proparse.Entered_func, NodeTypesOption.STRUCTURE),
   EVENT_LIST(Proparse.Event_list, NodeTypesOption.STRUCTURE),
@@ -158,17 +161,23 @@ public enum ABLNodeType {
   FIELD_REF(Proparse.Field_ref, NodeTypesOption.STRUCTURE),
   FORM_ITEM(Proparse.Form_item, NodeTypesOption.STRUCTURE),
   FORMAT_PHRASE(Proparse.Format_phrase, NodeTypesOption.STRUCTURE),
+  IN_UI_REF(Proparse.In_UI_ref, NodeTypesOption.STRUCTURE),
   LOCAL_METHOD_REF(Proparse.Local_method_ref, NodeTypesOption.STRUCTURE),
-  ATTRIBUTE_REF(Proparse.Attribute_ref, NodeTypesOption.STRUCTURE),
   LEFT_PART(Proparse.Left_Part, NodeTypesOption.STRUCTURE),
+  METHOD_REF(Proparse.Method_ref, NodeTypesOption.STRUCTURE),
   METHOD_PARAM_LIST(Proparse.Method_param_list, NodeTypesOption.STRUCTURE),
+  NAMED_MEMBER(Proparse.Named_member, NodeTypesOption.STRUCTURE),
+  NAMED_MEMBER_ARRAY(Proparse.Named_member_array, NodeTypesOption.STRUCTURE),
+  NEW_TYPE_REF(Proparse.New_Type_expr, NodeTypesOption.STRUCTURE),
   NOT_CASESENS(Proparse.Not_casesens, NodeTypesOption.STRUCTURE),
   PARAMETER_LIST(Proparse.Parameter_list, NodeTypesOption.STRUCTURE),
+  PAREN_EXPR(Proparse.Paren_expr, NodeTypesOption.STRUCTURE),
   PROGRAM_ROOT(Proparse.Program_root, NodeTypesOption.STRUCTURE),
   PROGRAM_TAIL(Proparse.Program_tail, NodeTypesOption.STRUCTURE),
   PROPERTY_GETTER(Proparse.Property_getter, NodeTypesOption.STRUCTURE),
   PROPERTY_SETTER(Proparse.Property_setter, NodeTypesOption.STRUCTURE),
   RECORD_NAME(Proparse.Record_name, NodeTypesOption.STRUCTURE),
+  SYSTEM_HANDLE_REF(Proparse.System_handle, NodeTypesOption.STRUCTURE),
   TYPE_NAME(Proparse.Type_name, NodeTypesOption.STRUCTURE),
   TYPELESS_TOKEN(Proparse.Typeless_token, NodeTypesOption.STRUCTURE),
   USER_FUNC(Proparse.User_func, NodeTypesOption.STRUCTURE),
@@ -2009,6 +2018,7 @@ public enum ABLNodeType {
       case Proparse.RAW:
         return DataType.RAW;
       case Proparse.HANDLE:
+      case Proparse.WIDGETHANDLE:
         return DataType.HANDLE;
       case Proparse.MEMPTR:
         return DataType.MEMPTR;

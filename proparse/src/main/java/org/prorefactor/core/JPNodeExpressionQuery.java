@@ -1,5 +1,4 @@
 /********************************************************************************
- * Copyright (c) 2003-2015 John Green
  * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
@@ -13,32 +12,26 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.core.nodetypes;
+package org.prorefactor.core;
 
-import org.prorefactor.core.JPNode;
-import org.prorefactor.core.ProToken;
-import org.prorefactor.proparse.support.ParserSupport;
-import org.prorefactor.treeparser.ParseUnit;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ProgramRootNode extends BlockNode {
-  private final ParseUnit unit;
+class JPNodeExpressionQuery implements ICallback<List<JPNode>> {
+  private final List<JPNode> result = new ArrayList<>();
 
-  public ProgramRootNode(ProToken t, JPNode parent, int num, boolean hasChildren, ParseUnit unit) {
-    super(t, parent, num, hasChildren);
-    this.unit = unit;
+  @Override
+  public List<JPNode> getResult() {
+    return result;
   }
 
   @Override
-  public boolean hasAnnotation(String str) {
-    return false;
+  public boolean visitNode(JPNode node) {
+    if (node.isExpression()) {
+      result.add(node);
+      return false;
+    } else
+      return true;
   }
 
-  public ParseUnit getParseUnit() {
-    return unit;
-  }
-
-  public ParserSupport getParserSupport() {
-    return unit.getSupport();
-  }
-  
 }

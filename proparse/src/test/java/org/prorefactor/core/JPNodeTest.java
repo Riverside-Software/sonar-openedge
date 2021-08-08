@@ -219,9 +219,11 @@ public class JPNodeTest {
     assertNotNull(node.getFirstChild());
     assertEquals(node.getFirstChild().getNodeType(), ABLNodeType.EQ);
     assertNotNull(node.getFirstChild().getFirstChild());
-    assertEquals(node.getFirstChild().getFirstChild().getNodeType(), ABLNodeType.NUMBER);
+    assertEquals(node.getFirstChild().getFirstChild().getNodeType(), ABLNodeType.CONSTANT_REF);
+    assertEquals(node.getFirstChild().getFirstChild().getFirstChild().getNodeType(), ABLNodeType.NUMBER);
     assertNotNull(node.getFirstChild().getFirstChild().getNextSibling());
-    assertEquals(node.getFirstChild().getFirstChild().getNextSibling().getNodeType(), ABLNodeType.NUMBER);
+    assertEquals(node.getFirstChild().getFirstChild().getNextSibling().getNodeType(), ABLNodeType.CONSTANT_REF);
+    assertEquals(node.getFirstChild().getFirstChild().getNextSibling().getFirstChild().getNodeType(), ABLNodeType.NUMBER);
 
     node = node.getNextSibling();
     assertNotNull(node);

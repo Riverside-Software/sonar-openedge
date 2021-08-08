@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import javax.annotation.Generated;
+
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.ParameterMode;
@@ -31,6 +33,7 @@ import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.fixed.PropertyElement;
 import eu.rssw.pct.elements.fixed.TypeInfo;
 
+@Generated(value = "genBuiltinClasses.p")
 public class BuiltinClasses {
   private static final Collection<ITypeInfo> BUILTIN_CLASSES = new ArrayList<>();
 
@@ -43,7 +46,6 @@ public class BuiltinClasses {
   }
 
   static {
-    // NO-SONAR
     TypeInfo typeInfo;
     typeInfo = new TypeInfo("Progress.ApplicationServer.AdapterTypes", false, false, "Progress.Lang.Enum", "");
     typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType("Progress.Lang.Object")));

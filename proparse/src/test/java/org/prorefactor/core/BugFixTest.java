@@ -522,12 +522,16 @@ public class BugFixTest {
   public void testNoArgFunc() {
     ParseUnit pu = genericTest("noargfunc.p");
     List<JPNode> nodes = pu.getTopNode().query(ABLNodeType.MESSAGE);
-    assertEquals(nodes.get(0).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.GUID);
+    assertEquals(nodes.get(0).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.BUILTIN_REF);
     assertEquals(nodes.get(1).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.FIELD_REF);
-    assertEquals(nodes.get(2).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.TIMEZONE);
+    assertEquals(nodes.get(2).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.BUILTIN_REF);
     assertEquals(nodes.get(3).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.FIELD_REF);
-    assertEquals(nodes.get(4).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.MTIME);
+    assertEquals(nodes.get(4).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.BUILTIN_REF);
     assertEquals(nodes.get(5).getFirstChild().getFirstChild().getNodeType(), ABLNodeType.FIELD_REF);
+
+    assertEquals(nodes.get(0).getFirstChild().getFirstChild().getFirstChild().getNodeType(), ABLNodeType.GUID);
+    assertEquals(nodes.get(2).getFirstChild().getFirstChild().getFirstChild().getNodeType(), ABLNodeType.TIMEZONE);
+    assertEquals(nodes.get(4).getFirstChild().getFirstChild().getFirstChild().getNodeType(), ABLNodeType.MTIME);
   }
 
   @Test

@@ -20,37 +20,34 @@ import org.prorefactor.core.ProToken;
 import com.google.common.base.Strings;
 
 import eu.rssw.pct.elements.DataType;
-import eu.rssw.pct.elements.IMethodElement;
+import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.IVariableElement;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
-public class MethodCallNode extends JPNode implements IExpression {
-  private String methodName = "";
+public class AttributeReferenceNode extends JPNode implements IExpression {
+  private String attributeName = "";
 
-  public MethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+  public AttributeReferenceNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     this(t, parent, num, hasChildren, "");
   }
 
-  public MethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String methodName) {
+  public AttributeReferenceNode(ProToken t, JPNode parent, int num, boolean hasChildren, String attributeName) {
     super(t, parent, num, hasChildren);
-    this.methodName = Strings.nullToEmpty(methodName);
+    this.attributeName = Strings.nullToEmpty(attributeName);
   }
 
-  public String getMethodName() {
-    return methodName;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
+  public String getAttributeName() {
+    return attributeName;
   }
 
   @Override
   public DataType getDataType() {
     if (getFirstChild() instanceof SystemHandleNode) {
       SystemHandleNode shn = (SystemHandleNode) getFirstChild();
-      return shn.getMethodDataType(methodName.toUpperCase());
+      return shn.getAttributeDataType(attributeName.toUpperCase());
     }
+
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
       return DataType.UNKNOWN;
@@ -60,17 +57,26 @@ public class MethodCallNode extends JPNode implements IExpression {
     if (expr.getDataType().getDataType() == PrimitiveDataType.CLASS) {
       ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(expr.getDataType().getClassName());
       if (info != null) {
-        for (IMethodElement m : info.getMethods()) {
-          if (m.getName().equalsIgnoreCase(methodName))
-            return m.getReturnType();
+        for (IPropertyElement m : info.getProperties()) {
+          if (m.getName().equalsIgnoreCase(attributeName))
+            return m.getVariable().getDataType();
+        }
+        for (IVariableElement e: info.getVariables()) {
+          if (e.getName().equalsIgnoreCase(attributeName))
+            return e.getDataType();
         }
       }
     } else if (expr.getDataType().getDataType() == PrimitiveDataType.HANDLE) {
       // On va tenter quoi ??
-      return ExpressionNode.getStandardMethodDataType(methodName.toUpperCase());
+      return ExpressionNode.getStandardAttributeDataType(attributeName.toUpperCase());
     }
 
     return DataType.UNKNOWN;
+  }
+
+  @Override
+  public boolean isExpression() {
+    return true;
   }
 
 }

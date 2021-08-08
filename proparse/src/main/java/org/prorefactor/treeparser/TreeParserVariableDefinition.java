@@ -422,9 +422,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterExprTermArray(ExprTermArrayContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     setContextQualifier(ctx.expressionTerm(), qual);
-    setContextQualifier(ctx.arraySubscript().expression(0), ContextQualifier.REF);
-    if (ctx.arraySubscript().expression(1) != null)
-      setContextQualifier(ctx.arraySubscript().expression(1), ContextQualifier.REF);
+    setContextQualifier(ctx.expression(0), ContextQualifier.REF);
+    if (ctx.expression(1) != null)
+      setContextQualifier(ctx.expression(1), ContextQualifier.REF);
   }
 
   @Override

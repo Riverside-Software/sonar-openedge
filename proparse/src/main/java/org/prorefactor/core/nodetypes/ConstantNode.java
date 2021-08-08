@@ -1,5 +1,4 @@
 /********************************************************************************
- * Copyright (c) 2003-2015 John Green
  * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
@@ -17,28 +16,45 @@ package org.prorefactor.core.nodetypes;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.proparse.support.ParserSupport;
-import org.prorefactor.treeparser.ParseUnit;
 
-public class ProgramRootNode extends BlockNode {
-  private final ParseUnit unit;
+import eu.rssw.pct.elements.DataType;
 
-  public ProgramRootNode(ProToken t, JPNode parent, int num, boolean hasChildren, ParseUnit unit) {
+public class ConstantNode extends JPNode implements IExpression {
+
+  public ConstantNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
-    this.unit = unit;
   }
 
   @Override
-  public boolean hasAnnotation(String str) {
-    return false;
+  public boolean isExpression() {
+    return true;
   }
 
-  public ParseUnit getParseUnit() {
-    return unit;
+  @Override
+  public DataType getDataType() {
+    switch (getFirstChild().getNodeType()) {
+      case TRUE:
+      case FALSE:
+      case YES:
+      case NO:
+        return DataType.LOGICAL;
+      case UNKNOWNVALUE:
+        return DataType.UNKNOWN;
+      case QSTRING:
+        return DataType.CHARACTER;
+      case LEXDATE:
+        return DataType.DATE;
+      case NULL:
+        return DataType.UNKNOWN;
+      case NUMBER:
+        if (getFirstChild().getText().contains("."))
+          return DataType.DECIMAL;
+        else
+          return DataType.INTEGER;
+      default:
+        // All remaining constants are interpreted as INTEGER
+        return DataType.INTEGER;
+    }
   }
 
-  public ParserSupport getParserSupport() {
-    return unit.getSupport();
-  }
-  
 }

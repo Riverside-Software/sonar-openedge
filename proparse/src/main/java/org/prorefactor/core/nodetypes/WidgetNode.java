@@ -17,28 +17,27 @@ package org.prorefactor.core.nodetypes;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.proparse.support.ParserSupport;
-import org.prorefactor.treeparser.ParseUnit;
 
-public class ProgramRootNode extends BlockNode {
-  private final ParseUnit unit;
+import eu.rssw.pct.elements.DataType;
 
-  public ProgramRootNode(ProToken t, JPNode parent, int num, boolean hasChildren, ParseUnit unit) {
+public class WidgetNode extends JPNode implements IExpression {
+
+  public WidgetNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
-    this.unit = unit;
   }
 
   @Override
-  public boolean hasAnnotation(String str) {
-    return false;
+  public boolean isExpression() {
+    return true;
   }
 
-  public ParseUnit getParseUnit() {
-    return unit;
+  @Override
+  public DataType getDataType() {
+    return DataType.HANDLE;
   }
 
-  public ParserSupport getParserSupport() {
-    return unit.getSupport();
+  public DataType getMethodDataType(String id) {
+    return DataType.UNKNOWN;
   }
-  
+
 }

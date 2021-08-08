@@ -22,16 +22,15 @@ import com.google.common.base.Strings;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;
-import eu.rssw.pct.elements.PrimitiveDataType;
 
-public class MethodCallNode extends JPNode implements IExpression {
+public class LocalMethodCallNode extends JPNode implements IExpression {
   private String methodName = "";
 
-  public MethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+  public LocalMethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     this(t, parent, num, hasChildren, "");
   }
 
-  public MethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String methodName) {
+  public LocalMethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String methodName) {
     super(t, parent, num, hasChildren);
     this.methodName = Strings.nullToEmpty(methodName);
   }
@@ -47,27 +46,15 @@ public class MethodCallNode extends JPNode implements IExpression {
 
   @Override
   public DataType getDataType() {
-    if (getFirstChild() instanceof SystemHandleNode) {
-      SystemHandleNode shn = (SystemHandleNode) getFirstChild();
-      return shn.getMethodDataType(methodName.toUpperCase());
-    }
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
       return DataType.UNKNOWN;
-
-    // Left-Handle expression has to be a class
-    IExpression expr = (IExpression) getFirstChild();
-    if (expr.getDataType().getDataType() == PrimitiveDataType.CLASS) {
-      ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(expr.getDataType().getClassName());
-      if (info != null) {
-        for (IMethodElement m : info.getMethods()) {
-          if (m.getName().equalsIgnoreCase(methodName))
-            return m.getReturnType();
-        }
-      }
-    } else if (expr.getDataType().getDataType() == PrimitiveDataType.HANDLE) {
-      // On va tenter quoi ??
-      return ExpressionNode.getStandardMethodDataType(methodName.toUpperCase());
+    ITypeInfo info = root.getParseUnit().getTypeInfo();
+    if (info == null)
+      return DataType.UNKNOWN;
+    for (IMethodElement elem : info.getMethods()) {
+      if (elem.getName().equalsIgnoreCase(methodName))
+        return elem.getReturnType();
     }
 
     return DataType.UNKNOWN;

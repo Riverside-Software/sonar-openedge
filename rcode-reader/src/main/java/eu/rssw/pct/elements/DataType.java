@@ -85,6 +85,14 @@ public class DataType {
     return className;
   }
 
+  @Override
+  public String toString() {
+    if (primDataType == PrimitiveDataType.CLASS)
+      return "Class " + className;
+    else
+      return primDataType.toString();
+  }
+
   /**
    * @return DataType based on upper-case strings (using underscore as separator)
    */
@@ -156,6 +164,7 @@ public class DataType {
       case "TIME":
         return TIME;
       case "DATETIME":
+      case "TIMESTAMP":
         return DATETIME;
       case "FIXRAW":
         return FIXRAW;
@@ -278,4 +287,15 @@ public class DataType {
     }
   }
 
+  public static boolean isNumeric(DataType type) {
+    return (type == DataType.BIGINT) || (type == DataType.BYTE) || (type == DataType.DECIMAL)
+        || (type == DataType.DOUBLE) || (type == DataType.FLOAT) || (type == DataType.INT64)
+        || (type == DataType.INTEGER) || (type == DataType.LONG) 
+        || (type == DataType.SHORT) || (type == DataType.UNSIGNED_BYTE) || (type == DataType.UNSIGNED_INTEGER)
+        || (type == DataType.UNSIGNED_SHORT);
+  }
+
+  public static boolean isDateLike(DataType type) {
+    return (type == DataType.DATE) || (type == DataType.DATETIME) || (type == DataType.DATETIME_TZ);
+  }
 }

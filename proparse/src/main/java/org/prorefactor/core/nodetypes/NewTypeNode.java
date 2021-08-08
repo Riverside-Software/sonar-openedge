@@ -1,5 +1,4 @@
 /********************************************************************************
- * Copyright (c) 2003-2015 John Green
  * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
@@ -17,28 +16,24 @@ package org.prorefactor.core.nodetypes;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.proparse.support.ParserSupport;
-import org.prorefactor.treeparser.ParseUnit;
 
-public class ProgramRootNode extends BlockNode {
-  private final ParseUnit unit;
+import eu.rssw.pct.elements.DataType;
 
-  public ProgramRootNode(ProToken t, JPNode parent, int num, boolean hasChildren, ParseUnit unit) {
+public class NewTypeNode extends JPNode implements IExpression {
+
+  public NewTypeNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
-    this.unit = unit;
   }
 
   @Override
-  public boolean hasAnnotation(String str) {
-    return false;
+  public boolean isExpression() {
+    return true;
   }
 
-  public ParseUnit getParseUnit() {
-    return unit;
+  @Override
+  public DataType getDataType() {
+    TypeNameNode typeNameNode = (TypeNameNode) getFirstChild().getNextSibling();
+    return new DataType(typeNameNode.getQualName());
   }
 
-  public ParserSupport getParserSupport() {
-    return unit.getSupport();
-  }
-  
 }
