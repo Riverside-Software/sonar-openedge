@@ -27,6 +27,7 @@ import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.v11.VariableElementV11;
 
 public class VariableElementV12 extends VariableElementV11 {
@@ -45,7 +46,7 @@ public class VariableElementV12 extends VariableElementV11 {
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
-    String typeName = dataType != 42 ? null
+    String typeName = dataType != PrimitiveDataType.CLASS.getNum() ? null
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
     DataType dataTypeObj = typeName == null ? DataType.get(dataType) : new DataType(typeName);
 

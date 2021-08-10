@@ -25,6 +25,7 @@ import java.nio.ByteOrder;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.v11.MethodParameterV11;
 
 public class MethodParameterV12 extends MethodParameterV11 {
@@ -42,7 +43,7 @@ public class MethodParameterV12 extends MethodParameterV11 {
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
 
-    String typeName = dataType != 42 ? null
+    String typeName = dataType != PrimitiveDataType.CLASS.getNum() ? null
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
     DataType dataTypeObj = typeName == null ? DataType.get(dataType) : new DataType(typeName);
     String name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);

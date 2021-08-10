@@ -66,7 +66,7 @@ public class MethodParameterV11 extends AbstractElement implements IParameter {
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 20, Integer.BYTES).order(order).getInt();
 
-    String typeName = dataType != 42 ? null
+    String typeName = dataType != PrimitiveDataType.CLASS.getNum() ? null
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
     DataType dataTypeObj = typeName == null ? DataType.get(dataType) : new DataType(typeName);
 

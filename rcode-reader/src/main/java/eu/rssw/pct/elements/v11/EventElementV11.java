@@ -32,6 +32,7 @@ import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IEventElement;
 import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.PrimitiveDataType;
 
 public class EventElementV11 extends AbstractAccessibleElement implements IEventElement {
   private final int flags;
@@ -58,7 +59,7 @@ public class EventElementV11 extends AbstractAccessibleElement implements IEvent
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
-    String typeName = returnType != 42 ? null
+    String typeName = returnType != PrimitiveDataType.CLASS.getNum() ? null
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
     DataType returnTypeObj = typeName == null ? DataType.get(returnType) : new DataType(typeName);
 
