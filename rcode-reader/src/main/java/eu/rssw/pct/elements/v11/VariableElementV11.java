@@ -35,18 +35,15 @@ public class VariableElementV11 extends AbstractAccessibleElement implements IVa
   private static final int BASE_IS_DOTNET = 4;
   private static final int NO_UNDO = 8;
 
-  private final int dataType;
+  private final DataType dataType;
   private final int extent;
   private final int flags;
-  private final String typeName;
 
-  public VariableElementV11(String name, Set<AccessType> accessType, int dataType, int extent, int flags,
-      String typeName) {
+  public VariableElementV11(String name, Set<AccessType> accessType, DataType dataType, int extent, int flags) {
     super(name, accessType);
     this.dataType = dataType;
     this.extent = extent;
     this.flags = flags;
-    this.typeName = typeName;
   }
 
   public static IVariableElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment,
@@ -59,10 +56,11 @@ public class VariableElementV11 extends AbstractAccessibleElement implements IVa
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
-    String typeName = typeNameOffset == 0 ? ""
+    String typeName = dataType != 42 ? null
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
+    DataType dataTypeObj = typeName == null ? DataType.get(dataType) : new DataType(typeName);
 
-    return new VariableElementV11(name2, accessType, dataType, extent, flags, typeName);
+    return new VariableElementV11(name2, accessType, dataTypeObj, extent, flags);
   }
 
   @Override
@@ -72,25 +70,25 @@ public class VariableElementV11 extends AbstractAccessibleElement implements IVa
 
   @Override
   public DataType getDataType() {
-    return DataType.getDataType(dataType);
+    return dataType;
   }
 
-  public String getTypeName() {
-    return typeName;
-  }
-
+  @Override
   public boolean isReadOnly() {
     return (flags & READ_ONLY) != 0;
   }
 
+  @Override
   public boolean isWriteOnly() {
     return (flags & WRITE_ONLY) != 0;
   }
 
+  @Override
   public boolean isNoUndo() {
     return (flags & NO_UNDO) != 0;
   }
 
+  @Override
   public boolean baseIsDotNet() {
     return (flags & BASE_IS_DOTNET) != 0;
   }
@@ -113,8 +111,7 @@ public class VariableElementV11 extends AbstractAccessibleElement implements IVa
   public boolean equals(Object obj) {
     if (obj instanceof IVariableElement) {
       IVariableElement obj2 = (IVariableElement) obj;
-      return getName().equals(obj2.getName()) && getDataType().equals(obj2.getDataType())
-          && (extent == obj2.getExtent());
+      return getName().equals(obj2.getName()) && dataType.equals(obj2.getDataType()) && (extent == obj2.getExtent());
     }
     return false;
   }

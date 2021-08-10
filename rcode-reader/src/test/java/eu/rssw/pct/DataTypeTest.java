@@ -22,27 +22,27 @@ package eu.rssw.pct;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.PrimitiveDataType;
 
 public class DataTypeTest {
 
   @Test
   public void test1() {
-    Assert.assertEquals(DataType.getDataType(-1), DataType.UNKNOWN);
-    Assert.assertEquals(DataType.getDataType(0), DataType.VOID);
-    Assert.assertEquals(DataType.getDataType(48), DataType.RUNTYPE);
-    Assert.assertEquals(DataType.getDataType(49), DataType.UNKNOWN);
+    Assert.assertEquals(PrimitiveDataType.getDataType(-1), PrimitiveDataType.UNKNOWN);
+    Assert.assertEquals(PrimitiveDataType.getDataType(0), PrimitiveDataType.VOID);
+    Assert.assertEquals(PrimitiveDataType.getDataType(48), PrimitiveDataType.RUNTYPE);
+    Assert.assertEquals(PrimitiveDataType.getDataType(49), PrimitiveDataType.UNKNOWN);
   }
 
   @Test
   public void test2() {
-    Assert.assertEquals(DataType.getDataType("-1"), DataType.UNKNOWN);
-    Assert.assertEquals(DataType.getDataType("0"), DataType.VOID);
-    Assert.assertEquals(DataType.getDataType("48"), DataType.RUNTYPE);
-    Assert.assertEquals(DataType.getDataType("49"), DataType.UNKNOWN);
+    Assert.assertEquals(PrimitiveDataType.getDataType("-1"), PrimitiveDataType.UNKNOWN);
+    Assert.assertEquals(PrimitiveDataType.getDataType("0"), PrimitiveDataType.VOID);
+    Assert.assertEquals(PrimitiveDataType.getDataType("48"), PrimitiveDataType.RUNTYPE);
+    Assert.assertEquals(PrimitiveDataType.getDataType("49"), PrimitiveDataType.UNKNOWN);
     // Really ?
-    Assert.assertEquals(DataType.getDataType(""), DataType.CLASS);
-    Assert.assertEquals(DataType.getDataType("Progress.Lang.Object"), DataType.CLASS);
+    Assert.assertEquals(PrimitiveDataType.getDataType(""), PrimitiveDataType.CLASS);
+    Assert.assertEquals(PrimitiveDataType.getDataType("Progress.Lang.Object"), PrimitiveDataType.CLASS);
   }
 
 }

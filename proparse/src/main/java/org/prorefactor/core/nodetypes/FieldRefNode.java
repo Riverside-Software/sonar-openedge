@@ -19,8 +19,9 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
+
+import eu.rssw.pct.elements.DataType;
 
 public class FieldRefNode extends JPNode {
   private ContextQualifier qualifier;

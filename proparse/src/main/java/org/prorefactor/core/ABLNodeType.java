@@ -28,6 +28,8 @@ import org.prorefactor.proparse.antlr4.Proparse;
 
 import com.google.common.base.Strings;
 
+import eu.rssw.pct.elements.DataType;
+
 public enum ABLNodeType {
   // Placeholders and unknown tokens
   EMPTY_NODE(-1000, NodeTypesOption.PLACEHOLDER),
@@ -1986,6 +1988,83 @@ public enum ABLNodeType {
     if (type == null)
       return false;
     return type.isRegularFunc();
+  }
+
+  public static DataType getDataType(int nodeType) {
+    switch (nodeType) {
+      case Proparse.VOID:
+        return DataType.VOID;
+      case Proparse.CHARACTER:
+        return DataType.CHARACTER;
+      case Proparse.DATE:
+        return DataType.DATE;
+      case Proparse.LOGICAL:
+        return DataType.LOGICAL;
+      case Proparse.INTEGER:
+        return DataType.INTEGER;
+      case Proparse.DECIMAL:
+        return DataType.DECIMAL;
+      case Proparse.RECID:
+        return DataType.RECID;
+      case Proparse.RAW:
+        return DataType.RAW;
+      case Proparse.HANDLE:
+        return DataType.HANDLE;
+      case Proparse.MEMPTR:
+        return DataType.MEMPTR;
+      case Proparse.ROWID:
+        return DataType.ROWID;
+      case Proparse.COMHANDLE:
+        return DataType.COMPONENT_HANDLE;
+      case Proparse.TABLE:
+        return DataType.TABLE;
+      case Proparse.TABLEHANDLE:
+        return DataType.TABLE_HANDLE;
+      case Proparse.BLOB:
+        return DataType.BLOB;
+      case Proparse.CLOB:
+        return DataType.CLOB;
+      case Proparse.BYTE:
+        return DataType.BYTE;
+      case Proparse.SHORT:
+        return DataType.SHORT;
+      case Proparse.LONG:
+        return DataType.LONG;
+      case Proparse.FLOAT:
+        return DataType.FLOAT;
+      case Proparse.DOUBLE:
+        return DataType.DOUBLE;
+      case Proparse.UNSIGNEDSHORT:
+        return DataType.UNSIGNED_SHORT;
+      case Proparse.UNSIGNEDBYTE:
+        return DataType.UNSIGNED_BYTE;
+      case Proparse.CURRENCY:
+        return DataType.CURRENCY;
+      case Proparse.ERRORCODE:
+        return DataType.ERROR_CODE;
+      case Proparse.FIXCHAR:
+        return DataType.FIXCHAR;
+      case Proparse.BIGINT:
+        return DataType.BIGINT;
+      case Proparse.TIME:
+        return DataType.TIME;
+      case Proparse.DATETIME:
+        return DataType.DATETIME;
+      case Proparse.DATASET:
+        return DataType.DATASET;
+      case Proparse.DATASETHANDLE:
+        return DataType.DATASET_HANDLE;
+      case Proparse.LONGCHAR:
+        return DataType.LONGCHAR;
+      case Proparse.DATETIMETZ:
+        return DataType.DATETIME_TZ;
+      case Proparse.INT64:
+        return DataType.INT64;
+      case Proparse.UNSIGNEDINTEGER:
+        return DataType.UNSIGNED_INTEGER;
+      default:
+        return DataType.UNKNOWN;
+    }
   }
 
   private static void generateKeywordsG4(final PrintStream out) {

@@ -19,9 +19,10 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ISchema;
-import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
+
+import eu.rssw.pct.elements.DataType;
 
 /**
  * FieldBuffer is the Symbol object linked to from the AST for schema, temp, and work table fields, and FieldBuffer
@@ -89,17 +90,6 @@ public class FieldBuffer extends Symbol implements Primative {
     return buffer;
   }
 
-  /**
-   * Gets the underlying Field's className (or null if not a class).
-   * 
-   * @see Primative#getClassName()
-   */
-  @Override
-  public String getClassName() {
-    return field.getClassName();
-  }
-
-  /** Gets the underlying Field's dataType. */
   @Override
   public DataType getDataType() {
     return field.getDataType();
@@ -136,13 +126,6 @@ public class FieldBuffer extends Symbol implements Primative {
   @Override
   public int getProgressType() {
     return getNodeType().getType();
-  }
-
-  /** Sets the underlying Field's className. */
-  @Override
-  public Primative setClassName(String className) {
-    field.setClassName(className);
-    return this;
   }
 
   /** Sets the underlying Field's dataType. */

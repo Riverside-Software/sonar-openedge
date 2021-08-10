@@ -50,4 +50,8 @@ CLASS rcode.TestClassElements:
 
   END METHOD.
 
+  METHOD PUBLIC Progress.Lang.Object testMethod5(INPUT x1 AS Progress.Lang.Enum):
+
+  END METHOD.
+
 END CLASS.

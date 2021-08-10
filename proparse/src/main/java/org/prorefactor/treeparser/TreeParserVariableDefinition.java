@@ -46,6 +46,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
+import eu.rssw.pct.elements.DataType;
+
 public class TreeParserVariableDefinition extends AbstractBlockProparseListener {
   private static final Logger LOG = LoggerFactory.getLogger(TreeParserVariableDefinition.class);
 
@@ -2044,14 +2046,13 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
     if ((ctx.getStart().getType() == ABLNodeType.CLASS.getType())
         || (ctx.getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
-      primative.setDataType(DataType.CLASS);
       String qualName = support.lookupClassName(ctx.getStop().getText());
       if (Strings.isNullOrEmpty(qualName))
-        primative.setClassName(ctx.getStop().getText());
+        primative.setDataType(new DataType(ctx.getStop().getText()));
       else
-        primative.setClassName(qualName);
+        primative.setDataType(new DataType(qualName));
     } else {
-      primative.setDataType(DataType.getDataType(ctx.getStop().getType()));
+      primative.setDataType(ABLNodeType.getDataType(ctx.getStop().getType()));
     }
   }
 

@@ -19,6 +19,8 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.Variable;
 
+import eu.rssw.pct.elements.PrimitiveDataType;
+
 public class Parameter {
 
   private boolean bind = false;
@@ -89,10 +91,10 @@ public class Parameter {
       case VARIABLE:
         Variable v = (Variable) symbol;
         if (v != null) {
-          if (v.getDataType() == DataType.CLASS) {
-            sb.append('L').append(v.getClassName());
+          if (v.getDataType().getDataType() == PrimitiveDataType.CLASS) {
+            sb.append('L').append(v.getDataType().getClassName());
           } else {
-            sb.append(v.getDataType().getSignature());
+            sb.append(v.getDataType().getDataType().getSignature());
           }
           if (v.getExtent() != 0)
             sb.append("[]");

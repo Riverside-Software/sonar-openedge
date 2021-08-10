@@ -35,7 +35,7 @@ import java.util.Set;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 
-import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.v11.TypeInfoV11;
 import eu.rssw.pct.elements.v12.TypeInfoV12;
@@ -406,7 +406,7 @@ public class RCodeInfo {
     // Second element is return type, which may be empty (if entry doesn't return anything)
     String retType = lst.next();
     if (retType.isEmpty()) {
-      fn.returnType = DataType.VOID;
+      fn.returnType = PrimitiveDataType.VOID;
     } else {
       // Generics handling, which break comma-separated list...
       if (retType.contains("[[")) {
@@ -416,8 +416,8 @@ public class RCodeInfo {
       }
       // If not empty, then two entries separated by a space, first is data type, then extent number
       fn.returnExtent = Integer.parseInt(retType.substring(retType.lastIndexOf(' ') + 1));
-      fn.returnType = DataType.getDataType(retType.substring(0, retType.lastIndexOf(' ')));
-      if (fn.returnType == DataType.CLASS) {
+      fn.returnType = PrimitiveDataType.getDataType(retType.substring(0, retType.lastIndexOf(' ')));
+      if (fn.returnType == PrimitiveDataType.CLASS) {
         fn.classReturnType = retType.substring(0, retType.indexOf(' '));
       }
     }
@@ -448,7 +448,7 @@ public class RCodeInfo {
     }
     param.name = prm.get(1);
     param.type = ParameterType.getTypeFromString(prm.get(0));
-    param.datatype = DataType.getDataType(prm.get(2));
+    param.datatype = PrimitiveDataType.getDataType(prm.get(2));
     param.extent = Integer.parseInt(prm.get(3));
     param.classType = prm.get(2);
 
@@ -459,7 +459,7 @@ public class RCodeInfo {
     private Set<SigAccessType> accessTypes;
     private String name;
     private List<Parameter> parameters = new ArrayList<>();
-    private DataType returnType;
+    private PrimitiveDataType returnType;
     private String classReturnType;
     private int returnExtent;
     private FunctionType type;
@@ -471,7 +471,7 @@ public class RCodeInfo {
         sb.append(type).append(' ');
       }
       sb.append(type).append(' ').append(returnType);
-      if (returnType == DataType.CLASS) {
+      if (returnType == PrimitiveDataType.CLASS) {
         sb.append('{').append(classReturnType).append('}');
       }
       if (returnExtent > 0) {
@@ -580,7 +580,7 @@ public class RCodeInfo {
   public static class Parameter {
     private ParameterType type;
     private String name;
-    private DataType datatype;
+    private PrimitiveDataType datatype;
     private int extent;
     private String classType;
 
@@ -595,7 +595,7 @@ public class RCodeInfo {
         sb.append(" FOR ").append(name);
       } else {
         sb.append(name).append(" AS ").append(datatype);
-        if (datatype == DataType.CLASS) {
+        if (datatype == PrimitiveDataType.CLASS) {
           sb.append('{').append(classType).append('}');
         }
         if (extent > 0) {

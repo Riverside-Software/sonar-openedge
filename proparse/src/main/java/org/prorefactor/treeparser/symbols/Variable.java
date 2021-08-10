@@ -20,11 +20,11 @@ import java.util.List;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.ProgressString;
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
+
+import eu.rssw.pct.elements.DataType;
 
 /**
  * A Symbol defined with DEFINE VARIABLE or any of the other various syntaxes which implicitly define a variable.
@@ -43,7 +43,6 @@ public class Variable extends Symbol implements Primative {
   private int extent = 0;
   private DataType dataType;
   private Object initialValue = null;
-  private String className = null;
   private boolean refInFrame = false;
   private boolean graphicalComponent = false;
 
@@ -59,7 +58,6 @@ public class Variable extends Symbol implements Primative {
   @Override
   public void assignAttributesLike(Primative likePrim) {
     dataType = likePrim.getDataType();
-    className = likePrim.getClassName();
     extent = likePrim.getExtent();
   }
 
@@ -73,11 +71,6 @@ public class Variable extends Symbol implements Primative {
 
   public Type getType() {
     return type;
-  }
-
-  @Override
-  public String getClassName() {
-    return className;
   }
 
   @Override
@@ -105,14 +98,6 @@ public class Variable extends Symbol implements Primative {
   @Override
   public int getProgressType() {
     return getNodeType().getType();
-  }
-
-  @Override
-  public Primative setClassName(String s) {
-    if (s != null)  {
-      this.className = ProgressString.dequote(s).trim();
-    }
-    return this;
   }
 
   @Override

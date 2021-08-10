@@ -35,17 +35,15 @@ import eu.rssw.pct.elements.IParameter;
 
 public class EventElementV11 extends AbstractAccessibleElement implements IEventElement {
   private final int flags;
-  private final int returnType;
-  private final String returnTypeName;
+  private final DataType returnType;
   private final String delegateName;
   private final IParameter[] parameters;
 
-  public EventElementV11(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
-      String delegateName, IParameter[] parameters) {
+  public EventElementV11(String name, Set<AccessType> accessType, int flags, DataType returnType, String delegateName,
+      IParameter[] parameters) {
     super(name, accessType);
     this.flags = flags;
     this.returnType = returnType;
-    this.returnTypeName = returnTypeName;
     this.delegateName = delegateName;
     this.parameters = parameters;
   }
@@ -60,8 +58,9 @@ public class EventElementV11 extends AbstractAccessibleElement implements IEvent
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
-    String returnTypeName = typeNameOffset == 0 ? ""
+    String typeName = returnType != 42 ? null
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
+    DataType returnTypeObj = typeName == null ? DataType.get(returnType) : new DataType(typeName);
 
     int delegateNameOffset = ByteBuffer.wrap(segment, currentPos + 20, Integer.BYTES).order(order).getInt();
     String delegateName = delegateNameOffset == 0 ? ""
@@ -75,17 +74,12 @@ public class EventElementV11 extends AbstractAccessibleElement implements IEvent
       parameters[zz] = param;
     }
 
-    return new EventElementV11(name2, accessType, flags, returnType, returnTypeName, delegateName, parameters);
+    return new EventElementV11(name2, accessType, flags, returnTypeObj, delegateName, parameters);
   }
 
   @Override
   public DataType getReturnType() {
-    return DataType.getDataType(returnType);
-  }
-
-  @Override
-  public String getReturnTypeName() {
-    return returnTypeName;
+    return returnType;
   }
 
   @Override
@@ -127,8 +121,7 @@ public class EventElementV11 extends AbstractAccessibleElement implements IEvent
     if (obj instanceof IEventElement) {
       IEventElement obj2 = (IEventElement) obj;
       return getName().equals(obj2.getName()) && delegateName.equals(obj2.getDelegateName())
-          && (DataType.getDataType(returnType) == obj2.getReturnType())
-          && Arrays.deepEquals(parameters, obj2.getParameters());
+          && returnType.equals(obj2.getReturnType()) && Arrays.deepEquals(parameters, obj2.getParameters());
     }
     return false;
   }

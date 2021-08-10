@@ -29,7 +29,6 @@ import java.util.List;
 
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
-import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.Modifier;
@@ -43,6 +42,9 @@ import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.PrimitiveDataType;
 
 /**
  * This class simply runs the tree parser through various code, and as long as the tree parser does not throw any
@@ -286,12 +288,12 @@ public class TreeParser03Test {
     List<Routine> lst = unit.getRootScope().lookupRoutines("foo1");
     assertEquals(lst.size(), 1);
     Routine r1 = lst.get(0);
-    assertEquals(r1.getReturnDatatypeNode(), DataType.CLASS);
+    assertEquals(r1.getReturnDatatypeNode().getDataType(), PrimitiveDataType.CLASS);
 
     lst = unit.getRootScope().lookupRoutines("foo2");
     assertEquals(lst.size(), 1);
     Routine r2 = lst.get(0);
-    assertEquals(r2.getReturnDatatypeNode(), DataType.CLASS);
+    assertEquals(r2.getReturnDatatypeNode().getDataType(), PrimitiveDataType.CLASS);
 
     lst = unit.getRootScope().lookupRoutines("foo3");
     assertEquals(lst.size(), 1);
@@ -425,30 +427,30 @@ public class TreeParser03Test {
 
     assertEquals(unit.getRootScope().getVariables().size(), 11);
     Variable var1 = unit.getRootScope().getVariable("prm1");
-    assertEquals(var1.getDataType(), DataType.INTEGER);
+    assertEquals(var1.getDataType().getDataType(), PrimitiveDataType.INTEGER);
     Variable var2 = unit.getRootScope().getVariable("prm2");
-    assertEquals(var2.getDataType(), DataType.INTEGER);
+    assertEquals(var2.getDataType().getDataType(), PrimitiveDataType.INTEGER);
     Variable var3 = unit.getRootScope().getVariable("prm3");
-    assertEquals(var3.getDataType(), DataType.INTEGER);
+    assertEquals(var3.getDataType().getDataType(), PrimitiveDataType.INTEGER);
     Variable var4 = unit.getRootScope().getVariable("prm4");
-    assertEquals(var4.getDataType(), DataType.INTEGER);
+    assertEquals(var4.getDataType().getDataType(), PrimitiveDataType.INTEGER);
     Variable var5 = unit.getRootScope().getVariable("prm5");
-    assertEquals(var5.getDataType(), DataType.INTEGER);
+    assertEquals(var5.getDataType().getDataType(), PrimitiveDataType.INTEGER);
     Variable var6 = unit.getRootScope().getVariable("prm6");
-    assertEquals(var6.getDataType(), DataType.CHARACTER);
+    assertEquals(var6.getDataType().getDataType(), PrimitiveDataType.CHARACTER);
     Variable var7 = unit.getRootScope().getVariable("prm7");
-    assertEquals(var7.getDataType(), DataType.LONGCHAR);
+    assertEquals(var7.getDataType().getDataType(), PrimitiveDataType.LONGCHAR);
     Variable var8 = unit.getRootScope().getVariable("prm8");
-    assertEquals(var8.getDataType(), DataType.HANDLE);
+    assertEquals(var8.getDataType().getDataType(), PrimitiveDataType.HANDLE);
     Variable var9 = unit.getRootScope().getVariable("prm9");
-    assertEquals(var9.getDataType(), DataType.CLASS);
-    assertEquals(var9.getClassName(), "Progress.Lang.Object");
+    assertEquals(var9.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(var9.getDataType().getClassName(), "Progress.Lang.Object");
     Variable var10 = unit.getRootScope().getVariable("prm10");
-    assertEquals(var10.getDataType(), DataType.CLASS);
-    assertEquals(var10.getClassName(), "Progress.Lang.Object");
+    assertEquals(var10.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(var10.getDataType().getClassName(), "Progress.Lang.Object");
     Variable var11 = unit.getRootScope().getVariable("prm11");
-    assertEquals(var11.getDataType(), DataType.CLASS);
-    assertEquals(var9.getClassName(), "Progress.Lang.Object");
+    assertEquals(var11.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(var11.getDataType().getClassName(), "Progress.Lang.Object");
   }
 
   @Test
@@ -643,12 +645,12 @@ public class TreeParser03Test {
     assertNotNull(v1);
     assertNotNull(v2);
     assertNotNull(v3);
-    assertEquals(v1.getDataType(), DataType.CLASS);
-    assertEquals(v2.getDataType(), DataType.CLASS);
-    assertEquals(v3.getDataType(), DataType.CLASS);
-    assertEquals(v1.getClassName(), "mypackage.subdir.myclass");
-    assertEquals(v2.getClassName(), "mypackage.subdir.myclass");
-    assertEquals(v3.getClassName(), "mypackage.subdir.myclass");
+    assertEquals(v1.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(v2.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(v3.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(v1.getDataType().getClassName(), "mypackage.subdir.myclass");
+    assertEquals(v2.getDataType().getClassName(), "mypackage.subdir.myclass");
+    assertEquals(v3.getDataType().getClassName(), "mypackage.subdir.myclass");
   }
 
   @Test
@@ -665,8 +667,8 @@ public class TreeParser03Test {
         v1 = var;
     }
     assertNotNull(v1);
-    assertEquals(v1.getDataType(), DataType.CLASS);
-    assertEquals(v1.getClassName(), "mypackage.subdir.myclass");
+    assertEquals(v1.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(v1.getDataType().getClassName(), "mypackage.subdir.myclass");
   }
 
   @Test
@@ -689,9 +691,9 @@ public class TreeParser03Test {
     assertNotNull(v1);
     assertNotNull(v2);
     assertNotNull(v3);
-    assertEquals(v1.getDataType(), DataType.DATE);
-    assertEquals(v2.getDataType(), DataType.DATE);
-    assertEquals(v3.getDataType(), DataType.DATE);
+    assertEquals(v1.getDataType().getDataType(), PrimitiveDataType.DATE);
+    assertEquals(v2.getDataType().getDataType(), PrimitiveDataType.DATE);
+    assertEquals(v3.getDataType().getDataType(), PrimitiveDataType.DATE);
     assertNull(v1.getInitialValue());
     assertNotNull(v2.getInitialValue());
     assertNotNull(v3.getInitialValue());
@@ -716,8 +718,8 @@ public class TreeParser03Test {
     }
     assertNotNull(v1);
     assertNotNull(v2);
-    assertEquals(v1.getDataType(), DataType.DATE);
-    assertEquals(v2.getDataType(), DataType.DATE);
+    assertEquals(v1.getDataType().getDataType(), PrimitiveDataType.DATE);
+    assertEquals(v2.getDataType().getDataType(), PrimitiveDataType.DATE);
     assertTrue(v1.containsModifier(Modifier.PROTECTED));
     assertTrue(v2.containsModifier(Modifier.PROTECTED));
   }
@@ -840,8 +842,8 @@ public class TreeParser03Test {
         v1 = var;
     }
     assertNotNull(v1);
-    assertEquals(v1.getDataType(), DataType.CLASS);
-    assertEquals(v1.getClassName(), "foo");
+    assertEquals(v1.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(v1.getDataType().getClassName(), "foo");
     assertEquals(v1.getExtent(), 2);
   }
 
@@ -859,8 +861,8 @@ public class TreeParser03Test {
         v1 = var;
     }
     assertNotNull(v1);
-    assertEquals(v1.getDataType(), DataType.CLASS);
-    assertEquals(v1.getClassName(), "System.Collections.Generic.List<char>");
+    assertEquals(v1.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(v1.getDataType().getClassName(), "System.Collections.Generic.List<char>");
     assertEquals(v1.getExtent(), 0);
   }
 
@@ -982,8 +984,8 @@ public class TreeParser03Test {
         varX = var;
 
       assertNotNull(varX);
-      assertEquals(varX.getDataType(), DataType.CLASS);
-      assertEquals(varX.getClassName(), "Progress.Lang.Object");
+      assertEquals(varX.getDataType().getDataType(), PrimitiveDataType.CLASS);
+      assertEquals(varX.getDataType().getClassName(), "Progress.Lang.Object");
       assertEquals(varX.getExtent(), 0);
       assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
       assertEquals(varX.getNumReads(), 0);
@@ -1006,7 +1008,7 @@ public class TreeParser03Test {
         varX = var;
 
       assertNotNull(varX);
-      assertEquals(varX.getDataType(), DataType.DATETIME);
+      assertEquals(varX.getDataType().getDataType(), PrimitiveDataType.DATETIME);
       assertEquals(varX.getExtent(), 0);
       assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
       assertEquals(varX.getNumReads(), 0);

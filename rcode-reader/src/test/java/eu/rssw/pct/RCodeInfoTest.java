@@ -31,6 +31,7 @@ import java.io.IOException;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
+import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IDatasetElement;
 import eu.rssw.pct.elements.IMethodElement;
@@ -320,8 +321,10 @@ public class RCodeInfoTest {
       assertEquals(testMethod.getParameters()[1].getMode(), ParameterMode.OUTPUT);
       assertEquals(testMethod.getParameters()[2].getParameterType(), ParameterType.VARIABLE);
       assertEquals(testMethod.getParameters()[2].getMode(), ParameterMode.INPUT);
-      assertEquals(testMethod.getParameters()[2].getABLDataType(), DataType.INTEGER);
+      assertEquals(testMethod.getParameters()[2].getDataType(), DataType.INTEGER);
       assertEquals(testMethod.getParameters()[2].getExtent(), 3);
+      assertEquals(testMethod.getReturnType().getDataType(), PrimitiveDataType.INTEGER);
+      assertNull(testMethod.getReturnType().getClassName());
 
       IMethodElement testMethod21 = null;
       IMethodElement testMethod22 = null;
@@ -337,6 +340,10 @@ public class RCodeInfoTest {
       assertEquals(testMethod22.getParameters()[0].getExtent(), -32767);
       assertEquals(testMethod21.getSignature(), "testMethod2(II)");
       assertEquals(testMethod22.getSignature(), "testMethod2(II[])");
+      assertEquals(testMethod21.getReturnType().getDataType(), PrimitiveDataType.INTEGER);
+      assertNull(testMethod21.getReturnType().getClassName());
+      assertEquals(testMethod22.getReturnType().getDataType(), PrimitiveDataType.INTEGER);
+      assertNull(testMethod22.getReturnType().getClassName());
 
       IMethodElement testMethod3 = null;
       for (IMethodElement elem : rci.getTypeInfo().getMethods()) {
@@ -347,12 +354,14 @@ public class RCodeInfoTest {
       assertEquals(testMethod3.getSignature(), "testMethod3(ITH,MDH)");
       assertNotNull(testMethod3.getParameters());
       assertEquals(testMethod3.getParameters().length, 2);
-      assertEquals(testMethod3.getParameters()[0].getABLDataType(), DataType.HANDLE);
+      assertEquals(testMethod3.getParameters()[0].getDataType(), DataType.HANDLE);
       assertEquals(testMethod3.getParameters()[0].getMode(), ParameterMode.INPUT);
       assertEquals(testMethod3.getParameters()[0].getParameterType(), ParameterType.TABLE);
-      assertEquals(testMethod3.getParameters()[1].getABLDataType(), DataType.HANDLE);
+      assertEquals(testMethod3.getParameters()[1].getDataType(), DataType.HANDLE);
       assertEquals(testMethod3.getParameters()[1].getMode(), ParameterMode.INPUT_OUTPUT);
       assertEquals(testMethod3.getParameters()[1].getParameterType(), ParameterType.DATASET);
+      assertEquals(testMethod3.getReturnType().getDataType(), PrimitiveDataType.INTEGER);
+      assertNull(testMethod3.getReturnType().getClassName());
 
       IMethodElement testMethod4 = null;
       for (IMethodElement elem : rci.getTypeInfo().getMethods()) {
@@ -361,6 +370,18 @@ public class RCodeInfoTest {
       }
       assertNotNull(testMethod4);
       assertEquals(testMethod4.getSignature(), "testMethod4(IC,MLProgress.Lang.Object,OD,IDT,IDTZ,ODE,IH,I64,IB,ILC,OM,IRAW,IREC,IROW)");
+      assertEquals(testMethod4.getReturnType().getDataType(), PrimitiveDataType.INTEGER);
+      assertNull(testMethod4.getReturnType().getClassName());
+
+      IMethodElement testMethod5 = null;
+      for (IMethodElement elem : rci.getTypeInfo().getMethods()) {
+        if ("testMethod5".equalsIgnoreCase(elem.getName()))
+          testMethod5 = elem;
+      }
+      assertNotNull(testMethod5);
+      assertEquals(testMethod5.getReturnType().getDataType(), PrimitiveDataType.CLASS);
+      assertEquals(testMethod5.getReturnType().getClassName(), "Progress.Lang.Object");
+
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }

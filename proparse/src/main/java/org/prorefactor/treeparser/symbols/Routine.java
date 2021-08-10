@@ -19,9 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
+
+import eu.rssw.pct.elements.DataType;
 
 /**
  * Represents the definition of a Routine. Is a Symbol - used as an entry in the symbol table. A Routine is a

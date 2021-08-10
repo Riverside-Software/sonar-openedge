@@ -58,6 +58,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
+import eu.rssw.pct.elements.DataType;
+
 /**
  * First level of TreeParser, creates blocks (with statement order), scopes and routines
  */
@@ -260,9 +262,9 @@ public class TreeParserBlocks extends ProparseBaseListener {
     newRoutine((BlockNode) support.getNode(ctx), ctx.id.getText(), ABLNodeType.FUNCTION);
     if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
         || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
-      currentRoutine.setReturnDatatypeNode(DataType.CLASS);
+      currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
     } else {
-      currentRoutine.setReturnDatatypeNode(DataType.getDataType(ctx.datatype().getStop().getType()));
+      currentRoutine.setReturnDatatypeNode(ABLNodeType.getDataType(ctx.datatype().getStop().getType()));
     }
 
     if (ctx.FORWARDS() != null) {
@@ -302,9 +304,9 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
     if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
         || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
-      currentRoutine.setReturnDatatypeNode(DataType.CLASS);
+      currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
     } else {
-      currentRoutine.setReturnDatatypeNode(DataType.getDataType(ctx.datatype().getStop().getType()));
+      currentRoutine.setReturnDatatypeNode(ABLNodeType.getDataType(ctx.datatype().getStop().getType()));
     }
   }
 
@@ -322,13 +324,13 @@ public class TreeParserBlocks extends ProparseBaseListener {
       currentRoutine.setReturnDatatypeNode(DataType.VOID);
     } else {
       if (ctx.datatype().CLASS() != null) {
-        currentRoutine.setReturnDatatypeNode(DataType.CLASS);
+        currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
       } else {
-        if (ctx.datatype().datatypeVar().typeName() != null)
-          currentRoutine.setReturnDatatypeNode(DataType.CLASS);
-        else
+        if (ctx.datatype().datatypeVar().typeName() != null) {
+          currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
+        } else
           currentRoutine.setReturnDatatypeNode(
-              DataType.getDataType(support.getNode(ctx.datatype().datatypeVar()).getType()));
+              ABLNodeType.getDataType(support.getNode(ctx.datatype().datatypeVar()).getType()));
       }
     }
   }

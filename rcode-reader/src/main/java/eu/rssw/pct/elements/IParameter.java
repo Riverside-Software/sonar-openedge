@@ -20,10 +20,10 @@
 package eu.rssw.pct.elements;
 
 public interface IParameter extends IElement {
+  int getNum();
   String getName();
   int getExtent();
-  DataType getABLDataType();
-  String getDataType();
+  DataType getDataType();
   ParameterMode getMode();
   ParameterType getParameterType();
   boolean isClassDataType();
@@ -49,21 +49,21 @@ public interface IParameter extends IElement {
       case TABLE:
       case BUFFER_TEMP_TABLE:
         sb.append('T');
-        if (getABLDataType() == DataType.HANDLE)
+        if (getDataType().getDataType() == PrimitiveDataType.HANDLE)
           sb.append('H');
         break;
       case DATASET:
         sb.append('D');
-        if (getABLDataType() == DataType.HANDLE)
+        if (getDataType().getDataType() == PrimitiveDataType.HANDLE)
           sb.append('H');
         break;
       case BROWSE:
         return sb.append('W').toString();
       case VARIABLE:
         if (isClassDataType())
-          sb.append('L').append(getDataType());
+          sb.append('L').append(getDataType().getClassName());
         else
-          sb.append(getABLDataType().getSignature());
+          sb.append(getDataType().getDataType().getSignature());
         break;
       default:
         sb.append("??");

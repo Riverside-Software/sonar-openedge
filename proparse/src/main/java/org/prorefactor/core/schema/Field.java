@@ -15,8 +15,9 @@
  ********************************************************************************/
 package org.prorefactor.core.schema;
 
-import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
+
+import eu.rssw.pct.elements.DataType;
 
 /**
  * Field objects are created both by the Schema class and they are also created for temp and work table fields defined
@@ -26,7 +27,6 @@ public class Field implements IField {
   private final String name;
   private int extent;
   private DataType dataType;
-  private String className = null;
   private ITable table;
 
   /**
@@ -50,7 +50,6 @@ public class Field implements IField {
   @Override
   public void assignAttributesLike(Primative likePrim) {
     dataType = likePrim.getDataType();
-    className = likePrim.getClassName();
     extent = likePrim.getExtent();
   }
 
@@ -66,13 +65,7 @@ public class Field implements IField {
     Field f = new Field(this.name, toTable);
     f.dataType = this.dataType;
     f.extent = this.extent;
-    f.className = this.className;
     return f;
-  }
-
-  @Override
-  public String getClassName() {
-    return className;
   }
 
   @Override
@@ -93,12 +86,6 @@ public class Field implements IField {
   @Override
   public ITable getTable() {
     return table;
-  }
-
-  @Override
-  public Primative setClassName(String s) {
-    this.className = s;
-    return this;
   }
 
   @Override

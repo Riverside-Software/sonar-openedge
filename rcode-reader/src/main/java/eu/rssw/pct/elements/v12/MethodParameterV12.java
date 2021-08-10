@@ -23,31 +23,31 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.v11.MethodParameterV11;
 
 public class MethodParameterV12 extends MethodParameterV11 {
 
-  public MethodParameterV12(int num, String name, int type, int mode, int flags, int dataType, String dataTypeName,
-      int extent) {
-    super(num, name, type, mode, flags, dataType, dataTypeName, extent);
+  public MethodParameterV12(int num, String name, int type, int mode, int flags, DataType dataType, int extent) {
+    super(num, name, type, mode, flags, dataType, extent);
   }
 
-  protected static IParameter fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
-      ByteOrder order) {
+  protected static IParameter fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
     int parameterType = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(order).getShort();
     int paramMode = ByteBuffer.wrap(segment, currentPos + 12, Short.BYTES).order(order).getShort();
     int extent = ByteBuffer.wrap(segment, currentPos + 14, Short.BYTES).order(order).getShort();
     int dataType = ByteBuffer.wrap(segment, currentPos + 16, Short.BYTES).order(order).getShort();
     int flags = ByteBuffer.wrap(segment, currentPos + 18, Short.BYTES).order(order).getShort() & 0xffff;
-    int argumentNameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
+    int typeNameOffset = ByteBuffer.wrap(segment, currentPos, Integer.BYTES).order(order).getInt();
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
 
-    String dataTypeName = argumentNameOffset == 0 ? ""
-        : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + argumentNameOffset);
+    String typeName = dataType != 42 ? null
+        : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
+    DataType dataTypeObj = typeName == null ? DataType.get(dataType) : new DataType(typeName);
     String name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
-    return new MethodParameterV12(0, name, parameterType, paramMode, flags, dataType, dataTypeName, extent);
+    return new MethodParameterV12(0, name, parameterType, paramMode, flags, dataTypeObj, extent);
   }
 
 }

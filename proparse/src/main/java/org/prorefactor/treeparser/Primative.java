@@ -15,6 +15,8 @@
  ********************************************************************************/
 package org.prorefactor.treeparser;
 
+import eu.rssw.pct.elements.DataType;
+
 /**
  * Field and Variable implement Primative because they both have a "primative" Progress data type (INTEGER, CHARACTER,
  * etc).
@@ -26,19 +28,12 @@ public interface Primative {
    */
   void assignAttributesLike(Primative likePrim);
 
-  /**
-   * The name of the CLASS that this variable was defined for. Returns null if this variable was not defined for a CLASS.
-   */
-  String getClassName();
-
   DataType getDataType();
 
   /**
    * @return -32767 if undertermined array, 0 if not an array, or &gt; 0 if determined-length array
    */
   int getExtent();
-
-  Primative setClassName(String className);
 
   Primative setDataType(DataType dataType);
 
