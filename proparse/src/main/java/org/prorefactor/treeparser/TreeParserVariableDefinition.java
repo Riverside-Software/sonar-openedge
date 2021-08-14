@@ -419,6 +419,22 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void enterExprTermArray(ExprTermArrayContext ctx) {
+    ContextQualifier qual = contextQualifiers.removeFrom(ctx);
+    setContextQualifier(ctx.expressionTerm(), qual);
+    setContextQualifier(ctx.arraySubscript().expression(0), ContextQualifier.REF);
+    if (ctx.arraySubscript().expression(1) != null)
+      setContextQualifier(ctx.arraySubscript().expression(1), ContextQualifier.REF);
+  }
+
+  @Override
+  public void enterExprTermInUI(ExprTermInUIContext ctx) {
+    ContextQualifier qual = contextQualifiers.removeFrom(ctx);
+    setContextQualifier(ctx.expressionTerm(), qual);
+    setContextQualifier(ctx.inuic().widgetname(), ContextQualifier.REF);
+  }
+
+  @Override
   public void enterExprTermWidget(ExprTermWidgetContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     setContextQualifier(ctx.widName(), qual);
