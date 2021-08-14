@@ -117,7 +117,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterBlockOptionIterator(BlockOptionIteratorContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.REFUP);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.REFUP);
     setContextQualifier(ctx.expression(0), ContextQualifier.REF);
     setContextQualifier(ctx.expression(1), ContextQualifier.REF);
   }
@@ -194,7 +194,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterParameterArgTableHandle(ParameterArgTableHandleContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.INIT);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.INIT);
   }
 
   @Override
@@ -204,7 +204,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterParameterArgDatasetHandle(ParameterArgDatasetHandleContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.INIT);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.INIT);
   }
 
   @Override
@@ -287,7 +287,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void exitFunctionParamStandardLike(FunctionParamStandardLikeContext ctx) {
-    defLike(support.getNode(ctx.likeField().field()));
+    defLike(support.getNode(ctx.likeField().fieldExpr().field()));
     addToSymbolScope(stack.pop());
   }
 
@@ -456,8 +456,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterSWidget(SWidgetContext ctx) {
-    if (ctx.field() != null) {
-      setContextQualifier(ctx.field(), ContextQualifier.REF);
+    if (ctx.fieldExpr() != null) {
+      setContextQualifier(ctx.fieldExpr(), ContextQualifier.REF);
     }
   }
 
@@ -469,7 +469,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     } else if (ctx.BROWSE() != null) {
       browseRef(support.getNode(ctx).getNextNode());
     } else if (ctx.FIELD() != null) {
-      setContextQualifier(ctx.field(), ContextQualifier.REF);
+      setContextQualifier(ctx.fieldExpr(), ContextQualifier.REF);
     }
   }
 
@@ -486,9 +486,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       setContextQualifier(ctx.record(), ContextQualifier.UPDATING);
     }
     if (ctx.exceptFields() != null) {
-      for (FieldContext fld : ctx.exceptFields().field()) {
+      for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
-        nameResolution.put(fld, TableNameResolution.LAST);
+        nameResolution.put(fld.field(), TableNameResolution.LAST);
       }
     }
   }
@@ -499,8 +499,6 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     ContextQualifier qual = ctx.EQUAL() == null ? ContextQualifier.REFUP : ContextQualifier.UPDATING;
     if (ctx.expressionTerm() != null) {
       setContextQualifier(ctx.expressionTerm(), qual);
-    } else if (ctx.field() != null) {
-      setContextQualifier(ctx.field(), qual);
     }
     setContextQualifier(ctx.expression(), ContextQualifier.REF);
   }
@@ -520,24 +518,22 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       setContextQualifier(ctx.pseudoFunction(), qual);
     else if (ctx.expressionTerm() != null)
       setContextQualifier(ctx.expressionTerm(), qual);
-    else if (ctx.field() != null)
-      setContextQualifier(ctx.field(), qual);
   }
 
   @Override
   public void enterReferencePoint(ReferencePointContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
   }
 
   @Override
   public void enterBufferCompareStatement(BufferCompareStatementContext ctx) {
     setContextQualifier(ctx.record(0), ContextQualifier.REF);
 
-    if ((ctx.exceptUsingFields() != null) && (ctx.exceptUsingFields().field() != null)) {
+    if ((ctx.exceptUsingFields() != null) && (ctx.exceptUsingFields().fieldExpr() != null)) {
       ContextQualifier qual = ctx.exceptUsingFields().USING() == null ? ContextQualifier.SYMBOL : ContextQualifier.REF;
-      for (FieldContext field : ctx.exceptUsingFields().field()) {
+      for (FieldExprContext field : ctx.exceptUsingFields().fieldExpr()) {
         setContextQualifier(field, qual);
-        nameResolution.put(field, TableNameResolution.LAST);
+        nameResolution.put(field.field(), TableNameResolution.LAST);
       }
     }
 
@@ -546,18 +542,18 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterBufferCompareSave(BufferCompareSaveContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
   }
 
   @Override
   public void enterBufferCopyStatement(BufferCopyStatementContext ctx) {
     setContextQualifier(ctx.record(0), ContextQualifier.REF);
 
-    if ((ctx.exceptUsingFields() != null) && (ctx.exceptUsingFields().field() != null)) {
+    if ((ctx.exceptUsingFields() != null) && (ctx.exceptUsingFields().fieldExpr() != null)) {
       ContextQualifier qual = ctx.exceptUsingFields().USING() == null ? ContextQualifier.SYMBOL : ContextQualifier.REF;
-      for (FieldContext field : ctx.exceptUsingFields().field()) {
+      for (FieldExprContext field : ctx.exceptUsingFields().fieldExpr()) {
         setContextQualifier(field, qual);
-        nameResolution.put(field, TableNameResolution.LAST);
+        nameResolution.put(field.field(), TableNameResolution.LAST);
       }
     }
 
@@ -571,13 +567,13 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterChooseField(ChooseFieldContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
-    frameStack.formItem(support.getNode(ctx.field()));
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
+    frameStack.formItem(support.getNode(ctx.fieldExpr().field()));
   }
 
   @Override
   public void enterChooseOption(ChooseOptionContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
   }
 
   @Override
@@ -604,12 +600,12 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterCloseStoredField(CloseStoredFieldContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.REF);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.REF);
   }
 
   @Override
   public void enterCloseStoredWhere(CloseStoredWhereContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.REF);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.REF);
   }
 
   @Override
@@ -628,9 +624,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void exitColumnFormatOption(ColumnFormatOptionContext ctx) {
-    if ((ctx.LEXAT() != null) && (ctx.field() != null)) {
-      setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
-      frameStack.lexAt(support.getNode(ctx.field()));
+    if ((ctx.LEXAT() != null) && (ctx.fieldExpr() != null)) {
+      setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
+      frameStack.lexAt(support.getNode(ctx.fieldExpr().field()));
     }
   }
 
@@ -696,7 +692,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterCreateWidgetStatement(CreateWidgetStatementContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.UPDATING_UI);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING_UI);
   }
 
   @Override
@@ -726,17 +722,17 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDdeGetStatement(DdeGetStatementContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
   }
 
   @Override
   public void enterDdeInitiateStatement(DdeInitiateStatementContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
   }
 
   @Override
   public void enterDdeRequestStatement(DdeRequestStatementContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
   }
 
   @Override
@@ -752,9 +748,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterDefBrowseDisplay(DefBrowseDisplayContext ctx) {
     if (ctx.exceptFields() != null) {
-      for (FieldContext fld : ctx.exceptFields().field()) {
+      for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
-        nameResolution.put(fld, TableNameResolution.LAST);
+        nameResolution.put(fld.field(), TableNameResolution.LAST);
       }
     }
   }
@@ -779,7 +775,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterDefBrowseEnable(DefBrowseEnableContext ctx) {
     if ((ctx.allExceptFields() != null) && (ctx.allExceptFields().exceptFields() != null)) {
-      for (FieldContext fld : ctx.allExceptFields().exceptFields().field()) {
+      for (FieldExprContext fld : ctx.allExceptFields().exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
       }
     }
@@ -787,7 +783,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDefBrowseEnableItem(DefBrowseEnableItemContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
     frameStack.formItem(support.getNode(ctx));
   }
 
@@ -799,9 +795,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFieldsFields(FieldsFieldsContext ctx) {
-    for (FieldContext fld : ctx.field()) {
+    for (FieldExprContext fld : ctx.fieldExpr()) {
       setContextQualifier(fld, ContextQualifier.SYMBOL);
-      nameResolution.put(fld, TableNameResolution.LAST);
+      nameResolution.put(fld.field(), TableNameResolution.LAST);
     }
   }
 
@@ -818,7 +814,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterButtonOption(ButtonOptionContext ctx) {
     if (ctx.likeField() != null) {
-      setContextQualifier(ctx.likeField().field(), ContextQualifier.SYMBOL);
+      setContextQualifier(ctx.likeField().fieldExpr(), ContextQualifier.SYMBOL);
     }
   }
 
@@ -852,18 +848,18 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     for (RecordContext record : ctx.record()) {
       setContextQualifier(record, ContextQualifier.INIT);
     }
-    for (FieldContext fld : ctx.field()) {
+    for (FieldExprContext fld : ctx.fieldExpr()) {
       setContextQualifier(fld, ContextQualifier.SYMBOL);
     }
   }
 
   @Override
   public void enterFieldMappingPhrase(FieldMappingPhraseContext ctx) {
-    for (int zz = 0; zz < ctx.field().size(); zz += 2) {
-      setContextQualifier(ctx.field().get(zz), ContextQualifier.SYMBOL);
-      nameResolution.put(ctx.field().get(zz), TableNameResolution.PREVIOUS);
-      setContextQualifier(ctx.field().get(zz + 1), ContextQualifier.SYMBOL);
-      nameResolution.put(ctx.field().get(zz + 1), TableNameResolution.LAST);
+    for (int zz = 0; zz < ctx.fieldExpr().size(); zz += 2) {
+      setContextQualifier(ctx.fieldExpr().get(zz), ContextQualifier.SYMBOL);
+      nameResolution.put(ctx.fieldExpr().get(zz).field(), TableNameResolution.PREVIOUS);
+      setContextQualifier(ctx.fieldExpr().get(zz + 1), ContextQualifier.SYMBOL);
+      nameResolution.put(ctx.fieldExpr().get(zz + 1).field(), TableNameResolution.LAST);
     }
   }
 
@@ -880,8 +876,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterSourceBufferPhrase(SourceBufferPhraseContext ctx) {
     setContextQualifier(ctx.record(), ContextQualifier.INIT);
-    if (ctx.field() != null) {
-      for (FieldContext fld : ctx.field()) {
+    if (ctx.fieldExpr() != null) {
+      for (FieldExprContext fld : ctx.fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
       }
     }
@@ -906,9 +902,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     setContextQualifier(ctx.formItemsOrRecord(), ContextQualifier.SYMBOL);
 
     if (ctx.exceptFields() != null) {
-      for (FieldContext fld : ctx.exceptFields().field()) {
+      for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
-        nameResolution.put(fld, TableNameResolution.LAST);
+        nameResolution.put(fld.field(), TableNameResolution.LAST);
       }
     }
   }
@@ -927,7 +923,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterDefineImageOption(DefineImageOptionContext ctx) {
     if (ctx.likeField() != null) {
-      setContextQualifier(ctx.likeField().field(), ContextQualifier.SYMBOL);
+      setContextQualifier(ctx.likeField().fieldExpr(), ContextQualifier.SYMBOL);
     }
   }
 
@@ -1021,7 +1017,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void exitDefineParamVarLike(DefineParamVarLikeContext ctx) {
-    defLike(support.getNode(ctx.field()));
+    defLike(support.getNode(ctx.fieldExpr().field()));
     if ((ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
       defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
     }
@@ -1094,7 +1090,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterRectangleOption(RectangleOptionContext ctx) {
     if (ctx.likeField() != null) {
-      setContextQualifier(ctx.likeField().field(), ContextQualifier.SYMBOL);
+      setContextQualifier(ctx.likeField().fieldExpr(), ContextQualifier.SYMBOL);
     }
   }
 
@@ -1224,7 +1220,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       setContextQualifier(form, ContextQualifier.SYMBOL);
     }
     if ((ctx.allExceptFields() != null) && (ctx.allExceptFields().exceptFields() != null)) {
-      for (FieldContext fld : ctx.allExceptFields().exceptFields().field()) {
+      for (FieldExprContext fld : ctx.allExceptFields().exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
       }
     }
@@ -1246,9 +1242,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     frameInitializingStatement(ctx);
     setContextQualifier(ctx.displayItemsOrRecord(), ContextQualifier.REF);
     if (ctx.exceptFields() != null) {
-      for (FieldContext fld : ctx.exceptFields().field()) {
+      for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
-        nameResolution.put(fld, TableNameResolution.LAST);
+        nameResolution.put(fld.field(), TableNameResolution.LAST);
       }
     }
   }
@@ -1284,8 +1280,6 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterFieldEqualDynamicNew(FieldEqualDynamicNewContext ctx) {
     if (ctx.expressionTerm() != null) {
       setContextQualifier(ctx.expressionTerm(), ContextQualifier.UPDATING);
-    } else if (ctx.field() != null) {
-      setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
     }
   }
 
@@ -1324,7 +1318,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       setContextQualifier(form, ContextQualifier.SYMBOL);
     }
     if ((ctx.allExceptFields() != null) && (ctx.allExceptFields().exceptFields() != null)) {
-      for (FieldContext fld : ctx.allExceptFields().exceptFields().field()) {
+      for (FieldExprContext fld : ctx.allExceptFields().exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
       }
     }
@@ -1340,9 +1334,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterExportStatement(ExportStatementContext ctx) {
     setContextQualifier(ctx.displayItemsOrRecord(), ContextQualifier.REF);
     if (ctx.exceptFields() != null) {
-      for (FieldContext fld : ctx.exceptFields().field()) {
+      for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
-        nameResolution.put(fld, TableNameResolution.LAST);
+        nameResolution.put(fld.field(), TableNameResolution.LAST);
       }
     }
   }
@@ -1357,7 +1351,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     if (ctx.AS() != null) {
       defAs(ctx.datatype());
     } else if (ctx.LIKE() != null) {
-      setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
+      setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
     } else if ((ctx.initialConstant() != null) && (currSymbol instanceof Variable)) {
       // Initial value only set for variables, not for TT fields
       defineInitialValue((Variable) currSymbol, ctx.initialConstant().varStatementInitialValue());
@@ -1367,7 +1361,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void exitFieldOption(FieldOptionContext ctx) {
     if (ctx.LIKE() != null) {
-      defLike(support.getNode(ctx.field()));
+      defLike(support.getNode(ctx.fieldExpr().field()));
     }
   }
 
@@ -1400,8 +1394,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterFormItem(FormItemContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
-    if (ctx.field() != null) {
-      setContextQualifier(ctx.field(), qual);
+    if (ctx.fieldExpr() != null) {
+      setContextQualifier(ctx.fieldExpr(), qual);
     } else if (ctx.recordAsFormItem() != null) {
       setContextQualifier(ctx.recordAsFormItem(), qual);
     }
@@ -1409,7 +1403,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void exitFormItem(FormItemContext ctx) {
-    if ((ctx.field() != null) || (ctx.recordAsFormItem() != null)) {
+    if ((ctx.fieldExpr() != null) || (ctx.recordAsFormItem() != null)) {
       frameStack.formItem(support.getNode(ctx));
     }
   }
@@ -1430,7 +1424,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     if (ctx.record() != null)
       setContextQualifier(ctx.record(), contextQualifiers.removeFrom(ctx));
     else
-      setContextQualifier(ctx.field(), contextQualifiers.removeFrom(ctx));
+      setContextQualifier(ctx.fieldExpr(), contextQualifiers.removeFrom(ctx));
   }
 
   @Override
@@ -1444,9 +1438,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     frameInitializingStatement(ctx);
     setContextQualifier(ctx.formItemsOrRecord(), ContextQualifier.SYMBOL);
     if (ctx.exceptFields() != null) {
-      for (FieldContext fld : ctx.exceptFields().field()) {
+      for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
-        nameResolution.put(fld, TableNameResolution.LAST);
+        nameResolution.put(fld.field(), TableNameResolution.LAST);
       }
     }
   }
@@ -1459,11 +1453,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFormatOption(FormatOptionContext ctx) {
-    if ((ctx.LEXAT() != null) && (ctx.field() != null)) {
-      setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
-      frameStack.lexAt(support.getNode(ctx.field()));
-    } else if ((ctx.LIKE() != null) && (ctx.field() != null)) {
-      setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
+    if ((ctx.LEXAT() != null) && (ctx.fieldExpr() != null)) {
+      setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
+      frameStack.lexAt(support.getNode(ctx.fieldExpr().field()));
+    } else if ((ctx.LIKE() != null) && (ctx.fieldExpr() != null)) {
+      setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
     }
   }
 
@@ -1474,28 +1468,28 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFrameOption(FrameOptionContext ctx) {
-    if (((ctx.CANCELBUTTON() != null) || (ctx.DEFAULTBUTTON() != null)) && (ctx.field() != null)) {
-      setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
+    if (((ctx.CANCELBUTTON() != null) || (ctx.DEFAULTBUTTON() != null)) && (ctx.fieldExpr() != null)) {
+      setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
     }
   }
 
   @Override
   public void enterGetKeyValueStatement(GetKeyValueStatementContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
   }
 
   @Override
   public void enterImportStatement(ImportStatementContext ctx) {
-    for (FieldContext fld : ctx.field()) {
+    for (FieldExprContext fld : ctx.fieldExpr()) {
       setContextQualifier(fld, ContextQualifier.UPDATING);
     }
     if (ctx.varRecField() != null) {
       setContextQualifier(ctx.varRecField(), ContextQualifier.UPDATING);
     }
     if (ctx.exceptFields() != null) {
-      for (FieldContext fld : ctx.exceptFields().field()) {
+      for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
-        nameResolution.put(fld, TableNameResolution.LAST);
+        nameResolution.put(fld.field(), TableNameResolution.LAST);
       }
     }
   }
@@ -1506,9 +1500,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
     setContextQualifier(ctx.record(), ContextQualifier.UPDATING);
     if (ctx.exceptFields() != null) {
-      for (FieldContext fld : ctx.exceptFields().field()) {
+      for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
-        nameResolution.put(fld, TableNameResolution.LAST);
+        nameResolution.put(fld.field(), TableNameResolution.LAST);
       }
     }
   }
@@ -1525,16 +1519,16 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterMessageOption(MessageOptionContext ctx) {
-    if ((ctx.SET() != null) && (ctx.field() != null)) {
-      setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
-    } else if ((ctx.UPDATE() != null) && (ctx.field() != null)) {
-      setContextQualifier(ctx.field(), ContextQualifier.REFUP);
+    if ((ctx.SET() != null) && (ctx.fieldExpr() != null)) {
+      setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
+    } else if ((ctx.UPDATE() != null) && (ctx.fieldExpr() != null)) {
+      setContextQualifier(ctx.fieldExpr(), ContextQualifier.REFUP);
     }
   }
 
   @Override
   public void enterNextPromptStatement(NextPromptStatementContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
   }
 
   @Override
@@ -1549,9 +1543,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
     setContextQualifier(ctx.formItemsOrRecord(), ContextQualifier.SYMBOL);
     if (ctx.exceptFields() != null) {
-      for (FieldContext fld : ctx.exceptFields().field()) {
+      for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
-        nameResolution.put(fld, TableNameResolution.LAST);
+        nameResolution.put(fld.field(), TableNameResolution.LAST);
       }
     }
   }
@@ -1572,8 +1566,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterRawTransferElement(RawTransferElementContext ctx) {
     if (ctx.record() != null) {
       setContextQualifier(ctx.record(), contextQualifiers.removeFrom(ctx));
-    } else if (ctx.field() != null) {
-      setContextQualifier(ctx.field(), contextQualifiers.removeFrom(ctx));
+    } else if (ctx.fieldExpr() != null) {
+      setContextQualifier(ctx.fieldExpr(), contextQualifiers.removeFrom(ctx));
     } else {
       setContextQualifier(ctx.varRecField(), contextQualifiers.removeFrom(ctx));
     }
@@ -1585,6 +1579,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       frameRef(support.getNode(ctx).getFirstChild());
     else if (ctx.BROWSE() != null)
       browseRef(support.getNode(ctx).getFirstChild());
+  }
+
+  @Override
+  public void enterFieldExpr(FieldExprContext ctx) {
+    setContextQualifier(ctx.field(), contextQualifiers.get(ctx));
   }
 
   @Override
@@ -1600,9 +1599,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterRecordFields(RecordFieldsContext ctx) {
-    for (FieldContext fld : ctx.field()) {
+    for (FieldExprContext fld : ctx.fieldExpr()) {
       setContextQualifier(fld, ContextQualifier.SYMBOL);
-      nameResolution.put(fld, TableNameResolution.LAST);
+      nameResolution.put(fld.field(), TableNameResolution.LAST);
     }
   }
 
@@ -1611,10 +1610,10 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     if ((ctx.OF() != null) && (ctx.record() != null)) {
       setContextQualifier(ctx.record(), ContextQualifier.REF);
     }
-    if ((ctx.USING() != null) && (ctx.field() != null)) {
-      for (FieldContext field : ctx.field()) {
+    if ((ctx.USING() != null) && (ctx.fieldExpr() != null)) {
+      for (FieldExprContext field : ctx.fieldExpr()) {
         setContextQualifier(field, ContextQualifier.SYMBOL);
-        nameResolution.put(field, TableNameResolution.LAST);
+        nameResolution.put(field.field(), TableNameResolution.LAST);
       }
     }
   }
@@ -1651,7 +1650,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterOnAssign(OnAssignContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.INIT);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.INIT);
   }
 
   @Override
@@ -1692,8 +1691,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterRunSet(RunSetContext ctx) {
-    if (ctx.field() != null) {
-      setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
+    if (ctx.fieldExpr() != null) {
+      setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
     }
   }
 
@@ -1714,9 +1713,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
     setContextQualifier(ctx.formItemsOrRecord(), ContextQualifier.REFUP);
     if (ctx.exceptFields() != null) {
-      for (FieldContext fld : ctx.exceptFields().field()) {
+      for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
-        nameResolution.put(fld, TableNameResolution.LAST);
+        nameResolution.put(fld.field(), TableNameResolution.LAST);
       }
     }
   }
@@ -1730,45 +1729,45 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterSystemDialogColorStatement(SystemDialogColorStatementContext ctx) {
     if (ctx.updateField() != null) {
-      setContextQualifier(ctx.updateField().field(), ContextQualifier.UPDATING);
+      setContextQualifier(ctx.updateField().fieldExpr(), ContextQualifier.UPDATING);
     }
   }
 
   @Override
   public void enterSystemDialogFontOption(SystemDialogFontOptionContext ctx) {
     if (ctx.updateField() != null) {
-      setContextQualifier(ctx.updateField().field(), ContextQualifier.UPDATING);
+      setContextQualifier(ctx.updateField().fieldExpr(), ContextQualifier.UPDATING);
     }
   }
 
   @Override
   public void enterSystemDialogGetDirStatement(SystemDialogGetDirStatementContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.REFUP);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.REFUP);
   }
 
   @Override
   public void enterSystemDialogGetDirOption(SystemDialogGetDirOptionContext ctx) {
-    if (ctx.field() != null) {
-      setContextQualifier(ctx.field(), ContextQualifier.REFUP);
+    if (ctx.fieldExpr() != null) {
+      setContextQualifier(ctx.fieldExpr(), ContextQualifier.REFUP);
     }
   }
 
   @Override
   public void enterSystemDialogGetFileStatement(SystemDialogGetFileStatementContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.REFUP);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.REFUP);
   }
 
   @Override
   public void enterSystemDialogGetFileOption(SystemDialogGetFileOptionContext ctx) {
-    if (ctx.field() != null) {
-      setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
+    if (ctx.fieldExpr() != null) {
+      setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
     }
   }
 
   @Override
   public void enterSystemDialogPrinterOption(SystemDialogPrinterOptionContext ctx) {
     if (ctx.updateField() != null) {
-      setContextQualifier(ctx.updateField().field(), ContextQualifier.UPDATING);
+      setContextQualifier(ctx.updateField().fieldExpr(), ContextQualifier.UPDATING);
     }
   }
 
@@ -1804,7 +1803,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterTriggerOfSub1(TriggerOfSub1Context ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.SYMBOL);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
   }
 
   @Override
@@ -1858,9 +1857,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     frameEnablingStatement(ctx);
     setContextQualifier(ctx.formItemsOrRecord(), ContextQualifier.REFUP);
     if (ctx.exceptFields() != null) {
-      for (FieldContext fld : ctx.exceptFields().field()) {
+      for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
         setContextQualifier(fld, ContextQualifier.SYMBOL);
-        nameResolution.put(fld, TableNameResolution.LAST);
+        nameResolution.put(fld.field(), TableNameResolution.LAST);
       }
     }
   }
@@ -1898,7 +1897,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterWaitForSet(WaitForSetContext ctx) {
-    setContextQualifier(ctx.field(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
   }
 
   // ******************

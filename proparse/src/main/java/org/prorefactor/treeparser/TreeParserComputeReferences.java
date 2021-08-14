@@ -49,12 +49,12 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
   @Override
   public void exitParameterArgTableHandle(ParameterArgTableHandleContext ctx) {
-    noteReference(support.getNode(ctx.field()), contextQualifiers.get(ctx));
+    noteReference(support.getNode(ctx.fieldExpr().field()), contextQualifiers.get(ctx));
   }
 
   @Override
   public void exitParameterArgDatasetHandle(ParameterArgDatasetHandleContext ctx) {
-    noteReference(support.getNode(ctx.field()), contextQualifiers.get(ctx));
+    noteReference(support.getNode(ctx.fieldExpr().field()), contextQualifiers.get(ctx));
   }
 
   @Override

@@ -442,7 +442,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitField(FieldContext ctx) {
     Builder holder = createTree(ctx, ABLNodeType.FIELD_REF).setRuleNode(ctx);
-    if ((ctx.getParent() instanceof MessageOptionContext) && support.isInlineVar(ctx.getText())) {
+    if ((ctx.getParent().getParent() instanceof MessageOptionContext) && support.isInlineVar(ctx.getText())) {
       holder.setInlineVar();
     }
     return holder;
