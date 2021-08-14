@@ -34,11 +34,16 @@ import eu.rssw.pct.elements.fixed.TypeInfo;
 public class BuiltinClasses {
   private static final Collection<ITypeInfo> BUILTIN_CLASSES = new ArrayList<>();
 
+  private BuiltinClasses() {
+    // No constructor
+  }
+
   public static Collection<ITypeInfo> getBuiltinClasses() {
     return Collections.unmodifiableCollection(BUILTIN_CLASSES);
   }
 
   static {
+    // NO-SONAR
     TypeInfo typeInfo;
     typeInfo = new TypeInfo("Progress.ApplicationServer.AdapterTypes", false, false, "Progress.Lang.Enum", "");
     typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType("Progress.Lang.Object")));
