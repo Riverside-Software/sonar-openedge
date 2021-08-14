@@ -23,6 +23,7 @@ import java.util.EnumSet;
 
 import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.IVariableElement;
@@ -40,8 +41,15 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
   protected static final int OVERLOADED_METHOD = 256;
   protected static final int STATIC_METHOD = 512;
 
+  private final IVariableElement var;
+
   public PropertyElement(String name, boolean isStatic) {
+    this(name, isStatic, DataType.VOID);
+  }
+
+  public PropertyElement(String name, boolean isStatic, DataType dataType) {
     super(name, isStatic ? EnumSet.of(AccessType.STATIC): EnumSet.noneOf(AccessType.class));
+    var = new VariableElement(name, dataType);
   }
 
   @Override
@@ -51,7 +59,7 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
 
   @Override
   public IVariableElement getVariable() {
-    return null;
+    return var;
   }
 
   @Override

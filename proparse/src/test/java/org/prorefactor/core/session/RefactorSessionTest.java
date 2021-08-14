@@ -69,7 +69,7 @@ public class RefactorSessionTest {
     ITypeInfo info = session.getTypeInfo("Progress.Json.JsonParser");
     assertNotNull(info);
     assertEquals(info.getMethods().size(), 0);
-    assertEquals(info.getProperties().size(), 1);
+    assertEquals(info.getProperties().size(), 3); // FIXME Next-Sibling and Previous-Sibling should not be included
     assertEquals(info.getParentTypeName(), "Progress.Lang.Object");
     assertEquals(info.getInterfaces().size(), 0);
   }
@@ -78,14 +78,13 @@ public class RefactorSessionTest {
   public void testProgressJsonObjectModelJsonArray() {
     ITypeInfo info = session.getTypeInfo("Progress.Json.ObjectModel.JsonArray");
     assertNotNull(info);
-    assertEquals(info.getMethods().size(), 32);
-    assertEquals(info.getProperties().size(), 2);
+    assertEquals(info.getMethods().size(), 140);
+    assertEquals(info.getProperties().size(), 3);
     assertEquals(info.getParentTypeName(), "Progress.Json.ObjectModel.JsonConstruct");
     assertEquals(info.getInterfaces().size(), 0);
 
     assertNotNull(info.getProperty("Length"));
     assertFalse(info.getProperty("Length").isStatic());
-    assertTrue(info.getProperty("END_OF_ARRAY").isStatic());
   }
 
 }

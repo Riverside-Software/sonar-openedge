@@ -24,37 +24,14 @@ import java.util.EnumSet;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.DataType;
-import eu.rssw.pct.elements.IMethodElement;
-import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.IVariableElement;
 
-public class MethodElement extends AbstractAccessibleElement implements IMethodElement {
-  private DataType returnDataType;
-  private final IParameter[] parameters;
+public class VariableElement extends AbstractAccessibleElement implements IVariableElement {
+  private final DataType dataType;
 
-  public MethodElement(String name, boolean isStatic, DataType returnDataType, IParameter... params) {
-    super(name, isStatic ? EnumSet.of(AccessType.STATIC) : EnumSet.noneOf(AccessType.class));
-    this.returnDataType = returnDataType;
-    this.parameters = params;
-  }
-
-  @Override
-  public DataType getReturnType() {
-    return returnDataType;
-  }
-
-  @Override
-  public IParameter[] getParameters() {
-    return parameters;
-  }
-
-  @Override
-  public int getExtent() {
-    return 1;
-  }
-
-  @Override
-  public boolean isDestructor() {
-    return false;
+  public VariableElement(String name, DataType dataType) {
+    super(name, EnumSet.noneOf(AccessType.class));
+    this.dataType = dataType;
   }
 
   @Override
@@ -63,27 +40,33 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
   }
 
   @Override
-  public boolean isFinal() {
+  public int getExtent() {
+    return 0;
+  }
+
+  @Override
+  public DataType getDataType() {
+    return dataType;
+  }
+
+  @Override
+  public boolean isReadOnly() {
     return false;
   }
 
   @Override
-  public boolean isProcedure() {
+  public boolean isWriteOnly() {
     return false;
   }
 
   @Override
-  public boolean isFunction() {
+  public boolean isNoUndo() {
     return false;
   }
 
   @Override
-  public boolean isConstructor() {
+  public boolean baseIsDotNet() {
     return false;
   }
 
-  @Override
-  public boolean isOverloaded() {
-    return false;
-  }
 }

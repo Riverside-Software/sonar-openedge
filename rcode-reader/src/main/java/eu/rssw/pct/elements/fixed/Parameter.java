@@ -24,37 +24,24 @@ import java.util.EnumSet;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.DataType;
-import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.ParameterMode;
+import eu.rssw.pct.elements.ParameterType;
+import eu.rssw.pct.elements.PrimitiveDataType;
 
-public class MethodElement extends AbstractAccessibleElement implements IMethodElement {
-  private DataType returnDataType;
-  private final IParameter[] parameters;
+public class Parameter extends AbstractAccessibleElement implements IParameter {
 
-  public MethodElement(String name, boolean isStatic, DataType returnDataType, IParameter... params) {
-    super(name, isStatic ? EnumSet.of(AccessType.STATIC) : EnumSet.noneOf(AccessType.class));
-    this.returnDataType = returnDataType;
-    this.parameters = params;
-  }
+  private final int num;
+  private final int extent;
+  private final ParameterMode mode;
+  private final DataType dataType;
 
-  @Override
-  public DataType getReturnType() {
-    return returnDataType;
-  }
-
-  @Override
-  public IParameter[] getParameters() {
-    return parameters;
-  }
-
-  @Override
-  public int getExtent() {
-    return 1;
-  }
-
-  @Override
-  public boolean isDestructor() {
-    return false;
+  public Parameter(int  num, String name, int extent, ParameterMode mode, DataType type) {
+    super(name,  EnumSet.noneOf(AccessType.class));
+    this.num = num;
+    this.extent = extent;
+    this.mode = mode;
+    this.dataType = type;
   }
 
   @Override
@@ -63,27 +50,33 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
   }
 
   @Override
-  public boolean isFinal() {
-    return false;
+  public int getExtent() {
+    return extent;
   }
 
   @Override
-  public boolean isProcedure() {
-    return false;
+  public int getNum() {
+    return num;
   }
 
   @Override
-  public boolean isFunction() {
-    return false;
+  public DataType getDataType() {
+    return dataType;
   }
 
   @Override
-  public boolean isConstructor() {
-    return false;
+  public ParameterMode getMode() {
+    return mode;
   }
 
   @Override
-  public boolean isOverloaded() {
-    return false;
+  public ParameterType getParameterType() {
+    return null;
   }
+
+  @Override
+  public boolean isClassDataType() {
+    return dataType.getDataType() == PrimitiveDataType.CLASS;
+  }
+
 }

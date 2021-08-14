@@ -16,8 +16,6 @@
 package org.prorefactor.refactor;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -40,6 +38,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 
+import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.PropertyElement;
@@ -107,10 +106,14 @@ public class RefactorSession implements IProparseEnvironment {
   }
 
   private void initializeProgressClasses() {
-    try (Reader reader = new InputStreamReader(this.getClass().getResourceAsStream("/libraries.json"))) {
-      injectClassesFromCatalog(reader);
-    } catch (IOException uncaught) {
-      LOG.error("Unable to read libraries.json", uncaught);
+    for (ITypeInfo typeInfo : BuiltinClasses.getBuiltinClasses()) {
+      classInfo.put(typeInfo.getTypeName(), typeInfo);
+      lcClassInfo.put(typeInfo.getTypeName().toLowerCase(), typeInfo);
+      int dotPos = typeInfo.getTypeName().lastIndexOf('.');
+      String pkgName = dotPos >= 1 ? typeInfo.getTypeName().substring(0, dotPos) : "";
+      synchronized (pkgLock) {
+        classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(typeInfo);
+      }
     }
   }
 
@@ -123,12 +126,12 @@ public class RefactorSession implements IProparseEnvironment {
       TypeInfo typeInfo = new TypeInfo(info.name, info.isInterface, info.isAbstract, parentType, "", interfaces);
       if (info.methods != null) {
         for (String str : info.methods) {
-          typeInfo.addMethod(new MethodElement(str, false));
+          typeInfo.addMethod(new MethodElement(str, false, DataType.VOID));
         }
       }
       if (info.staticMethods != null) {
         for (String str : info.staticMethods) {
-          typeInfo.addMethod(new MethodElement(str, true));
+          typeInfo.addMethod(new MethodElement(str, true, DataType.VOID));
         }
       }
       if (info.properties != null) {
