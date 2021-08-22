@@ -102,7 +102,7 @@ public class MethodParameterV11 extends AbstractElement implements IParameter {
 
   @Override
   public boolean isClassDataType() {
-    return dataType.getDataType() == PrimitiveDataType.CLASS;
+    return dataType.getPrimitive() == PrimitiveDataType.CLASS;
   }
 
   public boolean isBind() {

@@ -91,10 +91,10 @@ public class Parameter {
       case VARIABLE:
         Variable v = (Variable) symbol;
         if (v != null) {
-          if (v.getDataType().getDataType() == PrimitiveDataType.CLASS) {
+          if (v.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
             sb.append('L').append(v.getDataType().getClassName());
           } else {
-            sb.append(v.getDataType().getDataType().getSignature());
+            sb.append(v.getDataType().getPrimitive().getSignature());
           }
           if (v.getExtent() != 0)
             sb.append("[]");

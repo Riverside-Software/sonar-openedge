@@ -77,7 +77,7 @@ public class DataType {
     this.className = className;
   }
 
-  public PrimitiveDataType getDataType() {
+  public PrimitiveDataType getPrimitive() {
     return primDataType;
   }
 

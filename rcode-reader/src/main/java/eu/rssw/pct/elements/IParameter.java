@@ -49,12 +49,12 @@ public interface IParameter extends IElement {
       case TABLE:
       case BUFFER_TEMP_TABLE:
         sb.append('T');
-        if (getDataType().getDataType() == PrimitiveDataType.HANDLE)
+        if (getDataType().getPrimitive() == PrimitiveDataType.HANDLE)
           sb.append('H');
         break;
       case DATASET:
         sb.append('D');
-        if (getDataType().getDataType() == PrimitiveDataType.HANDLE)
+        if (getDataType().getPrimitive() == PrimitiveDataType.HANDLE)
           sb.append('H');
         break;
       case BROWSE:
@@ -63,7 +63,7 @@ public interface IParameter extends IElement {
         if (isClassDataType())
           sb.append('L').append(getDataType().getClassName());
         else
-          sb.append(getDataType().getDataType().getSignature());
+          sb.append(getDataType().getPrimitive().getSignature());
         break;
       default:
         sb.append("??");

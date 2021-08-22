@@ -76,7 +76,7 @@ public class Parameter extends AbstractAccessibleElement implements IParameter {
 
   @Override
   public boolean isClassDataType() {
-    return dataType.getDataType() == PrimitiveDataType.CLASS;
+    return dataType.getPrimitive() == PrimitiveDataType.CLASS;
   }
 
 }

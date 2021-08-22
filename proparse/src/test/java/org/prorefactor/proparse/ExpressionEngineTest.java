@@ -125,7 +125,7 @@ public class ExpressionEngineTest {
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
     IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp.getDataType().getClassName(), "Progress.Lang.Object");
   }
 
@@ -137,7 +137,7 @@ public class ExpressionEngineTest {
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
     IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType().getDataType(), PrimitiveDataType.CHARACTER);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
   }
 
   @Test
@@ -148,7 +148,7 @@ public class ExpressionEngineTest {
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
     IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType().getDataType(), PrimitiveDataType.LOGICAL);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.LOGICAL);
   }
 
   @Test
@@ -159,7 +159,7 @@ public class ExpressionEngineTest {
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
     IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp.getDataType().getClassName(), "Progress.Lang.Class");
   }
 
@@ -171,7 +171,7 @@ public class ExpressionEngineTest {
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
     IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType().getDataType(), PrimitiveDataType.CHARACTER);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
   }
 
   @Test
@@ -182,7 +182,7 @@ public class ExpressionEngineTest {
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
     IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType().getDataType(), PrimitiveDataType.INTEGER);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
   }
 
   @Test
@@ -193,7 +193,7 @@ public class ExpressionEngineTest {
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
     IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType().getDataType(), PrimitiveDataType.DATETIME);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.DATETIME);
   }
 
   @Test
@@ -204,7 +204,7 @@ public class ExpressionEngineTest {
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
     IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType().getDataType(), PrimitiveDataType.DATETIME_TZ);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.DATETIME_TZ);
   }
 
   @Test
@@ -215,7 +215,7 @@ public class ExpressionEngineTest {
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
     IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType().getDataType(), PrimitiveDataType.INTEGER);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
   }
 
   @Test
@@ -226,7 +226,17 @@ public class ExpressionEngineTest {
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
     IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType().getDataType(), PrimitiveDataType.DECIMAL);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.DECIMAL);
   }
 
+  @Test
+  public void testSysHandle01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("message rcode-info:InvalidFunction().".getBytes()), session);
+    unit.treeParser01();
+
+    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 1);
+    IExpression exp = (IExpression) nodes.get(0);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.UNKNOWN);
+  }
 }

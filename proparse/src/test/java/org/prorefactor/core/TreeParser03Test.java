@@ -288,12 +288,12 @@ public class TreeParser03Test {
     List<Routine> lst = unit.getRootScope().lookupRoutines("foo1");
     assertEquals(lst.size(), 1);
     Routine r1 = lst.get(0);
-    assertEquals(r1.getReturnDatatypeNode().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(r1.getReturnDatatypeNode().getPrimitive(), PrimitiveDataType.CLASS);
 
     lst = unit.getRootScope().lookupRoutines("foo2");
     assertEquals(lst.size(), 1);
     Routine r2 = lst.get(0);
-    assertEquals(r2.getReturnDatatypeNode().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(r2.getReturnDatatypeNode().getPrimitive(), PrimitiveDataType.CLASS);
 
     lst = unit.getRootScope().lookupRoutines("foo3");
     assertEquals(lst.size(), 1);
@@ -427,29 +427,29 @@ public class TreeParser03Test {
 
     assertEquals(unit.getRootScope().getVariables().size(), 11);
     Variable var1 = unit.getRootScope().getVariable("prm1");
-    assertEquals(var1.getDataType().getDataType(), PrimitiveDataType.INTEGER);
+    assertEquals(var1.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
     Variable var2 = unit.getRootScope().getVariable("prm2");
-    assertEquals(var2.getDataType().getDataType(), PrimitiveDataType.INTEGER);
+    assertEquals(var2.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
     Variable var3 = unit.getRootScope().getVariable("prm3");
-    assertEquals(var3.getDataType().getDataType(), PrimitiveDataType.INTEGER);
+    assertEquals(var3.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
     Variable var4 = unit.getRootScope().getVariable("prm4");
-    assertEquals(var4.getDataType().getDataType(), PrimitiveDataType.INTEGER);
+    assertEquals(var4.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
     Variable var5 = unit.getRootScope().getVariable("prm5");
-    assertEquals(var5.getDataType().getDataType(), PrimitiveDataType.INTEGER);
+    assertEquals(var5.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
     Variable var6 = unit.getRootScope().getVariable("prm6");
-    assertEquals(var6.getDataType().getDataType(), PrimitiveDataType.CHARACTER);
+    assertEquals(var6.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
     Variable var7 = unit.getRootScope().getVariable("prm7");
-    assertEquals(var7.getDataType().getDataType(), PrimitiveDataType.LONGCHAR);
+    assertEquals(var7.getDataType().getPrimitive(), PrimitiveDataType.LONGCHAR);
     Variable var8 = unit.getRootScope().getVariable("prm8");
-    assertEquals(var8.getDataType().getDataType(), PrimitiveDataType.HANDLE);
+    assertEquals(var8.getDataType().getPrimitive(), PrimitiveDataType.HANDLE);
     Variable var9 = unit.getRootScope().getVariable("prm9");
-    assertEquals(var9.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(var9.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(var9.getDataType().getClassName(), "Progress.Lang.Object");
     Variable var10 = unit.getRootScope().getVariable("prm10");
-    assertEquals(var10.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(var10.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(var10.getDataType().getClassName(), "Progress.Lang.Object");
     Variable var11 = unit.getRootScope().getVariable("prm11");
-    assertEquals(var11.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(var11.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(var11.getDataType().getClassName(), "Progress.Lang.Object");
   }
 
@@ -651,9 +651,9 @@ public class TreeParser03Test {
     assertNotNull(v1);
     assertNotNull(v2);
     assertNotNull(v3);
-    assertEquals(v1.getDataType().getDataType(), PrimitiveDataType.CLASS);
-    assertEquals(v2.getDataType().getDataType(), PrimitiveDataType.CLASS);
-    assertEquals(v3.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(v1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(v2.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(v3.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(v1.getDataType().getClassName(), "mypackage.subdir.myclass");
     assertEquals(v2.getDataType().getClassName(), "mypackage.subdir.myclass");
     assertEquals(v3.getDataType().getClassName(), "mypackage.subdir.myclass");
@@ -673,7 +673,7 @@ public class TreeParser03Test {
         v1 = var;
     }
     assertNotNull(v1);
-    assertEquals(v1.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(v1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(v1.getDataType().getClassName(), "mypackage.subdir.myclass");
   }
 
@@ -697,9 +697,9 @@ public class TreeParser03Test {
     assertNotNull(v1);
     assertNotNull(v2);
     assertNotNull(v3);
-    assertEquals(v1.getDataType().getDataType(), PrimitiveDataType.DATE);
-    assertEquals(v2.getDataType().getDataType(), PrimitiveDataType.DATE);
-    assertEquals(v3.getDataType().getDataType(), PrimitiveDataType.DATE);
+    assertEquals(v1.getDataType().getPrimitive(), PrimitiveDataType.DATE);
+    assertEquals(v2.getDataType().getPrimitive(), PrimitiveDataType.DATE);
+    assertEquals(v3.getDataType().getPrimitive(), PrimitiveDataType.DATE);
     assertNull(v1.getInitialValue());
     assertNotNull(v2.getInitialValue());
     assertNotNull(v3.getInitialValue());
@@ -724,8 +724,8 @@ public class TreeParser03Test {
     }
     assertNotNull(v1);
     assertNotNull(v2);
-    assertEquals(v1.getDataType().getDataType(), PrimitiveDataType.DATE);
-    assertEquals(v2.getDataType().getDataType(), PrimitiveDataType.DATE);
+    assertEquals(v1.getDataType().getPrimitive(), PrimitiveDataType.DATE);
+    assertEquals(v2.getDataType().getPrimitive(), PrimitiveDataType.DATE);
     assertTrue(v1.containsModifier(Modifier.PROTECTED));
     assertTrue(v2.containsModifier(Modifier.PROTECTED));
   }
@@ -848,7 +848,7 @@ public class TreeParser03Test {
         v1 = var;
     }
     assertNotNull(v1);
-    assertEquals(v1.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(v1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(v1.getDataType().getClassName(), "foo");
     assertEquals(v1.getExtent(), 2);
   }
@@ -867,7 +867,7 @@ public class TreeParser03Test {
         v1 = var;
     }
     assertNotNull(v1);
-    assertEquals(v1.getDataType().getDataType(), PrimitiveDataType.CLASS);
+    assertEquals(v1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(v1.getDataType().getClassName(), "System.Collections.Generic.List<char>");
     assertEquals(v1.getExtent(), 0);
   }
@@ -990,7 +990,7 @@ public class TreeParser03Test {
         varX = var;
 
       assertNotNull(varX);
-      assertEquals(varX.getDataType().getDataType(), PrimitiveDataType.CLASS);
+      assertEquals(varX.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
       assertEquals(varX.getDataType().getClassName(), "Progress.Lang.Object");
       assertEquals(varX.getExtent(), 0);
       assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
@@ -1014,7 +1014,7 @@ public class TreeParser03Test {
         varX = var;
 
       assertNotNull(varX);
-      assertEquals(varX.getDataType().getDataType(), PrimitiveDataType.DATETIME);
+      assertEquals(varX.getDataType().getPrimitive(), PrimitiveDataType.DATETIME);
       assertEquals(varX.getExtent(), 0);
       assertEquals(varX.getInitialValue(), Variable.CONSTANT_EXPRESSION);
       assertEquals(varX.getNumReads(), 0);
