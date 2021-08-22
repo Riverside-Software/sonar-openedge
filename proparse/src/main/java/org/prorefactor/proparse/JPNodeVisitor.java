@@ -314,7 +314,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExprTermAttribute(ExprTermAttributeContext ctx) {
-    return createTree(ctx, ABLNodeType.ATTRIBUTE_REF).setRuleNode(ctx).setExpression(true);
+    return createTree(ctx, ABLNodeType.ATTRIBUTE_REF).setExtraField1(ctx.id.getText()).setRuleNode(ctx).setExpression(true);
   }
 
   @Override
