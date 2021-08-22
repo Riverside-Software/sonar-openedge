@@ -45,9 +45,9 @@ public class FieldRefNode extends JPNode implements IExpression {
   public DataType getDataType() {
     if (getSymbol() instanceof Primative) {
       DataType dataType = ((Primative) getSymbol()).getDataType();
-      return dataType == null ? DataType.UNKNOWN : dataType;
+      return dataType == null ? DataType.NOT_COMPUTED : dataType;
     }
-    return DataType.UNKNOWN;
+    return DataType.NOT_COMPUTED;
   }
 
   @Override

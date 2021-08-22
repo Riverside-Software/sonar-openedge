@@ -48,16 +48,16 @@ public class LocalMethodCallNode extends JPNode implements IExpression {
   public DataType getDataType() {
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
-      return DataType.UNKNOWN;
+      return DataType.NOT_COMPUTED;
     ITypeInfo info = root.getParseUnit().getTypeInfo();
     if (info == null)
-      return DataType.UNKNOWN;
+      return DataType.NOT_COMPUTED;
     for (IMethodElement elem : info.getMethods()) {
       if (elem.getName().equalsIgnoreCase(methodName))
         return elem.getReturnType();
     }
 
-    return DataType.UNKNOWN;
+    return DataType.NOT_COMPUTED;
   }
 
 }

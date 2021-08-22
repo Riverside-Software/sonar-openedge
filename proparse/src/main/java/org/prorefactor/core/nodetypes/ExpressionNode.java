@@ -707,7 +707,7 @@ public class ExpressionNode extends JPNode implements IExpression {
       case "ROWID":
         return DataType.ROWID;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -717,7 +717,7 @@ public class ExpressionNode extends JPNode implements IExpression {
         return DataType.LOGICAL;
       // TODO Full list
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 }

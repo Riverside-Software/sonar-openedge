@@ -35,7 +35,7 @@ public class SingleArgumentExpression extends JPNode implements IExpression {
       case NOT:
         return DataType.LOGICAL;
       default:
-        return null;
+        return DataType.NOT_COMPUTED;
     }
   }
 

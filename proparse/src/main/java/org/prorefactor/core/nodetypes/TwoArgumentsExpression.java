@@ -43,7 +43,7 @@ public class TwoArgumentsExpression extends JPNode implements IExpression {
         else if (DataType.isNumeric(left) && DataType.isNumeric(right))
           return DataType.INTEGER;
         else
-          return DataType.UNKNOWN;
+          return DataType.NOT_COMPUTED;
       case STAR:
       case MULTIPLY:
       case SLASH:
@@ -71,7 +71,7 @@ public class TwoArgumentsExpression extends JPNode implements IExpression {
       case OR:
         return DataType.LOGICAL;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 

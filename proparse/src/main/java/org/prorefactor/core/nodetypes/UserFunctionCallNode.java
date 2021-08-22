@@ -47,14 +47,14 @@ public class UserFunctionCallNode extends JPNode implements IExpression {
   public DataType getDataType() {
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
-      return DataType.UNKNOWN;
+      return DataType.NOT_COMPUTED;
 
     for (Routine r : root.getParseUnit().getRootScope().getRoutines()) {
       if (r.getName().equalsIgnoreCase(methodName))
         return r.getReturnDatatypeNode();
     }
 
-    return DataType.UNKNOWN;
+    return DataType.NOT_COMPUTED;
   }
 
 }

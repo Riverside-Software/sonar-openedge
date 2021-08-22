@@ -48,7 +48,6 @@ public class DataType {
   public static final DataType UNSIGNED_BYTE = new DataType(PrimitiveDataType.UNSIGNED_BYTE);
   public static final DataType CURRENCY = new DataType(PrimitiveDataType.CURRENCY);
   public static final DataType ERROR_CODE = new DataType(PrimitiveDataType.ERROR_CODE);
-  public static final DataType UNKNOWN2 = new DataType(PrimitiveDataType.UNKNOWN2);
   public static final DataType FIXCHAR = new DataType(PrimitiveDataType.FIXCHAR);
   public static final DataType BIGINT = new DataType(PrimitiveDataType.BIGINT);
   public static final DataType TIME = new DataType(PrimitiveDataType.TIME);
@@ -63,6 +62,8 @@ public class DataType {
   public static final DataType UNSIGNED_INT64 = new DataType(PrimitiveDataType.UNSIGNED_INT64);
   public static final DataType SINGLE_CHARACTER = new DataType(PrimitiveDataType.SINGLE_CHARACTER);
   public static final DataType RUNTYPE = new DataType(PrimitiveDataType.RUNTYPE);
+  // Only used in the expression engine to express the fact that it's not possible to compute the returned data type
+  public static final DataType NOT_COMPUTED = new DataType(PrimitiveDataType.UNKNOWN2);
 
   private PrimitiveDataType primDataType;
   private String className;
@@ -155,8 +156,6 @@ public class DataType {
         return CURRENCY;
       case "ERROR_CODE":
         return ERROR_CODE;
-      case "UNKNOWN2":
-        return UNKNOWN2;
       case "FIXCHAR":
         return FIXCHAR;
       case "BIGINT":
@@ -252,8 +251,6 @@ public class DataType {
         return CURRENCY;
       case 29:
         return ERROR_CODE;
-      case 30:
-        return UNKNOWN2;
       case 31:
         return FIXCHAR;
       case 32:

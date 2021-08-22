@@ -37,7 +37,7 @@ public class WidgetNode extends JPNode implements IExpression {
   }
 
   public DataType getMethodDataType(String id) {
-    return DataType.UNKNOWN;
+    return DataType.NOT_COMPUTED;
   }
 
 }

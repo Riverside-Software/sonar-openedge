@@ -39,7 +39,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
   public DataType getAttributeDataType(String id) {
     ABLNodeType type = getFirstChild().getNodeType();
     if (type == ABLNodeType.ACTIVEFORM)
-        return getActiveFormAttributeDataType(id);
+      return getActiveFormAttributeDataType(id);
     return ExpressionNode.getStandardAttributeDataType(id);
   }
 
@@ -93,33 +93,33 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case WEBCONTEXT:
         return getWebContextMethodDataType(id);
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
   private DataType getActiveFormAttributeDataType(String id) {
-    switch(id) {
+    switch (id) {
       case "NEXTFORM":
       case "PREVFORM":
         return new DataType("Progress.Windows.IForm");
       case "PROWINHANDLE":
         return DataType.HANDLE;
-        default:
-          return DataType.UNKNOWN;
+      default:
+        return DataType.NOT_COMPUTED;
     }
   }
 
   private DataType getAuditControlMethodDataType(String id) {
     switch (id) {
       case "BEGIN-EVENT-GROUP":
-      case "LOG-AUDIT-EVENT" :
+      case "LOG-AUDIT-EVENT":
       case "SET-APPL-CONTEXT":
         return DataType.CHARACTER;
-      case "CLEAR-APPL-CONTEXT":  
+      case "CLEAR-APPL-CONTEXT":
       case "END-EVENT-GROUP":
         return DataType.LOGICAL;
-        default:
-          return DataType.UNKNOWN;
+      default:
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -130,7 +130,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case "REFRESH-AUDIT-POLICY":
         return DataType.LOGICAL;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -149,7 +149,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case "SET-RGB-VALUE":
         return DataType.LOGICAL;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -167,7 +167,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case "GET-FILE-NAME":
         return DataType.CHARACTER;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -181,7 +181,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case "DISPLAY-MESSAGE":
         return DataType.INTEGER;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -192,7 +192,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case "GET-NUMBER":
         return DataType.INTEGER;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -205,7 +205,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case "GET-TEXT-WIDTH-PIXELS":
         return DataType.INTEGER;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -216,7 +216,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case "WRITE-MESSAGE":
         return DataType.LOGICAL;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -229,17 +229,17 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case "GET-SIGNATURE":
         return DataType.CHARACTER;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
-  
+
   private DataType getProfilerMethodDataType(String id) {
     switch (id) {
       case "USER-DATA":
       case "WRITE-DATA":
         return DataType.LOGICAL;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -253,7 +253,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case "SET-CLIENT":
         return DataType.LOGICAL;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -269,7 +269,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case "SET-WAIT-STATE":
         return DataType.LOGICAL;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -288,7 +288,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case "INCREMENT-EXCLUSIVE-ID":
         return DataType.INTEGER;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 
@@ -306,7 +306,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case "GET-SELECTED-WIDGET":
         return DataType.HANDLE;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 

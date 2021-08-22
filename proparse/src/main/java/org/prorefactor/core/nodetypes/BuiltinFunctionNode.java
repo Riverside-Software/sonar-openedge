@@ -44,7 +44,7 @@ public class BuiltinFunctionNode extends JPNode implements IExpression {
   public DataType getIfDataType() {
     List<JPNode> nodes = getFirstChild().queryExpressions();
     if (nodes.size() != 3) {
-      return DataType.UNKNOWN;
+      return DataType.NOT_COMPUTED;
     }
     return ((IExpression) nodes.get(1)).getDataType();
   }
@@ -274,8 +274,9 @@ public class BuiltinFunctionNode extends JPNode implements IExpression {
       case DYNAMICFUNCTION:
       case DYNAMICINVOKE:
       case UNBOX:
+        return DataType.RUNTYPE;
       default:
-        return DataType.UNKNOWN;
+        return DataType.NOT_COMPUTED;
     }
   }
 

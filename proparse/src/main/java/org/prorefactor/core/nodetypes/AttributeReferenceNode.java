@@ -50,7 +50,7 @@ public class AttributeReferenceNode extends JPNode implements IExpression {
 
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
-      return DataType.UNKNOWN;
+      return DataType.NOT_COMPUTED;
 
     // Left-Handle expression has to be a class
     IExpression expr = (IExpression) getFirstChild();
@@ -71,7 +71,7 @@ public class AttributeReferenceNode extends JPNode implements IExpression {
       return ExpressionNode.getStandardAttributeDataType(attributeName.toUpperCase());
     }
 
-    return DataType.UNKNOWN;
+    return DataType.NOT_COMPUTED;
   }
 
   @Override
