@@ -513,8 +513,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterAssignStatement2(AssignStatement2Context ctx) {
     // Shorthand operator also read variable content
     ContextQualifier qual = ctx.EQUAL() == null ? ContextQualifier.REFUP : ContextQualifier.UPDATING;
-    if (ctx.expressionTerm() != null) {
-      setContextQualifier(ctx.expressionTerm(), qual);
+    if (ctx.assignEqualLeft() != null) {
+      setContextQualifier(ctx.assignEqualLeft(), qual);
     }
     setContextQualifier(ctx.expression(), ContextQualifier.REF);
   }

@@ -1060,6 +1060,14 @@ public class JPNode {
       return this;
     }
 
+    @Override
+    public String toString() {
+      StringBuilder buff = new StringBuilder();
+      buff.append(tok.getNodeType()).append(" \"").append(tok.getText()).append("\" F").append(
+          tok.getFileIndex()).append('/').append(tok.getLine()).append(':').append(tok.getCharPositionInLine());
+      return buff.toString();
+    }
+
     /**
      * Transforms <pre>x1 - x2 - x3 - x4</pre> into
      * <pre>

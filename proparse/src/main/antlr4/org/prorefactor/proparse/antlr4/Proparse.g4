@@ -778,7 +778,7 @@ assignmentList: // SEMITRANSLATED
   ;
 
 assignStatement2:
-    ( pseudoFunction | expressionTerm ) ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) expression NOERROR? statementEnd
+    assignEqualLeft ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) expression NOERROR? statementEnd
   ;
 
 assignEqual:
