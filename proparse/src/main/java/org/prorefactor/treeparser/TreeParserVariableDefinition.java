@@ -2340,19 +2340,18 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
     refNode.setContextQualifier(cq);
 
+    JPNode stmtNode = refNode.getStatement();
     // Check if this is a Field_ref being "inline defined"
     // If so, we define it right now.
     if (refNode.attrGet(IConstants.INLINE_VAR_DEF) == 1)
       addToSymbolScope(defineVariable(ctx, refNode, name, Variable.Type.VARIABLE));
-
     if (cq == ContextQualifier.STATIC) {
       // Nothing with static for now, but at least we don't check for external tables
       if (LOG.isTraceEnabled())
         LOG.trace("Static reference to {}", refNode.getIdNode().getText());
-    } else if ((refNode.getParent().getNodeType() == ABLNodeType.USING
-        && refNode.getParent().getSibling(ABLNodeType.RECORD_NAME) != null)
-        || (refNode.getFirstChild().getNodeType() == ABLNodeType.INPUT
-            && (refNode.getNextSibling() == null || refNode.getNextSibling().getNodeType() != ABLNodeType.OBJCOLON))) {
+    } else if ((refNode.getParent().getNodeType() == ABLNodeType.USING)
+        && (stmtNode.getNodeType() != ABLNodeType.BUFFERCOPY)
+        && (stmtNode.getNodeType() != ABLNodeType.BUFFERCOMPARE)) {
       // First condition : there seems to be an implicit INPUT in USING phrases in a record phrase.
       // Second condition :I've seen at least one instance of "INPUT objHandle:attribute" in code,
       // which for some reason compiled clean. As far as I'm aware, the INPUT was
