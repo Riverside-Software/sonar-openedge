@@ -1,6 +1,7 @@
 package org.prorefactor.proparse;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -229,14 +230,42 @@ public class ExpressionEngineTest {
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.DECIMAL);
   }
 
-  @Test
-  public void testSysHandle01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("message rcode-info:InvalidFunction().".getBytes()), session);
-    unit.treeParser01();
+  private void testSysHandle(String code, DataType expected) {
+    ParseUnit unit01 = new ParseUnit(new ByteArrayInputStream(code.getBytes()), session);
+    unit01.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<JPNode> nodes = unit01.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
+    assertTrue(nodes.get(0).isExpression());
     IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.UNKNOWN);
+    assertEquals(exp.getDataType().getPrimitive(), expected.getPrimitive());
+    if (expected.getPrimitive() == PrimitiveDataType.CLASS)
+      assertEquals(exp.getDataType().getClassName(), expected.getClassName());
   }
+
+  @Test
+  public void testSysHandles() {
+    testSysHandle("message rcode-info.", DataType.HANDLE);
+    // Methods
+    testSysHandle("message rcode-info:InvalidFunction().", DataType.UNKNOWN);
+    testSysHandle("message audit-control:log-audit-event().", DataType.CHARACTER);
+    testSysHandle("message audit-policy:refresh-audit-policy().", DataType.LOGICAL);
+    testSysHandle("message color-table:set-green-value().", DataType.LOGICAL);
+    testSysHandle("message compiler:InvalidFunction().", DataType.NOT_COMPUTED);
+    testSysHandle("message compiler:get-number().", DataType.INTEGER);
+    testSysHandle("message debugger:display-message().", DataType.INTEGER);
+    testSysHandle("message error-status:get-message().", DataType.CHARACTER);
+    testSysHandle("message font-table:GET-TEXT-WIDTH-CHARS().", DataType.DECIMAL);
+    testSysHandle("message log-manager:write-message().", DataType.LOGICAL);
+    testSysHandle("message this-procedure:get-signature().", DataType.CHARACTER);
+    testSysHandle("message profiler:user-data().", DataType.LOGICAL);
+    testSysHandle("message security-policy:get-client().", DataType.HANDLE);
+    testSysHandle("message session:get-printers().", DataType.CHARACTER);
+    testSysHandle("message web-context:get-binary-data().", DataType.MEMPTR);
+    testSysHandle("message web-context:get-cgi-long-value().", DataType.LONGCHAR);
+    testSysHandle("message current-window:end-file-drop().", DataType.LOGICAL);
+    // Attributes
+    testSysHandle("message active-form:nextform", new DataType("Progress.Windows.IForm"));
+  }
+
 }
