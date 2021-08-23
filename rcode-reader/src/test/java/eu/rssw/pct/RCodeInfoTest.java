@@ -34,6 +34,7 @@ import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IDatasetElement;
+import eu.rssw.pct.elements.IEventElement;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.ITableElement;
@@ -44,10 +45,24 @@ import eu.rssw.pct.elements.ParameterType;
 public class RCodeInfoTest {
 
   @Test
-  public void testEnum() throws IOException {
-    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/MyEnum.r")) {
+  public void testEnumV11() throws IOException {
+    testEnum("src/test/resources/rcode/MyEnumV11.r");
+  }
+
+  @Test
+  public void testEnumV12() throws IOException {
+    testEnum("src/test/resources/rcode/MyEnumV12.r");
+  }
+
+  public void testEnum(String fileName) throws IOException {
+    try (FileInputStream input = new FileInputStream(fileName)) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertNotNull(rci.getTypeInfo());
+      assertNotNull(rci.getTypeInfo().getProperties());
+      assertEquals(rci.getTypeInfo().getProperties().size(), 8);
+      assertNotNull(rci.getTypeInfo().getMethods());
+      assertEquals(rci.getTypeInfo().getMethods().size(), 0);
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -278,8 +293,17 @@ public class RCodeInfoTest {
   }
 
   @Test
-  public void testElements() throws IOException {
-    try (FileInputStream input = new FileInputStream("src/test/resources/rcode/TestClassElements.r")) {
+  public void testElementsV11() throws IOException {
+    testElements("src/test/resources/rcode/TestClassElementsV11.r");
+  }
+
+  @Test
+  public void testElementsV12() throws IOException {
+    testElements("src/test/resources/rcode/TestClassElementsV12.r");
+  }
+
+  public void testElements(String fileName) throws IOException {
+    try (FileInputStream input = new FileInputStream(fileName)) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertNotNull(rci.getTypeInfo());
@@ -305,6 +329,14 @@ public class RCodeInfoTest {
       assertEquals(ds1.getBufferNames()[0], "tt1");
       assertEquals(ds1.getBufferNames()[1], "tt2");
       assertNull(rci.getTypeInfo().getDataset("ds2"));
+
+      assertNotNull(rci.getTypeInfo().getEvents());
+      assertEquals(rci.getTypeInfo().getEvents().size(), 1);
+      IEventElement event1 = rci.getTypeInfo().getEvents().iterator().next();
+      assertEquals(event1.getName(), "NewCustomer");
+      assertEquals(event1.getReturnType(), DataType.VOID);
+      assertEquals(event1.getParameters().length, 1);
+      assertEquals(event1.getParameters()[0].getDataType(), DataType.CHARACTER);
 
       IMethodElement testMethod = null;
       for (IMethodElement elem : rci.getTypeInfo().getMethods()) {

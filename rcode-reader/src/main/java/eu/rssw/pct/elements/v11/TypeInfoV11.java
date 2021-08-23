@@ -109,7 +109,9 @@ public class TypeInfoV11 implements ITypeInfo {
     int currOffset = 80 + 16 * (publicElementCount + protectedElementCount + privateElementCount + constructorCount);
     typeInfo.parentTypeName = RCodeInfo.readNullTerminatedString(segment, textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
     currOffset += 24;
-    
+    boolean isEnum = "Progress.Lang.Enum".equals(typeInfo.getParentTypeName())
+        || "Progress.Lang.FlagsEnum".equals(typeInfo.getParentTypeName());
+
     for (int zz = 0; zz < interfaceCount; zz++) {
       String str = RCodeInfo.readNullTerminatedString(segment,
           textAreaOffset + ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt());
@@ -120,6 +122,8 @@ public class TypeInfoV11 implements ITypeInfo {
     for (int[] entry : entries) {
       String name = RCodeInfo.readNullTerminatedString(segment, textAreaOffset + entry[3]);
       Set<AccessType> set = AccessType.getTypeFromString(entry[1]);
+      if ((isEnum) && (ElementKind.getKind(entry[2]) != ElementKind.PROPERTY))
+        return typeInfo;
 
       switch (ElementKind.getKind(entry[2])) {
         case METHOD:
@@ -154,6 +158,7 @@ public class TypeInfoV11 implements ITypeInfo {
         case DATASET:
           IDatasetElement ds =  DatasetElementV11.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
           currOffset += ds.getSizeInRCode();
+          typeInfo.getDatasets().add(ds);
           break;
         case DATASOURCE:
           IDataSourceElement dso =  DataSourceElementV11.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
@@ -277,6 +282,11 @@ public class TypeInfoV11 implements ITypeInfo {
   }
 
   @Override
+  public Collection<IBufferElement> getBuffers() {
+    return buffers;
+  }
+
+  @Override
   public Collection<IDatasetElement> getDatasets() {
     return datasets;
   }
@@ -289,11 +299,6 @@ public class TypeInfoV11 implements ITypeInfo {
       }
     }
     return null;
-  }
-
-  @Override
-  public Collection<IBufferElement> getBuffers() {
-    return buffers;
   }
 
   @Override

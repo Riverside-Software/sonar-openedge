@@ -115,7 +115,7 @@ public class TypeInfoV12 implements ITypeInfo {
     for (int[] entry : entries) {
       String name = RCodeInfo.readNullTerminatedString(segment, textAreaOffset + entry[3]);
       Set<AccessType> set = AccessType.getTypeFromString(entry[1]);
-      if ((isEnum) && (ElementKind.getKind(entry[2]) != ElementKind.PROPERTY))
+      if (isEnum && (ElementKind.getKind(entry[2]) != ElementKind.PROPERTY))
         return typeInfo;
 
       switch (ElementKind.getKind(entry[2])) {
