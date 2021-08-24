@@ -169,6 +169,18 @@ public class JPNodeTest {
   }
 
   @Test
+  public void testSibling() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "query02.p"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+    assertNull(unit.getTopNode().getSibling(ABLNodeType.FOR));
+    JPNode node = unit.getTopNode().queryStateHead(ABLNodeType.FOR).get(0);
+    JPNode recNode = node.query(ABLNodeType.RECORD_NAME).get(0);
+    assertNotNull(recNode.getSibling(ABLNodeType.WHERE));
+    assertNotNull(recNode.getSibling(ABLNodeType.USEINDEX));
+  }
+
+  @Test
   public void testDotComment01() {
     ParseUnit unit = genericTest("dotcomment01.p");
     JPNode node = unit.getTopNode().firstNaturalChild();

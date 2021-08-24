@@ -11,6 +11,8 @@ import java.util.List;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.BuiltinFunctionNode;
 import org.prorefactor.core.nodetypes.IExpression;
+import org.prorefactor.core.nodetypes.NamedMemberArrayNode;
+import org.prorefactor.core.nodetypes.NamedMemberNode;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -63,6 +65,30 @@ public class ExpressionEngineTest {
     assertEquals(nodes.size(), 1);
     IExpression exp = (IExpression) nodes.get(0);
     assertEquals(exp.getDataType(), DataType.DECIMAL);
+  }
+
+  @Test
+  public void testNamedMember01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define temp-table tt1 field fld1 as int. define buffer b1 for tt1. buffer b1::fld1.".getBytes()), session);
+    unit.treeParser01();
+    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 1);
+    assertTrue(nodes.get(0).isExpression());
+    NamedMemberNode exp = (NamedMemberNode) nodes.get(0);
+    assertEquals(exp.getNamedMember(), "fld1");
+    assertEquals(exp.getDataType(), DataType.NOT_COMPUTED);
+  }
+
+  @Test
+  public void testNamedMemberArray01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define temp-table tt1 field fld1 as int extent. define buffer b1 for tt1. buffer b1::fld1(1).".getBytes()), session);
+    unit.treeParser01();
+    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 1);
+    assertTrue(nodes.get(0).isExpression());
+    NamedMemberArrayNode exp = (NamedMemberArrayNode) nodes.get(0);
+    assertEquals(exp.getNamedMember(), "fld1");
+    assertEquals(exp.getDataType(), DataType.NOT_COMPUTED);
   }
 
   @Test
