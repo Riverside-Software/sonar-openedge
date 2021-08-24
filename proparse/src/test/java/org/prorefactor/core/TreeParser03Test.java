@@ -24,8 +24,11 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+
+import javax.xml.bind.JAXBException;
 
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
@@ -1076,6 +1079,102 @@ public class TreeParser03Test {
     assertNotNull(x6);
     assertEquals(x6.getNumReads(), 1);
     assertEquals(x6.getNumWrites(), 1);
+  }
+
+  @Test
+  public void testAssignmentList() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test26.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+  }
+
+  @Test
+  public void testBufferCompare() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test27.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Variable logVar = unit.getRootScope ().getVariable("logVar");
+    assertNotNull(logVar);
+    assertEquals(logVar.getNumReads(), 0);
+    assertEquals(logVar.getNumWrites(), 1);
+  }
+
+  @Test(enabled = false) // FIXME
+  public void testChoose() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test28.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Variable menu = unit.getRootScope ().getVariable("menu");
+    assertNotNull(menu);
+    assertEquals(menu.getNumReads(), 1);
+    assertEquals(menu.getNumWrites(), 1);
+  }
+
+  @Test
+  public void testLexAt() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test29.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Variable x1 = unit.getRootScope ().getVariable("x1");
+    assertNotNull(x1);
+    assertEquals(x1.getNumReads(), 1);
+    assertEquals(x1.getNumWrites(), 0);
+
+    Variable x2 = unit.getRootScope ().getVariable("x2");
+    assertNotNull(x2);
+    assertEquals(x2.getNumReads(), 0);
+    assertEquals(x2.getNumReferenced(), 1);
+    assertEquals(x2.getNumWrites(), 0);
+  }
+
+  @Test
+  public void testDefBrowseDisplay() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test30.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+  }
+
+  @Test
+  public void testParameters() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test31.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Variable prm1 = unit.getRootScope ().getVariable("prm1");
+    assertNotNull(prm1);
+    assertEquals(prm1.getDataType(), DataType.INTEGER);
+    assertNull(prm1.getInitialValue());
+    Variable prm2 = unit.getRootScope ().getVariable("prm2");
+    assertNotNull(prm2);
+    assertEquals(prm2.getDataType(), DataType.INTEGER);
+    assertEquals(prm2.getInitialValue(), Double.valueOf(2));
+    Variable prm3 = unit.getRootScope ().getVariable("prm3");
+    assertNotNull(prm3);
+    assertEquals(prm3.getDataType(), DataType.TABLE_HANDLE);
+    Variable prm4 = unit.getRootScope ().getVariable("prm4");
+    assertNotNull(prm4);
+    assertEquals(prm4.getDataType(), DataType.DATASET_HANDLE);
   }
 
 }

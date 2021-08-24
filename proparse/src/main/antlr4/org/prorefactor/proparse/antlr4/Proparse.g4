@@ -512,7 +512,7 @@ expressionTerm:
   | expressionTerm OBJCOLON id=nonPunctuating                          # exprTermAttribute
   | expressionTerm DOUBLECOLON id=nonPunctuating                       # exprTermNamedMember
   | expressionTerm DOUBLECOLON id=nonPunctuating methodParamList       # exprTermNamedMemberArray /* WTF... */
-  | expressionTerm LEFTBRACE expression ( FOR expression )? RIGHTBRACE # exprTermArray
+  | expressionTerm LEFTBRACE expression ( FOR constant )? RIGHTBRACE # exprTermArray
   | expressionTerm inuic          # exprTermInUI
   | widName                       # exprTermWidget
   | expressionTerm2               # exprTermOther

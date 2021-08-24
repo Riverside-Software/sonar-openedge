@@ -13,8 +13,8 @@ WAIT-FOR System.Windows.Forms.Application:Run (oForm) .
 
 
 /* unexpected token: DYNAMIC-INVOKE */
-def var h1 as handle.
-dynamic-invoke(new progress.lang.object(), "yada", input-output dataset-handle h1, "b").
+def var h1 as handle. def var h2 as handle.
+dynamic-invoke(new progress.lang.object(), "yada", input-output dataset-handle h1, output table-handle h2, "b").
 
 
 /* unexpected token: ( */

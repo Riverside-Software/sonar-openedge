@@ -30,7 +30,6 @@ import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Index;
-import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
@@ -90,8 +89,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterBlockFor(BlockForContext ctx) {
-    for (RecordContext record : ctx.record()) {
-      setContextQualifier(record, ContextQualifier.BUFFERSYMBOL);
+    for (RecordContext rec : ctx.record()) {
+      setContextQualifier(rec, ContextQualifier.BUFFERSYMBOL);
     }
   }
 
@@ -107,11 +106,6 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     if (qual != null) {
       recordNameNode((RecordNameNode) support.getNode(ctx), qual);
-    } else {
-      LOG.info("No context qualifier found for {} in {} => {} => {} => {}", ctx.getText(),
-          Proparse.ruleNames[ctx.getParent().getParent().getParent().getRuleIndex()],
-          Proparse.ruleNames[ctx.getParent().getParent().getRuleIndex()],
-          Proparse.ruleNames[ctx.getParent().getRuleIndex()], Proparse.ruleNames[ctx.getRuleIndex()]);
     }
   }
 
@@ -299,23 +293,23 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFunctionParamStandardTableHandle(FunctionParamStandardTableHandleContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.hn.getText(), DataType.HANDLE,
+    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.hn.getText(), DataType.HANDLE,
         Variable.Type.PARAMETER);
-    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
-    wipParameters.getFirst().setSymbol(var);
+    v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    wipParameters.getFirst().setSymbol(v);
     wipParameters.getFirst().setProgressType(ABLNodeType.TABLEHANDLE);
-    addToSymbolScope(var);
+    addToSymbolScope(v);
   }
 
   @Override
   public void enterFunctionParamStandardDatasetHandle(FunctionParamStandardDatasetHandleContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.hn2.getText(), DataType.HANDLE,
+    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.hn2.getText(), DataType.HANDLE,
         Variable.Type.PARAMETER);
-    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
-    wipParameters.getFirst().setSymbol(var);
+    v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    wipParameters.getFirst().setSymbol(v);
     wipParameters.getFirst().setProgressType(ABLNodeType.DATASETHANDLE);
 
-    addToSymbolScope(var);
+    addToSymbolScope(v);
   }
 
   private void enterExpression(ExpressionContext ctx) {
@@ -422,9 +416,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterExprTermArray(ExprTermArrayContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     setContextQualifier(ctx.expressionTerm(), qual);
-    setContextQualifier(ctx.expression(0), ContextQualifier.REF);
-    if (ctx.expression(1) != null)
-      setContextQualifier(ctx.expression(1), ContextQualifier.REF);
+    setContextQualifier(ctx.expression(), ContextQualifier.REF);
   }
 
   @Override
@@ -500,11 +492,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterAssignmentList(AssignmentListContext ctx) {
     if (ctx.record() != null) {
       setContextQualifier(ctx.record(), ContextQualifier.UPDATING);
-    }
-    if (ctx.exceptFields() != null) {
-      for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
-        setContextQualifier(fld, ContextQualifier.SYMBOL);
-        nameResolution.put(fld.field(), TableNameResolution.LAST);
+      if (ctx.exceptFields() != null) {
+        for (FieldExprContext fld : ctx.exceptFields().fieldExpr()) {
+          setContextQualifier(fld, ContextQualifier.SYMBOL);
+          nameResolution.put(fld.field(), TableNameResolution.LAST);
+        }
       }
     }
   }
@@ -513,9 +505,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterAssignStatement2(AssignStatement2Context ctx) {
     // Shorthand operator also read variable content
     ContextQualifier qual = ctx.EQUAL() == null ? ContextQualifier.REFUP : ContextQualifier.UPDATING;
-    if (ctx.assignEqualLeft() != null) {
-      setContextQualifier(ctx.assignEqualLeft(), qual);
-    }
+    setContextQualifier(ctx.assignEqualLeft(), qual);
     setContextQualifier(ctx.expression(), ContextQualifier.REF);
   }
 
@@ -532,7 +522,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     if (ctx.pseudoFunction() != null)
       setContextQualifier(ctx.pseudoFunction(), qual);
-    else if (ctx.expressionTerm() != null)
+    else
       setContextQualifier(ctx.expressionTerm(), qual);
   }
 
@@ -842,8 +832,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterDefineDatasetStatement(DefineDatasetStatementContext ctx) {
     stack.push(defineSymbol(ABLNodeType.DATASET, support.getNode(ctx), ctx.identifier().getText()));
-    for (RecordContext record : ctx.record()) {
-      setContextQualifier(record, ContextQualifier.INIT);
+    for (RecordContext rec : ctx.record()) {
+      setContextQualifier(rec, ContextQualifier.INIT);
     }
   }
 
@@ -854,15 +844,15 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDataRelation(DataRelationContext ctx) {
-    for (RecordContext record : ctx.record()) {
-      setContextQualifier(record, ContextQualifier.INIT);
+    for (RecordContext rec : ctx.record()) {
+      setContextQualifier(rec, ContextQualifier.INIT);
     }
   }
 
   @Override
   public void enterParentIdRelation(ParentIdRelationContext ctx) {
-    for (RecordContext record : ctx.record()) {
-      setContextQualifier(record, ContextQualifier.INIT);
+    for (RecordContext rec : ctx.record()) {
+      setContextQualifier(rec, ContextQualifier.INIT);
     }
     for (FieldExprContext fld : ctx.fieldExpr()) {
       setContextQualifier(fld, ContextQualifier.SYMBOL);
@@ -991,10 +981,10 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDefineParameterStatementSub2Variable(DefineParameterStatementSub2VariableContext ctx) {
-    Variable var = defineVariable(ctx.parent, support.getNode(ctx.parent), ctx.identifier().getText(),
+    Variable v = defineVariable(ctx.parent, support.getNode(ctx.parent), ctx.identifier().getText(),
         Variable.Type.PARAMETER);
-    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
-    stack.push(var);
+    v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    stack.push(v);
   }
 
   @Override
@@ -1005,10 +995,10 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDefineParameterStatementSub2VariableLike(DefineParameterStatementSub2VariableLikeContext ctx) {
-    Variable var = defineVariable(ctx.parent, support.getNode(ctx.parent), ctx.identifier().getText(),
+    Variable v = defineVariable(ctx.parent, support.getNode(ctx.parent), ctx.identifier().getText(),
         Variable.Type.PARAMETER);
-    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
-    stack.push(var);
+    v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    stack.push(v);
   }
 
   @Override
@@ -1048,28 +1038,28 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterDefineParameterStatementSub2TableHandle(DefineParameterStatementSub2TableHandleContext ctx) {
     wipParameters.getFirst().setProgressType(ABLNodeType.TABLEHANDLE);
-    Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.pn2.getText(), DataType.HANDLE,
+    Variable v = defineVariable(ctx, support.getNode(ctx.parent), ctx.pn2.getText(), DataType.TABLE_HANDLE,
         Variable.Type.PARAMETER);
-    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
-    addToSymbolScope(var);
+    v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    addToSymbolScope(v);
   }
 
   @Override
   public void enterDefineParameterStatementSub2DatasetHandle(DefineParameterStatementSub2DatasetHandleContext ctx) {
     wipParameters.getFirst().setProgressType(ABLNodeType.DATASETHANDLE);
-    Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.dsh.getText(), DataType.HANDLE,
+    Variable v = defineVariable(ctx, support.getNode(ctx.parent), ctx.dsh.getText(), DataType.DATASET_HANDLE,
         Variable.Type.PARAMETER);
-    var.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
-    addToSymbolScope(var);
+    v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
+    addToSymbolScope(v);
   }
 
   @Override
   public void enterDefinePropertyStatement(DefinePropertyStatementContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.PROPERTY);
+    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.PROPERTY);
     for (DefinePropertyModifierContext ctx2 : ctx.definePropertyModifier()) {
-      var.addModifier(Modifier.getModifier(ctx2.getStart().getType()));
+      v.addModifier(Modifier.getModifier(ctx2.getStart().getType()));
     }
-    stack.push(var);
+    stack.push(v);
   }
 
   @Override
@@ -1088,8 +1078,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterDefineQueryStatement(DefineQueryStatementContext ctx) {
     stack.push(defineSymbol(ABLNodeType.QUERY, support.getNode(ctx), ctx.identifier().getText()));
-    for (RecordContext record : ctx.record()) {
-      setContextQualifier(record, ContextQualifier.INIT);
+    for (RecordContext rec : ctx.record()) {
+      setContextQualifier(rec, ContextQualifier.INIT);
     }
   }
 
@@ -1184,11 +1174,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDefineVariableStatement(DefineVariableStatementContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.VARIABLE);
+    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.VARIABLE);
     for (DefineVariableModifierContext ctx2 : ctx.defineVariableModifier()) {
-      var.addModifier(Modifier.getModifier(ctx2.getStart().getType()));
+      v.addModifier(Modifier.getModifier(ctx2.getStart().getType()));
     }
-    stack.push(var);
+    stack.push(v);
   }
 
   @Override
@@ -1294,9 +1284,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFieldEqualDynamicNew(FieldEqualDynamicNewContext ctx) {
-    if (ctx.expressionTerm() != null) {
-      setContextQualifier(ctx.expressionTerm(), ContextQualifier.UPDATING);
-    }
+    setContextQualifier(ctx.expressionTerm(), ContextQualifier.UPDATING);
   }
 
   @Override
@@ -2071,44 +2059,44 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     }
   }
 
-  private void defineInitialValue(Variable var, VarStatementInitialValueContext ctx) {
+  private void defineInitialValue(Variable v, VarStatementInitialValueContext ctx) {
     if (ctx.varStatementInitialValueArray() != null) {
       // Just set initial value to Array, no matter what the values are
-      var.noteReference(support.getNode(ctx.varStatementInitialValueArray()), ContextQualifier.UPDATING);
-      var.setInitialValue(Variable.CONSTANT_ARRAY);
+      v.noteReference(support.getNode(ctx.varStatementInitialValueArray()), ContextQualifier.UPDATING);
+      v.setInitialValue(Variable.CONSTANT_ARRAY);
     } else if (ctx.varStatementInitialValueSub() != null) {
       VarStatementInitialValueSubContext ctx2 = ctx.varStatementInitialValueSub();
       if (ctx2.TODAY() != null) {
-        var.setInitialValue(Variable.CONSTANT_TODAY);
+        v.setInitialValue(Variable.CONSTANT_TODAY);
       } else if (ctx2.NOW() != null) {
-        var.setInitialValue(Variable.CONSTANT_NOW);
+        v.setInitialValue(Variable.CONSTANT_NOW);
       } else if ((ctx2.TRUE() != null) || (ctx2.YES() != null)) {
-        var.setInitialValue(Boolean.TRUE);
+        v.setInitialValue(Boolean.TRUE);
       } else if ((ctx2.FALSE() != null) || (ctx2.NO() != null)) {
-        var.setInitialValue(Boolean.FALSE);
+        v.setInitialValue(Boolean.FALSE);
       } else if (ctx2.UNKNOWNVALUE() != null) {
-        var.setInitialValue(Variable.CONSTANT_NULL);
+        v.setInitialValue(Variable.CONSTANT_NULL);
       } else if (ctx2.QSTRING() != null) {
-        var.setInitialValue(ProgressString.dequote(ctx2.getText()));
+        v.setInitialValue(ProgressString.dequote(ctx2.getText()));
       } else if (ctx2.NUMBER() != null) {
         try {
           Double dbl = Double.valueOf(ctx2.getText());
           if (dbl == 0)
-            var.setInitialValue(Variable.CONSTANT_ZERO);
+            v.setInitialValue(Variable.CONSTANT_ZERO);
           else
-            var.setInitialValue(dbl);
+            v.setInitialValue(dbl);
         } catch (NumberFormatException caught) {
           // Assume it's a non-zero value if we have an exception
           // Also, dates can be recognized as numbers
-          var.setInitialValue(Double.valueOf(1));
+          v.setInitialValue(Double.valueOf(1));
         }
       } else if (ctx2.LEXDATE() != null) {
-        var.setInitialValue(new Date());
+        v.setInitialValue(new Date());
       } else if (ctx2.expression() != null) {
-        var.setInitialValue(Variable.CONSTANT_EXPRESSION);
-        var.noteReference(support.getNode(ctx2.expression()), ContextQualifier.UPDATING);
+        v.setInitialValue(Variable.CONSTANT_EXPRESSION);
+        v.noteReference(support.getNode(ctx2.expression()), ContextQualifier.UPDATING);
       } else {
-        var.setInitialValue(Variable.CONSTANT_OTHER);
+        v.setInitialValue(Variable.CONSTANT_OTHER);
       }
     }
   }
