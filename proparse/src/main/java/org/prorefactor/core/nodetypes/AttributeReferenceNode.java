@@ -67,7 +67,6 @@ public class AttributeReferenceNode extends JPNode implements IExpression {
         }
       }
     } else if (expr.getDataType().getPrimitive() == PrimitiveDataType.HANDLE) {
-      // On va tenter quoi ??
       return ExpressionNode.getStandardAttributeDataType(attributeName.toUpperCase());
     }
 

@@ -488,8 +488,6 @@ public class ExpressionNode extends JPNode implements IExpression {
       case "Y":
       case "YEAR-OFFSET":
         return DataType.INTEGER;
-      case "FORM-LONG-INPUT":
-        return DataType.RAW;
       case "ACTIVE":
       case "ALLOW-COLUMN-SEARCHING":
       case "ALWAYS-ON-TOP":
@@ -695,6 +693,7 @@ public class ExpressionNode extends JPNode implements IExpression {
       case "XML-SUPPRESS-NAMESPACE-PROCESSING":
         return DataType.LOGICAL;
       case "ENCRYPTION-SALT":
+      case "FORM-LONG-INPUT":
       case "SYMMETRIC-ENCRYPTION-IV":
       case "SYMMETRIC-ENCRYPTION-KEY":
         return DataType.RAW;
