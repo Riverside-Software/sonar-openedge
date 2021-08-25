@@ -64,7 +64,6 @@ blockOrStatement:
   | annotation
   | dotComment
   | labeledBlock
-  | dynamicNewStatement
   | assignStatement2
   | statement
   | expressionStatement
@@ -147,6 +146,7 @@ statement:
   |  catchStatement
   |  chooseStatement
   |  classStatement
+  |  dynamicNewStatement
   |  enumStatement
   |  clearStatement
   |  closeQueryStatement
