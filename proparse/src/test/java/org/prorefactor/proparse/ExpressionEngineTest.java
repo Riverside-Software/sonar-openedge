@@ -11,8 +11,11 @@ import java.util.List;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.BuiltinFunctionNode;
 import org.prorefactor.core.nodetypes.IExpression;
+import org.prorefactor.core.nodetypes.LocalMethodCallNode;
+import org.prorefactor.core.nodetypes.MethodCallNode;
 import org.prorefactor.core.nodetypes.NamedMemberArrayNode;
 import org.prorefactor.core.nodetypes.NamedMemberNode;
+import org.prorefactor.core.nodetypes.UserFunctionCallNode;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -290,6 +293,70 @@ public class ExpressionEngineTest {
     IExpression exp = (IExpression) nodes.get(0);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp.getDataType().getClassName(), "Progress.Lang.Object");
+  }
+
+  @Test
+  public void testObjectMethod() {
+    ParseUnit unit = new ParseUnit(
+        new ByteArrayInputStream("def var xx as Progress.Lang.Object. message xx:toString(). message xx:UnknownMethod().".getBytes()), session);
+    unit.treeParser01();
+
+    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+
+    assertTrue(nodes.get(0).isExpression());
+    assertTrue(nodes.get(0) instanceof MethodCallNode);
+    IExpression exp = (IExpression) nodes.get(0);
+    assertEquals(exp.getDataType(), DataType.CHARACTER);
+
+    assertTrue(nodes.get(1).isExpression());
+    assertTrue(nodes.get(1) instanceof MethodCallNode);
+    IExpression exp2 = (IExpression) nodes.get(1);
+    assertEquals(exp2.getDataType(), DataType.NOT_COMPUTED);
+  }
+
+  @Test
+  public void testObjectMethod02() {
+    ParseUnit unit = new ParseUnit(
+        new ByteArrayInputStream("class rssw.pct: method void m1(): toString(). foobar(). end method. end class.".getBytes()), session);
+    unit.treeParser01();
+
+    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+
+    assertTrue(nodes.get(0).isExpression());
+    assertTrue(nodes.get(0) instanceof LocalMethodCallNode);
+    LocalMethodCallNode exp = (LocalMethodCallNode) nodes.get(0);
+    assertEquals(exp.getMethodName(), "toString");
+    assertEquals(exp.getDataType(), DataType.CHARACTER);
+
+    assertTrue(nodes.get(1).isExpression());
+    assertTrue(nodes.get(1) instanceof LocalMethodCallNode);
+    LocalMethodCallNode exp2 = (LocalMethodCallNode) nodes.get(1);
+    assertEquals(exp2.getMethodName(), "foobar");
+    assertEquals(exp2.getDataType(), DataType.NOT_COMPUTED);
+  }
+
+  @Test
+  public void testFunctions() {
+    ParseUnit unit = new ParseUnit(
+        new ByteArrayInputStream("function f1 returns char(): end function. function f2 returns int64(): end function. f1(). f2().".getBytes()), session);
+    unit.treeParser01();
+
+    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+
+    assertTrue(nodes.get(0).isExpression());
+    assertTrue(nodes.get(0) instanceof UserFunctionCallNode);
+    UserFunctionCallNode exp = (UserFunctionCallNode) nodes.get(0);
+    assertEquals(exp.getFunctionName(), "f1");
+    assertEquals(exp.getDataType(), DataType.CHARACTER);
+
+    assertTrue(nodes.get(1).isExpression());
+    assertTrue(nodes.get(1) instanceof UserFunctionCallNode);
+    UserFunctionCallNode exp2 = (UserFunctionCallNode) nodes.get(1);
+    assertEquals(exp2.getFunctionName(), "f2");
+    assertEquals(exp2.getDataType(), DataType.INT64);
   }
 
   @Test

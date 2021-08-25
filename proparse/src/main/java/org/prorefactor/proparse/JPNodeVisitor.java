@@ -105,17 +105,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
-  public Builder visitFunctionCallStatement(FunctionCallStatementContext ctx) {
-    return createTree(ctx, ABLNodeType.EXPR_STATEMENT).setStatement().setRuleNode(ctx);
-  }
-
-  @Override
-  public Builder visitFunctionCallStatementSub(FunctionCallStatementSubContext ctx) {
-    return createTreeFromFirstNode(ctx).changeType(
-        ABLNodeType.getNodeType(support.isMethodOrFunc(ctx.fname.getText())));
-  }
-
-  @Override
   public Builder visitExpressionStatement(ExpressionStatementContext ctx) {
     return createTree(ctx, ABLNodeType.EXPR_STATEMENT).setStatement().setRuleNode(ctx);
   }
@@ -319,12 +308,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExprTermNamedMember(ExprTermNamedMemberContext ctx) {
-    return createTree(ctx, ABLNodeType.NAMED_MEMBER).setRuleNode(ctx).setExpression(true);
+    return createTree(ctx, ABLNodeType.NAMED_MEMBER).setExtraField1(ctx.id.getText()).setRuleNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExprTermNamedMemberArray(ExprTermNamedMemberArrayContext ctx) {
-    return createTree(ctx, ABLNodeType.NAMED_MEMBER_ARRAY).setRuleNode(ctx).setExpression(true);
+    return createTree(ctx, ABLNodeType.NAMED_MEMBER_ARRAY).setExtraField1(ctx.id.getText()).setRuleNode(ctx).setExpression(true);
   }
 
   @Override

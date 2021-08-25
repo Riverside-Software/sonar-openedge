@@ -68,7 +68,6 @@ blockOrStatement:
   | labeledBlock
   | dynamicNewStatement
   | assignStatement2
-  | { support.isMethodOrFunc(_input.LT(1)) != 0 }? functionCallStatement
   | statement
   | expressionStatement
   ;
@@ -89,14 +88,6 @@ emptyStatement:
 
 dotComment:
     NAMEDOT notStatementEnd+ statementEnd
-  ;
-
-functionCallStatement:
-    functionCallStatementSub NOERROR? statementEnd
-  ;
-
-functionCallStatementSub:
-    fname=identifier parameterListNoRoot
   ;
 
 expressionStatement:

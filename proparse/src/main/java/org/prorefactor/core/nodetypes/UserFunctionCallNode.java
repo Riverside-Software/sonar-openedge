@@ -23,19 +23,19 @@ import com.google.common.base.Strings;
 import eu.rssw.pct.elements.DataType;
 
 public class UserFunctionCallNode extends JPNode implements IExpression {
-  private String methodName = "";
+  private String functionName = "";
 
   public UserFunctionCallNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     this(t, parent, num, hasChildren, "");
   }
 
-  public UserFunctionCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String methodName) {
+  public UserFunctionCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String functinoName) {
     super(t, parent, num, hasChildren);
-    this.methodName = Strings.nullToEmpty(methodName);
+    this.functionName = Strings.nullToEmpty(functinoName);
   }
 
-  public String getMethodName() {
-    return methodName;
+  public String getFunctionName() {
+    return functionName;
   }
 
   @Override
@@ -50,7 +50,7 @@ public class UserFunctionCallNode extends JPNode implements IExpression {
       return DataType.NOT_COMPUTED;
 
     for (Routine r : root.getParseUnit().getRootScope().getRoutines()) {
-      if (r.getName().equalsIgnoreCase(methodName))
+      if (r.getName().equalsIgnoreCase(functionName))
         return r.getReturnDatatypeNode();
     }
 

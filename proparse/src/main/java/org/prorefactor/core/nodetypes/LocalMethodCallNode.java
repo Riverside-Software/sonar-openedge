@@ -50,11 +50,14 @@ public class LocalMethodCallNode extends JPNode implements IExpression {
     if (root == null)
       return DataType.NOT_COMPUTED;
     ITypeInfo info = root.getParseUnit().getTypeInfo();
-    if (info == null)
-      return DataType.NOT_COMPUTED;
-    for (IMethodElement elem : info.getMethods()) {
-      if (elem.getName().equalsIgnoreCase(methodName))
-        return elem.getReturnType();
+    if (root.getParseUnit().isClass() && (info == null))
+      info = root.getParserSupport().getProparseSession().getTypeInfo("Progress.Lang.Object");
+    while (info != null) {
+      for (IMethodElement elem : info.getMethods()) {
+        if (elem.getName().equalsIgnoreCase(methodName))
+          return elem.getReturnType();
+      }
+      info = root.getParserSupport().getProparseSession().getTypeInfo(info.getParentTypeName());
     }
 
     return DataType.NOT_COMPUTED;
