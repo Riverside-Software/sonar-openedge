@@ -14,7 +14,6 @@
  ********************************************************************************/
 
 // Based on original work by John Green
-// Annotations: SEMITRANSLATED
 
 parser grammar Proparse;
 
@@ -61,7 +60,6 @@ codeBlock:
   ;
 
 blockOrStatement:
-    // Method calls and other expressions can stand alone as statements.
     emptyStatement
   | annotation
   | dotComment
@@ -760,7 +758,7 @@ assignStatement:
     ASSIGN assignmentList NOERROR? statementEnd
   ;
 
-assignmentList: // SEMITRANSLATED
+assignmentList:
     record exceptFields
   | // We want to pick up record only if it can't be a variable name
     { _input.LA(2) == NAMEDOT || !support.isVar(_input.LT(1).getText()) }?
