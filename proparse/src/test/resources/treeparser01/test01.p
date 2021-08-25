@@ -83,6 +83,8 @@ display tt12.f1.
 find first state.
 MESSAGE "hello" 
   VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE state AS LOGICAL.
+MESSAGE "hello" 
+  VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO SET state AS LOGICAL.
 display state.
 
 

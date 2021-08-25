@@ -1659,9 +1659,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterOnAssignOldValue(OnAssignOldValueContext ctx) {
-    Variable var = defineVariable(ctx, support.getNode(ctx.parent), ctx.f.getText(), Variable.Type.VARIABLE);
-    currSymbol = var;
-    stack.push(var);
+    Variable v = defineVariable(ctx, support.getNode(ctx.parent), ctx.f.getText(), Variable.Type.VARIABLE);
+    currSymbol = v;
+    stack.push(v);
   }
 
   @Override

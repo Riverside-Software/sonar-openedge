@@ -84,6 +84,8 @@ display /* 0:tt12.f1 */  tt12.f1.
 find first  /* 0:sports2000.State */ state.
 MESSAGE "hello" 
   VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE /* 0:state */   /* 0:state */ state AS LOGICAL.
+MESSAGE "hello" 
+  VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO SET /* 0:state */   /* 0:state */ state AS LOGICAL.
 display /* 0:state */  state.
 
 

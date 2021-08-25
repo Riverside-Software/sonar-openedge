@@ -1234,4 +1234,14 @@ public class TreeParser03Test {
     assertEquals(x4.getNumWrites(), 0);
   }
 
+  @Test
+  public void testImportExport() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test34.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+  }
+
 }
