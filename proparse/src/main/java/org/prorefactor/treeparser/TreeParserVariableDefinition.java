@@ -293,7 +293,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFunctionParamStandardTableHandle(FunctionParamStandardTableHandleContext ctx) {
-    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.hn.getText(), DataType.HANDLE,
+    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.hn.getText(), DataType.TABLE_HANDLE,
         Variable.Type.PARAMETER);
     v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     wipParameters.getFirst().setSymbol(v);
@@ -303,7 +303,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFunctionParamStandardDatasetHandle(FunctionParamStandardDatasetHandleContext ctx) {
-    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.hn2.getText(), DataType.HANDLE,
+    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.hn2.getText(), DataType.DATASET_HANDLE,
         Variable.Type.PARAMETER);
     v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     wipParameters.getFirst().setSymbol(v);

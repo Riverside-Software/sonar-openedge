@@ -4,9 +4,10 @@ DEFINE TEMP-TABLE tmp_mstr
 DEFINE QUERY q1 FOR tmp_mstr SCROLLING.
 DEFINE BROWSE b1 QUERY q1 NO-LOCK 
   DISPLAY tmp_part tmp_choice
-  ENABLE tmp_choice.
+  ENABLE tmp_choice WITH 10 DOWN.
 DEFINE FRAME f1 b1.
-   
+DEFINE FRAME f2 tmp_mstr EXCEPT tmp_part.
+
 REPEAT:
   VIEW FRAME f1.
   RUN make_choice.

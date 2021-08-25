@@ -764,20 +764,20 @@ public class JPNode {
       }
       return this;
     } else if ((getNodeType() == ABLNodeType.NEW)|| (getNodeType() == ABLNodeType.OLD)) {
-      JPNode nxt = nextNode();
+      JPNode nxt = getNextNode();
       if ((nxt != null) && (nxt.getNodeType() == ABLNodeType.ID))
         return nxt;
       if ((nxt != null) && (nxt.getNodeType() == ABLNodeType.BUFFER)) {
-        nxt = nxt.nextNode();
+        nxt = nxt.getNextNode();
         if ((nxt != null) && (nxt.getNodeType() == ABLNodeType.ID))
           return nxt;
         else
           return this;
       }
       return this;
-    } else if  (getNodeType() == ABLNodeType.TABLEHANDLE) {
-      if ((nextNode() != null) && (nextNode().getNodeType() == ABLNodeType.ID))
-        return nextNode();
+    } else if ((getNodeType() == ABLNodeType.TABLEHANDLE) || (getNodeType() == ABLNodeType.DATASETHANDLE)) {
+      if ((getNextNode() != null) && (getNextNode().getNodeType() == ABLNodeType.ID))
+        return getNextNode();
       else return this;
     } else {
       return this;

@@ -27,11 +27,12 @@ public class SingleArgumentExpression extends JPNode implements IExpression {
 
   @Override
   public DataType getDataType() {
-    switch (getFirstChild().getNodeType()) {
-      case PLUS:
-      case MINUS:
-      case LEFTPAREN:
-        return ((IExpression) getDirectChildren().get(1)).getDataType();
+    switch (getNodeType()) {
+      case UNARY_PLUS:
+      case UNARY_MINUS:
+        return ((IExpression) getFirstChild()).getDataType();
+      case PAREN_EXPR:
+        return ((IExpression) getFirstChild().getNextSibling()).getDataType();
       case NOT:
         return DataType.LOGICAL;
       default:

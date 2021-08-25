@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.nodetypes.AttributeReferenceNode;
 import org.prorefactor.core.nodetypes.BuiltinFunctionNode;
 import org.prorefactor.core.nodetypes.IExpression;
 import org.prorefactor.core.nodetypes.LocalMethodCallNode;
@@ -30,8 +31,6 @@ import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
 public class ExpressionEngineTest {
-  private final static String SRC_DIR = "src/test/resources/data/expression";
-
   private RefactorSession session;
 
   @BeforeTest
@@ -41,33 +40,12 @@ public class ExpressionEngineTest {
   }
 
   @Test
-  public void testUnary01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("+45".getBytes()), session);
-    unit.treeParser01();
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
-    assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType(), DataType.INTEGER);
-  }
-
-  @Test
-  public void testUnary02() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("-45".getBytes()), session);
-    unit.treeParser01();
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
-    assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType(), DataType.INTEGER);
-  }
-
-  @Test
-  public void testUnary03() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("-45.112".getBytes()), session);
-    unit.treeParser01();
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
-    assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType(), DataType.DECIMAL);
+  public void testUnaryExpression() {
+    testSimpleExpression("+ 45", DataType.INTEGER);
+    testSimpleExpression("- 45", DataType.INTEGER);
+    testSimpleExpression("- -45.112", DataType.DECIMAL);
+    testSimpleExpression("def var xx as log. not xx.", DataType.LOGICAL);
+    testSimpleExpression("def var xx as log. not (not xx).", DataType.LOGICAL);
   }
 
   @Test
@@ -253,25 +231,54 @@ public class ExpressionEngineTest {
   public void testSysHandles() {
     testSimpleExpression("message rcode-info.", DataType.HANDLE);
     // Methods
-    testSimpleExpression("message rcode-info:InvalidFunction().", DataType.UNKNOWN);
     testSimpleExpression("message audit-control:log-audit-event().", DataType.CHARACTER);
+    testSimpleExpression("message audit-control:clear-appl-context().", DataType.LOGICAL);
+    testSimpleExpression("message audit-control:InvalidFunction().", DataType.NOT_COMPUTED);
+    testSimpleExpression("message audit-policy:encrypt-audit-mac-key().", DataType.CHARACTER);
     testSimpleExpression("message audit-policy:refresh-audit-policy().", DataType.LOGICAL);
+    testSimpleExpression("message audit-policy:InvalidFunction().", DataType.NOT_COMPUTED);
+    testSimpleExpression("message color-table:get-green-value().", DataType.INTEGER);
     testSimpleExpression("message color-table:set-green-value().", DataType.LOGICAL);
+    testSimpleExpression("message color-table:InvalidFunction().", DataType.NOT_COMPUTED);
     testSimpleExpression("message compiler:InvalidFunction().", DataType.NOT_COMPUTED);
+    testSimpleExpression("message compiler:get-file-name().", DataType.CHARACTER);
     testSimpleExpression("message compiler:get-number().", DataType.INTEGER);
+    testSimpleExpression("message compiler:InvalidFunction().", DataType.NOT_COMPUTED);
+    testSimpleExpression("message debugger:cancel-break().", DataType.LOGICAL);
     testSimpleExpression("message debugger:display-message().", DataType.INTEGER);
+    testSimpleExpression("message debugger:InvalidFunction().", DataType.NOT_COMPUTED);
     testSimpleExpression("message error-status:get-message().", DataType.CHARACTER);
+    testSimpleExpression("message error-status:get-number().", DataType.INTEGER);
+    testSimpleExpression("message error-status:InvalidFunction().", DataType.NOT_COMPUTED);
     testSimpleExpression("message font-table:GET-TEXT-WIDTH-CHARS().", DataType.DECIMAL);
+    testSimpleExpression("message font-table:GET-TEXT-WIDTH-PIXELS().", DataType.INTEGER);
+    testSimpleExpression("message font-table:InvalidFunction().", DataType.NOT_COMPUTED);
     testSimpleExpression("message log-manager:write-message().", DataType.LOGICAL);
+    testSimpleExpression("message log-manager:InvalidFunction().", DataType.NOT_COMPUTED);
+    testSimpleExpression("message this-procedure:add-super-procedure().", DataType.LOGICAL);
     testSimpleExpression("message this-procedure:get-signature().", DataType.CHARACTER);
+    testSimpleExpression("message this-procedure:InvalidFunction().", DataType.NOT_COMPUTED);
     testSimpleExpression("message profiler:user-data().", DataType.LOGICAL);
+    testSimpleExpression("message profiler:InvalidFunction().", DataType.NOT_COMPUTED);
+    testSimpleExpression("message rcode-info:InvalidFunction().", DataType.UNKNOWN);
     testSimpleExpression("message security-policy:get-client().", DataType.HANDLE);
+    testSimpleExpression("message security-policy:load-domains().", DataType.LOGICAL);
+    testSimpleExpression("message security-policy:InvalidFunction().", DataType.NOT_COMPUTED);
     testSimpleExpression("message session:get-printers().", DataType.CHARACTER);
+    testSimpleExpression("message session:export().", DataType.LOGICAL);
+    testSimpleExpression("message session:InvalidFunction().", DataType.NOT_COMPUTED);
     testSimpleExpression("message web-context:get-binary-data().", DataType.MEMPTR);
+    testSimpleExpression("message web-context:get-cgi-list().", DataType.CHARACTER);
     testSimpleExpression("message web-context:get-cgi-long-value().", DataType.LONGCHAR);
+    testSimpleExpression("message web-context:InvalidFunction().", DataType.NOT_COMPUTED);
     testSimpleExpression("message current-window:end-file-drop().", DataType.LOGICAL);
+    testSimpleExpression("message current-window:get-dropped-file().", DataType.CHARACTER);
+    testSimpleExpression("message current-window:get-selected-widget().", DataType.HANDLE);
+    testSimpleExpression("message current-window:InvalidFunction().", DataType.NOT_COMPUTED);
     // Attributes
     testSimpleExpression("message active-form:nextform", new DataType("Progress.Windows.IForm"));
+    testSimpleExpression("message active-form:prowinHandle", DataType.HANDLE);
+    testSimpleExpression("message active-form:unknownAttribute", DataType.NOT_COMPUTED);
     testSimpleExpression("message session:xml-data-type", DataType.CHARACTER);
     testSimpleExpression("message session:file-mod-date", DataType.DATE);
     testSimpleExpression("message session:seal-timestamp", DataType.DATETIME_TZ);
@@ -283,7 +290,7 @@ public class ExpressionEngineTest {
   }
 
   @Test
-  public void testObjectAttribute() {
+  public void testObjectAttribute01() {
     ParseUnit unit = new ParseUnit(
         new ByteArrayInputStream("def var xx as Progress.Lang.Object. message xx:Next-Sibling.".getBytes()), session);
     unit.treeParser01();
@@ -293,6 +300,26 @@ public class ExpressionEngineTest {
     IExpression exp = (IExpression) nodes.get(0);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp.getDataType().getClassName(), "Progress.Lang.Object");
+  }
+
+  @Test(enabled = false) // TODO Implementation missing for now
+  public void testObjectAttribute02() {
+    ParseUnit unit = new ParseUnit(
+        new ByteArrayInputStream("class rssw.pct: define property p1 as char get. set. define variable v1 as longchar. method void m1(): this-object:p1. this-object:v1. end method. end class.".getBytes()), session);
+    unit.treeParser01();
+
+    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+
+    assertTrue(nodes.get(0).isExpression());
+    assertTrue(nodes.get(0) instanceof AttributeReferenceNode);
+    IExpression exp = (IExpression) nodes.get(0);
+    assertEquals(exp.getDataType(), DataType.CHARACTER);
+
+    assertTrue(nodes.get(1).isExpression());
+    assertTrue(nodes.get(1) instanceof AttributeReferenceNode);
+    IExpression exp2 = (IExpression) nodes.get(1);
+    assertEquals(exp2.getDataType(), DataType.LONGCHAR);
   }
 
   @Test

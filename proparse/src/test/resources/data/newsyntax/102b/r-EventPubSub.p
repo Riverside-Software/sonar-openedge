@@ -14,6 +14,7 @@ rPubObj = NEW r-EventPublish( ).
 rSubObj = NEW r-EventSubScribe( rPubObj ).
 
 ENABLE ALL WITH FRAME aFrame.
+DISABLE ALL WITH FRAME aFrame.
 WAIT-FOR CHOOSE OF bQuit OR WINDOW-CLOSE OF CURRENT-WINDOW.
                      
 PROCEDURE CallNewCust:

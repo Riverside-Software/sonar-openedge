@@ -3,6 +3,7 @@ define temp-table tt1
   field x2 as int.
 define buffer b1 for tt1.
 define buffer b2 for tt1.
+define buffer b3 for tt1 fields x1.
 define variable logVar as logical no-undo.
 find first b1.
 find last b2.

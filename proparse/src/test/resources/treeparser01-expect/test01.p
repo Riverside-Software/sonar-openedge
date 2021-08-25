@@ -55,7 +55,8 @@ DEFINE TEMP-TABLE  /* 0:tt11 */ tt11
     (   buffer  /* 1:sports2000.bf11 */ bf11 for  /* 0:sports2000.Customer */ customer,
         table for  /* 0:tt11 */ tt11 append,
         table  /* 0:tt11 */ tt11,
-        table-handle  /* 1:thandle11 */ thandle11 append
+        table-handle  /* 1:thandle11 */ thandle11 append,
+        dataset-handle  /* 1:dhandle11 */ dhandle11
     ):
   message /* 1:thandle11 */  thandle11.
   find first  /* 1:sports2000.bf11 */ bf11.
