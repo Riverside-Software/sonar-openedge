@@ -68,7 +68,7 @@ public enum PrimitiveDataType {
   SINGLE_CHARACTER(46),
   RUNTYPE(48);
 
-  private static final int LAST_VALUE = 48;
+  public static final int LAST_VALUE = 48;
   private static final PrimitiveDataType[] LOOKUP = new PrimitiveDataType[LAST_VALUE + 1];
 
   private final int num;

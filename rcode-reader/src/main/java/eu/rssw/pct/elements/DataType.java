@@ -98,6 +98,8 @@ public class DataType {
    * @return DataType based on upper-case strings (using underscore as separator)
    */
   public static DataType get(String name) {
+    if (name == null)
+      return UNKNOWN;
     switch (name.toUpperCase().replace('-', '_')) {
       case "VOID":
         return VOID;
@@ -271,10 +273,10 @@ public class DataType {
         return DATETIME_TZ;
       case 41:
         return INT64;
-      case 44:
-        return UNSIGNED_INTEGER;
       case 43:
         return UNSIGNED_INT64;
+      case 44:
+        return UNSIGNED_INTEGER;
       case 46:
         return SINGLE_CHARACTER;
       case 48:
