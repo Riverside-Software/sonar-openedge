@@ -34,6 +34,7 @@ import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Modifier;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
@@ -1242,6 +1243,28 @@ public class TreeParser03Test {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
+  }
+
+  @Test
+  public void testExternalDataTypes() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test35.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    assertEquals(unit.getRootScope().getChildScopes().size(), 1);
+    TreeParserSymbolScope scope = unit.getRootScope().getChildScopes().get(0);
+    assertEquals(scope.getVariable("prm1").getDataType(), DataType.BLOB);
+    assertEquals(scope.getVariable("prm2").getDataType(), DataType.CLOB);
+    assertEquals(scope.getVariable("prm3").getDataType(), DataType.BYTE);
+    assertEquals(scope.getVariable("prm4").getDataType(), DataType.SHORT);
+    assertEquals(scope.getVariable("prm5").getDataType(), DataType.FLOAT);
+    assertEquals(scope.getVariable("prm6").getDataType(), DataType.DOUBLE);
+    assertEquals(scope.getVariable("prm7").getDataType(), DataType.UNSIGNED_SHORT);
+    assertEquals(scope.getVariable("prm8").getDataType(), DataType.UNSIGNED_BYTE);
+    assertEquals(scope.getVariable("prm9").getDataType(), DataType.UNSIGNED_INTEGER);
   }
 
 }
