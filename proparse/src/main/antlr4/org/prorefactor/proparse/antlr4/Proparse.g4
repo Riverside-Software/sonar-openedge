@@ -14,7 +14,6 @@
  ********************************************************************************/
 
 // Based on original work by John Green
-// Annotations: SEMITRANSLATED
 
 parser grammar Proparse;
 
@@ -61,14 +60,11 @@ codeBlock:
   ;
 
 blockOrStatement:
-    // Method calls and other expressions can stand alone as statements.
     emptyStatement
   | annotation
   | dotComment
   | labeledBlock
-  | dynamicNewStatement
   | assignStatement2
-  | { support.isMethodOrFunc(_input.LT(1)) != 0 }? functionCallStatement
   | statement
   | expressionStatement
   ;
@@ -89,14 +85,6 @@ emptyStatement:
 
 dotComment:
     NAMEDOT notStatementEnd+ statementEnd
-  ;
-
-functionCallStatement:
-    functionCallStatementSub NOERROR? statementEnd
-  ;
-
-functionCallStatementSub:
-    fname=identifier parameterListNoRoot
   ;
 
 expressionStatement:
@@ -123,7 +111,7 @@ blockFor:
   ;
 
 blockOption:
-    field EQUAL expression TO expression ( BY constant )? # blockOptionIterator
+    fieldExpr EQUAL expression TO expression ( BY constant )? # blockOptionIterator
   | queryTuningPhrase    # blockOptionQueryTuning
   | WHILE expression     # blockOptionWhile
   | TRANSACTION          # blockOptionTransaction
@@ -158,6 +146,7 @@ statement:
   |  catchStatement
   |  chooseStatement
   |  classStatement
+  |  dynamicNewStatement
   |  enumStatement
   |  clearStatement
   |  closeQueryStatement
@@ -276,6 +265,7 @@ statement:
   |  showStatsStatement
   |  statusStatement
   |  stopStatement
+  |  superStatement
   |  subscribeStatement
   |  systemDialogColorStatement
   |  systemDialogFontStatement
@@ -395,7 +385,6 @@ builtinFunction:
   |  PAGENUMBER LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  PAGESIZE LEFTPAREN streamname RIGHTPAREN  // also noarg
   |  SEEK LEFTPAREN ( INPUT | OUTPUT | streamname | STREAMHANDLE expression ) RIGHTPAREN // streamname, /not/ stream_name_or_handle.
-  |  SUPER parameterList  // also noarg
   |  TYPEOF LEFTPAREN expression COMMA typeName RIGHTPAREN
   |  argFunction
   |  optionalArgFunction
@@ -417,11 +406,11 @@ parameter:
   ;
 
 parameterArg:
-    TABLEHANDLE field parameterDatasetOptions  # parameterArgTableHandle
+    TABLEHANDLE fieldExpr parameterDatasetOptions  # parameterArgTableHandle
   | TABLE FOR? record parameterDatasetOptions  # parameterArgTable
   | { _input.LA(3) != OBJCOLON && _input.LA(3) != DOUBLECOLON }? DATASET identifier parameterDatasetOptions  # parameterArgDataset
-  | DATASETHANDLE field parameterDatasetOptions # parameterArgDatasetHandle
-  | PARAMETER field EQUAL expression  # parameterArgStoredProcedure  // for RUN STORED-PROCEDURE
+  | DATASETHANDLE fieldExpr parameterDatasetOptions # parameterArgDatasetHandle
+  | PARAMETER fieldExpr EQUAL expression  # parameterArgStoredProcedure  // for RUN STORED-PROCEDURE
   | expression ( AS datatype )? # parameterArgExpression
   ;
 
@@ -433,7 +422,6 @@ parameterList:
     parameterListNoRoot
   ;
 
-// FIXME Verify all those calls
 parameterListNoRoot:
     // This is used by user defd funcs, because the udfunc name /is/ the root for its parameter list.
     // Using a Parameter_list node would be unnecessary and silly.
@@ -509,28 +497,21 @@ expression:
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 expressionTerm:
-    NORETURNVALUE sWidget colonAttribute  # exprtNoReturnValue
-  | // Widget attributes has to be checked before field or func, because they can be ambiguous up to the OBJCOLON. Think about no-arg functions like SUPER.
-    // Also has to be checked before systemhandlename, because you want to pick up all of FILE-INFO:FILE-TYPE rather than just FILE-INFO, for example.
-    widName colonAttribute           # exprtWidName
-  | expressionTerm2 colonAttribute?  # exprtExprt2
-  ;
-
-widattr:
-    widName colonAttribute           # widattrWidName
-  | expressionTerm2 colonAttribute   # widattrExprt2
+    expressionTerm OBJCOLON id=nonPunctuating methodParamList          # exprTermMethodCall
+  | expressionTerm OBJCOLON id=nonPunctuating                          # exprTermAttribute
+  | expressionTerm DOUBLECOLON id=nonPunctuating                       # exprTermNamedMember
+  | expressionTerm DOUBLECOLON id=nonPunctuating methodParamList       # exprTermNamedMemberArray /* WTF... */
+  | expressionTerm LEFTBRACE expression ( FOR constant )? RIGHTBRACE # exprTermArray
+  | expressionTerm inuic          # exprTermInUI
+  | widName                       # exprTermWidget
+  | expressionTerm2               # exprTermOther
   ;
 
 expressionTerm2:
     LEFTPAREN expression RIGHTPAREN # exprt2ParenExpr
-  | // methodOrFunc returns zero, and the assignment evaluates to false, if
-    // the identifier cannot be resolved to a method or user function name.
-    // Otherwise, the return value assigned to ntype is either LOCAL_METHOD_REF
-    // or USER_FUNC.
-    // Methods take precedent over built-in functions. The compiler (10.2b) 
-    // does not seem to try recognize by function/method signature.
-    { support.isMethodOrFunc(_input.LT(1)) != 0 }? fname=identifier parameterListNoRoot  # exprt2ParenCall
   | NEW typeName parameterList # exprt2New
+  | // Methods take precedence over built-in functions. The compiler does not seem to try recognize by function/method signature.
+    { support.isMethodOrFunc(_input.LT(1)) != 0 }? fname=identifier parameterListNoRoot  # exprt2ParenCall
   | // Have to predicate all of builtinfunc, because it can be ambiguous with method call.
     builtinFunction  # exprt2BuiltinFunc
   | // We are going to have lots of cases where we are inheriting methods
@@ -541,7 +522,6 @@ expressionTerm2:
     { support.isClass() && support.unknownMethodCallsAllowed() }? methodname=identifier parameterListNoRoot # exprt2ParenCall2
   | constant   # exprt2Constant
   | noArgFunction  # exprt2NoArgFunc
-  | systemHandleName  # exprt2SystemHandleName
   | field ( NOT? ENTERED )?  # exprt2Field
   ;
 
@@ -549,27 +529,19 @@ widName:
     systemHandleName
   | DATASET identifier
   | DATASOURCE identifier
-  | FIELD field
+  | FIELD fieldExpr
   | FRAME identifier
   | MENU identifier
   | SUBMENU identifier
   | MENUITEM identifier
   | BROWSE identifier
   | QUERY identifier
-  | TEMPTABLE filn
-  | BUFFER filn
-  | XDOCUMENT filn
-  | XNODEREF filn
-  | SOCKET filn
+  | TEMPTABLE identifier
+  | BUFFER identifier
+  | XDOCUMENT identifier
+  | XNODEREF identifier
+  | SOCKET identifier
   | STREAM streamname
-  ;
-
-colonAttribute:
-    colonAttributeSub+ inuic? ( AS . )?
-  ;
-
-colonAttributeSub:
-    ( OBJCOLON | DOUBLECOLON ) id=. arraySubscript? methodParamList?
   ;
 
 gWidget:
@@ -581,9 +553,8 @@ widgetList:
   ;
 
 sWidget:
-    widName | field
+    widName | fieldExpr
   ;
-
 
 filn:
     t1=identifier ( NAMEDOT t2=identifier )?
@@ -594,17 +565,16 @@ fieldn:
   ;
 
 field:
-    INPUT? fieldFrameOrBrowse? id=fieldn arraySubscript?
-    { support.fieldReference($id.text); }
+    INPUT? fieldFrameOrBrowse? id=fieldn { support.fieldReference($id.text); }
+  ;
+
+fieldExpr:
+    field ( LEFTBRACE expression ( FOR expression )? RIGHTBRACE )?
   ;
 
 fieldFrameOrBrowse:
      FRAME widgetname
   |  BROWSE widgetname
-  ;
-
-arraySubscript:
-    LEFTBRACE expression ( FOR expression )? RIGHTBRACE
   ;
 
 methodParamList:
@@ -619,9 +589,9 @@ varRecField:
     // If there's junk in front, like INPUT FRAME, then it won't get picked up
     // as a record - we don't have to worry about that. So, we can look at the
     // very next token, and if it's an identifier it might be record - check its name.
-    { _input.LA(2) != NAMEDOT && support.isVar(_input.LT(1).getText()) }? field
+    { _input.LA(2) != NAMEDOT && support.isVar(_input.LT(1).getText()) }? fieldExpr
   | record
-  | field
+  | fieldExpr
   ;
 
 recordAsFormItem:
@@ -788,7 +758,7 @@ assignStatement:
     ASSIGN assignmentList NOERROR? statementEnd
   ;
 
-assignmentList: // SEMITRANSLATED
+assignmentList:
     record exceptFields
   | // We want to pick up record only if it can't be a variable name
     { _input.LA(2) == NAMEDOT || !support.isVar(_input.LT(1).getText()) }?
@@ -797,15 +767,19 @@ assignmentList: // SEMITRANSLATED
   ;
 
 assignStatement2:
-    ( pseudoFunction | widattr | field ) ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) expression NOERROR? statementEnd
+    assignEqualLeft ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) expression NOERROR? statementEnd
   ;
 
 assignEqual:
-   ( pseudoFunction | widattr | field ) ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) expression
+    left=assignEqualLeft ( EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL ) right=expression
+  ;
+
+assignEqualLeft:
+    pseudoFunction | expressionTerm
   ;
 
 assignField:
-    field
+    fieldExpr
   ;
 
 atExpression:
@@ -828,7 +802,7 @@ atPhraseSub:
   ;
 
 referencePoint:
-    field ( ( PLUS | MINUS ) expression )?
+    fieldExpr ( ( PLUS | MINUS ) expression )?
   ;
 
 bellStatement:
@@ -857,7 +831,7 @@ bufferCompareStatement:
   ;
 
 bufferCompareSave:
-    SAVE bufferCompareResult? field
+    SAVE bufferCompareResult? fieldExpr
   ;
 
 bufferCompareResult:
@@ -949,14 +923,14 @@ chooseStatement:
   ;
 
 chooseField:
-    field helpConstant?
+    fieldExpr helpConstant?
   ;
 
 chooseOption:
     AUTORETURN 
   | colorAnyOrValue
   | goOnPhrase
-  | KEYS field
+  | KEYS fieldExpr
   | NOERROR
   | pauseExpression
   ;
@@ -1019,11 +993,11 @@ closeStoredProcedureStatement:
   ;
 
 closeStoredField:
-    field EQUAL PROCSTATUS
+    fieldExpr EQUAL PROCSTATUS
   ;
 
 closeStoredWhere:
-    WHERE PROCHANDLE ( EQUAL | EQ ) field
+    WHERE PROCHANDLE ( EQUAL | EQ ) fieldExpr
   ;
 
 collatePhrase:
@@ -1088,7 +1062,7 @@ columnFormatOption:
   | LABELDCOLOR expression
   | LABELBGCOLOR expression
   | LABELFGCOLOR expression
-  | LEXAT field columnFormat?
+  | LEXAT fieldExpr columnFormat?
   ;
 
 comboBoxPhrase:
@@ -1294,7 +1268,7 @@ createWidgetStatement:
     |  MENU | MENUITEM | RADIOSET | RECTANGLE | SELECTIONLIST | SLIDER
     |  SUBMENU | TEXT | TOGGLEBOX | WINDOW
     )
-    field
+    fieldExpr
     inWidgetPoolExpression?
     createConnect?
     NOERROR?
@@ -1308,7 +1282,7 @@ createWidgetPoolStatement:
   ;
 
 canFindFunction:
-    CANFIND LEFTPAREN findWhich? recordphrase RIGHTPAREN
+    CANFIND LEFTPAREN findWhich? recordPhrase RIGHTPAREN
   ;
 
 currentValueFunction:
@@ -1366,15 +1340,15 @@ ddeExecuteStatement:
   ;
 
 ddeGetStatement:
-    DDE GET expression TARGET field ITEM expression timeExpression? NOERROR? statementEnd
+    DDE GET expression TARGET fieldExpr ITEM expression timeExpression? NOERROR? statementEnd
   ;
 
 ddeInitiateStatement:
-    DDE INITIATE field FRAME expression APPLICATION expression TOPIC expression NOERROR? statementEnd
+    DDE INITIATE fieldExpr FRAME expression APPLICATION expression TOPIC expression NOERROR? statementEnd
   ;
 
 ddeRequestStatement:
-    DDE REQUEST expression TARGET field ITEM expression timeExpression? NOERROR? statementEnd
+    DDE REQUEST expression TARGET fieldExpr ITEM expression timeExpression? NOERROR? statementEnd
   ;
 
 ddeSendStatement:
@@ -1425,7 +1399,7 @@ defBrowseEnable:
   ;
 
 defBrowseEnableItem:
-    field
+    fieldExpr
     (  helpConstant
     |  validatePhrase
     |  AUTORETURN
@@ -1504,15 +1478,15 @@ dataRelation:
 parentIdRelation:
     PARENTIDRELATION identifier?
     FOR record COMMA record
-    PARENTIDFIELD field
-    ( PARENTFIELDSBEFORE LEFTPAREN field (COMMA field)* RIGHTPAREN)?
-    ( PARENTFIELDSAFTER  LEFTPAREN field (COMMA field)* RIGHTPAREN)?
+    PARENTIDFIELD fieldExpr
+    ( PARENTFIELDSBEFORE LEFTPAREN fieldExpr (COMMA fieldExpr)* RIGHTPAREN)?
+    ( PARENTFIELDSAFTER  LEFTPAREN fieldExpr (COMMA fieldExpr)* RIGHTPAREN)?
   ;
 
 fieldMappingPhrase:
     RELATIONFIELDS  LEFTPAREN
-    field COMMA field
-    ( COMMA field COMMA field )*
+    fieldExpr COMMA fieldExpr
+    ( COMMA fieldExpr COMMA fieldExpr )*
     RIGHTPAREN
   ;
 
@@ -1534,7 +1508,7 @@ sourceBufferPhrase:
     r=record
     ( KEYS LEFTPAREN
       (  { _input.LA(2) == RIGHTPAREN }? ROWID
-      |  field ( COMMA field )*
+      |  fieldExpr ( COMMA fieldExpr )*
       )
       RIGHTPAREN
     )?
@@ -1648,7 +1622,7 @@ defineParamVar:
 defineParamVarLike:
     // 'LIKE field' can only be provided once, but other options can appear anywhere
     ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase )*
-    LIKE field
+    LIKE fieldExpr
     ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase )*
   ;
 
@@ -1957,7 +1931,7 @@ dynamicPropertyFunction:
   ;
 
 fieldEqualDynamicNew:
-    (widattr | field) EQUAL dynamicNew
+    expressionTerm EQUAL dynamicNew
   ;
 
 dynamicNew:
@@ -2005,11 +1979,11 @@ entryFunction:
   ;
 
 exceptFields:
-    EXCEPT field*
+    EXCEPT fieldExpr*
   ;
 
 exceptUsingFields:
-    ( EXCEPT | USING ) field*
+    ( EXCEPT | USING ) fieldExpr*
   ;
 
 exportStatement:
@@ -2028,11 +2002,11 @@ extentPhrase2:
   ;
 
 fieldFormItem:
-    field formatPhrase?
+    fieldExpr formatPhrase?
   ;
 
 fieldsFields:
-    ( FIELDS | FIELD ) field*
+    ( FIELDS | FIELD ) fieldExpr*
   ;
 
 fieldOption:
@@ -2049,7 +2023,7 @@ fieldOption:
   | helpConstant
   | initialConstant
   | labelConstant
-  | LIKE field VALIDATE?
+  | LIKE fieldExpr VALIDATE?
   | MOUSEPOINTER expression
   | NOUNDO
   | viewAsPhrase
@@ -2074,7 +2048,7 @@ finallyEnd:
   ;
 
 findStatement:
-    FIND findWhich? recordphrase ( NOWAIT | NOPREFETCH | NOERROR )* statementEnd
+    FIND findWhich? recordPhrase ( NOWAIT | NOPREFETCH | NOERROR )* statementEnd
   ;
 
 fontExpression:
@@ -2090,7 +2064,7 @@ forstate_sub:
   ;
 
 forRecordSpec:
-    findWhich? recordphrase (COMMA findWhich? recordphrase)*
+    findWhich? recordPhrase (COMMA findWhich? recordPhrase)*
   ;
 
 formatExpression:
@@ -2115,7 +2089,7 @@ formItem:
     |  skipPhrase
     |  widgetId
     |  CARET
-    |  field ( aggregatePhrase | formatPhrase )*
+    |  fieldExpr ( aggregatePhrase | formatPhrase )*
     |  { support.isTableName(_input.LT(1)) }? recordAsFormItem
     )
   ;
@@ -2148,8 +2122,8 @@ formatOption:
   |  formatExpression
   |  helpConstant
   |  labelConstant
-  |  LEXAT field formatPhrase?
-  |  LIKE { support.defVarInlineAntlr4(); } field
+  |  LEXAT fieldExpr formatPhrase?
+  |  LIKE { support.defVarInlineAntlr4(); } fieldExpr
   |  NOLABELS
   |  NOTABSTOP
   |  PASSWORDFIELD
@@ -2217,11 +2191,11 @@ browseOption:
 frameOption:
     (  ACCUMULATE expression?
     |  ATTRSPACE | NOATTRSPACE
-    |  CANCELBUTTON field
+    |  CANCELBUTTON fieldExpr
     |  CENTERED 
     |  ( COLUMN | COLUMNS ) expression
     |  CONTEXTHELP | CONTEXTHELPFILE expression
-    |  DEFAULTBUTTON field
+    |  DEFAULTBUTTON fieldExpr
     |  EXPORT
     |  FITLASTCOLUMN
     |  FONT expression
@@ -2347,7 +2321,7 @@ getStatement:
   ;
 
 getKeyValueStatement:
-    GETKEYVALUE SECTION expression KEY ( DEFAULT | expression ) VALUE field statementEnd
+    GETKEYVALUE SECTION expression KEY ( DEFAULT | expression ) VALUE fieldExpr statementEnd
   ;
 
 goOnPhrase:
@@ -2401,7 +2375,7 @@ importStatement:
     IMPORT streamNameOrHandle?
     ( delimiterConstant | UNFORMATTED )?
     (  // If there's more than one, then we've got fields, not a record
-      ( ( field | CARET ) ( field | CARET )+ )
+      ( ( fieldExpr | CARET ) ( fieldExpr | CARET )+ )
     | varRecField
     | CARET
     )?
@@ -2586,7 +2560,7 @@ lengthFunction:
   ;
 
 likeField:
-    LIKE field VALIDATE?
+    LIKE fieldExpr VALIDATE?
   ;
 
 loadStatement:
@@ -2621,8 +2595,8 @@ messageOption:
     ( MESSAGE | QUESTION | INFORMATION | ERROR | WARNING )?
     ( ( BUTTONS | BUTTON ) ( YESNO | YESNOCANCEL | OK | OKCANCEL | RETRYCANCEL ) )?
     titleExpression?
-  | SET field ( { _input.LA(2) != ALERTBOX }? formatPhrase? | )
-  | UPDATE field ( { _input.LA(2) != ALERTBOX }? formatPhrase? | )
+  | SET fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? | )
+  | UPDATE fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? | )
   ;
 
 methodStatement locals [ boolean abs = false ]:
@@ -2668,7 +2642,7 @@ nextStatement:
   ;
 
 nextPromptStatement:
-    NEXTPROMPT field framePhrase? statementEnd
+    NEXTPROMPT fieldExpr framePhrase? statementEnd
   ;
 
 nextValueFunction:
@@ -2699,7 +2673,7 @@ onStatement:
   ;
 
 onAssign:
-    ASSIGN OF field triggerTableLabel?
+    ASSIGN OF fieldExpr triggerTableLabel?
        onAssignOldValue?
        OVERRIDE?
        ( REVERT statementEnd
@@ -2989,7 +2963,7 @@ rawTransferStatement:
 
 rawTransferElement:
     BUFFER record
-  | FIELD field
+  | FIELD fieldExpr
   | varRecField
   ;
 
@@ -3007,10 +2981,10 @@ repeatStatementSub:
 
 recordFields:
     // It may not look like it from the grammar, but the compiler really does allow FIELD here.
-    ( FIELDS | FIELD | EXCEPT ) ( LEFTPAREN ( field whenExpression? )* RIGHTPAREN )?
+    ( FIELDS | FIELD | EXCEPT ) ( LEFTPAREN ( fieldExpr whenExpression? )* RIGHTPAREN )?
   ;
 
-recordphrase:
+recordPhrase:
     rec=record recordFields? ( TODAY | NOW | constant )? recordOption*
   ;
 
@@ -3026,7 +3000,7 @@ recordOption:
   | WHERE expression?
   | TENANTWHERE expression? 
   | USEINDEX identifier
-  | USING field (AND field)*
+  | USING fieldExpr (AND fieldExpr)*
   | lockHow
   | NOWAIT
   | NOPREFETCH
@@ -3113,7 +3087,7 @@ runEvent:
   ;
 
 runSet:
-    SET field?
+    SET fieldExpr?
   ;
 
 runStoredProcedureStatement:
@@ -3231,6 +3205,10 @@ stopStatement:
     STOP statementEnd
   ;
 
+superStatement:
+    SUPER LEFTPAREN ( parameter ( COMMA parameter )* )? RIGHTPAREN statementEnd
+  ;
+
 streamNameOrHandle:
     STREAM streamname
   | STREAMHANDLE expression
@@ -3268,18 +3246,18 @@ systemDialogFontOption:
   ;
 
 systemDialogGetDirStatement:
-    SYSTEMDIALOG GETDIR field systemDialogGetDirOption* statementEnd
+    SYSTEMDIALOG GETDIR fieldExpr systemDialogGetDirOption* statementEnd
   ;
 
 systemDialogGetDirOption:
     INITIALDIR expression
   | RETURNTOSTARTDIR
   | TITLE expression
-  | UPDATE field
+  | UPDATE fieldExpr
   ;
 
 systemDialogGetFileStatement:
-    SYSTEMDIALOG GETFILE field systemDialogGetFileOption* statementEnd
+    SYSTEMDIALOG GETFILE fieldExpr systemDialogGetFileOption* statementEnd
   ;
 
 systemDialogGetFileOption:
@@ -3293,7 +3271,7 @@ systemDialogGetFileOption:
   |  SAVEAS
   |  titleExpression
   |  USEFILENAME
-  |  UPDATE field
+  |  UPDATE fieldExpr
   |  inWindowExpression
   ;
 
@@ -3412,7 +3390,7 @@ triggerProcedureStatementSub2:
   ;
 
 triggerOf:
-    OF field triggerTableLabel?  # triggerOfSub1
+    OF fieldExpr triggerTableLabel?  # triggerOfSub1
   | NEW VALUE? id=identifier defineParamVar # triggerOfSub2
   ;
 
@@ -3454,7 +3432,7 @@ upStatement:
   ;
 
 updateField:
-    UPDATE field
+    UPDATE fieldExpr
   ;
 
 updateStatement:
@@ -3535,7 +3513,7 @@ waitForFocus:
   ;
 
 waitForSet:
-    SET field
+    SET fieldExpr
   ;
 
 whenExpression:

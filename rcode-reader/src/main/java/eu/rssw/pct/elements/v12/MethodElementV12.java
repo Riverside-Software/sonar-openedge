@@ -25,19 +25,20 @@ import java.util.Set;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.v11.MethodElementV11;
 
 public class MethodElementV12 extends MethodElementV11 {
 
-  public MethodElementV12(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
-      int extent, IParameter[] parameters) {
-    super(name, accessType, flags, returnType, returnTypeName, extent, parameters);
+  public MethodElementV12(String name, Set<AccessType> accessType, int flags, DataType returnType, int extent,
+      IParameter[] parameters) {
+    super(name, accessType, flags, returnType, extent, parameters);
   }
 
-  public static IMethodElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
-      ByteOrder order) {
+  public static IMethodElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
+      int textAreaOffset, ByteOrder order) {
     int flags = ByteBuffer.wrap(segment, currentPos + 14, Short.BYTES).order(order).getShort() & 0xffff;
     int returnType = ByteBuffer.wrap(segment, currentPos + 16, Short.BYTES).order(order).getShort();
     int paramCount = ByteBuffer.wrap(segment, currentPos + 18, Short.BYTES).order(order).getShort();
@@ -47,8 +48,9 @@ public class MethodElementV12 extends MethodElementV11 {
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
-    String typeName = typeNameOffset == 0 ? ""
+    String typeName = returnType != 42 ? null
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
+    DataType returnTypeObj = typeName == null ? DataType.get(returnType) : new DataType(typeName);
 
     int currPos = currentPos + 56;
     IParameter[] parameters = new IParameter[paramCount];
@@ -57,8 +59,8 @@ public class MethodElementV12 extends MethodElementV11 {
       currPos += param.getSizeInRCode();
       parameters[zz] = param;
     }
-    
-    return new MethodElementV12(name2, accessType, flags, returnType, typeName, extent, parameters);
+
+    return new MethodElementV12(name2, accessType, flags, returnTypeObj, extent, parameters);
   }
 
   @Override

@@ -47,23 +47,21 @@ public class MethodElementV11 extends AbstractAccessibleElement implements IMeth
   protected static final int STATIC_METHOD = 512;
 
   private final int flags;
-  private final int returnType;
-  private final String returnTypeName;
+  private final DataType returnType;
   private final int extent;
   private final IParameter[] parameters;
 
-  public MethodElementV11(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
-      int extent, IParameter[] parameters) {
+  public MethodElementV11(String name, Set<AccessType> accessType, int flags, DataType returnType, int extent,
+      IParameter[] parameters) {
     super(name, accessType);
     this.flags = flags;
     this.returnType = returnType;
-    this.returnTypeName = returnTypeName;
     this.extent = extent;
     this.parameters = parameters;
   }
 
-  public static IMethodElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset,
-      ByteOrder order) {
+  public static IMethodElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
+      int textAreaOffset, ByteOrder order) {
     int flags = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort() & 0xffff;
     int returnType = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
     int paramCount = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
@@ -73,8 +71,9 @@ public class MethodElementV11 extends AbstractAccessibleElement implements IMeth
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
-    String typeName = typeNameOffset == 0 ? ""
+    String typeName = returnType != 42 ? null
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
+    DataType returnTypeObj = typeName == null ? DataType.get(returnType) : new DataType(typeName);
 
     int currPos = currentPos + 24;
     IParameter[] parameters = new IParameter[paramCount];
@@ -83,18 +82,16 @@ public class MethodElementV11 extends AbstractAccessibleElement implements IMeth
       currPos += param.getSizeInRCode();
       parameters[zz] = param;
     }
-    
-    return new MethodElementV11(name2, accessType, flags, returnType, typeName, extent, parameters);
+
+    return new MethodElementV11(name2, accessType, flags, returnTypeObj, extent, parameters);
   }
 
-  public String getReturnTypeName() {
-    return returnTypeName;
-  }
-
+  @Override
   public DataType getReturnType() {
-    return DataType.getDataType(returnType);
+    return returnType;
   }
 
+  @Override
   public IParameter[] getParameters() {
     return this.parameters;
   }
@@ -104,10 +101,12 @@ public class MethodElementV11 extends AbstractAccessibleElement implements IMeth
     return (flags & STATIC_METHOD) != 0;
   }
 
+  @Override
   public boolean isProcedure() {
     return (flags & PROCEDURE_METHOD) != 0;
   }
 
+  @Override
   public boolean isFinal() {
     return (flags & FINAL_METHOD) != 0;
   }
@@ -132,6 +131,7 @@ public class MethodElementV11 extends AbstractAccessibleElement implements IMeth
     return (flags & OVERLOADED_METHOD) != 0;
   }
 
+  @Override
   public int getExtent() {
     if (this.extent == 32769) {
       return -1;
@@ -150,7 +150,7 @@ public class MethodElementV11 extends AbstractAccessibleElement implements IMeth
 
   @Override
   public String toString() {
-    return String.format("Method %s(%d arguments) returns %s", getName(), parameters.length, getReturnType()); 
+    return String.format("Method %s(%d arguments) returns %s", getName(), parameters.length, getReturnType());
   }
 
   @Override

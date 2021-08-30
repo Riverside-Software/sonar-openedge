@@ -21,12 +21,12 @@ package org.sonar.plugins.openedge.api.objects;
 
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 
 import com.google.common.base.Preconditions;
 
 import eu.rssw.antlr.database.objects.Field;
+import eu.rssw.pct.elements.DataType;
 
 public class FieldWrapper implements IField {
   private final ITable table;
@@ -50,13 +50,7 @@ public class FieldWrapper implements IField {
 
   @Override
   public DataType getDataType() {
-    return DataType.getDataType(field.getDataType().toUpperCase());
-  }
-
-  @Override
-  public String getClassName() {
-    // Fields can't be instances of class
-    return null;
+    return DataType.get(field.getDataType());
   }
 
   @Override
@@ -76,11 +70,6 @@ public class FieldWrapper implements IField {
 
   @Override
   public void assignAttributesLike(Primative likePrim) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Primative setClassName(String className) {
     throw new UnsupportedOperationException();
   }
 

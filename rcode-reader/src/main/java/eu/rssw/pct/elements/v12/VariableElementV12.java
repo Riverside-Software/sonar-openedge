@@ -25,14 +25,15 @@ import java.util.Set;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.v11.VariableElementV11;
 
 public class VariableElementV12 extends VariableElementV11 {
 
-  public VariableElementV12(String name, Set<AccessType> accessType, int dataType, int extent, int flags,
-      String typeName) {
-    super(name, accessType, dataType, extent, flags, typeName);
+  public VariableElementV12(String name, Set<AccessType> accessType, DataType dataType, int extent, int flags) {
+    super(name, accessType, dataType, extent, flags);
   }
 
   public static IVariableElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment,
@@ -45,10 +46,11 @@ public class VariableElementV12 extends VariableElementV11 {
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
-    String typeName = typeNameOffset == 0 ? ""
+    String typeName = dataType != PrimitiveDataType.CLASS.getNum() ? null
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
+    DataType dataTypeObj = typeName == null ? DataType.get(dataType) : new DataType(typeName);
 
-    return new VariableElementV12(name2, accessType, dataType, extent, flags, typeName);
+    return new VariableElementV12(name2, accessType, dataTypeObj, extent, flags);
   }
 
 }

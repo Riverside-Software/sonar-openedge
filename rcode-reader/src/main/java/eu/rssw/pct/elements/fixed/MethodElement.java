@@ -28,43 +28,28 @@ import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IParameter;
 
 public class MethodElement extends AbstractAccessibleElement implements IMethodElement {
-  protected static final int METHOD_DESCRIPTOR_SIZE = 24;
-  protected static final int FINAL_METHOD = 1;
-  protected static final int PROTECTED_METHOD = 2;
-  protected static final int PUBLIC_METHOD = 4;
-  protected static final int PRIVATE_METHOD = 8;
-  protected static final int PROCEDURE_METHOD = 16;
-  protected static final int FUNCTION_METHOD = 32;
-  protected static final int CONSTRUCTOR_METHOD = 64;
-  protected static final int DESTRUCTOR_METHOD = 128;
-  protected static final int OVERLOADED_METHOD = 256;
-  protected static final int STATIC_METHOD = 512;
+  private DataType returnDataType;
+  private final IParameter[] parameters;
 
-  private final int returnType = 0;
-  private final String returnTypeName = null;
-  private final int extent = 1;
-
-  public MethodElement(String name, boolean isStatic) {
-    super(name, isStatic ? EnumSet.of(AccessType.STATIC): EnumSet.noneOf(AccessType.class));
+  public MethodElement(String name, boolean isStatic, DataType returnDataType, IParameter... params) {
+    super(name, isStatic ? EnumSet.of(AccessType.STATIC) : EnumSet.noneOf(AccessType.class));
+    this.returnDataType = returnDataType;
+    this.parameters = params;
   }
 
-  public String getReturnTypeName() {
-    return returnTypeName;
-  }
-
+  @Override
   public DataType getReturnType() {
-    return DataType.getDataType(returnType);
+    return returnDataType;
   }
 
+  @Override
   public IParameter[] getParameters() {
-    return new IParameter[] { };
+    return parameters;
   }
 
+  @Override
   public int getExtent() {
-    if (this.extent == 32769) {
-      return -1;
-    }
-    return this.extent;
+    return 1;
   }
 
   @Override

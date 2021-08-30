@@ -19,10 +19,11 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 
-public class FieldRefNode extends JPNode {
+import eu.rssw.pct.elements.DataType;
+
+public class FieldRefNode extends JPNode implements IExpression {
   private ContextQualifier qualifier;
 
   public FieldRefNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
@@ -40,15 +41,18 @@ public class FieldRefNode extends JPNode {
   /**
    * Returns null if symbol is null or is a graphical component
    */
+  @Override
   public DataType getDataType() {
-    if (getSymbol() == null) {
-      // Just in order to avoid NPE
-      return null;
+    if (getSymbol() instanceof Primative) {
+      DataType dataType = ((Primative) getSymbol()).getDataType();
+      return dataType == null ? DataType.NOT_COMPUTED : dataType;
     }
-    if (!(getSymbol() instanceof Primative)) {
-      return null;
-    }
-    return ((Primative) getSymbol()).getDataType();
+    return DataType.NOT_COMPUTED;
+  }
+
+  @Override
+  public boolean isExpression() {
+    return true;
   }
 
   /**

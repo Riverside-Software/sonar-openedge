@@ -49,15 +49,15 @@ import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
-import org.prorefactor.macrolevel.PreprocessorEventListener.EditableCodeSection;
+import org.prorefactor.macrolevel.PreprocessorEventListener.CodeSection;
 import org.prorefactor.proparse.ABLLexer;
 import org.prorefactor.proparse.JPNodeVisitor;
 import org.prorefactor.proparse.ProparseErrorListener;
 import org.prorefactor.proparse.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.Proparse;
+import org.prorefactor.proparse.antlr4.ProparseListener;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.IntegerIndex;
-import org.prorefactor.proparse.antlr4.ProparseListener;
 import org.prorefactor.proparse.support.ParserSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +90,8 @@ public class ParseUnit {
   private IncludeRef macroGraph;
   private boolean appBuilderCode;
   private boolean syntaxError;
-  private List<EditableCodeSection> sections;
+  private List<CodeSection> appBuilderSections;
+
   private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
   private Document doc = null;
@@ -250,7 +251,7 @@ public class ParseUnit {
     fileNameList = lexer.getFilenameList();
     macroGraph = lexer.getMacroGraph();
     appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
-    sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
+    appBuilderSections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
     metrics = lexer.getMetrics();
 
     return lexer;
@@ -304,7 +305,7 @@ public class ParseUnit {
       } catch (ParseCancellationException uncaught) {
         // Not really precise as it includes exception trapping
         parseTimeSLL = System.nanoTime() - startTimeNs;
-        LOGGER.trace("Switching to LL prediction mode");
+        LOGGER.info("Switching to LL prediction mode because of token: {}", tokStream.get(tokStream.index()));
         switchToLL = true;
         tokStream.seek(0);
         parser.addErrorListener(new ProparseErrorListener());
@@ -327,7 +328,7 @@ public class ParseUnit {
     lexer.parseComplete();
     long startTimeNs = System.nanoTime();
     JPNodeVisitor visitor = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
-    topNode = (ProgramRootNode) visitor.visit(tree).build(parser.getParserSupport());
+    topNode = (ProgramRootNode) visitor.visit(tree).build(this, parser.getParserSupport());
     isClass = visitor.isClass();
     isInterface = visitor.isInterface();
     isEnum = visitor.isEnum();
@@ -339,7 +340,7 @@ public class ParseUnit {
     fileNameList = lexer.getFilenameList();
     macroGraph = lexer.getMacroGraph();
     appBuilderCode = ((PreprocessorEventListener) lexer.getLstListener()).isAppBuilderCode();
-    sections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
+    appBuilderSections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
     metrics = lexer.getMetrics();
     support = parser.getParserSupport();
 
@@ -577,7 +578,7 @@ public class ParseUnit {
   public boolean isInEditableSection(int file, int line) {
     if (!appBuilderCode || (file > 0))
       return true;
-    for (EditableCodeSection range : sections) {
+    for (CodeSection range : appBuilderSections) {
       if ((range.getFileNum() == file) && (range.getStartLine() <= line) && (range.getEndLine() >= line))
         return true;
     }

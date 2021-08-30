@@ -25,20 +25,22 @@ import java.util.Set;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IEventElement;
 import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.v11.EventElementV11;
 
 public class EventElementV12 extends EventElementV11 {
 
-  public EventElementV12(String name, Set<AccessType> accessType, int flags, int returnType, String returnTypeName,
-      String delegateName, IParameter[] parameters) {
-    super(name, accessType, flags, returnType, returnTypeName, delegateName, parameters);
+  public EventElementV12(String name, Set<AccessType> accessType, int flags, DataType returnType, String delegateName,
+      IParameter[] parameters) {
+    super(name, accessType, flags, returnType, delegateName, parameters);
   }
 
   public static IEventElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos,
       int textAreaOffset, ByteOrder order) {
-    int flags = ByteBuffer.wrap(segment, currentPos +  18, Short.BYTES).order(order).getShort() & 0xffff;
+    int flags = ByteBuffer.wrap(segment, currentPos + 18, Short.BYTES).order(order).getShort() & 0xffff;
     int returnType = ByteBuffer.wrap(segment, currentPos + 20, Short.BYTES).order(order).getShort();
     int parameterCount = ByteBuffer.wrap(segment, currentPos + 22, Short.BYTES).order(order).getShort();
 
@@ -46,8 +48,9 @@ public class EventElementV12 extends EventElementV11 {
     String name2 = nameOffset == 0 ? name : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
     int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 4, Integer.BYTES).order(order).getInt();
-    String returnTypeName = typeNameOffset == 0 ? ""
+    String typeName = returnType != PrimitiveDataType.CLASS.getNum() ? null
         : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
+    DataType returnTypeObj = typeName == null ? DataType.get(returnType) : new DataType(typeName);
 
     int delegateNameOffset = ByteBuffer.wrap(segment, currentPos + 8, Integer.BYTES).order(order).getInt();
     String delegateName = delegateNameOffset == 0 ? ""
@@ -61,7 +64,7 @@ public class EventElementV12 extends EventElementV11 {
       parameters[zz] = param;
     }
 
-    return new EventElementV12(name2, accessType, flags, returnType, returnTypeName, delegateName, parameters);
+    return new EventElementV12(name2, accessType, flags, returnTypeObj, delegateName, parameters);
   }
 
 }

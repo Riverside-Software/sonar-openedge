@@ -17,14 +17,28 @@ package org.prorefactor.core.nodetypes;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.proparse.support.ParserSupport;
+import org.prorefactor.treeparser.ParseUnit;
 
 public class ProgramRootNode extends BlockNode {
-  public ProgramRootNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+  private final ParseUnit unit;
+
+  public ProgramRootNode(ProToken t, JPNode parent, int num, boolean hasChildren, ParseUnit unit) {
     super(t, parent, num, hasChildren);
+    this.unit = unit;
   }
 
   @Override
   public boolean hasAnnotation(String str) {
     return false;
   }
+
+  public ParseUnit getParseUnit() {
+    return unit;
+  }
+
+  public ParserSupport getParserSupport() {
+    return unit.getSupport();
+  }
+  
 }

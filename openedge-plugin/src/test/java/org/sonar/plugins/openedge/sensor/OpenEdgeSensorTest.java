@@ -38,8 +38,8 @@ public class OpenEdgeSensorTest {
     OpenEdgeSensor sensor = new OpenEdgeSensor();
     sensor.execute(context);
 
-    Assert.assertEquals(1, context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.PROCEDURES_KEY).value());
-    Assert.assertEquals(1, context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.PROCEDURES_KEY).value());
+    Assert.assertEquals(context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.PROCEDURES_KEY).value(), 1);
+    Assert.assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.PROCEDURES_KEY).value(), 1);
   }
 
 }

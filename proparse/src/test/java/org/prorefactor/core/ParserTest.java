@@ -57,6 +57,54 @@ public class ParserTest {
   }
 
   @Test
+  public void testNameDot01() {
+    // Issue #897
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "namedot01.p"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+
+    List<JPNode> stmts = unit.getTopNode().queryStateHead(ABLNodeType.FIND);
+    assertEquals(stmts.size(), 7);
+    JPNode ref1 = stmts.get(0).query(ABLNodeType.FIELD_REF).get(0);
+    assertEquals(ref1.getNumberOfChildren(), 1);
+    assertEquals(ref1.getFirstChild().getText(), "tt.fld1");
+    assertEquals(ref1.getFirstChild().getRawText(), "tt  .fld1");
+    JPNode ref2 = stmts.get(1).query(ABLNodeType.FIELD_REF).get(0);
+    assertEquals(ref2.getNumberOfChildren(), 1);
+    assertEquals(ref2.getFirstChild().getText(), "tt.fld1");
+    assertEquals(ref2.getFirstChild().getRawText(), "tt .fld1");
+    JPNode ref3 = stmts.get(2).query(ABLNodeType.FIELD_REF).get(0);
+    assertEquals(ref3.getNumberOfChildren(), 1);
+    assertEquals(ref3.getFirstChild().getText(), "tt.fld1.fld1");
+    assertEquals(ref3.getFirstChild().getRawText(), "tt  .fld1 .fld1");
+    JPNode ref4 = stmts.get(3).query(ABLNodeType.FIELD_REF).get(0);
+    assertEquals(ref4.getNumberOfChildren(), 1);
+    assertEquals(ref4.getFirstChild().getText(), "tt.fld1");
+    assertNull(ref4.getFirstChild().getRawText());
+    JPNode ref5 = stmts.get(4).query(ABLNodeType.FIELD_REF).get(0);
+    assertEquals(ref5.getNumberOfChildren(), 1);
+    assertEquals(ref5.getFirstChild().getText(), "tt.fld1");
+    assertEquals(ref5.getFirstChild().getRawText(), "tt /* my eyes are bleeding */ /* yes */ .fld1");
+    JPNode ref6 = stmts.get(5).query(ABLNodeType.FIELD_REF).get(0);
+    assertEquals(ref6.getNumberOfChildren(), 1);
+    assertEquals(ref6.getFirstChild().getText(), "customer.name");
+    assertEquals(ref6.getFirstChild().getRawText(), "customer .name");
+    JPNode ref7 = stmts.get(6).query(ABLNodeType.FIELD_REF).get(0);
+    assertEquals(ref7.getNumberOfChildren(), 1);
+    assertEquals(ref7.getFirstChild().getText(), "sports2000.customer.name");
+    assertEquals(ref7.getFirstChild().getRawText(), "sports2000  .customer /* foo */   .name");
+    JPNode rec1 = stmts.get(6).query(ABLNodeType.RECORD_NAME).get(0);
+    assertEquals(rec1.getNumberOfChildren(), 0);
+    assertEquals(rec1.getText(), "sports2000.customer");
+    assertEquals(rec1.getRawText(), "sports2000   .customer");
+
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DOT_COMMENT).size(), 0);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).get(0).query(ABLNodeType.FIELD_REF).get(
+        0).getFirstChild().getLine(), 8);
+  }
+
+  @Test
   public void testAscending01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending01.p"), session);
     unit.parse();
@@ -160,6 +208,14 @@ public class ParserTest {
     assertEquals(stmts.get(2).query(ABLNodeType.GETCODEPAGES).size(), 1);
     assertEquals(stmts.get(3).query(ABLNodeType.GETCODEPAGE).size(), 0);
     assertEquals(stmts.get(3).query(ABLNodeType.GETCODEPAGES).size(), 1);
+  }
+
+  @Test
+  public void testExpr() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("message xx. catch err as Progress.Lang.Error: message err:GetClass():TypeName. end.".getBytes()), "<unnamed>", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
   }
 
   @Test
@@ -441,6 +497,26 @@ public class ParserTest {
     unit.reportAmbiguity();
     unit.parse();
     assertFalse(unit.hasSyntaxError());
+  }
+
+  @Test
+  public void testSwitchLL() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("run procName(input frame frame-a fldName).".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    // Switch to LL is NOT good, but unit test is there to be aware of any change here
+    assertTrue(unit.hasSwitchedToLL());
+  }
+
+  @Test
+  public void testSuperStatement() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("class foo: constructor foo(): super(). end. end class.".getBytes()),
+        "<unnamed>", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.SUPER).size(), 1);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.PERIOD).size(), 0);
   }
 
   @Test

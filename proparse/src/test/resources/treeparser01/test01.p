@@ -54,7 +54,8 @@ function fn11 returns logical
     (   buffer bf11 for customer,
         table for tt11 append,
         table tt11,
-        table-handle thandle11 append
+        table-handle thandle11 append,
+        dataset-handle dhandle11
     ):
   message thandle11.
   find first bf11.
@@ -82,6 +83,8 @@ display tt12.f1.
 find first state.
 MESSAGE "hello" 
   VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE state AS LOGICAL.
+MESSAGE "hello" 
+  VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO SET state AS LOGICAL.
 display state.
 
 

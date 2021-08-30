@@ -32,7 +32,6 @@ import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.core.util.UnitTestWindowsModule;
-import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.prorefactor.treeparser.ParseUnit;
@@ -99,8 +98,8 @@ public class PostLexerTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
     TokenSource src = unit.preprocess();
     // Whitespaces on hidden channel
-    Token tok = nextVisibleToken(src);
-    assertEquals(tok.getType(), Proparse.QSTRING);
+    ProToken tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getText(), "\"zz\"");
   }
 
@@ -108,8 +107,8 @@ public class PostLexerTest {
   public void testPostLexer02() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer02.p"), session);
     TokenSource src = unit.preprocess();
-    Token tok = nextVisibleToken(src);
-    assertEquals(tok.getType(), Proparse.QSTRING);
+    ProToken tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getText(), "\"yy\"");
   }
 
@@ -117,8 +116,8 @@ public class PostLexerTest {
   public void testPostLexer03() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer03.p"), session);
     TokenSource src = unit.preprocess();
-    Token tok = nextVisibleToken(src);
-    assertEquals(tok.getType(), Proparse.QSTRING);
+    ProToken tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getText(), "\"zz\"");
   }
 
@@ -126,8 +125,8 @@ public class PostLexerTest {
   public void testPostLexer04() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer04.p"), session);
     TokenSource src = unit.preprocess();
-    Token tok = nextVisibleToken(src);
-    assertEquals(tok.getType(), Proparse.QSTRING);
+    ProToken tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     // The best we can do right now... This is to cover edge cases in preprocessing...
     assertEquals(tok.getText(), "\"a'aabb'bxxx~\nyyy\"");
   }
@@ -260,15 +259,15 @@ public class PostLexerTest {
     TokenSource stream = unit.preprocess();
 
     ProToken tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.MESSAGE);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
     assertTrue(tok.isMacroExpansion());
 
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.QSTRING);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertTrue(tok.isMacroExpansion());
 
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.PERIOD);
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
     // Bug lies here in the lexer
     assertTrue(tok.isMacroExpansion());
   }
@@ -306,7 +305,7 @@ public class PostLexerTest {
 
     // lexer14.i contains 'message "xcode".'
     ProToken tok = (ProToken) nextVisibleToken(src);
-    assertEquals(tok.getType(), Proparse.MESSAGE);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
     assertEquals(tok.getLine(), 2);
     assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 2);
@@ -328,7 +327,7 @@ public class PostLexerTest {
 
     // lexer14.i contains 'message "xcode".'
     ProToken tok = (ProToken) nextVisibleToken(src);
-    assertEquals(tok.getType(), Proparse.MESSAGE);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
     assertEquals(tok.getLine(), 2);
     assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 2);
@@ -357,7 +356,7 @@ public class PostLexerTest {
 
     // lexer14.i contains 'message "xcode".'
     ProToken tok = (ProToken) nextVisibleToken(src);
-    assertEquals(tok.getType(), Proparse.MESSAGE);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
 
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.WS);
@@ -477,45 +476,45 @@ public class PostLexerTest {
     TokenSource stream = unit.lex();
 
     ProToken tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.MESSAGE);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.WS);
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.NUMBER);
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
     assertEquals(tok.getText(), "125");
 
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.WS);
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.NUMBER);
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
     assertEquals(tok.getText(), "0x65");
 
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.WS);
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.NUMBER);
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
     assertEquals(tok.getText(), "0X66");
 
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.WS);
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.NUMBER);
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
     assertEquals(tok.getText(), "0xfb");
 
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.WS);
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.NUMBER);
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
     assertEquals(tok.getText(), "0xab");
 
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.WS);
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.NUMBER);
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
     assertEquals(tok.getText(), "-0x01");
 
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.PERIOD);
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
   }
 
   @Test
@@ -524,17 +523,17 @@ public class PostLexerTest {
     TokenSource stream = unit.lex();
 
     ProToken tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.MESSAGE);
+    assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.WS);
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.NUMBER);
+    assertEquals(tok.getNodeType(), ABLNodeType.NUMBER);
     assertEquals(tok.getText(), "125");
 
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.WS);
+    assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) stream.nextToken();
-    assertEquals(tok.getType(), Proparse.ID);
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
     assertEquals(tok.getText(), "0x2g8");
   }
 

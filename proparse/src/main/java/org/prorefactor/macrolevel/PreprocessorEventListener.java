@@ -35,7 +35,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
 
   // AppBuilder managed is read-only by default - Keep track of editable code sections
   private boolean appBuilderCode = false;
-  private final List<EditableCodeSection> sections = new ArrayList<>();
+  private final List<CodeSection> appBuilderSections = new ArrayList<>();
 
   /* Temp stack of scopes, just used during tree creation */
   private Deque<Scope> scopeStack = new LinkedList<>();
@@ -44,7 +44,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   private Map<String, MacroDef> globalDefMap = new HashMap<>();
   private MacroRef currRef;
   /* Temp object for editable section */
-  private EditableCodeSection currSection;
+  private CodeSection currSection;
 
   public PreprocessorEventListener() {
     root = new IncludeRef(null, 0, 0);
@@ -175,7 +175,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   public void analyzeSuspend(String str, int line) {
     appBuilderCode = true;
     if ((currInclude.getFileIndex() == 0) && ProToken.isTokenEditableInAB(str)) {
-      currSection = new EditableCodeSection();
+      currSection = new CodeSection();
       currSection.fileNum = currInclude.getFileIndex();
       currSection.startLine = line;
     }
@@ -185,7 +185,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   public void analyzeResume(int line) {
     if ((currSection != null) && (currInclude.getFileIndex() == currSection.fileNum)) {
       currSection.endLine = line;
-      sections.add(currSection);
+      appBuilderSections.add(currSection);
     }
     currSection = null;
   }
@@ -195,7 +195,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   }
 
   public boolean isLineInEditableSection(int file, int line) {
-    for (EditableCodeSection range : sections) {
+    for (CodeSection range : appBuilderSections) {
       if ((range.fileNum == file) && (range.startLine <= line) && (range.endLine >= line))
         return true;
     }
@@ -230,8 +230,8 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
     return ret;
   }
 
-  public List<EditableCodeSection> getEditableCodeSections() {
-    return Collections.unmodifiableList(sections);
+  public List<CodeSection> getEditableCodeSections() {
+    return Collections.unmodifiableList(appBuilderSections);
   }
 
   // These scopes are temporary, just used during tree creation
@@ -244,7 +244,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
     }
   }
 
-  public static class EditableCodeSection {
+  public static class CodeSection {
     private int fileNum;
     private int startLine;
     private int endLine;

@@ -28,6 +28,8 @@ import org.prorefactor.proparse.antlr4.Proparse;
 
 import com.google.common.base.Strings;
 
+import eu.rssw.pct.elements.DataType;
+
 public enum ABLNodeType {
   // Placeholders and unknown tokens
   EMPTY_NODE(-1000, NodeTypesOption.PLACEHOLDER),
@@ -142,43 +144,40 @@ public enum ABLNodeType {
 
   // Parser Structure Elements
   AGGREGATE_PHRASE(Proparse.Aggregate_phrase, NodeTypesOption.STRUCTURE),
-  ARRAY_SUBSCRIPT(Proparse.Array_subscript, NodeTypesOption.STRUCTURE),
+  ARRAY_REFERENCE(Proparse.Array_ref, NodeTypesOption.STRUCTURE),
   ASSIGN_DYNAMIC_NEW(Proparse.Assign_dynamic_new, NodeTypesOption.STRUCTURE),
   ASSIGN_FROM_BUFFER(Proparse.Assign_from_buffer, NodeTypesOption.STRUCTURE),
+  ATTRIBUTE_REF(Proparse.Attribute_ref, NodeTypesOption.STRUCTURE),
   AUTOMATION_OBJECT(Proparse.Automationobject, NodeTypesOption.STRUCTURE),
   BLOCK_ITERATOR(Proparse.Block_iterator, NodeTypesOption.STRUCTURE),
   BLOCK_LABEL(Proparse.Block_label, NodeTypesOption.STRUCTURE),
+  BUILTIN_REF(Proparse.Built_in_func, NodeTypesOption.STRUCTURE),
   CODE_BLOCK(Proparse.Code_block, NodeTypesOption.STRUCTURE),
+  CONSTANT_REF(Proparse.Constant_ref, NodeTypesOption.STRUCTURE),
   EDITING_PHRASE(Proparse.Editing_phrase, NodeTypesOption.STRUCTURE),
   ENTERED_FUNC(Proparse.Entered_func, NodeTypesOption.STRUCTURE),
   EVENT_LIST(Proparse.Event_list, NodeTypesOption.STRUCTURE),
   EXPR_STATEMENT(Proparse.Expr_statement, NodeTypesOption.STRUCTURE),
-  FIELD_LIST(Proparse.Field_list, NodeTypesOption.STRUCTURE),
   FIELD_REF(Proparse.Field_ref, NodeTypesOption.STRUCTURE),
   FORM_ITEM(Proparse.Form_item, NodeTypesOption.STRUCTURE),
   FORMAT_PHRASE(Proparse.Format_phrase, NodeTypesOption.STRUCTURE),
-  INLINE_DEFINITION(Proparse.Inline_definition, NodeTypesOption.STRUCTURE),
+  IN_UI_REF(Proparse.In_UI_ref, NodeTypesOption.STRUCTURE),
   LOCAL_METHOD_REF(Proparse.Local_method_ref, NodeTypesOption.STRUCTURE),
-  LOOSE_END_KEEPER(Proparse.Loose_End_Keeper, NodeTypesOption.STRUCTURE),
+  LEFT_PART(Proparse.Left_Part, NodeTypesOption.STRUCTURE),
+  METHOD_REF(Proparse.Method_ref, NodeTypesOption.STRUCTURE),
   METHOD_PARAM_LIST(Proparse.Method_param_list, NodeTypesOption.STRUCTURE),
-  METHOD_PARAMETER(Proparse.Method_parameter, NodeTypesOption.STRUCTURE),
+  NAMED_MEMBER(Proparse.Named_member, NodeTypesOption.STRUCTURE),
+  NAMED_MEMBER_ARRAY(Proparse.Named_member_array, NodeTypesOption.STRUCTURE),
+  NEW_TYPE_REF(Proparse.New_Type_expr, NodeTypesOption.STRUCTURE),
   NOT_CASESENS(Proparse.Not_casesens, NodeTypesOption.STRUCTURE),
-  NOT_NULL(Proparse.Not_null, NodeTypesOption.STRUCTURE),
   PARAMETER_LIST(Proparse.Parameter_list, NodeTypesOption.STRUCTURE),
+  PAREN_EXPR(Proparse.Paren_expr, NodeTypesOption.STRUCTURE),
   PROGRAM_ROOT(Proparse.Program_root, NodeTypesOption.STRUCTURE),
   PROGRAM_TAIL(Proparse.Program_tail, NodeTypesOption.STRUCTURE),
   PROPERTY_GETTER(Proparse.Property_getter, NodeTypesOption.STRUCTURE),
   PROPERTY_SETTER(Proparse.Property_setter, NodeTypesOption.STRUCTURE),
   RECORD_NAME(Proparse.Record_name, NodeTypesOption.STRUCTURE),
-  SCANNER_HEAD(Proparse.Scanner_head, NodeTypesOption.STRUCTURE),
-  SCANNER_TAIL(Proparse.Scanner_tail, NodeTypesOption.STRUCTURE),
-  SQL_BEGINS(Proparse.Sql_begins, NodeTypesOption.STRUCTURE),
-  SQL_BETWEEN(Proparse.Sql_between, NodeTypesOption.STRUCTURE),
-  SQL_COMP_QUERY(Proparse.Sql_comp_query, NodeTypesOption.STRUCTURE),
-  SQL_IN(Proparse.Sql_in, NodeTypesOption.STRUCTURE),
-  SQL_LIKE(Proparse.Sql_like, NodeTypesOption.STRUCTURE),
-  SQL_NULL_TEST(Proparse.Sql_null_test, NodeTypesOption.STRUCTURE),
-  SQL_SELECT_WHAT(Proparse.Sql_select_what, NodeTypesOption.STRUCTURE),
+  SYSTEM_HANDLE_REF(Proparse.System_handle, NodeTypesOption.STRUCTURE),
   TYPE_NAME(Proparse.Type_name, NodeTypesOption.STRUCTURE),
   TYPELESS_TOKEN(Proparse.Typeless_token, NodeTypesOption.STRUCTURE),
   USER_FUNC(Proparse.User_func, NodeTypesOption.STRUCTURE),
@@ -1813,7 +1812,7 @@ public enum ABLNodeType {
     return options.contains(NodeTypesOption.KEYWORD) && !options.contains(NodeTypesOption.RESERVED);
   }
 
-  public boolean isSystemHandleName() {
+  public boolean isSystemHandle() {
     return SYSTEM_HANDLES.contains(this);
   }
 
@@ -1821,12 +1820,20 @@ public enum ABLNodeType {
     return DATATYPE_IN_VARIABLE.contains(this);
   }
 
-  public boolean mayBeNoArgFunc() {
+  public boolean isNoArgFunc() {
     return NO_ARGUMENT_FUNCTIONS.contains(this);
   }
 
-  public boolean mayBeRegularFunc() {
+  public boolean isOptionalArgFunction() {
+    return OPTIONAL_ARG_FUNCTIONS.contains(this);
+  }
+
+  public boolean isRegularFunc() {
     return REGULAR_FUNCTIONS.contains(this);
+  }
+
+  public boolean isRecordFunc() {
+    return RECORD_FUNCTIONS.contains(this);
   }
 
   public boolean isAbbreviated(String txt) {
@@ -1968,7 +1975,7 @@ public enum ABLNodeType {
     ABLNodeType type = typeMap.get(nodeType);
     if (type == null)
       return false;
-    return type.isSystemHandleName();
+    return type.isSystemHandle();
   }
 
   public static boolean isValidDatatype(int nodeType) {
@@ -1982,14 +1989,92 @@ public enum ABLNodeType {
     ABLNodeType type = typeMap.get(nodeType);
     if (type == null)
       return false;
-    return type.mayBeNoArgFunc();
+    return type.isNoArgFunc();
   }
 
-  static boolean mayBeRegularFunc(int nodeType) {
+  static boolean isRegularFunc(int nodeType) {
     ABLNodeType type = typeMap.get(nodeType);
     if (type == null)
       return false;
-    return type.mayBeRegularFunc();
+    return type.isRegularFunc();
+  }
+
+  public static DataType getDataType(int nodeType) {
+    switch (nodeType) {
+      case Proparse.VOID:
+        return DataType.VOID;
+      case Proparse.CHARACTER:
+        return DataType.CHARACTER;
+      case Proparse.DATE:
+        return DataType.DATE;
+      case Proparse.LOGICAL:
+        return DataType.LOGICAL;
+      case Proparse.INTEGER:
+        return DataType.INTEGER;
+      case Proparse.DECIMAL:
+        return DataType.DECIMAL;
+      case Proparse.RECID:
+        return DataType.RECID;
+      case Proparse.RAW:
+        return DataType.RAW;
+      case Proparse.HANDLE:
+      case Proparse.WIDGETHANDLE:
+        return DataType.HANDLE;
+      case Proparse.MEMPTR:
+        return DataType.MEMPTR;
+      case Proparse.ROWID:
+        return DataType.ROWID;
+      case Proparse.COMHANDLE:
+        return DataType.COMPONENT_HANDLE;
+      case Proparse.TABLE:
+        return DataType.TABLE;
+      case Proparse.TABLEHANDLE:
+        return DataType.TABLE_HANDLE;
+      case Proparse.BLOB:
+        return DataType.BLOB;
+      case Proparse.CLOB:
+        return DataType.CLOB;
+      case Proparse.BYTE:
+        return DataType.BYTE;
+      case Proparse.SHORT:
+        return DataType.SHORT;
+      case Proparse.LONG:
+        return DataType.LONG;
+      case Proparse.FLOAT:
+        return DataType.FLOAT;
+      case Proparse.DOUBLE:
+        return DataType.DOUBLE;
+      case Proparse.UNSIGNEDSHORT:
+        return DataType.UNSIGNED_SHORT;
+      case Proparse.UNSIGNEDBYTE:
+        return DataType.UNSIGNED_BYTE;
+      case Proparse.CURRENCY:
+        return DataType.CURRENCY;
+      case Proparse.ERRORCODE:
+        return DataType.ERROR_CODE;
+      case Proparse.FIXCHAR:
+        return DataType.FIXCHAR;
+      case Proparse.BIGINT:
+        return DataType.BIGINT;
+      case Proparse.TIME:
+        return DataType.TIME;
+      case Proparse.DATETIME:
+        return DataType.DATETIME;
+      case Proparse.DATASET:
+        return DataType.DATASET;
+      case Proparse.DATASETHANDLE:
+        return DataType.DATASET_HANDLE;
+      case Proparse.LONGCHAR:
+        return DataType.LONGCHAR;
+      case Proparse.DATETIMETZ:
+        return DataType.DATETIME_TZ;
+      case Proparse.INT64:
+        return DataType.INT64;
+      case Proparse.UNSIGNEDINTEGER:
+        return DataType.UNSIGNED_INTEGER;
+      default:
+        return DataType.UNKNOWN;
+    }
   }
 
   private static void generateKeywordsG4(final PrintStream out) {

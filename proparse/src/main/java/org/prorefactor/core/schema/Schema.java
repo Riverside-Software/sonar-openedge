@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.prorefactor.treeparser.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +36,8 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
+
+import eu.rssw.pct.elements.DataType;
 
 /**
  * Schema is a singleton with methods and fields for working with database schema names, and references to those from
@@ -280,7 +281,7 @@ public class Schema implements ISchema {
         if ((currTable == null) || (ch1 == -1) || (ch2 == -1))
           throw new IOException("Invalid file format: " + line);
         Field f = new Field(line.substring(1, ch1), currTable);
-        f.setDataType(DataType.getDataType(line.substring(ch1 + 1, ch2).toUpperCase()));
+        f.setDataType(DataType.get(line.substring(ch1 + 1, ch2)));
         if (f.getDataType() == null)
           throw new IOException("Unknown datatype: " + line.substring(ch1 + 1, ch2));
         f.setExtent(Integer.parseInt(line.substring(ch2 + 1)));

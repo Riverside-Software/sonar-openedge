@@ -145,6 +145,10 @@ public class ParserSupport {
     innerScopesMap.put(ctx, currentScope);
   }
 
+  public IProparseEnvironment getProparseSession() {
+    return session;
+  }
+
   // TEMP-ANTLR4
   public RootSymbolScope getUnitScope() {
     return unitScope;

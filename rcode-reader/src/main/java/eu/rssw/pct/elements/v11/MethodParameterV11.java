@@ -28,6 +28,7 @@ import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.ParameterType;
+import eu.rssw.pct.elements.PrimitiveDataType;
 
 public class MethodParameterV11 extends AbstractElement implements IParameter {
   private static final int PARAMETER_APPEND = 1;
@@ -38,42 +39,45 @@ public class MethodParameterV11 extends AbstractElement implements IParameter {
   public static final int PARAMETER_INOUT = 6110;
   public static final int PARAMETER_OUTPUT = 6049;
   public static final int PARAMETER_BUFFER = 1070;
-  
+
   private final int paramNum;
   private final int extent;
   private final int flags;
   private final int parameterType;
   private final int paramMode;
-  private final int dataType;
-  private final String dataTypeName;
+  private final DataType dataType;
 
-  public MethodParameterV11(int num, String name, int type, int mode, int flags, int dataType, String dataTypeName,
-      int extent) {
+  public MethodParameterV11(int num, String name, int type, int mode, int flags, DataType dataType, int extent) {
     super(name);
     this.paramNum = num;
     this.parameterType = type;
     this.paramMode = mode;
     this.dataType = dataType;
-    this.dataTypeName = dataTypeName;
     this.flags = flags;
     this.extent = extent;
   }
 
-  protected static IParameter fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset,
-      ByteOrder order) {
+  protected static IParameter fromDebugSegment(byte[] segment, int currentPos, int textAreaOffset, ByteOrder order) {
     int parameterType = ByteBuffer.wrap(segment, currentPos, Short.BYTES).order(order).getShort();
     int paramMode = ByteBuffer.wrap(segment, currentPos + 2, Short.BYTES).order(order).getShort();
     int extent = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort();
     int dataType = ByteBuffer.wrap(segment, currentPos + 6, Short.BYTES).order(order).getShort();
     int flags = ByteBuffer.wrap(segment, currentPos + 10, Short.BYTES).order(order).getShort() & 0xffff;
-    int argumentNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
+    int typeNameOffset = ByteBuffer.wrap(segment, currentPos + 16, Integer.BYTES).order(order).getInt();
     int nameOffset = ByteBuffer.wrap(segment, currentPos + 20, Integer.BYTES).order(order).getInt();
 
-    String dataTypeName = argumentNameOffset == 0 ? ""
-        : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + argumentNameOffset);
+    String typeName = dataType != PrimitiveDataType.CLASS.getNum() ? null
+        : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + typeNameOffset);
+    DataType dataTypeObj = typeName == null ? DataType.get(dataType) : new DataType(typeName);
+
     String name = nameOffset == 0 ? "" : RCodeInfo.readNullTerminatedString(segment, textAreaOffset + nameOffset);
 
-    return new MethodParameterV11(0, name, parameterType, paramMode, flags, dataType, dataTypeName, extent);
+    return new MethodParameterV11(0, name, parameterType, paramMode, flags, dataTypeObj, extent);
+  }
+
+  @Override
+  public int getNum() {
+    return paramNum;
   }
 
   @Override
@@ -82,19 +86,8 @@ public class MethodParameterV11 extends AbstractElement implements IParameter {
   }
 
   @Override
-  public DataType getABLDataType() {
-    return DataType.getDataType(dataType);
-  }
-
-  @Override
-  public String getDataType() {
-    if (dataType == DataType.CLASS.getNum())
-      return dataTypeName;
-    return getABLDataType().name();
-  }
-
-  public String getArgumentName() {
-    return dataTypeName;
+  public DataType getDataType() {
+    return dataType;
   }
 
   @Override
@@ -109,7 +102,7 @@ public class MethodParameterV11 extends AbstractElement implements IParameter {
 
   @Override
   public boolean isClassDataType() {
-    return dataType == DataType.CLASS.getNum();
+    return dataType.getPrimitive() == PrimitiveDataType.CLASS;
   }
 
   public boolean isBind() {
@@ -144,7 +137,7 @@ public class MethodParameterV11 extends AbstractElement implements IParameter {
     if (obj instanceof IParameter) {
       IParameter obj2 = (IParameter) obj;
       return getName().equals(obj2.getName()) && getMode().equals(obj2.getMode())
-          && getParameterType().equals(obj2.getParameterType()) && getDataType().equals(obj2.getDataType());
+          && getParameterType().equals(obj2.getParameterType()) && dataType.equals(obj2.getDataType());
     }
     return false;
   }

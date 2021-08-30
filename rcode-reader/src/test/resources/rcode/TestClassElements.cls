@@ -10,6 +10,8 @@ CLASS rcode.TestClassElements:
 
   DEFINE PROTECTED DATASET ds1 FOR tt1, tt2.
 
+  DEFINE PUBLIC EVENT NewCustomer SIGNATURE VOID (INPUT pcCustName AS CHARACTER).
+
   CONSTRUCTOR PUBLIC TestClassElements():
   
   END CONSTRUCTOR.
@@ -47,6 +49,10 @@ CLASS rcode.TestClassElements:
                    INPUT x12 AS RAW,
                    INPUT x13 AS RECID,
                    INPUT x14 AS ROWID):
+
+  END METHOD.
+
+  METHOD PUBLIC Progress.Lang.Object testMethod5(INPUT x1 AS Progress.Lang.Enum):
 
   END METHOD.
 

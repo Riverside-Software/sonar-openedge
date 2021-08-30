@@ -169,6 +169,18 @@ public class JPNodeTest {
   }
 
   @Test
+  public void testSibling() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "query02.p"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+    assertNull(unit.getTopNode().getSibling(ABLNodeType.FOR));
+    JPNode node = unit.getTopNode().queryStateHead(ABLNodeType.FOR).get(0);
+    JPNode recNode = node.query(ABLNodeType.RECORD_NAME).get(0);
+    assertNotNull(recNode.getSibling(ABLNodeType.WHERE));
+    assertNotNull(recNode.getSibling(ABLNodeType.USEINDEX));
+  }
+
+  @Test
   public void testDotComment01() {
     ParseUnit unit = genericTest("dotcomment01.p");
     JPNode node = unit.getTopNode().firstNaturalChild();
@@ -219,9 +231,11 @@ public class JPNodeTest {
     assertNotNull(node.getFirstChild());
     assertEquals(node.getFirstChild().getNodeType(), ABLNodeType.EQ);
     assertNotNull(node.getFirstChild().getFirstChild());
-    assertEquals(node.getFirstChild().getFirstChild().getNodeType(), ABLNodeType.NUMBER);
+    assertEquals(node.getFirstChild().getFirstChild().getNodeType(), ABLNodeType.CONSTANT_REF);
+    assertEquals(node.getFirstChild().getFirstChild().getFirstChild().getNodeType(), ABLNodeType.NUMBER);
     assertNotNull(node.getFirstChild().getFirstChild().getNextSibling());
-    assertEquals(node.getFirstChild().getFirstChild().getNextSibling().getNodeType(), ABLNodeType.NUMBER);
+    assertEquals(node.getFirstChild().getFirstChild().getNextSibling().getNodeType(), ABLNodeType.CONSTANT_REF);
+    assertEquals(node.getFirstChild().getFirstChild().getNextSibling().getFirstChild().getNodeType(), ABLNodeType.NUMBER);
 
     node = node.getNextSibling();
     assertNotNull(node);

@@ -25,6 +25,7 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.core.nodetypes.TwoArgumentsExpression;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.ParseUnit;
@@ -94,7 +95,7 @@ public class AttributedWriter {
   private void walker(JPNode node, boolean showSiblings) throws IOException {
     if (node == null)
       return;
-    if (node.isOperator()) {
+    if (node.isOperator() || (node instanceof TwoArgumentsExpression)) {
       walker(node.getFirstChild(), false);
       writeNode(node);
       walker(node.getFirstChild().getNextSibling(), true);
@@ -132,8 +133,6 @@ public class AttributedWriter {
     }
     writer.write(getAttributes(node));
     writer.write(node.getText());
-    if ((node.getNodeType() == ABLNodeType.RUN) || (node.getNodeType() == ABLNodeType.PROCEDURE))
-      writer.write(' ');
   }
 
 }

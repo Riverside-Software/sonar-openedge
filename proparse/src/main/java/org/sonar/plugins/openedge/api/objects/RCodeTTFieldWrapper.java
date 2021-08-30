@@ -12,11 +12,11 @@ package org.sonar.plugins.openedge.api.objects;
 
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.treeparser.DataType;
 import org.prorefactor.treeparser.Primative;
 
 import com.google.common.base.Preconditions;
 
+import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IVariableElement;
 
 public class RCodeTTFieldWrapper implements IField {
@@ -41,14 +41,7 @@ public class RCodeTTFieldWrapper implements IField {
 
   @Override
   public DataType getDataType() {
-    // TODO Fix conversion between datatypes
-    return DataType.getDataType(field.getDataType().toString().replace('_', '-'));
-  }
-
-  @Override
-  public String getClassName() {
-    // Fields can't be instances of class
-    return null;
+    return field.getDataType();
   }
 
   @Override
@@ -68,11 +61,6 @@ public class RCodeTTFieldWrapper implements IField {
 
   @Override
   public void assignAttributesLike(Primative likePrim) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Primative setClassName(String className) {
     throw new UnsupportedOperationException();
   }
 

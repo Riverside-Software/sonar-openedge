@@ -26,8 +26,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode.Builder;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.proparse.antlr4.ProparseBaseVisitor;
 import org.prorefactor.proparse.antlr4.Proparse.*;
+import org.prorefactor.proparse.antlr4.ProparseBaseVisitor;
 import org.prorefactor.proparse.support.ParserSupport;
 
 public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
@@ -102,17 +102,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
     node.setDown(visit(ctx.statementEnd()));
 
     return node;
-  }
-
-  @Override
-  public Builder visitFunctionCallStatement(FunctionCallStatementContext ctx) {
-    return createTree(ctx, ABLNodeType.EXPR_STATEMENT).setStatement().setRuleNode(ctx);
-  }
-
-  @Override
-  public Builder visitFunctionCallStatementSub(FunctionCallStatementSubContext ctx) {
-    return createTreeFromFirstNode(ctx).changeType(
-        ABLNodeType.getNodeType(support.isMethodOrFunc(ctx.fname.getText())));
   }
 
   @Override
@@ -236,21 +225,17 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExpressionMinus(ExpressionMinusContext ctx) {
-    Builder holder = createTreeFromFirstNode(ctx);
-    holder.changeType(ABLNodeType.UNARY_MINUS);
-    return holder;
+    return createTreeFromFirstNode(ctx).changeType(ABLNodeType.UNARY_MINUS).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionPlus(ExpressionPlusContext ctx) {
-    Builder holder = createTreeFromFirstNode(ctx);
-    holder.changeType(ABLNodeType.UNARY_PLUS);
-    return holder;
+    return createTreeFromFirstNode(ctx).changeType(ABLNodeType.UNARY_PLUS).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionOp1(ExpressionOp1Context ctx) {
-    Builder holder = createTreeFromSecondNode(ctx).setOperator();
+    Builder holder = createTreeFromSecondNode(ctx).setExpression(true);
     if (holder.getNodeType() == ABLNodeType.STAR)
       holder.changeType(ABLNodeType.MULTIPLY);
     else if (holder.getNodeType() == ABLNodeType.SLASH)
@@ -260,12 +245,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExpressionOp2(ExpressionOp2Context ctx) {
-    return createTreeFromSecondNode(ctx).setOperator();
+    return createTreeFromSecondNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionComparison(ExpressionComparisonContext ctx) {
-    Builder holder = createTreeFromSecondNode(ctx).setOperator();
+    Builder holder = createTreeFromSecondNode(ctx).setExpression(true);
     if (holder.getNodeType() == ABLNodeType.LEFTANGLE)
       holder.changeType(ABLNodeType.LTHAN);
     else if (holder.getNodeType() == ABLNodeType.LTOREQUAL)
@@ -284,27 +269,27 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExpressionStringComparison(ExpressionStringComparisonContext ctx) {
-    return createTreeFromSecondNode(ctx).setOperator();
+    return createTreeFromSecondNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionNot(ExpressionNotContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    return createTreeFromFirstNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionAnd(ExpressionAndContext ctx) {
-    return createTreeFromSecondNode(ctx).setOperator();
+    return createTreeFromSecondNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionXor(ExpressionXorContext ctx) {
-    return createTreeFromSecondNode(ctx).setOperator();
+    return createTreeFromSecondNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExpressionOr(ExpressionOrContext ctx) {
-    return createTreeFromSecondNode(ctx).setOperator();
+    return createTreeFromSecondNode(ctx).setExpression(true);
   }
 
   // ---------------
@@ -312,63 +297,89 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   // ---------------
 
   @Override
-  public Builder visitExprtNoReturnValue(ExprtNoReturnValueContext ctx) {
-    return createTree(ctx, ABLNodeType.WIDGET_REF);
+  public Builder visitExprTermMethodCall(ExprTermMethodCallContext ctx) {
+    return createTree(ctx, ABLNodeType.METHOD_REF).setExtraField1(ctx.id.getText()).setRuleNode(ctx).setExpression(true);
   }
 
   @Override
-  public Builder visitExprtWidName(ExprtWidNameContext ctx) {
-    return createTree(ctx, ABLNodeType.WIDGET_REF).setRuleNode(ctx);
+  public Builder visitExprTermAttribute(ExprTermAttributeContext ctx) {
+    return createTree(ctx, ABLNodeType.ATTRIBUTE_REF).setExtraField1(ctx.id.getText()).setRuleNode(ctx).setExpression(true);
   }
 
   @Override
-  public Builder visitExprtExprt2(ExprtExprt2Context ctx) {
-    if (ctx.colonAttribute() != null) {
-      return createTree(ctx, ABLNodeType.WIDGET_REF);
-    }
-    return visitChildren(ctx);
+  public Builder visitExprTermNamedMember(ExprTermNamedMemberContext ctx) {
+    return createTree(ctx, ABLNodeType.NAMED_MEMBER).setExtraField1(ctx.id.getText()).setRuleNode(ctx).setExpression(true);
   }
 
   @Override
-  public Builder visitWidattrWidName(WidattrWidNameContext ctx) {
-    return createTree(ctx, ABLNodeType.WIDGET_REF);
+  public Builder visitExprTermNamedMemberArray(ExprTermNamedMemberArrayContext ctx) {
+    return createTree(ctx, ABLNodeType.NAMED_MEMBER_ARRAY).setExtraField1(ctx.id.getText()).setRuleNode(ctx).setExpression(true);
   }
 
   @Override
-  public Builder visitWidattrExprt2(WidattrExprt2Context ctx) {
-    return createTree(ctx, ABLNodeType.WIDGET_REF);
+  public Builder visitExprTermArray(ExprTermArrayContext ctx) {
+    return createTree(ctx, ABLNodeType.ARRAY_REFERENCE).setRuleNode(ctx).setExpression(true);
   }
+
+  @Override
+  public Builder visitExprTermInUI(ExprTermInUIContext ctx) {
+    return createTree(ctx, ABLNodeType.IN_UI_REF).setRuleNode(ctx).setExpression(true);
+  }
+
+  @Override
+  public Builder visitExprTermWidget(ExprTermWidgetContext ctx) {
+    if (ctx.widName().systemHandleName() == null)
+      return createTree(ctx, ABLNodeType.WIDGET_REF).setRuleNode(ctx).setExpression(true);
+    else
+      return createTree(ctx, ABLNodeType.SYSTEM_HANDLE_REF).setRuleNode(ctx).setExpression(true);
+  }
+
+  // EXPRESSION TERM2
 
   @Override
   public Builder visitExprt2ParenExpr(Exprt2ParenExprContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public Builder visitExprt2ParenCall(Exprt2ParenCallContext ctx) {
-    Builder holder = createTreeFromFirstNode(ctx);
-    holder.changeType(ABLNodeType.getNodeType(support.isMethodOrFunc(ctx.fname.getText())));
-    return holder;
+    return createTree(ctx, ABLNodeType.PAREN_EXPR).setExpression(true);
   }
 
   @Override
   public Builder visitExprt2New(Exprt2NewContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    return createTree(ctx, ABLNodeType.NEW_TYPE_REF).setExpression(true);
+  }
+
+  @Override
+  public Builder visitExprt2ParenCall(Exprt2ParenCallContext ctx) {
+    return createTreeFromFirstNode(ctx).changeType(
+        ABLNodeType.getNodeType(support.isMethodOrFunc(ctx.fname.getText()))).setExtraField1(
+            ctx.fname.getText()).setExpression(true);
+  }
+
+  @Override
+  public Builder visitExprt2BuiltinFunc(Exprt2BuiltinFuncContext ctx) {
+    return createTree(ctx, ABLNodeType.BUILTIN_REF).setExpression(true);
   }
 
   @Override
   public Builder visitExprt2ParenCall2(Exprt2ParenCall2Context ctx) {
-    Builder holder = createTreeFromFirstNode(ctx);
-    holder.changeType(ABLNodeType.LOCAL_METHOD_REF);
-    return holder;
+    return createTreeFromFirstNode(ctx).changeType(ABLNodeType.LOCAL_METHOD_REF).setExtraField1(
+        ctx.identifier().getText()).setExpression(true);
+  }
+
+  @Override
+  public Builder visitExprt2Constant(Exprt2ConstantContext ctx) {
+    return createTree(ctx, ABLNodeType.CONSTANT_REF).setExpression(true);
+  }
+
+  @Override
+  public Builder visitNoArgFunction(NoArgFunctionContext ctx) {
+    return createTree(ctx, ABLNodeType.BUILTIN_REF).setExpression(true);
   }
 
   @Override
   public Builder visitExprt2Field(Exprt2FieldContext ctx) {
     if (ctx.ENTERED() != null)
-      return createTree(ctx, ABLNodeType.ENTERED_FUNC);
+      return createTree(ctx, ABLNodeType.ENTERED_FUNC).setExpression(true);
     else
-      return visitChildren(ctx);
+      return visitChildren(ctx).setExpression(true);
   }
 
   @Override
@@ -378,18 +389,89 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitFiln(FilnContext ctx) {
-    return visitChildren(ctx);
+    if (ctx.t2 == null)
+      return visitChildren(ctx).changeType(ABLNodeType.ID);
+
+    // Merge NameDot attribute into a single token 
+    ProToken.Builder tok = new ProToken.Builder((ProToken) ctx.t1.start).setType(ABLNodeType.ID);
+    String originalText = ctx.t1.start.getText();
+    boolean hiddenTokens = false;
+    ProToken h = getHiddenBefore(ctx.NAMEDOT().getSymbol());
+    if (h != null) {
+      hiddenTokens = true;
+      originalText += getHiddenText(h); 
+    }
+    tok.mergeWith((ProToken) ctx.NAMEDOT().getSymbol());
+    originalText += ctx.NAMEDOT().getText();
+    h = getHiddenBefore(ctx.t2.start);
+    if (h != null) {
+      hiddenTokens = true;
+      originalText += getHiddenText(h); 
+    }
+    originalText += ctx.t2.getText();
+    tok.mergeWith((ProToken) ctx.t2.start);
+
+    if (hiddenTokens)
+      tok.setRawText(originalText);
+    return new Builder(tok.build());
   }
 
   @Override
   public Builder visitFieldn(FieldnContext ctx) {
-    return visitChildren(ctx);
+    if (ctx.t2 == null)
+      return visitChildren(ctx).changeType(ABLNodeType.ID);
+
+    ProToken.Builder tok = new ProToken.Builder((ProToken) ctx.t1.start).setType(ABLNodeType.ID);
+    String originalText = ctx.t1.start.getText();
+    boolean hiddenTokens = false;
+    ProToken h = getHiddenBefore(ctx.NAMEDOT(0).getSymbol());
+    if (h != null) {
+      hiddenTokens = true;
+      originalText += getHiddenText(h);
+    }
+    tok.mergeWith((ProToken) ctx.NAMEDOT(0).getSymbol());
+    originalText += ctx.NAMEDOT(0).getText();
+    h = getHiddenBefore(ctx.t2.start);
+    if (h != null) {
+      hiddenTokens = true;
+      originalText += getHiddenText(h);
+    }
+    originalText += ctx.t2.getText();
+    tok.mergeWith((ProToken) ctx.t2.start);
+
+    if (ctx.t3 != null) {
+      h = getHiddenBefore(ctx.NAMEDOT(1).getSymbol());
+      if (h != null) {
+        hiddenTokens = true;
+        originalText += getHiddenText(h);
+      }
+      tok.mergeWith((ProToken) ctx.NAMEDOT(1).getSymbol());
+      originalText += ctx.NAMEDOT(1).getText();
+      h = getHiddenBefore(ctx.t3.start);
+      if (h != null) {
+        hiddenTokens = true;
+        originalText += getHiddenText(h);
+      }
+      originalText += ctx.t3.getText();
+      tok.mergeWith((ProToken) ctx.t3.start);
+    }
+    if (hiddenTokens)
+      tok.setRawText(originalText);
+    return new Builder(tok.build());
+  }
+
+  @Override
+  public Builder visitFieldExpr(FieldExprContext ctx) {
+    if (ctx.LEFTBRACE() != null)
+      return createTree(ctx, ABLNodeType.ARRAY_REFERENCE).setRuleNode(ctx);
+    else
+      return visitChildren(ctx);
   }
 
   @Override
   public Builder visitField(FieldContext ctx) {
     Builder holder = createTree(ctx, ABLNodeType.FIELD_REF).setRuleNode(ctx);
-    if ((ctx.getParent() instanceof MessageOptionContext) && support.isInlineVar(ctx.getText())) {
+    if ((ctx.getParent().getParent() instanceof MessageOptionContext) && support.isInlineVar(ctx.getText())) {
       holder.setInlineVar();
     }
     return holder;
@@ -398,11 +480,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitFieldFrameOrBrowse(FieldFrameOrBrowseContext ctx) {
     return createTreeFromFirstNode(ctx).setRuleNode(ctx);
-  }
-
-  @Override
-  public Builder visitArraySubscript(ArraySubscriptContext ctx) {
-    return createTree(ctx, ABLNodeType.ARRAY_SUBSCRIPT);
   }
 
   @Override
@@ -443,11 +520,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitFilename(FilenameContext ctx) {
-    ProToken.Builder tok = new ProToken.Builder((ProToken) ctx.t1.start).setType(ABLNodeType.FILENAME);
+    ProToken.Builder tok = new ProToken.Builder((ProToken) ctx.t1.start).setType(ABLNodeType.FILENAME).setHiddenBefore(
+        getHiddenBefore(ctx.t1.start));
     for (int zz = 1; zz < ctx.filenamePart().size(); zz++) {
       tok.mergeWith((ProToken) ctx.filenamePart(zz).start);
     }
-
     return new Builder(tok.build()).setRuleNode(ctx);
   }
 
@@ -565,21 +642,38 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitAssignStatement2(AssignStatement2Context ctx) {
-    // Unset rule node, as it's in fact assigned to the parent node
     Builder node1 = createTreeFromSecondNode(ctx).setOperator().unsetRuleNode();
+
+    // ABL is using the same symbol '=' for assignment and comparison ; depending on what is in the left part, the
+    // statement can be an assignment or a comparison. And it is faster and easier to transform ASSIGN statement to
+    // EXPRESSION statement when the left-part of the assignment is a constant, rather than doing that directly in the
+    // grammar
+    if ((ctx.EQUAL() != null) && (ctx.assignEqualLeft().expressionTerm() instanceof ExprTermOtherContext)) {
+      ExprTermOtherContext ctx2 = (ExprTermOtherContext) ctx.assignEqualLeft().expressionTerm();
+      if (ctx2.expressionTerm2() instanceof Exprt2ConstantContext) {
+        node1.getDown().getDown().setRight(node1.getDown().getRight());
+        node1.setDown(node1.getDown().getDown());
+        return new Builder(ABLNodeType.EXPR_STATEMENT).setStatement().setDown(
+            node1.changeType(ABLNodeType.EQ)).setRuleNode(ctx);
+      }
+    }
 
     Builder holder = new Builder(ABLNodeType.ASSIGN).setStatement().setDown(node1).setRuleNode(ctx);
     Builder lastNode = node1;
     for (int zz = 3; zz < ctx.getChildCount(); zz++) {
       lastNode = lastNode.setRight(visit(ctx.getChild(zz))).getLast();
     }
-
     return holder;
   }
 
   @Override
   public Builder visitAssignEqual(AssignEqualContext ctx) {
     return createTreeFromSecondNode(ctx).setOperator();
+  }
+
+  @Override
+  public Builder visitAssignEqualLeft(AssignEqualLeftContext ctx) {
+    return createTree(ctx, ABLNodeType.LEFT_PART);
   }
 
   @Override
@@ -691,11 +785,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitCaseWhen(CaseWhenContext ctx) {
     return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public Builder visitCaseExpression1(CaseExpression1Context ctx) {
-    return visitChildren(ctx);
   }
 
   @Override
@@ -883,11 +972,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitCompileOption(CompileOptionContext ctx) {
     return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public Builder visitCompileLang(CompileLangContext ctx) {
-    return visitChildren(ctx);
   }
 
   @Override
@@ -2244,11 +2328,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
-  public Builder visitRecordphrase(RecordphraseContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
   public Builder visitRecordOption(RecordOptionContext ctx) {
     if ((ctx.LEFT() != null) || (ctx.OF() != null) || (ctx.WHERE() != null) || (ctx.USEINDEX() != null)
         || (ctx.USING() != null))
@@ -2438,6 +2517,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitStopStatement(StopStatementContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public Builder visitSuperStatement(SuperStatementContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
 
@@ -2764,8 +2848,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   // ------------------
 
   /**
-   * Default behavior for each ParseTree node is to create an array of JPNode. ANTLR2 construct ruleName: TOKEN TOKEN |
-   * rule TOKEN | rule ...
+   * Default behavior for each ParseTree node is to create an array of JPNode.
    */
   @Override
   @Nonnull
@@ -2789,24 +2872,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Nonnull
   public Builder visitTerminal(TerminalNode node) {
     ProToken tok = (ProToken) node.getSymbol();
-
-    ProToken lastHiddenTok = null;
-    ProToken firstHiddenTok = null;
-
-    ProToken t = node.getSymbol().getTokenIndex() > 0 ? (ProToken) stream.get(node.getSymbol().getTokenIndex() - 1)
-        : null;
-    while ((t != null) && (t.getChannel() != Token.DEFAULT_CHANNEL)) {
-      if (firstHiddenTok == null) {
-        firstHiddenTok = t;
-      } else {
-        lastHiddenTok.setHiddenBefore(t);
-      }
-      lastHiddenTok = t;
-
-      t = t.getTokenIndex() > 0 ? (ProToken) stream.get(t.getTokenIndex() - 1) : null;
-    }
-    if (firstHiddenTok != null)
-      tok.setHiddenBefore(firstHiddenTok);
+    tok.setHiddenBefore(getHiddenBefore(tok));
 
     return new Builder(tok);
   }
@@ -2826,6 +2892,35 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   protected Builder defaultResult() {
     throw new UnsupportedOperationException("Not implemented");
+  }
+
+  private ProToken getHiddenBefore(Token initialToken) {
+    ProToken lastHiddenTok = null;
+    ProToken firstHiddenTok = null;
+
+    ProToken t = initialToken.getTokenIndex() > 0 ? (ProToken) stream.get(initialToken.getTokenIndex() - 1)
+        : null;
+    while ((t != null) && (t.getChannel() != Token.DEFAULT_CHANNEL)) {
+      if (firstHiddenTok == null) {
+        firstHiddenTok = t;
+      } else {
+        lastHiddenTok.setHiddenBefore(t);
+      }
+      lastHiddenTok = t;
+
+      t = t.getTokenIndex() > 0 ? (ProToken) stream.get(t.getTokenIndex() - 1) : null;
+    }
+    return firstHiddenTok;
+  }
+
+  private String getHiddenText(ProToken firstHiddenToken) {
+    String str = firstHiddenToken.getText();
+    ProToken curr = firstHiddenToken.getHiddenBefore();
+    while (curr != null) {
+      str = curr.getText() + str;
+      curr = curr.getHiddenBefore();
+    }
+    return str;
   }
 
   /**

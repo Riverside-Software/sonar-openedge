@@ -17,7 +17,6 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.WritableProToken;
 import org.prorefactor.core.util.UnitTestModule;
-import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.testng.annotations.BeforeTest;
@@ -303,50 +302,50 @@ public class ABLLexerTest {
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt");
 
     // CURRENT-WINDOW:HANDLE.
-    assertEquals(lexer.nextToken().getType(), Proparse.CURRENTWINDOW);
-    assertEquals(lexer.nextToken().getType(), Proparse.OBJCOLON);
-    assertEquals(lexer.nextToken().getType(), Proparse.HANDLE);
-    assertEquals(lexer.nextToken().getType(), Proparse.PERIOD);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.CURRENTWINDOW);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.HANDLE);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
 
     // SESSION:FIRST-SERVER-SOCKET:HANDLE.
-    assertEquals(lexer.nextToken().getType(), Proparse.SESSION);
-    assertEquals(lexer.nextToken().getType(), Proparse.OBJCOLON);
-    assertEquals(lexer.nextToken().getType(), Proparse.ID);
-    assertEquals(lexer.nextToken().getType(), Proparse.OBJCOLON);
-    assertEquals(lexer.nextToken().getType(), Proparse.HANDLE);
-    assertEquals(lexer.nextToken().getType(), Proparse.PERIOD);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.SESSION);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.HANDLE);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
 
     // TEMP-TABLE tt1::fld1.
-    assertEquals(lexer.nextToken().getType(), Proparse.TEMPTABLE);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
-    assertEquals(lexer.nextToken().getType(), Proparse.ID);
-    assertEquals(lexer.nextToken().getType(), Proparse.DOUBLECOLON);
-    assertEquals(lexer.nextToken().getType(), Proparse.ID);
-    assertEquals(lexer.nextToken().getType(), Proparse.PERIOD);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.TEMPTABLE);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.DOUBLECOLON);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
 
     // DATASET ds1::tt1.
-    assertEquals(lexer.nextToken().getType(), Proparse.DATASET);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
-    assertEquals(lexer.nextToken().getType(), Proparse.ID);
-    assertEquals(lexer.nextToken().getType(), Proparse.DOUBLECOLON);
-    assertEquals(lexer.nextToken().getType(), Proparse.ID);
-    assertEquals(lexer.nextToken().getType(), Proparse.PERIOD);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.DATASET);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.DOUBLECOLON);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.PERIOD);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
 
     // DATASET ds1::tt1:set-callback().
-    assertEquals(lexer.nextToken().getType(), Proparse.DATASET);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
-    assertEquals(lexer.nextToken().getType(), Proparse.ID);
-    assertEquals(lexer.nextToken().getType(), Proparse.DOUBLECOLON);
-    assertEquals(lexer.nextToken().getType(), Proparse.ID);
-    assertEquals(lexer.nextToken().getType(), Proparse.OBJCOLON);
-    assertEquals(lexer.nextToken().getType(), Proparse.ID);
-    assertEquals(lexer.nextToken().getType(), Proparse.LEFTPAREN);
-    assertEquals(lexer.nextToken().getType(), Proparse.RIGHTPAREN);
-    assertEquals(lexer.nextToken().getType(), Proparse.PERIOD);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.DATASET);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.DOUBLECOLON);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.LEFTPAREN);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.RIGHTPAREN);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.PERIOD);
   }
 
   @Test
@@ -375,22 +374,22 @@ public class ABLLexerTest {
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("do while xx > '': end.".getBytes()), "file.txt");
 
     ProToken tok = (ProToken) lexer.nextToken();
-    assertEquals(tok.getType(), Proparse.DO);
+    assertEquals(tok.getNodeType(), ABLNodeType.DO);
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 2);
 
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
-    assertEquals(lexer.nextToken().getType(), Proparse.WHILE);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
-    assertEquals(lexer.nextToken().getType(), Proparse.ID);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
-    assertEquals(lexer.nextToken().getType(), Proparse.RIGHTANGLE);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WHILE);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.RIGHTANGLE);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
     // Quoted string
     tok = (ProToken) lexer.nextToken();
-    assertEquals(tok.getType(), Proparse.QSTRING);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getCharPositionInLine(), 15);
     assertEquals(tok.getEndLine(), 1);
@@ -399,7 +398,7 @@ public class ABLLexerTest {
 
     // Colon
     tok = (ProToken) lexer.nextToken();
-    assertEquals(tok.getType(), Proparse.LEXCOLON);
+    assertEquals(tok.getNodeType(), ABLNodeType.LEXCOLON);
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getCharPositionInLine(), 17);
     assertEquals(tok.getEndLine(), 1);
@@ -411,33 +410,33 @@ public class ABLLexerTest {
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("do while xx > '' : end.".getBytes()), "file.txt");
 
     ProToken tok = (ProToken) lexer.nextToken();
-    assertEquals(tok.getType(), Proparse.DO);
+    assertEquals(tok.getNodeType(), ABLNodeType.DO);
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 2);
 
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
-    assertEquals(lexer.nextToken().getType(), Proparse.WHILE);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
-    assertEquals(lexer.nextToken().getType(), Proparse.ID);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
-    assertEquals(lexer.nextToken().getType(), Proparse.RIGHTANGLE);
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WHILE);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.ID);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.RIGHTANGLE);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
 
     // Quoted string
     tok = (ProToken) lexer.nextToken();
-    assertEquals(tok.getType(), Proparse.QSTRING);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getCharPositionInLine(), 15);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 16);
 
-    assertEquals(lexer.nextToken().getType(), Proparse.WS);
+    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
 
     // Colon
     tok = (ProToken) lexer.nextToken();
-    assertEquals(tok.getType(), Proparse.LEXCOLON);
+    assertEquals(tok.getNodeType(), ABLNodeType.LEXCOLON);
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getCharPositionInLine(), 18);
     assertEquals(tok.getEndLine(), 1);
@@ -449,13 +448,13 @@ public class ABLLexerTest {
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("\"Test\":L10.".getBytes()), "file.txt");
 
     ProToken tok = (ProToken) lexer.nextToken();
-    assertEquals(tok.getType(), Proparse.QSTRING);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 10);
     tok = (ProToken) lexer.nextToken();
-    assertEquals(tok.getType(), Proparse.PERIOD);
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getCharPositionInLine(), 11);
     assertEquals(tok.getEndLine(), 1);
@@ -467,13 +466,13 @@ public class ABLLexerTest {
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("\"Test\".".getBytes()), "file.txt");
 
     ProToken tok = (ProToken) lexer.nextToken();
-    assertEquals(tok.getType(), Proparse.QSTRING);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 6);
     tok = (ProToken) lexer.nextToken();
-    assertEquals(tok.getType(), Proparse.PERIOD);
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getCharPositionInLine(), 7);
     assertEquals(tok.getEndLine(), 1);
@@ -485,13 +484,13 @@ public class ABLLexerTest {
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("\"Test\":U.".getBytes()), "file.txt");
 
     ProToken tok = (ProToken) lexer.nextToken();
-    assertEquals(tok.getType(), Proparse.QSTRING);
+    assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getCharPositionInLine(), 1);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 8);
     tok = (ProToken) lexer.nextToken();
-    assertEquals(tok.getType(), Proparse.PERIOD);
+    assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
     assertEquals(tok.getLine(), 1);
     assertEquals(tok.getCharPositionInLine(), 9);
     assertEquals(tok.getEndLine(), 1);
