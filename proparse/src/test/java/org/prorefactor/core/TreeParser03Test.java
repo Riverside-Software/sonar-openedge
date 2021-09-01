@@ -1267,4 +1267,35 @@ public class TreeParser03Test {
     assertEquals(scope.getVariable("prm9").getDataType(), DataType.UNSIGNED_INTEGER);
   }
 
+  @Test
+  public void testSuper01() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test36.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    List<JPNode> list = unit.getTopNode().query(ABLNodeType.SUPER);
+    assertEquals(list.size(), 4);
+    assertEquals(list.get(0).getParent().getNodeType(), ABLNodeType.BUILTIN_REF);
+    assertEquals(list.get(1).getParent().getNodeType(), ABLNodeType.BUILTIN_REF);
+    assertEquals(list.get(2).getParent().getNodeType(), ABLNodeType.BUILTIN_REF);
+    assertEquals(list.get(3).getParent().getNodeType(), ABLNodeType.SYSTEM_HANDLE_REF);
+  }
+
+  @Test
+  public void testSuper02() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test36.cls"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    List<JPNode> list = unit.getTopNode().query(ABLNodeType.SUPER);
+    assertEquals(list.size(), 2);
+    assertEquals(list.get(0).getParent().getNodeType(), ABLNodeType.METHOD_REF);
+    assertEquals(list.get(1).getParent().getNodeType(), ABLNodeType.SYSTEM_HANDLE_REF);
+    assertEquals(list.get(1).getParent().getParent().getNodeType(), ABLNodeType.METHOD_REF);
+  }
+
 }

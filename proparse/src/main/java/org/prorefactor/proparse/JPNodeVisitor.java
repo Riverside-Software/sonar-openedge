@@ -383,6 +383,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitExprt2Super(Exprt2SuperContext ctx) {
+    return createTree(ctx, ABLNodeType.SYSTEM_HANDLE_REF).setExpression(true);
+  }
+
+  @Override
   public Builder visitGWidget(GWidgetContext ctx) {
     return createTree(ctx, ABLNodeType.WIDGET_REF);
   }
@@ -2522,7 +2527,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitSuperStatement(SuperStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createTree(ctx, ABLNodeType.METHOD_REF).setStatement().setRuleNode(ctx);
   }
 
   @Override

@@ -523,6 +523,7 @@ expressionTerm2:
   | constant   # exprt2Constant
   | noArgFunction  # exprt2NoArgFunc
   | field ( NOT? ENTERED )?  # exprt2Field
+  | SUPER # exprt2Super
   ;
 
 widName:

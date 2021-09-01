@@ -192,6 +192,7 @@ optionalArgFunction:
   | GETEFFECTIVETENANTID
   | GETEFFECTIVETENANTNAME
   | GUID
+  | SUPER
   | TENANTID
   | TENANTNAME
   )
@@ -248,7 +249,6 @@ noArgFunction:
 | RETRY
 | RETURNVALUE
 | SCREENLINES
-| SUPER
 | TERMINAL
 | TIME
 | TIMEZONE
@@ -258,6 +258,9 @@ noArgFunction:
 | USERID
 ;
 
+// SUPER is excluded from this list as this keyword can be used in various cases
+// Having it here breaks the SLL prediction mode, so ANTLR has to switch to the
+// slower LL prediction mode
 systemHandleName:
   AAMEMORY
 | ACTIVEFORM
@@ -285,7 +288,6 @@ systemHandleName:
 | SELF
 | SESSION
 | SOURCEPROCEDURE
-| SUPER
 | TARGETPROCEDURE
 | TEXTCURSOR
 | THISOBJECT

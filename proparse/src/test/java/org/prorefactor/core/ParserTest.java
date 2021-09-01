@@ -515,7 +515,8 @@ public class ParserTest {
         "<unnamed>", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.SUPER).size(), 1);
+    assertEquals(unit.getTopNode().query(ABLNodeType.SUPER).size(), 1);
+    assertEquals(unit.getTopNode().query(ABLNodeType.SUPER).get(0).getParent().getNodeType(), ABLNodeType.METHOD_REF);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.PERIOD).size(), 0);
   }
 
