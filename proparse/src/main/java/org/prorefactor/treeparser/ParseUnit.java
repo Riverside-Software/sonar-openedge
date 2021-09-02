@@ -54,6 +54,7 @@ import org.prorefactor.proparse.ABLLexer;
 import org.prorefactor.proparse.JPNodeVisitor;
 import org.prorefactor.proparse.ProparseErrorListener;
 import org.prorefactor.proparse.ProparseErrorStrategy;
+import org.prorefactor.proparse.TraceListener;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.antlr4.ProparseListener;
 import org.prorefactor.proparse.support.IProparseEnvironment;
@@ -283,7 +284,10 @@ public class ParseUnit {
       lexer.enableWritableTokens();
     CommonTokenStream tokStream = new CommonTokenStream(lexer);
     Proparse parser = new Proparse(tokStream);
-    parser.setTrace(trace);
+    parser.setTrace(false);
+    if (trace) {
+      parser.addParseListener(new TraceListener(parser));
+    }
     parser.setProfile(profiler);
     parser.initAntlr4(session, xref);
     if (ambiguityReport) {
