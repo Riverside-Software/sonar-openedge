@@ -355,7 +355,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExprt2BuiltinFunc(Exprt2BuiltinFuncContext ctx) {
-    return createTree(ctx, ABLNodeType.BUILTIN_REF).setExpression(true);
+    return createTree(ctx, ABLNodeType.BUILTIN_FUNCTION).setExpression(true);
   }
 
   @Override
@@ -371,7 +371,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitNoArgFunction(NoArgFunctionContext ctx) {
-    return createTree(ctx, ABLNodeType.BUILTIN_REF).setExpression(true);
+    return createTree(ctx, ABLNodeType.BUILTIN_FUNCTION).setExpression(true);
   }
 
   @Override

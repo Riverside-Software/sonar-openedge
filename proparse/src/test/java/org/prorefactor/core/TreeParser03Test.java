@@ -1277,9 +1277,9 @@ public class TreeParser03Test {
     assertNotNull(unit.getRootScope());
     List<JPNode> list = unit.getTopNode().query(ABLNodeType.SUPER);
     assertEquals(list.size(), 4);
-    assertEquals(list.get(0).getParent().getNodeType(), ABLNodeType.BUILTIN_REF);
-    assertEquals(list.get(1).getParent().getNodeType(), ABLNodeType.BUILTIN_REF);
-    assertEquals(list.get(2).getParent().getNodeType(), ABLNodeType.BUILTIN_REF);
+    assertEquals(list.get(0).getParent().getNodeType(), ABLNodeType.BUILTIN_FUNCTION);
+    assertEquals(list.get(1).getParent().getNodeType(), ABLNodeType.BUILTIN_FUNCTION);
+    assertEquals(list.get(2).getParent().getNodeType(), ABLNodeType.BUILTIN_FUNCTION);
     assertEquals(list.get(3).getParent().getNodeType(), ABLNodeType.SYSTEM_HANDLE_REF);
   }
 
