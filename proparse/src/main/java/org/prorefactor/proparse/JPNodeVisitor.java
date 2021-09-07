@@ -2367,7 +2367,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitReturnStatement(ReturnStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    if (ctx.returnOption().ERROR() != null)
+      return createStatementTreeFromFirstNode(ctx, ABLNodeType.ERROR);
+    else if (ctx.returnOption().NOAPPLY() != null)
+      return createStatementTreeFromFirstNode(ctx, ABLNodeType.NOAPPLY);
+    else
+      return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
