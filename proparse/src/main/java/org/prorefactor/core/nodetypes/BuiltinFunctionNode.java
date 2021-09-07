@@ -98,7 +98,6 @@ public class BuiltinFunctionNode extends JPNode implements IExpression {
       case DAY:
       case DBTASKID:
       case DYNAMICCURRENTVALUE:
-      case ETIME:
       case EXTENT:
       case FRAMEDOWN:
       case FRAMELINE:
@@ -135,6 +134,7 @@ public class BuiltinFunctionNode extends JPNode implements IExpression {
       case WEEKDAY:
       case YEAR:
         return DataType.INTEGER;
+      case ETIME:
       case GETINT64:
       case GETPOINTERVALUE:
       case GETSIZE:
