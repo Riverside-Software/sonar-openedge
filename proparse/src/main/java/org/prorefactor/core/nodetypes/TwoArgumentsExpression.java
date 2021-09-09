@@ -36,20 +36,15 @@ public class TwoArgumentsExpression extends JPNode implements IExpression {
 
     switch (getNodeType()) {
       case PLUS:
-        if ((left == DataType.CHARACTER) || (right == DataType.CHARACTER))
-          return DataType.CHARACTER;
-        else if ((DataType.isDateLike(left) || DataType.isDateLike(right)) && (DataType.isNumeric(left) || DataType.isNumeric(right)))
-          return DataType.DATE;
-        else if (DataType.isNumeric(left) && DataType.isNumeric(right))
-          return DataType.INTEGER;
-        else
-          return DataType.NOT_COMPUTED;
+      case MINUS:
+        return handlePlus(left, right);
       case STAR:
       case MULTIPLY:
+        return handleMult(left, right);
       case SLASH:
       case DIVIDE:
+        return handleDiv(left, right);
       case MODULO:
-      case MINUS:
         return DataType.INTEGER;
       case EQUAL:
       case EQ:
@@ -80,4 +75,39 @@ public class TwoArgumentsExpression extends JPNode implements IExpression {
     return true;
   }
 
+  private DataType handlePlus(DataType left, DataType right) {
+    if ((left == DataType.LONGCHAR) || (right == DataType.LONGCHAR))
+      return DataType.LONGCHAR;
+    if ((left == DataType.CHARACTER) || (right == DataType.CHARACTER))
+      return DataType.CHARACTER;
+    else if ((DataType.isDateLike(left) || DataType.isDateLike(right)) && (DataType.isNumeric(left) || DataType.isNumeric(right)))
+      return DataType.isDateLike(left) ? left : right;
+    else if (DataType.isNumeric(left) && DataType.isNumeric(right)) {
+      if ((left == DataType.DECIMAL) || (right == DataType.DECIMAL))
+        return DataType.DECIMAL;
+      else if ((left == DataType.INT64) || (right == DataType.INT64) || (left == DataType.LONG)
+          || (right == DataType.LONG))
+        return DataType.INT64;
+      else
+        return DataType.INTEGER;
+    }
+    else
+      return DataType.NOT_COMPUTED;
+  }
+
+  private DataType handleMult(DataType left, DataType right) {
+    if ((left == DataType.DECIMAL) || (right == DataType.DECIMAL))
+      return DataType.DECIMAL;
+    else if ((left == DataType.INT64) || (right == DataType.INT64) || (left == DataType.LONG)
+        || (right == DataType.LONG))
+      return DataType.INT64;
+    else if ((left == DataType.INTEGER) || (right == DataType.INTEGER))
+      return DataType.INTEGER;
+    else
+      return DataType.NOT_COMPUTED;
+  }
+
+  private DataType handleDiv(DataType left, DataType right) {
+    return DataType.DECIMAL;
+  }
 }
