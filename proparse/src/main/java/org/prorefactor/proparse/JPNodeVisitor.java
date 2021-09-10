@@ -2070,6 +2070,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitNoReturnValueStatement(NoReturnValueStatementContext ctx) {
+    // Might be good to restrict expressionTerm to exprTermMethodCall and exprTermAttribute
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
   public Builder visitNullPhrase(NullPhraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }

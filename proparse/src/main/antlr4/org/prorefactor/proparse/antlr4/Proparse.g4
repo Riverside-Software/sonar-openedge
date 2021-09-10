@@ -230,6 +230,7 @@ statement:
   |  messageStatement
   |  nextStatement
   |  nextPromptStatement
+  |  noReturnValueStatement
   |  onStatement
   |  openQueryStatement
   |  osAppendStatement
@@ -2648,6 +2649,10 @@ nextPromptStatement:
 
 nextValueFunction:
     NEXTVALUE LEFTPAREN sequencename ( COMMA identifier )* RIGHTPAREN
+  ;
+
+noReturnValueStatement:
+    NORETURNVALUE expressionTerm // Only limited subset of expressionTerm is valid here
   ;
 
 nullPhrase:
