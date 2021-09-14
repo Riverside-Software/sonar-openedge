@@ -20,7 +20,6 @@ import org.prorefactor.core.ProToken;
 import com.google.common.base.Strings;
 
 import eu.rssw.pct.elements.DataType;
-import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
@@ -59,14 +58,8 @@ public class MethodCallNode extends JPNode implements IExpression {
     IExpression expr = (IExpression) getFirstChild();
     if (expr.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
       ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(expr.getDataType().getClassName());
-      if (info != null) {
-        for (IMethodElement m : info.getMethods()) {
-          if (m.getName().equalsIgnoreCase(methodName))
-            return m.getReturnType();
-        }
-      }
+      return ExpressionNode.getObjectMethodDataType(root.getParserSupport().getProparseSession(), info, methodName);
     } else if (expr.getDataType().getPrimitive() == PrimitiveDataType.HANDLE) {
-      // On va tenter quoi ??
       return ExpressionNode.getStandardMethodDataType(methodName.toUpperCase());
     }
 

@@ -54,6 +54,7 @@ public class TypeInfo implements ITypeInfo {
 
   private Collection<IMethodElement> methods = new ArrayList<>();
   private Collection<IPropertyElement> properties = new ArrayList<>();
+  private Collection<IVariableElement> variables = new ArrayList<>();
 
   public TypeInfo(String typeName, boolean iface, boolean abstrct, String parentTypeName, String assemblyName, String... interfaces) {
     this.typeName = typeName;
@@ -69,6 +70,10 @@ public class TypeInfo implements ITypeInfo {
 
   public void addProperty(IPropertyElement element) {
     properties.add(element);
+  }
+
+  public void addVariable(IVariableElement element) {
+    variables.add(element);
   }
 
   @Override
@@ -137,7 +142,7 @@ public class TypeInfo implements ITypeInfo {
 
   @Override
   public Collection<IVariableElement> getVariables() {
-    return Collections.emptyList();
+    return variables;
   }
 
   @Override
