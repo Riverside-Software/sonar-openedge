@@ -558,12 +558,12 @@ public class ParserTest {
     assertFalse(unit.hasSyntaxError());
 
     // Looking for the DEFINE node
-    JPNode node1 = (JPNode) unit.getTopNode().findDirectChild(ABLNodeType.DEFINE);
+    JPNode node1 = unit.getTopNode().findDirectChild(ABLNodeType.DEFINE);
     assertNotNull(node1);
     assertTrue(node1.isStateHead());
 
     // Looking for the NO-UNDO node, and trying to get the state-head node
-    JPNode node2 = (JPNode) unit.getTopNode().query(ABLNodeType.NOUNDO).get(0);
+    JPNode node2 = unit.getTopNode().query(ABLNodeType.NOUNDO).get(0);
     JPNode parent = node2;
     while (!parent.isStateHead()) {
       parent = parent.getPreviousNode();

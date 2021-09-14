@@ -35,6 +35,11 @@ public class ExpressionNode extends JPNode implements IExpression {
     return true;
   }
 
+  @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
   public static DataType getStandardAttributeDataType(String id) {
     switch (id) {
       case "ACCELERATOR":

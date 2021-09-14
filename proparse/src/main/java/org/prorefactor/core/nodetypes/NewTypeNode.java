@@ -31,6 +31,11 @@ public class NewTypeNode extends JPNode implements IExpression {
   }
 
   @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
+  @Override
   public DataType getDataType() {
     TypeNameNode typeNameNode = (TypeNameNode) getFirstChild().getNextSibling();
     return new DataType(typeNameNode.getQualName());

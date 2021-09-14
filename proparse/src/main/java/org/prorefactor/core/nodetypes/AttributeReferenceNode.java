@@ -78,4 +78,9 @@ public class AttributeReferenceNode extends JPNode implements IExpression {
     return true;
   }
 
+  @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
 }

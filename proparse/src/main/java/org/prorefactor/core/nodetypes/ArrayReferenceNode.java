@@ -34,4 +34,9 @@ public class ArrayReferenceNode extends JPNode implements IExpression {
   public boolean isExpression() {
     return true;
   }
+
+  @Override
+  public JPNode asJPNode() {
+    return this;
+  }
 }

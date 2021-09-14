@@ -75,6 +75,11 @@ public class TwoArgumentsExpression extends JPNode implements IExpression {
     return true;
   }
 
+  @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
   private DataType handlePlus(DataType left, DataType right) {
     if ((left == DataType.LONGCHAR) || (right == DataType.LONGCHAR))
       return DataType.LONGCHAR;

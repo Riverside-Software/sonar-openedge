@@ -45,6 +45,11 @@ public class MethodCallNode extends JPNode implements IExpression {
   }
 
   @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
+  @Override
   public DataType getDataType() {
     if (getFirstChild() instanceof SystemHandleNode) {
       SystemHandleNode shn = (SystemHandleNode) getFirstChild();

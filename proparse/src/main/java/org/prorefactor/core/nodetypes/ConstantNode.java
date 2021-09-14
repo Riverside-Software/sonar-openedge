@@ -31,6 +31,11 @@ public class ConstantNode extends JPNode implements IExpression {
   }
 
   @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
+  @Override
   public DataType getDataType() {
     switch (getFirstChild().getNodeType()) {
       case TRUE:

@@ -2,6 +2,8 @@ package org.prorefactor.core.nodetypes;
 
 import javax.annotation.Nonnull;
 
+import org.prorefactor.core.JPNode;
+
 import eu.rssw.pct.elements.DataType;
 
 public interface IExpression {
@@ -14,4 +16,7 @@ public interface IExpression {
     return DataType.NOT_COMPUTED;
   }
 
+  default JPNode asJPNode() {
+    return null;
+  }
 }

@@ -32,6 +32,11 @@ public class SystemHandleNode extends JPNode implements IExpression {
   }
 
   @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
+  @Override
   public DataType getDataType() {
     return DataType.HANDLE;
   }

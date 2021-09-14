@@ -33,6 +33,11 @@ public class BuiltinFunctionNode extends JPNode implements IExpression {
     return true;
   }
 
+  @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
   public DataType getAddIntervalDataType() {
     List<JPNode> nodes = getFirstChild().queryExpressions();
     if (nodes.size() != 3) {

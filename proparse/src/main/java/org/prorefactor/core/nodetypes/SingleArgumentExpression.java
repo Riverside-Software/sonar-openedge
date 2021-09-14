@@ -45,4 +45,9 @@ public class SingleArgumentExpression extends JPNode implements IExpression {
     return true;
   }
 
+  @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
 }
