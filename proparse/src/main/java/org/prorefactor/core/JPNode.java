@@ -1142,7 +1142,7 @@ public class JPNode {
           case WIDGET_REF:
             node = new WidgetNode(tok, up, num, hasChildren);
             break;
-          case BUILTIN_REF:
+          case BUILTIN_FUNCTION:
             node = new BuiltinFunctionNode(tok, up, num, hasChildren);
             break;
           case NEW_TYPE_REF:

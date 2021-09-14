@@ -54,6 +54,7 @@ import org.prorefactor.proparse.ABLLexer;
 import org.prorefactor.proparse.JPNodeVisitor;
 import org.prorefactor.proparse.ProparseErrorListener;
 import org.prorefactor.proparse.ProparseErrorStrategy;
+import org.prorefactor.proparse.TraceListener;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.antlr4.ProparseListener;
 import org.prorefactor.proparse.support.IProparseEnvironment;
@@ -283,7 +284,10 @@ public class ParseUnit {
       lexer.enableWritableTokens();
     CommonTokenStream tokStream = new CommonTokenStream(lexer);
     Proparse parser = new Proparse(tokStream);
-    parser.setTrace(trace);
+    parser.setTrace(false);
+    if (trace) {
+      parser.addParseListener(new TraceListener(parser));
+    }
     parser.setProfile(profiler);
     parser.initAntlr4(session, xref);
     if (ambiguityReport) {
@@ -305,7 +309,8 @@ public class ParseUnit {
       } catch (ParseCancellationException uncaught) {
         // Not really precise as it includes exception trapping
         parseTimeSLL = System.nanoTime() - startTimeNs;
-        LOGGER.info("Switching to LL prediction mode because of token: {}", tokStream.get(tokStream.index()));
+        LOGGER.info("File {} - Switching to LL prediction mode because of token: {}", relativeName,
+            tokStream.get(tokStream.index()));
         switchToLL = true;
         tokStream.seek(0);
         parser.addErrorListener(new ProparseErrorListener());

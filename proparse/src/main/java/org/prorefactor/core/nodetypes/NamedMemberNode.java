@@ -40,4 +40,9 @@ public class NamedMemberNode extends JPNode implements IExpression {
     return true;
   }
 
+  @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
 }

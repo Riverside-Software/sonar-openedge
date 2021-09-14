@@ -16,8 +16,13 @@ package org.prorefactor.core.nodetypes;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.proparse.support.IProparseEnvironment;
 
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IMethodElement;
+import eu.rssw.pct.elements.IPropertyElement;
+import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.IVariableElement;
 
 public class ExpressionNode extends JPNode implements IExpression {
 
@@ -28,6 +33,11 @@ public class ExpressionNode extends JPNode implements IExpression {
   @Override
   public boolean isExpression() {
     return true;
+  }
+
+  @Override
+  public JPNode asJPNode() {
+    return this;
   }
 
   public static DataType getStandardAttributeDataType(String id) {
@@ -719,4 +729,34 @@ public class ExpressionNode extends JPNode implements IExpression {
         return DataType.NOT_COMPUTED;
     }
   }
+
+  public static DataType getObjectMethodDataType(IProparseEnvironment session, ITypeInfo info, String methodName) {
+    while (info != null) {
+      for (IMethodElement m : info.getMethods()) {
+        if (m.getName().equalsIgnoreCase(methodName))
+          return m.getReturnType();
+      }
+      info = session.getTypeInfo(info.getParentTypeName());
+    }
+    return DataType.NOT_COMPUTED;
+  }
+
+  public static DataType getObjectAttributeDataType(IProparseEnvironment session, ITypeInfo info, String methodName, boolean firstLevel) {
+    while (info != null) {
+      for (IPropertyElement prop : info.getProperties()) {
+        if (prop.getName().equalsIgnoreCase(methodName))
+          return prop.getVariable().getDataType();
+      }
+      if (firstLevel) {
+      for (IVariableElement v : info.getVariables()) {
+        if (v.getName().equalsIgnoreCase(methodName))
+          return v.getDataType();
+      }
+      firstLevel = false;
+      }
+      info = session.getTypeInfo(info.getParentTypeName());
+    }
+    return DataType.NOT_COMPUTED;
+  }
+
 }

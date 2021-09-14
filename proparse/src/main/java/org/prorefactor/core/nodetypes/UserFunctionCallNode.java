@@ -44,6 +44,11 @@ public class UserFunctionCallNode extends JPNode implements IExpression {
   }
 
   @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
+  @Override
   public DataType getDataType() {
     ProgramRootNode root = getTopLevelParent();
     if (root == null)

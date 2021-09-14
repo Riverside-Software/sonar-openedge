@@ -24,63 +24,96 @@ grammar ProfilerGrammar;
 }
 
 profiler:
-  description module_data call_tree_data line_summary tracing_data coverage_data coverage_data2 user_data;
+  description
+  moduleData
+  callTreeData
+  lineSummary
+  tracingData
+  coverageData
+  statisticsData
+  coverageData2
+  userData;
 
 description:
   version=NUMBER
     { try { versionNumber = Integer.parseInt($version.text) ; } catch (NumberFormatException uncaught) { } } 
-  date=DATE desc=STRING time=TIME author=STRING
-  json_data
-  NEWLINE CHR_DOT NEWLINE;
+  date=DATE desc=STRING time=TIME author=STRING jsonData NEWLINE CHR_DOT NEWLINE;
 
-json_data:
-  { versionNumber >= 3 }?
+jsonData:
+  | { versionNumber >= 3 }?
   '{' STRING ':' ( NUMBER | FLOAT | STRING ) ( ',' STRING ':' ( NUMBER | FLOAT | STRING ) )* '}';
 
-module_data:
-  module_data_line* CHR_DOT NEWLINE;
+moduleData:
+  moduleDataLine* CHR_DOT NEWLINE;
 
-module_data_line:
+moduleDataLine:
   id=NUMBER name=STRING debugListingFile=STRING crc=NUMBER ( NUMBER STRING )? NEWLINE;
 
-call_tree_data:
-  call_tree_data_line* CHR_DOT NEWLINE;
+callTreeData:
+  callTreeDataLine* CHR_DOT NEWLINE;
 
-call_tree_data_line:
+callTreeDataLine:
   callerId=NUMBER callerLineNum=NUMBER calleeId=NUMBER callCount=NUMBER NEWLINE;
 
-line_summary:
-  line_summary_line* CHR_DOT NEWLINE;
+lineSummary:
+  lineSummaryLine* CHR_DOT NEWLINE;
 
-line_summary_line:
+lineSummaryLine:
   moduleId=NUMBER lineNumber=NUMBER execCount=NUMBER actualTime=FLOAT cumulativeTime=FLOAT NEWLINE;
 
-tracing_data:
-  tracing_data_line* CHR_DOT NEWLINE;
+tracingData:
+  tracingDataLine* CHR_DOT NEWLINE;
 
-tracing_data_line:
+tracingDataLine:
   moduleId=NUMBER lineNumber=NUMBER execTime=FLOAT timestamp=FLOAT NEWLINE;
 
-coverage_data:
-  coverage_section* CHR_DOT NEWLINE;
+coverageData:
+  coverageSection* CHR_DOT NEWLINE;
 
-coverage_section:
+coverageSection:
   moduleId=NUMBER name=STRING lineCount=NUMBER NEWLINE coverage_section_line+ CHR_DOT NEWLINE;
 
 coverage_section_line:
   linenum=NUMBER NEWLINE;
 
-coverage_data2:
-  { versionNumber >= 3 }?
-  coverage_section2_line* CHR_DOT NEWLINE;
+coverageData2:
+  | { versionNumber >= 3 }? coverageSection2Line* CHR_DOT NEWLINE;
 
-coverage_section2_line:
+coverageSection2Line:
   NUMBER NUMBER NUMBER NUMBER NUMBER FLOAT NUMBER* NEWLINE;
 
-user_data:
-  user_data_line* CHR_DOT NEWLINE;
+statisticsData:
+  | { (versionNumber == 2) || (versionNumber == 4) }?
+  stats1Data stats2Data stats3Data stats4Data;
 
-user_data_line:
+stats1Data:
+  stats1Line* CHR_DOT NEWLINE;
+
+stats2Data:
+  stats2Line* CHR_DOT NEWLINE;
+
+stats3Data:
+  stats3Line* CHR_DOT NEWLINE;
+
+stats4Data:
+  stats4Line CHR_DOT NEWLINE;
+
+stats1Line:
+  NUMBER NUMBER NUMBER STRING NEWLINE;
+
+stats2Line:
+  NUMBER FLOAT+ NEWLINE;
+
+stats3Line:
+  NUMBER+ NEWLINE;
+
+stats4Line:
+  NUMBER NUMBER STRING NEWLINE;
+
+userData:
+  userDataLine* CHR_DOT NEWLINE;
+
+userDataLine:
   FLOAT STRING NEWLINE;
 
 fragment INT:

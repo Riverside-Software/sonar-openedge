@@ -387,6 +387,13 @@ public class JPNodeTest {
   }
 
   @Test
+  public void testNoReturnValue() {
+    ParseUnit unit = genericTest("noreturnvalue01.p");
+    List<JPNode> nodes = unit.getTopNode().queryStateHead(ABLNodeType.NORETURNVALUE);
+    assertEquals(nodes.size(), 6);
+  }
+
+  @Test
   public void testXref01() throws JAXBException, IOException {
     InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref01.p.xref"));
     SAXSource source = new SAXSource(reader, is);

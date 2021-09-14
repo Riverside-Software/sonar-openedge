@@ -230,6 +230,7 @@ statement:
   |  messageStatement
   |  nextStatement
   |  nextPromptStatement
+  |  noReturnValueStatement
   |  onStatement
   |  openQueryStatement
   |  osAppendStatement
@@ -523,6 +524,7 @@ expressionTerm2:
   | constant   # exprt2Constant
   | noArgFunction  # exprt2NoArgFunc
   | field ( NOT? ENTERED )?  # exprt2Field
+  | SUPER # exprt2Super
   ;
 
 widName:
@@ -2647,6 +2649,10 @@ nextPromptStatement:
 
 nextValueFunction:
     NEXTVALUE LEFTPAREN sequencename ( COMMA identifier )* RIGHTPAREN
+  ;
+
+noReturnValueStatement:
+    NORETURNVALUE expressionTerm // Only limited subset of expressionTerm is valid here
   ;
 
 nullPhrase:

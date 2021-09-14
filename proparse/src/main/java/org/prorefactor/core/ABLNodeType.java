@@ -151,7 +151,7 @@ public enum ABLNodeType {
   AUTOMATION_OBJECT(Proparse.Automationobject, NodeTypesOption.STRUCTURE),
   BLOCK_ITERATOR(Proparse.Block_iterator, NodeTypesOption.STRUCTURE),
   BLOCK_LABEL(Proparse.Block_label, NodeTypesOption.STRUCTURE),
-  BUILTIN_REF(Proparse.Built_in_func, NodeTypesOption.STRUCTURE),
+  BUILTIN_FUNCTION(Proparse.Built_in_func, NodeTypesOption.STRUCTURE),
   CODE_BLOCK(Proparse.Code_block, NodeTypesOption.STRUCTURE),
   CONSTANT_REF(Proparse.Constant_ref, NodeTypesOption.STRUCTURE),
   EDITING_PHRASE(Proparse.Editing_phrase, NodeTypesOption.STRUCTURE),

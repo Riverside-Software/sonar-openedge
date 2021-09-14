@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2015-2021 Riverside Software
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * This Source Code may also be made available under the following Secondary
+ * Licenses when the conditions for such availability set forth in the Eclipse
+ * Public License, v. 2.0 are satisfied: GNU Lesser General Public License v3.0
+ * which is available at https://www.gnu.org/licenses/lgpl-3.0.txt
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
+ ********************************************************************************/
 package org.prorefactor.proparse;
 
 import static org.testng.Assert.assertEquals;
@@ -29,6 +43,10 @@ import com.google.inject.Injector;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.PrimitiveDataType;
+import eu.rssw.pct.elements.fixed.MethodElement;
+import eu.rssw.pct.elements.fixed.PropertyElement;
+import eu.rssw.pct.elements.fixed.TypeInfo;
+import eu.rssw.pct.elements.fixed.VariableElement;
 
 public class ExpressionEngineTest {
   private RefactorSession session;
@@ -37,6 +55,18 @@ public class ExpressionEngineTest {
   public void setUp() throws IOException, InvalidRCodeException {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
+
+    // For testObjectAttribute02
+    TypeInfo typeInfo01 = new TypeInfo("rssw.test.Class02", false, false, "Progress.Lang.Object", "");
+    typeInfo01.addProperty(new PropertyElement("p1", false, DataType.CHARACTER));
+    typeInfo01.addVariable(new VariableElement("v1", DataType.LONGCHAR));
+    session.injectTypeInfo(typeInfo01);
+
+    // For testObjectMethod03
+    TypeInfo typeInfo02 = new TypeInfo("rssw.test.Class03", false, false, "Progress.Lang.Object", "");
+    typeInfo02.addMethod(new MethodElement("m1", false, DataType.VOID));
+    typeInfo02.addMethod(new MethodElement("m2", false, DataType.INT64));
+    session.injectTypeInfo(typeInfo02);
   }
 
   @Test
@@ -50,7 +80,8 @@ public class ExpressionEngineTest {
 
   @Test
   public void testNamedMember01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define temp-table tt1 field fld1 as int. define buffer b1 for tt1. buffer b1::fld1.".getBytes()), session);
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "define temp-table tt1 field fld1 as int. define buffer b1 for tt1. buffer b1::fld1.".getBytes()), session);
     unit.treeParser01();
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
@@ -62,7 +93,10 @@ public class ExpressionEngineTest {
 
   @Test
   public void testNamedMemberArray01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define temp-table tt1 field fld1 as int extent. define buffer b1 for tt1. buffer b1::fld1(1).".getBytes()), session);
+    ParseUnit unit = new ParseUnit(
+        new ByteArrayInputStream(
+            "define temp-table tt1 field fld1 as int extent. define buffer b1 for tt1. buffer b1::fld1(1).".getBytes()),
+        session);
     unit.treeParser01();
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
@@ -110,7 +144,8 @@ public class ExpressionEngineTest {
   public void testBuiltinFunctions() {
     testSimpleExpression("def var hnd as handle. valid-handle(hnd).", DataType.LOGICAL);
     testSimpleExpression("def var xxx as Progress.Lang.Object. get-class(xxx).", new DataType("Progress.Lang.Class"));
-    testSimpleExpression("def var xx as Progress.Lang.Object. message cast(new Progress.Lang.Object(), Progress.Lang.Class).",
+    testSimpleExpression(
+        "def var xx as Progress.Lang.Object. message cast(new Progress.Lang.Object(), Progress.Lang.Class).",
         new DataType("Progress.Lang.Class"));
     testSimpleExpression("def var xx as datetime. message add-interval(xx, 1, 'weeks').", DataType.DATETIME);
     testSimpleExpression("def var xx as datetime-tz. message add-interval(xx, 1, 'weeks').", DataType.DATETIME_TZ);
@@ -302,14 +337,15 @@ public class ExpressionEngineTest {
     assertEquals(exp.getDataType().getClassName(), "Progress.Lang.Object");
   }
 
-  @Test(enabled = false) // TODO Implementation missing for now
+  @Test
   public void testObjectAttribute02() {
-    ParseUnit unit = new ParseUnit(
-        new ByteArrayInputStream("class rssw.pct: define property p1 as char get. set. define variable v1 as longchar. method void m1(): this-object:p1. this-object:v1. end method. end class.".getBytes()), session);
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "class rssw.test.Class02: define property p1 as char get. set. define variable v1 as longchar. method void m1(): this-object:p1. this-object:v1. super:Prev-Sibling. super:Next-Sibling. end method. end class.".getBytes()),
+        session);
     unit.treeParser01();
 
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
-    assertEquals(nodes.size(), 2);
+    assertEquals(nodes.size(), 4);
 
     assertTrue(nodes.get(0).isExpression());
     assertTrue(nodes.get(0) instanceof AttributeReferenceNode);
@@ -320,12 +356,24 @@ public class ExpressionEngineTest {
     assertTrue(nodes.get(1) instanceof AttributeReferenceNode);
     IExpression exp2 = (IExpression) nodes.get(1);
     assertEquals(exp2.getDataType(), DataType.LONGCHAR);
+
+    assertTrue(nodes.get(2).isExpression());
+    assertTrue(nodes.get(2) instanceof AttributeReferenceNode);
+    IExpression exp3 = (IExpression) nodes.get(2);
+    assertEquals(exp3.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+
+    assertTrue(nodes.get(3).isExpression());
+    assertTrue(nodes.get(3) instanceof AttributeReferenceNode);
+    IExpression exp4 = (IExpression) nodes.get(3);
+    assertEquals(exp4.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
   }
 
   @Test
   public void testObjectMethod() {
     ParseUnit unit = new ParseUnit(
-        new ByteArrayInputStream("def var xx as Progress.Lang.Object. message xx:toString(). message xx:UnknownMethod().".getBytes()), session);
+        new ByteArrayInputStream(
+            "def var xx as Progress.Lang.Object. message xx:toString(). message xx:UnknownMethod().".getBytes()),
+        session);
     unit.treeParser01();
 
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
@@ -344,8 +392,8 @@ public class ExpressionEngineTest {
 
   @Test
   public void testObjectMethod02() {
-    ParseUnit unit = new ParseUnit(
-        new ByteArrayInputStream("class rssw.pct: method void m1(): toString(). foobar(). end method. end class.".getBytes()), session);
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "class rssw.pct: method void m1(): toString(). foobar(). end method. end class.".getBytes()), session);
     unit.treeParser01();
 
     List<JPNode> nodes = unit.getTopNode().queryExpressions();
@@ -365,9 +413,33 @@ public class ExpressionEngineTest {
   }
 
   @Test
+  public void testObjectMethod03() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "class rssw.test.Class03: method void m1(): this-object:m2(). super:toString(). end method. method int64 m2(): return 0. end method. end class.".getBytes()),
+        session);
+    unit.treeParser01();
+
+    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 3);
+
+    assertTrue(nodes.get(0).isExpression());
+    assertTrue(nodes.get(0) instanceof MethodCallNode);
+    MethodCallNode exp = (MethodCallNode) nodes.get(0);
+    assertEquals(exp.getMethodName(), "m2");
+    assertEquals(exp.getDataType(), DataType.INT64);
+
+    assertTrue(nodes.get(1).isExpression());
+    assertTrue(nodes.get(1) instanceof MethodCallNode);
+    MethodCallNode exp2 = (MethodCallNode) nodes.get(1);
+    assertEquals(exp2.getMethodName(), "toString");
+    assertEquals(exp2.getDataType(), DataType.CHARACTER);
+  }
+
+  @Test
   public void testFunctions() {
-    ParseUnit unit = new ParseUnit(
-        new ByteArrayInputStream("function f1 returns char(): end function. function f2 returns int64(): end function. f1(). f2().".getBytes()), session);
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
+        "function f1 returns char(): end function. function f2 returns int64(): end function. f1(). f2().".getBytes()),
+        session);
     unit.treeParser01();
 
     List<JPNode> nodes = unit.getTopNode().queryExpressions();

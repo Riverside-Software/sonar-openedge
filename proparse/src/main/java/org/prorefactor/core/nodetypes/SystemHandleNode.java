@@ -14,11 +14,11 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
-import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.ITypeInfo;
 
 public class SystemHandleNode extends JPNode implements IExpression {
 
@@ -32,15 +32,26 @@ public class SystemHandleNode extends JPNode implements IExpression {
   }
 
   @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
+  @Override
   public DataType getDataType() {
     return DataType.HANDLE;
   }
 
   public DataType getAttributeDataType(String id) {
-    ABLNodeType type = getFirstChild().getNodeType();
-    if (type == ABLNodeType.ACTIVEFORM)
-      return getActiveFormAttributeDataType(id);
-    return ExpressionNode.getStandardAttributeDataType(id);
+    switch (getFirstChild().getNodeType()) {
+      case ACTIVEFORM:
+        return getActiveFormAttributeDataType(id);
+      case SUPER:
+        return getSuperAttributeDataType(id);
+      case THISOBJECT:
+        return getThisObjectAttributeDataType(id);
+      default:
+        return ExpressionNode.getStandardAttributeDataType(id);
+    }
   }
 
   public DataType getMethodDataType(String id) {
@@ -55,9 +66,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
       case MOUSE:
       case RCODEINFORMATION:
       case SELF:
-      case SUPER: // TODO
       case TEXTCURSOR: // TODO Verify
-      case THISOBJECT: // TODO
         // No methods
         return DataType.UNKNOWN;
       case ACTIVEWINDOW:
@@ -86,6 +95,10 @@ public class SystemHandleNode extends JPNode implements IExpression {
         return getSecurityPolicyMethodDataType(id);
       case SESSION:
         return getSessionMethodDataType(id);
+      case SUPER:
+        return getSuperMethodDataType(id);
+      case THISOBJECT:
+        return getThisObjectMethodDataType(id);
       case SOURCEPROCEDURE:
       case TARGETPROCEDURE:
       case THISPROCEDURE:
@@ -271,6 +284,48 @@ public class SystemHandleNode extends JPNode implements IExpression {
       default:
         return DataType.NOT_COMPUTED;
     }
+  }
+
+  private DataType getSuperAttributeDataType(String id) {
+    ProgramRootNode root = getTopLevelParent();
+    if (root == null)
+      return DataType.NOT_COMPUTED;
+    ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(root.getParserSupport().getClassName());
+    if ((info == null) || (info.getParentTypeName() == null))
+      return DataType.NOT_COMPUTED;
+    info = root.getParserSupport().getProparseSession().getTypeInfo(info.getParentTypeName());
+    return ExpressionNode.getObjectAttributeDataType(root.getParserSupport().getProparseSession(), info, id, false);
+  }
+
+  private DataType getSuperMethodDataType(String id) {
+    ProgramRootNode root = getTopLevelParent();
+    if (root == null)
+      return DataType.NOT_COMPUTED;
+    ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(root.getParserSupport().getClassName());
+    if ((info == null) || (info.getParentTypeName() == null))
+      return DataType.NOT_COMPUTED;
+    info = root.getParserSupport().getProparseSession().getTypeInfo(info.getParentTypeName());
+    return ExpressionNode.getObjectMethodDataType(root.getParserSupport().getProparseSession(), info, id);
+  }
+
+  private DataType getThisObjectAttributeDataType(String id) {
+    ProgramRootNode root = getTopLevelParent();
+    if (root == null)
+      return DataType.NOT_COMPUTED;
+    ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(root.getParserSupport().getClassName());
+    if (info == null)
+      return DataType.NOT_COMPUTED;
+    return ExpressionNode.getObjectAttributeDataType(root.getParserSupport().getProparseSession(), info, id, true);
+  }
+
+  private DataType getThisObjectMethodDataType(String id) {
+    ProgramRootNode root = getTopLevelParent();
+    if (root == null)
+      return DataType.NOT_COMPUTED;
+    ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(root.getParserSupport().getClassName());
+    if (info == null)
+      return DataType.NOT_COMPUTED;
+    return ExpressionNode.getObjectMethodDataType(root.getParserSupport().getProparseSession(), info, id);
   }
 
   private DataType getWebContextMethodDataType(String id) {

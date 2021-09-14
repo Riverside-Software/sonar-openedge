@@ -55,6 +55,11 @@ public class FieldRefNode extends JPNode implements IExpression {
     return true;
   }
 
+  @Override
+  public JPNode asJPNode() {
+    return this;
+  }
+
   /**
    * We very often need to reference the ID node for a Field_ref node. The Field_ref node is a synthetic node - it
    * doesn't have any text. If we want the field/variable name, or the file/line/column, then we probably want to get

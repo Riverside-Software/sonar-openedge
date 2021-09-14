@@ -355,7 +355,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExprt2BuiltinFunc(Exprt2BuiltinFuncContext ctx) {
-    return createTree(ctx, ABLNodeType.BUILTIN_REF).setExpression(true);
+    return createTree(ctx, ABLNodeType.BUILTIN_FUNCTION).setExpression(true);
   }
 
   @Override
@@ -371,7 +371,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitNoArgFunction(NoArgFunctionContext ctx) {
-    return createTree(ctx, ABLNodeType.BUILTIN_REF).setExpression(true);
+    return createTree(ctx, ABLNodeType.BUILTIN_FUNCTION).setExpression(true);
   }
 
   @Override
@@ -380,6 +380,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
       return createTree(ctx, ABLNodeType.ENTERED_FUNC).setExpression(true);
     else
       return visitChildren(ctx).setExpression(true);
+  }
+
+  @Override
+  public Builder visitExprt2Super(Exprt2SuperContext ctx) {
+    return createTree(ctx, ABLNodeType.SYSTEM_HANDLE_REF).setExpression(true);
   }
 
   @Override
@@ -2065,6 +2070,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitNoReturnValueStatement(NoReturnValueStatementContext ctx) {
+    // Might be good to restrict expressionTerm to exprTermMethodCall and exprTermAttribute
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
   public Builder visitNullPhrase(NullPhraseContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
@@ -2362,7 +2373,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitReturnStatement(ReturnStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    if (ctx.returnOption().ERROR() != null)
+      return createStatementTreeFromFirstNode(ctx, ABLNodeType.ERROR);
+    else if (ctx.returnOption().NOAPPLY() != null)
+      return createStatementTreeFromFirstNode(ctx, ABLNodeType.NOAPPLY);
+    else
+      return createStatementTreeFromFirstNode(ctx);
   }
 
   @Override
@@ -2522,7 +2538,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitSuperStatement(SuperStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createTree(ctx, ABLNodeType.METHOD_REF).setStatement().setRuleNode(ctx);
   }
 
   @Override
