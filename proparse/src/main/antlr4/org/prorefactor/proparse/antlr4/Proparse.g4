@@ -3212,7 +3212,8 @@ stopStatement:
   ;
 
 superStatement:
-    SUPER LEFTPAREN ( parameter ( COMMA parameter )* )? RIGHTPAREN statementEnd
+    // Only for SUPER(...) in FUNCTION ; SUPER() in a class is handled by exprt2ParenCall2
+    SUPER parameterListNoRoot statementEnd // TODO Use parameterList
   ;
 
 streamNameOrHandle:
