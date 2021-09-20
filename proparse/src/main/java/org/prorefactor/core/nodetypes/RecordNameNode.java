@@ -15,12 +15,8 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
-import javax.annotation.Nonnull;
-
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.proparse.support.SymbolScope.FieldType;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -85,24 +81,6 @@ public class RecordNameNode extends JPNode {
   @Override
   public boolean hasTableBuffer() {
     return getSymbol() instanceof TableBuffer;
-  }
-
-  /** Set the 'store type' attribute on a RECORD_NAME node. */
-  public void setStoreType(@Nonnull FieldType tabletype) {
-    switch (tabletype) {
-      case DBTABLE:
-        attrSet(IConstants.STORETYPE, IConstants.ST_DBTABLE);
-        break;
-      case TTABLE:
-        attrSet(IConstants.STORETYPE, IConstants.ST_TTABLE);
-        break;
-      case WTABLE:
-        attrSet(IConstants.STORETYPE, IConstants.ST_WTABLE);
-        break;
-      case VARIABLE:
-        // Never happens
-        break;
-    }
   }
 
 }

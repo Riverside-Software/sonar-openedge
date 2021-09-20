@@ -16,10 +16,8 @@ package org.prorefactor.core;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -76,13 +74,19 @@ public class JPNode {
   private Block inBlock;
   // Annotations found on statements (and blocks)
   private List<String> annotations;
+  private boolean statement;
+  private int state2;
 
   // Fields are usually set in TreeParser
   private Symbol symbol;
   private FieldContainer container;
   private BufferScope bufferScope;
 
-  private Map<Integer, Integer> attrMap;
+  private boolean operator;
+  private boolean inlineVar;
+  private int storeType;
+  private boolean abbrev;
+  private boolean invalidUseIndex;
 
   protected JPNode(ProToken token, JPNode parent, int num, boolean hasChildren) {
     this.token = token;
@@ -509,37 +513,43 @@ public class JPNode {
   // Various attributes management
   // *****************************
 
-  public int attrGet(int key) {
-    if ((attrMap != null) && attrMap.containsKey(key)) {
-      return attrMap.get(key);
-    }
-    switch (key) {
-      case IConstants.ABBREVIATED:
-        return isAbbreviated() ? 1 : 0;
-      default:
-        return 0;
-    }
-  }
-
-  public void attrSet(Integer key, int val) {
-    if (attrMap == null)
-      initAttrMap();
-    attrMap.put(key, val);
-  }
-
   /**
    * Mark a node as "operator"
    */
   public void setOperator() {
-    attrSet(IConstants.OPERATOR, IConstants.TRUE);
+    this.operator = true;
   }
 
   public boolean isOperator() {
-    return attrGet(IConstants.OPERATOR) == IConstants.TRUE;
+    return operator;
   }
 
   public int getState2() {
-    return attrGet(IConstants.STATE2);
+    return state2;
+  }
+
+  public boolean isInlineVar() {
+    return inlineVar;
+  }
+
+  public int getStoreType() {
+    return storeType;
+  }
+
+  public void setStoreType(int storeType) {
+    this.storeType = storeType;
+  }
+
+  public void setAbbrev(boolean abbrev) {
+    this.abbrev = abbrev;
+  }
+
+  public void setInvalidUseIndex(boolean invalidUseIndex) {
+    this.invalidUseIndex = invalidUseIndex;
+  }
+
+  public boolean isInvalidUseIndex() {
+    return invalidUseIndex;
   }
 
   /**
@@ -570,14 +580,14 @@ public class JPNode {
 
   /** Mark a node as a "statement head" */
   public void setStatementHead() {
-    attrSet(IConstants.STATEHEAD, IConstants.TRUE);
+    this.statement = true;
   }
 
   /** Mark a node as a "statement head" */
   public void setStatementHead(int state2) {
-    attrSet(IConstants.STATEHEAD, IConstants.TRUE);
+    this.statement = true;
     if (state2 != 0)
-      attrSet(IConstants.STATE2, state2);
+      this.state2 = state2;
   }
 
   /** Certain nodes will have a link to a Symbol, set by TreeParser. */
@@ -741,16 +751,8 @@ public class JPNode {
     return annName.toString();
   }
 
-
-
-  private void initAttrMap() {
-    if (attrMap == null) {
-      attrMap = new HashMap<>();
-    }
-  }
-
   public boolean isAbbreviated() {
-    return token.isAbbreviated();
+    return token.isAbbreviated() || abbrev;
   }
 
   /**
@@ -769,9 +771,8 @@ public class JPNode {
 
   /** Does this node have the Proparse STATEHEAD attribute? */
   public boolean isStateHead() {
-    return attrGet(IConstants.STATEHEAD) == IConstants.TRUE;
+    return statement;
   }
-
 
   /**
    * Used by TreeParser in order to assign Symbol to the right node
@@ -1254,17 +1255,17 @@ public class JPNode {
       if (operator)
         node.setOperator();
       if (inline)
-        node.attrSet(IConstants.INLINE_VAR_DEF, IConstants.TRUE);
+        node.inlineVar = true;
       if (tabletype != null) {
         switch (tabletype) {
           case DBTABLE:
-            node.attrSet(IConstants.STORETYPE, IConstants.ST_DBTABLE);
+            node.storeType = IConstants.ST_DBTABLE;
             break;
           case TTABLE:
-            node.attrSet(IConstants.STORETYPE, IConstants.ST_TTABLE);
+            node.storeType = IConstants.ST_TTABLE;
             break;
           case WTABLE:
-            node.attrSet(IConstants.STORETYPE, IConstants.ST_WTABLE);
+            node.storeType = IConstants.ST_WTABLE;
             break;
           case VARIABLE:
             // Never happens

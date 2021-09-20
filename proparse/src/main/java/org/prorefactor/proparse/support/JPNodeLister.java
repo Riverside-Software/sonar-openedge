@@ -18,7 +18,6 @@ package org.prorefactor.proparse.support;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 
 /**
@@ -87,9 +86,8 @@ public class JPNodeLister {
     if (showFileName)
       ofile.append(Integer.toString(node.getFileIndex())).append(spacer);
     if (showStore) {
-      int storetype = node.attrGet(IConstants.STORETYPE);
-      if (storetype != 0)
-        ofile.append(Integer.toString(storetype)).append(spacer);
+      if (node.getStoreType() != 0)
+        ofile.append(Integer.toString(node.getStoreType())).append(spacer);
     }
     ofile.append(getExtraInfo(node, spacer));
     ofile.println();

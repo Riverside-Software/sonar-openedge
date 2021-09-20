@@ -86,12 +86,12 @@ public class TreeNodeLister {
       return;
     ofile.write(String.format("%3s %s", tabs, java.nio.CharBuffer.allocate(tabs).toString().replace('\0', ' ')));
     ofile.write(node.getNodeType() + (node.isStateHead() ? "^ " : " ") + (node.isStateHead() && node.getState2() != 0 ? node.getState2() : ""));
-    if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE)
+    if (node.isOperator())
       ofile.write("*OP* ");
-    if (node.attrGet(IConstants.INLINE_VAR_DEF) == IConstants.TRUE)
+    if (node.isInlineVar())
       ofile.write("*IN* ");
-    if (node.attrGet(IConstants.STORETYPE) > 0)
-      ofile.write("StoreType " + node.attrGet(IConstants.STORETYPE) + " ");
+    if (node.getStoreType() > 0)
+      ofile.write("StoreType " + node.getStoreType() + " ");
     if ((node.getNodeType() == ABLNodeType.ID) || (node.getNodeType() == ABLNodeType.TYPE_NAME)) {
       ofile.write("[");
       ofile.write(node.getText().replace('\'', ' ').replace('"', ' '));

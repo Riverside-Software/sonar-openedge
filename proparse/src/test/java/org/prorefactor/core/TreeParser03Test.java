@@ -98,13 +98,12 @@ public class TreeParser03Test {
     for (JPNode node : unit.getTopNode().query(ABLNodeType.DEFINE)) {
       if ((node.getState2() == ABLNodeType.TEMPTABLE.getType())
           && "myTT2".equals(node.getNextNode().getNextNode().getText())) {
-        assertEquals(node.query(ABLNodeType.USEINDEX).get(0).getNextNode().attrGet(IConstants.INVALID_USEINDEX),
-            IConstants.TRUE);
+        assertTrue(node.query(ABLNodeType.USEINDEX).get(0).getNextNode().isInvalidUseIndex());
         found1 = true;
       }
       if ((node.getState2() == ABLNodeType.TEMPTABLE.getType())
           && "myTT3".equals(node.getNextNode().getNextNode().getText())) {
-        assertEquals(node.query(ABLNodeType.USEINDEX).get(0).getNextNode().attrGet(IConstants.INVALID_USEINDEX), 0);
+        assertFalse(node.query(ABLNodeType.USEINDEX).get(0).getNextNode().isInvalidUseIndex());
         found2 = true;
       }
     }
@@ -489,7 +488,7 @@ public class TreeParser03Test {
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     JPNode node = unit.getTopNode().findDirectChild(ABLNodeType.DEFINE);
-    assertEquals(ABLNodeType.VARIABLE.getType(), node.attrGet(IConstants.STATE2));
+    assertEquals(node.getState2(), ABLNodeType.VARIABLE.getType());
   }
 
   @Test

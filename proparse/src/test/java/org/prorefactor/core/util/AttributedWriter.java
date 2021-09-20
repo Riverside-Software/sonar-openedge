@@ -25,6 +25,7 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.TwoArgumentsExpression;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
@@ -86,9 +87,9 @@ public class AttributedWriter {
     nodeComments.append(symbol.getScope().depth());
     nodeComments.append(":");
     nodeComments.append(symbol.fullName());
-    if ((node.getNodeType() != ABLNodeType.DEFINE) && (node.attrGet(IConstants.ABBREVIATED) > 0))
+    if ((node.getNodeType() != ABLNodeType.DEFINE) && node.isAbbreviated())
       nodeComments.append(" abbrev");
-    if (node.attrGet(IConstants.UNQUALIFIED_FIELD) > 0)
+    if ((node instanceof FieldRefNode) && ((FieldRefNode) node).isUnqualifiedField())
       nodeComments.append(" unqualfield");
   }
 

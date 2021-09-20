@@ -28,6 +28,7 @@ import eu.rssw.pct.elements.DataType;
  */
 public class FieldRefNode extends ExpressionNode {
   private ContextQualifier qualifier;
+  private boolean unqualifiedField;
 
   public FieldRefNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
@@ -39,6 +40,14 @@ public class FieldRefNode extends ExpressionNode {
 
   public ContextQualifier getQualifier() {
     return qualifier;
+  }
+
+  public void setUnqualifiedField(boolean unqualifiedField) {
+    this.unqualifiedField = unqualifiedField;
+  }
+
+  public boolean isUnqualifiedField() {
+    return unqualifiedField;
   }
 
   /**
