@@ -24,7 +24,6 @@ import java.util.List;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Field;
@@ -262,7 +261,7 @@ public class FrameStack {
     JPNode frameIDNode = containerTypeNode.nextNode();
     assert frameIDNode.getType() == Proparse.ID;
     Frame frame = frameRefSet(frameIDNode, currentBlock.getSymbolScope());
-    frame.setFrameScopeBlockExplicitDefault(((BlockNode) blockNode).getBlock());
+    frame.setFrameScopeBlockExplicitDefault(blockNode.getBlock());
     blockNode.setFieldContainer(frame);
     containerForCurrentStatement = frame;
   }

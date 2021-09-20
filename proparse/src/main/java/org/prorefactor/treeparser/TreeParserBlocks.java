@@ -110,7 +110,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
       throw new IllegalStateException("TreeParser has already been executed...");
     }
 
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = pushBlock(new Block(rootScope, blockNode, null));
     rootScope.setRootBlock(currentBlock);
     blockNode.setBlock(currentBlock);
@@ -160,7 +160,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterConstructorStatement(ConstructorStatementContext ctx) {
-    newRoutine((BlockNode) support.getNode(ctx), "", ABLNodeType.CONSTRUCTOR);
+    newRoutine(support.getNode(ctx), "", ABLNodeType.CONSTRUCTOR);
   }
 
   @Override
@@ -172,7 +172,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
   @Override
   public void enterCanFindFunction(CanFindFunctionContext ctx) {
     // ...create a can-find scope and block (assigns currentBlock)...
-    scopeAdd((BlockNode) support.getNode(ctx));
+    scopeAdd(support.getNode(ctx));
   }
 
   @Override
@@ -183,7 +183,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
   @Override
   public void enterDefinePropertyAccessorGetBlock(DefinePropertyAccessorGetBlockContext ctx) {
     if (ctx.codeBlock() != null) {
-      BlockNode node = (BlockNode) support.getNode(ctx);
+      JPNode node = support.getNode(ctx);
       newRoutine(node, node.getText(), node.getNodeType());
     }
   }
@@ -191,7 +191,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
   @Override
   public void enterDefinePropertyAccessorSetBlock(DefinePropertyAccessorSetBlockContext ctx) {
     if (ctx.codeBlock() != null) {
-      BlockNode node = (BlockNode) support.getNode(ctx);
+      JPNode node = support.getNode(ctx);
       newRoutine(node, node.getText(), node.getNodeType());
     }
   }
@@ -210,7 +210,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterDestructorStatement(DestructorStatementContext ctx) {
-    newRoutine((BlockNode) support.getNode(ctx), "", ABLNodeType.DESTRUCTOR);
+    newRoutine(support.getNode(ctx), "", ABLNodeType.DESTRUCTOR);
   }
 
   @Override
@@ -258,8 +258,8 @@ public class TreeParserBlocks extends ProparseBaseListener {
     Routine fwdRoutine = forwardScope != null ? forwardScope.getRoutine() : null;
 
     TreeParserSymbolScope definingScope = currentScope;
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
-    newRoutine((BlockNode) support.getNode(ctx), ctx.id.getText(), ABLNodeType.FUNCTION);
+    JPNode blockNode = support.getNode(ctx);
+    newRoutine(blockNode, ctx.id.getText(), ABLNodeType.FUNCTION);
     if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
         || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
       currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
@@ -300,7 +300,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
   public void enterExternalFunctionStatement(ExternalFunctionStatementContext ctx) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> New external function definition '{}'", indent(), ctx.id.getText());
-    newRoutine((BlockNode) support.getNode(ctx), ctx.id.getText(), ABLNodeType.FUNCTION);
+    newRoutine(support.getNode(ctx), ctx.id.getText(), ABLNodeType.FUNCTION);
 
     if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
         || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
@@ -318,7 +318,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterMethodStatement(MethodStatementContext ctx) {
-    newRoutine((BlockNode) support.getNode(ctx), ctx.id.getText(), ABLNodeType.METHOD);
+    newRoutine(support.getNode(ctx), ctx.id.getText(), ABLNodeType.METHOD);
 
     if (ctx.VOID() != null) {
       currentRoutine.setReturnDatatypeNode(DataType.VOID);
@@ -343,7 +343,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterExternalProcedureStatement(ExternalProcedureStatementContext ctx) {
-    newRoutine((BlockNode) support.getNode(ctx), ctx.filename().getText(), ABLNodeType.PROCEDURE);
+    newRoutine(support.getNode(ctx), ctx.filename().getText(), ABLNodeType.PROCEDURE);
   }
 
   @Override
@@ -354,7 +354,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterProcedureStatement(ProcedureStatementContext ctx) {
-    newRoutine((BlockNode) support.getNode(ctx), ctx.filename().getText(), ABLNodeType.PROCEDURE);
+    newRoutine(support.getNode(ctx), ctx.filename().getText(), ABLNodeType.PROCEDURE);
   }
 
   @Override
@@ -365,7 +365,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterOnStatement(OnStatementContext ctx) {
-    scopeAdd((BlockNode) support.getNode(ctx));
+    scopeAdd(support.getNode(ctx));
   }
 
   @Override
@@ -385,7 +385,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterTriggerOn(TriggerOnContext ctx) {
-    scopeAdd((BlockNode) support.getNode(ctx));
+    scopeAdd(support.getNode(ctx));
   }
 
   @Override
@@ -397,7 +397,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
   // INTERNAL METHODS
   // ******************
 
-  private void newRoutine(BlockNode blockNode, String routineName, ABLNodeType routineType) {
+  private void newRoutine(JPNode blockNode, String routineName, ABLNodeType routineType) {
     TreeParserSymbolScope definingScope = currentScope;
     scopeAdd(blockNode);
 
@@ -435,7 +435,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
   private void blockBegin(ParseTree ctx) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Creating new block", indent());
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = pushBlock(new Block(currentBlock, blockNode));
     blockNode.setBlock(currentBlock);
   }
@@ -446,7 +446,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
     currentBlock = popBlock();
   }
 
-  private void scopeAdd(BlockNode blockNode) {
+  private void scopeAdd(JPNode blockNode) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Creating new scope for block {}", indent(), blockNode.getNodeType());
 
@@ -522,8 +522,8 @@ public class TreeParserBlocks extends ProparseBaseListener {
     }
 
     node.setInBlock(currentBlock);
-    if (currentBlock.getNode().getFirstStatement() == null)
-      currentBlock.getNode().setFirstStatement(node);
+    if (((BlockNode) currentBlock.getNode()).getFirstStatement() == null)
+      ((BlockNode) currentBlock.getNode()).setFirstStatement(node);
 
     // Assign annotations to statement
     JPNode prev = node.getPreviousStatement();
