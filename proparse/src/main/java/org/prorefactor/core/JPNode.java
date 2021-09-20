@@ -30,8 +30,9 @@ import org.prorefactor.core.nodetypes.AttributeReferenceNode;
 import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.BuiltinFunctionNode;
 import org.prorefactor.core.nodetypes.ConstantNode;
-import org.prorefactor.core.nodetypes.ExpressionNode;
+import org.prorefactor.core.nodetypes.EnteredFunction;
 import org.prorefactor.core.nodetypes.FieldRefNode;
+import org.prorefactor.core.nodetypes.IExpression;
 import org.prorefactor.core.nodetypes.IfNode;
 import org.prorefactor.core.nodetypes.InUIReferenceNode;
 import org.prorefactor.core.nodetypes.LocalMethodCallNode;
@@ -432,7 +433,7 @@ public class JPNode {
   /**
    * Get an array of all expressions
    */
-  public List<JPNode> queryExpressions() {
+  public List<IExpression> queryExpressions() {
     JPNodeExpressionQuery query = new JPNodeExpressionQuery();
     walk2(query);
 
@@ -530,8 +531,18 @@ public class JPNode {
     return attrGet(IConstants.STATE2);
   }
 
-  public boolean isExpression() {
+  /**
+   * @return True is node is an expression
+   */
+  public boolean isIExpression() {
     return false;
+  }
+
+  /**
+   * @return Cast to IExpression if isIExpression is true, otherwise null
+   */
+  public IExpression asIExpression() {
+    return null;
   }
 
   /**
@@ -1151,6 +1162,9 @@ public class JPNode {
           case FIELD_REF:
             node = new FieldRefNode(tok, up, num, hasChildren);
             break;
+          case ENTERED_FUNC:
+            node = new EnteredFunction(tok, up, num, hasChildren);
+            break;
           case STAR:
           case MULTIPLY:
           case SLASH:
@@ -1179,7 +1193,7 @@ public class JPNode {
             node = new TwoArgumentsExpression(tok, up, num, hasChildren);
             break;
           default:
-            node = new ExpressionNode(tok, up, num, hasChildren);
+            throw new IllegalStateException("Invalid Expression node: " + tok.getNodeType());
         }
       } else {
         switch (tok.getNodeType()) {

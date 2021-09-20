@@ -23,7 +23,10 @@ import org.prorefactor.treeparser.Primative;
 
 import eu.rssw.pct.elements.DataType;
 
-public class FieldRefNode extends JPNode implements IExpression {
+/**
+ * Expression node: <code>ID</code> where ID is a variable, field name, ...
+ */
+public class FieldRefNode extends ExpressionNode {
   private ContextQualifier qualifier;
 
   public FieldRefNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
@@ -48,16 +51,6 @@ public class FieldRefNode extends JPNode implements IExpression {
       return dataType == null ? DataType.NOT_COMPUTED : dataType;
     }
     return DataType.NOT_COMPUTED;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
-
-  @Override
-  public JPNode asJPNode() {
-    return this;
   }
 
   /**

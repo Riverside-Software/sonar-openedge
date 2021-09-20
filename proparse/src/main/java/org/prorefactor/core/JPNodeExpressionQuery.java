@@ -17,18 +17,20 @@ package org.prorefactor.core;
 import java.util.ArrayList;
 import java.util.List;
 
-class JPNodeExpressionQuery implements ICallback<List<JPNode>> {
-  private final List<JPNode> result = new ArrayList<>();
+import org.prorefactor.core.nodetypes.IExpression;
+
+class JPNodeExpressionQuery implements ICallback<List<IExpression>> {
+  private final List<IExpression> result = new ArrayList<>();
 
   @Override
-  public List<JPNode> getResult() {
+  public List<IExpression> getResult() {
     return result;
   }
 
   @Override
   public boolean visitNode(JPNode node) {
-    if (node.isExpression()) {
-      result.add(node);
+    if (node.isIExpression()) {
+      result.add(node.asIExpression());
       return false;
     } else
       return true;

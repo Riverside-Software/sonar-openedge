@@ -20,11 +20,11 @@ import org.prorefactor.core.ProToken;
 import eu.rssw.pct.elements.DataType;
 
 /**
- * Expression node: <code>&lt;expr&gt;[expr]</code>
+ * Expression node: <code>&lt;field&gt; NOT? ENTERED</code>
  */
-public class ArrayReferenceNode extends ExpressionNode {
+public class EnteredFunction extends ExpressionNode {
 
-  public ArrayReferenceNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+  public EnteredFunction(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
   }
 

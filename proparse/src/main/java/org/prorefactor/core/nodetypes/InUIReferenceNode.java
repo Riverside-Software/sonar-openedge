@@ -19,7 +19,10 @@ import org.prorefactor.core.ProToken;
 
 import eu.rssw.pct.elements.DataType;
 
-public class InUIReferenceNode extends JPNode implements IExpression {
+/**
+ * Expression node: <code>&lt;expr&gt; IN FRAME frame-name</code>
+ */
+public class InUIReferenceNode extends ExpressionNode {
 
   public InUIReferenceNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
@@ -27,17 +30,7 @@ public class InUIReferenceNode extends JPNode implements IExpression {
 
   @Override
   public DataType getDataType() {
-    return ((IExpression) getDirectChildren().get(0)).getDataType();
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
-
-  @Override
-  public JPNode asJPNode() {
-    return this;
+    return getDirectChildren().get(0).asIExpression().getDataType();
   }
 
 }

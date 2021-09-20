@@ -25,12 +25,11 @@ import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.IVariableElement;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
-public class AttributeReferenceNode extends JPNode implements IExpression {
+/**
+ * Expression node: <code>&lt;expr&gt;:attributeName</code>
+ */
+public class AttributeReferenceNode extends ExpressionNode {
   private String attributeName = "";
-
-  public AttributeReferenceNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
-    this(t, parent, num, hasChildren, "");
-  }
 
   public AttributeReferenceNode(ProToken t, JPNode parent, int num, boolean hasChildren, String attributeName) {
     super(t, parent, num, hasChildren);
@@ -53,7 +52,7 @@ public class AttributeReferenceNode extends JPNode implements IExpression {
       return DataType.NOT_COMPUTED;
 
     // Left-Handle expression has to be a class
-    IExpression expr = (IExpression) getFirstChild();
+    IExpression expr = getFirstChild().asIExpression();
     if (expr.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
       ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(expr.getDataType().getClassName());
       if (info != null) {
@@ -71,16 +70,6 @@ public class AttributeReferenceNode extends JPNode implements IExpression {
     }
 
     return DataType.NOT_COMPUTED;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
-
-  @Override
-  public JPNode asJPNode() {
-    return this;
   }
 
 }

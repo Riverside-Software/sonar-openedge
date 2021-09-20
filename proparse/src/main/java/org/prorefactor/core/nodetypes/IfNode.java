@@ -1,5 +1,4 @@
 /********************************************************************************
- * Copyright (c) 2003-2015 John Green
  * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the

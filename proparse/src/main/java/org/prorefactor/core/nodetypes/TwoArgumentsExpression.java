@@ -19,7 +19,10 @@ import org.prorefactor.core.ProToken;
 
 import eu.rssw.pct.elements.DataType;
 
-public class TwoArgumentsExpression extends JPNode implements IExpression {
+/**
+ * Expression node: <code>&lt;expr&gt; [+|-|*|/|...] &lt;expr&gt;</code>
+ */
+public class TwoArgumentsExpression extends ExpressionNode {
   public TwoArgumentsExpression(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
   }
@@ -31,8 +34,8 @@ public class TwoArgumentsExpression extends JPNode implements IExpression {
 
   @Override
   public DataType getDataType() {
-    DataType left = ((IExpression) getDirectChildren().get(0)).getDataType();
-    DataType right = ((IExpression) getDirectChildren().get(1)).getDataType();
+    DataType left = getDirectChildren().get(0).asIExpression().getDataType();
+    DataType right = getDirectChildren().get(1).asIExpression().getDataType();
 
     switch (getNodeType()) {
       case PLUS:
@@ -68,16 +71,6 @@ public class TwoArgumentsExpression extends JPNode implements IExpression {
       default:
         return DataType.NOT_COMPUTED;
     }
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
-
-  @Override
-  public JPNode asJPNode() {
-    return this;
   }
 
   private DataType handlePlus(DataType left, DataType right) {

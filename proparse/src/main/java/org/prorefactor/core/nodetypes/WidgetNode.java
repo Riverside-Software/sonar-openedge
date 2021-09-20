@@ -20,20 +20,13 @@ import org.prorefactor.core.ProToken;
 
 import eu.rssw.pct.elements.DataType;
 
-public class WidgetNode extends JPNode implements IExpression {
+/**
+ * Expression node: <code>widget</code>
+ */
+public class WidgetNode extends ExpressionNode {
 
   public WidgetNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
-
-  @Override
-  public JPNode asJPNode() {
-    return this;
   }
 
   @Override
@@ -41,7 +34,7 @@ public class WidgetNode extends JPNode implements IExpression {
     return DataType.HANDLE;
   }
 
-  public DataType getMethodDataType(String id) {
+  DataType getMethodDataType(String id) {
     return DataType.NOT_COMPUTED;
   }
 

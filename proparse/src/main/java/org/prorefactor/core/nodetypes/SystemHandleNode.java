@@ -20,20 +20,13 @@ import org.prorefactor.core.ProToken;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.ITypeInfo;
 
-public class SystemHandleNode extends JPNode implements IExpression {
+/**
+ * Expression node: <code>syshandle</code>
+ */
+public class SystemHandleNode extends ExpressionNode {
 
   public SystemHandleNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
-
-  @Override
-  public JPNode asJPNode() {
-    return this;
   }
 
   @Override
@@ -41,7 +34,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
     return DataType.HANDLE;
   }
 
-  public DataType getAttributeDataType(String id) {
+  DataType getAttributeDataType(String id) {
     switch (getFirstChild().getNodeType()) {
       case ACTIVEFORM:
         return getActiveFormAttributeDataType(id);
@@ -54,7 +47,7 @@ public class SystemHandleNode extends JPNode implements IExpression {
     }
   }
 
-  public DataType getMethodDataType(String id) {
+  DataType getMethodDataType(String id) {
     switch (getFirstChild().getNodeType()) {
       case ACTIVEFORM:
       case CLIPBOARD:

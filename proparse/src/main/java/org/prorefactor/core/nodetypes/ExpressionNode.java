@@ -24,15 +24,20 @@ import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.IVariableElement;
 
-public class ExpressionNode extends JPNode implements IExpression {
+public abstract class ExpressionNode extends JPNode implements IExpression {
 
-  public ExpressionNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+  ExpressionNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
   }
 
   @Override
-  public boolean isExpression() {
+  public boolean isIExpression() {
     return true;
+  }
+
+  @Override
+  public IExpression asIExpression() {
+    return this;
   }
 
   @Override
@@ -40,7 +45,7 @@ public class ExpressionNode extends JPNode implements IExpression {
     return this;
   }
 
-  public static DataType getStandardAttributeDataType(String id) {
+  static DataType getStandardAttributeDataType(String id) {
     switch (id) {
       case "ACCELERATOR":
       case "ACTOR":
@@ -720,7 +725,7 @@ public class ExpressionNode extends JPNode implements IExpression {
     }
   }
 
-  public static DataType getStandardMethodDataType(String id) {
+  static DataType getStandardMethodDataType(String id) {
     switch (id) {
       case "ADD-NEW-FIELD":
         return DataType.LOGICAL;
@@ -730,7 +735,7 @@ public class ExpressionNode extends JPNode implements IExpression {
     }
   }
 
-  public static DataType getObjectMethodDataType(IProparseEnvironment session, ITypeInfo info, String methodName) {
+  static DataType getObjectMethodDataType(IProparseEnvironment session, ITypeInfo info, String methodName) {
     while (info != null) {
       for (IMethodElement m : info.getMethods()) {
         if (m.getName().equalsIgnoreCase(methodName))
@@ -741,7 +746,7 @@ public class ExpressionNode extends JPNode implements IExpression {
     return DataType.NOT_COMPUTED;
   }
 
-  public static DataType getObjectAttributeDataType(IProparseEnvironment session, ITypeInfo info, String methodName, boolean firstLevel) {
+  static DataType getObjectAttributeDataType(IProparseEnvironment session, ITypeInfo info, String methodName, boolean firstLevel) {
     while (info != null) {
       for (IPropertyElement prop : info.getProperties()) {
         if (prop.getName().equalsIgnoreCase(methodName))
