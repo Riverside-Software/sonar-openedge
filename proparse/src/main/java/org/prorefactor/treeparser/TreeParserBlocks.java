@@ -25,8 +25,10 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.nodetypes.BlockNode;
+import org.prorefactor.core.nodetypes.IStatement;
+import org.prorefactor.core.nodetypes.IStatementBlock;
 import org.prorefactor.core.nodetypes.IfNode;
+import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.antlr4.Proparse.CanFindFunctionContext;
 import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
@@ -72,7 +74,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
   private final TreeParserRootSymbolScope rootScope;
 
   private Routine rootRoutine;
-  private JPNode lastStatement;
+  private IStatement lastStatement;
   private int currentLevel;
   private boolean inIfStmt;
   private boolean inElseStmt;
@@ -422,12 +424,16 @@ public class TreeParserBlocks extends ProparseBaseListener {
   private Block popBlock() {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Popping block from stack", indent());
+
     Block bb = blockStack.remove(blockStack.size() - 1);
-    lastStatement = bb.getNode();
-    if (lastStatement.getParent().getNodeType() == ABLNodeType.IF) {
-      lastStatement = lastStatement.getParent();
-    } else if (lastStatement.getParent().getNodeType() == ABLNodeType.ELSE) {
-      lastStatement = lastStatement.getParent().getParent();
+    lastStatement = bb.getNode().asIStatement();
+
+    if (lastStatement != null) {
+      if (lastStatement.asJPNode().getParent().getNodeType() == ABLNodeType.THEN) {
+        lastStatement = lastStatement.getParentStatement().getParentStatement().asJPNode().asIStatement();
+      } else if (lastStatement.asJPNode().getParent().getNodeType() == ABLNodeType.ELSE) {
+        lastStatement = lastStatement.asJPNode().getParent().getParent().asIStatement();
+      }
     }
     return blockStack.get(blockStack.size() - 1);
   }
@@ -491,8 +497,8 @@ public class TreeParserBlocks extends ProparseBaseListener {
       LOG.trace("{}> {}", indent(), Proparse.ruleNames[ctx.getRuleIndex()]);
 
     JPNode node = support.getNode(ctx);
-    if ((node != null) && node.isStateHead()) {
-      enterNewStatement(node);
+    if ((node != null) && node.isStatement() && !(node instanceof ProgramRootNode)) {
+      enterNewStatement(node.asIStatement());
     }
   }
 
@@ -506,12 +512,18 @@ public class TreeParserBlocks extends ProparseBaseListener {
   }
 
   // Attach current statement to the previous one
-  private void enterNewStatement(@Nonnull JPNode node) {
-    if (inIfStmt && (node != lastStatement) && (lastStatement instanceof IfNode)) {
-      ((IfNode) lastStatement).setIfStatement(node);
+  private void enterNewStatement(@Nonnull IStatement node) {
+    if ((inIfStmt || inElseStmt) && (node != lastStatement) && (lastStatement instanceof IfNode)) {
+      IfNode ifNode = (IfNode) lastStatement;
+      IStatementBlock thenElseNode = node.asJPNode().getParent().asIStatementBlock();
+      if (inIfStmt)
+        ifNode.setThenNode(thenElseNode);
+      else
+        ifNode.setElseNode(thenElseNode);
+      node.setParentStatement(thenElseNode);
+      thenElseNode.setFirstStatement(node);
+      thenElseNode.setParentStatement(ifNode);
       inIfStmt = false;
-    } else if (inElseStmt && (node != lastStatement) && (lastStatement instanceof IfNode)) {
-      ((IfNode) lastStatement).setElseStatement(node);
       inElseStmt = false;
     } else {
       if ((lastStatement != null) && (node != lastStatement)) {
@@ -519,16 +531,17 @@ public class TreeParserBlocks extends ProparseBaseListener {
         node.setPreviousStatement(lastStatement);
       }
       lastStatement = node;
+      node.setParentStatement(currentBlock.getNode().asIStatementBlock());
     }
 
-    node.setInBlock(currentBlock);
-    if (((BlockNode) currentBlock.getNode()).getFirstStatement() == null)
-      ((BlockNode) currentBlock.getNode()).setFirstStatement(node);
+    if (currentBlock.getNode().asIStatementBlock().getFirstStatement() == null) {
+      currentBlock.getNode().asIStatementBlock().setFirstStatement(node);
+    }
 
     // Assign annotations to statement
-    JPNode prev = node.getPreviousStatement();
-    while ((prev != null) && (prev.getNodeType() == ABLNodeType.ANNOTATION)) {
-      node.addAnnotation(prev.getText());
+    IStatement prev = node.getPreviousStatement();
+    while ((prev != null) && (prev.asJPNode().getNodeType() == ABLNodeType.ANNOTATION)) {
+      node.addAnnotation(prev.asJPNode().getText());
       prev = prev.getPreviousStatement();
     }
   }

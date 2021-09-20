@@ -19,13 +19,10 @@ import java.io.PrintWriter;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.proparse.support.JPNodeLister;
-import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 import org.prorefactor.treeparser.symbols.Symbol;
-import org.prorefactor.treeparser.symbols.widgets.Frame;
 
 public class TP01FramesTreeLister extends JPNodeLister {
 
@@ -44,8 +41,8 @@ public class TP01FramesTreeLister extends JPNodeLister {
   protected String getExtraInfo(JPNode node, char spacer) {
     StringBuffer buff = new StringBuffer();
     // buff.append(indent(1));
-    if (node instanceof BlockNode)
-      blockNode(buff, (BlockNode) node, spacer);
+    /* if (node instanceof BlockNode)
+      blockNode(buff, (BlockNode) node, spacer); */
     if (node instanceof FieldRefNode) {
       fieldRefNode(buff, (FieldRefNode) node, spacer);
       fieldContainer(buff, node, spacer);
@@ -55,7 +52,7 @@ public class TP01FramesTreeLister extends JPNodeLister {
     return buff.toString();
   }
 
-  private void blockNode(StringBuffer buff, BlockNode blockNode, char spacer) {
+  /*private void blockNode(StringBuffer buff, BlockNode blockNode, char spacer) {
     Block block = blockNode.getBlock();
     if (block.getDefaultFrame() != null) {
       buff
@@ -70,7 +67,7 @@ public class TP01FramesTreeLister extends JPNodeLister {
       buff.append(" ");
       appendName(buff, frame);
     }
-  }
+  }*/
 
   private void fieldContainer(StringBuffer buff, JPNode node, char spacer) {
     FieldContainer fieldContainer = node.getFieldContainer();

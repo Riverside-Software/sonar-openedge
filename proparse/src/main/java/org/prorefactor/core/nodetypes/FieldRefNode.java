@@ -28,7 +28,10 @@ import eu.rssw.pct.elements.DataType;
  */
 public class FieldRefNode extends ExpressionNode {
   private ContextQualifier qualifier;
+  private int storeType;
   private boolean unqualifiedField;
+  private boolean inlineVar;
+  private boolean abbrev;
 
   public FieldRefNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
@@ -48,6 +51,31 @@ public class FieldRefNode extends ExpressionNode {
 
   public boolean isUnqualifiedField() {
     return unqualifiedField;
+  }
+
+  public void setInlineVar(boolean inlineVar) {
+    this.inlineVar = inlineVar;
+  }
+
+  public boolean isInlineVar() {
+    return inlineVar;
+  }
+
+  public int getStoreType() {
+    return storeType;
+  }
+
+  public void setStoreType(int storeType) {
+    this.storeType = storeType;
+  }
+
+  public void setAbbrev(boolean abbrev) {
+    this.abbrev = abbrev;
+  }
+
+  @Override
+  public boolean isAbbreviated() {
+    return abbrev;
   }
 
   /**

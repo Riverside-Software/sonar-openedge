@@ -18,7 +18,10 @@ package org.prorefactor.proparse.support;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.nodetypes.FieldRefNode;
+import org.prorefactor.core.nodetypes.RecordNameNode;
 
 /**
  * Prints out the structure of a JPNode AST. Prints nodes one per line, using indentation to show the tree structure.
@@ -86,8 +89,10 @@ public class JPNodeLister {
     if (showFileName)
       ofile.append(Integer.toString(node.getFileIndex())).append(spacer);
     if (showStore) {
-      if (node.getStoreType() != 0)
-        ofile.append(Integer.toString(node.getStoreType())).append(spacer);
+      if ((node.getNodeType() == ABLNodeType.FIELD_REF) && ((FieldRefNode) node).getStoreType() != 0)
+        ofile.append(Integer.toString(((FieldRefNode) node).getStoreType())).append(spacer);
+      if ((node.getNodeType() == ABLNodeType.RECORD_NAME) && ((RecordNameNode) node).getStoreType() != 0)
+        ofile.append(Integer.toString(((RecordNameNode) node).getStoreType())).append(spacer);
     }
     ofile.append(getExtraInfo(node, spacer));
     ofile.println();

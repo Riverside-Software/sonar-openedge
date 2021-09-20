@@ -2350,8 +2350,11 @@ hideStatement:
 ifStatement:
     // Plplt. Progress compiles this fine: DO: IF FALSE THEN END.
     // i.e. you don't have to have anything after the THEN or the ELSE.
-    IF expression THEN blockOrStatement ifElse?
+    IF expression ifThen ifElse?
   ;
+
+ifThen:
+    THEN blockOrStatement;
 
 ifElse:
     ELSE blockOrStatement

@@ -25,12 +25,14 @@ import javax.annotation.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.nodetypes.ArrayReferenceNode;
 import org.prorefactor.core.nodetypes.AttributeReferenceNode;
-import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.BuiltinFunctionNode;
+import org.prorefactor.core.nodetypes.CanFindNode;
 import org.prorefactor.core.nodetypes.ConstantNode;
 import org.prorefactor.core.nodetypes.EnteredFunction;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.IExpression;
+import org.prorefactor.core.nodetypes.IStatement;
+import org.prorefactor.core.nodetypes.IStatementBlock;
 import org.prorefactor.core.nodetypes.IfNode;
 import org.prorefactor.core.nodetypes.InUIReferenceNode;
 import org.prorefactor.core.nodetypes.LocalMethodCallNode;
@@ -38,9 +40,12 @@ import org.prorefactor.core.nodetypes.MethodCallNode;
 import org.prorefactor.core.nodetypes.NamedMemberArrayNode;
 import org.prorefactor.core.nodetypes.NamedMemberNode;
 import org.prorefactor.core.nodetypes.NewTypeNode;
+import org.prorefactor.core.nodetypes.NonStatementBlockNode;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.nodetypes.SingleArgumentExpression;
+import org.prorefactor.core.nodetypes.StatementBlockNode;
+import org.prorefactor.core.nodetypes.StatementNode;
 import org.prorefactor.core.nodetypes.SystemHandleNode;
 import org.prorefactor.core.nodetypes.TwoArgumentsExpression;
 import org.prorefactor.core.nodetypes.TypeNameNode;
@@ -67,25 +72,13 @@ public class JPNode {
   @Nullable
   private final List<JPNode> children;
 
-  // Only for statement nodes: previous and next statement
-  private JPNode previousStatement;
-  private JPNode nextStatement;
-  // Only for statement nodes and block nodes: enclosing block
-  private Block inBlock;
-  // Annotations found on statements (and blocks)
-  private List<String> annotations;
-  private boolean statement;
-  private int state2;
-
   // Fields are usually set in TreeParser
   private Symbol symbol;
   private FieldContainer container;
   private BufferScope bufferScope;
 
   private boolean operator;
-  private boolean inlineVar;
-  private int storeType;
-  private boolean abbrev;
+  // TODO Create subtype for USE-INDEX nodes 
   private boolean invalidUseIndex;
 
   protected JPNode(ProToken token, JPNode parent, int num, boolean hasChildren) {
@@ -524,26 +517,6 @@ public class JPNode {
     return operator;
   }
 
-  public int getState2() {
-    return state2;
-  }
-
-  public boolean isInlineVar() {
-    return inlineVar;
-  }
-
-  public int getStoreType() {
-    return storeType;
-  }
-
-  public void setStoreType(int storeType) {
-    this.storeType = storeType;
-  }
-
-  public void setAbbrev(boolean abbrev) {
-    this.abbrev = abbrev;
-  }
-
   public void setInvalidUseIndex(boolean invalidUseIndex) {
     this.invalidUseIndex = invalidUseIndex;
   }
@@ -564,30 +537,6 @@ public class JPNode {
    */
   public IExpression asIExpression() {
     return null;
-  }
-
-  /**
-   * @return Secondary node type, i.e. VARIABLE in DEFINE VARIABLE statement. Can be null
-   */
-  @Nullable
-  public ABLNodeType getNodeType2() {
-    int state2 = getState2();
-    if (state2 == 0)
-      return null;
-    else
-      return ABLNodeType.getNodeType(state2);
-  }
-
-  /** Mark a node as a "statement head" */
-  public void setStatementHead() {
-    this.statement = true;
-  }
-
-  /** Mark a node as a "statement head" */
-  public void setStatementHead(int state2) {
-    this.statement = true;
-    if (state2 != 0)
-      this.state2 = state2;
   }
 
   /** Certain nodes will have a link to a Symbol, set by TreeParser. */
@@ -752,7 +701,7 @@ public class JPNode {
   }
 
   public boolean isAbbreviated() {
-    return token.isAbbreviated() || abbrev;
+    return token.isAbbreviated();
   }
 
   /**
@@ -771,7 +720,27 @@ public class JPNode {
 
   /** Does this node have the Proparse STATEHEAD attribute? */
   public boolean isStateHead() {
-    return statement;
+    return isStatement();
+  }
+
+  public boolean isStatement() {
+    return false;
+  }
+
+  public boolean isIStatement() {
+    return false;
+  }
+
+  public boolean isIStatementBlock() {
+    return false;
+  }
+
+  public IStatement asIStatement() {
+    return null;
+  }
+
+  public IStatementBlock asIStatementBlock() {
+    return null;
   }
 
   /**
@@ -914,52 +883,8 @@ public class JPNode {
     return ret.toString();
   }
 
-  public void setPreviousStatement(JPNode previousStatement) {
-    this.previousStatement = previousStatement;
-  }
-
-  public JPNode getPreviousStatement() {
-    return previousStatement;
-  }
-
-  public void setNextStatement(JPNode nextStatement) {
-    this.nextStatement = nextStatement;
-  }
-
-  public JPNode getNextStatement() {
-    return nextStatement;
-  }
-
-  public void setInBlock(Block inBlock) {
-    this.inBlock = inBlock;
-  }
-
-  public void addAnnotation(String annotation) {
-    if (annotations == null)
-      annotations = new ArrayList<>();
-    annotations.add(annotation);
-  }
-
-  public List<String> getAnnotations() {
-    return annotations;
-  }
-
   public boolean hasAnnotation(String str) {
-    if (isStateHead()) {
-      if ((annotations != null) && annotations.contains(str))
-        return true;
-      else if ((inBlock != null) && (inBlock.getNode() != null))
-        return inBlock.getNode().hasAnnotation(str);
-
-      else
-        return false;
-    } else {
-      return getStatement().hasAnnotation(str);
-    }
-  }
-
-  public Block getEnclosingBlock() {
-    return inBlock;
+    return getStatement().hasAnnotation(str);
   }
 
   public static class Builder {
@@ -974,8 +899,8 @@ public class JPNode {
     private String className;
     private boolean inline;
     private String xtra1;
-    private String xtra2;
     private boolean expression;
+    private boolean block;
 
     public Builder(ProToken tok) {
       this.tok = tok;
@@ -1073,13 +998,13 @@ public class JPNode {
       return this;
     }
 
-    public Builder setExtraField2(String xtra2) {
-      this.xtra2 = xtra2;
+    public Builder setExpression(boolean expression) {
+      this.expression = expression;
       return this;
     }
 
-    public Builder setExpression(boolean expression) {
-      this.expression = expression;
+    public Builder setBlock(boolean block) {
+      this.block = block;
       return this;
     }
 
@@ -1213,65 +1138,55 @@ public class JPNode {
             throw new IllegalStateException("Empty node can't generate JPNode");
           case RECORD_NAME:
             node = new RecordNameNode(tok, up, num, hasChildren);
+            if (tabletype != null) {
+              switch (tabletype) {
+                case DBTABLE:
+                  ((RecordNameNode) node).setStoreType(IConstants.ST_DBTABLE);
+                  break;
+                case TTABLE:
+                  ((RecordNameNode) node).setStoreType(IConstants.ST_TTABLE);
+                  break;
+                case WTABLE:
+                  ((RecordNameNode) node).setStoreType(IConstants.ST_WTABLE);
+                  break;
+                case VARIABLE:
+                  // Never happens
+                  break;
+              }
+            }
             break;
           case FIELD_REF:
             node = new FieldRefNode(tok, up, num, hasChildren);
+            if (inline)
+              ((FieldRefNode) node).setInlineVar(true);
             break;
           case PROGRAM_ROOT:
             node = new ProgramRootNode(tok, up, num, hasChildren, unit);
             break;
-          case FOR:
-            // FOR in 'DEFINE BUFFER x FOR y' is not a BlockNode
-            node = stmt ? new BlockNode(tok, up, num, hasChildren) : new JPNode(tok, up, num, hasChildren);
-            break;
           case TYPE_NAME:
             node = new TypeNameNode(tok, up, num, hasChildren, className);
             break;
-          case DO:
-          case REPEAT:
-          case FUNCTION:
-          case PROCEDURE:
-          case CONSTRUCTOR:
-          case DESTRUCTOR:
-          case METHOD:
           case CANFIND:
-          case CATCH:
-          case ON:
-          case PROPERTY_GETTER:
-          case PROPERTY_SETTER:
-            node = new BlockNode(tok, up, num, hasChildren);
+            node = new CanFindNode(tok, up, num, hasChildren);
             break;
           case IF:
             node = new IfNode(tok, up, num, hasChildren);
             break;
           default:
-            node = new JPNode(tok, up, num, hasChildren);
+            if (stmt && block)
+              node = new StatementBlockNode(tok, up, num, hasChildren, stmt2);
+            else if (stmt)
+              node = new StatementNode(tok, up, num, hasChildren, stmt2);
+            else if (block)
+              node = new NonStatementBlockNode(tok, up, num, hasChildren);
+            else
+              node = new JPNode(tok, up, num, hasChildren);
             break;
         }
       }
 
-      if (stmt)
-        node.setStatementHead(stmt2 == null ? 0 : stmt2.getType());
       if (operator)
         node.setOperator();
-      if (inline)
-        node.inlineVar = true;
-      if (tabletype != null) {
-        switch (tabletype) {
-          case DBTABLE:
-            node.storeType = IConstants.ST_DBTABLE;
-            break;
-          case TTABLE:
-            node.storeType = IConstants.ST_TTABLE;
-            break;
-          case WTABLE:
-            node.storeType = IConstants.ST_WTABLE;
-            break;
-          case VARIABLE:
-            // Never happens
-            break;
-        }
-      }
 
       if ((ctx != null) && (support != null))
         support.pushNode(ctx, node);

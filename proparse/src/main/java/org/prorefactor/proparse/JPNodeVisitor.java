@@ -814,7 +814,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitCatchStatement(CatchStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -1011,7 +1011,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitConstructorStatement(ConstructorStatementContext ctx) {
-    Builder holder = createStatementTreeFromFirstNode(ctx);
+    Builder holder = createStatementTreeFromFirstNode(ctx).setBlock(true);
     Builder typeName = holder.getDown();
     if (typeName.getNodeType() != ABLNodeType.TYPE_NAME)
       typeName = typeName.getRight();
@@ -1269,12 +1269,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitDefinePropertyAccessorGetBlock(DefinePropertyAccessorGetBlockContext ctx) {
-    return createTree(ctx, ABLNodeType.PROPERTY_GETTER).setRuleNode(ctx);
+    return createTree(ctx, ABLNodeType.PROPERTY_GETTER).setRuleNode(ctx).setBlock(true);
   }
 
   @Override
   public Builder visitDefinePropertyAccessorSetBlock(DefinePropertyAccessorSetBlockContext ctx) {
-    return createTree(ctx, ABLNodeType.PROPERTY_SETTER).setRuleNode(ctx);
+    return createTree(ctx, ABLNodeType.PROPERTY_SETTER).setRuleNode(ctx).setBlock(true);
   }
 
   @Override
@@ -1499,7 +1499,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitDestructorStatement(DestructorStatementContext ctx) {
-    Builder holder = createStatementTreeFromFirstNode(ctx);
+    Builder holder = createStatementTreeFromFirstNode(ctx).setBlock(true);
     Builder typeName = holder.getDown();
     if (typeName.getNodeType() != ABLNodeType.TYPE_NAME)
       typeName = typeName.getRight();
@@ -1552,7 +1552,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitDoStatement(DoStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -1685,7 +1685,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitForStatement(ForStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -1766,12 +1766,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitFunctionStatement(FunctionStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
   public Builder visitExternalFunctionStatement(ExternalFunctionStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -1853,8 +1853,13 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitIfThen(IfThenContext ctx) {
+    return createTreeFromFirstNode(ctx).setBlock(true);
+  }
+
+  @Override
   public Builder visitIfElse(IfElseContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    return createTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -2036,7 +2041,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitMethodStatement(MethodStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -2082,7 +2087,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitOnStatement(OnStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -2196,14 +2201,14 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitProcedureStatement(ProcedureStatementContext ctx) {
-    Builder holder = createStatementTreeFromFirstNode(ctx);
+    Builder holder = createStatementTreeFromFirstNode(ctx).setBlock(true);
     holder.getDown().changeType(ABLNodeType.ID);
     return holder;
   }
 
   @Override
   public Builder visitExternalProcedureStatement(ExternalProcedureStatementContext ctx) {
-    Builder holder = createStatementTreeFromFirstNode(ctx);
+    Builder holder = createStatementTreeFromFirstNode(ctx).setBlock(true);
     holder.getDown().changeType(ABLNodeType.ID);
     holder.getDown().getRight().moveRightToDown();
 
@@ -2327,7 +2332,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitRepeatStatement(RepeatStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -2538,7 +2543,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitSuperStatement(SuperStatementContext ctx) {
-    return createTree(ctx, ABLNodeType.METHOD_REF).setStatement().setExpression(true).setRuleNode(ctx);
+    Builder builder = createTree(ctx, ABLNodeType.METHOD_REF).setExpression(true);
+    return new Builder(ABLNodeType.EXPR_STATEMENT).setStatement().setDown(builder).setRuleNode(ctx);
   }
 
   @Override
@@ -2648,7 +2654,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitThisObjectStatement(ThisObjectStatementContext ctx) {
-    return createTree(ctx, ABLNodeType.METHOD_REF).setStatement().setExpression(true).setRuleNode(ctx);
+    Builder builder = createTree(ctx, ABLNodeType.METHOD_REF).setExpression(true);
+    return new Builder(ABLNodeType.EXPR_STATEMENT).setStatement().setDown(builder).setRuleNode(ctx);
   }
 
   @Override
@@ -2698,7 +2705,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitTriggerOn(TriggerOnContext ctx) {
-    return createTreeFromFirstNode(ctx).setRuleNode(ctx);
+    return createTreeFromFirstNode(ctx).setRuleNode(ctx).setBlock(true);
   }
 
   @Override

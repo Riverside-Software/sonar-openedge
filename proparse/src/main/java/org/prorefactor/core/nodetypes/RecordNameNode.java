@@ -28,6 +28,8 @@ public class RecordNameNode extends JPNode {
   private boolean wholeIndex;
   private String searchIndexName = "";
   private ContextQualifier qualifier;
+  private int storeType;
+  private boolean abbrev;
 
   public RecordNameNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
@@ -65,6 +67,23 @@ public class RecordNameNode extends JPNode {
 
   public void setSearchIndexName(String indexName) {
     this.searchIndexName = indexName;
+  }
+
+  public int getStoreType() {
+    return storeType;
+  }
+
+  public void setStoreType(int storeType) {
+    this.storeType = storeType;
+  }
+
+  public void setAbbrev(boolean abbrev) {
+    this.abbrev = abbrev;
+  }
+
+  @Override
+  public boolean isAbbreviated() {
+    return abbrev;
   }
 
   @Override

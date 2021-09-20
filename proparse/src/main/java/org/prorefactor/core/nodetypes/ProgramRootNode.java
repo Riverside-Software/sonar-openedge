@@ -20,7 +20,7 @@ import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.support.ParserSupport;
 import org.prorefactor.treeparser.ParseUnit;
 
-public class ProgramRootNode extends BlockNode {
+public class ProgramRootNode extends NonStatementBlockNode {
   private final ParseUnit unit;
 
   public ProgramRootNode(ProToken t, JPNode parent, int num, boolean hasChildren, ParseUnit unit) {
@@ -40,5 +40,5 @@ public class ProgramRootNode extends BlockNode {
   public ParserSupport getParserSupport() {
     return unit.getSupport();
   }
-  
+
 }

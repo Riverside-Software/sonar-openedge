@@ -96,12 +96,12 @@ public class TreeParser03Test {
     boolean found1 = false;
     boolean found2 = false;
     for (JPNode node : unit.getTopNode().query(ABLNodeType.DEFINE)) {
-      if ((node.getState2() == ABLNodeType.TEMPTABLE.getType())
+      if ((node.asIStatement().getNodeType2() == ABLNodeType.TEMPTABLE)
           && "myTT2".equals(node.getNextNode().getNextNode().getText())) {
         assertTrue(node.query(ABLNodeType.USEINDEX).get(0).getNextNode().isInvalidUseIndex());
         found1 = true;
       }
-      if ((node.getState2() == ABLNodeType.TEMPTABLE.getType())
+      if ((node.asIStatement().getNodeType2() == ABLNodeType.TEMPTABLE)
           && "myTT3".equals(node.getNextNode().getNextNode().getText())) {
         assertFalse(node.query(ABLNodeType.USEINDEX).get(0).getNextNode().isInvalidUseIndex());
         found2 = true;
@@ -488,7 +488,7 @@ public class TreeParser03Test {
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     JPNode node = unit.getTopNode().findDirectChild(ABLNodeType.DEFINE);
-    assertEquals(node.getState2(), ABLNodeType.VARIABLE.getType());
+    assertEquals(node.asIStatement().getNodeType2(), ABLNodeType.VARIABLE);
   }
 
   @Test
@@ -1294,10 +1294,10 @@ public class TreeParser03Test {
     assertEquals(list.size(), 3);
     assertEquals(list.get(0).getParent().getNodeType(), ABLNodeType.METHOD_REF);
     assertTrue(list.get(0).getParent().isIExpression());
-    assertTrue(list.get(0).getParent().isStateHead());
+    assertTrue(list.get(0).getParent().getParent().isStateHead());
     assertEquals(list.get(1).getParent().getNodeType(), ABLNodeType.METHOD_REF);
     assertTrue(list.get(1).getParent().isIExpression());
-    assertTrue(list.get(1).getParent().isStateHead());
+    assertTrue(list.get(1).getParent().getParent().isStateHead());
     assertEquals(list.get(2).getParent().getNodeType(), ABLNodeType.SYSTEM_HANDLE_REF);
     assertTrue(list.get(2).getParent().isIExpression());
     assertEquals(list.get(2).getParent().getParent().getNodeType(), ABLNodeType.METHOD_REF);
@@ -1317,10 +1317,10 @@ public class TreeParser03Test {
     assertEquals(list.size(), 3);
     assertEquals(list.get(0).getParent().getNodeType(), ABLNodeType.METHOD_REF);
     assertTrue(list.get(0).getParent().isIExpression());
-    assertTrue(list.get(0).getParent().isStateHead());
+    assertTrue(list.get(0).getParent().getParent().isStateHead());
     assertEquals(list.get(1).getParent().getNodeType(), ABLNodeType.METHOD_REF);
     assertTrue(list.get(1).getParent().isIExpression());
-    assertTrue(list.get(1).getParent().isStateHead());
+    assertTrue(list.get(1).getParent().getParent().isStateHead());
     assertEquals(list.get(2).getParent().getNodeType(), ABLNodeType.SYSTEM_HANDLE_REF);
     assertTrue(list.get(2).getParent().isIExpression());
     assertEquals(list.get(2).getParent().getParent().getNodeType(), ABLNodeType.METHOD_REF);

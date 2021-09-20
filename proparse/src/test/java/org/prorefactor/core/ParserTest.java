@@ -377,7 +377,7 @@ public class ParserTest {
     assertFalse(unit.hasSyntaxError());
     assertNull(session.getSchema().lookupTable("widget-pool"));
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).getState2(), ABLNodeType.WIDGETPOOL.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).asIStatement().getNodeType2(), ABLNodeType.WIDGETPOOL);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
 
     // widget-pool table available, statement is still about creating a widget-pool
@@ -389,7 +389,7 @@ public class ParserTest {
     ParseUnit unit2 = new ParseUnit(new ByteArrayInputStream("create widget-pool. message 'hello'.".getBytes()), "<unnamed>", session2);
     unit2.treeParser01();
     assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
-    assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).getState2(), ABLNodeType.WIDGETPOOL.getType());
+    assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).asIStatement().getNodeType2(), ABLNodeType.WIDGETPOOL);
     assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
 
   }
@@ -409,8 +409,8 @@ public class ParserTest {
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 2);
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).getState2(), ABLNodeType.IMAGE.getType());
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(1).getState2(), ABLNodeType.FRAME.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).asIStatement().getNodeType2(), ABLNodeType.IMAGE);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(1).asIStatement().getNodeType2(), ABLNodeType.FRAME);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).get(0).query(ABLNodeType.FRAME).size(),
         1);
@@ -424,13 +424,13 @@ public class ParserTest {
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 3);
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).getState2(),
-        ABLNodeType.VARIABLE.getType());
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(1).getState2(),
-        ABLNodeType.VARIABLE.getType());
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(2).getState2(), ABLNodeType.FRAME.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).asIStatement().getNodeType2(),
+        ABLNodeType.VARIABLE);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(1).asIStatement().getNodeType2(),
+        ABLNodeType.VARIABLE);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(2).asIStatement().getNodeType2(), ABLNodeType.FRAME);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).getState2(), ABLNodeType.WIDGET.getType());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).asIStatement().getNodeType2(), ABLNodeType.WIDGET);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
   }
 

@@ -1,5 +1,4 @@
 /********************************************************************************
- * Copyright (c) 2003-2015 John Green
  * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
@@ -15,46 +14,65 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.Block;
 
 /**
- * Specialized type of JPNode for those token types: DO, FOR, REPEAT, FUNCTION, PROCEDURE, CONSTRUCTOR, DESTRUCTOR,
- * METHOD, CANFIND, CATCH, ON, PROPERTY_GETTER, PROPERTY_SETTER
+ * Specialized type of JPNode for those token types: PROPERTY_GETTER, PROPERTY_SETTER, THEN, ELSE
  */
-public class BlockNode extends JPNode {
+public class NonStatementBlockNode extends JPNode implements IStatementBlock {
   private Block block;
-  private JPNode firstStatement;
+  private IStatement firstStatement;
+  private IStatementBlock parentStatement;
 
-  public BlockNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+  public NonStatementBlockNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
   }
 
-  public void setFirstStatement(JPNode firstStatement) {
+  @Override
+  public void setFirstStatement(IStatement firstStatement) {
     this.firstStatement = firstStatement;
   }
 
-  public JPNode getFirstStatement() {
+  @Override
+  public IStatement getFirstStatement() {
     return firstStatement;
   }
 
-  @Nullable
+  @Override
+  public IStatementBlock getParentStatement() {
+    return parentStatement;
+  }
+
+  @Override
+  public void setParentStatement(IStatementBlock statement) {
+    this.parentStatement = statement;
+  }
+
   @Override
   public Block getBlock() {
     return block;
   }
 
   @Override
-  public void setBlock(@Nonnull Block block) {
+  public void setBlock(Block block) {
     this.block = block;
   }
 
   @Override
-  public boolean hasBlock() {
-    return block != null;
+  public JPNode asJPNode() {
+    return this;
   }
+
+  @Override
+  public boolean isIStatementBlock() {
+    return true;
+  }
+
+  @Override
+  public IStatementBlock asIStatementBlock() {
+    return this;
+  }
+
 }

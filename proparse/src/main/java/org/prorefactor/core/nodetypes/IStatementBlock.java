@@ -17,34 +17,23 @@ package org.prorefactor.core.nodetypes;
 import javax.annotation.Nullable;
 
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.ProToken;
 
-/**
- * Specialized type of JPNode for IF statement
- */
-public class IfNode extends StatementBlockNode {
-  private IStatementBlock thenNode;
-  private IStatementBlock elseNode;
-
-  public IfNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
-    super(t, parent, num, hasChildren, null);
-  }
-
-  public void setThenNode(IStatementBlock statement) {
-    this.thenNode = statement;
-  }
-
-  public IStatementBlock getThenNode() {
-    return thenNode;
-  }
-
-  public void setElseNode(IStatementBlock statement) {
-    this.elseNode = statement;
-  }
-
+public interface IStatementBlock {
+  /**
+   * @return First child of a block statement
+   */
   @Nullable
-  public IStatementBlock getElseNode() {
-    return elseNode;
-  }
+  IStatement getFirstStatement();
 
+  /**
+   * @return Block this statement belongs to. Null when called on ProgramRootNode.
+   */
+  @Nullable
+  IStatementBlock getParentStatement();
+
+  void setFirstStatement(IStatement statement);
+
+  void setParentStatement(IStatementBlock statement);
+
+  JPNode asJPNode();
 }

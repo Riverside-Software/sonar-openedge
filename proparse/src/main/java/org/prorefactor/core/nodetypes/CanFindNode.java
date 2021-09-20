@@ -14,37 +14,36 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.treeparser.Block;
 
 /**
- * Specialized type of JPNode for IF statement
+ * Specialized type of JPNode for CANFIND
  */
-public class IfNode extends StatementBlockNode {
-  private IStatementBlock thenNode;
-  private IStatementBlock elseNode;
+public class CanFindNode extends JPNode {
+  private Block block;
 
-  public IfNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
-    super(t, parent, num, hasChildren, null);
-  }
-
-  public void setThenNode(IStatementBlock statement) {
-    this.thenNode = statement;
-  }
-
-  public IStatementBlock getThenNode() {
-    return thenNode;
-  }
-
-  public void setElseNode(IStatementBlock statement) {
-    this.elseNode = statement;
+  public CanFindNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+    super(t, parent, num, hasChildren);
   }
 
   @Nullable
-  public IStatementBlock getElseNode() {
-    return elseNode;
+  @Override
+  public Block getBlock() {
+    return block;
   }
 
+  @Override
+  public void setBlock(@Nonnull Block block) {
+    this.block = block;
+  }
+
+  @Override
+  public boolean hasBlock() {
+    return block != null;
+  }
 }

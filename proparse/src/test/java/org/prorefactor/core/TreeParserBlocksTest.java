@@ -23,8 +23,9 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 
-import org.prorefactor.core.nodetypes.BlockNode;
+import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IfNode;
+import org.prorefactor.core.nodetypes.StatementBlockNode;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
@@ -52,74 +53,83 @@ public class TreeParserBlocksTest {
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    JPNode currStmt = unit.getTopNode().getFirstStatement();
+    IStatement currStmt = unit.getTopNode().getFirstStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.DEFINE);
-    assertEquals(currStmt.getLine(), 1);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.DEFINE);
+    assertEquals(currStmt.asJPNode().getLine(), 1);
+    assertEquals(currStmt.getParentStatement(), unit.getTopNode());
     assertNull(currStmt.getPreviousStatement());
     assertNotNull(currStmt.getNextStatement());
 
-    JPNode prevStmt = currStmt;
+    IStatement prevStmt = currStmt;
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.DEFINE);
-    assertEquals(currStmt.getLine(), 2);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.DEFINE);
+    assertEquals(currStmt.asJPNode().getLine(), 2);
+    assertEquals(currStmt.getParentStatement(), unit.getTopNode());
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
     assertNotNull(currStmt.getNextStatement());
 
     prevStmt = currStmt;
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.DEFINE);
-    assertEquals(currStmt.getLine(), 3);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.DEFINE);
+    assertEquals(currStmt.asJPNode().getLine(), 3);
+    assertEquals(currStmt.getParentStatement(), unit.getTopNode());
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
     assertNotNull(currStmt.getNextStatement());
 
     prevStmt = currStmt;
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(currStmt.getLine(), 5);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(currStmt.asJPNode().getLine(), 5);
+    assertEquals(currStmt.getParentStatement(), unit.getTopNode());
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
     assertNotNull(currStmt.getNextStatement());
 
     prevStmt = currStmt;
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(currStmt.getLine(), 6);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(currStmt.asJPNode().getLine(), 6);
+    assertEquals(currStmt.getParentStatement(), unit.getTopNode());
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
     assertNotNull(currStmt.getNextStatement());
 
     prevStmt = currStmt;
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.PROCEDURE);
-    assertEquals(currStmt.getLine(), 8);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.PROCEDURE);
+    assertEquals(currStmt.asJPNode().getLine(), 8);
+    assertEquals(currStmt.getParentStatement(), unit.getTopNode());
+    assertTrue(currStmt.asJPNode().isIStatementBlock());
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
     assertNotNull(currStmt.getNextStatement());
-    assertTrue(currStmt instanceof BlockNode);
 
-    JPNode currSubStmt = ((BlockNode) currStmt).getFirstStatement();
+    IStatement currSubStmt = currStmt.asJPNode().asIStatementBlock().getFirstStatement();
     assertNotNull(currSubStmt);
-    assertEquals(currSubStmt.getNodeType(), ABLNodeType.DISPLAY);
-    assertEquals(currSubStmt.getLine(), 9);
+    assertEquals(currSubStmt.asJPNode().getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(currSubStmt.asJPNode().getLine(), 9);
+    assertEquals(currSubStmt.getParentStatement(), currStmt);
     assertNull(currSubStmt.getPreviousStatement());
     assertNotNull(currSubStmt.getNextStatement());
 
-    JPNode prevSubStmt = currSubStmt;
+    IStatement prevSubStmt = currSubStmt;
     currSubStmt = currSubStmt.getNextStatement();
     assertNotNull(currSubStmt);
-    assertEquals(currSubStmt.getNodeType(), ABLNodeType.DISPLAY);
-    assertEquals(currSubStmt.getLine(), 10);
+    assertEquals(currSubStmt.asJPNode().getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(currSubStmt.asJPNode().getLine(), 10);
+    assertEquals(currSubStmt.getParentStatement(), currStmt);
     assertEquals(currSubStmt.getPreviousStatement(), prevSubStmt);
     assertNull(currSubStmt.getNextStatement());
 
     prevStmt = currStmt;
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(currStmt.getLine(), 13);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(currStmt.asJPNode().getLine(), 13);
+    assertEquals(currStmt.getParentStatement(), unit.getTopNode());
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
     assertNull(currStmt.getNextStatement());
   }
@@ -133,59 +143,68 @@ public class TreeParserBlocksTest {
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    JPNode stmt1 = unit.getTopNode().getFirstStatement();
+    IStatement stmt1 = unit.getTopNode().getFirstStatement();
     assertNotNull(stmt1);
-    assertEquals(stmt1.getNodeType(), ABLNodeType.IF);
-    assertEquals(stmt1.getLine(), 1);
+    assertEquals(stmt1.asJPNode().getNodeType(), ABLNodeType.IF);
+    assertEquals(stmt1.asJPNode().getLine(), 1);
+    assertEquals(stmt1.getParentStatement(), unit.getTopNode());
+    assertEquals(unit.getTopNode().getFirstStatement(), stmt1);
     assertNull(stmt1.getPreviousStatement());
     assertNotNull(stmt1.getNextStatement());
 
-    JPNode stmt2 = stmt1.getNextStatement();
+    IStatement stmt2 = stmt1.getNextStatement();
     assertNotNull(stmt2);
-    assertEquals(stmt2.getNodeType(), ABLNodeType.IF);
-    assertEquals(stmt2.getLine(), 6);
+    assertEquals(stmt2.asJPNode().getNodeType(), ABLNodeType.IF);
+    assertEquals(stmt2.asJPNode().getLine(), 6);
+    assertEquals(stmt2.getParentStatement(), unit.getTopNode());
     assertEquals(stmt2.getPreviousStatement(), stmt1);
     assertNull(stmt2.getNextStatement());
 
-    JPNode currSubStmt = ((IfNode) stmt1).getIfStatement();
+    IStatement currSubStmt = ((IfNode) stmt1).getThenNode().getFirstStatement();
     assertNotNull(currSubStmt);
-    assertEquals(currSubStmt.getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(currSubStmt.getLine(), 2);
+    assertEquals(currSubStmt.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(currSubStmt.asJPNode().getLine(), 2);
+    assertEquals(currSubStmt.getParentStatement().getParentStatement(), stmt1);
     assertNull(currSubStmt.getPreviousStatement());
     assertNull(currSubStmt.getNextStatement());
 
-    currSubStmt = ((IfNode) stmt1).getElseStatement();
+    currSubStmt = ((IfNode) stmt1).getElseNode().getFirstStatement();
     assertNotNull(currSubStmt);
-    assertEquals(currSubStmt.getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(currSubStmt.getLine(), 4);
+    assertEquals(currSubStmt.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(currSubStmt.asJPNode().getLine(), 4);
+    assertEquals(currSubStmt.getParentStatement().getParentStatement(), stmt1);
     assertNull(currSubStmt.getPreviousStatement());
     assertNull(currSubStmt.getNextStatement());
 
-    currSubStmt = ((IfNode) stmt2).getIfStatement();
+    currSubStmt = ((IfNode) stmt2).getThenNode().getFirstStatement();
     assertNotNull(currSubStmt);
-    assertEquals(currSubStmt.getNodeType(), ABLNodeType.DO);
-    assertEquals(currSubStmt.getLine(), 6);
+    assertEquals(currSubStmt.asJPNode().getNodeType(), ABLNodeType.DO);
+    assertEquals(currSubStmt.asJPNode().getLine(), 6);
+    assertEquals(currSubStmt.getParentStatement().getParentStatement(), stmt2);
     assertNull(currSubStmt.getPreviousStatement());
     assertNull(currSubStmt.getNextStatement());
 
-    JPNode currSubStmt2 = ((BlockNode) currSubStmt).getFirstStatement();
+    IStatement currSubStmt2 = ((StatementBlockNode) currSubStmt).getFirstStatement();
     assertNotNull(currSubStmt2);
-    assertEquals(currSubStmt2.getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(currSubStmt2.getLine(), 7);
+    assertEquals(currSubStmt2.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(currSubStmt2.asJPNode().getLine(), 7);
+    assertEquals(currSubStmt2.getParentStatement(), currSubStmt);
     assertNull(currSubStmt2.getPreviousStatement());
     assertNull(currSubStmt2.getNextStatement());
 
-    currSubStmt = ((IfNode) stmt2).getElseStatement();
+    currSubStmt = ((IfNode) stmt2).getElseNode().getFirstStatement();
     assertNotNull(currSubStmt);
-    assertEquals(currSubStmt.getNodeType(), ABLNodeType.DO);
-    assertEquals(currSubStmt.getLine(), 9);
+    assertEquals(currSubStmt.asJPNode().getNodeType(), ABLNodeType.DO);
+    assertEquals(currSubStmt.asJPNode().getLine(), 9);
+    assertEquals(currSubStmt.getParentStatement().getParentStatement(), stmt2);
     assertNull(currSubStmt.getPreviousStatement());
     assertNull(currSubStmt.getNextStatement());
 
-    currSubStmt2 = ((BlockNode) currSubStmt).getFirstStatement();
+    currSubStmt2 = ((StatementBlockNode) currSubStmt).getFirstStatement();
     assertNotNull(currSubStmt2);
-    assertEquals(currSubStmt2.getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(currSubStmt2.getLine(), 10);
+    assertEquals(currSubStmt2.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(currSubStmt2.asJPNode().getLine(), 10);
+    assertEquals(currSubStmt2.getParentStatement(), currSubStmt);
     assertNull(currSubStmt2.getPreviousStatement());
     assertNull(currSubStmt2.getNextStatement());
 
@@ -208,76 +227,76 @@ public class TreeParserBlocksTest {
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    JPNode currStmt = unit.getTopNode().getFirstStatement();
+    IStatement currStmt = unit.getTopNode().getFirstStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.DEFINE);
-    assertEquals(currStmt.getLine(), 1);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.DEFINE);
+    assertEquals(currStmt.asJPNode().getLine(), 1);
     assertNull(currStmt.getPreviousStatement());
     assertNotNull(currStmt.getNextStatement());
 
-    JPNode prevStmt = currStmt;
+    IStatement prevStmt = currStmt;
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.PROCEDURE);
-    assertEquals(currStmt.getLine(), 3);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.PROCEDURE);
+    assertEquals(currStmt.asJPNode().getLine(), 3);
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
     assertNotNull(currStmt.getNextStatement());
 
     prevStmt = currStmt;
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.DO);
-    assertEquals(currStmt.getLine(), 15);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.DO);
+    assertEquals(currStmt.asJPNode().getLine(), 15);
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
     assertNull(currStmt.getNextStatement());
 
-    JPNode subNode1 = ((BlockNode) prevStmt).getFirstStatement();
+    IStatement subNode1 = ((StatementBlockNode) prevStmt).getFirstStatement();
     assertNotNull(subNode1);
-    assertEquals(subNode1.getNodeType(), ABLNodeType.DO);
-    assertEquals(subNode1.getLine(), 4);
+    assertEquals(subNode1.asJPNode().getNodeType(), ABLNodeType.DO);
+    assertEquals(subNode1.asJPNode().getLine(), 4);
     assertNull(subNode1.getPreviousStatement());
     assertNull(subNode1.getNextStatement());
 
-    JPNode subNode2 = ((BlockNode) subNode1).getFirstStatement();
+    IStatement subNode2 = ((StatementBlockNode) subNode1).getFirstStatement();
     assertNotNull(subNode2);
-    assertEquals(subNode2.getNodeType(), ABLNodeType.DO);
-    assertEquals(subNode2.getLine(), 5);
+    assertEquals(subNode2.asJPNode().getNodeType(), ABLNodeType.DO);
+    assertEquals(subNode2.asJPNode().getLine(), 5);
     assertNull(subNode2.getPreviousStatement());
     assertNotNull(subNode2.getNextStatement());
 
     subNode2 = subNode2.getNextStatement();
     assertNotNull(subNode2);
-    assertEquals(subNode2.getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(subNode2.getLine(), 11);
+    assertEquals(subNode2.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(subNode2.asJPNode().getLine(), 11);
     assertNotNull(subNode2.getPreviousStatement());
     assertNull(subNode2.getNextStatement());
 
-    JPNode subNode3 = ((BlockNode) subNode2.getPreviousNode()).getFirstStatement();
+    IStatement subNode3 = subNode2.asJPNode().getPreviousNode().asIStatementBlock().getFirstStatement();
     assertNotNull(subNode3);
-    assertEquals(subNode3.getNodeType(), ABLNodeType.DISPLAY);
-    assertEquals(subNode3.getLine(), 6);
+    assertEquals(subNode3.asJPNode().getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(subNode3.asJPNode().getLine(), 6);
     assertNull(subNode3.getPreviousStatement());
     assertNotNull(subNode3.getNextStatement());
 
     subNode3 = subNode3.getNextStatement();
     assertNotNull(subNode3);
-    assertEquals(subNode3.getNodeType(), ABLNodeType.DO);
-    assertEquals(subNode3.getLine(), 7);
+    assertEquals(subNode3.asJPNode().getNodeType(), ABLNodeType.DO);
+    assertEquals(subNode3.asJPNode().getLine(), 7);
     assertNotNull(subNode3.getPreviousStatement());
     assertNull(subNode3.getNextStatement());
 
-    JPNode subNode4 = ((BlockNode) subNode3).getFirstStatement();
+    IStatement subNode4 = ((StatementBlockNode) subNode3).getFirstStatement();
     assertNotNull(subNode4);
-    assertEquals(subNode4.getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(subNode4.getLine(), 8);
+    assertEquals(subNode4.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(subNode4.asJPNode().getLine(), 8);
     assertNull(subNode4.getPreviousStatement());
     assertNull(subNode4.getNextStatement());
 
     // Back to the last DO
-    JPNode subNode5 = ((BlockNode) currStmt).getFirstStatement();
+    IStatement subNode5 = ((StatementBlockNode) currStmt).getFirstStatement();
     assertNotNull(subNode5);
-    assertEquals(subNode5.getNodeType(), ABLNodeType.CREATE);
-    assertEquals(subNode5.getLine(), 16);
+    assertEquals(subNode5.asJPNode().getNodeType(), ABLNodeType.CREATE);
+    assertEquals(subNode5.asJPNode().getLine(), 16);
     assertNull(subNode5.getPreviousStatement());
     assertNotNull(subNode5.getNextStatement());
   }
@@ -291,38 +310,38 @@ public class TreeParserBlocksTest {
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    JPNode currStmt = unit.getTopNode().getFirstStatement();
+    IStatement currStmt = unit.getTopNode().getFirstStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.FUNCTION);
-    assertEquals(currStmt.getLine(), 2);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.FUNCTION);
+    assertEquals(currStmt.asJPNode().getLine(), 2);
     assertNull(currStmt.getPreviousStatement());
     assertNotNull(currStmt.getNextStatement());
 
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.DISPLAY);
-    assertEquals(currStmt.getLine(), 5);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(currStmt.asJPNode().getLine(), 5);
     assertNotNull(currStmt.getPreviousStatement());
     assertNotNull(currStmt.getNextStatement());
 
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.DISPLAY);
-    assertEquals(currStmt.getLine(), 6);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(currStmt.asJPNode().getLine(), 6);
     assertNotNull(currStmt.getPreviousStatement());
     assertNotNull(currStmt.getNextStatement());
 
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.DISPLAY);
-    assertEquals(currStmt.getLine(), 7);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(currStmt.asJPNode().getLine(), 7);
     assertNotNull(currStmt.getPreviousStatement());
     assertNotNull(currStmt.getNextStatement());
 
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.getNodeType(), ABLNodeType.FUNCTION);
-    assertEquals(currStmt.getLine(), 10);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.FUNCTION);
+    assertEquals(currStmt.asJPNode().getLine(), 10);
     assertNotNull(currStmt.getPreviousStatement());
     assertNull(currStmt.getNextStatement());
   }
