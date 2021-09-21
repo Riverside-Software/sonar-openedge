@@ -51,6 +51,11 @@ public class NonStatementBlockNode extends JPNode implements IStatementBlock {
   }
 
   @Override
+  public boolean hasBlock() {
+    return block != null;
+  }
+
+  @Override
   public Block getBlock() {
     return block;
   }

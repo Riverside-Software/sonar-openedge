@@ -24,7 +24,6 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 
 import org.prorefactor.core.nodetypes.IStatement;
-import org.prorefactor.core.nodetypes.IfNode;
 import org.prorefactor.core.nodetypes.StatementBlockNode;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
@@ -160,7 +159,7 @@ public class TreeParserBlocksTest {
     assertEquals(stmt2.getPreviousStatement(), stmt1);
     assertNull(stmt2.getNextStatement());
 
-    IStatement currSubStmt = ((IfNode) stmt1).getThenNode().getFirstStatement();
+    IStatement currSubStmt = stmt1.asJPNode().asIStatementBlock().getFirstStatement().asJPNode().asIStatementBlock().getFirstStatement();
     assertNotNull(currSubStmt);
     assertEquals(currSubStmt.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
     assertEquals(currSubStmt.asJPNode().getLine(), 2);
@@ -168,7 +167,7 @@ public class TreeParserBlocksTest {
     assertNull(currSubStmt.getPreviousStatement());
     assertNull(currSubStmt.getNextStatement());
 
-    currSubStmt = ((IfNode) stmt1).getElseNode().getFirstStatement();
+    currSubStmt = stmt1.asJPNode().asIStatementBlock().getFirstStatement().getNextStatement().asJPNode().asIStatementBlock().getFirstStatement();
     assertNotNull(currSubStmt);
     assertEquals(currSubStmt.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
     assertEquals(currSubStmt.asJPNode().getLine(), 4);
@@ -176,7 +175,7 @@ public class TreeParserBlocksTest {
     assertNull(currSubStmt.getPreviousStatement());
     assertNull(currSubStmt.getNextStatement());
 
-    currSubStmt = ((IfNode) stmt2).getThenNode().getFirstStatement();
+    currSubStmt = stmt2.asJPNode().asIStatementBlock().getFirstStatement().asJPNode().asIStatementBlock().getFirstStatement();
     assertNotNull(currSubStmt);
     assertEquals(currSubStmt.asJPNode().getNodeType(), ABLNodeType.DO);
     assertEquals(currSubStmt.asJPNode().getLine(), 6);
@@ -192,7 +191,7 @@ public class TreeParserBlocksTest {
     assertNull(currSubStmt2.getPreviousStatement());
     assertNull(currSubStmt2.getNextStatement());
 
-    currSubStmt = ((IfNode) stmt2).getElseNode().getFirstStatement();
+    currSubStmt = stmt2.asJPNode().asIStatementBlock().getFirstStatement().getNextStatement().asJPNode().asIStatementBlock().getFirstStatement();
     assertNotNull(currSubStmt);
     assertEquals(currSubStmt.asJPNode().getNodeType(), ABLNodeType.DO);
     assertEquals(currSubStmt.asJPNode().getLine(), 9);
@@ -345,4 +344,5 @@ public class TreeParserBlocksTest {
     assertNotNull(currStmt.getPreviousStatement());
     assertNull(currStmt.getNextStatement());
   }
+
 }

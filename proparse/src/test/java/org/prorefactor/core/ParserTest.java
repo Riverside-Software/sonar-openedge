@@ -240,7 +240,7 @@ public class ParserTest {
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.ON).size(), 1);
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.IF).get(0).queryStateHead().size(), 2);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.IF).get(0).queryStateHead(ABLNodeType.DO).size(), 1);
   }
 
   @Test

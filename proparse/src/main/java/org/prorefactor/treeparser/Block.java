@@ -470,4 +470,8 @@ public class Block {
     }
   }
 
+  @Override
+  public String toString() {
+    return "Block associated to " + blockStatementNode.toString(); 
+  }
 }

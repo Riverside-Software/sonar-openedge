@@ -880,15 +880,15 @@ caseSensitiveOrNot:
   ;
 
 caseStatement:
-    CASE expression blockColon caseBlock caseOtherwise? (EOF | caseEnd statementEnd)
-  ;
-
-caseBlock:
-    caseWhen*
+    CASE expression blockColon caseWhen* caseOtherwise? (EOF | caseEnd statementEnd)
   ;
 
 caseWhen:
-    WHEN caseExpression THEN blockOrStatement
+    WHEN caseExpression caseWhenThen
+  ;
+
+caseWhenThen:
+    THEN blockOrStatement
   ;
 
 caseExpression:

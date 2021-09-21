@@ -779,17 +779,17 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitCaseStatement(CaseStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
-  }
-
-  @Override
-  public Builder visitCaseBlock(CaseBlockContext ctx) {
-    return createTree(ctx, ABLNodeType.CODE_BLOCK);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
   public Builder visitCaseWhen(CaseWhenContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+  }
+
+  @Override
+  public Builder visitCaseWhenThen(CaseWhenThenContext ctx) {
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -804,7 +804,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitCaseOtherwise(CaseOtherwiseContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -1849,17 +1849,17 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitIfStatement(IfStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
   public Builder visitIfThen(IfThenContext ctx) {
-    return createTreeFromFirstNode(ctx).setBlock(true);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
   public Builder visitIfElse(IfElseContext ctx) {
-    return createTreeFromFirstNode(ctx).setBlock(true);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override

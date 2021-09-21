@@ -33,7 +33,6 @@ import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.IExpression;
 import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IStatementBlock;
-import org.prorefactor.core.nodetypes.IfNode;
 import org.prorefactor.core.nodetypes.InUIReferenceNode;
 import org.prorefactor.core.nodetypes.LocalMethodCallNode;
 import org.prorefactor.core.nodetypes.MethodCallNode;
@@ -806,6 +805,10 @@ public class JPNode {
     return sz;
   }
 
+  public String getPositionString() {
+    return String.format("F%d/%d:%d", getFileIndex(), getLine(), getColumn());
+  }
+
   @Override
   public String toString() {
     StringBuilder buff = new StringBuilder();
@@ -1176,9 +1179,6 @@ public class JPNode {
             break;
           case CANFIND:
             node = new CanFindNode(tok, up, num, hasChildren);
-            break;
-          case IF:
-            node = new IfNode(tok, up, num, hasChildren);
             break;
           default:
             if (stmt && block)

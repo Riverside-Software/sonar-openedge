@@ -27,9 +27,7 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IStatementBlock;
-import org.prorefactor.core.nodetypes.IfNode;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
-import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.antlr4.Proparse.CanFindFunctionContext;
 import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ClassStatementContext;
@@ -42,8 +40,6 @@ import org.prorefactor.proparse.antlr4.Proparse.ExternalFunctionStatementContext
 import org.prorefactor.proparse.antlr4.Proparse.ExternalProcedureStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ForStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.FunctionStatementContext;
-import org.prorefactor.proparse.antlr4.Proparse.IfElseContext;
-import org.prorefactor.proparse.antlr4.Proparse.IfStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.InterfaceStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.MethodStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.OnStatementContext;
@@ -74,10 +70,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
   private final TreeParserRootSymbolScope rootScope;
 
   private Routine rootRoutine;
-  private IStatement lastStatement;
   private int currentLevel;
-  private boolean inIfStmt;
-  private boolean inElseStmt;
 
   private Block currentBlock;
   private TreeParserSymbolScope currentScope;
@@ -92,6 +85,11 @@ public class TreeParserBlocks extends ProparseBaseListener {
    */
   private List<Block> blockStack = new ArrayList<>();
   private Map<String, TreeParserSymbolScope> funcForwards = new HashMap<>();
+
+  private IStatementBlock currStmtBlock;
+  private IStatement lastStatement;
+  private List<IStatement> stmtStack = new ArrayList<>();
+  private List<IStatementBlock> stmtBlockStack = new ArrayList<>();
 
   @Inject
   public TreeParserBlocks(ParseUnit unit) {
@@ -112,19 +110,18 @@ public class TreeParserBlocks extends ProparseBaseListener {
       throw new IllegalStateException("TreeParser has already been executed...");
     }
 
-    JPNode blockNode = support.getNode(ctx);
-    currentBlock = pushBlock(new Block(rootScope, blockNode, null));
+    JPNode programRootNode = support.getNode(ctx);
+    currentBlock = pushBlock(new Block(rootScope, programRootNode, null));
     rootScope.setRootBlock(currentBlock);
-    blockNode.setBlock(currentBlock);
+    programRootNode.setBlock(currentBlock);
 
-    Routine routine = new Routine("", rootScope, rootScope);
-    routine.setProgressType(ABLNodeType.PROGRAM_ROOT);
-    routine.setDefinitionNode(blockNode);
-    blockNode.setSymbol(routine);
+    rootRoutine = new Routine("", rootScope, rootScope);
+    rootRoutine.setProgressType(ABLNodeType.PROGRAM_ROOT);
+    rootRoutine.setDefinitionNode(programRootNode);
+    programRootNode.setSymbol(rootRoutine);
 
-    rootScope.add(routine);
-    currentRoutine = routine;
-    rootRoutine = routine;
+    rootScope.add(rootRoutine);
+    currentRoutine = rootRoutine;
   }
 
   @Override
@@ -150,14 +147,40 @@ public class TreeParserBlocks extends ProparseBaseListener {
     rootScope.setInterface(true);
   }
 
+  // ********
+  // ROUTINES
+  // ********
+
   @Override
-  public void enterCatchStatement(CatchStatementContext ctx) {
-    blockBegin(ctx);
+  public void enterDefinePropertyAccessorGetBlock(DefinePropertyAccessorGetBlockContext ctx) {
+    JPNode node = support.getNode(ctx);
+    if (ctx.codeBlock() != null) {
+      newRoutine(node, node.getText(), node.getNodeType());
+    }
   }
 
   @Override
-  public void exitCatchStatement(CatchStatementContext ctx) {
-    blockEnd();
+  public void enterDefinePropertyAccessorSetBlock(DefinePropertyAccessorSetBlockContext ctx) {
+    JPNode node = support.getNode(ctx);
+    if (ctx.codeBlock() != null) {
+      newRoutine(node, node.getText(), node.getNodeType());
+    }
+  }
+
+  @Override
+  public void exitDefinePropertyAccessorGetBlock(DefinePropertyAccessorGetBlockContext ctx) {
+    if (ctx.codeBlock() != null) {
+      scopeClose();
+      currentRoutine = rootRoutine;
+    }
+  }
+
+  @Override
+  public void exitDefinePropertyAccessorSetBlock(DefinePropertyAccessorSetBlockContext ctx) {
+    if (ctx.codeBlock() != null) {
+      scopeClose();
+      currentRoutine = rootRoutine;
+    }
   }
 
   @Override
@@ -172,45 +195,6 @@ public class TreeParserBlocks extends ProparseBaseListener {
   }
 
   @Override
-  public void enterCanFindFunction(CanFindFunctionContext ctx) {
-    // ...create a can-find scope and block (assigns currentBlock)...
-    scopeAdd(support.getNode(ctx));
-  }
-
-  @Override
-  public void exitCanFindFunction(CanFindFunctionContext ctx) {
-    scopeClose();
-  }
-
-  @Override
-  public void enterDefinePropertyAccessorGetBlock(DefinePropertyAccessorGetBlockContext ctx) {
-    if (ctx.codeBlock() != null) {
-      JPNode node = support.getNode(ctx);
-      newRoutine(node, node.getText(), node.getNodeType());
-    }
-  }
-
-  @Override
-  public void enterDefinePropertyAccessorSetBlock(DefinePropertyAccessorSetBlockContext ctx) {
-    if (ctx.codeBlock() != null) {
-      JPNode node = support.getNode(ctx);
-      newRoutine(node, node.getText(), node.getNodeType());
-    }
-  }
-
-  @Override
-  public void exitDefinePropertyAccessorGetBlock(DefinePropertyAccessorGetBlockContext ctx) {
-    if (ctx.codeBlock() != null)
-      propGetSetEnd();
-  }
-
-  @Override
-  public void exitDefinePropertyAccessorSetBlock(DefinePropertyAccessorSetBlockContext ctx) {
-    if (ctx.codeBlock() != null)
-      propGetSetEnd();
-  }
-
-  @Override
   public void enterDestructorStatement(DestructorStatementContext ctx) {
     newRoutine(support.getNode(ctx), "", ABLNodeType.DESTRUCTOR);
   }
@@ -222,33 +206,47 @@ public class TreeParserBlocks extends ProparseBaseListener {
   }
 
   @Override
-  public void enterDoStatement(DoStatementContext ctx) {
-    blockBegin(ctx);
+  public void enterMethodStatement(MethodStatementContext ctx) {
+    newRoutine(support.getNode(ctx), ctx.id.getText(), ABLNodeType.METHOD);
+
+    if (ctx.VOID() != null) {
+      currentRoutine.setReturnDatatypeNode(DataType.VOID);
+    } else if (ctx.datatype().CLASS() != null) {
+      currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
+    } else if (ctx.datatype().datatypeVar().typeName() != null) {
+      currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
+    } else {
+      currentRoutine.setReturnDatatypeNode(
+          ABLNodeType.getDataType(support.getNode(ctx.datatype().datatypeVar()).getType()));
+    }
   }
 
   @Override
-  public void exitDoStatement(DoStatementContext ctx) {
-    blockEnd();
+  public void exitMethodStatement(MethodStatementContext ctx) {
+    scopeClose();
+    currentRoutine = rootRoutine;
   }
 
   @Override
-  public void enterForStatement(ForStatementContext ctx) {
-    blockBegin(ctx);
+  public void enterProcedureStatement(ProcedureStatementContext ctx) {
+    newRoutine(support.getNode(ctx), ctx.filename().getText(), ABLNodeType.PROCEDURE);
   }
 
   @Override
-  public void exitForStatement(ForStatementContext ctx) {
-    blockEnd();
+  public void exitProcedureStatement(ProcedureStatementContext ctx) {
+    scopeClose();
+    currentRoutine = rootRoutine;
   }
 
   @Override
-  public void enterIfStatement(IfStatementContext ctx) {
-    inIfStmt = true;
+  public void enterExternalProcedureStatement(ExternalProcedureStatementContext ctx) {
+    newRoutine(support.getNode(ctx), ctx.filename().getText(), ABLNodeType.PROCEDURE);
   }
 
   @Override
-  public void enterIfElse(IfElseContext ctx) {
-    inElseStmt = true;
+  public void exitExternalProcedureStatement(ExternalProcedureStatementContext ctx) {
+    scopeClose();
+    currentRoutine = rootRoutine;
   }
 
   @Override
@@ -318,51 +316,19 @@ public class TreeParserBlocks extends ProparseBaseListener {
     currentRoutine = rootRoutine;
   }
 
-  @Override
-  public void enterMethodStatement(MethodStatementContext ctx) {
-    newRoutine(support.getNode(ctx), ctx.id.getText(), ABLNodeType.METHOD);
+  // ******
+  // Scopes
+  // ******
 
-    if (ctx.VOID() != null) {
-      currentRoutine.setReturnDatatypeNode(DataType.VOID);
-    } else {
-      if (ctx.datatype().CLASS() != null) {
-        currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
-      } else {
-        if (ctx.datatype().datatypeVar().typeName() != null) {
-          currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
-        } else
-          currentRoutine.setReturnDatatypeNode(
-              ABLNodeType.getDataType(support.getNode(ctx.datatype().datatypeVar()).getType()));
-      }
-    }
+  @Override
+  public void enterCanFindFunction(CanFindFunctionContext ctx) {
+    // ...create a can-find scope and block (assigns currentBlock)...
+    scopeAdd(support.getNode(ctx));
   }
 
   @Override
-  public void exitMethodStatement(MethodStatementContext ctx) {
+  public void exitCanFindFunction(CanFindFunctionContext ctx) {
     scopeClose();
-    currentRoutine = rootRoutine;
-  }
-
-  @Override
-  public void enterExternalProcedureStatement(ExternalProcedureStatementContext ctx) {
-    newRoutine(support.getNode(ctx), ctx.filename().getText(), ABLNodeType.PROCEDURE);
-  }
-
-  @Override
-  public void exitExternalProcedureStatement(ExternalProcedureStatementContext ctx) {
-    scopeClose();
-    currentRoutine = rootRoutine;
-  }
-
-  @Override
-  public void enterProcedureStatement(ProcedureStatementContext ctx) {
-    newRoutine(support.getNode(ctx), ctx.filename().getText(), ABLNodeType.PROCEDURE);
-  }
-
-  @Override
-  public void exitProcedureStatement(ProcedureStatementContext ctx) {
-    scopeClose();
-    currentRoutine = rootRoutine;
   }
 
   @Override
@@ -376,16 +342,6 @@ public class TreeParserBlocks extends ProparseBaseListener {
   }
 
   @Override
-  public void enterRepeatStatement(RepeatStatementContext ctx) {
-    blockBegin(ctx);
-  }
-
-  @Override
-  public void exitRepeatStatement(RepeatStatementContext ctx) {
-    blockEnd();
-  }
-
-  @Override
   public void enterTriggerOn(TriggerOnContext ctx) {
     scopeAdd(support.getNode(ctx));
   }
@@ -395,61 +351,65 @@ public class TreeParserBlocks extends ProparseBaseListener {
     scopeClose();
   }
 
+  // ******
+  // Blocks
+  // ******
+
+  @Override
+  public void enterCatchStatement(CatchStatementContext ctx) {
+    blockBegin(ctx);
+  }
+
+  @Override
+  public void exitCatchStatement(CatchStatementContext ctx) {
+    blockEnd();
+  }
+
+  @Override
+  public void enterDoStatement(DoStatementContext ctx) {
+    blockBegin(ctx);
+  }
+
+  @Override
+  public void exitDoStatement(DoStatementContext ctx) {
+    blockEnd();
+  }
+
+  @Override
+  public void enterForStatement(ForStatementContext ctx) {
+    blockBegin(ctx);
+  }
+
+  @Override
+  public void exitForStatement(ForStatementContext ctx) {
+    blockEnd();
+  }
+
+  @Override
+  public void enterRepeatStatement(RepeatStatementContext ctx) {
+    blockBegin(ctx);
+  }
+
+  @Override
+  public void exitRepeatStatement(RepeatStatementContext ctx) {
+    blockEnd();
+  }
+
   // ******************
   // INTERNAL METHODS
   // ******************
 
   private void newRoutine(JPNode blockNode, String routineName, ABLNodeType routineType) {
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Creating new routine '{}'", indent(), routineName);
+
     TreeParserSymbolScope definingScope = currentScope;
     scopeAdd(blockNode);
 
-    Routine r = new Routine(routineName, definingScope, currentScope);
-    r.setProgressType(routineType);
-    r.setDefinitionNode(blockNode);
-    blockNode.setSymbol(r);
-    definingScope.add(r);
-    currentRoutine = r;
-  }
-
-  private Block pushBlock(Block block) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> Pushing block '{}' to stack", indent(), block);
-    blockStack.add(block);
-
-    lastStatement = null;
-
-    return block;
-  }
-
-  private Block popBlock() {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> Popping block from stack", indent());
-
-    Block bb = blockStack.remove(blockStack.size() - 1);
-    lastStatement = bb.getNode().asIStatement();
-
-    if (lastStatement != null) {
-      if (lastStatement.asJPNode().getParent().getNodeType() == ABLNodeType.THEN) {
-        lastStatement = lastStatement.getParentStatement().getParentStatement().asJPNode().asIStatement();
-      } else if (lastStatement.asJPNode().getParent().getNodeType() == ABLNodeType.ELSE) {
-        lastStatement = lastStatement.asJPNode().getParent().getParent().asIStatement();
-      }
-    }
-    return blockStack.get(blockStack.size() - 1);
-  }
-
-  private void blockBegin(ParseTree ctx) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> Creating new block", indent());
-    JPNode blockNode = support.getNode(ctx);
-    currentBlock = pushBlock(new Block(currentBlock, blockNode));
-    blockNode.setBlock(currentBlock);
-  }
-
-  private void blockEnd() {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> End of block", indent());
-    currentBlock = popBlock();
+    currentRoutine = new Routine(routineName, definingScope, currentScope);
+    currentRoutine.setProgressType(routineType).setDefinitionNode(blockNode);
+    blockNode.setSymbol(currentRoutine);
+    definingScope.add(currentRoutine);
   }
 
   private void scopeAdd(JPNode blockNode) {
@@ -485,60 +445,100 @@ public class TreeParserBlocks extends ProparseBaseListener {
     currentBlock = pushBlock(scope.getRootBlock());
   }
 
-  private void propGetSetEnd() {
-    scopeClose();
-    currentRoutine = rootRoutine;
+  private Block pushBlock(Block block) {
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Pushing block '{}' to stack", indent(), block);
+    blockStack.add(block);
+
+    return block;
+  }
+
+  private Block popBlock() {
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Popping block from stack", indent());
+
+    blockStack.remove(blockStack.size() - 1);
+
+    return blockStack.get(blockStack.size() - 1);
+  }
+
+  private void blockBegin(ParseTree ctx) {
+    JPNode blockNode = support.getNode(ctx);
+    currentBlock = pushBlock(new Block(currentBlock, blockNode));
+    blockNode.setBlock(currentBlock);
+  }
+
+  private void blockEnd() {
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> End of block", indent());
+    currentBlock = popBlock();
+  }
+
+  private void statementBlockBegin(IStatementBlock stmt) {
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> New statement block {} ", indent(), stmt.asJPNode());
+
+    stmtStack.add(lastStatement);
+    lastStatement = null;
+    if (currStmtBlock != null)
+      stmtBlockStack.add(currStmtBlock);
+    currStmtBlock = stmt;
+  }
+
+  private void statementBlockEnd() {
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> End statement block - Back to '{}' - Last statement '{}'", indent(),
+          stmtBlockStack.get(stmtBlockStack.size() - 1), stmtStack.get(stmtStack.size() - 1));
+
+    currStmtBlock = stmtBlockStack.remove(stmtBlockStack.size() - 1);
+    lastStatement = stmtStack.remove(stmtStack.size() - 1);
   }
 
   @Override
   public void enterEveryRule(ParserRuleContext ctx) {
     currentLevel++;
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> {}", indent(), Proparse.ruleNames[ctx.getRuleIndex()]);
 
     JPNode node = support.getNode(ctx);
-    if ((node != null) && node.isStatement() && !(node instanceof ProgramRootNode)) {
+    if ((node != null) && node.isStatement()) {
       enterNewStatement(node.asIStatement());
+    }
+    if ((node != null) && node.isIStatementBlock()) {
+      statementBlockBegin(node.asIStatementBlock());
     }
   }
 
   @Override
   public void exitEveryRule(ParserRuleContext ctx) {
     currentLevel--;
+
+    JPNode node = support.getNode(ctx);
+    if ((node != null) && node.isIStatementBlock() && !(node instanceof ProgramRootNode)) {
+      if (LOG.isTraceEnabled())
+        LOG.trace("{}> PopStatementBlock {}", indent(), node);
+
+      statementBlockEnd();
+    }
   }
 
   private String indent() {
-    return java.nio.CharBuffer.allocate(currentLevel).toString().replace('\0', ' ');
+    return java.nio.CharBuffer.allocate(currentLevel).toString().replace('\0', '-');
   }
 
   // Attach current statement to the previous one
   private void enterNewStatement(@Nonnull IStatement node) {
-    if ((inIfStmt || inElseStmt) && (node != lastStatement) && (lastStatement instanceof IfNode)) {
-      IfNode ifNode = (IfNode) lastStatement;
-      JPNode thenElseNode = node.asJPNode().getParent();
-      if (thenElseNode.getNodeType() == ABLNodeType.BLOCK_LABEL)
-        thenElseNode = thenElseNode.getParent();
-      IStatementBlock thenElseBlock = thenElseNode.asIStatementBlock();
-      if (inIfStmt)
-        ifNode.setThenNode(thenElseBlock);
-      else
-        ifNode.setElseNode(thenElseBlock);
-      node.setParentStatement(thenElseBlock);
-      thenElseBlock.setFirstStatement(node);
-      thenElseBlock.setParentStatement(ifNode);
-      inIfStmt = false;
-      inElseStmt = false;
-    } else {
-      if ((lastStatement != null) && (node != lastStatement)) {
-        lastStatement.setNextStatement(node);
-        node.setPreviousStatement(lastStatement);
-      }
-      lastStatement = node;
-      node.setParentStatement(currentBlock.getNode().asIStatementBlock());
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> NewStatement {}", indent(), node);
+
+    if ((lastStatement != null) && (node != lastStatement)) {
+      lastStatement.setNextStatement(node);
+      node.setPreviousStatement(lastStatement);
     }
+    lastStatement = node;
+    node.setParentStatement(currStmtBlock);
+
     node.setInBlock(currentBlock);
-    if (currentBlock.getNode().asIStatementBlock().getFirstStatement() == null) {
-      currentBlock.getNode().asIStatementBlock().setFirstStatement(node);
+    if (currStmtBlock.getFirstStatement() == null) {
+      currStmtBlock.setFirstStatement(node);
     }
 
     // Assign annotations to statement
