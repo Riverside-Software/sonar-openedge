@@ -20,6 +20,7 @@ import java.util.List;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.treeparser.Block;
 
 public class StatementNode extends JPNode implements IStatement {
   private IStatement previousStatement;
@@ -27,6 +28,7 @@ public class StatementNode extends JPNode implements IStatement {
   private IStatementBlock parentStatement;
   private List<String> annotations;
   private ABLNodeType state2;
+  private Block inBlock;
 
   public StatementNode(ProToken t, JPNode parent, int num, boolean hasChildren, ABLNodeType state2) {
     super(t, parent, num, hasChildren);
@@ -113,6 +115,16 @@ public class StatementNode extends JPNode implements IStatement {
       return parentStatement.asJPNode().hasAnnotation(str);
     else
       return false;
+  }
+
+  @Override
+  public Block getEnclosingBlock() {
+    return inBlock;
+  }
+
+  @Override
+  public void setInBlock(Block inBlock) {
+    this.inBlock = inBlock;
   }
 
 }

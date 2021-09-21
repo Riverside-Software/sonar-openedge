@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.treeparser.Block;
 
 public interface IStatement {
   /**
@@ -55,6 +56,10 @@ public interface IStatement {
    * @return Annotation list of current statement
    */
   List<String> getAnnotations();
+
+  Block getEnclosingBlock();
+
+  void setInBlock(Block inBlock);
 
   void setPreviousStatement(IStatement statement);
 

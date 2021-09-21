@@ -533,7 +533,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
       lastStatement = node;
       node.setParentStatement(currentBlock.getNode().asIStatementBlock());
     }
-
+    node.setInBlock(currentBlock);
     if (currentBlock.getNode().asIStatementBlock().getFirstStatement() == null) {
       currentBlock.getNode().asIStatementBlock().setFirstStatement(node);
     }
