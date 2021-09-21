@@ -54,6 +54,11 @@ public class StatementNode extends JPNode implements IStatement {
   }
 
   @Override
+  public int getState2() {
+    return state2 != null ? state2.getType() : 0;
+  }
+
+  @Override
   public boolean isStatement() {
     return true;
   }

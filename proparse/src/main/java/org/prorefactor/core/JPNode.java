@@ -723,6 +723,14 @@ public class JPNode {
     return isStatement();
   }
 
+  /**
+   * @deprecated Use JPNode()#asIStatement()#getNodeType2()
+   */
+  @Deprecated
+  public int getState2() {
+    return 0;
+  }
+
   public boolean isStatement() {
     return false;
   }
