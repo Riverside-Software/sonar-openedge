@@ -281,10 +281,21 @@ public class JPNode {
   }
 
   /**
-   * @return First child if there is one, otherwise next sibling
+   * @return First child if there is one, otherwise next sibling, otherwise parent's next sibling, or null if last node
    */
   public JPNode getNextNode() {
-    return children == null || children.isEmpty() ? getNextSibling() : children.get(0);
+    if ((children != null) && !children.isEmpty())
+      return children.get(0);
+
+    JPNode tmp = parent;
+    int num = childNum;
+    while ((tmp.children.size() <= num + 1)) {
+      if (tmp.parent == null)
+        return null;
+      num = tmp.childNum;
+      tmp = tmp.parent;
+    }
+    return tmp.children.get(num + 1);
   }
 
   /**

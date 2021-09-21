@@ -188,6 +188,15 @@ public class TreeParserBlocksTest {
     assertEquals(currSubStmt2.getLine(), 10);
     assertNull(currSubStmt2.getPreviousStatement());
     assertNull(currSubStmt2.getNextStatement());
+
+    // Test getNextNode()
+    JPNode tmp = unit.getTopNode();
+    int count = 0;
+    while (tmp != null) {
+      count++;
+      tmp = tmp.getNextNode();
+    }
+    assertEquals(count, 42);
   }
 
   @Test
