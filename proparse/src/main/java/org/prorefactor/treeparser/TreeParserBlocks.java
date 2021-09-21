@@ -515,14 +515,17 @@ public class TreeParserBlocks extends ProparseBaseListener {
   private void enterNewStatement(@Nonnull IStatement node) {
     if ((inIfStmt || inElseStmt) && (node != lastStatement) && (lastStatement instanceof IfNode)) {
       IfNode ifNode = (IfNode) lastStatement;
-      IStatementBlock thenElseNode = node.asJPNode().getParent().asIStatementBlock();
+      JPNode thenElseNode = node.asJPNode().getParent();
+      if (thenElseNode.getNodeType() == ABLNodeType.BLOCK_LABEL)
+        thenElseNode = thenElseNode.getParent();
+      IStatementBlock thenElseBlock = thenElseNode.asIStatementBlock();
       if (inIfStmt)
-        ifNode.setThenNode(thenElseNode);
+        ifNode.setThenNode(thenElseBlock);
       else
-        ifNode.setElseNode(thenElseNode);
-      node.setParentStatement(thenElseNode);
-      thenElseNode.setFirstStatement(node);
-      thenElseNode.setParentStatement(ifNode);
+        ifNode.setElseNode(thenElseBlock);
+      node.setParentStatement(thenElseBlock);
+      thenElseBlock.setFirstStatement(node);
+      thenElseBlock.setParentStatement(ifNode);
       inIfStmt = false;
       inElseStmt = false;
     } else {
