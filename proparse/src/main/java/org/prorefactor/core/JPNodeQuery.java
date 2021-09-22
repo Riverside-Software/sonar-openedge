@@ -61,7 +61,7 @@ class JPNodeQuery implements ICallback<List<JPNode>> {
     if (mainFileOnly && (node.getFileIndex() > 0))
       return true;
 
-    if (stateHeadOnly && !node.isStateHead())
+    if (stateHeadOnly && (!node.isStateHead() || (node.getNodeType() == ABLNodeType.THEN) || (node.getNodeType() == ABLNodeType.ELSE)))
       return true;
 
     if (findTypes.isEmpty() || findTypes.contains(node.getNodeType())) {
