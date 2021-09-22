@@ -19,7 +19,10 @@ import org.prorefactor.core.ProToken;
 
 import eu.rssw.pct.elements.DataType;
 
-public class SingleArgumentExpression extends JPNode implements IExpression {
+/**
+ * Expression node: <code>[+|-|NOT]expr</code> or parenthesis
+ */
+public class SingleArgumentExpression extends ExpressionNode {
 
   public SingleArgumentExpression(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
@@ -30,24 +33,14 @@ public class SingleArgumentExpression extends JPNode implements IExpression {
     switch (getNodeType()) {
       case UNARY_PLUS:
       case UNARY_MINUS:
-        return ((IExpression) getFirstChild()).getDataType();
+        return getFirstChild().asIExpression().getDataType();
       case PAREN_EXPR:
-        return ((IExpression) getFirstChild().getNextSibling()).getDataType();
+        return getFirstChild().getNextSibling().asIExpression().getDataType();
       case NOT:
         return DataType.LOGICAL;
       default:
         return DataType.NOT_COMPUTED;
     }
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
-
-  @Override
-  public JPNode asJPNode() {
-    return this;
   }
 
 }

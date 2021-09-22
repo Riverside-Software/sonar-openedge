@@ -23,12 +23,11 @@ import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;
 
-public class LocalMethodCallNode extends JPNode implements IExpression {
+/**
+ * Expression node: <code>methodName(parameters)</code> (only in classes)
+ */
+public class LocalMethodCallNode extends ExpressionNode {
   private String methodName = "";
-
-  public LocalMethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
-    this(t, parent, num, hasChildren, "");
-  }
 
   public LocalMethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String methodName) {
     super(t, parent, num, hasChildren);
@@ -37,16 +36,6 @@ public class LocalMethodCallNode extends JPNode implements IExpression {
 
   public String getMethodName() {
     return methodName;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
-
-  @Override
-  public JPNode asJPNode() {
-    return this;
   }
 
   @Override

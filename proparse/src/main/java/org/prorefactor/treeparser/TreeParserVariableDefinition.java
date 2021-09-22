@@ -1990,7 +1990,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       String[] nameParts = nodeText.split("\\.");
       int tableNameLen = nameParts[nameParts.length - 1].length();
       if (table.getName().length() > tableNameLen)
-        node.attrSet(IConstants.ABBREVIATED, 1);
+        node.setAbbrev(true);
     }
   }
 
@@ -2209,7 +2209,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       currDefTable.getTable().add(new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary()));
     } else {
       // Mark idNode as INVALID_INDEX
-      idNode.attrSet(IConstants.INVALID_USEINDEX, IConstants.TRUE);
+      idNode.setInvalidUseIndex(true);
     }
     currDefTableUseIndex = true;
   }
@@ -2331,7 +2331,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     JPNode stmtNode = refNode.getStatement();
     // Check if this is a Field_ref being "inline defined"
     // If so, we define it right now.
-    if (refNode.attrGet(IConstants.INLINE_VAR_DEF) == 1)
+    if (refNode.isInlineVar())
       addToSymbolScope(defineVariable(ctx, refNode, name, Variable.Type.VARIABLE));
     if (cq == ContextQualifier.STATIC) {
       // Nothing with static for now, but at least we don't check for external tables
@@ -2378,9 +2378,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       return;
 
     if (result.isUnqualified())
-      refNode.attrSet(IConstants.UNQUALIFIED_FIELD, IConstants.TRUE);
+      refNode.setUnqualifiedField(true);
     if (result.isAbbreviated())
-      refNode.attrSet(IConstants.ABBREVIATED, IConstants.TRUE);
+      refNode.setAbbrev(true);
 
     // Buffer attributes
     if (result.getBufferScope() != null) {
@@ -2390,9 +2390,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     refNode.setSymbol((Symbol) result.getSymbol());
     if (result.getSymbol() instanceof FieldBuffer) {
       FieldBuffer fb = (FieldBuffer) result.getSymbol();
-      refNode.attrSet(IConstants.STORETYPE, fb.getField().getTable().getStoretype());
+      refNode.setStoreType(fb.getField().getTable().getStoretype());
     } else {
-      refNode.attrSet(IConstants.STORETYPE, IConstants.ST_VAR);
+      refNode.setStoreType(IConstants.ST_VAR);
     }
   }
 

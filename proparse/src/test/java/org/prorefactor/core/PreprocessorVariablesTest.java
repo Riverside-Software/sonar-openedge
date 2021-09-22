@@ -97,4 +97,13 @@ public class PreprocessorVariablesTest {
     Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 0);
   }
 
+  @Test(enabled = false)
+  public void test24() {
+    // Valid ABL code, but not recognized by Proparse (issue #911)
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor24.p"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+    Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
+  }
+
 }

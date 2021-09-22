@@ -3,7 +3,6 @@ package org.prorefactor.treeparser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.proparse.antlr4.Proparse.CanFindFunctionContext;
 import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ConstructorStatementContext;
@@ -49,7 +48,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
   ParseTreeProperty<TableNameResolution> nameResolution = new ParseTreeProperty<>();
 
   @Inject
-  public AbstractBlockProparseListener(ParseUnit unit) {
+  AbstractBlockProparseListener(ParseUnit unit) {
     this.unit = unit;
     this.support = unit.getSupport();
     this.refSession = unit.getSession();
@@ -57,7 +56,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
   }
 
   @Inject
-  public AbstractBlockProparseListener(AbstractBlockProparseListener listener) {
+  AbstractBlockProparseListener(AbstractBlockProparseListener listener) {
     this.unit = listener.unit;
     this.support = unit.getSupport();
     this.refSession = unit.getSession();
@@ -81,7 +80,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterCatchStatement(CatchStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
     currentScope = currentBlock.getSymbolScope();
   }
@@ -94,7 +93,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterConstructorStatement(ConstructorStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
@@ -109,7 +108,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterCanFindFunction(CanFindFunctionContext ctx) {
-    BlockNode node = (BlockNode) support.getNode(ctx);
+    JPNode node = support.getNode(ctx);
     currentBlock = node.getBlock();
     currentScope = currentBlock.getSymbolScope();
   }
@@ -146,7 +145,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterDestructorStatement(DestructorStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
@@ -161,7 +160,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterDoStatement(DoStatementContext ctx) {
-    currentBlock = ((BlockNode) support.getNode(ctx)).getBlock();
+    currentBlock = support.getNode(ctx).getBlock();
   }
 
   @Override
@@ -171,7 +170,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
   
   @Override
   public void enterForStatement(ForStatementContext ctx) {
-    currentBlock = ((BlockNode) support.getNode(ctx)).getBlock();
+    currentBlock = support.getNode(ctx).getBlock();
   }
 
   @Override
@@ -181,7 +180,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterFunctionStatement(FunctionStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
@@ -196,7 +195,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterExternalFunctionStatement(ExternalFunctionStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
@@ -211,7 +210,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterMethodStatement(MethodStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
@@ -226,7 +225,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterExternalProcedureStatement(ExternalProcedureStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
@@ -241,7 +240,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterProcedureStatement(ProcedureStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
@@ -256,7 +255,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterOnStatement(OnStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
     currentScope = currentBlock.getSymbolScope();
   }
@@ -269,7 +268,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterRepeatStatement(RepeatStatementContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
   }
 
@@ -280,7 +279,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterTriggerOn(TriggerOnContext ctx) {
-    BlockNode blockNode = (BlockNode) support.getNode(ctx);
+    JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
     currentScope = currentBlock.getSymbolScope();
   }
@@ -292,7 +291,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
   }
 
   public void propGetSetBegin(JPNode propAST) {
-    currentBlock = ((BlockNode) propAST).getBlock();
+    currentBlock = propAST.getBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();
   }

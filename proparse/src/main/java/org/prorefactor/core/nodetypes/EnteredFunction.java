@@ -1,5 +1,4 @@
 /********************************************************************************
- * Copyright (c) 2003-2015 John Green
  * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
@@ -15,37 +14,23 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
-import javax.annotation.Nullable;
-
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 
-/**
- * Specialized type of JPNode for IF statement
- */
-public class IfNode extends JPNode {
-  private JPNode ifStatement;
-  private JPNode elseStatement;
+import eu.rssw.pct.elements.DataType;
 
-  public IfNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+/**
+ * Expression node: <code>&lt;field&gt; NOT? ENTERED</code>
+ */
+public class EnteredFunction extends ExpressionNode {
+
+  public EnteredFunction(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
   }
 
-  public void setIfStatement(JPNode ifStatement) {
-    this.ifStatement = ifStatement;
-  }
-
-  public JPNode getIfStatement() {
-    return ifStatement;
-  }
-
-  public void setElseStatement(JPNode elseStatement) {
-    this.elseStatement = elseStatement;
-  }
-
-  @Nullable
-  public JPNode getElseStatement() {
-    return elseStatement;
+  @Override
+  public DataType getDataType() {
+    return getDirectChildren().get(0).asIExpression().getDataType();
   }
 
 }

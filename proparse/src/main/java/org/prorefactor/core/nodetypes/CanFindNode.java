@@ -14,23 +14,36 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-
-import eu.rssw.pct.elements.DataType;
+import org.prorefactor.treeparser.Block;
 
 /**
- * Expression node: <code>&lt;expr&gt;[expr]</code>
+ * Specialized type of JPNode for CANFIND
  */
-public class ArrayReferenceNode extends ExpressionNode {
+public class CanFindNode extends JPNode {
+  private Block block;
 
-  public ArrayReferenceNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
+  public CanFindNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
   }
 
+  @Nullable
   @Override
-  public DataType getDataType() {
-    return getDirectChildren().get(0).asIExpression().getDataType();
+  public Block getBlock() {
+    return block;
   }
 
+  @Override
+  public void setBlock(@Nonnull Block block) {
+    this.block = block;
+  }
+
+  @Override
+  public boolean hasBlock() {
+    return block != null;
+  }
 }

@@ -1,0 +1,2 @@
+message {&param}.
+message "Hello".

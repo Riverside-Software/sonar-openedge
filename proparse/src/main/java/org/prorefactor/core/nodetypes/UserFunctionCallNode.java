@@ -22,30 +22,19 @@ import com.google.common.base.Strings;
 
 import eu.rssw.pct.elements.DataType;
 
-public class UserFunctionCallNode extends JPNode implements IExpression {
+/**
+ * Expression node: <code>functionName(parameters)</code> (only in procedures)
+ */
+public class UserFunctionCallNode extends ExpressionNode {
   private String functionName = "";
 
-  public UserFunctionCallNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
-    this(t, parent, num, hasChildren, "");
-  }
-
-  public UserFunctionCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String functinoName) {
+  public UserFunctionCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String functionName) {
     super(t, parent, num, hasChildren);
-    this.functionName = Strings.nullToEmpty(functinoName);
+    this.functionName = Strings.nullToEmpty(functionName);
   }
 
   public String getFunctionName() {
     return functionName;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
-
-  @Override
-  public JPNode asJPNode() {
-    return this;
   }
 
   @Override

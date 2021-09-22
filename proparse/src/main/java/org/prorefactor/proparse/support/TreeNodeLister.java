@@ -20,8 +20,9 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.nodetypes.FieldRefNode;
+import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.nodetypes.TypeNameNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,13 +86,17 @@ public class TreeNodeLister {
     if (node.getNodeType() == ABLNodeType.EOF_ANTLR4)
       return;
     ofile.write(String.format("%3s %s", tabs, java.nio.CharBuffer.allocate(tabs).toString().replace('\0', ' ')));
-    ofile.write(node.getNodeType() + (node.isStateHead() ? "^ " : " ") + (node.isStateHead() && node.getState2() != 0 ? node.getState2() : ""));
-    if (node.attrGet(IConstants.OPERATOR) == IConstants.TRUE)
+    ofile.write(node.getNodeType() + (node.isStateHead() ? "^ " : " "));
+    if (node.isIStatement() && node.asIStatement().getNodeType2() != null)
+      ofile.write(node.asIStatement().getNodeType2().toString());
+    if (node.isOperator())
       ofile.write("*OP* ");
-    if (node.attrGet(IConstants.INLINE_VAR_DEF) == IConstants.TRUE)
+    if ((node.getNodeType() == ABLNodeType.FIELD_REF) && ((FieldRefNode) node).isInlineVar())
       ofile.write("*IN* ");
-    if (node.attrGet(IConstants.STORETYPE) > 0)
-      ofile.write("StoreType " + node.attrGet(IConstants.STORETYPE) + " ");
+    if ((node.getNodeType() == ABLNodeType.FIELD_REF) && ((FieldRefNode) node).getStoreType() != 0)
+      ofile.write("StoreType " + ((FieldRefNode) node).getStoreType());
+    if ((node.getNodeType() == ABLNodeType.RECORD_NAME) && ((RecordNameNode) node).getStoreType() != 0)
+      ofile.write("StoreType " + ((RecordNameNode) node).getStoreType());
     if ((node.getNodeType() == ABLNodeType.ID) || (node.getNodeType() == ABLNodeType.TYPE_NAME)) {
       ofile.write("[");
       ofile.write(node.getText().replace('\'', ' ').replace('"', ' '));

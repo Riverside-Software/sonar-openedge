@@ -82,13 +82,6 @@ public class IConstants {
    */
   public static final int BUFFERSCOPE = -212;
   /**
-   * A valid value for setLink() and getLink(). You should not use this directly. Only JPNodes of subtype BlockNode will
-   * have this set, so use BlockNode.getBlock instead.
-   * 
-   * @see org.prorefactor.core.nodetypes.BlockNode
-   */
-  public static final int BLOCK = -214;
-  /**
    * A valid value for setLink() and getLink().
    */
   public static final int FIELD_CONTAINER = -217;

@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.nodetypes.BlockNode;
+import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.proparse.antlr4.Proparse;
@@ -38,7 +38,7 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
  * scopes.
  */
 public class Block {
-  private final BlockNode blockStatementNode;
+  private final JPNode blockStatementNode;
   private List<Frame> frames = new ArrayList<>();
   private Set<BufferScope> bufferScopes = new HashSet<>();
   private Frame defaultFrame = null;
@@ -49,7 +49,7 @@ public class Block {
   private TreeParserSymbolScope symbolScope;
 
   /** For constructing nested blocks */
-  public Block(Block parent, BlockNode node) {
+  public Block(Block parent, JPNode node) {
     this.blockStatementNode = node;
     this.parentScopeBlock = parent;
     this.parentBlock = parent;
@@ -62,7 +62,7 @@ public class Block {
    * @param symbolScope
    * @param node Is the Program_root if this is the program root block.
    */
-  public Block(TreeParserSymbolScope symbolScope, BlockNode node, Block parentBlock) {
+  public Block(TreeParserSymbolScope symbolScope, JPNode node, Block parentBlock) {
     this.blockStatementNode = node;
     this.symbolScope = symbolScope;
     this.parentBlock = parentBlock;
@@ -281,7 +281,7 @@ public class Block {
    * Get the node for this block. Returns a node of one of these types:
    * Program_root/DO/FOR/REPEAT/EDITING/PROCEDURE/FUNCTION/ON/TRIGGERS.
    */
-  public BlockNode getNode() {
+  public JPNode getNode() {
     return blockStatementNode;
   }
 
@@ -470,4 +470,8 @@ public class Block {
     }
   }
 
+  @Override
+  public String toString() {
+    return "Block associated to " + blockStatementNode.toString(); 
+  }
 }

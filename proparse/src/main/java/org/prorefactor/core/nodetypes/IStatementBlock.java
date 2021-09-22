@@ -14,23 +14,26 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import javax.annotation.Nullable;
+
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.ProToken;
 
-import eu.rssw.pct.elements.DataType;
+public interface IStatementBlock {
+  /**
+   * @return First child of a block statement
+   */
+  @Nullable
+  IStatement getFirstStatement();
 
-/**
- * Expression node: <code>&lt;expr&gt;[expr]</code>
- */
-public class ArrayReferenceNode extends ExpressionNode {
+  /**
+   * @return Block this statement belongs to. Null when called on ProgramRootNode.
+   */
+  @Nullable
+  IStatementBlock getParentStatement();
 
-  public ArrayReferenceNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
-    super(t, parent, num, hasChildren);
-  }
+  void setFirstStatement(IStatement statement);
 
-  @Override
-  public DataType getDataType() {
-    return getDirectChildren().get(0).asIExpression().getDataType();
-  }
+  void setParentStatement(IStatementBlock statement);
 
+  JPNode asJPNode();
 }

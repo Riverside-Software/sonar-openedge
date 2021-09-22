@@ -22,7 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.AttributeReferenceNode;
 import org.prorefactor.core.nodetypes.BuiltinFunctionNode;
 import org.prorefactor.core.nodetypes.IExpression;
@@ -83,9 +82,8 @@ public class ExpressionEngineTest {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
         "define temp-table tt1 field fld1 as int. define buffer b1 for tt1. buffer b1::fld1.".getBytes()), session);
     unit.treeParser01();
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    assertTrue(nodes.get(0).isExpression());
     NamedMemberNode exp = (NamedMemberNode) nodes.get(0);
     assertEquals(exp.getNamedMember(), "fld1");
     assertEquals(exp.getDataType(), DataType.NOT_COMPUTED);
@@ -98,9 +96,8 @@ public class ExpressionEngineTest {
             "define temp-table tt1 field fld1 as int extent. define buffer b1 for tt1. buffer b1::fld1(1).".getBytes()),
         session);
     unit.treeParser01();
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    assertTrue(nodes.get(0).isExpression());
     NamedMemberArrayNode exp = (NamedMemberArrayNode) nodes.get(0);
     assertEquals(exp.getNamedMember(), "fld1");
     assertEquals(exp.getDataType(), DataType.NOT_COMPUTED);
@@ -123,10 +120,9 @@ public class ExpressionEngineTest {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("session:get-printers().".getBytes()), session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType(), DataType.CHARACTER);
+    assertEquals(nodes.get(0).getDataType(), DataType.CHARACTER);
   }
 
   @Test
@@ -134,10 +130,9 @@ public class ExpressionEngineTest {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("compiler:get-row().".getBytes()), session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
-    assertEquals(exp.getDataType(), DataType.INTEGER);
+    assertEquals(nodes.get(0).getDataType(), DataType.INTEGER);
   }
 
   @Test
@@ -177,12 +172,12 @@ public class ExpressionEngineTest {
     ParseUnit unit = new ParseUnit(new ByteArrayInputStream("etime(true). recid(customer).".getBytes()), session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 2);
-    IExpression exp1 = (IExpression) nodes.get(0);
+    IExpression exp1 = nodes.get(0);
     assertTrue(exp1 instanceof BuiltinFunctionNode);
     assertTrue(((BuiltinFunctionNode) exp1).hasSideEffect());
-    IExpression exp2 = (IExpression) nodes.get(1);
+    IExpression exp2 = nodes.get(1);
     assertTrue(exp2 instanceof BuiltinFunctionNode);
     assertFalse(((BuiltinFunctionNode) exp2).hasSideEffect());
   }
@@ -193,9 +188,9 @@ public class ExpressionEngineTest {
         new ByteArrayInputStream("function f1 returns char () forwards. message f1().".getBytes()), session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
+    IExpression exp = nodes.get(0);
     assertEquals(exp.getDataType(), DataType.CHARACTER);
   }
 
@@ -206,9 +201,9 @@ public class ExpressionEngineTest {
         session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
+    IExpression exp = nodes.get(0);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp.getDataType().getClassName(), "Progress.Lang.Object");
   }
@@ -219,9 +214,9 @@ public class ExpressionEngineTest {
         "def var xx as Progress.Lang.Object. message new Progress.Lang.Object():toString().".getBytes()), session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
+    IExpression exp = nodes.get(0);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
   }
 
@@ -232,9 +227,9 @@ public class ExpressionEngineTest {
         session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
+    IExpression exp = nodes.get(0);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.LOGICAL);
   }
 
@@ -244,9 +239,9 @@ public class ExpressionEngineTest {
         session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
+    IExpression exp = nodes.get(0);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
   }
 
@@ -256,9 +251,9 @@ public class ExpressionEngineTest {
         session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
+    IExpression exp = nodes.get(0);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
   }
 
@@ -330,9 +325,9 @@ public class ExpressionEngineTest {
         new ByteArrayInputStream("def var xx as Progress.Lang.Object. message xx:Next-Sibling.".getBytes()), session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
+    IExpression exp = nodes.get(0);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp.getDataType().getClassName(), "Progress.Lang.Object");
   }
@@ -344,27 +339,23 @@ public class ExpressionEngineTest {
         session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 4);
 
-    assertTrue(nodes.get(0).isExpression());
     assertTrue(nodes.get(0) instanceof AttributeReferenceNode);
-    IExpression exp = (IExpression) nodes.get(0);
+    IExpression exp = nodes.get(0);
     assertEquals(exp.getDataType(), DataType.CHARACTER);
 
-    assertTrue(nodes.get(1).isExpression());
     assertTrue(nodes.get(1) instanceof AttributeReferenceNode);
-    IExpression exp2 = (IExpression) nodes.get(1);
+    IExpression exp2 = nodes.get(1);
     assertEquals(exp2.getDataType(), DataType.LONGCHAR);
 
-    assertTrue(nodes.get(2).isExpression());
     assertTrue(nodes.get(2) instanceof AttributeReferenceNode);
-    IExpression exp3 = (IExpression) nodes.get(2);
+    IExpression exp3 = nodes.get(2);
     assertEquals(exp3.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
 
-    assertTrue(nodes.get(3).isExpression());
     assertTrue(nodes.get(3) instanceof AttributeReferenceNode);
-    IExpression exp4 = (IExpression) nodes.get(3);
+    IExpression exp4 = nodes.get(3);
     assertEquals(exp4.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
   }
 
@@ -376,17 +367,15 @@ public class ExpressionEngineTest {
         session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 2);
 
-    assertTrue(nodes.get(0).isExpression());
     assertTrue(nodes.get(0) instanceof MethodCallNode);
-    IExpression exp = (IExpression) nodes.get(0);
+    IExpression exp = nodes.get(0);
     assertEquals(exp.getDataType(), DataType.CHARACTER);
 
-    assertTrue(nodes.get(1).isExpression());
     assertTrue(nodes.get(1) instanceof MethodCallNode);
-    IExpression exp2 = (IExpression) nodes.get(1);
+    IExpression exp2 = nodes.get(1);
     assertEquals(exp2.getDataType(), DataType.NOT_COMPUTED);
   }
 
@@ -396,16 +385,14 @@ public class ExpressionEngineTest {
         "class rssw.pct: method void m1(): toString(). foobar(). end method. end class.".getBytes()), session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 2);
 
-    assertTrue(nodes.get(0).isExpression());
     assertTrue(nodes.get(0) instanceof LocalMethodCallNode);
     LocalMethodCallNode exp = (LocalMethodCallNode) nodes.get(0);
     assertEquals(exp.getMethodName(), "toString");
     assertEquals(exp.getDataType(), DataType.CHARACTER);
 
-    assertTrue(nodes.get(1).isExpression());
     assertTrue(nodes.get(1) instanceof LocalMethodCallNode);
     LocalMethodCallNode exp2 = (LocalMethodCallNode) nodes.get(1);
     assertEquals(exp2.getMethodName(), "foobar");
@@ -419,16 +406,14 @@ public class ExpressionEngineTest {
         session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 3);
 
-    assertTrue(nodes.get(0).isExpression());
     assertTrue(nodes.get(0) instanceof MethodCallNode);
     MethodCallNode exp = (MethodCallNode) nodes.get(0);
     assertEquals(exp.getMethodName(), "m2");
     assertEquals(exp.getDataType(), DataType.INT64);
 
-    assertTrue(nodes.get(1).isExpression());
     assertTrue(nodes.get(1) instanceof MethodCallNode);
     MethodCallNode exp2 = (MethodCallNode) nodes.get(1);
     assertEquals(exp2.getMethodName(), "toString");
@@ -442,16 +427,14 @@ public class ExpressionEngineTest {
         session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 2);
 
-    assertTrue(nodes.get(0).isExpression());
     assertTrue(nodes.get(0) instanceof UserFunctionCallNode);
     UserFunctionCallNode exp = (UserFunctionCallNode) nodes.get(0);
     assertEquals(exp.getFunctionName(), "f1");
     assertEquals(exp.getDataType(), DataType.CHARACTER);
 
-    assertTrue(nodes.get(1).isExpression());
     assertTrue(nodes.get(1) instanceof UserFunctionCallNode);
     UserFunctionCallNode exp2 = (UserFunctionCallNode) nodes.get(1);
     assertEquals(exp2.getFunctionName(), "f2");
@@ -464,9 +447,9 @@ public class ExpressionEngineTest {
         session);
     unit.treeParser01();
 
-    List<JPNode> nodes = unit.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    IExpression exp = (IExpression) nodes.get(0);
+    IExpression exp = nodes.get(0);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.LOGICAL);
   }
 
@@ -474,10 +457,9 @@ public class ExpressionEngineTest {
     ParseUnit unit01 = new ParseUnit(new ByteArrayInputStream(code.getBytes()), session);
     unit01.treeParser01();
 
-    List<JPNode> nodes = unit01.getTopNode().queryExpressions();
+    List<IExpression> nodes = unit01.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    assertTrue(nodes.get(0).isExpression());
-    IExpression exp = (IExpression) nodes.get(0);
+    IExpression exp = nodes.get(0);
     assertEquals(exp.getDataType().getPrimitive(), expected.getPrimitive());
     if (expected.getPrimitive() == PrimitiveDataType.CLASS)
       assertEquals(exp.getDataType().getClassName(), expected.getClassName());

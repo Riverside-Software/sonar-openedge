@@ -24,7 +24,6 @@ import java.util.List;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.core.nodetypes.BlockNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Field;
@@ -212,7 +211,7 @@ public class FrameStack {
       tempType = tempNode.getType();
     }
     if (tempType == Proparse.BROWSE || tempType == Proparse.FRAME) {
-      fieldContainer = (FieldContainer) tempNode.nextNode().getSymbol();
+      fieldContainer = (FieldContainer) tempNode.getNextNode().getSymbol();
       fieldOrVariable = fieldContainer.lookupFieldOrVar(inputName);
     } else {
       for (Frame frame : frameMRU) {
@@ -259,10 +258,10 @@ public class FrameStack {
       return;
     // No such thing as DO WITH BROWSE...
     assert containerTypeNode.getType() == Proparse.FRAME;
-    JPNode frameIDNode = containerTypeNode.nextNode();
+    JPNode frameIDNode = containerTypeNode.getNextNode();
     assert frameIDNode.getType() == Proparse.ID;
     Frame frame = frameRefSet(frameIDNode, currentBlock.getSymbolScope());
-    frame.setFrameScopeBlockExplicitDefault(((BlockNode) blockNode).getBlock());
+    frame.setFrameScopeBlockExplicitDefault(blockNode.getBlock());
     blockNode.setFieldContainer(frame);
     containerForCurrentStatement = frame;
   }
@@ -304,7 +303,7 @@ public class FrameStack {
     JPNode containerTypeNode = getContainerTypeNode(stateNode);
     JPNode idNode = null;
     if (containerTypeNode != null) {
-      idNode = containerTypeNode.nextNode();
+      idNode = containerTypeNode.getNextNode();
       assert idNode.getType() == Proparse.ID;
     }
     if (containerTypeNode != null && containerTypeNode.getType() == Proparse.BROWSE) {
@@ -328,7 +327,7 @@ public class FrameStack {
   void simpleFrameInitStatement(ParseTree headNode2, JPNode headNode, JPNode frameIDNode, Block currentBlock) {
     LOG.trace("Enter FrameStack#simpleFrameInitStatement");
 
-    Frame frame = (Frame) frameIDNode.nextNode().getSymbol();
+    Frame frame = (Frame) frameIDNode.getNextNode().getSymbol();
     assert frame != null;
     initializeFrame(frame, currentBlock);
     headNode.setFieldContainer(frame);

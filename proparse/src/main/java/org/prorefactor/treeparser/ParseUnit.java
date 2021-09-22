@@ -407,7 +407,7 @@ public class ParseUnit {
       return false;
     // On the same table
     if ((recNode.getTableBuffer() == null) || !tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
-        || (recNode.attrGet(IConstants.STORETYPE) != tableType))
+        || (recNode.getStoreType() != tableType))
       return false;
     // Does this statement have multiple RecordName nodes pointing to the same table ?
     // If so, we discard the Reference as it's currently not possible to assign to the right object

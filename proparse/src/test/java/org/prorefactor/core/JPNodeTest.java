@@ -166,6 +166,15 @@ public class JPNodeTest {
     assertEquals(msgStmts.get(0).query(ABLNodeType.VIEWAS).size(), 1);
     assertEquals(msgStmts.get(1).query(ABLNodeType.VIEWAS).size(), 1);
     assertEquals(msgStmts.get(2).query(ABLNodeType.VIEWAS).size(), 1);
+
+    // Test getNextNode()
+    JPNode tmp = unit.getTopNode();
+    int count = 0;
+    while (tmp != null) {
+      count++;
+      tmp = tmp.getNextNode();
+    }
+    assertEquals(count, 33);
   }
 
   @Test

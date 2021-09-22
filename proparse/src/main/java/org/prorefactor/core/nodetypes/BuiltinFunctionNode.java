@@ -22,36 +22,29 @@ import org.prorefactor.core.ProToken;
 
 import eu.rssw.pct.elements.DataType;
 
-public class BuiltinFunctionNode extends JPNode implements IExpression {
+/**
+ * Expression node: <code>funcName(parameters)</code>
+ */
+public class BuiltinFunctionNode extends ExpressionNode {
 
   public BuiltinFunctionNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
   }
 
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
-
-  @Override
-  public JPNode asJPNode() {
-    return this;
-  }
-
   public DataType getAddIntervalDataType() {
-    List<JPNode> nodes = getFirstChild().queryExpressions();
+    List<IExpression> nodes = getFirstChild().queryExpressions();
     if (nodes.size() != 3) {
       return DataType.DATE;
     }
-    return ((IExpression) nodes.get(0)).getDataType();
+    return nodes.get(0).getDataType();
   }
 
   public DataType getIfDataType() {
-    List<JPNode> nodes = getFirstChild().queryExpressions();
+    List<IExpression> nodes = getFirstChild().queryExpressions();
     if (nodes.size() != 3) {
       return DataType.NOT_COMPUTED;
     }
-    return ((IExpression) nodes.get(1)).getDataType();
+    return nodes.get(1).getDataType();
   }
 
   public DataType getCastDataType() {
@@ -63,10 +56,10 @@ public class BuiltinFunctionNode extends JPNode implements IExpression {
   }
 
   public DataType getMinMaxDataType() {
-    List<JPNode> nodes = getFirstChild().queryExpressions();
+    List<IExpression> nodes = getFirstChild().queryExpressions();
     boolean hasDecimal = false;
-    for (JPNode node : nodes) {
-      if( ((IExpression) node).getDataType() == DataType.DECIMAL) 
+    for (IExpression node : nodes) {
+      if (node.getDataType() == DataType.DECIMAL)
         hasDecimal = true;
     }
     return hasDecimal ? DataType.DECIMAL : DataType.INTEGER;

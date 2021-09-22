@@ -15,12 +15,8 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
-import javax.annotation.Nonnull;
-
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.proparse.support.SymbolScope.FieldType;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -32,6 +28,8 @@ public class RecordNameNode extends JPNode {
   private boolean wholeIndex;
   private String searchIndexName = "";
   private ContextQualifier qualifier;
+  private int storeType;
+  private boolean abbrev;
 
   public RecordNameNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
@@ -71,6 +69,23 @@ public class RecordNameNode extends JPNode {
     this.searchIndexName = indexName;
   }
 
+  public int getStoreType() {
+    return storeType;
+  }
+
+  public void setStoreType(int storeType) {
+    this.storeType = storeType;
+  }
+
+  public void setAbbrev(boolean abbrev) {
+    this.abbrev = abbrev;
+  }
+
+  @Override
+  public boolean isAbbreviated() {
+    return abbrev;
+  }
+
   @Override
   public void setTableBuffer(TableBuffer buffer) {
     setSymbol(buffer);
@@ -85,24 +100,6 @@ public class RecordNameNode extends JPNode {
   @Override
   public boolean hasTableBuffer() {
     return getSymbol() instanceof TableBuffer;
-  }
-
-  /** Set the 'store type' attribute on a RECORD_NAME node. */
-  public void setStoreType(@Nonnull FieldType tabletype) {
-    switch (tabletype) {
-      case DBTABLE:
-        attrSet(IConstants.STORETYPE, IConstants.ST_DBTABLE);
-        break;
-      case TTABLE:
-        attrSet(IConstants.STORETYPE, IConstants.ST_TTABLE);
-        break;
-      case WTABLE:
-        attrSet(IConstants.STORETYPE, IConstants.ST_WTABLE);
-        break;
-      case VARIABLE:
-        // Never happens
-        break;
-    }
   }
 
 }

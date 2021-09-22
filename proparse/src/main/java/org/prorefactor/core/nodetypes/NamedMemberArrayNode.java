@@ -19,12 +19,11 @@ import org.prorefactor.core.ProToken;
 
 import com.google.common.base.Strings;
 
-public class NamedMemberArrayNode extends JPNode implements IExpression {
+/**
+ * Expression node: <code>&lt;expr&gt;::namedMember(expr)</code>
+ */
+public class NamedMemberArrayNode extends ExpressionNode {
   private String namedMember = "";
-
-  public NamedMemberArrayNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
-    this(t, parent, num, hasChildren, "");
-  }
 
   public NamedMemberArrayNode(ProToken t, JPNode parent, int num, boolean hasChildren, String namedMember) {
     super(t, parent, num, hasChildren);
@@ -33,16 +32,6 @@ public class NamedMemberArrayNode extends JPNode implements IExpression {
 
   public String getNamedMember() {
     return namedMember;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
-
-  @Override
-  public JPNode asJPNode() {
-    return this;
   }
 
 }

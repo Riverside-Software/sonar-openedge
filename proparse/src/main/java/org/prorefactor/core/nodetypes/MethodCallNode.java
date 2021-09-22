@@ -23,12 +23,11 @@ import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
-public class MethodCallNode extends JPNode implements IExpression {
+/**
+ * Expression node: <code>&lt;expr&gt;:methodName(parameters)</code>
+ */
+public class MethodCallNode extends ExpressionNode {
   private String methodName = "";
-
-  public MethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
-    this(t, parent, num, hasChildren, "");
-  }
 
   public MethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String methodName) {
     super(t, parent, num, hasChildren);
@@ -37,16 +36,6 @@ public class MethodCallNode extends JPNode implements IExpression {
 
   public String getMethodName() {
     return methodName;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
-
-  @Override
-  public JPNode asJPNode() {
-    return this;
   }
 
   @Override
@@ -60,7 +49,7 @@ public class MethodCallNode extends JPNode implements IExpression {
       return DataType.NOT_COMPUTED;
 
     // Left-Handle expression has to be a class
-    IExpression expr = (IExpression) getFirstChild();
+    IExpression expr = getFirstChild().asIExpression();
     if (expr.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
       ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(expr.getDataType().getClassName());
       return ExpressionNode.getObjectMethodDataType(root.getParserSupport().getProparseSession(), info, methodName);

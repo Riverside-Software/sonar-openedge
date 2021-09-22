@@ -880,15 +880,15 @@ caseSensitiveOrNot:
   ;
 
 caseStatement:
-    CASE expression blockColon caseBlock caseOtherwise? (EOF | caseEnd statementEnd)
-  ;
-
-caseBlock:
-    caseWhen*
+    CASE expression blockColon caseWhen* caseOtherwise? (EOF | caseEnd statementEnd)
   ;
 
 caseWhen:
-    WHEN caseExpression THEN blockOrStatement
+    WHEN caseExpression caseWhenThen
+  ;
+
+caseWhenThen:
+    THEN blockOrStatement
   ;
 
 caseExpression:
@@ -2350,8 +2350,11 @@ hideStatement:
 ifStatement:
     // Plplt. Progress compiles this fine: DO: IF FALSE THEN END.
     // i.e. you don't have to have anything after the THEN or the ELSE.
-    IF expression THEN blockOrStatement ifElse?
+    IF expression ifThen ifElse?
   ;
+
+ifThen:
+    THEN blockOrStatement;
 
 ifElse:
     ELSE blockOrStatement
@@ -3212,7 +3215,8 @@ stopStatement:
   ;
 
 superStatement:
-    SUPER LEFTPAREN ( parameter ( COMMA parameter )* )? RIGHTPAREN statementEnd
+    // Only for SUPER(...) in FUNCTION ; SUPER() in a class is handled by exprt2ParenCall2
+    SUPER parameterListNoRoot statementEnd // TODO Use parameterList
   ;
 
 streamNameOrHandle:

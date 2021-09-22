@@ -96,15 +96,14 @@ public class TreeParser03Test {
     boolean found1 = false;
     boolean found2 = false;
     for (JPNode node : unit.getTopNode().query(ABLNodeType.DEFINE)) {
-      if ((node.getState2() == ABLNodeType.TEMPTABLE.getType())
+      if ((node.asIStatement().getNodeType2() == ABLNodeType.TEMPTABLE)
           && "myTT2".equals(node.getNextNode().getNextNode().getText())) {
-        assertEquals(node.query(ABLNodeType.USEINDEX).get(0).getNextNode().attrGet(IConstants.INVALID_USEINDEX),
-            IConstants.TRUE);
+        assertTrue(node.query(ABLNodeType.USEINDEX).get(0).getNextNode().isInvalidUseIndex());
         found1 = true;
       }
-      if ((node.getState2() == ABLNodeType.TEMPTABLE.getType())
+      if ((node.asIStatement().getNodeType2() == ABLNodeType.TEMPTABLE)
           && "myTT3".equals(node.getNextNode().getNextNode().getText())) {
-        assertEquals(node.query(ABLNodeType.USEINDEX).get(0).getNextNode().attrGet(IConstants.INVALID_USEINDEX), 0);
+        assertFalse(node.query(ABLNodeType.USEINDEX).get(0).getNextNode().isInvalidUseIndex());
         found2 = true;
       }
     }
@@ -489,7 +488,7 @@ public class TreeParser03Test {
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     JPNode node = unit.getTopNode().findDirectChild(ABLNodeType.DEFINE);
-    assertEquals(ABLNodeType.VARIABLE.getType(), node.attrGet(IConstants.STATE2));
+    assertEquals(node.asIStatement().getNodeType2(), ABLNodeType.VARIABLE);
   }
 
   @Test
@@ -1292,10 +1291,41 @@ public class TreeParser03Test {
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
     List<JPNode> list = unit.getTopNode().query(ABLNodeType.SUPER);
-    assertEquals(list.size(), 2);
+    assertEquals(list.size(), 3);
     assertEquals(list.get(0).getParent().getNodeType(), ABLNodeType.METHOD_REF);
-    assertEquals(list.get(1).getParent().getNodeType(), ABLNodeType.SYSTEM_HANDLE_REF);
-    assertEquals(list.get(1).getParent().getParent().getNodeType(), ABLNodeType.METHOD_REF);
+    assertTrue(list.get(0).getParent().isIExpression());
+    assertTrue(list.get(0).getParent().getParent().isStateHead());
+    assertEquals(list.get(1).getParent().getNodeType(), ABLNodeType.METHOD_REF);
+    assertTrue(list.get(1).getParent().isIExpression());
+    assertTrue(list.get(1).getParent().getParent().isStateHead());
+    assertEquals(list.get(2).getParent().getNodeType(), ABLNodeType.SYSTEM_HANDLE_REF);
+    assertTrue(list.get(2).getParent().isIExpression());
+    assertEquals(list.get(2).getParent().getParent().getNodeType(), ABLNodeType.METHOD_REF);
+    assertTrue(list.get(2).getParent().getParent().isIExpression());
+    assertFalse(list.get(2).getParent().getParent().isStateHead());
+  }
+
+  @Test
+  public void testThisObject01() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test37.cls"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    List<JPNode> list = unit.getTopNode().query(ABLNodeType.THISOBJECT);
+    assertEquals(list.size(), 3);
+    assertEquals(list.get(0).getParent().getNodeType(), ABLNodeType.METHOD_REF);
+    assertTrue(list.get(0).getParent().isIExpression());
+    assertTrue(list.get(0).getParent().getParent().isStateHead());
+    assertEquals(list.get(1).getParent().getNodeType(), ABLNodeType.METHOD_REF);
+    assertTrue(list.get(1).getParent().isIExpression());
+    assertTrue(list.get(1).getParent().getParent().isStateHead());
+    assertEquals(list.get(2).getParent().getNodeType(), ABLNodeType.SYSTEM_HANDLE_REF);
+    assertTrue(list.get(2).getParent().isIExpression());
+    assertEquals(list.get(2).getParent().getParent().getNodeType(), ABLNodeType.METHOD_REF);
+    assertTrue(list.get(2).getParent().getParent().isIExpression());
+    assertFalse(list.get(2).getParent().getParent().isStateHead());
   }
 
 }

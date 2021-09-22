@@ -31,8 +31,9 @@ public class MultiLineIssue extends OpenEdgeProparseCheck {
 
   @Override
   public void execute(InputFile file, ParseUnit unit) {
-    NewIssue issue = createIssue(file, unit.getTopNode().getFirstStatement(), "First statement", true);
-    addLocation(issue, file, unit.getTopNode().getFirstStatement().getNextStatement(), "... and next one", false);
+    NewIssue issue = createIssue(file, unit.getTopNode().getFirstStatement().asJPNode(), "First statement", true);
+    addLocation(issue, file, unit.getTopNode().getFirstStatement().getNextStatement().asJPNode(), "... and next one",
+        false);
     issue.save();
   }
 
