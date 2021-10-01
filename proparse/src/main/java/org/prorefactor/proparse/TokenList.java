@@ -86,8 +86,8 @@ public class TokenList implements TokenSource {
       } else if ((firstToken.getNodeType() == ABLNodeType.NAMEDOT)
           || ((firstToken.getNodeType() != ABLNodeType.PERIOD) && firstToken.getText().startsWith("."))) {
         // NAMEDOT or something which starts with a dot but not just an end of statement ?
-        // Then add first token and tokens from previous list
-        leftPart.addFirst(firstToken);
+        // Then add previous tokens
+        prevTokens.descendingIterator().forEachRemaining(leftPart::addFirst);
         getBackwardsFirstVisibleToken(queue).descendingIterator().forEachRemaining(leftPart::addFirst);
       } else if ((prevTokens.size() == 1)
           && ((firstToken.getNodeType() == ABLNodeType.ID) || firstToken.getNodeType().isKeyword())) {
@@ -101,7 +101,8 @@ public class TokenList implements TokenSource {
     }
 
     if (leftPart.size() > 1) {
-      if (leftPart.peekFirst().getNodeType() == ABLNodeType.NAMEDOT) {
+      if ((leftPart.peekFirst().getNodeType() == ABLNodeType.NAMEDOT)
+          || leftPart.peekFirst().getNodeType().isSymbol()) {
         // NAMEDOT as the beginning of stream, kept as is
         leftPart.iterator().forEachRemaining(queue::addLast);
       } else {
@@ -126,19 +127,6 @@ public class TokenList implements TokenSource {
     }
     queue.addAll(comments);
     queue.add(objColonToken);
-  }
-
-  private Deque<ProToken> getBackwardsFirstVisibleToken(Deque<ProToken> queue) {
-    Deque<ProToken> retVal = new LinkedList<>();
-    ProToken tok = queue.pollLast();
-    while ((tok != null) && (tok.getChannel() != Token.DEFAULT_CHANNEL)) {
-      retVal.addFirst(tok);
-      tok = queue.pollLast();
-    }
-    if (tok != null)
-      retVal.addFirst(tok);
-
-    return retVal;
   }
 
   @Override
@@ -188,6 +176,19 @@ public class TokenList implements TokenSource {
   @Override
   public TokenFactory<?> getTokenFactory() {
     return source.getTokenFactory();
+  }
+
+  private static Deque<ProToken> getBackwardsFirstVisibleToken(Deque<ProToken> queue) {
+    Deque<ProToken> retVal = new LinkedList<>();
+    ProToken tok = queue.pollLast();
+    while ((tok != null) && (tok.getChannel() != Token.DEFAULT_CHANNEL)) {
+      retVal.addFirst(tok);
+      tok = queue.pollLast();
+    }
+    if (tok != null)
+      retVal.addFirst(tok);
+
+    return retVal;
   }
 
 }
