@@ -1,5 +1,9 @@
 package org.prorefactor.proparse;
 
+import static org.prorefactor.proparse.TokenSourceUtils.assertNextTokenType;
+import static org.prorefactor.proparse.TokenSourceUtils.assertNextTokenTypeWS;
+import static org.prorefactor.proparse.TokenSourceUtils.firstToken;
+import static org.prorefactor.proparse.TokenSourceUtils.nextMessageToken;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -12,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.WritableProToken;
@@ -36,6 +39,70 @@ public class ABLLexerTest {
   public void setUp() throws IOException, InvalidRCodeException {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
+  }
+
+  @Test
+  public void testDecimalNumber01() {
+    final String source = "rct1:height = 0.1\n rct1:row ";
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+
+    assertNextTokenType(lexer, ABLNodeType.ID, "rct1");
+    assertNextTokenType(lexer, ABLNodeType.OBJCOLON, ":");
+    assertNextTokenTypeWS(lexer, ABLNodeType.HEIGHT, "height");
+    assertNextTokenTypeWS(lexer, ABLNodeType.EQUAL, "=");
+    assertNextTokenTypeWS(lexer, ABLNodeType.NUMBER, "0.1");
+    assertNextTokenType(lexer, ABLNodeType.ID, "rct1");
+    assertNextTokenType(lexer, ABLNodeType.OBJCOLON, ":");
+    assertNextTokenTypeWS(lexer, ABLNodeType.ROW, "row");
+  }
+
+  @Test
+  public void testDecimalNumber02() {
+    final String source = "rct1:height = .1\n rct1:row ";
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+
+    assertNextTokenType(lexer, ABLNodeType.ID, "rct1");
+    assertNextTokenType(lexer, ABLNodeType.OBJCOLON, ":");
+    assertNextTokenTypeWS(lexer, ABLNodeType.HEIGHT, "height");
+    assertNextTokenTypeWS(lexer, ABLNodeType.EQUAL, "=");
+    assertNextTokenTypeWS(lexer, ABLNodeType.NUMBER, ".1"); // White space is unfortunately gobbled
+    assertNextTokenType(lexer, ABLNodeType.ID, "rct1");
+    assertNextTokenType(lexer, ABLNodeType.OBJCOLON, ":");
+    assertNextTokenTypeWS(lexer, ABLNodeType.ROW, "row");
+  }
+
+  @Test
+  public void testDecimalNumber03() {
+    final String source = "rct1:height = var1 * .1\n rct1:row ";
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+
+    assertNextTokenType(lexer, ABLNodeType.ID, "rct1");
+    assertNextTokenType(lexer, ABLNodeType.OBJCOLON, ":");
+    assertNextTokenTypeWS(lexer, ABLNodeType.HEIGHT, "height");
+    assertNextTokenTypeWS(lexer, ABLNodeType.EQUAL, "=");
+    assertNextTokenTypeWS(lexer, ABLNodeType.ID, "var1");
+    assertNextTokenTypeWS(lexer, ABLNodeType.STAR, "*");
+    assertNextTokenTypeWS(lexer, ABLNodeType.NUMBER, ".1"); // White space is unfortunately gobbled
+    assertNextTokenType(lexer, ABLNodeType.ID, "rct1");
+    assertNextTokenType(lexer, ABLNodeType.OBJCOLON, ":");
+    assertNextTokenTypeWS(lexer, ABLNodeType.ROW, "row");
+  }
+
+  @Test
+  public void testDecimalNumber04() {
+    final String source = "rct1:height = .1 * var1\nrct1:row ";
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+
+    assertNextTokenType(lexer, ABLNodeType.ID, "rct1");
+    assertNextTokenType(lexer, ABLNodeType.OBJCOLON, ":");
+    assertNextTokenTypeWS(lexer, ABLNodeType.HEIGHT, "height");
+    assertNextTokenTypeWS(lexer, ABLNodeType.EQUAL, "=");
+    assertNextTokenTypeWS(lexer, ABLNodeType.NUMBER, ".1");
+    assertNextTokenTypeWS(lexer, ABLNodeType.STAR, "*");
+    assertNextTokenTypeWS(lexer, ABLNodeType.ID, "var1");
+    assertNextTokenType(lexer, ABLNodeType.ID, "rct1");
+    assertNextTokenType(lexer, ABLNodeType.OBJCOLON, ":");
+    assertNextTokenTypeWS(lexer, ABLNodeType.ROW, "row");
   }
 
   @Test
@@ -654,67 +721,6 @@ public class ABLLexerTest {
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("&GLOBAL-DEFINE machin truc ~\nchouette".getBytes()),
         "file.txt");
     assertNextTokenType(lexer, ABLNodeType.AMPGLOBALDEFINE, "&GLOBAL-DEFINE machin truc chouette");
-  }
-
-  // *********
-  // Utilities
-  // *********
-
-  private ProToken firstToken(TokenSource lexer, ABLNodeType type) {
-    ProToken tok = (ProToken) lexer.nextToken();
-    while ((tok != null) && (tok.getNodeType() != type)) {
-      tok = (ProToken) lexer.nextToken();
-    }
-    return tok;
-  }
-
-  private void nextMessageToken(TokenSource lexer, boolean suspend, boolean editable) {
-    ProToken tok = (ProToken) lexer.nextToken();
-    while (tok.getNodeType() != ABLNodeType.MESSAGE) {
-      tok = (ProToken) lexer.nextToken();
-    }
-    assertNotNull(tok);
-    if (suspend)
-      assertNotNull(tok.getAnalyzeSuspend());
-    assertEquals(tok.isEditableInAB(), editable);
-  }
-
-  private static void assertNextTokenType(ABLLexer lexer, ABLNodeType type) {
-    ProToken tok = (ProToken) lexer.nextToken();
-    assertNotNull(tok);
-    assertEquals(tok.getNodeType(), type);
-  }
-
-  private static void assertNextTokenTypeWS(ABLLexer lexer, ABLNodeType type) {
-    ProToken tok = (ProToken) lexer.nextToken();
-    assertNotNull(tok);
-    assertEquals(tok.getNodeType(), type);
-    tok = (ProToken) lexer.nextToken();
-    assertNotNull(tok);
-    assertEquals(tok.getNodeType(), ABLNodeType.WS);
-  }
-
-  /**
-   * Checks next token is of given type, and consume following token (just assuming it's whitespace)
-   */
-  private static void assertNextTokenType(ABLLexer lexer, ABLNodeType type, String text) {
-    ProToken tok = (ProToken) lexer.nextToken();
-    assertNotNull(tok);
-    assertEquals(tok.getNodeType(), type);
-    assertEquals(tok.getText(), text);
-  }
-
-  /**
-   * Checks next token is of given type, and consume following token (just assuming it's whitespace)
-   */
-  private static void assertNextTokenTypeWS(ABLLexer lexer, ABLNodeType type, String text) {
-    ProToken tok = (ProToken) lexer.nextToken();
-    assertNotNull(tok);
-    assertEquals(tok.getNodeType(), type);
-    assertEquals(tok.getText(), text);
-    tok = (ProToken) lexer.nextToken();
-    assertNotNull(tok);
-    assertEquals(tok.getNodeType(), ABLNodeType.WS);
   }
 
 }
