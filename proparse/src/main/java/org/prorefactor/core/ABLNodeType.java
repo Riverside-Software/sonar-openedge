@@ -1798,6 +1798,10 @@ public enum ABLNodeType {
     return options.contains(NodeTypesOption.PREPROCESSOR);
   }
 
+  public boolean isSymbol() {
+    return options.contains(NodeTypesOption.SYMBOL);
+  }
+
   /**
    * @return True if node type is a keyword but can't be used as a variable name or field name among other things
    */

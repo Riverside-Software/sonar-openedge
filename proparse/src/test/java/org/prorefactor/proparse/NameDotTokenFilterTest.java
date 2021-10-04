@@ -47,7 +47,7 @@ public class NameDotTokenFilterTest {
   public void testNoNameDot() {
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("message 'Hello'.".getBytes()), "file.txt");
     TokenSource filter = new NameDotTokenFilter(lexer.getTokenSource());
-    
+
     Token tok = filter.nextToken();
     assertNotNull(tok);
     assertEquals(tok.getType(), ABLNodeType.MESSAGE.getType());
