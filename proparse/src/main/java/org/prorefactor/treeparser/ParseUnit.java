@@ -307,10 +307,9 @@ public class ParseUnit {
         tree = parser.program();
         parseTimeSLL = System.nanoTime() - startTimeNs;
       } catch (ParseCancellationException uncaught) {
+        Token llToken = tokStream.get(tokStream.index()); // Keep reference to faulty token
         // Not really precise as it includes exception trapping
         parseTimeSLL = System.nanoTime() - startTimeNs;
-        LOGGER.info("File {} - Switching to LL prediction mode because of token: {}", relativeName,
-            tokStream.get(tokStream.index()));
         switchToLL = true;
         tokStream.seek(0);
         parser.addErrorListener(new ProparseErrorListener());
@@ -322,6 +321,8 @@ public class ParseUnit {
         try {
           tree = parser.program();
           parseTimeLL = System.nanoTime() - startTimeNs;
+          // Display 'Switch to LL' log message only if parsing is successful
+          LOGGER.info("File {} - Switching to LL prediction mode - Token: {}", relativeName, llToken);
         } catch (ParseCancellationException uncaught2) {
           parseTimeLL = System.nanoTime() - startTimeNs;
           syntaxError = true;
