@@ -54,7 +54,7 @@
     <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>
       <artifactId>sonar-plugin-api</artifactId>
-      <version>7.9.4</version>
+      <version>7.9.6</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -80,7 +80,7 @@
     <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>
       <artifactId>sonar-ws</artifactId>
-      <version>7.9.4</version>
+      <version>7.9.6</version>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
