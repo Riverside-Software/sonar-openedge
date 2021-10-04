@@ -2600,8 +2600,9 @@ messageOption:
     ( MESSAGE | QUESTION | INFORMATION | ERROR | WARNING )?
     ( ( BUTTONS | BUTTON ) ( YESNO | YESNOCANCEL | OK | OKCANCEL | RETRYCANCEL ) )?
     titleExpression?
-  | SET fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? | )
-  | UPDATE fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? | )
+  | SET fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? )
+    // LA(2) check is only there to make sure VIEW-AS ALERT-BOX is assigned to MESSAGE statement and not to variable declaration 
+  | UPDATE fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? )
   ;
 
 methodStatement locals [ boolean abs = false ]:
@@ -2616,9 +2617,7 @@ methodStatement locals [ boolean abs = false ]:
     |  OVERRIDE
     |  FINAL
     )*
-    ( VOID | datatype extentPhrase? )
-    id=newIdentifier
-    functionParams
+    ( VOID | datatype extentPhrase? ) id=newIdentifier functionParams
     ( { $abs || support.isInterface() }? blockColon // An INTERFACE declares without defining, ditto ABSTRACT.
     | { !$abs && !support.isInterface() }?
       blockColon

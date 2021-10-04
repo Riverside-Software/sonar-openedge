@@ -460,6 +460,39 @@ public class ExpressionEngineTest {
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.LOGICAL);
   }
 
+  @Test
+  public void testInlineVariable01() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("message 'xx' update lVar as logical".getBytes()), session);
+    unit.treeParser01();
+
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+    IExpression exp = nodes.get(1);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.LOGICAL);
+  }
+
+  @Test
+  public void testInlineVariable02() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("message 'xx' update lVar as integer".getBytes()), session);
+    unit.treeParser01();
+
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+    IExpression exp = nodes.get(1);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
+  }
+
+  @Test
+  public void testInlineVariable03() {
+    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("def var zz as decimal. message 'xx' update lVar like zz.".getBytes()), session);
+    unit.treeParser01();
+
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 3);
+    IExpression exp = nodes.get(1);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.DECIMAL);
+  }
+
   private void testSimpleExpression(String code, DataType expected) {
     ParseUnit unit01 = new ParseUnit(new ByteArrayInputStream(code.getBytes()), session);
     unit01.treeParser01();

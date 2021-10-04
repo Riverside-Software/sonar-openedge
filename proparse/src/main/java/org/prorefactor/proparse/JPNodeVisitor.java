@@ -1705,7 +1705,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitFormatPhrase(FormatPhraseContext ctx) {
-    // TODO Add IConstants.INLINE_VAR_DEF to JPNode objects when in 'AS datatypeVar' or 'LIKE field' cases
     return createTree(ctx, ABLNodeType.FORMAT_PHRASE);
   }
 
