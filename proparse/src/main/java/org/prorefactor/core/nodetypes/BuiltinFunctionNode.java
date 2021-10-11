@@ -78,8 +78,6 @@ public class BuiltinFunctionNode extends ExpressionNode {
         return new DataType("System.Object"); // Use second parameter if available
       case ADDINTERVAL:
         return getAddIntervalDataType();
-      case ISODATE:
-        return DataType.DATE;
       case MAXIMUM:
       case MINIMUM:
         return getMinMaxDataType();
@@ -98,6 +96,7 @@ public class BuiltinFunctionNode extends ExpressionNode {
       case DYNAMICCURRENTVALUE:
       case EXTENT:
       case FRAMEDOWN:
+      case FRAMEINDEX:
       case FRAMELINE:
       case GETBITS: // FIXME
       case GETBYTE:
@@ -109,24 +108,34 @@ public class BuiltinFunctionNode extends ExpressionNode {
       case INDEX:
       case INTEGER:
       case KEYCODE:
+      case LASTKEY:
       case LENGTH:
       case LINECOUNTER:
       case LOOKUP:
+      case MESSAGELINES:
       case MONTH:
       case MTIME:
       case NEXTVALUE:
+      case NUMALIASES:
+      case NUMDBS:
       case NUMENTRIES:
       case NUMRESULTS:
+      case OSERROR:
       case PAGENUMBER:
       case PAGESIZE:
+      case PROCESSARCHITECTURE:
+      case PROCHANDLE:
+      case PROCSTATUS:
       case RANDOM:
       case RGBVALUE:
       case RECORDLENGTH:
       case RINDEX:
       case ROUND:
       case ROWSTATE:
+      case SCREENLINES:
       case TENANTID:
       case TENANTNAMETOID:
+      case TIME:
       case TIMEZONE:
       case USERID:
       case WEEKDAY:
@@ -147,14 +156,20 @@ public class BuiltinFunctionNode extends ExpressionNode {
       case CAPS:
       case CHR:
       case CODEPAGECONVERT:
+      case CURRENTLANGUAGE:
+      case DATASERVERS:
       case DBCODEPAGE:
       case DBCOLLATION:
+      case DBNAME:
       case DBPARAM:
       case DBTYPE:
       case DBVERSION:
       case ENCODE:
       case ENTRY:
       case FILL:
+      case FRAMEFILE:
+      case FRAMENAME:
+      case FRAMEVALUE:
       case GETCODEPAGE:
       case GETCODEPAGES:
       case GETCOLLATIONS:
@@ -177,12 +192,18 @@ public class BuiltinFunctionNode extends ExpressionNode {
       case LISTWIDGETS:
       case MEMBER:
       case NORMALIZE:
+      case OPSYS:
+      case OSDRIVES:
       case OSGETENV:
       case PDBNAME:
       case PROGRAMNAME:
+      case PROGRESS:
+      case PROMSGS:
+      case PROPATH:
       case PROVERSION:
       case QUOTER:
       case REPLACE:
+      case RETURNVALUE:
       case RIGHTTRIM:
       case SDBNAME:
       case SEARCH:
@@ -191,6 +212,7 @@ public class BuiltinFunctionNode extends ExpressionNode {
       case SUBSTITUTE:
       case SUBSTRING:
       case TENANTNAME:
+      case TERMINAL:
       case TRIM:
       case USER:
         return DataType.CHARACTER;
@@ -209,6 +231,8 @@ public class BuiltinFunctionNode extends ExpressionNode {
       case ERROR:
       case FIRST:
       case FIRSTOF:
+      case GOPENDING:
+      case ISATTRSPACE:
       case ISCODEPAGEFIXED:
       case ISCOLUMNCODEPAGE:
       case ISDBMULTITENANT:
@@ -220,9 +244,11 @@ public class BuiltinFunctionNode extends ExpressionNode {
       case NEW:
       case QUERYOFFEND:
       case REJECTED:
+      case RETRY:
       case SETDBCLIENT:
       case SETEFFECTIVETENANT:
       case SETUSERID:
+      case TRANSACTION:
       case TYPEOF:
       case VALIDEVENT:
       case VALIDHANDLE:
@@ -236,6 +262,9 @@ public class BuiltinFunctionNode extends ExpressionNode {
       case GETBYTES:
         return DataType.MEMPTR;
       case GENERATEPBEKEY:
+      case GENERATEPBESALT:
+      case GENERATERANDOMKEY:
+      case GENERATEUUID:
       case HEXDECODE:
       case MD5DIGEST:
       case MESSAGEDIGEST:
@@ -251,10 +280,13 @@ public class BuiltinFunctionNode extends ExpressionNode {
       case TRUNCATE:
         return DataType.DECIMAL;
       case DATE:
+      case ISODATE:
+      case TODAY:
         return DataType.DATE;
       case DATETIME:
         return DataType.DATETIME;
       case DATETIMETZ:
+      case NOW:
         return DataType.DATETIME_TZ;
       case GETDBCLIENT:
       case HANDLE:

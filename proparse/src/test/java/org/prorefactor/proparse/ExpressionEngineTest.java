@@ -165,6 +165,13 @@ public class ExpressionEngineTest {
     testSimpleExpression("recid(customer).", DataType.RECID);
     testSimpleExpression("rowid(customer).", DataType.ROWID);
     testSimpleExpression("dynamic-function('funcName').", DataType.RUNTYPE);
+    testSimpleExpression("now.", DataType.DATETIME_TZ);
+    testSimpleExpression("NUM-DBS.", DataType.INTEGER);
+    testSimpleExpression("num-aliases", DataType.INTEGER);
+    testSimpleExpression("opsys.", DataType.CHARACTER);
+    testSimpleExpression("progress.", DataType.CHARACTER);
+    testSimpleExpression("RETURN-VALUE.", DataType.CHARACTER);
+    testSimpleExpression("transaction.", DataType.LOGICAL);
   }
 
   @Test
