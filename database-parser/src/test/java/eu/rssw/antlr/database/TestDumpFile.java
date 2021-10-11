@@ -22,6 +22,7 @@ package eu.rssw.antlr.database;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -51,6 +52,15 @@ public class TestDumpFile {
     InputStream stream2 = new FileInputStream("src/test/resources/sp4k.df");
     DatabaseDescription db2 = DumpFileUtils.getDatabaseDescription(stream2, Charset.forName("utf-8"), "sp4k");
     assertEquals(db2.getTable("Tbl1").getDescription(), "Ã©Ã§");
+  }
+
+  @Test
+  public void testComments() throws IOException {
+    InputStream stream = new FileInputStream("src/test/resources/comments.df");
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(stream, Charset.forName("utf-8"), "sp2k");
+    assertNull(db.getTable("Tbl1").getDescription());
+    assertEquals(db.getTable("Tbl1").getArea(), "XXX");
+    assertTrue(db.getTable("Tbl1").isFrozen());
   }
 
   @Test

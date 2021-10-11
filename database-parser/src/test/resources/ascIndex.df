@@ -11,7 +11,7 @@ ADD FIELD "Fld2" OF "Tab1" AS character
   FORMAT "x(24)"
   MANDATORY
 
-ADD FIELD "Fld2" OF "Tab1" AS character
+ADD FIELD "Fld3" OF "Tab1" AS character
   FORMAT "x(24)"
   MANDATORY
 

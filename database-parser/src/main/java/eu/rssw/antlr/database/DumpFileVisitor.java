@@ -48,6 +48,7 @@ import eu.rssw.antlr.database.DumpFileGrammarParser.SeqMinValContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.TableAreaContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.TableDescriptionContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.TableDumpNameContext;
+import eu.rssw.antlr.database.DumpFileGrammarParser.TableFrozenContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.TableTriggerContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.TableValMsgContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.UpdateIndexBPContext;
@@ -222,6 +223,14 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
     if (ctx.noOverride != null)
       trigger.setNoOverride(true);
     tables.peek().addTrigger(trigger);
+
+    return null;
+  }
+
+  @Override
+  public Void visitTableFrozen(TableFrozenContext ctx) {
+    if (!tables.isEmpty())
+      tables.peek().setFrozen(true);
 
     return null;
   }

@@ -296,6 +296,9 @@ addConstraintOption:
 footer:
  '.' 'PSC'? ('bufpool' '=' 'yes')? (UNQUOTED_STRING '=' UNQUOTED_STRING)? ( '.' NUMBER? )?;
 
+SINGLE_LINE_COMMENT:
+  '#' ~[\r\n]* -> channel(HIDDEN);
+
 fragment INT:
   ('0'..'9');
 
