@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,8 +70,10 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
    * @param type IConstants.ST_TTABLE or IConstants.ST_WTABLE.
    * @return A newly created BufferSymbol for this temp/work table.
    */
-  public TableBuffer defineTable(String name, int type) {
-    ITable table = new Table(name, type);
+  public TableBuffer defineTable(String name, int type, boolean noUndo, boolean undo) {
+    Table table = new Table(name, type);
+    table.setNoUndo(noUndo);
+    table.setUndo(undo);
     tableMap.put(name.toLowerCase(), table);
     // Pass empty string for name for default buffer.
     TableBuffer bufferSymbol = new TableBuffer("", this, table);
@@ -183,6 +186,10 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
    */
   public ITable lookupTableDefinition(String name) {
     return tableMap.get(name.toLowerCase());
+  }
+
+  public Collection<ITable> getAllTableDefinitions() {
+    return tableMap.values();
   }
 
   @Override

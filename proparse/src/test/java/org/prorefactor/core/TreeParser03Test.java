@@ -30,6 +30,7 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Parameter;
@@ -1328,4 +1329,37 @@ public class TreeParser03Test {
     assertFalse(list.get(2).getParent().getParent().isStateHead());
   }
 
+  @Test
+  public void testTempTableNoUndo01() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test38.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    ITable tta = unit.getRootScope().lookupTableDefinition("tta");
+    ITable ttb = unit.getRootScope().lookupTableDefinition("ttb");
+    ITable ttc = unit.getRootScope().lookupTableDefinition("ttc");
+    ITable ttd = unit.getRootScope().lookupTableDefinition("ttd");
+    ITable tte = unit.getRootScope().lookupTableDefinition("tte");
+    ITable ttf = unit.getRootScope().lookupTableDefinition("ttf");
+    ITable ttg = unit.getRootScope().lookupTableDefinition("ttg");
+    ITable tth = unit.getRootScope().lookupTableDefinition("tth");
+    assertNotNull(tta);
+    assertNotNull(ttb);
+    assertNotNull(ttc);
+    assertNotNull(ttd);
+    assertNotNull(tte);
+    assertNotNull(ttf);
+    assertNotNull(ttg);
+    assertNotNull(tth);
+    assertFalse(tta.isNoUndo());
+    assertFalse(ttb.isNoUndo());
+    assertTrue(ttc.isNoUndo());
+    assertFalse(ttd.isNoUndo());
+    assertFalse(tte.isNoUndo());
+    assertTrue(ttf.isNoUndo());
+    assertTrue(ttg.isNoUndo());
+    assertFalse(tth.isNoUndo());
+  }
 }

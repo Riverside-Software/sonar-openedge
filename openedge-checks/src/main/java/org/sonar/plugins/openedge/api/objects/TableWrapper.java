@@ -129,4 +129,8 @@ public class TableWrapper implements ITable {
     return IConstants.ST_DBTABLE;
   }
 
+  @Override
+  public boolean isNoUndo() {
+    return false;
+  }
 }

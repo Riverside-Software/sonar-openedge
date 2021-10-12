@@ -396,7 +396,7 @@ public class ParserTest {
 
   private IDatabase createWidgetPoolDB() {
     IDatabase retVal = new Database("mydb");
-    retVal.add(new Table("widget-pool", IConstants.ST_DBTABLE));
+    retVal.add(new Table("widget-pool", retVal));
 
     return retVal;
   }

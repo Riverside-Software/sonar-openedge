@@ -29,6 +29,7 @@ import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Index;
+import org.prorefactor.core.schema.Table;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
@@ -2223,6 +2224,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     currDefTableLike = astTableBufferLink(support.getNode(ctx));
     currDefTable.setLikeSymbol(currDefTableLike);
     if (currDefTableLike != null) {
+      if (!currDefTable.getTable().isNoUndo())
+        ((Table) currDefTable.getTable()).setParentNoUndo(currDefTableLike.getTable().isNoUndo());
       // For each field in "table", create a field def in currDefTable
       for (IField field : currDefTableLike.getTable().getFieldPosOrder()) {
         rootScope.defineTableField(field.getName(), currDefTable).assignAttributesLike(field);
@@ -2260,7 +2263,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Table definition {} {}", indent(), defNode, storeType);
 
-    TableBuffer buffer = rootScope.defineTable(name, storeType);
+    TableBuffer buffer = rootScope.defineTable(name, storeType,
+        !defNode.queryCurrentStatement(ABLNodeType.NOUNDO).isEmpty(), !defNode.queryCurrentStatement(ABLNodeType.UNDO).isEmpty());
     currSymbol = buffer;
     currSymbol.setDefinitionNode(defNode.getIdNode());
     currDefTable = buffer;

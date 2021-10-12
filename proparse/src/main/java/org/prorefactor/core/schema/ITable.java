@@ -60,6 +60,11 @@ public interface ITable {
   List<IField> getFieldPosOrder();
 
   List<IIndex> getIndexes();
-  
+
   IIndex lookupIndex(String name);
+
+  /**
+   * Return true if explicitely no-undo, or if no-undo is inherited from LIKE clause
+   */
+  boolean isNoUndo();
 }
