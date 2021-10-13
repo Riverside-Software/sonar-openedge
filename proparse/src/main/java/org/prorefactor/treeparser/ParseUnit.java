@@ -335,6 +335,7 @@ public class ParseUnit {
     long startTimeNs = System.nanoTime();
     JPNodeVisitor visitor = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
     topNode = (ProgramRootNode) visitor.visit(tree).build(this, parser.getParserSupport());
+    parser.getParserSupport().clearRecordExpressions();
     isClass = visitor.isClass();
     isInterface = visitor.isInterface();
     isEnum = visitor.isEnum();

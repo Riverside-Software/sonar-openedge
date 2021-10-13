@@ -45,19 +45,20 @@ public class ParserSupport {
 
   private final IProparseEnvironment session;
   private final ClassFinder classFinder;
+  private final CrossReference xref;
   // Scope for the compile unit or class. It might be "sub" to a super scope in a class hierarchy
   private final RootSymbolScope unitScope;
-  private final CrossReference xref;
 
   // Current scope might be "unitScope" or an inner method/subprocedure scope
   private SymbolScope currentScope;
+  private List<SymbolScope> innerScopes = new ArrayList<>();
+  private Map<RuleContext, SymbolScope> innerScopesMap = new HashMap<>();
+  private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
 
   private boolean schemaTablePriority = false;
   private boolean unitIsInterface = false;
   private boolean unitIsEnum = false;
   private boolean allowUnknownMethodCalls = true;
-
-  private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
 
   private String className = "";
 
@@ -67,9 +68,6 @@ public class ParserSupport {
   private ParseTreeProperty<FieldType> recordExpressions = new ParseTreeProperty<>();
   private ParseTreeProperty<JPNode> nodes = new ParseTreeProperty<>();
 
-  private List<SymbolScope> innerScopes = new ArrayList<>();
-  private Map<RuleContext, SymbolScope> innerScopesMap = new HashMap<>();
-
   public ParserSupport(IProparseEnvironment session, CrossReference xref) {
     this.session = session;
     this.unitScope = new RootSymbolScope(session);
@@ -78,9 +76,21 @@ public class ParserSupport {
     this.xref = xref == null ? new EmptyCrossReference() : xref;
   }
 
+  public CrossReference getXREF() {
+    return xref;
+  }
+
   public String getClassName() {
     return className;
   }
+
+  public IProparseEnvironment getProparseSession() {
+    return session;
+  }
+
+  // ************************************
+  // Functions triggered from proparse.g4
+  // ************************************
 
   /**
    * An AS phrase allows further abbreviations on the datatype names. Input a token's text, this returns 0 if it is not
@@ -97,7 +107,7 @@ public class ParserSupport {
    * <li>widget-h: widg
    * </ul>
    */
-  public int abbrevDatatype(String text) {
+  public static int abbrevDatatype(String text) {
     String s = text.toLowerCase();
     if ("cha".startsWith(s))
       return Proparse.CHARACTER;
@@ -134,32 +144,12 @@ public class ParserSupport {
     }
   }
 
-  public void addInnerScope() {
-    currentScope = new SymbolScope(session, currentScope);
-    innerScopes.add(currentScope);
-  }
-
   // TEMP-ANTLR4
   public void addInnerScope(RuleContext ctx) {
-    addInnerScope();
+    currentScope = new SymbolScope(session, currentScope);
+    innerScopes.add(currentScope);
     innerScopesMap.put(ctx, currentScope);
   }
-
-  public IProparseEnvironment getProparseSession() {
-    return session;
-  }
-
-  // TEMP-ANTLR4
-  public RootSymbolScope getUnitScope() {
-    return unitScope;
-  }
-
-  // TEMP-ANTLR4
-  public List<SymbolScope> getInnerScopes() {
-    return innerScopes;
-  }
-
-  // Functions triggered from proparse.g
 
   public void defBuffer(String bufferName, String tableName) {
     LOG.trace("defBuffer {} to {}", bufferName, tableName);
@@ -236,19 +226,18 @@ public class ParserSupport {
     classFinder.addPath(typeName);
   }
 
-  // End of functions triggered from proparse.g
-
   public boolean recordSemanticPredicate(Token lt1, Token lt2, Token lt3) {
     String recname = lt1.getText();
-    // Since ANTLR4 migration, NAMEDOT doesn't exist anymore in the token stream, as they're filtered out by
-    // NameDotTokenFilter
-    // So this 'if' block can probably be removed...
     if (lt2.getType() == ABLNodeType.NAMEDOT.getType()) {
       recname += ".";
       recname += lt3.getText();
     }
     return (schemaTablePriority ? isTableSchemaFirst(recname.toLowerCase()) : isTable(recname.toLowerCase())) != null;
   }
+
+  // *******************************************
+  // End of functions triggered from proparse.g4
+  // *******************************************
 
   public void pushNode(ParseTree ctx, JPNode node) {
     nodes.put(ctx, node);
@@ -265,6 +254,10 @@ public class ParserSupport {
 
   public FieldType getRecordExpression(RuleContext ctx) {
     return recordExpressions.get(ctx);
+  }
+
+  public void clearRecordExpressions() {
+    recordExpressions = new ParseTreeProperty<>();
   }
 
   public FieldType isTable(String inName) {

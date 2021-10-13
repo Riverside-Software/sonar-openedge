@@ -1163,7 +1163,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
     else if (builder.getNodeType() == ABLNodeType.WIDGET)
       builder.changeType(ABLNodeType.WIDGETHANDLE);
     else if (ctx.id != null)
-      builder.changeType(ABLNodeType.getNodeType(support.abbrevDatatype(ctx.id.getText())));
+      builder.changeType(ABLNodeType.getNodeType(ParserSupport.abbrevDatatype(ctx.id.getText())));
 
     return builder.setRuleNode(ctx);
   }
