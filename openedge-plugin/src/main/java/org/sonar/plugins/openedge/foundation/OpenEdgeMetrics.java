@@ -147,10 +147,12 @@ public class OpenEdgeMetrics implements Metrics {
       Metric.ValueType.INT).setDescription("Complexity (w/ include files content)").setDirection(Metric.DIRECTION_WORST).setQualitative(
           false).setDomain(CoreMetrics.DOMAIN_COMPLEXITY).create();
 
+  @SuppressWarnings("rawtypes")
   private static final List<Metric> METRICS = ImmutableList.<Metric> builder().add(PACKAGES, CLASSES, PROCEDURES,
       INCLUDES, WINDOWS, TRANSACTIONS, NUM_TRANSACTIONS, SHR_DS, SHR_TT, SHR_VAR, NUM_TABLES, NUM_SEQUENCES, NUM_INDEXES,
       NUM_FIELDS, NUM_TRIGGERS, INTERNAL_PROCEDURES, INTERNAL_FUNCTIONS, METHODS, COMPLEXITY).build();
 
+  @SuppressWarnings("rawtypes")
   @Override
   public List<Metric> getMetrics() {
     return METRICS;
