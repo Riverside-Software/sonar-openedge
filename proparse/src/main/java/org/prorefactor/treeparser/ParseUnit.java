@@ -82,6 +82,7 @@ public class ParseUnit {
 
   private final IProparseEnvironment session;
   private final File file;
+  private final String str;
   private final InputStream input;
   private final String relativeName;
 
@@ -131,20 +132,31 @@ public class ParseUnit {
   public ParseUnit(File file, String relativeName, IProparseEnvironment session) {
     this.file = file;
     this.input = null;
+    this.str = null;
     this.relativeName = relativeName;
     this.session = session;
   }
 
   public ParseUnit(InputStream input, IProparseEnvironment session) {
-    this.file = null;
-    this.input = input;
-    this.relativeName = "<unnamed>";
-    this.session = session;
+    this(input, "<unnamed>", session);
   }
 
   public ParseUnit(InputStream input, String relativeName, IProparseEnvironment session) {
     this.file = null;
     this.input = input;
+    this.str = null;
+    this.relativeName = relativeName;
+    this.session = session;
+  }
+
+  public ParseUnit(String str, IProparseEnvironment session) {
+    this(str, "<unnamed>", session);
+  }
+
+  public ParseUnit(String str, String relativeName, IProparseEnvironment session) {
+    this.file = null;
+    this.input = null;
+    this.str = str;
     this.relativeName = relativeName;
     this.session = session;
   }
@@ -593,6 +605,9 @@ public class ParseUnit {
   }
 
   private ByteSource getByteSource() {
+    if (str != null) {
+      return ByteSource.wrap(str.getBytes(session.getCharset()));
+    }
     try (InputStream s = input == null ? new FileInputStream(file) : input) {
       if (s.markSupported())
         s.reset();

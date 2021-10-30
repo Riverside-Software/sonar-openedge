@@ -4,8 +4,6 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import java.io.ByteArrayInputStream;
-
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
@@ -27,7 +25,7 @@ public class ParserFailureTest {
 
   @Test
   public void testFailure01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("MESSAGE 'Hello' VIEW-AS".getBytes()), session);
+    ParseUnit unit = new ParseUnit("MESSAGE 'Hello' VIEW-AS", session);
     try {
       unit.treeParser01();
       fail("Missing keyword, should have failed");
@@ -39,7 +37,7 @@ public class ParserFailureTest {
 
   @Test
   public void testFailure02() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("FIND customer. FIND sp2k.plopmachin. ".getBytes()), session);
+    ParseUnit unit = new ParseUnit("FIND customer. FIND sp2k.plopmachin. ", session);
     try {
       unit.treeParser01();
       fail("Invalid table name, should have failed");

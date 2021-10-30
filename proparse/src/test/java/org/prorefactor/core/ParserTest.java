@@ -20,7 +20,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -121,7 +120,7 @@ public class ParserTest {
   }
 
   // SQL not recognized anymore
-  @Test(enabled=false)
+  @Test(enabled = false)
   public void testAscending02() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ascending02.p"), session);
     unit.parse();
@@ -192,7 +191,6 @@ public class ParserTest {
     assertEquals(unit.getTopNode().query(ABLNodeType.DYNAMICFUNCTION).size(), 3);
   }
 
-
   @Test
   public void testGetCodepage() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "getcodepage.p"), session);
@@ -212,7 +210,8 @@ public class ParserTest {
 
   @Test
   public void testExpr() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("message xx. catch err as Progress.Lang.Error: message err:GetClass():TypeName. end.".getBytes()), "<unnamed>", session);
+    ParseUnit unit = new ParseUnit(
+        "message xx. catch err as Progress.Lang.Error: message err:GetClass():TypeName. end.", "<unnamed>", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
@@ -220,7 +219,7 @@ public class ParserTest {
 
   @Test
   public void testConnectDatabase() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("connect database dialog box".getBytes()), "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("connect database dialog box", "<unnamed>", session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CONNECT).size(), 1);
@@ -228,7 +227,7 @@ public class ParserTest {
 
   @Test
   public void testReservedKeyword() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define temp-table xxx field to-rowid as character.".getBytes()), "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("define temp-table xxx field to-rowid as character.", "<unnamed>", session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
@@ -245,7 +244,7 @@ public class ParserTest {
 
   @Test
   public void testParameterLike() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("define input parameter ipPrm no-undo like customer.custnum.".getBytes()), "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("define input parameter ipPrm no-undo like customer.custnum.", "<unnamed>", session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
@@ -255,7 +254,8 @@ public class ParserTest {
 
   @Test
   public void testAnnotation01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("@Progress.Lang.Annotation. MESSAGE 'Hello1'. MESSAGE 'Hello2'.".getBytes()), "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("@Progress.Lang.Annotation. MESSAGE 'Hello1'. MESSAGE 'Hello2'.", "<unnamed>",
+        session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
@@ -263,14 +263,15 @@ public class ParserTest {
 
   @Test
   public void testAnnotation02() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("@Progress.Lang.Annotation(foo='bar'). MESSAGE 'Hello1'. MESSAGE 'Hello2'.".getBytes()), "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("@Progress.Lang.Annotation(foo='bar'). MESSAGE 'Hello1'. MESSAGE 'Hello2'.",
+        "<unnamed>", session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
   }
 
   /**
-   * TODO Yes, should probably move to TreeParserTest.  
+   * TODO Yes, should probably move to TreeParserTest.
    */
   @Test
   public void tesTTIndex01() {
@@ -325,7 +326,7 @@ public class ParserTest {
   }
 
   /**
-   * TODO Yes, should probably move to TreeParserTest.  
+   * TODO Yes, should probably move to TreeParserTest.
    */
   @Test
   public void testRecordNameNode() {
@@ -372,12 +373,13 @@ public class ParserTest {
   @Test
   public void testCreateWidgetPool() {
     // No widget-pool table, statement is about creating a widget-pool
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("create widget-pool. message 'hello'.".getBytes()), "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("create widget-pool. message 'hello'.", "<unnamed>", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertNull(session.getSchema().lookupTable("widget-pool"));
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).asIStatement().getNodeType2(), ABLNodeType.WIDGETPOOL);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).asIStatement().getNodeType2(),
+        ABLNodeType.WIDGETPOOL);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
 
     // widget-pool table available, statement is still about creating a widget-pool
@@ -386,10 +388,11 @@ public class ParserTest {
     RefactorSession session2 = new RefactorSession(session.getProparseSettings(), schema);
     assertNotNull(session2.getSchema().lookupTable("widget-pool"));
 
-    ParseUnit unit2 = new ParseUnit(new ByteArrayInputStream("create widget-pool. message 'hello'.".getBytes()), "<unnamed>", session2);
+    ParseUnit unit2 = new ParseUnit("create widget-pool. message 'hello'.", "<unnamed>", session2);
     unit2.treeParser01();
     assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
-    assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).asIStatement().getNodeType2(), ABLNodeType.WIDGETPOOL);
+    assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).asIStatement().getNodeType2(),
+        ABLNodeType.WIDGETPOOL);
     assertEquals(unit2.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
 
   }
@@ -403,14 +406,16 @@ public class ParserTest {
 
   @Test
   public void testExpression01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
-        "def image img1 file 'f1' size 1 by 1. def frame f1 img1 at row 1 col 1. img1:load-image('f2') in frame f1.".getBytes()),
-        "<unnamed>", session);
+    ParseUnit unit = new ParseUnit(
+        "def image img1 file 'f1' size 1 by 1. def frame f1 img1 at row 1 col 1. img1:load-image('f2') in frame f1.",
+        session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 2);
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).asIStatement().getNodeType2(), ABLNodeType.IMAGE);
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(1).asIStatement().getNodeType2(), ABLNodeType.FRAME);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).asIStatement().getNodeType2(),
+        ABLNodeType.IMAGE);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(1).asIStatement().getNodeType2(),
+        ABLNodeType.FRAME);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).get(0).query(ABLNodeType.FRAME).size(),
         1);
@@ -418,9 +423,9 @@ public class ParserTest {
 
   @Test
   public void testExpression02() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
-        "def var xxx as widget-handle. def var yyy as char. def frame zzz yyy. create control-frame xxx. xxx:move-after(yyy:handle in frame zzz).".getBytes()),
-        "<unnamed>", session);
+    ParseUnit unit = new ParseUnit(
+        "def var xxx as widget-handle. def var yyy as char. def frame zzz yyy. create control-frame xxx. xxx:move-after(yyy:handle in frame zzz).",
+        session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 3);
@@ -428,16 +433,17 @@ public class ParserTest {
         ABLNodeType.VARIABLE);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(1).asIStatement().getNodeType2(),
         ABLNodeType.VARIABLE);
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(2).asIStatement().getNodeType2(), ABLNodeType.FRAME);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(2).asIStatement().getNodeType2(),
+        ABLNodeType.FRAME);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).size(), 1);
-    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).asIStatement().getNodeType2(), ABLNodeType.WIDGET);
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CREATE).get(0).asIStatement().getNodeType2(),
+        ABLNodeType.WIDGET);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
   }
 
   @Test
   public void testExpression03() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("def var xxx as handle. message xxx::yyy.".getBytes()),
-        "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("def var xxx as handle. message xxx::yyy.", "<unnamed>", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
@@ -446,9 +452,9 @@ public class ParserTest {
 
   @Test
   public void testExpression04() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
-        "def var xxx as System.Reflection.PropertyInfo. xxx:SetValue('xxx', xxx as long, 'xx' + 'yy' + 'zz').".getBytes()),
-        "<unnamed>", session);
+    ParseUnit unit = new ParseUnit(
+        "def var xxx as System.Reflection.PropertyInfo. xxx:SetValue('xxx', xxx as long, 'xx' + 'yy' + 'zz').",
+        session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
@@ -461,9 +467,7 @@ public class ParserTest {
 
   @Test
   public void testExpression05() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
-        "System.Math:Max(1 + 2 as unsigned-byte, 3 * 4 as unsigned-byte).".getBytes()),
-        "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("System.Math:Max(1 + 2 as unsigned-byte, 3 * 4 as unsigned-byte).", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.EXPR_STATEMENT).size(), 1);
@@ -501,8 +505,7 @@ public class ParserTest {
 
   @Test
   public void testSwitchLL() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("run procName(input frame frame-a fldName).".getBytes()),
-        "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("run procName(input frame frame-a fldName).", "<unnamed>", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     // Switch to LL is NOT good, but unit test is there to be aware of any change here
@@ -511,8 +514,7 @@ public class ParserTest {
 
   @Test
   public void testSuperStatement() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("class foo: constructor foo(): super(). end. end class.".getBytes()),
-        "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("class foo: constructor foo(): super(). end. end class.", "<unnamed>", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().query(ABLNodeType.SUPER).size(), 1);
@@ -522,9 +524,7 @@ public class ParserTest {
 
   @Test
   public void testRecordFunction01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
-        "find first _file. display recid(_file).".getBytes()),
-        "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("find first _file. display recid(_file).", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().query(ABLNodeType.RECORD_NAME).size(), 2);
@@ -532,9 +532,7 @@ public class ParserTest {
 
   @Test
   public void testOptionalArgFunction01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
-        "get-db-client('sp2k'). get-db-client().".getBytes()),
-        "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("get-db-client('sp2k'). get-db-client().", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -543,9 +541,9 @@ public class ParserTest {
 
   @Test
   public void testDatatype01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream(
-        "interface rssw.test: method public Progress.Lang.Object getService(input xxx as class Progress.Lang.Class). end interface.".getBytes()),
-        "<unnamed>", session);
+    ParseUnit unit = new ParseUnit(
+        "interface rssw.test: method public Progress.Lang.Object getService(input xxx as class Progress.Lang.Class). end interface.",
+        session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -635,7 +633,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CHAR s1, s2, s3, s4.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR CHAR s1, s2, s3, s4.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -643,7 +641,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement02() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT x, y, z = 3.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT x, y, z = 3.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -651,7 +649,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement03() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS mypackage.subdir.myclass myobj1, myobj2, myobj3.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR CLASS mypackage.subdir.myclass myobj1, myobj2, myobj3.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -659,7 +657,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement04() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR mypackage.subdir.myclass myobj1.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR mypackage.subdir.myclass myobj1.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -667,7 +665,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement05() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR DATE d1, d2 = 1/1/2020, d3 = TODAY.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR DATE d1, d2 = 1/1/2020, d3 = TODAY.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -675,7 +673,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement06() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR PROTECTED DATE d1, d2 = 1/1/2020.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR PROTECTED DATE d1, d2 = 1/1/2020.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -683,7 +681,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement07() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[3] x = [1, 2], y, z = [100, 200, 300].".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT[3] x = [1, 2], y, z = [100, 200, 300].", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -691,7 +689,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement08() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT[] x, y.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -699,7 +697,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement09() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y = [1,2,3].".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT[] x, y = [1,2,3].", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -707,7 +705,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement10() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x = [1,2], y = [1,2,3].".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT[] x = [1,2], y = [1,2,3].", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -715,7 +713,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement11() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS foo[2] classArray.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR CLASS foo[2] classArray.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -723,7 +721,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement12() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR \"System.Collections.Generic.List<char>\" cList.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR \"System.Collections.Generic.List<char>\" cList.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -731,8 +729,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement13() {
-    ParseUnit unit = new ParseUnit(
-        new ByteArrayInputStream("VAR INT a, b, x = a + b, y = a - b, z = x - y.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT a, b, x = a + b, y = a - b, z = x - y.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -740,8 +737,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement14() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT a, b. VAR INT[] x = [ a + b, a - b ].".getBytes()),
-        session);
+    ParseUnit unit = new ParseUnit("VAR INT a, b. VAR INT[] x = [ a + b, a - b ].", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -749,8 +745,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement15() {
-    ParseUnit unit = new ParseUnit(
-        new ByteArrayInputStream("USING Progress.Lang.Object. VAR Object x = NEW Object().".getBytes()), session);
+    ParseUnit unit = new ParseUnit("USING Progress.Lang.Object. VAR Object x = NEW Object().", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -758,8 +753,7 @@ public class ParserTest {
 
   @Test
   public void testVarStatement16() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR DATETIME dtm = DATETIME(TODAY,MTIME).".getBytes()),
-        session);
+    ParseUnit unit = new ParseUnit("VAR DATETIME dtm = DATETIME(TODAY,MTIME).", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
