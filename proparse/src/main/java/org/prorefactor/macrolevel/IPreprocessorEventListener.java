@@ -20,9 +20,9 @@ package org.prorefactor.macrolevel;
  * analyze-* statements, ...
  */
 public interface IPreprocessorEventListener {
-  void macroRef(int line, int column, String macroName);
+  void macroRef(int line, int column, int endLine, int endColumn, String macroName);
   void macroRefEnd();
-  void include(int line, int column, int currentFile, String incFile);
+  void include(int line, int column, int endLine, int endColumn, int currentFile, String incFile);
   void includeArgument(String argName, String value, boolean undefined);
   void includeEnd();
   void define(int line, int column, String name, String value, MacroDefinitionType type);

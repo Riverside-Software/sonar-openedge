@@ -27,6 +27,7 @@ import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroDef;
+import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.NamedMacroRef;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
@@ -303,6 +304,10 @@ public class PreprocessorDirectiveTest {
     assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
     NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
     assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
+    assertEquals(nmr.getLine(), 4);
+    assertEquals(nmr.getEndLine(), 4);
+    assertEquals(nmr.getColumn(), 10);
+    assertEquals(nmr.getEndColumn(), 17);
   }
 
   @Test
@@ -310,12 +315,17 @@ public class PreprocessorDirectiveTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor16.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
-    IncludeRef incRef = unit.getMacroGraph();
-    assertEquals(incRef.macroEventList.size(), 3);
-    assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
-    assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
-    NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
-    assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
+    IncludeRef mainFile = unit.getMacroGraph();
+    assertEquals(mainFile.macroEventList.size(), 3);
+    assertTrue(mainFile.macroEventList.get(0) instanceof MacroDef);
+    assertTrue(mainFile.macroEventList.get(1) instanceof NamedMacroRef);
+    NamedMacroRef nmr = (NamedMacroRef) mainFile.macroEventList.get(1);
+    assertEquals(nmr.getMacroDef(), mainFile.macroEventList.get(0));
+    IncludeRef incRef = (IncludeRef) mainFile.macroEventList.get(2);
+    assertEquals(incRef.getLine(), 6);
+    assertEquals(incRef.getEndLine(), 6);
+    assertEquals(incRef.getColumn(), 4);
+    assertEquals(incRef.getEndColumn(), 36);
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.DEFINE);
     assertEquals(nodes.size(), 1);
     // Preprocessor magic... Keywords can start in main file, and end in include file...

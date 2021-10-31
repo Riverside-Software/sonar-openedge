@@ -28,12 +28,12 @@ public class IncludeRef extends MacroRef {
   private int fileIndex;
   private boolean usesNamedArgs;
 
-  public IncludeRef(MacroRef parent, int line, int column) {
-    super(parent, line, column);
+  public IncludeRef(MacroRef parent, int line, int column, int endLine, int endColumn) {
+    super(parent, line, column, endLine, endColumn);
   }
 
-  public IncludeRef(MacroRef parent, int line, int column, int fileIndex) {
-    super(parent, line, column);
+  public IncludeRef(MacroRef parent, int line, int column, int endLine, int endColumn, int fileIndex) {
+    super(parent, line, column, endLine, endColumn);
     this.fileIndex = fileIndex;
   }
 

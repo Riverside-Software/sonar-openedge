@@ -1547,7 +1547,7 @@ public class Lexer implements IPreprocessor {
         ppCurrChar = '{';
         currentInput = new InputSource(++sourceCounter, refText.substring(1), refPos.file, refPos.line, refPos.col);
         currentInclude.addInputSource(currentInput);
-        prepro.getLstListener().macroRef(refPos.line, refPos.col, "_proparse_");
+        prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol, "_proparse_");
       } else {
         // Proparse Directive
         ppCurrChar = PROPARSE_DIRECTIVE;
@@ -1556,7 +1556,7 @@ public class Lexer implements IPreprocessor {
         // This will be counted as a source whether picked up here or picked
         // up as a normal macro ref.
         ++sourceCounter;
-        prepro.getLstListener().macroRef(refPos.line, refPos.col, "_proparse_");
+        prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol, "_proparse_");
         prepro.getLstListener().macroRefEnd();
       }
     } else if ("{*}".equals(refText)) {
@@ -1663,16 +1663,13 @@ public class Lexer implements IPreprocessor {
       if (prepro.isLexOnly()) {
         ppCurrChar = INCLUDE_DIRECTIVE;
         includeDirectiveText = refText.trim();
-      } else
-      // newInclude() returns false if filename is blank or currently
-      // "consuming" due to &IF FALSE.
-      // newInclude() will throw() if file not found or cannot be opened.
-      if (ppNewInclude(includeFilename)) {
-        // Unlike currline and currcol,
-        // currfile is only updated with a push/pop of the input stack.
+      } else if (ppNewInclude(includeFilename)) {
+        // ppNewInclude() returns false if filename is blank or currently "consuming" due to &IF FALSE.
+        // ppNewInclude() will throw UncheckedIOException if file not found or cannot be opened.
+        // Unlike currline and currcol, currfile is only updated with a push/pop of the input stack.
         currFile = currentInput.getFileIndex();
         currSourceNum = currentInput.getSourceNum();
-        prepro.getLstListener().include(refPos.line, refPos.col, currFile, includeFilename);
+        prepro.getLstListener().include(refPos.line, refPos.col, currLine, currCol, currFile, includeFilename);
         // Add the arguments to the new include object.
         int argNum = 1;
         for (IncludeArg incarg : incArgs) {
@@ -1696,12 +1693,12 @@ public class Lexer implements IPreprocessor {
     // Using this trick: {{&undefined-argument}{&*}}
     // it is possible to get line breaks into what we
     // get here as the macroName. See test data bug15.p and bug15.i.
-    prepro.getLstListener().macroRef(refPos.line, refPos.col, macroName);
+    prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol, macroName);
     ppNewMacroRef2(getArgText(macroName), refPos);
   }
 
   private void ppNewMacroRef(int argNum, FilePos refPos) {
-    prepro.getLstListener().macroRef(refPos.line, refPos.col, Integer.toString(argNum));
+    prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol, Integer.toString(argNum));
     ppNewMacroRef2(getArgText(argNum), refPos);
   }
 

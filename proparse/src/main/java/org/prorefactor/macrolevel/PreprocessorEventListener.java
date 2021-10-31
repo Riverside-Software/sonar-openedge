@@ -47,7 +47,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   private CodeSection currSection;
 
   public PreprocessorEventListener() {
-    root = new IncludeRef(null, 0, 0);
+    root = new IncludeRef(null, 0, 0, 0, 0);
 
     currRef = root;
     currInclude = root;
@@ -91,8 +91,8 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   }
 
   @Override
-  public void include(int line, int column, int currentFile, String incFile) {
-    IncludeRef newRef = new IncludeRef(currRef, line, column, currentFile);
+  public void include(int line, int column, int endLine, int endColumn, int currentFile, String incFile) {
+    IncludeRef newRef = new IncludeRef(currRef, line, column, endLine, endColumn, currentFile);
     scopeStack.addFirst(new Scope(newRef));
     currRef.macroEventList.add(newRef);
     currInclude = newRef;
@@ -128,8 +128,8 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   }
 
   @Override
-  public void macroRef(int line, int column, String macroName) {
-    NamedMacroRef newRef = new NamedMacroRef(findMacroDef(macroName), currRef, line, column);
+  public void macroRef(int line, int column, int endLine, int endColumn, String macroName) {
+    NamedMacroRef newRef = new NamedMacroRef(findMacroDef(macroName), currRef, line, column, endLine, endColumn);
     currRef.macroEventList.add(newRef);
     currRef = newRef;
   }
