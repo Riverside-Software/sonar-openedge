@@ -42,7 +42,7 @@ public class TokenListTest {
   private RefactorSession session;
 
   @BeforeTest
-  public void setUp() {
+  public void setUp() { 
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
   }

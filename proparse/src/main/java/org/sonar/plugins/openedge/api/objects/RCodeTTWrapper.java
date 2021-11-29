@@ -105,6 +105,14 @@ public class RCodeTTWrapper implements ITable {
     return null;
   }
 
+  /**
+   * Note: Not inherited from LIKE temp-tables
+   */
+  @Override
+  public boolean isNoUndo() {
+    return table.isNoUndo();
+  }
+
   @Override
   public int getStoretype() {
     return IConstants.ST_TTABLE;

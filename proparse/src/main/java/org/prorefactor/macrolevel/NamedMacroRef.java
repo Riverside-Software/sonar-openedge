@@ -21,8 +21,8 @@ package org.prorefactor.macrolevel;
 public class NamedMacroRef extends MacroRef {
   private final MacroDef macroDef;
 
-  public NamedMacroRef(MacroDef macro, MacroRef parent, int line, int column) {
-    super(parent, line, column);
+  public NamedMacroRef(MacroDef macro, MacroRef parent, int line, int column, int endLine, int endColumn) {
+    super(parent, line, column, endLine, endColumn);
     this.macroDef = macro;
   }
 

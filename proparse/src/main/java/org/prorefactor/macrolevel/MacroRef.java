@@ -29,14 +29,18 @@ public abstract class MacroRef implements MacroEvent {
   private final MacroRef parent;
   private final int refColumn;
   private final int refLine;
+  private final int refEndLine;
+  private final int refEndColumn;
 
   /** A list of macro references and defines that are in this macro's source */
   public final List<MacroEvent> macroEventList = new ArrayList<>();
 
-  public MacroRef(MacroRef parent, int line, int column) {
+  MacroRef(MacroRef parent, int line, int column, int endLine, int endColumn) {
     this.parent = parent;
     this.refLine = line;
     this.refColumn = column;
+    this.refEndLine = endLine;
+    this.refEndColumn = endColumn;
   }
 
   @Override
@@ -52,15 +56,22 @@ public abstract class MacroRef implements MacroEvent {
     return refColumn;
   }
 
+  public int getEndLine() {
+    return refEndLine;
+  }
+
+  public int getEndColumn() {
+    return refEndColumn;
+  }
+
   /**
-   * Find <i>external macro references</i>. An external macro is an include file, a &amp;GLOBAL or a &amp;SCOPED from another
-   * file, and include args.
+   * Find <i>external macro references</i>. An external macro is an include file, a &amp;GLOBAL or a &amp;SCOPED from
+   * another file, and include args.
    * 
-   * TODO: (Jan 26) This doesn't seem right to me anymore. An &amp;UNDEFINE only affects the local scope. If re-implemented
-   * after building a pseudoprocessor, consider dropping this. &amp;UNDEFINE of a &amp;GLOBAL or of a &amp;SCOPED from another file
-   * is considered a reference. &amp;UNDEFINE of an include argument is considered a reference.
+   * &amp;UNDEFINE of a &amp;GLOBAL or of a &amp;SCOPED from another file is considered a reference. &amp;UNDEFINE of an
+   * include argument is considered a reference.
    * 
-   * The subroutine is recursive, because a local define may incur an external reference!
+   * The subroutine is recursive, because a local define may incur an external reference.
    * 
    * @return An array of objects: MacroRef and MacroDef (for UNDEFINE).
    */

@@ -1,3 +1,0 @@
-x05_ignore.i
-x05_ignore2.i
- 

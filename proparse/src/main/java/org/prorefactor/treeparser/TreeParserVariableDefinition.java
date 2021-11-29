@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedList;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
@@ -30,6 +29,7 @@ import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Index;
+import org.prorefactor.core.schema.Table;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
@@ -1457,11 +1457,20 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFormatOption(FormatOptionContext ctx) {
-    if ((ctx.LEXAT() != null) && (ctx.fieldExpr() != null)) {
+    if (ctx.LEXAT() != null) {
       setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
       frameStack.lexAt(support.getNode(ctx.fieldExpr().field()));
-    } else if ((ctx.LIKE() != null) && (ctx.fieldExpr() != null)) {
+    } else if (ctx.LIKE() != null) {
       setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
+    }
+  }
+
+  @Override
+  public void exitFormatOption(FormatOptionContext ctx) {
+    if ((ctx.AS() != null) && (ctx.getParent().getParent() instanceof MessageOptionContext)) {
+      defAs(ctx.datatype());
+    } else if (ctx.LIKE() != null) {
+      defLike(support.getNode(ctx.fieldExpr().field()));
     }
   }
 
@@ -2039,24 +2048,47 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     return variable;
   }
 
-  private void defAs(ParserRuleContext ctx) {
-    defAs((Primative) currSymbol, ctx);
+  private DataType getDataTypeFromContext(ClassTypeNameContext ctx) {
+    String qualName = support.lookupClassName(ctx.getStop().getText());
+    if (Strings.isNullOrEmpty(qualName))
+      return new DataType(ctx.getStop().getText());
+    else
+      return new DataType(qualName);
   }
 
-  private void defAs(Primative primative, ParserRuleContext ctx) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> Variable AS '{}'", indent(), ctx.getText());
-
+  private DataType getDataTypeFromContext(DatatypeContext ctx) {
     if ((ctx.getStart().getType() == ABLNodeType.CLASS.getType())
         || (ctx.getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
       String qualName = support.lookupClassName(ctx.getStop().getText());
       if (Strings.isNullOrEmpty(qualName))
-        primative.setDataType(new DataType(ctx.getStop().getText()));
+        return new DataType(ctx.getStop().getText());
       else
-        primative.setDataType(new DataType(qualName));
+        return new DataType(qualName);
     } else {
-      primative.setDataType(ABLNodeType.getDataType(ctx.getStop().getType()));
+      return ABLNodeType.getDataType(ctx.getStop().getType());
     }
+  }
+
+  private void defAs(DatatypeContext ctx) {
+    defAs((Primative) currSymbol, ctx);
+  }
+
+  private void defAs(ClassTypeNameContext ctx) {
+    defAs((Primative) currSymbol, ctx);
+  }
+
+  private void defAs(Primative primative, DatatypeContext ctx) {
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Variable AS '{}'", indent(), ctx.getText());
+
+    primative.setDataType(getDataTypeFromContext(ctx));
+  }
+
+  private void defAs(Primative primative, ClassTypeNameContext ctx) {
+    if (LOG.isTraceEnabled())
+      LOG.trace("{}> Variable AS '{}'", indent(), ctx.getText());
+
+    primative.setDataType(getDataTypeFromContext(ctx));
   }
 
   private void defineInitialValue(Variable v, VarStatementInitialValueContext ctx) {
@@ -2192,6 +2224,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     currDefTableLike = astTableBufferLink(support.getNode(ctx));
     currDefTable.setLikeSymbol(currDefTableLike);
     if (currDefTableLike != null) {
+      if (!currDefTable.getTable().isNoUndo())
+        ((Table) currDefTable.getTable()).setParentNoUndo(currDefTableLike.getTable().isNoUndo());
       // For each field in "table", create a field def in currDefTable
       for (IField field : currDefTableLike.getTable().getFieldPosOrder()) {
         rootScope.defineTableField(field.getName(), currDefTable).assignAttributesLike(field);
@@ -2229,7 +2263,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Table definition {} {}", indent(), defNode, storeType);
 
-    TableBuffer buffer = rootScope.defineTable(name, storeType);
+    TableBuffer buffer = rootScope.defineTable(name, storeType,
+        !defNode.queryCurrentStatement(ABLNodeType.NOUNDO).isEmpty(), !defNode.queryCurrentStatement(ABLNodeType.UNDO).isEmpty());
     currSymbol = buffer;
     currSymbol.setDefinitionNode(defNode.getIdNode());
     currDefTable = buffer;

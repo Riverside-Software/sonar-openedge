@@ -293,9 +293,7 @@ public class OpenEdgeSettings {
     // Include files in propath
     for (File entry : propath) {
       if (entry.getName().endsWith(".pl")) {
-        srv.service.submit(() -> {
-          parseLibrary(entry);
-        });
+        srv.service.submit(() -> parseLibrary(entry));
       } else {
         parseRCodeInPath(entry, srv);
       }

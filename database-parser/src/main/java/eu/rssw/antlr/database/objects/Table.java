@@ -29,6 +29,7 @@ public class Table {
   private String description;
   private String dumpName;
   private String valMsg;
+  private boolean frozen;
 
   private Collection<Field> fields = new ArrayList<>();
   private Collection<Index> indexes = new ArrayList<>();
@@ -51,6 +52,14 @@ public class Table {
 
   public void setArea(String area) {
     this.area = area;
+  }
+
+  public boolean isFrozen() {
+    return frozen;
+  }
+
+  public void setFrozen(boolean frozen) {
+    this.frozen = frozen;
   }
 
   public String getLabel() {

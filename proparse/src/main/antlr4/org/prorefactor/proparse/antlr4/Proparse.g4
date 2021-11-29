@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2018 Riverside Software
+ * Copyright (c) 2015-2021 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -1329,7 +1329,7 @@ datatypeVar:
   | UNSIGNEDBYTE
   | UNSIGNEDSHORT
   | UNSIGNEDINTEGER
-  | { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID // Like 'i' for INTEGER or 'de' for DECIMAL
+  | { ABLNodeType.abbrevDatatype(_input.LT(1).getText()) != ABLNodeType.INVALID_NODE  }? id=ID // Like 'i' for INTEGER or 'de' for DECIMAL
   | { !support.isDataTypeVariable(_input.LT(1)) }? typeName
   ;
 
@@ -2600,8 +2600,9 @@ messageOption:
     ( MESSAGE | QUESTION | INFORMATION | ERROR | WARNING )?
     ( ( BUTTONS | BUTTON ) ( YESNO | YESNOCANCEL | OK | OKCANCEL | RETRYCANCEL ) )?
     titleExpression?
-  | SET fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? | )
-  | UPDATE fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? | )
+  | SET fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? )
+    // LA(2) check is only there to make sure VIEW-AS ALERT-BOX is assigned to MESSAGE statement and not to variable declaration 
+  | UPDATE fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? )
   ;
 
 methodStatement locals [ boolean abs = false ]:
@@ -2616,9 +2617,7 @@ methodStatement locals [ boolean abs = false ]:
     |  OVERRIDE
     |  FINAL
     )*
-    ( VOID | datatype extentPhrase? )
-    id=newIdentifier
-    functionParams
+    ( VOID | datatype extentPhrase? ) id=newIdentifier functionParams
     ( { $abs || support.isInterface() }? blockColon // An INTERFACE declares without defining, ditto ABSTRACT.
     | { !$abs && !support.isInterface() }?
       blockColon

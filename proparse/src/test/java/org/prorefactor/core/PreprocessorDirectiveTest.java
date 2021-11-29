@@ -18,7 +18,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -28,6 +27,7 @@ import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroDef;
+import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.NamedMacroRef;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
@@ -139,11 +139,11 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test04() throws IOException {
-    ParseUnit unit01 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &myParam=1 }".getBytes()), "<unnamed>", session);
+    ParseUnit unit01 = new ParseUnit("{ preprocessor/preprocessor10.i &myParam=1 }", session);
     TokenSource stream01 = unit01.preprocess();
     assertEquals(nextVisibleToken(stream01).getType(), Proparse.TRUE);
 
-    ParseUnit unit02 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &abc=1 &myParam }".getBytes()), "<unnamed>", session);
+    ParseUnit unit02 = new ParseUnit("{ preprocessor/preprocessor10.i &abc=1 &myParam }", session);
     TokenSource stream02 = unit02.preprocess();
     assertEquals(nextVisibleToken(stream02).getType(), Proparse.TRUE);
     IncludeRef events02 = (IncludeRef) unit02.getMacroSourceArray()[1];
@@ -154,11 +154,11 @@ public class PreprocessorDirectiveTest {
     assertEquals(events02.getArgNumber(2).getName(), "myParam");
     assertTrue(events02.getArgNumber(2).isUndefined());
 
-    ParseUnit unit03 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &abc &myParam }".getBytes()), "<unnamed>", session);
+    ParseUnit unit03 = new ParseUnit("{ preprocessor/preprocessor10.i &abc &myParam }", session);
     TokenSource stream03 = unit03.preprocess();
     assertEquals(nextVisibleToken(stream03).getType(), Proparse.TRUE);
 
-    ParseUnit unit04 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &myParam &abc }".getBytes()), "<unnamed>", session);
+    ParseUnit unit04 = new ParseUnit("{ preprocessor/preprocessor10.i &myParam &abc }", session);
     TokenSource stream04 = unit04.preprocess();
     // Different behavior in ABL
     assertEquals(nextVisibleToken(stream04).getType(), Proparse.TRUE);
@@ -169,7 +169,7 @@ public class PreprocessorDirectiveTest {
     assertEquals(events04.getArgNumber(2).getName(), "abc");
     assertTrue(events04.getArgNumber(2).isUndefined());
 
-    ParseUnit unit05 = new ParseUnit(new ByteArrayInputStream("{ preprocessor/preprocessor10.i &abc &myParam=1 }".getBytes()), "<unnamed>", session);
+    ParseUnit unit05 = new ParseUnit("{ preprocessor/preprocessor10.i &abc &myParam=1 }", session);
     TokenSource stream05 = unit05.preprocess();
     assertEquals(nextVisibleToken(stream05).getType(), Proparse.TRUE);
     IncludeRef events05 = (IncludeRef) unit05.getMacroSourceArray()[1];
@@ -304,6 +304,10 @@ public class PreprocessorDirectiveTest {
     assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
     NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
     assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
+    assertEquals(nmr.getLine(), 4);
+    assertEquals(nmr.getEndLine(), 4);
+    assertEquals(nmr.getColumn(), 10);
+    assertEquals(nmr.getEndColumn(), 17);
   }
 
   @Test
@@ -311,12 +315,17 @@ public class PreprocessorDirectiveTest {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor16.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
-    IncludeRef incRef = unit.getMacroGraph();
-    assertEquals(incRef.macroEventList.size(), 3);
-    assertTrue(incRef.macroEventList.get(0) instanceof MacroDef);
-    assertTrue(incRef.macroEventList.get(1) instanceof NamedMacroRef);
-    NamedMacroRef nmr = (NamedMacroRef) incRef.macroEventList.get(1);
-    assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
+    IncludeRef mainFile = unit.getMacroGraph();
+    assertEquals(mainFile.macroEventList.size(), 3);
+    assertTrue(mainFile.macroEventList.get(0) instanceof MacroDef);
+    assertTrue(mainFile.macroEventList.get(1) instanceof NamedMacroRef);
+    NamedMacroRef nmr = (NamedMacroRef) mainFile.macroEventList.get(1);
+    assertEquals(nmr.getMacroDef(), mainFile.macroEventList.get(0));
+    IncludeRef incRef = (IncludeRef) mainFile.macroEventList.get(2);
+    assertEquals(incRef.getLine(), 6);
+    assertEquals(incRef.getEndLine(), 6);
+    assertEquals(incRef.getColumn(), 4);
+    assertEquals(incRef.getEndColumn(), 36);
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.DEFINE);
     assertEquals(nodes.size(), 1);
     // Preprocessor magic... Keywords can start in main file, and end in include file...

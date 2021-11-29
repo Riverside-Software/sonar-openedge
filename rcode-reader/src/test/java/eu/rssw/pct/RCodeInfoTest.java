@@ -295,11 +295,13 @@ public class RCodeInfoTest {
   @Test
   public void testElementsV11() throws IOException {
     testElements("src/test/resources/rcode/TestClassElementsV11.r");
+    testElements2("src/test/resources/rcode/TestClassElementsChV11.r");
   }
 
   @Test
   public void testElementsV12() throws IOException {
     testElements("src/test/resources/rcode/TestClassElementsV12.r");
+    testElements2("src/test/resources/rcode/TestClassElementsChV12.r");
   }
 
   public void testElements(String fileName) throws IOException {
@@ -309,7 +311,7 @@ public class RCodeInfoTest {
       assertNotNull(rci.getTypeInfo());
 
       assertNotNull(rci.getTypeInfo().getTables());
-      assertEquals(rci.getTypeInfo().getTables().size(), 2);
+      assertEquals(rci.getTypeInfo().getTables().size(), 7);
       ITableElement tt1 = rci.getTypeInfo().getTempTable("tt1");
       assertNotNull(tt1);
       assertEquals(tt1.getFields().length, 3); // Always an empty field at the end (ROWID ?)
@@ -318,7 +320,23 @@ public class RCodeInfoTest {
       assertNotNull(tt2);
       assertEquals(tt2.getFields().length, 3);
       assertEquals(tt2.getIndexes().length, 1);
-      assertNull(rci.getTypeInfo().getTempTable("tt3"));
+      ITableElement tt3 = rci.getTypeInfo().getTempTable("tt3");
+      assertNotNull(tt3);
+      assertTrue(tt3.isNoUndo());
+      ITableElement tt4 = rci.getTypeInfo().getTempTable("tt4");
+      assertNotNull(tt4);
+      assertFalse(tt4.isNoUndo());
+      ITableElement tt5 = rci.getTypeInfo().getTempTable("tt5");
+      assertNotNull(tt5);
+      // Information is not available in rcode
+      // assertTrue(tt5.isNoUndo());
+      ITableElement tt6 = rci.getTypeInfo().getTempTable("tt6");
+      assertNotNull(tt6);
+      assertFalse(tt6.isNoUndo());
+      ITableElement tt7 = rci.getTypeInfo().getTempTable("tt7");
+      assertNotNull(tt7);
+      // Information is not available in rcode
+      // assertTrue(tt7.isNoUndo());
 
       assertNotNull(rci.getTypeInfo().getDatasets());
       assertEquals(rci.getTypeInfo().getDatasets().size(), 1);
@@ -418,4 +436,25 @@ public class RCodeInfoTest {
       throw new RuntimeException("RCode should be valid", caught);
     }
   }
+
+  public void testElements2(String fileName) throws IOException {
+    try (FileInputStream input = new FileInputStream(fileName)) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      assertNotNull(rci.getTypeInfo());
+
+      assertNotNull(rci.getTypeInfo().getTables());
+      assertEquals(rci.getTypeInfo().getTables().size(), 2);
+      ITableElement tt1 = rci.getTypeInfo().getTempTable("chtt1");
+      assertFalse(tt1.isNoUndo());
+      assertNotNull(tt1);
+      ITableElement tt2 = rci.getTypeInfo().getTempTable("chtt2");
+      assertNotNull(tt2);
+      assertFalse(tt2.isNoUndo());
+
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
 }

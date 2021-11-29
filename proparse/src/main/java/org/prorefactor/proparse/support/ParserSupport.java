@@ -27,7 +27,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
-import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.support.SymbolScope.FieldType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,19 +44,20 @@ public class ParserSupport {
 
   private final IProparseEnvironment session;
   private final ClassFinder classFinder;
+  private final CrossReference xref;
   // Scope for the compile unit or class. It might be "sub" to a super scope in a class hierarchy
   private final RootSymbolScope unitScope;
-  private final CrossReference xref;
 
   // Current scope might be "unitScope" or an inner method/subprocedure scope
   private SymbolScope currentScope;
+  private List<SymbolScope> innerScopes = new ArrayList<>();
+  private Map<RuleContext, SymbolScope> innerScopesMap = new HashMap<>();
+  private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
 
   private boolean schemaTablePriority = false;
   private boolean unitIsInterface = false;
   private boolean unitIsEnum = false;
   private boolean allowUnknownMethodCalls = true;
-
-  private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
 
   private String className = "";
 
@@ -67,9 +67,6 @@ public class ParserSupport {
   private ParseTreeProperty<FieldType> recordExpressions = new ParseTreeProperty<>();
   private ParseTreeProperty<JPNode> nodes = new ParseTreeProperty<>();
 
-  private List<SymbolScope> innerScopes = new ArrayList<>();
-  private Map<RuleContext, SymbolScope> innerScopesMap = new HashMap<>();
-
   public ParserSupport(IProparseEnvironment session, CrossReference xref) {
     this.session = session;
     this.unitScope = new RootSymbolScope(session);
@@ -78,88 +75,27 @@ public class ParserSupport {
     this.xref = xref == null ? new EmptyCrossReference() : xref;
   }
 
+  public CrossReference getXREF() {
+    return xref;
+  }
+
   public String getClassName() {
     return className;
-  }
-
-  /**
-   * An AS phrase allows further abbreviations on the datatype names. Input a token's text, this returns 0 if it is not
-   * a datatype abbreviation, otherwise returns the integer token type for the abbreviation. Here's the normal keyword
-   * abbreviation, with what AS phrase allows:
-   * <ul>
-   * <li>char: c
-   * <li>date: da
-   * <li>dec: de
-   * <li>int: i
-   * <li>logical: l
-   * <li>recid: rec
-   * <li>rowid: rowi
-   * <li>widget-h: widg
-   * </ul>
-   */
-  public int abbrevDatatype(String text) {
-    String s = text.toLowerCase();
-    if ("cha".startsWith(s))
-      return Proparse.CHARACTER;
-    if ("da".equals(s) || "dat".equals(s))
-      return Proparse.DATE;
-    if ("de".equals(s))
-      return Proparse.DECIMAL;
-    if ("i".equals(s) || "in".equals(s))
-      return Proparse.INTEGER;
-    if ("logical".startsWith(s))
-      return Proparse.LOGICAL;
-    if ("rec".equals(s) || "reci".equals(s))
-      return Proparse.RECID;
-    if ("rowi".equals(s))
-      return Proparse.ROWID;
-    if ("widget-h".startsWith(s) && s.length() >= 4)
-      return Proparse.WIDGETHANDLE;
-    return 0;
-  }
-
-  // TEMP-ANTLR4
-  public void visitorEnterScope(RuleContext ctx) {
-    SymbolScope scope = innerScopesMap.get(ctx);
-    if (scope != null) {
-      currentScope = scope;
-    }
-  }
-
-  // TEMP-ANTLR4
-  public void visitorExitScope(RuleContext ctx) {
-    SymbolScope scope = innerScopesMap.get(ctx);
-    if (scope != null) {
-      currentScope = currentScope.getSuperScope();
-    }
-  }
-
-  public void addInnerScope() {
-    currentScope = new SymbolScope(session, currentScope);
-    innerScopes.add(currentScope);
-  }
-
-  // TEMP-ANTLR4
-  public void addInnerScope(RuleContext ctx) {
-    addInnerScope();
-    innerScopesMap.put(ctx, currentScope);
   }
 
   public IProparseEnvironment getProparseSession() {
     return session;
   }
 
-  // TEMP-ANTLR4
-  public RootSymbolScope getUnitScope() {
-    return unitScope;
-  }
+  // ************************************
+  // Functions triggered from proparse.g4
+  // ************************************
 
-  // TEMP-ANTLR4
-  public List<SymbolScope> getInnerScopes() {
-    return innerScopes;
+  public void addInnerScope(RuleContext ctx) {
+    currentScope = new SymbolScope(session, currentScope);
+    innerScopes.add(currentScope);
+    innerScopesMap.put(ctx, currentScope);
   }
-
-  // Functions triggered from proparse.g
 
   public void defBuffer(String bufferName, String tableName) {
     LOG.trace("defBuffer {} to {}", bufferName, tableName);
@@ -236,13 +172,8 @@ public class ParserSupport {
     classFinder.addPath(typeName);
   }
 
-  // End of functions triggered from proparse.g
-
   public boolean recordSemanticPredicate(Token lt1, Token lt2, Token lt3) {
     String recname = lt1.getText();
-    // Since ANTLR4 migration, NAMEDOT doesn't exist anymore in the token stream, as they're filtered out by
-    // NameDotTokenFilter
-    // So this 'if' block can probably be removed...
     if (lt2.getType() == ABLNodeType.NAMEDOT.getType()) {
       recname += ".";
       recname += lt3.getText();
@@ -250,29 +181,9 @@ public class ParserSupport {
     return (schemaTablePriority ? isTableSchemaFirst(recname.toLowerCase()) : isTable(recname.toLowerCase())) != null;
   }
 
-  public void pushNode(ParseTree ctx, JPNode node) {
-    nodes.put(ctx, node);
-  }
-
-  public JPNode getNode(ParseTree ctx) {
-    return nodes.get(ctx);
-  }
-
   public void pushRecordExpression(RuleContext ctx, String recName) {
     recordExpressions.put(ctx, schemaTablePriority ? currentScope.isTableSchemaFirst(recName.toLowerCase())
         : currentScope.isTable(recName.toLowerCase()));
-  }
-
-  public FieldType getRecordExpression(RuleContext ctx) {
-    return recordExpressions.get(ctx);
-  }
-
-  public FieldType isTable(String inName) {
-    return currentScope.isTable(inName);
-  }
-
-  public FieldType isTableSchemaFirst(String inName) {
-    return currentScope.isTableSchemaFirst(inName);
   }
 
   /** Returns true if the lookahead is a table name, and not a var name. */
@@ -293,42 +204,10 @@ public class ParserSupport {
     return currentScope.isVariable(name);
   }
 
-  public boolean isInlineVar(String name) {
-    return currentScope.isInlineVariable(name);
-  }
-
-  public int isMethodOrFunc(String name) {
-    // Methods and user functions are only at the "unit" (class) scope.
-    // Methods can also be inherited from superclasses.
-    return unitScope.isMethodOrFunction(name);
-  }
-
   public int isMethodOrFunc(Token token) {
     if (token == null)
       return 0;
     return unitScope.isMethodOrFunction(token.getText());
-  }
-
-  /**
-   * @return True if parsing a class or interface
-   */
-  public boolean isClass() {
-    return !Strings.isNullOrEmpty(className);
-  }
-
-  /**
-   * @return True if parsing an interface
-   */
-  public boolean isInterface() {
-    return unitIsInterface;
-  }
-
-  public boolean isEnum() {
-    return unitIsEnum;
-  }
-
-  public boolean isSchemaTablePriority() {
-    return schemaTablePriority;
   }
 
   public void setSchemaTablePriority(boolean priority) {
@@ -351,11 +230,6 @@ public class ParserSupport {
     return allowUnknownMethodCalls;
   }
 
-  // TODO Speed issue in this function, multiplied JPNode tree generation time by a factor 10
-  public String lookupClassName(String text) {
-    return classFinder.lookup(text);
-  }
-
   public boolean hasHiddenBefore(TokenStream stream) {
     int currIndex = stream.index();
     // Obviously no hidden token for first token
@@ -373,4 +247,80 @@ public class ParserSupport {
     // Otherwise see if token is in different channel
     return stream.get(currIndex + 1).getChannel() != Token.DEFAULT_CHANNEL;
   }
+
+  /**
+   * @return True if parsing a class or interface
+   */
+  public boolean isClass() {
+    return !Strings.isNullOrEmpty(className);
+  }
+
+  /**
+   * @return True if parsing an interface
+   */
+  public boolean isInterface() {
+    return unitIsInterface;
+  }
+
+  public boolean isEnum() {
+    return unitIsEnum;
+  }
+
+  private FieldType isTable(String inName) {
+    return currentScope.isTable(inName);
+  }
+
+  private FieldType isTableSchemaFirst(String inName) {
+    return currentScope.isTableSchemaFirst(inName);
+  }
+
+  // *******************************************
+  // End of functions triggered from proparse.g4
+  // *******************************************
+
+  public void pushNode(ParseTree ctx, JPNode node) {
+    nodes.put(ctx, node);
+  }
+
+  public JPNode getNode(ParseTree ctx) {
+    return nodes.get(ctx);
+  }
+
+  public void visitorEnterScope(RuleContext ctx) {
+    SymbolScope scope = innerScopesMap.get(ctx);
+    if (scope != null) {
+      currentScope = scope;
+    }
+  }
+
+  public void visitorExitScope(RuleContext ctx) {
+    SymbolScope scope = innerScopesMap.get(ctx);
+    if (scope != null) {
+      currentScope = currentScope.getSuperScope();
+    }
+  }
+
+  public FieldType getRecordExpression(RuleContext ctx) {
+    return recordExpressions.get(ctx);
+  }
+
+  public void clearRecordExpressions() {
+    recordExpressions = new ParseTreeProperty<>();
+  }
+
+  public boolean isInlineVar(String name) {
+    return currentScope.isInlineVariable(name);
+  }
+
+  public int isMethodOrFunc(String name) {
+    // Methods and user functions are only at the "unit" (class) scope.
+    // Methods can also be inherited from superclasses.
+    return unitScope.isMethodOrFunction(name);
+  }
+
+  // TODO Speed issue in this function, multiplied JPNode tree generation time by a factor 10
+  public String lookupClassName(String text) {
+    return classFinder.lookup(text);
+  }
+
 }

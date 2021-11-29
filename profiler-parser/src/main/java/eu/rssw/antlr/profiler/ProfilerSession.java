@@ -52,8 +52,6 @@ public class ProfilerSession {
   private List<String> stats1 = new ArrayList<>();
   // Json description
   private String json;
-  // Coverage 2
-  private List<ModuleInfo> modInfos = new ArrayList<>();
   private boolean hasModuleInfo;
 
   // Internal use
@@ -244,16 +242,18 @@ public class ProfilerSession {
     }
   }
 
+  @SuppressWarnings("unused")
   private class ProfilerDescription {
-    private long StmtCnt;
-    private long DataPts;
-    private long NumWrites;
-    private double TotTime;
-    private long BufferSize;
-    private String Directory;
+    private long stmtCnt;
+    private long dataPts;
+    private long numWrites;
+    private double totTime;
+    private long bufferSize;
+    private String directory;
     private String propath;
   }
 
+  @SuppressWarnings("unused")
   private class TraceLine {
     private Module module;
     private int lineNumber;
@@ -261,7 +261,4 @@ public class ProfilerSession {
     private float timestamp;
   }
 
-  private class ModuleInfo {
-    
-  }
 }

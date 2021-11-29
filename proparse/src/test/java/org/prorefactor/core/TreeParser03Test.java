@@ -22,7 +22,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -30,6 +29,7 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Parameter;
@@ -242,9 +242,7 @@ public class TreeParser03Test {
 
   @Test
   public void test10() {
-    ParseUnit unit = new ParseUnit(
-        new ByteArrayInputStream("define input parameter ipPrm no-undo like customer.custnum.".getBytes()), "<unnamed>",
-        session);
+    ParseUnit unit = new ParseUnit("define input parameter ipPrm no-undo like customer.custnum.", session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -574,7 +572,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CHAR s1, s2, s3.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR CHAR s1, s2, s3.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -607,7 +605,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement02() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT s1, s2, s3 = 3.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT s1, s2, s3 = 3.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -636,8 +634,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement03() {
-    ParseUnit unit = new ParseUnit(
-        new ByteArrayInputStream("VAR CLASS mypackage.subdir.myclass myobj1, myobj2, myobj3.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR CLASS mypackage.subdir.myclass myobj1, myobj2, myobj3.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -665,8 +662,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement04() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR mypackage.subdir.myclass myobj1.".getBytes()),
-        session);
+    ParseUnit unit = new ParseUnit("VAR mypackage.subdir.myclass myobj1.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -684,8 +680,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement05() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR DATE d1, d2 = 1/1/2020, d3 = TODAY.".getBytes()),
-        session);
+    ParseUnit unit = new ParseUnit("VAR DATE d1, d2 = 1/1/2020, d3 = TODAY.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -715,8 +710,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement06() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR PROTECTED DATE d1, d2 = 1/1/2020.".getBytes()),
-        session);
+    ParseUnit unit = new ParseUnit("VAR PROTECTED DATE d1, d2 = 1/1/2020.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -739,8 +733,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement07() {
-    ParseUnit unit = new ParseUnit(
-        new ByteArrayInputStream("VAR INT[3] x = [1, 2], y, z = [100, 200, 300].".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT[3] x = [1, 2], y, z = [100, 200, 300].", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -773,7 +766,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement08() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT[] x, y.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -796,7 +789,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement09() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x, y = [1,2,3].".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT[] x, y = [1,2,3].", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -819,7 +812,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement10() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT[] x = [1,2], y = [1,2,3].".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT[] x = [1,2], y = [1,2,3].", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -844,7 +837,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement11() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR CLASS foo[2] classArray.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR CLASS foo[2] classArray.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -863,8 +856,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement12() {
-    ParseUnit unit = new ParseUnit(
-        new ByteArrayInputStream("VAR \"System.Collections.Generic.List<char>\" cList.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR \"System.Collections.Generic.List<char>\" cList.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -883,8 +875,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement13() {
-    ParseUnit unit = new ParseUnit(
-        new ByteArrayInputStream("VAR INT a, b, x = a + b, y = a - b, z = x - y.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT a, b, x = a + b, y = a - b, z = x - y.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -944,8 +935,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement14() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT a, b. VAR INT[] x = [ a + b, a - b ].".getBytes()),
-        session);
+    ParseUnit unit = new ParseUnit("VAR INT a, b. VAR INT[] x = [ a + b, a - b ].", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -986,8 +976,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement15() {
-    ParseUnit unit = new ParseUnit(
-        new ByteArrayInputStream("USING Progress.Lang.Object. VAR Object x = NEW Object().".getBytes()), session);
+    ParseUnit unit = new ParseUnit("USING Progress.Lang.Object. VAR Object x = NEW Object().", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -1010,8 +999,7 @@ public class TreeParser03Test {
 
   @Test
   public void testVarStatement16() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR DATETIME dtm = DATETIME(TODAY,MTIME).".getBytes()),
-        session);
+    ParseUnit unit = new ParseUnit("VAR DATETIME dtm = DATETIME(TODAY,MTIME).", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
@@ -1033,7 +1021,7 @@ public class TreeParser03Test {
 
   @Test
   public void testShorthandOperator01() {
-    ParseUnit unit = new ParseUnit(new ByteArrayInputStream("VAR INT i1. ASSIGN i1 += 1.".getBytes()), session);
+    ParseUnit unit = new ParseUnit("VAR INT i1. ASSIGN i1 += 1.", session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -1328,4 +1316,37 @@ public class TreeParser03Test {
     assertFalse(list.get(2).getParent().getParent().isStateHead());
   }
 
+  @Test
+  public void testTempTableNoUndo01() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test38.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    ITable tta = unit.getRootScope().lookupTableDefinition("tta");
+    ITable ttb = unit.getRootScope().lookupTableDefinition("ttb");
+    ITable ttc = unit.getRootScope().lookupTableDefinition("ttc");
+    ITable ttd = unit.getRootScope().lookupTableDefinition("ttd");
+    ITable tte = unit.getRootScope().lookupTableDefinition("tte");
+    ITable ttf = unit.getRootScope().lookupTableDefinition("ttf");
+    ITable ttg = unit.getRootScope().lookupTableDefinition("ttg");
+    ITable tth = unit.getRootScope().lookupTableDefinition("tth");
+    assertNotNull(tta);
+    assertNotNull(ttb);
+    assertNotNull(ttc);
+    assertNotNull(ttd);
+    assertNotNull(tte);
+    assertNotNull(ttf);
+    assertNotNull(ttg);
+    assertNotNull(tth);
+    assertFalse(tta.isNoUndo());
+    assertFalse(ttb.isNoUndo());
+    assertTrue(ttc.isNoUndo());
+    assertFalse(ttd.isNoUndo());
+    assertFalse(tte.isNoUndo());
+    assertTrue(ttf.isNoUndo());
+    assertTrue(ttg.isNoUndo());
+    assertFalse(tth.isNoUndo());
+  }
 }

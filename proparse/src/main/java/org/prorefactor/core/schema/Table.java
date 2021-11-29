@@ -30,6 +30,9 @@ public class Table implements ITable {
   private final IDatabase database;
   private final String name;
   private final int storetype;
+  private boolean parentNoUndo = false;
+  private boolean undo = false;
+  private boolean noUndo = false;
 
   private List<IField> fieldPosOrder = new ArrayList<>();
   private List<IIndex> indexes = new ArrayList<>();
@@ -54,7 +57,7 @@ public class Table implements ITable {
   public Table(String name) {
     this.name = name;
     this.storetype = IConstants.ST_DBTABLE;
-    database = Constants.nullDatabase;
+    this.database = Constants.nullDatabase;
   }
 
   @Override
@@ -105,6 +108,28 @@ public class Table implements ITable {
   @Override
   public int getStoretype() {
     return storetype;
+  }
+
+  public void setParentNoUndo(boolean parentNoUndo) {
+    this.parentNoUndo = parentNoUndo;
+  }
+
+  public void setNoUndo(boolean noUndo) {
+    this.noUndo = noUndo;
+  }
+
+  public void setUndo(boolean undo) {
+    this.undo = undo;
+  }
+
+  @Override
+  public boolean isNoUndo() {
+    if (undo)
+      return false;
+    else if (noUndo)
+      return true;
+    else 
+      return parentNoUndo;
   }
 
   @Override
