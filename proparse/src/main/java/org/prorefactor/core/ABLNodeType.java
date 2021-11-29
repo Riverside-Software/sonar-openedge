@@ -2081,6 +2081,43 @@ public enum ABLNodeType {
     }
   }
 
+  /**
+   * An AS phrase allows further abbreviations on the datatype names. Input a token's text, this returns 0 if it is not
+   * a datatype abbreviation, otherwise returns the integer token type for the abbreviation. Here's the normal keyword
+   * abbreviation, with what AS phrase allows:
+   * <ul>
+   * <li>char: c
+   * <li>date: da
+   * <li>dec: de
+   * <li>int: i
+   * <li>logical: l
+   * <li>recid: rec
+   * <li>rowid: rowi
+   * <li>widget-h: widg
+   * </ul>
+   */
+  public static ABLNodeType abbrevDatatype(String text) {
+    String s = text.toLowerCase();
+    if ("cha".startsWith(s))
+      return ABLNodeType.CHARACTER;
+    if ("da".equals(s) || "dat".equals(s))
+      return ABLNodeType.DATE;
+    if ("de".equals(s))
+      return ABLNodeType.DECIMAL;
+    if ("i".equals(s) || "in".equals(s))
+      return ABLNodeType.INTEGER;
+    if ("logical".startsWith(s))
+      return ABLNodeType.LOGICAL;
+    if ("rec".equals(s) || "reci".equals(s))
+      return ABLNodeType.RECID;
+    if ("rowi".equals(s))
+      return ABLNodeType.ROWID;
+    if ("widget-h".startsWith(s) && s.length() >= 4)
+      return ABLNodeType.WIDGETHANDLE;
+
+    return ABLNodeType.INVALID_NODE;
+  }
+
   private static void generateKeywordsG4(final PrintStream out) {
     out.println("// Generated file - Do not manually edit");
     out.println();

@@ -1163,7 +1163,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
     else if (builder.getNodeType() == ABLNodeType.WIDGET)
       builder.changeType(ABLNodeType.WIDGETHANDLE);
     else if (ctx.id != null)
-      builder.changeType(ABLNodeType.getNodeType(ParserSupport.abbrevDatatype(ctx.id.getText())));
+      builder.changeType(ABLNodeType.abbrevDatatype(ctx.id.getText()));
 
     return builder.setRuleNode(ctx);
   }
@@ -2086,7 +2086,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitOnStatement(OnStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+    support.visitorEnterScope(ctx);
+    Builder builder = createStatementTreeFromFirstNode(ctx).setBlock(true);
+    support.visitorExitScope(ctx);
+    return builder;
   }
 
   @Override
@@ -2724,7 +2727,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitTriggerOfSub2(TriggerOfSub2Context ctx) {
-    support.defVar(ctx.id.getText());
+    support.defVar(ctx.id.getText()); // FIXME Is that really needed at this stage ?
     return createTreeFromFirstNode(ctx).setRuleNode(ctx);
   }
 
@@ -2736,7 +2739,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitTriggerOld(TriggerOldContext ctx) {
     Builder node = createTreeFromFirstNode(ctx).setRuleNode(ctx);
-    support.defVar(ctx.id.getText());
+    support.defVar(ctx.id.getText()); // FIXME Is that really needed at this stage ?
     return node;
   }
 
