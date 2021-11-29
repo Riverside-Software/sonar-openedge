@@ -481,6 +481,22 @@ public class ExpressionEngineTest {
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.DECIMAL);
   }
 
+  @Test
+  public void testInlineVariable04() {
+    // Not a good test case, this has to be removed. The way inline variables are handled has to be rewritten,
+    // as it is the only reason why we have to maintain the ParseSupport.currentScope object from JPNodeVisitor
+    // This test case just ensures that the scope is set correctly, as a bug was detected late in the dev cycle
+    // that broke the parser with NPE in some inline variables cases
+    ParseUnit unit01 = new ParseUnit("procedure p1: message 'xx' update lVar as log. end.", session);
+    unit01.treeParser01();
+    ParseUnit unit02 = new ParseUnit("function f1 returns char(): message 'xx' update lVar as log. end.", session);
+    unit02.treeParser01();
+    ParseUnit unit03 = new ParseUnit("on choose of btn1 do: message 'xx' update lVar as log. end.", session);
+    unit03.treeParser01();
+    ParseUnit unit04 = new ParseUnit("class cls1: method public void m1(): message 'xx' update lVar as log. end. end.", session);
+    unit04.treeParser01();
+  }
+
   private void testSimpleExpression(String code, DataType expected) {
     ParseUnit unit01 = new ParseUnit(code, session);
     unit01.treeParser01();

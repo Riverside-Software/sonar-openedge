@@ -1329,7 +1329,7 @@ datatypeVar:
   | UNSIGNEDBYTE
   | UNSIGNEDSHORT
   | UNSIGNEDINTEGER
-  | { support.abbrevDatatype(_input.LT(1).getText()) !=0  }? id=ID // Like 'i' for INTEGER or 'de' for DECIMAL
+  | { ABLNodeType.abbrevDatatype(_input.LT(1).getText()) != ABLNodeType.INVALID_NODE  }? id=ID // Like 'i' for INTEGER or 'de' for DECIMAL
   | { !support.isDataTypeVariable(_input.LT(1)) }? typeName
   ;
 
