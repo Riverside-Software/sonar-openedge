@@ -39,6 +39,7 @@ import org.sonar.api.server.rule.RulesDefinition.NewParam;
 import org.sonar.api.server.rule.RulesDefinition.NewRepository;
 import org.sonar.api.server.rule.RulesDefinition.NewRule;
 import org.sonar.api.server.rule.RulesDefinition.OwaspTop10;
+import org.sonar.api.server.rule.RulesDefinition.OwaspTop10Version;
 import org.sonar.api.server.rule.RulesDefinitionAnnotationLoader;
 import org.sonar.api.utils.AnnotationUtils;
 import org.sonar.api.utils.Version;
@@ -108,7 +109,7 @@ public class AnnotationBasedRulesDefinition {
         for (String str : annotation.owasp()) {
           OwaspTop10 owasp = OwaspTop10.valueOf(str);
           if (owasp != null)
-            rule.addOwaspTop10(owasp);
+            rule.addOwaspTop10(OwaspTop10Version.Y2017, owasp);
         }
         for (int tmp : annotation.cwe()) { 
           rule.addCwe(tmp);
