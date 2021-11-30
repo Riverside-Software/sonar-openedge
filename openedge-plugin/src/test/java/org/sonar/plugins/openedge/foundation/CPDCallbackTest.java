@@ -39,11 +39,12 @@ import org.sonar.api.batch.sensor.cpd.NewCpdTokens;
 import org.sonar.api.batch.sensor.cpd.internal.TokensLine;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
-import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.Constants;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.io.Files;
 
 public class CPDCallbackTest {
   private static final String BASEDIR = "src/test/resources/";

@@ -32,9 +32,10 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.plugins.openedge.api.Constants;
 import org.testng.annotations.BeforeMethod;
+
+import com.google.common.io.Files;
 
 public abstract class AbstractTest {
   private static final String BASEDIR = "src/test/resources/";
