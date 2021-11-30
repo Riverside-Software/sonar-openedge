@@ -41,6 +41,7 @@ import org.sonar.api.batch.sensor.cpd.NewCpdTokens;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.IRefactorSessionEnv;
 import org.sonar.plugins.openedge.foundation.InputFileUtils;
+import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
 public class OpenEdgeCPDSensor implements Sensor {
@@ -48,9 +49,11 @@ public class OpenEdgeCPDSensor implements Sensor {
 
   // IoC
   private final OpenEdgeSettings settings;
+  private final OpenEdgeComponents components;
 
-  public OpenEdgeCPDSensor(OpenEdgeSettings settings) {
+  public OpenEdgeCPDSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
     this.settings = settings;
+    this.components = components;
   }
 
   @Override
@@ -66,10 +69,16 @@ public class OpenEdgeCPDSensor implements Sensor {
       return;
     settings.init();
     IRefactorSessionEnv sessions = settings.getProparseSessions();
+    boolean skipUnchangedFiles = settings.skipUnchangedFiles();
 
     for (InputFile file : context.fileSystem().inputFiles(
         context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("CPD on {}", file);
+      if (skipUnchangedFiles && !components.isChanged(context, file)) {
+        LOG.debug("Skip {} as it is unchanged in this branch", file);
+        continue;
+      }
+
       IProparseEnvironment session = sessions.getSession(file.toString());
       try {
         processFile(context, session, file);

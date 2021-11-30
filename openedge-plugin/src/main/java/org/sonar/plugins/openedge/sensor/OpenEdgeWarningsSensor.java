@@ -40,6 +40,7 @@ import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.InputFileUtils;
+import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
@@ -52,9 +53,11 @@ public class OpenEdgeWarningsSensor implements Sensor {
 
   // IoC
   private final OpenEdgeSettings settings;
+  private final OpenEdgeComponents components;
 
-  public OpenEdgeWarningsSensor(OpenEdgeSettings settings) {
+  public OpenEdgeWarningsSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
     this.settings = settings;
+    this.components = components;
   }
 
   @Override
@@ -68,6 +71,9 @@ public class OpenEdgeWarningsSensor implements Sensor {
     if (context.runtime().getProduct() == SonarProduct.SONARLINT)
       return;
     settings.init();
+
+    boolean skipUnchangedFiles = settings.skipUnchangedFiles();
+
     int warningsImportNum = 0;
     final RuleKey defaultWarningRuleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY,
         OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY);
@@ -79,7 +85,10 @@ public class OpenEdgeWarningsSensor implements Sensor {
     FilePredicates predicates = context.fileSystem().predicates();
     for (InputFile file : context.fileSystem().inputFiles(predicates.and(
         predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
-      LOG.debug("Looking for warnings of {}", file);
+      if (skipUnchangedFiles && !components.isChanged(context, file)) {
+        LOG.debug("Skip {} as it is unchanged in this branch", file);
+        continue;
+      }
       processFile(context, file);
       warningsImportNum++;
       if (context.isCancelled()) {

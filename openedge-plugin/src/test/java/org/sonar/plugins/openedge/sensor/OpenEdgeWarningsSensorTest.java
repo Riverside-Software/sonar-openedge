@@ -33,6 +33,7 @@ import org.sonar.api.batch.sensor.issue.Issue;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
@@ -47,7 +48,8 @@ public class OpenEdgeWarningsSensorTest {
     context.setActiveRules(createRules1());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, components);
     sensor.execute(context);
 
     // Case-sensitive, so one issue can't be reported
@@ -91,7 +93,8 @@ public class OpenEdgeWarningsSensorTest {
     context.setActiveRules(createRules2());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, components);
     sensor.execute(context);
 
     // Case-sensitive, so one issue can't be reported
@@ -128,7 +131,8 @@ public class OpenEdgeWarningsSensorTest {
     context.setActiveRules(createRules0());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, components);
     sensor.execute(context);
 
     // Nothing should be reported

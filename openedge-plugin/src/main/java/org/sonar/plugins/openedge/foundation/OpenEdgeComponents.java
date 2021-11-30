@@ -22,6 +22,7 @@ package org.sonar.plugins.openedge.foundation;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -35,6 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.SonarProduct;
+import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.InputFile.Status;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.config.Configuration;
@@ -75,6 +78,7 @@ public class OpenEdgeComponents {
   private boolean initialized = false;
   private String analytics = "";
   private int ncLoc = 0;
+  private Map<String, List<String>> includeDependencies = new HashMap<>();
 
   public OpenEdgeComponents() {
     this(null, null, null, null);
@@ -177,6 +181,29 @@ public class OpenEdgeComponents {
 
   public int getNcLoc() {
     return ncLoc;
+  }
+
+  public void addIncludeDependency(String uri, List<String> dependencies) {
+    includeDependencies.put(uri, dependencies);
+  }
+
+  public List<String> getIncludeDependencies(String uri) {
+    return includeDependencies.getOrDefault(uri, Arrays.asList());
+  }
+
+  /**
+   * Return true if main file or one of its include files has changed
+   */
+  public boolean isChanged(SensorContext context, InputFile file) {
+    if ((file.status() == Status.ADDED) || (file.status() == Status.CHANGED))
+      return true;
+    for (String str : getIncludeDependencies(file.uri().toString())) {
+      InputFile target = context.fileSystem().inputFile(context.fileSystem().predicates().hasRelativePath(str));
+      if ((target != null) && ((target.status() == Status.ADDED) || (target.status() == Status.CHANGED)))
+        return true;
+    }
+
+    return false;
   }
 
   public Map<ActiveRule, OpenEdgeProparseCheck> getProparseRules() {
