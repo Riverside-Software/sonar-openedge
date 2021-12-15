@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.xml.bind.JAXBException;
 
@@ -1348,5 +1349,29 @@ public class TreeParser03Test {
     assertTrue(ttf.isNoUndo());
     assertTrue(ttg.isNoUndo());
     assertFalse(tth.isNoUndo());
+  }
+
+  @Test
+  public void testTTAsParameter() throws JAXBException, IOException {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test39.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    Optional<Routine> p1 = unit.getRootScope().getRoutines().stream().filter(r -> "p1".equals(r.getName())).findFirst();
+    Optional<Routine> f1 = unit.getRootScope().getRoutines().stream().filter(r -> "f1".equals(r.getName())).findFirst();
+    assertTrue(p1.isPresent());
+    assertTrue(f1.isPresent());
+    Parameter prm1 = p1.get().getParameters().get(0);
+    assertNotNull(prm1);
+    assertEquals(prm1.getProgressType(), ABLNodeType.TEMPTABLE.getType());
+    assertNotNull(prm1.getSymbol());
+    assertEquals(prm1.getSymbol().getName(), "tt1");
+    Parameter prm2 = f1.get().getParameters().get(0);
+    assertNotNull(prm2);
+    assertEquals(prm2.getProgressType(), ABLNodeType.TEMPTABLE.getType());
+    assertNotNull(prm2.getSymbol());
+    assertEquals(prm2.getSymbol().getName(), "tt1");
   }
 }

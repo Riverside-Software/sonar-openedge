@@ -292,6 +292,12 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void exitFunctionParamStandardTable(FunctionParamStandardTableContext ctx) {
+    RecordNameNode recNode = (RecordNameNode) support.getNode(ctx.record());
+    wipParameters.getFirst().setSymbol(recNode.getTableBuffer());
+  }
+
+  @Override
   public void enterFunctionParamStandardTableHandle(FunctionParamStandardTableHandleContext ctx) {
     Variable v = defineVariable(ctx, support.getNode(ctx), ctx.hn.getText(), DataType.TABLE_HANDLE,
         Variable.Type.PARAMETER);
@@ -1036,12 +1042,23 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void exitDefineParameterStatementSub2Table(DefineParameterStatementSub2TableContext ctx) {
+    RecordNameNode recNode = (RecordNameNode) support.getNode(ctx.record());
+    wipParameters.getFirst().setSymbol(recNode.getTableBuffer());
+  }
+
+  @Override
   public void enterDefineParameterStatementSub2TableHandle(DefineParameterStatementSub2TableHandleContext ctx) {
     wipParameters.getFirst().setProgressType(ABLNodeType.TABLEHANDLE);
     Variable v = defineVariable(ctx, support.getNode(ctx.parent), ctx.pn2.getText(), DataType.TABLE_HANDLE,
         Variable.Type.PARAMETER);
     v.addModifier(Modifier.getModifier(wipParameters.getFirst().getDirectionNode()));
     addToSymbolScope(v);
+  }
+
+  @Override
+  public void enterDefineParameterStatementSub2Dataset(DefineParameterStatementSub2DatasetContext ctx) {
+    wipParameters.getFirst().setProgressType(ABLNodeType.DATASET);
   }
 
   @Override
