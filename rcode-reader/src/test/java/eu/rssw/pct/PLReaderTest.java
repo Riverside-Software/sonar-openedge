@@ -19,10 +19,12 @@
  */
 package eu.rssw.pct;
 
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
@@ -32,12 +34,12 @@ public class PLReaderTest {
   @Test
   public void testRCodeInPL() throws IOException, InvalidRCodeException {
     PLReader pl = new PLReader(Path.of("src/test/resources/ablunit.pl"));
-    Assert.assertNotNull(pl.getEntry("OpenEdge/ABLUnit/Reflection/ClassAnnotationInfo.r"));
+    assertNotNull(pl.getEntry("OpenEdge/ABLUnit/Reflection/ClassAnnotationInfo.r"));
     RCodeInfo rci = new RCodeInfo(pl.getInputStream(pl.getEntry("OpenEdge/ABLUnit/Reflection/ClassAnnotationInfo.r")));
-    Assert.assertTrue(rci.isClass());
-    Assert.assertTrue(rci.getTypeInfo().getMethods().size() > 0);
-    Assert.assertTrue(rci.getTypeInfo().getProperties().size() > 0);
-    Assert.assertTrue(rci.getTypeInfo().getTables().size() == 0);
+    assertTrue(rci.isClass());
+    assertTrue(rci.getTypeInfo().getMethods().size() > 0);
+    assertTrue(rci.getTypeInfo().getProperties().size() > 0);
+    assertTrue(rci.getTypeInfo().getTables().size() == 0);
   }
 
 }

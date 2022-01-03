@@ -150,8 +150,8 @@ public class PLReader {
       channel.read(buf3);
       int fileOffset = buf3.getInt(6);
       int fileSize = buf3.getInt(11);
-      long added = buf3.getInt(15) * 1000L;
-      long modified = buf3.getInt(19) * 1000L;
+      long added = buf3.getInt(15);
+      long modified = buf3.getInt(19);
 
       int tocSize = (buf3.get(47) == 0 ? 50 : 49) + fNameSize;
       return new FileEntry(fName, modified, added, fileOffset, fileSize, tocSize);

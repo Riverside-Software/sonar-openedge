@@ -20,7 +20,8 @@
 package eu.rssw.pct;
 
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 /**
  * Class representing a file entry in a PL file
@@ -62,12 +63,18 @@ public class FileEntry implements Comparable<FileEntry> {
         return size;
     }
 
+    /**
+     * @return Modification date (in milliseconds)
+     */
     public long getModDate() {
-        return modDate;
+        return modDate * 1000;
     }
 
+    /**
+     * @return Add date (in milliseconds)
+     */
     public long getAddDate() {
-        return addDate;
+        return addDate * 1000;
     }
 
     public int getOffset() {
@@ -84,8 +91,9 @@ public class FileEntry implements Comparable<FileEntry> {
 
     @Override
     public String toString() {
-        return MessageFormat
-                .format("File {0} [{1} bytes] Added {2,date} Modified {3,date} [Offset : {4}]", this.fileName, Integer.valueOf(size), new Date(addDate), new Date(modDate), Long.valueOf(offset));
+      return MessageFormat.format("File {0} [{1} bytes] Added {2} Modified {3} [Offset : {4}]", this.fileName, size,
+          LocalDateTime.ofEpochSecond(addDate, 0, ZoneOffset.UTC),
+          LocalDateTime.ofEpochSecond(modDate, 0, ZoneOffset.UTC), offset);
     }
 
     @Override
