@@ -348,7 +348,7 @@ public class OpenEdgeSettings {
 
   private void parseLibrary(File lib) {
     LOG.debug("Parsing PL {}", lib.getAbsolutePath());
-    PLReader pl = new PLReader(lib);
+    PLReader pl = new PLReader(lib.toPath());
     for (FileEntry entry : pl.getFileList()) {
       if (entry.getFileName().endsWith(".r")) {
         try {

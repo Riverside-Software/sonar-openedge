@@ -19,8 +19,8 @@
  */
 package eu.rssw.pct;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -31,7 +31,7 @@ public class PLReaderTest {
 
   @Test
   public void testRCodeInPL() throws IOException, InvalidRCodeException {
-    PLReader pl = new PLReader(new File("src/test/resources/ablunit.pl"));
+    PLReader pl = new PLReader(Path.of("src/test/resources/ablunit.pl"));
     Assert.assertNotNull(pl.getEntry("OpenEdge/ABLUnit/Reflection/ClassAnnotationInfo.r"));
     RCodeInfo rci = new RCodeInfo(pl.getInputStream(pl.getEntry("OpenEdge/ABLUnit/Reflection/ClassAnnotationInfo.r")));
     Assert.assertTrue(rci.isClass());
