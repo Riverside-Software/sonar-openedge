@@ -19,8 +19,8 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
@@ -67,7 +67,7 @@ public class TableWrapperTest {
 
   @Test
   public void testFromDotDF() throws IOException {
-    DatabaseDescription dbDesc = DumpFileUtils.getDatabaseDescription(new File("src/test/resources/project1/src/schema/sp2k.df"));
+    DatabaseDescription dbDesc = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/project1/src/schema/sp2k.df"));
     Schema sch = new Schema(new DatabaseWrapper(dbDesc));
 
     IField fld1 = sch.lookupUnqualifiedField("minqty");

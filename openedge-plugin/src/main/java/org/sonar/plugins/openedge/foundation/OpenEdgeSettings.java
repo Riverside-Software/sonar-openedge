@@ -705,7 +705,7 @@ public class OpenEdgeSettings {
         }
       } else {
         try {
-          desc = DumpFileUtils.getDatabaseDescription(resolvePath(str), dbName);
+          desc = DumpFileUtils.getDatabaseDescription(resolvePath(str).toPath(), dbName);
         } catch (IOException caught) {
           // Interrupt SonarLint analysis as this is the only way to have a notification for invalid DF file
           // By default, analysis log is not visible

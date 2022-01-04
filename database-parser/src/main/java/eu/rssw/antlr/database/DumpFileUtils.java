@@ -21,8 +21,6 @@ package eu.rssw.antlr.database;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,13 +28,14 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
 
 import eu.rssw.antlr.database.objects.DatabaseDescription;
@@ -47,8 +46,8 @@ public final class DumpFileUtils {
     // Not instantiated
   }
 
-  public static final ParseTree getDumpFileParseTree(File file) throws IOException {
-    return getDumpFileParseTree(new FileInputStream(file), null);
+  public static final ParseTree getDumpFileParseTree(Path path) throws IOException {
+    return getDumpFileParseTree(Files.newInputStream(path), null);
   }
 
   /**
@@ -88,13 +87,13 @@ public final class DumpFileUtils {
     return parser.dump();
   }
 
-  public static final DatabaseDescription getDatabaseDescription(File file) throws IOException {
-    return getDatabaseDescription(file, Files.getNameWithoutExtension(file.getName()));
+  public static final DatabaseDescription getDatabaseDescription(Path path) throws IOException {
+    return getDatabaseDescription(path, com.google.common.io.Files.getNameWithoutExtension(path.getFileName().toString()));
   }
 
-  public static final DatabaseDescription getDatabaseDescription(File file, String dbName) throws IOException {
+  public static final DatabaseDescription getDatabaseDescription(Path path, String dbName) throws IOException {
     DumpFileVisitor visitor = new DumpFileVisitor(dbName);
-    visitor.visit(getDumpFileParseTree(file));
+    visitor.visit(getDumpFileParseTree(path));
 
     return visitor.getDatabase();
   }
