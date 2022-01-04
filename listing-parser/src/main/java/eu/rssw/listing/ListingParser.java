@@ -20,9 +20,9 @@
 package eu.rssw.listing;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -48,12 +48,13 @@ public class ListingParser {
    * @param file File name shouldn't contain any space character
    * @throws IOException
    */
-  public ListingParser(File file, String relativeName) throws IOException {
-    if (file.getAbsolutePath().indexOf(' ') != -1) {
-      throw new IllegalArgumentException("File name shouldn't contain space character - '" + file.getAbsolutePath() + "'");
+  public ListingParser(Path path, String relativeName) throws IOException {
+    if (path.toAbsolutePath().toString().indexOf(' ') != -1) {
+      throw new IllegalArgumentException(
+          "File name shouldn't contain space character - '" + path.toAbsolutePath().toString() + "'");
     }
     this.relativeName = relativeName;
-    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+    try (BufferedReader reader = Files.newBufferedReader(path)) {
       parseFile(reader);
     }
   }

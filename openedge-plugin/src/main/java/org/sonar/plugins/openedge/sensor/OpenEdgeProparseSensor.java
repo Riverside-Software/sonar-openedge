@@ -302,7 +302,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     List<Integer> trxBlocks = new ArrayList<>();
     if ((listingFile != null) && listingFile.exists() && (listingFile.getAbsolutePath().indexOf(' ') == -1)) {
       try {
-        ListingParser parser = new ListingParser(listingFile,
+        ListingParser parser = new ListingParser(listingFile.toPath(),
             InputFileUtils.getRelativePath(file, context.fileSystem()));
         for (CodeBlock block : parser.getTransactionBlocks()) {
           trxBlocks.add(block.getLineNumber());
