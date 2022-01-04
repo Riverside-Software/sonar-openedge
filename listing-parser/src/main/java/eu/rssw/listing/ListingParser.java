@@ -45,7 +45,7 @@ public class ListingParser {
   /**
    * Ctor
    * 
-   * @param file File name shouldn't contain any space character
+   * @param path File name shouldn't contain any space character
    * @throws IOException
    */
   public ListingParser(Path path, String relativeName) throws IOException {
