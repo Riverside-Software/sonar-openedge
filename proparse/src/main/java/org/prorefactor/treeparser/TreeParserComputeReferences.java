@@ -110,6 +110,14 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
           fb.getBuffer().noteReference(refNode, qual);
         }
       }
+    } else if (support.isClass()) {
+      // refNode.getSymbol() can return null if the symbol is accessed before being defined
+      // See unit test BugFixTest#testVarUsage2
+      FieldLookupResult result = rootScope.getRootBlock().lookupField(ctx.getText(), true);
+      if ((result != null) && (result.getSymbol() instanceof Variable)) {
+        refNode.setSymbol((Variable) result.getSymbol());
+        result.getSymbol().noteReference(refNode, qual);
+      }
     }
   }
 
