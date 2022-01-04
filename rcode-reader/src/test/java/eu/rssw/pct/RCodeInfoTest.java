@@ -28,12 +28,11 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
-import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IDatasetElement;
 import eu.rssw.pct.elements.IEventElement;
@@ -43,6 +42,7 @@ import eu.rssw.pct.elements.ITableElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.ParameterType;
+import eu.rssw.pct.elements.PrimitiveDataType;
 
 public class RCodeInfoTest {
 
@@ -57,7 +57,7 @@ public class RCodeInfoTest {
   }
 
   public void testEnum(String fileName) throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of(fileName))) {
+    try (InputStream input = Files.newInputStream(Paths.get(fileName))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertNotNull(rci.getTypeInfo());
@@ -72,7 +72,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testInterface() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/IMyTest.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/IMyTest.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
     } catch (InvalidRCodeException caught) {
@@ -82,7 +82,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testClass() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/BackupDataCallback.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/BackupDataCallback.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
     } catch (InvalidRCodeException caught) {
@@ -92,7 +92,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testClass2() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/propList.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/propList.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       ITypeInfo info = rci.getTypeInfo();
@@ -132,7 +132,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testClass3() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/ttClass.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/ttClass.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
     } catch (InvalidRCodeException caught) {
@@ -142,7 +142,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testClassMinSize() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/ClassMinSize.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/ClassMinSize.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertEquals(rci.getTypeInfo().getProperties().size(), 2);
@@ -153,7 +153,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testProcedure() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/compile.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/compile.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertFalse(rci.isClass());
     } catch (InvalidRCodeException caught) {
@@ -163,7 +163,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testProcedure2() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/AbstractTTCollection.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/AbstractTTCollection.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
     } catch (InvalidRCodeException caught) {
@@ -173,7 +173,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testProcedure3() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/FileTypeRegistry.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/FileTypeRegistry.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
     } catch (InvalidRCodeException caught) {
@@ -183,7 +183,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testProcedure4() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/_dmpincr.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/_dmpincr.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertFalse(rci.isClass());
     } catch (InvalidRCodeException caught) {
@@ -193,7 +193,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testV11() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/WebRequestV11.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/WebRequestV11.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertEquals(rci.getVersion(), 1100);
@@ -215,7 +215,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testV12() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/WebRequestV12.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/WebRequestV12.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertEquals(rci.getVersion(), -1215);
@@ -237,7 +237,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testV121() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/NMSTrace.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/NMSTrace.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertNotNull(rci.getTypeInfo());
@@ -249,7 +249,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testPackageProtected() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/PkgLevelAttr.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/PkgLevelAttr.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertNotNull(rci.getTypeInfo());
@@ -272,7 +272,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testTempTable() throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of("src/test/resources/rcode/TempTableAttrs.r"))) {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/TempTableAttrs.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertNotNull(rci.getTypeInfo());
@@ -307,7 +307,7 @@ public class RCodeInfoTest {
   }
 
   public void testElements(String fileName) throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of(fileName))) {
+    try (InputStream input = Files.newInputStream(Paths.get(fileName))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertNotNull(rci.getTypeInfo());
@@ -441,7 +441,7 @@ public class RCodeInfoTest {
   }
 
   public void testElements2(String fileName) throws IOException {
-    try (InputStream input = Files.newInputStream(Path.of(fileName))) {
+    try (InputStream input = Files.newInputStream(Paths.get(fileName))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertNotNull(rci.getTypeInfo());

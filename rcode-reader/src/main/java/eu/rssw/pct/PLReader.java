@@ -96,7 +96,7 @@ public class PLReader {
       channel.read(buf);
     }
 
-    return new ByteBufferBackedInputStream(buf.position(0));
+    return new ByteBufferBackedInputStream((ByteBuffer) buf.position(0));
   }
 
   private Charset getCharset(SeekableByteChannel channel) throws IOException {
@@ -132,19 +132,19 @@ public class PLReader {
     channel.read(buf1);
 
     if (buf1.get(0) == (byte) 0xFE) {
-      while ((channel.read(buf1.position(0)) != -1) && (buf1.get(0) != (byte) 0xFF)) {
+      while ((channel.read((ByteBuffer) buf1.position(0)) != -1) && (buf1.get(0) != (byte) 0xFF)) {
         // Just read until EOF or next 0xFF
       }
       return new FileEntry((int) (channel.position() - offset - 1));
     } else if (buf1.get(0) == (byte) 0xFF) {
-      channel.read(buf1.position(0));
+      channel.read((ByteBuffer) buf1.position(0));
       int fNameSize = (int) buf1.get(0) & 0xFF;
       if (fNameSize == 0)
         return new FileEntry(49);
 
       ByteBuffer buf2 = ByteBuffer.allocate(fNameSize);
       channel.read(buf2);
-      String fName = charset.decode(buf2.position(0)).toString();
+      String fName = charset.decode((ByteBuffer) buf2.position(0)).toString();
 
       ByteBuffer buf3 = ByteBuffer.allocate(48);
       channel.read(buf3);
@@ -167,6 +167,7 @@ public class PLReader {
       this.buf = buf;
     }
 
+    @Override
     public int read() throws IOException {
       if (!buf.hasRemaining()) {
         return -1;
@@ -174,6 +175,7 @@ public class PLReader {
       return buf.get() & 0xFF;
     }
 
+    @Override
     public int read(byte[] bytes, int off, int len) throws IOException {
       if (!buf.hasRemaining()) {
         return -1;
