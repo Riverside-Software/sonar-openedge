@@ -19,10 +19,7 @@
  */
 package org.sonar.plugins.openedge.api.checks;
 
-import java.io.Serializable;
-
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
@@ -96,14 +93,6 @@ public abstract class OpenEdgeCheck<T> {
       loc.at(file.selectLine(lineNumber));
     }
     issue.at(loc).save();
-  }
-
-  /**
-   * Reports a measure on specified file
-   */
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  public void reportMeasure(InputFile file, Metric metric, Serializable value) {
-    context.newMeasure().forMetric(metric).on(file).withValue(value).save();
   }
 
   public enum CheckType {

@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.xml.XMLConstants;
@@ -100,6 +99,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.progress.xref.CrossReference;
+import com.progress.xref.EmptyCrossReference;
 
 import eu.rssw.listing.CodeBlock;
 import eu.rssw.listing.ListingParser;
@@ -297,6 +297,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         doc = parseXREF(settings.getSonarlintXrefFile(file));
       settings.parseHierarchy(file);
     }
+    xref = xref == null ? new EmptyCrossReference() : xref;
 
     File listingFile = settings.getListingFile(file);
     List<Integer> trxBlocks = new ArrayList<>();
@@ -315,10 +316,20 @@ public class OpenEdgeProparseSensor implements Sensor {
       LOG.debug("Listing file for '{}' not found or contains space character - Was looking for '{}'", file,
           listingFile);
     }
-    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.TRANSACTIONS).withValue(
-        trxBlocks.stream().map(Object::toString).collect(Collectors.joining(","))).save();
+
+    // Shared objects
+    long numShrTT = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
+        ref -> "NEW-SHR-TEMPTABLE".equalsIgnoreCase(ref.getReferenceType())).count()).sum();
+    long numShrDS = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
+        ref -> "NEW-SHR-DATASET".equalsIgnoreCase(ref.getReferenceType())).count()).sum();;
+    long numShrVar = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
+        ref -> "NEW-SHR-VARIABLE".equalsIgnoreCase(ref.getReferenceType())).count()).sum();;
+
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TRANSACTIONS).withValue(
         trxBlocks.size()).save();
+    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.SHR_TT).withValue((int) numShrTT).save();
+    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.SHR_DS).withValue((int) numShrDS).save();
+    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.SHR_VAR).withValue((int) numShrVar).save();
 
     ParseUnit unit = null;
     long startTime = System.currentTimeMillis();

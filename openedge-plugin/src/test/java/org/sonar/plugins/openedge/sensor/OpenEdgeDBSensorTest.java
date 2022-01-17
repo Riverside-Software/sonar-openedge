@@ -21,11 +21,11 @@ package org.sonar.plugins.openedge.sensor;
 
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.BASEDIR;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.DF1;
+import static org.testng.Assert.assertEquals;
 
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class OpenEdgeDBSensorTest {
@@ -36,9 +36,9 @@ public class OpenEdgeDBSensorTest {
     OpenEdgeDBSensor sensor = new OpenEdgeDBSensor();
     sensor.execute(context);
 
-    Assert.assertEquals(context.measure(BASEDIR + ":" + DF1, OpenEdgeMetrics.NUM_TABLES_KEY).value(), 25,
+    assertEquals(context.measure(BASEDIR + ":" + DF1, OpenEdgeMetrics.NUM_TABLES.getKey()).value(), 25,
         "Wrong number of tables");
-    Assert.assertEquals(context.measure(BASEDIR + ":" + DF1, OpenEdgeMetrics.NUM_SEQUENCES_KEY).value(), 13,
+    assertEquals(context.measure(BASEDIR + ":" + DF1, OpenEdgeMetrics.NUM_SEQUENCES.getKey()).value(), 13,
         "Wrong number of sequences");
   }
 

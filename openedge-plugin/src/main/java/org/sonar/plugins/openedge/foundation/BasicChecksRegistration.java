@@ -27,7 +27,6 @@ import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.checks.LargeTransactionScope;
 import org.sonar.plugins.openedge.checks.NoOpDatabaseRule;
-import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 
 public class BasicChecksRegistration implements CheckRegistration {
   private static final Logger LOGGER = Loggers.get(BasicChecksRegistration.class);
@@ -52,7 +51,7 @@ public class BasicChecksRegistration implements CheckRegistration {
    */
   @SuppressWarnings("unchecked")
   public static Class<? extends OpenEdgeProparseCheck>[] ppCheckClasses() {
-    return new Class[] {SharedObjectsAnalyzer.class, LargeTransactionScope.class, ClumsySyntax.class};
+    return new Class[] {LargeTransactionScope.class, ClumsySyntax.class};
   }
 
   /**

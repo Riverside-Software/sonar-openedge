@@ -179,9 +179,9 @@ public class OpenEdgeProparseSensorTest {
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
-    assertEquals(context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.NUM_TRANSACTIONS_KEY).value(), 1,
+    assertEquals(context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.NUM_TRANSACTIONS.getKey()).value(), 1,
         "Wrong number of transactions");
-    assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.NUM_TRANSACTIONS_KEY).value(), 0,
+    assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.NUM_TRANSACTIONS.getKey()).value(), 0,
         "Wrong number of transactions");
   }
 

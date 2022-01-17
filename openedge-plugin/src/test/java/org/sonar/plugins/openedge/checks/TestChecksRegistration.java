@@ -49,7 +49,7 @@ public class TestChecksRegistration implements CheckRegistration {
    */
   @SuppressWarnings("unchecked")
   public static Class<? extends OpenEdgeProparseCheck>[] ppCheckClasses() {
-    return new Class[] {SharedObjectsAnalyzer.class, LargeTransactionScope.class, ClumsySyntax.class, IntegerRule.class};
+    return new Class[] {LargeTransactionScope.class, ClumsySyntax.class, IntegerRule.class};
   }
 
   /**
