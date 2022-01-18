@@ -50,7 +50,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   private ParseUnit unit;
   private Set<String> incReports = new HashSet<>();
   private Set<String> issueAnnotations = new HashSet<>();
-  
+
   @Override
   public final void sensorExecute(InputFile file, ParseUnit unit) {
     this.unit = unit;
@@ -58,7 +58,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   }
 
   @Override
-  public OpenEdgeCheck.CheckType getCheckType() {
+  public CheckType getCheckType() {
     return CheckType.PROPARSE;
   }
 

@@ -33,11 +33,11 @@ public abstract class OpenEdgeCheck<T> {
   private RuleKey ruleKey;
   private SensorContext context;
 
-  public final RuleKey getRuleKey() {
+  protected final RuleKey getRuleKey() {
     return ruleKey;
   }
 
-  public final SensorContext getContext() {
+  protected final SensorContext getContext() {
     return context;
   }
 
