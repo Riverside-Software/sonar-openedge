@@ -15,6 +15,7 @@
 
 package com.progress.xref;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -71,6 +72,10 @@ public class CrossReferenceUtils {
     }
 
     return doc;
+  }
+
+  public static CrossReference parseXREF(File xref) {
+    return ((xref != null) && xref.exists()) ? parseXREF(xref.toPath()) : EMPTY_XREF;
   }
 
 }

@@ -249,11 +249,11 @@ public class OpenEdgeProparseSensor implements Sensor {
     CrossReference xref = null;
     Document doc = null;
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
-      xref = CrossReferenceUtils.parseXREF(settings.getXrefFile(file).toPath());
+      xref = CrossReferenceUtils.parseXREF(settings.getXrefFile(file));
       if (settings.parseXrefDocument())
         doc = parseXREF(settings.getXrefFile(file));
     } else if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
-      xref = CrossReferenceUtils.parseXREF(settings.getSonarlintXrefFile(file).toPath());
+      xref = CrossReferenceUtils.parseXREF(settings.getSonarlintXrefFile(file));
       if (settings.parseXrefDocument())
         doc = parseXREF(settings.getSonarlintXrefFile(file));
       settings.parseHierarchy(file);
