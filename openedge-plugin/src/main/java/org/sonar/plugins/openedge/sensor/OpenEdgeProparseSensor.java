@@ -90,6 +90,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.progress.xref.CrossReference;
 import com.progress.xref.CrossReferenceUtils;
+import com.progress.xref.InvalidXMLFilterStream;
 
 import eu.rssw.listing.CodeBlock;
 import eu.rssw.listing.ListingParser;
@@ -281,9 +282,9 @@ public class OpenEdgeProparseSensor implements Sensor {
     long numShrTT = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
         ref -> "NEW-SHR-TEMPTABLE".equalsIgnoreCase(ref.getReferenceType())).count()).sum();
     long numShrDS = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
-        ref -> "NEW-SHR-DATASET".equalsIgnoreCase(ref.getReferenceType())).count()).sum();;
+        ref -> "NEW-SHR-DATASET".equalsIgnoreCase(ref.getReferenceType())).count()).sum();
     long numShrVar = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
-        ref -> "NEW-SHR-VARIABLE".equalsIgnoreCase(ref.getReferenceType())).count()).sum();;
+        ref -> "NEW-SHR-VARIABLE".equalsIgnoreCase(ref.getReferenceType())).count()).sum();
 
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TRANSACTIONS).withValue(
         trxBlocks.size()).save();
