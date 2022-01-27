@@ -37,6 +37,8 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import com.progress.xref.InvalidXMLFilterStream;
+
 public class InvalidXMLFilterStreamTest {
   @Test
   public void testValidFile() throws IOException {
