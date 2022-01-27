@@ -27,8 +27,9 @@ import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
-import org.sonar.api.internal.google.common.io.Files;
 import org.sonar.plugins.openedge.api.Constants;
+
+import com.google.common.io.Files;
 
 public class TestProjectSensorContextExtra {
   public final static String BASEDIR = "target/test-classes/project1";

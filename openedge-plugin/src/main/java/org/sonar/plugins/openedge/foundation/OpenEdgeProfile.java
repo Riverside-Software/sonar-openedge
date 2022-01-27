@@ -23,7 +23,6 @@ import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.checks.LargeTransactionScope;
-import org.sonar.plugins.openedge.checks.SharedObjectsAnalyzer;
 
 public class OpenEdgeProfile implements BuiltInQualityProfilesDefinition {
   public static final String PROFILE_NAME = "Sonar way";
@@ -48,7 +47,6 @@ public class OpenEdgeProfile implements BuiltInQualityProfilesDefinition {
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_15090_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_18494_RULEKEY);
     profile.activateRule(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_19822_RULEKEY);
-    profile.activateRule(Constants.STD_REPOSITORY_KEY, SharedObjectsAnalyzer.class.getName());
     profile.activateRule(Constants.STD_REPOSITORY_KEY, LargeTransactionScope.class.getName());
     profile.activateRule(Constants.STD_REPOSITORY_KEY, ClumsySyntax.class.getName());
 

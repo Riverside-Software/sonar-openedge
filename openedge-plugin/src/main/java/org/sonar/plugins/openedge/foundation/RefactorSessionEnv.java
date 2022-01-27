@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.refactor.RefactorSession;
-import org.sonar.api.batch.fs.internal.PathPattern;
+import org.sonar.api.utils.PathUtils;
+import org.sonar.api.utils.WildcardPattern;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
@@ -33,10 +34,10 @@ public class RefactorSessionEnv implements IRefactorSessionEnv {
 
   @Override
   public RefactorSession getSession(String fileName) {
-    for (SessionMapping mapping: extraSessions) {
-      for (PathPattern x : mapping.patterns) {
-        if (x.match(Paths.get(""), Paths.get(fileName))) {
-          LOG.debug("File {} matches pattern {} in module {}", fileName, x, mapping.num);
+    for (SessionMapping mapping : extraSessions) {
+      for (WildcardPattern pattern : mapping.patterns) {
+        if (pattern.match(PathUtils.sanitize(Paths.get(fileName).toString()))) {
+          LOG.debug("File {} matches pattern {} in module {}", fileName, pattern, mapping.num);
           return mapping.session;
         }
       }
@@ -48,22 +49,22 @@ public class RefactorSessionEnv implements IRefactorSessionEnv {
   private static class SessionMapping {
     private final int num;
     private final RefactorSession session;
-    private final PathPattern [] patterns;
+    private final WildcardPattern [] patterns;
 
     private SessionMapping(int num, RefactorSession session, String pattern) {
       this.num = num;
       this.session = session;
       if (pattern == null) {
-        this.patterns = new PathPattern[0];
+        this.patterns = new WildcardPattern[0];
       } else {
         List<String> strs = Splitter.on(',').omitEmptyStrings().trimResults().splitToList(pattern);
-        this.patterns = new PathPattern[strs.size()];
+        this.patterns = new WildcardPattern[strs.size()];
         int zz = 0;
         for (String s : strs) {
-          patterns[zz++] = PathPattern.create(s);
+          patterns[zz++] = WildcardPattern.create(s);
         }
       }
     }
-
   }
+
 }

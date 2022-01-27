@@ -25,8 +25,8 @@ import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +37,7 @@ public class TestProfiler {
 
   @Test
   public void testProfiler1() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler1.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler1.out"));
     assertEquals(session.getUser(), "gquerret");
     assertEquals(session.getDescription(), "Default description");
 
@@ -56,26 +56,26 @@ public class TestProfiler {
 
   @Test
   public void testProfiler2() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler2.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler2.out"));
     assertEquals(session.getUser(), "gquerret");
     assertEquals(session.getVersionNumber(), 1);
   }
 
   @Test
   public void testProfiler3() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler3.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler3.out"));
     assertEquals(session.getUser(), "gquerret");
   }
 
   @Test
   public void testProfiler4() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler4.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler4.out"));
     assertEquals(session.getUser(), "gquerret");
   }
 
   @Test
   public void testProfiler5() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler5.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler5.out"));
     assertEquals(session.getUser(), "gquerret");
     Map<String, Set<LineData>> map = session.getCoverageByFile();
     assertNotNull(map);
@@ -84,29 +84,29 @@ public class TestProfiler {
 
   @Test
   public void testProfiler7() throws IOException {
-    // New file format in 11.7.4
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler7.out"));
+    // Paths.get format in 11.7.4
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler7.out"));
     assertEquals(session.getUser(), "SYSTEM");
   }
 
   @Test
   public void testProfiler8() throws IOException {
-    // New file format in 12.0
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler8.out"));
+    // Paths.get format in 12.0
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler8.out"));
     assertEquals(session.getVersionNumber(), 3);
   }
 
   @Test
   public void testProfiler9() throws IOException {
-    // New file format in 12.0 + trace filter + user data
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler9.out"));
+    // Paths.get format in 12.0 + trace filter + user data
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler9.out"));
     assertEquals(session.getVersionNumber(), 3);
   }
 
   @Test
   public void testProfiler10() throws IOException {
-    // New file format in 12.1 - Line -2 is for Garbage Collection
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler10.out"));
+    // Paths.get format in 12.1 - Line -2 is for Garbage Collection
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler10.out"));
     assertEquals(session.getVersionNumber(), 3);
     assertNotNull(session.getModuleById(1));
     assertTrue(session.getModuleById(1).getLinesToCover().contains(-2));
@@ -114,8 +114,8 @@ public class TestProfiler {
 
   @Test
   public void testProfiler11() throws IOException {
-    // New file format in 12.1 - Module name includes callee name when using super:xxx() or methods not overidden in child class
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler11.out"));
+    // Paths.get format in 12.1 - Module name includes callee name when using super:xxx() or methods not overidden in child class
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler11.out"));
     assertEquals(session.getVersionNumber(), 3);
     assertEquals(session.getModules().size(), 7);
     assertNotNull(session.getModuleByName("MyLogger"));
@@ -123,7 +123,7 @@ public class TestProfiler {
     assertEquals(session.getModuleByName("MyLogger").getLinesToCover().size(), 3);
 
     // Same test but using 11.7 profiler
-    ProfilerSession session2 = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler12.out"));
+    ProfilerSession session2 = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler12.out"));
     assertEquals(session2.getVersionNumber(), 1);
     assertEquals(session2.getModules().size(), 7);
     assertNotNull(session2.getModuleByName("MyLogger"));
@@ -133,7 +133,7 @@ public class TestProfiler {
 
   @Test
   public void testProfilerStatistics01() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-11.7.9.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler-11.7.9.out"));
     assertEquals(session.getVersionNumber(), 1);
     assertNotNull(session.getJsonDescription());
     assertTrue(session.getJsonDescription().trim().isEmpty());
@@ -150,7 +150,7 @@ public class TestProfiler {
   
   @Test
   public void testProfilerStatistics02() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-12.2.4.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler-12.2.4.out"));
     assertEquals(session.getVersionNumber(), 3);
     assertNotNull(session.getJsonDescription());
     assertTrue(session.getJsonDescription().length() > 10);
@@ -167,7 +167,7 @@ public class TestProfiler {
   
   @Test
   public void testProfilerStatistics03() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-coverage-11.7.9.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler-coverage-11.7.9.out"));
     assertEquals(session.getVersionNumber(), 1);
     assertNotNull(session.getJsonDescription());
     assertTrue(session.getJsonDescription().trim().isEmpty());
@@ -185,7 +185,7 @@ public class TestProfiler {
   
   @Test
   public void testProfilerStatistics04() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-coverage-12.2.4.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler-coverage-12.2.4.out"));
     assertEquals(session.getVersionNumber(), 3);
     assertNotNull(session.getJsonDescription());
     assertTrue(session.getJsonDescription().length() > 10);
@@ -203,7 +203,7 @@ public class TestProfiler {
 
   @Test
   public void testProfilerStatistics05() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-statistics-11.7.9.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler-statistics-11.7.9.out"));
     assertEquals(session.getVersionNumber(), 2);
     assertNotNull(session.getJsonDescription());
     assertTrue(session.getJsonDescription().trim().isEmpty());
@@ -222,7 +222,7 @@ public class TestProfiler {
 
   @Test
   public void testProfilerStatistics06() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-statistics-12.2.4.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler-statistics-12.2.4.out"));
     assertEquals(session.getVersionNumber(), 4);
     assertNotNull(session.getJsonDescription());
     assertTrue(session.getJsonDescription().length() > 10);
@@ -241,7 +241,7 @@ public class TestProfiler {
 
   @Test
   public void testProfilerStatistics07() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-tracestart-11.7.9.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler-tracestart-11.7.9.out"));
     assertEquals(session.getVersionNumber(), 1);
     assertEquals(session.getModules().size(), 3);
     assertFalse(session.hasModuleInfo());
@@ -257,7 +257,7 @@ public class TestProfiler {
 
   @Test
   public void testProfilerStatistics08() throws IOException {
-    ProfilerSession session = ProfilerUtils.getProfilerSession(new File("src/test/resources/profiler-tracestart-12.2.4.out"));
+    ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler-tracestart-12.2.4.out"));
     assertEquals(session.getVersionNumber(), 3);
     assertEquals(session.getModules().size(), 3);
     assertTrue(session.hasModuleInfo());

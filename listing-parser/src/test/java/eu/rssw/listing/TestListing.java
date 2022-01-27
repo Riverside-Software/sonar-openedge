@@ -19,8 +19,8 @@
  */
 package eu.rssw.listing;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -30,7 +30,7 @@ public class TestListing {
   @Test
   public static void testListing0() throws IOException {
     try {
-      new ListingParser(new File("src/test/resources/listing0.txt"), "listing0.txt");
+      new ListingParser(Paths.get("src/test/resources/listing0.txt"), "listing0.txt");
     } catch (IOException caught) {
       return;
     }
@@ -39,7 +39,7 @@ public class TestListing {
 
   @Test
   public static void testListing1() throws IOException {
-    ListingParser parser = new ListingParser(new File("src/test/resources/listing1.txt"), "listing1.txt");
+    ListingParser parser = new ListingParser(Paths.get("src/test/resources/listing1.txt"), "listing1.txt");
     Assert.assertEquals(parser.getTransactionBlocks().size(), 4);
     Assert.assertEquals(parser.getMainBlock().getBuffers().size(), 3);
     Assert.assertEquals(parser.getMainBlock().getFrames().size(), 1);
@@ -47,7 +47,7 @@ public class TestListing {
 
   @Test
   public static void testListing2() throws IOException {
-    ListingParser parser = new ListingParser(new File("src/test/resources/listing2.txt"), "listing2.txt");
+    ListingParser parser = new ListingParser(Paths.get("src/test/resources/listing2.txt"), "listing2.txt");
     Assert.assertEquals(parser.getTransactionBlocks().size(), 0);
     Assert.assertEquals(parser.getMainBlock().getBuffers().size(), 4);
     // Find last and penultimate entry
@@ -68,11 +68,11 @@ public class TestListing {
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public static void testListing3() throws IOException {
-    new ListingParser(new File("src/test/resources/listing 3.txt"), "listing 3.txt");
+    new ListingParser(Paths.get("src/test/resources/listing 3.txt"), "listing 3.txt");
   }
 
   @Test
   public static void testListing4() throws IOException {
-    new ListingParser(new File("src/test/resources/listing4.txt"), "listing4.txt");
+    new ListingParser(Paths.get("src/test/resources/listing4.txt"), "listing4.txt");
   }
 }

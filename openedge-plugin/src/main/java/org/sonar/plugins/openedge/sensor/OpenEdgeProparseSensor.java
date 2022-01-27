@@ -33,18 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.sax.SAXSource;
 
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.TokenSource;
@@ -87,11 +80,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
-import org.xml.sax.XMLReader;
 
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
@@ -100,6 +89,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.progress.xref.CrossReference;
+import com.progress.xref.CrossReferenceUtils;
+import com.progress.xref.InvalidXMLFilterStream;
 
 import eu.rssw.listing.CodeBlock;
 import eu.rssw.listing.ListingParser;
@@ -114,9 +105,6 @@ public class OpenEdgeProparseSensor implements Sensor {
   // Internal use
   private final DocumentBuilderFactory dbFactory;
   private final DocumentBuilder dBuilder;
-  private final JAXBContext context;
-  private final Unmarshaller unmarshaller;
-  private final SAXParserFactory saxParserFactory;
 
   // File statistics
   private int numFiles;
@@ -140,17 +128,11 @@ public class OpenEdgeProparseSensor implements Sensor {
     this.settings = settings;
     this.components = components;
     dbFactory = DocumentBuilderFactory.newInstance();
-    saxParserFactory = SAXParserFactory.newInstance();
-    saxParserFactory.setNamespaceAware(false);
 
     try {
       dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-      saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
       dBuilder = dbFactory.newDocumentBuilder();
-      context = JAXBContext.newInstance("com.progress.xref", CrossReference.class.getClassLoader());
-      unmarshaller = context.createUnmarshaller();
-    } catch (ParserConfigurationException | JAXBException | SAXNotRecognizedException
-        | SAXNotSupportedException caught) {
+    } catch (ParserConfigurationException caught) {
       throw new IllegalStateException(caught);
     }
   }
@@ -263,36 +245,16 @@ public class OpenEdgeProparseSensor implements Sensor {
     return doc;
   }
 
-  private CrossReference jaxbXREF(File xrefFile) {
-    CrossReference doc = null;
-    if ((xrefFile != null) && xrefFile.exists()) {
-      LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
-      try (InputStream inpStream = new FileInputStream(xrefFile)) {
-        long startTime = System.currentTimeMillis();
-        InputSource is = new InputSource(new InvalidXMLFilterStream(inpStream));
-        XMLReader reader = saxParserFactory.newSAXParser().getXMLReader();
-        SAXSource source = new SAXSource(reader, is);
-        doc = (CrossReference) unmarshaller.unmarshal(source);
-        xmlParseTime += (System.currentTimeMillis() - startTime);
-        numXREF++;
-      } catch (JAXBException | SAXException | ParserConfigurationException | IOException caught) {
-        LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
-      }
-    }
-
-    return doc;
-  }
-
   @SuppressWarnings({"unchecked", "rawtypes"})
   private void parseMainFile(SensorContext context, InputFile file, IProparseEnvironment session) {
     CrossReference xref = null;
     Document doc = null;
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
-      xref = jaxbXREF(settings.getXrefFile(file));
+      xref = CrossReferenceUtils.parseXREF(settings.getXrefFile(file));
       if (settings.parseXrefDocument())
         doc = parseXREF(settings.getXrefFile(file));
     } else if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
-      xref = jaxbXREF(settings.getSonarlintXrefFile(file));
+      xref = CrossReferenceUtils.parseXREF(settings.getSonarlintXrefFile(file));
       if (settings.parseXrefDocument())
         doc = parseXREF(settings.getSonarlintXrefFile(file));
       settings.parseHierarchy(file);
@@ -302,7 +264,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     List<Integer> trxBlocks = new ArrayList<>();
     if ((listingFile != null) && listingFile.exists() && (listingFile.getAbsolutePath().indexOf(' ') == -1)) {
       try {
-        ListingParser parser = new ListingParser(listingFile,
+        ListingParser parser = new ListingParser(listingFile.toPath(),
             InputFileUtils.getRelativePath(file, context.fileSystem()));
         for (CodeBlock block : parser.getTransactionBlocks()) {
           trxBlocks.add(block.getLineNumber());
@@ -315,10 +277,20 @@ public class OpenEdgeProparseSensor implements Sensor {
       LOG.debug("Listing file for '{}' not found or contains space character - Was looking for '{}'", file,
           listingFile);
     }
-    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.TRANSACTIONS).withValue(
-        trxBlocks.stream().map(Object::toString).collect(Collectors.joining(","))).save();
+
+    // Shared objects
+    long numShrTT = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
+        ref -> "NEW-SHR-TEMPTABLE".equalsIgnoreCase(ref.getReferenceType())).count()).sum();
+    long numShrDS = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
+        ref -> "NEW-SHR-DATASET".equalsIgnoreCase(ref.getReferenceType())).count()).sum();
+    long numShrVar = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
+        ref -> "NEW-SHR-VARIABLE".equalsIgnoreCase(ref.getReferenceType())).count()).sum();
+
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TRANSACTIONS).withValue(
         trxBlocks.size()).save();
+    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.SHR_TT).withValue((int) numShrTT).save();
+    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.SHR_DS).withValue((int) numShrDS).save();
+    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.SHR_VAR).withValue((int) numShrVar).save();
 
     ParseUnit unit = null;
     long startTime = System.currentTimeMillis();

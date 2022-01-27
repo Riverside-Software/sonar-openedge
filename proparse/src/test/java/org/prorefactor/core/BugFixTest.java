@@ -161,25 +161,34 @@ public class BugFixTest {
     Variable x1 = unit.getRootScope().getVariable("x1");
     assertEquals(x1.getNumWrites(), 1);
     assertEquals(x1.getNumReads(), 0);
-    assertEquals(x1.getReadWriteReferences().get(0).getNode().getStatement().firstNaturalChild().getLine(), 16);
+    assertEquals(x1.getReadWriteReferences().get(0).getNode().getStatement().firstNaturalChild().getLine(), 13);
     Variable x2 = unit.getRootScope().getVariable("x2");
     assertEquals(x2.getNumWrites(), 1);
     assertEquals(x2.getNumReads(), 2);
-    assertEquals(x2.getReadWriteReferences().get(0).getNode().getStatement().firstNaturalChild().getLine(), 9);
+    assertEquals(x2.getReadWriteReferences().get(0).getNode().getStatement().firstNaturalChild().getLine(), 6);
     assertEquals(x2.getReadWriteReferences().get(0).getType(), ReadWrite.WRITE);
-    assertEquals(x2.getReadWriteReferences().get(1).getNode().getStatement().firstNaturalChild().getLine(), 13);
+    assertEquals(x2.getReadWriteReferences().get(1).getNode().getStatement().firstNaturalChild().getLine(), 10);
     assertEquals(x2.getReadWriteReferences().get(1).getType(), ReadWrite.READ);
-    assertEquals(x2.getReadWriteReferences().get(2).getNode().getStatement().firstNaturalChild().getLine(), 14);
+    assertEquals(x2.getReadWriteReferences().get(2).getNode().getStatement().firstNaturalChild().getLine(), 11);
     assertEquals(x2.getReadWriteReferences().get(2).getType(), ReadWrite.READ);
     Variable x3 = unit.getRootScope().getVariable("x3");
     assertEquals(x3.getNumWrites(), 2);
     assertEquals(x3.getNumReads(), 1);
-    assertEquals(x3.getReadWriteReferences().get(0).getNode().getStatement().firstNaturalChild().getLine(), 9);
+    assertEquals(x3.getReadWriteReferences().get(0).getNode().getStatement().firstNaturalChild().getLine(), 6);
     assertEquals(x3.getReadWriteReferences().get(0).getType(), ReadWrite.READ);
-    assertEquals(x3.getReadWriteReferences().get(1).getNode().getStatement().firstNaturalChild().getLine(), 10);
+    assertEquals(x3.getReadWriteReferences().get(1).getNode().getStatement().firstNaturalChild().getLine(), 7);
     assertEquals(x3.getReadWriteReferences().get(1).getType(), ReadWrite.WRITE);
-    assertEquals(x3.getReadWriteReferences().get(2).getNode().getStatement().firstNaturalChild().getLine(), 14);
+    assertEquals(x3.getReadWriteReferences().get(2).getNode().getStatement().firstNaturalChild().getLine(), 11);
     assertEquals(x3.getReadWriteReferences().get(2).getType(), ReadWrite.WRITE);
+    Variable x4 = unit.getRootScope().getVariable("x4");
+    assertEquals(x4.getNumWrites(), 1);
+    assertEquals(x4.getNumReads(), 2);
+    assertEquals(x4.getReadWriteReferences().get(0).getNode().getStatement().firstNaturalChild().getLine(), 14);
+    assertEquals(x4.getReadWriteReferences().get(0).getType(), ReadWrite.READ);
+    assertEquals(x4.getReadWriteReferences().get(1).getNode().getStatement().firstNaturalChild().getLine(), 14);
+    assertEquals(x4.getReadWriteReferences().get(1).getType(), ReadWrite.READ);
+    assertEquals(x4.getReadWriteReferences().get(2).getNode().getStatement().firstNaturalChild().getLine(), 15);
+    assertEquals(x4.getReadWriteReferences().get(2).getType(), ReadWrite.WRITE);
   }
 
   @Test

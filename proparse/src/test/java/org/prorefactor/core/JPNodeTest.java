@@ -26,15 +26,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.sax.SAXSource;
 
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.util.UnitTestModule;
@@ -43,13 +39,11 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.progress.xref.CrossReference;
+import com.progress.xref.CrossReferenceUtils;
 import com.progress.xref.EmptyCrossReference;
 
 import eu.rssw.pct.RCodeInfo;
@@ -62,10 +56,6 @@ public class JPNodeTest {
   private final static String SRC_DIR = "src/test/resources/jpnode";
   private final static String TEMP_DIR = "target/nodes-lister/jpnode";
 
-  private JAXBContext context;
-  private Unmarshaller unmarshaller;
-  private XMLReader reader;
-
   private RefactorSession session;
   private File tempDir = new File(TEMP_DIR);
 
@@ -74,17 +64,6 @@ public class JPNodeTest {
 
   @BeforeTest
   public void setUp() throws IOException, InvalidRCodeException {
-    try {
-      context = JAXBContext.newInstance("com.progress.xref", this.getClass().getClassLoader());
-      unmarshaller = context.createUnmarshaller();
-
-      SAXParserFactory sax = SAXParserFactory.newInstance();
-      sax.setNamespaceAware(false);
-      reader = sax.newSAXParser().getXMLReader();
-    } catch (JAXBException | SAXException | ParserConfigurationException caught) {
-      throw new IllegalStateException(caught);
-    }
-
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
     session.getSchema().createAlias("foo", "sports2000");
@@ -404,10 +383,7 @@ public class JPNodeTest {
 
   @Test
   public void testXref01() throws JAXBException, IOException {
-    InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref01.p.xref"));
-    SAXSource source = new SAXSource(reader, is);
-    CrossReference xref = (CrossReference) unmarshaller.unmarshal(source);
-
+    CrossReference xref = CrossReferenceUtils.parseXREF(Paths.get(SRC_DIR + "/xref01.p.xref"));
     ParseUnit unit = genericTest("xref01.p", xref);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -431,10 +407,7 @@ public class JPNodeTest {
 
   @Test
   public void testXref02() throws JAXBException, IOException {
-    InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref02.cls.xref"));
-    SAXSource source = new SAXSource(reader, is);
-    CrossReference xref = (CrossReference) unmarshaller.unmarshal(source);
-
+    CrossReference xref = CrossReferenceUtils.parseXREF(Paths.get(SRC_DIR + "/xref02.cls.xref"));
     ParseUnit unit = genericTest("xref02.cls", xref);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -449,10 +422,7 @@ public class JPNodeTest {
 
   @Test
   public void testXref03() throws JAXBException, IOException {
-    InputSource is = new InputSource(new FileInputStream(SRC_DIR + "/xref03.p.xref"));
-    SAXSource source = new SAXSource(reader, is);
-    CrossReference xref = (CrossReference) unmarshaller.unmarshal(source);
-
+    CrossReference xref = CrossReferenceUtils.parseXREF(Paths.get(SRC_DIR + "/xref03.p.xref"));
     ParseUnit unit = genericTest("xref03.p", xref);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());

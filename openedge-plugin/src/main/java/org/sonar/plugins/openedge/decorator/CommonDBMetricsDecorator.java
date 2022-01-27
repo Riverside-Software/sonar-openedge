@@ -19,9 +19,12 @@
  */
 package org.sonar.plugins.openedge.decorator;
 
+import java.util.Arrays;
+
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer;
+import org.sonar.api.measures.Metric;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
@@ -29,47 +32,40 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 public class CommonDBMetricsDecorator implements MeasureComputer {
   private static final Logger LOG = Loggers.get(CommonDBMetricsDecorator.class);
 
+  @SuppressWarnings("rawtypes")
+  private final Metric[] intMetrics;
+
+  public CommonDBMetricsDecorator(OpenEdgeMetrics metrics) {
+    this.intMetrics = metrics.getMetrics().stream().filter(
+        m -> m.isNumericType() && OpenEdgeMetrics.DOMAIN_OPENEDGE_DB.equals(m.getDomain())).toArray(Metric[]::new);
+  }
+
+  @Override
+  public MeasureComputerDefinition define(MeasureComputerDefinitionContext defContext) {
+    String[] keys = Arrays.stream(intMetrics).map(Metric::getKey).toArray(String[]::new);
+    return defContext.newDefinitionBuilder().setInputMetrics(keys).setOutputMetrics(keys).build();
+  }
+
+  @SuppressWarnings("rawtypes")
+  @Override
+  public void compute(MeasureComputerContext context) {
+    LOG.debug("Decorating " + context.getComponent().getKey());
+
+    if ((context.getComponent().getType() == Component.Type.DIRECTORY)
+        || (context.getComponent().getType() == Component.Type.PROJECT)) {
+      for (Metric m : intMetrics) {
+        int rslt = 0;
+        for (Measure measure : context.getChildrenMeasures(m.getKey())) {
+          rslt += measure.getIntValue();
+        }
+        context.addMeasure(m.getKey(), rslt);
+      }
+    }
+  }
+
   @Override
   public String toString() {
     return getClass().getSimpleName();
   }
 
-  @Override
-  public MeasureComputerDefinition define(MeasureComputerDefinitionContext defContext) {
-    return defContext.newDefinitionBuilder().setInputMetrics(OpenEdgeMetrics.NUM_TABLES_KEY,
-        OpenEdgeMetrics.NUM_SEQUENCES_KEY, OpenEdgeMetrics.NUM_FIELDS_KEY, OpenEdgeMetrics.NUM_INDEXES_KEY,
-        OpenEdgeMetrics.NUM_TRIGGERS_KEY).setOutputMetrics(OpenEdgeMetrics.NUM_TABLES_KEY,
-            OpenEdgeMetrics.NUM_SEQUENCES_KEY, OpenEdgeMetrics.NUM_FIELDS_KEY, OpenEdgeMetrics.NUM_INDEXES_KEY,
-            OpenEdgeMetrics.NUM_TRIGGERS_KEY).build();
-  }
-
-  @Override
-  public void compute(MeasureComputerContext context) {
-    LOG.debug("Decorating " + context.getComponent().getKey());
-
-    int numTables = 0, numSeq = 0, numIndex = 0, numFields = 0, numTriggers = 0;
-    if ((context.getComponent().getType() == Component.Type.DIRECTORY)
-        || (context.getComponent().getType() == Component.Type.PROJECT)) {
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.NUM_TABLES_KEY)) {
-        numTables += m.getIntValue();
-      }
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.NUM_FIELDS_KEY)) {
-        numFields += m.getIntValue();
-      }
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.NUM_INDEXES_KEY)) {
-        numIndex += m.getIntValue();
-      }
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.NUM_SEQUENCES_KEY)) {
-        numSeq += m.getIntValue();
-      }
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.NUM_TRIGGERS_KEY)) {
-        numTriggers += m.getIntValue();
-      }
-      context.addMeasure(OpenEdgeMetrics.NUM_TABLES_KEY, numTables);
-      context.addMeasure(OpenEdgeMetrics.NUM_FIELDS_KEY, numFields);
-      context.addMeasure(OpenEdgeMetrics.NUM_INDEXES_KEY, numIndex);
-      context.addMeasure(OpenEdgeMetrics.NUM_SEQUENCES_KEY, numSeq);
-      context.addMeasure(OpenEdgeMetrics.NUM_TRIGGERS_KEY, numTriggers);
-    }
-  }
 }

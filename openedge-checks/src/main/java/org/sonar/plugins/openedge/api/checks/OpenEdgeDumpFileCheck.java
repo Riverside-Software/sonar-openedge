@@ -33,7 +33,7 @@ public abstract class OpenEdgeDumpFileCheck extends OpenEdgeCheck<ParseTree> {
   }
 
   @Override
-  public OpenEdgeCheck.CheckType getCheckType() {
+  public CheckType getCheckType() {
     return CheckType.DUMP_FILE;
   }
 }

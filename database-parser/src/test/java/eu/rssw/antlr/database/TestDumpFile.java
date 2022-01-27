@@ -27,11 +27,11 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.testng.annotations.Test;
 
@@ -45,18 +45,18 @@ public class TestDumpFile {
 
   @Test
   public void testInputStream() throws IOException {
-    InputStream stream1 = new FileInputStream("src/test/resources/sp3k.df");
+    InputStream stream1 = Files.newInputStream(Paths.get("src/test/resources/sp3k.df"));
     DatabaseDescription db = DumpFileUtils.getDatabaseDescription(stream1, Charset.forName("utf-8"), "sp3k");
     assertEquals(db.getTable("Tbl1").getDescription(), "éç");
 
-    InputStream stream2 = new FileInputStream("src/test/resources/sp4k.df");
+    InputStream stream2 = Files.newInputStream(Paths.get("src/test/resources/sp4k.df"));
     DatabaseDescription db2 = DumpFileUtils.getDatabaseDescription(stream2, Charset.forName("utf-8"), "sp4k");
     assertEquals(db2.getTable("Tbl1").getDescription(), "Ã©Ã§");
   }
 
   @Test
   public void testComments() throws IOException {
-    InputStream stream = new FileInputStream("src/test/resources/comments.df");
+    InputStream stream = Files.newInputStream(Paths.get("src/test/resources/comments.df"));
     DatabaseDescription db = DumpFileUtils.getDatabaseDescription(stream, Charset.forName("utf-8"), "sp2k");
     assertNull(db.getTable("Tbl1").getDescription());
     assertEquals(db.getTable("Tbl1").getArea(), "XXX");
@@ -65,7 +65,7 @@ public class TestDumpFile {
 
   @Test
   public void testSports2000() throws IOException {
-    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(new File("src/test/resources/sp2k.df"));
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/sp2k.df"));
     assertEquals(db.getTables().size(), 25);
     assertEquals(db.getSequences().size(), 13);
 
@@ -94,24 +94,24 @@ public class TestDumpFile {
   @Test
   public void testFieldTriggerNotAssign() throws IOException {
     // Invalid field trigger type shouldn't crash the visitor, and has to be reported
-    DumpFileUtils.getDatabaseDescription(new File("src/test/resources/fieldTriggerAssign.df"));
+    DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/fieldTriggerAssign.df"));
   }
 
   @Test
   public void testNullAllowed() throws IOException {
     // NULL-ALLOWED is a valid argument
-    DumpFileUtils.getDatabaseDescription(new File("src/test/resources/nullAllowed.df"));
+    DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/nullAllowed.df"));
   }
 
   @Test
   public void testTriggerDelete() throws IOException {
     // Delete triggers on table
-    DumpFileUtils.getDatabaseDescription(new File("src/test/resources/triggerDelete.df"));
+    DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/triggerDelete.df"));
   }
 
   @Test
   public void testSerialize() throws IOException {
-    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(new File("src/test/resources/sp2k.df"));
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/sp2k.df"));
     // Serialize object
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     db.serialize(bytes);
@@ -133,7 +133,7 @@ public class TestDumpFile {
   @Test
   public void testAscIndex() throws IOException {
     // Delete triggers on table
-    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(new File("src/test/resources/ascIndex.df"));
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/ascIndex.df"));
     assertNotNull(db.getTable("Tab1"));
     assertNotNull(db.getTable("Tab1").getIndex("Idx1"));
     assertNotNull(db.getTable("Tab1").getIndex("Idx1").getFields());

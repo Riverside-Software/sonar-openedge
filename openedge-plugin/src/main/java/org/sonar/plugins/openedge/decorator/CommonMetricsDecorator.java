@@ -19,9 +19,13 @@
  */
 package org.sonar.plugins.openedge.decorator;
 
+import java.util.Arrays;
+
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer;
+import org.sonar.api.measures.CoreMetrics;
+import org.sonar.api.measures.Metric;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
@@ -29,80 +33,51 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 public class CommonMetricsDecorator implements MeasureComputer {
   private static final Logger LOG = Loggers.get(CommonMetricsDecorator.class);
 
-  public CommonMetricsDecorator() {
-    // No need for parameters
+  @SuppressWarnings("rawtypes")
+  private final Metric[] intMetrics;
+
+  public CommonMetricsDecorator(OpenEdgeMetrics metrics) {
+    this.intMetrics = metrics.getMetrics().stream().filter(
+        m -> m.isNumericType() && (OpenEdgeMetrics.DOMAIN_OPENEDGE.equals(m.getDomain())
+            || CoreMetrics.DOMAIN_SIZE.equals(m.getDomain()))).toArray(Metric[]::new);
   }
 
   @Override
   public MeasureComputerDefinition define(MeasureComputerDefinitionContext defContext) {
-    return defContext.newDefinitionBuilder().setInputMetrics(OpenEdgeMetrics.CLASSES_KEY,
-        OpenEdgeMetrics.PROCEDURES_KEY, OpenEdgeMetrics.INCLUDES_KEY, OpenEdgeMetrics.WINDOWS_KEY,
-        OpenEdgeMetrics.TRANSACTIONS_KEY, OpenEdgeMetrics.PACKAGES_KEY, OpenEdgeMetrics.INTERNAL_FUNCTIONS_KEY,
-        OpenEdgeMetrics.INTERNAL_PROCEDURES_KEY, OpenEdgeMetrics.METHODS_KEY, OpenEdgeMetrics.OE_COMPLEXITY_KEY).setOutputMetrics(
-            OpenEdgeMetrics.CLASSES_KEY, OpenEdgeMetrics.PROCEDURES_KEY, OpenEdgeMetrics.INCLUDES_KEY,
-            OpenEdgeMetrics.WINDOWS_KEY, OpenEdgeMetrics.TRANSACTIONS_KEY, OpenEdgeMetrics.PACKAGES_KEY,
-            OpenEdgeMetrics.INTERNAL_FUNCTIONS_KEY, OpenEdgeMetrics.INTERNAL_PROCEDURES_KEY,
-            OpenEdgeMetrics.METHODS_KEY, OpenEdgeMetrics.OE_COMPLEXITY_KEY).build();
+    String[] keys = Arrays.stream(intMetrics).map(Metric::getKey).toArray(String[]::new);
+    return defContext.newDefinitionBuilder().setInputMetrics(keys).setOutputMetrics(keys).build();
   }
-  
+
+  @SuppressWarnings("rawtypes")
   @Override
   public void compute(MeasureComputerContext context) {
     LOG.debug("Decorating " + context.getComponent().getKey());
 
-    int numClasses = 0;
-    int numProcedures = 0;
-    int numIncludes = 0;
-    int numWindows = 0;
-    int numPackages = 0;
-    int numIntProcs = 0;
-    int numIntFuncs = 0;
-    int numMethods = 0;
-    int complexity = 0;
     if ((context.getComponent().getType() == Component.Type.DIRECTORY)
         || (context.getComponent().getType() == Component.Type.PROJECT)) {
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.CLASSES_KEY)) {
-        numClasses += m.getIntValue();
+      int numClasses = 0;
+      int numPackages = 0;
+      for (Metric m : intMetrics) {
+        int rslt = 0;
+        for (Measure measure : context.getChildrenMeasures(m.getKey())) {
+          rslt += measure.getIntValue();
+        }
+        if (m == OpenEdgeMetrics.CLASSES) {
+          numClasses = rslt;
+          context.addMeasure(m.getKey(), rslt);
+        } else if (m == OpenEdgeMetrics.PACKAGES) {
+          numPackages = rslt;
+        } else {
+          context.addMeasure(m.getKey(), rslt);
+        }
       }
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.PROCEDURES_KEY)) {
-        numWindows += m.getIntValue();
-      }
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.INCLUDES_KEY)) {
-        numIncludes += m.getIntValue();
-      }
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.WINDOWS_KEY)) {
-        numProcedures += m.getIntValue();
-      }
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.PACKAGES_KEY)) {
-        numPackages += m.getIntValue();
-      }
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.INTERNAL_PROCEDURES_KEY)) {
-        numIntProcs+= m.getIntValue();
-      }
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.INTERNAL_FUNCTIONS_KEY)) {
-        numIntFuncs += m.getIntValue();
-      }
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.METHODS_KEY)) {
-        numMethods += m.getIntValue();
-      }
-      for (Measure m : context.getChildrenMeasures(OpenEdgeMetrics.OE_COMPLEXITY_KEY)) {
-        complexity += m.getIntValue();
-      }
-
-      context.addMeasure(OpenEdgeMetrics.CLASSES_KEY, numClasses);
-      context.addMeasure(OpenEdgeMetrics.PROCEDURES_KEY, numWindows);
-      context.addMeasure(OpenEdgeMetrics.INCLUDES_KEY, numIncludes);
-      context.addMeasure(OpenEdgeMetrics.WINDOWS_KEY, numProcedures);
-      context.addMeasure(OpenEdgeMetrics.INTERNAL_PROCEDURES_KEY, numIntProcs);
-      context.addMeasure(OpenEdgeMetrics.INTERNAL_FUNCTIONS_KEY, numIntFuncs);
-      context.addMeasure(OpenEdgeMetrics.METHODS_KEY, numMethods);
-      context.addMeasure(OpenEdgeMetrics.OE_COMPLEXITY_KEY, complexity);
 
       if (context.getComponent().getType() == Component.Type.DIRECTORY) {
         if (numClasses > 0) {
-          context.addMeasure(OpenEdgeMetrics.PACKAGES_KEY, 1);
+          context.addMeasure(OpenEdgeMetrics.PACKAGES.getKey(), 1);
         }
       } else if (context.getComponent().getType() == Component.Type.PROJECT) {
-        context.addMeasure(OpenEdgeMetrics.PACKAGES_KEY, numPackages);
+        context.addMeasure(OpenEdgeMetrics.PACKAGES.getKey(), numPackages);
       }
     }
   }

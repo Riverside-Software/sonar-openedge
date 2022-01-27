@@ -54,22 +54,22 @@ public class Parameter {
     return symbol;
   }
 
-  /** Set by TreeParser01. */
+  /** FIXME Lost in migration ? :-) */
   public void setBind(boolean bind) {
     this.bind = bind;
   }
 
-  /** Set by TreeParser01. */
+  /** Set by TreeParserVariableDefinition */
   public void setDirectionNode(ABLNodeType directionNode) {
     this.directionNode = directionNode;
   }
 
-  /** Set by TreeParser01. */
+  /** Set by TreeParserVariableDefinition */
   public void setProgressType(ABLNodeType type) {
     this.progressType = type;
   }
 
-  /** Set by TreeParser01. */
+  /** Set by TreeParserVariableDefinition */
   public void setSymbol(Symbol symbol) {
     this.symbol = symbol;
   }

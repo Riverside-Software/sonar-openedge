@@ -19,10 +19,10 @@
  */
 package eu.rssw.antlr.profiler;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -37,8 +37,8 @@ public final class ProfilerUtils {
     // No-op
   }
 
-  public static final ProfilerSession getProfilerSession(File file) throws IOException {
-    return getProfilerSession(new FileInputStream(file));
+  public static final ProfilerSession getProfilerSession(Path path) throws IOException {
+    return getProfilerSession(Files.newInputStream(path));
   }
 
   public static final ProfilerSession getProfilerSession(InputStream input) throws IOException {
