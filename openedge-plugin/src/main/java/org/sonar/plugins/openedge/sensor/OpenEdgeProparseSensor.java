@@ -234,9 +234,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     if ((xrefFile != null) && xrefFile.exists()) {
       LOG.debug("Parsing XML XREF file {}", xrefFile.getAbsolutePath());
       try (InputStream inpStream = new FileInputStream(xrefFile)) {
-        long startTime = System.currentTimeMillis();
         doc = dBuilder.parse(new InvalidXMLFilterStream(inpStream));
-        xmlParseTime += (System.currentTimeMillis() - startTime);
       } catch (SAXException | IOException caught) {
         LOG.error("Unable to parse XREF file " + xrefFile.getAbsolutePath(), caught);
       }
@@ -250,15 +248,21 @@ public class OpenEdgeProparseSensor implements Sensor {
     CrossReference xref = null;
     Document doc = null;
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE) {
+      long startTime = System.currentTimeMillis();
       xref = CrossReferenceUtils.parseXREF(settings.getXrefFile(file));
       if (settings.parseXrefDocument())
         doc = parseXREF(settings.getXrefFile(file));
+      xmlParseTime += (System.currentTimeMillis() - startTime);
     } else if (context.runtime().getProduct() == SonarProduct.SONARLINT) {
+      long startTime = System.currentTimeMillis();
       xref = CrossReferenceUtils.parseXREF(settings.getSonarlintXrefFile(file));
       if (settings.parseXrefDocument())
         doc = parseXREF(settings.getSonarlintXrefFile(file));
+      xmlParseTime += (System.currentTimeMillis() - startTime);
       settings.parseHierarchy(file);
     }
+    if (!xref.getSource().isEmpty())
+      numXREF++;
 
     File listingFile = settings.getListingFile(file);
     List<Integer> trxBlocks = new ArrayList<>();
@@ -420,10 +424,11 @@ public class OpenEdgeProparseSensor implements Sensor {
   }
 
   private void logStatistics() {
-    LOG.info("{} files proparse'd, {} XML files, {} listing files, {} failure(s), {} NCLOCs", numFiles, numXREF,
+    LOG.info("{} files proparse'd, {} XREF files, {} listing files, {} failure(s), {} NCLOCs", numFiles, numXREF,
         numListings, numFailures, ncLocs);
     LOG.info("AST Generation | time={} ms", parseTime);
-    LOG.info("XML Parsing    | time={} ms", xmlParseTime);
+    LOG.info("XREF Parsing   | time={} ms", xmlParseTime);
+    LOG.info("Rules          | time={} ms", ruleTime.values().stream().reduce(0L, Long::sum));
     // Sort entries by rule name
     ruleTime.entrySet().stream().sorted(
         (Entry<String, Long> obj1, Entry<String, Long> obj2) -> obj1.getKey().compareTo(obj2.getKey())).forEach(
