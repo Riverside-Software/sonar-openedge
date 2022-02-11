@@ -33,4 +33,5 @@ public interface IPreprocessorEventListener {
   void preproEndIf(int line, int column);
   void analyzeSuspend(String str, int line);
   void analyzeResume(int line);
+  void message(String str);
 }
