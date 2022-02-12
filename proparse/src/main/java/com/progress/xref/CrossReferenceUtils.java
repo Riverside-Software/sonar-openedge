@@ -107,7 +107,7 @@ public class CrossReferenceUtils {
         if (xml)
           return parseXmlXref(inpStream);
         else
-          return parsePlainTextXref(inpStream, getCharset(plainTextCodepage));
+          return parsePlainTextXref(xref.toAbsolutePath().toString(), inpStream, getCharset(plainTextCodepage));
       } catch (IOException caught) {
         LOGGER.error("Unable to open file " + xref.toAbsolutePath(), caught);
       }
@@ -197,7 +197,7 @@ public class CrossReferenceUtils {
     src.reference.add(ref);
   }
 
-  private static CrossReference parsePlainTextXref(InputStream input, Charset charset) throws IOException {
+  private static CrossReference parsePlainTextXref(String fName, InputStream input, Charset charset) throws IOException {
     CrossReference doc = new CrossReference();
     doc.source = new ArrayList<>();
 
@@ -210,49 +210,53 @@ public class CrossReferenceUtils {
       String ln = null;
       final AtomicInteger fileNum = new AtomicInteger(1);
       while ((ln = reader2.readLine()) != null) {
-        String[] line = parseLine(ln);
-        if ((currSrc == null) || (currSrcStr == null) || !currSrcStr.equals(line[1])) {
-          currSrcStr = line[1];
-          currSrc = sources.computeIfAbsent(line[1], key -> {
-            Source src = new Source();
-            src.fileNum = fileNum.getAndIncrement();
-            src.fileName = key;
-            src.reference = new ArrayList<>();
-            doc.source.add(src);
-            return src;
-          });
-        }
-
-        Reference ref = new Reference();
-        ref.referenceType = line[3];
-        ref.fileNum = currSrc.fileNum;
-        // Line-number can be 'IMPLICIT'
-        ref.lineNum = line[2].charAt(0) == 'I' ? 0 : Integer.parseInt(line[2]);
-        ref.objectIdentifier = line[4].charAt(0) == '"' && line[4].charAt(line[4].length() - 1) == '"'
-            ? line[4].substring(1, line[4].length() - 1) : line[4];
-
-        switch (line[3]) {
-          case "INCLUDE":
-            handleIncludeReference(currSrc, ref);
-            break;
-          case "RUN":
-            handleRunReference(currSrc, ref);
-            break;
-          case "SORT-ACCESS":
-            handleSortAccessReference(currSrc, ref);
-            break;
-          case "SEARCH":
-            handleSearchReference(currSrc, ref);
-            break;
-          case "INVOKE":
-          case "NEW":
-            handleInvokeReference(currSrc, ref);
-            break;
-          case "NEW-SHR-TEMPTABLE":
-          case "NEW-SHR-DATASET":
-          case "NEW-SHR-VARIABLE":
-            handleNewSharedReference(currSrc, ref);
-            break;
+        try {
+          String[] line = parseLine(ln);
+          if ((currSrc == null) || (currSrcStr == null) || !currSrcStr.equals(line[1])) {
+            currSrcStr = line[1];
+            currSrc = sources.computeIfAbsent(line[1], key -> {
+              Source src = new Source();
+              src.fileNum = fileNum.getAndIncrement();
+              src.fileName = key;
+              src.reference = new ArrayList<>();
+              doc.source.add(src);
+              return src;
+            });
+          }
+  
+          Reference ref = new Reference();
+          ref.referenceType = line[3];
+          ref.fileNum = currSrc.fileNum;
+          // Line-number can be 'IMPLICIT' or 'NONE'
+          ref.lineNum = !Character.isDigit(line[2].charAt(0)) ? 0 : Integer.parseInt(line[2]);
+          ref.objectIdentifier = (line[4].length() > 2) && (line[4].charAt(0) == '"')
+              && (line[4].charAt(line[4].length() - 1) == '"') ? line[4].substring(1, line[4].length() - 1) : line[4];
+  
+          switch (line[3]) {
+            case "INCLUDE":
+              handleIncludeReference(currSrc, ref);
+              break;
+            case "RUN":
+              handleRunReference(currSrc, ref);
+              break;
+            case "SORT-ACCESS":
+              handleSortAccessReference(currSrc, ref);
+              break;
+            case "SEARCH":
+              handleSearchReference(currSrc, ref);
+              break;
+            case "INVOKE":
+            case "NEW":
+              handleInvokeReference(currSrc, ref);
+              break;
+            case "NEW-SHR-TEMPTABLE":
+            case "NEW-SHR-DATASET":
+            case "NEW-SHR-VARIABLE":
+              handleNewSharedReference(currSrc, ref);
+              break;
+          }
+        } catch (Exception caught) {
+          LOGGER.error("Unable to parse XREF file {} -- Line '{}' -- Msg: {}", fName, ln, caught.getMessage());
         }
       }
     }
