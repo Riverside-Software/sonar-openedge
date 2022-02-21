@@ -108,8 +108,8 @@ public class OpenEdgeCodeColorizer implements Sensor {
         try {
           TextPointer start = file.newPointer(tok.getLine(), tok.getCharPositionInLine() - 1);
           int maxChar = file.selectLine(tok.getEndLine()).end().lineOffset();
-          TextPointer end = file.newPointer(tok.getEndLine(),
-              maxChar < tok.getEndCharPositionInLine() ? maxChar - 1 : tok.getEndCharPositionInLine());
+          TextPointer end = file.newPointer(tok.getEndLine(), maxChar < tok.getEndCharPositionInLine()
+              ? (maxChar > 0 ? maxChar - 1 : 0) : tok.getEndCharPositionInLine());
 
           highlighting.highlight(file.newRange(start, end), textType);
         } catch (IllegalArgumentException caught) {

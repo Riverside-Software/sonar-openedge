@@ -251,7 +251,7 @@ public class Schema implements ISchema {
    */
   private ITable lookupMetaTable(String inName) {
     String[] parts = inName.split("\\.");
-    IDatabase db = lookupDatabase(parts[0]);
+    IDatabase db = parts.length >= 1 ? lookupDatabase(parts[0]) : null;
     if ((db == null) || (parts[1] == null) || (!parts[1].startsWith("_"))) {
       return null;
     }

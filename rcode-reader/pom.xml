@@ -2,9 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>eu.rssw</groupId>
+    <artifactId>sonar-openedge</artifactId>
+    <version>2.14.7</version>
+  </parent>
   <groupId>eu.rssw.openedge.rcode</groupId>
   <artifactId>rcode-reader</artifactId>
-  <version>2.14.6</version>
 
   <name>rcode-reader</name>
   <description>rcode reader</description>
@@ -49,12 +53,12 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>31.0.1-jre</version>
+      <version>${guava.version}</version>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>7.4.0</version>
+      <version>${testng.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -65,7 +69,7 @@
         <plugin>
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
-          <version>3.9.0.2155</version>
+          <version>${maven.sonar.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -74,7 +78,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.7</version>
+        <version>${jacoco.version}</version>
         <executions>
           <execution>
             <goals>
@@ -101,7 +105,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>3.2.1</version>
+            <version>${maven.source.version}</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -114,7 +118,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.2.0</version>
+            <version>${maven.javadoc.version}</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
@@ -127,7 +131,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
+            <version>${maven.gpg.version}</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -147,7 +151,7 @@
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.8</version>
+            <version>${maven.nexus-staging.version}</version>
             <extensions>true</extensions>
             <configuration>
               <serverId>ossrh</serverId>
