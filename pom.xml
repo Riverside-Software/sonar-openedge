@@ -2,12 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>eu.rssw</groupId>
   <artifactId>sonar-openedge</artifactId>
-  <packaging>pom</packaging>
   <version>2.14.7-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
   <name>OpenEdge plugin for SonarQube</name>
-  <url>http://www.riverside-software.fr/</url>
+  <url>https://riverside-software.fr</url>
   <description>Open source code analysis for OpenEdge</description>
 
   <modules>
@@ -21,13 +23,28 @@
     <module>coverage-report</module>
   </modules>
 
+  <properties>
+    <cabl.version>2.14.7-SNAPSHOT</cabl.version>
+    <sonarqube.version>7.9.6</sonarqube.version>
+    <antlr.version>4.9.2</antlr.version>
+    <guava.version>31.0.1-jre</guava.version>
+    <testng.version>7.4.0</testng.version>
+    <jacoco.version>0.8.7</jacoco.version>
+    <slf4j.version>1.7.32</slf4j.version>
+    <maven.sonar.version>3.9.0.2155</maven.sonar.version>
+    <maven.source.version>3.2.1</maven.source.version>
+    <maven.javadoc.version>3.2.0</maven.javadoc.version>
+    <maven.gpg.version>1.6</maven.gpg.version>
+    <maven.nexus-staging.version>1.6.8</maven.nexus-staging.version>
+  </properties>
+
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
-          <version>3.9.0.2155</version>
+          <version>${maven.sonar.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
