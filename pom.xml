@@ -5,7 +5,7 @@
 
   <groupId>eu.rssw</groupId>
   <artifactId>sonar-openedge</artifactId>
-  <version>2.14.7</version>
+  <version>2.14.8</version>
   <packaging>pom</packaging>
 
   <name>OpenEdge plugin for SonarQube</name>
@@ -24,7 +24,7 @@
   </modules>
 
   <properties>
-    <cabl.version>2.14.7</cabl.version>
+    <cabl.version>2.14.8</cabl.version>
     <sonarqube.version>7.9.6</sonarqube.version>
     <antlr.version>4.9.2</antlr.version>
     <guava.version>31.0.1-jre</guava.version>

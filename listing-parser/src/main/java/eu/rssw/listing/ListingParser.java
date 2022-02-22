@@ -21,6 +21,7 @@ package eu.rssw.listing;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -54,7 +55,9 @@ public class ListingParser {
           "File name shouldn't contain space character - '" + path.toAbsolutePath().toString() + "'");
     }
     this.relativeName = relativeName;
-    try (BufferedReader reader = Files.newBufferedReader(path)) {
+    // Force iso8859-1 encoding so that all crappy characters inserted in the listing will be processed without an exception
+    // We only care about the last part of the file, which doesn't contain non-ASCII characters
+    try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.ISO_8859_1)) {
       parseFile(reader);
     }
   }
