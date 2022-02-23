@@ -5,7 +5,7 @@
   <parent>
     <groupId>eu.rssw</groupId>
     <artifactId>sonar-openedge</artifactId>
-    <version>2.14.9-SNAPSHOT</version>
+    <version>2.14.10-SNAPSHOT</version>
   </parent>
   <groupId>eu.rssw.openedge.rcode</groupId>
   <artifactId>rcode-reader</artifactId>
@@ -53,12 +53,12 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>${guava.version}</version>
+      <version>31.0.1-jre</version>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>${testng.version}</version>
+      <version>7.4.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
