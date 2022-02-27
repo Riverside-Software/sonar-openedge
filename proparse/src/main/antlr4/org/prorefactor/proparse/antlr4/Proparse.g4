@@ -509,8 +509,8 @@ expression:
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 expressionTerm:
-    expressionTerm OBJCOLON id=nonPunctuating methodParamList          # exprTermMethodCall
-  | expressionTerm OBJCOLON id=nonPunctuating                          # exprTermAttribute
+    expressionTerm ( OBJCOLON | ELVIS ) id=nonPunctuating methodParamList          # exprTermMethodCall
+  | expressionTerm ( OBJCOLON | ELVIS ) id=nonPunctuating                          # exprTermAttribute
   | expressionTerm DOUBLECOLON id=nonPunctuating                       # exprTermNamedMember
   | expressionTerm DOUBLECOLON id=nonPunctuating methodParamList       # exprTermNamedMemberArray /* WTF... */
   | expressionTerm LEFTBRACE expression ( FOR constant )? RIGHTBRACE # exprTermArray

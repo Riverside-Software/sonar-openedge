@@ -240,7 +240,7 @@ public class Lexer implements IPreprocessor {
           return nextTokenFromStar();
         case '?':
           getChar();
-          return makeToken(ABLNodeType.UNKNOWNVALUE);
+          return questionMark();
         case '`':
           return nextTokenFromSymbol('`', ABLNodeType.BACKTICK, ABLNodeType.ID);
 
@@ -469,6 +469,17 @@ public class Lexer implements IPreprocessor {
     return makeToken(ABLNodeType.ID);
   }
 
+  ProToken questionMark() {
+    LOGGER.trace("Entering questionMark()");
+
+    if (currChar == ':') {
+      append();
+      getChar();
+      return makeToken(ABLNodeType.ELVIS);
+    } else
+      return makeToken(ABLNodeType.UNKNOWNVALUE);
+  }
+  
   ProToken colon() {
     LOGGER.trace("Entering colon()");
 

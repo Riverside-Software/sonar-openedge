@@ -108,6 +108,7 @@ public enum ABLNodeType {
   MINUSEQUAL(Proparse.MINUSEQUAL, "-=", NodeTypesOption.SYMBOL),
   STAREQUAL(Proparse.STAREQUAL, "*=", NodeTypesOption.SYMBOL),
   SLASHEQUAL(Proparse.SLASHEQUAL, "/=", NodeTypesOption.SYMBOL),
+  ELVIS(Proparse.ELVIS, "?:", NodeTypesOption.SYMBOL),
 
   // Lexer (and later) elements
   ANNOTATION(Proparse.ANNOTATION),
