@@ -1951,7 +1951,7 @@ public class Lexer implements IPreprocessor {
       if (prepro.getProparseSettings().getOpSys() == OperatingSystem.UNIX)
         ret = ret.replace('\\', '/');
       else
-        ret = ret.replace('/', '\\');
+        ret = ret.replace('/', '\\').replace("\\", "~\\");
       return ret;
     }
     if ("line-number".equals(argName))
