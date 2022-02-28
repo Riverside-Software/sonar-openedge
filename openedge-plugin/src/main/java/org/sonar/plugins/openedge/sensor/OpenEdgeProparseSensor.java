@@ -332,10 +332,10 @@ public class OpenEdgeProparseSensor implements Sensor {
       RecognitionException cause = (RecognitionException) caught.getCause();
       ProToken tok = (ProToken) cause.getOffendingToken();
       if (settings.displayStackTraceOnError()) {
-        LOG.error("Error during code parsing for " + file + " at position " + tok.getFileName() + ":" + tok.getLine()
+        LOG.error("Parser error in '" + file + "' at position " + tok.getFileName() + ":" + tok.getLine()
             + ":" + tok.getCharPositionInLine(), cause);
       } else {
-        LOG.error("Error during code parsing for {} at position {}:{}:{}", file, tok.getFileName(), tok.getLine(),
+        LOG.error("Parser error in '{}' at position {}:{}:{}", file, tok.getFileName(), tok.getLine(),
             tok.getCharPositionInLine());
       }
       numFailures++;
@@ -372,7 +372,7 @@ public class OpenEdgeProparseSensor implements Sensor {
 
       return;
     } catch (RuntimeException caught) {
-      LOG.error("Error during code parsing for " + InputFileUtils.getRelativePath(file, context.fileSystem()), caught);
+      LOG.error("Parser error in '" + InputFileUtils.getRelativePath(file, context.fileSystem()) + "'", caught);
       numFailures++;
       NewIssue issue = context.newIssue();
       issue.forRule(RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
