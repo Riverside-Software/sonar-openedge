@@ -592,6 +592,14 @@ public class ParserTest {
   }
 
   @Test
+  public void testGenerics01() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "generics01.p"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+
+  }
+
+  @Test
   public void testExpressionEngine01() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "expression01.p"), session);
     unit.parse();

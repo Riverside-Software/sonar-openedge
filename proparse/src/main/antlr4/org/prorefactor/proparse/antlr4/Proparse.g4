@@ -668,12 +668,12 @@ filenamePart:
   ;
 
 typeName:
-    nonPunctuating
+    nonPunctuating ( LEFTANGLE typeName RIGHTANGLE )?
   ;
 
 // Different action in the visitor (no class lookup in typeName2)
 typeName2:
-    nonPunctuating
+    nonPunctuating ( LEFTANGLE typeName RIGHTANGLE )?
   ;
 
 constant:
