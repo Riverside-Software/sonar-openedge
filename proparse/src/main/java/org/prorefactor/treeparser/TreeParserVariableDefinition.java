@@ -2391,7 +2391,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       // Nothing with static for now, but at least we don't check for external tables
       if (LOG.isTraceEnabled())
         LOG.trace("Static reference to {}", refNode.getIdNode().getText());
-    } else if ((refNode.getParent().getNodeType() == ABLNodeType.USING)
+    } else if ((refNode.getParent() != null) && (refNode.getParent().getNodeType() == ABLNodeType.USING)
         && (stmtNode.getNodeType() != ABLNodeType.BUFFERCOPY)
         && (stmtNode.getNodeType() != ABLNodeType.BUFFERCOMPARE)) {
       // First condition : there seems to be an implicit INPUT in USING phrases in a record phrase.
