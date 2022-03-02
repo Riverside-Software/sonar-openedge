@@ -27,7 +27,6 @@ import org.antlr.v4.runtime.TokenSource;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroDef;
-import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.NamedMacroRef;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
