@@ -21,6 +21,7 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
@@ -81,12 +82,32 @@ public class ProparseErrorStrategy extends DefaultErrorStrategy {
 
   @Override
   protected Token getMissingSymbol(Parser recognizer) {
-    // Just convert into ProToken type
-    Token tok = super.getMissingSymbol(recognizer);
-    LOGGER.debug("Injecting missing token {} at line {} - column {}", ABLNodeType.getNodeType(tok.getType()),
-        tok.getLine(), tok.getCharPositionInLine());
-    return new ProToken.Builder(ABLNodeType.getNodeType(tok.getType()), tok.getText()).setLine(
-        tok.getLine()).setCharPositionInLine(tok.getCharPositionInLine()).build();
+    // Rewrite superclass method as it throws NPE on ProToken.getTokenSource().getInputStream()
+    Token currentSymbol = recognizer.getCurrentToken();
+    IntervalSet expecting = getExpectedTokens(recognizer);
+    int expectedTokenType = Token.INVALID_TYPE;
+    if (!expecting.isNil()) {
+      expectedTokenType = expecting.getMinElement(); // get any element
+    }
+    String tokenText;
+    if (expectedTokenType == Token.EOF)
+      tokenText = "<missing EOF>";
+    else
+      tokenText = "<missing " + recognizer.getVocabulary().getDisplayName(expectedTokenType) + ">";
+    Token current = currentSymbol;
+    Token lookback = recognizer.getInputStream().LT(-1);
+    if (current.getType() == Token.EOF && lookback != null) {
+      current = lookback;
+    }
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Injecting missing token {} at line {} - column {}", ABLNodeType.getNodeType(expectedTokenType),
+          current.getLine(), current.getCharPositionInLine());
+    }
+
+    return new ProToken.Builder(ABLNodeType.getNodeType(expectedTokenType), tokenText) //
+      .setLine(current.getLine()) //
+      .setCharPositionInLine(current.getCharPositionInLine()) //
+      .build();
   }
 
   private String getMsgForInputMismatch(Parser recognizer, InputMismatchException e) {

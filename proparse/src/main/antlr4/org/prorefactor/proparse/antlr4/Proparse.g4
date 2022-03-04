@@ -34,9 +34,15 @@ options {
 
 @members {
   private ParserSupport support;
+  private boolean c3;
+
+  public void initialize(IProparseEnvironment session, CrossReference xref, boolean c3) {
+    this.support = new ParserSupport(session, xref);
+    this.c3 = c3;
+  }
 
   public void initAntlr4(IProparseEnvironment session, CrossReference xref) {
-    this.support = new ParserSupport(session, xref);
+    this.initialize(session, xref, false);
   }
 
   public ParserSupport getParserSupport() {
@@ -53,6 +59,10 @@ import keywords;
 
 program:
     blockOrStatement*
+  ;
+
+program2:
+    blockOrStatement* EOF
   ;
 
 codeBlock:
@@ -312,7 +322,8 @@ inclassStatement:
   |  varStatement
   |  constructorStatement
   |  destructorStatement
-  |  methodStatement
+  |  { !c3 }? methodStatement
+  |  { c3 }? methodStatement2 // No context-specific semantic predicates when using C3
   |  externalProcedureStatement // Only external procedures are accepted
   |  externalFunctionStatement  // Only FUNCTION ... IN ... are accepted
   |  onStatement
@@ -2621,6 +2632,30 @@ methodStatement locals [ boolean abs = false ]:
     ( { $abs || support.isInterface() }? blockColon // An INTERFACE declares without defining, ditto ABSTRACT.
     | { !$abs && !support.isInterface() }?
       blockColon
+      { support.addInnerScope(_localctx); }
+      codeBlock
+      methodEnd
+      { support.dropInnerScope(); }
+      statementEnd
+    )
+  ;
+
+// No context-specific semantic predicates when using C3
+methodStatement2:
+    METHOD
+    (  PRIVATE
+    |  PACKAGEPRIVATE
+    |  PROTECTED
+    |  PACKAGEPROTECTED
+    |  PUBLIC
+    |  STATIC
+    |  ABSTRACT
+    |  OVERRIDE
+    |  FINAL
+    )*
+    ( VOID | datatype extentPhrase? ) id=newIdentifier functionParams
+    ( PERIOD
+    | LEXCOLON
       { support.addInnerScope(_localctx); }
       codeBlock
       methodEnd
