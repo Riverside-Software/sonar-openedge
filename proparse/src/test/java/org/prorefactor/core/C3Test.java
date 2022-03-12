@@ -39,9 +39,8 @@ import com.progress.xref.EmptyCrossReference;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 
 /**
- * Test the tree parsers against problematic syntax. These tests just run the tree parsers against the data/bugsfixed
- * directory. If no exceptions are thrown, then the tests pass. The files in the "bugsfixed" directories are subject to
- * change, so no other tests should be added other than the expectation that they parse clean.
+ * Test two variants of the parser, one with a local context semantic predicate, and one without.
+ * Local context semantic predicates can't be used with C3.
  */
 public class C3Test {
   private RefactorSession session;
