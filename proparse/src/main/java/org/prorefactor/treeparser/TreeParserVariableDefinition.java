@@ -2381,10 +2381,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     refNode.setContextQualifier(cq);
 
     JPNode stmtNode = refNode.getStatement();
-    // Check if this is a Field_ref being "inline defined"
-    // If so, we define it right now.
-    if (refNode.isInlineVar())
-      addToSymbolScope(defineVariable(ctx, refNode, name, Variable.Type.VARIABLE));
+    // Check if this is a FieldRef being "inline defined". If so, we define it right now.
+    // refNode.isInlineVar returns true for all variable references, not only in the definition node
+    if (refNode.isInlineVar() && (currentScope.getVariable(name) == null)) {
+        addToSymbolScope(defineVariable(ctx, refNode, name, Variable.Type.VARIABLE));
+    }
     if (cq == ContextQualifier.STATIC) {
       // Nothing with static for now, but at least we don't check for external tables
       if (LOG.isTraceEnabled())
