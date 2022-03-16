@@ -36,11 +36,20 @@ options {
   private ParserSupport support;
   private boolean c3;
 
+  public void initialize(IProparseEnvironment session, CrossReference xref) {
+    this.initialize(session, xref, false);
+  }
+
   public void initialize(IProparseEnvironment session, CrossReference xref, boolean c3) {
     this.support = new ParserSupport(session, xref);
     this.c3 = c3;
   }
 
+  /**
+   * @deprecated
+   * Use {@link Proparse#initialize(IProparseEnvironment, CrossReference)}
+   */
+  @Deprecated
   public void initAntlr4(IProparseEnvironment session, CrossReference xref) {
     this.initialize(session, xref, false);
   }
