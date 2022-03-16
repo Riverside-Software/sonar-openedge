@@ -83,7 +83,7 @@ public enum ABLNodeType {
   LEFTPAREN(Proparse.LEFTPAREN, "(", NodeTypesOption.SYMBOL),
   LEXAT(Proparse.LEXAT, "@", NodeTypesOption.SYMBOL),
   LEXCOLON(Proparse.LEXCOLON, ":", NodeTypesOption.SYMBOL),
-  LTOREQUAL(Proparse.LTOREQUAL, ">=", NodeTypesOption.SYMBOL),
+  LTOREQUAL(Proparse.LTOREQUAL, "<=", NodeTypesOption.SYMBOL),
   MINUS(Proparse.MINUS, "-", NodeTypesOption.SYMBOL),
   MULTIPLY(Proparse.MULTIPLY, "*", NodeTypesOption.SYMBOL),
   NAMEDOT(Proparse.NAMEDOT, ".", NodeTypesOption.SYMBOL),
