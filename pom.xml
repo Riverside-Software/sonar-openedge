@@ -5,7 +5,7 @@
 
   <groupId>eu.rssw</groupId>
   <artifactId>sonar-openedge</artifactId>
-  <version>2.14.10-SNAPSHOT</version>
+  <version>2.14.11-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>OpenEdge plugin for SonarQube</name>
@@ -23,22 +23,13 @@
     <module>coverage-report</module>
   </modules>
 
-  <properties>
-    <jacoco.version>0.8.7</jacoco.version>
-    <maven.sonar.version>3.9.0.2155</maven.sonar.version>
-    <maven.source.version>3.2.1</maven.source.version>
-    <maven.javadoc.version>3.2.0</maven.javadoc.version>
-    <maven.gpg.version>1.6</maven.gpg.version>
-    <maven.nexus-staging.version>1.6.8</maven.nexus-staging.version>
-  </properties>
-
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
-          <version>${maven.sonar.version}</version>
+          <version>3.9.0.2155</version>
         </plugin>
       </plugins>
     </pluginManagement>
