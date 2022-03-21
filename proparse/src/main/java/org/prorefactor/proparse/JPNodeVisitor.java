@@ -469,7 +469,13 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitField(FieldContext ctx) {
     Builder holder = createTree(ctx, ABLNodeType.FIELD_REF).setRuleNode(ctx);
-    if ((ctx.getParent().getParent() instanceof MessageOptionContext) && support.isInlineVar(ctx.getText())) {
+    // Part of FormItem or MessageOption
+    boolean validContext = (ctx.parent != null)
+        && ((ctx.parent.parent instanceof FormItemContext) || (ctx.parent.parent instanceof MessageOptionContext));
+    // Or part of DisplayItem
+    validContext |= (ctx.parent.parent != null) && (ctx.parent.parent.parent != null)
+        && (ctx.parent.parent.parent.parent instanceof DisplayItemContext);
+    if (validContext && support.isInlineVar(ctx.getText())) {
       holder.setInlineVar();
     }
     return holder;

@@ -131,6 +131,8 @@ public class ParserSupport {
     currentScope.defineVar(name);
   }
 
+  // TODO It probably doesn't make sense anymore to set the 'inline' attribute in ParserSupport.
+  // This can probably be handled directly in TreeParserVariableDefinition
   public void defVarInlineAntlr4() {
     if (lastFieldIDStr == null) {
       LOG.warn("Trying to define inline variable, but no ID symbol available");

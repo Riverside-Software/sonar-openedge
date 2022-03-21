@@ -1490,6 +1490,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       frameStack.lexAt(support.getNode(ctx.fieldExpr().field()));
     } else if (ctx.LIKE() != null) {
       setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
+    } else if (ctx.AS() != null) {
+      defAs(ctx.datatype());
     }
   }
 

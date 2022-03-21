@@ -1378,4 +1378,27 @@ public class TreeParser03Test {
     assertNotNull(prm2.getSymbol());
     assertEquals(prm2.getSymbol().getName(), "tt1");
   }
+
+  @Test
+  public void test40() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test40.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Variable xx = unit.getRootScope().getVariable("xx");
+    Variable yy = unit.getRootScope().getVariable("yy");
+    Variable zz = unit.getRootScope().getVariable("zz");
+    Variable zz2 = unit.getRootScope().getVariable("zz");
+    assertNotNull(xx);
+    assertNotNull(yy);
+    assertNotNull(zz);
+    assertNotNull(zz2);
+    assertEquals(xx.getDataType(), DataType.DATETIME);
+    assertEquals(yy.getDataType(), DataType.INTEGER);
+    assertEquals(zz.getDataType(), DataType.DECIMAL);
+    assertEquals(zz2.getDataType(), DataType.DECIMAL);
+  }
 }

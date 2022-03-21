@@ -1170,8 +1170,6 @@ public class JPNode {
             break;
           case FIELD_REF:
             node = new FieldRefNode(tok, up, num, hasChildren);
-            if (inline)
-              ((FieldRefNode) node).setInlineVar(true);
             break;
           case PROGRAM_ROOT:
             node = new ProgramRootNode(tok, up, num, hasChildren, support);
@@ -1195,6 +1193,8 @@ public class JPNode {
         }
       }
 
+      if (inline && (tok.getNodeType() == ABLNodeType.FIELD_REF))
+        ((FieldRefNode) node).setInlineVar(true);
       if (operator)
         node.setOperator();
 
