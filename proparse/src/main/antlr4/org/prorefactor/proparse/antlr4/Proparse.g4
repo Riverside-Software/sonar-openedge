@@ -2628,9 +2628,8 @@ messageOption:
     ( MESSAGE | QUESTION | INFORMATION | ERROR | WARNING )?
     ( ( BUTTONS | BUTTON ) ( YESNO | YESNOCANCEL | OK | OKCANCEL | RETRYCANCEL ) )?
     titleExpression?
-  | SET fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? )
-    // LA(2) check is only there to make sure VIEW-AS ALERT-BOX is assigned to MESSAGE statement and not to variable declaration 
-  | UPDATE fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? )
+  | SET fieldExpr formatPhrase?
+  | UPDATE fieldExpr formatPhrase?
   ;
 
 methodStatement locals [ boolean abs = false ]:
