@@ -498,12 +498,12 @@ eventList:
 
 functionArgs:
     // Use funargs /only/ if it is the child of a root-node keyword.
-    LEFTPAREN expression ( COMMA expression )* RIGHTPAREN
+    LEFTPAREN parameter ( COMMA parameter )* RIGHTPAREN
   ;
 
 optionalFunctionArgs:
     // Use optfunargs /only/ if it is the child of a root-node keyword.
-    LEFTPAREN ( expression ( COMMA expression )* )? RIGHTPAREN
+    LEFTPAREN ( parameter ( COMMA parameter )* )? RIGHTPAREN
   ;
 
 // ... or value phrases

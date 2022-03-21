@@ -344,8 +344,8 @@ public class TreeParser03Test {
 
     Variable xxx = unit.getRootScope().getVariable("xxx");
     assertNotNull(xxx);
-    assertEquals(xxx.getNumReads(), 1);
-    assertEquals(xxx.getNumWrites(), 3);
+    assertEquals(xxx.getNumReads(), 1); // In the MESSAGE statement
+    assertEquals(xxx.getNumWrites(), 3); // In OVERLAY, SUBSTRING, ENTRY
   }
 
   @Test

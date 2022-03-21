@@ -138,27 +138,27 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterPseudoFunction(PseudoFunctionContext ctx) {
     if (ctx.entryFunction() != null) {
-      setContextQualifier(ctx.entryFunction().functionArgs().expression(1), ContextQualifier.UPDATING);
+      setContextQualifier(ctx.entryFunction().functionArgs().parameter(1), ContextQualifier.UPDATING);
     }
     if (ctx.lengthFunction() != null) {
-      setContextQualifier(ctx.lengthFunction().functionArgs().expression(0), ContextQualifier.UPDATING);
+      setContextQualifier(ctx.lengthFunction().functionArgs().parameter(0), ContextQualifier.UPDATING);
     }
     if (ctx.rawFunction() != null) {
-      setContextQualifier(ctx.rawFunction().functionArgs().expression(0), ContextQualifier.UPDATING);
+      setContextQualifier(ctx.rawFunction().functionArgs().parameter(0), ContextQualifier.UPDATING);
     }
     if (ctx.substringFunction() != null) {
-      setContextQualifier(ctx.substringFunction().functionArgs().expression(0), ContextQualifier.UPDATING);
+      setContextQualifier(ctx.substringFunction().functionArgs().parameter(0), ContextQualifier.UPDATING);
     }
   }
 
   @Override
   public void enterMemoryManagementFunction(MemoryManagementFunctionContext ctx) {
-    setContextQualifier(ctx.functionArgs().expression(0), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.functionArgs().parameter(0), ContextQualifier.UPDATING);
   }
 
   @Override
   public void enterFunctionArgs(FunctionArgsContext ctx) {
-    for (ExpressionContext exp : ctx.expression()) {
+    for (ParameterContext exp : ctx.parameter()) {
       ContextQualifier qual = contextQualifiers.get(exp);
       if (qual == null)
         setContextQualifier(exp, ContextQualifier.REF);
@@ -192,6 +192,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       } else {
         setContextQualifier(ctx.parameterArg(), ContextQualifier.REF);
       }
+    } else if (qual != null) {
+      setContextQualifier(ctx.parameterArg(), qual);
     }
   }
 
