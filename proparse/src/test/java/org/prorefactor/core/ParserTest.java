@@ -876,6 +876,40 @@ public class ParserTest {
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 4);
+    JPNode node1 = unit.getTopNode().query(ABLNodeType.ELVIS).get(0);
+    assertEquals(node1.getLine(), 3);
+    assertEquals(node1.getEndLine(), 3);
+    assertEquals(node1.getColumn(), 11);
+    assertEquals(node1.getEndColumn(), 12);
+    assertEquals(node1.getText(), "?:");
+  }
+
+  @Test
+  public void testElvis02() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "elvis02.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    JPNode node1 = unit.getTopNode().query(ABLNodeType.UNKNOWNVALUE).get(0);
+    JPNode node2 = unit.getTopNode().query(ABLNodeType.LEXCOLON).get(0);
+    JPNode node3 = unit.getTopNode().query(ABLNodeType.DISPLAY).get(0);
+    assertEquals(node1.getLine(), 1);
+    assertEquals(node1.getColumn(), 42);
+    assertEquals(node1.getEndColumn(), 42);
+    assertEquals(node1.getText(), "?");
+    assertEquals(node2.getLine(), 1);
+    assertEquals(node2.getColumn(), 43);
+    assertEquals(node2.getEndColumn(), 43);
+    assertEquals(node2.getText(), ":");
+    assertEquals(node3.getLine(), 2);
+    assertEquals(node3.getColumn(), 3);
+    assertEquals(node3.getEndColumn(), 9);
+    assertNotNull(node3.getHiddenBefore());
+    assertNull(node3.getHiddenBefore().getHiddenBefore());
+    assertEquals(node3.getHiddenBefore().getLine(), 1);
+    assertEquals(node3.getHiddenBefore().getEndLine(), 2);
+    assertEquals(node3.getHiddenBefore().getCharPositionInLine(), 44);
+    assertEquals(node3.getHiddenBefore().getEndCharPositionInLine(), 2);
   }
 
 }

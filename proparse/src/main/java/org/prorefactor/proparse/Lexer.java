@@ -473,13 +473,23 @@ public class Lexer implements IPreprocessor {
     LOGGER.trace("Entering questionMark()");
 
     if (currChar == ':') {
-      append();
+      // Elvis token only created if next character is not a whitespace
+      ProToken unknownVal = makeToken(ABLNodeType.UNKNOWNVALUE);
+      CharPos colonCharPos = new CharPos(currChar, currFile, currLine, currCol, currSourceNum);
       getChar();
-      return makeToken(ABLNodeType.ELVIS);
+      if (Character.isWhitespace(currChar)) {
+        // Return UNKNOWN_VALUE and preserve LEXCOLON for next iteration
+        preserve = true;
+        preservedChar = colonCharPos;
+        return unknownVal;
+      } else {
+        currText.append(':');
+        return makeToken(ABLNodeType.ELVIS);
+      }
     } else
       return makeToken(ABLNodeType.UNKNOWNVALUE);
   }
-  
+
   ProToken colon() {
     LOGGER.trace("Entering colon()");
 
