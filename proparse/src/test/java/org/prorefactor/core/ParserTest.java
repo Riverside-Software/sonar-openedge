@@ -550,6 +550,17 @@ public class ParserTest {
   }
 
   @Test
+  public void testNamedMember() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "namedMember01.p"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+    assertFalse(unit.getTopNode().query(ABLNodeType.NAMED_MEMBER).isEmpty());
+    assertFalse(unit.getTopNode().query(ABLNodeType.NAMED_MEMBER_ARRAY).isEmpty());
+    assertEquals(unit.getTopNode().query(ABLNodeType.NAMED_MEMBER).get(0).firstNaturalChild().getLine(), 4);
+    assertEquals(unit.getTopNode().query(ABLNodeType.NAMED_MEMBER_ARRAY).get(0).firstNaturalChild().getLine(), 5);
+  }
+
+  @Test
   public void testDirective() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "directive.p"), session);
     unit.parse();

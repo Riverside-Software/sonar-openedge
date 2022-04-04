@@ -406,7 +406,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterExprTermMethodCall(ExprTermMethodCallContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     setContextQualifier(ctx.expressionTerm(), ContextQualifier.REF);
-    setContextQualifier(ctx.id, qual);
+    setContextQualifier(ctx.methodName().nonPunctuating(), qual);
     setStaticQualifier(ctx.expressionTerm());
   }
 
@@ -414,7 +414,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterExprTermAttribute(ExprTermAttributeContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     setContextQualifier(ctx.expressionTerm(), ContextQualifier.REF);
-    setContextQualifier(ctx.id, qual);
+    setContextQualifier(ctx.attributeName().nonPunctuating(), qual);
     setStaticQualifier(ctx.expressionTerm());
   }
 

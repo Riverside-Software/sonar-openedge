@@ -518,15 +518,23 @@ expression:
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 expressionTerm:
-    expressionTerm ( OBJCOLON | ELVIS ) id=nonPunctuating methodParamList          # exprTermMethodCall
-  | expressionTerm ( OBJCOLON | ELVIS ) id=nonPunctuating                          # exprTermAttribute
-  | expressionTerm DOUBLECOLON id=nonPunctuating                       # exprTermNamedMember
-  | expressionTerm DOUBLECOLON id=nonPunctuating methodParamList       # exprTermNamedMemberArray /* WTF... */
+    expressionTerm ( OBJCOLON | ELVIS ) methodName methodParamList # exprTermMethodCall
+  | expressionTerm ( OBJCOLON | ELVIS ) attributeName              # exprTermAttribute
+  | expressionTerm DOUBLECOLON memberName methodParamList?         # exprTermNamedMember
   | expressionTerm LEFTBRACE expression ( FOR constant )? RIGHTBRACE # exprTermArray
   | expressionTerm inuic          # exprTermInUI
   | widName                       # exprTermWidget
   | expressionTerm2               # exprTermOther
   ;
+
+methodName:
+  nonPunctuating;
+
+attributeName:
+  nonPunctuating;
+
+memberName:
+  nonPunctuating;
 
 expressionTerm2:
     LEFTPAREN expression RIGHTPAREN # exprt2ParenExpr
