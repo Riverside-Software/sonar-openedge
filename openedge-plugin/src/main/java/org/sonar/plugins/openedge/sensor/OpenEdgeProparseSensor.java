@@ -183,6 +183,7 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     computeAnalytics(context);
     logStatistics();
+    context.addContextProperty("sonar.oe.ncloc", Integer.toString(ncLocs));
     generateProparseDebugIndex();
   }
 
