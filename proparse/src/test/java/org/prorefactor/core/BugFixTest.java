@@ -418,6 +418,12 @@ public class BugFixTest {
     assertEquals(unit.getTopNode().queryStateHead().size(), 3);
   }
 
+  @Test(expectedExceptions = ParseCancellationException.class, description = "Same behavior as compiler...")
+  public void test50() {
+    ParseUnit unit = genericTest("bug50.cls");
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
+  }
+
   // Next two tests : same exception should be thrown in both cases
 //  @Test(expectedExceptions = {ProparseRuntimeException.class})
 //  public void testCache1() {
