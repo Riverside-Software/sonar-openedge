@@ -630,7 +630,7 @@ recordAsFormItem:
 
 record:
     // RECORD can be any db table name, work/temp table name, buffer name.
-    { support.recordSemanticPredicate(_input.LT(1), _input.LT(2), _input.LT(3)) }? f=filn { support.pushRecordExpression(_localctx, $f.text); }
+    { c3 || support.recordSemanticPredicate(_input.LT(1), _input.LT(2), _input.LT(3)) }? f=filn { support.pushRecordExpression(_localctx, $f.text); }
   ;
 
 ////  Names  ////
