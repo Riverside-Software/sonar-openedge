@@ -79,7 +79,7 @@ public class C3Test {
       if (c3)
         parser.initialize(session, new EmptyCrossReference(), true);
       else
-        parser.initAntlr4(session, new EmptyCrossReference());
+        parser.initialize(session, new EmptyCrossReference());
       parser.setErrorHandler(new ProparseErrorStrategy(false, false, false));
       parser.getInterpreter().setPredictionMode(PredictionMode.LL);
       parser.program();

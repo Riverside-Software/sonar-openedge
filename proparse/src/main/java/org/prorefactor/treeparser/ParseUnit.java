@@ -301,7 +301,7 @@ public class ParseUnit {
       parser.addParseListener(new TraceListener(parser));
     }
     parser.setProfile(profiler);
-    parser.initAntlr4(session, xref);
+    parser.initialize(session, xref);
     if (ambiguityReport) {
       parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
       parser.addErrorListener(new DiagnosticErrorListener(true));
