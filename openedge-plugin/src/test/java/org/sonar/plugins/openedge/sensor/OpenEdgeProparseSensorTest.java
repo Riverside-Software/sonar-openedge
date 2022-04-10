@@ -183,6 +183,8 @@ public class OpenEdgeProparseSensorTest {
         "Wrong number of transactions");
     assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.NUM_TRANSACTIONS.getKey()).value(), 0,
         "Wrong number of transactions");
+    assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.DIRECTIVES.getKey()).value(), 2,
+        "Wrong number of transactions");
   }
 
   @Test

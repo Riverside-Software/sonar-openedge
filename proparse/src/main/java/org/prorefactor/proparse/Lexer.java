@@ -98,6 +98,7 @@ public class Lexer implements IPreprocessor {
 
   private Set<Integer> comments = new HashSet<>();
   private Set<Integer> loc = new HashSet<>();
+  private int numDirectives;
 
   private boolean preserve;
   private CharPos preservedChar;
@@ -1203,6 +1204,8 @@ public class Lexer implements IPreprocessor {
   }
 
   ProToken makeToken(ABLNodeType type, String text) {
+    if (type == ABLNodeType.PROPARSEDIRECTIVE)
+      numDirectives++;
     // Counting lines of code and commented lines only in the main file (textStartFile set to 0)
     if ((tokenStartPos.file == 0) && (type == ABLNodeType.COMMENT)) {
       int numLines = currText.toString().length() - currText.toString().replace("\n", "").length();
@@ -1368,6 +1371,10 @@ public class Lexer implements IPreprocessor {
 
   public int getCommentedLines() {
     return comments.size();
+  }
+
+  public int getProparseDirectivesCount() {
+    return numDirectives;
   }
 
   void preserveCurrent() {

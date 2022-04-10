@@ -184,7 +184,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   }
 
   public JPNodeMetrics getMetrics() {
-    return new JPNodeMetrics(lexer.getLoc(), lexer.getCommentedLines());
+    return new JPNodeMetrics(lexer.getLoc(), lexer.getCommentedLines(), lexer.getProparseDirectivesCount());
   }
 
   public IncludeRef getMacroGraph() {

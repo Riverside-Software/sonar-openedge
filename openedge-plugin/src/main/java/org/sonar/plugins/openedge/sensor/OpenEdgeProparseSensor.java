@@ -499,11 +499,13 @@ public class OpenEdgeProparseSensor implements Sensor {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private void computeSimpleMetrics(SensorContext context, InputFile file, ParseUnit unit) {
-    // Saving LOC and COMMENTS metrics
+    // Saving LOC, COMMENTS and DIRECTIVES metrics
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(unit.getMetrics().getLoc()).save();
     ncLocs += unit.getMetrics().getLoc();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
         unit.getMetrics().getComments()).save();
+    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.DIRECTIVES).withValue(
+        unit.getMetrics().getDirectives()).save();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

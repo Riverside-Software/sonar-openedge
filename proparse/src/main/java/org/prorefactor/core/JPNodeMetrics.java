@@ -17,17 +17,23 @@ package org.prorefactor.core;
 public class JPNodeMetrics {
   private final int loc;
   private final int comments;
+  private final int directives;
 
-  public JPNodeMetrics(int loc, int comments) {
+  public JPNodeMetrics(int loc, int comments, int directives) {
     this.loc = loc;
     this.comments = comments;
+    this.directives = directives;
   }
 
   public int getLoc() {
     return loc;
   }
-  
+
   public int getComments() {
     return comments;
+  }
+
+  public int getDirectives() {
+    return directives;
   }
 }

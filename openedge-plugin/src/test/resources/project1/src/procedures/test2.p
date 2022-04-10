@@ -36,7 +36,7 @@ end.
 
 procedure proc1:
   DEF INPUT PARAMETER prm1 as INTEGER.
-
+  {&_proparse_ prolint-nowarn(test)}
   def var zz as char no-undo.
   
   if (prm1 mod 2) = 0 then do:
@@ -57,5 +57,5 @@ end.
 for each wt1:
   display wt1.a wt1.b.
 end.
-
+{&_proparse_ prolint-nowarn(test2)}
 return '0'.
