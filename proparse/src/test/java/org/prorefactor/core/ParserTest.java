@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -550,6 +550,17 @@ public class ParserTest {
   }
 
   @Test
+  public void testNamedMember() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "namedMember01.p"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+    assertFalse(unit.getTopNode().query(ABLNodeType.NAMED_MEMBER).isEmpty());
+    assertFalse(unit.getTopNode().query(ABLNodeType.NAMED_MEMBER_ARRAY).isEmpty());
+    assertEquals(unit.getTopNode().query(ABLNodeType.NAMED_MEMBER).get(0).firstNaturalChild().getLine(), 4);
+    assertEquals(unit.getTopNode().query(ABLNodeType.NAMED_MEMBER_ARRAY).get(0).firstNaturalChild().getLine(), 5);
+  }
+
+  @Test
   public void testDirective() {
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "directive.p"), session);
     unit.parse();
@@ -589,6 +600,14 @@ public class ParserTest {
     assertNotNull(tok);
     assertEquals(tok.getNodeType(), ABLNodeType.PROPARSEDIRECTIVE);
     assertEquals(tok.getText(), "prolint-nowarn(something)");
+  }
+
+  @Test
+  public void testGenerics01() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "generics01.p"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+
   }
 
   @Test
@@ -861,4 +880,47 @@ public class ParserTest {
     assertEquals(unit.getClassName(), "rssw.enum01");
     assertTrue(unit.isEnum());
   }
+
+  @Test
+  public void testElvis01() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "elvis01.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 4);
+    JPNode node1 = unit.getTopNode().query(ABLNodeType.ELVIS).get(0);
+    assertEquals(node1.getLine(), 3);
+    assertEquals(node1.getEndLine(), 3);
+    assertEquals(node1.getColumn(), 11);
+    assertEquals(node1.getEndColumn(), 12);
+    assertEquals(node1.getText(), "?:");
+  }
+
+  @Test
+  public void testElvis02() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "elvis02.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    JPNode node1 = unit.getTopNode().query(ABLNodeType.UNKNOWNVALUE).get(0);
+    JPNode node2 = unit.getTopNode().query(ABLNodeType.LEXCOLON).get(0);
+    JPNode node3 = unit.getTopNode().query(ABLNodeType.DISPLAY).get(0);
+    assertEquals(node1.getLine(), 1);
+    assertEquals(node1.getColumn(), 42);
+    assertEquals(node1.getEndColumn(), 42);
+    assertEquals(node1.getText(), "?");
+    assertEquals(node2.getLine(), 1);
+    assertEquals(node2.getColumn(), 43);
+    assertEquals(node2.getEndColumn(), 43);
+    assertEquals(node2.getText(), ":");
+    assertEquals(node3.getLine(), 2);
+    assertEquals(node3.getColumn(), 3);
+    assertEquals(node3.getEndColumn(), 9);
+    assertNotNull(node3.getHiddenBefore());
+    assertNull(node3.getHiddenBefore().getHiddenBefore());
+    assertEquals(node3.getHiddenBefore().getLine(), 1);
+    assertEquals(node3.getHiddenBefore().getEndLine(), 2);
+    assertEquals(node3.getHiddenBefore().getCharPositionInLine(), 44);
+    assertEquals(node3.getHiddenBefore().getEndCharPositionInLine(), 2);
+  }
+
 }

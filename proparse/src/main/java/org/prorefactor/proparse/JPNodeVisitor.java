@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -298,22 +298,19 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitExprTermMethodCall(ExprTermMethodCallContext ctx) {
-    return createTree(ctx, ABLNodeType.METHOD_REF).setExtraField1(ctx.id.getText()).setRuleNode(ctx).setExpression(true);
+    return createTree(ctx, ABLNodeType.METHOD_REF).setExtraField1(ctx.methodName().nonPunctuating().getText()).setRuleNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExprTermAttribute(ExprTermAttributeContext ctx) {
-    return createTree(ctx, ABLNodeType.ATTRIBUTE_REF).setExtraField1(ctx.id.getText()).setRuleNode(ctx).setExpression(true);
+    return createTree(ctx, ABLNodeType.ATTRIBUTE_REF).setExtraField1(ctx.attributeName().nonPunctuating().getText()).setRuleNode(ctx).setExpression(true);
   }
 
   @Override
   public Builder visitExprTermNamedMember(ExprTermNamedMemberContext ctx) {
-    return createTree(ctx, ABLNodeType.NAMED_MEMBER).setExtraField1(ctx.id.getText()).setRuleNode(ctx).setExpression(true);
-  }
-
-  @Override
-  public Builder visitExprTermNamedMemberArray(ExprTermNamedMemberArrayContext ctx) {
-    return createTree(ctx, ABLNodeType.NAMED_MEMBER_ARRAY).setExtraField1(ctx.id.getText()).setRuleNode(ctx).setExpression(true);
+    return createTree(ctx,
+        ctx.methodParamList() == null ? ABLNodeType.NAMED_MEMBER : ABLNodeType.NAMED_MEMBER_ARRAY).setExtraField1(
+            ctx.memberName().nonPunctuating().getText()).setRuleNode(ctx).setExpression(true);
   }
 
   @Override

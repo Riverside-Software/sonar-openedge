@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -183,6 +183,7 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     computeAnalytics(context);
     logStatistics();
+    context.addContextProperty("sonar.oe.ncloc", Integer.toString(ncLocs));
     generateProparseDebugIndex();
   }
 
@@ -332,10 +333,10 @@ public class OpenEdgeProparseSensor implements Sensor {
       RecognitionException cause = (RecognitionException) caught.getCause();
       ProToken tok = (ProToken) cause.getOffendingToken();
       if (settings.displayStackTraceOnError()) {
-        LOG.error("Error during code parsing for " + file + " at position " + tok.getFileName() + ":" + tok.getLine()
+        LOG.error("Parser error in '" + file + "' at position " + tok.getFileName() + ":" + tok.getLine()
             + ":" + tok.getCharPositionInLine(), cause);
       } else {
-        LOG.error("Error during code parsing for {} at position {}:{}:{}", file, tok.getFileName(), tok.getLine(),
+        LOG.error("Parser error in '{}' at position {}:{}:{}", file, tok.getFileName(), tok.getLine(),
             tok.getCharPositionInLine());
       }
       numFailures++;
@@ -372,7 +373,7 @@ public class OpenEdgeProparseSensor implements Sensor {
 
       return;
     } catch (RuntimeException caught) {
-      LOG.error("Error during code parsing for " + InputFileUtils.getRelativePath(file, context.fileSystem()), caught);
+      LOG.error("Parser error in '" + InputFileUtils.getRelativePath(file, context.fileSystem()) + "'", caught);
       numFailures++;
       NewIssue issue = context.newIssue();
       issue.forRule(RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY)).at(
@@ -498,11 +499,13 @@ public class OpenEdgeProparseSensor implements Sensor {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private void computeSimpleMetrics(SensorContext context, InputFile file, ParseUnit unit) {
-    // Saving LOC and COMMENTS metrics
+    // Saving LOC, COMMENTS and DIRECTIVES metrics
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(unit.getMetrics().getLoc()).save();
     ncLocs += unit.getMetrics().getLoc();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
         unit.getMetrics().getComments()).save();
+    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.DIRECTIVES).withValue(
+        unit.getMetrics().getDirectives()).save();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

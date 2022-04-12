@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -406,7 +406,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterExprTermMethodCall(ExprTermMethodCallContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     setContextQualifier(ctx.expressionTerm(), ContextQualifier.REF);
-    setContextQualifier(ctx.id, qual);
+    setContextQualifier(ctx.methodName().nonPunctuating(), qual);
     setStaticQualifier(ctx.expressionTerm());
   }
 
@@ -414,7 +414,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterExprTermAttribute(ExprTermAttributeContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     setContextQualifier(ctx.expressionTerm(), ContextQualifier.REF);
-    setContextQualifier(ctx.id, qual);
+    setContextQualifier(ctx.attributeName().nonPunctuating(), qual);
     setStaticQualifier(ctx.expressionTerm());
   }
 
@@ -2174,7 +2174,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     } else {
       JPNode naturalNode = likeNode.firstNaturalChild();
       if (naturalNode != null) {
-        LOG.error("Failed to find LIKE datatype at {} line {}", naturalNode.getFileName(), naturalNode.getLine());
+        LOG.error("Failed to find LIKE datatype at {} line {}: '{}'", naturalNode.getFileName(), naturalNode.getLine(),
+            naturalNode.getText());
       }
     }
   }
@@ -2381,15 +2382,16 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     refNode.setContextQualifier(cq);
 
     JPNode stmtNode = refNode.getStatement();
-    // Check if this is a Field_ref being "inline defined"
-    // If so, we define it right now.
-    if (refNode.isInlineVar())
-      addToSymbolScope(defineVariable(ctx, refNode, name, Variable.Type.VARIABLE));
+    // Check if this is a FieldRef being "inline defined". If so, we define it right now.
+    // refNode.isInlineVar returns true for all variable references, not only in the definition node
+    if (refNode.isInlineVar() && (currentScope.getVariable(name) == null)) {
+        addToSymbolScope(defineVariable(ctx, refNode, name, Variable.Type.VARIABLE));
+    }
     if (cq == ContextQualifier.STATIC) {
       // Nothing with static for now, but at least we don't check for external tables
       if (LOG.isTraceEnabled())
         LOG.trace("Static reference to {}", refNode.getIdNode().getText());
-    } else if ((refNode.getParent().getNodeType() == ABLNodeType.USING)
+    } else if ((refNode.getParent() != null) && (refNode.getParent().getNodeType() == ABLNodeType.USING)
         && (stmtNode.getNodeType() != ABLNodeType.BUFFERCOPY)
         && (stmtNode.getNodeType() != ABLNodeType.BUFFERCOMPARE)) {
       // First condition : there seems to be an implicit INPUT in USING phrases in a record phrase.

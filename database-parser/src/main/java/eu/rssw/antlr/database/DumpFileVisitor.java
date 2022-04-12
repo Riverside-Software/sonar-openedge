@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -32,8 +32,11 @@ import eu.rssw.antlr.database.DumpFileGrammarParser.AddTableContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldDescriptionContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldExtentContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldFormatContext;
+import eu.rssw.antlr.database.DumpFileGrammarParser.FieldInitialContext;
+import eu.rssw.antlr.database.DumpFileGrammarParser.FieldLabelContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldMaxWidthContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldOrderContext;
+import eu.rssw.antlr.database.DumpFileGrammarParser.FieldPositionContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldTriggerContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.IndexAreaContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.IndexFieldContext;
@@ -113,6 +116,32 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
     return null;
   }
 
+  @Override
+  public Void visitFieldLabel(FieldLabelContext ctx) {
+    if (!fields.isEmpty())
+      fields.peek().setLabel(ctx.QUOTED_STRING().getText());
+
+    return null;
+  }
+
+  @Override
+  public Void visitFieldInitial(FieldInitialContext ctx) {
+    if (!fields.isEmpty() && ctx.QUOTED_STRING() != null) 
+      fields.peek().setInitial(ctx.QUOTED_STRING().getText());
+
+    return null;
+  }
+
+  @Override
+  public Void visitFieldPosition(FieldPositionContext ctx) {
+    if (!fields.isEmpty()) {
+      try {
+        fields.peek().setPosition(Integer.parseInt(ctx.val.getText()));  
+      } catch (Exception e) {}
+    }
+      
+    return null;
+  }
   @Override
   public Void visitFieldExtent(FieldExtentContext ctx) {
     if (!fields.isEmpty())

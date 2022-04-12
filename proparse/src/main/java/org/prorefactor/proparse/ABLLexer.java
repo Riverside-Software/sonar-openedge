@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -184,7 +184,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   }
 
   public JPNodeMetrics getMetrics() {
-    return new JPNodeMetrics(lexer.getLoc(), lexer.getCommentedLines());
+    return new JPNodeMetrics(lexer.getLoc(), lexer.getCommentedLines(), lexer.getProparseDirectivesCount());
   }
 
   public IncludeRef getMacroGraph() {

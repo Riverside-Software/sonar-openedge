@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -59,16 +59,16 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
   @Override
   public void enterExprTermAttribute(ExprTermAttributeContext ctx) {
-    ContextQualifier cq = contextQualifiers.get(ctx.id);
+    ContextQualifier cq = contextQualifiers.get(ctx.attributeName().nonPunctuating());
 
     if (ctx.expressionTerm() instanceof ExprTermOtherContext) {
       ExprTermOtherContext ctx2 = (ExprTermOtherContext) ctx.expressionTerm();
       if (ctx2.expressionTerm2() instanceof Exprt2FieldContext) {
         Exprt2FieldContext fld = (Exprt2FieldContext) ctx2.expressionTerm2();
-        widattr(fld, cq, ctx.id.getText());
+        widattr(fld, cq, ctx.attributeName().nonPunctuating().getText());
       }
     } else if (ctx.expressionTerm() instanceof ExprTermWidgetContext) {
-      widattr(ctx, (ExprTermWidgetContext) ctx.expressionTerm(), cq, ctx.id.getText());
+      widattr(ctx, (ExprTermWidgetContext) ctx.expressionTerm(), cq, ctx.attributeName().nonPunctuating().getText());
     }
   }
 

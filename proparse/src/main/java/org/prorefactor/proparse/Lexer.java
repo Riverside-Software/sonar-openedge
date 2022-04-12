@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -98,6 +98,7 @@ public class Lexer implements IPreprocessor {
 
   private Set<Integer> comments = new HashSet<>();
   private Set<Integer> loc = new HashSet<>();
+  private int numDirectives;
 
   private boolean preserve;
   private CharPos preservedChar;
@@ -240,7 +241,7 @@ public class Lexer implements IPreprocessor {
           return nextTokenFromStar();
         case '?':
           getChar();
-          return makeToken(ABLNodeType.UNKNOWNVALUE);
+          return questionMark();
         case '`':
           return nextTokenFromSymbol('`', ABLNodeType.BACKTICK, ABLNodeType.ID);
 
@@ -467,6 +468,27 @@ public class Lexer implements IPreprocessor {
       getChar();
     }
     return makeToken(ABLNodeType.ID);
+  }
+
+  ProToken questionMark() {
+    LOGGER.trace("Entering questionMark()");
+
+    if (currChar == ':') {
+      // Elvis token only created if next character is not a whitespace
+      ProToken unknownVal = makeToken(ABLNodeType.UNKNOWNVALUE);
+      CharPos colonCharPos = new CharPos(currChar, currFile, currLine, currCol, currSourceNum);
+      getChar();
+      if (Character.isWhitespace(currChar)) {
+        // Return UNKNOWN_VALUE and preserve LEXCOLON for next iteration
+        preserve = true;
+        preservedChar = colonCharPos;
+        return unknownVal;
+      } else {
+        currText.append(':');
+        return makeToken(ABLNodeType.ELVIS);
+      }
+    } else
+      return makeToken(ABLNodeType.UNKNOWNVALUE);
   }
 
   ProToken colon() {
@@ -1182,6 +1204,8 @@ public class Lexer implements IPreprocessor {
   }
 
   ProToken makeToken(ABLNodeType type, String text) {
+    if (type == ABLNodeType.PROPARSEDIRECTIVE)
+      numDirectives++;
     // Counting lines of code and commented lines only in the main file (textStartFile set to 0)
     if ((tokenStartPos.file == 0) && (type == ABLNodeType.COMMENT)) {
       int numLines = currText.toString().length() - currText.toString().replace("\n", "").length();
@@ -1347,6 +1371,10 @@ public class Lexer implements IPreprocessor {
 
   public int getCommentedLines() {
     return comments.size();
+  }
+
+  public int getProparseDirectivesCount() {
+    return numDirectives;
   }
 
   void preserveCurrent() {
@@ -1951,7 +1979,7 @@ public class Lexer implements IPreprocessor {
       if (prepro.getProparseSettings().getOpSys() == OperatingSystem.UNIX)
         ret = ret.replace('\\', '/');
       else
-        ret = ret.replace('/', '\\');
+        ret = ret.replace('/', '\\').replace("\\", "~\\");
       return ret;
     }
     if ("line-number".equals(argName))

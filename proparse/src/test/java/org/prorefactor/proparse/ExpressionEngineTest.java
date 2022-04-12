@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -16,6 +16,7 @@ package org.prorefactor.proparse;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
@@ -32,6 +33,7 @@ import org.prorefactor.core.nodetypes.UserFunctionCallNode;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.treeparser.symbols.Variable;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -495,6 +497,24 @@ public class ExpressionEngineTest {
     unit03.treeParser01();
     ParseUnit unit04 = new ParseUnit("class cls1: method public void m1(): message 'xx' update lVar as log. end. end.", session);
     unit04.treeParser01();
+  }
+
+  @Test
+  public void testInlineVariable05() {
+    // See previous unit test, this is still not good code...
+    ParseUnit unit01 = new ParseUnit("message 'X' set x1 as logical.", session);
+    unit01.treeParser01();
+    Variable x1 = unit01.getRootScope().getVariable("x1");
+    assertNotNull(x1);
+    assertNotNull(x1.getDataType());
+    assertEquals(x1.getDataType().getPrimitive(), PrimitiveDataType.LOGICAL);
+
+    ParseUnit unit02 = new ParseUnit("message 'X' set x1 as logical. message 'X' set x1.", session);
+    unit02.treeParser01();
+    Variable x2 = unit02.getRootScope().getVariable("x1");
+    assertNotNull(x2);
+    assertNotNull(x2.getDataType());
+    assertEquals(x2.getDataType().getPrimitive(), PrimitiveDataType.LOGICAL);
   }
 
   private void testSimpleExpression(String code, DataType expected) {

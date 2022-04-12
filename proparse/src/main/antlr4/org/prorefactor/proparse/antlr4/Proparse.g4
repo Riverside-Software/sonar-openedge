@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -34,9 +34,24 @@ options {
 
 @members {
   private ParserSupport support;
+  private boolean c3;
 
-  public void initAntlr4(IProparseEnvironment session, CrossReference xref) {
+  public void initialize(IProparseEnvironment session, CrossReference xref) {
+    this.initialize(session, xref, false);
+  }
+
+  public void initialize(IProparseEnvironment session, CrossReference xref, boolean c3) {
     this.support = new ParserSupport(session, xref);
+    this.c3 = c3;
+  }
+
+  /**
+   * @deprecated
+   * Use {@link Proparse#initialize(IProparseEnvironment, CrossReference)}
+   */
+  @Deprecated
+  public void initAntlr4(IProparseEnvironment session, CrossReference xref) {
+    this.initialize(session, xref, false);
   }
 
   public ParserSupport getParserSupport() {
@@ -53,6 +68,10 @@ import keywords;
 
 program:
     blockOrStatement*
+  ;
+
+program2:
+    blockOrStatement* EOF
   ;
 
 codeBlock:
@@ -312,7 +331,8 @@ inclassStatement:
   |  varStatement
   |  constructorStatement
   |  destructorStatement
-  |  methodStatement
+  |  { !c3 }? methodStatement
+  |  { c3 }? methodStatement2 // No context-specific semantic predicates when using C3
   |  externalProcedureStatement // Only external procedures are accepted
   |  externalFunctionStatement  // Only FUNCTION ... IN ... are accepted
   |  onStatement
@@ -498,15 +518,23 @@ expression:
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 expressionTerm:
-    expressionTerm OBJCOLON id=nonPunctuating methodParamList          # exprTermMethodCall
-  | expressionTerm OBJCOLON id=nonPunctuating                          # exprTermAttribute
-  | expressionTerm DOUBLECOLON id=nonPunctuating                       # exprTermNamedMember
-  | expressionTerm DOUBLECOLON id=nonPunctuating methodParamList       # exprTermNamedMemberArray /* WTF... */
+    expressionTerm ( OBJCOLON | ELVIS ) methodName methodParamList # exprTermMethodCall
+  | expressionTerm ( OBJCOLON | ELVIS ) attributeName              # exprTermAttribute
+  | expressionTerm DOUBLECOLON memberName methodParamList?         # exprTermNamedMember
   | expressionTerm LEFTBRACE expression ( FOR constant )? RIGHTBRACE # exprTermArray
   | expressionTerm inuic          # exprTermInUI
   | widName                       # exprTermWidget
   | expressionTerm2               # exprTermOther
   ;
+
+methodName:
+  nonPunctuating;
+
+attributeName:
+  nonPunctuating;
+
+memberName:
+  nonPunctuating;
 
 expressionTerm2:
     LEFTPAREN expression RIGHTPAREN # exprt2ParenExpr
@@ -602,7 +630,7 @@ recordAsFormItem:
 
 record:
     // RECORD can be any db table name, work/temp table name, buffer name.
-    { support.recordSemanticPredicate(_input.LT(1), _input.LT(2), _input.LT(3)) }? f=filn { support.pushRecordExpression(_localctx, $f.text); }
+    { c3 || support.recordSemanticPredicate(_input.LT(1), _input.LT(2), _input.LT(3)) }? f=filn { support.pushRecordExpression(_localctx, $f.text); }
   ;
 
 ////  Names  ////
@@ -657,12 +685,12 @@ filenamePart:
   ;
 
 typeName:
-    nonPunctuating
+    nonPunctuating ( LEFTANGLE typeName RIGHTANGLE )?
   ;
 
 // Different action in the visitor (no class lookup in typeName2)
 typeName2:
-    nonPunctuating
+    nonPunctuating ( LEFTANGLE typeName RIGHTANGLE )?
   ;
 
 constant:
@@ -2600,9 +2628,8 @@ messageOption:
     ( MESSAGE | QUESTION | INFORMATION | ERROR | WARNING )?
     ( ( BUTTONS | BUTTON ) ( YESNO | YESNOCANCEL | OK | OKCANCEL | RETRYCANCEL ) )?
     titleExpression?
-  | SET fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? )
-    // LA(2) check is only there to make sure VIEW-AS ALERT-BOX is assigned to MESSAGE statement and not to variable declaration 
-  | UPDATE fieldExpr ( { _input.LA(2) != ALERTBOX }? formatPhrase? )
+  | SET fieldExpr formatPhrase?
+  | UPDATE fieldExpr formatPhrase?
   ;
 
 methodStatement locals [ boolean abs = false ]:
@@ -2621,6 +2648,30 @@ methodStatement locals [ boolean abs = false ]:
     ( { $abs || support.isInterface() }? blockColon // An INTERFACE declares without defining, ditto ABSTRACT.
     | { !$abs && !support.isInterface() }?
       blockColon
+      { support.addInnerScope(_localctx); }
+      codeBlock
+      methodEnd
+      { support.dropInnerScope(); }
+      statementEnd
+    )
+  ;
+
+// No context-specific semantic predicates when using C3
+methodStatement2:
+    METHOD
+    (  PRIVATE
+    |  PACKAGEPRIVATE
+    |  PROTECTED
+    |  PACKAGEPROTECTED
+    |  PUBLIC
+    |  STATIC
+    |  ABSTRACT
+    |  OVERRIDE
+    |  FINAL
+    )*
+    ( VOID | datatype extentPhrase? ) id=newIdentifier functionParams
+    ( PERIOD
+    | LEXCOLON
       { support.addInnerScope(_localctx); }
       codeBlock
       methodEnd

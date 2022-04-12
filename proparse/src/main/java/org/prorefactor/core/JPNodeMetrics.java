@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -17,17 +17,23 @@ package org.prorefactor.core;
 public class JPNodeMetrics {
   private final int loc;
   private final int comments;
+  private final int directives;
 
-  public JPNodeMetrics(int loc, int comments) {
+  public JPNodeMetrics(int loc, int comments, int directives) {
     this.loc = loc;
     this.comments = comments;
+    this.directives = directives;
   }
 
   public int getLoc() {
     return loc;
   }
-  
+
   public int getComments() {
     return comments;
+  }
+
+  public int getDirectives() {
+    return directives;
   }
 }

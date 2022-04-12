@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -36,6 +36,7 @@ import java.nio.file.Paths;
 import org.testng.annotations.Test;
 
 import eu.rssw.antlr.database.objects.DatabaseDescription;
+import eu.rssw.antlr.database.objects.Field;
 import eu.rssw.antlr.database.objects.Index;
 import eu.rssw.antlr.database.objects.Table;
 import eu.rssw.antlr.database.objects.Trigger;
@@ -141,5 +142,22 @@ public class TestDumpFile {
     assertTrue(db.getTable("Tab1").getIndex("Idx1").getFields().get(0).isAscending());
     assertTrue(db.getTable("Tab1").getIndex("Idx1").getFields().get(1).isAscending());
     assertFalse(db.getTable("Tab1").getIndex("Idx1").getFields().get(2).isAscending());
+  }
+
+  @Test
+  public void testFieldAttributes() throws IOException {
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/sp2k.df"));
+
+    Field f = db.getTable("Benefits").getField("EmpNum");
+    assertEquals(f.getLabel().toUpperCase(), "EMP NO");
+    assertEquals(f.getPosition().intValue(), 2);
+    assertEquals(f.getOrder().intValue(), 10);
+    assertEquals(f.getInitial(), "0");
+
+    f = db.getTable("BillTo").getField("State");
+    assertEquals(f.getDescription(), "Label/Valexp/Valmsg/Help are set based on value of NON-US field!");
+    assertEquals(f.getLabel(), "State");
+    assertEquals(f.getMaxWidth().intValue(), 40);
+    assertEquals(f.getFormat(), "x(20)");
   }
 }

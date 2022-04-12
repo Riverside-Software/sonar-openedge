@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -83,7 +83,7 @@ public enum ABLNodeType {
   LEFTPAREN(Proparse.LEFTPAREN, "(", NodeTypesOption.SYMBOL),
   LEXAT(Proparse.LEXAT, "@", NodeTypesOption.SYMBOL),
   LEXCOLON(Proparse.LEXCOLON, ":", NodeTypesOption.SYMBOL),
-  LTOREQUAL(Proparse.LTOREQUAL, ">=", NodeTypesOption.SYMBOL),
+  LTOREQUAL(Proparse.LTOREQUAL, "<=", NodeTypesOption.SYMBOL),
   MINUS(Proparse.MINUS, "-", NodeTypesOption.SYMBOL),
   MULTIPLY(Proparse.MULTIPLY, "*", NodeTypesOption.SYMBOL),
   NAMEDOT(Proparse.NAMEDOT, ".", NodeTypesOption.SYMBOL),
@@ -108,6 +108,7 @@ public enum ABLNodeType {
   MINUSEQUAL(Proparse.MINUSEQUAL, "-=", NodeTypesOption.SYMBOL),
   STAREQUAL(Proparse.STAREQUAL, "*=", NodeTypesOption.SYMBOL),
   SLASHEQUAL(Proparse.SLASHEQUAL, "/=", NodeTypesOption.SYMBOL),
+  ELVIS(Proparse.ELVIS, "?:", NodeTypesOption.SYMBOL),
 
   // Lexer (and later) elements
   ANNOTATION(Proparse.ANNOTATION),

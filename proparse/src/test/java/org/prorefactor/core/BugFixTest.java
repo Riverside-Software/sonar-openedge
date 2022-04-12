@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -409,6 +409,18 @@ public class BugFixTest {
   @Test
   public void test48() {
     ParseUnit unit = genericTest("bug48.p");
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
+  }
+
+  @Test
+  public void test49() {
+    ParseUnit unit = genericTest("bug49.p");
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
+  }
+
+  @Test(expectedExceptions = ParseCancellationException.class, description = "Same behavior as compiler...")
+  public void test50() {
+    ParseUnit unit = genericTest("bug50.cls");
     assertEquals(unit.getTopNode().queryStateHead().size(), 3);
   }
 

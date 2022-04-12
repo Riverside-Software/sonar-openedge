@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -26,10 +26,13 @@ public class Field {
   private final String name;
   private final String dataType;
   private Integer order;
+  private Integer position;
   private Integer extent = 0;
   private String description;
+  private String label;
   private String lobArea;
   private String format;
+  private String initial;
   private Integer maxWidth;
   private Collection<Trigger> triggers = new ArrayList<>();
 
@@ -53,12 +56,28 @@ public class Field {
     this.description = description;
   }
 
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
+  }
+
   public Integer getOrder() {
     return order;
   }
 
   public void setOrder(Integer order) {
     this.order = order;
+  }
+
+  public Integer getPosition() {
+    return position;
+  }
+
+  public void setPosition(Integer position) {
+    this.position = position;
   }
 
   public String getLobArea() {
@@ -75,6 +94,14 @@ public class Field {
 
   public void setFormat(String format) {
     this.format = format;
+  }
+
+  public String getInitial() {
+    return initial;
+  }
+
+  public void setInitial(String initial) {
+    this.initial = initial;
   }
 
   public Integer getExtent() {

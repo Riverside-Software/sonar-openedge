@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2021 Riverside Software
+ * Copyright (c) 2015-2022 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -182,6 +182,8 @@ public class OpenEdgeProparseSensorTest {
     assertEquals(context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.NUM_TRANSACTIONS.getKey()).value(), 1,
         "Wrong number of transactions");
     assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.NUM_TRANSACTIONS.getKey()).value(), 0,
+        "Wrong number of transactions");
+    assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.DIRECTIVES.getKey()).value(), 2,
         "Wrong number of transactions");
   }
 
