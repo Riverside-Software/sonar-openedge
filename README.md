@@ -22,4 +22,4 @@ PCT is open-source and free, but if you want to rely on our consulting services,
 
 ## Build status
 
-OpenEdge plugin - master branch: <br/>  [![Build Status](http://ci.rssw.eu/job/sonar-openedge/job/master/badge/icon)](http://ci.rssw.eu/job/sonar-openedge/job/master/)
+OpenEdge plugin - main branch: <br/>  [![Build Status](http://ci.rssw.eu/job/sonar-openedge/job/main/badge/icon)](http://ci.rssw.eu/job/sonar-openedge/job/main/)
