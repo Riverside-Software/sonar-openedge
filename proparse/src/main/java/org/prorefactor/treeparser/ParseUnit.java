@@ -118,6 +118,7 @@ public class ParseUnit {
   private long treeParseTime;
   private long xrefAttachTime;
   private boolean switchToLL;
+  private int numTokens;
 
   private boolean isClass;
   private boolean isInterface;
@@ -343,6 +344,7 @@ public class ParseUnit {
       }
     }
 
+    numTokens = tokStream.index();
     lexer.parseComplete();
     long startTimeNs = System.nanoTime();
     JPNodeVisitor visitor = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
