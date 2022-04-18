@@ -24,7 +24,9 @@ parser grammar Proparse;
   import org.prorefactor.proparse.support.IntegerIndex;
   import org.prorefactor.proparse.support.ParserSupport;
   import org.prorefactor.proparse.support.SymbolScope;
-  
+  import org.slf4j.Logger;
+  import org.slf4j.LoggerFactory;
+
   import com.progress.xref.CrossReference;
 }
 
@@ -33,6 +35,8 @@ options {
 }
 
 @members {
+  private static final Logger LOGGER = LoggerFactory.getLogger(Proparse.class);
+
   private ParserSupport support;
   private boolean c3;
 
@@ -56,6 +60,50 @@ options {
 
   public ParserSupport getParserSupport() {
     return this.support;
+  }
+
+  private boolean assignmentListSemanticPredicate() {
+    return (_input.LA(2) == NAMEDOT) || !support.isVar(_input.LT(1).getText());
+  }
+
+  private boolean blockLabelSemanticPredicate() {
+    return (_input.LT(1).getType() != ABLNodeType.FINALLY.getType());
+  }
+
+  private boolean clearStatementSemanticPredicate() {
+    return (_input.LA(3) != OBJCOLON);
+  }
+
+  private boolean defineMenuStatementSemanticPredicate() {
+    return (_input.LA(2) == RULE) || (_input.LA(2) == SKIP) || (_input.LA(2) == SUBMENU) || (_input.LA(2) == MENUITEM);
+  }
+
+  private boolean expressionTerm2SemanticPredicate() {
+    return (support.isMethodOrFunc(_input.LT(1)) != 0);
+  }
+
+  private boolean expressionTerm2SemanticPredicate2() {
+    return support.isClass() && support.unknownMethodCallsAllowed();
+  }
+
+  private boolean functionParamStdSemanticPredicate() {
+    return (_input.LA(2) != NAMEDOT);
+  }
+
+  private boolean parameterSemanticPredicate() {
+    return (_input.LA(3) != OBJCOLON) && (_input.LA(3) != DOUBLECOLON);
+  }
+
+  private boolean parameterArgSemanticPredicate() {
+    return (_input.LA(3) != OBJCOLON) && (_input.LA(3) != DOUBLECOLON);
+  }
+
+  private boolean recordSemanticPredicate() {
+    return c3 || support.recordSemanticPredicate(_input.LT(1), _input.LT(2), _input.LT(3));
+  }
+
+  private boolean varRecFieldSemanticPredicate() {
+    return (_input.LA(2) != NAMEDOT) && support.isVar(_input.LT(1).getText());
   }
 
 }
@@ -416,10 +464,8 @@ parameter:
     // This is the syntax for parameters when calling or running something.
     // This can refer to a buffer/tablehandle, but it doesn't define one.
     BUFFER identifier FOR record # parameterBufferFor
-  | 
-    // BUFFER parameter. Be careful not to pick up BUFFER customer:whatever or BUFFER sports2000.customer:whatever or BUFFER foo::fld1  or BUFFER sports2000.foo::fld1
-    { (_input.LA(3) != OBJCOLON) && (_input.LA(3) != DOUBLECOLON) }?
-    BUFFER record  # parameterBufferRecord
+  | // BUFFER parameter. Be careful not to pick up BUFFER customer:whatever or BUFFER sports2000.customer:whatever or BUFFER foo::fld1  or BUFFER sports2000.foo::fld1
+    { parameterSemanticPredicate() }? BUFFER record  # parameterBufferRecord
   |  p=( OUTPUT | INPUTOUTPUT | INPUT )?
     parameterArg
     ( BYPOINTER | BYVARIANTPOINTER )?  
@@ -429,7 +475,7 @@ parameter:
 parameterArg:
     TABLEHANDLE fieldExpr parameterDatasetOptions  # parameterArgTableHandle
   | TABLE FOR? record parameterDatasetOptions  # parameterArgTable
-  | { _input.LA(3) != OBJCOLON && _input.LA(3) != DOUBLECOLON }? DATASET identifier parameterDatasetOptions  # parameterArgDataset
+  | { parameterArgSemanticPredicate() }? DATASET identifier parameterDatasetOptions  # parameterArgDataset
   | DATASETHANDLE fieldExpr parameterDatasetOptions # parameterArgDatasetHandle
   | PARAMETER fieldExpr EQUAL expression  # parameterArgStoredProcedure  // for RUN STORED-PROCEDURE
   | expression ( AS datatype )? # parameterArgExpression
@@ -540,7 +586,7 @@ expressionTerm2:
     LEFTPAREN expression RIGHTPAREN # exprt2ParenExpr
   | NEW typeName parameterList # exprt2New
   | // Methods take precedence over built-in functions. The compiler does not seem to try recognize by function/method signature.
-    { support.isMethodOrFunc(_input.LT(1)) != 0 }? fname=identifier parameterListNoRoot  # exprt2ParenCall
+    { expressionTerm2SemanticPredicate() }? fname=identifier parameterListNoRoot  # exprt2ParenCall
   | // Have to predicate all of builtinfunc, because it can be ambiguous with method call.
     builtinFunction  # exprt2BuiltinFunc
   | // We are going to have lots of cases where we are inheriting methods
@@ -548,7 +594,7 @@ expressionTerm2:
     // point in expression evaluation, if we have anything followed by a left-paren,
     // we're going to assume it's a method call.
     // Method names which are reserved keywords must be prefixed with THIS-OBJECT:.
-    { support.isClass() && support.unknownMethodCallsAllowed() }? methodname=identifier parameterListNoRoot # exprt2ParenCall2
+    { expressionTerm2SemanticPredicate2() }? methodname=identifier parameterListNoRoot # exprt2ParenCall2
   | constant   # exprt2Constant
   | noArgFunction  # exprt2NoArgFunc
   | field ( NOT? ENTERED )?  # exprt2Field
@@ -619,7 +665,7 @@ varRecField:
     // If there's junk in front, like INPUT FRAME, then it won't get picked up
     // as a record - we don't have to worry about that. So, we can look at the
     // very next token, and if it's an identifier it might be record - check its name.
-    { _input.LA(2) != NAMEDOT && support.isVar(_input.LT(1).getText()) }? fieldExpr
+    { varRecFieldSemanticPredicate() }? fieldExpr
   | record
   | fieldExpr
   ;
@@ -630,14 +676,14 @@ recordAsFormItem:
 
 record:
     // RECORD can be any db table name, work/temp table name, buffer name.
-    { c3 || support.recordSemanticPredicate(_input.LT(1), _input.LT(2), _input.LT(3)) }? f=filn { support.pushRecordExpression(_localctx, $f.text); }
+    { recordSemanticPredicate() }? f=filn { support.pushRecordExpression(_localctx, $f.text); }
   ;
 
 ////  Names  ////
 
 blockLabel:
     // Block labels can begin with [#|$|%], which are picked up as FILENAME by the lexer.
-    { _input.LT(1).getType() != ABLNodeType.FINALLY.getType() }?
+    { blockLabelSemanticPredicate() }?
     identifier | FILENAME
   ;
 
@@ -791,7 +837,7 @@ assignStatement:
 assignmentList:
     record exceptFields
   | // We want to pick up record only if it can't be a variable name
-    { _input.LA(2) == NAMEDOT || !support.isVar(_input.LT(1).getText()) }?
+    { assignmentListSemanticPredicate() }?
     record
   | ( assignEqual whenExpression? | assignField whenExpression? )*
   ;
@@ -1011,7 +1057,7 @@ enumEnd:
   ;
 
 clearStatement:
-    CLEAR ( {_input.LA(3) != OBJCOLON }? frameWidgetName)? ALL? NOPAUSE? statementEnd
+    CLEAR ( { clearStatementSemanticPredicate() }? frameWidgetName)? ALL? NOPAUSE? statementEnd
   ;
 
 closeQueryStatement:
@@ -1592,7 +1638,7 @@ defineMenuStatement:
     DEFINE defineShare? PRIVATE?
     MENU n=identifier menuOption*
     ( menuListItem
-      ( {_input.LA(2) == RULE || _input.LA(2) == SKIP || _input.LA(2) == SUBMENU || _input.LA(2) == MENUITEM }? PERIOD )?
+      ( { defineMenuStatementSemanticPredicate() }? PERIOD )?
     )*
     statementEnd
     { support.defVar($n.text); }
@@ -1723,7 +1769,7 @@ defineSubMenuStatement:
     DEFINE defineShare? PRIVATE?
     SUBMENU n=identifier menuOption*
     (  menuListItem
-      ( {_input.LA(2) == RULE || _input.LA(2) == SKIP || _input.LA(2) == SUBMENU || _input.LA(2) == MENUITEM }? PERIOD )?
+      ( { defineMenuStatementSemanticPredicate() }? PERIOD )?
     )*
     statementEnd
     { support.defVar($n.text); }
@@ -2293,7 +2339,7 @@ functionStatement:
     // It's also not illegal to define them IN.. more than once, so we can't
     // drop the scope the first time it's defined.
     ( FORWARDS ( LEXCOLON | PERIOD | EOF )
-    | { _input.LA(2) == SUPER }? IN SUPER ( LEXCOLON | PERIOD | EOF )
+    | IN SUPER ( LEXCOLON | PERIOD | EOF )
     | (MAP TO? identifier)? IN expression ( LEXCOLON | PERIOD | EOF )
     | blockColon
       codeBlock
@@ -2323,10 +2369,10 @@ functionParam:
 functionParamStd:
     n=identifier AS datatype extentPhrase? { support.defVar($n.text); } # functionParamStandardAs
   | n2=identifier likeField extentPhrase? { support.defVar($n2.text); } # functionParamStandardLike
-  | { _input.LA(2) != NAMEDOT }? TABLE FOR? record APPEND? BIND? # functionParamStandardTable
-  | { _input.LA(2) != NAMEDOT }? TABLEHANDLE FOR? hn=identifier APPEND? BIND? { support.defVar($hn.text); } # functionParamStandardTableHandle
-  | { _input.LA(2) != NAMEDOT}? DATASET FOR? identifier APPEND? BIND?  # functionParamStandardDataset
-  | { _input.LA(2) != NAMEDOT}? DATASETHANDLE FOR? hn2=identifier APPEND? BIND? { support.defVar($hn2.text); }  # functionParamStandardDatasetHandle
+  | { functionParamStdSemanticPredicate() }? TABLE FOR? record APPEND? BIND? # functionParamStandardTable
+  | { functionParamStdSemanticPredicate() }? TABLEHANDLE FOR? hn=identifier APPEND? BIND? { support.defVar($hn.text); } # functionParamStandardTableHandle
+  | { functionParamStdSemanticPredicate() }? DATASET FOR? identifier APPEND? BIND?  # functionParamStandardDataset
+  | { functionParamStdSemanticPredicate() }? DATASETHANDLE FOR? hn2=identifier APPEND? BIND? { support.defVar($hn2.text); }  # functionParamStandardDatasetHandle
   | // When declaring a function, it's possible to just list the datatype without an identifier AS
     datatype extentPhrase2? # functionParamStandardOther
   ;
@@ -2339,7 +2385,7 @@ externalFunctionStatement:
     extentPhrase?
     PRIVATE?
     functionParams?
-    ( { _input.LA(2) == SUPER }? IN SUPER
+    ( IN SUPER
     | ( MAP TO? identifier )? IN expression
     )
     ( LEXCOLON | PERIOD )
