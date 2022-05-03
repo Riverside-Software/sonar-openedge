@@ -177,21 +177,17 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitParameterBufferFor(ParameterBufferForContext ctx) {
-    return createTreeFromFirstNode(ctx).setRuleNode(ctx);
+    return createTree(ctx, ABLNodeType.PARAMETER_ITEM).setRuleNode(ctx);
   }
 
   @Override
   public Builder visitParameterBufferRecord(ParameterBufferRecordContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    return createTree(ctx, ABLNodeType.PARAMETER_ITEM).setRuleNode(ctx);
   }
 
   @Override
   public Builder visitParameterOther(ParameterOtherContext ctx) {
-    if (ctx.p == null) {
-      return createTree(ctx, ABLNodeType.INPUT);
-    } else {
-      return createTreeFromFirstNode(ctx);
-    }
+    return createTree(ctx, ABLNodeType.PARAMETER_ITEM).setRuleNode(ctx);
   }
 
   @Override
