@@ -8,4 +8,4 @@ FIELD field2 AS CHARACTER XML-NODE-TYPE "element" XML-NODE-NAME "BB2".
 
 DEFINE DATASET ds_trafic XML-NODE-NAME "JJJ"
 FOR tt_one, tt_two
-PARENT-ID-RELATION FOR tt_one, tt_two PARENT-ID-FIELD id /* <-- this line causes exception in proparse */
+PARENT-ID-RELATION FOR tt_one, tt_two PARENT-ID-FIELD id. /* <-- this line causes exception in proparse */

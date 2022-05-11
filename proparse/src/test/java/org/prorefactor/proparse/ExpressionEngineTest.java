@@ -71,9 +71,9 @@ public class ExpressionEngineTest {
 
   @Test
   public void testUnaryExpression() {
-    testSimpleExpression("+ 45", DataType.INTEGER);
-    testSimpleExpression("- 45", DataType.INTEGER);
-    testSimpleExpression("- -45.112", DataType.DECIMAL);
+    testSimpleExpression("+ 45.", DataType.INTEGER);
+    testSimpleExpression("- 45.", DataType.INTEGER);
+    testSimpleExpression("- -45.112.", DataType.DECIMAL);
     testSimpleExpression("def var xx as log. not xx.", DataType.LOGICAL);
     testSimpleExpression("def var xx as log. not (not xx).", DataType.LOGICAL);
   }
@@ -105,7 +105,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testTwoArguments() {
-    testSimpleExpression("1 + 1", DataType.INTEGER);
+    testSimpleExpression("1 + 1.", DataType.INTEGER);
     testSimpleExpression("def var xx as date. xx + 3.", DataType.DATE);
     testSimpleExpression("def var xx as date. 3 + xx.", DataType.DATE);
     testSimpleExpression("def var xx as int. xx + 3.", DataType.INTEGER);
@@ -167,7 +167,7 @@ public class ExpressionEngineTest {
     testSimpleExpression("dynamic-function('funcName').", DataType.RUNTYPE);
     testSimpleExpression("now.", DataType.DATETIME_TZ);
     testSimpleExpression("NUM-DBS.", DataType.INTEGER);
-    testSimpleExpression("num-aliases", DataType.INTEGER);
+    testSimpleExpression("num-aliases.", DataType.INTEGER);
     testSimpleExpression("opsys.", DataType.CHARACTER);
     testSimpleExpression("progress.", DataType.CHARACTER);
     testSimpleExpression("RETURN-VALUE.", DataType.CHARACTER);
@@ -307,17 +307,17 @@ public class ExpressionEngineTest {
     testSimpleExpression("message current-window:get-selected-widget().", DataType.HANDLE);
     testSimpleExpression("message current-window:InvalidFunction().", DataType.NOT_COMPUTED);
     // Attributes
-    testSimpleExpression("message active-form:nextform", new DataType("Progress.Windows.IForm"));
-    testSimpleExpression("message active-form:prowinHandle", DataType.HANDLE);
-    testSimpleExpression("message active-form:unknownAttribute", DataType.NOT_COMPUTED);
-    testSimpleExpression("message session:xml-data-type", DataType.CHARACTER);
-    testSimpleExpression("message session:file-mod-date", DataType.DATE);
-    testSimpleExpression("message session:seal-timestamp", DataType.DATETIME_TZ);
-    testSimpleExpression("message session:x-document", DataType.HANDLE);
-    testSimpleExpression("message session:year-offset", DataType.INTEGER);
-    testSimpleExpression("message session:form-long-input", DataType.RAW);
-    testSimpleExpression("message session:word-wrap", DataType.LOGICAL);
-    testSimpleExpression("message session:after-rowid", DataType.ROWID);
+    testSimpleExpression("message active-form:nextform.", new DataType("Progress.Windows.IForm"));
+    testSimpleExpression("message active-form:prowinHandle.", DataType.HANDLE);
+    testSimpleExpression("message active-form:unknownAttribute.", DataType.NOT_COMPUTED);
+    testSimpleExpression("message session:xml-data-type.", DataType.CHARACTER);
+    testSimpleExpression("message session:file-mod-date.", DataType.DATE);
+    testSimpleExpression("message session:seal-timestamp.", DataType.DATETIME_TZ);
+    testSimpleExpression("message session:x-document.", DataType.HANDLE);
+    testSimpleExpression("message session:year-offset.", DataType.INTEGER);
+    testSimpleExpression("message session:form-long-input.", DataType.RAW);
+    testSimpleExpression("message session:word-wrap.", DataType.LOGICAL);
+    testSimpleExpression("message session:after-rowid.", DataType.ROWID);
   }
 
   @Test
@@ -452,7 +452,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testInlineVariable01() {
-    ParseUnit unit = new ParseUnit("message 'xx' update lVar as logical", session);
+    ParseUnit unit = new ParseUnit("message 'xx' update lVar as logical.", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -463,7 +463,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testInlineVariable02() {
-    ParseUnit unit = new ParseUnit("message 'xx' update lVar as integer", session);
+    ParseUnit unit = new ParseUnit("message 'xx' update lVar as integer.", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();

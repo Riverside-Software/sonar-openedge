@@ -219,7 +219,7 @@ public class ParserTest {
 
   @Test
   public void testConnectDatabase() {
-    ParseUnit unit = new ParseUnit("connect database dialog box", "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("connect database dialog box.", "<unnamed>", session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CONNECT).size(), 1);

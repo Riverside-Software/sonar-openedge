@@ -115,10 +115,6 @@ import keywords;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 program:
-    blockOrStatement*
-  ;
-
-program2:
     blockOrStatement* EOF
   ;
 
@@ -168,7 +164,7 @@ blockColon:
   ;
 
 blockEnd:
-    EOF
+    { !c3 }? EOF
   | END statementEnd
   ;
 
@@ -954,7 +950,7 @@ caseSensitiveOrNot:
   ;
 
 caseStatement:
-    CASE expression blockColon caseWhen* caseOtherwise? (EOF | caseEnd statementEnd)
+    CASE expression blockColon caseWhen* caseOtherwise? ( { !c3 }? EOF | caseEnd statementEnd)
   ;
 
 caseWhen:
@@ -985,7 +981,7 @@ caseEnd:
 catchStatement:
     CATCH
     n=identifier AS classTypeName { support.defVar($n.text); }
-    blockColon codeBlock ( EOF | catchEnd statementEnd )
+    blockColon codeBlock (  { !c3 }? EOF | catchEnd statementEnd )
   ;
 
 catchEnd:
@@ -2116,7 +2112,7 @@ fillInPhrase:
   ;
 
 finallyStatement:
-    FINALLY blockColon codeBlock ( EOF | finallyEnd statementEnd )
+    FINALLY blockColon codeBlock ( { !c3 }? EOF | finallyEnd statementEnd )
   ;
 
 finallyEnd:
@@ -2338,9 +2334,9 @@ functionStatement:
     // A function can be FORWARD declared and then later defined IN...
     // It's also not illegal to define them IN.. more than once, so we can't
     // drop the scope the first time it's defined.
-    ( FORWARDS ( LEXCOLON | PERIOD | EOF )
-    | IN SUPER ( LEXCOLON | PERIOD | EOF )
-    | (MAP TO? identifier)? IN expression ( LEXCOLON | PERIOD | EOF )
+    ( FORWARDS ( LEXCOLON | PERIOD | { !c3 }? EOF )
+    | IN SUPER ( LEXCOLON | PERIOD | { !c3 }? EOF )
+    | (MAP TO? identifier)? IN expression ( LEXCOLON | PERIOD | { !c3 }? EOF )
     | blockColon
       codeBlock
       functionEnd
@@ -2922,7 +2918,9 @@ externalProcedureStatement:
     { support.addInnerScope(_localctx); }
     codeBlock
     { support.dropInnerScope(); }
-    procedureEnd statementEnd
+    ( { !c3 }? EOF
+    |  procedureEnd statementEnd
+    )
   ;
 
 procedureStatement:
@@ -2932,7 +2930,7 @@ procedureStatement:
     { support.addInnerScope(_localctx); }
     codeBlock
     { support.dropInnerScope(); }
-    (  EOF
+    ( { !c3 }? EOF
     |  procedureEnd statementEnd
     )
   ;
@@ -3286,7 +3284,7 @@ spacePhrase:
   ;
 
 statementEnd:
-    PERIOD | EOF
+    PERIOD | { !c3 }? EOF
   ;
 
 notStatementEnd:

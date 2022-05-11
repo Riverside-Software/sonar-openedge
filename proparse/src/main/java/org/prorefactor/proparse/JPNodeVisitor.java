@@ -2890,6 +2890,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Nonnull
   public Builder visitTerminal(TerminalNode node) {
     ProToken tok = (ProToken) node.getSymbol();
+    if (tok.getNodeType() == ABLNodeType.EOF_ANTLR4)
+      return new Builder(ABLNodeType.EMPTY_NODE);
     tok.setHiddenBefore(getHiddenBefore(tok));
 
     return new Builder(tok);
