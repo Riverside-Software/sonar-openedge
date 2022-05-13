@@ -1,5 +1,5 @@
 <p>While the Progress compiler accepts the following syntax quirks, they shouldn't be used in real code as they are hard to read.
-Furthermore, they slow down the internal parser, so support for those quirks will be dropped soon.</p>
+Furthermore, they slow down the internal parser, so support <em>could</em> be dropped in the future.</p>
 
 <h2>Syntax #1</h2>
 <pre>
@@ -10,4 +10,14 @@ METHOD PUBLIC ABSTRACT VOID mthd2().
 // Use this syntax:
 METHOD PUBLIC ABSTRACT VOID mthd1().
 METHOD PUBLIC ABSTRACT VOID mthd2().
+</pre>
+
+<h2>Syntax #2</h2>
+<pre>
+define variable zz1 as integer.
+define variable zz2 as integre.
+do zz1 = 1 to 5:
+  do zz2 = 1 to 10:
+    message "Msg " + string(zz1 * zz2)
+    // Period after message statement is optional, as well as the two END of the do statements
 </pre>

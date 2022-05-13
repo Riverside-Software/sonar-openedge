@@ -19,6 +19,8 @@
  */
 package org.sonar.plugins.openedge.checks;
 
+import java.util.List;
+
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ParseUnit;
@@ -30,20 +32,112 @@ import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
 
 @Rule(priority = Priority.BLOCKER, name = "Valid yet clumsy ABL syntax", tags = {"clumsy", "confusing"})
-@SqaleConstantRemediation(value = "15min")
+@SqaleConstantRemediation(value = "2min")
 public class ClumsySyntax extends OpenEdgeProparseCheck {
 
   @Override
   public void execute(InputFile file, ParseUnit unit) {
-    if (unit.isInterface() || unit.isAbstractClass()) {
-      for (JPNode node : unit.getTopNode().queryStateHead(ABLNodeType.METHOD)) {
-        JPNode lastChild = node.getLastDescendant();
-        if (lastChild.getNodeType() == ABLNodeType.LEXCOLON) {
-          NewIssue issue = createIssue(file, node, "METHOD prototype declaration...", true);
-          addLocation(issue, file, lastChild, "... should end with a period and not a colon", true);
+    for (JPNode node : unit.getTopNode().queryStateHead()) {
+      switch (node.getNodeType()) {
+        case CATCH:
+        case CASE:
+        case DO:
+        case FOR:
+        case REPEAT:
+        case FINALLY:
+        case PROCEDURE:
+          handleDoBlock(unit, file, node);
+          break;
+        case FUNCTION:
+          handleFunctionBlock(unit, file, node);
+          break;
+        case METHOD:
+          handleMethodBlock(unit, file, node);
+          break;
+        default:
+          handleStatement(unit, file, node);
+      }
+    }
+  }
+
+  private void handleFunctionBlock(ParseUnit unit, InputFile file, JPNode node) {
+    List<JPNode> ch = node.getDirectChildren();
+    boolean containsForward = ch.stream().map(n -> n.getNodeType()).anyMatch(type -> type == ABLNodeType.FORWARDS);
+    boolean containsSuper = ch.stream().map(n -> n.getNodeType()).anyMatch(type -> type == ABLNodeType.SUPER);
+    boolean containsMap = ch.stream().map(n -> n.getNodeType()).anyMatch(type -> type == ABLNodeType.MAP);
+    if (containsForward || containsSuper || containsMap) {
+      // Last child should be PERIOD
+      JPNode lastCh = ch.get(ch.size() - 1);
+      if (lastCh.getNodeType() != ABLNodeType.PERIOD) {
+        reportIssue(file, node, "FUNCTION declaration should end with a period", true);
+      }
+    } else {
+      // Last child should be PERIOD
+      JPNode lastCh = ch.get(ch.size() - 1);
+      JPNode lastCh2 = ch.get(ch.size() - 2);
+      if ((lastCh.getNodeType() != ABLNodeType.PERIOD) || (lastCh2.getNodeType() != ABLNodeType.END)) {
+        reportIssue(file, node, "FUNCTION declaration should end with END [FUNCTION] followed by a period", true);
+      }
+    }
+  }
+
+  private void handleMethodBlock(ParseUnit unit, InputFile file, JPNode node) {
+    List<JPNode> ch = node.getDirectChildren();
+    boolean containsAbstract = ch.stream().map(n -> n.getNodeType()).anyMatch(type -> type == ABLNodeType.ABSTRACT);
+    JPNode lastCh = ch.get(ch.size() - 1);
+    if (unit.isInterface() || containsAbstract) {
+      if (lastCh.getNodeType() == ABLNodeType.LEXCOLON) {
+        NewIssue issue = createIssue(file, node, "METHOD prototype declaration...", true);
+        if (issue != null) {
+          addLocation(issue, file, lastCh, "... should end with a period and not a colon", true);
           issue.save();
         }
       }
+    } else {
+      for (int zz = 1; zz < ch.size() - 1; zz++) {
+        if ((ch.get(zz).getNodeType() == ABLNodeType.PARAMETER_LIST)
+            && (ch.get(zz + 1).getNodeType() == ABLNodeType.PERIOD)) {
+          NewIssue issue = createIssue(file, node, "METHOD block...", true);
+          if (issue != null) {
+            addLocation(issue, file, ch.get(zz + 1), "... should end with a colon and not a period", true);
+            issue.save();
+          }
+        }
+      }
+    }
+  }
+
+  private void handleDoBlock(ParseUnit unit, InputFile file, JPNode node) {
+    List<JPNode> ch = node.getDirectChildren();
+    if ((ch == null) || (ch.size() <= 1)) {
+      // Unlikely, but early exit just to be sure
+      return;
+    }
+
+    // Last child should be PERIOD
+    JPNode lastCh = ch.get(ch.size() - 1);
+    JPNode lastCh2 = ch.get(ch.size() - 2);
+    if ((lastCh.getNodeType() != ABLNodeType.PERIOD) || (lastCh2.getNodeType() != ABLNodeType.END)) {
+      reportIssue(file, node, "Block should end with END [blockType] followed by a period", true);
+    }
+  }
+
+  private void handleStatement(ParseUnit unit, InputFile file, JPNode node) {
+    if ((node.getNodeType() == ABLNodeType.IF) || (node.getNodeType() == ABLNodeType.WHEN)
+        || (node.getNodeType() == ABLNodeType.OTHERWISE) || (node.getNodeType() == ABLNodeType.ON)
+        || (node.getNodeType() == ABLNodeType.EXPR_STATEMENT))
+      return;
+    if ((node.getNodeType() == ABLNodeType.DEFINE) && (node.getState2() == ABLNodeType.PROPERTY.getType()))
+      return;
+    List<JPNode> ch = node.getDirectChildren();
+    if ((ch == null) || (ch.size() < 1)) {
+      // Anormal, mais on ne fait rien pour le moment
+      return;
+    }
+    // Last child should be PERIOD
+    JPNode lastCh = ch.get(ch.size() - 1);
+    if (lastCh.getNodeType() != ABLNodeType.PERIOD) {
+      reportIssue(file, node.firstNaturalChild(), "Statement should end with a period", true);
     }
   }
 
