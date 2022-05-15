@@ -31,6 +31,8 @@ import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Index;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.proparse.antlr4.Proparse.*;
+import org.prorefactor.proparse.support.ParserSupport;
+import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;
@@ -85,6 +87,12 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Inject
   public TreeParserVariableDefinition(ParseUnit unit) {
     super(unit);
+  }
+
+  @Inject
+  public TreeParserVariableDefinition(ParserSupport support, RefactorSession session,
+      TreeParserRootSymbolScope rootScope) {
+    super(support, session, rootScope);
   }
 
   @Override

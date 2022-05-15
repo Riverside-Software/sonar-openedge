@@ -50,6 +50,7 @@ import org.prorefactor.proparse.antlr4.Proparse.TriggerOnContext;
 import org.prorefactor.proparse.antlr4.ProparseBaseListener;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
+import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +101,15 @@ public class TreeParserBlocks extends ProparseBaseListener {
     this.currentScope = rootScope;
   }
 
+  @Inject
+  public TreeParserBlocks(ParserSupport support, RefactorSession session) {
+    this.unit = null;
+    this.support = support;
+    this.refSession = session;
+    this.rootScope = new TreeParserRootSymbolScope(refSession);
+    this.currentScope = rootScope;
+  }
+
   @Override
   public void enterProgram(ProgramContext ctx) {
     if (LOG.isTraceEnabled())
@@ -128,7 +138,8 @@ public class TreeParserBlocks extends ProparseBaseListener {
   public void exitProgram(ProgramContext ctx) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Exiting program", indent());
-    unit.setRootScope(rootScope);
+    if (unit != null)
+      unit.setRootScope(rootScope);
   }
 
   @Override

@@ -23,12 +23,12 @@ import org.prorefactor.proparse.antlr4.Proparse.TriggerOnContext;
 import org.prorefactor.proparse.antlr4.ProparseBaseListener;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
+import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.symbols.Routine;
 
 import com.google.inject.Inject;
 
 public abstract class AbstractBlockProparseListener extends ProparseBaseListener {
-  final ParseUnit unit;
   final ParserSupport support;
   final IProparseEnvironment refSession;
   final TreeParserRootSymbolScope rootScope;
@@ -49,18 +49,23 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Inject
   AbstractBlockProparseListener(ParseUnit unit) {
-    this.unit = unit;
     this.support = unit.getSupport();
     this.refSession = unit.getSession();
     this.rootScope = unit.getRootScope();
   }
 
   @Inject
+  AbstractBlockProparseListener(ParserSupport support, RefactorSession session, TreeParserRootSymbolScope rootScope) {
+    this.support = support;
+    this.refSession = session;
+    this.rootScope = rootScope;
+  }
+
+  @Inject
   AbstractBlockProparseListener(AbstractBlockProparseListener listener) {
-    this.unit = listener.unit;
-    this.support = unit.getSupport();
-    this.refSession = unit.getSession();
-    this.rootScope = unit.getRootScope();
+    this.support = listener.support;
+    this.refSession = listener.refSession;
+    this.rootScope = listener.rootScope;
     this.contextQualifiers = listener.contextQualifiers;
     this.nameResolution = listener.nameResolution;
   }
