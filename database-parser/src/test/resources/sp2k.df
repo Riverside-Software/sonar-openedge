@@ -309,7 +309,7 @@ ADD FIELD "BinNum" OF "Bin" AS integer
 ADD FIELD "BinName" OF "Bin" AS character 
   FORMAT "x(30)"
   INITIAL ""
-  LABEL "Bin Name"
+  LABEL ?
   POSITION 6
   MAX-WIDTH 60
   HELP "Please enter a bin name"
