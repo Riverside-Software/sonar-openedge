@@ -2037,6 +2037,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitMethodStatement2(MethodStatement2Context ctx) {
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+  }
+
+  @Override
   public Builder visitMethodEnd(MethodEndContext ctx) {
     return createTreeFromFirstNode(ctx);
   }

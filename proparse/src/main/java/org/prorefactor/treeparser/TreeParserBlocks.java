@@ -41,6 +41,7 @@ import org.prorefactor.proparse.antlr4.Proparse.ExternalProcedureStatementContex
 import org.prorefactor.proparse.antlr4.Proparse.ForStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.FunctionStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.InterfaceStatementContext;
+import org.prorefactor.proparse.antlr4.Proparse.MethodStatement2Context;
 import org.prorefactor.proparse.antlr4.Proparse.MethodStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.OnStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ProcedureStatementContext;
@@ -217,6 +218,24 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterMethodStatement(MethodStatementContext ctx) {
+    // Beware of code duplication in enterMethodStatement2
+    newRoutine(ctx, support.getNode(ctx), ctx.id.getText(), ABLNodeType.METHOD);
+
+    if (ctx.VOID() != null) {
+      currentRoutine.setReturnDatatypeNode(DataType.VOID);
+    } else if (ctx.datatype().CLASS() != null) {
+      currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
+    } else if (ctx.datatype().datatypeVar().typeName() != null) {
+      currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
+    } else {
+      currentRoutine.setReturnDatatypeNode(
+          ABLNodeType.getDataType(support.getNode(ctx.datatype().datatypeVar()).getType()));
+    }
+  }
+
+  @Override
+  public void enterMethodStatement2(MethodStatement2Context ctx) {
+    // Beware of code duplication in enterMethodStatement
     newRoutine(ctx, support.getNode(ctx), ctx.id.getText(), ABLNodeType.METHOD);
 
     if (ctx.VOID() != null) {
@@ -233,6 +252,12 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void exitMethodStatement(MethodStatementContext ctx) {
+    scopeClose();
+    currentRoutine = rootRoutine;
+  }
+
+  @Override
+  public void exitMethodStatement2(MethodStatement2Context ctx) {
     scopeClose();
     currentRoutine = rootRoutine;
   }
