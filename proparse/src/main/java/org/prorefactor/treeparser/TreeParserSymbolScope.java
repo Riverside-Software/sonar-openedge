@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.ITable;
@@ -47,20 +48,23 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
  * record or frame scoping!
  */
 public class TreeParserSymbolScope {
-  protected final TreeParserSymbolScope parentScope;
+  private final TreeParserSymbolScope parentScope;
+  private final int startTokenIndex;
+  private final int stopTokenIndex;
 
-  protected List<Symbol> allSymbols = new ArrayList<>();
-  protected List<TreeParserSymbolScope> childScopes = new ArrayList<>();
-  protected Block rootBlock;
-  protected Routine routine;
-  protected List<Routine> routineList = new ArrayList<>();
-  protected Map<String, TableBuffer> bufferMap = new HashMap<>();
-  protected Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
-  protected Map<ITable, TableBuffer> unnamedBuffers = new HashMap<>();
-  protected Map<Integer, Map<String, Symbol>> typeMap = new HashMap<>();
-  protected Map<String, Variable> variableMap = new HashMap<>();
+  final List<Symbol> allSymbols = new ArrayList<>();
+  final List<TreeParserSymbolScope> childScopes = new ArrayList<>();
+  final List<Routine> routineList = new ArrayList<>();
+  final Map<String, TableBuffer> bufferMap = new HashMap<>();
+  final Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
+  final Map<ITable, TableBuffer> unnamedBuffers = new HashMap<>();
+  final Map<Integer, Map<String, Symbol>> typeMap = new HashMap<>();
+  final Map<String, Variable> variableMap = new HashMap<>();
 
-  protected TreeParserSymbolScope() {
+  private Block rootBlock;
+  private Routine routine;
+
+  TreeParserSymbolScope() {
     this(null);
   }
 
@@ -69,9 +73,15 @@ public class TreeParserSymbolScope {
    * 
    * @param parentScope null if called by the SymbolScopeRoot constructor.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
   private TreeParserSymbolScope(TreeParserSymbolScope parentScope) {
+    this(parentScope, -1, -1);
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private TreeParserSymbolScope(TreeParserSymbolScope parentScope, int startTokenIndex, int stopTokenIndex) {
     this.parentScope = parentScope;
+    this.startTokenIndex = startTokenIndex;
+    this.stopTokenIndex = stopTokenIndex;
     typeMap.put(Proparse.VARIABLE, Collections.checkedMap((Map) variableMap, String.class, Symbol.class));
   }
 
@@ -154,10 +164,27 @@ public class TreeParserSymbolScope {
   }
 
   /** Add a new scope to this scope. */
-  public TreeParserSymbolScope addScope() {
-    TreeParserSymbolScope newScope = new TreeParserSymbolScope(this);
+  public TreeParserSymbolScope addScope(ParserRuleContext ctx) {
+    TreeParserSymbolScope newScope = new TreeParserSymbolScope(this, ctx.getStart().getTokenIndex(),
+        ctx.getStop().getTokenIndex());
     childScopes.add(newScope);
     return newScope;
+  }
+
+  /**
+   * Returns SymbolScope which is associated with a tokenIndex. Used in C3 for getting context of caret position
+   */
+  public TreeParserSymbolScope getTokenSymbolScope(int tokenIndex) {
+    for (TreeParserSymbolScope ch: childScopes) {
+      TreeParserSymbolScope rslt = ch.getTokenSymbolScope(tokenIndex);
+      if (rslt != null)
+        return rslt;
+    }
+    // Not found in children scopes, check current scope
+    if ((startTokenIndex <= tokenIndex) && (stopTokenIndex >= tokenIndex)) {
+      return this;
+    }
+    return null;
   }
 
   /**

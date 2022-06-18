@@ -58,6 +58,12 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     return refSession;
   }
 
+  @Override
+  public TreeParserSymbolScope getTokenSymbolScope(int tokenIndex) { 
+    TreeParserSymbolScope rslt = super.getTokenSymbolScope(tokenIndex);
+    return rslt == null ? this : rslt;
+  }
+
   public void addTableDefinitionIfNew(ITable table) {
     String lcName = table.getName().toLowerCase();
     tableMap.computeIfAbsent(lcName, key -> table);
