@@ -572,6 +572,10 @@ public class ParseUnit {
     return switchToLL;
   }
 
+  public int getNumTokens() {
+    return numTokens;
+  }
+
   public boolean hasSyntaxError() {
     return syntaxError;
   }

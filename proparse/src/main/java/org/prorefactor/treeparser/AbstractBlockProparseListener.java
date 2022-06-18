@@ -24,7 +24,6 @@ import org.prorefactor.proparse.antlr4.Proparse.TriggerOnContext;
 import org.prorefactor.proparse.antlr4.ProparseBaseListener;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
-import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.symbols.Routine;
 
 import com.google.inject.Inject;
