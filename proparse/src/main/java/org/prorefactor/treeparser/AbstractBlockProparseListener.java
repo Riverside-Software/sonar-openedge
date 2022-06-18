@@ -55,7 +55,7 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
   }
 
   @Inject
-  AbstractBlockProparseListener(ParserSupport support, RefactorSession session, TreeParserRootSymbolScope rootScope) {
+  AbstractBlockProparseListener(ParserSupport support, IProparseEnvironment session, TreeParserRootSymbolScope rootScope) {
     this.support = support;
     this.refSession = session;
     this.rootScope = rootScope;

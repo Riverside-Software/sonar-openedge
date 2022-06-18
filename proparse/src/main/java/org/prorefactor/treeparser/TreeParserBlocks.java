@@ -50,7 +50,6 @@ import org.prorefactor.proparse.antlr4.Proparse.TriggerOnContext;
 import org.prorefactor.proparse.antlr4.ProparseBaseListener;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
-import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +101,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
   }
 
   @Inject
-  public TreeParserBlocks(ParserSupport support, RefactorSession session) {
+  public TreeParserBlocks(ParserSupport support, IProparseEnvironment session) {
     this.unit = null;
     this.support = support;
     this.refSession = session;
