@@ -348,7 +348,7 @@ public class ParseUnit {
     lexer.parseComplete();
     long startTimeNs = System.nanoTime();
     JPNodeVisitor visitor = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
-    topNode = (ProgramRootNode) visitor.visit(tree).build(this, parser.getParserSupport());
+    topNode = (ProgramRootNode) visitor.visit(tree).build(parser.getParserSupport());
     parser.getParserSupport().clearRecordExpressions();
     isClass = visitor.isClass();
     isInterface = visitor.isInterface();

@@ -16,6 +16,7 @@ package org.prorefactor.core.nodetypes;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.refactor.BuiltinClasses;
 
 import com.google.common.base.Strings;
 
@@ -43,15 +44,15 @@ public class LocalMethodCallNode extends ExpressionNode {
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
       return DataType.NOT_COMPUTED;
-    ITypeInfo info = root.getParseUnit().getTypeInfo();
-    if (root.getParseUnit().isClass() && (info == null))
-      info = root.getParserSupport().getProparseSession().getTypeInfo("Progress.Lang.Object");
+    ITypeInfo info = root.getTypeInfo();
+    if (root.isClass() && (info == null))
+      info = BuiltinClasses.PROGRESS_LANG_OBJECT;
     while (info != null) {
       for (IMethodElement elem : info.getMethods()) {
         if (elem.getName().equalsIgnoreCase(methodName))
           return elem.getReturnType();
       }
-      info = root.getParserSupport().getProparseSession().getTypeInfo(info.getParentTypeName());
+      info = root.getEnvironment().getTypeInfo(info.getParentTypeName());
     }
 
     return DataType.NOT_COMPUTED;

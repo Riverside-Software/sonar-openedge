@@ -15,17 +15,25 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import javax.annotation.Nullable;
+
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
-import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.treeparser.Block;
+import org.prorefactor.treeparser.TreeParserRootSymbolScope;
+
+import eu.rssw.pct.elements.ITypeInfo;
 
 public class ProgramRootNode extends NonStatementBlockNode {
-  private final ParseUnit unit;
+  private final IProparseEnvironment environment;
+  private final String className;
 
-  public ProgramRootNode(ProToken t, JPNode parent, int num, boolean hasChildren, ParseUnit unit) {
+  public ProgramRootNode(ProToken t, JPNode parent, int num, boolean hasChildren, ParserSupport parserSupport) {
     super(t, parent, num, hasChildren);
-    this.unit = unit;
+    this.environment = parserSupport.getProparseSession();
+    this.className = parserSupport.getClassName();
   }
 
   @Override
@@ -33,12 +41,31 @@ public class ProgramRootNode extends NonStatementBlockNode {
     return false;
   }
 
-  public ParseUnit getParseUnit() {
-    return unit;
+  public IProparseEnvironment getEnvironment() {
+    return environment;
   }
 
-  public ParserSupport getParserSupport() {
-    return unit.getSupport();
+  public boolean isClass() {
+    return (className != null) && !className.isBlank();
+  }
+
+  public String getClassName() {
+    return className;
+  }
+
+  public ITypeInfo getTypeInfo() {
+    return environment.getTypeInfo(className);
+  }
+
+  /**
+   * Return null if the treeparsers have not been executed yet
+   */
+  @Nullable
+  public TreeParserRootSymbolScope getRootScope() {
+    Block block = getBlock();
+    if (block == null)
+      return null;
+    return (TreeParserRootSymbolScope) block.getSymbolScope();
   }
 
 }

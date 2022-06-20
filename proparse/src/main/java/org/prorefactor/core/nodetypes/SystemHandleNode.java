@@ -283,42 +283,42 @@ public class SystemHandleNode extends ExpressionNode {
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
       return DataType.NOT_COMPUTED;
-    ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(root.getParserSupport().getClassName());
+    ITypeInfo info = root.getTypeInfo();
     if ((info == null) || (info.getParentTypeName() == null))
       return DataType.NOT_COMPUTED;
-    info = root.getParserSupport().getProparseSession().getTypeInfo(info.getParentTypeName());
-    return ExpressionNode.getObjectAttributeDataType(root.getParserSupport().getProparseSession(), info, id, false);
+    info = root.getEnvironment().getTypeInfo(info.getParentTypeName());
+    return ExpressionNode.getObjectAttributeDataType(root.getEnvironment(), info, id, false);
   }
 
   private DataType getSuperMethodDataType(String id) {
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
       return DataType.NOT_COMPUTED;
-    ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(root.getParserSupport().getClassName());
+    ITypeInfo info = root.getTypeInfo();
     if ((info == null) || (info.getParentTypeName() == null))
       return DataType.NOT_COMPUTED;
-    info = root.getParserSupport().getProparseSession().getTypeInfo(info.getParentTypeName());
-    return ExpressionNode.getObjectMethodDataType(root.getParserSupport().getProparseSession(), info, id);
+    info = root.getEnvironment().getTypeInfo(info.getParentTypeName());
+    return ExpressionNode.getObjectMethodDataType(root.getEnvironment(), info, id);
   }
 
   private DataType getThisObjectAttributeDataType(String id) {
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
       return DataType.NOT_COMPUTED;
-    ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(root.getParserSupport().getClassName());
+    ITypeInfo info = root.getTypeInfo();
     if (info == null)
       return DataType.NOT_COMPUTED;
-    return ExpressionNode.getObjectAttributeDataType(root.getParserSupport().getProparseSession(), info, id, true);
+    return ExpressionNode.getObjectAttributeDataType(root.getEnvironment(), info, id, true);
   }
 
   private DataType getThisObjectMethodDataType(String id) {
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
       return DataType.NOT_COMPUTED;
-    ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(root.getParserSupport().getClassName());
+    ITypeInfo info = root.getTypeInfo();
     if (info == null)
       return DataType.NOT_COMPUTED;
-    return ExpressionNode.getObjectMethodDataType(root.getParserSupport().getProparseSession(), info, id);
+    return ExpressionNode.getObjectMethodDataType(root.getEnvironment(), info, id);
   }
 
   private DataType getWebContextMethodDataType(String id) {

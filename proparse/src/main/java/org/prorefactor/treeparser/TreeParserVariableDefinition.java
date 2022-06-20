@@ -33,7 +33,6 @@ import org.prorefactor.core.schema.Table;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
-import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;

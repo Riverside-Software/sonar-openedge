@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
@@ -111,6 +113,14 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
    */
   public String getClassName() {
     return className;
+  }
+
+  /**
+   * Valid only if the parse unit is a CLASS. Returns null otherwise.
+   */
+  @Nullable
+  public ITypeInfo getTypeInfo() {
+    return typeInfo;
   }
 
   /**
