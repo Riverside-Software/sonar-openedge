@@ -27,7 +27,6 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ICallback;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -45,13 +44,11 @@ public class CPDCallback implements ICallback<NewCpdTokens> {
   private final NewCpdTokens cpdTokens;
   private final OpenEdgeSettings settings;
   private final InputFile file;
-  private final ParseUnit unit;
 
-  public CPDCallback(SensorContext context, InputFile file, OpenEdgeSettings settings, ParseUnit unit) {
+  public CPDCallback(SensorContext context, InputFile file, OpenEdgeSettings settings) {
     this.cpdTokens = context.newCpdTokens().onFile(file);
     this.file = file;
     this.settings = settings;
-    this.unit = unit;
   }
 
   @Override

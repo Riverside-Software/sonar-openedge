@@ -127,7 +127,8 @@ public class ClumsySyntax extends OpenEdgeProparseCheck {
         || (node.getNodeType() == ABLNodeType.OTHERWISE) || (node.getNodeType() == ABLNodeType.ON)
         || (node.getNodeType() == ABLNodeType.EXPR_STATEMENT))
       return;
-    if ((node.getNodeType() == ABLNodeType.DEFINE) && (node.getState2() == ABLNodeType.PROPERTY.getType()))
+    if ((node.getNodeType() == ABLNodeType.DEFINE) && node.isIStatement()
+        && (node.asIStatement().getNodeType2() == ABLNodeType.PROPERTY))
       return;
     List<JPNode> ch = node.getDirectChildren();
     if ((ch == null) || (ch.size() < 1)) {
