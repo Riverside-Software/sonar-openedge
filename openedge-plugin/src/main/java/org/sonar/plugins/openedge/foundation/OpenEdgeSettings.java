@@ -185,7 +185,7 @@ public class OpenEdgeSettings {
     boolean dlcInPropath = config.getBoolean(Constants.PROPATH_DLC).orElse(false);
     if (dlcInPropath && !Strings.isNullOrEmpty(dlcInstallDir)) {
       File dlc = new File(dlcInstallDir);
-      LOG.info("DLC directory '{}' will be added to all PROPATH", dlc.getAbsolutePath());
+      LOG.info("DLC directory '{}' will be added to PROPATH", dlc.getAbsolutePath());
       propathDlc.add(new File(dlc, "gui"));
       propathDlc.add(new File(dlc, "tty"));
       propathDlc.add(new File(dlc, "src"));
