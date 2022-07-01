@@ -27,6 +27,14 @@ public class TwoArgumentsExpression extends ExpressionNode {
     super(t, parent, num, hasChildren);
   }
 
+  public IExpression getLeftExpression() {
+    return getDirectChildren().get(0).asIExpression();
+  }
+
+  public IExpression getRightExpression() {
+    return getDirectChildren().get(1).asIExpression();
+  }
+
   @Override
   public boolean hasProparseDirective(String directive) {
     return getFirstChild().hasProparseDirective(directive);

@@ -92,7 +92,6 @@ public class TableBuffer extends Symbol {
 
   /** Get or create a FieldBuffer for a Field. */
   public FieldBuffer getFieldBuffer(IField field) {
-    assert field.getTable() == this.table;
     FieldBuffer ret = fieldBuffers.get(field);
     if (ret != null)
       return ret;
@@ -127,4 +126,18 @@ public class TableBuffer extends Symbol {
     return isDefault && table.getStoretype() == IConstants.ST_DBTABLE;
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof TableBuffer) {
+      TableBuffer other = (TableBuffer) obj;
+      return table.getName().equalsIgnoreCase(other.table.getName()) && getName().equalsIgnoreCase(other.getName());
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    return (table.getName().toLowerCase() + "##" + getName().toLowerCase()).hashCode();
+  }
 }
