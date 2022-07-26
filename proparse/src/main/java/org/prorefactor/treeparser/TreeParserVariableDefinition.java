@@ -2174,9 +2174,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   private void defLike(JPNode likeNode) {
     LOG.trace("Entering defLike {}", likeNode);
-    Primative likePrim = (Primative) likeNode.getSymbol();
-    Primative newPrim = (Primative) currSymbol;
-    if (likePrim != null) {
+    Primative likePrim = likeNode.getSymbol() instanceof Primative ? (Primative) likeNode.getSymbol() : null;
+    Primative newPrim = currSymbol instanceof Primative ? (Primative) currSymbol : null;
+    if ((likePrim != null) && (newPrim != null)) {
       newPrim.assignAttributesLike(likePrim);
       currSymbol.setLikeSymbol(likeNode.getSymbol());
     } else {
