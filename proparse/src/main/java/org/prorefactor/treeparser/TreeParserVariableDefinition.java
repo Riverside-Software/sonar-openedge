@@ -22,6 +22,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProgressString;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
@@ -1025,8 +1026,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterDefineParamVar(DefineParamVarContext ctx) {
     if (ctx.datatypeVar() != null) {
       // AS HANDLE TO datatype
-      Primative primative = (Primative) currSymbol;
-      primative.setDataType(DataType.HANDLE);
+      if (currSymbol instanceof Primative)
+        ((Primative) currSymbol).setDataType(DataType.HANDLE);
     } else {
       defAs(ctx.datatype());
     }
@@ -2095,11 +2096,23 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   private void defAs(DatatypeContext ctx) {
-    defAs((Primative) currSymbol, ctx);
+    if (currSymbol instanceof Primative)
+      defAs((Primative) currSymbol, ctx);
+    else {
+      LOG.error("Unable to find 'AS' datatype in '{}' at position {}:{}:{}", ctx.getText(),
+          ctx.start instanceof ProToken ? ((ProToken) ctx.start).getFileName() : "<unknown_file>", ctx.start.getLine(),
+          ctx.start.getCharPositionInLine());
+    }
   }
 
   private void defAs(ClassTypeNameContext ctx) {
-    defAs((Primative) currSymbol, ctx);
+    if (currSymbol instanceof Primative)
+      defAs((Primative) currSymbol, ctx);
+    else {
+      LOG.error("Unable to find 'AS' datatype in '{}' at position {}:{}:{}", ctx.getText(),
+          ctx.start instanceof ProToken ? ((ProToken) ctx.start).getFileName() : "<unknown_file>", ctx.start.getLine(),
+          ctx.start.getCharPositionInLine());
+    }
   }
 
   private void defAs(Primative primative, DatatypeContext ctx) {
@@ -2162,7 +2175,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Variable extent '{}'", indent(), text);
 
-    Primative primative = (Primative) currSymbol;
+    Primative primative = currSymbol instanceof Primative ? (Primative) currSymbol : null;
     if (primative == null)
       return;
     try {
