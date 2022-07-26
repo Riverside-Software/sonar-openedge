@@ -62,9 +62,9 @@ public class ClumsySyntax extends OpenEdgeProparseCheck {
 
   private void handleFunctionBlock(ParseUnit unit, InputFile file, JPNode node) {
     List<JPNode> ch = node.getDirectChildren();
-    boolean containsForward = ch.stream().map(n -> n.getNodeType()).anyMatch(type -> type == ABLNodeType.FORWARDS);
-    boolean containsSuper = ch.stream().map(n -> n.getNodeType()).anyMatch(type -> type == ABLNodeType.SUPER);
-    boolean containsMap = ch.stream().map(n -> n.getNodeType()).anyMatch(type -> type == ABLNodeType.MAP);
+    boolean containsForward = ch.stream().map(JPNode::getNodeType).anyMatch(type -> type == ABLNodeType.FORWARDS);
+    boolean containsSuper = ch.stream().map(JPNode::getNodeType).anyMatch(type -> type == ABLNodeType.SUPER);
+    boolean containsMap = ch.stream().map(JPNode::getNodeType).anyMatch(type -> type == ABLNodeType.MAP);
     if (containsForward || containsSuper || containsMap) {
       // Last child should be PERIOD
       JPNode lastCh = ch.get(ch.size() - 1);
@@ -83,7 +83,7 @@ public class ClumsySyntax extends OpenEdgeProparseCheck {
 
   private void handleMethodBlock(ParseUnit unit, InputFile file, JPNode node) {
     List<JPNode> ch = node.getDirectChildren();
-    boolean containsAbstract = ch.stream().map(n -> n.getNodeType()).anyMatch(type -> type == ABLNodeType.ABSTRACT);
+    boolean containsAbstract = ch.stream().map(JPNode::getNodeType).anyMatch(type -> type == ABLNodeType.ABSTRACT);
     JPNode lastCh = ch.get(ch.size() - 1);
     if (unit.isInterface() || containsAbstract) {
       if (lastCh.getNodeType() == ABLNodeType.LEXCOLON) {
