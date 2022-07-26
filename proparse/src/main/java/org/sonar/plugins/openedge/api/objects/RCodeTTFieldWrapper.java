@@ -12,7 +12,7 @@ package org.sonar.plugins.openedge.api.objects;
 
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.treeparser.Primative;
+import org.prorefactor.treeparser.Primitive;
 
 import com.google.common.base.Preconditions;
 
@@ -60,17 +60,17 @@ public class RCodeTTFieldWrapper implements IField {
   }
 
   @Override
-  public void assignAttributesLike(Primative likePrim) {
+  public void assignAttributesLike(Primitive likePrim) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Primative setDataType(DataType dataType) {
+  public Primitive setDataType(DataType dataType) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Primative setExtent(int extent) {
+  public Primitive setExtent(int extent) {
     throw new UnsupportedOperationException();
   }
 

@@ -18,15 +18,15 @@ package org.prorefactor.treeparser;
 import eu.rssw.pct.elements.DataType;
 
 /**
- * Field and Variable implement Primative because they both have a "primative" Progress data type (INTEGER, CHARACTER,
+ * Field and Variable implement Primitive because they both have a "primitive" Progress data type (INTEGER, CHARACTER,
  * etc).
  */
-public interface Primative {
+public interface Primitive {
 
   /**
-   * Assign datatype, class, extent from another primative (for the LIKE keyword)
+   * Assign datatype, class, extent from another primitive (for the LIKE keyword)
    */
-  void assignAttributesLike(Primative likePrim);
+  void assignAttributesLike(Primitive likePrim);
 
   DataType getDataType();
 
@@ -35,8 +35,8 @@ public interface Primative {
    */
   int getExtent();
 
-  Primative setDataType(DataType dataType);
+  Primitive setDataType(DataType dataType);
 
-  Primative setExtent(int extent);
+  Primitive setExtent(int extent);
 
 }

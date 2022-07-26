@@ -21,7 +21,7 @@ import java.util.List;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.Primative;
+import org.prorefactor.treeparser.Primitive;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 import eu.rssw.pct.elements.DataType;
@@ -29,7 +29,7 @@ import eu.rssw.pct.elements.DataType;
 /**
  * A Symbol defined with DEFINE VARIABLE or any of the other various syntaxes which implicitly define a variable.
  */
-public class Variable extends Symbol implements Primative {
+public class Variable extends Symbol implements Primitive {
   public static final Object CONSTANT_NOW = new Object();
   public static final Object CONSTANT_TODAY = new Object();
   public static final Object CONSTANT_NULL = new Object();
@@ -56,7 +56,7 @@ public class Variable extends Symbol implements Primative {
   }
 
   @Override
-  public void assignAttributesLike(Primative likePrim) {
+  public void assignAttributesLike(Primitive likePrim) {
     dataType = likePrim.getDataType();
     extent = likePrim.getExtent();
   }
@@ -101,13 +101,13 @@ public class Variable extends Symbol implements Primative {
   }
 
   @Override
-  public Primative setDataType(DataType dataType) {
+  public Primitive setDataType(DataType dataType) {
     this.dataType = dataType;
     return this;
   }
 
   @Override
-  public Primative setExtent(int extent) {
+  public Primitive setExtent(int extent) {
     this.extent = extent;
     return this;
   }

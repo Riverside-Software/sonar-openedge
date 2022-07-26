@@ -19,7 +19,7 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ISchema;
-import org.prorefactor.treeparser.Primative;
+import org.prorefactor.treeparser.Primitive;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 import eu.rssw.pct.elements.DataType;
@@ -28,7 +28,7 @@ import eu.rssw.pct.elements.DataType;
  * FieldBuffer is the Symbol object linked to from the AST for schema, temp, and work table fields, and FieldBuffer
  * provides the link to the Field object.
  */
-public class FieldBuffer extends Symbol implements Primative {
+public class FieldBuffer extends Symbol implements Primitive {
   private final TableBuffer buffer;
   private final IField field;
 
@@ -43,7 +43,7 @@ public class FieldBuffer extends Symbol implements Primative {
   }
 
   @Override
-  public void assignAttributesLike(Primative likePrim) {
+  public void assignAttributesLike(Primitive likePrim) {
     field.assignAttributesLike(likePrim);
   }
 
@@ -130,14 +130,14 @@ public class FieldBuffer extends Symbol implements Primative {
 
   /** Sets the underlying Field's dataType. */
   @Override
-  public Primative setDataType(DataType dataType) {
+  public Primitive setDataType(DataType dataType) {
     field.setDataType(dataType);
     return this;
   }
 
   /** Sets the extent of the underlying Field. */
   @Override
-  public Primative setExtent(int extent) {
+  public Primitive setExtent(int extent) {
     field.setExtent(extent);
     return this;
   }

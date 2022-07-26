@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.prorefactor.core.schema;
 
-import org.prorefactor.treeparser.Primative;
+import org.prorefactor.treeparser.Primitive;
 
 import eu.rssw.pct.elements.DataType;
 
@@ -48,7 +48,7 @@ public class Field implements IField {
   }
 
   @Override
-  public void assignAttributesLike(Primative likePrim) {
+  public void assignAttributesLike(Primitive likePrim) {
     dataType = likePrim.getDataType();
     extent = likePrim.getExtent();
   }
@@ -89,13 +89,13 @@ public class Field implements IField {
   }
 
   @Override
-  public Primative setDataType(DataType dataType) {
+  public Primitive setDataType(DataType dataType) {
     this.dataType = dataType;
     return this;
   }
 
   @Override
-  public Primative setExtent(int extent) {
+  public Primitive setExtent(int extent) {
     this.extent = extent;
     return this;
   }
