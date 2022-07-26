@@ -46,21 +46,21 @@ public class ClumsySyntax extends OpenEdgeProparseCheck {
         case REPEAT:
         case FINALLY:
         case PROCEDURE:
-          handleDoBlock(unit, file, node);
+          handleDoBlock(file, node);
           break;
         case FUNCTION:
-          handleFunctionBlock(unit, file, node);
+          handleFunctionBlock(file, node);
           break;
         case METHOD:
           handleMethodBlock(unit, file, node);
           break;
         default:
-          handleStatement(unit, file, node);
+          handleStatement(file, node);
       }
     }
   }
 
-  private void handleFunctionBlock(ParseUnit unit, InputFile file, JPNode node) {
+  private void handleFunctionBlock(InputFile file, JPNode node) {
     List<JPNode> ch = node.getDirectChildren();
     boolean containsForward = ch.stream().map(JPNode::getNodeType).anyMatch(type -> type == ABLNodeType.FORWARDS);
     boolean containsSuper = ch.stream().map(JPNode::getNodeType).anyMatch(type -> type == ABLNodeType.SUPER);
@@ -107,12 +107,11 @@ public class ClumsySyntax extends OpenEdgeProparseCheck {
     }
   }
 
-  private void handleDoBlock(ParseUnit unit, InputFile file, JPNode node) {
+  private void handleDoBlock(InputFile file, JPNode node) {
     List<JPNode> ch = node.getDirectChildren();
-    if ((ch == null) || (ch.size() <= 1)) {
-      // Unlikely, but early exit just to be sure
+    // Unlikely, but early exit just to be sure
+    if (ch.size() <= 1)
       return;
-    }
 
     // Last child should be PERIOD
     JPNode lastCh = ch.get(ch.size() - 1);
@@ -122,7 +121,7 @@ public class ClumsySyntax extends OpenEdgeProparseCheck {
     }
   }
 
-  private void handleStatement(ParseUnit unit, InputFile file, JPNode node) {
+  private void handleStatement(InputFile file, JPNode node) {
     if ((node.getNodeType() == ABLNodeType.IF) || (node.getNodeType() == ABLNodeType.WHEN)
         || (node.getNodeType() == ABLNodeType.OTHERWISE) || (node.getNodeType() == ABLNodeType.ON)
         || (node.getNodeType() == ABLNodeType.EXPR_STATEMENT))
@@ -131,10 +130,10 @@ public class ClumsySyntax extends OpenEdgeProparseCheck {
         && (node.asIStatement().getNodeType2() == ABLNodeType.PROPERTY))
       return;
     List<JPNode> ch = node.getDirectChildren();
-    if ((ch == null) || (ch.size() < 1)) {
-      // Anormal, mais on ne fait rien pour le moment
+    // Unlikely, but early exit just to be sure
+    if (ch.size() < 1)
       return;
-    }
+
     // Last child should be PERIOD
     JPNode lastCh = ch.get(ch.size() - 1);
     if (lastCh.getNodeType() != ABLNodeType.PERIOD) {

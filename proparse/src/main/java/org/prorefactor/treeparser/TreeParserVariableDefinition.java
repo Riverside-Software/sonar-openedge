@@ -1031,7 +1031,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     } else {
       defAs(ctx.datatype());
     }
-    if ((ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+    if ((currSymbol instanceof Variable) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
       defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
     }
   }
