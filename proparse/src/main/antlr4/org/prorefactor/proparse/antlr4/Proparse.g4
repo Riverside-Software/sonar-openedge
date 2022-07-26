@@ -372,6 +372,7 @@ inclassStatement:
   |  defineTempTableStatement
   |  defineWorkTableStatement
   |  defineVariableStatement
+  |  formStatement
   |  varStatement
   |  constructorStatement
   |  destructorStatement

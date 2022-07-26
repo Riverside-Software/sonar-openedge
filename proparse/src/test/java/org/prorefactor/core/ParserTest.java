@@ -934,4 +934,16 @@ public class ParserTest {
     assertEquals(node1.getFirstChild().getNodeType(), ABLNodeType.TOTAL);
     assertEquals(node2.getFirstChild().getNodeType(), ABLNodeType.SUM);
   }
+
+  @Test
+  public void testInClassStatement() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "FormStmtInClass.cls"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 4);
+    JPNode node1 = unit.getTopNode().query(ABLNodeType.FORMAT).get(0);
+    assertEquals(node1.getParent().getFirstChild().getNodeType(), ABLNodeType.DEFINE);
+    assertEquals(node1.getParent().getDirectChildren().get(2).getNodeType(), ABLNodeType.CONSTRUCTOR);
+  }
+
 }
