@@ -51,8 +51,8 @@ public class MethodCallNode extends ExpressionNode {
     // Left-Handle expression has to be a class
     IExpression expr = getFirstChild().asIExpression();
     if (expr.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
-      ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(expr.getDataType().getClassName());
-      return ExpressionNode.getObjectMethodDataType(root.getParserSupport().getProparseSession(), info, methodName);
+      ITypeInfo info = root.getEnvironment().getTypeInfo(expr.getDataType().getClassName());
+      return ExpressionNode.getObjectMethodDataType(root.getEnvironment(), info, methodName);
     } else if (expr.getDataType().getPrimitive() == PrimitiveDataType.HANDLE) {
       return ExpressionNode.getStandardMethodDataType(methodName.toUpperCase());
     }

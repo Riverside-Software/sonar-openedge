@@ -22,6 +22,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProgressString;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
@@ -31,6 +32,8 @@ import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Index;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.proparse.antlr4.Proparse.*;
+import org.prorefactor.proparse.support.IProparseEnvironment;
+import org.prorefactor.proparse.support.ParserSupport;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;
@@ -85,6 +88,12 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Inject
   public TreeParserVariableDefinition(ParseUnit unit) {
     super(unit);
+  }
+
+  @Inject
+  public TreeParserVariableDefinition(ParserSupport support, IProparseEnvironment session,
+      TreeParserRootSymbolScope rootScope) {
+    super(support, session, rootScope);
   }
 
   @Override
@@ -1017,12 +1026,12 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterDefineParamVar(DefineParamVarContext ctx) {
     if (ctx.datatypeVar() != null) {
       // AS HANDLE TO datatype
-      Primative primative = (Primative) currSymbol;
-      primative.setDataType(DataType.HANDLE);
+      if (currSymbol instanceof Primitive)
+        ((Primitive) currSymbol).setDataType(DataType.HANDLE);
     } else {
       defAs(ctx.datatype());
     }
-    if ((ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+    if ((currSymbol instanceof Variable) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
       defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
     }
   }
@@ -2087,25 +2096,37 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   private void defAs(DatatypeContext ctx) {
-    defAs((Primative) currSymbol, ctx);
+    if (currSymbol instanceof Primitive)
+      defAs((Primitive) currSymbol, ctx);
+    else {
+      LOG.error("Unable to find 'AS' datatype in '{}' at position {}:{}:{}", ctx.getText(),
+          ctx.start instanceof ProToken ? ((ProToken) ctx.start).getFileName() : "<unknown_file>", ctx.start.getLine(),
+          ctx.start.getCharPositionInLine());
+    }
   }
 
   private void defAs(ClassTypeNameContext ctx) {
-    defAs((Primative) currSymbol, ctx);
+    if (currSymbol instanceof Primitive)
+      defAs((Primitive) currSymbol, ctx);
+    else {
+      LOG.error("Unable to find 'AS' datatype in '{}' at position {}:{}:{}", ctx.getText(),
+          ctx.start instanceof ProToken ? ((ProToken) ctx.start).getFileName() : "<unknown_file>", ctx.start.getLine(),
+          ctx.start.getCharPositionInLine());
+    }
   }
 
-  private void defAs(Primative primative, DatatypeContext ctx) {
+  private void defAs(Primitive primitive, DatatypeContext ctx) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Variable AS '{}'", indent(), ctx.getText());
 
-    primative.setDataType(getDataTypeFromContext(ctx));
+    primitive.setDataType(getDataTypeFromContext(ctx));
   }
 
-  private void defAs(Primative primative, ClassTypeNameContext ctx) {
+  private void defAs(Primitive primitive, ClassTypeNameContext ctx) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Variable AS '{}'", indent(), ctx.getText());
 
-    primative.setDataType(getDataTypeFromContext(ctx));
+    primitive.setDataType(getDataTypeFromContext(ctx));
   }
 
   private void defineInitialValue(Variable v, VarStatementInitialValueContext ctx) {
@@ -2154,21 +2175,21 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Variable extent '{}'", indent(), text);
 
-    Primative primative = (Primative) currSymbol;
-    if (primative == null)
+    Primitive primitive = currSymbol instanceof Primitive ? (Primitive) currSymbol : null;
+    if (primitive == null)
       return;
     try {
-      primative.setExtent(Integer.parseInt(text));
+      primitive.setExtent(Integer.parseInt(text));
     } catch (NumberFormatException caught) {
-      primative.setExtent(-32767);
+      primitive.setExtent(-32767);
     }
   }
 
   private void defLike(JPNode likeNode) {
     LOG.trace("Entering defLike {}", likeNode);
-    Primative likePrim = (Primative) likeNode.getSymbol();
-    Primative newPrim = (Primative) currSymbol;
-    if (likePrim != null) {
+    Primitive likePrim = likeNode.getSymbol() instanceof Primitive ? (Primitive) likeNode.getSymbol() : null;
+    Primitive newPrim = currSymbol instanceof Primitive ? (Primitive) currSymbol : null;
+    if ((likePrim != null) && (newPrim != null)) {
       newPrim.assignAttributesLike(likePrim);
       currSymbol.setLikeSymbol(likeNode.getSymbol());
     } else {

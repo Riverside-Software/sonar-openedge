@@ -177,21 +177,17 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitParameterBufferFor(ParameterBufferForContext ctx) {
-    return createTreeFromFirstNode(ctx).setRuleNode(ctx);
+    return createTree(ctx, ABLNodeType.PARAMETER_ITEM).setRuleNode(ctx);
   }
 
   @Override
   public Builder visitParameterBufferRecord(ParameterBufferRecordContext ctx) {
-    return createTreeFromFirstNode(ctx);
+    return createTree(ctx, ABLNodeType.PARAMETER_ITEM).setRuleNode(ctx);
   }
 
   @Override
   public Builder visitParameterOther(ParameterOtherContext ctx) {
-    if (ctx.p == null) {
-      return createTree(ctx, ABLNodeType.INPUT);
-    } else {
-      return createTreeFromFirstNode(ctx);
-    }
+    return createTree(ctx, ABLNodeType.PARAMETER_ITEM).setRuleNode(ctx);
   }
 
   @Override
@@ -2041,6 +2037,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitMethodStatement2(MethodStatement2Context ctx) {
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+  }
+
+  @Override
   public Builder visitMethodEnd(MethodEndContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
@@ -2894,6 +2895,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Nonnull
   public Builder visitTerminal(TerminalNode node) {
     ProToken tok = (ProToken) node.getSymbol();
+    if (tok.getNodeType() == ABLNodeType.EOF_ANTLR4)
+      return new Builder(ABLNodeType.EMPTY_NODE);
     tok.setHiddenBefore(getHiddenBefore(tok));
 
     return new Builder(tok);

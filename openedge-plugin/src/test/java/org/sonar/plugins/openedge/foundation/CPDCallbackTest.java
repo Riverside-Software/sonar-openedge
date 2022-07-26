@@ -64,7 +64,7 @@ public class CPDCallbackTest {
     settings.init();
     InputFile inputFile = getInputFile(context, "cpd01.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings, unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
 
@@ -84,7 +84,7 @@ public class CPDCallbackTest {
     settings.init();
     InputFile inputFile = getInputFile(context, "cpd02.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings, unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
 
@@ -107,7 +107,7 @@ public class CPDCallbackTest {
     settings.init();
     InputFile inputFile = getInputFile(context, "cpd03.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings, unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
 
@@ -127,7 +127,7 @@ public class CPDCallbackTest {
     settings.init();
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings, unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, settings);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
     List<TokensLine> lines = context.cpdTokens(inputFile.key());
@@ -148,7 +148,7 @@ public class CPDCallbackTest {
     oeSettings.init();
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, oeSettings, unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, oeSettings);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
 
@@ -170,7 +170,7 @@ public class CPDCallbackTest {
     oeSettings.init();
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, oeSettings, unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, oeSettings);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
 
@@ -194,7 +194,7 @@ public class CPDCallbackTest {
 
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
-    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, oeSettings, unit);
+    ICallback<NewCpdTokens> callback = new CPDCallback(context, inputFile, oeSettings);
     unit.getTopNode().walk(callback);
     callback.getResult().save();
 

@@ -22,11 +22,15 @@ import java.nio.file.Paths;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.proparse.ABLLexer;
+import org.prorefactor.proparse.JPNodeVisitor;
 import org.prorefactor.proparse.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.TreeParserBlocks;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -82,7 +86,14 @@ public class C3Test {
         parser.initialize(session, new EmptyCrossReference());
       parser.setErrorHandler(new ProparseErrorStrategy(false, false, false));
       parser.getInterpreter().setPredictionMode(PredictionMode.LL);
-      parser.program();
+      ParseTree tree = parser.program();
+
+      JPNodeVisitor jpnv = new JPNodeVisitor(parser.getParserSupport(), tokStream);
+      jpnv.visit(tree).build(parser.getParserSupport());
+
+      ParseTreeWalker walker = new ParseTreeWalker();
+      TreeParserBlocks blocks = new TreeParserBlocks(parser.getParserSupport(), session);
+      walker.walk(blocks, tree);
     }
   }
 }

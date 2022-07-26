@@ -43,4 +43,16 @@ public class SingleArgumentExpression extends ExpressionNode {
     }
   }
 
+  public IExpression getExpression() {
+    switch (getNodeType()) {
+    case UNARY_PLUS:
+    case UNARY_MINUS:
+    case NOT:
+      return getFirstChild().asIExpression();
+    case PAREN_EXPR:
+      return getFirstChild().getNextSibling().asIExpression();
+    default:
+      return null;
+    }
+  }
 }

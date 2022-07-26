@@ -19,7 +19,7 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.Primative;
+import org.prorefactor.treeparser.Primitive;
 
 import eu.rssw.pct.elements.DataType;
 
@@ -83,8 +83,8 @@ public class FieldRefNode extends ExpressionNode {
    */
   @Override
   public DataType getDataType() {
-    if (getSymbol() instanceof Primative) {
-      DataType dataType = ((Primative) getSymbol()).getDataType();
+    if (getSymbol() instanceof Primitive) {
+      DataType dataType = ((Primitive) getSymbol()).getDataType();
       return dataType == null ? DataType.NOT_COMPUTED : dataType;
     }
     return DataType.NOT_COMPUTED;

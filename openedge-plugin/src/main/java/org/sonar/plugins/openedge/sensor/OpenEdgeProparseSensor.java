@@ -492,7 +492,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   }
 
   private void computeCpd(SensorContext context, InputFile file, ParseUnit unit) {
-    CPDCallback cpdCallback = new CPDCallback(context, file, settings, unit);
+    CPDCallback cpdCallback = new CPDCallback(context, file, settings);
     unit.getTopNode().walk(cpdCallback);
     cpdCallback.getResult().save();
   }

@@ -35,13 +35,19 @@ public class Parameter extends AbstractAccessibleElement implements IParameter {
   private final int extent;
   private final ParameterMode mode;
   private final DataType dataType;
+  private final ParameterType paramType;
 
-  public Parameter(int  num, String name, int extent, ParameterMode mode, DataType type) {
-    super(name,  EnumSet.noneOf(AccessType.class));
+  public Parameter(int num, String name, int extent, ParameterMode mode, DataType dataType) {
+    this(num, name, extent, mode, dataType, ParameterType.VARIABLE);
+  }
+
+  public Parameter(int num, String name, int extent, ParameterMode mode, DataType dataType, ParameterType paramType) {
+    super(name, EnumSet.noneOf(AccessType.class));
     this.num = num;
     this.extent = extent;
     this.mode = mode;
-    this.dataType = type;
+    this.dataType = dataType;
+    this.paramType = paramType;
   }
 
   @Override
@@ -71,7 +77,7 @@ public class Parameter extends AbstractAccessibleElement implements IParameter {
 
   @Override
   public ParameterType getParameterType() {
-    return null;
+    return paramType;
   }
 
   @Override

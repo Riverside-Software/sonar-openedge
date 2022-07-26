@@ -159,5 +159,11 @@ public class TestDumpFile {
     assertEquals(f.getLabel(), "State");
     assertEquals(f.getMaxWidth().intValue(), 40);
     assertEquals(f.getFormat(), "x(20)");
+
+    f = db.getTable("Bin").getField("BinName");
+    assertNull(f.getLabel());
+    f = db.getTable("Bin").getField("BinNum");
+    assertEquals(f.getLabel(), "Bin Num");
   }
+
 }

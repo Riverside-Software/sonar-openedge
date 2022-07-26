@@ -14,6 +14,7 @@ import org.prorefactor.proparse.antlr4.Proparse.ExternalFunctionStatementContext
 import org.prorefactor.proparse.antlr4.Proparse.ExternalProcedureStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ForStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.FunctionStatementContext;
+import org.prorefactor.proparse.antlr4.Proparse.MethodStatement2Context;
 import org.prorefactor.proparse.antlr4.Proparse.MethodStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.OnStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ProcedureStatementContext;
@@ -28,7 +29,6 @@ import org.prorefactor.treeparser.symbols.Routine;
 import com.google.inject.Inject;
 
 public abstract class AbstractBlockProparseListener extends ProparseBaseListener {
-  final ParseUnit unit;
   final ParserSupport support;
   final IProparseEnvironment refSession;
   final TreeParserRootSymbolScope rootScope;
@@ -49,18 +49,23 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Inject
   AbstractBlockProparseListener(ParseUnit unit) {
-    this.unit = unit;
     this.support = unit.getSupport();
     this.refSession = unit.getSession();
     this.rootScope = unit.getRootScope();
   }
 
   @Inject
+  AbstractBlockProparseListener(ParserSupport support, IProparseEnvironment session, TreeParserRootSymbolScope rootScope) {
+    this.support = support;
+    this.refSession = session;
+    this.rootScope = rootScope;
+  }
+
+  @Inject
   AbstractBlockProparseListener(AbstractBlockProparseListener listener) {
-    this.unit = listener.unit;
-    this.support = unit.getSupport();
-    this.refSession = unit.getSession();
-    this.rootScope = unit.getRootScope();
+    this.support = listener.support;
+    this.refSession = listener.refSession;
+    this.rootScope = listener.rootScope;
     this.contextQualifiers = listener.contextQualifiers;
     this.nameResolution = listener.nameResolution;
   }
@@ -210,6 +215,16 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void enterMethodStatement(MethodStatementContext ctx) {
+    // Beware of code duplication in enterMethodStatement2
+    JPNode blockNode = support.getNode(ctx);
+    currentBlock = blockNode.getBlock();
+    currentScope = currentBlock.getSymbolScope();
+    currentRoutine = currentScope.getRoutine();
+  }
+
+  @Override
+  public void enterMethodStatement2(MethodStatement2Context ctx) {
+    // Beware of code duplication in enterMethodStatement
     JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
     currentScope = currentBlock.getSymbolScope();
@@ -218,6 +233,15 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
 
   @Override
   public void exitMethodStatement(MethodStatementContext ctx) {
+    // Beware of code duplication in exitMethodStatement2
+    currentBlock = currentBlock.getParentBlock();
+    currentScope = currentBlock.getSymbolScope();
+    currentRoutine = currentScope.getRoutine();
+  }
+
+  @Override
+  public void exitMethodStatement2(MethodStatement2Context ctx) {
+    // Beware of code duplication in exitMethodStatement
     currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();
     currentRoutine = currentScope.getRoutine();

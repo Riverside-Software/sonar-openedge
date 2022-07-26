@@ -171,6 +171,7 @@ public enum ABLNodeType {
   NAMED_MEMBER_ARRAY(Proparse.Named_member_array, NodeTypesOption.STRUCTURE),
   NEW_TYPE_REF(Proparse.New_Type_expr, NodeTypesOption.STRUCTURE),
   NOT_CASESENS(Proparse.Not_casesens, NodeTypesOption.STRUCTURE),
+  PARAMETER_ITEM(Proparse.Parameter, NodeTypesOption.STRUCTURE),
   PARAMETER_LIST(Proparse.Parameter_list, NodeTypesOption.STRUCTURE),
   PAREN_EXPR(Proparse.Paren_expr, NodeTypesOption.STRUCTURE),
   PROGRAM_ROOT(Proparse.Program_root, NodeTypesOption.STRUCTURE),
@@ -186,7 +187,7 @@ public enum ABLNodeType {
   WITH_COLUMNS(Proparse.With_columns, NodeTypesOption.STRUCTURE),
   WITH_DOWN(Proparse.With_down, NodeTypesOption.STRUCTURE),
 
-  // Hidden keywords 
+  // Hidden keywords
   AACBIT(Proparse.AACBIT, "_cbit", NodeTypesOption.KEYWORD),
   AACONTROL(Proparse.AACONTROL, "_control", NodeTypesOption.KEYWORD),
   AALIST(Proparse.AALIST, "_list", NodeTypesOption.KEYWORD),
@@ -1611,7 +1612,7 @@ public enum ABLNodeType {
       AUDITENABLED, //
       GETDBCLIENT, //
       GETEFFECTIVETENANTID, //
-      GETEFFECTIVETENANTNAME,//
+      GETEFFECTIVETENANTNAME, //
       GUID, //
       TENANTID, //
       TENANTNAME //
@@ -1683,7 +1684,7 @@ public enum ABLNodeType {
       UNSIGNEDBYTE, //
       UNSIGNEDSHORT, //
       UNSIGNEDINTEGER, //
-      VOID
+      VOID //
   );
 
   private static final String ERR_INIT = "Error while initializing typeMap - Duplicate key ";
@@ -1854,7 +1855,6 @@ public enum ABLNodeType {
     }
     return false;
   }
-
 
   static {
     for (ABLNodeType e : ABLNodeType.values()) {

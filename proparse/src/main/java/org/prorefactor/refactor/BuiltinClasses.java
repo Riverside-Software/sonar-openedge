@@ -36,6 +36,8 @@ import eu.rssw.pct.elements.fixed.TypeInfo;
 @Generated(value = "genBuiltinClasses.p")
 public class BuiltinClasses {
   private static final Collection<ITypeInfo> BUILTIN_CLASSES = new ArrayList<>();
+  public static final ITypeInfo PROGRESS_LANG_OBJECT;
+  public static final ITypeInfo PROGRESS_LANG_ENUM;
 
   private BuiltinClasses() {
     // No constructor
@@ -46,7 +48,26 @@ public class BuiltinClasses {
   }
 
   static {
-    TypeInfo typeInfo;
+    TypeInfo typeInfo = new TypeInfo("Progress.Lang.Object", false, false, null, "");
+    typeInfo.addMethod(new MethodElement("GetClass", false, new DataType("Progress.Lang.Class")));
+    typeInfo.addMethod(new MethodElement("ToString", false, DataType.CHARACTER));
+    typeInfo.addMethod(new MethodElement("Equals", false, DataType.LOGICAL,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object"))));
+    typeInfo.addMethod(new MethodElement("Clone", false, new DataType("Progress.Lang.Object")));
+    typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType("Progress.Lang.Object")));
+    typeInfo.addProperty(new PropertyElement("Prev-Sibling", false, new DataType("Progress.Lang.Object")));
+    PROGRESS_LANG_OBJECT = typeInfo;
+    BUILTIN_CLASSES.add(typeInfo);
+
+    typeInfo = new TypeInfo("Progress.Lang.Enum", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("GetValue", false, DataType.INT64));
+    typeInfo.addMethod(new MethodElement("CompareTo", false, DataType.INTEGER,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Enum"))));
+    typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType("Progress.Lang.Object")));
+    typeInfo.addProperty(new PropertyElement("Prev-Sibling", false, new DataType("Progress.Lang.Object")));
+    PROGRESS_LANG_ENUM = typeInfo;
+    BUILTIN_CLASSES.add(typeInfo);
+
     typeInfo = new TypeInfo("Progress.ApplicationServer.AdapterTypes", false, false, "Progress.Lang.Enum", "");
     typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType("Progress.Lang.Object")));
     typeInfo.addProperty(new PropertyElement("Prev-Sibling", false, new DataType("Progress.Lang.Object")));
@@ -1150,13 +1171,6 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType("Progress.Lang.Object")));
     typeInfo.addProperty(new PropertyElement("Prev-Sibling", false, new DataType("Progress.Lang.Object")));
     BUILTIN_CLASSES.add(typeInfo);
-    typeInfo = new TypeInfo("Progress.Lang.Enum", false, false, "Progress.Lang.Object", "");
-    typeInfo.addMethod(new MethodElement("GetValue", false, DataType.INT64));
-    typeInfo.addMethod(new MethodElement("CompareTo", false, DataType.INTEGER,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Enum"))));
-    typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType("Progress.Lang.Object")));
-    typeInfo.addProperty(new PropertyElement("Prev-Sibling", false, new DataType("Progress.Lang.Object")));
-    BUILTIN_CLASSES.add(typeInfo);
     typeInfo = new TypeInfo("Progress.Lang.Error", true, false, null, "");
     typeInfo.addMethod(new MethodElement("GetMessage", false, DataType.CHARACTER,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
@@ -1177,15 +1191,6 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("User", false, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("Device", false, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("CallStack", false, DataType.CHARACTER));
-    typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType("Progress.Lang.Object")));
-    typeInfo.addProperty(new PropertyElement("Prev-Sibling", false, new DataType("Progress.Lang.Object")));
-    BUILTIN_CLASSES.add(typeInfo);
-    typeInfo = new TypeInfo("Progress.Lang.Object", false, false, null, "");
-    typeInfo.addMethod(new MethodElement("GetClass", false, new DataType("Progress.Lang.Class")));
-    typeInfo.addMethod(new MethodElement("ToString", false, DataType.CHARACTER));
-    typeInfo.addMethod(new MethodElement("Equals", false, DataType.LOGICAL,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object"))));
-    typeInfo.addMethod(new MethodElement("Clone", false, new DataType("Progress.Lang.Object")));
     typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType("Progress.Lang.Object")));
     typeInfo.addProperty(new PropertyElement("Prev-Sibling", false, new DataType("Progress.Lang.Object")));
     BUILTIN_CLASSES.add(typeInfo);

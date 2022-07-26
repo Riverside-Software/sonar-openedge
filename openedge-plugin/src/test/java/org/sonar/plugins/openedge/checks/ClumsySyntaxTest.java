@@ -37,7 +37,7 @@ public class ClumsySyntaxTest extends AbstractTest {
     ruleKey = RuleKey.parse("rssw-oe-main:ClumsySyntax");
   }
 
-  @Test(enabled=false)
+  @Test(enabled = false)
   public void test1() {
     InputFile inputFile = getInputFile("clumsy01.p");
     ClumsySyntax rule = new ClumsySyntax();
@@ -61,10 +61,65 @@ public class ClumsySyntaxTest extends AbstractTest {
     rule.setContext(ruleKey, context, null);
     rule.sensorExecute(inputFile, getParseUnit(inputFile));
 
-    assertEquals(context.allIssues().size(), 1);
+    assertEquals(context.allIssues().size(), 2);
     Iterator<Issue> iter = context.allIssues().iterator();
     Issue issue1 = iter.next();
     assertEquals(issue1.primaryLocation().textRange().start().line(), 5);
+    Issue issue2 = iter.next();
+    assertEquals(issue2.primaryLocation().textRange().start().line(), 6);
+  }
+
+  @Test
+  public void test3() {
+    InputFile inputFile = getInputFile("clumsy03.p");
+    ClumsySyntax rule = new ClumsySyntax();
+    rule.setContext(ruleKey, context, null);
+    rule.sensorExecute(inputFile, getParseUnit(inputFile));
+
+    assertEquals(context.allIssues().size(), 3);
+    Iterator<Issue> iter = context.allIssues().iterator();
+    Issue issue1 = iter.next();
+    assertEquals(issue1.primaryLocation().textRange().start().line(), 3);
+    Issue issue2 = iter.next();
+    assertEquals(issue2.primaryLocation().textRange().start().line(), 4);
+    Issue issue3 = iter.next();
+    assertEquals(issue3.primaryLocation().textRange().start().line(), 5);
+  }
+
+  @Test
+  public void test4() {
+    InputFile inputFile = getInputFile("clumsy04.p");
+    ClumsySyntax rule = new ClumsySyntax();
+    rule.setContext(ruleKey, context, null);
+    rule.sensorExecute(inputFile, getParseUnit(inputFile));
+
+    assertEquals(context.allIssues().size(), 1);
+    Iterator<Issue> iter = context.allIssues().iterator();
+    Issue issue1 = iter.next();
+    assertEquals(issue1.primaryLocation().textRange().start().line(), 7);
+  }
+
+  @Test
+  public void test5() {
+    InputFile inputFile = getInputFile("clumsy05.p");
+    ClumsySyntax rule = new ClumsySyntax();
+    rule.setContext(ruleKey, context, null);
+    rule.sensorExecute(inputFile, getParseUnit(inputFile));
+
+    assertEquals(context.allIssues().size(), 1);
+    Iterator<Issue> iter = context.allIssues().iterator();
+    Issue issue1 = iter.next();
+    assertEquals(issue1.primaryLocation().textRange().start().line(), 10);
+  }
+
+  @Test
+  public void test6() {
+    InputFile inputFile = getInputFile("clumsy06.p");
+    ClumsySyntax rule = new ClumsySyntax();
+    rule.setContext(ruleKey, context, null);
+    rule.sensorExecute(inputFile, getParseUnit(inputFile));
+
+    assertEquals(context.allIssues().size(), 0);
   }
 
 }

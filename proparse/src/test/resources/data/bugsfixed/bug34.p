@@ -1,1 +1,1 @@
-run xxx.p
+run xxx.p.

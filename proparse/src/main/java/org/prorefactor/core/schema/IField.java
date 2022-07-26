@@ -15,9 +15,9 @@
  ********************************************************************************/
 package org.prorefactor.core.schema;
 
-import org.prorefactor.treeparser.Primative;
+import org.prorefactor.treeparser.Primitive;
 
-public interface IField extends Primative {
+public interface IField extends Primitive {
   String getName();
   IField copyBare(ITable toTable);
   ITable getTable();

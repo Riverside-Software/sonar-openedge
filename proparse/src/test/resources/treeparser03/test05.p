@@ -27,3 +27,5 @@ end function.
 function f5 returns int:
 
 end function.
+
+message "Hello world!".

@@ -102,7 +102,7 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
     if (table != null) {
       table.addField(field);
     } else {
-      // Log error 
+      // Log error
     }
 
     return visitChildren(ctx);
@@ -118,7 +118,7 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitFieldLabel(FieldLabelContext ctx) {
-    if (!fields.isEmpty())
+    if (!fields.isEmpty() && (ctx.QUOTED_STRING() != null))
       fields.peek().setLabel(ctx.QUOTED_STRING().getText());
 
     return null;
@@ -126,7 +126,7 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitFieldInitial(FieldInitialContext ctx) {
-    if (!fields.isEmpty() && ctx.QUOTED_STRING() != null) 
+    if (!fields.isEmpty() && (ctx.QUOTED_STRING() != null))
       fields.peek().setInitial(ctx.QUOTED_STRING().getText());
 
     return null;
@@ -136,12 +136,15 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
   public Void visitFieldPosition(FieldPositionContext ctx) {
     if (!fields.isEmpty()) {
       try {
-        fields.peek().setPosition(Integer.parseInt(ctx.val.getText()));  
-      } catch (Exception e) {}
+        fields.peek().setPosition(Integer.parseInt(ctx.val.getText()));
+      } catch (Exception e) {
+        // Nothing
+      }
     }
-      
+
     return null;
   }
+
   @Override
   public Void visitFieldExtent(FieldExtentContext ctx) {
     if (!fields.isEmpty())
@@ -229,7 +232,7 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
   public Void visitTableDumpName(TableDumpNameContext ctx) {
     if (!tables.isEmpty())
       tables.peek().setDumpName(ctx.val.getText());
-    
+
     return null;
   }
 

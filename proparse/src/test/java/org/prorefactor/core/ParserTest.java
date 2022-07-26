@@ -219,7 +219,7 @@ public class ParserTest {
 
   @Test
   public void testConnectDatabase() {
-    ParseUnit unit = new ParseUnit("connect database dialog box", "<unnamed>", session);
+    ParseUnit unit = new ParseUnit("connect database dialog box.", "<unnamed>", session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.CONNECT).size(), 1);
@@ -921,6 +921,29 @@ public class ParserTest {
     assertEquals(node3.getHiddenBefore().getEndLine(), 2);
     assertEquals(node3.getHiddenBefore().getCharPositionInLine(), 44);
     assertEquals(node3.getHiddenBefore().getEndCharPositionInLine(), 2);
+  }
+
+  @Test
+  public void testAccumulateSum() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "accumulate01.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 6);
+    JPNode node1 = unit.getTopNode().query(ABLNodeType.ACCUMULATE).get(1);
+    JPNode node2 = unit.getTopNode().query(ABLNodeType.ACCUMULATE).get(3);
+    assertEquals(node1.getFirstChild().getNodeType(), ABLNodeType.TOTAL);
+    assertEquals(node2.getFirstChild().getNodeType(), ABLNodeType.SUM);
+  }
+
+  @Test
+  public void testInClassStatement() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "FormStmtInClass.cls"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 4);
+    JPNode node1 = unit.getTopNode().query(ABLNodeType.FORMAT).get(0);
+    assertEquals(node1.getParent().getFirstChild().getNodeType(), ABLNodeType.DEFINE);
+    assertEquals(node1.getParent().getDirectChildren().get(2).getNodeType(), ABLNodeType.CONSTRUCTOR);
   }
 
 }

@@ -54,7 +54,7 @@ public class AttributeReferenceNode extends ExpressionNode {
     // Left-Handle expression has to be a class
     IExpression expr = getFirstChild().asIExpression();
     if (expr.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
-      ITypeInfo info = root.getParserSupport().getProparseSession().getTypeInfo(expr.getDataType().getClassName());
+      ITypeInfo info = root.getEnvironment().getTypeInfo(expr.getDataType().getClassName());
       if (info != null) {
         for (IPropertyElement m : info.getProperties()) {
           if (m.getName().equalsIgnoreCase(attributeName))

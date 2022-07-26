@@ -14,6 +14,9 @@
  ********************************************************************************/
 package org.prorefactor.proparse;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.InputMismatchException;
 import org.antlr.v4.runtime.NoViableAltException;
@@ -21,6 +24,7 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.Vocabulary;
 import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
@@ -36,6 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ProparseErrorStrategy extends DefaultErrorStrategy {
   private static final Logger LOGGER = LoggerFactory.getLogger(ProparseErrorStrategy.class);
+  private static final int INPUT_MISMATCH_TOKEN_LIST_SIZE = 20;
 
   private final boolean allowDeletion;
   private final boolean allowInsertion;
@@ -46,6 +51,37 @@ public class ProparseErrorStrategy extends DefaultErrorStrategy {
     this.allowDeletion = allowDeletion;
     this.allowInsertion = allowInsertion;
     this.allowRecover = allowRecover;
+  }
+
+  @Override
+  protected void reportInputMismatch(Parser recognizer, InputMismatchException e) {
+    // Improves error message
+    String msg = "Mismatched input " + getTokenErrorDisplay(e.getOffendingToken());
+    List<Integer> expTokens = e.getExpectedTokens().toList();
+    String expList = expTokens.stream().limit(INPUT_MISMATCH_TOKEN_LIST_SIZE).map(
+        it -> elementName(recognizer.getVocabulary(), it)).collect(Collectors.joining(", "));
+    if (expTokens.size() > INPUT_MISMATCH_TOKEN_LIST_SIZE)
+      expList += ", ...";
+    msg += " expecting { " + expList + " }";
+    recognizer.notifyErrorListeners(e.getOffendingToken(), msg, e);
+  }
+
+  @Override
+  protected void reportUnwantedToken(Parser recognizer) {
+    if (inErrorRecoveryMode(recognizer)) {
+      return;
+    }
+    beginErrorCondition(recognizer);
+
+    Token t = recognizer.getCurrentToken();
+    String tokenName = getTokenErrorDisplay(t);
+    List<Integer> expTokens = getExpectedTokens(recognizer).toList();
+    String expList = expTokens.stream().limit(INPUT_MISMATCH_TOKEN_LIST_SIZE).map(
+        it -> elementName(recognizer.getVocabulary(), it)).collect(Collectors.joining(", "));
+    if (expTokens.size() > INPUT_MISMATCH_TOKEN_LIST_SIZE)
+      expList += ", ...";
+    String msg = "Extraneous input " + tokenName + " expecting { " + expList + " }";
+    recognizer.notifyErrorListeners(t, msg, null);
   }
 
   @Override
@@ -128,6 +164,15 @@ public class ProparseErrorStrategy extends DefaultErrorStrategy {
     }
     String msg = "No viable alternative at input " + escapeWSAndQuote(input);
     return msg;
+  }
+
+  private static String elementName(Vocabulary vocabulary, int a) {
+    if (a == Token.EOF)
+      return "<EOF>";
+    else if (a == Token.EPSILON)
+      return "<EPSILON>";
+    else
+      return vocabulary.getDisplayName(a);
   }
 
 }

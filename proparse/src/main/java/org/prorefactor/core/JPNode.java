@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -54,7 +55,6 @@ import org.prorefactor.proparse.support.ParserSupport;
 import org.prorefactor.proparse.support.SymbolScope.FieldType;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.BufferScope;
-import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.FieldContainer;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -192,7 +192,8 @@ public class JPNode {
   // ******************
   // Navigation methods
   // ******************
-  
+
+  @Nonnull
   private List<JPNode> getChildren() {
     return children == null ? new ArrayList<>() : children;
   }
@@ -312,6 +313,7 @@ public class JPNode {
   /**
    * Get list of the direct children of this node.
    */
+  @Nonnull
   public List<JPNode> getDirectChildren() {
     return getChildren();
   }
@@ -1053,11 +1055,11 @@ public class JPNode {
       return this;
     }
 
-    public JPNode build(ParseUnit unit, ParserSupport support) {
-      return build(unit, support, null, 0);
+    public JPNode build(ParserSupport support) {
+      return build(support, null, 0);
     }
 
-    private JPNode build(ParseUnit unit, ParserSupport support, JPNode up, int num) {
+    private JPNode build(ParserSupport support, JPNode up, int num) {
       JPNode node;
       boolean hasChildren = (down != null) && ((down.getNodeType() != ABLNodeType.EMPTY_NODE) || down.right != null || down.down != null);
       if (expression) {
@@ -1172,7 +1174,7 @@ public class JPNode {
               ((FieldRefNode) node).setInlineVar(true);
             break;
           case PROGRAM_ROOT:
-            node = new ProgramRootNode(tok, up, num, hasChildren, unit);
+            node = new ProgramRootNode(tok, up, num, hasChildren, support);
             break;
           case TYPE_NAME:
             node = new TypeNameNode(tok, up, num, hasChildren, className);
@@ -1209,7 +1211,7 @@ public class JPNode {
           }
           tmp = tmp.right;
         } else {
-          node.children.add(tmp.build(unit, support, node, 0));
+          node.children.add(tmp.build(support, node, 0));
           tmpRight = tmp.right;
           tmp = null;
         }
@@ -1224,7 +1226,7 @@ public class JPNode {
           }
           tmpRight = tmpRight.right;
         } else {
-          node.children.add(tmpRight.build(unit, support, node, numCh++));
+          node.children.add(tmpRight.build(support, node, numCh++));
           tmpRight = tmpRight.right;
         }
       }

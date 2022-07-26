@@ -118,6 +118,7 @@ public class ParseUnit {
   private long treeParseTime;
   private long xrefAttachTime;
   private boolean switchToLL;
+  private int numTokens;
 
   private boolean isClass;
   private boolean isInterface;
@@ -343,10 +344,11 @@ public class ParseUnit {
       }
     }
 
+    numTokens = tokStream.index();
     lexer.parseComplete();
     long startTimeNs = System.nanoTime();
     JPNodeVisitor visitor = new JPNodeVisitor(parser.getParserSupport(), (BufferedTokenStream) parser.getInputStream());
-    topNode = (ProgramRootNode) visitor.visit(tree).build(this, parser.getParserSupport());
+    topNode = (ProgramRootNode) visitor.visit(tree).build(parser.getParserSupport());
     parser.getParserSupport().clearRecordExpressions();
     isClass = visitor.isClass();
     isInterface = visitor.isInterface();
@@ -568,6 +570,10 @@ public class ParseUnit {
 
   public boolean hasSwitchedToLL() {
     return switchToLL;
+  }
+
+  public int getNumTokens() {
+    return numTokens;
   }
 
   public boolean hasSyntaxError() {

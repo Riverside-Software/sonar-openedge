@@ -189,6 +189,10 @@ public class TreeParser03Test {
     Routine f5 = lst5.get(0);
     assertEquals(f5.getSignature(), "f5()");
     assertEquals(f5.getParameters().size(), 0);
+
+    // Test TreeParserSymbolScope#getTokenSymbolScope()
+    assertEquals(unit.getRootScope().getTokenSymbolScope(205), unit.getRootScope());
+    assertEquals(unit.getRootScope().getTokenSymbolScope(150).getRoutine().getName(), "f3");
   }
 
   @Test

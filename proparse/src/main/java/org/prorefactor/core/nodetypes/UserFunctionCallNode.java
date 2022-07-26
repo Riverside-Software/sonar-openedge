@@ -43,7 +43,7 @@ public class UserFunctionCallNode extends ExpressionNode {
     if (root == null)
       return DataType.NOT_COMPUTED;
 
-    for (Routine r : root.getParseUnit().getRootScope().getRoutines()) {
+    for (Routine r : root.getRootScope().getRoutines()) {
       if (r.getName().equalsIgnoreCase(functionName))
         return r.getReturnDatatypeNode();
     }

@@ -21,6 +21,7 @@ package eu.rssw.pct;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
@@ -33,6 +34,9 @@ import java.util.List;
 
 /**
  * Read and extract content of a Progress Library file.
+ * 
+ * Note: calls to ByteBuffer.position(int) are changed to Buffer.position() in order to keep compatibility with Java 8.
+ * This can be removed later.
  */
 public class PLReader {
   private static final int MAGIC_V11 = 0xd70b;
@@ -96,7 +100,7 @@ public class PLReader {
       channel.read(buf);
     }
 
-    return new ByteBufferBackedInputStream((ByteBuffer) buf.position(0));
+    return new ByteBufferBackedInputStream((ByteBuffer) ((Buffer) buf).position(0));
   }
 
   private Charset getCharset(SeekableByteChannel channel) throws IOException {
@@ -132,19 +136,19 @@ public class PLReader {
     channel.read(buf1);
 
     if (buf1.get(0) == (byte) 0xFE) {
-      while ((channel.read((ByteBuffer) buf1.position(0)) != -1) && (buf1.get(0) != (byte) 0xFF)) {
+      while ((channel.read((ByteBuffer) ((Buffer) buf1).position(0)) != -1) && (buf1.get(0) != (byte) 0xFF)) {
         // Just read until EOF or next 0xFF
       }
       return new FileEntry((int) (channel.position() - offset - 1));
     } else if (buf1.get(0) == (byte) 0xFF) {
-      channel.read((ByteBuffer) buf1.position(0));
+      channel.read((ByteBuffer) ((Buffer) buf1).position(0));
       int fNameSize = (int) buf1.get(0) & 0xFF;
       if (fNameSize == 0)
         return new FileEntry(49);
 
       ByteBuffer buf2 = ByteBuffer.allocate(fNameSize);
       channel.read(buf2);
-      String fName = charset.decode((ByteBuffer) buf2.position(0)).toString();
+      String fName = charset.decode((ByteBuffer) ((Buffer) buf2).position(0)).toString();
 
       ByteBuffer buf3 = ByteBuffer.allocate(48);
       channel.read(buf3);
