@@ -20,6 +20,7 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -294,5 +295,15 @@ public class RefactorSession implements IProparseEnvironment {
     String[] methods;
     String[] staticMethods;
     String[] staticProperties;
+  }
+
+  @Override
+  public Collection<ITypeInfo> getAllClassesInPropath() {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public Collection<ITypeInfo> getAllClassesInSource() {
+    throw new UnsupportedOperationException("Not implemented");
   }
 }

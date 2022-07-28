@@ -57,4 +57,22 @@ public interface ITypeInfo {
   boolean hasProperty(String name);
   boolean hasBuffer(String inName);
 
+  /**
+   * Returns simple name of this class (without package name)
+   */
+  default String getSimpleName() {
+    String str = getTypeName();
+    int lastDot = str.lastIndexOf('.');
+    return lastDot == -1 ? str : str.substring(lastDot + 1);
+  }
+
+  /**
+   * Returns package name of this class. Returns empty string if class has no package.
+   */
+  default String getPackageName() {
+    String str = getTypeName();
+    int lastDot = str.lastIndexOf('.');
+    return lastDot == -1 ? "" : str.substring(0 ,lastDot );
+  }
+
 }
