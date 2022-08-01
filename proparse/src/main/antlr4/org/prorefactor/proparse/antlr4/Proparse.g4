@@ -1216,7 +1216,7 @@ connectStatement:
 
 constructorStatement:
     CONSTRUCTOR
-    ( PUBLIC | PROTECTED | PRIVATE | STATIC )?
+    ( PUBLIC | PROTECTED | PRIVATE | STATIC | PACKAGEPRIVATE | PACKAGEPROTECTED )?
     tn=typeName2 functionParams blockColon
     codeBlock
     constructorEnd statementEnd
