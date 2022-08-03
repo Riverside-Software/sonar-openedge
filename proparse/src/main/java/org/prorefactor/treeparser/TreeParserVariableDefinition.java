@@ -2197,8 +2197,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     } else {
       JPNode naturalNode = likeNode.firstNaturalChild();
       if (naturalNode != null) {
-        LOG.error("Failed to find LIKE datatype at {} line {}: '{}'", naturalNode.getFileName(), naturalNode.getLine(),
-            naturalNode.getText());
+        LOG.error("Failed to find LIKE datatype '{}' at {}:{} for symbol '{}'", naturalNode.getText(), naturalNode.getFileName(), naturalNode.getLine(), 
+          currSymbol == null ? "<undefined>" : currSymbol.getName() );
       }
     }
   }
