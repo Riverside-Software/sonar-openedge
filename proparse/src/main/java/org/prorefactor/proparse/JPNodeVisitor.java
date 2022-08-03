@@ -461,7 +461,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitFieldExpr(FieldExprContext ctx) {
     if (ctx.LEFTBRACE() != null)
-      return createTree(ctx, ABLNodeType.ARRAY_REFERENCE).setRuleNode(ctx);
+      return createTree(ctx, ABLNodeType.ARRAY_REFERENCE).setRuleNode(ctx).setExpression(true);
     else
       return visitChildren(ctx);
   }
