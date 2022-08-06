@@ -737,6 +737,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       isDefault = true;
     }
     TableBuffer newBuff = currentScope.defineBuffer(isDefault ? "" : buffName, table);
+    newBuff.setDefinitionNode(support.getNode(ctx.recordPhrase().record()));
     recordNode.setTableBuffer(newBuff);
     currentBlock.addHiddenCursor(recordNode);
 
