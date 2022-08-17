@@ -418,10 +418,9 @@ public class OpenEdgeProparseSensor implements Sensor {
 
   private void computeAnalytics(SensorContext context) {
     // Store value in OpenEdgeComponents object
-    components.setAnalytics(String.format(
-        "files=%1$d,failures=%2$d,parseTime=%3$d,maxParseTime=%4$d,version=\"%5$s\",ncloc=%6$d,oeversion=\"%7$s\"",
-        numFiles, numFailures, parseTime, maxParseTime, context.runtime().getApiVersion().toString(), ncLocs,
-        settings.getOpenEdgePluginVersion()));
+    components.setAnalytics(
+        String.format("files=%1$d,failures=%2$d,parseTime=%3$d,maxParseTime=%4$d,ncloc=%5$d,oeversion=\"%6$s\"",
+            numFiles, numFailures, parseTime, maxParseTime, ncLocs, settings.getOpenEdgePluginVersion()));
   }
 
   private void logStatistics() {
