@@ -111,7 +111,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   private int numXREF;
   private int numListings;
   private int numFailures;
-  private int ncLocs;
+  private int ncLoc;
 
   // Timing statistics
   private Map<String, Long> ruleTime = new HashMap<>();
@@ -183,7 +183,6 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     computeAnalytics(context);
     logStatistics();
-    context.addContextProperty("sonar.oe.ncloc", Integer.toString(ncLocs));
     generateProparseDebugIndex();
   }
 
@@ -213,7 +212,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       // Saving LOC and COMMENTS metrics
       context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(
           lexUnit.getMetrics().getLoc()).save();
-      ncLocs += lexUnit.getMetrics().getLoc();
+      ncLoc += lexUnit.getMetrics().getLoc();
       context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
           lexUnit.getMetrics().getComments()).save();
     }
@@ -417,15 +416,18 @@ public class OpenEdgeProparseSensor implements Sensor {
   }
 
   private void computeAnalytics(SensorContext context) {
-    // Store value in OpenEdgeComponents object
+    // Store values in OpenEdgeComponents instance. Used by client-side sensor in rules package.
     components.setAnalytics(
         String.format("files=%1$d,failures=%2$d,parseTime=%3$d,maxParseTime=%4$d,ncloc=%5$d,oeversion=\"%6$s\"",
-            numFiles, numFailures, parseTime, maxParseTime, ncLocs, settings.getOpenEdgePluginVersion()));
+            numFiles, numFailures, parseTime, maxParseTime, ncLoc, settings.getOpenEdgePluginVersion()));
+    components.setNcLoc(ncLoc);
+    // And make the value available the value available to Compute Engine task
+    context.addContextProperty("sonar.oe.ncloc", Integer.toString(ncLoc));
   }
 
   private void logStatistics() {
     LOG.info("{} files proparse'd, {} XREF files, {} listing files, {} failure(s), {} NCLOCs", numFiles, numXREF,
-        numListings, numFailures, ncLocs);
+        numListings, numFailures, ncLoc);
     LOG.info("AST Generation | time={} ms", parseTime);
     LOG.info("XREF Parsing   | time={} ms", xmlParseTime);
     LOG.info("Rules          | time={} ms", ruleTime.values().stream().reduce(0L, Long::sum));
@@ -500,7 +502,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   private void computeSimpleMetrics(SensorContext context, InputFile file, ParseUnit unit) {
     // Saving LOC, COMMENTS and DIRECTIVES metrics
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(unit.getMetrics().getLoc()).save();
-    ncLocs += unit.getMetrics().getLoc();
+    ncLoc += unit.getMetrics().getLoc();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
         unit.getMetrics().getComments()).save();
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.DIRECTIVES).withValue(

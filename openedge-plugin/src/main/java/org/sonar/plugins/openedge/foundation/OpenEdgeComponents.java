@@ -73,6 +73,7 @@ public class OpenEdgeComponents {
 
   private boolean initialized = false;
   private String analytics = "";
+  private int ncLoc = 0;
 
   public OpenEdgeComponents() {
     this(null, null, null, null);
@@ -167,6 +168,14 @@ public class OpenEdgeComponents {
 
   public String getAnalytics() {
     return analytics;
+  }
+
+  public void setNcLoc(int ncLoc) {
+    this.ncLoc = ncLoc;
+  }
+
+  public int getNcLoc() {
+    return ncLoc;
   }
 
   public Map<ActiveRule, OpenEdgeProparseCheck> getProparseRules() {
