@@ -109,7 +109,7 @@ public class ClumsySyntaxTest extends AbstractTest {
     assertEquals(context.allIssues().size(), 1);
     Iterator<Issue> iter = context.allIssues().iterator();
     Issue issue1 = iter.next();
-    assertEquals(issue1.primaryLocation().textRange().start().line(), 10);
+    assertEquals(issue1.primaryLocation().textRange().start().line(), 11);
   }
 
   @Test
