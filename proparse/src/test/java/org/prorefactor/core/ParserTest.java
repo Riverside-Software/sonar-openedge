@@ -999,4 +999,11 @@ public class ParserTest {
     assertEquals(node1.getParent().getDirectChildren().get(2).getNodeType(), ABLNodeType.CONSTRUCTOR);
   }
 
+  @Test(enabled = false)
+  public void testDotComment01() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "comHandle01.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 10);
+  }
 }
