@@ -46,7 +46,7 @@ public class ProgramRootNode extends NonStatementBlockNode {
   }
 
   public boolean isClass() {
-    return (className != null) && !className.isBlank();
+    return (className != null) && !className.trim().isEmpty();
   }
 
   public String getClassName() {
