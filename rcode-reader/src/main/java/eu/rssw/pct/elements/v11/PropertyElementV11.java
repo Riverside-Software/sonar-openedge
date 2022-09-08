@@ -27,6 +27,7 @@ import java.util.Set;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.IEnumDescriptor;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.IVariableElement;
@@ -109,6 +110,11 @@ public class PropertyElementV11 extends AbstractAccessibleElement implements IPr
   @Override
   public IMethodElement getSetter() {
     return this.setter;
+  }
+
+  @Override
+  public IEnumDescriptor getEnumDescriptor() {
+    return null;
   }
 
   @Override

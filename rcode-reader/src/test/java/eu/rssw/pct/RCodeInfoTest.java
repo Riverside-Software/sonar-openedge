@@ -48,23 +48,37 @@ public class RCodeInfoTest {
 
   @Test
   public void testEnumV11() throws IOException {
-    testEnum("src/test/resources/rcode/MyEnumV11.r");
+    testEnum("src/test/resources/rcode/MyEnumV11.r", false);
   }
 
   @Test
   public void testEnumV12() throws IOException {
-    testEnum("src/test/resources/rcode/MyEnumV12.r");
+    testEnum("src/test/resources/rcode/MyEnumV12.r", true);
   }
 
-  public void testEnum(String fileName) throws IOException {
+  public void testEnum(String fileName, boolean checkEnumValues) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(fileName))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
       assertNotNull(rci.getTypeInfo());
       assertNotNull(rci.getTypeInfo().getProperties());
-      assertEquals(rci.getTypeInfo().getProperties().size(), 8);
+      assertEquals(rci.getTypeInfo().getProperties().size(), 10);
       assertNotNull(rci.getTypeInfo().getMethods());
       assertEquals(rci.getTypeInfo().getMethods().size(), 0);
+
+      assertNotNull(rci.getTypeInfo().getProperty("Delete"));
+      if (checkEnumValues) {
+        assertNotNull(rci.getTypeInfo().getProperty("Write").getEnumDescriptor());
+        assertEquals(rci.getTypeInfo().getProperty("Write").getEnumDescriptor().getValue(), 0X2L);
+        assertNotNull(rci.getTypeInfo().getProperty("Delete").getEnumDescriptor());
+        assertEquals(rci.getTypeInfo().getProperty("Delete").getEnumDescriptor().getValue(), 0x179324681357L);
+        assertNotNull(rci.getTypeInfo().getProperty("Execute").getEnumDescriptor());
+        assertEquals(rci.getTypeInfo().getProperty("Execute").getEnumDescriptor().getValue(), 0x973113572468L);
+        assertNotNull(rci.getTypeInfo().getProperty("Extra01").getEnumDescriptor());
+        assertEquals(rci.getTypeInfo().getProperty("Extra01").getEnumDescriptor().getValue(), 0x1234L);
+        assertNotNull(rci.getTypeInfo().getProperty("Extra02").getEnumDescriptor());
+        assertEquals(rci.getTypeInfo().getProperty("Extra02").getEnumDescriptor().getValue(), 0x5678L);
+      }
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }

@@ -19,8 +19,18 @@
  */
 package eu.rssw.pct.elements;
 
+import javax.annotation.Nullable;
+
 public interface IPropertyElement extends IAccessibleElement {
+  @Nullable
   IVariableElement getVariable();
+  @Nullable
   IMethodElement getGetter();
+  @Nullable
   IMethodElement getSetter();
+  /**
+   * v11 rcode always return null
+   */
+  @Nullable
+  IEnumDescriptor getEnumDescriptor();
 }

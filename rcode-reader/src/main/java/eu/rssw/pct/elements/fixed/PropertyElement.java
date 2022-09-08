@@ -24,6 +24,7 @@ import java.util.EnumSet;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IEnumDescriptor;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.IVariableElement;
@@ -69,6 +70,11 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
 
   @Override
   public IMethodElement getSetter() {
+    return null;
+  }
+
+  @Override
+  public IEnumDescriptor getEnumDescriptor() {
     return null;
   }
 
