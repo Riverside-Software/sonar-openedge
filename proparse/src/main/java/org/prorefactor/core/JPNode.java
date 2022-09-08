@@ -19,6 +19,7 @@ import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -319,39 +320,23 @@ public class JPNode {
   }
 
   /**
-   * Return first direct child of a given type, or null if not found
+   * Use {@link JPNode#findDirectChild(ABLNodeType)}
+   * @deprecated 
    */
+  @Deprecated
   public JPNode getFirstDirectChild(ABLNodeType type) {
-    JPNode n = getFirstChild();
-    while (n != null) {
-      if (n.getNodeType() == type)
-        return n;
-      n = n.getNextSibling();
-    }
-    return null;
+    return findDirectChild(type);
   }
 
   /**
    * Get a list of the direct children of a given type
    */
   public List<JPNode> getDirectChildren(ABLNodeType type, ABLNodeType... types) {
-    List<JPNode> ret = new ArrayList<>();
-    if (children != null) {
-      for (JPNode n : children) {
-        if (n.getNodeType() == type)
-          ret.add(n);
-        if (types != null) {
-          for (ABLNodeType t : types) {
-            if (n.getNodeType() == t)
-              ret.add(n);
-          }
-        }
-      }
-    }
-
-    return ret;
+    if (children == null)
+      return new ArrayList<>();
+    EnumSet<ABLNodeType> filter = EnumSet.of(type, types);
+    return children.stream().filter(node -> filter.contains(node.getNodeType())).collect(Collectors.toList());
   }
-
 
   /**
    * Get an array of all descendant nodes (including this node) of a given type
@@ -491,11 +476,7 @@ public class JPNode {
   public JPNode findDirectChild(ABLNodeType nodeType) {
     if (children == null)
       return null;
-    for (JPNode node: children) {
-      if (node.getNodeType() == nodeType)
-        return node;
-    }
-    return null;
+    return children.stream().filter(node -> node.getNodeType() == nodeType).findFirst().orElse(null);
   }
 
   /** Find the first direct child with a given node type. */
