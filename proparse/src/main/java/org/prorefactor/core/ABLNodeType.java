@@ -179,6 +179,7 @@ public enum ABLNodeType {
   PROPERTY_GETTER(Proparse.Property_getter, NodeTypesOption.STRUCTURE),
   PROPERTY_SETTER(Proparse.Property_setter, NodeTypesOption.STRUCTURE),
   RECORD_NAME(Proparse.Record_name, NodeTypesOption.STRUCTURE),
+  RECORD_SEARCH(Proparse.Record_search, NodeTypesOption.STRUCTURE),
   SYSTEM_HANDLE_REF(Proparse.System_handle, NodeTypesOption.STRUCTURE),
   TYPE_NAME(Proparse.Type_name, NodeTypesOption.STRUCTURE),
   TYPELESS_TOKEN(Proparse.Typeless_token, NodeTypesOption.STRUCTURE),

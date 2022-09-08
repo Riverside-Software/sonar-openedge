@@ -1688,6 +1688,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitRecordSearch(RecordSearchContext ctx) {
+    return createTree(ctx, ABLNodeType.RECORD_SEARCH).setRuleNode(ctx);
+  }
+
+  @Override
   public Builder visitFormatExpression(FormatExpressionContext ctx) {
     return createTreeFromFirstNode(ctx);
   }

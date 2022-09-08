@@ -791,7 +791,10 @@ public class ParserTest {
     assertEquals(nodes.size(), 4);
 
     JPNode findNode = nodes.get(0);
-    JPNode ch1 = findNode.getFirstChild();
+    JPNode ch0 = findNode.getFirstChild();
+    assertNotNull(ch0);
+    assertEquals(ch0.getNodeType(), ABLNodeType.RECORD_SEARCH);
+    JPNode ch1 = ch0.getFirstChild();
     assertNotNull(ch1);
     assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
     RecordNameNode rec1 = (RecordNameNode) ch1;
@@ -799,7 +802,10 @@ public class ParserTest {
     assertEquals(rec1.getTableBuffer().getTargetFullName(), "sports2000.Customer");
 
     findNode = nodes.get(1);
-    ch1 = findNode.getFirstChild();
+    ch0 = findNode.getFirstChild();
+    assertNotNull(ch0);
+    assertEquals(ch0.getNodeType(), ABLNodeType.RECORD_SEARCH);
+    ch1 = ch0.getFirstChild();
     assertNotNull(ch1);
     assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
     rec1 = (RecordNameNode) ch1;
@@ -807,7 +813,10 @@ public class ParserTest {
     assertEquals(rec1.getTableBuffer().getTargetFullName(), "sports2000.Customer");
 
     findNode = nodes.get(2);
-    ch1 = findNode.getFirstChild();
+    ch0 = findNode.getFirstChild();
+    assertNotNull(ch0);
+    assertEquals(ch0.getNodeType(), ABLNodeType.RECORD_SEARCH);
+    ch1 = ch0.getFirstChild();
     assertNotNull(ch1);
     assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
     rec1 = (RecordNameNode) ch1;
@@ -815,7 +824,10 @@ public class ParserTest {
     assertEquals(rec1.getTableBuffer().getTargetFullName(), "sports2000.Customer");
 
     findNode = nodes.get(3);
-    ch1 = findNode.getFirstChild();
+    ch0 = findNode.getFirstChild();
+    assertNotNull(ch0);
+    assertEquals(ch0.getNodeType(), ABLNodeType.RECORD_SEARCH);
+    ch1 = ch0.getFirstChild();
     assertNotNull(ch1);
     assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
     rec1 = (RecordNameNode) ch1;
@@ -838,7 +850,10 @@ public class ParserTest {
     assertEquals(nodes.size(), 4);
 
     JPNode findNode = nodes.get(0);
-    JPNode ch1 = findNode.getFirstChild();
+    JPNode ch0 = findNode.getFirstChild();
+    assertNotNull(ch0);
+    assertEquals(ch0.getNodeType(), ABLNodeType.RECORD_SEARCH);
+    JPNode ch1 = ch0.getFirstChild();
     assertNotNull(ch1);
     assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
     RecordNameNode rec1 = (RecordNameNode) ch1;
@@ -846,7 +861,10 @@ public class ParserTest {
     assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
 
     findNode = nodes.get(1);
-    ch1 = findNode.getFirstChild();
+    ch0 = findNode.getFirstChild();
+    assertNotNull(ch0);
+    assertEquals(ch0.getNodeType(), ABLNodeType.RECORD_SEARCH);
+    ch1 = ch0.getFirstChild();
     assertNotNull(ch1);
     assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
     rec1 = (RecordNameNode) ch1;
@@ -854,7 +872,10 @@ public class ParserTest {
     assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
 
     findNode = nodes.get(2);
-    ch1 = findNode.getFirstChild();
+    ch0 = findNode.getFirstChild();
+    assertNotNull(ch0);
+    assertEquals(ch0.getNodeType(), ABLNodeType.RECORD_SEARCH);
+    ch1 = ch0.getFirstChild();
     assertNotNull(ch1);
     assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
     rec1 = (RecordNameNode) ch1;
@@ -862,7 +883,10 @@ public class ParserTest {
     assertEquals(rec1.getTableBuffer().getTargetFullName(), "SP2K.Customer");
 
     findNode = nodes.get(3);
-    ch1 = findNode.getFirstChild();
+    ch0 = findNode.getFirstChild();
+    assertNotNull(ch0);
+    assertEquals(ch0.getNodeType(), ABLNodeType.RECORD_SEARCH);
+    ch1 = ch0.getFirstChild();
     assertNotNull(ch1);
     assertEquals(ch1.getNodeType(), ABLNodeType.RECORD_NAME);
     rec1 = (RecordNameNode) ch1;

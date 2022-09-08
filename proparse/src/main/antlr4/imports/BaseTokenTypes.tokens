@@ -109,13 +109,14 @@ Program_tail=182
 Property_getter=183
 Property_setter=184
 Record_name=185
-System_handle=186
-Type_name=187
-Typeless_token=188
-User_func=189
-Widget_ref=190
-With_columns=191
-With_down=192
+Record_search=186
+System_handle=187
+Type_name=188
+Typeless_token=189
+User_func=190
+Widget_ref=191
+With_columns=192
+With_down=193
 
 
 AACBIT=201

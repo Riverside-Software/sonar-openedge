@@ -132,7 +132,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterBlockPreselect(BlockPreselectContext ctx) {
-    setContextQualifier(ctx.forRecordSpec(), ContextQualifier.INITWEAK);
+    setContextQualifier(ctx.multiRecordSearch(), ContextQualifier.INITWEAK);
   }
 
   @Override
@@ -722,8 +722,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterCanFindFunction(CanFindFunctionContext ctx) {
     super.enterCanFindFunction(ctx);
 
-    RecordNameNode recordNode = (RecordNameNode) support.getNode(ctx.recordPhrase().record());
-    String buffName = ctx.recordPhrase().record().getText();
+    RecordNameNode recordNode = (RecordNameNode) support.getNode(ctx.recordSearch().recordPhrase().record());
+    String buffName = ctx.recordSearch().recordPhrase().record().getText();
     ITable table;
     boolean isDefault;
     TableBuffer tableBuffer = currentScope.lookupBuffer(buffName);
@@ -737,11 +737,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       isDefault = true;
     }
     TableBuffer newBuff = currentScope.defineBuffer(isDefault ? "" : buffName, table);
-    newBuff.setDefinitionNode(support.getNode(ctx.recordPhrase().record()));
+    newBuff.setDefinitionNode(support.getNode(ctx.recordSearch().recordPhrase().record()));
     recordNode.setTableBuffer(newBuff);
     currentBlock.addHiddenCursor(recordNode);
 
-    setContextQualifier(ctx.recordPhrase().record(), ContextQualifier.INIT);
+    setContextQualifier(ctx.recordSearch().recordPhrase().record(), ContextQualifier.INIT);
   }
 
   @Override
@@ -1400,7 +1400,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFindStatement(FindStatementContext ctx) {
-    setContextQualifier(ctx.recordPhrase().record(), ContextQualifier.INIT);
+    setContextQualifier(ctx.recordSearch().recordPhrase().record(), ContextQualifier.INIT);
   }
 
   @Override
@@ -1408,7 +1408,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     super.enterForStatement(ctx);
     frameBlockCheck(support.getNode(ctx));
 
-    setContextQualifier(ctx.forRecordSpec(), ContextQualifier.INITWEAK);
+    setContextQualifier(ctx.multiRecordSearch(), ContextQualifier.INITWEAK);
   }
 
   @Override
@@ -1417,10 +1417,10 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
-  public void enterForRecordSpec(ForRecordSpecContext ctx) {
+  public void enterMultiRecordSearch(MultiRecordSearchContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
-    for (RecordPhraseContext rec : ctx.recordPhrase()) {
-      setContextQualifier(rec.record(), qual);
+    for (RecordSearchContext rec : ctx.recordSearch()) {
+      setContextQualifier(rec.recordPhrase().record(), qual);
     }
   }
 
@@ -1577,7 +1577,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterOpenQueryStatement(OpenQueryStatementContext ctx) {
-    setContextQualifier(ctx.forRecordSpec(), ContextQualifier.INIT);
+    setContextQualifier(ctx.multiRecordSearch(), ContextQualifier.INIT);
   }
 
   @Override
