@@ -17,6 +17,7 @@ package org.prorefactor.proparse.support;
 import java.io.File;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.List;
 
 import org.prorefactor.core.schema.ISchema;
@@ -78,4 +79,14 @@ public interface IProparseEnvironment {
    * Third version of findFile :-)
    */
   File findFile3(String fileName);
+
+  /**
+   * Return all classes defined in propath (as well as standard Progress classes)
+   */
+  Collection<ITypeInfo> getAllClassesInPropath();
+
+  /**
+   * Return all known classes in source directories
+   */
+  Collection<ITypeInfo> getAllClassesInSource();
 }

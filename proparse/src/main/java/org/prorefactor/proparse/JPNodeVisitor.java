@@ -461,7 +461,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitFieldExpr(FieldExprContext ctx) {
     if (ctx.LEFTBRACE() != null)
-      return createTree(ctx, ABLNodeType.ARRAY_REFERENCE).setRuleNode(ctx);
+      return createTree(ctx, ABLNodeType.ARRAY_REFERENCE).setRuleNode(ctx).setExpression(true);
     else
       return visitChildren(ctx);
   }
@@ -469,7 +469,13 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitField(FieldContext ctx) {
     Builder holder = createTree(ctx, ABLNodeType.FIELD_REF).setRuleNode(ctx);
-    if ((ctx.getParent().getParent() instanceof MessageOptionContext) && support.isInlineVar(ctx.getText())) {
+    // Part of FormItem or MessageOption
+    boolean validContext = (ctx.parent != null)
+        && ((ctx.parent.parent instanceof FormItemContext) || (ctx.parent.parent instanceof MessageOptionContext));
+    // Or part of DisplayItem
+    validContext |= (ctx.parent.parent != null) && (ctx.parent.parent.parent != null)
+        && (ctx.parent.parent.parent.parent instanceof DisplayItemContext);
+    if (validContext && support.isInlineVar(ctx.getText())) {
       holder.setInlineVar();
     }
     return holder;
@@ -1679,6 +1685,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitForStatement(ForStatementContext ctx) {
     return createStatementTreeFromFirstNode(ctx).setBlock(true);
+  }
+
+  @Override
+  public Builder visitRecordSearch(RecordSearchContext ctx) {
+    return createTree(ctx, ABLNodeType.RECORD_SEARCH).setRuleNode(ctx);
   }
 
   @Override
@@ -2953,6 +2964,8 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
    */
   @Nonnull
   private Builder createTreeFromFirstNode(RuleNode ctx) {
+    if (ctx.getChildCount() == 0)
+      return new Builder(ABLNodeType.EMPTY_NODE);
     Builder node = visit(ctx.getChild(0));
 
     Builder firstChild = node.getDown();

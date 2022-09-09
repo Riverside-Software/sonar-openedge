@@ -40,6 +40,11 @@ public class PropertyElementV12 extends PropertyElementV11 {
     this.enumDesc = enumDesc;
   }
 
+  @Override
+  public IEnumDescriptor getEnumDescriptor() {
+    return enumDesc;
+  }
+
   public static IPropertyElement fromDebugSegment(String name, Set<AccessType> accessType, byte[] segment, int currentPos, int textAreaOffset, ByteOrder order, boolean isEnum) {
     int flags = ByteBuffer.wrap(segment, currentPos + 4, Short.BYTES).order(order).getShort() & 0xffff;
 

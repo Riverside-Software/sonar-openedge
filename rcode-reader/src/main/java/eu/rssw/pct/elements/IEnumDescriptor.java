@@ -20,5 +20,5 @@
 package eu.rssw.pct.elements;
 
 public interface IEnumDescriptor extends IElement {
-
+  long getValue();
 }

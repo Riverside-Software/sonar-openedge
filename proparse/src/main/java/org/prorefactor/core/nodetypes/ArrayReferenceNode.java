@@ -33,4 +33,11 @@ public class ArrayReferenceNode extends ExpressionNode {
     return getDirectChildren().get(0).asIExpression().getDataType();
   }
 
+  public IExpression getVariableExpression() {
+    return getDirectChildren().get(0).asIExpression();
+  }
+
+  public IExpression getOffsetExpression() {
+    return getDirectChildren().get(2).asIExpression();
+  }
 }

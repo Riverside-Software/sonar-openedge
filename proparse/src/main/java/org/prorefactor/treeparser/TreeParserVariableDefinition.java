@@ -132,33 +132,33 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterBlockPreselect(BlockPreselectContext ctx) {
-    setContextQualifier(ctx.forRecordSpec(), ContextQualifier.INITWEAK);
+    setContextQualifier(ctx.multiRecordSearch(), ContextQualifier.INITWEAK);
   }
 
   @Override
   public void enterPseudoFunction(PseudoFunctionContext ctx) {
     if (ctx.entryFunction() != null) {
-      setContextQualifier(ctx.entryFunction().functionArgs().expression(1), ContextQualifier.UPDATING);
+      setContextQualifier(ctx.entryFunction().functionArgs().parameter(1), ContextQualifier.UPDATING);
     }
     if (ctx.lengthFunction() != null) {
-      setContextQualifier(ctx.lengthFunction().functionArgs().expression(0), ContextQualifier.UPDATING);
+      setContextQualifier(ctx.lengthFunction().functionArgs().parameter(0), ContextQualifier.UPDATING);
     }
     if (ctx.rawFunction() != null) {
-      setContextQualifier(ctx.rawFunction().functionArgs().expression(0), ContextQualifier.UPDATING);
+      setContextQualifier(ctx.rawFunction().functionArgs().parameter(0), ContextQualifier.UPDATING);
     }
     if (ctx.substringFunction() != null) {
-      setContextQualifier(ctx.substringFunction().functionArgs().expression(0), ContextQualifier.UPDATING);
+      setContextQualifier(ctx.substringFunction().functionArgs().parameter(0), ContextQualifier.UPDATING);
     }
   }
 
   @Override
   public void enterMemoryManagementFunction(MemoryManagementFunctionContext ctx) {
-    setContextQualifier(ctx.functionArgs().expression(0), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.functionArgs().parameter(0), ContextQualifier.UPDATING);
   }
 
   @Override
   public void enterFunctionArgs(FunctionArgsContext ctx) {
-    for (ExpressionContext exp : ctx.expression()) {
+    for (ParameterContext exp : ctx.parameter()) {
       ContextQualifier qual = contextQualifiers.get(exp);
       if (qual == null)
         setContextQualifier(exp, ContextQualifier.REF);
@@ -192,6 +192,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       } else {
         setContextQualifier(ctx.parameterArg(), ContextQualifier.REF);
       }
+    } else if (qual != null) {
+      setContextQualifier(ctx.parameterArg(), qual);
     }
   }
 
@@ -720,8 +722,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterCanFindFunction(CanFindFunctionContext ctx) {
     super.enterCanFindFunction(ctx);
 
-    RecordNameNode recordNode = (RecordNameNode) support.getNode(ctx.recordPhrase().record());
-    String buffName = ctx.recordPhrase().record().getText();
+    RecordNameNode recordNode = (RecordNameNode) support.getNode(ctx.recordSearch().recordPhrase().record());
+    String buffName = ctx.recordSearch().recordPhrase().record().getText();
     ITable table;
     boolean isDefault;
     TableBuffer tableBuffer = currentScope.lookupBuffer(buffName);
@@ -735,10 +737,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       isDefault = true;
     }
     TableBuffer newBuff = currentScope.defineBuffer(isDefault ? "" : buffName, table);
+    newBuff.setDefinitionNode(support.getNode(ctx.recordSearch().recordPhrase().record()));
     recordNode.setTableBuffer(newBuff);
     currentBlock.addHiddenCursor(recordNode);
 
-    setContextQualifier(ctx.recordPhrase().record(), ContextQualifier.INIT);
+    setContextQualifier(ctx.recordSearch().recordPhrase().record(), ContextQualifier.INIT);
   }
 
   @Override
@@ -1397,7 +1400,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFindStatement(FindStatementContext ctx) {
-    setContextQualifier(ctx.recordPhrase().record(), ContextQualifier.INIT);
+    setContextQualifier(ctx.recordSearch().recordPhrase().record(), ContextQualifier.INIT);
   }
 
   @Override
@@ -1405,7 +1408,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     super.enterForStatement(ctx);
     frameBlockCheck(support.getNode(ctx));
 
-    setContextQualifier(ctx.forRecordSpec(), ContextQualifier.INITWEAK);
+    setContextQualifier(ctx.multiRecordSearch(), ContextQualifier.INITWEAK);
   }
 
   @Override
@@ -1414,10 +1417,10 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
-  public void enterForRecordSpec(ForRecordSpecContext ctx) {
+  public void enterMultiRecordSearch(MultiRecordSearchContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
-    for (RecordPhraseContext rec : ctx.recordPhrase()) {
-      setContextQualifier(rec.record(), qual);
+    for (RecordSearchContext rec : ctx.recordSearch()) {
+      setContextQualifier(rec.recordPhrase().record(), qual);
     }
   }
 
@@ -1488,6 +1491,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       frameStack.lexAt(support.getNode(ctx.fieldExpr().field()));
     } else if (ctx.LIKE() != null) {
       setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
+    } else if (ctx.AS() != null) {
+      defAs(ctx.datatype());
     }
   }
 
@@ -1572,7 +1577,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterOpenQueryStatement(OpenQueryStatementContext ctx) {
-    setContextQualifier(ctx.forRecordSpec(), ContextQualifier.INIT);
+    setContextQualifier(ctx.multiRecordSearch(), ContextQualifier.INIT);
   }
 
   @Override
@@ -2195,8 +2200,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     } else {
       JPNode naturalNode = likeNode.firstNaturalChild();
       if (naturalNode != null) {
-        LOG.error("Failed to find LIKE datatype at {} line {}: '{}'", naturalNode.getFileName(), naturalNode.getLine(),
-            naturalNode.getText());
+        LOG.error("Failed to find LIKE datatype '{}' at {}:{} for symbol '{}'", naturalNode.getText(), naturalNode.getFileName(), naturalNode.getLine(), 
+          currSymbol == null ? "<undefined>" : currSymbol.getName() );
       }
     }
   }

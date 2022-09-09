@@ -189,7 +189,7 @@ blockOption:
   ;
 
 blockPreselect:
-    PRESELECT forRecordSpec
+    PRESELECT multiRecordSearch
   ;
 
 statement:
@@ -498,12 +498,12 @@ eventList:
 
 functionArgs:
     // Use funargs /only/ if it is the child of a root-node keyword.
-    LEFTPAREN expression ( COMMA expression )* RIGHTPAREN
+    LEFTPAREN parameter ( COMMA parameter )* RIGHTPAREN
   ;
 
 optionalFunctionArgs:
     // Use optfunargs /only/ if it is the child of a root-node keyword.
-    LEFTPAREN ( expression ( COMMA expression )* )? RIGHTPAREN
+    LEFTPAREN ( parameter ( COMMA parameter )* )? RIGHTPAREN
   ;
 
 // ... or value phrases
@@ -1216,7 +1216,7 @@ connectStatement:
 
 constructorStatement:
     CONSTRUCTOR
-    ( PUBLIC | PROTECTED | PRIVATE | STATIC )?
+    ( PUBLIC | PROTECTED | PRIVATE | STATIC | PACKAGEPRIVATE | PACKAGEPROTECTED )?
     tn=typeName2 functionParams blockColon
     codeBlock
     constructorEnd statementEnd
@@ -1355,7 +1355,7 @@ createWidgetPoolStatement:
   ;
 
 canFindFunction:
-    CANFIND LEFTPAREN findWhich? recordPhrase RIGHTPAREN
+    CANFIND LEFTPAREN recordSearch RIGHTPAREN
   ;
 
 currentValueFunction:
@@ -2121,7 +2121,7 @@ finallyEnd:
   ;
 
 findStatement:
-    FIND findWhich? recordPhrase ( NOWAIT | NOPREFETCH | NOERROR )* statementEnd
+    FIND recordSearch ( NOWAIT | NOPREFETCH | NOERROR )* statementEnd
   ;
 
 fontExpression:
@@ -2129,15 +2129,19 @@ fontExpression:
   ;
 
 forStatement:
-    FOR forRecordSpec blockOption* forstate_sub
+    FOR multiRecordSearch blockOption* forstate_sub
   ;
 
 forstate_sub:
     blockColon codeBlock blockEnd
   ;
 
-forRecordSpec:
-    findWhich? recordPhrase (COMMA findWhich? recordPhrase)*
+multiRecordSearch:
+    recordSearch (COMMA recordSearch)*
+  ;
+
+recordSearch:
+    findWhich? recordPhrase
   ;
 
 formatExpression:
@@ -2826,7 +2830,7 @@ onAction:
   ;
 
 openQueryStatement:
-    OPEN QUERY identifier ( FOR | PRESELECT ) forRecordSpec
+    OPEN QUERY identifier ( FOR | PRESELECT ) multiRecordSearch
     openQueryOption*
     statementEnd
   ;

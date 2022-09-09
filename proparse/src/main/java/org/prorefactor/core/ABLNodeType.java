@@ -179,6 +179,7 @@ public enum ABLNodeType {
   PROPERTY_GETTER(Proparse.Property_getter, NodeTypesOption.STRUCTURE),
   PROPERTY_SETTER(Proparse.Property_setter, NodeTypesOption.STRUCTURE),
   RECORD_NAME(Proparse.Record_name, NodeTypesOption.STRUCTURE),
+  RECORD_SEARCH(Proparse.Record_search, NodeTypesOption.STRUCTURE),
   SYSTEM_HANDLE_REF(Proparse.System_handle, NodeTypesOption.STRUCTURE),
   TYPE_NAME(Proparse.Type_name, NodeTypesOption.STRUCTURE),
   TYPELESS_TOKEN(Proparse.Typeless_token, NodeTypesOption.STRUCTURE),
@@ -2119,6 +2120,22 @@ public enum ABLNodeType {
     return ABLNodeType.INVALID_NODE;
   }
 
+  private static void generateVSCodeKeywords(final PrintStream out) {
+    boolean first = true;
+    out.println("export const keywords = ["); 
+    for (ABLNodeType type: ABLNodeType.values()) {
+      if (type.isKeyword()) {
+        out.print((first ? "": ",") + " ");
+        out.println("\"" + type.getText().toLowerCase() + "\"");
+        first = false;
+        if (type.getText().length() != type.abbrMain) {
+          out.println(", \"" + type.getText().toLowerCase().substring(0, type.abbrMain) + "\"");
+        }
+      }
+    }
+    out.println("];");
+  }
+
   private static void generateKeywordsG4(final PrintStream out) {
     out.println("// Generated file - Do not manually edit");
     out.println();
@@ -2185,5 +2202,6 @@ public enum ABLNodeType {
     try (PrintStream output = new PrintStream("src/main/antlr4/imports/keywords.g4")) {
       generateKeywordsG4(output);
     }
+    generateVSCodeKeywords(System.out);
   }
 }

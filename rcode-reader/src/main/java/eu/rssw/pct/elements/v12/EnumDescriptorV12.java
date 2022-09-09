@@ -19,20 +19,37 @@
  */
 package eu.rssw.pct.elements.v12;
 
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import eu.rssw.pct.elements.AbstractElement;
 import eu.rssw.pct.elements.IEnumDescriptor;
 
 public class EnumDescriptorV12 extends AbstractElement implements IEnumDescriptor {
+  private long value;
+  private int dupIdx;
 
-  public EnumDescriptorV12(String name) {
+  public EnumDescriptorV12(String name, long value, int dupIdx) {
     super(name);
+    this.value = value;
+    this.dupIdx = dupIdx;
+  }
+
+  @Override
+  public long getValue() {
+    return value;
+  }
+
+  public int getDupIdx() {
+    return dupIdx;
   }
 
   public static IEnumDescriptor fromDebugSegment(String name, byte[] segment, int currentPos, int textAreaOffset,
       ByteOrder order) {
-    return new EnumDescriptorV12(name);
+    long value = ByteBuffer.wrap(segment, currentPos, Long.BYTES).order(ByteOrder.BIG_ENDIAN).getLong();
+    int dupIdx = ByteBuffer.wrap(segment, currentPos + 8, Short.BYTES).order(ByteOrder.BIG_ENDIAN).getShort();
+
+    return new EnumDescriptorV12(name, value, dupIdx);
   }
 
   @Override

@@ -261,6 +261,13 @@ public class TreeParserSymbolScope {
     return bufferMap.entrySet();
   }
 
+  /**
+   * Get the list of unnamed buffers
+   */
+  public Collection<TableBuffer> getUnnamedBuffers()  {
+    return unnamedBuffers.values();
+  }
+
   /** Given a name, find a BufferSymbol (or create if necessary for unnamed buffer). */
   public TableBuffer getBufferSymbol(String inName) {
     TableBuffer symbol = lookupBuffer(inName);

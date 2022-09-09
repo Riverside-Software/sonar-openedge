@@ -64,7 +64,7 @@ public class ClassesTest {
     assertEquals(method.asIStatement().getAnnotations().get(0), "@Progress.Lang.Deprecated");
     assertTrue(method.hasAnnotation("@Progress.Lang.Deprecated"));
     assertFalse(method.hasAnnotation("@Progress.Deprecated"));
-    JPNode inMethodStmt = method.getFirstDirectChild(ABLNodeType.CODE_BLOCK).queryStateHead(ABLNodeType.RETURN).get(0);
+    JPNode inMethodStmt = method.findDirectChild(ABLNodeType.CODE_BLOCK).queryStateHead(ABLNodeType.RETURN).get(0);
     assertTrue(inMethodStmt.hasAnnotation("@Progress.Lang.Deprecated"));
     assertFalse(inMethodStmt.hasAnnotation("@Progress.Deprecated"));
 

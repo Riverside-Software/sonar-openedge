@@ -345,7 +345,7 @@ public class PreprocessorDirectiveTest {
     assertEquals(nodes.size(), 2);
     JPNode substNode = nodes.get(0);
     JPNode leftParen = substNode.getNextNode();
-    JPNode str = leftParen.getNextNode().getFirstChild();
+    JPNode str = leftParen.getNextNode().getFirstChild().getFirstChild();
     assertEquals(leftParen.getLine(), 2);
     assertEquals(leftParen.getColumn(), 19);
     assertEquals(leftParen.getEndLine(), 2);
@@ -357,7 +357,7 @@ public class PreprocessorDirectiveTest {
 
     JPNode substNode2 = nodes.get(1);
     JPNode leftParen2 = substNode2.getNextNode();
-    JPNode str2 = leftParen2.getNextNode().getFirstChild();
+    JPNode str2 = leftParen2.getNextNode().getFirstChild().getFirstChild();
     assertEquals(leftParen2.getLine(), 3);
     assertEquals(leftParen2.getColumn(), 19);
     assertEquals(leftParen2.getEndLine(), 3);

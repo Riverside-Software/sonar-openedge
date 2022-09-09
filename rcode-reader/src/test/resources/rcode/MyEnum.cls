@@ -5,6 +5,8 @@ ENUM rcode.MyEnum FLAGS:
                 Update = 0x02
                 ReadWrite = 0x03
                 Create = 0x04
-                Delete = 0x08
-                Execute = 0x10.
+                Delete = 0x179324681357
+                Execute = 0x973113572468
+                Extra01 = 0x1234
+                Extra02 = 0x5678.
 END ENUM.

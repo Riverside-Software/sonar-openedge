@@ -63,9 +63,9 @@ public class ClumsySyntax extends OpenEdgeProparseCheck {
   private void handleFunctionBlock(InputFile file, JPNode node) {
     List<JPNode> ch = node.getDirectChildren();
     boolean containsForward = ch.stream().map(JPNode::getNodeType).anyMatch(type -> type == ABLNodeType.FORWARDS);
-    boolean containsSuper = ch.stream().map(JPNode::getNodeType).anyMatch(type -> type == ABLNodeType.SUPER);
+    boolean containsIn = ch.stream().map(JPNode::getNodeType).anyMatch(type -> type == ABLNodeType.IN);
     boolean containsMap = ch.stream().map(JPNode::getNodeType).anyMatch(type -> type == ABLNodeType.MAP);
-    if (containsForward || containsSuper || containsMap) {
+    if (containsForward || containsIn || containsMap) {
       // Last child should be PERIOD
       JPNode lastCh = ch.get(ch.size() - 1);
       if (lastCh.getNodeType() != ABLNodeType.PERIOD) {

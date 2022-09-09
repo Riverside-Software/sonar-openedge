@@ -68,7 +68,7 @@ public class RefactorSessionTest {
     ITypeInfo info = session.getTypeInfo("Progress.Json.JsonParser");
     assertNotNull(info);
     assertEquals(info.getMethods().size(), 0);
-    assertEquals(info.getProperties().size(), 3); // FIXME Next-Sibling and Previous-Sibling should not be included
+    assertEquals(info.getProperties().size(), 1);
     assertEquals(info.getParentTypeName(), "Progress.Lang.Object");
     assertEquals(info.getInterfaces().size(), 0);
   }
@@ -78,7 +78,7 @@ public class RefactorSessionTest {
     ITypeInfo info = session.getTypeInfo("Progress.Json.ObjectModel.JsonArray");
     assertNotNull(info);
     assertEquals(info.getMethods().size(), 140);
-    assertEquals(info.getProperties().size(), 3);
+    assertEquals(info.getProperties().size(), 1);
     assertEquals(info.getParentTypeName(), "Progress.Json.ObjectModel.JsonConstruct");
     assertEquals(info.getInterfaces().size(), 0);
 

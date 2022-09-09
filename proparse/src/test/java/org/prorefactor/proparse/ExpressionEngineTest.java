@@ -23,8 +23,11 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 
+import org.prorefactor.core.nodetypes.ArrayReferenceNode;
 import org.prorefactor.core.nodetypes.AttributeReferenceNode;
 import org.prorefactor.core.nodetypes.BuiltinFunctionNode;
+import org.prorefactor.core.nodetypes.ConstantNode;
+import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.IExpression;
 import org.prorefactor.core.nodetypes.LocalMethodCallNode;
 import org.prorefactor.core.nodetypes.MethodCallNode;
@@ -576,7 +579,6 @@ public class ExpressionEngineTest {
     assertEquals(rightExp.getDataType(), DataType.INTEGER);
   }
 
-
   private void testSimpleExpression(String code, DataType expected) {
     ParseUnit unit01 = new ParseUnit(code, session);
     unit01.treeParser01();
@@ -587,6 +589,39 @@ public class ExpressionEngineTest {
     assertEquals(exp.getDataType().getPrimitive(), expected.getPrimitive());
     if (expected.getPrimitive() == PrimitiveDataType.CLASS)
       assertEquals(exp.getDataType().getClassName(), expected.getClassName());
+  }
+
+  @Test
+  public void testArrayGetExpressions01() {
+    ParseUnit unit01 = new ParseUnit("x1[10] + x2[20].", session);
+    unit01.treeParser01();
+
+    List<IExpression> nodes = unit01.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 1);
+    IExpression exp = nodes.get(0);
+    IExpression leftExp = ((TwoArgumentsExpression) exp).getLeftExpression();
+    IExpression rightExp = ((TwoArgumentsExpression) exp).getRightExpression();
+
+    assertTrue(leftExp instanceof ArrayReferenceNode);
+    assertTrue(rightExp instanceof ArrayReferenceNode);
+    assertTrue(((ArrayReferenceNode) leftExp).getVariableExpression() instanceof FieldRefNode);
+    assertTrue(((ArrayReferenceNode) rightExp).getVariableExpression() instanceof FieldRefNode);
+    assertTrue(((ArrayReferenceNode) leftExp).getOffsetExpression() instanceof ConstantNode);
+    assertTrue(((ArrayReferenceNode) rightExp).getOffsetExpression() instanceof ConstantNode);
+  }
+
+  @Test
+  public void testArrayGetExpressions02() {
+    ParseUnit unit01 = new ParseUnit("do x1[10] = 1 to 10: end.", session);
+    unit01.treeParser01();
+
+    List<IExpression> nodes = unit01.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 3);
+    IExpression exp = nodes.get(0);
+
+    assertTrue(exp instanceof ArrayReferenceNode);
+    assertTrue(((ArrayReferenceNode) exp).getVariableExpression() instanceof FieldRefNode);
+    assertTrue(((ArrayReferenceNode) exp).getOffsetExpression() instanceof ConstantNode);
   }
 
 }
