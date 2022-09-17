@@ -197,6 +197,7 @@ statement:
   |  aaTraceCloseStatement
   |  aaTraceStatement
   |  accumulateStatement
+  |  aggregateStatement
   |  analyzeStatement
   |  applyStatement
   |  assignStatement
@@ -796,6 +797,14 @@ aggregateOption: // SEMITRANSLATED
 
 allExceptFields:
     ALL exceptFields?
+  ;
+
+aggregateStatement:
+    AGGREGATE expressionTerm EQUAL aggregateExpression FOR record ( WHERE expression )? statementEnd
+  ;
+
+aggregateExpression:
+    ( COUNT | TOTAL | AVERAGE ) LEFTPAREN fieldn RIGHTPAREN
   ;
 
 analyzeStatement:

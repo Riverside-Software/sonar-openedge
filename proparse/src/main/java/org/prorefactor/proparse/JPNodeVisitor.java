@@ -593,6 +593,16 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitAggregateStatement(AggregateStatementContext ctx) {
+    return createStatementTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public Builder visitAggregateExpression(AggregateExpressionContext ctx) {
+    return createTree(ctx, ABLNodeType.AGGREGATE_EXPRESSION).setRuleNode(ctx).setExpression(true);
+  }
+
+  @Override
   public Builder visitAnalyzeStatement(AnalyzeStatementContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }

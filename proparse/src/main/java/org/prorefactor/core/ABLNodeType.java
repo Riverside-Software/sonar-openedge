@@ -148,6 +148,7 @@ public enum ABLNodeType {
   // SQSTRING(Proparse.SQSTRING),
 
   // Parser Structure Elements
+  AGGREGATE_EXPRESSION(Proparse.Aggregate_expression, NodeTypesOption.STRUCTURE),
   AGGREGATE_PHRASE(Proparse.Aggregate_phrase, NodeTypesOption.STRUCTURE),
   ARRAY_REFERENCE(Proparse.Array_ref, NodeTypesOption.STRUCTURE),
   ASSIGN_DYNAMIC_NEW(Proparse.Assign_dynamic_new, NodeTypesOption.STRUCTURE),
