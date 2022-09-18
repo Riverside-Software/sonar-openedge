@@ -298,7 +298,7 @@ public class TokenListTest {
       assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
       assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
       assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
-      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
+      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.NAME);
       assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
       assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
       // Third line: comment after period results in NAMEDOT
