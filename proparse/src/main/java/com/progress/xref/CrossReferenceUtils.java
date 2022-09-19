@@ -208,8 +208,10 @@ public class CrossReferenceUtils {
       Source currSrc = null;
       String currSrcStr = null;
       String ln = null;
+      int lineNum = 0;
       final AtomicInteger fileNum = new AtomicInteger(1);
       while ((ln = reader2.readLine()) != null) {
+        lineNum++;
         try {
           String[] line = parseLine(ln);
           if ((currSrc == null) || (currSrcStr == null) || !currSrcStr.equals(line[1])) {
@@ -256,7 +258,8 @@ public class CrossReferenceUtils {
               break;
           }
         } catch (Exception caught) {
-          LOGGER.error("Unable to parse XREF file {} -- Line '{}' -- Msg: {}", fName, ln, caught.getMessage());
+          LOGGER.debug("File '{}' - Unable to parse XREF line {}: '{}' -- Msg: {}", fName, lineNum, ln,
+              caught.getMessage());
         }
       }
     }
