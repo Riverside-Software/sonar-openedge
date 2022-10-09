@@ -21,11 +21,14 @@ package eu.rssw.pct;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+
+import javax.annotation.Nonnull;
 
 import com.google.common.base.Strings;
 
@@ -94,7 +97,7 @@ public class RCodeInfo {
   private ITypeInfo typeInfo;
 
   public RCodeInfo(InputStream input) throws InvalidRCodeException, IOException {
-    this(input, null);
+    this(input, new PrintStream(new NullOutputStream()));
   }
 
   /**
@@ -106,7 +109,7 @@ public class RCodeInfo {
    * @throws InvalidRCodeException
    * @throws IOException
    */
-  public RCodeInfo(InputStream input, PrintStream out) throws InvalidRCodeException, IOException {
+  public RCodeInfo(InputStream input, @Nonnull PrintStream out) throws InvalidRCodeException, IOException {
     processHeader(input, out);
     processSignatureBlock(input, out);
     processSegmentTable(input, out);
@@ -148,10 +151,8 @@ public class RCodeInfo {
       throw new InvalidRCodeException("Not enough bytes in header");
     }
 
-    if (out != null) {
-      out.printf("%n******%nHEADER%n******%n");
-      printByteBuffer(out, header);
-    }
+    out.printf("%n******%nHEADER%n******%n");
+    printByteBuffer(out, header);
 
     long magic = ByteBuffer.wrap(header, HEADER_OFFSET_MAGIC, Integer.BYTES).getInt();
     if (magic == MAGIC1) {
@@ -194,10 +195,8 @@ public class RCodeInfo {
     if (bytesRead != signatureSize) {
       throw new InvalidRCodeException("Not enough bytes in signature block");
     }
-    if (out != null) {
-      out.printf("%n*********%nSIGNATURE%n*********%n");
-      printByteBuffer(out, header);
-    }
+    out.printf("%n*********%nSIGNATURE%n*********%n");
+    printByteBuffer(out, header);
 
     int preambleSize = readAsciiEncodedNumber(header, 0, 4);
     int numElements = readAsciiEncodedNumber(header, 4, 4);
@@ -230,10 +229,8 @@ public class RCodeInfo {
     if (bytesRead != segmentTableSize) {
       throw new InvalidRCodeException("Not enough bytes in segment table block");
     }
-    if (out != null) {
-      out.printf("%n*******%nSEGMENT%n*******%n");
-      printByteBuffer(out, header);
-    }
+    out.printf("%n*******%nSEGMENT%n*******%n");
+    printByteBuffer(out, header);
 
     initialValueSegmentOffset = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_INITIAL_VALUE_SEGMENT_OFFSET, Integer.BYTES).order(order).getInt();
     initialValueSegmentSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_INITIAL_VALUE_SEGMENT_SIZE, Integer.BYTES).order(order).getInt();
@@ -255,10 +252,8 @@ public class RCodeInfo {
     if (bytesRead != typeBlockSize) {
       throw new InvalidRCodeException("Not enough bytes in type block");
     }
-    if (out != null) {
-      out.printf("%n**********%nTYPE BLOCK%n***********%n");
-      printByteBuffer(out, segment);
-    }
+    out.printf("%n**********%nTYPE BLOCK%n***********%n");
+    printByteBuffer(out, segment);
 
     if ((version & 0x3FFF) >= 1200) {
       this.typeInfo = TypeInfoV12.newTypeInfo(segment, order);
@@ -273,10 +268,8 @@ public class RCodeInfo {
     if (bytesRead != initialValueSegmentSize) {
       throw new InvalidRCodeException("Not enough bytes in initial value segment block");
     }
-    if (out != null) {
-      out.printf("%n**********%nINITIAL VALUES%n***********%n");
-      printByteBuffer(out, segment);
-    }
+    out.printf("%n**********%nINITIAL VALUES%n***********%n");
+    printByteBuffer(out, segment);
   }
 
   void processDebugSegment(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {
@@ -285,11 +278,8 @@ public class RCodeInfo {
     if (bytesRead != debugSegmentSize) {
       throw new InvalidRCodeException("Not enough bytes in debug segment block");
     }
-    if (out != null) {
-      out.printf("%n*******%nDEBUG%n*******%n");
-      printByteBuffer(out, segment);
-    }
-
+    out.printf("%n*******%nDEBUG%n*******%n");
+    printByteBuffer(out, segment);
   }
 
   public ITypeInfo getTypeInfo() {
@@ -377,6 +367,22 @@ public class RCodeInfo {
 
     public InvalidRCodeException(Throwable caught) {
       super(caught);
+    }
+  }
+
+  // Use OutputStream.NullOutputStream in Java 11
+  private static class NullOutputStream extends OutputStream {
+    @Override
+    public void write(int b) throws IOException {
+      // Nothing
+    }
+    @Override
+    public void write(byte[] b) throws IOException {
+      // Nothing
+    }
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+      // Nothing
     }
   }
 
