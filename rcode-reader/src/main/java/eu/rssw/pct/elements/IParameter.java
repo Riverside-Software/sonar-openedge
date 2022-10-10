@@ -115,6 +115,8 @@ public interface IParameter extends IElement {
     }
     if (getExtent() != 0)
       sb.append("[]");
+    sb.append(' ').append(getName());
+
     return sb.toString();
   }
 
