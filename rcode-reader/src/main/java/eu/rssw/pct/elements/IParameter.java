@@ -73,4 +73,49 @@ public interface IParameter extends IElement {
     return sb.toString();
   }
 
+  default String getIDESignature() {
+    StringBuilder sb = new StringBuilder();
+    switch (getMode()) {
+      case INPUT_OUTPUT:
+        sb.append('⇅');
+        break;
+      case OUTPUT:
+        sb.append('↓');
+        break;
+      case RETURN:
+        sb.append('⇊');
+        break;
+      case BUFFER:
+        return sb.append("BUFFER").toString();
+      default:
+        sb.append('↑'); // INPUT
+    }
+    switch (getParameterType()) {
+      case TABLE:
+      case BUFFER_TEMP_TABLE:
+        sb.append("TBL");
+        if (getDataType().getPrimitive() == PrimitiveDataType.HANDLE)
+          sb.append("-HDL");
+        break;
+      case DATASET:
+        sb.append("DS");
+        if (getDataType().getPrimitive() == PrimitiveDataType.HANDLE)
+          sb.append("-HDL");
+        break;
+      case BROWSE:
+        return sb.append("BRWS").toString();
+      case VARIABLE:
+        if (isClassDataType())
+          sb.append(getDataType().getClassName());
+        else
+          sb.append(getDataType().getPrimitive().getIDESignature());
+        break;
+      default:
+        sb.append("??");
+    }
+    if (getExtent() != 0)
+      sb.append("[]");
+    return sb.toString();
+  }
+
 }

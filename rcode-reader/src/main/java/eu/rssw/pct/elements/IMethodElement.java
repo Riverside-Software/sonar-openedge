@@ -46,4 +46,18 @@ public interface IMethodElement extends IAccessibleElement {
     return retVal.toString();
   }
 
+  default String getIDESignature() {
+    StringBuilder retVal = new StringBuilder(getName()).append('(');
+    boolean first = true;
+    for (IParameter p : getParameters()) {
+      if (first) {
+        first = false;
+      } else {
+        retVal.append(", ");
+      }
+      retVal.append(p.getIDESignature());
+    }
+    retVal.append(')');
+    return retVal.toString();
+  }
 }

@@ -379,6 +379,7 @@ public class RCodeInfoTest {
       }
       assertNotNull(testMethod);
       assertEquals(testMethod.getSignature(), "testMethod(IT,OD,II[])");
+      assertEquals(testMethod.getIDESignature(), "testMethod(↑TBL, ↓DS, ↑INT[])");
       assertEquals(testMethod.getExtent(), -32767);
       assertEquals(testMethod.getParameters().length, 3);
       assertEquals(testMethod.getParameters()[0].getParameterType(), ParameterType.TABLE);
@@ -405,7 +406,9 @@ public class RCodeInfoTest {
       assertEquals(testMethod21.getParameters()[0].getExtent(), 0);
       assertEquals(testMethod22.getParameters()[0].getExtent(), -32767);
       assertEquals(testMethod21.getSignature(), "testMethod2(II)");
+      assertEquals(testMethod21.getIDESignature(), "testMethod2(↑INT)");
       assertEquals(testMethod22.getSignature(), "testMethod2(II[])");
+      assertEquals(testMethod22.getIDESignature(), "testMethod2(↑INT[])");
       assertEquals(testMethod21.getReturnType().getPrimitive(), PrimitiveDataType.INTEGER);
       assertNull(testMethod21.getReturnType().getClassName());
       assertEquals(testMethod22.getReturnType().getPrimitive(), PrimitiveDataType.INTEGER);
@@ -418,6 +421,7 @@ public class RCodeInfoTest {
       }
       assertNotNull(testMethod3);
       assertEquals(testMethod3.getSignature(), "testMethod3(ITH,MDH)");
+      assertEquals(testMethod3.getIDESignature(), "testMethod3(↑TBL-HDL, ⇅DS-HDL)");
       assertNotNull(testMethod3.getParameters());
       assertEquals(testMethod3.getParameters().length, 2);
       assertEquals(testMethod3.getParameters()[0].getDataType(), DataType.HANDLE);
@@ -437,6 +441,8 @@ public class RCodeInfoTest {
       assertNotNull(testMethod4);
       assertEquals(testMethod4.getSignature(),
           "testMethod4(IC,MLProgress.Lang.Object,OD,IDT,IDTZ,ODE,IH,I64,IB,ILC,OM,IRAW,IREC,IROW)");
+      assertEquals(testMethod4.getIDESignature(),
+          "testMethod4(↑CHAR, ⇅Progress.Lang.Object, ↓DT, ↑DTM, ↑DTMZ, ↓DEC, ↑HDL, ↑INT64, ↑LOG, ↑CLOB, ↓MEMPTR, ↑RAW, ↑RECID, ↑ROWID)");
       assertEquals(testMethod4.getReturnType().getPrimitive(), PrimitiveDataType.INTEGER);
       assertNull(testMethod4.getReturnType().getClassName());
 
