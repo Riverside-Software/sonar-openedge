@@ -60,4 +60,18 @@ public interface IMethodElement extends IAccessibleElement {
     retVal.append(')');
     return retVal.toString();
   }
+
+  default String getIDEInsertElement() {
+    StringBuilder retVal = new StringBuilder(getName()).append('(');
+    int cnt = 1;
+    for (IParameter p : getParameters()) {
+      if (cnt > 1) {
+        retVal.append(", ");
+      }
+      retVal.append("${" + cnt++ + ":").append(p.getName()).append("}");
+    }
+    retVal.append(")$0");
+    return retVal.toString();
+  }
+
 }
