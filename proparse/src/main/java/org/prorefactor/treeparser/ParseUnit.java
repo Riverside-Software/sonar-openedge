@@ -110,6 +110,7 @@ public class ParseUnit {
   private boolean trace;
   private boolean ambiguityReport;
   private boolean writableTokens;
+  private boolean quiet = false;
 
   // Timings (in ns)
   private long parseTimeSLL;
@@ -190,6 +191,10 @@ public class ParseUnit {
    */
   public void enableTrace() {
     trace = true;
+  }
+
+  public void setQuiet(boolean quiet) {
+    this.quiet = quiet;
   }
 
   /**
@@ -325,7 +330,8 @@ public class ParseUnit {
         parseTimeSLL = System.nanoTime() - startTimeNs;
         switchToLL = true;
         tokStream.seek(0);
-        parser.addErrorListener(new ProparseErrorListener());
+        if (!quiet)
+          parser.addErrorListener(new ProparseErrorListener());
         parser.setErrorHandler(new ProparseErrorStrategy(session.getProparseSettings().allowAntlrTokenDeletion(),
             session.getProparseSettings().allowAntlrTokenInsertion(), session.getProparseSettings().allowAntlrRecover()));
         parser.getInterpreter().setPredictionMode(PredictionMode.LL);
