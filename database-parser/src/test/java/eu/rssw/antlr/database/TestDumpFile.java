@@ -166,4 +166,10 @@ public class TestDumpFile {
     assertEquals(f.getLabel(), "Bin Num");
   }
 
+  @Test
+  public void test1252() throws IOException {
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/1252.df"));
+    assertNotNull(db.getTable("Tab1"));
+    assertNotNull(db.getTable("Tab1").getField("Fld1"));
+  }
 }
