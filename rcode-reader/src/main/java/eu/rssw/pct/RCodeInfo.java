@@ -112,7 +112,7 @@ public class RCodeInfo {
     processSegmentTable(input, out);
 
     if ((initialValueSegmentOffset >= 0) && (initialValueSegmentSize > 0)) {
-      long bytesRead = input.skip(initialValueSegmentOffset);
+      long bytesRead = skipNBytes(input, initialValueSegmentOffset);
       if (bytesRead != initialValueSegmentOffset) {
         throw new InvalidRCodeException("Not enough bytes to reach initial values segment");
       }
@@ -120,7 +120,7 @@ public class RCodeInfo {
     }
 
     if ((debugSegmentOffset > 0) && (debugSegmentSize > 0)) {
-      long bytesRead = input.skip((long) debugSegmentOffset - initialValueSegmentSize);
+      long bytesRead = skipNBytes(input, debugSegmentOffset - initialValueSegmentSize);
       if (bytesRead != debugSegmentOffset - initialValueSegmentSize) {
         throw new InvalidRCodeException("Not enough bytes to reach debug segment");
       }
@@ -130,7 +130,7 @@ public class RCodeInfo {
     if (typeBlockSize > 0) {
       int skip = debugSegmentOffset > 0 ? rcodeSize - debugSegmentOffset - debugSegmentSize
           : rcodeSize - initialValueSegmentSize - debugSegmentSize;
-      long bytesRead = input.skip(skip);
+      long bytesRead = skipNBytes(input, skip);
       if (bytesRead != skip) {
         throw new InvalidRCodeException("Not enough bytes to reach type block");
       }
@@ -345,6 +345,27 @@ public class RCodeInfo {
 
   public boolean isClass() {
     return isClass;
+  }
+
+  /**
+   * Issue #1005: skip() doesn't always return the exact number of bytes, especially in slow environments. Javadoc is
+   * rather vague, so the implementation does its best. See https://stackoverflow.com/a/14400985
+   */
+  public static long skipNBytes(InputStream is, long n) throws IOException {
+    long count = 0L;
+    while (count < n) {
+      long n1 = is.skip(n - count);
+      if (n1 > 0) {
+        count += n1;
+      } else if (n1 == 0) { // should we retry? lets read one byte
+        if (is.read() == -1) // EOF
+          break;
+        else
+          count++;
+      } else // negative? this should never happen but...
+        throw new IOException("skip() returned a negative value. This should never happen");
+    }
+    return count;
   }
 
   public static String readNullTerminatedString(byte[] array, int offset) {

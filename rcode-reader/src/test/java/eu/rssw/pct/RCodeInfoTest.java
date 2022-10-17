@@ -206,6 +206,18 @@ public class RCodeInfoTest {
   }
 
   @Test
+  public void testInputStreamSkip() throws IOException {
+    // Issue #1005: 
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/_dmpincr.r"));
+        InputStream input2 = new SpecialSkipInputStreamWrapper(input)) {
+      RCodeInfo rci = new RCodeInfo(input2);
+      assertFalse(rci.isClass());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
   public void testV11() throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/WebRequestV11.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
