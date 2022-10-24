@@ -30,6 +30,7 @@ public class Field {
   private Integer extent = 0;
   private String description;
   private String label;
+  private String columnLabel;
   private String lobArea;
   private String format;
   private String initial;
@@ -62,6 +63,14 @@ public class Field {
 
   public void setLabel(String label) {
     this.label = label;
+  }
+
+  public String getColumnLabel() {
+    return columnLabel;
+  }
+
+  public void setColumnLabel(String columnLabel) {
+    this.columnLabel = columnLabel;
   }
 
   public Integer getOrder() {

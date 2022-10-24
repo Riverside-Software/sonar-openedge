@@ -29,6 +29,7 @@ import eu.rssw.antlr.database.DumpFileGrammarParser.AddFieldContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.AddIndexContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.AddSequenceContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.AddTableContext;
+import eu.rssw.antlr.database.DumpFileGrammarParser.FieldColumnLabelContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldDescriptionContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldExtentContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldFormatContext;
@@ -120,6 +121,14 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
   public Void visitFieldLabel(FieldLabelContext ctx) {
     if (!fields.isEmpty() && (ctx.QUOTED_STRING() != null))
       fields.peek().setLabel(ctx.QUOTED_STRING().getText());
+
+    return null;
+  }
+
+  @Override
+  public Void visitFieldColumnLabel(FieldColumnLabelContext ctx) {
+    if (!fields.isEmpty() && (ctx.QUOTED_STRING() != null))
+      fields.peek().setColumnLabel(ctx.QUOTED_STRING().getText());
 
     return null;
   }

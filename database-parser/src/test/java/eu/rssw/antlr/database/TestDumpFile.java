@@ -164,6 +164,9 @@ public class TestDumpFile {
     assertNull(f.getLabel());
     f = db.getTable("Bin").getField("BinNum");
     assertEquals(f.getLabel(), "Bin Num");
+
+    f = db.getTable("PurchaseOrder").getField("SupplierIDNum");
+    assertEquals(f.getColumnLabel(), "Supplier ID");
   }
 
   @Test
