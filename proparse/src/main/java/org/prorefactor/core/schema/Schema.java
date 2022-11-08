@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -80,6 +81,11 @@ public class Schema implements ISchema {
       }
     }
     injectMetaSchema();
+  }
+
+  @Override
+  public Collection<IDatabase> getDatabases() {
+    return getDbSet();
   }
 
   /** Get databases sorted by name. */

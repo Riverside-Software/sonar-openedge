@@ -15,6 +15,8 @@
  ********************************************************************************/
 package org.prorefactor.core.schema;
 
+import java.util.Collection;
+
 /**
  * Represents the list of all available db, aliases and tables in an OpenEdge session
  */
@@ -33,6 +35,11 @@ public interface ISchema {
    * @param aliasname The name for the alias, null or empty string to delete all.
    */
   void deleteAlias(String aliasname);
+
+  /**
+   * All databases
+   */
+  Collection<IDatabase> getDatabases();
 
   /**
    * Returns the database with the given (or alias)
