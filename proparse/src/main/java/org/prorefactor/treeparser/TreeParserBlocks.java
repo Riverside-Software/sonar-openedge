@@ -196,8 +196,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterConstructorStatement(ConstructorStatementContext ctx) {
-    newRoutine(ctx, support.getNode(ctx), unit.getClassName().substring(unit.getClassName().lastIndexOf('.') + 1),
-        ABLNodeType.CONSTRUCTOR);
+    newRoutine(ctx, support.getNode(ctx), ctx.tn.getText(), ABLNodeType.CONSTRUCTOR);
   }
 
   @Override
