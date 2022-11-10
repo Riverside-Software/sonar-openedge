@@ -53,7 +53,7 @@ public class ClassesTest {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
-    assertTrue(unit.getTopNode().query(ABLNodeType.ANNOTATION).size() == 1);
+    assertTrue(unit.getTopNode().query(ABLNodeType.ANNOTATION).size() == 3);
     assertEquals(unit.getTopNode().query(ABLNodeType.ANNOTATION).get(0).getAnnotationName(),
         "Progress.Lang.Deprecated");
     JPNode method = unit.getTopNode().query(ABLNodeType.ANNOTATION).get(0).asIStatement().getNextStatement().asJPNode();
@@ -64,6 +64,22 @@ public class ClassesTest {
     assertEquals(method.asIStatement().getAnnotations().get(0), "@Progress.Lang.Deprecated");
     assertTrue(method.hasAnnotation("@Progress.Lang.Deprecated"));
     assertFalse(method.hasAnnotation("@Progress.Deprecated"));
+    JPNode method2 = unit.getTopNode().query(ABLNodeType.ANNOTATION).get(1).asIStatement().getNextStatement().asJPNode();
+    assertNotNull(method2);
+    assertEquals(method2.getNodeType(), ABLNodeType.METHOD);
+    assertNotNull(method2.asIStatement().getAnnotations());
+    assertEquals(method2.asIStatement().getAnnotations().size(), 1);
+    assertEquals(method2.asIStatement().getAnnotations().get(0), "@Progress.Lang.Deprecated(message = 'foobar')");
+    assertTrue(method2.hasAnnotation("@Progress.Lang.Deprecated"));
+    assertFalse(method2.hasAnnotation("@Progress.Lang.Deprecatedd"));
+    JPNode method3 = unit.getTopNode().query(ABLNodeType.ANNOTATION).get(2).asIStatement().getNextStatement().asJPNode();
+    assertNotNull(method3);
+    assertEquals(method3.getNodeType(), ABLNodeType.METHOD);
+    assertNotNull(method3.asIStatement().getAnnotations());
+    assertEquals(method3.asIStatement().getAnnotations().size(), 1);
+    assertEquals(method3.asIStatement().getAnnotations().get(0), "@Progress.Lang.Deprecated(since= '1.1', message = 'foobar' )");
+    assertTrue(method3.hasAnnotation("@Progress.Lang.Deprecated"));
+
     JPNode inMethodStmt = method.findDirectChild(ABLNodeType.CODE_BLOCK).queryStateHead(ABLNodeType.RETURN).get(0);
     assertTrue(inMethodStmt.hasAnnotation("@Progress.Lang.Deprecated"));
     assertFalse(inMethodStmt.hasAnnotation("@Progress.Deprecated"));
