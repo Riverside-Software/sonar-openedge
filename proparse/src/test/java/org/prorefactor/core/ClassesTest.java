@@ -84,11 +84,16 @@ public class ClassesTest {
     assertTrue(inMethodStmt.hasAnnotation("@Progress.Lang.Deprecated"));
     assertFalse(inMethodStmt.hasAnnotation("@Progress.Deprecated"));
 
-    List<Routine> lst = unit.getRootScope().lookupRoutines("addError");
-    assertNotNull(lst);
-    assertEquals(lst.size(), 2);
-    assertEquals(lst.get(0).getSignature(), "AddError(ILProgress.Lang.Error)");
-    assertEquals(lst.get(1).getSignature(), "AddError(IC)");
+    List<Routine> lst0 = unit.getRootScope().lookupRoutines("LoadLogger");
+    assertNotNull(lst0);
+    assertEquals(lst0.size(), 1);
+    assertEquals(lst0.get(0).getSignature(), "LoadLogger(II)");
+
+    List<Routine> lst1 = unit.getRootScope().lookupRoutines("addError");
+    assertNotNull(lst1);
+    assertEquals(lst1.size(), 2);
+    assertEquals(lst1.get(0).getSignature(), "AddError(ILProgress.Lang.Error)");
+    assertEquals(lst1.get(1).getSignature(), "AddError(IC)");
 
     List<Routine> lst2 = unit.getRootScope().lookupRoutines("addWarnings");
     assertNotNull(lst2);
