@@ -1550,7 +1550,8 @@ dataRelation:
     (
       fieldMappingPhrase
     | REPOSITION
-    | dataRelationNested
+    | NESTED
+    | FOREIGNKEYHIDDEN
     | NOTACTIVE
     | RECURSIVE
     )*
@@ -1570,10 +1571,6 @@ fieldMappingPhrase:
     fieldExpr COMMA fieldExpr
     ( COMMA fieldExpr COMMA fieldExpr )*
     RIGHTPAREN
-  ;
-
-dataRelationNested:
-    NESTED FOREIGNKEYHIDDEN?
   ;
 
 defineDataSourceStatement:

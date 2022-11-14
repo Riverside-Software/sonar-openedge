@@ -1397,11 +1397,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
-  public Builder visitDataRelationNested(DataRelationNestedContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
   public Builder visitEventSignature(EventSignatureContext ctx) {
     if (ctx.SIGNATURE() != null)
       return createTreeFromFirstNode(ctx);
