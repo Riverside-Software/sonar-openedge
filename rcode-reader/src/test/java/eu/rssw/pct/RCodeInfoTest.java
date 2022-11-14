@@ -455,6 +455,10 @@ public class RCodeInfoTest {
           "testMethod4(IC,MLProgress.Lang.Object,OD,IDT,IDTZ,ODE,IH,I64,IB,ILC,OM,IRAW,IREC,IROW)");
       assertEquals(testMethod4.getIDESignature(),
           "testMethod4(↑CHAR x1, ⇅Progress.Lang.Object x2, ↓DT x3, ↑DTM x4, ↑DTMZ x5, ↓DEC x6, ↑HDL x7, ↑INT64 x8, ↑LOG x9, ↑CLOB x10, ↓MEMPTR x11, ↑RAW x12, ↑RECID x13, ↑ROWID x14)");
+      assertEquals(testMethod4.getIDEInsertElement(false),
+          "testMethod4(${1:x1}, input-output ${2:x2}, output ${3:x3}, ${4:x4}, ${5:x5}, output ${6:x6}, ${7:x7}, ${8:x8}, ${9:x9}, ${10:x10}, output ${11:x11}, ${12:x12}, ${13:x13}, ${14:x14})$0");
+      assertEquals(testMethod4.getIDEInsertElement(true),
+          "testMethod4(${1:x1}, INPUT-OUTPUT ${2:x2}, OUTPUT ${3:x3}, ${4:x4}, ${5:x5}, OUTPUT ${6:x6}, ${7:x7}, ${8:x8}, ${9:x9}, ${10:x10}, OUTPUT ${11:x11}, ${12:x12}, ${13:x13}, ${14:x14})$0");
       assertEquals(testMethod4.getReturnType().getPrimitive(), PrimitiveDataType.INTEGER);
       assertNull(testMethod4.getReturnType().getClassName());
 
