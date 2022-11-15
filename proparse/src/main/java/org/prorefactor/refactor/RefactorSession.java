@@ -29,6 +29,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.prorefactor.core.schema.ISchema;
+import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.refactor.settings.IProparseSettings;
 import org.slf4j.Logger;
@@ -70,6 +71,9 @@ public class RefactorSession implements IProparseEnvironment {
   private final Map<String, File> propathCache = new HashMap<>();
   // Cached entries from propath again
   private final Map<String, String> propathCache2 = new HashMap<>();
+
+  // ClassDocumentation
+  private final Map<String, ClassDocumentation> classDoc = new HashMap<>();
 
   @Inject
   public RefactorSession(IProparseSettings proparseSettings, ISchema schema) {
@@ -214,6 +218,15 @@ public class RefactorSession implements IProparseEnvironment {
     }
 
     return retVal;
+  }
+
+  public void injectClassDocumentation(ClassDocumentation classDoc) {
+    this.classDoc.put(classDoc.getClassName(), classDoc);
+  }
+
+  @Override
+  public ClassDocumentation getClassDocumentation(String className) {
+    return classDoc.get(className);
   }
 
   public void injectTypeInfo(ITypeInfo unit) {

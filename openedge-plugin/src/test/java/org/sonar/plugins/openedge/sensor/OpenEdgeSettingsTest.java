@@ -29,6 +29,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 
+import org.prorefactor.proparse.classdoc.ClassDocumentation;
+import org.prorefactor.proparse.classdoc.ClassDocumentation.DeprecatedInfo;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
@@ -257,4 +259,38 @@ public class OpenEdgeSettingsTest {
     assertTrue(info4.isAbstract());
     assertTrue(info4.isInterface());
   }
+
+  @Test
+  public void testClassDocumentation() throws Exception {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(Constants.CLASS_DOCUMENTATION,
+        new File(TestProjectSensorContext.BASEDIR, "netlib.json").getAbsolutePath() + ","
+            + new File(TestProjectSensorContext.BASEDIR, "corelib.json").getAbsolutePath());
+    settings.setProperty("sonar.sources", "src");
+
+    SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
+    context.setSettings(settings);
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+    IProparseEnvironment session = oeSettings.getProparseSessions().getDefaultSession();
+
+    ClassDocumentation doc = session.getClassDocumentation("OpenEdge.Core.ByteBucket");
+    assertNotNull(doc);
+    DeprecatedInfo dep = doc.objectDoc.get("M#PutString(ILC,ILC)");
+    assertNotNull(dep);
+    assertEquals(dep.since, "11.7.3");
+
+    ClassDocumentation doc2 = session.getClassDocumentation("OpenEdge.Core.Collections.List");
+    assertNotNull(doc2);
+    assertNotNull(doc2.deprecated);
+
+    ClassDocumentation doc3 = session.getClassDocumentation("OpenEdge.Net.HTTP.Lib.ABLSockets.ABLSocketLibrary");
+    assertNotNull(doc3);
+    DeprecatedInfo dep2 = doc3.objectDoc.get("M#MakeSyncRequest(IZOpenEdge.Net.ServerConnection.ClientSocket,IZOpenEdge.Net.HTTP.IHttpRequest,IZOpenEdge.Net.HTTP.IHttpResponse,IZOpenEdge.Core.ByteBucket)");
+    assertNotNull(dep2);
+    assertEquals(dep2.since, "12.5.0");
+
+  }
+
 }
