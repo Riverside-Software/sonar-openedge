@@ -452,7 +452,7 @@ public class RCodeInfoTest {
       }
       assertNotNull(testMethod4);
       assertEquals(testMethod4.getSignature(),
-          "testMethod4(IC,MLProgress.Lang.Object,OD,IDT,IDTZ,ODE,IH,I64,IB,ILC,OM,IRAW,IREC,IROW)");
+          "testMethod4(IC,MZProgress.Lang.Object,OD,IDT,IDTZ,ODE,IH,I64,IB,ILC,OM,IRAW,IREC,IROW)");
       assertEquals(testMethod4.getIDESignature(),
           "testMethod4(↑CHAR x1, ⇅Progress.Lang.Object x2, ↓DT x3, ↑DTM x4, ↑DTMZ x5, ↓DEC x6, ↑HDL x7, ↑INT64 x8, ↑LOG x9, ↑CLOB x10, ↓MEMPTR x11, ↑RAW x12, ↑RECID x13, ↑ROWID x14)");
       assertEquals(testMethod4.getIDEInsertElement(false),

@@ -61,7 +61,7 @@ public interface IParameter extends IElement {
         return sb.append('W').toString();
       case VARIABLE:
         if (isClassDataType())
-          sb.append('L').append(getDataType().getClassName());
+          sb.append('Z').append(getDataType().getClassName());
         else
           sb.append(getDataType().getPrimitive().getSignature());
         break;

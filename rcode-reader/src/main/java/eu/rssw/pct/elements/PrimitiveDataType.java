@@ -89,7 +89,7 @@ public enum PrimitiveDataType {
       case CHARACTER:
         return "C";
       case CLASS:
-        return "L";
+        return "Z";
       case COMPONENT_HANDLE:
         return "CH";
       case DATASET:
