@@ -453,59 +453,66 @@ public class ParseUnit {
     }
   }
 
+  private void handleSearchNode(Source src, Reference ref, List<JPNode> recordNodes) {
+    String tableName = ref.getObjectIdentifier();
+    boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
+    int tableType = tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE;
+    if (tempTable && (tableName.lastIndexOf(':') != -1)) {
+      // Temp-table defined in classes are prefixed by the class name
+      tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
+    }
+    if (!tempTable && (tableName.indexOf("._") != -1)) {
+      // DBName._Metaschema -> skip
+      return;
+    }
+
+    boolean lFound = false;
+    for (JPNode node : recordNodes) {
+      RecordNameNode recNode = (RecordNameNode) node;
+      if (isReferenceAssociatedToRecordNode(recNode, src, ref, tableName, tableType)) {
+        recNode.setWholeIndex("WHOLE-INDEX".equals(ref.getDetail()));
+        recNode.setSearchIndexName(recNode.getTableBuffer().getTable().getName() + "." + ref.getObjectContext());
+        lFound = true;
+        break;
+      }
+    }
+    if (!lFound && "WHOLE-INDEX".equals(ref.getDetail())) {
+      LOGGER.debug("WHOLE-INDEX search on '{}' with index '{}' couldn't be assigned to {} at line {}", tableName,
+          ref.getObjectContext(), new File(src.getFileName()).getPath(), ref.getLineNum());
+    }
+  }
+
+  private void handleSortAccessNode(Source src, Reference ref, List<JPNode> recordNodes) {
+    String tableName = ref.getObjectIdentifier();
+    boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
+    int tableType = tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE;
+    if (tempTable && (tableName.lastIndexOf(':') != -1)) {
+      tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
+    }
+    if (!tempTable && (tableName.indexOf("._") != -1)) {
+      // DBName._Metaschema -> skip
+      return;
+    }
+
+    for (JPNode node : recordNodes) {
+      RecordNameNode recNode = (RecordNameNode) node;
+      if (isReferenceAssociatedToRecordNode(recNode, src, ref, tableName, tableType)) {
+        recNode.setSortAccess(ref.getObjectContext());
+        break;
+      }
+    }
+  }
+
   private void finalizeXrefInfo() {
     if ((topNode == null) || (xref == null))
       return;
     List<JPNode> recordNodes = topNode.query(ABLNodeType.RECORD_NAME);
     for (Source src : xref.getSource()) {
-      File srcFile = new File(src.getFileName());
       for (Reference ref : src.getReference()) {
         if ("search".equalsIgnoreCase(ref.getReferenceType())) {
-          String tableName = ref.getObjectIdentifier();
-          boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
-          int tableType = tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE;
-          if (tempTable && (tableName.lastIndexOf(':') != -1)) {
-            // Temp-table defined in classes are prefixed by the class name
-            tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
-          }
-          if (!tempTable && (tableName.indexOf("._") != -1)) {
-            // DBName._Metaschema -> skip
-            continue;
-          }
-
-          boolean lFound = false;
-          for (JPNode node : recordNodes) {
-            RecordNameNode recNode = (RecordNameNode) node;
-            if (isReferenceAssociatedToRecordNode(recNode, src, ref, tableName, tableType)) {
-              recNode.setWholeIndex("WHOLE-INDEX".equals(ref.getDetail()));
-              recNode.setSearchIndexName(recNode.getTableBuffer().getTable().getName() + "." + ref.getObjectContext());
-              lFound = true;
-              break;
-            }
-          }
-          if (!lFound && "WHOLE-INDEX".equals(ref.getDetail())) {
-            LOGGER.debug("WHOLE-INDEX search on '{}' with index '{}' couldn't be assigned to {} at line {}", tableName,
-                ref.getObjectContext(), srcFile.getPath(), ref.getLineNum());
-          }
+          handleSearchNode(src, ref, recordNodes);
         } else if ("sort-access".equalsIgnoreCase(ref.getReferenceType())) {
-          String tableName = ref.getObjectIdentifier();
-          boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
-          int tableType = tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE;
-          if (tempTable && (tableName.lastIndexOf(':') != -1)) {
-            tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
-          }
-          if (!tempTable && (tableName.indexOf("._") != -1)) {
-            // DBName._Metaschema -> skip
-            continue;
-          }
-
-          for (JPNode node : recordNodes) {
-            RecordNameNode recNode = (RecordNameNode) node;
-            if (isReferenceAssociatedToRecordNode(recNode, src, ref, tableName, tableType)) {
-              recNode.setSortAccess(ref.getObjectContext());
-              break;
-            }
-          }
+          handleSortAccessNode(src, ref, recordNodes);
         }
       }
     }
