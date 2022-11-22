@@ -197,6 +197,7 @@ statement:
   |  aaTraceCloseStatement
   |  aaTraceStatement
   |  accumulateStatement
+  |  aggregateStatement
   |  analyzeStatement
   |  applyStatement
   |  assignStatement
@@ -796,6 +797,14 @@ aggregateOption: // SEMITRANSLATED
 
 allExceptFields:
     ALL exceptFields?
+  ;
+
+aggregateStatement:
+    AGGREGATE expressionTerm EQUAL aggregateExpression FOR record ( WHERE expression )? statementEnd
+  ;
+
+aggregateExpression:
+    ( COUNT | TOTAL | AVERAGE ) LEFTPAREN fieldn RIGHTPAREN
   ;
 
 analyzeStatement:
@@ -1541,7 +1550,8 @@ dataRelation:
     (
       fieldMappingPhrase
     | REPOSITION
-    | dataRelationNested
+    | NESTED
+    | FOREIGNKEYHIDDEN
     | NOTACTIVE
     | RECURSIVE
     )*
@@ -1561,10 +1571,6 @@ fieldMappingPhrase:
     fieldExpr COMMA fieldExpr
     ( COMMA fieldExpr COMMA fieldExpr )*
     RIGHTPAREN
-  ;
-
-dataRelationNested:
-    NESTED FOREIGNKEYHIDDEN?
   ;
 
 defineDataSourceStatement:
@@ -2752,7 +2758,7 @@ nextValueFunction:
   ;
 
 noReturnValueStatement:
-    NORETURNVALUE expressionTerm // Only limited subset of expressionTerm is valid here
+    NORETURNVALUE expressionTerm statementEnd // Only limited subset of expressionTerm is valid here
   ;
 
 nullPhrase:

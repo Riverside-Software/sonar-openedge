@@ -45,6 +45,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   private MacroRef currRef;
   /* Temp object for editable section */
   private CodeSection currSection;
+  private List<String> messages = new ArrayList<>();
 
   public PreprocessorEventListener() {
     root = new IncludeRef(null, 0, 0, 0, 0);
@@ -56,6 +57,10 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
 
   public IncludeRef getMacroGraph() {
     return root;
+  }
+
+  public List<String> getMessages() {
+    return messages;
   }
 
   @Override
@@ -188,6 +193,11 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
       appBuilderSections.add(currSection);
     }
     currSection = null;
+  }
+
+  @Override
+  public void message(String str) {
+    messages.add(str);
   }
 
   public boolean isAppBuilderCode() {

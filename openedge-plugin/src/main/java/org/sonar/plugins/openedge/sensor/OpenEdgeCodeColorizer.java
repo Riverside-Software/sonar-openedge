@@ -68,7 +68,7 @@ public class OpenEdgeCodeColorizer implements Sensor {
     for (InputFile file : context.fileSystem().inputFiles(
         context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("Syntax highlight on {}", file);
-      IProparseEnvironment session = sessions.getSession(file.relativePath());
+      IProparseEnvironment session = sessions.getSession(file.toString());
       try {
         highlightFile(context, session, file);
       } catch (UncheckedIOException | ProparseRuntimeException caught) {

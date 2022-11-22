@@ -506,6 +506,12 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void enterAggregateStatement(AggregateStatementContext ctx) {
+    setContextQualifier(ctx.expressionTerm(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.record(), ContextQualifier.BUFFERSYMBOL);
+  }
+
+  @Override
   public void enterAssignmentList(AssignmentListContext ctx) {
     if (ctx.record() != null) {
       setContextQualifier(ctx.record(), ContextQualifier.UPDATING);

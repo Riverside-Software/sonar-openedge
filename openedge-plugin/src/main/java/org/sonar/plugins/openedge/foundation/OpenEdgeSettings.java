@@ -50,6 +50,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.Schema;
+import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.sonar.api.CoreProperties;
@@ -264,6 +265,16 @@ public class OpenEdgeSettings {
       ITypeInfo inf = getRCode2(iface);
       if (inf != null) {
         parseHierarchy(inf);
+      }
+    }
+  }
+
+  private final void parseClassDocumentation() {
+    Optional<String> classDoc = config.get(Constants.CLASS_DOCUMENTATION);
+    if (classDoc.isPresent()) {
+      for (String str : Splitter.on(',').trimResults().omitEmptyStrings().split(classDoc.get())) {
+        ClassDocumentation.fromJsonDocumentation(Paths.get(str)).stream() //
+          .forEach(it -> defaultSession.injectClassDocumentation(it));
       }
     }
   }
@@ -683,6 +694,8 @@ public class OpenEdgeSettings {
       if (runtime.getProduct() == SonarProduct.SONARQUBE) {
         // Parse entire build directory if not in SonarLint
         parseBuildDirectory();
+        // Parse class documentation
+        parseClassDocumentation();
       }
     }
 

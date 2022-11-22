@@ -92,7 +92,7 @@ public class Parameter {
         Variable v = (Variable) symbol;
         if (v != null) {
           if (v.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
-            sb.append('L').append(v.getDataType().getClassName());
+            sb.append('Z').append(v.getDataType().getClassName());
           } else {
             sb.append(v.getDataType().getPrimitive().getSignature());
           }

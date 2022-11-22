@@ -205,9 +205,12 @@ public class CPDCallbackTest {
 
   private InputFile getInputFile(SensorContextTester context, String file) {
     try {
-      InputFile inputFile = TestInputFileBuilder.create(BASEDIR, file).setLanguage(Constants.LANGUAGE_KEY).setType(
-          Type.MAIN).setCharset(StandardCharsets.UTF_8).setContents(
-              Files.toString(new File(BASEDIR, file), StandardCharsets.UTF_8)).build();
+      InputFile inputFile = TestInputFileBuilder.create(BASEDIR, file) //
+        .setLanguage(Constants.LANGUAGE_KEY) //
+        .setType(Type.MAIN) //
+        .setCharset(StandardCharsets.UTF_8) //
+        .setContents(Files.asCharSource(new File(BASEDIR, file), StandardCharsets.UTF_8).read()) //
+        .build();
       context.fileSystem().add(inputFile);
 
       return inputFile;

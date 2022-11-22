@@ -70,7 +70,7 @@ public class OpenEdgeCPDSensor implements Sensor {
     for (InputFile file : context.fileSystem().inputFiles(
         context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       LOG.debug("CPD on {}", file);
-      IProparseEnvironment session = sessions.getSession(file.relativePath());
+      IProparseEnvironment session = sessions.getSession(file.toString());
       try {
         processFile(context, session, file);
       } catch (UncheckedIOException | ProparseRuntimeException caught) {

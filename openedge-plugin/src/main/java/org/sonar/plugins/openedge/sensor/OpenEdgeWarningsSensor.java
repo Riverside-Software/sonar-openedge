@@ -176,7 +176,9 @@ public class OpenEdgeWarningsSensor implements Sensor {
         msg = msg.substring(0, lastOpeningParen);
       }
       if (msg.startsWith("WARNING: ")) {
-        msg = msg.substring(8);
+        msg = msg.substring(9);
+      } else if (msg.startsWith("** WARNING--")) {
+        msg = msg.substring(12);
       }
       results.add(new Warning(fileName, lineNumber == null ? 0 : lineNumber, msg.trim(), msgNum == null ? -1 : msgNum));
 

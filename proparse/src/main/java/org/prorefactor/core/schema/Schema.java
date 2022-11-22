@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -80,6 +81,11 @@ public class Schema implements ISchema {
       }
     }
     injectMetaSchema();
+  }
+
+  @Override
+  public Collection<IDatabase> getDatabases() {
+    return getDbSet();
   }
 
   /** Get databases sorted by name. */
@@ -258,6 +264,32 @@ public class Schema implements ISchema {
     return lookupTableCheckName(db.getTableSet().tailSet(new Table(parts[1])), parts[1]);
   }
 
+  /**
+   * HOWTO: Generate proparse/src/main/resources/meta.txt
+   * 
+   * Create new database + Enable auditing + CDC + Table Partitioning
+   * 
+   * Execute:
+   * DEFINE VARIABLE lst AS CHARACTER   NO-UNDO.
+   * OUTPUT TO "meta.txt".
+   * FOR EACH _file WHERE (_file-num LT 0) OR (_file-name BEGINS 'SYS') BY _file-name:
+   *   PUT UNFORMATTED SUBSTITUTE("T&1", _file-name) SKIP.
+   *   FOR EACH _field OF _file:
+   *     PUT UNFORMATTED SUBSTITUTE("F&1:&2:&3", _field-name, _data-type, _extent) SKIP.
+   *   END.
+   *   FOR EACH _index OF _file:
+   *     lst = ''.
+   *     FOR EACH _index-field OF _index :
+   *       FIND _field WHERE RECID(_field)  = _index-field._field-recid.
+   *       ASSIGN lst = lst + (IF lst = '' THEN '' ELSE ':') + (IF _ascending THEN 'A' ELSE 'D') + _field-name.
+   *     END.
+   *     PUT UNFORMATTED SUBSTITUTE("I&1:&2&3:&4", _index-name, (IF recid(_index) = _file._prime-index THEN 'P' ELSE ''), IF _unique THEN 'U' ELSE '', lst) SKIP. 
+   *   END.
+   * END.
+   * OUTPUT CLOSE.
+   *
+   * Keep _Startup and _Statbase in file for compatibility reason
+   */
   private class SchemaLineProcessor implements LineProcessor<Void> {
     private IDatabase currDatabase;
     private Table currTable;

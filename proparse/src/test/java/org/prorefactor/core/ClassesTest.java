@@ -53,7 +53,7 @@ public class ClassesTest {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
-    assertTrue(unit.getTopNode().query(ABLNodeType.ANNOTATION).size() == 1);
+    assertTrue(unit.getTopNode().query(ABLNodeType.ANNOTATION).size() == 3);
     assertEquals(unit.getTopNode().query(ABLNodeType.ANNOTATION).get(0).getAnnotationName(),
         "Progress.Lang.Deprecated");
     JPNode method = unit.getTopNode().query(ABLNodeType.ANNOTATION).get(0).asIStatement().getNextStatement().asJPNode();
@@ -64,15 +64,36 @@ public class ClassesTest {
     assertEquals(method.asIStatement().getAnnotations().get(0), "@Progress.Lang.Deprecated");
     assertTrue(method.hasAnnotation("@Progress.Lang.Deprecated"));
     assertFalse(method.hasAnnotation("@Progress.Deprecated"));
+    JPNode method2 = unit.getTopNode().query(ABLNodeType.ANNOTATION).get(1).asIStatement().getNextStatement().asJPNode();
+    assertNotNull(method2);
+    assertEquals(method2.getNodeType(), ABLNodeType.METHOD);
+    assertNotNull(method2.asIStatement().getAnnotations());
+    assertEquals(method2.asIStatement().getAnnotations().size(), 1);
+    assertEquals(method2.asIStatement().getAnnotations().get(0), "@Progress.Lang.Deprecated(message = 'foobar')");
+    assertTrue(method2.hasAnnotation("@Progress.Lang.Deprecated"));
+    assertFalse(method2.hasAnnotation("@Progress.Lang.Deprecatedd"));
+    JPNode method3 = unit.getTopNode().query(ABLNodeType.ANNOTATION).get(2).asIStatement().getNextStatement().asJPNode();
+    assertNotNull(method3);
+    assertEquals(method3.getNodeType(), ABLNodeType.METHOD);
+    assertNotNull(method3.asIStatement().getAnnotations());
+    assertEquals(method3.asIStatement().getAnnotations().size(), 1);
+    assertEquals(method3.asIStatement().getAnnotations().get(0), "@Progress.Lang.Deprecated(since= '1.1', message = 'foobar' )");
+    assertTrue(method3.hasAnnotation("@Progress.Lang.Deprecated"));
+
     JPNode inMethodStmt = method.findDirectChild(ABLNodeType.CODE_BLOCK).queryStateHead(ABLNodeType.RETURN).get(0);
     assertTrue(inMethodStmt.hasAnnotation("@Progress.Lang.Deprecated"));
     assertFalse(inMethodStmt.hasAnnotation("@Progress.Deprecated"));
 
-    List<Routine> lst = unit.getRootScope().lookupRoutines("addError");
-    assertNotNull(lst);
-    assertEquals(lst.size(), 2);
-    assertEquals(lst.get(0).getSignature(), "AddError(ILProgress.Lang.Error)");
-    assertEquals(lst.get(1).getSignature(), "AddError(IC)");
+    List<Routine> lst0 = unit.getRootScope().lookupRoutines("LoadLogger");
+    assertNotNull(lst0);
+    assertEquals(lst0.size(), 1);
+    assertEquals(lst0.get(0).getSignature(), "LoadLogger(II)");
+
+    List<Routine> lst1 = unit.getRootScope().lookupRoutines("addError");
+    assertNotNull(lst1);
+    assertEquals(lst1.size(), 2);
+    assertEquals(lst1.get(0).getSignature(), "AddError(IZProgress.Lang.Error)");
+    assertEquals(lst1.get(1).getSignature(), "AddError(IC)");
 
     List<Routine> lst2 = unit.getRootScope().lookupRoutines("addWarnings");
     assertNotNull(lst2);

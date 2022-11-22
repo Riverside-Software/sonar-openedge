@@ -89,7 +89,7 @@ public enum PrimitiveDataType {
       case CHARACTER:
         return "C";
       case CLASS:
-        return "L";
+        return "Z";
       case COMPONENT_HANDLE:
         return "CH";
       case DATASET:
@@ -132,6 +132,62 @@ public enum PrimitiveDataType {
         return "TH";
       case VOID:
         return "V";
+      default:
+        return "?";
+    }
+  }
+
+  public String getIDESignature() {
+    switch (this) {
+      case BLOB:
+      case CLOB:
+        return "LOB";
+      case CHARACTER:
+        return "CHAR";
+      case CLASS:
+        return "CLZ";
+      case COMPONENT_HANDLE:
+        return "COM-HDL";
+      case DATASET:
+        return "DS";
+      case DATASET_HANDLE:
+        return "DS-HDL";
+      case DATE:
+        return "DT";
+      case DATETIME:
+        return "DTM";
+      case DATETIME_TZ:
+        return "DTMZ";
+      case DECIMAL:
+      case DOUBLE:
+      case FLOAT:
+        return "DEC";
+      case HANDLE:
+        return "HDL";
+      case INT64:
+        return "INT64";
+      case INTEGER:
+        return "INT";
+      case LOGICAL:
+        return "LOG";
+      case LONG:
+        return "LONG";
+      case LONGCHAR:
+        return "CLOB";
+      case MEMPTR:
+        return "MEMPTR";
+      case RAW:
+        return "RAW";
+      case RECID:
+        return "RECID";
+      case ROWID:
+        return "ROWID";
+      case TABLE:
+        return "TBL";
+      case TABLE_HANDLE:
+        return "TBL-HDL";
+      case VOID:
+        return "VOID";
       default:
         return "?";
     }

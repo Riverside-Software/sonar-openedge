@@ -10,19 +10,21 @@ CLASS rssw.pct.LoadLogger INHERITS rssw.pct.AbstractLoadLogger:
   DEFINE VARIABLE errors AS LONGCHAR NO-UNDO.
   DEFINE VARIABLE warnings AS LONGCHAR NO-UNDO.
 
-  CONSTRUCTOR PUBLIC LoadLogger():
+  CONSTRUCTOR PUBLIC LoadLogger(xx as int):
     THIS-OBJECT:IsReader = FALSE.
   END CONSTRUCTOR.
 
+  @Progress.Lang.Deprecated.
   METHOD PUBLIC LONGCHAR getErrors ():
     RETURN errors.
   END METHOD.
 
-  @Progress.Lang.Deprecated.
+  @Progress.Lang.Deprecated(message = 'foobar').
   METHOD PUBLIC LONGCHAR getWarnings ():
     RETURN warnings.
   END METHOD.
 
+  @Progress.Lang.Deprecated(since=   '1.1',  message = 'foobar' ).
   METHOD PUBLIC OVERRIDE VOID AddError( pError as Error) :
     DEFINE VARIABLE zz AS INTEGER NO-UNDO.
 

@@ -264,9 +264,12 @@ public class OpenEdgeProparseSensorTest {
     MapSettings settings = new MapSettings();
     SensorContextTester context = TestProjectSensorContext.createContext(settings);
 
-    context.fileSystem().add(
-        new TestInputFileBuilder(BASEDIR, "src/procedures/test5.p").setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, "src/procedures/test5.p"), Charset.defaultCharset())).build());
+    context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, "src/procedures/test5.p") //
+      .setLanguage(Constants.LANGUAGE_KEY) //
+      .setType(Type.MAIN) //
+      .setCharset(Charset.defaultCharset()) //
+      .setContents(Files.asCharSource(new File(BASEDIR, "src/procedures/test5.p"), Charset.defaultCharset()).read()) //
+      .build());
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
@@ -286,9 +289,12 @@ public class OpenEdgeProparseSensorTest {
     settings.setProperty("sonar.oe.proparse.tokenStartChars", ";!^");
     SensorContextTester context = TestProjectSensorContext.createContext(settings);
 
-    context.fileSystem().add(
-        new TestInputFileBuilder(BASEDIR, "src/procedures/test5.p").setLanguage(Constants.LANGUAGE_KEY).setType(
-            Type.MAIN).setCharset(Charset.defaultCharset()).setContents(Files.toString(new File(BASEDIR, "src/procedures/test5.p"), Charset.defaultCharset())).build());
+    context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, "src/procedures/test5.p") //
+        .setLanguage(Constants.LANGUAGE_KEY) //
+        .setType(Type.MAIN) //
+        .setCharset(Charset.defaultCharset()) //
+        .setContents(Files.asCharSource(new File(BASEDIR, "src/procedures/test5.p"), Charset.defaultCharset()).read()) //
+        .build());
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);

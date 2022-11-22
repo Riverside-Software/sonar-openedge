@@ -167,9 +167,9 @@ public class OpenEdgeProparseSensor implements Sensor {
 
       if (System.currentTimeMillis() - prevMessage > 30000L) {
         prevMessage = System.currentTimeMillis();
-        LOG.info("{}/{} - Current file: {}", numFiles, totFiles, file.relativePath());
+        LOG.info("{}/{} - Current file: {}", numFiles, totFiles, file.toString());
       }
-      IProparseEnvironment session = sessions.getSession(file.relativePath());
+      IProparseEnvironment session = sessions.getSession(file.toString());
       if (settings.isIncludeFile(file.filename())) {
         parseIncludeFile(context, file, session);
       } else {
@@ -452,7 +452,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   }
 
   private void generateProparseDebugFile(InputFile file, ParseUnit unit) {
-    String fileName = ".proparse/" + file.relativePath() + ".json";
+    String fileName = ".proparse/" + file.toString() + ".json";
     File dbgFile = new File(fileName);
     dbgFile.getParentFile().mkdirs();
     try (PrintWriter writer = new PrintWriter(dbgFile)) {
@@ -460,7 +460,7 @@ public class OpenEdgeProparseSensor implements Sensor {
           ABLNodeType.RIGHTPAREN, ABLNodeType.COMMA, ABLNodeType.PERIOD, ABLNodeType.LEXCOLON, ABLNodeType.OBJCOLON,
           ABLNodeType.THEN, ABLNodeType.END);
       nodeLister.print();
-      debugFiles.add(file.relativePath() + ".json");
+      debugFiles.add(file.toString() + ".json");
     } catch (IOException caught) {
       LOG.error("Unable to write proparse debug file", caught);
     }

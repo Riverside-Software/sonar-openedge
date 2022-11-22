@@ -122,4 +122,14 @@ public class ClumsySyntaxTest extends AbstractTest {
     assertEquals(context.allIssues().size(), 0);
   }
 
+  @Test
+  public void test7() {
+    InputFile inputFile = getInputFile("clumsy07.p");
+    ClumsySyntax rule = new ClumsySyntax();
+    rule.setContext(ruleKey, context, null);
+    rule.sensorExecute(inputFile, getParseUnit(inputFile));
+
+    assertEquals(context.allIssues().size(), 0);
+  }
+
 }

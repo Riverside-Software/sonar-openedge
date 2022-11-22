@@ -25,6 +25,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.prorefactor.core.nodetypes.AggregateExpression;
 import org.prorefactor.core.nodetypes.ArrayReferenceNode;
 import org.prorefactor.core.nodetypes.AttributeReferenceNode;
 import org.prorefactor.core.nodetypes.BuiltinFunctionNode;
@@ -1095,6 +1096,9 @@ public class JPNode {
             break;
           case ENTERED_FUNC:
             node = new EnteredFunction(tok, up, num, hasChildren);
+            break;
+          case AGGREGATE_EXPRESSION:
+            node = new AggregateExpression(tok, up, num, hasChildren);
             break;
           case STAR:
           case MULTIPLY:

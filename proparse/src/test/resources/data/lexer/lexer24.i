@@ -1,0 +1,1 @@
+&MESSAGE X{&P1}X{&P2}X

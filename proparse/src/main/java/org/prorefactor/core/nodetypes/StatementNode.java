@@ -109,12 +109,18 @@ public class StatementNode extends JPNode implements IStatement {
 
   @Override
   public boolean hasAnnotation(String str) {
-    if ((annotations != null) && annotations.contains(str))
+    if (currNodeHasAnnotation(str))
       return true;
     else if (parentStatement != null)
       return parentStatement.asJPNode().hasAnnotation(str);
     else
       return false;
+  }
+
+  private boolean currNodeHasAnnotation(String str) {
+    if (annotations == null)
+      return false;
+    return annotations.stream().anyMatch(it -> it.equals(str) || it.startsWith(str + '('));
   }
 
   @Override

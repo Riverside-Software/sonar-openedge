@@ -39,6 +39,7 @@ import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Modifier;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
+import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.Variable.ReadWrite;
 import org.prorefactor.treeparser.symbols.Variable.ReadWriteReference;
@@ -1401,4 +1402,34 @@ public class TreeParser03Test {
     assertEquals(zz.getDataType(), DataType.DECIMAL);
     assertEquals(zz2.getDataType(), DataType.DECIMAL);
   }
+
+  @Test
+  public void test41() {
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser03/test41.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Variable numCustomers = unit.getRootScope().getVariable("numCustomers");
+    assertNotNull(numCustomers);
+    assertEquals(numCustomers.getDataType(), DataType.INTEGER);
+    assertEquals(numCustomers.getNumReads(), 1);
+    assertEquals(numCustomers.getNumWrites(), 3);
+    assertEquals(unit.getRootScope().getUnnamedBuffers().size(), 1);
+
+    TableBuffer buff = unit.getRootScope().getUnnamedBuffers().iterator().next();
+    assertNotNull(buff);
+    assertEquals(buff.getName(), "Customer");
+    assertEquals(buff.getAllRefsCount(), 3);
+
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.AGGREGATE_EXPRESSION);
+    assertNotNull(nodes);
+    assertEquals(nodes.size(), 3);
+    assertEquals(nodes.get(0).asIExpression().getDataType(), DataType.INT64);
+    assertEquals(nodes.get(1).asIExpression().getDataType(), DataType.INT64);
+    assertEquals(nodes.get(2).asIExpression().getDataType(), DataType.DECIMAL);
+  }
+
 }

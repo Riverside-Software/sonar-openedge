@@ -46,4 +46,39 @@ public interface IMethodElement extends IAccessibleElement {
     return retVal.toString();
   }
 
+  default String getIDESignature() {
+    StringBuilder retVal = new StringBuilder(getName()).append('(');
+    boolean first = true;
+    for (IParameter p : getParameters()) {
+      if (first) {
+        first = false;
+      } else {
+        retVal.append(", ");
+      }
+      retVal.append(p.getIDESignature());
+    }
+    retVal.append(')');
+    return retVal.toString();
+  }
+
+  default String getIDEInsertElement(boolean upperCase) {
+    StringBuilder retVal = new StringBuilder(getName()).append('(');
+    int cnt = 1;
+    for (IParameter p : getParameters()) {
+      if (cnt > 1) {
+        retVal.append(", ");
+      }
+      String mode = "";
+      if (p.getMode() == ParameterMode.INPUT_OUTPUT)
+        mode = "input-output ";
+      else if ((p.getMode() == ParameterMode.OUTPUT) || (p.getMode() == ParameterMode.RETURN))
+        mode = "output ";
+      if (upperCase)
+        mode = mode.toUpperCase();
+      retVal.append(mode).append("${" + cnt++ + ":").append(p.getName()).append("}");
+    }
+    retVal.append(")$0");
+    return retVal.toString();
+  }
+
 }

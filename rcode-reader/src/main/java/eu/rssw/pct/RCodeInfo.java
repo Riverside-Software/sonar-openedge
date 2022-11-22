@@ -101,7 +101,7 @@ public class RCodeInfo {
    * Parse InputStream and store debug segment information
    * 
    * @param input Has to be closed by caller
-   * @param out Output stream for debug. Can be null
+   * @param out   Output stream for debug. Can be null
    * 
    * @throws InvalidRCodeException
    * @throws IOException
@@ -111,30 +111,35 @@ public class RCodeInfo {
     processSignatureBlock(input, out);
     processSegmentTable(input, out);
 
-    if ((initialValueSegmentOffset >= 0) && (initialValueSegmentSize > 0)) {
-      long bytesRead = input.skip(initialValueSegmentOffset);
-      if (bytesRead != initialValueSegmentOffset) {
-        throw new InvalidRCodeException("Not enough bytes to reach initial values segment");
-      }
-      processInitialValueSegment(input, out);
+    byte[] rcodeBlock = new byte[rcodeSize];
+    int bytesRead = input.read(rcodeBlock);
+    if (bytesRead != rcodeSize) {
+      throw new InvalidRCodeException("Not enough bytes in rcode block");
     }
-
+    if ((initialValueSegmentOffset >= 0) && (initialValueSegmentSize > 0)) {
+      processInitialValueSegment(Arrays.copyOfRange(rcodeBlock, initialValueSegmentOffset,
+          initialValueSegmentOffset + initialValueSegmentSize), out);
+    }
+    if ((actionSegmentOffset >= 0) && (actionSegmentSize > 0)) {
+      processActionSegment(Arrays.copyOfRange(rcodeBlock, actionSegmentOffset, actionSegmentOffset + actionSegmentSize),
+          out);
+    }
+    if ((ecodeSegmentOffset >= 0) && (ecodeSegmentSize > 0)) {
+      processEcodeSegment(Arrays.copyOfRange(rcodeBlock, ecodeSegmentOffset, ecodeSegmentOffset + ecodeSegmentSize),
+          out);
+    }
     if ((debugSegmentOffset > 0) && (debugSegmentSize > 0)) {
-      long bytesRead = input.skip((long) debugSegmentOffset - initialValueSegmentSize);
-      if (bytesRead != debugSegmentOffset - initialValueSegmentSize) {
-        throw new InvalidRCodeException("Not enough bytes to reach debug segment");
-      }
-      processDebugSegment(input, out);
+      processDebugSegment(Arrays.copyOfRange(rcodeBlock, debugSegmentOffset, debugSegmentOffset + debugSegmentSize),
+          out);
     }
 
     if (typeBlockSize > 0) {
-      int skip = debugSegmentOffset > 0 ? rcodeSize - debugSegmentOffset - debugSegmentSize
-          : rcodeSize - initialValueSegmentSize - debugSegmentSize;
-      long bytesRead = input.skip(skip);
-      if (bytesRead != skip) {
-        throw new InvalidRCodeException("Not enough bytes to reach type block");
+      byte[] typeBlock = new byte[typeBlockSize];
+      bytesRead = input.read(typeBlock);
+      if (bytesRead != typeBlockSize) {
+        throw new InvalidRCodeException("Not enough bytes in type block");
       }
-      processTypeBlock(input, out);
+      processTypeBlock(typeBlock, out);
       isClass = true;
     }
 
@@ -169,7 +174,7 @@ public class RCodeInfo {
       if (input.read(header2) != 16) {
         throw new InvalidRCodeException("Not enough bytes in OE12 header");
       }
-      
+
       timeStamp = ByteBuffer.wrap(header, HEADER_OFFSET_TIMESTAMP, Integer.BYTES).order(order).getInt();
       digestOffset = ByteBuffer.wrap(header, HEADER_OFFSET_DIGEST_V12, Short.BYTES).order(order).getShort();
       segmentTableSize = ByteBuffer.wrap(header, HEADER_OFFSET_SEGMENT_TABLE_SIZE, Short.BYTES).order(order).getShort();
@@ -186,9 +191,15 @@ public class RCodeInfo {
     } else {
       throw new InvalidRCodeException("Only v11 rcode is supported");
     }
+
+    if (out != null) {
+      out.printf("%nSig Sz: %08X -- SegTbl Sz: %08X -- TypeBlock Sz: %08X -- RCode Sz: %08X%n", signatureSize,
+          segmentTableSize, typeBlockSize, rcodeSize);
+    }
   }
 
-  private final void processSignatureBlock(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {
+  private final void processSignatureBlock(InputStream input, PrintStream out)
+      throws IOException, InvalidRCodeException {
     byte[] header = new byte[signatureSize];
     int bytesRead = input.read(header);
     if (bytesRead != signatureSize) {
@@ -231,7 +242,7 @@ public class RCodeInfo {
       throw new InvalidRCodeException("Not enough bytes in segment table block");
     }
     if (out != null) {
-      out.printf("%n*******%nSEGMENT%n*******%n");
+      out.printf("%n**************%nSEGMENTS TABLE%n**************%n");
       printByteBuffer(out, header);
     }
 
@@ -243,18 +254,23 @@ public class RCodeInfo {
     ecodeSegmentSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_ECODE_SEGMENT_SIZE, Integer.BYTES).order(order).getInt();
     debugSegmentOffset = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_DEBUG_SEGMENT_OFFSET, Integer.BYTES).order(order).getInt();
     debugSegmentSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_DEBUG_SEGMENT_SIZE, Integer.BYTES).order(order).getInt();
-    
+
     ipacsTableSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_IPACS_TABLE_SIZE, Short.BYTES).order(order).getShort();
     frameSegmentTableSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_FRAME_SEGMENT_TABLE_SIZE, Short.BYTES).order(order).getShort();
     textSegmentTableSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_TEXT_SEGMENT_TABLE_SIZE, Short.BYTES).order(order).getShort();
+
+    if (out != null) {
+      out.printf("%nInitVal segment: %08X %08X%n", initialValueSegmentOffset, initialValueSegmentSize);
+      out.printf("Action segment:  %08X %08X%n", actionSegmentOffset, actionSegmentSize);
+      out.printf("Ecode segment:   %08X %08X%n", ecodeSegmentOffset, ecodeSegmentSize);
+      out.printf("Debug segment:   %08X %08X%n", debugSegmentOffset, debugSegmentSize);
+      out.printf("IPACS Sz:                 %08X%n", ipacsTableSize);
+      out.printf("FrameSeg Sz:              %08X%n", frameSegmentTableSize);
+      out.printf("TextSeg Sz:               %08X%n", textSegmentTableSize);
+    }
   }
 
-  void processTypeBlock(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {
-    byte[] segment = new byte[typeBlockSize];
-    int bytesRead = input.read(segment);
-    if (bytesRead != typeBlockSize) {
-      throw new InvalidRCodeException("Not enough bytes in type block");
-    }
+  void processTypeBlock(byte[] segment, PrintStream out) throws IOException, InvalidRCodeException {
     if (out != null) {
       out.printf("%n**********%nTYPE BLOCK%n***********%n");
       printByteBuffer(out, segment);
@@ -267,36 +283,23 @@ public class RCodeInfo {
     }
   }
 
-  private final void processInitialValueSegment(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {
-    byte[] segment = new byte[initialValueSegmentSize];
-    int bytesRead = input.read(segment);
-    if (bytesRead != initialValueSegmentSize) {
-      throw new InvalidRCodeException("Not enough bytes in initial value segment block");
-    }
-    if (out != null) {
-      out.printf("%n**********%nINITIAL VALUES%n***********%n");
-      printByteBuffer(out, segment);
-    }
+  void processInitialValueSegment(byte[] segment, PrintStream out) throws IOException, InvalidRCodeException {
+    // No-op
   }
 
-  void processDebugSegment(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {
-    byte[] segment = new byte[debugSegmentSize];
-    int bytesRead = input.read(segment);
-    if (bytesRead != debugSegmentSize) {
-      throw new InvalidRCodeException("Not enough bytes in debug segment block");
-    }
-    if (out != null) {
-      out.printf("%n*******%nDEBUG%n*******%n");
-      printByteBuffer(out, segment);
-    }
-
+  void processActionSegment(byte[] segment, PrintStream out) throws IOException, InvalidRCodeException {
+    // No-op
   }
 
-  public ITypeInfo getTypeInfo() {
-    return typeInfo;
+  void processEcodeSegment(byte[] segment, PrintStream out) throws IOException, InvalidRCodeException {
+    // No-op
   }
 
-  public static void printByteBuffer(PrintStream writer, byte[] block) {
+  void processDebugSegment(byte[] segment, PrintStream out) throws IOException, InvalidRCodeException {
+    // No-op
+  }
+
+  void printByteBuffer(PrintStream writer, byte[] block) {
     StringBuilder sb = new StringBuilder();
     int pos = 0;
     while (pos < block.length) {
@@ -319,6 +322,10 @@ public class RCodeInfo {
       writer.print(Strings.repeat("   ", 16 - (pos % 16)));
       writer.println(" | " + sb.toString());
     }
+  }
+
+  public ITypeInfo getTypeInfo() {
+    return typeInfo;
   }
 
   /**
@@ -351,7 +358,7 @@ public class RCodeInfo {
     return readNullTerminatedString(array, offset, Charset.defaultCharset());
   }
 
-  public static String readNullTerminatedString(byte[] array, int offset, Charset charset) {
+  static String readNullTerminatedString(byte[] array, int offset, Charset charset) {
     int zz = 0;
     while ((zz + offset < array.length) && (array[zz + offset] != 0)) {
       zz++;
@@ -360,7 +367,7 @@ public class RCodeInfo {
     return charset.decode(ByteBuffer.wrap(array, offset, zz)).toString();
   }
 
-  private static int readAsciiEncodedNumber(byte[] array, int pos, int length) throws InvalidRCodeException {
+  static int readAsciiEncodedNumber(byte[] array, int pos, int length) throws InvalidRCodeException {
     try {
       return Integer.valueOf(new String(Arrays.copyOfRange(array, pos, pos + length)), 16);
     } catch (NumberFormatException caught) {

@@ -206,6 +206,18 @@ public class RCodeInfoTest {
   }
 
   @Test
+  public void testInputStreamSkip() throws IOException {
+    // Issue #1005: 
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/_dmpincr.r"));
+        InputStream input2 = new SpecialSkipInputStreamWrapper(input)) {
+      RCodeInfo rci = new RCodeInfo(input2);
+      assertFalse(rci.isClass());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
   public void testV11() throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/WebRequestV11.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
@@ -379,6 +391,7 @@ public class RCodeInfoTest {
       }
       assertNotNull(testMethod);
       assertEquals(testMethod.getSignature(), "testMethod(IT,OD,II[])");
+      assertEquals(testMethod.getIDESignature(), "testMethod(↑TBL tt1, ↓DS ds1, ↑INT[] xx)");
       assertEquals(testMethod.getExtent(), -32767);
       assertEquals(testMethod.getParameters().length, 3);
       assertEquals(testMethod.getParameters()[0].getParameterType(), ParameterType.TABLE);
@@ -405,7 +418,9 @@ public class RCodeInfoTest {
       assertEquals(testMethod21.getParameters()[0].getExtent(), 0);
       assertEquals(testMethod22.getParameters()[0].getExtent(), -32767);
       assertEquals(testMethod21.getSignature(), "testMethod2(II)");
+      assertEquals(testMethod21.getIDESignature(), "testMethod2(↑INT xx)");
       assertEquals(testMethod22.getSignature(), "testMethod2(II[])");
+      assertEquals(testMethod22.getIDESignature(), "testMethod2(↑INT[] xx)");
       assertEquals(testMethod21.getReturnType().getPrimitive(), PrimitiveDataType.INTEGER);
       assertNull(testMethod21.getReturnType().getClassName());
       assertEquals(testMethod22.getReturnType().getPrimitive(), PrimitiveDataType.INTEGER);
@@ -418,6 +433,7 @@ public class RCodeInfoTest {
       }
       assertNotNull(testMethod3);
       assertEquals(testMethod3.getSignature(), "testMethod3(ITH,MDH)");
+      assertEquals(testMethod3.getIDESignature(), "testMethod3(↑TBL-HDL htt1, ⇅DS-HDL hds1)");
       assertNotNull(testMethod3.getParameters());
       assertEquals(testMethod3.getParameters().length, 2);
       assertEquals(testMethod3.getParameters()[0].getDataType(), DataType.HANDLE);
@@ -436,7 +452,13 @@ public class RCodeInfoTest {
       }
       assertNotNull(testMethod4);
       assertEquals(testMethod4.getSignature(),
-          "testMethod4(IC,MLProgress.Lang.Object,OD,IDT,IDTZ,ODE,IH,I64,IB,ILC,OM,IRAW,IREC,IROW)");
+          "testMethod4(IC,MZProgress.Lang.Object,OD,IDT,IDTZ,ODE,IH,I64,IB,ILC,OM,IRAW,IREC,IROW)");
+      assertEquals(testMethod4.getIDESignature(),
+          "testMethod4(↑CHAR x1, ⇅Progress.Lang.Object x2, ↓DT x3, ↑DTM x4, ↑DTMZ x5, ↓DEC x6, ↑HDL x7, ↑INT64 x8, ↑LOG x9, ↑CLOB x10, ↓MEMPTR x11, ↑RAW x12, ↑RECID x13, ↑ROWID x14)");
+      assertEquals(testMethod4.getIDEInsertElement(false),
+          "testMethod4(${1:x1}, input-output ${2:x2}, output ${3:x3}, ${4:x4}, ${5:x5}, output ${6:x6}, ${7:x7}, ${8:x8}, ${9:x9}, ${10:x10}, output ${11:x11}, ${12:x12}, ${13:x13}, ${14:x14})$0");
+      assertEquals(testMethod4.getIDEInsertElement(true),
+          "testMethod4(${1:x1}, INPUT-OUTPUT ${2:x2}, OUTPUT ${3:x3}, ${4:x4}, ${5:x5}, OUTPUT ${6:x6}, ${7:x7}, ${8:x8}, ${9:x9}, ${10:x10}, OUTPUT ${11:x11}, ${12:x12}, ${13:x13}, ${14:x14})$0");
       assertEquals(testMethod4.getReturnType().getPrimitive(), PrimitiveDataType.INTEGER);
       assertNull(testMethod4.getReturnType().getClassName());
 

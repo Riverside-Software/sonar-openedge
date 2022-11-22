@@ -196,7 +196,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
   @Override
   public void enterConstructorStatement(ConstructorStatementContext ctx) {
-    newRoutine(ctx, support.getNode(ctx), "", ABLNodeType.CONSTRUCTOR);
+    newRoutine(ctx, support.getNode(ctx), ctx.tn.getText(), ABLNodeType.CONSTRUCTOR);
   }
 
   @Override
@@ -582,7 +582,11 @@ public class TreeParserBlocks extends ProparseBaseListener {
     // Assign annotations to statement
     IStatement prev = node.getPreviousStatement();
     while ((prev != null) && (prev.asJPNode().getNodeType() == ABLNodeType.ANNOTATION)) {
-      node.addAnnotation(prev.asJPNode().getText());
+      String text = prev.asJPNode().getText();
+      if (prev.asJPNode().getNumberOfChildren() > 1) {
+        text += prev.asJPNode().getFirstChild().getText();
+      }
+      node.addAnnotation(text);
       prev = prev.getPreviousStatement();
     }
   }

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.prorefactor.core.schema.ISchema;
+import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.refactor.settings.IProparseSettings;
 
 import eu.rssw.pct.elements.ITypeInfo;
@@ -89,4 +90,11 @@ public interface IProparseEnvironment {
    * Return all known classes in source directories
    */
   Collection<ITypeInfo> getAllClassesInSource();
+
+  /**
+   * Return ClassDocumentation for given class name. Null if not found
+   */
+  default ClassDocumentation getClassDocumentation(String className) {
+    return null;
+  }
 }
