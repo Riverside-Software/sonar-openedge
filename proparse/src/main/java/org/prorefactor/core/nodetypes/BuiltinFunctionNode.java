@@ -279,6 +279,7 @@ public class BuiltinFunctionNode extends ExpressionNode {
       case SQRT:
       case TRUNCATE:
         return DataType.DECIMAL;
+      case CURRENTDATE:
       case DATE:
       case ISODATE:
       case TODAY:
