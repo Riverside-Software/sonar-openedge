@@ -60,7 +60,7 @@ public class ABLLexerTest {
   @Test
   public void testDecimalNumber01() {
     final String source = "rct1:height = 0.1\n rct1:row ";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenType(lexer, ABLNodeType.ID, "rct1");
     assertNextTokenType(lexer, ABLNodeType.OBJCOLON, ":");
@@ -75,7 +75,7 @@ public class ABLLexerTest {
   @Test
   public void testDecimalNumber02() {
     final String source = "rct1:height = .1\n rct1:row ";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenType(lexer, ABLNodeType.ID, "rct1");
     assertNextTokenType(lexer, ABLNodeType.OBJCOLON, ":");
@@ -90,7 +90,7 @@ public class ABLLexerTest {
   @Test
   public void testDecimalNumber03() {
     final String source = "rct1:height = var1 * .1\n rct1:row ";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenType(lexer, ABLNodeType.ID, "rct1");
     assertNextTokenType(lexer, ABLNodeType.OBJCOLON, ":");
@@ -107,7 +107,7 @@ public class ABLLexerTest {
   @Test
   public void testDecimalNumber04() {
     final String source = "rct1:height = .1 * var1\nrct1:row ";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenType(lexer, ABLNodeType.ID, "rct1");
     assertNextTokenType(lexer, ABLNodeType.OBJCOLON, ":");
@@ -124,7 +124,7 @@ public class ABLLexerTest {
   @Test
   public void testSymbols() {
     final String source = "+ - +123 -123 += -= * *= / /= ";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.PLUS);
     assertNextTokenTypeWS(lexer, ABLNodeType.MINUS);
@@ -141,7 +141,7 @@ public class ABLLexerTest {
   @Test
   public void testAmpersand01() {
     final String source = "MESSAGE &giélles &ab-cd &ab#$%&&-_cd & && &ab/*foo*/ &ab/def message";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.MESSAGE);
     assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "&giélles");
@@ -157,7 +157,7 @@ public class ABLLexerTest {
   @Test
   public void testSlash01() {
     final String source = "MESSAGE / xyz /(2) /10";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.MESSAGE);
     assertNextTokenTypeWS(lexer, ABLNodeType.SLASH, "/");
@@ -177,7 +177,7 @@ public class ABLLexerTest {
     ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {'/'});
 
     final String source = "MESSAGE / xyz /(2) /10";
-    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.MESSAGE);
     assertNextTokenTypeWS(lexer, ABLNodeType.SLASH, "/");
@@ -192,7 +192,7 @@ public class ABLLexerTest {
   @Test
   public void testSlash03() {
     final String source = "MESSAGE //Test\nMESSAGE";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.MESSAGE);
     assertNextTokenTypeWS(lexer, ABLNodeType.COMMENT, "//Test");
@@ -202,7 +202,7 @@ public class ABLLexerTest {
   @Test
   public void testSlash04() {
     final String source = "MESSAGE /*Test*/ MESSAGE";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.MESSAGE);
     assertNextTokenTypeWS(lexer, ABLNodeType.COMMENT, "/*Test*/");
@@ -212,7 +212,7 @@ public class ABLLexerTest {
   @Test
   public void testAt01() {
     final String source = "message h@ello @hello @ RETURNS";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.MESSAGE);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h@ello");
@@ -224,7 +224,7 @@ public class ABLLexerTest {
   @Test
   public void testCaret01() {
     final String source = "FUNCTION h^ello ^hello ^ RETURNS VOID";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h^ello");
@@ -241,7 +241,7 @@ public class ABLLexerTest {
     ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {'^'});
 
     final String source = "FUNCTION h^ello ^hello ^ RETURNS VOID";
-    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h^ello");
@@ -253,7 +253,7 @@ public class ABLLexerTest {
   @Test
   public void testSemiColon01() {
     final String source = "FUNCTION h;ello ;hello ; RETURNS VOID";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h;ello");
@@ -270,7 +270,7 @@ public class ABLLexerTest {
     ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {';'});
 
     final String source = "FUNCTION h;ello ;hello ; RETURNS VOID";
-    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h;ello");
@@ -282,7 +282,7 @@ public class ABLLexerTest {
   @Test
   public void testStar01() {
     final String source = "FUNCTION h*ello *hello * *= RETURNS";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h*ello");
@@ -300,7 +300,7 @@ public class ABLLexerTest {
     ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {'*'});
 
     final String source = "FUNCTION h*ello *hello * *= VOID";
-    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h*ello");
@@ -313,7 +313,7 @@ public class ABLLexerTest {
   @Test
   public void testExclamationHashPercent01() {
     final String source = "FUNCTION h#ello h%ello #hello %hello # % RETURNS ";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h#ello");
@@ -328,7 +328,7 @@ public class ABLLexerTest {
   @Test
   public void testExclamationMarkBacktick01() {
     final String source = "FUNCTION h!ello !hello ! h`ello `hello ` RETURNS";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h!ello");
@@ -349,7 +349,7 @@ public class ABLLexerTest {
     ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {'!', '`'});
 
     final String source = "FUNCTION h!ello !hello ! h`ello `hello ` RETURNS";
-    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h!ello");
@@ -365,7 +365,7 @@ public class ABLLexerTest {
   public void testEndOfFile() {
     // Could be anything...
     final String source = "CURRENT-WINDOW:HANDLE. SESSION:FIRST-SERVER-SOCKET:HANDLE. TEMP-TABLE tt1::fld1. DATASET ds1::tt1. DATASET ds1::tt1:set-callback().";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     while (lexer.nextToken().getType() != Token.EOF) {
       // Consume until the end of the file
@@ -742,7 +742,7 @@ public class ABLLexerTest {
   @Test(enabled = false)
   public void testQuotesInPrepro01() {
     String code = "&SCOPED-DEFINE EMPTY1\n&SCOPED-DEFINE EMPTY2\"\"\n\n&MESSAGE X{&EMPTY1}X{&EMPTY2}X\n";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(code.getBytes()), "file.txt", true);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(code.getBytes()), true);
     Token tok = lexer.nextToken();
     while (tok.getType() != Token.EOF) {
       tok = lexer.nextToken();
@@ -757,7 +757,7 @@ public class ABLLexerTest {
   @Test(enabled = false)
   public void testQuotesInPrepro02() {
     String code = "&SCOPED-DEFINE EMPTY1\n&SCOPED-DEFINE EMPTY2\"\"\n\n{ lexer/lexer24.i &P1 = \"{&EMPTY1}\" &P2 = \"{&EMPTY2}\" }\n";
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(code.getBytes()), "file.txt", false);
+    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(code.getBytes()), false);
     Token tok = lexer.nextToken();
     while (tok.getType() != Token.EOF) {
       tok = lexer.nextToken();

@@ -47,6 +47,10 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   // How many levels of &IF FALSE are we currently into?
   private int consuming = 0;
 
+  public ABLLexer(IProparseEnvironment session, ByteSource src, boolean lexOnly) {
+    this(session, src, "unnamed", lexOnly);
+  }
+
   /**
    * Standard constructor for the ABL lexer. Requires an initialized session object.
    * 
