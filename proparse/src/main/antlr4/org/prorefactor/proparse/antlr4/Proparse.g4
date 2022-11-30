@@ -2797,7 +2797,7 @@ nextValueFunction:
   ;
 
 noReturnValueStatement:
-    NORETURNVALUE expressionTerm statementEnd // Only limited subset of expressionTerm is valid here
+    NORETURNVALUE expressionTerm NOERROR? statementEnd // Only limited subset of expressionTerm is valid here
   ;
 
 nullPhrase:
