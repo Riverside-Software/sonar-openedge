@@ -896,6 +896,7 @@ public class JPNode {
     private String xtra1;
     private boolean expression;
     private boolean block;
+    private String blockLabel;
 
     public Builder(ProToken tok) {
       this.tok = tok;
@@ -1000,6 +1001,11 @@ public class JPNode {
 
     public Builder setBlock(boolean block) {
       this.block = block;
+      return this;
+    }
+
+    public Builder setBlockLabel(String label) {
+      this.blockLabel = label;
       return this;
     }
 
@@ -1167,7 +1173,7 @@ public class JPNode {
             break;
           default:
             if (stmt && block)
-              node = new StatementBlockNode(tok, up, num, hasChildren, stmt2);
+              node = new StatementBlockNode(tok, up, num, hasChildren, stmt2, blockLabel);
             else if (stmt)
               node = new StatementNode(tok, up, num, hasChildren, stmt2);
             else if (block)

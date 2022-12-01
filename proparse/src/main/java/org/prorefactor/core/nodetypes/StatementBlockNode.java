@@ -27,11 +27,21 @@ import org.prorefactor.treeparser.Block;
  * METHOD, CATCH, ON
  */
 public class StatementBlockNode extends StatementNode implements IStatementBlock {
+  private final String label;
   private Block block;
   private IStatement firstStatement;
 
   public StatementBlockNode(ProToken t, JPNode parent, int num, boolean hasChildren, ABLNodeType state2) {
+    this(t, parent, num, hasChildren, state2, null);
+  }
+
+  public StatementBlockNode(ProToken t, JPNode parent, int num, boolean hasChildren, ABLNodeType state2, String label) {
     super(t, parent, num, hasChildren, state2);
+    this.label = label;
+  }
+
+  public String getBlockLabel() {
+    return label;
   }
 
   @Override

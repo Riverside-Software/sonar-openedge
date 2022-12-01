@@ -110,11 +110,6 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
-  public Builder visitLabeledBlock(LabeledBlockContext ctx) {
-    return createTreeFromFirstNode(ctx);
-  }
-
-  @Override
   public Builder visitBlockFor(BlockForContext ctx) {
     return createTreeFromFirstNode(ctx);
   }
@@ -1556,7 +1551,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitDoStatement(DoStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+    if (ctx.blockLabel() == null)
+      return createStatementTreeFromFirstNode(ctx).setBlock(true);
+    else
+      return createStatementTreeWithBlockLavel(ctx).setBlock(true);
   }
 
   @Override
@@ -1689,7 +1687,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitForStatement(ForStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+    if (ctx.blockLabel() == null)
+      return createStatementTreeFromFirstNode(ctx).setBlock(true);
+    else
+      return createStatementTreeWithBlockLavel(ctx).setBlock(true);
   }
 
   @Override
@@ -2348,7 +2349,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitRepeatStatement(RepeatStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+    if (ctx.blockLabel() == null)
+      return createStatementTreeFromFirstNode(ctx).setBlock(true);
+    else
+      return createStatementTreeWithBlockLavel(ctx).setBlock(true);
   }
 
   @Override
@@ -3045,4 +3049,24 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
     return node;
   }
 
+  private Builder createStatementTreeWithBlockLavel(RuleNode ctx) {
+    if (ctx.getChildCount() < 3)
+      return new Builder(ABLNodeType.EMPTY_NODE);
+    Builder top = visit(ctx.getChild(2)).setStatement().setRuleNode(ctx).setBlockLabel(ctx.getChild(0).getText());
+
+    Builder firstChild = top.getDown();
+    Builder lastChild = firstChild == null ? null : firstChild.getLast();
+    for (int zz = 3; zz < ctx.getChildCount(); zz++) {
+      Builder xx = visit(ctx.getChild(zz));
+      if (lastChild != null) {
+        lastChild = lastChild.setRight(xx).getLast();
+      } else if (xx != null) {
+        firstChild = xx;
+        lastChild = firstChild.getLast();
+      }
+    }
+    top.setDown(firstChild);
+
+    return top;
+  }
 }

@@ -126,7 +126,6 @@ blockOrStatement:
     emptyStatement
   | annotation
   | dotComment
-  | labeledBlock
   | assignStatement2
   | statement
   | expressionStatement
@@ -152,11 +151,6 @@ dotComment:
 
 expressionStatement:
     expression NOERROR? statementEnd
-  ;
-
-labeledBlock:
-    blockLabel
-    LEXCOLON ( doStatement | forStatement | repeatStatement )
   ;
 
 blockColon:
@@ -2020,7 +2014,7 @@ displayWith:
   ;
 
 doStatement:
-    DO blockFor? blockPreselect? blockOption* doStatementSub
+    ( blockLabel LEXCOLON )? DO blockFor? blockPreselect? blockOption* doStatementSub
   ;
 
 doStatementSub:
@@ -2174,7 +2168,7 @@ fontExpression:
   ;
 
 forStatement:
-    FOR multiRecordSearch blockOption* forstate_sub
+    ( blockLabel LEXCOLON )? FOR multiRecordSearch blockOption* forstate_sub
   ;
 
 forstate_sub:
@@ -3125,7 +3119,7 @@ readkeyStatement:
   ;
 
 repeatStatement:
-    REPEAT blockFor? blockPreselect? blockOption* repeatStatementSub
+    ( blockLabel LEXCOLON )? REPEAT blockFor? blockPreselect? blockOption* repeatStatementSub
   ;
 
 repeatStatementSub:
