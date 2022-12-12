@@ -134,7 +134,7 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
     String clsRef = ctx2.field().getText();
     String clsName = rootScope.getClassName();
     if ((clsRef != null) && (clsName != null) && (clsRef.indexOf('.') == -1) && (clsName.indexOf('.') != -1))
-      clsName = clsName.substring(clsName.indexOf('.') + 1);
+      clsName = clsName.substring(clsName.lastIndexOf('.') + 1);
 
     if ((clsRef != null) && (clsName != null) && clsRef.equalsIgnoreCase(clsName)) {
       FieldLookupResult result = currentBlock.lookupField(right, true);
