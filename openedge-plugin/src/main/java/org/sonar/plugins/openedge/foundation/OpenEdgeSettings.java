@@ -106,6 +106,7 @@ public class OpenEdgeSettings {
   private RefactorSessionEnv sessionsEnv;
   private RefactorSession defaultSession;
   private String oePluginVersion;
+  private boolean rtbCompatibility;
 
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
     this.config = config;
@@ -126,6 +127,9 @@ public class OpenEdgeSettings {
     initializeDefaultPropath(config, fileSystem);
     initializeCPD(config);
     initializeIncludeExtensions(config);
+    rtbCompatibility = config.getBoolean(Constants.RTB_COMPATIBILITY).orElse(false);
+    if (rtbCompatibility)
+      LOG.info("Using Roundtable compatibility mode");
 
     LOG.debug("Using backslash as escape character : {}", config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
     LOG.info("XML XREF filter activated");
@@ -466,7 +470,7 @@ public class OpenEdgeSettings {
     if (Strings.isNullOrEmpty(relPath))
       return null;
     else
-      return getFileFromPctDirs(relPath + ".xref");
+      return rtbCompatibility ? getFileFromRtbListDir(relPath, ".x") : getFileFromPctDirs(relPath + ".xref");
   }
 
   public File getSonarlintXrefFile(InputFile file) {
@@ -481,7 +485,26 @@ public class OpenEdgeSettings {
     if (Strings.isNullOrEmpty(relPath))
       return null;
     else
-      return getFileFromPctDirs(relPath);
+      return rtbCompatibility ? getFileFromRtbListDir(relPath, ".l") : getFileFromPctDirs(relPath);
+  }
+
+  private File getFileFromRtbListDir(String fileName, String extension) {
+    Path path = Paths.get(fileName);
+    int lastPeriodPos = path.getFileName().toString().lastIndexOf('.');
+    String targetFileName = lastPeriodPos == -1 ? path.getFileName().toString() + extension
+        : path.getFileName().toString().substring(0, lastPeriodPos) + extension;
+    Path targetPath = (path.getParent() == null ? Paths.get("list") : path.getParent().resolve("list")).resolve(
+        targetFileName);
+    LOG.debug("Trying to locate '{}' of '{}' in source directories as '{}'", extension, fileName, targetPath);
+    for (Path srcPath : sourcePaths) {
+      Path tmp = srcPath.resolve(targetPath);
+      if (tmp.toFile().exists()) {
+        LOG.debug("  Found in: {}", tmp);
+        return tmp.toFile();
+      }
+    }
+
+    return null;
   }
 
   private File getFileFromPctDirs(String relPath) {
