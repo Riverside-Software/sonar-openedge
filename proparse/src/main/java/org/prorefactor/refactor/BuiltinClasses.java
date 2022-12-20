@@ -36,6 +36,7 @@ import eu.rssw.pct.elements.fixed.TypeInfo;
 @Generated(value = "genBuiltinClasses.p")
 public class BuiltinClasses {
   private static final Collection<ITypeInfo> BUILTIN_CLASSES = new ArrayList<>();
+
   public static final ITypeInfo PROGRESS_LANG_OBJECT;
   public static final ITypeInfo PROGRESS_LANG_ENUM;
 
@@ -67,6 +68,11 @@ public class BuiltinClasses {
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.ApplicationServer.AdapterTypes", false, false, "Progress.Lang.Enum", "");
+    typeInfo.addProperty(new PropertyElement("Unexpected", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
+    typeInfo.addProperty(new PropertyElement("APSV", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
+    typeInfo.addProperty(new PropertyElement("SOAP", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
+    typeInfo.addProperty(new PropertyElement("REST", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
+    typeInfo.addProperty(new PropertyElement("WEB", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.ApplicationServer.AgentInfo", false, false, "Progress.Lang.Object", "");
@@ -1239,6 +1245,9 @@ public class BuiltinClasses {
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.Reflect.AccessMode", false, false, "Progress.Lang.Enum", "");
+    typeInfo.addProperty(new PropertyElement("Public", true, new DataType("Progress.Reflect.AccessMode")));
+    typeInfo.addProperty(new PropertyElement("Protected", true, new DataType("Progress.Reflect.AccessMode")));
+    typeInfo.addProperty(new PropertyElement("Private", true, new DataType("Progress.Reflect.AccessMode")));
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.Reflect.Constructor", false, false, "Progress.Lang.Object", "");
@@ -1252,6 +1261,38 @@ public class BuiltinClasses {
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.Reflect.DataType", false, false, "Progress.Lang.Enum", "");
+    typeInfo.addProperty(new PropertyElement("AnyType", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Buffer", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Byte", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Character", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("COMHandle", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("DataSet", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("DataSetHandle", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Date", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("DateTime", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("DateTimeTZ", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Decimal", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Double", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Float", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Handle", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Int64", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Integer", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Logical", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Longchar", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Memptr", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Object", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Raw", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Recid", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Rowid", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Short", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("SingleCharacter", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Table", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("TableHandle", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("UnsignedByte", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("UnsignedInt", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("InsignedInt64", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("UnsignedShort", true, new DataType("Progress.Reflect.DataType")));
+    typeInfo.addProperty(new PropertyElement("Void", true, new DataType("Progress.Reflect.DataType")));
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.Reflect.Event", false, false, "Progress.Lang.Object", "");
@@ -1293,6 +1334,12 @@ public class BuiltinClasses {
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.Reflect.Flags", false, false, "Progress.Lang.FlagsEnum", "");
+    typeInfo.addProperty(new PropertyElement("Public", true, new DataType("Progress.Reflect.Flags")));
+    typeInfo.addProperty(new PropertyElement("Protected", true, new DataType("Progress.Reflect.Flags")));
+    typeInfo.addProperty(new PropertyElement("Private", true, new DataType("Progress.Reflect.Flags")));
+    typeInfo.addProperty(new PropertyElement("Static", true, new DataType("Progress.Reflect.Flags")));
+    typeInfo.addProperty(new PropertyElement("Instance", true, new DataType("Progress.Reflect.Flags")));
+    typeInfo.addProperty(new PropertyElement("DeclaredOnly", true, new DataType("Progress.Reflect.Flags")));
     typeInfo.addMethod(new MethodElement("SetFlag", false, new DataType("Progress.Reflect.Flags"),
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Reflect.Flags"))));
     typeInfo.addMethod(new MethodElement("UnsetFlag", false, new DataType("Progress.Reflect.Flags"),
