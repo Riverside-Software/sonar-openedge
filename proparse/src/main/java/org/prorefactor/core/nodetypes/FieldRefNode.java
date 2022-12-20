@@ -22,9 +22,10 @@ import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.Primitive;
 
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.ITypeInfo;
 
 /**
- * Expression node: <code>ID</code> where ID is a variable, field name, ...
+ * Expression node: <code>ID</code> where ID is a variable, field name, type name, ...
  */
 public class FieldRefNode extends ExpressionNode {
   private ContextQualifier qualifier;
@@ -32,6 +33,7 @@ public class FieldRefNode extends ExpressionNode {
   private boolean unqualifiedField;
   private boolean inlineVar;
   private boolean abbrev;
+  private ITypeInfo staticRef;
 
   public FieldRefNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
@@ -76,6 +78,18 @@ public class FieldRefNode extends ExpressionNode {
   @Override
   public boolean isAbbreviated() {
     return abbrev;
+  }
+
+  public boolean isStaticReference() {
+    return staticRef != null;
+  }
+
+  public ITypeInfo getStaticReference() {
+    return staticRef;
+  }
+
+  public void setStaticReference(ITypeInfo info) {
+    this.staticRef = info;
   }
 
   /**

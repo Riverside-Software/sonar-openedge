@@ -26,7 +26,7 @@ import eu.rssw.pct.elements.IVariableElement;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
 /**
- * Expression node: <code>&lt;expr&gt;:attributeName</code>
+ * Expression node: <code>&lt;expr&gt;:attributeName</code>. Can also be a reference to an enum value.
  */
 public class AttributeReferenceNode extends ExpressionNode {
   private String attributeName = "";
@@ -42,30 +42,35 @@ public class AttributeReferenceNode extends ExpressionNode {
 
   @Override
   public DataType getDataType() {
-    if (getFirstChild() instanceof SystemHandleNode) {
-      SystemHandleNode shn = (SystemHandleNode) getFirstChild();
-      return shn.getAttributeDataType(attributeName.toUpperCase());
-    }
-
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
       return DataType.NOT_COMPUTED;
 
+    if (getFirstChild() instanceof SystemHandleNode) {
+      SystemHandleNode shn = (SystemHandleNode) getFirstChild();
+      return shn.getAttributeDataType(attributeName.toUpperCase());
+    } else if ((getFirstChild() instanceof FieldRefNode) && ((FieldRefNode) getFirstChild()).isStaticReference()) {
+      ITypeInfo info = ((FieldRefNode) getFirstChild()).getStaticReference();
+      return ExpressionNode.getObjectAttributeDataType(getTopLevelParent().getEnvironment(), info, attributeName,
+          false);
+    }
+
     // Left-Handle expression has to be a class
     IExpression expr = getFirstChild().asIExpression();
-    if (expr.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
+    PrimitiveDataType pdt = expr.getDataType().getPrimitive();
+    if (pdt == PrimitiveDataType.CLASS) {
       ITypeInfo info = root.getEnvironment().getTypeInfo(expr.getDataType().getClassName());
       if (info != null) {
         for (IPropertyElement m : info.getProperties()) {
           if (m.getName().equalsIgnoreCase(attributeName))
             return m.getVariable().getDataType();
         }
-        for (IVariableElement e: info.getVariables()) {
+        for (IVariableElement e : info.getVariables()) {
           if (e.getName().equalsIgnoreCase(attributeName))
             return e.getDataType();
         }
       }
-    } else if (expr.getDataType().getPrimitive() == PrimitiveDataType.HANDLE) {
+    } else if (pdt == PrimitiveDataType.HANDLE) {
       return ExpressionNode.getStandardAttributeDataType(attributeName.toUpperCase());
     }
 

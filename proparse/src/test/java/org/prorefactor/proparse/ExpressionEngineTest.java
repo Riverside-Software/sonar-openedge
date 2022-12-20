@@ -48,8 +48,10 @@ import com.google.inject.Injector;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.fixed.MethodElement;
+import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.fixed.PropertyElement;
 import eu.rssw.pct.elements.fixed.TypeInfo;
 import eu.rssw.pct.elements.fixed.VariableElement;
@@ -73,6 +75,13 @@ public class ExpressionEngineTest {
     typeInfo02.addMethod(new MethodElement("m1", false, DataType.VOID));
     typeInfo02.addMethod(new MethodElement("m2", false, DataType.INT64));
     session.injectTypeInfo(typeInfo02);
+
+    // For testStaticMethod
+    TypeInfo typeInfo03 = new TypeInfo("rssw.test.Class04", false, false, "Progress.Lang.Object", "");
+    typeInfo03.addMethod(new MethodElement("m1", true, DataType.CHARACTER));
+    typeInfo03.addMethod(new MethodElement("m2", true, DataType.INTEGER));
+    typeInfo03.addMethod(new MethodElement("m2", true, DataType.INT64, new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    session.injectTypeInfo(typeInfo03);
   }
 
   @Test
@@ -366,9 +375,77 @@ public class ExpressionEngineTest {
   }
 
   @Test
+  public void testEnumValues01() {
+    ParseUnit unit = new ParseUnit(
+        "message Progress.Reflect.AccessMode:Public. message Progress.Reflect.AccessMode:Private.",
+        session);
+    unit.treeParser01();
+
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+
+    assertTrue(nodes.get(0) instanceof AttributeReferenceNode);
+    IExpression exp = nodes.get(0);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp.getDataType().getClassName(), "Progress.Reflect.AccessMode");
+
+    assertTrue(nodes.get(1) instanceof AttributeReferenceNode);
+    IExpression exp2 = nodes.get(1);
+    assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp2.getDataType().getClassName(), "Progress.Reflect.AccessMode");
+  }
+
+  @Test
+  public void testEnumValues02() {
+    ParseUnit unit = new ParseUnit(
+        "using Progress.Reflect.AccessMode. message AccessMode:Public. message AccessMode:Private.",
+        session);
+    unit.treeParser01();
+
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+
+    assertTrue(nodes.get(0) instanceof AttributeReferenceNode);
+    IExpression exp = nodes.get(0);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp.getDataType().getClassName(), "Progress.Reflect.AccessMode");
+
+    assertTrue(nodes.get(1) instanceof AttributeReferenceNode);
+    IExpression exp2 = nodes.get(1);
+    assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp2.getDataType().getClassName(), "Progress.Reflect.AccessMode");
+  }
+
+  @Test
+  public void testStaticMethod01() {
+    ParseUnit unit = new ParseUnit("message rssw.test.Class04:m1().", session);
+    unit.treeParser01();
+
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 1);
+
+    assertTrue(nodes.get(0) instanceof MethodCallNode);
+    IExpression exp = nodes.get(0);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
+  }
+
+  @Test
+  public void testStaticMethod02() {
+    ParseUnit unit = new ParseUnit("message rssw.test.Class04:m2(1).", session);
+    unit.treeParser01();
+
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 1);
+
+    assertTrue(nodes.get(0) instanceof MethodCallNode);
+    IExpression exp = nodes.get(0);
+    // Wrong answer. Current implementation doesn't take parameters into account.
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
+  }
+
+  @Test
   public void testObjectMethod() {
     ParseUnit unit = new ParseUnit(
-
         "def var xx as Progress.Lang.Object. message xx:toString(). message xx:UnknownMethod().", session);
     unit.treeParser01();
 

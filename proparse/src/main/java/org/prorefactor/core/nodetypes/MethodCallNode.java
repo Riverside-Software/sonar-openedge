@@ -40,13 +40,17 @@ public class MethodCallNode extends ExpressionNode {
 
   @Override
   public DataType getDataType() {
-    if (getFirstChild() instanceof SystemHandleNode) {
-      SystemHandleNode shn = (SystemHandleNode) getFirstChild();
-      return shn.getMethodDataType(methodName.toUpperCase());
-    }
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
       return DataType.NOT_COMPUTED;
+
+    if (getFirstChild() instanceof SystemHandleNode) {
+      SystemHandleNode shn = (SystemHandleNode) getFirstChild();
+      return shn.getMethodDataType(methodName.toUpperCase());
+    } else if ((getFirstChild() instanceof FieldRefNode) && ((FieldRefNode) getFirstChild()).isStaticReference()) {
+      ITypeInfo info = ((FieldRefNode) getFirstChild()).getStaticReference();
+      return ExpressionNode.getObjectMethodDataType(getTopLevelParent().getEnvironment(), info, methodName);
+    }
 
     // Left-Handle expression has to be a class
     IExpression expr = getFirstChild().asIExpression();
