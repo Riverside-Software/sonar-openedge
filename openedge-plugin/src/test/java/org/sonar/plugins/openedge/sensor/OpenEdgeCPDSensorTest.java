@@ -46,7 +46,7 @@ public class OpenEdgeCPDSensorTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings);
     sensor.execute(context);
 
@@ -62,7 +62,7 @@ public class OpenEdgeCPDSensorTest {
   public void testCPDSensor02() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings);
     sensor.execute(context);
 

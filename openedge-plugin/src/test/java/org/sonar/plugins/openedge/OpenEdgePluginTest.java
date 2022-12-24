@@ -25,6 +25,7 @@ import org.sonar.api.Plugin;
 import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarQubeSide;
 import org.sonar.api.SonarRuntime;
+import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.internal.SonarRuntimeImpl;
 import org.sonar.api.platform.Server;
 import org.sonar.api.utils.Version;
@@ -39,6 +40,7 @@ public class OpenEdgePluginTest {
       SonarEdition.COMMUNITY);
 
   public static final Server SERVER = new TestServer();
+  public static final MapSettings SETTINGS = new MapSettings();
 
   @Test
   public void testExtensionsSonarLint() {

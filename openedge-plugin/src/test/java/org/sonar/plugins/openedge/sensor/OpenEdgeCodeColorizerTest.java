@@ -38,7 +38,7 @@ public class OpenEdgeCodeColorizerTest {
   public void testSp2k() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     OpenEdgeCodeColorizer sensor = new OpenEdgeCodeColorizer(oeSettings);
     sensor.execute(context);
 

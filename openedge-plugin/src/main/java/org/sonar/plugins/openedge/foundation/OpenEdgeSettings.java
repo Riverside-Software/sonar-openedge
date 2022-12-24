@@ -59,7 +59,6 @@ import org.sonar.api.SonarRuntime;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.config.Configuration;
-import org.sonar.api.platform.Server;
 import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -90,7 +89,6 @@ public class OpenEdgeSettings {
   private final Configuration config;
   private final FileSystem fileSystem;
   private final SonarRuntime runtime;
-  private final Server server;
 
   // Internal use
   private boolean init = false;
@@ -110,14 +108,9 @@ public class OpenEdgeSettings {
   private String oePluginVersion;
 
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
-    this(config, fileSystem, runtime, null);
-  }
-
-  public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime, Server server) {
     this.config = config;
     this.fileSystem = fileSystem;
     this.runtime = runtime;
-    this.server = server;
   }
 
   public final void init() {
@@ -127,7 +120,7 @@ public class OpenEdgeSettings {
 
     oePluginVersion = readPluginVersion(this.getClass().getClassLoader(), "sonar-openedge.txt");
     LOG.info("OpenEdge plugin version: {}", oePluginVersion);
-    LOG.info("Loading OpenEdge settings for server ID '{}'", server == null ? "" : server.getId());
+    LOG.info("Loading OpenEdge settings for server ID '{}'", config.get(CoreProperties.SERVER_ID).orElse(""));
     initializeDirectories(config, fileSystem);
     initializePropathDlc(config);
     initializeDefaultPropath(config, fileSystem);
