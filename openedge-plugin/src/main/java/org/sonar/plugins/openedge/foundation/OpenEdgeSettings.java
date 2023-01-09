@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2022 Riverside Software
+ * Copyright (c) 2015-2023 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -59,7 +59,6 @@ import org.sonar.api.SonarRuntime;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.config.Configuration;
-import org.sonar.api.platform.Server;
 import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -90,7 +89,6 @@ public class OpenEdgeSettings {
   private final Configuration config;
   private final FileSystem fileSystem;
   private final SonarRuntime runtime;
-  private final Server server;
 
   // Internal use
   private boolean init = false;
@@ -108,16 +106,12 @@ public class OpenEdgeSettings {
   private RefactorSessionEnv sessionsEnv;
   private RefactorSession defaultSession;
   private String oePluginVersion;
+  private boolean rtbCompatibility;
 
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
-    this(config, fileSystem, runtime, null);
-  }
-
-  public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime, Server server) {
     this.config = config;
     this.fileSystem = fileSystem;
     this.runtime = runtime;
-    this.server = server;
   }
 
   public final void init() {
@@ -127,12 +121,15 @@ public class OpenEdgeSettings {
 
     oePluginVersion = readPluginVersion(this.getClass().getClassLoader(), "sonar-openedge.txt");
     LOG.info("OpenEdge plugin version: {}", oePluginVersion);
-    LOG.info("Loading OpenEdge settings for server ID '{}'", server == null ? "" : server.getId());
+    LOG.info("Loading OpenEdge settings for server ID '{}'", config.get(CoreProperties.SERVER_ID).orElse(""));
     initializeDirectories(config, fileSystem);
     initializePropathDlc(config);
     initializeDefaultPropath(config, fileSystem);
     initializeCPD(config);
     initializeIncludeExtensions(config);
+    rtbCompatibility = config.getBoolean(Constants.RTB_COMPATIBILITY).orElse(false);
+    if (rtbCompatibility)
+      LOG.info("Using Roundtable compatibility mode");
 
     LOG.debug("Using backslash as escape character : {}", config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
     LOG.info("XML XREF filter activated");
@@ -473,7 +470,7 @@ public class OpenEdgeSettings {
     if (Strings.isNullOrEmpty(relPath))
       return null;
     else
-      return getFileFromPctDirs(relPath + ".xref");
+      return rtbCompatibility ? getFileFromRtbListDir(relPath, ".x") : getFileFromPctDirs(relPath + ".xref");
   }
 
   public File getSonarlintXrefFile(InputFile file) {
@@ -488,7 +485,26 @@ public class OpenEdgeSettings {
     if (Strings.isNullOrEmpty(relPath))
       return null;
     else
-      return getFileFromPctDirs(relPath);
+      return rtbCompatibility ? getFileFromRtbListDir(relPath, ".l") : getFileFromPctDirs(relPath);
+  }
+
+  private File getFileFromRtbListDir(String fileName, String extension) {
+    Path path = Paths.get(fileName);
+    int lastPeriodPos = path.getFileName().toString().lastIndexOf('.');
+    String targetFileName = lastPeriodPos == -1 ? path.getFileName().toString() + extension
+        : path.getFileName().toString().substring(0, lastPeriodPos) + extension;
+    Path targetPath = (path.getParent() == null ? Paths.get("list") : path.getParent().resolve("list")).resolve(
+        targetFileName);
+    LOG.debug("Trying to locate '{}' of '{}' in source directories as '{}'", extension, fileName, targetPath);
+    for (Path srcPath : sourcePaths) {
+      Path tmp = srcPath.resolve(targetPath);
+      if (tmp.toFile().exists()) {
+        LOG.debug("  Found in: {}", tmp);
+        return tmp.toFile();
+      }
+    }
+
+    return null;
   }
 
   private File getFileFromPctDirs(String relPath) {

@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2022 Riverside Software
+ * Copyright (c) 2015-2023 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -27,11 +27,21 @@ import org.prorefactor.treeparser.Block;
  * METHOD, CATCH, ON
  */
 public class StatementBlockNode extends StatementNode implements IStatementBlock {
+  private final String label;
   private Block block;
   private IStatement firstStatement;
 
   public StatementBlockNode(ProToken t, JPNode parent, int num, boolean hasChildren, ABLNodeType state2) {
+    this(t, parent, num, hasChildren, state2, null);
+  }
+
+  public StatementBlockNode(ProToken t, JPNode parent, int num, boolean hasChildren, ABLNodeType state2, String label) {
     super(t, parent, num, hasChildren, state2);
+    this.label = label;
+  }
+
+  public String getBlockLabel() {
+    return label;
   }
 
   @Override

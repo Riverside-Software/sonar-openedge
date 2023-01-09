@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2022 Riverside Software
+ * Copyright (c) 2015-2023 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -73,8 +73,8 @@ public class OpenEdgeProparseSensorTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, null, null);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -99,8 +99,8 @@ public class OpenEdgeProparseSensorTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, null, null);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -118,8 +118,8 @@ public class OpenEdgeProparseSensorTest {
             Constants.LANGUAGE_KEY).build());
     context.setActiveRules(rulesBuilder.build());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER,
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(),
         new CheckRegistration[] {new BasicChecksRegistration()}, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
@@ -136,8 +136,8 @@ public class OpenEdgeProparseSensorTest {
             Constants.LANGUAGE_KEY).build());
     context.setActiveRules(rulesBuilder.build());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER,
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(),
         new CheckRegistration[] {new TestChecksRegistration()}, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
@@ -157,8 +157,8 @@ public class OpenEdgeProparseSensorTest {
             Constants.LANGUAGE_KEY).build());
     context.setActiveRules(rulesBuilder.build());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARLINT_RUNTIME, OpenEdgePluginTest.SERVER);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER,
+        OpenEdgePluginTest.SONARLINT_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(),
         new CheckRegistration[] {new TestChecksRegistration()}, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
@@ -174,8 +174,8 @@ public class OpenEdgeProparseSensorTest {
     SensorContextTester context = TestProjectSensorContext.createContext();
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, null, null);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -200,7 +200,7 @@ public class OpenEdgeProparseSensorTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     assertFalse(oeSettings.getProparseSessions().getDefaultSession().getProparseSettings().getBatchMode());
     assertEquals(oeSettings.getProparseSessions().getDefaultSession().getProparseSettings().getWindowSystem(),
         "foobar");
@@ -216,7 +216,7 @@ public class OpenEdgeProparseSensorTest {
     SensorContextTester context = TestProjectSensorContext.createContext();
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     assertTrue(oeSettings.getProparseSessions().getDefaultSession().getProparseSettings().getBatchMode());
     assertEquals(oeSettings.getProparseSessions().getDefaultSession().getProparseSettings().getProcessArchitecture(),
         Integer.valueOf(64));
@@ -233,7 +233,7 @@ public class OpenEdgeProparseSensorTest {
     context.setRuntime(OpenEdgePluginTest.SONARLINT_RUNTIME);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARLINT_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARLINT_RUNTIME);
     try {
       oeSettings.getProparseSessions();
       fail("RuntimeException should have been thrown");
@@ -251,7 +251,7 @@ public class OpenEdgeProparseSensorTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     try {
       oeSettings.getProparseSessions();
     } catch (RuntimeException caught) {
@@ -272,8 +272,8 @@ public class OpenEdgeProparseSensorTest {
       .build());
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, null, null);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -297,8 +297,8 @@ public class OpenEdgeProparseSensorTest {
         .build());
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, null, null);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -313,8 +313,8 @@ public class OpenEdgeProparseSensorTest {
     SensorContextTester context = TestProjectSensorContext.createContext();
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, null, null);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -330,8 +330,8 @@ public class OpenEdgeProparseSensorTest {
     context.setRuntime(OpenEdgePluginTest.SONARLINT_RUNTIME);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARLINT_RUNTIME, OpenEdgePluginTest.SERVER);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, null, null);
+        OpenEdgePluginTest.SONARLINT_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -348,9 +348,9 @@ public class OpenEdgeProparseSensorTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
 
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SERVER, null, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 

@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2022 Riverside Software
+ * Copyright (c) 2015-2023 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -40,13 +40,17 @@ public class MethodCallNode extends ExpressionNode {
 
   @Override
   public DataType getDataType() {
-    if (getFirstChild() instanceof SystemHandleNode) {
-      SystemHandleNode shn = (SystemHandleNode) getFirstChild();
-      return shn.getMethodDataType(methodName.toUpperCase());
-    }
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
       return DataType.NOT_COMPUTED;
+
+    if (getFirstChild() instanceof SystemHandleNode) {
+      SystemHandleNode shn = (SystemHandleNode) getFirstChild();
+      return shn.getMethodDataType(methodName.toUpperCase());
+    } else if ((getFirstChild() instanceof FieldRefNode) && ((FieldRefNode) getFirstChild()).isStaticReference()) {
+      ITypeInfo info = ((FieldRefNode) getFirstChild()).getStaticReference();
+      return ExpressionNode.getObjectMethodDataType(getTopLevelParent().getEnvironment(), info, methodName);
+    }
 
     // Left-Handle expression has to be a class
     IExpression expr = getFirstChild().asIExpression();

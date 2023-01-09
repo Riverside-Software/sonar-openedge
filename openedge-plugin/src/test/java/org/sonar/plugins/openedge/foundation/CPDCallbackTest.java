@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2022 Riverside Software
+ * Copyright (c) 2015-2023 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -60,7 +60,7 @@ public class CPDCallbackTest {
   public void test1() {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     settings.init();
     InputFile inputFile = getInputFile(context, "cpd01.p");
     ParseUnit unit = getParseUnit(inputFile);
@@ -80,7 +80,7 @@ public class CPDCallbackTest {
   public void test2() {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     settings.init();
     InputFile inputFile = getInputFile(context, "cpd02.p");
     ParseUnit unit = getParseUnit(inputFile);
@@ -103,7 +103,7 @@ public class CPDCallbackTest {
   public void test3() {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     settings.init();
     InputFile inputFile = getInputFile(context, "cpd03.p");
     ParseUnit unit = getParseUnit(inputFile);
@@ -123,7 +123,7 @@ public class CPDCallbackTest {
   public void testNoProperties() {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     OpenEdgeSettings settings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     settings.init();
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
@@ -144,7 +144,7 @@ public class CPDCallbackTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     oeSettings.init();
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
@@ -166,7 +166,7 @@ public class CPDCallbackTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     oeSettings.init();
     InputFile inputFile = getInputFile(context, "cpd04.p");
     ParseUnit unit = getParseUnit(inputFile);
@@ -189,7 +189,7 @@ public class CPDCallbackTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     oeSettings.init();
 
     InputFile inputFile = getInputFile(context, "cpd04.p");

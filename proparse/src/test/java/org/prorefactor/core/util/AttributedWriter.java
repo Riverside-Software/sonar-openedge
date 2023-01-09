@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2022 Riverside Software
+ * Copyright (c) 2015-2023 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -26,6 +26,7 @@ import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.nodetypes.FieldRefNode;
+import org.prorefactor.core.nodetypes.StatementBlockNode;
 import org.prorefactor.core.nodetypes.TwoArgumentsExpression;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Block;
@@ -131,6 +132,12 @@ public class AttributedWriter {
   private void writeNode(JPNode node) throws IOException {
     for (ProToken t : node.getHiddenTokens()) {
       writer.write(t.getText());
+    }
+    if (node instanceof StatementBlockNode) {
+      String label = ((StatementBlockNode) node).getBlockLabel();
+      if (label != null) {
+        writer.write("\n" + label + ":\n");
+      }
     }
     writer.write(getAttributes(node));
     writer.write(node.getText());

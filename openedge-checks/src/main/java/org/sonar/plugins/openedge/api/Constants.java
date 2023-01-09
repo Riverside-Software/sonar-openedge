@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2022 Riverside Software
+ * Copyright (c) 2015-2023 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -58,6 +58,7 @@ public class Constants {
   public static final String XML_DOCUMENT_RULES = "sonar.oe.xml.doc";
   public static final String ASSEMBLY_CATALOG = "sonar.oe.assembly.catalog";
   public static final String CLASS_DOCUMENTATION = "sonar.oe.classdoc";
+  public static final String RTB_COMPATIBILITY = "sonar.oe.rtb";
 
   private Constants() {
     

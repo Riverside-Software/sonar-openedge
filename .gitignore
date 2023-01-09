@@ -9,3 +9,5 @@
 current-commit
 proparse/src/test/resources/OpenEdge
 proparse/src/test/resources/rssw
+.DS_Store
+

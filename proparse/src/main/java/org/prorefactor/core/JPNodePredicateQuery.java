@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 
 class JPNodePredicateQuery implements ICallback<List<JPNode>> {
   public static final Predicate<JPNode> MAIN_FILE_ONLY = node -> node.getFileIndex() == 0;
-  public static final Predicate<JPNode> STATEMENT_ONLY = node -> node.isStateHead();
+  public static final Predicate<JPNode> STATEMENT_ONLY = JPNode::isStateHead;
 
   private final List<JPNode> result = new ArrayList<>();
   private final List<Predicate<JPNode>> predicates = new ArrayList<>();

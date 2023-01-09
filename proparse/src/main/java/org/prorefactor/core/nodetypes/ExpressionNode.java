@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2022 Riverside Software
+ * Copyright (c) 2015-2023 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -746,18 +746,19 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
     return DataType.NOT_COMPUTED;
   }
 
-  static DataType getObjectAttributeDataType(IProparseEnvironment session, ITypeInfo info, String methodName, boolean firstLevel) {
+  static DataType getObjectAttributeDataType(IProparseEnvironment session, ITypeInfo info, String methodName,
+      boolean firstLevel) {
     while (info != null) {
       for (IPropertyElement prop : info.getProperties()) {
         if (prop.getName().equalsIgnoreCase(methodName))
           return prop.getVariable().getDataType();
       }
       if (firstLevel) {
-      for (IVariableElement v : info.getVariables()) {
-        if (v.getName().equalsIgnoreCase(methodName))
-          return v.getDataType();
-      }
-      firstLevel = false;
+        for (IVariableElement v : info.getVariables()) {
+          if (v.getName().equalsIgnoreCase(methodName))
+            return v.getDataType();
+        }
+        firstLevel = false;
       }
       info = session.getTypeInfo(info.getParentTypeName());
     }

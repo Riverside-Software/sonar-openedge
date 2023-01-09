@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2022 Riverside Software
+ * Copyright (c) 2015-2023 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -31,10 +31,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.prorefactor.proparse.antlr4.ProparseListener;
+import org.sonar.api.CoreProperties;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.platform.Server;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.server.ServerSide;
@@ -66,7 +67,7 @@ public class OpenEdgeComponents {
   private final Map<ActiveRule, OpenEdgeProparseCheck> ppChecksMap = new HashMap<>();
   private final Map<ActiveRule, OpenEdgeDumpFileCheck> dfChecksMap = new HashMap<>();
 
-  private final Server server;
+  private final Configuration config;
   private final CheckRegistrar checkRegistrar = new CheckRegistrar();
   private final LicenseRegistrar licenseRegistrar = new LicenseRegistrar();
   private final TreeParserRegistrar parserRegistrar = new TreeParserRegistrar();
@@ -79,24 +80,24 @@ public class OpenEdgeComponents {
     this(null, null, null, null);
   }
 
-  public OpenEdgeComponents(Server server) {
-    this(server, null, null, null);
+  public OpenEdgeComponents(Configuration config) {
+    this(config, null, null, null);
   }
 
   public OpenEdgeComponents(CheckRegistration[] checkRegistrars) {
     this(null, checkRegistrars, null, null);
   }
 
-  public OpenEdgeComponents(Server server, CheckRegistration[] checkRegistrars) {
-    this(server, checkRegistrars, null, null);
+  public OpenEdgeComponents(Configuration config, CheckRegistration[] checkRegistrars) {
+    this(config, checkRegistrars, null, null);
   }
 
   public OpenEdgeComponents(CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars) {
     this(null, checkRegistrars, licRegistrars, null);
   }
 
-  public OpenEdgeComponents(Server server, CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars) {
-    this(server, checkRegistrars, licRegistrars, null);
+  public OpenEdgeComponents(Configuration config, CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars) {
+    this(config, checkRegistrars, licRegistrars, null);
   }
 
   public OpenEdgeComponents(CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars,
@@ -104,9 +105,9 @@ public class OpenEdgeComponents {
     this(null, checkRegistrars, licRegistrars, tpRegistrars);
   }
 
-  public OpenEdgeComponents(Server server, CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars,
+  public OpenEdgeComponents(Configuration config, CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars,
       TreeParserRegistration[] tpRegistrars) {
-    this.server = server;
+    this.config = config;
     if (checkRegistrars != null) {
       for (CheckRegistration registration : checkRegistrars) {
         registration.register(checkRegistrar);
@@ -271,7 +272,7 @@ public class OpenEdgeComponents {
   }
 
   public String getServerId() {
-    return server == null ? "" : server.getId();
+    return config == null ? "" : config.get(CoreProperties.SERVER_ID).orElse("");
   }
 
   private static class LicenseRegistrar implements LicenseRegistration.Registrar {

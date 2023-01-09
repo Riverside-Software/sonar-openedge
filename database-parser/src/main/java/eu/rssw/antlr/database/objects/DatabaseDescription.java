@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2022 Riverside Software
+ * Copyright (c) 2015-2023 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +72,7 @@ public class DatabaseDescription {
   }
 
   public void serialize(OutputStream out) throws IOException {
-    try (OutputStreamWriter osw = new OutputStreamWriter(out, Charset.forName("utf-8"));
+    try (OutputStreamWriter osw = new OutputStreamWriter(out, StandardCharsets.UTF_8);
         BufferedWriter writer = new BufferedWriter(osw)) {
       for (Sequence s : sequences.values()) {
         writer.write("S" + s.getName());

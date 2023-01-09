@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2022 Riverside Software
+ * Copyright (c) 2015-2023 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -51,7 +51,7 @@ public class OpenEdgeSettingsTest {
     context.setSettings(new MapSettings());
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertSame(ppSess, oeSettings.getProparseSessions().getDefaultSession());
   }
@@ -61,7 +61,7 @@ public class OpenEdgeSettingsTest {
     SensorContextTester context = TestProjectSensorContextExtra.createContext();
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertSame(ppSess, oeSettings.getProparseSessions().getDefaultSession());
     assertSame(ppSess, oeSettings.getProparseSessions().getSession("src/procedures/test1.p"));
@@ -83,7 +83,7 @@ public class OpenEdgeSettingsTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertNotNull(ppSess);
     assertNotNull(ppSess.getSchema());
@@ -101,7 +101,7 @@ public class OpenEdgeSettingsTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertNotNull(ppSess);
     assertNotNull(ppSess.getSchema());
@@ -126,7 +126,7 @@ public class OpenEdgeSettingsTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertNotNull(ppSess);
     assertNotNull(ppSess.getSchema());
@@ -152,7 +152,7 @@ public class OpenEdgeSettingsTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertNotNull(ppSess);
     assertNotNull(ppSess.getSchema());
@@ -182,7 +182,7 @@ public class OpenEdgeSettingsTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARLINT_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARLINT_RUNTIME);
     IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertNotNull(ppSess);
     assertNotNull(ppSess.getSchema());
@@ -213,7 +213,7 @@ public class OpenEdgeSettingsTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARLINT_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARLINT_RUNTIME);
     IProparseEnvironment ppSess = oeSettings.getProparseSessions().getDefaultSession();
     assertNotNull(ppSess);
     assertNotNull(ppSess.getSchema());
@@ -240,7 +240,7 @@ public class OpenEdgeSettingsTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARLINT_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARLINT_RUNTIME);
     IProparseEnvironment session = oeSettings.getProparseSessions().getDefaultSession();
 
     ITypeInfo info = session.getTypeInfo("Progress.Json.ObjectModel.JsonArray");
@@ -272,7 +272,7 @@ public class OpenEdgeSettingsTest {
     context.setSettings(settings);
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME, OpenEdgePluginTest.SERVER);
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
     IProparseEnvironment session = oeSettings.getProparseSessions().getDefaultSession();
 
     ClassDocumentation doc = session.getClassDocumentation("OpenEdge.Core.ByteBucket");

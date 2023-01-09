@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2022 Riverside Software
+ * Copyright (c) 2015-2023 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -34,6 +34,7 @@ import org.prorefactor.core.schema.Table;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
+import org.prorefactor.refactor.BuiltinClasses;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;
@@ -49,6 +50,7 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.ITypeInfo;
 
 public class TreeParserVariableDefinition extends AbstractBlockProparseListener {
   private static final Logger LOG = LoggerFactory.getLogger(TreeParserVariableDefinition.class);
@@ -2420,9 +2422,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
         addToSymbolScope(defineVariable(ctx, refNode, name, Variable.Type.VARIABLE));
     }
     if (cq == ContextQualifier.STATIC) {
-      // Nothing with static for now, but at least we don't check for external tables
+      ITypeInfo info = refSession.getTypeInfoCI(support.lookupClassName(refNode.getIdNode().getText()));
+      refNode.setStaticReference(info == null ? BuiltinClasses.PROGRESS_LANG_OBJECT : info);
       if (LOG.isTraceEnabled())
-        LOG.trace("Static reference to {}", refNode.getIdNode().getText());
+        LOG.trace("Static reference to {} - TypeInfo: {}", refNode.getIdNode().getText(),
+            refNode.getStaticReference().getTypeName());
     } else if ((refNode.getParent() != null) && (refNode.getParent().getNodeType() == ABLNodeType.USING)
         && (stmtNode.getNodeType() != ABLNodeType.BUFFERCOPY)
         && (stmtNode.getNodeType() != ABLNodeType.BUFFERCOMPARE)) {
