@@ -600,9 +600,8 @@ public class ExpressionEngineTest {
     assertEquals(x2.getDataType().getPrimitive(), PrimitiveDataType.LOGICAL);
   }
 
-  @Test
-  public void testSingleArgGetExpression01() {
-    ParseUnit unit01 = new ParseUnit("+ 45.", session);
+  public void testSingleArgGetExpression(String expr) {
+    ParseUnit unit01 = new ParseUnit(expr, session);
     unit01.treeParser01();
 
     List<IExpression> nodes = unit01.getTopNode().queryExpressions();
@@ -611,32 +610,21 @@ public class ExpressionEngineTest {
     IExpression innerExp = ((SingleArgumentExpression) exp).getExpression();
     assertNotEquals(exp, innerExp);
     assertEquals(innerExp.getDataType(), DataType.INTEGER);
+  }
+
+  @Test
+  public void testSingleArgGetExpression01() {
+    testSingleArgGetExpression("+ 45.");
   }
 
   @Test
   public void testSingleArgGetExpression02() {
-    ParseUnit unit01 = new ParseUnit("- 45.", session);
-    unit01.treeParser01();
-
-    List<IExpression> nodes = unit01.getTopNode().queryExpressions();
-    assertEquals(nodes.size(), 1);
-    IExpression exp = nodes.get(0);
-    IExpression innerExp = ((SingleArgumentExpression) exp).getExpression();
-    assertNotEquals(exp, innerExp);
-    assertEquals(innerExp.getDataType(), DataType.INTEGER);
+    testSingleArgGetExpression("- 45.");
   }
 
   @Test
   public void testSingleArgGetExpression03() {
-    ParseUnit unit01 = new ParseUnit("( 45).", session);
-    unit01.treeParser01();
-
-    List<IExpression> nodes = unit01.getTopNode().queryExpressions();
-    assertEquals(nodes.size(), 1);
-    IExpression exp = nodes.get(0);
-    IExpression innerExp = ((SingleArgumentExpression) exp).getExpression();
-    assertNotEquals(exp, innerExp);
-    assertEquals(innerExp.getDataType(), DataType.INTEGER);
+    testSingleArgGetExpression("( 45).");
   }
 
   @Test
