@@ -131,7 +131,7 @@ public class ClumsySyntax extends OpenEdgeProparseCheck {
       return;
     List<JPNode> ch = node.getDirectChildren();
     // Unlikely, but early exit just to be sure
-    if (ch.size() < 1)
+    if (ch.isEmpty())
       return;
 
     // Last child should be PERIOD

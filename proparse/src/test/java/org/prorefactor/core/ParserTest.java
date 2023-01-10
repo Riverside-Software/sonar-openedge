@@ -959,44 +959,33 @@ public class ParserTest {
     assertEquals(node2.getFirstChild().getNodeType(), ABLNodeType.SUM);
   }
 
-  @Test
-  public void testAggregate01() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "aggregate01.p"), session);
+  public void testAggregate(String name, int statements) {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, name), session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
-    assertEquals(unit.getTopNode().queryStateHead().size(), 5);
+    assertEquals(unit.getTopNode().queryStateHead().size(), statements);
     JPNode node1 = unit.getTopNode().query(ABLNodeType.AGGREGATE).get(0);
     assertNotNull(node1);
+  }
+
+  @Test
+  public void testAggregate01() {
+    testAggregate("aggregate01.p", 5);
   }
 
   @Test
   public void testAggregate02() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "aggregate02.p"), session);
-    unit.treeParser01();
-    assertFalse(unit.hasSyntaxError());
-    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
-    JPNode node1 = unit.getTopNode().query(ABLNodeType.AGGREGATE).get(0);
-    assertNotNull(node1);
+    testAggregate("aggregate02.p", 3);
   }
 
   @Test
   public void testAggregate03() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "aggregate03.p"), session);
-    unit.treeParser01();
-    assertFalse(unit.hasSyntaxError());
-    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
-    JPNode node1 = unit.getTopNode().query(ABLNodeType.AGGREGATE).get(0);
-    assertNotNull(node1);
+    testAggregate("aggregate03.p", 3);
   }
 
   @Test
   public void testAggregate04() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "aggregate04.p"), session);
-    unit.treeParser01();
-    assertFalse(unit.hasSyntaxError());
-    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
-    JPNode node1 = unit.getTopNode().query(ABLNodeType.AGGREGATE).get(0);
-    assertNotNull(node1);
+    testAggregate("aggregate04.p", 3);
   }
 
   @Test

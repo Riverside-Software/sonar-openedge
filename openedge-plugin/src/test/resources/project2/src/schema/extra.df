@@ -1,0 +1,23 @@
+ADD TABLE "ExtraTab1"
+  AREA "Schema Area"
+  DUMP-NAME "extratab1"
+
+ADD FIELD "Fld1" OF "ExtraTab1" AS integer 
+  FORMAT "zzzzzzzzz9"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "Fld2" OF "ExtraTab1" AS integer 
+  FORMAT "zzzzzzzzz9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD INDEX "ExtraTab1-Idx1" ON "ExtraTab1" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "Fld1" ASCENDING 
