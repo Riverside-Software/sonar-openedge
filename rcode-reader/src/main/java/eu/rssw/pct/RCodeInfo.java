@@ -270,7 +270,7 @@ public class RCodeInfo {
     }
   }
 
-  void processTypeBlock(byte[] segment, PrintStream out) throws IOException, InvalidRCodeException {
+  void processTypeBlock(byte[] segment, PrintStream out) throws InvalidRCodeException {
     if (out != null) {
       out.printf("%n**********%nTYPE BLOCK%n***********%n");
       printByteBuffer(out, segment);
@@ -283,19 +283,19 @@ public class RCodeInfo {
     }
   }
 
-  void processInitialValueSegment(byte[] segment, PrintStream out) throws IOException, InvalidRCodeException {
+  void processInitialValueSegment(byte[] segment, PrintStream out) throws InvalidRCodeException {
     // No-op
   }
 
-  void processActionSegment(byte[] segment, PrintStream out) throws IOException, InvalidRCodeException {
+  void processActionSegment(byte[] segment, PrintStream out) throws InvalidRCodeException {
     // No-op
   }
 
-  void processEcodeSegment(byte[] segment, PrintStream out) throws IOException, InvalidRCodeException {
+  void processEcodeSegment(byte[] segment, PrintStream out) throws InvalidRCodeException {
     // No-op
   }
 
-  void processDebugSegment(byte[] segment, PrintStream out) throws IOException, InvalidRCodeException {
+  void processDebugSegment(byte[] segment, PrintStream out) throws InvalidRCodeException {
     // No-op
   }
 

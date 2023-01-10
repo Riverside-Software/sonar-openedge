@@ -28,10 +28,14 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.proparse.classdoc.ClassDocumentation.DeprecatedInfo;
 import org.prorefactor.proparse.support.IProparseEnvironment;
+import org.sonar.api.batch.fs.FilePredicates;
+import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.internal.DefaultFilePredicates;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
@@ -39,6 +43,7 @@ import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContextExtra;
+import org.sonar.plugins.openedge.utils.TestProjectSensorRtbContext;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.elements.ITypeInfo;
@@ -70,6 +75,22 @@ public class OpenEdgeSettingsTest {
     assertNotSame(ppSess, sess2);
     assertNotNull(sess2.getSchema().lookupTable("extraTab1"));
     assertNull(sess2.getSchema().lookupTable("customer"));
+  }
+
+  @Test
+  public void testRtbCompatibility() throws Exception {
+    SensorContextTester context = TestProjectSensorRtbContext.createContext();
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    oeSettings.init();
+    FilePredicates preds = new DefaultFilePredicates(Path.of(TestProjectSensorRtbContext.BASEDIR));
+    InputFile input1 = context.fileSystem().inputFile(preds.hasFilename("test1.p"));
+    assertTrue(oeSettings.getListingFile(input1).exists());
+    assertTrue(oeSettings.getXrefFile(input1).exists());
+    InputFile input2 = context.fileSystem().inputFile(preds.hasFilename("testclass.cls"));
+    assertTrue(oeSettings.getListingFile(input2).exists());
+    assertNull(oeSettings.getXrefFile(input2));
   }
 
   @Test
