@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Base64;
 
 import com.google.common.base.Strings;
 
@@ -66,11 +67,18 @@ public class RCodeInfo {
   private static final int SEGMENT_TABLE_OFFSET_FRAME_SEGMENT_TABLE_SIZE = 34;
   private static final int SEGMENT_TABLE_OFFSET_TEXT_SEGMENT_TABLE_SIZE = 36;
 
+  // IVS
+  private static final int IVS_CRC_OFFSET_V10 = 0x6E;
+  private static final int IVS_CRC_OFFSET_V11 = 0xA4;
+  private static final int IVS_CRC_OFFSET_V12 = 0xAE;
+
   protected ByteOrder order;
   protected int version;
   protected boolean sixtyFourBits;
   protected long timeStamp;
   protected int digestOffset;
+  private long crc;
+  private String digest;
 
   protected int segmentTableSize;
   protected int signatureSize;
@@ -116,21 +124,38 @@ public class RCodeInfo {
     if (bytesRead != rcodeSize) {
       throw new InvalidRCodeException("Not enough bytes in rcode block");
     }
-    if ((initialValueSegmentOffset >= 0) && (initialValueSegmentSize > 0)) {
-      processInitialValueSegment(Arrays.copyOfRange(rcodeBlock, initialValueSegmentOffset,
-          initialValueSegmentOffset + initialValueSegmentSize), out);
+
+    if ((version & 0x3FFF) >= 1200) {
+      crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V12, Short.BYTES).order(order).getShort() & 0xFFFF;
+      digest = Base64.getEncoder().encodeToString(
+          Arrays.copyOfRange(rcodeBlock, digestOffset + 16, digestOffset + 16 + 32));
+    } else if ((version & 0x3FFF) >= 1100) {
+      crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V11, Short.BYTES).order(order).getShort() & 0xFFFF;
+      if (digestOffset > 0)
+        digest = bufferToHex(Arrays.copyOfRange(rcodeBlock, digestOffset, digestOffset + 16));
+    } else {
+      crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V10, Short.BYTES).order(order).getShort() & 0xFFFF;
+      if (digestOffset > 0)
+        digest = bufferToHex(Arrays.copyOfRange(rcodeBlock, digestOffset, digestOffset + 16));
     }
-    if ((actionSegmentOffset >= 0) && (actionSegmentSize > 0)) {
-      processActionSegment(Arrays.copyOfRange(rcodeBlock, actionSegmentOffset, actionSegmentOffset + actionSegmentSize),
-          out);
-    }
-    if ((ecodeSegmentOffset >= 0) && (ecodeSegmentSize > 0)) {
-      processEcodeSegment(Arrays.copyOfRange(rcodeBlock, ecodeSegmentOffset, ecodeSegmentOffset + ecodeSegmentSize),
-          out);
-    }
-    if ((debugSegmentOffset > 0) && (debugSegmentSize > 0)) {
-      processDebugSegment(Arrays.copyOfRange(rcodeBlock, debugSegmentOffset, debugSegmentOffset + debugSegmentSize),
-          out);
+
+    if ((version & 0x3FFF) >= 1100) {
+      if ((initialValueSegmentOffset >= 0) && (initialValueSegmentSize > 0)) {
+        processInitialValueSegment(Arrays.copyOfRange(rcodeBlock, initialValueSegmentOffset,
+            initialValueSegmentOffset + initialValueSegmentSize), out);
+      }
+      if ((actionSegmentOffset >= 0) && (actionSegmentSize > 0)) {
+        processActionSegment(
+            Arrays.copyOfRange(rcodeBlock, actionSegmentOffset, actionSegmentOffset + actionSegmentSize), out);
+      }
+      if ((ecodeSegmentOffset >= 0) && (ecodeSegmentSize > 0)) {
+        processEcodeSegment(Arrays.copyOfRange(rcodeBlock, ecodeSegmentOffset, ecodeSegmentOffset + ecodeSegmentSize),
+            out);
+      }
+      if ((debugSegmentOffset > 0) && (debugSegmentSize > 0)) {
+        processDebugSegment(Arrays.copyOfRange(rcodeBlock, debugSegmentOffset, debugSegmentOffset + debugSegmentSize),
+            out);
+      }
     }
 
     if (typeBlockSize > 0) {
@@ -188,8 +213,15 @@ public class RCodeInfo {
       signatureSize = ByteBuffer.wrap(header, HEADER_OFFSET_SIGNATURE_SIZE, Integer.BYTES).order(order).getInt();
       typeBlockSize = ByteBuffer.wrap(header, HEADER_OFFSET_TYPEBLOCK_SIZE, Integer.BYTES).order(order).getInt();
       rcodeSize = ByteBuffer.wrap(header, HEADER_OFFSET_RCODE_SIZE, Integer.BYTES).order(order).getInt();
+    } else if ((version & 0x3FFF) >= 1000) {
+      timeStamp = ByteBuffer.wrap(header, HEADER_OFFSET_TIMESTAMP, Integer.BYTES).order(order).getInt();
+      digestOffset = ByteBuffer.wrap(header, HEADER_OFFSET_DIGEST, Short.BYTES).order(order).getShort();
+      segmentTableSize = ByteBuffer.wrap(header, 30, Short.BYTES).order(order).getShort();
+      signatureSize = ByteBuffer.wrap(header, 8, Short.BYTES).order(order).getShort();
+      typeBlockSize = 0;
+      rcodeSize = ByteBuffer.wrap(header, HEADER_OFFSET_RCODE_SIZE, Integer.BYTES).order(order).getInt();
     } else {
-      throw new InvalidRCodeException("Only v11 rcode is supported");
+      throw new InvalidRCodeException("Only v10+ rcode is supported");
     }
 
     if (out != null) {
@@ -209,6 +241,8 @@ public class RCodeInfo {
       out.printf("%n*********%nSIGNATURE%n*********%n");
       printByteBuffer(out, header);
     }
+    if ((version & 0x3FFF) < 1100)
+      return;
 
     int preambleSize = readAsciiEncodedNumber(header, 0, 4);
     int numElements = readAsciiEncodedNumber(header, 4, 4);
@@ -245,6 +279,8 @@ public class RCodeInfo {
       out.printf("%n**************%nSEGMENTS TABLE%n**************%n");
       printByteBuffer(out, header);
     }
+    if ((version & 0x3FFF) < 1100)
+      return;
 
     initialValueSegmentOffset = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_INITIAL_VALUE_SEGMENT_OFFSET, Integer.BYTES).order(order).getInt();
     initialValueSegmentSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_INITIAL_VALUE_SEGMENT_SIZE, Integer.BYTES).order(order).getInt();
@@ -354,8 +390,25 @@ public class RCodeInfo {
     return isClass;
   }
 
+  public long getCrc() {
+    return crc;
+  }
+
+  public String getDigest() {
+    return digest;
+  }
+
   public static String readNullTerminatedString(byte[] array, int offset) {
     return readNullTerminatedString(array, offset, Charset.defaultCharset());
+  }
+
+  static String bufferToHex(byte[] buf) {
+    StringBuilder hexString = new StringBuilder(2 * buf.length);
+    for (int i = 0; i < buf.length; i++) {
+      hexString.append(String.format("%02X", buf[i]));
+    }
+
+    return hexString.toString();
   }
 
   static String readNullTerminatedString(byte[] array, int offset, Charset charset) {
