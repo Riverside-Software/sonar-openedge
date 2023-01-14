@@ -39,13 +39,17 @@ import java.util.List;
  * This can be removed later.
  */
 public class PLReader {
+  private static final int MAGIC = 0xd707;
   private static final int MAGIC_V11 = 0xd70b;
+  private static final int MAGIC_V11_MM = 0xd70c;
   private static final int ENCODING_OFFSET = 0x02;
   private static final int ENCODING_SIZE = 20;
+  private static final int FILE_LIST_OFFSET = 0x1e;
   private static final int FILE_LIST_OFFSET_V11 = 0x22;
 
   private Path library;
   private List<FileEntry> files = null;
+  private boolean mm = false;
 
   public PLReader(Path file) {
     this.library = file;
@@ -71,25 +75,8 @@ public class PLReader {
     return null;
   }
 
-  private void readFileList() {
-    try (SeekableByteChannel channel = Files.newByteChannel(library, StandardOpenOption.READ)) {
-      ByteBuffer magic = ByteBuffer.allocate(2);
-      channel.read(magic);
-      if ((magic.getShort(0) & 0xffff) != MAGIC_V11)
-        throw new RuntimeException("Not a valid PL file");
-
-      Charset charset = getCharset(channel);
-      int offset = getTOCOffset(channel);
-      files = new ArrayList<>();
-      FileEntry fe = null;
-      while ((fe = readEntry(channel, offset, charset)) != null) {
-        if (fe.isValid())
-          files.add(fe);
-        offset += fe.getTocSize();
-      }
-    } catch (IOException caught) {
-      throw new RuntimeException(caught);
-    }
+  public boolean isMemoryMapped() {
+    return mm;
   }
 
   public InputStream getInputStream(FileEntry entry) throws IOException {
@@ -103,11 +90,42 @@ public class PLReader {
     return new ByteBufferBackedInputStream((ByteBuffer) ((Buffer) buf).position(0));
   }
 
+  private void readFileList() {
+    ILibVersion version;
+    try (SeekableByteChannel channel = Files.newByteChannel(library, StandardOpenOption.READ)) {
+      ByteBuffer magic = ByteBuffer.allocate(2);
+      channel.read(magic);
+      int magicVal = magic.getShort(0) & 0xffff;
+      if (magicVal == MAGIC) {
+        version = new Version10();
+      } else if (magicVal == MAGIC_V11) {
+        version = new Version11();
+      } else if (magicVal == MAGIC_V11_MM) {
+        version = new Version11();
+        mm = true;
+      } else {
+        throw new InvalidLibraryException("Invalid magic number");
+      }
+
+      Charset charset = getCharset(channel);
+      int offset = getTOCOffset(channel, version);
+      files = new ArrayList<>();
+      FileEntry fe = null;
+      while ((fe = readEntry(channel, offset, charset, version)) != null) {
+        if (fe.isValid())
+          files.add(fe);
+        offset += fe.getTocSize();
+      }
+    } catch (IOException caught) {
+      throw new InvalidLibraryException(caught);
+    }
+  }
+
   private Charset getCharset(SeekableByteChannel channel) throws IOException {
     ByteBuffer buf = ByteBuffer.allocate(ENCODING_SIZE);
     channel.position(ENCODING_OFFSET);
     if (channel.read(buf) != ENCODING_SIZE)
-      throw new RuntimeException("Invalid PL file");
+      throw new InvalidLibraryException("Can't read charset");
 
     StringBuilder sbEncoding = new StringBuilder();
     int zz = 0;
@@ -121,16 +139,17 @@ public class PLReader {
     }
   }
 
-  private int getTOCOffset(SeekableByteChannel channel) throws IOException {
+  private int getTOCOffset(SeekableByteChannel channel, ILibVersion version) throws IOException {
     ByteBuffer buf = ByteBuffer.allocate(4);
-    channel.position(FILE_LIST_OFFSET_V11);
+    channel.position(version.getFileListOffset());
     if (channel.read(buf) != 4)
-      throw new RuntimeException("Invalid PL file");
+      throw new InvalidLibraryException("Can't read table of contents");
 
     return buf.getInt(0);
   }
 
-  private FileEntry readEntry(SeekableByteChannel channel, int offset, Charset charset) throws IOException {
+  private FileEntry readEntry(SeekableByteChannel channel, int offset, Charset charset, ILibVersion version)
+      throws IOException {
     ByteBuffer buf1 = ByteBuffer.allocate(1);
     channel.position(offset);
     channel.read(buf1);
@@ -142,29 +161,134 @@ public class PLReader {
       return new FileEntry((int) (channel.position() - offset - 1));
     } else if (buf1.get(0) == (byte) 0xFF) {
       channel.read((ByteBuffer) ((Buffer) buf1).position(0));
-      int fNameSize = (int) buf1.get(0) & 0xFF;
+      int fNameSize = buf1.get(0) & 0xFF;
       if (fNameSize == 0)
-        return new FileEntry(49);
+        return new FileEntry(version.getEmptyEntrySize());
 
       ByteBuffer buf2 = ByteBuffer.allocate(fNameSize);
       channel.read(buf2);
       String fName = charset.decode((ByteBuffer) ((Buffer) buf2).position(0)).toString();
 
-      ByteBuffer buf3 = ByteBuffer.allocate(48);
+      ByteBuffer buf3 = ByteBuffer.allocate(version.getEntryMinSize());
       channel.read(buf3);
-      int fileOffset = buf3.getInt(6);
-      int fileSize = buf3.getInt(11);
-      long added = buf3.getInt(15);
-      long modified = buf3.getInt(19);
+      int fileOffset = buf3.getInt(version.getEntryFileNameOffset());
+      int fileSize = buf3.getInt(version.getEntryFileSizeOffset());
+      long added = buf3.getInt(version.getEntryFileAddedOffset());
+      long modified = buf3.getInt(version.getEntryFileModifiedOffset());
 
-      int tocSize = (buf3.get(47) == 0 ? 50 : 49) + fNameSize;
+      int tocSize = (buf3.get(version.getEntryMinSize() - 1) == 0 ? (version.getEntryMinSize() + 2)
+          : (version.getEntryMinSize() + 1)) + fNameSize;
       return new FileEntry(fName, modified, added, fileOffset, fileSize, tocSize);
     } else {
       return null;
     }
   }
 
-  public class ByteBufferBackedInputStream extends InputStream {
+
+  public static class InvalidLibraryException extends RuntimeException {
+    private static final long serialVersionUID = -5636414187086107273L;
+
+    public InvalidLibraryException(String msg) {
+      super(msg);
+    }
+
+    public InvalidLibraryException(Throwable cause) {
+      super(cause);
+    }
+  }
+
+  private interface ILibVersion {
+    // File list offset in header
+    int getFileListOffset();
+    // Size of empty file list entries
+    int getEmptyEntrySize();
+    // File list entry minimum size
+    int getEntryMinSize();
+    // File name offset in entry
+    int getEntryFileNameOffset();
+    // File size offset in entry
+    int getEntryFileSizeOffset();
+    // File added timestamp offset in entry
+    int getEntryFileAddedOffset();
+    // File modified timestamp offset in entry
+    int getEntryFileModifiedOffset();
+  }
+
+  private class Version10 implements ILibVersion {
+    @Override
+    public int getFileListOffset() {
+      return FILE_LIST_OFFSET;
+    }
+
+    @Override
+    public int getEmptyEntrySize() {
+      return 29;
+    }
+
+    @Override
+    public int getEntryMinSize() {
+      return 28;
+    }
+
+    @Override
+    public int getEntryFileNameOffset() {
+      return 2;
+    }
+
+    @Override
+    public int getEntryFileSizeOffset() {
+      return 7;
+    }
+
+    @Override
+    public int getEntryFileAddedOffset() {
+      return 11;
+    }
+
+    @Override
+    public int getEntryFileModifiedOffset() {
+      return 15;
+    }
+  }
+
+  private class Version11 implements ILibVersion {
+    @Override
+    public int getFileListOffset() {
+      return FILE_LIST_OFFSET_V11;
+    }
+
+    @Override
+    public int getEmptyEntrySize() {
+      return 49;
+    }
+
+    @Override
+    public int getEntryMinSize() {
+      return 48;
+    }
+
+    @Override
+    public int getEntryFileNameOffset() {
+      return 6;
+    }
+
+    @Override
+    public int getEntryFileSizeOffset() {
+      return 11;
+    }
+
+    @Override
+    public int getEntryFileAddedOffset() {
+      return 15;
+    }
+
+    @Override
+    public int getEntryFileModifiedOffset() {
+      return 19;
+    }
+  }
+
+  private class ByteBufferBackedInputStream extends InputStream {
     private ByteBuffer buf;
 
     public ByteBufferBackedInputStream(ByteBuffer buf) {

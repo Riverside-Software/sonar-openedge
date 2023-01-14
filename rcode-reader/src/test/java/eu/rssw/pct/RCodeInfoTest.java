@@ -47,19 +47,46 @@ import eu.rssw.pct.elements.PrimitiveDataType;
 public class RCodeInfoTest {
 
   @Test
+  public void testV10() throws IOException {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/simpleV10.r"))) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertFalse(rci.isClass());
+      assertEquals(rci.getCrc(), 1876);
+      assertEquals(rci.getDigest(), "E762264216FF9D45EB82D4FFF4618578");
+      assertNull(rci.getTypeInfo());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testV10NoMd5() throws IOException {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/simpleV10NoMD5.r"))) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertFalse(rci.isClass());
+      assertEquals(rci.getCrc(), 1876);
+      assertNull(rci.getDigest());
+      assertNull(rci.getTypeInfo());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
   public void testEnumV11() throws IOException {
-    testEnum("src/test/resources/rcode/MyEnumV11.r", false);
+    testEnum("src/test/resources/rcode/MyEnumV11.r", false, 14646);
   }
 
   @Test
   public void testEnumV12() throws IOException {
-    testEnum("src/test/resources/rcode/MyEnumV12.r", true);
+    testEnum("src/test/resources/rcode/MyEnumV12.r", true, 14646);
   }
 
-  public void testEnum(String fileName, boolean checkEnumValues) throws IOException {
+  public void testEnum(String fileName, boolean checkEnumValues, long expectedCrc) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(fileName))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertEquals(rci.getCrc(), expectedCrc);
       assertNotNull(rci.getTypeInfo());
       assertNotNull(rci.getTypeInfo().getProperties());
       assertEquals(rci.getTypeInfo().getProperties().size(), 10);
@@ -266,6 +293,7 @@ public class RCodeInfoTest {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/NMSTrace.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertEquals(rci.getCrc(), 64163);
       assertNotNull(rci.getTypeInfo());
       assertEquals(rci.getTypeInfo().getProperties().size(), 5);
     } catch (InvalidRCodeException caught) {
@@ -278,6 +306,7 @@ public class RCodeInfoTest {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/PkgLevelAttr.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertEquals(rci.getCrc(), 18598);
       assertNotNull(rci.getTypeInfo());
       assertEquals(rci.getTypeInfo().getProperties().size(), 3);
       IPropertyElement obj1 = rci.getTypeInfo().getProperty("obj0");
@@ -301,6 +330,7 @@ public class RCodeInfoTest {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/TempTableAttrs.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertEquals(rci.getCrc(), 56310);
       assertNotNull(rci.getTypeInfo());
 
       ITableElement tt1 = rci.getTypeInfo().getTempTable("tt1");
@@ -322,20 +352,24 @@ public class RCodeInfoTest {
 
   @Test
   public void testElementsV11() throws IOException {
-    testElements("src/test/resources/rcode/TestClassElementsV11.r");
-    testElements2("src/test/resources/rcode/TestClassElementsChV11.r");
+    testElements("src/test/resources/rcode/TestClassElementsV11.r", 56984, "BBA93318F0B81F7840FA3D45FFE40A35");
+    testElements2("src/test/resources/rcode/TestClassElementsChV11.r", 32156, "7945FD8804C9E910211A5E37708143D5");
   }
 
   @Test
   public void testElementsV12() throws IOException {
-    testElements("src/test/resources/rcode/TestClassElementsV12.r");
-    testElements2("src/test/resources/rcode/TestClassElementsChV12.r");
+    testElements("src/test/resources/rcode/TestClassElementsV12.r", 56984,
+        "z0duspqsS+drLa5kEcDQrePMMTqRU6WNHqf7Rq/t6Ao=");
+    testElements2("src/test/resources/rcode/TestClassElementsChV12.r", 32156,
+        "JIg2azB7KXRZrAfnG2zFYlMiYuqdOCd+LO1MHgr9egg=");
   }
 
-  public void testElements(String fileName) throws IOException {
+  public void testElements(String fileName, long crc, String digest) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(fileName))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertEquals(rci.getCrc(), crc);
+      assertEquals(rci.getDigest(), digest);
       assertNotNull(rci.getTypeInfo());
 
       assertNotNull(rci.getTypeInfo().getTables());
@@ -476,10 +510,12 @@ public class RCodeInfoTest {
     }
   }
 
-  public void testElements2(String fileName) throws IOException {
+  public void testElements2(String fileName, long crc, String digest) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(fileName))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertEquals(rci.getCrc(), crc);
+      assertEquals(rci.getDigest(), digest);
       assertNotNull(rci.getTypeInfo());
 
       assertNotNull(rci.getTypeInfo().getTables());
