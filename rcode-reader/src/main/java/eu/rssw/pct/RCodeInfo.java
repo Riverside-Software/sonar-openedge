@@ -398,6 +398,10 @@ public class RCodeInfo {
     return digest;
   }
 
+  public int getRCodeSize() {
+    return rcodeSize;
+  }
+
   public static String readNullTerminatedString(byte[] array, int offset) {
     return readNullTerminatedString(array, offset, Charset.defaultCharset());
   }
