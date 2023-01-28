@@ -25,8 +25,10 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 
 import com.google.common.base.Strings;
 
@@ -118,12 +120,7 @@ public class RCodeInfo {
     processHeader(input, out);
     processSignatureBlock(input, out);
     processSegmentTable(input, out);
-
-    byte[] rcodeBlock = new byte[rcodeSize];
-    int bytesRead = input.read(rcodeBlock);
-    if (bytesRead != rcodeSize) {
-      throw new InvalidRCodeException("Not enough bytes in rcode block");
-    }
+    byte[] rcodeBlock = readNBytes(input, rcodeSize);
 
     if ((version & 0x3FFF) >= 1200) {
       crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V12, Short.BYTES).order(order).getShort() & 0xFFFF;
@@ -159,12 +156,7 @@ public class RCodeInfo {
     }
 
     if (typeBlockSize > 0) {
-      byte[] typeBlock = new byte[typeBlockSize];
-      bytesRead = input.read(typeBlock);
-      if (bytesRead != typeBlockSize) {
-        throw new InvalidRCodeException("Not enough bytes in type block");
-      }
-      processTypeBlock(typeBlock, out);
+      processTypeBlock(readNBytes(input, typeBlockSize), out);
       isClass = true;
     }
 
@@ -172,11 +164,7 @@ public class RCodeInfo {
   }
 
   private final void processHeader(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {
-    byte[] header = new byte[HEADER_SIZE];
-    int bytesRead = input.read(header);
-    if (bytesRead != HEADER_SIZE) {
-      throw new InvalidRCodeException("Not enough bytes in header");
-    }
+    byte[] header = readNBytes(input, HEADER_SIZE);
 
     if (out != null) {
       out.printf("%n******%nHEADER%n******%n");
@@ -195,17 +183,13 @@ public class RCodeInfo {
     version = ByteBuffer.wrap(header, HEADER_OFFSET_RCODE_VERSION, Short.BYTES).order(order).getShort();
     sixtyFourBits = (version & 0x4000) != 0;
     if ((version & 0x3FFF) >= 1200) {
-      byte[] header2 = new byte[16];
-      if (input.read(header2) != 16) {
-        throw new InvalidRCodeException("Not enough bytes in OE12 header");
-      }
-
+      byte[] extraHeaderSegmentOE12 = readNBytes(input, 16);
       timeStamp = ByteBuffer.wrap(header, HEADER_OFFSET_TIMESTAMP, Integer.BYTES).order(order).getInt();
       digestOffset = ByteBuffer.wrap(header, HEADER_OFFSET_DIGEST_V12, Short.BYTES).order(order).getShort();
       segmentTableSize = ByteBuffer.wrap(header, HEADER_OFFSET_SEGMENT_TABLE_SIZE, Short.BYTES).order(order).getShort();
       signatureSize = ByteBuffer.wrap(header, HEADER_OFFSET_SIGNATURE_SIZE, Integer.BYTES).order(order).getInt();
       typeBlockSize = ByteBuffer.wrap(header, HEADER_OFFSET_TYPEBLOCK_SIZE, Integer.BYTES).order(order).getInt();
-      rcodeSize = ByteBuffer.wrap(header2, 0xc, Integer.BYTES).order(order).getInt();
+      rcodeSize = ByteBuffer.wrap(extraHeaderSegmentOE12, 0xc, Integer.BYTES).order(order).getInt();
     } else if ((version & 0x3FFF) >= 1100) {
       timeStamp = ByteBuffer.wrap(header, HEADER_OFFSET_TIMESTAMP, Integer.BYTES).order(order).getInt();
       digestOffset = ByteBuffer.wrap(header, HEADER_OFFSET_DIGEST, Short.BYTES).order(order).getShort();
@@ -232,11 +216,7 @@ public class RCodeInfo {
 
   private final void processSignatureBlock(InputStream input, PrintStream out)
       throws IOException, InvalidRCodeException {
-    byte[] header = new byte[signatureSize];
-    int bytesRead = input.read(header);
-    if (bytesRead != signatureSize) {
-      throw new InvalidRCodeException("Not enough bytes in signature block");
-    }
+    byte[] header = readNBytes(input, signatureSize);
     if (out != null) {
       out.printf("%n*********%nSIGNATURE%n*********%n");
       printByteBuffer(out, header);
@@ -269,12 +249,8 @@ public class RCodeInfo {
     }
   }
 
-  private final void processSegmentTable(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {
-    byte[] header = new byte[segmentTableSize];
-    int bytesRead = input.read(header);
-    if (bytesRead != segmentTableSize) {
-      throw new InvalidRCodeException("Not enough bytes in segment table block");
-    }
+  private final void processSegmentTable(InputStream input, PrintStream out) throws IOException {
+    byte[] header = readNBytes(input, segmentTableSize);
     if (out != null) {
       out.printf("%n**************%nSEGMENTS TABLE%n**************%n");
       printByteBuffer(out, header);
@@ -400,6 +376,71 @@ public class RCodeInfo {
 
   public int getRCodeSize() {
     return rcodeSize;
+  }
+
+  /**
+   * Exact copy of InputStream.readNBytes() from Java 11. Can be removed once project is fully migrated to Java 11.
+   */
+  public static byte[] readNBytes(InputStream input, int len) throws IOException {
+    if (len < 0) {
+      throw new IllegalArgumentException("len < 0");
+    }
+
+    List<byte[]> bufs = null;
+    byte[] result = null;
+    int total = 0;
+    int remaining = len;
+    int n;
+    do {
+      byte[] buf = new byte[Math.min(remaining, 8192)];
+      int nread = 0;
+
+      // read to EOF which may read more or less than buffer size
+      while ((n = input.read(buf, nread, Math.min(buf.length - nread, remaining))) > 0) {
+        nread += n;
+        remaining -= n;
+      }
+
+      if (nread > 0) {
+        if (Integer.MAX_VALUE - 8 - total < nread) {
+          throw new OutOfMemoryError("Required array size too large");
+        }
+        if (nread < buf.length) {
+          buf = Arrays.copyOfRange(buf, 0, nread);
+        }
+        total += nread;
+        if (result == null) {
+          result = buf;
+        } else {
+          if (bufs == null) {
+            bufs = new ArrayList<>();
+            bufs.add(result);
+          }
+          bufs.add(buf);
+        }
+      }
+      // if the last call to read returned -1 or the number of bytes
+      // requested have been read then break
+    } while (n >= 0 && remaining > 0);
+
+    if (bufs == null) {
+      if (result == null) {
+        return new byte[0];
+      }
+      return result.length == total ? result : Arrays.copyOf(result, total);
+    }
+
+    result = new byte[total];
+    int offset = 0;
+    remaining = total;
+    for (byte[] b : bufs) {
+      int count = Math.min(b.length, remaining);
+      System.arraycopy(b, 0, result, offset, count);
+      offset += count;
+      remaining -= count;
+    }
+
+    return result;
   }
 
   public static String readNullTerminatedString(byte[] array, int offset) {
