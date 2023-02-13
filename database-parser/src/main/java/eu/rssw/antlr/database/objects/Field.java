@@ -35,6 +35,7 @@ public class Field {
   private String format;
   private String initial;
   private Integer maxWidth;
+  private Boolean isMandatory;
   private Collection<Trigger> triggers = new ArrayList<>();
 
   private int firstLine;
@@ -143,6 +144,14 @@ public class Field {
 
   public void setLastLine(int lastLine) {
     this.lastLine = lastLine;
+  }
+
+  public Boolean isMandatory() {
+    return (isMandatory != null) && (isMandatory != false);
+  }
+
+  public void setIsMandatory(Boolean isMandatory) {
+    this.isMandatory = isMandatory;
   }
 
   public String getName() {
