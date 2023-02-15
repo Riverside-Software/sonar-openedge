@@ -88,17 +88,21 @@ public class ClassesTest {
     assertNotNull(lst0);
     assertEquals(lst0.size(), 1);
     assertEquals(lst0.get(0).getSignature(), "LoadLogger(II)");
+    assertEquals(lst0.get(0).getIDESignature(), "LoadLogger(↑INT)");
 
     List<Routine> lst1 = unit.getRootScope().lookupRoutines("addError");
     assertNotNull(lst1);
     assertEquals(lst1.size(), 2);
     assertEquals(lst1.get(0).getSignature(), "AddError(IZProgress.Lang.Error)");
+    assertEquals(lst1.get(0).getIDESignature(), "AddError(↑Progress.Lang.Error) : VOID");
     assertEquals(lst1.get(1).getSignature(), "AddError(IC)");
+    assertEquals(lst1.get(1).getIDESignature(), "AddError(↑CHAR) : VOID");
 
     List<Routine> lst2 = unit.getRootScope().lookupRoutines("addWarnings");
     assertNotNull(lst2);
     assertEquals(lst2.size(), 1);
     assertEquals(lst2.get(0).getSignature(), "AddWarnings(IC[])");
+    assertEquals(lst2.get(0).getIDESignature(), "AddWarnings(↑CHAR[]) : VOID");
   }
 
   @Test

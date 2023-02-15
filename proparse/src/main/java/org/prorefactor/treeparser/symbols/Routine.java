@@ -23,6 +23,7 @@ import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.PrimitiveDataType;
 
 /**
  * Represents the definition of a Routine. Is a Symbol - used as an entry in the symbol table. A Routine is a
@@ -64,6 +65,31 @@ public class Routine extends Symbol {
     }
     val.append(')');
     return val.toString();
+  }
+
+  public String getIDESignature() {
+    StringBuilder retVal = new StringBuilder(getName()).append('(');
+    boolean first = true;
+    for (Parameter p : parameters) {
+      if (first) {
+        first = false;
+      } else {
+        retVal.append(", ");
+      }
+      retVal.append(p.getIDESignature());
+    }
+    retVal.append(')');
+
+    if (getReturnDatatypeNode() != null) {
+      retVal.append(" : ");
+      if (getReturnDatatypeNode().getPrimitive() == PrimitiveDataType.CLASS) {
+        retVal.append(getReturnDatatypeNode().getClassName());
+      } else {
+        retVal.append(getReturnDatatypeNode().getPrimitive().getIDESignature());
+      }
+    }
+
+    return retVal.toString();
   }
 
   public List<Parameter> getParameters() {
