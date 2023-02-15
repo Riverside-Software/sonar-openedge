@@ -97,6 +97,12 @@ public class ClassesTest {
     assertEquals(lst1.get(0).getIDESignature(), "AddError(↑Progress.Lang.Error) : VOID");
     assertEquals(lst1.get(1).getSignature(), "AddError(IC)");
     assertEquals(lst1.get(1).getIDESignature(), "AddError(↑CHAR) : VOID");
+    Routine addError1 = unit.getRootScope().lookupRoutineBySignature("AddError(IZProgress.Lang.Error)");
+    assertNotNull(addError1);
+    assertEquals(addError1.getDefineNode().getLine(), 28);
+    Routine addError2 = unit.getRootScope().lookupRoutineBySignature("AddError(IC)");
+    assertNotNull(addError2);
+    assertEquals(addError2.getDefineNode().getLine(), 38);
 
     List<Routine> lst2 = unit.getRootScope().lookupRoutines("addWarnings");
     assertNotNull(lst2);

@@ -36,6 +36,7 @@ import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.Modifier;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
@@ -320,6 +321,16 @@ public class TreeParser03Test {
     assertEquals(lst.size(), 1);
     Routine r4 = lst.get(0);
     assertEquals(r4.getReturnDatatypeNode(), DataType.CHARACTER);
+
+    Event e1 = unit.getRootScope().lookupEvent("NewCustomer1");
+    assertNotNull(e1);
+    assertEquals(e1.getDefineNode().getLine(), 23);
+    Event e2 = unit.getRootScope().lookupEvent("NewCustomer2");
+    assertNotNull(e2);
+    assertEquals(e2.getDefineNode().getLine(), 24);
+    Event e3 = unit.getRootScope().lookupEvent("NewCustomer3");
+    assertNotNull(e3);
+    assertEquals(e3.getDefineNode().getLine(), 25);
   }
 
   @Test

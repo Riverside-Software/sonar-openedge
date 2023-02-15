@@ -32,6 +32,7 @@ import org.prorefactor.core.schema.ITable;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
+import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Stream;
@@ -40,6 +41,8 @@ import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.Widget;
 import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
+
+import com.google.common.base.Strings;
 
 /**
  * For keeping track of PROCEDURE, FUNCTION, and trigger scopes within a 4gl compile unit. Note that scopes are nested.
@@ -421,6 +424,16 @@ public class TreeParserSymbolScope {
 
   public List<Routine> lookupRoutines(String name) {
     return routineList.stream().filter(r -> r.getName().equalsIgnoreCase(name)).collect(Collectors.toList());
+  }
+
+  public Routine lookupRoutineBySignature(String signature) {
+    if (Strings.isNullOrEmpty(signature))
+      return null;
+    return routineList.stream().filter(r -> signature.equalsIgnoreCase(r.getSignature())).findFirst().orElse(null);
+  }
+
+  public Event lookupEvent(String name) {
+    return (Event) lookupSymbolLocally(Proparse.EVENT, name);
   }
 
   public Stream lookupStream(String name) {
