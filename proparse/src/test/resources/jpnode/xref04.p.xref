@@ -1,0 +1,24 @@
+src\procedures\debugger01.p src\procedures\debugger01.p 1 COMPILE debugger01.p
+src\procedures\debugger01.p src\procedures\debugger01.p 1 CPINTERNAL utf-8
+src\procedures\debugger01.p src\procedures\debugger01.p 1 CPSTREAM iso8859-15
+src\procedures\debugger01.p src\procedures\debugger01.p 1 STRING "tt1" 3 NONE UNTRANSLATABLE 
+src\procedures\debugger01.p src\procedures\debugger01.p 1 STRING "fld1" 4 NONE UNTRANSLATABLE 
+src\procedures\debugger01.p src\procedures\debugger01.p 1 STRING "fld2" 4 NONE UNTRANSLATABLE 
+src\procedures\debugger01.p src\procedures\debugger01.p 1 STRING "fld3" 4 NONE UNTRANSLATABLE 
+src\procedures\debugger01.p src\procedures\debugger01.p 6 STRING "bCust" 5 NONE UNTRANSLATABLE 
+src\procedures\debugger01.p src\procedures\debugger01.p 6 STRING "Customer" 8 NONE UNTRANSLATABLE 
+src\procedures\debugger01.p src\procedures\debugger01.p 6 REFERENCE sports2000.Customer 
+src\procedures\debugger01.p src\procedures\debugger01.p 8 STRING "1" 1 NONE TRANSLATABLE 
+src\procedures\debugger01.p src\procedures\debugger01.p 8 STRING "2" 1 NONE TRANSLATABLE 
+src\procedures\debugger01.p src\procedures\debugger01.p 8 SEARCH tt1 default TEMPTABLE WHOLE-INDEX
+src\procedures\debugger01.p src\procedures\debugger01.p 11 STRING "Customer" 8 NONE UNTRANSLATABLE 
+src\procedures\debugger01.p src\procedures\debugger01.p 11 ACCESS sports2000.Customer Address 
+src\procedures\debugger01.p src\procedures\debugger01.p 11 SEARCH sports2000.Customer CustNum WHOLE-INDEX
+src\procedures\debugger01.p src\procedures\debugger01.p 11 REFERENCE sports2000.Customer 
+src\procedures\debugger01.p src\procedures\debugger01.p 14 ACCESS sports2000.Customer Address 
+src\procedures\debugger01.p src\procedures\debugger01.p 14 SEARCH sports2000.Customer CustNum WHOLE-INDEX
+src\procedures\debugger01.p src\procedures\debugger01.p 14 REFERENCE sports2000.Customer 
+src\procedures\debugger01.p src\procedures\debugger01.p 14 ACCESS sports2000.Customer Address 
+src\procedures\debugger01.p src\procedures\debugger01.p 14 REFERENCE sports2000.Customer 
+src\procedures\debugger01.p src\procedures\debugger01.p 14 SEARCH sports2000.Customer CountryPost WHOLE-INDEX
+src\procedures\debugger01.p src\procedures\debugger01.p 22 STRING "default" 7 NONE UNTRANSLATABLE 

@@ -210,6 +210,7 @@ public class CrossReferenceUtils {
       String ln = null;
       int lineNum = 0;
       final AtomicInteger fileNum = new AtomicInteger(1);
+      final AtomicInteger seqNum = new AtomicInteger(1);
       while ((ln = reader2.readLine()) != null) {
         lineNum++;
         try {
@@ -229,6 +230,7 @@ public class CrossReferenceUtils {
           Reference ref = new Reference();
           ref.referenceType = line[3];
           ref.fileNum = currSrc.fileNum;
+          ref.refSeq = seqNum.getAndIncrement();
           // Line-number can be 'IMPLICIT' or 'NONE'
           ref.lineNum = !Character.isDigit(line[2].charAt(0)) ? 0 : Integer.parseInt(line[2]);
           ref.objectIdentifier = (line[4].length() > 2) && (line[4].charAt(0) == '"')

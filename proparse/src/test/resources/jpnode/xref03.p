@@ -9,8 +9,8 @@ message
   can-find (first i1 where i1.itemname = "y").
 message
   can-find (first b1 where b1.name = "x")
-  can-find (first b1 where b1.name = "y").
+  can-find (first b1 where b1.address = "y").
 message
   can-find (first b1 where b1.name = "x")
-  can-find (first b2 where b2.name = "y").
+  can-find (first b2 where b2.address = "y").
 
