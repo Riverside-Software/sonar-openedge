@@ -339,6 +339,20 @@ public class JPNode {
     return children.stream().filter(node -> filter.contains(node.getNodeType())).collect(Collectors.toList());
   }
 
+  public boolean hasDirectChildOfType(ABLNodeType type) {
+    if (children == null)
+      return false;
+    return children.stream().anyMatch(node -> node.getNodeType() == type);
+  }
+
+  public boolean hasDirectChildOfType(ABLNodeType type, ABLNodeType... types) {
+    if (children == null)
+      return false;
+    EnumSet<ABLNodeType> filter = EnumSet.of(type, types);
+    return children.stream().anyMatch(node -> filter.contains(node.getNodeType()));
+  }
+
+
   /**
    * Get an array of all descendant nodes (including this node) of a given type
    */
