@@ -167,6 +167,12 @@ public class TestDumpFile {
 
     f = db.getTable("PurchaseOrder").getField("SupplierIDNum");
     assertEquals(f.getColumnLabel(), "Supplier ID");
+
+    f = db.getTable("Supplier").getField("Password");
+    assertEquals(f.isMandatory(), Boolean.TRUE);
+
+    f = db.getTable("Supplier").getField("Phone");
+    assertEquals(f.isMandatory(), Boolean.FALSE);
   }
 
   @Test

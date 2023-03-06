@@ -107,4 +107,46 @@ public class Parameter {
     }
     return sb.toString();
   }
+
+  public String getIDESignature() {
+    StringBuilder sb = new StringBuilder();
+    switch (directionNode) {
+      case INPUTOUTPUT: sb.append('⇅'); break;
+      case OUTPUT: sb.append('↓'); break;
+      case RETURN: sb.append('⇊'); break;
+      case BUFFER: return sb.append("BUFFER").toString();
+      default: sb.append('↑'); // INPUT
+    }
+    switch (progressType) {
+      case TEMPTABLE:
+        sb.append("TBL");
+        break;
+      case TABLEHANDLE:
+        sb.append("TBL-HDL");
+        break;
+      case DATASET: sb.append("DS"); break;
+      case DATASETHANDLE: sb.append("DS-HDL"); break;
+      case VARIABLE:
+        Variable v = (Variable) symbol;
+        if (v != null) {
+          if (v.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
+            sb.append(v.getDataType().getClassName());
+          } else {
+            sb.append(v.getDataType().getPrimitive().getIDESignature());
+          }
+          if (v.getExtent() != 0)
+            sb.append("[]");
+        } else {
+          sb.append("??");
+        }
+        break;
+      default:
+        sb.append("??");
+    }
+//    sb.append(' ').append(getName());
+
+    return sb.toString();
+
+  }
+
 }

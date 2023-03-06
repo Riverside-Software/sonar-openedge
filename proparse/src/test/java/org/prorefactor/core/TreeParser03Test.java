@@ -36,6 +36,7 @@ import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.Modifier;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
@@ -142,6 +143,7 @@ public class TreeParser03Test {
     assertEquals(lst.size(), 1);
     Routine f1 = lst.get(0);
     assertEquals(f1.getSignature(), "f1(II)");
+    assertEquals(f1.getIDESignature(), "f1(↑INT) : INT");
     assertEquals(f1.getParameters().size(), 1);
     Variable var1 = (Variable) f1.getParameters().get(0).getSymbol();
     assertEquals(var1.getName(), "zz");
@@ -157,6 +159,7 @@ public class TreeParser03Test {
     assertEquals(lst2.size(), 1);
     Routine f2 = lst2.get(0);
     assertEquals(f2.getSignature(), "f2(II,II)");
+    assertEquals(f2.getIDESignature(), "f2(↑INT, ↑INT) : INT");
     assertEquals(f2.getParameters().size(), 2);
     assertEquals(f2.getParameters().get(0).getSymbol().getName(), "a");
     assertEquals(f2.getParameters().get(0).getSymbol().getNumReads(), 0);
@@ -174,6 +177,7 @@ public class TreeParser03Test {
     assertEquals(lst3.size(), 1);
     Routine f3 = lst3.get(0);
     assertEquals(f3.getSignature(), "f3(II)");
+    assertEquals(f3.getIDESignature(), "f3(↑INT) : INT");
     assertEquals(f3.getParameters().size(), 1);
     assertEquals(f3.getParameters().get(0).getSymbol().getName(), "a");
     assertEquals(f3.getParameters().get(0).getSymbol().getNumReads(), 1);
@@ -183,12 +187,14 @@ public class TreeParser03Test {
     assertEquals(lst4.size(), 1);
     Routine f4 = lst4.get(0);
     assertEquals(f4.getSignature(), "f4()");
+    assertEquals(f4.getIDESignature(), "f4() : INT");
     assertEquals(f4.getParameters().size(), 0);
 
     List<Routine> lst5 = unit.getRootScope().lookupRoutines("f5");
     assertEquals(lst5.size(), 1);
     Routine f5 = lst5.get(0);
     assertEquals(f5.getSignature(), "f5()");
+    assertEquals(f5.getIDESignature(), "f5() : INT");
     assertEquals(f5.getParameters().size(), 0);
 
     // Test TreeParserSymbolScope#getTokenSymbolScope()
@@ -271,6 +277,7 @@ public class TreeParser03Test {
     assertEquals(lst.size(), 1);
     Routine r1 = lst.get(0);
     assertEquals(r1.getSignature(), "foo1(OI)");
+    assertEquals(r1.getIDESignature(), "foo1(↓INT) : VOID");
     assertEquals(r1.getParameters().size(), 1);
     Parameter p1 = r1.getParameters().get(0);
     Symbol s1 = p1.getSymbol();
@@ -314,6 +321,16 @@ public class TreeParser03Test {
     assertEquals(lst.size(), 1);
     Routine r4 = lst.get(0);
     assertEquals(r4.getReturnDatatypeNode(), DataType.CHARACTER);
+
+    Event e1 = unit.getRootScope().lookupEvent("NewCustomer1");
+    assertNotNull(e1);
+    assertEquals(e1.getDefineNode().getLine(), 23);
+    Event e2 = unit.getRootScope().lookupEvent("NewCustomer2");
+    assertNotNull(e2);
+    assertEquals(e2.getDefineNode().getLine(), 24);
+    Event e3 = unit.getRootScope().lookupEvent("NewCustomer3");
+    assertNotNull(e3);
+    assertEquals(e3.getDefineNode().getLine(), 25);
   }
 
   @Test

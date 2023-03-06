@@ -35,7 +35,7 @@ import org.prorefactor.proparse.classdoc.ClassDocumentation.DeprecatedInfo;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.internal.DefaultFilePredicates;
+import org.sonar.api.batch.fs.internal.predicates.DefaultFilePredicates;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;

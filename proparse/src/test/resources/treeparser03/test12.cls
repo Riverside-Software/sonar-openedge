@@ -20,4 +20,8 @@ class cls12:
     return.
   end method.
 
+  define public event NewCustomer1 signature void ( input pcCustName as character ).
+  define public event NewCustomer2 signature void ( input pcCustName as character ).
+  define private event NewCustomer3 void ( input pcCustName as character ).
+
 end class.

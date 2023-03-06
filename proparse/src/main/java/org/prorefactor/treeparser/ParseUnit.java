@@ -23,6 +23,8 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,7 +43,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
@@ -431,14 +432,9 @@ public class ParseUnit {
     if ((recNode.getTableBuffer() == null) || !tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
         || (recNode.getStoreType() != tableType))
       return false;
-    // Does this statement have multiple RecordName nodes pointing to the same table ?
-    // If so, we discard the Reference as it's currently not possible to assign to the right object
-    List<JPNode> list = recNode.getStatement().queryCurrentStatement(ABLNodeType.RECORD_NAME);
-    for (JPNode ch : list) {
-      if ((ch != recNode) && (ch.getTableBuffer() != null)
-          && tableName.equalsIgnoreCase(ch.getTableBuffer().getTargetFullName()))
+    // No searchIndex
+    if (!Strings.isNullOrEmpty(recNode.getSearchIndexName()))
         return false;
-    }
     // In the main file ?
     if ((src.getFileNum() == 1) && (recNode.getFileIndex() == 0))
       return true;
@@ -453,7 +449,7 @@ public class ParseUnit {
     }
   }
 
-  private void handleSearchNode(Source src, Reference ref, List<JPNode> recordNodes) {
+  private void handleSearchNode(Source src, Reference ref, List<RecordNameNode> recordNodes) {
     String tableName = ref.getObjectIdentifier();
     boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
     int tableType = tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE;
@@ -467,11 +463,19 @@ public class ParseUnit {
     }
 
     boolean lFound = false;
-    for (JPNode node : recordNodes) {
-      RecordNameNode recNode = (RecordNameNode) node;
+    for (RecordNameNode recNode : recordNodes) {
       if (isReferenceAssociatedToRecordNode(recNode, src, ref, tableName, tableType)) {
         recNode.setWholeIndex("WHOLE-INDEX".equals(ref.getDetail()));
         recNode.setSearchIndexName(recNode.getTableBuffer().getTable().getName() + "." + ref.getObjectContext());
+        // Is next reference a sort-access node ?
+        Optional<Reference> nextRefOpt = src.getReference().stream().filter(
+            it -> it.getRefSeq() == ref.getRefSeq() + 1).findFirst();
+        if (nextRefOpt.isPresent()) {
+          Reference nextRef = nextRefOpt.get();
+          if ("SORT-ACCESS".equalsIgnoreCase(nextRef.getReferenceType())
+              && ref.getObjectIdentifier().equalsIgnoreCase(nextRef.getObjectIdentifier()))
+            recNode.setSortAccess(nextRef.getObjectContext());
+        }
         lFound = true;
         break;
       }
@@ -482,37 +486,19 @@ public class ParseUnit {
     }
   }
 
-  private void handleSortAccessNode(Source src, Reference ref, List<JPNode> recordNodes) {
-    String tableName = ref.getObjectIdentifier();
-    boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
-    int tableType = tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE;
-    if (tempTable && (tableName.lastIndexOf(':') != -1)) {
-      tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
-    }
-    if (!tempTable && (tableName.indexOf("._") != -1)) {
-      // DBName._Metaschema -> skip
-      return;
-    }
-
-    for (JPNode node : recordNodes) {
-      RecordNameNode recNode = (RecordNameNode) node;
-      if (isReferenceAssociatedToRecordNode(recNode, src, ref, tableName, tableType)) {
-        recNode.setSortAccess(ref.getObjectContext());
-        break;
-      }
-    }
-  }
-
   private void finalizeXrefInfo() {
     if ((topNode == null) || (xref == null))
       return;
-    List<JPNode> recordNodes = topNode.query(ABLNodeType.RECORD_NAME);
+    List<RecordNameNode> recordNodes = topNode.query(ABLNodeType.RECORD_SEARCH).stream() //
+        .filter(it -> it.findDirectChild(ABLNodeType.RECORD_NAME) != null) //
+        .map(it -> it.findDirectChild(ABLNodeType.RECORD_NAME)) //
+        .map(RecordNameNode.class::cast) //
+        .collect(Collectors.toList());
+    
     for (Source src : xref.getSource()) {
       for (Reference ref : src.getReference()) {
         if ("search".equalsIgnoreCase(ref.getReferenceType())) {
           handleSearchNode(src, ref, recordNodes);
-        } else if ("sort-access".equalsIgnoreCase(ref.getReferenceType())) {
-          handleSortAccessNode(src, ref, recordNodes);
         }
       }
     }
