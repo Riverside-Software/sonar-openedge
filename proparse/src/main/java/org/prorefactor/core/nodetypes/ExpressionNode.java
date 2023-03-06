@@ -325,13 +325,9 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       case "ASYNC-REQUEST-COUNT":
       case "BATCH-SIZE":
       case "BGCOLOR":
-      case "BORDER-BOTTOM-CHARS":
       case "BORDER-BOTTOM-PIXELS":
-      case "BORDER-LEFT-CHARS":
       case "BORDER-LEFT-PIXELS":
-      case "BORDER-RIGHT-CHARS":
       case "BORDER-RIGHT-PIXELS":
-      case "BORDER-TOP-CHARS":
       case "BORDER-TOP-PIXELS":
       case "BUFFER-CHARS":
       case "BUFFER-GROUP-ID":
@@ -344,7 +340,6 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       case "CALL-TYPE":
       case "CHILD-NUM":
       case "CODE":
-      case "COLUMN":
       case "COLUMN-BGCOLOR":
       case "COLUMN-DCOLOR":
       case "COLUMN-FGCOLOR":
@@ -362,7 +357,6 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       case "DECIMALS":
       case "DISPLAY-TIMEZONE":
       case "DOWN":
-      case "EDGE-CHARS":
       case "EDGE-PIXELS":
       case "ENTITY-EXPANSION-LIMIT":
       case "ERROR-COLUMN":
@@ -381,17 +375,12 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       case "FRAME-X":
       case "FRAME-Y":
       case "FREQUENCY":
-      case "FULL-HEIGHT-CHARS":
       case "FULL-HEIGHT-PIXELS":
-      case "FULL-WIDTH-CHARS":
       case "FULL-WIDTH-PIXELS":
       case "GRID-FACTOR-HORIZONTAL":
       case "GRID-FACTOR-VERTICAL":
-      case "GRID-UNIT-HEIGHT-CHARS":
       case "GRID-UNIT-HEIGHT-PIXELS":
-      case "GRID-UNIT-WIDTH-CHARS":
       case "GRID-UNIT-WIDTH-PIXELS":
-      case "HEIGHT-CHARS":
       case "HEIGHT-PIXELS":
       case "HWND":
       case "INDEX":
@@ -411,20 +400,15 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       case "LOGGING-LEVEL":
       case "MAX-CHARS":
       case "MAX-DATA-GUESS":
-      case "MAX-HEIGHT-CHARS":
       case "MAX-HEIGHT-PIXELS":
       case "MAX-VALUE":
-      case "MAX-WIDTH-CHARS":
       case "MAX-WIDTH-PIXELS":
       case "MAXIMUM-LEVEL":
       case "MENU-MOUSE":
       case "MESSAGE-AREA-FONT":
-      case "MIN-COLUMN-WIDTH-CHARS":
       case "MIN-COLUMN-WIDTH-PIXELS":
-      case "MIN-HEIGHT-CHARS":
       case "MIN-HEIGHT-PIXELS":
       case "MIN-VALUE":
-      case "MIN-WIDTH-CHARS":
       case "MIN-WIDTH-PIXELS":
       case "MULTITASKING-INTERVAL":
       case "NUM-BUFFERS":
@@ -467,8 +451,6 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       case "RECORD-LENGTH":
       case "REMOTE-PORT":
       case "RESTART-ROW":
-      case "ROW":
-      case "ROW-HEIGHT-CHARS":
       case "ROW-HEIGHT-PIXELS":
       case "ROW-STATE":
       case "SCREEN-LINES":
@@ -485,12 +467,9 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       case "TITLE-FGCOLOR":
       case "TITLE-FONT":
       case "UNIQUE-ID":
-      case "VIRTUAL-HEIGHT-CHARS":
       case "VIRTUAL-HEIGHT-PIXELS":
-      case "VIRTUAL-WIDTH-CHARS":
       case "VIRTUAL-WIDTH-PIXELS":
       case "WIDGET-ID":
-      case "WIDTH-CHARS":
       case "WIDTH-PIXELS":
       case "WINDOW-STATE":
       case "WORK-AREA-HEIGHT-PIXELS":
@@ -503,6 +482,28 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       case "Y":
       case "YEAR-OFFSET":
         return DataType.INTEGER;
+      case "BORDER-BOTTOM-CHARS":
+      case "BORDER-LEFT-CHARS":
+      case "BORDER-RIGHT-CHARS":
+      case "BORDER-TOP-CHARS":
+      case "COLUMN":
+      case "EDGE-CHARS":
+      case "FULL-HEIGHT-CHARS":
+      case "FULL-WIDTH-CHARS":
+      case "GRID-UNIT-HEIGHT-CHARS":
+      case "GRID-UNIT-WIDTH-CHARS":
+      case "HEIGHT-CHARS":
+      case "MAX-HEIGHT-CHARS":
+      case "MAX-WIDTH-CHARS":
+      case "MIN-COLUMN-WIDTH-CHARS":
+      case "MIN-HEIGHT-CHARS":
+      case "MIN-WIDTH-CHARS":
+      case "ROW":
+      case "ROW-HEIGHT-CHARS":
+      case "VIRTUAL-HEIGHT-CHARS":
+      case "VIRTUAL-WIDTH-CHARS":
+      case "WIDTH-CHARS":
+        return DataType.DECIMAL;
       case "ACTIVE":
       case "ALLOW-COLUMN-SEARCHING":
       case "ALWAYS-ON-TOP":
