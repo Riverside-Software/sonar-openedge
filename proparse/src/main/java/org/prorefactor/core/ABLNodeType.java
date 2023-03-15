@@ -2832,6 +2832,18 @@ public enum ABLNodeType {
     return RECORD_FUNCTIONS.contains(this);
   }
 
+  /**
+   * Returns uppercase of the type info record's full text. Returns null if there's no type info for the type number.
+   * Returns empty string if there's no text for the type.
+   */
+  public String getFullText() {
+    if (this.options.contains(NodeTypesOption.PLACEHOLDER))
+      return null;
+    if (!this.options.contains(NodeTypesOption.KEYWORD))
+      return "";
+    return Strings.nullToEmpty(this.text).toUpperCase();
+  }
+
   public boolean isAbbreviated(String txt) {
     if (Strings.isNullOrEmpty(txt) || !isKeyword())
       return false;
@@ -2889,13 +2901,7 @@ public enum ABLNodeType {
    */
   public static String getFullText(int type) {
     ABLNodeType e = typeMap.get(type);
-    if (e == null)
-      return null;
-    if (e.options.contains(NodeTypesOption.PLACEHOLDER))
-      return null;
-    if (!e.options.contains(NodeTypesOption.KEYWORD))
-      return "";
-    return Strings.nullToEmpty(e.text).toUpperCase();
+    return e == null ? null : e.getFullText();
   }
 
   public static ABLNodeType getLiteral(String text) {
@@ -2909,15 +2915,6 @@ public enum ABLNodeType {
     if (type == null)
       return defaultType;
     return type;
-  }
-
-  public static String getFullText(String text) {
-    if (text == null)
-      return "";
-    ABLNodeType type = literalsMap.get(text.toLowerCase());
-    if (type == null)
-      return "";
-    return type.text.toUpperCase();
   }
 
   /**
@@ -3069,6 +3066,86 @@ public enum ABLNodeType {
         return DataType.UNSIGNED_INTEGER;
       default:
         return DataType.UNKNOWN;
+    }
+  }
+
+  /**
+   * @see ABLNodeType#getDataType(int)
+   */
+  public static ABLNodeType getNodeType(DataType dataType) {
+    switch (dataType.getPrimitive()) {
+      case VOID:
+        return ABLNodeType.VOID;
+      case CHARACTER:
+        return ABLNodeType.CHARACTER;
+      case DATE:
+        return ABLNodeType.DATE;
+      case LOGICAL:
+        return ABLNodeType.LOGICAL;
+      case INTEGER:
+        return ABLNodeType.INTEGER;
+      case DECIMAL:
+        return ABLNodeType.DECIMAL;
+      case RECID:
+        return ABLNodeType.RECID;
+      case RAW:
+        return ABLNodeType.RAW;
+      case HANDLE:
+        return ABLNodeType.HANDLE;
+      case MEMPTR:
+        return ABLNodeType.MEMPTR;
+      case ROWID:
+        return ABLNodeType.ROWID;
+      case COMPONENT_HANDLE:
+        return ABLNodeType.COMHANDLE;
+      case TABLE:
+        return ABLNodeType.TABLE;
+      case TABLE_HANDLE:
+        return ABLNodeType.TABLEHANDLE;
+      case BLOB:
+        return ABLNodeType.BLOB;
+      case CLOB:
+        return ABLNodeType.CLOB;
+      case BYTE:
+        return ABLNodeType.BYTE;
+      case SHORT:
+        return ABLNodeType.SHORT;
+      case LONG:
+        return ABLNodeType.LONG;
+      case FLOAT:
+        return ABLNodeType.FLOAT;
+      case DOUBLE:
+        return ABLNodeType.DOUBLE;
+      case UNSIGNED_SHORT:
+        return ABLNodeType.UNSIGNEDSHORT;
+      case UNSIGNED_BYTE:
+        return ABLNodeType.UNSIGNEDBYTE;
+      case CURRENCY:
+        return ABLNodeType.CURRENCY;
+      case ERROR_CODE:
+        return ABLNodeType.ERRORCODE;
+      case FIXCHAR:
+        return ABLNodeType.FIXCHAR;
+      case BIGINT:
+        return ABLNodeType.BIGINT;
+      case TIME:
+        return ABLNodeType.TIME;
+      case DATETIME:
+        return ABLNodeType.DATETIME;
+      case DATASET:
+        return ABLNodeType.DATASET;
+      case DATASET_HANDLE:
+        return ABLNodeType.DATASETHANDLE;
+      case LONGCHAR:
+        return ABLNodeType.LONGCHAR;
+      case DATETIME_TZ:
+        return ABLNodeType.DATETIMETZ;
+      case INT64:
+        return ABLNodeType.INT64;
+      case UNSIGNED_INTEGER:
+        return ABLNodeType.UNSIGNEDINTEGER;
+      default:
+        return ABLNodeType.IUNKNOWN;
     }
   }
 
