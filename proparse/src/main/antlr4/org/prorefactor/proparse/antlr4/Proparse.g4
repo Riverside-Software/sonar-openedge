@@ -1738,6 +1738,16 @@ defineParamVarLike:
     ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase )*
   ;
 
+defineParamVar2:
+    ( AS datatype | LIKE fieldExpr )
+    ( formatExpression | initialConstant | labelConstant | NOUNDO )*
+  ;
+
+defineParamVar3:
+    ( AS datatype | LIKE fieldExpr )?
+    ( formatExpression | initialConstant | labelConstant | NOUNDO )*
+  ;
+
 definePropertyStatement:
     DEFINE defineShare? modifiers=definePropertyModifier*
     PROPERTY n=newIdentifier definePropertyAs
@@ -3522,7 +3532,7 @@ triggerProcedureStatement:
       (
         triggerProcedureStatementSub1
       | triggerProcedureStatementSub2
-      | ASSIGN triggerOf? triggerOld?
+      | ASSIGN ( triggerOf triggerOld? )?
       )
     statementEnd
   ;
@@ -3539,16 +3549,16 @@ triggerProcedureStatementSub2:
 
 triggerOf:
     OF fieldExpr triggerTableLabel?  # triggerOfSub1
-  | NEW VALUE? id=identifier defineParamVar # triggerOfSub2
+  | NEW VALUE? id=identifier defineParamVar2 # triggerOfSub2
   ;
 
+// Found this in PSC's grammar
 triggerTableLabel:
-    // Found this in PSC's grammar
     TABLE LABEL constant
   ;
 
 triggerOld:
-    OLD VALUE? id=identifier defineParamVar?
+    OLD VALUE? id=identifier defineParamVar3
   ;
 
 underlineStatement:

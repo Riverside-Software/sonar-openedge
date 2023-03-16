@@ -1056,6 +1056,32 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void enterDefineParamVar2(DefineParamVar2Context ctx) {
+    if (ctx.datatype() != null) {
+      defAs(ctx.datatype());
+    } else {
+      defLike(support.getNode(ctx.fieldExpr().field()));
+    }
+    if ((currSymbol instanceof Variable) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+      defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
+    }
+  }
+
+  @Override
+  public void enterDefineParamVar3(DefineParamVar3Context ctx) {
+    if (ctx.datatype() != null) {
+      defAs(ctx.datatype());
+    } else if (ctx.LIKE() != null) {
+      defLike(support.getNode(ctx.fieldExpr().field()));
+    } else {
+      // Use same datatype as new variable 
+    }
+    if ((currSymbol instanceof Variable) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+      defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
+    }
+  }
+
+  @Override
   public void enterDefineParameterStatementSub2Table(DefineParameterStatementSub2TableContext ctx) {
     wipParameters.getFirst().setProgressType(ABLNodeType.TEMPTABLE);
     setContextQualifier(ctx.record(), ContextQualifier.TEMPTABLESYMBOL);

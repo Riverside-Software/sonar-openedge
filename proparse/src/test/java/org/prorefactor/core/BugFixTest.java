@@ -430,6 +430,12 @@ public class BugFixTest {
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
   }
 
+  @Test
+  public void test52() {
+    ParseUnit unit = genericTest("bug52.p");
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+
   // Next two tests : same exception should be thrown in both cases
 //  @Test(expectedExceptions = {ProparseRuntimeException.class})
 //  public void testCache1() {
