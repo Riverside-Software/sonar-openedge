@@ -201,7 +201,7 @@ public class RCodeInfo {
       timeStamp = ByteBuffer.wrap(header, HEADER_OFFSET_TIMESTAMP, Integer.BYTES).order(order).getInt();
       digestOffset = ByteBuffer.wrap(header, HEADER_OFFSET_DIGEST, Short.BYTES).order(order).getShort();
       segmentTableSize = ByteBuffer.wrap(header, 30, Short.BYTES).order(order).getShort();
-      signatureSize = ByteBuffer.wrap(header, 8, Short.BYTES).order(order).getShort();
+      signatureSize = Short.toUnsignedInt(ByteBuffer.wrap(header, 8, Short.BYTES).order(order).getShort());
       typeBlockSize = 0;
       rcodeSize = ByteBuffer.wrap(header, HEADER_OFFSET_RCODE_SIZE, Integer.BYTES).order(order).getInt();
     } else {

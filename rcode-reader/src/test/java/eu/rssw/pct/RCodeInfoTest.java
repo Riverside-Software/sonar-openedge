@@ -73,6 +73,45 @@ public class RCodeInfoTest {
   }
 
   @Test
+  public void testV10LongSignatureSegment() throws IOException {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/longSigV10.r"))) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertFalse(rci.isClass());
+      assertEquals(rci.getCrc(), 33974);
+      assertEquals(rci.getDigest(), "F9FBF64A38EC9A6264A00CAAF9E136FC");
+      assertNull(rci.getTypeInfo());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testV11LongSignatureSegment() throws IOException {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/longSigV11.r"))) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertFalse(rci.isClass());
+      assertEquals(rci.getCrc(), 33974);
+      assertEquals(rci.getDigest(), "135A1AD0C1F088893A46D39ED9765BAC");
+      assertNull(rci.getTypeInfo());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testV12LongSignatureSegment() throws IOException {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/longSigV12.r"))) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertFalse(rci.isClass());
+      assertEquals(rci.getCrc(), 33974);
+      assertEquals(rci.getDigest(), "JKgWEeW5CtyJXjUM6zQqqAa3KqAQXY2ttIe9uepOFjQ=");
+      assertNull(rci.getTypeInfo());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
   public void testEnumV11() throws IOException {
     testEnum("src/test/resources/rcode/MyEnumV11.r", false, 14646);
   }
