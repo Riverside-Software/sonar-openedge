@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IStatementBlock;
+import org.prorefactor.core.nodetypes.IfStatementNode;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -55,7 +56,22 @@ public class StatementFlowWriter {
 
     IStatement ch = node.getFirstStatement();
     while (ch != null) {
-      if (ch.asJPNode().isIStatementBlock()) {
+      if (ch instanceof IfStatementNode) {
+        IfStatementNode ifNode = (IfStatementNode) ch;
+        writeNode(ifNode.asJPNode(), scope, level + 2);
+        writeNode(ifNode.getThenNode(), scope, level + 4);
+        if (ifNode.getThenBlockOrNode() instanceof IStatementBlock)
+          walker((IStatementBlock) ifNode.getThenBlockOrNode(), node.asJPNode().hasBlock() ? node.asJPNode().getBlock().getSymbolScope() : scope, level + 6);
+        else
+          writeNode(ifNode.getThenBlockOrNode().asJPNode(), scope, level + 6);
+        if (ifNode.getElseNode() != null) {
+          writeNode(ifNode.getElseNode(), scope, level + 4);
+          if (ifNode.getElseBlockOrNode() instanceof IStatementBlock)
+            walker((IStatementBlock) ifNode.getElseBlockOrNode(), node.asJPNode().hasBlock() ? node.asJPNode().getBlock().getSymbolScope() : scope, level + 6);
+          else
+            writeNode(ifNode.getElseBlockOrNode().asJPNode(), scope, level + 6);
+        }
+      } else if (ch.asJPNode().isIStatementBlock()) {
         walker(ch.asJPNode().asIStatementBlock(), node.asJPNode().hasBlock() ? node.asJPNode().getBlock().getSymbolScope() : scope, level + 2);
       } else {
         writeNode(ch.asJPNode(), scope, level + 2);

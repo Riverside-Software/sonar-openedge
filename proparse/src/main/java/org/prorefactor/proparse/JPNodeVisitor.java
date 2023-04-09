@@ -851,7 +851,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   public Builder visitEnumStatement(EnumStatementContext ctx) {
     isEnum = true;
     className = ctx.tn.getText();
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -869,7 +869,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
     isClass = true;
     className = ctx.tn.getText();
     isAbstract = !ctx.ABSTRACT().isEmpty();
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -1667,7 +1667,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitFinallyStatement(FinallyStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -1863,12 +1863,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitIfThen(IfThenContext ctx) {
-    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+    return createTreeFromFirstNode(ctx).setRuleNode(ctx);
   }
 
   @Override
   public Builder visitIfElse(IfElseContext ctx) {
-    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+    return createTreeFromFirstNode(ctx).setRuleNode(ctx);
   }
 
   @Override
@@ -1940,7 +1940,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   public Builder visitInterfaceStatement(InterfaceStatementContext ctx) {
     isInterface = true;
     className = ctx.name.getText();
-    return createStatementTreeFromFirstNode(ctx);
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override

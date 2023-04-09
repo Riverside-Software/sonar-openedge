@@ -27,6 +27,7 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IStatementBlock;
+import org.prorefactor.core.nodetypes.IfStatementNode;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.proparse.antlr4.Proparse.CanFindFunctionContext;
 import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
@@ -40,6 +41,9 @@ import org.prorefactor.proparse.antlr4.Proparse.ExternalFunctionStatementContext
 import org.prorefactor.proparse.antlr4.Proparse.ExternalProcedureStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ForStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.FunctionStatementContext;
+import org.prorefactor.proparse.antlr4.Proparse.IfElseContext;
+import org.prorefactor.proparse.antlr4.Proparse.IfStatementContext;
+import org.prorefactor.proparse.antlr4.Proparse.IfThenContext;
 import org.prorefactor.proparse.antlr4.Proparse.InterfaceStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.MethodStatement2Context;
 import org.prorefactor.proparse.antlr4.Proparse.MethodStatementContext;
@@ -71,11 +75,13 @@ public class TreeParserBlocks extends ProparseBaseListener {
   private final TreeParserRootSymbolScope rootScope;
 
   private Routine rootRoutine;
-  private int currentLevel;
-
   private Block currentBlock;
   private TreeParserSymbolScope currentScope;
   private Routine currentRoutine;
+
+  // Internal Usage
+  private int currentLevel;
+  private boolean inIfElseThen = false;
 
   /*
    * Note that blockStack is *only* valid for determining the current block - the stack itself cannot be used for
@@ -435,6 +441,36 @@ public class TreeParserBlocks extends ProparseBaseListener {
   // **********
 
   @Override
+  public void enterIfStatement(IfStatementContext ctx) {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("{}> IfStatement {}", indent(), support.getNode(ctx));
+    }
+
+    JPNode node = support.getNode(ctx);
+    if (node instanceof IfStatementNode) {
+      IfStatementNode ifStmt = (IfStatementNode) node;
+      ifStmt.setThenNode(support.getNode(ctx.ifThen()));
+      ifStmt.setThenBlockOrNode(support.getNode(ctx.ifThen()).getFirstChild().asIStatement());
+      if (ctx.ifElse() != null) {
+        ifStmt.setElseNode(support.getNode(ctx.ifElse()));
+        ifStmt.setElseBlockOrNode(support.getNode(ctx.ifElse()).getFirstChild().asIStatement());
+      }
+    }
+  }
+
+  @Override
+  public void enterIfThen(IfThenContext ctx) {
+    // Next statement or block won't be attached in the same way
+    inIfElseThen = true;
+  }
+
+  @Override
+  public void enterIfElse(IfElseContext ctx) {
+    // Next statement or block won't be attached in the same way
+    inIfElseThen = true;
+  }
+
+  @Override
   public void enterEveryRule(ParserRuleContext ctx) {
     currentLevel++;
 
@@ -442,7 +478,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
     if ((node != null) && node.isStatement()) {
       enterNewStatement(node.asIStatement());
     }
-    if ((node != null) && node.isIStatementBlock()) {
+    if ((node != null) && node.isIStatementBlock() && !(ctx instanceof IfStatementContext)) {
       statementBlockBegin(node.asIStatementBlock());
     }
   }
@@ -452,7 +488,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
     currentLevel--;
 
     JPNode node = support.getNode(ctx);
-    if ((node != null) && node.isIStatementBlock() && !(node instanceof ProgramRootNode)) {
+    if ((node != null) && node.isIStatementBlock() && !(node instanceof ProgramRootNode) && !(ctx instanceof IfStatementContext)) {
       if (LOG.isTraceEnabled())
         LOG.trace("{}> PopStatementBlock {}", indent(), node);
 
@@ -571,17 +607,22 @@ public class TreeParserBlocks extends ProparseBaseListener {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> NewStatement {}", indent(), node);
 
-    if ((lastStatement != null) && (node != lastStatement)) {
-      lastStatement.setNextStatement(node);
-      node.setPreviousStatement(lastStatement);
-    }
-    lastStatement = node;
-    node.setParentStatement(currStmtBlock);
+    if (inIfElseThen) {
+      inIfElseThen = false;
+      node.setParentStatement((IfStatementNode) lastStatement);
+    } else {
+      if ((lastStatement != null) && (node != lastStatement)) {
+        lastStatement.setNextStatement(node);
+        node.setPreviousStatement(lastStatement);
+      }
+      lastStatement = node;
+      node.setParentStatement(currStmtBlock);
 
-    node.setInBlock(currentBlock);
-    if (currStmtBlock.getFirstStatement() == null) {
-      currStmtBlock.setFirstStatement(node);
+      if (currStmtBlock.getFirstStatement() == null) {
+        currStmtBlock.setFirstStatement(node);
+      }
     }
+    node.setInBlock(currentBlock);
 
     // Assign annotations to statement
     IStatement prev = node.getPreviousStatement();
