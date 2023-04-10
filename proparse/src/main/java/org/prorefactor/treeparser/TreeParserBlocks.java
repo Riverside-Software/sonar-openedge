@@ -430,6 +430,36 @@ public class TreeParserBlocks extends ProparseBaseListener {
     blockEnd();
   }
 
+  // **********
+  // STATEMENTS
+  // **********
+
+  @Override
+  public void enterEveryRule(ParserRuleContext ctx) {
+    currentLevel++;
+
+    JPNode node = support.getNode(ctx);
+    if ((node != null) && node.isStatement()) {
+      enterNewStatement(node.asIStatement());
+    }
+    if ((node != null) && node.isIStatementBlock()) {
+      statementBlockBegin(node.asIStatementBlock());
+    }
+  }
+
+  @Override
+  public void exitEveryRule(ParserRuleContext ctx) {
+    currentLevel--;
+
+    JPNode node = support.getNode(ctx);
+    if ((node != null) && node.isIStatementBlock() && !(node instanceof ProgramRootNode)) {
+      if (LOG.isTraceEnabled())
+        LOG.trace("{}> PopStatementBlock {}", indent(), node);
+
+      statementBlockEnd();
+    }
+  }
+
   // ******************
   // INTERNAL METHODS
   // ******************
@@ -530,32 +560,6 @@ public class TreeParserBlocks extends ProparseBaseListener {
 
     currStmtBlock = stmtBlockStack.remove(stmtBlockStack.size() - 1);
     lastStatement = stmtStack.remove(stmtStack.size() - 1);
-  }
-
-  @Override
-  public void enterEveryRule(ParserRuleContext ctx) {
-    currentLevel++;
-
-    JPNode node = support.getNode(ctx);
-    if ((node != null) && node.isStatement()) {
-      enterNewStatement(node.asIStatement());
-    }
-    if ((node != null) && node.isIStatementBlock()) {
-      statementBlockBegin(node.asIStatementBlock());
-    }
-  }
-
-  @Override
-  public void exitEveryRule(ParserRuleContext ctx) {
-    currentLevel--;
-
-    JPNode node = support.getNode(ctx);
-    if ((node != null) && node.isIStatementBlock() && !(node instanceof ProgramRootNode)) {
-      if (LOG.isTraceEnabled())
-        LOG.trace("{}> PopStatementBlock {}", indent(), node);
-
-      statementBlockEnd();
-    }
   }
 
   private String indent() {
