@@ -57,6 +57,11 @@ public class StatementFlowTest {
     genericTest("test02.cls");
   }
 
+  @Test
+  public void test03() throws IOException {
+    genericTest("test03.p");
+  }
+
   private void genericTest(String name) throws IOException {
     StatementFlowWriter writer = new StatementFlowWriter();
     writer.write(SOURCEDIR + name, new File(TARGETDIR + name), session);

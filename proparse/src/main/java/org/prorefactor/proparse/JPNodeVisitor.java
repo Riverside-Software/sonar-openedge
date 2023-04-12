@@ -2256,7 +2256,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitPromptForStatement(PromptForStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx).changeType(ABLNodeType.PROMPTFOR);
+    Builder b = createStatementTreeFromFirstNode(ctx).changeType(ABLNodeType.PROMPTFOR);
+    if (ctx.editingPhrase() != null)
+      b.setBlock(true);
+    return b;
   }
 
   @Override
@@ -2501,7 +2504,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitSetStatement(SetStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    Builder b = createStatementTreeFromFirstNode(ctx);
+    if (ctx.editingPhrase() != null)
+      b.setBlock(true);
+    return b;
   }
 
   @Override
@@ -2798,7 +2804,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitUpdateStatement(UpdateStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx);
+    Builder b = createStatementTreeFromFirstNode(ctx);
+    if (ctx.editingPhrase() != null)
+      b.setBlock(true);
+    return b;
   }
 
   @Override
