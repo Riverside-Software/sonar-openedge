@@ -3656,7 +3656,7 @@ waitForStatement:
       waitForFocus?
       pauseExpression?
       ( EXCLUSIVEWEBUSER expression? )?
-    |  // This is for a .Net WAIT-FOR, and will be in the tree as #(Widget_ref ...)
+    |  // This is for a .Net WAIT-FOR
       expressionTerm waitForSet?
     )
     statementEnd
