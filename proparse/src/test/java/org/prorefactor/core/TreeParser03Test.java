@@ -197,6 +197,20 @@ public class TreeParser03Test {
     assertEquals(f5.getIDESignature(), "f5() : INT");
     assertEquals(f5.getParameters().size(), 0);
 
+    List<Routine> lst6 = unit.getRootScope().lookupRoutines("f6");
+    assertEquals(lst6.size(), 1);
+    Routine f6 = lst6.get(0);
+    assertEquals(f6.getSignature(), "f6(MD)");
+    assertEquals(f6.getIDESignature(), "f6(⇅DS) : INT");
+    assertEquals(f6.getParameters().size(), 1);
+
+    List<Routine> lst7 = unit.getRootScope().lookupRoutines("f7");
+    assertEquals(lst7.size(), 1);
+    Routine f7 = lst7.get(0);
+    assertEquals(f7.getSignature(), "f7(MDE)");
+    assertEquals(f7.getIDESignature(), "f7(⇅DEC) : INT");
+    assertEquals(f7.getParameters().size(), 1);
+
     // Test TreeParserSymbolScope#getTokenSymbolScope()
     assertEquals(unit.getRootScope().getTokenSymbolScope(205), unit.getRootScope());
     assertEquals(unit.getRootScope().getTokenSymbolScope(150).getRoutine().getName(), "f3");

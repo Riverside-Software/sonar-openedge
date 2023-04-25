@@ -28,4 +28,14 @@ function f5 returns int:
 
 end function.
 
+define temp-table tt1 field fld1 as char.
+define dataset ds1 for tt1.
+function f6 returns int(input-output dataset ds1):
+
+end function.
+
+function f7 returns int(input-output xx as decimal):
+
+end function.
+
 message "Hello world!".

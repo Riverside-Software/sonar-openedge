@@ -321,6 +321,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void enterFunctionParamStandardDataset(FunctionParamStandardDatasetContext ctx) {
+    wipParameters.getFirst().setProgressType(ABLNodeType.DATASET);
+  }
+
+  @Override
   public void enterFunctionParamStandardDatasetHandle(FunctionParamStandardDatasetHandleContext ctx) {
     Variable v = defineVariable(ctx, support.getNode(ctx), ctx.hn2.getText(), DataType.DATASET_HANDLE,
         Variable.Type.PARAMETER);
