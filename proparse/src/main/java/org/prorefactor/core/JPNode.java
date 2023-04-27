@@ -36,6 +36,7 @@ import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.IExpression;
 import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IStatementBlock;
+import org.prorefactor.core.nodetypes.IfStatementNode;
 import org.prorefactor.core.nodetypes.InUIReferenceNode;
 import org.prorefactor.core.nodetypes.LocalMethodCallNode;
 import org.prorefactor.core.nodetypes.MethodCallNode;
@@ -1184,6 +1185,12 @@ public class JPNode {
             break;
           case CANFIND:
             node = new CanFindNode(tok, up, num, hasChildren);
+            break;
+          case IF:
+            if (stmt)
+              node = new IfStatementNode(tok, up, num, hasChildren);
+            else
+              node = new JPNode(tok, up, num, hasChildren);
             break;
           default:
             if (stmt && block)

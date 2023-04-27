@@ -1738,6 +1738,16 @@ defineParamVarLike:
     ( caseSensitiveOrNot | formatExpression | decimalsExpr | initialConstant | labelConstant | NOUNDO | extentPhrase )*
   ;
 
+defineParamVar2:
+    ( AS datatype | LIKE fieldExpr )
+    ( formatExpression | initialConstant | labelConstant | NOUNDO )*
+  ;
+
+defineParamVar3:
+    ( AS datatype | LIKE fieldExpr )?
+    ( formatExpression | initialConstant | labelConstant | NOUNDO )*
+  ;
+
 definePropertyStatement:
     DEFINE defineShare? modifiers=definePropertyModifier*
     PROPERTY n=newIdentifier definePropertyAs
@@ -2812,7 +2822,8 @@ onStatement:
       )
       (  REVERT statementEnd
       |  PERSISTENT RUN filenameOrValue inExpression? onstateRunParams? statementEnd
-      |  { support.addInnerScope(_localctx); } blockOrStatement { support.dropInnerScope(); }
+      |  { support.addInnerScope(_localctx); } DO blockColon blockOrStatement* END statementEnd { support.dropInnerScope(); }
+      |  blockOrStatement
       )
     )
   ;
@@ -3522,7 +3533,7 @@ triggerProcedureStatement:
       (
         triggerProcedureStatementSub1
       | triggerProcedureStatementSub2
-      | ASSIGN triggerOf? triggerOld?
+      | ASSIGN ( triggerOf triggerOld? )?
       )
     statementEnd
   ;
@@ -3539,16 +3550,16 @@ triggerProcedureStatementSub2:
 
 triggerOf:
     OF fieldExpr triggerTableLabel?  # triggerOfSub1
-  | NEW VALUE? id=identifier defineParamVar # triggerOfSub2
+  | NEW VALUE? id=identifier defineParamVar2 # triggerOfSub2
   ;
 
+// Found this in PSC's grammar
 triggerTableLabel:
-    // Found this in PSC's grammar
     TABLE LABEL constant
   ;
 
 triggerOld:
-    OLD VALUE? id=identifier defineParamVar?
+    OLD VALUE? id=identifier defineParamVar3
   ;
 
 underlineStatement:
@@ -3646,7 +3657,7 @@ waitForStatement:
       waitForFocus?
       pauseExpression?
       ( EXCLUSIVEWEBUSER expression? )?
-    |  // This is for a .Net WAIT-FOR, and will be in the tree as #(Widget_ref ...)
+    |  // This is for a .Net WAIT-FOR
       expressionTerm waitForSet?
     )
     statementEnd
