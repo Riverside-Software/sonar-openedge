@@ -98,6 +98,10 @@ public class PropertyElementV11 extends AbstractAccessibleElement implements IPr
     return new PropertyElementV11(name2, accessType, flags, variable, getter, setter);
   }
 
+  public int getFlags() {
+    return flags;
+  }
+
   public IVariableElement getVariable() {
     return this.variable;
   }

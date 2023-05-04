@@ -64,6 +64,10 @@ public class VariableElementV11 extends AbstractAccessibleElement implements IVa
     return new VariableElementV11(name2, accessType, dataTypeObj, extent, flags);
   }
 
+  public int getFlags() {
+    return flags;
+  }
+
   @Override
   public int getExtent() {
     return this.extent;

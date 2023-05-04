@@ -39,6 +39,10 @@ public class DatabaseDescription {
   private Map<String, Sequence> sequences = new HashMap<>();
   private Map<String, Table> tables = new HashMap<>();
 
+  public DatabaseDescription() {
+    this.dbName = "empty";
+  }
+
   public DatabaseDescription(String dbName) {
     this.dbName = dbName;
   }

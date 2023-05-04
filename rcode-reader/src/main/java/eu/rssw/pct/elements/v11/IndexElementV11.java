@@ -65,6 +65,10 @@ public class IndexElementV11 extends AbstractElement implements IIndexElement {
     return new IndexElementV11(name, primary, flags, indexComponents);
   }
 
+  public int getFlags() {
+    return flags;
+  }
+
   @Override
   public IIndexComponentElement[] getIndexComponents() {
     return this.indexComponents;

@@ -83,6 +83,10 @@ public class Schema implements ISchema {
     injectMetaSchema();
   }
 
+  public Map<String, String> getAliases() {
+    return aliases;
+  }
+
   @Override
   public Collection<IDatabase> getDatabases() {
     return getDbSet();

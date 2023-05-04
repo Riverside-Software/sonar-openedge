@@ -44,6 +44,10 @@ public class DatabaseWrapper implements IDatabase {
     }
   }
 
+  public DatabaseDescription getDbDesc() {
+    return dbDesc;
+  }
+
   @Override
   public String getName() {
     return dbDesc.getDbName();
