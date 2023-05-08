@@ -36,6 +36,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -43,9 +44,11 @@ import org.testng.annotations.Test;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.minlog.Log;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.AccessType;
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IDatasetElement;
 import eu.rssw.pct.elements.IEventElement;
@@ -148,19 +151,22 @@ public class RCodeInfoTest {
 
   private Kryo getKryo() {
     Kryo kryo = new Kryo();
+    Log.TRACE();
     kryo.register(HashMap.class);
     kryo.register(ArrayList.class);
     kryo.register(TypeInfoV11.class);
     kryo.register(TypeInfoV12.class);
-    
+
+    eu.rssw.pct.elements.fixed.KryoSerializers.addSerializers(kryo);
     eu.rssw.pct.elements.v12.KryoSerializers.addSerializers(kryo);
     eu.rssw.pct.elements.v11.KryoSerializers.addSerializers(kryo);
 
     kryo.register(EnumSet.class);
     kryo.register(AccessType.class);
-    
+
     return kryo;
   }
+
   public void testEnum(String fileName, boolean checkEnumValues, long expectedCrc) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(fileName))) {
       RCodeInfo rci = new RCodeInfo(input);
@@ -196,11 +202,10 @@ public class RCodeInfoTest {
       }
 
       try (Input input2 = new Input(new FileInputStream("target/plop.bin"));) {
-        TypeInfoV12 foo =   kryo.readObject(input2, TypeInfoV12.class);
+        TypeInfoV12 foo = kryo.readObject(input2, TypeInfoV12.class);
         System.out.println(foo);
       }
-       
-      
+
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -329,7 +334,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testInputStreamSkip() throws IOException {
-    // Issue #1005: 
+    // Issue #1005:
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/_dmpincr.r"));
         InputStream input2 = new SpecialSkipInputStreamWrapper(input)) {
       RCodeInfo rci = new RCodeInfo(input2);
@@ -378,7 +383,7 @@ public class RCodeInfoTest {
 
       assertNotNull(rci.getTypeInfo().getTables());
       assertEquals(rci.getTypeInfo().getTables().size(), 0);
-      
+
       Kryo kryo = getKryo();
 
       try (OutputStream output = Files.newOutputStream(Paths.get("target/plop.bin"));
@@ -389,10 +394,10 @@ public class RCodeInfoTest {
       }
 
       try (Input input2 = new Input(new FileInputStream("target/plop.bin"));) {
-        TypeInfoV12 foo =   kryo.readObject(input2, TypeInfoV12.class);
+        TypeInfoV12 foo = kryo.readObject(input2, TypeInfoV12.class);
         System.out.println(foo);
       }
- 
+
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -455,7 +460,7 @@ public class RCodeInfoTest {
       ITableElement tt4 = rci.getTypeInfo().getTempTable("tt4");
       assertNotNull(tt4);
       assertTrue(tt4.isNonSerializable());
-      
+
       Kryo kryo = getKryo();
 
       try (OutputStream output = Files.newOutputStream(Paths.get("target/plop.bin"));
@@ -466,7 +471,7 @@ public class RCodeInfoTest {
       }
 
       try (Input input2 = new Input(new FileInputStream("target/plop.bin"));) {
-        TypeInfoV12 foo =   kryo.readObject(input2, TypeInfoV12.class);
+        TypeInfoV12 foo = kryo.readObject(input2, TypeInfoV12.class);
         System.out.println(foo);
       }
 
@@ -664,7 +669,8 @@ public class RCodeInfoTest {
     Kryo kryo = getKryo();
     RCodeInfo rci = null;
     try (InputStream input = Files.newInputStream(fileName);
-        OutputStream output = Files.newOutputStream(Paths.get("target/kryo/", fileName.getFileName().toString() + ".bin"));
+        OutputStream output = Files.newOutputStream(
+            Paths.get("target/kryo/", fileName.getFileName().toString() + ".bin"));
         Output data = new Output(output)) {
       rci = new RCodeInfo(input);
       kryo.writeClassAndObject(data, rci.getTypeInfo());
@@ -673,7 +679,8 @@ public class RCodeInfoTest {
     }
 
     ITypeInfo serObj = null;
-    try (InputStream input = Files.newInputStream(Paths.get("target/kryo/", fileName.getFileName().toString() + ".bin"));
+    try (
+        InputStream input = Files.newInputStream(Paths.get("target/kryo/", fileName.getFileName().toString() + ".bin"));
         Input input2 = new Input(input)) {
       Object obj = kryo.readClassAndObject(input2);
       assertTrue(obj instanceof ITypeInfo);
@@ -689,4 +696,26 @@ public class RCodeInfoTest {
     assertEquals(serObj.getVariables().size(), rci.getTypeInfo().getVariables().size());
   }
 
+  @Test
+  public void testKryoBuiltinClasses() throws IOException {
+    Kryo kryo = getKryo();
+    try (OutputStream output = Files.newOutputStream(Paths.get("target/kryo/builtin.bin"));
+        Output data = new Output(output)) {
+      for (ITypeInfo info : BuiltinClasses.getBuiltinClasses()) {
+        kryo.writeClassAndObject(data, info);
+      }
+    }
+
+    List<ITypeInfo> list = new ArrayList<>();
+    try (InputStream input = Files.newInputStream(Paths.get("target/kryo/builtin.bin"));
+        Input input2 = new Input(input)) {
+      while (input2.available() > 0)  {
+        Object obj = kryo.readClassAndObject(input2);
+        assertTrue(obj instanceof ITypeInfo);
+        list.add((ITypeInfo) obj);
+      }
+    }
+
+    assertEquals(list.size(), BuiltinClasses.getBuiltinClasses().size());
+  }
 }

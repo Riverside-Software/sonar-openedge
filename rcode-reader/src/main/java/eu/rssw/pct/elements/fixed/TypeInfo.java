@@ -56,6 +56,10 @@ public class TypeInfo implements ITypeInfo {
   private Collection<IPropertyElement> properties = new ArrayList<>();
   private Collection<IVariableElement> variables = new ArrayList<>();
 
+  public TypeInfo() {
+    // No-op
+  }
+
   public TypeInfo(String typeName, boolean iface, boolean abstrct, String parentTypeName, String assemblyName, String... interfaces) {
     this.typeName = typeName;
     this.parentTypeName = parentTypeName;
