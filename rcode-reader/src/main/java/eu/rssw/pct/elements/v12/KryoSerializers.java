@@ -42,20 +42,21 @@ public class KryoSerializers {
   }
 
   public static void addSerializers(Kryo kryo) {
-    kryo.register(BufferElementV12.class, new BufferElementV12Serializer());
-    kryo.register(DataRelationElementV12.class, new DataRelationElementV12Serializer());
-    kryo.register(DatasetElementV12.class, new DatasetElementV12Serializer());
-    kryo.register(DataSourceElementV12.class, new DataSourceElementV12Serializer());
-    kryo.register(EnumDescriptorV12.class, new EnumDescriptorV12Serializer());
-    kryo.register(EventElementV12.class, new EventElementV12Serializer());
-    kryo.register(IndexComponentElementV12.class, new IndexComponentElementV12Serializer());
-    kryo.register(IndexElementV12.class, new IndexElementV12Serializer());
-    kryo.register(MethodElementV12.class, new MethodElementV12Serializer());
-    kryo.register(MethodParameterV12.class, new MethodParameterV12Serializer());
-    kryo.register(PropertyElementV12.class, new PropertyElementV12Serializer());
-    kryo.register(QueryElementV12.class, new QueryElementV12Serializer());
-    kryo.register(TableElementV12.class, new TableElementV12Serializer());
-    kryo.register(VariableElementV12.class, new VariableElementV12Serializer());
+    kryo.register(TypeInfoV12.class, 49);
+    kryo.register(BufferElementV12.class, new BufferElementV12Serializer(), 50);
+    kryo.register(DataRelationElementV12.class, new DataRelationElementV12Serializer(), 51);
+    kryo.register(DatasetElementV12.class, new DatasetElementV12Serializer(), 52);
+    kryo.register(DataSourceElementV12.class, new DataSourceElementV12Serializer(), 53);
+    kryo.register(EnumDescriptorV12.class, new EnumDescriptorV12Serializer(), 54);
+    kryo.register(EventElementV12.class, new EventElementV12Serializer(), 55);
+    kryo.register(IndexComponentElementV12.class, new IndexComponentElementV12Serializer(), 56);
+    kryo.register(IndexElementV12.class, new IndexElementV12Serializer(), 57);
+    kryo.register(MethodElementV12.class, new MethodElementV12Serializer(), 58);
+    kryo.register(MethodParameterV12.class, new MethodParameterV12Serializer(), 59);
+    kryo.register(PropertyElementV12.class, new PropertyElementV12Serializer(), 60);
+    kryo.register(QueryElementV12.class, new QueryElementV12Serializer(), 61);
+    kryo.register(TableElementV12.class, new TableElementV12Serializer(), 62);
+    kryo.register(VariableElementV12.class, new VariableElementV12Serializer(), 63);
   }
 
   public static class BufferElementV12Serializer extends Serializer<BufferElementV12> {

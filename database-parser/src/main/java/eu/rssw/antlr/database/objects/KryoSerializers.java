@@ -34,13 +34,13 @@ public class KryoSerializers {
   }
 
   public static void addSerializers(Kryo kryo) {
-    kryo.register(DatabaseDescription.class);
-    kryo.register(Table.class, new KryoSerializers.DbTableSerializer(kryo, Table.class));
-    kryo.register(Field.class, new KryoSerializers.DbFieldSerializer(kryo, Field.class));
-    kryo.register(Index.class, new KryoSerializers.DbIndexSerializer(kryo, Index.class));
-    kryo.register(Sequence.class, new KryoSerializers.DbSequenceSerializer(kryo, Sequence.class));
-    kryo.register(Trigger.class, new KryoSerializers.DbTriggerSerializer(kryo, Trigger.class));
-    kryo.register(TriggerType.class);
+    kryo.register(DatabaseDescription.class, 70);
+    kryo.register(Table.class, new KryoSerializers.DbTableSerializer(kryo, Table.class), 71);
+    kryo.register(Field.class, new KryoSerializers.DbFieldSerializer(kryo, Field.class), 72);
+    kryo.register(Index.class, new KryoSerializers.DbIndexSerializer(kryo, Index.class), 73);
+    kryo.register(Sequence.class, new KryoSerializers.DbSequenceSerializer(kryo, Sequence.class), 74);
+    kryo.register(Trigger.class, new KryoSerializers.DbTriggerSerializer(kryo, Trigger.class), 75);
+    kryo.register(TriggerType.class, 76);
   }
 
   public static class DbTableSerializer extends FieldSerializer<Table> {

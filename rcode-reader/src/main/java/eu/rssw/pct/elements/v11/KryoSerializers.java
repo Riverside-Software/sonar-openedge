@@ -33,7 +33,6 @@ import eu.rssw.pct.elements.IIndexComponentElement;
 import eu.rssw.pct.elements.IIndexElement;
 import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.IVariableElement;
-import eu.rssw.pct.elements.PrimitiveDataType;
 
 public class KryoSerializers {
 
@@ -42,22 +41,20 @@ public class KryoSerializers {
   }
 
   public static void addSerializers(Kryo kryo) {
-    kryo.register(DataType.class, new DataTypeSerializer());
-    kryo.register(PrimitiveDataType.class);
-    // V11
-    kryo.register(BufferElementV11.class, new BufferElementV11Serializer());
-    kryo.register(DataRelationElementV11.class, new DataRelationElementV11Serializer());
-    kryo.register(DatasetElementV11.class, new DatasetElementV11Serializer());
-    kryo.register(DataSourceElementV11.class, new DataSourceElementV11Serializer());
-    kryo.register(EventElementV11.class, new EventElementV11Serializer());
-    kryo.register(IndexComponentElementV11.class, new IndexComponentElementV11Serializer());
-    kryo.register(IndexElementV11.class, new IndexElementV11Serializer());
-    kryo.register(MethodElementV11.class, new MethodElementV11Serializer());
-    kryo.register(MethodParameterV11.class, new MethodParameterV11Serializer());
-    kryo.register(PropertyElementV11.class, new PropertyElementV11Serializer());
-    kryo.register(QueryElementV11.class, new QueryElementV11Serializer());
-    kryo.register(TableElementV11.class, new TableElementV11Serializer());
-    kryo.register(VariableElementV11.class, new VariableElementV11Serializer());
+    kryo.register(TypeInfoV11.class, 30);
+    kryo.register(BufferElementV11.class, new BufferElementV11Serializer(), 31);
+    kryo.register(DataRelationElementV11.class, new DataRelationElementV11Serializer(), 32);
+    kryo.register(DatasetElementV11.class, new DatasetElementV11Serializer(), 33);
+    kryo.register(DataSourceElementV11.class, new DataSourceElementV11Serializer(), 34);
+    kryo.register(EventElementV11.class, new EventElementV11Serializer(), 35);
+    kryo.register(IndexComponentElementV11.class, new IndexComponentElementV11Serializer(), 36);
+    kryo.register(IndexElementV11.class, new IndexElementV11Serializer(), 37);
+    kryo.register(MethodElementV11.class, new MethodElementV11Serializer(), 38);
+    kryo.register(MethodParameterV11.class, new MethodParameterV11Serializer(), 39);
+    kryo.register(PropertyElementV11.class, new PropertyElementV11Serializer(), 40);
+    kryo.register(QueryElementV11.class, new QueryElementV11Serializer(), 41);
+    kryo.register(TableElementV11.class, new TableElementV11Serializer(), 42);
+    kryo.register(VariableElementV11.class, new VariableElementV11Serializer(), 43);
   }
 
   public static class DataTypeSerializer extends Serializer<DataType> {

@@ -44,10 +44,8 @@ import org.testng.annotations.Test;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.minlog.Log;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
-import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IDatasetElement;
@@ -59,7 +57,6 @@ import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.ParameterType;
 import eu.rssw.pct.elements.PrimitiveDataType;
-import eu.rssw.pct.elements.v11.TypeInfoV11;
 import eu.rssw.pct.elements.v12.TypeInfoV12;
 
 public class RCodeInfoTest {
@@ -151,18 +148,12 @@ public class RCodeInfoTest {
 
   private Kryo getKryo() {
     Kryo kryo = new Kryo();
-    Log.TRACE();
     kryo.register(HashMap.class);
     kryo.register(ArrayList.class);
-    kryo.register(TypeInfoV11.class);
-    kryo.register(TypeInfoV12.class);
-
+    kryo.register(EnumSet.class);
     eu.rssw.pct.elements.fixed.KryoSerializers.addSerializers(kryo);
     eu.rssw.pct.elements.v12.KryoSerializers.addSerializers(kryo);
     eu.rssw.pct.elements.v11.KryoSerializers.addSerializers(kryo);
-
-    kryo.register(EnumSet.class);
-    kryo.register(AccessType.class);
 
     return kryo;
   }
