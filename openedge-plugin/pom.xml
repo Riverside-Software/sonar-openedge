@@ -107,12 +107,29 @@
           <pluginClass>${sonar.pluginClass}</pluginClass>
           <sonarQubeMinVersion>7.6</sonarQubeMinVersion>
           <sonarLintSupported>true</sonarLintSupported>
+          <skipDependenciesPackaging>true</skipDependenciesPackaging>
           <archive>
             <manifestEntries>
               <Implementation-Build>${git.commit}</Implementation-Build>
             </manifestEntries>
           </archive>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.1</version>
+        <configuration>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
