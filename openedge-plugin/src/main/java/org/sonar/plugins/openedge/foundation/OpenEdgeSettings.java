@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,6 +49,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -69,6 +71,9 @@ import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.objects.DatabaseWrapper;
 import org.sonarsource.api.sonarlint.SonarLintSide;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoException;
+import com.esotericsoftware.kryo.io.Input;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -113,6 +118,7 @@ public class OpenEdgeSettings {
   private RefactorSession defaultSession;
   private String oePluginVersion;
   private boolean rtbCompatibility;
+  private Kryo kryo;
 
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
     this.config = config;
@@ -858,6 +864,43 @@ public class OpenEdgeSettings {
     return dbs;
   }
 
+  private Schema readSchemaFromProp3(Configuration config) {
+    if (kryo == null)
+      kryo = getKryoInstance();
+
+    String fileName = config.get(Constants.SLINT_DATABASES_KRYO).orElse("");
+    try (InputStream fileIn = java.nio.file.Files.newInputStream(Paths.get(fileName)); //
+        InputStream gzip = new GZIPInputStream(fileIn); //
+        Input input = new Input(gzip)) {
+      int magic = input.readInt();
+      int version = input.readInt();
+      if ((magic == 0x57535352) && (version == 1)) {
+        Object obj = kryo.readClassAndObject(input);
+        if (obj instanceof Schema)
+          return (Schema) obj;
+      }
+      LOG.info("Invalid schema read from serialized file");
+    } catch (KryoException | IOException caught) {
+      LOG.error("Unable to deserialize schema from '" + fileName + "'", caught);
+    }
+
+    return new Schema();
+  }
+
+  private Kryo getKryoInstance() {
+    Kryo kryo = new Kryo();
+    kryo.register(HashMap.class);
+    kryo.register(ArrayList.class);
+    kryo.register(EnumSet.class);
+    eu.rssw.pct.elements.fixed.KryoSerializers.addSerializers(kryo);
+    eu.rssw.pct.elements.v11.KryoSerializers.addSerializers(kryo);
+    eu.rssw.pct.elements.v12.KryoSerializers.addSerializers(kryo);
+    eu.rssw.antlr.database.objects.KryoSerializers.addSerializers(kryo);
+    org.sonar.plugins.openedge.api.objects.KryoSerializers.addSerializers(kryo);
+
+    return kryo;
+  }
+
   private Schema readSchema(Configuration config, FileSystem fileSystem, String dbPropValue, String aliasPropValue) {
     Collection<IDatabase> dbs = new ArrayList<>();
 
@@ -867,6 +910,9 @@ public class OpenEdgeSettings {
     } else if ((runtime.getProduct() == SonarProduct.SONARLINT)
         && (config.get(Constants.SLINT_DATABASES).orElse("").length() > 0)) {
       dbs = readSchemaFromProp2(config);
+    } else if ((runtime.getProduct() == SonarProduct.SONARLINT)
+        && (config.get(Constants.SLINT_DATABASES_KRYO).orElse("").length() > 0)) {
+      return readSchemaFromProp3(config);
     }
 
     Schema sch = new Schema(dbs.toArray(new IDatabase[] {}));
