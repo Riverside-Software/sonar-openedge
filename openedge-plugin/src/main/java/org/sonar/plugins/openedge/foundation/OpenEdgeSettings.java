@@ -772,6 +772,18 @@ public class OpenEdgeSettings {
         parseBuildDirectory();
         // Parse class documentation
         parseClassDocumentation();
+      } else if (runtime.getProduct() == SonarProduct.SONARLINT) {
+        // Check Kryo caches
+        if (config.get("sonar.oe.propath.cache").isPresent()) {
+          for (ITypeInfo info : readKryoCache(Paths.get(config.get("sonar.oe.propath.cache").orElse("")))) {
+            defaultSession.injectTypeInfo(info);
+          }
+        }
+        if (config.get("sonar.oe.rcode.cache").isPresent()) {
+          for (ITypeInfo info : readKryoCache(Paths.get(config.get("sonar.oe.rcode.cache").orElse("")))) {
+            defaultSession.injectTypeInfo(info);
+          }
+        }
       }
     }
 
@@ -955,6 +967,26 @@ public class OpenEdgeSettings {
       throw new IllegalArgumentException("Unable to resolve path '" + path + "'", e);
     }
     return file;
+  }
+
+  private List<ITypeInfo> readKryoCache(Path path) {
+    List<ITypeInfo> list = new ArrayList<>();
+    try (InputStream fileIn = java.nio.file.Files.newInputStream(path); //
+        InputStream gzip = new GZIPInputStream(fileIn); //
+        Input input = new Input(gzip)) {
+      int magic = input.readInt();
+      int version = input.readInt();
+      if ((magic == 0x57535352) && (version == 1)) {
+        int len = input.readInt();
+        for (int zz = 0; zz < len; zz++) {
+          list.add((ITypeInfo) getKryoInstance().readClassAndObject(input));
+        }
+      }
+    } catch (KryoException | IOException caught) {
+      LOG.error("Unable to read from cache file " + path.toString(), caught);
+    }
+
+    return list;
   }
 
   private class RCodeInjectorService {
