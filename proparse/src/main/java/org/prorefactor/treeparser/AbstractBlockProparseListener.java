@@ -3,6 +3,7 @@ package org.prorefactor.treeparser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.proparse.antlr4.Proparse.AbstractMethodStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.CanFindFunctionContext;
 import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ConstructorStatementContext;
@@ -14,7 +15,7 @@ import org.prorefactor.proparse.antlr4.Proparse.ExternalFunctionStatementContext
 import org.prorefactor.proparse.antlr4.Proparse.ExternalProcedureStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ForStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.FunctionStatementContext;
-import org.prorefactor.proparse.antlr4.Proparse.MethodStatement2Context;
+import org.prorefactor.proparse.antlr4.Proparse.MethodDefinitionStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.MethodStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.OnStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ProcedureStatementContext;
@@ -223,7 +224,16 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
   }
 
   @Override
-  public void enterMethodStatement2(MethodStatement2Context ctx) {
+  public void enterAbstractMethodStatement(AbstractMethodStatementContext ctx) {
+    // Beware of code duplication in enterMethodStatement
+    JPNode blockNode = support.getNode(ctx);
+    currentBlock = blockNode.getBlock();
+    currentScope = currentBlock.getSymbolScope();
+    currentRoutine = currentScope.getRoutine();
+  }
+
+  @Override
+  public void enterMethodDefinitionStatement(MethodDefinitionStatementContext ctx) {
     // Beware of code duplication in enterMethodStatement
     JPNode blockNode = support.getNode(ctx);
     currentBlock = blockNode.getBlock();
@@ -240,7 +250,15 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
   }
 
   @Override
-  public void exitMethodStatement2(MethodStatement2Context ctx) {
+  public void exitAbstractMethodStatement(AbstractMethodStatementContext ctx) {
+    // Beware of code duplication in exitMethodStatement
+    currentBlock = currentBlock.getParentBlock();
+    currentScope = currentBlock.getSymbolScope();
+    currentRoutine = currentScope.getRoutine();
+  }
+
+  @Override
+  public void exitMethodDefinitionStatement(MethodDefinitionStatementContext ctx) {
     // Beware of code duplication in exitMethodStatement
     currentBlock = currentBlock.getParentBlock();
     currentScope = currentBlock.getSymbolScope();

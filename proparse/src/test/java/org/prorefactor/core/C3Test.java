@@ -60,7 +60,7 @@ public class C3Test {
     genericTest("src/test/resources/data/c3/TestClass01.cls", false);
   }
 
-  @Test(expectedExceptions = {ParseCancellationException.class})
+  @Test
   public void test02() throws IOException {
     genericTest("src/test/resources/data/c3/TestClass01.cls", true);
   }

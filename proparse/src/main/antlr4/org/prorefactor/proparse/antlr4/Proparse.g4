@@ -131,14 +131,34 @@ blockOrStatement:
   | expressionStatement
   ;
 
+abstractClassCodeBlock:
+    abstractClassBlockOrStatement*
+  ;
+
 classCodeBlock:
     classBlockOrStatement*
+  ;
+
+interfaceCodeBlock:
+    interfaceBlockOrStatement*
   ;
 
 classBlockOrStatement:
     emptyStatement
   | annotation
-  | inclassStatement
+  | inClassStatement
+  ;
+
+abstractClassBlockOrStatement:
+    emptyStatement
+  | annotation
+  | inAbstractClassStatement
+  ;
+
+interfaceBlockOrStatement:
+    emptyStatement
+  | annotation
+  | inInterfaceStatement
   ;
 
 emptyStatement:
@@ -204,6 +224,7 @@ statement:
   |  catchStatement
   |  chooseStatement
   |  classStatement
+  |  abstractClassStatement
   |  dynamicNewStatement
   |  enumStatement
   |  clearStatement
@@ -348,7 +369,7 @@ statement:
   |  waitForStatement
   ;
 
-inclassStatement:
+inClassStatement:
      defineBrowseStatement
   |  defineBufferStatement
   |  defineButtonStatement
@@ -371,11 +392,51 @@ inclassStatement:
   |  varStatement
   |  constructorStatement
   |  destructorStatement
-  |  { !c3 }? methodStatement
-  |  { c3 }? methodStatement2 // No context-specific semantic predicates when using C3
+  |  methodStatement
   |  externalProcedureStatement // Only external procedures are accepted
   |  externalFunctionStatement  // Only FUNCTION ... IN ... are accepted
   |  onStatement
+  ;
+
+inAbstractClassStatement:
+     defineBrowseStatement
+  |  defineBufferStatement
+  |  defineButtonStatement
+  |  defineDatasetStatement
+  |  defineDataSourceStatement
+  |  defineEventStatement
+  |  defineFrameStatement
+  |  defineImageStatement
+  |  defineMenuStatement
+  |  defineParameterStatement
+  |  definePropertyStatement
+  |  defineQueryStatement
+  |  defineRectangleStatement
+  |  defineStreamStatement
+  |  defineSubMenuStatement
+  |  defineTempTableStatement
+  |  defineWorkTableStatement
+  |  defineVariableStatement
+  |  formStatement
+  |  varStatement
+  |  constructorStatement
+  |  destructorStatement
+  |  methodStatement
+  |  abstractMethodStatement
+  |  externalProcedureStatement // Only external procedures are accepted
+  |  externalFunctionStatement  // Only FUNCTION ... IN ... are accepted
+  |  onStatement
+  ;
+
+inInterfaceStatement:
+     defineDatasetStatement
+  |  defineEventStatement
+  |  definePropertyStatement
+  |  defineTempTableStatement
+  |  defineWorkTableStatement
+  |  methodDefinitionStatement
+  |  externalProcedureStatement // Only external procedures are accepted
+  |  externalFunctionStatement  // Only FUNCTION ... IN ... are accepted
   ;
 
 pseudoFunction:
@@ -1055,9 +1116,18 @@ classTypeName:
   | typeName
   ;
 
+abstractClassStatement:
+    CLASS tn=typeName2
+    ( classInherits | classImplements | USEWIDGETPOOL | FINAL | SERIALIZABLE )* ABSTRACT ( classInherits | classImplements | USEWIDGETPOOL | FINAL | SERIALIZABLE )*
+    { support.defineClass($tn.text); }
+    blockColon
+    abstractClassCodeBlock
+    classEnd statementEnd
+  ;
+
 classStatement:
     CLASS tn=typeName2
-    ( classInherits | classImplements | USEWIDGETPOOL | ABSTRACT | FINAL | SERIALIZABLE )*
+    ( classInherits | classImplements | USEWIDGETPOOL | FINAL | SERIALIZABLE )*
     { support.defineClass($tn.text); }
     blockColon
     classCodeBlock
@@ -2564,7 +2634,7 @@ insertStatement:
 interfaceStatement:
     INTERFACE name=typeName2 interfaceInherits? blockColon
     { support.defineInterface($name.text); }
-    classCodeBlock
+    interfaceCodeBlock
     interfaceEnd
     statementEnd
   ;
@@ -2728,7 +2798,8 @@ messageOption:
   | UPDATE fieldExpr formatPhrase?
   ;
 
-methodStatement locals [ boolean abs = false ]:
+// Standard method (no abstract keyword)
+methodStatement:
     METHOD
     (  PRIVATE
     |  PACKAGEPRIVATE
@@ -2736,14 +2807,11 @@ methodStatement locals [ boolean abs = false ]:
     |  PACKAGEPROTECTED
     |  PUBLIC // default
     |  STATIC
-    |  ABSTRACT { $abs = true; }
     |  OVERRIDE
     |  FINAL
     )*
     ( VOID | datatype extentPhrase? ) id=newIdentifier functionParams
-    ( { $abs || support.isInterface() }? blockColon // An INTERFACE declares without defining, ditto ABSTRACT.
-    | { !$abs && !support.isInterface() }?
-      blockColon
+    ( blockColon
       { support.addInnerScope(_localctx); }
       codeBlock
       methodEnd
@@ -2752,8 +2820,8 @@ methodStatement locals [ boolean abs = false ]:
     )
   ;
 
-// No context-specific semantic predicates when using C3
-methodStatement2:
+// Abstract method (only in abstract classes)
+abstractMethodStatement:
     METHOD
     (  PRIVATE
     |  PACKAGEPRIVATE
@@ -2761,19 +2829,26 @@ methodStatement2:
     |  PACKAGEPROTECTED
     |  PUBLIC
     |  STATIC
-    |  ABSTRACT
+    |  OVERRIDE
+    |  FINAL
+    )*
+    ABSTRACT
+    (  PRIVATE
+    |  PACKAGEPRIVATE
+    |  PROTECTED
+    |  PACKAGEPROTECTED
+    |  PUBLIC
+    |  STATIC
     |  OVERRIDE
     |  FINAL
     )*
     ( VOID | datatype extentPhrase? ) id=newIdentifier functionParams
-    ( PERIOD
-    | LEXCOLON
-      { support.addInnerScope(_localctx); }
-      codeBlock
-      methodEnd
-      { support.dropInnerScope(); }
-      statementEnd
-    )
+    blockColon
+  ;
+
+// Method definition (only in interfaces)
+methodDefinitionStatement:
+    METHOD PUBLIC? ( VOID | datatype extentPhrase? ) id=newIdentifier functionParams blockColon
   ;
 
 methodEnd:

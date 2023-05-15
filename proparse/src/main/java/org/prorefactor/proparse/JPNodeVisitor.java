@@ -85,6 +85,16 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitAbstractClassCodeBlock(AbstractClassCodeBlockContext ctx) {
+    return createTree(ctx, ABLNodeType.CODE_BLOCK);
+  }
+
+  @Override
+  public Builder visitInterfaceCodeBlock(InterfaceCodeBlockContext ctx) {
+    return createTree(ctx, ABLNodeType.CODE_BLOCK);
+  }
+
+  @Override
   public Builder visitEmptyStatement(EmptyStatementContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }
@@ -868,7 +878,15 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   public Builder visitClassStatement(ClassStatementContext ctx) {
     isClass = true;
     className = ctx.tn.getText();
-    isAbstract = !ctx.ABSTRACT().isEmpty();
+    isAbstract = false;
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+  }
+
+  @Override
+  public Builder visitAbstractClassStatement(AbstractClassStatementContext ctx) {
+    isClass = true;
+    className = ctx.tn.getText();
+    isAbstract = true;
     return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
@@ -2054,7 +2072,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
-  public Builder visitMethodStatement2(MethodStatement2Context ctx) {
+  public Builder visitAbstractMethodStatement(AbstractMethodStatementContext ctx) {
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+  }
+
+  @Override
+  public Builder visitMethodDefinitionStatement(MethodDefinitionStatementContext ctx) {
     return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 

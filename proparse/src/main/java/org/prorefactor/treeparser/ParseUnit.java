@@ -296,6 +296,9 @@ public class ParseUnit {
   }
 
   public void parse() {
+    parse(false);
+  }
+  public void parse(boolean c3) {
     LOGGER.trace("Entering ParseUnit#parse()");
 
     ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
@@ -308,7 +311,7 @@ public class ParseUnit {
       parser.addParseListener(new TraceListener(parser));
     }
     parser.setProfile(profiler);
-    parser.initialize(session, xref);
+    parser.initialize(session, xref, c3);
     if (ambiguityReport) {
       parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
       parser.addErrorListener(new DiagnosticErrorListener(true));
