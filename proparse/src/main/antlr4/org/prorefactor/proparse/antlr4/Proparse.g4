@@ -49,6 +49,11 @@ options {
     this.c3 = c3;
   }
 
+  public void initialize(ParserSupport support, boolean c3) {
+    this.support = support;
+    this.c3 = c3;
+  }
+
   /**
    * @deprecated
    * Use {@link Proparse#initialize(IProparseEnvironment, CrossReference)}
