@@ -18,6 +18,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -40,7 +41,6 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.common.io.ByteSource;
-import com.google.common.io.ByteStreams;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.progress.xref.EmptyCrossReference;
@@ -61,54 +61,96 @@ public class ErrorRangeTest {
 
   @Test
   public void test01() throws IOException {
-    ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test01.p");
+    ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test01.p", 3, "dynamic-function ('foobar', ).");
     assertEquals(listener.errors.size(), 1);
     assertEquals(listener.errCode.size(), 1);
+    String t0 = listener.errCode.get(0);
+    assertEquals(t0, "dynamic-function ('foobar', )");
     Interval i0 = listener.errors.get(0);
     assertEquals(i0.a, 11);
     assertEquals(i0.b, 17);
-    String t0 = listener.errCode.get(0);
-    assertEquals(t0, "dynamic-function ('foobar', )");
   }
 
   @Test
   public void test02() throws IOException {
-    ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test02.cls");
+    ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test02.cls", 8, "dynamic-function ('foobar', ).");
     assertEquals(listener.errors.size(), 1);
     assertEquals(listener.errCode.size(), 1);
+    String t0 = listener.errCode.get(0);
+    assertEquals(t0, "dynamic-function ('foobar', )");
     Interval i0 = listener.errors.get(0);
     assertEquals(i0.a, 37);
     assertEquals(i0.b, 43);
-    String t0 = listener.errCode.get(0);
-    assertEquals(t0, "dynamic-function ('foobar', )");
   }
 
   @Test
   public void test03() throws IOException {
-    ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test03.p");
+    // Error on last line
+    ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test01.p", 4, "dynamic-function('foobar2', )");
     assertEquals(listener.errors.size(), 1);
     assertEquals(listener.errCode.size(), 1);
-    Interval i0 = listener.errors.get(0);
-    assertEquals(i0.a, 21);
-    assertEquals(i0.b, 26);
     String t0 = listener.errCode.get(0);
     assertEquals(t0, "dynamic-function('foobar2', )");
+    Interval i0 = listener.errors.get(0);
+    assertEquals(i0.a, 14);
+    assertEquals(i0.b, 19);
   }
 
   @Test
   public void test04() throws IOException {
-    ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test04.p");
+    // Just a missing period at the end
+    ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test01.p", 4, "message x1");
     assertEquals(listener.errors.size(), 1);
     assertEquals(listener.errCode.size(), 1);
     Interval i0 = listener.errors.get(0);
-    assertEquals(i0.a, 25);
-    assertEquals(i0.b, 25);
+    assertEquals(i0.a, 18);
+    assertEquals(i0.b, 18);
     // TODO Interval currently reported in only EOF, while it should be the last statement which is not complete
   }
 
-  private ErrorDetectionListener genericTest(String filename) throws IOException {
+  @Test
+  public void test05() throws IOException {
+    // Add m1() line, the end statement is also included in the error range... Shouldn't be there
+    ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test02.cls", 9, "  m1 ( )");
+    assertEquals(listener.errors.size(), 1);
+    assertEquals(listener.errCode.size(), 1);
+    String t0 = listener.errCode.get(0);
+    assertEquals(t0, "m1 ( )\n end");
+    Interval i0 = listener.errors.get(0);
+    assertEquals(i0.a, 40);
+    assertEquals(i0.b, 46);
+  }
+
+  @Test
+  public void test05bis() throws IOException {
+    // Add m1() line and a valid statement, error range contains the first keyword of the next statement
+    ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test02.cls", 9, "  m1 ( )", "dynamic-function('plop', 1, 2, 3).");
+    assertEquals(listener.errors.size(), 1);
+    assertEquals(listener.errCode.size(), 1);
+    String t0 = listener.errCode.get(0);
+    assertEquals(t0, "m1 ( )\ndynamic-function");
+    Interval i0 = listener.errors.get(0);
+    assertEquals(i0.a, 40);
+    assertEquals(i0.b, 46);
+  }
+
+  @Test
+  public void test06() throws IOException {
+    // Compared to test05, adding a parameter changes the error range. Weird 
+    ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test02.cls", 9, "  m1 ( 'foobar', )");
+    assertEquals(listener.errors.size(), 1);
+    assertEquals(listener.errCode.size(), 1);
+    String t0 = listener.errCode.get(0);
+    assertEquals(t0, "m1 ( 'foobar', )");
+    Interval i0 = listener.errors.get(0);
+    assertEquals(i0.a, 40);
+    assertEquals(i0.b, 47);
+  }
+
+  private ErrorDetectionListener genericTest(String filename, int lineNumber, String... lines2) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(filename))) {
-      ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(ByteStreams.toByteArray(input)), filename, false);
+      String code = injectCode(filename, lineNumber, lines2);
+      ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(code.getBytes()), filename, false);
       CommonTokenStream tokStream = new CommonTokenStream(lexer);
       Proparse parser = new Proparse(tokStream);
       parser.initialize(session, new EmptyCrossReference(), true);
@@ -126,6 +168,29 @@ public class ErrorRangeTest {
 
       return errLsnr;
     }
+  }
+
+  /**
+   * Return specified source file with additional lines
+   */
+  private static String injectCode(String filename, int lineNumber, String... lines2) throws IOException {
+    List<String> lines = Files.readAllLines(Paths.get(filename), StandardCharsets.UTF_8);
+    StringBuilder sb = new StringBuilder();
+    for (int zz = 0; zz < lines.size(); zz++) {
+      if (zz == lineNumber - 1) {
+        for (String str : lines2) {
+          sb.append(str).append('\n');
+        }
+      }
+      sb.append(lines.get(zz)).append('\n');
+    }
+    if (lines.size() == lineNumber - 1) {
+      for (String str : lines2) {
+        sb.append(str).append('\n');
+      }
+    }
+
+    return sb.toString();
   }
 
   private static class ErrorDetectionListener extends BaseErrorListener {

@@ -5,7 +5,6 @@ class test02:
  end method.
 
  method public void m1():
-  dynamic-function ('foobar', ).
   quit.
  end method.
 
