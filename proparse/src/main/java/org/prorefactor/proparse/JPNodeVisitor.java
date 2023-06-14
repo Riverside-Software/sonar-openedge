@@ -39,10 +39,16 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   private boolean isEnum;
   private boolean isAbstract;
   private String className;
+  private boolean generateErrorNode;
 
   public JPNodeVisitor(ParserSupport support, BufferedTokenStream stream) {
     this.support = support;
     this.stream = stream;
+  }
+
+  public JPNodeVisitor(ParserSupport support, BufferedTokenStream stream, boolean genErrorNode) {
+    this(support, stream);
+    this.generateErrorNode = genErrorNode;
   }
 
   public boolean isClass() {
@@ -2957,8 +2963,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   @Nonnull
   public Builder visitErrorNode(ErrorNode node) {
-    // Better return an empty node rather than nothing or an error
-    return new Builder(ABLNodeType.EMPTY_NODE);
+    // Standard mode: EMPTY_NODE is returned, which will be ignored when generating the tree
+    // If genErrorMode set to true, a specific node is generated
+    if (generateErrorNode)
+      return new Builder((ProToken) node.getSymbol()).setError(true);
+    else 
+      return new Builder(ABLNodeType.EMPTY_NODE);
   }
 
   @Override
