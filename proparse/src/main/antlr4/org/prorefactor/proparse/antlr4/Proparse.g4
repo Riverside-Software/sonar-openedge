@@ -3082,6 +3082,7 @@ procedureDllOption:
   | STDCALL
   | ORDINAL expression
   | PERSISTENT
+  | THREADSAFE
   ;
 
 procedureEnd:
