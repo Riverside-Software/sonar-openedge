@@ -2852,7 +2852,7 @@ abstractMethodStatement:
 
 // Method definition (only in interfaces)
 methodDefinitionStatement:
-    METHOD PUBLIC? ( VOID | datatype extentPhrase? ) id=newIdentifier functionParams blockColon
+    METHOD ( PUBLIC | OVERRIDE )* ( VOID | datatype extentPhrase? ) id=newIdentifier functionParams blockColon
   ;
 
 methodEnd:
