@@ -53,11 +53,17 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
   private boolean finalClass;
 
   public TreeParserRootSymbolScope(IProparseEnvironment session) {
+    super(null);
     this.refSession = session;
   }
 
   public IProparseEnvironment getRefactorSession() {
     return refSession;
+  }
+
+  @Override
+  public boolean isRootScope() {
+    return true;
   }
 
   @Override

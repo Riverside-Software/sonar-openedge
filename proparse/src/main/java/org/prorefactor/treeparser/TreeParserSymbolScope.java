@@ -67,16 +67,12 @@ public class TreeParserSymbolScope {
   private Block rootBlock;
   private Routine routine;
 
-  TreeParserSymbolScope() {
-    this(null);
-  }
-
   /**
    * Only Scope and derivatives may create a Scope object.
    * 
    * @param parentScope null if called by the SymbolScopeRoot constructor.
    */
-  private TreeParserSymbolScope(TreeParserSymbolScope parentScope) {
+  TreeParserSymbolScope(TreeParserSymbolScope parentScope) {
     this(parentScope, -1, -1);
   }
 
@@ -300,12 +296,24 @@ public class TreeParserSymbolScope {
     return ret;
   }
 
+  public boolean isRootScope() {
+    return false;
+  }
+
   public TreeParserSymbolScope getParentScope() {
     return parentScope;
   }
 
   public Block getRootBlock() {
     return rootBlock;
+  }
+
+  public int getStartTokenIndex() {
+    return startTokenIndex;
+  }
+
+  public int getStopTokenIndex() {
+    return stopTokenIndex;
   }
 
   public TreeParserRootSymbolScope getRootScope() {
