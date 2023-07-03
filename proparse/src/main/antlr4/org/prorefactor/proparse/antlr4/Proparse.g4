@@ -1124,7 +1124,7 @@ classTypeName:
 abstractClassStatement:
     CLASS tn=typeName2
     ( classInherits | classImplements | USEWIDGETPOOL | FINAL | SERIALIZABLE )* ABSTRACT ( classInherits | classImplements | USEWIDGETPOOL | FINAL | SERIALIZABLE )*
-    { support.defineClass($tn.text); }
+    { support.defineAbstractClass($tn.text); }
     blockColon
     abstractClassCodeBlock
     classEnd statementEnd
