@@ -37,7 +37,6 @@ public class ABLLexer implements TokenSource, IPreprocessor {
 
   // Do we only read tokens ? Or do we expand include files ?
   private final boolean lexOnly;
-  private final IProparseSettings ppSettings;
   private final IProparseEnvironment session;
   private final IntegerIndex<String> filenameList = new IntegerIndex<>();
   private final IPreprocessorEventListener lstListener = new PreprocessorEventListener();
@@ -62,7 +61,6 @@ public class ABLLexer implements TokenSource, IPreprocessor {
    */
   public ABLLexer(IProparseEnvironment session, ByteSource src, String fileName, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
-    this.ppSettings = session.getProparseSettings();
     this.session = session;
     this.lexOnly = lexOnly;
 
@@ -80,7 +78,6 @@ public class ABLLexer implements TokenSource, IPreprocessor {
    */
   protected ABLLexer(IProparseEnvironment session, ByteSource src, String fileName) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
-    this.ppSettings = session.getProparseSettings();
     this.session = session;
     this.lexOnly = false;
 
@@ -196,7 +193,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   }
 
   public IProparseSettings getProparseSettings(){
-    return ppSettings;
+    return session.getProparseSettings();
   }
 
   public boolean isAppBuilderCode() {
@@ -246,9 +243,9 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   public void analyzeResume() {
     lexer.analyzeResume();
   }
+
   // ***********************************
   // End of IPreprocessor implementation
   // ***********************************
-
 
 }
