@@ -66,11 +66,17 @@ public class ABLLexer implements TokenSource, IPreprocessor {
 
     lexer = new Lexer(this, src, fileName);
     lexer.setTokenStartChars(session.getProparseSettings().getTokenStartChars());
-    TokenSource postLexer = lexOnly ? new NoOpPostLexer(lexer) : new PostLexer(this, lexer);
-    TokenSource filter0 = new ProparseSkipFilter(postLexer);
-    TokenSource filter1 = new NameDotTokenFilter(filter0);
-    TokenSource filter2 = new TokenList(filter1);
-    wrapper = new FunctionKeywordTokenFilter(filter2);
+    if (lexOnly) {
+      TokenSource postLexer = new NoOpPostLexer(lexer);
+      TokenSource filter0 = new NameDotTokenFilter(postLexer);
+      wrapper = new FunctionKeywordTokenFilter(filter0);
+    } else {
+      TokenSource postLexer = new PostLexer(this, lexer);
+      TokenSource filter0 = new ProparseSkipFilter(postLexer);
+      TokenSource filter1 = new NameDotTokenFilter(filter0);
+      TokenSource filter2 = new TokenList(filter1);
+      wrapper = new FunctionKeywordTokenFilter(filter2);
+    }
   }
 
   /**
