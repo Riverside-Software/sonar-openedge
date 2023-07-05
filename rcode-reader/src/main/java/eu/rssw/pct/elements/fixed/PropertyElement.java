@@ -49,7 +49,7 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
   }
 
   public PropertyElement(String name, boolean isStatic, DataType dataType) {
-    super(name, isStatic ? EnumSet.of(AccessType.STATIC): EnumSet.noneOf(AccessType.class));
+    super(name, isStatic ? EnumSet.of(AccessType.STATIC, AccessType.PUBLIC) : EnumSet.of(AccessType.PUBLIC));
     var = new VariableElement(name, dataType);
   }
 

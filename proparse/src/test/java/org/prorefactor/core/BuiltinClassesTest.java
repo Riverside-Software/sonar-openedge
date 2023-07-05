@@ -2,9 +2,9 @@ package org.prorefactor.core;
 
 import static org.testng.Assert.assertNotNull;
 
-import org.prorefactor.refactor.BuiltinClasses;
 import org.testng.annotations.Test;
 
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;
 

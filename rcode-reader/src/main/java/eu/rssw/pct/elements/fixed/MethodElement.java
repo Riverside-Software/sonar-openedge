@@ -32,7 +32,7 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
   private final IParameter[] parameters;
 
   public MethodElement(String name, boolean isStatic, DataType returnDataType, IParameter... params) {
-    super(name, isStatic ? EnumSet.of(AccessType.STATIC) : EnumSet.noneOf(AccessType.class));
+    super(name, isStatic ? EnumSet.of(AccessType.STATIC, AccessType.PUBLIC) : EnumSet.of(AccessType.PUBLIC));
     this.returnDataType = returnDataType;
     this.parameters = params;
   }
