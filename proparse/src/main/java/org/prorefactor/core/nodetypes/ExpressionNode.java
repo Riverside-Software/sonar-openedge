@@ -747,16 +747,16 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
     return DataType.NOT_COMPUTED;
   }
 
-  static DataType getObjectAttributeDataType(IProparseEnvironment session, ITypeInfo info, String methodName,
+  static DataType getObjectAttributeDataType(IProparseEnvironment session, ITypeInfo info, String propName,
       boolean firstLevel) {
     while (info != null) {
       for (IPropertyElement prop : info.getProperties()) {
-        if (prop.getName().equalsIgnoreCase(methodName))
+        if (prop.getName().equalsIgnoreCase(propName))
           return prop.getVariable().getDataType();
       }
       if (firstLevel) {
         for (IVariableElement v : info.getVariables()) {
-          if (v.getName().equalsIgnoreCase(methodName))
+          if (v.getName().equalsIgnoreCase(propName))
             return v.getDataType();
         }
         firstLevel = false;

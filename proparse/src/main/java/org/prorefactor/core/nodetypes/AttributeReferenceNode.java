@@ -20,9 +20,7 @@ import org.prorefactor.core.ProToken;
 import com.google.common.base.Strings;
 
 import eu.rssw.pct.elements.DataType;
-import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.ITypeInfo;
-import eu.rssw.pct.elements.IVariableElement;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
 /**
@@ -51,25 +49,15 @@ public class AttributeReferenceNode extends ExpressionNode {
       return shn.getAttributeDataType(attributeName.toUpperCase());
     } else if ((getFirstChild() instanceof FieldRefNode) && ((FieldRefNode) getFirstChild()).isStaticReference()) {
       ITypeInfo info = ((FieldRefNode) getFirstChild()).getStaticReference();
-      return ExpressionNode.getObjectAttributeDataType(getTopLevelParent().getEnvironment(), info, attributeName,
-          false);
+      return ExpressionNode.getObjectAttributeDataType(root.getEnvironment(), info, attributeName, false);
     }
 
     // Left-Handle expression has to be a class
     IExpression expr = getFirstChild().asIExpression();
     PrimitiveDataType pdt = expr.getDataType().getPrimitive();
     if (pdt == PrimitiveDataType.CLASS) {
-      ITypeInfo info = root.getEnvironment().getTypeInfo(expr.getDataType().getClassName());
-      if (info != null) {
-        for (IPropertyElement m : info.getProperties()) {
-          if (m.getName().equalsIgnoreCase(attributeName))
-            return m.getVariable().getDataType();
-        }
-        for (IVariableElement e : info.getVariables()) {
-          if (e.getName().equalsIgnoreCase(attributeName))
-            return e.getDataType();
-        }
-      }
+      return ExpressionNode.getObjectAttributeDataType(root.getEnvironment(),
+          root.getEnvironment().getTypeInfo(expr.getDataType().getClassName()), attributeName, true);
     } else if (pdt == PrimitiveDataType.HANDLE) {
       return ExpressionNode.getStandardAttributeDataType(attributeName.toUpperCase());
     }
