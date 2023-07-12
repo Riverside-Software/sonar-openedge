@@ -36,6 +36,8 @@ public class BuiltinClasses {
 
   public static final ITypeInfo PROGRESS_LANG_OBJECT;
   public static final ITypeInfo PROGRESS_LANG_ENUM;
+  public static final String PLO_CLASSNAME = "Progress.Lang.Object";
+  public static final String PLE_CLASSNAME = "Progress.Lang.Enum";
 
   private BuiltinClasses() {
     // No constructor
@@ -46,25 +48,30 @@ public class BuiltinClasses {
   }
 
   static {
-    TypeInfo typeInfo = new TypeInfo("Progress.Lang.Object", false, false, null, "");
+    TypeInfo typeInfo = new TypeInfo(PLO_CLASSNAME, false, false, null, "");
     typeInfo.addMethod(new MethodElement("GetClass", false, new DataType("Progress.Lang.Class")));
     typeInfo.addMethod(new MethodElement("ToString", false, DataType.CHARACTER));
     typeInfo.addMethod(new MethodElement("Equals", false, DataType.LOGICAL,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object"))));
-    typeInfo.addMethod(new MethodElement("Clone", false, new DataType("Progress.Lang.Object")));
-    typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType("Progress.Lang.Object")));
-    typeInfo.addProperty(new PropertyElement("Prev-Sibling", false, new DataType("Progress.Lang.Object")));
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME))));
+    typeInfo.addMethod(new MethodElement("Clone", false, new DataType(PLO_CLASSNAME)));
+    typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType(PLO_CLASSNAME)));
+    typeInfo.addProperty(new PropertyElement("Prev-Sibling", false, new DataType(PLO_CLASSNAME)));
     PROGRESS_LANG_OBJECT = typeInfo;
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Lang.Enum", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo(PLE_CLASSNAME, false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("GetValue", false, DataType.INT64));
     typeInfo.addMethod(new MethodElement("CompareTo", false, DataType.INTEGER,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Enum"))));
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLE_CLASSNAME))));
     PROGRESS_LANG_ENUM = typeInfo;
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.ApplicationServer.AdapterTypes", false, false, "Progress.Lang.Enum", "");
+    typeInfo = new TypeInfo("rssw.pct.AndOrEnum", false, false, PLE_CLASSNAME, "");
+    typeInfo.addProperty(new PropertyElement("And", true, new DataType("rssw.pct.AndOrEnum")));
+    typeInfo.addProperty(new PropertyElement("Or", true, new DataType("rssw.pct.AndOrEnum")));
+    BUILTIN_CLASSES.add(typeInfo);
+
+    typeInfo = new TypeInfo("Progress.ApplicationServer.AdapterTypes", false, false, PLE_CLASSNAME, "");
     typeInfo.addProperty(new PropertyElement("Unexpected", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
     typeInfo.addProperty(new PropertyElement("APSV", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
     typeInfo.addProperty(new PropertyElement("SOAP", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
@@ -72,10 +79,10 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("WEB", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.ApplicationServer.AgentInfo", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.ApplicationServer.AgentInfo", false, false, PLO_CLASSNAME, "");
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.ApplicationServer.AgentManager", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.ApplicationServer.AgentManager", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("CancelRequest", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER)));
@@ -141,7 +148,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Severity", false, DataType.INTEGER));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.DataSlot", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.BPM.DataSlot", false, false, PLO_CLASSNAME, "");
     typeInfo.addProperty(new PropertyElement("Name", false, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("BPMDataTypeName", false, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("Choices", false, DataType.CHARACTER));
@@ -151,7 +158,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("WriteOnly", false, DataType.LOGICAL));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.DataSlotTemplate", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.BPM.DataSlotTemplate", false, false, PLO_CLASSNAME, "");
     typeInfo.addProperty(new PropertyElement("Name", false, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("BPMDataTypeName", false, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("Choices", false, DataType.CHARACTER));
@@ -167,61 +174,61 @@ public class BuiltinClasses {
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.BPM.Task"))));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskActivityFilter", false, false, "Progress.Lang.Object", "",
+    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskActivityFilter", false, false, PLO_CLASSNAME, "",
         "Progress.BPM.Filter.ITaskFilter");
     typeInfo.addMethod(new MethodElement("Is", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.BPM.Task"))));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskCreatorFilter", false, false, "Progress.Lang.Object", "",
+    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskCreatorFilter", false, false, PLO_CLASSNAME, "",
         "Progress.BPM.Filter.ITaskFilter");
     typeInfo.addMethod(new MethodElement("Is", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.BPM.Task"))));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskDueDateFilter", false, false, "Progress.Lang.Object", "",
+    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskDueDateFilter", false, false, PLO_CLASSNAME, "",
         "Progress.BPM.Filter.ITaskFilter");
     typeInfo.addMethod(new MethodElement("Is", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.BPM.Task"))));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskNameFilter", false, false, "Progress.Lang.Object", "",
+    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskNameFilter", false, false, PLO_CLASSNAME, "",
         "Progress.BPM.Filter.ITaskFilter");
     typeInfo.addMethod(new MethodElement("Is", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.BPM.Task"))));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskPerformerFilter", false, false, "Progress.Lang.Object", "",
+    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskPerformerFilter", false, false, PLO_CLASSNAME, "",
         "Progress.BPM.Filter.ITaskFilter");
     typeInfo.addMethod(new MethodElement("Is", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.BPM.Task"))));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskPriorityFilter", false, false, "Progress.Lang.Object", "",
+    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskPriorityFilter", false, false, PLO_CLASSNAME, "",
         "Progress.BPM.Filter.ITaskFilter");
     typeInfo.addMethod(new MethodElement("Is", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.BPM.Task"))));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskProcessFilter", false, false, "Progress.Lang.Object", "",
+    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskProcessFilter", false, false, PLO_CLASSNAME, "",
         "Progress.BPM.Filter.ITaskFilter");
     typeInfo.addMethod(new MethodElement("Is", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.BPM.Task"))));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskProcessTemplateFilter", false, false, "Progress.Lang.Object", "",
+    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskProcessTemplateFilter", false, false, PLO_CLASSNAME, "",
         "Progress.BPM.Filter.ITaskFilter");
     typeInfo.addMethod(new MethodElement("Is", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.BPM.Task"))));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskTimeStartedFilter", false, false, "Progress.Lang.Object", "",
+    typeInfo = new TypeInfo("Progress.BPM.Filter.TaskTimeStartedFilter", false, false, PLO_CLASSNAME, "",
         "Progress.BPM.Filter.ITaskFilter");
     typeInfo.addMethod(new MethodElement("Is", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.BPM.Task"))));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.Process", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.BPM.Process", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("GetDataSlots", false, new DataType("Progress.BPM.DataSlot")));
     typeInfo.addMethod(new MethodElement("UpdateDataSlots", false, DataType.LOGICAL,
         new Parameter(1, "prm1", -1, ParameterMode.INPUT, new DataType("Progress.BPM.DataSlot"))));
@@ -243,7 +250,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Priority", false, DataType.CHARACTER));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.Task", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.BPM.Task", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("Complete", false, DataType.LOGICAL));
     typeInfo.addMethod(new MethodElement("Assign", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
@@ -266,7 +273,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("ProcessTemplateName", false, DataType.CHARACTER));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.BPM.UserSession", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.BPM.UserSession", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("Connect", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER)));
@@ -322,11 +329,11 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Connected", false, DataType.LOGICAL));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.IO.BinarySerializer", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.IO.BinarySerializer", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("Serialize", false, DataType.VOID,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, new DataType("Progress.IO.OutputStream"))));
-    typeInfo.addMethod(new MethodElement("Deserialize", false, new DataType("Progress.Lang.Object"),
+    typeInfo.addMethod(new MethodElement("Deserialize", false, new DataType(PLO_CLASSNAME),
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.IO.InputStream"))));
     BUILTIN_CLASSES.add(typeInfo);
 
@@ -341,7 +348,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Closed", false, DataType.LOGICAL));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.IO.InputStream", false, true, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.IO.InputStream", false, true, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("Read", false, DataType.INT64,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.MEMPTR),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.INT64),
@@ -362,16 +369,16 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Closed", false, DataType.LOGICAL));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.IO.JsonSerializer", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.IO.JsonSerializer", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("Serialize", false, DataType.VOID,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, new DataType("Progress.IO.OutputStream"))));
-    typeInfo.addMethod(new MethodElement("Deserialize", false, new DataType("Progress.Lang.Object"),
+    typeInfo.addMethod(new MethodElement("Deserialize", false, new DataType(PLO_CLASSNAME),
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.IO.InputStream"))));
     typeInfo.addProperty(new PropertyElement("Formatted", false, DataType.LOGICAL));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.IO.OutputStream", false, true, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.IO.OutputStream", false, true, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("Write", false, DataType.INT64,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.MEMPTR),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.INT64),
@@ -396,7 +403,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Severity", false, DataType.INTEGER));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Json.JsonParser", false, true, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Json.JsonParser", false, true, PLO_CLASSNAME, "");
     typeInfo.addProperty(new PropertyElement("IgnoreComments", false, DataType.LOGICAL));
     BUILTIN_CLASSES.add(typeInfo);
 
@@ -596,7 +603,7 @@ public class BuiltinClasses {
     typeInfo.addMethod(new MethodElement("AddNumber", false, DataType.INTEGER,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "prm2", -1, ParameterMode.INPUT, DataType.CHARACTER)));
-    typeInfo.addMethod(new MethodElement("Clone", false, new DataType("Progress.Lang.Object")));
+    typeInfo.addMethod(new MethodElement("Clone", false, new DataType(PLO_CLASSNAME)));
     typeInfo.addMethod(new MethodElement("GetType", false, DataType.INTEGER,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetJsonText", false, DataType.LONGCHAR));
@@ -768,7 +775,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Length", false, DataType.INTEGER));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Json.ObjectModel.JsonConstruct", false, true, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Json.ObjectModel.JsonConstruct", false, true, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("Write", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.HANDLE)));
     typeInfo.addMethod(new MethodElement("Write", false, DataType.LOGICAL,
@@ -821,7 +828,7 @@ public class BuiltinClasses {
         new Parameter(3, "prm3", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Json.ObjectModel.JsonDataType", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Json.ObjectModel.JsonDataType", false, false, PLO_CLASSNAME, "");
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.Json.ObjectModel.JsonObject", false, false,
@@ -885,7 +892,7 @@ public class BuiltinClasses {
     typeInfo.addMethod(new MethodElement("GetJsonText", false, DataType.LONGCHAR));
     typeInfo.addMethod(new MethodElement("GetJsonText", false, DataType.LONGCHAR,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
-    typeInfo.addMethod(new MethodElement("Clone", false, new DataType("Progress.Lang.Object")));
+    typeInfo.addMethod(new MethodElement("Clone", false, new DataType(PLO_CLASSNAME)));
     typeInfo.addMethod(new MethodElement("GetNames", false, DataType.CHARACTER));
     typeInfo.addMethod(new MethodElement("GetType", false, DataType.INTEGER,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
@@ -1027,18 +1034,18 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Severity", false, DataType.INTEGER));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Lang.Class", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Lang.Class", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("IsInterface", false, DataType.LOGICAL));
     typeInfo.addMethod(new MethodElement("IsFinal", false, DataType.LOGICAL));
-    typeInfo.addMethod(new MethodElement("New", false, new DataType("Progress.Lang.Object"),
+    typeInfo.addMethod(new MethodElement("New", false, new DataType(PLO_CLASSNAME),
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
-    typeInfo.addMethod(new MethodElement("New", false, new DataType("Progress.Lang.Object")));
+    typeInfo.addMethod(new MethodElement("New", false, new DataType(PLO_CLASSNAME)));
     typeInfo.addMethod(new MethodElement("Invoke", false, DataType.RUNTYPE,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(3, "prm3", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
     typeInfo.addMethod(new MethodElement("Invoke", false, DataType.RUNTYPE,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("Invoke", false, DataType.RUNTYPE,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
@@ -1046,26 +1053,26 @@ public class BuiltinClasses {
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
     typeInfo.addMethod(new MethodElement("GetPropertyValue", false, DataType.RUNTYPE,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("GetPropertyValue", false, DataType.RUNTYPE,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("GetPropertyValue", false, DataType.RUNTYPE,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(3, "prm3", 0, ParameterMode.INPUT, DataType.RUNTYPE)));
     typeInfo.addMethod(new MethodElement("GetPropertyValue", false, DataType.RUNTYPE,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("SetPropertyValue", false, DataType.VOID,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(3, "prm3", 0, ParameterMode.INPUT, DataType.RUNTYPE)));
     typeInfo.addMethod(new MethodElement("SetPropertyValue", false, DataType.VOID,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.RUNTYPE)));
     typeInfo.addMethod(new MethodElement("SetPropertyValue", false, DataType.VOID,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(3, "prm3", 0, ParameterMode.INPUT, DataType.RUNTYPE),
         new Parameter(4, "prm4", 0, ParameterMode.INPUT, DataType.RUNTYPE)));
@@ -1094,7 +1101,7 @@ public class BuiltinClasses {
     typeInfo.addMethod(new MethodElement("IsA", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("IsA", false, DataType.LOGICAL,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object"))));
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME))));
     typeInfo.addMethod(new MethodElement("HasStatics", false, DataType.LOGICAL));
     typeInfo.addMethod(new MethodElement("IsAbstract", false, DataType.LOGICAL));
     typeInfo.addMethod(new MethodElement("HasWidgetPool", false, DataType.LOGICAL));
@@ -1149,7 +1156,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Severity", false, DataType.INTEGER));
 
     BUILTIN_CLASSES.add(typeInfo);
-    typeInfo = new TypeInfo("Progress.Lang.FlagsEnum", false, false, "Progress.Lang.Enum", "");
+    typeInfo = new TypeInfo("Progress.Lang.FlagsEnum", false, false, PLE_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("IsFlagSet", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.FlagsEnum"))));
     BUILTIN_CLASSES.add(typeInfo);
@@ -1161,7 +1168,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("CallStack", false, DataType.CHARACTER));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Lang.OERequestInfo", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Lang.OERequestInfo", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("GetClientPrincipal", false, DataType.HANDLE));
     typeInfo.addMethod(new MethodElement("SetClientPrincipal", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.HANDLE)));
@@ -1176,14 +1183,14 @@ public class BuiltinClasses {
         new PropertyElement("AdapterType", false, new DataType("Progress.ApplicationServer.AdapterTypes")));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Lang.OEVersionInfo", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Lang.OEVersionInfo", false, false, PLO_CLASSNAME, "");
     typeInfo.addProperty(new PropertyElement("OEMajorVersion", false, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("OEMinorVersion", false, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("OEMaintVersion", false, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("OEClientType", false, DataType.CHARACTER));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Lang.ParameterList", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Lang.ParameterList", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("SetParameter", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER),
@@ -1197,7 +1204,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("SignatureList", false, DataType.CHARACTER));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Lang.ProError", false, false, "Progress.Lang.Object", "", "Progress.Lang.Error");
+    typeInfo = new TypeInfo("Progress.Lang.ProError", false, false, PLO_CLASSNAME, "", "Progress.Lang.Error");
     typeInfo.addMethod(new MethodElement("GetMessage", false, DataType.CHARACTER,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetMessageNum", false, DataType.INTEGER,
@@ -1215,7 +1222,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Severity", false, DataType.INTEGER));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Lang.Stop", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Lang.Stop", false, false, PLO_CLASSNAME, "");
     typeInfo.addProperty(new PropertyElement("CallStack", false, DataType.CHARACTER));
     BUILTIN_CLASSES.add(typeInfo);
 
@@ -1241,15 +1248,15 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("CallStack", false, DataType.CHARACTER));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Reflect.AccessMode", false, false, "Progress.Lang.Enum", "");
+    typeInfo = new TypeInfo("Progress.Reflect.AccessMode", false, false, PLE_CLASSNAME, "");
     typeInfo.addProperty(new PropertyElement("Public", true, new DataType("Progress.Reflect.AccessMode")));
     typeInfo.addProperty(new PropertyElement("Protected", true, new DataType("Progress.Reflect.AccessMode")));
     typeInfo.addProperty(new PropertyElement("Private", true, new DataType("Progress.Reflect.AccessMode")));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Reflect.Constructor", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Reflect.Constructor", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("GetParameters", false, new DataType("Progress.Reflect.Parameter")));
-    typeInfo.addMethod(new MethodElement("Invoke", false, new DataType("Progress.Lang.Object"),
+    typeInfo.addMethod(new MethodElement("Invoke", false, new DataType(PLO_CLASSNAME),
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
     typeInfo.addProperty(new PropertyElement("Name", false, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("NumParameters", false, DataType.INTEGER));
@@ -1257,7 +1264,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("OriginatingClass", false, new DataType("Progress.Lang.Class")));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Reflect.DataType", false, false, "Progress.Lang.Enum", "");
+    typeInfo = new TypeInfo("Progress.Reflect.DataType", false, false, PLE_CLASSNAME, "");
     typeInfo.addProperty(new PropertyElement("AnyType", true, new DataType("Progress.Reflect.DataType")));
     typeInfo.addProperty(new PropertyElement("Buffer", true, new DataType("Progress.Reflect.DataType")));
     typeInfo.addProperty(new PropertyElement("Byte", true, new DataType("Progress.Reflect.DataType")));
@@ -1292,22 +1299,22 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Void", true, new DataType("Progress.Reflect.DataType")));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Reflect.Event", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Reflect.Event", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("GetHandlerParameters", false, new DataType("Progress.Reflect.Parameter")));
     typeInfo.addMethod(new MethodElement("Subscribe", false, DataType.VOID,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
-        new Parameter(2, "prm2", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
+        new Parameter(2, "prm2", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(3, "prm3", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("Subscribe", false, DataType.VOID,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(3, "prm3", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("Subscribe", false, DataType.VOID,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.HANDLE),
         new Parameter(3, "prm3", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("Subscribe", false, DataType.VOID,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("Subscribe", false, DataType.VOID,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER),
@@ -1316,7 +1323,7 @@ public class BuiltinClasses {
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.HANDLE),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("Publish", false, DataType.VOID,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
     typeInfo.addMethod(new MethodElement("Publish", false, DataType.VOID,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
@@ -1345,10 +1352,10 @@ public class BuiltinClasses {
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Reflect.Flags"))));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Reflect.Method", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Reflect.Method", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("GetParameters", false, new DataType("Progress.Reflect.Parameter")));
     typeInfo.addMethod(new MethodElement("Invoke", false, DataType.RUNTYPE,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
     typeInfo.addMethod(new MethodElement("Invoke", false, DataType.RUNTYPE,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
@@ -1366,7 +1373,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("OriginatingClass", false, new DataType("Progress.Lang.Class")));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Reflect.Parameter", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Reflect.Parameter", false, false, PLO_CLASSNAME, "");
     typeInfo.addProperty(new PropertyElement("Name", false, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("Mode", false, new DataType("Progress.Reflect.ParameterMode")));
     typeInfo.addProperty(new PropertyElement("DataType", false, new DataType("Progress.Reflect.DataType")));
@@ -1402,20 +1409,20 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("OriginatingClass", false, new DataType("Progress.Lang.Class")));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Reflect.Variable", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Reflect.Variable", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("Get", false, DataType.RUNTYPE,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object"))));
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME))));
     typeInfo.addMethod(new MethodElement("Get", false, DataType.RUNTYPE,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("Get", false, DataType.RUNTYPE));
     typeInfo.addMethod(new MethodElement("Get", false, DataType.RUNTYPE,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("Set", false, DataType.VOID,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.RUNTYPE)));
     typeInfo.addMethod(new MethodElement("Set", false, DataType.VOID,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")),
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(3, "prm3", 0, ParameterMode.INPUT, DataType.RUNTYPE)));
     typeInfo.addMethod(new MethodElement("Set", false, DataType.VOID,
@@ -1433,7 +1440,7 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("OriginatingClass", false, new DataType("Progress.Lang.Class")));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Security.PAMStatus", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Security.PAMStatus", false, false, PLO_CLASSNAME, "");
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.Security.Realm.IHybridRealm", true, false, null, "");
@@ -1464,12 +1471,12 @@ public class BuiltinClasses {
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Web.AbstractWebRouter", false, true, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Web.AbstractWebRouter", false, true, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("HandleRequest", false, DataType.INTEGER,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("Progress.Web.InternalWebHandler", false, false, "Progress.Lang.Object", "");
+    typeInfo = new TypeInfo("Progress.Web.InternalWebHandler", false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("HandleRequest", false, DataType.INTEGER,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.MEMPTR),
