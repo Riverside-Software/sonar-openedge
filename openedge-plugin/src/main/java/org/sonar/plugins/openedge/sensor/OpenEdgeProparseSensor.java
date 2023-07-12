@@ -259,7 +259,6 @@ public class OpenEdgeProparseSensor implements Sensor {
       if (settings.parseXrefDocument())
         doc = parseXREF(settings.getSonarlintXrefFile(file));
       xmlParseTime += (System.currentTimeMillis() - startTime);
-      settings.parseHierarchy(file);
     }
     if (!xref.getSource().isEmpty())
       numXREF++;
