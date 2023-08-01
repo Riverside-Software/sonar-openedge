@@ -185,14 +185,14 @@ public class RCodeInfoTest {
 
       Kryo kryo = getKryo();
 
-      try (OutputStream output = Files.newOutputStream(Paths.get("target/plop.bin"));
+      try (OutputStream output = Files.newOutputStream(Paths.get("target/rcode-kryo.bin"));
           Output data = new Output(output)) {
         kryo.writeObject(data, rci.getTypeInfo());
       } catch (IOException caught) {
         return;
       }
 
-      try (Input input2 = new Input(new FileInputStream("target/plop.bin"));) {
+      try (Input input2 = new Input(new FileInputStream("target/rcode-kryo.bin"));) {
         TypeInfoV12 foo = kryo.readObject(input2, TypeInfoV12.class);
         System.out.println(foo);
       }
