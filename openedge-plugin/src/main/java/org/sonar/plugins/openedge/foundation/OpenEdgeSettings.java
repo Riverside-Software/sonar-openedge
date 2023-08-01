@@ -265,8 +265,9 @@ public class OpenEdgeSettings {
   }
 
   private final void initializeRCodeCache() {
-    if (config.get(Constants.SLINT_RCODE_CACHE).isPresent()) {
-      File cache = new File(config.get(Constants.SLINT_RCODE_CACHE).get());
+    Optional<String> opt = config.get(Constants.SLINT_RCODE_CACHE);
+    if (opt.isPresent()) {
+      File cache = new File(opt.get());
       if (cache.exists() && cache.isFile() && cache.canRead()) {
         try {
           for (String str : java.nio.file.Files.readAllLines(cache.toPath(), StandardCharsets.UTF_8)) {

@@ -171,7 +171,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
       if ((lastOpeningParen > -1) && (lastClosingParen > -1)) {
         msgNum = Ints.tryParse(msg.substring(lastOpeningParen + 1, lastClosingParen));
       }
-      if (msgNum > -1) {
+      if ((msgNum != null) && (msgNum > -1)) {
         // Brackets found, so trim right part
         msg = msg.substring(0, lastOpeningParen);
       }
