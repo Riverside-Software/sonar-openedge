@@ -21,19 +21,15 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.NoViableAltException;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.proparse.ABLLexer;
+import org.prorefactor.proparse.ErrorDetectionListener;
 import org.prorefactor.proparse.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
@@ -62,11 +58,11 @@ public class ErrorRangeTest {
   @Test
   public void test01() throws IOException {
     ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test01.p", 3, "dynamic-function ('foobar', ).");
-    assertEquals(listener.errors.size(), 1);
-    assertEquals(listener.errCode.size(), 1);
-    String t0 = listener.errCode.get(0);
+    assertEquals(listener.getErrors().size(), 1);
+    assertEquals(listener.getErrCode().size(), 1);
+    String t0 = listener.getErrCode().get(0);
     assertEquals(t0, "dynamic-function ('foobar', )");
-    Interval i0 = listener.errors.get(0);
+    Interval i0 = listener.getErrors().get(0);
     assertEquals(i0.a, 11);
     assertEquals(i0.b, 17);
   }
@@ -74,11 +70,11 @@ public class ErrorRangeTest {
   @Test
   public void test02() throws IOException {
     ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test02.cls", 8, "dynamic-function ('foobar', ).");
-    assertEquals(listener.errors.size(), 1);
-    assertEquals(listener.errCode.size(), 1);
-    String t0 = listener.errCode.get(0);
+    assertEquals(listener.getErrors().size(), 1);
+    assertEquals(listener.getErrCode().size(), 1);
+    String t0 = listener.getErrCode().get(0);
     assertEquals(t0, "dynamic-function ('foobar', )");
-    Interval i0 = listener.errors.get(0);
+    Interval i0 = listener.getErrors().get(0);
     assertEquals(i0.a, 37);
     assertEquals(i0.b, 43);
   }
@@ -87,11 +83,11 @@ public class ErrorRangeTest {
   public void test03() throws IOException {
     // Error on last line
     ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test01.p", 4, "dynamic-function('foobar2', )");
-    assertEquals(listener.errors.size(), 1);
-    assertEquals(listener.errCode.size(), 1);
-    String t0 = listener.errCode.get(0);
+    assertEquals(listener.getErrors().size(), 1);
+    assertEquals(listener.getErrCode().size(), 1);
+    String t0 = listener.getErrCode().get(0);
     assertEquals(t0, "dynamic-function('foobar2', )");
-    Interval i0 = listener.errors.get(0);
+    Interval i0 = listener.getErrors().get(0);
     assertEquals(i0.a, 14);
     assertEquals(i0.b, 19);
   }
@@ -100,9 +96,9 @@ public class ErrorRangeTest {
   public void test04() throws IOException {
     // Just a missing period at the end
     ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test01.p", 4, "message x1");
-    assertEquals(listener.errors.size(), 1);
-    assertEquals(listener.errCode.size(), 1);
-    Interval i0 = listener.errors.get(0);
+    assertEquals(listener.getErrors().size(), 1);
+    assertEquals(listener.getErrCode().size(), 1);
+    Interval i0 = listener.getErrors().get(0);
     assertEquals(i0.a, 18);
     assertEquals(i0.b, 18);
     // TODO Interval currently reported in only EOF, while it should be the last statement which is not complete
@@ -112,11 +108,11 @@ public class ErrorRangeTest {
   public void test05() throws IOException {
     // Add m1() line, the end statement is also included in the error range... Shouldn't be there
     ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test02.cls", 9, "  m1 ( )");
-    assertEquals(listener.errors.size(), 1);
-    assertEquals(listener.errCode.size(), 1);
-    String t0 = listener.errCode.get(0);
+    assertEquals(listener.getErrors().size(), 1);
+    assertEquals(listener.getErrCode().size(), 1);
+    String t0 = listener.getErrCode().get(0);
     assertEquals(t0, "m1 ( )\n end");
-    Interval i0 = listener.errors.get(0);
+    Interval i0 = listener.getErrors().get(0);
     assertEquals(i0.a, 40);
     assertEquals(i0.b, 46);
   }
@@ -125,11 +121,11 @@ public class ErrorRangeTest {
   public void test05bis() throws IOException {
     // Add m1() line and a valid statement, error range contains the first keyword of the next statement
     ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test02.cls", 9, "  m1 ( )", "dynamic-function('plop', 1, 2, 3).");
-    assertEquals(listener.errors.size(), 1);
-    assertEquals(listener.errCode.size(), 1);
-    String t0 = listener.errCode.get(0);
+    assertEquals(listener.getErrors().size(), 1);
+    assertEquals(listener.getErrCode().size(), 1);
+    String t0 = listener.getErrCode().get(0);
     assertEquals(t0, "m1 ( )\ndynamic-function");
-    Interval i0 = listener.errors.get(0);
+    Interval i0 = listener.getErrors().get(0);
     assertEquals(i0.a, 40);
     assertEquals(i0.b, 46);
   }
@@ -138,13 +134,25 @@ public class ErrorRangeTest {
   public void test06() throws IOException {
     // Compared to test05, adding a parameter changes the error range. Weird 
     ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test02.cls", 9, "  m1 ( 'foobar', )");
-    assertEquals(listener.errors.size(), 1);
-    assertEquals(listener.errCode.size(), 1);
-    String t0 = listener.errCode.get(0);
+    assertEquals(listener.getErrors().size(), 1);
+    assertEquals(listener.getErrCode().size(), 1);
+    String t0 = listener.getErrCode().get(0);
     assertEquals(t0, "m1 ( 'foobar', )");
-    Interval i0 = listener.errors.get(0);
+    Interval i0 = listener.getErrors().get(0);
     assertEquals(i0.a, 40);
     assertEquals(i0.b, 47);
+  }
+
+  @Test
+  public void test07() throws IOException {
+    ErrorDetectionListener listener = genericTest("src/test/resources/data/errors/test02.cls", 9, "  assign this-object:m1().");
+    assertEquals(listener.getErrors().size(), 1);
+    assertEquals(listener.getErrCode().size(), 1);
+    String t0 = listener.getErrCode().get(0);
+    assertEquals(t0, "this-object:m1()");
+    Interval i0 = listener.getErrors().get(0);
+    assertEquals(i0.a, 42);
+    assertEquals(i0.b, 46);
   }
 
   private ErrorDetectionListener genericTest(String filename, int lineNumber, String... lines2) throws IOException {
@@ -191,25 +199,6 @@ public class ErrorRangeTest {
     }
 
     return sb.toString();
-  }
-
-  private static class ErrorDetectionListener extends BaseErrorListener {
-    private final List<Interval> errors = new ArrayList<>();
-    private final List<String> errCode = new ArrayList<>();
-
-    @Override
-    public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
-        String msg, RecognitionException caught) {
-      Proparse proparse = (Proparse) recognizer;
-
-      if (caught instanceof NoViableAltException) {
-        NoViableAltException nvae = (NoViableAltException) caught;
-        int startIndex = nvae.getStartToken().getTokenIndex();
-        int endIndex = nvae.getOffendingToken().getTokenIndex();
-        errors.add(new Interval(startIndex, endIndex));
-        errCode.add(proparse.getTokenStream().getText(new Interval(startIndex, endIndex)));
-      }
-    }
   }
 
 }
