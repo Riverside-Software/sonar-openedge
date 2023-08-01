@@ -3056,6 +3056,9 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
    */
   @Nonnull
   private Builder createTreeFromSecondNode(RuleNode ctx) {
+    if (ctx.getChildCount() < 3)
+      return new Builder(ABLNodeType.EMPTY_NODE);
+
     Builder node = visit(ctx.getChild(1));
     Builder left = visit(ctx.getChild(0));
     Builder right = visit(ctx.getChild(2));
