@@ -88,7 +88,7 @@ options {
   }
 
   private boolean expressionTerm2SemanticPredicate2() {
-    return support.isClass() && support.unknownMethodCallsAllowed();
+    return c3 || (support.isClass() && support.unknownMethodCallsAllowed());
   }
 
   private boolean functionParamStdSemanticPredicate() {

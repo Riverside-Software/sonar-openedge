@@ -59,6 +59,8 @@ public class ParserSupport {
   private boolean unitIsInterface = false;
   private boolean unitIsEnum = false;
   private boolean allowUnknownMethodCalls = true;
+  // Only for C3
+  private boolean allowAnyMethodCalls = false;
 
   private String className = "";
 
