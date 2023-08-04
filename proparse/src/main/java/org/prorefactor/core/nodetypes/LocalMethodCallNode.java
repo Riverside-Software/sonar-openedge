@@ -16,10 +16,10 @@ package org.prorefactor.core.nodetypes;
 
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
-import org.prorefactor.refactor.BuiltinClasses;
 
 import com.google.common.base.Strings;
 
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;

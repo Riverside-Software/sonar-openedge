@@ -25,9 +25,17 @@ import java.util.Set;
 public abstract class AbstractAccessibleElement extends AbstractElement implements IAccessibleElement {
   private Set<AccessType> accessType;
 
+  protected AbstractAccessibleElement() {
+    // No-op
+  }
+
   public AbstractAccessibleElement(String name, Set<AccessType> accessType) {
     super(name);
     this.accessType = accessType == null ? EnumSet.noneOf(AccessType.class) : accessType;
+  }
+
+  public Set<AccessType> getAccessType() {
+    return accessType;
   }
 
   public boolean isProtected() {

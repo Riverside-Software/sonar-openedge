@@ -39,10 +39,16 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   private boolean isEnum;
   private boolean isAbstract;
   private String className;
+  private boolean generateErrorNode;
 
   public JPNodeVisitor(ParserSupport support, BufferedTokenStream stream) {
     this.support = support;
     this.stream = stream;
+  }
+
+  public JPNodeVisitor(ParserSupport support, BufferedTokenStream stream, boolean genErrorNode) {
+    this(support, stream);
+    this.generateErrorNode = genErrorNode;
   }
 
   public boolean isClass() {
@@ -81,6 +87,16 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitClassCodeBlock(ClassCodeBlockContext ctx) {
+    return createTree(ctx, ABLNodeType.CODE_BLOCK);
+  }
+
+  @Override
+  public Builder visitAbstractClassCodeBlock(AbstractClassCodeBlockContext ctx) {
+    return createTree(ctx, ABLNodeType.CODE_BLOCK);
+  }
+
+  @Override
+  public Builder visitInterfaceCodeBlock(InterfaceCodeBlockContext ctx) {
     return createTree(ctx, ABLNodeType.CODE_BLOCK);
   }
 
@@ -868,7 +884,15 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   public Builder visitClassStatement(ClassStatementContext ctx) {
     isClass = true;
     className = ctx.tn.getText();
-    isAbstract = !ctx.ABSTRACT().isEmpty();
+    isAbstract = false;
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+  }
+
+  @Override
+  public Builder visitAbstractClassStatement(AbstractClassStatementContext ctx) {
+    isClass = true;
+    className = ctx.tn.getText();
+    isAbstract = true;
     return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
@@ -2054,7 +2078,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
-  public Builder visitMethodStatement2(MethodStatement2Context ctx) {
+  public Builder visitAbstractMethodStatement(AbstractMethodStatementContext ctx) {
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+  }
+
+  @Override
+  public Builder visitMethodDefinitionStatement(MethodDefinitionStatementContext ctx) {
     return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
@@ -2934,8 +2963,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   @Nonnull
   public Builder visitErrorNode(ErrorNode node) {
-    // Better return an empty node rather than nothing or an error
-    return new Builder(ABLNodeType.EMPTY_NODE);
+    // Standard mode: EMPTY_NODE is returned, which will be ignored when generating the tree
+    // If genErrorMode set to true, a specific node is generated
+    if (generateErrorNode)
+      return new Builder((ProToken) node.getSymbol()).setError(true);
+    else 
+      return new Builder(ABLNodeType.EMPTY_NODE);
   }
 
   @Override
@@ -3023,6 +3056,9 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
    */
   @Nonnull
   private Builder createTreeFromSecondNode(RuleNode ctx) {
+    if (ctx.getChildCount() < 3)
+      return new Builder(ABLNodeType.EMPTY_NODE);
+
     Builder node = visit(ctx.getChild(1));
     Builder left = visit(ctx.getChild(0));
     Builder right = visit(ctx.getChild(2));

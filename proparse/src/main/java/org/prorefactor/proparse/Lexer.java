@@ -57,6 +57,8 @@ import com.google.common.io.ByteSource;
  * could go wrong. There are some unit tests, but they don't cover every corner case of the lexer (and I swear there are
  * loads of corner cases, all of them being used at least by one Progress vendor).
  * It's still possible to do some refactor on the code... But running out of sleepless nights...
+ * 
+ * Unless you want to see the raw tokens of a source code, you should rather use {@link ABLLexer}
  */
 public class Lexer implements IPreprocessor {
   private static final Logger LOGGER = LoggerFactory.getLogger(Lexer.class);
@@ -128,7 +130,7 @@ public class Lexer implements IPreprocessor {
   private Map<String, String> globalDefdNames = new HashMap<>();
   private int sequence = 0;
 
-  Lexer(ABLLexer prepro, ByteSource src, String fileName) {
+  public Lexer(ABLLexer prepro, ByteSource src, String fileName) {
     this.prepro = prepro;
     this.factory = new ProTokenFactory();
     try {
@@ -150,6 +152,26 @@ public class Lexer implements IPreprocessor {
 
   public void setTokenStartChars(char[] tokenStartChars) {
     this.tokenStartChars = (tokenStartChars == null ? new char[]{ } : tokenStartChars);
+  }
+
+  public TokenFactory<ProToken> getTokenFactory() {
+    return factory;
+  }
+
+  /**
+   * Returns number of lines of code in the main file (i.e. including any line where there's a non-comment and
+   * non-whitespace token
+   */
+  public int getLoc() {
+    return loc.size();
+  }
+
+  public int getCommentedLines() {
+    return comments.size();
+  }
+
+  public int getProparseDirectivesCount() {
+    return numDirectives;
   }
 
   //////////////// Lexical productions listed first, support functions follow.
@@ -418,17 +440,6 @@ public class Lexer implements IPreprocessor {
   }
   
   /**
-   * Get argument for &IF DEFINED(...). The nextToken function is necessarily the main entry point. This is just a
-   * wrapper around that.
-   */
-  ProToken getAmpIfDefArg() {
-    LOGGER.trace("Entering getAmpIfDefArg()");
-
-    gettingAmpIfDefArg = true;
-    return nextToken();
-  }
-
-  /**
    * Get the text between the parens for &IF DEFINED(...). The compiler seems to allow any number of tokens between the
    * parens, and like with an &Name reference, it allows embedded comments. Here, I'm allowing for the embedded comments
    * and just gathering all the text up to the closing paren. Hopefully that will do it.
@@ -470,7 +481,7 @@ public class Lexer implements IPreprocessor {
     return makeToken(ABLNodeType.ID);
   }
 
-  ProToken questionMark() {
+  private ProToken questionMark() {
     LOGGER.trace("Entering questionMark()");
 
     if (currChar == ':') {
@@ -491,7 +502,7 @@ public class Lexer implements IPreprocessor {
       return makeToken(ABLNodeType.UNKNOWNVALUE);
   }
 
-  ProToken colon() {
+  private ProToken colon() {
     LOGGER.trace("Entering colon()");
 
     if (currChar == ':') {
@@ -504,7 +515,7 @@ public class Lexer implements IPreprocessor {
     return makeToken(ABLNodeType.OBJCOLON);
   }
 
-  ProToken whitespace() {
+  private ProToken whitespace() {
     LOGGER.trace("Entering whitespace()");
 
     boolean consume = true;
@@ -525,7 +536,7 @@ public class Lexer implements IPreprocessor {
     return makeToken(ABLNodeType.WS);
   }
 
-  ProToken comment() {
+  private ProToken comment() {
     LOGGER.trace("Entering comment()");
 
     // Escapes in comments are processed because you can end a comment with something dumb like: ~*~/
@@ -560,7 +571,7 @@ public class Lexer implements IPreprocessor {
     return makeToken(ABLNodeType.COMMENT);
   }
 
-  ProToken singleLineComment() {
+  private ProToken singleLineComment() {
     LOGGER.trace("Entering singleLineComment()");
 
     // Single line comments are treated just like regular comments, everything till end of line is considered comment -
@@ -582,7 +593,7 @@ public class Lexer implements IPreprocessor {
     }
   }
 
-  ProToken quotedString(int currStringType) {
+  private ProToken quotedString(int currStringType) {
     LOGGER.trace("Entering quotedString()");
 
     // Inside quoted strings (string constants) we preserve
@@ -652,7 +663,7 @@ public class Lexer implements IPreprocessor {
     return makeToken(ABLNodeType.QSTRING);
   }
 
-  ProToken digitStart(boolean hex) {
+  private ProToken digitStart(boolean hex) {
     LOGGER.trace("Entering digitStart()");
 
     ABLNodeType ttype = ABLNodeType.NUMBER;
@@ -749,7 +760,7 @@ public class Lexer implements IPreprocessor {
     return makeToken(ttype);
   }
 
-  ProToken plusMinusStart(ABLNodeType inputType) {
+  private ProToken plusMinusStart(ABLNodeType inputType) {
     LOGGER.trace("Entering plusMinusStart()");
     ABLNodeType ttype = ABLNodeType.NUMBER;
     for_loop : for (;;) {
@@ -834,7 +845,7 @@ public class Lexer implements IPreprocessor {
       return makeToken(ttype);
   }
 
-  ProToken periodStart() {
+  private ProToken periodStart() {
     LOGGER.trace("Entering periodStart()");
 
     if (!Character.isDigit(currChar)) {
@@ -907,7 +918,7 @@ public class Lexer implements IPreprocessor {
     return makeToken(ttype);
   }
 
-  ProToken id(ABLNodeType inputTokenType) {
+  private ProToken id(ABLNodeType inputTokenType) {
     LOGGER.trace("Entering id()");
 
     // Tokens that start with a-z or underscore
@@ -1043,7 +1054,7 @@ public class Lexer implements IPreprocessor {
     return makeToken(ABLNodeType.FILENAME);
   }
 
-  ProToken directive() {
+  private ProToken directive() {
     LOGGER.trace("Entering directive()");
 
     // Called by ampText, which has already gather the text for
@@ -1189,7 +1200,7 @@ public class Lexer implements IPreprocessor {
     }
   }
 
-  boolean currIsSpace() {
+  private boolean currIsSpace() {
     return (currInt == Token.EOF || Character.isWhitespace(currChar));
   }
 
@@ -1200,11 +1211,11 @@ public class Lexer implements IPreprocessor {
     currChar = Character.toLowerCase(currInt);
   }
 
-  ProToken makeToken(ABLNodeType type) {
+  private ProToken makeToken(ABLNodeType type) {
     return makeToken(type, currText.toString());
   }
 
-  ProToken makeToken(ABLNodeType type, String text) {
+  private ProToken makeToken(ABLNodeType type, String text) {
     if (type == ABLNodeType.PROPARSEDIRECTIVE)
       numDirectives++;
     // Counting lines of code and commented lines only in the main file (textStartFile set to 0)
@@ -1233,7 +1244,7 @@ public class Lexer implements IPreprocessor {
       .build();
   }
 
-  void macroDefine(int defType) {
+  private void macroDefine(int defType) {
     LOGGER.trace("Entering macroDefine({})", defType);
 
     if (prepro.isConsuming() || prepro.isLexOnly())
@@ -1261,7 +1272,7 @@ public class Lexer implements IPreprocessor {
       defScoped(macroName.toLowerCase(), defText);
   }
 
-  void macroUndefine() {
+  private void macroUndefine() {
     LOGGER.trace("Entering macroUndefine()");
 
     if (prepro.isConsuming())
@@ -1362,23 +1373,7 @@ public class Lexer implements IPreprocessor {
     return retChar;
   }
 
-  /**
-   * Returns number of lines of code in the main file (i.e. including any line where there's a non-comment and
-   * non-whitespace token
-   */
-  public int getLoc() {
-    return loc.size();
-  }
-
-  public int getCommentedLines() {
-    return comments.size();
-  }
-
-  public int getProparseDirectivesCount() {
-    return numDirectives;
-  }
-
-  void preserveCurrent() {
+  private void preserveCurrent() {
     // Preserve the current character/file/line/col before looking
     // ahead to the next character. Need this because current char
     // might be appended to current token, or it might be the start
@@ -1389,11 +1384,11 @@ public class Lexer implements IPreprocessor {
     preservedChar = new CharPos(currChar, currFile, currLine, currCol, currSourceNum);
   }
 
-  void preserveDrop() {
+  private void preserveDrop() {
     preserve = false;
   }
 
-  void unEscapedAppend() {
+  private void unEscapedAppend() {
     if (wasEscape) {
       currText.append(escapeText);
       if (escapeAppend)
@@ -1403,26 +1398,12 @@ public class Lexer implements IPreprocessor {
     }
   }
 
-  void lexicalThrow(String theMessage) {
+  private void lexicalThrow(String theMessage) {
     throw new ProparseRuntimeException(getFilename() + ":" + Integer.toString(currLine) + " " + theMessage);
   }
 
-  /**
-   * Cleanup work, once the parse is complete.
-   */
-   void parseComplete() {
-    while (ppPopInput() != 0) {
-      // No-op
-    }
-    // Clean up the temporary junk
-    currentInclude = null;
-    currentInput = null;
-    includeCache.clear();
-    includeCache2.clear();
-  }
-
   @CheckForNull
-  String getCurrentAnalyzeSuspend() {
+  private String getCurrentAnalyzeSuspend() {
     return currentInput.getAnalyzeSuspend();
   }
 
@@ -1439,15 +1420,11 @@ public class Lexer implements IPreprocessor {
     nameDot = (la.ch != Token.EOF) && !Character.isWhitespace(la.ch) && (la.ch != '.');
   }
 
-  int addFilename(String filename) {
+  private int addFilename(String filename) {
     if (prepro.getFilenameList().hasValue(filename))
       return prepro.getFilenameList().getIndex(filename);
 
     return prepro.getFilenameList().add(filename);
-  }
-
-  public TokenFactory<ProToken> getTokenFactory() {
-    return factory;
   }
 
   private int ppGetChar() {
@@ -1878,6 +1855,31 @@ public class Lexer implements IPreprocessor {
     LOGGER.trace("Entering file: {}", getFilename());
 
     return true;
+  }
+
+  /**
+   * Cleanup work, once the parse is complete.
+   */
+  void parseComplete() {
+    while (ppPopInput() != 0) {
+      // No-op
+    }
+    // Clean up the temporary junk
+    currentInclude = null;
+    currentInput = null;
+    includeCache.clear();
+    includeCache2.clear();
+  }
+
+  /**
+   * Get argument for &IF DEFINED(...). The nextToken function is necessarily the main entry point. This is just a
+   * wrapper around that.
+   */
+  ProToken getAmpIfDefArg() {
+    LOGGER.trace("Entering getAmpIfDefArg()");
+
+    gettingAmpIfDefArg = true;
+    return nextToken();
   }
 
   // ****************************

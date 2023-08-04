@@ -55,9 +55,12 @@ public class ParserSupport {
   private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
 
   private boolean schemaTablePriority = false;
+  private boolean unitIsAbstract = true;
   private boolean unitIsInterface = false;
   private boolean unitIsEnum = false;
   private boolean allowUnknownMethodCalls = true;
+  // Only for C3
+  private boolean allowAnyMethodCalls = false;
 
   private String className = "";
 
@@ -105,6 +108,13 @@ public class ParserSupport {
   public void defineClass(String name) {
     LOG.trace("defineClass '{}'", name);
     className = ClassFinder.dequote(name);
+    unitScope.attachTypeInfo(session.getTypeInfo(className));
+  }
+
+  public void defineAbstractClass(String name) {
+    LOG.trace("defineAbstractClass '{}'", name);
+    className = ClassFinder.dequote(name);
+    unitIsAbstract = true;
     unitScope.attachTypeInfo(session.getTypeInfo(className));
   }
 
@@ -266,6 +276,10 @@ public class ParserSupport {
 
   public boolean isEnum() {
     return unitIsEnum;
+  }
+
+  public boolean isAbstractClass() {
+    return unitIsAbstract;
   }
 
   private FieldType isTable(String inName) {

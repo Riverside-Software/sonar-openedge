@@ -19,10 +19,7 @@
  */
 package eu.rssw.pct.elements.fixed;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import eu.rssw.pct.elements.IBufferElement;
@@ -34,139 +31,24 @@ import eu.rssw.pct.elements.ITableElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.IVariableElement;
 
-public class TypeInfo implements ITypeInfo {
-  private static final int IS_FINAL = 1;
-  private static final int IS_INTERFACE = 2;
-  private static final int USE_WIDGET_POOL = 4;
-  private static final int IS_DOTNET = 8;
-  private static final int HAS_STATICS = 64;
-  private static final int IS_BUILTIN = 128;
-  private static final int IS_HYBRID = 2048;
-  private static final int HAS_DOTNETBASE = 4096;
-  private static final int IS_ABSTRACT = 32768;
-  private static final int IS_SERIALIZABLE = 65536;
+/**
+ * Proxy for a TypeInfo object. Used by SonarLint to delay file loading until required by the analyzer
+ */
+public abstract class TypeInfoProxy implements ITypeInfo {
+  protected final String typeName;
+  protected ITypeInfo typeInfo = null;
 
-  protected String typeName;
-  protected String parentTypeName;
-  protected String assemblyName;
-  protected int flags;
-  private List<String> interfaces = new ArrayList<>();
-
-  private Collection<IMethodElement> methods = new ArrayList<>();
-  private Collection<IPropertyElement> properties = new ArrayList<>();
-  private Collection<IVariableElement> variables = new ArrayList<>();
-
-  public TypeInfo() {
-    // No-op
-  }
-
-  public TypeInfo(String typeName, boolean iface, boolean abstrct, String parentTypeName, String assemblyName, String... interfaces) {
+  protected TypeInfoProxy(String typeName) {
     this.typeName = typeName;
-    this.parentTypeName = parentTypeName;
-    this.assemblyName = assemblyName;
-    this.interfaces.addAll(Arrays.asList(interfaces));
-    this.flags = (iface ? IS_INTERFACE : 0) | (abstrct ? IS_ABSTRACT : 0);
   }
 
-  public void addMethod(IMethodElement element) {
-    methods.add(element);
-  }
+  /**
+   * typeInfo object is expected not to be null after execution of this method.
+   */
+  abstract void checkTypeInfo();
 
-  public void addProperty(IPropertyElement element) {
-    properties.add(element);
-  }
-
-  public void addVariable(IVariableElement element) {
-    variables.add(element);
-  }
-
-  @Override
-  public IBufferElement getBufferFor(String name) {
-    return null;
-  }
-
-  @Override
-  public boolean hasTempTable(String inName) {
-    return false;
-  }
-
-  @Override
-  public boolean hasMethod(String name) {
-    for (IMethodElement mthd : methods) {
-      if (mthd.getName().equalsIgnoreCase(name))
-        return true;
-    }
-    return false;
-  }
-
-  @Override
-  public ITableElement getTempTable(String inName) {
-    return null;
-  }
-
-  @Override
-  public boolean hasProperty(String name) {
-    return false;
-  }
-
-  @Override
-  public IPropertyElement getProperty(String name) {
-    // Only for testing
-    for (IPropertyElement prop : properties) {
-      if (prop.getName().equalsIgnoreCase(name))
-        return prop;
-    }
-    return null;
-  }
-
-  @Override
-  public boolean hasBuffer(String inName) {
-    return false;
-  }
-
-  @Override
-  public IBufferElement getBuffer(String inName) {
-    return null;
-  }
-
-  @Override
-  public Collection<IMethodElement> getMethods() {
-    return methods;
-  }
-
-  @Override
-  public Collection<IPropertyElement> getProperties() {
-    return properties;
-  }
-
-  @Override
-  public Collection<IEventElement> getEvents() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public Collection<IVariableElement> getVariables() {
-    return variables;
-  }
-
-  @Override
-  public Collection<ITableElement> getTables() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public Collection<IBufferElement> getBuffers() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public Collection<IDatasetElement> getDatasets() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public IDatasetElement getDataset(String dataset) {
-    return null;
+  public boolean isInitialized() {
+    return typeInfo != null;
   }
 
   @Override
@@ -175,72 +57,177 @@ public class TypeInfo implements ITypeInfo {
   }
 
   @Override
+  public IBufferElement getBufferFor(String name) {
+    checkTypeInfo();
+    return typeInfo.getBufferFor(name);
+  }
+
+  @Override
+  public boolean hasTempTable(String inName) {
+    checkTypeInfo();
+    return typeInfo.hasTempTable(inName);
+  }
+
+  @Override
+  public boolean hasMethod(String name) {
+    checkTypeInfo();
+    return typeInfo.hasMethod(name);
+  }
+
+  @Override
+  public ITableElement getTempTable(String inName) {
+    checkTypeInfo();
+    return typeInfo.getTempTable(inName);
+  }
+
+  @Override
+  public boolean hasProperty(String name) {
+    checkTypeInfo();
+    return typeInfo.hasProperty(name);
+  }
+
+  @Override
+  public IPropertyElement getProperty(String name) {
+    checkTypeInfo();
+    return typeInfo.getProperty(name);
+  }
+
+  @Override
+  public boolean hasBuffer(String inName) {
+    checkTypeInfo();
+    return typeInfo.hasBuffer(inName);
+  }
+
+  @Override
+  public IBufferElement getBuffer(String inName) {
+    checkTypeInfo();
+    return typeInfo.getBuffer(inName);
+  }
+
+  @Override
+  public Collection<IMethodElement> getMethods() {
+    checkTypeInfo();
+    return typeInfo.getMethods();
+  }
+
+  @Override
+  public Collection<IPropertyElement> getProperties() {
+    checkTypeInfo();
+    return typeInfo.getProperties();
+  }
+
+  @Override
+  public Collection<IEventElement> getEvents() {
+    checkTypeInfo();
+    return typeInfo.getEvents();
+  }
+
+  @Override
+  public Collection<IVariableElement> getVariables() {
+    checkTypeInfo();
+    return typeInfo.getVariables();
+  }
+
+  @Override
+  public Collection<ITableElement> getTables() {
+    checkTypeInfo();
+    return typeInfo.getTables();
+  }
+
+  @Override
+  public Collection<IBufferElement> getBuffers() {
+    checkTypeInfo();
+    return typeInfo.getBuffers();
+  }
+
+  @Override
+  public Collection<IDatasetElement> getDatasets() {
+    checkTypeInfo();
+    return typeInfo.getDatasets();
+  }
+
+  @Override
+  public IDatasetElement getDataset(String getDataset) {
+    checkTypeInfo();
+    return typeInfo.getDataset(getDataset);
+  }
+
+  @Override
   public String getParentTypeName() {
-    return parentTypeName;
+    checkTypeInfo();
+    return typeInfo.getParentTypeName();
   }
 
   @Override
   public String getAssemblyName() {
-    return assemblyName;
+    checkTypeInfo();
+    return typeInfo.getAssemblyName();
   }
 
   @Override
   public List<String> getInterfaces() {
-    return interfaces;
+    checkTypeInfo();
+    return typeInfo.getInterfaces();
   }
 
   @Override
   public String toString() {
-    return String.format("Type info %s - Parent %s", typeName, parentTypeName);
+    checkTypeInfo();
+    return String.format("TypeInfoProxy for %s", typeInfo);
   }
 
   @Override
   public boolean isFinal() {
-    return (flags & IS_FINAL) != 0;
+    checkTypeInfo();
+    return typeInfo.isFinal();
   }
 
   @Override
   public boolean isInterface() {
-    return (flags & IS_INTERFACE) != 0;
+    checkTypeInfo();
+    return typeInfo.isInterface();
   }
 
   @Override
   public boolean hasStatics() {
-    return (flags & HAS_STATICS) != 0;
+    checkTypeInfo();
+    return typeInfo.hasStatics();
   }
 
   @Override
   public boolean isBuiltIn() {
-    return (flags & IS_BUILTIN) != 0;
+    checkTypeInfo();
+    return typeInfo.isBuiltIn();
   }
 
   @Override
   public boolean isHybrid() {
-    return (flags & IS_HYBRID) != 0;
+    checkTypeInfo();
+    return typeInfo.isHybrid();
   }
 
   @Override
   public boolean hasDotNetBase() {
-    return (flags & HAS_DOTNETBASE) != 0;
+    checkTypeInfo();
+    return typeInfo.hasDotNetBase();
   }
 
   @Override
   public boolean isAbstract() {
-    return (flags & IS_ABSTRACT) != 0;
+    checkTypeInfo();
+    return typeInfo.isAbstract();
   }
 
   @Override
   public boolean isSerializable() {
-    return (flags & IS_SERIALIZABLE) != 0;
+    checkTypeInfo();
+    return typeInfo.isSerializable();
   }
 
   @Override
   public boolean isUseWidgetPool() {
-    return (flags & USE_WIDGET_POOL) != 0;
-  }
-
-  protected boolean isDotNet() {
-    return (flags & IS_DOTNET) != 0;
+    checkTypeInfo();
+    return typeInfo.isUseWidgetPool();
   }
 
 }

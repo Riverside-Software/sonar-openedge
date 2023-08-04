@@ -75,6 +75,10 @@ public class MethodParameterV11 extends AbstractElement implements IParameter {
     return new MethodParameterV11(0, name, parameterType, paramMode, flags, dataTypeObj, extent);
   }
 
+  public int getFlags() {
+    return flags;
+  }
+
   @Override
   public int getNum() {
     return paramNum;

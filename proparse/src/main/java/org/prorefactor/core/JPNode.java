@@ -94,6 +94,13 @@ public class JPNode {
     return token;
   }
 
+  /**
+   * @return True if node was generated from a token in the error stream 
+   */
+  public boolean isErrorNode() {
+    return false;
+  }
+
   // Attributes from ProToken
 
   /**
@@ -912,6 +919,7 @@ public class JPNode {
     private boolean expression;
     private boolean block;
     private String blockLabel;
+    private boolean error;
 
     public Builder(ProToken tok) {
       this.tok = tok;
@@ -919,6 +927,11 @@ public class JPNode {
 
     public Builder(ABLNodeType type) {
       this(new ProToken.Builder(type, "").setSynthetic(true).build());
+    }
+
+    public Builder setError(boolean error) {
+      this.error = error;
+      return this;
     }
 
     public Builder updateToken(ProToken tok) {
@@ -1065,7 +1078,9 @@ public class JPNode {
     private JPNode build(ParserSupport support, JPNode up, int num) {
       JPNode node;
       boolean hasChildren = (down != null) && ((down.getNodeType() != ABLNodeType.EMPTY_NODE) || down.right != null || down.down != null);
-      if (expression) {
+      if (error) {
+        return new JPErrorNode(tok, up, num, false);
+      } else if (expression) {
         switch (tok.getNodeType()) {
           case UNARY_MINUS:
           case UNARY_PLUS:

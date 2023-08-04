@@ -86,6 +86,10 @@ public class MethodElementV11 extends AbstractAccessibleElement implements IMeth
     return new MethodElementV11(name2, accessType, flags, returnTypeObj, extent, parameters);
   }
 
+  public int getFlags() {
+    return flags;
+  }
+
   @Override
   public DataType getReturnType() {
     return returnType;

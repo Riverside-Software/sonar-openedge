@@ -65,8 +65,8 @@ public class DataType {
   // Only used in the expression engine to express the fact that it's not possible to compute the returned data type
   public static final DataType NOT_COMPUTED = new DataType(PrimitiveDataType.UNKNOWN2);
 
-  private PrimitiveDataType primDataType;
-  private String className;
+  private final PrimitiveDataType primDataType;
+  private final String className;
 
   private DataType(PrimitiveDataType dataType) {
     this.primDataType = dataType;

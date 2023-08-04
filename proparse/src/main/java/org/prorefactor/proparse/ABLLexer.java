@@ -37,7 +37,6 @@ public class ABLLexer implements TokenSource, IPreprocessor {
 
   // Do we only read tokens ? Or do we expand include files ?
   private final boolean lexOnly;
-  private final IProparseSettings ppSettings;
   private final IProparseEnvironment session;
   private final IntegerIndex<String> filenameList = new IntegerIndex<>();
   private final IPreprocessorEventListener lstListener = new PreprocessorEventListener();
@@ -62,17 +61,22 @@ public class ABLLexer implements TokenSource, IPreprocessor {
    */
   public ABLLexer(IProparseEnvironment session, ByteSource src, String fileName, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
-    this.ppSettings = session.getProparseSettings();
     this.session = session;
     this.lexOnly = lexOnly;
 
     lexer = new Lexer(this, src, fileName);
     lexer.setTokenStartChars(session.getProparseSettings().getTokenStartChars());
-    TokenSource postLexer = lexOnly ? new NoOpPostLexer(lexer) : new PostLexer(this, lexer);
-    TokenSource filter0 = new ProparseSkipFilter(postLexer);
-    TokenSource filter1 = new NameDotTokenFilter(filter0);
-    TokenSource filter2 = new TokenList(filter1);
-    wrapper = new FunctionKeywordTokenFilter(filter2);
+    if (lexOnly) {
+      TokenSource postLexer = new NoOpPostLexer(lexer);
+      TokenSource filter0 = new NameDotTokenFilter(postLexer);
+      wrapper = new FunctionKeywordTokenFilter(filter0);
+    } else {
+      TokenSource postLexer = new PostLexer(this, lexer);
+      TokenSource filter0 = new ProparseSkipFilter(postLexer);
+      TokenSource filter1 = new NameDotTokenFilter(filter0);
+      TokenSource filter2 = new TokenList(filter1);
+      wrapper = new FunctionKeywordTokenFilter(filter2);
+    }
   }
 
   /**
@@ -80,7 +84,6 @@ public class ABLLexer implements TokenSource, IPreprocessor {
    */
   protected ABLLexer(IProparseEnvironment session, ByteSource src, String fileName) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
-    this.ppSettings = session.getProparseSettings();
     this.session = session;
     this.lexOnly = false;
 
@@ -196,7 +199,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   }
 
   public IProparseSettings getProparseSettings(){
-    return ppSettings;
+    return session.getProparseSettings();
   }
 
   public boolean isAppBuilderCode() {
@@ -246,9 +249,9 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   public void analyzeResume() {
     lexer.analyzeResume();
   }
+
   // ***********************************
   // End of IPreprocessor implementation
   // ***********************************
-
 
 }

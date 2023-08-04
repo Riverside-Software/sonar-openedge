@@ -25,14 +25,28 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
 
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IDatasetElement;
 import eu.rssw.pct.elements.IEventElement;
@@ -43,8 +57,18 @@ import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.ParameterType;
 import eu.rssw.pct.elements.PrimitiveDataType;
+import eu.rssw.pct.elements.v12.TypeInfoV12;
 
 public class RCodeInfoTest {
+
+  @BeforeTest
+  public void init() throws IOException {
+    try {
+      Files.createDirectories(Path.of("target/kryo"));
+    } catch (FileAlreadyExistsException caught) {
+      // No-op
+    }
+  }
 
   @Test
   public void testV10() throws IOException {
@@ -54,6 +78,7 @@ public class RCodeInfoTest {
       assertEquals(rci.getCrc(), 1876);
       assertEquals(rci.getDigest(), "E762264216FF9D45EB82D4FFF4618578");
       assertNull(rci.getTypeInfo());
+
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -121,6 +146,18 @@ public class RCodeInfoTest {
     testEnum("src/test/resources/rcode/MyEnumV12.r", true, 14646);
   }
 
+  private Kryo getKryo() {
+    Kryo kryo = new Kryo();
+    kryo.register(HashMap.class);
+    kryo.register(ArrayList.class);
+    kryo.register(EnumSet.class);
+    eu.rssw.pct.elements.fixed.KryoSerializers.addSerializers(kryo);
+    eu.rssw.pct.elements.v12.KryoSerializers.addSerializers(kryo);
+    eu.rssw.pct.elements.v11.KryoSerializers.addSerializers(kryo);
+
+    return kryo;
+  }
+
   public void testEnum(String fileName, boolean checkEnumValues, long expectedCrc) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(fileName))) {
       RCodeInfo rci = new RCodeInfo(input);
@@ -145,6 +182,21 @@ public class RCodeInfoTest {
         assertNotNull(rci.getTypeInfo().getProperty("Extra02").getEnumDescriptor());
         assertEquals(rci.getTypeInfo().getProperty("Extra02").getEnumDescriptor().getValue(), 0x5678L);
       }
+
+      Kryo kryo = getKryo();
+
+      try (OutputStream output = Files.newOutputStream(Paths.get("target/rcode-kryo.bin"));
+          Output data = new Output(output)) {
+        kryo.writeObject(data, rci.getTypeInfo());
+      } catch (IOException caught) {
+        return;
+      }
+
+      try (Input input2 = new Input(new FileInputStream("target/rcode-kryo.bin"));) {
+        TypeInfoV12 foo = kryo.readObject(input2, TypeInfoV12.class);
+        System.out.println(foo);
+      }
+
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -273,7 +325,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testInputStreamSkip() throws IOException {
-    // Issue #1005: 
+    // Issue #1005:
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/_dmpincr.r"));
         InputStream input2 = new SpecialSkipInputStreamWrapper(input)) {
       RCodeInfo rci = new RCodeInfo(input2);
@@ -322,6 +374,21 @@ public class RCodeInfoTest {
 
       assertNotNull(rci.getTypeInfo().getTables());
       assertEquals(rci.getTypeInfo().getTables().size(), 0);
+
+      Kryo kryo = getKryo();
+
+      try (OutputStream output = Files.newOutputStream(Paths.get("target/plop.bin"));
+          Output data = new Output(output)) {
+        kryo.writeObject(data, rci.getTypeInfo());
+      } catch (IOException caught) {
+        return;
+      }
+
+      try (Input input2 = new Input(new FileInputStream("target/plop.bin"));) {
+        TypeInfoV12 foo = kryo.readObject(input2, TypeInfoV12.class);
+        System.out.println(foo);
+      }
+
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -384,6 +451,21 @@ public class RCodeInfoTest {
       ITableElement tt4 = rci.getTypeInfo().getTempTable("tt4");
       assertNotNull(tt4);
       assertTrue(tt4.isNonSerializable());
+
+      Kryo kryo = getKryo();
+
+      try (OutputStream output = Files.newOutputStream(Paths.get("target/plop.bin"));
+          Output data = new Output(output)) {
+        kryo.writeObject(data, rci.getTypeInfo());
+      } catch (IOException caught) {
+        return;
+      }
+
+      try (Input input2 = new Input(new FileInputStream("target/plop.bin"));) {
+        TypeInfoV12 foo = kryo.readObject(input2, TypeInfoV12.class);
+        System.out.println(foo);
+      }
+
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -393,6 +475,8 @@ public class RCodeInfoTest {
   public void testElementsV11() throws IOException {
     testElements("src/test/resources/rcode/TestClassElementsV11.r", 56984, "BBA93318F0B81F7840FA3D45FFE40A35");
     testElements2("src/test/resources/rcode/TestClassElementsChV11.r", 32156, "7945FD8804C9E910211A5E37708143D5");
+    testElements3(Paths.get("src/test/resources/rcode/TestClassElementsV11.r"));
+    testElements3(Paths.get("src/test/resources/rcode/TestClassElementsChV11.r"));
   }
 
   @Test
@@ -401,6 +485,8 @@ public class RCodeInfoTest {
         "z0duspqsS+drLa5kEcDQrePMMTqRU6WNHqf7Rq/t6Ao=");
     testElements2("src/test/resources/rcode/TestClassElementsChV12.r", 32156,
         "JIg2azB7KXRZrAfnG2zFYlMiYuqdOCd+LO1MHgr9egg=");
+    testElements3(Paths.get("src/test/resources/rcode/TestClassElementsV12.r"));
+    testElements3(Paths.get("src/test/resources/rcode/TestClassElementsChV12.r"));
   }
 
   public void testElements(String fileName, long crc, String digest) throws IOException {
@@ -543,7 +629,6 @@ public class RCodeInfoTest {
       assertNotNull(testMethod5);
       assertEquals(testMethod5.getReturnType().getPrimitive(), PrimitiveDataType.CLASS);
       assertEquals(testMethod5.getReturnType().getClassName(), "Progress.Lang.Object");
-
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -571,4 +656,57 @@ public class RCodeInfoTest {
     }
   }
 
+  public void testElements3(Path fileName) throws IOException {
+    Kryo kryo = getKryo();
+    RCodeInfo rci = null;
+    try (InputStream input = Files.newInputStream(fileName);
+        OutputStream output = Files.newOutputStream(
+            Paths.get("target/kryo/", fileName.getFileName().toString() + ".bin"));
+        Output data = new Output(output)) {
+      rci = new RCodeInfo(input);
+      kryo.writeClassAndObject(data, rci.getTypeInfo());
+    } catch (InvalidRCodeException | IOException caught) {
+      throw new RuntimeException("Test failure", caught);
+    }
+
+    ITypeInfo serObj = null;
+    try (
+        InputStream input = Files.newInputStream(Paths.get("target/kryo/", fileName.getFileName().toString() + ".bin"));
+        Input input2 = new Input(input)) {
+      Object obj = kryo.readClassAndObject(input2);
+      assertTrue(obj instanceof ITypeInfo);
+      serObj = (ITypeInfo) obj;
+    }
+
+    assertEquals(serObj.getProperties().size(), rci.getTypeInfo().getProperties().size());
+    assertEquals(serObj.getBuffers().size(), rci.getTypeInfo().getBuffers().size());
+    assertEquals(serObj.getDatasets().size(), rci.getTypeInfo().getDatasets().size());
+    assertEquals(serObj.getInterfaces().size(), rci.getTypeInfo().getInterfaces().size());
+    assertEquals(serObj.getMethods().size(), rci.getTypeInfo().getMethods().size());
+    assertEquals(serObj.getTables().size(), rci.getTypeInfo().getTables().size());
+    assertEquals(serObj.getVariables().size(), rci.getTypeInfo().getVariables().size());
+  }
+
+  @Test
+  public void testKryoBuiltinClasses() throws IOException {
+    Kryo kryo = getKryo();
+    try (OutputStream output = Files.newOutputStream(Paths.get("target/kryo/builtin.bin"));
+        Output data = new Output(output)) {
+      for (ITypeInfo info : BuiltinClasses.getBuiltinClasses()) {
+        kryo.writeClassAndObject(data, info);
+      }
+    }
+
+    List<ITypeInfo> list = new ArrayList<>();
+    try (InputStream input = Files.newInputStream(Paths.get("target/kryo/builtin.bin"));
+        Input input2 = new Input(input)) {
+      while (input2.available() > 0)  {
+        Object obj = kryo.readClassAndObject(input2);
+        assertTrue(obj instanceof ITypeInfo);
+        list.add((ITypeInfo) obj);
+      }
+    }
+
+    assertEquals(list.size(), BuiltinClasses.getBuiltinClasses().size());
+  }
 }

@@ -60,6 +60,10 @@ public class BufferElementV11 extends AbstractAccessibleElement implements IBuff
     return new BufferElementV11(name2, accessType, tableName, databaseName, flags);
   }
 
+  public int getFlags() {
+    return flags;
+  }
+
   @Override
   public String getTableName() {
     return tableName;

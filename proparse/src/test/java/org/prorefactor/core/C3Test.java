@@ -21,7 +21,6 @@ import java.nio.file.Paths;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.atn.PredictionMode;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.prorefactor.core.util.UnitTestModule;
@@ -60,7 +59,7 @@ public class C3Test {
     genericTest("src/test/resources/data/c3/TestClass01.cls", false);
   }
 
-  @Test(expectedExceptions = {ParseCancellationException.class})
+  @Test
   public void test02() throws IOException {
     genericTest("src/test/resources/data/c3/TestClass01.cls", true);
   }

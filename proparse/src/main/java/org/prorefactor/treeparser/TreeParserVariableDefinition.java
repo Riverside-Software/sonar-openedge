@@ -34,7 +34,6 @@ import org.prorefactor.core.schema.Table;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
-import org.prorefactor.refactor.BuiltinClasses;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;
@@ -49,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.ITypeInfo;
 

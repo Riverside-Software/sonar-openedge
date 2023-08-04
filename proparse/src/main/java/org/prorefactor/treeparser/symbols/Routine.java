@@ -80,16 +80,23 @@ public class Routine extends Symbol {
     }
     retVal.append(')');
 
-    if (getReturnDatatypeNode() != null) {
-      retVal.append(" : ");
-      if (getReturnDatatypeNode().getPrimitive() == PrimitiveDataType.CLASS) {
-        retVal.append(getReturnDatatypeNode().getClassName());
-      } else {
-        retVal.append(getReturnDatatypeNode().getPrimitive().getIDESignature());
-      }
+    if (returnDatatypeNode != null) {
+      retVal.append(" : ").append(getReturnDataType());
     }
 
     return retVal.toString();
+  }
+
+  public String getReturnDataType() {
+    if (returnDatatypeNode != null) {
+      if (returnDatatypeNode.getPrimitive() == PrimitiveDataType.CLASS) {
+        return returnDatatypeNode.getClassName();
+      } else {
+        return returnDatatypeNode.getPrimitive().getIDESignature();
+      }
+    } else {
+      return "N/A";
+    }
   }
 
   public List<Parameter> getParameters() {

@@ -29,6 +29,8 @@ import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IStatementBlock;
 import org.prorefactor.core.nodetypes.IfStatementNode;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
+import org.prorefactor.proparse.antlr4.Proparse.AbstractClassStatementContext;
+import org.prorefactor.proparse.antlr4.Proparse.AbstractMethodStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.CanFindFunctionContext;
 import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ClassStatementContext;
@@ -45,7 +47,7 @@ import org.prorefactor.proparse.antlr4.Proparse.IfElseContext;
 import org.prorefactor.proparse.antlr4.Proparse.IfStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.IfThenContext;
 import org.prorefactor.proparse.antlr4.Proparse.InterfaceStatementContext;
-import org.prorefactor.proparse.antlr4.Proparse.MethodStatement2Context;
+import org.prorefactor.proparse.antlr4.Proparse.MethodDefinitionStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.MethodStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.OnStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ProcedureStatementContext;
@@ -152,7 +154,16 @@ public class TreeParserBlocks extends ProparseBaseListener {
   public void enterClassStatement(ClassStatementContext ctx) {
     rootScope.setClassName(ctx.tn.getText());
     rootScope.setTypeInfo(refSession.getTypeInfo(ctx.tn.getText()));
-    rootScope.setAbstractClass(!ctx.ABSTRACT().isEmpty());
+    rootScope.setAbstractClass(false);
+    rootScope.setSerializableClass(!ctx.SERIALIZABLE().isEmpty());
+    rootScope.setFinalClass(!ctx.FINAL().isEmpty());
+  }
+
+  @Override
+  public void enterAbstractClassStatement(AbstractClassStatementContext ctx) {
+    rootScope.setClassName(ctx.tn.getText());
+    rootScope.setTypeInfo(refSession.getTypeInfo(ctx.tn.getText()));
+    rootScope.setAbstractClass(true);
     rootScope.setSerializableClass(!ctx.SERIALIZABLE().isEmpty());
     rootScope.setFinalClass(!ctx.FINAL().isEmpty());
   }
@@ -240,8 +251,23 @@ public class TreeParserBlocks extends ProparseBaseListener {
   }
 
   @Override
-  public void enterMethodStatement2(MethodStatement2Context ctx) {
-    // Beware of code duplication in enterMethodStatement
+  public void enterAbstractMethodStatement(AbstractMethodStatementContext ctx) {
+    newRoutine(ctx, support.getNode(ctx), ctx.id.getText(), ABLNodeType.METHOD);
+
+    if (ctx.VOID() != null) {
+      currentRoutine.setReturnDatatypeNode(DataType.VOID);
+    } else if (ctx.datatype().CLASS() != null) {
+      currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
+    } else if (ctx.datatype().datatypeVar().typeName() != null) {
+      currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
+    } else {
+      currentRoutine.setReturnDatatypeNode(
+          ABLNodeType.getDataType(support.getNode(ctx.datatype().datatypeVar()).getType()));
+    }
+  }
+
+  @Override
+  public void enterMethodDefinitionStatement(MethodDefinitionStatementContext ctx) {
     newRoutine(ctx, support.getNode(ctx), ctx.id.getText(), ABLNodeType.METHOD);
 
     if (ctx.VOID() != null) {
@@ -263,7 +289,13 @@ public class TreeParserBlocks extends ProparseBaseListener {
   }
 
   @Override
-  public void exitMethodStatement2(MethodStatement2Context ctx) {
+  public void exitAbstractMethodStatement(AbstractMethodStatementContext ctx) {
+    scopeClose();
+    currentRoutine = rootRoutine;
+  }
+
+  @Override
+  public void exitMethodDefinitionStatement(MethodDefinitionStatementContext ctx) {
     scopeClose();
     currentRoutine = rootRoutine;
   }
