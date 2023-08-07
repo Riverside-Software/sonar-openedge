@@ -66,11 +66,6 @@ public class BuiltinClasses {
     PROGRESS_LANG_ENUM = typeInfo;
     BUILTIN_CLASSES.add(typeInfo);
 
-    typeInfo = new TypeInfo("rssw.pct.AndOrEnum", false, false, PLE_CLASSNAME, "");
-    typeInfo.addProperty(new PropertyElement("And", true, new DataType("rssw.pct.AndOrEnum")));
-    typeInfo.addProperty(new PropertyElement("Or", true, new DataType("rssw.pct.AndOrEnum")));
-    BUILTIN_CLASSES.add(typeInfo);
-
     typeInfo = new TypeInfo("Progress.ApplicationServer.AdapterTypes", false, false, PLE_CLASSNAME, "");
     typeInfo.addProperty(new PropertyElement("Unexpected", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
     typeInfo.addProperty(new PropertyElement("APSV", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
