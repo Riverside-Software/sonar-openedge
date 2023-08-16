@@ -22,6 +22,8 @@ package eu.rssw.pct.elements;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.annotation.processing.Generated;
 
@@ -33,6 +35,7 @@ import eu.rssw.pct.elements.fixed.TypeInfo;
 @Generated(value = "genBuiltinClasses.p")
 public class BuiltinClasses {
   private static final Collection<ITypeInfo> BUILTIN_CLASSES = new ArrayList<>();
+  private static final Set<String> BUILTIN_CLASSES_NAMES = new HashSet<>();
 
   public static final ITypeInfo PROGRESS_LANG_OBJECT;
   public static final ITypeInfo PROGRESS_LANG_ENUM;
@@ -41,6 +44,10 @@ public class BuiltinClasses {
 
   private BuiltinClasses() {
     // No constructor
+  }
+
+  public static boolean isBuiltinClass(String name) {
+    return BUILTIN_CLASSES_NAMES.contains(name);
   }
 
   public static Collection<ITypeInfo> getBuiltinClasses() {
@@ -1481,5 +1488,7 @@ public class BuiltinClasses {
     typeInfo = new TypeInfo("Progress.Web.IWebHandler", true, false, null, "");
     typeInfo.addMethod(new MethodElement("HandleRequest", false, DataType.INTEGER));
     BUILTIN_CLASSES.add(typeInfo);
+
+    BUILTIN_CLASSES.stream().map(it -> it.getTypeName()).forEach(it -> BUILTIN_CLASSES_NAMES.add(it));
   }
 }
