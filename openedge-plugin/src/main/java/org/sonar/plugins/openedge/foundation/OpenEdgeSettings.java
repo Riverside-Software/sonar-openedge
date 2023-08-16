@@ -86,6 +86,7 @@ import eu.rssw.pct.PLReader;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.fixed.TypeInfoKryoProxy;
 import eu.rssw.pct.elements.fixed.TypeInfoPLProxy;
 import eu.rssw.pct.elements.fixed.TypeInfoRCodeProxy;
 
@@ -239,6 +240,28 @@ public class OpenEdgeSettings {
     includeExtensions.addAll(Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
         config.get(Constants.INCLUDE_SUFFIXES).orElse(OpenEdge.DEFAULT_INCLUDE_FILE_SUFFIXES)).stream().map(
             String::toLowerCase).collect(Collectors.toList()));
+  }
+
+  private final void initializeBuildBinaryCache() {
+    initializeBinaryCache(Constants.SLINT_BUILD_BINARY_CACHE);
+  }
+
+  private final void initializePropathBinaryCache() {
+    initializeBinaryCache(Constants.SLINT_PROPATH_BINARY_CACHE);
+  }
+
+  private final void initializeBinaryCache(String optionName) {
+    Optional<String> option = config.get(optionName);
+    LOG.debug("Initialize binary cache from {}", option);
+    if (option.isPresent()) {
+      Path cache = Paths.get(option.get());
+      if (java.nio.file.Files.exists(cache) && java.nio.file.Files.isRegularFile(cache)
+          && java.nio.file.Files.isReadable(cache)) {
+        for (ITypeInfo info : readPackageAsProxy(cache.getParent(), cache.getFileName().toString(), kryo)) {
+          defaultSession.injectTypeInfo(info);
+        }
+      }
+    }
   }
 
   private final void initializeProlibCache() {
@@ -731,12 +754,42 @@ public class OpenEdgeSettings {
         // Parse class documentation
         parseClassDocumentation();
       } else if (runtime.getProduct() == SonarProduct.SONARLINT) {
+        initializePropathBinaryCache();
+        initializeBuildBinaryCache();
         initializeProlibCache();
         initializeRCodeCache();
       }
     }
 
     return defaultSession;
+  }
+
+  public static List<ITypeInfo> readPackageAsProxy(Path rootPath, String fileName, Kryo kryo) {
+    Path rootCache = rootPath.resolve(fileName);
+    try {
+      String hash = Files.asCharSource(rootCache.toFile(), StandardCharsets.UTF_8).read();
+      List<ITypeInfo> list = new ArrayList<>();
+      readAllClassesAsProxy(list, rootPath, rootPath.resolve(hash.substring(0, 2)).resolve(hash.substring(2)), kryo);
+      return list;
+    } catch (IOException uncaught) {
+      return new ArrayList<>();
+    }
+  }
+
+  private static void readAllClassesAsProxy(List<ITypeInfo> list, Path rootPath, Path storageFile, Kryo kryo) {
+    try {
+      Files.readLines(storageFile.toFile(), StandardCharsets.UTF_8).stream().skip(1).forEach(str -> {
+        int tab1 = str.indexOf('\t');
+        Path p = rootPath.resolve(str.substring(tab1 + 3, tab1 + 5)).resolve(str.substring(tab1 + 5));
+        if ("C".equals(str.substring(tab1 + 1, tab1 + 2))) {
+          list.add(new TypeInfoKryoProxy(str.substring(0, tab1), p, kryo));
+        } else if ("P".equals(str.substring(tab1 + 1, tab1 + 2))) {
+          readAllClassesAsProxy(list, rootPath, p, kryo);
+        }
+      });
+    } catch (IOException caught) {
+      // Nothing...
+    }
   }
 
   /**
