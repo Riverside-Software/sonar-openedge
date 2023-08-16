@@ -22,6 +22,8 @@ package eu.rssw.pct.elements;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.annotation.processing.Generated;
 
@@ -33,6 +35,7 @@ import eu.rssw.pct.elements.fixed.TypeInfo;
 @Generated(value = "genBuiltinClasses.p")
 public class BuiltinClasses {
   private static final Collection<ITypeInfo> BUILTIN_CLASSES = new ArrayList<>();
+  private static final Set<String> BUILTIN_CLASSES_NAMES = new HashSet<>();
 
   public static final ITypeInfo PROGRESS_LANG_OBJECT;
   public static final ITypeInfo PROGRESS_LANG_ENUM;
@@ -41,6 +44,10 @@ public class BuiltinClasses {
 
   private BuiltinClasses() {
     // No constructor
+  }
+
+  public static boolean isBuiltinClass(String name) {
+    return BUILTIN_CLASSES_NAMES.contains(name);
   }
 
   public static Collection<ITypeInfo> getBuiltinClasses() {
@@ -64,11 +71,6 @@ public class BuiltinClasses {
     typeInfo.addMethod(new MethodElement("CompareTo", false, DataType.INTEGER,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLE_CLASSNAME))));
     PROGRESS_LANG_ENUM = typeInfo;
-    BUILTIN_CLASSES.add(typeInfo);
-
-    typeInfo = new TypeInfo("rssw.pct.AndOrEnum", false, false, PLE_CLASSNAME, "");
-    typeInfo.addProperty(new PropertyElement("And", true, new DataType("rssw.pct.AndOrEnum")));
-    typeInfo.addProperty(new PropertyElement("Or", true, new DataType("rssw.pct.AndOrEnum")));
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.ApplicationServer.AdapterTypes", false, false, PLE_CLASSNAME, "");
@@ -1486,5 +1488,7 @@ public class BuiltinClasses {
     typeInfo = new TypeInfo("Progress.Web.IWebHandler", true, false, null, "");
     typeInfo.addMethod(new MethodElement("HandleRequest", false, DataType.INTEGER));
     BUILTIN_CLASSES.add(typeInfo);
+
+    BUILTIN_CLASSES.stream().map(it -> it.getTypeName()).forEach(it -> BUILTIN_CLASSES_NAMES.add(it));
   }
 }
