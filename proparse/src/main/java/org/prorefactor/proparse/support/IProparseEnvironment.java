@@ -92,6 +92,11 @@ public interface IProparseEnvironment {
   Collection<ITypeInfo> getAllClassesInSource();
 
   /**
+   * Return all known classes in .Net assemblies
+   */
+  Collection<ITypeInfo> getAllClassesInAssemblies();
+
+  /**
    * Return ClassDocumentation for given class name. Null if not found
    */
   default ClassDocumentation getClassDocumentation(String className) {
