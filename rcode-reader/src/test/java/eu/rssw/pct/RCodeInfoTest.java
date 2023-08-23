@@ -64,7 +64,7 @@ public class RCodeInfoTest {
   @BeforeTest
   public void init() throws IOException {
     try {
-      Files.createDirectories(Path.of("target/kryo"));
+      Files.createDirectories(Paths.get("target/kryo"));
     } catch (FileAlreadyExistsException caught) {
       // No-op
     }

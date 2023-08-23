@@ -28,7 +28,7 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.proparse.classdoc.ClassDocumentation.DeprecatedInfo;
@@ -84,7 +84,7 @@ public class OpenEdgeSettingsTest {
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
     oeSettings.init();
-    FilePredicates preds = new DefaultFilePredicates(Path.of(TestProjectSensorRtbContext.BASEDIR));
+    FilePredicates preds = new DefaultFilePredicates(Paths.get(TestProjectSensorRtbContext.BASEDIR));
     InputFile input1 = context.fileSystem().inputFile(preds.hasFilename("test1.p"));
     assertTrue(oeSettings.getListingFile(input1).exists());
     assertTrue(oeSettings.getXrefFile(input1).exists());
