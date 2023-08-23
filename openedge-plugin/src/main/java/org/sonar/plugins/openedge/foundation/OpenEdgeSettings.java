@@ -276,7 +276,7 @@ public class OpenEdgeSettings {
               int hashPos = plPart.indexOf('#');
               if ((hashPos > 0) && (plPart.length() > hashPos)) {
                 defaultSession.injectTypeInfo(new TypeInfoPLProxy(str.substring(0, commaPos),
-                    Path.of(plPart.substring(0, hashPos)), plPart.substring(hashPos + 1)));
+                    Paths.get(plPart.substring(0, hashPos)), plPart.substring(hashPos + 1)));
               }
             }
           }
@@ -297,7 +297,7 @@ public class OpenEdgeSettings {
             int commaPos = str.indexOf(':');
             if ((commaPos > 0) && (str.length() > commaPos)) {
               defaultSession.injectTypeInfo(
-                  new TypeInfoRCodeProxy(str.substring(0, commaPos), Path.of(str.substring(commaPos + 1))));
+                  new TypeInfoRCodeProxy(str.substring(0, commaPos), Paths.get(str.substring(commaPos + 1))));
             }
           }
         } catch (IOException caught) {
