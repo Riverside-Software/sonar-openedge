@@ -36,6 +36,7 @@ import org.sonar.plugins.openedge.api.objects.RCodeTTWrapper;
 import com.google.common.base.Strings;
 
 import eu.rssw.pct.elements.IBufferElement;
+import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.ITypeInfo;
 
 /**
@@ -174,15 +175,19 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
 
   @Override
   public Variable lookupVariable(String name) {
-    Variable var = super.lookupVariable(name);
-    if (var != null) {
-      return var;
+    Variable v = super.lookupVariable(name);
+    if (v != null) {
+      return v;
     }
 
     ITypeInfo info = typeInfo;
     while (info != null) {
-      if (info.hasProperty(name)) {
-        return new Variable(name, this);
+      IPropertyElement prop = info.getProperty(name);
+      if (prop != null) {
+        Variable retVal = new Variable(name, this);
+        if (prop.getVariable() != null)
+          retVal.setDataType(prop.getVariable().getDataType());
+        return retVal;
       }
       info = refSession.getTypeInfo(info.getParentTypeName());
     }
@@ -195,7 +200,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     if (ds != null) {
       return ds;
     }
-    
+
     // TODO Lookup in parent classes
     return null;
   }
