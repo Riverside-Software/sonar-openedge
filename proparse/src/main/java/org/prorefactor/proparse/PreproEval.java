@@ -14,6 +14,7 @@
  ********************************************************************************/
 package org.prorefactor.proparse;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -68,6 +69,8 @@ import org.slf4j.LoggerFactory;
 
 public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   private static final Logger LOGGER = LoggerFactory.getLogger(PreproEval.class);
+  private static final String TILDE_STAR = "\u0005";
+  private static final String TILDE_DOT = "\u0006";
 
   private final IProparseSettings settings;
 
@@ -117,7 +120,7 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
     Object o2 = visit(ctx.expr(1));
 
     if (ctx.op.getType() == PreprocessorParser.MATCHES) {
-      return matches(o1, o2);
+      return matches(getString(o1), getString(o2));
     } else {
       return getString(o1).toLowerCase().startsWith(getString(o2).toLowerCase());
     }
@@ -673,34 +676,87 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
     return 0;
   }
 
-  static Boolean matches(Object y, Object z) {
-    String a = getString(y).toLowerCase();
-    String b = getString(z).toLowerCase();
-    // Completion conditions
-    if (b.length() == 1 && b.charAt(0) == '*')
-      return true;
-    if (a.length() == 0) {
-      return b.length() == 0;
-    }
-    if (b.length() == 0)
+  public static Boolean matches(String a, String b) {
+    if ((a == null) || (b == null))
       return false;
 
-    // Match any single char
-    if (b.charAt(0) == '.')
+    // Sanitize input. Escaped stars and dots converted to non-printable character.
+    a = a.toLowerCase();
+    b = b.toLowerCase().replace("~~", "~").replace("~*", TILDE_STAR).replace("~.", TILDE_DOT);
+
+    // Empty pattern ? True if source is empty
+    if (b.isEmpty())
+      return a.isEmpty();
+
+      // First character is a dot ? Consume one character
+    if (b.charAt(0) == '.') {
+      if (a.isEmpty())
+        return false;
       return matches(a.substring(1), b.substring(1));
+    }
 
-    // Match any number of chars
+    // First character a star ?
     if (b.charAt(0) == '*') {
-      return matches(a, b.substring(1)) || matches(a.substring(1), b);
-    }
+      // Short-circuit if pattern is just a star
+      if( b.length() == 1)
+        return true;
 
-    // Match an escaped char
-    if (b.charAt(0) == '~') {
-      return a.charAt(0) == b.charAt(1) && matches(a.substring(1), b.substring(2));
-    }
+      // Consume the star(s) and dot(s), and text coming after that. Then recursive call with the remaining of the string
+      int offset1 = 1; // Offset of first non-star, non-dot character
+      int offsetSrc = 0; // Start offset in source string (depends on the number of dots)
+      while ((offset1 < b.length()) && ((b.charAt(offset1) == '*') || (b.charAt(offset1) == '.'))) {
+        if (b.charAt(offset1) == '.')
+          offsetSrc++;
+        offset1++;
+      }
+      int offset2 = offset1 + 1; // Offset of end of alphanumeric string
+      while ((offset2 < b.length()) && ((b.charAt(offset2) != '*') && (b.charAt(offset2) != '.'))) {
+        offset2++;
+      }
 
-    // Match a single specific char
-    return a.charAt(0) == b.charAt(0) && matches(a.substring(1), b.substring(1));
+      // String to be consumed after the star
+      String str = "";
+      if (offset2 > b.length()) {
+        if (offset1 <= b.length())
+          str = b.substring(offset1);
+      } else
+        str = b.substring(offset1, offset2);
+
+      // Empty string ? Then we just need to find at least enough chars for dots
+      if (str.isEmpty()) {
+        return a.length() > offsetSrc;
+      }
+      // All possible occurences of string to be consumed. We keep the remaining of the string in the list
+      List<String> occurences = new ArrayList<>();
+      while (offsetSrc < a.length()) {
+        int xx = a.indexOf(str, offsetSrc);
+        if (xx == -1) {
+          offsetSrc = a.length() + 1;
+        } else {
+          occurences.add(a.substring(xx + str.length()));
+          offsetSrc = xx + 1;
+        }
+      }
+
+      // If remaining of pattern is valid, then return true
+      for (String s : occurences) {
+        if (matches(s, b.substring(offset2)).booleanValue())
+          return true;
+      }
+      // No valid possibility
+      return false;
+    } else {
+      // First character is alphanumeric. Consume until next dot / star, then return matches of remaining string
+      int starPos = b.indexOf('*');
+      int dotPos = b.indexOf('.');
+      if ((starPos == -1) && (dotPos == -1)) {
+        return a.equals(b.replace(TILDE_STAR, "*").replace(TILDE_DOT, "."));
+      } else {
+        int endPos = (starPos != -1) && (dotPos != -1) ? Math.min(starPos, dotPos) : Math.max(starPos, dotPos);
+        String substr = b.substring(0, endPos).replace(TILDE_STAR, "*").replace(TILDE_DOT, ".");
+        return a.startsWith(substr) && matches(a.substring(substr.length()), b.substring(substr.length()));
+      }
+    }
   }
 
   static Integer numentries(Object a, Object b) {

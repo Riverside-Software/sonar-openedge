@@ -15,10 +15,12 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 
 import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.proparse.PreproEval;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.Assert;
@@ -410,4 +412,18 @@ public class PreprocessorParserTest {
     testVariable(unit.getTopNode(), "var81");
   }
 
+  @Test
+  public void testMatchesFunction() {
+    assertTrue(PreproEval.matches("test1,test2,test3", "*test2*"));
+    assertTrue(PreproEval.matches("test1,test2,test3", "*test2*.."));
+    assertTrue(PreproEval.matches("test1,test2,test3", "*test2*....."));
+    assertFalse(PreproEval.matches("test1,test2,test3", "*test2*......."));
+    assertFalse(PreproEval.matches("test1,test2,test3", "*test2*.......*"));
+    assertFalse(PreproEval.matches("test1,test2,test3", "*test2.......**"));
+    assertFalse(PreproEval.matches("test1,test2,test3", "*test2**......."));
+
+    assertTrue(PreproEval.matches("xxxfoobarxxx", "*foo*bar*"));
+    assertFalse(PreproEval.matches("xxxfoobarxxx", "*foo*.*bar*"));
+    assertTrue(PreproEval.matches("xxxfooxbarxxx", "*foo*.*bar*"));
+  }
 }
