@@ -55,6 +55,7 @@ public class TypeInfo implements ITypeInfo {
   private Collection<IMethodElement> methods = new ArrayList<>();
   private Collection<IPropertyElement> properties = new ArrayList<>();
   private Collection<IVariableElement> variables = new ArrayList<>();
+  private Collection<IEventElement> events = new ArrayList<>();
 
   public TypeInfo() {
     // No-op
@@ -66,6 +67,10 @@ public class TypeInfo implements ITypeInfo {
     this.assemblyName = assemblyName;
     this.interfaces.addAll(Arrays.asList(interfaces));
     this.flags = (iface ? IS_INTERFACE : 0) | (abstrct ? IS_ABSTRACT : 0);
+  }
+
+  public void addEvent(IEventElement element) {
+    events.add(element);
   }
 
   public void addMethod(IMethodElement element) {
