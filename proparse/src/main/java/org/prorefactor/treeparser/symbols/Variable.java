@@ -147,6 +147,11 @@ public class Variable extends Symbol implements Primitive {
 
   public enum Type {
     VARIABLE, PROPERTY, PARAMETER;
+
+    @Override
+    public String toString() {
+      return name().charAt(0) + name().substring(1).toLowerCase();
+    }
   }
 
   public enum ReadWrite {

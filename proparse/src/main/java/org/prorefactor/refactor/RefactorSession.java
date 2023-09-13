@@ -42,8 +42,13 @@ import com.google.inject.Inject;
 
 import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IMethodElement;
+import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.ParameterMode;
+import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.fixed.MethodElement;
+import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.fixed.PropertyElement;
 import eu.rssw.pct.elements.fixed.TypeInfo;
 
@@ -131,13 +136,13 @@ public class RefactorSession implements IProparseEnvironment {
           ? Arrays.copyOfRange(info.baseTypes, 1, info.baseTypes.length) : new String[] {};
       TypeInfo typeInfo = new TypeInfo(info.name, info.isInterface, info.isAbstract, parentType, "", interfaces);
       if (info.methods != null) {
-        for (String str : info.methods) {
-          typeInfo.addMethod(new MethodElement(str, false, DataType.VOID));
+        for (MethodInfo methd : info.methods) {
+          typeInfo.addMethod(methd.toMethodElement(false));
         }
       }
       if (info.staticMethods != null) {
-        for (String str : info.staticMethods) {
-          typeInfo.addMethod(new MethodElement(str, true, DataType.VOID));
+        for (MethodInfo methd : info.staticMethods) {
+          typeInfo.addMethod(methd.toMethodElement(true));
         }
       }
       if (info.properties != null) {
@@ -306,9 +311,48 @@ public class RefactorSession implements IProparseEnvironment {
     boolean isEnum;
     boolean isInterface;
     String[] properties;
-    String[] methods;
-    String[] staticMethods;
+    MethodInfo[] methods;
+    MethodInfo[] staticMethods;
     String[] staticProperties;
+  }
+
+  private class MethodInfo {
+    String name;
+    String returnType;
+
+    public IMethodElement toMethodElement(boolean staticM) {
+      int leftBracket = name.indexOf('(');
+      String methdName = name.substring(0, leftBracket).trim();
+      String params = name.substring(leftBracket + 1, name.indexOf(')'));
+      String[] prms = params.split(",");
+      List<IParameter> pp = new ArrayList<>();
+      int offset = 0;
+      for (String str : prms) {
+        str = str.trim();
+        if (!str.isEmpty()) {
+          pp.add(toParameter(str, offset++));
+        }
+      }
+      return new MethodElement(methdName, staticM, toDataType(returnType), pp.toArray(new IParameter[0]));
+    }
+
+    private IParameter toParameter(String str, int num) {
+      if (str.charAt(str.length() - 1) == '&')
+        str = str.substring(0, str.length() - 1);
+      int spacePos = str.indexOf(' ');
+      ParameterMode mode = spacePos == -1 ? ParameterMode.INPUT : ParameterMode.OUTPUT;
+      str = str.substring(spacePos + 1);
+      int extent = str.endsWith("[]") ? 1 : 0;
+      if (extent == 1)
+        str = str.substring(0, str.length() - 2);
+
+      return new Parameter(num, "prm" + num, extent, mode, toDataType(str));
+    }
+
+    private DataType toDataType(String str) {
+      DataType dt = DataType.get(str);
+      return dt.getPrimitive() == PrimitiveDataType.UNKNOWN ? new DataType(str) : dt;
+    }
   }
 
   @Override
@@ -318,6 +362,11 @@ public class RefactorSession implements IProparseEnvironment {
 
   @Override
   public Collection<ITypeInfo> getAllClassesInSource() {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public Collection<ITypeInfo> getAllClassesInAssemblies() {
     throw new UnsupportedOperationException("Not implemented");
   }
 }

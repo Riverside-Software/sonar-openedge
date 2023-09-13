@@ -268,17 +268,22 @@ public class OpenEdgeSettingsTest {
     assertNotNull(info);
     ITypeInfo info2 = session.getTypeInfo("Progress.Lang.Object");
     assertNotNull(info2);
-    ITypeInfo info3 = session.getTypeInfo("System.AppContextDefaultValues");
+    ITypeInfo info3 = session.getTypeInfo("System.Diagnostics.StackTrace");
     assertNotNull(info3);
     assertEquals(info3.getParentTypeName(), "System.Object");
     assertFalse(info3.isInterface());
-    assertTrue(info3.isAbstract());
-    assertTrue(info3.hasMethod("GetHashCode"));
-    assertTrue(info3.hasMethod("PopulateDefaultValues"));
-    ITypeInfo info4 = session.getTypeInfo("Microsoft.Win32.IInternetSecurityManager");
+    assertFalse(info3.isAbstract());
+    assertTrue(info3.hasMethod("GetFrame"));
+    assertEquals(info.getMethods().iterator().next().getParameters().length, 1);
+    assertTrue(info3.hasMethod("GetFrames"));
+    ITypeInfo info4 = session.getTypeInfo("System.AppContext");
     assertNotNull(info4);
     assertTrue(info4.isAbstract());
-    assertTrue(info4.isInterface());
+    assertFalse(info4.isInterface());
+    ITypeInfo info5 = session.getTypeInfo("System.ICloneable");
+    assertNotNull(info5);
+    assertTrue(info5.isAbstract());
+    assertTrue(info5.isInterface());
   }
 
   @Test
