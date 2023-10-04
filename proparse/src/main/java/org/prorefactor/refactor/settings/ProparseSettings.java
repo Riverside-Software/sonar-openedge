@@ -42,6 +42,7 @@ public class ProparseSettings implements IProparseSettings {
   private boolean antlrTokenInsertion = false;
   private boolean antlrTokenDeletion = false;
   private boolean antlrRecover = false;
+  private boolean requireFullName = false;
 
   public ProparseSettings(String propath) {
     this(propath, false);
@@ -150,6 +151,15 @@ public class ProparseSettings implements IProparseSettings {
 
   public void setAntlrRecover(boolean recover) {
     this.antlrRecover = recover;
+  }
+
+  public void setRequireFullName(boolean requireFullName) {
+    this.requireFullName = requireFullName;
+  }
+
+  @Override
+  public boolean requireFullName() {
+    return this.requireFullName;
   }
 
   public void setCustomBatchMode(boolean customBatchMode) {

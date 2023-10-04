@@ -199,10 +199,10 @@ public class Schema implements ISchema {
   }
 
   @Override
-  public IField lookupUnqualifiedField(String name) {
+  public IField lookupUnqualifiedField(String name, boolean requireFullName) {
     IField field;
     for (ITable table : allTables) {
-      field = table.lookupField(name);
+      field = requireFullName ? table.lookupFullNameField(name) : table.lookupField(name);
       if (field != null)
         return field;
     }

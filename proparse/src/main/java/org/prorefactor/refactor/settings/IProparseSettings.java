@@ -38,4 +38,8 @@ public interface IProparseSettings {
   boolean allowAntlrTokenInsertion();
   boolean allowAntlrTokenDeletion();
   boolean allowAntlrRecover();
+
+  default boolean requireFullName()  {
+    return false;
+  }
 }

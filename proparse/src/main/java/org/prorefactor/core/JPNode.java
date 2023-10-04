@@ -545,6 +545,7 @@ public class JPNode {
   }
 
   /** Certain nodes will have a link to a Symbol, set by TreeParser. */
+  @Nullable
   public Symbol getSymbol() {
     return symbol;
   }

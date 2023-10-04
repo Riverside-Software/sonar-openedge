@@ -43,6 +43,17 @@ public interface ITable {
    */
   IField lookupField(String name);
 
+  /**
+   * Same as lookupField, except field names can't be abbreviated
+   */
+  default IField lookupFullNameField(String name) {
+    for (IField fld : getFieldSet()) {
+      if (fld.getName().equalsIgnoreCase(name))
+        return fld;
+    }
+    return null;
+  }
+
   /** Add a Field to this table. "Package" visibility only. */
   void add(IField field);
 

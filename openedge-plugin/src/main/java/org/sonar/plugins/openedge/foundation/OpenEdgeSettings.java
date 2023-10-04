@@ -737,6 +737,8 @@ public class OpenEdgeSettings {
       ppSettings.setAntlrTokenInsertion(config.getBoolean("sonar.oe.proparse.token.insertion").orElse(false));
       // ANTLR Recover
       ppSettings.setAntlrRecover(config.getBoolean("sonar.oe.proparse.recover").orElse(false));
+      // Require full names
+      ppSettings.setRequireFullName(config.getBoolean(Constants.REQUIRE_FULL_NAMES).orElse(false));
 
       defaultSession = new RefactorSession(ppSettings, sch, encoding());
       Optional<String> assemblyCatalog = config.get(Constants.ASSEMBLY_CATALOG);

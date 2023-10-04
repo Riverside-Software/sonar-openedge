@@ -306,3 +306,4 @@ Fguid:character:0
 Ftimezone:integer:0
 Fmtime:integer:0
 Ffoobar:character:0
+FREGExt:integer:0

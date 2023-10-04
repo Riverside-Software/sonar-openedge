@@ -37,11 +37,11 @@ public class TableWrapperTest {
   @Test
   public void testFromDotSchema() throws IOException {
     Schema sch = new Schema("src/test/resources/project1/src/schema/sp2k.cache");
-    IField fld1 = sch.lookupUnqualifiedField("minqty");
+    IField fld1 = sch.lookupUnqualifiedField("minqty", false);
     Assert.assertNotNull(fld1);
-    IField fld2 = sch.lookupUnqualifiedField("minqt");
+    IField fld2 = sch.lookupUnqualifiedField("minqt", false);
     Assert.assertNotNull(fld2);
-    IField fld3 = sch.lookupUnqualifiedField("custnum");
+    IField fld3 = sch.lookupUnqualifiedField("custnum", false);
     Assert.assertNotNull(fld3);
     Assert.assertEquals(fld3.getTable().getName(), "BillTo");
 
@@ -70,11 +70,11 @@ public class TableWrapperTest {
     DatabaseDescription dbDesc = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/project1/src/schema/sp2k.df"));
     Schema sch = new Schema(new DatabaseWrapper(dbDesc));
 
-    IField fld1 = sch.lookupUnqualifiedField("minqty");
+    IField fld1 = sch.lookupUnqualifiedField("minqty", false);
     Assert.assertNotNull(fld1);
-    IField fld2 = sch.lookupUnqualifiedField("minqt");
+    IField fld2 = sch.lookupUnqualifiedField("minqt", false);
     Assert.assertNotNull(fld2);
-    IField fld3 = sch.lookupUnqualifiedField("custnum");
+    IField fld3 = sch.lookupUnqualifiedField("custnum", false);
     Assert.assertNotNull(fld3);
     Assert.assertEquals(fld3.getTable().getName(), "BillTo");
 
