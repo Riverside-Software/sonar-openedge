@@ -19,6 +19,8 @@
  */
 package eu.rssw.pct.elements;
 
+import java.util.function.Function;
+
 public class DataType {
   public static final DataType VOID = new DataType(PrimitiveDataType.VOID);
   public static final DataType CHARACTER = new DataType(PrimitiveDataType.CHARACTER);
@@ -296,5 +298,60 @@ public class DataType {
 
   public static boolean isDateLike(DataType type) {
     return (type == DataType.DATE) || (type == DataType.DATETIME) || (type == DataType.DATETIME_TZ);
+  }
+
+  /**
+   * Return true if parameter datatype can be passed to this object.
+   * LONGCHAR.isCompatible(CHARACTER) is true
+   * CHARACTER.isCompatible(LONGCHAR) is false
+   * Progress.Lang.Object.isCompatible(Progress.Json.JsonObject) is true
+   * Progress.Json.JsonObject.isCompatible(Progress.Lang.Object) is false
+   */
+  public boolean isCompatible(DataType obj, Function<String, ITypeInfo> provider) {
+    if (primDataType == PrimitiveDataType.LONGCHAR) {
+      return (obj.primDataType == PrimitiveDataType.LONGCHAR) || (obj.primDataType == PrimitiveDataType.CHARACTER);
+    } else if (primDataType == PrimitiveDataType.DECIMAL) {
+      return (obj.primDataType == PrimitiveDataType.DECIMAL) || (obj.primDataType == PrimitiveDataType.INT64)
+          || (obj.primDataType == PrimitiveDataType.INTEGER);
+    } else if (primDataType == PrimitiveDataType.INT64) {
+      return (obj.primDataType == PrimitiveDataType.INT64) || (obj.primDataType == PrimitiveDataType.INTEGER);
+    } else if (primDataType == PrimitiveDataType.DATETIME_TZ) {
+      return (obj.primDataType == PrimitiveDataType.DATETIME_TZ) || (obj.primDataType == PrimitiveDataType.DATETIME)
+          || (obj.primDataType == PrimitiveDataType.DATE);
+    } else if (primDataType == PrimitiveDataType.DATETIME) {
+      return (obj.primDataType == PrimitiveDataType.DATETIME) || (obj.primDataType == PrimitiveDataType.DATE);
+    } else if (primDataType == PrimitiveDataType.CLASS) {
+      ITypeInfo info = provider.apply(className);
+      if (info == null) {
+        return className.equals(obj.getClassName());
+      } else {
+        return info.isAssignableFrom(obj.getClassName(), provider);
+      }
+    } else {
+      return equals(obj);
+    }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
+    } else if (obj == null) {
+      return false;
+    } else if (this.getClass() == obj.getClass()) {
+      if (primDataType == PrimitiveDataType.CLASS)
+        return className.equals(((DataType) obj).getClassName());
+      else
+        return primDataType.equals(((DataType) obj).getPrimitive());
+    } else
+      return false;
+  }
+
+  @Override
+  public int hashCode() {
+    if (primDataType == PrimitiveDataType.CLASS)
+      return ("CLS" + className).hashCode();
+    else
+      return primDataType.hashCode();
   }
 }

@@ -21,6 +21,8 @@ package eu.rssw.pct.elements;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
+
 
 public interface ITypeInfo {
   String getTypeName();
@@ -75,4 +77,59 @@ public interface ITypeInfo {
     return lastDot == -1 ? "" : str.substring(0 ,lastDot );
   }
 
+  default boolean isAssignableFrom(String clsName, Function<String, ITypeInfo> provider) {
+    ITypeInfo info = provider.apply(clsName);
+    if (info == null)
+      return false;
+    if (info.getTypeName().equals(getTypeName()))
+      return true;
+    for (String str : info.getInterfaces()) {
+      if (str.equals(getTypeName()))
+          return true;
+    }
+    return isAssignableFrom(info.getParentTypeName(), provider);
+  }
+
+  default IMethodElement getExactMatch(Function<String, ITypeInfo> provider, String method, DataType... parameters) {
+    for (IMethodElement elem : getMethods()) {
+      if (method.equalsIgnoreCase(elem.getName()) && (elem.getParameters().length == parameters.length)) {
+        boolean match = true;
+        for (int zz = 0; zz < elem.getParameters().length; zz++) {
+          match &= elem.getParameters()[zz].getDataType().equals(parameters[zz]);
+        }
+        if (match)
+          return elem;
+      }
+    }
+    ITypeInfo parent = provider.apply(getParentTypeName());
+    if (parent != null)
+      return parent.getExactMatch(provider, method, parameters);
+
+    return null;
+  }
+
+  default IMethodElement getCompatibleMatch(Function<String, ITypeInfo> provider, String method, DataType... parameters) {
+    for (IMethodElement elem : getMethods()) {
+      if (method.equalsIgnoreCase(elem.getName()) && (elem.getParameters().length == parameters.length)) {
+        boolean match = true;
+        for (int zz = 0; zz < elem.getParameters().length; zz++) {
+          match &= elem.getParameters()[zz].getDataType().isCompatible(parameters[zz], provider);
+        }
+        if (match)
+          return elem;
+      }
+    }
+    ITypeInfo parent = provider.apply(getParentTypeName());
+    if (parent != null)
+      return parent.getCompatibleMatch(provider, method, parameters);
+
+    return null;
+  }
+
+  default IMethodElement getMethod(Function<String, ITypeInfo> provider, String method, DataType... parameters) {
+    IMethodElement exactMatch = getExactMatch(provider, method, parameters);
+    if (exactMatch != null)
+      return exactMatch;
+    return getCompatibleMatch(provider, method, parameters);
+  }
 }

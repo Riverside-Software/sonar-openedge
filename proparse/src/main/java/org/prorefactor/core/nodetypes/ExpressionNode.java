@@ -14,6 +14,10 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import java.util.List;
+import java.util.function.Function;
+
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.support.IProparseEnvironment;
@@ -736,15 +740,27 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
     }
   }
 
-  static DataType getObjectMethodDataType(IProparseEnvironment session, ITypeInfo info, String methodName) {
-    while (info != null) {
-      for (IMethodElement m : info.getMethods()) {
-        if (m.getName().equalsIgnoreCase(methodName))
-          return m.getReturnType();
+  static DataType getObjectMethodDataType(Function<String, ITypeInfo> provider, JPNode node, ITypeInfo info, String methodName) {
+    // Create array of dataTypes
+    List<JPNode> paramItems = node.getDirectChildren(ABLNodeType.PARAMETER_ITEM);
+    DataType[] params = new DataType[paramItems.size()];
+    int zz = 0;
+    for (JPNode ch : paramItems) {
+      DataType dt = DataType.UNKNOWN;
+      for (JPNode ch2 : ch.getDirectChildren()) {
+        if ((dt == DataType.UNKNOWN) && ch2.isIExpression()) {
+          dt = ch2.asIExpression().getDataType();
+        }
       }
-      info = session.getTypeInfo(info.getParentTypeName());
+      params[zz++] = dt;
     }
-    return DataType.NOT_COMPUTED;
+
+    if (info != null) {
+      IMethodElement methd = info.getMethod(provider, methodName, params);
+      return methd == null ? DataType.NOT_COMPUTED : methd.getReturnType();
+    } else {
+      return DataType.NOT_COMPUTED;
+    }
   }
 
   static DataType getObjectAttributeDataType(IProparseEnvironment session, ITypeInfo info, String propName,

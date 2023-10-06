@@ -14,6 +14,7 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 
@@ -49,18 +50,26 @@ public class MethodCallNode extends ExpressionNode {
       return shn.getMethodDataType(methodName.toUpperCase());
     } else if ((getFirstChild() instanceof FieldRefNode) && ((FieldRefNode) getFirstChild()).isStaticReference()) {
       ITypeInfo info = ((FieldRefNode) getFirstChild()).getStaticReference();
-      return ExpressionNode.getObjectMethodDataType(getTopLevelParent().getEnvironment(), info, methodName);
+      return getObjectMethodDataType(root.getTypeInfoProvider(), this, info, methodName);
     }
 
     // Left-Handle expression has to be a class
     IExpression expr = getFirstChild().asIExpression();
-    if (expr.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
-      ITypeInfo info = root.getEnvironment().getTypeInfo(expr.getDataType().getClassName());
-      return ExpressionNode.getObjectMethodDataType(root.getEnvironment(), info, methodName);
-    } else if (expr.getDataType().getPrimitive() == PrimitiveDataType.HANDLE) {
-      return ExpressionNode.getStandardMethodDataType(methodName.toUpperCase());
+    if (expr != null) {
+      if (expr.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
+        ITypeInfo info = root.getEnvironment().getTypeInfo(expr.getDataType().getClassName());
+        return getObjectMethodDataType(getTopLevelParent().getTypeInfoProvider(), this, info, methodName);
+      } else if (expr.getDataType().getPrimitive() == PrimitiveDataType.HANDLE) {
+        return ExpressionNode.getStandardMethodDataType(methodName.toUpperCase());
+      }
+    } else {
+      JPNode firstChild = getFirstChild();
+      JPNode nextChild = firstChild.getNextSibling();
+      if (((firstChild.getNodeType() == ABLNodeType.SUPER) || (firstChild.getNodeType() == ABLNodeType.THISOBJECT))
+          && (nextChild.getNodeType() == ABLNodeType.LEFTPAREN)) {
+        return new DataType(root.getTypeInfo().getTypeName());
+      }
     }
-
     return DataType.NOT_COMPUTED;
   }
 
