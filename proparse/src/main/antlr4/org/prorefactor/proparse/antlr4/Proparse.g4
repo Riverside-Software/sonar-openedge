@@ -2901,8 +2901,7 @@ onStatement:
       )
       (  REVERT statementEnd
       |  PERSISTENT RUN filenameOrValue inExpression? onstateRunParams? statementEnd
-      |  { support.addInnerScope(_localctx); } DO blockColon blockOrStatement* END statementEnd { support.dropInnerScope(); }
-      |  blockOrStatement
+      |  { support.addInnerScope(_localctx); } blockOrStatement { support.dropInnerScope(); }
       )
     )
   ;
