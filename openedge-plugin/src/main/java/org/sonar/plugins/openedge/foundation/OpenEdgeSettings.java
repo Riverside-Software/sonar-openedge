@@ -265,8 +265,9 @@ public class OpenEdgeSettings {
   }
 
   private final void initializeProlibCache() {
-    if (config.get(Constants.SLINT_PL_CACHE).isPresent()) {
-      File cache = new File(config.get(Constants.SLINT_PL_CACHE).get());
+    Optional<String> plCache = config.get(Constants.SLINT_PL_CACHE);
+    if (plCache.isPresent()) {
+      File cache = new File(plCache.get());
       if (cache.exists() && cache.isFile() && cache.canRead()) {
         try {
           for (String str : java.nio.file.Files.readAllLines(cache.toPath(), StandardCharsets.UTF_8)) {
