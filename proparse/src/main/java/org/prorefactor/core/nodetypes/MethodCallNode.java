@@ -50,19 +50,23 @@ public class MethodCallNode extends ExpressionNode {
       return shn.getMethodDataType(methodName.toUpperCase());
     } else if ((getFirstChild() instanceof FieldRefNode) && ((FieldRefNode) getFirstChild()).isStaticReference()) {
       ITypeInfo info = ((FieldRefNode) getFirstChild()).getStaticReference();
-      return getObjectMethodDataType(root.getTypeInfoProvider(), this, info, methodName);
+      return getObjectMethodDataType(root.getTypeInfoProvider(), findDirectChild(ABLNodeType.METHOD_PARAM_LIST), info,
+          methodName);
     }
 
     // Left-Handle expression has to be a class
     IExpression expr = getFirstChild().asIExpression();
     if (expr != null) {
-      if (expr.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
-        ITypeInfo info = root.getEnvironment().getTypeInfo(expr.getDataType().getClassName());
-        return getObjectMethodDataType(getTopLevelParent().getTypeInfoProvider(), this, info, methodName);
-      } else if (expr.getDataType().getPrimitive() == PrimitiveDataType.HANDLE) {
-        return ExpressionNode.getStandardMethodDataType(methodName.toUpperCase());
+      DataType dataType = expr.getDataType();
+      if (dataType.getPrimitive() == PrimitiveDataType.CLASS) {
+        ITypeInfo info = root.getEnvironment().getTypeInfo(dataType.getClassName());
+        return getObjectMethodDataType(getTopLevelParent().getTypeInfoProvider(),
+            findDirectChild(ABLNodeType.METHOD_PARAM_LIST), info, methodName);
+      } else if (dataType.getPrimitive() == PrimitiveDataType.HANDLE) {
+        return getStandardMethodDataType(methodName.toUpperCase());
       }
     } else {
+      // Within constructor: super(...) or this-object(...)
       JPNode firstChild = getFirstChild();
       JPNode nextChild = firstChild.getNextSibling();
       if (((firstChild.getNodeType() == ABLNodeType.SUPER) || (firstChild.getNodeType() == ABLNodeType.THISOBJECT))

@@ -14,6 +14,7 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 
@@ -298,7 +299,8 @@ public class SystemHandleNode extends ExpressionNode {
     if ((info == null) || (info.getParentTypeName() == null))
       return DataType.NOT_COMPUTED;
     info = root.getEnvironment().getTypeInfo(info.getParentTypeName());
-    return getObjectMethodDataType(root.getTypeInfoProvider(), this, info, id);
+    return getObjectMethodDataType(root.getTypeInfoProvider(),
+        this.getParent().findDirectChild(ABLNodeType.METHOD_PARAM_LIST), info, id);
   }
 
   private DataType getThisObjectAttributeDataType(String id) {
@@ -318,7 +320,8 @@ public class SystemHandleNode extends ExpressionNode {
     ITypeInfo info = root.getTypeInfo();
     if (info == null)
       return DataType.NOT_COMPUTED;
-    return getObjectMethodDataType(root.getTypeInfoProvider(), this, info, id);
+    return getObjectMethodDataType(root.getTypeInfoProvider(),
+        this.getParent().findDirectChild(ABLNodeType.METHOD_PARAM_LIST), info, id);
   }
 
   private DataType getWebContextMethodDataType(String id) {
