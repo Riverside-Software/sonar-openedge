@@ -461,8 +461,7 @@ public class ExpressionEngineTest {
 
     assertTrue(nodes.get(0) instanceof MethodCallNode);
     IExpression exp = nodes.get(0);
-    // Wrong answer. Current implementation doesn't take parameters into account.
-    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.INT64);
   }
 
   @Test
