@@ -114,6 +114,11 @@ public class TwoArgumentsExpression extends ExpressionNode {
   }
 
   private DataType handleDiv(DataType left, DataType right) {
-    return DataType.DECIMAL;
+    if ((left == DataType.INTEGER) && (right == DataType.INTEGER))
+      return DataType.INTEGER;
+    else if ((left == DataType.INT64) && ((right == DataType.INTEGER) || (right == DataType.INT64)))
+      return DataType.INT64;
+    else
+      return DataType.DECIMAL;
   }
 }

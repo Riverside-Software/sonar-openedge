@@ -139,6 +139,8 @@ public class ExpressionEngineTest {
     testSimpleExpression("def var xx as int. 4 * xx.", DataType.INTEGER);
     testSimpleExpression("5 ge 4.", DataType.LOGICAL);
     testSimpleExpression("'xxx' contains 'x'.", DataType.LOGICAL);
+    testSimpleExpression("3 / 4.", DataType.INTEGER);
+    testSimpleExpression("def var xx as int64. xx / 4.", DataType.INT64);
   }
 
   @Test
