@@ -71,6 +71,10 @@ public class CrossReferenceUtils {
   }
 
   public static CrossReference parseXREF(File xref) {
+    if (xref != null)
+      LOGGER.debug("XREF file: {} - Found: {}", xref.getAbsolutePath(), xref.exists());
+    else
+      LOGGER.debug("Null XREF reference");
     return ((xref != null) && xref.exists()) ? parseXREF(xref.toPath()) : EMPTY_XREF;
   }
 

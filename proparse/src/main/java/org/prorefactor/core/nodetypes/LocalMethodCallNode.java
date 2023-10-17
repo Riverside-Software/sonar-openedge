@@ -21,7 +21,6 @@ import com.google.common.base.Strings;
 
 import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
-import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;
 
 /**
@@ -44,18 +43,12 @@ public class LocalMethodCallNode extends ExpressionNode {
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
       return DataType.NOT_COMPUTED;
+
     ITypeInfo info = root.getTypeInfo();
     if (root.isClass() && (info == null))
       info = BuiltinClasses.PROGRESS_LANG_OBJECT;
-    while (info != null) {
-      for (IMethodElement elem : info.getMethods()) {
-        if (elem.getName().equalsIgnoreCase(methodName))
-          return elem.getReturnType();
-      }
-      info = root.getEnvironment().getTypeInfo(info.getParentTypeName());
-    }
 
-    return DataType.NOT_COMPUTED;
+    return getObjectMethodDataType(root.getTypeInfoProvider(), this, info, methodName);
   }
 
 }

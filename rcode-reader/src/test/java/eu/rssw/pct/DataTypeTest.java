@@ -20,15 +20,26 @@
 package eu.rssw.pct;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.function.Function;
 
 import org.testng.annotations.Test;
 
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
 public class DataTypeTest {
+  private static final Function<String, ITypeInfo> TYPE_INFO_PROVIDER = name -> //
+  BuiltinClasses.getBuiltinClasses().stream() //
+    .filter(it -> it.getTypeName().equals(name)) //
+    .findFirst() //
+    .orElse(null);
 
   @Test
   public void test1() {
@@ -78,4 +89,25 @@ public class DataTypeTest {
     assertEquals(DataType.get(null), DataType.UNKNOWN);
   }
 
+  @Test
+  public void testEquals() {
+    assertTrue(DataType.HANDLE.equals(DataType.get("HANDLE")));
+    assertFalse(DataType.HANDLE.equals(DataType.CHARACTER));
+    assertTrue(new DataType("Progress.Lang.Object").equals(new DataType("Progress.Lang.Object")));
+    assertFalse(new DataType("Progress.Lang.Object").equals(new DataType("Progress.Lang2.Object")));
+  }
+
+  @Test
+  public void testIsCompatible() {
+    assertTrue(DataType.LONGCHAR.isCompatible(DataType.CHARACTER, null));
+    assertFalse(DataType.CHARACTER.isCompatible(DataType.LONGCHAR, null));
+    assertTrue(DataType.DECIMAL.isCompatible(DataType.INTEGER, null));
+    assertFalse(DataType.INTEGER.isCompatible(DataType.DECIMAL, null));
+    // Classes
+    assertTrue(new DataType("Progress.Lang.Object").isCompatible(new DataType("Progress.Lang.Enum"), TYPE_INFO_PROVIDER));
+    assertTrue(new DataType("Progress.Lang.Object").isCompatible(new DataType("Progress.BPM.BPMError"), TYPE_INFO_PROVIDER));
+    assertTrue(new DataType("Progress.Lang.SysError").isCompatible(new DataType("Progress.BPM.BPMError"), TYPE_INFO_PROVIDER));
+    assertTrue(new DataType("Progress.Lang.Error").isCompatible(new DataType("Progress.BPM.BPMError"), TYPE_INFO_PROVIDER));
+    assertFalse(new DataType("Progress.Lang.Enum").isCompatible(new DataType("Progress.Lang.Object"), TYPE_INFO_PROVIDER));
+  }
 }

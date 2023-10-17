@@ -64,6 +64,7 @@ public class Constants {
   public static final String ASSEMBLY_CATALOG = "sonar.oe.assembly.catalog";
   public static final String CLASS_DOCUMENTATION = "sonar.oe.classdoc";
   public static final String RTB_COMPATIBILITY = "sonar.oe.rtb";
+  public static final String REQUIRE_FULL_NAMES = "sonar.oe.require.full_names";
 
   private Constants() {
     

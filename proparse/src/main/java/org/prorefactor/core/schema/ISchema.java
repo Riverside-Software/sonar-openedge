@@ -75,7 +75,8 @@ public interface ISchema {
    * anywhere this is run, the compiler would check that the field name is also unique against temp/work tables.
    * 
    * @param name Unqualified schema field name
+   * @param requireFullName True to search only for full field names
    * @return Null if nothing found
    */
-  IField lookupUnqualifiedField(String name);
+  IField lookupUnqualifiedField(String name, boolean requireFullName);
 }

@@ -40,7 +40,7 @@ import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.Variable;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
@@ -59,7 +59,7 @@ import eu.rssw.pct.elements.fixed.VariableElement;
 public class ExpressionEngineTest {
   private RefactorSession session;
 
-  @BeforeTest
+  @BeforeMethod
   public void setUp() throws IOException, InvalidRCodeException {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
@@ -80,8 +80,19 @@ public class ExpressionEngineTest {
     TypeInfo typeInfo03 = new TypeInfo("rssw.test.Class04", false, false, "Progress.Lang.Object", "");
     typeInfo03.addMethod(new MethodElement("m1", true, DataType.CHARACTER));
     typeInfo03.addMethod(new MethodElement("m2", true, DataType.INTEGER));
-    typeInfo03.addMethod(new MethodElement("m2", true, DataType.INT64, new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    typeInfo03.addMethod(new MethodElement("m2", true, DataType.INT64, //
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
     session.injectTypeInfo(typeInfo03);
+
+    // Overloaded methods
+    TypeInfo typeInfo04 = new TypeInfo("rssw.test.Class05", false, false, "Progress.Lang.Object", "");
+    typeInfo04.addMethod(new MethodElement("over01", true, DataType.CHARACTER));
+    typeInfo04.addMethod(new MethodElement("over01", true, DataType.VOID, new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    typeInfo04.addMethod(new MethodElement("over01", true, DataType.INTEGER, new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    typeInfo04.addMethod(new MethodElement("over01", true, DataType.INT64, //
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER), //
+        new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    session.injectTypeInfo(typeInfo04);
   }
 
   @Test
@@ -128,6 +139,8 @@ public class ExpressionEngineTest {
     testSimpleExpression("def var xx as int. 4 * xx.", DataType.INTEGER);
     testSimpleExpression("5 ge 4.", DataType.LOGICAL);
     testSimpleExpression("'xxx' contains 'x'.", DataType.LOGICAL);
+    testSimpleExpression("3 / 4.", DataType.INTEGER);
+    testSimpleExpression("def var xx as int64. xx / 4.", DataType.INT64);
   }
 
   @Test
@@ -418,15 +431,26 @@ public class ExpressionEngineTest {
 
   @Test
   public void testStaticMethod01() {
-    ParseUnit unit = new ParseUnit("message rssw.test.Class04:m1().", session);
+    String sourceCode = "message rssw.test.Class04:m1(). "
+        + "message rssw.test.Class04:m2(). "
+        + "message rssw.test.Class04:m2(123).";
+    ParseUnit unit = new ParseUnit(sourceCode, session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
-    assertEquals(nodes.size(), 1);
+    assertEquals(nodes.size(), 3);
 
-    assertTrue(nodes.get(0) instanceof MethodCallNode);
-    IExpression exp = nodes.get(0);
-    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
+    IExpression exp1 = nodes.get(0);
+    assertTrue(exp1 instanceof MethodCallNode);
+    assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
+
+    IExpression exp2 = nodes.get(1);
+    assertTrue(exp2 instanceof MethodCallNode);
+    assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
+
+    IExpression exp3 = nodes.get(2);
+    assertTrue(exp3 instanceof MethodCallNode);
+    assertEquals(exp3.getDataType().getPrimitive(), PrimitiveDataType.INT64);
   }
 
   @Test
@@ -439,8 +463,7 @@ public class ExpressionEngineTest {
 
     assertTrue(nodes.get(0) instanceof MethodCallNode);
     IExpression exp = nodes.get(0);
-    // Wrong answer. Current implementation doesn't take parameters into account.
-    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.INT64);
   }
 
   @Test
@@ -687,6 +710,68 @@ public class ExpressionEngineTest {
     assertTrue(exp instanceof ArrayReferenceNode);
     assertTrue(((ArrayReferenceNode) exp).getVariableExpression() instanceof FieldRefNode);
     assertTrue(((ArrayReferenceNode) exp).getOffsetExpression() instanceof ConstantNode);
+  }
+
+  @Test
+  public void testOverloadedMethodCall01() {
+    String sourceCode = "def var var1 as rssw.test.Class05. "
+        + "var1:over01(). "
+        + "var1:over01(123). "
+        + "var1:over01('123'). "
+        + "var1:over01('123', '456').";
+    ParseUnit unit01 = new ParseUnit(sourceCode, session);
+    unit01.treeParser01();
+
+    List<IExpression> nodes = unit01.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 4);
+
+    IExpression exp1 = nodes.get(0);
+    assertTrue(exp1 instanceof MethodCallNode);
+    assertEquals(exp1.getDataType(), DataType.CHARACTER);
+
+    IExpression exp2 = nodes.get(1);
+    assertTrue(exp2 instanceof MethodCallNode);
+    assertEquals(exp2.getDataType(), DataType.VOID);
+
+    IExpression exp3 = nodes.get(2);
+    assertTrue(exp3 instanceof MethodCallNode);
+    assertEquals(exp3.getDataType(), DataType.INTEGER);
+
+    IExpression exp4 = nodes.get(3);
+    assertTrue(exp4 instanceof MethodCallNode);
+    assertEquals(exp4.getDataType(), DataType.INT64);
+  }
+
+  @Test
+  public void testOverloadedMethodCall02() {
+    TypeInfo testClass = new TypeInfo("rssw.MyTestClass", false, false, "rssw.test.Class05", "");
+    testClass.addMethod(new MethodElement("test01", false, DataType.VOID));
+    session.injectTypeInfo(testClass);
+
+    String sourceCode = "class rssw.MyTestClass inherits rssw.test.Class05: "
+        + "method public test01(): "
+        + "over01(123). "
+        + "this-object:over01('123'). "
+        + "super:over01('123', '456'). "
+        + "end method. "
+        + "end class.";
+    ParseUnit unit01 = new ParseUnit(sourceCode, session);
+    unit01.treeParser01();
+
+    List<IExpression> nodes = unit01.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 3);
+
+    IExpression exp1 = nodes.get(0);
+    assertTrue(exp1 instanceof LocalMethodCallNode);
+    assertEquals(exp1.getDataType(), DataType.VOID);
+
+    IExpression exp2 = nodes.get(1);
+    assertTrue(exp2 instanceof MethodCallNode);
+    assertEquals(exp2.getDataType(), DataType.INTEGER);
+
+    IExpression exp3 = nodes.get(2);
+    assertTrue(exp3 instanceof MethodCallNode);
+    assertEquals(exp3.getDataType(), DataType.INT64);
   }
 
 }

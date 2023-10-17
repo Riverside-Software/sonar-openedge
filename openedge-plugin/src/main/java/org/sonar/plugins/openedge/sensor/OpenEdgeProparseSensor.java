@@ -262,6 +262,8 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
     if (!xref.getSource().isEmpty())
       numXREF++;
+    else
+      LOG.debug("Empty XREF file");
 
     File listingFile = settings.getListingFile(file);
     List<Integer> trxBlocks = new ArrayList<>();

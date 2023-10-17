@@ -11,6 +11,8 @@ pipeline {
     stage ('Build OpenEdge plugin') {
       steps {
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: scm.userRemoteConfigs])
+        checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: [[credentialsId: scm.userRemoteConfigs.credentialsId[0], url: scm.userRemoteConfigs.url[0], refspec: '+refs/heads/main:refs/remotes/origin/main']] ])
+        checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: [[credentialsId: scm.userRemoteConfigs.credentialsId[0], url: scm.userRemoteConfigs.url[0], refspec: '+refs/heads/develop:refs/remotes/origin/develop']] ])
         script {
           withEnv(["MVN_HOME=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}", "JAVA_HOME=${tool name: 'Corretto 11', type: 'jdk'}"]) {
             if (("main" == env.BRANCH_NAME) || ("master" == env.BRANCH_NAME)) {
@@ -32,7 +34,13 @@ pipeline {
         script {
           withEnv(["MVN_HOME=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}", "JAVA_HOME=${tool name: 'Corretto 11', type: 'jdk'}"]) {
             withSonarQubeEnv(installationName: 'SonarCloud') {
-              sh "$MVN_HOME/bin/mvn -Dsonar.organization=rssw -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
+              if (("main" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME)) {
+                sh "$MVN_HOME/bin/mvn -Dsonar.organization=rssw -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
+              } else if (env.BRANCH_NAME.startsWith("hotfix")) {
+                sh "$MVN_HOME/bin/mvn -Dsonar.organization=rssw -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=main sonar:sonar"
+              } else {
+                sh "$MVN_HOME/bin/mvn -Dsonar.organization=rssw -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=develop sonar:sonar"
+              }
             }
           }
         }

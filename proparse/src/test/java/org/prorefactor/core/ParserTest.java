@@ -36,9 +36,11 @@ import org.prorefactor.core.schema.Table;
 import org.prorefactor.core.util.UnitTestModule;
 import org.prorefactor.core.util.UnitTestModule2;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.refactor.settings.ProparseSettings;
 import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.TableBuffer;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
@@ -49,7 +51,7 @@ public class ParserTest {
 
   private RefactorSession session;
 
-  @BeforeTest
+  @BeforeMethod
   public void setUp() {
     Injector injector = Guice.createInjector(new UnitTestModule());
     session = injector.getInstance(RefactorSession.class);
@@ -1005,5 +1007,58 @@ public class ParserTest {
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 10);
+  }
+
+  @Test
+  public void testRequire() {
+    // This procedure doesn't compile, but Proparse still accepts it. Not particularly correct,
+    // but that won't be fixed for now. In order to be aware of this behavior, we keep this unit test.
+    // The Regex ID is considered a field buffer (abbreviated) pointing to a DB table
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "require.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    assertEquals(unit.getTopNode().query(ABLNodeType.FIELD_REF).size(), 1);
+    JPNode n1 = unit.getTopNode().query(ABLNodeType.FIELD_REF).get(0);
+    assertNotNull(n1.getSymbol());
+    assertTrue(n1.getSymbol() instanceof FieldBuffer);
+  }
+
+  @Test
+  public void testRequireBis() {
+    // This procedure doesn't compile, but Proparse still accepts it. Not particularly correct,
+    // but that won't be fixed for now. In order to be aware of this behavior, we keep this unit test.
+    // The Regex ID is considered a field buffer (abbreviated) pointing to a DB table
+    ((ProparseSettings) session.getProparseSettings()).setRequireFullName(true);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "require.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    assertEquals(unit.getTopNode().query(ABLNodeType.FIELD_REF).size(), 1);
+    JPNode n1 = unit.getTopNode().query(ABLNodeType.FIELD_REF).get(0);
+    assertNull(n1.getSymbol());
+  }
+
+  @Test
+  public void testRequire02() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "require02.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    assertEquals(unit.getTopNode().query(ABLNodeType.RECORD_NAME).size(), 1);
+    JPNode n1 = unit.getTopNode().query(ABLNodeType.FIELD_REF).get(0);
+    assertNotNull(n1.getSymbol());
+  }
+
+  @Test
+  public void testRequire02Bis() {
+    ((ProparseSettings) session.getProparseSettings()).setRequireFullName(true);
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "require02.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    assertEquals(unit.getTopNode().query(ABLNodeType.RECORD_NAME).size(), 1);
+    JPNode n1 = unit.getTopNode().query(ABLNodeType.FIELD_REF).get(0);
+    assertNull(n1.getSymbol());
   }
 }

@@ -265,8 +265,9 @@ public class OpenEdgeSettings {
   }
 
   private final void initializeProlibCache() {
-    if (config.get(Constants.SLINT_PL_CACHE).isPresent()) {
-      File cache = new File(config.get(Constants.SLINT_PL_CACHE).get());
+    Optional<String> plCache = config.get(Constants.SLINT_PL_CACHE);
+    if (plCache.isPresent()) {
+      File cache = new File(plCache.get());
       if (cache.exists() && cache.isFile() && cache.canRead()) {
         try {
           for (String str : java.nio.file.Files.readAllLines(cache.toPath(), StandardCharsets.UTF_8)) {
@@ -737,6 +738,8 @@ public class OpenEdgeSettings {
       ppSettings.setAntlrTokenInsertion(config.getBoolean("sonar.oe.proparse.token.insertion").orElse(false));
       // ANTLR Recover
       ppSettings.setAntlrRecover(config.getBoolean("sonar.oe.proparse.recover").orElse(false));
+      // Require full names
+      ppSettings.setRequireFullName(config.getBoolean(Constants.REQUIRE_FULL_NAMES).orElse(false));
 
       defaultSession = new RefactorSession(ppSettings, sch, encoding());
       Optional<String> assemblyCatalog = config.get(Constants.ASSEMBLY_CATALOG);

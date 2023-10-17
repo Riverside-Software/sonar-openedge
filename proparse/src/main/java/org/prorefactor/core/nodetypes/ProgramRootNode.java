@@ -15,6 +15,8 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import java.util.function.Function;
+
 import javax.annotation.Nullable;
 
 import org.prorefactor.core.JPNode;
@@ -39,6 +41,10 @@ public class ProgramRootNode extends NonStatementBlockNode {
   @Override
   public boolean hasAnnotation(String str) {
     return false;
+  }
+
+  public Function<String, ITypeInfo> getTypeInfoProvider() {
+    return environment::getTypeInfo;
   }
 
   public IProparseEnvironment getEnvironment() {

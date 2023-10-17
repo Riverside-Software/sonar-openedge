@@ -360,7 +360,8 @@ public class Block {
         if (field != null) {
           tableBuff = symbolScope.getRootScope().getLocalTableBuffer(field.getTable());
         } else {
-          field = symbolScope.getRootScope().getRefactorSession().getSchema().lookupUnqualifiedField(name);
+          field = symbolScope.getRootScope().getRefactorSession().getSchema().lookupUnqualifiedField(name,
+              blockStatementNode.getTopLevelParent().getEnvironment().getProparseSettings().requireFullName());
           if (field == null)
             return null;
           tableBuff = symbolScope.getUnnamedBuffer(field.getTable());
@@ -376,7 +377,8 @@ public class Block {
       tableBuff = symbolScope.getBufferSymbol(tablePart);
       if (tableBuff == null)
         return null;
-      IField field = tableBuff.getTable().lookupField(fieldPart);
+      IField field = blockStatementNode.getTopLevelParent().getEnvironment().getProparseSettings().requireFullName()
+          ? tableBuff.getTable().lookupFullNameField(fieldPart) : tableBuff.getTable().lookupField(fieldPart);
       if (field == null)
         return null;
       result.setSymbol(tableBuff.getFieldBuffer(field));
