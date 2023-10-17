@@ -34,7 +34,8 @@ import org.antlr.v4.runtime.Token;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.WritableProToken;
-import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
@@ -43,8 +44,6 @@ import org.testng.annotations.Test;
 
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 
@@ -53,8 +52,7 @@ public class ABLLexerTest {
 
   @BeforeTest
   public void setUp() throws IOException, InvalidRCodeException {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+    session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
   }
 
   @Test
@@ -171,9 +169,8 @@ public class ABLLexerTest {
   }
 
   @Test
-  public void testSlash02() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    RefactorSession session2 = injector.getInstance(RefactorSession.class);
+  public void testSlash02() throws IOException {
+    RefactorSession session2 = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {'/'});
 
     final String source = "MESSAGE / xyz /(2) /10";
@@ -235,9 +232,8 @@ public class ABLLexerTest {
   }
 
   @Test
-  public void testCaret02() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    RefactorSession session2 = injector.getInstance(RefactorSession.class);
+  public void testCaret02() throws IOException {
+    RefactorSession session2 = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {'^'});
 
     final String source = "FUNCTION h^ello ^hello ^ RETURNS VOID";
@@ -264,9 +260,8 @@ public class ABLLexerTest {
   }
 
   @Test
-  public void testSemiColon02() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    RefactorSession session2 = injector.getInstance(RefactorSession.class);
+  public void testSemiColon02() throws IOException {
+    RefactorSession session2 = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {';'});
 
     final String source = "FUNCTION h;ello ;hello ; RETURNS VOID";
@@ -294,9 +289,8 @@ public class ABLLexerTest {
   }
 
   @Test
-  public void testStar02() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    RefactorSession session2 = injector.getInstance(RefactorSession.class);
+  public void testStar02() throws IOException {
+    RefactorSession session2 = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {'*'});
 
     final String source = "FUNCTION h*ello *hello * *= VOID";
@@ -343,9 +337,8 @@ public class ABLLexerTest {
   }
 
   @Test
-  public void testExclamationMarkBacktick02() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    RefactorSession session2 = injector.getInstance(RefactorSession.class);
+  public void testExclamationMarkBacktick02() throws IOException {
+    RefactorSession session2 = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {'!', '`'});
 
     final String source = "FUNCTION h!ello !hello ! h`ello `hello ` RETURNS";

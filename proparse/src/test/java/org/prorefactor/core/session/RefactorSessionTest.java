@@ -20,13 +20,14 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
-import org.prorefactor.core.util.UnitTestModule;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 import eu.rssw.pct.elements.ITypeInfo;
 
@@ -38,8 +39,11 @@ public class RefactorSessionTest {
 
   @BeforeTest
   public void setUp() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+    try {
+      session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
+    } catch (IOException caught) {
+      throw new UncheckedIOException(caught);
+    }
   }
 
   @Test

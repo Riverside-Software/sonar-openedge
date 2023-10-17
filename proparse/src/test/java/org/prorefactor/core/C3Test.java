@@ -23,7 +23,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.proparse.ABLLexer;
 import org.prorefactor.proparse.JPNodeVisitor;
 import org.prorefactor.proparse.ProparseErrorStrategy;
@@ -35,8 +36,6 @@ import org.testng.annotations.Test;
 
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.progress.xref.EmptyCrossReference;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
@@ -50,8 +49,7 @@ public class C3Test {
 
   @BeforeTest
   public void setUp() throws IOException, InvalidRCodeException {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+    session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
   }
 
   @Test

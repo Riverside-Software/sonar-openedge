@@ -18,6 +18,8 @@ import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import javax.inject.Inject;
+
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
@@ -46,7 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
-import com.google.inject.Inject;
 
 import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;

@@ -22,6 +22,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UncheckedIOException;
 
 import org.antlr.v4.runtime.Token;
@@ -30,8 +31,9 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.core.schema.Schema;
-import org.prorefactor.core.util.UnitTestModule;
-import org.prorefactor.core.util.UnitTestWindowsModule;
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
+import org.prorefactor.core.util.UnitTestWindowsSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.prorefactor.treeparser.ParseUnit;
@@ -39,8 +41,6 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Charsets;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 public class PostLexerTest {
   private final static String SRC_DIR = "src/test/resources/data/lexer";
@@ -48,9 +48,8 @@ public class PostLexerTest {
   private RefactorSession session;
 
   @BeforeTest
-  public void setUp() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+  public void setUp() throws IOException {
+    session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
   }
 
   @Test
@@ -538,10 +537,9 @@ public class PostLexerTest {
   }
 
   @Test
-  public void testFileNumName() {
+  public void testFileNumName() throws IOException {
     // Use Windows settings here in order to use backlash directory separator
-    Injector injector = Guice.createInjector(new UnitTestWindowsModule());
-    RefactorSession session = injector.getInstance(RefactorSession.class);
+    RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer18.p"), session);
     TokenSource src = unit.preprocess();
 
@@ -589,9 +587,8 @@ public class PostLexerTest {
   }
 
   @Test
-  public void testDirectiveEOF() {
-    Injector injector = Guice.createInjector(new UnitTestWindowsModule());
-    RefactorSession session = injector.getInstance(RefactorSession.class);
+  public void testDirectiveEOF() throws IOException {
+    RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer19.p"), session);
     TokenSource src = unit.preprocess();
 
@@ -604,9 +601,8 @@ public class PostLexerTest {
   }
 
   @Test
-  public void testUndefine() {
-    Injector injector = Guice.createInjector(new UnitTestWindowsModule());
-    RefactorSession session = injector.getInstance(RefactorSession.class);
+  public void testUndefine() throws IOException {
+    RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer20.p"), session);
     TokenSource src = unit.preprocess();
 
@@ -625,9 +621,8 @@ public class PostLexerTest {
   }
 
   @Test
-  public void testEndOfIncInIncludeParameter() {
-    Injector injector = Guice.createInjector(new UnitTestWindowsModule());
-    RefactorSession session = injector.getInstance(RefactorSession.class);
+  public void testEndOfIncInIncludeParameter() throws IOException {
+    RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer21.p"), session);
     TokenSource src = unit.preprocess();
 
@@ -646,9 +641,8 @@ public class PostLexerTest {
   }
 
   @Test
-  public void test22() {
-    Injector injector = Guice.createInjector(new UnitTestWindowsModule());
-    RefactorSession session = injector.getInstance(RefactorSession.class);
+  public void test22() throws IOException {
+    RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer22.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) nextVisibleToken(src);
@@ -665,9 +659,8 @@ public class PostLexerTest {
   }
 
   @Test
-  public void test23() {
-    Injector injector = Guice.createInjector(new UnitTestWindowsModule());
-    RefactorSession session = injector.getInstance(RefactorSession.class);
+  public void test23() throws IOException {
+    RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer23.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) nextVisibleToken(src);

@@ -31,7 +31,8 @@ import java.util.Optional;
 import javax.xml.bind.JAXBException;
 
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
@@ -48,9 +49,6 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
@@ -62,9 +60,8 @@ public class TreeParser03Test {
   private RefactorSession session;
 
   @BeforeTest
-  public void setUp() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+  public void setUp() throws IOException {
+    session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
   }
 
   @Test

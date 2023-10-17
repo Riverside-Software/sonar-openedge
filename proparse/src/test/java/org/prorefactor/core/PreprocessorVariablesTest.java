@@ -17,16 +17,15 @@ package org.prorefactor.core;
 import static org.testng.Assert.assertFalse;
 
 import java.io.File;
+import java.io.IOException;
 
-import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 public class PreprocessorVariablesTest {
   private final static String SRC_DIR = "src/test/resources/data/preprocessor";
@@ -34,9 +33,8 @@ public class PreprocessorVariablesTest {
   private RefactorSession session;
 
   @BeforeTest
-  public void setUp() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+  public void setUp() throws IOException {
+    session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
   }
 
   @Test

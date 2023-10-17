@@ -50,7 +50,6 @@ import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.proparse.IncludeFileNotFoundException;
 import org.prorefactor.proparse.XCodedFileException;
 import org.prorefactor.proparse.antlr4.Proparse;
-import org.prorefactor.proparse.antlr4.ProparseListener;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.treeparser.ParseUnit;
 import org.sonar.api.SonarProduct;
@@ -84,10 +83,6 @@ import org.xml.sax.SAXException;
 
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
-import com.google.inject.Binder;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
 import com.progress.xref.CrossReference;
 import com.progress.xref.CrossReferenceUtils;
 import com.progress.xref.InvalidXMLFilterStream;
@@ -307,11 +302,6 @@ public class OpenEdgeProparseSensor implements Sensor {
       unit.attachXref(xref);
       unit.parse();
       unit.treeParser01();
-      for (Class<? extends ProparseListener> clz : components.getProparseListeners()) {
-        Injector injector = Guice.createInjector(new TreeParserModule(clz, unit));
-        ProparseListener listener = injector.getInstance(ProparseListener.class);
-        unit.treeParser(listener);
-      }
 
       unit.attachTransactionBlocks(trxBlocks);
       unit.attachTypeInfo(session.getTypeInfo(unit.getClassName()));
@@ -570,19 +560,4 @@ public class OpenEdgeProparseSensor implements Sensor {
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.COMPLEXITY).withValue(complexityWithInc).save();
   }
 
-  private static class TreeParserModule implements Module {
-    private final Class<? extends ProparseListener> instanceName;
-    private final ParseUnit unit;
-
-    public TreeParserModule(Class<? extends ProparseListener> instName, ParseUnit unit) {
-      this.instanceName = instName;
-      this.unit = unit;
-    }
-
-    @Override
-    public void configure(Binder binder) {
-      binder.bind(ParseUnit.class).toInstance(unit);
-      binder.bind(ProparseListener.class).to(instanceName);
-    }
-  }
 }

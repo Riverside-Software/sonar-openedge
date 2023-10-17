@@ -33,15 +33,14 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.prorefactor.core.nodetypes.RecordNameNode;
-import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.progress.xref.CrossReference;
 import com.progress.xref.CrossReferenceUtils;
 import com.progress.xref.EmptyCrossReference;
@@ -64,8 +63,7 @@ public class JPNodeTest {
 
   @BeforeTest
   public void setUp() throws IOException, InvalidRCodeException {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+    session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     session.getSchema().createAlias("foo", "sports2000");
     session.injectTypeInfo(
         new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ParentClass.r")).getTypeInfo());

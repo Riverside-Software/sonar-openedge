@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -60,8 +61,6 @@ import org.prorefactor.proparse.support.ParserSupport;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.inject.Inject;
 
 import eu.rssw.pct.elements.DataType;
 

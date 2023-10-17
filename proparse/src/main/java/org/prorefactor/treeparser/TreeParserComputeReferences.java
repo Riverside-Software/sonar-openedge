@@ -14,6 +14,8 @@
  ********************************************************************************/
 package org.prorefactor.treeparser;
 
+import javax.inject.Inject;
+
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
@@ -32,8 +34,6 @@ import org.prorefactor.proparse.antlr4.Proparse.WidNameContext;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
-
-import com.google.inject.Inject;
 
 public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
