@@ -1904,6 +1904,7 @@ defineTempTableStatement:
     namespaceUri? namespacePrefix? xmlNodeName? serializeName?
     REFERENCEONLY?
     defTableLike?
+    labelConstant?
     RCODEINFORMATION?
     defTableBeforeTable?
     defTableField*

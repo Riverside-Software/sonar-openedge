@@ -1058,4 +1058,21 @@ public class ParserTest {
     JPNode n1 = unit.getTopNode().query(ABLNodeType.FIELD_REF).get(0);
     assertNull(n1.getSymbol());
   }
+
+  @Test
+  public void testTempTableWithLabel() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ttwithlabel.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    assertEquals(unit.getTopNode().query(ABLNodeType.DEFINE).size(), 2);
+    JPNode n1 = unit.getTopNode().query(ABLNodeType.DEFINE).get(0);
+    assertTrue(n1.isIStatement());
+    assertEquals(n1.asIStatement().getNodeType2(), ABLNodeType.TEMPTABLE);
+    JPNode n2 = unit.getTopNode().query(ABLNodeType.DEFINE).get(1);
+    assertTrue(n2.isIStatement());
+    assertEquals(n2.asIStatement().getNodeType2(), ABLNodeType.TEMPTABLE);
+  }
+
+  
 }
