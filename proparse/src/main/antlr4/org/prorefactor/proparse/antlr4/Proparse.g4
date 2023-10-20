@@ -3107,7 +3107,9 @@ publishStatement:
   ;
 
 publishOption:
+    { support.disallowUnknownMethodCalls(); }
     FROM expression
+    { support.allowUnknownMethodCalls(); }
   ;
 
 putStatement:
@@ -3313,7 +3315,7 @@ runOption:
   | SINGLERUN runSet?     # runOptSingleRun
   | SINGLETON runSet?     # runOptSingleton
   | runSet                # runOptSet
-  | ON SERVER? expression ( TRANSACTION DISTINCT? )?  # runOptServer
+  | { support.disallowUnknownMethodCalls(); } ON SERVER? expression ( TRANSACTION DISTINCT? )?  { support.allowUnknownMethodCalls(); } # runOptServer
   | inExpression          # runOptIn
   | ASYNCHRONOUS runSet? runEvent? inExpression? # runOptAsync
   ;

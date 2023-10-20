@@ -1074,5 +1074,14 @@ public class ParserTest {
     assertEquals(n2.asIStatement().getNodeType2(), ABLNodeType.TEMPTABLE);
   }
 
-  
+  @Test
+  public void testPublishFrom() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "publishFrom.cls"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().query(ABLNodeType.PUBLISH).size(), 1);
+    JPNode n1 = unit.getTopNode().query(ABLNodeType.PUBLISH).get(0);
+    assertNotNull(n1.findDirectChild(ABLNodeType.PARAMETER_LIST));
+  }
+
 }
