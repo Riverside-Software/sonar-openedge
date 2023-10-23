@@ -272,7 +272,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void exitFunctionParamStandardAs(FunctionParamStandardAsContext ctx) {
-    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.PARAMETER);
+    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.n1.getText(), Variable.Type.PARAMETER);
     if (ctx.extentPhrase() != null) {
       defExtent(ctx.extentPhrase().constant() != null ? ctx.extentPhrase().constant().getText() : "");
     }
