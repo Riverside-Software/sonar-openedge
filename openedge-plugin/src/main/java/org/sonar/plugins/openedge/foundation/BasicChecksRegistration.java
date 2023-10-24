@@ -36,7 +36,7 @@ public class BasicChecksRegistration implements CheckRegistration {
    */
   @Override
   public void register(Registrar registrar) {
-    LOG.debug("Registering CheckRegistrar {}", BasicChecksRegistration.class.toString());
+    LOG.debug("Registering {}", registrar.getClass().getCanonicalName());
 
     for (Class<? extends OpenEdgeProparseCheck> clz : ppCheckClasses()) {
       registrar.registerParserCheck(clz);
