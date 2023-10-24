@@ -26,15 +26,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Collections2;
 import com.google.common.primitives.Ints;
 
 public class ListingParser {
@@ -72,34 +70,15 @@ public class ListingParser {
   }
 
   public Collection<CodeBlock> getTransactionBlocks() {
-    return Collections2.filter(blocks, new Predicate<CodeBlock>() {
-      @Override
-      public boolean apply(CodeBlock input) {
-        return input.isTransaction();
-      }
-    });
+    return blocks.stream().filter(CodeBlock::isTransaction).collect(Collectors.toList());
   }
 
   public Collection<CodeBlock> getBlocksWithBuffer() {
-    return Collections2.filter(blocks, new Predicate<CodeBlock>() {
-      @Override
-      public boolean apply(CodeBlock input) {
-        return input.getBuffers() != null;
-      }
-    });
+    return blocks.stream().filter(it -> it.getBuffers() != null).collect(Collectors.toList());
   }
 
   public CodeBlock getMainBlock() {
-    Iterator<CodeBlock> iter = Collections2.filter(blocks, new Predicate<CodeBlock>() {
-      @Override
-      public boolean apply(CodeBlock input) {
-        return input.getLineNumber() == 0;
-      }
-    }).iterator();
-    if (iter.hasNext())
-      return iter.next();
-
-    return null;
+    return blocks.stream().filter(it -> it.getLineNumber() == 0).findFirst().orElse(null);
   }
 
   private void parseFile(BufferedReader reader) throws IOException {
