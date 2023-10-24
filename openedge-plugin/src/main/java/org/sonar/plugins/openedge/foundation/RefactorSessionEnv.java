@@ -5,15 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.refactor.RefactorSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.utils.PathUtils;
 import org.sonar.api.utils.WildcardPattern;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 
 import com.google.common.base.Splitter;
 
 public class RefactorSessionEnv implements IRefactorSessionEnv {
-  private static final Logger LOG = Loggers.get(RefactorSessionEnv.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RefactorSessionEnv.class);
   
   private final RefactorSession defaultSession;
   private final List<SessionMapping> extraSessions = new ArrayList<>();

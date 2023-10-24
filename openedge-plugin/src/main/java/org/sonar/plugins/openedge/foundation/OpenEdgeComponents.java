@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.prorefactor.proparse.antlr4.ProparseListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.rule.ActiveRule;
@@ -40,8 +42,6 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.server.ServerSide;
 import org.sonar.api.utils.MessageException;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.CheckRegistration;
 import org.sonar.plugins.openedge.api.Constants;
@@ -62,7 +62,7 @@ import com.google.common.base.Strings;
 @SonarLintSide
 @ServerSide
 public class OpenEdgeComponents {
-  private static final Logger LOG = Loggers.get(OpenEdgeComponents.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeComponents.class);
 
   private final Map<ActiveRule, OpenEdgeProparseCheck> ppChecksMap = new HashMap<>();
   private final Map<ActiveRule, OpenEdgeDumpFileCheck> dfChecksMap = new HashMap<>();

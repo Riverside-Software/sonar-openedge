@@ -52,6 +52,8 @@ import org.prorefactor.proparse.XCodedFileException;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.treeparser.ParseUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
@@ -67,8 +69,6 @@ import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.foundation.CPDCallback;
@@ -91,7 +91,7 @@ import eu.rssw.listing.CodeBlock;
 import eu.rssw.listing.ListingParser;
 
 public class OpenEdgeProparseSensor implements Sensor {
-  private static final Logger LOG = Loggers.get(OpenEdgeProparseSensor.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeProparseSensor.class);
 
   // IoC
   private final OpenEdgeSettings settings;
