@@ -22,8 +22,7 @@ package eu.rssw.pct.elements.v11;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
-
-import com.google.common.base.Joiner;
+import java.util.stream.Collectors;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractElement;
@@ -111,7 +110,8 @@ public class IndexElementV11 extends AbstractElement implements IIndexElement {
 
   @Override
   public int hashCode() {
-    return (getName() + "/" + flags + "/" + Joiner.on('/').join(indexComponents)).hashCode();
+    String str = Arrays.stream(indexComponents).map(IIndexComponentElement::toString).collect(Collectors.joining("/"));
+    return (getName() + "/" + flags + "/" + str).hashCode();
   }
 
   @Override

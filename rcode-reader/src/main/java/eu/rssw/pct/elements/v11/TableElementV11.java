@@ -23,8 +23,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Set;
-
-import com.google.common.base.Joiner;
+import java.util.stream.Collectors;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
@@ -131,7 +130,9 @@ public class TableElementV11 extends AbstractAccessibleElement implements ITable
 
   @Override
   public int hashCode() {
-    return (getName() + "/" + Joiner.on('-').join(fields) + "/" + Joiner.on('-').join(indexes)).hashCode();
+    String str1 = Arrays.stream(fields).map(IVariableElement::toString).collect(Collectors.joining("-"));
+    String str2 = Arrays.stream(indexes).map(IIndexElement::toString).collect(Collectors.joining("-"));
+    return (getName() + "/" + str1 + "/" + str2).hashCode();
   }
 
   @Override
