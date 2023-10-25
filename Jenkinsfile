@@ -22,7 +22,7 @@ pipeline {
             } else if (env.BRANCH_NAME.startsWith("release") || env.BRANCH_NAME.startsWith("hotfix")) {
               sh "$MVN_HOME/bin/mvn clean javadoc:javadoc install -Dmaven.test.failure.ignore=true -Dgit.commit=\$(git rev-parse --short HEAD)"
             } else {
-              sh "$MVN_HOME/bin/mvn clean package -Dmaven.test.failure.ignore=true"
+              sh "$MVN_HOME/bin/mvn clean package -Dmaven.test.failure.ignore=true -Dgit.commit=\$(git rev-parse --short HEAD)"
             }
           }
         }
