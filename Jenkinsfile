@@ -34,7 +34,7 @@ pipeline {
     stage ('SonarQube analysis') {
       steps {
         script {
-          withEnv(["MVN_HOME=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}", "JAVA_HOME=${tool name: 'Corretto 11', type: 'jdk'}"]) {
+          withEnv(["MVN_HOME=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}", "JAVA_HOME=${tool name: 'JDK17', type: 'jdk'}"]) {
             withSonarQubeEnv(installationName: 'SonarCloud') {
               if (("main" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME)) {
                 sh "$MVN_HOME/bin/mvn -Dsonar.organization=rssw -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
