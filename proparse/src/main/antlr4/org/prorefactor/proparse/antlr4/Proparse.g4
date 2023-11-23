@@ -1904,6 +1904,7 @@ defineTempTableStatement:
     namespaceUri? namespacePrefix? xmlNodeName? serializeName?
     REFERENCEONLY?
     defTableLike?
+    labelConstant?
     RCODEINFORMATION?
     defTableBeforeTable?
     defTableField*
@@ -2482,17 +2483,15 @@ functionParams:
   ;
 
 functionParam:
-    BUFFER bn=identifier? FOR bf=record PRESELECT?
+    BUFFER bn=newIdentifier? FOR bf=record PRESELECT?
     { if ($bn.ctx != null) support.defBuffer($bn.text, $bf.text); }
     # functionParamBufferFor
-  | qualif=( INPUT | OUTPUT | INPUTOUTPUT )?
-    functionParamStd
-    # functionParamStandard
+  | qualif=( INPUT | OUTPUT | INPUTOUTPUT )? functionParamStd # functionParamStandard
   ;
 
 functionParamStd:
-    n=identifier AS datatype extentPhrase? { support.defVar($n.text); } # functionParamStandardAs
-  | n2=identifier likeField extentPhrase? { support.defVar($n2.text); } # functionParamStandardLike
+    n1=newIdentifier AS datatype extentPhrase? { support.defVar($n1.text); } # functionParamStandardAs
+  | n2=newIdentifier likeField extentPhrase? { support.defVar($n2.text); } # functionParamStandardLike
   | { functionParamStdSemanticPredicate() }? TABLE FOR? record APPEND? BIND? # functionParamStandardTable
   | { functionParamStdSemanticPredicate() }? TABLEHANDLE FOR? hn=identifier APPEND? BIND? { support.defVar($hn.text); } # functionParamStandardTableHandle
   | { functionParamStdSemanticPredicate() }? DATASET FOR? identifier APPEND? BIND?  # functionParamStandardDataset
@@ -3108,7 +3107,9 @@ publishStatement:
   ;
 
 publishOption:
+    { support.disallowUnknownMethodCalls(); }
     FROM expression
+    { support.allowUnknownMethodCalls(); }
   ;
 
 putStatement:
@@ -3314,7 +3315,7 @@ runOption:
   | SINGLERUN runSet?     # runOptSingleRun
   | SINGLETON runSet?     # runOptSingleton
   | runSet                # runOptSet
-  | ON SERVER? expression ( TRANSACTION DISTINCT? )?  # runOptServer
+  | { support.disallowUnknownMethodCalls(); } ON SERVER? expression ( TRANSACTION DISTINCT? )?  { support.allowUnknownMethodCalls(); } # runOptServer
   | inExpression          # runOptIn
   | ASYNCHRONOUS runSet? runEvent? inExpression? # runOptAsync
   ;

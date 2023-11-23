@@ -235,6 +235,7 @@ public class RCodeInfoTest {
       IPropertyElement prop1 = info.getProperty("prop1");
       assertNotNull(prop1);
       assertTrue(prop1.isPublic());
+      assertEquals(prop1.hashCode(), -1942347255);
 
       IPropertyElement prop2 = info.getProperty("prop2");
       assertNotNull(prop2);
@@ -503,6 +504,7 @@ public class RCodeInfoTest {
       assertNotNull(tt1);
       assertEquals(tt1.getFields().length, 3); // Always an empty field at the end (ROWID ?)
       assertEquals(tt1.getIndexes().length, 1);
+      assertEquals(tt1.hashCode(), -2036140043);
       ITableElement tt2 = rci.getTypeInfo().getTempTable("tt2");
       assertNotNull(tt2);
       assertEquals(tt2.getFields().length, 3);
@@ -533,6 +535,7 @@ public class RCodeInfoTest {
       assertEquals(ds1.getBufferNames().length, 2);
       assertEquals(ds1.getBufferNames()[0], "tt1");
       assertEquals(ds1.getBufferNames()[1], "tt2");
+      assertEquals(ds1.hashCode(), 1623550553);
       assertNull(rci.getTypeInfo().getDataset("ds2"));
 
       assertNotNull(rci.getTypeInfo().getEvents());
@@ -542,6 +545,7 @@ public class RCodeInfoTest {
       assertEquals(event1.getReturnType(), DataType.VOID);
       assertEquals(event1.getParameters().length, 1);
       assertEquals(event1.getParameters()[0].getDataType(), DataType.CHARACTER);
+      assertEquals(event1.hashCode(), 1303426073);
 
       IMethodElement testMethod = null;
       for (IMethodElement elem : rci.getTypeInfo().getMethods()) {
@@ -563,6 +567,7 @@ public class RCodeInfoTest {
       assertEquals(testMethod.getParameters()[2].getExtent(), 3);
       assertEquals(testMethod.getReturnType().getPrimitive(), PrimitiveDataType.INTEGER);
       assertNull(testMethod.getReturnType().getClassName());
+      assertEquals(testMethod.hashCode(), -901218374);
 
       IMethodElement testMethod21 = null;
       IMethodElement testMethod22 = null;

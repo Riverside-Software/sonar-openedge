@@ -24,12 +24,10 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import org.prorefactor.core.util.AttributedWriter;
-import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.testng.annotations.Test;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 public class TreeParser01Test {
 
@@ -39,8 +37,7 @@ public class TreeParser01Test {
 
   @Test
   public void test01() throws IOException {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    RefactorSession session = injector.getInstance(RefactorSession.class);
+    RefactorSession session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     outFile.getParentFile().mkdirs();
 
     AttributedWriter writer = new AttributedWriter();

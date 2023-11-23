@@ -21,6 +21,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -33,8 +34,9 @@ import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.core.schema.Table;
-import org.prorefactor.core.util.UnitTestModule;
-import org.prorefactor.core.util.UnitTestModule2;
+import org.prorefactor.core.util.SP2KSchema;
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.prorefactor.treeparser.ParseUnit;
@@ -43,18 +45,14 @@ import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
 public class ParserTest {
   private final static String SRC_DIR = "src/test/resources/data/parser";
 
   private RefactorSession session;
 
   @BeforeMethod
-  public void setUp() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+  public void setUp() throws IOException {
+    session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
   }
 
   @Test
@@ -838,9 +836,8 @@ public class ParserTest {
   }
 
   @Test
-  public void testDbQualifierSP2K() {
-    Injector injector = Guice.createInjector(new UnitTestModule2());
-    RefactorSession session2 = injector.getInstance(RefactorSession.class);
+  public void testDbQualifierSP2K() throws IOException {
+    RefactorSession session2 = new RefactorSession(new UnitTestProparseSettings(), new SP2KSchema());
 
     ParseUnit unit = new ParseUnit(new File(SRC_DIR, "dbqualifier02.p"), session2);
     unit.treeParser01();
@@ -1061,4 +1058,30 @@ public class ParserTest {
     JPNode n1 = unit.getTopNode().query(ABLNodeType.FIELD_REF).get(0);
     assertNull(n1.getSymbol());
   }
+
+  @Test
+  public void testTempTableWithLabel() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "ttwithlabel.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    assertEquals(unit.getTopNode().query(ABLNodeType.DEFINE).size(), 2);
+    JPNode n1 = unit.getTopNode().query(ABLNodeType.DEFINE).get(0);
+    assertTrue(n1.isIStatement());
+    assertEquals(n1.asIStatement().getNodeType2(), ABLNodeType.TEMPTABLE);
+    JPNode n2 = unit.getTopNode().query(ABLNodeType.DEFINE).get(1);
+    assertTrue(n2.isIStatement());
+    assertEquals(n2.asIStatement().getNodeType2(), ABLNodeType.TEMPTABLE);
+  }
+
+  @Test
+  public void testPublishFrom() {
+    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "publishFrom.cls"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().query(ABLNodeType.PUBLISH).size(), 1);
+    JPNode n1 = unit.getTopNode().query(ABLNodeType.PUBLISH).get(0);
+    assertNotNull(n1.findDirectChild(ABLNodeType.PARAMETER_LIST));
+  }
+
 }

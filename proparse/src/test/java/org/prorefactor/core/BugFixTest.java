@@ -30,7 +30,8 @@ import java.util.List;
 
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -39,9 +40,6 @@ import org.prorefactor.treeparser.symbols.Variable.ReadWrite;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
@@ -63,17 +61,14 @@ public class BugFixTest {
 
   @BeforeTest
   public void setUp() throws IOException, InvalidRCodeException {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+    session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     session.getSchema().createAlias("foo", "sports2000");
     session.injectTypeInfo(
         new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ParentClass.r")).getTypeInfo());
     session.injectTypeInfo(
         new RCodeInfo(new FileInputStream("src/test/resources/data/rssw/pct/ChildClass.r")).getTypeInfo());
-    session.injectTypeInfo(
-        new RCodeInfo(new FileInputStream("src/test/resources/data/ttClass.r")).getTypeInfo());
-    session.injectTypeInfo(
-        new RCodeInfo(new FileInputStream("src/test/resources/data/ProtectedTT.r")).getTypeInfo());
+    session.injectTypeInfo(new RCodeInfo(new FileInputStream("src/test/resources/data/ttClass.r")).getTypeInfo());
+    session.injectTypeInfo(new RCodeInfo(new FileInputStream("src/test/resources/data/ProtectedTT.r")).getTypeInfo());
 
     tempDir.mkdirs();
   }
@@ -81,8 +76,10 @@ public class BugFixTest {
   @AfterTest
   public void tearDown() throws IOException {
     PrintWriter writer = new PrintWriter(new File(tempDir, "index.html"));
-    writer.println("<!DOCTYPE html><html><head><meta charset=\"utf-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"https://dl.rssw.eu/d3-style.css\" />");
-    writer.println("<script src=\"https://dl.rssw.eu/jquery-1.10.2.min.js\"></script><script src=\"https://dl.rssw.eu/d3.v3.min.js\"></script>");
+    writer.println(
+        "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"https://dl.rssw.eu/d3-style.css\" />");
+    writer.println(
+        "<script src=\"https://dl.rssw.eu/jquery-1.10.2.min.js\"></script><script src=\"https://dl.rssw.eu/d3.v3.min.js\"></script>");
     writer.println("<script>var data= { \"files\": [");
     int zz = 1;
     for (String str : jsonNames) {
@@ -96,7 +93,8 @@ public class BugFixTest {
     for (String str : jsonOut) {
       writer.println("var json" + zz++ + " = " + str + ";");
     }
-    writer.println("</script></head><body><div id=\"wrapper\"><div id=\"left\"></div><div id=\"tree-container\"></div></div>");
+    writer.println(
+        "</script></head><body><div id=\"wrapper\"><div id=\"left\"></div><div id=\"tree-container\"></div></div>");
     writer.println("<script src=\"https://dl.rssw.eu/dndTreeDebug.js\"></script></body></html>");
     writer.close();
   }
@@ -116,7 +114,7 @@ public class BugFixTest {
         ABLNodeType.RIGHTPAREN, ABLNodeType.COMMA, ABLNodeType.PERIOD, ABLNodeType.LEXCOLON, ABLNodeType.OBJCOLON,
         ABLNodeType.THEN, ABLNodeType.END);
     nodeLister.print();
-    
+
     jsonNames.add(file);
     jsonOut.add(writer.toString());
 
@@ -437,15 +435,15 @@ public class BugFixTest {
   }
 
   // Next two tests : same exception should be thrown in both cases
-//  @Test(expectedExceptions = {ProparseRuntimeException.class})
-//  public void testCache1() {
-//    genericTest("CacheChild.cls");
-//  }
-//
-//  @Test(expectedExceptions = {ProparseRuntimeException.class})
-//  public void testCache2() {
-//    genericTest("CacheChild.cls");
-//  }
+  // @Test(expectedExceptions = {ProparseRuntimeException.class})
+  // public void testCache1() {
+  // genericTest("CacheChild.cls");
+  // }
+  //
+  // @Test(expectedExceptions = {ProparseRuntimeException.class})
+  // public void testCache2() {
+  // genericTest("CacheChild.cls");
+  // }
 
   @Test
   public void testSerializableKeyword() {
@@ -644,23 +642,23 @@ public class BugFixTest {
 
   @Test
   public void testRCodeStructure() {
-     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/ChildClass.cls"), session);
-     assertNull(unit.getTopNode());
-     assertNull(unit.getRootScope());
-     unit.treeParser01();
-     assertFalse(unit.hasSyntaxError());
-     assertNotNull(unit.getTopNode());
-   }
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/ChildClass.cls"), session);
+    assertNull(unit.getTopNode());
+    assertNull(unit.getRootScope());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+  }
 
   @Test
   public void testProtectedTTAndBuffers() {
-     ParseUnit unit = new ParseUnit(new File("src/test/resources/data/ProtectedTT.cls"), session);
-     assertNull(unit.getTopNode());
-     assertNull(unit.getRootScope());
-     unit.treeParser01();
-     assertFalse(unit.hasSyntaxError());
-     assertNotNull(unit.getTopNode());
-   }
+    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/ProtectedTT.cls"), session);
+    assertNull(unit.getTopNode());
+    assertNull(unit.getRootScope());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+  }
 
   @Test
   public void testAscendingFunction() {

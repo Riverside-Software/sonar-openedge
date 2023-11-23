@@ -19,7 +19,6 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
-import java.io.File;
 import java.util.Date;
 
 import org.sonar.api.platform.Server;
@@ -42,11 +41,6 @@ public class TestServer extends Server {
   }
 
   @Override
-  public File getRootDir() {
-    return null;
-  }
-
-  @Override
   public String getContextPath() {
     return "";
   }
@@ -57,18 +51,8 @@ public class TestServer extends Server {
   }
 
   @Override
-  public boolean isDev() {
-    return false;
-  }
-
-  @Override
   public boolean isSecured() {
     return false;
-  }
-
-  @Override
-  public String getURL() {
-    return "http://localhost";
   }
 
   @Override

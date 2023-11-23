@@ -22,14 +22,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.StatementFlowWriter;
-import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 public class StatementFlowTest {
 
@@ -40,9 +38,8 @@ public class StatementFlowTest {
   private final static String EXPECTDIR = "src/test/resources/treeparser06-expect/";
 
   @BeforeTest
-  public void setUp() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+  public void setUp() throws IOException {
+    session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     session.getSchema().createAlias("foo", "sports2000");
     new File(TARGETDIR).mkdirs();
   }

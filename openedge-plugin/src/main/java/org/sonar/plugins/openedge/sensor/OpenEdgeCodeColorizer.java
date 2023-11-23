@@ -28,6 +28,8 @@ import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.proparse.XCodedFileException;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.treeparser.ParseUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextPointer;
@@ -36,15 +38,13 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.highlighting.NewHighlighting;
 import org.sonar.api.batch.sensor.highlighting.TypeOfText;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.IRefactorSessionEnv;
 import org.sonar.plugins.openedge.foundation.InputFileUtils;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
 public class OpenEdgeCodeColorizer implements Sensor {
-  private static final Logger LOG = Loggers.get(OpenEdgeCodeColorizer.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeCodeColorizer.class);
 
   // IoC
   private final OpenEdgeSettings settings;

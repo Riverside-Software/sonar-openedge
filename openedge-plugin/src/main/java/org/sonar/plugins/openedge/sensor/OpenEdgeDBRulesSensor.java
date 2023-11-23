@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
@@ -32,8 +34,6 @@ import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
@@ -41,7 +41,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import eu.rssw.antlr.database.DumpFileUtils;
 
 public class OpenEdgeDBRulesSensor implements Sensor {
-  private static final Logger LOG = Loggers.get(OpenEdgeDBRulesSensor.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeDBRulesSensor.class);
 
   // IoC
   private final OpenEdgeComponents components;

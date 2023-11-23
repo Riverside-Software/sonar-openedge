@@ -23,8 +23,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Set;
-
-import com.google.common.base.Joiner;
+import java.util.stream.Collectors;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
@@ -159,7 +158,8 @@ public class MethodElementV11 extends AbstractAccessibleElement implements IMeth
 
   @Override
   public int hashCode() {
-    return (getName() + "/" + getReturnType() + "/" + getExtent() + "/" + Joiner.on('/').join(parameters)).hashCode();
+    String str = Arrays.stream(parameters).map(IParameter::toString).collect(Collectors.joining("/"));
+    return (getName() + "/" + getReturnType() + "/" + getExtent() + "/" + str).hashCode();
   }
 
   @Override

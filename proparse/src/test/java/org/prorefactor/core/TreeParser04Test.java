@@ -24,15 +24,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.apache.commons.io.FileUtils;
+import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.TP01FramesTreeLister;
-import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.proparse.support.JPNodeLister;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.Test;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 /**
  * Test frame scopes and implicit field associations to frames.
@@ -45,8 +43,7 @@ public class TreeParser04Test {
   @Test(enabled = false)
   public void test01() throws IOException {
     // TODO Re-enable test when FrameStack implementation is 100% identical to previous one
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    RefactorSession session = injector.getInstance(RefactorSession.class);
+    RefactorSession session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     outFile.getParentFile().mkdirs();
 
     ParseUnit pu = new ParseUnit(new File(inName), session);

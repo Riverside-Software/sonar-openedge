@@ -36,15 +36,13 @@ import org.prorefactor.core.nodetypes.NamedMemberNode;
 import org.prorefactor.core.nodetypes.SingleArgumentExpression;
 import org.prorefactor.core.nodetypes.TwoArgumentsExpression;
 import org.prorefactor.core.nodetypes.UserFunctionCallNode;
-import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.DataType;
@@ -61,8 +59,7 @@ public class ExpressionEngineTest {
 
   @BeforeMethod
   public void setUp() throws IOException, InvalidRCodeException {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+    session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
 
     // For testObjectAttribute02
     TypeInfo typeInfo01 = new TypeInfo("rssw.test.Class02", false, false, "Progress.Lang.Object", "");

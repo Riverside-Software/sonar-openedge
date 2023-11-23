@@ -27,7 +27,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.proparse.ABLLexer;
 import org.prorefactor.proparse.ErrorDetectionListener;
 import org.prorefactor.proparse.ProparseErrorStrategy;
@@ -37,8 +38,6 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.common.io.ByteSource;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.progress.xref.EmptyCrossReference;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
@@ -51,8 +50,7 @@ public class ErrorRangeTest {
 
   @BeforeTest
   public void setUp() throws IOException, InvalidRCodeException {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+    session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
   }
 
   @Test

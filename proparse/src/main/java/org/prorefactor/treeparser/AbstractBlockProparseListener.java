@@ -1,5 +1,7 @@
 package org.prorefactor.treeparser;
 
+import javax.inject.Inject;
+
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.prorefactor.core.JPNode;
@@ -26,8 +28,6 @@ import org.prorefactor.proparse.antlr4.ProparseBaseListener;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
 import org.prorefactor.treeparser.symbols.Routine;
-
-import com.google.inject.Inject;
 
 public abstract class AbstractBlockProparseListener extends ProparseBaseListener {
   final ParserSupport support;

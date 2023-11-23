@@ -19,8 +19,8 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.plugins.openedge.api.CheckRegistration;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
@@ -29,14 +29,14 @@ import org.sonar.plugins.openedge.checks.LargeTransactionScope;
 import org.sonar.plugins.openedge.checks.NoOpDatabaseRule;
 
 public class BasicChecksRegistration implements CheckRegistration {
-  private static final Logger LOGGER = Loggers.get(BasicChecksRegistration.class);
+  private static final Logger LOG = LoggerFactory.getLogger(BasicChecksRegistration.class);
 
   /**
    * Register the classes that will be used to instantiate checks during analysis.
    */
   @Override
   public void register(Registrar registrar) {
-    LOGGER.debug("Registering CheckRegistrar {}", BasicChecksRegistration.class.toString());
+    LOG.debug("Registering {}", registrar.getClass().getCanonicalName());
 
     for (Class<? extends OpenEdgeProparseCheck> clz : ppCheckClasses()) {
       registrar.registerParserCheck(clz);

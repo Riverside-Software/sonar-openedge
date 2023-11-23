@@ -21,17 +21,17 @@ package org.sonar.plugins.openedge.decorator;
 
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.measures.Metric;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 
 public class CommonMetricsDecorator implements MeasureComputer {
-  private static final Logger LOG = Loggers.get(CommonMetricsDecorator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CommonMetricsDecorator.class);
 
   @SuppressWarnings("rawtypes")
   private final Metric[] intMetrics;

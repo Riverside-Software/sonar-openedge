@@ -20,16 +20,16 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
 import org.prorefactor.core.schema.ISchema;
-import org.prorefactor.core.util.UnitTestModule;
+import org.prorefactor.core.util.SportsSchema;
+import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 public class AliasesTest {
   private RefactorSession session;
@@ -38,8 +38,11 @@ public class AliasesTest {
 
   @BeforeTest
   public void setUp() {
-    Injector injector = Guice.createInjector(new UnitTestModule());
-    session = injector.getInstance(RefactorSession.class);
+    try {
+      session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
+    } catch (IOException caught) {
+      throw new UncheckedIOException(caught);
+    }
     schema = session.getSchema();
     schema.createAlias("dictdb", "sports2000");
     schema.createAlias("foo", "sports2000");
@@ -84,7 +87,7 @@ public class AliasesTest {
   }
 
   @Test
-  public void test05()  {
+  public void test05() {
     // Issue #27
     assertNotNull(schema.lookupTable("salesrep"), "Salesrep table exists");
     assertNull(schema.lookupTable("salesrepp"), "Typo, table doesn't exist");

@@ -20,21 +20,21 @@
 
 package org.sonar.plugins.openedge.checks;
 
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.plugins.openedge.api.CheckRegistration;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 
 public class TestChecksRegistration implements CheckRegistration {
-  private static final Logger LOGGER = Loggers.get(TestChecksRegistration.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TestChecksRegistration.class);
 
   /**
    * Register the classes that will be used to instantiate checks during analysis.
    */
   @Override
   public void register(Registrar registrar) {
-    LOGGER.debug("Registering CheckRegistrar {}", TestChecksRegistration.class.toString());
+    LOG.debug("Registering CheckRegistrar {}", TestChecksRegistration.class.toString());
 
     for (Class<? extends OpenEdgeProparseCheck> clz : ppCheckClasses()) {
       registrar.registerParserCheck(clz);

@@ -57,6 +57,8 @@ import org.prorefactor.core.schema.Schema;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.SonarRuntime;
@@ -64,8 +66,6 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.scanner.ScannerSide;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.objects.DatabaseWrapper;
 import org.sonarsource.api.sonarlint.SonarLintSide;
@@ -93,7 +93,7 @@ import eu.rssw.pct.elements.fixed.TypeInfoRCodeProxy;
 @ScannerSide
 @SonarLintSide
 public class OpenEdgeSettings {
-  private static final Logger LOG = Loggers.get(OpenEdgeSettings.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeSettings.class);
 
   // IoC
   private final Configuration config;

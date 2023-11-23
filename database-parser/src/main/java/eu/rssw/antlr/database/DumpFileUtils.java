@@ -19,6 +19,7 @@
  */
 package eu.rssw.antlr.database;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,8 +36,6 @@ import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-
-import com.google.common.io.LineProcessor;
 
 import eu.rssw.antlr.database.objects.DatabaseDescription;
 
@@ -62,12 +61,19 @@ public final class DumpFileUtils {
       outStream.write(buffer, 0, len);
     }
     ByteArrayInputStream buffdInput = new ByteArrayInputStream(outStream.toByteArray());
+    if (defaultCharset == null)
+      defaultCharset = Charset.defaultCharset();
 
     // Trying to read codepage from DF footer
     LineProcessor<Charset> charsetReader = new DFCodePageProcessor(defaultCharset);
-    com.google.common.io.CharStreams.readLines(
-        new InputStreamReader(buffdInput, defaultCharset == null ? Charset.defaultCharset() : defaultCharset),
-        charsetReader);
+    try (Reader reader =  new InputStreamReader(buffdInput, defaultCharset);
+        BufferedReader buff = new BufferedReader(reader)) {
+      String str = buff.readLine();
+      while (str != null) {
+        charsetReader.processLine(str);
+        str = buff.readLine();
+      }
+    }
     buffdInput.reset();
     return getDumpFileParseTree(new InputStreamReader(buffdInput, charsetReader.getResult()));
   }
@@ -105,6 +111,11 @@ public final class DumpFileUtils {
     return visitor.getDatabase();
   }
 
+  private interface LineProcessor<T> {
+    T getResult();
+    boolean processLine(String line);
+  }
+
   private static class DFCodePageProcessor implements LineProcessor<Charset> {
     private Charset charset = Charset.defaultCharset();
 
@@ -119,10 +130,10 @@ public final class DumpFileUtils {
     }
 
     @Override
-    public boolean processLine(String arg0) throws IOException {
-      if (arg0.startsWith("cpstream=")) {
+    public boolean processLine(String line) {
+      if (line.startsWith("cpstream=")) {
         try {
-          charset = Charset.forName(arg0.substring(9));
+          charset = Charset.forName(line.substring(9));
         } catch (IllegalCharsetNameException | UnsupportedCharsetException uncaught) {
           // Undefined for example...
         }

@@ -23,8 +23,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Set;
-
-import com.google.common.base.Joiner;
+import java.util.stream.Collectors;
 
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
@@ -93,8 +92,8 @@ public class DatasetElementV11 extends AbstractAccessibleElement implements IDat
 
   @Override
   public int hashCode() {
-    String str1 = Joiner.on('/').join(bufferNames);
-    String str2 = Joiner.on('/').join(relations);
+    String str1 = String.join("/", bufferNames);
+    String str2 = Arrays.stream(relations).map(IDataRelationElement::toString).collect(Collectors.joining(","));
     return (str1 + "-" + str2).hashCode();
   }
 

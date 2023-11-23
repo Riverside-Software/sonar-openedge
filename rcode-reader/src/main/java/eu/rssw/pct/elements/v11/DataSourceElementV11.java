@@ -24,8 +24,6 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Set;
 
-import com.google.common.base.Joiner;
-
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
@@ -96,7 +94,7 @@ public class DataSourceElementV11 extends AbstractAccessibleElement implements I
 
   @Override
   public int hashCode() {
-    return (queryName + "-" + keyComponentNames + "-" + Joiner.on('/').join(bufferNames)).hashCode();
+    return (queryName + "-" + keyComponentNames + "-" + String.join("/", bufferNames)).hashCode();
   }
 
   @Override

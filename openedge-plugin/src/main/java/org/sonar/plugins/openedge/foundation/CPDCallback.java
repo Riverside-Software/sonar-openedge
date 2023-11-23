@@ -27,19 +27,19 @@ import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.ICallback;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.cpd.NewCpdTokens;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 
 /**
  * This class generates CPD tokens for the CPD engine, by skipping tokens within annotated code blocks and also by
  * reverting preprocessor, as CPD engine doesn't want tokens to overlap.
  */
 public class CPDCallback implements ICallback<NewCpdTokens> {
-  private static final Logger LOG = Loggers.get(CPDCallback.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CPDCallback.class);
 
   private final NewCpdTokens cpdTokens;
   private final OpenEdgeSettings settings;

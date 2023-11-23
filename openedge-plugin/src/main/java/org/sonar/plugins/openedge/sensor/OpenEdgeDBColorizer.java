@@ -23,6 +23,8 @@ import java.io.IOException;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextPointer;
@@ -31,14 +33,12 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.highlighting.NewHighlighting;
 import org.sonar.api.batch.sensor.highlighting.TypeOfText;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.openedge.api.Constants;
 
 import eu.rssw.antlr.database.DumpFileGrammarLexer;
 
 public class OpenEdgeDBColorizer implements Sensor {
-  private static final Logger LOG = Loggers.get(OpenEdgeDBColorizer.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeDBColorizer.class);
 
   @Override
   public void describe(SensorDescriptor descriptor) {

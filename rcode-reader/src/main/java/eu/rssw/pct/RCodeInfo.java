@@ -30,8 +30,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
-import com.google.common.base.Strings;
-
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.v11.TypeInfoV11;
 import eu.rssw.pct.elements.v12.TypeInfoV12;
@@ -331,7 +329,7 @@ public class RCodeInfo {
       pos++;
     }
     if ((pos % 16) != 0) {
-      writer.print(Strings.repeat("   ", 16 - (pos % 16)));
+      writer.print("   ".repeat(16 - (pos % 16)));
       writer.println(" | " + sb.toString());
     }
   }

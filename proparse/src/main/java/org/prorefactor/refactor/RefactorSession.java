@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
@@ -38,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.inject.Inject;
 
 import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
