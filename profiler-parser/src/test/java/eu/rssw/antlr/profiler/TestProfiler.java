@@ -136,7 +136,7 @@ public class TestProfiler {
     ProfilerSession session = ProfilerUtils.getProfilerSession(Paths.get("src/test/resources/profiler-11.7.9.out"));
     assertEquals(session.getVersionNumber(), 1);
     assertNotNull(session.getJsonDescription());
-    assertTrue(session.getJsonDescription().trim().isEmpty());
+    assertTrue(session.getJsonDescription().isEmpty());
     assertEquals(session.getModules().size(), 3);
     assertFalse(session.hasModuleInfo());
     assertFalse(session.hasTracingData());
