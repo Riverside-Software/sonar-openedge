@@ -37,11 +37,11 @@ profiler:
 description:
   version=NUMBER
     { try { versionNumber = Integer.parseInt($version.text) ; } catch (NumberFormatException uncaught) { } } 
-  date=DATE desc=STRING time=TIME author=STRING jsonData NEWLINE CHR_DOT NEWLINE;
+  date=DATE desc=STRING time=TIME author=STRING jsonData CHR_DOT NEWLINE;
 
 jsonData:
-  | { versionNumber >= 3 }?
-  '{' STRING ':' ( NUMBER | FLOAT | STRING ) ( ',' STRING ':' ( NUMBER | FLOAT | STRING ) )* '}';
+    { versionNumber < 3 }? NEWLINE
+  | { versionNumber >= 3 }? JSON;
 
 moduleData:
   moduleDataLine* CHR_DOT NEWLINE;
@@ -115,6 +115,9 @@ userData:
 
 userDataLine:
   FLOAT STRING NEWLINE;
+
+JSON:
+  '{' .*? '}' WS* NEWLINE;
 
 fragment INT:
   ('0'..'9');
