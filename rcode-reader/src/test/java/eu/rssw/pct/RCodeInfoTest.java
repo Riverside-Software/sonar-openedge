@@ -57,6 +57,7 @@ import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.ParameterType;
 import eu.rssw.pct.elements.PrimitiveDataType;
+import eu.rssw.pct.elements.fixed.EnumGetValueMethodElement;
 import eu.rssw.pct.elements.v12.TypeInfoV12;
 
 public class RCodeInfoTest {
@@ -148,6 +149,7 @@ public class RCodeInfoTest {
 
   private Kryo getKryo() {
     Kryo kryo = new Kryo();
+    kryo.setReferences(true);
     kryo.register(HashMap.class);
     kryo.register(ArrayList.class);
     kryo.register(EnumSet.class);
@@ -167,7 +169,7 @@ public class RCodeInfoTest {
       assertNotNull(rci.getTypeInfo().getProperties());
       assertEquals(rci.getTypeInfo().getProperties().size(), 10);
       assertNotNull(rci.getTypeInfo().getMethods());
-      assertEquals(rci.getTypeInfo().getMethods().size(), 0);
+      assertEquals(rci.getTypeInfo().getMethods().size(), 6);
 
       assertNotNull(rci.getTypeInfo().getProperty("Delete"));
       if (checkEnumValues) {
@@ -701,6 +703,16 @@ public class RCodeInfoTest {
         kryo.writeClassAndObject(data, info);
       }
     }
+    ITypeInfo info = BuiltinClasses.getBuiltinClasses().stream() //
+      .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
+      .findFirst().get();
+    assertNotNull(info);
+    IMethodElement elem = info.getMethods().stream() //
+      .filter(it -> "GetValue".equals(it.getName())) //
+      .findFirst().get();
+    assertNotNull(elem);
+    assertTrue(elem instanceof EnumGetValueMethodElement);
+    assertEquals(((EnumGetValueMethodElement) elem).getParent(), info);
 
     List<ITypeInfo> list = new ArrayList<>();
     try (InputStream input = Files.newInputStream(Paths.get("target/kryo/builtin.bin"));
@@ -713,5 +725,13 @@ public class RCodeInfoTest {
     }
 
     assertEquals(list.size(), BuiltinClasses.getBuiltinClasses().size());
+    ITypeInfo info2 = list.stream() //
+        .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
+        .findFirst().get();
+    IMethodElement elem2 = info2.getMethods().stream().filter(it -> "GetValue".equals(it.getName())) //
+    .findFirst().get();
+    assertNotNull(elem2);
+    assertTrue(elem2 instanceof EnumGetValueMethodElement);
+    assertEquals(((EnumGetValueMethodElement) elem2).getParent(), info2);
   }
 }
