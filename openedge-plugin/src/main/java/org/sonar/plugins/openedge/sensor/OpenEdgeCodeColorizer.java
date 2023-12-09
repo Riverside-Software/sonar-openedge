@@ -31,6 +31,7 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarProduct;
+import org.sonar.api.batch.DependsUpon;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextPointer;
 import org.sonar.api.batch.sensor.Sensor;
@@ -41,16 +42,20 @@ import org.sonar.api.batch.sensor.highlighting.TypeOfText;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.IRefactorSessionEnv;
 import org.sonar.plugins.openedge.foundation.InputFileUtils;
+import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
+@DependsUpon(value = {"PctDependencies"})
 public class OpenEdgeCodeColorizer implements Sensor {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeCodeColorizer.class);
 
   // IoC
   private final OpenEdgeSettings settings;
-  
-  public OpenEdgeCodeColorizer(OpenEdgeSettings settings) {
+  private final OpenEdgeComponents components;
+
+  public OpenEdgeCodeColorizer(OpenEdgeSettings settings, OpenEdgeComponents components) {
     this.settings = settings;
+    this.components = components;
   }
 
   @Override
@@ -64,9 +69,13 @@ public class OpenEdgeCodeColorizer implements Sensor {
       return;
     settings.init();
     IRefactorSessionEnv sessions = settings.getProparseSessions();
-
+    boolean skipUnchangedFiles = settings.skipUnchangedFiles();
     for (InputFile file : context.fileSystem().inputFiles(
         context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
+      if (skipUnchangedFiles && !components.isChanged(context, file)) {
+        LOG.debug("Skip {} as it is unchanged in this branch", file);
+        continue;
+      }
       LOG.debug("Syntax highlight on {}", file);
       IProparseEnvironment session = sessions.getSession(file.toString());
       try {

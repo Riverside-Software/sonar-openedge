@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.annotation.processing.Generated;
 
+import eu.rssw.pct.elements.fixed.EnumGetValueMethodElement;
 import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.fixed.PropertyElement;
@@ -74,6 +75,7 @@ public class BuiltinClasses {
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.ApplicationServer.AdapterTypes", false, false, PLE_CLASSNAME, "");
+    typeInfo.addMethod(new EnumGetValueMethodElement(typeInfo));
     typeInfo.addProperty(new PropertyElement("Unexpected", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
     typeInfo.addProperty(new PropertyElement("APSV", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
     typeInfo.addProperty(new PropertyElement("SOAP", true, new DataType("Progress.ApplicationServer.AdapterTypes")));
@@ -1159,6 +1161,7 @@ public class BuiltinClasses {
 
     BUILTIN_CLASSES.add(typeInfo);
     typeInfo = new TypeInfo("Progress.Lang.FlagsEnum", false, false, PLE_CLASSNAME, "");
+    typeInfo.addMethod(new EnumGetValueMethodElement(typeInfo));
     typeInfo.addMethod(new MethodElement("IsFlagSet", false, DataType.LOGICAL,
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType("Progress.Lang.FlagsEnum"))));
     BUILTIN_CLASSES.add(typeInfo);
@@ -1251,6 +1254,7 @@ public class BuiltinClasses {
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.Reflect.AccessMode", false, false, PLE_CLASSNAME, "");
+    typeInfo.addMethod(new EnumGetValueMethodElement(typeInfo));
     typeInfo.addProperty(new PropertyElement("Public", true, new DataType("Progress.Reflect.AccessMode")));
     typeInfo.addProperty(new PropertyElement("Protected", true, new DataType("Progress.Reflect.AccessMode")));
     typeInfo.addProperty(new PropertyElement("Private", true, new DataType("Progress.Reflect.AccessMode")));
@@ -1267,6 +1271,7 @@ public class BuiltinClasses {
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.Reflect.DataType", false, false, PLE_CLASSNAME, "");
+    typeInfo.addMethod(new EnumGetValueMethodElement(typeInfo));
     typeInfo.addProperty(new PropertyElement("AnyType", true, new DataType("Progress.Reflect.DataType")));
     typeInfo.addProperty(new PropertyElement("Buffer", true, new DataType("Progress.Reflect.DataType")));
     typeInfo.addProperty(new PropertyElement("Byte", true, new DataType("Progress.Reflect.DataType")));

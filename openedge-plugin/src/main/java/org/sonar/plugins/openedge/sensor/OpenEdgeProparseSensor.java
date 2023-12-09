@@ -55,6 +55,7 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarProduct;
+import org.sonar.api.batch.DependsUpon;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
@@ -90,6 +91,7 @@ import com.progress.xref.InvalidXMLFilterStream;
 import eu.rssw.listing.CodeBlock;
 import eu.rssw.listing.ListingParser;
 
+@DependsUpon(value = {"PctDependencies"})
 public class OpenEdgeProparseSensor implements Sensor {
   private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeProparseSensor.class);
 
@@ -142,8 +144,13 @@ public class OpenEdgeProparseSensor implements Sensor {
   public void execute(SensorContext context) {
     if (settings.skipProparseSensor())
       return;
+
     settings.init();
     components.init(context);
+    boolean skipUnchangedFiles = settings.skipUnchangedFiles();
+    if (skipUnchangedFiles)
+      LOG.info("Unchanged files will be skipped during the analysis (SonarQube DE or more, version 9.9 or more, and sonar.pullrequest.branch is set)");
+
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
     }
@@ -157,12 +164,19 @@ public class OpenEdgeProparseSensor implements Sensor {
     long prevMessage = System.currentTimeMillis();
     for (InputFile file : context.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
-      LOG.debug("Parsing {}", file);
+      if (skipUnchangedFiles) {
+        if (components.isChanged(context, file))
+          LOG.debug("Analyzing {} as it is changed in this branch", file);
+        else {
+          LOG.debug("Skip {} as it is unchanged in this branch", file);
+          continue;
+        }
+      }
       numFiles++;
 
       if (System.currentTimeMillis() - prevMessage > 30000L) {
         prevMessage = System.currentTimeMillis();
-        LOG.info("{}/{} - Current file: {}", numFiles, totFiles, file.toString());
+        LOG.info("{}/{} - Current file: {}", numFiles, totFiles, file);
       }
       IProparseEnvironment session = sessions.getSession(file.toString());
       if (settings.isIncludeFile(file.filename())) {

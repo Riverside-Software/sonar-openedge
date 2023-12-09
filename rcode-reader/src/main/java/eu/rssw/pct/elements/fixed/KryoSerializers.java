@@ -27,6 +27,7 @@ import com.esotericsoftware.kryo.io.Output;
 import eu.rssw.pct.elements.AccessType;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.ParameterType;
 import eu.rssw.pct.elements.PrimitiveDataType;
@@ -47,6 +48,22 @@ public class KryoSerializers {
     kryo.register(DataType.class, new DataTypeSerializer(), 25);
     kryo.register(PrimitiveDataType.class, 26);
     kryo.register(AccessType.class, 27);
+    kryo.register(EnumGetValueMethodElement.class, new EnumGetValueMethodElementSerializer(), 28);
+  }
+
+  public static class EnumGetValueMethodElementSerializer extends Serializer<EnumGetValueMethodElement> {
+
+    @Override
+    public void write(Kryo kryo, Output output, EnumGetValueMethodElement object) {
+      kryo.writeClassAndObject(output, object.getParent());
+    }
+
+    @Override
+    public EnumGetValueMethodElement read(Kryo kryo, Input input, Class<? extends EnumGetValueMethodElement> type) {
+      ITypeInfo parent = (ITypeInfo) kryo.readClassAndObject(input);
+      return new EnumGetValueMethodElement(parent);
+    }
+
   }
 
   public static class MethodElementSerializer extends Serializer<MethodElement> {

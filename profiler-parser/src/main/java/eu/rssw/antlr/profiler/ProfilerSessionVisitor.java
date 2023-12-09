@@ -62,7 +62,10 @@ public class ProfilerSessionVisitor extends ProfilerGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitJsonData(JsonDataContext ctx) {
-    session.setJsonDescription(ctx.getText());
+    if (ctx.JSON() != null)
+      session.setJsonDescription(ctx.JSON().getText().trim());
+    else
+      session.setJsonDescription("");
     return null;
   }
 

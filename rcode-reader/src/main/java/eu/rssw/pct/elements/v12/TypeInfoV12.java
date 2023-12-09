@@ -40,6 +40,7 @@ import eu.rssw.pct.elements.IQueryElement;
 import eu.rssw.pct.elements.ITableElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.fixed.EnumGetValueMethodElement;
 
 public class TypeInfoV12 implements ITypeInfo {
   private static final int IS_FINAL = 1;
@@ -104,6 +105,8 @@ public class TypeInfoV12 implements ITypeInfo {
     currOffset += 56;
     boolean isEnum = "Progress.Lang.Enum".equals(typeInfo.getParentTypeName())
         || "Progress.Lang.FlagsEnum".equals(typeInfo.getParentTypeName());
+    if (isEnum)
+      typeInfo.getMethods().add(new EnumGetValueMethodElement(typeInfo));
 
     for (int zz = 0; zz < interfaceCount; zz++) {
       String str = RCodeInfo.readNullTerminatedString(segment,
@@ -115,8 +118,6 @@ public class TypeInfoV12 implements ITypeInfo {
     for (int[] entry : entries) {
       String name = RCodeInfo.readNullTerminatedString(segment, textAreaOffset + entry[3]);
       Set<AccessType> set = AccessType.getTypeFromString(entry[1]);
-      if (isEnum && (ElementKind.getKind(entry[2]) != ElementKind.PROPERTY))
-        return typeInfo;
 
       switch (ElementKind.getKind(entry[2])) {
         case METHOD:

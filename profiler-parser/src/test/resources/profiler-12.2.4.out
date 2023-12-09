@@ -1,4 +1,4 @@
-3 09/10/2021 "Default description" 16:59:51 "" {"StmtCnt":25,"DataPts":54,"NumWrites":0,"TotTime":0.005093,"BufferSize":61440,"Directory":"/home/gquerret/dev/pct/testbox/PCTRun/test49/","Propath":"/tmp/pct220950602.pl,,/opt/dlc-12.2/tty,/opt/dlc-12.2/tty/OpenEdge.Core.pl,/opt/dlc-12.2/tty/dataadmin.pl,/opt/dlc-12.2/tty/ablunit.pl,/opt/dlc-12.2/tty/adeshar.pl,/opt/dlc-12.2/tty/adeedit.pl,/opt/dlc-12.2/tty/adecomm.pl,/opt/dlc-12.2/tty/prodict.pl,/opt/dlc-12.2/tty/adecomp.pl,/opt/dlc-12.2,/opt/dlc-12.2/bin"}
+3 09/10/2021 "Default description" 16:59:51 "" {"StmtCnt":25,"DataPts":54,"NumWrites":0,"TotTime":0.005093,"BufferSize":61440,"Directory":"/home/gquerret/dev/pct/testbox/PCTRun/test49/","Propath":"/tmp/pct220950602.pl,,/opt/dlc-12.2/tty,/opt/dlc-12.2/tty/OpenEdge.Core.pl,/opt/dlc-12.2/tty/dataadmin.pl,/opt/dlc-12.2/tty/ablunit.pl,/opt/dlc-12.2/tty/adeshar.pl,/opt/dlc-12.2/tty/adeedit.pl,/opt/dlc-12.2/tty/adecomm.pl,/opt/dlc-12.2/tty/prodict.pl,/opt/dlc-12.2/tty/adecomp.pl,/opt/dlc-12.2,/opt/dlc-12.2/bin", PASOE": { "transport": "WEB", "ABLSessionID": "AS-4", "AgentPid": 7096 }}
 .
 2 "test.p" "" 20667 0 ""
 1 "/tmp/pctinit117287014.p" "" 11528 0 ""
