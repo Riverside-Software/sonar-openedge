@@ -31,6 +31,7 @@ import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.annotations.Test;
@@ -47,7 +48,8 @@ public class OpenEdgeCPDSensorTest {
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
     assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE3));
@@ -63,7 +65,8 @@ public class OpenEdgeCPDSensorTest {
     SensorContextTester context = TestProjectSensorContext.createContext();
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
     assertNull(context.cpdTokens(BASEDIR + ":" + FILE3));

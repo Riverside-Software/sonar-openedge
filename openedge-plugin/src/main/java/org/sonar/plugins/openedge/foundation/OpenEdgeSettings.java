@@ -60,12 +60,14 @@ import org.prorefactor.refactor.settings.ProparseSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.CoreProperties;
+import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.scanner.ScannerSide;
+import org.sonar.api.utils.Version;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.objects.DatabaseWrapper;
 import org.sonarsource.api.sonarlint.SonarLintSide;
@@ -499,6 +501,14 @@ public class OpenEdgeSettings {
     return null;
   }
 
+  public Path getPctIncludeFile(InputFile file) {
+    String relPath = getRelativePathToSourceDirs(file);
+    if (Strings.isNullOrEmpty(relPath))
+      return null;
+    else
+      return getPathFromPctDirs(relPath + ".inc");
+  }
+
   public File getWarningsFile(InputFile file) {
     String relPath = getRelativePathToSourceDirs(file);
     if (Strings.isNullOrEmpty(relPath))
@@ -530,6 +540,15 @@ public class OpenEdgeSettings {
       return rtbCompatibility ? getFileFromRtbListDir(relPath, ".l") : getFileFromPctDirs(relPath);
   }
 
+  public boolean skipUnchangedFiles() {
+    if (runtime.getProduct() != SonarProduct.SONARQUBE)
+      return false;
+    boolean developerOrMore = ((runtime.getEdition() == SonarEdition.DEVELOPER)
+        || (runtime.getEdition() == SonarEdition.ENTERPRISE) || (runtime.getEdition() == SonarEdition.DATACENTER));
+    boolean version99OrMore = runtime.getApiVersion().isGreaterThanOrEqual(Version.create(9, 9));
+    return developerOrMore && version99OrMore && config.get("sonar.pullrequest.branch").isPresent();
+  }
+
   private File getFileFromRtbListDir(String fileName, String extension) {
     Path path = Paths.get(fileName);
     int lastPeriodPos = path.getFileName().toString().lastIndexOf('.');
@@ -544,6 +563,16 @@ public class OpenEdgeSettings {
         LOG.debug("  Found in: {}", tmp);
         return tmp.toFile();
       }
+    }
+
+    return null;
+  }
+
+  private Path getPathFromPctDirs(String relPath) {
+    for (Path dir : pctDirs) {
+      Path path = dir.resolve(relPath);
+      if (java.nio.file.Files.exists(path))
+        return path;
     }
 
     return null;
