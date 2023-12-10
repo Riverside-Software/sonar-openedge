@@ -43,14 +43,20 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
   protected static final int STATIC_METHOD = 512;
 
   private final IVariableElement var;
+  private final Long enumValue;
 
   public PropertyElement(String name, boolean isStatic) {
     this(name, isStatic, DataType.VOID);
   }
 
   public PropertyElement(String name, boolean isStatic, DataType dataType) {
+    this(name, isStatic, dataType, null);
+  }
+
+  public PropertyElement(String name, boolean isStatic, DataType dataType, Long enumValue) {
     super(name, isStatic ? EnumSet.of(AccessType.STATIC, AccessType.PUBLIC) : EnumSet.of(AccessType.PUBLIC));
     var = new VariableElement(name, dataType);
+    this.enumValue = enumValue;
   }
 
   @Override
@@ -75,7 +81,23 @@ public class PropertyElement extends AbstractAccessibleElement implements IPrope
 
   @Override
   public IEnumDescriptor getEnumDescriptor() {
-    return null;
+    if (enumValue == null)
+      return null;
+    else
+      return new IEnumDescriptor() {
+        @Override
+        public int getSizeInRCode() {
+          return 0;
+        }
+        @Override
+        public String getName() {
+          return null;
+        }
+        @Override
+        public long getValue() {
+          return enumValue;
+        }
+      };
   }
 
 }

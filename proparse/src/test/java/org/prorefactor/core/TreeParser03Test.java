@@ -536,6 +536,8 @@ public class TreeParser03Test {
     Variable var1 = unit.getRootScope().getVariable("yyy");
     assertEquals(var1.getNumReads(), 1);
     assertEquals(var1.getNumWrites(), 1);
+    Variable lvar1 = unit.getRootScope().lookupVariable("yyy");
+    assertEquals(var1, lvar1);
   }
 
   @Test
@@ -551,9 +553,13 @@ public class TreeParser03Test {
     Variable var1 = unit.getRootScope().getVariable("xxx");
     assertEquals(var1.getNumReads(), 0);
     assertEquals(var1.getNumWrites(), 1);
+    Variable lvar1 = unit.getRootScope().lookupVariable("xxx");
+    assertEquals(var1, lvar1);
     Variable var2 = unit.getRootScope().getVariable("yyy");
     assertEquals(var2.getNumReads(), 1);
     assertEquals(var2.getNumWrites(), 1);
+    Variable lvar2 = unit.getRootScope().lookupVariable("yyy");
+    assertEquals(var2, lvar2);
 
     assertEquals(unit.getRootScope().getChildScopes().size(), 2);
     Variable var3 = unit.getRootScope().getChildScopes().get(0).getVariable("xxx");
