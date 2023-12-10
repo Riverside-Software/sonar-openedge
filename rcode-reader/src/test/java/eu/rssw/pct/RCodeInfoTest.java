@@ -58,6 +58,9 @@ import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.ParameterType;
 import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.fixed.EnumGetValueMethodElement;
+import eu.rssw.pct.elements.fixed.EventElement;
+import eu.rssw.pct.elements.fixed.PropertyElement;
+import eu.rssw.pct.elements.fixed.TypeInfo;
 import eu.rssw.pct.elements.v12.TypeInfoV12;
 
 public class RCodeInfoTest {
@@ -507,6 +510,7 @@ public class RCodeInfoTest {
       assertEquals(tt1.getFields().length, 3); // Always an empty field at the end (ROWID ?)
       assertEquals(tt1.getIndexes().length, 1);
       assertEquals(tt1.hashCode(), -2036140043);
+      assertEquals(tt1.getIndexes()[0].hashCode(), 1049755399);
       ITableElement tt2 = rci.getTypeInfo().getTempTable("tt2");
       assertNotNull(tt2);
       assertEquals(tt2.getFields().length, 3);
@@ -733,5 +737,40 @@ public class RCodeInfoTest {
     assertNotNull(elem2);
     assertTrue(elem2 instanceof EnumGetValueMethodElement);
     assertEquals(((EnumGetValueMethodElement) elem2).getParent(), info2);
+  }
+
+  @Test
+  public void testEnumGetValue() {
+    ITypeInfo info = BuiltinClasses.getBuiltinClasses().stream() //
+      .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
+      .findFirst().get();
+    IMethodElement elem = info.getMethods().stream() //
+      .filter(it -> "GetValue".equals(it.getName())) //
+      .findFirst().get();
+    assertEquals(elem.getReturnType(), DataType.INTEGER);
+
+  }
+
+  @Test
+  public void testEnumGetValue2() {
+    TypeInfo typeInfo = new TypeInfo("rssw.sonar.MyEnum", false, false, "Progress.Lang.Enum", "");
+    typeInfo.addMethod(new EnumGetValueMethodElement(typeInfo));
+    typeInfo.addProperty(new PropertyElement("FirstElement", true,
+        new DataType("Progress.ApplicationServer.AdapterTypes"), 8_000_000_000L));
+    IMethodElement elem = typeInfo.getMethods().stream() //
+      .filter(it -> "GetValue".equals(it.getName())) //
+      .findFirst().get();
+    assertEquals(elem.getReturnType(), DataType.INT64);
+  }
+
+  @Test
+  public void testEventElement() {
+    TypeInfo typeInfo = new TypeInfo("rssw.sonar.MyObject", false, false, "Progress.Lang.Object", "");
+    EventElement event1 = new EventElement("event1");
+    typeInfo.addEvent(event1);
+    assertEquals(event1.getReturnType(), DataType.UNKNOWN);
+    assertEquals(event1.getDelegateName(), "");
+    assertNotNull(event1.getParameters());
+    assertEquals(event1.getParameters().length, 0);
   }
 }

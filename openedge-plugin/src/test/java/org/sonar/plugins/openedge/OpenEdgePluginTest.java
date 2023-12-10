@@ -33,11 +33,14 @@ import org.sonar.plugins.openedge.sensor.TestServer;
 import org.testng.annotations.Test;
 
 public class OpenEdgePluginTest {
-  public static final Version VERSION = Version.parse("7.6");
+  public static final Version VERSION_7 = Version.parse("7.6");
+  public static final Version VERSION_9 = Version.parse("9.9");
 
-  public static final SonarRuntime SONARLINT_RUNTIME = SonarRuntimeImpl.forSonarLint(VERSION);
-  public static final SonarRuntime SONARQUBE_RUNTIME = SonarRuntimeImpl.forSonarQube(VERSION, SonarQubeSide.SCANNER,
+  public static final SonarRuntime SONARLINT_RUNTIME = SonarRuntimeImpl.forSonarLint(VERSION_7);
+  public static final SonarRuntime SONARQUBE_RUNTIME = SonarRuntimeImpl.forSonarQube(VERSION_7, SonarQubeSide.SCANNER,
       SonarEdition.COMMUNITY);
+  public static final SonarRuntime SONARQUBE_DE_RUNTIME = SonarRuntimeImpl.forSonarQube(VERSION_9,
+      SonarQubeSide.SCANNER, SonarEdition.DEVELOPER);
 
   public static final Server SERVER = new TestServer();
   public static final MapSettings SETTINGS = new MapSettings();

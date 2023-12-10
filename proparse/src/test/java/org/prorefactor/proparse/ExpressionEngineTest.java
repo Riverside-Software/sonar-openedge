@@ -771,4 +771,32 @@ public class ExpressionEngineTest {
     assertEquals(exp3.getDataType(), DataType.INT64);
   }
 
+  @Test
+  public void testSuperConstructor() {
+    TypeInfo testClass = new TypeInfo("rssw.MyTestClass", false, false, "rssw.test.Class05", "");
+    session.injectTypeInfo(testClass);
+
+    String sourceCode = "class rssw.MyTestClass inherits rssw.test.Class05: "
+        + "constructor public MyTestClass(): "
+        + "  super(). "
+        + "end constructor. "
+        + "constructor public MyTestClass(xyz as int): "
+        + "  this-object(). "
+        + "end constructor. "
+        + "end class.";
+    ParseUnit unit01 = new ParseUnit(sourceCode, session);
+    unit01.treeParser01();
+
+    List<IExpression> nodes = unit01.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+
+    IExpression exp1 = nodes.get(0);
+    assertTrue(exp1 instanceof MethodCallNode);
+    assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp1.getDataType().getClassName(), "rssw.MyTestClass"); // Suspicious
+    IExpression exp2 = nodes.get(1);
+    assertTrue(exp2 instanceof MethodCallNode);
+    assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp2.getDataType().getClassName(), "rssw.MyTestClass");
+  }
 }
