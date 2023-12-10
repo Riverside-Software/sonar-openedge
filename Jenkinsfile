@@ -15,8 +15,8 @@ pipeline {
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: [[credentialsId: scm.userRemoteConfigs.credentialsId[0], url: scm.userRemoteConfigs.url[0], refspec: '+refs/heads/develop:refs/remotes/origin/develop']] ])
         script {
           withEnv(["MVN_HOME=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}", "JAVA_HOME=${tool name: 'Corretto 11', type: 'jdk'}"]) {
-            if (("main" == env.BRANCH_NAME) || ("master" == env.BRANCH_NAME)) {
-              sh "$MVN_HOME/bin/mvn -P release clean package verify deploy -Dgit.commit=\$(git rev-parse --short HEAD)"
+            if ("main" == env.BRANCH_NAME) {
+              sh "$MVN_HOME/bin/mvn -P release clean deploy -Dgit.commit=\$(git rev-parse --short HEAD)"
             } else if ("develop" == env.BRANCH_NAME) {
               sh "$MVN_HOME/bin/mvn clean javadoc:javadoc deploy -Dmaven.test.failure.ignore=true -Dgit.commit=\$(git rev-parse --short HEAD)"
             } else if (env.BRANCH_NAME.startsWith("release") || env.BRANCH_NAME.startsWith("hotfix")) {
