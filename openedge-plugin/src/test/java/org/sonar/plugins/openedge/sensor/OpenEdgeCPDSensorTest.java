@@ -73,4 +73,41 @@ public class OpenEdgeCPDSensorTest {
     assertNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
     assertNull(context.cpdTokens(BASEDIR + ":" + FILE4));
   }
+
+  @Test
+  public void testCPDSensorNoBranch() throws Exception {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(Constants.USE_SIMPLE_CPD, true);
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    context.setSettings(settings);
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_DE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings, components);
+    sensor.execute(context);
+
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE3));
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE4));
+  }
+
+  @Test
+  public void testCPDSensorBranch() throws Exception {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(Constants.USE_SIMPLE_CPD, true);
+    settings.setProperty("sonar.pullrequest.branch", "PR1");
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    context.setSettings(settings);
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_DE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings, components);
+    sensor.execute(context);
+
+    // No file changed, then no CPD tokens
+    assertNull(context.cpdTokens(BASEDIR + ":" + FILE3));
+    assertNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
+    assertNull(context.cpdTokens(BASEDIR + ":" + FILE4));
+  }
+
 }
