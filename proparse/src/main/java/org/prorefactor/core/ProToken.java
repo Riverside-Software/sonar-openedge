@@ -46,6 +46,7 @@ public class ProToken implements Token {
   private int endLine;
   private int endCharPositionInLine;
   private int macroSourceNum;
+  private int preprocessorLevel = 0;
 
   private String analyzeSuspend = null;
   private ProToken hiddenBefore = null;
@@ -252,6 +253,14 @@ public class ProToken implements Token {
 
   public void setTokenIndex(int index) {
     this.index = index;
+  }
+
+  public void setPreprocessorLevel(int preprocessorLevel) {
+    this.preprocessorLevel = preprocessorLevel;
+  }
+
+  public int getPreprocessorLevel() {
+    return preprocessorLevel;
   }
 
   public void setHiddenBefore(ProToken hiddenBefore) {

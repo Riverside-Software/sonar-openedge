@@ -133,6 +133,79 @@ public class PostLexerTest extends AbstractProparseTest {
   }
 
   @Test
+  public void testPreprocessorLevel01() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer05.p"), session);
+    TokenSource src = unit.preprocess();
+
+    ProToken tok = nextToken(src, ABLNodeType.IF);
+    assertEquals(tok.getPreprocessorLevel(), 1);
+    assertEquals(tok.getLine(), 6);
+    tok = nextToken(src, ABLNodeType.IF);
+    assertEquals(tok.getPreprocessorLevel(), 2);
+    assertEquals(tok.getLine(), 9);
+  }
+
+  @Test
+  public void testPreprocessorLevel02() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer06.p"), session);
+    TokenSource src = unit.preprocess();
+
+    ProToken tok = nextToken(src, ABLNodeType.DEFINE);
+    assertEquals(tok.getPreprocessorLevel(), 0);
+
+    tok = nextToken(src, ABLNodeType.MESSAGE);
+    ProToken tokmsg = nextVisibleToken(src);
+    assertEquals(tokmsg.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tokmsg.getText(), "\"test1\"");
+    assertEquals(tok.getPreprocessorLevel(), 1);
+
+    tok = nextToken(src, ABLNodeType.MESSAGE);
+    tokmsg = nextVisibleToken(src);
+    assertEquals(tokmsg.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tokmsg.getText(), "\"test3\"");
+    assertEquals(tok.getPreprocessorLevel(), 2);
+
+    tok = nextToken(src, ABLNodeType.MESSAGE);
+    tokmsg = nextVisibleToken(src);
+    assertEquals(tokmsg.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tokmsg.getText(), "\"test4\"");
+    assertEquals(tok.getPreprocessorLevel(), 1);
+
+    tok = nextToken(src, ABLNodeType.DEFINE);
+    assertEquals(tok.getPreprocessorLevel(), 0);
+  }
+
+  @Test
+  public void testPreprocessorLevel03() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer07.p"), session);
+    TokenSource src = unit.preprocess();
+
+    ProToken tok = nextToken(src, ABLNodeType.MESSAGE);
+    ProToken tokmsg = nextVisibleToken(src);
+    assertEquals(tokmsg.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tokmsg.getText(), "\"test1\"");
+    assertEquals(tok.getPreprocessorLevel(), 1);
+
+    tok = nextToken(src, ABLNodeType.MESSAGE);
+    tokmsg = nextVisibleToken(src);
+    assertEquals(tokmsg.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tokmsg.getText(), "\"test3\"");
+    assertEquals(tok.getPreprocessorLevel(), 3);
+
+    tok = nextToken(src, ABLNodeType.MESSAGE);
+    tokmsg = nextVisibleToken(src);
+    assertEquals(tokmsg.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tokmsg.getText(), "\"test4\"");
+    assertEquals(tok.getPreprocessorLevel(), 2);
+
+    tok = nextToken(src, ABLNodeType.MESSAGE);
+    tokmsg = nextVisibleToken(src);
+    assertEquals(tokmsg.getNodeType(), ABLNodeType.QSTRING);
+    assertEquals(tokmsg.getText(), "\"test5\"");
+    assertEquals(tok.getPreprocessorLevel(), 1);
+  }
+
+  @Test
   public void testAnalyzeSuspend() {
     ParseUnit unit2 = getParseUnit(new File(SRC_DIR, "lexer05.p"), session);
     unit2.parse();
