@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.SerializedName;
 
 import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
@@ -146,13 +147,13 @@ public class RefactorSession implements IProparseEnvironment {
         }
       }
       if (info.properties != null) {
-        for (String str : info.properties) {
-          typeInfo.addProperty(new PropertyElement(str, false));
+        for (Property str : info.properties) {
+          typeInfo.addProperty(new PropertyElement(str.name, false));
         }
       }
       if (info.staticProperties != null) {
-        for (String str : info.staticProperties) {
-          typeInfo.addProperty(new PropertyElement(str, true));
+        for (Property str : info.staticProperties) {
+          typeInfo.addProperty(new PropertyElement(str.name, true));
         }
       }
       classInfo.put(typeInfo.getTypeName(), typeInfo);
@@ -310,10 +311,16 @@ public class RefactorSession implements IProparseEnvironment {
     @SuppressWarnings("unused")
     boolean isEnum;
     boolean isInterface;
-    String[] properties;
+    Property[] properties;
     MethodInfo[] methods;
     MethodInfo[] staticMethods;
-    String[] staticProperties;
+    Property[] staticProperties;
+  }
+  public static class Property {
+    @SerializedName(value = "name")
+    public String name;
+    @SerializedName(value = "dataType")
+    public String dataType;
   }
 
   private class MethodInfo {
