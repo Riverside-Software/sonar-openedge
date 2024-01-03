@@ -253,6 +253,10 @@ public class OpenEdgeSettings {
   }
 
   private final void initializeBinaryCache(String optionName) {
+    if (kryo == null) {
+      kryo = getKryoInstance();
+    }
+
     Optional<String> option = config.get(optionName);
     LOG.debug("Initialize binary cache from {}", option);
     if (option.isPresent()) {
@@ -920,7 +924,7 @@ public class OpenEdgeSettings {
         Input input = new Input(gzip)) {
       int magic = input.readInt();
       int version = input.readInt();
-      if ((magic == 0x57535352) && (version == 1)) {
+      if ((magic == 0x57535352) && (version == 2)) {
         Object obj = kryo.readClassAndObject(input);
         if (obj instanceof Schema)
           return (Schema) obj;
@@ -934,17 +938,18 @@ public class OpenEdgeSettings {
   }
 
   private Kryo getKryoInstance() {
-    Kryo kryo = new Kryo();
-    kryo.register(HashMap.class);
-    kryo.register(ArrayList.class);
-    kryo.register(EnumSet.class);
-    eu.rssw.pct.elements.fixed.KryoSerializers.addSerializers(kryo);
-    eu.rssw.pct.elements.v11.KryoSerializers.addSerializers(kryo);
-    eu.rssw.pct.elements.v12.KryoSerializers.addSerializers(kryo);
-    eu.rssw.antlr.database.objects.KryoSerializers.addSerializers(kryo);
-    org.sonar.plugins.openedge.api.objects.KryoSerializers.addSerializers(kryo);
+    Kryo kr = new Kryo();
+    kr.setReferences(true);
+    kr.register(HashMap.class);
+    kr.register(ArrayList.class);
+    kr.register(EnumSet.class);
+    eu.rssw.pct.elements.fixed.KryoSerializers.addSerializers(kr);
+    eu.rssw.pct.elements.v11.KryoSerializers.addSerializers(kr);
+    eu.rssw.pct.elements.v12.KryoSerializers.addSerializers(kr);
+    eu.rssw.antlr.database.objects.KryoSerializers.addSerializers(kr);
+    org.sonar.plugins.openedge.api.objects.KryoSerializers.addSerializers(kr);
 
-    return kryo;
+    return kr;
   }
 
   private Schema readSchema(Configuration config, FileSystem fileSystem, String dbPropValue, String aliasPropValue) {
