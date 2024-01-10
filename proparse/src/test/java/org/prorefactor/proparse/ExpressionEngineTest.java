@@ -116,7 +116,6 @@ public class ExpressionEngineTest {
   @Test
   public void testNamedMemberArray01() {
     ParseUnit unit = new ParseUnit(
-
         "define temp-table tt1 field fld1 as int extent. define buffer b1 for tt1. buffer b1::fld1(1).", session);
     unit.treeParser01();
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -799,4 +798,29 @@ public class ExpressionEngineTest {
     assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp2.getDataType().getClassName(), "rssw.MyTestClass");
   }
+
+  @Test
+  public void testEvent01() {
+    String sourceCode = "class rssw.MyTestClass: "
+        + "define public event myEvent01 signature void(). "
+        + "constructor MyTestClass(): "
+        + "  myEvent01:publish(). "
+        + "  myEvent01:subscribe(m1). "
+        + "end constructor. "
+        + "method public void m1(): end method. "
+        + "end class.";
+    ParseUnit unit01 = new ParseUnit(sourceCode, session);
+    unit01.treeParser01();
+
+    List<IExpression> nodes = unit01.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+
+    IExpression exp1 = nodes.get(0);
+    assertTrue(exp1 instanceof MethodCallNode);
+    assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.VOID);
+    IExpression exp2 = nodes.get(1);
+    assertTrue(exp2 instanceof MethodCallNode);
+    assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.VOID);
+  }
+
 }
