@@ -298,6 +298,7 @@ public class ParseUnit {
   public void parse() {
     parse(false);
   }
+
   public void parse(boolean c3) {
     LOGGER.trace("Entering ParseUnit#parse()");
 
@@ -374,6 +375,7 @@ public class ParseUnit {
     appBuilderSections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
     metrics = lexer.getMetrics();
     support = parser.getParserSupport();
+    typeInfo = session.getTypeInfo(className);
 
     if (profiler) {
       parseInfo = parser.getParseInfo();
@@ -505,10 +507,6 @@ public class ParseUnit {
         }
       }
     }
-  }
-
-  public void attachTypeInfo(ITypeInfo unit) {
-    this.typeInfo = unit;
   }
 
   public void attachTransactionBlocks(List<Integer> blocks) {

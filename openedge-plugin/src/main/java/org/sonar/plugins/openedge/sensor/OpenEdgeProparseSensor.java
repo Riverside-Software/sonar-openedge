@@ -318,7 +318,6 @@ public class OpenEdgeProparseSensor implements Sensor {
       unit.treeParser01();
 
       unit.attachTransactionBlocks(trxBlocks);
-      unit.attachTypeInfo(session.getTypeInfo(unit.getClassName()));
       updateParseTime(System.currentTimeMillis() - startTime);
     } catch (UncheckedIOException caught) {
       numFailures++;
