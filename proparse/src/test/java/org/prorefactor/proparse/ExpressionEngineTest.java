@@ -20,7 +20,9 @@ import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.List;
 
 import org.prorefactor.core.nodetypes.ArrayReferenceNode;
@@ -90,6 +92,15 @@ public class ExpressionEngineTest {
         new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER), //
         new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     session.injectTypeInfo(typeInfo04);
+
+    // For catalog
+    TypeInfo typeInfo05 = new TypeInfo("rssw.MyTestClassCatalog", false, false, "System.Windows.Forms.Control", "");
+    session.injectTypeInfo(typeInfo05);
+
+    // Inject content of catalog.json
+    try (Reader reader = new FileReader("src/test/resources/catalog.json")) {
+      session.injectClassesFromCatalog(reader);
+    }
   }
 
   @Test
@@ -823,4 +834,23 @@ public class ExpressionEngineTest {
     assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.VOID);
   }
 
+  @Test
+  public void testCatalog01() {
+    String sourceCode = "class rssw.MyTestClassCatalog inherits System.Windows.Forms.Control: "
+        + "constructor MyTestClassCatalog(): "
+        + "  message Size. "
+        + "  message Size:Width. "
+        + "end constructor. "
+        + "end class.";
+    ParseUnit unit01 = new ParseUnit(sourceCode, session);
+    unit01.treeParser01();
+
+    List<IExpression> nodes = unit01.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+    IExpression exp1 = nodes.get(0);
+    assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp1.getDataType().getClassName(), "System.Drawing.Size");
+    IExpression exp2 = nodes.get(1);
+    assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
+  }
 }
