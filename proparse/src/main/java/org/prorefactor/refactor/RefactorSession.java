@@ -148,12 +148,12 @@ public class RefactorSession implements IProparseEnvironment {
       }
       if (info.properties != null) {
         for (Property str : info.properties) {
-          typeInfo.addProperty(new PropertyElement(str.name, false));
+          typeInfo.addProperty(new PropertyElement(str.name, false, toDataType(str.dataType)));
         }
       }
       if (info.staticProperties != null) {
         for (Property str : info.staticProperties) {
-          typeInfo.addProperty(new PropertyElement(str.name, true));
+          typeInfo.addProperty(new PropertyElement(str.name, true, toDataType(str.dataType)));
         }
       }
       classInfo.put(typeInfo.getTypeName(), typeInfo);
@@ -356,10 +356,11 @@ public class RefactorSession implements IProparseEnvironment {
       return new Parameter(num, "prm" + num, extent, mode, toDataType(str));
     }
 
-    private DataType toDataType(String str) {
-      DataType dt = DataType.get(str);
-      return dt.getPrimitive() == PrimitiveDataType.UNKNOWN ? new DataType(str) : dt;
-    }
+  }
+
+  private static DataType toDataType(String str) {
+    DataType dt = DataType.get(str);
+    return dt.getPrimitive() == PrimitiveDataType.UNKNOWN ? new DataType(str) : dt;
   }
 
   @Override
