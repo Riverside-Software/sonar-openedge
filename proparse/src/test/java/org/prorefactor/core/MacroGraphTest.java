@@ -32,11 +32,12 @@ import org.prorefactor.macrolevel.MacroEvent;
 import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.NamedMacroRef;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class MacroGraphTest {
+public class MacroGraphTest extends AbstractProparseTest {
   private final static String SRC_DIR = "src/test/resources/data/preprocessor";
 
   private RefactorSession session;
@@ -65,7 +66,7 @@ public class MacroGraphTest {
 
   @Test
   public void testGlobalDefine() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -76,7 +77,7 @@ public class MacroGraphTest {
 
   @Test
   public void testScopedDefine() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -85,7 +86,7 @@ public class MacroGraphTest {
 
   @Test
   public void testMacroGraph() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -118,7 +119,7 @@ public class MacroGraphTest {
 
   @Test
   public void testMacroGraphPosition() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor02.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -167,7 +168,7 @@ public class MacroGraphTest {
 
   @Test
   public void testIncludeParameter01() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor18.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor18.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -191,7 +192,7 @@ public class MacroGraphTest {
 
   @Test
   public void testIncludeParameter02() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor18-2.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor18-2.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 

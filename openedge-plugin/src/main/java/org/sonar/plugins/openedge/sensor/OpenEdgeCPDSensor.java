@@ -94,7 +94,7 @@ public class OpenEdgeCPDSensor implements Sensor {
 
   private void processFile(SensorContext context, IProparseEnvironment session, InputFile file) {
     TokenSource stream = new ParseUnit(InputFileUtils.getInputStream(file),
-        InputFileUtils.getRelativePath(file, context.fileSystem()), session).lex();
+        InputFileUtils.getRelativePath(file, context.fileSystem()), session, file.charset()).lex();
     if (stream == null)
       return;
 

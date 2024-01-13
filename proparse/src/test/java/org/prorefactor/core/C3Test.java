@@ -16,6 +16,7 @@ package org.prorefactor.core;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -74,7 +75,7 @@ public class C3Test {
 
   private void genericTest(String filename, boolean c3) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(filename))) {
-      ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(ByteStreams.toByteArray(input)), filename, false);
+      ABLLexer lexer = new ABLLexer(session, StandardCharsets.UTF_8, ByteSource.wrap(ByteStreams.toByteArray(input)), filename, false);
       CommonTokenStream tokStream = new CommonTokenStream(lexer);
       Proparse parser = new Proparse(tokStream);
       if (c3)

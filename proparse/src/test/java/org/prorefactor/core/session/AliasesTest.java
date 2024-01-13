@@ -27,11 +27,12 @@ import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class AliasesTest {
+public class AliasesTest extends AbstractProparseTest {
   private RefactorSession session;
   // Just a shortcut for schema
   private ISchema schema;
@@ -50,7 +51,7 @@ public class AliasesTest {
 
   @Test
   public void test01() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/aliases.p"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/data/aliases.p"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();

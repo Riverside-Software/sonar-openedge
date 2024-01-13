@@ -91,7 +91,7 @@ public class OpenEdgeCodeColorizer implements Sensor {
   }
 
   private void highlightFile(SensorContext context, IProparseEnvironment session, InputFile file) {
-    TokenSource stream = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session).lex();
+    TokenSource stream = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session, file.charset()).lex();
 
     ProToken tok = (ProToken) stream.nextToken();
     ProToken nextTok = (ProToken) stream.nextToken();

@@ -23,11 +23,12 @@ import java.io.IOException;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class MetricsTest {
+public class MetricsTest extends AbstractProparseTest {
   private RefactorSession session;
 
   @BeforeTest
@@ -37,7 +38,7 @@ public class MetricsTest {
 
   @Test
   public void test01() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/preprocessor/preprocessor14.p"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/data/preprocessor/preprocessor14.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -47,7 +48,7 @@ public class MetricsTest {
 
   @Test
   public void test02() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/inc3.i"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/data/inc3.i"), session);
     unit.lexAndGenerateMetrics();
 
     assertEquals(unit.getMetrics().getLoc(), 1);

@@ -33,6 +33,7 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
@@ -49,7 +50,7 @@ import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
  * directory. If no exceptions are thrown, then the tests pass. The files in the "bugsfixed" directories are subject to
  * change, so no other tests should be added other than the expectation that they parse clean.
  */
-public class BugFixTest {
+public class BugFixTest extends AbstractProparseTest {
   private final static String SRC_DIR = "src/test/resources/data/bugsfixed";
   private final static String TEMP_DIR = "target/nodes-lister/data/bugsfixed";
 
@@ -100,7 +101,7 @@ public class BugFixTest {
   }
 
   private ParseUnit genericTest(String file) {
-    ParseUnit pu = new ParseUnit(new File(SRC_DIR, file), session);
+    ParseUnit pu = getParseUnit(new File(SRC_DIR, file), session);
     assertNull(pu.getTopNode());
     assertNull(pu.getRootScope());
     pu.parse();
@@ -122,7 +123,7 @@ public class BugFixTest {
   }
 
   private TokenSource genericLex(String file) {
-    ParseUnit pu = new ParseUnit(new File(SRC_DIR, file), session);
+    ParseUnit pu = getParseUnit(new File(SRC_DIR, file), session);
     assertNull(pu.getTopNode());
     assertNull(pu.getMetrics());
     assertNull(pu.getRootScope());
@@ -600,7 +601,7 @@ public class BugFixTest {
 
   @Test
   public void testTTLikeDB02() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/bugsfixed/ttlikedb02.p"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/data/bugsfixed/ttlikedb02.p"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
@@ -642,7 +643,7 @@ public class BugFixTest {
 
   @Test
   public void testRCodeStructure() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/ChildClass.cls"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/data/rssw/pct/ChildClass.cls"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
@@ -652,7 +653,7 @@ public class BugFixTest {
 
   @Test
   public void testProtectedTTAndBuffers() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/ProtectedTT.cls"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/data/ProtectedTT.cls"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
@@ -662,7 +663,7 @@ public class BugFixTest {
 
   @Test
   public void testAscendingFunction() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/bugsfixed/ascending.p"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/data/bugsfixed/ascending.p"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();

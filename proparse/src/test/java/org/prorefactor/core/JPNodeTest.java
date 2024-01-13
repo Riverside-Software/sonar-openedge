@@ -36,6 +36,7 @@ import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -51,7 +52,7 @@ import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 /**
  * Tests for JPNodeVisitor
  */
-public class JPNodeTest {
+public class JPNodeTest extends AbstractProparseTest {
   private final static String SRC_DIR = "src/test/resources/jpnode";
   private final static String TEMP_DIR = "target/nodes-lister/jpnode";
 
@@ -105,7 +106,7 @@ public class JPNodeTest {
   }
 
   private ParseUnit genericTest(String file, CrossReference xref) {
-    ParseUnit pu = new ParseUnit(new File(SRC_DIR, file), session);
+    ParseUnit pu = getParseUnit(new File(SRC_DIR, file), session);
     pu.attachXref(xref);
     assertNull(pu.getTopNode());
     pu.parse();
@@ -126,7 +127,7 @@ public class JPNodeTest {
 
   @Test
   public void testStatements() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "query01.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "query01.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -156,7 +157,7 @@ public class JPNodeTest {
 
   @Test
   public void testSibling() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "query02.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "query02.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertNull(unit.getTopNode().getSibling(ABLNodeType.FOR));

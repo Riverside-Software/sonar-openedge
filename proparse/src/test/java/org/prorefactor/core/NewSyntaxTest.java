@@ -24,6 +24,7 @@ import java.io.IOException;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -36,7 +37,7 @@ import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
  * If no exceptions are thrown, then the tests pass. The files in the "newsyntax" directories are subject to change, so
  * no other tests should be added other than the expectation that they parse clean.
  */
-public class NewSyntaxTest {
+public class NewSyntaxTest extends AbstractProparseTest {
   private RefactorSession session;
 
   @BeforeTest
@@ -50,7 +51,7 @@ public class NewSyntaxTest {
 
   private void testNewSyntax(String file) {
     // Just run the TreeParser to see if file can be parsed without error
-    ParseUnit pu = new ParseUnit(new File("src/test/resources/data/newsyntax", file), session);
+    ParseUnit pu = getParseUnit(new File("src/test/resources/data/newsyntax", file), session);
     pu.treeParser01();
     assertFalse(pu.hasSyntaxError());
   }

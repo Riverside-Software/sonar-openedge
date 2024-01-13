@@ -15,6 +15,7 @@
 package org.prorefactor.proparse;
 
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
@@ -42,12 +43,23 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   private final IPreprocessorEventListener lstListener = new PreprocessorEventListener();
   private final Lexer lexer;
   private final TokenSource wrapper;
+  private final Charset charset;
 
   // How many levels of &IF FALSE are we currently into?
   private int consuming = 0;
 
-  public ABLLexer(IProparseEnvironment session, ByteSource src, boolean lexOnly) {
-    this(session, src, "unnamed", lexOnly);
+  /**
+   * Test-only constructor
+   */
+  protected ABLLexer(IProparseEnvironment session, ByteSource src, boolean lexOnly) {
+    this(session, session.getCharset(), src, lexOnly);
+  }
+
+  /**
+   * Test-only constructor
+   */
+  protected ABLLexer(IProparseEnvironment session, Charset charset, ByteSource src, boolean lexOnly) {
+    this(session, charset, src, "unnamed", lexOnly);
   }
 
   /**
@@ -59,10 +71,11 @@ public class ABLLexer implements TokenSource, IPreprocessor {
    * @param lexOnly Don't use preprocessor
    * @throws UncheckedIOException
    */
-  public ABLLexer(IProparseEnvironment session, ByteSource src, String fileName, boolean lexOnly) {
+  public ABLLexer(IProparseEnvironment session, Charset charset, ByteSource src, String fileName, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.session = session;
     this.lexOnly = lexOnly;
+    this.charset = charset;
 
     lexer = new Lexer(this, src, fileName);
     lexer.setTokenStartChars(session.getProparseSettings().getTokenStartChars());
@@ -86,6 +99,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.session = session;
     this.lexOnly = false;
+    this.charset = session.getCharset();
 
     lexer = new Lexer(this, src, fileName);
     wrapper = new NoOpPostLexer(lexer);
@@ -188,6 +202,10 @@ public class ABLLexer implements TokenSource, IPreprocessor {
 
   public IProparseEnvironment getRefactorSession() {
     return session;
+  }
+
+  public Charset getCharset() {
+    return charset;
   }
 
   public JPNodeMetrics getMetrics() {

@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
@@ -86,6 +87,7 @@ public class ParseUnit {
   private final String str;
   private final InputStream input;
   private final String relativeName;
+  private final Charset charset;
 
   private IntegerIndex<String> fileNameList;
   private ParseTree tree;
@@ -128,40 +130,43 @@ public class ParseUnit {
   private boolean isAbstract;
   private String className;
 
-  public ParseUnit(File file, IProparseEnvironment session) {
-    this(file, file.getPath(), session);
+  // Test-only constructor
+  protected ParseUnit(File file, IProparseEnvironment session) {
+    this(file, file.getPath(), session, session.getCharset());
   }
 
-  public ParseUnit(File file, String relativeName, IProparseEnvironment session) {
+  // Test-only constructor
+  protected ParseUnit(File file, String relativeName, IProparseEnvironment session, Charset charset) {
     this.file = file;
     this.input = null;
     this.str = null;
     this.relativeName = relativeName;
     this.session = session;
+    this.charset = charset;
   }
 
-  public ParseUnit(InputStream input, IProparseEnvironment session) {
-    this(input, "<unnamed>", session);
-  }
-
-  public ParseUnit(InputStream input, String relativeName, IProparseEnvironment session) {
+  public ParseUnit(InputStream input, String relativeName, IProparseEnvironment session, Charset charset) {
     this.file = null;
     this.input = input;
     this.str = null;
     this.relativeName = relativeName;
     this.session = session;
+    this.charset = charset;
   }
 
-  public ParseUnit(String str, IProparseEnvironment session) {
-    this(str, "<unnamed>", session);
+  // Only for tests
+  protected ParseUnit(String code, IProparseEnvironment session) {
+    this(code, "<unnamed>", session);
   }
 
-  public ParseUnit(String str, String relativeName, IProparseEnvironment session) {
+  // Only for tests
+  protected ParseUnit(String code, String relativeName, IProparseEnvironment session) {
     this.file = null;
     this.input = null;
-    this.str = str;
+    this.str = code;
     this.relativeName = relativeName;
     this.session = session;
+    this.charset = session.getCharset();
   }
 
   /**
@@ -261,11 +266,11 @@ public class ParseUnit {
    * @throws UncheckedIOException If main file can't be opened
    */
   public TokenSource lex() {
-    return new ABLLexer(session, getByteSource(), relativeName, true);
+    return new ABLLexer(session, charset, getByteSource(), relativeName, true);
   }
 
   public TokenSource preprocess() {
-    ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
+    ABLLexer lexer = new ABLLexer(session, charset, getByteSource(), relativeName, false);
     if (writableTokens)
       lexer.enableWritableTokens();
     fileNameList = lexer.getFilenameList();
@@ -284,7 +289,7 @@ public class ParseUnit {
    */
   public void lexAndGenerateMetrics() {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
-    ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, true);
+    ABLLexer lexer = new ABLLexer(session, charset, getByteSource(), relativeName, true);
     if (writableTokens)
       lexer.enableWritableTokens();
     Token tok = lexer.nextToken();
@@ -302,7 +307,7 @@ public class ParseUnit {
   public void parse(boolean c3) {
     LOGGER.trace("Entering ParseUnit#parse()");
 
-    ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
+    ABLLexer lexer = new ABLLexer(session, charset, getByteSource(), relativeName, false);
     if (writableTokens)
       lexer.enableWritableTokens();
     CommonTokenStream tokStream = new CommonTokenStream(lexer);
@@ -544,6 +549,10 @@ public class ParseUnit {
     return session;
   }
 
+  public Charset getCharset() {
+    return charset;
+  }
+
   public boolean isAppBuilderCode() {
     return appBuilderCode;
   }
@@ -612,7 +621,7 @@ public class ParseUnit {
 
   private ByteSource getByteSource() {
     if (str != null) {
-      return ByteSource.wrap(str.getBytes(session.getCharset()));
+      return ByteSource.wrap(str.getBytes(charset));
     }
     try (InputStream s = input == null ? new FileInputStream(file) : input) {
       if (s.markSupported())

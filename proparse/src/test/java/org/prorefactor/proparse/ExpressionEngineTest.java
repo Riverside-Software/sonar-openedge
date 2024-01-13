@@ -41,6 +41,7 @@ import org.prorefactor.core.nodetypes.UserFunctionCallNode;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.testng.annotations.BeforeMethod;
@@ -56,7 +57,7 @@ import eu.rssw.pct.elements.fixed.PropertyElement;
 import eu.rssw.pct.elements.fixed.TypeInfo;
 import eu.rssw.pct.elements.fixed.VariableElement;
 
-public class ExpressionEngineTest {
+public class ExpressionEngineTest extends AbstractProparseTest {
   private RefactorSession session;
 
   @BeforeMethod
@@ -114,7 +115,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testNamedMember01() {
-    ParseUnit unit = new ParseUnit(
+    ParseUnit unit = getParseUnit(
         "define temp-table tt1 field fld1 as int. define buffer b1 for tt1. buffer b1::fld1.", session);
     unit.treeParser01();
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -126,7 +127,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testNamedMemberArray01() {
-    ParseUnit unit = new ParseUnit(
+    ParseUnit unit = getParseUnit(
         "define temp-table tt1 field fld1 as int extent. define buffer b1 for tt1. buffer b1::fld1(1).", session);
     unit.treeParser01();
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -152,7 +153,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testMethod01() {
-    ParseUnit unit = new ParseUnit("session:get-printers().", session);
+    ParseUnit unit = getParseUnit("session:get-printers().", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -162,7 +163,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testMethod02() {
-    ParseUnit unit = new ParseUnit("compiler:get-row().", session);
+    ParseUnit unit = getParseUnit("compiler:get-row().", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -211,7 +212,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testSideEffect() {
-    ParseUnit unit = new ParseUnit("etime(true). recid(customer).", session);
+    ParseUnit unit = getParseUnit("etime(true). recid(customer).", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -226,7 +227,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testFunction01() {
-    ParseUnit unit = new ParseUnit("function f1 returns char () forwards. message f1().", session);
+    ParseUnit unit = getParseUnit("function f1 returns char () forwards. message f1().", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -237,7 +238,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testNewObject01() {
-    ParseUnit unit = new ParseUnit("def var xx as Progress.Lang.Object. message new Progress.Lang.Object().", session);
+    ParseUnit unit = getParseUnit("def var xx as Progress.Lang.Object. message new Progress.Lang.Object().", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -249,7 +250,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testNewObject02() {
-    ParseUnit unit = new ParseUnit("def var xx as Progress.Lang.Object. message new Progress.Lang.Object():toString().",
+    ParseUnit unit = getParseUnit("def var xx as Progress.Lang.Object. message new Progress.Lang.Object():toString().",
         session);
     unit.treeParser01();
 
@@ -261,7 +262,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testNewObject03() {
-    ParseUnit unit = new ParseUnit(
+    ParseUnit unit = getParseUnit(
         "def var xx as Progress.Lang.Object. message new Progress.Lang.Object():GetClass():HasStatics().", session);
     unit.treeParser01();
 
@@ -273,7 +274,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testIfExpr01() {
-    ParseUnit unit = new ParseUnit("message (if true then 'abc' else 'def').", session);
+    ParseUnit unit = getParseUnit("message (if true then 'abc' else 'def').", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -284,7 +285,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testIfExpr02() {
-    ParseUnit unit = new ParseUnit("message (if true then 123 else 456).", session);
+    ParseUnit unit = getParseUnit("message (if true then 123 else 456).", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -357,7 +358,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testObjectAttribute01() {
-    ParseUnit unit = new ParseUnit("def var xx as Progress.Lang.Object. message xx:Next-Sibling.", session);
+    ParseUnit unit = getParseUnit("def var xx as Progress.Lang.Object. message xx:Next-Sibling.", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -369,7 +370,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testObjectAttribute02() {
-    ParseUnit unit = new ParseUnit(
+    ParseUnit unit = getParseUnit(
         "class rssw.test.Class02: define property p1 as char get. set. define variable v1 as longchar. method void m1(): this-object:p1. this-object:v1. super:Prev-Sibling. super:Next-Sibling. end method. end class.",
         session);
     unit.treeParser01();
@@ -396,7 +397,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testEnumValues01() {
-    ParseUnit unit = new ParseUnit(
+    ParseUnit unit = getParseUnit(
         "message Progress.Reflect.AccessMode:Public. message Progress.Reflect.AccessMode:Private.",
         session);
     unit.treeParser01();
@@ -417,7 +418,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testEnumValues02() {
-    ParseUnit unit = new ParseUnit(
+    ParseUnit unit = getParseUnit(
         "using Progress.Reflect.AccessMode. message AccessMode:Public. message AccessMode:Private.",
         session);
     unit.treeParser01();
@@ -441,7 +442,7 @@ public class ExpressionEngineTest {
     String sourceCode = "message rssw.test.Class04:m1(). "
         + "message rssw.test.Class04:m2(). "
         + "message rssw.test.Class04:m2(123).";
-    ParseUnit unit = new ParseUnit(sourceCode, session);
+    ParseUnit unit = getParseUnit(sourceCode, session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -462,7 +463,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testStaticMethod02() {
-    ParseUnit unit = new ParseUnit("message rssw.test.Class04:m2(1).", session);
+    ParseUnit unit = getParseUnit("message rssw.test.Class04:m2(1).", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -475,7 +476,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testObjectMethod() {
-    ParseUnit unit = new ParseUnit(
+    ParseUnit unit = getParseUnit(
         "def var xx as Progress.Lang.Object. message xx:toString(). message xx:UnknownMethod().", session);
     unit.treeParser01();
 
@@ -493,7 +494,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testObjectMethod02() {
-    ParseUnit unit = new ParseUnit("class rssw.pct: method void m1(): toString(). foobar(). end method. end class.",
+    ParseUnit unit = getParseUnit("class rssw.pct: method void m1(): toString(). foobar(). end method. end class.",
         session);
     unit.treeParser01();
 
@@ -513,7 +514,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testObjectMethod03() {
-    ParseUnit unit = new ParseUnit(
+    ParseUnit unit = getParseUnit(
         "class rssw.test.Class03: method void m1(): this-object:m2(). super:toString(). end method. method int64 m2(): return 0. end method. end class.",
         session);
     unit.treeParser01();
@@ -534,7 +535,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testFunctions() {
-    ParseUnit unit = new ParseUnit(
+    ParseUnit unit = getParseUnit(
         "function f1 returns char(): end function. function f2 returns int64(): end function. f1(). f2().", session);
     unit.treeParser01();
 
@@ -554,7 +555,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testHandleAttribute() {
-    ParseUnit unit = new ParseUnit("define frame frm1. message frame frm1:box.", session);
+    ParseUnit unit = getParseUnit("define frame frm1. message frame frm1:box.", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -565,7 +566,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testInlineVariable01() {
-    ParseUnit unit = new ParseUnit("message 'xx' update lVar as logical.", session);
+    ParseUnit unit = getParseUnit("message 'xx' update lVar as logical.", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -576,7 +577,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testInlineVariable02() {
-    ParseUnit unit = new ParseUnit("message 'xx' update lVar as integer.", session);
+    ParseUnit unit = getParseUnit("message 'xx' update lVar as integer.", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -587,7 +588,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testInlineVariable03() {
-    ParseUnit unit = new ParseUnit("def var zz as decimal. message 'xx' update lVar like zz.", session);
+    ParseUnit unit = getParseUnit("def var zz as decimal. message 'xx' update lVar like zz.", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -602,27 +603,27 @@ public class ExpressionEngineTest {
     // as it is the only reason why we have to maintain the ParseSupport.currentScope object from JPNodeVisitor
     // This test case just ensures that the scope is set correctly, as a bug was detected late in the dev cycle
     // that broke the parser with NPE in some inline variables cases
-    ParseUnit unit01 = new ParseUnit("procedure p1: message 'xx' update lVar as log. end.", session);
+    ParseUnit unit01 = getParseUnit("procedure p1: message 'xx' update lVar as log. end.", session);
     unit01.treeParser01();
-    ParseUnit unit02 = new ParseUnit("function f1 returns char(): message 'xx' update lVar as log. end.", session);
+    ParseUnit unit02 = getParseUnit("function f1 returns char(): message 'xx' update lVar as log. end.", session);
     unit02.treeParser01();
-    ParseUnit unit03 = new ParseUnit("on choose of btn1 do: message 'xx' update lVar as log. end.", session);
+    ParseUnit unit03 = getParseUnit("on choose of btn1 do: message 'xx' update lVar as log. end.", session);
     unit03.treeParser01();
-    ParseUnit unit04 = new ParseUnit("class cls1: method public void m1(): message 'xx' update lVar as log. end. end.", session);
+    ParseUnit unit04 = getParseUnit("class cls1: method public void m1(): message 'xx' update lVar as log. end. end.", session);
     unit04.treeParser01();
   }
 
   @Test
   public void testInlineVariable05() {
     // See previous unit test, this is still not good code...
-    ParseUnit unit01 = new ParseUnit("message 'X' set x1 as logical.", session);
+    ParseUnit unit01 = getParseUnit("message 'X' set x1 as logical.", session);
     unit01.treeParser01();
     Variable x1 = unit01.getRootScope().getVariable("x1");
     assertNotNull(x1);
     assertNotNull(x1.getDataType());
     assertEquals(x1.getDataType().getPrimitive(), PrimitiveDataType.LOGICAL);
 
-    ParseUnit unit02 = new ParseUnit("message 'X' set x1 as logical. message 'X' set x1.", session);
+    ParseUnit unit02 = getParseUnit("message 'X' set x1 as logical. message 'X' set x1.", session);
     unit02.treeParser01();
     Variable x2 = unit02.getRootScope().getVariable("x1");
     assertNotNull(x2);
@@ -631,7 +632,7 @@ public class ExpressionEngineTest {
   }
 
   public void testSingleArgGetExpression(String expr) {
-    ParseUnit unit01 = new ParseUnit(expr, session);
+    ParseUnit unit01 = getParseUnit(expr, session);
     unit01.treeParser01();
 
     List<IExpression> nodes = unit01.getTopNode().queryExpressions();
@@ -659,7 +660,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testTwoArgsGetExpression01() {
-    ParseUnit unit01 = new ParseUnit("18.5 + 45.", session);
+    ParseUnit unit01 = getParseUnit("18.5 + 45.", session);
     unit01.treeParser01();
 
     List<IExpression> nodes = unit01.getTopNode().queryExpressions();
@@ -675,7 +676,7 @@ public class ExpressionEngineTest {
   }
 
   private void testSimpleExpression(String code, DataType expected) {
-    ParseUnit unit01 = new ParseUnit(code, session);
+    ParseUnit unit01 = getParseUnit(code, session);
     unit01.treeParser01();
 
     List<IExpression> nodes = unit01.getTopNode().queryExpressions();
@@ -688,7 +689,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testArrayGetExpressions01() {
-    ParseUnit unit01 = new ParseUnit("x1[10] + x2[20].", session);
+    ParseUnit unit01 = getParseUnit("x1[10] + x2[20].", session);
     unit01.treeParser01();
 
     List<IExpression> nodes = unit01.getTopNode().queryExpressions();
@@ -707,7 +708,7 @@ public class ExpressionEngineTest {
 
   @Test
   public void testArrayGetExpressions02() {
-    ParseUnit unit01 = new ParseUnit("do x1[10] = 1 to 10: end.", session);
+    ParseUnit unit01 = getParseUnit("do x1[10] = 1 to 10: end.", session);
     unit01.treeParser01();
 
     List<IExpression> nodes = unit01.getTopNode().queryExpressions();
@@ -726,7 +727,7 @@ public class ExpressionEngineTest {
         + "var1:over01(123). "
         + "var1:over01('123'). "
         + "var1:over01('123', '456').";
-    ParseUnit unit01 = new ParseUnit(sourceCode, session);
+    ParseUnit unit01 = getParseUnit(sourceCode, session);
     unit01.treeParser01();
 
     List<IExpression> nodes = unit01.getTopNode().queryExpressions();
@@ -762,7 +763,7 @@ public class ExpressionEngineTest {
         + "super:over01('123', '456'). "
         + "end method. "
         + "end class.";
-    ParseUnit unit01 = new ParseUnit(sourceCode, session);
+    ParseUnit unit01 = getParseUnit(sourceCode, session);
     unit01.treeParser01();
 
     List<IExpression> nodes = unit01.getTopNode().queryExpressions();
@@ -794,7 +795,7 @@ public class ExpressionEngineTest {
         + "  this-object(). "
         + "end constructor. "
         + "end class.";
-    ParseUnit unit01 = new ParseUnit(sourceCode, session);
+    ParseUnit unit01 = getParseUnit(sourceCode, session);
     unit01.treeParser01();
 
     List<IExpression> nodes = unit01.getTopNode().queryExpressions();
@@ -820,7 +821,7 @@ public class ExpressionEngineTest {
         + "end constructor. "
         + "method public void m1(): end method. "
         + "end class.";
-    ParseUnit unit01 = new ParseUnit(sourceCode, session);
+    ParseUnit unit01 = getParseUnit(sourceCode, session);
     unit01.treeParser01();
 
     List<IExpression> nodes = unit01.getTopNode().queryExpressions();
@@ -842,7 +843,7 @@ public class ExpressionEngineTest {
         + "  message Size:Width. "
         + "end constructor. "
         + "end class.";
-    ParseUnit unit01 = new ParseUnit(sourceCode, session);
+    ParseUnit unit01 = getParseUnit(sourceCode, session);
     unit01.treeParser01();
 
     List<IExpression> nodes = unit01.getTopNode().queryExpressions();

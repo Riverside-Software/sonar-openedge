@@ -34,6 +34,7 @@ import org.prorefactor.proparse.ErrorDetectionListener;
 import org.prorefactor.proparse.ProparseErrorStrategy;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -45,7 +46,7 @@ import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 /**
  * Test how errors are detected with invalid source code. Useful in code completion context
  */
-public class ErrorRangeTest {
+public class ErrorRangeTest extends AbstractProparseTest {
   private RefactorSession session;
 
   @BeforeTest
@@ -156,7 +157,7 @@ public class ErrorRangeTest {
   private ErrorDetectionListener genericTest(String filename, int lineNumber, String... lines2) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(filename))) {
       String code = injectCode(filename, lineNumber, lines2);
-      ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(code.getBytes()), filename, false);
+      ABLLexer lexer = new ABLLexer(session, StandardCharsets.UTF_8, ByteSource.wrap(code.getBytes()), filename, false);
       CommonTokenStream tokStream = new CommonTokenStream(lexer);
       Proparse parser = new Proparse(tokStream);
       parser.initialize(session, new EmptyCrossReference(), true);

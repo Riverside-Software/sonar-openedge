@@ -24,10 +24,11 @@ import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IStatementBlock;
 import org.prorefactor.core.nodetypes.IfStatementNode;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
-public class StatementFlowWriter {
+public class StatementFlowWriter extends AbstractProparseTest {
 
   BufferedWriter writer = null;
 
@@ -40,7 +41,7 @@ public class StatementFlowWriter {
    */
   public void write(String inName, File outName, RefactorSession session) throws IOException {
     try {
-      ParseUnit pu = new ParseUnit(new File(inName), session);
+      ParseUnit pu = getParseUnit(new File(inName), session);
       pu.treeParser01();
       writer = new BufferedWriter(new FileWriter(outName));
       walker(pu.getTopNode().asIStatementBlock(), null, 0);

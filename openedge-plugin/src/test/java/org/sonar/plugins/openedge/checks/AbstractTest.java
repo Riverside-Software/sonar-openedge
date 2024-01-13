@@ -71,7 +71,7 @@ public abstract class AbstractTest {
 
   public ParseUnit getParseUnit(InputFile file) {
     try (InputStream input = file.inputStream()) {
-      ParseUnit unit = new ParseUnit(file.inputStream(), file.toString(), session);
+      ParseUnit unit = new ParseUnit(file.inputStream(), file.toString(), session, StandardCharsets.UTF_8);
       unit.treeParser01();
 
       return unit;
