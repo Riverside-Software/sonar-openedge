@@ -161,12 +161,16 @@ public class ParseUnit {
 
   // Only for tests
   protected ParseUnit(String code, String relativeName, IProparseEnvironment session) {
+    this(code, relativeName, session, session.getCharset());
+  }
+
+  public ParseUnit(String code, String relativeName, IProparseEnvironment session, Charset charset) {
     this.file = null;
     this.input = null;
     this.str = code;
     this.relativeName = relativeName;
     this.session = session;
-    this.charset = session.getCharset();
+    this.charset = charset;
   }
 
   /**
