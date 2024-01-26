@@ -100,7 +100,7 @@ public class OpenEdgeDependenciesSensor implements Sensor {
     @Override
     public boolean processLine(String line)  {
       // Line format "includeFileName" "resolvedToPath"
-      if (line.charAt(line.length() - 1) != '\"')
+      if ((line == null) || (line.length() < 7) || (line.charAt(line.length() - 1) != '\"'))
         return false;
       int startQuotePos = line.substring(0, line.length() - 1).lastIndexOf('\"');
       if (startQuotePos == -1)
