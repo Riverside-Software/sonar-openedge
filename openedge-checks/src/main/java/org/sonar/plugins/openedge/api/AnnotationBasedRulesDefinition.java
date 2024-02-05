@@ -108,8 +108,12 @@ public class AnnotationBasedRulesDefinition {
         rule.setType(RuleType.SECURITY_HOTSPOT);
         for (String str : annotation.owasp()) {
           OwaspTop10 owasp = OwaspTop10.valueOf(str);
-          if (owasp != null)
-            rule.addOwaspTop10(OwaspTop10Version.Y2017, owasp);
+          if (owasp != null) {
+            if (runtime.getApiVersion().isGreaterThanOrEqual(Version.create(9, 3)))
+              rule.addOwaspTop10(OwaspTop10Version.Y2017, owasp);
+            else
+              rule.addOwaspTop10(owasp);
+          }
         }
         for (int tmp : annotation.cwe()) { 
           rule.addCwe(tmp);
