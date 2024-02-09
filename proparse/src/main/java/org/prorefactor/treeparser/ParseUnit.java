@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -446,9 +447,6 @@ public class ParseUnit {
     if ((recNode.getTableBuffer() == null) || !tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
         || (recNode.getStoreType() != tableType))
       return false;
-    // No searchIndex
-    if (!Strings.isNullOrEmpty(recNode.getSearchIndexName()))
-        return false;
     // In the main file ?
     if ((src.getFileNum() == 1) && (recNode.getFileIndex() == 0))
       return true;
@@ -479,17 +477,27 @@ public class ParseUnit {
     boolean lFound = false;
     for (RecordNameNode recNode : recordNodes) {
       if (isReferenceAssociatedToRecordNode(recNode, src, ref, tableName, tableType)) {
-        recNode.setWholeIndex("WHOLE-INDEX".equals(ref.getDetail()));
-        recNode.setSearchIndexName(recNode.getTableBuffer().getTable().getName() + "." + ref.getObjectContext());
+        recNode.addSearchIndex(recNode.getTableBuffer().getTable().getName() + "." + ref.getObjectContext(), "WHOLE-INDEX".equals(ref.getDetail()));
+        // All sort-access on the same line number
+        src.getReference().stream() //
+          .filter(it -> "SORT-ACCESS".equals(it.getReferenceType())) //
+          .filter(it -> it.getRefSeq().intValue() > ref.getRefSeq().intValue()) //
+          .filter(it -> it.getFileNum().intValue()  == ref.getFileNum().intValue() && it.getLineNum().intValue() == ref.getLineNum().intValue()) //
+          .filter(it -> ref.getObjectIdentifier().equals(it.getObjectIdentifier())) //
+          .forEach(it -> { 
+          /*if ("SORT-ACCESS".equalsIgnoreCase(it.getReferenceType())
+              && ref.getObjectIdentifier().equalsIgnoreCase(nextRef.getObjectIdentifier()))*/
+            recNode.addSortAccess(it.getObjectContext());
+        });
         // Is next reference a sort-access node ?
-        Optional<Reference> nextRefOpt = src.getReference().stream().filter(
+        /*Optional<Reference> nextRefOpt = src.getReference().stream().filter(
             it -> it.getRefSeq() == ref.getRefSeq() + 1).findFirst();
         if (nextRefOpt.isPresent()) {
           Reference nextRef = nextRefOpt.get();
           if ("SORT-ACCESS".equalsIgnoreCase(nextRef.getReferenceType())
               && ref.getObjectIdentifier().equalsIgnoreCase(nextRef.getObjectIdentifier()))
-            recNode.setSortAccess(nextRef.getObjectContext());
-        }
+            recNode.addSortAccess(nextRef.getObjectContext());
+        }*/
         lFound = true;
         break;
       }
@@ -508,11 +516,32 @@ public class ParseUnit {
         .map(it -> it.findDirectChild(ABLNodeType.RECORD_NAME)) //
         .map(RecordNameNode.class::cast) //
         .collect(Collectors.toList());
-    
+    // Remove duplicates RecordNameNodes pointing to the same table at the same *statement* line and in same file
+    // XREF report index usage at the enclosing statement line number, and only with the table name (not with the actual
+    // buffer name)
+    List<RecordNameNode> filteredList = new ArrayList<>();
+    for (RecordNameNode node : recordNodes) {
+      if ((node.getTableBuffer() == null) || (node.getStatement() == null)
+          || (node.getStatement().firstNaturalChild() == null))
+        break;
+      String tgt = node.getTableBuffer().getTargetFullName();
+      int lineNumber = node.getStatement().firstNaturalChild().getLine();
+      Optional<RecordNameNode> opt = recordNodes.stream() //
+        .filter(it -> it != node) //
+        .filter(it -> it.getTableBuffer() != null) //
+        .filter(it -> tgt.equalsIgnoreCase(it.getTableBuffer().getTargetFullName())) //
+        .filter(it -> it.getStatement().firstNaturalChild().getLine() == lineNumber) //
+        .filter(it -> it.getFileIndex() == node.getFileIndex()) //
+        .findAny();
+      if (opt.isEmpty()) {
+        filteredList.add(node);
+      }
+    }
+
     for (Source src : xref.getSource()) {
       for (Reference ref : src.getReference()) {
         if ("search".equalsIgnoreCase(ref.getReferenceType())) {
-          handleSearchNode(src, ref, recordNodes);
+          handleSearchNode(src, ref, filteredList);
         }
       }
     }

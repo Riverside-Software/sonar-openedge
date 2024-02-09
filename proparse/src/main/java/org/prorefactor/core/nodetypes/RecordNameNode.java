@@ -15,7 +15,12 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.Pair;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.symbols.Symbol;
@@ -24,9 +29,8 @@ import org.prorefactor.treeparser.symbols.TableBuffer;
 import com.google.common.base.Strings;
 
 public class RecordNameNode extends JPNode {
-  private String sortAccess = "";
-  private boolean wholeIndex;
-  private String searchIndexName = "";
+  private List<String> sortAccess = new ArrayList<>();
+  private List<Pair<String, Boolean>> searchIndex = new ArrayList<>();;
   private ContextQualifier qualifier;
   private int storeType;
   private boolean abbrev;
@@ -43,30 +47,23 @@ public class RecordNameNode extends JPNode {
     return qualifier;
   }
 
-  public String getSortAccess() {
-    return sortAccess;
+  public List<String> getSortAccess() {
+    return Collections.unmodifiableList(sortAccess);
   }
 
-  public boolean isWholeIndex() {
-    return wholeIndex;
+  public List<Pair<String, Boolean>> getSearchIndexes() {
+    return Collections.unmodifiableList(searchIndex);
   }
 
-  public String getSearchIndexName() {
-    return searchIndexName;
-  }
-
-  public void setSortAccess(String str) {
+  public void addSortAccess(String str) {
     if (Strings.isNullOrEmpty(str))
       return;
-    sortAccess = sortAccess + (sortAccess.isEmpty() ? "" : ',') + str;
+    if (!sortAccess.contains(str))
+      sortAccess.add(str);
   }
 
-  public void setWholeIndex(boolean wholeIndex) {
-    this.wholeIndex = wholeIndex;
-  }
-
-  public void setSearchIndexName(String indexName) {
-    this.searchIndexName = indexName;
+  public void addSearchIndex(String str, boolean wholeIndex) {
+    searchIndex.add(Pair.of(str, Boolean.valueOf(wholeIndex)));
   }
 
   public int getStoreType() {

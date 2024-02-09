@@ -394,15 +394,20 @@ public class JPNodeTest extends AbstractProparseTest {
     RecordNameNode customer = (RecordNameNode) recNodes.get(1);
     RecordNameNode item = (RecordNameNode) recNodes.get(2);
 
-    assertTrue(warehouse.isWholeIndex());
-    assertEquals(warehouse.getSearchIndexName(), "Warehouse.warehousenum");
+    assertEquals(warehouse.getSearchIndexes().size(), 1);
+    assertTrue(warehouse.getSearchIndexes().get(0).getO2());
+    assertEquals(warehouse.getSearchIndexes().get(0).getO1(), "Warehouse.warehousenum");
+    assertEquals(warehouse.getSortAccess().size(), 0);
 
-    assertFalse(customer.isWholeIndex());
-    assertEquals(customer.getSearchIndexName(), "Customer.CountryPost");
-    assertEquals(customer.getSortAccess(), "Address");
+    assertEquals(customer.getSearchIndexes().size(), 1);
+    assertFalse(customer.getSearchIndexes().get(0).getO2());
+    assertEquals(customer.getSearchIndexes().get(0).getO1(), "Customer.CountryPost");
+    assertEquals(customer.getSortAccess().size(), 1);
+    assertEquals(customer.getSortAccess().get(0), "Address");
 
-    assertTrue(item.isWholeIndex());
-    assertEquals(item.getSearchIndexName(), "Item.ItemNum");
+    assertEquals(item.getSearchIndexes().size(), 1);
+    assertTrue(item.getSearchIndexes().get(0).getO2());
+    assertEquals(item.getSearchIndexes().get(0).getO1(), "Item.ItemNum");
   }
 
   @Test
@@ -418,7 +423,8 @@ public class JPNodeTest extends AbstractProparseTest {
     for (JPNode node : recNodes) {
       RecordNameNode rec = (RecordNameNode) node;
       assertEquals(rec.getTableBuffer().getTable().getName(), "ttFoo");
-      assertTrue(rec.isWholeIndex());
+      assertEquals(rec.getSearchIndexes().size(), 1);
+      assertTrue(rec.getSearchIndexes().get(0).getO2());
     }
   }
 
@@ -432,17 +438,32 @@ public class JPNodeTest extends AbstractProparseTest {
     List<JPNode> recNodes = unit.getTopNode().query2(node -> (node.getNodeType() == ABLNodeType.RECORD_NAME)
         && (node.getParent().getNodeType() == ABLNodeType.RECORD_SEARCH));
     assertEquals(recNodes.size(), 7);
+
     // One can-find, search index should be set
-    assertEquals(((RecordNameNode) recNodes.get(0)).getSearchIndexName(), "Customer.Name");
+    RecordNameNode recNode0 = (RecordNameNode) recNodes.get(0);
+    assertEquals(recNode0.getSearchIndexes().size(), 1);
+    assertEquals(recNode0.getSearchIndexes().get(0).getO1(), "Customer.Name");
+
     // Two can-find on different tables, should be ok
-    assertEquals(((RecordNameNode) recNodes.get(1)).getSearchIndexName(), "Customer.Name");
-    assertEquals(((RecordNameNode) recNodes.get(2)).getSearchIndexName(), "Item.ItemNum");
-    // Two can-find on same buffer, they have to be in the right order
-    assertEquals(((RecordNameNode) recNodes.get(3)).getSearchIndexName(), "Customer.Name");
-    assertEquals(((RecordNameNode) recNodes.get(4)).getSearchIndexName(), "Customer.CustNum");
-    // Two can-find on different buffer, same as before
-    assertEquals(((RecordNameNode) recNodes.get(5)).getSearchIndexName(), "Customer.Name");
-    assertEquals(((RecordNameNode) recNodes.get(6)).getSearchIndexName(), "Customer.CustNum");
+    RecordNameNode recNode1 = (RecordNameNode) recNodes.get(1);
+    RecordNameNode recNode2 = (RecordNameNode) recNodes.get(2);
+    assertEquals(recNode1.getSearchIndexes().size(), 1);
+    assertEquals(recNode1.getSearchIndexes().get(0).getO1(), "Customer.Name");
+    assertEquals(recNode2.getSearchIndexes().size(), 1);
+    assertEquals(recNode2.getSearchIndexes().get(0).getO1(), "Item.ItemNum");
+
+    // Two can-find on same buffer, not handled correctly
+    RecordNameNode recNode3 = (RecordNameNode) recNodes.get(3);
+    RecordNameNode recNode4 = (RecordNameNode) recNodes.get(4);
+    // This is suboptimal, but XREF info is not good enough
+    assertEquals(recNode3.getSearchIndexes().size(), 0);
+    assertEquals(recNode4.getSearchIndexes().size(), 0);
+
+    // Two can-find on different buffer, also doesn't work
+    RecordNameNode recNode5 = (RecordNameNode) recNodes.get(5);
+    RecordNameNode recNode6 = (RecordNameNode) recNodes.get(6);
+    assertEquals(recNode5.getSearchIndexes().size(), 0);
+    assertEquals(recNode6.getSearchIndexes().size(), 0);
   }
 
   @Test
@@ -455,14 +476,49 @@ public class JPNodeTest extends AbstractProparseTest {
     List<JPNode> recNodes = unit.getTopNode().query2(node -> (node.getNodeType() == ABLNodeType.RECORD_NAME)
         && (node.getParent().getNodeType() == ABLNodeType.RECORD_SEARCH));
     assertEquals(recNodes.size(), 4);
-    assertEquals(((RecordNameNode) recNodes.get(0)).getSearchIndexName(), "tt1.default");
-    assertTrue(((RecordNameNode) recNodes.get(0)).isWholeIndex());
-    assertEquals(((RecordNameNode) recNodes.get(1)).getSearchIndexName(), "Customer.CustNum");
-    assertTrue(((RecordNameNode) recNodes.get(1)).isWholeIndex());
-    assertEquals(((RecordNameNode) recNodes.get(2)).getSearchIndexName(), "Customer.CustNum");
-    assertTrue(((RecordNameNode) recNodes.get(2)).isWholeIndex());
-    assertEquals(((RecordNameNode) recNodes.get(3)).getSearchIndexName(), "Customer.CountryPost");
-    assertTrue(((RecordNameNode) recNodes.get(3)).isWholeIndex());
+    RecordNameNode recNode0 = (RecordNameNode) recNodes.get(0);
+    RecordNameNode recNode1 = (RecordNameNode) recNodes.get(1);
+    RecordNameNode recNode2 = (RecordNameNode) recNodes.get(2);
+    RecordNameNode recNode3 = (RecordNameNode) recNodes.get(3);
+
+    assertEquals(recNode0.getSearchIndexes().size(), 1);
+    assertEquals(recNode0.getSearchIndexes().get(0).getO1(), "tt1.default");
+    assertTrue(recNode0.getSearchIndexes().get(0).getO2());
+
+    assertEquals(recNode1.getSearchIndexes().size(), 1);
+    assertEquals(recNode1.getSearchIndexes().get(0).getO1(), "Customer.CustNum");
+    assertTrue(recNode1.getSearchIndexes().get(0).getO2());
+
+    assertEquals(recNode2.getSearchIndexes().size(), 1);
+    assertEquals(recNode2.getSearchIndexes().get(0).getO1(), "Customer.CustNum");
+    assertTrue(recNode2.getSearchIndexes().get(0).getO2());
+
+    assertEquals(recNode3.getSearchIndexes().size(), 1);
+    assertEquals(recNode3.getSearchIndexes().get(0).getO1(), "Item.ItemNum");
+    assertTrue(recNode3.getSearchIndexes().get(0).getO2());
   }
 
+  @Test
+  public void testXref05() throws JAXBException, IOException {
+    CrossReference xref = CrossReferenceUtils.parseXREF(Paths.get(SRC_DIR + "/xref05.p.xref"));
+    ParseUnit unit = genericTest("xref05.p", xref);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    List<JPNode> recNodes = unit.getTopNode().query2(node -> (node.getNodeType() == ABLNodeType.RECORD_NAME)
+        && (node.getParent().getNodeType() == ABLNodeType.RECORD_SEARCH));
+    assertEquals(recNodes.size(), 1);
+    RecordNameNode recNode0 = (RecordNameNode) recNodes.get(0);
+    assertEquals(recNode0.getSearchIndexes().size(), 3);
+    assertEquals(recNode0.getSearchIndexes().get(0).getO1(), "Customer.Comments");
+    assertEquals(recNode0.getSearchIndexes().get(1).getO1(), "Customer.CountryPost");
+    assertEquals(recNode0.getSearchIndexes().get(2).getO1(), "Customer.Name");
+    assertFalse(recNode0.getSearchIndexes().get(0).getO2());
+    assertFalse(recNode0.getSearchIndexes().get(1).getO2());
+    assertFalse(recNode0.getSearchIndexes().get(2).getO2());
+    assertEquals(recNode0.getSortAccess().size(), 3);
+    assertTrue(recNode0.getSortAccess().contains("Name"));
+    assertTrue(recNode0.getSortAccess().contains("Country"));
+    assertTrue(recNode0.getSortAccess().contains("PostalCode"));
+  }
 }
