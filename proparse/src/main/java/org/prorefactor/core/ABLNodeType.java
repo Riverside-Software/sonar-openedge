@@ -2537,7 +2537,6 @@ public enum ABLNodeType {
       OSGETENV, //
       PDBNAME, //
       PROGRAMNAME, //
-      PROVERSION, //
       QUERYOFFEND, //
       QUOTER, //
       RANDOM, //
@@ -2603,6 +2602,7 @@ public enum ABLNodeType {
       GETEFFECTIVETENANTID, //
       GETEFFECTIVETENANTNAME, //
       GUID, //
+      PROVERSION, //
       TENANTID, //
       TENANTNAME //
   );

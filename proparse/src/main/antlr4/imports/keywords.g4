@@ -129,7 +129,6 @@ argFunction:
   | OSGETENV
   | PDBNAME
   | PROGRAMNAME
-  | PROVERSION
   | QUERYOFFEND
   | QUOTER
   | RANDOM
@@ -195,6 +194,7 @@ optionalArgFunction:
   | GETEFFECTIVETENANTNAME
   | GUID
   | SUPER
+  | PROVERSION
   | TENANTID
   | TENANTNAME
   )

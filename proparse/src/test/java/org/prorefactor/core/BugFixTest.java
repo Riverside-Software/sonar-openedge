@@ -506,6 +506,14 @@ public class BugFixTest extends AbstractProparseTest {
   }
 
   @Test
+  public void testProversion() {
+    ParseUnit pu = genericTest("proversion_function.p");
+    List<JPNode> list = pu.getTopNode().queryStateHead(ABLNodeType.ASSIGN);
+    assertEquals(list.size(), 4);
+  }
+
+
+  @Test
   public void testOnEvent() {
     genericTest("onEvent.p");
   }
