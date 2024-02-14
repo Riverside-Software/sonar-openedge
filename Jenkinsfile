@@ -17,6 +17,7 @@ pipeline {
           withEnv(["MVN_HOME=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}", "JAVA_HOME=${tool name: 'Corretto 11', type: 'jdk'}"]) {
             if ("main" == env.BRANCH_NAME) {
               sh "$MVN_HOME/bin/mvn -P release clean deploy -Dgit.commit=\$(git rev-parse --short HEAD)"
+              mail body: "---", to: "g.querret@riverside-software.fr", subject: "Release artifact on Sonatype"
             } else if ("develop" == env.BRANCH_NAME) {
               sh "$MVN_HOME/bin/mvn clean javadoc:javadoc deploy -Dmaven.test.failure.ignore=true -Dgit.commit=\$(git rev-parse --short HEAD)"
             } else if (env.BRANCH_NAME.startsWith("release") || env.BRANCH_NAME.startsWith("hotfix")) {
