@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import org.sonar.api.batch.fs.InputFile.Status;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
@@ -61,12 +62,14 @@ public class TestProjectSensorContext {
     context.setSettings(settings);
 
     context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, DF1) //
+      .setStatus(Status.SAME)
       .setLanguage(Constants.DB_LANGUAGE_KEY) //
       .setType(Type.MAIN) //
       .setCharset(Charset.defaultCharset()) //
       .setContents(Files.asCharSource(new File(BASEDIR, DF1), Charset.defaultCharset()).read()) //
       .build());
     context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, FILE1) //
+      .setStatus(Status.SAME)
       .setLanguage(Constants.LANGUAGE_KEY) //
       .setType(Type.MAIN) //
       .setCharset(Charset.defaultCharset()) //
@@ -74,30 +77,35 @@ public class TestProjectSensorContext {
       .build());
     context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, FILE2) //
       .setLanguage(Constants.LANGUAGE_KEY) //
+      .setStatus(Status.ADDED)
       .setType(Type.MAIN) //
       .setCharset(Charset.defaultCharset()) //
       .setContents(Files.asCharSource(new File(BASEDIR, FILE2), Charset.defaultCharset()).read()) //
       .build());
     context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, FILE3) //
       .setLanguage(Constants.LANGUAGE_KEY) //
+      .setStatus(Status.SAME)
       .setType(Type.MAIN) //
       .setCharset(Charset.defaultCharset()) //
       .setContents(Files.asCharSource(new File(BASEDIR, FILE3), Charset.defaultCharset()).read()) //
       .build());
     context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, FILE4) //
       .setLanguage(Constants.LANGUAGE_KEY) //
+      .setStatus(Status.ADDED)
       .setType(Type.MAIN) //
       .setCharset(Charset.defaultCharset()) //
       .setContents(Files.asCharSource(new File(BASEDIR, FILE4), Charset.defaultCharset()).read()) //
       .build());
     context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, FILE5) //
       .setLanguage(Constants.LANGUAGE_KEY) //
+      .setStatus(Status.ADDED)
       .setType(Type.MAIN) //
       .setCharset(Charset.defaultCharset()) //
       .setContents(Files.asCharSource(new File(BASEDIR, FILE5), Charset.defaultCharset()).read()) //
       .build());
     context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, CLASS1) //
       .setLanguage(Constants.LANGUAGE_KEY) //
+      .setStatus(Status.ADDED)
       .setType(Type.MAIN) //
       .setCharset(Charset.defaultCharset()) //
       .setContents(Files.asCharSource(new File(BASEDIR, CLASS1), Charset.defaultCharset()).read()) //
