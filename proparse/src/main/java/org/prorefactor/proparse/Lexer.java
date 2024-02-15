@@ -134,7 +134,7 @@ public class Lexer implements IPreprocessor {
     this.prepro = prepro;
     this.factory = new ProTokenFactory();
     try {
-      currentInput = new InputSource(0, fileName, src, prepro.getRefactorSession().getCharset(), 0, true, true);
+      currentInput = new InputSource(0, fileName, src, prepro.getCharset(), 0, true, true);
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
@@ -1494,7 +1494,7 @@ public class Lexer implements IPreprocessor {
       // This is the 'replacement' character in Unicode, used by Java as a placeholder for a character which could not
       // be converted. We replace those characters at runtime with a space, and log an error
       LOGGER.error("Character conversion error in {} at line {} column {} from encoding {}", getFilename(), currLine,
-          currCol, prepro.getRefactorSession().getCharset());
+          currCol, prepro.getCharset());
       ppCurrChar = ' ';
     }
     while (ppCurrChar == Token.EOF) {
@@ -1843,7 +1843,7 @@ public class Lexer implements IPreprocessor {
       }
     } else {
       try {
-        currentInput = new InputSource(++sourceCounter, incFile, prepro.getRefactorSession().getCharset(), idx,
+        currentInput = new InputSource(++sourceCounter, incFile, prepro.getCharset(), idx,
             prepro.getProparseSettings().getSkipXCode(), false);
         includeCache2.put(idx, currentInput.getContent());
       } catch (IOException caught) {

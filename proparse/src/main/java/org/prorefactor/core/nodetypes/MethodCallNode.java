@@ -17,6 +17,7 @@ package org.prorefactor.core.nodetypes;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.treeparser.symbols.Event;
 
 import com.google.common.base.Strings;
 
@@ -48,10 +49,16 @@ public class MethodCallNode extends ExpressionNode {
     if (getFirstChild() instanceof SystemHandleNode) {
       SystemHandleNode shn = (SystemHandleNode) getFirstChild();
       return shn.getMethodDataType(methodName.toUpperCase());
-    } else if ((getFirstChild() instanceof FieldRefNode) && ((FieldRefNode) getFirstChild()).isStaticReference()) {
-      ITypeInfo info = ((FieldRefNode) getFirstChild()).getStaticReference();
-      return getObjectMethodDataType(root.getTypeInfoProvider(), findDirectChild(ABLNodeType.METHOD_PARAM_LIST), info,
-          methodName);
+    } else if (getFirstChild() instanceof FieldRefNode) {
+      if (((FieldRefNode) getFirstChild()).isStaticReference()) {
+        ITypeInfo info = ((FieldRefNode) getFirstChild()).getStaticReference();
+        return getObjectMethodDataType(root.getTypeInfoProvider(), findDirectChild(ABLNodeType.METHOD_PARAM_LIST), info,
+            methodName);
+      } else if ((getFirstChild().getSymbol() instanceof Event)
+          && ("publish".equalsIgnoreCase(methodName) || "subscribe".equalsIgnoreCase(methodName))) {
+        // Events only have Publish / Subscribe
+        return DataType.VOID;
+      }
     }
 
     // Left-Handle expression has to be a class

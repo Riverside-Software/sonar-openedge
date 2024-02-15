@@ -10,11 +10,12 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class ParserFailureTest {
+public class ParserFailureTest extends AbstractProparseTest {
   private RefactorSession session;
 
   @BeforeTest
@@ -24,7 +25,7 @@ public class ParserFailureTest {
 
   @Test
   public void testFailure01() {
-    ParseUnit unit = new ParseUnit("MESSAGE 'Hello' VIEW-AS", session);
+    ParseUnit unit = getParseUnit("MESSAGE 'Hello' VIEW-AS", session);
     try {
       unit.treeParser01();
       fail("Missing keyword, should have failed");
@@ -36,7 +37,7 @@ public class ParserFailureTest {
 
   @Test
   public void testFailure02() {
-    ParseUnit unit = new ParseUnit("FIND customer. FIND sp2k.plopmachin. ", session);
+    ParseUnit unit = getParseUnit("FIND customer. FIND sp2k.plopmachin. ", session);
     try {
       unit.treeParser01();
       fail("Invalid table name, should have failed");

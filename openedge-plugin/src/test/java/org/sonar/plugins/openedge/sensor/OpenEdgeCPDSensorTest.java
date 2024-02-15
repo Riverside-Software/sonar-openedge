@@ -21,12 +21,17 @@ package org.sonar.plugins.openedge.sensor;
 
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.BASEDIR;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.CLASS1;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE4;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
+import java.util.List;
+
+import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
@@ -93,21 +98,32 @@ public class OpenEdgeCPDSensorTest {
 
   @Test
   public void testCPDSensorBranch() throws Exception {
-    MapSettings settings = new MapSettings();
-    settings.setProperty(Constants.USE_SIMPLE_CPD, true);
-    settings.setProperty("sonar.pullrequest.branch", "PR1");
     SensorContextTester context = TestProjectSensorContext.createContext();
-    context.setSettings(settings);
+    context.settings().setProperty(Constants.USE_SIMPLE_CPD, true);
+    context.settings().setProperty("sonar.pullrequest.branch", "PR1");
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_DE_RUNTIME);
     OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeDependenciesSensor sensor01 = new OpenEdgeDependenciesSensor(oeSettings, components);
+    sensor01.execute(context);
+    InputFile test3 = context.fileSystem().inputFile(
+        context.fileSystem().predicates().hasRelativePath("src/procedures/test3.p"));
+    assertNotNull(test3);
+    List<String> deps = components.getIncludeDependencies(test3.uri().toString());
+    assertFalse(deps.isEmpty());
+    String str = deps.get(0);
+    assertEquals(str, "src\\procedures\\test3.i");
+
     OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
-    // No file changed, then no CPD tokens
-    assertNull(context.cpdTokens(BASEDIR + ":" + FILE3));
-    assertNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
-    assertNull(context.cpdTokens(BASEDIR + ":" + FILE4));
+    // No CPD tokens on unchanged files
+    assertNull(context.cpdTokens(BASEDIR + ":" + FILE1));
+    // FILE3 is SAME, but references FILE4 (file3.i) which is ADDED
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE3));
+    // CPD tokens on ADDED files
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE4));
   }
 
 }

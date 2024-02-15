@@ -30,11 +30,12 @@ import org.prorefactor.core.nodetypes.StatementBlockNode;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class TreeParserBlocksTest {
+public class TreeParserBlocksTest extends AbstractProparseTest {
   private RefactorSession session;
 
   @BeforeTest
@@ -44,7 +45,7 @@ public class TreeParserBlocksTest {
 
   @Test
   public void test01() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser05/test01.p"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test01.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -134,7 +135,7 @@ public class TreeParserBlocksTest {
 
   @Test
   public void test02() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser05/test02.p"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test02.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -218,7 +219,7 @@ public class TreeParserBlocksTest {
 
   @Test
   public void test03() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser05/test03.p"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test03.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -301,7 +302,7 @@ public class TreeParserBlocksTest {
 
   @Test
   public void test04() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/treeparser05/test04.p"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test04.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());

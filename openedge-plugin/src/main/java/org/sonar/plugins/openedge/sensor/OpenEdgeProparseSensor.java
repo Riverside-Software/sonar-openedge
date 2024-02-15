@@ -201,7 +201,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     ParseUnit lexUnit = null;
     try {
       lexUnit = new ParseUnit(InputFileUtils.getInputStream(file),
-          InputFileUtils.getRelativePath(file, context.fileSystem()), session);
+          InputFileUtils.getRelativePath(file, context.fileSystem()), session, file.charset());
       lexUnit.lexAndGenerateMetrics();
     } catch (UncheckedIOException caught) {
       numFailures++;
@@ -229,7 +229,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     if (!settings.useSimpleCPD()) {
       try {
         lexUnit = new ParseUnit(InputFileUtils.getInputStream(file),
-            InputFileUtils.getRelativePath(file, context.fileSystem()), session);
+            InputFileUtils.getRelativePath(file, context.fileSystem()), session, file.charset());
         TokenSource stream = lexUnit.lex();
         OpenEdgeCPDSensor.processTokenSource(file, context.newCpdTokens().onFile(file), stream);
       } catch (UncheckedIOException | ProparseRuntimeException caught) {
@@ -311,14 +311,13 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     try {
       unit = new ParseUnit(InputFileUtils.getInputStream(file),
-          InputFileUtils.getRelativePath(file, context.fileSystem()), session);
+          InputFileUtils.getRelativePath(file, context.fileSystem()), session, file.charset());
       unit.attachXref(doc);
       unit.attachXref(xref);
       unit.parse();
       unit.treeParser01();
 
       unit.attachTransactionBlocks(trxBlocks);
-      unit.attachTypeInfo(session.getTypeInfo(unit.getClassName()));
       updateParseTime(System.currentTimeMillis() - startTime);
     } catch (UncheckedIOException caught) {
       numFailures++;

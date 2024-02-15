@@ -20,7 +20,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -86,6 +88,7 @@ public class ParseUnit {
   private final String str;
   private final InputStream input;
   private final String relativeName;
+  private final Charset charset;
 
   private IntegerIndex<String> fileNameList;
   private ParseTree tree;
@@ -128,40 +131,47 @@ public class ParseUnit {
   private boolean isAbstract;
   private String className;
 
-  public ParseUnit(File file, IProparseEnvironment session) {
-    this(file, file.getPath(), session);
+  // Test-only constructor
+  protected ParseUnit(File file, IProparseEnvironment session) {
+    this(file, file.getPath(), session, session.getCharset());
   }
 
-  public ParseUnit(File file, String relativeName, IProparseEnvironment session) {
+  // Test-only constructor
+  protected ParseUnit(File file, String relativeName, IProparseEnvironment session, Charset charset) {
     this.file = file;
     this.input = null;
     this.str = null;
     this.relativeName = relativeName;
     this.session = session;
+    this.charset = charset;
   }
 
-  public ParseUnit(InputStream input, IProparseEnvironment session) {
-    this(input, "<unnamed>", session);
-  }
-
-  public ParseUnit(InputStream input, String relativeName, IProparseEnvironment session) {
+  public ParseUnit(InputStream input, String relativeName, IProparseEnvironment session, Charset charset) {
     this.file = null;
     this.input = input;
     this.str = null;
     this.relativeName = relativeName;
     this.session = session;
+    this.charset = charset;
   }
 
-  public ParseUnit(String str, IProparseEnvironment session) {
-    this(str, "<unnamed>", session);
+  // Only for tests
+  protected ParseUnit(String code, IProparseEnvironment session) {
+    this(code, "<unnamed>", session);
   }
 
-  public ParseUnit(String str, String relativeName, IProparseEnvironment session) {
+  // Only for tests
+  protected ParseUnit(String code, String relativeName, IProparseEnvironment session) {
+    this(code, relativeName, session, session.getCharset());
+  }
+
+  public ParseUnit(String code, String relativeName, IProparseEnvironment session, Charset charset) {
     this.file = null;
     this.input = null;
-    this.str = str;
+    this.str = code;
     this.relativeName = relativeName;
     this.session = session;
+    this.charset = charset;
   }
 
   /**
@@ -261,11 +271,11 @@ public class ParseUnit {
    * @throws UncheckedIOException If main file can't be opened
    */
   public TokenSource lex() {
-    return new ABLLexer(session, getByteSource(), relativeName, true);
+    return new ABLLexer(session, charset, getByteSource(), relativeName, true);
   }
 
   public TokenSource preprocess() {
-    ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
+    ABLLexer lexer = new ABLLexer(session, charset, getByteSource(), relativeName, false);
     if (writableTokens)
       lexer.enableWritableTokens();
     fileNameList = lexer.getFilenameList();
@@ -284,7 +294,7 @@ public class ParseUnit {
    */
   public void lexAndGenerateMetrics() {
     LOGGER.trace("Entering ParseUnit#lexAndGenerateMetrics()");
-    ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, true);
+    ABLLexer lexer = new ABLLexer(session, charset, getByteSource(), relativeName, true);
     if (writableTokens)
       lexer.enableWritableTokens();
     Token tok = lexer.nextToken();
@@ -298,10 +308,11 @@ public class ParseUnit {
   public void parse() {
     parse(false);
   }
+
   public void parse(boolean c3) {
     LOGGER.trace("Entering ParseUnit#parse()");
 
-    ABLLexer lexer = new ABLLexer(session, getByteSource(), relativeName, false);
+    ABLLexer lexer = new ABLLexer(session, charset, getByteSource(), relativeName, false);
     if (writableTokens)
       lexer.enableWritableTokens();
     CommonTokenStream tokStream = new CommonTokenStream(lexer);
@@ -374,6 +385,7 @@ public class ParseUnit {
     appBuilderSections = ((PreprocessorEventListener) lexer.getLstListener()).getEditableCodeSections();
     metrics = lexer.getMetrics();
     support = parser.getParserSupport();
+    typeInfo = session.getTypeInfo(className);
 
     if (profiler) {
       parseInfo = parser.getParseInfo();
@@ -435,9 +447,6 @@ public class ParseUnit {
     if ((recNode.getTableBuffer() == null) || !tableName.equalsIgnoreCase(recNode.getTableBuffer().getTargetFullName())
         || (recNode.getStoreType() != tableType))
       return false;
-    // No searchIndex
-    if (!Strings.isNullOrEmpty(recNode.getSearchIndexName()))
-        return false;
     // In the main file ?
     if ((src.getFileNum() == 1) && (recNode.getFileIndex() == 0))
       return true;
@@ -468,17 +477,14 @@ public class ParseUnit {
     boolean lFound = false;
     for (RecordNameNode recNode : recordNodes) {
       if (isReferenceAssociatedToRecordNode(recNode, src, ref, tableName, tableType)) {
-        recNode.setWholeIndex("WHOLE-INDEX".equals(ref.getDetail()));
-        recNode.setSearchIndexName(recNode.getTableBuffer().getTable().getName() + "." + ref.getObjectContext());
-        // Is next reference a sort-access node ?
-        Optional<Reference> nextRefOpt = src.getReference().stream().filter(
-            it -> it.getRefSeq() == ref.getRefSeq() + 1).findFirst();
-        if (nextRefOpt.isPresent()) {
-          Reference nextRef = nextRefOpt.get();
-          if ("SORT-ACCESS".equalsIgnoreCase(nextRef.getReferenceType())
-              && ref.getObjectIdentifier().equalsIgnoreCase(nextRef.getObjectIdentifier()))
-            recNode.setSortAccess(nextRef.getObjectContext());
-        }
+        recNode.addSearchIndex(recNode.getTableBuffer().getTable().getName() + "." + ref.getObjectContext(), "WHOLE-INDEX".equals(ref.getDetail()));
+        // All sort-access on the same line number
+        src.getReference().stream() //
+          .filter(it -> "SORT-ACCESS".equals(it.getReferenceType())) //
+          .filter(it -> it.getRefSeq().intValue() > ref.getRefSeq().intValue()) //
+          .filter(it -> it.getFileNum().intValue()  == ref.getFileNum().intValue() && it.getLineNum().intValue() == ref.getLineNum().intValue()) //
+          .filter(it -> ref.getObjectIdentifier().equals(it.getObjectIdentifier())) //
+          .forEach(it -> recNode.addSortAccess(it.getObjectContext()));
         lFound = true;
         break;
       }
@@ -497,18 +503,35 @@ public class ParseUnit {
         .map(it -> it.findDirectChild(ABLNodeType.RECORD_NAME)) //
         .map(RecordNameNode.class::cast) //
         .collect(Collectors.toList());
-    
+    // Remove duplicates RecordNameNodes pointing to the same table at the same *statement* line and in same file
+    // XREF report index usage at the enclosing statement line number, and only with the table name (not with the actual
+    // buffer name)
+    List<RecordNameNode> filteredList = new ArrayList<>();
+    for (RecordNameNode node : recordNodes) {
+      if ((node.getTableBuffer() == null) || (node.getStatement() == null)
+          || (node.getStatement().firstNaturalChild() == null))
+        break;
+      String tgt = node.getTableBuffer().getTargetFullName();
+      int lineNumber = node.getStatement().firstNaturalChild().getLine();
+      Optional<RecordNameNode> opt = recordNodes.stream() //
+        .filter(it -> it != node) //
+        .filter(it -> it.getTableBuffer() != null) //
+        .filter(it -> tgt.equalsIgnoreCase(it.getTableBuffer().getTargetFullName())) //
+        .filter(it -> it.getStatement().firstNaturalChild().getLine() == lineNumber) //
+        .filter(it -> it.getFileIndex() == node.getFileIndex()) //
+        .findAny();
+      if (opt.isEmpty()) {
+        filteredList.add(node);
+      }
+    }
+
     for (Source src : xref.getSource()) {
       for (Reference ref : src.getReference()) {
         if ("search".equalsIgnoreCase(ref.getReferenceType())) {
-          handleSearchNode(src, ref, recordNodes);
+          handleSearchNode(src, ref, filteredList);
         }
       }
     }
-  }
-
-  public void attachTypeInfo(ITypeInfo unit) {
-    this.typeInfo = unit;
   }
 
   public void attachTransactionBlocks(List<Integer> blocks) {
@@ -544,6 +567,10 @@ public class ParseUnit {
 
   public IProparseEnvironment getSession() {
     return session;
+  }
+
+  public Charset getCharset() {
+    return charset;
   }
 
   public boolean isAppBuilderCode() {
@@ -614,7 +641,7 @@ public class ParseUnit {
 
   private ByteSource getByteSource() {
     if (str != null) {
-      return ByteSource.wrap(str.getBytes(session.getCharset()));
+      return ByteSource.wrap(str.getBytes(charset));
     }
     try (InputStream s = input == null ? new FileInputStream(file) : input) {
       if (s.markSupported())

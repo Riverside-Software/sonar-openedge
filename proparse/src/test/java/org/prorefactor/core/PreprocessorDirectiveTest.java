@@ -31,11 +31,12 @@ import org.prorefactor.macrolevel.MacroDef;
 import org.prorefactor.macrolevel.NamedMacroRef;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class PreprocessorDirectiveTest {
+public class PreprocessorDirectiveTest extends AbstractProparseTest {
   private final static String SRC_DIR = "src/test/resources/data/preprocessor";
 
   private RefactorSession session;
@@ -47,7 +48,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test01() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor05.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor05.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().query(ABLNodeType.PROPARSEDIRECTIVE).size(), 0);
@@ -84,13 +85,13 @@ public class PreprocessorDirectiveTest {
   @Test
   public void test02() {
     // Used to throw an exception, not the case anymore...
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor07.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor07.p"), session);
     unit.parse();
   }
 
   @Test
   public void test03() throws IOException {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor09.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor09.p"), session);
     TokenSource stream = unit.preprocess();
 
     assertEquals(nextVisibleToken(stream).getType(), Proparse.DEFINE);
@@ -135,11 +136,11 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test04() throws IOException {
-    ParseUnit unit01 = new ParseUnit("{ preprocessor/preprocessor10.i &myParam=1 }", session);
+    ParseUnit unit01 = getParseUnit("{ preprocessor/preprocessor10.i &myParam=1 }", session);
     TokenSource stream01 = unit01.preprocess();
     assertEquals(nextVisibleToken(stream01).getType(), Proparse.TRUE);
 
-    ParseUnit unit02 = new ParseUnit("{ preprocessor/preprocessor10.i &abc=1 &myParam }", session);
+    ParseUnit unit02 = getParseUnit("{ preprocessor/preprocessor10.i &abc=1 &myParam }", session);
     TokenSource stream02 = unit02.preprocess();
     assertEquals(nextVisibleToken(stream02).getType(), Proparse.TRUE);
     IncludeRef events02 = (IncludeRef) unit02.getMacroSourceArray()[1];
@@ -150,11 +151,11 @@ public class PreprocessorDirectiveTest {
     assertEquals(events02.getArgNumber(2).getName(), "myParam");
     assertTrue(events02.getArgNumber(2).isUndefined());
 
-    ParseUnit unit03 = new ParseUnit("{ preprocessor/preprocessor10.i &abc &myParam }", session);
+    ParseUnit unit03 = getParseUnit("{ preprocessor/preprocessor10.i &abc &myParam }", session);
     TokenSource stream03 = unit03.preprocess();
     assertEquals(nextVisibleToken(stream03).getType(), Proparse.TRUE);
 
-    ParseUnit unit04 = new ParseUnit("{ preprocessor/preprocessor10.i &myParam &abc }", session);
+    ParseUnit unit04 = getParseUnit("{ preprocessor/preprocessor10.i &myParam &abc }", session);
     TokenSource stream04 = unit04.preprocess();
     // Different behavior in ABL
     assertEquals(nextVisibleToken(stream04).getType(), Proparse.TRUE);
@@ -165,7 +166,7 @@ public class PreprocessorDirectiveTest {
     assertEquals(events04.getArgNumber(2).getName(), "abc");
     assertTrue(events04.getArgNumber(2).isUndefined());
 
-    ParseUnit unit05 = new ParseUnit("{ preprocessor/preprocessor10.i &abc &myParam=1 }", session);
+    ParseUnit unit05 = getParseUnit("{ preprocessor/preprocessor10.i &abc &myParam=1 }", session);
     TokenSource stream05 = unit05.preprocess();
     assertEquals(nextVisibleToken(stream05).getType(), Proparse.TRUE);
     IncludeRef events05 = (IncludeRef) unit05.getMacroSourceArray()[1];
@@ -179,7 +180,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test05() throws IOException {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor11.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor11.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.DISPLAY);
@@ -215,7 +216,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test06() throws IOException {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor12.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor12.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.DISPLAY);
@@ -237,7 +238,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test07() throws IOException {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor13.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor13.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.DISPLAY);
@@ -276,7 +277,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test08() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor14.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor14.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     // Three include file (including main file)
@@ -291,7 +292,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test09() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor15.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor15.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     IncludeRef incRef = unit.getMacroGraph();
@@ -308,7 +309,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test10() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor16.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor16.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     IncludeRef mainFile = unit.getMacroGraph();
@@ -335,7 +336,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test11() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor17.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor17.p"), session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.SUBSTITUTE);
@@ -378,7 +379,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test19() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor19.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor19.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.AMPSCOPEDDEFINE);
@@ -394,7 +395,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test20() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor20.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor20.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.AMPGLOBALDEFINE);
@@ -431,7 +432,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test21() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor21.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor21.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
@@ -453,7 +454,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test22() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor22.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor22.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
@@ -472,7 +473,7 @@ public class PreprocessorDirectiveTest {
 
   @Test
   public void test23() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "preprocessor23.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor23.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);

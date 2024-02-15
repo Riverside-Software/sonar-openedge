@@ -24,12 +24,13 @@ import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.proparse.PreproEval;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class PreprocessorParserTest {
+public class PreprocessorParserTest extends AbstractProparseTest {
   private final static String SRC_DIR = "src/test/resources/data/preprocessor";
 
   private RefactorSession session;
@@ -39,7 +40,7 @@ public class PreprocessorParserTest {
   public void setUp() throws IOException {
     session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     try {
-      unit = new ParseUnit(new File(SRC_DIR, "preprocessor01.p"), session);
+      unit = getParseUnit(new File(SRC_DIR, "preprocessor01.p"), session);
       unit.parse();
       assertFalse(unit.hasSyntaxError());
     } catch (RuntimeException caught) {

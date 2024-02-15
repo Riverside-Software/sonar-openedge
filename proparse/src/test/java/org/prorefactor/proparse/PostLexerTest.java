@@ -36,13 +36,14 @@ import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.core.util.UnitTestWindowsSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Charsets;
 
-public class PostLexerTest {
+public class PostLexerTest extends AbstractProparseTest {
   private final static String SRC_DIR = "src/test/resources/data/lexer";
 
   private RefactorSession session;
@@ -55,7 +56,7 @@ public class PostLexerTest {
   @Test
   public void testPostLexer01Init() {
     // First time verifying the channel locations
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
     TokenSource src = unit.preprocess();
     // &IF
     ProToken tok = (ProToken) src.nextToken();
@@ -94,7 +95,7 @@ public class PostLexerTest {
   @Test
   public void testPostLexer01() {
     // First time verifying the channel locations
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
     TokenSource src = unit.preprocess();
     // Whitespaces on hidden channel
     ProToken tok = nextVisibleToken(src);
@@ -104,7 +105,7 @@ public class PostLexerTest {
 
   @Test
   public void testPostLexer02() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer02.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer02.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
@@ -113,7 +114,7 @@ public class PostLexerTest {
 
   @Test
   public void testPostLexer03() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer03.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer03.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
@@ -122,7 +123,7 @@ public class PostLexerTest {
 
   @Test
   public void testPostLexer04() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "postlexer04.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer04.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
@@ -132,7 +133,7 @@ public class PostLexerTest {
 
   @Test
   public void testAnalyzeSuspend() {
-    ParseUnit unit2 = new ParseUnit(new File(SRC_DIR, "lexer05.p"), session);
+    ParseUnit unit2 = getParseUnit(new File(SRC_DIR, "lexer05.p"), session);
     unit2.parse();
     assertFalse(unit2.isInEditableSection(0, 9));
     assertFalse(unit2.isInEditableSection(0, 18));
@@ -141,7 +142,7 @@ public class PostLexerTest {
 
   @Test
   public void testPreproErrorMessages01() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer06.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer06.p"), session);
     try {
       TokenSource src = unit.preprocess();
       while (src.nextToken().getType() != Token.EOF) {
@@ -159,7 +160,7 @@ public class PostLexerTest {
 
   @Test
   public void testPreproErrorMessages02() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer07.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer07.p"), session);
     try {
       TokenSource src = unit.preprocess();
       while (src.nextToken().getType() != Token.EOF) {
@@ -177,7 +178,7 @@ public class PostLexerTest {
 
   @Test
   public void testPreproErrorMessages03() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer08.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer08.p"), session);
     try {
       TokenSource src = unit.preprocess();
       while (src.nextToken().getType() != Token.EOF) {
@@ -196,7 +197,7 @@ public class PostLexerTest {
 
   @Test
   public void testPreproErrorMessages04() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer09.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer09.p"), session);
     try {
       TokenSource src = unit.preprocess();
       while (src.nextToken().getType() != Token.EOF) {
@@ -215,7 +216,7 @@ public class PostLexerTest {
 
   @Test
   public void testAnalyzeSuspendIncludeFile() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer10.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer10.p"), session);
     TokenSource stream = unit.preprocess();
 
     // First MESSAGE in main file
@@ -254,7 +255,7 @@ public class PostLexerTest {
 
   @Test(enabled = false)
   public void testMacroExpansion() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer12.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer12.p"), session);
     TokenSource stream = unit.preprocess();
 
     ProToken tok = (ProToken) stream.nextToken();
@@ -274,7 +275,7 @@ public class PostLexerTest {
   @Test
   public void testUnicodeBom() {
     RefactorSession session2 = new RefactorSession(new ProparseSettings("src/test/resources/data"), new Schema(), Charsets.UTF_8);
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer13.p"), session2);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer13.p"), session2);
     TokenSource src = unit.preprocess();
 
     ProToken tok = (ProToken) nextVisibleToken(src);
@@ -299,7 +300,7 @@ public class PostLexerTest {
   @Test
   public void testXCode1() {
     // Default behavior is that it shouldn't fail
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer14.p"), session);
     TokenSource src = unit.preprocess();
 
     // lexer14.i contains 'message "xcode".'
@@ -321,7 +322,7 @@ public class PostLexerTest {
     ProparseSettings settings = new ProparseSettings("src/test/resources/data");
     settings.setCustomSkipXCode(true);
     RefactorSession session2 = new RefactorSession(settings, new Schema(), Charsets.UTF_8);
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
     TokenSource src = unit.preprocess();
 
     // lexer14.i contains 'message "xcode".'
@@ -343,14 +344,14 @@ public class PostLexerTest {
     ProparseSettings settings = new ProparseSettings("src/test/resources/data");
     settings.setCustomSkipXCode(false);
     RefactorSession session2 = new RefactorSession(settings, new Schema(), Charsets.UTF_8);
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
     // Has to fail here
     unit.preprocess();
   }
 
   @Test
   public void testXCode4() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer14-2.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer14-2.p"), session);
     TokenSource src = unit.preprocess();
 
     // lexer14.i contains 'message "xcode".'
@@ -383,7 +384,7 @@ public class PostLexerTest {
 
   @Test
   public void testProparseDirectiveLexPhase() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer15.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer15.p"), session);
     TokenSource stream = unit.lex();
 
     ProToken tok = (ProToken) stream.nextToken();
@@ -440,7 +441,7 @@ public class PostLexerTest {
 
   @Test
   public void testProparseDirectivePreprocessPhase() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer15.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer15.p"), session);
     TokenSource src = unit.preprocess();
 
     ProToken tok = (ProToken) nextVisibleToken(src);
@@ -471,7 +472,7 @@ public class PostLexerTest {
 
   @Test
   public void testHexNumbers() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer16.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer16.p"), session);
     TokenSource stream = unit.lex();
 
     ProToken tok = (ProToken) stream.nextToken();
@@ -518,7 +519,7 @@ public class PostLexerTest {
 
   @Test
   public void testHexNumbers2() {
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer17.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer17.p"), session);
     TokenSource stream = unit.lex();
 
     ProToken tok = (ProToken) stream.nextToken();
@@ -540,7 +541,7 @@ public class PostLexerTest {
   public void testFileNumName() throws IOException {
     // Use Windows settings here in order to use backlash directory separator
     RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer18.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer18.p"), session);
     TokenSource src = unit.preprocess();
 
     ProToken tok = (ProToken) nextVisibleToken(src);
@@ -589,7 +590,7 @@ public class PostLexerTest {
   @Test
   public void testDirectiveEOF() throws IOException {
     RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer19.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer19.p"), session);
     TokenSource src = unit.preprocess();
 
     ProToken tok = (ProToken) nextVisibleToken(src);
@@ -603,7 +604,7 @@ public class PostLexerTest {
   @Test
   public void testUndefine() throws IOException {
     RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer20.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer20.p"), session);
     TokenSource src = unit.preprocess();
 
     ProToken tok = (ProToken) nextVisibleToken(src);
@@ -623,7 +624,7 @@ public class PostLexerTest {
   @Test
   public void testEndOfIncInIncludeParameter() throws IOException {
     RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer21.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer21.p"), session);
     TokenSource src = unit.preprocess();
 
     ProToken tok = (ProToken) nextVisibleToken(src);
@@ -643,7 +644,7 @@ public class PostLexerTest {
   @Test
   public void test22() throws IOException {
     RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer22.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer22.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.IF);
@@ -661,7 +662,7 @@ public class PostLexerTest {
   @Test
   public void test23() throws IOException {
     RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
-    ParseUnit unit = new ParseUnit(new File(SRC_DIR, "lexer23.p"), session);
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer23.p"), session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.IF);

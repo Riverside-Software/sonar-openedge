@@ -29,12 +29,13 @@ import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.StatementBlockNode;
 import org.prorefactor.core.nodetypes.TwoArgumentsExpression;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.Block;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 
-public class AttributedWriter {
+public class AttributedWriter extends AbstractProparseTest {
 
   BufferedWriter writer = null;
 
@@ -118,7 +119,7 @@ public class AttributedWriter {
    */
   public void write(String inName, File outName, RefactorSession session) throws IOException {
     try {
-      ParseUnit pu = new ParseUnit(new File(inName), session);
+      ParseUnit pu = getParseUnit(new File(inName), session);
       pu.treeParser01();
       writer = new BufferedWriter(new FileWriter(outName));
       walker(pu.getTopNode(), true);

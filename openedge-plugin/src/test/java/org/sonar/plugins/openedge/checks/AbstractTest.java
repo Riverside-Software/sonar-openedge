@@ -71,9 +71,8 @@ public abstract class AbstractTest {
 
   public ParseUnit getParseUnit(InputFile file) {
     try (InputStream input = file.inputStream()) {
-      ParseUnit unit = new ParseUnit(file.inputStream(), file.toString(), session);
+      ParseUnit unit = new ParseUnit(file.inputStream(), file.toString(), session, StandardCharsets.UTF_8);
       unit.treeParser01();
-      unit.attachTypeInfo(session.getTypeInfo(unit.getRootScope().getClassName()));
 
       return unit;
     } catch (IOException caught) {

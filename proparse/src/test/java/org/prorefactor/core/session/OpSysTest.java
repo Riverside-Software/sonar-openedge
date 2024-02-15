@@ -23,13 +23,18 @@ import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestBackslashProparseSettings;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class OpSysTest {
-  private final static boolean IS_WINDOWS = (System.getenv("windir") != null);
+public class OpSysTest extends AbstractProparseTest {
+  private final static boolean IS_WINDOWS = System.getenv("windir") != null;
   private final static String SRC_DIR = "src/test/resources/data/bugsfixed";
+
+  private ParseUnit createParseUnit(RefactorSession session, String fileName) {
+    return getParseUnit(new File(SRC_DIR, fileName), session);
+  }
 
   @Test
   public void testBackslashNoEscape() throws IOException {
@@ -38,7 +43,7 @@ public class OpSysTest {
     if (!IS_WINDOWS)
       return;
     RefactorSession session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
-    ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char.p"), session);
+    ParseUnit pu = createParseUnit(session, "escape_char.p");
     try {
       pu.parse();
       Assert.fail("Should have failed");
@@ -51,7 +56,7 @@ public class OpSysTest {
   public void testBackslashEscape() throws IOException {
     // Backslash considered an escape character on Windows, so it shouldn't fail on both Windows and Unix
     RefactorSession session = new RefactorSession(new UnitTestBackslashProparseSettings(), new SportsSchema());
-    ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char.p"), session);
+    ParseUnit pu = createParseUnit(session, "escape_char.p");
     pu.parse();
   }
 
@@ -62,7 +67,7 @@ public class OpSysTest {
       return;
 
     RefactorSession session = new RefactorSession(new UnitTestBackslashProparseSettings(), new SportsSchema());
-    ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char2.p"), session);
+    ParseUnit pu = createParseUnit(session, "escape_char2.p");
     try {
       pu.parse();
       Assert.fail("Should have failed");
@@ -78,7 +83,7 @@ public class OpSysTest {
       return;
 
     RefactorSession session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
-    ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char2.p"), session);
+    ParseUnit pu = createParseUnit(session, "escape_char2.p");
     pu.parse();
   }
 
@@ -89,7 +94,7 @@ public class OpSysTest {
       return;
 
     RefactorSession session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
-    ParseUnit pu = new ParseUnit(new File(SRC_DIR, "escape_char2.p"), session);
+    ParseUnit pu = createParseUnit(session, "escape_char2.p");
     try {
       pu.parse();
       Assert.fail("Should have failed");

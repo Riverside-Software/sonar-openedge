@@ -27,6 +27,7 @@ import java.util.List;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Routine;
@@ -34,7 +35,7 @@ import org.prorefactor.treeparser.symbols.Variable;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class ClassesTest {
+public class ClassesTest extends AbstractProparseTest {
   private RefactorSession session;
 
   @BeforeTest
@@ -44,7 +45,7 @@ public class ClassesTest {
 
   @Test
   public void test01() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/LoadLogger.cls"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/data/rssw/pct/LoadLogger.cls"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
@@ -111,7 +112,7 @@ public class ClassesTest {
 
   @Test
   public void test03() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/ScopeTest.cls"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/data/rssw/pct/ScopeTest.cls"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();
@@ -139,7 +140,7 @@ public class ClassesTest {
 
   @Test
   public void testThisObject() {
-    ParseUnit unit = new ParseUnit(new File("src/test/resources/data/rssw/pct/TestThisObject.cls"), session);
+    ParseUnit unit = getParseUnit(new File("src/test/resources/data/rssw/pct/TestThisObject.cls"), session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();

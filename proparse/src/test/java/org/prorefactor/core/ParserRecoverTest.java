@@ -24,11 +24,12 @@ import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.refactor.settings.ProparseSettings;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class ParserRecoverTest {
+public class ParserRecoverTest extends AbstractProparseTest {
   private RefactorSession session;
 
   @BeforeTest
@@ -43,7 +44,7 @@ public class ParserRecoverTest {
     ((ProparseSettings) session.getProparseSettings()).setAntlrTokenInsertion(true);
     ((ProparseSettings) session.getProparseSettings()).setAntlrTokenDeletion(true);
     // Everything should be fine here
-    ParseUnit unit = new ParseUnit("define variable xyz as character no-undo.", session);
+    ParseUnit unit = getParseUnit("define variable xyz as character no-undo.", session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
@@ -55,7 +56,7 @@ public class ParserRecoverTest {
     ((ProparseSettings) session.getProparseSettings()).setAntlrTokenInsertion(true);
     ((ProparseSettings) session.getProparseSettings()).setAntlrTokenDeletion(true);
     // Doesn't compile but recover is on, so should be silently discarded and token insertion is on
-    ParseUnit unit = new ParseUnit("define variable xyz character no-undo.", session);
+    ParseUnit unit = getParseUnit("define variable xyz character no-undo.", session);
     unit.treeParser01();
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.PERIOD).size(), 0);
@@ -67,7 +68,7 @@ public class ParserRecoverTest {
     ((ProparseSettings) session.getProparseSettings()).setAntlrTokenInsertion(false);
     ((ProparseSettings) session.getProparseSettings()).setAntlrTokenDeletion(false);
     // Doesn't compile and recover is off, so should throw ParseCancellationException
-    ParseUnit unit = new ParseUnit("define variable xyz character no-undo.", session);
+    ParseUnit unit = getParseUnit("define variable xyz character no-undo.", session);
     unit.treeParser01();
   }
 

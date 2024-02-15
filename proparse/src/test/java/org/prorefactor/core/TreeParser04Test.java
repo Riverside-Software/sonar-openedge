@@ -29,13 +29,14 @@ import org.prorefactor.core.util.TP01FramesTreeLister;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.proparse.support.JPNodeLister;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.Test;
 
 /**
  * Test frame scopes and implicit field associations to frames.
  */
-public class TreeParser04Test {
+public class TreeParser04Test extends AbstractProparseTest {
   String expectName = "src/test/resources/treeparser04-expect/frames.p";
   String inName = "src/test/resources/treeparser04/frames.p";
   File outFile = new File("target/test-temp/treeparser04/frames.p");
@@ -46,7 +47,7 @@ public class TreeParser04Test {
     RefactorSession session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     outFile.getParentFile().mkdirs();
 
-    ParseUnit pu = new ParseUnit(new File(inName), session);
+    ParseUnit pu = getParseUnit(new File(inName), session);
     pu.treeParser01();
     assertFalse(pu.hasSyntaxError());
 
