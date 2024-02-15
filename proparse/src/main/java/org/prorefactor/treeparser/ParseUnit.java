@@ -484,20 +484,7 @@ public class ParseUnit {
           .filter(it -> it.getRefSeq().intValue() > ref.getRefSeq().intValue()) //
           .filter(it -> it.getFileNum().intValue()  == ref.getFileNum().intValue() && it.getLineNum().intValue() == ref.getLineNum().intValue()) //
           .filter(it -> ref.getObjectIdentifier().equals(it.getObjectIdentifier())) //
-          .forEach(it -> { 
-          /*if ("SORT-ACCESS".equalsIgnoreCase(it.getReferenceType())
-              && ref.getObjectIdentifier().equalsIgnoreCase(nextRef.getObjectIdentifier()))*/
-            recNode.addSortAccess(it.getObjectContext());
-        });
-        // Is next reference a sort-access node ?
-        /*Optional<Reference> nextRefOpt = src.getReference().stream().filter(
-            it -> it.getRefSeq() == ref.getRefSeq() + 1).findFirst();
-        if (nextRefOpt.isPresent()) {
-          Reference nextRef = nextRefOpt.get();
-          if ("SORT-ACCESS".equalsIgnoreCase(nextRef.getReferenceType())
-              && ref.getObjectIdentifier().equalsIgnoreCase(nextRef.getObjectIdentifier()))
-            recNode.addSortAccess(nextRef.getObjectContext());
-        }*/
+          .forEach(it -> recNode.addSortAccess(it.getObjectContext()));
         lFound = true;
         break;
       }

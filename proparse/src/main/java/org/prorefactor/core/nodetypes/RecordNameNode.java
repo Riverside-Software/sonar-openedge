@@ -30,7 +30,7 @@ import com.google.common.base.Strings;
 
 public class RecordNameNode extends JPNode {
   private List<String> sortAccess = new ArrayList<>();
-  private List<Pair<String, Boolean>> searchIndex = new ArrayList<>();;
+  private List<Pair<String, Boolean>> searchIndex = new ArrayList<>();
   private ContextQualifier qualifier;
   private int storeType;
   private boolean abbrev;
