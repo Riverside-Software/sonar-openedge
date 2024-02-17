@@ -520,7 +520,7 @@ public class ParseUnit {
         .filter(it -> it.getStatement().firstNaturalChild().getLine() == lineNumber) //
         .filter(it -> it.getFileIndex() == node.getFileIndex()) //
         .findAny();
-      if (opt.isEmpty()) {
+      if (!opt.isPresent()) {
         filteredList.add(node);
       }
     }
