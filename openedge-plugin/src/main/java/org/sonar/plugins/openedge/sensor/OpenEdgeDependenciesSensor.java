@@ -93,9 +93,9 @@ public class OpenEdgeDependenciesSensor implements Sensor {
     Path incFile = settings.getPctIncludeFile(file);
     LOGGER.info("Include file: {} for {}" , incFile , file.relativePath());
 
-    if (useCache && (incFile != null)) {
+    if (useCache && (incFile != null) && context.previousCache().contains(file.relativePath())) {
       LOGGER.info("read from cache");
-      List<String> lst = new ArrayList<String>();
+      List<String> lst = new ArrayList<>();
       try (InputStream stream = context.previousCache().read(file.relativePath());
           InputStreamReader r1 = new InputStreamReader(stream);
           BufferedReader r2 = new BufferedReader(new InputStreamReader(stream)) ) {
