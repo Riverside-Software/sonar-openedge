@@ -73,4 +73,9 @@ public class InputFileUtils {
     }
   }
 
+  @SuppressWarnings("deprecation")
+  public static String getRelativePath(InputFile file) {
+    return file.relativePath();
+  }
+
 }

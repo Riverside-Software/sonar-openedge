@@ -23,7 +23,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,6 +44,7 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
 import com.google.common.base.Joiner;
+import static org.sonar.plugins.openedge.foundation.InputFileUtils.getRelativePath;
 
 @DependedUpon(value = "PctDependencies")
 public class OpenEdgeDependenciesSensor implements Sensor {
@@ -91,39 +91,55 @@ public class OpenEdgeDependenciesSensor implements Sensor {
 
   private void processFile(SensorContext context, InputFile file) {
     Path incFile = settings.getPctIncludeFile(file);
-    LOGGER.info("Include file: {} for {}" , incFile , file.relativePath());
+    String relPath = getRelativePath(file);
+    LOGGER.info("Include file: {} for {}" , incFile , relPath);
 
-    if (useCache && (incFile != null) && context.previousCache().contains(file.relativePath())) {
-      LOGGER.info("read from cache");
-      List<String> lst = new ArrayList<>();
-      try (InputStream stream = context.previousCache().read(file.relativePath());
+    List<String> deps = new ArrayList<>();
+    if (useCache && (incFile != null) && context.previousCache().contains(relPath)) {
+      // Always read from cache
+      LOGGER.info("Read from cache");
+      try (InputStream stream = context.previousCache().read(relPath);
           InputStreamReader r1 = new InputStreamReader(stream);
           BufferedReader r2 = new BufferedReader(new InputStreamReader(stream)) ) {
         String str = r2.readLine();
         while (str != null) {
-          lst.add(str);
+          deps.add(str);
           str = r2.readLine();
         }
-        components.addIncludeDependency(file.uri().toString(), lst);
-        LOGGER.info("Add {} lines from previous version", lst.size());
+
+        LOGGER.info("Lines found: ");
+        for (String s : deps) {
+          LOGGER.info("  -> {}", s);
+        }
       } catch (IOException caught) {
         LOGGER.error("IOExc", caught);
       }
-    } else if ((incFile != null) && Files.isReadable(incFile)) {
+    }
+
+    // But also read from file if it's available
+    if ((incFile != null) && Files.isReadable(incFile)) {
       LOGGER.info("Import include dependencies from {}", incFile);
       try {
         IncFileProcessor processor = new IncFileProcessor();
         Files.readAllLines(incFile, StandardCharsets.UTF_8).forEach(processor::processLine);
-        components.addIncludeDependency(file.uri().toString(), processor.results);
-        if (useCache) {
-          LOGGER.info("Write cache");
-          context.nextCache().write(file.relativePath(),
-              Joiner.on('\n').join(processor.results).getBytes(StandardCharsets.UTF_8));
-        }
+        deps.clear();
+        deps.addAll(processor.results);
       } catch (IOException caught) {
         // Nothing...
       }
     }
+
+    LOGGER.info("Will serialize those lines:");
+    for (String s : deps) {
+      LOGGER.info("  -> {}", s);
+    }
+
+    components.addIncludeDependency(file.uri().toString(), deps);
+    if (useCache) {
+      LOGGER.info("Write cache");
+      context.nextCache().write(relPath, Joiner.on('\n').join(deps).getBytes(StandardCharsets.UTF_8));
+    }
+
   }
 
   private class IncFileProcessor implements LineProcessor<List<String>> {
