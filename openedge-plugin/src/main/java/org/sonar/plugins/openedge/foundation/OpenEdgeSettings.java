@@ -553,6 +553,15 @@ public class OpenEdgeSettings {
     return developerOrMore && version99OrMore && config.get("sonar.pullrequest.branch").isPresent();
   }
 
+  public boolean useCache() {
+    if (runtime.getProduct() != SonarProduct.SONARQUBE)
+      return false;
+    boolean developerOrMore = ((runtime.getEdition() == SonarEdition.DEVELOPER)
+        || (runtime.getEdition() == SonarEdition.ENTERPRISE) || (runtime.getEdition() == SonarEdition.DATACENTER));
+    boolean version94OrMore = runtime.getApiVersion().isGreaterThanOrEqual(Version.create(9, 4));
+    return developerOrMore && version94OrMore;
+  }
+
   private File getFileFromRtbListDir(String fileName, String extension) {
     Path path = Paths.get(fileName);
     int lastPeriodPos = path.getFileName().toString().lastIndexOf('.');

@@ -19,7 +19,11 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,13 +44,17 @@ import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 
+import com.google.common.base.Joiner;
+
 @DependedUpon(value = "PctDependencies")
 public class OpenEdgeDependenciesSensor implements Sensor {
-  private static final Logger LOG = LoggerFactory.getLogger(OpenEdgeDependenciesSensor.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OpenEdgeDependenciesSensor.class);
 
   // IoC
   private final OpenEdgeSettings settings;
   private final OpenEdgeComponents components;
+  // Internal use 
+  private boolean useCache;
 
   public OpenEdgeDependenciesSensor(OpenEdgeSettings settings,  OpenEdgeComponents components) {
     this.settings = settings;
@@ -64,30 +72,54 @@ public class OpenEdgeDependenciesSensor implements Sensor {
     if (context.runtime().getProduct() == SonarProduct.SONARLINT)
       return;
     settings.init();
+    useCache = context.isCacheEnabled() && settings.useCache();
 
     int incImportNum = 0;
     FilePredicates predicates = context.fileSystem().predicates();
     for (InputFile file : context.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
-      LOG.debug("Looking for include file dependencies of {}", file);
-      processFile(file);
+      LOGGER.info("Looking for include file dependencies of {}", file);
+      processFile(context, file);
       incImportNum++;
       if (context.isCancelled()) {
-        LOG.info("Analysis cancelled...");
+        LOGGER.info("Analysis cancelled...");
         return;
       }
     }
-    LOG.info("{} files processed", incImportNum);
+    LOGGER.info("{} files processed", incImportNum);
   }
 
-  private void processFile(InputFile file) {
+  private void processFile(SensorContext context, InputFile file) {
     Path incFile = settings.getPctIncludeFile(file);
-    if ((incFile != null) && Files.isReadable(incFile)) {
-      LOG.debug("Import include dependencies from {}", incFile);
+    LOGGER.info("Include file: {} for {}" , incFile , file.relativePath());
+
+    if (useCache && (incFile != null)) {
+      LOGGER.info("read from cache");
+      List<String> lst = new ArrayList<String>();
+      try (InputStream stream = context.previousCache().read(file.relativePath());
+          InputStreamReader r1 = new InputStreamReader(stream);
+          BufferedReader r2 = new BufferedReader(new InputStreamReader(stream)) ) {
+        String str = r2.readLine();
+        while (str != null) {
+          lst.add(str);
+          str = r2.readLine();
+        }
+        components.addIncludeDependency(file.uri().toString(), lst);
+        LOGGER.info("Add {} lines from previous version", lst.size());
+      } catch (IOException caught) {
+        LOGGER.error("IOExc", caught);
+      }
+    } else if ((incFile != null) && Files.isReadable(incFile)) {
+      LOGGER.info("Import include dependencies from {}", incFile);
       try {
         IncFileProcessor processor = new IncFileProcessor();
         Files.readAllLines(incFile, StandardCharsets.UTF_8).forEach(processor::processLine);
         components.addIncludeDependency(file.uri().toString(), processor.results);
+        if (useCache) {
+          LOGGER.info("Write cache");
+          context.nextCache().write(file.relativePath(),
+              Joiner.on('\n').join(processor.results).getBytes(StandardCharsets.UTF_8));
+        }
       } catch (IOException caught) {
         // Nothing...
       }
