@@ -99,15 +99,16 @@
       <plugin>
         <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
         <artifactId>sonar-packaging-maven-plugin</artifactId>
-        <version>1.20.0.405</version>
+        <version>1.23.0.740</version>
         <extensions>true</extensions>
         <configuration>
           <pluginKey>${sonar.pluginKey}</pluginKey>
           <pluginName>${sonar.pluginName}</pluginName>
           <pluginClass>${sonar.pluginClass}</pluginClass>
-          <sonarQubeMinVersion>7.6</sonarQubeMinVersion>
+          <pluginApiMinVersion>8.9</pluginApiMinVersion>
           <sonarLintSupported>true</sonarLintSupported>
           <skipDependenciesPackaging>true</skipDependenciesPackaging>
+          <requiredForLanguages>oe,oedb</requiredForLanguages>
           <archive>
             <manifestEntries>
               <Implementation-Build>${git.commit}</Implementation-Build>
