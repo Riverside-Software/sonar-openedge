@@ -2,7 +2,7 @@
  * ABL Language Server implementation
  *
  * This source code is not part of an open-source package.
- * Copyright (c) 2021-2023 Riverside Software
+ * Copyright (c) 2021-2024 Riverside Software
  * contact@riverside-software.fr
  */
 package org.prorefactor.core;
