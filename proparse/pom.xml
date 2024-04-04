@@ -113,9 +113,6 @@
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-maven-plugin</artifactId>
         <version>4.13.0</version>
-        <configuration>
-          <libDirectory>src/main/antlr4/imports</libDirectory>
-        </configuration>
         <executions>
           <execution>
             <goals>
