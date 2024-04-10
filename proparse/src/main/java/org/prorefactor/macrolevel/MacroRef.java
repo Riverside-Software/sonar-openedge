@@ -172,6 +172,19 @@ public abstract class MacroRef implements MacroEvent {
   }
 
   /**
+   * Check if line/column are within this macro reference
+   */
+  public boolean contains(int x, int y) {
+    if ((x < refLine) || ((x == refLine) && (y < refColumn))) {
+      return false;
+    }
+    if ((x > refEndLine) || ((x == refEndLine) && (y > refEndColumn))) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Assuming an x,y range, this function returns whether an input x and y are within the specified range of x,y begin
    * and x,y end. We use this primarily for checking if a line/column are within the specified range. The "range" may be
    * open ended, see parameter descriptions.
