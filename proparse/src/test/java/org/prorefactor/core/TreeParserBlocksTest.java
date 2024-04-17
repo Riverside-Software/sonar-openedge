@@ -32,6 +32,8 @@ import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.treeparser.symbols.Routine;
+import org.prorefactor.treeparser.symbols.Routine.GraphNode;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -345,4 +347,24 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertNull(currStmt.getNextStatement());
   }
 
+  @Test
+  public void executionGraphTest01() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test01.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Routine r0 = unit.getRootScope().getRoutines().get(0);
+    GraphNode zz = r0.createExecutionGraph();
+    assertNotNull(zz.contains(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).asIStatement()));
+    assertNull(zz.contains(unit.getTopNode().queryStateHead(ABLNodeType.PROCEDURE).get(0).asIStatement()));
+    assertNull(zz.contains(unit.getTopNode().queryStateHead(ABLNodeType.DISPLAY).get(0).asIStatement()));
+
+    Routine r1 = unit.getRootScope().getRoutines().get(1);
+    GraphNode zz2 = r1.createExecutionGraph();
+    assertNull(zz2.contains(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).asIStatement()));
+    assertNotNull(zz2.contains(unit.getTopNode().queryStateHead(ABLNodeType.DISPLAY).get(0).asIStatement()));
+  }
 }
