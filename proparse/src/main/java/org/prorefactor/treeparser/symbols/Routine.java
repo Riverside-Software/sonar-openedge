@@ -238,6 +238,15 @@ public class Routine extends Symbol {
       }
       return null;
     }
+
+    @Override
+    public String toString() {
+      String str = " - " + adj.size() + " edge(s)";
+      if (stmt == null)
+        return "Joiner node" + str;
+      else
+        return "Node to " + stmt.toString() + str;
+    }
   }
 
 }

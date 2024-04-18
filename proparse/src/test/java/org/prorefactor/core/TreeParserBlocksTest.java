@@ -357,14 +357,60 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertNotNull(unit.getRootScope());
 
     Routine r0 = unit.getRootScope().getRoutines().get(0);
-    GraphNode zz = r0.createExecutionGraph();
-    assertNotNull(zz.contains(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).asIStatement()));
-    assertNull(zz.contains(unit.getTopNode().queryStateHead(ABLNodeType.PROCEDURE).get(0).asIStatement()));
-    assertNull(zz.contains(unit.getTopNode().queryStateHead(ABLNodeType.DISPLAY).get(0).asIStatement()));
+    GraphNode node0 = r0.createExecutionGraph();
+    assertNotNull(node0.contains(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).asIStatement()));
+    assertNull(node0.contains(unit.getTopNode().queryStateHead(ABLNodeType.PROCEDURE).get(0).asIStatement()));
+    assertNull(node0.contains(unit.getTopNode().queryStateHead(ABLNodeType.DISPLAY).get(0).asIStatement()));
 
     Routine r1 = unit.getRootScope().getRoutines().get(1);
-    GraphNode zz2 = r1.createExecutionGraph();
-    assertNull(zz2.contains(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).asIStatement()));
-    assertNotNull(zz2.contains(unit.getTopNode().queryStateHead(ABLNodeType.DISPLAY).get(0).asIStatement()));
+    GraphNode node1 = r1.createExecutionGraph();
+    assertNull(node1.contains(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).asIStatement()));
+    assertNotNull(node1.contains(unit.getTopNode().queryStateHead(ABLNodeType.DISPLAY).get(0).asIStatement()));
+  }
+
+  @Test
+  public void executionGraphTest02() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test02.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Routine r0 = unit.getRootScope().getRoutines().get(0);
+    GraphNode node0 = r0.createExecutionGraph();
+    assertTrue(node0.getStmt().asJPNode().getNodeType() == ABLNodeType.IF);
+    assertEquals(node0.getAdj().size(), 2);
+    assertEquals(node0.getAdj().get(0).getStmt().asJPNode().getLine(), 2);
+    assertEquals(node0.getAdj().get(1).getStmt().asJPNode().getLine(), 4);
+
+    // Point to Joiner node
+    GraphNode node1 = node0.getAdj().get(0).getAdj().get(0);
+    assertNull(node1.getStmt());
+    assertEquals(node0.getAdj().get(1).getAdj().get(0), node1);
+
+    assertEquals(node1.getAdj().size(), 1);
+    assertEquals(node1.getAdj().get(0).getStmt().asJPNode().getLine(), 6);
+  }
+
+  @Test
+  public void executionGraphTest03() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test03.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Routine r0 = unit.getRootScope().getRoutines().get(0);
+    GraphNode node0 = r0.createExecutionGraph();
+    assertEquals(node0.getStmt().asJPNode().getNodeType(), ABLNodeType.DEFINE);
+    GraphNode node1 = node0.getAdj().get(0);
+    assertEquals(node1.getStmt().asJPNode().getNodeType(), ABLNodeType.DO);
+    GraphNode node2 = node1.getAdj().get(0);
+    assertEquals(node2.getStmt().asJPNode().getNodeType(), ABLNodeType.CREATE);
+    GraphNode node3 = node2.getAdj().get(0);
+    assertEquals(node3.getStmt().asJPNode().getNodeType(), ABLNodeType.CREATE);
+    assertEquals(node3.getAdj().size(), 0);
   }
 }
