@@ -91,7 +91,15 @@ public class MacroGraphTest extends AbstractProparseTest {
     assertFalse(unit.hasSyntaxError());
 
     assertEquals(unit.getMacroGraph().findExternalMacroReferences().size(), 4);
-    assertEquals(unit.getMacroGraph().findExternalMacroReferences(new int[] {1,1}, new int[] {5,1}).size(), 1);
+    List<MacroEvent> list = unit.getMacroGraph().findExternalMacroReferences(new int[] {1,1}, new int[] {5,1});
+    assertEquals(list.size(), 1);
+    assertTrue(list.get(0) instanceof MacroRef);
+    MacroRef ref0 = (MacroRef) list.get(0);
+    assertFalse(ref0.contains(0, 2));
+    assertFalse(ref0.contains(3, 1));
+    assertTrue(ref0.contains(3, 10));
+    assertFalse(ref0.contains(3, 50));
+    assertFalse(ref0.contains(6, 1));
     assertEquals(unit.getMacroGraph().findExternalMacroReferences(new int[] {1,1}, new int[] {2,1}).size(), 0);
     assertEquals(unit.getMacroGraph().findIncludeReferences(0).size(), 1);
     assertEquals(unit.getMacroGraph().findIncludeReferences(1).size(), 1);
