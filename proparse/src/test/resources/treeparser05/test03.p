@@ -12,6 +12,11 @@ procedure p1:
   end.
 end procedure.
 
+on write of customer do:
+  message "Test".
+  display "Test2".
+end.
+
 do zz = 1 to 10:
   create customer.
   create customer.

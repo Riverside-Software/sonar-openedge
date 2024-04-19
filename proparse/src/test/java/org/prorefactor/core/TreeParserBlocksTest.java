@@ -246,12 +246,19 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     prevStmt = currStmt;
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.DO);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.ON);
     assertEquals(currStmt.asJPNode().getLine(), 15);
+    assertEquals(currStmt.getPreviousStatement(), prevStmt);
+
+    prevStmt = currStmt;
+    currStmt = currStmt.getNextStatement();
+    assertNotNull(currStmt);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.DO);
+    assertEquals(currStmt.asJPNode().getLine(), 20);
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
     assertNull(currStmt.getNextStatement());
 
-    IStatement subNode1 = ((StatementBlockNode) prevStmt).getFirstStatement();
+    IStatement subNode1 = ((StatementBlockNode) prevStmt.getPreviousStatement()).getFirstStatement();
     assertNotNull(subNode1);
     assertEquals(subNode1.asJPNode().getNodeType(), ABLNodeType.DO);
     assertEquals(subNode1.asJPNode().getLine(), 4);
@@ -297,7 +304,7 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     IStatement subNode5 = ((StatementBlockNode) currStmt).getFirstStatement();
     assertNotNull(subNode5);
     assertEquals(subNode5.asJPNode().getNodeType(), ABLNodeType.CREATE);
-    assertEquals(subNode5.asJPNode().getLine(), 16);
+    assertEquals(subNode5.asJPNode().getLine(), 21);
     assertNull(subNode5.getPreviousStatement());
     assertNotNull(subNode5.getNextStatement());
   }

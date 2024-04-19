@@ -155,7 +155,7 @@ public class Routine extends Symbol {
     IStatement currStmt = stmt.getFirstStatement().getNextStatement();
     while (currStmt != null) {
       if ((currStmt.asJPNode().getNodeType() != ABLNodeType.FUNCTION) && (currStmt.asJPNode().getNodeType()!= ABLNodeType.PROCEDURE)
-          && (currStmt.asJPNode().getNodeType() != ABLNodeType.METHOD)) {
+          && (currStmt.asJPNode().getNodeType() != ABLNodeType.METHOD)&& (currStmt.asJPNode().getNodeType()!= ABLNodeType.ON)) {
       GraphNode nn = createExecutionGraph(currStmt) ;
       currNode.addAdj(nn);}
       currNode = currNode.getLastChild();
