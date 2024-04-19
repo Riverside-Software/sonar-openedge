@@ -192,7 +192,7 @@ public class RefactorSession implements IProparseEnvironment {
       info = classInfo.get(clz);
     }
     if (info == null) {
-      LOG.debug("No TypeInfo found for {}", clz);
+      LOG.trace("No TypeInfo found for {}", clz);
     }
 
     return info;
@@ -208,7 +208,7 @@ public class RefactorSession implements IProparseEnvironment {
       info = lcClassInfo.get(clz.toLowerCase());
     }
     if (info == null) {
-      LOG.debug("No TypeInfo found for {}", clz);
+      LOG.trace("No TypeInfo found for {}", clz);
     }
 
     return info;
