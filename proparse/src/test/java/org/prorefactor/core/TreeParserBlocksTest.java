@@ -23,6 +23,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IfStatementNode;
@@ -31,9 +32,9 @@ import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.AbstractProparseTest;
+import org.prorefactor.treeparser.ExecutionGraph;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.symbols.Routine;
-import org.prorefactor.treeparser.symbols.Routine.GraphNode;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -364,15 +365,28 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertNotNull(unit.getRootScope());
 
     Routine r0 = unit.getRootScope().getRoutines().get(0);
-    GraphNode node0 = r0.createExecutionGraph();
-    assertNotNull(node0.contains(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).asIStatement()));
-    assertNull(node0.contains(unit.getTopNode().queryStateHead(ABLNodeType.PROCEDURE).get(0).asIStatement()));
-    assertNull(node0.contains(unit.getTopNode().queryStateHead(ABLNodeType.DISPLAY).get(0).asIStatement()));
+    ExecutionGraph graph0 = r0.getExecutionGraph();
+    assertEquals(graph0.getVertices().size(), 7); // 6 statements + RootNode
+    assertEquals(graph0.getVertices().get(0).getNodeType(), ABLNodeType.PROGRAM_ROOT);
+    // Very simple flow
+    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph0.getEdges().get(1), Arrays.asList(2));
+    assertEquals(graph0.getEdges().get(2), Arrays.asList(3));
+    assertEquals(graph0.getEdges().get(3), Arrays.asList(4));
+    assertEquals(graph0.getEdges().get(4), Arrays.asList(5));
+    assertEquals(graph0.getEdges().get(5), Arrays.asList(6));
+    assertTrue(graph0.getEdges().get(6).isEmpty());
 
     Routine r1 = unit.getRootScope().getRoutines().get(1);
-    GraphNode node1 = r1.createExecutionGraph();
-    assertNull(node1.contains(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).get(0).asIStatement()));
-    assertNotNull(node1.contains(unit.getTopNode().queryStateHead(ABLNodeType.DISPLAY).get(0).asIStatement()));
+    ExecutionGraph graph1 = r1.getExecutionGraph();
+    assertEquals(graph1.getVertices().size(), 3); // 2 statements + Procedure node
+    assertEquals(graph1.getVertices().get(0).getNodeType(), ABLNodeType.PROCEDURE);
+    assertEquals(graph1.getVertices().get(1).getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(graph1.getVertices().get(2).getNodeType(), ABLNodeType.DISPLAY);
+    // Very simple flow
+    assertEquals(graph1.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph1.getEdges().get(1), Arrays.asList(2));
+    assertTrue(graph1.getEdges().get(2).isEmpty());
   }
 
   @Test
@@ -385,20 +399,19 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertNotNull(unit.getRootScope());
 
     Routine r0 = unit.getRootScope().getRoutines().get(0);
-    GraphNode node0 = r0.createExecutionGraph();
-    assertTrue(node0.getStmt().asJPNode().getNodeType() == ABLNodeType.IF);
-    assertEquals(node0.getAdj().size(), 2);
-    assertEquals(node0.getAdj().get(0).getStmt().asJPNode().getLine(), 2);
-    assertEquals(node0.getAdj().get(1).getStmt().asJPNode().getLine(), 4);
-
-    // Point to Joiner node
-    GraphNode node1 = node0.getAdj().get(0).getAdj().get(0);
-    assertNull(node1.getStmt());
-    assertEquals(node0.getAdj().get(1).getAdj().get(0), node1);
-
-    assertEquals(node1.getAdj().size(), 1);
-    assertEquals(node1.getAdj().get(0).getStmt().asJPNode().getLine(), 6);
-  }
+    ExecutionGraph graph0 = r0.getExecutionGraph();
+    assertEquals(graph0.getVertices().size(), 9); // 8 statements + RootNode
+    assertEquals(graph0.getVertices().get(0).getNodeType(), ABLNodeType.PROGRAM_ROOT);
+    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph0.getEdges().get(1), Arrays.asList(2, 3, 4)); // IF
+    assertTrue(graph0.getEdges().get(2).isEmpty()); // THEN
+    assertTrue(graph0.getEdges().get(3).isEmpty()); // ELSE
+    assertEquals(graph0.getEdges().get(4), Arrays.asList(5, 7)); // IF
+    assertEquals(graph0.getEdges().get(5), Arrays.asList(6));
+    assertEquals(graph0.getEdges().get(7), Arrays.asList(8));
+    assertTrue(graph0.getEdges().get(6).isEmpty());
+    assertTrue(graph0.getEdges().get(8).isEmpty());
+    }
 
   @Test
   public void executionGraphTest03() {
@@ -410,14 +423,23 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertNotNull(unit.getRootScope());
 
     Routine r0 = unit.getRootScope().getRoutines().get(0);
-    GraphNode node0 = r0.createExecutionGraph();
-    assertEquals(node0.getStmt().asJPNode().getNodeType(), ABLNodeType.DEFINE);
-    GraphNode node1 = node0.getAdj().get(0);
-    assertEquals(node1.getStmt().asJPNode().getNodeType(), ABLNodeType.DO);
-    GraphNode node2 = node1.getAdj().get(0);
-    assertEquals(node2.getStmt().asJPNode().getNodeType(), ABLNodeType.CREATE);
-    GraphNode node3 = node2.getAdj().get(0);
-    assertEquals(node3.getStmt().asJPNode().getNodeType(), ABLNodeType.CREATE);
-    assertEquals(node3.getAdj().size(), 0);
+    ExecutionGraph graph0 = r0.getExecutionGraph();
+    assertEquals(graph0.getVertices().size(), 5); // 4 statements + RootNode
+    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph0.getEdges().get(1), Arrays.asList(2));
+    assertEquals(graph0.getEdges().get(2), Arrays.asList(3));
+    assertEquals(graph0.getEdges().get(3), Arrays.asList(4));
+    assertTrue(graph0.getEdges().get(4).isEmpty());
+
+    Routine r1 = unit.getRootScope().getRoutines().get(1);
+    ExecutionGraph graph1 = r1.getExecutionGraph();
+    assertEquals(graph1.getVertices().size(), 7); // 6 statements + Procedure node
+    assertEquals(graph1.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph1.getEdges().get(1), Arrays.asList(2));
+    assertEquals(graph1.getEdges().get(2), Arrays.asList(3, 6));
+    assertEquals(graph1.getEdges().get(3), Arrays.asList(4));
+    assertEquals(graph1.getEdges().get(4), Arrays.asList(5));
+    assertTrue(graph1.getEdges().get(5).isEmpty());
+    assertTrue(graph1.getEdges().get(6).isEmpty());
   }
 }
