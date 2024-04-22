@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2023 Riverside Software
+ * Copyright (c) 2015-2024 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -132,7 +132,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   }
 
   /**
-   * Tries to create a new issue. Will return null if the issue can't be created.
+   * Create new issue. Will return null if issue can't be created (no-sonar annotation, appbuilder generated code, ...
    */
   protected NewIssue createIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
     if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {

@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2023 Riverside Software
+ * Copyright (c) 2015-2024 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -23,6 +23,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IfStatementNode;
@@ -31,7 +32,9 @@ import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.AbstractProparseTest;
+import org.prorefactor.treeparser.ExecutionGraph;
 import org.prorefactor.treeparser.ParseUnit;
+import org.prorefactor.treeparser.symbols.Routine;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -244,12 +247,19 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     prevStmt = currStmt;
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
-    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.DO);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.ON);
     assertEquals(currStmt.asJPNode().getLine(), 15);
+    assertEquals(currStmt.getPreviousStatement(), prevStmt);
+
+    prevStmt = currStmt;
+    currStmt = currStmt.getNextStatement();
+    assertNotNull(currStmt);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.DO);
+    assertEquals(currStmt.asJPNode().getLine(), 20);
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
     assertNull(currStmt.getNextStatement());
 
-    IStatement subNode1 = ((StatementBlockNode) prevStmt).getFirstStatement();
+    IStatement subNode1 = ((StatementBlockNode) prevStmt.getPreviousStatement()).getFirstStatement();
     assertNotNull(subNode1);
     assertEquals(subNode1.asJPNode().getNodeType(), ABLNodeType.DO);
     assertEquals(subNode1.asJPNode().getLine(), 4);
@@ -295,7 +305,7 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     IStatement subNode5 = ((StatementBlockNode) currStmt).getFirstStatement();
     assertNotNull(subNode5);
     assertEquals(subNode5.asJPNode().getNodeType(), ABLNodeType.CREATE);
-    assertEquals(subNode5.asJPNode().getLine(), 16);
+    assertEquals(subNode5.asJPNode().getLine(), 21);
     assertNull(subNode5.getPreviousStatement());
     assertNotNull(subNode5.getNextStatement());
   }
@@ -345,4 +355,91 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertNull(currStmt.getNextStatement());
   }
 
+  @Test
+  public void executionGraphTest01() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test01.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Routine r0 = unit.getRootScope().getRoutines().get(0);
+    ExecutionGraph graph0 = r0.getExecutionGraph();
+    assertEquals(graph0.getVertices().size(), 7); // 6 statements + RootNode
+    assertEquals(graph0.getVertices().get(0).getNodeType(), ABLNodeType.PROGRAM_ROOT);
+    // Very simple flow
+    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph0.getEdges().get(1), Arrays.asList(2));
+    assertEquals(graph0.getEdges().get(2), Arrays.asList(3));
+    assertEquals(graph0.getEdges().get(3), Arrays.asList(4));
+    assertEquals(graph0.getEdges().get(4), Arrays.asList(5));
+    assertEquals(graph0.getEdges().get(5), Arrays.asList(6));
+    assertTrue(graph0.getEdges().get(6).isEmpty());
+
+    Routine r1 = unit.getRootScope().getRoutines().get(1);
+    ExecutionGraph graph1 = r1.getExecutionGraph();
+    assertEquals(graph1.getVertices().size(), 3); // 2 statements + Procedure node
+    assertEquals(graph1.getVertices().get(0).getNodeType(), ABLNodeType.PROCEDURE);
+    assertEquals(graph1.getVertices().get(1).getNodeType(), ABLNodeType.DISPLAY);
+    assertEquals(graph1.getVertices().get(2).getNodeType(), ABLNodeType.DISPLAY);
+    // Very simple flow
+    assertEquals(graph1.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph1.getEdges().get(1), Arrays.asList(2));
+    assertTrue(graph1.getEdges().get(2).isEmpty());
+  }
+
+  @Test
+  public void executionGraphTest02() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test02.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Routine r0 = unit.getRootScope().getRoutines().get(0);
+    ExecutionGraph graph0 = r0.getExecutionGraph();
+    assertEquals(graph0.getVertices().size(), 9); // 8 statements + RootNode
+    assertEquals(graph0.getVertices().get(0).getNodeType(), ABLNodeType.PROGRAM_ROOT);
+    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph0.getEdges().get(1), Arrays.asList(2, 3, 4)); // IF
+    assertTrue(graph0.getEdges().get(2).isEmpty()); // THEN
+    assertTrue(graph0.getEdges().get(3).isEmpty()); // ELSE
+    assertEquals(graph0.getEdges().get(4), Arrays.asList(5, 7)); // IF
+    assertEquals(graph0.getEdges().get(5), Arrays.asList(6));
+    assertEquals(graph0.getEdges().get(7), Arrays.asList(8));
+    assertTrue(graph0.getEdges().get(6).isEmpty());
+    assertTrue(graph0.getEdges().get(8).isEmpty());
+    }
+
+  @Test
+  public void executionGraphTest03() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test03.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Routine r0 = unit.getRootScope().getRoutines().get(0);
+    ExecutionGraph graph0 = r0.getExecutionGraph();
+    assertEquals(graph0.getVertices().size(), 5); // 4 statements + RootNode
+    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph0.getEdges().get(1), Arrays.asList(2));
+    assertEquals(graph0.getEdges().get(2), Arrays.asList(3));
+    assertEquals(graph0.getEdges().get(3), Arrays.asList(4));
+    assertTrue(graph0.getEdges().get(4).isEmpty());
+
+    Routine r1 = unit.getRootScope().getRoutines().get(1);
+    ExecutionGraph graph1 = r1.getExecutionGraph();
+    assertEquals(graph1.getVertices().size(), 7); // 6 statements + Procedure node
+    assertEquals(graph1.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph1.getEdges().get(1), Arrays.asList(2));
+    assertEquals(graph1.getEdges().get(2), Arrays.asList(3, 6));
+    assertEquals(graph1.getEdges().get(3), Arrays.asList(4));
+    assertEquals(graph1.getEdges().get(4), Arrays.asList(5));
+    assertTrue(graph1.getEdges().get(5).isEmpty());
+    assertTrue(graph1.getEdges().get(6).isEmpty());
+  }
 }

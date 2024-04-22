@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2023 Riverside Software
+ * Copyright (c) 2015-2024 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -126,8 +126,8 @@ public class TreeParserSymbolScope {
   }
 
   /** Add a Variable for names lookup. */
-  private void add(Variable var) {
-    variableMap.put(var.getName().toLowerCase(), var);
+  private void add(Variable v1) {
+    variableMap.put(v1.getName().toLowerCase(), v1);
   }
 
   /** Add a TableBuffer to the appropriate map. */
@@ -502,10 +502,10 @@ public class TreeParserSymbolScope {
    * @return A Variable, or null if not found.
    */
   public Variable lookupVariable(String inName) {
-    Variable var = variableMap.get(inName.toLowerCase());
-    if (var == null && parentScope != null)
+    Variable v1 = variableMap.get(inName.toLowerCase());
+    if (v1 == null && parentScope != null)
       return parentScope.lookupVariable(inName);
-    return var;
+    return v1;
   }
 
   /** Lookup a Widget based on TokenType (FRAME, BUTTON, etc) and the name in this scope or enclosing scope. */

@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2023 Riverside Software
+ * Copyright (c) 2015-2024 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -169,6 +169,19 @@ public abstract class MacroRef implements MacroEvent {
   @Override
   public MacroPosition getPosition() {
     return new MacroPosition(parent == null ? 0 : parent.getFileIndex(), refLine, refColumn);
+  }
+
+  /**
+   * Check if line/column are within this macro reference
+   */
+  public boolean contains(int x, int y) {
+    if ((x < refLine) || ((x == refLine) && (y < refColumn))) {
+      return false;
+    }
+    if ((x > refEndLine) || ((x == refEndLine) && (y > refEndColumn))) {
+      return false;
+    }
+    return true;
   }
 
   /**

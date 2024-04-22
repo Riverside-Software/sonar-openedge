@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2023 Riverside Software
+ * Copyright (c) 2015-2024 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -19,6 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.JPNode;
+import org.prorefactor.core.nodetypes.IStatement;
+import org.prorefactor.core.nodetypes.IStatementBlock;
+import org.prorefactor.core.nodetypes.IfStatementNode;
+import org.prorefactor.treeparser.ExecutionGraph;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
@@ -34,6 +39,7 @@ public class Routine extends Symbol {
   private final List<Parameter> parameters = new ArrayList<>();
   private DataType returnDatatypeNode = null;
   private ABLNodeType progressType;
+  private ExecutionGraph graph;
 
   public Routine(String name, TreeParserSymbolScope definingScope, TreeParserSymbolScope routineScope) {
     super(name, definingScope);
@@ -139,6 +145,74 @@ public class Routine extends Symbol {
   /** Set by TreeParser for functions and methods. */
   public void setReturnDatatypeNode(DataType n) {
     this.returnDatatypeNode = n;
+  }
+
+  public ExecutionGraph getExecutionGraph() {
+    if (graph == null) {
+      this.graph = createExecutionGraph();
+    }
+
+    return graph;
+  }
+  
+  private ExecutionGraph createExecutionGraph() {
+    ExecutionGraph g2 = new ExecutionGraph();
+    if (routineScope.getRootBlock().getNode().isIStatementBlock()) {
+      addVerticesAndEdges(g2, routineScope.getRootBlock().getNode().asIStatementBlock());
+    }
+
+    return g2;
+  }
+
+  private void addVerticesAndEdges(ExecutionGraph graph, IStatementBlock block) {
+    // Init navigation
+    IStatement currStmt = block.getFirstStatement();
+    JPNode prevStmt = block.asJPNode();
+
+    // Add block vertex
+    graph.addVertex(block.asJPNode());
+
+    while (currStmt != null) {
+      if ((currStmt.asJPNode().getNodeType() == ABLNodeType.FUNCTION)
+          || (currStmt.asJPNode().getNodeType() == ABLNodeType.PROCEDURE)
+          || (currStmt.asJPNode().getNodeType() == ABLNodeType.METHOD)
+          || (currStmt.asJPNode().getNodeType() == ABLNodeType.ON)) {
+        currStmt = currStmt.getNextStatement();
+        continue;
+      }
+
+      if (currStmt instanceof IfStatementNode) {
+        addVertices(graph, (IfStatementNode) currStmt);
+      } else if (currStmt instanceof IStatementBlock) {
+        addVerticesAndEdges(graph, (IStatementBlock) currStmt);
+      } else {
+        graph.addVertex(currStmt.asJPNode());
+      }
+      graph.addEdge(prevStmt, currStmt.asJPNode());
+
+      prevStmt = currStmt.asJPNode();
+      currStmt = currStmt.getNextStatement();
+    }
+  }
+
+  private void addVertices(ExecutionGraph graph, IfStatementNode ifNode) {
+    graph.addVertex(ifNode.asJPNode());
+
+    if (ifNode.getThenBlockOrNode() instanceof IStatementBlock) {
+      addVerticesAndEdges(graph, (IStatementBlock) ifNode.getThenBlockOrNode());
+    } else {
+      graph.addVertex(ifNode.getThenBlockOrNode().asJPNode());
+    }
+    graph.addEdge(ifNode.asJPNode(), ifNode.getThenBlockOrNode().asJPNode());
+
+    if (ifNode.getElseBlockOrNode() != null) {
+      if (ifNode.getElseBlockOrNode() instanceof IStatementBlock)
+        addVerticesAndEdges(graph, (IStatementBlock) ifNode.getElseBlockOrNode());
+      else if (ifNode.getElseBlockOrNode() instanceof IStatement)
+        graph.addVertex(ifNode.getElseBlockOrNode().asJPNode());
+
+      graph.addEdge(ifNode.asJPNode(), ifNode.getElseBlockOrNode().asJPNode());
+    }
   }
 
 }

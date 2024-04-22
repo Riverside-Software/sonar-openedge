@@ -1,5 +1,5 @@
 pipeline {
-  agent { label 'Linux-Office' }
+  agent { label 'Linux-Office03' }
   options {
     buildDiscarder(logRotator(daysToKeepStr:'10'))
     timeout(time: 15, unit: 'MINUTES')
@@ -14,7 +14,7 @@ pipeline {
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: [[credentialsId: scm.userRemoteConfigs.credentialsId[0], url: scm.userRemoteConfigs.url[0], refspec: '+refs/heads/main:refs/remotes/origin/main']] ])
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: [[credentialsId: scm.userRemoteConfigs.credentialsId[0], url: scm.userRemoteConfigs.url[0], refspec: '+refs/heads/develop:refs/remotes/origin/develop']] ])
         script {
-          withEnv(["MVN_HOME=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}", "JAVA_HOME=${tool name: 'Corretto 11', type: 'jdk'}"]) {
+          withEnv(["MVN_HOME=${tool name: 'Maven 3', type: 'hudson.tasks.Maven$MavenInstallation'}", "JAVA_HOME=${tool name: 'JDK17', type: 'jdk'}"]) {
             if ("main" == env.BRANCH_NAME) {
               sh "$MVN_HOME/bin/mvn -P release clean deploy -Dgit.commit=\$(git rev-parse --short HEAD)"
               mail body: "---", to: "g.querret@riverside-software.fr", subject: "Release artifact on Sonatype"
@@ -27,7 +27,6 @@ pipeline {
             }
           }
         }
-        archiveArtifacts artifacts: 'openedge-plugin/target/sonar-openedge-plugin-*.jar'
         step([$class: 'Publisher', reportFilenamePattern: '**/target/surefire-reports/testng-results.xml'])
       }
     }

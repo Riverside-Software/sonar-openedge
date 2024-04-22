@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2023 Riverside Software
+ * Copyright (c) 2015-2024 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -192,7 +192,7 @@ public class RefactorSession implements IProparseEnvironment {
       info = classInfo.get(clz);
     }
     if (info == null) {
-      LOG.debug("No TypeInfo found for {}", clz);
+      LOG.trace("No TypeInfo found for {}", clz);
     }
 
     return info;
@@ -208,7 +208,7 @@ public class RefactorSession implements IProparseEnvironment {
       info = lcClassInfo.get(clz.toLowerCase());
     }
     if (info == null) {
-      LOG.debug("No TypeInfo found for {}", clz);
+      LOG.trace("No TypeInfo found for {}", clz);
     }
 
     return info;

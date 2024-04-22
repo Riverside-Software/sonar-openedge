@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2023 Riverside Software
+ * Copyright (c) 2015-2024 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -14,8 +14,6 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
-import javax.annotation.Nonnull;
-
 import org.prorefactor.core.JPNode;
 
 import eu.rssw.pct.elements.DataType;
@@ -25,7 +23,6 @@ public interface IExpression {
   /**
    * @return Resulting data type of expression, or DataType.NOT_COMPUTED if it can't be computed for any reason
    */
-  @Nonnull
   default DataType getDataType() {
     return DataType.NOT_COMPUTED;
   }

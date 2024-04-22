@@ -23,3 +23,7 @@ PCT is open-source and free, but if you want to rely on our consulting services,
 ## Build status
 
 OpenEdge plugin - main branch: <br/>  [![Build Status](http://ci.rssw.eu/job/sonar-openedge/job/main/badge/icon)](http://ci.rssw.eu/job/sonar-openedge/job/main/)
+
+## IntelliJ support
+
+Opening this repository in IntelliJ requires the [ANTLR 4 plugin](https://plugins.jetbrains.com/plugin/7358-antlr-v4). Once installed, open "ANTLR v4 default project settings", and add `src/main/antlr4/imports` to "Location of imported grammars".

@@ -5,7 +5,7 @@
   <parent>
     <groupId>eu.rssw</groupId>
     <artifactId>sonar-openedge</artifactId>
-    <version>2.25.1</version>
+    <version>2.26.0</version>
   </parent>
   <groupId>eu.rssw.sonar.openedge</groupId>
   <artifactId>sonar-openedge-plugin</artifactId>
@@ -30,17 +30,17 @@
     <dependency>
       <groupId>eu.rssw.openedge.checks</groupId>
       <artifactId>openedge-checks</artifactId>
-      <version>2.25.1</version>
+      <version>2.26.0</version>
     </dependency>
     <dependency>
       <groupId>eu.rssw.openedge.parsers</groupId>
       <artifactId>listing-parser</artifactId>
-      <version>2.25.1</version>
+      <version>2.26.0</version>
     </dependency>
     <dependency>
       <groupId>eu.rssw.openedge.parsers</groupId>
       <artifactId>profiler-parser</artifactId>
-      <version>2.25.1</version>
+      <version>2.26.0</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -99,20 +99,48 @@
       <plugin>
         <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
         <artifactId>sonar-packaging-maven-plugin</artifactId>
-        <version>1.20.0.405</version>
+        <version>1.23.0.740</version>
         <extensions>true</extensions>
         <configuration>
           <pluginKey>${sonar.pluginKey}</pluginKey>
           <pluginName>${sonar.pluginName}</pluginName>
           <pluginClass>${sonar.pluginClass}</pluginClass>
-          <sonarQubeMinVersion>7.6</sonarQubeMinVersion>
+          <pluginApiMinVersion>8.9</pluginApiMinVersion>
           <sonarLintSupported>true</sonarLintSupported>
+          <skipDependenciesPackaging>true</skipDependenciesPackaging>
+          <requiredForLanguages>oe,oedb</requiredForLanguages>
           <archive>
             <manifestEntries>
               <Implementation-Build>${git.commit}</Implementation-Build>
             </manifestEntries>
           </archive>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+              <resources>
+                <resource>LICENSE</resource>
+                <resource>LICENSE.txt</resource>
+                <resource>NOTICE</resource>
+                <resource>NOTICE.txt</resource>
+              </resources>
+            </transformer>
+          </transformers>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
