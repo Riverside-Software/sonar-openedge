@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IStatementBlock;
 import org.prorefactor.core.nodetypes.IfStatementNode;
+import org.prorefactor.treeparser.ExecutionGraph;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
@@ -37,6 +39,7 @@ public class Routine extends Symbol {
   private final List<Parameter> parameters = new ArrayList<>();
   private DataType returnDatatypeNode = null;
   private ABLNodeType progressType;
+  private ExecutionGraph graph;
 
   public Routine(String name, TreeParserSymbolScope definingScope, TreeParserSymbolScope routineScope) {
     super(name, definingScope);
@@ -144,108 +147,71 @@ public class Routine extends Symbol {
     this.returnDatatypeNode = n;
   }
 
-  public GraphNode createExecutionGraph() {
-    if (!routineScope.getRootBlock().getNode().isIStatementBlock()) 
-      return null;
-    IStatementBlock stmt = routineScope.getRootBlock().getNode().asIStatementBlock();
-    if (stmt.getFirstStatement() == null)
-      return new GraphNode(null);
-    GraphNode n1 = createExecutionGraph(stmt.getFirstStatement());
-    GraphNode currNode = n1.getLastChild();
-    IStatement currStmt = stmt.getFirstStatement().getNextStatement();
+  public ExecutionGraph getExecutionGraph() {
+    if (graph == null) {
+      this.graph = createExecutionGraph();
+    }
+
+    return graph;
+  }
+  
+  private ExecutionGraph createExecutionGraph() {
+    ExecutionGraph g2 = new ExecutionGraph();
+    if (routineScope.getRootBlock().getNode().isIStatementBlock()) {
+      addVerticesAndEdges(g2, routineScope.getRootBlock().getNode().asIStatementBlock());
+    }
+
+    return g2;
+  }
+
+  private void addVerticesAndEdges(ExecutionGraph graph, IStatementBlock block) {
+    // Init navigation
+    IStatement currStmt = block.getFirstStatement();
+    JPNode prevStmt = block.asJPNode();
+
+    // Add block vertex
+    graph.addVertex(block.asJPNode());
+
     while (currStmt != null) {
-      if ((currStmt.asJPNode().getNodeType() != ABLNodeType.FUNCTION) && (currStmt.asJPNode().getNodeType()!= ABLNodeType.PROCEDURE)
-          && (currStmt.asJPNode().getNodeType() != ABLNodeType.METHOD)) {
-      GraphNode nn = createExecutionGraph(currStmt) ;
-      currNode.addAdj(nn);}
-      currNode = currNode.getLastChild();
+      if ((currStmt.asJPNode().getNodeType() == ABLNodeType.FUNCTION)
+          || (currStmt.asJPNode().getNodeType() == ABLNodeType.PROCEDURE)
+          || (currStmt.asJPNode().getNodeType() == ABLNodeType.METHOD)
+          || (currStmt.asJPNode().getNodeType() == ABLNodeType.ON)) {
+        currStmt = currStmt.getNextStatement();
+        continue;
+      }
+
+      if (currStmt instanceof IfStatementNode) {
+        addVertices(graph, (IfStatementNode) currStmt);
+      } else if (currStmt instanceof IStatementBlock) {
+        addVerticesAndEdges(graph, (IStatementBlock) currStmt);
+      } else {
+        graph.addVertex(currStmt.asJPNode());
+      }
+      graph.addEdge(prevStmt, currStmt.asJPNode());
+
+      prevStmt = currStmt.asJPNode();
       currStmt = currStmt.getNextStatement();
     }
-    
-    return n1;
   }
 
-  private GraphNode createExecutionGraph(IStatement stmt) {
-    if (stmt instanceof IfStatementNode) {
-      GraphNode n = new GraphNode(stmt);
-      GraphNode joinerNode = new GraphNode(null);
-      IfStatementNode ifNode = (IfStatementNode) stmt;
-      GraphNode thenNode =createExecutionGraph( ifNode.getThenBlockOrNode()); 
-      n.addAdj(thenNode);
-      thenNode.getLastChild().addAdj(joinerNode);
-      if (ifNode.getElseNode() != null) {
-        GraphNode elseNode = createExecutionGraph( ifNode.getElseBlockOrNode());
-        n.addAdj(elseNode);
-        elseNode.addAdj(joinerNode);
-      }
-      // Add joiner node
-      return n; 
-    } else if (stmt.asJPNode().isIStatementBlock()) {
-        GraphNode n = new GraphNode(stmt);
-        IStatementBlock block = stmt.asJPNode().asIStatementBlock();
-        IStatement currStmt = block.getFirstStatement();
-        GraphNode currNode = n;
-        while (currStmt != null)  {
-          currNode.addAdj(createExecutionGraph(currStmt));
-          currNode = currNode.getLastChild();
-          currStmt = currStmt.getNextStatement();
-        }
-        return n;
-      } else {
-        return new GraphNode(stmt);
-      }
-    
-  }
+  private void addVertices(ExecutionGraph graph, IfStatementNode ifNode) {
+    graph.addVertex(ifNode.asJPNode());
 
-  /**
-   * Naive implementation of execution graph
-   */
-  public static class GraphNode {
-    private final IStatement stmt;
-    private final List<GraphNode> adj = new ArrayList<>();
-
-    public GraphNode(IStatement stmt) {
-      this.stmt = stmt;
+    if (ifNode.getThenBlockOrNode() instanceof IStatementBlock) {
+      addVerticesAndEdges(graph, (IStatementBlock) ifNode.getThenBlockOrNode());
+    } else {
+      graph.addVertex(ifNode.getThenBlockOrNode().asJPNode());
     }
+    graph.addEdge(ifNode.asJPNode(), ifNode.getThenBlockOrNode().asJPNode());
 
-    protected void addAdj(GraphNode node) {
-      adj.add(node);
-    }
+    if (ifNode.getElseBlockOrNode() != null) {
+      if (ifNode.getElseBlockOrNode() instanceof IStatementBlock)
+        addVerticesAndEdges(graph, (IStatementBlock) ifNode.getElseBlockOrNode());
+      else if (ifNode.getElseBlockOrNode() instanceof IStatement)
+        graph.addVertex(ifNode.getElseBlockOrNode().asJPNode());
 
-    public IStatement getStmt() {
-      return stmt;
-    }
-
-    public List<GraphNode> getAdj() {
-      return adj;
-    }
-
-    // Only valid in current dummy implementation
-    public GraphNode getLastChild() {
-      if (adj.isEmpty())
-        return this;
-      else
-        return adj.get(0).getLastChild();
-    }
-
-    public GraphNode contains(IStatement stmt) {
-      if (this.stmt == stmt)
-        return this;
-      for (GraphNode n : adj) {
-        GraphNode rslt = n.contains(stmt);
-        if (rslt != null)
-          return rslt;
-      }
-      return null;
-    }
-
-    @Override
-    public String toString() {
-      String str = " - " + adj.size() + " edge(s)";
-      if (stmt == null)
-        return "Joiner node" + str;
-      else
-        return "Node to " + stmt.toString() + str;
+      graph.addEdge(ifNode.asJPNode(), ifNode.getElseBlockOrNode().asJPNode());
     }
   }
 
