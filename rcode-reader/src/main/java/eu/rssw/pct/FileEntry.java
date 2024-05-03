@@ -27,97 +27,100 @@ import java.time.ZoneOffset;
  * Class representing a file entry in a PL file
  */
 public class FileEntry implements Comparable<FileEntry> {
-    private final boolean valid;
-    private final String fileName;
-    private final long modDate, addDate;
-    private final int offset, size, tocSize;
+  private final boolean valid;
+  private final String fileName;
+  private final long modDate;
+  private final long addDate;
+  private final int offset;
+  private final int size;
+  private final int tocSize;
 
-    /**
-     * Invalid file entry - Will be skipped in entries list
-     * 
-     * @param tocSize
-     */
-    public FileEntry(int tocSize) {
-        this.tocSize = tocSize;
-        valid = false;
-        fileName = "";
-        modDate = addDate = offset = 0;
-        size = 0;
+  /**
+   * Invalid file entry - Will be skipped in entries list
+   * 
+   * @param tocSize
+   */
+  public FileEntry(int tocSize) {
+    this.tocSize = tocSize;
+    valid = false;
+    fileName = "";
+    modDate = addDate = offset = 0;
+    size = 0;
+  }
+
+  public FileEntry(String fileName, long modDate, long addDate, int offSet, int size, int tocSize) {
+    this.valid = true;
+    this.fileName = fileName;
+    this.modDate = modDate;
+    this.addDate = addDate;
+    this.offset = offSet;
+    this.size = size;
+    this.tocSize = tocSize;
+  }
+
+  public String getFileName() {
+    return fileName;
+  }
+
+  public int getSize() {
+    return size;
+  }
+
+  /**
+   * @return Modification date (in milliseconds)
+   */
+  public long getModDate() {
+    return modDate * 1000;
+  }
+
+  /**
+   * @return Add date (in milliseconds)
+   */
+  public long getAddDate() {
+    return addDate * 1000;
+  }
+
+  public int getOffset() {
+    return offset;
+  }
+
+  public int getTocSize() {
+    return tocSize;
+  }
+
+  public boolean isValid() {
+    return valid;
+  }
+
+  @Override
+  public String toString() {
+    return MessageFormat.format("File {0} [{1} bytes] Added {2} Modified {3} [Offset : {4}]", this.fileName, size,
+        LocalDateTime.ofEpochSecond(addDate, 0, ZoneOffset.UTC),
+        LocalDateTime.ofEpochSecond(modDate, 0, ZoneOffset.UTC), offset);
+  }
+
+  @Override
+  public int compareTo(FileEntry o) {
+    return fileName.compareTo(o.getFileName());
+  }
+
+  @Override
+  public int hashCode() {
+    return fileName.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
     }
-
-    public FileEntry(String fileName, long modDate, long addDate, int offSet, int size, int tocSize) {
-        this.valid = true;
-        this.fileName = fileName;
-        this.modDate = modDate;
-        this.addDate = addDate;
-        this.offset = offSet;
-        this.size = size;
-        this.tocSize = tocSize;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    /**
-     * @return Modification date (in milliseconds)
-     */
-    public long getModDate() {
-        return modDate * 1000;
-    }
-
-    /**
-     * @return Add date (in milliseconds)
-     */
-    public long getAddDate() {
-        return addDate * 1000;
-    }
-
-    public int getOffset() {
-        return offset;
-    }
-
-    public int getTocSize() {
-        return tocSize;
-    }
-
-    public boolean isValid() {
-        return valid;
-    }
-
-    @Override
-    public String toString() {
-      return MessageFormat.format("File {0} [{1} bytes] Added {2} Modified {3} [Offset : {4}]", this.fileName, size,
-          LocalDateTime.ofEpochSecond(addDate, 0, ZoneOffset.UTC),
-          LocalDateTime.ofEpochSecond(modDate, 0, ZoneOffset.UTC), offset);
-    }
-
-    @Override
-    public int compareTo(FileEntry o) {
-        return fileName.compareTo(o.getFileName());
-    }
-
-    @Override
-    public int hashCode() {
-        return fileName.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj == this) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() == obj.getClass()) {
-        return ((FileEntry) obj).fileName.equalsIgnoreCase(fileName);
-      }
+    if (obj == null) {
       return false;
     }
+    if (this.getClass() == obj.getClass()) {
+      return ((FileEntry) obj).fileName.equalsIgnoreCase(fileName);
+    }
+    return false;
+  }
 
 }
