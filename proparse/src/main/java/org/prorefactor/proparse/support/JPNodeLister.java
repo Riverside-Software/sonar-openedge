@@ -55,7 +55,7 @@ public class JPNodeLister {
    * Print node content to PrintWriter
    */
   public void print(char spacer, boolean showLine, boolean showCol, boolean showFileName, boolean showStore) {
-    print_sub(topNode, 0, spacer, showLine, showCol, showFileName, showStore);
+    printSubNode(topNode, 0, spacer, showLine, showCol, showFileName, showStore);
     ofile.flush();
   }
 
@@ -63,11 +63,11 @@ public class JPNodeLister {
     return "";
   }
 
-  private void print_sub(JPNode node, int level, char spacer, boolean showLine, boolean showCol, boolean showFileName,
+  private void printSubNode(JPNode node, int level, char spacer, boolean showLine, boolean showCol, boolean showFileName,
       boolean showStore) {
     printline(node, level, spacer, showLine, showCol, showFileName, showStore);
     for (JPNode child : node.getDirectChildren()) {
-      print_sub(child, level + 1, spacer, showLine, showCol, showFileName, showStore);
+      printSubNode(child, level + 1, spacer, showLine, showCol, showFileName, showStore);
     }
   }
 

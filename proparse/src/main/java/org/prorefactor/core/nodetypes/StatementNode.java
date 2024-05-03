@@ -55,7 +55,11 @@ public class StatementNode extends JPNode implements IStatement {
     return state2;
   }
 
+  /**
+   * @deprecated Use JPNode()#asIStatement()#getNodeType2()
+   */
   @Override
+  @Deprecated
   public int getState2() {
     return state2 != null ? state2.getType() : 0;
   }
