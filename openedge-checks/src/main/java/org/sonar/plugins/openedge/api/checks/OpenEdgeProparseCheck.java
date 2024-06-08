@@ -132,6 +132,19 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   }
 
   /**
+   * Create new issue on input file at a specific location.
+   */
+  protected NewIssue createIssue(InputFile file, int line, int col, int endLine, int endCol, String msg) {
+    NewIssue issue = getContext().newIssue().forRule(getRuleKey());
+    NewIssueLocation location = issue.newLocation().on(file);
+    location.at(file.newRange(line, col, endLine, endCol));
+    location.message(msg);
+    issue.at(location);
+
+    return issue;
+  }
+
+  /**
    * Create new issue. Will return null if issue can't be created (no-sonar annotation, appbuilder generated code, ...
    */
   protected NewIssue createIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
