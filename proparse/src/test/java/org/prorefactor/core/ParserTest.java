@@ -19,6 +19,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +29,8 @@ import java.util.Optional;
 
 import org.antlr.v4.runtime.atn.DecisionInfo;
 import org.antlr.v4.runtime.atn.ParseInfo;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Database;
 import org.prorefactor.core.schema.IDatabase;
@@ -1082,6 +1085,29 @@ public class ParserTest extends AbstractProparseTest {
     assertEquals(unit.getTopNode().query(ABLNodeType.PUBLISH).size(), 1);
     JPNode n1 = unit.getTopNode().query(ABLNodeType.PUBLISH).get(0);
     assertNotNull(n1.findDirectChild(ABLNodeType.PARAMETER_LIST));
+  }
+
+  @Test
+  public void testUnknownTable() {
+    ParseUnit unit = getParseUnit(
+        "FIND customer. DISPLAY customer.address. FIND sp2k.plopmachin. DISPLAY sp2k.plopmachin.fld1. ", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    List<JPNode> list = unit.getTopNode().query(ABLNodeType.RECORD_NAME);
+    assertEquals(list.size(), 2);
+    RecordNameNode recNode1 = (RecordNameNode) list.get(0);
+    RecordNameNode recNode2 = (RecordNameNode) list.get(1);
+    assertNotNull(recNode1.getSymbol());
+    assertNull(recNode2.getSymbol());
+    assertEquals(recNode1.getTableBuffer().getName(), "Customer");
+
+    List<JPNode> list2 = unit.getTopNode().query(ABLNodeType.FIELD_REF);
+    assertEquals(list2.size(), 2);
+    FieldRefNode field1 = (FieldRefNode) list2.get(0);
+    FieldRefNode field2 = (FieldRefNode) list2.get(1);
+    assertNotNull(field1.getSymbol());
+    assertEquals(field1.getSymbol().getName(), "Address");
+    assertNull(field2.getSymbol());
   }
 
 }

@@ -722,7 +722,7 @@ varRecField:
     // as a record - we don't have to worry about that. So, we can look at the
     // very next token, and if it's an identifier it might be record - check its name.
     { varRecFieldSemanticPredicate() }? fieldExpr
-  | record
+  | { recordSemanticPredicate() }? record
   | fieldExpr
   ;
 
@@ -732,7 +732,7 @@ recordAsFormItem:
 
 record:
     // RECORD can be any db table name, work/temp table name, buffer name.
-    { recordSemanticPredicate() }? f=filn { support.pushRecordExpression(_localctx, $f.text); }
+    f=filn { support.pushRecordExpression(_localctx, $f.text); }
   ;
 
 ////  Names  ////
@@ -940,7 +940,7 @@ assignStatement:
 assignmentList:
     record exceptFields
   | // We want to pick up record only if it can't be a variable name
-    { assignmentListSemanticPredicate() }?
+    { assignmentListSemanticPredicate() && recordSemanticPredicate() }?
     record
   | ( assignEqual whenExpression? | assignField whenExpression? )*
   ;
