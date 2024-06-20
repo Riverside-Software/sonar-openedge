@@ -55,10 +55,10 @@ public class PropertyElementV11 extends AbstractAccessibleElement implements IPr
   private final IMethodElement getter;
   private final IMethodElement setter;
 
-  public PropertyElementV11(String name, Set<AccessType> accessType, int flags, IVariableElement var, IMethodElement getter, IMethodElement setter) {
+  public PropertyElementV11(String name, Set<AccessType> accessType, int flags, IVariableElement varElement, IMethodElement getter, IMethodElement setter) {
     super(name, accessType);
     this.flags = flags;
-    this.variable = var;
+    this.variable = varElement;
     this.getter = getter;
     this.setter = setter;
   }

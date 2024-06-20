@@ -107,9 +107,9 @@ public abstract class FieldContainer extends Widget {
    */
   public Symbol lookupFieldOrVar(Field.Name name) {
     if (name.getTable() == null) {
-      for (Variable var : variableSet) {
-        if (var.getName().equalsIgnoreCase(name.getField()))
-          return var;
+      for (Variable v1 : variableSet) {
+        if (v1.getName().equalsIgnoreCase(name.getField()))
+          return v1;
       }
     }
     for (FieldBuffer fieldBuffer : fieldSet) {

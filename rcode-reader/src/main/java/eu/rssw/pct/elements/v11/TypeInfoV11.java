@@ -138,9 +138,9 @@ public class TypeInfoV11 implements ITypeInfo {
           typeInfo.getProperties().add(prop);
           break;
         case VARIABLE:
-          IVariableElement var =  VariableElementV11.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
-          currOffset += var.getSizeInRCode();
-          typeInfo.getVariables().add(var);
+          IVariableElement varElem =  VariableElementV11.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);
+          currOffset += varElem.getSizeInRCode();
+          typeInfo.getVariables().add(varElem);
           break;
         case TABLE:
           ITableElement tbl =  TableElementV11.fromDebugSegment(name, set, segment, currOffset, textAreaOffset, order);

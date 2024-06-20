@@ -108,8 +108,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void exitBlockFor(BlockForContext ctx) {
-    for (RecordContext record : ctx.record()) {
-      currentBlock.addStrongBufferScope((RecordNameNode) support.getNode(record));
+    for (RecordContext rec : ctx.record()) {
+      currentBlock.addStrongBufferScope((RecordNameNode) support.getNode(rec));
     }
   }
 
