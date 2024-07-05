@@ -515,7 +515,7 @@ public class ParseUnit {
       int lineNumber = node.getStatement().firstNaturalChild().getLine();
       Optional<RecordNameNode> opt = recordNodes.stream() //
         .filter(it -> it != node) //
-        .filter(it -> it.getTableBuffer() != null) //
+        .filter(it -> (it.getTableBuffer() != null) && (it.getTableBuffer().getTable() != null)) //
         .filter(it -> tgt.equalsIgnoreCase(it.getTableBuffer().getTargetFullName())) //
         .filter(it -> it.getStatement().firstNaturalChild().getLine() == lineNumber) //
         .filter(it -> it.getFileIndex() == node.getFileIndex()) //

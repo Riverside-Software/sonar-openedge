@@ -108,8 +108,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void exitBlockFor(BlockForContext ctx) {
-    for (RecordContext record : ctx.record()) {
-      currentBlock.addStrongBufferScope((RecordNameNode) support.getNode(record));
+    for (RecordContext rec : ctx.record()) {
+      currentBlock.addStrongBufferScope((RecordNameNode) support.getNode(rec));
     }
   }
 
@@ -2512,7 +2512,10 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     refNode.setSymbol((Symbol) result.getSymbol());
     if (result.getSymbol() instanceof FieldBuffer) {
       FieldBuffer fb = (FieldBuffer) result.getSymbol();
-      refNode.setStoreType(fb.getField().getTable().getStoretype());
+      if ((fb.getField() == null) || (fb.getField().getTable() == null))
+        refNode.setStoreType(IConstants.ST_TTABLE);
+      else
+        refNode.setStoreType(fb.getField().getTable().getStoretype());
     } else {
       refNode.setStoreType(IConstants.ST_VAR);
     }

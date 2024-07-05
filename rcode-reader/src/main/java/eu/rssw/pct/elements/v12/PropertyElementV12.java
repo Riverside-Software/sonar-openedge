@@ -35,8 +35,8 @@ import eu.rssw.pct.elements.v11.PropertyElementV11;
 public class PropertyElementV12 extends PropertyElementV11 {
   private final IEnumDescriptor enumDesc;
 
-  public PropertyElementV12(String name, Set<AccessType> accessType, int flags, IVariableElement var, IMethodElement getter, IMethodElement setter, IEnumDescriptor enumDesc) {
-    super(name, accessType, flags, var, getter, setter);
+  public PropertyElementV12(String name, Set<AccessType> accessType, int flags, IVariableElement varElement, IMethodElement getter, IMethodElement setter, IEnumDescriptor enumDesc) {
+    super(name, accessType, flags, varElement, getter, setter);
     this.enumDesc = enumDesc;
   }
 

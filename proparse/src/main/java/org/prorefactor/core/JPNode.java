@@ -762,14 +762,11 @@ public class JPNode {
    * Never returns null
    */
   public JPNode getIdNode() {
-    // TODO Probably a better way to do that...
-    if ((getNodeType() == ABLNodeType.DEFINE) || (getNodeType() == ABLNodeType.BUFFER) || (getNodeType() == ABLNodeType.BEFORETABLE)) {
-      for (JPNode child : getDirectChildren()) {
-        if (child.getNodeType() == ABLNodeType.ID)
-          return child;
-      }
-      return this;
-    } else if ((getNodeType() == ABLNodeType.NEW)|| (getNodeType() == ABLNodeType.OLD)) {
+    if ((getNodeType() == ABLNodeType.DEFINE) || (getNodeType() == ABLNodeType.PARAMETER_ITEM)
+        || (getNodeType() == ABLNodeType.BEFORETABLE)) {
+      JPNode idNode = findDirectChild(ABLNodeType.ID);
+      return idNode == null ? this : idNode;
+    } else if ((getNodeType() == ABLNodeType.NEW) || (getNodeType() == ABLNodeType.OLD)) {
       JPNode nxt = getNextNode();
       if ((nxt != null) && (nxt.getNodeType() == ABLNodeType.ID))
         return nxt;
@@ -784,7 +781,8 @@ public class JPNode {
     } else if ((getNodeType() == ABLNodeType.TABLEHANDLE) || (getNodeType() == ABLNodeType.DATASETHANDLE)) {
       if ((getNextNode() != null) && (getNextNode().getNodeType() == ABLNodeType.ID))
         return getNextNode();
-      else return this;
+      else
+        return this;
     } else {
       return this;
     }

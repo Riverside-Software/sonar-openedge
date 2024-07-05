@@ -188,12 +188,10 @@ public class SymbolScope {
 
   // Field and table types
   public enum FieldType {
-    VARIABLE(1), DBTABLE(2), TTABLE(3), WTABLE(4);
-    int intval;
-
-    FieldType(int intval) {
-      this.intval = intval;
-    }
+    VARIABLE,
+    DBTABLE,
+    TTABLE,
+    WTABLE;
   }
 
   private static class TableRef {

@@ -28,6 +28,7 @@ pipeline {
           }
         }
         step([$class: 'Publisher', reportFilenamePattern: '**/target/surefire-reports/testng-results.xml'])
+        archiveArtifacts artifacts: '**/openedge-plugin/target/sonar-openedge-plugin-*.jar'
       }
     }
 

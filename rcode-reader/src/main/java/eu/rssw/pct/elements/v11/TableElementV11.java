@@ -62,9 +62,9 @@ public class TableElementV11 extends AbstractAccessibleElement implements ITable
     IVariableElement[] fields = new VariableElementV11[fieldCount];
     int currPos = currentPos + 24;
     for (int zz = 0; zz < fieldCount; zz++) {
-      IVariableElement var = VariableElementV11.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
-      currPos += var.getSizeInRCode();
-      fields[zz] = var;
+      IVariableElement elem = VariableElementV11.fromDebugSegment("", null, segment, currPos, textAreaOffset, order);
+      currPos += elem.getSizeInRCode();
+      fields[zz] = elem;
     }
 
     IIndexElement[] indexes = new IndexElementV11[indexCount];

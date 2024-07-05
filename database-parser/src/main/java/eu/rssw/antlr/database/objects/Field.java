@@ -147,7 +147,7 @@ public class Field {
   }
 
   public Boolean isMandatory() {
-    return (isMandatory != null) && (isMandatory != false);
+    return Boolean.TRUE.equals(isMandatory);
   }
 
   public void setIsMandatory(Boolean isMandatory) {

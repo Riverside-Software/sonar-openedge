@@ -78,7 +78,10 @@ public class MethodCallNode extends ExpressionNode {
       JPNode nextChild = firstChild.getNextSibling();
       if (((firstChild.getNodeType() == ABLNodeType.SUPER) || (firstChild.getNodeType() == ABLNodeType.THISOBJECT))
           && (nextChild.getNodeType() == ABLNodeType.LEFTPAREN)) {
-        return new DataType(root.getTypeInfo().getTypeName());
+        if (root.getTypeInfo() == null)
+          return new DataType(root.getRootScope().getClassName());
+        else
+          return new DataType(root.getTypeInfo().getTypeName());
       }
     }
     return DataType.NOT_COMPUTED;

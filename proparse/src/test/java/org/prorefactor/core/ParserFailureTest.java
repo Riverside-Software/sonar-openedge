@@ -35,16 +35,4 @@ public class ParserFailureTest extends AbstractProparseTest {
     }
   }
 
-  @Test
-  public void testFailure02() {
-    ParseUnit unit = getParseUnit("FIND customer. FIND sp2k.plopmachin. ", session);
-    try {
-      unit.treeParser01();
-      fail("Invalid table name, should have failed");
-    } catch (ParseCancellationException caught) {
-      assertTrue(unit.hasSyntaxError());
-      assertNull(unit.getTopNode());
-    }
-  }
-
 }

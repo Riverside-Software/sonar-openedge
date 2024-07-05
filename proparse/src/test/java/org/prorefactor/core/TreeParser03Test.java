@@ -619,13 +619,13 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
     assertEquals(unit.getRootScope().getVariables().size(), 3);
     Variable v1 = null, v2 = null, v3 = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("s1".equals(var.getName()))
-        v1 = var;
-      if ("s2".equals(var.getName()))
-        v2 = var;
-      if ("s3".equals(var.getName()))
-        v3 = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("s1".equals(vv.getName()))
+        v1 = vv;
+      if ("s2".equals(vv.getName()))
+        v2 = vv;
+      if ("s3".equals(vv.getName()))
+        v3 = vv;
     }
     assertNotNull(v1);
     assertNotNull(v2);
@@ -653,13 +653,13 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 3);
     Variable v1 = null, v2 = null, v3 = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("s1".equals(var.getName()))
-        v1 = var;
-      if ("s2".equals(var.getName()))
-        v2 = var;
-      if ("s3".equals(var.getName()))
-        v3 = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("s1".equals(vv.getName()))
+        v1 = vv;
+      if ("s2".equals(vv.getName()))
+        v2 = vv;
+      if ("s3".equals(vv.getName()))
+        v3 = vv;
     }
     assertNotNull(v1);
     assertNotNull(v2);
@@ -682,13 +682,13 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 3);
     Variable v1 = null, v2 = null, v3 = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("myobj1".equals(var.getName()))
-        v1 = var;
-      if ("myobj2".equals(var.getName()))
-        v2 = var;
-      if ("myobj3".equals(var.getName()))
-        v3 = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("myobj1".equals(vv.getName()))
+        v1 = vv;
+      if ("myobj2".equals(vv.getName()))
+        v2 = vv;
+      if ("myobj3".equals(vv.getName()))
+        v3 = vv;
     }
     assertNotNull(v1);
     assertNotNull(v2);
@@ -728,13 +728,13 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 3);
     Variable v1 = null, v2 = null, v3 = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("d1".equals(var.getName()))
-        v1 = var;
-      if ("d2".equals(var.getName()))
-        v2 = var;
-      if ("d3".equals(var.getName()))
-        v3 = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("d1".equals(vv.getName()))
+        v1 = vv;
+      if ("d2".equals(vv.getName()))
+        v2 = vv;
+      if ("d3".equals(vv.getName()))
+        v3 = vv;
     }
     assertNotNull(v1);
     assertNotNull(v2);
@@ -758,11 +758,11 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 2);
     Variable v1 = null, v2 = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("d1".equals(var.getName()))
-        v1 = var;
-      if ("d2".equals(var.getName()))
-        v2 = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("d1".equals(vv.getName()))
+        v1 = vv;
+      if ("d2".equals(vv.getName()))
+        v2 = vv;
     }
     assertNotNull(v1);
     assertNotNull(v2);
@@ -781,13 +781,13 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 3);
     Variable v1 = null, v2 = null, v3 = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("x".equals(var.getName()))
-        v1 = var;
-      if ("y".equals(var.getName()))
-        v2 = var;
-      if ("z".equals(var.getName()))
-        v3 = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("x".equals(vv.getName()))
+        v1 = vv;
+      if ("y".equals(vv.getName()))
+        v2 = vv;
+      if ("z".equals(vv.getName()))
+        v3 = vv;
     }
     assertNotNull(v1);
     assertNotNull(v2);
@@ -814,11 +814,11 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 2);
     Variable v1 = null, v2 = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("x".equals(var.getName()))
-        v1 = var;
-      if ("y".equals(var.getName()))
-        v2 = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("x".equals(vv.getName()))
+        v1 = vv;
+      if ("y".equals(vv.getName()))
+        v2 = vv;
     }
     assertNotNull(v1);
     assertNotNull(v2);
@@ -837,11 +837,11 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 2);
     Variable v1 = null, v2 = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("x".equals(var.getName()))
-        v1 = var;
-      if ("y".equals(var.getName()))
-        v2 = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("x".equals(vv.getName()))
+        v1 = vv;
+      if ("y".equals(vv.getName()))
+        v2 = vv;
     }
     assertNotNull(v1);
     assertNotNull(v2);
@@ -860,11 +860,11 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 2);
     Variable v1 = null, v2 = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("x".equals(var.getName()))
-        v1 = var;
-      if ("y".equals(var.getName()))
-        v2 = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("x".equals(vv.getName()))
+        v1 = vv;
+      if ("y".equals(vv.getName()))
+        v2 = vv;
     }
     assertNotNull(v1);
     assertNotNull(v2);
@@ -885,9 +885,9 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 1);
     Variable v1 = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("classArray".equals(var.getName()))
-        v1 = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("classArray".equals(vv.getName()))
+        v1 = vv;
     }
     assertNotNull(v1);
     assertEquals(v1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
@@ -904,9 +904,9 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 1);
     Variable v1 = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("cList".equals(var.getName()))
-        v1 = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("cList".equals(vv.getName()))
+        v1 = vv;
     }
     assertNotNull(v1);
     assertEquals(v1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
@@ -927,17 +927,17 @@ public class TreeParser03Test extends AbstractProparseTest {
     Variable varX = null;
     Variable varY = null;
     Variable varZ = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("a".equals(var.getName()))
-        varA = var;
-      else if ("b".equals(var.getName()))
-        varB = var;
-      else if ("x".equals(var.getName()))
-        varX = var;
-      else if ("y".equals(var.getName()))
-        varY = var;
-      else if ("z".equals(var.getName()))
-        varZ = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("a".equals(vv.getName()))
+        varA = vv;
+      else if ("b".equals(vv.getName()))
+        varB = vv;
+      else if ("x".equals(vv.getName()))
+        varX = vv;
+      else if ("y".equals(vv.getName()))
+        varY = vv;
+      else if ("z".equals(vv.getName()))
+        varZ = vv;
     }
     assertNotNull(varA);
     assertEquals(varA.getDataType(), DataType.INTEGER);
@@ -985,13 +985,13 @@ public class TreeParser03Test extends AbstractProparseTest {
     Variable varA = null;
     Variable varB = null;
     Variable varX = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("a".equals(var.getName()))
-        varA = var;
-      else if ("b".equals(var.getName()))
-        varB = var;
-      else if ("x".equals(var.getName()))
-        varX = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("a".equals(vv.getName()))
+        varA = vv;
+      else if ("b".equals(vv.getName()))
+        varB = vv;
+      else if ("x".equals(vv.getName()))
+        varX = vv;
     }
     assertNotNull(varA);
     assertEquals(varA.getDataType(), DataType.INTEGER);
@@ -1024,9 +1024,9 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 1);
     Variable varX = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("x".equals(var.getName()))
-        varX = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("x".equals(vv.getName()))
+        varX = vv;
 
       assertNotNull(varX);
       assertEquals(varX.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
@@ -1047,9 +1047,9 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 1);
     Variable varX = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("dtm".equals(var.getName()))
-        varX = var;
+    for (Variable vv : unit.getRootScope().getVariables()) {
+      if ("dtm".equals(vv.getName()))
+        varX = vv;
 
       assertNotNull(varX);
       assertEquals(varX.getDataType().getPrimitive(), PrimitiveDataType.DATETIME);
