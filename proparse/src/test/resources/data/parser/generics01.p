@@ -2,7 +2,8 @@ var Progress.Collections.List<Progress.Lang.Object> thelist.
 var Progress.Collections.IIterator<Progress.Lang.Object> iterator.
 var Progress.Lang.Object president1.
 var Progress.Lang.Object president2.
-
+var HashMap<Object, Object> map1.
+ 
 // Create the list
 thelist = new Progress.Collections.List<Progress.Lang.Object>().
 

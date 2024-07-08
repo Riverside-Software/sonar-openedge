@@ -787,12 +787,12 @@ filenamePart:
   ;
 
 typeName:
-    nonPunctuating ( LEFTANGLE typeName RIGHTANGLE )?
+    nonPunctuating ( LEFTANGLE typeName ( COMMA typeName )* RIGHTANGLE )?
   ;
 
 // Different action in the visitor (no class lookup in typeName2)
 typeName2:
-    nonPunctuating ( LEFTANGLE typeName RIGHTANGLE )?
+    nonPunctuating ( LEFTANGLE typeName ( COMMA typeName )* RIGHTANGLE )?
   ;
 
 // These are necessarily reserved keywords.
