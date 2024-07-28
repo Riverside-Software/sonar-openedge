@@ -80,6 +80,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.google.common.primitives.Ints;
+import com.google.gson.JsonParseException;
 
 import eu.rssw.antlr.database.DumpFileUtils;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
@@ -788,9 +789,19 @@ public class OpenEdgeSettings {
       if (assemblyCatalog.isPresent()) {
         try (Reader reader = new FileReader(assemblyCatalog.get())) {
           defaultSession.injectClassesFromCatalog(reader);
-        } catch (IOException caught) {
+        } catch (IOException | JsonParseException caught) {
           LOG.error("Unable to read assembly catalog '" + assemblyCatalog.get() + "'", caught);
         }
+      }
+      Optional<String> dotNetCatalog = config.get(Constants.DOTNET_CATALOG);
+      if (dotNetCatalog.isPresent()) {
+        long startTime = System.currentTimeMillis();
+        try (Reader reader = new FileReader(dotNetCatalog.get())) {
+          defaultSession.injectClassesFromDotNetCatalog(reader);
+        } catch (IOException | JsonParseException caught) {
+          LOG.error("Unable to read .Net catalog '" + dotNetCatalog.get() + "'", caught);
+        }
+        LOG.info("Read .Net catalog in {} ms", System.currentTimeMillis() - startTime);
       }
 
       if (runtime.getProduct() == SonarProduct.SONARQUBE) {

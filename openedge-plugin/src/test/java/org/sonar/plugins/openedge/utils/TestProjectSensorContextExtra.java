@@ -32,15 +32,15 @@ import org.sonar.plugins.openedge.api.Constants;
 import com.google.common.io.Files;
 
 public class TestProjectSensorContextExtra {
-  public final static String BASEDIR = "target/test-classes/project1";
-  public final static String DF1 = "src/schema/sp2k.df";
-  public final static String FILE1 = "src/procedures/test1.p";
-  public final static String FILE2 = "src/procedures/test2.p";
-  public final static String FILE3 = "src/procedures/test3.p";
-  public final static String FILE4 = "src/procedures/test3.i";
-  public final static String FILE5 = "src/procedures/invalid.p";
-  public final static String FILE6 = "src/procedures/test4.p";
-  public final static String CLASS1 = "src/classes/rssw/testclass.cls";
+  public static final String BASEDIR = "target/test-classes/project1";
+  public static final String DF1 = "src/schema/sp2k.df";
+  public static final String FILE1 = "src/procedures/test1.p";
+  public static final String FILE2 = "src/procedures/test2.p";
+  public static final String FILE3 = "src/procedures/test3.p";
+  public static final String FILE4 = "src/procedures/test3.i";
+  public static final String FILE5 = "src/procedures/invalid.p";
+  public static final String FILE6 = "src/procedures/test4.p";
+  public static final String CLASS1 = "src/classes/rssw/testclass.cls";
 
   private TestProjectSensorContextExtra() {
     // No-op
@@ -54,6 +54,7 @@ public class TestProjectSensorContextExtra {
     settings.setProperty(Constants.DATABASES, "src/schema/sp2k.df");
     settings.setProperty(Constants.SKIP_RCODE, true);
     settings.setProperty(Constants.PROPARSE_ERROR_STACKTRACE, false);
+    settings.setProperty(Constants.DOTNET_CATALOG, "catalog.json");
     settings.setProperty("sonar.oe.module1.pattern", FILE6);
     settings.setProperty("sonar.oe.module1.databases", "src/schema/extra.df");
 
