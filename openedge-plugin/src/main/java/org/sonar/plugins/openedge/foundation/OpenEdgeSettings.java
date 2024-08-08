@@ -102,6 +102,7 @@ public class OpenEdgeSettings {
   private final Configuration config;
   private final FileSystem fileSystem;
   private final SonarRuntime runtime;
+  private final SettingsCache cache;
 
   // Internal use
   private boolean init = false;
@@ -123,9 +124,14 @@ public class OpenEdgeSettings {
   private Kryo kryo;
 
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
+    this(config, fileSystem, runtime, null);
+  }
+
+  public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime, SettingsCache cache) {
     this.config = config;
     this.fileSystem = fileSystem;
     this.runtime = runtime;
+    this.cache = cache;
   }
 
   public final void init() {
@@ -699,11 +705,24 @@ public class OpenEdgeSettings {
   }
 
   public IRefactorSessionEnv getProparseSessions() {
+    if (cache != null) {
+      RefactorSession rs = cache.getSession(fileSystem.baseDir().toString());
+      if (rs != null) {
+        LOG.debug("Using cached RefactorSession for project {}", fileSystem.baseDir());
+        return new RefactorSessionEnv(rs);
+      }
+    }
+
     if (sessionsEnv == null) {
       sessionsEnv = new RefactorSessionEnv(getProparseSession());
-      if (runtime.getProduct() == SonarProduct.SONARLINT)
+      if (runtime.getProduct() == SonarProduct.SONARLINT) {
+        if (cache != null) {
+          LOG.debug("Saving RefactorSession to cache for {}", fileSystem.baseDir());
+          cache.setSession(fileSystem.baseDir().toString(), sessionsEnv.getDefaultSession());
+        }
         // Only one session in SonarLint for now
         return sessionsEnv;
+      }
 
       int modNum = 1;
       while (true) {
