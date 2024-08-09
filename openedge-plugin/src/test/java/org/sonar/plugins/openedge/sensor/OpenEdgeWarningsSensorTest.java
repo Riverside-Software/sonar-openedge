@@ -48,7 +48,7 @@ public class OpenEdgeWarningsSensorTest {
     context.setActiveRules(createRules1());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -93,7 +93,7 @@ public class OpenEdgeWarningsSensorTest {
     context.setActiveRules(createRules2());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -131,7 +131,7 @@ public class OpenEdgeWarningsSensorTest {
     context.setActiveRules(createRules0());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, components);
     sensor.execute(context);
 

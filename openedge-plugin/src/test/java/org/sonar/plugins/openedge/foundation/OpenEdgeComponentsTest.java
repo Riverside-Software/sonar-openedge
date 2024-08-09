@@ -21,7 +21,6 @@ package org.sonar.plugins.openedge.foundation;
 
 import static org.testng.Assert.assertEquals;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import org.sonar.api.SonarProduct;
@@ -34,18 +33,17 @@ import org.testng.annotations.Test;
 public class OpenEdgeComponentsTest {
 
   @Test
-  public void testNoLicenses() throws IOException {
-    OpenEdgeComponents components1 = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig());
+  public void testNoLicenses() {
+    OpenEdgeComponents components1 = new OpenEdgeComponents();
     assertEquals(components1.getLicenses().size(), 0);
-    OpenEdgeComponents components2 = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), new CheckRegistration[] {});
+    OpenEdgeComponents components2 = new OpenEdgeComponents(new CheckRegistration[] {});
     assertEquals(components2.getLicenses().size(), 0);
-    OpenEdgeComponents components3 = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), new CheckRegistration[] {},
-        new LicenseRegistration[] {});
+    OpenEdgeComponents components3 = new OpenEdgeComponents(new CheckRegistration[] {}, new LicenseRegistration[] {});
     assertEquals(components3.getLicenses().size(), 0);
   }
 
   @Test
-  public void testNoServer() throws IOException {
+  public void testNoServer() {
     OpenEdgeComponents components1 = new OpenEdgeComponents();
     assertEquals(components1.getServerId(), "");
     assertEquals(components1.getLicenses().size(), 0);
@@ -58,42 +56,42 @@ public class OpenEdgeComponentsTest {
   }
 
   @Test
-  public void testOneLicense() throws IOException {
+  public void testOneLicense() {
     OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_ME_OE_2015});
     assertEquals(components.getLicenses().size(), 1);
   }
 
   @Test
-  public void testTwoLicenses() throws IOException {
+  public void testTwoLicenses() {
     OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_ME_OE_2015, LICENSE_ME_OE_2025});
     assertEquals(components.getLicenses().size(), 1);
   }
 
   @Test
-  public void testTwoPermId() throws IOException {
+  public void testTwoPermId() {
     OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_ME_OE_2015, LICENSE_YOU_OE_2025});
     assertEquals(components.getLicenses().size(), 2);
   }
 
   @Test
-  public void testTwoRepositories() throws IOException {
+  public void testTwoRepositories() {
     OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_ME_OE_2015, LICENSE_YOU_OTHER_2015});
     assertEquals(components.getLicenses().size(), 2);
   }
 
   @Test
-  public void testThreeLicenses() throws IOException {
+  public void testThreeLicenses() {
     OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_ME_OE_2015, LICENSE_ME_OE_2030, LICENSE_ME_OE_2025});
     assertEquals(components.getLicenses().size(), 1);
   }
 
   @Test
-  public void testMixedLicenses() throws IOException {
+  public void testMixedLicenses() {
     OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), new CheckRegistration[] {},
         new LicenseRegistration[] {
             LICENSE_ME_OE_2015, LICENSE_ME_OE_2030, LICENSE_ME_OE_2025, LICENSE_YOU_OTHER_2015, LICENSE_YOU_OE_2015,
@@ -102,14 +100,14 @@ public class OpenEdgeComponentsTest {
   }
 
   @Test
-  public void testSLPlusSQLicenses() throws IOException {
+  public void testSLPlusSQLicenses() {
     OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_ME_OE_2025, LICENSE_SL_ME_OE_2025, LICENSE_SL_YOU_OE_2025});
     assertEquals(components.getLicenses().size(), 3);
   }
 
   @Test
-  public void testOldLicenses() throws IOException {
+  public void testOldLicenses() {
     OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), new CheckRegistration[] {},
         new LicenseRegistration[] {OLD_SONARQUBE_REGISTRATION, OLD_SONARLINT_REGISTRATION});
     assertEquals(components.getLicenses().size(), 2);
@@ -123,7 +121,7 @@ public class OpenEdgeComponentsTest {
   }
 
   @Test
-  public void testNewLicenses() throws IOException {
+  public void testNewLicenses() {
     OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), new CheckRegistration[] {},
         new LicenseRegistration[] {LICENSE_NEW_TYPE});
     assertEquals(components.getLicenses().size(), 1);
@@ -134,7 +132,7 @@ public class OpenEdgeComponentsTest {
     assertEquals(lic1.getLines(), 1000L);
   }
 
-  private final static LicenseRegistration OLD_SONARQUBE_REGISTRATION = new LicenseRegistration() {
+  private static final LicenseRegistration OLD_SONARQUBE_REGISTRATION = new LicenseRegistration() {
     @SuppressWarnings("deprecation")
     @Override
     public void register(Registrar context) {
@@ -142,7 +140,7 @@ public class OpenEdgeComponentsTest {
           new byte[] {}, 1420074061000L);
     }
   };
-  private final static LicenseRegistration OLD_SONARLINT_REGISTRATION = new LicenseRegistration() {
+  private static final LicenseRegistration OLD_SONARLINT_REGISTRATION = new LicenseRegistration() {
     @SuppressWarnings("deprecation")
     @Override
     public void register(Registrar context) {
@@ -150,7 +148,7 @@ public class OpenEdgeComponentsTest {
           LicenseRegistration.LicenseType.COMMERCIAL, new byte[] {}, 1420074061000L);
     }
   };
-  private final static LicenseRegistration LICENSE_ME_OE_2015 = new LicenseRegistration() {
+  private static final LicenseRegistration LICENSE_ME_OE_2015 = new LicenseRegistration() {
     @SuppressWarnings("deprecation")
     @Override
     public void register(Registrar context) {
@@ -158,7 +156,7 @@ public class OpenEdgeComponentsTest {
           LicenseRegistration.LicenseType.COMMERCIAL, new byte[] {}, 1420074061000L);
     }
   };
-  private final static LicenseRegistration LICENSE_YOU_OE_2015 = new LicenseRegistration() {
+  private static final LicenseRegistration LICENSE_YOU_OE_2015 = new LicenseRegistration() {
     @SuppressWarnings("deprecation")
     @Override
     public void register(Registrar context) {
@@ -166,7 +164,7 @@ public class OpenEdgeComponentsTest {
           LicenseRegistration.LicenseType.COMMERCIAL, new byte[] {}, 1420074061000L);
     }
   };
-  private final static LicenseRegistration LICENSE_YOU_OTHER_2015 = new LicenseRegistration() {
+  private static final LicenseRegistration LICENSE_YOU_OTHER_2015 = new LicenseRegistration() {
     @SuppressWarnings("deprecation")
     @Override
     public void register(Registrar context) {
@@ -174,7 +172,7 @@ public class OpenEdgeComponentsTest {
           LicenseRegistration.LicenseType.COMMERCIAL, new byte[] {}, 1420074061000L);
     }
   };
-  private final static LicenseRegistration LICENSE_ME_OE_2025 = new LicenseRegistration() {
+  private static final LicenseRegistration LICENSE_ME_OE_2025 = new LicenseRegistration() {
     @SuppressWarnings("deprecation")
     @Override
     public void register(Registrar context) {
@@ -182,7 +180,7 @@ public class OpenEdgeComponentsTest {
           LicenseRegistration.LicenseType.COMMERCIAL, new byte[] {}, 1735693261000L);
     }
   };
-  private final static LicenseRegistration LICENSE_YOU_OE_2025 = new LicenseRegistration() {
+  private static final LicenseRegistration LICENSE_YOU_OE_2025 = new LicenseRegistration() {
     @SuppressWarnings("deprecation")
     @Override
     public void register(Registrar context) {
@@ -190,7 +188,7 @@ public class OpenEdgeComponentsTest {
           LicenseRegistration.LicenseType.COMMERCIAL, new byte[] {}, 1735693261000L);
     }
   };
-  private final static LicenseRegistration LICENSE_ME_OE_2030 = new LicenseRegistration() {
+  private static final LicenseRegistration LICENSE_ME_OE_2030 = new LicenseRegistration() {
     @SuppressWarnings("deprecation")
     @Override
     public void register(Registrar context) {
@@ -198,7 +196,7 @@ public class OpenEdgeComponentsTest {
           LicenseRegistration.LicenseType.COMMERCIAL, new byte[] {}, 1893459661000L);
     }
   };
-  private final static LicenseRegistration LICENSE_SL_ME_OE_2025 = new LicenseRegistration() {
+  private static final LicenseRegistration LICENSE_SL_ME_OE_2025 = new LicenseRegistration() {
     @SuppressWarnings("deprecation")
     @Override
     public void register(Registrar context) {
@@ -206,7 +204,7 @@ public class OpenEdgeComponentsTest {
           LicenseRegistration.LicenseType.COMMERCIAL, new byte[] {}, 1735693261000L);
     }
   };
-  private final static LicenseRegistration LICENSE_SL_YOU_OE_2025 = new LicenseRegistration() {
+  private static final LicenseRegistration LICENSE_SL_YOU_OE_2025 = new LicenseRegistration() {
     @SuppressWarnings("deprecation")
     @Override
     public void register(Registrar context) {
@@ -214,7 +212,7 @@ public class OpenEdgeComponentsTest {
           LicenseRegistration.LicenseType.COMMERCIAL, new byte[] {}, 1735693261000L);
     }
   };
-  private final static LicenseRegistration LICENSE_NEW_TYPE = new LicenseRegistration() {
+  private static final LicenseRegistration LICENSE_NEW_TYPE = new LicenseRegistration() {
     @Override
     public void register(Registrar context) {
       context.registerLicense(3, "987654321", SonarProduct.SONARLINT, "You", "salt", "rssw-oe-main",
