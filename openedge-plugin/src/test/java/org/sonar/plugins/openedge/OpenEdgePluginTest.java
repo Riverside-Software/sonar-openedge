@@ -49,7 +49,7 @@ public class OpenEdgePluginTest {
   public void testExtensionsSonarLint() {
     Plugin.Context context = new Plugin.Context(SONARLINT_RUNTIME);
     new OpenEdgePlugin().define(context);
-    assertEquals(context.getExtensions().size(), 25);
+    assertEquals(context.getExtensions().size(), 26);
   }
 
   @Test

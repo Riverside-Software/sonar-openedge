@@ -191,7 +191,8 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
 
     computeAnalytics(context);
-    logStatistics();
+    if (context.runtime().getProduct() == SonarProduct.SONARQUBE)
+      logStatistics();
     generateProparseDebugIndex();
   }
 

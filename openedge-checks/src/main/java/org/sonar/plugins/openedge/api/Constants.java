@@ -62,6 +62,7 @@ public class Constants {
   public static final String SKIP_XCODE = "sonar.oe.xcode.skip";
   public static final String XML_DOCUMENT_RULES = "sonar.oe.xml.doc"; // Boolean - Create org.w3c.dom.Document object from XREF
   public static final String ASSEMBLY_CATALOG = "sonar.oe.assembly.catalog";
+  public static final String DOTNET_CATALOG = "sonar.oe.dotnet.catalog";
   public static final String CLASS_DOCUMENTATION = "sonar.oe.classdoc";
   public static final String RTB_COMPATIBILITY = "sonar.oe.rtb";
   public static final String REQUIRE_FULL_NAMES = "sonar.oe.require.full_names";

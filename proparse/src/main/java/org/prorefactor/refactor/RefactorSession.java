@@ -30,6 +30,8 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.prorefactor.core.schema.ISchema;
+import org.prorefactor.proparse.AssemblyCatalog;
+import org.prorefactor.proparse.AssemblyCatalog.Event;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.refactor.settings.IProparseSettings;
@@ -48,6 +50,7 @@ import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.PrimitiveDataType;
+import eu.rssw.pct.elements.fixed.EventElement;
 import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.fixed.PropertyElement;
@@ -165,6 +168,59 @@ public class RefactorSession implements IProparseEnvironment {
         classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(typeInfo);
       }
     }
+  }
+
+  public void injectClassesFromDotNetCatalog(Reader reader) {
+    Gson gson = new GsonBuilder().create();
+    AssemblyCatalog catalog = gson.fromJson(reader, AssemblyCatalog.class);
+    if (catalog.version != 1) {
+      LOG.info("Outdated JSON catalog, file should be regenerated using the latest version of the tool");
+      return;
+    }
+    for (AssemblyCatalog.Entry info : catalog.entries) {
+      String parentType = info.baseTypes != null && info.baseTypes.length > 0 ? info.baseTypes[0] : null;
+      String[] interfaces = info.baseTypes != null && info.baseTypes.length > 1
+          ? Arrays.copyOfRange(info.baseTypes, 1, info.baseTypes.length) : new String[] {};
+      TypeInfo typeInfo = new TypeInfo(info.name, info.isInterface, info.isAbstract, parentType, "", interfaces);
+      if (info.methods != null) {
+        for (org.prorefactor.proparse.AssemblyCatalog.Method methd : info.methods) {
+          typeInfo.addMethod(toMethodElement(methd));
+        }
+      }
+      if (info.properties != null) {
+        for (org.prorefactor.proparse.AssemblyCatalog.Property prop : info.properties) {
+          typeInfo.addProperty(new PropertyElement(prop.name, prop.isStatic, toDataType(prop.dataType)));
+        }
+      }
+      if (info.events != null) {
+        for (Event event : info.events) {
+          typeInfo.addEvent(new EventElement(event.name));
+        }
+      }
+      classInfo.put(typeInfo.getTypeName(), typeInfo);
+      lcClassInfo.put(typeInfo.getTypeName().toLowerCase(), typeInfo);
+
+      int dotPos = info.name.lastIndexOf('.');
+      String pkgName = dotPos >= 1 ? info.name.substring(0, dotPos) : "";
+      synchronized (pkgLock) {
+        classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(typeInfo);
+      }
+    }
+  }
+
+  private static IMethodElement toMethodElement(org.prorefactor.proparse.AssemblyCatalog.Method method) {
+    List<IParameter> params = new ArrayList<>();
+    int offset = 0;
+    for (org.prorefactor.proparse.AssemblyCatalog.Parameter methd : method.parameters) {
+      int extent = methd.dataType.endsWith("[]") ? 1 : 0;
+      String dataType = extent == 1 ? methd.dataType.substring(0, methd.dataType.length() - 2) : methd.dataType;
+      ParameterMode mode = "IO".equalsIgnoreCase(methd.mode) ? ParameterMode.INPUT_OUTPUT
+          : ("O".equalsIgnoreCase(methd.mode) ? ParameterMode.OUTPUT : ParameterMode.INPUT);
+      params.add(new Parameter(offset++, methd.name, extent, mode, toDataType(dataType)));
+    }
+
+    return new MethodElement(method.name, method.isStatic, toDataType(method.returnType),
+        params.toArray(new IParameter[0]));
   }
 
   public Charset getCharset() {

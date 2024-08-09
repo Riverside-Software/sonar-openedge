@@ -23,7 +23,7 @@ public class OpenEdgeDependenciesTest {
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
     OpenEdgeDependenciesSensor sensor = new OpenEdgeDependenciesSensor(oeSettings, components);
     sensor.execute(context);
 

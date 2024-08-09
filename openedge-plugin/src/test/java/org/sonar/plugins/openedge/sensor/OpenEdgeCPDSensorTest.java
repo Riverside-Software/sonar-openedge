@@ -53,7 +53,7 @@ public class OpenEdgeCPDSensorTest {
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
     OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -70,7 +70,7 @@ public class OpenEdgeCPDSensorTest {
     SensorContextTester context = TestProjectSensorContext.createContext();
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
     OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -87,7 +87,7 @@ public class OpenEdgeCPDSensorTest {
     context.setSettings(settings);
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_DE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
     OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -103,7 +103,7 @@ public class OpenEdgeCPDSensorTest {
     context.settings().setProperty("sonar.pullrequest.branch", "PR1");
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_DE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), null, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
     OpenEdgeDependenciesSensor sensor01 = new OpenEdgeDependenciesSensor(oeSettings, components);
     sensor01.execute(context);
     InputFile test3 = context.fileSystem().inputFile(

@@ -33,6 +33,8 @@ import java.nio.file.Paths;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.proparse.classdoc.ClassDocumentation.DeprecatedInfo;
 import org.prorefactor.proparse.support.IProparseEnvironment;
+import org.prorefactor.refactor.RefactorSession;
+import org.sonar.api.SonarRuntime;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.predicates.DefaultFilePredicates;
@@ -40,7 +42,9 @@ import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.IRefactorSessionEnv;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+import org.sonar.plugins.openedge.foundation.SettingsCache;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContextExtra;
 import org.sonar.plugins.openedge.utils.TestProjectSensorRtbContext;
@@ -51,7 +55,7 @@ import eu.rssw.pct.elements.ITypeInfo;
 public class OpenEdgeSettingsTest {
 
   @Test
-  public void testSameObject() throws Exception {
+  public void testSameObject() {
     SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
     context.setSettings(new MapSettings());
 
@@ -94,7 +98,7 @@ public class OpenEdgeSettingsTest {
   }
 
   @Test
-  public void testSonarDatabasesFromSonarQube01() throws Exception {
+  public void testSonarDatabasesFromSonarQube01() {
     // No database schema, verify no DB table available
     MapSettings settings = new MapSettings();
     settings.setProperty(Constants.DATABASES, "");
@@ -112,7 +116,7 @@ public class OpenEdgeSettingsTest {
   }
 
   @Test
-  public void testSonarDatabasesFromSonarQube02() throws Exception {
+  public void testSonarDatabasesFromSonarQube02() {
     // Simple sports2000 database schema
     MapSettings settings = new MapSettings();
     settings.setProperty(Constants.DATABASES, "src/schema/sp2k.df");
@@ -137,7 +141,7 @@ public class OpenEdgeSettingsTest {
   }
 
   @Test
-  public void testSonarDatabasesFromSonarQube03() throws Exception {
+  public void testSonarDatabasesFromSonarQube03() {
     // Simple sports2000 database schema under a different logical name
     MapSettings settings = new MapSettings();
     settings.setProperty(Constants.DATABASES, "src/schema/sp2k.df:rssw");
@@ -162,7 +166,7 @@ public class OpenEdgeSettingsTest {
   }
 
   @Test
-  public void testSonarDatabasesFromSonarQube04() throws Exception {
+  public void testSonarDatabasesFromSonarQube04() {
     // Simple sports2000 database schema under a different logical name and with aliases
     MapSettings settings = new MapSettings();
     settings.setProperty(Constants.DATABASES, "src/schema/sp2k.df:rssw");
@@ -192,7 +196,7 @@ public class OpenEdgeSettingsTest {
   }
 
   @Test
-  public void testSonarDatabasesFromSonarLint01() throws Exception {
+  public void testSonarDatabasesFromSonarLint01() {
     // Simple sports2000 database schema on SonarLint - This schema doesn't include table 'Benefits'
     MapSettings settings = new MapSettings();
     settings.setProperty(Constants.SLINT_DATABASES,
@@ -218,7 +222,7 @@ public class OpenEdgeSettingsTest {
   }
 
   @Test
-  public void testSonarDatabasesFromSonarLint02() throws Exception {
+  public void testSonarDatabasesFromSonarLint02() {
     // Simple sports2000 database schema under a different logical name and with aliases*
     // Override with standard schema
     MapSettings settings = new MapSettings();
@@ -250,7 +254,7 @@ public class OpenEdgeSettingsTest {
   }
 
   @Test
-  public void testAssemblyCatalog() throws Exception {
+  public void testAssemblyCatalog() {
     MapSettings settings = new MapSettings();
     settings.setProperty(Constants.ASSEMBLY_CATALOG,
         new File(TestProjectSensorContext.BASEDIR, "assemblies.json").getAbsolutePath());
@@ -287,7 +291,7 @@ public class OpenEdgeSettingsTest {
   }
 
   @Test
-  public void testClassDocumentation() throws Exception {
+  public void testClassDocumentation() {
     MapSettings settings = new MapSettings();
     settings.setProperty(Constants.CLASS_DOCUMENTATION,
         new File(TestProjectSensorContext.BASEDIR, "netlib.json").getAbsolutePath() + ","
@@ -316,7 +320,30 @@ public class OpenEdgeSettingsTest {
     DeprecatedInfo dep2 = doc3.objectDoc.get("M#MakeSyncRequest(IZOpenEdge.Net.ServerConnection.ClientSocket,IZOpenEdge.Net.HTTP.IHttpRequest,IZOpenEdge.Net.HTTP.IHttpResponse,IZOpenEdge.Core.ByteBucket)");
     assertNotNull(dep2);
     assertEquals(dep2.since, "12.5.0");
-
   }
 
+  @Test
+  public void testSettingsCache() {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(Constants.CLASS_DOCUMENTATION,
+        new File(TestProjectSensorContext.BASEDIR, "netlib.json").getAbsolutePath() + ","
+            + new File(TestProjectSensorContext.BASEDIR, "corelib.json").getAbsolutePath());
+    settings.setProperty("sonar.sources", "src");
+    SonarRuntime runtime = OpenEdgePluginTest.SONARLINT_RUNTIME;
+
+    SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
+    context.setSettings(settings);
+    context.setRuntime(runtime);
+
+    SettingsCache cache = new SettingsCache();
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), context.runtime(),
+        cache);
+    oeSettings.init();
+
+    assertNull(cache.getSession(context.fileSystem().baseDir().toString()));
+    IRefactorSessionEnv rsEnv = oeSettings.getProparseSessions();
+    RefactorSession rs1 = cache.getSession(context.fileSystem().baseDir().toString());
+    assertNotNull(rs1);
+    assertEquals(rsEnv.getDefaultSession(), rs1);
+  }
 }

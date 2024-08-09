@@ -52,7 +52,7 @@ public class CPDCallbackTest {
   private RefactorSession session;
 
   @BeforeMethod
-  public void initContext() throws IOException {
+  public void initContext() {
     session = new RefactorSession(new ProparseSettings("src/test/resources"), new Schema(), StandardCharsets.UTF_8);
   }
 
