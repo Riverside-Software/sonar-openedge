@@ -142,11 +142,11 @@ public class OpenEdgeSettings {
     oePluginVersion = readPluginVersion(this.getClass().getClassLoader(), "sonar-openedge.txt");
     LOG.info("OpenEdge plugin version: {}", oePluginVersion);
     LOG.info("Loading OpenEdge settings for server ID '{}'", config.get(CoreProperties.SERVER_ID).orElse(""));
-    initializeDirectories(config, fileSystem);
-    initializePropathDlc(config);
-    initializeDefaultPropath(config, fileSystem);
-    initializeCPD(config);
-    initializeIncludeExtensions(config);
+    initializeDirectories();
+    initializePropathDlc();
+    initializeDefaultPropath();
+    initializeCPD();
+    initializeIncludeExtensions();
     rtbCompatibility = config.getBoolean(Constants.RTB_COMPATIBILITY).orElse(false);
     if (rtbCompatibility)
       LOG.info("Using Roundtable compatibility mode");
@@ -154,11 +154,11 @@ public class OpenEdgeSettings {
     init = true;
   }
 
-  private final void initializeDirectories(Configuration config, FileSystem fileSystem) {
+  private final void initializeDirectories() {
     // Looking for source directories
     Optional<String> sonarSources = config.get("sonar.sources");
     if (sonarSources.isPresent()) {
-      initializeDirectory(fileSystem, sonarSources.get(), "source", sourcePaths);
+      initializeDirectory(sonarSources.get(), "source", sourcePaths);
     } else {
       sourcePaths.add(fileSystem.baseDir().toPath().normalize());
       LOG.debug("No sonar.sources property, defaults to base directory");
@@ -167,7 +167,7 @@ public class OpenEdgeSettings {
     // Build directories
     Optional<String> binariesSetting = config.get(Constants.BINARIES);
     if (binariesSetting.isPresent()) {
-      initializeDirectory(fileSystem, binariesSetting.get(), "binaries", binariesDirs);
+      initializeDirectory(binariesSetting.get(), "binaries", binariesDirs);
     } else {
       LOG.debug("No sonar.oe.binaries property, defaults to source directories");
       binariesDirs.addAll(sourcePaths);
@@ -176,14 +176,14 @@ public class OpenEdgeSettings {
     // .PCT directories
     Optional<String> dotPctSetting = config.get(Constants.DOTPCT);
     if (dotPctSetting.isPresent()) {
-      initializeDirectory(fileSystem, dotPctSetting.get(), ".pct", pctDirs);
+      initializeDirectory(dotPctSetting.get(), ".pct", pctDirs);
     } else {
       LOG.debug("No sonar.oe.dotpct property, defaults to <binaries>/.pct directories");
       binariesDirs.forEach(dir -> pctDirs.add(Paths.get(dir.toString(), ".pct")));
     }
   }
 
-  private final void initializeDirectory(FileSystem fileSystem, String prop, String type, List<Path> paths) {
+  private final void initializeDirectory(String prop, String type, List<Path> paths) {
     for (String str : Splitter.on(',').trimResults().split(prop)) {
       LOG.debug("Adding {} directory '{}' ...", type, str);
       try {
@@ -196,7 +196,7 @@ public class OpenEdgeSettings {
     }
   }
 
-  private final void initializePropathDlc(Configuration config) {
+  private final void initializePropathDlc() {
     String dlcInstallDir = config.get(Constants.DLC).orElse(null);
     boolean dlcInPropath = config.getBoolean(Constants.PROPATH_DLC).orElse(false);
     if (dlcInPropath && !Strings.isNullOrEmpty(dlcInstallDir)) {
@@ -209,13 +209,13 @@ public class OpenEdgeSettings {
     }
   }
 
-  private final void initializeDefaultPropath(Configuration config, FileSystem fileSystem) {
-    propath.addAll(readPropath(fileSystem, config.get(Constants.PROPATH).orElse("")));
+  private final void initializeDefaultPropath() {
+    propath.addAll(readPropath(config.get(Constants.PROPATH).orElse("")));
     propathFull.addAll(propath);
     propathFull.addAll(propathDlc);
   }
 
-  private final List<File> readPropath(FileSystem fileSystem, String propValue) {
+  private final List<File> readPropath(String propValue) {
     List<File> retVal = new ArrayList<>();
     LOG.info("Using PROPATH : {}", propValue);
     for (String str : Splitter.on(',').trimResults().split(propValue)) {
@@ -227,7 +227,7 @@ public class OpenEdgeSettings {
     return retVal;
   }
 
-  private final void initializeCPD(Configuration config) {
+  private final void initializeCPD() {
     // CPD annotations
     for (String str : config.get(Constants.CPD_ANNOTATIONS).orElse("").split(",")) {
       LOG.debug("CPD annotation : '{}'", str);
@@ -245,7 +245,7 @@ public class OpenEdgeSettings {
     }
   }
 
-  private final void initializeIncludeExtensions(Configuration config) {
+  private final void initializeIncludeExtensions() {
     includeExtensions.addAll(Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
         config.get(Constants.INCLUDE_SUFFIXES).orElse(OpenEdge.DEFAULT_INCLUDE_FILE_SUFFIXES)).stream().map(
             String::toLowerCase).collect(Collectors.toList()));
@@ -741,11 +741,11 @@ public class OpenEdgeSettings {
         // As long as we have a pattern, we contine the list
         LOG.info(" Found pattern '{}' for submodule #{}", modPattern, modNum);
 
-        List<File> pp = readPropath(fileSystem, modulePropath);
+        List<File> pp = readPropath(modulePropath);
         pp.addAll(propathDlc);
         ProparseSettings ppSettings = new ProparseSettings(Joiner.on(',').skipNulls().join(pp),
             config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
-        Schema sch = readSchema(config, fileSystem, modDatabases, modAliases);
+        Schema sch = readSchema(modDatabases, modAliases);
         RefactorSession rf = new RefactorSession(ppSettings, sch, encoding(), getProparseSession());
         sessionsEnv.addSession(rf, modPattern);
 
@@ -758,7 +758,7 @@ public class OpenEdgeSettings {
 
   private RefactorSession getProparseSession() {
     if (defaultSession == null) {
-      Schema sch = readSchema(config, fileSystem, config.get(Constants.DATABASES).orElse(""),
+      Schema sch = readSchema(config.get(Constants.DATABASES).orElse(""),
           config.get(Constants.ALIASES).orElse(""));
       ProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
           config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
@@ -879,7 +879,7 @@ public class OpenEdgeSettings {
     }
   }
 
-  private Collection<IDatabase> readSchemaFromProp1(FileSystem fileSystem, String dbList) {
+  private Collection<IDatabase> readSchemaFromProp1(String dbList) {
     Collection<IDatabase> dbs = new ArrayList<>();
     LOG.info("Using schema : {}", dbList);
 
@@ -937,7 +937,7 @@ public class OpenEdgeSettings {
     return dbs;
   }
 
-  private Collection<IDatabase> readSchemaFromProp2(Configuration config) {
+  private Collection<IDatabase> readSchemaFromProp2() {
     Collection<IDatabase> dbs = new ArrayList<>();
     for (String str : Splitter.on(',').trimResults().omitEmptyStrings().split(
         config.get(Constants.SLINT_DATABASES).orElse(""))) {
@@ -953,7 +953,7 @@ public class OpenEdgeSettings {
     return dbs;
   }
 
-  private Schema readSchemaFromProp3(Configuration config) {
+  private Schema readSchemaFromProp3() {
     if (kryo == null)
       kryo = getKryoInstance();
 
@@ -991,18 +991,18 @@ public class OpenEdgeSettings {
     return kr;
   }
 
-  private Schema readSchema(Configuration config, FileSystem fileSystem, String dbPropValue, String aliasPropValue) {
+  private Schema readSchema(String dbPropValue, String aliasPropValue) {
     Collection<IDatabase> dbs = new ArrayList<>();
 
     // First use sonar.oe.databases property, even on SonarLint (for compatibility reasons)
     if (dbPropValue.length() > 0) {
-      dbs = readSchemaFromProp1(fileSystem, dbPropValue);
+      dbs = readSchemaFromProp1(dbPropValue);
     } else if ((runtime.getProduct() == SonarProduct.SONARLINT)
         && (config.get(Constants.SLINT_DATABASES).orElse("").length() > 0)) {
-      dbs = readSchemaFromProp2(config);
+      dbs = readSchemaFromProp2();
     } else if ((runtime.getProduct() == SonarProduct.SONARLINT)
         && (config.get(Constants.SLINT_DATABASES_KRYO).orElse("").length() > 0)) {
-      return readSchemaFromProp3(config);
+      return readSchemaFromProp3();
     }
 
     Schema sch = new Schema(dbs.toArray(new IDatabase[] {}));
