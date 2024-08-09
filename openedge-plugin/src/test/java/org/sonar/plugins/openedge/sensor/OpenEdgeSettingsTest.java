@@ -33,6 +33,8 @@ import java.nio.file.Paths;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.proparse.classdoc.ClassDocumentation.DeprecatedInfo;
 import org.prorefactor.proparse.support.IProparseEnvironment;
+import org.prorefactor.refactor.RefactorSession;
+import org.sonar.api.SonarRuntime;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.predicates.DefaultFilePredicates;
@@ -40,7 +42,9 @@ import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.IRefactorSessionEnv;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
+import org.sonar.plugins.openedge.foundation.SettingsCache;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContextExtra;
 import org.sonar.plugins.openedge.utils.TestProjectSensorRtbContext;
@@ -316,7 +320,30 @@ public class OpenEdgeSettingsTest {
     DeprecatedInfo dep2 = doc3.objectDoc.get("M#MakeSyncRequest(IZOpenEdge.Net.ServerConnection.ClientSocket,IZOpenEdge.Net.HTTP.IHttpRequest,IZOpenEdge.Net.HTTP.IHttpResponse,IZOpenEdge.Core.ByteBucket)");
     assertNotNull(dep2);
     assertEquals(dep2.since, "12.5.0");
-
   }
 
+  @Test
+  public void testSettingsCache() {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(Constants.CLASS_DOCUMENTATION,
+        new File(TestProjectSensorContext.BASEDIR, "netlib.json").getAbsolutePath() + ","
+            + new File(TestProjectSensorContext.BASEDIR, "corelib.json").getAbsolutePath());
+    settings.setProperty("sonar.sources", "src");
+    SonarRuntime runtime = OpenEdgePluginTest.SONARLINT_RUNTIME;
+
+    SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
+    context.setSettings(settings);
+    context.setRuntime(runtime);
+
+    SettingsCache cache = new SettingsCache();
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), context.runtime(),
+        cache);
+    oeSettings.init();
+
+    assertNull(cache.getSession(context.fileSystem().baseDir().toString()));
+    IRefactorSessionEnv rsEnv = oeSettings.getProparseSessions();
+    RefactorSession rs1 = cache.getSession(context.fileSystem().baseDir().toString());
+    assertNotNull(rs1);
+    assertEquals(rsEnv.getDefaultSession(), rs1);
+  }
 }
