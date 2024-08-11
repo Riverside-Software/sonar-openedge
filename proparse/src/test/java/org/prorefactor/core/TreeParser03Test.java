@@ -28,8 +28,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import javax.xml.bind.JAXBException;
-
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
@@ -73,6 +71,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
+    assertNotNull(unit.getRootScope().getRootBlock());
+    assertEquals(unit.getRootScope().getRootBlock().getChildren().size(), 0);
   }
 
   @Test
@@ -83,6 +83,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
+    assertNotNull(unit.getRootScope().getRootBlock());
+    assertEquals(unit.getRootScope().getRootBlock().getChildren().size(), 0);
   }
 
   @Test
@@ -93,6 +95,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
+    assertNotNull(unit.getRootScope().getRootBlock());
+    assertEquals(unit.getRootScope().getRootBlock().getChildren().size(), 0);
 
     boolean found1 = false;
     boolean found2 = false;
@@ -120,6 +124,9 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
+    assertNotNull(unit.getRootScope().getRootBlock());
+    assertEquals(unit.getRootScope().getRootBlock().getChildren().size(), 0);
+
     Variable xx = unit.getRootScope().getVariable("xx");
     assertNotNull(xx);
     Variable yy = unit.getRootScope().getVariable("yy");
@@ -136,6 +143,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
+    assertNotNull(unit.getRootScope().getRootBlock());
+    assertEquals(unit.getRootScope().getRootBlock().getChildren().size(), 0);
 
     List<Routine> lst = unit.getRootScope().lookupRoutines("f1");
     assertEquals(lst.size(), 1);
@@ -222,6 +231,9 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
+    assertNotNull(unit.getRootScope().getRootBlock());
+    // One REPEAT block in main block
+    assertEquals(unit.getRootScope().getRootBlock().getChildren().size(), 1);
   }
 
   @Test
@@ -246,6 +258,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
+    assertNotNull(unit.getRootScope().getRootBlock());
+    assertEquals(unit.getRootScope().getRootBlock().getChildren().size(), 0);
     Variable xx = unit.getRootScope().getChildScopes().get(0).getVariable("xx");
     assertNotNull(xx);
     assertEquals(xx.getNumReads(), 1);
@@ -513,6 +527,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().query(ABLNodeType.DISPLAY).size(), 1);
+    assertNotNull(unit.getRootScope().getRootBlock());
+    assertEquals(unit.getRootScope().getRootBlock().getChildren().size(), 1);
   }
 
   @Test
@@ -522,6 +538,10 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertFalse(unit.hasSyntaxError());
     JPNode node = unit.getTopNode().findDirectChild(ABLNodeType.DEFINE);
     assertEquals(node.asIStatement().getNodeType2(), ABLNodeType.VARIABLE);
+    assertNotNull(unit.getRootScope().getRootBlock());
+    assertEquals(unit.getRootScope().getRootBlock().getChildren().size(), 2);
+    assertEquals(unit.getRootScope().getRootBlock().getChildren().get(0).getChildren().size(), 1);
+    assertEquals(unit.getRootScope().getRootBlock().getChildren().get(1).getChildren().size(), 1);
   }
 
   @Test
@@ -599,16 +619,20 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    /*
-     * assertEquals(unit.getRootScope().getVariables().size(), 2); Variable var1 =
-     * unit.getRootScope().getVariable("xxx"); assertEquals(var1.getNumReads(), 0); assertEquals(var1.getNumWrites(),
-     * 1); Variable var2 = unit.getRootScope().getVariable("yyy"); assertEquals(var2.getNumReads(), 1);
-     * assertEquals(var2.getNumWrites(), 2);
-     * 
-     * assertEquals(unit.getRootScope().getChildScopes().size(), 2); Variable var3 =
-     * unit.getRootScope().getChildScopes().get(0).getVariable("xxx"); assertNotNull(var3);
-     * assertEquals(var3.getNumReads(), 0); assertEquals(var3.getNumWrites(), 1);
-     */
+    // assertEquals(unit.getRootScope().getVariables().size(), 2);
+    // Variable var1 = unit.getRootScope().getVariable("xxx");
+    // assertEquals(var1.getNumReads(), 0);
+    // assertEquals(var1.getNumWrites(), 1);
+    //
+    // Variable var2 = unit.getRootScope().getVariable("yyy");
+    // assertEquals(var2.getNumReads(), 1);
+    // assertEquals(var2.getNumWrites(), 2);
+    // assertEquals(unit.getRootScope().getChildScopes().size(), 2);
+    //
+    // Variable var3 = unit.getRootScope().getChildScopes().get(0).getVariable("xxx");
+    // assertNotNull(var3);
+    // assertEquals(var3.getNumReads(), 0);
+    // assertEquals(var3.getNumWrites(), 1);
   }
 
   @Test
@@ -710,9 +734,9 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     assertEquals(unit.getRootScope().getVariables().size(), 1);
     Variable v1 = null;
-    for (Variable var : unit.getRootScope().getVariables()) {
-      if ("myobj1".equals(var.getName()))
-        v1 = var;
+    for (Variable v : unit.getRootScope().getVariables()) {
+      if ("myobj1".equals(v.getName()))
+        v1 = v;
     }
     assertNotNull(v1);
     assertEquals(v1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
@@ -1117,7 +1141,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testAssignmentList() throws JAXBException, IOException {
+  public void testAssignmentList() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test26.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1127,7 +1151,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testBufferCompare() throws JAXBException, IOException {
+  public void testBufferCompare() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test27.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1142,7 +1166,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test(enabled = false) // FIXME
-  public void testChoose() throws JAXBException, IOException {
+  public void testChoose() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test28.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1157,7 +1181,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testLexAt() throws JAXBException, IOException {
+  public void testLexAt() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test29.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1178,7 +1202,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testDefBrowseDisplay() throws JAXBException, IOException {
+  public void testDefBrowseDisplay() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test30.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1188,7 +1212,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testParameters() throws JAXBException, IOException {
+  public void testParameters() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test31.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1213,7 +1237,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testEntered() throws JAXBException, IOException {
+  public void testEntered() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test32.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1230,7 +1254,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testImgLike() throws JAXBException, IOException {
+  public void testImgLike() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test33.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1264,7 +1288,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testImportExport() throws JAXBException, IOException {
+  public void testImportExport() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test34.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1274,7 +1298,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testExternalDataTypes() throws JAXBException, IOException {
+  public void testExternalDataTypes() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test35.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1296,7 +1320,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testSuper01() throws JAXBException, IOException {
+  public void testSuper01() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test36.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1312,7 +1336,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testSuper02() throws JAXBException, IOException {
+  public void testSuper02() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test36.cls"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1335,7 +1359,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testThisObject01() throws JAXBException, IOException {
+  public void testThisObject01() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test37.cls"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1358,7 +1382,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testTempTableNoUndo01() throws JAXBException, IOException {
+  public void testTempTableNoUndo01() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test38.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
@@ -1392,7 +1416,7 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
-  public void testTTAsParameter() throws JAXBException, IOException {
+  public void testTTAsParameter() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test39.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
