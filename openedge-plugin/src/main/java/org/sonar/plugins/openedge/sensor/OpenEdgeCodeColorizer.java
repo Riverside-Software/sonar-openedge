@@ -91,7 +91,8 @@ public class OpenEdgeCodeColorizer implements Sensor {
   }
 
   private void highlightFile(SensorContext context, IProparseEnvironment session, InputFile file) {
-    TokenSource stream = new ParseUnit(InputFileUtils.getInputStream(file), InputFileUtils.getRelativePath(file, context.fileSystem()), session, file.charset()).lex();
+    TokenSource stream = new ParseUnit(InputFileUtils.getInputStream(file),
+        InputFileUtils.getRelativePath(file, context.fileSystem()), session, file.charset()).lex();
 
     ProToken tok = (ProToken) stream.nextToken();
     ProToken nextTok = (ProToken) stream.nextToken();
@@ -103,7 +104,8 @@ public class OpenEdgeCodeColorizer implements Sensor {
         textType = TypeOfText.STRING;
       } else if (tok.getNodeType() == ABLNodeType.COMMENT) {
         textType = TypeOfText.COMMENT;
-      } else if (tok.getNodeType().isKeyword()) {
+      } else if (tok.getNodeType().isKeyword()
+          || ((tok.getNodeType() == ABLNodeType.ID) && (ABLNodeType.isFormerUnreservedKeyword(tok.getText())))) {
         textType = TypeOfText.KEYWORD;
       } else if ((tok.getNodeType() == ABLNodeType.INCLUDEDIRECTIVE) || tok.getNodeType().isPreprocessor()) {
         textType = TypeOfText.PREPROCESS_DIRECTIVE;
