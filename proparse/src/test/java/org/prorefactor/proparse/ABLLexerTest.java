@@ -45,13 +45,11 @@ import org.testng.annotations.Test;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 
-import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
-
 public class ABLLexerTest {
   private RefactorSession session;
 
   @BeforeTest
-  public void setUp() throws IOException, InvalidRCodeException {
+  public void setUp() throws IOException {
     session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
   }
 
@@ -387,7 +385,9 @@ public class ABLLexerTest {
     // SESSION:FIRST-SERVER-SOCKET:HANDLE.
     assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.SESSION);
     assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
-    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.FIRSTSERVERSOCKET);
+    ProToken tok = (ProToken) lexer.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "FIRST-SERVER-SOCKET");
     assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
     assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.HANDLE);
     assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.PERIOD);
@@ -414,11 +414,17 @@ public class ABLLexerTest {
     // DATASET ds1::tt1:set-callback().
     assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.DATASET);
     assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.WS);
-    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) lexer.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "ds1");
     assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.DOUBLECOLON);
-    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.ID);
+    tok = (ProToken) lexer.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "tt1");
     assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.OBJCOLON);
-    assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.SETCALLBACK);
+    tok = (ProToken) lexer.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.ID);
+    assertEquals(tok.getText(), "set-callback");
     assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.LEFTPAREN);
     assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.RIGHTPAREN);
     assertEquals(((ProToken) lexer.nextToken()).getNodeType(), ABLNodeType.PERIOD);
@@ -675,8 +681,8 @@ public class ABLLexerTest {
   public void testWritableTokens() {
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("  MESSAGE 'Hello'".getBytes()), "file.txt");
     lexer.enableWritableTokens();
+    lexer.nextToken(); // Skip first WS
     Token tok = lexer.nextToken();
-    tok = lexer.nextToken();
     assertNotNull(tok);
     assertTrue(tok instanceof WritableProToken);
     assertEquals(tok.getLine(), 1);
@@ -695,7 +701,7 @@ public class ABLLexerTest {
     assertNotNull(tok);
     assertEquals(tok.getNodeType(), ABLNodeType.COMMENT);
     assertFalse(tok.hasNestedComments());
-    tok = (ProToken) lexer.nextToken();
+    lexer.nextToken();
     tok = (ProToken) lexer.nextToken();
     assertNotNull(tok);
     assertEquals(tok.getNodeType(), ABLNodeType.COMMENT);
