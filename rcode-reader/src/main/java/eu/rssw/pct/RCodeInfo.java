@@ -221,7 +221,8 @@ public class RCodeInfo {
     }
     if ((version & 0x3FFF) < 1100)
       return;
-
+    if (header.length == 0)
+      return;
     int preambleSize = readAsciiEncodedNumber(header, 0, 4);
     int numElements = readAsciiEncodedNumber(header, 4, 4);
     // Version of signature block : offset 8, 4 bytes
