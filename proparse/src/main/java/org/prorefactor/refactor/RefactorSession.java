@@ -170,41 +170,47 @@ public class RefactorSession implements IProparseEnvironment {
     }
   }
 
-  public void injectClassesFromDotNetCatalog(Reader reader) {
+  private static ITypeInfo assemblyCatalogEntryToTypeInfo(AssemblyCatalog.Entry info) {
+    String parentType = info.baseTypes != null && info.baseTypes.length > 0 ? info.baseTypes[0] : null;
+    String[] interfaces = info.baseTypes != null && info.baseTypes.length > 1
+        ? Arrays.copyOfRange(info.baseTypes, 1, info.baseTypes.length) : new String[] {};
+    TypeInfo typeInfo = new TypeInfo(info.name, info.isInterface, info.isAbstract, parentType, "", interfaces);
+    if (info.methods != null) {
+      for (org.prorefactor.proparse.AssemblyCatalog.Method methd : info.methods) {
+        typeInfo.addMethod(toMethodElement(methd));
+      }
+    }
+    if (info.properties != null) {
+      for (org.prorefactor.proparse.AssemblyCatalog.Property prop : info.properties) {
+        typeInfo.addProperty(new PropertyElement(prop.name, prop.isStatic, toDataType(prop.dataType)));
+      }
+    }
+    if (info.events != null) {
+      for (Event event : info.events) {
+        typeInfo.addEvent(new EventElement(event.name));
+      }
+    }
+
+    return typeInfo;
+  }
+
+  public static List<ITypeInfo> getClassesFromDotNetCatalog(Reader reader) {
+    List<ITypeInfo> list = new ArrayList<>();
     Gson gson = new GsonBuilder().create();
     AssemblyCatalog catalog = gson.fromJson(reader, AssemblyCatalog.class);
     if (catalog.version != 1) {
       LOG.info("Outdated JSON catalog, file should be regenerated using the latest version of the tool");
-      return;
+      return list;
     }
     for (AssemblyCatalog.Entry info : catalog.entries) {
-      String parentType = info.baseTypes != null && info.baseTypes.length > 0 ? info.baseTypes[0] : null;
-      String[] interfaces = info.baseTypes != null && info.baseTypes.length > 1
-          ? Arrays.copyOfRange(info.baseTypes, 1, info.baseTypes.length) : new String[] {};
-      TypeInfo typeInfo = new TypeInfo(info.name, info.isInterface, info.isAbstract, parentType, "", interfaces);
-      if (info.methods != null) {
-        for (org.prorefactor.proparse.AssemblyCatalog.Method methd : info.methods) {
-          typeInfo.addMethod(toMethodElement(methd));
-        }
-      }
-      if (info.properties != null) {
-        for (org.prorefactor.proparse.AssemblyCatalog.Property prop : info.properties) {
-          typeInfo.addProperty(new PropertyElement(prop.name, prop.isStatic, toDataType(prop.dataType)));
-        }
-      }
-      if (info.events != null) {
-        for (Event event : info.events) {
-          typeInfo.addEvent(new EventElement(event.name));
-        }
-      }
-      classInfo.put(typeInfo.getTypeName(), typeInfo);
-      lcClassInfo.put(typeInfo.getTypeName().toLowerCase(), typeInfo);
+      list.add(assemblyCatalogEntryToTypeInfo(info));
+    }
+    return list;
+  }
 
-      int dotPos = info.name.lastIndexOf('.');
-      String pkgName = dotPos >= 1 ? info.name.substring(0, dotPos) : "";
-      synchronized (pkgLock) {
-        classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(typeInfo);
-      }
+  public void injectClassesFromDotNetCatalog(Reader reader) {
+    for (ITypeInfo typeInfo: getClassesFromDotNetCatalog(reader)) {
+      injectClassInfo(typeInfo);
     }
   }
 
@@ -292,16 +298,36 @@ public class RefactorSession implements IProparseEnvironment {
     return classDoc.get(className);
   }
 
-  public void injectTypeInfo(ITypeInfo unit) {
-    if ((unit == null) || Strings.isNullOrEmpty(unit.getTypeName()))
+  /**
+   * Inject TypeInfo object into the structure managing build directory
+   */
+  public void injectTypeInfo(ITypeInfo typeInfo) {
+    if ((typeInfo == null) || Strings.isNullOrEmpty(typeInfo.getTypeName()))
       return;
-    typeInfoMap.put(unit.getTypeName(), unit);
-    lcTypeInfoMap.put(unit.getTypeName().toLowerCase(), unit);
+    typeInfoMap.put(typeInfo.getTypeName(), typeInfo);
+    lcTypeInfoMap.put(typeInfo.getTypeName().toLowerCase(), typeInfo);
 
-    int dotPos = unit.getTypeName().lastIndexOf('.');
-    String pkgName = dotPos >= 1 ? unit.getTypeName().substring(0, dotPos) : "";
+    int dotPos = typeInfo.getTypeName().lastIndexOf('.');
+    String pkgName = dotPos >= 1 ? typeInfo.getTypeName().substring(0, dotPos) : "";
     synchronized(pkgLock) { 
-      classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(unit);
+      classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(typeInfo);
+    }
+  }
+
+  /**
+   * Inject TypeInfo object into the structure managing builtin classes and .Net catalog
+   */
+  public void injectClassInfo(ITypeInfo typeInfo) {
+    if ((typeInfo == null) || Strings.isNullOrEmpty(typeInfo.getTypeName()))
+      return;
+
+    classInfo.put(typeInfo.getTypeName(), typeInfo);
+    lcClassInfo.put(typeInfo.getTypeName().toLowerCase(), typeInfo);
+
+    int dotPos = typeInfo.getTypeName().lastIndexOf('.');
+    String pkgName = dotPos >= 1 ? typeInfo.getTypeName().substring(0, dotPos) : "";
+    synchronized(pkgLock) { 
+      classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(typeInfo);
     }
   }
 
