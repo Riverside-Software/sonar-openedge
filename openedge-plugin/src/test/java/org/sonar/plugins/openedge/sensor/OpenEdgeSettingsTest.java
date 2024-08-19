@@ -29,11 +29,12 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.List;
 
+import org.prorefactor.core.schema.Schema;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.proparse.classdoc.ClassDocumentation.DeprecatedInfo;
 import org.prorefactor.proparse.support.IProparseEnvironment;
-import org.prorefactor.refactor.RefactorSession;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
@@ -340,10 +341,48 @@ public class OpenEdgeSettingsTest {
         cache);
     oeSettings.init();
 
-    assertNull(cache.getSession(context.fileSystem().baseDir().toString()));
+    assertNull(cache.getSchemaCache(context.fileSystem().baseDir().toString()));
+    assertNull(cache.getCatalogCache(new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath()));
+
     IRefactorSessionEnv rsEnv = oeSettings.getProparseSessions();
-    RefactorSession rs1 = cache.getSession(context.fileSystem().baseDir().toString());
-    assertNotNull(rs1);
-    assertEquals(rsEnv.getDefaultSession(), rs1);
+    Schema sch = cache.getSchemaCache(context.fileSystem().baseDir().toString());
+    assertNotNull(sch);
+    assertEquals(rsEnv.getDefaultSession().getSchema(), sch);
+    List<ITypeInfo> catalog = cache.getCatalogCache(new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath());
+    assertNull(catalog);
   }
+
+  @Test
+  public void testSettingsCache02() {
+    MapSettings settings = new MapSettings();
+    // Inject Catalog
+    settings.setProperty(Constants.DOTNET_CATALOG,
+        new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath());
+    settings.setProperty(Constants.CLASS_DOCUMENTATION,
+        new File(TestProjectSensorContext.BASEDIR, "netlib.json").getAbsolutePath() + ","
+            + new File(TestProjectSensorContext.BASEDIR, "corelib.json").getAbsolutePath());
+    settings.setProperty("sonar.sources", "src");
+    SonarRuntime runtime = OpenEdgePluginTest.SONARLINT_RUNTIME;
+
+    SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
+    context.setSettings(settings);
+    context.setRuntime(runtime);
+
+    SettingsCache cache = new SettingsCache();
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), context.runtime(),
+        cache);
+    oeSettings.init();
+
+    assertNull(cache.getSchemaCache(context.fileSystem().baseDir().toString()));
+    assertNull(cache.getCatalogCache(new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath()));
+
+    IRefactorSessionEnv rsEnv = oeSettings.getProparseSessions();
+    Schema sch = cache.getSchemaCache(context.fileSystem().baseDir().toString());
+    assertNotNull(sch);
+    assertEquals(rsEnv.getDefaultSession().getSchema(), sch);
+    List<ITypeInfo> catalog = cache.getCatalogCache(new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath());
+    assertNotNull(catalog);
+    assertEquals(catalog.size(), 4797);
+  }
+
 }
