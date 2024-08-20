@@ -17,10 +17,12 @@ package org.prorefactor.proparse;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.List;
 
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
@@ -32,7 +34,7 @@ import eu.rssw.pct.elements.ITypeInfo;
 public class DotNetCatalogTest {
 
   @Test
-  public void testDotNetCatalog() throws IOException {
+  public void testDotNetCatalog01() throws IOException {
     RefactorSession session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
     assertNull( session.getTypeInfo("Microsoft.Win32.Registry"));
     // Inject content of dotnet.json
@@ -43,6 +45,22 @@ public class DotNetCatalogTest {
     assertNotNull(info);
     assertEquals(info.getMethods().size(), 3);
     assertEquals(info.getProperties().size(), 0);
+  }
+
+  @Test
+  public void testDotNetCatalog02() throws IOException {
+    // Same, but use static method from RefactorSession
+    try (Reader reader = new FileReader("src/test/resources/dotnet.json")) {
+      List<ITypeInfo> list = RefactorSession.getClassesFromDotNetCatalog(reader);
+      assertTrue(list.stream().anyMatch(it -> "Microsoft.Win32.Registry".equals(it.getTypeName())));
+      ITypeInfo info = list.stream()//
+        .filter(it -> "Microsoft.Win32.Registry".equals(it.getTypeName())) //
+        .findFirst() //
+        .get();
+      assertEquals(info.getMethods().size(), 3);
+      assertEquals(info.getProperties().size(), 0);
+
+    }
   }
 
 }

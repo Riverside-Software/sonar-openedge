@@ -267,10 +267,10 @@ public class OpenEdgeSettings {
     Optional<String> option = config.get(optionName);
     LOG.debug("Initialize binary cache from {}", option);
     if (option.isPresent()) {
-      Path cache = Paths.get(option.get());
-      if (java.nio.file.Files.exists(cache) && java.nio.file.Files.isRegularFile(cache)
-          && java.nio.file.Files.isReadable(cache)) {
-        for (ITypeInfo info : readPackageAsProxy(cache.getParent(), cache.getFileName().toString(), kryo)) {
+      Path binCache = Paths.get(option.get());
+      if (java.nio.file.Files.exists(binCache) && java.nio.file.Files.isRegularFile(binCache)
+          && java.nio.file.Files.isReadable(binCache)) {
+        for (ITypeInfo info : readPackageAsProxy(binCache.getParent(), binCache.getFileName().toString(), kryo)) {
           defaultSession.injectTypeInfo(info);
         }
       }
@@ -280,10 +280,10 @@ public class OpenEdgeSettings {
   private final void initializeProlibCache() {
     Optional<String> plCache = config.get(Constants.SLINT_PL_CACHE);
     if (plCache.isPresent()) {
-      File cache = new File(plCache.get());
-      if (cache.exists() && cache.isFile() && cache.canRead()) {
+      File prolibCache = new File(plCache.get());
+      if (prolibCache.exists() && prolibCache.isFile() && prolibCache.canRead()) {
         try {
-          for (String str : java.nio.file.Files.readAllLines(cache.toPath(), StandardCharsets.UTF_8)) {
+          for (String str : java.nio.file.Files.readAllLines(prolibCache.toPath(), StandardCharsets.UTF_8)) {
             int commaPos = str.indexOf(':');
             if ((commaPos > 0) && (str.length() > commaPos)) {
               String plPart =  str.substring(commaPos + 1);
@@ -295,7 +295,7 @@ public class OpenEdgeSettings {
             }
           }
         } catch (IOException caught) {
-          LOG.error("Unable to read PL cache " + cache.getAbsolutePath(), caught);
+          LOG.error("Unable to read PL cache " + prolibCache.getAbsolutePath(), caught);
         }
       }
     }
@@ -304,10 +304,10 @@ public class OpenEdgeSettings {
   private final void initializeRCodeCache() {
     Optional<String> opt = config.get(Constants.SLINT_RCODE_CACHE);
     if (opt.isPresent()) {
-      File cache = new File(opt.get());
-      if (cache.exists() && cache.isFile() && cache.canRead()) {
+      File rcodeCache = new File(opt.get());
+      if (rcodeCache.exists() && rcodeCache.isFile() && rcodeCache.canRead()) {
         try {
-          for (String str : java.nio.file.Files.readAllLines(cache.toPath(), StandardCharsets.UTF_8)) {
+          for (String str : java.nio.file.Files.readAllLines(rcodeCache.toPath(), StandardCharsets.UTF_8)) {
             int commaPos = str.indexOf(':');
             if ((commaPos > 0) && (str.length() > commaPos)) {
               defaultSession.injectTypeInfo(
@@ -315,7 +315,7 @@ public class OpenEdgeSettings {
             }
           }
         } catch (IOException caught) {
-          LOG.error("Unable to read PL cache " + cache.getAbsolutePath(), caught);
+          LOG.error("Unable to read PL cache " + rcodeCache.getAbsolutePath(), caught);
         }
       }
     }
@@ -383,9 +383,7 @@ public class OpenEdgeSettings {
           }
         });
       } else if (f.getName().endsWith(".pl")) {
-        srv.service.submit(() -> {
-          parseLibrary(f);
-        });
+        srv.service.submit(() -> parseLibrary(f));
       }
     });
   }
@@ -705,25 +703,11 @@ public class OpenEdgeSettings {
   }
 
   public IRefactorSessionEnv getProparseSessions() {
-    if (cache != null) {
-      RefactorSession rs = cache.getSession(fileSystem.baseDir().toString());
-      if (rs != null) {
-        LOG.debug("Using cached RefactorSession for project {}", fileSystem.baseDir());
-        return new RefactorSessionEnv(rs);
-      }
-    }
-
     if (sessionsEnv == null) {
       sessionsEnv = new RefactorSessionEnv(getProparseSession());
-      if (runtime.getProduct() == SonarProduct.SONARLINT) {
-        if (cache != null) {
-          LOG.debug("Saving RefactorSession to cache for {}", fileSystem.baseDir());
-          cache.setSession(fileSystem.baseDir().toString(), sessionsEnv.getDefaultSession());
-        }
+      if (runtime.getProduct() == SonarProduct.SONARLINT)
         // Only one session in SonarLint for now
         return sessionsEnv;
-      }
-
       int modNum = 1;
       while (true) {
         LOG.info("Looking for submodule #{}", modNum);
@@ -758,8 +742,22 @@ public class OpenEdgeSettings {
 
   private RefactorSession getProparseSession() {
     if (defaultSession == null) {
-      Schema sch = readSchema(config.get(Constants.DATABASES).orElse(""),
+      Schema sch = null;
+      if (cache != null) {
+        sch = cache.getSchemaCache(fileSystem.baseDir().toString());
+        if (sch != null) {
+          LOG.info("Reusing database schema from cache for project {}",fileSystem.baseDir().toString());
+        }
+      }
+      if (sch == null) {
+       sch = readSchema(config.get(Constants.DATABASES).orElse(""),
           config.get(Constants.ALIASES).orElse(""));
+       if (cache != null) {
+         LOG.info("Cache database schema for project {}", fileSystem.baseDir().toString());
+         cache.addSchemaCache(fileSystem.baseDir().toString(), sch);
+       }
+      }
+
       ProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
           config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
 
@@ -812,15 +810,28 @@ public class OpenEdgeSettings {
           LOG.error("Unable to read assembly catalog '" + assemblyCatalog.get() + "'", caught);
         }
       }
+
       Optional<String> dotNetCatalog = config.get(Constants.DOTNET_CATALOG);
       if (dotNetCatalog.isPresent()) {
-        long startTime = System.currentTimeMillis();
-        try (Reader reader = new FileReader(dotNetCatalog.get())) {
-          defaultSession.injectClassesFromDotNetCatalog(reader);
-        } catch (IOException | JsonParseException caught) {
-          LOG.error("Unable to read .Net catalog '" + dotNetCatalog.get() + "'", caught);
+        // First try to read from cache
+        List<ITypeInfo> list = cache == null ? null : cache.getCatalogCache(dotNetCatalog.get());
+        if (list == null) {
+          long startTime = System.currentTimeMillis();
+          try (Reader reader = new FileReader(dotNetCatalog.get())) {
+            list = RefactorSession.getClassesFromDotNetCatalog(reader);
+            if ((cache != null) && (list != null)) {
+              cache.addCatalogCache(dotNetCatalog.get(), list);
+            }
+            LOG.info("Read .Net catalog in {} ms", System.currentTimeMillis() - startTime);
+          } catch (IOException | JsonParseException caught) {
+            LOG.error("Unable to read .Net catalog '" + dotNetCatalog.get() + "'", caught);
+          }
         }
-        LOG.info("Read .Net catalog in {} ms", System.currentTimeMillis() - startTime);
+        if (list != null) {
+          for (ITypeInfo typeInfo : list) {
+            defaultSession.injectClassInfo(typeInfo);
+          }
+        }
       }
 
       if (runtime.getProduct() == SonarProduct.SONARQUBE) {

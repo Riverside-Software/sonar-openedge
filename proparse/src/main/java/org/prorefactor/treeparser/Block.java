@@ -39,28 +39,30 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
  */
 public class Block {
   private final JPNode blockStatementNode;
+  private final Block parentScopeBlock;
+  private final Block parentBlock;
+  // The SymbolScope for a block is going to be the root program scope, unless the block is inside a method
+  // (function/trigger/procedure).
+  private final TreeParserSymbolScope symbolScope;
+
   private List<Frame> frames = new ArrayList<>();
   private Set<BufferScope> bufferScopes = new HashSet<>();
   private Frame defaultFrame = null;
-  private Block parentScopeBlock;
-  private Block parentBlock;
-  // The SymbolScope for a block is going to be the root program scope, unless the block is inside a method
-  // (function/trigger/procedure).
-  private TreeParserSymbolScope symbolScope;
+  private List<Block> children = new ArrayList<>();
 
-  /** For constructing nested blocks */
+  /**
+   * For constructing nested blocks (FOR, DO, REPEAT, CATCH)
+   */
   public Block(Block parent, JPNode node) {
     this.blockStatementNode = node;
     this.parentScopeBlock = parent;
     this.parentBlock = parent;
     this.symbolScope = parent.symbolScope;
+    this.parentBlock.addChild(this);
   }
 
   /**
-   * For constructing a root (method root or program root) block.
-   * 
-   * @param symbolScope
-   * @param node Is the Program_root if this is the program root block.
+   * For constructing a root block (METHOD, PROCEDURE, ON, FUNCTION, root block, trigger, ...)
    */
   public Block(TreeParserSymbolScope symbolScope, JPNode node, Block parentBlock) {
     this.blockStatementNode = node;
@@ -71,6 +73,14 @@ public class Block {
     else
       this.parentScopeBlock = null; // is program-block
     
+  }
+
+  private void addChild(Block block) {
+    this.children.add(block);
+  }
+
+  public List<Block> getChildren() {
+    return children;
   }
 
   /**
