@@ -1640,7 +1640,7 @@ buttonOption:
   ;
 
 defineDatasetStatement:
-    DEFINE defineShare? ( PRIVATE | PROTECTED | STATIC )*
+    DEFINE defineShare? ( PRIVATE | PROTECTED | STATIC | SERIALIZABLE | NONSERIALIZABLE )*
     DATASET identifier
     namespaceUri? namespacePrefix? xmlNodeName? serializeName? xmlNodeType? SERIALIZEHIDDEN?
     REFERENCEONLY?

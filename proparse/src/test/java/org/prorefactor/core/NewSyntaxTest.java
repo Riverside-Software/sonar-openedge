@@ -320,4 +320,10 @@ public class NewSyntaxTest extends AbstractProparseTest {
   public void testShorthandOperators() {
     testNewSyntax("12.3/operators.p");
   }
+
+  @Test
+  public void testSerializable() {
+    testNewSyntax("12.x/SerDS.cls");
+  }
+
 }
