@@ -225,4 +225,10 @@ public class MacroGraphTest extends AbstractProparseTest {
     assertNull(ref.getArgNumber(4));
   }
 
+  @Test
+  public void testIncludeParameter03() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor25.p"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+  }
 }

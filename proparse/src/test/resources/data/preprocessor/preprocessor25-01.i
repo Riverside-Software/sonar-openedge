@@ -1,0 +1,3 @@
+DEFINE VARIABLE xxx AS CHARACTER NO-UNDO.
+
+ASSIGN xxx = {&DefaultValue}.
