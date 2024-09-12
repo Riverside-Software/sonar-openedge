@@ -763,7 +763,7 @@ public class OpenEdgeSettings {
 
       // Tokens may start with special chars
       Optional<String> tokenStartChars = config.get("sonar.oe.proparse.tokenStartChars");
-      if (tokenStartChars.isPresent())
+      if (tokenStartChars.isPresent()) // TODO Split with ,
         ppSettings.setTokenStartChars(tokenStartChars.get().toCharArray());
 
       // Some preprocessor values can be overridden at the project level
