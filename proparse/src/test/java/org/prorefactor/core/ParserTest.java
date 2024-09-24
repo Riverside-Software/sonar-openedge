@@ -123,6 +123,15 @@ public class ParserTest extends AbstractProparseTest {
     assertFalse(stmts.get(2).query(ABLNodeType.ASCENDING).get(0).isAbbreviated());
   }
 
+  @Test
+  public void testDynamicFunction01() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "dynfunc01.cls"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+
+    // TODO Add extra tests to make sure syntax is correctly recognized
+  }
+
   // SQL not recognized anymore
   @Test(enabled = false)
   public void testAscending02() {

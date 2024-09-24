@@ -1898,6 +1898,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitInExpression2(InExpression2Context ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
   public Builder visitInWindowExpression(InWindowExpressionContext ctx) {
     return createTreeFromFirstNode(ctx);
   }

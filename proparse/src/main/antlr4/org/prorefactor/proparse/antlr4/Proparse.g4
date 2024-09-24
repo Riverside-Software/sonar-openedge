@@ -490,7 +490,7 @@ builtinFunction:
   |  CAST LEFTPAREN expression COMMA typeName RIGHTPAREN
   |  currentValueFunction // is also a pseudfn.
   |  dynamicCurrentValueFunction // is also a pseudfn.
-  |  DYNAMICFUNCTION LEFTPAREN expression inExpression? (COMMA parameter)* RIGHTPAREN NOERROR?
+  |  DYNAMICFUNCTION LEFTPAREN expression inExpression2? (COMMA parameter)* RIGHTPAREN NOERROR?
   |  DYNAMICINVOKE
        LEFTPAREN
        ( expression | typeName )
@@ -2559,6 +2559,11 @@ inExpression:
     { support.disallowUnknownMethodCalls(); }
     IN expression
     { support.allowUnknownMethodCalls(); }
+  ;
+
+inExpression2:
+    // Used in DYNAMIC-FUNCTION as the opening bracket is not ambiguous in this case
+    IN expression
   ;
 
 inWindowExpression:
