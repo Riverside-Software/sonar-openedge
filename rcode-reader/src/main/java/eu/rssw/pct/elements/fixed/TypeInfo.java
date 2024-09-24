@@ -71,18 +71,26 @@ public class TypeInfo implements ITypeInfo {
 
   public void addEvent(IEventElement element) {
     events.add(element);
+    if (element.isStatic())
+      this.flags = this.flags | HAS_STATICS;
   }
 
   public void addMethod(IMethodElement element) {
     methods.add(element);
+    if (element.isStatic())
+      this.flags = this.flags | HAS_STATICS;
   }
 
   public void addProperty(IPropertyElement element) {
     properties.add(element);
+    if (element.isStatic())
+      this.flags = this.flags | HAS_STATICS;
   }
 
   public void addVariable(IVariableElement element) {
     variables.add(element);
+    if (element.isStatic())
+      this.flags = this.flags | HAS_STATICS;
   }
 
   @Override

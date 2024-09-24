@@ -20,8 +20,10 @@
 package eu.rssw.pct;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.function.Function;
@@ -102,5 +104,19 @@ public class ITypeInfoTest {
     IMethodElement m2 = typeInfo02.getMethod(name -> map.get(name), "method1", DataType.INT64);
     assertNotNull(m2);
     assertEquals(m2.getReturnType(), DataType.INTEGER);
+  }
+
+
+  @Test
+  public void testStatics() {
+    TypeInfo typeInfo01 = new TypeInfo("rssw.ParentClass", false, false, "Progress.Lang.Object", "");
+    typeInfo01.addMethod(new MethodElement("method1", false, DataType.VOID,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    assertFalse(typeInfo01.hasStatics());
+
+    TypeInfo typeInfo02 = new TypeInfo("rssw.ChildClass", false, false, "Progress.Lang.Object", "");
+    typeInfo02.addMethod(new MethodElement("method1", true, DataType.INTEGER,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INT64)));
+    assertTrue(typeInfo02.hasStatics());
   }
 }
