@@ -28,9 +28,15 @@ import eu.rssw.pct.elements.IVariableElement;
 
 public class VariableElement extends AbstractAccessibleElement implements IVariableElement {
   private final DataType dataType;
+  private final boolean isStatic;
 
   public VariableElement(String name, DataType dataType) {
-    super(name, EnumSet.noneOf(AccessType.class));
+    this(name, false, dataType);
+  }
+
+  public VariableElement(String name, boolean isStatic, DataType dataType) {
+    super(name, EnumSet.of(AccessType.PUBLIC));
+    this.isStatic = isStatic;
     this.dataType = dataType;
   }
 
@@ -69,4 +75,8 @@ public class VariableElement extends AbstractAccessibleElement implements IVaria
     return false;
   }
 
+  @Override
+  public boolean isStatic() {
+    return isStatic;
+  }
 }
