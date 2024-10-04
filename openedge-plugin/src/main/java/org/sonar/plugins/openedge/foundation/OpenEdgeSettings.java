@@ -50,8 +50,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
@@ -916,7 +914,11 @@ public class OpenEdgeSettings {
           desc = DatabaseDescription.deserialize(is, dbName);
         } catch (IOException caught) {
           LOG.error("Unable to deserialize from '" + serFile + "', deleting file", caught);
-          FileUtils.deleteQuietly(serFile);
+          try {
+            java.nio.file.Files.delete(serFile.toPath());
+          } catch (IOException uncaught) {
+            // Nothing
+          }
         }
       } else {
         try {
