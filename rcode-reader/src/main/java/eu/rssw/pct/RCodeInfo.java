@@ -115,50 +115,55 @@ public class RCodeInfo {
    * @throws IOException
    */
   public RCodeInfo(InputStream input, PrintStream out) throws InvalidRCodeException, IOException {
-    processHeader(input, out);
-    processSignatureBlock(input, out);
-    processSegmentTable(input, out);
-    byte[] rcodeBlock = readNBytes(input, rcodeSize);
-
-    if ((version & 0x3FFF) >= 1200) {
-      crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V12, Short.BYTES).order(order).getShort() & 0xFFFF;
-      digest = Base64.getEncoder().encodeToString(
-          Arrays.copyOfRange(rcodeBlock, digestOffset + 16, digestOffset + 16 + 32));
-    } else if ((version & 0x3FFF) >= 1100) {
-      crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V11, Short.BYTES).order(order).getShort() & 0xFFFF;
-      if (digestOffset > 0)
-        digest = bufferToHex(Arrays.copyOfRange(rcodeBlock, digestOffset, digestOffset + 16));
-    } else {
-      crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V10, Short.BYTES).order(order).getShort() & 0xFFFF;
-      if (digestOffset > 0)
-        digest = bufferToHex(Arrays.copyOfRange(rcodeBlock, digestOffset, digestOffset + 16));
+    try {
+      processHeader(input, out);
+      processSignatureBlock(input, out);
+      processSegmentTable(input, out);
+      byte[] rcodeBlock = readNBytes(input, rcodeSize);
+  
+      if ((version & 0x3FFF) >= 1200) {
+        crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V12, Short.BYTES).order(order).getShort() & 0xFFFF;
+        digest = Base64.getEncoder().encodeToString(
+            Arrays.copyOfRange(rcodeBlock, digestOffset + 16, digestOffset + 16 + 32));
+      } else if ((version & 0x3FFF) >= 1100) {
+        crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V11, Short.BYTES).order(order).getShort() & 0xFFFF;
+        if (digestOffset > 0)
+          digest = bufferToHex(Arrays.copyOfRange(rcodeBlock, digestOffset, digestOffset + 16));
+      } else {
+        crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V10, Short.BYTES).order(order).getShort() & 0xFFFF;
+        if (digestOffset > 0)
+          digest = bufferToHex(Arrays.copyOfRange(rcodeBlock, digestOffset, digestOffset + 16));
+      }
+  
+      if ((version & 0x3FFF) >= 1100) {
+        if ((initialValueSegmentOffset >= 0) && (initialValueSegmentSize > 0)) {
+          processInitialValueSegment(Arrays.copyOfRange(rcodeBlock, initialValueSegmentOffset,
+              initialValueSegmentOffset + initialValueSegmentSize), out);
+        }
+        if ((actionSegmentOffset >= 0) && (actionSegmentSize > 0)) {
+          processActionSegment(
+              Arrays.copyOfRange(rcodeBlock, actionSegmentOffset, actionSegmentOffset + actionSegmentSize), out);
+        }
+        if ((ecodeSegmentOffset >= 0) && (ecodeSegmentSize > 0)) {
+          processEcodeSegment(Arrays.copyOfRange(rcodeBlock, ecodeSegmentOffset, ecodeSegmentOffset + ecodeSegmentSize),
+              out);
+        }
+        if ((debugSegmentOffset > 0) && (debugSegmentSize > 0)) {
+          processDebugSegment(Arrays.copyOfRange(rcodeBlock, debugSegmentOffset, debugSegmentOffset + debugSegmentSize),
+              out);
+        }
+      }
+  
+      if (typeBlockSize > 0) {
+        processTypeBlock(readNBytes(input, typeBlockSize), out);
+        isClass = true;
+      }
+  
+      input.close();
+    } catch (IndexOutOfBoundsException caught) {
+      // Prevent RuntimeException from bubbling up
+      throw new InvalidRCodeException(caught);
     }
-
-    if ((version & 0x3FFF) >= 1100) {
-      if ((initialValueSegmentOffset >= 0) && (initialValueSegmentSize > 0)) {
-        processInitialValueSegment(Arrays.copyOfRange(rcodeBlock, initialValueSegmentOffset,
-            initialValueSegmentOffset + initialValueSegmentSize), out);
-      }
-      if ((actionSegmentOffset >= 0) && (actionSegmentSize > 0)) {
-        processActionSegment(
-            Arrays.copyOfRange(rcodeBlock, actionSegmentOffset, actionSegmentOffset + actionSegmentSize), out);
-      }
-      if ((ecodeSegmentOffset >= 0) && (ecodeSegmentSize > 0)) {
-        processEcodeSegment(Arrays.copyOfRange(rcodeBlock, ecodeSegmentOffset, ecodeSegmentOffset + ecodeSegmentSize),
-            out);
-      }
-      if ((debugSegmentOffset > 0) && (debugSegmentSize > 0)) {
-        processDebugSegment(Arrays.copyOfRange(rcodeBlock, debugSegmentOffset, debugSegmentOffset + debugSegmentSize),
-            out);
-      }
-    }
-
-    if (typeBlockSize > 0) {
-      processTypeBlock(readNBytes(input, typeBlockSize), out);
-      isClass = true;
-    }
-
-    input.close();
   }
 
   private final void processHeader(InputStream input, PrintStream out) throws IOException, InvalidRCodeException {

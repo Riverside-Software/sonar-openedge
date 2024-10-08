@@ -91,7 +91,8 @@ public class Block {
     // References do not get added to DO blocks.
     if (blockStatementNode.getNodeType() != ABLNodeType.DO)
       bufferScopes.add(bufferScope);
-    if (parentScopeBlock != null && bufferScope.getSymbol().getScope().getRootBlock() != this) {
+    if ((parentScopeBlock != null) && (bufferScope.getSymbol() != null)
+        && bufferScope.getSymbol().getScope().getRootBlock() != this) {
       parentScopeBlock.addBufferScopeReferences(bufferScope);
     }
   }

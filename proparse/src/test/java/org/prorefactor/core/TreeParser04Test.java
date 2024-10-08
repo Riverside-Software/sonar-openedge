@@ -15,15 +15,15 @@
  ********************************************************************************/
 package org.prorefactor.core;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 
-import org.apache.commons.io.FileUtils;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.TP01FramesTreeLister;
 import org.prorefactor.core.util.UnitTestProparseSettings;
@@ -56,7 +56,7 @@ public class TreeParser04Test extends AbstractProparseTest {
     nodeLister.print(' ');
     writer.close();
 
-    assertTrue(FileUtils.contentEquals(new File(expectName), outFile));
+    assertEquals(Files.readAllBytes(new File(expectName).toPath()), Files.readAllBytes(outFile.toPath()));
   }
 
 }

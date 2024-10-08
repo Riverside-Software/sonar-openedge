@@ -24,6 +24,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -71,6 +72,17 @@ public class RCodeInfoTest {
       Files.createDirectories(Paths.get("target/kryo"));
     } catch (FileAlreadyExistsException caught) {
       // No-op
+    }
+  }
+
+  @Test
+  public void testInvalidRCode() throws IOException {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/Invalid.r"))) {
+      new RCodeInfo(input);
+      fail("Invalid rcode, should have failed");
+    } catch (InvalidRCodeException caught) {
+      if (!(caught.getCause() instanceof IndexOutOfBoundsException))
+        fail("Invalid rcode, expected IOOBException wrapped in InvalidRCodeException");
     }
   }
 
