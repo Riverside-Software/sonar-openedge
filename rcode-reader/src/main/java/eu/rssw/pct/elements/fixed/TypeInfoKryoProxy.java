@@ -47,6 +47,9 @@ public class TypeInfoKryoProxy extends TypeInfoProxy {
       typeInfo = (ITypeInfo) kryo.readClassAndObject(new Input(Files.readAllBytes(path)));
     } catch (IOException caught) {
       typeInfo = new TypeInfo(typeName, false, false, BuiltinClasses.PLO_CLASSNAME, "");
+    } catch (Throwable caught) {
+      
+      typeInfo = new TypeInfo(typeName, false, false, BuiltinClasses.PLO_CLASSNAME, "");
     }
   }
 

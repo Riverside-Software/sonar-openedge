@@ -19,7 +19,6 @@
  */
 package org.sonar.plugins.openedge.sensor;
 
-import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarProduct;
@@ -31,6 +30,7 @@ import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.FilenameUtils;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 
 public class OpenEdgeSensor implements Sensor {
