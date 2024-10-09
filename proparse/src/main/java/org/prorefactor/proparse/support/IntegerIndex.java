@@ -76,7 +76,7 @@ public class IntegerIndex<T> {
    * Returns an array list in order from zero to number of indexes of all the values
    */
   public List<T> getValues() {
-    List<T> list = new ArrayList<T>(nextIndex);
+    List<T> list = new ArrayList<>(nextIndex);
     for (int i = 0; i < nextIndex; ++i) {
       list.add(biMap.get(i));
     }

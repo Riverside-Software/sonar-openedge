@@ -36,7 +36,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 
 public class TokenListTest {
-  private final static String SRC_DIR = "src/test/resources/data/lexer";
+  private static final String SRC_DIR = "src/test/resources/data/lexer";
 
   private RefactorSession session;
 
