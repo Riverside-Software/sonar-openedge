@@ -17,7 +17,6 @@ package org.prorefactor.proparse;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,7 +73,6 @@ public class Lexer implements IPreprocessor {
 
   // Cached include files for current lexer
   private final Map<String, Integer> includeCache = new HashMap<>();
-  private final Map<Integer, String> includeCache2 = new HashMap<>();
   private final LinkedList<IncludeFile> includeVector = new LinkedList<>();
   private IncludeFile currentInclude;
   private InputSource currentInput;
@@ -1831,24 +1829,15 @@ public class Lexer implements IPreprocessor {
         throw new UncheckedIOException(caught);
       }
       includeCache.put(fName, idx);
+    } else {
+      incFile = new File(prepro.getFilename(idx));
     }
 
-    if (includeCache2.get(idx) != null) {
-      try {
-        currentInput = new InputSource(++sourceCounter, fName,
-            ByteSource.wrap(includeCache2.get(idx).getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8, idx,
-            prepro.getProparseSettings().getSkipXCode(), false);
-      } catch (IOException caught) {
-        throw new UncheckedIOException(caught);
-      }
-    } else {
-      try {
-        currentInput = new InputSource(++sourceCounter, incFile, prepro.getCharset(), idx,
-            prepro.getProparseSettings().getSkipXCode(), false);
-        includeCache2.put(idx, currentInput.getContent());
-      } catch (IOException caught) {
-        throw new UncheckedIOException(caught);
-      }
+    try {
+      currentInput = new InputSource(++sourceCounter, incFile, prepro.getCharset(), idx,
+          prepro.getProparseSettings().getSkipXCode(), false);
+    } catch (IOException caught) {
+      throw new UncheckedIOException(caught);
     }
     currentInclude = new IncludeFile(referencedWithName, currentInput);
     includeVector.add(currentInclude);
@@ -1868,7 +1857,6 @@ public class Lexer implements IPreprocessor {
     currentInclude = null;
     currentInput = null;
     includeCache.clear();
-    includeCache2.clear();
   }
 
   /**
