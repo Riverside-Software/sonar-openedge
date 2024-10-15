@@ -43,6 +43,20 @@ public interface IMethodElement extends IAccessibleElement {
       retVal.append(p.getSignature());
     }
     retVal.append(')');
+    if (isAbstract())
+      retVal.append('A');
+    if (isStatic())
+      retVal.append('S');
+    if (isPublic())
+      retVal.append('U');
+    else if (isProtected())
+      retVal.append('T');
+    else if (isPackageProtected())
+      retVal.append("PT");
+    else if (isPrivate())
+      retVal.append('V');
+    else if (isPackagePrivate())
+      retVal.append("PV");
     return retVal.toString();
   }
 
