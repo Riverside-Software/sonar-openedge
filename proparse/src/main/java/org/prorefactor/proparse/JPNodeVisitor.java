@@ -1258,7 +1258,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitDefineEventStatement(DefineEventStatementContext ctx) {
-    return createStatementTreeFromFirstNode(ctx, ABLNodeType.EVENT);
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.EVENT).setBlock(true);
   }
 
   @Override

@@ -57,6 +57,7 @@ public class TreeParserSymbolScope {
 
   final List<Symbol> allSymbols = new ArrayList<>();
   final List<TreeParserSymbolScope> childScopes = new ArrayList<>();
+  final List<Routine> eventRoutines = new ArrayList<>();
   final List<Routine> routineList = new ArrayList<>();
   final Map<String, TableBuffer> bufferMap = new HashMap<>();
   final Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
@@ -106,13 +107,17 @@ public class TreeParserSymbolScope {
    * the *last added* is what will be found.
    */
   private void add(Routine routine) {
-    if (routine.getNodeType() == ABLNodeType.FUNCTION) {
+    if (routine.getNodeType() == ABLNodeType.EVENT) {
+      eventRoutines.add(routine);
+    } else if (routine.getNodeType() == ABLNodeType.FUNCTION) {
       // Only one function per name (existing one is the FORWARDS definition)
       Routine existingRoutine = lookupRoutine(routine.getName());
       if ((existingRoutine != null) && (existingRoutine.getNodeType() == ABLNodeType.FUNCTION))
         routineList.remove(existingRoutine);
+      routineList.add(routine);
+    } else {
+      routineList.add(routine);
     }
-    routineList.add(routine);
   }
 
   /**
@@ -424,6 +429,10 @@ public class TreeParserSymbolScope {
 
   public List<Routine> getRoutines() {
     return new ArrayList<>(routineList);
+  }
+
+  public List<Routine> getEventRoutines() {
+    return new ArrayList<>(eventRoutines);
   }
 
   private Routine lookupRoutine(String name) {

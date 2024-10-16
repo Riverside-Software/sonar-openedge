@@ -923,12 +923,14 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDefineEventStatement(DefineEventStatementContext ctx) {
+    super.enterDefineEventStatement(ctx);
     this.inDefineEvent = true;
     stack.push(defineEvent(support.getNode(ctx), support.getNode(ctx.identifier()), ctx.identifier().getText()));
   }
 
   @Override
   public void exitDefineEventStatement(DefineEventStatementContext ctx) {
+    super.exitDefineEventStatement(ctx);
     this.inDefineEvent = false;
     addToSymbolScope(stack.pop());
   }

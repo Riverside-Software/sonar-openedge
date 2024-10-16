@@ -9,6 +9,7 @@ import org.prorefactor.proparse.antlr4.Proparse.AbstractMethodStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.CanFindFunctionContext;
 import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ConstructorStatementContext;
+import org.prorefactor.proparse.antlr4.Proparse.DefineEventStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.DefinePropertyAccessorGetBlockContext;
 import org.prorefactor.proparse.antlr4.Proparse.DefinePropertyAccessorSetBlockContext;
 import org.prorefactor.proparse.antlr4.Proparse.DestructorStatementContext;
@@ -182,6 +183,21 @@ public abstract class AbstractBlockProparseListener extends ProparseBaseListener
   @Override
   public void exitForStatement(ForStatementContext ctx) {
     currentBlock = currentBlock.getParentBlock();
+  }
+
+  @Override
+  public void enterDefineEventStatement(DefineEventStatementContext ctx) {
+    JPNode blockNode = support.getNode(ctx);
+    currentBlock = blockNode.getBlock();
+    currentScope = currentBlock.getSymbolScope();
+    currentRoutine = currentScope.getRoutine();
+  }
+
+  @Override
+  public void exitDefineEventStatement(DefineEventStatementContext ctx) {
+    currentBlock = currentBlock.getParentBlock();
+    currentScope = currentBlock.getSymbolScope();
+    currentRoutine = currentScope.getRoutine();
   }
 
   @Override
