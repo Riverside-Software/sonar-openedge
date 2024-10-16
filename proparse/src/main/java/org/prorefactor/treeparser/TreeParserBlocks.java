@@ -36,6 +36,7 @@ import org.prorefactor.proparse.antlr4.Proparse.CanFindFunctionContext;
 import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ClassStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ConstructorStatementContext;
+import org.prorefactor.proparse.antlr4.Proparse.DefineEventStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.DefinePropertyAccessorGetBlockContext;
 import org.prorefactor.proparse.antlr4.Proparse.DefinePropertyAccessorSetBlockContext;
 import org.prorefactor.proparse.antlr4.Proparse.DestructorStatementContext;
@@ -177,6 +178,17 @@ public class TreeParserBlocks extends ProparseBaseListener {
   // ********
   // ROUTINES
   // ********
+
+  @Override
+  public void enterDefineEventStatement(DefineEventStatementContext ctx) {
+    newRoutine(ctx, support.getNode(ctx), ctx.n.getText(), ABLNodeType.EVENT);
+  }
+
+  @Override
+  public void exitDefineEventStatement(DefineEventStatementContext ctx) {
+    scopeClose();
+    currentRoutine = rootRoutine;
+  }
 
   @Override
   public void enterDefinePropertyAccessorGetBlock(DefinePropertyAccessorGetBlockContext ctx) {

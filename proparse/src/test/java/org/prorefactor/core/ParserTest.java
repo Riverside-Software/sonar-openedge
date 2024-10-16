@@ -50,7 +50,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class ParserTest extends AbstractProparseTest {
-  private final static String SRC_DIR = "src/test/resources/data/parser";
+  private static final String SRC_DIR = "src/test/resources/data/parser";
 
   private RefactorSession session;
 
@@ -1163,6 +1163,18 @@ public class ParserTest extends AbstractProparseTest {
   public void testIncludeNotFound01() {
     ParseUnit unit = getParseUnit(new File(SRC_DIR, "inc_not_found.p"), session);
     expectThrows(UncheckedIOException.class, () -> unit.treeParser01());
+  }
+
+  @Test
+  public void testEventScope() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "eventScope.cls"), session);
+    unit.treeParser01();
+    assertEquals(unit.getRootScope().getRoutine().getParameters().size(), 0);
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    assertEquals(unit.getRootScope().getEventRoutines().size(), 3);
+    assertEquals(unit.getRootScope().getEventRoutines().get(0).getParameters().size(), 2);
+    assertEquals(unit.getRootScope().getEventRoutines().get(1).getParameters().size(), 2);
+    assertEquals(unit.getRootScope().getEventRoutines().get(2).getParameters().size(), 3);
   }
 
 }
