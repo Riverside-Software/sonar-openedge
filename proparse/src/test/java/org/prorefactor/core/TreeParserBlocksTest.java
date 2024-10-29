@@ -442,4 +442,47 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertTrue(graph1.getEdges().get(5).isEmpty());
     assertTrue(graph1.getEdges().get(6).isEmpty());
   }
+
+  @Test
+  public void executionGraphTest05() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test05.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Routine r0 = unit.getRootScope().getRoutines().get(0);
+    ExecutionGraph graph0 = r0.getExecutionGraph();
+    assertEquals(graph0.getVertices().size(), 9); // 2 IF + 2 DO + FINALLY + 3 MESSAGE + Root
+    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph0.getEdges().get(1), Arrays.asList(2, 4, 7));
+    assertEquals(graph0.getEdges().get(2), Arrays.asList(3));
+    assertTrue(graph0.getEdges().get(3).isEmpty());
+    assertEquals(graph0.getEdges().get(4), Arrays.asList(5));
+    assertEquals(graph0.getEdges().get(5), Arrays.asList(6));
+    assertTrue(graph0.getEdges().get(6).isEmpty());
+    assertEquals(graph0.getEdges().get(7), Arrays.asList(8));
+    assertTrue(graph0.getEdges().get(8).isEmpty());
+  }
+
+  @Test
+  public void executionGraphTest06() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test06.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Routine r0 = unit.getRootScope().getRoutines().get(0);
+    ExecutionGraph graph0 = r0.getExecutionGraph();
+    assertEquals(graph0.getVertices().size(), 5); // 2 IF + 1 DO + 1 MESSAGE + Root
+    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph0.getEdges().get(1), Arrays.asList(2));
+    assertEquals(graph0.getEdges().get(2), Arrays.asList(3));
+    assertEquals(graph0.getEdges().get(3), Arrays.asList(4));
+    assertTrue(graph0.getEdges().get(4).isEmpty());
+  }
+
 }
