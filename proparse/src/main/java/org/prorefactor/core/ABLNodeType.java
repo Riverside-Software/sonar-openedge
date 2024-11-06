@@ -2859,9 +2859,7 @@ public enum ABLNodeType {
   }
 
   static {
-    for (String kw : NON_ENUM_KEYWORDS) {
-      NON_ENUM_KEYWORDS_SET.add(kw);
-    }
+    NON_ENUM_KEYWORDS_SET.addAll(Arrays.asList(NON_ENUM_KEYWORDS));
     for (ABLNodeType e : ABLNodeType.values()) {
       // No duplicates allowed in definition
       if (typeMap.put(e.typeNum, e) != null)
