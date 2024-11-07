@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.prorefactor.core.ABLNodeType;
@@ -1838,13 +1839,29 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
-  public Builder visitFunctionParamStandardTableHandle(FunctionParamStandardTableHandleContext ctx) {
+  public Builder visitFunctionParamStandardTable(FunctionParamStandardTableContext ctx) {
     return visitChildren(ctx).setRuleNode(ctx);
   }
 
   @Override
+  public Builder visitFunctionParamStandardTableHandle(FunctionParamStandardTableHandleContext ctx) {
+    Builder builder = visitChildren(ctx).setRuleNode(ctx);
+    flagSiblingAsRuleNode(builder, ABLNodeType.ID, ctx.hn);
+    return builder;
+  }
+
+  @Override
+  public Builder visitFunctionParamStandardDataset(FunctionParamStandardDatasetContext ctx) {
+    Builder builder = visitChildren(ctx).setRuleNode(ctx);
+    flagSiblingAsRuleNode(builder, ABLNodeType.ID, ctx.identifier());
+    return builder;
+  }
+
+  @Override
   public Builder visitFunctionParamStandardDatasetHandle(FunctionParamStandardDatasetHandleContext ctx) {
-    return visitChildren(ctx).setRuleNode(ctx);
+    Builder builder = visitChildren(ctx).setRuleNode(ctx);
+    flagSiblingAsRuleNode(builder, ABLNodeType.ID, ctx.hn2);
+    return builder;
   }
 
   @Override
@@ -3116,4 +3133,13 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
     return top;
   }
+
+  private void flagSiblingAsRuleNode(Builder tmp, ABLNodeType type, ParseTree ctx) {
+    while (tmp != null) {
+      if (tmp.getNodeType() == type)
+        tmp.setRuleNode(ctx);
+      tmp = tmp.getRight();
+    }
+  }
+
 }

@@ -232,7 +232,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFunctionParamBufferFor(FunctionParamBufferForContext ctx) {
-    Parameter param = new Parameter();
+    Parameter param = new Parameter(support.getNode(ctx));
     param.setDirectionNode(null);
     currentRoutine.addParameter(param);
     wipParameters.addFirst(param);
@@ -254,17 +254,27 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterFunctionParamStandard(FunctionParamStandardContext ctx) {
-    Parameter param = new Parameter();
-    param.setDirectionNode(null);
+    JPNode defNode = getDefinitionNodeFromParam(ctx.functionParamStd());
+    Parameter param = new Parameter(defNode);
     currentRoutine.addParameter(param);
     wipParameters.addFirst(param);
-    if (ctx.qualif == null) {
-      param.setDirectionNode(ABLNodeType.INPUT);
-    } else {
+    if (ctx.qualif != null) {
       param.setDirectionNode(ABLNodeType.getNodeType(ctx.qualif.getType()));
     }
   }
 
+  private JPNode getDefinitionNodeFromParam(FunctionParamStdContext ctx) {
+    if (ctx instanceof FunctionParamStandardTableContext)
+      return support.getNode(((FunctionParamStandardTableContext) ctx).record());
+    else if (ctx instanceof FunctionParamStandardTableHandleContext)
+      return support.getNode(((FunctionParamStandardTableHandleContext) ctx).hn);
+    else if (ctx instanceof FunctionParamStandardDatasetContext)
+      return support.getNode(((FunctionParamStandardDatasetContext) ctx).identifier());
+    else if (ctx instanceof FunctionParamStandardDatasetHandleContext)
+      return support.getNode(((FunctionParamStandardDatasetHandleContext) ctx).hn2);
+    return support.getNode(ctx);
+  }
+  
   @Override
   public void exitFunctionParamStandard(FunctionParamStandardContext ctx) {
     wipParameters.removeFirst();
@@ -984,7 +994,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDefineParameterStatement(DefineParameterStatementContext ctx) {
-    Parameter param = new Parameter();
+    Parameter param = new Parameter(support.getNode(ctx));
     if (ctx.defineParameterStatementSub2() != null) {
       if (ctx.qualif != null)
         param.setDirectionNode(ABLNodeType.getNodeType(ctx.qualif.getType()));

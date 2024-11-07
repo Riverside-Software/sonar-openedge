@@ -7,3 +7,14 @@ end.
 function f1 returns integer (input table for tt1):
 
 end.
+
+define dataset ds1 for tt1.
+function f2 returns integer
+   (i1 as int,
+    i2 like customer.custnum,
+    table tt1,
+    table-handle h1,
+    dataset ds1,
+    dataset-handle h2):
+    
+end function.
