@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.nodetypes.AggregateExpression;
+import org.prorefactor.core.nodetypes.AnnotationStatementNode;
 import org.prorefactor.core.nodetypes.ArrayReferenceNode;
 import org.prorefactor.core.nodetypes.AttributeReferenceNode;
 import org.prorefactor.core.nodetypes.BuiltinFunctionNode;
@@ -1174,6 +1175,9 @@ public class JPNode {
         switch (tok.getNodeType()) {
           case EMPTY_NODE:
             throw new IllegalStateException("Empty node can't generate JPNode");
+          case ANNOTATION:
+            node = new AnnotationStatementNode(tok, up, num, hasChildren);
+            break;
           case RECORD_NAME:
             node = new RecordNameNode(tok, up, num, hasChildren);
             if (tabletype != null) {
