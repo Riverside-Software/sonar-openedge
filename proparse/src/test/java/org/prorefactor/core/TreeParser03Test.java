@@ -306,6 +306,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(r1.getIDESignature(), "foo1(↓INT) : VOID");
     assertEquals(r1.getParameters().size(), 1);
     Parameter p1 = r1.getParameters().get(0);
+    assertEquals(p1.getDefinitionNode().getNodeType(), ABLNodeType.ID);
+    assertEquals(p1.getDefinitionNode().getLine(), 3);
     Symbol s1 = p1.getSymbol();
     assertNotNull(s1);
     assertEquals(s1.getName(), "ipPrm");
@@ -1425,18 +1427,62 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertNotNull(unit.getRootScope());
     Optional<Routine> p1 = unit.getRootScope().getRoutines().stream().filter(r -> "p1".equals(r.getName())).findFirst();
     Optional<Routine> f1 = unit.getRootScope().getRoutines().stream().filter(r -> "f1".equals(r.getName())).findFirst();
+    Optional<Routine> f2 = unit.getRootScope().getRoutines().stream().filter(r -> "f2".equals(r.getName())).findFirst();
     assertTrue(p1.isPresent());
     assertTrue(f1.isPresent());
+    assertTrue(f2.isPresent());
     Parameter prm1 = p1.get().getParameters().get(0);
     assertNotNull(prm1);
+    assertEquals(prm1.getDefinitionNode().getNodeType(), ABLNodeType.DEFINE);
+    assertEquals(prm1.getDefinitionNode().getLine(), 4);
     assertEquals(prm1.getProgressType(), ABLNodeType.TEMPTABLE.getType());
     assertNotNull(prm1.getSymbol());
     assertEquals(prm1.getSymbol().getName(), "tt1");
     Parameter prm2 = f1.get().getParameters().get(0);
     assertNotNull(prm2);
+    assertEquals(prm2.getDefinitionNode().getNodeType(), ABLNodeType.RECORD_NAME);
+    assertEquals(prm2.getDefinitionNode().getLine(), 7);
     assertEquals(prm2.getProgressType(), ABLNodeType.TEMPTABLE.getType());
     assertNotNull(prm2.getSymbol());
     assertEquals(prm2.getSymbol().getName(), "tt1");
+    // All parameters from f2
+    Parameter f2prm1 = f2.get().getParameters().get(0);
+    Parameter f2prm2 = f2.get().getParameters().get(1);
+    Parameter f2prm3 = f2.get().getParameters().get(2);
+    Parameter f2prm4 = f2.get().getParameters().get(3);
+    Parameter f2prm5 = f2.get().getParameters().get(4);
+    Parameter f2prm6 = f2.get().getParameters().get(5);
+    assertNotNull(f2prm1);
+    assertNotNull(f2prm2);
+    assertNotNull(f2prm3);
+    assertNotNull(f2prm4);
+    assertNotNull(f2prm5);
+    assertNotNull(f2prm6);
+    assertNotNull(f2prm1.getDefinitionNode());
+    assertNotNull(f2prm2.getDefinitionNode());
+    assertNotNull(f2prm3.getDefinitionNode());
+    assertNotNull(f2prm4.getDefinitionNode());
+    assertNotNull(f2prm5.getDefinitionNode());
+    assertNotNull(f2prm6.getDefinitionNode());
+    assertEquals(f2prm1.getDefinitionNode().getNodeType(), ABLNodeType.ID);
+    assertEquals(f2prm1.getDefinitionNode().getLine(), 13);
+    assertEquals(f2prm1.getDefinitionNode().getColumn(), 5);
+    assertEquals(f2prm2.getDefinitionNode().getNodeType(), ABLNodeType.ID);
+    assertEquals(f2prm2.getDefinitionNode().getLine(), 14);
+    assertEquals(f2prm2.getDefinitionNode().getColumn(), 5);
+    assertEquals(f2prm3.getDefinitionNode().getNodeType(), ABLNodeType.RECORD_NAME);
+    assertEquals(f2prm3.getDefinitionNode().getLine(), 15);
+    assertEquals(f2prm3.getDefinitionNode().getColumn(), 11);
+    assertEquals(f2prm4.getDefinitionNode().getNodeType(), ABLNodeType.ID);
+    assertEquals(f2prm4.getDefinitionNode().getLine(), 16);
+    assertEquals(f2prm4.getDefinitionNode().getColumn(), 18);
+    assertEquals(f2prm5.getDefinitionNode().getNodeType(), ABLNodeType.ID);
+    assertEquals(f2prm5.getDefinitionNode().getLine(), 17);
+    assertEquals(f2prm5.getDefinitionNode().getColumn(), 13);
+    assertEquals(f2prm6.getDefinitionNode().getNodeType(), ABLNodeType.ID);
+    assertEquals(f2prm6.getDefinitionNode().getLine(), 18);
+    assertEquals(f2prm6.getDefinitionNode().getColumn(), 20);
+
   }
 
   @Test

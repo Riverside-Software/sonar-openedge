@@ -16,21 +16,24 @@
 package org.prorefactor.treeparser;
 
 import org.prorefactor.core.ABLNodeType;
+import org.prorefactor.core.JPNode;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.Variable;
 
 import eu.rssw.pct.elements.PrimitiveDataType;
 
 public class Parameter {
-
-  private boolean bind = false;
+  private final JPNode definitionNode;
   private ABLNodeType progressType = ABLNodeType.VARIABLE;
   private ABLNodeType directionNode = ABLNodeType.INPUT;
   private Symbol symbol;
 
-  /** For a TEMP-TABLE or DATASET, was the BIND keyword used? */
-  public boolean isBind() {
-    return bind;
+  public Parameter(JPNode definitionNode) {
+    this.definitionNode = definitionNode;
+  }
+
+  public JPNode getDefinitionNode() {
+    return definitionNode;
   }
 
   /** The node of (BUFFER|INPUT|OUTPUT|INPUTOUTPUT|RETURN). */
@@ -52,11 +55,6 @@ public class Parameter {
    */
   public Symbol getSymbol() {
     return symbol;
-  }
-
-  /** FIXME Lost in migration ? :-) */
-  public void setBind(boolean bind) {
-    this.bind = bind;
   }
 
   /** Set by TreeParserVariableDefinition */

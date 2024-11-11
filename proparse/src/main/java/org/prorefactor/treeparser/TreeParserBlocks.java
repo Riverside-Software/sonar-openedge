@@ -26,6 +26,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.nodetypes.AnnotationStatementNode;
 import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IStatementBlock;
 import org.prorefactor.core.nodetypes.IfStatementNode;
@@ -36,6 +37,7 @@ import org.prorefactor.proparse.antlr4.Proparse.CanFindFunctionContext;
 import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ClassStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.ConstructorStatementContext;
+import org.prorefactor.proparse.antlr4.Proparse.DefineEventStatementContext;
 import org.prorefactor.proparse.antlr4.Proparse.DefinePropertyAccessorGetBlockContext;
 import org.prorefactor.proparse.antlr4.Proparse.DefinePropertyAccessorSetBlockContext;
 import org.prorefactor.proparse.antlr4.Proparse.DestructorStatementContext;
@@ -177,6 +179,17 @@ public class TreeParserBlocks extends ProparseBaseListener {
   // ********
   // ROUTINES
   // ********
+
+  @Override
+  public void enterDefineEventStatement(DefineEventStatementContext ctx) {
+    newRoutine(ctx, support.getNode(ctx), ctx.n.getText(), ABLNodeType.EVENT);
+  }
+
+  @Override
+  public void exitDefineEventStatement(DefineEventStatementContext ctx) {
+    scopeClose();
+    currentRoutine = rootRoutine;
+  }
 
   @Override
   public void enterDefinePropertyAccessorGetBlock(DefinePropertyAccessorGetBlockContext ctx) {
@@ -656,15 +669,28 @@ public class TreeParserBlocks extends ProparseBaseListener {
     node.setInBlock(currentBlock);
 
     // Assign annotations to statement
-    IStatement prev = node.getPreviousStatement();
-    while ((prev != null) && (prev.asJPNode().getNodeType() == ABLNodeType.ANNOTATION)) {
-      String text = prev.asJPNode().getText();
-      if (prev.asJPNode().getNumberOfChildren() > 1) {
-        text += prev.asJPNode().getFirstChild().getText();
-      }
-      node.addAnnotation(text);
-      prev = prev.getPreviousStatement();
+    if (node.asJPNode().getNodeType() != ABLNodeType.ANNOTATION) {
+      attachAnnotations(node);
     }
   }
 
+  // Iterate over annotations before this statement
+  private void attachAnnotations(IStatement node) {
+    IStatement prev = node.getPreviousStatement();
+    while (prev instanceof AnnotationStatementNode) {
+      node.addAnnotation((AnnotationStatementNode) prev);
+      // If annotation was the first statement of the block, then re-attach to current node
+      if (prev.getParentStatement().getFirstStatement() == prev) {
+        prev.getParentStatement().setFirstStatement(node);
+      }
+      // Change previous statement of current node to the one before the annotation
+      node.setPreviousStatement(prev.getPreviousStatement());
+      // Then change next node of previous node
+      if (prev.getPreviousStatement() != null)
+        prev.getPreviousStatement().setNextStatement(node);
+
+      // Continue iteration over annotations
+      prev = node.getPreviousStatement();
+    }
+  }
 }

@@ -744,14 +744,14 @@ public class OpenEdgeSettings {
       if (cache != null) {
         sch = cache.getSchemaCache(fileSystem.baseDir().toString());
         if (sch != null) {
-          LOG.info("Reusing database schema from cache for project {}",fileSystem.baseDir().toString());
+          LOG.info("Reusing database schema from cache for project {}",fileSystem.baseDir());
         }
       }
       if (sch == null) {
        sch = readSchema(config.get(Constants.DATABASES).orElse(""),
           config.get(Constants.ALIASES).orElse(""));
        if (cache != null) {
-         LOG.info("Cache database schema for project {}", fileSystem.baseDir().toString());
+         LOG.info("Cache database schema for project {}", fileSystem.baseDir());
          cache.addSchemaCache(fileSystem.baseDir().toString(), sch);
        }
       }

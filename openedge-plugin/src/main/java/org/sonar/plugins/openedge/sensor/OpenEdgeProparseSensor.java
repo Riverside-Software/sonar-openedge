@@ -398,17 +398,17 @@ public class OpenEdgeProparseSensor implements Sensor {
       generateProparseDebugFile(file, unit);
     }
 
-    try {
-      for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
+    for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
+      try {
         LOG.debug("ActiveRule - Internal key {} - Repository {} - Rule {}", entry.getKey().internalKey(),
             entry.getKey().ruleKey().repository(), entry.getKey().ruleKey().rule());
         startTime = System.currentTimeMillis();
         entry.getValue().sensorExecute(file, unit);
         ruleTime.put(entry.getKey().ruleKey().toString(),
             ruleTime.get(entry.getKey().ruleKey().toString()) + System.currentTimeMillis() - startTime);
+      } catch (RuntimeException caught) {
+        LOG.error("Error during rule execution for " + file, caught);
       }
-    } catch (RuntimeException caught) {
-      LOG.error("Error during rule execution for " + file, caught);
     }
   }
 

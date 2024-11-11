@@ -36,7 +36,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 
 public class TokenListTest {
-  private final static String SRC_DIR = "src/test/resources/data/lexer";
+  private static final String SRC_DIR = "src/test/resources/data/lexer";
 
   private RefactorSession session;
 
@@ -296,7 +296,9 @@ public class TokenListTest {
       assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.ID);
       assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
       assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
-      assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.NAME);
+      ProToken tok1bis = ((ProToken) src.nextToken());
+      assertEquals(tok1bis.getNodeType(), ABLNodeType.ID);
+      assertEquals(tok1bis.getText(), "name");
       assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.PERIOD);
       assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
       // Third line: comment after period results in NAMEDOT

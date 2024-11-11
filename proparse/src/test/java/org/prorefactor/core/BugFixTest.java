@@ -51,8 +51,8 @@ import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
  * change, so no other tests should be added other than the expectation that they parse clean.
  */
 public class BugFixTest extends AbstractProparseTest {
-  private final static String SRC_DIR = "src/test/resources/data/bugsfixed";
-  private final static String TEMP_DIR = "target/nodes-lister/data/bugsfixed";
+  private static final String SRC_DIR = "src/test/resources/data/bugsfixed";
+  private static final String TEMP_DIR = "target/nodes-lister/data/bugsfixed";
 
   private RefactorSession session;
   private File tempDir = new File(TEMP_DIR);

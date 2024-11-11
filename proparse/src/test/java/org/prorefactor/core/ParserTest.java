@@ -19,9 +19,11 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.expectThrows;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +50,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class ParserTest extends AbstractProparseTest {
-  private final static String SRC_DIR = "src/test/resources/data/parser";
+  private static final String SRC_DIR = "src/test/resources/data/parser";
 
   private RefactorSession session;
 
@@ -119,6 +121,15 @@ public class ParserTest extends AbstractProparseTest {
     assertTrue(stmts.get(0).query(ABLNodeType.ASCENDING).get(0).isAbbreviated());
     assertTrue(stmts.get(1).query(ABLNodeType.ASCENDING).get(0).isAbbreviated());
     assertFalse(stmts.get(2).query(ABLNodeType.ASCENDING).get(0).isAbbreviated());
+  }
+
+  @Test
+  public void testDynamicFunction01() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "dynfunc01.cls"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+
+    // TODO Add extra tests to make sure syntax is correctly recognized
   }
 
   // SQL not recognized anymore
@@ -1106,6 +1117,64 @@ public class ParserTest extends AbstractProparseTest {
     assertNotNull(field1.getSymbol());
     assertEquals(field1.getSymbol().getName(), "Address");
     assertNull(field2.getSymbol());
+  }
+
+  @Test
+  public void testMultipleIncludes01() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "multi_inc_01.p"), session);
+    unit.treeParser01();
+
+    List<JPNode> list = unit.getTopNode().queryStateHead(ABLNodeType.PROCEDURE);
+    assertEquals(list.size(), 3);
+    assertEquals(list.get(0).getFileIndex(), 1);
+    assertEquals(list.get(1).getFileIndex(), 1);
+    assertEquals(list.get(2).getFileIndex(), 1);
+    assertEquals(list.get(0).getLine(), 2);
+    assertEquals(list.get(1).getLine(), 8);
+    assertEquals(list.get(2).getLine(), 14);
+
+    List<String> includes = unit.getIncludeFilesList();
+    assertEquals(includes.size(), 2);
+    assertEquals(includes.get(0).replace('\\', '/'), SRC_DIR + "/multi_inc_01.p");
+    assertTrue(includes.get(1).replace('\\', '/').endsWith(SRC_DIR + "/multi_inc_01.i"));
+  }
+
+  @Test
+  public void testMultipleIncludes02() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "multi_inc_02.p"), session);
+    unit.treeParser01();
+
+    List<JPNode> list = unit.getTopNode().queryStateHead(ABLNodeType.PROCEDURE);
+    assertEquals(list.size(), 3);
+    assertEquals(list.get(0).getFileIndex(), 1);
+    assertEquals(list.get(1).getFileIndex(), 1);
+    assertEquals(list.get(2).getFileIndex(), 1);
+    assertEquals(list.get(0).getLine(), 2);
+    assertEquals(list.get(1).getLine(), 8);
+    assertEquals(list.get(2).getLine(), 14);
+
+    List<String> includes = unit.getIncludeFilesList();
+    assertEquals(includes.size(), 2);
+    assertEquals(includes.get(0).replace('\\', '/'), SRC_DIR + "/multi_inc_02.p");
+    assertTrue(includes.get(1).replace('\\', '/').endsWith(SRC_DIR + "/multi_inc_01.i"));
+  }
+
+  @Test
+  public void testIncludeNotFound01() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "inc_not_found.p"), session);
+    expectThrows(UncheckedIOException.class, () -> unit.treeParser01());
+  }
+
+  @Test
+  public void testEventScope() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "eventScope.cls"), session);
+    unit.treeParser01();
+    assertEquals(unit.getRootScope().getRoutine().getParameters().size(), 0);
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    assertEquals(unit.getRootScope().getEventRoutines().size(), 3);
+    assertEquals(unit.getRootScope().getEventRoutines().get(0).getParameters().size(), 2);
+    assertEquals(unit.getRootScope().getEventRoutines().get(1).getParameters().size(), 2);
+    assertEquals(unit.getRootScope().getEventRoutines().get(2).getParameters().size(), 3);
   }
 
 }

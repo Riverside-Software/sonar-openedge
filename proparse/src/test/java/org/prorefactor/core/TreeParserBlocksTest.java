@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.prorefactor.core.nodetypes.IStatement;
+import org.prorefactor.core.nodetypes.IStatementBlock;
 import org.prorefactor.core.nodetypes.IfStatementNode;
 import org.prorefactor.core.nodetypes.StatementBlockNode;
 import org.prorefactor.core.util.SportsSchema;
@@ -85,16 +86,17 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
     assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(currStmt.asJPNode().getLine(), 5);
+    assertEquals(currStmt.asJPNode().getLine(), 6);
     assertEquals(currStmt.getParentStatement(), unit.getTopNode());
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
+    assertEquals(currStmt.getAnnotations().size(), 2);
     assertNotNull(currStmt.getNextStatement());
 
     prevStmt = currStmt;
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
     assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(currStmt.asJPNode().getLine(), 6);
+    assertEquals(currStmt.asJPNode().getLine(), 7);
     assertEquals(currStmt.getParentStatement(), unit.getTopNode());
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
     assertNotNull(currStmt.getNextStatement());
@@ -103,7 +105,7 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
     assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.PROCEDURE);
-    assertEquals(currStmt.asJPNode().getLine(), 8);
+    assertEquals(currStmt.asJPNode().getLine(), 9);
     assertEquals(currStmt.getParentStatement(), unit.getTopNode());
     assertTrue(currStmt.asJPNode().isIStatementBlock());
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
@@ -112,7 +114,7 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     IStatement currSubStmt = currStmt.asJPNode().asIStatementBlock().getFirstStatement();
     assertNotNull(currSubStmt);
     assertEquals(currSubStmt.asJPNode().getNodeType(), ABLNodeType.DISPLAY);
-    assertEquals(currSubStmt.asJPNode().getLine(), 9);
+    assertEquals(currSubStmt.asJPNode().getLine(), 10);
     assertEquals(currSubStmt.getParentStatement(), currStmt);
     assertNull(currSubStmt.getPreviousStatement());
     assertNotNull(currSubStmt.getNextStatement());
@@ -121,7 +123,7 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     currSubStmt = currSubStmt.getNextStatement();
     assertNotNull(currSubStmt);
     assertEquals(currSubStmt.asJPNode().getNodeType(), ABLNodeType.DISPLAY);
-    assertEquals(currSubStmt.asJPNode().getLine(), 10);
+    assertEquals(currSubStmt.asJPNode().getLine(), 11);
     assertEquals(currSubStmt.getParentStatement(), currStmt);
     assertEquals(currSubStmt.getPreviousStatement(), prevSubStmt);
     assertNull(currSubStmt.getNextStatement());
@@ -130,7 +132,17 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     currStmt = currStmt.getNextStatement();
     assertNotNull(currStmt);
     assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
-    assertEquals(currStmt.asJPNode().getLine(), 13);
+    assertEquals(currStmt.asJPNode().getLine(), 14);
+    assertEquals(currStmt.getParentStatement(), unit.getTopNode());
+    assertEquals(currStmt.getPreviousStatement(), prevStmt);
+    assertNotNull(currStmt.getNextStatement());
+
+    // Last annotation can't be attached
+    prevStmt = currStmt;
+    currStmt = currStmt.getNextStatement();
+    assertNotNull(currStmt);
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.ANNOTATION);
+    assertEquals(currStmt.asJPNode().getLine(), 15);
     assertEquals(currStmt.getParentStatement(), unit.getTopNode());
     assertEquals(currStmt.getPreviousStatement(), prevStmt);
     assertNull(currStmt.getNextStatement());
@@ -366,7 +378,7 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
     Routine r0 = unit.getRootScope().getRoutines().get(0);
     ExecutionGraph graph0 = r0.getExecutionGraph();
-    assertEquals(graph0.getVertices().size(), 7); // 6 statements + RootNode
+    assertEquals(graph0.getVertices().size(), 8); // 7 statements + RootNode
     assertEquals(graph0.getVertices().get(0).getNodeType(), ABLNodeType.PROGRAM_ROOT);
     // Very simple flow
     assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
@@ -375,7 +387,8 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertEquals(graph0.getEdges().get(3), Arrays.asList(4));
     assertEquals(graph0.getEdges().get(4), Arrays.asList(5));
     assertEquals(graph0.getEdges().get(5), Arrays.asList(6));
-    assertTrue(graph0.getEdges().get(6).isEmpty());
+    assertEquals(graph0.getEdges().get(6), Arrays.asList(7));
+    assertTrue(graph0.getEdges().get(7).isEmpty());
 
     Routine r1 = unit.getRootScope().getRoutines().get(1);
     ExecutionGraph graph1 = r1.getExecutionGraph();
@@ -442,4 +455,99 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertTrue(graph1.getEdges().get(5).isEmpty());
     assertTrue(graph1.getEdges().get(6).isEmpty());
   }
+
+  @Test
+  public void executionGraphTest05() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test05.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Routine r0 = unit.getRootScope().getRoutines().get(0);
+    ExecutionGraph graph0 = r0.getExecutionGraph();
+    assertEquals(graph0.getVertices().size(), 9); // 2 IF + 2 DO + FINALLY + 3 MESSAGE + Root
+    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph0.getEdges().get(1), Arrays.asList(2, 4, 7));
+    assertEquals(graph0.getEdges().get(2), Arrays.asList(3));
+    assertTrue(graph0.getEdges().get(3).isEmpty());
+    assertEquals(graph0.getEdges().get(4), Arrays.asList(5));
+    assertEquals(graph0.getEdges().get(5), Arrays.asList(6));
+    assertTrue(graph0.getEdges().get(6).isEmpty());
+    assertEquals(graph0.getEdges().get(7), Arrays.asList(8));
+    assertTrue(graph0.getEdges().get(8).isEmpty());
+  }
+
+  @Test
+  public void executionGraphTest06() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test06.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Routine r0 = unit.getRootScope().getRoutines().get(0);
+    ExecutionGraph graph0 = r0.getExecutionGraph();
+    assertEquals(graph0.getVertices().size(), 5); // 2 IF + 1 DO + 1 MESSAGE + Root
+    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
+    assertEquals(graph0.getEdges().get(1), Arrays.asList(2));
+    assertEquals(graph0.getEdges().get(2), Arrays.asList(3));
+    assertEquals(graph0.getEdges().get(3), Arrays.asList(4));
+    assertTrue(graph0.getEdges().get(4).isEmpty());
+  }
+
+  @Test
+  public void test05() {
+    // Only annotations
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test07.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    IStatement currStmt = unit.getTopNode().getFirstStatement();
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.ANNOTATION);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.ANNOTATION);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.ANNOTATION);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.ANNOTATION);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.ANNOTATION);
+    currStmt = currStmt.getNextStatement();
+    assertNull(currStmt);
+  }
+
+  @Test
+  public void test06() {
+    // Only annotations
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test08.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    Routine p1 = unit.getRootScope().getRoutines().get(1);
+    assertEquals(p1.getName(), "p1");
+    ExecutionGraph g1 = p1.getExecutionGraph();
+    assertEquals(g1.getVertices().size(), 4); // The last 2 annotations are still there
+    IStatement currStmt = p1.getExecutionGraph().getVertices().get(0).asIStatement();
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.PROCEDURE);
+    assertTrue(currStmt.asJPNode().isIStatementBlock());
+    currStmt = ((IStatementBlock) currStmt).getFirstStatement();
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.MESSAGE);
+    assertEquals(currStmt.getAnnotations().size(), 2);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.ANNOTATION);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.asJPNode().getNodeType(), ABLNodeType.ANNOTATION);
+    currStmt = currStmt.getNextStatement();
+    assertNull(currStmt);
+  }
+
 }

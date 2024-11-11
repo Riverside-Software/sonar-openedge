@@ -53,9 +53,14 @@ public interface IStatement {
   IStatementBlock getParentStatement();
 
   /**
-   * @return Annotation list of current statement
+   * @return Text of annotations attached to the current statement
    */
   List<String> getAnnotations();
+
+  /**
+   * @return Annotation statements attached to the current statement
+   */
+  List<AnnotationStatementNode> getAnnotationStatements();
 
   Block getEnclosingBlock();
 
@@ -67,7 +72,7 @@ public interface IStatement {
 
   void setParentStatement(IStatementBlock statement);
 
-  void addAnnotation(String annotation);
+  void addAnnotation(AnnotationStatementNode annotation);
 
   JPNode asJPNode();
 }

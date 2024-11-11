@@ -238,6 +238,13 @@ public class ParseUnit {
     return metrics;
   }
 
+  public List<String> getIncludeFilesList() {
+    if (fileNameList == null)
+      return new ArrayList<>();
+
+    return fileNameList.getValues();
+  }
+
   public String getIncludeFileName(int index) {
     if (fileNameList == null)
       return "";

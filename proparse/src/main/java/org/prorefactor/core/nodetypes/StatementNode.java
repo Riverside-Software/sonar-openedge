@@ -16,6 +16,7 @@ package org.prorefactor.core.nodetypes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
@@ -26,7 +27,7 @@ public class StatementNode extends JPNode implements IStatement {
   private IStatement previousStatement;
   private IStatement nextStatement;
   private IStatementBlock parentStatement;
-  private List<String> annotations;
+  private List<AnnotationStatementNode> annotations;
   private ABLNodeType state2;
   private Block inBlock;
 
@@ -101,11 +102,18 @@ public class StatementNode extends JPNode implements IStatement {
 
   @Override
   public List<String> getAnnotations() {
+    return annotations.stream() //
+      .map(AnnotationStatementNode::getAnnotationText) //
+      .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<AnnotationStatementNode> getAnnotationStatements() {
     return annotations;
   }
 
   @Override
-  public void addAnnotation(String annotation) {
+  public void addAnnotation(AnnotationStatementNode annotation) {
     if (annotations == null)
       annotations = new ArrayList<>();
     annotations.add(annotation);
@@ -124,7 +132,10 @@ public class StatementNode extends JPNode implements IStatement {
   private boolean currNodeHasAnnotation(String str) {
     if (annotations == null)
       return false;
-    return annotations.stream().anyMatch(it -> it.equals(str) || it.startsWith(str + '('));
+    if (str == null)
+      return false;
+    return annotations.stream().anyMatch(
+        it -> it.getAnnotationText().equals(str) || it.getAnnotationText().startsWith(str + '('));
   }
 
   @Override

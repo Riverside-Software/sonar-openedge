@@ -198,7 +198,9 @@ public class Routine extends Symbol {
   private void addVertices(ExecutionGraph graph, IfStatementNode ifNode) {
     graph.addVertex(ifNode.asJPNode());
 
-    if (ifNode.getThenBlockOrNode() instanceof IStatementBlock) {
+    if (ifNode.getThenBlockOrNode() instanceof IfStatementNode)
+      addVertices(graph, (IfStatementNode) ifNode.getThenBlockOrNode());
+    else if (ifNode.getThenBlockOrNode() instanceof IStatementBlock) {
       addVerticesAndEdges(graph, (IStatementBlock) ifNode.getThenBlockOrNode());
     } else {
       graph.addVertex(ifNode.getThenBlockOrNode().asJPNode());
@@ -206,7 +208,9 @@ public class Routine extends Symbol {
     graph.addEdge(ifNode.asJPNode(), ifNode.getThenBlockOrNode().asJPNode());
 
     if (ifNode.getElseBlockOrNode() != null) {
-      if (ifNode.getElseBlockOrNode() instanceof IStatementBlock)
+      if (ifNode.getElseBlockOrNode() instanceof IfStatementNode)
+        addVertices(graph, (IfStatementNode) ifNode.getElseBlockOrNode());
+      else if (ifNode.getElseBlockOrNode() instanceof IStatementBlock)
         addVerticesAndEdges(graph, (IStatementBlock) ifNode.getElseBlockOrNode());
       else if (ifNode.getElseBlockOrNode() instanceof IStatement)
         graph.addVertex(ifNode.getElseBlockOrNode().asJPNode());

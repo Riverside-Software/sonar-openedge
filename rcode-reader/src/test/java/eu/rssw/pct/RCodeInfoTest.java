@@ -491,7 +491,7 @@ public class RCodeInfoTest {
 
   @Test
   public void testElementsV11() throws IOException {
-    testElements("src/test/resources/rcode/TestClassElementsV11.r", 56984, "BBA93318F0B81F7840FA3D45FFE40A35");
+    testElements("src/test/resources/rcode/TestClassElementsV11.r", 7362, "FD68B3A75111510B3DD219BAD820CB0C");
     testElements2("src/test/resources/rcode/TestClassElementsChV11.r", 32156, "7945FD8804C9E910211A5E37708143D5");
     testElements3(Paths.get("src/test/resources/rcode/TestClassElementsV11.r"));
     testElements3(Paths.get("src/test/resources/rcode/TestClassElementsChV11.r"));
@@ -499,8 +499,8 @@ public class RCodeInfoTest {
 
   @Test
   public void testElementsV12() throws IOException {
-    testElements("src/test/resources/rcode/TestClassElementsV12.r", 56984,
-        "z0duspqsS+drLa5kEcDQrePMMTqRU6WNHqf7Rq/t6Ao=");
+    testElements("src/test/resources/rcode/TestClassElementsV12.r", 61154,
+        "HQ6EkpNyOcWsMwdls8AwASGA8ubkdv6rLXwp4tkVHYE=");
     testElements2("src/test/resources/rcode/TestClassElementsChV12.r", 32156,
         "JIg2azB7KXRZrAfnG2zFYlMiYuqdOCd+LO1MHgr9egg=");
     testElements3(Paths.get("src/test/resources/rcode/TestClassElementsV12.r"));
@@ -571,7 +571,7 @@ public class RCodeInfoTest {
           testMethod = elem;
       }
       assertNotNull(testMethod);
-      assertEquals(testMethod.getSignature(), "testMethod(IT,OD,II[])");
+      assertEquals(testMethod.getSignature(), "testMethod(IT,OD,II[])U");
       assertEquals(testMethod.getIDESignature(), "testMethod(↑TBL tt1, ↓DS ds1, ↑INT[] xx)");
       assertEquals(testMethod.getExtent(), -32767);
       assertEquals(testMethod.getParameters().length, 3);
@@ -599,9 +599,11 @@ public class RCodeInfoTest {
       assertNotNull(testMethod22);
       assertEquals(testMethod21.getParameters()[0].getExtent(), 0);
       assertEquals(testMethod22.getParameters()[0].getExtent(), -32767);
-      assertEquals(testMethod21.getSignature(), "testMethod2(II)");
+      assertEquals(testMethod21.getSignature(), "testMethod2(II)ST");
       assertEquals(testMethod21.getIDESignature(), "testMethod2(↑INT xx)");
-      assertEquals(testMethod22.getSignature(), "testMethod2(II[])");
+      boolean b1 = "testMethod2(II[])PT".equals(testMethod22.getSignature()); 
+      boolean b2 = "testMethod2(II[])T".equals(testMethod22.getSignature());
+      assertTrue(b1 | b2);
       assertEquals(testMethod22.getIDESignature(), "testMethod2(↑INT[] xx)");
       assertEquals(testMethod21.getReturnType().getPrimitive(), PrimitiveDataType.INTEGER);
       assertNull(testMethod21.getReturnType().getClassName());
@@ -614,7 +616,9 @@ public class RCodeInfoTest {
           testMethod3 = elem;
       }
       assertNotNull(testMethod3);
-      assertEquals(testMethod3.getSignature(), "testMethod3(ITH,MDH)");
+      b1 = "testMethod3(ITH,MDH)PV".equals(testMethod3.getSignature()); 
+      b2 = "testMethod3(ITH,MDH)V".equals(testMethod3.getSignature());
+      assertTrue(b1 | b2);
       assertEquals(testMethod3.getIDESignature(), "testMethod3(↑TBL-HDL htt1, ⇅DS-HDL hds1)");
       assertNotNull(testMethod3.getParameters());
       assertEquals(testMethod3.getParameters().length, 2);
@@ -634,7 +638,7 @@ public class RCodeInfoTest {
       }
       assertNotNull(testMethod4);
       assertEquals(testMethod4.getSignature(),
-          "testMethod4(IC,MZProgress.Lang.Object,OD,IDT,IDTZ,ODE,IH,I64,IB,ILC,OM,IRAW,IREC,IROW)");
+          "testMethod4(IC,MZProgress.Lang.Object,OD,IDT,IDTZ,ODE,IH,I64,IB,ILC,OM,IRAW,IREC,IROW)V");
       assertEquals(testMethod4.getIDESignature(),
           "testMethod4(↑CHAR x1, ⇅Progress.Lang.Object x2, ↓DT x3, ↑DTM x4, ↑DTMZ x5, ↓DEC x6, ↑HDL x7, ↑INT64 x8, ↑LOG x9, ↑CLOB x10, ↓MEMPTR x11, ↑RAW x12, ↑RECID x13, ↑ROWID x14)");
       assertEquals(testMethod4.getIDEInsertElement(false),
