@@ -102,6 +102,8 @@ public class StatementNode extends JPNode implements IStatement {
 
   @Override
   public List<String> getAnnotations() {
+    if (annotations == null)
+      return new ArrayList<>();
     return annotations.stream() //
       .map(AnnotationStatementNode::getAnnotationText) //
       .collect(Collectors.toList());
