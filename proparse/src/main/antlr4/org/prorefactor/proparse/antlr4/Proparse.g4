@@ -660,7 +660,7 @@ expressionTerm2:
 
 widName:
     systemHandleName
-  | DATASET identifier
+  | DATASET datasetIdentifier
   | DATASOURCE identifier
   | FIELD fieldExpr
   | FRAME identifier
@@ -669,8 +669,8 @@ widName:
   | MENUITEM identifier
   | BROWSE identifier
   | QUERY identifier
-  | TEMPTABLE identifier
-  | BUFFER identifier
+  | TEMPTABLE tempTableIdentifier
+  | BUFFER bufferIdentifier
   | XDOCUMENT identifier
   | XNODEREF identifier
   | SOCKET identifier
@@ -753,6 +753,18 @@ streamname:
   ;
 
 widgetname:
+    identifier
+  ;
+
+bufferIdentifier:
+    identifier
+  ;
+
+tempTableIdentifier:
+    identifier
+  ;
+
+datasetIdentifier:
     identifier
   ;
 
