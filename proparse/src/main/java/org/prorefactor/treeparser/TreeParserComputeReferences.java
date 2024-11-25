@@ -86,8 +86,13 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
   @Override
   public void enterWidName(WidNameContext ctx) {
-    if ((ctx.BUFFER() != null) || (ctx.TEMPTABLE() != null)) {
-      TableBuffer tableBuffer = currentScope.lookupBuffer(ctx.identifier().getText());
+    if (ctx.BUFFER() != null) {
+      TableBuffer tableBuffer = currentScope.lookupBuffer(ctx.bufferIdentifier().getText());
+      if (tableBuffer != null) {
+        tableBuffer.noteReference(support.getNode(ctx), ContextQualifier.SYMBOL);
+      }
+    } else if (ctx.TEMPTABLE() != null) {
+      TableBuffer tableBuffer = currentScope.lookupBuffer(ctx.tempTableIdentifier().getText());
       if (tableBuffer != null) {
         tableBuffer.noteReference(support.getNode(ctx), ContextQualifier.SYMBOL);
       }

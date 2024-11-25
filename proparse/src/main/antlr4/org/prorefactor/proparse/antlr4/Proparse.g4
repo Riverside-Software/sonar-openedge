@@ -660,20 +660,20 @@ expressionTerm2:
 
 widName:
     systemHandleName
-  | DATASET identifier
-  | DATASOURCE identifier
+  | DATASET datasetIdentifier
+  | DATASOURCE dataSourceIdentifier
   | FIELD fieldExpr
-  | FRAME identifier
-  | MENU identifier
-  | SUBMENU identifier
-  | MENUITEM identifier
-  | BROWSE identifier
-  | QUERY identifier
-  | TEMPTABLE identifier
-  | BUFFER identifier
-  | XDOCUMENT identifier
-  | XNODEREF identifier
-  | SOCKET identifier
+  | FRAME frameIdentifier
+  | MENU menuIdentifier
+  | SUBMENU subMenuIdentifier
+  | MENUITEM menuItemIdentifier
+  | BROWSE browseIdentifier
+  | QUERY queryIdentifier
+  | TEMPTABLE tempTableIdentifier
+  | BUFFER bufferIdentifier
+  | XDOCUMENT xDocIdentifier
+  | XNODEREF xNodeRefIdentifier
+  | SOCKET socketIdentifier
   | STREAM streamname
   ;
 
@@ -756,7 +756,55 @@ widgetname:
     identifier
   ;
 
+bufferIdentifier:
+    identifier
+  ;
+
+datasetIdentifier:
+    identifier
+  ;
+
+dataSourceIdentifier:
+    identifier
+  ;
+
+frameIdentifier:
+    identifier
+  ;
+
+menuIdentifier:
+    identifier
+  ;
+
+menuItemIdentifier:
+    identifier
+  ;
+
+subMenuIdentifier:
+    identifier
+  ;
+
+browseIdentifier:
+    identifier
+  ;
+
 queryIdentifier:
+    identifier
+  ;
+
+tempTableIdentifier:
+    identifier
+  ;
+
+xDocIdentifier:
+    identifier
+  ;
+
+xNodeRefIdentifier:
+    identifier
+  ;
+
+socketIdentifier:
     identifier
   ;
 
