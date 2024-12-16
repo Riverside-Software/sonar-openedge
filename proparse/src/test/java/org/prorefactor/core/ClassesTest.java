@@ -151,15 +151,23 @@ public class ClassesTest extends AbstractProparseTest {
     Variable prop1 = unit.getRootScope().getVariable("prop1");
     Variable prop2 = unit.getRootScope().getVariable("prop2");
     Variable var1 = unit.getRootScope().getVariable("var1");
+    Variable var2 = unit.getRootScope().getVariable("var2");
+    Variable var3 = unit.getRootScope().getVariable("var3");
     assertNotNull(prop1);
     assertNotNull(prop2);
     assertNotNull(var1);
+    assertNotNull(var2);
+    assertNotNull(var3);
     assertEquals(prop1.getNumReads(), 1);
     assertEquals(prop1.getNumWrites(), 1);
     assertEquals(prop2.getNumReads(), 1);
     assertEquals(prop2.getNumWrites(), 1);
     assertEquals(var1.getNumReads(), 0);
     assertEquals(var1.getNumWrites(), 1);
+    assertEquals(var2.getNumReads(), 0);
+    assertEquals(var2.getNumWrites(), 2);
+    assertEquals(var3.getNumReads(), 1);
+    assertEquals(var3.getNumWrites(), 1);
   }
 
 }
