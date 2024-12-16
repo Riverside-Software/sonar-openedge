@@ -18,6 +18,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.FileReader;
@@ -493,11 +494,13 @@ public class ExpressionEngineTest extends AbstractProparseTest {
 
     assertTrue(nodes.get(0) instanceof LocalMethodCallNode);
     LocalMethodCallNode exp = (LocalMethodCallNode) nodes.get(0);
+    assertNotNull(exp.getMethodElement());
     assertEquals(exp.getMethodName(), "toString");
     assertEquals(exp.getDataType(), DataType.CHARACTER);
 
     assertTrue(nodes.get(1) instanceof LocalMethodCallNode);
     LocalMethodCallNode exp2 = (LocalMethodCallNode) nodes.get(1);
+    assertNull(exp2.getMethodElement());
     assertEquals(exp2.getMethodName(), "foobar");
     assertEquals(exp2.getDataType(), DataType.NOT_COMPUTED);
   }
@@ -513,22 +516,85 @@ public class ExpressionEngineTest extends AbstractProparseTest {
   @Test
   public void testObjectMethod03() {
     ParseUnit unit = getParseUnit(
-        "class rssw.test.Class03: method void m1(): this-object:m2(). super:toString(). end method. method int64 m2(): return 0. end method. end class.",
+        "class rssw.test.Class03: method void m1(): this-object:m2(). super:toString(). super:unknown(). end method. method int64 m2(): return 0. end method. end class.",
         session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
-    assertEquals(nodes.size(), 3);
+    assertEquals(nodes.size(), 4);
 
     assertTrue(nodes.get(0) instanceof MethodCallNode);
     MethodCallNode exp = (MethodCallNode) nodes.get(0);
+    assertNotNull(exp.getMethodElement());
     assertEquals(exp.getMethodName(), "m2");
     assertEquals(exp.getDataType(), DataType.INT64);
 
     assertTrue(nodes.get(1) instanceof MethodCallNode);
     MethodCallNode exp2 = (MethodCallNode) nodes.get(1);
+    assertNotNull(exp2.getMethodElement());
     assertEquals(exp2.getMethodName(), "toString");
     assertEquals(exp2.getDataType(), DataType.CHARACTER);
+
+    assertTrue(nodes.get(2) instanceof MethodCallNode);
+    MethodCallNode exp3 = (MethodCallNode) nodes.get(2);
+    assertNull(exp3.getMethodElement());
+    assertEquals(exp3.getMethodName(), "unknown");
+    assertEquals(exp3.getDataType(), DataType.NOT_COMPUTED);
+  }
+
+  @BeforeMethod(dependsOnMethods = "setUp")
+  public void beforeObjectMethod04() {
+    TypeInfo typeInfo = new TypeInfo("rssw.test.Class06", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("m1", false, DataType.VOID));
+    typeInfo.addMethod(new MethodElement("m2", false, DataType.HANDLE));
+    session.injectTypeInfo(typeInfo);
+  }
+
+  @Test
+  public void testObjectMethod04() {
+    ParseUnit unit = getParseUnit("class rssw.test.Class06: " //
+        + "method void m1():" //
+        + " m2():add-super-procedure(xx). " //
+        + "end method. " //
+        + "method handle m2():" //
+        + " return session. " //
+        + "end method. " //
+        + "end class.", session);
+    unit.treeParser01();
+
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+
+    assertTrue(nodes.get(0) instanceof MethodCallNode);
+    MethodCallNode exp = (MethodCallNode) nodes.get(0);
+    assertEquals(exp.getMethodName(), "add-super-procedure");
+    assertEquals(exp.getDataType(), DataType.LOGICAL);
+  }
+
+  @Test
+  public void testObjectMethod05() {
+    ParseUnit unit = getParseUnit("class rssw.test.Class07: " //
+        + "constructor Class07():" //
+        + " this-object(1). " //
+        + "end constructor. " //
+        + "constructor Class07(xx as int):" //
+        + " super(1). " //
+        + "end constructor. " //
+        + "end class.", session);
+    unit.treeParser01();
+
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+
+    assertTrue(nodes.get(0) instanceof MethodCallNode);
+    MethodCallNode exp = (MethodCallNode) nodes.get(0);
+    assertNull(exp.getMethodElement()); // Currently not available
+    assertEquals(exp.getDataType().getClassName(), "rssw.test.Class07");
+
+    assertTrue(nodes.get(1) instanceof MethodCallNode);
+    MethodCallNode exp2 = (MethodCallNode) nodes.get(0);
+    assertNull(exp2.getMethodElement()); // Currently not available
+    assertEquals(exp2.getDataType().getClassName(), "rssw.test.Class07");
   }
 
   @Test
@@ -871,5 +937,31 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(exp1.getDataType().getClassName(), "System.Drawing.Size");
     IExpression exp2 = nodes.get(1);
     assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
+  }
+
+  @BeforeMethod(dependsOnMethods = "setUp")
+  public void beforeSignature01() {
+    TypeInfo typeInfo = new TypeInfo("rssw.test.FooClass01", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("Foo", false, DataType.CHARACTER, //
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT_OUTPUT, DataType.CHARACTER)));
+    session.injectTypeInfo(typeInfo);
+  }
+
+  @Test
+  public void testSignature01() {
+    String sourceCode = "class rssw.test.FooClass01:"
+        + "  constructor FooClass01( ):"
+        + "    this-object:Foo('')."
+        + "  end constructor."
+        + "  method public character Foo(input-output pcTest as character):"
+        + "  end method. "
+        + "end class.";
+    ParseUnit unit01 = getParseUnit(sourceCode, session);
+    unit01.treeParser01();
+
+    List<IExpression> nodes = unit01.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 1);
+    IExpression exp1 = nodes.get(0);
+    assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
   }
 }

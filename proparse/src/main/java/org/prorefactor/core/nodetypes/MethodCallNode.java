@@ -22,6 +22,7 @@ import org.prorefactor.treeparser.symbols.Event;
 import com.google.common.base.Strings;
 
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
@@ -29,7 +30,10 @@ import eu.rssw.pct.elements.PrimitiveDataType;
  * Expression node: <code>&lt;expr&gt;:methodName(parameters)</code>
  */
 public class MethodCallNode extends ExpressionNode {
-  private String methodName = "";
+  private final String methodName;
+  private IMethodElement method = null;
+  private DataType returnDataType = DataType.NOT_COMPUTED;
+  private boolean computed = false;
 
   public MethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String methodName) {
     super(t, parent, num, hasChildren);
@@ -40,51 +44,97 @@ public class MethodCallNode extends ExpressionNode {
     return methodName;
   }
 
-  @Override
-  public DataType getDataType() {
+  private void handleSystemHandleNode(SystemHandleNode node, ProgramRootNode root) {
+    if (node.getFirstChild().getNodeType() == ABLNodeType.THISOBJECT) {
+      ITypeInfo info = root.getEnvironment().getTypeInfo(root.getClassName());
+      method = info == null ? null : getObjectMethod(root.getTypeInfoProvider(),
+          this.findDirectChild(ABLNodeType.METHOD_PARAM_LIST), info, methodName);
+      returnDataType = method == null ? DataType.NOT_COMPUTED : method.getReturnType();
+    } else if (node.getFirstChild().getNodeType() == ABLNodeType.SUPER) {
+      ITypeInfo info = root.getEnvironment().getTypeInfo(root.getClassName());
+      ITypeInfo parent = info == null ? null : root.getEnvironment().getTypeInfo(info.getParentTypeName());
+      if (parent == null)
+        return;
+      method = getObjectMethod(root.getTypeInfoProvider(), this.findDirectChild(ABLNodeType.METHOD_PARAM_LIST),
+          parent, methodName);
+      returnDataType = method == null ? DataType.NOT_COMPUTED : method.getReturnType();
+    } else {
+      returnDataType = node.getMethodDataType(methodName.toUpperCase());
+    }
+  }
+
+  private void handleFieldRefNode(FieldRefNode node, ProgramRootNode root) {
+    if (node.isStaticReference()) {
+      method = getObjectMethod(root.getTypeInfoProvider(), findDirectChild(ABLNodeType.METHOD_PARAM_LIST),
+          node.getStaticReference(), methodName);
+      returnDataType = method == null ? DataType.NOT_COMPUTED : method.getReturnType();
+    } else if ((node.getSymbol() instanceof Event)
+        && ("publish".equalsIgnoreCase(methodName) || "subscribe".equalsIgnoreCase(methodName))) {
+      // Events only have Publish / Subscribe
+      returnDataType = DataType.VOID;
+    } else if (node.isIExpression()) {
+      handleExpression(node.asIExpression(), root);
+    }
+  }
+
+  private void handleExpression(IExpression expr, ProgramRootNode root) {
+    DataType dataType = expr.getDataType();
+    if (dataType.getPrimitive() == PrimitiveDataType.CLASS) {
+      ITypeInfo info = root.getEnvironment().getTypeInfo(dataType.getClassName());
+      method = info == null ? null : getObjectMethod(getTopLevelParent().getTypeInfoProvider(),
+          findDirectChild(ABLNodeType.METHOD_PARAM_LIST), info, methodName);
+      returnDataType = method == null ? DataType.NOT_COMPUTED : method.getReturnType();
+    } else if (dataType.getPrimitive() == PrimitiveDataType.HANDLE) {
+      returnDataType = getStandardMethodDataType(methodName.toUpperCase());
+    }
+  }
+
+  private void handleNonExpression(JPNode firstChild, ProgramRootNode root) {
+    // Within constructor: super(...) or this-object(...)
+    JPNode nextChild = firstChild.getNextSibling();
+    if (((firstChild.getNodeType() == ABLNodeType.SUPER) || (firstChild.getNodeType() == ABLNodeType.THISOBJECT))
+        && (nextChild.getNodeType() == ABLNodeType.LEFTPAREN)) {
+      if (root.getTypeInfo() == null) {
+        returnDataType = new DataType(root.getRootScope().getClassName());
+      } else {
+        returnDataType = new DataType(root.getTypeInfo().getTypeName());
+      }
+    }
+  }
+
+  private void compute() {
+    // Default
     ProgramRootNode root = getTopLevelParent();
     if (root == null)
-      return DataType.NOT_COMPUTED;
+      return;
 
-    if (getFirstChild() instanceof SystemHandleNode) {
-      SystemHandleNode shn = (SystemHandleNode) getFirstChild();
-      return shn.getMethodDataType(methodName.toUpperCase());
-    } else if (getFirstChild() instanceof FieldRefNode) {
-      if (((FieldRefNode) getFirstChild()).isStaticReference()) {
-        ITypeInfo info = ((FieldRefNode) getFirstChild()).getStaticReference();
-        return getObjectMethodDataType(root.getTypeInfoProvider(), findDirectChild(ABLNodeType.METHOD_PARAM_LIST), info,
-            methodName);
-      } else if ((getFirstChild().getSymbol() instanceof Event)
-          && ("publish".equalsIgnoreCase(methodName) || "subscribe".equalsIgnoreCase(methodName))) {
-        // Events only have Publish / Subscribe
-        return DataType.VOID;
-      }
-    }
-
-    // Left-Handle expression has to be a class
-    IExpression expr = getFirstChild().asIExpression();
-    if (expr != null) {
-      DataType dataType = expr.getDataType();
-      if (dataType.getPrimitive() == PrimitiveDataType.CLASS) {
-        ITypeInfo info = root.getEnvironment().getTypeInfo(dataType.getClassName());
-        return getObjectMethodDataType(getTopLevelParent().getTypeInfoProvider(),
-            findDirectChild(ABLNodeType.METHOD_PARAM_LIST), info, methodName);
-      } else if (dataType.getPrimitive() == PrimitiveDataType.HANDLE) {
-        return getStandardMethodDataType(methodName.toUpperCase());
-      }
+    JPNode firstChild = getFirstChild();
+    if (firstChild instanceof SystemHandleNode) {
+      handleSystemHandleNode((SystemHandleNode) firstChild, root);
+    } else if (firstChild instanceof FieldRefNode) {
+      handleFieldRefNode((FieldRefNode) firstChild, root);
+    } else if (firstChild.isIExpression()) {
+      handleExpression(firstChild.asIExpression(), root);
     } else {
-      // Within constructor: super(...) or this-object(...)
-      JPNode firstChild = getFirstChild();
-      JPNode nextChild = firstChild.getNextSibling();
-      if (((firstChild.getNodeType() == ABLNodeType.SUPER) || (firstChild.getNodeType() == ABLNodeType.THISOBJECT))
-          && (nextChild.getNodeType() == ABLNodeType.LEFTPAREN)) {
-        if (root.getTypeInfo() == null)
-          return new DataType(root.getRootScope().getClassName());
-        else
-          return new DataType(root.getTypeInfo().getTypeName());
-      }
+      handleNonExpression(firstChild, root);
     }
-    return DataType.NOT_COMPUTED;
+  }
+
+  public synchronized IMethodElement getMethodElement() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return method;
+  }
+
+  @Override
+  public synchronized DataType getDataType() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return returnDataType;
   }
 
 }
