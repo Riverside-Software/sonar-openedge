@@ -47,7 +47,6 @@ import org.prorefactor.treeparser.symbols.Variable;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.PrimitiveDataType;
@@ -61,42 +60,8 @@ public class ExpressionEngineTest extends AbstractProparseTest {
   private RefactorSession session;
 
   @BeforeMethod
-  public void setUp() throws IOException, InvalidRCodeException {
+  public void setUp() throws IOException {
     session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
-
-    // For testObjectAttribute02
-    TypeInfo typeInfo01 = new TypeInfo("rssw.test.Class02", false, false, "Progress.Lang.Object", "");
-    typeInfo01.addProperty(new PropertyElement("p1", false, DataType.CHARACTER));
-    typeInfo01.addVariable(new VariableElement("v1", DataType.LONGCHAR));
-    session.injectTypeInfo(typeInfo01);
-
-    // For testObjectMethod03
-    TypeInfo typeInfo02 = new TypeInfo("rssw.test.Class03", false, false, "Progress.Lang.Object", "");
-    typeInfo02.addMethod(new MethodElement("m1", false, DataType.VOID));
-    typeInfo02.addMethod(new MethodElement("m2", false, DataType.INT64));
-    session.injectTypeInfo(typeInfo02);
-
-    // For testStaticMethod
-    TypeInfo typeInfo03 = new TypeInfo("rssw.test.Class04", false, false, "Progress.Lang.Object", "");
-    typeInfo03.addMethod(new MethodElement("m1", true, DataType.CHARACTER));
-    typeInfo03.addMethod(new MethodElement("m2", true, DataType.INTEGER));
-    typeInfo03.addMethod(new MethodElement("m2", true, DataType.INT64, //
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    session.injectTypeInfo(typeInfo03);
-
-    // Overloaded methods
-    TypeInfo typeInfo04 = new TypeInfo("rssw.test.Class05", false, false, "Progress.Lang.Object", "");
-    typeInfo04.addMethod(new MethodElement("over01", true, DataType.CHARACTER));
-    typeInfo04.addMethod(new MethodElement("over01", true, DataType.VOID, new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo04.addMethod(new MethodElement("over01", true, DataType.INTEGER, new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
-    typeInfo04.addMethod(new MethodElement("over01", true, DataType.INT64, //
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER), //
-        new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER)));
-    session.injectTypeInfo(typeInfo04);
-
-    // For catalog
-    TypeInfo typeInfo05 = new TypeInfo("rssw.MyTestClassCatalog", false, false, "System.Windows.Forms.Control", "");
-    session.injectTypeInfo(typeInfo05);
 
     // Inject content of catalog.json
     try (Reader reader = new FileReader("src/test/resources/catalog.json")) {
@@ -368,6 +333,14 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(exp.getDataType().getClassName(), "Progress.Lang.Object");
   }
 
+  @BeforeMethod(dependsOnMethods = "setUp")
+  public void beforeObjectAttribute02() {
+    TypeInfo typeInfo = new TypeInfo("rssw.test.Class02", false, false, "Progress.Lang.Object", "");
+    typeInfo.addProperty(new PropertyElement("p1", false, DataType.CHARACTER));
+    typeInfo.addVariable(new VariableElement("v1", DataType.LONGCHAR));
+    session.injectTypeInfo(typeInfo);
+  }
+
   @Test
   public void testObjectAttribute02() {
     ParseUnit unit = getParseUnit(
@@ -437,6 +410,16 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(exp2.getDataType().getClassName(), "Progress.Reflect.AccessMode");
   }
 
+  @BeforeMethod(dependsOnMethods = "setUp")
+  public void beforeStaticMethod() {
+    TypeInfo typeInfo = new TypeInfo("rssw.test.Class04", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("m1", true, DataType.CHARACTER));
+    typeInfo.addMethod(new MethodElement("m2", true, DataType.INTEGER));
+    typeInfo.addMethod(new MethodElement("m2", true, DataType.INT64, //
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    session.injectTypeInfo(typeInfo);
+  }
+
   @Test
   public void testStaticMethod01() {
     String sourceCode = "message rssw.test.Class04:m1(). "
@@ -492,10 +475,17 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(exp2.getDataType(), DataType.NOT_COMPUTED);
   }
 
+  @BeforeMethod(dependsOnMethods = "setUp")
+  public void beforeObjectMethod02() {
+    TypeInfo typeInfo = new TypeInfo("rssw.pct.Class02", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("m1", false, DataType.VOID));
+    session.injectTypeInfo(typeInfo);
+  }
+
   @Test
   public void testObjectMethod02() {
-    ParseUnit unit = getParseUnit("class rssw.pct: method void m1(): toString(). foobar(). end method. end class.",
-        session);
+    ParseUnit unit = getParseUnit(
+        "class rssw.pct.Class02: method void m1(): toString(). foobar(). end method. end class.", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -510,6 +500,14 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     LocalMethodCallNode exp2 = (LocalMethodCallNode) nodes.get(1);
     assertEquals(exp2.getMethodName(), "foobar");
     assertEquals(exp2.getDataType(), DataType.NOT_COMPUTED);
+  }
+
+  @BeforeMethod(dependsOnMethods = "setUp")
+  public void beforeObjectMethod03() {
+    TypeInfo typeInfo = new TypeInfo("rssw.test.Class03", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("m1", false, DataType.VOID));
+    typeInfo.addMethod(new MethodElement("m2", false, DataType.INT64));
+    session.injectTypeInfo(typeInfo);
   }
 
   @Test
@@ -720,6 +718,20 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertTrue(((ArrayReferenceNode) exp).getOffsetExpression() instanceof ConstantNode);
   }
 
+  @BeforeMethod(dependsOnMethods = "setUp")
+  public void beforeOverloadedMethodCall() {
+    TypeInfo typeInfo = new TypeInfo("rssw.test.Class05", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("over01", true, DataType.CHARACTER));
+    typeInfo.addMethod(new MethodElement("over01", true, DataType.VOID,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    typeInfo.addMethod(new MethodElement("over01", true, DataType.INTEGER,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    typeInfo.addMethod(new MethodElement("over01", true, DataType.INT64, //
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER), //
+        new Parameter(2, "prm2", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    session.injectTypeInfo(typeInfo);
+  }
+
   @Test
   public void testOverloadedMethodCall01() {
     String sourceCode = "def var var1 as rssw.test.Class05. "
@@ -833,6 +845,12 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     IExpression exp2 = nodes.get(1);
     assertTrue(exp2 instanceof MethodCallNode);
     assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.VOID);
+  }
+
+  @BeforeMethod(dependsOnMethods = "setUp")
+  public void beforeCatalog01() {
+    TypeInfo typeInfo = new TypeInfo("rssw.MyTestClassCatalog", false, false, "System.Windows.Forms.Control", "");
+    session.injectTypeInfo(typeInfo);
   }
 
   @Test
