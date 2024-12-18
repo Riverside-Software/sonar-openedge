@@ -26,6 +26,7 @@ import static org.testng.Assert.assertNull;
 import java.util.HashMap;
 import java.util.function.Function;
 
+import org.prorefactor.core.Pair;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.elements.BuiltinClasses;
@@ -65,9 +66,10 @@ public class ITypeInfoTest {
     assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType("Progress.Json.ObjectModel.JsonArray")));
     assertNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType("Progress.Lang.Object")));
 
-    IMethodElement m1 = info.getMethod(TYPE_INFO_PROVIDER, "GetDatetime", DataType.INTEGER, DataType.INTEGER);
-    assertNotNull(m1);
-    assertEquals(m1.getReturnType(), DataType.DATETIME);
+    Pair<ITypeInfo, IMethodElement> val1 = info.getMethod(TYPE_INFO_PROVIDER, "GetDatetime", DataType.INTEGER, DataType.INTEGER);
+    assertNotNull(val1);
+    assertEquals(val1.getO1().getTypeName(), "Progress.Json.ObjectModel.JsonArray");
+    assertEquals(val1.getO2().getReturnType(), DataType.DATETIME);
   }
 
   @Test
@@ -95,12 +97,14 @@ public class ITypeInfoTest {
     map.put(typeInfo02.getTypeName(), typeInfo02);
 
     // Expected is method from parent class
-    IMethodElement m1 = typeInfo02.getMethod(name -> map.get(name), "method1", DataType.INTEGER);
-    assertNotNull(m1);
-    assertEquals(m1.getReturnType(), DataType.VOID);
+    Pair<ITypeInfo, IMethodElement> val1 = typeInfo02.getMethod(map::get, "method1", DataType.INTEGER);
+    assertNotNull(val1);
+    assertEquals(val1.getO1().getTypeName(), "rssw.ParentClass");
+    assertEquals(val1.getO2().getReturnType(), DataType.VOID);
     // Expected is method from child class
-    IMethodElement m2 = typeInfo02.getMethod(name -> map.get(name), "method1", DataType.INT64);
-    assertNotNull(m2);
-    assertEquals(m2.getReturnType(), DataType.INTEGER);
+    Pair<ITypeInfo, IMethodElement> val2 = typeInfo02.getMethod(map::get, "method1", DataType.INT64);
+    assertNotNull(val2);
+    assertEquals(val2.getO1().getTypeName(), "rssw.ChildClass");
+    assertEquals(val2.getO2().getReturnType(), DataType.INTEGER);
   }
 }

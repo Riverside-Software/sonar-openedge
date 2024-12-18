@@ -494,13 +494,16 @@ public class ExpressionEngineTest extends AbstractProparseTest {
 
     assertTrue(nodes.get(0) instanceof LocalMethodCallNode);
     LocalMethodCallNode exp = (LocalMethodCallNode) nodes.get(0);
+    assertNotNull(exp.getTypeInfo());
     assertNotNull(exp.getMethodElement());
+    assertEquals(exp.getTypeInfo().getTypeName(), "Progress.Lang.Object");
     assertEquals(exp.getMethodName(), "toString");
     assertEquals(exp.getDataType(), DataType.CHARACTER);
 
     assertTrue(nodes.get(1) instanceof LocalMethodCallNode);
     LocalMethodCallNode exp2 = (LocalMethodCallNode) nodes.get(1);
     assertNull(exp2.getMethodElement());
+    assertNull(exp2.getTypeInfo());
     assertEquals(exp2.getMethodName(), "foobar");
     assertEquals(exp2.getDataType(), DataType.NOT_COMPUTED);
   }
@@ -526,11 +529,13 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertTrue(nodes.get(0) instanceof MethodCallNode);
     MethodCallNode exp = (MethodCallNode) nodes.get(0);
     assertNotNull(exp.getMethodElement());
+    assertEquals(exp.getTypeInfo().getTypeName(), "rssw.test.Class03");
     assertEquals(exp.getMethodName(), "m2");
     assertEquals(exp.getDataType(), DataType.INT64);
 
     assertTrue(nodes.get(1) instanceof MethodCallNode);
     MethodCallNode exp2 = (MethodCallNode) nodes.get(1);
+    assertEquals(exp2.getTypeInfo().getTypeName(), "Progress.Lang.Object");
     assertNotNull(exp2.getMethodElement());
     assertEquals(exp2.getMethodName(), "toString");
     assertEquals(exp2.getDataType(), DataType.CHARACTER);
@@ -538,6 +543,7 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertTrue(nodes.get(2) instanceof MethodCallNode);
     MethodCallNode exp3 = (MethodCallNode) nodes.get(2);
     assertNull(exp3.getMethodElement());
+    assertNull(exp3.getTypeInfo());
     assertEquals(exp3.getMethodName(), "unknown");
     assertEquals(exp3.getDataType(), DataType.NOT_COMPUTED);
   }

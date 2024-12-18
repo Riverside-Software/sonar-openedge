@@ -15,6 +15,7 @@
 package org.prorefactor.core.nodetypes;
 
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.Pair;
 import org.prorefactor.core.ProToken;
 
 import com.google.common.base.Strings;
@@ -29,8 +30,8 @@ import eu.rssw.pct.elements.ITypeInfo;
  */
 public class LocalMethodCallNode extends ExpressionNode {
   private final String methodName;
-  private IMethodElement method = null;
   private boolean computed = false;
+  private Pair<ITypeInfo, IMethodElement> method = null;
 
   public LocalMethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String methodName) {
     super(t, parent, num, hasChildren);
@@ -41,18 +42,30 @@ public class LocalMethodCallNode extends ExpressionNode {
     return methodName;
   }
 
-  public synchronized IMethodElement getMethodElement() {
+  private void compute() {
+    ProgramRootNode root = getTopLevelParent();
+    if (root != null) {
+      ITypeInfo typeInfo = root.getTypeInfo();
+      if (root.isClass() && (typeInfo == null))
+        typeInfo = BuiltinClasses.PROGRESS_LANG_OBJECT;
+      method = typeInfo == null ? null : getObjectMethod(root.getTypeInfoProvider(), this, typeInfo, methodName);
+    }
+  }
+
+  public synchronized ITypeInfo getTypeInfo() {
     if (!computed) {
-      ProgramRootNode root = getTopLevelParent();
-      if (root != null) {
-        ITypeInfo info = root.getTypeInfo();
-        if (root.isClass() && (info == null))
-          info = BuiltinClasses.PROGRESS_LANG_OBJECT;
-        method = getObjectMethod(root.getTypeInfoProvider(), this, info, methodName);
-      }
+      compute();
       computed = true;
     }
-    return method;
+    return method == null ? null : method.getO1();
+  }
+
+  public synchronized IMethodElement getMethodElement() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return method == null ? null : method.getO2();
   }
 
   @Override

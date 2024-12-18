@@ -19,6 +19,7 @@ import java.util.function.Function;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.Pair;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 
@@ -741,7 +742,7 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
     }
   }
 
-  static IMethodElement getObjectMethod(Function<String, ITypeInfo> provider, JPNode node, ITypeInfo info,
+  static Pair<ITypeInfo, IMethodElement> getObjectMethod(Function<String, ITypeInfo> provider, JPNode node, ITypeInfo info,
       String methodName) {
     // Create array of dataTypes
     List<JPNode> paramItems = node.getDirectChildren(ABLNodeType.PARAMETER_ITEM);
