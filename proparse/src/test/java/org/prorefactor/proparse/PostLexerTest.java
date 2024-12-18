@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
 import com.google.common.base.Charsets;
 
 public class PostLexerTest extends AbstractProparseTest {
-  private final static String SRC_DIR = "src/test/resources/data/lexer";
+  private static final String SRC_DIR = "src/test/resources/data/lexer";
 
   private RefactorSession session;
 

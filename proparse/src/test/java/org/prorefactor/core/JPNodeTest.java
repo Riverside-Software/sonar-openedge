@@ -53,8 +53,8 @@ import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
  * Tests for JPNodeVisitor
  */
 public class JPNodeTest extends AbstractProparseTest {
-  private final static String SRC_DIR = "src/test/resources/jpnode";
-  private final static String TEMP_DIR = "target/nodes-lister/jpnode";
+  private static final String SRC_DIR = "src/test/resources/jpnode";
+  private static final String TEMP_DIR = "target/nodes-lister/jpnode";
 
   private RefactorSession session;
   private File tempDir = new File(TEMP_DIR);
