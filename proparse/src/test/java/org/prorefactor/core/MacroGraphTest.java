@@ -135,42 +135,42 @@ public class MacroGraphTest extends AbstractProparseTest {
     assertTrue(list.get(0) instanceof IncludeRef);
     assertEquals(((MacroRef) list.get(0)).getFileIndex(), 1);
     assertEquals(((MacroRef) list.get(0)).getLine(), 3);
-    assertEquals(((MacroRef) list.get(0)).getColumn(), 5);
+    assertEquals(((MacroRef) list.get(0)).getColumn(), 4);
     assertEquals(((MacroRef) list.get(0)).getEndLine(), 3);
     assertEquals(((MacroRef) list.get(0)).getEndColumn(), 40);
     assertTrue(list.get(1) instanceof IncludeRef);
     assertEquals(((MacroRef) list.get(1)).getFileIndex(), 2);
     assertEquals(((MacroRef) list.get(1)).getLine(), 20);
-    assertEquals(((MacroRef) list.get(1)).getColumn(), 1);
+    assertEquals(((MacroRef) list.get(1)).getColumn(), 0);
     assertEquals(((MacroRef) list.get(1)).getEndLine(), 20);
     assertEquals(((MacroRef) list.get(1)).getEndColumn(), 44);
     assertTrue(list.get(2) instanceof IncludeRef);
     assertEquals(((MacroRef) list.get(2)).getFileIndex(), 3);
     assertEquals(((MacroRef) list.get(2)).getLine(), 22);
-    assertEquals(((MacroRef) list.get(2)).getColumn(), 1);
+    assertEquals(((MacroRef) list.get(2)).getColumn(), 0);
     assertEquals(((MacroRef) list.get(2)).getEndLine(), 22);
     assertEquals(((MacroRef) list.get(2)).getEndColumn(), 36);
     assertTrue(list.get(3) instanceof IncludeRef);
     assertEquals(((MacroRef) list.get(3)).getFileIndex(), 3);
     assertEquals(((MacroRef) list.get(3)).getLine(), 28);
-    assertEquals(((MacroRef) list.get(3)).getColumn(), 1);
+    assertEquals(((MacroRef) list.get(3)).getColumn(), 0);
     assertEquals(((MacroRef) list.get(3)).getEndLine(), 28);
     assertEquals(((MacroRef) list.get(3)).getEndColumn(), 36);
 
     MacroRef ref = (MacroRef) unit.getMacroGraph().macroEventList.get(5);
     assertEquals(ref.getLine(), 24);
     assertEquals(ref.getEndLine(), 24);
-    assertEquals(ref.getColumn(), 1);
+    assertEquals(ref.getColumn(), 0);
     assertEquals(ref.getEndColumn(), 49);
     ref = (MacroRef) unit.getMacroGraph().macroEventList.get(6);
     assertEquals(ref.getLine(), 25);
     assertEquals(ref.getEndLine(), 25);
-    assertEquals(ref.getColumn(), 3);
+    assertEquals(ref.getColumn(), 2);
     assertEquals(ref.getEndColumn(), 53);
     ref = (MacroRef) unit.getMacroGraph().macroEventList.get(7);
     assertEquals(ref.getLine(), 26);
     assertEquals(ref.getEndLine(), 27);
-    assertEquals(ref.getColumn(), 1);
+    assertEquals(ref.getColumn(), 0);
     assertEquals(ref.getEndColumn(), 1);
   }
 
@@ -187,7 +187,7 @@ public class MacroGraphTest extends AbstractProparseTest {
     IncludeRef ref = (IncludeRef) list.get(0);
     assertEquals(ref.getLine(), 1);
     assertEquals(ref.getEndLine(), 3);
-    assertEquals(ref.getColumn(), 1);
+    assertEquals(ref.getColumn(), 0);
     assertEquals(ref.getEndColumn(), 44);
     assertNotNull(ref.getArgNumber(1));
     assertEquals(ref.getArgNumber(1).getName(), "param1");
@@ -211,7 +211,7 @@ public class MacroGraphTest extends AbstractProparseTest {
     IncludeRef ref = (IncludeRef) list.get(0);
     assertEquals(ref.getLine(), 1);
     assertEquals(ref.getEndLine(), 5);
-    assertEquals(ref.getColumn(), 1);
+    assertEquals(ref.getColumn(), 0);
     assertEquals(ref.getEndColumn(), 33);
     assertNotNull(ref.getArgNumber(1));
     assertEquals(ref.getArgNumber(1).getName(), "param1");

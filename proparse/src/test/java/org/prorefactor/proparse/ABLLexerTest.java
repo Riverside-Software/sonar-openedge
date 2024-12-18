@@ -458,7 +458,7 @@ public class ABLLexerTest {
     ProToken tok = (ProToken) lexer.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.DO);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 1);
+    assertEquals(tok.getCharPositionInLine(), 0);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 2);
 
@@ -473,7 +473,7 @@ public class ABLLexerTest {
     tok = (ProToken) lexer.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 15);
+    assertEquals(tok.getCharPositionInLine(), 14);
     assertEquals(tok.getEndLine(), 1);
     // The important test here, end column has to be 16 even when followed by ':'
     assertEquals(tok.getEndCharPositionInLine(), 16);
@@ -482,7 +482,7 @@ public class ABLLexerTest {
     tok = (ProToken) lexer.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.LEXCOLON);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 17);
+    assertEquals(tok.getCharPositionInLine(), 16);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 17);
   }
@@ -494,7 +494,7 @@ public class ABLLexerTest {
     ProToken tok = (ProToken) lexer.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.DO);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 1);
+    assertEquals(tok.getCharPositionInLine(), 0);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 2);
 
@@ -510,7 +510,7 @@ public class ABLLexerTest {
     tok = (ProToken) lexer.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 15);
+    assertEquals(tok.getCharPositionInLine(), 14);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 16);
 
@@ -520,7 +520,7 @@ public class ABLLexerTest {
     tok = (ProToken) lexer.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.LEXCOLON);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 18);
+    assertEquals(tok.getCharPositionInLine(), 17);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 18);
   }
@@ -532,13 +532,13 @@ public class ABLLexerTest {
     ProToken tok = (ProToken) lexer.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 1);
+    assertEquals(tok.getCharPositionInLine(), 0);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 10);
     tok = (ProToken) lexer.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 11);
+    assertEquals(tok.getCharPositionInLine(), 10);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 11);
   }
@@ -550,13 +550,13 @@ public class ABLLexerTest {
     ProToken tok = (ProToken) lexer.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 1);
+    assertEquals(tok.getCharPositionInLine(), 0);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 6);
     tok = (ProToken) lexer.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 7);
+    assertEquals(tok.getCharPositionInLine(), 6);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 7);
   }
@@ -568,13 +568,13 @@ public class ABLLexerTest {
     ProToken tok = (ProToken) lexer.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 1);
+    assertEquals(tok.getCharPositionInLine(), 0);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 8);
     tok = (ProToken) lexer.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.PERIOD);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 9);
+    assertEquals(tok.getCharPositionInLine(), 8);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 9);
   }
@@ -686,7 +686,7 @@ public class ABLLexerTest {
     assertNotNull(tok);
     assertTrue(tok instanceof WritableProToken);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 3);
+    assertEquals(tok.getCharPositionInLine(), 2);
     WritableProToken tok2 = (WritableProToken) tok;
     tok2.setLine(5);
     tok2.setCharPositionInLine(4);

@@ -77,12 +77,6 @@ public class ProToken implements Token {
     return line;
   }
 
-  /**
-   * The index of the first character of this token relative to the beginning of the line at which it occurs.
-   * 
-   * IMPORTANT: While the ANTLR4 Token interface specifies that charPositionInLine should start at 0, the ProToken
-   * implementation starts at 1. This implementation detail might change in the future (if that's not too late).
-   */
   @Override
   public int getCharPositionInLine() {
     return charPositionInLine;
@@ -150,9 +144,7 @@ public class ProToken implements Token {
   }
 
   /**
-   * The index of the last character of this token relative to the beginning of the line at which it occurs. This means
-   * that the first character of next token will be at this position + 1. Also means that getCharPositionInLine() ==
-   * getEndCharPositionInLine() for single-character tokens.
+   * Line offset **after** the last character of the token
    */
   public int getEndCharPositionInLine() {
     return endCharPositionInLine;

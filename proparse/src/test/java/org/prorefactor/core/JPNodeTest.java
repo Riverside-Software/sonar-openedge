@@ -177,14 +177,14 @@ public class JPNodeTest extends AbstractProparseTest {
     assertTrue(node.getText().startsWith(".message"));
     assertEquals(node.getLine(), 1);
     assertEquals(node.getEndLine(), 3);
-    assertEquals(node.getColumn(), 1);
+    assertEquals(node.getColumn(), 0);
     assertEquals(node.getEndColumn(), 27);
 
     assertNotNull(node.getFirstChild());
     assertEquals(node.getFirstChild().getNodeType(), ABLNodeType.PERIOD);
     assertEquals(node.getFirstChild().getLine(), 3);
     assertEquals(node.getFirstChild().getEndLine(), 3);
-    assertEquals(node.getFirstChild().getColumn(), 29);
+    assertEquals(node.getFirstChild().getColumn(), 28);
     assertEquals(node.getFirstChild().getEndColumn(), 29);
   }
 
@@ -198,14 +198,14 @@ public class JPNodeTest extends AbstractProparseTest {
 
     assertEquals(node.getLine(), 1);
     assertEquals(node.getEndLine(), 1);
-    assertEquals(node.getColumn(), 1);
+    assertEquals(node.getColumn(), 0);
     assertEquals(node.getEndColumn(), 8);
 
     assertNotNull(node.getFirstChild());
     assertEquals(node.getFirstChild().getNodeType(), ABLNodeType.PERIOD);
     assertEquals(node.getFirstChild().getLine(), 1);
     assertEquals(node.getFirstChild().getEndLine(), 1);
-    assertEquals(node.getFirstChild().getColumn(), 9);
+    assertEquals(node.getFirstChild().getColumn(), 8);
     assertEquals(node.getFirstChild().getEndColumn(), 9);
   }
 
@@ -267,7 +267,7 @@ public class JPNodeTest extends AbstractProparseTest {
     assertEquals(node.getFirstChild().getText(), "c:/foo/bar/something.p");
     assertEquals(node.getFirstChild().getLine(), 1);
     assertEquals(node.getFirstChild().getEndLine(), 1);
-    assertEquals(node.getFirstChild().getColumn(), 9);
+    assertEquals(node.getFirstChild().getColumn(), 8);
     assertEquals(node.getFirstChild().getEndColumn(), 30);
 
     assertNotNull(node.getFirstChild().getNextSibling());

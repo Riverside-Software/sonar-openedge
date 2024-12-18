@@ -57,7 +57,7 @@ public class TokenListTest {
       assertEquals(tok.getNodeType(), ABLNodeType.ID);
       assertEquals(tok.getText(), "Progress.Security.PAMStatus");
       assertEquals(tok.getLine(), 1);
-      assertEquals(tok.getCharPositionInLine(), 1);
+      assertEquals(tok.getCharPositionInLine(), 0);
       assertEquals(tok.getEndLine(), 1);
       assertEquals(tok.getEndCharPositionInLine(), 27);
       assertEquals(tok.getChannel(), 0);
@@ -71,7 +71,7 @@ public class TokenListTest {
       assertEquals(tok.getNodeType(), ABLNodeType.ID);
       assertEquals(tok.getText(), "Progress.Security.PAMStatus");
       assertEquals(tok.getLine(), 2);
-      assertEquals(tok.getCharPositionInLine(), 1);
+      assertEquals(tok.getCharPositionInLine(), 0);
       assertEquals(tok.getEndLine(), 2);
       assertEquals(tok.getEndCharPositionInLine(), 27);
       assertEquals(tok.getChannel(), 0);
@@ -86,7 +86,7 @@ public class TokenListTest {
       assertEquals(tok.getNodeType(), ABLNodeType.ID);
       assertEquals(tok.getText(), "Progress.Security.PAMStatus");
       assertEquals(tok.getLine(), 3);
-      assertEquals(tok.getCharPositionInLine(), 1);
+      assertEquals(tok.getCharPositionInLine(), 0);
       assertEquals(tok.getEndLine(), 3);
       assertEquals(tok.getEndCharPositionInLine(), 27);
       assertEquals(((ProToken) src.nextToken()).getNodeType(), ABLNodeType.WS);
@@ -108,7 +108,7 @@ public class TokenListTest {
       assertEquals(tok.getNodeType(), ABLNodeType.ID);
       assertEquals(tok.getText(), "Progress.117x.clsName");
       assertEquals(tok.getLine(), 7);
-      assertEquals(tok.getCharPositionInLine(), 1);
+      assertEquals(tok.getCharPositionInLine(), 0);
       assertEquals(tok.getEndLine(), 7);
       assertEquals(tok.getEndCharPositionInLine(), 21);
       assertEquals(tok.getChannel(), 0);

@@ -52,7 +52,7 @@ public class InputSource {
   private final int fileIndex;
   private final boolean macroExpansion;
 
-  private int nextCol = 1;
+  private int nextCol = 0;
   private int nextLine = 1;
   private int currPos;
   private String currAnalyzeSuspend = null;
@@ -122,7 +122,7 @@ public class InputSource {
     if (!macroExpansion) {
       if (currChar == '\n') {
         nextLine++;
-        nextCol = 1;
+        nextCol = 0;
       } else {
         nextCol++;
       }

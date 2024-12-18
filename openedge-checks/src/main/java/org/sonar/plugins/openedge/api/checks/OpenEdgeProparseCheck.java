@@ -109,7 +109,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     NewIssueLocation location = issue.newLocation().on(targetFile);
     if (lineNumber > 0) {
       if (exactLocation) {
-        location.at(targetFile.newRange(token.getLine(), token.getCharPositionInLine() - 1, token.getEndLine(),
+        location.at(targetFile.newRange(token.getLine(), token.getCharPositionInLine(), token.getEndLine(),
             token.getEndCharPositionInLine()));
       } else {
         TextRange range = targetFile.selectLine(lineNumber);
@@ -168,7 +168,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
       int lineNumber = naturalChild.getLine();
       if (lineNumber > 0) {
         if (exactLocation) {
-          location.at(targetFile.newRange(naturalChild.getLine(), naturalChild.getColumn() - 1,
+          location.at(targetFile.newRange(naturalChild.getLine(), naturalChild.getColumn(),
               naturalChild.getEndLine(), naturalChild.getEndColumn()));
         } else {
           TextRange range = targetFile.selectLine(lineNumber);

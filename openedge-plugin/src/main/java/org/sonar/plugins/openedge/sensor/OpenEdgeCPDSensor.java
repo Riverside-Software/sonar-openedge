@@ -136,7 +136,7 @@ public class OpenEdgeCPDSensor implements Sensor {
     }
 
     try {
-      TextRange range = file.newRange(tok.getLine(), tok.getCharPositionInLine() - 1, tok.getEndLine(),
+      TextRange range = file.newRange(tok.getLine(), tok.getCharPositionInLine(), tok.getEndLine(),
           tok.getEndCharPositionInLine());
       cpdTokens.addToken(range, str);
     } catch (IllegalArgumentException | IllegalStateException uncaught) {

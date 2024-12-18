@@ -349,8 +349,8 @@ public class OpenEdgeProparseSensor implements Sensor {
       TextPointer end = null;
       if (InputFileUtils.getRelativePath(file, context.fileSystem()).equals(tok.getFileName())) {
         try {
-          strt = file.newPointer(tok.getLine(), tok.getCharPositionInLine() - 1);
-          end = file.newPointer(tok.getLine(), tok.getCharPositionInLine());
+          strt = file.newPointer(tok.getLine(), tok.getCharPositionInLine());
+          end = file.newPointer(tok.getLine(), tok.getEndCharPositionInLine());
         } catch (IllegalArgumentException uncaught) {
           // Nothing
         }
