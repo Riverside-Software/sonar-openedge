@@ -10,8 +10,7 @@
   <groupId>eu.rssw.openedge.rcode</groupId>
   <artifactId>rcode-reader</artifactId>
 
-  <name>rcode-reader</name>
-  <description>rcode reader</description>
+  <name>RCode Reader</name>
 
   <dependencies>
     <dependency>
