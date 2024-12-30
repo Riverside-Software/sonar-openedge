@@ -525,6 +525,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitQueryIdentifier(QueryIdentifierContext ctx) {
+    return visitChildren(ctx).setRuleNode(ctx);
+  }
+
+  @Override
   public Builder visitIdentifierUKW(IdentifierUKWContext ctx) {
     return visitChildren(ctx).changeType(ABLNodeType.ID);
   }

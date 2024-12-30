@@ -755,6 +755,10 @@ widgetname:
     identifier
   ;
 
+queryIdentifier:
+    identifier
+  ;
+
 identifier:
     // identifier gets us an ID node for an unqualified (local) reference.
     // Only an ID or unreservedkeyword can be used as an unqualified reference.
@@ -1173,7 +1177,7 @@ clearStatement:
   ;
 
 closeQueryStatement:
-    CLOSE QUERY identifier statementEnd
+    CLOSE QUERY queryIdentifier statementEnd
   ;
 
 closeStoredProcedureStatement:
@@ -1851,12 +1855,12 @@ definePropertyAccessorSetBlock:
 
 defineQueryStatement:
     DEFINE defineShare? ( PRIVATE | PROTECTED | STATIC )*
-    QUERY n=identifier
+    QUERY id=identifier
     FOR record recordFields?
     ( COMMA record recordFields? )*
     ( cacheExpr | SCROLLING | RCODEINFORMATION )*
     statementEnd
-    { support.defVar($n.text); }
+    { support.defVar($id.text); }
   ;
 
 defineRectangleStatement:
@@ -2514,7 +2518,7 @@ externalFunctionStatement:
   ;
 
 getStatement:
-    GET findWhich identifier ( lockHow | NOWAIT )* statementEnd
+    GET findWhich queryIdentifier ( lockHow | NOWAIT )* statementEnd
   ;
 
 getKeyValueStatement:
@@ -2960,7 +2964,7 @@ onAction:
   ;
 
 openQueryStatement:
-    OPEN QUERY identifier ( FOR | PRESELECT ) multiRecordSearch
+    OPEN QUERY queryIdentifier ( FOR | PRESELECT ) multiRecordSearch
     openQueryOption*
     statementEnd
   ;
@@ -3268,7 +3272,7 @@ releaseObjectStatement:
   ;
 
 repositionStatement:
-    REPOSITION identifier repositionOption NOERROR? statementEnd
+    REPOSITION queryIdentifier repositionOption NOERROR? statementEnd
   ;
 
 repositionOption:

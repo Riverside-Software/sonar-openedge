@@ -29,9 +29,11 @@ import org.prorefactor.proparse.antlr4.Proparse.Exprt2FieldContext;
 import org.prorefactor.proparse.antlr4.Proparse.FieldContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgDatasetHandleContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgTableHandleContext;
+import org.prorefactor.proparse.antlr4.Proparse.QueryIdentifierContext;
 import org.prorefactor.proparse.antlr4.Proparse.RecordContext;
 import org.prorefactor.proparse.antlr4.Proparse.WidNameContext;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 
@@ -70,6 +72,15 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
       }
     } else if (ctx.expressionTerm() instanceof ExprTermWidgetContext) {
       widattr(ctx, (ExprTermWidgetContext) ctx.expressionTerm(), cq, ctx.attributeName().nonPunctuating().getText());
+    }
+  }
+
+  @Override
+  public void enterQueryIdentifier(QueryIdentifierContext ctx) {
+    Query qry = currentScope.lookupQuery(ctx.identifier().getText());
+    JPNode node = support.getNode(ctx);
+    if ((node != null) && (qry != null)) {
+      node.setSymbol(qry);
     }
   }
 

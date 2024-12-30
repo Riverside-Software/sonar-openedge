@@ -38,6 +38,7 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.Modifier;
+import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -1537,4 +1538,21 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(nodes.get(2).asIExpression().getDataType(), DataType.DECIMAL);
   }
 
+  @Test
+  public void test42() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test42.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    assertNull(unit.getRootScope().lookupQuery("qry00"));
+    Query qry = unit.getRootScope().lookupQuery("qry");
+    assertNotNull(qry);
+    List<JPNode> list = unit.getTopNode().query(ABLNodeType.ID);
+    assertEquals(list.size(), 4);
+    assertFalse(list.stream().anyMatch(it -> it.getSymbol() == null));
+    assertFalse(list.stream().anyMatch(it -> it.getSymbol().getNodeType() != ABLNodeType.QUERY));
+  }
 }
