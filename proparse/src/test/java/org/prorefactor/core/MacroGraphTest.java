@@ -28,6 +28,8 @@ import java.util.List;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.macrolevel.IncludeRef;
+import org.prorefactor.macrolevel.MacroDef;
+import org.prorefactor.macrolevel.MacroDefinitionType;
 import org.prorefactor.macrolevel.MacroEvent;
 import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.NamedMacroRef;
@@ -225,4 +227,86 @@ public class MacroGraphTest extends AbstractProparseTest {
     assertNull(ref.getArgNumber(4));
   }
 
+  @Test
+  public void testIncludeParameter03() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor20.p"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+
+    List<MacroEvent> list = unit.getMacroGraph().findExternalMacroReferences();
+    assertNotNull(list);
+    assertEquals(list.size(), 3);
+
+    /* First include file */
+    IncludeRef ref1 = (IncludeRef) list.get(0);
+    assertEquals(ref1.getLine(), 6);
+    assertEquals(ref1.getEndLine(), 6);
+    assertEquals(ref1.getColumn(), 17);
+    assertEquals(ref1.getEndColumn(), 58);
+    assertEquals(ref1.numArgs(), 1);
+    MacroDef ref1Arg1 = ref1.getArgNumber(1);
+    assertEquals(ref1Arg1.getType(), MacroDefinitionType.NUMBEREDARG);
+    assertEquals(ref1Arg1.getValue(), "BAR");
+
+    /* Second include file */
+    IncludeRef ref2 = (IncludeRef) list.get(1);
+    assertEquals(ref2.getLine(), 2);
+    assertEquals(ref2.getEndLine(), 8);
+    assertEquals(ref2.getColumn(), 0);
+    assertEquals(ref2.getEndColumn(), 7);
+    assertEquals(ref2.numArgs(), 5);
+    MacroDef ref2Arg1 = ref2.lookupNamedArg("param1");
+    assertEquals(ref2Arg1.getValue(), "");
+    MacroDef ref2Arg2 = ref2.lookupNamedArg("param2");
+    assertEquals(ref2Arg2.getValue(), "");
+    MacroDef ref2Arg3 = ref2.lookupNamedArg("param3");
+    assertEquals(ref2Arg3.getValue(), " ");
+    MacroDef ref2Arg4 = ref2.lookupNamedArg("param4");
+    assertEquals(ref2Arg4.getValue(), "XXX BAR BAR XXX ");
+    MacroDef ref2Arg5 = ref2.lookupNamedArg("param5");
+    assertEquals(ref2Arg5.getValue(), " test ");
+
+    /* Third include file */
+    IncludeRef ref3 = (IncludeRef) list.get(2);
+    assertEquals(ref3.getLine(), 9);
+    assertEquals(ref3.getEndLine(), 9);
+    assertEquals(ref3.getColumn(), 0);
+    assertEquals(ref3.getEndColumn(), 82);
+    assertEquals(ref3.numArgs(), 6);
+    MacroDef ref3Arg1 = ref3.getArgNumber(1);
+    assertEquals(ref3Arg1.getValue(), "\"");
+    MacroDef ref3Arg2 = ref3.getArgNumber(2);
+    assertEquals(ref3Arg2.getValue(), "value1");
+    MacroDef ref3Arg3 = ref3.getArgNumber(3);
+    assertEquals(ref3Arg3.getValue(), "value2");
+    MacroDef ref3Arg4 = ref3.getArgNumber(4);
+    assertEquals(ref3Arg4.getValue(), "\"value3\":U");
+    MacroDef ref3Arg5 = ref3.getArgNumber(5);
+    assertEquals(ref3Arg5.getValue(), "\"value4\"");
+    MacroDef ref3Arg6 = ref3.getArgNumber(6);
+    assertEquals(ref3Arg6.getValue(), " ");
+  }
+
+  @Test
+  public void testIncludeParameter04() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor25.p"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+
+    List<MacroEvent> list = unit.getMacroGraph().findExternalMacroReferences();
+    assertNotNull(list);
+    assertEquals(list.size(), 1);
+
+    /* First include file */
+    IncludeRef ref1 = (IncludeRef) list.get(0);
+    assertEquals(ref1.getLine(), 1);
+    assertEquals(ref1.getEndLine(), 1);
+    assertEquals(ref1.getColumn(), 0);
+    assertEquals(ref1.getEndColumn(), 56);
+    assertEquals(ref1.numArgs(), 1);
+    MacroDef ref1Arg1 = ref1.getArgNumber(1);
+    assertEquals(ref1Arg1.getType(), MacroDefinitionType.NAMEDARG);
+    assertEquals(ref1Arg1.getName(), "DefaultValue");
+    assertEquals(ref1Arg1.getValue(), "\"-\"");
+  }
 }

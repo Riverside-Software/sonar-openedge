@@ -1759,22 +1759,21 @@ public class Lexer implements IPreprocessor {
    * If not a doublequote, we collect characters until we find a whitespace
    */
   private String ppIncludeRefArg(MacroCharPos cp, boolean numberedArg) {
-    StringBuilder retVal = new StringBuilder();
-    boolean gobbleWS = false;
-    char c = cp.chars[cp.pos];
-    
-    if (!numberedArg) {
-      if (c == '"') {
-        gobbleWS = true;
-      } else {
-        retVal.append(c);
-      }
-      cp.pos++;
+    // Handle empty string in double quotes followed by space in a different way depending on numberedArg value
+    if ((cp.pos <= cp.chars.length - 4) && (cp.chars[cp.pos] == '"') && (cp.chars[cp.pos + 1] == '"')
+        && Character.isWhitespace(cp.chars[cp.pos + 2])) {
+      cp.pos += 2;
+      if (numberedArg)
+        return "\"";
+      else
+        return "";
     }
 
+    StringBuilder retVal = new StringBuilder();
+    boolean gobbleWS = false;
     // Iterate up to, but not including, closing curly
     while (cp.pos < cp.chars.length - 1) {
-      c = cp.chars[cp.pos];
+      char c = cp.chars[cp.pos];
       switch (c) {
         case '"':
           if (cp.chars[cp.pos + 1] == '"') {
