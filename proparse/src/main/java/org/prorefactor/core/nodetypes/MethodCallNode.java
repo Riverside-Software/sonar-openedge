@@ -127,14 +127,6 @@ public class MethodCallNode extends ExpressionNode {
     return method == null ? null : method.getO1();
   }
 
-  public synchronized IMethodElement getMethodElement() {
-    if (!computed) {
-      compute();
-      computed = true;
-    }
-    return method == null ? null : method.getO2();
-  }
-
   @Override
   public synchronized DataType getDataType() {
     if (!computed) {
@@ -142,6 +134,14 @@ public class MethodCallNode extends ExpressionNode {
       computed = true;
     }
     return returnDataType;
+  }
+
+  public synchronized IMethodElement getMethodElement() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return method == null ? null : method.getO2();
   }
 
 }
