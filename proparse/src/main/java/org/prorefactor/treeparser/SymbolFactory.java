@@ -65,8 +65,7 @@ public final class SymbolFactory {
       case SUBMENU:
         return new Submenu(name, scope);
       default:
-        assert false : "Unexpected values for SymbolFactory" + " " + symbolType + " " + name;
-        return null;
+        throw new IllegalArgumentException("Unexpected " + symbolType + " node type for SymbolFactory#create()");
     }
   }
 

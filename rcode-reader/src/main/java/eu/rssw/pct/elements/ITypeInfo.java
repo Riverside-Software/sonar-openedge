@@ -23,6 +23,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
+import org.prorefactor.core.Pair;
+
 
 public interface ITypeInfo {
   String getTypeName();
@@ -90,7 +92,7 @@ public interface ITypeInfo {
     return isAssignableFrom(info.getParentTypeName(), provider);
   }
 
-  default IMethodElement getExactMatch(Function<String, ITypeInfo> provider, String method, DataType... parameters) {
+  default Pair<ITypeInfo, IMethodElement> getExactMatch(Function<String, ITypeInfo> provider, String method, DataType... parameters) {
     for (IMethodElement elem : getMethods()) {
       if (method.equalsIgnoreCase(elem.getName()) && (elem.getParameters().length == parameters.length)) {
         boolean match = true;
@@ -98,7 +100,7 @@ public interface ITypeInfo {
           match &= elem.getParameters()[zz].getDataType().equals(parameters[zz]);
         }
         if (match)
-          return elem;
+          return Pair.of(this, elem);
       }
     }
     ITypeInfo parent = provider.apply(getParentTypeName());
@@ -108,7 +110,7 @@ public interface ITypeInfo {
     return null;
   }
 
-  default IMethodElement getCompatibleMatch(Function<String, ITypeInfo> provider, String method, DataType... parameters) {
+  default Pair<ITypeInfo, IMethodElement> getCompatibleMatch(Function<String, ITypeInfo> provider, String method, DataType... parameters) {
     for (IMethodElement elem : getMethods()) {
       if (method.equalsIgnoreCase(elem.getName()) && (elem.getParameters().length == parameters.length)) {
         boolean match = true;
@@ -116,7 +118,7 @@ public interface ITypeInfo {
           match &= elem.getParameters()[zz].getDataType().isCompatible(parameters[zz], provider);
         }
         if (match)
-          return elem;
+          return Pair.of(this, elem);
       }
     }
     ITypeInfo parent = provider.apply(getParentTypeName());
@@ -126,8 +128,8 @@ public interface ITypeInfo {
     return null;
   }
 
-  default IMethodElement getMethod(Function<String, ITypeInfo> provider, String method, DataType... parameters) {
-    IMethodElement exactMatch = getExactMatch(provider, method, parameters);
+  default Pair<ITypeInfo, IMethodElement> getMethod(Function<String, ITypeInfo> provider, String method, DataType... parameters) {
+    Pair<ITypeInfo, IMethodElement> exactMatch = getExactMatch(provider, method, parameters);
     if (exactMatch != null)
       return exactMatch;
     return getCompatibleMatch(provider, method, parameters);

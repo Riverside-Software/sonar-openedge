@@ -58,11 +58,8 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(OpenEdge.class, OpenEdgeDB.class, OpenEdgeSettings.class);
 
     // Profile and rules
-    if (context.getRuntime().getProduct() == SonarProduct.SONARQUBE)
-      context.addExtension(OpenEdgeRulesDefinition.class);
-
-    context.addExtensions(BasicChecksRegistration.class, OpenEdgeProfile.class, OpenEdgeDBProfile.class,
-        OpenEdgeMetrics.class, OpenEdgeComponents.class);
+    context.addExtensions(OpenEdgeRulesDefinition.class, BasicChecksRegistration.class, OpenEdgeProfile.class,
+        OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
 
     // Syntax highlight and simple CPD
     if (context.getRuntime().getProduct() == SonarProduct.SONARQUBE) {

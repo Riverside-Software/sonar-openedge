@@ -29,11 +29,15 @@ import org.prorefactor.proparse.antlr4.Proparse.Exprt2FieldContext;
 import org.prorefactor.proparse.antlr4.Proparse.FieldContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgDatasetHandleContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgTableHandleContext;
+import org.prorefactor.proparse.antlr4.Proparse.QueryIdentifierContext;
 import org.prorefactor.proparse.antlr4.Proparse.RecordContext;
 import org.prorefactor.proparse.antlr4.Proparse.WidNameContext;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
+
+import eu.rssw.pct.elements.DataType;
 
 public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
@@ -60,7 +64,6 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
   @Override
   public void enterExprTermAttribute(ExprTermAttributeContext ctx) {
     ContextQualifier cq = contextQualifiers.get(ctx.attributeName().nonPunctuating());
-
     if (ctx.expressionTerm() instanceof ExprTermOtherContext) {
       ExprTermOtherContext ctx2 = (ExprTermOtherContext) ctx.expressionTerm();
       if (ctx2.expressionTerm2() instanceof Exprt2FieldContext) {
@@ -69,6 +72,15 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
       }
     } else if (ctx.expressionTerm() instanceof ExprTermWidgetContext) {
       widattr(ctx, (ExprTermWidgetContext) ctx.expressionTerm(), cq, ctx.attributeName().nonPunctuating().getText());
+    }
+  }
+
+  @Override
+  public void enterQueryIdentifier(QueryIdentifierContext ctx) {
+    Query qry = currentScope.lookupQuery(ctx.identifier().getText());
+    JPNode node = support.getNode(ctx);
+    if ((node != null) && (qry != null)) {
+      node.setSymbol(qry);
     }
   }
 
@@ -130,19 +142,25 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
   // Called from expressionTerm rule (expressionTerm2 option) and widattr rule (widattrExprt2 option)
   // Tries to add references to variables/properties of current class, or references to static classes
+  // And references to current variables / properties through another object reference
   private void widattr(Exprt2FieldContext ctx2, ContextQualifier cq, String right) {
     String clsRef = ctx2.field().getText();
     String clsName = rootScope.getClassName();
-    if ((clsRef != null) && (clsName != null) && (clsRef.indexOf('.') == -1) && (clsName.indexOf('.') != -1))
-      clsName = clsName.substring(clsName.lastIndexOf('.') + 1);
 
-    if ((clsRef != null) && (clsName != null) && clsRef.equalsIgnoreCase(clsName)) {
+    boolean isFullStaticRef = (clsRef != null) && clsRef.equalsIgnoreCase(clsName);
+    boolean isShortStaticRef = (clsRef != null) && (clsRef.indexOf('.') == -1) && (clsName != null)
+        && clsRef.equalsIgnoreCase(clsName.substring(clsName.lastIndexOf('.') + 1));
+    boolean isStaticRef = isFullStaticRef || isShortStaticRef;
+
+    JPNode fieldNode = support.getNode(ctx2.field());
+    boolean isExpr = (fieldNode != null) && fieldNode.isIExpression();
+    DataType dt = isExpr ? fieldNode.asIExpression().getDataType() : null;
+    boolean isRefToCurrentClass = (dt != null) && (dt.getClassName() != null)
+        && (dt.getClassName().equalsIgnoreCase(rootScope.getClassName()));
+
+    if (isStaticRef || isRefToCurrentClass) {
       FieldLookupResult result = currentBlock.lookupField(right, true);
-      if (result == null)
-        return;
-
-      // Variable
-      if (result.getSymbol() instanceof Variable) {
+      if ((result != null) && (result.getSymbol() instanceof Variable)) {
         result.getSymbol().noteReference(support.getNode(ctx2.getParent().getParent()), cq);
       }
     }

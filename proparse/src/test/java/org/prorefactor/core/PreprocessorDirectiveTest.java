@@ -37,7 +37,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class PreprocessorDirectiveTest extends AbstractProparseTest {
-  private final static String SRC_DIR = "src/test/resources/data/preprocessor";
+  private static final String SRC_DIR = "src/test/resources/data/preprocessor";
 
   private RefactorSession session;
 
@@ -303,7 +303,7 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
     assertEquals(nmr.getMacroDef(), incRef.macroEventList.get(0));
     assertEquals(nmr.getLine(), 4);
     assertEquals(nmr.getEndLine(), 4);
-    assertEquals(nmr.getColumn(), 10);
+    assertEquals(nmr.getColumn(), 9);
     assertEquals(nmr.getEndColumn(), 17);
   }
 
@@ -321,7 +321,7 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
     IncludeRef incRef = (IncludeRef) mainFile.macroEventList.get(2);
     assertEquals(incRef.getLine(), 6);
     assertEquals(incRef.getEndLine(), 6);
-    assertEquals(incRef.getColumn(), 4);
+    assertEquals(incRef.getColumn(), 3);
     assertEquals(incRef.getEndColumn(), 36);
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.DEFINE);
     assertEquals(nodes.size(), 1);
@@ -330,7 +330,7 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
     assertEquals(nodes.get(0).getEndFileIndex(), 1);
     assertEquals(nodes.get(0).getLine(), 6);
     assertEquals(nodes.get(0).getEndLine(), 1);
-    assertEquals(nodes.get(0).getColumn(), 1);
+    assertEquals(nodes.get(0).getColumn(), 0);
     assertEquals(nodes.get(0).getEndColumn(), 3);
   }
 
@@ -345,11 +345,11 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
     JPNode leftParen = substNode.getNextNode();
     JPNode str = leftParen.getNextNode().getFirstChild().getFirstChild();
     assertEquals(leftParen.getLine(), 2);
-    assertEquals(leftParen.getColumn(), 19);
+    assertEquals(leftParen.getColumn(), 18);
     assertEquals(leftParen.getEndLine(), 2);
     assertEquals(leftParen.getEndColumn(), 19);
     assertEquals(str.getLine(), 2);
-    assertEquals(str.getColumn(), 20);
+    assertEquals(str.getColumn(), 19);
     assertEquals(str.getEndLine(), 2);
     assertEquals(str.getEndColumn(), 24);
 
@@ -357,11 +357,11 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
     JPNode leftParen2 = substNode2.getNextNode();
     JPNode str2 = leftParen2.getNextNode().getFirstChild().getFirstChild();
     assertEquals(leftParen2.getLine(), 3);
-    assertEquals(leftParen2.getColumn(), 19);
+    assertEquals(leftParen2.getColumn(), 18);
     assertEquals(leftParen2.getEndLine(), 3);
     assertEquals(leftParen2.getEndColumn(), 19);
     assertEquals(str2.getLine(), 3);
-    assertEquals(str2.getColumn(), 20);
+    assertEquals(str2.getColumn(), 19);
     assertEquals(str2.getEndLine(), 3);
     // FIXME Wrong value, should be 25
     assertEquals(str2.getEndColumn(), 20);
@@ -372,7 +372,7 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
     JPNode str3 = dispNode.getNextNode().getNextNode().getFirstChild();
     assertEquals(str3.getLine(), 4);
     assertEquals(str3.getEndLine(), 4);
-    assertEquals(str3.getColumn(), 9);
+    assertEquals(str3.getColumn(), 8);
     // FIXME Wrong value, should be 14
     assertEquals(str3.getEndColumn(), 9);
   }

@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
 import com.google.common.base.Charsets;
 
 public class PostLexerTest extends AbstractProparseTest {
-  private final static String SRC_DIR = "src/test/resources/data/lexer";
+  private static final String SRC_DIR = "src/test/resources/data/lexer";
 
   private RefactorSession session;
 
@@ -307,7 +307,7 @@ public class PostLexerTest extends AbstractProparseTest {
     ProToken tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
     assertEquals(tok.getLine(), 2);
-    assertEquals(tok.getCharPositionInLine(), 1);
+    assertEquals(tok.getCharPositionInLine(), 0);
     assertEquals(tok.getEndLine(), 2);
     assertEquals(tok.getEndCharPositionInLine(), 7);
     
@@ -329,7 +329,7 @@ public class PostLexerTest extends AbstractProparseTest {
     ProToken tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
     assertEquals(tok.getLine(), 2);
-    assertEquals(tok.getCharPositionInLine(), 1);
+    assertEquals(tok.getCharPositionInLine(), 0);
     assertEquals(tok.getEndLine(), 2);
     assertEquals(tok.getEndCharPositionInLine(), 7);
     
@@ -365,7 +365,7 @@ public class PostLexerTest extends AbstractProparseTest {
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 27);
+    assertEquals(tok.getCharPositionInLine(), 26);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 33);
 
@@ -377,7 +377,7 @@ public class PostLexerTest extends AbstractProparseTest {
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
     assertEquals(tok.getLine(), 1);
-    assertEquals(tok.getCharPositionInLine(), 72);
+    assertEquals(tok.getCharPositionInLine(), 71);
     assertEquals(tok.getEndLine(), 1);
     assertEquals(tok.getEndCharPositionInLine(), 84);
   }

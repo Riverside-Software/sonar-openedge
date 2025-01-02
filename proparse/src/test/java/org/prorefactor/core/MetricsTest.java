@@ -44,6 +44,8 @@ public class MetricsTest extends AbstractProparseTest {
 
     assertEquals(unit.getMetrics().getLoc(), 2);
     assertEquals(unit.getMetrics().getComments(), 6);
+    assertEquals(unit.getParseTreeSize(), 50);
+    assertEquals(unit.getJPNodeSize(), 22);
   }
 
   @Test

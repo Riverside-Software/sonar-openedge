@@ -38,6 +38,7 @@ import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.Modifier;
+import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -1466,22 +1467,22 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertNotNull(f2prm6.getDefinitionNode());
     assertEquals(f2prm1.getDefinitionNode().getNodeType(), ABLNodeType.ID);
     assertEquals(f2prm1.getDefinitionNode().getLine(), 13);
-    assertEquals(f2prm1.getDefinitionNode().getColumn(), 5);
+    assertEquals(f2prm1.getDefinitionNode().getColumn(), 4);
     assertEquals(f2prm2.getDefinitionNode().getNodeType(), ABLNodeType.ID);
     assertEquals(f2prm2.getDefinitionNode().getLine(), 14);
-    assertEquals(f2prm2.getDefinitionNode().getColumn(), 5);
+    assertEquals(f2prm2.getDefinitionNode().getColumn(), 4);
     assertEquals(f2prm3.getDefinitionNode().getNodeType(), ABLNodeType.RECORD_NAME);
     assertEquals(f2prm3.getDefinitionNode().getLine(), 15);
-    assertEquals(f2prm3.getDefinitionNode().getColumn(), 11);
+    assertEquals(f2prm3.getDefinitionNode().getColumn(), 10);
     assertEquals(f2prm4.getDefinitionNode().getNodeType(), ABLNodeType.ID);
     assertEquals(f2prm4.getDefinitionNode().getLine(), 16);
-    assertEquals(f2prm4.getDefinitionNode().getColumn(), 18);
+    assertEquals(f2prm4.getDefinitionNode().getColumn(), 17);
     assertEquals(f2prm5.getDefinitionNode().getNodeType(), ABLNodeType.ID);
     assertEquals(f2prm5.getDefinitionNode().getLine(), 17);
-    assertEquals(f2prm5.getDefinitionNode().getColumn(), 13);
+    assertEquals(f2prm5.getDefinitionNode().getColumn(), 12);
     assertEquals(f2prm6.getDefinitionNode().getNodeType(), ABLNodeType.ID);
     assertEquals(f2prm6.getDefinitionNode().getLine(), 18);
-    assertEquals(f2prm6.getDefinitionNode().getColumn(), 20);
+    assertEquals(f2prm6.getDefinitionNode().getColumn(), 19);
 
   }
 
@@ -1537,4 +1538,21 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(nodes.get(2).asIExpression().getDataType(), DataType.DECIMAL);
   }
 
+  @Test
+  public void test42() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test42.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    assertNull(unit.getRootScope().lookupQuery("qry00"));
+    Query qry = unit.getRootScope().lookupQuery("qry");
+    assertNotNull(qry);
+    List<JPNode> list = unit.getTopNode().query(ABLNodeType.ID);
+    assertEquals(list.size(), 4);
+    assertFalse(list.stream().anyMatch(it -> it.getSymbol() == null));
+    assertFalse(list.stream().anyMatch(it -> it.getSymbol().getNodeType() != ABLNodeType.QUERY));
+  }
 }

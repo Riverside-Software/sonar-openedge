@@ -19,6 +19,7 @@ import java.util.function.Function;
 
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.Pair;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 
@@ -733,6 +734,7 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
   static DataType getStandardMethodDataType(String id) {
     switch (id) {
       case "ADD-NEW-FIELD":
+      case "ADD-SUPER-PROCEDURE":
         return DataType.LOGICAL;
       // TODO Full list
       default:
@@ -740,7 +742,8 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
     }
   }
 
-  static DataType getObjectMethodDataType(Function<String, ITypeInfo> provider, JPNode node, ITypeInfo info, String methodName) {
+  static Pair<ITypeInfo, IMethodElement> getObjectMethod(Function<String, ITypeInfo> provider, JPNode node, ITypeInfo info,
+      String methodName) {
     // Create array of dataTypes
     List<JPNode> paramItems = node.getDirectChildren(ABLNodeType.PARAMETER_ITEM);
     DataType[] params = new DataType[paramItems.size()];
@@ -755,12 +758,7 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       params[zz++] = dt;
     }
 
-    if (info != null) {
-      IMethodElement methd = info.getMethod(provider, methodName, params);
-      return methd == null ? DataType.NOT_COMPUTED : methd.getReturnType();
-    } else {
-      return DataType.NOT_COMPUTED;
-    }
+    return info == null ? null : info.getMethod(provider, methodName, params);
   }
 
   static DataType getObjectAttributeDataType(IProparseEnvironment session, ITypeInfo info, String propName,

@@ -45,6 +45,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.IConstants;
+import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JPNodeMetrics;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
@@ -270,6 +271,40 @@ public class ParseUnit {
       return new MacroRef[] {};
     }
     return MacroLevel.sourceArray(macroGraph);
+  }
+
+  /**
+   * Return total number of ParseTree objects (ANTLR4 output) in this unit 
+   */
+  public long getParseTreeSize() {
+    return sizeOfParseTree(tree);
+  }
+
+  private static long sizeOfParseTree(ParseTree tree) {
+    if (tree == null)
+      return 0L;
+    long sz = 1;
+    for (int zz = 0; zz < tree.getChildCount(); zz++) {
+      sz += sizeOfParseTree(tree.getChild(zz));
+    }
+    return sz;
+  }
+
+  /**
+   * Return total number of JPNode in this unit
+   */
+  public long getJPNodeSize() {
+    return sizeOfJPNode(topNode);
+  }
+
+  private static long sizeOfJPNode(JPNode tree) {
+    if (tree == null)
+      return 0L;
+    long sz = 1;
+    for (JPNode n : tree.getDirectChildren()) {
+      sz += sizeOfJPNode(n);
+    }
+    return sz;
   }
 
   /**

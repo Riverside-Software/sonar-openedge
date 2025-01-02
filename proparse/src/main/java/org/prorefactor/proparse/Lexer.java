@@ -1236,7 +1236,7 @@ public class Lexer implements IPreprocessor {
       .setCharPositionInLine(tokenStartPos.col) //
       .setEndFileIndex(prevChar.file) //
       .setEndLine(prevChar.line) //
-      .setEndCharPositionInLine(prevChar.col) //
+      .setEndCharPositionInLine(prevChar.col + 1) //
       .setMacroExpansion(prevMacroExpansion) //
       .setMacroSourceNum(tokenStartPos.sourceNum) //
       .setAnalyzeSuspend(getCurrentAnalyzeSuspend()) //
@@ -1553,7 +1553,7 @@ public class Lexer implements IPreprocessor {
         ppCurrChar = '{';
         currentInput = new InputSource(++sourceCounter, refText.substring(1), refPos.file, refPos.line, refPos.col);
         currentInclude.addInputSource(currentInput);
-        prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol, "_proparse_");
+        prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol + 1, "_proparse_");
       } else {
         // Proparse Directive
         ppCurrChar = PROPARSE_DIRECTIVE;
@@ -1562,7 +1562,7 @@ public class Lexer implements IPreprocessor {
         // This will be counted as a source whether picked up here or picked
         // up as a normal macro ref.
         ++sourceCounter;
-        prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol, "_proparse_");
+        prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol + 1, "_proparse_");
         prepro.getLstListener().macroRefEnd();
       }
     } else if ("{*}".equals(refText)) {
@@ -1675,7 +1675,7 @@ public class Lexer implements IPreprocessor {
         // Unlike currline and currcol, currfile is only updated with a push/pop of the input stack.
         currFile = currentInput.getFileIndex();
         currSourceNum = currentInput.getSourceNum();
-        prepro.getLstListener().include(refPos.line, refPos.col, currLine, currCol, currFile, includeFilename);
+        prepro.getLstListener().include(refPos.line, refPos.col, currLine, currCol + 1, currFile, includeFilename);
         // Add the arguments to the new include object.
         int argNum = 1;
         for (IncludeArg incarg : incArgs) {
@@ -1699,12 +1699,12 @@ public class Lexer implements IPreprocessor {
     // Using this trick: {{&undefined-argument}{&*}}
     // it is possible to get line breaks into what we
     // get here as the macroName. See test data bug15.p and bug15.i.
-    prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol, macroName);
+    prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol + 1, macroName);
     ppNewMacroRef2(getArgText(macroName), refPos);
   }
 
   private void ppNewMacroRef(int argNum, FilePos refPos) {
-    prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol, Integer.toString(argNum));
+    prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol + 1, Integer.toString(argNum));
     ppNewMacroRef2(getArgText(argNum), refPos);
   }
 
@@ -1759,22 +1759,18 @@ public class Lexer implements IPreprocessor {
    * If not a doublequote, we collect characters until we find a whitespace
    */
   private String ppIncludeRefArg(MacroCharPos cp, boolean numberedArg) {
-    StringBuilder retVal = new StringBuilder();
-    boolean gobbleWS = false;
-    char c = cp.chars[cp.pos];
-    
-    if (!numberedArg) {
-      if (c == '"') {
-        gobbleWS = true;
-      } else {
-        retVal.append(c);
-      }
-      cp.pos++;
+    // Handle empty string in double quotes followed by space in a different way depending on numberedArg value
+    if ((cp.pos <= cp.chars.length - 4) && (cp.chars[cp.pos] == '"') && (cp.chars[cp.pos + 1] == '"')
+        && Character.isWhitespace(cp.chars[cp.pos + 2])) {
+      cp.pos += 2;
+      return numberedArg ? "\"" : "";
     }
 
+    StringBuilder retVal = new StringBuilder();
+    boolean gobbleWS = false;
     // Iterate up to, but not including, closing curly
     while (cp.pos < cp.chars.length - 1) {
-      c = cp.chars[cp.pos];
+      char c = cp.chars[cp.pos];
       switch (c) {
         case '"':
           if (cp.chars[cp.pos + 1] == '"') {
