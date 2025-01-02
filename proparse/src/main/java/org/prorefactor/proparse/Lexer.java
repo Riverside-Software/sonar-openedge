@@ -1763,10 +1763,7 @@ public class Lexer implements IPreprocessor {
     if ((cp.pos <= cp.chars.length - 4) && (cp.chars[cp.pos] == '"') && (cp.chars[cp.pos + 1] == '"')
         && Character.isWhitespace(cp.chars[cp.pos + 2])) {
       cp.pos += 2;
-      if (numberedArg)
-        return "\"";
-      else
-        return "";
+      return numberedArg ? "\"" : "";
     }
 
     StringBuilder retVal = new StringBuilder();
