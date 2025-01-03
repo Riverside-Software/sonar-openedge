@@ -50,14 +50,4 @@ public class TestServer extends Server {
     return "http://localhost";
   }
 
-  @Override
-  public boolean isSecured() {
-    return false;
-  }
-
-  @Override
-  public String getPermanentServerId() {
-    return "";
-  }
-
 }
