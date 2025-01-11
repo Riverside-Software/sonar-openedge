@@ -711,11 +711,6 @@ public class JPNode {
     return token.isAbbreviated();
   }
 
-  public boolean isKeyword() {
-    return token.getNodeType().isKeyword()
-        || ((token.getNodeType() == ABLNodeType.ID) && (ABLNodeType.isFormerUnreservedKeyword(getText())));
-  }
-
   /**
    * @return True if token is part of an editable section in AppBuilder managed code
    */
