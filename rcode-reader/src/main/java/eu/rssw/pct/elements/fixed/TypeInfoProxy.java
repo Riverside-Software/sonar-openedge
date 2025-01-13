@@ -87,12 +87,6 @@ public abstract class TypeInfoProxy implements ITypeInfo {
   }
 
   @Override
-  public IPropertyElement getProperty(String name) {
-    checkTypeInfo();
-    return typeInfo.getProperty(name);
-  }
-
-  @Override
   public boolean hasBuffer(String inName) {
     checkTypeInfo();
     return typeInfo.hasBuffer(inName);

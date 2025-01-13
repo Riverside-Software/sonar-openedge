@@ -115,16 +115,6 @@ public class TypeInfo implements ITypeInfo {
   }
 
   @Override
-  public IPropertyElement getProperty(String name) {
-    // Only for testing
-    for (IPropertyElement prop : properties) {
-      if (prop.getName().equalsIgnoreCase(name))
-        return prop;
-    }
-    return null;
-  }
-
-  @Override
   public boolean hasBuffer(String inName) {
     return false;
   }

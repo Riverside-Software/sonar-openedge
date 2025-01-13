@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.prorefactor.core.IConstants;
+import org.prorefactor.core.Pair;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
@@ -179,18 +180,16 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
     if (v != null) {
       return v;
     }
-
-    ITypeInfo info = typeInfo;
-    while (info != null) {
-      IPropertyElement prop = info.getProperty(name);
-      if (prop != null) {
+    if (typeInfo != null) {
+      Pair<ITypeInfo, IPropertyElement> pair = typeInfo.lookupProperty(refSession::getTypeInfo, name);
+      if (pair != null) {
         Variable retVal = new Variable(name, this);
-        if (prop.getVariable() != null)
-          retVal.setDataType(prop.getVariable().getDataType());
+        if (pair.getO2().getVariable() != null)
+          retVal.setDataType(pair.getO2().getVariable().getDataType());
         return retVal;
       }
-      info = refSession.getTypeInfo(info.getParentTypeName());
     }
+
     return null;
   }
 
