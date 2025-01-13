@@ -22,6 +22,7 @@ import static org.testng.Assert.assertNull;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.function.Function;
 
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
@@ -35,6 +36,8 @@ import eu.rssw.pct.elements.ITypeInfo;
  * Test Progress built-in classes presence in the session
  */
 public class RefactorSessionTest {
+  private static final Function<String, ITypeInfo> EMPTY_PROVIDER = str -> null;
+
   private RefactorSession session;
 
   @BeforeTest
@@ -86,8 +89,8 @@ public class RefactorSessionTest {
     assertEquals(info.getParentTypeName(), "Progress.Json.ObjectModel.JsonConstruct");
     assertEquals(info.getInterfaces().size(), 0);
 
-    assertNotNull(info.getProperty("Length"));
-    assertFalse(info.getProperty("Length").isStatic());
+    assertNotNull(info.lookupProperty(EMPTY_PROVIDER, "Length"));
+    assertFalse(info.lookupProperty(EMPTY_PROVIDER, "Length").getO2().isStatic());
   }
 
 }

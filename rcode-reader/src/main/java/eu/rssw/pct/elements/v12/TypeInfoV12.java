@@ -220,16 +220,6 @@ public class TypeInfoV12 implements ITypeInfo {
   }
 
   @Override
-  public IPropertyElement getProperty(String name) {
-    // Only for testing
-    for (IPropertyElement prop : properties) {
-      if (prop.getName().equalsIgnoreCase(name))
-        return prop;
-    }
-    return null;
-  }
-
-  @Override
   public boolean hasBuffer(String inName) {
     // TODO Can it be abbreviated ??
     for (IBufferElement buf : buffers) {

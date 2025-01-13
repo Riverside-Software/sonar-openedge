@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -65,6 +66,7 @@ import eu.rssw.pct.elements.fixed.TypeInfo;
 import eu.rssw.pct.elements.v12.TypeInfoV12;
 
 public class RCodeInfoTest {
+  private static final Function<String, ITypeInfo> EMPTY_PROVIDER = str -> null;
 
   @BeforeTest
   public void init() throws IOException {
@@ -186,18 +188,18 @@ public class RCodeInfoTest {
       assertNotNull(rci.getTypeInfo().getMethods());
       assertEquals(rci.getTypeInfo().getMethods().size(), 6);
 
-      assertNotNull(rci.getTypeInfo().getProperty("Delete"));
+      assertNotNull(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Delete"));
       if (checkEnumValues) {
-        assertNotNull(rci.getTypeInfo().getProperty("Write").getEnumDescriptor());
-        assertEquals(rci.getTypeInfo().getProperty("Write").getEnumDescriptor().getValue(), 0X2L);
-        assertNotNull(rci.getTypeInfo().getProperty("Delete").getEnumDescriptor());
-        assertEquals(rci.getTypeInfo().getProperty("Delete").getEnumDescriptor().getValue(), 0x179324681357L);
-        assertNotNull(rci.getTypeInfo().getProperty("Execute").getEnumDescriptor());
-        assertEquals(rci.getTypeInfo().getProperty("Execute").getEnumDescriptor().getValue(), 0x973113572468L);
-        assertNotNull(rci.getTypeInfo().getProperty("Extra01").getEnumDescriptor());
-        assertEquals(rci.getTypeInfo().getProperty("Extra01").getEnumDescriptor().getValue(), 0x1234L);
-        assertNotNull(rci.getTypeInfo().getProperty("Extra02").getEnumDescriptor());
-        assertEquals(rci.getTypeInfo().getProperty("Extra02").getEnumDescriptor().getValue(), 0x5678L);
+        assertNotNull(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Write").getO2().getEnumDescriptor());
+        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Write").getO2().getEnumDescriptor().getValue(), 0X2L);
+        assertNotNull(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Delete").getO2().getEnumDescriptor());
+        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Delete").getO2().getEnumDescriptor().getValue(), 0x179324681357L);
+        assertNotNull(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Execute").getO2().getEnumDescriptor());
+        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Execute").getO2().getEnumDescriptor().getValue(), 0x973113572468L);
+        assertNotNull(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Extra01").getO2().getEnumDescriptor());
+        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Extra01").getO2().getEnumDescriptor().getValue(), 0x1234L);
+        assertNotNull(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Extra02").getO2().getEnumDescriptor());
+        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Extra02").getO2().getEnumDescriptor().getValue(), 0x5678L);
       }
 
       Kryo kryo = getKryo();
@@ -249,29 +251,29 @@ public class RCodeInfoTest {
       assertNotNull(info.getProperties());
       assertEquals(info.getProperties().size(), 6);
 
-      IPropertyElement prop1 = info.getProperty("prop1");
+      IPropertyElement prop1 = info.lookupProperty(EMPTY_PROVIDER, "prop1").getO2();
       assertNotNull(prop1);
       assertTrue(prop1.isPublic());
       assertEquals(prop1.hashCode(), -1942347255);
 
-      IPropertyElement prop2 = info.getProperty("prop2");
+      IPropertyElement prop2 = info.lookupProperty(EMPTY_PROVIDER, "prop2").getO2();
       assertNotNull(prop2);
       assertTrue(prop2.isPrivate());
 
-      IPropertyElement prop3 = info.getProperty("prop3");
+      IPropertyElement prop3 = info.lookupProperty(EMPTY_PROVIDER, "prop3").getO2();
       assertNotNull(prop3);
       assertTrue(prop3.isPublic());
 
-      IPropertyElement prop4 = info.getProperty("prop4");
+      IPropertyElement prop4 = info.lookupProperty(EMPTY_PROVIDER, "prop4").getO2();
       assertNotNull(prop4);
       assertTrue(prop4.isProtected());
 
-      IPropertyElement prop5 = info.getProperty("prop5");
+      IPropertyElement prop5 = info.lookupProperty(EMPTY_PROVIDER, "prop5").getO2();
       assertNotNull(prop5);
       assertTrue(prop5.isProtected());
       assertTrue(prop5.isAbstract());
 
-      IPropertyElement prop6 = info.getProperty("prop6");
+      IPropertyElement prop6 = info.lookupProperty(EMPTY_PROVIDER, "prop6").getO2();
       assertNotNull(prop6);
       assertTrue(prop6.isPublic());
       assertTrue(prop6.isStatic());
@@ -433,15 +435,15 @@ public class RCodeInfoTest {
       assertEquals(rci.getCrc(), 18598);
       assertNotNull(rci.getTypeInfo());
       assertEquals(rci.getTypeInfo().getProperties().size(), 3);
-      IPropertyElement obj1 = rci.getTypeInfo().getProperty("obj0");
+      IPropertyElement obj1 = rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "obj0").getO2();
       assertNotNull(obj1);
       assertTrue(obj1.isPackageProtected());
 
-      IPropertyElement obj2 = rci.getTypeInfo().getProperty("obj1");
+      IPropertyElement obj2 = rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "obj1").getO2();
       assertNotNull(obj2);
       assertTrue(obj2.isPackagePrivate());
 
-      IPropertyElement obj3 = rci.getTypeInfo().getProperty("obj2");
+      IPropertyElement obj3 = rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "obj2").getO2();
       assertNotNull(obj3);
       assertTrue(obj3.isPublic());
     } catch (InvalidRCodeException caught) {

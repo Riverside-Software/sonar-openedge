@@ -25,7 +25,6 @@ import java.util.function.Function;
 
 import org.prorefactor.core.Pair;
 
-
 public interface ITypeInfo {
   String getTypeName();
   String getParentTypeName();
@@ -52,7 +51,6 @@ public interface ITypeInfo {
 
   IBufferElement getBuffer(String inName);
   IBufferElement getBufferFor(String name);
-  IPropertyElement getProperty(String name);
   ITableElement getTempTable(String inName);
   IDatasetElement getDataset(String dataset);
 
@@ -134,4 +132,43 @@ public interface ITypeInfo {
       return exactMatch;
     return getCompatibleMatch(provider, method, parameters);
   }
+
+  /**
+   * Return property by name in class hierarchy
+   */
+  default Pair<ITypeInfo, IPropertyElement> lookupProperty(Function<String, ITypeInfo> typeInfoProvider, String property) {
+    for (var elem : getProperties()) {
+      if (property.equalsIgnoreCase(elem.getName())) {
+        return Pair.of(this, elem);
+      }
+    }
+    var parent = typeInfoProvider.apply(getParentTypeName());
+    if (parent != null) {
+      var parentProp = parent.lookupProperty(typeInfoProvider, property);
+      if (parentProp != null)
+        return parentProp;
+    }
+    // When an interface inherits another one, the TypeInfo object still inherits from P.L.O. Inherited interface
+    // are stored in the list of interfaces
+    for (var str : getInterfaces()) {
+      var iface = typeInfoProvider.apply(str);
+      if (iface != null) {
+        var ifaceProp = iface.lookupProperty(typeInfoProvider, property);
+        if (ifaceProp != null)
+          return ifaceProp;
+      }
+    }
+
+    return null;
+  }
+
+  default IVariableElement lookupVariable(String varName) {
+    for (var elem : getVariables()) {
+      if (varName.equalsIgnoreCase(elem.getName())) {
+        return elem;
+      }
+    }
+    return null;
+  }
+
 }
