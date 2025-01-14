@@ -377,6 +377,7 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(exp2.getDataType(), DataType.LONGCHAR);
     assertFalse(exp2.isProperty());
     assertTrue(exp2.isVariable());
+    assertEquals(exp2.getTypeInfo().getTypeName(), "rssw.test.Class02");
     assertNull(exp2.getPropertyElement());
     assertNotNull(exp2.getVariableElement());
 

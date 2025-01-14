@@ -36,7 +36,7 @@ public class AttributeReferenceNode extends ExpressionNode {
   private String attributeName = "";
   private boolean computed = false;
   private Pair<ITypeInfo, IPropertyElement> property = null;
-  private IVariableElement variable = null;
+  private Pair<ITypeInfo, IVariableElement> variable = null;
   private DataType returnDataType = DataType.NOT_COMPUTED;
 
   public AttributeReferenceNode(ProToken t, JPNode parent, int num, boolean hasChildren, String attributeName) {
@@ -52,12 +52,14 @@ public class AttributeReferenceNode extends ExpressionNode {
     if (node.getFirstChild().getNodeType() == ABLNodeType.THISOBJECT) {
       var typeInfo = root.getTypeInfoProvider().apply(root.getClassName());
       property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
-      variable = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
+      var v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
+      variable = v1 == null ? null : Pair.of(typeInfo, v1);
     } else if (node.getFirstChild().getNodeType() == ABLNodeType.SUPER) {
       var typeInfo = root.getTypeInfoProvider().apply(root.getClassName());
       typeInfo = typeInfo == null ? null : root.getTypeInfoProvider().apply(typeInfo.getParentTypeName());
       property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
-      variable = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
+      var v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
+      variable = v1 == null ? null : Pair.of(typeInfo, v1);
     } else {
       returnDataType = node.getAttributeDataType(attributeName.toUpperCase());
     }
@@ -78,7 +80,8 @@ public class AttributeReferenceNode extends ExpressionNode {
     if (dataType.getPrimitive() == PrimitiveDataType.CLASS) {
       var typeInfo = root.getTypeInfoProvider().apply(dataType.getClassName());
       property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
-      variable = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
+      var v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
+      variable = v1 == null ? null : Pair.of(typeInfo, v1);
     } else if (dataType.getPrimitive() == PrimitiveDataType.HANDLE) {
       returnDataType = getStandardAttributeDataType(attributeName.toUpperCase());
     }
@@ -101,7 +104,7 @@ public class AttributeReferenceNode extends ExpressionNode {
     if (property != null)
       returnDataType = property.getO2().getVariable().getDataType();
     else if (variable != null)
-      returnDataType = variable.getDataType();
+      returnDataType = variable.getO2().getDataType();
   }
 
   public synchronized ITypeInfo getTypeInfo() {
@@ -109,7 +112,12 @@ public class AttributeReferenceNode extends ExpressionNode {
       compute();
       computed = true;
     }
-    return property == null ? null : property.getO1();
+    if ((property == null) && (variable == null))
+      return null;
+    else if (property != null)
+      return property.getO1();
+    else
+      return variable.getO1();
   }
 
   @Override
@@ -134,7 +142,7 @@ public class AttributeReferenceNode extends ExpressionNode {
       compute();
       computed = true;
     }
-    return variable;
+    return variable == null ? null : variable.getO2();
   }
 
   public synchronized boolean isVariable() {
