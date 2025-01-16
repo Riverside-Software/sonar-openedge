@@ -14,20 +14,30 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.Pair;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.treeparser.symbols.Event;
 
 import com.google.common.base.Strings;
 
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.IVariableElement;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
 /**
- * Expression node: <code>&lt;expr&gt;:attributeName</code>. Can also be a reference to an enum value.
+ * Expression node: <code>&lt;expr&gt;:attributeName</code>. Can also be a reference to an enum value, a reference to
+ * local class variable, a reference to a static property, ...
  */
 public class AttributeReferenceNode extends ExpressionNode {
   private String attributeName = "";
+  private boolean computed = false;
+  private Pair<ITypeInfo, IPropertyElement> property = null;
+  private Pair<ITypeInfo, IVariableElement> variable = null;
+  private DataType returnDataType = DataType.NOT_COMPUTED;
 
   public AttributeReferenceNode(ProToken t, JPNode parent, int num, boolean hasChildren, String attributeName) {
     super(t, parent, num, hasChildren);
@@ -38,31 +48,118 @@ public class AttributeReferenceNode extends ExpressionNode {
     return attributeName;
   }
 
-  @Override
-  public DataType getDataType() {
-    ProgramRootNode root = getTopLevelParent();
-    if (root == null)
-      return DataType.NOT_COMPUTED;
-
-    if (getFirstChild() instanceof SystemHandleNode) {
-      SystemHandleNode shn = (SystemHandleNode) getFirstChild();
-      return shn.getAttributeDataType(attributeName.toUpperCase());
-    } else if ((getFirstChild() instanceof FieldRefNode) && ((FieldRefNode) getFirstChild()).isStaticReference()) {
-      ITypeInfo info = ((FieldRefNode) getFirstChild()).getStaticReference();
-      return ExpressionNode.getObjectAttributeDataType(root.getEnvironment(), info, attributeName, false);
+  private void handleSystemHandleNode(SystemHandleNode node, ProgramRootNode root) {
+    if (node.getFirstChild().getNodeType() == ABLNodeType.THISOBJECT) {
+      ITypeInfo typeInfo = root.getTypeInfoProvider().apply(root.getClassName());
+      property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
+      IVariableElement v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
+      variable = v1 == null ? null : Pair.of(typeInfo, v1);
+    } else if (node.getFirstChild().getNodeType() == ABLNodeType.SUPER) {
+      ITypeInfo typeInfo = root.getTypeInfoProvider().apply(root.getClassName());
+      typeInfo = typeInfo == null ? null : root.getTypeInfoProvider().apply(typeInfo.getParentTypeName());
+      property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
+      IVariableElement v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
+      variable = v1 == null ? null : Pair.of(typeInfo, v1);
+    } else {
+      returnDataType = node.getAttributeDataType(attributeName.toUpperCase());
     }
-
-    // Left-Handle expression has to be a class
-    IExpression expr = getFirstChild().asIExpression();
-    PrimitiveDataType pdt = expr.getDataType().getPrimitive();
-    if (pdt == PrimitiveDataType.CLASS) {
-      return ExpressionNode.getObjectAttributeDataType(root.getEnvironment(),
-          root.getEnvironment().getTypeInfo(expr.getDataType().getClassName()), attributeName, true);
-    } else if (pdt == PrimitiveDataType.HANDLE) {
-      return ExpressionNode.getStandardAttributeDataType(attributeName.toUpperCase());
-    }
-
-    return DataType.NOT_COMPUTED;
   }
 
+  private void handleFieldRefNode(FieldRefNode node, ProgramRootNode root) {
+    if (node.isStaticReference()) {
+      property = node.getStaticReference().lookupProperty(root.getTypeInfoProvider(), attributeName);
+    } else if (node.getSymbol() instanceof Event) {
+      // Events only have Publish / Subscribe, no properties
+    } else if (node.isIExpression()) {
+      handleExpression(node.asIExpression(), root);
+    }
+  }
+
+  private void handleExpression(IExpression expr, ProgramRootNode root) {
+    DataType dataType = expr.getDataType();
+    if (dataType.getPrimitive() == PrimitiveDataType.CLASS) {
+      ITypeInfo typeInfo = root.getTypeInfoProvider().apply(dataType.getClassName());
+      property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
+      IVariableElement v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
+      variable = v1 == null ? null : Pair.of(typeInfo, v1);
+    } else if (dataType.getPrimitive() == PrimitiveDataType.HANDLE) {
+      returnDataType = getStandardAttributeDataType(attributeName.toUpperCase());
+    }
+  }
+
+  private void compute() {
+    ProgramRootNode root = getTopLevelParent();
+    if (root == null)
+      return;
+
+    JPNode firstChild = getFirstChild();
+    if (firstChild instanceof SystemHandleNode) {
+      SystemHandleNode shn = (SystemHandleNode) firstChild;
+      handleSystemHandleNode(shn, root);
+    } else if (firstChild instanceof FieldRefNode) {
+      FieldRefNode frn = (FieldRefNode) firstChild;
+      handleFieldRefNode(frn, root);
+    } else if (firstChild.isIExpression()) {
+      handleExpression(firstChild.asIExpression(), root);
+    }
+
+    if (property != null)
+      returnDataType = property.getO2().getVariable().getDataType();
+    else if (variable != null)
+      returnDataType = variable.getO2().getDataType();
+  }
+
+  public synchronized ITypeInfo getTypeInfo() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    if ((property == null) && (variable == null))
+      return null;
+    else if (property != null)
+      return property.getO1();
+    else
+      return variable.getO1();
+  }
+
+  @Override
+  public synchronized DataType getDataType() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return returnDataType;
+  }
+
+  public synchronized IPropertyElement getPropertyElement() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return property == null ? null : property.getO2();
+  }
+
+  public synchronized IVariableElement getVariableElement() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return variable == null ? null : variable.getO2();
+  }
+
+  public synchronized boolean isVariable() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return variable != null;
+  }
+
+  public synchronized boolean isProperty() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return property != null;
+  }
 }
