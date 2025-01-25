@@ -28,13 +28,19 @@ import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IParameter;
 
 public class MethodElement extends AbstractAccessibleElement implements IMethodElement {
-  private DataType returnDataType;
+  private final DataType returnDataType;
   private final IParameter[] parameters;
+  private final int extent;
 
   public MethodElement(String name, boolean isStatic, DataType returnDataType, IParameter... params) {
+    this(name, isStatic, returnDataType, 0, params);
+  }
+
+  public MethodElement(String name, boolean isStatic, DataType returnDataType, int extent, IParameter... params) {
     super(name, isStatic ? EnumSet.of(AccessType.STATIC, AccessType.PUBLIC) : EnumSet.of(AccessType.PUBLIC));
     this.returnDataType = returnDataType;
     this.parameters = params;
+    this.extent = extent;
   }
 
   @Override
@@ -49,7 +55,7 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
 
   @Override
   public int getExtent() {
-    return 1;
+    return extent;
   }
 
   @Override

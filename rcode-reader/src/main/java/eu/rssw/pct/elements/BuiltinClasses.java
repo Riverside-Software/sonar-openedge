@@ -216,7 +216,7 @@ public class BuiltinClasses {
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.BPM.Process", false, false, PLO_CLASSNAME, "");
-    typeInfo.addMethod(new MethodElement("GetDataSlots", false, new DataType("Progress.BPM.DataSlot")));
+    typeInfo.addMethod(new MethodElement("GetDataSlots", false, new DataType("Progress.BPM.DataSlot"), -1));
     typeInfo.addMethod(new MethodElement("UpdateDataSlots", false, DataType.LOGICAL,
         new Parameter(1, "dsArray", -1, ParameterMode.INPUT, new DataType("Progress.BPM.DataSlot"))));
     typeInfo.addMethod(new MethodElement("ActivateWorkstep", false, DataType.LOGICAL,
@@ -243,7 +243,7 @@ public class BuiltinClasses {
         new Parameter(1, "name", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("Reassign", false, DataType.LOGICAL,
         new Parameter(1, "name", 0, ParameterMode.INPUT, DataType.CHARACTER)));
-    typeInfo.addMethod(new MethodElement("GetDataSlots", false, new DataType("Progress.BPM.DataSlot")));
+    typeInfo.addMethod(new MethodElement("GetDataSlots", false, new DataType("Progress.BPM.DataSlot"), -1));
     typeInfo.addMethod(new MethodElement("MakeAvailable", false, DataType.LOGICAL));
     typeInfo.addMethod(new MethodElement("GetAvailablePresentationTypes", false, DataType.CHARACTER));
     typeInfo.addMethod(new MethodElement("GetPresentationUI", false, DataType.CHARACTER,
@@ -270,11 +270,11 @@ public class BuiltinClasses {
         new Parameter(1, "templateName", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("GetTask", false, new DataType("Progress.BPM.Task"),
         new Parameter(1, "taskName", 0, ParameterMode.INPUT, DataType.CHARACTER)));
-    typeInfo.addMethod(new MethodElement("GetProcessTemplateNames", false, DataType.CHARACTER));
-    typeInfo.addMethod(new MethodElement("GetAssignedTasks", false, new DataType("Progress.BPM.Task")));
-    typeInfo.addMethod(new MethodElement("GetAvailableTasks", false, new DataType("Progress.BPM.Task")));
+    typeInfo.addMethod(new MethodElement("GetProcessTemplateNames", false, DataType.CHARACTER, -1));
+    typeInfo.addMethod(new MethodElement("GetAssignedTasks", false, new DataType("Progress.BPM.Task"), -1));
+    typeInfo.addMethod(new MethodElement("GetAvailableTasks", false, new DataType("Progress.BPM.Task"), -1));
     typeInfo.addMethod(new MethodElement("GetDataSlotTemplates", false, new DataType("Progress.BPM.DataSlotTemplate"),
-        new Parameter(1, "templateName", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+        -1, new Parameter(1, "templateName", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("StartProcess", false, new DataType("Progress.BPM.Process"),
         new Parameter(1, "templateName", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(2, "dsTemplateArray", -1, ParameterMode.INPUT, new DataType("Progress.BPM.DataSlotTemplate"))));
@@ -285,14 +285,14 @@ public class BuiltinClasses {
         new Parameter(4, "priority", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("Connect", false, DataType.LOGICAL,
         new Parameter(1, "sessionID", 0, ParameterMode.INPUT, DataType.CHARACTER)));
-    typeInfo.addMethod(new MethodElement("GetAssignedTasks", false, new DataType("Progress.BPM.Task"),
+    typeInfo.addMethod(new MethodElement("GetAssignedTasks", false, new DataType("Progress.BPM.Task"), -1,
         new Parameter(1, "filter", 0, ParameterMode.INPUT, new DataType("Progress.BPM.Filter.ITaskFilter"))));
-    typeInfo.addMethod(new MethodElement("GetAvailableTasks", false, new DataType("Progress.BPM.Task"),
+    typeInfo.addMethod(new MethodElement("GetAvailableTasks", false, new DataType("Progress.BPM.Task"), -1,
         new Parameter(1, "filter", 0, ParameterMode.INPUT, new DataType("Progress.BPM.Filter.ITaskFilter"))));
-    typeInfo.addMethod(new MethodElement("GetAssignedTasks", false, new DataType("Progress.BPM.Task"),
+    typeInfo.addMethod(new MethodElement("GetAssignedTasks", false, new DataType("Progress.BPM.Task"), -1,
         new Parameter(1, "filter", -1, ParameterMode.INPUT, new DataType("Progress.BPM.Filter.ITaskFilter")),
         new Parameter(2, "operator", 0, ParameterMode.INPUT, DataType.CHARACTER)));
-    typeInfo.addMethod(new MethodElement("GetAvailableTasks", false, new DataType("Progress.BPM.Task"),
+    typeInfo.addMethod(new MethodElement("GetAvailableTasks", false, new DataType("Progress.BPM.Task"), -1,
         new Parameter(1, "filter", -1, ParameterMode.INPUT, new DataType("Progress.BPM.Filter.ITaskFilter")),
         new Parameter(2, "operator", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("GetProcess", false, new DataType("Progress.BPM.Process"),
@@ -308,7 +308,7 @@ public class BuiltinClasses {
     typeInfo.addMethod(new MethodElement("GetProcess", false, new DataType("Progress.BPM.Process"),
         new Parameter(1, "templateName", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(2, "eiID", 0, ParameterMode.INPUT, DataType.CHARACTER)));
-    typeInfo.addMethod(new MethodElement("GetProcesses", false, new DataType("Progress.BPM.Process")));
+    typeInfo.addMethod(new MethodElement("GetProcesses", false, new DataType("Progress.BPM.Process"), -1));
     typeInfo.addMethod(new MethodElement("Connect", false, DataType.LOGICAL,
         new Parameter(1, "clientPrincipalHdl", 0, ParameterMode.INPUT, DataType.HANDLE)));
     typeInfo.addMethod(new MethodElement("GetClientPrincipal", false, DataType.HANDLE));
@@ -650,67 +650,67 @@ public class BuiltinClasses {
     typeInfo.addMethod(new MethodElement("GetJsonText", false, DataType.LONGCHAR));
     typeInfo.addMethod(new MethodElement("GetJsonText", false, DataType.LONGCHAR,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetJsonText", false, DataType.LONGCHAR,
+    typeInfo.addMethod(new MethodElement("GetJsonText", false, DataType.LONGCHAR, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetCharacter", false, DataType.CHARACTER,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetCharacter", false, DataType.CHARACTER,
+    typeInfo.addMethod(new MethodElement("GetCharacter", false, DataType.CHARACTER, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetCOMHandle", false, DataType.COMPONENT_HANDLE,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetCOMHandle", false, DataType.COMPONENT_HANDLE,
+    typeInfo.addMethod(new MethodElement("GetCOMHandle", false, DataType.COMPONENT_HANDLE, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetDate", false, DataType.DATE,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetDate", false, DataType.DATE,
+    typeInfo.addMethod(new MethodElement("GetDate", false, DataType.DATE, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetDatetime", false, DataType.DATETIME,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetDatetime", false, DataType.DATETIME,
+    typeInfo.addMethod(new MethodElement("GetDatetime", false, DataType.DATETIME, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetDatetimeTZ", false, DataType.DATETIME_TZ,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetDatetimeTZ", false, DataType.DATETIME_TZ,
+    typeInfo.addMethod(new MethodElement("GetDatetimeTZ", false, DataType.DATETIME_TZ, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetDecimal", false, DataType.DECIMAL,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetDecimal", false, DataType.DECIMAL,
+    typeInfo.addMethod(new MethodElement("GetDecimal", false, DataType.DECIMAL, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetHandle", false, DataType.HANDLE,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetHandle", false, DataType.HANDLE,
+    typeInfo.addMethod(new MethodElement("GetHandle", false, DataType.HANDLE, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetInt64", false, DataType.INT64,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetInt64", false, DataType.INT64,
+    typeInfo.addMethod(new MethodElement("GetInt64", false, DataType.INT64, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetInteger", false, DataType.INTEGER,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetInteger", false, DataType.INTEGER,
+    typeInfo.addMethod(new MethodElement("GetInteger", false, DataType.INTEGER, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetJsonArray", false, new DataType("Progress.Json.ObjectModel.JsonArray"),
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetJsonArray", false, new DataType("Progress.Json.ObjectModel.JsonArray"),
+    typeInfo.addMethod(new MethodElement("GetJsonArray", false, new DataType("Progress.Json.ObjectModel.JsonArray"), -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetJsonObject", false, new DataType("Progress.Json.ObjectModel.JsonObject"),
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetJsonObject", false, new DataType("Progress.Json.ObjectModel.JsonObject"),
-        new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
+        -1, new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetLogical", false, DataType.LOGICAL,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetLogical", false, DataType.LOGICAL,
+    typeInfo.addMethod(new MethodElement("GetLogical", false, DataType.LOGICAL, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetLongchar", false, DataType.LONGCHAR,
@@ -718,31 +718,31 @@ public class BuiltinClasses {
     typeInfo.addMethod(new MethodElement("GetLongchar", false, DataType.LONGCHAR,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "codepage", 0, ParameterMode.INPUT, DataType.CHARACTER)));
-    typeInfo.addMethod(new MethodElement("GetLongchar", false, DataType.LONGCHAR,
+    typeInfo.addMethod(new MethodElement("GetLongchar", false, DataType.LONGCHAR, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetLongchar", false, DataType.LONGCHAR,
+    typeInfo.addMethod(new MethodElement("GetLongchar", false, DataType.LONGCHAR, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(3, "codepage", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("GetMemptr", false, DataType.MEMPTR,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetMemptr", false, DataType.MEMPTR,
+    typeInfo.addMethod(new MethodElement("GetMemptr", false, DataType.MEMPTR, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetRaw", false, DataType.RAW,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetRaw", false, DataType.RAW,
+    typeInfo.addMethod(new MethodElement("GetRaw", false, DataType.RAW, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetRecid", false, DataType.RECID,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetRecid", false, DataType.RECID,
+    typeInfo.addMethod(new MethodElement("GetRecid", false, DataType.RECID, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("GetRowid", false, DataType.ROWID,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetRowid", false, DataType.ROWID,
+    typeInfo.addMethod(new MethodElement("GetRowid", false, DataType.ROWID, -1,
         new Parameter(1, "index", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "size", 0, ParameterMode.INPUT, DataType.INTEGER)));
     typeInfo.addMethod(new MethodElement("IsNull", false, DataType.LOGICAL,
@@ -934,7 +934,7 @@ public class BuiltinClasses {
     typeInfo.addMethod(new MethodElement("GetJsonText", false, DataType.LONGCHAR,
         new Parameter(1, "propertyName", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("Clone", false, new DataType(PLO_CLASSNAME)));
-    typeInfo.addMethod(new MethodElement("GetNames", false, DataType.CHARACTER));
+    typeInfo.addMethod(new MethodElement("GetNames", false, DataType.CHARACTER, -1));
     typeInfo.addMethod(new MethodElement("GetType", false, DataType.INTEGER,
         new Parameter(1, "propertyName", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("GetCharacter", false, DataType.CHARACTER,
@@ -1127,16 +1127,16 @@ public class BuiltinClasses {
         new Parameter(1, "methodName", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(2, "flags", 0, ParameterMode.INPUT, new DataType("Progress.Reflect.Flags")),
         new Parameter(3, "parameterList", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
-    typeInfo.addMethod(new MethodElement("GetMethods", false, new DataType("Progress.Reflect.Method")));
-    typeInfo.addMethod(new MethodElement("GetMethods", false, new DataType("Progress.Reflect.Method"),
+    typeInfo.addMethod(new MethodElement("GetMethods", false, new DataType("Progress.Reflect.Method"), -1));
+    typeInfo.addMethod(new MethodElement("GetMethods", false, new DataType("Progress.Reflect.Method"), -1,
         new Parameter(1, "flags", 0, ParameterMode.INPUT, new DataType("Progress.Reflect.Flags"))));
     typeInfo.addMethod(new MethodElement("GetConstructor", false, new DataType("Progress.Reflect.Constructor"),
         new Parameter(1, "parameterList", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
     typeInfo.addMethod(new MethodElement("GetConstructor", false, new DataType("Progress.Reflect.Constructor"),
         new Parameter(1, "flags", 0, ParameterMode.INPUT, new DataType("Progress.Reflect.Flags")),
         new Parameter(2, "parameterList", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
-    typeInfo.addMethod(new MethodElement("GetConstructors", false, new DataType("Progress.Reflect.Constructor")));
-    typeInfo.addMethod(new MethodElement("GetConstructors", false, new DataType("Progress.Reflect.Constructor"),
+    typeInfo.addMethod(new MethodElement("GetConstructors", false, new DataType("Progress.Reflect.Constructor"), -1));
+    typeInfo.addMethod(new MethodElement("GetConstructors", false, new DataType("Progress.Reflect.Constructor"), -1,
         new Parameter(1, "flags", 0, ParameterMode.INPUT, new DataType("Progress.Reflect.Flags"))));
     typeInfo.addMethod(new MethodElement("IsA", false, DataType.LOGICAL,
         new Parameter(1, "typeName", 0, ParameterMode.INPUT, DataType.CHARACTER)));
@@ -1146,7 +1146,7 @@ public class BuiltinClasses {
     typeInfo.addMethod(new MethodElement("IsAbstract", false, DataType.LOGICAL));
     typeInfo.addMethod(new MethodElement("HasWidgetPool", false, DataType.LOGICAL));
     typeInfo.addMethod(new MethodElement("IsSerializable", false, DataType.LOGICAL));
-    typeInfo.addMethod(new MethodElement("GetInterfaces", false, new DataType("Progress.Lang.Class")));
+    typeInfo.addMethod(new MethodElement("GetInterfaces", false, new DataType("Progress.Lang.Class"), -1));
     typeInfo.addMethod(new MethodElement("IsGeneric", false, DataType.LOGICAL));
     typeInfo.addMethod(new MethodElement("IsIndexed", false, DataType.LOGICAL));
     typeInfo.addMethod(new MethodElement("IsEnum", false, DataType.LOGICAL));
@@ -1157,14 +1157,14 @@ public class BuiltinClasses {
         new Parameter(1, "enumMemberName", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("GetEnumNames", false, DataType.CHARACTER));
     typeInfo.addMethod(new MethodElement("GetEnumValues", false, DataType.CHARACTER));
-    typeInfo.addMethod(new MethodElement("GetProperties", false, new DataType("Progress.Reflect.Property")));
-    typeInfo.addMethod(new MethodElement("GetProperties", false, new DataType("Progress.Reflect.Property"),
+    typeInfo.addMethod(new MethodElement("GetProperties", false, new DataType("Progress.Reflect.Property"), -1));
+    typeInfo.addMethod(new MethodElement("GetProperties", false, new DataType("Progress.Reflect.Property"), -1,
         new Parameter(1, "flags", 0, ParameterMode.INPUT, new DataType("Progress.Reflect.Flags"))));
-    typeInfo.addMethod(new MethodElement("GetVariables", false, new DataType("Progress.Reflect.Variable")));
-    typeInfo.addMethod(new MethodElement("GetVariables", false, new DataType("Progress.Reflect.Variable"),
+    typeInfo.addMethod(new MethodElement("GetVariables", false, new DataType("Progress.Reflect.Variable"), -1));
+    typeInfo.addMethod(new MethodElement("GetVariables", false, new DataType("Progress.Reflect.Variable"), -1,
         new Parameter(1, "flags", 0, ParameterMode.INPUT, new DataType("Progress.Reflect.Flags"))));
-    typeInfo.addMethod(new MethodElement("GetEvents", false, new DataType("Progress.Reflect.Event")));
-    typeInfo.addMethod(new MethodElement("GetEvents", false, new DataType("Progress.Reflect.Event"),
+    typeInfo.addMethod(new MethodElement("GetEvents", false, new DataType("Progress.Reflect.Event"), -1));
+    typeInfo.addMethod(new MethodElement("GetEvents", false, new DataType("Progress.Reflect.Event"), -1,
         new Parameter(1, "flags", 0, ParameterMode.INPUT, new DataType("Progress.Reflect.Flags"))));
     typeInfo.addMethod(new MethodElement("GetProperty", false, new DataType("Progress.Reflect.Property"),
         new Parameter(1, "propertyName", 0, ParameterMode.INPUT, DataType.CHARACTER)));
@@ -1181,8 +1181,8 @@ public class BuiltinClasses {
     typeInfo.addMethod(new MethodElement("GetEvent", false, new DataType("Progress.Reflect.Event"),
         new Parameter(1, "eventName", 0, ParameterMode.INPUT, DataType.CHARACTER),
         new Parameter(2, "flags", 0, ParameterMode.INPUT, new DataType("Progress.Reflect.Flags"))));
-    typeInfo.addMethod(new MethodElement("GetTypeArguments", false, new DataType("Progress.Lang.Class")));
-    typeInfo.addMethod(new MethodElement("GetTypeParameters", false, new DataType("Progress.Lang.Class")));
+    typeInfo.addMethod(new MethodElement("GetTypeArguments", false, new DataType("Progress.Lang.Class"), -1));
+    typeInfo.addMethod(new MethodElement("GetTypeParameters", false, new DataType("Progress.Lang.Class"), -1));
     typeInfo.addMethod(new MethodElement("IsInstantiable", false, DataType.LOGICAL));
     typeInfo.addProperty(new PropertyElement("TypeName", false, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("Package", false, DataType.CHARACTER));
@@ -1308,7 +1308,7 @@ public class BuiltinClasses {
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.Reflect.Constructor", false, false, PLO_CLASSNAME, "");
-    typeInfo.addMethod(new MethodElement("GetParameters", false, new DataType("Progress.Reflect.Parameter")));
+    typeInfo.addMethod(new MethodElement("GetParameters", false, new DataType("Progress.Reflect.Parameter"), -1));
     typeInfo.addMethod(new MethodElement("Invoke", false, new DataType(PLO_CLASSNAME),
         new Parameter(1, "parameterList", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
     typeInfo.addProperty(new PropertyElement("Name", false, DataType.CHARACTER));
@@ -1354,7 +1354,8 @@ public class BuiltinClasses {
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.Reflect.Event", false, false, PLO_CLASSNAME, "");
-    typeInfo.addMethod(new MethodElement("GetHandlerParameters", false, new DataType("Progress.Reflect.Parameter")));
+    typeInfo.addMethod(
+        new MethodElement("GetHandlerParameters", false, new DataType("Progress.Reflect.Parameter"), -1));
     typeInfo.addMethod(new MethodElement("Subscribe", false, DataType.VOID,
         new Parameter(1, "objectRef", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "handlerObj", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
@@ -1410,7 +1411,7 @@ public class BuiltinClasses {
     BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo("Progress.Reflect.Method", false, false, PLO_CLASSNAME, "");
-    typeInfo.addMethod(new MethodElement("GetParameters", false, new DataType("Progress.Reflect.Parameter")));
+    typeInfo.addMethod(new MethodElement("GetParameters", false, new DataType("Progress.Reflect.Parameter"), -1));
     typeInfo.addMethod(new MethodElement("Invoke", false, DataType.RUNTYPE,
         new Parameter(1, "parameterList", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME)),
         new Parameter(2, "objectRef", 0, ParameterMode.INPUT, new DataType("Progress.Lang.ParameterList"))));
@@ -1507,10 +1508,10 @@ public class BuiltinClasses {
     typeInfo.addMethod(new MethodElement("GetAttribute", false, DataType.CHARACTER,
         new Parameter(1, "cUserid", 0, ParameterMode.INPUT, DataType.INTEGER),
         new Parameter(2, "attrName", 0, ParameterMode.INPUT, DataType.CHARACTER)));
-    typeInfo.addMethod(new MethodElement("GetAttributeNames", false, DataType.CHARACTER,
+    typeInfo.addMethod(new MethodElement("GetAttributeNames", false, DataType.CHARACTER, -1,
         new Parameter(1, "cUserid", 0, ParameterMode.INPUT, DataType.INTEGER)));
-    typeInfo.addMethod(new MethodElement("GetUserNames", false, DataType.CHARACTER));
-    typeInfo.addMethod(new MethodElement("GetUserNamesByQuery", false, DataType.CHARACTER,
+    typeInfo.addMethod(new MethodElement("GetUserNames", false, DataType.CHARACTER, -1));
+    typeInfo.addMethod(new MethodElement("GetUserNamesByQuery", false, DataType.CHARACTER, -1,
         new Parameter(1, "queryString", 0, ParameterMode.INPUT, DataType.CHARACTER)));
     typeInfo.addMethod(new MethodElement("RemoveAttribute", false, DataType.LOGICAL,
         new Parameter(1, "cUserid", 0, ParameterMode.INPUT, DataType.INTEGER),
