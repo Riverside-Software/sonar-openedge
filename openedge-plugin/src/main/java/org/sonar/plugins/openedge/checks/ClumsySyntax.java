@@ -29,23 +29,21 @@ import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.check.Priority;
 import org.sonar.check.Rule;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
+import org.sonar.plugins.openedge.api.model.CleanCode;
+import org.sonar.plugins.openedge.api.model.Impact;
 import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
 
 @Rule(priority = Priority.BLOCKER, name = "Valid yet clumsy ABL syntax", tags = {"clumsy", "confusing"})
 @SqaleConstantRemediation(value = "2min")
+@CleanCode(attribute = "FORMATTED")
+@Impact(quality = "MAINTAINABILITY", severity = "BLOCKER")
 public class ClumsySyntax extends OpenEdgeProparseCheck {
 
   @Override
   public void execute(InputFile file, ParseUnit unit) {
     for (JPNode node : unit.getTopNode().queryStateHead()) {
       switch (node.getNodeType()) {
-        case CATCH:
-        case CASE:
-        case DO:
-        case FOR:
-        case REPEAT:
-        case FINALLY:
-        case PROCEDURE:
+        case CATCH, CASE, DO, FOR, REPEAT, FINALLY, PROCEDURE:
           handleDoBlock(file, node);
           break;
         case FUNCTION:

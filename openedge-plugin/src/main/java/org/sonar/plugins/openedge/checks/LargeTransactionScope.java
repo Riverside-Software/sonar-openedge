@@ -26,10 +26,14 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.check.Priority;
 import org.sonar.check.Rule;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
+import org.sonar.plugins.openedge.api.model.CleanCode;
+import org.sonar.plugins.openedge.api.model.Impact;
 import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
 
 @Rule(priority = Priority.CRITICAL, name = "Large transaction scope")
 @SqaleConstantRemediation(value = "3h")
+@CleanCode(attribute = "EFFICIENT")
+@Impact(quality = "RELIABILITY", severity = "HIGH")
 public class LargeTransactionScope extends OpenEdgeProparseCheck {
 
   @Override

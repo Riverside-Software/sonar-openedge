@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.rules.RuleType;
 import org.sonar.api.server.rule.RulesDefinition;
+import org.sonar.api.utils.Version;
 import org.sonar.check.Priority;
 import org.sonar.plugins.openedge.api.AnnotationBasedRulesDefinition;
 import org.sonar.plugins.openedge.api.Constants;
@@ -54,6 +55,9 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
 
   @Override
   public void define(Context context) {
+    // Clean code attributes can only be set in version 10 and above
+    var version10 = runtime.getApiVersion().isGreaterThanOrEqual(Version.create(10, 1));
+
     var repository = context //
       .createRepository(Constants.STD_REPOSITORY_KEY, Constants.LANGUAGE_KEY) //
       .setName(REPOSITORY_NAME);
@@ -62,9 +66,8 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
 
     try (var input = this.getClass().getResourceAsStream("/rules/compiler-warnings.json");
         var reader = new InputStreamReader(input)) {
-      for (var rule : new GsonBuilder().create().fromJson(reader, RuleDefinition[].class)) {
-        createWarningRule(repository, rule.key, rule.name, rule.remediationCost,
-            Constants.lookupPriority(rule.priority), rule.tags);
+      for (var ruleDef : new GsonBuilder().create().fromJson(reader, RuleDefinition[].class)) {
+        createWarningRule(repository, ruleDef, version10);
       }
     } catch (IOException caught) {
       LOGGER.error("Unable to read compiler warning rules definition", caught);
@@ -95,16 +98,22 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     return IntStream.of(OpenEdgeRulesDefinition.WARNING_MSGS).anyMatch(x -> x == warningNum);
   }
 
-  private NewRule createWarningRule(NewRepository repository, String ruleKey, String name, int remediationCost,
-      Priority priority, String[] tags) {
-    var rule = repository.createRule(ruleKey); //
-    rule.setName(name) //
-      .setSeverity(priority.name()) //
-      .setTags(tags) //
+  private NewRule createWarningRule(NewRepository repository, RuleDefinition def, boolean cleanCode) {
+    var rule = repository.createRule(def.key); //
+    rule.setName(def.name) //
+      .setSeverity(def.priority) //
+      .setTags(def.tags) //
       .addTags("compiler-warnings") //
       .setType(RuleType.CODE_SMELL) //
-      .setHtmlDescription(getDescriptionUrl(ruleKey)) //
-      .setDebtRemediationFunction(rule.debtRemediationFunctions().constantPerIssue(remediationCost + "min"));
+      .setHtmlDescription(getDescriptionUrl(def.key)) //
+      .setDebtRemediationFunction(rule.debtRemediationFunctions().constantPerIssue(def.remediationCost + "min"));
+    if (cleanCode) {
+      rule.setCleanCodeAttribute(Constants.lookupCleanCodeAttribute(def.cleanCodeAttribute));
+      for (var impact : def.impacts) {
+        rule.addDefaultImpact(Constants.lookupSoftwareQuality(impact.quality),
+            Constants.lookupSeverity(impact.severity));
+      }
+    }
 
     return rule;
   }
@@ -120,6 +129,13 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     int remediationCost;
     String priority;
     String[] tags;
+    String cleanCodeAttribute;
+    Impact[] impacts;
+  }
+
+  private static final class Impact {
+    String quality;
+    String severity;
   }
 
 }

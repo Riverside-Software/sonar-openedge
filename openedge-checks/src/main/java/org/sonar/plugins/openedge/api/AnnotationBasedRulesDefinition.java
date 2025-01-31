@@ -34,8 +34,11 @@ import org.sonar.api.server.rule.RulesDefinition.OwaspTop10;
 import org.sonar.api.server.rule.RulesDefinition.OwaspTop10Version;
 import org.sonar.api.server.rule.RulesDefinitionAnnotationLoader;
 import org.sonar.api.utils.AnnotationUtils;
+import org.sonar.api.utils.Version;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
+import org.sonar.plugins.openedge.api.model.CleanCode;
+import org.sonar.plugins.openedge.api.model.Impact;
 import org.sonar.plugins.openedge.api.model.RuleTemplate;
 import org.sonar.plugins.openedge.api.model.SecurityHotspot;
 import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
@@ -70,7 +73,6 @@ public class AnnotationBasedRulesDefinition {
 
   private final NewRepository repository;
   private final ExternalDescriptionLoader externalDescriptionLoader;
-  @SuppressWarnings("unused")
   private final SonarRuntime runtime;
 
   public AnnotationBasedRulesDefinition(NewRepository repository, String languageKey, SonarRuntime runtime) {
@@ -102,6 +104,26 @@ public class AnnotationBasedRulesDefinition {
         }
         for (int tmp : annotation.cwe()) {
           rule.addCwe(tmp);
+        }
+      }
+      // Clean code attribute + impacts
+      if (runtime.getApiVersion().isGreaterThanOrEqual(Version.create(10, 1))) {
+        var cleanCodeAnnotation = AnnotationUtils.getAnnotation(ruleClass, CleanCode.class);
+        if (cleanCodeAnnotation != null) {
+          var attr = Constants.lookupCleanCodeAttribute(cleanCodeAnnotation.attribute());
+          if (attr != null) {
+            rule.setCleanCodeAttribute(attr);
+          }
+          var impacts = ruleClass.getDeclaredAnnotationsByType(Impact.class);
+          if (impacts != null) {
+            for (var impact : impacts) {
+              var qual = Constants.lookupSoftwareQuality(impact.quality());
+              var sev = Constants.lookupSeverity(impact.severity());
+              if ((qual != null) && (sev != null)) {
+                rule.addDefaultImpact(qual, sev);
+              }
+            }
+          }
         }
       }
       rule.setTemplate(AnnotationUtils.getAnnotation(ruleClass, RuleTemplate.class) != null);
@@ -178,4 +200,5 @@ public class AnnotationBasedRulesDefinition {
       }
     }
   }
+
 }

@@ -21,6 +21,7 @@ package org.sonar.plugins.openedge.foundation;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import org.sonar.api.SonarEdition;
@@ -28,10 +29,15 @@ import org.sonar.api.SonarQubeSide;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.impl.server.RulesDefinitionContext;
 import org.sonar.api.internal.SonarRuntimeImpl;
+import org.sonar.api.issue.impact.Severity;
+import org.sonar.api.issue.impact.SoftwareQuality;
+import org.sonar.api.rules.CleanCodeAttribute;
 import org.sonar.api.utils.Version;
 import org.testng.annotations.Test;
 
 public class OpenEdgeRulesDefinitionTest {
+  private SonarRuntime sqRuntime9 = SonarRuntimeImpl.forSonarQube(Version.create(9, 9), SonarQubeSide.SERVER,
+      SonarEdition.COMMUNITY);
   private SonarRuntime sqRuntime10 = SonarRuntimeImpl.forSonarQube(Version.create(10, 8), SonarQubeSide.SERVER,
       SonarEdition.COMMUNITY);
 
@@ -45,15 +51,59 @@ public class OpenEdgeRulesDefinitionTest {
     assertNotNull(repo);
     assertEquals(repo.name(), "Standard rules");
     assertEquals(repo.language(), "oe");
-
     assertEquals(repo.rules().stream().filter(it -> it.key().startsWith("compiler.warning")).count(), 14);
     assertEquals(repo.rules().stream().filter(it -> !it.key().startsWith("compiler.warning")).count(), 3);
-    var cw = repo.rule("compiler.warning");
-    assertNotNull(cw);
-    assertTrue(cw.tags().contains("compiler-warnings"));
+
+    var cw1 = repo.rule("compiler.warning");
+    assertNotNull(cw1);
+    assertTrue(cw1.tags().contains("compiler-warnings"));
+
+    var cw2 = repo.rule("compiler.warning.214");
+    assertNotNull(cw2);
+    assertTrue(cw2.tags().contains("compiler-warnings"));
+    assertEquals(cw2.cleanCodeAttribute(), CleanCodeAttribute.LOGICAL);
+    assertEquals(cw2.defaultImpacts().size(), 1);
+    var entry = cw2.defaultImpacts().entrySet().iterator().next();
+    assertEquals(entry.getKey(), SoftwareQuality.RELIABILITY);
+    assertEquals(entry.getValue(), Severity.HIGH);
 
     var proparseError = repo.rule(OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY);
     assertNotNull(proparseError);
+
+    var rule1 = repo.rule("org.sonar.plugins.openedge.checks.LargeTransactionScope");
+    assertNotNull(rule1);
+    assertEquals(rule1.cleanCodeAttribute(), CleanCodeAttribute.EFFICIENT);
+    assertEquals(rule1.defaultImpacts().size(), 1);
+    var entry2 = rule1.defaultImpacts().entrySet().iterator().next();
+    assertEquals(entry2.getKey(), SoftwareQuality.RELIABILITY);
+    assertEquals(entry2.getValue(), Severity.HIGH);
+  }
+
+  @Test
+  public void testMainRulesV9() {
+    var rulesDef = new OpenEdgeRulesDefinition(sqRuntime9);
+    var context = new RulesDefinitionContext();
+    rulesDef.define(context);
+
+    var repo = context.repository("rssw-oe");
+    assertNotNull(repo);
+
+    var cw = repo.rule("compiler.warning.214");
+    assertNotNull(cw);
+    assertTrue(cw.tags().contains("compiler-warnings"));
+    assertNull(cw.cleanCodeAttribute());
+    assertEquals(cw.defaultImpacts().size(), 1);
+    var entry = cw.defaultImpacts().entrySet().iterator().next();
+    assertEquals(entry.getKey(), SoftwareQuality.MAINTAINABILITY);
+    assertEquals(entry.getValue(), Severity.HIGH);
+
+    var rule1 = repo.rule("org.sonar.plugins.openedge.checks.LargeTransactionScope");
+    assertNotNull(rule1);
+    assertNull(rule1.cleanCodeAttribute());
+    assertEquals(rule1.defaultImpacts().size(), 1);
+    var entry2 = rule1.defaultImpacts().entrySet().iterator().next();
+    assertEquals(entry2.getKey(), SoftwareQuality.MAINTAINABILITY);
+    assertEquals(entry2.getValue(), Severity.HIGH);
   }
 
   @Test
