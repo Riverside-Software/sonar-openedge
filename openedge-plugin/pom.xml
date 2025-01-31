@@ -100,7 +100,8 @@
           <pluginKey>${sonar.pluginKey}</pluginKey>
           <pluginName>${sonar.pluginName}</pluginName>
           <pluginClass>${sonar.pluginClass}</pluginClass>
-          <pluginApiMinVersion>8.9</pluginApiMinVersion>
+          <!-- SonarQube 9.9 -->
+          <pluginApiMinVersion>9.14</pluginApiMinVersion>
           <sonarLintSupported>true</sonarLintSupported>
           <skipDependenciesPackaging>true</skipDependenciesPackaging>
           <requiredForLanguages>oe,oedb</requiredForLanguages>

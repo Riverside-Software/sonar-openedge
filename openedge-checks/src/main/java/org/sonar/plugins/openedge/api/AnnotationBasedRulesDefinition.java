@@ -81,6 +81,7 @@ public class AnnotationBasedRulesDefinition {
   private final NewRepository repository;
   private final String languageKey;
   private final ExternalDescriptionLoader externalDescriptionLoader;
+  @SuppressWarnings("unused")
   private final SonarRuntime runtime;
 
   public AnnotationBasedRulesDefinition(NewRepository repository, String languageKey, SonarRuntime runtime) {
@@ -104,18 +105,14 @@ public class AnnotationBasedRulesDefinition {
       NewRule rule = newRule(ruleClass, failIfNoExplicitKey);
       externalDescriptionLoader.addHtmlDescription(rule, ruleClass);
       SecurityHotspot annotation = AnnotationUtils.getAnnotation(ruleClass, SecurityHotspot.class);
-      if (runtime.getApiVersion().isGreaterThanOrEqual(Version.create(7, 3)) && (annotation != null)) {
+      if (annotation != null) {
         rule.setType(RuleType.SECURITY_HOTSPOT);
         for (String str : annotation.owasp()) {
           OwaspTop10 owasp = OwaspTop10.valueOf(str);
-          if (owasp != null) {
-            if (runtime.getApiVersion().isGreaterThanOrEqual(Version.create(9, 3)))
-              rule.addOwaspTop10(OwaspTop10Version.Y2017, owasp);
-            else
-              rule.addOwaspTop10(owasp);
-          }
+          if (owasp != null)
+            rule.addOwaspTop10(OwaspTop10Version.Y2017, owasp);
         }
-        for (int tmp : annotation.cwe()) { 
+        for (int tmp : annotation.cwe()) {
           rule.addCwe(tmp);
         }
       }
