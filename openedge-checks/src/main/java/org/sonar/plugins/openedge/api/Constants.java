@@ -19,6 +19,8 @@
  */
 package org.sonar.plugins.openedge.api;
 
+import org.sonar.check.Priority;
+
 public class Constants {
   public static final String LANGUAGE_KEY = "oe";
   public static final String DB_LANGUAGE_KEY = "oedb";
@@ -69,5 +71,14 @@ public class Constants {
 
   private Constants() {
     
+  }
+
+  public static Priority lookupPriority(String str) {
+    for (Priority pri : Priority.values()) {
+      if (pri.name().equals(str))
+        return pri;
+    }
+
+    return Priority.INFO;
   }
 }

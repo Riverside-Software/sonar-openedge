@@ -19,9 +19,14 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.rules.RuleType;
 import org.sonar.api.server.rule.RulesDefinition;
@@ -29,28 +34,17 @@ import org.sonar.check.Priority;
 import org.sonar.plugins.openedge.api.AnnotationBasedRulesDefinition;
 import org.sonar.plugins.openedge.api.Constants;
 
+import com.google.gson.GsonBuilder;
+
 public class OpenEdgeRulesDefinition implements RulesDefinition {
   public static final String REPOSITORY_NAME = "Standard rules";
-
-  private static final int[] WARNING_MSGS = {
-      214, 1688, 2750, 2965, 4788, 4958, 4983, 5378, 12115, 14786, 14789, 15090, 18494, 19822};
   public static final String COMPILER_WARNING_RULEKEY = "compiler.warning";
-  public static final String COMPILER_WARNING_214_RULEKEY = "compiler.warning.214";
-  public static final String COMPILER_WARNING_1688_RULEKEY = "compiler.warning.1688";
-  public static final String COMPILER_WARNING_2750_RULEKEY = "compiler.warning.2750";
-  public static final String COMPILER_WARNING_2965_RULEKEY = "compiler.warning.2965";
-  public static final String COMPILER_WARNING_4788_RULEKEY = "compiler.warning.4788";
-  public static final String COMPILER_WARNING_4958_RULEKEY = "compiler.warning.4958";
-  public static final String COMPILER_WARNING_5378_RULEKEY = "compiler.warning.5378";
-  public static final String COMPILER_WARNING_12115_RULEKEY = "compiler.warning.12115";
-  public static final String COMPILER_WARNING_14786_RULEKEY = "compiler.warning.14786";
-  public static final String COMPILER_WARNING_14789_RULEKEY = "compiler.warning.14789";
-  public static final String COMPILER_WARNING_15090_RULEKEY = "compiler.warning.15090";
-  public static final String COMPILER_WARNING_18494_RULEKEY = "compiler.warning.18494";
-  public static final String COMPILER_WARNING_19822_RULEKEY = "compiler.warning.19822";
   public static final String PROPARSE_ERROR_RULEKEY = "proparse.error";
-  private static final String COMPILER_WARNING_TAG = "compiler-warnings";
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(OpenEdgeRulesDefinition.class);
   private static final String HTML_DOC_PATH = "/rules/%s/%s/%s.html";
+  private static final int[] WARNING_MSGS = {
+      214, 1688, 2750, 2965, 4788, 4958, 5378, 12115, 14786, 14789, 15090, 18494, 19822};
 
   private final SonarRuntime runtime;
 
@@ -58,73 +52,74 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     this.runtime = runtime;
   }
 
-  @SuppressWarnings("rawtypes")
   @Override
   public void define(Context context) {
-    NewRepository repository = context.createRepository(Constants.STD_REPOSITORY_KEY, Constants.LANGUAGE_KEY).setName(REPOSITORY_NAME);
-    AnnotationBasedRulesDefinition annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY, runtime);
-    annotationLoader.addRuleClasses(false, Arrays.<Class> asList(BasicChecksRegistration.ppCheckClasses()));
+    var repository = context //
+      .createRepository(Constants.STD_REPOSITORY_KEY, Constants.LANGUAGE_KEY) //
+      .setName(REPOSITORY_NAME);
+    var annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY, runtime);
+    annotationLoader.addRuleClasses(false, Arrays.asList(BasicChecksRegistration.ppCheckClasses()));
 
-    // Manually created rules for compiler warnings
-    createWarningRule(repository, COMPILER_WARNING_RULEKEY, "Compiler warnings", "15min", Priority.MINOR);
-    createWarningRule(repository, COMPILER_WARNING_214_RULEKEY,
-        "TRANSACTION keyword given within actual transaction level", "30min", Priority.CRITICAL);
-    createWarningRule(repository, COMPILER_WARNING_1688_RULEKEY,
-        "Subscript on array field in CONTAINS phrase ignored", "5min");
-    createWarningRule(repository, COMPILER_WARNING_2750_RULEKEY,
-        "RETURN statement in UDF or method is missing a return value expression", "5min");
-    createWarningRule(repository, COMPILER_WARNING_2965_RULEKEY,
-        "Invalid use of nonconstant elements in preprocessor expression", "10min", Priority.BLOCKER);
-    createWarningRule(repository, COMPILER_WARNING_4788_RULEKEY, "Translation exceeds allocated length", "30min",
-        Priority.CRITICAL, new String[] {COMPILER_WARNING_TAG, "tranman"});
-    createWarningRule(repository, COMPILER_WARNING_4958_RULEKEY,
-        "IMPORT UNFORMATTED statement references more than one field", "5min");
-    createWarningRule(repository, COMPILER_WARNING_5378_RULEKEY,
-        "The EXCEPT or USING phrase of the BUFFER-COPY statement only honors fields in the source buffer", "5min");
-    createWarningRule(repository, COMPILER_WARNING_12115_RULEKEY, "Expression evaluates to a constant", "5min");
-    createWarningRule(repository, COMPILER_WARNING_14786_RULEKEY,
-        "Table and field names must appear as they are in the schema", "2min", Priority.MAJOR);
-    createWarningRule(repository, COMPILER_WARNING_14789_RULEKEY, "Fields must be qualified with table name", "2min",
-        Priority.MAJOR);
-    createWarningRule(repository, COMPILER_WARNING_15090_RULEKEY, "Dead code", "30min", Priority.CRITICAL);
-    createWarningRule(repository, COMPILER_WARNING_18494_RULEKEY, "Abbreviated keywords are not authorized", "1min",
-        Priority.INFO);
-    createWarningRule(repository, COMPILER_WARNING_19822_RULEKEY,
-        "All code paths in a function or a method must return a value", "15min", Priority.CRITICAL);
+    try (var input = this.getClass().getResourceAsStream("/rules/compiler-warnings.json");
+        var reader = new InputStreamReader(input)) {
+      for (var rule : new GsonBuilder().create().fromJson(reader, RuleDefinition[].class)) {
+        createWarningRule(repository, rule.key, rule.name, rule.remediationCost,
+            Constants.lookupPriority(rule.priority), rule.tags);
+      }
+    } catch (IOException caught) {
+      LOGGER.error("Unable to read compiler warning rules definition", caught);
+    }
 
     // Manually created rule for proparse errors
-    NewRule proparseRule = repository.createRule(PROPARSE_ERROR_RULEKEY).setName("Proparse error").setSeverity(
-        Priority.INFO.name());
-    proparseRule.setType(RuleType.BUG);
-    proparseRule.setHtmlDescription(getClass().getResource(String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY,
-        Constants.STD_REPOSITORY_KEY, proparseRule.key())));
-
+    repository.createRule(PROPARSE_ERROR_RULEKEY) //
+      .setName("Proparse error") //
+      .setSeverity(Priority.INFO.name()) //
+      .setType(RuleType.BUG) //
+      .setHtmlDescription(getDescriptionUrl(PROPARSE_ERROR_RULEKEY));
     repository.done();
 
-    NewRepository repository2 = context.createRepository(Constants.STD_DB_REPOSITORY_KEY, Constants.DB_LANGUAGE_KEY).setName(REPOSITORY_NAME);
-    AnnotationBasedRulesDefinition annotationLoader2 = new AnnotationBasedRulesDefinition(repository2, Constants.DB_LANGUAGE_KEY, runtime);
-    annotationLoader2.addRuleClasses(false, Arrays.<Class> asList(BasicChecksRegistration.dbCheckClasses()));
+    var repository2 = context //
+      .createRepository(Constants.STD_DB_REPOSITORY_KEY, Constants.DB_LANGUAGE_KEY) //
+      .setName(REPOSITORY_NAME);
+    var annotationLoader2 = new AnnotationBasedRulesDefinition(repository2, Constants.DB_LANGUAGE_KEY, runtime);
+    annotationLoader2.addRuleClasses(false, Arrays.asList(BasicChecksRegistration.dbCheckClasses()));
+
     repository2.done();
+  }
+
+  public static int[] getWarningMsgList() {
+    return WARNING_MSGS;
   }
 
   public static boolean isWarningManagedByCABL(int warningNum) {
     return IntStream.of(OpenEdgeRulesDefinition.WARNING_MSGS).anyMatch(x -> x == warningNum);
   }
 
-  private void createWarningRule(NewRepository repository, String ruleKey, String name, String remediationCost) {
-    createWarningRule(repository, ruleKey, name, remediationCost, Priority.MINOR);
+  private NewRule createWarningRule(NewRepository repository, String ruleKey, String name, int remediationCost,
+      Priority priority, String[] tags) {
+    var rule = repository.createRule(ruleKey); //
+    rule.setName(name) //
+      .setSeverity(priority.name()) //
+      .setTags(tags) //
+      .addTags("compiler-warnings") //
+      .setType(RuleType.CODE_SMELL) //
+      .setHtmlDescription(getDescriptionUrl(ruleKey)) //
+      .setDebtRemediationFunction(rule.debtRemediationFunctions().constantPerIssue(remediationCost + "min"));
+
+    return rule;
   }
 
-  private void createWarningRule(NewRepository repository, String ruleKey, String name, String remediationCost, Priority priority) {
-    createWarningRule(repository, ruleKey, name, remediationCost, priority, new String[] { COMPILER_WARNING_TAG });
+  private URL getDescriptionUrl(String key) {
+    return getClass().getResource(
+        String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY, Constants.STD_REPOSITORY_KEY, key));
   }
 
-  private void createWarningRule(NewRepository repository, String ruleKey, String name, String remediationCost, Priority priority, String[] tags) {
-    NewRule warning = repository.createRule(ruleKey).setName(name).setSeverity(priority.name());
-    warning.setTags(tags);
-    warning.setDebtRemediationFunction(warning.debtRemediationFunctions().constantPerIssue(remediationCost));
-    warning.setType(RuleType.CODE_SMELL);
-    warning.setHtmlDescription(getClass().getResource(
-        String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY, Constants.STD_REPOSITORY_KEY, warning.key())));
+  private static final class RuleDefinition {
+    String key;
+    String name;
+    int remediationCost;
+    String priority;
+    String[] tags;
   }
+
 }

@@ -1,0 +1,102 @@
+[
+  {
+    "key": "compiler.warning",
+    "name": "Compiler warning",
+    "remediationCost": 15,
+    "priority": "MINOR",
+    "tags": []
+  },
+  {
+    "key": "compiler.warning.214",
+    "name": "TRANSACTION keyword given within actual transaction level",
+    "remediationCost": 30,
+    "priority": "CRITICAL",
+    "tags": []
+  },
+  {
+    "key": "compiler.warning.1688",
+    "name": "Subscript on array field in CONTAINS phrase ignored",
+    "remediationCost": 5,
+    "priority": "MINOR",
+    "tags": []
+  },
+  {
+    "key": "compiler.warning.2750",
+    "name": "RETURN statement in UDF or method is missing a return value expression",
+    "remediationCost": 5,
+    "priority": "MINOR",
+    "tags": []
+  },
+  {
+    "key": "compiler.warning.2965",
+    "name": "Invalid use of nonconstant elements in preprocessor expression",
+    "remediationCost": 10,
+    "priority": "BLOCKER",
+    "tags": []
+  },
+  {
+    "key": "compiler.warning.4788",
+    "name": "Translation exceeds allocated length",
+    "remediationCost": 30,
+    "priority": "CRITICAL",
+    "tags": [
+      "tranman"
+    ]
+  },
+  {
+    "key": "compiler.warning.4958",
+    "name": "IMPORT UNFORMATTED statement references more than one field",
+    "remediationCost": 5,
+    "priority": "MINOR",
+    "tags": []
+  },
+  {
+    "key": "compiler.warning.5378",
+    "name": "The EXCEPT or USING phrase of the BUFFER-COPY statement only honors fields in the source buffer",
+    "remediationCost": 5,
+    "priority": "MINOR",
+    "tags": []
+  },
+  {
+    "key": "compiler.warning.12115",
+    "name": "Expression evaluates to a constant",
+    "remediationCost": 5,
+    "priority": "MINOR",
+    "tags": []
+  },
+  {
+    "key": "compiler.warning.14786",
+    "name": "Table and field names must appear as they are in the schema",
+    "remediationCost": 2,
+    "priority": "MAJOR",
+    "tags": []
+  },
+  {
+    "key": "compiler.warning.14789",
+    "name": "Fields must be qualified with table name",
+    "remediationCost": 2,
+    "priority": "MAJOR",
+    "tags": []
+  },
+  {
+    "key": "compiler.warning.15090",
+    "name": "Dead code",
+    "remediationCost": 30,
+    "priority": "CRITICAL",
+    "tags": []
+  },
+  {
+    "key": "compiler.warning.18494",
+    "name": "Abbreviated keywords are not authorized",
+    "remediationCost": 1,
+    "priority": "INFO",
+    "tags": []
+  },
+  {
+    "key": "compiler.warning.19822",
+    "name": "All code paths in a function or a method must return a value",
+    "remediationCost": 15,
+    "priority": "CRITICAL",
+    "tags": []
+  }
+]
