@@ -5,7 +5,7 @@
 DEFINE TEMP-TABLE tt
   FIELD fld1 AS CHARACTER EXTENT 10
   INDEX idx1 IS WORD-INDEX fld1
- 
+
 FOR EACH tt WHERE tt.fld1[1] CONTAINS "foobar":
   // Code here...
 END.
@@ -16,7 +16,7 @@ END.
 DEFINE TEMP-TABLE tt
   FIELD fld1 AS CHARACTER EXTENT 10
   INDEX idx1 IS WORD-INDEX fld1
- 
+
 FOR EACH tt WHERE tt.fld1 CONTAINS "foobar":
   // Code here...
 END.

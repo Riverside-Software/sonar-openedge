@@ -50,7 +50,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
   public static final String COMPILER_WARNING_19822_RULEKEY = "compiler.warning.19822";
   public static final String PROPARSE_ERROR_RULEKEY = "proparse.error";
   private static final String COMPILER_WARNING_TAG = "compiler-warnings";
-  private static final String HTML_DOC_PATH = "/org/sonar/l10n/%s/rules/%s/%s.html";
+  private static final String HTML_DOC_PATH = "/rules/%s/%s/%s.html";
 
   private final SonarRuntime runtime;
 

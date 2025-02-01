@@ -2,24 +2,19 @@
 
 <h2>Noncompliant Code Example</h2>
 <pre>
-  FUNCTION f1 RETURNS CHARACTER:
-    IF (condition) THEN DO:
-      // Logic here
-      RETURN "XYZ".
-    END.
-    // If condition evaluates to false, then ? will be returned
-  END FUNCTION.
+FUNCTION f1 RETURNS CHARACTER:
+  IF (condition) THEN
+    RETURN "XYZ".
+  // If condition evaluates to false, then ? will be returned
+END FUNCTION.
 </pre>
 
 <h2>Compliant Solution</h2>
 <pre>
-  FUNCTION f1 RETURNS CHARACTER:
-    IF (condition) THEN DO:
-      // Logic here
-      RETURN "XYZ".
-    END.
-    ELSE
-      RETURN "ABC".
-
-  END FUNCTION.
+FUNCTION f1 RETURNS CHARACTER:
+  IF (condition) THEN
+    RETURN "XYZ".
+  ELSE
+    RETURN "ABC".
+END FUNCTION.
 </pre>

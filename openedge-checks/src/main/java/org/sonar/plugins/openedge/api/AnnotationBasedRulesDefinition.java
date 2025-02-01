@@ -19,30 +19,21 @@
  */
 package org.sonar.plugins.openedge.api;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.rules.RuleType;
 import org.sonar.api.server.rule.RulesDefinition;
-import org.sonar.api.server.rule.RulesDefinition.NewParam;
 import org.sonar.api.server.rule.RulesDefinition.NewRepository;
 import org.sonar.api.server.rule.RulesDefinition.NewRule;
 import org.sonar.api.server.rule.RulesDefinition.OwaspTop10;
 import org.sonar.api.server.rule.RulesDefinition.OwaspTop10Version;
 import org.sonar.api.server.rule.RulesDefinitionAnnotationLoader;
 import org.sonar.api.utils.AnnotationUtils;
-import org.sonar.api.utils.Version;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.model.RuleTemplate;
@@ -68,27 +59,24 @@ import com.google.common.collect.Sets;
  * </ul>
  * Names and descriptions are also retrieved based on the legacy SonarQube conventions:
  * <ul>
- * <li>Rule names and rule property descriptions can be defined in a property file:
- * /org/sonar/l10n/[languageKey].properties</li>
  * <li>HTML rule descriptions can be defined in individual resources:
- * /org/sonar/l10n/[languageKey]/rules/[repositoryKey]/ruleKey.html</li>
+ * /rules/[languageKey]/[repositoryKey]/ruleKey.html</li>
  * </ul>
  *
  * @since 2.5
  */
 public class AnnotationBasedRulesDefinition {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AnnotationBasedRulesDefinition.class);
 
   private final NewRepository repository;
-  private final String languageKey;
   private final ExternalDescriptionLoader externalDescriptionLoader;
   @SuppressWarnings("unused")
   private final SonarRuntime runtime;
 
   public AnnotationBasedRulesDefinition(NewRepository repository, String languageKey, SonarRuntime runtime) {
     this.repository = repository;
-    this.languageKey = languageKey;
-    String externalDescriptionBasePath = String.format("/org/sonar/l10n/%s/rules/%s", languageKey, repository.key());
-    this.externalDescriptionLoader = new ExternalDescriptionLoader(repository, externalDescriptionBasePath);
+    String externalDescriptionBasePath = String.format("/rules/%s/%s/", languageKey, repository.key());
+    this.externalDescriptionLoader = new ExternalDescriptionLoader(externalDescriptionBasePath);
     this.runtime = runtime;
   }
 
@@ -124,7 +112,6 @@ public class AnnotationBasedRulesDefinition {
       }
       newRules.add(rule);
     }
-    setupExternalNames(newRules);
   }
 
   @VisibleForTesting
@@ -146,27 +133,6 @@ public class AnnotationBasedRulesDefinition {
     }
 
     return rule;
-  }
-
-  private void setupExternalNames(Collection<NewRule> rules) {
-    URL resource = AnnotationBasedRulesDefinition.class.getResource("/org/sonar/l10n/" + languageKey + ".properties");
-    if (resource == null) {
-      return;
-    }
-    ResourceBundle bundle = ResourceBundle.getBundle("org.sonar.l10n." + languageKey, Locale.ENGLISH);
-    for (NewRule rule : rules) {
-      String baseKey = "rule." + repository.key() + "." + rule.key();
-      String nameKey = baseKey + ".name";
-      if (bundle.containsKey(nameKey)) {
-        rule.setName(bundle.getString(nameKey));
-      }
-      for (NewParam param : rule.params()) {
-        String paramDescriptionKey = baseKey + ".param." + param.key();
-        if (bundle.containsKey(paramDescriptionKey)) {
-          param.setDescription(bundle.getString(paramDescriptionKey));
-        }
-      }
-    }
   }
 
   private void setupSqaleModel(NewRule rule, Class<?> ruleClass) {
@@ -195,43 +161,21 @@ public class AnnotationBasedRulesDefinition {
   }
 
   private class ExternalDescriptionLoader {
-    @SuppressWarnings("unused")
-    private final NewRepository repository;
     private final String resourceBasePath;
 
-    public ExternalDescriptionLoader(NewRepository repository, String resourceBasePath) {
-      this.repository = repository;
+    public ExternalDescriptionLoader(String resourceBasePath) {
       this.resourceBasePath = resourceBasePath;
     }
 
     public void addHtmlDescription(NewRule rule, Class<?> clz) {
-      URL resource = clz.getResource(resourceBasePath + "/" + rule.key() + ".html");
-      if (resource != null) {
-        addHtmlDescription(rule, resource);
+      var path = resourceBasePath + rule.key().replace('.', '/') + ".html";
+      var url = clz.getResource(path);
+      if (url != null) {
+        rule.setHtmlDescription(url);
+      } else {
+        rule.setHtmlDescription("<p>No description</p>");
+        LOGGER.warn("No HTML description found in path {} for rule {}", path, rule.key());
       }
-    }
-
-    @VisibleForTesting
-    void addHtmlDescription(NewRule rule, URL resource) {
-      URLConnection cnx;
-      try {
-        cnx = resource.openConnection();
-      } catch (IOException caught) {
-        throw new IllegalStateException("Failed to read: " + resource, caught);
-      }
-      // Important in development, in order to prevent JAR locking
-      cnx.setUseCaches(false);
-
-      StringBuilder str = new StringBuilder();
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(cnx.getInputStream(), StandardCharsets.UTF_8))) {
-        String s;
-        while ((s = reader.readLine()) != null) {
-          str.append(s).append('\n');
-        }
-      } catch (IOException caught) {
-        throw new IllegalStateException("Failed to read: " + resource, caught);
-      }
-      rule.setHtmlDescription(str.toString());
     }
   }
 }
