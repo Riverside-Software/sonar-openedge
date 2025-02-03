@@ -93,40 +93,11 @@ public class AnnotationBasedRulesDefinition {
     List<NewRule> newRules = Lists.newArrayList();
     for (Class<?> ruleClass : ruleClasses) {
       NewRule rule = newRule(ruleClass, failIfNoExplicitKey);
-      externalDescriptionLoader.addHtmlDescription(rule, ruleClass);
-      SecurityHotspot annotation = AnnotationUtils.getAnnotation(ruleClass, SecurityHotspot.class);
-      if (annotation != null) {
-        rule.setType(RuleType.SECURITY_HOTSPOT);
-        for (String str : annotation.owasp()) {
-          OwaspTop10 owasp = OwaspTop10.valueOf(str);
-          if (owasp != null)
-            rule.addOwaspTop10(OwaspTop10Version.Y2017, owasp);
-        }
-        for (int tmp : annotation.cwe()) {
-          rule.addCwe(tmp);
-        }
-      }
-      // Clean code attribute + impacts
-      if (runtime.getApiVersion().isGreaterThanOrEqual(Version.create(10, 1))) {
-        var cleanCodeAnnotation = AnnotationUtils.getAnnotation(ruleClass, CleanCode.class);
-        if (cleanCodeAnnotation != null) {
-          var attr = Constants.lookupCleanCodeAttribute(cleanCodeAnnotation.attribute());
-          if (attr != null) {
-            rule.setCleanCodeAttribute(attr);
-          }
-          var impacts = ruleClass.getDeclaredAnnotationsByType(Impact.class);
-          if (impacts != null) {
-            for (var impact : impacts) {
-              var qual = Constants.lookupSoftwareQuality(impact.quality());
-              var sev = Constants.lookupSeverity(impact.severity());
-              if ((qual != null) && (sev != null)) {
-                rule.addDefaultImpact(qual, sev);
-              }
-            }
-          }
-        }
-      }
       rule.setTemplate(AnnotationUtils.getAnnotation(ruleClass, RuleTemplate.class) != null);
+      externalDescriptionLoader.addHtmlDescription(rule, ruleClass);
+      setupSecurityModel(rule, ruleClass);
+      if (runtime.getApiVersion().isGreaterThanOrEqual(Version.create(10, 1)))
+        setupCleanCode(rule, ruleClass);
       try {
         setupSqaleModel(rule, ruleClass);
       } catch (RuntimeException e) {
@@ -138,7 +109,7 @@ public class AnnotationBasedRulesDefinition {
 
   @VisibleForTesting
   NewRule newRule(Class<?> ruleClass, boolean failIfNoExplicitKey) {
-    org.sonar.check.Rule ruleAnnotation = AnnotationUtils.getAnnotation(ruleClass, org.sonar.check.Rule.class);
+    var ruleAnnotation = AnnotationUtils.getAnnotation(ruleClass, org.sonar.check.Rule.class);
     if (ruleAnnotation == null) {
       throw new IllegalArgumentException("No Rule annotation was found on " + ruleClass);
     }
@@ -155,6 +126,41 @@ public class AnnotationBasedRulesDefinition {
     }
 
     return rule;
+  }
+
+  private void setupSecurityModel(NewRule rule, Class<?> ruleClass) {
+    var annotation = AnnotationUtils.getAnnotation(ruleClass, SecurityHotspot.class);
+    if (annotation != null) {
+      rule.setType(RuleType.SECURITY_HOTSPOT);
+      for (String str : annotation.owasp()) {
+        OwaspTop10 owasp = OwaspTop10.valueOf(str);
+        if (owasp != null)
+          rule.addOwaspTop10(OwaspTop10Version.Y2017, owasp);
+      }
+      for (int tmp : annotation.cwe()) {
+        rule.addCwe(tmp);
+      }
+    }
+  }
+
+  private void setupCleanCode(NewRule rule, Class<?> ruleClass) {
+    var cleanCodeAnnotation = AnnotationUtils.getAnnotation(ruleClass, CleanCode.class);
+    if (cleanCodeAnnotation != null) {
+      var attr = Constants.lookupCleanCodeAttribute(cleanCodeAnnotation.attribute());
+      if (attr != null) {
+        rule.setCleanCodeAttribute(attr);
+      }
+      var impacts = ruleClass.getDeclaredAnnotationsByType(Impact.class);
+      if (impacts != null) {
+        for (var impact : impacts) {
+          var qual = Constants.lookupSoftwareQuality(impact.quality());
+          var sev = Constants.lookupSeverity(impact.severity());
+          if ((qual != null) && (sev != null)) {
+            rule.addDefaultImpact(qual, sev);
+          }
+        }
+      }
+    }
   }
 
   private void setupSqaleModel(NewRule rule, Class<?> ruleClass) {
