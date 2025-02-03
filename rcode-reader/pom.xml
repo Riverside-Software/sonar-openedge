@@ -12,6 +12,10 @@
 
   <name>RCode Reader</name>
 
+  <properties>
+    <sonar.cpd.exclusions>src/main/java/eu/rssw/pct/elements/BuiltinClasses.java</sonar.cpd.exclusions>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
