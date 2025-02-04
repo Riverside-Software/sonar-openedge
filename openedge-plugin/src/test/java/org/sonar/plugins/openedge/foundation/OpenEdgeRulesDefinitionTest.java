@@ -40,6 +40,7 @@ import org.sonar.check.Rule;
 import org.sonar.plugins.openedge.api.AnnotationBasedRulesDefinition;
 import org.sonar.plugins.openedge.api.model.CWE;
 import org.sonar.plugins.openedge.api.model.OWASP;
+import org.sonar.plugins.openedge.api.model.OWASP2021;
 import org.sonar.plugins.openedge.api.model.SecurityHotspot;
 import org.testng.annotations.Test;
 
@@ -150,15 +151,23 @@ public class OpenEdgeRulesDefinitionTest {
     // Nothing
   }
 
+  @Rule(key = "CustomRule04", name = "Number 4", tags = {"rssw", "security"})
+  @CWE(values = {10})
+  @OWASP2021(values = {"A9"})
+  private static class CustomRule04 {
+    // Nothing
+  }
+
   @Test
   public void testCustomRule() {
     var context = new RulesDefinitionContext();
     var repo = context.createRepository("repo1", "oe");
     var def = new AnnotationBasedRulesDefinition(repo, "oe", sqRuntime10);
-    def.addRuleClasses(Arrays.asList(new Class[] {CustomRule01.class, CustomRule02.class, CustomRule03.class}));
+    def.addRuleClasses(
+        Arrays.asList(new Class[] {CustomRule01.class, CustomRule02.class, CustomRule03.class, CustomRule04.class}));
     repo.done();
 
-    assertEquals(context.repository("repo1").rules().size(), 3);
+    assertEquals(context.repository("repo1").rules().size(), 4);
 
     var rule1 = context.repository("repo1").rule("CustomRule01");
     assertEquals(rule1.name(), "Number 1");
@@ -179,6 +188,12 @@ public class OpenEdgeRulesDefinitionTest {
     assertTrue(rule3.securityStandards().contains("cwe:4"));
     assertTrue(rule3.securityStandards().contains("owaspTop10:a1"));
     assertTrue(rule3.securityStandards().contains("owaspTop10:a2"));
+
+    var rule4 = context.repository("repo1").rule("CustomRule04");
+    assertEquals(rule4.name(), "Number 4");
+    assertEquals(rule4.type(), RuleType.VULNERABILITY);
+    assertTrue(rule4.securityStandards().contains("cwe:10"));
+    assertTrue(rule4.securityStandards().contains("owaspTop10-2021:a9"));
   }
 
 }
