@@ -37,8 +37,10 @@ import org.sonar.api.utils.AnnotationUtils;
 import org.sonar.api.utils.Version;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
+import org.sonar.plugins.openedge.api.model.CWE;
 import org.sonar.plugins.openedge.api.model.CleanCode;
 import org.sonar.plugins.openedge.api.model.Impact;
+import org.sonar.plugins.openedge.api.model.OWASP;
 import org.sonar.plugins.openedge.api.model.RuleTemplate;
 import org.sonar.plugins.openedge.api.model.SecurityHotspot;
 import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
@@ -129,17 +131,31 @@ public class AnnotationBasedRulesDefinition {
   }
 
   private void setupSecurityModel(NewRule rule, Class<?> ruleClass) {
-    var annotation = AnnotationUtils.getAnnotation(ruleClass, SecurityHotspot.class);
-    if (annotation != null) {
+    var hotspotAnnotation = AnnotationUtils.getAnnotation(ruleClass, SecurityHotspot.class);
+    if (hotspotAnnotation != null) {
       rule.setType(RuleType.SECURITY_HOTSPOT);
-      for (String str : annotation.owasp()) {
-        OwaspTop10 owasp = OwaspTop10.valueOf(str);
-        if (owasp != null)
-          rule.addOwaspTop10(OwaspTop10Version.Y2017, owasp);
-      }
-      for (int tmp : annotation.cwe()) {
-        rule.addCwe(tmp);
-      }
+      setOwasp(rule, hotspotAnnotation.owasp());
+      setCwe(rule, hotspotAnnotation.cwe());
+    }
+    var cweAnnotation = AnnotationUtils.getAnnotation(ruleClass, CWE.class);
+    if (cweAnnotation != null)
+      setCwe(rule, cweAnnotation.values());
+    var owaspAnnotation = AnnotationUtils.getAnnotation(ruleClass, OWASP.class);
+    if (owaspAnnotation != null)
+      setOwasp(rule, owaspAnnotation.values());
+  }
+
+  private void setOwasp(NewRule rule, String[] list) {
+    for (String str : list) {
+      OwaspTop10 owasp = OwaspTop10.valueOf(str);
+      if (owasp != null)
+        rule.addOwaspTop10(OwaspTop10Version.Y2017, owasp);
+    }
+  }
+
+  private void setCwe(NewRule rule, int[] list) {
+    for (int tmp : list) {
+      rule.addCwe(tmp);
     }
   }
 
