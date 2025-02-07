@@ -93,6 +93,32 @@ public class Routine extends Symbol {
     return retVal.toString();
   }
 
+  public String getIDEInsertElement(boolean upperCase) {
+    StringBuilder retVal = new StringBuilder(getName()).append('(');
+    int cnt = 1;
+    for (Parameter p : parameters) {
+      if (cnt > 1) {
+        retVal.append(", ");
+      }
+      String mode = "";
+      if (p.getDirectionNode() == ABLNodeType.INPUTOUTPUT)
+        mode = "input-output ";
+      else if ((p.getDirectionNode() == ABLNodeType.OUTPUT) || (p.getDirectionNode() == ABLNodeType.RETURN))
+        mode = "output ";
+      if (upperCase)
+        mode = mode.toUpperCase();
+      retVal.append(mode).append("${" + cnt + ":");
+      if ((p.getSymbol() != null) && (p.getSymbol().getName() != null))
+        retVal.append(p.getSymbol().getName());
+      else
+        retVal.append("arg" + cnt);
+      retVal.append("}");
+      cnt++;
+    }
+    retVal.append(")$0");
+    return retVal.toString();
+  }
+
   public String getReturnDataType() {
     if (returnDatatypeNode != null) {
       if (returnDatatypeNode.getPrimitive() == PrimitiveDataType.CLASS) {
