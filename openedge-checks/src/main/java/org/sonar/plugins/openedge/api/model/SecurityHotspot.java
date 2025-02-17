@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2024 Riverside Software
+ * Copyright (c) 2015-2025 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -27,6 +27,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface SecurityHotspot {
+  @Deprecated(forRemoval = true)
   int[] cwe() default {};
+  @Deprecated(forRemoval = true)
   String[] owasp() default {};
 }

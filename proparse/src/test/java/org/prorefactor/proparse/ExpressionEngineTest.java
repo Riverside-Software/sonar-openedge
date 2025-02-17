@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2024 Riverside Software
+ * Copyright (c) 2015-2025 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -324,7 +324,7 @@ public class ExpressionEngineTest extends AbstractProparseTest {
 
   @Test
   public void testObjectAttribute01() {
-    ParseUnit unit = getParseUnit("def var xx as Progress.Lang.Object. message xx:Next-Sibling.", session);
+    var unit = getParseUnit("def var xx as Progress.Lang.Object. message xx:Next-Sibling.", session);
     unit.treeParser01();
 
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
@@ -344,25 +344,27 @@ public class ExpressionEngineTest extends AbstractProparseTest {
 
   @Test
   public void testObjectAttribute02() {
-    String code = "class rssw.test.Class02:\n"
-        + "  define property p1 as char get. set.\n"
-        + "  define variable v1 as longchar.\n"
-        + "  method void m1():\n"
-        + "    this-object:p1.\n"
-        + "    this-object:v1.\n"
-        + "    this-object:Prev-Sibling.\n"
-        + "    super:Next-Sibling.\n"
-        + "    this-object:v2.\n"
-        + "  end method.\n"
-        + "end class.";
-    ParseUnit unit = getParseUnit(code, session);
+    var code = """
+        class rssw.test.Class02:
+          define property p1 as char get. set.
+          define variable v1 as longchar.
+          method void m1():
+            this-object:p1.
+            this-object:v1.
+            this-object:Prev-Sibling.
+            super:Next-Sibling.
+            this-object:v2.
+          end method.
+        end class.
+        """;
+    var unit = getParseUnit(code, session);
     unit.treeParser01();
 
-    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    var nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 5);
 
     assertTrue(nodes.get(0) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp1 = (AttributeReferenceNode) nodes.get(0);
+    var exp1 = (AttributeReferenceNode) nodes.get(0);
     assertEquals(exp1.getDataType(), DataType.CHARACTER);
     assertTrue(exp1.isProperty());
     assertFalse(exp1.isVariable());
@@ -371,7 +373,7 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertNull(exp1.getVariableElement());
 
     assertTrue(nodes.get(1) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp2 = (AttributeReferenceNode) nodes.get(1);
+    var exp2 = (AttributeReferenceNode) nodes.get(1);
     assertEquals(exp2.getDataType(), DataType.LONGCHAR);
     assertFalse(exp2.isProperty());
     assertTrue(exp2.isVariable());
@@ -380,53 +382,55 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertNotNull(exp2.getVariableElement());
 
     assertTrue(nodes.get(2) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp3 = (AttributeReferenceNode) nodes.get(2);
+    var exp3 = (AttributeReferenceNode) nodes.get(2);
     assertEquals(exp3.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp3.getTypeInfo().getTypeName(), "Progress.Lang.Object");
 
     assertTrue(nodes.get(3) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp4 = (AttributeReferenceNode) nodes.get(3);
+    var exp4 = (AttributeReferenceNode) nodes.get(3);
     assertEquals(exp4.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp4.getTypeInfo().getTypeName(), "Progress.Lang.Object");
 
     assertTrue(nodes.get(4) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp5 = (AttributeReferenceNode) nodes.get(4);
+    var exp5 = (AttributeReferenceNode) nodes.get(4);
     assertEquals(exp5.getDataType(), DataType.NOT_COMPUTED);
   }
 
   @BeforeMethod(dependsOnMethods = "setUp")
   public void beforeObjectAttribute03() {
-    TypeInfo typeInfo = new TypeInfo("rssw.test.IFace01", true, false, "Progress.Lang.Object", "");
+    var typeInfo = new TypeInfo("rssw.test.IFace01", true, false, "Progress.Lang.Object", "");
     typeInfo.addProperty(new PropertyElement("p1", false, DataType.INTEGER));
     session.injectTypeInfo(typeInfo);
 
     // When an interface inherits another one, the TypeInfo object still inherits from P.L.O. Inherited interface
     // are stored in the list of interfaces
-    TypeInfo typeInfo2 = new TypeInfo("rssw.test.IFace02", true, false, "Progress.Lang.Object", "", "rssw.test.IFace01");
+    var typeInfo2 = new TypeInfo("rssw.test.IFace02", true, false, "Progress.Lang.Object", "", "rssw.test.IFace01");
     typeInfo2.addProperty(new PropertyElement("p2", false, DataType.CHARACTER));
     session.injectTypeInfo(typeInfo2);
   }
 
   @Test
   public void testObjectAttribute03() {
-    String code = "define variable x1 as rssw.test.IFace02.\n"
-        + "message x1:p1.\n"
-        + "message x1:p2.";
-    ParseUnit unit = getParseUnit(code, session);
+    var code = """
+        define variable x1 as rssw.test.IFace02.
+        message x1:p1.
+        message x1:p2.
+        """;
+    var unit = getParseUnit(code, session);
     unit.treeParser01();
 
-    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    var nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 2);
 
     assertTrue(nodes.get(0) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp1 = (AttributeReferenceNode) nodes.get(0);
+    var exp1 = (AttributeReferenceNode) nodes.get(0);
     assertEquals(exp1.getDataType(), DataType.INTEGER);
     assertTrue(exp1.isProperty());
     assertFalse(exp1.isVariable());
     assertEquals(exp1.getTypeInfo().getTypeName(), "rssw.test.IFace01");
 
     assertTrue(nodes.get(1) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp2 = (AttributeReferenceNode) nodes.get(1);
+    var exp2 = (AttributeReferenceNode) nodes.get(1);
     assertEquals(exp2.getDataType(), DataType.CHARACTER);
     assertTrue(exp2.isProperty());
     assertFalse(exp2.isVariable());
@@ -435,16 +439,18 @@ public class ExpressionEngineTest extends AbstractProparseTest {
 
   @Test
   public void testEnumValues01() {
-    String code = "message Progress.Reflect.AccessMode:Public.\n"
-        + "message Progress.Reflect.AccessMode:Private.";
-    ParseUnit unit = getParseUnit(code, session);
+    var code = """
+        message Progress.Reflect.AccessMode:Public.
+        message Progress.Reflect.AccessMode:Private.
+        """;
+    var unit = getParseUnit(code, session);
     unit.treeParser01();
 
-    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    var nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 2);
 
     assertTrue(nodes.get(0) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp1 = (AttributeReferenceNode) nodes.get(0);
+    var exp1 = (AttributeReferenceNode) nodes.get(0);
     assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp1.getDataType().getClassName(), "Progress.Reflect.AccessMode");
     assertEquals(exp1.getTypeInfo().getTypeName(), "Progress.Reflect.AccessMode");
@@ -452,7 +458,7 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertFalse(exp1.isVariable());
 
     assertTrue(nodes.get(1) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp2 = (AttributeReferenceNode) nodes.get(1);
+    var exp2 = (AttributeReferenceNode) nodes.get(1);
     assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp2.getDataType().getClassName(), "Progress.Reflect.AccessMode");
     assertEquals(exp2.getTypeInfo().getTypeName(), "Progress.Reflect.AccessMode");
@@ -462,17 +468,19 @@ public class ExpressionEngineTest extends AbstractProparseTest {
 
   @Test
   public void testEnumValues02() {
-    String code = "using Progress.Reflect.AccessMode.\n"
-        + "message AccessMode:Public.\n"
-        + "message AccessMode:Private.";
-    ParseUnit unit = getParseUnit(code, session);
+    var code = """
+        using Progress.Reflect.AccessMode.
+        message AccessMode:Public.
+        message AccessMode:Private.
+        """;
+    var unit = getParseUnit(code, session);
     unit.treeParser01();
 
-    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    var nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 2);
 
     assertTrue(nodes.get(0) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp1 = (AttributeReferenceNode) nodes.get(0);
+    var exp1 = (AttributeReferenceNode) nodes.get(0);
     assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp1.getDataType().getClassName(), "Progress.Reflect.AccessMode");
     assertEquals(exp1.getTypeInfo().getTypeName(), "Progress.Reflect.AccessMode");
@@ -480,7 +488,7 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertFalse(exp1.isVariable());
 
     assertTrue(nodes.get(1) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp2 = (AttributeReferenceNode) nodes.get(1);
+    var exp2 = (AttributeReferenceNode) nodes.get(1);
     assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp2.getDataType().getClassName(), "Progress.Reflect.AccessMode");
     assertEquals(exp2.getTypeInfo().getTypeName(), "Progress.Reflect.AccessMode");
@@ -537,13 +545,13 @@ public class ExpressionEngineTest extends AbstractProparseTest {
 
   @BeforeMethod(dependsOnMethods = "setUp")
   public void beforeStaticProperty() {
-    TypeInfo typeInfo = new TypeInfo("rssw.test.Class08", false, false, "Progress.Lang.Object", "");
+    var typeInfo = new TypeInfo("rssw.test.Class08", false, false, "Progress.Lang.Object", "");
     typeInfo.addProperty(new PropertyElement("prop01", true, DataType.CHARACTER));
     typeInfo.addProperty(new PropertyElement("prop02", true, DataType.INTEGER));
     typeInfo.addProperty(new PropertyElement("prop03", true, DataType.DECIMAL));
     session.injectTypeInfo(typeInfo);
 
-    TypeInfo typeInfo2 = new TypeInfo("rssw.test.Class08Child", false, false, "rssw.test.Class08", "");
+    var typeInfo2 = new TypeInfo("rssw.test.Class08Child", false, false, "rssw.test.Class08", "");
     typeInfo2.addProperty(new PropertyElement("prop04", true, DataType.CHARACTER));
     typeInfo2.addProperty(new PropertyElement("prop05", true, DataType.INTEGER));
     typeInfo2.addProperty(new PropertyElement("prop06", true, DataType.DECIMAL));
@@ -552,33 +560,35 @@ public class ExpressionEngineTest extends AbstractProparseTest {
 
   @Test
   public void testStaticProperty01() {
-    String sourceCode = "message rssw.test.Class08:prop01.\n"
-        + "message rssw.test.Class08Child:prop02.\n"
-        + "message rssw.test.Class08:prop03.\n"
-        + "message rssw.test.Class08Child:prop04.";
-    ParseUnit unit = getParseUnit(sourceCode, session);
+    var sourceCode = """
+        message rssw.test.Class08:prop01. 
+        message rssw.test.Class08Child:prop02. 
+        message rssw.test.Class08:prop03.
+        message rssw.test.Class08Child:prop04.
+        """;
+    var unit = getParseUnit(sourceCode, session);
     unit.treeParser01();
 
-    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    var nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 4);
 
     assertTrue(nodes.get(0) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp1 = (AttributeReferenceNode) nodes.get(0);
+    var exp1 = (AttributeReferenceNode) nodes.get(0);
     assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
     assertEquals(exp1.getTypeInfo().getTypeName(), "rssw.test.Class08");
 
     assertTrue(nodes.get(1) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp2 = (AttributeReferenceNode) nodes.get(1);
+    var exp2 = (AttributeReferenceNode) nodes.get(1);
     assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.INTEGER);
     assertEquals(exp2.getTypeInfo().getTypeName(), "rssw.test.Class08");
 
     assertTrue(nodes.get(2) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp3 = (AttributeReferenceNode) nodes.get(2);
+    var exp3 = (AttributeReferenceNode) nodes.get(2);
     assertEquals(exp3.getDataType().getPrimitive(), PrimitiveDataType.DECIMAL);
     assertEquals(exp3.getTypeInfo().getTypeName(), "rssw.test.Class08");
 
     assertTrue(nodes.get(3) instanceof AttributeReferenceNode);
-    AttributeReferenceNode exp4 = (AttributeReferenceNode) nodes.get(3);
+    var exp4 = (AttributeReferenceNode) nodes.get(3);
     assertEquals(exp4.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
     assertEquals(exp4.getTypeInfo().getTypeName(), "rssw.test.Class08Child");
   }

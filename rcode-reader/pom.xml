@@ -5,12 +5,16 @@
   <parent>
     <groupId>eu.rssw</groupId>
     <artifactId>sonar-openedge</artifactId>
-    <version>2.30.1</version>
+    <version>3.0.0</version>
   </parent>
   <groupId>eu.rssw.openedge.rcode</groupId>
   <artifactId>rcode-reader</artifactId>
 
   <name>RCode Reader</name>
+
+  <properties>
+    <sonar.cpd.exclusions>src/main/java/eu/rssw/pct/elements/BuiltinClasses.java</sonar.cpd.exclusions>
+  </properties>
 
   <dependencies>
     <dependency>

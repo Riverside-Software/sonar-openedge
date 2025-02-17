@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2024 Riverside Software
+ * Copyright (c) 2015-2025 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -50,15 +50,15 @@ public class AttributeReferenceNode extends ExpressionNode {
 
   private void handleSystemHandleNode(SystemHandleNode node, ProgramRootNode root) {
     if (node.getFirstChild().getNodeType() == ABLNodeType.THISOBJECT) {
-      ITypeInfo typeInfo = root.getTypeInfoProvider().apply(root.getClassName());
+      var typeInfo = root.getTypeInfoProvider().apply(root.getClassName());
       property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
-      IVariableElement v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
+      var v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
       variable = v1 == null ? null : Pair.of(typeInfo, v1);
     } else if (node.getFirstChild().getNodeType() == ABLNodeType.SUPER) {
-      ITypeInfo typeInfo = root.getTypeInfoProvider().apply(root.getClassName());
+      var typeInfo = root.getTypeInfoProvider().apply(root.getClassName());
       typeInfo = typeInfo == null ? null : root.getTypeInfoProvider().apply(typeInfo.getParentTypeName());
       property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
-      IVariableElement v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
+      var v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
       variable = v1 == null ? null : Pair.of(typeInfo, v1);
     } else {
       returnDataType = node.getAttributeDataType(attributeName.toUpperCase());
@@ -76,11 +76,11 @@ public class AttributeReferenceNode extends ExpressionNode {
   }
 
   private void handleExpression(IExpression expr, ProgramRootNode root) {
-    DataType dataType = expr.getDataType();
+    var dataType = expr.getDataType();
     if (dataType.getPrimitive() == PrimitiveDataType.CLASS) {
-      ITypeInfo typeInfo = root.getTypeInfoProvider().apply(dataType.getClassName());
+      var typeInfo = root.getTypeInfoProvider().apply(dataType.getClassName());
       property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
-      IVariableElement v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
+      var v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
       variable = v1 == null ? null : Pair.of(typeInfo, v1);
     } else if (dataType.getPrimitive() == PrimitiveDataType.HANDLE) {
       returnDataType = getStandardAttributeDataType(attributeName.toUpperCase());
@@ -88,16 +88,14 @@ public class AttributeReferenceNode extends ExpressionNode {
   }
 
   private void compute() {
-    ProgramRootNode root = getTopLevelParent();
+    var root = getTopLevelParent();
     if (root == null)
       return;
 
-    JPNode firstChild = getFirstChild();
-    if (firstChild instanceof SystemHandleNode) {
-      SystemHandleNode shn = (SystemHandleNode) firstChild;
+    var firstChild = getFirstChild();
+    if (firstChild instanceof SystemHandleNode shn) {
       handleSystemHandleNode(shn, root);
-    } else if (firstChild instanceof FieldRefNode) {
-      FieldRefNode frn = (FieldRefNode) firstChild;
+    } else if (firstChild instanceof FieldRefNode frn) {
       handleFieldRefNode(frn, root);
     } else if (firstChild.isIExpression()) {
       handleExpression(firstChild.asIExpression(), root);

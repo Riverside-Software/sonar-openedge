@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2024 Riverside Software
+ * Copyright (c) 2015-2025 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -19,23 +19,15 @@
  */
 package org.sonar.plugins.openedge.api;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.rules.RuleType;
 import org.sonar.api.server.rule.RulesDefinition;
-import org.sonar.api.server.rule.RulesDefinition.NewParam;
 import org.sonar.api.server.rule.RulesDefinition.NewRepository;
 import org.sonar.api.server.rule.RulesDefinition.NewRule;
 import org.sonar.api.server.rule.RulesDefinition.OwaspTop10;
@@ -45,6 +37,11 @@ import org.sonar.api.utils.AnnotationUtils;
 import org.sonar.api.utils.Version;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
+import org.sonar.plugins.openedge.api.model.CWE;
+import org.sonar.plugins.openedge.api.model.CleanCode;
+import org.sonar.plugins.openedge.api.model.Impact;
+import org.sonar.plugins.openedge.api.model.OWASP;
+import org.sonar.plugins.openedge.api.model.OWASP2021;
 import org.sonar.plugins.openedge.api.model.RuleTemplate;
 import org.sonar.plugins.openedge.api.model.SecurityHotspot;
 import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
@@ -68,26 +65,23 @@ import com.google.common.collect.Sets;
  * </ul>
  * Names and descriptions are also retrieved based on the legacy SonarQube conventions:
  * <ul>
- * <li>Rule names and rule property descriptions can be defined in a property file:
- * /org/sonar/l10n/[languageKey].properties</li>
  * <li>HTML rule descriptions can be defined in individual resources:
- * /org/sonar/l10n/[languageKey]/rules/[repositoryKey]/ruleKey.html</li>
+ * /rules/[languageKey]/[repositoryKey]/ruleKey.html</li>
  * </ul>
  *
  * @since 2.5
  */
 public class AnnotationBasedRulesDefinition {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AnnotationBasedRulesDefinition.class);
 
   private final NewRepository repository;
-  private final String languageKey;
   private final ExternalDescriptionLoader externalDescriptionLoader;
   private final SonarRuntime runtime;
 
   public AnnotationBasedRulesDefinition(NewRepository repository, String languageKey, SonarRuntime runtime) {
     this.repository = repository;
-    this.languageKey = languageKey;
-    String externalDescriptionBasePath = String.format("/org/sonar/l10n/%s/rules/%s", languageKey, repository.key());
-    this.externalDescriptionLoader = new ExternalDescriptionLoader(repository, externalDescriptionBasePath);
+    String externalDescriptionBasePath = String.format("/rules/%s/%s/", languageKey, repository.key());
+    this.externalDescriptionLoader = new ExternalDescriptionLoader(externalDescriptionBasePath);
     this.runtime = runtime;
   }
 
@@ -102,24 +96,11 @@ public class AnnotationBasedRulesDefinition {
     List<NewRule> newRules = Lists.newArrayList();
     for (Class<?> ruleClass : ruleClasses) {
       NewRule rule = newRule(ruleClass, failIfNoExplicitKey);
-      externalDescriptionLoader.addHtmlDescription(rule, ruleClass);
-      SecurityHotspot annotation = AnnotationUtils.getAnnotation(ruleClass, SecurityHotspot.class);
-      if (runtime.getApiVersion().isGreaterThanOrEqual(Version.create(7, 3)) && (annotation != null)) {
-        rule.setType(RuleType.SECURITY_HOTSPOT);
-        for (String str : annotation.owasp()) {
-          OwaspTop10 owasp = OwaspTop10.valueOf(str);
-          if (owasp != null) {
-            if (runtime.getApiVersion().isGreaterThanOrEqual(Version.create(9, 3)))
-              rule.addOwaspTop10(OwaspTop10Version.Y2017, owasp);
-            else
-              rule.addOwaspTop10(owasp);
-          }
-        }
-        for (int tmp : annotation.cwe()) { 
-          rule.addCwe(tmp);
-        }
-      }
       rule.setTemplate(AnnotationUtils.getAnnotation(ruleClass, RuleTemplate.class) != null);
+      externalDescriptionLoader.addHtmlDescription(rule, ruleClass);
+      setupSecurityModel(rule, ruleClass);
+      if (runtime.getApiVersion().isGreaterThanOrEqual(Version.create(10, 1)))
+        setupCleanCode(rule, ruleClass);
       try {
         setupSqaleModel(rule, ruleClass);
       } catch (RuntimeException e) {
@@ -127,12 +108,11 @@ public class AnnotationBasedRulesDefinition {
       }
       newRules.add(rule);
     }
-    setupExternalNames(newRules);
   }
 
   @VisibleForTesting
   NewRule newRule(Class<?> ruleClass, boolean failIfNoExplicitKey) {
-    org.sonar.check.Rule ruleAnnotation = AnnotationUtils.getAnnotation(ruleClass, org.sonar.check.Rule.class);
+    var ruleAnnotation = AnnotationUtils.getAnnotation(ruleClass, org.sonar.check.Rule.class);
     if (ruleAnnotation == null) {
       throw new IllegalArgumentException("No Rule annotation was found on " + ruleClass);
     }
@@ -151,22 +131,53 @@ public class AnnotationBasedRulesDefinition {
     return rule;
   }
 
-  private void setupExternalNames(Collection<NewRule> rules) {
-    URL resource = AnnotationBasedRulesDefinition.class.getResource("/org/sonar/l10n/" + languageKey + ".properties");
-    if (resource == null) {
-      return;
+  private void setupSecurityModel(NewRule rule, Class<?> ruleClass) {
+    var hotspotAnnotation = AnnotationUtils.getAnnotation(ruleClass, SecurityHotspot.class);
+    if (hotspotAnnotation != null) {
+      rule.setType(RuleType.SECURITY_HOTSPOT);
+      setOwasp(rule, OwaspTop10Version.Y2017, hotspotAnnotation.owasp());
+      setCwe(rule, hotspotAnnotation.cwe());
     }
-    ResourceBundle bundle = ResourceBundle.getBundle("org.sonar.l10n." + languageKey, Locale.ENGLISH);
-    for (NewRule rule : rules) {
-      String baseKey = "rule." + repository.key() + "." + rule.key();
-      String nameKey = baseKey + ".name";
-      if (bundle.containsKey(nameKey)) {
-        rule.setName(bundle.getString(nameKey));
+    var cweAnnotation = AnnotationUtils.getAnnotation(ruleClass, CWE.class);
+    if (cweAnnotation != null)
+      setCwe(rule, cweAnnotation.values());
+    var owaspAnnotation = AnnotationUtils.getAnnotation(ruleClass, OWASP.class);
+    if (owaspAnnotation != null)
+      setOwasp(rule, OwaspTop10Version.Y2017, owaspAnnotation.values());
+    var owasp2021Annotation = AnnotationUtils.getAnnotation(ruleClass, OWASP2021.class);
+    if (owasp2021Annotation != null)
+      setOwasp(rule, OwaspTop10Version.Y2021, owasp2021Annotation.values());
+  }
+
+  private void setOwasp(NewRule rule, OwaspTop10Version version, String[] list) {
+    for (String str : list) {
+      OwaspTop10 owasp = OwaspTop10.valueOf(str);
+      if (owasp != null)
+        rule.addOwaspTop10(version, owasp);
+    }
+  }
+
+  private void setCwe(NewRule rule, int[] list) {
+    for (int tmp : list) {
+      rule.addCwe(tmp);
+    }
+  }
+
+  private void setupCleanCode(NewRule rule, Class<?> ruleClass) {
+    var cleanCodeAnnotation = AnnotationUtils.getAnnotation(ruleClass, CleanCode.class);
+    if (cleanCodeAnnotation != null) {
+      var attr = Constants.lookupCleanCodeAttribute(cleanCodeAnnotation.attribute());
+      if (attr != null) {
+        rule.setCleanCodeAttribute(attr);
       }
-      for (NewParam param : rule.params()) {
-        String paramDescriptionKey = baseKey + ".param." + param.key();
-        if (bundle.containsKey(paramDescriptionKey)) {
-          param.setDescription(bundle.getString(paramDescriptionKey));
+      var impacts = ruleClass.getDeclaredAnnotationsByType(Impact.class);
+      if (impacts != null) {
+        for (var impact : impacts) {
+          var qual = Constants.lookupSoftwareQuality(impact.quality());
+          var sev = Constants.lookupSeverity(impact.severity());
+          if ((qual != null) && (sev != null)) {
+            rule.addDefaultImpact(qual, sev);
+          }
         }
       }
     }
@@ -198,43 +209,22 @@ public class AnnotationBasedRulesDefinition {
   }
 
   private class ExternalDescriptionLoader {
-    @SuppressWarnings("unused")
-    private final NewRepository repository;
     private final String resourceBasePath;
 
-    public ExternalDescriptionLoader(NewRepository repository, String resourceBasePath) {
-      this.repository = repository;
+    public ExternalDescriptionLoader(String resourceBasePath) {
       this.resourceBasePath = resourceBasePath;
     }
 
     public void addHtmlDescription(NewRule rule, Class<?> clz) {
-      URL resource = clz.getResource(resourceBasePath + "/" + rule.key() + ".html");
-      if (resource != null) {
-        addHtmlDescription(rule, resource);
+      var path = resourceBasePath + rule.key().replace('.', '/') + ".html";
+      var url = clz.getResource(path);
+      if (url != null) {
+        rule.setHtmlDescription(url);
+      } else {
+        rule.setHtmlDescription("<p>No description</p>");
+        LOGGER.warn("No HTML description found in path {} for rule {}", path, rule.key());
       }
-    }
-
-    @VisibleForTesting
-    void addHtmlDescription(NewRule rule, URL resource) {
-      URLConnection cnx;
-      try {
-        cnx = resource.openConnection();
-      } catch (IOException caught) {
-        throw new IllegalStateException("Failed to read: " + resource, caught);
-      }
-      // Important in development, in order to prevent JAR locking
-      cnx.setUseCaches(false);
-
-      StringBuilder str = new StringBuilder();
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(cnx.getInputStream(), StandardCharsets.UTF_8))) {
-        String s;
-        while ((s = reader.readLine()) != null) {
-          str.append(s).append('\n');
-        }
-      } catch (IOException caught) {
-        throw new IllegalStateException("Failed to read: " + resource, caught);
-      }
-      rule.setHtmlDescription(str.toString());
     }
   }
+
 }

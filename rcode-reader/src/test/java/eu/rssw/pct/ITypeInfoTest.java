@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2024 Riverside Software
+ * Copyright (c) 2015-2025 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -46,8 +46,8 @@ public class ITypeInfoTest {
     .orElse(null);
 
   @Test
-  public void test1() {
-    ITypeInfo info = TYPE_INFO_PROVIDER.apply("Progress.BPM.UserSession");
+  public void test01() {
+    var info = TYPE_INFO_PROVIDER.apply("Progress.BPM.UserSession");
     assertNotNull(info);
     assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "GetProcessTemplateNames"));
     assertNull(info.getMethod(TYPE_INFO_PROVIDER, "GetProcessTemplateNames", DataType.INT64));
@@ -57,8 +57,8 @@ public class ITypeInfoTest {
   }
 
   @Test
-  public void test2() {
-    ITypeInfo info = TYPE_INFO_PROVIDER.apply("Progress.Json.ObjectModel.JsonArray");
+  public void test02() {
+    var info = TYPE_INFO_PROVIDER.apply("Progress.Json.ObjectModel.JsonArray");
     assertNotNull(info);
     assertNull(info.getMethod(TYPE_INFO_PROVIDER, "Add"));
     assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", DataType.CHARACTER));
@@ -66,14 +66,22 @@ public class ITypeInfoTest {
     assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType("Progress.Json.ObjectModel.JsonArray")));
     assertNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType("Progress.Lang.Object")));
 
-    Pair<ITypeInfo, IMethodElement> val1 = info.getMethod(TYPE_INFO_PROVIDER, "GetDatetime", DataType.INTEGER, DataType.INTEGER);
+    var val1 = info.getMethod(TYPE_INFO_PROVIDER, "GetDatetime", DataType.INTEGER, DataType.INTEGER);
     assertNotNull(val1);
     assertEquals(val1.getO1().getTypeName(), "Progress.Json.ObjectModel.JsonArray");
     assertEquals(val1.getO2().getReturnType(), DataType.DATETIME);
+
+    var methd01 = info.getMethod(TYPE_INFO_PROVIDER, "GetCharacter", DataType.INTEGER);
+    assertNotNull(methd01);
+    assertEquals(methd01.getO2().getExtent(), 0);
+
+    var methd02 = info.getMethod(TYPE_INFO_PROVIDER, "GetCharacter", DataType.INTEGER, DataType.INTEGER);
+    assertNotNull(methd02);
+    assertEquals(methd02.getO2().getExtent(), -1);
   }
 
   @Test
-  public void test3() {
+  public void test03() {
     ITypeInfo info01 = TYPE_INFO_PROVIDER.apply("Progress.Lang.Object");
     ITypeInfo info02 = TYPE_INFO_PROVIDER.apply("Progress.Json.ObjectModel.JsonArray");
     assertNotNull(info01);
@@ -83,7 +91,7 @@ public class ITypeInfoTest {
   }
 
   @Test
-  public void test4() {
+  public void test04() {
     HashMap<String, ITypeInfo> map = new HashMap<>();
     BuiltinClasses.getBuiltinClasses().forEach(it -> map.put(it.getTypeName(), it));
 
@@ -107,4 +115,5 @@ public class ITypeInfoTest {
     assertEquals(val2.getO1().getTypeName(), "rssw.ChildClass");
     assertEquals(val2.getO2().getReturnType(), DataType.INTEGER);
   }
+
 }

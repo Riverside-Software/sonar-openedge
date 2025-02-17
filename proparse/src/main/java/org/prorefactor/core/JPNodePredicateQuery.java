@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2019 Riverside Software
+ * Copyright (c) 2015-2025 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -23,21 +23,18 @@ class JPNodePredicateQuery implements ICallback<List<JPNode>> {
   public static final Predicate<JPNode> STATEMENT_ONLY = JPNode::isStateHead;
 
   private final List<JPNode> result = new ArrayList<>();
-  private final List<Predicate<JPNode>> predicates = new ArrayList<>();
-  
+  private final Predicate<JPNode> predicate;
+
   public JPNodePredicateQuery(Predicate<JPNode> pred1) {
-    predicates.add(pred1);
+    predicate = pred1;
   }
 
   public JPNodePredicateQuery(Predicate<JPNode> pred1, Predicate<JPNode> pred2) {
-    predicates.add(pred1);
-    predicates.add(pred2);
+    predicate = pred1.and(pred2);
   }
 
   public JPNodePredicateQuery(Predicate<JPNode> pred1, Predicate<JPNode> pred2, Predicate<JPNode> pred3) {
-    predicates.add(pred1);
-    predicates.add(pred2);
-    predicates.add(pred3);
+    predicate = pred1.and(pred2).and(pred3);
   }
 
   @Override
@@ -47,14 +44,8 @@ class JPNodePredicateQuery implements ICallback<List<JPNode>> {
 
   @Override
   public boolean visitNode(JPNode node) {
-    boolean isValid = true;
-    int offset = 0;
-    while (isValid && (offset < predicates.size())) {
-      isValid &= predicates.get(offset++).test(node);
-    }
-    if (isValid) {
+    if (predicate.test(node))
       result.add(node);
-    }
 
     return true;
   }

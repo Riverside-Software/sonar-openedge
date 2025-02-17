@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2024 Riverside Software
+ * Copyright (c) 2015-2025 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -22,7 +22,6 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.prorefactor.core.IConstants;
-import org.prorefactor.core.Pair;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
@@ -37,7 +36,6 @@ import org.sonar.plugins.openedge.api.objects.RCodeTTWrapper;
 import com.google.common.base.Strings;
 
 import eu.rssw.pct.elements.IBufferElement;
-import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.ITypeInfo;
 
 /**
@@ -176,14 +174,14 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
 
   @Override
   public Variable lookupVariable(String name) {
-    Variable v = super.lookupVariable(name);
+    var v = super.lookupVariable(name);
     if (v != null) {
       return v;
     }
     if (typeInfo != null) {
-      Pair<ITypeInfo, IPropertyElement> pair = typeInfo.lookupProperty(refSession::getTypeInfo, name);
+      var pair = typeInfo.lookupProperty(refSession::getTypeInfo, name);
       if (pair != null) {
-        Variable retVal = new Variable(name, this);
+        var retVal = new Variable(name, this);
         if (pair.getO2().getVariable() != null)
           retVal.setDataType(pair.getO2().getVariable().getDataType());
         return retVal;

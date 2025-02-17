@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2024 Riverside Software
+ * Copyright (c) 2015-2025 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -137,23 +137,23 @@ public interface ITypeInfo {
    * Return property by name in class hierarchy
    */
   default Pair<ITypeInfo, IPropertyElement> lookupProperty(Function<String, ITypeInfo> typeInfoProvider, String property) {
-    for (IPropertyElement elem : getProperties()) {
+    for (var elem : getProperties()) {
       if (property.equalsIgnoreCase(elem.getName())) {
         return Pair.of(this, elem);
       }
     }
-    ITypeInfo parent = typeInfoProvider.apply(getParentTypeName());
+    var parent = typeInfoProvider.apply(getParentTypeName());
     if (parent != null) {
-      Pair<ITypeInfo, IPropertyElement> parentProp = parent.lookupProperty(typeInfoProvider, property);
+      var parentProp = parent.lookupProperty(typeInfoProvider, property);
       if (parentProp != null)
         return parentProp;
     }
     // When an interface inherits another one, the TypeInfo object still inherits from P.L.O. Inherited interface
     // are stored in the list of interfaces
-    for (String str : getInterfaces()) {
-      ITypeInfo iface = typeInfoProvider.apply(str);
+    for (var str : getInterfaces()) {
+      var iface = typeInfoProvider.apply(str);
       if (iface != null) {
-        Pair<ITypeInfo, IPropertyElement> ifaceProp = iface.lookupProperty(typeInfoProvider, property);
+        var ifaceProp = iface.lookupProperty(typeInfoProvider, property);
         if (ifaceProp != null)
           return ifaceProp;
       }
@@ -163,7 +163,7 @@ public interface ITypeInfo {
   }
 
   default IVariableElement lookupVariable(String varName) {
-    for (IVariableElement elem : getVariables()) {
+    for (var elem : getVariables()) {
       if (varName.equalsIgnoreCase(elem.getName())) {
         return elem;
       }

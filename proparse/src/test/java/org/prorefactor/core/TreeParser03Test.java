@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2024 Riverside Software
+ * Copyright (c) 2015-2025 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -152,6 +152,7 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f1 = lst.get(0);
     assertEquals(f1.getSignature(), "f1(II)");
     assertEquals(f1.getIDESignature(), "f1(↑INT) : INT");
+    assertEquals(f1.getIDEInsertElement(true), "f1(${1:zz})$0");
     assertEquals(f1.getParameters().size(), 1);
     Variable var1 = (Variable) f1.getParameters().get(0).getSymbol();
     assertEquals(var1.getName(), "zz");
@@ -168,6 +169,7 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f2 = lst2.get(0);
     assertEquals(f2.getSignature(), "f2(II,II)");
     assertEquals(f2.getIDESignature(), "f2(↑INT, ↑INT) : INT");
+    assertEquals(f2.getIDEInsertElement(true), "f2(${1:a}, ${2:zz})$0");
     assertEquals(f2.getParameters().size(), 2);
     assertEquals(f2.getParameters().get(0).getSymbol().getName(), "a");
     assertEquals(f2.getParameters().get(0).getSymbol().getNumReads(), 0);
@@ -186,6 +188,7 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f3 = lst3.get(0);
     assertEquals(f3.getSignature(), "f3(II)");
     assertEquals(f3.getIDESignature(), "f3(↑INT) : INT");
+    assertEquals(f3.getIDEInsertElement(true), "f3(${1:a})$0");
     assertEquals(f3.getParameters().size(), 1);
     assertEquals(f3.getParameters().get(0).getSymbol().getName(), "a");
     assertEquals(f3.getParameters().get(0).getSymbol().getNumReads(), 1);
@@ -196,6 +199,7 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f4 = lst4.get(0);
     assertEquals(f4.getSignature(), "f4()");
     assertEquals(f4.getIDESignature(), "f4() : INT");
+    assertEquals(f4.getIDEInsertElement(true), "f4()$0");
     assertEquals(f4.getParameters().size(), 0);
 
     List<Routine> lst5 = unit.getRootScope().lookupRoutines("f5");
@@ -203,6 +207,7 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f5 = lst5.get(0);
     assertEquals(f5.getSignature(), "f5()");
     assertEquals(f5.getIDESignature(), "f5() : INT");
+    assertEquals(f5.getIDEInsertElement(true), "f5()$0");
     assertEquals(f5.getParameters().size(), 0);
 
     List<Routine> lst6 = unit.getRootScope().lookupRoutines("f6");
@@ -210,6 +215,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f6 = lst6.get(0);
     assertEquals(f6.getSignature(), "f6(MD)");
     assertEquals(f6.getIDESignature(), "f6(⇅DS) : INT");
+    assertEquals(f6.getIDEInsertElement(true), "f6(INPUT-OUTPUT ${1:arg1})$0");
+    assertEquals(f6.getIDEInsertElement(false), "f6(input-output ${1:arg1})$0");
     assertEquals(f6.getParameters().size(), 1);
 
     List<Routine> lst7 = unit.getRootScope().lookupRoutines("f7");
@@ -217,7 +224,18 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f7 = lst7.get(0);
     assertEquals(f7.getSignature(), "f7(MDE)");
     assertEquals(f7.getIDESignature(), "f7(⇅DEC) : INT");
+    assertEquals(f7.getIDEInsertElement(true), "f7(INPUT-OUTPUT ${1:xx})$0");
+    assertEquals(f7.getIDEInsertElement(false), "f7(input-output ${1:xx})$0");
     assertEquals(f7.getParameters().size(), 1);
+
+    List<Routine> lst8 = unit.getRootScope().lookupRoutines("f8");
+    assertEquals(lst8.size(), 1);
+    Routine f8 = lst8.get(0);
+    assertEquals(f8.getSignature(), "f8(ODE)");
+    assertEquals(f8.getIDESignature(), "f8(↓DEC) : INT");
+    assertEquals(f8.getIDEInsertElement(true), "f8(OUTPUT ${1:xx})$0");
+    assertEquals(f8.getIDEInsertElement(false), "f8(output ${1:xx})$0");
+    assertEquals(f8.getParameters().size(), 1);
 
     // Test TreeParserSymbolScope#getTokenSymbolScope()
     assertEquals(unit.getRootScope().getTokenSymbolScope(205), unit.getRootScope());

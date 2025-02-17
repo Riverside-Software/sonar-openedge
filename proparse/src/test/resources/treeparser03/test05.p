@@ -38,4 +38,8 @@ function f7 returns int(input-output xx as decimal):
 
 end function.
 
+function f8 returns int(output xx as decimal):
+
+end function.
+
 message "Hello world!".

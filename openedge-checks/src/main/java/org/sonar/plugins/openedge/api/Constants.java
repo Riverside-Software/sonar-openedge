@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2024 Riverside Software
+ * Copyright (c) 2015-2025 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -18,6 +18,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
 package org.sonar.plugins.openedge.api;
+
+import org.sonar.api.issue.impact.Severity;
+import org.sonar.api.issue.impact.SoftwareQuality;
+import org.sonar.api.rules.CleanCodeAttribute;
+import org.sonar.check.Priority;
 
 public class Constants {
   public static final String LANGUAGE_KEY = "oe";
@@ -68,6 +73,42 @@ public class Constants {
   public static final String REQUIRE_FULL_NAMES = "sonar.oe.require.full_names";
 
   private Constants() {
-    
+    // No-op
+  }
+
+  public static SoftwareQuality lookupSoftwareQuality(String str) {
+    for (SoftwareQuality sq : SoftwareQuality.values()) {
+      if (sq.name().equals(str))
+        return sq;
+    }
+
+    return SoftwareQuality.MAINTAINABILITY;
+  }
+
+  public static CleanCodeAttribute lookupCleanCodeAttribute(String str) {
+    for (CleanCodeAttribute attr : CleanCodeAttribute.values()) {
+      if (attr.name().equals(str))
+        return attr;
+    }
+
+    return CleanCodeAttribute.defaultCleanCodeAttribute();
+  }
+
+  public static Severity lookupSeverity(String str) {
+    for (Severity sev : Severity.values()) {
+      if (sev.name().equals(str))
+        return sev;
+    }
+
+    return Severity.INFO;
+  }
+
+  public static Priority lookupPriority(String str) {
+    for (Priority pri : Priority.values()) {
+      if (pri.name().equals(str))
+        return pri;
+    }
+
+    return Priority.INFO;
   }
 }
