@@ -288,7 +288,7 @@ public enum ABLNodeType {
   TOOLBAR(Proparse.TOOLBAR, "tool-bar", NodeTypesOption.KEYWORD),
   TRANSACTION(Proparse.TRANSACTION, "trans", 5, "transaction", 8, NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   UNSIGNEDINTEGER(Proparse.UNSIGNEDINTEGER, "unsigned-integer", NodeTypesOption.KEYWORD),
-  VAR(Proparse.VAR, "var", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
+  VAR(Proparse.VAR, "var", NodeTypesOption.KEYWORD),
   USERID(Proparse.USERID, "userid", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   USERID2(Proparse.USERID2, "user-id", NodeTypesOption.KEYWORD),
   WORKTABLE(Proparse.WORKTABLE, "work-table", 8, "workfile", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
