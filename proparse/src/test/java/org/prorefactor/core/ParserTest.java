@@ -30,6 +30,7 @@ import java.util.Optional;
 
 import org.antlr.v4.runtime.atn.DecisionInfo;
 import org.antlr.v4.runtime.atn.ParseInfo;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Database;
@@ -1182,7 +1183,7 @@ public class ParserTest extends AbstractProparseTest {
   @Test
   public void testIncludeNotFound01() {
     ParseUnit unit = getParseUnit(new File(SRC_DIR, "inc_not_found.p"), session);
-    expectThrows(UncheckedIOException.class, () -> unit.treeParser01());
+    expectThrows(UncheckedIOException.class, unit::treeParser01);
   }
 
   @Test
@@ -1197,4 +1198,21 @@ public class ParserTest extends AbstractProparseTest {
     assertEquals(unit.getRootScope().getEventRoutines().get(2).getParameters().size(), 3);
   }
 
+  @Test
+  public void testTokenChars01() throws IOException {
+    var settings = new UnitTestProparseSettings();
+    var localSession =  new RefactorSession(settings, new SportsSchema());
+    var unit = getParseUnit(new File(SRC_DIR, "tokenChars01.p"), localSession);
+    expectThrows(ParseCancellationException.class, unit::parse);
+  }
+
+  @Test
+  public void testTokenChars02() throws IOException {
+    var settings = new UnitTestProparseSettings();
+    settings.setTokenStartChars(new char[] {'#', '!'});
+    var localSession =  new RefactorSession(settings, new SportsSchema());
+    var unit = getParseUnit(new File(SRC_DIR, "tokenChars01.p"), localSession);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+  }
 }

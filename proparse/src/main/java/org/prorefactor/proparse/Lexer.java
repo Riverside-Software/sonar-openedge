@@ -297,8 +297,9 @@ public class Lexer implements IPreprocessor {
         case '-':
           return nextTokenStartingWithPlusMinus('-');
 
-        case '#':
-        case '%':
+        case '#', '%':
+          return nextTokenFromFilename((char) currChar, ABLNodeType.FILENAME, ABLNodeType.ID);
+
         case '|':
           getChar();
           return id(ABLNodeType.FILENAME);
@@ -372,6 +373,20 @@ public class Lexer implements IPreprocessor {
     } else {
       append();
       getChar();
+      return id(idType);
+    }
+  }
+
+  // Similar to previous 
+  private ProToken nextTokenFromFilename(char c, ABLNodeType type, ABLNodeType idType) {
+    getChar();
+    if (currIsSpace()) {
+      return makeToken(type);
+    } else if (!canTokenStartWith(c)) {
+      append();
+      getChar();
+      return id(type);
+    } else {
       return id(idType);
     }
   }
