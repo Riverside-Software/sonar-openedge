@@ -19,7 +19,6 @@ import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -345,7 +344,7 @@ public class JPNode {
     if (children == null)
       return new ArrayList<>();
     EnumSet<ABLNodeType> filter = EnumSet.of(type, types);
-    return children.stream().filter(node -> filter.contains(node.getNodeType())).collect(Collectors.toList());
+    return children.stream().filter(node -> filter.contains(node.getNodeType())).toList();
   }
 
   public boolean hasDirectChildOfType(ABLNodeType type) {
