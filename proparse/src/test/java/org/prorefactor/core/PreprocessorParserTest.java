@@ -16,6 +16,7 @@ package org.prorefactor.core;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,26 +45,18 @@ public class PreprocessorParserTest extends AbstractProparseTest {
       unit.parse();
       assertFalse(unit.hasSyntaxError());
     } catch (RuntimeException caught) {
-      // Just so that tests will throw NPE and fail (and not just be skipped)
-      unit = null;
+      fail("Couldn't parse preprocessor01.p", caught);
     }
   }
 
   private void testVariable(JPNode topNode, String variable) {
-    for (JPNode node : topNode.query(ABLNodeType.ID)) {
-      if (node.getText().equals(variable)) {
-        return;
-      }
-    }
-    Assert.fail("Variable " + variable + " not found");
+    if (topNode.query2(node -> node.getNodeType() == ABLNodeType.ID && variable.equals(node.getText())).isEmpty())
+      Assert.fail("Variable " + variable + " not found");
   }
 
   private void testNoVariable(JPNode topNode, String variable) {
-    for (JPNode node : topNode.query(ABLNodeType.ID)) {
-      if (node.getText().equals(variable)) {
-        Assert.fail("Variable " + variable + " not found");
-      }
-    }
+    if (!topNode.query2(node -> node.getNodeType() == ABLNodeType.ID && variable.equals(node.getText())).isEmpty())
+      Assert.fail("Variable " + variable + " not found");
   }
 
   @Test
