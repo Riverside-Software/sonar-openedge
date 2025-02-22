@@ -127,7 +127,7 @@ public class StringFuncs {
     int end = c.length;
     while (begin < end && trimSet.contains(c[begin]))
       ++begin;
-    while (end >= begin && trimSet.contains(c[end - 1]))
+    while (end > begin && trimSet.contains(c[end - 1]))
       --end;
     return s.substring(begin, end);
   }

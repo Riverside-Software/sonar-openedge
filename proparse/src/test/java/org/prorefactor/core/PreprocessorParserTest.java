@@ -31,7 +31,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class PreprocessorParserTest extends AbstractProparseTest {
-  private final static String SRC_DIR = "src/test/resources/data/preprocessor";
+  private static final String SRC_DIR = "src/test/resources/data/preprocessor";
 
   private RefactorSession session;
   private ParseUnit unit;
@@ -409,6 +409,16 @@ public class PreprocessorParserTest extends AbstractProparseTest {
   @Test
   public void testQStrings() {
     testVariable(unit.getTopNode(), "var81");
+  }
+
+  @Test
+  public void testTrim01() {
+    testVariable(unit.getTopNode(), "var82");
+  }
+
+  @Test
+  public void testTrim02() {
+    testVariable(unit.getTopNode(), "var83");
   }
 
   @Test
