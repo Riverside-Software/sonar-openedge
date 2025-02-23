@@ -35,6 +35,7 @@ import eu.rssw.antlr.database.DumpFileGrammarParser.FieldExtentContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldFormatContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldInitialContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldLabelContext;
+import eu.rssw.antlr.database.DumpFileGrammarParser.FieldLobAreaContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldMaxWidthContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldOrderContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.FieldPositionContext;
@@ -210,6 +211,14 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
     if (ctx.noOverride != null)
       trigger.setNoOverride(true);
     fields.peek().addTrigger(trigger);
+
+    return null;
+  }
+
+  @Override
+  public Void visitFieldLobArea(FieldLobAreaContext ctx) {
+    if (!fields.isEmpty())
+      fields.peek().setLobArea(ctx.val.getText());
 
     return null;
   }

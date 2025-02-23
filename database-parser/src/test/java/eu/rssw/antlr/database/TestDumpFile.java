@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.testng.annotations.Test;
@@ -69,6 +70,8 @@ public class TestDumpFile {
     DatabaseDescription db = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/sp2k.df"));
     assertEquals(db.getTables().size(), 25);
     assertEquals(db.getSequences().size(), 13);
+    assertNotNull(db.getSequence("NextCustNum"));
+    assertNull(db.getSequence("NoSuchSequence"));
 
     Table tbl = db.getTable("Item");
     assertNotNull(tbl);
@@ -181,4 +184,46 @@ public class TestDumpFile {
     assertNotNull(db.getTable("Tab1"));
     assertNotNull(db.getTable("Tab1").getField("Fld1"));
   }
+
+  @Test
+  public void testSports2020() throws IOException {
+    var db = DumpFileUtils.getDatabaseDescription(Path.of("src/test/resources/sp2k20.df"));
+    assertEquals(db.getTables().size(), 25);
+    assertEquals(db.getSequences().size(), 12);
+
+    var itemTbl = db.getTable("Item");
+    assertNull(itemTbl.getLabel());
+    assertEquals(itemTbl.getDumpName(), "item");
+    assertTrue(itemTbl.getValMsg().startsWith("Cannot delete Item"));
+    assertEquals(itemTbl.getFirstLine(), 1140);
+    assertEquals(itemTbl.getLastLine(), 1148);
+    assertNull(itemTbl.getField("NoSuchField"));
+    assertNull(itemTbl.getIndex("NoSuchIndex"));
+    assertNull(itemTbl.getTrigger(TriggerType.REPLICATION_WRITE));
+    var itemImgFld = itemTbl.getField("ItemImage");
+    assertEquals(itemImgFld.getLobArea(), "LOB Area");
+    assertEquals(itemImgFld.getFirstLine(), 1284);
+    assertEquals(itemImgFld.getLastLine(), 1291);
+    var itemNumIdx = itemTbl.getIndex("ItemNum");
+    assertEquals(itemNumIdx.getArea(), "Index Area");
+    assertEquals(itemNumIdx.getFirstLine(), 1293);
+    assertEquals(itemNumIdx.getLastLine(), 1297);
+    assertEquals(itemNumIdx.toString(), "Index ItemNum");
+
+    var binSeq = db.getSequence("NextBinNum");
+    assertEquals(binSeq.getMinValue(), 1000);
+    assertEquals(binSeq.getMaxValue(), 1000000);
+    assertEquals(binSeq.getIncrement(), 1);
+    assertEquals(binSeq.getFirstLine(), 1);
+    assertEquals(binSeq.getLastLine(), 6);
+
+    var descIndex = db.getTable("BillTo").getIndex("CustNumBillTo");
+    var flds = descIndex.getFields();
+    assertEquals(flds.size(), 2);
+    assertTrue(flds.get(0).isAscending());
+    assertFalse(flds.get(1).isAscending());
+
+    var wordIndex = db.getTable("Customer").getIndex("Comments");
+    assertTrue(wordIndex.isWord());
+}
 }
