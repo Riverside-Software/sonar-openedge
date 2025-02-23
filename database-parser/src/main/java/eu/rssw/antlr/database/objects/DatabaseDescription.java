@@ -29,10 +29,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import com.google.common.base.Splitter;
 
 public class DatabaseDescription {
   private String dbName;
@@ -125,14 +122,15 @@ public class DatabaseDescription {
           if (currTbl == null)
             throw new IOException("No associated table for " + line);
           // IndexName:Attributes:Field1:Field2:...
-          List<String> lst = Splitter.on(':').trimResults().splitToList(line);
-          if (lst.size() < 3)
+          var lst = line.split(":");
+          //List<String> lst = Splitter.on(':').trimResults().splitToList(line);
+          if (lst.length < 3)
             throw new IOException("Invalid file format: " + line);
-          Index i = new Index(lst.get(0).substring(1));
-          i.setUnique(lst.get(1).indexOf('U') > -1);
-          i.setPrimary(lst.get(1).indexOf('P') > -1);
-          for (int zz = 2; zz < lst.size(); zz++) {
-            i.addField(new IndexField(currTbl.getField(lst.get(zz).substring(1)), lst.get(zz).charAt(0) == 'A'));
+          Index i = new Index(lst[0].substring(1));
+          i.setUnique(lst[1].indexOf('U') > -1);
+          i.setPrimary(lst[2].indexOf('P') > -1);
+          for (int zz = 2; zz < lst.length; zz++) {
+            i.addField(new IndexField(currTbl.getField(lst[zz].substring(1)), lst[zz].charAt(0) == 'A'));
           }
           currTbl.addIndex(i);
         }

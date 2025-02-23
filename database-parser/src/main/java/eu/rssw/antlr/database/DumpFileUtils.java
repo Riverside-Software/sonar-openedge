@@ -94,9 +94,15 @@ public final class DumpFileUtils {
   }
 
   public static final DatabaseDescription getDatabaseDescription(Path path) throws IOException {
-    return getDatabaseDescription(path, com.google.common.io.Files.getNameWithoutExtension(path.getFileName().toString()));
+    return getDatabaseDescription(path, getNameWithoutExtension(path));
   }
 
+  public static String getNameWithoutExtension(Path path) {
+    var fileName = path.getFileName().toString();
+    int dotIndex = fileName.lastIndexOf('.');
+    return (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
+
+  }
   public static final DatabaseDescription getDatabaseDescription(Path path, String dbName) throws IOException {
     DumpFileVisitor visitor = new DumpFileVisitor(dbName);
     visitor.visit(getDumpFileParseTree(path));
