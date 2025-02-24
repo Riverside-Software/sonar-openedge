@@ -59,6 +59,7 @@ public class Constants {
   public static final String SKIP_ANNOTATIONS = "sonar.oe.issues.annotations";
   public static final String SUFFIXES = "sonar.oe.file.suffixes";
   public static final String INCLUDE_SUFFIXES = "sonar.oe.include.suffixes";
+  public static final String DB_SUFFIXES = "sonar.oedb.file.suffixes";
   public static final String BACKSLASH_ESCAPE = "sonar.oe.backslash.escape";
   public static final String OE_ANALYTICS = "sonar.oe.analytics";
   public static final String SKIP_RCODE = "sonar.oe.rcode.skip";

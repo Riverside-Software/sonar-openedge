@@ -129,6 +129,16 @@ public class OpenEdgePlugin implements Plugin {
       .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
+    context.addExtension(PropertyDefinition.builder(Constants.DB_SUFFIXES) //
+        .name("DF file suffixes") //
+        .description("Comma-separated list of suffixes of OpenEdge DF files") //
+        .type(PropertyType.STRING) //
+        .defaultValue("df") //
+        .category(CATEGORY_OPENEDGE) //
+        .subCategory(SUBCATEGORY_GENERAL) //
+        .onQualifiers(Qualifiers.PROJECT) //
+        .build());
+
     context.addExtension(PropertyDefinition.builder(Constants.INCLUDE_SUFFIXES) //
       .name("File suffixes of ABL include files") //
       .description("Comma-separated list of suffixes of OpenEdge include files") //
