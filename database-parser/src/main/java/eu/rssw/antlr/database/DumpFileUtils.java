@@ -21,7 +21,6 @@ package eu.rssw.antlr.database;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,7 +31,6 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -54,21 +52,15 @@ public final class DumpFileUtils {
    * right value.
    */
   public static final ParseTree getDumpFileParseTree(InputStream stream, Charset defaultCharset) throws IOException {
-    // FileInputStream doesn't support mark for example, so we read the entire file in memory
-    ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-    byte[] buffer = new byte[16384];
-    for (int len = stream.read(buffer); len != -1; len = stream.read(buffer)) {
-      outStream.write(buffer, 0, len);
-    }
-    ByteArrayInputStream buffdInput = new ByteArrayInputStream(outStream.toByteArray());
+    var buffdInput = new ByteArrayInputStream(stream.readAllBytes());
     if (defaultCharset == null)
       defaultCharset = Charset.defaultCharset();
 
     // Trying to read codepage from DF footer
-    LineProcessor<Charset> charsetReader = new DFCodePageProcessor(defaultCharset);
+    var charsetReader = new DFCodePageProcessor(defaultCharset);
     try (Reader reader =  new InputStreamReader(buffdInput, defaultCharset);
         BufferedReader buff = new BufferedReader(reader)) {
-      String str = buff.readLine();
+      var str = buff.readLine();
       while (str != null) {
         charsetReader.processLine(str);
         str = buff.readLine();
@@ -79,14 +71,14 @@ public final class DumpFileUtils {
   }
 
   public static final ParseTree getDumpFileParseTree(Reader reader) throws IOException {
-    ANTLRErrorListener listener = new DescriptiveErrorListener();
-    DumpFileGrammarLexer lexer = new DumpFileGrammarLexer(CharStreams.fromReader(reader));
+    var listener = new DescriptiveErrorListener();
+    var lexer = new DumpFileGrammarLexer(CharStreams.fromReader(reader));
     lexer.removeErrorListeners();
     lexer.addErrorListener(listener);
 
     // Using SLL first proved not to be useful for the DF parser, so we directly parse with LL prediction mode
-    CommonTokenStream tokens = new CommonTokenStream(lexer);
-    DumpFileGrammarParser parser = new DumpFileGrammarParser(tokens);
+    var tokens = new CommonTokenStream(lexer);
+    var parser = new DumpFileGrammarParser(tokens);
     parser.removeErrorListeners();
     parser.addErrorListener(listener);
 
@@ -99,19 +91,21 @@ public final class DumpFileUtils {
 
   public static String getNameWithoutExtension(Path path) {
     var fileName = path.getFileName().toString();
-    int dotIndex = fileName.lastIndexOf('.');
-    return (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
+    var dotIndex = fileName.lastIndexOf('.');
 
+    return (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
   }
+
   public static final DatabaseDescription getDatabaseDescription(Path path, String dbName) throws IOException {
-    DumpFileVisitor visitor = new DumpFileVisitor(dbName);
+    var visitor = new DumpFileVisitor(dbName);
     visitor.visit(getDumpFileParseTree(path));
 
     return visitor.getDatabase();
   }
 
-  public static final DatabaseDescription getDatabaseDescription(InputStream stream, Charset cs, String dbName) throws IOException {
-    DumpFileVisitor visitor = new DumpFileVisitor(dbName);
+  public static final DatabaseDescription getDatabaseDescription(InputStream stream, Charset cs, String dbName)
+      throws IOException {
+    var visitor = new DumpFileVisitor(dbName);
     visitor.visit(getDumpFileParseTree(stream, cs));
 
     return visitor.getDatabase();
