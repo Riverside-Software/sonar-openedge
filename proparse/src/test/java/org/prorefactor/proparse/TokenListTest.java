@@ -32,7 +32,6 @@ import org.prorefactor.refactor.RefactorSession;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 
 public class TokenListTest {
@@ -48,7 +47,7 @@ public class TokenListTest {
   @Test
   public void testTokenList02() {
     try (InputStream input = new FileInputStream(new File(SRC_DIR, "tokenlist02.p"))) {
-      ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(ByteStreams.toByteArray(input)), "file.txt");
+      ABLLexer lexer = new ABLLexer(session, (ByteStreams.toByteArray(input)), "file.txt");
       TokenSource filter0 = new NameDotTokenFilter(lexer);
       TokenSource src = new TokenList(filter0);
 
@@ -123,7 +122,7 @@ public class TokenListTest {
 
   @Test
   public void testTokenList03() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("MESSAGE Progress./* Holy shit */   Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, ("MESSAGE Progress./* Holy shit */   Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
@@ -141,7 +140,7 @@ public class TokenListTest {
 
   @Test
   public void testTokenList03bis() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("MESSAGE Progress. /* Holy shit */   Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, ("MESSAGE Progress. /* Holy shit */   Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
@@ -163,7 +162,7 @@ public class TokenListTest {
 
   @Test
   public void testTokenList03ter() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("MESSAGE Progress /* Holy shit */   .Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, ("MESSAGE Progress /* Holy shit */   .Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
@@ -181,7 +180,7 @@ public class TokenListTest {
 
   @Test
   public void testTokenList03quater() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("MESSAGE Riverside /* Holy shit */   .Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, ("MESSAGE Riverside /* Holy shit */   .Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
@@ -199,7 +198,7 @@ public class TokenListTest {
 
   @Test
   public void testTokenList04() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(".Security.PAMStatus.FooBar.Machin:AccessDenied.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, (".Security.PAMStatus.FooBar.Machin:AccessDenied.".getBytes()), "file.txt");
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
@@ -213,7 +212,7 @@ public class TokenListTest {
 
   @Test
   public void testTokenList05() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("MESSAGE customer.custnum Progress.Security.PAMStatus:AccessDenied.\nMESSAGE customer.custnum. Progress.Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, ("MESSAGE customer.custnum Progress.Security.PAMStatus:AccessDenied.\nMESSAGE customer.custnum. Progress.Security.PAMStatus:AccessDenied.".getBytes()), "file.txt");
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
@@ -242,7 +241,7 @@ public class TokenListTest {
 
   @Test
   public void testTokenList06() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(":AccessDenied.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, (":AccessDenied.".getBytes()), "file.txt");
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
@@ -253,7 +252,7 @@ public class TokenListTest {
 
   @Test
   public void testTokenList07() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(".. :PAMStatus.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, (".. :PAMStatus.".getBytes()), "file.txt");
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
@@ -267,7 +266,7 @@ public class TokenListTest {
 
   @Test
   public void testTokenList08() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("/* Comment */\n{&procedure-handle}:file-name + \"_\":U + string({&procedure-handle})".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, ("/* Comment */\n{&procedure-handle}:file-name + \"_\":U + string({&procedure-handle})".getBytes()), "file.txt");
     TokenSource filter0 = new NameDotTokenFilter(lexer);
     TokenSource src = new TokenList(filter0);
 
@@ -282,7 +281,7 @@ public class TokenListTest {
   @Test
   public void testTokenList09() {
     try (InputStream input = new FileInputStream(new File(SRC_DIR, "tokenlist09.p"))) {
-      ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(ByteStreams.toByteArray(input)), "file.txt");
+      ABLLexer lexer = new ABLLexer(session, (ByteStreams.toByteArray(input)), "file.txt");
       TokenSource filter0 = new NameDotTokenFilter(lexer);
       TokenSource src = new TokenList(filter0);
 

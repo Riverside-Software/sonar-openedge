@@ -38,7 +38,7 @@ public class FunctionKeywordTokenFilter implements TokenSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(FunctionKeywordTokenFilter.class);
 
   private final TokenSource source;
-  private final Queue<Token> heap = new LinkedList<>();
+  private final Queue<ProToken> heap = new LinkedList<>();
 
   public FunctionKeywordTokenFilter(TokenSource source) {
     this.source = source;
@@ -47,7 +47,7 @@ public class FunctionKeywordTokenFilter implements TokenSource {
   @Override
   public Token nextToken() {
     if (!heap.isEmpty()) {
-      Token tok = heap.poll();
+      var tok = heap.poll();
       if (LOGGER.isTraceEnabled()) {
         logToken(tok);
       }
