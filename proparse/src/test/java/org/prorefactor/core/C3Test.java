@@ -35,7 +35,6 @@ import org.prorefactor.treeparser.TreeParserBlocks;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.progress.xref.EmptyCrossReference;
 
@@ -75,7 +74,7 @@ public class C3Test {
 
   private void genericTest(String filename, boolean c3) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(filename))) {
-      ABLLexer lexer = new ABLLexer(session, StandardCharsets.UTF_8, ByteSource.wrap(ByteStreams.toByteArray(input)), filename, false);
+      ABLLexer lexer = new ABLLexer(session, StandardCharsets.UTF_8, ByteStreams.toByteArray(input), filename, false);
       CommonTokenStream tokStream = new CommonTokenStream(lexer);
       Proparse parser = new Proparse(tokStream);
       if (c3)

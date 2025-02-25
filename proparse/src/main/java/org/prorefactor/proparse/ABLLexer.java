@@ -31,8 +31,6 @@ import org.prorefactor.refactor.settings.IProparseSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.io.ByteSource;
-
 public class ABLLexer implements TokenSource, IPreprocessor {
   private static final Logger LOGGER = LoggerFactory.getLogger(ABLLexer.class);
 
@@ -51,15 +49,36 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   /**
    * Test-only constructor
    */
-  protected ABLLexer(IProparseEnvironment session, ByteSource src, boolean lexOnly) {
+  protected ABLLexer(IProparseEnvironment session, byte[] src, boolean lexOnly) {
     this(session, session.getCharset(), src, lexOnly);
   }
 
   /**
    * Test-only constructor
    */
-  protected ABLLexer(IProparseEnvironment session, Charset charset, ByteSource src, boolean lexOnly) {
+  protected ABLLexer(IProparseEnvironment session, Charset charset, byte[] src, boolean lexOnly) {
     this(session, charset, src, "unnamed", lexOnly);
+  }
+
+  public ABLLexer(IProparseEnvironment session, String src, String fileName, boolean lexOnly) {
+    LOGGER.trace("New ProgressLexer instance {}", fileName);
+    this.session = session;
+    this.lexOnly = lexOnly;
+    this.charset = session.getCharset();
+
+    lexer = new Lexer(this, src, fileName);
+    lexer.setTokenStartChars(session.getProparseSettings().getTokenStartChars());
+    if (lexOnly) {
+      TokenSource postLexer = new NoOpPostLexer(lexer);
+      TokenSource filter0 = new NameDotTokenFilter(postLexer);
+      wrapper = new FunctionKeywordTokenFilter(filter0);
+    } else {
+      TokenSource postLexer = new PostLexer(this, lexer);
+      TokenSource filter0 = new ProparseSkipFilter(postLexer);
+      TokenSource filter1 = new NameDotTokenFilter(filter0);
+      TokenSource filter2 = new TokenList(filter1);
+      wrapper = new FunctionKeywordTokenFilter(filter2);
+    }
   }
 
   /**
@@ -71,7 +90,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
    * @param lexOnly Don't use preprocessor
    * @throws UncheckedIOException
    */
-  public ABLLexer(IProparseEnvironment session, Charset charset, ByteSource src, String fileName, boolean lexOnly) {
+  public ABLLexer(IProparseEnvironment session, Charset charset, byte[] src, String fileName, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.session = session;
     this.lexOnly = lexOnly;
@@ -95,7 +114,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   /**
    * Test-only constructor, no filters added
    */
-  protected ABLLexer(IProparseEnvironment session, ByteSource src, String fileName) {
+  protected ABLLexer(IProparseEnvironment session, String src, String fileName) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.session = session;
     this.lexOnly = false;
