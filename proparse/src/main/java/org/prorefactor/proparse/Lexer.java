@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.io.ByteSource;
 
 /**
  * Voodoo implementation of the ABL lexer (i.e. include file management, preprocessor variables, and lexer) in this
@@ -130,11 +129,23 @@ public class Lexer implements IPreprocessor {
   private Map<String, String> globalDefdNames = new HashMap<>();
   private int sequence = 0;
 
-  public Lexer(ABLLexer prepro, ByteSource src, String fileName) {
+  public Lexer(ABLLexer prepro, String src, String fileName) {
+    this.prepro = prepro;
+    this.factory = new ProTokenFactory();
+    currentInput = new InputSource(src);
+    currentInclude = new IncludeFile(fileName, currentInput);
+    currFile = addFilename(fileName);
+    includeVector.add(currentInclude);
+    currSourceNum = currentInput.getSourceNum();
+
+    getChar(); // We always assume "currChar" is available.
+  }
+
+  public Lexer(ABLLexer prepro, byte[] src, String fileName) {
     this.prepro = prepro;
     this.factory = new ProTokenFactory();
     try {
-      currentInput = new InputSource(0, fileName, src, prepro.getCharset(), 0, true, true);
+      currentInput = new InputSource(0, fileName, src, prepro.getCharset(), 0, true);
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
@@ -1851,15 +1862,15 @@ public class Lexer implements IPreprocessor {
     if (includeCache2.get(idx) != null) {
       try {
         currentInput = new InputSource(++sourceCounter, fName,
-            ByteSource.wrap(includeCache2.get(idx).getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8, idx,
-            prepro.getProparseSettings().getSkipXCode(), false);
+            includeCache2.get(idx).getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8, idx,
+            prepro.getProparseSettings().getSkipXCode());
       } catch (IOException caught) {
         throw new UncheckedIOException(caught);
       }
     } else {
       try {
-        currentInput = new InputSource(++sourceCounter, incFile, prepro.getCharset(), idx,
-            prepro.getProparseSettings().getSkipXCode(), false);
+        currentInput = new InputSource(++sourceCounter, incFile.toPath(), prepro.getCharset(), idx,
+            prepro.getProparseSettings().getSkipXCode());
         includeCache2.put(idx, currentInput.getContent());
       } catch (IOException caught) {
         throw new UncheckedIOException(caught);
