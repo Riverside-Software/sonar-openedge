@@ -38,7 +38,6 @@ import org.prorefactor.treeparser.AbstractProparseTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.google.common.io.ByteSource;
 import com.progress.xref.EmptyCrossReference;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
@@ -157,7 +156,7 @@ public class ErrorRangeTest extends AbstractProparseTest {
   private ErrorDetectionListener genericTest(String filename, int lineNumber, String... lines2) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(filename))) {
       String code = injectCode(filename, lineNumber, lines2);
-      ABLLexer lexer = new ABLLexer(session, StandardCharsets.UTF_8, ByteSource.wrap(code.getBytes()), filename, false);
+      ABLLexer lexer = new ABLLexer(session, StandardCharsets.UTF_8, code.getBytes(), filename, false);
       CommonTokenStream tokStream = new CommonTokenStream(lexer);
       Proparse parser = new Proparse(tokStream);
       parser.initialize(session, new EmptyCrossReference(), true);
