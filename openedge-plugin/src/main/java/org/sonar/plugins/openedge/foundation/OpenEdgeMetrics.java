@@ -35,6 +35,14 @@ public class OpenEdgeMetrics implements Metrics {
   // CoreMetrics.DOMAIN_SIZE
   // ***********************
 
+  public static final Metric<Integer> OELIC_NCLOC = new Metric.Builder("OE_LIC_NCLOC", "OpenEdge lines of code (L2)",
+      Metric.ValueType.INT) //
+        .setDescription("Lines of code (L2)") //
+        .setDirection(Metric.DIRECTION_NONE) //
+        .setQualitative(false) //
+        .setDomain(CoreMetrics.DOMAIN_SIZE) //
+        .create();
+
   public static final Metric<Integer> CLASSES = new Metric.Builder("OE_CLASSES", "OpenEdge classes",
       Metric.ValueType.INT) //
         .setDescription("Number of classes") //
@@ -196,8 +204,8 @@ public class OpenEdgeMetrics implements Metrics {
         .create();
 
   @SuppressWarnings("rawtypes")
-  private static final List<Metric> METRICS = ImmutableList.<Metric> builder().add(PACKAGES, CLASSES, PROCEDURES,
-      INCLUDES, WINDOWS, NUM_TRANSACTIONS, SHR_DS, SHR_TT, SHR_VAR, NUM_TABLES, NUM_SEQUENCES, NUM_INDEXES,
+  private static final List<Metric> METRICS = ImmutableList.<Metric> builder().add(PACKAGES, OELIC_NCLOC, CLASSES,
+      PROCEDURES, INCLUDES, WINDOWS, NUM_TRANSACTIONS, SHR_DS, SHR_TT, SHR_VAR, NUM_TABLES, NUM_SEQUENCES, NUM_INDEXES,
       NUM_FIELDS, NUM_TRIGGERS, INTERNAL_PROCEDURES, INTERNAL_FUNCTIONS, METHODS, COMPLEXITY, DIRECTIVES).build();
 
   @SuppressWarnings("rawtypes")

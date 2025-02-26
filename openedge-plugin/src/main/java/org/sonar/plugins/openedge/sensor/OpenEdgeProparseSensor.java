@@ -29,9 +29,11 @@ import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
@@ -41,6 +43,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
@@ -48,6 +51,7 @@ import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
 import org.prorefactor.proparse.IncludeFileNotFoundException;
+import org.prorefactor.proparse.LinesOfCodeVisitor;
 import org.prorefactor.proparse.XCodedFileException;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.proparse.support.IProparseEnvironment;
@@ -109,6 +113,11 @@ public class OpenEdgeProparseSensor implements Sensor {
   private int numListings;
   private int numFailures;
   private int ncLoc;
+  private int ncLocL2;
+
+  // Include files LOC
+  private Map<String, IntervalSet> incLinesOfOCode = new HashMap<>();
+  private Set<InputFile> ncLocPushed = new HashSet<>();
 
   // Timing statistics
   private Map<String, Long> ruleTime = new HashMap<>();
@@ -136,8 +145,9 @@ public class OpenEdgeProparseSensor implements Sensor {
 
   @Override
   public void describe(SensorDescriptor descriptor) {
-    descriptor.onlyOnLanguage(Constants.LANGUAGE_KEY).name(getClass().getSimpleName()).onlyWhenConfiguration(
-        config -> !config.getBoolean(Constants.SKIP_PROPARSE_PROPERTY).orElse(false));
+    descriptor.onlyOnLanguage(Constants.LANGUAGE_KEY) //
+      .name(getClass().getSimpleName()) //
+      .onlyWhenConfiguration(config -> !config.getBoolean(Constants.SKIP_PROPARSE_PROPERTY).orElse(false));
   }
 
   @Override
@@ -190,6 +200,8 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
     }
 
+    // Publish consolidated LOC-L2 of all include files 
+    publishIncLocL2(context);
     computeAnalytics(context);
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE)
       logStatistics();
@@ -392,6 +404,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       computeSimpleMetrics(context, file, unit);
       computeCommonMetrics(context, file, unit);
       computeComplexity(context, file, unit);
+      computeLOCL2(context, file, unit);
     }
 
     if (settings.useProparseDebug()) {
@@ -422,17 +435,19 @@ public class OpenEdgeProparseSensor implements Sensor {
 
   private void computeAnalytics(SensorContext context) {
     // Store values in OpenEdgeComponents instance. Used by client-side sensor in rules package.
-    components.setAnalytics(
-        String.format("files=%1$d,failures=%2$d,parseTime=%3$d,maxParseTime=%4$d,ncloc=%5$d,oeversion=\"%6$s\"",
-            numFiles, numFailures, parseTime, maxParseTime, ncLoc, settings.getOpenEdgePluginVersion()));
+    components.setAnalytics(String.format(
+        "files=%1$d,failures=%2$d,parseTime=%3$d,maxParseTime=%4$d,ncloc=%5$d,nclocl2=%6$d,oeversion=\"%7$s\"",
+        numFiles, numFailures, parseTime, maxParseTime, ncLoc, ncLocL2, settings.getOpenEdgePluginVersion()));
     components.setNcLoc(ncLoc);
+    components.setNcLocL2(ncLocL2);
     // And make the value available the value available to Compute Engine task
     context.addContextProperty("sonar.oe.ncloc", Integer.toString(ncLoc));
+    context.addContextProperty("sonar.oe.nclocl2", Integer.toString(ncLocL2));
   }
 
   private void logStatistics() {
-    LOG.info("{} files proparse'd, {} XREF files, {} listing files, {} failure(s), {} NCLOCs", numFiles, numXREF,
-        numListings, numFailures, ncLoc);
+    LOG.info("{} files proparse'd, {} XREF files, {} listing files, {} failure(s), {} NCLOCs, {} NCLOC-L2", numFiles, numXREF,
+        numListings, numFailures, ncLoc, ncLocL2);
     LOG.info("AST Generation | time={} ms", parseTime);
     LOG.info("XREF Parsing   | time={} ms", xmlParseTime);
     LOG.info("Rules          | time={} ms", ruleTime.values().stream().reduce(0L, Long::sum));
@@ -506,12 +521,19 @@ public class OpenEdgeProparseSensor implements Sensor {
   @SuppressWarnings({"unchecked", "rawtypes"})
   private void computeSimpleMetrics(SensorContext context, InputFile file, ParseUnit unit) {
     // Saving LOC, COMMENTS and DIRECTIVES metrics
-    context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(unit.getMetrics().getLoc()).save();
     ncLoc += unit.getMetrics().getLoc();
-    context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
-        unit.getMetrics().getComments()).save();
-    context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.DIRECTIVES).withValue(
-        unit.getMetrics().getDirectives()).save();
+    context.newMeasure().on(file) //
+      .forMetric((Metric) CoreMetrics.NCLOC) //
+      .withValue(unit.getMetrics().getLoc()) //
+      .save();
+    context.newMeasure().on(file) //
+      .forMetric((Metric) CoreMetrics.COMMENT_LINES) //
+      .withValue(unit.getMetrics().getComments()) //
+      .save();
+    context.newMeasure().on(file) //
+      .forMetric((Metric) OpenEdgeMetrics.DIRECTIVES) //
+      .withValue(unit.getMetrics().getDirectives()) //
+      .save();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -572,6 +594,59 @@ public class OpenEdgeProparseSensor implements Sensor {
         ABLNodeType.METHOD, ABLNodeType.ENUM).size();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMPLEXITY).withValue(complexity).save();
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.COMPLEXITY).withValue(complexityWithInc).save();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private void computeLOCL2(SensorContext context, InputFile file, ParseUnit unit) {
+    var visitor = new LinesOfCodeVisitor();
+    visitor.walkStatementBlock(unit.getTopNode());
+    var locCountPerFile = visitor.getCounts();
+
+    var locCountMainFile = locCountPerFile.get(0);
+    if (locCountMainFile != null) {
+      // Store LOC-L2 of main file
+      if (unit.isAppBuilderCode()) {
+        var editableSections = unit.getCodeSections().get(0);
+        if (editableSections != null)
+          locCountMainFile = locCountMainFile.and(editableSections);
+      }
+      ncLocL2 += locCountMainFile.size();
+      context.newMeasure().on(file) //
+        .forMetric((Metric) OpenEdgeMetrics.OELIC_NCLOC) //
+        .withValue(locCountMainFile.size()) //
+        .save();
+      ncLocPushed.add(file);
+    }
+    // Then collect LOC-LC2 of all include files
+    for (var entry : locCountPerFile.entrySet()) {
+      if (entry.getKey() > 0) {
+        var set = incLinesOfOCode.computeIfAbsent(unit.getIncludeFileName(entry.getKey()), it -> new IntervalSet());
+        for (var ii : entry.getValue().getIntervals()) {
+          set.add(ii.a, ii.b);
+        }
+      }
+    }
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private void publishIncLocL2(SensorContext context) {
+    for (var entry : incLinesOfOCode.entrySet()) {
+      var pred1 = context.fileSystem().predicates().hasAbsolutePath(entry.getKey());
+      var pred2 = context.fileSystem().predicates().hasRelativePath(entry.getKey());
+      var target = context.fileSystem().inputFile(pred1);
+      if (target == null) {
+        target = context.fileSystem().inputFile(pred2);
+      }
+      if ((target != null) && Constants.LANGUAGE_KEY.equals(target.language()) && !ncLocPushed.contains(target)) {
+        var sz = entry.getValue().size();
+        context.newMeasure().on(target) //
+          .forMetric((Metric) OpenEdgeMetrics.OELIC_NCLOC) //
+          .withValue(sz) //
+          .save();
+        ncLocL2 += sz;
+        ncLocPushed.add(target);
+      }
+    }
   }
 
 }
