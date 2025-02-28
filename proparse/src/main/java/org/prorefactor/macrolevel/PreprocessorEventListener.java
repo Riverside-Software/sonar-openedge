@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.antlr.v4.runtime.misc.IntervalSet;
 import org.prorefactor.core.ProToken;
 
 /**
@@ -35,7 +36,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
 
   // AppBuilder managed is read-only by default - Keep track of editable code sections
   private boolean appBuilderCode = false;
-  private final List<CodeSection> appBuilderSections = new ArrayList<>();
+  private final Map<Integer, IntervalSet> appBuilderSections = new HashMap<>();
 
   /* Temp stack of scopes, just used during tree creation */
   private Deque<Scope> scopeStack = new LinkedList<>();
@@ -44,7 +45,8 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   private Map<String, MacroDef> globalDefMap = new HashMap<>();
   private MacroRef currRef;
   /* Temp object for editable section */
-  private CodeSection currSection;
+  private boolean inEditableSection;
+  private int editableSectionFirstLine = -1;
   private List<String> messages = new ArrayList<>();
 
   public PreprocessorEventListener() {
@@ -180,19 +182,18 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   public void analyzeSuspend(String str, int line) {
     appBuilderCode = true;
     if ((currInclude.getFileIndex() == 0) && ProToken.isTokenEditableInAB(str)) {
-      currSection = new CodeSection();
-      currSection.fileNum = currInclude.getFileIndex();
-      currSection.startLine = line;
+      inEditableSection = true;
+      editableSectionFirstLine = line;
     }
   }
 
   @Override
   public void analyzeResume(int line) {
-    if ((currSection != null) && (currInclude.getFileIndex() == currSection.fileNum)) {
-      currSection.endLine = line;
-      appBuilderSections.add(currSection);
+    if (inEditableSection && (currInclude.getFileIndex() == 0)) {
+      appBuilderSections.computeIfAbsent(0, it -> new IntervalSet()).add(editableSectionFirstLine, line);
     }
-    currSection = null;
+    inEditableSection = false;
+    editableSectionFirstLine = -1;
   }
 
   @Override
@@ -202,14 +203,6 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
 
   public boolean isAppBuilderCode() {
     return appBuilderCode;
-  }
-
-  public boolean isLineInEditableSection(int file, int line) {
-    for (CodeSection range : appBuilderSections) {
-      if ((range.fileNum == file) && (range.startLine <= line) && (range.endLine >= line))
-        return true;
-    }
-    return false;
   }
 
   /**
@@ -240,8 +233,8 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
     return ret;
   }
 
-  public List<CodeSection> getEditableCodeSections() {
-    return Collections.unmodifiableList(appBuilderSections);
+  public Map<Integer, IntervalSet> getEditableCodeSections() {
+    return Collections.unmodifiableMap(appBuilderSections);
   }
 
   // These scopes are temporary, just used during tree creation
@@ -254,30 +247,4 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
     }
   }
 
-  public static class CodeSection {
-    private int fileNum;
-    private int startLine;
-    private int endLine;
-
-    /**
-     * @return Always 0 for now
-     */
-    public int getFileNum() {
-      return fileNum;
-    }
-
-    /**
-     * @return Starting line number of editable code sectin
-     */
-    public int getStartLine() {
-      return startLine;
-    }
-
-    /**
-     * @return Ending line number of editable code sectin
-     */
-    public int getEndLine() {
-      return endLine;
-    }
-  }
 }
