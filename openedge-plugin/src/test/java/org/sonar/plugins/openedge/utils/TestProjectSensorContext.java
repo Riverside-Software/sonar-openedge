@@ -40,6 +40,7 @@ public class TestProjectSensorContext {
   public static final String FILE3 = "src/procedures/test3.p";
   public static final String FILE4 = "src/procedures/test3.i";
   public static final String FILE5 = "src/procedures/invalid.p";
+  public static final String FILE6 = "src/procedures/test3.i1";
   public static final String CLASS1 = "src/classes/rssw/testclass.cls";
 
   private TestProjectSensorContext() {
@@ -104,6 +105,13 @@ public class TestProjectSensorContext {
       .setCharset(Charset.defaultCharset()) //
       .setContents(Files.asCharSource(new File(BASEDIR, FILE5), Charset.defaultCharset()).read()) //
       .build());
+    context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, FILE6) //
+        .setLanguage("") //
+        .setStatus(Status.ADDED)
+        .setType(Type.MAIN) //
+        .setCharset(Charset.defaultCharset()) //
+        .setContents(Files.asCharSource(new File(BASEDIR, FILE6), Charset.defaultCharset()).read()) //
+        .build());
     context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, CLASS1) //
       .setLanguage(Constants.LANGUAGE_KEY) //
       .setStatus(Status.ADDED)

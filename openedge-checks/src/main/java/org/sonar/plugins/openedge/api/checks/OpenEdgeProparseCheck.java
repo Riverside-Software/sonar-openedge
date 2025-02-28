@@ -102,7 +102,10 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
       else
         incReports.add(targetFile.toString() + ":" + token.getLine());
     }
-
+    // Don't report issue if include file is not recognized by Sonar (e.g. extension not managed) 
+    if (!"oe".equals(targetFile.language())) {
+      return null;
+    }
     int lineNumber = token.getLine();
     LOG.trace("Adding issue {} to {} line {}", getRuleKey(), targetFile, lineNumber);
     NewIssue issue = getContext().newIssue().forRule(getRuleKey());
@@ -145,7 +148,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
   }
 
   /**
-   * Create new issue. Will return null if issue can't be created (no-sonar annotation, appbuilder generated code, ...
+   * Create new issue. Will return null if issue can't be created (no-sonar annotation, appbuilder generated code, ...)
    */
   protected NewIssue createIssue(InputFile file, JPNode node, String msg, boolean exactLocation) {
     if (!"".equals(getNoSonarKeyword()) && skipIssue(node)) {

@@ -49,6 +49,7 @@ import org.sonar.plugins.openedge.api.CheckRegistration;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.checks.IntegerRule;
+import org.sonar.plugins.openedge.checks.LineNumberRule;
 import org.sonar.plugins.openedge.checks.TestChecksRegistration;
 import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
@@ -167,6 +168,32 @@ public class OpenEdgeProparseSensorTest {
     // IntegerRule reports 16 issues on test2.p, 2 issues on test3.p + 0 from nested test3.i as we're in SonarLint
     // context
     assertEquals(context.allIssues().stream().count(), 18);
+  }
+
+  @Test
+  public void testNoIssueOnNonOEFiles() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    var rulesBuilder = new ActiveRulesBuilder();
+    rulesBuilder.addRule(new NewActiveRule.Builder() //
+      .setRuleKey(RuleKey.of(Constants.STD_REPOSITORY_KEY, LineNumberRule.class.getCanonicalName())) //
+      .setLanguage(Constants.LANGUAGE_KEY) //
+      .setParam("fileNums", "0,10;1,1;2,1") //
+      .build());
+    context.setActiveRules(rulesBuilder.build());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(),
+        new CheckRegistration[] {new TestChecksRegistration()}, null);
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    assertEquals(components.getProparseRules().size(), 1);
+    assertEquals(context.allIssues().stream().filter(
+        it -> it.primaryLocation().inputComponent().key().endsWith("test3.p")).count(), 1);
+    assertEquals(context.allIssues().stream().filter(
+        it -> it.primaryLocation().inputComponent().key().endsWith("test3.i")).count(), 1);
+    assertEquals(context.allIssues().stream().filter(
+        it -> it.primaryLocation().inputComponent().key().endsWith("test3.i2")).count(), 0);
   }
 
   @Test

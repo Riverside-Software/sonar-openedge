@@ -34,7 +34,7 @@ public class TestChecksRegistration implements CheckRegistration {
    */
   @Override
   public void register(Registrar registrar) {
-    LOG.debug("Registering CheckRegistrar {}", TestChecksRegistration.class.toString());
+    LOG.debug("Registering CheckRegistrar {}", TestChecksRegistration.class);
 
     for (Class<? extends OpenEdgeProparseCheck> clz : ppCheckClasses()) {
       registrar.registerParserCheck(clz);
@@ -49,7 +49,7 @@ public class TestChecksRegistration implements CheckRegistration {
    */
   @SuppressWarnings("unchecked")
   public static Class<? extends OpenEdgeProparseCheck>[] ppCheckClasses() {
-    return new Class[] {LargeTransactionScope.class, ClumsySyntax.class, IntegerRule.class};
+    return new Class[] {LargeTransactionScope.class, ClumsySyntax.class, IntegerRule.class, LineNumberRule.class};
   }
 
   /**
