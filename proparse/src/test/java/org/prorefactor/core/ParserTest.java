@@ -920,6 +920,14 @@ public class ParserTest extends AbstractProparseTest {
   }
 
   @Test
+  public void testEntered01() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "entered01.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
+  }
+
+  @Test
   public void testElvis01() {
     ParseUnit unit = getParseUnit(new File(SRC_DIR, "elvis01.p"), session);
     unit.treeParser01();
