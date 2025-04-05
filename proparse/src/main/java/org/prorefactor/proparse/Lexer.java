@@ -1151,7 +1151,11 @@ public class Lexer implements IPreprocessor {
     if ("&message".equals(macroType)) {
       appendToEOL();
       getChar();
-      prepro.getLstListener().message(currText.toString().substring(currText.toString().indexOf(' ')).trim());
+      var spPos = currText.toString().indexOf(' ');
+      if (spPos != -1)
+        prepro.getLstListener().message(currText.toString().substring(spPos).trim());
+      else
+        prepro.getLstListener().message("");
       return makeToken(ABLNodeType.AMPMESSAGE);
     }
 
