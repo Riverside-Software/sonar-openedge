@@ -482,16 +482,20 @@ public class BugFixTest extends AbstractProparseTest {
     List<JPNode> list = unit.getTopNode().query(ABLNodeType.CREATE);
     // COM automation
     assertEquals(list.get(0).getLine(), 3);
+    assertEquals(list.get(0).asIStatement().getNodeType(), ABLNodeType.CREATE);
     assertEquals(list.get(0).asIStatement().getNodeType2(), ABLNodeType.AUTOMATION_OBJECT);
     assertEquals(list.get(1).getLine(), 4);
     assertEquals(list.get(1).asIStatement().getNodeType2(), ABLNodeType.AUTOMATION_OBJECT);
     // Widgets
     assertEquals(list.get(2).getLine(), 8);
+    assertEquals(list.get(2).asIStatement().getNodeType(), ABLNodeType.CREATE);
     assertEquals(list.get(2).asIStatement().getNodeType2(), ABLNodeType.WIDGET);
     assertEquals(list.get(3).getLine(), 12);
+    assertEquals(list.get(3).asIStatement().getNodeType(), ABLNodeType.CREATE);
     assertEquals(list.get(3).asIStatement().getNodeType2(), ABLNodeType.WIDGET);
     // Ambiguous
     assertEquals(list.get(4).getLine(), 15);
+    assertEquals(list.get(4).asIStatement().getNodeType(), ABLNodeType.CREATE);
     assertEquals(list.get(4).asIStatement().getNodeType2(), ABLNodeType.WIDGET);
   }
 

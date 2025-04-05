@@ -29,6 +29,11 @@ public interface IStatement {
   boolean isStatement();
 
   /**
+   * @return Primary node type, i.e. DEFINE in DEFINE VARIABLE statement. Never null.
+   */
+  ABLNodeType getNodeType();
+
+  /**
    * @return Secondary node type, i.e. VARIABLE in DEFINE VARIABLE statement. Can be null
    */
   @Nullable

@@ -199,10 +199,10 @@ public class Routine extends Symbol {
     graph.addVertex(block.asJPNode());
 
     while (currStmt != null) {
-      if ((currStmt.asJPNode().getNodeType() == ABLNodeType.FUNCTION)
-          || (currStmt.asJPNode().getNodeType() == ABLNodeType.PROCEDURE)
-          || (currStmt.asJPNode().getNodeType() == ABLNodeType.METHOD)
-          || (currStmt.asJPNode().getNodeType() == ABLNodeType.ON)) {
+      if ((currStmt.getNodeType() == ABLNodeType.FUNCTION)
+          || (currStmt.getNodeType() == ABLNodeType.PROCEDURE)
+          || (currStmt.getNodeType() == ABLNodeType.METHOD)
+          || (currStmt.getNodeType() == ABLNodeType.ON)) {
         currStmt = currStmt.getNextStatement();
         continue;
       }

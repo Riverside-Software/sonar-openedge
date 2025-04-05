@@ -669,7 +669,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
     node.setInBlock(currentBlock);
 
     // Assign annotations to statement
-    if (node.asJPNode().getNodeType() != ABLNodeType.ANNOTATION) {
+    if (node.getNodeType() != ABLNodeType.ANNOTATION) {
       attachAnnotations(node);
     }
   }
