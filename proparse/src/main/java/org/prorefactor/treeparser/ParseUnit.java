@@ -552,7 +552,7 @@ public class ParseUnit {
     // buffer name)
     List<RecordNameNode> filteredList = new ArrayList<>();
     for (RecordNameNode node : recordNodes) {
-      if ((node.getTableBuffer() == null) || (node.getStatement() == null)
+      if ((node.getTableBuffer() == null) || (node.getTableBuffer().getTable() == null) || (node.getStatement() == null)
           || (node.getStatement().firstNaturalChild() == null))
         break;
       String tgt = node.getTableBuffer().getTargetFullName();
