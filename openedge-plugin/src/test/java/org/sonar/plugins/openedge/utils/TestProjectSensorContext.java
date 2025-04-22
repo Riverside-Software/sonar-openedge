@@ -42,6 +42,7 @@ public class TestProjectSensorContext {
   public static final String FILE4 = "src/procedures/test3.i";
   public static final String FILE5 = "src/procedures/invalid.p";
   public static final String FILE6 = "src/procedures/test3.i1";
+  public static final String FILE7 = "src/procedures/invalid02.p";
   public static final String CLASS1 = "src/classes/rssw/testclass.cls";
 
   private TestProjectSensorContext() {
@@ -64,7 +65,7 @@ public class TestProjectSensorContext {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     context.setSettings(settings);
 
-    Set<String> oeFiles = Set.of(FILE1, FILE2, FILE3, FILE4, FILE5, FILE6, CLASS1);
+    Set<String> oeFiles = Set.of(FILE1, FILE2, FILE3, FILE4, FILE5, FILE6, FILE7, CLASS1);
     Set<String> addedFiles = Set.of(FILE2, FILE4, FILE5, FILE6, CLASS1);
 
     // DB Schema

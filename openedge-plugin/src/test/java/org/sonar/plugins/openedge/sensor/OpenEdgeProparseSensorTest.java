@@ -352,6 +352,22 @@ public class OpenEdgeProparseSensorTest {
   }
 
   @Test
+  public void testProparseError02() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    assertEquals(context.allAnalysisErrors().size(), 0);
+    assertEquals(context.allIssues().size(), 1);
+    Issue issue = context.allIssues().iterator().next();
+    assertEquals(issue.ruleKey().rule(), OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY);
+  }
+
+  @Test
   public void testProparseErrorSonarLint() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
     context.setRuntime(OpenEdgePluginTest.SONARLINT_RUNTIME);
