@@ -54,17 +54,17 @@ pipeline {
   post {
     unstable {
       script {
-        mail body: "Check console output at ${BUILD_URL}/console", to: "g.querret@riverside-software.fr", subject: "sonar-openedge build is unstable - Branch ${BRANCH_NAME}"
+        mail body: "Check console output at ${BUILD_URL}/console", to: "g.querret@riverside-software.fr", subject: "sonar-openedge ${BRANCH_NAME} build is unstable"
       }
     }
     failure {
       script {
-        mail body: "Check console output at ${BUILD_URL}/console", to: "g.querret@riverside-software.fr", subject: "sonar-openedge build failure in Jenkins - Branch ${BRANCH_NAME}"
+        mail body: "Check console output at ${BUILD_URL}/console", to: "g.querret@riverside-software.fr", subject: "sonar-openedge ${BRANCH_NAME} build failure"
       }
     }
     fixed {
       script {
-        mail body: "Console output at ${BUILD_URL}/console", to: "g.querret@riverside-software.fr", subject: "sonar-openedge build is back to normal - Branch ${BRANCH_NAME}"
+        mail body: "Console output at ${BUILD_URL}/console", to: "g.querret@riverside-software.fr", subject: "sonar-openedge ${BRANCH_NAME} build is back to normal"
       }
     }
   }
