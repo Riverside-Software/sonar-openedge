@@ -32,4 +32,9 @@ public abstract class Widget extends Symbol implements IWidget {
     return getName();
   }
 
+  @Override
+  public Stream copy(TreeParserSymbolScope newScope) {
+    throw new UnsupportedOperationException("Widget objects can't be copied");
+  }
+
 }

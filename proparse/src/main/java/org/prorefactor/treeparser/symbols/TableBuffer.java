@@ -128,8 +128,7 @@ public class TableBuffer extends Symbol {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof TableBuffer) {
-      TableBuffer other = (TableBuffer) obj;
+    if (obj instanceof TableBuffer other) {
       return table.getName().equalsIgnoreCase(other.table.getName()) && getName().equalsIgnoreCase(other.getName());
     } else {
       return false;
@@ -139,5 +138,14 @@ public class TableBuffer extends Symbol {
   @Override
   public int hashCode() {
     return (table.getName().toLowerCase() + "##" + getName().toLowerCase()).hashCode();
+  }
+
+  @Override
+  public TableBuffer copy(TreeParserSymbolScope newScope) {
+    var obj = new TableBuffer(name, newScope, table);
+    obj.setDefinitionNode(getDefineNode());
+    obj.setLikeSymbol(getLikeSymbol());
+
+    return obj;
   }
 }

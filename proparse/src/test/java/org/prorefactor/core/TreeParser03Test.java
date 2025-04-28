@@ -237,6 +237,15 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(f8.getIDEInsertElement(false), "f8(output ${1:xx})$0");
     assertEquals(f8.getParameters().size(), 1);
 
+    var lst9 = unit.getRootScope().lookupRoutines("f9");
+    assertEquals(lst9.size(), 1);
+    var f9 = lst9.get(0);
+    assertEquals(f9.getSignature(), "f9(II,IT,OTH,ID,IDH)");
+    assertEquals(f9.getIDESignature(), "f9(↑INT, ↑TBL, ↓TBL-HDL, ↑DS, ↑DS-HDL) : INT");
+    assertEquals(f9.getIDEInsertElement(true), "f9(${1:prm1}, ${2:ttCustomer}, OUTPUT ${3:h1}, ${4:arg4}, ${5:h2})$0");
+    assertEquals(f9.getIDEInsertElement(false), "f9(${1:prm1}, ${2:ttCustomer}, output ${3:h1}, ${4:arg4}, ${5:h2})$0");
+    assertEquals(f9.getParameters().size(), 5);
+
     // Test TreeParserSymbolScope#getTokenSymbolScope()
     assertEquals(unit.getRootScope().getTokenSymbolScope(205), unit.getRootScope());
     assertEquals(unit.getRootScope().getTokenSymbolScope(150).getRoutine().getName(), "f3");

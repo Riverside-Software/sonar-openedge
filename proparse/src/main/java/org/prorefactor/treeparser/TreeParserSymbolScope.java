@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.prorefactor.core.ABLNodeType;
@@ -436,11 +435,16 @@ public class TreeParserSymbolScope {
   }
 
   private Routine lookupRoutine(String name) {
-    return routineList.stream().filter(r -> r.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    return routineList.stream() //
+      .filter(r -> r.getName().equalsIgnoreCase(name) && !r.isForwardDeclaration()) //
+      .findFirst() //
+      .orElse(null);
   }
 
   public List<Routine> lookupRoutines(String name) {
-    return routineList.stream().filter(r -> r.getName().equalsIgnoreCase(name)).collect(Collectors.toList());
+    return routineList.stream() //
+      .filter(r -> r.getName().equalsIgnoreCase(name) && !r.isForwardDeclaration()) //
+      .toList();
   }
 
   public Routine lookupRoutineBySignature(String signature) {

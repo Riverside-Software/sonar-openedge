@@ -231,6 +231,24 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void exitFunctionParams(FunctionParamsContext ctx) {
+    var fwdDecl = currentRoutine.getForwardDeclaration();
+    if ((fwdDecl != null) && currentRoutine.getParameters().isEmpty()) {
+      LOG.debug("Copy parameters from FORWARDS definition");
+      for (var prm : fwdDecl.getParameters()) {
+        var prmCopy = new Parameter(prm.getDefinitionNode());
+        prmCopy.setDirectionNode(prm.getDirectionNode());
+        prmCopy.setProgressType(ABLNodeType.getNodeType(prm.getProgressType()));
+        if (prm.getSymbol() != null) {
+          prmCopy.setSymbol(prm.getSymbol().copy(currentScope));
+          currentScope.add(prmCopy.getSymbol());
+        }
+        currentRoutine.addParameter(prmCopy);
+      }
+    }
+  }
+
+  @Override
   public void enterFunctionParamBufferFor(FunctionParamBufferForContext ctx) {
     Parameter param = new Parameter(support.getNode(ctx));
     param.setDirectionNode(null);

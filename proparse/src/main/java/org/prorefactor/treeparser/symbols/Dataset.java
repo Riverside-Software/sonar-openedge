@@ -58,4 +58,13 @@ public class Dataset extends Symbol {
     return getNodeType().getType();
   }
 
+  @Override
+  public Dataset copy(TreeParserSymbolScope newScope) {
+    var obj = new Dataset(name, newScope);
+    obj.setDefinitionNode(getDefineNode());
+    obj.setLikeSymbol(getLikeSymbol());
+    buffers.forEach(it -> obj.addBuffer(it.copy(newScope)));
+
+    return obj;
+  }
 }

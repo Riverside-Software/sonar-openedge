@@ -145,6 +145,18 @@ public class Variable extends Symbol implements Primitive {
     return readWriteRefs;
   }
 
+  @Override
+  public Symbol copy(TreeParserSymbolScope newScope) {
+    var obj = new Variable(name, newScope, type);
+    obj.setDefinitionNode(getDefineNode());
+    obj.setLikeSymbol(getLikeSymbol());
+    obj.extent = extent;
+    obj.dataType = dataType;
+    obj.initialValue = initialValue;
+
+    return obj;
+  }
+
   public enum Type {
     VARIABLE, PROPERTY, PARAMETER;
 
