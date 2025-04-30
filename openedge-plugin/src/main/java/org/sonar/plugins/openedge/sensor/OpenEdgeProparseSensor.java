@@ -50,6 +50,8 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
+import org.prorefactor.core.nodetypes.ProgramRootNode;
+import org.prorefactor.proparse.CognitiveComplexityListener;
 import org.prorefactor.proparse.IncludeFileNotFoundException;
 import org.prorefactor.proparse.LinesOfCodeVisitor;
 import org.prorefactor.proparse.XCodedFileException;
@@ -404,6 +406,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       computeSimpleMetrics(context, file, unit);
       computeCommonMetrics(context, file, unit);
       computeComplexity(context, file, unit);
+      computeCognitiveComplexity(context, file, unit);
       computeLOCL2(context, file, unit);
     }
 
@@ -594,6 +597,26 @@ public class OpenEdgeProparseSensor implements Sensor {
         ABLNodeType.METHOD, ABLNodeType.ENUM).size();
     context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMPLEXITY).withValue(complexity).save();
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.COMPLEXITY).withValue(complexityWithInc).save();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private void computeCognitiveComplexity(SensorContext context, InputFile file, ParseUnit unit) {
+    var complexity = 0;
+    for (var routine : unit.getRootScope().getRoutines()) {
+      var sig = routine.getSignature();
+      final var signature = sig.substring(0, sig.lastIndexOf(')') + 1);
+      var method = unit.getTypeInfo() == null ? null : unit.getTypeInfo().getMethods().stream().filter(
+          it -> it.getSignature().equals(signature)).findFirst().orElse(null);
+
+      var block = routine.getRoutineScope().getRootBlock().getNode().asIStatementBlock();
+      // Count complexity only on main blocks and on blocks in the main file
+      if ((block instanceof ProgramRootNode) || (block.asJPNode().firstNaturalChild().getFileIndex() == 0)) {
+        var listener = new CognitiveComplexityListener(block, unit.getTypeInfo(), method);
+        listener.walkStatementBlock(block);
+        complexity += listener.getMainFileComplexity();
+      }
+    }
+    context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COGNITIVE_COMPLEXITY).withValue(complexity).save();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

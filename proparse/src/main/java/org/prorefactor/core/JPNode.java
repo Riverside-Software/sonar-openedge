@@ -458,6 +458,16 @@ public class JPNode {
   }
 
   /**
+   * Get an array of all expressions
+   */
+  public List<IExpression> queryExpressionsCurrentStatement() {
+    JPNodeExpressionQuery query = new JPNodeExpressionQuery(this);
+    walk2(query);
+
+    return query.getResult();
+  }
+
+  /**
    * Get an array of all descendant nodes (including this node) of a given type
    */
   public List<JPNode> queryStateHead(ABLNodeType type, ABLNodeType... findTypes) {

@@ -43,6 +43,7 @@ import org.sonar.api.batch.rule.internal.NewActiveRule;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.batch.sensor.issue.Issue;
 import org.sonar.api.config.internal.MapSettings;
+import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.CheckRegistration;
@@ -126,6 +127,33 @@ public class OpenEdgeProparseSensorTest {
     sensor.execute(context);
 
     assertEquals(components.getProparseRules().size(), 1);
+  }
+
+  @Test
+  public void testComplexity() throws Exception {
+    var context = TestProjectSensorContext.createContext();
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    var components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(),
+        new CheckRegistration[] {new TestChecksRegistration()}, null);
+    var sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    var m1 = context.measure(BASEDIR + ":" + FILE1, CoreMetrics.COMPLEXITY);
+    assertEquals(m1.value(), 1);
+    var m1bis = context.measure(BASEDIR + ":" + FILE1, CoreMetrics.COGNITIVE_COMPLEXITY);
+    assertEquals(m1bis.value(), 0);
+    var m2 = context.measure(BASEDIR + ":" + FILE2, CoreMetrics.COMPLEXITY);
+    assertEquals(m2.value(), 13);
+    var m2bis = context.measure(BASEDIR + ":" + FILE2, CoreMetrics.COGNITIVE_COMPLEXITY);
+    assertEquals(m2bis.value(), 2);
+    var m3 = context.measure(BASEDIR + ":" + FILE3, CoreMetrics.COMPLEXITY);
+    assertEquals(m3.value(), 8);
+    var m3bis = context.measure(BASEDIR + ":" + FILE3, CoreMetrics.COGNITIVE_COMPLEXITY);
+    assertEquals(m3bis.value(), 0);
+    var m4 = context.measure(BASEDIR + ":" + CLASS1, CoreMetrics.COMPLEXITY);
+    assertEquals(m4.value(), 14);
+    var m4bis = context.measure(BASEDIR + ":" + CLASS1, CoreMetrics.COGNITIVE_COMPLEXITY);
+    assertEquals(m4bis.value(), 0);
   }
 
   @Test
