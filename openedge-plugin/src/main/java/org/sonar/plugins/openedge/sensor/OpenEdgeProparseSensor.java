@@ -381,7 +381,7 @@ public class OpenEdgeProparseSensor implements Sensor {
             RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.PROPARSE_ERROR_RULEKEY));
         NewIssueLocation loc = issue.newLocation().on(file).message(Strings.nullToEmpty(caught.getMessage()) + " in "
             + tok.getFileName() + ":" + tok.getLine() + ":" + tok.getCharPositionInLine());
-        if ((strt != null) && (end != null))
+        if ((strt != null) && (end != null) && (strt.compareTo(end) < 0))
           loc.at(file.newRange(strt, end));
         issue.at(loc);
         issue.save();
