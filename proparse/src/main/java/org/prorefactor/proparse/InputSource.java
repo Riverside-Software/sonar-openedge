@@ -44,8 +44,7 @@ import com.google.common.io.ByteStreams;
 public class InputSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(InputSource.class);
 
-  // TODO Almost sure those two fields are useless
-  private final boolean primaryInput;
+  // TODO Almost sure this field is useless
   private final int sourceNum;
 
   private final String fileContent;
@@ -60,7 +59,6 @@ public class InputSource {
   public InputSource(int sourceNum, String str, int fileIndex, int line, int col) {
     LOGGER.trace("New InputSource object for macro element '{}'", str);
     this.sourceNum = sourceNum;
-    this.primaryInput = false;
     this.fileContent = str;
     this.fileIndex = fileIndex;
     this.macroExpansion = true;
@@ -68,10 +66,9 @@ public class InputSource {
     this.nextCol = col;
   }
 
-  public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean skipXCode, boolean isPrimary) throws IOException {
+  public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
     LOGGER.trace("New InputSource object for file '{}'", file.getName());
     this.sourceNum = sourceNum;
-    this.primaryInput = isPrimary;
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
     try (InputStream input = new FileInputStream(file)) {
@@ -90,10 +87,9 @@ public class InputSource {
       currPos++;
   }
 
-  public InputSource(int sourceNum, String fileName, ByteSource src, Charset charset, int fileIndex, boolean skipXCode, boolean isPrimary) throws IOException {
+  public InputSource(int sourceNum, String fileName, ByteSource src, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
     LOGGER.trace("New InputSource object for include stream '{}'", fileName);
     this.sourceNum = sourceNum;
-    this.primaryInput = isPrimary;
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
     if (src.read(new XCodedFileByteProcessor())) {
@@ -157,10 +153,6 @@ public class InputSource {
 
   public void setAnalyzeSuspend(@Nonnull String str) {
     this.currAnalyzeSuspend = str;
-  }
-
-  public boolean isPrimaryInput() {
-    return primaryInput;
   }
 
   public void setNextCol(int nextCol) {
