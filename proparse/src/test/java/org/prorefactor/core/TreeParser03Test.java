@@ -1222,6 +1222,7 @@ public class TreeParser03Test extends AbstractProparseTest {
     Variable x1 = unit.getRootScope().getVariable("x1");
     assertNotNull(x1);
     assertEquals(x1.getNumReads(), 1);
+    assertEquals(x1.getNumReferenced(), 0);
     assertEquals(x1.getNumWrites(), 0);
 
     Variable x2 = unit.getRootScope().getVariable("x2");
@@ -1582,4 +1583,43 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertFalse(list.stream().anyMatch(it -> it.getSymbol() == null));
     assertFalse(list.stream().anyMatch(it -> it.getSymbol().getNodeType() != ABLNodeType.QUERY));
   }
+
+  @Test
+  public void testArrayRefInFrame() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/arrayRefInFrame.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    var a1 = unit.getRootScope().getVariable("a1");
+    assertNotNull(a1);
+    assertEquals(a1.getNumReads(), 0);
+    assertEquals(a1.getNumReferenced(), 2);
+    assertEquals(a1.getNumWrites(), 0);
+    assertTrue(a1.isReferencedInFrame());
+
+    var b1 = unit.getRootScope().getVariable("b1");
+    assertNotNull(b1);
+    assertEquals(b1.getNumReads(), 0);
+    assertEquals(b1.getNumReferenced(), 2);
+    assertEquals(b1.getNumWrites(), 0);
+    assertTrue(b1.isReferencedInFrame());
+
+    var a2 = unit.getRootScope().getVariable("a2");
+    assertNotNull(a2);
+    assertEquals(a2.getNumReads(), 1);
+    assertEquals(a2.getNumReferenced(), 0);
+    assertEquals(a2.getNumWrites(), 0);
+    assertFalse(a2.isReferencedInFrame());
+
+    var b2 = unit.getRootScope().getVariable("b2");
+    assertNotNull(b2);
+    assertEquals(b2.getNumReads(), 1);
+    assertEquals(b2.getNumReferenced(), 0);
+    assertEquals(b2.getNumWrites(), 0);
+    assertFalse(b2.isReferencedInFrame());
+  }
+
 }

@@ -109,7 +109,7 @@ public class FrameStack {
   }
 
   /**
-   * Recieve a Form_item node for a field which should be referenceable on the frame|browse. This checks for LEXAT
+   * Receive a Form_item node for a field which should be referenceable on the frame | browse. This checks for LEXAT
    * (DISPLAY thisField @ anotherField) which would keep thisField from being added to the frame. The LEXAT is dealt
    * with in a separate call. This must be called <b>after</b> any Field_ref symbols have been resolved. This only does
    * anything if the first child of the Form_item is RECORD_NAME or Field_ref. Tree parser rules like display_item and
@@ -121,24 +121,26 @@ public class FrameStack {
 
     if (containerForCurrentStatement == null)
       return;
-    assert formItemNode.getType() == Proparse.Form_item;
-    JPNode firstChild = formItemNode.getFirstChild();
+    var firstChild = formItemNode.getFirstChild();
     if (firstChild.getNodeType() == ABLNodeType.RECORD_NAME) {
       // Delay processing until the end of the statement. We need any EXCEPT fields resolved first.
       currStatementWholeTableFormItemNode = formItemNode;
-    } else {
-      FieldRefNode fieldRefNode = null;
-      JPNode tempNode = formItemNode.findDirectChild(Proparse.Format_phrase);
-      if (tempNode != null) {
-        tempNode = tempNode.findDirectChild(Proparse.LEXAT);
-        if (tempNode != null)
-          return;
+    } else if (firstChild.getNodeType() == ABLNodeType.ARRAY_REFERENCE) {
+      var tempNode = formItemNode.findDirectChild(ABLNodeType.FORMAT_PHRASE);
+      if ((tempNode != null) && (tempNode.findDirectChild(ABLNodeType.LEXAT) != null)) {
+        return;
       }
-      if (fieldRefNode == null && firstChild.getType() == Proparse.Field_ref) {
-        fieldRefNode = (FieldRefNode) firstChild;
-      }
-      if (fieldRefNode != null)
+      if (firstChild.getFirstChild() instanceof FieldRefNode fieldRefNode) {
         containerForCurrentStatement.addSymbol(fieldRefNode.getSymbol(), currStatementIsEnabler);
+      }
+    } else {
+      var tempNode = formItemNode.findDirectChild(ABLNodeType.FORMAT_PHRASE);
+      if ((tempNode != null) && (tempNode.findDirectChild(ABLNodeType.LEXAT) != null)) {
+        return;
+      }
+      if (firstChild instanceof FieldRefNode fieldRefNode) {
+        containerForCurrentStatement.addSymbol(fieldRefNode.getSymbol(), currStatementIsEnabler);
+      }
     }
   }
 
