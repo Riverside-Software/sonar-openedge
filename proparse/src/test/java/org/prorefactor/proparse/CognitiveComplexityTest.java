@@ -213,4 +213,45 @@ public class CognitiveComplexityTest extends AbstractProparseTest {
     assertEquals(visitor.getComplexity(), 3);
     assertEquals(visitor.getMainFileComplexity(), 0);
   }
+
+  @Test
+  public void test07() {
+    var unit = getParseUnit(new File(SRC_DIR + "/test07.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    var mainRoutine = unit.getRootScope().getRoutine();
+    var mainBlock = mainRoutine.getRoutineScope().getRootBlock().getNode().asIStatementBlock();
+    var visitor = new CognitiveComplexityListener(mainBlock);
+    visitor.walkStatementBlock(mainBlock);
+    assertEquals(visitor.getComplexity(), 6);
+
+    var items = visitor.getItems();
+    assertEquals(items.size(), 6);
+
+    var i1 = items.stream().filter(it -> it.getO1().getLine() == 3).findFirst();
+    assertTrue(i1.isPresent());
+    assertEquals(i1.get().getO2(), 0);
+
+    var i2 = items.stream().filter(it -> it.getO1().getLine() == 5).findFirst();
+    assertTrue(i2.isPresent());
+    assertEquals(i2.get().getO2(), 0);
+
+    var i3 = items.stream().filter(it -> it.getO1().getLine() == 7).findFirst();
+    assertTrue(i3.isPresent());
+    assertEquals(i3.get().getO2(), 0);
+
+    var i4 = items.stream().filter(it -> it.getO1().getLine() == 10).findFirst();
+    assertTrue(i4.isPresent());
+    assertEquals(i4.get().getO2(), 0);
+
+    var i5 = items.stream().filter(it -> it.getO1().getLine() == 12).findFirst();
+    assertTrue(i5.isPresent());
+    assertEquals(i5.get().getO2(), 0);
+
+    var i6 = items.stream().filter(it -> it.getO1().getLine() == 14).findFirst();
+    assertTrue(i6.isPresent());
+    assertEquals(i6.get().getO2(), 0);
+  }
+
 }

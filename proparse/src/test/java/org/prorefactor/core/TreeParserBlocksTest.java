@@ -550,4 +550,49 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertNull(currStmt);
   }
 
+  @Test
+  public void test09() {
+    // Only annotations
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test09.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    var currStmt = unit.getTopNode().getFirstStatement();
+    assertNotNull(currStmt);
+    assertEquals(currStmt.getNodeType(), ABLNodeType.DEFINE);
+    assertEquals(currStmt.asJPNode().getLine(), 1);
+    assertNull(currStmt.getPreviousStatement());
+    assertNotNull(currStmt.getNextStatement());
+
+    currStmt = currStmt.getNextStatement();
+    assertNotNull(currStmt);
+    assertEquals(currStmt.getNodeType(), ABLNodeType.IF);
+    assertEquals(currStmt.asJPNode().getLine(), 3);
+    assertNotNull(currStmt.getPreviousStatement());
+    assertNotNull(currStmt.getNextStatement());
+
+    var thenStmt = ((IfStatementNode) currStmt).getThenBlockOrNode();
+    assertNotNull(thenStmt);
+    assertEquals(thenStmt.getNodeType(), ABLNodeType.ASSIGN);
+    assertEquals(thenStmt.asJPNode().firstNaturalChild().getLine(), 4);
+    assertNull(thenStmt.getPreviousStatement());
+    assertNull(thenStmt.getNextStatement());
+    assertEquals(thenStmt.getParentStatement(), currStmt);
+
+    currStmt = currStmt.getNextStatement();
+    assertNotNull(currStmt);
+    assertEquals(currStmt.getNodeType(), ABLNodeType.IF);
+    assertEquals(currStmt.asJPNode().getLine(), 10);
+
+    thenStmt = ((IfStatementNode) currStmt).getThenBlockOrNode();
+    assertNotNull(thenStmt);
+    assertEquals(thenStmt.getNodeType(), ABLNodeType.ASSIGN_DYNAMIC_NEW);
+    assertEquals(thenStmt.asJPNode().firstNaturalChild().getLine(), 11);
+    assertNull(thenStmt.getPreviousStatement());
+    assertNull(thenStmt.getNextStatement());
+    assertEquals(thenStmt.getParentStatement(), currStmt);
+  }
 }

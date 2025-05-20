@@ -1601,7 +1601,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitDynamicNewStatement(DynamicNewStatementContext ctx) {
-    return createTree(ctx, ABLNodeType.ASSIGN_DYNAMIC_NEW).setStatement();
+    return createTree(ctx, ABLNodeType.ASSIGN_DYNAMIC_NEW).setStatement().setRuleNode(ctx);
   }
 
   @Override
