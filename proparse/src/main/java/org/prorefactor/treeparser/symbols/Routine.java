@@ -40,6 +40,9 @@ public class Routine extends Symbol {
   private DataType returnDatatypeNode = null;
   private ABLNodeType progressType;
   private ExecutionGraph graph;
+  // Pointer to FORWARDS declaration of FUNCTION. Can be null.
+  private Routine fwdDeclaration;
+  private boolean isFwdDeclaration;
 
   public Routine(String name, TreeParserSymbolScope definingScope, TreeParserSymbolScope routineScope) {
     super(name, definingScope);
@@ -163,6 +166,29 @@ public class Routine extends Symbol {
     return routineScope;
   }
 
+  public Routine getForwardDeclaration() {
+    return fwdDeclaration;
+  }
+
+  public boolean isForwardDeclaration() {
+    return isFwdDeclaration;
+  }
+
+  /**
+   * Add pointer to FORWARDS declaration routine
+   * @param fwdRoutine
+   */
+  public void addForwardDeclaration(Routine fwdRoutine) {
+    this.fwdDeclaration = fwdRoutine;
+  }
+
+  /**
+   * Set routine as a FORWARDS declaration
+   */
+  public void setForwardDeclaration() {
+    this.isFwdDeclaration = true;
+  }
+
   public Routine setProgressType(ABLNodeType t) {
     progressType = t;
     return this;
@@ -199,10 +225,10 @@ public class Routine extends Symbol {
     graph.addVertex(block.asJPNode());
 
     while (currStmt != null) {
-      if ((currStmt.asJPNode().getNodeType() == ABLNodeType.FUNCTION)
-          || (currStmt.asJPNode().getNodeType() == ABLNodeType.PROCEDURE)
-          || (currStmt.asJPNode().getNodeType() == ABLNodeType.METHOD)
-          || (currStmt.asJPNode().getNodeType() == ABLNodeType.ON)) {
+      if ((currStmt.getNodeType() == ABLNodeType.FUNCTION)
+          || (currStmt.getNodeType() == ABLNodeType.PROCEDURE)
+          || (currStmt.getNodeType() == ABLNodeType.METHOD)
+          || (currStmt.getNodeType() == ABLNodeType.ON)) {
         currStmt = currStmt.getNextStatement();
         continue;
       }
@@ -243,6 +269,11 @@ public class Routine extends Symbol {
 
       graph.addEdge(ifNode.asJPNode(), ifNode.getElseBlockOrNode().asJPNode());
     }
+  }
+
+  @Override
+  public Stream copy(TreeParserSymbolScope newScope) {
+    throw new UnsupportedOperationException("Routine objects can't be copied");
   }
 
 }

@@ -53,11 +53,11 @@ public abstract class FieldContainer extends Widget {
    * parser passes 'true' for ENABLE|UPDATE|PROMPT-FOR.
    */
   public void addSymbol(Symbol symbol, boolean statementIsEnabler) {
-    if (symbol instanceof FieldBuffer)
-      fieldSet.add((FieldBuffer) symbol);
-    else if (symbol instanceof Variable) {
-      ((Variable) symbol).referencedInFrame();
-      variableSet.add((Variable) symbol);
+    if (symbol instanceof FieldBuffer fb)
+      fieldSet.add(fb);
+    else if (symbol instanceof Variable v) {
+      v.referencedInFrame();
+      variableSet.add(v);
     }
     else
       otherSymbols.add(symbol);

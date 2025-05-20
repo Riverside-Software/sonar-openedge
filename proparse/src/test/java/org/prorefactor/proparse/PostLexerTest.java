@@ -58,6 +58,7 @@ public class PostLexerTest extends AbstractProparseTest {
     // First time verifying the channel locations
     ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
     TokenSource src = unit.preprocess();
+    assertEquals(unit.getCodeSections().keySet().size(), 0);
     // &IF
     ProToken tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.AMPIF);
@@ -135,9 +136,15 @@ public class PostLexerTest extends AbstractProparseTest {
   public void testAnalyzeSuspend() {
     ParseUnit unit2 = getParseUnit(new File(SRC_DIR, "lexer05.p"), session);
     unit2.parse();
+    assertEquals(unit2.getCodeSections().keySet().size(), 1);
+    assertFalse(unit2.isInEditableSection(-1, 10));
+    assertFalse(unit2.isInEditableSection(0, -1));
     assertFalse(unit2.isInEditableSection(0, 9));
     assertFalse(unit2.isInEditableSection(0, 18));
     assertTrue(unit2.isInEditableSection(0, 28));
+    assertFalse(unit2.isInEditableSection(0, 1000));
+    // Code sections only apply to main file
+    assertTrue(unit2.isInEditableSection(1, 1));
   }
 
   @Test

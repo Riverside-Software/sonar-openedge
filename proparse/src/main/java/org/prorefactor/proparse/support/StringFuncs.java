@@ -15,6 +15,7 @@
 package org.prorefactor.proparse.support;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public class StringFuncs {
 
@@ -33,7 +34,7 @@ public class StringFuncs {
     return ret;
   }
 
-  public static String ltrim(String s) {
+  public static String leftTrim(String s) {
     char[] c = s.toCharArray();
     int begin = 0;
     int end = c.length;
@@ -43,8 +44,8 @@ public class StringFuncs {
     return s.substring(begin);
   }
 
-  public static String ltrim(String s, String t) {
-    HashSet<Character> trimSet = setOfMatchChars(t);
+  public static String leftTrim(String s, String t) {
+    Set<Character> trimSet = setOfMatchChars(t);
     char[] c = s.toCharArray();
     int begin = 0;
     int end = c.length;
@@ -67,7 +68,7 @@ public class StringFuncs {
     return s.substring(1, endQuotePos).replace(String.valueOf(quoteType) + String.valueOf(quoteType), String.valueOf(quoteType)); 
   }
 
-  static HashSet<Character> setOfMatchChars(String s) {
+  static Set<Character> setOfMatchChars(String s) {
     HashSet<Character> set = new HashSet<>();
     for (char c : s.toLowerCase().toCharArray())
       set.add(c);
@@ -111,7 +112,7 @@ public class StringFuncs {
   }
 
   public static String rtrim(String s, String t) {
-    HashSet<Character> trimSet = setOfMatchChars(t);
+    Set<Character> trimSet = setOfMatchChars(t);
     char[] c = s.toCharArray();
     int end = c.length;
     while (end > 0 && trimSet.contains(c[end - 1])) {
@@ -121,13 +122,13 @@ public class StringFuncs {
   }
 
   public static String trim(String s, String t) {
-    HashSet<Character> trimSet = setOfMatchChars(t);
+    Set<Character> trimSet = setOfMatchChars(t);
     char[] c = s.toCharArray();
     int begin = 0;
     int end = c.length;
     while (begin < end && trimSet.contains(c[begin]))
       ++begin;
-    while (end >= begin && trimSet.contains(c[end - 1]))
+    while (end > begin && trimSet.contains(c[end - 1]))
       --end;
     return s.substring(begin, end);
   }

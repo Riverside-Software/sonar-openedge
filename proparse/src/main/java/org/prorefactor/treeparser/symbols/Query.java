@@ -43,4 +43,13 @@ public class Query extends Symbol {
     return getNodeType().getType();
   }
 
+  @Override
+  public Query copy(TreeParserSymbolScope newScope) {
+    var obj = new Query(name, newScope);
+    obj.setDefinitionNode(getDefineNode());
+    obj.setLikeSymbol(getLikeSymbol());
+
+    return obj;
+  }
+
 }

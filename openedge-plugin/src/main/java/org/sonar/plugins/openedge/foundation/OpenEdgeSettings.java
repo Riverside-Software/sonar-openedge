@@ -661,6 +661,10 @@ public class OpenEdgeSettings {
     return config.getBoolean(Constants.SKIP_PROPARSE_PROPERTY).orElse(false);
   }
 
+  public boolean skipCognitiveComplexity() {
+    return config.getBoolean(Constants.SKIP_COGNITIVE_COMPLEXITY).orElse(false);
+  }
+
   public boolean skipXCode() {
     return config.getBoolean(Constants.SKIP_XCODE).orElse(true);
   }

@@ -30,7 +30,7 @@ public class OpenEdgeDB extends AbstractLanguage {
 
   @Override
   public String[] getFileSuffixes() {
-    return new String[] { ".df" };
+    return new String[] { "df" };
   }
 
 }

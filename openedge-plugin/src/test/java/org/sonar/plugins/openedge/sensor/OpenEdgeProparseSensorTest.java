@@ -43,12 +43,14 @@ import org.sonar.api.batch.rule.internal.NewActiveRule;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.batch.sensor.issue.Issue;
 import org.sonar.api.config.internal.MapSettings;
+import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.CheckRegistration;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.checks.IntegerRule;
+import org.sonar.plugins.openedge.checks.LineNumberRule;
 import org.sonar.plugins.openedge.checks.TestChecksRegistration;
 import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
@@ -128,6 +130,33 @@ public class OpenEdgeProparseSensorTest {
   }
 
   @Test
+  public void testComplexity() throws Exception {
+    var context = TestProjectSensorContext.createContext();
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    var components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(),
+        new CheckRegistration[] {new TestChecksRegistration()}, null);
+    var sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    var m1 = context.measure(BASEDIR + ":" + FILE1, CoreMetrics.COMPLEXITY);
+    assertEquals(m1.value(), 1);
+    var m1bis = context.measure(BASEDIR + ":" + FILE1, CoreMetrics.COGNITIVE_COMPLEXITY);
+    assertEquals(m1bis.value(), 0);
+    var m2 = context.measure(BASEDIR + ":" + FILE2, CoreMetrics.COMPLEXITY);
+    assertEquals(m2.value(), 13);
+    var m2bis = context.measure(BASEDIR + ":" + FILE2, CoreMetrics.COGNITIVE_COMPLEXITY);
+    assertEquals(m2bis.value(), 2);
+    var m3 = context.measure(BASEDIR + ":" + FILE3, CoreMetrics.COMPLEXITY);
+    assertEquals(m3.value(), 8);
+    var m3bis = context.measure(BASEDIR + ":" + FILE3, CoreMetrics.COGNITIVE_COMPLEXITY);
+    assertEquals(m3bis.value(), 0);
+    var m4 = context.measure(BASEDIR + ":" + CLASS1, CoreMetrics.COMPLEXITY);
+    assertEquals(m4.value(), 14);
+    var m4bis = context.measure(BASEDIR + ":" + CLASS1, CoreMetrics.COGNITIVE_COMPLEXITY);
+    assertEquals(m4bis.value(), 0);
+  }
+
+  @Test
   public void testSonarQubeRule() throws Exception {
     SensorContextTester context = TestProjectSensorContext.createContext();
     ActiveRulesBuilder rulesBuilder = new ActiveRulesBuilder();
@@ -167,6 +196,32 @@ public class OpenEdgeProparseSensorTest {
     // IntegerRule reports 16 issues on test2.p, 2 issues on test3.p + 0 from nested test3.i as we're in SonarLint
     // context
     assertEquals(context.allIssues().stream().count(), 18);
+  }
+
+  @Test
+  public void testNoIssueOnNonOEFiles() throws Exception {
+    SensorContextTester context = TestProjectSensorContext.createContext();
+    var rulesBuilder = new ActiveRulesBuilder();
+    rulesBuilder.addRule(new NewActiveRule.Builder() //
+      .setRuleKey(RuleKey.of(Constants.STD_REPOSITORY_KEY, LineNumberRule.class.getCanonicalName())) //
+      .setLanguage(Constants.LANGUAGE_KEY) //
+      .setParam("fileNums", "0,10;1,1;2,1") //
+      .build());
+    context.setActiveRules(rulesBuilder.build());
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+        OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(),
+        new CheckRegistration[] {new TestChecksRegistration()}, null);
+    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    sensor.execute(context);
+
+    assertEquals(components.getProparseRules().size(), 1);
+    assertEquals(context.allIssues().stream().filter(
+        it -> it.primaryLocation().inputComponent().key().endsWith("test3.p")).count(), 1);
+    assertEquals(context.allIssues().stream().filter(
+        it -> it.primaryLocation().inputComponent().key().endsWith("test3.i")).count(), 1);
+    assertEquals(context.allIssues().stream().filter(
+        it -> it.primaryLocation().inputComponent().key().endsWith("test3.i2")).count(), 0);
   }
 
   @Test

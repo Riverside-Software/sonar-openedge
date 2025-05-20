@@ -231,6 +231,24 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void exitFunctionParams(FunctionParamsContext ctx) {
+    var fwdDecl = currentRoutine.getForwardDeclaration();
+    if ((fwdDecl != null) && currentRoutine.getParameters().isEmpty()) {
+      LOG.debug("Copy parameters from FORWARDS definition");
+      for (var prm : fwdDecl.getParameters()) {
+        var prmCopy = new Parameter(prm.getDefinitionNode());
+        prmCopy.setDirectionNode(prm.getDirectionNode());
+        prmCopy.setProgressType(ABLNodeType.getNodeType(prm.getProgressType()));
+        if (prm.getSymbol() != null) {
+          prmCopy.setSymbol(prm.getSymbol().copy(currentScope));
+          currentScope.add(prmCopy.getSymbol());
+        }
+        currentRoutine.addParameter(prmCopy);
+      }
+    }
+  }
+
+  @Override
   public void enterFunctionParamBufferFor(FunctionParamBufferForContext ctx) {
     Parameter param = new Parameter(support.getNode(ctx));
     param.setDirectionNode(null);
@@ -417,16 +435,12 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   // Expression term
 
   private void setStaticQualifier(ExpressionTermContext ctx) {
-    if (ctx instanceof ExprTermOtherContext) {
-      ExprTermOtherContext ctx2 = (ExprTermOtherContext) ctx;
-      if (ctx2.expressionTerm2() instanceof Exprt2FieldContext) {
-        Exprt2FieldContext fld = (Exprt2FieldContext) ctx2.expressionTerm2();
-        String clsRef = fld.getText();
-        if ((fld.ENTERED() == null) && !Strings.isNullOrEmpty(support.lookupClassName(clsRef))) {
-          FieldLookupResult result = currentBlock.lookupField(clsRef, true);
-          if (result == null)
-            setContextQualifier(ctx2, ContextQualifier.STATIC);
-        }
+    if ((ctx instanceof ExprTermOtherContext ctx2) && (ctx2.expressionTerm2() instanceof Exprt2FieldContext fld)) {
+      var clsRef = fld.getText();
+      if (!Strings.isNullOrEmpty(support.lookupClassName(clsRef))) {
+        var result = currentBlock.lookupField(clsRef, true);
+        if (result == null)
+          setContextQualifier(ctx2, ContextQualifier.STATIC);
       }
     }
   }
@@ -476,6 +490,14 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterExprt2ParenExpr(Exprt2ParenExprContext ctx) {
     setContextQualifier(ctx.expression(), contextQualifiers.removeFrom(ctx));
+  }
+
+  @Override
+  public void enterExprt2FieldEntered(Exprt2FieldEnteredContext ctx) {
+    ContextQualifier qual = contextQualifiers.removeFrom(ctx);
+    if ((qual == null) || (qual == ContextQualifier.SYMBOL))
+      qual = ContextQualifier.REF;
+    setContextQualifier(ctx.fieldExpr().field(), qual);
   }
 
   @Override

@@ -26,6 +26,16 @@ import org.prorefactor.treeparser.TreeParserSymbolScope;
  * Base class for any type of symbol which needs to be kept track of when parsing a 4gl compile unit's AST.
  */
 public abstract class Symbol implements ISymbol {
+  // What scope this symbol was defined in
+  final TreeParserSymbolScope scope;
+  // Stores the full name, original (mixed) case as in definition
+  final String name;
+
+  // We store the DEFINE node if available and sensible. If defined in a syntax where there is no DEFINE node briefly
+  // preceeding the ID node, then we store the ID node. If this is a schema symbol, then this member is null.
+  private JPNode defNode;
+  private EnumSet<Modifier> modifiers = EnumSet.noneOf(Modifier.class);
+
   private int allRefsCount = 0;
   private int numReads = 0;
   private int numWrites = 0;
@@ -33,17 +43,7 @@ public abstract class Symbol implements ISymbol {
   private boolean outputPrm = false;
   private ISymbol like;
 
-  // We store the DEFINE node if available and sensible. If defined in a syntax where there is no DEFINE node briefly
-  // preceeding the ID node, then we store the ID node. If this is a schema symbol, then this member is null.
-  private JPNode defNode;
-
-  // What scope this symbol was defined in
-  private final TreeParserSymbolScope scope;
-  // Stores the full name, original (mixed) case as in definition
-  private final String name;
-  private EnumSet<Modifier> modifiers = EnumSet.noneOf(Modifier.class);
-
-  public Symbol(String name, TreeParserSymbolScope scope) {
+  Symbol(String name, TreeParserSymbolScope scope) {
     this.name = name;
     this.scope = scope;
     scope.addSymbol(this);
@@ -154,4 +154,7 @@ public abstract class Symbol implements ISymbol {
   public Set<Modifier> getModifiers() {
     return EnumSet.copyOf(modifiers);
   }
+
+  // Clone current object. Currently used to copy parameters when functions have FORWARDS declaration
+  public abstract Symbol copy(TreeParserSymbolScope newScope);
 }

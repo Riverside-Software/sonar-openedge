@@ -134,7 +134,7 @@ public class Lexer implements IPreprocessor {
     this.prepro = prepro;
     this.factory = new ProTokenFactory();
     try {
-      currentInput = new InputSource(0, fileName, src, prepro.getCharset(), 0, true, true);
+      currentInput = new InputSource(0, fileName, src, prepro.getCharset(), 0, true);
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
@@ -297,8 +297,9 @@ public class Lexer implements IPreprocessor {
         case '-':
           return nextTokenStartingWithPlusMinus('-');
 
-        case '#':
-        case '%':
+        case '#', '%':
+          return nextTokenFromFilename((char) currChar, ABLNodeType.FILENAME, ABLNodeType.ID);
+
         case '|':
           getChar();
           return id(ABLNodeType.FILENAME);
@@ -372,6 +373,20 @@ public class Lexer implements IPreprocessor {
     } else {
       append();
       getChar();
+      return id(idType);
+    }
+  }
+
+  // Similar to previous 
+  private ProToken nextTokenFromFilename(char c, ABLNodeType type, ABLNodeType idType) {
+    getChar();
+    if (currIsSpace()) {
+      return makeToken(type);
+    } else if (!canTokenStartWith(c)) {
+      append();
+      getChar();
+      return id(type);
+    } else {
       return id(idType);
     }
   }
@@ -1136,7 +1151,11 @@ public class Lexer implements IPreprocessor {
     if ("&message".equals(macroType)) {
       appendToEOL();
       getChar();
-      prepro.getLstListener().message(currText.toString().substring(currText.toString().indexOf(' ')).trim());
+      var spPos = currText.toString().indexOf(' ');
+      if (spPos != -1)
+        prepro.getLstListener().message(currText.toString().substring(spPos).trim());
+      else
+        prepro.getLstListener().message("");
       return makeToken(ABLNodeType.AMPMESSAGE);
     }
 
@@ -1833,14 +1852,14 @@ public class Lexer implements IPreprocessor {
       try {
         currentInput = new InputSource(++sourceCounter, fName,
             ByteSource.wrap(includeCache2.get(idx).getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8, idx,
-            prepro.getProparseSettings().getSkipXCode(), false);
+            prepro.getProparseSettings().getSkipXCode());
       } catch (IOException caught) {
         throw new UncheckedIOException(caught);
       }
     } else {
       try {
         currentInput = new InputSource(++sourceCounter, incFile, prepro.getCharset(), idx,
-            prepro.getProparseSettings().getSkipXCode(), false);
+            prepro.getProparseSettings().getSkipXCode());
         includeCache2.put(idx, currentInput.getContent());
       } catch (IOException caught) {
         throw new UncheckedIOException(caught);

@@ -21,6 +21,15 @@ import org.prorefactor.core.nodetypes.IExpression;
 
 class JPNodeExpressionQuery implements ICallback<List<IExpression>> {
   private final List<IExpression> result = new ArrayList<>();
+  private final JPNode currStatement;
+
+  public JPNodeExpressionQuery() {
+    this(null);
+  }
+
+  public JPNodeExpressionQuery(JPNode currStmt) {
+    this.currStatement = currStmt;
+  }
 
   @Override
   public List<IExpression> getResult() {
@@ -29,6 +38,9 @@ class JPNodeExpressionQuery implements ICallback<List<IExpression>> {
 
   @Override
   public boolean visitNode(JPNode node) {
+    if ((currStatement != null) && (node.getStatement() != currStatement))
+      return false;
+
     if (node.isIExpression()) {
       result.add(node.asIExpression());
       return false;

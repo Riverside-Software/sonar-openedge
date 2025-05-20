@@ -38,7 +38,6 @@ import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.refactor.RefactorSession;
-import org.prorefactor.refactor.settings.ProparseSettings;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -168,11 +167,12 @@ public class ABLLexerTest {
 
   @Test
   public void testSlash02() throws IOException {
-    RefactorSession session2 = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
-    ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {'/'});
+    var settings = new UnitTestProparseSettings();
+    settings.setTokenStartChars(new char[] {'/'});
+    var localSession =  new RefactorSession(settings, new SportsSchema());
 
     final String source = "MESSAGE / xyz /(2) /10";
-    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), true);
+    ABLLexer lexer = new ABLLexer(localSession, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.MESSAGE);
     assertNextTokenTypeWS(lexer, ABLNodeType.SLASH, "/");
@@ -231,11 +231,12 @@ public class ABLLexerTest {
 
   @Test
   public void testCaret02() throws IOException {
-    RefactorSession session2 = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
-    ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {'^'});
+    var settings = new UnitTestProparseSettings();
+    settings.setTokenStartChars(new char[] {'^'});
+    var localSession =  new RefactorSession(settings, new SportsSchema());
 
     final String source = "FUNCTION h^ello ^hello ^ RETURNS VOID";
-    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), true);
+    ABLLexer lexer = new ABLLexer(localSession, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h^ello");
@@ -259,11 +260,12 @@ public class ABLLexerTest {
 
   @Test
   public void testSemiColon02() throws IOException {
-    RefactorSession session2 = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
-    ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {';'});
+    var settings = new UnitTestProparseSettings();
+    settings.setTokenStartChars(new char[] {';'});
+    var localSession =  new RefactorSession(settings, new SportsSchema());
 
     final String source = "FUNCTION h;ello ;hello ; RETURNS VOID";
-    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), true);
+    ABLLexer lexer = new ABLLexer(localSession, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h;ello");
@@ -288,11 +290,12 @@ public class ABLLexerTest {
 
   @Test
   public void testStar02() throws IOException {
-    RefactorSession session2 = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
-    ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {'*'});
+    var settings = new UnitTestProparseSettings();
+    settings.setTokenStartChars(new char[] {'*'});
+    var localSession =  new RefactorSession(settings, new SportsSchema());
 
     final String source = "FUNCTION h*ello *hello * *= VOID";
-    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), true);
+    ABLLexer lexer = new ABLLexer(localSession, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h*ello");
@@ -303,17 +306,48 @@ public class ABLLexerTest {
   }
 
   @Test
-  public void testExclamationHashPercent01() {
-    final String source = "FUNCTION h#ello h%ello #hello %hello # % RETURNS ";
+  public void testPipeHashPercent01() {
+    final String source = "FUNCTION h|ello h#ello h%ello |hello #hello %hello | # % |a #a %a RETURNS ";
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
+    assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h|ello");
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h#ello");
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h%ello");
+    assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "|hello");
     assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "#hello");
     assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "%hello");
+    assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "|");
     assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "#");
     assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "%");
+    assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "|a");
+    assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "#a");
+    assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "%a");
+    assertNextTokenTypeWS(lexer, ABLNodeType.RETURNS, "RETURNS");
+  }
+
+  @Test
+  public void testPipeHashPercent02() throws IOException {
+    var settings = new UnitTestProparseSettings();
+    settings.setTokenStartChars(new char[] {'#', '%'});
+    var localSession =  new RefactorSession(settings, new SportsSchema());
+
+    final String source = "FUNCTION h|ello h#ello h%ello |hello #hello %hello | # % |a #a %a RETURNS ";
+    ABLLexer lexer = new ABLLexer(localSession, ByteSource.wrap(source.getBytes()), true);
+
+    assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
+    assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h|ello");
+    assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h#ello");
+    assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h%ello");
+    assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "|hello");
+    assertNextTokenTypeWS(lexer, ABLNodeType.ID, "#hello");
+    assertNextTokenTypeWS(lexer, ABLNodeType.ID, "%hello");
+    assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "|");
+    assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "#");
+    assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "%");
+    assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, "|a");
+    assertNextTokenTypeWS(lexer, ABLNodeType.ID, "#a");
+    assertNextTokenTypeWS(lexer, ABLNodeType.ID, "%a");
     assertNextTokenTypeWS(lexer, ABLNodeType.RETURNS, "RETURNS");
   }
 
@@ -336,11 +370,12 @@ public class ABLLexerTest {
 
   @Test
   public void testExclamationMarkBacktick02() throws IOException {
-    RefactorSession session2 = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
-    ((ProparseSettings) session2.getProparseSettings()).setTokenStartChars(new char[] {'!', '`'});
+    var settings = new UnitTestProparseSettings();
+    settings.setTokenStartChars(new char[] {'!', '`'});
+    var localSession =  new RefactorSession(settings, new SportsSchema());
 
     final String source = "FUNCTION h!ello !hello ! h`ello `hello ` RETURNS";
-    ABLLexer lexer = new ABLLexer(session2, ByteSource.wrap(source.getBytes()), true);
+    ABLLexer lexer = new ABLLexer(localSession, ByteSource.wrap(source.getBytes()), true);
 
     assertNextTokenTypeWS(lexer, ABLNodeType.FUNCTION);
     assertNextTokenTypeWS(lexer, ABLNodeType.ID, "h!ello");

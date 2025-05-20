@@ -22,6 +22,7 @@ package org.sonar.plugins.openedge.utils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Set;
 
 import org.sonar.api.batch.fs.InputFile.Status;
 import org.sonar.api.batch.fs.InputFile.Type;
@@ -40,6 +41,7 @@ public class TestProjectSensorContext {
   public static final String FILE3 = "src/procedures/test3.p";
   public static final String FILE4 = "src/procedures/test3.i";
   public static final String FILE5 = "src/procedures/invalid.p";
+  public static final String FILE6 = "src/procedures/test3.i1";
   public static final String CLASS1 = "src/classes/rssw/testclass.cls";
 
   private TestProjectSensorContext() {
@@ -62,55 +64,27 @@ public class TestProjectSensorContext {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     context.setSettings(settings);
 
+    Set<String> oeFiles = Set.of(FILE1, FILE2, FILE3, FILE4, FILE5, FILE6, CLASS1);
+    Set<String> addedFiles = Set.of(FILE2, FILE4, FILE5, FILE6, CLASS1);
+
+    // DB Schema
     context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, DF1) //
-      .setStatus(Status.SAME)
+      .setStatus(Status.SAME) //
       .setLanguage(Constants.DB_LANGUAGE_KEY) //
       .setType(Type.MAIN) //
       .setCharset(Charset.defaultCharset()) //
       .setContents(Files.asCharSource(new File(BASEDIR, DF1), Charset.defaultCharset()).read()) //
       .build());
-    context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, FILE1) //
-      .setStatus(Status.SAME)
-      .setLanguage(Constants.LANGUAGE_KEY) //
-      .setType(Type.MAIN) //
-      .setCharset(Charset.defaultCharset()) //
-      .setContents(Files.asCharSource(new File(BASEDIR, FILE1), Charset.defaultCharset()).read()) //
-      .build());
-    context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, FILE2) //
-      .setLanguage(Constants.LANGUAGE_KEY) //
-      .setStatus(Status.ADDED)
-      .setType(Type.MAIN) //
-      .setCharset(Charset.defaultCharset()) //
-      .setContents(Files.asCharSource(new File(BASEDIR, FILE2), Charset.defaultCharset()).read()) //
-      .build());
-    context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, FILE3) //
-      .setLanguage(Constants.LANGUAGE_KEY) //
-      .setStatus(Status.SAME)
-      .setType(Type.MAIN) //
-      .setCharset(Charset.defaultCharset()) //
-      .setContents(Files.asCharSource(new File(BASEDIR, FILE3), Charset.defaultCharset()).read()) //
-      .build());
-    context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, FILE4) //
-      .setLanguage(Constants.LANGUAGE_KEY) //
-      .setStatus(Status.ADDED)
-      .setType(Type.MAIN) //
-      .setCharset(Charset.defaultCharset()) //
-      .setContents(Files.asCharSource(new File(BASEDIR, FILE4), Charset.defaultCharset()).read()) //
-      .build());
-    context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, FILE5) //
-      .setLanguage(Constants.LANGUAGE_KEY) //
-      .setStatus(Status.ADDED)
-      .setType(Type.MAIN) //
-      .setCharset(Charset.defaultCharset()) //
-      .setContents(Files.asCharSource(new File(BASEDIR, FILE5), Charset.defaultCharset()).read()) //
-      .build());
-    context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, CLASS1) //
-      .setLanguage(Constants.LANGUAGE_KEY) //
-      .setStatus(Status.ADDED)
-      .setType(Type.MAIN) //
-      .setCharset(Charset.defaultCharset()) //
-      .setContents(Files.asCharSource(new File(BASEDIR, CLASS1), Charset.defaultCharset()).read()) //
-      .build());
+    // OpenEdge files
+    for (String str : oeFiles) {
+      context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, str) //
+        .setStatus(addedFiles.contains(str) ? Status.ADDED : Status.SAME) //
+        .setLanguage(Constants.LANGUAGE_KEY) //
+        .setType(Type.MAIN) //
+        .setCharset(Charset.defaultCharset()) //
+        .setContents(Files.asCharSource(new File(BASEDIR, str), Charset.defaultCharset()).read()) //
+        .build());
+    }
 
     return context;
   }

@@ -68,6 +68,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
+  private static final String INCOMPAT_DT = "Incompatible datatype";
   private static final Logger LOGGER = LoggerFactory.getLogger(PreproEval.class);
   private static final String TILDE_STAR = "\u0005";
   private static final String TILDE_DOT = "\u0006";
@@ -132,23 +133,17 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
     Object o2 = visit(ctx.expr(1));
 
     switch (ctx.op.getType()) {
-      case PreprocessorParser.EQ:
-      case PreprocessorParser.EQUAL:
+      case PreprocessorParser.EQ, PreprocessorParser.EQUAL:
         return compare(o1, o2, Compare.EQ);
-      case PreprocessorParser.GTORLT:
-      case PreprocessorParser.NE:
+      case PreprocessorParser.GTORLT, PreprocessorParser.NE:
         return compare(o1, o2, Compare.NE);
-      case PreprocessorParser.RIGHTANGLE:
-      case PreprocessorParser.GTHAN:
+      case PreprocessorParser.RIGHTANGLE, PreprocessorParser.GTHAN:
         return compare(o1, o2, Compare.GT);
-      case PreprocessorParser.LEFTANGLE:
-      case PreprocessorParser.LTHAN:
+      case PreprocessorParser.LEFTANGLE, PreprocessorParser.LTHAN:
         return compare(o1, o2, Compare.LT);
-      case PreprocessorParser.GTOREQUAL:
-      case PreprocessorParser.GE:
+      case PreprocessorParser.GTOREQUAL, PreprocessorParser.GE:
         return compare(o1, o2, Compare.GE);
-      case PreprocessorParser.LTOREQUAL:
-      case PreprocessorParser.LE:
+      case PreprocessorParser.LTOREQUAL, PreprocessorParser.LE:
         return compare(o1, o2, Compare.LE);
       default:
         return null;
@@ -166,11 +161,9 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   @Override
   public Object visitMultiply(MultiplyContext ctx) {
     switch (ctx.op.getType()) {
-      case PreprocessorParser.STAR:
-      case PreprocessorParser.MULTIPLY:
+      case PreprocessorParser.STAR, PreprocessorParser.MULTIPLY:
         return opMultiply(visit(ctx.expr(0)), visit(ctx.expr(1)));
-      case PreprocessorParser.SLASH:
-      case PreprocessorParser.DIVIDE:
+      case PreprocessorParser.SLASH, PreprocessorParser.DIVIDE:
         return opDivide(visit(ctx.expr(0)), visit(ctx.expr(1)));
       case PreprocessorParser.MODULO:
         Double m1 = getFloat(visit(ctx.expr(0))) + .5;
@@ -189,8 +182,8 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   @Override
   public Object visitUnaryMinus(UnaryMinusContext ctx) {
     Object o = visit(ctx.expr());
-    if (o instanceof Integer)
-      return (Integer) o * -1;
+    if (o instanceof Integer num)
+      return num * -1;
     else
       return (Float) o * -1;
   }
@@ -494,13 +487,13 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
       return 0;
     if (left == null || right == null)
       return null;
-    if ((left instanceof Boolean) && (right instanceof Boolean))
-      return ((Boolean) left).compareTo((Boolean) right);
+    if ((left instanceof Boolean bLeft) && (right instanceof Boolean bRight))
+      return bLeft.compareTo(bRight);
     if ((left instanceof String) && (right instanceof String))
       return compareStringHelper(left).compareTo(compareStringHelper(right));
-    if ((left instanceof Number) && (right instanceof Number)) {
-      Double fl = ((Number) left).doubleValue();
-      Double fr = ((Number) right).doubleValue();
+    if ((left instanceof Number nLeft) && (right instanceof Number nRight)) {
+      Double fl = nLeft.doubleValue();
+      Double fr = nRight.doubleValue();
       return fl.compareTo(fr);
     }
     throw new ProEvalException("Incompatible data types in comparison expression.");
@@ -514,12 +507,12 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   static Float decimal(Object o) {
     if (o == null)
       return null;
-    if (o instanceof Number)
-      return ((Number) o).floatValue();
-    if (o instanceof String)
-      return getNumber((String) o).floatValue();
-    if (o instanceof Boolean)
-      return (Boolean) o ? 1f : 0f;
+    if (o instanceof Number num)
+      return num.floatValue();
+    if (o instanceof String str)
+      return getNumber(str).floatValue();
+    if (o instanceof Boolean bool)
+      return bool.booleanValue() ? 1f : 0f;
     throw new ProEvalException("Error converting to DECIMAL.");
   }
 
@@ -549,34 +542,34 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   static boolean getBool(Object obj) {
     // Implicit conversion from int or ProString to bool
     // Note that Progress does /not/ do implicit conversion to bool from decimal.
-    if (obj instanceof String)
-      return ((String) obj).length() != 0;
-    if (obj instanceof Boolean)
-      return (Boolean) obj;
-    if (obj instanceof Integer)
-      return ((Integer) obj) != 0;
+    if (obj instanceof String str)
+      return !str.isEmpty();
+    if (obj instanceof Boolean bool)
+      return bool.booleanValue();
+    if (obj instanceof Integer num)
+      return num != 0;
     throw new ProEvalException("Unknown datatype passed to getBool");
   }
 
   static float getFloat(Object obj) {
     // Implicit conversion from int to float, but no others.
-    if (obj instanceof Float)
-      return (Float) obj;
-    if (obj instanceof Integer)
-      return (Integer) obj;
-    throw new ProEvalException("Incompatible datatype");
+    if (obj instanceof Float num)
+      return num;
+    if (obj instanceof Integer num)
+      return num;
+    throw new ProEvalException(INCOMPAT_DT);
   }
 
   static int getInt(Object obj) {
     // No implicit conversion to int.
-    if (obj instanceof Integer)
-      return (Integer) obj;
-    throw new ProEvalException("Incompatible datatype");
+    if (obj instanceof Integer num)
+      return num;
+    throw new ProEvalException(INCOMPAT_DT);
   }
 
   static Number getNumber(String str) {
     String nbr = str.trim();
-    if (nbr.length() == 0) {
+    if (nbr.isEmpty()) {
       // Empty string returns 0
       return 0;
     }
@@ -599,9 +592,9 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
 
   static String getString(Object obj) {
     // No implicit conversion to String.
-    if (obj instanceof String)
-      return (String) obj;
-    throw new ProEvalException("Incompatible datatype");
+    if (obj instanceof String str)
+      return str;
+    throw new ProEvalException(INCOMPAT_DT);
   }
 
   static Integer index(Object x, Object y, Object z) {
@@ -609,7 +602,7 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
       return 0;
     String a = getString(x);
     String b = getString(y);
-    if (a.length() == 0 || b.length() == 0)
+    if (a.isEmpty() || b.isEmpty())
       return 0;
     int startIndex = 0;
     if (z != null)
@@ -624,21 +617,21 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   static Integer integer(Object o) {
     if (o == null)
       return null;
-    if (o instanceof Number)
-      return Math.round(((Number) o).floatValue());
-    if (o instanceof String)
-      return Math.round(getNumber((String) o).floatValue());
-    if (o instanceof Boolean)
-      return (Boolean) o ? 1 : 0;
+    if (o instanceof Number num)
+      return Math.round(num.floatValue());
+    if (o instanceof String str)
+      return Math.round(getNumber(str).floatValue());
+    if (o instanceof Boolean bool)
+      return bool.booleanValue() ? 1 : 0;
     throw new ProEvalException("Error converting to INTEGER.");
   }
 
   static String lefttrim(Object a, Object b) {
     if (b != null) {
       String t = getString(b);
-      return StringFuncs.ltrim(getString(a), t);
+      return StringFuncs.leftTrim(getString(a), t);
     }
-    return StringFuncs.ltrim(getString(a));
+    return StringFuncs.leftTrim(getString(a));
   }
 
   static Integer lookup(Object x, Object y, Object z) {
@@ -646,7 +639,7 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
       return null;
     String a = getString(x);
     String b = getString(y);
-    if (a.length() == 0 && b.length() == 0)
+    if (a.isEmpty() && b.isEmpty())
       return 1;
     a = a.toLowerCase();
     b = b.toLowerCase();
@@ -761,7 +754,7 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
 
   static Integer numentries(Object a, Object b) {
     String sa = getString(a);
-    if (sa.length() == 0)
+    if (sa.isEmpty())
       return 0;
     String sb;
     if (b != null) {
@@ -776,11 +769,11 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   static Object opDivide(Object left, Object right) {
     if (left == null || right == null)
       return null;
-    if ((left instanceof Integer) && (right instanceof Integer))
-      return (Integer) left / (Integer) right;
-    if ((left instanceof Number) && (right instanceof Number)) {
-      Double fl = ((Number) left).doubleValue();
-      Double fr = ((Number) right).doubleValue();
+    if ((left instanceof Integer iLeft) && (right instanceof Integer iRight))
+      return iLeft / iRight;
+    if ((left instanceof Number nLeft) && (right instanceof Number nRight)) {
+      Double fl = nLeft.doubleValue();
+      Double fr = nRight.doubleValue();
       return fl / fr;
     }
     throw new ProEvalException("Incompatible data type in expression.");
@@ -789,11 +782,11 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   static Object opMinus(Object left, Object right) {
     if (left == null || right == null)
       return null;
-    if ((left instanceof Integer) && (right instanceof Integer))
-      return (Integer) left - (Integer) right;
-    if ((left instanceof Number) && (right instanceof Number)) {
-      Double fl = ((Number) left).doubleValue();
-      Double fr = ((Number) right).doubleValue();
+    if ((left instanceof Integer iLeft) && (right instanceof Integer iRight))
+      return iLeft - iRight;
+    if ((left instanceof Number nLeft) && (right instanceof Number nRight)) {
+      Double fl = nLeft.doubleValue();
+      Double fr = nRight.doubleValue();
       return fl - fr;
     }
     throw new ProEvalException("Incompatible data type in expression.");
@@ -802,11 +795,11 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   static Object opMultiply(Object left, Object right) {
     if (left == null || right == null)
       return null;
-    if ((left instanceof Integer) && (right instanceof Integer))
-      return (Integer) left * (Integer) right;
-    if ((left instanceof Number) && (right instanceof Number)) {
-      Double fl = ((Number) left).doubleValue();
-      Double fr = ((Number) right).doubleValue();
+    if ((left instanceof Integer iLeft) && (right instanceof Integer iRight))
+      return iLeft * iRight;
+    if ((left instanceof Number nLeft) && (right instanceof Number nRight)) {
+      Double fl = nLeft.doubleValue();
+      Double fr = nRight.doubleValue();
       return fl * fr;
     }
     throw new ProEvalException("Incompatible data type in expression.");
@@ -815,13 +808,13 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   static Object opPlus(Object left, Object right) {
     if (left == null || right == null)
       return null;
-    if ((left instanceof String) && (right instanceof String))
-      return (String) left + right;
-    if ((left instanceof Integer) && (right instanceof Integer))
-      return (Integer) left + (Integer) right;
-    if ((left instanceof Number) && (right instanceof Number)) {
-      Double fl = ((Number) left).doubleValue();
-      Double fr = ((Number) right).doubleValue();
+    if ((left instanceof String sLeft) && (right instanceof String sRight))
+      return sLeft + sRight;
+    if ((left instanceof Integer iLeft) && (right instanceof Integer iRight))
+      return iLeft + iRight;
+    if ((left instanceof Number nLeft) && (right instanceof Number nRight)) {
+      Double fl = nLeft.doubleValue();
+      Double fr = nRight.doubleValue();
       return fl + fr;
     }
     throw new ProEvalException("Incompatible data type in expression.");
@@ -853,7 +846,7 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
     String source = getString(a).toLowerCase();
     String target = getString(b).toLowerCase();
     // If either string is empty, Progress returns zero
-    if (source.length() == 0 || target.length() == 0)
+    if (source.isEmpty() || target.isEmpty())
       return 0;
     if (c != null)
       return source.lastIndexOf(target, getInt(c) - 1) + 1;
@@ -863,8 +856,8 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   static String string(Object a) {
     if (a == null)
       return "?";
-    if (a instanceof Boolean)
-      return (Boolean) a ? "yes" : "no";
+    if (a instanceof Boolean bool)
+      return bool.booleanValue() ? "yes" : "no";
     return a.toString();
   }
 

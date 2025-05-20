@@ -45,4 +45,12 @@ public class Event extends Symbol {
     return getNodeType().getType();
   }
 
+  @Override
+  public Event copy(TreeParserSymbolScope newScope) {
+    var obj = new Event(name, newScope);
+    obj.setDefinitionNode(getDefineNode());
+    obj.setLikeSymbol(getLikeSymbol());
+
+    return obj;
+  }
 }

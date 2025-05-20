@@ -36,6 +36,7 @@ public class Constants {
 
   // Sonar analysis properties
   public static final String SKIP_PROPARSE_PROPERTY = "sonar.oe.skipProparse";
+  public static final String SKIP_COGNITIVE_COMPLEXITY = "sonar.oe.skipCognitiveComplexity";
   public static final String USE_SIMPLE_CPD = "sonar.oe.simplecpd";
   public static final String PROPARSE_DEBUG = "sonar.oe.proparse.debug";
   public static final String PROPARSE_ERROR_STACKTRACE = "sonar.oe.proparse.error.stacktrace";
@@ -59,6 +60,7 @@ public class Constants {
   public static final String SKIP_ANNOTATIONS = "sonar.oe.issues.annotations";
   public static final String SUFFIXES = "sonar.oe.file.suffixes";
   public static final String INCLUDE_SUFFIXES = "sonar.oe.include.suffixes";
+  public static final String DB_SUFFIXES = "sonar.oedb.file.suffixes";
   public static final String BACKSLASH_ESCAPE = "sonar.oe.backslash.escape";
   public static final String OE_ANALYTICS = "sonar.oe.analytics";
   public static final String SKIP_RCODE = "sonar.oe.rcode.skip";

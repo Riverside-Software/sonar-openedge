@@ -380,11 +380,13 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitExprt2FieldEntered(Exprt2FieldEnteredContext ctx) {
+    return createTree(ctx, ABLNodeType.ENTERED_FUNC).setExpression(true);
+  }
+
+  @Override
   public Builder visitExprt2Field(Exprt2FieldContext ctx) {
-    if (ctx.ENTERED() != null)
-      return createTree(ctx, ABLNodeType.ENTERED_FUNC).setExpression(true);
-    else
-      return visitChildren(ctx).setExpression(true);
+    return visitChildren(ctx).setExpression(true);
   }
 
   @Override
@@ -1599,7 +1601,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitDynamicNewStatement(DynamicNewStatementContext ctx) {
-    return createTree(ctx, ABLNodeType.ASSIGN_DYNAMIC_NEW).setStatement();
+    return createTree(ctx, ABLNodeType.ASSIGN_DYNAMIC_NEW).setStatement().setRuleNode(ctx);
   }
 
   @Override

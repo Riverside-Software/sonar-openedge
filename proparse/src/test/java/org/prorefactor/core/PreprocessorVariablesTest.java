@@ -105,4 +105,13 @@ public class PreprocessorVariablesTest extends AbstractProparseTest {
     Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 2);
   }
 
+  @Test
+  public void test26() {
+    // '&message' without message shouldn't throw exception 
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor26.p"), session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+    Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
+  }
+
 }

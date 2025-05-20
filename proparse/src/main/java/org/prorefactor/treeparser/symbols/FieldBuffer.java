@@ -142,4 +142,12 @@ public class FieldBuffer extends Symbol implements Primitive {
     return this;
   }
 
+  @Override
+  public FieldBuffer copy(TreeParserSymbolScope newScope) {
+    var obj = new FieldBuffer(newScope, buffer.copy(newScope), field);
+    obj.setDefinitionNode(getDefineNode());
+    obj.setLikeSymbol(getLikeSymbol());
+
+    return obj;
+  }
 }

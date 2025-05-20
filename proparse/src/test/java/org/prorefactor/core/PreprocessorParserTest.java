@@ -16,6 +16,7 @@ package org.prorefactor.core;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +32,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class PreprocessorParserTest extends AbstractProparseTest {
-  private final static String SRC_DIR = "src/test/resources/data/preprocessor";
+  private static final String SRC_DIR = "src/test/resources/data/preprocessor";
 
   private RefactorSession session;
   private ParseUnit unit;
@@ -44,26 +45,18 @@ public class PreprocessorParserTest extends AbstractProparseTest {
       unit.parse();
       assertFalse(unit.hasSyntaxError());
     } catch (RuntimeException caught) {
-      // Just so that tests will throw NPE and fail (and not just be skipped)
-      unit = null;
+      fail("Couldn't parse preprocessor01.p", caught);
     }
   }
 
   private void testVariable(JPNode topNode, String variable) {
-    for (JPNode node : topNode.query(ABLNodeType.ID)) {
-      if (node.getText().equals(variable)) {
-        return;
-      }
-    }
-    Assert.fail("Variable " + variable + " not found");
+    if (topNode.query2(node -> node.getNodeType() == ABLNodeType.ID && variable.equals(node.getText())).isEmpty())
+      Assert.fail("Variable " + variable + " not found");
   }
 
   private void testNoVariable(JPNode topNode, String variable) {
-    for (JPNode node : topNode.query(ABLNodeType.ID)) {
-      if (node.getText().equals(variable)) {
-        Assert.fail("Variable " + variable + " not found");
-      }
-    }
+    if (!topNode.query2(node -> node.getNodeType() == ABLNodeType.ID && variable.equals(node.getText())).isEmpty())
+      Assert.fail("Variable " + variable + " not found");
   }
 
   @Test
@@ -409,6 +402,16 @@ public class PreprocessorParserTest extends AbstractProparseTest {
   @Test
   public void testQStrings() {
     testVariable(unit.getTopNode(), "var81");
+  }
+
+  @Test
+  public void testTrim01() {
+    testVariable(unit.getTopNode(), "var82");
+  }
+
+  @Test
+  public void testTrim02() {
+    testVariable(unit.getTopNode(), "var83");
   }
 
   @Test

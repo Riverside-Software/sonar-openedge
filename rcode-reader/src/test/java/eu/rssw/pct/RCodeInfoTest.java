@@ -605,7 +605,7 @@ public class RCodeInfoTest {
       assertEquals(testMethod21.getIDESignature(), "testMethod2(↑INT xx)");
       boolean b1 = "testMethod2(II[])PT".equals(testMethod22.getSignature()); 
       boolean b2 = "testMethod2(II[])T".equals(testMethod22.getSignature());
-      assertTrue(b1 | b2);
+      assertTrue(b1 || b2);
       assertEquals(testMethod22.getIDESignature(), "testMethod2(↑INT[] xx)");
       assertEquals(testMethod21.getReturnType().getPrimitive(), PrimitiveDataType.INTEGER);
       assertNull(testMethod21.getReturnType().getClassName());
@@ -620,7 +620,7 @@ public class RCodeInfoTest {
       assertNotNull(testMethod3);
       b1 = "testMethod3(ITH,MDH)PV".equals(testMethod3.getSignature()); 
       b2 = "testMethod3(ITH,MDH)V".equals(testMethod3.getSignature());
-      assertTrue(b1 | b2);
+      assertTrue(b1 || b2);
       assertEquals(testMethod3.getIDESignature(), "testMethod3(↑TBL-HDL htt1, ⇅DS-HDL hds1)");
       assertNotNull(testMethod3.getParameters());
       assertEquals(testMethod3.getParameters().length, 2);

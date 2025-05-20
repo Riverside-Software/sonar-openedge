@@ -39,4 +39,9 @@ public class Pair<X, Y> {
   public Y getO2() {
     return o2;
   }
+
+  @Override
+  public String toString() {
+    return "<" + o1.toString() + ", " + o2.toString() + ">";
+  }
 }

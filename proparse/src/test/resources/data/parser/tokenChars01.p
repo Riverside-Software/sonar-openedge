@@ -1,0 +1,3 @@
+DEFINE TEMP-TABLE ttLocal NO-UNDO
+    FIELD cod_pro AS INTEGER 
+    INDEX #idx1 IS PRIMARY cod_pro.

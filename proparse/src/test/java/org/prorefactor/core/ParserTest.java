@@ -30,6 +30,7 @@ import java.util.Optional;
 
 import org.antlr.v4.runtime.atn.DecisionInfo;
 import org.antlr.v4.runtime.atn.ParseInfo;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.Database;
@@ -48,6 +49,8 @@ import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import eu.rssw.pct.elements.PrimitiveDataType;
 
 public class ParserTest extends AbstractProparseTest {
   private static final String SRC_DIR = "src/test/resources/data/parser";
@@ -917,6 +920,14 @@ public class ParserTest extends AbstractProparseTest {
   }
 
   @Test
+  public void testEntered01() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "entered01.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
+  }
+
+  @Test
   public void testElvis01() {
     ParseUnit unit = getParseUnit(new File(SRC_DIR, "elvis01.p"), session);
     unit.treeParser01();
@@ -1016,6 +1027,24 @@ public class ParserTest extends AbstractProparseTest {
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 10);
+  }
+
+  @Test
+  public void testVarName() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "var_name01.p"), session);
+    unit.treeParser01();
+
+    // Temp-table tt1 should be there
+    var b1 = unit.getRootScope().getBufferSymbol("tt1");
+    assertNotNull(b1);
+    // Field 'var' is defined, while 'var1' is not
+    assertTrue(b1.getFieldBufferList().stream().anyMatch(it -> "var".equals(it.getName())));
+    assertFalse(b1.getFieldBufferList().stream().anyMatch(it -> "var1".equals(it.getName())));
+    // Check that variable 'var' is defined
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    var v1 = unit.getRootScope().getVariable("var");
+    assertNotNull(v1);
+    assertEquals(v1.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
   }
 
   @Test
@@ -1162,7 +1191,7 @@ public class ParserTest extends AbstractProparseTest {
   @Test
   public void testIncludeNotFound01() {
     ParseUnit unit = getParseUnit(new File(SRC_DIR, "inc_not_found.p"), session);
-    expectThrows(UncheckedIOException.class, () -> unit.treeParser01());
+    expectThrows(UncheckedIOException.class, unit::treeParser01);
   }
 
   @Test
@@ -1177,4 +1206,21 @@ public class ParserTest extends AbstractProparseTest {
     assertEquals(unit.getRootScope().getEventRoutines().get(2).getParameters().size(), 3);
   }
 
+  @Test
+  public void testTokenChars01() throws IOException {
+    var settings = new UnitTestProparseSettings();
+    var localSession =  new RefactorSession(settings, new SportsSchema());
+    var unit = getParseUnit(new File(SRC_DIR, "tokenChars01.p"), localSession);
+    expectThrows(ParseCancellationException.class, unit::parse);
+  }
+
+  @Test
+  public void testTokenChars02() throws IOException {
+    var settings = new UnitTestProparseSettings();
+    settings.setTokenStartChars(new char[] {'#', '!'});
+    var localSession =  new RefactorSession(settings, new SportsSchema());
+    var unit = getParseUnit(new File(SRC_DIR, "tokenChars01.p"), localSession);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+  }
 }

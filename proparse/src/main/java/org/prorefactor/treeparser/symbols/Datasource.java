@@ -43,4 +43,13 @@ public class Datasource extends Symbol {
     return getNodeType().getType();
   }
 
+  @Override
+  public Datasource copy(TreeParserSymbolScope newScope) {
+    var obj = new Datasource(name, newScope);
+    obj.setDefinitionNode(getDefineNode());
+    obj.setLikeSymbol(getLikeSymbol());
+
+    return obj;
+  }
+
 }

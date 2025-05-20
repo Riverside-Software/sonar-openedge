@@ -653,7 +653,8 @@ expressionTerm2:
     { expressionTerm2SemanticPredicate2() }? methodname=identifier parameterListNoRoot # exprt2ParenCall2
   | constant   # exprt2Constant
   | noArgFunction  # exprt2NoArgFunc
-  | field ( NOT? ENTERED )?  # exprt2Field
+  | fieldExpr ( NOT? ENTERED )  # exprt2FieldEntered
+  | field # exprt2Field
   | SUPER # exprt2Super
   ;
 
@@ -4842,6 +4843,7 @@ unreservedkeyword:
 | VALIDEVENT
 | VALIDHANDLE
 | VALIDOBJECT
+| VAR
 | VARIABLE
 | VERBOSE
 | VERTICAL

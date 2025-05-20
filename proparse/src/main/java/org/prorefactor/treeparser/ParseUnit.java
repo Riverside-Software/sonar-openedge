@@ -24,7 +24,9 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -40,6 +42,7 @@ import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.atn.DecisionInfo;
 import org.antlr.v4.runtime.atn.ParseInfo;
 import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -53,7 +56,6 @@ import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroLevel;
 import org.prorefactor.macrolevel.MacroRef;
 import org.prorefactor.macrolevel.PreprocessorEventListener;
-import org.prorefactor.macrolevel.PreprocessorEventListener.CodeSection;
 import org.prorefactor.proparse.ABLLexer;
 import org.prorefactor.proparse.JPNodeVisitor;
 import org.prorefactor.proparse.ProparseErrorListener;
@@ -97,7 +99,7 @@ public class ParseUnit {
   private IncludeRef macroGraph;
   private boolean appBuilderCode;
   private boolean syntaxError;
-  private List<CodeSection> appBuilderSections;
+  private Map<Integer, IntervalSet> appBuilderSections;
 
   private TreeParserRootSymbolScope rootScope;
   private JPNodeMetrics metrics;
@@ -550,7 +552,7 @@ public class ParseUnit {
     // buffer name)
     List<RecordNameNode> filteredList = new ArrayList<>();
     for (RecordNameNode node : recordNodes) {
-      if ((node.getTableBuffer() == null) || (node.getStatement() == null)
+      if ((node.getTableBuffer() == null) || (node.getTableBuffer().getTable() == null) || (node.getStatement() == null)
           || (node.getStatement().firstNaturalChild() == null))
         break;
       String tgt = node.getTableBuffer().getTargetFullName();
@@ -619,6 +621,13 @@ public class ParseUnit {
     return appBuilderCode;
   }
 
+  public Map<Integer, IntervalSet> getCodeSections() {
+    if (appBuilderSections == null)
+      return new HashMap<>();
+    else
+      return appBuilderSections;
+  }
+
   public long getParseTimeLL() {
     return parseTimeLL / 1000000;
   }
@@ -674,11 +683,7 @@ public class ParseUnit {
   public boolean isInEditableSection(int file, int line) {
     if (!appBuilderCode || (file > 0))
       return true;
-    for (CodeSection range : appBuilderSections) {
-      if ((range.getFileNum() == file) && (range.getStartLine() <= line) && (range.getEndLine() >= line))
-        return true;
-    }
-    return false;
+    return appBuilderSections.getOrDefault(file, IntervalSet.EMPTY_SET).contains(line);
   }
 
   private ByteSource getByteSource() {

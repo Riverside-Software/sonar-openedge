@@ -43,3 +43,17 @@ function f8 returns int(output xx as decimal):
 end function.
 
 message "Hello world!".
+
+define temp-table ttCustomer no-undo like customer.
+define dataset ds1 for ttCustomer.
+function f9 returns int
+    ( prm1 like customer.custnum,
+      input table ttCustomer,
+      output table-handle h1,
+      input dataset ds1,
+      input dataset-handle h2 ) forwards.
+
+// Inherits from FORWARDS declaration
+function f9 returns int ():
+  return 1.
+end function.

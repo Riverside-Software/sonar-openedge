@@ -45,4 +45,13 @@ public class Stream extends Symbol {
     return getNodeType().getType();
   }
 
+  @Override
+  public Stream copy(TreeParserSymbolScope newScope) {
+    var obj = new Stream(name, newScope);
+    obj.setDefinitionNode(getDefineNode());
+    obj.setLikeSymbol(getLikeSymbol());
+
+    return obj;
+  }
+
 }

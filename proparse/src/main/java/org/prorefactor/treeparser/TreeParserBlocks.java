@@ -342,8 +342,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
     TreeParserSymbolScope forwardScope = funcForwards.get(ctx.id.getText());
     Routine fwdRoutine = forwardScope != null ? forwardScope.getRoutine() : null;
 
-    TreeParserSymbolScope definingScope = currentScope;
-    JPNode blockNode = support.getNode(ctx);
+    var blockNode = support.getNode(ctx);
     newRoutine(ctx, blockNode, ctx.id.getText(), ABLNodeType.FUNCTION);
     if ((ctx.datatype().getStart().getType() == ABLNodeType.CLASS.getType())
         || (ctx.datatype().getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
@@ -356,22 +355,9 @@ public class TreeParserBlocks extends ProparseBaseListener {
       if (LOG.isTraceEnabled())
         LOG.trace("{}> FORWARDS definition", indent());
       funcForwards.put(ctx.id.getText(), currentScope);
-    } else if ((ctx.functionParams() == null)
-        || (ctx.functionParams().getChildCount() == 2 /* LEFTPAREN RIGHTPAREN */)) {
-      if (LOG.isTraceEnabled())
-        LOG.trace("{}> No parameter, trying to find them in FORWARDS declaration", indent());
-      // No parameter defined, then we inherit from FORWARDS declaration (if available)
-
-      if (forwardScope != null) {
-        if (LOG.isTraceEnabled())
-          LOG.trace("{}> Inherits from FORWARDS definition", indent());
-        scopeSwap(forwardScope);
-        blockNode.setBlock(currentBlock);
-        blockNode.setSymbol(fwdRoutine);
-        fwdRoutine.setDefinitionNode(blockNode);
-        definingScope.add(fwdRoutine);
-        currentRoutine = fwdRoutine;
-      }
+    } else if (forwardScope != null) {
+      fwdRoutine.setForwardDeclaration();
+      currentRoutine.addForwardDeclaration(fwdRoutine);
     }
   }
 
@@ -491,8 +477,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
     }
 
     JPNode node = support.getNode(ctx);
-    if (node instanceof IfStatementNode) {
-      IfStatementNode ifStmt = (IfStatementNode) node;
+    if (node instanceof IfStatementNode ifStmt) {
       ifStmt.setThenNode(support.getNode(ctx.ifThen()));
       ifStmt.setThenBlockOrNode(support.getNode(ctx.ifThen()).getFirstChild().asIStatement());
       if (ctx.ifElse() != null) {
@@ -578,21 +563,6 @@ public class TreeParserBlocks extends ProparseBaseListener {
     blockEnd();
   }
 
-  /**
-   * In the case of a function definition that comes some time after a function forward declaration, we want to use the
-   * scope that was created with the forward declaration, because it is the scope that has all of the parameter
-   * definitions. We have to do this because the definition itself may have left out the parameter list - it's not
-   * required - it just uses the parameter list from the declaration.
-   */
-  private void scopeSwap(TreeParserSymbolScope scope) {
-    if (LOG.isTraceEnabled())
-      LOG.trace("{}> Swapping scope...", indent());
-
-    currentScope = scope;
-    blockEnd(); // pop the unused block from the stack
-    currentBlock = pushBlock(scope.getRootBlock());
-  }
-
   private Block pushBlock(Block block) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Pushing block '{}' to stack", indent(), block);
@@ -669,7 +639,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
     node.setInBlock(currentBlock);
 
     // Assign annotations to statement
-    if (node.asJPNode().getNodeType() != ABLNodeType.ANNOTATION) {
+    if (node.getNodeType() != ABLNodeType.ANNOTATION) {
       attachAnnotations(node);
     }
   }
@@ -677,8 +647,8 @@ public class TreeParserBlocks extends ProparseBaseListener {
   // Iterate over annotations before this statement
   private void attachAnnotations(IStatement node) {
     IStatement prev = node.getPreviousStatement();
-    while (prev instanceof AnnotationStatementNode) {
-      node.addAnnotation((AnnotationStatementNode) prev);
+    while (prev instanceof AnnotationStatementNode annStmtNode) {
+      node.addAnnotation(annStmtNode);
       // If annotation was the first statement of the block, then re-attach to current node
       if (prev.getParentStatement().getFirstStatement() == prev) {
         prev.getParentStatement().setFirstStatement(node);
