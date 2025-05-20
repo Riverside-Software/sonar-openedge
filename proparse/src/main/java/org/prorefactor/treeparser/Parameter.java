@@ -88,7 +88,7 @@ public class Parameter {
       case DATASETHANDLE: sb.append("DH"); break;
       case VARIABLE:
         Variable v = (Variable) symbol;
-        if (v != null) {
+        if ((v != null) && (v.getDataType() != null)) {
           if (v.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
             sb.append('Z').append(v.getDataType().getClassName());
           } else {
