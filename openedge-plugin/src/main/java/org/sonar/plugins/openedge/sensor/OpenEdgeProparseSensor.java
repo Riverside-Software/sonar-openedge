@@ -406,7 +406,8 @@ public class OpenEdgeProparseSensor implements Sensor {
       computeSimpleMetrics(context, file, unit);
       computeCommonMetrics(context, file, unit);
       computeComplexity(context, file, unit);
-      computeCognitiveComplexity(context, file, unit);
+      if (!settings.skipCognitiveComplexity())
+        computeCognitiveComplexity(context, file, unit);
       computeLOCL2(context, file, unit);
     }
 
