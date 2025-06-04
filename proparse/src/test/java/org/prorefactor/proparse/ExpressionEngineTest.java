@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.nodetypes.ArrayReferenceNode;
 import org.prorefactor.core.nodetypes.AttributeReferenceNode;
 import org.prorefactor.core.nodetypes.BuiltinFunctionNode;
@@ -576,6 +577,8 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     var exp1 = (AttributeReferenceNode) nodes.get(0);
     assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
     assertEquals(exp1.getTypeInfo().getTypeName(), "rssw.test.Class08");
+    assertEquals(exp1.getNumberOfChildren(), 3);
+    assertEquals(exp1.getDirectChildren().get(2).getNodeType(), ABLNodeType.ID);
 
     assertTrue(nodes.get(1) instanceof AttributeReferenceNode);
     var exp2 = (AttributeReferenceNode) nodes.get(1);
@@ -593,6 +596,68 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(exp4.getTypeInfo().getTypeName(), "rssw.test.Class08Child");
   }
 
+  @Test
+  public void testStaticProperty02() {
+    var sourceCode = """
+        using rssw.test.Class08.
+        message Class08:prop01. 
+        message rssw.test.Class08Child:prop02. 
+        message rssw.test.Class08:prop03.
+        message rssw.test.Class08Child:prop04.
+        """;
+    var unit = getParseUnit(sourceCode, session);
+    unit.treeParser01();
+
+    var nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 4);
+
+    assertTrue(nodes.get(0) instanceof AttributeReferenceNode);
+    var exp1 = (AttributeReferenceNode) nodes.get(0);
+    assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
+    assertEquals(exp1.getTypeInfo().getTypeName(), "rssw.test.Class08");
+    assertEquals(exp1.getNumberOfChildren(), 3);
+    assertEquals(exp1.getDirectChildren().get(2).getNodeType(), ABLNodeType.ID);
+  }
+
+  @BeforeMethod(dependsOnMethods = "setUp")
+  public void beforeNonStaticProperty() {
+    var typeInfo = new TypeInfo("rssw.test.Class09", false, false, "Progress.Lang.Object", "");
+    typeInfo.addProperty(new PropertyElement("instance", true, new DataType("rssw.test.Class09")));
+    typeInfo.addMethod(new MethodElement("methd01", false, DataType.CHARACTER));
+    typeInfo.addProperty(new PropertyElement("prop01", false, DataType.CHARACTER));
+    typeInfo.addProperty(new PropertyElement("prop02", false, DataType.INTEGER));
+    typeInfo.addProperty(new PropertyElement("prop03", true, DataType.DECIMAL));
+    session.injectTypeInfo(typeInfo);
+  }
+
+  @Test
+  public void testNonStaticProperty01() {
+    var sourceCode = """
+        message rssw.test.Class09:instance:methd01().
+        """;
+    var unit = getParseUnit(sourceCode, session);
+    unit.treeParser01();
+
+    var nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 1);
+
+    assertTrue(nodes.get(0) instanceof MethodCallNode);
+    var exp1 = (MethodCallNode) nodes.get(0);
+    assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
+    assertEquals(exp1.getTypeInfo().getTypeName(), "rssw.test.Class09");
+    assertEquals(exp1.getNumberOfChildren(), 4);
+    assertEquals(exp1.getDirectChildren().get(0).getNodeType(), ABLNodeType.ATTRIBUTE_REF);
+    assertEquals(exp1.getDirectChildren().get(2).getNodeType(), ABLNodeType.ID);
+    assertEquals(exp1.getDirectChildren().get(3).getNodeType(), ABLNodeType.METHOD_PARAM_LIST);
+
+    var exp2 = (AttributeReferenceNode) exp1.getDirectChildren().get(0);
+    assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp2.getTypeInfo().getTypeName(), "rssw.test.Class09");
+    assertEquals(exp2.getNumberOfChildren(), 3);
+
+    assertEquals(exp2.getDirectChildren().get(0).getNodeType(), ABLNodeType.FIELD_REF);
+    assertEquals(exp2.getDirectChildren().get(2).getNodeType(), ABLNodeType.ID);
+  }
 
   @Test
   public void testObjectMethod() {
