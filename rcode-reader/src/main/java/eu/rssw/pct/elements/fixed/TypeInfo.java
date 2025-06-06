@@ -50,12 +50,12 @@ public class TypeInfo implements ITypeInfo {
   protected String parentTypeName;
   protected String assemblyName;
   protected int flags;
-  private List<String> interfaces = new ArrayList<>();
+  private final List<String> interfaces = new ArrayList<>();
 
-  private Collection<IMethodElement> methods = new ArrayList<>();
-  private Collection<IPropertyElement> properties = new ArrayList<>();
-  private Collection<IVariableElement> variables = new ArrayList<>();
-  private Collection<IEventElement> events = new ArrayList<>();
+  private final Collection<IMethodElement> methods = new ArrayList<>();
+  private final Collection<IPropertyElement> properties = new ArrayList<>();
+  private final Collection<IVariableElement> variables = new ArrayList<>();
+  private final Collection<IEventElement> events = new ArrayList<>();
 
   public TypeInfo() {
     // No-op

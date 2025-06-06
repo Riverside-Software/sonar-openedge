@@ -23,12 +23,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
+import javax.annotation.Nonnull;
+
 import org.prorefactor.core.Pair;
 
 public interface ITypeInfo {
   String getTypeName();
   String getParentTypeName();
   String getAssemblyName();
+  @Nonnull
   List<String> getInterfaces();
 
   boolean isFinal();
