@@ -134,6 +134,16 @@ public class ITypeInfoTest {
     assertEquals(sub3.size(), 2);
     assertEquals(sub3.get(0).getO2().getName(), "Next-Sibling");
     assertEquals(sub3.get(1).getO2().getName(), "Prev-Sibling");
+
+    var list2 = info.getAllMethods(TYPE_INFO_PROVIDER);
+    var sub4 = list2.stream().filter(it -> "Progress.Lang.Object".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub4.size(), 4);
+    var sub5 = list2.stream().filter(
+        it -> "Progress.IO.FileInputStream".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub5.size(), 0);
+    var sub6 = list2.stream().filter(
+        it -> "Progress.IO.InputStream".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub6.size(), 7);
   }
 
   @Test
@@ -148,7 +158,7 @@ public class ITypeInfoTest {
     assertEquals(sub1.size(), 1);
     assertEquals(sub1.get(0).getO2().getName(), "ReturnValue");
     var sub2 = list.stream().filter(
-        it -> "Progress.Lang.Error".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+        it -> "Progress.Lang.ProError".equalsIgnoreCase(it.getO1().getTypeName())).toList();
     assertEquals(sub2.size(), 3);
     assertEquals(sub2.get(0).getO2().getName(), "NumMessages");
     assertEquals(sub2.get(1).getO2().getName(), "CallStack");
@@ -157,5 +167,25 @@ public class ITypeInfoTest {
     assertEquals(sub3.size(), 2);
     assertEquals(sub3.get(0).getO2().getName(), "Next-Sibling");
     assertEquals(sub3.get(1).getO2().getName(), "Prev-Sibling");
+    var sub4 = list.stream().filter(
+        it -> "Progress.Lang.Error".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub4.size(), 0);
+
+    var list2 = info.getAllMethods(TYPE_INFO_PROVIDER);
+    var sub5 = list2.stream().filter(it -> "Progress.Lang.Object".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub5.size(), 4);
+    var sub6 = list2.stream().filter(
+        it -> "Progress.Lang.AppError".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub6.size(), 2);
+    assertEquals(sub6.get(0).getO2().getName(), "AddMessage");
+    assertEquals(sub6.get(1).getO2().getName(), "RemoveMessage");
+    var sub7 = list2.stream().filter(
+        it -> "Progress.Lang.ProError".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub7.size(), 2);
+    assertEquals(sub7.get(0).getO2().getName(), "GetMessage");
+    assertEquals(sub7.get(1).getO2().getName(), "GetMessageNum");
+    var sub8 = list2.stream().filter(
+        it -> "Progress.Lang.Error".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub8.size(), 0);
   }
 }

@@ -168,22 +168,15 @@ public interface ITypeInfo {
   }
 
   /**
-   * Return all properties of this type, including inherited properties. Overidden properties are currently not handled.
+   * Return all properties of this type, including inherited properties.
    */
   default List<Pair<ITypeInfo, IPropertyElement>> getAllProperties(Function<String, ITypeInfo> typeInfoProvider) {
     // Result
     var list = new ArrayList<Pair<ITypeInfo, IPropertyElement>>();
-    // Consumer adding non-duplicate pairs
     Consumer<Pair<ITypeInfo, IPropertyElement>> pairConsumer = item -> {
-      if (list.stream().map(Pair::getO2).noneMatch(it -> it.getName().equalsIgnoreCase(item.getO2().getName()))) {
-        list.add(item);
-      }
-    };
-    // Consumer for local properties 
-    Consumer<IPropertyElement> propConsumer = item -> {
-      if (list.stream().map(Pair::getO2).noneMatch(it -> it.getName().equalsIgnoreCase(item.getName()))) {
-        list.add(Pair.of(this, item));
-      }
+      // Remove existing properties with same name (overidden properties)
+      list.removeAll(list.stream().filter(it -> it.getO2().getName().equalsIgnoreCase(item.getO2().getName())).toList());
+      list.add(item);
     };
 
     // Add properties from interfaces
@@ -201,7 +194,40 @@ public interface ITypeInfo {
     }
 
     // Then from class itself
-    getProperties().forEach(propConsumer);
+    getProperties().stream().map(it -> Pair.of(this, it)).forEach(pairConsumer);
+
+    return list;
+  }
+
+  /**
+   * Return all properties of this type, including inherited properties.
+   */
+  default List<Pair<ITypeInfo, IMethodElement>> getAllMethods(Function<String, ITypeInfo> typeInfoProvider) {
+    // Result
+    var list = new ArrayList<Pair<ITypeInfo, IMethodElement>>();
+    Consumer<Pair<ITypeInfo, IMethodElement>> pairConsumer = item -> {
+      // Remove existing methods with same signature
+      list.removeAll(list.stream().filter(it -> it.getO2().getSignatureWithoutModifiers().equalsIgnoreCase(
+          item.getO2().getSignatureWithoutModifiers())).toList());
+      list.add(item);
+    };
+
+    // Add methods from interfaces
+    for (var str : getInterfaces()) {
+      var iface = typeInfoProvider.apply(str);
+      if (iface != null) {
+        iface.getAllMethods(typeInfoProvider).forEach(pairConsumer);
+      }
+    }
+
+    // Add methods from parent
+    var parent = typeInfoProvider.apply(getParentTypeName());
+    if (parent != null) {
+      parent.getAllMethods(typeInfoProvider).forEach(pairConsumer);
+    }
+
+    // Then from class itself
+    getMethods().stream().map(it -> Pair.of(this, it)).forEach(pairConsumer);
 
     return list;
   }
