@@ -39,8 +39,7 @@ import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.fixed.TypeInfo;
 
 public class ITypeInfoTest {
-  private static final Function<String, ITypeInfo> TYPE_INFO_PROVIDER = name -> //
-  BuiltinClasses.getBuiltinClasses().stream() //
+  private static final Function<String, ITypeInfo> TYPE_INFO_PROVIDER = name -> BuiltinClasses.getBuiltinClasses().stream() //
     .filter(it -> it.getTypeName().equals(name)) //
     .findFirst() //
     .orElse(null);
@@ -116,4 +115,47 @@ public class ITypeInfoTest {
     assertEquals(val2.getO2().getReturnType(), DataType.INTEGER);
   }
 
+  @Test
+  public void test05() {
+    var info = TYPE_INFO_PROVIDER.apply("Progress.IO.FileInputStream");
+    assertNotNull(info);
+
+    var list = info.getAllProperties(TYPE_INFO_PROVIDER);
+    assertEquals(list.size(), 4);
+    var sub1 = list.stream().filter(
+        it -> "Progress.IO.FileInputStream".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub1.size(), 1);
+    assertEquals(sub1.get(0).getO2().getName(), "FileName");
+    var sub2 = list.stream().filter(
+        it -> "Progress.IO.InputStream".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub2.size(), 1);
+    assertEquals(sub2.get(0).getO2().getName(), "Closed");
+    var sub3 = list.stream().filter(it -> "Progress.Lang.Object".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub3.size(), 2);
+    assertEquals(sub3.get(0).getO2().getName(), "Next-Sibling");
+    assertEquals(sub3.get(1).getO2().getName(), "Prev-Sibling");
+  }
+
+  @Test
+  public void test06() {
+    var info = TYPE_INFO_PROVIDER.apply("Progress.Lang.AppError");
+    assertNotNull(info);
+
+    var list = info.getAllProperties(TYPE_INFO_PROVIDER);
+    assertEquals(list.size(), 6);
+    var sub1 = list.stream().filter(
+        it -> "Progress.Lang.AppError".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub1.size(), 1);
+    assertEquals(sub1.get(0).getO2().getName(), "ReturnValue");
+    var sub2 = list.stream().filter(
+        it -> "Progress.Lang.Error".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub2.size(), 3);
+    assertEquals(sub2.get(0).getO2().getName(), "NumMessages");
+    assertEquals(sub2.get(1).getO2().getName(), "CallStack");
+    assertEquals(sub2.get(2).getO2().getName(), "Severity");
+    var sub3 = list.stream().filter(it -> "Progress.Lang.Object".equalsIgnoreCase(it.getO1().getTypeName())).toList();
+    assertEquals(sub3.size(), 2);
+    assertEquals(sub3.get(0).getO2().getName(), "Next-Sibling");
+    assertEquals(sub3.get(1).getO2().getName(), "Prev-Sibling");
+  }
 }

@@ -19,8 +19,10 @@
  */
 package eu.rssw.pct.elements;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
@@ -163,6 +165,45 @@ public interface ITypeInfo {
     }
 
     return null;
+  }
+
+  /**
+   * Return all properties of this type, including inherited properties. Overidden properties are currently not handled.
+   */
+  default List<Pair<ITypeInfo, IPropertyElement>> getAllProperties(Function<String, ITypeInfo> typeInfoProvider) {
+    // Result
+    var list = new ArrayList<Pair<ITypeInfo, IPropertyElement>>();
+    // Consumer adding non-duplicate pairs
+    Consumer<Pair<ITypeInfo, IPropertyElement>> pairConsumer = item -> {
+      if (list.stream().map(Pair::getO2).noneMatch(it -> it.getName().equalsIgnoreCase(item.getO2().getName()))) {
+        list.add(item);
+      }
+    };
+    // Consumer for local properties 
+    Consumer<IPropertyElement> propConsumer = item -> {
+      if (list.stream().map(Pair::getO2).noneMatch(it -> it.getName().equalsIgnoreCase(item.getName()))) {
+        list.add(Pair.of(this, item));
+      }
+    };
+
+    // Add properties from interfaces
+    for (var str : getInterfaces()) {
+      var iface = typeInfoProvider.apply(str);
+      if (iface != null) {
+        iface.getAllProperties(typeInfoProvider).forEach(pairConsumer);
+      }
+    }
+
+    // Then add properties from parent
+    var parent = typeInfoProvider.apply(getParentTypeName());
+    if (parent != null) {
+      parent.getAllProperties(typeInfoProvider).forEach(pairConsumer);
+    }
+
+    // Then from class itself
+    getProperties().forEach(propConsumer);
+
+    return list;
   }
 
   default IVariableElement lookupVariable(String varName) {
