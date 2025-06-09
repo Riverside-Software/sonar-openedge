@@ -23,7 +23,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import org.testng.annotations.Test;
 
@@ -33,13 +33,14 @@ public class PLReaderTest {
 
   @Test
   public void testRCodeInPL() throws IOException, InvalidRCodeException {
-    PLReader pl = new PLReader(Paths.get("src/test/resources/ablunit.pl"));
-    assertNotNull(pl.getEntry("OpenEdge/ABLUnit/Reflection/ClassAnnotationInfo.r"));
-    RCodeInfo rci = new RCodeInfo(pl.getInputStream(pl.getEntry("OpenEdge/ABLUnit/Reflection/ClassAnnotationInfo.r")));
+    var pl = new PLReader(Path.of("src/test/resources/ablunit.pl"));
+    var entry = pl.getEntry("OpenEdge/ABLUnit/Reflection/ClassAnnotationInfo.r");
+    assertNotNull(entry);
+    var rci = new RCodeInfo(pl.getInputStream(entry));
     assertTrue(rci.isClass());
-    assertTrue(rci.getTypeInfo().getMethods().size() > 0);
-    assertTrue(rci.getTypeInfo().getProperties().size() > 0);
-    assertTrue(rci.getTypeInfo().getTables().size() == 0);
+    assertTrue(!rci.getTypeInfo().getMethods().isEmpty());
+    assertTrue(!rci.getTypeInfo().getProperties().isEmpty());
+    assertTrue(rci.getTypeInfo().getTables().isEmpty());
   }
 
 }

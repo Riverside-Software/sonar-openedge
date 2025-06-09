@@ -22,6 +22,7 @@ package eu.rssw.pct;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.function.Function;
@@ -144,6 +145,13 @@ public class ITypeInfoTest {
     var sub6 = list2.stream().filter(
         it -> "Progress.IO.InputStream".equalsIgnoreCase(it.getO1().getTypeName())).toList();
     assertEquals(sub6.size(), 7);
+
+    var list3 = info.getAllConstructors(TYPE_INFO_PROVIDER);
+    assertEquals(list3.size(), 1);
+    var c1 = list3.get(0);
+    assertEquals(c1.getO1().getTypeName(), "Progress.IO.FileInputStream");
+    assertTrue(c1.getO2().isConstructor());
+    assertEquals(c1.getO2().getParameters().length, 1);
   }
 
   @Test
@@ -187,5 +195,21 @@ public class ITypeInfoTest {
     var sub8 = list2.stream().filter(
         it -> "Progress.Lang.Error".equalsIgnoreCase(it.getO1().getTypeName())).toList();
     assertEquals(sub8.size(), 0);
+
+    var list3 = info.getAllConstructors(TYPE_INFO_PROVIDER);
+    assertEquals(list3.size(), 3);
+    var c1 = list3.get(0);
+    assertEquals(c1.getO1().getTypeName(), "Progress.Lang.AppError");
+    assertTrue(c1.getO2().isConstructor());
+    assertEquals(c1.getO2().getParameters().length, 0);
+    var c2 = list3.get(1);
+    assertEquals(c2.getO1().getTypeName(), "Progress.Lang.AppError");
+    assertTrue(c2.getO2().isConstructor());
+    assertEquals(c2.getO2().getParameters().length, 2);
+    var c3 = list3.get(2);
+    assertEquals(c3.getO1().getTypeName(), "Progress.Lang.AppError");
+    assertTrue(c3.getO2().isConstructor());
+    assertEquals(c3.getO2().getParameters().length, 1);
+
   }
 }

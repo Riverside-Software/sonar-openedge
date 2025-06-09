@@ -14,7 +14,6 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
-import java.util.List;
 import java.util.function.Function;
 
 import org.prorefactor.core.ABLNodeType;
@@ -742,15 +741,34 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
     }
   }
 
-  static Pair<ITypeInfo, IMethodElement> getObjectMethod(Function<String, ITypeInfo> provider, JPNode node, ITypeInfo info,
-      String methodName) {
+  static Pair<ITypeInfo, IMethodElement> getObjectConstructor(Function<String, ITypeInfo> provider, JPNode node,
+      ITypeInfo info) {
     // Create array of dataTypes
-    List<JPNode> paramItems = node.getDirectChildren(ABLNodeType.PARAMETER_ITEM);
-    DataType[] params = new DataType[paramItems.size()];
+    var paramItems = node.getDirectChildren(ABLNodeType.PARAMETER_ITEM);
+    var params = new DataType[paramItems.size()];
     int zz = 0;
-    for (JPNode ch : paramItems) {
-      DataType dt = DataType.UNKNOWN;
-      for (JPNode ch2 : ch.getDirectChildren()) {
+    for (var ch : paramItems) {
+      var dt = DataType.UNKNOWN;
+      for (var ch2 : ch.getDirectChildren()) {
+        if ((dt == DataType.UNKNOWN) && ch2.isIExpression()) {
+          dt = ch2.asIExpression().getDataType();
+        }
+      }
+      params[zz++] = dt;
+    }
+
+    return info == null ? null : info.getConstructor(provider, params);
+  }
+
+  static Pair<ITypeInfo, IMethodElement> getObjectMethod(Function<String, ITypeInfo> provider, JPNode node,
+      ITypeInfo info, String methodName) {
+    // Create array of dataTypes
+    var paramItems = node.getDirectChildren(ABLNodeType.PARAMETER_ITEM);
+    var params = new DataType[paramItems.size()];
+    int zz = 0;
+    for (var ch : paramItems) {
+      var dt = DataType.UNKNOWN;
+      for (var ch2 : ch.getDirectChildren()) {
         if ((dt == DataType.UNKNOWN) && ch2.isIExpression()) {
           dt = ch2.asIExpression().getDataType();
         }

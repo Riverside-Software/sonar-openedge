@@ -37,6 +37,7 @@ import org.prorefactor.core.nodetypes.LocalMethodCallNode;
 import org.prorefactor.core.nodetypes.MethodCallNode;
 import org.prorefactor.core.nodetypes.NamedMemberArrayNode;
 import org.prorefactor.core.nodetypes.NamedMemberNode;
+import org.prorefactor.core.nodetypes.NewTypeNode;
 import org.prorefactor.core.nodetypes.SingleArgumentExpression;
 import org.prorefactor.core.nodetypes.TwoArgumentsExpression;
 import org.prorefactor.core.nodetypes.UserFunctionCallNode;
@@ -208,11 +209,15 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     ParseUnit unit = getParseUnit("def var xx as Progress.Lang.Object. message new Progress.Lang.Object().", session);
     unit.treeParser01();
 
-    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    var nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);
-    IExpression exp = nodes.get(0);
+    var exp = nodes.get(0);
+    assertTrue (exp instanceof NewTypeNode);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp.getDataType().getClassName(), "Progress.Lang.Object");
+    var methd = ((NewTypeNode) exp).getMethod().getO2();
+    assertNotNull(methd) ;
+    assertEquals(methd.getReturnType().getPrimitive(), PrimitiveDataType.VOID);
   }
 
   @Test
@@ -237,6 +242,43 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(nodes.size(), 1);
     IExpression exp = nodes.get(0);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.LOGICAL);
+  }
+
+  @Test
+  public void testNewObject04() {
+    var unit = getParseUnit("def var xx as Progress.IO.FileInputStream. message new Progress.IO.FileInputStream('filename.txt').", session);
+    unit.treeParser01();
+
+    var nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 1);
+    var exp = nodes.get(0);
+    assertTrue (exp instanceof NewTypeNode);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp.getDataType().getClassName(), "Progress.IO.FileInputStream");
+    var methd = ((NewTypeNode) exp).getMethod().getO2();
+    assertNotNull(methd) ;
+    assertEquals(methd.getReturnType().getPrimitive(), PrimitiveDataType.VOID);
+  }
+
+  @Test
+  public void testNewObject05() {
+    var code = """
+        using Progress.IO.FileInputStream.
+        def var xx as Progress.IO.FileInputStream.
+        message new FileInputStream('filename.txt').
+        """;
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+
+    var nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 1);
+    var exp = nodes.get(0);
+    assertTrue (exp instanceof NewTypeNode);
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp.getDataType().getClassName(), "Progress.IO.FileInputStream");
+    var methd = ((NewTypeNode) exp).getMethod().getO2();
+    assertNotNull(methd) ;
+    assertEquals(methd.getReturnType().getPrimitive(), PrimitiveDataType.VOID);
   }
 
   @Test
