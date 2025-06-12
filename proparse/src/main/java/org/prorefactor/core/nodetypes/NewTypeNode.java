@@ -57,6 +57,10 @@ public class NewTypeNode extends ExpressionNode {
   }
 
   public Pair<ITypeInfo, IMethodElement> getMethod() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
     return method;
   }
 
