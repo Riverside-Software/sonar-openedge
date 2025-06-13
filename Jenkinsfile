@@ -8,7 +8,7 @@ pipeline {
   }
 
   stages {
-    stage ('Build OpenEdge plugin') {
+    stage ('👷 Build OpenEdge plugin') {
       environment {
         MAVEN_GPG_PASSPHRASE=credentials('GPG_KEY')
       }
@@ -35,7 +35,7 @@ pipeline {
       }
     }
 
-    stage ('SonarQube analysis') {
+    stage ('🔍 SonarQube analysis') {
       steps {
         script {
           withEnv(["MVN_HOME=${tool name: 'Maven 3', type: 'maven'}", "JAVA_HOME=${tool name: 'JDK17', type: 'jdk'}"]) {
