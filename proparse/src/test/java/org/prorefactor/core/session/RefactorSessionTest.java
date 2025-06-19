@@ -53,7 +53,7 @@ public class RefactorSessionTest {
   public void testProgressLangObject() {
     ITypeInfo info = session.getTypeInfo("Progress.Lang.Object");
     assertNotNull(info);
-    assertEquals(info.getMethods().size(), 4);
+    assertEquals(info.getMethods().size(), 5);
     assertEquals(info.getProperties().size(), 2);
     assertNull(info.getParentTypeName());
     assertEquals(info.getInterfaces().size(), 0);
@@ -84,7 +84,7 @@ public class RefactorSessionTest {
   public void testProgressJsonObjectModelJsonArray() {
     ITypeInfo info = session.getTypeInfo("Progress.Json.ObjectModel.JsonArray");
     assertNotNull(info);
-    assertEquals(info.getMethods().size(), 140);
+    assertEquals(info.getMethods().size(), 159);
     assertEquals(info.getProperties().size(), 1);
     assertEquals(info.getParentTypeName(), "Progress.Json.ObjectModel.JsonConstruct");
     assertEquals(info.getInterfaces().size(), 0);

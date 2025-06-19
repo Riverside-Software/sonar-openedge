@@ -640,7 +640,7 @@ memberName:
 
 expressionTerm2:
     LEFTPAREN expression RIGHTPAREN # exprt2ParenExpr
-  | NEW typeName parameterList # exprt2New
+  | NEW newTypeName parameterList # exprt2New
   | // Methods take precedence over built-in functions. The compiler does not seem to try recognize by function/method signature.
     { expressionTerm2SemanticPredicate() }? fname=identifier parameterListNoRoot  # exprt2ParenCall
   | // Have to predicate all of builtinfunc, because it can be ambiguous with method call.
@@ -789,6 +789,10 @@ filenamePart:
     // NAMEDOT has no space after it, and '.' is OK in the middle of a filename.
     // "run abc(def.p." and "run abc{def.p." do not compile.
     ~( PERIOD | LEXCOLON | RIGHTANGLE | LEFTANGLE | LEFTPAREN | LEFTCURLY )
+  ;
+
+newTypeName:
+    typeName
   ;
 
 typeName:

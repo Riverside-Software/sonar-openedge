@@ -14,24 +14,54 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.Pair;
 import org.prorefactor.core.ProToken;
 
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IMethodElement;
+import eu.rssw.pct.elements.ITypeInfo;
 
 /**
  * Expression node: <code>NEW typeName(parameters)</code>
  */
 public class NewTypeNode extends ExpressionNode {
+  private Pair<ITypeInfo, IMethodElement> method = null;
+  private DataType returnDataType = DataType.NOT_COMPUTED;
+  private boolean computed = false;
 
   public NewTypeNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
     super(t, parent, num, hasChildren);
   }
 
+  private void compute() {
+    ProgramRootNode root = getTopLevelParent();
+    if (root == null)
+      return;
+
+    var typeNameNode = (TypeNameNode) getFirstChild().getNextSibling();
+    var typeInfo = root.getEnvironment().getTypeInfo(typeNameNode.getQualName());
+    method = typeInfo == null ? null : getObjectConstructor(getTopLevelParent().getTypeInfoProvider(),
+        findDirectChild(ABLNodeType.PARAMETER_LIST), typeInfo);
+    returnDataType = new DataType(typeNameNode.getQualName());
+  }
+
   @Override
-  public DataType getDataType() {
-    TypeNameNode typeNameNode = (TypeNameNode) getFirstChild().getNextSibling();
-    return new DataType(typeNameNode.getQualName());
+  public synchronized DataType getDataType() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return returnDataType;
+  }
+
+  public Pair<ITypeInfo, IMethodElement> getMethod() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return method;
   }
 
 }

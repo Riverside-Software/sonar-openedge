@@ -31,10 +31,10 @@ public interface IMethodElement extends IAccessibleElement {
   boolean isOverloaded();
   boolean isFinal();
 
-  default String getSignature() {
-    StringBuilder retVal = new StringBuilder(getName()).append('(');
-    boolean first = true;
-    for (IParameter p : getParameters()) {
+  default String getSignatureWithoutModifiers() {
+    var retVal = new StringBuilder(getName()).append('(');
+    var first = true;
+    for (var p : getParameters()) {
       if (first) {
         first = false;
       } else {
@@ -43,6 +43,12 @@ public interface IMethodElement extends IAccessibleElement {
       retVal.append(p.getSignature());
     }
     retVal.append(')');
+
+    return retVal.toString();
+  }
+
+  default String getSignature() {
+    var retVal = new StringBuilder(getSignatureWithoutModifiers());
     if (isAbstract())
       retVal.append('A');
     if (isStatic())
@@ -57,6 +63,7 @@ public interface IMethodElement extends IAccessibleElement {
       retVal.append('V');
     else if (isPackagePrivate())
       retVal.append("PV");
+
     return retVal.toString();
   }
 

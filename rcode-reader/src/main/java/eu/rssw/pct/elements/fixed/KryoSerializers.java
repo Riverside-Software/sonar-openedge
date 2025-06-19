@@ -49,6 +49,7 @@ public class KryoSerializers {
     kryo.register(PrimitiveDataType.class, 26);
     kryo.register(AccessType.class, 27);
     kryo.register(EnumGetValueMethodElement.class, new EnumGetValueMethodElementSerializer(), 28);
+    kryo.register(ConstructorElement.class, new ConstructorElementSerializer(), 29);
   }
 
   public static class EnumGetValueMethodElementSerializer extends Serializer<EnumGetValueMethodElement> {
@@ -151,6 +152,30 @@ public class KryoSerializers {
     @Override
     public VariableElement read(Kryo kryo, Input input, Class<? extends VariableElement> type) {
       return new VariableElement(input.readString(), (DataType) kryo.readClassAndObject(input));
+    }
+
+  }
+
+  public static class ConstructorElementSerializer extends Serializer<ConstructorElement> {
+
+    @Override
+    public void write(Kryo kryo, Output output, ConstructorElement object) {
+      output.writeString(object.getName());
+      output.writeInt(object.getParameters().length, true);
+      for (IParameter prm : object.getParameters()) {
+        kryo.writeClassAndObject(output, prm);
+      }
+    }
+
+    @Override
+    public ConstructorElement read(Kryo kryo, Input input, Class<? extends ConstructorElement> type) {
+      var name = input.readString();
+      var len = input.readInt(true);
+      var prms = new IParameter[len];
+      for (int zz = 0; zz < len; zz++) {
+        prms[zz] = (IParameter) kryo.readClassAndObject(input);
+      }
+      return new ConstructorElement(name, prms);
     }
 
   }
