@@ -534,8 +534,23 @@ public class OpenEdgeSettings {
 
   public File getSonarlintXrefFile(InputFile file) {
     String s = getRelativePathToSourceDirs(file);
-    if (!Strings.isNullOrEmpty(s) && !s.endsWith(".") && (s.indexOf('.') > -1))
-      return new File(getSonarLintXrefDir(), s.subSequence(0, s.lastIndexOf('.')) + ".xref.xml");
+    if (Strings.isNullOrEmpty(s) || s.endsWith(".") || (s.indexOf('.') == -1))
+      return null;
+    if (config.get(Constants.SLINT_XREF).isPresent()) {
+      // Eclipse configuration, read XML XREF from this directory
+      var f1 = new File(getSonarLintXrefDir(), s.subSequence(0, s.lastIndexOf('.')) + ".xref.xml");
+      LOG.debug("XREF DevStudio: {}", f1);
+      return f1;
+    } else if (config.get(Constants.SLINT_XREF_DIRS).isPresent()) {
+      // VS Code configuration, read plain text XREF from this list of directories
+      for (String dir : config.get(Constants.SLINT_XREF_DIRS).get().split(",")) {
+        var f1 = new File(resolvePath(dir), s + ".xref");
+        LOG.debug("XREF VS Code: {} {}", f1, f1.exists());
+        if (f1.exists())
+          return f1;
+      }
+    }
+
     return null;
   }
 

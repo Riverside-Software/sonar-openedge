@@ -43,6 +43,7 @@ public class Constants {
   public static final String BINARIES = "sonar.oe.binaries";
   public static final String DOTPCT = "sonar.oe.dotpct";
   public static final String SLINT_XREF = "sonar.oe.lint.xref";
+  public static final String SLINT_XREF_DIRS = "sonar.oe.lint.xrefdirs";
   public static final String DLC = "sonar.oe.dlc";
   public static final String PROPATH = "sonar.oe.propath";
   public static final String PROPATH_DLC = "sonar.oe.propath.dlc";
