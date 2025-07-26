@@ -135,8 +135,6 @@ public class AnnotationBasedRulesDefinition {
     var hotspotAnnotation = AnnotationUtils.getAnnotation(ruleClass, SecurityHotspot.class);
     if (hotspotAnnotation != null) {
       rule.setType(RuleType.SECURITY_HOTSPOT);
-      setOwasp(rule, OwaspTop10Version.Y2017, hotspotAnnotation.owasp());
-      setCwe(rule, hotspotAnnotation.cwe());
     }
     var cweAnnotation = AnnotationUtils.getAnnotation(ruleClass, CWE.class);
     if (cweAnnotation != null)

@@ -20,6 +20,7 @@
 package org.sonar.plugins.openedge.foundation;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -185,9 +186,10 @@ public class OpenEdgeRulesDefinitionTest {
     assertEquals(rule3.name(), "Number 3");
     assertEquals(rule3.type(), RuleType.SECURITY_HOTSPOT);
     assertTrue(rule3.securityStandards().contains("cwe:3"));
-    assertTrue(rule3.securityStandards().contains("cwe:4"));
     assertTrue(rule3.securityStandards().contains("owaspTop10:a1"));
-    assertTrue(rule3.securityStandards().contains("owaspTop10:a2"));
+    // CWE and OWASP attributes of @SecurityHotspot are not parsed anymore
+    assertFalse(rule3.securityStandards().contains("cwe:4"));
+    assertFalse(rule3.securityStandards().contains("owaspTop10:a2"));
 
     var rule4 = context.repository("repo1").rule("CustomRule04");
     assertEquals(rule4.name(), "Number 4");
