@@ -20,6 +20,7 @@ import java.io.Writer;
 import java.util.EnumSet;
 import java.util.Set;
 
+import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,12 +82,27 @@ public class JsonNodeLister {
 
   private void printAttributes(JPNode node) throws IOException {
     ofile.write("\"name\": \"" + node.getNodeType());
-    if (node.getNodeType() == ABLNodeType.ID) {
+    if ((node.getNodeType() == ABLNodeType.ID) || (node instanceof RecordNameNode)) {
       ofile.write(" [");
       ofile.write(node.getText().replace('\'', ' ').replace('"', ' '));
       ofile.write("]");
     }
-    ofile.write("\", \"head\": " + (node.isStateHead() ? "true" : "false") + ", \"line\": " + node.getLine() + ", \"column\": " + node.getColumn() + ", \"file\": " + node.getFileIndex());
+    ofile.write("\", ");
+    ofile.write("\"head\": " + (node.isStatement() ? "true" : "false") + ", \"line\": " + node.getLine() + ", \"column\": " + node.getColumn() + ", \"file\": " + node.getFileIndex());
+    if (node instanceof RecordNameNode rnn) {
+      ofile.write(", \"table\": \"" + node.getText().replace('\'', ' ').replace('"', ' ') + "\", \"indexes\": [");
+      var firstIdx = true;
+      for (var idx : rnn.getSearchIndexes()) {
+        if (!firstIdx)
+          ofile.write(",");
+        ofile.write("{ \"name\": \"" + idx.getO1() + "\", \"wholeIndex\": " + idx.getO2() + "}");
+        firstIdx = false;
+      }
+      ofile.write("]");
+    }
+    if (node.isIExpression()) {
+      ofile.write(", \"expression\": true");
+    }
   }
 
 }

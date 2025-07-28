@@ -56,6 +56,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
+    <sonar.cpd.exclusions>**/SelectorUtils.java</sonar.cpd.exclusions>
+    <sonar.coverage.exclusions>**/SelectorUtils.java</sonar.coverage.exclusions>
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../coverage-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 

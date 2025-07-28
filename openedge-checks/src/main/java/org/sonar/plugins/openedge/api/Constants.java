@@ -39,6 +39,7 @@ public class Constants {
   public static final String SKIP_COGNITIVE_COMPLEXITY = "sonar.oe.skipCognitiveComplexity";
   public static final String USE_SIMPLE_CPD = "sonar.oe.simplecpd";
   public static final String PROPARSE_DEBUG = "sonar.oe.proparse.debug";
+  public static final String PROPARSE_DEBUG_INCLUDES = "sonar.oe.proparse.debug.includes";
   public static final String PROPARSE_ERROR_STACKTRACE = "sonar.oe.proparse.error.stacktrace";
   public static final String BINARIES = "sonar.oe.binaries";
   public static final String DOTPCT = "sonar.oe.dotpct";

@@ -688,6 +688,10 @@ public class OpenEdgeSettings {
     return config.getBoolean(Constants.PROPARSE_DEBUG).orElse(false);
   }
 
+  public String getProparseDebugIncludes() {
+    return config.get(Constants.PROPARSE_DEBUG_INCLUDES).orElse("");
+  }
+
   public boolean useANTLR4() {
     return config.getBoolean(Constants.ANTLR4_TEST).orElse(false);
   }

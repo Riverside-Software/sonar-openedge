@@ -32,8 +32,11 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 
 import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
 import org.sonar.api.batch.fs.InputFile.Type;
@@ -60,7 +63,6 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.annotations.Test;
 
-import com.google.common.io.Files;
 
 public class OpenEdgeProparseSensorTest {
 
@@ -293,7 +295,7 @@ public class OpenEdgeProparseSensorTest {
       oeSettings.getProparseSessions();
       fail("RuntimeException should have been thrown");
     } catch (RuntimeException caught) {
-
+      // Nothing
     }
   }
 
@@ -323,7 +325,7 @@ public class OpenEdgeProparseSensorTest {
       .setLanguage(Constants.LANGUAGE_KEY) //
       .setType(Type.MAIN) //
       .setCharset(Charset.defaultCharset()) //
-      .setContents(Files.asCharSource(new File(BASEDIR, "src/procedures/test5.p"), Charset.defaultCharset()).read()) //
+      .setContents(Files.readString(Path.of(BASEDIR,  "src/procedures/test5.p")))
       .build());
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
@@ -348,7 +350,7 @@ public class OpenEdgeProparseSensorTest {
         .setLanguage(Constants.LANGUAGE_KEY) //
         .setType(Type.MAIN) //
         .setCharset(Charset.defaultCharset()) //
-        .setContents(Files.asCharSource(new File(BASEDIR, "src/procedures/test5.p"), Charset.defaultCharset()).read()) //
+        .setContents(Files.readString(Path.of(BASEDIR,  "src/procedures/test5.p")))
         .build());
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
@@ -396,21 +398,74 @@ public class OpenEdgeProparseSensorTest {
 
   @Test
   public void testNoProparseError() throws Exception {
-    MapSettings settings = new MapSettings();
+    var settings = new MapSettings();
     settings.setProperty("sonar.oe.proparse.recover", true);
 
-    SensorContextTester context = TestProjectSensorContext.createContext();
-    context.setSettings(settings);
-
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME);
-
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
-    OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
+    var context = TestProjectSensorContext.createContext(settings);
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    var components = new OpenEdgeComponents(context.config());
+    var sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
     assertEquals(context.allAnalysisErrors().size(), 0);
     assertEquals(context.allIssues().size(), 0);
   }
 
+  @Test
+  public void testProparseDebug01() throws Exception {
+    var settings = new MapSettings();
+    settings.setProperty(Constants.PROPARSE_DEBUG, true);
+
+    var context = TestProjectSensorContext.createContext(settings);
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    var components = new OpenEdgeComponents(context.config());
+    var sensor = new OpenEdgeProparseSensor(oeSettings, components);
+
+    var dotProparseDir = context.fileSystem().baseDirPath().resolve(".proparse");
+    deleteDirectoryRecursive(dotProparseDir);
+    sensor.execute(context);
+    assertTrue(Files.exists(dotProparseDir));
+    assertTrue(Files.exists(dotProparseDir.resolve("index.json")));
+    assertTrue(Files.exists(dotProparseDir.resolve("index.html")));
+    assertFalse(Files.exists(dotProparseDir.resolve("files")));
+  }
+
+  @Test
+  public void testProparseDebug02() throws Exception {
+    var settings = new MapSettings();
+    settings.setProperty(Constants.PROPARSE_DEBUG, true);
+    settings.setProperty(Constants.PROPARSE_DEBUG_INCLUDES, "src/**/test1.p,src/procedures/test3.p");
+
+    var context = TestProjectSensorContext.createContext(settings);
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    var components = new OpenEdgeComponents(context.config());
+    var sensor = new OpenEdgeProparseSensor(oeSettings, components);
+
+    var dotProparseDir = context.fileSystem().baseDirPath().resolve(".proparse");
+    deleteDirectoryRecursive(dotProparseDir);
+    sensor.execute(context);
+    assertTrue(Files.exists(dotProparseDir));
+    assertTrue(Files.exists(dotProparseDir.resolve("index.json")));
+    assertTrue(Files.exists(dotProparseDir.resolve("index.html")));
+    assertTrue(Files.exists(dotProparseDir.resolve("files")));
+    assertTrue(Files.exists(dotProparseDir.resolve("files").resolve("src_procedures_test1_p.json")));
+    assertFalse(Files.exists(dotProparseDir.resolve("files").resolve("src_procedures_test2_p.json")));
+    assertTrue(Files.exists(dotProparseDir.resolve("files").resolve("src_procedures_test3_p.json")));
+    assertFalse(Files.exists(dotProparseDir.resolve("files").resolve("src_classes_rssw_testclass_cls.json")));
+  }
+
+  private void deleteDirectoryRecursive(Path pathToBeDeleted) throws IOException {
+    if (!Files.exists(pathToBeDeleted))
+      return;
+    try (var paths = Files.walk(pathToBeDeleted)) {
+      paths.sorted(Comparator.reverseOrder()).forEach(it -> {
+        try {
+          Files.delete(it);
+        } catch (IOException uncaught) {
+          // Nothing
+        }
+      });
+    }
+    assertFalse(Files.exists(pathToBeDeleted), "Directory still exists");
+  }
 }
