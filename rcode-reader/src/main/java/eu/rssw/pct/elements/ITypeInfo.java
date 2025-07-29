@@ -104,7 +104,7 @@ public interface ITypeInfo {
    * Return method or constructor with the right name (for methods) and exactly the same parameters
    */
   default Pair<ITypeInfo, IMethodElement> getExactMatch(Function<String, ITypeInfo> provider, String method,
-      boolean constructor, DataType... parameters) {
+      boolean constructor, DataType[] parameters) {
     for (var elem : getMethods()) {
       var c1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length);
       var c2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
@@ -131,7 +131,7 @@ public interface ITypeInfo {
    * Return constructor with exactly the same parameters
    */
   default Pair<ITypeInfo, IMethodElement> getExactMatchConstructor(Function<String, ITypeInfo> provider, 
-      DataType... parameters) {
+      DataType[] parameters) {
     return getExactMatch(provider, getTypeName(), true, parameters);
   }
 
@@ -139,12 +139,12 @@ public interface ITypeInfo {
    * Return method with exactly the same name and parameters
    */
   default Pair<ITypeInfo, IMethodElement> getExactMatchMethod(Function<String, ITypeInfo> provider, String method,
-      DataType... parameters) {
+      DataType[] parameters) {
     return getExactMatch(provider, method, false, parameters);
   }
 
   default Pair<ITypeInfo, IMethodElement> getCompatibleMatch(Function<String, ITypeInfo> provider, String method,
-      boolean constructor, DataType... parameters) {
+      boolean constructor, DataType[] parameters) {
     for (var elem : getMethods()) {
       var c1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length);
       var c2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
@@ -171,7 +171,7 @@ public interface ITypeInfo {
    * Return method with the same name and compatible parameters (CHAR / LONGCHAR for example)
    */
   default Pair<ITypeInfo, IMethodElement> getCompatibleMatchMethod(Function<String, ITypeInfo> provider, String method,
-      DataType... parameters) {
+      DataType[] parameters) {
     return getCompatibleMatch(provider, method, false, parameters);
   }
 
@@ -179,19 +179,19 @@ public interface ITypeInfo {
    * Return method with the same name and compatible parameters (CHAR / LONGCHAR for example)
    */
   default Pair<ITypeInfo, IMethodElement> getCompatibleMatchConstructor(Function<String, ITypeInfo> provider, 
-      DataType... parameters) {
+      DataType[] parameters) {
     return getCompatibleMatch(provider, getTypeName(), true, parameters);
   }
 
   default Pair<ITypeInfo, IMethodElement> getMethod(Function<String, ITypeInfo> provider, String method,
-      DataType... parameters) {
+      DataType[] parameters) {
     var exactMatch = getExactMatchMethod(provider, method, parameters);
     if (exactMatch != null)
       return exactMatch;
     return getCompatibleMatchMethod(provider, method, parameters);
   }
 
-  default Pair<ITypeInfo, IMethodElement> getConstructor(Function<String, ITypeInfo> provider, DataType... parameters) {
+  default Pair<ITypeInfo, IMethodElement> getConstructor(Function<String, ITypeInfo> provider, DataType[] parameters) {
     var exactMatch = getExactMatchConstructor(provider, parameters);
     if (exactMatch != null)
       return exactMatch;

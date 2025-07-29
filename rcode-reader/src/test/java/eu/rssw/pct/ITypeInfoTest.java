@@ -49,33 +49,35 @@ public class ITypeInfoTest {
   public void test01() {
     var info = TYPE_INFO_PROVIDER.apply("Progress.BPM.UserSession");
     assertNotNull(info);
-    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "GetProcessTemplateNames"));
-    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "GetProcessTemplateNames", DataType.INT64));
-    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "GetDataSlotTemplates", DataType.CHARACTER));
-    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "StartProcess", DataType.CHARACTER,
-        new DataType("Progress.BPM.DataSlotTemplate")));
+    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "GetProcessTemplateNames", new DataType[] {}));
+    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "GetProcessTemplateNames", new DataType[] {DataType.INT64}));
+    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "GetDataSlotTemplates", new DataType[] {DataType.CHARACTER}));
+    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "StartProcess",
+        new DataType[] {DataType.CHARACTER, new DataType("Progress.BPM.DataSlotTemplate")}));
   }
 
   @Test
   public void test02() {
     var info = TYPE_INFO_PROVIDER.apply("Progress.Json.ObjectModel.JsonArray");
     assertNotNull(info);
-    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "Add"));
-    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", DataType.CHARACTER));
-    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", DataType.LONGCHAR));
-    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType("Progress.Json.ObjectModel.JsonArray")));
-    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType("Progress.Lang.Object")));
+    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {}));
+    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {DataType.CHARACTER}));
+    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {DataType.LONGCHAR}));
+    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add",
+        new DataType[] {new DataType("Progress.Json.ObjectModel.JsonArray")}));
+    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {new DataType("Progress.Lang.Object")}));
 
-    var val1 = info.getMethod(TYPE_INFO_PROVIDER, "GetDatetime", DataType.INTEGER, DataType.INTEGER);
+    var val1 = info.getMethod(TYPE_INFO_PROVIDER, "GetDatetime", new DataType[] {DataType.INTEGER, DataType.INTEGER});
     assertNotNull(val1);
     assertEquals(val1.getO1().getTypeName(), "Progress.Json.ObjectModel.JsonArray");
     assertEquals(val1.getO2().getReturnType(), DataType.DATETIME);
 
-    var methd01 = info.getMethod(TYPE_INFO_PROVIDER, "GetCharacter", DataType.INTEGER);
+    var methd01 = info.getMethod(TYPE_INFO_PROVIDER, "GetCharacter", new DataType[] {DataType.INTEGER});
     assertNotNull(methd01);
     assertEquals(methd01.getO2().getExtent(), 0);
 
-    var methd02 = info.getMethod(TYPE_INFO_PROVIDER, "GetCharacter", DataType.INTEGER, DataType.INTEGER);
+    var methd02 = info.getMethod(TYPE_INFO_PROVIDER, "GetCharacter",
+        new DataType[] {DataType.INTEGER, DataType.INTEGER});
     assertNotNull(methd02);
     assertEquals(methd02.getO2().getExtent(), -1);
   }
@@ -86,8 +88,8 @@ public class ITypeInfoTest {
     ITypeInfo info02 = TYPE_INFO_PROVIDER.apply("Progress.Json.ObjectModel.JsonArray");
     assertNotNull(info01);
     assertNotNull(info02);
-    assertNotNull(info01.getMethod(TYPE_INFO_PROVIDER, "ToString"));
-    assertNotNull(info02.getMethod(TYPE_INFO_PROVIDER, "ToString"));
+    assertNotNull(info01.getMethod(TYPE_INFO_PROVIDER, "ToString", new DataType[] {}));
+    assertNotNull(info02.getMethod(TYPE_INFO_PROVIDER, "ToString", new DataType[] {}));
   }
 
   @Test
@@ -105,12 +107,12 @@ public class ITypeInfoTest {
     map.put(typeInfo02.getTypeName(), typeInfo02);
 
     // Expected is method from parent class
-    Pair<ITypeInfo, IMethodElement> val1 = typeInfo02.getMethod(map::get, "method1", DataType.INTEGER);
+    Pair<ITypeInfo, IMethodElement> val1 = typeInfo02.getMethod(map::get, "method1", new DataType[] {DataType.INTEGER});
     assertNotNull(val1);
     assertEquals(val1.getO1().getTypeName(), "rssw.ParentClass");
     assertEquals(val1.getO2().getReturnType(), DataType.VOID);
     // Expected is method from child class
-    Pair<ITypeInfo, IMethodElement> val2 = typeInfo02.getMethod(map::get, "method1", DataType.INT64);
+    Pair<ITypeInfo, IMethodElement> val2 = typeInfo02.getMethod(map::get, "method1", new DataType[] {DataType.INT64});
     assertNotNull(val2);
     assertEquals(val2.getO1().getTypeName(), "rssw.ChildClass");
     assertEquals(val2.getO2().getReturnType(), DataType.INTEGER);
