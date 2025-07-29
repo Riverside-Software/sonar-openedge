@@ -841,9 +841,54 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(exp.getDataType().getClassName(), "rssw.test.Class07");
 
     assertTrue(nodes.get(1) instanceof MethodCallNode);
-    MethodCallNode exp2 = (MethodCallNode) nodes.get(0);
+    MethodCallNode exp2 = (MethodCallNode) nodes.get(1);
     assertNull(exp2.getMethodElement()); // Currently not available
     assertEquals(exp2.getDataType().getClassName(), "rssw.test.Class07");
+  }
+
+  @BeforeMethod(dependsOnMethods = "setUp")
+  public void beforeObjectMethod06() {
+    var typeInfo = new TypeInfo("rssw.test.Class10", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID, //
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT_OUTPUT, DataType.CHARACTER)));
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID, //
+        new Parameter(1, "prm1", 0, ParameterMode.OUTPUT, DataType.CHARACTER)));
+    session.injectTypeInfo(typeInfo);
+  }
+
+  @Test
+  public void testObjectMethod06() {
+    var unit = getParseUnit("""
+        var character xx.
+        var rssw.test.Class10 obj.
+        obj:method01(input xx).
+        obj:method01(input-output xx).
+        obj:method01(output xx).
+        obj:method01(buffer bTable).
+        """, session);
+    unit.treeParser01();
+
+    var nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 4);
+
+    assertTrue(nodes.get(0) instanceof MethodCallNode);
+    var exp = (MethodCallNode) nodes.get(0);
+    assertNotNull(exp.getMethodElement());
+    assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.VOID);
+
+    assertTrue(nodes.get(1) instanceof MethodCallNode);
+    var exp2 = (MethodCallNode) nodes.get(1);
+    assertNotNull(exp2.getMethodElement());
+    assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.VOID);
+
+    assertTrue(nodes.get(2) instanceof MethodCallNode);
+    var exp3 = (MethodCallNode) nodes.get(2);
+    assertNotNull(exp3.getMethodElement());
+    assertEquals(exp3.getDataType().getPrimitive(), PrimitiveDataType.VOID);
+
+    assertTrue(nodes.get(3) instanceof MethodCallNode);
+    var exp4 = (MethodCallNode) nodes.get(3);
+    assertNull(exp4.getMethodElement());
   }
 
   @Test

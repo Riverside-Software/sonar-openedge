@@ -14,6 +14,7 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import java.util.List;
 import java.util.function.Function;
 
 import org.prorefactor.core.ABLNodeType;
@@ -27,6 +28,7 @@ import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.ParameterMode;
 
 public abstract class ExpressionNode extends JPNode implements IExpression {
 
@@ -741,12 +743,24 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
     }
   }
 
-  static Pair<ITypeInfo, IMethodElement> getObjectConstructor(Function<String, ITypeInfo> provider, JPNode node,
-      ITypeInfo info) {
-    // Create array of dataTypes
-    var paramItems = node.getDirectChildren(ABLNodeType.PARAMETER_ITEM);
+  private static ParameterMode[] readParameterModes(List<JPNode> paramItems) {
+    var modes = new ParameterMode[paramItems.size()];
+    var zz = 0;
+    for (var ch : paramItems) {
+      var pm = ParameterMode.INPUT;
+      // First node is always ParameterMode (if it's not already the parameter itself)
+      if (!ch.getFirstChild().isIExpression()) {
+        pm = parameterModeFromNodeType(ch.getFirstChild().getNodeType());
+      }
+      modes[zz++] = pm;
+    }
+
+    return modes;
+  }
+
+  private static DataType[] readDataTypes(List<JPNode> paramItems) {
     var params = new DataType[paramItems.size()];
-    int zz = 0;
+    var zz = 0;
     for (var ch : paramItems) {
       var dt = DataType.UNKNOWN;
       for (var ch2 : ch.getDirectChildren()) {
@@ -757,26 +771,38 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       params[zz++] = dt;
     }
 
-    return info == null ? null : info.getConstructor(provider, params);
+    return params;
+  }
+
+  static Pair<ITypeInfo, IMethodElement> getObjectConstructor(Function<String, ITypeInfo> provider, JPNode node,
+      ITypeInfo info) {
+    var paramItems = node.getDirectChildren(ABLNodeType.PARAMETER_ITEM);
+    var params = readDataTypes(paramItems);
+    var modes = readParameterModes(paramItems);
+
+    return info == null ? null : info.getConstructor(provider, params, modes);
   }
 
   static Pair<ITypeInfo, IMethodElement> getObjectMethod(Function<String, ITypeInfo> provider, JPNode node,
       ITypeInfo info, String methodName) {
-    // Create array of dataTypes
     var paramItems = node.getDirectChildren(ABLNodeType.PARAMETER_ITEM);
-    var params = new DataType[paramItems.size()];
-    int zz = 0;
-    for (var ch : paramItems) {
-      var dt = DataType.UNKNOWN;
-      for (var ch2 : ch.getDirectChildren()) {
-        if ((dt == DataType.UNKNOWN) && ch2.isIExpression()) {
-          dt = ch2.asIExpression().getDataType();
-        }
-      }
-      params[zz++] = dt;
-    }
+    var params = readDataTypes(paramItems);
+    var modes = readParameterModes(paramItems);
 
-    return info == null ? null : info.getMethod(provider, methodName, params);
+    return info == null ? null : info.getMethod(provider, methodName, params, modes);
+  }
+
+  static ParameterMode parameterModeFromNodeType(ABLNodeType nodeType) {
+    switch (nodeType) {
+      case OUTPUT:
+        return ParameterMode.OUTPUT;
+      case INPUTOUTPUT:
+        return ParameterMode.INPUT_OUTPUT;
+      case BUFFER:
+        return ParameterMode.BUFFER;
+      default:
+        return ParameterMode.INPUT;
+    }
   }
 
   static DataType getObjectAttributeDataType(IProparseEnvironment session, ITypeInfo info, String propName,

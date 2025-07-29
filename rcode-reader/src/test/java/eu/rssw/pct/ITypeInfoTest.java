@@ -20,6 +20,7 @@
 package eu.rssw.pct;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -49,35 +50,46 @@ public class ITypeInfoTest {
   public void test01() {
     var info = TYPE_INFO_PROVIDER.apply("Progress.BPM.UserSession");
     assertNotNull(info);
-    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "GetProcessTemplateNames", new DataType[] {}));
-    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "GetProcessTemplateNames", new DataType[] {DataType.INT64}));
-    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "GetDataSlotTemplates", new DataType[] {DataType.CHARACTER}));
+    assertNotNull(
+        info.getMethod(TYPE_INFO_PROVIDER, "GetProcessTemplateNames", new DataType[] {}, new ParameterMode[] {}));
+    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "GetProcessTemplateNames", new DataType[] {DataType.INT64},
+        new ParameterMode[] {ParameterMode.INPUT}));
+    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "GetDataSlotTemplates", new DataType[] {DataType.CHARACTER},
+        new ParameterMode[] {ParameterMode.INPUT}));
     assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "StartProcess",
-        new DataType[] {DataType.CHARACTER, new DataType("Progress.BPM.DataSlotTemplate")}));
+        new DataType[] {DataType.CHARACTER, new DataType("Progress.BPM.DataSlotTemplate")},
+        new ParameterMode[] {ParameterMode.INPUT, ParameterMode.INPUT}));
   }
 
   @Test
   public void test02() {
     var info = TYPE_INFO_PROVIDER.apply("Progress.Json.ObjectModel.JsonArray");
     assertNotNull(info);
-    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {}));
-    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {DataType.CHARACTER}));
-    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {DataType.LONGCHAR}));
-    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add",
-        new DataType[] {new DataType("Progress.Json.ObjectModel.JsonArray")}));
-    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {new DataType("Progress.Lang.Object")}));
+    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {}, new ParameterMode[] {}));
+    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {DataType.CHARACTER},
+        new ParameterMode[] {ParameterMode.INPUT}));
+    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {DataType.LONGCHAR},
+        new ParameterMode[] {ParameterMode.INPUT}));
+    assertNotNull(
+        info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {new DataType("Progress.Json.ObjectModel.JsonArray")},
+            new ParameterMode[] {ParameterMode.INPUT}));
+    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {new DataType("Progress.Lang.Object")},
+        new ParameterMode[] {ParameterMode.INPUT}));
 
-    var val1 = info.getMethod(TYPE_INFO_PROVIDER, "GetDatetime", new DataType[] {DataType.INTEGER, DataType.INTEGER});
+    var val1 = info.getMethod(TYPE_INFO_PROVIDER, "GetDatetime", new DataType[] {DataType.INTEGER, DataType.INTEGER},
+        new ParameterMode[] {ParameterMode.INPUT, ParameterMode.INPUT});
     assertNotNull(val1);
     assertEquals(val1.getO1().getTypeName(), "Progress.Json.ObjectModel.JsonArray");
     assertEquals(val1.getO2().getReturnType(), DataType.DATETIME);
 
-    var methd01 = info.getMethod(TYPE_INFO_PROVIDER, "GetCharacter", new DataType[] {DataType.INTEGER});
+    var methd01 = info.getMethod(TYPE_INFO_PROVIDER, "GetCharacter", new DataType[] {DataType.INTEGER},
+        new ParameterMode[] {ParameterMode.INPUT});
     assertNotNull(methd01);
     assertEquals(methd01.getO2().getExtent(), 0);
 
     var methd02 = info.getMethod(TYPE_INFO_PROVIDER, "GetCharacter",
-        new DataType[] {DataType.INTEGER, DataType.INTEGER});
+        new DataType[] {DataType.INTEGER, DataType.INTEGER},
+        new ParameterMode[] {ParameterMode.INPUT, ParameterMode.INPUT});
     assertNotNull(methd02);
     assertEquals(methd02.getO2().getExtent(), -1);
   }
@@ -88,8 +100,8 @@ public class ITypeInfoTest {
     ITypeInfo info02 = TYPE_INFO_PROVIDER.apply("Progress.Json.ObjectModel.JsonArray");
     assertNotNull(info01);
     assertNotNull(info02);
-    assertNotNull(info01.getMethod(TYPE_INFO_PROVIDER, "ToString", new DataType[] {}));
-    assertNotNull(info02.getMethod(TYPE_INFO_PROVIDER, "ToString", new DataType[] {}));
+    assertNotNull(info01.getMethod(TYPE_INFO_PROVIDER, "ToString", new DataType[] {}, new ParameterMode[] {}));
+    assertNotNull(info02.getMethod(TYPE_INFO_PROVIDER, "ToString", new DataType[] {}, new ParameterMode[] {}));
   }
 
   @Test
@@ -107,12 +119,14 @@ public class ITypeInfoTest {
     map.put(typeInfo02.getTypeName(), typeInfo02);
 
     // Expected is method from parent class
-    Pair<ITypeInfo, IMethodElement> val1 = typeInfo02.getMethod(map::get, "method1", new DataType[] {DataType.INTEGER});
+    Pair<ITypeInfo, IMethodElement> val1 = typeInfo02.getMethod(map::get, "method1", new DataType[] {DataType.INTEGER},
+        new ParameterMode[] {ParameterMode.INPUT});
     assertNotNull(val1);
     assertEquals(val1.getO1().getTypeName(), "rssw.ParentClass");
     assertEquals(val1.getO2().getReturnType(), DataType.VOID);
     // Expected is method from child class
-    Pair<ITypeInfo, IMethodElement> val2 = typeInfo02.getMethod(map::get, "method1", new DataType[] {DataType.INT64});
+    Pair<ITypeInfo, IMethodElement> val2 = typeInfo02.getMethod(map::get, "method1", new DataType[] {DataType.INT64},
+        new ParameterMode[] {ParameterMode.INPUT});
     assertNotNull(val2);
     assertEquals(val2.getO1().getTypeName(), "rssw.ChildClass");
     assertEquals(val2.getO2().getReturnType(), DataType.INTEGER);
@@ -212,6 +226,52 @@ public class ITypeInfoTest {
     assertEquals(c3.getO1().getTypeName(), "Progress.Lang.AppError");
     assertTrue(c3.getO2().isConstructor());
     assertEquals(c3.getO2().getParameters().length, 1);
-
   }
+
+  @Test
+  public void test07() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    BuiltinClasses.getBuiltinClasses().forEach(it -> map.put(it.getTypeName(), it));
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID, //
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT_OUTPUT, DataType.CHARACTER)));
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID, //
+        new Parameter(1, "prm1", 0, ParameterMode.OUTPUT, DataType.CHARACTER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    var val1 = typeInfo.getExactMatchMethod(map::get, "method01", new DataType[] {DataType.CHARACTER},
+        new ParameterMode[] {ParameterMode.INPUT});
+    assertNull(val1);
+
+    var val2 = typeInfo.getExactMatchMethod(map::get, "method01", new DataType[] {DataType.CHARACTER},
+        new ParameterMode[] {ParameterMode.INPUT_OUTPUT});
+    assertNotNull(val2);
+    assertEquals(val2.getO2().getParameters()[0].getMode(), ParameterMode.INPUT_OUTPUT);
+
+    var val3 = typeInfo.getExactMatchMethod(map::get, "method01", new DataType[] {DataType.CHARACTER},
+        new ParameterMode[] {ParameterMode.OUTPUT});
+    assertNotNull(val3);
+    assertEquals(val3.getO2().getParameters()[0].getMode(), ParameterMode.OUTPUT);
+
+    assertNotEquals(val2.getO2(), val3.getO2());
+
+    var val4 = typeInfo.getMethod(map::get, "method01", new DataType[] {DataType.CHARACTER},
+        new ParameterMode[] {ParameterMode.INPUT});
+    assertNotNull(val4);
+    // CompatibleMatch will return first method added in ITypeInfo, regardless of ParameterMode
+    // Not completely accurate, but good enough for now 
+    assertEquals(val4.getO2(), val2.getO2());
+
+    var val5 = typeInfo.getMethod(map::get, "method01", new DataType[] {DataType.CHARACTER},
+        new ParameterMode[] {ParameterMode.INPUT_OUTPUT});
+    assertEquals(val5.getO2(), val2.getO2());
+    assertEquals(val5.getO2().getParameters()[0].getMode(), ParameterMode.INPUT_OUTPUT);
+
+    var val6 = typeInfo.getMethod(map::get, "method01", new DataType[] {DataType.CHARACTER},
+        new ParameterMode[] {ParameterMode.OUTPUT});
+    assertEquals(val6.getO2(), val3.getO2());
+    assertEquals(val6.getO2().getParameters()[0].getMode(), ParameterMode.OUTPUT);
+  }
+
 }
