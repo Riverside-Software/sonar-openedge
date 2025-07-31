@@ -44,7 +44,6 @@ import org.sonar.api.server.rule.RulesDefinition.OwaspTop10;
 import org.sonar.api.server.rule.RulesDefinition.OwaspTop10Version;
 import org.sonar.api.server.rule.RulesDefinitionAnnotationLoader;
 import org.sonar.api.utils.AnnotationUtils;
-import org.sonar.api.utils.Version;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.sonar.plugins.openedge.api.model.CWE;
@@ -99,6 +98,7 @@ public class AnnotationBasedRulesDefinition {
 
   private final NewRepository repository;
   private final String basePath;
+  @SuppressWarnings("unused")
   private final SonarRuntime runtime;
 
   public AnnotationBasedRulesDefinition(NewRepository repository, String languageKey, SonarRuntime runtime) {
@@ -121,8 +121,7 @@ public class AnnotationBasedRulesDefinition {
       rule.setTemplate(AnnotationUtils.getAnnotation(ruleClass, RuleTemplate.class) != null);
       setupDocumentation(rule, ruleClass);
       setupSecurityModel(rule, ruleClass);
-      if (runtime.getApiVersion().isGreaterThanOrEqual(Version.create(10, 1)))
-        setupCleanCode(rule, ruleClass);
+      setupCleanCode(rule, ruleClass);
       try {
         setupSqaleModel(rule, ruleClass);
       } catch (RuntimeException e) {
