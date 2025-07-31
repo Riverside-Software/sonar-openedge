@@ -1494,6 +1494,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitDefTableIndexComponent(DefTableIndexComponentContext ctx) {
+    return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
   public Builder visitDeleteStatement(DeleteStatementContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }

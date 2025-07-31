@@ -1947,9 +1947,13 @@ defTableIndex:
     // Yes, the compiler really lets you use AS instead of IS here.
     // (AS|IS) is not optional the first time, but it is on subsequent uses.
     INDEX identifier ( ( AS | IS )? ( UNIQUE | PRIMARY | WORDINDEX ) )*
-    (identifier ( ASCENDING | ASC | DESCENDING | CASESENSITIVE )* )+
+    defTableIndexComponent+
   ;
-   
+
+defTableIndexComponent:
+    identifier ( ASCENDING | ASC | DESCENDING | CASESENSITIVE )*
+  ;
+
 defineWorkTableStatement:
     DEFINE defineShare? PRIVATE?
     // Token WORKTABLE can be "work-file" or abbreviated forms of "work-table"

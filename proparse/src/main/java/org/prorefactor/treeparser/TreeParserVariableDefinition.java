@@ -1264,9 +1264,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDefTableIndex(DefTableIndexContext ctx) {
-    defineIndexInitialize(ctx.identifier(0).getText(), ctx.UNIQUE() != null, ctx.PRIMARY() != null, false);
-    for (int zz = 1; zz < ctx.identifier().size(); zz++) {
-      defineIndexField(ctx.identifier(zz).getText());
+    defineIndexInitialize(ctx.identifier().getText(), ctx.UNIQUE() != null, ctx.PRIMARY() != null, false);
+    for (int zz = 1; zz < ctx.defTableIndexComponent().size(); zz++) {
+      defineIndexField(ctx.defTableIndexComponent(zz).identifier().getText());
     }
   }
 
