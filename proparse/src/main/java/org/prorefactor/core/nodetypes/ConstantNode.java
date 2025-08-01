@@ -31,10 +31,7 @@ public class ConstantNode extends ExpressionNode {
   @Override
   public DataType getDataType() {
     switch (getFirstChild().getNodeType()) {
-      case TRUE:
-      case FALSE:
-      case YES:
-      case NO:
+      case TRUE, FALSE, YES, NO:
         return DataType.LOGICAL;
       case UNKNOWNVALUE:
         return DataType.UNKNOWN;
