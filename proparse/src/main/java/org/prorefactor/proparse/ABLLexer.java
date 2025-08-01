@@ -111,6 +111,10 @@ public class ABLLexer implements TokenSource, IPreprocessor {
     }
   }
 
+  protected ABLLexer(IProparseEnvironment session, byte[] src, String fileName) {
+    this(session, session.getCharset(), src, fileName, true);
+  }
+
   /**
    * Test-only constructor, no filters added
    */

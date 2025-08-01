@@ -25,9 +25,8 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
@@ -40,9 +39,6 @@ import org.prorefactor.macrolevel.PreprocessorEventListener;
 import org.prorefactor.refactor.RefactorSession;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import com.google.common.io.ByteSource;
-import com.google.common.io.ByteStreams;
 
 public class ABLLexerTest {
   private RefactorSession session;
@@ -466,8 +462,9 @@ public class ABLLexerTest {
 
   @Test
   public void testAnalyzeSuspend() {
-    try (InputStream input = new FileInputStream(new File("src/test/resources/data/lexer/lexer05.p"))) {
-      ABLLexer lexer = new ABLLexer(session, input, "file.txt");
+    try {
+      ABLLexer lexer = new ABLLexer(session,
+          Files.readString(new File("src/test/resources/data/lexer/lexer05.p").toPath()), "file.txt");
       nextMessageToken(lexer, false, true);
       nextMessageToken(lexer, true, false);
       nextMessageToken(lexer, true, true);
@@ -775,7 +772,7 @@ public class ABLLexerTest {
   @Test(enabled = false)
   public void testQuotesInPrepro01() {
     String code = "&SCOPED-DEFINE EMPTY1\n&SCOPED-DEFINE EMPTY2\"\"\n\n&MESSAGE X{&EMPTY1}X{&EMPTY2}X\n";
-    ABLLexer lexer = new ABLLexer(session, code, true);
+    ABLLexer lexer = new ABLLexer(session, code.getBytes(), true);
     Token tok = lexer.nextToken();
     while (tok.getType() != Token.EOF) {
       tok = lexer.nextToken();
@@ -790,7 +787,7 @@ public class ABLLexerTest {
   @Test(enabled = false)
   public void testQuotesInPrepro02() {
     String code = "&SCOPED-DEFINE EMPTY1\n&SCOPED-DEFINE EMPTY2\"\"\n\n{ lexer/lexer24.i &P1 = \"{&EMPTY1}\" &P2 = \"{&EMPTY2}\" }\n";
-    ABLLexer lexer = new ABLLexer(session, code, false);
+    ABLLexer lexer = new ABLLexer(session, code.getBytes(), false);
     Token tok = lexer.nextToken();
     while (tok.getType() != Token.EOF) {
       tok = lexer.nextToken();
