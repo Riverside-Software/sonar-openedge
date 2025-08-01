@@ -274,4 +274,28 @@ public class ITypeInfoTest {
     assertEquals(val6.getO2().getParameters()[0].getMode(), ParameterMode.OUTPUT);
   }
 
+  @Test
+  public void testUnknownDataType() {
+    var info = TYPE_INFO_PROVIDER.apply("Progress.Json.ObjectModel.JsonArray");
+    assertNotNull(info);
+    assertNull(info.getMethod(TYPE_INFO_PROVIDER, "Add", new DataType[] {DataType.UNKNOWN}, new ParameterMode[] {ParameterMode.INPUT}));
+    assertNotNull(info.getMethod(TYPE_INFO_PROVIDER, "Read", new DataType[] {DataType.UNKNOWN}, new ParameterMode[] {ParameterMode.INPUT}));
+  }
+
+  @Test
+  public void testCompatibleMatch() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    BuiltinClasses.getBuiltinClasses().forEach(it -> map.put(it.getTypeName(), it));
+
+    var typeInfo2 = new TypeInfo("TestClass2", false, false, "Progress.Lang.Object", "");
+    typeInfo2.addMethod(new MethodElement("method01", false, DataType.VOID, //
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.DECIMAL)));
+    typeInfo2.addMethod(new MethodElement("method01", false, DataType.VOID, //
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INT64)));
+    map.put(typeInfo2.getTypeName(), typeInfo2);
+
+    var val6 = typeInfo2.getMethod(map::get, "method01", new DataType[] {DataType.INTEGER},
+        new ParameterMode[] {ParameterMode.INPUT});
+    assertNotNull(val6);
+  }
 }

@@ -21,13 +21,16 @@ package eu.rssw.pct.elements;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 
 import org.prorefactor.core.Pair;
+import org.prorefactor.core.Triplet;
 
 public interface ITypeInfo {
   String getTypeName();
@@ -147,6 +150,10 @@ public interface ITypeInfo {
 
   default Pair<ITypeInfo, IMethodElement> getCompatibleMatch(Function<String, ITypeInfo> provider, String method,
       boolean constructor, DataType[] parameters, ParameterMode[] modes) {
+    // First, keep track of all compatible methods, and the reason why they are compatible
+    // No enum for the reason as I don't want it to be public
+    // 1 -> Unknown data type used, 2 -> ParameterMode difference, 3 -> Parameter datatype difference
+    List<Triplet<ITypeInfo, IMethodElement, Set<Integer>>> list01 = new ArrayList<>();
     for (var elem : getMethods()) {
       var c1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length)
           && (elem.getParameters().length == modes.length);
@@ -154,14 +161,47 @@ public interface ITypeInfo {
           && (elem.getParameters().length == parameters.length) && (elem.getParameters().length == modes.length);
       if (c1 || c2) {
         var match = true;
+        Set<Integer> reason = new HashSet<>();
         for (int zz = 0; zz < elem.getParameters().length; zz++) {
-          match &= elem.getParameters()[zz].getDataType().isCompatible(parameters[zz], provider);
+          if (parameters[zz] == DataType.UNKNOWN) {
+            reason.add(1);
+          } else {
+            var same = elem.getParameters()[zz].getDataType().equals(parameters[zz]);
+            var compat = elem.getParameters()[zz].getDataType().isCompatible(parameters[zz], provider);
+            match &= compat;
+            if (!same && compat)
+              reason.add(3);
+            var sameMode = elem.getParameters()[zz].getMode().equals(modes[zz]);
+            if (!sameMode)
+              reason.add(2);
+          }
         }
-        if (match)
-          return Pair.of(this, elem);
+        if (match) {
+          list01.add(Triplet.of(this, elem, reason));
+        }
       }
     }
+    if (list01.size() > 1) {
+      // If multiple methods match, the following rules apply:
+      //   * If there was a null (?) parameter, then don't return anything (ambiguous)
+      //   * If matches involve only parameter mode, we return the first one (ambiguity is accepted)
+      //   * If matches involve only parameter type, we return the first one (ambiguity is accepted)
+      //   * If matches involve both parameter type and mode, we don't return anything
+      var anyUnknown = list01.stream().anyMatch(it -> it.getO3().contains(1));
+      var paramModeList = list01.stream().filter(it -> it.getO3().contains(2)).toList();
+      var paramTypeList = list01.stream().filter(it -> it.getO3().contains(3)).toList();
+      if (!anyUnknown) {
+        if (!paramModeList.isEmpty() && paramTypeList.isEmpty())
+          return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
+        else if (!paramTypeList.isEmpty() && paramModeList.isEmpty())
+          return Pair.of(paramTypeList.get(0).getO1(), paramTypeList.get(0).getO2());
+      }
+    } else if (list01.size() == 1) {
+      // Single match, return this one
+      return Pair.of(list01.get(0).getO1(), list01.get(0).getO2());
+    }
     if (!constructor) {
+      // Check parent class only when looking for methods
       var parent = provider.apply(getParentTypeName());
       if (parent != null)
         return parent.getCompatibleMatchMethod(provider, method, parameters, modes);

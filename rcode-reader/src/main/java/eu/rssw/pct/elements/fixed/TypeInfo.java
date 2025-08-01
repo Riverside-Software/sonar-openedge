@@ -186,7 +186,7 @@ public class TypeInfo implements ITypeInfo {
 
   @Override
   public String toString() {
-    return String.format("Type info %s - Parent %s", typeName, parentTypeName);
+    return String.format("TypeInfo %s", typeName);
   }
 
   @Override
