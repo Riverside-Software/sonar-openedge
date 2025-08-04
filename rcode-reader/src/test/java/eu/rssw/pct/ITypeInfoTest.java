@@ -92,6 +92,13 @@ public class ITypeInfoTest {
         new ParameterMode[] {ParameterMode.INPUT, ParameterMode.INPUT});
     assertNotNull(methd02);
     assertEquals(methd02.getO2().getExtent(), -1);
+
+    var info2 = TYPE_INFO_PROVIDER.apply("Progress.Json.ObjectModel.JsonObject");
+    var methd03 = info2.getMethod(TYPE_INFO_PROVIDER, "Write", new DataType[] {DataType.CHARACTER, DataType.LOGICAL},
+        new ParameterMode[] {ParameterMode.INPUT, ParameterMode.INPUT});
+    assertNotNull(methd03);
+    assertEquals(methd03.getO2().getParameters()[0].getMode(), ParameterMode.INPUT_OUTPUT);
+    assertEquals(methd03.getO2().getParameters()[0].getDataType(), DataType.LONGCHAR);
   }
 
   @Test

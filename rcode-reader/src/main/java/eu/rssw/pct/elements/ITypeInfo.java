@@ -186,7 +186,7 @@ public interface ITypeInfo {
       //   * If there was a null (?) parameter, then don't return anything (ambiguous)
       //   * If matches involve only parameter mode, we return the first one (ambiguity is accepted)
       //   * If matches involve only parameter type, we return the first one (ambiguity is accepted)
-      //   * If matches involve both parameter type and mode, we don't return anything
+      //   * If matches involve both parameter type and mode, we return the first one involving only mode
       var anyUnknown = list01.stream().anyMatch(it -> it.getO3().contains(1));
       var paramModeList = list01.stream().filter(it -> it.getO3().contains(2)).toList();
       var paramTypeList = list01.stream().filter(it -> it.getO3().contains(3)).toList();
@@ -195,6 +195,8 @@ public interface ITypeInfo {
           return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
         else if (!paramTypeList.isEmpty() && paramModeList.isEmpty())
           return Pair.of(paramTypeList.get(0).getO1(), paramTypeList.get(0).getO2());
+        else
+          return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
       }
     } else if (list01.size() == 1) {
       // Single match, return this one
