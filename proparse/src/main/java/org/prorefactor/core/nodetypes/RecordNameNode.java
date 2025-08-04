@@ -23,7 +23,6 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.Pair;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.ContextQualifier;
-import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 
 import com.google.common.base.Strings;
@@ -90,8 +89,9 @@ public class RecordNameNode extends JPNode {
 
   @Override
   public TableBuffer getTableBuffer() {
-    Symbol symbol = getSymbol();
-    return symbol instanceof TableBuffer ? (TableBuffer) symbol : null;
+    if (getSymbol() instanceof TableBuffer tBuff)
+      return tBuff;
+    return null;
   }
 
   @Override
