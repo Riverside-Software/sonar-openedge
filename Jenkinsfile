@@ -8,9 +8,10 @@ pipeline {
   }
 
   stages {
-    stage ('👷 Build OpenEdge plugin') {
+    stage ('👷 Build') {
       environment {
-        MAVEN_GPG_PASSPHRASE=credentials('GPG_KEY')
+        OP_CLI_PATH = '/usr/local/bin/'
+        MAVEN_GPG_PASSPHRASE = 'op://Jenkins/GPG/password'
       }
       steps {
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: scm.userRemoteConfigs])
@@ -19,7 +20,11 @@ pipeline {
         script {
           withEnv(["MVN_HOME=${tool name: 'Maven 3', type: 'maven'}", "JAVA_HOME=${tool name: 'JDK17', type: 'jdk'}"]) {
             if ("main" == env.BRANCH_NAME) {
-              sh "$MVN_HOME/bin/mvn -P release clean deploy -Dgit.commit=\$(git rev-parse --short HEAD)"
+              withSecrets() {
+                configFileProvider([configFile(fileId: 'MvnSettingsRSSW', variable: 'MAVEN_SETTINGS')]) {
+                  sh '$MVN_HOME/bin/mvn -s ${MAVEN_SETTINGS} -P release clean deploy -Dgit.commit=\$(git rev-parse --short HEAD)'
+                }
+              }
               mail body: "https://central.sonatype.com/publishing/deployments", to: "g.querret@riverside-software.fr", subject: "sonar-openedge - Publish artifact on Central"
             } else if ("develop" == env.BRANCH_NAME) {
               sh "$MVN_HOME/bin/mvn clean javadoc:javadoc deploy -Dmaven.test.failure.ignore=true -Dgit.commit=\$(git rev-parse --short HEAD)"
