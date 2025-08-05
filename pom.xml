@@ -5,7 +5,7 @@
 
   <groupId>eu.rssw</groupId>
   <artifactId>sonar-openedge</artifactId>
-  <version>3.2.0</version>
+  <version>3.3.0</version>
   <packaging>pom</packaging>
 
   <name>OpenEdge plugin for SonarQube</name>
@@ -56,6 +56,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
+    <sonar.cpd.exclusions>**/SelectorUtils.java</sonar.cpd.exclusions>
+    <sonar.coverage.exclusions>**/SelectorUtils.java</sonar.coverage.exclusions>
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../coverage-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
@@ -162,11 +164,11 @@
           <plugin>
             <groupId>org.sonatype.central</groupId>
             <artifactId>central-publishing-maven-plugin</artifactId>
-            <version>0.7.0</version>
+            <version>0.8.0</version>
             <extensions>true</extensions>
             <configuration>
               <publishingServerId>central</publishingServerId>
-              <deploymentName>sonar-openedge</deploymentName>
+              <deploymentName>sonar-openedge ${version}</deploymentName>
             </configuration>
           </plugin>
         </plugins>

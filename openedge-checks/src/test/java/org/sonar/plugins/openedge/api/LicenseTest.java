@@ -4,8 +4,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.io.IOException;
-
 import org.sonar.api.SonarProduct;
 import org.sonar.plugins.openedge.api.LicenseRegistration.License;
 import org.sonar.plugins.openedge.api.LicenseRegistration.LicenseType;
@@ -14,7 +12,7 @@ import org.testng.annotations.Test;
 public class LicenseTest {
 
   @Test
-  public void testDefaultValues() throws IOException {
+  public void testDefaultValues() {
     License lic1 = new License.Builder().setCustomerName("rssw").setPermanentId("123456").build();
     assertNotNull(lic1.getSig());
     assertEquals(lic1.getProduct(), SonarProduct.SONARQUBE);
@@ -24,7 +22,7 @@ public class LicenseTest {
   }
 
   @Test
-  public void testEquals() throws IOException {
+  public void testEquals() {
     License lic1 = new License.Builder().setCustomerName("rssw").setPermanentId("123456").build();
     License lic2 = new License.Builder().setCustomerName("rssw").setPermanentId("123456").build();
     License lic3 = new License.Builder().setCustomerName("rssw2").setPermanentId("123456").build();
@@ -37,7 +35,7 @@ public class LicenseTest {
   }
 
   @Test
-  public void testEqualsSignature() throws IOException {
+  public void testEqualsSignature() {
     // Signature is not part of equality
     License lic1 = new License.Builder().setCustomerName("rssw").setPermanentId("123456").setSignature(
         new byte[] {1, 2, 3}).build();

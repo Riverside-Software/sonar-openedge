@@ -63,6 +63,8 @@ public class TableBuffer extends Symbol {
    */
   @Override
   public String fullName() {
+    if (table == null)
+      return "<notable>";
     if (table.getStoretype() != IConstants.ST_DBTABLE)
       return getName();
 

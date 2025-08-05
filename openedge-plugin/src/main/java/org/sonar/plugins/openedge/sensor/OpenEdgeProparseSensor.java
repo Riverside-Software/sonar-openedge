@@ -21,12 +21,10 @@ package org.sonar.plugins.openedge.sensor;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,11 +43,13 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.apache.tools.ant.types.selectors.SelectorUtils;
 import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.JsonNodeLister;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProparseRuntimeException;
+import org.prorefactor.core.Triplet;
 import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.proparse.CognitiveComplexityListener;
 import org.prorefactor.proparse.IncludeFileNotFoundException;
@@ -130,7 +130,8 @@ public class OpenEdgeProparseSensor implements Sensor {
   private Map<Integer, Long> maxK = new HashMap<>();
 
   // Proparse debug
-  List<String> debugFiles = new ArrayList<>();
+  List<Triplet<String, String, String>> debugFiles = new ArrayList<>();
+  private int varNum = 0;
 
   public OpenEdgeProparseSensor(OpenEdgeSettings settings, OpenEdgeComponents components) {
     this.settings = settings;
@@ -207,7 +208,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     computeAnalytics(context);
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE)
       logStatistics();
-    generateProparseDebugIndex();
+    generateProparseDebugIndex(context);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -411,8 +412,8 @@ public class OpenEdgeProparseSensor implements Sensor {
       computeLOCL2(context, file, unit);
     }
 
-    if (settings.useProparseDebug()) {
-      generateProparseDebugFile(file, unit);
+    if (settings.useProparseDebug() && matchDebugInclude(file.toString())) {
+        generateProparseDebugFile(context, file, unit);
     }
 
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
@@ -475,41 +476,74 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
   }
 
-  private void generateProparseDebugFile(InputFile file, ParseUnit unit) {
-    String fileName = ".proparse/" + file.toString() + ".json";
-    File dbgFile = new File(fileName);
-    dbgFile.getParentFile().mkdirs();
-    try (PrintWriter writer = new PrintWriter(dbgFile)) {
-      JsonNodeLister nodeLister = new JsonNodeLister(unit.getTopNode(), writer, ABLNodeType.LEFTPAREN,
+  private boolean matchDebugInclude(String fName) {
+    for (var pattern : settings.getProparseDebugIncludes().split(",")) {
+      if (!pattern.isBlank() && SelectorUtils.matchPath(pattern, fName, false))
+        return true;
+    }
+    return false;
+  }
+
+  private void generateProparseDebugFile(SensorContext context, InputFile file, ParseUnit unit) {
+    var fName = file.toString().replace('/', '_').replace('.', '_');
+    var fileName = ".proparse/files/" + fName + ".json";
+    var dbgPath = context.fileSystem().baseDir().toPath().resolve(fileName);
+
+    try {
+      Files.createDirectories(dbgPath.getParent());
+    } catch (IOException caught) {
+      LOG.error("Error while creating .proparse/files directory", caught);
+      return;
+    }
+
+    try (var writer = Files.newBufferedWriter(dbgPath)
+        ) {
+      writer.write("var var" + varNum + " = ");
+      var nodeLister = new JsonNodeLister(unit.getTopNode(), writer, ABLNodeType.LEFTPAREN,
           ABLNodeType.RIGHTPAREN, ABLNodeType.COMMA, ABLNodeType.PERIOD, ABLNodeType.LEXCOLON, ABLNodeType.OBJCOLON,
           ABLNodeType.THEN, ABLNodeType.END);
       nodeLister.print();
-      debugFiles.add(file.toString() + ".json");
+      writer.write(";");
+      debugFiles.add(Triplet.of(file.toString(), fName, "var" + varNum++));
     } catch (IOException caught) {
       LOG.error("Unable to write proparse debug file", caught);
     }
   }
 
-  private void generateProparseDebugIndex() {
+  private void generateProparseDebugIndex(SensorContext context) {
     if (settings.useProparseDebug()) {
-      try (InputStream from = this.getClass().getResourceAsStream("/debug-index.html");
-          OutputStream to = new FileOutputStream(new File(".proparse/index.html"))) {
+      var outPath = context.fileSystem().baseDir().toPath().resolve(".proparse");
+      try {
+        Files.createDirectories(outPath);
+      } catch (IOException caught) {
+        LOG.error("Error while creating .proparse directory", caught);
+        return;
+      }
+
+      try (var from = getClass().getResourceAsStream("/debug-index.html");
+          var to = Files.newOutputStream(outPath.resolve("index.html"))) {
         ByteStreams.copy(from, to);
+        for (var dbgFile : debugFiles) {
+          var tmp = "<script src=\"files/" + dbgFile.getO2() + ".json\"></script>\n";
+          to.write(tmp.getBytes());
+        }
+        to.write("</body>\n</html>".getBytes());
       } catch (IOException caught) {
         LOG.error("Error while writing index.html", caught);
       }
-      try (PrintWriter writer = new PrintWriter(new File(".proparse/index.json"))) {
-        boolean first = true;
-        writer.println("var data= { \"files\": [");
-        for (String str : debugFiles) {
-          if (!first) {
+
+      try (var writer = Files.newBufferedWriter(outPath.resolve("index.json"))) {
+        var first = true;
+        writer.write("var data= [");
+        writer.newLine();
+        for (var dbgFile : debugFiles) {
+          if (!first)
             writer.write(',');
-          } else {
-            first = false;
-          }
-          writer.println("{ \"file\": \"" + str + "\" }");
+          first = false;
+          writer.write("{ \"file\": \"" + dbgFile.getO1() + "\", \"var\": \"" + dbgFile.getO3() + " \" }");
+          writer.newLine();
         }
-        writer.println("]}");
+        writer.write("]");
       } catch (IOException uncaught) {
         LOG.error("Error while writing debug index", uncaught);
       }

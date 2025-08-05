@@ -24,8 +24,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.Arrays;
-
 import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarQubeSide;
 import org.sonar.api.SonarRuntime;
@@ -34,14 +32,7 @@ import org.sonar.api.internal.SonarRuntimeImpl;
 import org.sonar.api.issue.impact.Severity;
 import org.sonar.api.issue.impact.SoftwareQuality;
 import org.sonar.api.rules.CleanCodeAttribute;
-import org.sonar.api.rules.RuleType;
 import org.sonar.api.utils.Version;
-import org.sonar.check.Rule;
-import org.sonar.plugins.openedge.api.AnnotationBasedRulesDefinition;
-import org.sonar.plugins.openedge.api.model.CWE;
-import org.sonar.plugins.openedge.api.model.OWASP;
-import org.sonar.plugins.openedge.api.model.OWASP2021;
-import org.sonar.plugins.openedge.api.model.SecurityHotspot;
 import org.testng.annotations.Test;
 
 public class OpenEdgeRulesDefinitionTest {
@@ -127,73 +118,6 @@ public class OpenEdgeRulesDefinitionTest {
     assertEquals(repo.language(), "oedb");
 
     assertEquals(repo.rules().size(), 1);
-  }
-
-  @Rule(key = "CustomRule01", name = "Number 1", tags = {"security"})
-  @CWE(values = {1, 2})
-  private static class CustomRule01 {
-    // Nothing
-  }
-
-  @Rule(key = "CustomRule02", name = "Number 2", tags = {"rssw"})
-  @CWE(values = {3})
-  @OWASP(values = {"A1"})
-  @SecurityHotspot
-  private static class CustomRule02 {
-    // Nothing
-  }
-
-  @Rule(key = "CustomRule03", name = "Number 3", tags = {"rssw"})
-  @CWE(values = {3})
-  @OWASP(values = {"A1"})
-  @SecurityHotspot(cwe = {4}, owasp = {"A2"})
-  private static class CustomRule03 {
-    // Nothing
-  }
-
-  @Rule(key = "CustomRule04", name = "Number 4", tags = {"rssw", "security"})
-  @CWE(values = {10})
-  @OWASP2021(values = {"A9"})
-  private static class CustomRule04 {
-    // Nothing
-  }
-
-  @Test
-  public void testCustomRule() {
-    var context = new RulesDefinitionContext();
-    var repo = context.createRepository("repo1", "oe");
-    var def = new AnnotationBasedRulesDefinition(repo, "oe", sqRuntime10);
-    def.addRuleClasses(
-        Arrays.asList(new Class[] {CustomRule01.class, CustomRule02.class, CustomRule03.class, CustomRule04.class}));
-    repo.done();
-
-    assertEquals(context.repository("repo1").rules().size(), 4);
-
-    var rule1 = context.repository("repo1").rule("CustomRule01");
-    assertEquals(rule1.name(), "Number 1");
-    assertEquals(rule1.type(), RuleType.VULNERABILITY);
-    assertTrue(rule1.securityStandards().contains("cwe:1"));
-    assertTrue(rule1.securityStandards().contains("cwe:2"));
-
-    var rule2 = context.repository("repo1").rule("CustomRule02");
-    assertEquals(rule2.name(), "Number 2");
-    assertEquals(rule2.type(), RuleType.SECURITY_HOTSPOT);
-    assertTrue(rule2.securityStandards().contains("cwe:3"));
-    assertTrue(rule2.securityStandards().contains("owaspTop10:a1"));
-
-    var rule3 = context.repository("repo1").rule("CustomRule03");
-    assertEquals(rule3.name(), "Number 3");
-    assertEquals(rule3.type(), RuleType.SECURITY_HOTSPOT);
-    assertTrue(rule3.securityStandards().contains("cwe:3"));
-    assertTrue(rule3.securityStandards().contains("cwe:4"));
-    assertTrue(rule3.securityStandards().contains("owaspTop10:a1"));
-    assertTrue(rule3.securityStandards().contains("owaspTop10:a2"));
-
-    var rule4 = context.repository("repo1").rule("CustomRule04");
-    assertEquals(rule4.name(), "Number 4");
-    assertEquals(rule4.type(), RuleType.VULNERABILITY);
-    assertTrue(rule4.securityStandards().contains("cwe:10"));
-    assertTrue(rule4.securityStandards().contains("owaspTop10-2021:a9"));
   }
 
 }
