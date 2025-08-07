@@ -494,15 +494,23 @@ public class ParseUnit {
     // In the main file ?
     if ((src.getFileNum() == 1) && (recNode.getFileIndex() == 0))
       return true;
-    else {
+    else if ((src.getFileNum() > 1) && (recNode.getStatement().getFileName() != null)) {
+      // Or in the same include file ?
       try {
-        // Or in the same include file ?
-        return ((src.getFileNum() > 1) && (recNode.getStatement().getFileName() != null) && Files.isSameFile(
-            new File(src.getFileName()).toPath(), new File(recNode.getStatement().getFileName()).toPath()));
+        var p1 = new File(src.getFileName()).toPath();
+        var p2 = new File(recNode.getStatement().getFileName()).toPath();
+        var sameFile = Files.isSameFile(p1, p2);
+        var sameFileName = p1.getFileName().toString().equalsIgnoreCase(p2.getFileName().toString());
+        if (sameFileName && !sameFile)
+          LOGGER.debug(
+              "Attach XREF - Skipped potential match between {} (found in XREF) and {} (scanner file name) - Line {}",
+              p1, p2, ref.getLineNum());
+        return sameFile;
       } catch (IOException uncaught) {
         return false;
       }
-    }
+    } else
+      return false;
   }
 
   private void handleSearchNode(Source src, Reference ref, List<RecordNameNode> recordNodes) {
