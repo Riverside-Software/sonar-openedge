@@ -23,7 +23,7 @@ import org.sonar.api.Plugin;
 import org.sonar.api.PropertyType;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.config.PropertyDefinition;
-import org.sonar.api.config.PropertyDefinition.ConfigScope;
+import org.sonar.api.resources.Qualifiers;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.decorator.CommonDBMetricsDecorator;
 import org.sonar.plugins.openedge.decorator.CommonMetricsDecorator;
@@ -84,7 +84,7 @@ public class OpenEdgePlugin implements Plugin {
       .type(PropertyType.BOOLEAN) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onConfigScopes(ConfigScope.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .defaultValue(Boolean.FALSE.toString()) //
       .build());
 
@@ -94,7 +94,7 @@ public class OpenEdgePlugin implements Plugin {
       .type(PropertyType.BOOLEAN) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onConfigScopes(ConfigScope.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .defaultValue(Boolean.FALSE.toString()) //
       .build());
 
@@ -105,7 +105,7 @@ public class OpenEdgePlugin implements Plugin {
       .type(PropertyType.BOOLEAN) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onConfigScopes(ConfigScope.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .defaultValue(Boolean.FALSE.toString()) //
       .build());
 
@@ -116,7 +116,7 @@ public class OpenEdgePlugin implements Plugin {
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_DEBUG) //
       .defaultValue(Boolean.FALSE.toString()) //
-      .onConfigScopes(ConfigScope.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.SUFFIXES) //
@@ -126,7 +126,7 @@ public class OpenEdgePlugin implements Plugin {
       .defaultValue(OpenEdge.DEFAULT_FILE_SUFFIXES) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onConfigScopes(ConfigScope.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.DB_SUFFIXES) //
@@ -136,7 +136,7 @@ public class OpenEdgePlugin implements Plugin {
         .defaultValue("df") //
         .category(CATEGORY_OPENEDGE) //
         .subCategory(SUBCATEGORY_GENERAL) //
-        .onConfigScopes(ConfigScope.PROJECT) //
+        .onQualifiers(Qualifiers.PROJECT) //
         .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.INCLUDE_SUFFIXES) //
@@ -146,7 +146,7 @@ public class OpenEdgePlugin implements Plugin {
       .defaultValue(OpenEdge.DEFAULT_INCLUDE_FILE_SUFFIXES) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onConfigScopes(ConfigScope.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.CPD_ANNOTATIONS) //
@@ -156,7 +156,7 @@ public class OpenEdgePlugin implements Plugin {
       .defaultValue("Generated") //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onConfigScopes(ConfigScope.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.SKIP_ANNOTATIONS) //
@@ -166,7 +166,7 @@ public class OpenEdgePlugin implements Plugin {
       .defaultValue("@InitializeComponent") //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onConfigScopes(ConfigScope.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
 
     context.addExtension(PropertyDefinition.builder(Constants.BACKSLASH_ESCAPE) //
@@ -176,7 +176,7 @@ public class OpenEdgePlugin implements Plugin {
       .defaultValue(Boolean.FALSE.toString()) //
       .category(CATEGORY_OPENEDGE) //
       .subCategory(SUBCATEGORY_GENERAL) //
-      .onConfigScopes(ConfigScope.PROJECT) //
+      .onQualifiers(Qualifiers.PROJECT) //
       .build());
   }
 
