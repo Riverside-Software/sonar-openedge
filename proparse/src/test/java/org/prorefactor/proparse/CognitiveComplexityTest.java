@@ -20,6 +20,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
@@ -252,6 +253,81 @@ public class CognitiveComplexityTest extends AbstractProparseTest {
     var i6 = items.stream().filter(it -> it.getO1().getLine() == 14).findFirst();
     assertTrue(i6.isPresent());
     assertEquals(i6.get().getO2(), 0);
+  }
+
+  @Test
+  public void test08() {
+    var lines = genericTest("test08.p", 3);
+    assertEquals(lines, List.of(3, 4, 5));
+
+  }
+
+  @Test
+  public void test09() {
+    var lines = genericTest("test09.p", 3);
+    assertEquals(lines, List.of(1, 2, 3));
+
+  }
+
+  @Test
+  public void test10() {
+    var lines = genericTest("test10.p", 3);
+    assertEquals(lines, List.of(2, 3, 4));
+
+  }
+
+  @Test
+  public void test11() {
+    var lines = genericTest("test11.p", 5);
+    assertEquals(lines, List.of(1, 2, 3, 5, 6));
+
+  }
+
+  @Test
+  public void test12() {
+    var lines = genericTest("test12.p", 6);
+    assertEquals(lines, List.of(5, 6, 6, 7, 8, 10));
+
+  }
+
+  @Test
+  public void test13() {
+    var lines = genericTest("test13.p", 0);
+    assertEquals(lines, List.of());
+  }
+
+  @Test
+  public void test14() {
+    var lines = genericTest("test14.p", 1);
+    assertEquals(lines, List.of(1));
+
+  }
+
+  @Test
+  public void test15() {
+    var lines = genericTest("test15.p", 1);
+    assertEquals(lines, List.of(1));
+  }
+
+  @Test
+  public void test16() {
+    var lines = genericTest("test16.p", 5);
+    assertEquals(lines, List.of(1, 3, 4, 5, 6));
+  }
+
+  private List<Integer> genericTest(String fileName, int complexityToCheck) {
+    var unit = getParseUnit(new File(SRC_DIR + "/" + fileName), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    var mainRoutine = unit.getRootScope().getRoutine();
+    var mainBlock = mainRoutine.getRoutineScope().getRootBlock().getNode().asIStatementBlock();
+    var visitor = new CognitiveComplexityListener(mainBlock);
+    visitor.walkStatementBlock(mainBlock);
+    assertEquals(visitor.getComplexity(), complexityToCheck);
+    assertEquals(visitor.getMainFileComplexity(), complexityToCheck);
+
+    return visitor.getItems().stream().map(it -> it.getO1().getLine()).sorted().toList();
   }
 
 }

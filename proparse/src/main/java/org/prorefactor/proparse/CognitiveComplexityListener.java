@@ -35,7 +35,6 @@ import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;
 
 public class CognitiveComplexityListener extends StatementListener {
-  private static final EnumSet<ABLNodeType> SKIP_EXPRESSION = EnumSet.of(ABLNodeType.FOR, ABLNodeType.FIND);
   private static final EnumSet<ABLNodeType> EXTERNAL_BLOCK = EnumSet.of(ABLNodeType.PROCEDURE, ABLNodeType.PROGRAM_ROOT,
       ABLNodeType.FUNCTION, ABLNodeType.METHOD);
   private static final EnumSet<ABLNodeType> NESTING_INCREMENT = EnumSet.of(ABLNodeType.ELSE, ABLNodeType.CASE,
@@ -66,9 +65,9 @@ public class CognitiveComplexityListener extends StatementListener {
   public int getMainFileComplexity() {
     // Each item in main file increases complexity by 1 + nesting level
     return items.stream() //
-        .filter(it -> it.getO1().getFileIndex() == 0) //
-        .mapToInt(it -> it.getO2() + 1) //
-        .sum();
+      .filter(it -> it.getO1().getFileIndex() == 0) //
+      .mapToInt(it -> it.getO2() + 1) //
+      .sum();
   }
 
   public List<Pair<JPNode, Integer>> getItems() {
@@ -114,11 +113,9 @@ public class CognitiveComplexityListener extends StatementListener {
   public void enterStatement(IStatement stmt) {
     var nodeType = stmt.getNodeType();
 
-    // Check expressions except in FOR and FIND
-    if (!SKIP_EXPRESSION.contains(nodeType)) {
-      for (var expr : stmt.asJPNode().queryExpressionsCurrentStatement()) {
-        visitExpression(expr);
-      }
+    // Check all expressions
+    for (var expr : stmt.asJPNode().queryExpressionsCurrentStatement()) {
+      visitExpression(expr);
     }
 
     // Automatically add complexity
@@ -146,6 +143,10 @@ public class CognitiveComplexityListener extends StatementListener {
   }
 
   void visitExpression(IExpression exprNode) {
+    if (exprNode.asJPNode().getParent().getNodeType() == ABLNodeType.WHERE
+        && (exprNode.asJPNode().getParent().getParent().getNodeType() == ABLNodeType.RECORD_SEARCH)) {
+      items.add(Pair.of(exprNode.asJPNode().getParent(), 0));
+    }
     if (exprNode instanceof TwoArgumentsExpression expr2) {
       var nodeType = exprNode.asJPNode().getNodeType();
       if ((nodeType == ABLNodeType.XOR) || (nodeType == ABLNodeType.AND) || (nodeType == ABLNodeType.OR)) {
