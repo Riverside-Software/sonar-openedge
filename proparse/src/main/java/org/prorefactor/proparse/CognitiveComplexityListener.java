@@ -66,9 +66,9 @@ public class CognitiveComplexityListener extends StatementListener {
   public int getMainFileComplexity() {
     // Each item in main file increases complexity by 1 + nesting level
     return items.stream() //
-        .filter(it -> it.getO1().getFileIndex() == 0) //
-        .mapToInt(it -> it.getO2() + 1) //
-        .sum();
+      .filter(it -> it.getO1().getFileIndex() == 0) //
+      .mapToInt(it -> it.getO2() + 1) //
+      .sum();
   }
 
   public List<Pair<JPNode, Integer>> getItems() {
@@ -145,20 +145,41 @@ public class CognitiveComplexityListener extends StatementListener {
     }
   }
 
-  void visitExpression(IExpression exprNode) {
-    if (exprNode instanceof TwoArgumentsExpression expr2) {
-      var nodeType = exprNode.asJPNode().getNodeType();
-      if ((nodeType == ABLNodeType.XOR) || (nodeType == ABLNodeType.AND) || (nodeType == ABLNodeType.OR)) {
+  private void visitTwoArgsBooleanExpression(TwoArgumentsExpression exprNode) {
+    var leftNode = exprNode.getLeftExpression();
+    // Due to ANTLR4 left recursion, boolean expressions can only be on the left side
+    if ((leftNode instanceof TwoArgumentsExpression twoArgsLeftNode)
+        && isBooleanExpression(leftNode.asJPNode().getNodeType())) {
+      // Current node is part of a list of operator. Increase complexity if previous one (i.e. left child) has a
+      // different type
+      if (exprNode.getNodeType() != leftNode.asJPNode().getNodeType()) {
         items.add(Pair.of(exprNode.asJPNode(), 0));
       }
-      visitExpression(expr2.getLeftExpression());
-      visitExpression(expr2.getRightExpression());
+      // And visit expression
+      visitTwoArgsBooleanExpression(twoArgsLeftNode);
+    } else {
+      // No child on left side, so current node is the first (AND|OR|XOR) in the list -> increase complexity
+      items.add(Pair.of(exprNode.asJPNode(), 0));
+      visitExpression(leftNode);
+    }
+    visitExpression(exprNode.getRightExpression());
+  }
+
+  private void visitExpression(IExpression exprNode) {
+    if (exprNode instanceof TwoArgumentsExpression expr2) {
+      var nodeType = exprNode.asJPNode().getNodeType();
+      if (isBooleanExpression(nodeType)) {
+        visitTwoArgsBooleanExpression(expr2);
+      } else {
+        visitExpression(expr2.getLeftExpression());
+        visitExpression(expr2.getRightExpression());
+      }
     } else if (exprNode instanceof SingleArgumentExpression expr2) {
       visitExpression(expr2.getExpression());
     } else if (exprNode instanceof BuiltinFunctionNode expr2) {
       if (expr2.asJPNode().getFirstChild().getNodeType() == ABLNodeType.IF) {
         items.add(Pair.of(expr2.asJPNode().getFirstChild(), nesting));
-      } else {
+      } else if (expr2.asJPNode().getFirstChild().getNodeType() != ABLNodeType.CANFIND) {
         visitChildren(exprNode);
       }
     } else if (exprNode instanceof UserFunctionCallNode) {
@@ -184,7 +205,7 @@ public class CognitiveComplexityListener extends StatementListener {
     }
   }
 
-  private boolean isSimpleDo(JPNode node) {
+  private static boolean isSimpleDo(JPNode node) {
     // node is DO node, check if only child is WIH FRAME
     if (node.getDirectChildren().isEmpty())
       return true;
@@ -196,4 +217,9 @@ public class CognitiveComplexityListener extends StatementListener {
     }
     return false;
   }
+
+  private static boolean isBooleanExpression(ABLNodeType nodeType) {
+    return (nodeType == ABLNodeType.XOR) || (nodeType == ABLNodeType.AND) || (nodeType == ABLNodeType.OR);
+  }
+
 }
