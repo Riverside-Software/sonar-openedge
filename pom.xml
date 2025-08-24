@@ -168,7 +168,7 @@
             <extensions>true</extensions>
             <configuration>
               <publishingServerId>central</publishingServerId>
-              <deploymentName>sonar-openedge ${version}</deploymentName>
+              <deploymentName>sonar-openedge ${project.version}</deploymentName>
             </configuration>
           </plugin>
         </plugins>
