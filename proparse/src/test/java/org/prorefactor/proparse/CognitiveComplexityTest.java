@@ -61,7 +61,7 @@ public class CognitiveComplexityTest extends AbstractProparseTest {
     assertEquals(visitor.getMainFileComplexity(), 6);
     var positions = visitor.getItems().stream().map(
         it -> Pair.of(it.getO1().getLine(), it.getO1().getColumn())).toList();
-    var expectedPositions = List.of(Pair.of(6, 6), Pair.of(8, 0), Pair.of(11, 0), Pair.of(12, 8), Pair.of(14, 2));
+    var expectedPositions = List.of(Pair.of(6, 0), Pair.of(8, 0), Pair.of(11, 0), Pair.of(12, 2), Pair.of(14, 2));
     assertEqualsNoOrder(positions, expectedPositions);
 
     var p1Routine = unit.getRootScope().getRoutines().stream().filter(it -> "p1".equals(it.getName())).findAny().get();
@@ -72,7 +72,7 @@ public class CognitiveComplexityTest extends AbstractProparseTest {
     assertEquals(p1Visitor.getMainFileComplexity(), 5);
     var positions2 = p1Visitor.getItems().stream().map(
         it -> Pair.of(it.getO1().getLine(), it.getO1().getColumn())).toList();
-    var expectedPositions2 = List.of(Pair.of(22, 8), Pair.of(24, 2), Pair.of(26, 2), Pair.of(26, 14), Pair.of(28, 2));
+    var expectedPositions2 = List.of(Pair.of(22, 2), Pair.of(24, 2), Pair.of(26, 2), Pair.of(26, 14), Pair.of(28, 2));
     assertEqualsNoOrder(positions2, expectedPositions2);
   }
 
@@ -280,7 +280,7 @@ public class CognitiveComplexityTest extends AbstractProparseTest {
 
     var items = visitor.getItems();
     var lines = items.stream().map(it -> it.getO1().getLine()).sorted().toList();
-    assertEquals(lines, List.of(8, 11, 12));
+    assertEquals(lines, List.of(7, 8, 11));
   }
 
   @Test
@@ -298,7 +298,7 @@ public class CognitiveComplexityTest extends AbstractProparseTest {
 
     var positions = visitor.getItems().stream().map(
         it -> Pair.of(it.getO1().getLine(), it.getO1().getColumn())).toList();
-    var expectedPositions = List.of(Pair.of(11, 29), Pair.of(15, 52), Pair.of(15, 29));
+    var expectedPositions = List.of(Pair.of(11, 4), Pair.of(15, 6), Pair.of(15, 29));
     assertEqualsNoOrder(positions, expectedPositions);
   }
 

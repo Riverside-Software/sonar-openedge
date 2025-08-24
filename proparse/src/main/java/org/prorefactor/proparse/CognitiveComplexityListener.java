@@ -99,7 +99,7 @@ public class CognitiveComplexityListener extends StatementListener {
     if (stmt.asJPNode().getParent().getParent() != stmt.getParentStatement().asJPNode()) {
       items.add(Pair.of(stmt.asJPNode().getParent().getParent().getParent(), 0));
     } else {
-      items.add(Pair.of(stmt.asJPNode().getParent(), nesting));
+      items.add(Pair.of(stmt.asJPNode().getParent().getParent(), nesting));
     }
   }
 
