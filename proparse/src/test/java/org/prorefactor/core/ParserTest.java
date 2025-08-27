@@ -970,7 +970,7 @@ public class ParserTest extends AbstractProparseTest {
   }
 
   @Test
-  public void testAccumulateSum() {
+  public void testAccumulateSum01() {
     ParseUnit unit = getParseUnit(new File(SRC_DIR, "accumulate01.p"), session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -979,6 +979,16 @@ public class ParserTest extends AbstractProparseTest {
     JPNode node2 = unit.getTopNode().query(ABLNodeType.ACCUMULATE).get(3);
     assertEquals(node1.getFirstChild().getNodeType(), ABLNodeType.TOTAL);
     assertEquals(node2.getFirstChild().getNodeType(), ABLNodeType.SUM);
+  }
+
+  @Test
+  public void testAccumulateSum02() {
+    ParseUnit unit = getParseUnit(new File(SRC_DIR, "accumulate02.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
+    JPNode node1 = unit.getTopNode().query(ABLNodeType.ACCUMULATE).get(1);
+    assertEquals(node1.getFirstChild().getNodeType(), ABLNodeType.AVG);
   }
 
   public void testAggregate(String name, int statements) {
