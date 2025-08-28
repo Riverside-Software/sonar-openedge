@@ -1,6 +1,8 @@
+<h2>Why is this an issue?</h2>
 <p>This issue is raised whenever a TRANSACTION keyword is found within the actual scope of a transaction, meaning that the TRANSACTION keyword doesn't have any effect.</p>
 
-<h2>Noncompliant Code Example</h2>
+<h2>How to fix it</h2>
+<h3>Noncompliant Code Example</h3>
 <pre>
 FIND FIRST Customer EXCLUSIVE-LOCK.
 DO TRANSACTION:
@@ -9,7 +11,7 @@ DO TRANSACTION:
 END.
 </pre>
 
-<h2>Compliant Solution</h2>
+<h3>Compliant Solution</h3>
 <pre>
 /* There are different compliant solutions, one may be : */
 DO TRANSACTION:

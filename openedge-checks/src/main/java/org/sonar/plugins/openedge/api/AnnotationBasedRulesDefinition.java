@@ -248,7 +248,7 @@ public class AnnotationBasedRulesDefinition {
   }
 
   // Adapted from org.sonarsource.analyzer.commons.EducationRuleLoader
-  private void setupEducationDocumentation(NewRule rule, String description) {
+  public static void setupEducationDocumentation(NewRule rule, String description) {
     // The "Why is this an issue?" section is expected.
     var split = description.split(WHY_SECTION_HEADER);
 

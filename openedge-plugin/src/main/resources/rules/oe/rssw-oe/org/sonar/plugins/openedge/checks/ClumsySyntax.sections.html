@@ -1,7 +1,9 @@
+<h2>Why is this an issue?</h2>
 <p>While the Progress compiler accepts the following syntax quirks, they shouldn't be used in real code as they are hard to read.
 Furthermore, they slow down the internal parser, so support <em>could</em> be dropped in the future.</p>
 
-<h2>Syntax #1</h2>
+<h2>How to fix it</h2>
+<h3>Syntax #1</h3>
 <pre>
 // Abstract methods or method prototypes defined in interfaces can be ended with a colon instead of a period
 METHOD PUBLIC ABSTRACT VOID mthd1():  // Ending with colon is OK for the compiler
@@ -12,7 +14,7 @@ METHOD PUBLIC ABSTRACT VOID mthd1().
 METHOD PUBLIC ABSTRACT VOID mthd2().
 </pre>
 
-<h2>Syntax #2</h2>
+<h3>Syntax #2</h3>
 <pre>
 define variable zz1 as integer.
 define variable zz2 as integer.

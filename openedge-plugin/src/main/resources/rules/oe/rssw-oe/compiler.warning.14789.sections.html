@@ -1,13 +1,15 @@
+<h2>Why is this an issue?</h2>
 <p>All buffer references (including database tables, temp-tables, and buffers) must be fully qualified.</p>
 
-<h2>Noncompliant Code Example</h2>
+<h2>How to fix it</h2>
+<h3>Noncompliant Code Example</h3>
 <pre>
 /* On sports2000 database */
 FIND FIRST Customer.
 DISPLAY CustNum.
 </pre>
 
-<h2>Compliant Solution</h2>
+<h3>Compliant Solution</h3>
 <pre>
 FIND FIRST Customer.
 DISPLAY Customer.CustNum.
