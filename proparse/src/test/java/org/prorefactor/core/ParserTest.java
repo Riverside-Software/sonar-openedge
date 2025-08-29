@@ -909,13 +909,24 @@ public class ParserTest extends AbstractProparseTest {
   }
 
   @Test
-  public void testEnum() {
+  public void testEnum01() {
     ParseUnit unit = getParseUnit(new File(SRC_DIR, "enum01.cls"), session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getSupport().getClassName(), "rssw.enum01");
     assertTrue(unit.getSupport().isEnum());
     assertEquals(unit.getClassName(), "rssw.enum01");
+    assertTrue(unit.isEnum());
+  }
+
+  @Test
+  public void testEnum02() {
+    var unit = getParseUnit(new File(SRC_DIR, "enum02.cls"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getSupport().getClassName(), "rssw.enum02");
+    assertTrue(unit.getSupport().isEnum());
+    assertEquals(unit.getClassName(), "rssw.enum02");
     assertTrue(unit.isEnum());
   }
 

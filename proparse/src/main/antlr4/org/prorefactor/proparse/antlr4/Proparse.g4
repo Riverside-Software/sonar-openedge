@@ -1160,7 +1160,7 @@ classEnd:
 
 enumStatement:
     ENUM tn=typeName2 { support.defineEnum($tn.text); } FLAGS? blockColon
-    defEnumStatement+
+    defEnumStatement*
     enumEnd
     statementEnd
   ;
