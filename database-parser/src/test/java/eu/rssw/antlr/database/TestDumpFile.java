@@ -88,8 +88,10 @@ public class TestDumpFile {
     assertEquals(trg2.getCrc(), "32704");
 
     Index idx1 = db.getTable("Warehouse").getIndex("warehousenum");
+    assertTrue(idx1.isPrimary());
     assertTrue(idx1.isInAlternateBufferPool());
     Index idx2 = db.getTable("Warehouse").getIndex("warehousename");
+    assertFalse(idx2.isPrimary());
     assertFalse(idx2.isInAlternateBufferPool());
     Index idx3 = db.getTable("BillTo").getIndex("custnumbillto");
     assertTrue(idx3.isUnique());
@@ -132,6 +134,8 @@ public class TestDumpFile {
     assertEquals(db2.getTable("Order").getIndexes().size(), 5);
     assertNotNull(db2.getTable("Order").getIndex("CustOrder"));
     assertEquals(db2.getTable("Order").getIndex("CustOrder").getFields().size(), 2);
+    assertTrue(db2.getTable("Warehouse").getIndex("warehousenum").isPrimary());
+    assertFalse(db2.getTable("Warehouse").getIndex("warehousename").isPrimary());
   }
 
   @Test
