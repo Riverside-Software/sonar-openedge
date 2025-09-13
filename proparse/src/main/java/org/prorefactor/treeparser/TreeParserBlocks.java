@@ -254,7 +254,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
       currentRoutine.setReturnDatatypeNode(DataType.VOID);
     } else if (ctx.datatype().CLASS() != null) {
       currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
-    } else if (ctx.datatype().datatypeVar().typeName() != null) {
+    } else if (ctx.datatype().typeName() != null) {
       currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
     } else {
       currentRoutine.setReturnDatatypeNode(
@@ -270,7 +270,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
       currentRoutine.setReturnDatatypeNode(DataType.VOID);
     } else if (ctx.datatype().CLASS() != null) {
       currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
-    } else if (ctx.datatype().datatypeVar().typeName() != null) {
+    } else if (ctx.datatype().typeName() != null) {
       currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
     } else {
       currentRoutine.setReturnDatatypeNode(
@@ -286,7 +286,7 @@ public class TreeParserBlocks extends ProparseBaseListener {
       currentRoutine.setReturnDatatypeNode(DataType.VOID);
     } else if (ctx.datatype().CLASS() != null) {
       currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
-    } else if (ctx.datatype().datatypeVar().typeName() != null) {
+    } else if (ctx.datatype().typeName() != null) {
       currentRoutine.setReturnDatatypeNode(new DataType(ctx.datatype().getStop().getText()));
     } else {
       currentRoutine.setReturnDatatypeNode(

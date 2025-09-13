@@ -1490,6 +1490,7 @@ currentValueFunction:
 datatype:
     CLASS typeName
   | datatypeVar
+  | { !support.isDataTypeVariable(_input.LT(1)) }? typeName
   ;
 
 // Ambig: An unreservedkeyword can be a class name (user defined type).
@@ -1525,7 +1526,6 @@ datatypeVar:
   | UNSIGNEDSHORT
   | UNSIGNEDINTEGER
   | { ABLNodeType.abbrevDatatype(_input.LT(1).getText()) != ABLNodeType.INVALID_NODE  }? id=ID // Like 'i' for INTEGER or 'de' for DECIMAL
-  | { !support.isDataTypeVariable(_input.LT(1)) }? typeName
   ;
 
 ddeAdviseStatement:
