@@ -26,6 +26,7 @@ import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -62,7 +63,7 @@ import com.google.common.io.ByteSource;
  */
 public class Lexer implements IPreprocessor {
   private static final Logger LOGGER = LoggerFactory.getLogger(Lexer.class);
-
+  private static final Pattern SCIENTIFIC_NOTATION = Pattern.compile("\\d+(\\.\\d+)?e[+-]\\d+");
   private static final int SKIP_CHAR = -100;
   private static final int PROPARSE_DIRECTIVE = -101;
   private static final int INCLUDE_DIRECTIVE = -102;
@@ -771,6 +772,8 @@ public class Lexer implements IPreprocessor {
           stop = true;
       }
     }
+    if (SCIENTIFIC_NOTATION.matcher(currText).matches())
+      ttype = ABLNodeType.NUMBER;
 
     return makeToken(ttype);
   }
