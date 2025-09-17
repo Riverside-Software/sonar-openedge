@@ -53,6 +53,20 @@ public class ABLLexerTest {
   }
 
   @Test
+  public void testScientificNotation01() {
+    final var source = "6.02214076 6.02214076e+23 1.456e-3 4.246e+4 6779.0 23766e-1 .23e-1 ";
+    var lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);
+
+    assertNextTokenTypeWS(lexer, ABLNodeType.NUMBER, "6.02214076");
+    assertNextTokenTypeWS(lexer, ABLNodeType.NUMBER, "6.02214076e+23");
+    assertNextTokenTypeWS(lexer, ABLNodeType.NUMBER, "1.456e-3");
+    assertNextTokenTypeWS(lexer, ABLNodeType.NUMBER, "4.246e+4");
+    assertNextTokenTypeWS(lexer, ABLNodeType.NUMBER, "6779.0");
+    assertNextTokenTypeWS(lexer, ABLNodeType.NUMBER, "23766e-1");
+    assertNextTokenTypeWS(lexer, ABLNodeType.FILENAME, ".23e-1");
+  }
+
+  @Test
   public void testDecimalNumber01() {
     final String source = "rct1:height = 0.1\n rct1:row ";
     ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(source.getBytes()), true);

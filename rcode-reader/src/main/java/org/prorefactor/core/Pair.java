@@ -19,6 +19,8 @@
  */
 package org.prorefactor.core;
 
+import java.util.Objects;
+
 public class Pair<X, Y> {
   private final X o1;
   private final Y o2;
@@ -43,5 +45,18 @@ public class Pair<X, Y> {
   @Override
   public String toString() {
     return "<" + o1.toString() + ", " + o2.toString() + ">";
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other instanceof Pair pair2) {
+      return Objects.equals(o1, pair2.o1) && Objects.equals(o2, pair2.o2);
+    } else
+      return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(o1, o2);
   }
 }

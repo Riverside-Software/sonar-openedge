@@ -128,7 +128,7 @@ public class DatabaseDescription {
             throw new IOException("Invalid file format: " + line);
           Index i = new Index(lst[0].substring(1));
           i.setUnique(lst[1].indexOf('U') > -1);
-          i.setPrimary(lst[2].indexOf('P') > -1);
+          i.setPrimary(lst[1].indexOf('P') > -1);
           for (int zz = 2; zz < lst.length; zz++) {
             i.addField(new IndexField(currTbl.getField(lst[zz].substring(1)), lst[zz].charAt(0) == 'A'));
           }

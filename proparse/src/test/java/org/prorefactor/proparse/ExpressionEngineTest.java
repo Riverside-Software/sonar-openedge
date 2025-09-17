@@ -96,7 +96,7 @@ public class ExpressionEngineTest extends AbstractProparseTest {
   @Test
   public void testNamedMemberArray01() {
     ParseUnit unit = getParseUnit(
-        "define temp-table tt1 field fld1 as int extent. define buffer b1 for tt1. buffer b1::fld1(1).", session);
+        "define temp-table tt1 field fld1 as int extent. temp-table tt1::fld1(1).", session);
     unit.treeParser01();
     List<IExpression> nodes = unit.getTopNode().queryExpressions();
     assertEquals(nodes.size(), 1);

@@ -1,9 +1,11 @@
+<h2>Why is this an issue?</h2>
 <p>The user defined function or method has a return statement but it does not return a value.
 User defined functions always return a value, as do non-void methods. If this RETURN statement
 is executed, it will result in the function evaluating to the unknown value.
 </p>
 
-<h2>Noncompliant Code Example</h2>
+<h2>How to fix it</h2>
+<h3>Noncompliant Code Example</h3>
 <pre>
 FUNCTION f1 RETURNS CHARACTER (ipCondition AS CHARACTER):
   IF (ipCondition EQ ?) THEN RETURN. // Will return unknown value
@@ -12,7 +14,7 @@ FUNCTION f1 RETURNS CHARACTER (ipCondition AS CHARACTER):
 END FUNCTION.
 </pre>
 
-<h2>Compliant Solution</h2>
+<h3>Compliant Solution</h3>
 <pre>
 FUNCTION f1 RETURNS CHARACTER (ipCondition AS CHARACTER):
   IF (ipCondition EQ ?) THEN RETURN ''. // Usually better to return an empty string

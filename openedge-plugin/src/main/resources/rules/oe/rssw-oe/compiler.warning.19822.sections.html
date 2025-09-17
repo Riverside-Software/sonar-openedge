@@ -1,6 +1,8 @@
+<h2>Why is this an issue?</h2>
 <p>All code paths in a function or a method must return a value. Method or function will return an unkwnown value (i.e. ?) if no RETURN statement is found in the body, while the consumer of the method / function would expect the specified return data type.</p>
 
-<h2>Noncompliant Code Example</h2>
+<h2>How to fix it</h2>
+<h3>Noncompliant Code Example</h3>
 <pre>
 FUNCTION f1 RETURNS CHARACTER:
   IF (condition) THEN
@@ -9,7 +11,7 @@ FUNCTION f1 RETURNS CHARACTER:
 END FUNCTION.
 </pre>
 
-<h2>Compliant Solution</h2>
+<h3>Compliant Solution</h3>
 <pre>
 FUNCTION f1 RETURNS CHARACTER:
   IF (condition) THEN

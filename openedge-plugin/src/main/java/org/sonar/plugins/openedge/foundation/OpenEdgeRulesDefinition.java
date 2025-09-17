@@ -21,7 +21,7 @@ package org.sonar.plugins.openedge.foundation;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
@@ -43,13 +43,16 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
   public static final String PROPARSE_ERROR_RULEKEY = "proparse.error";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenEdgeRulesDefinition.class);
-  private static final String HTML_DOC_PATH = "/rules/%s/%s/%s.html";
+
+  private static final String HTML_DOC_PATH = "/rules/%s/%s/";
   private static final int[] WARNING_MSGS = {
       214, 1688, 2750, 2965, 4788, 4958, 5378, 12115, 14786, 14789, 15090, 18494, 19822};
 
+  private final String basePath;
   private final SonarRuntime runtime;
 
   public OpenEdgeRulesDefinition(SonarRuntime runtime) {
+    this.basePath = String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY, Constants.STD_REPOSITORY_KEY);
     this.runtime = runtime;
   }
 
@@ -74,11 +77,11 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     }
 
     // Manually created rule for proparse errors
-    repository.createRule(PROPARSE_ERROR_RULEKEY) //
+    var rule = repository.createRule(PROPARSE_ERROR_RULEKEY) //
       .setName("Proparse error") //
       .setSeverity(Priority.INFO.name()) //
-      .setType(RuleType.BUG) //
-      .setHtmlDescription(getDescriptionUrl(PROPARSE_ERROR_RULEKEY));
+      .setType(RuleType.BUG); //
+    setupDocumentation(rule, PROPARSE_ERROR_RULEKEY);
     repository.done();
 
     var repository2 = context //
@@ -99,14 +102,14 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
   }
 
   private NewRule createWarningRule(NewRepository repository, RuleDefinition def, boolean cleanCode) {
-    var rule = repository.createRule(def.key); //
+    var rule = repository.createRule(def.key);
     rule.setName(def.name) //
       .setSeverity(def.priority) //
       .setTags(def.tags) //
       .addTags("compiler-warnings") //
       .setType(RuleType.CODE_SMELL) //
-      .setHtmlDescription(getDescriptionUrl(def.key)) //
       .setDebtRemediationFunction(rule.debtRemediationFunctions().constantPerIssue(def.remediationCost + "min"));
+    setupDocumentation(rule, def.key);
     if (cleanCode) {
       rule.setCleanCodeAttribute(Constants.lookupCleanCodeAttribute(def.cleanCodeAttribute));
       for (var impact : def.impacts) {
@@ -118,10 +121,15 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     return rule;
   }
 
-  private URL getDescriptionUrl(String key) {
-    return getClass().getResource(
-        String.format(HTML_DOC_PATH, Constants.LANGUAGE_KEY, Constants.STD_REPOSITORY_KEY, key));
-  }
+  private void setupDocumentation(NewRule rule, String key) {
+    try (var in = getClass().getResource(basePath + key + ".sections.html").openStream()) {
+      var desc = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+      rule.setHtmlDescription(desc); // Compatibility with old versions of SonarQube
+      AnnotationBasedRulesDefinition.setupEducationDocumentation(rule, desc);
+    } catch (IOException caught) {
+      rule.setHtmlDescription("<p>Invalid description</p>");
+    }
+  } 
 
   private static final class RuleDefinition {
     String key;

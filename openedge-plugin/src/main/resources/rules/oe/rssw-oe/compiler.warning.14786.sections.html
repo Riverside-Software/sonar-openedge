@@ -1,13 +1,15 @@
+<h2>Why is this an issue?</h2>
 <p>All table and field names must appear as they are in the schema.</p>
 
-<h2>Noncompliant Code Example</h2>
+<h2>How to fix it</h2>
+<h3>Noncompliant Code Example</h3>
 <pre>
 /* On sports2000 database */
 FIND FIRST custome.
 DISP cust.custnu.
 </pre>
 
-<h2>Compliant Solution</h2>
+<h3>Compliant Solution</h3>
 <pre>
 FIND FIRST customer.
 DISP customer.custnum.

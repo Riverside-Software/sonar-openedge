@@ -5,7 +5,7 @@
 
   <groupId>eu.rssw</groupId>
   <artifactId>sonar-openedge</artifactId>
-  <version>3.3.1</version>
+  <version>3.4.0</version>
   <packaging>pom</packaging>
 
   <name>OpenEdge plugin for SonarQube</name>
@@ -72,7 +72,7 @@
         <plugin>
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
-          <version>5.0.0.4389</version>
+          <version>5.1.0.4751</version>
         </plugin>
         <plugin>
           <groupId>org.jacoco</groupId>
@@ -168,7 +168,7 @@
             <extensions>true</extensions>
             <configuration>
               <publishingServerId>central</publishingServerId>
-              <deploymentName>sonar-openedge ${version}</deploymentName>
+              <deploymentName>sonar-openedge ${project.version}</deploymentName>
             </configuration>
           </plugin>
         </plugins>

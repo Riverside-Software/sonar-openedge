@@ -1,10 +1,12 @@
+<h2>Why is this an issue?</h2>
 <p>A preprocessor expression, such as would appear in an &amp;IF or &amp;ELSEIF, contained an element that was not a constant. Progress preprocessor expressions must consist solely of constants or of preprocessor names that expand to constants.
 For example: &amp;IF A &lt; 3 &amp;THEN ... is incorrect, because A is not a constant or a preprocessor reference that expands to a constant.</p>
 <p>As the compiler will (almost) silently discard the entire code block in the &amp;THEN or &amp;ELSE block, this issue should absolutely be fixed</p>
 
 <p><b>Please note that an issue in the OpenEdge compiler prevents this warning to be reported at the right line number. This is the case up to 11.7</b></p>
 
-<h2>Noncompliant Code Example</h2>
+<h2>How to fix it</h2>
+<h3>Noncompliant Code Example</h3>
 <pre>
 &amp;SCOPED-DEFINE VAR1 xxx
 &amp;SCOPED-DEFINE VAR2 yyy
@@ -13,7 +15,7 @@ For example: &amp;IF A &lt; 3 &amp;THEN ... is incorrect, because A is not a con
 &amp;ENDIF
 </pre>
 
-<h2>Compliant Solution</h2>
+<h3>Compliant Solution</h3>
 <pre>
 &amp;SCOPED-DEFINE VAR1 xxx
 &amp;SCOPED-DEFINE VAR2 yyy

@@ -161,6 +161,28 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
 
     return createIssue(file, node.getToken(), msg, exactLocation);
   }
+  
+  /**
+   * Create new issue on input file by file name at a specific line.
+   */
+  protected NewIssue createIssue(InputFile file, String fileName, int lineNumber, String msg) {
+    NewIssue issue = getContext().newIssue();
+    InputFile targetFile = getInputFile(fileName);
+    if (targetFile == null)
+      return null;
+    NewIssueLocation location = issue.newLocation().on(targetFile);
+    if (targetFile == file) {
+      location.message(msg);
+    } else {
+      location.message(MessageFormat.format(INC_MESSAGE, file.toString(), msg));
+    }
+    if (lineNumber > 0) {
+      location.at(targetFile.selectLine(lineNumber));
+    }
+    issue.forRule(getRuleKey()).at(location).save();
+
+    return issue;  
+  }
 
   protected void addLocation(NewIssue issue, InputFile file, JPNode node, String msg, boolean exactLocation) {
     InputFile targetFile = getInputFile(file, node.firstNaturalChild());
@@ -312,6 +334,10 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     }
   }
 
+  protected InputFile getInputFilebyName(String fileName) {
+    return getInputFile(fileName);
+  }
+  
   protected InputFile getInputFile(InputFile file, JPNode node) {
     return node.getFileIndex() == 0 ? file : getInputFile(node.getFileName());
   }

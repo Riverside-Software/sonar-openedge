@@ -15,12 +15,15 @@
 package org.prorefactor.proparse;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
+import org.prorefactor.core.Pair;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
@@ -56,6 +59,10 @@ public class CognitiveComplexityTest extends AbstractProparseTest {
     visitor.walkStatementBlock(mainBlock);
     assertEquals(visitor.getComplexity(), 6);
     assertEquals(visitor.getMainFileComplexity(), 6);
+    var positions = visitor.getItems().stream().map(
+        it -> Pair.of(it.getO1().getLine(), it.getO1().getColumn())).toList();
+    var expectedPositions = List.of(Pair.of(6, 0), Pair.of(8, 0), Pair.of(11, 0), Pair.of(12, 2), Pair.of(14, 2));
+    assertEqualsNoOrder(positions, expectedPositions);
 
     var p1Routine = unit.getRootScope().getRoutines().stream().filter(it -> "p1".equals(it.getName())).findAny().get();
     var p1Block = p1Routine.getRoutineScope().getRootBlock().getNode().asIStatementBlock();
@@ -63,6 +70,10 @@ public class CognitiveComplexityTest extends AbstractProparseTest {
     p1Visitor.walkStatementBlock(p1Block);
     assertEquals(p1Visitor.getComplexity(), 5);
     assertEquals(p1Visitor.getMainFileComplexity(), 5);
+    var positions2 = p1Visitor.getItems().stream().map(
+        it -> Pair.of(it.getO1().getLine(), it.getO1().getColumn())).toList();
+    var expectedPositions2 = List.of(Pair.of(22, 2), Pair.of(24, 2), Pair.of(26, 2), Pair.of(26, 14), Pair.of(28, 2));
+    assertEqualsNoOrder(positions2, expectedPositions2);
   }
 
   @Test
@@ -254,4 +265,59 @@ public class CognitiveComplexityTest extends AbstractProparseTest {
     assertEquals(i6.get().getO2(), 0);
   }
 
+  @Test
+  public void test08() {
+    var unit = getParseUnit(new File(SRC_DIR + "/test08.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    var mainRoutine = unit.getRootScope().getRoutine();
+    var mainBlock = mainRoutine.getRoutineScope().getRootBlock().getNode().asIStatementBlock();
+    var visitor = new CognitiveComplexityListener(mainBlock);
+    visitor.walkStatementBlock(mainBlock);
+    assertEquals(visitor.getComplexity(), 3);
+    assertEquals(visitor.getMainFileComplexity(), 3);
+
+    var items = visitor.getItems();
+    var lines = items.stream().map(it -> it.getO1().getLine()).sorted().toList();
+    assertEquals(lines, List.of(7, 8, 11));
+  }
+
+  @Test
+  public void test09() {
+    var unit = getParseUnit(new File(SRC_DIR + "/test09.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    var mainRoutine = unit.getRootScope().getRoutine();
+    var mainBlock = mainRoutine.getRoutineScope().getRootBlock().getNode().asIStatementBlock();
+    var visitor = new CognitiveComplexityListener(mainBlock);
+    visitor.walkStatementBlock(mainBlock);
+    assertEquals(visitor.getComplexity(), 8);
+    assertEquals(visitor.getMainFileComplexity(), 8);
+
+    var positions = visitor.getItems().stream().map(
+        it -> Pair.of(it.getO1().getLine(), it.getO1().getColumn())).toList();
+    var expectedPositions = List.of(Pair.of(11, 4), Pair.of(15, 6), Pair.of(15, 29));
+    assertEqualsNoOrder(positions, expectedPositions);
+  }
+
+  @Test
+  public void test10() {
+    var unit = getParseUnit(new File(SRC_DIR + "/test10.p"), session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    var mainRoutine = unit.getRootScope().getRoutine();
+    var mainBlock = mainRoutine.getRoutineScope().getRootBlock().getNode().asIStatementBlock();
+    var visitor = new CognitiveComplexityListener(mainBlock);
+    visitor.walkStatementBlock(mainBlock);
+    assertEquals(visitor.getComplexity(), 5);
+    assertEquals(visitor.getMainFileComplexity(), 5);
+
+    var positions = visitor.getItems().stream().map(
+        it -> Pair.of(it.getO1().getLine(), it.getO1().getColumn())).toList();
+    var expectedPositions = List.of(Pair.of(11, 0), Pair.of(11, 9), Pair.of(11, 16), Pair.of(11, 23), Pair.of(15, 0));
+    assertEqualsNoOrder(positions, expectedPositions);
+  }
 }

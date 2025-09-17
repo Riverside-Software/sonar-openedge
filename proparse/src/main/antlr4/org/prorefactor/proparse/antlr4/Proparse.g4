@@ -660,20 +660,20 @@ expressionTerm2:
 
 widName:
     systemHandleName
-  | DATASET identifier
-  | DATASOURCE identifier
+  | DATASET datasetIdentifier
+  | DATASOURCE dataSourceIdentifier
   | FIELD fieldExpr
-  | FRAME identifier
-  | MENU identifier
-  | SUBMENU identifier
-  | MENUITEM identifier
-  | BROWSE identifier
-  | QUERY identifier
-  | TEMPTABLE identifier
-  | BUFFER identifier
-  | XDOCUMENT identifier
-  | XNODEREF identifier
-  | SOCKET identifier
+  | FRAME frameIdentifier
+  | MENU menuIdentifier
+  | SUBMENU subMenuIdentifier
+  | MENUITEM menuItemIdentifier
+  | BROWSE browseIdentifier
+  | QUERY queryIdentifier
+  | TEMPTABLE tempTableIdentifier
+  | BUFFER bufferIdentifier
+  | XDOCUMENT xDocIdentifier
+  | XNODEREF xNodeRefIdentifier
+  | SOCKET socketIdentifier
   | STREAM streamname
   ;
 
@@ -756,7 +756,55 @@ widgetname:
     identifier
   ;
 
+bufferIdentifier:
+    identifier
+  ;
+
+datasetIdentifier:
+    identifier
+  ;
+
+dataSourceIdentifier:
+    identifier
+  ;
+
+frameIdentifier:
+    identifier
+  ;
+
+menuIdentifier:
+    identifier
+  ;
+
+menuItemIdentifier:
+    identifier
+  ;
+
+subMenuIdentifier:
+    identifier
+  ;
+
+browseIdentifier:
+    identifier
+  ;
+
 queryIdentifier:
+    identifier
+  ;
+
+tempTableIdentifier:
+    identifier
+  ;
+
+xDocIdentifier:
+    identifier
+  ;
+
+xNodeRefIdentifier:
+    identifier
+  ;
+
+socketIdentifier:
     identifier
   ;
 
@@ -886,7 +934,7 @@ aaTraceStatement:
   ;
 
 accumulateWhat:
-    AVERAGE | COUNT | MAXIMUM | MINIMUM | TOTAL | SUBAVERAGE | SUBCOUNT | SUBMAXIMUM | SUBMINIMUM | SUBTOTAL | SUM
+    AVERAGE | AVG | COUNT | MAXIMUM | MINIMUM | TOTAL | SUBAVERAGE | SUBCOUNT | SUBMAXIMUM | SUBMINIMUM | SUBTOTAL | SUM
   ;
 
 accumulateStatement:
@@ -1160,7 +1208,7 @@ classEnd:
 
 enumStatement:
     ENUM tn=typeName2 { support.defineEnum($tn.text); } FLAGS? blockColon
-    defEnumStatement+
+    defEnumStatement*
     enumEnd
     statementEnd
   ;
@@ -1490,6 +1538,7 @@ currentValueFunction:
 datatype:
     CLASS typeName
   | datatypeVar
+  | { !support.isDataTypeVariable(_input.LT(1)) }? typeName
   ;
 
 // Ambig: An unreservedkeyword can be a class name (user defined type).
@@ -1525,7 +1574,6 @@ datatypeVar:
   | UNSIGNEDSHORT
   | UNSIGNEDINTEGER
   | { ABLNodeType.abbrevDatatype(_input.LT(1).getText()) != ABLNodeType.INVALID_NODE  }? id=ID // Like 'i' for INTEGER or 'de' for DECIMAL
-  | { !support.isDataTypeVariable(_input.LT(1)) }? typeName
   ;
 
 ddeAdviseStatement:

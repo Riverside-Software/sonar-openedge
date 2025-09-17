@@ -23,7 +23,7 @@ procedure p1:
     message "x1".
   else if x2 then // +1
     message "x2".
-  else if (x3 and x4) then // +1 and +1
+  else if (x3 and x4) then // +1 (else) and +1 (extra condition)
     message "x3".
   else // +1
     message "x4".

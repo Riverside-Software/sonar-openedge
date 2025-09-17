@@ -1,8 +1,10 @@
+<h2>Why is this an issue?</h2>
 <p>This rule raises an issue whenever an <code>IMPORT UNFORMATTED</code> statement references more than one field.</p>
 <p>The <code>UNFORMATTED</code> phrase of the <code>IMPORT</code> statement implies that all data on the input line should be read into the first field in the <code>IMPORT</code> statement without regard to delimiters in the data.
 Your code has multiple fields listed in the <code>IMPORT</code> statement; subsequent fields will not be used in the <code>IMPORT</code> statement at runtime.</p> 
 
-<h2>Noncompliant Code Example</h2>
+<h2>How to fix it</h2>
+<h3>Noncompliant Code Example</h3>
 <pre>
 DEFINE VARIABLE x1 AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE x2 AS CHARACTER   NO-UNDO.
@@ -10,7 +12,7 @@ DEFINE VARIABLE x2 AS CHARACTER   NO-UNDO.
 IMPORT UNFORMATTED x1 x2. // x2 will always be empty
 </pre>
 
-<h2>Compliant Solution</h2>
+<h3>Compliant Solution</h3>
 <pre>
 DEFINE VARIABLE x1 AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE x2 AS CHARACTER   NO-UNDO.
