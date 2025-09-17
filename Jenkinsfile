@@ -25,7 +25,7 @@ pipeline {
                   sh '$MVN_HOME/bin/mvn -s ${MAVEN_SETTINGS} -P release clean deploy -Dgit.commit=\$(git rev-parse --short HEAD)'
                 }
               }
-              mail body: "https://central.sonatype.com/publishing/deployments", to: "g.querret@riverside-software.fr", subject: "sonar-openedge - Publish artifact on Central"
+              mail body: "https://central.sonatype.com/publishing/deployments", to: "jenkins-reports@riverside-software.fr", subject: "sonar-openedge - Publish artifact on Central"
             } else if ("develop" == env.BRANCH_NAME) {
               sh "$MVN_HOME/bin/mvn clean javadoc:javadoc deploy -Dmaven.test.failure.ignore=true -Dgit.commit=\$(git rev-parse --short HEAD)"
             } else if (env.BRANCH_NAME.startsWith("release") || env.BRANCH_NAME.startsWith("hotfix")) {
