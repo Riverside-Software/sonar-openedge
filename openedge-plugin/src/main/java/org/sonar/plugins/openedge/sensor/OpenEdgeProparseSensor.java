@@ -160,7 +160,7 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     settings.init();
     components.init(context);
-    boolean skipUnchangedFiles = settings.skipUnchangedFiles();
+    boolean skipUnchangedFiles = context.canSkipUnchangedFiles();
     if (skipUnchangedFiles)
       LOG.info("Unchanged files will be skipped during the analysis (SonarQube DE or more, version 9.9 or more, and sonar.pullrequest.branch is set)");
 

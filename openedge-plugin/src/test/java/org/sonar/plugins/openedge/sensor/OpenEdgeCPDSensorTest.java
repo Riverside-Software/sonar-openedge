@@ -29,10 +29,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
-import java.util.List;
-
-import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.Constants;
@@ -45,16 +41,15 @@ public class OpenEdgeCPDSensorTest {
 
   @Test
   public void testCPDSensor() throws Exception {
-    MapSettings settings = new MapSettings();
+    var settings = new MapSettings();
     settings.setProperty(Constants.USE_SIMPLE_CPD, true);
 
-    SensorContextTester context = TestProjectSensorContext.createContext();
+    var context = TestProjectSensorContext.createContext();
     context.setSettings(settings);
 
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
-    OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings, components);
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    var components = new OpenEdgeComponents(context.config());
+    var sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
     assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE3));
@@ -67,11 +62,10 @@ public class OpenEdgeCPDSensorTest {
 
   @Test
   public void testCPDSensor02() throws Exception {
-    SensorContextTester context = TestProjectSensorContext.createContext();
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
-        OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
-    OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings, components);
+    var context = TestProjectSensorContext.createContext();
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    var components = new OpenEdgeComponents(context.config());
+    var sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
     assertNull(context.cpdTokens(BASEDIR + ":" + FILE3));
@@ -81,14 +75,14 @@ public class OpenEdgeCPDSensorTest {
 
   @Test
   public void testCPDSensorNoBranch() throws Exception {
-    MapSettings settings = new MapSettings();
+    var settings = new MapSettings();
     settings.setProperty(Constants.USE_SIMPLE_CPD, true);
-    SensorContextTester context = TestProjectSensorContext.createContext();
+    var context = TestProjectSensorContext.createContext();
     context.setSettings(settings);
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_DE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
-    OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings, components);
+    var components = new OpenEdgeComponents(context.config());
+    var sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
     assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE3));
@@ -98,23 +92,23 @@ public class OpenEdgeCPDSensorTest {
 
   @Test
   public void testCPDSensorBranch() throws Exception {
-    SensorContextTester context = TestProjectSensorContext.createContext();
+    var context = TestProjectSensorContext.createContext();
     context.settings().setProperty(Constants.USE_SIMPLE_CPD, true);
-    context.settings().setProperty("sonar.pullrequest.branch", "PR1");
-    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
+    context.setCanSkipUnchangedFiles(true);
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_DE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
-    OpenEdgeDependenciesSensor sensor01 = new OpenEdgeDependenciesSensor(oeSettings, components);
+    var components = new OpenEdgeComponents(context.config());
+    var sensor01 = new OpenEdgeDependenciesSensor(oeSettings, components);
     sensor01.execute(context);
-    InputFile test3 = context.fileSystem().inputFile(
+    var test3 = context.fileSystem().inputFile(
         context.fileSystem().predicates().hasRelativePath("src/procedures/test3.p"));
     assertNotNull(test3);
-    List<String> deps = components.getIncludeDependencies(test3.uri().toString());
+    var deps = components.getIncludeDependencies(test3.uri().toString());
     assertFalse(deps.isEmpty());
-    String str = deps.get(0);
+    var str = deps.get(0);
     assertEquals(str, "src\\procedures\\test3.i");
 
-    OpenEdgeCPDSensor sensor = new OpenEdgeCPDSensor(oeSettings, components);
+    var sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
     // No CPD tokens on unchanged files

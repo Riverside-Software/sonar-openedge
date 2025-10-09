@@ -562,15 +562,6 @@ public class OpenEdgeSettings {
       return rtbCompatibility ? getFileFromRtbListDir(relPath, ".l") : getFileFromPctDirs(relPath);
   }
 
-  public boolean skipUnchangedFiles() {
-    if (runtime.getProduct() != SonarProduct.SONARQUBE)
-      return false;
-    boolean developerOrMore = ((runtime.getEdition() == SonarEdition.DEVELOPER)
-        || (runtime.getEdition() == SonarEdition.ENTERPRISE) || (runtime.getEdition() == SonarEdition.DATACENTER));
-    boolean version99OrMore = runtime.getApiVersion().isGreaterThanOrEqual(Version.create(9, 9));
-    return developerOrMore && version99OrMore && config.get("sonar.pullrequest.branch").isPresent();
-  }
-
   public boolean useCache() {
     if (runtime.getProduct() != SonarProduct.SONARQUBE)
       return false;

@@ -72,7 +72,7 @@ public class OpenEdgeWarningsSensor implements Sensor {
       return;
     settings.init();
 
-    boolean skipUnchangedFiles = settings.skipUnchangedFiles();
+    boolean skipUnchangedFiles = context.canSkipUnchangedFiles();
 
     int warningsImportNum = 0;
     final RuleKey defaultWarningRuleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY,
