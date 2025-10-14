@@ -69,7 +69,7 @@ public class OpenEdgeCodeColorizer implements Sensor {
       return;
     settings.init();
     IRefactorSessionEnv sessions = settings.getProparseSessions();
-    boolean skipUnchangedFiles = settings.skipUnchangedFiles();
+    boolean skipUnchangedFiles = context.canSkipUnchangedFiles();
     for (InputFile file : context.fileSystem().inputFiles(
         context.fileSystem().predicates().hasLanguage(Constants.LANGUAGE_KEY))) {
       if (skipUnchangedFiles && !components.isChanged(context, file)) {
