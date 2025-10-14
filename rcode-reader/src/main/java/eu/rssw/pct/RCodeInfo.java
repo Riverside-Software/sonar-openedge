@@ -156,8 +156,6 @@ public class RCodeInfo {
         processTypeBlock(input.readNBytes(typeBlockSize), out);
         isClass = true;
       }
-  
-      input.close();
     } catch (IndexOutOfBoundsException caught) {
       // Prevent RuntimeException from bubbling up
       throw new InvalidRCodeException(caught);
