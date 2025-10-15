@@ -25,12 +25,13 @@ public class NodeTypesTest {
 
   @Test
   public void testRange() {
-    for (ABLNodeType type : ABLNodeType.values()) {
+    for (var type : ABLNodeType.values()) {
       assertTrue(type.getType() >= -1020);
-      // This test ensures that no token is created during the parser generation (i.e. tokens found in proparse.g4,
-      // but not found in BaseTokenTypes.tokens)
-      assertTrue(type.getType() < Proparse.Last_Token_Number, "Invalid token: " + type.toString());
     }
+    // This test ensures that no token is created during the parser generation (i.e. tokens found in proparse.g4,
+    // but not found in BaseTokenTypes.tokens)
+    assertTrue(Proparse.VOCABULARY.getMaxTokenType() <= Proparse.Last_Token_Number, Proparse.VOCABULARY.getMaxTokenType()
+        + " tokens defined in grammar, exceeds lastTokenNumber in BaseTokenTypes: " + Proparse.Last_Token_Number);
   }
 
 }

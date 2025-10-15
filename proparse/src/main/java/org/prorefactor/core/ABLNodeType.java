@@ -604,6 +604,9 @@ public enum ABLNodeType {
   ESCAPE(Proparse.ESCAPE, "escape", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   ETIME(Proparse.ETIME, "etime", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   EVENT(Proparse.EVENT, "event", NodeTypesOption.KEYWORD),
+  EVENTHANDLER(Proparse.EVENTHANDLER, "event-handler", NodeTypesOption.KEYWORD),
+  EVENTHANDLERCONTEXT(Proparse.EVENTHANDLERCONTEXT, "event-handler-context", NodeTypesOption.KEYWORD),
+  EVENTHANDLEROBJECT(Proparse.EVENTHANDLEROBJECT, "event-handler-object", NodeTypesOption.KEYWORD),
   EVENTPROCEDURE(Proparse.EVENTPROCEDURE, "event-procedure", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   EVENTS(Proparse.EVENTS, "events", NodeTypesOption.KEYWORD),
   EVENTTYPE(Proparse.EVENTTYPE, "event-type", 7, NodeTypesOption.KEYWORD),
@@ -2100,9 +2103,6 @@ public enum ABLNodeType {
       "error-stack-trace", //
       "error-string", //
       "event-group-id", //
-      "event-handler", //
-      "event-handler-context", //
-      "event-handler-object", //
       "event-procedure-context", //
       "exclusive-id", //
       "execution-log", //
