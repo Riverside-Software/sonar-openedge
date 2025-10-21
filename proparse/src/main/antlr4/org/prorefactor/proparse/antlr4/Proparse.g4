@@ -3821,7 +3821,7 @@ waitForFocus:
   ;
 
 waitForSet:
-    SET fieldExpr
+    SET expression
   ;
 
 whenExpression:

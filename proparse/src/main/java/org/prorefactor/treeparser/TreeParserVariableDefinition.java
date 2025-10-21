@@ -2015,7 +2015,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterWaitForSet(WaitForSetContext ctx) {
-    setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.expression(), ContextQualifier.UPDATING);
   }
 
   // ******************

@@ -1282,4 +1282,14 @@ public class ParserTest extends AbstractProparseTest {
     assertFalse(list03.isEmpty());
     assertEquals(list03.get(0).getDirectChildren(ABLNodeType.PARAMETER_ITEM).size(), 2);
   }
+  
+  @Test
+  public void testWaitForSet() {
+    var unit = getParseUnit("WAIT-FOR xObj:methodName() SET this-object:attrName.", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+  
+
 }
