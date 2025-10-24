@@ -114,8 +114,8 @@ public class OpenEdgeProparseSensor implements Sensor {
   private int numXREF;
   private int numListings;
   private int numFailures;
-  private int ncLoc;
-  private int ncLocL2;
+  private int ncLocCABL;
+  private int ncLocSQ;
 
   // Include files LOC
   private Map<String, IntervalSet> incLinesOfOCode = new HashMap<>();
@@ -162,7 +162,8 @@ public class OpenEdgeProparseSensor implements Sensor {
     components.init(context);
     boolean skipUnchangedFiles = context.canSkipUnchangedFiles();
     if (skipUnchangedFiles)
-      LOG.info("Unchanged files will be skipped during the analysis (SonarQube DE or more, version 9.9 or more, and sonar.pullrequest.branch is set)");
+      LOG.info(
+          "Unchanged files will be skipped during the analysis (SonarQube DE or more, version 9.9 or more, and sonar.pullrequest.branch is set)");
 
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
       ruleTime.put(entry.getKey().ruleKey().toString(), 0L);
@@ -203,7 +204,7 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
     }
 
-    // Publish consolidated LOC-L2 of all include files 
+    // Publish consolidated OENCLOC of all include files
     publishIncLocL2(context);
     computeAnalytics(context);
     if (context.runtime().getProduct() == SonarProduct.SONARQUBE)
@@ -235,9 +236,9 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     if (lexUnit.getMetrics() != null) {
       // Saving LOC and COMMENTS metrics
-      context.newMeasure().on(file).forMetric((Metric) CoreMetrics.NCLOC).withValue(
+      context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.OELIC_NCLOC_L3).withValue(
           lexUnit.getMetrics().getLoc()).save();
-      ncLoc += lexUnit.getMetrics().getLoc();
+      ncLocCABL += lexUnit.getMetrics().getLoc();
       context.newMeasure().on(file).forMetric((Metric) CoreMetrics.COMMENT_LINES).withValue(
           lexUnit.getMetrics().getComments()).save();
     }
@@ -352,8 +353,8 @@ public class OpenEdgeProparseSensor implements Sensor {
       RecognitionException cause = (RecognitionException) caught.getCause();
       ProToken tok = (ProToken) cause.getOffendingToken();
       if (settings.displayStackTraceOnError()) {
-        LOG.error("Parser error in '" + file + "' at position " + tok.getFileName() + ":" + tok.getLine()
-            + ":" + tok.getCharPositionInLine(), cause);
+        LOG.error("Parser error in '" + file + "' at position " + tok.getFileName() + ":" + tok.getLine() + ":"
+            + tok.getCharPositionInLine(), cause);
       } else {
         LOG.error("Parser error in '{}' at position {}:{}:{}", file, tok.getFileName(), tok.getLine(),
             tok.getCharPositionInLine());
@@ -413,7 +414,7 @@ public class OpenEdgeProparseSensor implements Sensor {
     }
 
     if (settings.useProparseDebug() && matchDebugInclude(file.toString())) {
-        generateProparseDebugFile(context, file, unit);
+      generateProparseDebugFile(context, file, unit);
     }
 
     for (Map.Entry<ActiveRule, OpenEdgeProparseCheck> entry : components.getProparseRules().entrySet()) {
@@ -441,18 +442,19 @@ public class OpenEdgeProparseSensor implements Sensor {
   private void computeAnalytics(SensorContext context) {
     // Store values in OpenEdgeComponents instance. Used by client-side sensor in rules package.
     components.setAnalytics(String.format(
-        "files=%1$d,failures=%2$d,parseTime=%3$d,maxParseTime=%4$d,ncloc=%5$d,nclocl2=%6$d,oeversion=\"%7$s\"",
-        numFiles, numFailures, parseTime, maxParseTime, ncLoc, ncLocL2, settings.getOpenEdgePluginVersion()));
-    components.setNcLoc(ncLoc);
-    components.setNcLocL2(ncLocL2);
+        "files=%1$d,failures=%2$d,parseTime=%3$d,maxParseTime=%4$d,ncloc=%5$d,nclocl3=%6$d,oeversion=\"%7$s\"",
+        numFiles, numFailures, parseTime, maxParseTime, ncLocSQ, ncLocCABL, settings.getOpenEdgePluginVersion()));
+    components.setNcLocCABL(ncLocCABL);
+    components.setNcLocSQ(ncLocSQ);
+
     // And make the value available the value available to Compute Engine task
-    context.addContextProperty("sonar.oe.ncloc", Integer.toString(ncLoc));
-    context.addContextProperty("sonar.oe.nclocl2", Integer.toString(ncLocL2));
+    context.addContextProperty("sonar.oe.ncloc", Integer.toString(ncLocSQ)); // CABL licensing
+    context.addContextProperty("sonar.oe.nclocl3", Integer.toString(ncLocCABL)); // SonarQube licensing
   }
 
   private void logStatistics() {
-    LOG.info("{} files proparse'd, {} XREF files, {} listing files, {} failure(s), {} NCLOCs, {} NCLOC-L2", numFiles, numXREF,
-        numListings, numFailures, ncLoc, ncLocL2);
+    LOG.info("{} files proparse'd, {} XREF files, {} listing files, {} failure(s), {} NCLOCs, {} NCLOC-L3", numFiles,
+        numXREF, numListings, numFailures, ncLocSQ, ncLocCABL);
     LOG.info("AST Generation | time={} ms", parseTime);
     LOG.info("XREF Parsing   | time={} ms", xmlParseTime);
     LOG.info("Rules          | time={} ms", ruleTime.values().stream().reduce(0L, Long::sum));
@@ -496,11 +498,11 @@ public class OpenEdgeProparseSensor implements Sensor {
       return;
     }
 
-    try (var writer = Files.newBufferedWriter(dbgPath)
-        ) {
+    try (var writer = Files.newBufferedWriter(dbgPath)) {
       writer.write("var var" + varNum + " = ");
-      var nodeLister = new JsonNodeLister(unit.getTopNode(), writer, ABLNodeType.LEFTPAREN,
-          ABLNodeType.RIGHTPAREN, ABLNodeType.COMMA, ABLNodeType.PERIOD, ABLNodeType.LEXCOLON, ABLNodeType.OBJCOLON,ABLNodeType.END);
+      var nodeLister = new JsonNodeLister(unit.getTopNode(), writer, ABLNodeType.LEFTPAREN, ABLNodeType.RIGHTPAREN,
+          ABLNodeType.COMMA, ABLNodeType.PERIOD, ABLNodeType.LEXCOLON, ABLNodeType.OBJCOLON, ABLNodeType.THEN,
+          ABLNodeType.END);
       nodeLister.print();
       writer.write(";");
       debugFiles.add(Triplet.of(file.toString(), fName, "var" + varNum++));
@@ -558,9 +560,10 @@ public class OpenEdgeProparseSensor implements Sensor {
   @SuppressWarnings({"unchecked", "rawtypes"})
   private void computeSimpleMetrics(SensorContext context, InputFile file, ParseUnit unit) {
     // Saving LOC, COMMENTS and DIRECTIVES metrics
-    ncLoc += unit.getMetrics().getLoc();
+    ncLocCABL += unit.getMetrics().getLoc();
+    // Also store NCLOC as OENCLOCL3 (for project licensing)
     context.newMeasure().on(file) //
-      .forMetric((Metric) CoreMetrics.NCLOC) //
+      .forMetric((Metric) OpenEdgeMetrics.OELIC_NCLOC_L3) //
       .withValue(unit.getMetrics().getLoc()) //
       .save();
     context.newMeasure().on(file) //
@@ -666,11 +669,14 @@ public class OpenEdgeProparseSensor implements Sensor {
       if (editableSections != null)
         locCountMainFile = locCountMainFile.and(editableSections);
     }
-    ncLocL2 += locCountMainFile.size();
+    int l2Value = locCountMainFile.size();
+    ncLocSQ += l2Value;
+
     context.newMeasure().on(file) //
-      .forMetric((Metric) OpenEdgeMetrics.OELIC_NCLOC) //
-      .withValue(locCountMainFile.size()) //
-      .save();
+    .forMetric((Metric)  CoreMetrics.NCLOC) //
+    .withValue(l2Value) //
+    .save();
+ 
     ncLocPushed.add(file);
 
     // Then collect LOC-LC2 of all include files
@@ -695,11 +701,14 @@ public class OpenEdgeProparseSensor implements Sensor {
       }
       if ((target != null) && Constants.LANGUAGE_KEY.equals(target.language()) && !ncLocPushed.contains(target)) {
         var sz = entry.getValue().size();
+
+        // Store LOC-L2 as OENCLOC (for SonarQube)
         context.newMeasure().on(target) //
-          .forMetric((Metric) OpenEdgeMetrics.OELIC_NCLOC) //
+          .forMetric((Metric) CoreMetrics.NCLOC) //
           .withValue(sz) //
           .save();
-        ncLocL2 += sz;
+        ncLocSQ += sz;
+
         ncLocPushed.add(target);
       }
     }
