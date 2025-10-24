@@ -466,21 +466,21 @@ public class OpenEdgeProparseSensorTest {
 
     sensor.execute(context);
     assertEquals(context.measure(BASEDIR + ":" + PROC_TEST1, CoreMetrics.NCLOC.getKey()).value(), 0);
-    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST1, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 0);
-    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST2, CoreMetrics.NCLOC.getKey()).value(), 53);
-    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST2, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 26);
-    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3, CoreMetrics.NCLOC.getKey()).value(), 12);
-    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 10);
-    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3_I, CoreMetrics.NCLOC.getKey()).value(), 3);
-    // Include with no lines of code don't have an OELIC_NCLOC measure
-    assertNull(context.measure(BASEDIR + ":" + PROC_TEST3_I, OpenEdgeMetrics.OELIC_NCLOC.getKey()));
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST1, OpenEdgeMetrics.OELIC_NCLOC_L3.getKey()).value(), 0);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST2, CoreMetrics.NCLOC.getKey()).value(), 26);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST2, OpenEdgeMetrics.OELIC_NCLOC_L3.getKey()).value(), 53);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3, CoreMetrics.NCLOC.getKey()).value(), 10);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3, OpenEdgeMetrics.OELIC_NCLOC_L3.getKey()).value(), 12);
+    // Include with no lines of code don't have NCLOC measure
+    assertNull(context.measure(BASEDIR + ":" + PROC_TEST3_I, CoreMetrics.NCLOC.getKey()));
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3_I, OpenEdgeMetrics.OELIC_NCLOC_L3.getKey()).value(), 3);
     // Parser failure means no measures available
     assertNull(context.measure(BASEDIR + ":" + PROC_INVALID, CoreMetrics.NCLOC.getKey()));
-    assertNull(context.measure(BASEDIR + ":" + PROC_INVALID, OpenEdgeMetrics.OELIC_NCLOC.getKey()));
+    assertNull(context.measure(BASEDIR + ":" + PROC_INVALID, OpenEdgeMetrics.OELIC_NCLOC_L3.getKey()));
     assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3_I1, CoreMetrics.NCLOC.getKey()).value(), 1);
-    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3_I1, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 1);
-    assertEquals(context.measure(BASEDIR + ":" + CLS_TESTCLASS, CoreMetrics.NCLOC.getKey()).value(), 20);
-    assertEquals(context.measure(BASEDIR + ":" + CLS_TESTCLASS, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 17);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3_I1, OpenEdgeMetrics.OELIC_NCLOC_L3.getKey()).value(), 1);
+    assertEquals(context.measure(BASEDIR + ":" + CLS_TESTCLASS, CoreMetrics.NCLOC.getKey()).value(), 17);
+    assertEquals(context.measure(BASEDIR + ":" + CLS_TESTCLASS, OpenEdgeMetrics.OELIC_NCLOC_L3.getKey()).value(), 20);
   }
 
   private void deleteDirectoryRecursive(Path pathToBeDeleted) throws IOException {
