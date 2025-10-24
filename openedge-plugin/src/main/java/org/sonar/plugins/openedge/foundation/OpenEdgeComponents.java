@@ -77,8 +77,8 @@ public class OpenEdgeComponents {
 
   private boolean initialized = false;
   private String analytics = "";
-  private int ncLoc = 0;
-  private int ncLocL2 = 0;
+  private int ncLocCABL = 0;
+  private int ncLocSQ = 0;
   private Map<String, List<String>> includeDependencies = new HashMap<>();
 
   public OpenEdgeComponents() {
@@ -176,20 +176,20 @@ public class OpenEdgeComponents {
     return analytics;
   }
 
-  public void setNcLoc(int ncLoc) {
-    this.ncLoc = ncLoc;
+  public void setNcLocCABL(int ncLoc) {
+    this.ncLocCABL = ncLoc;
   }
 
-  public void setNcLocL2(int ncLocL2) {
-    this.ncLocL2 = ncLocL2;
+  public void setNcLocSQ(int ncLocL2) {
+    this.ncLocSQ = ncLocL2;
   }
 
-  public int getNcLoc() {
-    return ncLoc;
+  public int getNcLocCABL() {
+    return ncLocCABL;
   }
 
-  public int getNcLocL2() {
-    return ncLocL2;
+  public int getNcLocSQ() {
+    return ncLocSQ;
   }
 
   public void addIncludeDependency(String uri, List<String> dependencies) {
