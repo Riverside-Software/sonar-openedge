@@ -22,7 +22,7 @@ pipeline {
         script {
           sh '> author.txt git log --format="%ae" -n 1'
           withEnv(["PATH+MVN=${tool name: 'Maven 3', type: 'maven'}/bin", "JAVA_HOME=${tool name: 'JDK17', type: 'jdk'}"]) {
-            if ("main" == env.BRANCH_NAME) {
+            if (("main" == env.BRANCH_NAME) || env.BRANCH_NAME.startsWith("maintenance/")) {
               withSecrets() {
                 configFileProvider([configFile(fileId: 'MvnSettingsRSSW', variable: 'MAVEN_SETTINGS')]) {
                   sh 'mvn -s ${MAVEN_SETTINGS} -P release clean deploy -Dgit.commit=\$(git rev-parse --short HEAD)'
