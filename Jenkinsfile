@@ -19,7 +19,7 @@ pipeline {
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: [[credentialsId: scm.userRemoteConfigs.credentialsId[0], url: scm.userRemoteConfigs.url[0], refspec: '+refs/heads/develop:refs/remotes/origin/develop']] ])
         script {
           withEnv(["MVN_HOME=${tool name: 'Maven 3', type: 'maven'}", "JAVA_HOME=${tool name: 'JDK17', type: 'jdk'}"]) {
-            if ("main" == env.BRANCH_NAME) {
+            if (("main" == env.BRANCH_NAME) || env.BRANCH_NAME.startsWith("maintenance/")) {
               withSecrets() {
                 configFileProvider([configFile(fileId: 'MvnSettingsRSSW', variable: 'MAVEN_SETTINGS')]) {
                   sh '$MVN_HOME/bin/mvn -s ${MAVEN_SETTINGS} -P release clean deploy -Dgit.commit=\$(git rev-parse --short HEAD)'
