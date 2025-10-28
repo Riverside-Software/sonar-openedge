@@ -13,6 +13,8 @@
   <name>RCode Reader</name>
 
   <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
     <sonar.cpd.exclusions>src/main/java/eu/rssw/pct/elements/BuiltinClasses.java</sonar.cpd.exclusions>
   </properties>
 

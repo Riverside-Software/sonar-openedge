@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -188,8 +189,8 @@ public interface ITypeInfo {
       //   * If matches involve only parameter type, we return the first one (ambiguity is accepted)
       //   * If matches involve both parameter type and mode, we return the first one involving only mode
       var anyUnknown = list01.stream().anyMatch(it -> it.getO3().contains(1));
-      var paramModeList = list01.stream().filter(it -> it.getO3().contains(2)).toList();
-      var paramTypeList = list01.stream().filter(it -> it.getO3().contains(3)).toList();
+      var paramModeList = list01.stream().filter(it -> it.getO3().contains(2)).collect(Collectors.toList());
+      var paramTypeList = list01.stream().filter(it -> it.getO3().contains(3)).collect(Collectors.toList());
       if (!anyUnknown) {
         if (!paramModeList.isEmpty() && paramTypeList.isEmpty())
           return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
@@ -282,7 +283,7 @@ public interface ITypeInfo {
     Consumer<Pair<ITypeInfo, IPropertyElement>> pairConsumer = item -> {
       // Remove existing properties with same name (overidden properties)
       list.removeAll(
-          list.stream().filter(it -> it.getO2().getName().equalsIgnoreCase(item.getO2().getName())).toList());
+          list.stream().filter(it -> it.getO2().getName().equalsIgnoreCase(item.getO2().getName())).collect(Collectors.toList()));
       list.add(item);
     };
 
@@ -312,7 +313,7 @@ public interface ITypeInfo {
     Consumer<Pair<ITypeInfo, IMethodElement>> pairConsumer = item -> {
       // Remove existing methods with same signature
       list.removeAll(list.stream().filter(it -> it.getO2().getSignatureWithoutModifiers().equalsIgnoreCase(
-          item.getO2().getSignatureWithoutModifiers())).toList());
+          item.getO2().getSignatureWithoutModifiers())).collect(Collectors.toList()));
       list.add(item);
     };
 
@@ -342,7 +343,7 @@ public interface ITypeInfo {
     Consumer<Pair<ITypeInfo, IMethodElement>> pairConsumer = item -> {
       // Remove existing methods with same signature
       list.removeAll(list.stream().filter(it -> it.getO2().getSignatureWithoutModifiers().equalsIgnoreCase(
-          item.getO2().getSignatureWithoutModifiers())).toList());
+          item.getO2().getSignatureWithoutModifiers())).collect(Collectors.toList()));
       list.add(item);
     };
 

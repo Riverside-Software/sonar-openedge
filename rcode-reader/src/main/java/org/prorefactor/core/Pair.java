@@ -49,7 +49,8 @@ public class Pair<X, Y> {
 
   @Override
   public boolean equals(Object other) {
-    if (other instanceof Pair pair2) {
+    if (other instanceof Pair) {
+      var pair2 = (Pair) other;
       return Objects.equals(o1, pair2.o1) && Objects.equals(o2, pair2.o2);
     } else
       return false;
