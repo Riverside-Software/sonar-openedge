@@ -27,6 +27,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.testng.annotations.Test;
 
@@ -222,14 +223,14 @@ public class SystemHandleTest {
     assertNotNull(syshdl2);
     var list = syshdl2.getAttributes();
     assertEquals(list.size(), 12);
-    var sub = list.stream().filter(it -> "ALLOW-PREV-DESERIALIZATION".equalsIgnoreCase(it.getName())).toList();
+    var sub = list.stream().filter(it -> "ALLOW-PREV-DESERIALIZATION".equalsIgnoreCase(it.getName())).collect(Collectors.toList());
     assertEquals(sub.size(), 0);
 
     var syshdl22 = VERSION_SYS_HANDLE_PROVIDER.apply(OpenEdgeVersion.V122).apply("SECURITY-POLICY");
     assertNotNull(syshdl22);
     var list2 = syshdl22.getAttributes();
     assertEquals(list2.size(), 13);
-    var sub2 = list2.stream().filter(it -> "ALLOW-PREV-DESERIALIZATION".equalsIgnoreCase(it.getName())).toList();
+    var sub2 = list2.stream().filter(it -> "ALLOW-PREV-DESERIALIZATION".equalsIgnoreCase(it.getName())).collect(Collectors.toList());
     assertEquals(sub2.size(), 1);
   }
 }

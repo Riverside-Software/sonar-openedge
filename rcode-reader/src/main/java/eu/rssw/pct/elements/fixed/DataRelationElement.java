@@ -66,7 +66,8 @@ public class DataRelationElement extends AbstractElement implements IDataRelatio
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof IDataRelationElement obj2) {
+    if (obj instanceof IDataRelationElement) {
+      IDataRelationElement obj2 = (IDataRelationElement) obj;
       return (parentBufferName.equals(obj2.getParentBufferName()) && childBufferName.equals(obj2.getChildBufferName())
           && fieldPairs.equals(obj2.getFieldPairs()));
     }

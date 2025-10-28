@@ -49,7 +49,8 @@ public interface IParameter extends IElement {
         sb.append('I'); // INPUT
     }
     switch (getParameterType()) {
-      case TABLE, BUFFER_TEMP_TABLE:
+      case TABLE:
+      case BUFFER_TEMP_TABLE:
         sb.append('T');
         if (getDataType().getPrimitive() == PrimitiveDataType.HANDLE)
           sb.append('H');
@@ -93,7 +94,8 @@ public interface IParameter extends IElement {
         sb.append(chronological ? '↓' : '↑'); // INPUT
     }
     switch (getParameterType()) {
-      case TABLE, BUFFER_TEMP_TABLE:
+      case TABLE:
+      case BUFFER_TEMP_TABLE:
         sb.append("TBL");
         if (getDataType().getPrimitive() == PrimitiveDataType.HANDLE)
           sb.append("-HDL");

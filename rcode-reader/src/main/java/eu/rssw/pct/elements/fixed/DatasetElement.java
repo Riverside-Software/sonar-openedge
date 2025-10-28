@@ -67,7 +67,8 @@ public class DatasetElement extends AbstractAccessibleElement implements IDatase
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof IDatasetElement obj2) {
+    if (obj instanceof IDatasetElement) {
+      IDatasetElement obj2 = (IDatasetElement) obj;
       return (Arrays.deepEquals(bufferNames, obj2.getBufferNames())
           && Arrays.deepEquals(relations, obj2.getDataRelations()));
     }
