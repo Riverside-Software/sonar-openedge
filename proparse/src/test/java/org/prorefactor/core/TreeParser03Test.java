@@ -1585,6 +1585,53 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
+  public void testCanFindScope() {
+    var code = """
+        define temp-table tt1 field fld1 as character.
+        define temp-table tt2 field fld1 as character.
+        define buffer btt2 for tt2.
+        can-find(tt1 where tt1.fld1 = "").
+        can-find(tt2 where tt2.fld1 = "").
+        can-find(btt2 where btt2.fld1 = "").
+        can-find(customer where customer.name = "").
+        find customer where customer.name = "".
+        find item where item.itemname = "".
+        """;
+    var unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    var list = unit.getTopNode().query(ABLNodeType.RECORD_NAME);
+    var recNode1 = list.get(1);
+    var tblBuf1 = (TableBuffer) recNode1.getSymbol();
+    assertEquals(recNode1.getSymbol().getDefineNode().getLine(), 4);
+    assertFalse(tblBuf1.isDefault());
+    var recNode2 = list.get(2);
+    var tblBuf2 = (TableBuffer) recNode2.getSymbol();
+    assertEquals(recNode2.getSymbol().getDefineNode().getLine(), 5);
+    assertFalse(tblBuf2.isDefault());
+    var recNode3 = list.get(3);
+    var tblBuf3 = (TableBuffer) recNode3.getSymbol();
+    assertEquals(recNode3.getSymbol().getDefineNode().getLine(), 6);
+    assertFalse(tblBuf3.isDefault());
+    var recNode4 = list.get(4);
+    var tblBuf4 = (TableBuffer) recNode4.getSymbol();
+    assertEquals(recNode4.getSymbol().getDefineNode().getLine(), 7);
+    assertFalse(tblBuf4.isDefault());
+    var recNode5 = list.get(5);
+    var tblBuf5 = (TableBuffer) recNode5.getSymbol();
+    // Check we still end up with default buffer on customer after the can-find function
+    assertTrue(tblBuf5.isDefault());
+    var recNode6 = list.get(6);
+    var tblBuf6 = (TableBuffer) recNode6.getSymbol();
+    // Check we still end up with default buffer on customer without can-find function
+    assertTrue(tblBuf6.isDefault());
+  }
+
+  @Test
   public void testArrayRefInFrame() {
     ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/arrayRefInFrame.p"), session);
     assertNull(unit.getTopNode());
