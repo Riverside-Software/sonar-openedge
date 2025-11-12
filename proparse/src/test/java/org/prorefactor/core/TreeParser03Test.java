@@ -642,27 +642,17 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test24() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test24.cls"), session);
+    var unit = getParseUnit(new File("src/test/resources/treeparser03/test24.cls"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    // assertEquals(unit.getRootScope().getVariables().size(), 2);
-    // Variable var1 = unit.getRootScope().getVariable("xxx");
-    // assertEquals(var1.getNumReads(), 0);
-    // assertEquals(var1.getNumWrites(), 1);
-    //
-    // Variable var2 = unit.getRootScope().getVariable("yyy");
-    // assertEquals(var2.getNumReads(), 1);
-    // assertEquals(var2.getNumWrites(), 2);
-    // assertEquals(unit.getRootScope().getChildScopes().size(), 2);
-    //
-    // Variable var3 = unit.getRootScope().getChildScopes().get(0).getVariable("xxx");
-    // assertNotNull(var3);
-    // assertEquals(var3.getNumReads(), 0);
-    // assertEquals(var3.getNumWrites(), 1);
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    var var1 = unit.getRootScope().getVariable("xxx");
+    assertEquals(var1.getNumReads(), 1);
+    assertEquals(var1.getNumWrites(), 0);
   }
 
   @Test
@@ -1195,19 +1185,19 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(logVar.getNumWrites(), 1);
   }
 
-  @Test(enabled = false) // FIXME
+  @Test
   public void testChoose() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test28.p"), session);
+    var unit = getParseUnit(new File("src/test/resources/treeparser03/test28.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    Variable menu = unit.getRootScope().getVariable("menu");
+    var menu = unit.getRootScope().getVariable("menu");
     assertNotNull(menu);
     assertEquals(menu.getNumReads(), 1);
-    assertEquals(menu.getNumWrites(), 1);
+    assertEquals(menu.getNumWrites(), 2);
   }
 
   @Test
