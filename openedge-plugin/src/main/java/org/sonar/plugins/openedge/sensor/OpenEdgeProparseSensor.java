@@ -660,21 +660,20 @@ public class OpenEdgeProparseSensor implements Sensor {
     visitor.walkStatementBlock(unit.getTopNode());
     var locCountPerFile = visitor.getCounts();
 
-    var locCountMainFile = locCountPerFile.get(0);
-    if (locCountMainFile != null) {
-      // Store LOC-L2 of main file
-      if (unit.isAppBuilderCode()) {
-        var editableSections = unit.getCodeSections().get(0);
-        if (editableSections != null)
-          locCountMainFile = locCountMainFile.and(editableSections);
-      }
-      ncLocL2 += locCountMainFile.size();
-      context.newMeasure().on(file) //
-        .forMetric((Metric) OpenEdgeMetrics.OELIC_NCLOC) //
-        .withValue(locCountMainFile.size()) //
-        .save();
-      ncLocPushed.add(file);
+    var locCountMainFile = locCountPerFile.getOrDefault(0, new IntervalSet());
+    // Store LOC-L2 of main file
+    if (unit.isAppBuilderCode()) {
+      var editableSections = unit.getCodeSections().get(0);
+      if (editableSections != null)
+        locCountMainFile = locCountMainFile.and(editableSections);
     }
+    ncLocL2 += locCountMainFile.size();
+    context.newMeasure().on(file) //
+      .forMetric((Metric) OpenEdgeMetrics.OELIC_NCLOC) //
+      .withValue(locCountMainFile.size()) //
+      .save();
+    ncLocPushed.add(file);
+
     // Then collect LOC-LC2 of all include files
     for (var entry : locCountPerFile.entrySet()) {
       if (entry.getKey() > 0) {

@@ -25,6 +25,8 @@ import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE2;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE4;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE5;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE6;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -62,7 +64,6 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.annotations.Test;
-
 
 public class OpenEdgeProparseSensorTest {
 
@@ -452,6 +453,34 @@ public class OpenEdgeProparseSensorTest {
     assertFalse(Files.exists(dotProparseDir.resolve("files").resolve("src_procedures_test2_p.json")));
     assertTrue(Files.exists(dotProparseDir.resolve("files").resolve("src_procedures_test3_p.json")));
     assertFalse(Files.exists(dotProparseDir.resolve("files").resolve("src_classes_rssw_testclass_cls.json")));
+    deleteDirectoryRecursive(dotProparseDir);
+  }
+
+  @Test
+  public void testLOC01() throws Exception {
+    var settings = new MapSettings();
+    var context = TestProjectSensorContext.createContext(settings);
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    var components = new OpenEdgeComponents(context.config());
+    var sensor = new OpenEdgeProparseSensor(oeSettings, components);
+
+    sensor.execute(context);
+    assertEquals(context.measure(BASEDIR + ":" + FILE1, CoreMetrics.NCLOC.getKey()).value(), 0);
+    assertEquals(context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 0);
+    assertEquals(context.measure(BASEDIR + ":" + FILE2, CoreMetrics.NCLOC.getKey()).value(), 53);
+    assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 26);
+    assertEquals(context.measure(BASEDIR + ":" + FILE3, CoreMetrics.NCLOC.getKey()).value(), 12);
+    assertEquals(context.measure(BASEDIR + ":" + FILE3, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 10);
+    assertEquals(context.measure(BASEDIR + ":" + FILE4, CoreMetrics.NCLOC.getKey()).value(), 3);
+    // Include with no lines of code don't have an OELIC_NCLOC measure
+    assertNull(context.measure(BASEDIR + ":" + FILE4, OpenEdgeMetrics.OELIC_NCLOC.getKey()));
+    // Parser failure means no measures available
+    assertNull(context.measure(BASEDIR + ":" + FILE5, CoreMetrics.NCLOC.getKey()));
+    assertNull(context.measure(BASEDIR + ":" + FILE5, OpenEdgeMetrics.OELIC_NCLOC.getKey()));
+    assertEquals(context.measure(BASEDIR + ":" + FILE6, CoreMetrics.NCLOC.getKey()).value(), 1);
+    assertEquals(context.measure(BASEDIR + ":" + FILE6, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 1);
+    assertEquals(context.measure(BASEDIR + ":" + CLASS1, CoreMetrics.NCLOC.getKey()).value(), 20);
+    assertEquals(context.measure(BASEDIR + ":" + CLASS1, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 17);
   }
 
   private void deleteDirectoryRecursive(Path pathToBeDeleted) throws IOException {
