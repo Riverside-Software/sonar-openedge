@@ -60,19 +60,19 @@ public class OpenEdgeWarningsSensorTest {
     // Starts with ../
     issue = issues.next();
     assertEquals(issue.primaryLocation().inputComponent().key(),
-        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.PROC_TEST3_I);
     assertEquals(issue.primaryLocation().textRange().start().line(), 2);
 
     issue = issues.next();
     assertEquals(issue.primaryLocation().inputComponent().key(),
-        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.PROC_TEST3_I);
     assertEquals(issue.primaryLocation().textRange().start().line(), 3);
     assertEquals(issue.ruleKey(),
         RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + ".1688"));
 
     issue = issues.next();
     assertEquals(issue.primaryLocation().inputComponent().key(),
-        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.PROC_TEST3_I);
     assertEquals(issue.primaryLocation().textRange().start().line(), 3);
     assertTrue(issue.primaryLocation().message().endsWith("Another one (1689)"));
     assertEquals(issue.ruleKey(),
@@ -80,7 +80,7 @@ public class OpenEdgeWarningsSensorTest {
 
     issue = issues.next();
     assertEquals(issue.primaryLocation().inputComponent().key(),
-        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE1);
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.PROC_TEST1);
     assertEquals(issue.primaryLocation().textRange().start().line(), 1);
     // Verify that leading 'WARNING' is removed, as well as the message number
     assertEquals(issue.primaryLocation().message(),
@@ -105,12 +105,12 @@ public class OpenEdgeWarningsSensorTest {
     // Starts with ../
     issue = issues.next();
     assertEquals(issue.primaryLocation().inputComponent().key(),
-        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.PROC_TEST3_I);
     assertEquals(issue.primaryLocation().textRange().start().line(), 2);
 
     issue = issues.next();
     assertEquals(issue.primaryLocation().inputComponent().key(),
-        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE4);
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.PROC_TEST3_I);
     assertEquals(issue.primaryLocation().textRange().start().line(), 3);
     assertTrue(issue.primaryLocation().message().endsWith("Another one (1689)"));
     assertEquals(issue.ruleKey(),
@@ -118,7 +118,7 @@ public class OpenEdgeWarningsSensorTest {
 
     issue = issues.next();
     assertEquals(issue.primaryLocation().inputComponent().key(),
-        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.FILE1);
+        TestProjectSensorContext.BASEDIR + ":" + TestProjectSensorContext.PROC_TEST1);
     assertEquals(issue.primaryLocation().textRange().start().line(), 1);
     // Verify that leading 'WARNING' is removed, as well as the message number
     assertEquals(issue.primaryLocation().message(),

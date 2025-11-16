@@ -20,7 +20,7 @@
 package org.sonar.plugins.openedge.sensor;
 
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.BASEDIR;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.DF1;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.SP2K_DF;
 
 import org.sonar.api.batch.sensor.highlighting.TypeOfText;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
@@ -37,24 +37,24 @@ public class OpenEdgeDBColorizerTest {
     sensor.execute(context);
 
     // SEQUENCE keyword
-    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + DF1, 19, 10));
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + DF1, 19, 10).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + DF1, 19, 10).get(0), TypeOfText.KEYWORD);
+    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + SP2K_DF, 19, 10));
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + SP2K_DF, 19, 10).size(), 1);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + SP2K_DF, 19, 10).get(0), TypeOfText.KEYWORD);
 
     // Quoted string
-    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + DF1, 19, 20));
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + DF1, 19, 20).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + DF1, 19, 20).get(0), TypeOfText.STRING);
+    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + SP2K_DF, 19, 20));
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + SP2K_DF, 19, 20).size(), 1);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + SP2K_DF, 19, 20).get(0), TypeOfText.STRING);
 
     // Constant
-    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + DF1, 20, 12));
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + DF1, 20, 12).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + DF1, 20, 12).get(0), TypeOfText.CONSTANT);
+    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + SP2K_DF, 20, 12));
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + SP2K_DF, 20, 12).size(), 1);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + SP2K_DF, 20, 12).get(0), TypeOfText.CONSTANT);
 
     // Annotation
-    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + DF1, 79, 10));
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + DF1, 79, 10).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + DF1, 79, 10).get(0), TypeOfText.ANNOTATION);
+    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + SP2K_DF, 79, 10));
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + SP2K_DF, 79, 10).size(), 1);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + SP2K_DF, 79, 10).get(0), TypeOfText.ANNOTATION);
   }
 
 }
