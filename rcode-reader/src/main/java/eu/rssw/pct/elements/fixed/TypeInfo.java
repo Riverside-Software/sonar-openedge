@@ -56,12 +56,15 @@ public class TypeInfo implements ITypeInfo {
   private final Collection<IPropertyElement> properties = new ArrayList<>();
   private final Collection<IVariableElement> variables = new ArrayList<>();
   private final Collection<IEventElement> events = new ArrayList<>();
+  private final Collection<ITableElement> tables = new ArrayList<>();
+  private final Collection<IBufferElement> buffers = new ArrayList<>();
 
   public TypeInfo() {
     // No-op
   }
 
-  public TypeInfo(String typeName, boolean iface, boolean abstrct, String parentTypeName, String assemblyName, String... interfaces) {
+  public TypeInfo(String typeName, boolean iface, boolean abstrct, String parentTypeName, String assemblyName,
+      String... interfaces) {
     this.typeName = typeName;
     this.parentTypeName = parentTypeName;
     this.assemblyName = assemblyName;
@@ -93,13 +96,31 @@ public class TypeInfo implements ITypeInfo {
       this.flags = this.flags | HAS_STATICS;
   }
 
+  public void addTable(ITableElement element) {
+    tables.add(element);
+    if (element.isStatic())
+      this.flags = this.flags | HAS_STATICS;
+    var buf = new BufferElement(element.getName());
+    buffers.add(buf);
+  }
+
   @Override
   public IBufferElement getBufferFor(String name) {
+    for (IBufferElement tbl : buffers) {
+      if (tbl.getName().equalsIgnoreCase(name)) {
+        return tbl;
+      }
+    }
     return null;
   }
 
   @Override
   public boolean hasTempTable(String inName) {
+    for (ITableElement tbl : tables) {
+      if (tbl.getName().equalsIgnoreCase(inName)) {
+        return true;
+      }
+    }
     return false;
   }
 
@@ -114,6 +135,11 @@ public class TypeInfo implements ITypeInfo {
 
   @Override
   public ITableElement getTempTable(String inName) {
+    for (ITableElement tbl : tables) {
+      if (tbl.getName().equalsIgnoreCase(inName)) {
+        return tbl;
+      }
+    }
     return null;
   }
 
@@ -124,11 +150,21 @@ public class TypeInfo implements ITypeInfo {
 
   @Override
   public boolean hasBuffer(String inName) {
+    for (IBufferElement buf : buffers) {
+      if (buf.getName().equalsIgnoreCase(inName)) {
+        return true;
+      }
+    }
     return false;
   }
 
   @Override
   public IBufferElement getBuffer(String inName) {
+    for (IBufferElement buf : buffers) {
+      if (buf.getName().equalsIgnoreCase(inName)) {
+        return buf;
+      }
+    }
     return null;
   }
 
@@ -154,12 +190,12 @@ public class TypeInfo implements ITypeInfo {
 
   @Override
   public Collection<ITableElement> getTables() {
-    return Collections.emptyList();
+    return tables;
   }
 
   @Override
   public Collection<IBufferElement> getBuffers() {
-    return Collections.emptyList();
+    return buffers;
   }
 
   @Override
