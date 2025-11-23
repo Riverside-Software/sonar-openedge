@@ -46,8 +46,7 @@ public interface IParameter extends IElement {
         sb.append('I'); // INPUT
     }
     switch (getParameterType()) {
-      case TABLE:
-      case BUFFER_TEMP_TABLE:
+      case TABLE, BUFFER_TEMP_TABLE:
         sb.append('T');
         if (getDataType().getPrimitive() == PrimitiveDataType.HANDLE)
           sb.append('H');
@@ -73,26 +72,25 @@ public interface IParameter extends IElement {
     return sb.toString();
   }
 
-  default String getIDESignature() {
+  default String getIDESignature(boolean chronological) {
     StringBuilder sb = new StringBuilder();
     switch (getMode()) {
       case INPUT_OUTPUT:
         sb.append('⇅');
         break;
       case OUTPUT:
-        sb.append('↓');
+        sb.append(chronological ? '↑' : '↓');
         break;
       case RETURN:
-        sb.append('⇊');
+        sb.append(chronological ? '⇈' : '⇊');
         break;
       case BUFFER:
         return sb.append("BUFFER").toString();
       default:
-        sb.append('↑'); // INPUT
+        sb.append(chronological ? '↓' : '↑'); // INPUT
     }
     switch (getParameterType()) {
-      case TABLE:
-      case BUFFER_TEMP_TABLE:
+      case TABLE, BUFFER_TEMP_TABLE:
         sb.append("TBL");
         if (getDataType().getPrimitive() == PrimitiveDataType.HANDLE)
           sb.append("-HDL");

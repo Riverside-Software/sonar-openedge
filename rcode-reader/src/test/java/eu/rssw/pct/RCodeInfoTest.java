@@ -584,6 +584,8 @@ public class RCodeInfoTest {
       assertNotNull(testMethod);
       assertEquals(testMethod.getSignature(), "testMethod(IT,OD,II[])U");
       assertEquals(testMethod.getIDESignature(), "testMethod(↑TBL tt1, ↓DS ds1, ↑INT[] xx)");
+      assertEquals(testMethod.getIDESignature(false), "testMethod(↑TBL tt1, ↓DS ds1, ↑INT[] xx)");
+      assertEquals(testMethod.getIDESignature(true), "testMethod(↓TBL tt1, ↑DS ds1, ↓INT[] xx)");
       assertEquals(testMethod.getExtent(), -32767);
       assertEquals(testMethod.getParameters().length, 3);
       assertEquals(testMethod.getParameters()[0].getParameterType(), ParameterType.TABLE);

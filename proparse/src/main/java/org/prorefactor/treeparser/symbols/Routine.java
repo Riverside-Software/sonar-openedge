@@ -77,6 +77,10 @@ public class Routine extends Symbol {
   }
 
   public String getIDESignature() {
+    return getIDESignature(false);
+  }
+  
+  public String getIDESignature(boolean chronological) {
     StringBuilder retVal = new StringBuilder(getName()).append('(');
     boolean first = true;
     for (Parameter p : parameters) {
@@ -85,7 +89,7 @@ public class Routine extends Symbol {
       } else {
         retVal.append(", ");
       }
-      retVal.append(p.getIDESignature());
+      retVal.append(p.getIDESignature(chronological));
     }
     retVal.append(')');
 

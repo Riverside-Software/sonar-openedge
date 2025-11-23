@@ -68,6 +68,10 @@ public interface IMethodElement extends IAccessibleElement {
   }
 
   default String getIDESignature() {
+    return getIDESignature(false);
+  }
+
+  default String getIDESignature(boolean chronological) {
     StringBuilder retVal = new StringBuilder(getName()).append('(');
     boolean first = true;
     for (IParameter p : getParameters()) {
@@ -76,7 +80,7 @@ public interface IMethodElement extends IAccessibleElement {
       } else {
         retVal.append(", ");
       }
-      retVal.append(p.getIDESignature());
+      retVal.append(p.getIDESignature(chronological));
     }
     retVal.append(')');
     return retVal.toString();

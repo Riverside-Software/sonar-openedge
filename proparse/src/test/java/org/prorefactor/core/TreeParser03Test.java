@@ -152,6 +152,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f1 = lst.get(0);
     assertEquals(f1.getSignature(), "f1(II)");
     assertEquals(f1.getIDESignature(), "f1(↑INT) : INT");
+    assertEquals(f1.getIDESignature(false), "f1(↑INT) : INT");
+    assertEquals(f1.getIDESignature(true), "f1(↓INT) : INT");
     assertEquals(f1.getIDEInsertElement(true), "f1(${1:zz})$0");
     assertEquals(f1.getParameters().size(), 1);
     Variable var1 = (Variable) f1.getParameters().get(0).getSymbol();
@@ -169,6 +171,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f2 = lst2.get(0);
     assertEquals(f2.getSignature(), "f2(II,II)");
     assertEquals(f2.getIDESignature(), "f2(↑INT, ↑INT) : INT");
+    assertEquals(f2.getIDESignature(false), "f2(↑INT, ↑INT) : INT");
+    assertEquals(f2.getIDESignature(true), "f2(↓INT, ↓INT) : INT");
     assertEquals(f2.getIDEInsertElement(true), "f2(${1:a}, ${2:zz})$0");
     assertEquals(f2.getParameters().size(), 2);
     assertEquals(f2.getParameters().get(0).getSymbol().getName(), "a");
@@ -233,6 +237,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f8 = lst8.get(0);
     assertEquals(f8.getSignature(), "f8(ODE)");
     assertEquals(f8.getIDESignature(), "f8(↓DEC) : INT");
+    assertEquals(f8.getIDESignature(false), "f8(↓DEC) : INT");
+    assertEquals(f8.getIDESignature(true), "f8(↑DEC) : INT");
     assertEquals(f8.getIDEInsertElement(true), "f8(OUTPUT ${1:xx})$0");
     assertEquals(f8.getIDEInsertElement(false), "f8(output ${1:xx})$0");
     assertEquals(f8.getParameters().size(), 1);
