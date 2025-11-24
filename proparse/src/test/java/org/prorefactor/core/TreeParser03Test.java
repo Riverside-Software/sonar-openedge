@@ -152,6 +152,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f1 = lst.get(0);
     assertEquals(f1.getSignature(), "f1(II)");
     assertEquals(f1.getIDESignature(), "f1(↑INT) : INT");
+    assertEquals(f1.getIDESignature(false), "f1(↑INT) : INT");
+    assertEquals(f1.getIDESignature(true), "f1(↓INT) : INT");
     assertEquals(f1.getIDEInsertElement(true), "f1(${1:zz})$0");
     assertEquals(f1.getParameters().size(), 1);
     Variable var1 = (Variable) f1.getParameters().get(0).getSymbol();
@@ -169,6 +171,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f2 = lst2.get(0);
     assertEquals(f2.getSignature(), "f2(II,II)");
     assertEquals(f2.getIDESignature(), "f2(↑INT, ↑INT) : INT");
+    assertEquals(f2.getIDESignature(false), "f2(↑INT, ↑INT) : INT");
+    assertEquals(f2.getIDESignature(true), "f2(↓INT, ↓INT) : INT");
     assertEquals(f2.getIDEInsertElement(true), "f2(${1:a}, ${2:zz})$0");
     assertEquals(f2.getParameters().size(), 2);
     assertEquals(f2.getParameters().get(0).getSymbol().getName(), "a");
@@ -233,6 +237,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f8 = lst8.get(0);
     assertEquals(f8.getSignature(), "f8(ODE)");
     assertEquals(f8.getIDESignature(), "f8(↓DEC) : INT");
+    assertEquals(f8.getIDESignature(false), "f8(↓DEC) : INT");
+    assertEquals(f8.getIDESignature(true), "f8(↑DEC) : INT");
     assertEquals(f8.getIDEInsertElement(true), "f8(OUTPUT ${1:xx})$0");
     assertEquals(f8.getIDEInsertElement(false), "f8(output ${1:xx})$0");
     assertEquals(f8.getParameters().size(), 1);
@@ -642,27 +648,17 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test24() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test24.cls"), session);
+    var unit = getParseUnit(new File("src/test/resources/treeparser03/test24.cls"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    // assertEquals(unit.getRootScope().getVariables().size(), 2);
-    // Variable var1 = unit.getRootScope().getVariable("xxx");
-    // assertEquals(var1.getNumReads(), 0);
-    // assertEquals(var1.getNumWrites(), 1);
-    //
-    // Variable var2 = unit.getRootScope().getVariable("yyy");
-    // assertEquals(var2.getNumReads(), 1);
-    // assertEquals(var2.getNumWrites(), 2);
-    // assertEquals(unit.getRootScope().getChildScopes().size(), 2);
-    //
-    // Variable var3 = unit.getRootScope().getChildScopes().get(0).getVariable("xxx");
-    // assertNotNull(var3);
-    // assertEquals(var3.getNumReads(), 0);
-    // assertEquals(var3.getNumWrites(), 1);
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    var var1 = unit.getRootScope().getVariable("xxx");
+    assertEquals(var1.getNumReads(), 1);
+    assertEquals(var1.getNumWrites(), 0);
   }
 
   @Test
@@ -1195,19 +1191,19 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(logVar.getNumWrites(), 1);
   }
 
-  @Test(enabled = false) // FIXME
+  @Test
   public void testChoose() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test28.p"), session);
+    var unit = getParseUnit(new File("src/test/resources/treeparser03/test28.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    Variable menu = unit.getRootScope().getVariable("menu");
+    var menu = unit.getRootScope().getVariable("menu");
     assertNotNull(menu);
     assertEquals(menu.getNumReads(), 1);
-    assertEquals(menu.getNumWrites(), 1);
+    assertEquals(menu.getNumWrites(), 2);
   }
 
   @Test
@@ -1582,6 +1578,53 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(list.size(), 4);
     assertFalse(list.stream().anyMatch(it -> it.getSymbol() == null));
     assertFalse(list.stream().anyMatch(it -> it.getSymbol().getNodeType() != ABLNodeType.QUERY));
+  }
+
+  @Test
+  public void testCanFindScope() {
+    var code = """
+        define temp-table tt1 field fld1 as character.
+        define temp-table tt2 field fld1 as character.
+        define buffer btt2 for tt2.
+        can-find(tt1 where tt1.fld1 = "").
+        can-find(tt2 where tt2.fld1 = "").
+        can-find(btt2 where btt2.fld1 = "").
+        can-find(customer where customer.name = "").
+        find customer where customer.name = "".
+        find item where item.itemname = "".
+        """;
+    var unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    var list = unit.getTopNode().query(ABLNodeType.RECORD_NAME);
+    var recNode1 = list.get(1);
+    var tblBuf1 = (TableBuffer) recNode1.getSymbol();
+    assertEquals(recNode1.getSymbol().getDefineNode().getLine(), 4);
+    assertFalse(tblBuf1.isDefault());
+    var recNode2 = list.get(2);
+    var tblBuf2 = (TableBuffer) recNode2.getSymbol();
+    assertEquals(recNode2.getSymbol().getDefineNode().getLine(), 5);
+    assertFalse(tblBuf2.isDefault());
+    var recNode3 = list.get(3);
+    var tblBuf3 = (TableBuffer) recNode3.getSymbol();
+    assertEquals(recNode3.getSymbol().getDefineNode().getLine(), 6);
+    assertFalse(tblBuf3.isDefault());
+    var recNode4 = list.get(4);
+    var tblBuf4 = (TableBuffer) recNode4.getSymbol();
+    assertEquals(recNode4.getSymbol().getDefineNode().getLine(), 7);
+    assertFalse(tblBuf4.isDefault());
+    var recNode5 = list.get(5);
+    var tblBuf5 = (TableBuffer) recNode5.getSymbol();
+    // Check we still end up with default buffer on customer after the can-find function
+    assertTrue(tblBuf5.isDefault());
+    var recNode6 = list.get(6);
+    var tblBuf6 = (TableBuffer) recNode6.getSymbol();
+    // Check we still end up with default buffer on customer without can-find function
+    assertTrue(tblBuf6.isDefault());
   }
 
   @Test

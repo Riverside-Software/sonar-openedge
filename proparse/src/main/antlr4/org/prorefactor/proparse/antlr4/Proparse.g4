@@ -3381,11 +3381,16 @@ runOption:
   | runSet                # runOptSet
   | { support.disallowUnknownMethodCalls(); } ON SERVER? expression ( TRANSACTION DISTINCT? )?  { support.allowUnknownMethodCalls(); } # runOptServer
   | inExpression          # runOptIn
-  | ASYNCHRONOUS runSet? runEvent? inExpression? # runOptAsync
+  | ASYNCHRONOUS runSet? runEvent? # runOptAsync
   ;
 
 runEvent:
-    EVENTPROCEDURE expression
+    EVENTPROCEDURE expression inExpression?
+  | EVENTHANDLER expression handlerContextExpression?
+  ;
+
+handlerContextExpression:
+    EVENTHANDLERCONTEXT expression
   ;
 
 runSet:
@@ -3816,7 +3821,7 @@ waitForFocus:
   ;
 
 waitForSet:
-    SET fieldExpr
+    SET expression
   ;
 
 whenExpression:
@@ -4345,6 +4350,9 @@ unreservedkeyword:
 | ERRORCODE
 | ERRORCOLUMN
 | EVENT
+| EVENTHANDLER
+| EVENTHANDLERCONTEXT
+| EVENTHANDLEROBJECT
 | EVENTS
 | EVENTTYPE
 | EXECUTE

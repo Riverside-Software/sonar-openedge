@@ -23,21 +23,23 @@ import java.util.EnumSet;
 
 import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
-import eu.rssw.pct.elements.DataType;
-import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.IIndexComponentElement;
+import eu.rssw.pct.elements.IIndexElement;
 
-public class VariableElement extends AbstractAccessibleElement implements IVariableElement {
-  private final DataType dataType;
-  private final boolean isStatic;
+public class IndexElement extends AbstractAccessibleElement implements IIndexElement {
 
-  public VariableElement(String name, DataType dataType) {
-    this(name, false, dataType);
-  }
+  private final IIndexComponentElement[] indexComponents;
+  private final boolean primary;
+  private final boolean unique;
+  private final boolean wordIndex;
 
-  public VariableElement(String name, boolean isStatic, DataType dataType) {
+  public IndexElement(String name, boolean primary, boolean unique, boolean wordIndex,
+      IIndexComponentElement... indexComponents) {
     super(name, EnumSet.of(AccessType.PUBLIC));
-    this.isStatic = isStatic;
-    this.dataType = dataType;
+    this.primary = primary;
+    this.unique = unique;
+    this.wordIndex = wordIndex;
+    this.indexComponents = indexComponents;
   }
 
   @Override
@@ -46,37 +48,29 @@ public class VariableElement extends AbstractAccessibleElement implements IVaria
   }
 
   @Override
-  public int getExtent() {
-    return 0;
+  public IIndexComponentElement[] getIndexComponents() {
+    return indexComponents;
   }
 
   @Override
-  public DataType getDataType() {
-    return dataType;
+  public boolean isPrimary() {
+    return primary;
   }
 
   @Override
-  public boolean isReadOnly() {
+  public boolean isUnique() {
+    return unique;
+  }
+
+  @Override
+  public boolean isWordIndex() {
+    return wordIndex;
+  }
+
+  @Override
+  public boolean isDefaultIndex() {
+    // unused
     return false;
   }
 
-  @Override
-  public boolean isWriteOnly() {
-    return false;
-  }
-
-  @Override
-  public boolean isNoUndo() {
-    return false;
-  }
-
-  @Override
-  public boolean baseIsDotNet() {
-    return false;
-  }
-
-  @Override
-  public boolean isStatic() {
-    return isStatic;
-  }
 }

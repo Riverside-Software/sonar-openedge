@@ -32,7 +32,7 @@ import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.IVariableElement;
 
 /**
- * Proxy for a TypeInfo object. Used by SonarLint to delay file loading until required by the analyzer
+ * Proxy for a TypeInfo object. Used by SonarLint / VS Code to delay file loading until required by the analyzer
  */
 public abstract class TypeInfoProxy implements ITypeInfo {
   protected final String typeName;

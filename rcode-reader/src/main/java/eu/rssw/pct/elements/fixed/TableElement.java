@@ -23,21 +23,27 @@ import java.util.EnumSet;
 
 import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
-import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IIndexElement;
+import eu.rssw.pct.elements.ITableElement;
 import eu.rssw.pct.elements.IVariableElement;
 
-public class VariableElement extends AbstractAccessibleElement implements IVariableElement {
-  private final DataType dataType;
+public class TableElement extends AbstractAccessibleElement implements ITableElement {
+  private final IVariableElement[] fields;
+  private final IIndexElement[] indexes;
+  private final String beforeTableName;
   private final boolean isStatic;
 
-  public VariableElement(String name, DataType dataType) {
-    this(name, false, dataType);
+  public TableElement(String name, String beforeTableName, IIndexElement[] indexes, IVariableElement... field) {
+    this(name, beforeTableName, false, indexes, field);
   }
 
-  public VariableElement(String name, boolean isStatic, DataType dataType) {
+  public TableElement(String name, String beforeTableName, boolean isStatic, IIndexElement[] indexes,
+      IVariableElement... field) {
     super(name, EnumSet.of(AccessType.PUBLIC));
     this.isStatic = isStatic;
-    this.dataType = dataType;
+    this.fields = field;
+    this.indexes = indexes;
+    this.beforeTableName = beforeTableName;
   }
 
   @Override
@@ -46,23 +52,18 @@ public class VariableElement extends AbstractAccessibleElement implements IVaria
   }
 
   @Override
-  public int getExtent() {
-    return 0;
+  public String getBeforeTableName() {
+    return beforeTableName;
   }
 
   @Override
-  public DataType getDataType() {
-    return dataType;
+  public IVariableElement[] getFields() {
+    return fields;
   }
 
   @Override
-  public boolean isReadOnly() {
-    return false;
-  }
-
-  @Override
-  public boolean isWriteOnly() {
-    return false;
+  public IIndexElement[] getIndexes() {
+    return indexes;
   }
 
   @Override
@@ -71,7 +72,12 @@ public class VariableElement extends AbstractAccessibleElement implements IVaria
   }
 
   @Override
-  public boolean baseIsDotNet() {
+  public boolean isSerializable() {
+    return false;
+  }
+
+  @Override
+  public boolean isNonSerializable() {
     return false;
   }
 
@@ -79,4 +85,5 @@ public class VariableElement extends AbstractAccessibleElement implements IVaria
   public boolean isStatic() {
     return isStatic;
   }
+
 }

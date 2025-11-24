@@ -20,10 +20,10 @@
 package org.sonar.plugins.openedge.sensor;
 
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.BASEDIR;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.CLASS1;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE4;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.CLS_TESTCLASS;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST1;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST3;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST3_I;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -52,12 +52,12 @@ public class OpenEdgeCPDSensorTest {
     var sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
-    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE3));
-    assertEquals(context.cpdTokens(BASEDIR + ":" + FILE3).size(), 15);
-    assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
-    assertEquals(context.cpdTokens(BASEDIR + ":" + CLASS1).size(), 19);
-    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE4));
-    assertEquals(context.cpdTokens(BASEDIR + ":" + FILE4).size(), 3);
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST3));
+    assertEquals(context.cpdTokens(BASEDIR + ":" + PROC_TEST3).size(), 15);
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + CLS_TESTCLASS));
+    assertEquals(context.cpdTokens(BASEDIR + ":" + CLS_TESTCLASS).size(), 19);
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST3_I));
+    assertEquals(context.cpdTokens(BASEDIR + ":" + PROC_TEST3_I).size(), 3);
   }
 
   @Test
@@ -68,9 +68,9 @@ public class OpenEdgeCPDSensorTest {
     var sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
-    assertNull(context.cpdTokens(BASEDIR + ":" + FILE3));
-    assertNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
-    assertNull(context.cpdTokens(BASEDIR + ":" + FILE4));
+    assertNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST3));
+    assertNull(context.cpdTokens(BASEDIR + ":" + CLS_TESTCLASS));
+    assertNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST3_I));
   }
 
   @Test
@@ -85,9 +85,9 @@ public class OpenEdgeCPDSensorTest {
     var sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
-    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE3));
-    assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
-    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE4));
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST3));
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + CLS_TESTCLASS));
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST3_I));
   }
 
   @Test
@@ -112,12 +112,12 @@ public class OpenEdgeCPDSensorTest {
     sensor.execute(context);
 
     // No CPD tokens on unchanged files
-    assertNull(context.cpdTokens(BASEDIR + ":" + FILE1));
+    assertNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST1));
     // FILE3 is SAME, but references FILE4 (file3.i) which is ADDED
-    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE3));
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST3));
     // CPD tokens on ADDED files
-    assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
-    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE4));
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + CLS_TESTCLASS));
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST3_I));
   }
 
 }

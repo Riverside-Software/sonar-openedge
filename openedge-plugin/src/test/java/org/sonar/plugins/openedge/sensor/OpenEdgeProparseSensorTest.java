@@ -20,11 +20,13 @@
 package org.sonar.plugins.openedge.sensor;
 
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.BASEDIR;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.CLASS1;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE2;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE4;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.CLS_TESTCLASS;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST1;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST2;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST3;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST3_I;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_INVALID;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST3_I1;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -63,7 +65,6 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
 import org.testng.annotations.Test;
 
-
 public class OpenEdgeProparseSensorTest {
 
   @Test
@@ -82,12 +83,12 @@ public class OpenEdgeProparseSensorTest {
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
-    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE3));
-    assertEquals(context.cpdTokens(BASEDIR + ":" + FILE3).size(), 7);
-    assertNotNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
-    assertEquals(context.cpdTokens(BASEDIR + ":" + CLASS1).size(), 11);
-    assertNotNull(context.cpdTokens(BASEDIR + ":" + FILE4));
-    assertEquals(context.cpdTokens(BASEDIR + ":" + FILE4).size(), 3);
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST3));
+    assertEquals(context.cpdTokens(BASEDIR + ":" + PROC_TEST3).size(), 7);
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + CLS_TESTCLASS));
+    assertEquals(context.cpdTokens(BASEDIR + ":" + CLS_TESTCLASS).size(), 11);
+    assertNotNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST3_I));
+    assertEquals(context.cpdTokens(BASEDIR + ":" + PROC_TEST3_I).size(), 3);
   }
 
   @Test
@@ -108,9 +109,9 @@ public class OpenEdgeProparseSensorTest {
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
-    assertNull(context.cpdTokens(BASEDIR + ":" + FILE3));
-    assertNull(context.cpdTokens(BASEDIR + ":" + CLASS1));
-    assertNull(context.cpdTokens(BASEDIR + ":" + FILE4));
+    assertNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST3));
+    assertNull(context.cpdTokens(BASEDIR + ":" + CLS_TESTCLASS));
+    assertNull(context.cpdTokens(BASEDIR + ":" + PROC_TEST3_I));
   }
 
   @Test
@@ -140,21 +141,21 @@ public class OpenEdgeProparseSensorTest {
     var sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
-    var m1 = context.measure(BASEDIR + ":" + FILE1, CoreMetrics.COMPLEXITY);
+    var m1 = context.measure(BASEDIR + ":" + PROC_TEST1, CoreMetrics.COMPLEXITY);
     assertEquals(m1.value(), 1);
-    var m1bis = context.measure(BASEDIR + ":" + FILE1, CoreMetrics.COGNITIVE_COMPLEXITY);
+    var m1bis = context.measure(BASEDIR + ":" + PROC_TEST1, CoreMetrics.COGNITIVE_COMPLEXITY);
     assertEquals(m1bis.value(), 0);
-    var m2 = context.measure(BASEDIR + ":" + FILE2, CoreMetrics.COMPLEXITY);
+    var m2 = context.measure(BASEDIR + ":" + PROC_TEST2, CoreMetrics.COMPLEXITY);
     assertEquals(m2.value(), 13);
-    var m2bis = context.measure(BASEDIR + ":" + FILE2, CoreMetrics.COGNITIVE_COMPLEXITY);
+    var m2bis = context.measure(BASEDIR + ":" + PROC_TEST2, CoreMetrics.COGNITIVE_COMPLEXITY);
     assertEquals(m2bis.value(), 2);
-    var m3 = context.measure(BASEDIR + ":" + FILE3, CoreMetrics.COMPLEXITY);
+    var m3 = context.measure(BASEDIR + ":" + PROC_TEST3, CoreMetrics.COMPLEXITY);
     assertEquals(m3.value(), 8);
-    var m3bis = context.measure(BASEDIR + ":" + FILE3, CoreMetrics.COGNITIVE_COMPLEXITY);
+    var m3bis = context.measure(BASEDIR + ":" + PROC_TEST3, CoreMetrics.COGNITIVE_COMPLEXITY);
     assertEquals(m3bis.value(), 0);
-    var m4 = context.measure(BASEDIR + ":" + CLASS1, CoreMetrics.COMPLEXITY);
+    var m4 = context.measure(BASEDIR + ":" + CLS_TESTCLASS, CoreMetrics.COMPLEXITY);
     assertEquals(m4.value(), 14);
-    var m4bis = context.measure(BASEDIR + ":" + CLASS1, CoreMetrics.COGNITIVE_COMPLEXITY);
+    var m4bis = context.measure(BASEDIR + ":" + CLS_TESTCLASS, CoreMetrics.COGNITIVE_COMPLEXITY);
     assertEquals(m4bis.value(), 0);
   }
 
@@ -236,11 +237,11 @@ public class OpenEdgeProparseSensorTest {
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
-    assertEquals(context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.NUM_TRANSACTIONS.getKey()).value(), 1,
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST1, OpenEdgeMetrics.NUM_TRANSACTIONS.getKey()).value(), 1,
         "Wrong number of transactions");
-    assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.NUM_TRANSACTIONS.getKey()).value(), 0,
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST2, OpenEdgeMetrics.NUM_TRANSACTIONS.getKey()).value(), 0,
         "Wrong number of transactions");
-    assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.DIRECTIVES.getKey()).value(), 2,
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST2, OpenEdgeMetrics.DIRECTIVES.getKey()).value(), 2,
         "Wrong number of transactions");
   }
 
@@ -452,6 +453,34 @@ public class OpenEdgeProparseSensorTest {
     assertFalse(Files.exists(dotProparseDir.resolve("files").resolve("src_procedures_test2_p.json")));
     assertTrue(Files.exists(dotProparseDir.resolve("files").resolve("src_procedures_test3_p.json")));
     assertFalse(Files.exists(dotProparseDir.resolve("files").resolve("src_classes_rssw_testclass_cls.json")));
+    deleteDirectoryRecursive(dotProparseDir);
+  }
+
+  @Test
+  public void testLOC01() throws Exception {
+    var settings = new MapSettings();
+    var context = TestProjectSensorContext.createContext(settings);
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    var components = new OpenEdgeComponents(context.config());
+    var sensor = new OpenEdgeProparseSensor(oeSettings, components);
+
+    sensor.execute(context);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST1, CoreMetrics.NCLOC.getKey()).value(), 0);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST1, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 0);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST2, CoreMetrics.NCLOC.getKey()).value(), 53);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST2, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 26);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3, CoreMetrics.NCLOC.getKey()).value(), 12);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 10);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3_I, CoreMetrics.NCLOC.getKey()).value(), 3);
+    // Include with no lines of code don't have an OELIC_NCLOC measure
+    assertNull(context.measure(BASEDIR + ":" + PROC_TEST3_I, OpenEdgeMetrics.OELIC_NCLOC.getKey()));
+    // Parser failure means no measures available
+    assertNull(context.measure(BASEDIR + ":" + PROC_INVALID, CoreMetrics.NCLOC.getKey()));
+    assertNull(context.measure(BASEDIR + ":" + PROC_INVALID, OpenEdgeMetrics.OELIC_NCLOC.getKey()));
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3_I1, CoreMetrics.NCLOC.getKey()).value(), 1);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST3_I1, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 1);
+    assertEquals(context.measure(BASEDIR + ":" + CLS_TESTCLASS, CoreMetrics.NCLOC.getKey()).value(), 20);
+    assertEquals(context.measure(BASEDIR + ":" + CLS_TESTCLASS, OpenEdgeMetrics.OELIC_NCLOC.getKey()).value(), 17);
   }
 
   private void deleteDirectoryRecursive(Path pathToBeDeleted) throws IOException {

@@ -61,8 +61,12 @@ import eu.rssw.pct.elements.ParameterType;
 import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.fixed.EnumGetValueMethodElement;
 import eu.rssw.pct.elements.fixed.EventElement;
+import eu.rssw.pct.elements.fixed.IndexComponentElement;
+import eu.rssw.pct.elements.fixed.IndexElement;
 import eu.rssw.pct.elements.fixed.PropertyElement;
+import eu.rssw.pct.elements.fixed.TableElement;
 import eu.rssw.pct.elements.fixed.TypeInfo;
+import eu.rssw.pct.elements.fixed.VariableElement;
 import eu.rssw.pct.elements.v12.TypeInfoV12;
 
 public class RCodeInfoTest {
@@ -191,15 +195,20 @@ public class RCodeInfoTest {
       assertNotNull(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Delete"));
       if (checkEnumValues) {
         assertNotNull(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Write").getO2().getEnumDescriptor());
-        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Write").getO2().getEnumDescriptor().getValue(), 0X2L);
+        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Write").getO2().getEnumDescriptor().getValue(),
+            0X2L);
         assertNotNull(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Delete").getO2().getEnumDescriptor());
-        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Delete").getO2().getEnumDescriptor().getValue(), 0x179324681357L);
+        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Delete").getO2().getEnumDescriptor().getValue(),
+            0x179324681357L);
         assertNotNull(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Execute").getO2().getEnumDescriptor());
-        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Execute").getO2().getEnumDescriptor().getValue(), 0x973113572468L);
+        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Execute").getO2().getEnumDescriptor().getValue(),
+            0x973113572468L);
         assertNotNull(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Extra01").getO2().getEnumDescriptor());
-        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Extra01").getO2().getEnumDescriptor().getValue(), 0x1234L);
+        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Extra01").getO2().getEnumDescriptor().getValue(),
+            0x1234L);
         assertNotNull(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Extra02").getO2().getEnumDescriptor());
-        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Extra02").getO2().getEnumDescriptor().getValue(), 0x5678L);
+        assertEquals(rci.getTypeInfo().lookupProperty(EMPTY_PROVIDER, "Extra02").getO2().getEnumDescriptor().getValue(),
+            0x5678L);
       }
 
       Kryo kryo = getKryo();
@@ -575,6 +584,8 @@ public class RCodeInfoTest {
       assertNotNull(testMethod);
       assertEquals(testMethod.getSignature(), "testMethod(IT,OD,II[])U");
       assertEquals(testMethod.getIDESignature(), "testMethod(↑TBL tt1, ↓DS ds1, ↑INT[] xx)");
+      assertEquals(testMethod.getIDESignature(false), "testMethod(↑TBL tt1, ↓DS ds1, ↑INT[] xx)");
+      assertEquals(testMethod.getIDESignature(true), "testMethod(↓TBL tt1, ↑DS ds1, ↓INT[] xx)");
       assertEquals(testMethod.getExtent(), -32767);
       assertEquals(testMethod.getParameters().length, 3);
       assertEquals(testMethod.getParameters()[0].getParameterType(), ParameterType.TABLE);
@@ -603,7 +614,7 @@ public class RCodeInfoTest {
       assertEquals(testMethod22.getParameters()[0].getExtent(), -32767);
       assertEquals(testMethod21.getSignature(), "testMethod2(II)ST");
       assertEquals(testMethod21.getIDESignature(), "testMethod2(↑INT xx)");
-      boolean b1 = "testMethod2(II[])PT".equals(testMethod22.getSignature()); 
+      boolean b1 = "testMethod2(II[])PT".equals(testMethod22.getSignature());
       boolean b2 = "testMethod2(II[])T".equals(testMethod22.getSignature());
       assertTrue(b1 || b2);
       assertEquals(testMethod22.getIDESignature(), "testMethod2(↑INT[] xx)");
@@ -618,7 +629,7 @@ public class RCodeInfoTest {
           testMethod3 = elem;
       }
       assertNotNull(testMethod3);
-      b1 = "testMethod3(ITH,MDH)PV".equals(testMethod3.getSignature()); 
+      b1 = "testMethod3(ITH,MDH)PV".equals(testMethod3.getSignature());
       b2 = "testMethod3(ITH,MDH)V".equals(testMethod3.getSignature());
       assertTrue(b1 || b2);
       assertEquals(testMethod3.getIDESignature(), "testMethod3(↑TBL-HDL htt1, ⇅DS-HDL hds1)");
@@ -739,7 +750,7 @@ public class RCodeInfoTest {
     List<ITypeInfo> list = new ArrayList<>();
     try (InputStream input = Files.newInputStream(Paths.get("target/kryo/builtin.bin"));
         Input input2 = new Input(input)) {
-      while (input2.available() > 0)  {
+      while (input2.available() > 0) {
         Object obj = kryo.readClassAndObject(input2);
         assertTrue(obj instanceof ITypeInfo);
         list.add((ITypeInfo) obj);
@@ -748,10 +759,10 @@ public class RCodeInfoTest {
 
     assertEquals(list.size(), BuiltinClasses.getBuiltinClasses().size());
     ITypeInfo info2 = list.stream() //
-        .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
-        .findFirst().get();
+      .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
+      .findFirst().get();
     IMethodElement elem2 = info2.getMethods().stream().filter(it -> "GetValue".equals(it.getName())) //
-    .findFirst().get();
+      .findFirst().get();
     assertNotNull(elem2);
     assertTrue(elem2 instanceof EnumGetValueMethodElement);
     assertEquals(((EnumGetValueMethodElement) elem2).getParent(), info2);
@@ -791,4 +802,34 @@ public class RCodeInfoTest {
     assertNotNull(event1.getParameters());
     assertEquals(event1.getParameters().length, 0);
   }
+
+  @Test
+  public void testTempTable2() {
+    var typeInfo = new TypeInfo("rssw.sonar.MyTt", false, false, "Progress.Lang.Object", "", "");
+    var indexes = new IndexElement[1];
+    indexes[0] = new IndexElement("idxMain", true, false, false, new IndexComponentElement("f1", 0, false),
+        new IndexComponentElement("f2", 1, false));
+    var table1 = new TableElement("ttTest", "beforetable", indexes, new VariableElement("f1", DataType.CHARACTER),
+        new VariableElement("f2", DataType.CHARACTER));
+    typeInfo.addTable(table1);
+
+    assertTrue(typeInfo.hasTempTable("ttTest"));
+    assertFalse (typeInfo.hasTempTable("ttTest2"));
+    assertTrue(typeInfo.hasBuffer("ttTest"));
+    assertFalse (typeInfo.hasBuffer("ttTest2"));
+    assertNotNull(typeInfo.getTempTable("ttTest"));
+    assertNotNull(typeInfo.getBuffer("ttTest"));
+    assertEquals(table1.getName(), "ttTest");
+    assertNotNull(table1.getIndexes());
+    assertEquals(table1.getIndexes().length, 1);
+    assertTrue(table1.getIndexes()[0].isPrimary());
+    assertFalse(table1.getIndexes()[0].isUnique());
+    assertEquals(table1.getFields().length, 2);
+    assertFalse(table1.isStatic());
+    assertFalse(table1.isNonSerializable());
+    assertFalse(table1.isNoUndo());
+    assertFalse(table1.isSerializable());
+    assertTrue(table1.isPublic());
+  }
+
 }

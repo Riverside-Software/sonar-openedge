@@ -65,7 +65,6 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.scanner.ScannerSide;
-import org.sonar.api.utils.Version;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.objects.DatabaseWrapper;
 import org.sonarsource.api.sonarlint.SonarLintSide;
@@ -300,20 +299,25 @@ public class OpenEdgeSettings {
   }
 
   private final void initializeRCodeCache() {
-    Optional<String> opt = config.get(Constants.SLINT_RCODE_CACHE);
+    var opt = config.get(Constants.SLINT_RCODE_CACHE);
     if (opt.isPresent()) {
-      File rcodeCache = new File(opt.get());
-      if (rcodeCache.exists() && rcodeCache.isFile() && rcodeCache.canRead()) {
+      LOG.debug("Reading rcode cache from {}", opt.get());
+      var rcodeCache = Path.of(opt.get());
+      if (java.nio.file.Files.isRegularFile(rcodeCache) && java.nio.file.Files.isReadable(rcodeCache)) {
         try {
-          for (String str : java.nio.file.Files.readAllLines(rcodeCache.toPath(), StandardCharsets.UTF_8)) {
-            int commaPos = str.indexOf(':');
+          for (var str : java.nio.file.Files.readAllLines(rcodeCache, StandardCharsets.UTF_8)) {
+            var commaPos = str.indexOf(':');
             if ((commaPos > 0) && (str.length() > commaPos)) {
-              defaultSession.injectTypeInfo(
-                  new TypeInfoRCodeProxy(str.substring(0, commaPos), Paths.get(str.substring(commaPos + 1))));
+              var clsName = str.substring(0, commaPos);
+              var rcodePath = Path.of(str.substring(commaPos + 1));
+              if (!rcodePath.isAbsolute())
+                rcodePath = fileSystem.baseDir().toPath().resolve(rcodePath);
+              var proxy = new TypeInfoRCodeProxy(clsName, rcodePath);
+              defaultSession.injectTypeInfo(proxy);
             }
           }
         } catch (IOException caught) {
-          LOG.error("Unable to read PL cache " + rcodeCache.getAbsolutePath(), caught);
+          LOG.error("Unable to read rcode cache " + rcodeCache.toAbsolutePath(), caught);
         }
       }
     }
@@ -565,10 +569,8 @@ public class OpenEdgeSettings {
   public boolean useCache() {
     if (runtime.getProduct() != SonarProduct.SONARQUBE)
       return false;
-    boolean developerOrMore = ((runtime.getEdition() == SonarEdition.DEVELOPER)
-        || (runtime.getEdition() == SonarEdition.ENTERPRISE) || (runtime.getEdition() == SonarEdition.DATACENTER));
-    boolean version94OrMore = runtime.getApiVersion().isGreaterThanOrEqual(Version.create(9, 4));
-    return developerOrMore && version94OrMore;
+    return (runtime.getEdition() == SonarEdition.DEVELOPER) || (runtime.getEdition() == SonarEdition.ENTERPRISE)
+        || (runtime.getEdition() == SonarEdition.DATACENTER);
   }
 
   private File getFileFromRtbListDir(String fileName, String extension) {

@@ -23,21 +23,22 @@ import java.util.EnumSet;
 
 import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
-import eu.rssw.pct.elements.DataType;
-import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.IBufferElement;
 
-public class VariableElement extends AbstractAccessibleElement implements IVariableElement {
-  private final DataType dataType;
-  private final boolean isStatic;
+public class BufferElement extends AbstractAccessibleElement implements IBufferElement {
+  private final String databaseName;
+  private final String tableName;
+  private final boolean isTempTableBuffer;
 
-  public VariableElement(String name, DataType dataType) {
-    this(name, false, dataType);
+  public BufferElement(String tableName) {
+    this("", tableName, true);
   }
 
-  public VariableElement(String name, boolean isStatic, DataType dataType) {
-    super(name, EnumSet.of(AccessType.PUBLIC));
-    this.isStatic = isStatic;
-    this.dataType = dataType;
+  public BufferElement(String databaseName, String tableName, boolean isTempTableBuffer) {
+    super(tableName, EnumSet.of(AccessType.PUBLIC));
+    this.databaseName = databaseName;
+    this.tableName = tableName;
+    this.isTempTableBuffer = isTempTableBuffer;
   }
 
   @Override
@@ -46,37 +47,18 @@ public class VariableElement extends AbstractAccessibleElement implements IVaria
   }
 
   @Override
-  public int getExtent() {
-    return 0;
+  public String getDatabaseName() {
+    return databaseName;
   }
 
   @Override
-  public DataType getDataType() {
-    return dataType;
+  public String getTableName() {
+    return tableName;
   }
 
   @Override
-  public boolean isReadOnly() {
-    return false;
+  public boolean isTempTableBuffer() {
+    return isTempTableBuffer;
   }
 
-  @Override
-  public boolean isWriteOnly() {
-    return false;
-  }
-
-  @Override
-  public boolean isNoUndo() {
-    return false;
-  }
-
-  @Override
-  public boolean baseIsDotNet() {
-    return false;
-  }
-
-  @Override
-  public boolean isStatic() {
-    return isStatic;
-  }
 }

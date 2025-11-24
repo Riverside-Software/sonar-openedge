@@ -768,21 +768,19 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterCanFindFunction(CanFindFunctionContext ctx) {
     super.enterCanFindFunction(ctx);
 
-    RecordNameNode recordNode = (RecordNameNode) support.getNode(ctx.recordSearch().recordPhrase().record());
-    String buffName = ctx.recordSearch().recordPhrase().record().getText();
+    var recordNode = (RecordNameNode) support.getNode(ctx.recordSearch().recordPhrase().record());
+    var buffName = ctx.recordSearch().recordPhrase().record().getText();
     ITable table;
-    boolean isDefault;
-    TableBuffer tableBuffer = currentScope.lookupBuffer(buffName);
+    var tableBuffer = currentScope.lookupBuffer(buffName);
     if (tableBuffer != null) {
       table = tableBuffer.getTable();
-      isDefault = tableBuffer.isDefault();
       // Doing it early so that we don't have to query it again in next phase
       tableBuffer.noteReference(recordNode, ContextQualifier.INIT);
     } else {
       table = refSession.getSchema().lookupTable(buffName);
-      isDefault = true;
     }
-    TableBuffer newBuff = currentScope.defineBuffer(isDefault ? "" : buffName, table);
+    // Buffer defined with buffName as we don't want to use the default buffer here
+    var newBuff = currentScope.defineBuffer(buffName, table);
     newBuff.setDefinitionNode(support.getNode(ctx.recordSearch().recordPhrase().record()));
     recordNode.setTableBuffer(newBuff);
     currentBlock.addHiddenCursor(recordNode);
@@ -2015,7 +2013,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterWaitForSet(WaitForSetContext ctx) {
-    setContextQualifier(ctx.fieldExpr(), ContextQualifier.UPDATING);
+    setContextQualifier(ctx.expression(), ContextQualifier.UPDATING);
   }
 
   // ******************

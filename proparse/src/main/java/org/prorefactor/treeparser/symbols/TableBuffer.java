@@ -36,7 +36,7 @@ public class TableBuffer extends Symbol {
   /**
    * Constructor for a named buffer.
    * 
-   * @param name Input "" for an unnamed or default buffer
+   * @param name Empty string for an unnamed or default buffer
    */
   public TableBuffer(String name, TreeParserSymbolScope scope, ITable table) {
     super(name, scope);
@@ -49,7 +49,7 @@ public class TableBuffer extends Symbol {
   }
 
   /**
-   * Return fully qualified table name (with DB) of the table buffer is pointing to
+   * @return Fully qualified table name (with DB) of the table buffer is pointing to
    */
   public String getTargetFullName() {
     if (table.getStoretype() == IConstants.ST_DBTABLE)
@@ -103,7 +103,7 @@ public class TableBuffer extends Symbol {
   }
 
   /**
-   * Get the name of the buffer (overrides Symbol.getName). Returns the name of the table for default (unnamed) buffers.
+   * @return The name of the buffer, or the name of the table for default (unnamed) buffers
    */
   @Override
   public String getName() {
@@ -118,12 +118,16 @@ public class TableBuffer extends Symbol {
     return table;
   }
 
-  /** Is this the default (unnamed) buffer? */
+  /**
+   * @return True if this is the default (unnamed) buffer
+   */
   public boolean isDefault() {
     return isDefault;
   }
 
-  /** Is this a default (unnamed) buffer for a schema table? */
+  /**
+   * @return True if this a default (unnamed) buffer for a schema table
+   */
   public boolean isDefaultSchema() {
     return isDefault && table.getStoretype() == IConstants.ST_DBTABLE;
   }

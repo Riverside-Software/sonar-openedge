@@ -31,7 +31,6 @@ import javax.inject.Inject;
 
 import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.proparse.AssemblyCatalog;
-import org.prorefactor.proparse.AssemblyCatalog.Event;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.refactor.settings.IProparseSettings;
@@ -55,6 +54,7 @@ import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.fixed.PropertyElement;
 import eu.rssw.pct.elements.fixed.TypeInfo;
+import eu.rssw.pct.elements.fixed.VariableElement;
 
 /**
  * This class provides an interface to an org.prorefactor.refactor session. Much of this class was originally put in
@@ -171,23 +171,28 @@ public class RefactorSession implements IProparseEnvironment {
   }
 
   private static ITypeInfo assemblyCatalogEntryToTypeInfo(AssemblyCatalog.Entry info) {
-    String parentType = info.baseTypes != null && info.baseTypes.length > 0 ? info.baseTypes[0] : null;
-    String[] interfaces = info.baseTypes != null && info.baseTypes.length > 1
+    var parentType = info.baseTypes != null && info.baseTypes.length > 0 ? info.baseTypes[0] : null;
+    var interfaces = info.baseTypes != null && info.baseTypes.length > 1
         ? Arrays.copyOfRange(info.baseTypes, 1, info.baseTypes.length) : new String[] {};
-    TypeInfo typeInfo = new TypeInfo(info.name, info.isInterface, info.isAbstract, parentType, "", interfaces);
+    var typeInfo = new TypeInfo(info.name, info.isInterface, info.isAbstract, parentType, "", interfaces);
     if (info.methods != null) {
-      for (org.prorefactor.proparse.AssemblyCatalog.Method methd : info.methods) {
+      for (var methd : info.methods) {
         typeInfo.addMethod(toMethodElement(methd));
       }
     }
     if (info.properties != null) {
-      for (org.prorefactor.proparse.AssemblyCatalog.Property prop : info.properties) {
+      for (var prop : info.properties) {
         typeInfo.addProperty(new PropertyElement(prop.name, prop.isStatic, toDataType(prop.dataType)));
       }
     }
     if (info.events != null) {
-      for (Event event : info.events) {
+      for (var event : info.events) {
         typeInfo.addEvent(new EventElement(event.name));
+      }
+    }
+    if (info.fields != null) {
+      for (var fld : info.fields) {
+        typeInfo.addVariable(new VariableElement(fld.name, fld.isStatic, toDataType(fld.dataType)));
       }
     }
 

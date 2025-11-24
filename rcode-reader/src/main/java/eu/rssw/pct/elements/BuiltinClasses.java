@@ -1645,7 +1645,85 @@ public class BuiltinClasses {
     typeInfo = new TypeInfo("Progress.Web.IWebHandler", true, false, null, "");
     typeInfo.addMethod(new MethodElement("HandleRequest", false, DataType.INTEGER));
     BUILTIN_CLASSES.add(typeInfo);
+  }
 
+  private static void addProgressWindowsClasses() {
+    TypeInfo typeInfo = new TypeInfo("Progress.Windows.Form", false, false, "System.Windows.Forms.Form", "",
+        "System.ComponentModel.IComponent", "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl", "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow", "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2", "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate", "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget", "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window", "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent", "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl", "Progress.Windows.IForm", "Progress.Windows.IFormCommon");
+    typeInfo.addMethod(new MethodElement("SetWaitState", false, DataType.VOID,
+        new Parameter(1, "DisableForm", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    typeInfo.addMethod(new MethodElement("EnableForm", false, DataType.VOID,
+        new Parameter(1, "EnableForm", 0, ParameterMode.INPUT, DataType.LOGICAL)));
+    typeInfo.addProperty(new PropertyElement("ProWinHandle", false, DataType.HANDLE));
+    typeInfo.addProperty(new PropertyElement("NextForm", false, new DataType("Progress.Windows.IForm")));
+    typeInfo.addProperty(new PropertyElement("PrevForm", false, new DataType("Progress.Windows.IForm")));
+    typeInfo.addProperty(new PropertyElement("DisposeDialogOnClose", false, DataType.LOGICAL));
+    typeInfo.addProperty(
+        new PropertyElement("PreviousState", false, new DataType("System.Windows.Forms.FormWindowState")));
+    typeInfo.addMethod(new ConstructorElement("Form"));
+    BUILTIN_CLASSES.add(typeInfo);
+
+    typeInfo = new TypeInfo("Progress.Windows.FormProxy", false, false, "System.Object", "", "Progress.Windows.IForm");
+    typeInfo.addProperty(new PropertyElement("ProWinHandle", false, DataType.HANDLE));
+    typeInfo.addProperty(new PropertyElement("NextForm", false, new DataType("Progress.Windows.IForm")));
+    typeInfo.addProperty(new PropertyElement("PrevForm", false, new DataType("Progress.Windows.IForm")));
+    BUILTIN_CLASSES.add(typeInfo);
+
+    typeInfo = new TypeInfo("Progress.Windows.IForm", true, false, null, "");
+    typeInfo.addProperty(new PropertyElement("ProWinHandle", false, DataType.HANDLE));
+    typeInfo.addProperty(new PropertyElement("NextForm", false, new DataType("Progress.Windows.IForm")));
+    typeInfo.addProperty(new PropertyElement("PrevForm", false, new DataType("Progress.Windows.IForm")));
+    BUILTIN_CLASSES.add(typeInfo);
+
+    typeInfo = new TypeInfo("Progress.Windows.UserControl", false, false, "System.Windows.Forms.UserControl", "",
+        "System.ComponentModel.IComponent", "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl", "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow", "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2", "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate", "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget", "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window", "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent", "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl");
+    typeInfo.addMethod(new ConstructorElement("UserControl"));
+    BUILTIN_CLASSES.add(typeInfo);
+
+    typeInfo = new TypeInfo("Progress.Windows.WindowContainer", false, false, "Progress.Windows.UserControl", "",
+        "System.ComponentModel.IComponent", "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl", "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow", "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2", "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate", "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget", "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window", "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent", "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl");
+    typeInfo.addProperty(new PropertyElement("EmbeddedWindow", false, DataType.HANDLE));
+    typeInfo.addMethod(new ConstructorElement("WindowContainer"));
+    BUILTIN_CLASSES.add(typeInfo);
   }
 
   static {
@@ -1654,7 +1732,7 @@ public class BuiltinClasses {
     typeInfo.addMethod(new MethodElement("GetClass", false, new DataType("Progress.Lang.Class")));
     typeInfo.addMethod(new MethodElement("ToString", false, DataType.CHARACTER));
     typeInfo.addMethod(new MethodElement("Equals", false, DataType.LOGICAL,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME))));
+        new Parameter(1, "OtherObj", 0, ParameterMode.INPUT, new DataType(PLO_CLASSNAME))));
     typeInfo.addMethod(new MethodElement("Clone", false, new DataType(PLO_CLASSNAME)));
     typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType(PLO_CLASSNAME)));
     typeInfo.addProperty(new PropertyElement("Prev-Sibling", false, new DataType(PLO_CLASSNAME)));
@@ -1664,7 +1742,7 @@ public class BuiltinClasses {
     typeInfo = new TypeInfo(PLE_CLASSNAME, false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("GetValue", false, DataType.INT64));
     typeInfo.addMethod(new MethodElement("CompareTo", false, DataType.INTEGER,
-        new Parameter(1, "prm1", 0, ParameterMode.INPUT, new DataType(PLE_CLASSNAME))));
+        new Parameter(1, "otherEnum", 0, ParameterMode.INPUT, new DataType(PLE_CLASSNAME))));
     PROGRESS_LANG_ENUM = typeInfo;
     BUILTIN_CLASSES.add(typeInfo);
 
@@ -1676,6 +1754,7 @@ public class BuiltinClasses {
     addProgressReflectClasses();
     addProgressSecurityClasses();
     addProgressWebClasses();
+    addProgressWindowsClasses();
 
     BUILTIN_CLASSES.stream().map(it -> it.getTypeName()).forEach(it -> BUILTIN_CLASSES_NAMES.add(it));
   }

@@ -20,9 +20,9 @@
 package org.sonar.plugins.openedge.sensor;
 
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.BASEDIR;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE2;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE3;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST1;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST2;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST3;
 
 import org.sonar.api.batch.sensor.highlighting.TypeOfText;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
@@ -45,42 +45,42 @@ public class OpenEdgeCodeColorizerTest {
     sensor.execute(context);
 
     // Comments
-    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + FILE1, 1, 10));
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE1, 1, 10).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE1, 1, 10).get(0), TypeOfText.COMMENT);
+    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST1, 1, 10));
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST1, 1, 10).size(), 1);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST1, 1, 10).get(0), TypeOfText.COMMENT);
 
     // Quoted string
-    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + FILE2, 5, 13));
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE2, 5, 13).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE2, 5, 13).get(0), TypeOfText.STRING);
+    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST2, 5, 13));
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST2, 5, 13).size(), 1);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST2, 5, 13).get(0), TypeOfText.STRING);
 
     // Keyword
-    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + FILE2, 5, 5));
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE2, 5, 5).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE2, 5, 5).get(0), TypeOfText.KEYWORD);
+    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST2, 5, 5));
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST2, 5, 5).size(), 1);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST2, 5, 5).get(0), TypeOfText.KEYWORD);
 
     // Preprocessor
-    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 3, 25));
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 3, 25).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 3, 25).get(0),
+    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 3, 25));
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 3, 25).size(), 1);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 3, 25).get(0),
         TypeOfText.PREPROCESS_DIRECTIVE);
-    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 4, 10));
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 4, 10).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 4, 10).get(0), TypeOfText.STRING);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 4, 16).size(), 0);
+    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 4, 10));
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 4, 10).size(), 1);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 4, 10).get(0), TypeOfText.STRING);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 4, 16).size(), 0);
 
     // Constants
-    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 14, 9));
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 14, 9).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 14, 9).get(0), TypeOfText.CONSTANT);
+    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 14, 9));
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 14, 9).size(), 1);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 14, 9).get(0), TypeOfText.CONSTANT);
 
     // Include file
-    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 21, 3));
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 21, 3).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 21, 3).get(0),
+    Assert.assertNotNull(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 21, 3));
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 21, 3).size(), 1);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 21, 3).get(0),
         TypeOfText.PREPROCESS_DIRECTIVE);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 21, 20).size(), 1);
-    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + FILE3, 21, 20).get(0),
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 21, 20).size(), 1);
+    Assert.assertEquals(context.highlightingTypeAt(BASEDIR + ":" + PROC_TEST3, 21, 20).get(0),
         TypeOfText.PREPROCESS_DIRECTIVE);
   }
 

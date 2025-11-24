@@ -88,6 +88,8 @@ public class ClassesTest extends AbstractProparseTest {
     assertEquals(lst0.size(), 1);
     assertEquals(lst0.get(0).getSignature(), "LoadLogger(II)");
     assertEquals(lst0.get(0).getIDESignature(), "LoadLogger(↑INT)");
+    assertEquals(lst0.get(0).getIDESignature(false), "LoadLogger(↑INT)");
+    assertEquals(lst0.get(0).getIDESignature(true), "LoadLogger(↓INT)");
 
     List<Routine> lst1 = unit.getRootScope().lookupRoutines("addError");
     assertNotNull(lst1);

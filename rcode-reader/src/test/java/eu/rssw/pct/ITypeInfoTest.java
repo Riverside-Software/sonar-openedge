@@ -20,6 +20,7 @@
 package eu.rssw.pct;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -137,6 +138,19 @@ public class ITypeInfoTest {
     assertNotNull(val2);
     assertEquals(val2.getO1().getTypeName(), "rssw.ChildClass");
     assertEquals(val2.getO2().getReturnType(), DataType.INTEGER);
+  }
+
+  @Test
+  public void testStatics() {
+    var typeInfo01 = new TypeInfo("rssw.ParentClass", false, false, "Progress.Lang.Object", "");
+    typeInfo01.addMethod(new MethodElement("method1", false, DataType.VOID,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    assertFalse(typeInfo01.hasStatics());
+
+    var typeInfo02 = new TypeInfo("rssw.ChildClass", false, false, "Progress.Lang.Object", "");
+    typeInfo02.addMethod(new MethodElement("method1", true, DataType.INTEGER,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INT64)));
+    assertTrue(typeInfo02.hasStatics());
   }
 
   @Test

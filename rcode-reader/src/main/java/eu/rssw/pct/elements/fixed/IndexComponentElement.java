@@ -23,21 +23,16 @@ import java.util.EnumSet;
 
 import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
-import eu.rssw.pct.elements.DataType;
-import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.IIndexComponentElement;
 
-public class VariableElement extends AbstractAccessibleElement implements IVariableElement {
-  private final DataType dataType;
-  private final boolean isStatic;
+public class IndexComponentElement extends AbstractAccessibleElement implements IIndexComponentElement {
+  private final int position;
+  private final boolean ascending;
 
-  public VariableElement(String name, DataType dataType) {
-    this(name, false, dataType);
-  }
-
-  public VariableElement(String name, boolean isStatic, DataType dataType) {
+  public IndexComponentElement(String name, int position, boolean ascending) {
     super(name, EnumSet.of(AccessType.PUBLIC));
-    this.isStatic = isStatic;
-    this.dataType = dataType;
+    this.position = position;
+    this.ascending = ascending;
   }
 
   @Override
@@ -46,37 +41,18 @@ public class VariableElement extends AbstractAccessibleElement implements IVaria
   }
 
   @Override
-  public int getExtent() {
-    return 0;
-  }
-
-  @Override
-  public DataType getDataType() {
-    return dataType;
-  }
-
-  @Override
-  public boolean isReadOnly() {
-    return false;
-  }
-
-  @Override
-  public boolean isWriteOnly() {
-    return false;
-  }
-
-  @Override
-  public boolean isNoUndo() {
-    return false;
-  }
-
-  @Override
-  public boolean baseIsDotNet() {
-    return false;
-  }
-
-  @Override
   public boolean isStatic() {
-    return isStatic;
+    return false;
   }
+
+  @Override
+  public boolean isAscending() {
+    return ascending;
+  }
+
+  @Override
+  public int getFieldPosition() {
+    return position;
+  }
+
 }

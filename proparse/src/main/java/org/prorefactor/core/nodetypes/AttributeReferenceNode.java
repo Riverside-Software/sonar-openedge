@@ -68,6 +68,8 @@ public class AttributeReferenceNode extends ExpressionNode {
   private void handleFieldRefNode(FieldRefNode node, ProgramRootNode root) {
     if (node.isStaticReference()) {
       property = node.getStaticReference().lookupProperty(root.getTypeInfoProvider(), attributeName);
+      var v1 = (property == null) ? node.getStaticReference().lookupVariable(attributeName) : null;
+      variable = v1 == null ? null : Pair.of(node.getStaticReference(), v1);
     } else if (node.getSymbol() instanceof Event) {
       // Events only have Publish / Subscribe, no properties
     } else if (node.isIExpression()) {

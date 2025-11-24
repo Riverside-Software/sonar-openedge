@@ -35,14 +35,14 @@ import com.google.common.io.Files;
 
 public class TestProjectSensorContext {
   public static final String BASEDIR = "target/test-classes/project1";
-  public static final String DF1 = "src/schema/sp2k.df";
-  public static final String FILE1 = "src/procedures/test1.p";
-  public static final String FILE2 = "src/procedures/test2.p";
-  public static final String FILE3 = "src/procedures/test3.p";
-  public static final String FILE4 = "src/procedures/test3.i";
-  public static final String FILE5 = "src/procedures/invalid.p";
-  public static final String FILE6 = "src/procedures/test3.i1";
-  public static final String CLASS1 = "src/classes/rssw/testclass.cls";
+  public static final String SP2K_DF = "src/schema/sp2k.df";
+  public static final String PROC_TEST1 = "src/procedures/test1.p";
+  public static final String PROC_TEST2 = "src/procedures/test2.p";
+  public static final String PROC_TEST3 = "src/procedures/test3.p";
+  public static final String PROC_TEST3_I = "src/procedures/test3.i";
+  public static final String PROC_TEST3_I1 = "src/procedures/test3.i1";
+  public static final String PROC_INVALID = "src/procedures/invalid.p";
+  public static final String CLS_TESTCLASS = "src/classes/rssw/testclass.cls";
 
   private TestProjectSensorContext() {
     // No-op
@@ -56,7 +56,7 @@ public class TestProjectSensorContext {
     settings.setProperty("sonar.sources", "src");
     settings.setProperty(Constants.PROPATH, new File(BASEDIR).getAbsolutePath());
     settings.setProperty(Constants.BINARIES, "build");
-    settings.setProperty(Constants.DATABASES, "src/schema/sp2k.df");
+    settings.setProperty(Constants.DATABASES, SP2K_DF);
     settings.setProperty(Constants.SKIP_RCODE, true);
     settings.setProperty(Constants.PROPARSE_ERROR_STACKTRACE, false);
     settings.setProperty(Constants.DOTNET_CATALOG, "catalog.json");
@@ -64,16 +64,16 @@ public class TestProjectSensorContext {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     context.setSettings(settings);
 
-    Set<String> oeFiles = Set.of(FILE1, FILE2, FILE3, FILE4, FILE5, FILE6, CLASS1);
-    Set<String> addedFiles = Set.of(FILE2, FILE4, FILE5, FILE6, CLASS1);
+    Set<String> oeFiles = Set.of(PROC_TEST1, PROC_TEST2, PROC_TEST3, PROC_TEST3_I, PROC_INVALID, PROC_TEST3_I1, CLS_TESTCLASS);
+    Set<String> addedFiles = Set.of(PROC_TEST2, PROC_TEST3_I, PROC_INVALID, PROC_TEST3_I1, CLS_TESTCLASS);
 
     // DB Schema
-    context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, DF1) //
+    context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, SP2K_DF) //
       .setStatus(Status.SAME) //
       .setLanguage(Constants.DB_LANGUAGE_KEY) //
       .setType(Type.MAIN) //
       .setCharset(Charset.defaultCharset()) //
-      .setContents(Files.asCharSource(new File(BASEDIR, DF1), Charset.defaultCharset()).read()) //
+      .setContents(Files.asCharSource(new File(BASEDIR, SP2K_DF), Charset.defaultCharset()).read()) //
       .build());
     // OpenEdge files
     for (String str : oeFiles) {

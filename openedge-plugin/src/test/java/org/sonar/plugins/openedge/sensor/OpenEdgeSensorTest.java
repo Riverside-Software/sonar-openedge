@@ -20,8 +20,8 @@
 package org.sonar.plugins.openedge.sensor;
 
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.BASEDIR;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE1;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.FILE2;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST1;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST2;
 import static org.testng.Assert.assertEquals;
 
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
@@ -38,8 +38,8 @@ public class OpenEdgeSensorTest {
     OpenEdgeSensor sensor = new OpenEdgeSensor();
     sensor.execute(context);
 
-    assertEquals(context.measure(BASEDIR + ":" + FILE1, OpenEdgeMetrics.PROCEDURES.getKey()).value(), 1);
-    assertEquals(context.measure(BASEDIR + ":" + FILE2, OpenEdgeMetrics.PROCEDURES.getKey()).value(), 1);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST1, OpenEdgeMetrics.PROCEDURES.getKey()).value(), 1);
+    assertEquals(context.measure(BASEDIR + ":" + PROC_TEST2, OpenEdgeMetrics.PROCEDURES.getKey()).value(), 1);
   }
 
 }

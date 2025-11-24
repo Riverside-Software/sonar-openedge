@@ -1244,4 +1244,52 @@ public class ParserTest extends AbstractProparseTest {
     unit.parse();
     assertFalse(unit.hasSyntaxError());
   }
+
+  @Test
+  public void testRunAsync01() {
+    var code = """
+        var handle xHdl.
+        run xxx.p on server xHdl asynchronous event-handler 'xyz' event-handler-context this-object (input 1, input 2).
+        """;
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    var list01 = unit.getTopNode().queryStateHead(ABLNodeType.RUN);
+    assertEquals(list01.size(), 1);
+    var stmt01 = list01.get(0);
+    var list02 = stmt01.query(ABLNodeType.TYPELESS_TOKEN);
+    assertTrue(list02.isEmpty());
+    var list03 = stmt01.query(ABLNodeType.PARAMETER_LIST);
+    assertFalse(list03.isEmpty());
+    assertEquals(list03.get(0).getDirectChildren(ABLNodeType.PARAMETER_ITEM).size(), 2);
+  }
+
+  @Test
+  public void testRunAsync02() {
+    var code = """
+        var handle xHdl.
+        run xxx.p on server xHdl asynchronous event-handler 'xyz' (input 1, input 2).
+        """;
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    var list01 = unit.getTopNode().queryStateHead(ABLNodeType.RUN);
+    assertEquals(list01.size(), 1);
+    var stmt01 = list01.get(0);
+    var list02 = stmt01.query(ABLNodeType.TYPELESS_TOKEN);
+    assertTrue(list02.isEmpty());
+    var list03 = stmt01.query(ABLNodeType.PARAMETER_LIST);
+    assertFalse(list03.isEmpty());
+    assertEquals(list03.get(0).getDirectChildren(ABLNodeType.PARAMETER_ITEM).size(), 2);
+  }
+  
+  @Test
+  public void testWaitForSet() {
+    var unit = getParseUnit("WAIT-FOR xObj:methodName() SET this-object:attrName.", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+  }
+  
+
 }

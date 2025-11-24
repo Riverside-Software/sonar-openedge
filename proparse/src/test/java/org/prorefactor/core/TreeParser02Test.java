@@ -34,9 +34,9 @@ public class TreeParser02Test {
 
   private RefactorSession session;
 
-  private final static String SOURCEDIR = "src/test/resources/treeparser02/";
-  private final static String TARGETDIR = "target/test-temp/treeparser02/";
-  private final static String EXPECTDIR = "src/test/resources/treeparser02-expect/";
+  private static final String SOURCEDIR = "src/test/resources/treeparser02/";
+  private static final String TARGETDIR = "target/test-temp/treeparser02/";
+  private static final String EXPECTDIR = "src/test/resources/treeparser02-expect/";
 
   @BeforeTest
   public void setUp() throws IOException {

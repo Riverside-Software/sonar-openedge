@@ -106,14 +106,14 @@ public class Parameter {
     return sb.toString();
   }
 
-  public String getIDESignature() {
+  public String getIDESignature(boolean chronological) {
     StringBuilder sb = new StringBuilder();
     switch (directionNode) {
       case INPUTOUTPUT: sb.append('⇅'); break;
-      case OUTPUT: sb.append('↓'); break;
-      case RETURN: sb.append('⇊'); break;
+      case OUTPUT: sb.append(chronological ? '↑' : '↓'); break;
+      case RETURN: sb.append(chronological ? '⇈' : '⇊'); break;
       case BUFFER: return sb.append("BUFFER").toString();
-      default: sb.append('↑'); // INPUT
+      default: sb.append(chronological ? '↓' : '↑'); // INPUT
     }
     switch (progressType) {
       case TEMPTABLE:
@@ -141,7 +141,6 @@ public class Parameter {
       default:
         sb.append("??");
     }
-//    sb.append(' ').append(getName());
 
     return sb.toString();
 

@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.rules.RuleType;
 import org.sonar.api.server.rule.RulesDefinition;
-import org.sonar.api.utils.Version;
 import org.sonar.check.Priority;
 import org.sonar.plugins.openedge.api.AnnotationBasedRulesDefinition;
 import org.sonar.plugins.openedge.api.Constants;
@@ -58,9 +57,6 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
 
   @Override
   public void define(Context context) {
-    // Clean code attributes can only be set in version 10 and above
-    var version10 = runtime.getApiVersion().isGreaterThanOrEqual(Version.create(10, 1));
-
     var repository = context //
       .createRepository(Constants.STD_REPOSITORY_KEY, Constants.LANGUAGE_KEY) //
       .setName(REPOSITORY_NAME);
@@ -70,7 +66,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     try (var input = this.getClass().getResourceAsStream("/rules/compiler-warnings.json");
         var reader = new InputStreamReader(input)) {
       for (var ruleDef : new GsonBuilder().create().fromJson(reader, RuleDefinition[].class)) {
-        createWarningRule(repository, ruleDef, version10);
+        createWarningRule(repository, ruleDef);
       }
     } catch (IOException caught) {
       LOGGER.error("Unable to read compiler warning rules definition", caught);
@@ -101,7 +97,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     return IntStream.of(OpenEdgeRulesDefinition.WARNING_MSGS).anyMatch(x -> x == warningNum);
   }
 
-  private NewRule createWarningRule(NewRepository repository, RuleDefinition def, boolean cleanCode) {
+  private NewRule createWarningRule(NewRepository repository, RuleDefinition def) {
     var rule = repository.createRule(def.key);
     rule.setName(def.name) //
       .setSeverity(def.priority) //
@@ -110,12 +106,10 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
       .setType(RuleType.CODE_SMELL) //
       .setDebtRemediationFunction(rule.debtRemediationFunctions().constantPerIssue(def.remediationCost + "min"));
     setupDocumentation(rule, def.key);
-    if (cleanCode) {
-      rule.setCleanCodeAttribute(Constants.lookupCleanCodeAttribute(def.cleanCodeAttribute));
-      for (var impact : def.impacts) {
-        rule.addDefaultImpact(Constants.lookupSoftwareQuality(impact.quality),
-            Constants.lookupSeverity(impact.severity));
-      }
+    rule.setCleanCodeAttribute(Constants.lookupCleanCodeAttribute(def.cleanCodeAttribute));
+    for (var impact : def.impacts) {
+      rule.addDefaultImpact(Constants.lookupSoftwareQuality(impact.quality),
+          Constants.lookupSeverity(impact.severity));
     }
 
     return rule;
