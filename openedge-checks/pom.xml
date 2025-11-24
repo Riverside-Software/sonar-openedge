@@ -5,7 +5,7 @@
   <parent>
     <groupId>eu.rssw</groupId>
     <artifactId>sonar-openedge</artifactId>
-    <version>3.5.0</version>
+    <version>3.6.0-SNAPSHOT</version>
   </parent>
   <groupId>eu.rssw.openedge.checks</groupId>
   <artifactId>openedge-checks</artifactId>
@@ -23,12 +23,12 @@
     <dependency>
       <groupId>eu.rssw.openedge.parsers</groupId>
       <artifactId>database-parser</artifactId>
-      <version>3.5.0</version>
+      <version>3.6.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>eu.rssw.openedge.parsers</groupId>
       <artifactId>proparse</artifactId>
-      <version>3.5.0</version>
+      <version>3.6.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>
