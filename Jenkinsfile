@@ -12,6 +12,8 @@ pipeline {
       environment {
         OP_CLI_PATH = '/usr/local/bin/'
         MAVEN_GPG_PASSPHRASE = 'op://Jenkins/GPG/password'
+        SONATYPE_USERNAME = 'op://Jenkins/Sonatype/username'
+        SONATYPE_PASSWORD = 'op://Jenkins/Sonatype/password'
       }
       steps {
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: scm.userRemoteConfigs])
