@@ -19,41 +19,9 @@
  */
 package eu.rssw.pct.elements;
 
-public enum ParameterMode {
-  INPUT(6028),
-  OUTPUT(6049),
-  INPUT_OUTPUT(6110),
-  BUFFER(1070),
-  RETURN(-1);
 
-  private final int num;
+public interface IAttributeElement extends IVariableElement {
+  String getDescription();
 
-  private ParameterMode(int num) {
-    this.num = num;
-  }
-
-  public int getRCodeConstant() {
-    return this.num;
-  }
-
-  public String getName() {
-    return name().replace('_', '-');
-  }
-
-  public static ParameterMode getParameterMode(String mode) {
-    for (var m : ParameterMode.values()) {
-      if (m.getName().equalsIgnoreCase(mode.replace('_', '-')))
-        return m;
-    }
-    return INPUT;
-  }
-
-  public static ParameterMode getParameterMode(int mode) {
-    for (ParameterMode m : ParameterMode.values()) {
-      if (m.num == mode) {
-        return m;
-      }
-    }
-    return INPUT;
-  }
+  IVariableElement getVariable();
 }

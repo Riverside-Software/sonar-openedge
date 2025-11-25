@@ -291,9 +291,8 @@ public class DataType {
   public static boolean isNumeric(DataType type) {
     return (type == DataType.BIGINT) || (type == DataType.BYTE) || (type == DataType.DECIMAL)
         || (type == DataType.DOUBLE) || (type == DataType.FLOAT) || (type == DataType.INT64)
-        || (type == DataType.INTEGER) || (type == DataType.LONG) 
-        || (type == DataType.SHORT) || (type == DataType.UNSIGNED_BYTE) || (type == DataType.UNSIGNED_INTEGER)
-        || (type == DataType.UNSIGNED_SHORT);
+        || (type == DataType.INTEGER) || (type == DataType.LONG) || (type == DataType.SHORT)
+        || (type == DataType.UNSIGNED_BYTE) || (type == DataType.UNSIGNED_INTEGER) || (type == DataType.UNSIGNED_SHORT);
   }
 
   public static boolean isDateLike(DataType type) {
@@ -301,10 +300,8 @@ public class DataType {
   }
 
   /**
-   * Return true if parameter datatype can be passed to this object.
-   * LONGCHAR.isCompatible(CHARACTER) is true
-   * CHARACTER.isCompatible(LONGCHAR) is false
-   * Progress.Lang.Object.isCompatible(Progress.Json.JsonObject) is true
+   * Return true if parameter datatype can be passed to this object. LONGCHAR.isCompatible(CHARACTER) is true
+   * CHARACTER.isCompatible(LONGCHAR) is false Progress.Lang.Object.isCompatible(Progress.Json.JsonObject) is true
    * Progress.Json.JsonObject.isCompatible(Progress.Lang.Object) is false
    */
   public boolean isCompatible(DataType obj, Function<String, ITypeInfo> provider) {

@@ -27,6 +27,7 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProgressString;
 import org.prorefactor.core.nodetypes.FieldRefNode;
+import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.IIndex;
@@ -2487,7 +2488,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     }
     if (cq == ContextQualifier.STATIC) {
       ITypeInfo info = refSession.getTypeInfoCI(support.lookupClassName(refNode.getIdNode().getText()));
-      refNode.setStaticReference(info == null ? BuiltinClasses.PROGRESS_LANG_OBJECT : info);
+      refNode.setStaticReference(
+          info == null ? ((ProgramRootNode) rootScope.getRootBlock().getNode()).getTypeInfoProvider().apply(
+              BuiltinClasses.PLO_CLASSNAME) : info);
       if (LOG.isTraceEnabled())
         LOG.trace("Static reference to {} - TypeInfo: {}", refNode.getIdNode().getText(),
             refNode.getStaticReference().getTypeName());

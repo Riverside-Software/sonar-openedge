@@ -49,6 +49,7 @@ import com.esotericsoftware.kryo.io.Output;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.BuiltinClasses;
+import eu.rssw.pct.mapping.OpenEdgeVersion;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IDatasetElement;
 import eu.rssw.pct.elements.IEventElement;
@@ -729,54 +730,58 @@ public class RCodeInfoTest {
 
   @Test
   public void testKryoBuiltinClasses() throws IOException {
-    Kryo kryo = getKryo();
-    try (OutputStream output = Files.newOutputStream(Paths.get("target/kryo/builtin.bin"));
-        Output data = new Output(output)) {
-      for (ITypeInfo info : BuiltinClasses.getBuiltinClasses()) {
-        kryo.writeClassAndObject(data, info);
+    for (OpenEdgeVersion version : OpenEdgeVersion.values()) {
+      Kryo kryo = getKryo();
+      try (OutputStream output = Files.newOutputStream(Paths.get("target/kryo/builtin.bin"));
+          Output data = new Output(output)) {
+        for (ITypeInfo info : BuiltinClasses.getBuiltinClasses(version)) {
+          kryo.writeClassAndObject(data, info);
+        }
       }
-    }
-    ITypeInfo info = BuiltinClasses.getBuiltinClasses().stream() //
-      .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
-      .findFirst().get();
-    assertNotNull(info);
-    IMethodElement elem = info.getMethods().stream() //
-      .filter(it -> "GetValue".equals(it.getName())) //
-      .findFirst().get();
-    assertNotNull(elem);
-    assertTrue(elem instanceof EnumGetValueMethodElement);
-    assertEquals(((EnumGetValueMethodElement) elem).getParent(), info);
+      ITypeInfo info = BuiltinClasses.getBuiltinClasses(version).stream() //
+        .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
+        .findFirst().get();
+      assertNotNull(info);
+      IMethodElement elem = info.getMethods().stream() //
+        .filter(it -> "GetValue".equals(it.getName())) //
+        .findFirst().get();
+      assertNotNull(elem);
+      assertTrue(elem instanceof EnumGetValueMethodElement);
+      assertEquals(((EnumGetValueMethodElement) elem).getParent(), info);
 
-    List<ITypeInfo> list = new ArrayList<>();
-    try (InputStream input = Files.newInputStream(Paths.get("target/kryo/builtin.bin"));
-        Input input2 = new Input(input)) {
-      while (input2.available() > 0) {
-        Object obj = kryo.readClassAndObject(input2);
-        assertTrue(obj instanceof ITypeInfo);
-        list.add((ITypeInfo) obj);
+      List<ITypeInfo> list = new ArrayList<>();
+      try (InputStream input = Files.newInputStream(Paths.get("target/kryo/builtin.bin"));
+          Input input2 = new Input(input)) {
+        while (input2.available() > 0) {
+          Object obj = kryo.readClassAndObject(input2);
+          assertTrue(obj instanceof ITypeInfo);
+          list.add((ITypeInfo) obj);
+        }
       }
-    }
 
-    assertEquals(list.size(), BuiltinClasses.getBuiltinClasses().size());
-    ITypeInfo info2 = list.stream() //
-      .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
-      .findFirst().get();
-    IMethodElement elem2 = info2.getMethods().stream().filter(it -> "GetValue".equals(it.getName())) //
-      .findFirst().get();
-    assertNotNull(elem2);
-    assertTrue(elem2 instanceof EnumGetValueMethodElement);
-    assertEquals(((EnumGetValueMethodElement) elem2).getParent(), info2);
+      assertEquals(list.size(), BuiltinClasses.getBuiltinClasses(version).size());
+      ITypeInfo info2 = list.stream() //
+        .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
+        .findFirst().get();
+      IMethodElement elem2 = info2.getMethods().stream().filter(it -> "GetValue".equals(it.getName())) //
+        .findFirst().get();
+      assertNotNull(elem2);
+      assertTrue(elem2 instanceof EnumGetValueMethodElement);
+      assertEquals(((EnumGetValueMethodElement) elem2).getParent(), info2);
+    }
   }
 
   @Test
   public void testEnumGetValue() {
-    ITypeInfo info = BuiltinClasses.getBuiltinClasses().stream() //
-      .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
-      .findFirst().get();
-    IMethodElement elem = info.getMethods().stream() //
-      .filter(it -> "GetValue".equals(it.getName())) //
-      .findFirst().get();
-    assertEquals(elem.getReturnType(), DataType.INTEGER);
+    for (OpenEdgeVersion version : OpenEdgeVersion.values()) {
+      ITypeInfo info = BuiltinClasses.getBuiltinClasses(version).stream() //
+        .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
+        .findFirst().get();
+      IMethodElement elem = info.getMethods().stream() //
+        .filter(it -> "GetValue".equals(it.getName())) //
+        .findFirst().get();
+      assertEquals(elem.getReturnType(), DataType.INTEGER);
+    }
 
   }
 
@@ -814,9 +819,9 @@ public class RCodeInfoTest {
     typeInfo.addTable(table1);
 
     assertTrue(typeInfo.hasTempTable("ttTest"));
-    assertFalse (typeInfo.hasTempTable("ttTest2"));
+    assertFalse(typeInfo.hasTempTable("ttTest2"));
     assertTrue(typeInfo.hasBuffer("ttTest"));
-    assertFalse (typeInfo.hasBuffer("ttTest2"));
+    assertFalse(typeInfo.hasBuffer("ttTest2"));
     assertNotNull(typeInfo.getTempTable("ttTest"));
     assertNotNull(typeInfo.getBuffer("ttTest"));
     assertEquals(table1.getName(), "ttTest");

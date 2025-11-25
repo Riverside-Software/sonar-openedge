@@ -33,37 +33,60 @@ import org.prorefactor.core.Triplet;
 
 public interface ITypeInfo {
   String getTypeName();
+
   String getParentTypeName();
+
   String getAssemblyName();
+
   @Nonnull
   List<String> getInterfaces();
 
   boolean isFinal();
+
   boolean isInterface();
+
   boolean hasStatics();
+
   boolean isBuiltIn();
+
   boolean isHybrid();
+
   boolean hasDotNetBase();
+
   boolean isAbstract();
+
   boolean isSerializable();
+
   boolean isUseWidgetPool();
 
   Collection<IMethodElement> getMethods();
+
   Collection<IPropertyElement> getProperties();
+
   Collection<IEventElement> getEvents();
+
   Collection<IVariableElement> getVariables();
+
   Collection<ITableElement> getTables();
+
   Collection<IBufferElement> getBuffers();
+
   Collection<IDatasetElement> getDatasets();
 
   IBufferElement getBuffer(String inName);
+
   IBufferElement getBufferFor(String name);
+
   ITableElement getTempTable(String inName);
+
   IDatasetElement getDataset(String dataset);
 
   boolean hasTempTable(String inName);
+
   boolean hasMethod(String name);
+
   boolean hasProperty(String name);
+
   boolean hasBuffer(String inName);
 
   /**
@@ -182,10 +205,10 @@ public interface ITypeInfo {
     }
     if (list01.size() > 1) {
       // If multiple methods match, the following rules apply:
-      //   * If there was a null (?) parameter, then don't return anything (ambiguous)
-      //   * If matches involve only parameter mode, we return the first one (ambiguity is accepted)
-      //   * If matches involve only parameter type, we return the first one (ambiguity is accepted)
-      //   * If matches involve both parameter type and mode, we return the first one involving only mode
+      // * If there was a null (?) parameter, then don't return anything (ambiguous)
+      // * If matches involve only parameter mode, we return the first one (ambiguity is accepted)
+      // * If matches involve only parameter type, we return the first one (ambiguity is accepted)
+      // * If matches involve both parameter type and mode, we return the first one involving only mode
       var anyUnknown = list01.stream().anyMatch(it -> it.getO3().contains(1));
       var paramModeList = list01.stream().filter(it -> it.getO3().contains(2)).toList();
       var paramTypeList = list01.stream().filter(it -> it.getO3().contains(3)).toList();
@@ -246,7 +269,8 @@ public interface ITypeInfo {
   /**
    * Return property by name in class hierarchy
    */
-  default Pair<ITypeInfo, IPropertyElement> lookupProperty(Function<String, ITypeInfo> typeInfoProvider, String property) {
+  default Pair<ITypeInfo, IPropertyElement> lookupProperty(Function<String, ITypeInfo> typeInfoProvider,
+      String property) {
     for (var elem : getProperties()) {
       if (property.equalsIgnoreCase(elem.getName())) {
         return Pair.of(this, elem);

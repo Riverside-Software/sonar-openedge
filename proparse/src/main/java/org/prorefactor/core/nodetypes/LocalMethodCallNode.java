@@ -47,7 +47,7 @@ public class LocalMethodCallNode extends ExpressionNode {
     if (root != null) {
       ITypeInfo typeInfo = root.getTypeInfo();
       if (root.isClass() && (typeInfo == null))
-        typeInfo = BuiltinClasses.PROGRESS_LANG_OBJECT;
+        typeInfo = root.getTypeInfoProvider().apply(BuiltinClasses.PLO_CLASSNAME);
       method = typeInfo == null ? null : getObjectMethod(root.getTypeInfoProvider(), this, typeInfo, methodName);
     }
   }
