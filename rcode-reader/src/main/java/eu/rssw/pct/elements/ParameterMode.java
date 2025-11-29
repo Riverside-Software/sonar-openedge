@@ -40,6 +40,14 @@ public enum ParameterMode {
     return name().replace('_', '-');
   }
 
+  public static ParameterMode getParameterMode(String mode) {
+    for (var m : ParameterMode.values()) {
+      if (m.getName().equalsIgnoreCase(mode.replace('_', '-')))
+        return m;
+    }
+    return INPUT;
+  }
+
   public static ParameterMode getParameterMode(int mode) {
     for (ParameterMode m : ParameterMode.values()) {
       if (m.num == mode) {

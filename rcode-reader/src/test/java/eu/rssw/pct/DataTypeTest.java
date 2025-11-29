@@ -30,16 +30,18 @@ import java.util.function.Function;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.elements.BuiltinClasses;
+import eu.rssw.pct.mapping.OpenEdgeVersion;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
 public class DataTypeTest {
-  private static final Function<String, ITypeInfo> TYPE_INFO_PROVIDER = name -> //
-  BuiltinClasses.getBuiltinClasses().stream() //
-    .filter(it -> it.getTypeName().equals(name)) //
-    .findFirst() //
-    .orElse(null);
+  private static final Function<OpenEdgeVersion, Function<String, ITypeInfo>> VERSION_TYPE_INFO_PROVIDER = version -> {
+    return name -> BuiltinClasses.getBuiltinClasses(version).stream() //
+      .filter(it -> it.getTypeName().equals(name)) //
+      .findFirst() //
+      .orElse(null);
+  };
 
   @Test
   public void test1() {
@@ -53,8 +55,8 @@ public class DataTypeTest {
   public void test1bis() {
     for (int zz = 0; zz <= PrimitiveDataType.LAST_VALUE; zz++) {
       assertNotNull(DataType.get(zz));
-      if ((zz != 6)&&(zz!=9)&&(zz!=16)&&(zz!=30)&&(zz!=38)&&(zz!=42)&&(zz!=45)&&(zz!=47))
-      assertNotEquals(DataType.get(zz), DataType.UNKNOWN, "Unknown datatype for value " + zz);
+      if ((zz != 6) && (zz != 9) && (zz != 16) && (zz != 30) && (zz != 38) && (zz != 42) && (zz != 45) && (zz != 47))
+        assertNotEquals(DataType.get(zz), DataType.UNKNOWN, "Unknown datatype for value " + zz);
     }
     assertEquals(DataType.get(10), DataType.HANDLE);
     assertEquals(DataType.get(11), DataType.MEMPTR);
@@ -104,10 +106,13 @@ public class DataTypeTest {
     assertTrue(DataType.DECIMAL.isCompatible(DataType.INTEGER, null));
     assertFalse(DataType.INTEGER.isCompatible(DataType.DECIMAL, null));
     // Classes
-    assertTrue(new DataType("Progress.Lang.Object").isCompatible(new DataType("Progress.Lang.Enum"), TYPE_INFO_PROVIDER));
-    assertTrue(new DataType("Progress.Lang.Object").isCompatible(new DataType("Progress.BPM.BPMError"), TYPE_INFO_PROVIDER));
-    assertTrue(new DataType("Progress.Lang.SysError").isCompatible(new DataType("Progress.BPM.BPMError"), TYPE_INFO_PROVIDER));
-    assertTrue(new DataType("Progress.Lang.Error").isCompatible(new DataType("Progress.BPM.BPMError"), TYPE_INFO_PROVIDER));
-    assertFalse(new DataType("Progress.Lang.Enum").isCompatible(new DataType("Progress.Lang.Object"), TYPE_INFO_PROVIDER));
+    for (var version : OpenEdgeVersion.values()) {
+      var provider = VERSION_TYPE_INFO_PROVIDER.apply(version);
+      assertTrue(new DataType("Progress.Lang.Object").isCompatible(new DataType("Progress.Lang.Enum"), provider));
+      assertTrue(new DataType("Progress.Lang.Object").isCompatible(new DataType("Progress.BPM.BPMError"), provider));
+      assertTrue(new DataType("Progress.Lang.SysError").isCompatible(new DataType("Progress.BPM.BPMError"), provider));
+      assertTrue(new DataType("Progress.Lang.Error").isCompatible(new DataType("Progress.BPM.BPMError"), provider));
+      assertFalse(new DataType("Progress.Lang.Enum").isCompatible(new DataType("Progress.Lang.Object"), provider));
+    }
   }
 }

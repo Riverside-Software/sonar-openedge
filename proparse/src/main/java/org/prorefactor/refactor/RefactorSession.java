@@ -49,6 +49,7 @@ import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.PrimitiveDataType;
+import eu.rssw.pct.mapping.OpenEdgeVersion;
 import eu.rssw.pct.elements.fixed.EventElement;
 import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.Parameter;
@@ -121,7 +122,8 @@ public class RefactorSession implements IProparseEnvironment {
   }
 
   private void initializeProgressClasses() {
-    for (ITypeInfo typeInfo : BuiltinClasses.getBuiltinClasses()) {
+    for (var typeInfo : BuiltinClasses.getBuiltinClasses(
+        OpenEdgeVersion.getVersion(proparseSettings.getProversion()))) {
       classInfo.put(typeInfo.getTypeName(), typeInfo);
       lcClassInfo.put(typeInfo.getTypeName().toLowerCase(), typeInfo);
       int dotPos = typeInfo.getTypeName().lastIndexOf('.');
