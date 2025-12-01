@@ -95,6 +95,12 @@ public class TestDumpFile {
     assertFalse(idx2.isInAlternateBufferPool());
     Index idx3 = db.getTable("BillTo").getIndex("custnumbillto");
     assertTrue(idx3.isUnique());
+
+    var employeeTbl = db.getTable("Employee");
+    assertNotNull(employeeTbl);
+    var dtzFld = employeeTbl.getField("BirthdatetimeTZ");
+    assertNotNull(dtzFld);
+    assertEquals(dtzFld.getInitial(), "now");
   }
 
   @Test

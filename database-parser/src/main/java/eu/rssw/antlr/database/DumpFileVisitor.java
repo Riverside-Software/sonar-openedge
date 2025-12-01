@@ -144,8 +144,12 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 	
   @Override
   public Void visitFieldInitial(FieldInitialContext ctx) {
-    if (!fields.isEmpty() && (ctx.QUOTED_STRING() != null))
-      fields.peek().setInitial(ctx.QUOTED_STRING().getText());
+    if (!fields.isEmpty()) {
+      if (ctx.QUOTED_STRING() != null)
+        fields.peek().setInitial(ctx.QUOTED_STRING().getText());
+      else if (ctx.UNQUOTED_STRING() != null)
+        fields.peek().setInitial(ctx.UNQUOTED_STRING().getText());
+    }
 
     return null;
   }

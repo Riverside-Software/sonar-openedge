@@ -733,6 +733,15 @@ ADD FIELD "Birthdate" OF "Employee" AS date
   HELP "Please enter the birth date."
   ORDER 97
 
+ADD FIELD "BirthdatetimeTZ" OF "Employee" AS datetime-tz 
+  FORMAT "99/99/9999 HH:MM:SS.SSS+HH:MM "
+  INITIAL now
+  LABEL "Birthdate"
+  POSITION 18
+  MAX-WIDTH 4
+  HELP "Please enter the birth date."
+  ORDER 99
+
 ADD INDEX "EmpNo" ON "Employee" 
   AREA "Employee"
   UNIQUE
