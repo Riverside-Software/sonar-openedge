@@ -1,6 +1,7 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
@@ -30,6 +31,7 @@ public class BuiltinClassesTest {
       for (ITypeInfo typeInfo : BuiltinClasses.getBuiltinClasses(version)) {
         for (IMethodElement method : typeInfo.getMethods()) {
           assertNotNull(method.getSignature());
+          assertNotEquals(method.getReturnType(), DataType.UNKNOWN, "Method " + method.getSignature());
         }
       }
     }

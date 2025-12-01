@@ -108,7 +108,7 @@ public class BuiltinClasses {
               }
             }
             var method = new MethodElement(
-                methodEntry.name, methodEntry.isStatic, methodEntry.returnDataType.equals("Object")
+                methodEntry.name, methodEntry.isStatic, methodEntry.returnDataType.equals("OBJECT")
                     ? new DataType(methodEntry.returnName) : DataType.get(methodEntry.returnDataType),
                 methodEntry.extent, params);
             typeInfo.addMethod(method);
