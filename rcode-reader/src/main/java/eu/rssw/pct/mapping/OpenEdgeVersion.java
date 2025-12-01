@@ -41,7 +41,7 @@ public enum OpenEdgeVersion {
     return "";
   }
 
-  public String getClassesPath() {
+  public String getClassStructurePath() {
     switch (this) {
       case V117:
         return "doc/11.7/classes.json";
@@ -51,6 +51,20 @@ public enum OpenEdgeVersion {
         return "doc/12.8/classes.json";
       case V130:
         return "doc/13.0/classes.json";
+    }
+    return "";
+  }
+  
+  public String getClassDocumentationPath() {
+    switch (this) {
+      case V117:
+        return "doc/11.7/classDoc.json";
+      case V122:
+        return "doc/12.2/classDoc.json";
+      case V128:
+        return "doc/12.8/classDoc.json";
+      case V130:
+        return "doc/13.0/classDoc.json";
     }
     return "";
   }

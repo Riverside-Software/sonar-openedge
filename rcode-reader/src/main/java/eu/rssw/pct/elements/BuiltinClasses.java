@@ -67,7 +67,7 @@ public class BuiltinClasses {
     list.add(PROGRESS_LANG_OBJECT);
     list.add(PROGRESS_LANG_ENUM);
 
-    try (var input = BuiltinClasses.class.getClassLoader().getResourceAsStream(version.getClassesPath());
+    try (var input = BuiltinClasses.class.getClassLoader().getResourceAsStream(version.getClassStructurePath());
         var reader = new InputStreamReader(input, StandardCharsets.UTF_8)) {
       var clzArray = new GsonBuilder().create().fromJson(reader, BuiltinClassesMapping.class);
       for (var clz : clzArray.builtinClasses) {
