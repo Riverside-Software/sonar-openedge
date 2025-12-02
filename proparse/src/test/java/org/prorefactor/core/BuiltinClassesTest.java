@@ -4,7 +4,13 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.testng.annotations.Test;
@@ -87,6 +93,57 @@ public class BuiltinClassesTest {
         it -> "Progress.Reflect.Property".equalsIgnoreCase(it.getO1().getTypeName())).toList();
     assertEquals(sub2.size(), 8);
     assertEquals(sub2.get(7).getO2().getName(), "IsFinal");
+  }
+
+  private static Consumer<ITypeInfo> classConsumer(BufferedWriter writer) {
+    return info -> {
+      try {
+        writer.write(info.getTypeName());
+        writer.newLine();
+        for (var str : info.getInterfaces()) {
+          writer.write("  Interface: " + str);
+          writer.newLine();
+        }
+        for (var p : info.getProperties().stream().sorted((a, b) -> a.getName().compareTo(b.getName())).toList()) {
+          writer.write(p.isStatic() ? "  Static " : "  ");
+          writer.write("Property ");
+          writer.write(p.getName());
+          writer.write(" " + p.getVariable().getDataType() + " " + p.getVariable().getExtent());
+          writer.newLine();
+        }
+        for (var m : info.getMethods().stream().sorted((a, b) -> a.getName().compareTo(b.getName())).toList()) {
+          writer.write(m.isStatic() ? "  Static " : "  ");
+          writer.write("Method ");
+          writer.write(m.getReturnType().toString() + " ");
+          writer.write(m.getIDESignature());
+          writer.newLine();
+        }
+      } catch (IOException uncaught) {
+        System.out.println(uncaught.getMessage());
+      }
+    };
+  }
+
+  @Test
+  public void test0() throws IOException {
+    Files.createDirectories(Path.of("target/dump"));
+    try (var output = Files.newBufferedWriter(Path.of("target/dump/V117.txt"))) {
+      BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V117).stream().sorted((a, b) -> a.getTypeName().compareTo(b.getTypeName())).forEach(classConsumer(output));
+    }
+    try (var output = Files.newBufferedWriter(Path.of("target/dump/V122.txt"))) {
+      BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V122).stream().sorted((a, b) -> a.getTypeName().compareTo(b.getTypeName())).forEach(classConsumer(output));
+    }
+    try (var output = Files.newBufferedWriter(Path.of("target/dump/V128.txt"))) {
+      BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V128).stream().sorted((a, b) -> a.getTypeName().compareTo(b.getTypeName())).forEach(classConsumer(output));
+    }
+    try (var output = Files.newBufferedWriter(Path.of("target/dump/V130.txt"))) {
+      BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V130).stream().sorted((a, b) -> a.getTypeName().compareTo(b.getTypeName())).forEach(classConsumer(output));
+    }
+    assertTrue(Files.exists(Path.of("target/dump/V117.txt")));
+    assertTrue(Files.exists(Path.of("target/dump/V122.txt")));
+    assertTrue(Files.exists(Path.of("target/dump/V128.txt")));
+    assertTrue(Files.exists(Path.of("target/dump/V130.txt")));
+    
   }
 
 }

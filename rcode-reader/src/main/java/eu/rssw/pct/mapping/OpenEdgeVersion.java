@@ -19,6 +19,8 @@
  */
 package eu.rssw.pct.mapping;
 
+import javax.annotation.Nonnull;
+
 public enum OpenEdgeVersion {
   V117,
   V122,
@@ -53,6 +55,7 @@ public enum OpenEdgeVersion {
     return "";
   }
 
+  @Nonnull
   public static OpenEdgeVersion getVersion(String version) {
     if ((version == null) || version.isBlank())
       return V128;
