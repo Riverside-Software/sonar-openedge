@@ -61,10 +61,12 @@ public class BuiltinClassesTest {
     var info22 = provider128.apply("Progress.Archive.ArchiveInfo");
     assertNotNull(info22);
 
-    var info31 = provider122.apply("Progress.Util.DateTimeHelper");
+    var info31 = provider117.apply("Progress.Data.DummyRow");
     assertNull(info31);
-    var info32 = provider128.apply("Progress.Util.DateTimeHelper");
+    var info32 = provider122.apply("Progress.Data.DummyRow");
     assertNotNull(info32);
+    var info33 = provider128.apply("Progress.Data.DummyRow");
+    assertNotNull(info33);
 
     var info41 = provider117.apply("Progress.ApplicationServer.AgentManager");
     assertNotNull(info41);
