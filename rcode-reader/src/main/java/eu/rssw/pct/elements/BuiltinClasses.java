@@ -74,13 +74,12 @@ public class BuiltinClasses {
         if ("Progress.Lang.Object".equals(clz.name) || "Progress.Lang.Enum".equals(clz.name))
           continue;
         var typeInfo = new TypeInfo();
-        if(clz.interfaces == null) {
+        if (clz.interfaces == null) {
           typeInfo = new TypeInfo(clz.name, clz.iface, clz.isAbstract, clz.superClass, "");
-        }
-        else {
+        } else {
           typeInfo = new TypeInfo(clz.name, clz.iface, clz.isAbstract, clz.superClass, "", clz.interfaces);
         }
-                
+
         // All enums have this default method
         if (clz.enums != null) {
           typeInfo.addMethod(new EnumGetValueMethodElement(typeInfo));
