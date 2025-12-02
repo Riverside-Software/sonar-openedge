@@ -5,7 +5,7 @@
   <parent>
     <groupId>eu.rssw</groupId>
     <artifactId>sonar-openedge</artifactId>
-    <version>3.5.0</version>
+    <version>3.5.1</version>
   </parent>
   <groupId>eu.rssw.sonar.openedge</groupId>
   <artifactId>sonar-openedge-plugin</artifactId>
@@ -30,17 +30,17 @@
     <dependency>
       <groupId>eu.rssw.openedge.checks</groupId>
       <artifactId>openedge-checks</artifactId>
-      <version>3.5.0</version>
+      <version>3.5.1</version>
     </dependency>
     <dependency>
       <groupId>eu.rssw.openedge.parsers</groupId>
       <artifactId>listing-parser</artifactId>
-      <version>3.5.0</version>
+      <version>3.5.1</version>
     </dependency>
     <dependency>
       <groupId>eu.rssw.openedge.parsers</groupId>
       <artifactId>profiler-parser</artifactId>
-      <version>3.5.0</version>
+      <version>3.5.1</version>
     </dependency>
     <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>

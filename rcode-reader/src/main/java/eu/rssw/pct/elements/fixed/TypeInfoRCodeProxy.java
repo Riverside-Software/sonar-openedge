@@ -40,8 +40,8 @@ public class TypeInfoRCodeProxy extends TypeInfoProxy {
   synchronized void checkTypeInfo() {
     if (typeInfo != null)
       return;
-    try {
-      RCodeInfo info = new RCodeInfo(new FileInputStream(rcode.toFile()));
+    try (var input = new FileInputStream(rcode.toFile())) {
+      RCodeInfo info = new RCodeInfo(input);
       if (info.isClass())
         typeInfo = info.getTypeInfo();
       else
