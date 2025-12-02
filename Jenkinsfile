@@ -20,6 +20,7 @@ pipeline {
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: [[credentialsId: scm.userRemoteConfigs.credentialsId[0], url: scm.userRemoteConfigs.url[0], refspec: '+refs/heads/main:refs/remotes/origin/main']] ])
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: [[credentialsId: scm.userRemoteConfigs.credentialsId[0], url: scm.userRemoteConfigs.url[0], refspec: '+refs/heads/develop:refs/remotes/origin/develop']] ])
         script {
+          sh '> author.txt git log --format="%ae" -n 1'
           withEnv(["PATH+MVN=${tool name: 'Maven 3', type: 'maven'}/bin", "JAVA_HOME=${tool name: 'JDK17', type: 'jdk'}"]) {
             if ("main" == env.BRANCH_NAME) {
               withSecrets() {
@@ -64,17 +65,20 @@ pipeline {
   post {
     unstable {
       script {
-        mail body: "Check console output at ${BUILD_URL}/console", to: "jenkins-reports@riverside-software.fr", subject: "sonar-openedge ${BRANCH_NAME} build is unstable"
+        def author = readFile('author.txt').trim()
+        mail body: "Check console output at ${BUILD_URL}/console", to: "jenkins-reports@riverside-software.fr,${author}", subject: "sonar-openedge ${BRANCH_NAME} build is unstable"
       }
     }
     failure {
       script {
-        mail body: "Check console output at ${BUILD_URL}/console", to: "jenkins-reports@riverside-software.fr", subject: "sonar-openedge ${BRANCH_NAME} build failure"
+        def author = readFile('author.txt').trim()
+        mail body: "Check console output at ${BUILD_URL}/console", to: "jenkins-reports@riverside-software.fr,${author}", subject: "sonar-openedge ${BRANCH_NAME} build failure"
       }
     }
     fixed {
       script {
-        mail body: "Console output at ${BUILD_URL}/console", to: "jenkins-reports@riverside-software.fr", subject: "sonar-openedge ${BRANCH_NAME} build is back to normal"
+        def author = readFile('author.txt').trim()
+        mail body: "Console output at ${BUILD_URL}/console", to: "jenkins-reports@riverside-software.fr,${author}", subject: "sonar-openedge ${BRANCH_NAME} build is back to normal"
       }
     }
   }
