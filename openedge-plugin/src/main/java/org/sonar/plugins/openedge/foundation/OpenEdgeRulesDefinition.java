@@ -27,6 +27,7 @@ import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonar.api.SonarProduct;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.rules.RuleType;
 import org.sonar.api.server.rule.RulesDefinition;
@@ -63,21 +64,23 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     var annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY, runtime);
     annotationLoader.addRuleClasses(false, Arrays.asList(BasicChecksRegistration.ppCheckClasses()));
 
-    try (var input = this.getClass().getResourceAsStream("/rules/compiler-warnings.json");
-        var reader = new InputStreamReader(input)) {
-      for (var ruleDef : new GsonBuilder().create().fromJson(reader, RuleDefinition[].class)) {
-        createWarningRule(repository, ruleDef);
+    if (runtime.getProduct() == SonarProduct.SONARQUBE) {
+      try (var input = this.getClass().getResourceAsStream("/rules/compiler-warnings.json");
+          var reader = new InputStreamReader(input)) {
+        for (var ruleDef : new GsonBuilder().create().fromJson(reader, RuleDefinition[].class)) {
+          createWarningRule(repository, ruleDef);
+        }
+      } catch (IOException caught) {
+        LOGGER.error("Unable to read compiler warning rules definition", caught);
       }
-    } catch (IOException caught) {
-      LOGGER.error("Unable to read compiler warning rules definition", caught);
-    }
 
-    // Manually created rule for proparse errors
-    var rule = repository.createRule(PROPARSE_ERROR_RULEKEY) //
-      .setName("Proparse error") //
-      .setSeverity(Priority.INFO.name()) //
-      .setType(RuleType.BUG); //
-    setupDocumentation(rule, PROPARSE_ERROR_RULEKEY);
+      // Manually created rule for proparse errors
+      var rule = repository.createRule(PROPARSE_ERROR_RULEKEY) //
+        .setName("Proparse error") //
+        .setSeverity(Priority.INFO.name()) //
+        .setType(RuleType.BUG); //
+      setupDocumentation(rule, PROPARSE_ERROR_RULEKEY);
+    }
     repository.done();
 
     var repository2 = context //
