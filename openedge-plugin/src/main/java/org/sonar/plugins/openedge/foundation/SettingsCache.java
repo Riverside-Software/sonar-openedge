@@ -31,6 +31,7 @@ public class SettingsCache {
   }
 
   public void addSchemaCache(String path, Schema schema) {
-    schemaCache.put(path, schema);
+    if (!schema.getDatabases().isEmpty())
+      schemaCache.put(path, schema);
   }
 }
