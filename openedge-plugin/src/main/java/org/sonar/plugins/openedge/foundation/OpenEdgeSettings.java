@@ -759,17 +759,17 @@ public class OpenEdgeSettings {
       Schema sch = null;
       if (cache != null) {
         sch = cache.getSchemaCache(fileSystem.baseDir().toString());
-        if (sch != null) {
-          LOG.info("Reusing database schema from cache for project {}",fileSystem.baseDir());
+        if ((sch != null) && LOG.isDebugEnabled()) {
+          LOG.debug("Reusing database schema from cache for project {} -- DB: {}", fileSystem.baseDir(),
+              sch.getDatabases().stream().map(IDatabase::getName).collect(Collectors.joining(", ")));
         }
       }
       if (sch == null) {
-       sch = readSchema(config.get(Constants.DATABASES).orElse(""),
-          config.get(Constants.ALIASES).orElse(""));
-       if (cache != null) {
-         LOG.info("Cache database schema for project {}", fileSystem.baseDir());
-         cache.addSchemaCache(fileSystem.baseDir().toString(), sch);
-       }
+        sch = readSchema(config.get(Constants.DATABASES).orElse(""), config.get(Constants.ALIASES).orElse(""));
+        if (cache != null) {
+          LOG.info("Cache database schema for project {}", fileSystem.baseDir());
+          cache.addSchemaCache(fileSystem.baseDir().toString(), sch);
+        }
       }
 
       ProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
@@ -1024,13 +1024,13 @@ public class OpenEdgeSettings {
     Collection<IDatabase> dbs = new ArrayList<>();
 
     // First use sonar.oe.databases property, even on SonarLint (for compatibility reasons)
-    if (dbPropValue.length() > 0) {
+    if (!dbPropValue.isEmpty()) {
       dbs = readSchemaFromProp1(dbPropValue);
     } else if ((runtime.getProduct() == SonarProduct.SONARLINT)
-        && (config.get(Constants.SLINT_DATABASES).orElse("").length() > 0)) {
+        && (!config.get(Constants.SLINT_DATABASES).orElse("").isEmpty())) {
       dbs = readSchemaFromProp2();
     } else if ((runtime.getProduct() == SonarProduct.SONARLINT)
-        && (config.get(Constants.SLINT_DATABASES_KRYO).orElse("").length() > 0)) {
+        && (!config.get(Constants.SLINT_DATABASES_KRYO).orElse("").isEmpty())) {
       return readSchemaFromProp3();
     }
 

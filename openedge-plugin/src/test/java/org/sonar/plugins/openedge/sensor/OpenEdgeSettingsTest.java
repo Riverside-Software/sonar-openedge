@@ -324,8 +324,33 @@ public class OpenEdgeSettingsTest {
   }
 
   @Test
+  public void testEmptySchemaInCache() {
+    var settings = new MapSettings();
+    settings.setProperty("sonar.sources", "src");
+    var runtime = OpenEdgePluginTest.SONARLINT_RUNTIME;
+
+    var context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
+    context.setSettings(settings);
+    context.setRuntime(runtime);
+
+    var cache = new SettingsCache();
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), context.runtime(), cache);
+    oeSettings.init();
+
+    assertNull(cache.getSchemaCache(context.fileSystem().baseDir().toString()));
+    assertNull(cache.getCatalogCache(new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath()));
+
+    var rsEnv = oeSettings.getProparseSessions();
+    assertNotNull(rsEnv);
+    assertNotNull(rsEnv.getDefaultSession().getSchema());
+    var sch = cache.getSchemaCache(context.fileSystem().baseDir().toString());
+    assertNull(sch);
+  }
+
+  @Test
   public void testSettingsCache() {
     MapSettings settings = new MapSettings();
+    settings.setProperty(Constants.DATABASES, "src/schema/sp2k.df");
     settings.setProperty(Constants.CLASS_DOCUMENTATION,
         new File(TestProjectSensorContext.BASEDIR, "netlib.json").getAbsolutePath() + ","
             + new File(TestProjectSensorContext.BASEDIR, "corelib.json").getAbsolutePath());
@@ -346,7 +371,7 @@ public class OpenEdgeSettingsTest {
 
     IRefactorSessionEnv rsEnv = oeSettings.getProparseSessions();
     Schema sch = cache.getSchemaCache(context.fileSystem().baseDir().toString());
-    assertNotNull(sch);
+    assertNotNull(sch); // Empty schema is not cached
     assertEquals(rsEnv.getDefaultSession().getSchema(), sch);
     List<ITypeInfo> catalog = cache.getCatalogCache(new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath());
     assertNull(catalog);
@@ -356,6 +381,7 @@ public class OpenEdgeSettingsTest {
   public void testSettingsCache02() {
     MapSettings settings = new MapSettings();
     // Inject Catalog
+    settings.setProperty(Constants.DATABASES, "src/schema/sp2k.df");
     settings.setProperty(Constants.DOTNET_CATALOG,
         new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath());
     settings.setProperty(Constants.CLASS_DOCUMENTATION,

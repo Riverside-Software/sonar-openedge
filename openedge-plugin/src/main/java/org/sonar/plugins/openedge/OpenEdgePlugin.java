@@ -37,6 +37,8 @@ import org.sonar.plugins.openedge.foundation.OpenEdgeProfile;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.foundation.SettingsCache;
+import org.sonar.plugins.openedge.foundation.SonarLintDBProfile;
+import org.sonar.plugins.openedge.foundation.SonarLintProfile;
 import org.sonar.plugins.openedge.sensor.OpenEdgeCPDSensor;
 import org.sonar.plugins.openedge.sensor.OpenEdgeCodeColorizer;
 import org.sonar.plugins.openedge.sensor.OpenEdgeDBColorizer;
@@ -58,15 +60,17 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(OpenEdge.class, OpenEdgeDB.class, OpenEdgeSettings.class);
 
     // Profile and rules
-    context.addExtensions(OpenEdgeRulesDefinition.class, BasicChecksRegistration.class, OpenEdgeProfile.class,
-        OpenEdgeDBProfile.class, OpenEdgeMetrics.class, OpenEdgeComponents.class);
+    context.addExtensions(OpenEdgeRulesDefinition.class, BasicChecksRegistration.class, OpenEdgeMetrics.class,
+        OpenEdgeComponents.class);
 
     // Syntax highlight and simple CPD
     if (context.getRuntime().getProduct() == SonarProduct.SONARQUBE) {
+      context.addExtensions(OpenEdgeProfile.class, OpenEdgeDBProfile.class);
       context.addExtensions(OpenEdgeCodeColorizer.class, OpenEdgeDBColorizer.class, OpenEdgeCPDSensor.class);
     }
 
     if (context.getRuntime().getProduct() == SonarProduct.SONARLINT) {
+      context.addExtensions(SonarLintProfile.class, SonarLintDBProfile.class);
       context.addExtension(SettingsCache.class);
     }
 
