@@ -24,16 +24,14 @@ import eu.rssw.pct.elements.IAttributeElement;
 import eu.rssw.pct.elements.IVariableElement;
 
 public class AttributeElement implements IAttributeElement {
+  protected static final String WRITE_ONLY = "Write-only";
+  protected static final String READ_ONLY = "Read-only";
+  protected static final String READ_WRITE = "Readable/Writable";
+
   private boolean readOnly;
   private boolean writeOnly;
   private String description;
   private final IVariableElement varElement;
-
-  protected static final String WRITE_ONLY = "Write-only";
-  protected static final String READ_ONLY = "Read-only";
-  protected static final String READ_ONLY2 = "Readable";
-  protected static final String READ_WRITE = "Readable/Writeable";
-  protected static final String READ_WRITE2 = "Readable/Writable";
 
   public AttributeElement(String name, DataType datatype, String access, String description) {
     varElement = new VariableElement(name, datatype);
@@ -138,7 +136,7 @@ public class AttributeElement implements IAttributeElement {
 
   private void setAccess(String access) {
     switch (access) {
-      case READ_ONLY, READ_ONLY2:
+      case READ_ONLY:
         this.readOnly = true;
         this.writeOnly = false;
         break;
@@ -146,11 +144,13 @@ public class AttributeElement implements IAttributeElement {
         this.readOnly = false;
         this.writeOnly = true;
         break;
-      case READ_WRITE, READ_WRITE2:
+      case READ_WRITE:
         this.readOnly = false;
         this.writeOnly = false;
         break;
       default:
+        this.readOnly = true;
+        this.writeOnly = true;
         throw new IllegalArgumentException("Unexpected value: " + access);
     }
   }

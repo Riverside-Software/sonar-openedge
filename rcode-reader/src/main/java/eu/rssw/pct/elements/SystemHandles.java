@@ -64,14 +64,16 @@ public class SystemHandles {
         var reader = new InputStreamReader(input, StandardCharsets.UTF_8)) {
       var sysHdlArray = new GsonBuilder().create().fromJson(reader, SystemHandlesMapping.class);
       for (var hdl : sysHdlArray.systemHandles) {
-        // Con't keep the SELF system handle (no documentation possible)
+        // Don't keep the SELF system handle (no documentation possible)
         if (hdl.name.equals("SELF"))
           continue;
         var systemHandle = new SystemHandle(hdl.name, hdl.description);
 
         if (hdl.attributes != null) {
           for (var attrEntry : hdl.attributes) {
-            var attr = new AttributeElement(attrEntry.name, DataType.get(attrEntry.dataType), attrEntry.access,
+
+            var attr = new AttributeElement(attrEntry.name, attrEntry.dataType.equals("OBJECT")
+                ? new DataType(attrEntry.dataTypeName) : DataType.get(attrEntry.dataType), attrEntry.access,
                 attrEntry.description);
             systemHandle.addAttribute(attr);
           }

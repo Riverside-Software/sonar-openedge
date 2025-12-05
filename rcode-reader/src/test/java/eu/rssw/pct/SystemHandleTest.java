@@ -73,10 +73,10 @@ public class SystemHandleTest {
         for (var attr : systemHandle.getAttributes()) {
           assertNotNull(attr.getName());
           assertNotNull(attr.getDescription());
-          /*
-           * assertNotEquals(attr.getDataType(), DataType.UNKNOWN, version + " " + systemHandle.getName() + " -- " +
-           * attr.getName());
-           */
+          assertNotEquals(attr.getDataType(), DataType.UNKNOWN,
+              version + " " + systemHandle.getName() + " -- " + attr.getName());
+          assertFalse(attr.isReadOnly() && attr.isWriteOnly(),version + " " + systemHandle.getName() + " -- " + attr.getName());
+          
         }
       }
     }

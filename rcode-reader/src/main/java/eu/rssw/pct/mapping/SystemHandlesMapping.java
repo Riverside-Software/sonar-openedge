@@ -53,6 +53,8 @@ public class SystemHandlesMapping {
     public String name;
     @SerializedName(value = "dataType")
     public String dataType;
+    @SerializedName(value = "dataTypeName")
+    public String dataTypeName;
     @SerializedName(value = "access")
     public String access;
     @SerializedName(value = "description")

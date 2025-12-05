@@ -13,7 +13,7 @@
         {
           "name": "ADM-DATA",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "An arbitrary string value associated with a\npersistent procedure. Applies\nto:Buffer object handle,Buffer-field object handle,Data-relation object handle,Data-source object handle,Procedure object handle,ProDataSet object handle,Query object handle,SAX-attributes object handle,SAX-reader object handle,SOAP-header object handle,SOAP-header-entryref object handle,SOURCE-PROCEDURE system handle,Stream object handle,TARGET-PROCEDURE system handle,Temp-table object handle,THIS-PROCEDURE system handle"
         },
         {
@@ -25,7 +25,7 @@
         {
           "name": "CURRENT-WINDOW",
           "dataType": "HANDLE",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "A current window for the specified procedure. Data\ntype:HANDLE Applies\nto:Procedure object handle,SOURCE-PROCEDURE system handle,TARGET-PROCEDURE system handle,THIS-PROCEDURE system handle Specifies and allows you to reset the current\nwindow used to parent alert box, dialog box, or frame widgets for\nthe specified procedure. The default value is the Unknown value (?).\nReturns the Unknown value (?) for a Web service procedure\nor proxy procedure. If you set this attribute to the handle\nof a window, this value takes precedence over the CURRENT-WINDOW\nhandle to provide the default window for parenting alert boxes,\nframes, and dialog boxes created within the procedure. This\nattribute is especially useful for creating and associating a unique current\nwindow with each instantiation of a persistent procedure. For more information\non persistent procedures, see theRUN statementreference\nentry."
         },
         {
@@ -37,7 +37,7 @@
         {
           "name": "FILE-NAME",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The name of the file associated with a handle.\nReturns the empty string for a Web service procedure. The\nFILE-NAME attribute of the COMPILER handle is maintained only for\nbackward compatibility. Use theGET-FILE-NAME( ) method, instead. Applies\nto:COMPILER system handle,FILE-INFO system handle,Procedure object handle,RCODE-INFO handle,SOURCE-PROCEDURE system handle,TARGET-PROCEDURE system handle,THIS-PROCEDURE system handle The FILE-NAME attribute of the COMPILER handle\nis the name of the source file from the preceding compilation. If\nno error occurred during the preceding compilation, FILE-NAME assumes\nthe Unknown value (?). The FILE-NAME attribute of\nthe FILE-INFO or RCODE-INFO handle is the name of the file used\nby subsequent references to the handle. You can specify the filename\nwith a.p,.r, or no extension.\nIf you set FILE-NAME to a relative pathname, the AVM searches thePROPATHto\nfind the file. Otherwise, the AVM looks for the file specified by\nthe absolute pathname. When used with FILE-INFO, the filename can\ncontain Unicode characters. When used with RCODE-INFO, the filename\ncannot contain characters outside of the non-Unicode code page.\nSeeOpenEdge Development: Internationalizing Applicationsfor\nmore information about Unicode and code pages. The FILE-NAME\nattribute of a procedure handle is the pathname of the procedure\nfile that contains the procedure associated with the handle. If\nthe procedure file is specified by the Startup Procedure (-p) parameter,\nthe attribute contains the full pathname of the file. Otherwise,\nit contains the pathname exactly as specified in the RUN statement\nthat invoked it. The procedure can be local or remote. For more\ninformation on remote procedures, seeOpenEdge Application\nServer: Developing AppServer Applications. The FILE-NAME\nattribute of the COMPILER handle and procedure handles is read only."
         },
         {
@@ -61,7 +61,7 @@
         {
           "name": "NAME",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "A string identifier for the specified object\nor widget. Applies\nto:Asynchronous request object handle,BROWSE widget(browse, column,\nand cell),Buffer object handle,Buffer-field object handle,BUTTON widget,COMBO-BOX widget,CONTROL-FRAME widget,Data-relation object handle,Data-source object handle,DIALOG-BOX widget,EDITOR widget,FIELD-GROUP widget,FILL-IN widget,FRAME widget,IMAGE widget,LITERAL widget,MENU widget,MENU-ITEM widget,Procedure object handle,ProDataSet object handle,Query object handle,RADIO-SET widget,RECTANGLE widget,SELECTION-LIST widget,Server object handle,Server socket object handle,SLIDER widget,SOAP-header object handle,SOAP-header-entryref object handle,Socket object handle,SOURCE-PROCEDURE system handle,Stream object handle,SUB-MENU widget,TARGET-PROCEDURE system handle,Temp-table object handle,TEXT widget,THIS-PROCEDURE system handle,TOGGLE-BOX widget,WINDOW widget,X-document object handle,X-noderef object handle For the SOAP-header and SOAP-header-entryref\nobject handles, this attribute is read-only. For static data\nrepresentation widgets, the default value is the name of the field\nor variable associated with the widget. You can use the NAME attribute\nto store any information associated with the widget. For a\nstate-reset, state-aware, or stateless AppServer, this attribute\nreturns the connection ID for the AppServer associated with the\nserver handle. For a state-free AppServer, it returns the connection\nID of the first AppServer connection created in the session pool\nwith this server handle when the application service is first bound\nusing the CONNECT( ) method. The default value is the unique\nconnection name of the AppServer. For Web services, the default\nvalue is the URL of the Web service procedure object from the WSDL.\nThis is the portType name used on the RUN statement that instantiated\nthis object. For a non-Web service procedure, returns the\npathname of the procedure file that contains the current procedure. For\ncontrol-frames, this attribute maps to the Name property of the\nof the control-frame COM object (ActiveX control container). For\ndynamic widgets and asynchronous request handles, this attribute defaults\nto the Unknown value (?). For query objects, the NAME attribute applies\n        only to static queries. For more information on query objects, seeOpenEdge Development: ABL\n        Handbook. For the SOAP-header object\nhandle, this attribute is the qualified name of the SOAP-header\nobject, which consists of a namespace prefix + \":\" + HEADER. For\nthe SOAP-header-entryref object handle, this attribute is the qualified name\nof the SOAP-header-entryref object, which consists of a namespace\nprefix + \":\" + localname. You cannot change this attribute directly;\nyou must use the local-name and namespace-prefix. The NAME\nattribute of the Temp-table object handle is writeable for dynamic\nand AVM-generated temp-tables. A new temp-table name cannot be assigned\nuntil after the TEMP-TABLE-PREPARE() method has been executed. For\nthe X-document object handle or X-noderef object handle, this attribute\nreturns the name of the XML node. For any object or widget,\nthis attribute can contain any arbitrary value that you set."
         },
         {
@@ -85,7 +85,7 @@
         {
           "name": "PRIVATE-DATA",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "An arbitrary string associated with the handle\nof an object or widget. Applies\nto:Asynchronous request object handle,BROWSE widget(browse\nand column),Buffer-field object handle,Buffer object handle,BUTTON widget,COMBO-BOX widget,CONTROL-FRAME widget,Data-relation object handle,Data-source object handle,DIALOG-BOX widget,EDITOR widget,FIELD-GROUP widget,FILL-IN widget,FRAME widget,IMAGE widget,LITERAL widget,MENU widget,MENU-ITEM widget,Procedure object handle,ProDataSet object handle,Query object handle,RADIO-SET widget,RECTANGLE widget,SAX-attributes object handle,SAX-reader object handle,SELECTION-LIST widget,Server object handle,Server socket object handle,SLIDER widget,SOAP-header object handle,SOAP-header-entryref object handle,Socket object handle,Stream object handle,SUB-MENU widget,Temp-table object handle,TEXT widget,TOGGLE-BOX widget,WINDOW widget Use\nthis attribute any way you want. The AVM does not check the value\nof this attribute."
         },
         {
@@ -222,7 +222,7 @@
         {
           "name": "ADM-DATA",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "An arbitrary string value associated with a\npersistent procedure. Applies\nto:Buffer object handle,Buffer-field object handle,Data-relation object handle,Data-source object handle,Procedure object handle,ProDataSet object handle,Query object handle,SAX-attributes object handle,SAX-reader object handle,SOAP-header object handle,SOAP-header-entryref object handle,SOURCE-PROCEDURE system handle,Stream object handle,TARGET-PROCEDURE system handle,Temp-table object handle,THIS-PROCEDURE system handle"
         },
         {
@@ -234,7 +234,7 @@
         {
           "name": "CURRENT-WINDOW",
           "dataType": "HANDLE",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "A current window for the specified procedure. Data\ntype:HANDLE Applies\nto:Procedure object handle,SOURCE-PROCEDURE system handle,TARGET-PROCEDURE system handle,THIS-PROCEDURE system handle Specifies and allows you to reset the current\nwindow used to parent alert box, dialog box, or frame widgets for\nthe specified procedure. The default value is the Unknown value (?).\nReturns the Unknown value (?) for a Web service procedure\nor proxy procedure. If you set this attribute to the handle\nof a window, this value takes precedence over the CURRENT-WINDOW\nhandle to provide the default window for parenting alert boxes,\nframes, and dialog boxes created within the procedure. This\nattribute is especially useful for creating and associating a unique current\nwindow with each instantiation of a persistent procedure. For more information\non persistent procedures, see theRUN statementreference\nentry."
         },
         {
@@ -246,7 +246,7 @@
         {
           "name": "FILE-NAME",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The name of the file associated with a handle.\nReturns the empty string for a Web service procedure. The\nFILE-NAME attribute of the COMPILER handle is maintained only for\nbackward compatibility. Use theGET-FILE-NAME( ) method, instead. Applies\nto:COMPILER system handle,FILE-INFO system handle,Procedure object handle,RCODE-INFO handle,SOURCE-PROCEDURE system handle,TARGET-PROCEDURE system handle,THIS-PROCEDURE system handle The FILE-NAME attribute of the COMPILER handle\nis the name of the source file from the preceding compilation. If\nno error occurred during the preceding compilation, FILE-NAME assumes\nthe Unknown value (?). The FILE-NAME attribute of\nthe FILE-INFO or RCODE-INFO handle is the name of the file used\nby subsequent references to the handle. You can specify the filename\nwith a.p,.r, or no extension.\nIf you set FILE-NAME to a relative pathname, the AVM searches thePROPATHto\nfind the file. Otherwise, the AVM looks for the file specified by\nthe absolute pathname. When used with FILE-INFO, the filename can\ncontain Unicode characters. When used with RCODE-INFO, the filename\ncannot contain characters outside of the non-Unicode code page.\nSeeOpenEdge Development: Internationalizing Applicationsfor\nmore information about Unicode and code pages. The FILE-NAME\nattribute of a procedure handle is the pathname of the procedure\nfile that contains the procedure associated with the handle. If\nthe procedure file is specified by the Startup Procedure (-p) parameter,\nthe attribute contains the full pathname of the file. Otherwise,\nit contains the pathname exactly as specified in the RUN statement\nthat invoked it. The procedure can be local or remote. For more\ninformation on remote procedures, seeOpenEdge Application\nServer: Developing AppServer Applications. The FILE-NAME\nattribute of the COMPILER handle and procedure handles is read only."
         },
         {
@@ -270,7 +270,7 @@
         {
           "name": "NAME",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "A string identifier for the specified object\nor widget. Applies\nto:Asynchronous request object handle,BROWSE widget(browse, column,\nand cell),Buffer object handle,Buffer-field object handle,BUTTON widget,COMBO-BOX widget,CONTROL-FRAME widget,Data-relation object handle,Data-source object handle,DIALOG-BOX widget,EDITOR widget,FIELD-GROUP widget,FILL-IN widget,FRAME widget,IMAGE widget,LITERAL widget,MENU widget,MENU-ITEM widget,Procedure object handle,ProDataSet object handle,Query object handle,RADIO-SET widget,RECTANGLE widget,SELECTION-LIST widget,Server object handle,Server socket object handle,SLIDER widget,SOAP-header object handle,SOAP-header-entryref object handle,Socket object handle,SOURCE-PROCEDURE system handle,Stream object handle,SUB-MENU widget,TARGET-PROCEDURE system handle,Temp-table object handle,TEXT widget,THIS-PROCEDURE system handle,TOGGLE-BOX widget,WINDOW widget,X-document object handle,X-noderef object handle For the SOAP-header and SOAP-header-entryref\nobject handles, this attribute is read-only. For static data\nrepresentation widgets, the default value is the name of the field\nor variable associated with the widget. You can use the NAME attribute\nto store any information associated with the widget. For a\nstate-reset, state-aware, or stateless AppServer, this attribute\nreturns the connection ID for the AppServer associated with the\nserver handle. For a state-free AppServer, it returns the connection\nID of the first AppServer connection created in the session pool\nwith this server handle when the application service is first bound\nusing the CONNECT( ) method. The default value is the unique\nconnection name of the AppServer. For Web services, the default\nvalue is the URL of the Web service procedure object from the WSDL.\nThis is the portType name used on the RUN statement that instantiated\nthis object. For a non-Web service procedure, returns the\npathname of the procedure file that contains the current procedure. For\ncontrol-frames, this attribute maps to the Name property of the\nof the control-frame COM object (ActiveX control container). For\ndynamic widgets and asynchronous request handles, this attribute defaults\nto the Unknown value (?). For query objects, the NAME attribute applies\n        only to static queries. For more information on query objects, seeOpenEdge Development: ABL\n        Handbook. For the SOAP-header object\nhandle, this attribute is the qualified name of the SOAP-header\nobject, which consists of a namespace prefix + \":\" + HEADER. For\nthe SOAP-header-entryref object handle, this attribute is the qualified name\nof the SOAP-header-entryref object, which consists of a namespace\nprefix + \":\" + localname. You cannot change this attribute directly;\nyou must use the local-name and namespace-prefix. The NAME\nattribute of the Temp-table object handle is writeable for dynamic\nand AVM-generated temp-tables. A new temp-table name cannot be assigned\nuntil after the TEMP-TABLE-PREPARE() method has been executed. For\nthe X-document object handle or X-noderef object handle, this attribute\nreturns the name of the XML node. For any object or widget,\nthis attribute can contain any arbitrary value that you set."
         },
         {
@@ -294,7 +294,7 @@
         {
           "name": "PRIVATE-DATA",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "An arbitrary string associated with the handle\nof an object or widget. Applies\nto:Asynchronous request object handle,BROWSE widget(browse\nand column),Buffer-field object handle,Buffer object handle,BUTTON widget,COMBO-BOX widget,CONTROL-FRAME widget,Data-relation object handle,Data-source object handle,DIALOG-BOX widget,EDITOR widget,FIELD-GROUP widget,FILL-IN widget,FRAME widget,IMAGE widget,LITERAL widget,MENU widget,MENU-ITEM widget,Procedure object handle,ProDataSet object handle,Query object handle,RADIO-SET widget,RECTANGLE widget,SAX-attributes object handle,SAX-reader object handle,SELECTION-LIST widget,Server object handle,Server socket object handle,SLIDER widget,SOAP-header object handle,SOAP-header-entryref object handle,Socket object handle,Stream object handle,SUB-MENU widget,Temp-table object handle,TEXT widget,TOGGLE-BOX widget,WINDOW widget Use\nthis attribute any way you want. The AVM does not check the value\nof this attribute."
         },
         {
@@ -455,7 +455,7 @@
         {
           "name": "FILE-NAME",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The name of the file associated with a handle.\nReturns the empty string for a Web service procedure. The\nFILE-NAME attribute of the COMPILER handle is maintained only for\nbackward compatibility. Use theGET-FILE-NAME( ) method, instead. Applies\nto:COMPILER system handle,FILE-INFO system handle,Procedure object handle,RCODE-INFO handle,SOURCE-PROCEDURE system handle,TARGET-PROCEDURE system handle,THIS-PROCEDURE system handle The FILE-NAME attribute of the COMPILER handle\nis the name of the source file from the preceding compilation. If\nno error occurred during the preceding compilation, FILE-NAME assumes\nthe Unknown value (?). The FILE-NAME attribute of\nthe FILE-INFO or RCODE-INFO handle is the name of the file used\nby subsequent references to the handle. You can specify the filename\nwith a.p,.r, or no extension.\nIf you set FILE-NAME to a relative pathname, the AVM searches thePROPATHto\nfind the file. Otherwise, the AVM looks for the file specified by\nthe absolute pathname. When used with FILE-INFO, the filename can\ncontain Unicode characters. When used with RCODE-INFO, the filename\ncannot contain characters outside of the non-Unicode code page.\nSeeOpenEdge Development: Internationalizing Applicationsfor\nmore information about Unicode and code pages. The FILE-NAME\nattribute of a procedure handle is the pathname of the procedure\nfile that contains the procedure associated with the handle. If\nthe procedure file is specified by the Startup Procedure (-p) parameter,\nthe attribute contains the full pathname of the file. Otherwise,\nit contains the pathname exactly as specified in the RUN statement\nthat invoked it. The procedure can be local or remote. For more\ninformation on remote procedures, seeOpenEdge Application\nServer: Developing AppServer Applications. The FILE-NAME\nattribute of the COMPILER handle and procedure handles is read only."
         },
         {
@@ -516,7 +516,7 @@
         {
           "name": "ERROR",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "A compile-time or run-time error condition. Data\ntype:LOGICAL Applies\nto:Asynchronous request object handle,Buffer object handle,COMPILER system handle,ERROR-STATUS system handle,ProDataSet object handle,Temp-table object handle The ERROR attribute corresponds to theERROR function. For\nthe asynchronous request object handle, the ERROR attribute indicates that\nthe ERROR condition was encountered during the processing of an AppServer\nor Web Server request. If the COMPLETE attribute is FALSE, the value\nof this attribute is the Unknown value (?). This attribute\nis set immediately before the event procedure is executed. For\nthe COMPILER system handle, the ERROR attribute indicates whether an\nerror occurred in the preceding compilation. If no error occurred\nin the preceding compilation, the value of ERROR is the Unknown value (?). For\ntheProDataSet object handle,Temp-table object handle, andBuffer object handle,\nthe ERROR attribute indicates whether an error occurred during a\nFILL or SAVE-ROW-CHANGES operation. For a ProDataSet object\nhandle or a temp-table object handle, the ERROR attribute is reset\nto FALSE when one of the following methods removes the object's\nbefore-image records: The ERROR attribute is effective only if a before-table is NO-UNDO during a data source\n          update. If the before-table is UNDO, the ERROR attribute is lost. For theBuffer object handle,\nthis attribute causes the row to be backed out rather than merged\nwith theMERGE-CHANGES( ) methodor theMERGE-ROW-CHANGES( ) method. This attribute is marshalled between the\nclient and the AppServer. For the ERROR-STATUS system handle,\nthe ERROR attribute indicates whether the ABL ERROR condition was\nraised in the most recent statement that used the NO-ERROR option.\nIf no ERROR condition was raised in that statement, the value of\nthe ERROR attribute is FALSE. The ERROR attribute is writeable\nfor a ProDataSet object, a Temp-table object, and a Buffer object.\nYou can set the ERROR attribute programmatically in order to manage\nthe application response to errors. For example, you might set the\nERROR attribute to FALSE in order to ignore all errors that might\nbe returned for a statement using the NO-ERROR option. However,\nnote that manually setting this attribute has no affect on ABL error\nmanagement. Thus, if you set the ERROR attribute to TRUE, the AVM\ndoesnotalso raise the ERROR condition."
         },
         {
@@ -534,7 +534,7 @@
         {
           "name": "FILE-NAME",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The name of the file associated with a handle.\nReturns the empty string for a Web service procedure. The\nFILE-NAME attribute of the COMPILER handle is maintained only for\nbackward compatibility. Use theGET-FILE-NAME( ) method, instead. Applies\nto:COMPILER system handle,FILE-INFO system handle,Procedure object handle,RCODE-INFO handle,SOURCE-PROCEDURE system handle,TARGET-PROCEDURE system handle,THIS-PROCEDURE system handle The FILE-NAME attribute of the COMPILER handle\nis the name of the source file from the preceding compilation. If\nno error occurred during the preceding compilation, FILE-NAME assumes\nthe Unknown value (?). The FILE-NAME attribute of\nthe FILE-INFO or RCODE-INFO handle is the name of the file used\nby subsequent references to the handle. You can specify the filename\nwith a.p,.r, or no extension.\nIf you set FILE-NAME to a relative pathname, the AVM searches thePROPATHto\nfind the file. Otherwise, the AVM looks for the file specified by\nthe absolute pathname. When used with FILE-INFO, the filename can\ncontain Unicode characters. When used with RCODE-INFO, the filename\ncannot contain characters outside of the non-Unicode code page.\nSeeOpenEdge Development: Internationalizing Applicationsfor\nmore information about Unicode and code pages. The FILE-NAME\nattribute of a procedure handle is the pathname of the procedure\nfile that contains the procedure associated with the handle. If\nthe procedure file is specified by the Startup Procedure (-p) parameter,\nthe attribute contains the full pathname of the file. Otherwise,\nit contains the pathname exactly as specified in the RUN statement\nthat invoked it. The procedure can be local or remote. For more\ninformation on remote procedures, seeOpenEdge Application\nServer: Developing AppServer Applications. The FILE-NAME\nattribute of the COMPILER handle and procedure handles is read only."
         },
         {
@@ -558,7 +558,7 @@
         {
           "name": "MULTI-COMPILE",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Specifies whether ABL compiles all class definition files\nin the inherited class hierarchy or only those class definition\nfiles for which a cached version is not found. Applies\nto:COMPILER system handle When set to TRUE, ABL compiles only those class\ndefinition files in the inherited class hierarchy that are not found\nin the cache. ABL also caches any classes or interfaces it compiles\nto avoid recompiling them during the session. When set to\nFALSE, ABL compiles all class definition files in the inherited class\nhierarchy. ABL also clears the cache of any classes or interfaces\ncompiled during the session. The default value is FALSE."
         },
         {
@@ -704,7 +704,7 @@
         {
           "name": "AUTO-DELETE-XML",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Determines whether the X-document object handle\nis deleted on a new web request. The default is YES. Data\ntype:LOGICAL Applies\nto:WEB-CONTEXT system handle"
         },
         {
@@ -746,55 +746,55 @@
         {
           "name": "HTML-CHARSET",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(WebSpeed only) The\nABL version (as opposed to the MIME version) of the code page name of\na Web request. Set by ABL when a WebSpeed application incorporates dynamic\ncode page support. The default is blank. Applies\nto:WEB-CONTEXT system handle Once the AVM sets HTML-CHARSET, each time\na Web browser sends a Web request to the application: For\nmore information on dynamic code-page support, seeOpenEdge Application\nServer: Developing WebSpeed Applications."
         },
         {
           "name": "HTML-END-OF-LINE",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Defaults to the newline character (ASCII 10;\n'~n'; '\\n'). A null string value causes a NEWLINE character (not\na null string) to be output. You might want to set this to \"~n\"\n(the NEWLINE character) or to the null string (to force the NEWLINE\ncharacter). Depending on the other attribute values, using the NEWLINE\nrather than the <BR> tag can result in more readable output when\nviewing document source in a browser. Applies\nto:WEB-CONTEXT system handle"
         },
         {
           "name": "HTML-END-OF-PAGE",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Between stream pages, defaults to \"<HR>\".\nOutput between stream pages to visually break up the sectioning\ncaused by the PAGED or PAGE-SIZE options of the OUTPUT TO \"WEB\"\nstatement. Does not affect the line count of any stream page. Data\ntype:CHARACTER Applies\nto:WEB-CONTEXT system handle"
         },
         {
           "name": "HTML-FRAME-BEGIN",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Before a SpeedScript frame, defaults to \"<PRE>\". Generally,\nif you change this value you must change the value of HTML-FRAME-END.\nOutput only before the data row(s) for the current iteration of\na DOWN frame, not to column headers (see also HTML-HEADER-BEGIN\nand HTML-HEADER-END). Applies to any side-labels displayed in the\nframe, whether or not the frame is a DOWN frame. Applies\nto:WEB-CONTEXT system handle"
         },
         {
           "name": "HTML-FRAME-END",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "After a SpeedScript frame, defaults to \"</PRE>\". Generally,\nif you change this value you must change the value of HTML-FRAME-BEGIN.\nOutput at the end of the data row(s) for the current iteration of\na DOWN frame. Applies\nto:WEB-CONTEXT system handle"
         },
         {
           "name": "HTML-HEADER-BEGIN",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Before the column headers of a SpeedScript\nframe, defaults to \"<PRE>\". Generally, if you change this value\nyou must change the value of HTML-HEADER-END. Output at the beginning\nof the column header section of a DOWN frame. Applies\nto:WEB-CONTEXT system handle"
         },
         {
           "name": "HTML-HEADER-END",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "After the column headers of a SpeedScript frame, defaults\nto \"</PRE>\". Generally, if you change this value you must change\nthe value of HTML-HEADER-BEGIN. Output at the end of the column\nheader section of a DOWN frame. Applies\nto:WEB-CONTEXT system handle"
         },
         {
           "name": "HTML-TITLE-BEGIN",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Before a SpeedScript frame title, Defaults\nto the null string (\"\"), no text. Generally, if you change this\nvalue you must change the value of HTML-TITLE-END. Output before\nthe frame's TITLE value. Setting to a color or bold tag might improve\nreadability. Applies\nto:WEB-CONTEXT system handle"
         },
         {
           "name": "HTML-TITLE-END",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "After a SpeedScript frame title, defaults to\nthe null string (\"\"), no text. Generally, if you change this value\nyou must change the value of HTML-TITLE-BEGIN. Output after the\nframe's TITLE value. Applies\nto:WEB-CONTEXT system handle"
         },
         {
@@ -818,7 +818,7 @@
         {
           "name": "SESSION-END",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Sets the end of a logical WebSpeed session.\nIntended for internal use only. Applies\nto:WEB-CONTEXT system handle"
         },
         {
@@ -830,7 +830,7 @@
         {
           "name": "VALIDATE-XML",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Sets validation on parsing when an XML document\nis posted to the transaction server. The default is NO. Data\ntype:LOGICAL Applies\nto:WEB-CONTEXT system handle"
         },
         {
@@ -842,25 +842,25 @@
         {
           "name": "XML-ENTITY-EXPANSION-LIMIT",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(WebSpeed Only) Indicates the maximum number of entity substitutions the XML parser (either DOM or SAX)\n        will permit in a XML document sent as a WebSpeed request. By limiting the number of entity substitutions, use of this attribute prevents recursive\n        entities from consuming system resources. The default value is 50,000. The attribute's value\n        must be equal to or greater than 0; setting the attribute to a negative value will result in\n        a runtime error. If the attribute is set to the Unknown value (?), the\n        feature is off. You can set this behavior globally by using the-entityExpansionLimitstartup parameter. The default value of the attribute is set by the startup parameter, but\n        you can change the attribute as needed to override the behavior set by the startup\n        parameter. See theOpenEdge Deployment: Startup Command and Parameter Referencefor more information."
         },
         {
           "name": "XML-SCHEMA-PATH",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(WebSpeed Only) A\ndelimiter-separated list of directory paths for the XML Document\nType Definition (DTD) associated with a particular XML document\nin a WebSpeed environment. Searched if the XML document contains\na relative path to the DTD. Applies\nto:WEB-CONTEXT system handle Almost identical to the SCHEMA-PATH attribute\nof the X-document and SAX-reader objects. Like SCHEMA-PATH, the\npathnames can contain Unicode characters. SeeOpenEdge Development:\nInternationalizing Applicationsfor more information about\nUnicode. For more information on SCHEMA-PATH, see the reference\nentry for theSCHEMA-PATH attribute."
         },
         {
           "name": "XML-STRICT-ENTITY-RESOLUTION",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(WebSpeed Only) Indicates whether or not the XML parser (DOM or SAX) will attempt to resolve an external\n        entity if the entity is located outside of the directories in the XML-SCHEMA-PATH attribute\n        of an XML document sent as a WebSpeed request. If XML-STRICT-ENTITY-RESOLUTION is TRUE, the parser will NOT attempt to resolve an external\n        entity that is located outside of the directories in the XML-SCHEMA-PATH attribute of the\n        WEB-CONTEXT system handle. If XML-STRICT-ENTITY-RESOLUTION is FALSE, the parser will attempt\n        to resolve an external entity. Setting this attribute to TRUE can help prevent an external\n        caller from gaining access to data located in directories not included in the\n        XML-SCHEMA-PATH attribute. You can set this behavior globally by using the-strictEntityResolutionstartup parameter. The default value of the attribute is set by the startup parameter, but\n        you can change the attribute as needed to override the behavior set by the startup\n        parameter. See theOpenEdge Deployment: Startup Command and Parameter Referencefor more information."
         },
         {
           "name": "XML-SUPPRESS-NAMESPACE-PROCESSING",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(WebSpeed Only) Specifies\nwhether to suppress namespace processing. Applies\nto:WEB-CONTEXT system handle Almost identical to the SUPPRESS-NAMESPACE-PROCESSING\nattribute of the X-document handle. For more information on SUPPRESS-NAMESPACE-PROCESSING,\nsee the reference entry for theSUPPRESS-NAMESPACE-PROCESSING attribute."
         }
       ],
@@ -921,7 +921,7 @@
         {
           "name": "DB-CONTEXT",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Returns the logical database to which the DSLOG-MANAGER\nsystem handle currently applies. Valid values are any valid, connected\nlogical name or alias for a database of a supported database type.\nThe default value is the Unknown value (?). If you set\nDB-CONTEXT to an alias, it returns the logical name of the database currently\nassigned to that alias. Applies\nto:DSLOG-MANAGER system handle Each DataServer connection is a separate\nentity for which you can specify different logging settings. You\nuse this attribute at run time to specify the DataServer connection\nwith which you are working. You must set DB-CONTEXT before accessing\nany other attribute or method of the DSLOG-MANAGER system handle. If\nyou set DB-CONTEXT to the Unknown value (?), you cannot\naccess DSLOG-MANAGER until you reset DB-CONTEXT to a valid logical\ndatabase name or alias. When the database specified in DB-CONTEXT\nis disconnected, the client automatically sets DB-CONTEXT to the Unknown value (?). The\nfollowing statements show how you can set this attribute:"
         },
         {
@@ -957,7 +957,7 @@
         {
           "name": "LOGFILE-NAME",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The name of log file OpenEdge uses to log\nmessages and ABL stack trace information. If the filename you supply is a relative\npathname, then a file is accessed relative to the current working\ndirectory. If the filename is an absolute pathname, then the specified\nfile is accessed. In Windows, the pathname cannot contain characters\noutside of the non-Unicode code page. SeeOpenEdge Development:\nInternationalizing Applicationsfor more information about Unicode\nand code pages. When the specified log file is\nopen, this LOG-MANAGER attribute is read-only. This attribute is\nalways read-only for the DSLOG-MANAGER system handle. For\nthe LOG-MANAGER system handle, the LOGFILE-NAME attribute corresponds\nto the Client Logging (-clientlog) startup parameter.\nFor the DSLOG-MANAGER system handle, this attribute corresponds\nto the DataServer Logging (-dslog) startup parameter\nwhen the client is self-service or client/server using ProBroker.\nFor DataServer Broker instances of the Unified Broker, the read-only LOGFILE-NAME\nattribute corresponds to thesrvrDSLogFileattribute\nin theubroker.propertiesfile. Use theLOG-ENTRY-TYPES attributeor the Log Entry Types (-logentrytypes)\nstartup parameter to specify one or more types of log entries you\nwant to write to the log file. Use theLOGGING-LEVEL attributeor the Logging Level (-logginglevel)\nstartup parameter to specify a general level at which log entries\nare written to the log file. For more information about the\nClient Logging (-clientlog), DataServer Logging (-dslog),\nLog Entry Types (-logentrytypes), and Logging Level (-logginglevel)\nstartup parameters, seeOpenEdge Deployment: Startup Command\nand Parameter Reference,OpenEdge Data Management:\nDataServer for Microsoft SQL Server, andOpenEdge Development:\nDebugging and Troubleshooting."
         },
         {
@@ -1035,7 +1035,7 @@
         {
           "name": "LOGFILE-NAME",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The name of log file OpenEdge uses to log\nmessages and ABL stack trace information. If the filename you supply is a relative\npathname, then a file is accessed relative to the current working\ndirectory. If the filename is an absolute pathname, then the specified\nfile is accessed. In Windows, the pathname cannot contain characters\noutside of the non-Unicode code page. SeeOpenEdge Development:\nInternationalizing Applicationsfor more information about Unicode\nand code pages. When the specified log file is\nopen, this LOG-MANAGER attribute is read-only. This attribute is\nalways read-only for the DSLOG-MANAGER system handle. For\nthe LOG-MANAGER system handle, the LOGFILE-NAME attribute corresponds\nto the Client Logging (-clientlog) startup parameter.\nFor the DSLOG-MANAGER system handle, this attribute corresponds\nto the DataServer Logging (-dslog) startup parameter\nwhen the client is self-service or client/server using ProBroker.\nFor DataServer Broker instances of the Unified Broker, the read-only LOGFILE-NAME\nattribute corresponds to thesrvrDSLogFileattribute\nin theubroker.propertiesfile. Use theLOG-ENTRY-TYPES attributeor the Log Entry Types (-logentrytypes)\nstartup parameter to specify one or more types of log entries you\nwant to write to the log file. Use theLOGGING-LEVEL attributeor the Logging Level (-logginglevel)\nstartup parameter to specify a general level at which log entries\nare written to the log file. For more information about the\nClient Logging (-clientlog), DataServer Logging (-dslog),\nLog Entry Types (-logentrytypes), and Logging Level (-logginglevel)\nstartup parameters, seeOpenEdge Deployment: Startup Command\nand Parameter Reference,OpenEdge Data Management:\nDataServer for Microsoft SQL Server, andOpenEdge Development:\nDebugging and Troubleshooting."
         },
         {
@@ -1118,7 +1118,7 @@
         {
           "name": "VISIBLE",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Indicates whether a widget is currently visible\non the display. This\nattribute is read-only for field groups, menus, menu items, and submenus.\nA field-level widget must be specified in a frame definition before you\nset its VISIBLE attribute. The behavior of the VISIBLE attribute\ndepends on the setting of the HIDDEN attribute of related widgets:"
         }
       ],
@@ -1199,7 +1199,7 @@
         {
           "name": "COLUMN",
           "dataType": "DECIMAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The column position of the left edge of the\nwidget or the column position of the mouse cursor for the last mouse\nevent on the display. Applies\nto:BROWSE widget(browse and\ncolumn),BUTTON widget,COMBO-BOX widget,CONTROL-FRAME widget,DIALOG-BOX widget,EDITOR widget,FIELD-GROUP widget,FILL-IN widget,FRAME widget,IMAGE widget,LAST-EVENT system handle,LITERAL widget,RADIO-SET widget,RECTANGLE widget,SELECTION-LIST widget,SLIDER widget,TEXT widget,TOGGLE-BOX widget,WINDOW widget For\nbrowse cells, field groups, and the LAST-EVENT handle, it is readable only. For\nall widgets except windows, the COLUMN attribute specifies the location,\nin character units, of the left edge of the widget relative to the\nleft edge of its parent widget. In windows, the location is relative\nto the left edge of the display. For browse columns, the COLUMN\nattribute returns the Unknown value (?) if the column\nis hidden. For control-frames, the COLUMN attribute maps to\nthe Left property of the control-frame COM object (ActiveX control\ncontainer). For the LAST-EVENT handle, the COLUMN attribute\nspecifies the column location, in character units, of the last mouse\nevent relative to the left edge of the current frame. This\nattribute is functionally equivalent to the X attribute."
         },
         {
@@ -1229,7 +1229,7 @@
         {
           "name": "LABEL",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The label of a widget or the name of a low-level event. Data\ntype:CHARACTER Applies\nto:BROWSE widget(column),Buffer-field object handle,BUTTON widget,COMBO-BOX widget,EDITOR widget,FILL-IN widget,MENU-ITEM widget,RADIO-SET widget,SELECTION-LIST widget,SLIDER widget,SUB-MENU widget,TEXT widget,TOGGLE-BOX widget,LAST-EVENT system handle For the LAST-EVENT handle, this attribute is\nreadable only. For a widget, the LABEL attribute specifies\nthe label for the widget. For some data representation widgets,\nit is actually the SCREEN-VALUE attribute value of the literal or\ntext widget that is assigned to the SIDE-LABEL-HANDLE attribute\nof the specified data representation widget. For more information,\nsee theSIDE-LABEL-HANDLE attributereference entry. For the LAST-EVENT handle,\nthe LABEL attribute returns the names of low-level events based\non the EVENT-TYPE attribute value. For EVENT-TYPE = \"KEYPRESS\",\nthis attribute returns key label events, such as \"F1\" or \"ESC\".\nIt also returns the key labels of any keys that trigger key function\nevents (returned by the FUNCTION attribute). For EVENT-TYPE\n= \"MOUSE\", this attribute returns low-level events for both portable\nand three-button mouse event types, such as \"SELECT-MOUSE-UP\" (portable)\nor \"LEFT-MOUSE-UP\" (three-button). It also returns the names of\nthe low-level mouse actions that trigger any high-level mouse events\n(returned by the FUNCTION attribute). For EVENT-TYPE = \"PROGRESS\",\nthis attribute returns the same high-level event name returned by\nthe FUNCTION attribute unless the ABL event is triggered by a key\npress. In this case, it returns the key label of the key that triggered\nthe event."
         },
         {
@@ -1241,7 +1241,7 @@
         {
           "name": "ROW",
           "dataType": "DECIMAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The row position of the top edge of the widget\nrelative to the top edge of the current iteration of a parent widget\nor the display. Specifies the row position of the mouse cursor for\nthe last mouse event relative to the top edge of the display. Data\ntype:DECIMAL Applies\nto:BROWSE widget(browse and\ncell),BUTTON widget,COMBO-BOX widget,CONTROL-FRAME widget,DIALOG-BOX widget,EDITOR widget,FIELD-GROUP widget,FILL-IN widget,FRAME widget,IMAGE widget,LITERAL widget,RADIO-SET widget,RECTANGLE widget,SELECTION-LIST widget,SLIDER widget,TEXT widget,TOGGLE-BOX widget,WINDOW widget,LAST-EVENT system handle This attribute is read-only for browse columns,\nfield groups, and the LAST-EVENT handle. For all widgets except\nwindows, the ROW attribute specifies the location, in character\nunits, of the top edge of the widget relative to the top edge of\nits parent widget. In windows, the location is relative to the top\nedge of the display. For a browse column, the ROW attribute\nreturns the Unknown value (?) if the column is hidden. If\nthe parent is a down frame with multiple occurrences, the ROW attribute regards\nthe parent as the current occurrence. For control-frames,\nthe ROW attribute maps to the Top property of the control-frame\nCOM object (ActiveX control container). For the LAST-EVENT\nhandle, the ROW attribute specifies the row location, in character\nunits, of the last mouse event relative to the top edge of the current\nframe. This attribute is functionally equivalent to the Y\nattribute."
         },
         {
@@ -1265,13 +1265,13 @@
         {
           "name": "X",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The pixel location of the left edge of a widget\nrelative to the left edge of the parent widget or the display. The\npixel location of the mouse cursor relative to the left edge of\nthe display (for the last mouse event). Applies\nto:BROWSE widget(browse and\ncolumn),BUTTON widget,COMBO-BOX widget,CONTROL-FRAME widget,DIALOG-BOX widget,EDITOR widget,FIELD-GROUP widget,FILL-IN widget,FRAME widget,IMAGE widget,LAST-EVENT system handle,LITERAL widget,RADIO-SET widget,RECTANGLE widget,SELECTION-LIST widget,SLIDER widget,TEXT widget,TOGGLE-BOX widget,WINDOW widget This\nattribute is read-only for field groups, browse cells, and the LAST-EVENT\nhandle. For all user interface widgets except windows, the\nX attribute specifies the location, in pixels, of the left edge\nof the widget relative to the left edge of its parent widget. In\nwindows, it is the location of the left edge of the window relative\nto the left edge of the display. For a browse column, the\nX attribute returns the Unknown value (?) if the column\nis hidden. For control-frames, the X attribute maps to the\nLeft property of the control-frame COM object (ActiveX control container). For\nthe LAST-EVENT handle, the X attribute returns the pixel location\nof a mouse event relative to the left edge of the current frame. This\nattribute is functionally equivalent to the COLUMN attribute."
         },
         {
           "name": "Y",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The pixel location of the top edge of the widget\nrelative to the top edge of the parent widget or the display. The\npixel location of the mouse cursor relative to the top edge of the\ndisplay (for the last mouse event). This attribute is functionally\nequivalent to the ROW attribute. Applies\nto:BROWSE widget(browse and\ncell),BUTTON widget,COMBO-BOX widget,CONTROL-FRAME widget,DIALOG-BOX widget,EDITOR widget,FIELD-GROUP widget,FILL-IN widget,FRAME widget,IMAGE widget,LAST-EVENT system handle,LITERAL widget,RADIO-SET widget,RECTANGLE widget,SELECTION-LIST widget,SLIDER widget,TEXT widget,TOGGLE-BOX widget,WINDOW widget This\nattribute is read-only for field groups, browse cells, and the LAST-EVENT\nhandle. For all user interface widgets except windows, the\nY attribute specifies the location, in pixels, of the top edge of\nthe widget relative to the top edge of its parent widget. In windows,\nit is the location of the top edge of the window relative to the\ntop edge of the display. For a browse column, the Y attribute\nreturns the Unknown value (?) if the column is hidden. For\ncontrol-frames, the Y attribute maps to the Top property of the control-frame\nCOM object (ActiveX control container). For the LAST-EVENT\nhandle, the Y attribute returns the pixel location of a mouse event\nrelative to the top edge of the current frame."
         }
       ],
@@ -1290,7 +1290,7 @@
         {
           "name": "ENCRYPTION-SALT",
           "dataType": "RAW",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The default salt value (a random series of\nbytes) to use with the GENERATE-PBE-KEY function. The default value\nis the Unknown value (?), which indicates that no salt\nvalue is used to generate the password-based encryption key. Data\ntype:RAW Applies\nto:SECURITY-POLICY system handle If specified, this salt value is combined\nwith a password value and hashed some number of times to\ngenerate a password-based encryption key (using the algorithm specified\nby the PBE-HASH-ALGORITHM attribute and the number of iterations\nspecified by the PBE-KEY-ROUNDS attribute). When set, only\nthe first 8 bytes are used. If the value has fewer than 8 bytes, it\nis padded at the end with zero-value bytes. You can use the\nGENERATE-PBE-SALT function to generate a salt value, which can help\nto ensure that the password key value is unique. You are responsible\nfor generating, storing, and transporting this value."
         },
         {
@@ -1308,25 +1308,25 @@
         {
           "name": "PBE-HASH-ALGORITHM",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "A text string containing the name of the hash\nalgorithm to use with theGENERATE-PBE-KEY functionto generate a password-based encryption key. Data\ntype:CHARACTER Applies\nto:SECURITY-POLICY system handle The method accepts the following values and\ncorresponding hash algorithms in increasing order of security and\ndecreasing order of performance: The default value is\"SHA-1\". You\nare responsible for generating, storing, and transporting this value."
         },
         {
           "name": "PBE-KEY-ROUNDS",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The number of hash algorithm iterations to\nperform in theGENERATE-PBE-KEY functionto generate a password-based encryption key. The\nvalue must be a positive integer. The default value is 1000. Data\ntype:INTEGER Applies\nto:SECURITY-POLICY system handle You are responsible for generating, storing,\nand transporting this value."
         },
         {
           "name": "SYMMETRIC-ENCRYPTION-ALGORITHM",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "A character string that specifies the name\nof the default cryptographic algorithm to use with the ENCRYPT and\nDECRYPT functions. The default value is\"AES_CBC_128\". Data\ntype:CHARACTER Applies\nto:SECURITY-POLICY system handle This string is a concatenation of three character\nexpressions that identify an algorithm, mode, and key size. For\na list the supported cryptographic algorithms, see theSYMMETRIC-SUPPORT attributereference entry. You are responsible for\ngenerating, storing, and transporting this value."
         },
         {
           "name": "SYMMETRIC-ENCRYPTION-IV",
           "dataType": "RAW",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The default initialization vector value to\nuse with the encryption key in the ENCRYPT and DECRYPT functions.\nThe default value is the Unknown value (?), which indicates\nthat no initialization vector value is used. Applies\nto:SECURITY-POLICY system handle Using an initialization vector value increases\nthe strength of the specified encryption key (that is, it makes\nthe key more unpredictable). You are responsible for generating,\nstoring, and transporting this value."
         },
         {
@@ -1466,13 +1466,13 @@
         {
           "name": "ITEMS-PER-ROW",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "How to format multiple items written to the\nsystem clipboard using the CLIPBOARD handle. Applies\nto:CLIPBOARD system handle This attribute has meaning only when the CLIPBOARD:MULTIPLE\nattribute is TRUE, and has no effect when reading data from the\nclipboard. For more information, see the reference entry for theCLIPBOARD system handle."
         },
         {
           "name": "MULTIPLE",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Indicates the selection behavior of browse\nselection list widgets, and the read and write behavior of the system\nclipboard. For\nbrowse widgets, the MULTIPLE attribute specifies whether the user can\nselect multiple rows from the widget, or only a single row. (Typically,\nthe selected rows are processed in response to a DEFAULT-ACTION\nevent.) The MULTIPLE attribute is read-only for browse widgets.\nThe MULTIPLE attribute for a browse can be set before the browse\nis realized. Use the MULTIPLE or SINGLE option of the browse phrase\nin the DEFINE BROWSE statement to set the selection behavior for\na browse widget. The MOUSE-SELECT-DOWN and MOUSE-SELECT-UP events\nare generated as the user scrolls through the browse. For\nselection-list widgets, the MULTIPLE attribute specifies whether\nthe user can select multiple items from the widget, or only a single\nitem. (Typically, the selected rows are processed in response to\na DEFAULT-ACTION event.) You can specify selection behavior for\na selection list using the MULTIPLE or SINGLE option of a SELECTION-LIST\nphrase. You can set this attribute for a selection list only before\nthe widget is realized. For the CLIPBOARD\nhandle, the MULTIPLE attribute specifies whether the AVM reads and\nwrites data to the CLIPBOARD handle as multiple items or as a single\nitem. For more information, see theCLIPBOARD system handlereference entry."
         },
         {
@@ -1490,7 +1490,7 @@
         {
           "name": "VALUE",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The data values in the system clipboard. Data\ntype:CHARACTER Applies\nto:CLIPBOARD system handle During single-item operation (with the CLIPBOARD:MULTIPLE\nattribute set to FALSE), reading this attribute returns all the\ndata in the clipboard, and writing to attribute completely replaces\nany and all data in the clipboard. During multiple-item operation\n(with the CLIPBOARD:MULTIPLE attribute set to TRUE), reading this\nattribute returns one of several data items in the clipboard, and\nwriting to this attribute appends a data item to a buffered value\nformatted to replace the data in the clipboard. If\nthere is no data in the clipboard or the last data item has been\nread during a multiple-item operation, the VALUE attribute returns\nthe Unknown value (?). Reading this attribute during either\nsingle-item or multiple-item operation has no effect on the existing\nclipboard data value(s). Setting the VALUE attribute to the Unknown value (?) during\nsingle- or multiple-item operation has no effect. To clear the clipboard\nof all data, set the VALUE attribute to the null string in a single-item\noperation. For more information on using the VALUE attribute, see the\nreference entry for theCLIPBOARD system handle."
         }
       ],
@@ -1515,7 +1515,7 @@
         {
           "name": "NUM-ENTRIES",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(Graphical interfaces\nonly) The number of entries in a color table or font table. Data\ntype:INTEGER Applies\nto:COLOR-TABLE system handle,FONT-TABLE system handle This attribute returns zero (0) in character\ninterfaces because colors and fonts are not supported for character\ninterfaces."
         },
         {
@@ -1605,7 +1605,7 @@
         {
           "name": "NUM-ENTRIES",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(Graphical interfaces\nonly) The number of entries in a color table or font table. Data\ntype:INTEGER Applies\nto:COLOR-TABLE system handle,FONT-TABLE system handle This attribute returns zero (0) in character\ninterfaces because colors and fonts are not supported for character\ninterfaces."
         },
         {
@@ -1962,19 +1962,19 @@
         {
           "name": "APPSERVER-INFO",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Connection parameter for the AppServer CONNECT( )\nmethod. Applies\nto:CODEBASE-LOCATOR system handle Valid only if LOCATOR-TYPE is \"AppServer\"."
         },
         {
           "name": "APPSERVER-PASSWORD",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Password parameter for the AppServer CONNECT( ) method. Data\ntype:CHARACTER Applies\nto:CODEBASE-LOCATOR system handle Valid only if LOCATOR-TYPE is \"AppServer\"."
         },
         {
           "name": "APPSERVER-USERID",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Userid parameter for the AppServer CONNECT( ) method. Data\ntype:CHARACTER Applies\nto:CODEBASE-LOCATOR system handle Valid only if LOCATOR-TYPE is \"AppServer\"."
         },
         {
@@ -2004,7 +2004,7 @@
         {
           "name": "KEEP-SECURITY-CACHE",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Indicates whether WebClient saves the values\nof the attributes in the security cache between sessions (TRUE)\nor not (FALSE), as requested by the user. The default value is FALSE. Data\ntype:LOGICAL Applies\nto:CODEBASE-LOCATOR system handle The following attributes represent the security\ncache: These attributes are readable\nand writeable."
         },
         {
@@ -2052,13 +2052,13 @@
         {
           "name": "URL-PASSWORD",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Password parameter for connecting to the server\nreferenced in the URL, if required by the URL protocol. Data\ntype:CHARACTER Applies\nto:CODEBASE-LOCATOR system handle"
         },
         {
           "name": "URL-USERID",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Userid parameter for connecting to the server\nreferenced in the URL, if required by the URL protocol. Data\ntype:CHARACTER Applies\nto:CODEBASE-LOCATOR system handle"
         }
       ],
@@ -2071,13 +2071,13 @@
         {
           "name": "APPL-ALERT-BOXES",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Directs application messages to alert boxes\nor the default message area. Applies\nto:SESSION system handle If\nthe APPL-ALERT-BOXES attribute is TRUE, an application message produced\nby the MESSAGE statement is displayed in alert boxes rather than\nin the message area. The default value is FALSE."
         },
         {
           "name": "BASE-ADE",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Sets the location of the ADE r-code directory.\nWhen set, the AVM adds the directory, followed by all the procedure\nlibraries in the directory, to thePROPATH. Data\ntype:CHARACTER Applies\nto:SESSION system handle You\ncan also specify the ADE r-code location using the ADE R-code Location\n(-baseADE) startup parameter. For more information\nabout the ADE R-code Location (-baseADE) startup parameter,\nseeOpenEdge Deployment: Startup Command and Parameter Reference. With\nthe BASE-ADE attribute and the ADE R-code Location (-baseADE)\nstartup parameter, you can have multiple versions of ADE r-code\non the same machine and easily switch between them. If-baseADEis\nnot specified at startup, SESSION:BASE-ADE has the Unknown value (?) until it\nis set. When SESSION:BASE-ADE is set, the AVM adds the directory,\nfollowed by all of the procedure libraries in the directory toPROPATH.\nIf the directory or any of the procedure libraries are already onPROPATH,\nthe AVM does not add them. When SESSION:BASE-ADE is set, the\nAVM removes allPROPATHentries representing the\ncurrent ADE r-code directory and procedure libraries before adding\nthe newPROPATHentries. The AVM adds the newPROPATHentries\nat the location where it removed the previous entries. The AVM only\nremovesPROPATHentries that it added. For example,\nif$DLC/gui/adecomm.plis part of thePROPATH,\nit remains on thePROPATHafter BASE-ADE is set\nto a directory other than$DLC/gui. If\nBASE-ADE is set to an empty string, the AVM removes whatever it added\ntoPROPATH. The AVM does not remove the ADE\nr-code directory or any of the procedure libraries in that directory\nfromPROPATH, even if thePROPATHstatement\ndoes not contain them. These entries are part of the basePROPATH.\nIf-baseADEor SESSION:BASE-ADE is used, the directory\nand procedure libraries that the AVM adds are part of the basePROPATHand\nremain part of thePROPATHeven if thePROPATHstatement\ndoes not contain them. SESSION:BASE-ADE modifiesPROPATH.\nIf the oldPROPATHcontains a procedure library\nthat is not in the newPROPATH, the AVM automatically\ncloses the procedure library as long as there are no procedures\nfrom the library running. In Windows, the r-code directory\nname cannot contain characters outside of the non-Unicode code page.\nSeeOpenEdge Development: Internationalizing Applicationsfor\nmore information about Unicode and code pages."
         },
         {
@@ -2100,7 +2100,7 @@
         },
         {
           "name": "CONTEXT-HELP-FILE",
-          "dataType": "HANDLE",
+          "dataType": "CHARACTER",
           "access": "Readable/Writable",
           "description": "(Windows only) Specifies\nthe path name of a help (.HLP) file associated with\na dialog box, window, or session. Return type:CHARACTER Applies\nto:SESSION system handle,DIALOG-BOX widget,WINDOW widget If\nCONTEXT-HELP-FILE is not specified (is unknown) for a dialog box, the\ndialog box inherits the help file of its parent window. If the parent\nwindow's CONTEXT-HELP-FILE is also unknown, it inherits the session's\nhelp file (specified by SESSION:CONTEXT-HELP-FILE). The full\npathname of the help file should be given. The AVM does not search\nfor the help file. The pathname can contain Unicode characters.\nSeeOpenEdge Development: Internationalizing Applicationsfor\nmore information about Unicode."
         },
@@ -2167,31 +2167,31 @@
         {
           "name": "CURRENT-RESPONSE-INFO",
           "dataType": "HANDLE",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "An object reference to aProgress.Lang.OERequestInfoclass that allows you to set the response to a\n        current request that an AppServer agent or aProgress Application Serveragent returns to a client. Data\ntype:Progress.Lang.OERequestInfo class Applies\nto:SESSION system handle The\nfollowing AppServer code fragment generates a unique value as a\nclient context identifier (CCID) and assigns it as the value returned\nto an AppServer client in response to the current request: The bold code in the following fragment sets\nthe client principal returned to an AppServer client:"
         },
         {
           "name": "DATA-ENTRY-RETURN",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The behavior of theRETURNkey\nfor the fill-in widgets of a frame. Applies\nto:SESSION system handle If\nTRUE, theRETURNkey in a fill-in\nacts like aTAB, and if the fill-in\nis the last widget in the tab order of its parent frame and of all ancestor\nframes, theRETURNkey applies a\nGO event to the frame (behavior prior to Version 7). This GO event,\nfrom a fill-inRETURN, propagates\nto all ancestor frames and their descendants, including siblings\nof the current frame and their descendants, all in the same frame\nfamily. If a widget is not a fill-in, the window system handlesRETURNentries. The default\nvalue is TRUE for character interfaces and FALSE for graphical interfaces.\nThe AVM ignores this attribute if there is a default button on the frame."
         },
         {
           "name": "DATE-FORMAT",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The format used to represent dates during the\ncurrent ABL session (for the DATE, DATETIME, and DATETIME-TZ data\ntypes). Applies\nto:SESSION system handle Typical\nvalues are \"mdy\" or \"dmy\". This attribute provides the same functionality\nas the Date Format (-d) parameter."
         },
         {
           "name": "DEBUG-ALERT",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Indicates whether the AVM provides access to\nABL stack trace and .NET stack trace information, where applicable,\nwhen an error occurs during a session (TRUE or FALSE). Its major\nuse is for error alert boxes, so you can determine where an error\nhas occurred in your code. Applies\nto:SESSION system handle You can also set DEBUG-ALERT to TRUE using the Debug Alert (-debugalert)\n        startup parameter. For more information about the-debugalertstartup\n        parameter, seeOpenEdge Deployment: Startup Command and Parameter\n        Reference. When\nan unhandled ABL error or .NET Exception occurs—there is noCATCHorNO-ERRORlogic present—in\nan interactive session for any ABL client the AVM displays an Error message\nbox. When Debug Alert isTRUE, the message box also\nincludes aHelpbutton. Clicking on theHelpbutton\nproduces aStack Tracedialog box containing ABL\nstack trace and .NET stack trace information. The ABL stack\ntrace and the .NET stack trace are written to the client log\nwhen the Client Logging (-clientlog) startup parameter\nis specified. The top of the stack (most recent call) is displayed\nat the top of the trace listing. For more information about\ndebugging from an alert dialog box, seeOpenEdge Development:\nDebugging and Troubleshooting."
         },
         {
           "name": "DISPLAY-TIMEZONE",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The time zone offset, in minutes, used to display DATETIME-TZ\ndata. The default value is the session's time zone offset. Data\ntype:INTEGER Applies\nto:SESSION system handle If\nthe format string for the DATETIME-TZ does not include the time\nzone offset, the AVM converts the DATETIME-TZ data to the local\ndate and time and displays the data with the time zone offset specified\nby this attribute. If the format string for the DATETIME-TZ\nincludes the time zone offset, the AVM ignores this attribute and\ndisplays the data in the local time of the value, along with the\ntime zone offset. Set this attribute to the Unknown value (?) to\nuse the session's time zone offset for display."
         },
         {
@@ -2203,7 +2203,7 @@
         {
           "name": "ERROR-STACK-TRACE",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "This attribute controls whether or not theCallStackproperty\non error objects can be used. Because theCallStackfeature\nis for debugging and can slow system performance, error objects\nshould not save call stacks in a production environment. This attribute\nallows you to disable theCallStackproperty on\nall error objects. When this attribute is FALSE, the default value,\ntheCallStackproperty on an error object will\nbe the Unknown value (?). You can also set this\nsession attribute using the-errorstackstartup\nparameter. Applies\nto:SESSION system handle An\nerror object thrown from an AppServer to a client will contain the\nstack trace from the AppServer in itsCallStackproperty.\nIf ERROR-STACK-TRACE is TRUE on the client, the AVM will prepend\ntheCallStackproperty with the stack trace from\nthe client. The text \"Server StackTrace\" will appear at the start\nof the AppServer stack trace to differentiate it from the client\nside stack. In the example below, the lines in boldface represent\nthe AppServer stack trace:"
         },
         {
@@ -2238,13 +2238,15 @@
         },
         {
           "name": "FIRST-FORM",
-          "dataType": "HANDLE",
+          "dataTypeName": "Progress.Windows.IForm",
+          "dataType": "OBJECT",
           "access": "Read-only",
           "description": "(Windows only; GUI\nfor .NET only) The object reference for the first .NETProgress.Windows.IFormor\nABL windowFormProxy(Progress.Windows.FormProxy)\nobject in the list of all valid OpenEdge form objects created\nin the current ABL session. Applies\nto:SESSION system handle Once\nyou get the first object reference in the list, you can use theNextForm propertyin\ntheProgress.Windows.IForminterface to get the\nnext entry in the list of OpenEdge form object references. If you instantiate aProgress.Windows.IFormin\na non-GUI ABL session, the object does not appear in the list of OpenEdge form objects,\nbut only in the list of valid class-based objects."
         },
         {
           "name": "FIRST-OBJECT",
-          "dataType": "Progress.Lang.Object",
+          "dataTypeName": "Progress.Lang.Object",
+          "dataType": "OBJECT",
           "access": "Read-only",
           "description": "The object reference for the first class instance\nin the list of all valid ABL and .NET class instances created\nin the current ABL session. If there are no class instances in the\ncurrent session, this attribute returns the Unknown value (?). Data\ntype:Progress.Lang.Object Applies\nto:SESSION system handle Once\nyou get the first object reference in the list, you can use the NEXT-SIBLING\nproperty in the Progress.Lang.Object class to get the next entry in\nthe list of ABL and .NET object references. There are\ntwo points worth noting about this attribute with garbage collection\nenabled:"
         },
@@ -2281,7 +2283,7 @@
         {
           "name": "FRAME-SPACING",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The number of display units between frames\nin a window. In graphical interfaces the display units are pixels.\nIn character interfaces the display units are character cells. Data\ntype:INTEGER Applies\nto:SESSION system handle By\ndefault, the value for FRAME-SPACING is the height of one row in\nthe default system font. In character interfaces, this is the character\ncell height. In graphical interfaces, this is the number of pixels\nreturned by the PIXELS-PER-ROW attribute."
         },
         {
@@ -2293,13 +2295,13 @@
         {
           "name": "HEIGHT-CHARS",
           "dataType": "DECIMAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The height, in character units, of the widget.\nThe HEIGHT-CHARS attribute of the SESSION handle contains the height\nof the display. Applies\nto:BROWSE widget(browse and\ncell),BUTTON widget,COMBO-BOX widget,CONTROL-FRAME widget,DIALOG-BOX widget,EDITOR widget,FIELD-GROUP widget,FILL-IN widget,FRAME widget,IMAGE widget,LITERAL widget,RADIO-SET widget,RECTANGLE widget,SELECTION-LIST widget,SESSION system handle,SLIDER widget,TEXT widget,TOGGLE-BOX widget,WINDOW widget For\ncombo boxes, field groups, and the SESSION handle, this attribute\nis read-only. In character mode, the HEIGHT-CHARS attribute\nmust be set before the browse is realized. Attempting to set the\nattribute after realization of the browse causes a run-time error. For\ncontrol-frames, the HEIGHT-CHARS attribute maps to the Height property\nof the control-frame COM object (ActiveX control container). For\nbrowses, the HEIGHT-CHARS attribute sets the decimal height, in characters,\nof the browse without changing the height of the browse's rows.\nIf you change the value of a browse's HEIGHT-CHARS or HEIGHT-PIXELS attribute,\nthe number of rows that appear in the viewport might change."
         },
         {
           "name": "HEIGHT-PIXELS",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The height, in pixels, of the widget. The HEIGHT-PIXEL\nattribute of the SESSION handle contains the height of the display. Data\ntype:INTEGER Applies\nto:BROWSE widget(browse and\ncell),BUTTON widget,COMBO-BOX widget,CONTROL-FRAME widget,DIALOG-BOX widget,EDITOR widget,FIELD-GROUP widget,FILL-IN widget,FRAME widget,IMAGE widget,LITERAL widget,RADIO-SET widget,RECTANGLE widget,SELECTION-LIST widget,SESSION system handle,SLIDER widget,TEXT widget,TOGGLE-BOX widget,WINDOW widget For\ncombo boxes, field groups, and the SESSION handle, this attribute\nis read-only. In character mode, the HEIGHT-PIXELS attribute\nmust be set before the browse is realized. Attempting to set the\nattribute after realization of the browse causes a run-time error. For\ncontrol-frames, the HEIGHT-PIXELS attribute maps to the Height property\nof the control-frame COM object (ActiveX control container). For\nbrowses, the HEIGHT-PIXELS attribute sets the decimal height, in pixels,\nof the browse without changing the height of the browse's rows.\nIf you change the value of a browse's HEIGHT-CHARS or HEIGHT-PIXELS\nattribute, the number of rows that appear in the viewport might change."
         },
         {
@@ -2311,19 +2313,19 @@
         {
           "name": "IMMEDIATE-DISPLAY",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(Graphical interfaces\nonly) The frequency of screen updates for the current session. Data\ntype:LOGICAL Applies\nto:SESSION system handle If\nTRUE, the AVM updates the display for every I/O operation, including DISPLAY\nstatements. If FALSE, the AVM does not update the display until\na statement blocks for input, such as an UPDATE statement. FALSE\nis the default setting. A TRUE setting provides more accurate screen\ndisplays during long display loops at the price of slower performance. In\nWindows, this attribute has a similar effect on interactive I/O\nto setting the MULTITASKING-INTERVAL attribute to a low non-zero\nvalue, providing a more frequent display refresh. This attribute\nalso provides the same functionality as the ImmediateDisplay parameter\nin the current environment (which might be the Registry (Windows\nonly) or an initialization file). For more information on environments,\nsee the chapter on user interface environments inOpenEdge\nDeployment: Managing ABL Applications."
         },
         {
           "name": "INHERIT-BGCOLOR",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(Graphical interfaces\nonly) Indicates whether field-level widgets inherit the background\ncolor of their containing dialog-box or frame widget. Data\ntype:LOGICAL Applies\nto:DIALOG-BOX widget,FRAME widget,SESSION system handle The\ndefault value is TRUE. That is, field-level widgets inherit the\nbackground color of the containing dialog-box or frame widget, by\ndefault. When set to FALSE for a dialog-box or frame widget,\nthe following field-level widgets will not inherit the background\ncolor of their containing widget: BROWSE, COMBO-BOX (all types),\nEDITOR, FILL-IN (NATIVE and Enabled), and SELECTION-LIST. You\nmust set this attribute before realizing the dialog-box or frame\nwidgets. For static dialog-box and frame widgets, you can\nalso change the default background color inheritance on a frame-by-frame\nbasis by specifying the INHERIT-BGCOLOR option in the Frame phrase\nwhen you define the widget. You can also set this attribute\nto FALSE on the SESSION system handle to change the default background\ncolor inheritance for all dialog-box and frame widgets in the session.\nSetting this attribute affects dialog-box and frame widgets created\nonly after the attribute is set; it does not affect existing widgets. Setting\nthe BGCOLOR attribute for a field-level widget within the dialog-box\nor frame overrides any INHERIT-BGCOLOR attribute or option settings."
         },
         {
           "name": "INHERIT-FGCOLOR",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(Graphical interfaces\nonly) Indicates whether field-level widgets inherit the foreground\ncolor of their containing dialog-box or frame widget. Data\ntype:LOGICAL Applies\nto:DIALOG-BOX widget,FRAME widget,SESSION system handle The\ndefault value is TRUE. That is, field-level widgets inherit the\nforeground color of the containing dialog-box or frame widget, by\ndefault. When set to FALSE for a dialog-box or frame widget,\nthe following field-level widgets will not inherit the foreground\ncolor of their containing widget: BROWSE, COMBO-BOX (all types),\nEDITOR, FILL-IN (NATIVE and Enabled), and SELECTION-LIST. You\nmust set this attribute before realizing the dialog-box or frame\nwidgets. For static dialog-box and frame widgets, you can\nalso change the default foreground color inheritance on a frame-by-frame\nbasis by specifying the INHERIT-FGCOLOR option in the Frame phrase\nwhen you define the widget. You can also set this attribute\nto FALSE on the SESSION system handle to change the default foreground\ncolor inheritance for all dialog-box and frame widgets in the session.\nSetting this attribute affects dialog-box and frame widgets created\nonly after the attribute is set; it does not affect existing widgets. Setting\nthe FGCOLOR attribute for a field-level widget within the dialog-box\nor frame overrides any INHERIT-FGCOLOR attribute or option settings."
         },
         {
@@ -2340,13 +2342,15 @@
         },
         {
           "name": "LAST-FORM",
-          "dataType": "HANDLE",
+          "dataTypeName": "Progress.Windows.IForm",
+          "dataType": "OBJECT",
           "access": "Read-only",
           "description": "(Windows only; GUI\nfor .NET only) The object reference for the last .NETProgress.Windows.IFormor\nABL windowFormProxy(Progress.Windows.FormProxy)\nobject in the list of all valid OpenEdge form objects created\nin the current ABL session. Applies\nto:SESSION system handle Once\nyou get the last object reference in the list, you can use thePrevForm propertyin\ntheProgress.Windows.IForminterface to get the previous\nentry in the list of OpenEdge form object references. If you instantiate aProgress.Windows.IFormin\na non-GUI ABL session, the object does not appear in the list of OpenEdge form objects,\nbut only in the list of valid class-based objects."
         },
         {
           "name": "LAST-OBJECT",
-          "dataType": "Progress.Lang.Object",
+          "dataTypeName": "Progress.Lang.Object",
+          "dataType": "OBJECT",
           "access": "Read-only",
           "description": "The object reference for the last class instance\nin the list of all valid ABL and .NET class instances created\nin the current ABL session. If there are no class instances in the\ncurrent session, this attribute returns the Unknown value (?). Data\ntype:Progress.Lang.Object Applies\nto:SESSION system handle Once\nyou get the last object reference in the list, you can use the PREV-SIBLING\nproperty in the Progress.Lang.Object class to get the previous entry\nin the list of ABL and .NET object references. There\nare two points worth noting about this attribute with garbage collection\nenabled:"
         },
@@ -2376,14 +2380,15 @@
         },
         {
           "name": "LOCAL-VERSION-INFO",
-          "dataType": "HANDLE",
+          "dataTypeName": "Progress.Lang.OEVersionInfo",
+          "dataType": "OBJECT",
           "access": "Read-only",
           "description": "An object reference to aProgreses.Lang.OEVersionInfoclass\nthat provides version information for the current instance of the\nOpenEdge ABL Virtual Machine (AVM). If an ABL client accesses this\nattribute, it describes the OpenEdge version of the client. If an\nAppServer agent accesses this attribute, it describes the OpenEdge\nversion of the AppServer agent, and so on. Applies\nto:SESSION system handle"
         },
         {
           "name": "MULTITASKING-INTERVAL",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(Windows only) How\noften the AVM filters events between itself and other Windows applications. Data\ntype:INTEGER Applies\nto:SESSION system handle The\nvalue of the MULTITASKING-INTERVAL attribute determines how often\nthe AVM internally filters events (messages) between itself and\nother Windows applications. As the AVM filters these events more\noften, it executes procedures less efficiently, but allows other\nwindows applications more opportunity to execute. Adjusting the\ninternal event filter is particularly useful during background processing,\nsuch as report generation. The default value, zero, tells\nthe AVM never to filter events internally, giving ABL applications\nmaximum access to execution resources. This is perfectly adequate\nfor interactive ABL applications that block for input often, giving\nother applications enough opportunity to execute. For values\ngreater than zero, the lower the value, the more often the AVM internally\nfilters events, giving other applications greater opportunity to execute,\nbut slowing down the AVM execution. However, similar to a TRUE value\nfor the IMMEDIATE-DISPLAY attribute, low non-zero values also cause the\nAVM to refresh the display more often, potentially providing crisper\ndisplay interaction. Low non-zero values also provide better interoperability\nwith other applications, for example, using Dynamic Data Exchange\n(DDE). The maximum value you can set is 9999. In general,\nset this attribute greater than zero only for code segments that\nperform lengthy background operations, and reset it to zero before\nthe application blocks for interactive input (for example, executes\na WAIT-FOR or UPDATE statement). This attribute provides the same\nfunctionality as the MultitaskingInterval parameter in the current\nenvironment, which might be the Registry (Windows only) or an initialization\nfile. For more information on environments, see the chapter on user\ninterface environments inOpenEdge Deployment: Managing ABL Applications."
         },
         {
@@ -2401,7 +2406,7 @@
         {
           "name": "NUMERIC-FORMAT",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "How to interpret commas and periods within\nnumeric values. Applies\nto:SESSION system handle The\npossible values are \"American\", \"European\"\nor a character string consisting of the thousands separator followed\nby the decimal point. This attribute provides the same functionality\nas the European Numeric Format (-E) parameter."
         },
         {
@@ -2431,7 +2436,7 @@
         {
           "name": "PRINTER-CONTROL-HANDLE",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(Windows only) The\ndefault context for print jobs. Applies\nto:SESSION system handle The\nprint context is an integer identifier for a set of values that\ndefine a printer and setup for that printer in Windows. You can\nestablish a print context using the Print dialog box. The SYSTEM-DIALOG\nPRINTER-SETUP statement allows you to display the Print dialog box\nand set a print context. This print context is used by the OUTPUT\nTO PRINTER statement to direct output to a printer. If the\nPRINTER-CONTROL-HANDLE attribute contains zero (0) or the Unknown value (?),\nthe print context is the default print context in Windows as set\nin the Windows Control Panel. You can assign any integer value to\nthis attribute, but the result of the assignment will be to set the\nattribute value to 0 and to release any Windows resources related\nto the previous print context."
         },
         {
@@ -2443,7 +2448,7 @@
         {
           "name": "PRINTER-NAME",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(Windows only) The\nname of the currently selected printer in Windows platforms, and\nthe Unknown value (?) on other platforms. Data\ntype:CHARACTER Applies\nto:SESSION system handle Use\nthis attribute to set the printer name in the default print context.\nThe value of PRINTER-NAME is the name Windows uses to identify a\nprinter. The specified printer must be defined in the Windows Registry.\nIf the specified printer is not defined in the Windows Registry,\nthe value of PRINTER-NAME is not modified. You must specify network\nprinters in Universal Naming Convention format. Use the GET-PRINTERS( )\nmethod to get the list of printers currently defined in the Windows\nRegistry. If you use the SYSTEM-DIALOG PRINTER-SETUP statement\nto set the printer name, this attribute assumes the modified value. The\nprinter name can contain Unicode characters. SeeOpenEdge Development:\nInternationalizing Applicationsfor more information about\nUnicode."
         },
         {
@@ -2455,13 +2460,13 @@
         {
           "name": "PROXY-PASSWORD",
           "dataType": "Character",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Authenticates an AppServer or Web service client\nto the HTTP-based proxy server. Applies\nto:SESSION system handle This\nattribute corresponds to the-proxyPasswordstartup\nparameter. If-proxyPasswordis not specified on\nthe command line, this attribute has the Unknown value (?) until\nit is set. This attribute is validated during the CONNECT( )\nmethod (for an AppServer and a Web service). If PROXY-PASSWORD is\ninvalid, the CONNECT( ) method fails and the AVM issues\nan error message. If PROXY-USERIDis notunknown and PROXY-PASSWORDisunknown,\nthe AppServer CONNECT( ) method uses a blank proxy password.\nIf SESSION:PROXY-USERID is unknown, the CONNECT( ) method\nignores any value of PROXY-PASSWORD. PROXY-PASSWORD must be a string\nof up to 512 printable ASCII characters."
         },
         {
           "name": "PROXY-USERID",
           "dataType": "Character",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Authenticates an AppServer or Web service client\nto the HTTP-based proxy server. Applies\nto:SESSION system handle This\nattribute corresponds to the-proxyUseridstartup\nparameter. If -proxyUseridis not specified on\nthe command line, this attribute has the Unknown value (?) until\nit is set. This attribute is validated during the CONNECT( )\nmethod (for an AppServer and a Web service). If PROXY-USERID is\ninvalid, the CONNECT( ) method fails and the AVM issues\nan error message. PROXY-USERID must be a string of up to 512\nprintable ASCII characters, including the space character."
         },
         {
@@ -2473,7 +2478,7 @@
         {
           "name": "SCHEMA-CHANGE",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Relaxes the requirement for exclusive access\nto a database in order to make the following schema changes online: Data\ntype:CHARACTER Applies\nto:SESSION system handle Set this attribute to\"NEW OBJECTS\"to activate this feature; and to the\n        empty string (\"\") or the Unknown value (?) to deactivate\n        this feature."
         },
         {
@@ -2485,13 +2490,13 @@
         {
           "name": "SERVER-CONNECTION-BOUND-REQUEST",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(AppServer only;\nPAS for OE only) Tells an AppServer agent running on a stateless\nAppServer to bind or unbind its current client connection. Data\ntype:LOGICAL Applies\nto:SESSION system handle This\nattribute is valid only if the REMOTE attribute is TRUE and the\noperating mode is stateless. When set to TRUE, requests that\nthe AppServer agent makes its connection bound to the current client\nconnection identified by the SERVER-CONNECTION-ID attribute. When\nset to FALSE, requests that the AppServer agent makes its connection\nunbound from the currently bound client connection pending the deletion of\nall remote persistent procedures running in the session. When all\nremote persistent procedure for the connection have been deleted,\nthe AppServer agent becomes available to service a different client\nconnection. The SERVER-CONNECTION-BOUND attribute for the session\nis also set to FALSE when the AppServer agent becomes available. In\nstate-free operating mode, any attempt to set this attribute raises\na WARNING condition in the AppServer agent, which writes a message\nto the AppServer log file, and the value remains unchanged. You\ncan handle the WARNING condition by including the NO-ERROR option\nin the statement that attempts to set the value, and checking ERROR-STATUS:NUM-MESSAGES\nfor a value greater than zero. In state-free operating mode, this\nattribute always has the Unknown value (?)."
         },
         {
           "name": "SERVER-CONNECTION-CONTEXT",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(AppServer only;\nPAS for OE only) An application-determined value that you\nset within an AppServer agent. The AVM passes this value to each\nAppServer agent that executes a request on behalf of the client\nconnection identified by the SERVER-CONNECTION-ID attribute. Data\ntype:CHARACTER Applies\nto:SESSION system handle This\nattribute is valid only if the REMOTE attribute is TRUE. When\na client application requests a connection with an AppServer, the AppServer\nbroker creates an area to store this value for the connection. The initial\nvalue is the Unknown value (?). This attribute,\nwhile available in all AppServer operating modes, has practical\napplication only on a stateless AppServer, where more than one AppServer agent\ncan service the same client connection. This value is available\nto any Connect procedure, Activate procedure, Deactivate procedure,\nor Disconnect procedure that you have configured for the AppServer,\nas well as any application procedure. Thus, each AppServer agent\nthat services a client connection can pass context information to\nthe next. For an AppServer agent, the AVM sets the SERVER-CONNECTION-CONTEXT\nattribute to the Unknown value (?) each time a new connection\nis assigned to the process. If the AppServer operating mode is state-aware\nor state-reset, the AppServer agent procedure can also reset this\nattribute to an application-specific value. However, any such value does\nnot last beyond the current client connection within the current\nAppServer agent session. Thus, AppServer agents running on a state-aware\nor state-reset AppServer cannot pass information among themselves\nusing this attribute. In state-free operating mode, any attempt to set this attribute raises a WARNING condition\n        in the AppServer agent, which writes a message to the AppServer log file, and the value\n        remains unchanged. You can handle the WARNING condition by including the NO-ERROR option in\n        the statement that attempts to set the value, and checkingERROR-STATUS:NUM-MESSAGESfor a value greater than zero. In state-free\n        operating mode, this attribute always has the Unknown value (?)."
         },
         {
@@ -2527,43 +2532,43 @@
         {
           "name": "SUPPRESS-WARNINGS",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Indicates whether the AVM suppresses warning messages\nduring the session. Applies\nto:SESSION system handle If TRUE, the AVM does not display warning messages during the session. The\n        default value of this attribute is FALSE unless the Suppress Warnings (-sw) startup parameter is used, in which case the attribute\n        defaults to TRUE. For more information on the-swstartup\n        parameter, seeOpenEdge Deployment: Startup Command and Parameter\n          Reference."
         },
         {
           "name": "SUPPRESS-WARNINGS-LIST",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "A character expression with a comma separated list of\n        warning message numbers to suppress."
         },
         {
           "name": "SYSTEM-ALERT-BOXES",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Indicates whether the AVM displays system messages in\nalert boxes. Applies\nto:SESSION system handle If\nTRUE, the AVM displays system messages in alert boxes rather than\nin the message area."
         },
         {
           "name": "THREE-D",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(Windows only; Graphical\ninterfaces only) Indicates whether the AVM displays widgets\nusing a three-dimensional format. Applies\nto:DIALOG-BOX widget,FRAME widget,SESSION system handle,WINDOW widget If\nTRUE, the specified widgets are displayed in a three-dimensional\nformat. For a frame or dialog box, any field-level widgets in the\nframe or dialog box are also displayed in three-dimensional format.\nIf a frame has the THREE-D attribute set to TRUE, the default background\ncolor is the color Button Face rather than the color Window. For\na window, setting this attribute changes the window background color\nto color Button Face only, and has no effect on any widgets contained\nin the window. Frames do not inherit the THREE-D attribute from\na window or ancestor frame. If the THREE-D attribute is TRUE\nfor the SESSION handle, then all system dialog boxes and alert boxes\nare displayed in three-dimensional format. You can set this\nattribute only before the widget is realized."
         },
         {
           "name": "TIME-SOURCE",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Specifies the client or database server machine\nthat serves as the time source for applications running during the\nABL session. Applies\nto:SESSION system handle TIME-SOURCE\naccepts either of the following settings: All language elements that involve the current time, such as the MTIME,\n        NOW, TIME, TIMEZONE, and TODAY functions, use the specified time source. This attribute is\n        useful for client/server applications that span time zones."
         },
         {
           "name": "TIMEZONE",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "Specifies the time zone offset from UTC, in\nminutes, to use for the current session. Applies\nto:SESSION system handle For example, the following code shows how TIMEZONE Is used in a direct\n        assignment of a DATE value to a DATETIME-TZ value: For more information on assignments with time data types, see theASSIGN statement."
         },
         {
           "name": "TOOLTIPS",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(Windows only; Graphical\ninterfaces only) Indicates whether ToolTip information is\ndisplayed when the mouse pointer pauses over a control for which\ntooltip information is defined. Applies\nto:SESSION system handle If\nTRUE, the ToolTip information that is defined for any controls associated\nwith a given session displays when the mouse pointer pauses over\na control. Otherwise, ToolTip information does not display for any\ncontrols in the session."
         },
         {
@@ -2575,7 +2580,7 @@
         {
           "name": "V6DISPLAY",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "(Windows only) Indicates\nwhether the AVM follows Progress Version 6 rules or Progress Version\n7 rules when it lays out and displays widgets in Windows. This attribute lets\nyou compile and execute Progress Version 6 applications on Progress Version\n7 in Windows. Applies\nto:SESSION system handle If\nthe V6DISPLAY attribute is TRUE, the AVM uses Version 6 rules to manage\nthe display. That is: To\nrun an application with V6DISPLAY set to TRUE, you must compile the\napplication with the V6DISPLAY set to TRUE. This\nattribute provides the same functionality as the V6Display parameter in\nthe current environment, which might be the Registry (Windows only)\nor an initialization file. For more information on environments,\nsee the chapter on user interface environments inOpenEdge\nDeployment: Managing ABL Applications."
         },
         {
@@ -2629,7 +2634,7 @@
         {
           "name": "YEAR-OFFSET",
           "dataType": "INTEGER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The current start date for the ABL two-digit\nyear-range of 100 years. Use this attribute to display DATE, DATETIME,\nand DATETIME-TZ data when the format specifies a two-digit year. Data\ntype:INTEGER Applies\nto:SESSION system handle Typical\nvalues are 1920 or 1950. This attribute provides the same functionality\nas the Year Offset (-yy) parameter. The default\nvalue is 1950."
         },
         {
@@ -2729,7 +2734,7 @@
         {
           "name": "ADM-DATA",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "An arbitrary string value associated with a\npersistent procedure. Applies\nto:Buffer object handle,Buffer-field object handle,Data-relation object handle,Data-source object handle,Procedure object handle,ProDataSet object handle,Query object handle,SAX-attributes object handle,SAX-reader object handle,SOAP-header object handle,SOAP-header-entryref object handle,SOURCE-PROCEDURE system handle,Stream object handle,TARGET-PROCEDURE system handle,Temp-table object handle,THIS-PROCEDURE system handle"
         },
         {
@@ -2741,7 +2746,7 @@
         {
           "name": "CURRENT-WINDOW",
           "dataType": "HANDLE",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "A current window for the specified procedure. Data\ntype:HANDLE Applies\nto:Procedure object handle,SOURCE-PROCEDURE system handle,TARGET-PROCEDURE system handle,THIS-PROCEDURE system handle Specifies and allows you to reset the current\nwindow used to parent alert box, dialog box, or frame widgets for\nthe specified procedure. The default value is the Unknown value (?).\nReturns the Unknown value (?) for a Web service procedure\nor proxy procedure. If you set this attribute to the handle\nof a window, this value takes precedence over the CURRENT-WINDOW\nhandle to provide the default window for parenting alert boxes,\nframes, and dialog boxes created within the procedure. This\nattribute is especially useful for creating and associating a unique current\nwindow with each instantiation of a persistent procedure. For more information\non persistent procedures, see theRUN statementreference\nentry."
         },
         {
@@ -2753,7 +2758,7 @@
         {
           "name": "FILE-NAME",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "The name of the file associated with a handle.\nReturns the empty string for a Web service procedure. The\nFILE-NAME attribute of the COMPILER handle is maintained only for\nbackward compatibility. Use theGET-FILE-NAME( ) method, instead. Applies\nto:COMPILER system handle,FILE-INFO system handle,Procedure object handle,RCODE-INFO handle,SOURCE-PROCEDURE system handle,TARGET-PROCEDURE system handle,THIS-PROCEDURE system handle The FILE-NAME attribute of the COMPILER handle\nis the name of the source file from the preceding compilation. If\nno error occurred during the preceding compilation, FILE-NAME assumes\nthe Unknown value (?). The FILE-NAME attribute of\nthe FILE-INFO or RCODE-INFO handle is the name of the file used\nby subsequent references to the handle. You can specify the filename\nwith a.p,.r, or no extension.\nIf you set FILE-NAME to a relative pathname, the AVM searches thePROPATHto\nfind the file. Otherwise, the AVM looks for the file specified by\nthe absolute pathname. When used with FILE-INFO, the filename can\ncontain Unicode characters. When used with RCODE-INFO, the filename\ncannot contain characters outside of the non-Unicode code page.\nSeeOpenEdge Development: Internationalizing Applicationsfor\nmore information about Unicode and code pages. The FILE-NAME\nattribute of a procedure handle is the pathname of the procedure\nfile that contains the procedure associated with the handle. If\nthe procedure file is specified by the Startup Procedure (-p) parameter,\nthe attribute contains the full pathname of the file. Otherwise,\nit contains the pathname exactly as specified in the RUN statement\nthat invoked it. The procedure can be local or remote. For more\ninformation on remote procedures, seeOpenEdge Application\nServer: Developing AppServer Applications. The FILE-NAME\nattribute of the COMPILER handle and procedure handles is read only."
         },
         {
@@ -2777,7 +2782,7 @@
         {
           "name": "NAME",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "A string identifier for the specified object\nor widget. Applies\nto:Asynchronous request object handle,BROWSE widget(browse, column,\nand cell),Buffer object handle,Buffer-field object handle,BUTTON widget,COMBO-BOX widget,CONTROL-FRAME widget,Data-relation object handle,Data-source object handle,DIALOG-BOX widget,EDITOR widget,FIELD-GROUP widget,FILL-IN widget,FRAME widget,IMAGE widget,LITERAL widget,MENU widget,MENU-ITEM widget,Procedure object handle,ProDataSet object handle,Query object handle,RADIO-SET widget,RECTANGLE widget,SELECTION-LIST widget,Server object handle,Server socket object handle,SLIDER widget,SOAP-header object handle,SOAP-header-entryref object handle,Socket object handle,SOURCE-PROCEDURE system handle,Stream object handle,SUB-MENU widget,TARGET-PROCEDURE system handle,Temp-table object handle,TEXT widget,THIS-PROCEDURE system handle,TOGGLE-BOX widget,WINDOW widget,X-document object handle,X-noderef object handle For the SOAP-header and SOAP-header-entryref\nobject handles, this attribute is read-only. For static data\nrepresentation widgets, the default value is the name of the field\nor variable associated with the widget. You can use the NAME attribute\nto store any information associated with the widget. For a\nstate-reset, state-aware, or stateless AppServer, this attribute\nreturns the connection ID for the AppServer associated with the\nserver handle. For a state-free AppServer, it returns the connection\nID of the first AppServer connection created in the session pool\nwith this server handle when the application service is first bound\nusing the CONNECT( ) method. The default value is the unique\nconnection name of the AppServer. For Web services, the default\nvalue is the URL of the Web service procedure object from the WSDL.\nThis is the portType name used on the RUN statement that instantiated\nthis object. For a non-Web service procedure, returns the\npathname of the procedure file that contains the current procedure. For\ncontrol-frames, this attribute maps to the Name property of the\nof the control-frame COM object (ActiveX control container). For\ndynamic widgets and asynchronous request handles, this attribute defaults\nto the Unknown value (?). For query objects, the NAME attribute applies\n        only to static queries. For more information on query objects, seeOpenEdge Development: ABL\n        Handbook. For the SOAP-header object\nhandle, this attribute is the qualified name of the SOAP-header\nobject, which consists of a namespace prefix + \":\" + HEADER. For\nthe SOAP-header-entryref object handle, this attribute is the qualified name\nof the SOAP-header-entryref object, which consists of a namespace\nprefix + \":\" + localname. You cannot change this attribute directly;\nyou must use the local-name and namespace-prefix. The NAME\nattribute of the Temp-table object handle is writeable for dynamic\nand AVM-generated temp-tables. A new temp-table name cannot be assigned\nuntil after the TEMP-TABLE-PREPARE() method has been executed. For\nthe X-document object handle or X-noderef object handle, this attribute\nreturns the name of the XML node. For any object or widget,\nthis attribute can contain any arbitrary value that you set."
         },
         {
@@ -2801,7 +2806,7 @@
         {
           "name": "PRIVATE-DATA",
           "dataType": "CHARACTER",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "An arbitrary string associated with the handle\nof an object or widget. Applies\nto:Asynchronous request object handle,BROWSE widget(browse\nand column),Buffer-field object handle,Buffer object handle,BUTTON widget,COMBO-BOX widget,CONTROL-FRAME widget,Data-relation object handle,Data-source object handle,DIALOG-BOX widget,EDITOR widget,FIELD-GROUP widget,FILL-IN widget,FRAME widget,IMAGE widget,LITERAL widget,MENU widget,MENU-ITEM widget,Procedure object handle,ProDataSet object handle,Query object handle,RADIO-SET widget,RECTANGLE widget,SAX-attributes object handle,SAX-reader object handle,SELECTION-LIST widget,Server object handle,Server socket object handle,SLIDER widget,SOAP-header object handle,SOAP-header-entryref object handle,Socket object handle,Stream object handle,SUB-MENU widget,Temp-table object handle,TEXT widget,TOGGLE-BOX widget,WINDOW widget Use\nthis attribute any way you want. The AVM does not check the value\nof this attribute."
         },
         {
@@ -2938,7 +2943,7 @@
         {
           "name": "ERROR",
           "dataType": "LOGICAL",
-          "access": "Readable/Writeable",
+          "access": "Readable/Writable",
           "description": "A compile-time or run-time error condition. Data\ntype:LOGICAL Applies\nto:Asynchronous request object handle,Buffer object handle,COMPILER system handle,ERROR-STATUS system handle,ProDataSet object handle,Temp-table object handle The ERROR attribute corresponds to theERROR function. For\nthe asynchronous request object handle, the ERROR attribute indicates that\nthe ERROR condition was encountered during the processing of an AppServer\nor Web Server request. If the COMPLETE attribute is FALSE, the value\nof this attribute is the Unknown value (?). This attribute\nis set immediately before the event procedure is executed. For\nthe COMPILER system handle, the ERROR attribute indicates whether an\nerror occurred in the preceding compilation. If no error occurred\nin the preceding compilation, the value of ERROR is the Unknown value (?). For\ntheProDataSet object handle,Temp-table object handle, andBuffer object handle,\nthe ERROR attribute indicates whether an error occurred during a\nFILL or SAVE-ROW-CHANGES operation. For a ProDataSet object\nhandle or a temp-table object handle, the ERROR attribute is reset\nto FALSE when one of the following methods removes the object's\nbefore-image records: The ERROR attribute is effective only if a before-table is NO-UNDO during a data source\n          update. If the before-table is UNDO, the ERROR attribute is lost. For theBuffer object handle,\nthis attribute causes the row to be backed out rather than merged\nwith theMERGE-CHANGES( ) methodor theMERGE-ROW-CHANGES( ) method. This attribute is marshalled between the\nclient and the AppServer. For the ERROR-STATUS system handle,\nthe ERROR attribute indicates whether the ABL ERROR condition was\nraised in the most recent statement that used the NO-ERROR option.\nIf no ERROR condition was raised in that statement, the value of\nthe ERROR attribute is FALSE. The ERROR attribute is writeable\nfor a ProDataSet object, a Temp-table object, and a Buffer object.\nYou can set the ERROR attribute programmatically in order to manage\nthe application response to errors. For example, you might set the\nERROR attribute to FALSE in order to ignore all errors that might\nbe returned for a statement using the NO-ERROR option. However,\nnote that manually setting this attribute has no affect on ABL error\nmanagement. Thus, if you set the ERROR attribute to TRUE, the AVM\ndoesnotalso raise the ERROR condition."
         },
         {
