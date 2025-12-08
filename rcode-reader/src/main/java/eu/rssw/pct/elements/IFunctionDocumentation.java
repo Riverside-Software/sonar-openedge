@@ -17,35 +17,30 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements.fixed;
+package eu.rssw.pct.elements;
 
-import eu.rssw.pct.elements.IMethodDocumentation;
-import eu.rssw.pct.elements.IParameterDocumentation;
+import java.util.Collection;
 
-public class MethodDocumentation implements IMethodDocumentation {
-  private final String name;
-  private final String description;
-  private final IParameterDocumentation[] parameters;
+public interface IFunctionDocumentation extends IElementDocumentation {
 
-  public MethodDocumentation(String name, String description, IParameterDocumentation... params) {
-    this.name = name;
-    this.description = description;
-    this.parameters = params;
+  Collection<IParameterDocumentation> getParameters();
+  
+  default boolean hasParameters(String name) {
+    for (var param : getParameters()) {
+      if (param.getName().equalsIgnoreCase(name))
+        return true;
+    }
+    return false;
   }
 
-  @Override
-  public String getName() {
-    return this.name;
+  default IParameterDocumentation getParameter(String param) {
+    var tmp = param; 
+    for (var elem : getParameters()) {
+      if (tmp.equalsIgnoreCase(elem.getName())) {
+        return elem;
+      }
+    }
+    return null;
   }
-
-  @Override
-  public String getDescription() {
-    return this.description;
-  }
-
-  @Override
-  public IParameterDocumentation[] getParameters() {
-    return parameters;
-  }
-
+  
 }

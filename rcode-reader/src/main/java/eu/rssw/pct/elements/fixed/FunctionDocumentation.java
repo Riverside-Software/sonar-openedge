@@ -19,33 +19,46 @@
  */
 package eu.rssw.pct.elements.fixed;
 
-import eu.rssw.pct.elements.IMethodDocumentation;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import eu.rssw.pct.elements.IFunctionDocumentation;
 import eu.rssw.pct.elements.IParameterDocumentation;
 
-public class MethodDocumentation implements IMethodDocumentation {
+public class FunctionDocumentation implements IFunctionDocumentation {
   private final String name;
   private final String description;
-  private final IParameterDocumentation[] parameters;
+  private final Collection<IParameterDocumentation> parameters = new ArrayList<>();
 
-  public MethodDocumentation(String name, String description, IParameterDocumentation... params) {
+  public FunctionDocumentation(String name, String description) {
     this.name = name;
     this.description = description;
-    this.parameters = params;
+  }
+
+  public void addParameter(IParameterDocumentation element) {
+    parameters.add(element);
   }
 
   @Override
+  public Collection<IParameterDocumentation> getParameters() {
+    return parameters;
+  }
+ 
+
+  @Override
   public String getName() {
-    return this.name;
+    return name;
   }
 
   @Override
   public String getDescription() {
-    return this.description;
+    return description;
   }
+ 
 
   @Override
-  public IParameterDocumentation[] getParameters() {
-    return parameters;
+  public String toString() {
+    return String.format("Function documentation of %s", name);
   }
 
 }

@@ -68,6 +68,20 @@ public enum OpenEdgeVersion {
     }
     return "";
   }
+  
+  public String getFunctionsDocumentationPath() {
+    switch (this) {
+      case V117:
+        return "doc/11.7/functionsDoc.json";
+      case V122:
+        return "doc/12.2/functionsDoc.json";
+      case V128:
+        return "doc/12.8/functionsDoc.json";
+      case V130:
+        return "doc/13.0/functionsDoc.json";
+    }
+    return "";
+  }
 
   @Nonnull
   public static OpenEdgeVersion getVersion(String version) {

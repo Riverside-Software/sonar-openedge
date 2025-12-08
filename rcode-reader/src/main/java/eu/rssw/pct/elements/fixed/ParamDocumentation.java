@@ -19,15 +19,24 @@
  */
 package eu.rssw.pct.elements.fixed;
 
-import eu.rssw.pct.elements.IElementDocumentation;
+import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IParameterDocumentation;
 
-public class ParamDocumentation implements IElementDocumentation {
+public class ParamDocumentation implements IParameterDocumentation {
   private final String name;
   private final String description;
+  private final boolean isOptional;
+  private final DataType dataType;
 
   public ParamDocumentation(String name, String description) {
+    this(name, description, false, DataType.UNKNOWN);
+  }
+
+  public ParamDocumentation(String name, String description, boolean optional, DataType dataType) {
     this.name = name;
     this.description = description;
+    this.isOptional = optional;
+    this.dataType = dataType;
   }
 
   @Override
@@ -38,5 +47,15 @@ public class ParamDocumentation implements IElementDocumentation {
   @Override
   public String getDescription() {
     return this.description;
+  }
+
+  @Override
+  public DataType getDataType() {
+    return this.dataType;
+  }
+
+  @Override
+  public boolean isOptional() {
+    return this.isOptional;
   }
 }

@@ -16,5 +16,5 @@ package eu.rssw.pct.elements;
 
 public interface IMethodDocumentation extends IElementDocumentation {
 
-  IElementDocumentation[] getParameters();
+  IParameterDocumentation[] getParameters();
 }
