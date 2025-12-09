@@ -82,7 +82,7 @@ public enum OpenEdgeVersion {
       return V128;
     var minor = -1;
     try {
-      Integer.parseInt(version.substring(pos + 1));
+      minor = Integer.parseInt(version.substring(pos + 1));
     } catch (NumberFormatException uncaught) {
       // Uncaught
     }
