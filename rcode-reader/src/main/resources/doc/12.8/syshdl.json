@@ -26,7 +26,7 @@
           "name": "DIRECTORY",
           "dataType": "CHARACTER",
           "access": "Readable/Writable",
-          "description": "The directory to which the output file is stored. The attribute cannot be set to the unknown value (?), and only accepts a valid directory. The default value is either the-Tdirectory or the current working directory if-Twas not specified. "
+          "description": "The directory to which the output file is stored. The attribute cannot be set to the unknown value (?), and only accepts a valid directory. The default value is either the-Tdirectory or the current working directory if-Twas not specified."
         },
         {
           "name": "ENABLED",
@@ -165,7 +165,7 @@
           "name": "NAME",
           "dataType": "CHARACTER",
           "access": "Readable/Writable",
-          "description": "A string identifier for the specified object or widget. For the SOAP-header and SOAP-header-entryref object handles, this attribute is read-only. For static data representation widgets, the default value is the name of the field or variable associated with the widget. You can use the NAME attribute to store any information associated with the widget. For a state-reset, state-aware, or stateless AppServer, this attribute returns the connection ID for the AppServer associated with the server handle. For a state-free AppServer, it returns the connection ID of the first AppServer connection created in the session pool with this server handle when the application service is first bound using the CONNECT( ) method. The default value is the unique connection name of the AppServer. For Web services, the default value is the URL of the Web service procedure object from the WSDL. This is the portType name used on the RUN statement that instantiated this object. For a non-Web service procedure, returns the pathname of the procedure file that contains the current procedure. For control-frames, this attribute maps to the Name property of the of the control-frame COM object (ActiveX control container). For dynamic widgets and asynchronous request handles, this attribute defaults to the Unknown value (?). For query objects, the NAME attribute applies only to static queries. For more information on query objects, seeABL Essentials.. For the SOAP-header object handle, this attribute is the qualified name of the SOAP-header object, which consists of a namespace prefix + \":\" + HEADER. For the SOAP-header-entryref object handle, this attribute is the qualified name of the SOAP-header-entryref object, which consists of a namespace prefix + \":\" + localname. You cannot change this attribute directly; you must use the local-name and namespace-prefix. The NAME attribute of the Temp-table object handle is writeable for dynamic and AVM-generated temp-tables. A new temp-table name cannot be assigned until after the TEMP-TABLE-PREPARE() method has been executed. For the X-document object handle or X-noderef object handle, this attribute returns the name of the XML node. For any object or widget, this attribute can contain any arbitrary value that you set."
+          "description": "A string identifier for the specified object or widget. For the SOAP-header and SOAP-header-entryref object handles, this attribute is read-only. For static data representation widgets, the default value is the name of the field or variable associated with the widget. You can use the NAME attribute to store any information associated with the widget. For a state-reset, state-aware, or stateless AppServer, this attribute returns the connection ID for the AppServer associated with the server handle. For a state-free AppServer, it returns the connection ID of the first AppServer connection created in the session pool with this server handle when the application service is first bound using the CONNECT( ) method. The default value is the unique connection name of the AppServer. For Web services, the default value is the URL of the Web service procedure object from the WSDL. This is the portType name used on the RUN statement that instantiated this object. For a non-Web service procedure, returns the pathname of the procedure file that contains the current procedure. For control-frames, this attribute maps to the Name property of the of the control-frame COM object (ActiveX control container). For dynamic widgets and asynchronous request handles, this attribute defaults to the Unknown value (?). For query objects, the NAME attribute applies only to static queries. For more information on query objects, seeABL Essentials.. For the SOAP-header object handle, this attribute is the qualified name of the SOAP-header object, which consists of a namespace prefix + \":\" + HEADER. For the SOAP-header-entryref object handle, this attribute is the qualified name of the SOAP-header-entryref object, which consists of a namespace prefix + \":\" + localname. You cannot change this attribute directly; you must use the local-name and namespace-prefix. The NAME attribute of the Temp-table object handle is writeable for dynamic and AVM-generated temp-tables. A new temp-table name cannot be assigned until after the TEMP-TABLE-PREPARE() method has been executed. For the X-document object handle or X-noderef object handle, this attribute returns the name of the XML node. For any object or widget, this attribute can contain any arbitrary value that you set."
         },
         {
           "name": "NEXT-SIBLING",
@@ -396,7 +396,7 @@
           "name": "NAME",
           "dataType": "CHARACTER",
           "access": "Readable/Writable",
-          "description": "A string identifier for the specified object or widget. For the SOAP-header and SOAP-header-entryref object handles, this attribute is read-only. For static data representation widgets, the default value is the name of the field or variable associated with the widget. You can use the NAME attribute to store any information associated with the widget. For a state-reset, state-aware, or stateless AppServer, this attribute returns the connection ID for the AppServer associated with the server handle. For a state-free AppServer, it returns the connection ID of the first AppServer connection created in the session pool with this server handle when the application service is first bound using the CONNECT( ) method. The default value is the unique connection name of the AppServer. For Web services, the default value is the URL of the Web service procedure object from the WSDL. This is the portType name used on the RUN statement that instantiated this object. For a non-Web service procedure, returns the pathname of the procedure file that contains the current procedure. For control-frames, this attribute maps to the Name property of the of the control-frame COM object (ActiveX control container). For dynamic widgets and asynchronous request handles, this attribute defaults to the Unknown value (?). For query objects, the NAME attribute applies only to static queries. For more information on query objects, seeABL Essentials.. For the SOAP-header object handle, this attribute is the qualified name of the SOAP-header object, which consists of a namespace prefix + \":\" + HEADER. For the SOAP-header-entryref object handle, this attribute is the qualified name of the SOAP-header-entryref object, which consists of a namespace prefix + \":\" + localname. You cannot change this attribute directly; you must use the local-name and namespace-prefix. The NAME attribute of the Temp-table object handle is writeable for dynamic and AVM-generated temp-tables. A new temp-table name cannot be assigned until after the TEMP-TABLE-PREPARE() method has been executed. For the X-document object handle or X-noderef object handle, this attribute returns the name of the XML node. For any object or widget, this attribute can contain any arbitrary value that you set."
+          "description": "A string identifier for the specified object or widget. For the SOAP-header and SOAP-header-entryref object handles, this attribute is read-only. For static data representation widgets, the default value is the name of the field or variable associated with the widget. You can use the NAME attribute to store any information associated with the widget. For a state-reset, state-aware, or stateless AppServer, this attribute returns the connection ID for the AppServer associated with the server handle. For a state-free AppServer, it returns the connection ID of the first AppServer connection created in the session pool with this server handle when the application service is first bound using the CONNECT( ) method. The default value is the unique connection name of the AppServer. For Web services, the default value is the URL of the Web service procedure object from the WSDL. This is the portType name used on the RUN statement that instantiated this object. For a non-Web service procedure, returns the pathname of the procedure file that contains the current procedure. For control-frames, this attribute maps to the Name property of the of the control-frame COM object (ActiveX control container). For dynamic widgets and asynchronous request handles, this attribute defaults to the Unknown value (?). For query objects, the NAME attribute applies only to static queries. For more information on query objects, seeABL Essentials.. For the SOAP-header object handle, this attribute is the qualified name of the SOAP-header object, which consists of a namespace prefix + \":\" + HEADER. For the SOAP-header-entryref object handle, this attribute is the qualified name of the SOAP-header-entryref object, which consists of a namespace prefix + \":\" + localname. You cannot change this attribute directly; you must use the local-name and namespace-prefix. The NAME attribute of the Temp-table object handle is writeable for dynamic and AVM-generated temp-tables. A new temp-table name cannot be assigned until after the TEMP-TABLE-PREPARE() method has been executed. For the X-document object handle or X-noderef object handle, this attribute returns the name of the XML node. For any object or widget, this attribute can contain any arbitrary value that you set."
         },
         {
           "name": "NEXT-SIBLING",
@@ -1140,7 +1140,7 @@
         },
         {
           "name": "WRITE-MESSAGE",
-          "description": "Writes a user message to the current log file. For an interactive or batch client, the WRITE-MESSAGE( ) method writes the log entries to the log file specified by theLOGFILE-NAME attributeor the Client Logging (-clientlog) startup parameter. For application servers, the WRITE-MESSAGE( ) method writes the log entries to the server log file. For DataServers, the WRITE-MESSAGE( ) method writes the log entries to the log file specified by the DataServer Logging (-dslog) startup parameter. Return type:LOGICAL",
+          "description": "Writes a user message to the current log file. For an interactive or batch client, the WRITE-MESSAGE( ) method writes the log entries to the log file specified by theLOGFILE-NAME attributeor the Client Logging (-clientlog) startup parameter. For application servers, the WRITE-MESSAGE( ) method writes the log entries to the server log file. For DataServers, the WRITE-MESSAGE( ) method writes the log entries to the log file specified by the DataServer Logging (-dslog) startup parameter. Return type:LOGICAL",
           "returnType": "LOGICAL",
           "parameters": [
             {
@@ -1224,12 +1224,12 @@
         },
         {
           "name": "CLOSE-LOG",
-          "description": "Closes the current log file, which stops an interactive or batch client from writing messages to the log file. The CLOSE-LOG( ) method writes a message to the log file indicating that the client intentionally closed the log file, so that the user knows why there are no more messages in the log file. Return type:LOGICAL",
+          "description": "Closes the current log file, which stops an interactive or batch client from writing messages to the log file. The CLOSE-LOG( ) method writes a message to the log file indicating that the client intentionally closed the log file, so that the user knows why there are no more messages in the log file. Return type:LOGICAL",
           "returnType": "LOGICAL"
         },
         {
           "name": "WRITE-MESSAGE",
-          "description": "Writes a user message to the current log file. For an interactive or batch client, the WRITE-MESSAGE( ) method writes the log entries to the log file specified by theLOGFILE-NAME attributeor the Client Logging (-clientlog) startup parameter. For application servers, the WRITE-MESSAGE( ) method writes the log entries to the server log file. For DataServers, the WRITE-MESSAGE( ) method writes the log entries to the log file specified by the DataServer Logging (-dslog) startup parameter. Return type:LOGICAL",
+          "description": "Writes a user message to the current log file. For an interactive or batch client, the WRITE-MESSAGE( ) method writes the log entries to the log file specified by theLOGFILE-NAME attributeor the Client Logging (-clientlog) startup parameter. For application servers, the WRITE-MESSAGE( ) method writes the log entries to the server log file. For DataServers, the WRITE-MESSAGE( ) method writes the log entries to the log file specified by the DataServer Logging (-dslog) startup parameter. Return type:LOGICAL",
           "returnType": "LOGICAL",
           "parameters": [
             {
@@ -1317,7 +1317,7 @@
         },
         {
           "name": "INITIATE",
-          "description": "Initializes the Debugger, but does not pass control to the Debugger immediately. To start the Debugger from the procedure in application mode, you must set a breakpoint using the SET-BREAK( )method that the procedure encounters. When the procedure encounters the breakpoint, the Debugger takes control of the procedure at that point. Return type:LOGICAL",
+          "description": "Initializes the Debugger, but does not pass control to the Debugger immediately. To start the Debugger from the procedure in application mode, you must set a breakpoint using the SET-BREAK( )method that the procedure encounters. When the procedure encounters the breakpoint, the Debugger takes control of the procedure at that point. Return type:LOGICAL",
           "returnType": "LOGICAL"
         },
         {
@@ -1450,7 +1450,7 @@
           "name": "ENCRYPTION-SALT",
           "dataType": "RAW",
           "access": "Readable/Writable",
-          "description": "The default salt value (a random series of bytes) to use with the GENERATE-PBE-KEY function. The default value is the Unknown value (?), which indicates that no salt value is used to generate the password-based encryption key. If specified, this salt value is combined with a password value and hashed some number of times to generate a password-based encryption key (using the algorithm specified by the PBE-HASH-ALGORITHM attribute and the number of iterations specified by the PBE-KEY-ROUNDS attribute). When set, only the first 8 bytes are used. If the value has fewer than 8 bytes, it is padded at the end with zero-value bytes. You can use the GENERATE-PBE-SALT function to generate a salt value, which can help to ensure that the password key value is unique. You are responsible for generating, storing, and transporting this value."
+          "description": "The default salt value (a random series of bytes) to use with the GENERATE-PBE-KEY function. The default value is the Unknown value (?), which indicates that no salt value is used to generate the password-based encryption key. If specified, this salt value is combined with a password value and hashed some number of times to generate a password-based encryption key (using the algorithm specified by the PBE-HASH-ALGORITHM attribute and the number of iterations specified by the PBE-KEY-ROUNDS attribute). When set, only the first 8 bytes are used. If the value has fewer than 8 bytes, it is padded at the end with zero-value bytes. You can use the GENERATE-PBE-SALT function to generate a salt value, which can help to ensure that the password key value is unique. You are responsible for generating, storing, and transporting this value."
         },
         {
           "name": "CAN-DO-DOMAIN-SUPPORT",
@@ -1896,7 +1896,7 @@
         },
         {
           "name": "SET-BLUE-VALUE",
-          "description": "(Graphical interfaces only) Specifies the blue component of an entry in the color table. You cannot change a static color with this method. Before changing the color, you must make the color dynamic using the SET-DYNAMIC( ) method. For an example, seer-colhan.pin the COLOR-TABLE system handle entry. Return type:LOGICAL",
+          "description": "(Graphical interfaces only) Specifies the blue component of an entry in the color table. You cannot change a static color with this method. Before changing the color, you must make the color dynamic using the SET-DYNAMIC( ) method. For an example, seer-colhan.pin the COLOR-TABLE system handle entry. Return type:LOGICAL",
           "returnType": "LOGICAL",
           "parameters": [
             {
@@ -1930,7 +1930,7 @@
         },
         {
           "name": "SET-GREEN-VALUE",
-          "description": "(Graphical interfaces only) Specifies the green component of an entry in the color table. If the operation is successful, the method returns TRUE. You cannot change a static color with this method. Before changing the color, you must make the color dynamic using the SET-DYNAMIC( ) method. For an example, seer-colhan.pin the COLOR-TABLE system handle entry. Return type:LOGICAL",
+          "description": "(Graphical interfaces only) Specifies the green component of an entry in the color table. If the operation is successful, the method returns TRUE. You cannot change a static color with this method. Before changing the color, you must make the color dynamic using the SET-DYNAMIC( ) method. For an example, seer-colhan.pin the COLOR-TABLE system handle entry. Return type:LOGICAL",
           "returnType": "LOGICAL",
           "parameters": [
             {
@@ -1947,7 +1947,7 @@
         },
         {
           "name": "SET-RED-VALUE",
-          "description": "(Graphical interfaces only) Specifies the red component of an entry in the color table. You cannot change a static color with this method. Before changing the color, you must make the color dynamic using the SET-DYNAMIC( ) method. For an example, seer-colhan.pin the COLOR-TABLE system handle entry. Return type:LOGICAL",
+          "description": "(Graphical interfaces only) Specifies the red component of an entry in the color table. You cannot change a static color with this method. Before changing the color, you must make the color dynamic using the SET-DYNAMIC( ) method. For an example, seer-colhan.pin the COLOR-TABLE system handle entry. Return type:LOGICAL",
           "returnType": "LOGICAL",
           "parameters": [
             {
@@ -2062,13 +2062,13 @@
           "name": "APPL-CONTEXT-ID",
           "dataType": "CHARACTER",
           "access": "Read-only",
-          "description": "Returns the universally unique identifier (UUID) for the application context in effect for the current session, as a Base64 character string. The UUID is 22 characters in length (the two trailing Base64 pad characters are removed). The value of this attribute is set by the SET-APPL-CONTEXT( ) method, and cleared by the CLEAR-APPL-CONTEXT( ) method. This value is recorded in all audit event records generated for this application context until you either clear the current application context or set a different application context. If no application context is in effect, this method returns the Unknown value (?)."
+          "description": "Returns the universally unique identifier (UUID) for the application context in effect for the current session, as a Base64 character string. The UUID is 22 characters in length (the two trailing Base64 pad characters are removed). The value of this attribute is set by the SET-APPL-CONTEXT( ) method, and cleared by the CLEAR-APPL-CONTEXT( ) method. This value is recorded in all audit event records generated for this application context until you either clear the current application context or set a different application context. If no application context is in effect, this method returns the Unknown value (?)."
         },
         {
           "name": "EVENT-GROUP-ID",
           "dataType": "CHARACTER",
           "access": "Read-only",
-          "description": "Returns the universally unique identifier (UUID) for the audit event group in effect for the current session, as a Base64 character string. The UUID is 22 characters in length (the two trailing Base64 pad characters are removed). The value of this attribute is set by the BEGIN-EVENT-GROUP( ) method, and cleared by the END-EVENT-GROUP( ) method. This value is recorded in all audit event records generated for this audit event group until you either end the current audit event group or begin a different audit event group. If no audit event group is in effect, this method returns the Unknown value (?)."
+          "description": "Returns the universally unique identifier (UUID) for the audit event group in effect for the current session, as a Base64 character string. The UUID is 22 characters in length (the two trailing Base64 pad characters are removed). The value of this attribute is set by the BEGIN-EVENT-GROUP( ) method, and cleared by the END-EVENT-GROUP( ) method. This value is recorded in all audit event records generated for this audit event group until you either end the current audit event group or begin a different audit event group. If no audit event group is in effect, this method returns the Unknown value (?)."
         },
         {
           "name": "HANDLE",
@@ -2181,19 +2181,19 @@
           "name": "APPSERVER-INFO",
           "dataType": "CHARACTER",
           "access": "Readable/Writable",
-          "description": "Connection parameter for the AppServer CONNECT( ) method. Valid only if LOCATOR-TYPE is \"AppServer\"."
+          "description": "Connection parameter for the AppServer CONNECT( ) method. Valid only if LOCATOR-TYPE is \"AppServer\"."
         },
         {
           "name": "APPSERVER-PASSWORD",
           "dataType": "CHARACTER",
           "access": "Readable/Writable",
-          "description": "Password parameter for the AppServer CONNECT( ) method. Valid only if LOCATOR-TYPE is \"AppServer\"."
+          "description": "Password parameter for the AppServer CONNECT( ) method. Valid only if LOCATOR-TYPE is \"AppServer\"."
         },
         {
           "name": "APPSERVER-USERID",
           "dataType": "CHARACTER",
           "access": "Readable/Writable",
-          "description": "Userid parameter for the AppServer CONNECT( ) method. Valid only if LOCATOR-TYPE is \"AppServer\"."
+          "description": "Userid parameter for the AppServer CONNECT( ) method. Valid only if LOCATOR-TYPE is \"AppServer\"."
         },
         {
           "name": "END-USER-PROMPT",
@@ -2308,7 +2308,7 @@
           "name": "CHARSET",
           "dataType": "CHARACTER",
           "access": "Read-only",
-          "description": "The current setting of the Character Set (-charset) parameter. The CHARSET attribute returns a value that specifies the character set used for ABL data, which is either \"iso8859-1\" or \"undefined\". The value is set by the Character Set (-charset) parameter. This attribute is obsolete. See theCPINTERNAL attribute."
+          "description": "The current setting of the Character Set (-charset) parameter. The CHARSET attribute returns a value that specifies the character set used for ABL data, which is either \"iso8859-1\" or \"undefined\". The value is set by the Character Set (-charset) parameter. This attribute is obsolete. See theCPINTERNAL attribute."
         },
         {
           "name": "CLIENT-TYPE",
@@ -2675,7 +2675,7 @@
           "name": "PRINTER-NAME",
           "dataType": "CHARACTER",
           "access": "Readable/Writable",
-          "description": "(Windows only) The name of the currently selected printer in Windows platforms, and the Unknown value (?) on other platforms. Use this attribute to set the printer name in the default print context. The value of PRINTER-NAME is the name Windows uses to identify a printer. The specified printer must be defined in the Windows Registry. If the specified printer is not defined in the Windows Registry, the value of PRINTER-NAME is not modified. You must specify network printers in Universal Naming Convention format. Use the GET-PRINTERS( ) method to get the list of printers currently defined in the Windows Registry. If you use the SYSTEM-DIALOG PRINTER-SETUP statement to set the printer name, this attribute assumes the modified value. The printer name can contain Unicode characters. SeeInternationalize ABL Applicationsfor more information about Unicode."
+          "description": "(Windows only) The name of the currently selected printer in Windows platforms, and the Unknown value (?) on other platforms. Use this attribute to set the printer name in the default print context. The value of PRINTER-NAME is the name Windows uses to identify a printer. The specified printer must be defined in the Windows Registry. If the specified printer is not defined in the Windows Registry, the value of PRINTER-NAME is not modified. You must specify network printers in Universal Naming Convention format. Use the GET-PRINTERS( ) method to get the list of printers currently defined in the Windows Registry. If you use the SYSTEM-DIALOG PRINTER-SETUP statement to set the printer name, this attribute assumes the modified value. The printer name can contain Unicode characters. SeeInternationalize ABL Applicationsfor more information about Unicode."
         },
         {
           "name": "PRINTER-PORT",
@@ -2687,13 +2687,13 @@
           "name": "PROXY-PASSWORD",
           "dataType": "Character",
           "access": "Readable/Writable",
-          "description": "Authenticates an application server or Web service client to the HTTP-based proxy server. This attribute corresponds to the-proxyPasswordstartup parameter. If-proxyPasswordis not specified on the command line, this attribute has the Unknown value (?) until it is set. This attribute is validated during the CONNECT( ) method (for an application server and a Web service). If PROXY-PASSWORD is invalid, the CONNECT( ) method fails and the AVM issues an error message. If PROXY-USERIDis notunknown and PROXY-PASSWORDisunknown, the application server CONNECT( ) method uses a blank proxy password. If SESSION:PROXY-USERID is unknown, the CONNECT( ) method ignores any value of PROXY-PASSWORD. PROXY-PASSWORD must be a string of up to 512 printable ASCII characters."
+          "description": "Authenticates an application server or Web service client to the HTTP-based proxy server. This attribute corresponds to the-proxyPasswordstartup parameter. If-proxyPasswordis not specified on the command line, this attribute has the Unknown value (?) until it is set. This attribute is validated during the CONNECT( ) method (for an application server and a Web service). If PROXY-PASSWORD is invalid, the CONNECT( ) method fails and the AVM issues an error message. If PROXY-USERIDis notunknown and PROXY-PASSWORDisunknown, the application server CONNECT( ) method uses a blank proxy password. If SESSION:PROXY-USERID is unknown, the CONNECT( ) method ignores any value of PROXY-PASSWORD. PROXY-PASSWORD must be a string of up to 512 printable ASCII characters."
         },
         {
           "name": "PROXY-USERID",
           "dataType": "Character",
           "access": "Readable/Writable",
-          "description": "Authenticates an application server or Web service client to the HTTP-based proxy server. This attribute corresponds to the-proxyUseridstartup parameter. If -proxyUseridis not specified on the command line, this attribute has the Unknown value (?) until it is set. This attribute is validated during the CONNECT( ) method (for an application server and a Web service). If PROXY-USERID is invalid, the CONNECT( ) method fails and the AVM issues an error message. PROXY-USERID must be a string of up to 512 printable ASCII characters, including the space character."
+          "description": "Authenticates an application server or Web service client to the HTTP-based proxy server. This attribute corresponds to the-proxyUseridstartup parameter. If -proxyUseridis not specified on the command line, this attribute has the Unknown value (?) until it is set. This attribute is validated during the CONNECT( ) method (for an application server and a Web service). If PROXY-USERID is invalid, the CONNECT( ) method fails and the AVM issues an error message. PROXY-USERID must be a string of up to 512 printable ASCII characters, including the space character."
         },
         {
           "name": "REMOTE",
@@ -2735,7 +2735,7 @@
           "name": "SERVER-OPERATING-MODE",
           "dataType": "CHARACTER",
           "access": "Read-only",
-          "description": "(AppServer only; PAS for OE only) Returns the operating mode of the current Progress Application Server (PAS) for OpenEdge or AppServer session. This attribute is valid only if the REMOTE attribute is TRUE. The possible values for this attribute when used with the AppServer include: This is the value of the operatingMode property set for this AppServer in theubroker.propertiesfile. The possible values for this attribute when used with PAS for OpenEdge include: Because an instance of the Progress Application Server (PAS) for OpenEdge can run sessions in both modes simultaneously, the operating mode is not set in a properties file. The operating mode is specified through a parameter on the CONNECT( ) method on the client."
+          "description": "(AppServer only; PAS for OE only) Returns the operating mode of the current Progress Application Server (PAS) for OpenEdge or AppServer session. This attribute is valid only if the REMOTE attribute is TRUE. The possible values for this attribute when used with the AppServer include: This is the value of the operatingMode property set for this AppServer in theubroker.propertiesfile. The possible values for this attribute when used with PAS for OpenEdge include: Because an instance of the Progress Application Server (PAS) for OpenEdge can run sessions in both modes simultaneously, the operating mode is not set in a properties file. The operating mode is specified through a parameter on the CONNECT( ) method on the client."
         },
         {
           "name": "STARTUP-PARAMETERS",
@@ -3009,7 +3009,7 @@
           "name": "NAME",
           "dataType": "CHARACTER",
           "access": "Readable/Writable",
-          "description": "A string identifier for the specified object or widget. For the SOAP-header and SOAP-header-entryref object handles, this attribute is read-only. For static data representation widgets, the default value is the name of the field or variable associated with the widget. You can use the NAME attribute to store any information associated with the widget. For a state-reset, state-aware, or stateless AppServer, this attribute returns the connection ID for the AppServer associated with the server handle. For a state-free AppServer, it returns the connection ID of the first AppServer connection created in the session pool with this server handle when the application service is first bound using the CONNECT( ) method. The default value is the unique connection name of the AppServer. For Web services, the default value is the URL of the Web service procedure object from the WSDL. This is the portType name used on the RUN statement that instantiated this object. For a non-Web service procedure, returns the pathname of the procedure file that contains the current procedure. For control-frames, this attribute maps to the Name property of the of the control-frame COM object (ActiveX control container). For dynamic widgets and asynchronous request handles, this attribute defaults to the Unknown value (?). For query objects, the NAME attribute applies only to static queries. For more information on query objects, seeABL Essentials.. For the SOAP-header object handle, this attribute is the qualified name of the SOAP-header object, which consists of a namespace prefix + \":\" + HEADER. For the SOAP-header-entryref object handle, this attribute is the qualified name of the SOAP-header-entryref object, which consists of a namespace prefix + \":\" + localname. You cannot change this attribute directly; you must use the local-name and namespace-prefix. The NAME attribute of the Temp-table object handle is writeable for dynamic and AVM-generated temp-tables. A new temp-table name cannot be assigned until after the TEMP-TABLE-PREPARE() method has been executed. For the X-document object handle or X-noderef object handle, this attribute returns the name of the XML node. For any object or widget, this attribute can contain any arbitrary value that you set."
+          "description": "A string identifier for the specified object or widget. For the SOAP-header and SOAP-header-entryref object handles, this attribute is read-only. For static data representation widgets, the default value is the name of the field or variable associated with the widget. You can use the NAME attribute to store any information associated with the widget. For a state-reset, state-aware, or stateless AppServer, this attribute returns the connection ID for the AppServer associated with the server handle. For a state-free AppServer, it returns the connection ID of the first AppServer connection created in the session pool with this server handle when the application service is first bound using the CONNECT( ) method. The default value is the unique connection name of the AppServer. For Web services, the default value is the URL of the Web service procedure object from the WSDL. This is the portType name used on the RUN statement that instantiated this object. For a non-Web service procedure, returns the pathname of the procedure file that contains the current procedure. For control-frames, this attribute maps to the Name property of the of the control-frame COM object (ActiveX control container). For dynamic widgets and asynchronous request handles, this attribute defaults to the Unknown value (?). For query objects, the NAME attribute applies only to static queries. For more information on query objects, seeABL Essentials.. For the SOAP-header object handle, this attribute is the qualified name of the SOAP-header object, which consists of a namespace prefix + \":\" + HEADER. For the SOAP-header-entryref object handle, this attribute is the qualified name of the SOAP-header-entryref object, which consists of a namespace prefix + \":\" + localname. You cannot change this attribute directly; you must use the local-name and namespace-prefix. The NAME attribute of the Temp-table object handle is writeable for dynamic and AVM-generated temp-tables. A new temp-table name cannot be assigned until after the TEMP-TABLE-PREPARE() method has been executed. For the X-document object handle or X-noderef object handle, this attribute returns the name of the XML node. For any object or widget, this attribute can contain any arbitrary value that you set."
         },
         {
           "name": "NEXT-SIBLING",
