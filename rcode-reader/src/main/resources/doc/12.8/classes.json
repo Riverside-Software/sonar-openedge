@@ -1767,6 +1767,505 @@
       ]
     },
     {
+      "name": "Progress.Collections.HashMap",
+      "interface": false,
+      "abstract": false,
+      "superClass": "Progress.Lang.Object",
+      "interfaces": "Progress.Collections.IMap,Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "methods": [
+        {
+          "name": "GetIterator",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Collections.IIterator",
+          "returnExtent": "0"
+        },
+        {
+          "name": "Add",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            },
+            {
+              "number": "2",
+              "name": "value",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Set",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            },
+            {
+              "number": "2",
+              "name": "value",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "ContainsKey",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Remove",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "GetValue",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Lang.Object",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "TryGetValue",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            },
+            {
+              "number": "2",
+              "name": "value",
+              "extent": "0",
+              "mode": "OUTPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Clear",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0"
+        },
+        {
+          "name": "AddAll",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "otherCollections",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.ICollection"
+            }
+          ]
+        },
+        {
+          "name": "Add",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "keyValuePairObject",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.KeyValuePair"
+            }
+          ]
+        },
+        {
+          "name": "Contains",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "keyValuePairObject",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.KeyValuePair"
+            }
+          ]
+        },
+        {
+          "name": "Remove",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "keyValuePairObject",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.KeyValuePair"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "Count",
+          "static": false,
+          "dataType": "INTEGER"
+        },
+        {
+          "name": "IsEmpty",
+          "static": false,
+          "dataType": "LOGICAL"
+        },
+        {
+          "name": "Keys",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Collections.ISet"
+        }
+      ],
+      "constructors": [
+        {
+          "name": "HashMap"
+        },
+        {
+          "name": "HashMap",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "initialCapacity",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            }
+          ]
+        },
+        {
+          "name": "HashMap",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "comparer",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.IEqualityComparer"
+            }
+          ]
+        },
+        {
+          "name": "HashMap",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "comparer",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.IEqualityComparer"
+            },
+            {
+              "number": "2",
+              "name": "initialCapacity",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.HashMapIterator",
+      "interface": false,
+      "abstract": false,
+      "superClass": "Progress.Lang.Object",
+      "interfaces": "Progress.Collections.IIterator",
+      "methods": [
+        {
+          "name": "MoveNext",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0"
+        },
+        {
+          "name": "Reset",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0"
+        }
+      ],
+      "properties": [
+        {
+          "name": "Current",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Lang.Object"
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.ICollection",
+      "interface": true,
+      "abstract": false,
+      "superclass": "null",
+      "interfaces": "Progress.Collections.IIterable",
+      "methods": [
+        {
+          "name": "Add",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "AddAll",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "otherCollections",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.ICollection"
+            }
+          ]
+        },
+        {
+          "name": "Clear",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0"
+        },
+        {
+          "name": "Contains",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Remove",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "Count",
+          "static": false,
+          "dataType": "INTEGER"
+        },
+        {
+          "name": "IsEmpty",
+          "static": false,
+          "dataType": "LOGICAL"
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.IComparable",
+      "interface": true,
+      "abstract": false,
+      "superclass": "null",
+      "methods": [
+        {
+          "name": "CompareTo",
+          "static": false,
+          "returnDataType": "INTEGER",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "otherObject",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.IComparer",
+      "interface": true,
+      "abstract": false,
+      "superclass": "null",
+      "methods": [
+        {
+          "name": "Compare",
+          "static": false,
+          "returnDataType": "INTEGER",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "objectRef",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            },
+            {
+              "number": "2",
+              "name": "otherObject",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.IEqualityComparer",
+      "interface": true,
+      "abstract": false,
+      "superclass": "null",
+      "methods": [
+        {
+          "name": "Equals",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "objectRef",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            },
+            {
+              "number": "2",
+              "name": "otherObject",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "HashCode",
+          "static": false,
+          "returnDataType": "INTEGER",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "objectValue",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Progress.Collections.IHashable",
       "interface": true,
       "abstract": false,
@@ -1793,6 +2292,761 @@
           "static": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0"
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.IIterable",
+      "interface": true,
+      "abstract": false,
+      "superclass": "null",
+      "methods": [
+        {
+          "name": "GetIterator",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Collections.IIterator",
+          "returnExtent": "0"
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.IIterator",
+      "interface": true,
+      "abstract": false,
+      "superclass": "null",
+      "methods": [
+        {
+          "name": "MoveNext",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0"
+        },
+        {
+          "name": "Reset",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0"
+        }
+      ],
+      "properties": [
+        {
+          "name": "Current",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Lang.Object"
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.IList",
+      "interface": true,
+      "abstract": false,
+      "superclass": "null",
+      "interfaces": "Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "methods": [
+        {
+          "name": "IndexOf",
+          "static": false,
+          "returnDataType": "INTEGER",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Insert",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "index",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            },
+            {
+              "number": "2",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Insert",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "index",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            },
+            {
+              "number": "2",
+              "name": "otherCollections",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.ICollection"
+            }
+          ]
+        },
+        {
+          "name": "RemoveAt",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "index",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            }
+          ]
+        },
+        {
+          "name": "Get",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Lang.Object",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "index",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            }
+          ]
+        },
+        {
+          "name": "Set",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Lang.Object",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "index",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            },
+            {
+              "number": "2",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        }
+      ],
+      "properties": []
+    },
+    {
+      "name": "Progress.Collections.IMap",
+      "interface": true,
+      "abstract": false,
+      "superclass": "null",
+      "interfaces": "Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "methods": [
+        {
+          "name": "Add",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            },
+            {
+              "number": "2",
+              "name": "value",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Set",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            },
+            {
+              "number": "2",
+              "name": "value",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "ContainsKey",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Remove",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "GetValue",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Lang.Object",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "TryGetValue",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            },
+            {
+              "number": "2",
+              "name": "value",
+              "extent": "0",
+              "mode": "OUTPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "Keys",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Collections.ISet"
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.ISet",
+      "interface": true,
+      "abstract": false,
+      "superclass": "null",
+      "interfaces": "Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "methods": [
+        {
+          "name": "Get",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Lang.Object",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        }
+      ],
+      "properties": []
+    },
+    {
+      "name": "Progress.Collections.KeySet",
+      "interface": false,
+      "abstract": false,
+      "superClass": "Progress.Lang.Object",
+      "interfaces": "Progress.Collections.ISet,Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "methods": [
+        {
+          "name": "GetIterator",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Collections.IIterator",
+          "returnExtent": "0"
+        },
+        {
+          "name": "Add",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Contains",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Remove",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Get",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Lang.Object",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Clear",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0"
+        },
+        {
+          "name": "AddAll",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "otherCollections",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.ICollection"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "Count",
+          "static": false,
+          "dataType": "INTEGER"
+        },
+        {
+          "name": "IsEmpty",
+          "static": false,
+          "dataType": "LOGICAL"
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.KeySetIterator",
+      "interface": false,
+      "abstract": false,
+      "superClass": "Progress.Lang.Object",
+      "interfaces": "Progress.Collections.IIterator",
+      "methods": [
+        {
+          "name": "MoveNext",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0"
+        },
+        {
+          "name": "Reset",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0"
+        }
+      ],
+      "properties": [
+        {
+          "name": "Current",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Lang.Object"
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.KeyValuePair",
+      "interface": false,
+      "abstract": false,
+      "superClass": "Progress.Lang.Object",
+      "methods": [],
+      "properties": [
+        {
+          "name": "Key",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Lang.Object"
+        },
+        {
+          "name": "Value",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Lang.Object"
+        }
+      ],
+      "constructors": [
+        {
+          "name": "KeyValuePair",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "key",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            },
+            {
+              "number": "2",
+              "name": "value",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.List",
+      "interface": false,
+      "abstract": false,
+      "superClass": "Progress.Lang.Object",
+      "interfaces": "Progress.Collections.IList,Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "methods": [
+        {
+          "name": "Add",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Contains",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Get",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Lang.Object",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "index",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            }
+          ]
+        },
+        {
+          "name": "IndexOf",
+          "static": false,
+          "returnDataType": "INTEGER",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Set",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Lang.Object",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "index",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            },
+            {
+              "number": "2",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Insert",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "index",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            },
+            {
+              "number": "2",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "GetIterator",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Collections.IIterator",
+          "returnExtent": "0"
+        },
+        {
+          "name": "AddAll",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "otherCollections",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.ICollection"
+            }
+          ]
+        },
+        {
+          "name": "Clear",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0"
+        },
+        {
+          "name": "Remove",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Insert",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "index",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            },
+            {
+              "number": "2",
+              "name": "otherCollections",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.ICollection"
+            }
+          ]
+        },
+        {
+          "name": "RemoveAt",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "index",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "Count",
+          "static": false,
+          "dataType": "INTEGER"
+        },
+        {
+          "name": "IsEmpty",
+          "static": false,
+          "dataType": "LOGICAL"
+        }
+      ],
+      "constructors": [
+        {
+          "name": "List"
+        },
+        {
+          "name": "List",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "capacity",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "INTEGER"
+            }
+          ]
         }
       ]
     },
@@ -1826,11 +3080,185 @@
       ]
     },
     {
+      "name": "Progress.Collections.SortedSet",
+      "interface": false,
+      "abstract": false,
+      "superClass": "Progress.Lang.Object",
+      "interfaces": "Progress.Collections.ISet,Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "methods": [
+        {
+          "name": "Add",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Contains",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "GetIterator",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Collections.IIterator",
+          "returnExtent": "0"
+        },
+        {
+          "name": "AddAll",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "otherCollections",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.ICollection"
+            }
+          ]
+        },
+        {
+          "name": "Clear",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0"
+        },
+        {
+          "name": "Remove",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        },
+        {
+          "name": "Get",
+          "static": false,
+          "returnDataType": "OBJECT",
+          "returnDataTypeName": "Progress.Lang.Object",
+          "returnExtent": "0",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "element",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Lang.Object"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "Count",
+          "static": false,
+          "dataType": "INTEGER"
+        },
+        {
+          "name": "IsEmpty",
+          "static": false,
+          "dataType": "LOGICAL"
+        },
+        {
+          "name": "First",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Lang.Object"
+        },
+        {
+          "name": "Last",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Lang.Object"
+        }
+      ],
+      "constructors": [
+        {
+          "name": "SortedSet"
+        },
+        {
+          "name": "SortedSet",
+          "parameters": [
+            {
+              "number": "1",
+              "name": "comparer",
+              "extent": "0",
+              "mode": "INPUT",
+              "dataType": "OBJECT",
+              "dataTypeName": "Progress.Collections.IComparer"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Progress.Collections.SortedSetIterator",
+      "interface": false,
+      "abstract": false,
+      "superClass": "Progress.Lang.Object",
+      "interfaces": "Progress.Collections.IIterator",
+      "methods": [
+        {
+          "name": "MoveNext",
+          "static": false,
+          "returnDataType": "LOGICAL",
+          "returnExtent": "0"
+        },
+        {
+          "name": "Reset",
+          "static": false,
+          "returnDataType": "VOID",
+          "returnExtent": "0"
+        }
+      ],
+      "properties": [
+        {
+          "name": "Current",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Lang.Object"
+        }
+      ]
+    },
+    {
       "name": "Progress.Data.BindingSource",
       "interface": false,
       "abstract": false,
       "superClass": "System.Windows.Forms.BindingSource",
-      "interfaces": "System.ComponentModel.IComponentb,System.IDisposableb,System.ComponentModel.IBindingListViewb,System.ComponentModel.IBindingListb,System.Collections.IListb,System.Collections.ICollectionb,System.Collections.IEnumerableb,System.ComponentModel.ITypedListb,System.ComponentModel.ICancelAddNewb,System.ComponentModel.ISupportInitializeNotificationb,System.ComponentModel.ISupportInitializeb,System.Windows.Forms.ICurrencyManagerProvider",
+      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.ComponentModel.IBindingListView,System.ComponentModel.IBindingList,System.Collections.IList,System.Collections.ICollection,System.Collections.IEnumerable,System.ComponentModel.ITypedList,System.ComponentModel.ICancelAddNew,System.ComponentModel.ISupportInitializeNotification,System.ComponentModel.ISupportInitialize,System.Windows.Forms.ICurrencyManagerProvider",
       "methods": [
         {
           "name": "Assign",
@@ -2567,7 +3995,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Enum",
-      "interfaces": "System.IComparableb,System.IFormattableb,System.IConvertible",
+      "interfaces": "System.IComparable,System.IFormattable,System.IConvertible",
       "enumNames": [
         "UNKNOWN",
         "CHARACTER",
@@ -2600,7 +4028,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Object",
-      "interfaces": "System.ComponentModel.IEditableObjectb,System.ComponentModel.IDataErrorInfob,System.ComponentModel.ITypedList",
+      "interfaces": "System.ComponentModel.IEditableObject,System.ComponentModel.IDataErrorInfo,System.ComponentModel.ITypedList",
       "methods": [
         {
           "name": "BeginEdit",
@@ -11188,7 +12616,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Windows.Forms.Form",
-      "interfaces": "System.ComponentModel.IComponentb,System.IDisposableb,System.Windows.Forms.UnsafeNativeMethods+IOleControlb,System.Windows.Forms.UnsafeNativeMethods+IOleObjectb,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObjectb,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObjectb,System.Windows.Forms.UnsafeNativeMethods+IOleWindowb,System.Windows.Forms.UnsafeNativeMethods+IViewObjectb,System.Windows.Forms.UnsafeNativeMethods+IViewObject2b,System.Windows.Forms.UnsafeNativeMethods+IPersistb,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInitb,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBagb,System.Windows.Forms.UnsafeNativeMethods+IPersistStorageb,System.Windows.Forms.UnsafeNativeMethods+IQuickActivateb,System.Windows.Forms.ISupportOleDropSourceb,System.Windows.Forms.IDropTargetb,System.ComponentModel.ISynchronizeInvokeb,System.Windows.Forms.IWin32Windowb,System.Windows.Forms.Layout.IArrangedElementb,System.Windows.Forms.IBindableComponentb,System.Windows.Forms.IKeyboardToolTipb,System.Windows.Forms.IContainerControlb,Progress.Windows.IFormb,Progress.Windows.IFormCommon",
+      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl,Progress.Windows.IForm,Progress.Windows.IFormCommon",
       "methods": [
         {
           "name": "SetWaitState",
@@ -11314,7 +12742,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Windows.Form",
-      "interfaces": "System.ComponentModel.IComponentb,System.IDisposableb,System.Windows.Forms.UnsafeNativeMethods+IOleControlb,System.Windows.Forms.UnsafeNativeMethods+IOleObjectb,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObjectb,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObjectb,System.Windows.Forms.UnsafeNativeMethods+IOleWindowb,System.Windows.Forms.UnsafeNativeMethods+IViewObjectb,System.Windows.Forms.UnsafeNativeMethods+IViewObject2b,System.Windows.Forms.UnsafeNativeMethods+IPersistb,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInitb,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBagb,System.Windows.Forms.UnsafeNativeMethods+IPersistStorageb,System.Windows.Forms.UnsafeNativeMethods+IQuickActivateb,System.Windows.Forms.ISupportOleDropSourceb,System.Windows.Forms.IDropTargetb,System.ComponentModel.ISynchronizeInvokeb,System.Windows.Forms.IWin32Windowb,System.Windows.Forms.Layout.IArrangedElementb,System.Windows.Forms.IBindableComponentb,System.Windows.Forms.IKeyboardToolTipb,System.Windows.Forms.IContainerControlb,Progress.Windows.IFormb,Progress.Windows.IFormCommon",
+      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl,Progress.Windows.IForm,Progress.Windows.IFormCommon",
       "methods": [],
       "properties": [
         {
@@ -11354,7 +12782,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Windows.Forms.UserControl",
-      "interfaces": "System.ComponentModel.IComponentb,System.IDisposableb,System.Windows.Forms.UnsafeNativeMethods+IOleControlb,System.Windows.Forms.UnsafeNativeMethods+IOleObjectb,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObjectb,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObjectb,System.Windows.Forms.UnsafeNativeMethods+IOleWindowb,System.Windows.Forms.UnsafeNativeMethods+IViewObjectb,System.Windows.Forms.UnsafeNativeMethods+IViewObject2b,System.Windows.Forms.UnsafeNativeMethods+IPersistb,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInitb,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBagb,System.Windows.Forms.UnsafeNativeMethods+IPersistStorageb,System.Windows.Forms.UnsafeNativeMethods+IQuickActivateb,System.Windows.Forms.ISupportOleDropSourceb,System.Windows.Forms.IDropTargetb,System.ComponentModel.ISynchronizeInvokeb,System.Windows.Forms.IWin32Windowb,System.Windows.Forms.Layout.IArrangedElementb,System.Windows.Forms.IBindableComponentb,System.Windows.Forms.IKeyboardToolTipb,System.Windows.Forms.IContainerControl",
+      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl",
       "methods": [],
       "properties": [],
       "constructors": [
@@ -11368,7 +12796,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Windows.UserControl",
-      "interfaces": "System.ComponentModel.IComponentb,System.IDisposableb,System.Windows.Forms.UnsafeNativeMethods+IOleControlb,System.Windows.Forms.UnsafeNativeMethods+IOleObjectb,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObjectb,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObjectb,System.Windows.Forms.UnsafeNativeMethods+IOleWindowb,System.Windows.Forms.UnsafeNativeMethods+IViewObjectb,System.Windows.Forms.UnsafeNativeMethods+IViewObject2b,System.Windows.Forms.UnsafeNativeMethods+IPersistb,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInitb,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBagb,System.Windows.Forms.UnsafeNativeMethods+IPersistStorageb,System.Windows.Forms.UnsafeNativeMethods+IQuickActivateb,System.Windows.Forms.ISupportOleDropSourceb,System.Windows.Forms.IDropTargetb,System.ComponentModel.ISynchronizeInvokeb,System.Windows.Forms.IWin32Windowb,System.Windows.Forms.Layout.IArrangedElementb,System.Windows.Forms.IBindableComponentb,System.Windows.Forms.IKeyboardToolTipb,System.Windows.Forms.IContainerControl",
+      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl",
       "methods": [],
       "properties": [
         {
@@ -11388,7 +12816,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Object",
-      "interfaces": "Progress.Lang.Errorb,System.Runtime.Serialization.ISerializableb,System.Runtime.InteropServices._Exception",
+      "interfaces": "Progress.Lang.Error,System.Runtime.Serialization.ISerializable,System.Runtime.InteropServices._Exception",
       "methods": [
         {
           "name": "GetMessage",
