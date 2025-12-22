@@ -1258,4 +1258,11 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     IExpression exp1 = nodes.get(0);
     assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
   }
+  
+  @Test
+  public void testGenerics1() {
+    testSimpleExpression("def var xx as Progress.Collections.IMap<Employee,Manager>. message new Progress.Collections.IMap<Employee,Manager>().", new DataType("Progress.Collections.IMap"));
+  }
+  
+
 }
