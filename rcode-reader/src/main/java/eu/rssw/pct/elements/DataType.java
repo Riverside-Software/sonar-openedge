@@ -76,8 +76,14 @@ public class DataType {
   }
 
   public DataType(String className) {
-    this.primDataType = PrimitiveDataType.CLASS;
-    this.className = className;
+    if (className == null) {
+      this.primDataType = PrimitiveDataType.UNKNOWN;
+      this.className = null;
+    } else {
+      this.primDataType = PrimitiveDataType.CLASS;
+      var idx = className.indexOf('<');
+      this.className = idx == -1 ? className : className.substring(0, idx);
+    }
   }
 
   public PrimitiveDataType getPrimitive() {

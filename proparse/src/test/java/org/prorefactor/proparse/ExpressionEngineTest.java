@@ -1258,4 +1258,26 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     IExpression exp1 = nodes.get(0);
     assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
   }
+  
+  @Test
+  public void testGenerics01() {
+    testSimpleExpression(
+        "def var xx as Progress.Collections.IMap<Employee,Manager>. message new Progress.Collections.IMap<Employee,Manager>().",
+        new DataType("Progress.Collections.IMap"));
+    testSimpleExpression(
+        "def var xx as class Progress.Collections.IMap<Employee,Manager>. message new Progress.Collections.IMap<Employee,Manager>().",
+        new DataType("Progress.Collections.IMap"));
+    testSimpleExpression(
+        "def var xx as Progress.Collections.IMap<OpenEdge.Core.String,OpenEdge.Core.String>. message new Progress.Collections.IMap<OpenEdge.Core.String,OpenEdge.Core.String>().",
+        new DataType("Progress.Collections.IMap"));
+    testSimpleExpression(
+        "def var xx as class Progress.Collections.IMap<OpenEdge.Core.String,OpenEdge.Core.String>. message new Progress.Collections.IMap<OpenEdge.Core.String,OpenEdge.Core.String>().",
+        new DataType("Progress.Collections.IMap"));
+    testSimpleExpression(
+        "def var xx as Progress.Collections.IMap<Progress.Collections.ListIterator<OpenEdge.Core.String>,OpenEdge.Core.String>. message new Progress.Collections.IMap<Progress.Collections.ListIterator<OpenEdge.Core.String>,OpenEdge.Core.String>().",
+        new DataType("Progress.Collections.IMap"));
+
+  } 
+
+
 }
