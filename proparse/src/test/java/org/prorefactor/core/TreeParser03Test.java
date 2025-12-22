@@ -960,7 +960,7 @@ public class TreeParser03Test extends AbstractProparseTest {
     }
     assertNotNull(v1);
     assertEquals(v1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
-    assertEquals(v1.getDataType().getClassName(), "System.Collections.Generic.List<char>");
+    assertEquals(v1.getDataType().getClassName(), "System.Collections.Generic.List");
     assertEquals(v1.getExtent(), 0);
   }
 
@@ -1664,5 +1664,55 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(b2.getNumWrites(), 0);
     assertFalse(b2.isReferencedInFrame());
   }
+  
+  @Test
+  public void testGenerics1() {
+    ParseUnit unit = getParseUnit("def var xx as Progress.Collections.IMap<Employee,Manager>.", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable xx = unit.getRootScope().getVariable("xx"); 
+    assertNotNull(xx);
+    
+    assertEquals(xx.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+     
+    assertEquals(xx.getDataType().getClassName(), "Progress.Collections.IMap");
+     
+  }
+  
+  @Test
+  public void testGenerics2() {
+    ParseUnit unit = getParseUnit("def var xx as Progress.Collections.IMap<Progress.Collections.Hashable<K,V>, Progress.Collections.Hashable<L,M>>.", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable xx = unit.getRootScope().getVariable("xx"); 
+    assertNotNull(xx);
+    
+    assertEquals(xx.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+     
+    assertEquals(xx.getDataType().getClassName(), "Progress.Collections.IMap");    
+  }
+  
+//  @Test
+//  public void testGenerics3() {
+//    ParseUnit unit = getParseUnit("def var xx as Progress.Collections.IMap<>.", session);
+//    unit.treeParser01();
+//    assertFalse(unit.hasSyntaxError());
+//    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+//
+//    assertEquals(unit.getRootScope().getVariables().size(), 1);
+//    Variable xx = unit.getRootScope().getVariable("xx"); 
+//    assertNotNull(xx);
+//    
+//    assertEquals(xx.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+//     
+//    assertEquals(xx.getDataType().getClassName(), "Progress.Collections.IMap");
+//     
+//  }
 
 }

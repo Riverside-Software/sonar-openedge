@@ -115,4 +115,18 @@ public class DataTypeTest {
       assertFalse(new DataType("Progress.Lang.Enum").isCompatible(new DataType("Progress.Lang.Object"), provider));
     }
   }
+
+  @Test
+  public void testGenerics() {
+    assertTrue(
+        new DataType("Progress.Collections.IMap<Employee,Manager>").getClassName().equals("Progress.Collections.IMap"));
+    assertTrue(new DataType("Progress.Collections.IMap<>").getClassName().equals("Progress.Collections.IMap"));
+    assertTrue(new DataType(
+        "Progress.Collections.IMap<Progress.Collections.Hashable<K,V>, Progress.Collections.Hashable<L,M>>").getClassName().equals(
+            "Progress.Collections.IMap"));
+    assertTrue(new DataType(
+        "Progress.Collections.IMap<Progress.Collections.Hashable<OpenEdge.Core.String,OpenEdge.Core.String>").getClassName().equals(
+            "Progress.Collections.IMap"));
+  }
+
 }

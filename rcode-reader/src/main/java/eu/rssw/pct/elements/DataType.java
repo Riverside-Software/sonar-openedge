@@ -77,7 +77,11 @@ public class DataType {
 
   public DataType(String className) {
     this.primDataType = PrimitiveDataType.CLASS;
-    this.className = className;
+    if (className != null) {
+      String[] spl = className.split("<");
+      this.className = spl[0];
+    } else
+      this.className = className;
   }
 
   public PrimitiveDataType getPrimitive() {
