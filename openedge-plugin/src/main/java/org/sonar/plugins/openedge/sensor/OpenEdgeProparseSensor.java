@@ -500,8 +500,7 @@ public class OpenEdgeProparseSensor implements Sensor {
         ) {
       writer.write("var var" + varNum + " = ");
       var nodeLister = new JsonNodeLister(unit.getTopNode(), writer, ABLNodeType.LEFTPAREN,
-          ABLNodeType.RIGHTPAREN, ABLNodeType.COMMA, ABLNodeType.PERIOD, ABLNodeType.LEXCOLON, ABLNodeType.OBJCOLON,
-          ABLNodeType.THEN, ABLNodeType.END);
+          ABLNodeType.RIGHTPAREN, ABLNodeType.COMMA, ABLNodeType.PERIOD, ABLNodeType.LEXCOLON, ABLNodeType.OBJCOLON,ABLNodeType.END);
       nodeLister.print();
       writer.write(";");
       debugFiles.add(Triplet.of(file.toString(), fName, "var" + varNum++));
