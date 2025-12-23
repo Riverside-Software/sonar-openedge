@@ -2161,11 +2161,19 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   private DataType getDataTypeFromContext(DatatypeContext ctx) {
+    String qualName = support.lookupClassName(ctx.getStop().getText());
     if ((ctx.getStart().getType() == ABLNodeType.CLASS.getType())
         || (ctx.getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
-      String qualName = support.lookupClassName(ctx.getStop().getText());
+
       if (Strings.isNullOrEmpty(qualName))
         return new DataType(ctx.getStop().getText());
+      else
+        return new DataType(qualName);
+    } else if (ctx.getStart().getType() == ABLNodeType.TYPE_NAME.getType()
+        && ctx.getStop().getType() == ABLNodeType.RIGHTANGLE.getType()) {
+      qualName = support.lookupClassName(ctx.getStart().getText());
+      if (Strings.isNullOrEmpty(qualName))
+        return new DataType(ctx.getStart().getText());
       else
         return new DataType(qualName);
     } else {

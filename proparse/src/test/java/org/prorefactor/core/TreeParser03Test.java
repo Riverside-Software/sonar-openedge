@@ -1664,5 +1664,22 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(b2.getNumWrites(), 0);
     assertFalse(b2.isReferencedInFrame());
   }
+  
+  @Test
+  public void testGenerics() {
+    ParseUnit unit = getParseUnit("def var xx as Progress.Collections.IMap<Employee,Manager>.", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    Variable xx = unit.getRootScope().getVariable("xx"); 
+    assertNotNull(xx);
+    
+    assertEquals(xx.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+     
+    assertEquals(xx.getDataType().getClassName(), "Progress.Collections.IMap");
+     
+  }
 
 }
