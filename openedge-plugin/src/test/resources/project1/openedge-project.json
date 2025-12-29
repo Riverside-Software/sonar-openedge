@@ -1,0 +1,56 @@
+{
+  "name": "Project1",
+  "version": "1.0",
+  "charset": "utf-8",
+  "oeversion": "12.8",
+  "graphicalMode": false,
+  "extraParameters": "-assemblies .",
+  "buildPath": [
+    { "type": "source", "path": "src/main/abl", "excludes": "sample/excl/**" },
+    { "type": "source", "path": "src/test/abl" },
+    { "type": "propath", "path": "src/main/resources" }
+  ],
+  "dependencies": [
+    { "groupId": "com.progress.openedge",  "artifactId": "net", "version" : "12.8.9", "extension": "pl" },
+    { "groupId": "com.progress.openedge", "artifactId": "core", "version" : "12.8.9", "extension": "apl" },
+    { "groupId": "com.progress.openedge", "artifactId": "adecomm", "version" : "12.8.9", "extension": "zip" },
+    { "groupId": "cefsharp", "artifactId": "cefsharp", "version" : "124.3.80", "classifier": "assembly", "extension": "zip" }
+  ],
+  "buildDirectory": "target/build",
+  "numThreads": 1,
+  "dbConnections": [
+    { "name": "sports", "connect": "-db target/db/sp2k -ld sports -RO", "schemaFile": "src/main/df/full/sports.df", "aliases": [ "foo", "bar"] }
+  ],
+  "profiles": [
+    {
+      "name": "OE-11.7",
+      "inherits": "default",
+      "value": {
+        "oeversion": "11.7"
+      }
+    },
+    {
+      "name": "OE-12.2",
+      "inherits": "default",
+      "value": {
+        "oeversion": "12.2"
+      }
+    },
+    {
+      "name": "GUI-Mode",
+      "inherits": "default",
+      "value": {
+        "graphicalMode": true
+      }
+    },
+    {
+      "name": "DevContainer",
+      "inherits": "default",
+      "value": {
+        "dbConnections": [
+          { "name": "sports", "connect": "-db sports -H dbserver -S 12345", "schemaFile": "src/main/df/full/sports.df", "aliases": [ "foo", "bar"] }
+        ]
+      }
+    }
+  ]
+}

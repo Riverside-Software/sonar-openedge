@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -50,6 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
+import org.eclipse.aether.RepositoryException;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
@@ -77,10 +79,15 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.google.common.primitives.Ints;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 import eu.rssw.antlr.database.DumpFileUtils;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
+import eu.rssw.openedge.ls.IDependencyResolver.LocalDependency;
+import eu.rssw.openedge.ls.OpenEdgeDependencyResolver;
+import eu.rssw.openedge.ls.mapping.ProjectConfigFile;
+import eu.rssw.openedge.ls.mapping.ProjectConfigFile.Dependency;
 import eu.rssw.pct.FileEntry;
 import eu.rssw.pct.PLReader;
 import eu.rssw.pct.RCodeInfo;
@@ -120,6 +127,9 @@ public class OpenEdgeSettings {
   private boolean rtbCompatibility;
   private Kryo kryo;
 
+  private OpenEdgeDependencyResolver resolver;
+  private Map<LocalDependency, java.nio.file.Path> dependencyHash;
+
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
     this(config, fileSystem, runtime, null);
   }
@@ -142,6 +152,7 @@ public class OpenEdgeSettings {
     initializeDirectories();
     initializePropathDlc();
     initializeDefaultPropath();
+    initializeDepedencies();
     initializeCPD();
     initializeIncludeExtensions();
     rtbCompatibility = config.getBoolean(Constants.RTB_COMPATIBILITY).orElse(false);
@@ -222,6 +233,98 @@ public class OpenEdgeSettings {
     }
 
     return retVal;
+  }
+
+  private final void initializeDepedencies() {
+    Optional<String> name = config.get("sonar.projectName");
+    String projectName = (name.isPresent() ? name.get() : "no project name");
+
+    LOG.info("Project name {}", projectName);
+    String srcFileName;
+
+    Optional<String> dependenciesSourceFile = config.get(Constants.DEPENDENCIES_SOURCE);
+    if (dependenciesSourceFile.isPresent()) {
+      srcFileName = dependenciesSourceFile.get();
+    } else {
+      LOG.info("No sonar.oe.file.openedge_project_properties, defaults to openedge-project.json");
+      srcFileName = "openedge-project.json".toString();
+    }
+
+    List<LocalDependency> resolvedDependencies = new ArrayList<>();
+    dependencyHash = new HashMap<>();
+    resolver = new OpenEdgeDependencyResolver();
+    Dependency deptmp = null;
+
+    LOG.info("Project config file {}", srcFileName);
+
+    try (
+        InputStreamReader isr = new InputStreamReader(
+            new FileInputStream(fileSystem.baseDir().toPath().resolve(srcFileName).toFile()));
+        BufferedReader reader = new BufferedReader(isr)) {
+      ProjectConfigFile config = new GsonBuilder().create().fromJson(reader, ProjectConfigFile.class);
+      if ((config != null) && (config.dependencies != null)) {
+        for (Dependency dep : config.dependencies) {
+          if (dep == null)
+            continue;
+          deptmp = dep;
+          File dlFile;
+          dlFile = resolver.downloadArtifact(dep.groupId, dep.artifactId, dep.version, dep.classifier, dep.extension);
+          LocalDependency locDependency = new LocalDependency(dep.groupId, dep.artifactId, dep.version, dep.classifier,
+              dep.extension, dlFile);
+          resolvedDependencies.add(locDependency);
+          LOG.debug("Dependencies added {}", dlFile.getPath());
+        }
+      }
+    } catch (IOException e) {
+      LOG.error("Error reading project file {} {}", srcFileName, e);
+      e.printStackTrace();
+    } catch (RepositoryException e) {
+      LOG.error("Error resolving dependency {} {}", deptmp.artifactId, e);
+      e.printStackTrace();
+    }
+
+    try {
+      List<Path> pathToAdd = processArtifacts(resolvedDependencies, projectName);
+      String commaSeparatedUsingCollect = pathToAdd.stream().map(Object::toString).collect(Collectors.joining(","));
+      propath.addAll(readPropath(commaSeparatedUsingCollect));
+      LOG.info("propath updated with depedencies : {}", commaSeparatedUsingCollect);
+
+    } catch (IOException e) {
+      LOG.error("error on getting dependencies{}{}"," ",e);
+      e.printStackTrace();
+    }
+
+  }
+
+  private List<Path> processArtifacts(List<LocalDependency> resolvedDependencies, String name) throws IOException {
+    File dotDir = resolvePath(".dependencies");
+    Files.createParentDirs(dotDir);
+    List<Path> lstPath = new ArrayList<>();
+    for (LocalDependency dep : resolvedDependencies) {
+      java.nio.file.Path extractPath = resolver.processArtifact(dep, dotDir.toPath(), name);
+      if (extractPath != null) {
+        LOG.debug("dependency extracted : {}", extractPath.toString());
+        dependencyHash.put(dep, extractPath);
+      }
+
+      if (dep.classifier() == null) {
+        if ("zip".equals(dep.extension()) && extractPath != null) {
+
+          File[] listToAdd = fileSystem.resolvePath(extractPath.toString()).listFiles(
+              (dir, filename) -> (filename.toLowerCase().endsWith(".pl") || filename.toLowerCase().endsWith(".apl")));
+
+          for (int i = 0; i < listToAdd.length; i++) {
+            lstPath.add(listToAdd[i].toPath());
+          }
+          lstPath.add(extractPath);
+        } else if ("pl".equals(dep.extension()) || "apl".equals(dep.extension())) {
+          lstPath.add(dep.localFile().toPath());
+        }
+      }
+
+    }
+
+    return lstPath;
   }
 
   private final void initializeCPD() {
@@ -1063,6 +1166,15 @@ public class OpenEdgeSettings {
     return retVal;
   }
 
+  public BufferedReader readFile(ClassLoader cl, String file) {
+
+    BufferedReader r2 = null;
+    InputStream inp = cl.getResourceAsStream(file);
+    Reader r1 = new InputStreamReader(inp);
+    r2 = new BufferedReader(r1);
+    return r2;
+  }
+  
   private File resolvePath(String path) {
     File file = new File(path);
     if (file.isAbsolute())

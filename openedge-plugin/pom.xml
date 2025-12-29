@@ -70,6 +70,13 @@
       <version>1.7.36</version>
       <scope>test</scope>
     </dependency>
+    <!-- Maven Resolver Shaded -->
+    <dependency>
+	  <groupId>eu.rssw.proparse</groupId>
+	  <artifactId>mvn-resolver-shaded</artifactId>
+	  <version>1.23.0-SNAPSHOT</version>
+	  <classifier>shaded</classifier>
+	</dependency>	
   </dependencies>
 
   <build>
@@ -85,7 +92,7 @@
         <directory>src/main/resources</directory>
         <filtering>false</filtering>
         <excludes>
-          <exclude>sonar-openedge.txt</exclude>
+          <exclude>sonar-openedge.txt</exclude>          
         </excludes>
       </resource>
     </resources>
@@ -129,6 +136,16 @@
               </resources>
             </transformer>
           </transformers>
+          <filters>
+	            <filter>
+	                <artifact>*:*</artifact>
+	                <excludes>
+	                    <exclude>META-INF/*.SF</exclude>
+	                    <exclude>META-INF/*.DSA</exclude>
+	                    <exclude>META-INF/*.RSA</exclude>
+	                </excludes>
+	            </filter>
+	        </filters>
         </configuration>
         <executions>
           <execution>
