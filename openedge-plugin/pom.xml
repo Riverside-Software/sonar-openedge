@@ -53,6 +53,11 @@
       <version>20231013</version>
     </dependency>
     <dependency>
+      <groupId>eu.rssw.proparse</groupId>
+      <artifactId>mvn-resolver</artifactId>
+      <version>1.23.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>
       <artifactId>sonar-plugin-api-impl</artifactId>
       <version>10.7.0.96327</version>
@@ -129,6 +134,16 @@
               </resources>
             </transformer>
           </transformers>
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+              <excludes>
+                <exclude>META-INF/*.SF</exclude>
+                <exclude>META-INF/*.DSA</exclude>
+                <exclude>META-INF/*.RSA</exclude>
+              </excludes>
+            </filter>
+          </filters>
         </configuration>
         <executions>
           <execution>

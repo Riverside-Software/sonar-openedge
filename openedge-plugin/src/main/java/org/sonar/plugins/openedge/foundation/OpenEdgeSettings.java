@@ -50,6 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
+import org.eclipse.aether.RepositoryException;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
@@ -77,10 +78,14 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.google.common.primitives.Ints;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 import eu.rssw.antlr.database.DumpFileUtils;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
+import eu.rssw.openedge.ls.IDependencyResolver.LocalDependency;
+import eu.rssw.openedge.ls.OpenEdgeDependencyResolver;
+import eu.rssw.openedge.ls.mapping.ProjectConfigFile;
 import eu.rssw.pct.FileEntry;
 import eu.rssw.pct.PLReader;
 import eu.rssw.pct.RCodeInfo;
@@ -120,6 +125,8 @@ public class OpenEdgeSettings {
   private boolean rtbCompatibility;
   private Kryo kryo;
 
+  private OpenEdgeDependencyResolver resolver;
+
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
     this(config, fileSystem, runtime, null);
   }
@@ -142,6 +149,7 @@ public class OpenEdgeSettings {
     initializeDirectories();
     initializePropathDlc();
     initializeDefaultPropath();
+    initializeDependencies();
     initializeCPD();
     initializeIncludeExtensions();
     rtbCompatibility = config.getBoolean(Constants.RTB_COMPATIBILITY).orElse(false);
@@ -222,6 +230,72 @@ public class OpenEdgeSettings {
     }
 
     return retVal;
+  }
+
+  private final void initializeDependencies() {
+    // Dependencies are injected by language server in the propath
+    if (runtime.getProduct() == SonarProduct.SONARLINT)
+      return;
+    if (config.get(Constants.DEPENDENCIES_SOURCE).isEmpty()) {
+      LOG.info("No dependencies specified");
+      return;
+    }
+    var projectName = config.get("sonar.projectName").orElse("No name");
+    var srcFileName = config.get(Constants.DEPENDENCIES_SOURCE).orElse("openedge-project.json");
+
+    List<LocalDependency> resolvedDependencies = new ArrayList<>();
+    resolver = new OpenEdgeDependencyResolver();
+    LOG.info("Reading dependencies in {}", srcFileName);
+
+    try (var reader = java.nio.file.Files.newBufferedReader(fileSystem.baseDir().toPath().resolve(srcFileName))) {
+      var cfg = new GsonBuilder().create().fromJson(reader, ProjectConfigFile.class);
+      if ((cfg != null) && (cfg.dependencies != null)) {
+        for (var dep : cfg.dependencies) {
+          if (dep == null)
+            continue;
+          var dlFile = resolver.downloadArtifact(dep.groupId, dep.artifactId, dep.version, dep.classifier,
+              dep.extension);
+          resolvedDependencies.add(
+              new LocalDependency(dep.groupId, dep.artifactId, dep.version, dep.classifier, dep.extension, dlFile));
+          LOG.debug("Dependency: {}", dlFile.getPath());
+        }
+      }
+    } catch (IOException | RepositoryException e) {
+      LOG.error("Error handling dependencies in {}", srcFileName, e);
+    }
+
+    try {
+      var list = processArtifacts(resolvedDependencies, projectName);
+      propath.addAll(list.stream().map(Path::toFile).toList());
+      propathFull.addAll(list.stream().map(Path::toFile).toList());
+    } catch (IOException e) {
+      LOG.error("error on getting dependencies{}{}", " ", e);
+      e.printStackTrace();
+    }
+  }
+
+  private List<Path> processArtifacts(List<LocalDependency> resolvedDependencies, String projectName)
+      throws IOException {
+    var dotDir = fileSystem.baseDir().toPath().resolve(".dependencies");
+    java.nio.file.Files.createDirectories(dotDir);
+    List<Path> list = new ArrayList<>();
+    for (var dep : resolvedDependencies) {
+      var extractPath = resolver.processArtifact(dep, dotDir, projectName);
+      if (dep.classifier() == null) {
+        if ("zip".equals(dep.extension()) && (extractPath != null)) {
+          try (var files = java.nio.file.Files.list(extractPath)) {
+            list.addAll(files.filter(
+                it -> it.getFileName().toString().endsWith(".pl") || it.getFileName().toString().endsWith(".apl")) //
+              .toList());
+          }
+          list.add(extractPath);
+        } else if ("pl".equals(dep.extension()) || "apl".equals(dep.extension())) {
+          list.add(dep.localFile().toPath());
+        }
+      }
+    }
+
+    return list;
   }
 
   private final void initializeCPD() {
