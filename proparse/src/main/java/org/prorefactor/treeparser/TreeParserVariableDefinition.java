@@ -171,7 +171,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterRecordFunction(RecordFunctionContext ctx) {
-    setContextQualifier(ctx.record(), ContextQualifier.REF);
+    setContextQualifier(ctx.recFuncRecord().record(), ContextQualifier.REF);
   }
 
   @Override

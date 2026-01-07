@@ -4024,8 +4024,13 @@ recordFunction:
   | ROWID
   | ROWSTATE
   )
-  ( LEFTPAREN record RIGHTPAREN | record )
+  ( LEFTPAREN recFuncRecord RIGHTPAREN | recFuncRecord )
 ;
+
+// Only in order to identify 'record' in code completion
+recFuncRecord:
+  record
+  ;
 
 optionalArgFunction:
   (
