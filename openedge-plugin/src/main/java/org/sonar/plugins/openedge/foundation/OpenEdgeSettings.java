@@ -319,7 +319,7 @@ public class OpenEdgeSettings {
   private final void initializeIncludeExtensions() {
     includeExtensions.addAll(Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
         config.get(Constants.INCLUDE_SUFFIXES).orElse(OpenEdge.DEFAULT_INCLUDE_FILE_SUFFIXES)).stream().map(
-            String::toLowerCase).collect(Collectors.toList()));
+            String::toLowerCase).toList());
   }
 
   private final void initializeBuildBinaryCache() {
@@ -1068,8 +1068,8 @@ public class OpenEdgeSettings {
       int version = input.readInt();
       if ((magic == 0x57535352) && (version == 2)) {
         Object obj = kryo.readClassAndObject(input);
-        if (obj instanceof Schema)
-          return (Schema) obj;
+        if (obj instanceof Schema schema)
+          return schema;
       }
       LOG.info("Invalid schema read from serialized file");
     } catch (KryoException | IOException caught) {
