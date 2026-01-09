@@ -23,6 +23,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -49,6 +50,8 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import eu.rssw.pct.RCodeInfo;
+import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
@@ -60,8 +63,11 @@ public class TreeParser03Test extends AbstractProparseTest {
   private RefactorSession session;
 
   @BeforeTest
-  public void setUp() throws IOException {
+  public void setUp() throws IOException, InvalidRCodeException {
     session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
+
+    session.injectTypeInfo(new RCodeInfo(new FileInputStream("src/test/resources/data/test43.r")).getTypeInfo());
+    session.injectTypeInfo(new RCodeInfo(new FileInputStream("src/test/resources/data/test44.r")).getTypeInfo());
   }
 
   @Test
@@ -1695,4 +1701,30 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(xx.getDataType().getClassName(), "Progress.Collections.IMap");
   }
 
+  @Test
+  public void test43() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test43.cls"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    List<Routine> lst = unit.getRootScope().lookupRoutines("foo1");
+    assertEquals(lst.size(), 1);
+    Routine r1 = lst.get(0);
+    assertNotNull(r1.getMethodElement());
+  }
+
+  @Test
+  public void test44() {
+    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test44.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    List<Routine> lst = unit.getRootScope().lookupRoutines("foo1");
+    assertEquals(lst.size(), 1);
+    Routine r1 = lst.get(0);
+    assertNull(r1.getMethodElement());
+  }
+  
 }

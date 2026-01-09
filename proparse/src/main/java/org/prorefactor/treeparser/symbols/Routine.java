@@ -28,6 +28,8 @@ import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IMethodElement;
+import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
 /**
@@ -170,6 +172,17 @@ public class Routine extends Symbol {
     return routineScope;
   }
 
+  public IMethodElement getMethodElement() {
+    if (progressType == ABLNodeType.METHOD) {
+      for (IMethodElement method : routineScope.getRootScope().getTypeInfo().getMethods()) {
+        if (isSameMethod(this, method)) {
+          return method;
+        }
+      }
+    }
+    return null;
+  }
+
   public Routine getForwardDeclaration() {
     return fwdDeclaration;
   }
@@ -273,6 +286,33 @@ public class Routine extends Symbol {
 
       graph.addEdge(ifNode.asJPNode(), ifNode.getElseBlockOrNode().asJPNode());
     }
+  }
+  
+  private boolean isSameMethod(Routine routine, IMethodElement method) {
+    // Different name, no match...
+    if (!method.getName().equalsIgnoreCase(routine.getName()))
+      return false;
+    // Different number of parameters, no match...
+    if (method.getParameters().length != routine.getParameters().size())
+      return false;
+    // Compare parameter data type one by one
+    int zz = 0;
+    for (IParameter prm : method.getParameters()) {
+      Symbol prm2 = routine.getParameters().get(zz).getSymbol();
+      if (!(prm2 instanceof Variable)) {
+        return false;
+      }
+      Variable var2 = (Variable) prm2;
+      if (prm.isClassDataType()) {
+        if (!prm.getDataType().getClassName().equalsIgnoreCase(var2.getDataType().getClassName()))
+          return false;
+      } else {
+        if (prm.getDataType() != var2.getDataType())
+          return false;
+      }
+      zz++;
+    }
+    return true;
   }
 
   @Override
