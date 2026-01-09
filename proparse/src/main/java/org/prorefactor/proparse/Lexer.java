@@ -1887,6 +1887,7 @@ public class Lexer implements IPreprocessor {
     currentInput = null;
     includeCache.clear();
     includeCache2.clear();
+    includeVector.clear();
   }
 
   /**

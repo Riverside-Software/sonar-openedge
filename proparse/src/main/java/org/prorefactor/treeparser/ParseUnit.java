@@ -404,6 +404,7 @@ public class ParseUnit {
         } catch (ParseCancellationException uncaught2) {
           parseTimeLL = System.nanoTime() - startTimeNs;
           syntaxError = true;
+          lexer.parseComplete();
           throw uncaught2;
         }
       }
