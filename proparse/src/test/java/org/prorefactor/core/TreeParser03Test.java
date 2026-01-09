@@ -49,8 +49,12 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.PrimitiveDataType;
+import eu.rssw.pct.elements.fixed.MethodElement;
+import eu.rssw.pct.elements.fixed.TypeInfo;
 
 /**
  * This class simply runs the tree parser through various code, and as long as the tree parser does not throw any
@@ -62,6 +66,12 @@ public class TreeParser03Test extends AbstractProparseTest {
   @BeforeTest
   public void setUp() throws IOException {
     session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
+
+    var test43 = new TypeInfo("test43", false, false, BuiltinClasses.PLO_CLASSNAME, "");
+    var test43Foo1 = new MethodElement("foo1", false, DataType.VOID, new eu.rssw.pct.elements.fixed.Parameter[] {
+        new eu.rssw.pct.elements.fixed.Parameter(0, "ipPrm", 0, ParameterMode.OUTPUT, DataType.INTEGER)});
+    test43.addMethod(test43Foo1);
+    session.injectTypeInfo(test43);
   }
 
   @Test
@@ -1695,4 +1705,30 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(xx.getDataType().getClassName(), "Progress.Collections.IMap");
   }
 
+  @Test
+  public void test43() {
+    var unit = getParseUnit(new File("src/test/resources/treeparser03/test43.cls"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    var lst = unit.getRootScope().lookupRoutines("foo1");
+    assertEquals(lst.size(), 1);
+    var r1 = lst.get(0);
+    assertNotNull(r1.getMethodElement());
+  }
+
+  @Test
+  public void test44() {
+    var unit = getParseUnit(new File("src/test/resources/treeparser03/test44.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    var lst = unit.getRootScope().lookupRoutines("foo1");
+    assertEquals(lst.size(), 1);
+    var r1 = lst.get(0);
+    assertNull(r1.getMethodElement());
+  }
+  
 }
