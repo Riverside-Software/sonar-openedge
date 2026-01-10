@@ -26,8 +26,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
 import javax.annotation.processing.Generated;
@@ -45,7 +45,7 @@ import eu.rssw.pct.mapping.OpenEdgeVersion;
 
 @Generated(value = "github.com/Riverside-Software/genBuiltinClasses")
 public class BuiltinClasses {
-  private static final Map<OpenEdgeVersion, Collection<ITypeInfo>> BUILTIN_CLASSES = new HashMap<>();
+  private static final Map<OpenEdgeVersion, Collection<ITypeInfo>> BUILTIN_CLASSES = new ConcurrentHashMap<>();
 
   private static final ITypeInfo PROGRESS_LANG_OBJECT;
   private static final ITypeInfo PROGRESS_LANG_ENUM;

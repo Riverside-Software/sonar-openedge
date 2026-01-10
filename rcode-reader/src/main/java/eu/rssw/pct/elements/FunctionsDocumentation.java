@@ -26,8 +26,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
@@ -35,14 +35,14 @@ import javax.annotation.processing.Generated;
 
 import com.google.gson.GsonBuilder;
 
-import eu.rssw.pct.elements.fixed.ParamDocumentation;
 import eu.rssw.pct.elements.fixed.FunctionDocumentation;
+import eu.rssw.pct.elements.fixed.ParamDocumentation;
 import eu.rssw.pct.mapping.FunctionsDocumentationMapping;
 import eu.rssw.pct.mapping.OpenEdgeVersion;
 
 @Generated(value = "github.com/Riverside-Software/oe-documentation")
 public class FunctionsDocumentation {
-  private static final Map<OpenEdgeVersion, Collection<IFunctionDocumentation>> FUNCTION_DOCUMENTATION = new HashMap<>();
+  private static final Map<OpenEdgeVersion, Collection<IFunctionDocumentation>> FUNCTION_DOCUMENTATION = new ConcurrentHashMap<>();
 
   public static final Function<OpenEdgeVersion, Function<String, IFunctionDocumentation>> FUNCTION_DOCUMENTATION_PROVIDER = version -> {
     return name -> getFunctionsDocumentation(version).stream().filter(
