@@ -2,7 +2,7 @@
  * OpenEdge plugin for SonarQube
  * Copyright (c) 2015-2025 Riverside Software
  * contact AT riverside DASH software DOT fr
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -17,15 +17,33 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements;
+package eu.rssw.pct.mapping;
 
-import com.google.gson.annotations.JsonAdapter;
+import java.io.IOException;
 
-import eu.rssw.pct.mapping.EventElementAdapter;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
-@JsonAdapter(EventElementAdapter.class)
-public interface IEventElement extends IAccessibleElement {
-  DataType getReturnType();
-  String getDelegateName();
-  IParameter[] getParameters();
+import eu.rssw.pct.elements.IBufferElement;
+
+public class BufferElementAdapter extends TypeAdapter<IBufferElement> {
+  @Override
+  public void write(JsonWriter out, IBufferElement value) throws IOException {
+    if (value == null) {
+      out.nullValue();
+      return;
+    }
+    out.beginObject();
+    out.name("name").value(value.getName());
+    out.name("databaseName").value(value.getDatabaseName());
+    out.name("tableName").value(value.getTableName());
+    out.name("isTempTableBuffer").value(value.isTempTableBuffer());
+    out.endObject();
+  }
+
+  @Override
+  public IBufferElement read(JsonReader in) throws IOException {
+    throw new UnsupportedOperationException();
+  }
 }

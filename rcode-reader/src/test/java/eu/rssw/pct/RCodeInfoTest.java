@@ -46,6 +46,11 @@ import org.testng.annotations.Test;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.BuiltinClasses;
@@ -835,6 +840,77 @@ public class RCodeInfoTest {
     assertFalse(table1.isNoUndo());
     assertFalse(table1.isSerializable());
     assertTrue(table1.isPublic());
+  }
+
+  @Test
+  public void testTypeInfoJsonSerialization() throws IOException {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/TestClassElementsV12.r"))) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      assertNotNull(rci.getTypeInfo());
+
+      // Serialize to JSON
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      String json = gson.toJson(rci.getTypeInfo());
+      assertNotNull(json);
+      assertFalse(json.isEmpty());
+
+      // Parse the JSON and verify attributes
+      JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+
+      // Verify basic structure exists
+      assertTrue(root.has("typeName"), "JSON should contain typeName: " + json);
+      assertEquals(root.get("typeName").getAsString(), "rcode.TestClassElements");
+
+      // Verify parent type name
+      assertTrue(root.has("parentTypeName"));
+      assertEquals(root.get("parentTypeName").getAsString(), "Progress.Lang.Object");
+
+      // Verify flags
+      assertTrue(root.has("isInterface"));
+      assertFalse(root.get("isInterface").getAsBoolean());
+      assertTrue(root.has("isAbstract"));
+      assertFalse(root.get("isAbstract").getAsBoolean());
+
+      // Verify methods array exists and has content
+      assertTrue(root.has("methods"));
+      JsonArray methods = root.getAsJsonArray("methods");
+      assertTrue(methods.size() > 0);
+
+      // Verify properties array exists
+      assertTrue(root.has("properties"));
+      JsonArray properties = root.getAsJsonArray("properties");
+      assertNotNull(properties);
+
+      // Verify tables array exists and has content
+      assertTrue(root.has("tables"));
+      JsonArray tables = root.getAsJsonArray("tables");
+      assertEquals(tables.size(), 7);
+
+      // Verify first table has expected structure
+      JsonObject firstTable = tables.get(0).getAsJsonObject();
+      assertTrue(firstTable.has("name"));
+      assertTrue(firstTable.has("fields"));
+      assertTrue(firstTable.has("indexes"));
+
+      // Verify datasets array exists
+      assertTrue(root.has("datasets"));
+      JsonArray datasets = root.getAsJsonArray("datasets");
+      assertEquals(datasets.size(), 1);
+
+      // Verify events array exists
+      assertTrue(root.has("events"));
+      JsonArray events = root.getAsJsonArray("events");
+      assertEquals(events.size(), 1);
+
+      // Verify first event has name
+      JsonObject firstEvent = events.get(0).getAsJsonObject();
+      assertTrue(firstEvent.has("name"));
+      assertEquals(firstEvent.get("name").getAsString(), "NewCustomer");
+
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
   }
 
 }

@@ -19,6 +19,11 @@
  */
 package eu.rssw.pct.elements;
 
+import com.google.gson.annotations.JsonAdapter;
+
+import eu.rssw.pct.mapping.ParameterAdapter;
+
+@JsonAdapter(ParameterAdapter.class)
 public interface IParameter extends IElement {
   int getNum();
   String getName();

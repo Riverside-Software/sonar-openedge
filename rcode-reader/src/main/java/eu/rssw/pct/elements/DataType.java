@@ -21,6 +21,11 @@ package eu.rssw.pct.elements;
 
 import java.util.function.Function;
 
+import com.google.gson.annotations.JsonAdapter;
+
+import eu.rssw.pct.mapping.DataTypeAdapter;
+
+@JsonAdapter(DataTypeAdapter.class)
 public class DataType {
   public static final DataType VOID = new DataType(PrimitiveDataType.VOID);
   public static final DataType CHARACTER = new DataType(PrimitiveDataType.CHARACTER);

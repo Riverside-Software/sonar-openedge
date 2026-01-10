@@ -19,6 +19,11 @@
  */
 package eu.rssw.pct.elements;
 
+import com.google.gson.annotations.JsonAdapter;
+
+import eu.rssw.pct.mapping.BufferElementAdapter;
+
+@JsonAdapter(BufferElementAdapter.class)
 public interface IBufferElement extends IAccessibleElement {
   String getDatabaseName();
   String getTableName();

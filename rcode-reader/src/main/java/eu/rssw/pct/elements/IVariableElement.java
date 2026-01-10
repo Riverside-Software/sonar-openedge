@@ -19,6 +19,11 @@
  */
 package eu.rssw.pct.elements;
 
+import com.google.gson.annotations.JsonAdapter;
+
+import eu.rssw.pct.mapping.VariableElementAdapter;
+
+@JsonAdapter(VariableElementAdapter.class)
 public interface IVariableElement extends IAccessibleElement {
   int getExtent();
   DataType getDataType();

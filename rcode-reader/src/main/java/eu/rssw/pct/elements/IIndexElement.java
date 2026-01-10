@@ -19,6 +19,11 @@
  */
 package eu.rssw.pct.elements;
 
+import com.google.gson.annotations.JsonAdapter;
+
+import eu.rssw.pct.mapping.IndexElementAdapter;
+
+@JsonAdapter(IndexElementAdapter.class)
 public interface IIndexElement extends IElement {
   IIndexComponentElement[] getIndexComponents();
   boolean isPrimary();

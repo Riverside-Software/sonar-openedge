@@ -21,6 +21,11 @@ package eu.rssw.pct.elements;
 
 import javax.annotation.Nullable;
 
+import com.google.gson.annotations.JsonAdapter;
+
+import eu.rssw.pct.mapping.PropertyElementAdapter;
+
+@JsonAdapter(PropertyElementAdapter.class)
 public interface IPropertyElement extends IAccessibleElement {
   @Nullable
   IVariableElement getVariable();
