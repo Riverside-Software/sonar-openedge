@@ -2,7 +2,7 @@
  * OpenEdge plugin for SonarQube
  * Copyright (c) 2015-2025 Riverside Software
  * contact AT riverside DASH software DOT fr
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,13 +19,28 @@
  */
 package eu.rssw.pct.elements;
 
-import com.google.gson.annotations.JsonAdapter;
+import java.io.IOException;
 
-@JsonAdapter(IndexElementAdapter.class)
-public interface IIndexElement extends IElement {
-  IIndexComponentElement[] getIndexComponents();
-  boolean isPrimary();
-  boolean isUnique();
-  boolean isWordIndex();
-  boolean isDefaultIndex();
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+
+public class IndexComponentElementAdapter extends TypeAdapter<IIndexComponentElement> {
+  @Override
+  public void write(JsonWriter out, IIndexComponentElement value) throws IOException {
+    if (value == null) {
+      out.nullValue();
+      return;
+    }
+    out.beginObject();
+    out.name("name").value(value.getName());
+    out.name("position").value(value.getFieldPosition());
+    out.name("ascending").value(value.isAscending());
+    out.endObject();
+  }
+
+  @Override
+  public IIndexComponentElement read(JsonReader in) throws IOException {
+    throw new UnsupportedOperationException();
+  }
 }

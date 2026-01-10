@@ -21,6 +21,9 @@ package eu.rssw.pct.elements;
 
 import java.util.function.Function;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(DataTypeAdapter.class)
 public class DataType {
   public static final DataType VOID = new DataType(PrimitiveDataType.VOID);
   public static final DataType CHARACTER = new DataType(PrimitiveDataType.CHARACTER);

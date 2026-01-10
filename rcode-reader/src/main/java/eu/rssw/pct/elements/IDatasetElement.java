@@ -19,6 +19,9 @@
  */
 package eu.rssw.pct.elements;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(DatasetElementAdapter.class)
 public interface IDatasetElement extends IAccessibleElement {
   IDataRelationElement[] getDataRelations();
   String[] getBufferNames();

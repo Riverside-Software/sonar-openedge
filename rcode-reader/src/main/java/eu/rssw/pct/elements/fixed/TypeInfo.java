@@ -33,7 +33,11 @@ import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.ITableElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.TypeInfoAdapter;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(TypeInfoAdapter.class)
 public class TypeInfo implements ITypeInfo {
   private static final int IS_FINAL = 1;
   private static final int IS_INTERFACE = 2;

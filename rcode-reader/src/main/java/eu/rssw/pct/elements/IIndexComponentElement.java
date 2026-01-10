@@ -19,6 +19,9 @@
  */
 package eu.rssw.pct.elements;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(IndexComponentElementAdapter.class)
 public interface IIndexComponentElement extends IElement {
   int getFieldPosition();
   boolean isAscending();

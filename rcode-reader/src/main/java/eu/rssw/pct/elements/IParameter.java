@@ -19,6 +19,9 @@
  */
 package eu.rssw.pct.elements;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(ParameterAdapter.class)
 public interface IParameter extends IElement {
   int getNum();
   String getName();

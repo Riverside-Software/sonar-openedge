@@ -30,10 +30,14 @@ import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.ITableElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.TypeInfoAdapter;
+
+import com.google.gson.annotations.JsonAdapter;
 
 /**
  * Proxy for a TypeInfo object. Used by SonarLint / VS Code to delay file loading until required by the analyzer
  */
+@JsonAdapter(TypeInfoAdapter.class)
 public abstract class TypeInfoProxy implements ITypeInfo {
   protected final String typeName;
   protected ITypeInfo typeInfo = null;

@@ -19,6 +19,9 @@
  */
 package eu.rssw.pct.elements;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(EventElementAdapter.class)
 public interface IEventElement extends IAccessibleElement {
   DataType getReturnType();
   String getDelegateName();

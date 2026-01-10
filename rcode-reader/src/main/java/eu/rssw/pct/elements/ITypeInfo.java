@@ -28,9 +28,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
+
 import org.prorefactor.core.Pair;
 import org.prorefactor.core.Triplet;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(TypeInfoAdapter.class)
 public interface ITypeInfo {
   String getTypeName();
   String getParentTypeName();

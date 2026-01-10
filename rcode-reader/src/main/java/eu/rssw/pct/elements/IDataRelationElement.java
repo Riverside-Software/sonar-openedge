@@ -19,6 +19,9 @@
  */
 package eu.rssw.pct.elements;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(DataRelationElementAdapter.class)
 public interface IDataRelationElement extends IElement {
   String getParentBufferName();
   String getChildBufferName();

@@ -25,10 +25,13 @@ import java.nio.file.Path;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
+import com.google.gson.annotations.JsonAdapter;
 
 import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.TypeInfoAdapter;
 
+@JsonAdapter(TypeInfoAdapter.class)
 public class TypeInfoKryoProxy extends TypeInfoProxy {
   private final Kryo kryo;
   private final Path path;

@@ -23,11 +23,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import com.google.gson.annotations.JsonAdapter;
+
 import eu.rssw.pct.PLReader.InvalidLibraryException;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.BuiltinClasses;
+import eu.rssw.pct.elements.TypeInfoAdapter;
 
+@JsonAdapter(TypeInfoAdapter.class)
 public class TypeInfoRCodeProxy extends TypeInfoProxy {
   private final Path rcode;
 

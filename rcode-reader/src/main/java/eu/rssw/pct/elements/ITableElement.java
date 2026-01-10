@@ -19,6 +19,9 @@
  */
 package eu.rssw.pct.elements;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(TableElementAdapter.class)
 public interface ITableElement extends IAccessibleElement {
   String getBeforeTableName();
   IVariableElement[] getFields();

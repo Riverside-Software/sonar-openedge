@@ -41,8 +41,12 @@ import eu.rssw.pct.elements.IQueryElement;
 import eu.rssw.pct.elements.ITableElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.TypeInfoAdapter;
 import eu.rssw.pct.elements.fixed.EnumGetValueMethodElement;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(TypeInfoAdapter.class)
 public class TypeInfoV11 implements ITypeInfo {
   private static final int IS_FINAL = 1;
   private static final int IS_INTERFACE = 2;
