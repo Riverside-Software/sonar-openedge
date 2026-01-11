@@ -53,7 +53,7 @@ public class ParserSupport {
   private List<SymbolScope> innerScopes = new ArrayList<>();
   private Map<RuleContext, SymbolScope> innerScopesMap = new HashMap<>();
   private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
-
+  private Map<String, String> resolvedClassNames = new HashMap<>();
   private boolean schemaTablePriority = false;
   private boolean unitIsAbstract = true;
   private boolean unitIsInterface = false;
@@ -334,7 +334,20 @@ public class ParserSupport {
 
   // TODO Speed issue in this function, multiplied JPNode tree generation time by a factor 10
   public String lookupClassName(String text) {
-    return classFinder.lookup(text);
+    var rslt = classFinder.lookup(text);
+    if ((rslt != null) && !rslt.isBlank())
+        resolvedClassNames.computeIfAbsent(text.toLowerCase(), it -> rslt);
+    return rslt;
+  }
+
+  /**
+   * @return List of all classes that have been resolved in USING statements by the parser
+   */
+  public List<String> getAllResolvedClasses() {
+    return resolvedClassNames.entrySet().stream() //
+      .filter(entry -> entry.getKey().length() < entry.getValue().length()) //
+      .map(entry -> entry.getValue()) //
+      .toList();
   }
 
 }
