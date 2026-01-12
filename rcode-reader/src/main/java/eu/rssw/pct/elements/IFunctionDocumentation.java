@@ -24,7 +24,7 @@ import java.util.Collection;
 public interface IFunctionDocumentation extends IElementDocumentation {
 
   Collection<IParameterDocumentation> getParameters();
-  
+
   default boolean hasParameters(String name) {
     for (var param : getParameters()) {
       if (param.getName().equalsIgnoreCase(name))
@@ -34,7 +34,7 @@ public interface IFunctionDocumentation extends IElementDocumentation {
   }
 
   default IParameterDocumentation getParameter(String param) {
-    var tmp = param; 
+    var tmp = param;
     for (var elem : getParameters()) {
       if (tmp.equalsIgnoreCase(elem.getName())) {
         return elem;
@@ -42,5 +42,5 @@ public interface IFunctionDocumentation extends IElementDocumentation {
     }
     return null;
   }
-  
+
 }
