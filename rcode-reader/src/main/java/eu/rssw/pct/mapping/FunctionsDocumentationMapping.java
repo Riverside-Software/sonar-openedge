@@ -42,6 +42,8 @@ public class FunctionsDocumentationMapping {
     public String name;
     @SerializedName(value = "description")
     public String description;
+    @SerializedName(value = "returnType")
+    public String returnType;    
     @SerializedName(value = "parameters")
     public Parameter[] parameters;
   }

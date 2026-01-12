@@ -19,11 +19,11 @@
  */
 package eu.rssw.pct.elements;
 
-import java.util.Collection;
-
 public interface IFunctionDocumentation extends IElementDocumentation {
 
-  Collection<IParameterDocumentation> getParameters();
+  IParameterDocumentation[] getParameters();
+
+  DataType getReturnType();
 
   default boolean hasParameters(String name) {
     for (var param : getParameters()) {
@@ -41,6 +41,32 @@ public interface IFunctionDocumentation extends IElementDocumentation {
       }
     }
     return null;
+  }
+
+  default String getIDESignature() {
+    return getIDESignature(false);
+  }
+
+  default String getIDESignature(boolean chronological) {
+    StringBuilder retVal = new StringBuilder(getName());
+    if (getParameters().length > 0)
+      retVal.append('(');
+    boolean first = true;
+    for (IParameterDocumentation p : getParameters()) {
+      retVal.append(p.isOptional() ? " [" : "");
+      if (first) {
+        first = false;
+      } else {
+        retVal.append(", ");
+      }
+      retVal.append(p.getDataType());
+      retVal.append(" ");
+      retVal.append(p.getName());
+      retVal.append(p.isOptional() ? "]" : "");
+    }
+    if (getParameters().length > 0)
+      retVal.append(')');
+    return retVal.toString();
   }
 
 }

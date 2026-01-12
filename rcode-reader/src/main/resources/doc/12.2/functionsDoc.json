@@ -16,7 +16,8 @@
           "description": "An integer or decimal expression. The return value is the same format as n.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "ACCUM",
@@ -34,7 +35,8 @@
           "description": "An expression that was used in an earlier ACCUMULATE or DISPLAY statement. The expression you use in the ACCUMULATE or DISPLAY statement and the expression you use in the ACCUM function must be in exactly the same form. (For example, \"on-hand * cost\" and \"cost * on-hand\" are not in exactly the same form.) For the AVERAGE, SUB-AVERAGE, TOTAL, and SUB-TOTAL aggregate phrases, expression must be numeric.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "ADD-INTERVAL",
@@ -58,7 +60,8 @@
           "description": "A character constant, or a character expression that evaluates to one of the following time units: ‘years', ‘months', ‘weeks', ‘days', 'hours', ‘minutes', ‘seconds' or ‘milliseconds'. These values are case insensitive and may be singular.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "DECIMAL"
     },
     {
       "name": "ALIAS",
@@ -70,7 +73,8 @@
           "description": "If there are, for example, three currently defined aliases, the functions ALIAS(1), ALIAS(2), and ALIAS(3) return them. If the ALIAS function cannot find a defined alias, it returns the Unknown value (?). For example, building on the previous example of three defined aliases, the functions ALIAS(4), ALIAS(5), and ALIAS(6) return the Unknown value (?) because they cannot find a defined alias.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "AMBIGUOUS",
@@ -82,7 +86,8 @@
           "description": "The name of a record or record buffer used in a previous FIND statement. To access a record in a table defined for multiple databases, you might have to qualify the record's table name with the database name. See the record definition in the Record phrase reference entry for more information.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "ASC",
@@ -106,7 +111,8 @@
           "description": "A character-string expression that evaluates to the name of a code page. The name that you specify must be a valid code page name available in the OpenEdge-install-dir/convmap.cp file. If you supply a non-valid name, the ASC function returns the value -1. The source-codepage specifies the name of the code page to which expression is relative. The default value of source-codepage is the code page identified with the Internal Code Page (-cpinternal) parameter.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "AUDIT-ENABLED",
@@ -124,7 +130,8 @@
           "description": "The logical name or alias of a connected database to query. These forms require a quoted character string or a character expression. If you specify a logical name or alias that does not correspond to a connected database, the AVM returns the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "AVAILABLE",
@@ -136,7 +143,8 @@
           "description": "The name of the record buffer you want to check. Note: To access a record in a table defined for multiple databases, you might have to qualify the record's table name with the database name. See the record definition in the Record phrase reference entry for more information.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "BASE64-DECODE",
@@ -148,7 +156,8 @@
           "description": "A CHARACTER or LONGCHAR expression containing the string you want to convert.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "MEMPTR"
     },
     {
       "name": "BASE64-ENCODE",
@@ -160,7 +169,8 @@
           "description": "A MEMPTR or RAW expression containing the binary data you want to convert.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LONGCHAR"
     },
     {
       "name": "BOX",
@@ -172,7 +182,8 @@
           "description": "Specifies an expression with a value in one of the following .NET-compatible ABL data types: CHARACTER DATE DATETIME DATETIME-TZ DECIMAL INT64 INTEGER LOGICAL LONGCHAR A .NET-compatible ABL array A .NET-compatible ABL array is an ABL array of one of the listed ABL primitive types or an ABL array of any supported .NET object type (a .NET object type not mapped as specified in Table 4 ).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "SYSTEM.OBJECT"
     },
     {
       "name": "BUFFER-GROUP-ID",
@@ -184,7 +195,8 @@
           "description": "An identifier that specifies the name of a record buffer.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "BUFFER-GROUP-NAME",
@@ -196,7 +208,8 @@
           "description": "An identifier that specifies the name of a record buffer.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "BUFFER-PARTITION-ID",
@@ -208,7 +221,8 @@
           "description": "An identifier that specifies the name of a record buffer. If the buffer is not populated with a record, this function returns the Unknown value (?). If there is a record in the buffer but it is not for a partitioned table, this function returns zero (0).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "BUFFER-TENANT-ID",
@@ -220,7 +234,8 @@
           "description": "An identifier that specifies the name of a record buffer. If the buffer is not populated with a record, this function returns the Unknown value (?). If the buffer is for a shared table, a temp-table, or for the default tenant of a multi-tenant table, the function returns the value zero (0). If the buffer contains a record for a tenant group and the user is a super tenant, the function returns the tenant ID of one of the members of the group. The tenant ID returned is indeterminate, but is always the tenant ID of a tenant in the group. For a regular tenant, the record in the buffer always belongs to that tenant. So, the function always returns the user's own tenant ID. This is true even if the record belongs to a tenant group.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "BUFFER-TENANT-NAME",
@@ -232,7 +247,8 @@
           "description": "An identifier that specifies the name of a record buffer. If the buffer is not populated with a record, this function returns the Unknown value (?). If the buffer is for a shared table or a temp-table, the function returns the empty string (\"\"). If the buffer contains a record that belongs to a tenant group and the user is a super tenant, the function returns the tenant name of one of the members of the group. The tenant name returned is indeterminate, but is always the name of a tenant in the group. For a regular tenant user, the record in the buffer always belongs to that tenant. So, the function always returns the user's own tenant name. This is true even if the record belongs to a tenant group.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "CAN-DO",
@@ -250,7 +266,8 @@
           "description": "A character expression that evaluates to a user ID value that can be returned from the QUALIFIED-USER-ID attribute, USER-ID attribute, or USERID function. The userid is checked against id-pattern-list. If you do not enter userid, the compiler inserts the USERID function by default, which is evaluated each time you run the procedure or class. If the compiler inserts the USERID function, the function does not reference a database name and therefore only works for an ABL session with one database connection. If you explicitly use the USERID function and have more than one database connected, be sure to include the database name with the function call, for example, USERID(\"Sports2020\").",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "CAN-FIND",
@@ -292,7 +309,8 @@
           "description": "One or more names of fields you want to use to search for a record. The field you name in this argument must have been previously entered into a screen field, usually with a PROMPT-FOR statement. The field must be viewed as a fill-in or text widget.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "CAN-QUERY",
@@ -310,7 +328,8 @@
           "description": "An expression that evaluates to a character-string value. The contents of the string must be an attribute or method name. For more information on attributes, see the Handle Attributes and Methods Reference.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "CAN-SET",
@@ -328,7 +347,8 @@
           "description": "An expression that evaluates to a character-string value. The contents of the string must be an attribute name. For more information on attributes, see the Handle Attributes and Methods Reference.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "CAPS",
@@ -340,7 +360,8 @@
           "description": "A constant, field name, variable name, or expression that results in a CHARACTER or LONGCHAR value.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "CAST",
@@ -358,7 +379,8 @@
           "description": "Specifies the type name of an ABL or .NET class or interface type to which the object reference is cast. This object type must be a class type in a class hierarchy that includes or implements the object-reference data type or it must be an interface type that the object-reference data type implements. Specify the object type name using the syntax described in the Type-name syntax reference entry. With an appropriate USING statement, you can also specify an unqualified class or interface name alone.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "CHR",
@@ -382,7 +404,8 @@
           "description": "A character-string expression that evaluates to the name of a code page. The name that you specify must be a valid code page name available in the DLC/convmap.cp file. If you supply a non-valid name, the CHR function returns a null string. The source-codepage specifies the name of the code page to which expression is relative. The default value of source-codepage is the value of SESSION:CHARSET.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "CODEPAGE-CONVERT",
@@ -406,7 +429,8 @@
           "description": "A character-string expression that evaluates to the name of a code page. The source-codepage specifies the name of the code page to which source-string is relative. The name that you specify must be a valid code page name available in the DLC/convmap.cp file. If you supply a non-valid name, the CODEPAGE-CONVERT function returns the Unknown value (?). The default value of source-codepage is the value of CHARSET attribute of the SESSION handle.If source-string is a LONGCHAR variable, the source-codepage argument is not valid. In this case, the code page of the LONGCHAR variable is used as the source code page.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "COMPARE",
@@ -442,7 +466,8 @@
           "description": "A CHARACTER expression that evaluates to the name of an ABL collation table or ICU collation. By default, the AVM uses the collation rules you specify to compare characters and sort records. The collation rules specified with the Collation Table (-cpcoll) startup parameter take precedence over a collation specified for any database the AVM accesses during the session, except when the AVM uses or modifies pre-existing indexes. If you do not specify a collation with the -cpcoll startup parameter, the AVM uses the language collation rules defined for the first database on the command line. If you do not specify a database on the command line, the AVM uses the collation rules with the default name \"basic\" (which might or might not exist in the convmap.cp file).If strength is not RAW or CAPS, the collation must be either an ABL collation table in the convmap.cp file or an ICU collation, and must be a valid collation table for the code page corresponding to the -cpinternal startup parameter.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "CONNECTED",
@@ -460,7 +485,8 @@
           "description": "Refers to an alias. It can be a quoted string or a character expression. An unquoted character string is not allowed.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "COUNT-OF",
@@ -472,7 +498,8 @@
           "description": "The name of a field or expression you named in the block header with the BREAK BY option.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "CURRENT-CHANGED",
@@ -484,11 +511,13 @@
           "description": "The name of a table or buffer.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "CURRENT-LANGUAGE",
-      "description": "Returns the current value of the CURRENT-LANGUAGE variable."
+      "description": "Returns the current value of the CURRENT-LANGUAGE variable.",
+      "returnType": "DECIMAL"
     },
     {
       "name": "CURRENT-RESULT-ROW",
@@ -500,7 +529,8 @@
           "description": "A character expression that evaluates to the name of a currently open, scrolling query. If query-name does not resolve to the name of a query, or if the query is not open or not scrolling, then the function returns the Unknown value (?).Note: Searching for a query using a handle is more efficient than a character expression. The AVM resolves a character expression at run time by searching in the current routine for a static query with that name. If not found, the AVM searches the enclosing main procedure. If still not found, the AVM searches up through the calling programs of the current routine and their main procedures. Since a handle uniquely identifies a query, no such search is required.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "CURRENT-VALUE",
@@ -524,11 +554,13 @@
           "description": "An integer expression that evaluates to the tenant ID of a regular tenant, including the default tenant (0). This option applies only to a multi-tenant sequence specified by sequence and is intended for access primarily by a super-tenant user. If you are a regular-tenant user and you specify tenant-id, the specified tenant must be the same as the tenant associated with the database connection identity for logical-dbname or the AVM raises a run-time error. If you are a super-tenant user and you do not specify tenant-id, the function assumes the effective tenant ID (GET-EFFECTIVE-TENANT-ID function). If the sequence specified by sequence is non-multi-tenant (a shared sequence in a multi-tenant database), and you specify tenant-id, the option is ignored.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INT64"
     },
     {
       "name": "DATASERVERS",
-      "description": "Returns a list of database types your OpenEdge product supports from where it is executed. The DATASERVERS function takes no arguments."
+      "description": "Returns a list of database types your OpenEdge product supports from where it is executed. The DATASERVERS function takes no arguments.",
+      "returnType": "CHARACTER"
     },
     {
       "name": "DATA-SOURCE-MODIFIED",
@@ -540,7 +572,8 @@
           "description": "The name of a ProDataSet temp-table buffer.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "DATE",
@@ -570,7 +603,8 @@
           "description": "A character string containing a date value to convert into a DATE data type. The string value must have the format specified by the Date Format (-d) startup parameter (the default is mdy). Note that -d sets the display format, not the date storage format, which is fixed. Furthermore, date constants entered in procedures, or as initial values in the Data Dictionary, are always specified in month/day/year format. You do not have to specify separator characters for the month, day, and year components of the date string; however, slashes(/), periods(.), and hyphens(-) are accepted as separator characters.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "DATE"
     },
     {
       "name": "DATETIME",
@@ -636,7 +670,8 @@
           "description": "An expression whose value is an integer from 0 to 999, inclusive.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "DATETIME"
     },
     {
       "name": "DATETIME-TZ",
@@ -720,7 +755,8 @@
           "description": "A character expression whose value is a string containing a DATETIME-TZ. The date portion of the string must have the format specified by the DATE-FORMAT attribute. The time portion must be in a valid time format (HH:MM:SS, and so on). If the string contains a time zone, it must be in +HH:MM format. If the string does not contain a time zone, the DATETIME-TZ inherits the session's time zone.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "DATETIME"
     },
     {
       "name": "DAY",
@@ -738,7 +774,8 @@
           "description": "An expression that evaluates to a DATETIME or DATETIME-TZ. The DAY function returns the day of the month of the date part of the DATETIME or DATETIME-TZ value.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "DBCODEPAGE",
@@ -756,7 +793,8 @@
           "description": "A character expression that specifies the database by its logical name or alias.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "DBCOLLATION",
@@ -774,11 +812,13 @@
           "description": "A character expression that specifies the database by its logical name or alias.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "DBNAME",
-      "description": "Returns, as a character string, the name of the logical database currently in use or the name of your first connected database."
+      "description": "Returns, as a character string, the name of the logical database currently in use or the name of your first connected database.",
+      "returnType": "CHARACTER"
     },
     {
       "name": "DBPARAM",
@@ -796,7 +836,8 @@
           "description": "These forms of the DBPARAM function require a character expression as a parameter. An unquoted character string is not permitted. If the parameter is an alias or the logical name of a connected database, then the AVM returns the comma-separated parameter list. Otherwise, it returns the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "DB-REMOTE-HOST",
@@ -814,7 +855,8 @@
           "description": "The sequence number of a connected database. For example, DB-REMOTE-HOST(1) returns information on the first connected database, DB-REMOTE-HOST(2) returns information on the second connected database, and so on.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "DBRESTRICTIONS",
@@ -838,7 +880,8 @@
           "description": "A character expression equal to the name of a table in the specified database. An unquoted character string is not permitted. If the table name is valid, DBRESTRICTIONS returns the list of unsupported features for the specified table. Otherwise, it returns the Unknown value (?).",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "DBTASKID",
@@ -856,7 +899,8 @@
           "description": "A character expression that evaluates to the logical name or alias of a database that is connected to the current ABL session. If the character expression does not evaluate to the logical name or alias of a connected database, DBTASKID returns the Unknown value (?).Note: You must enclose all character strings in quotes.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "DBTYPE",
@@ -874,7 +918,8 @@
           "description": "These forms of the DBTYPE function require a quoted character string or a character expression as a parameter. An unquoted character string is not permitted. If the parameter is an alias of a connected database or the logical name of a connected database, then the AVM returns the database type. Otherwise, it returns the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "DBVERSION",
@@ -892,7 +937,8 @@
           "description": "These forms of the DBVERSION function require a quoted character string or a character expression as a parameter. If the parameter is an alias of a connected database or the logical name of a connected database, then the AVM returns the version number. Otherwise, it returns the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "DECIMAL",
@@ -904,7 +950,8 @@
           "description": "If expression is a CHARACTER, then it must be valid for conversion into a number. (For example, 1.67 is valid but 1.x3 is not valid.) If expression is LOGICAL, then the result is 0 if expression is FALSE and 1 if expression is TRUE. If expression is a DATE, then the result is the number of days from 1/1/4713 B.C. to that date. If the value of expression is the Unknown value (?), then the result is also the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "DECIMAL"
     },
     {
       "name": "DECRYPT",
@@ -934,7 +981,8 @@
           "description": "An optional CHARACTER expression that evaluates to the name of the symmetric cryptographic algorithm originally used to encrypt the specified data instance. If you specify the Unknown value (?), the current value of the SYMMETRIC-ENCRYPTION-ALGORITHM attribute is used. For a list the supported cryptographic algorithms, see the SYMMETRIC-SUPPORT attribute reference entry.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "MEMPTR"
     },
     {
       "name": "DEFINED preprocessor",
@@ -946,7 +994,8 @@
           "description": "Preprocessor name or include file argument name whose status you want to check. You do not specify name as a preprocessor name reference or include file argument reference. That is, it is not quoted and does not appear in the reference form, {&name}. For example if you had a preprocessor name MAX-EXPENSE, the argument would appear as follows: DEFINED(MAX-EXPENSE)",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "DYNAMIC-CAST",
@@ -964,7 +1013,8 @@
           "description": "A character expression that evaluates to the fully qualified type name for the ABL or .NET class or interface type to which the object reference is cast. This object type must be a class type in a class hierarchy that includes or implements the object-reference data type or it must be an interface type that the object-reference data type implements. However, the object type cannot be a .NET generic type. Specify an object type name using the syntax described in the Type-name syntax reference entry. Any present USING statement has no effect. If no package is specified, the class or interface name must represent the complete type name.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "DYNAMIC-CURRENT-VALUE",
@@ -988,7 +1038,8 @@
           "description": "An integer expression that evaluates to the tenant ID of a regular tenant, including the default tenant (0). This option applies only to a multi-tenant sequence specified by sequence-expression and is intended for access primarily by a super-tenant user.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INT64"
     },
     {
       "name": "DYNAMIC-ENUM",
@@ -1012,7 +1063,8 @@
           "description": "Specifies an enum member in one of two ways: A CHARACTER expression that evaluates to the member name at runtime. For flag enums, this can be a comma-delimited list of member names for two or more members defined by the enum type. An INTEGER or INT64 expression that evaluates to the underlying numeric value of the member at runtime. For flag enums, this numeric value can represent two or more members defined by the enum type. Note: The function generates a runtime error if any specified character or numeric value does not correspond to a defined member.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "DYNAMIC-FUNCTION",
@@ -1096,7 +1148,8 @@
           "description": "An integer expression that evaluates to the tenant ID of a regular tenant, including the default tenant (0). This option applies only to a multi-tenant sequence specified by sequence-expression and is intended for access primarily by a super-tenant user. If you are a regular-tenant user and you specify tenant-id, the specified tenant must be the same as the tenant associated with the database connection identity for logical-dbname-expression or the AVM raises a run-time error. If you are a super-tenant user and you do not specify tenant-id, the function assumes the effective tenant ID (GET-EFFECTIVE-TENANT-ID function). If the sequence specified by sequence-expression is non-multi-tenant (a shared sequence in a multi-tenant database), and you specify tenant-id, the option is ignored.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INT64"
     },
     {
       "name": "DYNAMIC-PROPERTY",
@@ -1132,7 +1185,8 @@
           "description": "Specifies an integer expression for the index of the specified element. Use index to set or retrieve an individual array element. You can also operate on an entire array by removing the index the same way as you work with non-dynamic property access.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "ENCODE",
@@ -1144,7 +1198,8 @@
           "description": "An expression that results in a character string value. If you use a constant, you must enclose it in quotation marks (\" \").",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "ENCRYPT",
@@ -1174,7 +1229,8 @@
           "description": "An optional CHARACTER expression that evaluates to the name of the symmetric cryptographic algorithm to use in encrypting the specified data instance. If you specify the Unknown value (?), the current value of the SYMMETRIC-ENCRYPTION-ALGORITHM attribute is used. For a list the supported cryptographic algorithms, see the SYMMETRIC-SUPPORT attribute reference entry.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "MEMPTR"
     },
     {
       "name": "ENTERED",
@@ -1186,7 +1242,8 @@
           "description": "The name of the frame field you are checking. If you omit the FRAME option, the field name must be unambiguous.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "ENTRY",
@@ -1210,7 +1267,8 @@
           "description": "A delimiter you define for the list. The default is a comma. This allows the ENTRY function to operate on non-comma-separated lists. If you use an alphabetic character, this delimiter is case sensitive.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "ERROR",
@@ -1222,7 +1280,8 @@
           "description": "The name of a ProDataSet temp-table buffer.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "ETIME",
@@ -1234,7 +1293,8 @@
           "description": "A logical value, such as YES or TRUE. The default value is NO.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INT64"
     },
     {
       "name": "EXP",
@@ -1252,7 +1312,8 @@
           "description": "A numeric expression.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "EXTENT",
@@ -1264,7 +1325,8 @@
           "description": "Any array field or variable.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "FILL",
@@ -1282,7 +1344,8 @@
           "description": "A constant, field name, variable name, or expression with an integer value. The FILL function uses this value to repeat the expression you specify. If the value of repeats is less than or equal to 0, FILL produces a null string.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "FIRST",
@@ -1294,7 +1357,8 @@
           "description": "The name of a field or expression you name in the block header with the BREAK BY option.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "FIRST-OF",
@@ -1306,7 +1370,8 @@
           "description": "The name of a field or expression you name in the block header with the BREAK BY option.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "FRAME-COL",
@@ -1318,11 +1383,13 @@
           "description": "The name of the frame whose column position you are trying to determine. If you do not supply a frame name, the FRAME-COL function uses the default frame for the block it is in. If the FRAME-COL function is in a DO block, the function uses the default frame scoped to the block containing the DO block.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "DECIMAL"
     },
     {
       "name": "FRAME-DB",
-      "description": "Returns the logical database name of the database that contains any field in which the user-interface cursor is entered."
+      "description": "Returns the logical database name of the database that contains any field in which the user-interface cursor is entered.",
+      "returnType": "CHARACTER"
     },
     {
       "name": "FRAME-DOWN",
@@ -1334,19 +1401,23 @@
           "description": "The name of the frame whose number down you are trying to determine. If you do not supply a frame name, the FRAME-DOWN function uses the default frame for the block it is in. If the FRAME-DOWN function is in a DO block, the function uses the default frame scoped to the block containing the DO block.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "FRAME-FIELD",
-      "description": "During a data entry statement, returns the name of the input field the cursor is in. At other times, returns the name of the input field the cursor was last in."
+      "description": "During a data entry statement, returns the name of the input field the cursor is in. At other times, returns the name of the input field the cursor was last in.",
+      "returnType": "CHARACTER"
     },
     {
       "name": "FRAME-FILE",
-      "description": "Returns the name of the database table that contains the field the cursor is in. The FRAME-FILE function is useful if you want to provide users with context-sensitive help."
+      "description": "Returns the name of the database table that contains the field the cursor is in. The FRAME-FILE function is useful if you want to provide users with context-sensitive help.",
+      "returnType": "CHARACTER"
     },
     {
       "name": "FRAME-INDEX",
-      "description": "During a data entry statement, returns the subscript of the array element of the input field that the cursor is in as an INTEGER value. At other times, returns the subscript of the array element the cursor was in."
+      "description": "During a data entry statement, returns the subscript of the array element of the input field that the cursor is in as an INTEGER value. At other times, returns the subscript of the array element the cursor was in.",
+      "returnType": "INTEGER"
     },
     {
       "name": "FRAME-LINE",
@@ -1358,11 +1429,13 @@
           "description": "The frame name that you are trying to determine a line number for. If you do not supply a frame name, the FRAME-LINE function uses the default frame for the block that contains the FRAME-LINE function. If the FRAME-LINE function is in a DO block, the function uses the default frame scoped to the block that contains the DO block.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "FRAME-NAME",
-      "description": "Returns the name of the frame that the cursor is in to a field that is enabled for input."
+      "description": "Returns the name of the frame that the cursor is in to a field that is enabled for input.",
+      "returnType": "CHARACTER"
     },
     {
       "name": "FRAME-ROW",
@@ -1374,11 +1447,13 @@
           "description": "The name of the frame whose row position you are trying to determine. If you do not supply a frame name, the FRAME-ROW function uses the default frame for the block that contains the FRAME-ROW function. If the FRAME-ROW function is in a DO block, the function uses the default frame scoped to the block that contains the DO block.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "DECIMAL"
     },
     {
       "name": "FRAME-VALUE",
-      "description": "During a data entry statement, returns the (character string) value of the input field that the cursor is in to the current input field. At other times, returns the (character string) value of the input field the cursor was last in."
+      "description": "During a data entry statement, returns the (character string) value of the input field that the cursor is in to the current input field. At other times, returns the (character string) value of the input field the cursor was last in.",
+      "returnType": "CHARACTER"
     },
     {
       "name": "FUNCTION statement",
@@ -1478,19 +1553,23 @@
           "description": "An optional RAW expression that evaluates to the salt value (a random series of 8 bytes) to use in generating the encryption key. If you specify the Unknown value (?), the current value of the ENCRYPTION-SALT attribute is used. If no salt value is specified in the ENCRYPTION-SALT attribute, no salt value is used.You can also use the GENERATE-PBE-SALT function to generate a salt value, which can help to ensure that the password key value is unique. If specified, this salt value is combined with the password value and hashed some number of times to generate a password-based encryption key (using the algorithm specified by the PBE-HASH-ALGORITHM attribute and the number of iterations specified by the PBE-KEY-ROUNDS attribute).",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "RAW"
     },
     {
       "name": "GENERATE-PBE-SALT",
-      "description": "Generates a random salt value (a series of 8 bytes) to use in generating an encryption key, and returns the salt value as a RAW value. Using a salt value can help to ensure that a password key value is unique."
+      "description": "Generates a random salt value (a series of 8 bytes) to use in generating an encryption key, and returns the salt value as a RAW value. Using a salt value can help to ensure that a password key value is unique.",
+      "returnType": "RAW"
     },
     {
       "name": "GENERATE-RANDOM-KEY",
-      "description": "Generates a pseudorandom (rather than a truly random) series of bytes to use as an encryption key, and returns the key as a RAW value."
+      "description": "Generates a pseudorandom (rather than a truly random) series of bytes to use as an encryption key, and returns the key as a RAW value.",
+      "returnType": "RAW"
     },
     {
       "name": "GENERATE-UUID",
-      "description": "Generates a universally unique identifier (UUID), as a 16-byte RAW value."
+      "description": "Generates a universally unique identifier (UUID), as a 16-byte RAW value.",
+      "returnType": "RAW"
     },
     {
       "name": "GET-BITS",
@@ -1514,7 +1593,8 @@
           "description": "The number of bits to examine when generating the return value. If position plus numbits is greater than the length of an integer plus 1, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "GET-BYTE",
@@ -1532,7 +1612,8 @@
           "description": "An integer value greater than 0 that indicates the byte position where you want to find the information. If position is greater than the length of source, the AVM returns the Unknown value (?). If position is less than 1, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "GET-BYTE-ORDER",
@@ -1544,7 +1625,8 @@
           "description": "An expression that returns a MEMPTR.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "GET-BYTES",
@@ -1568,7 +1650,8 @@
           "description": "An integer value greater than 0 indicating how many bytes to return as a RAW value. If position plus numbytes is greater than the size of source, the AVM returns the Unknown value (?).If the variable that accepts the returned data is a RAW variable and numbytes is greater than its length but less than or equal to 32K, the AVM increases the size of the variable to numbytes. If either the source location, source, or the variable that accepts the returned data is a RAW value, and numbytes is greater than 32K, the AVM generates a run-time error. If the variable that accepts the returned data is a MEMPTR variable and numbytes is greater than its length, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "RAW"
     },
     {
       "name": "GET-CLASS",
@@ -1592,11 +1675,13 @@
           "description": "The name of a LONGCHAR variable or CLOB field. If the specified LONGCHAR is empty and the code page was not fixed using the FIX-CODEPAGE statement, the AVM returns the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "GET-CODEPAGES",
-      "description": "The GET-CODEPAGES function returns a comma-delimited list of the code pages listed in convmap.cp or specified by the Conversion Map (-convmap) startup parameter for the current ABL session."
+      "description": "The GET-CODEPAGES function returns a comma-delimited list of the code pages listed in convmap.cp or specified by the Conversion Map (-convmap) startup parameter for the current ABL session.",
+      "returnType": "INTEGER"
     },
     {
       "name": "GET-COLLATION",
@@ -1608,7 +1693,8 @@
           "description": "A CLOB field name.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "GET-COLLATIONS",
@@ -1620,7 +1706,8 @@
           "description": "A code page name. If there are no collations for the specified code page, the AVM returns the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "GET-DB-CLIENT",
@@ -1632,7 +1719,8 @@
           "description": "An optional character expression that evaluates to a case-insensitive logical or alias name of an OpenEdge RDBMS. This expression can be unspecified or evaluate to the Unknown value (?) only if there is a single OpenEdge database connection, in which case the client-principal object handle is returned for that connection.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "HANDLE"
     },
     {
       "name": "GET-DOUBLE",
@@ -1650,7 +1738,8 @@
           "description": "An integer value greater than 0 that indicates the byte position where you want to find the information. If position is greater than the length of source, the AVM returns the Unknown value (?). If position is less than 1, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "DECIMAL"
     },
     {
       "name": "GET-EFFECTIVE-TENANT-ID",
@@ -1662,7 +1751,8 @@
           "description": "A character expression that evaluates to a logical database name or database alias. If no database is specified and more than one database is connected, the AVM raises an error. If the database name is not a valid name for a connected database, the AVM raises an error.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "GET-EFFECTIVE-TENANT-NAME",
@@ -1674,7 +1764,8 @@
           "description": "A character expression that evaluates to a logical database name or database alias. If no database is specified and more than one database is connected, the AVM raises an error. If the database name is not a valid name for a connected database, the AVM raises an error.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "GET-FLOAT",
@@ -1692,7 +1783,8 @@
           "description": "An integer value greater than 0 that indicates the byte position where you want to find the information. If position is greater than the length of source, the AVM returns the Unknown value (?). If position is less than 1, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "DECIMAL"
     },
     {
       "name": "GET-INT64",
@@ -1710,7 +1802,8 @@
           "description": "An integer value greater than 0 that indicates the byte position where you want to find the information. If position is greater than the length of source, the AVM returns the Unknown value (?). If position is less than 1, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INT64"
     },
     {
       "name": "GET-LONG",
@@ -1728,7 +1821,8 @@
           "description": "An integer value greater than 0 that indicates the byte position where you want to find the information. If position is greater than the length of source, the AVM returns the Unknown value (?). If position is less than 1, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "GET-POINTER-VALUE",
@@ -1740,7 +1834,8 @@
           "description": "A reference to a variable defined as MEMPTR. If the variable is uninitialized (has no associated memory region), the function returns 0.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INT64"
     },
     {
       "name": "GET-SHORT",
@@ -1758,7 +1853,8 @@
           "description": "An integer value greater than 0 that indicates the byte position where you want to find the information. If position is greater than the length of source, the AVM returns the Unknown value (?). If position is less than 1, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "GET-SIZE",
@@ -1770,7 +1866,8 @@
           "description": "A MEMPTR variable. If the variable is uninitialized (has no associated memory region), the function returns 0.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INT64"
     },
     {
       "name": "GET-STRING",
@@ -1794,7 +1891,8 @@
           "description": "An integer value greater than 0 that indicates how many bytes to convert into the CHARACTER value that is returned. If numbytes is not specified, or is -1, GET-STRING( ) returns all bytes until it encounters a NULL value.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "GET-UNSIGNED-LONG",
@@ -1812,7 +1910,8 @@
           "description": "An INTEGER or INT64 value greater than 0 that indicates the byte position where you want to find the information. If position is greater than the length of source, the AVM returns the Unknown value (?). If position is less than 1, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INT64"
     },
     {
       "name": "GET-UNSIGNED-SHORT",
@@ -1830,11 +1929,13 @@
           "description": "An integer value greater than 0 that indicates the byte position where you want to find the information. If position is greater than the length of source, the AVM returns the Unknown value (?). If position is less than 1, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "GO-PENDING",
-      "description": "Returns a TRUE value if, within an EDITING phrase, an APPLY statement results in a GO action. The GO action is deferred until the end of the EDITING phrase."
+      "description": "Returns a TRUE value if, within an EDITING phrase, an APPLY statement results in a GO action. The GO action is deferred until the end of the EDITING phrase.",
+      "returnType": "LOGICAL"
     },
     {
       "name": "GUID",
@@ -1846,7 +1947,8 @@
           "description": "An optional 16-byte raw UUID value to be converted. If the specified UUID is not exactly 16 bytes in length, the AVM returns the Unknown value (?). If not specified, the AVM generates a UUID and then converts it into a GUID.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "GUID"
     },
     {
       "name": "HANDLE",
@@ -1858,7 +1960,8 @@
           "description": "A string representation of a handle. Since handles are integer values, the string must contain only numeric characters.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "HANDLE"
     },
     {
       "name": "HEX-DECODE",
@@ -1870,7 +1973,8 @@
           "description": "A character expression containing the value you want to convert. If the expression does not contain an even number of hexadecimal digits, or it is the Unknown value (?), the result is the Unknown value (?). If the expression is a zero-length value, the result is a zero-length value.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "RAW"
     },
     {
       "name": "HEX-ENCODE",
@@ -1882,7 +1986,8 @@
           "description": "A RAW expression containing the value you want to convert. If the expression is the Unknown value (?), the result is the Unknown value (?). If the expression is a zero-length value, the result is a zero-length value.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "IF...THEN...ELSE",
@@ -1906,7 +2011,8 @@
           "description": "A constant, field name, variable name, or expression whose value is of a data type that is compatible with the data type of expression1. If the condition is FALSE or the Unknown value (?), then the function returns this value.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "INDEX",
@@ -1930,7 +2036,8 @@
           "description": "An integer that specifies at which left-most position in the string to start the search. For example, INDEX(\"abcdefabcdef\",\"abc\",6) returns 7.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "INPUT",
@@ -1960,7 +2067,8 @@
           "description": "A constant, field name, variable name, or expression whose value can be of any data type except for RAW and MEMPTR. The function behaves as described for the following data types:If the value of expression is a CHARACTER, it must be valid for conversion into a number (for example, \"1.67\" is valid, \"1.x3\" is not). If expression is an object reference (CLASS), the result is the ABL-generated ID for the class instance. If expression is a reference to an instance of an enum, the result is the underlying numeric value of that instance. If expression is a LOGICAL, the result is 0 if expression is FALSE and the result is 1 if expression is TRUE. If expression is a DATE, the result is the number of days from 1/1/4713 B.C. to that day. If expression is the Unknown value (?), the result is the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INT64"
     },
     {
       "name": "INTEGER",
@@ -1972,7 +2080,8 @@
           "description": "A constant, field name, variable name, or expression. The function behaves as described for the following data types: If the value of expression is a CHARACTER, it must be valid for conversion into a number (for example, \"1.67\" is valid, \"1.x3\" is not). If expression is an object reference (CLASS), the result is the ABL-generated ID for the class instance. If expression is a reference to an instance of an enum, the result is the underlying numeric value of that instance. Because the underlying numeric values of enum members are of type INT64, the function may raise an error if the value cannot be represented as an INTEGER. If expression is a LOGICAL, the result is 0 if expression is FALSE and the result is 1 if expression is TRUE. If expression is a DATE, the result is the number of days from 1/1/4713 B.C. to that day. If expression is the Unknown value (?), the result is the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "INTERVAL",
@@ -1996,7 +2105,8 @@
           "description": "A character constant, or a character expression that evaluates to one of the following time units: ‘years', ‘months', ‘weeks', ‘days', 'hours', ‘minutes', ‘seconds' or ‘milliseconds'. These values are case insensitive and might be singular.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INT64"
     },
     {
       "name": "IS-ATTR-SPACE",
@@ -2012,7 +2122,8 @@
           "description": "The name of a LONGCHAR variable.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "IS-COLUMN-CODEPAGE",
@@ -2024,7 +2135,8 @@
           "description": "The name of a CLOB field.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "IS-DB-MULTI-TENANT",
@@ -2036,7 +2148,8 @@
           "description": "A character expression that evaluates to a logical database name or database alias. If no database is specified and more than one database is connected, the AVM raises an error. If the database name is not a valid name for a connected database, the AVM raises an error.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "IS-LEAD-BYTE",
@@ -2048,7 +2161,8 @@
           "description": "A character expression (a constant, field name, variable name, or any combination of these) whose value is a character.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "ISO-DATE",
@@ -2060,7 +2174,8 @@
           "description": "An expression that evaluates to a DATE, DATETIME or DATETIME-TZ. The ISO-DATE function returns the character string in the standard ISO format of the data type. The following table lists the standard ISO formats for each data type. Standard ISO formats Data type ISO format DATE YYYY-MM-DD DATETIME YYYY-MM-DDTHH:MM:SS.SSS DATETIME-TZ YYYY-MM-DDTHH:MM:SS.SSS+HH:MM",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "KBLABEL",
@@ -2072,7 +2187,8 @@
           "description": "An expression whose value is the name of the special ABL key function. See OpenEdge Programming Interfaces for possible values of key-name. If key-function is a constant, enclose it in quotation marks (\"\"). See the same guide for a list of key functions and the corresponding standard keyboard keys.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "KEYCODE",
@@ -2084,7 +2200,8 @@
           "description": "A constant, field name, variable name, or expression that evaluates to a character string that contains a key label. If key-label is a constant, enclose it in quotation marks (\" \").",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "KEYFUNCTION",
@@ -2096,7 +2213,8 @@
           "description": "A constant, field name, variable name, or expression whose value is an integer key code.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "KEYLABEL",
@@ -2108,7 +2226,8 @@
           "description": "The key code of the key whose label you want to know. A special case of key-code is LASTKEY. See OpenEdge Programming Interfaces for a list of key codes and key labels.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "KEYWORD",
@@ -2120,7 +2239,8 @@
           "description": "A constant, field name, variable name, or expression that results in a character string. If expression matches an ABL reserved keyword or valid abbreviation of a reserved keyword, the KEYWORD function returns the full keyword. If there is no match, the KEYWORD function returns the Unknown value (?).In some cases, the abbreviation for a keyword is also a keyword. For example, if expression is \"def\" (the abbreviation for DEFINE) or \"col\" (the abbreviation for COLUMN), the KEYWORD function returns the values \"def\" and \"col\", respectively. If you use the Run-time client, the KEYWORD function always returns the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "KEYWORD-ALL",
@@ -2132,7 +2252,8 @@
           "description": "A constant, field name, variable name, or expression that results in a character string. If expression matches an ABL keyword, whether reserved or unreserved or valid abbreviation of a keyword, the KEYWORD-ALL function returns the full keyword. If there is no match, the KEYWORD-ALL function returns the Unknown value (?).In some cases, the abbreviation for a keyword is also a keyword. For example, if expression is \"def\" (the abbreviation for DEFINE) or \"col\" (the abbreviation for COLUMN), the KEYWORD function returns the values \"def\" and \"col\", respectively. If you use the Run-time client, the KEYWORD-ALL function always returns the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "LAST",
@@ -2144,11 +2265,13 @@
           "description": "The name of a field or expression you named in the block header with the BREAK BY option.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "LASTKEY",
-      "description": "Returns, as an INTEGER value, the integer key code of the most recent event read from the user (that is, from the keyboard or mouse) during an interaction with a procedure."
+      "description": "Returns, as an INTEGER value, the integer key code of the most recent event read from the user (that is, from the keyboard or mouse) during an interaction with a procedure.",
+      "returnType": "INTEGER"
     },
     {
       "name": "LAST-OF",
@@ -2160,7 +2283,8 @@
           "description": "The name of a field or expression you named in the block header with the BREAK BY option.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "LC",
@@ -2172,7 +2296,8 @@
           "description": "A constant, field name, variable name, or expression that results in a CHARACTER or LONGCHAR value.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "LDBNAME",
@@ -2196,7 +2321,8 @@
           "description": "The name of a database table or buffer. The BUFFER option lets you determine the database a certain table belongs to without hard-coding the logical database name or alias.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "LEFT-TRIM",
@@ -2214,7 +2340,8 @@
           "description": "A character expression that specifies the characters to be trimmed from expression. If you do not specify trim-chars, the LEFT-TRIM function removes spaces, tabs, line feeds, and carriage returns.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "LENGTH",
@@ -2244,7 +2371,8 @@
           "description": "A character expression that indicates whether you want the length of exp in character units, bytes, or columns. A double-byte character registers as one character unit. By default, the unit of measurement is character units.There are three valid types: \"CHARACTER,\" \"RAW,\" and \"COLUMN.\" The expression \"CHARACTER\" indicates that the length is measured in characters, including double-byte characters. The expression \"RAW\" indicates that the length is measured in bytes. The expression \"COLUMN\" indicates that the length is measured in display or print character-columns. If you specify the type as a constant expression, ABL validates the type specification at compile time. If you specify the type as a non-constant expression, the AVM validates the type specification at run time. Note: The expression \"COLUMN\" is not valid for a LONGCHAR variable or a CLOB field.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "LIBRARY",
@@ -2256,7 +2384,8 @@
           "description": "A character expression whose value is the pathname of a file in a library. In Windows, the pahtname cannot contain characters outside of the non-Unicode code page. See Internationalize ABL Applications for more information about Unicode and code pages.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "LINE-COUNTER",
@@ -2274,7 +2403,8 @@
           "description": "Specifies the handle to a stream. If handle it is not a valid handle to a stream, the AVM generates a run-time error. Note that stream handles are not valid for the unnamed streams. See the topics on alternate I/O sources in OpenEdge Programming Interfaces for more information on streams and stream handles.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "LIST-EVENTS",
@@ -2292,7 +2422,8 @@
           "description": "A character-string value that specifies a display type. Valid values are GUI and TTY. Some events are valid only on certain platforms. If you omit the platform parameter, the AVM uses the platform for the current session.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "LIST-QUERY-ATTRS",
@@ -2304,7 +2435,8 @@
           "description": "A handle to a valid object or widget. The function returns a list of the attributes and methods that are supported for that object or widget.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "LIST-SET-ATTRS",
@@ -2316,7 +2448,8 @@
           "description": "A handle to a valid object or widget. The function returns a list of the attributes that can be set for that object or widget.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "LIST-WIDGETS",
@@ -2334,7 +2467,8 @@
           "description": "A character-string value that specifies a display type. Valid values are GUI and TTY. Some events are valid only on certain platforms. If you omit the platform parameter, the AVM uses the platform for the current session.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "LOCKED",
@@ -2346,7 +2480,8 @@
           "description": "The name of a record or buffer. To use the LOCKED function with a record in a table defined for multiple databases, you must qualify the record's table name with the database name. See the record definition in the Record phrase reference entry for more information.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "LOG",
@@ -2364,7 +2499,8 @@
           "description": "A numeric expression that is the base you want to use. If you do not specify a base, LOG returns the natural logarithm, base (e). The base must be greater than 1.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "DECIMAL"
     },
     {
       "name": "LOGICAL",
@@ -2382,7 +2518,8 @@
           "description": "A character expression that evaluates to a valid logical format, such as \"si/no\", or \"da/nyet\". This argument is ignored unless expression is of CHARACTER type. Also, this argument is only needed if expression evaluates to something other than the usual TRUE or FALSE, or YES or NO values.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "LOOKUP",
@@ -2406,7 +2543,8 @@
           "description": "A delimiter you define for the list. The default is a comma. This allows the LOOKUP function to operate on non-comma-separated lists.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "MAXIMUM",
@@ -2418,7 +2556,8 @@
           "description": "A constant, field name, variable name, or expression. If there is a mixture of decimal and integer data types, decimal type is returned.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "DECIMAL"
     },
     {
       "name": "MD5-DIGEST",
@@ -2436,7 +2575,8 @@
           "description": "An optional key value to use in the hash operation. The key may be of type CHARACTER, LONGCHAR, RAW, or MEMPTR. If the key is a CHARACTER or LONGCHAR value, the AVM converts it to UTF-8 (which ensures a consistent value regardless of code page settings). To avoid this automatic conversion, specify a RAW or MEMPTR value. This key value is combined with the source data before the hash operation begins. If the hash-key value contains a null character, the null character is included in the hash operation.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "RAW"
     },
     {
       "name": "MEMBER",
@@ -2448,7 +2588,8 @@
           "description": "A character expression (a constant, field name, variable or expression that results in a character value) whose value is the pathname of a file in an r-code library.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "MESSAGE-DIGEST",
@@ -2472,11 +2613,13 @@
           "description": "A key value to use in the hash operation for the hashing algorithms. The key may be of type CHARACTER, LONGCHAR, RAW, or MEMPTR. If the key is a CHARACTER or LONGCHAR value, the AVM converts it to UTF-8 (which ensures a consistent value regardless of code page settings). To avoid this automatic conversion, specify a RAW or MEMPTR value. This key value is used along with the source data during the hash operation. For the HMAC algorithms, it is strongly recommended that you specify a hash key (preferably a randomly generated one). If hash-key is not specified it defaults to the empty string (\"\"). If either data-to-hash or hash-key is the Unknown value (?), then the Unknown value (?) is returned from the function. If the hash-key value contains a null character, the null character is included in the hash operation.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "RAW"
     },
     {
       "name": "MESSAGE-LINES",
-      "description": "Returns, as an INTEGER value, the number of lines in the message area at the bottom of the window."
+      "description": "Returns, as an INTEGER value, the number of lines in the message area at the bottom of the window.",
+      "returnType": "INTEGER"
     },
     {
       "name": "MINIMUM",
@@ -2506,7 +2649,8 @@
           "description": "An expression that evaluates to a DATETIME or DATETIME-TZ. The MONTH function returns the month of the date part of the DATETIME or DATETIME-TZ value.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "MTIME",
@@ -2518,7 +2662,8 @@
           "description": "An expression that evaluates to a DATETIME or DATETIME-TZ. The MTIME function returns the time portion of datetime-expression in milliseconds. If datetime-expression is a DATETIME-TZ, the MTIME function returns the local time relative to the time zone of the DATETIME-TZ value. For Example, a DATETIME-TZ field, fdt, is created in London (time zone UTC+00:00) with a value of May 5, 2002 at 7:15:03.002 am. MTIME(fdt) returns 26,103,002, regardless of the session's time zone.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "NEW (classes)",
@@ -2548,7 +2693,8 @@
           "description": "The name of the record buffer you want to check with the NEW function.To use the NEW function with a record in a table defined for multiple databases, you must qualify the record's table name with the database name. See the record definition in the Record phrase reference entry for more information.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "NEXT-VALUE",
@@ -2566,7 +2712,8 @@
           "description": "An identifier that specifies the logical name of the database in which the sequence is defined. The database must be connected. If multiple databases are connected, you can omit this parameter if you specify a sequence that is unique to one of the databases.tenant-id An integer expression that evaluates to the tenant ID of a regular tenant, including the default tenant (0). This option applies only to a multi-tenant sequence specified by sequence and is intended for access primarily by a super-tenant user. If you are a regular-tenant user and you specify tenant-id, the specified tenant must be the same as the tenant associated with the database connection identity for logical-dbname or the AVM raises a run-time error. If you are a super-tenant user and you do not specify tenant-id, the function assumes the effective tenant ID (GET-EFFECTIVE-TENANT-ID function). If the sequence specified by sequence is non-multi-tenant (a shared sequence in a multi-tenant database), and you specify tenant-id, the option is ignored.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INT64"
     },
     {
       "name": "NORMALIZE",
@@ -2578,7 +2725,8 @@
           "description": "The source string to normalize. The value may be of type CHARACTER or LONGCHAR.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "NOT ENTERED",
@@ -2596,19 +2744,23 @@
           "description": "The name of the field or variable you are checking.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "NOW",
-      "description": "Returns the current system date, time, and time zone as a DATETIME-TZ value."
+      "description": "Returns the current system date, time, and time zone as a DATETIME-TZ value.",
+      "returnType": "DATETIME-TZ"
     },
     {
       "name": "NUM-ALIASES",
-      "description": "Returns an INTEGER value that represents the number of aliases defined. The NUM-ALIASES function uses no arguments."
+      "description": "Returns an INTEGER value that represents the number of aliases defined. The NUM-ALIASES function uses no arguments.",
+      "returnType": "INTEGER"
     },
     {
       "name": "NUM-DBS",
-      "description": "Takes no arguments; returns the number of connected databases as an INTEGER value."
+      "description": "Takes no arguments; returns the number of connected databases as an INTEGER value.",
+      "returnType": "INTEGER"
     },
     {
       "name": "NUM-ENTRIES",
@@ -2626,7 +2778,8 @@
           "description": "A delimiter you define for the list. The default is a comma (,). This allows functions to operate on non-comma-separated lists. If you use an alphabetic character, this delimiter is case sensitive.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "NUM-RESULTS",
@@ -2638,19 +2791,23 @@
           "description": "A character expression that evaluates to the name of a currently open, scrolling query. If query-name does not resolve to the name of a query, or if the query is not open or not scrolling, then the function returns the Unknown value (?).Note: Searching for a query using a handle is more efficient than a character expression. The AVM resolves a character expression at run time by searching in the current routine for a static query with that name. If not found, the AVM searches the enclosing main procedure. If still not found, the AVM searches up through the calling programs of the current routine, and their main procedures. Since a handle uniquely identifies a query, no such search is required. Use the query object handle's NUM-RESULTS attribute to avoid a run-time search.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "OPSYS",
-      "description": "Identifies the operating system being used, so that a single version of a procedure can work differently under different operating systems. Returns the value of that operating system. Valid values are \"UNIX\" and \"WIN32\"."
+      "description": "Identifies the operating system being used, so that a single version of a procedure can work differently under different operating systems. Returns the value of that operating system. Valid values are \"UNIX\" and \"WIN32\".",
+      "returnType": "DECIMAL"
     },
     {
       "name": "OS-DRIVES",
-      "description": "(Windows only)"
+      "description": "(Windows only)",
+      "returnType": "CHARACTER"
     },
     {
       "name": "OS-ERROR",
-      "description": "Returns, as an INTEGER value, an ABL error code that indicates whether an execution error occurred during the last OS-APPEND, OS-COPY, OS-CREATE-DIR, OS-DELETE, OS-RENAME or SAVE CACHE statement."
+      "description": "Returns, as an INTEGER value, an ABL error code that indicates whether an execution error occurred during the last OS-APPEND, OS-COPY, OS-CREATE-DIR, OS-DELETE, OS-RENAME or SAVE CACHE statement.",
+      "returnType": "INTEGER"
     },
     {
       "name": "OS-GETENV",
@@ -2662,7 +2819,8 @@
           "description": "The name of the environment variable whose value you want to find.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "PAGE-NUMBER",
@@ -2680,7 +2838,8 @@
           "description": "The handle to an output stream. If handle it is not a valid handle to a stream, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "PAGE-SIZE",
@@ -2698,7 +2857,8 @@
           "description": "The handle to an output stream. If handle it is not a valid handle to a stream, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "PDBNAME",
@@ -2716,19 +2876,23 @@
           "description": "This form of the PDBNAME function requires a quoted character string or a character expression as a parameter. If the parameter is the logical name of a connected database or an alias of a connected database, then the physical name is returned. Otherwise, it returns the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "PROC-HANDLE",
-      "description": "Returns a value in the appropriate data type (usually INTEGER) that is a unique identifier for a stored procedure."
+      "description": "Returns a value in the appropriate data type (usually INTEGER) that is a unique identifier for a stored procedure.",
+      "returnType": "INTEGER"
     },
     {
       "name": "PROC-STATUS",
-      "description": "Returns the return status from a stored procedure. The return status is an INTEGER value that indicates whether a stored procedure failed and why."
+      "description": "Returns the return status from a stored procedure. The return status is an INTEGER value that indicates whether a stored procedure failed and why.",
+      "returnType": "INTEGER"
     },
     {
       "name": "PROCESS-ARCHITECTURE",
-      "description": "Identifies the bit value of the AVM process you are using at run time and returns this value as an INTEGER. Valid values are 32 for a 32-bit AVM and 64 for 64-bit AVM. For example, an application that uses a 32-bit Windows API through the DLL external procedure interface may need to pass different parameters to a function when running a 64-bit GUI client than when running a 32-bit GUI client. Using PROCESS-ARCHITECTURE, you can decide the parameters to pass."
+      "description": "Identifies the bit value of the AVM process you are using at run time and returns this value as an INTEGER. Valid values are 32 for a 32-bit AVM and 64 for 64-bit AVM. For example, an application that uses a 32-bit Windows API through the DLL external procedure interface may need to pass different parameters to a function when running a 64-bit GUI client than when running a 32-bit GUI client. Using PROCESS-ARCHITECTURE, you can decide the parameters to pass.",
+      "returnType": "INTEGER"
     },
     {
       "name": "PROGRAM-NAME",
@@ -2740,19 +2904,23 @@
           "description": "The numeric argument. If n is 1, the name of the current program is returned. If n is 2, the name of the calling program is returned. If there is no calling program then you have reached the top of the call stack and the AVM returns the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "PROGRESS",
-      "description": "Returns one of the following character values which identifies the ABL product that is running: Full, Query or Run-time. Can also return COMPILE if you use the Developer's Toolkit, or COMPILE-ENCRYPT if you use the run-time Compiler."
+      "description": "Returns one of the following character values which identifies the ABL product that is running: Full, Query or Run-time. Can also return COMPILE if you use the Developer's Toolkit, or COMPILE-ENCRYPT if you use the run-time Compiler.",
+      "returnType": "CHARACTER"
     },
     {
       "name": "PROMSGS",
-      "description": "Returns the current value of the ABL PROMSGS variable."
+      "description": "Returns the current value of the ABL PROMSGS variable.",
+      "returnType": "DECIMAL"
     },
     {
       "name": "PROPATH",
-      "description": "Returns the current value of the PROPATH environment variable."
+      "description": "Returns the current value of the PROPATH environment variable.",
+      "returnType": "CHARACTER"
     },
     {
       "name": "PROVERSION",
@@ -2764,7 +2932,8 @@
           "description": "An optional integer expression that identifies how much version information is returned, as follows:If the value of mode is either 0 or not specified, PROVERSION returns limited version information—the major version number, the minor version number, and, if applicable, the version tag. If the value of mode is 1, PROVERSION returns full version information—the major version number, the minor version number, the service pack number, the hot fix version number, the build number, and, if applicable, the version tag. If the value of mode is other than 1 or 0, a run-time error message is returned.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "QUERY-OFF-END",
@@ -2776,7 +2945,8 @@
           "description": "A character expression that evaluates to the name of a currently open query. If query-name does not resolve to the name of a query, or if the query is not open, then the function returns the Unknown value (?).Note: Searching for a query using a handle is more efficient than a character expression. The AVM resolves a character expression at run time by searching in the current routine for a static query with that name. If not found, the AVM searches the enclosing main procedure. If still not found, the AVM searches up through the calling programs of the current routine, and their main procedures. Since a handle uniquely identifies a query, no such search is required. Use the query object handle's QUERY-OFF-END attribute to avoid a run-time search.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "QUOTER",
@@ -2800,7 +2970,8 @@
           "description": "The string you want for an unknown value: the word NULL or \"\" for example. The default is an unquoted question mark, which is the Unknown value (?).For example, the following code: DEFINE VARIABLE mychar As CHARACTER NO-UNDO INITIAL \"Lift Line Skiing\". ... qhandle:QUERY-PREPARE(\"FOR EACH Customer WHERE Customer.Name = \" + QUOTER(mychar)) Would produce this prepare-string: FOR EACH Customer WHERE Customer.Name = \"Lift Line Skiing\".",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "R-INDEX",
@@ -2824,7 +2995,8 @@
           "description": "An integer that specifies the begin point for the search. The search is right-to-left and starts from the starting point. For example, this statement returns 1 R-INDEX(\"abcdefabcdef\",\"abc\",6).",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "RANDOM",
@@ -2842,7 +3014,8 @@
           "description": "An integer expression that is the higher of the two expressions you are supplying to the RANDOM function. This can be an INT64 value.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "RAW",
@@ -2866,7 +3039,8 @@
           "description": "An integer expression that indicates the number of bytes you want to extract from field. If you do not use the length argument, RAW uses field from position to end.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "RAW"
     },
     {
       "name": "RECID",
@@ -2878,7 +3052,8 @@
           "description": "The name of the record whose RECID you want.To use the RECID function with a record in a table defined for multiple databases, you must qualify the record's table name with the database name. See the record definition in the Record phrase reference entry for more information.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "RECID"
     },
     {
       "name": "RECORD-LENGTH",
@@ -2890,7 +3065,8 @@
           "description": "A database buffer containing a record.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "REJECTED",
@@ -2902,7 +3078,8 @@
           "description": "The name of a ProDataSet temp-table buffer.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "REPLACE",
@@ -2926,15 +3103,18 @@
           "description": "Specifies the replacement substring. The to-string parameter can be any expression that evaluates to a string or a LONGCHAR. Each occurrence of from-string in source-string is replaced by to-string.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "RETRY",
-      "description": "Returns a TRUE value if the current block is being reprocessed after a previous UNDO, RETRY."
+      "description": "Returns a TRUE value if the current block is being reprocessed after a previous UNDO, RETRY.",
+      "returnType": "LOGICAL"
     },
     {
       "name": "RETURN-VALUE",
-      "description": "Provides a character string value returned by the most recently executed RETURN statement of a local or remote procedure, trigger block, user-defined function, method of a class, class constructor, or property accessor."
+      "description": "Provides a character string value returned by the most recently executed RETURN statement of a local or remote procedure, trigger block, user-defined function, method of a class, class constructor, or property accessor.",
+      "returnType": "CHARACTER"
     },
     {
       "name": "RGB-VALUE",
@@ -2946,7 +3126,8 @@
           "description": "Identifies red, green, and blue color values which can be combined to define a unique color value.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "RIGHT-TRIM",
@@ -2964,7 +3145,8 @@
           "description": "A character expression that specifies the characters to trim from expression. If you do not specify trim-chars, the RIGHT-TRIM function removes spaces, tabs, line feeds, and carriage returns.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "ROUND",
@@ -2982,7 +3164,8 @@
           "description": "A non-negative integer expression whose value is the number of places you want in the decimal result of the ROUND function.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "DECIMAL"
     },
     {
       "name": "ROW-STATE",
@@ -2994,7 +3177,8 @@
           "description": "The name of a ProDataSet temp-table buffer (preferably a before-image temp-table buffer).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "ROWID",
@@ -3006,11 +3190,13 @@
           "description": "The name of the record whose ROWID you want.To use the ROWID function with a record in a table defined for multiple databases, you must qualify the record's table name with the database name. See the record definition in the Record phrase reference entry for more information.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "ROWID"
     },
     {
       "name": "SCREEN-LINES",
-      "description": "Returns, as an INTEGER value, the number of lines you can use to display frames. This value omits the space used by the message area and status area."
+      "description": "Returns, as an INTEGER value, the number of lines you can use to display frames. This value omits the space used by the message area and status area.",
+      "returnType": "INTEGER"
     },
     {
       "name": "SDBNAME",
@@ -3028,7 +3214,8 @@
           "description": "These forms of the SDBNAME function require a quoted character string or a character expression as a parameter. If the parameter is the logical name of a connected database or an alias of a connected database, then the logical name of the schema holder database is returned according to the rule. Otherwise, SDBNAME returns the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "SEARCH",
@@ -3040,7 +3227,8 @@
           "description": "A character expression whose value is the name of the file you want to find. The name can include a complete or partial directory path. If opsys-file is a constant string, you must enclose it in quotation marks (\" \"). The value of opsys-file must be no more than 255 characters long. The filename can contain Unicode characters. See Internationalize ABL Applications for more information about Unicode.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "SEEK",
@@ -3058,7 +3246,8 @@
           "description": "If you specify the handle to a stream, the SEEK function returns the current position of the file pointer in the stream. If handle it is not a valid handle to a stream, the AVM generates a run-time error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INT64"
     },
     {
       "name": "SET-DB-CLIENT",
@@ -3088,7 +3277,8 @@
           "description": "The logical name or alias of a connected OpenEdge database for which to set the user identity. These forms require a quoted character string or a character expression. If you specify a logical name or alias that does not correspond to a connected database, the function returns FALSE.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "SET-EFFECTIVE-TENANT",
@@ -3106,7 +3296,8 @@
           "description": "A character expression that evaluates to a logical database name or database alias. If no database is specified and more than one database is connected, the AVM raises an error. If the database name is not a valid name for a connected database, the AVM raises an error.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "SETUSERID",
@@ -3130,7 +3321,8 @@
           "description": "The logical name of the database on whose connection you want to check and set the user identity. The logical database name must be a character string enclosed in quotes, or a character expression. If you do not specify this argument, the compiler inserts the name of the database that is connected when the procedure is compiled. If you omit this argument and more than one database is connected, ABL raises an error.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "SHA1-DIGEST",
@@ -3148,7 +3340,8 @@
           "description": "An optional key value to use in the hash operation. The key may be of type CHARACTER, LONGCHAR, RAW, or MEMPTR. If the key is a CHARACTER or LONGCHAR value, the AVM converts it to UTF-8 (which ensures a consistent value regardless of code page settings). To avoid this automatic conversion, specify a RAW or MEMPTR value. This key value is combined with the source data before the hash operation begins. If the hash-key value contains a null character, the null character is included in the hash operation.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "RAW"
     },
     {
       "name": "SQRT",
@@ -3160,7 +3353,8 @@
           "description": "A numeric expression. If the value of the expression is negative, SQRT returns the Unknown value (?).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "DECIMAL"
     },
     {
       "name": "SSL-SERVER-NAME",
@@ -3172,7 +3366,8 @@
           "description": "A quoted character string or character expression that specifies the database by its logical name.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "STRING",
@@ -3190,7 +3385,8 @@
           "description": "The format you want to use for the new character value. This format must be appropriate to the data type of source. If you do not use this argument, ABL uses the EXPORT format for all data types (except DATETIME and DATETIME-TZ, in which case it uses the default display format). This is useful if you want to produce left-justified numbers. For information on data display formats, see ABL Essentials.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "SUBSTITUTE",
@@ -3208,7 +3404,8 @@
           "description": "A constant, field name, variable, or expression that results in a CHARACTER or LONGCHAR value. These argument values replace substitution parameters in base-string.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "SUBSTRING",
@@ -3238,7 +3435,8 @@
           "description": "A CHARACTER expression that directs ABL to interpret the specified position and length values as character units, bytes, or columns. A double-byte character registers as one character unit. By default, ABL interprets the specified position and length values as character units. There are four valid types: \"CHARACTER,\" \"FIXED,\" \"COLUMN,\" and \"RAW.\" The expression \"CHARACTER\" specifies character units. The expression \"FIXED\" specifies that position is in character units and the length is in bytes, but directs SUBSTRING to yield only whole characters. That is, if the last byte or bytes represent part of, but not all of, a multi-byte character, these bytes are excluded. The expression \"COLUMN\" specifies display or print character-columns. The expression \"RAW\" specifies bytes. If you specify the type as a constant expression, ABL validates the type specification at compile time. If you specify the type as a non-constant expression, the AVM validates the type specification at run time. Note: If source is a LONGCHAR expression, \"CHARACTER\" is the only valid type and the default type.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "SUPER",
@@ -3262,7 +3460,8 @@
           "description": "A character expression that evaluates to a logical database name or database alias. If the database is not enabled for multi-tenancy, the function returns zero (0). If no database is specified and more than one database is connected, the AVM raises an error. If the database name is not a valid name for a connected database, the AVM raises an error.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "TENANT-NAME",
@@ -3274,7 +3473,8 @@
           "description": "A character expression that evaluates to a logical database name or database alias. If the database is not enabled for multi-tenancy, the function returns the empty string (\"\"). If no database is specified and more than one database is connected, the AVM raises an error. If the database name is not a valid name for a connected database, the AVM raises an error.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "TENANT-NAME-TO-ID",
@@ -3292,7 +3492,8 @@
           "description": "A character expression that evaluates to a logical database name or database alias. If no database is specified and more than one database is connected, the AVM raises an error. If the database name is not a valid name for a connected database, the AVM raises an error.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "TERMINAL",
@@ -3300,7 +3501,8 @@
     },
     {
       "name": "TIME",
-      "description": "Returns an INTEGER value representing the time as the number of seconds since midnight. Use this function together with the STRING function to produce the time in hours, minutes, and seconds."
+      "description": "Returns an INTEGER value representing the time as the number of seconds since midnight. Use this function together with the STRING function to produce the time in hours, minutes, and seconds.",
+      "returnType": "INTEGER"
     },
     {
       "name": "TIMEZONE",
@@ -3318,11 +3520,13 @@
           "description": "A character expression representing the time zone offset. The format of the expression must be +HH:MM. If the TIMEZONE function has no arguments, it returns the client or server machine that serves as the time source for applications running during the ABL session (specified by the TIME-SOURCE attribute).",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "TODAY",
-      "description": "Returns the current system date."
+      "description": "Returns the current system date.",
+      "returnType": "DATE"
     },
     {
       "name": "TO-ROWID",
@@ -3334,11 +3538,13 @@
           "description": "A string representation of a ROWID. Since ROWID values are a variable sequence of hexadecimal digits, rowid-string must be in the form \"0xhex-digits\", where hex-digits is any string of characters from 0 through 9 and A through F.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "ROWID"
     },
     {
       "name": "TRANSACTION",
-      "description": "Returns a LOGICAL value that indicates whether a transaction is currently active."
+      "description": "Returns a LOGICAL value that indicates whether a transaction is currently active.",
+      "returnType": "LOGICAL"
     },
     {
       "name": "TRIM",
@@ -3356,7 +3562,8 @@
           "description": "A character expression that specifies the characters to trim from expression. If you do not specify trim-chars, the TRIM function removes spaces, tabs, line feeds, and carriage returns.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "TRUNCATE",
@@ -3374,11 +3581,13 @@
           "description": "A non-negative integer expression that indicates the number of decimal places for a truncated expression.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "DECIMAL"
     },
     {
       "name": "TYPE-OF",
-      "description": "Verifies that the class instance to which the specified object reference points is an instance of the specified object type, inherits from the specified super class, or implements the specified interface. If the object reference points to an instance of the specified type, the function returns TRUE. Otherwise, it returns FALSE."
+      "description": "Verifies that the class instance to which the specified object reference points is an instance of the specified object type, inherits from the specified super class, or implements the specified interface. If the object reference points to an instance of the specified type, the function returns TRUE. Otherwise, it returns FALSE.",
+      "returnType": "LOGICAL"
     },
     {
       "name": "UNBOX",
@@ -3402,7 +3611,8 @@
           "description": "The logical name of the database from whose connection identity you want to retrieve the user ID. The logical database name must be a character string enclosed in quotes, or a character expression. If you do not specify this argument, the compiler inserts the name of the database that is connected when the procedure is compiled. If you omit this argument and more than one database is connected, ABL raises an error.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "CHARACTER"
     },
     {
       "name": "VALID-EVENT",
@@ -3426,7 +3636,8 @@
           "description": "A character-string expression that evaluates to the name of a platform type: GUI or TTY.",
           "optional": true
         }
-      ]
+      ],
+      "returnType": "DECIMAL"
     },
     {
       "name": "VALID-HANDLE",
@@ -3438,7 +3649,8 @@
           "description": "An expression that evaluates to a value of type HANDLE. If the handle represents an object that is currently valid, VALID-HANDLE returns TRUE. If the handle is no longer valid (if, for example, some procedure deleted the object), the function returns FALSE.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "VALID-OBJECT",
@@ -3456,7 +3668,8 @@
           "description": "An object reference defined for an ABL or .NET object type. For more information, see the Class-based object reference reference entry.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "WEEKDAY",
@@ -3474,7 +3687,8 @@
           "description": "An expression that evaluates to a DATETIME or DATETIME-TZ. The WEEKDAY function returns the weekday of the date part of the DATETIME or DATETIME-TZ value.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     },
     {
       "name": "WIDGET-HANDLE",
@@ -3486,7 +3700,8 @@
           "description": "A string representation of a handle. Since handles are integer values, the string must contain only numeric characters.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "LOGICAL"
     },
     {
       "name": "YEAR",
@@ -3504,7 +3719,8 @@
           "description": "An expression that evaluates to a DATETIME or DATETIME-TZ. The YEAR function returns the year of the date part of the DATETIME or DATETIME-TZ value.",
           "optional": false
         }
-      ]
+      ],
+      "returnType": "INTEGER"
     }
   ]
 }

@@ -66,17 +66,17 @@ public class FunctionsDocumentation {
         var reader = new InputStreamReader(input, StandardCharsets.UTF_8)) {
       var fnHdlArray = new GsonBuilder().create().fromJson(reader, FunctionsDocumentationMapping.class);
       for (var hdl : fnHdlArray.functions) {
-        var functionDocumentation = new FunctionDocumentation(hdl.name, hdl.description);
-
+        var params = new ParamDocumentation[hdl.parameters == null ? 0 : hdl.parameters.length];
         if (hdl.parameters != null) {
+          var number = 1;
           for (var paramEntry : hdl.parameters) {
-
-            var param = new ParamDocumentation(paramEntry.name, paramEntry.description, paramEntry.isOptional,
+            var prm = new ParamDocumentation(paramEntry.name, paramEntry.description, paramEntry.isOptional,
                 DataType.get(paramEntry.type));
-            functionDocumentation.addParameter(param);
+            params[number - 1] = prm;
+            number++;
           }
         }
-
+        var functionDocumentation = new FunctionDocumentation(hdl.name, hdl.description,hdl.returnType, params);
         list.add(functionDocumentation);
       }
     } catch (IOException caught) {

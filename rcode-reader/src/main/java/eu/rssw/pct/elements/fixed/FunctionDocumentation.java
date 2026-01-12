@@ -19,31 +19,28 @@
  */
 package eu.rssw.pct.elements.fixed;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
+import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IFunctionDocumentation;
 import eu.rssw.pct.elements.IParameterDocumentation;
 
 public class FunctionDocumentation implements IFunctionDocumentation {
   private final String name;
   private final String description;
-  private final Collection<IParameterDocumentation> parameters = new ArrayList<>();
+  private final DataType returnType;
+  private final IParameterDocumentation[] parameters;
 
-  public FunctionDocumentation(String name, String description) {
+  public FunctionDocumentation(String name, String description, String returnType,
+      IParameterDocumentation... parameters) {
     this.name = name;
     this.description = description;
-  }
-
-  public void addParameter(IParameterDocumentation element) {
-    parameters.add(element);
+    this.returnType = DataType.get(returnType);
+    this.parameters = parameters;
   }
 
   @Override
-  public Collection<IParameterDocumentation> getParameters() {
+  public IParameterDocumentation[] getParameters() {
     return parameters;
   }
- 
 
   @Override
   public String getName() {
@@ -54,7 +51,11 @@ public class FunctionDocumentation implements IFunctionDocumentation {
   public String getDescription() {
     return description;
   }
- 
+
+  @Override
+  public DataType getReturnType() {
+    return returnType;
+  }
 
   @Override
   public String toString() {
