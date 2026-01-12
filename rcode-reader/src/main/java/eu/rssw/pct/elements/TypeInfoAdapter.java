@@ -91,8 +91,8 @@ public class TypeInfoAdapter extends TypeAdapter<ITypeInfo> {
     // Variables
     out.name("variables");
     out.beginArray();
-    for (IVariableElement var : value.getVariables()) {
-      variableAdapter.write(out, var);
+    for (IVariableElement v : value.getVariables()) {
+      variableAdapter.write(out, v);
     }
     out.endArray();
 

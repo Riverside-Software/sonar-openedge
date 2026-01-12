@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.Token;
@@ -346,7 +347,7 @@ public class ParserSupport {
   public List<String> getAllResolvedClasses() {
     return resolvedClassNames.entrySet().stream() //
       .filter(entry -> entry.getKey().length() < entry.getValue().length()) //
-      .map(entry -> entry.getValue()) //
+      .map(Entry::getValue) //
       .toList();
   }
 
