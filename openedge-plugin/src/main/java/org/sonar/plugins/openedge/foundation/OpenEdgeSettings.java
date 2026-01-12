@@ -268,9 +268,8 @@ public class OpenEdgeSettings {
       var list = processArtifacts(resolvedDependencies, projectName);
       propath.addAll(list.stream().map(Path::toFile).toList());
       propathFull.addAll(list.stream().map(Path::toFile).toList());
-    } catch (IOException e) {
-      LOG.error("error on getting dependencies{}{}", " ", e);
-      e.printStackTrace();
+    } catch (IOException caught) {
+      LOG.error("Error while processing dependencies", caught);
     }
   }
 
