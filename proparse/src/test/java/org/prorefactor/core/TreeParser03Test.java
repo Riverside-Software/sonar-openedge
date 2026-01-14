@@ -1701,11 +1701,12 @@ public class TreeParser03Test extends AbstractProparseTest {
     var code = """
         define temp-table tt1 field fld1 as character.
         define dataset ds1 for tt1.
+        dataset ds1:fill().
         """;
     ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
-    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
     var xx = unit.getRootScope().getAllSymbols(Dataset.class);
     assertNotNull(xx);
     assertEquals(xx.size(), 1);
