@@ -102,6 +102,24 @@ public class TableBuffer extends Symbol {
     return ret;
   }
 
+  /** Get a FieldBuffer by its name. */
+  public FieldBuffer getFieldBufferByName(String name) {
+    for (FieldBuffer field : fieldBuffers.values()) {
+      if (field.getName().equals(name))
+        return field;
+    }
+    return null;
+  }
+
+  /** Get a FieldBuffer by its name. */
+  public boolean hasFieldBuffer(String name) {
+    for (FieldBuffer field : fieldBuffers.values()) {
+      if (field.getName().equals(name))
+        return true;
+    }
+    return false;
+  }
+
   /**
    * @return The name of the buffer, or the name of the table for default (unnamed) buffers
    */

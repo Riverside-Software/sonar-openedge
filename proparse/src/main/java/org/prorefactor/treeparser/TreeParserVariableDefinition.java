@@ -14,6 +14,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -38,6 +39,8 @@ import org.prorefactor.core.schema.TableType;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
+import org.prorefactor.treeparser.symbols.DataRelation;
+import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;
@@ -119,7 +122,15 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterRecord(RecordContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     if (qual != null) {
-      recordNameNode((RecordNameNode) support.getNode(ctx), qual);
+      RecordNameNode recordNode = (RecordNameNode) support.getNode(ctx);
+      recordNameNode(recordNode, qual);
+      
+      // If we're defining a dataset, add the buffer to it
+      if (!stack.isEmpty() && stack.peek() instanceof Dataset && recordNode.getTableBuffer() != null) {
+        if(!((Dataset) stack.peek()).hasBuffer(recordNode.getTableBuffer())) {
+          ((Dataset) stack.peek()).addBuffer(recordNode.getTableBuffer());
+        }
+      }
     }
   }
 
@@ -217,6 +228,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     setContextQualifier(ctx.fieldExpr(), ContextQualifier.INIT);
   }
 
+  @Override
+  public void enterParameterArgDataset(ParameterArgDatasetContext ctx) {
+    setContextQualifier(ctx.identifier(), ContextQualifier.INIT);
+  }
+  
   @Override
   public void enterParameterArgExpression(ParameterArgExpressionContext ctx) {
     setContextQualifier(ctx.expression(), contextQualifiers.removeFrom(ctx));
@@ -899,6 +915,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     for (RecordContext rec : ctx.record()) {
       setContextQualifier(rec, ContextQualifier.INIT);
     }
+    for (DataRelationContext rel : ctx.dataRelation()) {
+      setContextQualifier(rel, ContextQualifier.INIT);
+    }
   }
 
   @Override
@@ -908,8 +927,14 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDataRelation(DataRelationContext ctx) {
+    ArrayList<TableBuffer> buffer = new ArrayList<TableBuffer>();
     for (RecordContext rec : ctx.record()) {
       setContextQualifier(rec, ContextQualifier.INIT);
+      buffer.add(currentScope.lookupTableOrBufferSymbol(rec.getText()));
+    }
+    if (!stack.isEmpty() && stack.peek() instanceof Dataset && buffer.size() == 2) {
+      ((Dataset) stack.peek()).addRelation(
+          new DataRelation((ctx.identifier() != null ? ctx.identifier().getText() : ""), currentScope, buffer.get(0), buffer.get(1)));
     }
   }
 
@@ -930,6 +955,18 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       nameResolution.put(ctx.fieldExpr().get(zz).field(), TableNameResolution.PREVIOUS);
       setContextQualifier(ctx.fieldExpr().get(zz + 1), ContextQualifier.SYMBOL);
       nameResolution.put(ctx.fieldExpr().get(zz + 1).field(), TableNameResolution.LAST);
+      
+      var relName = ctx.fieldExpr().get(zz + 1).getParent().getParent().getChild(1).getText();
+      if (!stack.isEmpty() && stack.peek() instanceof Dataset && !relName.isEmpty()
+          && ((Dataset) stack.peek()).hasRelation(relName)) {
+        var rel = ((Dataset) stack.peek()).getRelation(relName);
+        var parentField = currentScope.lookupBuffer(rel.getParentBuffer().getName()).getFieldBufferByName(
+            ctx.fieldExpr().get(zz).field().getText());
+        var childField = currentScope.lookupBuffer(rel.getChildBuffer().getName()).getFieldBufferByName(
+            ctx.fieldExpr().get(zz + 1).field().getText());
+        if (parentField != null && childField != null)
+          rel.addRelationFields(parentField, childField);
+      }
     }
   }
 

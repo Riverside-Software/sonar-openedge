@@ -36,6 +36,7 @@ import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.Modifier;
 import org.prorefactor.treeparser.symbols.Query;
@@ -1746,4 +1747,252 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertNull(r1.getMethodElement());
   }
   
+  @Test
+  public void testDataset01() {
+    var code = """
+        define temp-table tt1 field fld1 as character.
+        define dataset ds1 for tt1.
+        dataset ds1:fill().
+        run proc1 (input dataset ds1).
+        procedure proc1:
+          define input parameter d as dataset.
+        end.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 6);
+    List<Dataset> xx = (List<Dataset>) unit.getRootScope().getAllSymbols(Dataset.class);
+    assertNotNull(xx);
+    assertEquals(xx.size(), 1);
+    assertEquals(xx.get(0).getName(), "ds1");
+    assertEquals(xx.get(0).getAllRefsCount(), 2);
+    assertEquals(xx.get(0).getDefineNode().getLine(), 2);
+    assertEquals(xx.get(0).getBuffers().size(), 1);
+    assertEquals(xx.get(0).getBuffers().get(0).getName(), "tt1");
+
+    var lststatements = unit.getTopNode().queryStateHead();
+    var methodCall = lststatements.get(2).getDirectChildren(ABLNodeType.METHOD_REF);
+
+    assertNotNull(methodCall);
+    assertEquals(methodCall.size(), 1);
+    var dataset = methodCall.get(0).query(ABLNodeType.DATASET);
+    assertNotNull(dataset);
+    assertEquals(dataset.size(), 1);
+    assertEquals(dataset.get(0).getSymbol().getName(), "ds1");
+    assertEquals(dataset.get(0).getSymbol().getDefineNode().getLine(), 2);
+
+    var lst = unit.getRootScope().lookupRoutines("proc1");
+    assertEquals(lst.size(), 1);
+
+    var procCall = lststatements.get(3);
+    assertNotNull(procCall);
+    var param = procCall.query(ABLNodeType.PARAMETER_ITEM);
+    assertNotNull(param);
+    assertEquals(param.size(), 1);
+    var dataset2 = param.get(0).getSymbol();
+    assertNotNull(dataset2);
+    assertEquals(dataset2.getDefineNode().getLine(), 2);
+  }
+
+  @Test
+  public void testDataset02() {
+    var code = """
+        define temp-table tt1 field fld1 as character.
+        define dataset ds1 for tt1.
+        define buffer ds1 for tt1.
+        dataset ds1:fill().
+        run proc1 (input dataset ds1).
+        procedure proc1:
+          define input parameter d as dataset.
+        end.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 7);
+    List<Dataset> xx = (List<Dataset>) unit.getRootScope().getAllSymbols(Dataset.class);
+    assertNotNull(xx);
+    assertEquals(xx.size(), 1);
+    assertEquals(xx.get(0).getName(), "ds1");
+    assertEquals(xx.get(0).getAllRefsCount(), 2);
+    assertEquals(xx.get(0).getDefineNode().getLine(), 2);
+    assertEquals(xx.get(0).getBuffers().size(), 1);
+    assertEquals(xx.get(0).getBuffers().get(0).getName(), "tt1");
+
+    var lststatements = unit.getTopNode().queryStateHead();
+    var methodCall = lststatements.get(3).getDirectChildren(ABLNodeType.METHOD_REF);
+
+    assertNotNull(methodCall);
+    assertEquals(methodCall.size(), 1);
+    var dataset = methodCall.get(0).query(ABLNodeType.DATASET);
+    assertNotNull(dataset);
+    assertEquals(dataset.size(), 1);
+    assertEquals(dataset.get(0).getSymbol().getName(), "ds1");
+    assertEquals(dataset.get(0).getSymbol().getDefineNode().getLine(), 2);
+
+    var lst = unit.getRootScope().lookupRoutines("proc1");
+    assertEquals(lst.size(), 1);
+
+    var procCall = lststatements.get(4);
+    assertNotNull(procCall);
+    var param = procCall.query(ABLNodeType.PARAMETER_ITEM);
+    assertNotNull(param);
+    assertEquals(param.size(), 1);
+    var dataset2 = param.get(0).getSymbol();
+    assertNotNull(dataset2);
+    assertEquals(dataset2.getDefineNode().getLine(), 2);
+
+  }
+
+  @Test
+  public void testDataset03() {
+    var code = """
+        define temp-table tt1 field fld1 as character.
+        define temp-table tt2 field fld2 as character.
+        define dataset ds1 for tt1, tt2 data-relation rel1 for tt1,tt2.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
+    List<Dataset> xx = (List<Dataset>) unit.getRootScope().getAllSymbols(Dataset.class);
+    assertNotNull(xx);
+    assertEquals(xx.size(), 1);
+    assertEquals(xx.get(0).getName(), "ds1");
+    assertEquals(xx.get(0).getDefineNode().getLine(), 3);
+    assertEquals(xx.get(0).getBuffers().size(), 2);
+    assertEquals(xx.get(0).getBuffers().get(0).getName(), "tt1");
+    assertEquals(xx.get(0).getBuffers().get(1).getName(), "tt2");
+
+    var rels = xx.get(0).getRelations();
+    assertNotNull(rels);
+    assertEquals(rels.size(), 1);
+    assertEquals(rels.get(0).getName(), "rel1");
+    assertEquals(rels.get(0).getParentBuffer().getName(), "tt1");
+    assertEquals(rels.get(0).getChildBuffer().getName(), "tt2");
+
+  }
+
+  @Test
+  public void testDataset04() {
+    var code = """
+        define temp-table tt1 field fld1 as character.
+        define temp-table tt2 field fld2 as character.
+        define temp-table tt3 field fld3 as character.
+        define dataset ds1 for tt1, tt2, tt3
+          data-relation rel1 for tt1,tt2
+           data-relation rel2 for tt2,tt3.
+        """;
+
+    ParseUnit unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 4);
+    List<Dataset> xx = (List<Dataset>) unit.getRootScope().getAllSymbols(Dataset.class);
+    assertNotNull(xx);
+    assertEquals(xx.size(), 1);
+    assertEquals(xx.get(0).getName(), "ds1");
+    assertEquals(xx.get(0).getDefineNode().getLine(), 4);
+    assertEquals(xx.get(0).getBuffers().size(), 3);
+    assertEquals(xx.get(0).getBuffers().get(0).getName(), "tt1");
+    assertEquals(xx.get(0).getBuffers().get(1).getName(), "tt2");
+    assertEquals(xx.get(0).getBuffers().get(2).getName(), "tt3");
+
+    var rels = xx.get(0).getRelations();
+    assertNotNull(rels);
+    assertEquals(rels.size(), 2);
+    assertEquals(rels.get(0).getName(), "rel1");
+    assertEquals(rels.get(0).getParentBuffer().getName(), "tt1");
+    assertEquals(rels.get(0).getChildBuffer().getName(), "tt2");
+    assertEquals(rels.get(1).getName(), "rel2");
+    assertEquals(rels.get(1).getParentBuffer().getName(), "tt2");
+    assertEquals(rels.get(1).getChildBuffer().getName(), "tt3");
+  }
+
+  @Test
+  public void testDataset05() {
+    var code = """
+        define temp-table tt1 field fld1 as character.
+        define temp-table tt2 field fld2 as CHARACTER FIELD fld21 AS CHARACTER.
+        define temp-table tt3 field fld3 as CHARACTER FIELD fld31 AS CHARACTER.
+        define dataset ds1 for tt1, tt2, tt3
+          data-relation rel1 for tt1,tt2
+          RELATION-FIELDS(fld1, fld2)
+           data-relation rel2 for tt2,tt3
+          RELATION-FIELDS(fld2, fld3, fld21, fld31).
+          """;
+
+    ParseUnit unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 4);
+    List<Dataset> xx = (List<Dataset>) unit.getRootScope().getAllSymbols(Dataset.class);
+    assertNotNull(xx);
+    assertEquals(xx.size(), 1);
+    assertEquals(xx.get(0).getName(), "ds1");
+    assertEquals(xx.get(0).getDefineNode().getLine(), 4);
+    assertEquals(xx.get(0).getBuffers().size(), 3);
+    assertEquals(xx.get(0).getBuffers().get(0).getName(), "tt1");
+    assertEquals(xx.get(0).getBuffers().get(1).getName(), "tt2");
+    assertEquals(xx.get(0).getBuffers().get(2).getName(), "tt3");
+
+    var rels = xx.get(0).getRelations();
+    assertNotNull(rels);
+    assertEquals(rels.size(), 2);
+    assertEquals(rels.get(0).getName(), "rel1");
+    assertEquals(rels.get(0).getParentBuffer().getName(), "tt1");
+    assertEquals(rels.get(0).getChildBuffer().getName(), "tt2");
+    assertEquals(rels.get(1).getName(), "rel2");
+    assertEquals(rels.get(1).getParentBuffer().getName(), "tt2");
+    assertEquals(rels.get(1).getChildBuffer().getName(), "tt3");
+
+    var fieldrel1 = rels.get(0).getRelationFields();
+    assertNotNull(fieldrel1);
+    assertEquals(fieldrel1.size(), 1);
+    assertEquals(fieldrel1.get(0).getO1().getName(), "fld1");
+    assertEquals(fieldrel1.get(0).getO2().getName(), "fld2");
+
+    var fieldrel2 = rels.get(1).getRelationFields();
+    assertNotNull(fieldrel2);
+    assertEquals(fieldrel2.size(), 2);
+    assertEquals(fieldrel2.get(0).getO1().getName(), "fld2");
+    assertEquals(fieldrel2.get(0).getO2().getName(), "fld3");
+    assertEquals(fieldrel2.get(1).getO1().getName(), "fld21");
+    assertEquals(fieldrel2.get(1).getO2().getName(), "fld31");
+  }
+  
+  @Test
+  public void testDataset06() {
+    // without data-relation identifier
+    var code = """
+        define temp-table tt1 field fld1 as character.
+        define temp-table tt2 field fld2 as character.         
+        define dataset ds1 for tt1, tt2, tt3
+          data-relation for tt1,tt2
+          RELATION-FIELDS(fld1, fld2).
+        """;
+
+    ParseUnit unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
+    List<Dataset> xx = (List<Dataset>) unit.getRootScope().getAllSymbols(Dataset.class);
+    assertNotNull(xx);
+    assertEquals(xx.size(), 1);
+    assertEquals(xx.get(0).getName(), "ds1");
+    assertEquals(xx.get(0).getDefineNode().getLine(), 3);
+    assertEquals(xx.get(0).getBuffers().size(), 2);
+    assertEquals(xx.get(0).getBuffers().get(0).getName(), "tt1");
+    assertEquals(xx.get(0).getBuffers().get(1).getName(), "tt2"); 
+
+    var rels = xx.get(0).getRelations();
+    assertNotNull(rels);
+    assertEquals(rels.size(), 1);
+    assertEquals(rels.get(0).getName(), "");
+    assertEquals(rels.get(0).getParentBuffer().getName(), "tt1");
+    assertEquals(rels.get(0).getChildBuffer().getName(), "tt2");
+
+  }
+
 }

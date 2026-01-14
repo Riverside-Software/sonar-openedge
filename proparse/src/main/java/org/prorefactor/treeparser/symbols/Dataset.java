@@ -25,6 +25,7 @@ import org.prorefactor.treeparser.TreeParserSymbolScope;
 public class Dataset extends Symbol {
   // Keep the buffers, in order, as part of the DATASET signature
   private final List<TableBuffer> buffers = new ArrayList<>();
+  private final List<DataRelation> relations = new ArrayList<>();
 
   public Dataset(String name, TreeParserSymbolScope scope) {
     super(name, scope);
@@ -37,6 +38,10 @@ public class Dataset extends Symbol {
     buffers.add(buff);
   }
 
+  public void addRelation(DataRelation rel) {
+    relations.add(rel);
+  }
+  
   /** For this subclass of Symbol, fullName() returns the same value as getName(). */
   @Override
   public String fullName() {
@@ -46,6 +51,28 @@ public class Dataset extends Symbol {
   /** Get the list of buffers (in order) which make up this dataset's signature. */
   public List<TableBuffer> getBuffers() {
     return buffers;
+  }
+  
+  /** Get one buffer by name. */
+  public TableBuffer getBuffer(String name) {
+    for(TableBuffer buf : buffers) {
+      if(buf.getName().equals(name)) return buf;      
+    }
+    return null;
+  }
+
+  /** Get the list of data relations which make up this dataset's signature. */
+  public List<DataRelation> getRelations() {
+    return relations;
+  }
+
+  /** Get one relation by name. */
+  public DataRelation getRelation(String name) {
+    for (DataRelation rel : relations) {
+      if (rel.getName().equals(name))
+        return rel;
+    }
+    return null;
   }
 
   @Override
@@ -64,7 +91,32 @@ public class Dataset extends Symbol {
     obj.setDefinitionNode(getDefineNode());
     obj.setLikeSymbol(getLikeSymbol());
     buffers.forEach(it -> obj.addBuffer(it.copy(newScope)));
+    relations.forEach(it -> obj.addRelation(it.copy(newScope)));
 
     return obj;
+  }
+  
+  public boolean hasBuffer(TableBuffer buf) {
+    for (TableBuffer b : buffers) {
+      if (b.equals(buf))
+        return true;
+    }
+    return false;
+  }
+
+  public boolean hasRelation(String name) {
+    for (DataRelation rel : relations) {
+      if (rel.getName().equals(name))
+        return true;
+    }
+    return false;
+  }
+  
+  public boolean hasRelation(DataRelation rel) {
+    for (DataRelation r : relations) {
+      if (r.equals(rel))
+        return true;
+    }
+    return false;
   }
 }

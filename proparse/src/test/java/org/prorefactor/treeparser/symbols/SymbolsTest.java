@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNotEquals;
 
 import java.io.IOException;
 
+import org.prorefactor.core.schema.Table;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.proparse.support.IProparseEnvironment;
@@ -32,6 +33,15 @@ public class SymbolsTest {
     assertNotEquals(ds1, ds2);
     assertEquals(ds2.getName(), "ds1");
     assertEquals(ds2.getScope(), rootScope2);
+    
+    var rel1 = new DataRelation("rel1", rootScope1, new TableBuffer("tt1",rootScope1, new Table("tt1")),new TableBuffer("tt2",rootScope1, new Table("tt2")));
+    assertEquals(rel1.getScope(), rootScope1);
+    var rel2 = rel1.copy(rootScope2);
+    assertNotEquals(rel1, rel2);
+    assertEquals(rel2.getName(), "rel1");
+    assertEquals(rel2.getScope(), rootScope2);
+    ds1.addRelation(rel1);
+    assertEquals(ds1.getRelations().get(0).getName(),"rel1");
 
     var dSrc1 = new Datasource("dsrc1", rootScope1);
     assertEquals(dSrc1.getScope(), rootScope1);
