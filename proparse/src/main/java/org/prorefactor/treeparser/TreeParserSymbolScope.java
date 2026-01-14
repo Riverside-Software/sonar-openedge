@@ -148,22 +148,21 @@ public class TreeParserSymbolScope {
 
   /** Add a Symbol for names lookup. */
   public void add(ISymbol symbol) {
-    if (symbol instanceof IFieldLevelWidget) {
-      add((IFieldLevelWidget) symbol);
-    } else if (symbol instanceof Variable) {
-      add((Variable) symbol);
-    } else if (symbol instanceof Routine) {
-      add((Routine) symbol);
-    } else if (symbol instanceof TableBuffer) {
-      add((TableBuffer) symbol);
-    } else {
-      var map = typeMap.get(symbol.getProgressType());
-      if (map == null) {
-        map = new HashMap<>();
-        typeMap.put(symbol.getProgressType(), map);
-      }
-      map.put(symbol.getName().toLowerCase(), symbol);
+    if (symbol instanceof IFieldLevelWidget s2) {
+      add(s2);
+    } else if (symbol instanceof Variable s2) {
+      add(s2);
+    } else if (symbol instanceof Routine s2) {
+      add(s2);
+    } else if (symbol instanceof TableBuffer s2) {
+      add(s2);
     }
+    var map = typeMap.get(symbol.getProgressType());
+    if (map == null) {
+      map = new HashMap<>();
+      typeMap.put(symbol.getProgressType(), map);
+    }
+    map.put(symbol.getName().toLowerCase(), symbol);
   }
 
   /** Add a new scope to this scope. */

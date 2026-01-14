@@ -16,7 +16,9 @@ package org.prorefactor.treeparser;
 
 import javax.inject.Inject;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
@@ -27,14 +29,16 @@ import org.prorefactor.proparse.antlr4.Proparse.ExprTermOtherContext;
 import org.prorefactor.proparse.antlr4.Proparse.ExprTermWidgetContext;
 import org.prorefactor.proparse.antlr4.Proparse.Exprt2FieldContext;
 import org.prorefactor.proparse.antlr4.Proparse.FieldContext;
+import org.prorefactor.proparse.antlr4.Proparse.ParameterArgDatasetContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgDatasetHandleContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgTableHandleContext;
 import org.prorefactor.proparse.antlr4.Proparse.QueryIdentifierContext;
 import org.prorefactor.proparse.antlr4.Proparse.RecordContext;
 import org.prorefactor.proparse.antlr4.Proparse.WidNameContext;
+import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.Query;
-import org.prorefactor.treeparser.symbols.TableBuffer;
+import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.Variable;
 
 import eu.rssw.pct.elements.DataType;
@@ -62,6 +66,22 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
   }
 
   @Override
+  public void exitParameterArgDataset(ParameterArgDatasetContext ctx) {
+    noteReference(support.getNode(ctx), contextQualifiers.get(ctx));
+  }
+
+  @Override
+  public void enterParameterArgDataset(ParameterArgDatasetContext ctx) {
+    if (ctx.identifier() != null) {
+      Dataset dataset = currentScope.lookupDataset(ctx.identifier().getText());
+      if (dataset != null) {
+        dataset.noteReference(support.getNode(ctx), ContextQualifier.REF);
+        support.getNode(ctx).setSymbol(dataset);
+      }
+    }
+  }
+
+  @Override
   public void enterExprTermAttribute(ExprTermAttributeContext ctx) {
     ContextQualifier cq = contextQualifiers.get(ctx.attributeName().nonPunctuating());
     if (ctx.expressionTerm() instanceof ExprTermOtherContext) {
@@ -86,15 +106,25 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
   @Override
   public void enterWidName(WidNameContext ctx) {
-    if (ctx.BUFFER() != null) {
-      TableBuffer tableBuffer = currentScope.lookupBuffer(ctx.bufferIdentifier().getText());
+    if (ctx.systemHandleName() != null || ctx.MENUITEM() != null || ctx.MENU() != null || ctx.SUBMENU() != null) {
+      // nothing for the first version
+    } else if (ctx.BUFFER() != null) {
+      var tableBuffer = currentScope.lookupBuffer(ctx.bufferIdentifier().getText());
       if (tableBuffer != null) {
         tableBuffer.noteReference(support.getNode(ctx), ContextQualifier.SYMBOL);
+        setSymbolOnRef(ctx, tableBuffer);
       }
     } else if (ctx.TEMPTABLE() != null) {
-      TableBuffer tableBuffer = currentScope.lookupBuffer(ctx.tempTableIdentifier().getText());
+      var tableBuffer = currentScope.lookupBuffer(ctx.tempTableIdentifier().getText());
       if (tableBuffer != null) {
         tableBuffer.noteReference(support.getNode(ctx), ContextQualifier.SYMBOL);
+        setSymbolOnRef(ctx, tableBuffer);
+      }
+    } else {
+      var symbol = currentScope.lookupSymbol(ctx.getStart().getType(), ctx.getStop().getText());
+      if (symbol != null) {
+        symbol.noteReference(support.getNode(ctx).getParent(), ContextQualifier.REF);
+        setSymbolOnRef(ctx, (Symbol) symbol);
       }
     }
   }
@@ -135,6 +165,14 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
         refNode.setSymbol((Variable) result.getSymbol());
         result.getSymbol().noteReference(refNode, qual);
       }
+    }
+  }
+
+  private void setSymbolOnRef(ParserRuleContext ctx, Symbol symbol) {
+    if (support.getNode(ctx).getNodeType() == ABLNodeType.WIDGET_REF) {
+      support.getNode(ctx).setSymbol(symbol);
+    } else if (support.getNode(ctx).getParent() != null) {
+      support.getNode(ctx).getParent().setSymbol(symbol);
     }
   }
 
