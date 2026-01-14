@@ -36,6 +36,7 @@ import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.ParseUnit;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
+import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.Modifier;
 import org.prorefactor.treeparser.symbols.Query;
@@ -1695,4 +1696,25 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(xx.getDataType().getClassName(), "Progress.Collections.IMap");
   }
 
+  @Test
+  public void testDataset01() {
+    var code = """
+        define temp-table tt1 field fld1 as character.
+        define dataset ds1 for tt1.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    var xx = unit.getRootScope().getAllSymbols(Dataset.class);
+    assertNotNull(xx);
+    assertEquals(xx.size(), 1);
+    assertNotNull(xx.get(0).getDefineNode());
+    assertNotNull(xx.get(0).getDefineNode().getParent());
+    assertEquals(xx.get(0).getDefineNode().getParent().getDirectChildren(ABLNodeType.RECORD_NAME).size(), 1);
+    assertEquals(xx.get(0).getDefineNode().getParent().getDirectChildren(ABLNodeType.RECORD_NAME).get(0).getText(),
+        "tt1");
+  }
+
+  
 }
