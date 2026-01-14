@@ -27,11 +27,13 @@ import org.prorefactor.proparse.antlr4.Proparse.ExprTermOtherContext;
 import org.prorefactor.proparse.antlr4.Proparse.ExprTermWidgetContext;
 import org.prorefactor.proparse.antlr4.Proparse.Exprt2FieldContext;
 import org.prorefactor.proparse.antlr4.Proparse.FieldContext;
+import org.prorefactor.proparse.antlr4.Proparse.ParameterArgDatasetContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgDatasetHandleContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgTableHandleContext;
 import org.prorefactor.proparse.antlr4.Proparse.QueryIdentifierContext;
 import org.prorefactor.proparse.antlr4.Proparse.RecordContext;
 import org.prorefactor.proparse.antlr4.Proparse.WidNameContext;
+import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.TableBuffer;
@@ -59,6 +61,22 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
   @Override
   public void exitParameterArgDatasetHandle(ParameterArgDatasetHandleContext ctx) {
     noteReference(support.getNode(ctx.fieldExpr().field()), contextQualifiers.get(ctx));
+  }
+
+  @Override
+  public void exitParameterArgDataset(ParameterArgDatasetContext ctx) {
+    noteReference(support.getNode(ctx.getParent()), contextQualifiers.get(ctx));
+  }
+
+  @Override
+  public void enterParameterArgDataset(ParameterArgDatasetContext ctx) {
+    if (ctx.identifier() != null) {
+      Dataset dataset = currentScope.lookupDataset(ctx.identifier().getText());
+      if (dataset != null) {
+        dataset.noteReference(support.getNode(ctx.getParent()), ContextQualifier.REF);
+        support.getNode(ctx.getParent()).setSymbol(dataset);
+      }
+    }
   }
 
   @Override
@@ -95,6 +113,13 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
       TableBuffer tableBuffer = currentScope.lookupBuffer(ctx.tempTableIdentifier().getText());
       if (tableBuffer != null) {
         tableBuffer.noteReference(support.getNode(ctx), ContextQualifier.SYMBOL);
+      }
+    }
+    else if (ctx.DATASET() != null) {
+      Dataset dataset = currentScope.lookupDataset(ctx.datasetIdentifier().getText());
+      if (dataset != null) {
+        dataset.noteReference(support.getNode(ctx), ContextQualifier.REF);
+        support.getNode(ctx).setSymbol((Dataset) dataset);
       }
     }
   }
