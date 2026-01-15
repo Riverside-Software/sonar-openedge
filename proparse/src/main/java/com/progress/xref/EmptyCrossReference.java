@@ -1,9 +1,9 @@
 package com.progress.xref;
 
-import com.google.common.collect.ImmutableList;
+import java.util.List;
 
 public class EmptyCrossReference extends CrossReference {
   public EmptyCrossReference() {
-    this.source = ImmutableList.<Source> of();
+    this.source = List.of();
   }
 }
