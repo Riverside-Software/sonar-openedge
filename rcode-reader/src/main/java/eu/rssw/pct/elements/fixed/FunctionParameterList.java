@@ -19,43 +19,19 @@
  */
 package eu.rssw.pct.elements.fixed;
 
-import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IFunctionParameter;
+import eu.rssw.pct.elements.IFunctionParameterList;
 
-public class ParamDocumentation implements IFunctionParameter {
-  private final String name;
-  private final String description;
-  private final boolean isOptional;
-  private final DataType dataType;
+public class FunctionParameterList implements IFunctionParameterList {
+  IFunctionParameter[] parameters;
 
-  public ParamDocumentation(String name, String description) {
-    this(name, description, false, DataType.UNKNOWN);
-  }
-
-  public ParamDocumentation(String name, String description, boolean optional, DataType dataType) {
-    this.name = name;
-    this.description = description;
-    this.isOptional = optional;
-    this.dataType = dataType;
+  public FunctionParameterList(IFunctionParameter... params) {
+    this.parameters = params;
   }
 
   @Override
-  public String getName() {
-    return this.name;
+  public IFunctionParameter[] getParameters() {
+    return this.parameters;
   }
 
-  @Override
-  public String getDescription() {
-    return this.description;
-  }
-
-  @Override
-  public DataType getDataType() {
-    return this.dataType;
-  }
-
-  @Override
-  public boolean isOptional() {
-    return this.isOptional;
-  }
 }

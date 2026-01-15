@@ -17,35 +17,10 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package eu.rssw.pct.elements.fixed;
+package eu.rssw.pct.elements;
 
-import eu.rssw.pct.elements.IMethodDocumentation;
-import eu.rssw.pct.elements.IFunctionParameter;
+public interface IFunctionParameterList {
 
-public class MethodDocumentation implements IMethodDocumentation {
-  private final String name;
-  private final String description;
-  private final IFunctionParameter[] parameters;
-
-  public MethodDocumentation(String name, String description, IFunctionParameter... params) {
-    this.name = name;
-    this.description = description;
-    this.parameters = params;
-  }
-
-  @Override
-  public String getName() {
-    return this.name;
-  }
-
-  @Override
-  public String getDescription() {
-    return this.description;
-  }
-
-  @Override
-  public IFunctionParameter[] getParameters() {
-    return parameters;
-  }
+  IFunctionParameter[] getParameters();
 
 }

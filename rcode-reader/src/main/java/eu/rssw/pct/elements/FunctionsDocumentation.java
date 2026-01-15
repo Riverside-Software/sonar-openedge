@@ -37,6 +37,7 @@ import com.google.gson.GsonBuilder;
 
 import eu.rssw.pct.elements.fixed.FunctionDocumentation;
 import eu.rssw.pct.elements.fixed.ParamDocumentation;
+import eu.rssw.pct.elements.fixed.FunctionParameterList;
 import eu.rssw.pct.mapping.FunctionsDocumentationMapping;
 import eu.rssw.pct.mapping.OpenEdgeVersion;
 
@@ -66,22 +67,34 @@ public class FunctionsDocumentation {
         var reader = new InputStreamReader(input, StandardCharsets.UTF_8)) {
       var fnHdlArray = new GsonBuilder().create().fromJson(reader, FunctionsDocumentationMapping.class);
       for (var hdl : fnHdlArray.functions) {
-        var params = new ParamDocumentation[hdl.parameters == null ? 0 : hdl.parameters.length];
-        if (hdl.parameters != null) {
-          var number = 1;
-          for (var paramEntry : hdl.parameters) {
-            var prm = new ParamDocumentation(paramEntry.name, paramEntry.description, paramEntry.isOptional,
-                DataType.get(paramEntry.type));
-            params[number - 1] = prm;
-            number++;
+        if (hdl.variants != null) {
+          var xx = 1;
+          var variants = new FunctionParameterList[hdl.variants == null ? 0 : hdl.variants.length];
+          for (var varianEntry : hdl.variants) {
+            var params = new ParamDocumentation[varianEntry.parameters == null ? 0 : varianEntry.parameters.length];
+            if (varianEntry.parameters != null) {
+              var number = 1;
+              for (var paramEntry : varianEntry.parameters) {
+                var prm = new ParamDocumentation(paramEntry.name, paramEntry.description, paramEntry.isOptional,
+                    paramEntry.type.equals("Object") ? new DataType("Progress.Lang.Object")
+                        : DataType.get(paramEntry.type));
+                params[number - 1] = prm;
+                number++;
+              }
+            }
+            var variant = new FunctionParameterList(params);
+            variants[xx - 1] = variant;
+            xx++;
           }
+
+          var functionDocumentation = new FunctionDocumentation(hdl.name, hdl.description, hdl.returnType, variants);
+          list.add(functionDocumentation);
         }
-        var functionDocumentation = new FunctionDocumentation(hdl.name, hdl.description,hdl.returnType, params);
-        list.add(functionDocumentation);
       }
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
+
     return Collections.unmodifiableList(list);
   }
 

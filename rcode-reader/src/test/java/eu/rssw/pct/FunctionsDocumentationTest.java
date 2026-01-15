@@ -52,14 +52,17 @@ public class FunctionsDocumentationTest {
         assertNotNull(functionDocumentation.getName());
         assertNotEquals(functionDocumentation.getReturnType(), null,
             version + " " + functionDocumentation.getName() + " -- " + "returndatatype");
+        assertNotNull(functionDocumentation.getVariants());
         assertNotNull(functionDocumentation.getIDESignature());
-        assertNotNull(functionDocumentation.getParameters());
-        for (var param : functionDocumentation.getParameters()) {
-          assertNotNull(param.getName());
-          assertNotNull(param.getDescription());
-          assertNotEquals(param.getDataType(), DataType.UNKNOWN,
-              version + " " + functionDocumentation.getName() + " -- " + param.getName() + " -- " + "datatype");
-          assertTrue(functionDocumentation.hasParameters(param.getName()));
+        assertNotNull(functionDocumentation.getVariants()[0].getParameters());
+        for (var variant : functionDocumentation.getVariants()) {
+          for (var param : variant.getParameters()) {
+            assertNotNull(param.getName());
+            assertNotNull(param.getDescription());
+            assertNotEquals(param.getDataType(), DataType.UNKNOWN,
+                version + " " + functionDocumentation.getName() + " -- " + param.getName() + " -- " + "datatype");
+            assertTrue(functionDocumentation.hasParameters(param.getName()));
+          }
         }
         assertFalse(functionDocumentation.hasParameters("unknown"));
         assertNull(functionDocumentation.getParameter("unknown"));
@@ -93,33 +96,42 @@ public class FunctionsDocumentationTest {
     var functionDocumentation3 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("SUBSTRING");
     assertNotNull(functionDocumentation3);
     assertEquals(functionDocumentation3.getIDESignature(),
-        "SUBSTRING(CHARACTER source, INTEGER position, INTEGER length [, CHARACTER type])");
+        "SUBSTRING(CHARACTER source, INTEGER position [, INTEGER length [, CHARACTER type]])");
+
+    var functionDocumentation4 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply(
+        "LINE-COUNTER");
+    assertNotNull(functionDocumentation4);
+    assertEquals(functionDocumentation4.getIDESignature(), "LINE-COUNTER([CHARACTER stream [, HANDLE handle]])");
+
+    var functionDocumentation5 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("CONNECTED");
+    assertNotNull(functionDocumentation5);
+    assertEquals(functionDocumentation5.getIDESignatures(null).length, 2);
   }
 
   @Test
   private void testFunctionDocumentationsPerVersion() {
     var functionDocumentation1 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V117).apply("LENGTH");
     assertNotNull(functionDocumentation1);
-    var list = functionDocumentation1.getParameters();
-    assertEquals(list.length, 4);
+    var list = functionDocumentation1.getVariants()[0].getParameters();
+    assertEquals(list.length, 2);
     var val1 = functionDocumentation1.getParameter("string");
     assertNotNull(val1);
     var functionDocumentation12 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V122).apply("LENGTH");
     assertNotNull(functionDocumentation12);
-    var list12 = functionDocumentation12.getParameters();
-    assertEquals(list12.length, 4);
+    var list12 = functionDocumentation12.getVariants()[0].getParameters();
+    assertEquals(list12.length, 2);
     var val12 = functionDocumentation1.getParameter("string");
     assertNotNull(val12);
     var functionDocumentation13 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("LENGTH");
     assertNotNull(functionDocumentation13);
-    var list13 = functionDocumentation13.getParameters();
-    assertEquals(list13.length, 4);
+    var list13 = functionDocumentation13.getVariants()[0].getParameters();
+    assertEquals(list13.length, 2);
     var val13 = functionDocumentation13.getParameter("exp");
     assertNotNull(val13);
     var functionDocumentation14 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V130).apply("LENGTH");
     assertNotNull(functionDocumentation14);
-    var list14 = functionDocumentation14.getParameters();
-    assertEquals(list14.length, 4);
+    var list14 = functionDocumentation14.getVariants()[0].getParameters();
+    assertEquals(list14.length, 2);
     var val14 = functionDocumentation14.getParameter("exp");
     assertNotNull(val14);
 
@@ -137,7 +149,7 @@ public class FunctionsDocumentationTest {
 
     var functionDocumentation3 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V117).apply("CAN-DO");
     assertNotNull(functionDocumentation3);
-    var list3 = functionDocumentation3.getParameters();
+    var list3 = functionDocumentation3.getVariants()[0].getParameters();;
     assertEquals(list3.length, 2);
     var val3 = functionDocumentation3.getParameter("userid");
     assertNotNull(val3);
@@ -151,7 +163,7 @@ public class FunctionsDocumentationTest {
   public void testOptionalParameter() {
     var ascDocumentation = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("ASC");
     assertNotNull(ascDocumentation);
-    assertNotNull(ascDocumentation.getParameters());
+    assertNotNull(ascDocumentation.getVariants()[0].getParameters());
     var prm1 = ascDocumentation.getParameter("expression");
     assertNotNull(prm1);
     assertEquals(prm1.getDataType(), DataType.CHARACTER);
@@ -159,7 +171,7 @@ public class FunctionsDocumentationTest {
     var prm2 = ascDocumentation.getParameter("target-codepage");
     assertNotNull(prm2);
     assertEquals(prm2.getDataType(), DataType.CHARACTER);
-    assertFalse(prm2.isOptional());
+    assertTrue(prm2.isOptional());
     var prm3 = ascDocumentation.getParameter("source-codepage");
     assertNotNull(prm3);
     assertEquals(prm3.getDataType(), DataType.CHARACTER);

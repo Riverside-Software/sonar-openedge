@@ -21,25 +21,24 @@ package eu.rssw.pct.elements.fixed;
 
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IFunctionDocumentation;
-import eu.rssw.pct.elements.IParameterDocumentation;
+import eu.rssw.pct.elements.IFunctionParameterList;
 
 public class FunctionDocumentation implements IFunctionDocumentation {
   private final String name;
   private final String description;
   private final DataType returnType;
-  private final IParameterDocumentation[] parameters;
+  private final IFunctionParameterList[] variants;
 
-  public FunctionDocumentation(String name, String description, String returnType,
-      IParameterDocumentation... parameters) {
+  public FunctionDocumentation(String name, String description, String returnType, IFunctionParameterList... variants) {
     this.name = name;
     this.description = description;
     this.returnType = DataType.get(returnType);
-    this.parameters = parameters;
+    this.variants = variants;
   }
 
   @Override
-  public IParameterDocumentation[] getParameters() {
-    return parameters;
+  public IFunctionParameterList[] getVariants() {
+    return variants;
   }
 
   @Override
