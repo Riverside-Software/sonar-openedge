@@ -31,8 +31,6 @@ import org.prorefactor.refactor.settings.IProparseSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.io.ByteSource;
-
 public class ABLLexer implements TokenSource, IPreprocessor {
   private static final Logger LOGGER = LoggerFactory.getLogger(ABLLexer.class);
 
@@ -51,14 +49,14 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   /**
    * Test-only constructor
    */
-  protected ABLLexer(IProparseEnvironment session, ByteSource src, boolean lexOnly) {
+  protected ABLLexer(IProparseEnvironment session, byte[] src, boolean lexOnly) {
     this(session, session.getCharset(), src, lexOnly);
   }
 
   /**
    * Test-only constructor
    */
-  protected ABLLexer(IProparseEnvironment session, Charset charset, ByteSource src, boolean lexOnly) {
+  protected ABLLexer(IProparseEnvironment session, Charset charset, byte[] src, boolean lexOnly) {
     this(session, charset, src, "unnamed", lexOnly);
   }
 
@@ -71,7 +69,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
    * @param lexOnly Don't use preprocessor
    * @throws UncheckedIOException
    */
-  public ABLLexer(IProparseEnvironment session, Charset charset, ByteSource src, String fileName, boolean lexOnly) {
+  public ABLLexer(IProparseEnvironment session, Charset charset, byte[] src, String fileName, boolean lexOnly) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.session = session;
     this.lexOnly = lexOnly;
@@ -95,7 +93,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   /**
    * Test-only constructor, no filters added
    */
-  protected ABLLexer(IProparseEnvironment session, ByteSource src, String fileName) {
+  protected ABLLexer(IProparseEnvironment session, byte[] src, String fileName) {
     LOGGER.trace("New ProgressLexer instance {}", fileName);
     this.session = session;
     this.lexOnly = false;

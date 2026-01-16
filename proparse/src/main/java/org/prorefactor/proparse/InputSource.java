@@ -15,20 +15,15 @@
 package org.prorefactor.proparse;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.io.ByteProcessor;
-import com.google.common.io.ByteSource;
-import com.google.common.io.ByteStreams;
 
 /**
  * The bottom InputSource object for an IncludeFile is the input for the include file itself.
@@ -56,6 +51,13 @@ public class InputSource {
   private int currPos;
   private String currAnalyzeSuspend = null;
 
+  public InputSource(int sourceNum, String src, int fileIndex) {
+    this.sourceNum = sourceNum;
+    this.fileIndex = fileIndex;
+    this.macroExpansion = false;
+    this.fileContent = src;
+  }
+
   public InputSource(int sourceNum, String str, int fileIndex, int line, int col) {
     LOGGER.trace("New InputSource object for macro element '{}'", str);
     this.sourceNum = sourceNum;
@@ -71,41 +73,39 @@ public class InputSource {
     this.sourceNum = sourceNum;
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
-    try (InputStream input = new FileInputStream(file)) {
-      ByteSource src = ByteSource.wrap(ByteStreams.toByteArray(input));
-      if (src.read(new XCodedFileByteProcessor())) {
+    try (var input = Files.newInputStream(file.toPath())) {
+      var src = input.readAllBytes();
+      if (isXCoded(src)) {
         if (skipXCode)
           this.fileContent = " ";
         else
           throw new XCodedFileException(file.getName());
       } else {
-        this.fileContent = src.asCharSource(charset).read();
+        this.fileContent = new String(src, charset);
       }
     }
-    // Skip first character if it's a BOM
-    if (!fileContent.isEmpty() && fileContent.charAt(0) == 0xFEFF)
-      currPos++;
   }
 
-  public InputSource(int sourceNum, String fileName, ByteSource src, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
+  public InputSource(int sourceNum, String fileName, byte[] src, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
     LOGGER.trace("New InputSource object for include stream '{}'", fileName);
     this.sourceNum = sourceNum;
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
-    if (src.read(new XCodedFileByteProcessor())) {
+    if (isXCoded(src)) {
       if (skipXCode)
         this.fileContent = " ";
       else
         throw new XCodedFileException(fileName);
     } else {
-      this.fileContent = src.asCharSource(charset).read();
+      this.fileContent = new String(src, charset);
     }
-    // Skip first character if it's a BOM
-    if (!fileContent.isEmpty() && fileContent.charAt(0) == 0xFEFF)
-      currPos++;
   }
 
   public int get() {
+    // Skip first character if it's a BOM
+    if ((currPos == 0) && !fileContent.isEmpty() && fileContent.charAt(0) == 0xFEFF)
+      currPos++;
+
     // We use nextLine and nextCol - that way '\n' can have a column number at the end of the line it's on, rather than
     // at column 0 of the following line.
     // If this is a macro expansion, then we don't increment column or line number. Those just stay put at the file
@@ -167,22 +167,8 @@ public class InputSource {
     return fileContent;
   }
 
-  /**
-   * XCode'd files start with byte 0x11 or 0x13
-   */
-  private class XCodedFileByteProcessor implements ByteProcessor<Boolean> {
-    private boolean isXCoded = false;
-
-    @Override
-    public boolean processBytes(byte[] buf, int off, int len) throws IOException {
-      isXCoded = (len > 0) && ((buf[0] == 0x11) || (buf[0] == 0x13));
-      // No need to read more bytes
-      return false;
-    }
-
-    @Override
-    public Boolean getResult() {
-      return isXCoded;
-    }
+  private static boolean isXCoded(byte[] src) {
+    return (src.length > 0) && ((src[0] == 0x11) || (src[0] == 0x13));
   }
+
 }

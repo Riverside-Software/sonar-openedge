@@ -15,21 +15,17 @@ import org.prorefactor.refactor.RefactorSession;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.google.common.io.ByteSource;
-
-import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
-
 public class NameDotTokenFilterTest {
   private RefactorSession session;
 
   @BeforeTest
-  public void setUp() throws IOException, InvalidRCodeException {
+  public void setUp() throws IOException {
     session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
   }
 
   @Test
   public void testEmptyList() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, "".getBytes(), "file.txt");
     TokenSource filter = new NameDotTokenFilter(lexer.getTokenSource());
 
     Token tok = filter.nextToken();
@@ -43,7 +39,7 @@ public class NameDotTokenFilterTest {
 
   @Test
   public void testNoNameDot() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("message 'Hello'.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, "message 'Hello'.".getBytes(), "file.txt");
     TokenSource filter = new NameDotTokenFilter(lexer.getTokenSource());
 
     Token tok = filter.nextToken();
@@ -62,7 +58,7 @@ public class NameDotTokenFilterTest {
 
   @Test
   public void testNameDot00() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap(".Lang.Object.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, ".Lang.Object.".getBytes(), "file.txt");
     TokenSource filter = new NameDotTokenFilter(lexer.getTokenSource());
 
     ProToken tok = (ProToken) filter.nextToken();
@@ -80,7 +76,7 @@ public class NameDotTokenFilterTest {
 
   @Test
   public void testNameDot01() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("using Riverside.Lang.Object.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, "using Riverside.Lang.Object.".getBytes(), "file.txt");
     TokenSource filter = new NameDotTokenFilter(lexer.getTokenSource());
 
     ProToken tok = (ProToken) filter.nextToken();
@@ -103,7 +99,7 @@ public class NameDotTokenFilterTest {
 
   @Test
   public void testNameDot02() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("using Progress.Lang.Object.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, "using Progress.Lang.Object.".getBytes(), "file.txt");
     TokenSource filter = new NameDotTokenFilter(lexer.getTokenSource());
 
     ProToken tok = (ProToken) filter.nextToken();
@@ -127,7 +123,7 @@ public class NameDotTokenFilterTest {
 
   @Test
   public void testNameDot03() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("using Riverside.20190101.Object.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, "using Riverside.20190101.Object.".getBytes(), "file.txt");
     TokenSource filter = new NameDotTokenFilter(lexer.getTokenSource());
 
     ProToken tok = (ProToken) filter.nextToken();
@@ -150,7 +146,7 @@ public class NameDotTokenFilterTest {
 
   @Test
   public void testNameDot04() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("using Riverside./* Woot */ /* Woot woot */20190101.Object.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, "using Riverside./* Woot */ /* Woot woot */20190101.Object.".getBytes(), "file.txt");
     TokenSource filter = new NameDotTokenFilter(lexer.getTokenSource());
 
     ProToken tok = (ProToken) filter.nextToken();
@@ -175,7 +171,7 @@ public class NameDotTokenFilterTest {
   @Test
   public void testNameDot05() {
     // Still a NAMEDOT if there's a tilde before the dot...
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("~.Lang.Object.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, "~.Lang.Object.".getBytes(), "file.txt");
     TokenSource filter = new NameDotTokenFilter(lexer.getTokenSource());
 
     ProToken tok = (ProToken) filter.nextToken();
@@ -193,7 +189,7 @@ public class NameDotTokenFilterTest {
 
   @Test
   public void testAnnotation01() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("@Riverside.Lang.Object. MESSAGE 'foo'.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, "@Riverside.Lang.Object. MESSAGE 'foo'.".getBytes(), "file.txt");
     TokenSource filter = new NameDotTokenFilter(lexer.getTokenSource());
 
     ProToken tok = (ProToken) filter.nextToken();
@@ -213,7 +209,7 @@ public class NameDotTokenFilterTest {
 
   @Test
   public void testAnnotation02() {
-    ABLLexer lexer = new ABLLexer(session, ByteSource.wrap("@Riverside.20190101.Object. MESSAGE 'foo'.".getBytes()), "file.txt");
+    ABLLexer lexer = new ABLLexer(session, "@Riverside.20190101.Object. MESSAGE 'foo'.".getBytes(), "file.txt");
     TokenSource filter = new NameDotTokenFilter(lexer.getTokenSource());
 
     ProToken tok = (ProToken) filter.nextToken();

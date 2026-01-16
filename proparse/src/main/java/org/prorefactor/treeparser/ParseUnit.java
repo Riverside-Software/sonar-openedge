@@ -71,8 +71,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.google.common.base.Strings;
-import com.google.common.io.ByteSource;
-import com.google.common.io.ByteStreams;
 import com.progress.xref.CrossReference;
 import com.progress.xref.CrossReference.Source;
 import com.progress.xref.CrossReference.Source.Reference;
@@ -695,14 +693,13 @@ public class ParseUnit {
     return appBuilderSections.getOrDefault(file, IntervalSet.EMPTY_SET).contains(line);
   }
 
-  private ByteSource getByteSource() {
-    if (str != null) {
-      return ByteSource.wrap(str.getBytes(charset));
-    }
+  private byte[] getByteSource() {
+    if (str != null)
+      return str.getBytes(charset);
     try (InputStream s = input == null ? new FileInputStream(file) : input) {
       if (s.markSupported())
         s.reset();
-      return ByteSource.wrap(ByteStreams.toByteArray(s));
+      return s.readAllBytes();
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
