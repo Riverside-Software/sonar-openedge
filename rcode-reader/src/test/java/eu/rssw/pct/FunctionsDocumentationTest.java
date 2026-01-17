@@ -149,7 +149,7 @@ public class FunctionsDocumentationTest {
 
     var functionDocumentation3 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V117).apply("CAN-DO");
     assertNotNull(functionDocumentation3);
-    var list3 = functionDocumentation3.getVariants()[0].getParameters();;
+    var list3 = functionDocumentation3.getVariants()[0].getParameters();
     assertEquals(list3.length, 2);
     var val3 = functionDocumentation3.getParameter("userid");
     assertNotNull(val3);

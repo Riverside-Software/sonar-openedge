@@ -305,7 +305,7 @@ public class Routine extends Symbol {
         if (prm.isClassDataType()) {
           if (!prm.getDataType().getClassName().equalsIgnoreCase(var2.getDataType().getClassName()))
             return false;
-        } else if (prm.getDataType() != var2.getDataType())
+        } else if (!prm.getDataType().equals(var2.getDataType()))
           return false;
       } else {
         return false;
