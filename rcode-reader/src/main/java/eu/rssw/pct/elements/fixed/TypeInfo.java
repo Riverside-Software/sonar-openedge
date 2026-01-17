@@ -60,6 +60,7 @@ public class TypeInfo implements ITypeInfo {
   private final Collection<IPropertyElement> properties = new ArrayList<>();
   private final Collection<IVariableElement> variables = new ArrayList<>();
   private final Collection<IEventElement> events = new ArrayList<>();
+  private final Collection<IDatasetElement> datasets = new ArrayList<>();
   private final Collection<ITableElement> tables = new ArrayList<>();
   private final Collection<IBufferElement> buffers = new ArrayList<>();
 
@@ -106,6 +107,12 @@ public class TypeInfo implements ITypeInfo {
       this.flags = this.flags | HAS_STATICS;
     var buf = new BufferElement(element.getName());
     buffers.add(buf);
+  }
+
+  public void addDataset(IDatasetElement element) {
+    datasets.add(element);
+    if (element.isStatic())
+      this.flags = this.flags | HAS_STATICS;
   }
 
   @Override
@@ -173,6 +180,16 @@ public class TypeInfo implements ITypeInfo {
   }
 
   @Override
+  public IDatasetElement getDataset(String name) {
+    for (var ds : datasets) {
+      if (ds.getName().equalsIgnoreCase(name)) {
+        return ds;
+      }
+    }
+    return null;
+  }
+
+  @Override
   public Collection<IMethodElement> getMethods() {
     return methods;
   }
@@ -204,12 +221,7 @@ public class TypeInfo implements ITypeInfo {
 
   @Override
   public Collection<IDatasetElement> getDatasets() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public IDatasetElement getDataset(String dataset) {
-    return null;
+    return datasets;
   }
 
   @Override
