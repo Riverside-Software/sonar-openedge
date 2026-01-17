@@ -21,6 +21,9 @@ package eu.rssw.pct.elements;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Function;
+
+import javax.annotation.Nonnull;
 
 public interface IFunctionDocumentation extends IElementDocumentation {
 
@@ -50,12 +53,31 @@ public interface IFunctionDocumentation extends IElementDocumentation {
     return null;
   }
 
-  default String getIDESignature() {
-    return getIDESignatures(null)[0];
+  /**
+   * @return First signature available for this function
+   */
+  default String getIDESignature(Function<String, ITypeInfo> provider) {
+    return getIDESignatures(provider)[0];
   }
 
-  default String[] getIDESignatures(DataType[] datatypes) {
-    var variants = getVariants(datatypes);
+  /**
+   * @return All signatures available for this function
+   */
+  default String[] getIDESignatures(Function<String, ITypeInfo> provider) {
+    var retVal = new String[getVariants().length];
+    var offset = 0;
+    for (var variant : getVariants()) {
+      retVal[offset++] = getSignature(variant);
+    }
+
+    return retVal;
+  }
+
+  /**
+   * @return All signatures matching the parameter datatypes
+   */
+  default String[] getIDESignatures(@Nonnull DataType[] datatypes, Function<String, ITypeInfo> provider) {
+    var variants = getVariants(datatypes, provider);
 
     var retVal = new String[variants.length];
     var offset = 0;
@@ -67,53 +89,53 @@ public interface IFunctionDocumentation extends IElementDocumentation {
   }
 
   private String getSignature(IFunctionParameterList variant) {
-    StringBuilder sigtmp = new StringBuilder(getName());
-
+    StringBuilder sb = new StringBuilder(getName());
     if (variant.getParameters().length > 0)
-      sigtmp.append('(');
+      sb.append('(');
     boolean first = true;
     int openBrackets = 0;
     for (var p : variant.getParameters()) {
       if (p.isOptional()) {
-        sigtmp.append(first ? "[" : " [");
+        sb.append(first ? "[" : " [");
         openBrackets++;
       }
       if (first) {
         first = false;
       } else {
-        sigtmp.append(", ");
+        sb.append(", ");
       }
-      sigtmp.append(p.getDataType());
-      sigtmp.append(" ");
-      sigtmp.append(p.getName());
+      if (p.getDataType().getPrimitive() == PrimitiveDataType.CLASS)
+        sb.append(p.getDataType().getClassName());
+      else
+        sb.append(p.getDataType().getPrimitive().getIDESignature());
+      sb.append(" ");
+      sb.append(p.getName());
     }
     // Close all opened brackets
     while (openBrackets-- > 0) {
-      sigtmp.append("]");
+      sb.append("]");
     }
     if (variant.getParameters().length > 0)
-      sigtmp.append(')');
+      sb.append(')');
 
-    return sigtmp.toString();
+    return sb.toString();
   }
 
-  private IFunctionParameterList[] getVariants(DataType[] datatypes) {
+  private IFunctionParameterList[] getVariants(@Nonnull DataType[] datatypes, Function<String, ITypeInfo> provider) {
     var variants = getVariants();
     if (variants.length == 0)
-      return variants;
-    if (datatypes == null)
       return variants;
 
     Collection<IFunctionParameterList> coll = new ArrayList<>();
     for (var variant : variants) {
-      var xx = 0;
+      var offset = 0;
       var addVariant = true;
       var prm = variant.getParameters();
       for (var datatype : datatypes) {
-        if (prm.length <= xx || xx >= datatypes.length || !prm[xx].getDataType().equals(datatype)) {
+        if (prm.length <= offset || offset >= datatypes.length || !prm[offset].getDataType().isCompatible(datatype, provider)) {
           addVariant = false;
         }
-        xx++;
+        offset++;
       }
       if (addVariant)
         coll.add(variant);

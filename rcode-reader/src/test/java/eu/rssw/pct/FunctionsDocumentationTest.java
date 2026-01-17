@@ -31,11 +31,20 @@ import java.util.function.Function;
 import org.testng.annotations.Test;
 
 import eu.rssw.pct.mapping.OpenEdgeVersion;
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.FunctionsDocumentation;
 import eu.rssw.pct.elements.IFunctionDocumentation;
+import eu.rssw.pct.elements.ITypeInfo;
 
 public class FunctionsDocumentationTest {
+  private static final Function<OpenEdgeVersion, Function<String, ITypeInfo>> VERSION_TYPE_INFO_PROVIDER = version -> {
+    return name -> BuiltinClasses.getBuiltinClasses(version).stream() //
+      .filter(it -> it.getTypeName().equals(name)) //
+      .findFirst() //
+      .orElse(null);
+  };
+
   private static final Function<OpenEdgeVersion, Function<String, IFunctionDocumentation>> VERSION_FUNCTION_DOCUMENTATION_PROVIDER = version -> {
     return name -> FunctionsDocumentation.getFunctionsDocumentation(version).stream() //
       .filter(it -> it.getName().equalsIgnoreCase(name)) //
@@ -53,7 +62,7 @@ public class FunctionsDocumentationTest {
         assertNotEquals(functionDocumentation.getReturnType(), null,
             version + " " + functionDocumentation.getName() + " -- " + "returndatatype");
         assertNotNull(functionDocumentation.getVariants());
-        assertNotNull(functionDocumentation.getIDESignature());
+        assertNotNull(functionDocumentation.getIDESignature(VERSION_TYPE_INFO_PROVIDER.apply(OpenEdgeVersion.V128)));
         assertNotNull(functionDocumentation.getVariants()[0].getParameters());
         for (var variant : functionDocumentation.getVariants()) {
           for (var param : variant.getParameters()) {
@@ -83,29 +92,39 @@ public class FunctionsDocumentationTest {
 
   @Test
   public void testSignatures() {
-    var functionDocumentation1 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V117).apply("LOOKUP");
-    assertNotNull(functionDocumentation1);
-    assertEquals(functionDocumentation1.getIDESignature(),
-        "LOOKUP(CHARACTER expression, CHARACTER list [, CHARACTER character])");
+    var provider = VERSION_TYPE_INFO_PROVIDER.apply(OpenEdgeVersion.V128);
+    var lookupFunc1 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V117).apply("LOOKUP");
+    assertNotNull(lookupFunc1);
+    assertEquals(lookupFunc1.getIDESignature(provider), "LOOKUP(CHAR expression, CHAR list [, CHAR character])");
 
-    var functionDocumentation2 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("LOOKUP");
-    assertNotNull(functionDocumentation2);
-    assertEquals(functionDocumentation2.getIDESignature(),
-        "LOOKUP(CHARACTER expression, CHARACTER list [, CHARACTER delimiter])");
+    var lookupFunc2 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("LOOKUP");
+    assertNotNull(lookupFunc2);
+    assertEquals(lookupFunc2.getIDESignature(provider), "LOOKUP(CHAR expression, CHAR list [, CHAR delimiter])");
 
-    var functionDocumentation3 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("SUBSTRING");
-    assertNotNull(functionDocumentation3);
-    assertEquals(functionDocumentation3.getIDESignature(),
-        "SUBSTRING(CHARACTER source, INTEGER position [, INTEGER length [, CHARACTER type]])");
+    var substringFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("SUBSTRING");
+    assertNotNull(substringFunc);
+    assertEquals(substringFunc.getIDESignature(provider),
+        "SUBSTRING(CHAR source, INT position [, INT length [, CHAR type]])");
 
-    var functionDocumentation4 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply(
-        "LINE-COUNTER");
-    assertNotNull(functionDocumentation4);
-    assertEquals(functionDocumentation4.getIDESignature(), "LINE-COUNTER([CHARACTER stream [, HANDLE handle]])");
+    var lineCounterFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("LINE-COUNTER");
+    assertNotNull(lineCounterFunc);
+    assertEquals(lineCounterFunc.getIDESignature(provider), "LINE-COUNTER([CHAR stream [, HDL handle]])");
 
-    var functionDocumentation5 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("CONNECTED");
-    assertNotNull(functionDocumentation5);
-    assertEquals(functionDocumentation5.getIDESignatures(null).length, 2);
+    var connectedFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("CONNECTED");
+    assertNotNull(connectedFunc);
+    assertEquals(connectedFunc.getIDESignatures(provider).length, 2);
+    assertEquals(connectedFunc.getIDESignatures(provider)[0], "CONNECTED(CHAR logical-name)");
+    assertEquals(connectedFunc.getIDESignatures(provider)[1], "CONNECTED(CHAR alias)");
+
+    var validObjectFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("VALID-OBJECT");
+    assertNotNull(validObjectFunc);
+    assertEquals(validObjectFunc.getIDESignatures(provider).length, 2);
+    assertEquals(validObjectFunc.getIDESignatures(provider)[0], "VALID-OBJECT(HDL handle)");
+    assertEquals(validObjectFunc.getIDESignatures(provider)[1], "VALID-OBJECT(Progress.Lang.Object object-reference)");
+    assertEquals(validObjectFunc.getIDESignatures(new DataType[] {DataType.HANDLE}, provider)[0],
+        "VALID-OBJECT(HDL handle)");
+    assertEquals(validObjectFunc.getIDESignatures(new DataType[] {new DataType("Progress.Lang.AppError")}, provider)[0],
+        "VALID-OBJECT(Progress.Lang.Object object-reference)");
   }
 
   @Test
