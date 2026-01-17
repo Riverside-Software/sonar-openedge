@@ -4,4 +4,16 @@ class test43:
     return.
   end method.
 
+  method public int foo2():
+    return 0.
+  end method.
+
+  method public int foo2(input xx as int):
+    return 0.
+  end method.
+
+  method public int foo2(input xx as int, input yy as char):
+    return 0.
+  end method.
+
 end class.

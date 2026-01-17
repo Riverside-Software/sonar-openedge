@@ -70,7 +70,17 @@ public class TreeParser03Test extends AbstractProparseTest {
     var test43 = new TypeInfo("test43", false, false, BuiltinClasses.PLO_CLASSNAME, "");
     var test43Foo1 = new MethodElement("foo1", false, DataType.VOID, new eu.rssw.pct.elements.fixed.Parameter[] {
         new eu.rssw.pct.elements.fixed.Parameter(0, "ipPrm", 0, ParameterMode.OUTPUT, DataType.INTEGER)});
+    var test43Foo2 = new MethodElement("foo2", false, DataType.INTEGER, new eu.rssw.pct.elements.fixed.Parameter[] {});
+    var test43Foo21 = new MethodElement("foo2", false, DataType.INTEGER, new eu.rssw.pct.elements.fixed.Parameter[] {
+        new eu.rssw.pct.elements.fixed.Parameter(0, "xx", 0, ParameterMode.INPUT, DataType.INTEGER)});
+    var test43Foo22 = new MethodElement("foo2", false, DataType.INTEGER,
+        new eu.rssw.pct.elements.fixed.Parameter[] {
+            new eu.rssw.pct.elements.fixed.Parameter(0, "xx", 0, ParameterMode.INPUT, DataType.INTEGER),
+            new eu.rssw.pct.elements.fixed.Parameter(1, "yy", 0, ParameterMode.INPUT, DataType.CHARACTER)});
     test43.addMethod(test43Foo1);
+    test43.addMethod(test43Foo2);
+    test43.addMethod(test43Foo21);
+    test43.addMethod(test43Foo22);
     session.injectTypeInfo(test43);
   }
 
@@ -1716,6 +1726,11 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(lst.size(), 1);
     var r1 = lst.get(0);
     assertNotNull(r1.getMethodElement());
+    var lst2 = unit.getRootScope().lookupRoutines("foo2");
+    assertEquals(lst2.size(), 3);
+    assertNotNull(lst2.get(0).getMethodElement());
+    assertNotNull(lst2.get(1).getMethodElement());
+    assertNotNull(lst2.get(2).getMethodElement());
   }
 
   @Test
