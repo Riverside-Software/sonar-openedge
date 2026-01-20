@@ -5,7 +5,7 @@
   <parent>
     <groupId>eu.rssw</groupId>
     <artifactId>sonar-openedge</artifactId>
-    <version>3.6.0-SNAPSHOT</version>
+    <version>3.6.0</version>
   </parent>
   <groupId>eu.rssw.openedge.parsers</groupId>
   <artifactId>proparse</artifactId>
@@ -22,7 +22,7 @@
     <dependency>
       <groupId>eu.rssw.openedge.rcode</groupId>
       <artifactId>rcode-reader</artifactId>
-      <version>3.6.0-SNAPSHOT</version>
+      <version>3.6.0</version>
     </dependency>
     <dependency>
       <groupId>org.antlr</groupId>
